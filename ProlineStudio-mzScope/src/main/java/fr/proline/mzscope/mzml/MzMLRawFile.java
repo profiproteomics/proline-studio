@@ -41,6 +41,11 @@ public class MzMLRawFile implements IRawFile {
     public String getName() {
         return mzMLFile.getName();
     }
+    
+    @Override
+    public File getFile(){
+       return mzMLFile;
+    }
 
    
     public Chromatogram getTIC() {

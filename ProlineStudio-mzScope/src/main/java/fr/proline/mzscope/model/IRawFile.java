@@ -1,6 +1,7 @@
 package fr.proline.mzscope.model;
 
 import fr.profi.mzdb.model.Feature;
+import java.io.File;
 import java.util.List;
 
 /**
@@ -10,6 +11,8 @@ import java.util.List;
 public interface IRawFile {
    
    public String getName();
+   
+   public File getFile();
 
    public Chromatogram getXIC(Ms1ExtractionRequest params);
    

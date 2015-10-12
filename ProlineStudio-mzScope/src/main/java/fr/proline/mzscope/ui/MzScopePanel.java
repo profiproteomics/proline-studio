@@ -3,6 +3,10 @@ package fr.proline.mzscope.ui;
 import fr.proline.mzscope.utils.ButtonTabComponent;
 import com.google.common.base.Strings;
 import fr.profi.mzdb.model.Feature;
+import fr.proline.mzscope.map.LcMsMap;
+import fr.proline.mzscope.map.LcMsViewer;
+import fr.proline.mzscope.map.LcMsViewport;
+import fr.proline.mzscope.map.ui.LcMsViewerUI;
 import fr.proline.mzscope.model.BaseFeature;
 import fr.proline.mzscope.model.Chromatogram;
 import fr.proline.mzscope.model.FeaturesExtractionRequest;
@@ -18,7 +22,9 @@ import fr.proline.mzscope.utils.MzScopeConstants;
 import fr.proline.mzscope.utils.MzScopeConstants.DisplayMode;
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.Frame;
+import java.awt.Toolkit;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
@@ -28,6 +34,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
@@ -569,6 +576,27 @@ public class MzScopePanel extends JPanel implements IFeatureViewer, IExtractionE
         final List<IRawFile> rawfiles = RawFileManager.getInstance().getAllFiles();
         TabbedMultiRawFilePanel plotPanel = new TabbedMultiRawFilePanel(rawfiles);
         addRawTab("All", plotPanel);
+    }
+    
+    
+    public void displayLCMSMap(IRawFile rawFile){
+        JDialog mapDialog = new JDialog(this.parentFrame);
+        mapDialog.setTitle("LCMS Map Viewer");
+	LcMsViewer viewer = new LcMsViewer(new LcMsMap(rawFile.getFile().getAbsolutePath()));
+	LcMsViewerUI viewerUI = new LcMsViewerUI();
+	mapDialog.add(viewerUI.getGui(), BorderLayout.CENTER);
+        mapDialog.setLocationRelativeTo(this);
+        Dimension screenSize = Toolkit.getDefaultToolkit ().getScreenSize(); 
+        mapDialog.setBounds(0, 0,  screenSize.width,  screenSize.height); 
+	mapDialog.setVisible(true);
+	viewerUI.setViewer(viewer);
+	try {
+	    Thread.sleep(1000);
+	} catch (InterruptedException e) {
+	    // TODO Auto-generated catch block
+	    e.printStackTrace();
+	}
+	viewerUI.getController().changeViewport(new LcMsViewport(390, 440, 1000, 1150));
     }
     
 }

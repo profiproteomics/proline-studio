@@ -52,6 +52,11 @@ public class ThreadedMzdbRawFile implements IRawFile {
     public String getName() {
         return file.getName();
     }
+    
+    @Override
+    public File getFile(){
+       return file;
+    }
    
    
     @Override

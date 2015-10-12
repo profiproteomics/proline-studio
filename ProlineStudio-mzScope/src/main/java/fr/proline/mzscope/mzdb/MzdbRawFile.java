@@ -89,6 +89,11 @@ public class MzdbRawFile implements IRawFile {
    public String getName() {
       return mzDbFile.getName();
    }
+   
+   @Override
+   public File getFile(){
+       return mzDbFile;
+   }
 
    @Override
    public String toString() {

@@ -133,7 +133,13 @@ public class IconManager {
         TICK_CIRCLE,
         REFRESH,
         SETTINGS,
-        TABLE_IMPORT;
+        TABLE_IMPORT, 
+        FULL_SCREEN, 
+        PROGRESS, 
+        UPDATE, 
+        SPECTRUM, 
+        NAVIGATE,
+        SELECT;
         
     }
     private final static HashMap<IconType, ImageIcon> m_iconMap = new HashMap<>();
@@ -502,6 +508,19 @@ public class IconManager {
                return "fr/proline/studio/images/settings.png";
            case TABLE_IMPORT:
                return "fr/proline/studio/images/table-import.png";
+            case FULL_SCREEN: 
+               return "fr/proline/studio/images/fullscreen.png";
+            case PROGRESS: 
+               return "fr/proline/studio/images/progress.gif";
+            case UPDATE: 
+               return "fr/proline/studio/images/update.png";
+            case SPECTRUM: 
+               return "fr/proline/studio/images/spectrum.png";
+            case NAVIGATE: 
+               return "fr/proline/studio/images/navigate.png";    
+            case SELECT: 
+               return "fr/proline/studio/images/select.png";    
+                
         }
 
 

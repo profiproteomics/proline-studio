@@ -12,7 +12,7 @@ import fr.proline.studio.dam.tasks.DatabaseProteinSetsTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.rsmexplorer.gui.RsmProteinSetPanel;
-import java.util.Arrays;
+
 
 /**
  * Databox for the list of Protein Sets corresponding to a Peptide Instance
@@ -22,7 +22,7 @@ public class DataBoxRsmProteinSetOfPeptides extends AbstractDataBox {
     
     private ResultSummary m_rsm = null;
 
-    
+    private long m_peptideCurId = -1;
     
     public DataBoxRsmProteinSetOfPeptides() { 
         super(DataboxType.DataBoxRsmProteinSetOfPeptides);
@@ -69,9 +69,15 @@ public class DataBoxRsmProteinSetOfPeptides extends AbstractDataBox {
 
         if (_peptideInstance == null) {
             ((RsmProteinSetPanel) m_panel).setData(null, null, true);
+            m_peptideCurId = -1;
             return;
         }
 
+        if ((m_peptideCurId!=-1) && (_peptideInstance.getId() == m_peptideCurId)) {
+            return;
+        }
+        m_peptideCurId = _peptideInstance.getId();
+        
         final int loadingId = setLoading();
 
         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {

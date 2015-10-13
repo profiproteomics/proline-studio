@@ -5,6 +5,7 @@ import fr.proline.core.orm.msi.ObjectTree;
 import fr.proline.core.orm.msi.Peptide;
 import fr.proline.core.orm.msi.PeptideInstance;
 import fr.proline.core.orm.msi.PeptideReadablePtmString;
+import fr.proline.core.orm.msi.ResultSet;
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.dto.DCluster;
 import fr.proline.core.orm.msi.dto.DMasterQuantPeptide;
@@ -406,19 +407,21 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                             }
                             rsId = (Long)res[2];
                         } catch (NoResultException | NonUniqueResultException e) {
-                            // take the dataset name as qch name
-                            String queryQCName = "SELECT ds.name "
-                                    + "FROM fr.proline.core.orm.uds.Dataset ds, fr.proline.core.orm.uds.QuantitationChannel qc "
-                                    + "WHERE ds.resultSummaryId = qc.identResultSummaryId AND "
-                                    + "qc.id=:qChId ";
-                            TypedQuery<String> queryQCNameQ = entityManagerUDS.createQuery(queryQCName, String.class);
-                            queryQCNameQ.setParameter("qChId", qc.getId());
-                            try {
-                                String name = queryQCNameQ.getSingleResult();
-                                resultFileName = name;
-                            } catch (NoResultException | NonUniqueResultException e2) {
+                            
+                        }
+                        // take the dataset name as qch name
+                        String queryQCName = "SELECT ds.name "
+                                + "FROM fr.proline.core.orm.uds.Dataset ds, fr.proline.core.orm.uds.QuantitationChannel qc "
+                                + "WHERE ds.resultSummaryId = qc.identResultSummaryId AND "
+                                + "qc.id=:qChId AND ds.project.id=:projectId ";
+                        TypedQuery<String> queryQCNameQ = entityManagerUDS.createQuery(queryQCName, String.class);
+                        queryQCNameQ.setParameter("qChId", qc.getId());
+                        queryQCNameQ.setParameter("projectId", projectId);
+                        try {
+                            String name = queryQCNameQ.getSingleResult();
+                            resultFileName = name;
+                        } catch (NoResultException | NonUniqueResultException e2) {
 
-                            }
                         }
                         dqc.setResultFileName(resultFileName);
                         dqc.setRawFilePath(rawPath);

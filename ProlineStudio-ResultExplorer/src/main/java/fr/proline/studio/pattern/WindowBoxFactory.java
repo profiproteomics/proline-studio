@@ -320,14 +320,25 @@ public class WindowBoxFactory {
         return new WindowBox(fullName, generatePanel(boxes), boxes[0], IconManager.getImage(iconType));
     }
     
-    public static WindowBox getMSQueriesWindowBox(String dataName, boolean fromRSM) {
+    public static WindowBox getMSQueriesWindowBoxForRSM(String dataName) {
         // create boxes
         AbstractDataBox[] boxes = new AbstractDataBox[2];
-        boxes[0] = new DataBoxMSQueries();
+        boxes[0] = new DataBoxMSQueriesForRSM();
         boxes[0].setDataName(dataName);
-        boxes[1] = new DataboxPSMForMsQuery(fromRSM);
+        boxes[1] = new DataboxRSMPSMForMsQuery();
         boxes[1].setLayout(SplittedPanelContainer.PanelLayout.VERTICAL);
-        IconManager.IconType iconType = fromRSM ? IconManager.IconType.DATASET_RSM : IconManager.IconType.DATASET_RSET;
+        IconManager.IconType iconType = IconManager.IconType.DATASET_RSM;
+        return new WindowBox(boxes[0].getFullName(), generatePanel(boxes), boxes[0], IconManager.getImage(iconType));
+    }
+    
+    public static WindowBox getMSQueriesWindowBoxForRset(String dataName) {
+        // create boxes
+        AbstractDataBox[] boxes = new AbstractDataBox[2];
+        boxes[0] = new DataBoxMSQueriesForRset();
+        boxes[0].setDataName(dataName);
+        boxes[1] = new DataboxRsetPSMForMsQuery();
+        boxes[1].setLayout(SplittedPanelContainer.PanelLayout.VERTICAL);
+        IconManager.IconType iconType = IconManager.IconType.DATASET_RSET;
         return new WindowBox(boxes[0].getFullName(), generatePanel(boxes), boxes[0], IconManager.getImage(iconType));
     }
     

@@ -21,7 +21,8 @@ import fr.proline.studio.markerbar.MarkerContainerPanel;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.pattern.DataMixerWindowBoxManager;
-import fr.proline.studio.pattern.MsQueryInfo;
+import fr.proline.studio.pattern.MsQueryInfoRSM;
+import fr.proline.studio.pattern.MsQueryInfoRset;
 import fr.proline.studio.python.data.TableInfo;
 import fr.proline.studio.rsmexplorer.gui.model.MSQueriesTableModel;
 import fr.proline.studio.table.CompoundTableModel;
@@ -69,8 +70,11 @@ public class MSQueriesPanel extends HourglassPanel implements DataBoxPanelInterf
     private JLabel m_titleLabel;
     private final String TABLE_TITLE = "MS Queries";
     
+    private boolean m_fromRSM;
     
-    public MSQueriesPanel() {
+    
+    public MSQueriesPanel(boolean fromRSm) {
+        m_fromRSM = fromRSm;
         initComponents();
     }
     
@@ -409,8 +413,12 @@ public class MSQueriesPanel extends HourglassPanel implements DataBoxPanelInterf
             if (selectionWillBeRestored) {
                 return;
             }
- 
-            m_dataBox.propagateDataChanged(MsQueryInfo.class);
+            
+            if (m_fromRSM){
+                m_dataBox.propagateDataChanged(MsQueryInfoRSM.class);
+            }else{
+                m_dataBox.propagateDataChanged(MsQueryInfoRset.class);
+            }
 
         }
         

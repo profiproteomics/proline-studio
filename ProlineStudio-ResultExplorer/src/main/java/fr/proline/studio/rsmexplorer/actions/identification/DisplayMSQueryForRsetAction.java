@@ -54,7 +54,7 @@ public class DisplayMSQueryForRsetAction extends AbstractRSMAction {
         if (rset != null) {
         
             // prepare window box
-            WindowBox wbox = WindowBoxFactory.getMSQueriesWindowBox(dataSet.getName(), false);
+            WindowBox wbox = WindowBoxFactory.getMSQueriesWindowBoxForRset(dataSet.getName());
             wbox.setEntryData(dataSet.getProject().getId(), rset);
             
             // open a window to display the window box
@@ -62,7 +62,7 @@ public class DisplayMSQueryForRsetAction extends AbstractRSMAction {
             win.open();
             win.requestActive();
         } else {
-            final WindowBox wbox = WindowBoxFactory.getMSQueriesWindowBox(dataSet.getName(), false);
+            final WindowBox wbox = WindowBoxFactory.getMSQueriesWindowBoxForRset(dataSet.getName());
             // open a window to display the window box
             DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
             win.open();

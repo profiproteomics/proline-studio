@@ -105,9 +105,11 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
         DataBoxAdjacencyMatrix(34),
         DataBoxAdjacencyMatrixChoice(35),
         DataBoxMapAlignment(36), 
-        DataBoxMSQueries(37), 
-        DataBoxPSMForMsQuery(38),
-        DataBoxRsetPeptideSpectrumValues(39);
+        DataBoxMSQueriesForRSM(37), 
+        DataBoxRSMPSMForMsQuery(38),
+        DataBoxRsetPeptideSpectrumValues(39),
+        DataBoxMSQueriesForRset(40), 
+        DataBoxRsetPSMForMsQuery(41);
         
         int m_type;
         private static HashMap<Integer, DataboxType> m_databoxTypeMap = null;
@@ -190,12 +192,16 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
                     return new DataboxExperimentalDesign();
                 case DataBoxMapAlignment:
                     return new DataboxMapAlignment();
-                case DataBoxMSQueries:
-                    return new DataBoxMSQueries();
-                case DataBoxPSMForMsQuery:
-                    return new DataboxPSMForMsQuery(false);
+                case DataBoxMSQueriesForRSM:
+                    return new DataBoxMSQueriesForRSM();
+                case DataBoxRSMPSMForMsQuery:
+                    return new DataboxRSMPSMForMsQuery();
                 case DataBoxRsetPeptideSpectrumValues:
                     return new DataBoxRsetPeptideSpectrumValues();
+                case DataBoxMSQueriesForRset:
+                    return new DataBoxMSQueriesForRset();
+                case DataBoxRsetPSMForMsQuery:
+                    return new DataboxRsetPSMForMsQuery();
             }
             return null; // should not happen
         }

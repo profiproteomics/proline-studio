@@ -23,49 +23,46 @@ import java.util.List;
  * display Peptide Matches for a given MsQuey
  * @author MB243701
  */
-public class DataboxPSMForMsQuery extends AbstractDataBox{
+public class DataboxRSMPSMForMsQuery extends AbstractDataBox{
     
     private MsQuery m_msQuery;
     private ResultSet m_rset;
     private ResultSummary m_rsm;
     private List<DPeptideMatch> m_peptideMatches;
     
-    private boolean m_fromRSM;
-
-    public DataboxPSMForMsQuery(boolean fromRSM) {
+    public DataboxRSMPSMForMsQuery() {
         
-        super(DataboxType.DataBoxPSMForMsQuery);
+        super(DataboxType.DataBoxRSMPSMForMsQuery);
         
         // Name of this databox
         m_typeName = "PSM";
-        m_description = "All PSM corresponding to a MsQuery";
+        m_description = "All PSM corresponding to a MsQuery for an Identification Summary";
         
-        m_fromRSM = fromRSM;
         
         // Register Possible in parameters
         // One MsQuery & rsm & rs, rsm could be null
         GroupParameter inParameter = new GroupParameter();
-        inParameter.addParameter(MsQueryInfo.class, false);
+        inParameter.addParameter(MsQueryInfoRSM.class, false);
         registerInParameter(inParameter);
         
         // Register possible out parameters
         // One or Multiple PeptideMatch
         GroupParameter outParameter = new GroupParameter();
-        outParameter.addParameter(DPeptideMatch.class, true);
+        outParameter.addParameter(DPeptideMatch.class, false);
         registerOutParameter(outParameter);
         
         outParameter = new GroupParameter();
-        outParameter.addParameter(CompareDataInterface.class, true);
+        outParameter.addParameter(CompareDataInterface.class, false);
         registerOutParameter(outParameter);
         
         outParameter = new GroupParameter();
-        outParameter.addParameter(CrossSelectionInterface.class, true);
+        outParameter.addParameter(CrossSelectionInterface.class, false);
         registerOutParameter(outParameter);
     }
     
     @Override
     public void createPanel() {
-        PeptideMatchPanel p = new PeptideMatchPanel(m_fromRSM, false, true, true); 
+        PeptideMatchPanel p = new PeptideMatchPanel(true, false, true, true); 
         p.setName(m_typeName);
         p.setDataBox(this);
         m_panel = p;
@@ -75,7 +72,7 @@ public class DataboxPSMForMsQuery extends AbstractDataBox{
     @Override
     public void dataChanged() {
         long oldMsQId = m_msQuery == null? -1: m_msQuery.getId();
-        final MsQueryInfo _msqI = (MsQueryInfo) m_previousDataBox.getData(false, MsQueryInfo.class);
+        final MsQueryInfoRSM _msqI = (MsQueryInfoRSM) m_previousDataBox.getData(false, MsQueryInfoRSM.class);
         if (_msqI != null && _msqI.getMsQuery() != null && oldMsQId == _msqI.getMsQuery().getId()){
             return ;
         }
@@ -142,8 +139,8 @@ public class DataboxPSMForMsQuery extends AbstractDataBox{
  
     @Override
     public void setEntryData(Object data) {
-        if (data instanceof MsQueryInfo) {
-            MsQueryInfo o = (MsQueryInfo) data;
+        if (data instanceof MsQueryInfoRSM) {
+            MsQueryInfoRSM o = (MsQueryInfoRSM) data;
             m_msQuery = o.getMsQuery();
             m_rset = o.getResultSet();
             m_rsm = o.getResultSummary();

@@ -10,6 +10,7 @@ import java.awt.event.ActionListener;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.prefs.Preferences;
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import org.openide.util.NbPreferences;
@@ -93,8 +94,12 @@ public class DefineQuantParamsPanel extends JPanel{
     
     private JTabbedPane m_tabbedPane;
     
+    private boolean m_selectXICMethod;
+    
     public DefineQuantParamsPanel(boolean readOnly) {
        m_readOnly = readOnly;
+       Preferences preferences = NbPreferences.root();
+        this.m_selectXICMethod = preferences.getBoolean("Profi", false);
         m_parameterList = new ParameterList("XicParameters");
         createParameters();
         m_parameterList.updateIsUsed(NbPreferences.root());
@@ -244,13 +249,32 @@ public class DefineQuantParamsPanel extends JPanel{
         m_extractedXICFromCB = new JComboBox(FEATURE_EXTRACTED_XIC_VALUES);
         m_extractedXICFromCB.setEnabled(!m_readOnly);
         m_extractedXICFromParameter = new ObjectParameter<>("extractedXICFrom", "ExtractedXICFrom", m_extractedXICFromCB, FEATURE_EXTRACTED_XIC_VALUES, FEATURE_EXTRACTED_XIC_KEYS,  0, null);
+        // do not allow to change the method of quanti
+        if (!m_selectXICMethod){
+            m_extractedXICFromCB.setEnabled(false);
+        }
         m_parameterList.add(m_extractedXICFromParameter);
         
         m_detectPeakelChB = new JCheckBox("Deisotoping Identification Based");
         m_detectPeakelChB.setEnabled(!m_readOnly);
         m_detectPeakelsParameter = new BooleanParameter("detectPeakel", "Deisotoping Identification Based", m_detectPeakelChB, true);
+        // do not allow to change the method of quanti
+        if (!m_selectXICMethod){
+            m_detectPeakelChB.setEnabled(false);
+        }
         m_parameterList.add(m_detectPeakelsParameter);
  
+    }
+    
+    
+    // case Profi=false: do not apply parameters for xic method
+    public void initXICMethod(){
+        if (!m_selectXICMethod){
+            m_extractedXICFromParameter.setValue(FEATURE_EXTRACTED_XIC_KEYS[2]);
+            m_detectPeakelsParameter.setValue("true");
+            m_extractedXICFromCB.setSelectedItem(2);
+            m_detectPeakelChB.setSelected(true);
+        }
     }
     
     public ParameterList getParameterList() {
@@ -387,6 +411,7 @@ public class DefineQuantParamsPanel extends JPanel{
                 m_detectPeakelChB.setSelected(false);
             }
         }
+        initXICMethod();
     }
     
     
@@ -444,7 +469,11 @@ public class DefineQuantParamsPanel extends JPanel{
         boolean start_from_validated_peptides = (m_extractedXICFromParameter.getStringValue() != null && m_extractedXICFromParameter.getStringValue().equalsIgnoreCase("ALL_DETECTABLE_FEATURES")) ;
         params.put("detect_features", detectFeatures);
         params.put("start_from_validated_peptides", start_from_validated_peptides);
-        params.put("detect_peakels", m_detectPeakelChB.isEnabled() && m_detectPeakelChB.isSelected());
+        if (m_selectXICMethod){
+            params.put("detect_peakels", m_detectPeakelChB.isEnabled() && m_detectPeakelChB.isSelected());
+        }else{
+            params.put("detect_peakels", true);
+        }
         return params;
     }
         
@@ -507,7 +536,11 @@ public class DefineQuantParamsPanel extends JPanel{
             @Override
             public void actionPerformed(ActionEvent e) {
                 boolean start_from_validated_peptides = (m_extractedXICFromParameter.getStringValue() != null && m_extractedXICFromParameter.getStringValue().equalsIgnoreCase("ALL_DETECTABLE_FEATURES")) ;
-                m_detectPeakelChB.setEnabled(!m_readOnly && start_from_validated_peptides);
+                if (m_selectXICMethod){
+                    m_detectPeakelChB.setEnabled(!m_readOnly && start_from_validated_peptides);
+                }else{
+                    m_detectPeakelChB.setEnabled(false);
+                }
             }
         });
             

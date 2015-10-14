@@ -585,6 +585,7 @@ public class CreateXICDialog extends DefaultDialog {
                     }
 
                     DefineQuantParamsPanel.getDefineQuantPanel().getParameterList().loadParameters(filePreferences);
+                    DefineQuantParamsPanel.getDefineQuantPanel().initXICMethod();
 
                 } catch (Exception e) {
                     LoggerFactory.getLogger("ProlineStudio.ResultExplorer").error("Parsing of User Settings File Failed", e);

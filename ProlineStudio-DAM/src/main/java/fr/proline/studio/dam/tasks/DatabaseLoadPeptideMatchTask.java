@@ -1,11 +1,19 @@
 package fr.proline.studio.dam.tasks;
 
 
-import fr.proline.core.orm.msi.*;
+
+import fr.proline.core.orm.msi.Peptide;
+import fr.proline.core.orm.msi.PeptideInstance;
+import fr.proline.core.orm.msi.PeptideReadablePtmString;
+import fr.proline.core.orm.msi.PeptideSet;
+import fr.proline.core.orm.msi.ResultSet;
+import fr.proline.core.orm.msi.ResultSummary;
+import fr.proline.core.orm.msi.SequenceMatch;
 import fr.proline.core.orm.msi.dto.DMsQuery;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.core.orm.msi.dto.DProteinSet;
+import fr.proline.core.orm.msi.dto.DSpectrum;
 import fr.proline.core.orm.util.DataStoreConnectorFactory;
 import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
@@ -37,7 +45,7 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
     private DProteinMatch m_proteinMatch = null;
     private DProteinSet m_proteinSet = null;
     private PeptideInstance m_peptideInstance = null;
-    private MsQuery m_msQuery = null;
+    private DMsQuery m_msQuery = null;
     private List<DPeptideMatch> m_listPeptideMatches =null;
     
     // data kept for sub tasks
@@ -47,7 +55,7 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
     private HashMap<Long, Integer> m_peptideMatchPosition = null;
 
 
-    private int m_action;
+    private final int m_action;
     
     private final static int LOAD_ALL_RSET   = 0;
     private final static int LOAD_ALL_RSM = 1;
@@ -91,7 +99,7 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
         m_action = LOAD_PSM_FOR_PEPTIDE_RSM;
     }
     
-    public DatabaseLoadPeptideMatchTask(AbstractDatabaseCallback callback, long projectId, MsQuery msQuery, ResultSummary rsm, ResultSet rs, List<DPeptideMatch> listPeptideMatches){
+    public DatabaseLoadPeptideMatchTask(AbstractDatabaseCallback callback, long projectId, DMsQuery msQuery, ResultSummary rsm, ResultSet rs, List<DPeptideMatch> listPeptideMatches){
         super(callback, SUB_TASK_COUNT_RSM, new TaskInfo("Load PSM for MsQuery " + (msQuery == null ? "null": msQuery.getId()), false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_MEDIUM));
         m_projectId = projectId;
         m_msQuery = msQuery;
@@ -908,26 +916,35 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
 
        List sliceOfPeptideMatchIds = subTask.getSubList(m_peptideMatchIds);
 
-        Query msQueryQuery = entityManagerMSI.createQuery("SELECT pm.id, msq.id, msq.initialId, s FROM PeptideMatch pm,MsQuery msq, Spectrum s WHERE pm.id IN (:listId) AND pm.msQuery=msq AND msq.spectrum=s");
+        Query msQueryQuery = entityManagerMSI.createQuery("SELECT pm.id, msq.id, msq.initialId, s.firstTime, s.precursorIntensity, s.title FROM PeptideMatch pm,MsQuery msq, Spectrum s WHERE pm.id IN (:listId) AND pm.msQuery=msq AND msq.spectrum=s");
         msQueryQuery.setParameter("listId", sliceOfPeptideMatchIds);
 
         List<Object[]> msQueries = msQueryQuery.getResultList();
         Iterator<Object[]> it = msQueries.iterator();
         while (it.hasNext()) {
             Object[] res = it.next();
-            Spectrum s = (Spectrum)res[3];
-            DMsQuery q = new DMsQuery((Long) res[0], (Long) res[1], (Integer) res[2], s.getPrecursorIntensity());
+            Float firstTime = (Float) res[3];
+            Float precursorIntensity = (Float) res[4];
+            String title = (String) res[5];
+            
+            DSpectrum spectrum = new DSpectrum();
+            spectrum.setFirstTime(firstTime);
+            spectrum.setPrecursorIntensity(precursorIntensity);
+            spectrum.setTitle(title);
+            
+            DMsQuery q = new DMsQuery((Long) res[0], (Long) res[1], (Integer) res[2], precursorIntensity);
+            q.setDSpectrum(spectrum);
             if (m_proteinMatch != null) {
                  ArrayList<DPeptideMatch> sequenceMatchArray = m_peptideMatchSequenceMatchArrayMap.get(q.getPeptideMatchId());
                  for (int i=0;i<sequenceMatchArray.size();i++) {
                      DPeptideMatch peptideMatch = sequenceMatchArray.get(i);
                      peptideMatch.setMsQuery(q);
-                     peptideMatch.setRetentionTime(s.getFirstTime());
+                     peptideMatch.setRetentionTime(spectrum.getFirstTime());
                  }
             } else {
                 DPeptideMatch peptideMatch = m_peptideMatchMap.get(q.getPeptideMatchId());
                 peptideMatch.setMsQuery(q);
-                peptideMatch.setRetentionTime(s.getFirstTime());
+                peptideMatch.setRetentionTime(spectrum.getFirstTime());
             }
             
             

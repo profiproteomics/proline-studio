@@ -1,8 +1,8 @@
 
 package fr.proline.studio.pattern;
 
-import fr.proline.core.orm.msi.MsQuery;
-import fr.proline.core.orm.msi.Spectrum;
+import fr.proline.core.orm.msi.dto.DMsQuery;
+import fr.proline.core.orm.msi.dto.DSpectrum;
 import fr.proline.core.orm.msi.dto.DMsQuery;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.studio.dam.AccessDatabaseThread;
@@ -58,7 +58,7 @@ public class DataBoxRsetPeptideSpectrumValues extends AbstractDataBox {
 
         
         boolean needToLoadData = ((!peptideMatch.isMsQuerySet()) ||
-                                  (!peptideMatch.getMsQuery().isSpectrumSet()));
+                                  (!peptideMatch.getMsQuery().isSpectrumFullySet()));
 
         // JPM.WART : look fo Spectrum table which will load same data
         if (needToLoadData) {
@@ -123,7 +123,7 @@ public class DataBoxRsetPeptideSpectrumValues extends AbstractDataBox {
     @Override
     public Object getData(boolean getArray, Class parameterType) {
         if (parameterType!= null ) {
-            if (parameterType.equals(MsQuery.class)) {
+            if (parameterType.equals(DMsQuery.class)) {
                 DPeptideMatch peptideMatch = (DPeptideMatch) m_previousDataBox.getData(false, DPeptideMatch.class);
                 if (peptideMatch != null) {
                     DMsQuery msQuery = peptideMatch.getMsQuery();
@@ -132,12 +132,12 @@ public class DataBoxRsetPeptideSpectrumValues extends AbstractDataBox {
                     }
                 }
             }
-            if (parameterType.equals(Spectrum.class)) {
+            if (parameterType.equals(DSpectrum.class)) {
                 DPeptideMatch peptideMatch = (DPeptideMatch) m_previousDataBox.getData(false, DPeptideMatch.class);
                 if (peptideMatch != null) {
                     DMsQuery msQuery = peptideMatch.getMsQuery();
                     if (msQuery != null) {
-                        Spectrum spectrum = msQuery.getSpectrum();
+                        DSpectrum spectrum = msQuery.getDSpectrum();
                         if (spectrum != null) {
                             return spectrum;
                         }

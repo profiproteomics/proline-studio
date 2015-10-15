@@ -1,11 +1,6 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package fr.proline.studio.rsmexplorer.gui.model;
 
-import fr.proline.core.orm.msi.MsQuery;
+import fr.proline.core.orm.msi.dto.DMsQuery;
 import fr.proline.studio.dam.tasks.DatabaseLoadMSQueriesTask;
 import fr.proline.studio.filter.DoubleFilter;
 import fr.proline.studio.filter.Filter;
@@ -50,7 +45,7 @@ public class MSQueriesTableModel extends LazyTableModel implements GlobalTableMo
     
     private final HashMap<Integer, TableCellRenderer> m_rendererMap = new HashMap();
     
-    private List<MsQuery> m_msqueries;
+    private List<DMsQuery> m_msqueries;
     private Map<Long, Integer> m_nbPeptideMatchesByMsQueryIdMap;
     
     private String m_modelName;
@@ -59,7 +54,7 @@ public class MSQueriesTableModel extends LazyTableModel implements GlobalTableMo
         super(table);
     }
     
-    public MsQuery getMsQuery(int row) {
+    public DMsQuery getMsQuery(int row) {
         return m_msqueries.get(row);
     }
     
@@ -85,8 +80,10 @@ public class MSQueriesTableModel extends LazyTableModel implements GlobalTableMo
     @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
         // Retrieve MSQuery
-        MsQuery msquery = m_msqueries.get(rowIndex);
+        DMsQuery msquery = m_msqueries.get(rowIndex);
 
+        boolean msQueryCompletelyLoaded = msquery.isSpectrumSet();
+        
         switch (columnIndex) {
             case COLTYPE_MSQUERY_ID: {
                 return msquery.getId();
@@ -94,9 +91,9 @@ public class MSQueriesTableModel extends LazyTableModel implements GlobalTableMo
             case COLTYPE_MSQUERY_INITIAL_ID: {
                 LazyData lazyData = getLazyData(rowIndex,columnIndex);
                 
-                if (msquery.getMsiSearch()!= null) {
+                if (msQueryCompletelyLoaded) {
                     lazyData.setData(msquery.getInitialId());
-                }else{
+                } else {
                     lazyData.setData(null);
                     givePriorityTo(m_taskId, rowIndex, columnIndex);
                 }
@@ -105,7 +102,7 @@ public class MSQueriesTableModel extends LazyTableModel implements GlobalTableMo
             case COLTYPE_MSQUERY_CHARGE: {
                 LazyData lazyData = getLazyData(rowIndex,columnIndex);
                 
-                if (msquery.getMsiSearch()!= null) {
+                if (msQueryCompletelyLoaded) {
                     lazyData.setData(msquery.getCharge());
                 }else{
                     lazyData.setData(null);
@@ -116,7 +113,7 @@ public class MSQueriesTableModel extends LazyTableModel implements GlobalTableMo
             case COLTYPE_MSQUERY_MOZ: {
                 LazyData lazyData = getLazyData(rowIndex,columnIndex);
                 
-                if (msquery.getMsiSearch()!= null) {
+                if (msQueryCompletelyLoaded) {
                     lazyData.setData(msquery.getMoz());
                 }else{
                     lazyData.setData(null);
@@ -127,7 +124,7 @@ public class MSQueriesTableModel extends LazyTableModel implements GlobalTableMo
             case COLTYPE_MSQUERY_NB_PEPTIDE_MATCH: {
                 LazyData lazyData = getLazyData(rowIndex,columnIndex);
                 
-                if (msquery.getMsiSearch()!= null) {
+                if (msQueryCompletelyLoaded) {
                     lazyData.setData(m_nbPeptideMatchesByMsQueryIdMap.get(msquery.getId()));
                 }else{
                     lazyData.setData(null);
@@ -138,8 +135,8 @@ public class MSQueriesTableModel extends LazyTableModel implements GlobalTableMo
             case COLTYPE_MSQUERY_FIRST_SCAN: {
                 LazyData lazyData = getLazyData(rowIndex,columnIndex);
                 
-                if (msquery.getMsiSearch()!= null) {
-                    lazyData.setData(msquery.getSpectrum().getFirstScan() == null ? 0: msquery.getSpectrum().getFirstScan());
+                 if (msQueryCompletelyLoaded) {
+                    lazyData.setData(msquery.getDSpectrum().getFirstScan() == null ? 0: msquery.getDSpectrum().getFirstScan());
                 }else{
                     lazyData.setData(null);
                     givePriorityTo(m_taskId, rowIndex, columnIndex);
@@ -149,9 +146,9 @@ public class MSQueriesTableModel extends LazyTableModel implements GlobalTableMo
             case COLTYPE_MSQUERY_LAST_SCAN: {
                 LazyData lazyData = getLazyData(rowIndex,columnIndex);
                 
-                if (msquery.getMsiSearch()!= null) {
-                    lazyData.setData(msquery.getSpectrum().getLastScan() == null ? 0 : msquery.getSpectrum().getLastScan());
-                }else{
+                if (msQueryCompletelyLoaded) {
+                    lazyData.setData(msquery.getDSpectrum().getLastScan() == null ? 0 : msquery.getDSpectrum().getLastScan());
+                } else {
                     lazyData.setData(null);
                     givePriorityTo(m_taskId, rowIndex, columnIndex);
                 }
@@ -160,8 +157,8 @@ public class MSQueriesTableModel extends LazyTableModel implements GlobalTableMo
             case COLTYPE_MSQUERY_FIRST_TIME: {
                 LazyData lazyData = getLazyData(rowIndex,columnIndex);
                 
-                if (msquery.getMsiSearch()!= null) {
-                    lazyData.setData(msquery.getSpectrum().getFirstTime() == null ? Float.NaN : msquery.getSpectrum().getFirstTime());
+                 if (msQueryCompletelyLoaded) {
+                    lazyData.setData(msquery.getDSpectrum().getFirstTime() == null ? Float.NaN : msquery.getDSpectrum().getFirstTime());
                 }else{
                     lazyData.setData(null);
                     givePriorityTo(m_taskId, rowIndex, columnIndex);
@@ -171,8 +168,8 @@ public class MSQueriesTableModel extends LazyTableModel implements GlobalTableMo
             case COLTYPE_MSQUERY_LAST_TIME: {
                 LazyData lazyData = getLazyData(rowIndex,columnIndex);
                 
-                if (msquery.getMsiSearch()!= null) {
-                    lazyData.setData(msquery.getSpectrum().getLastTime() == null ? Float.NaN : msquery.getSpectrum().getLastTime());
+                 if (msQueryCompletelyLoaded) {
+                    lazyData.setData(msquery.getDSpectrum().getLastTime() == null ? Float.NaN : msquery.getDSpectrum().getLastTime());
                 }else{
                     lazyData.setData(null);
                     givePriorityTo(m_taskId, rowIndex, columnIndex);
@@ -182,8 +179,8 @@ public class MSQueriesTableModel extends LazyTableModel implements GlobalTableMo
             case COLTYPE_MSQUERY_SPECTRUM_TITLE: {
                 LazyData lazyData = getLazyData(rowIndex,columnIndex);
                 
-                if (msquery.getMsiSearch()!= null) {
-                    lazyData.setData(msquery.getSpectrum().getTitle());
+                 if (msQueryCompletelyLoaded) {
+                    lazyData.setData(msquery.getDSpectrum().getTitle());
                 }else{
                     lazyData.setData(null);
                     givePriorityTo(m_taskId, rowIndex, columnIndex);
@@ -288,7 +285,7 @@ public class MSQueriesTableModel extends LazyTableModel implements GlobalTableMo
             data = ((LazyData) data).getData();
         }
         // Retrieve MSQuery
-        MsQuery msq = m_msqueries.get(rowIndex);
+        DMsQuery msq = m_msqueries.get(rowIndex);
 
         if(columnIndex == COLTYPE_MSQUERY_ID) {
             return msq.getId();
@@ -379,9 +376,9 @@ public class MSQueriesTableModel extends LazyTableModel implements GlobalTableMo
         fireTableDataChanged();
     }
     
-    public void setData(Long taskId,  List<MsQuery> msQueries, Map<Long, Integer> nbPeptideMatchesByMsQueryIdMap) {
-        this.m_msqueries = msQueries ;
-        this.m_nbPeptideMatchesByMsQueryIdMap = nbPeptideMatchesByMsQueryIdMap;
+    public void setData(Long taskId,  List<DMsQuery> msQueries, Map<Long, Integer> nbPeptideMatchesByMsQueryIdMap) {
+        m_msqueries = msQueries ;
+        m_nbPeptideMatchesByMsQueryIdMap = nbPeptideMatchesByMsQueryIdMap;
         fireTableStructureChanged();
         
         m_taskId = taskId;
@@ -402,7 +399,7 @@ public class MSQueriesTableModel extends LazyTableModel implements GlobalTableMo
         return m_columnNames[col];
     }
     
-     public MsQuery getSelectedMsQuery(int row){
+     public DMsQuery getSelectedMsQuery(int row){
         return m_msqueries.get(row);
      }
 

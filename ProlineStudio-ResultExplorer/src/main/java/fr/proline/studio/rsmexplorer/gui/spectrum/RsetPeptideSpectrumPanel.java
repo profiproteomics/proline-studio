@@ -44,7 +44,7 @@ import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
 
 import fr.proline.core.orm.msi.Peptide;
-import fr.proline.core.orm.msi.Spectrum;
+import fr.proline.core.orm.msi.dto.DSpectrum;
 import fr.proline.core.orm.msi.dto.DMsQuery;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.uds.Project;
@@ -362,7 +362,7 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
             return;
         }
         
-        Spectrum spectrum = msQuery.isSpectrumSet() ? msQuery.getSpectrum() : null;
+        DSpectrum spectrum = msQuery.isSpectrumFullySet() ? msQuery.getDSpectrum() : null;
         if (spectrum == null) {
             return;
         }

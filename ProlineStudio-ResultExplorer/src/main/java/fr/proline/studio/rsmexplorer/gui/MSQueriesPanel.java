@@ -1,11 +1,6 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package fr.proline.studio.rsmexplorer.gui;
 
-import fr.proline.core.orm.msi.MsQuery;
+import fr.proline.core.orm.msi.dto.DMsQuery;
 import fr.proline.studio.comparedata.AddDataAnalyzerButton;
 import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.comparedata.GlobalTabelModelProviderInterface;
@@ -218,7 +213,7 @@ public class MSQueriesPanel extends HourglassPanel implements DataBoxPanelInterf
         }
     }
     
-    public void setData(Long taskId, List<MsQuery> msQueries, Map<Long, Integer> nbPeptideMatchesByMsQueryIdMap, boolean finished) {
+    public void setData(Long taskId, List<DMsQuery> msQueries, Map<Long, Integer> nbPeptideMatchesByMsQueryIdMap, boolean finished) {
         ((MSQueriesTableModel) ((CompoundTableModel) m_msqueriesTable.getModel()).getBaseModel()).setData(taskId, msQueries, nbPeptideMatchesByMsQueryIdMap);
         int nbQ = msQueries.size();
         m_titleLabel.setText(TABLE_TITLE +" ("+msQueries.size()+")");
@@ -275,7 +270,7 @@ public class MSQueriesPanel extends HourglassPanel implements DataBoxPanelInterf
         return m_msqueriesTable;
     }
     
-    public MsQuery getSelectedMsQuery(){
+    public DMsQuery getSelectedMsQuery(){
         MSQueriesTable table = ((MSQueriesTable) m_msqueriesTable);
 
         // Retrieve Selected Row

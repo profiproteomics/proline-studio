@@ -8,14 +8,21 @@ import fr.proline.core.orm.msi.ResultSummary;
  * information needed to display psm for msquery: msQuery and a resultSet and if filled the rsm
  * @author MB243701
  */
-public class MsQueryInfoRSM {
+public class MsQueryInfo {
     private DMsQuery m_msQuery;
+    private ResultSet m_resultSet;
     private ResultSummary m_resultSummary;
 
+    public MsQueryInfo(DMsQuery msQuery, ResultSet resultSet) {
+        m_msQuery = msQuery;
+        m_resultSet = resultSet;
+        m_resultSummary = null;
+    }
     
-    public MsQueryInfoRSM(DMsQuery msQuery, ResultSummary resultSummary) {
-        this.m_msQuery = msQuery;
-        this.m_resultSummary = resultSummary;
+    public MsQueryInfo(DMsQuery msQuery, ResultSummary resultSummary) {
+        m_msQuery = msQuery;
+        m_resultSet = resultSummary.getResultSet();
+        m_resultSummary = resultSummary;
     }
 
     public DMsQuery getMsQuery() {
@@ -27,7 +34,11 @@ public class MsQueryInfoRSM {
     }
 
     public ResultSet getResultSet() {
-        return m_resultSummary.getResultSet();
+        return m_resultSet;
+    }
+
+    public void setResultSet(ResultSet resultSet) {
+        this.m_resultSet = resultSet;
     }
 
     public ResultSummary getResultSummary() {

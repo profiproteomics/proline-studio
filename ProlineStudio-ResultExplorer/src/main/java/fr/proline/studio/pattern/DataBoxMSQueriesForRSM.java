@@ -1,13 +1,8 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package fr.proline.studio.pattern;
 
 import fr.proline.core.orm.msi.ResultSet;
-import fr.proline.core.orm.msi.MsQuery;
 import fr.proline.core.orm.msi.ResultSummary;
+import fr.proline.core.orm.msi.dto.DMsQuery;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseLoadMSQueriesTask;
 import fr.proline.studio.dam.tasks.SubTask;
@@ -24,7 +19,7 @@ import java.util.Map;
 public class DataBoxMSQueriesForRSM extends AbstractDataBox{
 
     private ResultSummary m_rsm = null;
-    private List<MsQuery> m_msQueriesList = null;
+    private List<DMsQuery> m_msQueriesList = null;
     private Map<Long, Integer> m_nbPeptideMatchesByMsQueryIdMap;
     
     public DataBoxMSQueriesForRSM() {
@@ -44,7 +39,7 @@ public class DataBoxMSQueriesForRSM extends AbstractDataBox{
         // Register possible out parameters
         // One or Multiple PeptideMatchId for one msQuery
         GroupParameter outParameter = new GroupParameter();
-        outParameter.addParameter(MsQuery.class, false);
+        outParameter.addParameter(DMsQuery.class, false);
         registerOutParameter(outParameter);
         
         outParameter = new GroupParameter();
@@ -119,7 +114,7 @@ public class DataBoxMSQueriesForRSM extends AbstractDataBox{
     @Override
     public Object getData(boolean getArray, Class parameterType) {
         if (parameterType != null) {
-            if (parameterType.equals(MsQuery.class)) {
+            if (parameterType.equals(DMsQuery.class)) {
                 return ((MSQueriesPanel)m_panel).getSelectedMsQuery();
             }
             if (parameterType.equals(ResultSummary.class)) {
@@ -129,7 +124,7 @@ public class DataBoxMSQueriesForRSM extends AbstractDataBox{
                 return m_rsm.getResultSet();
             }
             if (parameterType.equals(MsQueryInfoRSM.class)) {
-                MsQuery msq = ((MSQueriesPanel)m_panel).getSelectedMsQuery();
+                DMsQuery msq = ((MSQueriesPanel)m_panel).getSelectedMsQuery();
                 return new MsQueryInfoRSM(msq,m_rsm);
             }
         }

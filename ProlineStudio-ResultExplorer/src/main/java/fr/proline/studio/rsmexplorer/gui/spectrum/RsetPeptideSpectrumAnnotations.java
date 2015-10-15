@@ -26,7 +26,7 @@ import org.jfree.ui.TextAnchor;
 
 import org.slf4j.LoggerFactory;
 
-import fr.proline.core.orm.msi.Spectrum;
+import fr.proline.core.orm.msi.dto.DSpectrum;
 import fr.proline.core.orm.msi.dto.DMsQuery;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.studio.pattern.AbstractDataBox;
@@ -76,7 +76,7 @@ public class RsetPeptideSpectrumAnnotations {
         }
 
         DMsQuery msQuery = m_peptideMatch.isMsQuerySet() ? m_peptideMatch.getMsQuery() : null;
-        Spectrum spectrum = msQuery.isSpectrumSet() ? msQuery.getSpectrum() : null;
+        DSpectrum spectrum = msQuery.isSpectrumFullySet() ? msQuery.getDSpectrum() : null;
 
         PeptideFragmentationData.TheoreticalFragmentSeries_AW[] fragSer = m_peptideFragmentationData.getFragmentSeries();
         PeptideFragmentationData.FragmentMatch_AW[] fragMa = m_peptideFragmentationData.getFragmentMatch();

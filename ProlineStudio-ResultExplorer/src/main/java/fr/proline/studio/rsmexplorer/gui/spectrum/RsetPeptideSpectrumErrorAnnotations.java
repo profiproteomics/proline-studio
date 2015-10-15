@@ -24,7 +24,7 @@ import org.jfree.ui.RectangleAnchor;
 import org.jfree.ui.TextAnchor;
 import org.slf4j.LoggerFactory;
 
-import fr.proline.core.orm.msi.Spectrum;
+import fr.proline.core.orm.msi.dto.DSpectrum;
 import fr.proline.core.orm.msi.dto.DMsQuery;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 
@@ -74,7 +74,7 @@ public class RsetPeptideSpectrumErrorAnnotations {
         }
     	
         DMsQuery msQuery = m_peptideMatch.isMsQuerySet() ? m_peptideMatch.getMsQuery() : null;
-        Spectrum spectrum = msQuery.isSpectrumSet() ? msQuery.getSpectrum() : null;
+        DSpectrum spectrum = msQuery.isSpectrumFullySet() ? msQuery.getDSpectrum() : null;
 
         if (spectrum == null) {
             return;

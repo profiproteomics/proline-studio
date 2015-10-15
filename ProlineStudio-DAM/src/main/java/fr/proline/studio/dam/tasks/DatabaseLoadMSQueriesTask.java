@@ -1,19 +1,19 @@
 package fr.proline.studio.dam.tasks;
 
-import fr.proline.core.orm.msi.MsQuery;
 import fr.proline.core.orm.msi.MsiSearch;
 import fr.proline.core.orm.msi.ResultSet;
-import fr.proline.core.orm.msi.Spectrum;
+import fr.proline.core.orm.msi.dto.DMsQuery;
+import fr.proline.core.orm.msi.dto.DSpectrum;
 import fr.proline.core.orm.util.DataStoreConnectorFactory;
 import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import static fr.proline.studio.dam.tasks.AbstractDatabaseTask.m_logger;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import javax.persistence.EntityManager;
-import javax.persistence.TypedQuery;
 import javax.persistence.Query;
 
 /**
@@ -31,8 +31,8 @@ public class DatabaseLoadMSQueriesTask extends AbstractDatabaseSlicerTask {
     
     private long m_projectId = -1;
     private ResultSet m_resultSet;
-    private List<MsQuery> m_listMsQueries;
-    private Map<Long, Integer> m_msqQueryMap;
+    private List<DMsQuery> m_listMsQueries;
+    private Map<Long, DMsQuery> m_msqQueryMap;
     private MsiSearch m_msiSearch;
     private  Map<Long, Integer> m_nbPeptideMatchesByMsQueryIdMap;
     
@@ -48,7 +48,7 @@ public class DatabaseLoadMSQueriesTask extends AbstractDatabaseSlicerTask {
 
     }
 
-    public void initLoadMSQueries(long projectId, ResultSet rs, List<MsQuery> listMsQueries, Map<Long, Integer> nbPeptideMatchesByMsQueryIdMap) {
+    public void initLoadMSQueries(long projectId, ResultSet rs, List<DMsQuery> listMsQueries, Map<Long, Integer> nbPeptideMatchesByMsQueryIdMap) {
         init(SUB_TASK_COUNT, new TaskInfo("Load MSQueries for resultSet "+(rs == null? "null":rs.getId()), false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_MEDIUM));
         m_projectId = projectId;
         m_resultSet = rs;
@@ -101,7 +101,7 @@ public class DatabaseLoadMSQueriesTask extends AbstractDatabaseSlicerTask {
             entityManagerMSI.getTransaction().begin();
             if (m_resultSet != null){
                 Long msiSearchId = m_resultSet.getMsiSearch() == null ? -1: m_resultSet.getMsiSearch().getId();
-                String query = "SELECT msq.id "
+                String query = "SELECT msq.id, msq.initialId, msq.charge, msq.moz "
                         + "FROM fr.proline.core.orm.msi.MsQuery msq, fr.proline.core.orm.msi.Spectrum s, "
                         + "fr.proline.core.orm.msi.Peaklist pl, fr.proline.core.orm.msi.MsiSearch msi "
                         + "WHERE msi.id =:msiSearchId AND "
@@ -109,18 +109,26 @@ public class DatabaseLoadMSQueriesTask extends AbstractDatabaseSlicerTask {
                         + "pl.id = s.peaklistId AND "
                         + "s.id = msq.spectrum.id AND "
                         + "msq.msiSearch.id =:msiSearchId ";
-                TypedQuery<Long> msQueryQ = entityManagerMSI.createQuery(query, Long.class);
+                Query msQueryQ = entityManagerMSI.createQuery(query);
                 msQueryQ.setParameter("msiSearchId", msiSearchId);
-                m_msQueriesIds = msQueryQ.getResultList();
+                List<Object[]> resultList = msQueryQ.getResultList();
+                m_msQueriesIds = new ArrayList<>(resultList.size());
                 m_msqQueryMap = new HashMap();
-                int i=0;
-                for (Long msqId : m_msQueriesIds) {
-                    MsQuery msQuery = new MsQuery();
-                    msQuery.setId(msqId);
+                Iterator<Object[]> it = resultList.iterator();
+                for (int i=0;i<resultList.size();i++) {
+                    Object[] res = it.next();
+                    Long msqId = (Long) res[0];
+                    Integer msqInitialId = (Integer) res[1];
+                    Integer charge = (Integer) res[2];
+                    Double moz = (Double) res[3];
+                    DMsQuery msQuery = new DMsQuery(-1,msqId, msqInitialId, null);
+                    msQuery.setCharge(charge);
+                    msQuery.setMoz(moz);
                     m_listMsQueries.add(msQuery);
-                    m_msqQueryMap.put(msqId, i);
+                    m_msQueriesIds.add(msqId);
+                    m_msqQueryMap.put(msqId, msQuery);
                     m_nbPeptideMatchesByMsQueryIdMap.put(msqId, 0);
-                    i++;
+
                 }
                 
                 m_msiSearch = entityManagerMSI.find(MsiSearch.class, msiSearchId);
@@ -197,28 +205,36 @@ public class DatabaseLoadMSQueriesTask extends AbstractDatabaseSlicerTask {
     
     
     private boolean fetchMSQueriesData(EntityManager entityManagerMSI, List<Long> listMSQueriesId) {
-        String queryMSQ = "SELECT msq "
+        String queryMSQ = "SELECT msq.id "
                 + "FROM fr.proline.core.orm.msi.MsQuery msq "
                 + "WHERE msq.id IN (:listId) ";
-        TypedQuery<MsQuery> queryMSQueries = entityManagerMSI.createQuery(queryMSQ, MsQuery.class);
+        Query queryMSQueries = entityManagerMSI.createQuery(queryMSQ);
         queryMSQueries.setParameter("listId", listMSQueriesId);
         
-        List<MsQuery> resultList = new ArrayList();
+        List<Long> resultList = new ArrayList();
         if (listMSQueriesId != null && !listMSQueriesId.isEmpty()) {
             resultList = queryMSQueries.getResultList();
         }
         
-        String querySp = "SELECT msq.id, sp "
+        String querySp = "SELECT msq.id, sp.firstTime, sp.precursorIntensity, sp.title "
                 + "FROM fr.proline.core.orm.msi.Spectrum sp, fr.proline.core.orm.msi.MsQuery msq "
                 + "WHERE sp.id = msq.spectrum.id AND "
                 + "msq.id IN (:listId) ";
         Query querySpectrum = entityManagerMSI.createQuery(querySp);
         querySpectrum.setParameter("listId", listMSQueriesId);
-        Map<Long, Spectrum> spectrumMap = new HashMap<>();
+        Map<Long, DSpectrum> spectrumMap = new HashMap<>();
         if (listMSQueriesId != null && !listMSQueriesId.isEmpty()) {
             List<Object[]> rsSp = querySpectrum.getResultList();
             for (Object[] o: rsSp){
-                spectrumMap.put((Long)o[0], (Spectrum)o[1]);
+                Float firstTime = (Float) o[1];
+                Float precursorIntensity = (Float) o[2];
+                String title = (String) o[3];
+
+                DSpectrum spectrum = new DSpectrum();
+                spectrum.setFirstTime(firstTime);
+                spectrum.setPrecursorIntensity(precursorIntensity);
+                spectrum.setTitle(title);
+                spectrumMap.put((Long)o[0], spectrum);
             }
         }
         List<Long> rsIdList = new ArrayList();
@@ -243,12 +259,12 @@ public class DatabaseLoadMSQueriesTask extends AbstractDatabaseSlicerTask {
             }
         }
         
-        for (MsQuery msq : resultList) {
+        Iterator<Long> it = resultList.iterator();
+        while (it.hasNext()) {
+            Long msqId = it.next();
             // update the list
-            int index = m_msqQueryMap.get(msq.getId());
-            msq.setSpectrum(spectrumMap.get(msq.getId()));
-            msq.setMsiSearch(m_msiSearch);
-            m_listMsQueries.set(index, msq);
+            DMsQuery msQuery = m_msqQueryMap.get(msqId);
+            msQuery.setDSpectrum(spectrumMap.get(msqId));
         }
         
         return true;

@@ -20,9 +20,7 @@ public class DataBoxRsetPSM extends AbstractDataBox {
 
     
     private ResultSet m_rset = null;
-    
-    private boolean m_finishedLoading = false;
-    
+
     public DataBoxRsetPSM() {
         super(DataboxType.DataBoxRsetPSM);
 
@@ -92,9 +90,8 @@ public class DataBoxRsetPSM extends AbstractDataBox {
                setLoaded(loadingId);
                
                 if (finished) {
-                    m_finishedLoading = true;
                     unregisterTask(taskId);
-                    //propagateDataChanged(ValuesForStatsAbstract.class);
+
                     propagateDataChanged(CompareDataInterface.class);
                 }
             }
@@ -126,13 +123,7 @@ public class DataBoxRsetPSM extends AbstractDataBox {
                     return m_rset;
                 }
             }
-            /*if (parameterType.equals(ValuesForStatsAbstract.class)) {
-                if (m_finishedLoading) {
-                    return ((PeptideMatchPanel)m_panel).getValuesForStats();
-                } else {
-                    return null;
-                }
-            }*/
+
             if (parameterType.equals(CompareDataInterface.class)) {
                 return ((GlobalTabelModelProviderInterface) m_panel).getGlobalTableModelInterface();
             }

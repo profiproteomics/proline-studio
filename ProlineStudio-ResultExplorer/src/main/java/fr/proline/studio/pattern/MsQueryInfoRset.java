@@ -1,11 +1,6 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package fr.proline.studio.pattern;
 
-import fr.proline.core.orm.msi.MsQuery;
+import fr.proline.core.orm.msi.dto.DMsQuery;
 import fr.proline.core.orm.msi.ResultSet;
 
 /**
@@ -13,20 +8,20 @@ import fr.proline.core.orm.msi.ResultSet;
  * @author MB243701
  */
 public class MsQueryInfoRset {
-    private MsQuery m_msQuery;
+    private DMsQuery m_msQuery;
     private ResultSet m_resultSet;
 
-    public MsQueryInfoRset(MsQuery msQuery, ResultSet resultSet) {
+    public MsQueryInfoRset(DMsQuery msQuery, ResultSet resultSet) {
         this.m_msQuery = msQuery;
         this.m_resultSet = resultSet;
     }
     
 
-    public MsQuery getMsQuery() {
+    public DMsQuery getMsQuery() {
         return m_msQuery;
     }
 
-    public void setMsQuery(MsQuery msQuery) {
+    public void setMsQuery(DMsQuery msQuery) {
         this.m_msQuery = msQuery;
     }
 

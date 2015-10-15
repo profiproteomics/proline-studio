@@ -41,7 +41,7 @@ import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
 
 import fr.proline.core.orm.msi.Peptide;
-import fr.proline.core.orm.msi.Spectrum;
+import fr.proline.core.orm.msi.dto.DSpectrum;
 import fr.proline.core.orm.msi.dto.DMsQuery;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.studio.export.ExportButton;
@@ -288,7 +288,7 @@ public class RsetPeptideSpectrumErrorPanel extends HourglassPanel implements Dat
             return;
         }
         
-        Spectrum spectrum = msQuery.isSpectrumSet() ? msQuery.getSpectrum() : null;
+        DSpectrum spectrum = msQuery.isSpectrumFullySet() ? msQuery.getDSpectrum() : null;
         if (spectrum == null) {
             m_chart.setTitle("No Data Available");
             return;

@@ -4,6 +4,7 @@ package fr.proline.studio.rsmexplorer.gui.model;
 import fr.proline.core.orm.msi.Peptide;
 import fr.proline.core.orm.msi.PeptideReadablePtmString;
 import fr.proline.core.orm.msi.SequenceMatch;
+import fr.proline.core.orm.msi.dto.DSpectrum;
 import fr.proline.core.orm.msi.dto.DMsQuery;
 import fr.proline.core.orm.msi.dto.DPeptideInstance;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
@@ -48,10 +49,11 @@ public class PeptideTableModel extends DecoratedTableModel implements GlobalTabl
     public static final int COLTYPE_PEPTIDE_CHARGE = 11;
     public static final int COLTYPE_PEPTIDE_MISSED_CLIVAGE = 12;
     public static final int COLTYPE_PEPTIDE_RETENTION_TIME = 13;
-    public static final int COLTYPE_PEPTIDE_ION_PARENT_INTENSITY = 14;
-    public static final int COLTYPE_PEPTIDE_PTM = 15;
-    private static final String[] m_columnNames = {"Id", "Prev. AA", "Peptide", "Next AA", "Score", "Protein S. Matches", "Start", "Stop", "Calc. Mass", "Exp. MoZ", "Ppm"/*"Delta MoZ"*/, "Charge", "Missed Cl.", "RT", "Ion Parent Int.", "PTM"};
-    private static final String[] m_columnTooltips = {"Peptide Inst. Id", "Previous Amino Acid","Peptide", "Next Amino Acid", "Score", "Protein Set Matches", "Start", "Stop", "Calculated Mass", "Experimental Mass to Charge Ration", "parts-per-million"/*"Delta Mass to Charge Ratio"*/, "Charge", "Missed Clivage", "Retention Time", "Ion Parent Intensity", "Post Translational Modifications"};
+    public static final int COLTYPE_SPECTRUM_TITLE = 14;
+    public static final int COLTYPE_PEPTIDE_ION_PARENT_INTENSITY = 15;
+    public static final int COLTYPE_PEPTIDE_PTM = 16;
+    private static final String[] m_columnNames = {"Id", "Prev. AA", "Peptide", "Next AA", "Score", "Protein S. Matches", "Start", "Stop", "Calc. Mass", "Exp. MoZ", "Ppm"/*"Delta MoZ"*/, "Charge", "Missed Cl.", "RT", "Spectrum Title", "Ion Parent Int.", "PTM"};
+    private static final String[] m_columnTooltips = {"Peptide Inst. Id", "Previous Amino Acid","Peptide", "Next Amino Acid", "Score", "Protein Set Matches", "Start", "Stop", "Calculated Mass", "Experimental Mass to Charge Ration", "parts-per-million"/*"Delta Mass to Charge Ratio"*/, "Charge", "Missed Clivage", "Retention Time", "Spectrum Title", "Ion Parent Intensity", "Post Translational Modifications"};
     
     
     private DPeptideInstance[] m_peptideInstances = null;
@@ -100,6 +102,7 @@ public class PeptideTableModel extends DecoratedTableModel implements GlobalTabl
                 return String.class;
             case COLTYPE_PROTEIN_SETS_MATCHES:
             case COLTYPE_PEPTIDE_PTM:
+            case COLTYPE_SPECTRUM_TITLE:
                 return String.class;
             case COLTYPE_PEPTIDE_SCORE:
             case COLTYPE_PEPTIDE_RETENTION_TIME:
@@ -275,6 +278,21 @@ public class PeptideTableModel extends DecoratedTableModel implements GlobalTabl
             case COLTYPE_PEPTIDE_RETENTION_TIME: {
                 return peptideInstance.getElutionTime();
             }
+            case COLTYPE_SPECTRUM_TITLE: {
+                DPeptideMatch peptideMatch = (DPeptideMatch) peptideInstance.getBestPeptideMatch();
+                if (peptideMatch == null) {
+                    return null;
+                }
+                DMsQuery msQuery = peptideMatch.getMsQuery();
+                if (msQuery == null) {
+                    return null;
+                }
+                DSpectrum s = msQuery.getDSpectrum();
+                if (s == null) {
+                    return null;
+                }
+                return s.getTitle();
+            }
             case COLTYPE_PEPTIDE_ION_PARENT_INTENSITY: {
                 DPeptideMatch peptideMatch = (DPeptideMatch) peptideInstance.getBestPeptideMatch();
                 if (peptideMatch != null) {
@@ -357,6 +375,7 @@ public class PeptideTableModel extends DecoratedTableModel implements GlobalTabl
         filtersMap.put(COLTYPE_PEPTIDE_CHARGE, new IntegerFilter(getColumnName(COLTYPE_PEPTIDE_CHARGE), null, COLTYPE_PEPTIDE_CHARGE));
         filtersMap.put(COLTYPE_PEPTIDE_MISSED_CLIVAGE, new IntegerFilter(getColumnName(COLTYPE_PEPTIDE_MISSED_CLIVAGE), null, COLTYPE_PEPTIDE_MISSED_CLIVAGE));
         filtersMap.put(COLTYPE_PEPTIDE_RETENTION_TIME, new DoubleFilter(getColumnName(COLTYPE_PEPTIDE_RETENTION_TIME), null, COLTYPE_PEPTIDE_RETENTION_TIME));
+        filtersMap.put(COLTYPE_SPECTRUM_TITLE, new StringFilter(getColumnName(COLTYPE_SPECTRUM_TITLE), null, COLTYPE_SPECTRUM_TITLE));
         filtersMap.put(COLTYPE_PEPTIDE_ION_PARENT_INTENSITY, new DoubleFilter(getColumnName(COLTYPE_PEPTIDE_ION_PARENT_INTENSITY), null, COLTYPE_PEPTIDE_ION_PARENT_INTENSITY));
         filtersMap.put(COLTYPE_PEPTIDE_PTM, new StringFilter(getColumnName(COLTYPE_PEPTIDE_PTM), null, COLTYPE_PEPTIDE_PTM));
 

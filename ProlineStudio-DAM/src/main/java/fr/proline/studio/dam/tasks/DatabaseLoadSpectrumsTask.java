@@ -1,8 +1,8 @@
 package fr.proline.studio.dam.tasks;
 
-import fr.proline.core.orm.msi.MsQuery;
+
 import fr.proline.core.orm.msi.Peptide;
-import fr.proline.core.orm.msi.Spectrum;
+import fr.proline.core.orm.msi.dto.DSpectrum;
 import fr.proline.core.orm.msi.dto.DMsQuery;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.util.DataStoreConnectorFactory;
@@ -46,7 +46,7 @@ public class DatabaseLoadSpectrumsTask extends AbstractDatabaseTask {
     @Override
     public boolean needToFetch() {
         return ((! m_peptideMatch.isMsQuerySet()) ||
-                (! m_peptideMatch.getMsQuery().isSpectrumSet()));
+                (! m_peptideMatch.getMsQuery().isSpectrumFullySet()));
     }
 
     @Override
@@ -72,17 +72,17 @@ public class DatabaseLoadSpectrumsTask extends AbstractDatabaseTask {
 
             // Load Spectrum
             DMsQuery msQuery = m_peptideMatch.getMsQuery();
-            
-            TypedQuery<Spectrum> spectrumQuery = entityManagerMSI.createQuery("SELECT sp FROM fr.proline.core.orm.msi.MsQuery ms, fr.proline.core.orm.msi.Spectrum sp WHERE ms.spectrum=sp AND ms.id=:MsQueryId", Spectrum.class);
-           
+
+
+            TypedQuery<DSpectrum> spectrumQuery = entityManagerMSI.createQuery("SELECT new fr.proline.core.orm.msi.dto.DSpectrum(sp.id, sp.firstScan, sp.firstTime, sp.lastTime, sp.intensityList, sp.mozList, sp.precursorCharge, sp.precursorIntensity, sp.precursorMoz, sp.title) FROM fr.proline.core.orm.msi.MsQuery ms, fr.proline.core.orm.msi.Spectrum sp WHERE ms.spectrum=sp AND ms.id=:MsQueryId", DSpectrum.class);
             spectrumQuery.setParameter("MsQueryId", msQuery.getId());
 
   
-            List<Spectrum> spectrums = spectrumQuery.getResultList();
+            List<DSpectrum> spectrums = spectrumQuery.getResultList();
             if (spectrums.isEmpty()) {
                 msQuery.setSpectrum(null);
             } else {
-                msQuery.setSpectrum(spectrums.get(0));
+                msQuery.setDSpectrum(spectrums.get(0));
             }
  
             entityManagerMSI.getTransaction().commit();

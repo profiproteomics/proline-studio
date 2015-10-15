@@ -5,7 +5,7 @@
  */
 package fr.proline.studio.pattern;
 
-import fr.proline.core.orm.msi.MsQuery;
+import fr.proline.core.orm.msi.dto.DMsQuery;
 import fr.proline.core.orm.msi.ResultSet;
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
@@ -25,7 +25,7 @@ import java.util.List;
  */
 public class DataboxRSMPSMForMsQuery extends AbstractDataBox{
     
-    private MsQuery m_msQuery;
+    private DMsQuery m_msQuery;
     private ResultSet m_rset;
     private ResultSummary m_rsm;
     private List<DPeptideMatch> m_peptideMatches;

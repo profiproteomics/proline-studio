@@ -35,15 +35,19 @@ class DnDTabbedPane extends JTabbedPane {
 
     private static final int LINEWIDTH = 3;
     private static final String NAME = "test";
-    private final GhostGlassPane glassPane = new GhostGlassPane();
-    private final Rectangle2D lineRect = new Rectangle2D.Double();
-    private final Color lineColor = new Color(0, 100, 255);
-	  //private final DragSource dragSource  = new DragSource();
-    //private final DropTarget dropTarget;
-    private int dragTabIndex = -1;
+    private final GhostGlassPane m_glassPane = new GhostGlassPane();
+    private final Rectangle2D m_lineRect = new Rectangle2D.Double();
+    private static final Color LINE_COLOR = new Color(0, 100, 255);
+
+    private final DnDTabbedPane m_tabbedPane;
+    
+    protected int m_dragTabIndex = -1;
 
     public DnDTabbedPane(int parameter) {
         super(parameter); // uses constructor to apply tab panes in BOTTOM mode (like in EXCEL tabs)
+        
+        m_tabbedPane = this;
+        
         final DragSourceListener dsl = new DragSourceListener() {
             @Override
             public void dragEnter(DragSourceDragEvent e) {
@@ -53,9 +57,9 @@ class DnDTabbedPane extends JTabbedPane {
             @Override
             public void dragExit(DragSourceEvent e) {
                 e.getDragSourceContext().setCursor(DragSource.DefaultMoveNoDrop);
-                lineRect.setRect(0, 0, 0, 0);
-                glassPane.setPoint(new Point(-1000, -1000));
-                glassPane.repaint();
+                m_lineRect.setRect(0, 0, 0, 0);
+                m_glassPane.setPoint(new Point(-1000, -1000));
+                m_glassPane.repaint();
             }
 
             @Override
@@ -65,10 +69,10 @@ class DnDTabbedPane extends JTabbedPane {
                 Point tabPt = e.getLocation();
                 SwingUtilities.convertPointFromScreen(tabPt, DnDTabbedPane.this);
                 Point glassPt = e.getLocation();
-                SwingUtilities.convertPointFromScreen(glassPt, glassPane);
+                SwingUtilities.convertPointFromScreen(glassPt, m_glassPane);
                 int targetIdx = getTargetTabIndex(glassPt);
                 if (getTabAreaBound().contains(tabPt) && targetIdx >= 0
-                        && targetIdx != dragTabIndex && targetIdx != dragTabIndex + 1) {
+                        && targetIdx != m_dragTabIndex && targetIdx != m_dragTabIndex + 1) {
                     e.getDragSourceContext().setCursor(DragSource.DefaultMoveDrop);
                 } else {
                     e.getDragSourceContext().setCursor(DragSource.DefaultMoveNoDrop);
@@ -77,11 +81,11 @@ class DnDTabbedPane extends JTabbedPane {
 
             @Override
             public void dragDropEnd(DragSourceDropEvent e) {
-                lineRect.setRect(0, 0, 0, 0);
-                dragTabIndex = -1;
+                m_lineRect.setRect(0, 0, 0, 0);
+                m_dragTabIndex = -1;
                 if (hasGhost()) {
-                    glassPane.setVisible(false);
-                    glassPane.setImage(null);
+                    m_glassPane.setVisible(false);
+                    m_glassPane.setImage(null);
                 }
             }
 
@@ -113,8 +117,8 @@ class DnDTabbedPane extends JTabbedPane {
             @Override
             public void dragGestureRecognized(DragGestureEvent e) {
                 Point tabPt = e.getDragOrigin();
-                dragTabIndex = indexAtLocation(tabPt.x, tabPt.y);
-                if (dragTabIndex < 0) {
+                m_dragTabIndex = indexAtLocation(tabPt.x, tabPt.y);
+                if (m_dragTabIndex < 0) {
                     return;
                 }
                 initGlassPane(e.getComponent(), e.getDragOrigin());
@@ -126,7 +130,7 @@ class DnDTabbedPane extends JTabbedPane {
             }
         };
         //dropTarget =
-        new DropTarget(glassPane, DnDConstants.ACTION_COPY_OR_MOVE, new CDropTargetListener(), true);
+        new DropTarget(m_glassPane, DnDConstants.ACTION_COPY_OR_MOVE, new CDropTargetListener(), true);
         new DragSource().createDefaultDragGestureRecognizer(this, DnDConstants.ACTION_COPY_OR_MOVE, dgl);
     }
 
@@ -158,15 +162,15 @@ class DnDTabbedPane extends JTabbedPane {
             }
             repaint();
             if (hasGhost()) {
-                glassPane.setPoint(e.getLocation());
-                glassPane.repaint();
+                m_glassPane.setPoint(e.getLocation());
+                m_glassPane.repaint();
             }
         }
 
         @Override
         public void drop(DropTargetDropEvent e) {
             if (isDropAcceptable(e)) {
-                convertTab(dragTabIndex, getTargetTabIndex(e.getLocation()));
+                convertTab(m_dragTabIndex, getTargetTabIndex(e.getLocation()));
                 e.dropComplete(true);
             } else {
                 e.dropComplete(false);
@@ -180,7 +184,7 @@ class DnDTabbedPane extends JTabbedPane {
                 return false;
             }
             DataFlavor[] f = e.getCurrentDataFlavors();
-            if (t.isDataFlavorSupported(f[0]) && dragTabIndex >= 0) {
+            if (t.isDataFlavorSupported(f[0]) && m_dragTabIndex >= 0) {
                 return true;
             }
             return false;
@@ -192,7 +196,7 @@ class DnDTabbedPane extends JTabbedPane {
                 return false;
             }
             DataFlavor[] f = t.getTransferDataFlavors();
-            if (t.isDataFlavorSupported(f[0]) && dragTabIndex >= 0) {
+            if (t.isDataFlavorSupported(f[0]) && m_dragTabIndex >= 0) {
                 return true;
             }
             return false;
@@ -210,7 +214,7 @@ class DnDTabbedPane extends JTabbedPane {
     }
 
     private int getTargetTabIndex(Point glassPt) {
-        Point tabPt = SwingUtilities.convertPoint(glassPane, glassPt, this);
+        Point tabPt = SwingUtilities.convertPoint(m_glassPane, glassPt, this);
         for (int i = 0; i < getTabCount(); i++) {
             Rectangle r = getBoundsAt(i);
             if (r.contains(tabPt)) {
@@ -261,53 +265,52 @@ class DnDTabbedPane extends JTabbedPane {
     }
 
     private void initTargetLeftRightLine(int next) {
-        if (next < 0 || dragTabIndex == next || next - dragTabIndex == 1) {
-            lineRect.setRect(0, 0, 0, 0);
+        if (next < 0 || m_dragTabIndex == next || next - m_dragTabIndex == 1) {
+            m_lineRect.setRect(0, 0, 0, 0);
         } else if (next == getTabCount()) {
             Rectangle rect = getBoundsAt(getTabCount() - 1);
-            lineRect.setRect(rect.x + rect.width - LINEWIDTH / 2, rect.y, LINEWIDTH, rect.height);
+            m_lineRect.setRect(rect.x + rect.width - LINEWIDTH / 2, rect.y, LINEWIDTH, rect.height);
         } else if (next == 0) {
             Rectangle rect = getBoundsAt(0);
-            lineRect.setRect(-LINEWIDTH / 2, rect.y, LINEWIDTH, rect.height);
+            m_lineRect.setRect(-LINEWIDTH / 2, rect.y, LINEWIDTH, rect.height);
         } else {
             Rectangle rect = getBoundsAt(next - 1);
-            lineRect.setRect(rect.x + rect.width - LINEWIDTH / 2, rect.y, LINEWIDTH, rect.height);
+            m_lineRect.setRect(rect.x + rect.width - LINEWIDTH / 2, rect.y, LINEWIDTH, rect.height);
         }
     }
 
     private void initTargetTopBottomLine(int next) {
-        if (next < 0 || dragTabIndex == next || next - dragTabIndex == 1) {
-            lineRect.setRect(0, 0, 0, 0);
+        if (next < 0 || m_dragTabIndex == next || next - m_dragTabIndex == 1) {
+            m_lineRect.setRect(0, 0, 0, 0);
         } else if (next == getTabCount()) {
             Rectangle rect = getBoundsAt(getTabCount() - 1);
-            lineRect.setRect(rect.x, rect.y + rect.height - LINEWIDTH / 2, rect.width, LINEWIDTH);
+            m_lineRect.setRect(rect.x, rect.y + rect.height - LINEWIDTH / 2, rect.width, LINEWIDTH);
         } else if (next == 0) {
             Rectangle rect = getBoundsAt(0);
-            lineRect.setRect(rect.x, -LINEWIDTH / 2, rect.width, LINEWIDTH);
+            m_lineRect.setRect(rect.x, -LINEWIDTH / 2, rect.width, LINEWIDTH);
         } else {
             Rectangle rect = getBoundsAt(next - 1);
-            lineRect.setRect(rect.x, rect.y + rect.height - LINEWIDTH / 2, rect.width, LINEWIDTH);
+            m_lineRect.setRect(rect.x, rect.y + rect.height - LINEWIDTH / 2, rect.width, LINEWIDTH);
         }
     }
 
     private void initGlassPane(Component c, Point tabPt) {
-        //Point p = (Point) pt.clone();
-        getRootPane().setGlassPane(glassPane);
+
+        getRootPane().setGlassPane(m_glassPane);
         if (hasGhost()) {
-            Rectangle rect = getBoundsAt(dragTabIndex);
+            Rectangle rect = getBoundsAt(m_dragTabIndex);
             BufferedImage image = new BufferedImage(c.getWidth(), c.getHeight(), BufferedImage.TYPE_INT_ARGB);
             Graphics g = image.getGraphics();
             c.paint(g);
             try {
                 image = image.getSubimage(rect.x, rect.y, rect.width, rect.height);
             } catch (Exception e) {
-                //e.printStackTrace();
             }
-            glassPane.setImage(image);
+            m_glassPane.setImage(image);
         }
-        Point glassPt = SwingUtilities.convertPoint(c, tabPt, glassPane);
-        glassPane.setPoint(glassPt);
-        glassPane.setVisible(true);
+        Point glassPt = SwingUtilities.convertPoint(c, tabPt, m_glassPane);
+        m_glassPane.setPoint(glassPt);
+        m_glassPane.setVisible(true);
     }
 
     private Rectangle getTabAreaBound() {
@@ -315,45 +318,59 @@ class DnDTabbedPane extends JTabbedPane {
         return new Rectangle(0, 0, getWidth(), lastTab.y + lastTab.height);
     }
 
-    @Override
+    /*@Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
-        if (dragTabIndex >= 0) {
+        
+        
+        if (m_dragTabIndex >= 0) {
             Graphics2D g2 = (Graphics2D) g;
-            g2.setPaint(lineColor);
-            g2.fill(lineRect);
+            g2.setPaint(LINE_COLOR);
+            g2.fill(m_lineRect);
+            
+            
+        }
+    }*/
+    
+    private class GhostGlassPane extends JPanel {
+
+        private final AlphaComposite composite;
+        private Point location = new Point(0, 0);
+        private BufferedImage draggingGhost = null;
+
+        public GhostGlassPane() {
+            setOpaque(false);
+            composite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f);
+        }
+
+        public void setImage(BufferedImage draggingGhost) {
+            this.draggingGhost = draggingGhost;
+        }
+
+        public void setPoint(Point location) {
+            this.location = location;
+        }
+
+        @Override
+        public void paintComponent(Graphics g) {
+            if (draggingGhost == null) {
+                return;
+            }
+            Graphics2D g2 = (Graphics2D) g;
+            g2.setComposite(composite);
+            double xx = location.getX() - (draggingGhost.getWidth(this) / 2d);
+            double yy = location.getY() - (draggingGhost.getHeight(this) / 2d);
+            g2.drawImage(draggingGhost, (int) xx, (int) yy, null);
+
+            if (m_dragTabIndex >= 0) {
+
+                Rectangle2D r = new Rectangle2D.Double(m_lineRect.getX()+getX()-m_tabbedPane.getX(), m_lineRect.getY()+getY()-m_tabbedPane.getY(), m_lineRect.getWidth(), m_lineRect.getHeight());
+                g2.setPaint(LINE_COLOR);
+                g2.fill(r);
+
+            }
         }
     }
 }
 
-class GhostGlassPane extends JPanel {
 
-    private final AlphaComposite composite;
-    private Point location = new Point(0, 0);
-    private BufferedImage draggingGhost = null;
-
-    public GhostGlassPane() {
-        setOpaque(false);
-        composite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f);
-    }
-
-    public void setImage(BufferedImage draggingGhost) {
-        this.draggingGhost = draggingGhost;
-    }
-
-    public void setPoint(Point location) {
-        this.location = location;
-    }
-
-    @Override
-    public void paintComponent(Graphics g) {
-        if (draggingGhost == null) {
-            return;
-        }
-        Graphics2D g2 = (Graphics2D) g;
-        g2.setComposite(composite);
-        double xx = location.getX() - (draggingGhost.getWidth(this) / 2d);
-        double yy = location.getY() - (draggingGhost.getHeight(this) / 2d);
-        g2.drawImage(draggingGhost, (int) xx, (int) yy, null);
-    }
-}

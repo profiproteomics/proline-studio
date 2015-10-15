@@ -1,12 +1,7 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package fr.proline.studio.pattern;
 
 import fr.proline.core.orm.msi.ResultSet;
-import fr.proline.core.orm.msi.MsQuery;
+import fr.proline.core.orm.msi.dto.DMsQuery;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseLoadMSQueriesTask;
 import fr.proline.studio.dam.tasks.SubTask;
@@ -23,7 +18,7 @@ import java.util.Map;
 public class DataBoxMSQueriesForRset extends AbstractDataBox{
 
     private ResultSet m_rset = null;
-    private List<MsQuery> m_msQueriesList = null;
+    private List<DMsQuery> m_msQueriesList = null;
     private Map<Long, Integer> m_nbPeptideMatchesByMsQueryIdMap;
     
     public DataBoxMSQueriesForRset() {
@@ -42,7 +37,7 @@ public class DataBoxMSQueriesForRset extends AbstractDataBox{
         // Register possible out parameters
         // One or Multiple PeptideMatchId for one msQuery
         GroupParameter outParameter = new GroupParameter();
-        outParameter.addParameter(MsQuery.class, false);
+        outParameter.addParameter(DMsQuery.class, false);
         registerOutParameter(outParameter);
         
         
@@ -113,14 +108,14 @@ public class DataBoxMSQueriesForRset extends AbstractDataBox{
     @Override
     public Object getData(boolean getArray, Class parameterType) {
         if (parameterType != null) {
-            if (parameterType.equals(MsQuery.class)) {
+            if (parameterType.equals(DMsQuery.class)) {
                 return ((MSQueriesPanel)m_panel).getSelectedMsQuery();
             }
             if (parameterType.equals(ResultSet.class)) {
                 return m_rset;
             }
             if (parameterType.equals(MsQueryInfoRset.class)) {
-                MsQuery msq = ((MSQueriesPanel)m_panel).getSelectedMsQuery();
+                DMsQuery msq = ((MSQueriesPanel)m_panel).getSelectedMsQuery();
                 return new MsQueryInfoRset(msq, m_rset);
             }
         }

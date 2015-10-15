@@ -1,10 +1,8 @@
 package fr.proline.studio.pattern;
 
 
-
-import fr.proline.core.orm.msi.MsQuery;
 import fr.proline.core.orm.msi.ObjectTree;
-import fr.proline.core.orm.msi.Spectrum;
+import fr.proline.core.orm.msi.dto.DSpectrum;
 import fr.proline.core.orm.msi.dto.DMsQuery;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.studio.dam.AccessDatabaseThread;
@@ -39,7 +37,7 @@ public class DataBoxRsetPeptideSpectrum extends AbstractDataBox {
         // Register possible out parameters
         GroupParameter outParameter = new GroupParameter();
         outParameter.addParameter(DMsQuery.class, false);
-        outParameter.addParameter(Spectrum.class, false);
+        outParameter.addParameter(DSpectrum.class, false);
         outParameter.addParameter(PeptideFragmentationData.class, false);
         registerOutParameter(outParameter);
     }
@@ -68,13 +66,12 @@ public class DataBoxRsetPeptideSpectrum extends AbstractDataBox {
         }
 
         boolean needToLoadData = ((!peptideMatch.isMsQuerySet()) ||
-                                  (!peptideMatch.getMsQuery().isSpectrumSet()));
+                                  (!peptideMatch.getMsQuery().isSpectrumFullySet()));
 
         if (needToLoadData) {
 
             final int loadingId = setLoading();
 
-            //final String searchedText = searchTextBeingDone; //JPM.TODO
             AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
 
                 @Override
@@ -163,7 +160,7 @@ public class DataBoxRsetPeptideSpectrum extends AbstractDataBox {
     @Override
     public Object getData(boolean getArray, Class parameterType) {
         if (parameterType!= null ) {
-            if (parameterType.equals(MsQuery.class)) {
+            if (parameterType.equals(DMsQuery.class)) {
                 DPeptideMatch peptideMatch = (DPeptideMatch) m_previousDataBox.getData(false, DPeptideMatch.class);
                 if (peptideMatch != null) {
                     DMsQuery msQuery = peptideMatch.getMsQuery();
@@ -172,12 +169,12 @@ public class DataBoxRsetPeptideSpectrum extends AbstractDataBox {
                     }
                 }
             }
-            if (parameterType.equals(Spectrum.class)) {
+            if (parameterType.equals(DSpectrum.class)) {
                 DPeptideMatch peptideMatch = (DPeptideMatch) m_previousDataBox.getData(false, DPeptideMatch.class);
                 if (peptideMatch != null) {
                     DMsQuery msQuery = peptideMatch.getMsQuery();
                     if (msQuery != null) {
-                        Spectrum spectrum = msQuery.getSpectrum();
+                        DSpectrum spectrum = msQuery.getDSpectrum();
                         if (spectrum != null) {
                             return spectrum;
                         }

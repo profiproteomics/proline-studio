@@ -1,13 +1,7 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package fr.proline.studio.pattern;
 
-import fr.proline.core.orm.msi.MsQuery;
+import fr.proline.core.orm.msi.dto.DMsQuery;
 import fr.proline.core.orm.msi.ResultSet;
-import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.comparedata.GlobalTabelModelProviderInterface;
@@ -25,7 +19,7 @@ import java.util.List;
  */
 public class DataboxRsetPSMForMsQuery extends AbstractDataBox{
     
-    private MsQuery m_msQuery;
+    private DMsQuery m_msQuery;
     private ResultSet m_rset;
     private List<DPeptideMatch> m_peptideMatches;
     

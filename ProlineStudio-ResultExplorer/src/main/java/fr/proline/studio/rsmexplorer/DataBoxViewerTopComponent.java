@@ -2,7 +2,6 @@ package fr.proline.studio.rsmexplorer;
 
 import fr.proline.studio.pattern.WindowBox;
 import fr.proline.studio.python.data.TableInfo;
-import fr.proline.studio.table.GlobalTableModelInterface;
 import java.awt.Graphics;
 import java.awt.GridLayout;
 import java.awt.Image;

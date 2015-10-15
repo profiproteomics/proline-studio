@@ -12,7 +12,7 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * Static reference of the instruments of the current UDS
+ * Static reference of the several UDS values : project, instruments ....
  * @author jm235353
  */
 public class DatabaseDataManager  {
@@ -25,6 +25,7 @@ public class DatabaseDataManager  {
     private UserAccount m_loggedUser;
     private String m_jdbcURL;
     private String m_jdbcDriver;
+    private HashMap<Object, Object> m_serverConnectionProperties;
     
     private HashMap<Aggregation.ChildNature, Aggregation> m_aggregationMap = null;
     
@@ -36,6 +37,10 @@ public class DatabaseDataManager  {
             m_singleton = new DatabaseDataManager();
         }
         return m_singleton;
+    }
+    
+    public void setServerConnectionProperties(HashMap<Object, Object> connProperties){
+        this.m_serverConnectionProperties = connProperties;
     }
     
     public void setIntruments(List<InstrumentConfiguration> l) {
@@ -136,8 +141,12 @@ public class DatabaseDataManager  {
         if (m_checkDatabaseExists == null) {
         
             try {
-
-                IDatabaseConnector seqDatabaseConnector = DatabaseAccess.getSEQDatabaseConnector(false);
+                IDatabaseConnector seqDatabaseConnector = null;
+                if(m_serverConnectionProperties != null && !m_serverConnectionProperties.isEmpty())
+                  seqDatabaseConnector = DatabaseAccess.getSEQDatabaseConnector(false,m_serverConnectionProperties);
+                else
+                    seqDatabaseConnector =DatabaseAccess.getSEQDatabaseConnector(false);
+                
                 if (seqDatabaseConnector == null) {
                     m_checkDatabaseExists = Boolean.FALSE;
                 } else {
@@ -148,7 +157,7 @@ public class DatabaseDataManager  {
             }
         }
 
-        return m_checkDatabaseExists.booleanValue();
+        return m_checkDatabaseExists;
     }
     private Boolean m_checkDatabaseExists = null;
     

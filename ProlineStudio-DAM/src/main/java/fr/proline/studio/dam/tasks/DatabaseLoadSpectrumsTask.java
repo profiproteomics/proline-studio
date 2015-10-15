@@ -80,7 +80,7 @@ public class DatabaseLoadSpectrumsTask extends AbstractDatabaseTask {
   
             List<DSpectrum> spectrums = spectrumQuery.getResultList();
             if (spectrums.isEmpty()) {
-                msQuery.setSpectrum(null);
+                msQuery.setDSpectrum(null);
             } else {
                 msQuery.setDSpectrum(spectrums.get(0));
             }

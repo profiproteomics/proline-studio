@@ -93,7 +93,7 @@ public class JMSConnectionManager {
         m_serviceQueue = null;        
     }
     
-    public Connection getJMSConnection() {
+    public Connection getJMSConnection() throws Exception {
             
         if(m_connection == null){
             try{
@@ -101,19 +101,20 @@ public class JMSConnectionManager {
             }catch(Exception e){
                 m_connection = null;
                 m_serviceQueue = null;
-            }
-            
+                throw e;
+            }            
         }        
         return m_connection;            
     }
     
-    public Queue getServiceQueue(){
+    public Queue getServiceQueue() throws Exception {
         if(m_serviceQueue == null){
             try{
                 createConnection();    
             }catch(Exception e){
                 m_connection = null;
                 m_serviceQueue = null;
+                throw e;
             }
         }
         return m_serviceQueue;

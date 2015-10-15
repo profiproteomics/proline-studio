@@ -101,7 +101,7 @@ public abstract class ConnectionDialog extends DefaultDialog {
             c.gridx = 0;
             c.gridy++;
             c.gridwidth = 2;
-            m_isJMSServerCheckBox = new JCheckBox("JMS Server: ");
+            m_isJMSServerCheckBox = new JCheckBox("JMS Server");
             URLPanel.add(m_isJMSServerCheckBox, c);
         }
         

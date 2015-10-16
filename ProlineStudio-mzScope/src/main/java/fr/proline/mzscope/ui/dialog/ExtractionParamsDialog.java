@@ -172,7 +172,7 @@ public class ExtractionParamsDialog extends JDialog {
             toleranceTF.setName("toleranceTF");
             toleranceTF.setColumns(5);
             toleranceTF.setToolTipText("Tolerance in ppm");
-            toleranceTF.setText("5.0");
+            toleranceTF.setText(Float.toString(MzScopePreferences.getInstance().getMzPPMTolerance()));
         }
         return toleranceTF;
     }

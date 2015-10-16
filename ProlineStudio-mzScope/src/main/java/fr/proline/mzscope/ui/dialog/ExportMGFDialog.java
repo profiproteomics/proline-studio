@@ -6,6 +6,7 @@
 package fr.proline.mzscope.ui.dialog;
 
 import fr.profi.mzdb.io.writer.mgf.PrecursorMzComputation;
+import fr.proline.mzscope.model.MzScopePreferences;
 import fr.proline.studio.export.ExportDialog;
 import fr.proline.studio.export.ExporterFactory;
 import fr.proline.studio.gui.DefaultDialog;
@@ -179,7 +180,7 @@ public class ExportMGFDialog extends DefaultDialog {
         c.gridx++;
         c.gridwidth = 2;
         mzTolField = new JTextField();
-        mzTolField.setText(new Float(10.0).toString());
+        mzTolField.setText(Float.toString(MzScopePreferences.getInstance().getMzPPMTolerance()));
         exportPanel.add(mzTolField, c);
         
         c.gridy++;

@@ -1,5 +1,6 @@
 package fr.proline.mzscope.mzml;
 
+import fr.profi.mzdb.io.writer.mgf.PrecursorMzComputation;
 import fr.profi.mzdb.model.Feature;
 import fr.proline.mzscope.model.Chromatogram;
 import fr.proline.mzscope.model.FeaturesExtractionRequest;
@@ -110,5 +111,10 @@ public class MzMLRawFile implements IRawFile {
    public int getSpectrumCount() {
       return scans.size();
    }
+   
+   @Override
+    public boolean exportAsMGF(String mgfFileName, PrecursorMzComputation precComp, float mzTolPPM ,float intensityCutoff, boolean exportProlineTitle ){
+       return true;
+    }
 
 }

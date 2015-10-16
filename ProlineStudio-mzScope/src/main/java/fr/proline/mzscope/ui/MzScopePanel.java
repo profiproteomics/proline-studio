@@ -2,6 +2,7 @@ package fr.proline.mzscope.ui;
 
 import fr.proline.mzscope.utils.ButtonTabComponent;
 import com.google.common.base.Strings;
+import fr.profi.mzdb.io.writer.mgf.PrecursorMzComputation;
 import fr.profi.mzdb.model.Feature;
 import fr.proline.mzscope.map.LcMsMap;
 import fr.proline.mzscope.map.LcMsViewer;
@@ -15,11 +16,14 @@ import fr.proline.mzscope.model.IRawFile;
 import fr.proline.mzscope.model.Ms1ExtractionRequest;
 import fr.proline.mzscope.model.MzScopeCallback;
 import fr.proline.mzscope.model.MzScopePreferences;
+import fr.proline.mzscope.ui.dialog.ExportMGFDialog;
 import fr.proline.mzscope.ui.dialog.ExtractionParamsDialog;
 import fr.proline.mzscope.ui.event.ExtractionEvent;
 import fr.proline.mzscope.ui.event.ExtractionStateListener;
 import fr.proline.mzscope.utils.MzScopeConstants;
 import fr.proline.mzscope.utils.MzScopeConstants.DisplayMode;
+import fr.proline.studio.gui.DefaultDialog;
+import fr.proline.studio.gui.DefaultDialog.ProgressTask;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -597,6 +601,36 @@ public class MzScopePanel extends JPanel implements IFeatureViewer, IExtractionE
 	    e.printStackTrace();
 	}
 	viewerUI.getController().changeViewport(new LcMsViewport(390, 440, 1000, 1150));
+    }
+    
+    public void exportAsMGF(IRawFile rawFile){
+        ExportMGFDialog exportDialog = ExportMGFDialog.getDialog(parentFrame, rawFile.getName());
+        exportDialog.setLocationRelativeTo(parentFrame);
+        ProgressTask task = new DefaultDialog.ProgressTask() {
+
+            @Override
+            public int getMinValue() {
+                return 0;
+            }
+
+            @Override
+            public int getMaxValue() {
+                return 100;
+            }
+
+            @Override
+            protected Object doInBackground() throws Exception {
+                exportAsMGF(rawFile, exportDialog.getMgfFileName(), exportDialog.getPrecComp(), exportDialog.getMzTolPPM(), exportDialog.getIntensityCutoff(), exportDialog.isExportProlineTitle());
+                setProgress(100);
+                return null;
+            }
+        };
+        exportDialog.setTask(task);
+        exportDialog.setVisible(true);
+    }
+    
+    public boolean exportAsMGF(IRawFile rawFile, String mgfFileName, PrecursorMzComputation precComp, float mzTolPPM ,float intensityCutoff, boolean exportProlineTitle ){
+        return rawFile.exportAsMGF(mgfFileName, precComp, mzTolPPM, intensityCutoff, exportProlineTitle);
     }
     
 }

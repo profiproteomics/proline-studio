@@ -397,13 +397,19 @@ public class ExportDialog extends DefaultDialog  {
         return true;
     }
     
+    
+    private FileNameExtensionFilter getFilterWithSameExtensions(FileNameExtensionFilter filter){
+        return ExportDialog.getFilterWithSameExtensions(filter, m_filterList);
+    }
+    
+    
     /* compare filter based on the extensions, returns null if the filter is not already in the list, otherwise returns the object filter in the list*/
-    private FileNameExtensionFilter getFilterWithSameExtensions(FileNameExtensionFilter filter) {
+    public  static FileNameExtensionFilter getFilterWithSameExtensions(FileNameExtensionFilter filter, List<FileNameExtensionFilter> filterList) {
         FileNameExtensionFilter existFilter = null;
         
         String[] newExtension = filter.getExtensions();
         int nbNew = newExtension.length;
-        for (FileNameExtensionFilter f : m_filterList) {
+        for (FileNameExtensionFilter f : filterList) {
             String[] extensions = f.getExtensions();
             boolean sameExt = true;
             int nbE = extensions.length;

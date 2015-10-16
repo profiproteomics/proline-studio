@@ -13,19 +13,22 @@ public class ExporterFactory {
     public static final int EXPORT_FROM_SERVER = 3;
     public static final int EXPORT_IMAGE2 = 4;
     public static final int EXPORT_XIC = 5;
+    public static final int EXPORT_MGF = 6;
 
     private static ArrayList<ExporterInfo> m_listTable = null;
     private static ArrayList<ExporterInfo> m_listImage = null;
     private static ArrayList<ExporterInfo> m_listServer= null;
     private static ArrayList<ExporterInfo> m_listImage2 = null;
     private static ArrayList<ExporterInfo> m_listXic = null;
+    private static ArrayList<ExporterInfo> m_listMGF = null;
     
     public enum ExporterType {
         EXCEL_XML,
         EXCEL_2003,
         CSV,
         PNG,
-        SVG
+        SVG, 
+        MGF
     };
     
     public static  ArrayList<ExporterInfo> getList(int exportType) {
@@ -80,7 +83,7 @@ public class ExporterFactory {
 
 
             return m_listXic;
-        } else { // EXPORT_FROM_SERVER
+        } else if(exportType == EXPORT_FROM_SERVER){ // EXPORT_FROM_SERVER
             
             if (m_listServer != null) {
                 return m_listServer;
@@ -94,7 +97,18 @@ public class ExporterFactory {
 
 
             return m_listServer;
+        }else if (exportType == EXPORT_MGF){
+            if (m_listMGF != null) {
+                return m_listMGF;
+            }
+            m_listMGF = new ArrayList<>(1);
+
+            m_listMGF.add(new ExporterInfo(ExporterType.MGF, "MGF (.mgf)", "mgf"));
+
+
+            return m_listMGF; 
         }
+        return new ArrayList(); // should not happen
     }
     
     public static class ExporterInfo {

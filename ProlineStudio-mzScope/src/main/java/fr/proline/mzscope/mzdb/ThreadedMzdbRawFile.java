@@ -1,5 +1,6 @@
 package fr.proline.mzscope.mzdb;
 
+import fr.profi.mzdb.io.writer.mgf.PrecursorMzComputation;
 import fr.profi.mzdb.model.Feature;
 import fr.proline.mzscope.model.Chromatogram;
 import fr.proline.mzscope.model.FeaturesExtractionRequest;
@@ -208,6 +209,16 @@ public class ThreadedMzdbRawFile implements IRawFile {
     @Override
     public List<Float> getMsMsEvent(double minMz, double maxMz) {
         return mzdbRawFile.getMsMsEvent(minMz, maxMz);
+    }
+    
+    @Override
+    public boolean exportAsMGF(String mgfFileName, PrecursorMzComputation precComp, float mzTolPPM ,float intensityCutoff, boolean exportProlineTitle ){
+        try {
+         return service.submit(() -> mzdbRawFile.exportAsMGF(mgfFileName, precComp, mzTolPPM, intensityCutoff, exportProlineTitle)).get();
+      } catch (InterruptedException | ExecutionException ex ) {
+         logger.error("exportAsMGF call fail", ex);
+      } 
+      return false;
     }
 
 }

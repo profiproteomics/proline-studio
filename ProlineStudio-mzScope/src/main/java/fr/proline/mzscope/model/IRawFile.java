@@ -1,5 +1,6 @@
 package fr.proline.mzscope.model;
 
+import fr.profi.mzdb.io.writer.mgf.PrecursorMzComputation;
 import fr.profi.mzdb.model.Feature;
 import java.io.File;
 import java.util.List;
@@ -40,4 +41,5 @@ public interface IRawFile {
     */
    public List<Float> getMsMsEvent(double minMz, double maxMz);
    
+   public boolean exportAsMGF(String mgfFileName, PrecursorMzComputation precComp, float mzTolPPM ,float intensityCutoff, boolean exportProlineTitle );
 }

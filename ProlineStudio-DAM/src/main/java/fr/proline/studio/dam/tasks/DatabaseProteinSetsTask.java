@@ -515,7 +515,7 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
         // FROM PeptideInstance pi, PeptideSetPeptideInstanceItem ps_to_pi, PeptideSetProteinMatchMap ps_to_pm
         // WHERE ps_to_pm.id.proteinMatchId IN (:proteinMatchIds) AND ps_to_pm.resultSummary.id=:rsmId AND ps_to_pm.id.peptideSetId=ps_to_pi.id.peptideSetId AND ps_to_pm.resultSummary.id=ps_to_pi.resultSummary.id AND ps_to_pi.id.peptideInstanceId=pi.id
         // GROUP BY ps_to_pm.id.proteinMatchId
-        String spectralCountQueryString = "SELECT ps_to_pm.id.proteinMatchId, sum(pi.peptideMatchCount) FROM PeptideInstance pi, PeptideSetPeptideInstanceItem ps_to_pi, PeptideSetProteinMatchMap ps_to_pm WHERE ps_to_pm.id.proteinMatchId IN (:proteinMatchIds) AND ps_to_pm.resultSummary.id=:rsmId AND ps_to_pm.id.peptideSetId=ps_to_pi.id.peptideSetId AND ps_to_pm.resultSummary.id=ps_to_pi.resultSummary.id AND ps_to_pi.id.peptideInstanceId=pi.id GROUP BY ps_to_pm.id.proteinMatchId";
+        String spectralCountQueryString = "SELECT ps_to_pm.id.proteinMatchId, sum(pi.totalLeavesMatchCount) FROM PeptideInstance pi, PeptideSetPeptideInstanceItem ps_to_pi, PeptideSetProteinMatchMap ps_to_pm WHERE ps_to_pm.id.proteinMatchId IN (:proteinMatchIds) AND ps_to_pm.resultSummary.id=:rsmId AND ps_to_pm.id.peptideSetId=ps_to_pi.id.peptideSetId AND ps_to_pm.resultSummary.id=ps_to_pi.resultSummary.id AND ps_to_pi.id.peptideInstanceId=pi.id GROUP BY ps_to_pm.id.proteinMatchId";
         Query spectralCountQuery = entityManagerMSI.createQuery(spectralCountQueryString);
         spectralCountQuery.setParameter("proteinMatchIds", sliceOfProteinMatchIds);
         spectralCountQuery.setParameter("rsmId", m_rsm.getId());
@@ -566,7 +566,7 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
         // FROM PeptideInstance pi, PeptideSetPeptideInstanceItem ps_to_pi, PeptideSetProteinMatchMap ps_to_pm
         // WHERE ps_to_pm.id.proteinMatchId IN (:proteinMatchIds) AND ps_to_pm.resultSummary.id=:rsmId AND ps_to_pm.id.peptideSetId=ps_to_pi.id.peptideSetId AND ps_to_pm.resultSummary.id=ps_to_pi.resultSummary.id AND ps_to_pi.id.peptideInstanceId=pi.id AND pi.validatedProteinSetCount=1
         // GROUP BY ps_to_pm.id.proteinMatchId
-        String specificSpectralCountQueryString = "SELECT ps_to_pm.id.proteinMatchId, sum(pi.peptideMatchCount) FROM PeptideInstance pi, PeptideSetPeptideInstanceItem ps_to_pi, PeptideSetProteinMatchMap ps_to_pm WHERE ps_to_pm.id.proteinMatchId IN (:proteinMatchIds) AND ps_to_pm.resultSummary.id=:rsmId AND ps_to_pm.id.peptideSetId=ps_to_pi.id.peptideSetId AND ps_to_pm.resultSummary.id=ps_to_pi.resultSummary.id AND ps_to_pi.id.peptideInstanceId=pi.id AND pi.validatedProteinSetCount=1 GROUP BY ps_to_pm.id.proteinMatchId";
+        String specificSpectralCountQueryString = "SELECT ps_to_pm.id.proteinMatchId, sum(pi.totalLeavesMatchCount) FROM PeptideInstance pi, PeptideSetPeptideInstanceItem ps_to_pi, PeptideSetProteinMatchMap ps_to_pm WHERE ps_to_pm.id.proteinMatchId IN (:proteinMatchIds) AND ps_to_pm.resultSummary.id=:rsmId AND ps_to_pm.id.peptideSetId=ps_to_pi.id.peptideSetId AND ps_to_pm.resultSummary.id=ps_to_pi.resultSummary.id AND ps_to_pi.id.peptideInstanceId=pi.id AND pi.validatedProteinSetCount=1 GROUP BY ps_to_pm.id.proteinMatchId";
 
         Query specificSpectralCountQuery = entityManagerMSI.createQuery(specificSpectralCountQueryString);
         specificSpectralCountQuery.setParameter("proteinMatchIds", sliceOfProteinMatchIds);

@@ -48,6 +48,7 @@ public class ButtonTabComponent extends JPanel{
     private EventListenerList closeListenerList = new EventListenerList();
     
     private JButton waitingButton = null;
+    private JButton closeButton = null;
 
     public ButtonTabComponent(String text) {
         //unset default FlowLayout' gaps
@@ -67,8 +68,8 @@ public class ButtonTabComponent extends JPanel{
         //add more space between the label and the button
         label.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 5));
         //tab button
-        JButton button = new TabButton();
-        add(button);
+        closeButton = new TabButton();
+        add(closeButton);
         //add more space to the top of the component
         setBorder(BorderFactory.createEmptyBorder(2, 0, 0, 0));
     }
@@ -76,10 +77,16 @@ public class ButtonTabComponent extends JPanel{
     /* display an icon for waiting process */
     public void setWaitingState(boolean waitingState){
         if (waitingState){
+            if( closeButton != null){
+                this.closeButton.setEnabled(false);
+            }
             this.add(getWaitingButton(), 0);
         }else if (this.waitingButton != null){
             this.remove(0);
             this.waitingButton = null;
+            if( closeButton != null){
+                this.closeButton.setEnabled(true);
+            }
         }
         repaint();
     }
@@ -124,7 +131,7 @@ public class ButtonTabComponent extends JPanel{
 
     private class TabButton extends JButton implements ActionListener {
 
-        private BasicStroke stroke = new BasicStroke(2, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
+        private final BasicStroke stroke = new BasicStroke(2, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
 
         public TabButton() {
             init();

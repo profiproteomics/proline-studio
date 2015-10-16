@@ -8,19 +8,25 @@ import fr.proline.mzscope.model.MzScopeCallback;
 import fr.proline.mzscope.model.Spectrum;
 import fr.proline.mzscope.utils.ButtonTabComponent;
 import fr.proline.mzscope.utils.MzScopeConstants.DisplayMode;
+import fr.proline.studio.tabs.IWrappedPanel;
+import fr.proline.studio.tabs.TabsPanel;
 import fr.proline.studio.utils.CyclicColorPalette;
+import fr.proline.studio.utils.IconManager;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Cursor;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
-import javax.swing.JTabbedPane;
+import javax.swing.JToolBar;
 import javax.swing.SwingWorker;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -36,10 +42,14 @@ public class TabbedMultiRawFilePanel extends JPanel implements IRawFilePanel {
     final private static Logger logger = LoggerFactory.getLogger(TabbedMultiRawFilePanel.class);
 
     private JSplitPane splitPane;
-    private JTabbedPane chromatogramContainerPanel;
+    private TabsPanel chromatogramContainerPanel;
     private ChromatogramPanel currentChromatogramPanel;
     protected SpectrumPanel spectrumContainerPanel;
     protected Spectrum currentScan;
+    
+    private JToolBar m_toolbarPanel;
+    private JPanel m_multiRawFilePanel;
+    private JButton m_buttonLayout;
 
     private final List<IRawFile> rawfiles;
     private final Map<IRawFile, Chromatogram> mapChromatogramForRawFile;
@@ -74,16 +84,71 @@ public class TabbedMultiRawFilePanel extends JPanel implements IRawFilePanel {
             splitPane.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
             splitPane.setDoubleBuffered(true);
             splitPane.setOneTouchExpandable(true);
-            splitPane.setTopComponent(getChromatogramContainerPanel());
+            splitPane.setTopComponent(getMultiRawFilePanel());
             splitPane.setBottomComponent(getSpectrumContainerPanel());
         }
         return splitPane;
     }
+    
+    private JPanel getMultiRawFilePanel(){
+        if (m_multiRawFilePanel == null){
+            m_multiRawFilePanel = new JPanel();
+            m_multiRawFilePanel.setLayout(new BorderLayout());
+            m_multiRawFilePanel.add(getChromatogramContainerPanel(), BorderLayout.CENTER);
+            m_multiRawFilePanel.add(getToolBar(), BorderLayout.NORTH);
+        }
+        return m_multiRawFilePanel;
+    }
+    
+    private JToolBar getToolBar(){
+        if (this.m_toolbarPanel == null){
+            m_toolbarPanel = new JToolBar();
+            m_toolbarPanel.setFloatable(false);
+            m_toolbarPanel.setRollover(true);
+        
+            m_toolbarPanel.add(getButtonLayout());
+            
+            JButton displayTICbtn = new JButton("TIC");
+            displayTICbtn.setToolTipText("Display TIC Chromatogram");
+            displayTICbtn.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    displayTIC();
+                }
+            });
+            m_toolbarPanel.add(displayTICbtn);
+            
+            JButton displayBPIbtn = new JButton("BPC");
+            displayBPIbtn.setToolTipText("Display Base Peak Chromatogram");
+            displayBPIbtn.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    displayBPI();
+                }
+            });
+            m_toolbarPanel.add(displayBPIbtn);
+        }
+        return this.m_toolbarPanel;
+    }
+    
+    private JButton getButtonLayout(){
+        if(m_buttonLayout == null){
+            m_buttonLayout = new JButton();
+            m_buttonLayout.setIcon(IconManager.getIcon(IconManager.IconType.GRID));
+            m_buttonLayout.setToolTipText("Change the presentation: tabs/grid");
+            m_buttonLayout.addActionListener((ActionEvent e) -> {
+                chromatogramContainerPanel.changeLayout();
+            });
+        }
+        return m_buttonLayout;
+    }
+    
 
-    private JTabbedPane getChromatogramContainerPanel() {
+    private TabsPanel getChromatogramContainerPanel() {
         if (this.chromatogramContainerPanel == null) {
-            chromatogramContainerPanel = new JTabbedPane();
+            chromatogramContainerPanel = new TabsPanel();
             chromatogramContainerPanel.setName("chromatogramContainerPanel");
+            long id = 0;
             for (IRawFile rawFile : rawfiles) {
                 ButtonTabComponent buttonTabComp = new ButtonTabComponent(rawFile.getName());
                 IRawFileLoading rawFileLoading = (boolean waitingState) -> {
@@ -94,17 +159,19 @@ public class TabbedMultiRawFilePanel extends JPanel implements IRawFilePanel {
 
                     @Override
                     public void closeTab(ButtonTabComponent buttonTabComponent) {
-                        int index = chromatogramContainerPanel.indexOfTabComponent(buttonTabComponent);
+                        int index = chromatogramContainerPanel.indexOfTabHeaderComponent(buttonTabComponent);
                         if (index != -1) {
-                            chromatogramContainerPanel.remove(index);
+                            chromatogramContainerPanel.removeTabAt(index);
+                            rawfiles.remove(index);
                         }
                     }
                     
                 });
-                chromatogramContainerPanel.addTab(rawFile.getName(), getChromatogramPanel(rawFile));
-                int i = chromatogramContainerPanel.getTabCount() - 1;
-                chromatogramContainerPanel.setTabComponentAt(i, buttonTabComp);
+                IWrappedPanel wpanel = new ChromatoWrappedPanel(id++, rawFile.getName(), getChromatogramPanel(rawFile));
+                wpanel.setTabHeaderComponent(buttonTabComp);
+                chromatogramContainerPanel.addTab(wpanel);
             }
+            
         }
         chromatogramContainerPanel.addChangeListener(new ChangeListener() {
             @Override
@@ -221,10 +288,15 @@ public class TabbedMultiRawFilePanel extends JPanel implements IRawFilePanel {
 
     @Override
     public void displayScan(long index) {
-        if (getCurrentRawfile() != null && ((currentScan == null) || (index != currentScan.getIndex()) )) {
-            currentScan = getCurrentRawfile().getSpectrum((int) index);
+        IRawFile selectedRawFile = getCurrentRawfile();
+        if (selectedRawFile != null && ((currentScan == null) || (index != currentScan.getIndex()) )) {
+            currentScan = selectedRawFile.getSpectrum((int) index);
             if (currentScan != null) {
                 spectrumContainerPanel.displayScan(currentScan);
+            }
+            int idP = rawfiles.indexOf(selectedRawFile);
+            if (idP != -1){
+                chromatogramContainerPanel.setSelectedIndex(idP);
             }
         }
     }
@@ -277,6 +349,48 @@ public class TabbedMultiRawFilePanel extends JPanel implements IRawFilePanel {
             protected void done() {
                 try {
                     logger.info("{} TIC chromatogram extracted", get());
+                } catch (InterruptedException | ExecutionException e) {
+                    logger.error("Error while reading chromatogram");
+                }finally{
+                    for (IRawFile rawFile : rawfiles) {
+                        mapRawFileLoading.get(rawFile).setWaitingState(false);
+                    }
+                }
+            }
+        };
+
+        worker.execute();
+    }
+    
+    private void displayBPI() {
+
+        SwingWorker worker = new SwingWorker<Integer, Chromatogram>() {
+            int count = 0;
+
+            @Override
+            protected Integer doInBackground() throws Exception {
+                    
+                for (IRawFile rawFile : rawfiles) {
+                    mapRawFileLoading.get(rawFile).setWaitingState(true);
+                    Chromatogram c = rawFile.getBPI();
+                    count++;
+                    publish(c);
+                }
+                return count;
+            }
+
+            @Override
+            protected void process(List<Chromatogram> chunks) {
+                for (int k = 0; k < chunks.size(); k++) {
+                    logger.info("display  chromato");
+                    displayChromatogram(chunks.get(k), DisplayMode.REPLACE);
+                }
+            }
+
+            @Override
+            protected void done() {
+                try {
+                    logger.info("{} BPI chromatogram extracted", get());
                 } catch (InterruptedException | ExecutionException e) {
                     logger.error("Error while reading chromatogram");
                 }finally{

@@ -242,7 +242,7 @@ public class PeptideInstanceTableModel extends LazyTableModel implements GlobalT
                 return lazyData;
             }
             case COLTYPE_PEPTIDE_RETENTION_TIME: {
-                return peptideInstance.getElutionTime();
+                return peptideMatch.getRetentionTime();
             }
             /*case COLTYPE_PEPTIDE_ION_PARENT_INTENSITY: {
                 

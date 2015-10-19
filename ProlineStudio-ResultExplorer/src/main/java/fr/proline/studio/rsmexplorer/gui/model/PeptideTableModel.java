@@ -276,7 +276,12 @@ public class PeptideTableModel extends DecoratedTableModel implements GlobalTabl
                 return Integer.valueOf(peptideMatch.getMissedCleavage());
             }
             case COLTYPE_PEPTIDE_RETENTION_TIME: {
-                return peptideInstance.getElutionTime();
+                DPeptideMatch peptideMatch = (DPeptideMatch) peptideInstance.getBestPeptideMatch();
+                if (peptideMatch != null) {
+                    return peptideMatch.getRetentionTime();
+                } else {
+                    return peptideInstance.getElutionTime();
+                }
             }
             case COLTYPE_SPECTRUM_TITLE: {
                 DPeptideMatch peptideMatch = (DPeptideMatch) peptideInstance.getBestPeptideMatch();

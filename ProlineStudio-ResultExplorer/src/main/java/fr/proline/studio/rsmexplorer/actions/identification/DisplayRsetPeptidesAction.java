@@ -56,8 +56,11 @@ public class DisplayRsetPeptidesAction extends AbstractRSMAction {
         
         if (rset != null) {
         
+            ResultSet.Type rsType = rset.getType();
+            boolean mergedData = (rsType == ResultSet.Type.USER) || (rsType == ResultSet.Type.DECOY_USER); // Merge or Decoy Merge
+            
             // prepare window box
-            WindowBox wbox = (hasResultSummary) ? WindowBoxFactory.getPeptidesWindowBox(dataSet.getName(), false) : WindowBoxFactory.getPeptidesForRsetOnlyWindowBox(dataSet.getName(), false);
+            WindowBox wbox = (hasResultSummary) ? WindowBoxFactory.getPeptidesWindowBox(dataSet.getName(), false, mergedData) : WindowBoxFactory.getPeptidesForRsetOnlyWindowBox(dataSet.getName(), false, mergedData);
             wbox.setEntryData(dataSet.getProject().getId(), rset);
             
 
@@ -68,11 +71,7 @@ public class DisplayRsetPeptidesAction extends AbstractRSMAction {
             win.requestActive();
         } else {
             
-            final WindowBox wbox = (hasResultSummary) ? WindowBoxFactory.getPeptidesWindowBox(dataSet.getName(), false) : WindowBoxFactory.getPeptidesForRsetOnlyWindowBox(dataSet.getName(), false);
-            // open a window to display the window box
-            DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
-            win.open();
-            win.requestActive();
+            
             
             // we have to load the result set
             AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
@@ -85,7 +84,18 @@ public class DisplayRsetPeptidesAction extends AbstractRSMAction {
                 @Override
                 public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
                     // prepare window box
-                    wbox.setEntryData(dataSet.getProject().getId(), dataSet.getResultSet());
+                    
+                    ResultSet rset = dataSet.getResultSet();
+                    ResultSet.Type rsType = rset.getType();
+                    boolean mergedData = (rsType == ResultSet.Type.USER) || (rsType == ResultSet.Type.DECOY_USER); // Merge or Decoy Merge
+                    
+                    final WindowBox wbox = (hasResultSummary) ? WindowBoxFactory.getPeptidesWindowBox(dataSet.getName(), false, mergedData) : WindowBoxFactory.getPeptidesForRsetOnlyWindowBox(dataSet.getName(), false, mergedData);
+                    // open a window to display the window box
+                    DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
+                    win.open();
+                    win.requestActive();
+                    
+                    wbox.setEntryData(dataSet.getProject().getId(), rset);
                 }
             };
 

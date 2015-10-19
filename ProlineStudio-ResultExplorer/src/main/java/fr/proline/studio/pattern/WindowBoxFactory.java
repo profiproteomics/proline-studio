@@ -45,17 +45,17 @@ public class WindowBoxFactory {
         return winBox;
     }
     
-    public static WindowBox getPeptidesWindowBox(String dataName, boolean isDecoy) {
-        return getPeptidesForRsetOnlyWindowBox(dataName, isDecoy);
+    public static WindowBox getPeptidesWindowBox(String dataName, boolean isDecoy, boolean isMerged) {
+        return getPeptidesForRsetOnlyWindowBox(dataName, isDecoy, isMerged);
 
     }
     
-    public static WindowBox getPeptidesForRsetOnlyWindowBox(String dataName, boolean isDecoy) {
+    public static WindowBox getPeptidesForRsetOnlyWindowBox(String dataName, boolean isDecoy, boolean isMerged) {
         // AW: search results / PSM set of boxes.
     	// 
         // create boxes
         AbstractDataBox[] boxes = new AbstractDataBox[6];
-        boxes[0] = new DataBoxRsetPSM();
+        boxes[0] = new DataBoxRsetPSM(isMerged);
         boxes[0].setDataName(dataName);
         boxes[1] = new DataBoxRsetPeptideSpectrum();
         boxes[2] = new DataBoxRsetPeptideSpectrumError();
@@ -117,14 +117,14 @@ public class WindowBoxFactory {
         return winBox;
     }
     
-    public static WindowBox getProteinMatchesForRsetWindowBox(String dataName, boolean isDecoy) {
+    public static WindowBox getProteinMatchesForRsetWindowBox(String dataName, boolean isDecoy, boolean mergedData) {
         
         // create boxes
     	// AW: search results / proteins
         AbstractDataBox[] boxes = new AbstractDataBox[2];
         boxes[0] = new DataBoxRsetAllProteinMatch();
         boxes[0].setDataName(dataName);
-        boxes[1] = new DataboxRsetPeptidesOfProtein();
+        boxes[1] = new DataboxRsetPeptidesOfProtein(mergedData);
 
         
         IconManager.IconType iconType = isDecoy ? IconManager.IconType.DATASET_RSET_DECOY : IconManager.IconType.DATASET_RSET;
@@ -135,11 +135,11 @@ public class WindowBoxFactory {
     }
     
     
-    public static WindowBox getRsmPSMWindowBox(String dataName, boolean isDecoy) {
+    public static WindowBox getRsmPSMWindowBox(String dataName, boolean isDecoy, boolean mergedData) {
         // create boxes
     	// AW: All PSM of an Identification Summary or corresponding to a Peptide Instance
         AbstractDataBox[] boxes = new AbstractDataBox[1];
-        boxes[0] = new DataBoxRsmPSM();
+        boxes[0] = new DataBoxRsmPSM(mergedData);
         boxes[0].setDataName(dataName);
 
         IconManager.IconType iconType = isDecoy ? IconManager.IconType.DATASET_RSM_DECOY : IconManager.IconType.DATASET_RSM;
@@ -320,23 +320,23 @@ public class WindowBoxFactory {
         return new WindowBox(fullName, generatePanel(boxes), boxes[0], IconManager.getImage(iconType));
     }
     
-    public static WindowBox getMSQueriesWindowBoxForRSM(String dataName) {
+    public static WindowBox getMSQueriesWindowBoxForRSM(String dataName, boolean mergedData) {
         // create boxes
         AbstractDataBox[] boxes = new AbstractDataBox[2];
         boxes[0] = new DataBoxMSQueriesForRSM();
         boxes[0].setDataName(dataName);
-        boxes[1] = new DataboxRSMPSMForMsQuery();
+        boxes[1] = new DataboxRSMPSMForMsQuery(mergedData);
         boxes[1].setLayout(SplittedPanelContainer.PanelLayout.VERTICAL);
         IconManager.IconType iconType = IconManager.IconType.DATASET_RSM;
         return new WindowBox(boxes[0].getFullName(), generatePanel(boxes), boxes[0], IconManager.getImage(iconType));
     }
     
-    public static WindowBox getMSQueriesWindowBoxForRset(String dataName) {
+    public static WindowBox getMSQueriesWindowBoxForRset(String dataName, boolean mergedData) {
         // create boxes
         AbstractDataBox[] boxes = new AbstractDataBox[2];
         boxes[0] = new DataBoxMSQueriesForRset();
         boxes[0].setDataName(dataName);
-        boxes[1] = new DataboxRsetPSMForMsQuery();
+        boxes[1] = new DataboxRsetPSMForMsQuery(mergedData);
         boxes[1].setLayout(SplittedPanelContainer.PanelLayout.VERTICAL);
         IconManager.IconType iconType = IconManager.IconType.DATASET_RSET;
         return new WindowBox(boxes[0].getFullName(), generatePanel(boxes), boxes[0], IconManager.getImage(iconType));

@@ -17,11 +17,18 @@ import fr.proline.studio.rsmexplorer.gui.PeptideMatchPanel;
  */
 public class DataboxRsmPSMOfProteinSet extends AbstractDataBox {
 
-    private boolean m_finishedLoading = false;
+    private boolean m_mergedData;
     
+                
     public DataboxRsmPSMOfProteinSet() {
+        this(false);
+    }
+    
+    public DataboxRsmPSMOfProteinSet(boolean mergedData) {
         super(DataboxType.DataboxRsmPSMOfProteinSet);
 
+        m_mergedData = mergedData;
+        
         // Name of this databox
         m_typeName = "PSM";
         m_description = "All PSM of a Protein Set";
@@ -48,7 +55,7 @@ public class DataboxRsmPSMOfProteinSet extends AbstractDataBox {
 
     @Override
     public void createPanel() {
-        PeptideMatchPanel p = new PeptideMatchPanel(true, false, false, false);
+        PeptideMatchPanel p = new PeptideMatchPanel(true, m_mergedData, false, false, false);
         p.setName(m_typeName);
         p.setDataBox(this);
         m_panel = p;
@@ -86,7 +93,6 @@ public class DataboxRsmPSMOfProteinSet extends AbstractDataBox {
                 }
                
                 if (finished) {
-                    m_finishedLoading = true;
                     unregisterTask(taskId);
                     //propagateDataChanged(ValuesForStatsAbstract.class);
                     propagateDataChanged(CompareDataInterface.class);

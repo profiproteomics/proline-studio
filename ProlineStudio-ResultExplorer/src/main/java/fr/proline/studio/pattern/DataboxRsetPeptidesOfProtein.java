@@ -22,8 +22,17 @@ public class DataboxRsetPeptidesOfProtein extends AbstractDataBox {
 
     private long m_proteinMatchCurId = -1;
     
+    private boolean m_mergedData;
+    
+            
     public DataboxRsetPeptidesOfProtein() {
+        this(false);
+    }
+    
+    public DataboxRsetPeptidesOfProtein(boolean mergedData) {
         super(DataboxType.DataboxRsetPeptidesOfProtein);
+        
+        m_mergedData = mergedData;
         
         // Name of this databox
         m_typeName = "Peptides";
@@ -50,7 +59,7 @@ public class DataboxRsetPeptidesOfProtein extends AbstractDataBox {
     
     @Override
     public void createPanel() {
-        PeptideMatchPanel p = new PeptideMatchPanel(false, false, false, false);
+        PeptideMatchPanel p = new PeptideMatchPanel(false, m_mergedData, false, false, false);
         p.setName(m_typeName);
         p.setDataBox(this);
         m_panel = p;

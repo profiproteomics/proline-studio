@@ -152,8 +152,6 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
                     return new DataBoxRsmProteinSetOfPeptides();
                 case DataBoxRsmProteinsOfProteinSet:
                     return new DataBoxRsmProteinsOfProteinSet();
-                 /*case DataBoxStatisticsFrequencyResponse:
-                    return new DataBoxStatisticsFrequencyResponse();*/
                 case DataBoxTaskDescription:
                     return new DataBoxTaskDescription();
                 case DataBoxTaskList:

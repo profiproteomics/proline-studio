@@ -1,10 +1,6 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package fr.proline.studio.rsmexplorer.actions.identification;
 
+import fr.proline.core.orm.msi.ResultSet;
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dam.AccessDatabaseThread;
@@ -53,8 +49,12 @@ public class DisplayMSQueryAction extends AbstractRSMAction {
         ResultSummary rsm = dataSetNode.getResultSummary();
         if (rsm != null) {
         
+            ResultSet rset = rsm.getResultSet();
+            ResultSet.Type rsType = rset.getType();
+            boolean mergedData = (rsType == ResultSet.Type.USER) || (rsType == ResultSet.Type.DECOY_USER); // Merge or Decoy Merge
+            
             // prepare window box
-            WindowBox wbox = WindowBoxFactory.getMSQueriesWindowBoxForRSM(dataSet.getName());
+            WindowBox wbox = WindowBoxFactory.getMSQueriesWindowBoxForRSM(dataSet.getName(), mergedData);
             wbox.setEntryData(dataSet.getProject().getId(), rsm);
             
             // open a window to display the window box
@@ -62,11 +62,7 @@ public class DisplayMSQueryAction extends AbstractRSMAction {
             win.open();
             win.requestActive();
         } else {
-            final WindowBox wbox = WindowBoxFactory.getMSQueriesWindowBoxForRSM(dataSet.getName());
-            // open a window to display the window box
-            DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
-            win.open();
-            win.requestActive();
+
             
             // we have to load the result set
             AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
@@ -78,8 +74,20 @@ public class DisplayMSQueryAction extends AbstractRSMAction {
 
                 @Override
                 public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
+                    
+                    ResultSummary rsm = dataSet.getResultSummary();
+                    ResultSet rset = rsm.getResultSet();
+                    ResultSet.Type rsType = rset.getType();
+                    boolean mergedData = (rsType == ResultSet.Type.USER) || (rsType == ResultSet.Type.DECOY_USER); // Merge or Decoy Merge
+                    
+                    WindowBox wbox = WindowBoxFactory.getMSQueriesWindowBoxForRSM(dataSet.getName(), mergedData);
+                    // open a window to display the window box
+                    DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
+                    win.open();
+                    win.requestActive();
+                    
                     // prepare window box
-                    wbox.setEntryData(dataSet.getProject().getId(), dataSet.getResultSummary());
+                    wbox.setEntryData(dataSet.getProject().getId(), rsm);
                 }
             };
 

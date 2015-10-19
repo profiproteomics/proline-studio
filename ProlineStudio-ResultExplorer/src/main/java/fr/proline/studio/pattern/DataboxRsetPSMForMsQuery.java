@@ -23,10 +23,18 @@ public class DataboxRsetPSMForMsQuery extends AbstractDataBox{
     private ResultSet m_rset;
     private List<DPeptideMatch> m_peptideMatches;
     
+    private boolean m_mergedData;
 
+        
     public DataboxRsetPSMForMsQuery() {
+        this(false);
+    }
+    
+    public DataboxRsetPSMForMsQuery(boolean mergedData) {
         
         super(DataboxType.DataBoxRsetPSMForMsQuery);
+        
+        m_mergedData = mergedData;
         
         // Name of this databox
         m_typeName = "PSM";
@@ -56,7 +64,7 @@ public class DataboxRsetPSMForMsQuery extends AbstractDataBox{
     
     @Override
     public void createPanel() {
-        PeptideMatchPanel p = new PeptideMatchPanel(false, false, true, true); 
+        PeptideMatchPanel p = new PeptideMatchPanel(false, m_mergedData, false, true, true); 
         p.setName(m_typeName);
         p.setDataBox(this);
         m_panel = p;
@@ -98,7 +106,6 @@ public class DataboxRsetPSMForMsQuery extends AbstractDataBox{
                 }
                
                 if (finished) {
-                    //m_finishedLoading = true;
                     unregisterTask(taskId);
                     propagateDataChanged(CompareDataInterface.class);
                 }

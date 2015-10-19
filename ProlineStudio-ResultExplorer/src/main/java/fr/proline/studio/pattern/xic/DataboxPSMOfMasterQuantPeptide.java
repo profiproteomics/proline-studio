@@ -26,8 +26,6 @@ import java.util.Map;
  */
 public class DataboxPSMOfMasterQuantPeptide extends AbstractDataBox {
 
-    private boolean m_finishedLoading = false;
-
     private DDataset m_dataset;
     private DMasterQuantPeptide m_masterQuantPeptide;
     private DQuantitationChannel[] quantitationChannelArray = null;

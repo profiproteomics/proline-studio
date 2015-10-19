@@ -60,10 +60,11 @@ public class PeptideMatchTableModel extends LazyTableModel implements GlobalTabl
     public static final int COLTYPE_SPECTRUM_TITLE = 18;
     public static final int COLTYPE_PEPTIDE_IS_DECOY = 19;
     public static final int COLTYPE_PEPTIDE_IS_VALIDATED = 20;
-    private static final String[] m_columnNames =  {"Id", "Prev. AA", "Peptide", "Next AA", "Score", "Start", "Stop", "MsQuery", "Rank", "Calc. Mass", "Exp. MoZ", "Ppm" /*"Delta MoZ"*/, "Charge", "Missed Cl.", "Ion Parent Int.", "PTM", "Protein Sets", "RT", "Spectrum Title","Decoy", "Validated"};
-    private static final String[] m_columnTooltips = {"PeptideMatch Id", "Previous Amino Acid","Peptide", "Next Amino Acid", "Score", "Start", "Stop", "MsQuery", "Rank", "Calculated Mass", "Experimental Mass to Charge Ratio", "parts-per-million" , "Charge", "Missed Clivage", "Ion Parent Intensity", "Post Translational Modifications", "Protein Sets", "Retention Time", "Spectrum Title", "Is Decoy", "Is Validated"};
+    public static final int COLTYPE_SRC_DAT_FILE = 21; // used for merged data only
+    private static final String[] m_columnNames =  {"Id", "Prev. AA", "Peptide", "Next AA", "Score", "Start", "Stop", "MsQuery", "Rank", "Calc. Mass", "Exp. MoZ", "Ppm" /*"Delta MoZ"*/, "Charge", "Missed Cl.", "Ion Parent Int.", "PTM", "Protein Sets", "RT", "Spectrum Title","Decoy", "Validated", ".dat File"};
+    private static final String[] m_columnTooltips = {"PeptideMatch Id", "Previous Amino Acid","Peptide", "Next Amino Acid", "Score", "Start", "Stop", "MsQuery", "Rank", "Calculated Mass", "Experimental Mass to Charge Ratio", "parts-per-million" , "Charge", "Missed Clivage", "Ion Parent Intensity", "Post Translational Modifications", "Protein Sets", "Retention Time", "Spectrum Title", "Is Decoy", "Is Validated", ".dat file of best PSM"};
     
-    private int[] m_colUsed = null;
+    private ArrayList<Integer> m_colUsed = new ArrayList<>();
 
     
     
@@ -77,55 +78,58 @@ public class PeptideMatchTableModel extends LazyTableModel implements GlobalTabl
 
     private String m_modelName;
     
-    public PeptideMatchTableModel(LazyTable table, boolean forRSM, boolean hasPrevNextAA, boolean isDecoyAndValidated) {
+    public PeptideMatchTableModel(LazyTable table, boolean forRSM, boolean hasPrevNextAA, boolean isDecoyAndValidated, boolean isMerged) {
         super(table);
         
-        if (forRSM) {
-            if (hasPrevNextAA) {
-                if (isDecoyAndValidated){
-                    final int[] colUsed = {COLTYPE_PEPTIDE_ID, COLTYPE_PEPTIDE_PREVIOUS_AA, COLTYPE_PEPTIDE_NAME, COLTYPE_PEPTIDE_NEXT_AA, COLTYPE_PEPTIDE_SCORE, COLTYPE_PEPTIDE_START, COLTYPE_PEPTIDE_STOP, COLTYPE_PEPTIDE_MSQUERY, COLTYPE_PEPTIDE_RANK, COLTYPE_PEPTIDE_CALCULATED_MASS, COLTYPE_PEPTIDE_EXPERIMENTAL_MOZ, COLTYPE_PEPTIDE_PPM /*COLTYPE_PEPTIDE_DELTA_MOZ*/, COLTYPE_PEPTIDE_CHARGE, COLTYPE_PEPTIDE_MISSED_CLIVAGE, COLTYPE_PEPTIDE_ION_PARENT_INTENSITY, COLTYPE_PEPTIDE_PTM, COLTYPE_PEPTIDE_PROTEIN_SET_NAMES, COLTYPE_PEPTIDE_RETENTION_TIME, COLTYPE_SPECTRUM_TITLE, COLTYPE_PEPTIDE_IS_DECOY, COLTYPE_PEPTIDE_IS_VALIDATED};
-                    m_colUsed = colUsed;
-                }else{
-                    final int[] colUsed = {COLTYPE_PEPTIDE_ID, COLTYPE_PEPTIDE_PREVIOUS_AA, COLTYPE_PEPTIDE_NAME, COLTYPE_PEPTIDE_NEXT_AA, COLTYPE_PEPTIDE_SCORE, COLTYPE_PEPTIDE_START, COLTYPE_PEPTIDE_STOP, COLTYPE_PEPTIDE_MSQUERY, COLTYPE_PEPTIDE_RANK, COLTYPE_PEPTIDE_CALCULATED_MASS, COLTYPE_PEPTIDE_EXPERIMENTAL_MOZ, COLTYPE_PEPTIDE_PPM /*COLTYPE_PEPTIDE_DELTA_MOZ*/, COLTYPE_PEPTIDE_CHARGE, COLTYPE_PEPTIDE_MISSED_CLIVAGE, COLTYPE_PEPTIDE_ION_PARENT_INTENSITY, COLTYPE_PEPTIDE_PTM, COLTYPE_PEPTIDE_PROTEIN_SET_NAMES, COLTYPE_PEPTIDE_RETENTION_TIME, COLTYPE_SPECTRUM_TITLE};
-                    m_colUsed = colUsed;
-                }
-            } else {
-                if (isDecoyAndValidated){
-                    final int[] colUsed = {COLTYPE_PEPTIDE_ID, COLTYPE_PEPTIDE_NAME, COLTYPE_PEPTIDE_SCORE, COLTYPE_PEPTIDE_MSQUERY, COLTYPE_PEPTIDE_RANK, COLTYPE_PEPTIDE_CALCULATED_MASS, COLTYPE_PEPTIDE_EXPERIMENTAL_MOZ, COLTYPE_PEPTIDE_PPM /*COLTYPE_PEPTIDE_DELTA_MOZ*/, COLTYPE_PEPTIDE_CHARGE, COLTYPE_PEPTIDE_MISSED_CLIVAGE, /*"RT",*/ COLTYPE_PEPTIDE_ION_PARENT_INTENSITY, COLTYPE_PEPTIDE_PTM, COLTYPE_PEPTIDE_PROTEIN_SET_NAMES, COLTYPE_PEPTIDE_RETENTION_TIME, COLTYPE_SPECTRUM_TITLE, COLTYPE_PEPTIDE_IS_DECOY, COLTYPE_PEPTIDE_IS_VALIDATED};
-                    m_colUsed = colUsed;
-                }else{
-                    final int[] colUsed = {COLTYPE_PEPTIDE_ID, COLTYPE_PEPTIDE_NAME, COLTYPE_PEPTIDE_SCORE, COLTYPE_PEPTIDE_MSQUERY, COLTYPE_PEPTIDE_RANK, COLTYPE_PEPTIDE_CALCULATED_MASS, COLTYPE_PEPTIDE_EXPERIMENTAL_MOZ, COLTYPE_PEPTIDE_PPM /*COLTYPE_PEPTIDE_DELTA_MOZ*/, COLTYPE_PEPTIDE_CHARGE, COLTYPE_PEPTIDE_MISSED_CLIVAGE, /*"RT",*/ COLTYPE_PEPTIDE_ION_PARENT_INTENSITY, COLTYPE_PEPTIDE_PTM, COLTYPE_PEPTIDE_PROTEIN_SET_NAMES, COLTYPE_PEPTIDE_RETENTION_TIME, COLTYPE_SPECTRUM_TITLE};
-                    m_colUsed = colUsed;
-                }
-            }
-        } else {
-            if (hasPrevNextAA) {
-                if (isDecoyAndValidated){
-                    final int[] colUsed = {COLTYPE_PEPTIDE_ID, COLTYPE_PEPTIDE_PREVIOUS_AA, COLTYPE_PEPTIDE_NAME, COLTYPE_PEPTIDE_NEXT_AA, COLTYPE_PEPTIDE_SCORE, COLTYPE_PEPTIDE_START, COLTYPE_PEPTIDE_STOP, COLTYPE_PEPTIDE_MSQUERY, COLTYPE_PEPTIDE_RANK, COLTYPE_PEPTIDE_CALCULATED_MASS, COLTYPE_PEPTIDE_EXPERIMENTAL_MOZ, COLTYPE_PEPTIDE_PPM /*COLTYPE_PEPTIDE_DELTA_MOZ*/, COLTYPE_PEPTIDE_CHARGE, COLTYPE_PEPTIDE_MISSED_CLIVAGE, COLTYPE_PEPTIDE_ION_PARENT_INTENSITY, COLTYPE_PEPTIDE_PTM, COLTYPE_PEPTIDE_RETENTION_TIME, COLTYPE_SPECTRUM_TITLE, COLTYPE_PEPTIDE_IS_DECOY};
-                    m_colUsed = colUsed;
-                }else{
-                    final int[] colUsed = {COLTYPE_PEPTIDE_ID, COLTYPE_PEPTIDE_PREVIOUS_AA, COLTYPE_PEPTIDE_NAME, COLTYPE_PEPTIDE_NEXT_AA, COLTYPE_PEPTIDE_SCORE, COLTYPE_PEPTIDE_START, COLTYPE_PEPTIDE_STOP, COLTYPE_PEPTIDE_MSQUERY, COLTYPE_PEPTIDE_RANK, COLTYPE_PEPTIDE_CALCULATED_MASS, COLTYPE_PEPTIDE_EXPERIMENTAL_MOZ, COLTYPE_PEPTIDE_PPM /*COLTYPE_PEPTIDE_DELTA_MOZ*/, COLTYPE_PEPTIDE_CHARGE, COLTYPE_PEPTIDE_MISSED_CLIVAGE, COLTYPE_PEPTIDE_ION_PARENT_INTENSITY, COLTYPE_PEPTIDE_PTM, COLTYPE_PEPTIDE_RETENTION_TIME, COLTYPE_SPECTRUM_TITLE};
-                    m_colUsed = colUsed;
-                }
-            } else {
-                if (isDecoyAndValidated){
-                    final int[] colUsed = {COLTYPE_PEPTIDE_ID, COLTYPE_PEPTIDE_NAME, COLTYPE_PEPTIDE_SCORE, COLTYPE_PEPTIDE_MSQUERY, COLTYPE_PEPTIDE_RANK, COLTYPE_PEPTIDE_CALCULATED_MASS, COLTYPE_PEPTIDE_EXPERIMENTAL_MOZ, COLTYPE_PEPTIDE_PPM /*COLTYPE_PEPTIDE_DELTA_MOZ*/, COLTYPE_PEPTIDE_CHARGE, COLTYPE_PEPTIDE_MISSED_CLIVAGE, /*"RT",*/ COLTYPE_PEPTIDE_ION_PARENT_INTENSITY, COLTYPE_PEPTIDE_PTM, COLTYPE_PEPTIDE_RETENTION_TIME, COLTYPE_SPECTRUM_TITLE, COLTYPE_PEPTIDE_IS_DECOY};
-                    m_colUsed = colUsed;
-                }else{
-                    final int[] colUsed = {COLTYPE_PEPTIDE_ID, COLTYPE_PEPTIDE_NAME, COLTYPE_PEPTIDE_SCORE, COLTYPE_PEPTIDE_MSQUERY, COLTYPE_PEPTIDE_RANK, COLTYPE_PEPTIDE_CALCULATED_MASS, COLTYPE_PEPTIDE_EXPERIMENTAL_MOZ, COLTYPE_PEPTIDE_PPM /*COLTYPE_PEPTIDE_DELTA_MOZ*/, COLTYPE_PEPTIDE_CHARGE, COLTYPE_PEPTIDE_MISSED_CLIVAGE, /*"RT",*/ COLTYPE_PEPTIDE_ION_PARENT_INTENSITY, COLTYPE_PEPTIDE_PTM, COLTYPE_PEPTIDE_RETENTION_TIME, COLTYPE_SPECTRUM_TITLE};
-                    m_colUsed = colUsed;
-                }
-            }
-        }
-
         m_forRSM = forRSM;
         m_hasPrevNextAA = hasPrevNextAA;
-        m_isDecoyAndValidated =isDecoyAndValidated;
+        m_isDecoyAndValidated = isDecoyAndValidated;
+
+        m_colUsed.add(COLTYPE_PEPTIDE_ID);
+        if (hasPrevNextAA) {
+            m_colUsed.add(COLTYPE_PEPTIDE_PREVIOUS_AA);
+        }
+        m_colUsed.add(COLTYPE_PEPTIDE_NAME);
+        if (hasPrevNextAA) {
+            m_colUsed.add(COLTYPE_PEPTIDE_NEXT_AA);
+        }
+        m_colUsed.add(COLTYPE_PEPTIDE_SCORE);
+        if (hasPrevNextAA) {
+            m_colUsed.add(COLTYPE_PEPTIDE_START);
+            m_colUsed.add(COLTYPE_PEPTIDE_STOP);
+        }
+        m_colUsed.add(COLTYPE_PEPTIDE_RANK);
+        m_colUsed.add(COLTYPE_PEPTIDE_CALCULATED_MASS);
+        m_colUsed.add(COLTYPE_PEPTIDE_EXPERIMENTAL_MOZ);
+        m_colUsed.add(COLTYPE_PEPTIDE_PPM);
+        m_colUsed.add(COLTYPE_PEPTIDE_CHARGE);
+        m_colUsed.add(COLTYPE_PEPTIDE_MISSED_CLIVAGE);
+        m_colUsed.add(COLTYPE_PEPTIDE_ION_PARENT_INTENSITY);
+        m_colUsed.add(COLTYPE_PEPTIDE_PTM);
+        if (forRSM) {
+            m_colUsed.add(COLTYPE_PEPTIDE_PROTEIN_SET_NAMES);
+        }
+        m_colUsed.add(COLTYPE_PEPTIDE_RETENTION_TIME);
+        
+        if (isDecoyAndValidated){
+            m_colUsed.add(COLTYPE_PEPTIDE_IS_DECOY);
+            if (forRSM) {
+                m_colUsed.add(COLTYPE_PEPTIDE_IS_VALIDATED);
+            }
+        }
+        m_colUsed.add(COLTYPE_PEPTIDE_MSQUERY);
+        if (isMerged) {
+            m_colUsed.add(COLTYPE_SRC_DAT_FILE);
+        }
+        m_colUsed.add(COLTYPE_SPECTRUM_TITLE);
+
+
+
     }
     
     public int convertColToColUsed(int col) {
-        for (int i=0; i<m_colUsed.length; i++) {
-            if (col == m_colUsed[i]) {
+        for (int i=0; i<m_colUsed.size(); i++) {
+            if (col == m_colUsed.get(i)) {
                 return i;
             }
         }
@@ -141,18 +145,18 @@ public class PeptideMatchTableModel extends LazyTableModel implements GlobalTabl
     
     @Override
     public int getColumnCount() {
-        return m_colUsed.length;
+        return m_colUsed.size();
      
     }
 
     @Override
     public String getColumnName(int col) {
-        return m_columnNames[m_colUsed[col]];
+        return m_columnNames[m_colUsed.get(col)];
     }
 
     @Override
     public String getToolTipForHeader(int col) {
-        return m_columnTooltips[m_colUsed[col]];
+        return m_columnTooltips[m_colUsed.get(col)];
     }
     
     @Override
@@ -162,7 +166,7 @@ public class PeptideMatchTableModel extends LazyTableModel implements GlobalTabl
 
     @Override
     public Class getColumnClass(int col) {
-        col = m_colUsed[col];
+        col = m_colUsed.get(col);
         if (col == COLTYPE_PEPTIDE_ID) {
             return Long.class;
         }
@@ -173,7 +177,7 @@ public class PeptideMatchTableModel extends LazyTableModel implements GlobalTabl
 
     @Override
     public int getSubTaskId(int col) {
-        col = (col == -1) ? -1 : m_colUsed[col];
+        col = (col == -1) ? -1 : m_colUsed.get(col);
         switch (col) {
             case COLTYPE_PEPTIDE_MISSED_CLIVAGE: // no data read at all (we only have the id of the PeptideMatch)
             case COLTYPE_PEPTIDE_IS_DECOY:
@@ -195,6 +199,8 @@ public class PeptideMatchTableModel extends LazyTableModel implements GlobalTabl
                 return DatabaseLoadPeptideMatchTask.SUB_TASK_MSQUERY;
             case COLTYPE_PEPTIDE_PROTEIN_SET_NAMES:
                 return DatabaseLoadPeptideMatchTask.SUB_TASK_PROTEINSET_NAME_LIST;
+            case COLTYPE_SRC_DAT_FILE:
+                return DatabaseLoadPeptideMatchTask.SUB_TASK_SRC_DAT_FILE;
                 
         }
         return -1;
@@ -214,7 +220,7 @@ public class PeptideMatchTableModel extends LazyTableModel implements GlobalTabl
         
         LazyData lazyData = getLazyData(row,col);
         
-        col =  m_colUsed[col];
+        col =  m_colUsed.get(col);
 
         // Retrieve Protein Set
         DPeptideMatch peptideMatch = m_peptideMatches[row];
@@ -513,6 +519,16 @@ public class PeptideMatchTableModel extends LazyTableModel implements GlobalTabl
                 lazyData.setData(isValidated);
                 return lazyData;
             }
+            case COLTYPE_SRC_DAT_FILE: {
+                 String srcDatFile = peptideMatch.getSourceDatFile();
+                if (srcDatFile == null) {
+                    givePriorityTo(m_taskId, row, col);
+                    lazyData.setData(null);
+                } else {
+                    lazyData.setData(srcDatFile);
+                }
+                return lazyData;
+            }
                 
         }
         return null; // should never happen
@@ -710,7 +726,7 @@ public class PeptideMatchTableModel extends LazyTableModel implements GlobalTabl
 
     @Override
     public Class getDataColumnClass(int columnIndex) {
-        columnIndex =  m_colUsed[columnIndex];
+        columnIndex =  m_colUsed.get(columnIndex);
         switch (columnIndex) {
             case COLTYPE_PEPTIDE_PREVIOUS_AA:
             case COLTYPE_PEPTIDE_NAME:
@@ -827,7 +843,7 @@ public class PeptideMatchTableModel extends LazyTableModel implements GlobalTabl
 
     @Override
     public TableCellRenderer getRenderer(int col) {
-        col =  m_colUsed[col];
+        col =  m_colUsed.get(col);
         
         if (m_rendererMap.containsKey(col)) {
             return m_rendererMap.get(col);

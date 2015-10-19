@@ -19,12 +19,18 @@ public class DataBoxRsmPSM extends AbstractDataBox {
 
     
     private ResultSummary m_rsm = null;
-    
-    private boolean m_finishedLoading = false;
+
+    private boolean m_mergedData;
     
     public DataBoxRsmPSM() {
+        this(false);
+    }
+    
+    public DataBoxRsmPSM(boolean mergedData) {
         super(DataboxType.DataBoxRsmPSM);
 
+        m_mergedData = mergedData;
+        
         // Name of this databox
         m_typeName = "PSM";
         m_description = "All PSM of an Identification Summary or corresponding to a Peptide Instance";
@@ -50,7 +56,7 @@ public class DataBoxRsmPSM extends AbstractDataBox {
 
     @Override
     public void createPanel() {
-        PeptideMatchPanel p = new PeptideMatchPanel(true, true, true, false);
+        PeptideMatchPanel p = new PeptideMatchPanel(true, m_mergedData, true, true, false);
         p.setName(m_typeName);
         p.setDataBox(this);
         m_panel = p;
@@ -82,7 +88,6 @@ public class DataBoxRsmPSM extends AbstractDataBox {
                 }
                
                 if (finished) {
-                    m_finishedLoading = true;
                     unregisterTask(taskId);
                     propagateDataChanged(CompareDataInterface.class);
                 }
@@ -108,13 +113,6 @@ public class DataBoxRsmPSM extends AbstractDataBox {
                     return m_rsm;
                 }
             }
-            /*if (parameterType.equals(ValuesForStatsAbstract.class)) {
-                if (m_finishedLoading) {
-                    return ((PeptideMatchPanel) m_panel).getValuesForStats();
-                } else {
-                    return null;
-                }
-            }*/
             if (parameterType.equals(CompareDataInterface.class)) {
                 return ((GlobalTabelModelProviderInterface) m_panel).getGlobalTableModelInterface();
             }

@@ -52,8 +52,11 @@ public class DisplayRsetProteinMatchesAction extends AbstractRSMAction {
 
         if (rset != null) {
 
+            ResultSet.Type rsType = rset.getType();
+            boolean mergedData = (rsType == ResultSet.Type.USER) || (rsType == ResultSet.Type.DECOY_USER); // Merge or Decoy Merge
+            
             // prepare window box
-            WindowBox wbox = WindowBoxFactory.getProteinMatchesForRsetWindowBox(dataSet.getName(), false);
+            WindowBox wbox = WindowBoxFactory.getProteinMatchesForRsetWindowBox(dataSet.getName(), false, mergedData);
             wbox.setEntryData(dataSet.getProject().getId(), rset);
 
 
@@ -64,11 +67,7 @@ public class DisplayRsetProteinMatchesAction extends AbstractRSMAction {
             win.requestActive();
         } else {
 
-            final WindowBox wbox = WindowBoxFactory.getProteinMatchesForRsetWindowBox(dataSet.getName(), false);
-            // open a window to display the window box
-            DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
-            win.open();
-            win.requestActive();
+
 
             // we have to load the result set
             AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
@@ -80,8 +79,19 @@ public class DisplayRsetProteinMatchesAction extends AbstractRSMAction {
 
                 @Override
                 public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
+                    
+                    ResultSet rset = dataSet.getResultSet();
+                    ResultSet.Type rsType = rset.getType();
+                    boolean mergedData = (rsType == ResultSet.Type.USER) || (rsType == ResultSet.Type.DECOY_USER); // Merge or Decoy Merge
+                    
+                    WindowBox wbox = WindowBoxFactory.getProteinMatchesForRsetWindowBox(dataSet.getName(), false, mergedData);
+                    // open a window to display the window box
+                    DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
+                    win.open();
+                    win.requestActive();
+                    
                     // prepare window box
-                    wbox.setEntryData(dataSet.getProject().getId(), dataSet.getResultSet());
+                    wbox.setEntryData(dataSet.getProject().getId(), rset);
                 }
             };
 

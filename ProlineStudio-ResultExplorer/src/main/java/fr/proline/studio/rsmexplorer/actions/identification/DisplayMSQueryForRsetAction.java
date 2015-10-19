@@ -53,8 +53,11 @@ public class DisplayMSQueryForRsetAction extends AbstractRSMAction {
         ResultSet rset = dataSetNode.getResultSet();
         if (rset != null) {
         
+            ResultSet.Type rsType = rset.getType();
+            boolean mergedData = (rsType == ResultSet.Type.USER) || (rsType == ResultSet.Type.DECOY_USER); // Merge or Decoy Merge
+            
             // prepare window box
-            WindowBox wbox = WindowBoxFactory.getMSQueriesWindowBoxForRset(dataSet.getName());
+            WindowBox wbox = WindowBoxFactory.getMSQueriesWindowBoxForRset(dataSet.getName(), mergedData);
             wbox.setEntryData(dataSet.getProject().getId(), rset);
             
             // open a window to display the window box
@@ -62,11 +65,7 @@ public class DisplayMSQueryForRsetAction extends AbstractRSMAction {
             win.open();
             win.requestActive();
         } else {
-            final WindowBox wbox = WindowBoxFactory.getMSQueriesWindowBoxForRset(dataSet.getName());
-            // open a window to display the window box
-            DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
-            win.open();
-            win.requestActive();
+
             
             // we have to load the result set
             AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
@@ -78,8 +77,19 @@ public class DisplayMSQueryForRsetAction extends AbstractRSMAction {
 
                 @Override
                 public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
+                    
+                    ResultSet rset = dataSet.getResultSet();
+                    ResultSet.Type rsType = rset.getType();
+                    boolean mergedData = (rsType == ResultSet.Type.USER) || (rsType == ResultSet.Type.DECOY_USER); // Merge or Decoy Merge
+                    
+                    WindowBox wbox = WindowBoxFactory.getMSQueriesWindowBoxForRset(dataSet.getName(), mergedData);
+                    // open a window to display the window box
+                    DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
+                    win.open();
+                    win.requestActive();
+
                     // prepare window box
-                    wbox.setEntryData(dataSet.getProject().getId(), dataSet.getResultSet());
+                    wbox.setEntryData(dataSet.getProject().getId(), rset);
                 }
             };
 

@@ -36,8 +36,9 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
     public static final int SUB_TASK_PEPTIDE = 1;
     public static final int SUB_TASK_MSQUERY = 2;
     public static final int SUB_TASK_PROTEINSET_NAME_LIST = 3;
-    public static final int SUB_TASK_COUNT_RSET = 4; // <<----- get in sync // SUB_TASK_PROTEINSET_NAME_LIST not used for RSET
-    public static final int SUB_TASK_COUNT_RSM = 4; // <<----- get in sync
+    public static final int SUB_TASK_SRC_DAT_FILE = 4;
+    public static final int SUB_TASK_COUNT_RSET = 5; // <<----- get in sync // SUB_TASK_PROTEINSET_NAME_LIST not used for RSET
+    public static final int SUB_TASK_COUNT_RSM = 5; // <<----- get in sync
     
     private long m_projectId = -1;
     private ResultSet m_rset = null;
@@ -248,6 +249,20 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
                 // execute the first slice now
                 fetchMsQuery(entityManagerMSI, subTask);
 
+                /**
+                 * Src .dat File for each PeptideMatch (merged data only)
+                 *
+                 */
+                ResultSet.Type rsType = m_rset.getType();
+                boolean mergedData = (rsType == ResultSet.Type.USER) || (rsType == ResultSet.Type.DECOY_USER); // Merge or Decoy Merge
+                if (mergedData) {
+                    // slice the task and get the first one
+                    subTask = m_subTaskManager.sliceATaskAndGetFirst(SUB_TASK_SRC_DAT_FILE, nbPeptideMatch, SLICE_SIZE);
+                
+                    // execute the first slice now
+                    fetchSrcDatFile(entityManagerMSI, subTask);
+                }
+                
             }
 
             entityManagerMSI.getTransaction().commit();
@@ -345,7 +360,19 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
             // execute the first slice now
             fetchMsQuery(entityManagerMSI, subTask);
 
+            /**
+             * Src .dat File for each PeptideMatch (merged data only)
+             *
+             */
+            ResultSet.Type rsType = m_rset.getType();
+            boolean mergedData = (rsType == ResultSet.Type.USER) || (rsType == ResultSet.Type.DECOY_USER); // Merge or Decoy Merge
+            if (mergedData) {
+                // slice the task and get the first one
+                subTask = m_subTaskManager.sliceATaskAndGetFirst(SUB_TASK_SRC_DAT_FILE, peptideMatches.size(), SLICE_SIZE);
 
+                // execute the first slice now
+                fetchSrcDatFile(entityManagerMSI, subTask);
+            }
 
             entityManagerMSI.getTransaction().commit();
         } catch (Exception e) {
@@ -449,6 +476,21 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
                 // execute the first slice now
                 fetchProteinSetName(entityManagerMSI, subTask);
 
+                
+                /**
+                 * Src .dat File for each PeptideMatch (merged data only)
+                 *
+                 */
+                ResultSet.Type rsType = m_rsm.getResultSet().getType();
+                boolean mergedData = (rsType == ResultSet.Type.USER) || (rsType == ResultSet.Type.DECOY_USER); // Merge or Decoy Merge
+                if (mergedData) {
+                    // slice the task and get the first one
+                    subTask = m_subTaskManager.sliceATaskAndGetFirst(SUB_TASK_SRC_DAT_FILE, peptideMatches.size(), SLICE_SIZE);
+
+                    // execute the first slice now
+                    fetchSrcDatFile(entityManagerMSI, subTask);
+                }
+                
             }
 
             entityManagerMSI.getTransaction().commit();
@@ -582,6 +624,21 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
                 // execute the first slice now
                 fetchProteinSetName(entityManagerMSI, subTask);
 
+                
+                /**
+                 * Src .dat File for each PeptideMatch (merged data only)
+                 *
+                 */
+                ResultSet.Type rsType = m_rsm.getResultSet().getType();
+                boolean mergedData = (rsType == ResultSet.Type.USER) || (rsType == ResultSet.Type.DECOY_USER); // Merge or Decoy Merge
+                if (mergedData) {
+                    // slice the task and get the first one
+                    subTask = m_subTaskManager.sliceATaskAndGetFirst(SUB_TASK_SRC_DAT_FILE, peptideMatches.size(), SLICE_SIZE);
+
+                    // execute the first slice now
+                    fetchSrcDatFile(entityManagerMSI, subTask);
+                }
+                
             }
 
             entityManagerMSI.getTransaction().commit();
@@ -607,7 +664,7 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
     
     
     private boolean fetchPSMForPeptideInstanceMainTask()  {
-         //JPM.TODO
+
         EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(m_projectId).getEntityManagerFactory().createEntityManager();
         try {
 
@@ -688,6 +745,20 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
                 // execute the first slice now
                 fetchProteinSetName(entityManagerMSI, subTask);
 
+                /**
+                 * Src .dat File for each PeptideMatch (merged data only)
+                 *
+                 */
+                ResultSet.Type rsType = m_rsm.getResultSet().getType();
+                boolean mergedData = (rsType == ResultSet.Type.USER) || (rsType == ResultSet.Type.DECOY_USER); // Merge or Decoy Merge
+                if (mergedData) {
+                    // slice the task and get the first one
+                    subTask = m_subTaskManager.sliceATaskAndGetFirst(SUB_TASK_SRC_DAT_FILE, peptideMatches.size(), SLICE_SIZE);
+
+                    // execute the first slice now
+                    fetchSrcDatFile(entityManagerMSI, subTask);
+                }
+                
             }
 
             entityManagerMSI.getTransaction().commit();
@@ -740,6 +811,9 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
                 case SUB_TASK_PROTEINSET_NAME_LIST:
                     fetchProteinSetName(entityManagerMSI, subTask);
                     break;
+                case SUB_TASK_SRC_DAT_FILE:
+                    fetchSrcDatFile(entityManagerMSI, subTask);
+                    break;
             }
 
 
@@ -783,8 +857,7 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
         
 
         DPeptideMatch[] peptideMatches = m_rset.getTransientData().getPeptideMatches();
-        
-        //int i = subTask.getStartIndex();
+
         Iterator<DPeptideMatch> it = resultList.iterator();
         while (it.hasNext()) {
             DPeptideMatch peptideMatch = it.next();
@@ -792,7 +865,6 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
             int position = m_peptideMatchPosition.get(id);
             peptideMatches[position] = peptideMatch;
             m_peptideMatchMap.put(id, peptideMatch);
-            //i++;
         }
 
 
@@ -955,7 +1027,41 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
         
     }
     
-    
+    private void fetchSrcDatFile(EntityManager entityManagerMSI, SubTask subTask) {
+
+        List sliceOfPeptideMatchIds = subTask.getSubList(m_peptideMatchIds);
+        
+        Query query = entityManagerMSI.createQuery("SELECT pm.id, msi.resultFileName "
+                + "FROM PeptideMatch pm, PeptideMatch pm2, ResultSet rset, MsiSearch msi "
+                + "WHERE pm.id IN (:listId) AND pm.bestPeptideMatch = pm2 AND pm2.resultSet = rset AND rset.msiSearch=msi");
+        query.setParameter("listId", sliceOfPeptideMatchIds);
+        
+        List<Object[]> resultList = query.getResultList();
+        Iterator<Object[]> it = resultList.iterator();
+        while (it.hasNext()) {
+            Object[] res = it.next();
+            Long pmId = (Long) res[0];
+            String datFile = (String) res[1];
+            
+            if (m_proteinMatch != null) {
+                 ArrayList<DPeptideMatch> sequenceMatchArray = m_peptideMatchSequenceMatchArrayMap.get(pmId);
+                 for (int i=0;i<sequenceMatchArray.size();i++) {
+                     DPeptideMatch peptideMatch = sequenceMatchArray.get(i);
+                     peptideMatch.setSourceDatFile(datFile);
+                 }
+            } else {
+                DPeptideMatch peptideMatch = m_peptideMatchMap.get(pmId);
+                peptideMatch.setSourceDatFile(datFile);
+            }
+            
+            
+            
+            
+            
+ 
+        }
+        
+    }
  
     /**
      * Retrieve MsQuery for a Sub Task

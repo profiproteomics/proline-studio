@@ -64,7 +64,7 @@ public class PeptideMatchTableModel extends LazyTableModel implements GlobalTabl
     private static final String[] m_columnNames =  {"Id", "Prev. AA", "Peptide", "Next AA", "Score", "Start", "Stop", "MsQuery", "Rank", "Calc. Mass", "Exp. MoZ", "Ppm" /*"Delta MoZ"*/, "Charge", "Missed Cl.", "Ion Parent Int.", "PTM", "Protein Sets", "RT", "Spectrum Title","Decoy", "Validated", ".dat File"};
     private static final String[] m_columnTooltips = {"PeptideMatch Id", "Previous Amino Acid","Peptide", "Next Amino Acid", "Score", "Start", "Stop", "MsQuery", "Rank", "Calculated Mass", "Experimental Mass to Charge Ratio", "parts-per-million" , "Charge", "Missed Clivage", "Ion Parent Intensity", "Post Translational Modifications", "Protein Sets", "Retention Time", "Spectrum Title", "Is Decoy", "Is Validated", ".dat file of best PSM"};
     
-    private ArrayList<Integer> m_colUsed = new ArrayList<>();
+    private final ArrayList<Integer> m_colUsed = new ArrayList<>();
 
     
     
@@ -105,12 +105,12 @@ public class PeptideMatchTableModel extends LazyTableModel implements GlobalTabl
         m_colUsed.add(COLTYPE_PEPTIDE_CHARGE);
         m_colUsed.add(COLTYPE_PEPTIDE_MISSED_CLIVAGE);
         m_colUsed.add(COLTYPE_PEPTIDE_ION_PARENT_INTENSITY);
-        m_colUsed.add(COLTYPE_PEPTIDE_PTM);
+        
         if (forRSM) {
             m_colUsed.add(COLTYPE_PEPTIDE_PROTEIN_SET_NAMES);
         }
         m_colUsed.add(COLTYPE_PEPTIDE_RETENTION_TIME);
-        
+        m_colUsed.add(COLTYPE_PEPTIDE_PTM);
         if (isDecoyAndValidated){
             m_colUsed.add(COLTYPE_PEPTIDE_IS_DECOY);
             if (forRSM) {

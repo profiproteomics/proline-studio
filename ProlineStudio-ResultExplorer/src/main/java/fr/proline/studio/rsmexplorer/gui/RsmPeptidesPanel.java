@@ -8,7 +8,6 @@ import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.comparedata.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.export.ExportButton;
-import fr.proline.studio.filter.Filter;
 import fr.proline.studio.filter.FilterButtonV2;
 import fr.proline.studio.filter.actions.ClearRestrainAction;
 import fr.proline.studio.filter.actions.RestrainAction;

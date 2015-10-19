@@ -247,7 +247,7 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
                 subTask = m_subTaskManager.sliceATaskAndGetFirst(SUB_TASK_MSQUERY, nbPeptideMatch, SLICE_SIZE);
 
                 // execute the first slice now
-                fetchMsQuery(entityManagerMSI, subTask);
+                fetchMsQuery(entityManagerMSI, subTask, m_peptideMatchIds, m_proteinMatch, m_peptideMatchSequenceMatchArrayMap, m_peptideMatchMap);
 
                 /**
                  * Src .dat File for each PeptideMatch (merged data only)
@@ -358,7 +358,7 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
             subTask = m_subTaskManager.sliceATaskAndGetFirst(SUB_TASK_MSQUERY, peptideMatches.size(), SLICE_SIZE);
 
             // execute the first slice now
-            fetchMsQuery(entityManagerMSI, subTask);
+            fetchMsQuery(entityManagerMSI, subTask, m_peptideMatchIds, m_proteinMatch, m_peptideMatchSequenceMatchArrayMap, m_peptideMatchMap);
 
             /**
              * Src .dat File for each PeptideMatch (merged data only)
@@ -463,7 +463,7 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
                 subTask = m_subTaskManager.sliceATaskAndGetFirst(SUB_TASK_MSQUERY, peptideMatches.size(), SLICE_SIZE);
 
                 // execute the first slice now
-                fetchMsQuery(entityManagerMSI, subTask);
+                fetchMsQuery(entityManagerMSI, subTask, m_peptideMatchIds, m_proteinMatch, m_peptideMatchSequenceMatchArrayMap, m_peptideMatchMap);
 
 
                 /**
@@ -611,7 +611,7 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
                 subTask = m_subTaskManager.sliceATaskAndGetFirst(SUB_TASK_MSQUERY, peptideMatches.size(), SLICE_SIZE);
 
                 // execute the first slice now
-                fetchMsQuery(entityManagerMSI, subTask);
+                fetchMsQuery(entityManagerMSI, subTask, m_peptideMatchIds, m_proteinMatch, m_peptideMatchSequenceMatchArrayMap, m_peptideMatchMap);
 
 
                 /**
@@ -732,7 +732,7 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
                 subTask = m_subTaskManager.sliceATaskAndGetFirst(SUB_TASK_MSQUERY, peptideMatches.size(), SLICE_SIZE);
 
                 // execute the first slice now
-                fetchMsQuery(entityManagerMSI, subTask);
+                fetchMsQuery(entityManagerMSI, subTask, m_peptideMatchIds, m_proteinMatch, m_peptideMatchSequenceMatchArrayMap, m_peptideMatchMap);
 
 
                 /**
@@ -806,7 +806,7 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
                     fetchPeptide(entityManagerMSI, subTask);
                     break;
                 case SUB_TASK_MSQUERY:
-                    fetchMsQuery(entityManagerMSI, subTask);
+                    fetchMsQuery(entityManagerMSI, subTask, m_peptideMatchIds, m_proteinMatch, m_peptideMatchSequenceMatchArrayMap, m_peptideMatchMap);
                     break;
                 case SUB_TASK_PROTEINSET_NAME_LIST:
                     fetchProteinSetName(entityManagerMSI, subTask);
@@ -983,10 +983,13 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
      * @param entityManagerMSI
      * @param slice
      */
-    private void fetchMsQuery(EntityManager entityManagerMSI, SubTask subTask) {
+    public static void fetchMsQuery(EntityManager entityManagerMSI, SubTask subTask, ArrayList<Long> peptideMatchIds, HashMap<Long, DPeptideMatch> peptideMatchMap) {
+        fetchMsQuery(entityManagerMSI, subTask, peptideMatchIds, null, null, peptideMatchMap);
+    }
+    private static void fetchMsQuery(EntityManager entityManagerMSI, SubTask subTask, ArrayList<Long> peptideMatchIds, DProteinMatch proteinMatch, HashMap<Long,  ArrayList<DPeptideMatch>> peptideMatchSequenceMatchArrayMap, HashMap<Long, DPeptideMatch> peptideMatchMap) {
 
 
-       List sliceOfPeptideMatchIds = subTask.getSubList(m_peptideMatchIds);
+       List sliceOfPeptideMatchIds = subTask.getSubList(peptideMatchIds);
 
         Query msQueryQuery = entityManagerMSI.createQuery("SELECT pm.id, msq.id, msq.initialId, s.firstTime, s.precursorIntensity, s.title FROM PeptideMatch pm,MsQuery msq, Spectrum s WHERE pm.id IN (:listId) AND pm.msQuery=msq AND msq.spectrum=s");
         msQueryQuery.setParameter("listId", sliceOfPeptideMatchIds);
@@ -1006,15 +1009,15 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
             
             DMsQuery q = new DMsQuery((Long) res[0], (Long) res[1], (Integer) res[2], precursorIntensity);
             q.setDSpectrum(spectrum);
-            if (m_proteinMatch != null) {
-                 ArrayList<DPeptideMatch> sequenceMatchArray = m_peptideMatchSequenceMatchArrayMap.get(q.getPeptideMatchId());
+            if (proteinMatch != null) {
+                 ArrayList<DPeptideMatch> sequenceMatchArray = peptideMatchSequenceMatchArrayMap.get(q.getPeptideMatchId());
                  for (int i=0;i<sequenceMatchArray.size();i++) {
                      DPeptideMatch peptideMatch = sequenceMatchArray.get(i);
                      peptideMatch.setMsQuery(q);
                      peptideMatch.setRetentionTime(spectrum.getFirstTime());
                  }
             } else {
-                DPeptideMatch peptideMatch = m_peptideMatchMap.get(q.getPeptideMatchId());
+                DPeptideMatch peptideMatch = peptideMatchMap.get(q.getPeptideMatchId());
                 peptideMatch.setMsQuery(q);
                 peptideMatch.setRetentionTime(spectrum.getFirstTime());
             }
@@ -1216,7 +1219,7 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
                 subTask = m_subTaskManager.sliceATaskAndGetFirst(SUB_TASK_MSQUERY, peptideMatches.size(), SLICE_SIZE);
 
                 // execute the first slice now
-                fetchMsQuery(entityManagerMSI, subTask);
+                fetchMsQuery(entityManagerMSI, subTask, m_peptideMatchIds, m_proteinMatch, m_peptideMatchSequenceMatchArrayMap, m_peptideMatchMap);
 
 
                 /**

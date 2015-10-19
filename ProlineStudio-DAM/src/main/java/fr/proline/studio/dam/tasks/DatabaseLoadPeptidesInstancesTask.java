@@ -42,7 +42,8 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseSlicerTas
     private static final int SLICE_SIZE = 1000;
     
     public static final int SUB_TASK_PROTEINSET_NAME_LIST = 0;
-    public static final int SUB_TASK_COUNT = 1; // <<----- get in sync
+    public static final int SUB_TASK_MSQUERY = 1;
+    public static final int SUB_TASK_COUNT = 2; // <<----- get in sync
     
     
     private long m_projectId = -1;
@@ -159,6 +160,9 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseSlicerTas
                 case SUB_TASK_PROTEINSET_NAME_LIST:
                     fetchProteinSetName(entityManagerMSI, subTask);
                     break;
+                case SUB_TASK_MSQUERY:
+                    DatabaseLoadPeptideMatchTask.fetchMsQuery(entityManagerMSI, subTask, m_peptideMatchIds, m_peptideMatchMap);
+                    break;
             }
 
 
@@ -255,9 +259,17 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseSlicerTas
 
             // slice the task and get the first one
             SubTask subTask = m_subTaskManager.sliceATaskAndGetFirst( SUB_TASK_PROTEINSET_NAME_LIST, nbPeptides, SLICE_SIZE );
-            
+
             // execute the first slice now
             fetchProteinSetName(entityManagerMSI, subTask);
+            
+            
+            // slice the task and get the first one
+            subTask = m_subTaskManager.sliceATaskAndGetFirst( SUB_TASK_MSQUERY, nbPeptides, SLICE_SIZE );
+
+            // execute the first slice now
+            DatabaseLoadPeptideMatchTask.fetchMsQuery(entityManagerMSI, subTask, m_peptideMatchIds, m_peptideMatchMap);
+            
             
             entityManagerMSI.getTransaction().commit();
         } catch (Exception e) {
@@ -299,8 +311,8 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseSlicerTas
         StringBuilder sb = new StringBuilder();
         long prevPeptideMatchId = -1;
 
-        List<Object[]> msQueries = proteinSetQuery.getResultList();
-        Iterator<Object[]> it = msQueries.iterator();
+        List<Object[]> resultList = proteinSetQuery.getResultList();
+        Iterator<Object[]> it = resultList.iterator();
         while (it.hasNext()) {
             Object[] resCur = it.next();
             String proteinName = (String) resCur[0];

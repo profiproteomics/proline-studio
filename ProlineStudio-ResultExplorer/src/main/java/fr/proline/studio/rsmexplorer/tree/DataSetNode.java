@@ -98,6 +98,20 @@ public class DataSetNode extends AbstractNode {
 
     }
     
+    public boolean isMerged() {
+
+        Dataset.DatasetType datasetType = ((DataSetData) getData()).getDatasetType();
+        if (datasetType == Dataset.DatasetType.AGGREGATE) {
+            DDataset dataset = ((DataSetData) getData()).getDataset();
+            if (dataset != null) {
+                if ((dataset.getResultSummaryId() != null) || (dataset.getResultSetId() != null)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+    
 
     
     public DDataset getDataset() {

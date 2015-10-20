@@ -122,6 +122,11 @@ public class DisplayMSQueryAction extends AbstractRSMAction {
                 setEnabled(false);
                 return;
             }
+            
+            if (dataSetNode.isMerged()) {
+                setEnabled(false);
+                return;
+            }
         }
 
         

@@ -39,23 +39,24 @@ public class PeptideTableModel extends DecoratedTableModel implements GlobalTabl
     public static final int COLTYPE_PEPTIDE_PREVIOUS_AA = 1;
     public static final int COLTYPE_PEPTIDE_NAME = 2;
     public static final int COLTYPE_PEPTIDE_NEXT_AA = 3;
-    public static final int COLTYPE_PEPTIDE_SCORE = 4;
-    public static final int COLTYPE_PEPTIDE_RANK = 5;
-    public static final int COLTYPE_PROTEIN_SETS_MATCHES = 6;
-    public static final int COLTYPE_PEPTIDE_START = 7;
-    public static final int COLTYPE_PEPTIDE_STOP = 8;
-    public static final int COLTYPE_PEPTIDE_CALCULATED_MASS = 9;
-    public static final int COLTYPE_PEPTIDE_EXPERIMENTAL_MOZ = 10;
-    public static final int COLTYPE_PEPTIDE_PPM = 11;
-    public static final int COLTYPE_PEPTIDE_CHARGE = 12;
-    public static final int COLTYPE_PEPTIDE_MISSED_CLIVAGE = 13;
+    public static final int COLTYPE_PEPTIDE_PTM = 4;
+    public static final int COLTYPE_PEPTIDE_SCORE = 5;
+    public static final int COLTYPE_PEPTIDE_START = 6;
+    public static final int COLTYPE_PEPTIDE_STOP = 7;
+    public static final int COLTYPE_PEPTIDE_CALCULATED_MASS = 8;
+    public static final int COLTYPE_PEPTIDE_EXPERIMENTAL_MOZ = 9;
+    public static final int COLTYPE_PEPTIDE_PPM = 10;
+    public static final int COLTYPE_PEPTIDE_CHARGE = 11;
+    public static final int COLTYPE_PEPTIDE_MISSED_CLIVAGE = 12;
+    public static final int COLTYPE_PEPTIDE_RANK = 13;
     public static final int COLTYPE_PEPTIDE_RETENTION_TIME = 14;
-    public static final int COLTYPE_PEPTIDE_ION_PARENT_INTENSITY = 15;
-    public static final int COLTYPE_PEPTIDE_PTM = 16;
-    public static final int COLTYPE_PEPTIDE_MSQUERY = 17;
-    public static final int COLTYPE_SPECTRUM_TITLE = 18;
-    private static final String[] m_columnNames = {"Id", "Prev. AA", "Peptide", "Next AA", "Score", "Rank", "Protein S. Matches", "Start", "Stop", "Calc. Mass", "Exp. MoZ", "Ppm"/*"Delta MoZ"*/, "Charge", "Missed Cl.", "RT", "Ion Parent Int.", "PTM", "MsQuery", "Spectrum Title"};
-    private static final String[] m_columnTooltips = {"Peptide Inst. Id", "Previous Amino Acid","Peptide", "Next Amino Acid", "Score", "Rank", "Protein Set Matches", "Start", "Stop", "Calculated Mass", "Experimental Mass to Charge Ration", "parts-per-million"/*"Delta Mass to Charge Ratio"*/, "Charge", "Missed Clivage", "Retention Time", "Ion Parent Intensity", "Post Translational Modifications", "MsQuery", "Spectrum Title"};
+    public static final int COLTYPE_PEPTIDE_PROTEIN_SET_COUNT = 15;
+    public static final int COLTYPE_PEPTIDE_PROTEIN_SET_NAMES = 16;
+    public static final int COLTYPE_PEPTIDE_ION_PARENT_INTENSITY = 17;
+    public static final int COLTYPE_PEPTIDE_MSQUERY = 18;
+    public static final int COLTYPE_SPECTRUM_TITLE = 19;
+    private static final String[] m_columnNames = {"Id", "Prev. AA", "Peptide", "Next AA", "PTM", "Score", "Start", "Stop", "Calc. Mass", "Exp. MoZ", "Ppm", "Charge", "Missed Cl.", "Rank", "RT", "Protein Set Count", "Protein Sets", "Ion Parent Int.", "MsQuery", "Spectrum Title"};
+    private static final String[] m_columnTooltips = {"Peptide Inst. Id", "Previous Amino Acid","Peptide", "Next Amino Acid", "Post Translational Modifications", "Score", "Start", "Stop", "Calculated Mass", "Experimental Mass to Charge Ration", "parts-per-million", "Charge", "Missed Clivage", "Rank", "Retention Time", "Protein Set Count", "Protein Sets", "Ion Parent Intensity", "MsQuery", "Spectrum Title"};
     
     
     private DPeptideInstance[] m_peptideInstances = null;
@@ -102,14 +103,14 @@ public class PeptideTableModel extends DecoratedTableModel implements GlobalTabl
                 return DPeptideMatch.class;
             case COLTYPE_PEPTIDE_NEXT_AA:
                 return String.class;
-            case COLTYPE_PROTEIN_SETS_MATCHES:
+            case COLTYPE_PEPTIDE_PROTEIN_SET_NAMES:
             case COLTYPE_PEPTIDE_PTM:
             case COLTYPE_SPECTRUM_TITLE:
                 return String.class;
             case COLTYPE_PEPTIDE_SCORE:
             case COLTYPE_PEPTIDE_RETENTION_TIME:
             case COLTYPE_PEPTIDE_ION_PARENT_INTENSITY:
-            case COLTYPE_PEPTIDE_PPM: //COLTYPE_PEPTIDE_DELTA_MOZ:
+            case COLTYPE_PEPTIDE_PPM:
                 return Float.class;
             case COLTYPE_PEPTIDE_EXPERIMENTAL_MOZ:
             case COLTYPE_PEPTIDE_CALCULATED_MASS:
@@ -119,6 +120,7 @@ public class PeptideTableModel extends DecoratedTableModel implements GlobalTabl
             case COLTYPE_PEPTIDE_START:
             case COLTYPE_PEPTIDE_STOP:    
             case COLTYPE_PEPTIDE_RANK:
+            case COLTYPE_PEPTIDE_PROTEIN_SET_COUNT:
                 return Integer.class;
             case COLTYPE_PEPTIDE_MSQUERY:
                 return DMsQuery.class;
@@ -189,7 +191,23 @@ public class PeptideTableModel extends DecoratedTableModel implements GlobalTabl
                 }
                 return (peptideMatch.getCDPrettyRank() == null) ? null : peptideMatch.getCDPrettyRank();
             }
-            case COLTYPE_PROTEIN_SETS_MATCHES: {
+            case COLTYPE_PEPTIDE_PROTEIN_SET_COUNT: {
+                DPeptideMatch peptideMatch = (DPeptideMatch) peptideInstance.getBestPeptideMatch();
+                if (peptideMatch == null) {
+                    return null;
+                }
+                Peptide p = peptideMatch.getPeptide();
+                if (p == null) {
+                    return null;
+                }
+                ArrayList<DProteinSet> proteinSetList = p.getTransientData().getProteinSetArray();
+                if (proteinSetList == null) {
+                    return null;
+                }
+                
+                return proteinSetList.size();
+            }
+            case COLTYPE_PEPTIDE_PROTEIN_SET_NAMES: {
                 DPeptideMatch peptideMatch = (DPeptideMatch) peptideInstance.getBestPeptideMatch();
                 if (peptideMatch == null) {
                     return ""; // should never happen   
@@ -393,7 +411,8 @@ public class PeptideTableModel extends DecoratedTableModel implements GlobalTabl
         filtersMap.put(COLTYPE_PEPTIDE_NEXT_AA, new StringFilter(getColumnName(COLTYPE_PEPTIDE_NEXT_AA), null, COLTYPE_PEPTIDE_NEXT_AA));
         filtersMap.put(COLTYPE_PEPTIDE_SCORE, new DoubleFilter(getColumnName(COLTYPE_PEPTIDE_SCORE), null, COLTYPE_PEPTIDE_SCORE));
         filtersMap.put(COLTYPE_PEPTIDE_RANK, new IntegerFilter(getColumnName(COLTYPE_PEPTIDE_RANK), null, COLTYPE_PEPTIDE_RANK));
-        filtersMap.put(COLTYPE_PROTEIN_SETS_MATCHES, new StringFilter(getColumnName(COLTYPE_PROTEIN_SETS_MATCHES), null, COLTYPE_PROTEIN_SETS_MATCHES));
+        filtersMap.put(COLTYPE_PEPTIDE_PROTEIN_SET_COUNT, new IntegerFilter(getColumnName(COLTYPE_PEPTIDE_PROTEIN_SET_COUNT), null, COLTYPE_PEPTIDE_PROTEIN_SET_COUNT));
+        filtersMap.put(COLTYPE_PEPTIDE_PROTEIN_SET_NAMES, new StringFilter(getColumnName(COLTYPE_PEPTIDE_PROTEIN_SET_NAMES), null, COLTYPE_PEPTIDE_PROTEIN_SET_NAMES));
         filtersMap.put(COLTYPE_PEPTIDE_START, new IntegerFilter(getColumnName(COLTYPE_PEPTIDE_START), null, COLTYPE_PEPTIDE_START));
         filtersMap.put(COLTYPE_PEPTIDE_STOP, new IntegerFilter(getColumnName(COLTYPE_PEPTIDE_STOP), null, COLTYPE_PEPTIDE_STOP));
         filtersMap.put(COLTYPE_PEPTIDE_CALCULATED_MASS, new DoubleFilter(getColumnName(COLTYPE_PEPTIDE_CALCULATED_MASS), null, COLTYPE_PEPTIDE_CALCULATED_MASS));
@@ -547,7 +566,7 @@ public class PeptideTableModel extends DecoratedTableModel implements GlobalTabl
         switch (col) {
             case COLTYPE_PEPTIDE_PREVIOUS_AA:
             case COLTYPE_PEPTIDE_NEXT_AA:
-            case COLTYPE_PROTEIN_SETS_MATCHES: 
+            case COLTYPE_PEPTIDE_PROTEIN_SET_NAMES: 
             case COLTYPE_PEPTIDE_PTM: {
                 renderer = new DefaultLeftAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class));
                 break;
@@ -566,7 +585,8 @@ public class PeptideTableModel extends DecoratedTableModel implements GlobalTabl
             case COLTYPE_PEPTIDE_CHARGE:
             case COLTYPE_PEPTIDE_MISSED_CLIVAGE: 
             case COLTYPE_PEPTIDE_RETENTION_TIME:
-            case COLTYPE_PEPTIDE_ION_PARENT_INTENSITY: {
+            case COLTYPE_PEPTIDE_ION_PARENT_INTENSITY:
+            case COLTYPE_PEPTIDE_PROTEIN_SET_COUNT: {
                 renderer = new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(Integer.class));
                 break;
             }

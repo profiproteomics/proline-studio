@@ -308,7 +308,7 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseSlicerTas
         proteinSetQuery.setParameter("listId", sliceOfPeptideMatchIds);
         proteinSetQuery.setParameter("rsmId", m_rsm == null ? -1 : m_rsm.getId());
 
-        StringBuilder sb = new StringBuilder();
+        ArrayList<String> proteinSetNameArray = new ArrayList();
         long prevPeptideMatchId = -1;
 
         List<Object[]> resultList = proteinSetQuery.getResultList();
@@ -321,29 +321,32 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseSlicerTas
             if (peptideMatchId != prevPeptideMatchId) {
                 if (prevPeptideMatchId != -1) {
                     DPeptideMatch prevPeptideMatch = m_peptideMatchMap.get(prevPeptideMatchId);
-                    prevPeptideMatch.setProteinSetStringList(sb.toString());
-                    sb.setLength(0);
-                    sb.append(proteinName);
+                    String[] proteinSetNames = proteinSetNameArray.toArray(new String[proteinSetNameArray.size()]);
+                    prevPeptideMatch.setProteinSetStringArray(proteinSetNames);
+                    proteinSetNameArray.clear();
+                    proteinSetNameArray.add(proteinName);
                 } else {
-                    sb.append(proteinName);
+                    proteinSetNameArray.add(proteinName);
                 }
             } else {
-                sb.append(", ").append(proteinName);
+                proteinSetNameArray.add(proteinName);
             }
 
             prevPeptideMatchId = peptideMatchId;
         }
         if (prevPeptideMatchId != -1) {
             DPeptideMatch prevPeptideMatch = m_peptideMatchMap.get(prevPeptideMatchId);
-            prevPeptideMatch.setProteinSetStringList(sb.toString());
+            String[] proteinSetNames = proteinSetNameArray.toArray(new String[proteinSetNameArray.size()]);
+            prevPeptideMatch.setProteinSetStringArray(proteinSetNames);
         }
 
         Iterator itIds = sliceOfPeptideMatchIds.iterator();
         while (itIds.hasNext()) {
             Long peptideMatchId = (Long) itIds.next();
             DPeptideMatch peptideMatch = m_peptideMatchMap.get(peptideMatchId);
-            if (peptideMatch.getProteinSetStringList() == null) {
-                peptideMatch.setProteinSetStringList("");
+            if (peptideMatch.getProteinSetStringArray() == null) {
+                String[] proteinSetNames = new String[0];
+                peptideMatch.setProteinSetStringArray(proteinSetNames);
             }
         }
     }

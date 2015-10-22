@@ -121,6 +121,11 @@ public class RsetPeptideFragmentationTablePanel extends HourglassPanel implement
     }
     
     @Override
+    public void addSingleValue(Object v) {
+        // not used for the moment JPM.TODO ?
+    }
+    
+    @Override
     public ActionListener getRemoveAction(SplittedPanelContainer splittedPanel) {
         return m_dataBox.getRemoveAction(splittedPanel);
     }

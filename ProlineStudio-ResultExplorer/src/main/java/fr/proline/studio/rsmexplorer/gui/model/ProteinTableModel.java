@@ -2,6 +2,7 @@ package fr.proline.studio.rsmexplorer.gui.model;
 
 import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.core.orm.msi.dto.DBioSequence;
+import fr.proline.studio.comparedata.ExtraDataType;
 import fr.proline.studio.filter.*;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
@@ -16,6 +17,7 @@ import fr.proline.studio.table.LazyData;
 import fr.proline.studio.table.TableDefaultRendererManager;
 import fr.proline.studio.utils.IconManager;
 import fr.proline.studio.utils.URLCellRenderer;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -406,5 +408,27 @@ public class ProteinTableModel extends DecoratedTableModel implements GlobalTabl
     @Override
     public GlobalTableModelInterface getFrozzenModel() {
         return this;
+    }
+    
+        
+    @Override
+    public ArrayList<ExtraDataType> getExtraDataTypes() {
+        ArrayList<ExtraDataType> list = new ArrayList<>();
+        list.add(new ExtraDataType(DProteinMatch.class, true));
+        registerSingleValuesAsExtraTypes(list);
+        return list;
+    }
+
+    @Override
+    public Object getValue(Class c) {
+        return getSingleValue(c);
+    }
+
+    @Override
+    public Object getValue(Class c, int row) {
+        if (c.equals(DProteinMatch.class)) {
+            return getProteinMatch(row);
+        }
+        return null;
     }
 }

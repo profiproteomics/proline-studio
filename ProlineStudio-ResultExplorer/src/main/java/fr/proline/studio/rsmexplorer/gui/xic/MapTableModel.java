@@ -1,6 +1,7 @@
 package fr.proline.studio.rsmexplorer.gui.xic;
 
 import fr.proline.core.orm.lcms.Map;
+import fr.proline.studio.comparedata.ExtraDataType;
 import fr.proline.studio.filter.Filter;
 import fr.proline.studio.filter.StringFilter;
 import fr.proline.studio.graphics.PlotInformation;
@@ -270,5 +271,25 @@ public class MapTableModel extends LazyTableModel implements GlobalTableModelInt
         return this;
     }
 
+    @Override
+    public ArrayList<ExtraDataType> getExtraDataTypes() {
+        ArrayList<ExtraDataType> list = new ArrayList<>();
+        list.add(new ExtraDataType(Map.class, true));
+        registerSingleValuesAsExtraTypes(list);
+        return list;
+    }
+
+    @Override
+    public Object getValue(Class c) {
+        return getSingleValue(c);
+    }
+
+    @Override
+    public Object getValue(Class c, int row) {
+        if (c.equals(Map.class)) {
+            return m_maps.get(row);
+        }
+        return null;
+    }
 
 }

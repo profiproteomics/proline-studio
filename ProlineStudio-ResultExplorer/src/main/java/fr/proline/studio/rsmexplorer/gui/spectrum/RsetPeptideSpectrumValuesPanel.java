@@ -6,6 +6,7 @@ import fr.proline.core.orm.msi.dto.DMsQuery;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.studio.comparedata.AddDataAnalyzerButton;
 import fr.proline.studio.comparedata.CompareDataInterface;
+import fr.proline.studio.comparedata.ExtraDataType;
 import fr.proline.studio.comparedata.GlobalTabelModelProviderInterface;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.filter.DoubleFilter;
@@ -42,6 +43,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.DoubleBuffer;
 import java.nio.FloatBuffer;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -257,6 +259,11 @@ public class RsetPeptideSpectrumValuesPanel extends HourglassPanel implements Da
     @Override
     public ActionListener getSaveAction(SplittedPanelContainer splittedPanel) {
         return m_dataBox.getSaveAction(splittedPanel);
+    }
+
+    @Override
+    public void addSingleValue(Object v) {
+        getGlobalTableModelInterface().addSingleValue(v);
     }
 
     @Override
@@ -530,6 +537,21 @@ public class RsetPeptideSpectrumValuesPanel extends HourglassPanel implements Da
         @Override
         public GlobalTableModelInterface getFrozzenModel() {
             return this;
+        }
+        
+        @Override
+        public ArrayList<ExtraDataType> getExtraDataTypes() {
+            return null;
+        }
+
+        @Override
+        public Object getValue(Class c) {
+            return getSingleValue(c);
+        }
+
+        @Override
+        public Object getValue(Class c, int row) {
+            return null;
         }
 
     }

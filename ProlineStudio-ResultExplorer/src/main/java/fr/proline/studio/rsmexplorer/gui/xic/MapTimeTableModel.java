@@ -1,12 +1,8 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package fr.proline.studio.rsmexplorer.gui.xic;
 
 import fr.proline.core.orm.lcms.MapAlignment;
 import fr.proline.core.orm.lcms.MapTime;
+import fr.proline.studio.comparedata.ExtraDataType;
 import fr.proline.studio.filter.DoubleFilter;
 import fr.proline.studio.filter.Filter;
 import fr.proline.studio.graphics.PlotInformation;
@@ -20,6 +16,7 @@ import fr.proline.studio.table.LazyTable;
 import fr.proline.studio.table.LazyTableModel;
 import fr.proline.studio.table.TableDefaultRendererManager;
 import java.awt.Color;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -237,10 +234,10 @@ public class MapTimeTableModel  extends LazyTableModel implements GlobalTableMod
     }
     
     public void setData(Long taskId, MapAlignment mapAlignment,  List<MapTime> mapTimes, Color color, String title) {
-        this.m_mapAlignment = mapAlignment;
-        this.m_mapTimes = mapTimes;
-        this.m_color = color;
-        this.m_title = title;
+        m_mapAlignment = mapAlignment;
+        m_mapTimes = mapTimes;
+        m_color = color;
+        m_title = title;
 
         m_taskId = taskId;
 
@@ -256,6 +253,28 @@ public class MapTimeTableModel  extends LazyTableModel implements GlobalTableMod
     @Override
     public GlobalTableModelInterface getFrozzenModel() {
         return this;
+    }
+    
+ 
+    @Override
+    public ArrayList<ExtraDataType> getExtraDataTypes() {
+        ArrayList<ExtraDataType> list = new ArrayList<>();
+        list.add(new ExtraDataType(MapTime.class, true));
+        registerSingleValuesAsExtraTypes(list);
+        return list;
+    }
+
+    @Override
+    public Object getValue(Class c) {
+        return getSingleValue(c);
+    }
+
+    @Override
+    public Object getValue(Class c, int row) {
+        if (c.equals(MapTime.class)) {
+            return m_mapTimes.get(row);
+        }
+        return null;
     }
     
 

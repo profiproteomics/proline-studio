@@ -6,7 +6,7 @@ import fr.proline.studio.comparedata.DiffDataModel;
 import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.python.data.TableInfo;
 import fr.proline.studio.rsmexplorer.gui.SelectComparePanel;
-import fr.proline.studio.rsmexplorer.gui.calc.DataMixerPanel;
+import fr.proline.studio.rsmexplorer.gui.calc.DataAnalyzerPanel;
 import fr.proline.studio.table.GlobalTableModelInterface;
 
 /**
@@ -26,7 +26,7 @@ public class DataboxDataMixer extends AbstractDataBox {
 
     @Override
     public void createPanel() {
-        DataMixerPanel p = new DataMixerPanel();
+        DataAnalyzerPanel p = new DataAnalyzerPanel();
         p.setName(m_typeName);
         p.setDataBox(this);
         m_panel = p;
@@ -40,7 +40,7 @@ public class DataboxDataMixer extends AbstractDataBox {
     @Override
     public void setEntryData(Object data) {
         if (data instanceof TableInfo) {
-            ((DataMixerPanel) m_panel).addTableInfoToGraph((TableInfo) data);
+            ((DataAnalyzerPanel) m_panel).addTableInfoToGraph((TableInfo) data);
         }
     }
 

@@ -28,10 +28,10 @@ import javax.swing.JToolBar;
 
 
 /**
- * Panel for the DataMixer (combine tree + graph panel)
+ * Panel for the DataAnalyzer (combine tree + graph panel)
  * @author JM235353
  */
-public class DataMixerPanel extends JPanel implements DataBoxPanelInterface {
+public class DataAnalyzerPanel extends JPanel implements DataBoxPanelInterface {
 
     private AbstractDataBox m_dataBox;
 
@@ -39,7 +39,7 @@ public class DataMixerPanel extends JPanel implements DataBoxPanelInterface {
     private GraphPanel m_graphPanel;
 
     
-    public DataMixerPanel() {
+    public DataAnalyzerPanel() {
         setLayout(new BorderLayout());
         setBounds(0, 0, 500, 400);
         setBackground(Color.white);
@@ -151,6 +151,11 @@ public class DataMixerPanel extends JPanel implements DataBoxPanelInterface {
     @Override
     public AbstractDataBox getDataBox() {
         return m_dataBox;
+    }
+    
+    @Override
+    public void addSingleValue(Object v) {
+        // not used for the moment JPM.TODO ?
     }
 
     @Override

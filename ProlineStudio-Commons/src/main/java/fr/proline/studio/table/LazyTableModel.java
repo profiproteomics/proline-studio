@@ -17,6 +17,7 @@ public abstract class LazyTableModel extends DecoratedTableModel implements Lazy
         m_table = table;
     }
 
+    @Override
     public Long getTaskId() {
         return m_taskId;
     }

@@ -139,10 +139,15 @@ public class DataboxRsetPSMForMsQuery extends AbstractDataBox{
  
     @Override
     public void setEntryData(Object data) {
+        
+        m_panel.addSingleValue(data);
+        
         if (data instanceof MsQueryInfoRset) {
             MsQueryInfoRset o = (MsQueryInfoRset) data;
             m_msQuery = o.getMsQuery();
+            m_panel.addSingleValue(m_msQuery);
             m_rset = o.getResultSet();
+            m_panel.addSingleValue(m_rset);
             dataChanged();
         }
     }

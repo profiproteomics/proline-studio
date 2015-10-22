@@ -1,14 +1,16 @@
 package fr.proline.studio.pattern;
 
-import fr.proline.studio.graphics.CrossSelectionInterface;
+
 import fr.proline.studio.gui.SplittedPanelContainer;
-import fr.proline.studio.table.GlobalTableModelInterface;
+
 
 /**
  * All panels which are linked to a databox must implement this interface
  * @author JM235353
  */
 public interface DataBoxPanelInterface extends SplittedPanelContainer.UserActions {
+    
+    public void addSingleValue(Object v);
     
     public void setDataBox(AbstractDataBox dataBox);
     public AbstractDataBox getDataBox();

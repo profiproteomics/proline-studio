@@ -1,6 +1,7 @@
 package fr.proline.mzscope.ui.model;
 
 import fr.profi.mzdb.model.Feature;
+import fr.proline.studio.comparedata.ExtraDataType;
 import fr.proline.studio.filter.DoubleFilter;
 import fr.proline.studio.filter.Filter;
 import fr.proline.studio.filter.IntegerFilter;
@@ -16,7 +17,7 @@ import java.util.Map;
 import javax.swing.table.TableCellRenderer;
 
 /**
- * table model for features / peaks
+ * table model for m_features / peaks
  * @author CB205360
  */
 public class FeaturesTableModel extends DecoratedTableModel implements GlobalTableModelInterface {
@@ -35,18 +36,18 @@ public class FeaturesTableModel extends DecoratedTableModel implements GlobalTab
    private static final String[] m_columnTooltips = {"m/z", "Elution Time in min","Duration in min", "Apex Intensity", "Area", "MS Count", "Charge state", "Isotope peakels count"};
     
 
-    private List<Feature> features = new ArrayList<>();
+    private List<Feature> m_features = new ArrayList<>();
     
     private String m_modelName;
 
     public void setFeatures(List<Feature> features) {
-        this.features = features;
+        m_features = features;
         fireTableDataChanged();
     }
 
    @Override
     public int getRowCount() {
-        return features.size();
+        return m_features.size();
     }
 
    @Override
@@ -58,21 +59,21 @@ public class FeaturesTableModel extends DecoratedTableModel implements GlobalTab
     public Object getValueAt(int rowIndex, int columnIndex) {
         switch (columnIndex){
             case COLTYPE_FEATURE_MZCOL:
-                return features.get(rowIndex).getMz();
+                return m_features.get(rowIndex).getMz();
             case COLTYPE_FEATURE_ET_COL:
-                return features.get(rowIndex).getElutionTime()/60.0;
+                return m_features.get(rowIndex).getElutionTime()/60.0;
             case COLTYPE_FEATURE_DURATION_COL:
-                return features.get(rowIndex).getBasePeakel().calcDuration()/60.0;
+                return m_features.get(rowIndex).getBasePeakel().calcDuration()/60.0;
             case COLTYPE_FEATURE_APEX_INT_COL:
-                return features.get(rowIndex).getBasePeakel().getApexIntensity();
+                return m_features.get(rowIndex).getBasePeakel().getApexIntensity();
             case COLTYPE_FEATURE_AREA_COL:
-                return features.get(rowIndex).getArea();
+                return m_features.get(rowIndex).getArea();
             case COLTYPE_FEATURE_SCAN_COUNT_COL:
-                return features.get(rowIndex).getMs1Count();
+                return m_features.get(rowIndex).getMs1Count();
             case COLTYPE_FEATURE_CHARGE_COL:
-               return features.get(rowIndex).charge();
+               return m_features.get(rowIndex).charge();
             case COLTYPE_FEATURE_PEAKELS_COUNT_COL:
-               return features.get(rowIndex).getPeakelsCount();
+               return m_features.get(rowIndex).getPeakelsCount();
         }
         return null; // should not happen
     }
@@ -241,6 +242,26 @@ public class FeaturesTableModel extends DecoratedTableModel implements GlobalTab
         return this;
     }
 
+    @Override
+    public ArrayList<ExtraDataType> getExtraDataTypes() {
+        ArrayList<ExtraDataType> list = new ArrayList<>();
+        list.add(new ExtraDataType(Feature.class, true));
+        registerSingleValuesAsExtraTypes(list);
+        return list;
+    }
+
+    @Override
+    public Object getValue(Class c) {
+        return getSingleValue(c);
+    }
+
+    @Override
+    public Object getValue(Class c, int row) {
+        if (c.equals(Feature.class)) {
+            return m_features.get(row);
+        }
+        return null;
+    }
     
     
 }

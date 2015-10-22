@@ -4,6 +4,7 @@ package fr.proline.studio.rsmexplorer.gui.model;
 
 import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.core.orm.msi.dto.DBioSequence;
+import fr.proline.studio.comparedata.ExtraDataType;
 import fr.proline.studio.table.LazyTable;
 import fr.proline.studio.table.LazyTableModel;
 import fr.proline.studio.dam.tasks.DatabaseProteinMatchesTask;
@@ -40,12 +41,8 @@ public class ProteinsOfPeptideMatchTableModel extends LazyTableModel implements 
     public static final int COLTYPE_PROTEIN_PEPTIDES_COUNT = 3;
     public static final int COLTYPE_PROTEIN_MASS           = 4;
     private static final String[] m_columnNames = {"Id","Protein", "Score", "Peptides", "Mass"};
+    
     private DProteinMatch[] m_proteinMatchArray = null;
-
-    
-    
-    private boolean m_isFiltering = false;
-    private boolean m_filteringAsked = false;
 
     private String m_modelName;
     
@@ -379,6 +376,25 @@ public class ProteinsOfPeptideMatchTableModel extends LazyTableModel implements 
         return this;
     }
 
+    @Override
+    public ArrayList<ExtraDataType> getExtraDataTypes() {
+        ArrayList<ExtraDataType> list = new ArrayList<>();
+        list.add(new ExtraDataType(DProteinMatch.class, true));
+        registerSingleValuesAsExtraTypes(list);
+        return list;
+    }
 
+    @Override
+    public Object getValue(Class c) {
+        return getSingleValue(c);
+    }
+
+    @Override
+    public Object getValue(Class c, int row) {
+        if (c.equals(DProteinMatch.class)) {
+            return m_proteinMatchArray[row];
+        }
+        return null;
+    }
  
 }

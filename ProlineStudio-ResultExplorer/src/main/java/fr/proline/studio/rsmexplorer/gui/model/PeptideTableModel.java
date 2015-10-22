@@ -9,6 +9,7 @@ import fr.proline.core.orm.msi.dto.DMsQuery;
 import fr.proline.core.orm.msi.dto.DPeptideInstance;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.msi.dto.DProteinSet;
+import fr.proline.studio.comparedata.ExtraDataType;
 import fr.proline.studio.filter.*;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
@@ -613,6 +614,25 @@ public class PeptideTableModel extends DecoratedTableModel implements GlobalTabl
         return this;
     }
 
+    @Override
+    public ArrayList<ExtraDataType> getExtraDataTypes() {
+        ArrayList<ExtraDataType> list = new ArrayList<>();
+        list.add(new ExtraDataType(DPeptideInstance.class, true));
+        registerSingleValuesAsExtraTypes(list);
+        return list;
+    }
 
+    @Override
+    public Object getValue(Class c) {
+        return getSingleValue(c);
+    }
+
+    @Override
+    public Object getValue(Class c, int row) {
+        if (c.equals(DPeptideInstance.class)) {
+            return m_peptideInstances[row];
+        }
+        return null;
+    }
     
 }

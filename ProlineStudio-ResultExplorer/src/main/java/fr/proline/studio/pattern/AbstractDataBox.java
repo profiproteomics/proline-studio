@@ -5,6 +5,7 @@ import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import fr.proline.studio.dam.tasks.AbstractDatabaseTask;
 import fr.proline.studio.gui.SplittedPanelContainer;
+import fr.proline.studio.id.ProjectId;
 import fr.proline.studio.pattern.xic.DataboxChildFeature;
 import fr.proline.studio.pattern.xic.DataboxExperimentalDesign;
 import fr.proline.studio.pattern.xic.DataboxMapAlignment;
@@ -47,7 +48,7 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
     
     private final HashMap<Long, TaskInfo> m_taskMap = new HashMap<>();
     
-    private long m_projectId = -1;
+    private ProjectId m_projectId = new ProjectId();
     
     protected String m_typeName;
     protected String m_dataName;
@@ -226,6 +227,11 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
     
     public AbstractDataBox(DataboxType type) {
         m_type = type;
+        
+        // Register possible out parameters
+        GroupParameter outParameter = new GroupParameter();
+        outParameter.addParameter(ProjectId.class, false);
+        registerOutParameter(outParameter);
     }
     
     public DataboxType getType() {
@@ -271,11 +277,11 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
     }
  
     
-    protected void registerInParameter(GroupParameter parameter) {
+    protected final void registerInParameter(GroupParameter parameter) {
         m_inParameters.add(parameter);
     }
     
-    protected void registerOutParameter(GroupParameter parameter)  {
+    protected final void registerOutParameter(GroupParameter parameter)  {
         m_outParameters.add(parameter);
     }
     
@@ -344,6 +350,16 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
     public abstract void dataChanged();
     
     public Object getData(boolean getArray, Class parameterType) {
+        
+        if ((parameterType!= null ) && (parameterType.equals(ProjectId.class))) {
+            if ((m_projectId==null) || (m_projectId.getId() == -1l)) {
+                if (m_previousDataBox != null) {
+                    return m_previousDataBox.getData(getArray, parameterType);
+                }
+            }
+            return m_projectId;
+        }
+        
         if (m_previousDataBox != null) {
             return m_previousDataBox.getData(getArray, parameterType);
         }
@@ -351,6 +367,11 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
     }
     
     public Object getData(boolean getArray, Class parameterType, boolean isList) {
+        
+        if ((parameterType!= null ) && (parameterType.equals(ProjectId.class))) {
+            return m_projectId;
+        }
+        
         if (m_previousDataBox != null) {
             return m_previousDataBox.getData(getArray, parameterType, isList);
         }
@@ -374,18 +395,16 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
     }
     
     public void setProjectId(long projectId) {
-        m_projectId = projectId;
+        m_panel.addSingleValue(m_projectId);
+        m_projectId.setId(projectId);
     }
-    
+
     public long getProjectId() {
-        if (m_projectId!=-1) {
-            return m_projectId;
+        ProjectId projectId = (ProjectId) getData(false, ProjectId.class);
+        if (projectId == null) {
+            return -1;
         }
-        if (m_previousDataBox != null) {
-            return m_previousDataBox.getProjectId();
-        }
-        return -1; // should not happen
-        
+        return projectId.getId();
     }
     
     public DataBoxPanelInterface getPanel() {

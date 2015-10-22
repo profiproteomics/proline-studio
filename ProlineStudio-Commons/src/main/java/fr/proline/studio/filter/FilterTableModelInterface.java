@@ -9,7 +9,7 @@ import org.jdesktop.swingx.JXTable;
  * Interface which must be respected to do a Filter Model
  * @author JM235353
  */
-public interface FilterTableModelInterfaceV2 extends GlobalTableModelInterface, FilterMapInterface {
+public interface FilterTableModelInterface extends GlobalTableModelInterface, FilterMapInterface {
 
     public void setTableModelSource(GlobalTableModelInterface tableModelSource);
     public GlobalTableModelInterface getTableModelSource();

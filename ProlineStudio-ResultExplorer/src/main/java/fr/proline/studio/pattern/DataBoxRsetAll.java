@@ -101,7 +101,11 @@ public class DataBoxRsetAll extends AbstractDataBox{
     
     @Override
     public void setEntryData(Object data) {
+        
+        m_panel.addSingleValue(data);
+        
         m_project = (Project) data;
+
         dataChanged();
         
         ImportSearchResultAsRsetAction.addEventListener(m_project.getId(), this);

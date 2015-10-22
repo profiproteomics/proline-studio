@@ -5,6 +5,7 @@ import fr.proline.core.orm.msi.dto.DMasterQuantPeptide;
 import fr.proline.core.orm.msi.dto.DPeptideInstance;
 import fr.proline.core.orm.msi.dto.DQuantPeptide;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
+import fr.proline.studio.comparedata.ExtraDataType;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadXicMasterQuantTask;
 import fr.proline.studio.filter.DoubleFilter;
 import fr.proline.studio.filter.Filter;
@@ -67,9 +68,7 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
     private DQuantitationChannel[] m_quantChannels = null;
     private int m_quantChannelNumber;
 
-    private boolean m_isFiltering = false;
-    private boolean m_filteringAsked = false;
-    
+
     private String m_modelName;
     
     private boolean m_isXICMode;
@@ -296,9 +295,6 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
         if (m_quantPeptides == null) {
             return 0;
         }
-        /*if ((!m_isFiltering) && (m_filteredIds != null)) {
-            return m_filteredIds.size();
-        }*/
         return m_quantPeptides.size();
     }
 
@@ -603,60 +599,32 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
                 structureChanged = !(m_quantChannels[i].equals(quantChannels[i]));
             }
         }
-        this.m_quantPeptides = peptides;
-        this.m_quantChannels = quantChannels;
-        this.m_quantChannelNumber = quantChannels.length;
-        //m_filteredIds = null;
-        m_isFiltering = false;
+        m_quantPeptides = peptides;
+        m_quantChannels = quantChannels;
+        m_quantChannelNumber = quantChannels.length;
+
         if (structureChanged) {
             fireTableStructureChanged();
         }
 
         m_taskId = taskId;
 
-        /*if (m_restrainIds != null) {
-            m_restrainIds = null;
-            m_filteringAsked = true;
-        }
-        
-        if (m_filteringAsked) {
-            m_filteringAsked = false;
-            filter();
-        } else {*/
-            fireTableDataChanged();
-        //}
+        fireTableDataChanged();
+
     }
 
     public void dataUpdated() {
 
-        // no need to do an updateMinMax : scores are known at once
-        /*if (m_filteredIds != null) {
-            filter();
-        } else {*/
-            fireTableDataChanged();
-        //}
+        fireTableDataChanged();
+
     }
 
     public DMasterQuantPeptide getPeptide(int i) {
-
-        /*if (m_filteredIds != null) {
-            i = m_filteredIds.get(i).intValue();
-        }*/
 
         return m_quantPeptides.get(i);
     }
 
     public int findRow(long peptideId) {
-
-        /*if (m_filteredIds != null) {
-            int nb = m_filteredIds.size();
-            for (int i = 0; i < nb; i++) {
-                if (peptideId == m_quantPeptides.get(m_filteredIds.get(i)).getPeptideInstanceId()) {
-                    return i;
-                }
-            }
-            return -1;
-        }*/
 
         int nb = m_quantPeptides.size();
         for (int i = 0; i < nb; i++) {
@@ -995,6 +963,27 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
     @Override
     public GlobalTableModelInterface getFrozzenModel() {
         return this;
+    }
+
+    @Override
+    public ArrayList<ExtraDataType> getExtraDataTypes() {
+        ArrayList<ExtraDataType> list = new ArrayList<>();
+        list.add(new ExtraDataType(DMasterQuantPeptide.class, true));
+        registerSingleValuesAsExtraTypes(list);
+        return list;
+    }
+
+    @Override
+    public Object getValue(Class c) {
+        return getSingleValue(c);
+    }
+
+    @Override
+    public Object getValue(Class c, int row) {
+        if (c.equals(DMasterQuantPeptide.class)) {
+            return m_quantPeptides.get(row);
+        }
+        return null;
     }
 
 }

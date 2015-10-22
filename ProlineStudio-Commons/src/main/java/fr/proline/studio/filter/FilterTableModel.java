@@ -1,5 +1,6 @@
 package fr.proline.studio.filter;
 
+import fr.proline.studio.comparedata.ExtraDataType;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
 import fr.proline.studio.progress.ProgressInterface;
@@ -21,7 +22,7 @@ import org.jdesktop.swingx.JXTable;
  * Model use to filter data and/or restrain rows of another model
  * @author JM235353
  */
-public class FilterTableModelV2 extends DecoratedTableModel implements FilterTableModelInterfaceV2, TableModelListener {
+public class FilterTableModel extends DecoratedTableModel implements FilterTableModelInterface, TableModelListener {
 
     protected LinkedHashMap<Integer, Filter> m_filters = null;
     protected HashSet<Integer> m_restrainIds = null;
@@ -35,7 +36,7 @@ public class FilterTableModelV2 extends DecoratedTableModel implements FilterTab
     private boolean m_isFiltering = false;
 
     
-    public FilterTableModelV2(GlobalTableModelInterface tableModelSource) {
+    public FilterTableModel(GlobalTableModelInterface tableModelSource) {
         setTableModelSource(tableModelSource);
     }
     
@@ -444,7 +445,36 @@ public class FilterTableModelV2 extends DecoratedTableModel implements FilterTab
             return -1;
         }
         return m_searchIds.get(m_searchIndex);
-        
 
+    }
+    
+    @Override
+    public ArrayList<ExtraDataType> getExtraDataTypes() {
+        return m_tableModelSource.getExtraDataTypes();
+    }
+
+    @Override
+    public Object getValue(Class c) {
+        return m_tableModelSource.getValue(c);
+    }
+
+    @Override
+    public Object getValue(Class c, int rowIndex) {
+
+        int rowFiltered = rowIndex;
+        if ((!m_isFiltering) && (m_filteredIds != null)) {
+            rowFiltered = m_filteredIds.get(rowIndex).intValue();
+        }
+        return m_tableModelSource.getValue(c, rowFiltered);
+    }
+    
+    @Override
+    public void addSingleValue(Object v) {
+        m_tableModelSource.addSingleValue(v);
+    }
+
+    @Override
+    public Object getSingleValue(Class c) {
+        return m_tableModelSource.getSingleValue(c);
     }
 }

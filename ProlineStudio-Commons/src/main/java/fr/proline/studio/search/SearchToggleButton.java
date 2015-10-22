@@ -2,7 +2,7 @@ package fr.proline.studio.search;
 
 import fr.proline.studio.filter.Filter;
 import fr.proline.studio.filter.FilterMapInterface;
-import fr.proline.studio.filter.FilterTableModelInterfaceV2;
+import fr.proline.studio.filter.FilterTableModelInterface;
 import fr.proline.studio.progress.ProgressBarDialog;
 import fr.proline.studio.progress.ProgressInterface;
 import fr.proline.studio.utils.IconManager;
@@ -24,7 +24,7 @@ public class SearchToggleButton extends JToggleButton {
     
     // for search on table
     private JXTable m_table = null;
-    private FilterTableModelInterfaceV2 m_tableModelFilterInterface = null;
+    private FilterTableModelInterface m_tableModelFilterInterface = null;
     
     // for generic search
     SearchInterface m_searchInterface = null;
@@ -38,7 +38,7 @@ public class SearchToggleButton extends JToggleButton {
      * @param table
      * @param tableModelFilterInterface 
      */
-    public SearchToggleButton(ProgressInterface progressInterface, JXTable table, FilterTableModelInterfaceV2 tableModelFilterInterface) {
+    public SearchToggleButton(ProgressInterface progressInterface, JXTable table, FilterTableModelInterface tableModelFilterInterface) {
         
         init(progressInterface, table, tableModelFilterInterface);
         initGraphic(new Search());
@@ -61,7 +61,7 @@ public class SearchToggleButton extends JToggleButton {
         
     }
     
-    public final void init(ProgressInterface progressInterface, JXTable table, FilterTableModelInterfaceV2 tableModelFilterInterface) {
+    public final void init(ProgressInterface progressInterface, JXTable table, FilterTableModelInterface tableModelFilterInterface) {
         m_progressInterface = progressInterface;
         m_table = table;
         m_tableModelFilterInterface = tableModelFilterInterface;

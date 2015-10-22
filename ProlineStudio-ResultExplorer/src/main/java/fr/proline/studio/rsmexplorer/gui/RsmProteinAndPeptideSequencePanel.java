@@ -15,6 +15,7 @@ import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
+import fr.proline.studio.table.DecoratedTableModel;
 import fr.proline.studio.utils.DataFormat;
 import fr.proline.studio.utils.GlobalValues;
 import java.awt.*;
@@ -360,6 +361,11 @@ public class RsmProteinAndPeptideSequencePanel extends HourglassPanel implements
     @Override
     public AbstractDataBox getDataBox() {
         return m_dataBox;
+    }
+    
+    @Override
+    public void addSingleValue(Object v) {
+        // should not be used
     }
     
     @Override

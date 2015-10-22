@@ -1,7 +1,7 @@
 package fr.proline.studio.filter.actions;
 
 
-import fr.proline.studio.filter.FilterTableModelInterfaceV2;
+import fr.proline.studio.filter.FilterTableModelInterface;
 import fr.proline.studio.table.AbstractTableAction;
 import java.util.HashSet;
 import javax.swing.JTable;
@@ -21,11 +21,11 @@ public abstract class RestrainAction extends AbstractTableAction {
     @Override
     public void actionPerformed(int col, int row, int[] selectedRows, JTable table) {
         TableModel tableModel = table.getModel();
-        if (!(tableModel instanceof FilterTableModelInterfaceV2)) {
+        if (!(tableModel instanceof FilterTableModelInterface)) {
             return;
         }
         
-        FilterTableModelInterfaceV2 filterTableModel = (FilterTableModelInterfaceV2) tableModel;
+        FilterTableModelInterface filterTableModel = (FilterTableModelInterface) tableModel;
         
         HashSet<Integer> restrainRowSet = filterTableModel.getRestrainRowSet();
         if (restrainRowSet == null) {

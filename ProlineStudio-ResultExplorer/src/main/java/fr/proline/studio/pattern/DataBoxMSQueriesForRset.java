@@ -99,6 +99,9 @@ public class DataBoxMSQueriesForRset extends AbstractDataBox{
     
     @Override
     public void setEntryData(Object data) {
+        
+        m_panel.addSingleValue(data);
+        
         if (data instanceof ResultSet) {
             m_rset = (ResultSet) data;
             dataChanged();

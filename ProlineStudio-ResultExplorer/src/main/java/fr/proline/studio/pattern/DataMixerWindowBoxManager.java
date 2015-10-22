@@ -1,8 +1,11 @@
 package fr.proline.studio.pattern;
 
 
+import fr.proline.studio.id.ProjectId;
+import fr.proline.studio.python.data.Table;
 import fr.proline.studio.python.data.TableInfo;
 import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
+import fr.proline.studio.table.GlobalTableModelInterface;
 
 /**
  *
@@ -20,7 +23,12 @@ public class DataMixerWindowBoxManager {
         if (m_windowBox == null) {
             m_windowBox = WindowBoxFactory.getDataMixerWindowBox();
             if (tableInfo != null) {
-                m_windowBox.setEntryData(-1, tableInfo);
+                
+                GlobalTableModelInterface model = tableInfo.getModel();
+                ProjectId projectId = (ProjectId) model.getSingleValue(ProjectId.class);
+                long id = (projectId != null) ? projectId.getId() : -1l;
+                
+                m_windowBox.setEntryData(id, tableInfo);
             }
             
             // open a window to display the window box
@@ -29,7 +37,12 @@ public class DataMixerWindowBoxManager {
             m_win.requestActive();
         } else {
             if (tableInfo != null) {
-                m_windowBox.setEntryData(-1, tableInfo);
+                
+                GlobalTableModelInterface model = tableInfo.getModel();
+                ProjectId projectId = (ProjectId) model.getSingleValue(ProjectId.class);
+                long id = (projectId != null) ? projectId.getId() : -1l;
+                
+                m_windowBox.setEntryData(id, tableInfo);
             }
             if (m_win.isOpened()) {
                 m_win.requestActive();

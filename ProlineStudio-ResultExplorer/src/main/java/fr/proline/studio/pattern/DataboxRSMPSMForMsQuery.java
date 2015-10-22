@@ -146,11 +146,16 @@ public class DataboxRSMPSMForMsQuery extends AbstractDataBox{
  
     @Override
     public void setEntryData(Object data) {
+        
+        m_panel.addSingleValue(data);
+        
         if (data instanceof MsQueryInfoRSM) {
             MsQueryInfoRSM o = (MsQueryInfoRSM) data;
             m_msQuery = o.getMsQuery();
             m_rset = o.getResultSet();
+            m_panel.addSingleValue(m_rset);
             m_rsm = o.getResultSummary();
+            m_panel.addSingleValue(m_rsm);
             dataChanged();
         }
     }

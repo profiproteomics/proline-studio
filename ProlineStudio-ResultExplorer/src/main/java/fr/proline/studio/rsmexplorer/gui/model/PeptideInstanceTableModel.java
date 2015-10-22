@@ -10,6 +10,7 @@ import fr.proline.core.orm.msi.PeptideReadablePtmString;
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.msi.dto.DMsQuery;
+import fr.proline.studio.comparedata.ExtraDataType;
 import fr.proline.studio.dam.tasks.DatabaseLoadPeptidesInstancesTask;
 import fr.proline.studio.filter.ConvertValueInterface;
 import fr.proline.studio.filter.DoubleFilter;
@@ -575,6 +576,27 @@ public class PeptideInstanceTableModel extends LazyTableModel implements GlobalT
     @Override
     public GlobalTableModelInterface getFrozzenModel() {
         return this;
+    }
+
+    @Override
+    public ArrayList<ExtraDataType> getExtraDataTypes() {
+        ArrayList<ExtraDataType> list = new ArrayList<>();
+        list.add(new ExtraDataType(PeptideInstance.class, true));
+        registerSingleValuesAsExtraTypes(list);
+        return list;
+    }
+
+    @Override
+    public Object getValue(Class c) {
+        return getSingleValue(c);
+    }
+
+    @Override
+    public Object getValue(Class c, int row) {
+        if (c.equals(PeptideInstance.class)) {
+            return m_peptideInstances[row];
+        }
+        return null;
     }
     
     

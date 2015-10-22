@@ -415,6 +415,11 @@ public class RsetPeptideSpectrumErrorPanel extends HourglassPanel implements Dat
     public AbstractDataBox getDataBox() {
         return m_dataBox;
     }
+    
+    @Override
+    public void addSingleValue(Object v) {
+        // not used for the moment JPM.TODO ?
+    }
 
     @Override
     public ActionListener getRemoveAction(SplittedPanelContainer splittedPanel) {

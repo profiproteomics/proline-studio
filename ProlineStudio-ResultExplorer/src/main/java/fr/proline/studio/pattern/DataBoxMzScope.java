@@ -79,7 +79,11 @@ public class DataBoxMzScope extends AbstractDataBox{
     
     @Override
     public void setEntryData(Object data) {
+        
+        m_panel.addSingleValue(data);
+        
         mzScope = (MzScopeInterface) data;
+
         dataChanged();
     }
     

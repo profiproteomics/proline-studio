@@ -334,6 +334,10 @@ public class TaskDescriptionPanel extends HourglassPanel implements DataBoxPanel
         return m_dataBox;
     }
 
+    @Override
+    public void addSingleValue(Object v) {
+        // should not be used
+    }
     
     @Override
     public ActionListener getRemoveAction(SplittedPanelContainer splittedPanel) {

@@ -210,6 +210,11 @@ public class XicPeptideMatchPanel extends HourglassPanel implements DataBoxPanel
     }
 
     @Override
+    public void addSingleValue(Object v) {
+        getGlobalTableModelInterface().addSingleValue(v);
+    }
+    
+    @Override
     public GlobalTableModelInterface getGlobalTableModelInterface() {
         return (GlobalTableModelInterface) m_psmTable.getModel();
     }

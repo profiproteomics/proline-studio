@@ -145,11 +145,16 @@ public class DataBoxRsetPSM extends AbstractDataBox {
  
     @Override
     public void setEntryData(Object data) {
+        
+        
+        
         if (data instanceof ResultSet) {
             m_rset = (ResultSet) data;
+            m_panel.addSingleValue(m_rset);
             dataChanged();
         } else if (data instanceof ResultSummary) {
             m_rset = ((ResultSummary) data).getResultSet();
+            m_panel.addSingleValue(m_rset);
         }
     }
 }

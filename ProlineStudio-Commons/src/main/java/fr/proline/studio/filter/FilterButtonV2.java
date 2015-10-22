@@ -16,9 +16,9 @@ import org.openide.windows.WindowManager;
  */
 public abstract class FilterButtonV2 extends JButton implements ActionListener {
     
-    private FilterTableModelInterfaceV2 m_tableModelFilterInterface;
+    private FilterTableModelInterface m_tableModelFilterInterface;
     
-    public FilterButtonV2(FilterTableModelInterfaceV2 tableModelFilterInterface) {
+    public FilterButtonV2(FilterTableModelInterface tableModelFilterInterface) {
 
         setModelFilterInterface(tableModelFilterInterface);
         
@@ -29,7 +29,7 @@ public abstract class FilterButtonV2 extends JButton implements ActionListener {
         addActionListener(this);
     }
 
-    public final void setModelFilterInterface(FilterTableModelInterfaceV2 tableModelFilterInterface) {
+    public final void setModelFilterInterface(FilterTableModelInterface tableModelFilterInterface) {
         m_tableModelFilterInterface = tableModelFilterInterface;
     }
     

@@ -219,6 +219,7 @@ public class DataboxChildFeature extends AbstractDataBox {
 
     @Override
     public void setEntryData(Object data) {
+        m_panel.addSingleValue(data);
         m_masterQuantPeptideIon = (MasterQuantPeptideIon) data;
         dataChanged();
     }

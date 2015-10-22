@@ -2,6 +2,7 @@ package fr.proline.studio.rsmexplorer.gui.xic;
 
 import fr.proline.core.orm.lcms.dto.DFeature;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
+import fr.proline.studio.comparedata.ExtraDataType;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadLcMSTask;
 import fr.proline.studio.filter.ConvertValueInterface;
 import fr.proline.studio.filter.DoubleFilter;
@@ -830,7 +831,29 @@ public class FeatureTableModel extends LazyTableModel implements GlobalTableMode
         return this;
     }
     
+    @Override
+    public ArrayList<ExtraDataType> getExtraDataTypes() {
+        ArrayList<ExtraDataType> list = new ArrayList<>();
+        list.add(new ExtraDataType(DFeature.class, true));
+        list.add(new ExtraDataType(QuantChannelInfo.class, false));
+        registerSingleValuesAsExtraTypes(list);
+        return list;
+    }
 
+    @Override
+    public Object getValue(Class c) {
+        if (c.equals(QuantChannelInfo.class)) {
+            return m_quantChannelInfo;
+        }
+        return getSingleValue(c);
+    }
 
+    @Override
+    public Object getValue(Class c, int row) {
+        if (c.equals(DFeature.class)) {
+            return m_features.get(row);
+        }
+        return null;
+    }
 
 }

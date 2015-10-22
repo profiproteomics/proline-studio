@@ -3,6 +3,7 @@ package fr.proline.studio.rsmexplorer.gui.xic;
 import fr.proline.core.orm.msi.dto.DMasterQuantProteinSet;
 import fr.proline.core.orm.msi.dto.DQuantProteinSet;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
+import fr.proline.studio.comparedata.ExtraDataType;
 import fr.proline.studio.filter.Filter;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
@@ -10,6 +11,7 @@ import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.table.LazyData;
 import fr.proline.studio.table.LazyTable;
 import fr.proline.studio.table.LazyTableModel;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import javax.swing.table.TableCellRenderer;
@@ -32,9 +34,6 @@ public class ProteinQuantTableModel extends LazyTableModel implements  GlobalTab
     private DMasterQuantProteinSet m_quantProtein = null;
     private DQuantitationChannel[] m_quantChannels = null;
 
-    private boolean m_isFiltering = false;
-    private boolean m_filteringAsked = false;
-    
     private String m_modelName;
 
     private boolean  m_isXICMode = true;
@@ -259,6 +258,31 @@ public class ProteinQuantTableModel extends LazyTableModel implements  GlobalTab
     @Override
     public GlobalTableModelInterface getFrozzenModel() {
         return this;
+    }
+
+    @Override
+    public ArrayList<ExtraDataType> getExtraDataTypes() {
+        ArrayList<ExtraDataType> list = new ArrayList<>();
+        list.add(new ExtraDataType(DQuantitationChannel.class, true));
+        list.add(new ExtraDataType(DMasterQuantProteinSet.class, false));
+        registerSingleValuesAsExtraTypes(list);
+        return list;
+    }
+
+    @Override
+    public Object getValue(Class c) {
+        if (c.equals(DMasterQuantProteinSet.class)) {
+            return m_quantProtein;
+        }
+        return getSingleValue(c);
+    }
+
+    @Override
+    public Object getValue(Class c, int row) {
+        if (c.equals(DQuantitationChannel.class)) {
+            return m_quantChannels[row];
+        }
+        return null;
     }
     
 }

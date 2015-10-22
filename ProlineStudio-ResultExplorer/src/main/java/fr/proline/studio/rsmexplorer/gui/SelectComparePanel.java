@@ -192,6 +192,11 @@ public class SelectComparePanel extends JPanel implements DataBoxPanelInterface,
     }
            
     @Override
+    public void addSingleValue(Object v) {
+        getGlobalTableModelInterface().addSingleValue(v);
+    }
+    
+    @Override
     public GlobalTableModelInterface getGlobalTableModelInterface() {
         return m_result;
     }

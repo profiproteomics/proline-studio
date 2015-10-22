@@ -1,5 +1,6 @@
 package fr.proline.studio.rsmexplorer.gui.calc.graph;
 
+import fr.proline.studio.id.ProjectId;
 import fr.proline.studio.pattern.WindowBox;
 import fr.proline.studio.pattern.WindowBoxFactory;
 import fr.proline.studio.python.data.TableInfo;
@@ -91,7 +92,12 @@ public class DataGraphNode extends GraphNode {
     @Override
     public void askDisplay() {
         WindowBox windowBox = WindowBoxFactory.getModelWindowBox(m_tableInfo.getDataName(), m_tableInfo.getTypeName());
-        windowBox.setEntryData(-1, m_tableInfo.getModel());
+        
+        GlobalTableModelInterface model = m_tableInfo.getModel();
+        ProjectId projectId = (ProjectId) model.getSingleValue(ProjectId.class);
+        long id = (projectId!=null) ? projectId.getId() : -1l;
+        
+        windowBox.setEntryData(id, model);
         DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(windowBox);
         win.open();
         win.requestActive();

@@ -21,6 +21,11 @@ public class GraphicsPanel extends BaseGraphicsPanel implements DataBoxPanelInte
     }
     
     @Override
+    public void addSingleValue(Object v) {
+        // should not be called
+    }
+    
+    @Override
     public void setDataBox(AbstractDataBox dataBox) {
         m_dataBox = dataBox;
     }

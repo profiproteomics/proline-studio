@@ -1,5 +1,6 @@
 package fr.proline.studio.python.data;
 
+import fr.proline.studio.comparedata.ExtraDataType;
 import fr.proline.studio.filter.DoubleFilter;
 import fr.proline.studio.filter.Filter;
 import fr.proline.studio.graphics.PlotInformation;
@@ -8,6 +9,7 @@ import fr.proline.studio.table.ChildModelInterface;
 import fr.proline.studio.table.DecoratedTableModel;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.table.LazyData;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import javax.swing.event.TableModelEvent;
@@ -259,6 +261,21 @@ public class ExprTableModel extends DecoratedTableModel implements ChildModelInt
     @Override
     public GlobalTableModelInterface getFrozzenModel() {
         return this;
+    }
+
+    @Override
+    public ArrayList<ExtraDataType> getExtraDataTypes() {
+        return m_parentModel.getExtraDataTypes();
+    }
+
+    @Override
+    public Object getValue(Class c) {
+        return m_parentModel.getValue(c);
+    }
+
+    @Override
+    public Object getValue(Class c, int row) {
+        return m_parentModel.getValue(c, row);
     }
  
 }

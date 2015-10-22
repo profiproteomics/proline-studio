@@ -1,8 +1,9 @@
 package fr.proline.studio.table;
 
+import fr.proline.studio.comparedata.ExtraDataType;
 import fr.proline.studio.filter.Filter;
-import fr.proline.studio.filter.FilterTableModelInterfaceV2;
-import fr.proline.studio.filter.FilterTableModelV2;
+import fr.proline.studio.filter.FilterTableModelInterface;
+import fr.proline.studio.filter.FilterTableModel;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
 import java.util.ArrayList;
@@ -19,11 +20,11 @@ import org.jdesktop.swingx.JXTable;
  *
  * @author JM235353
  */
-public class CompoundTableModel extends AbstractTableModel implements GlobalTableModelInterface, TableModelListener, FilterTableModelInterfaceV2 {
+public class CompoundTableModel extends AbstractTableModel implements GlobalTableModelInterface, TableModelListener, FilterTableModelInterface {
     
     private GlobalTableModelInterface m_baseModel = null;
     private GlobalTableModelInterface m_lastModel = null;
-    private FilterTableModelV2 m_filterModel = null;
+    private FilterTableModel m_filterModel = null;
 
     public CompoundTableModel(GlobalTableModelInterface baseModel, boolean filterCapability) {
         setBaseModel(baseModel);
@@ -117,7 +118,7 @@ public class CompoundTableModel extends AbstractTableModel implements GlobalTabl
     @Override
     public void initFilters() {
         if (m_filterModel == null) {
-            m_filterModel = new FilterTableModelV2(m_lastModel);
+            m_filterModel = new FilterTableModel(m_lastModel);
             m_lastModel.removeTableModelListener(this);
             m_lastModel = m_filterModel;
             m_filterModel.addTableModelListener(this);
@@ -366,12 +367,12 @@ public class CompoundTableModel extends AbstractTableModel implements GlobalTabl
         
         ArrayList<GlobalTableModelInterface> modelList = new ArrayList<>();
         GlobalTableModelInterface curModel = m_lastModel;
-        FilterTableModelV2 filterModel = null;
+        FilterTableModel filterModel = null;
         while (curModel != null) {
             GlobalTableModelInterface frozzenModel = curModel.getFrozzenModel();
             modelList.add(0, frozzenModel);
-            if (frozzenModel instanceof FilterTableModelV2) {
-                filterModel = (FilterTableModelV2) frozzenModel;
+            if (frozzenModel instanceof FilterTableModel) {
+                filterModel = (FilterTableModel) frozzenModel;
             }
             if (curModel instanceof ChildModelInterface) {
                 curModel = ((ChildModelInterface) curModel).getParentModel();
@@ -403,6 +404,32 @@ public class CompoundTableModel extends AbstractTableModel implements GlobalTabl
         copyModel.m_lastModel.addTableModelListener(this);
         
         return copyModel;
+    }
+    
+    @Override
+    public ArrayList<ExtraDataType> getExtraDataTypes() {
+        return m_lastModel.getExtraDataTypes();
+    }
+
+    @Override
+    public Object getValue(Class c) {
+        return m_lastModel.getValue(c);
+    }
+
+    @Override
+    public Object getValue(Class c, int rowIndex) {
+
+        return m_lastModel.getValue(c, rowIndex);
+    }
+    
+    @Override
+    public void addSingleValue(Object v) {
+        m_lastModel.addSingleValue(v);
+    }
+
+    @Override
+    public Object getSingleValue(Class c) {
+        return m_lastModel.getSingleValue(c);
     }
 
 }

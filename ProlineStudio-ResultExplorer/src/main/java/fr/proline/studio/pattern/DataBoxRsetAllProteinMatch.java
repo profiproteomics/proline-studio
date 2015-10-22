@@ -94,7 +94,7 @@ public class DataBoxRsetAllProteinMatch extends AbstractDataBox {
 
         // ask asynchronous loading of data
 
-        DatabaseProteinMatchesTask task = new DatabaseProteinMatchesTask(callback,getProjectId(), _rset);
+        DatabaseProteinMatchesTask task = new DatabaseProteinMatchesTask(callback, getProjectId(), _rset);
         Long taskId = task.getId();
         if (m_previousTaskId != null) {
             // old task is suppressed if it has not been already done
@@ -128,7 +128,11 @@ public class DataBoxRsetAllProteinMatch extends AbstractDataBox {
     
         @Override
     public void setEntryData(Object data) {
+        
+        m_panel.addSingleValue(data);
+        
         m_rset = (ResultSet) data;
+        
         dataChanged();
     }
     

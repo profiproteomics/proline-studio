@@ -3,6 +3,7 @@ package fr.proline.studio.rsmexplorer.gui.xic;
 import fr.proline.core.orm.msi.MasterQuantPeptideIon;
 import fr.proline.core.orm.msi.dto.DQuantPeptideIon;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
+import fr.proline.studio.comparedata.ExtraDataType;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadXicMasterQuantTask;
 import fr.proline.studio.filter.ConvertValueInterface;
 import fr.proline.studio.filter.Filter;
@@ -63,8 +64,6 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements GlobalT
     private int m_quantChannelNumber;
     private boolean m_isXICMode = true;
 
-    private boolean m_isFiltering = false;
-    private boolean m_filteringAsked = false;
     
     private String m_modelName;
 
@@ -337,7 +336,6 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements GlobalT
         this.m_quantPeptideIons = peptideIons;
         this.m_quantChannels = quantChannels;
         this.m_quantChannelNumber = quantChannels.length;
-        m_isFiltering = false;
         
         if (structureChanged) {
             fireTableStructureChanged();
@@ -800,6 +798,27 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements GlobalT
     @Override
     public GlobalTableModelInterface getFrozzenModel() {
         return this;
+    }
+
+    @Override
+    public ArrayList<ExtraDataType> getExtraDataTypes() {
+        ArrayList<ExtraDataType> list = new ArrayList<>();
+        list.add(new ExtraDataType(MasterQuantPeptideIon.class, true));
+        registerSingleValuesAsExtraTypes(list);
+        return list;
+    }
+
+    @Override
+    public Object getValue(Class c) {
+        return getSingleValue(c);
+    }
+
+    @Override
+    public Object getValue(Class c, int row) {
+        if (c.equals(MasterQuantPeptideIon.class)) {
+            return m_quantPeptideIons.get(row);
+        }
+        return null;
     }
 
 }

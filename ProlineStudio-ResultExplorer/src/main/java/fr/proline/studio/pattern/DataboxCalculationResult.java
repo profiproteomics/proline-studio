@@ -1,10 +1,12 @@
 package fr.proline.studio.pattern;
 
 import fr.proline.studio.comparedata.CompareDataInterface;
+import fr.proline.studio.comparedata.ExtraDataType;
 import fr.proline.studio.comparedata.GlobalTabelModelProviderInterface;
 import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.rsmexplorer.gui.GenericPanel;
 import fr.proline.studio.table.GlobalTableModelInterface;
+import java.util.ArrayList;
 
 /**
  *
@@ -50,6 +52,19 @@ public class DataboxCalculationResult extends AbstractDataBox {
     public void setEntryData(Object data) {
         if (data instanceof GlobalTableModelInterface) {
             m_entryModel = (GlobalTableModelInterface) data;
+            
+            
+             ArrayList<ExtraDataType> extraDataTypeList = m_entryModel.getExtraDataTypes();
+             if (extraDataTypeList != null) {
+                 for(ExtraDataType extraDataType : extraDataTypeList) {
+                     Class c = extraDataType.getTypeClass();
+
+                     GroupParameter outParameter = new GroupParameter();
+                     outParameter.addParameter(c, false);
+                     registerOutParameter(outParameter);
+                 }
+             }
+            
         }
          dataChanged();
     }
@@ -74,6 +89,14 @@ public class DataboxCalculationResult extends AbstractDataBox {
             if (parameterType.equals(CrossSelectionInterface.class)) {
                 return ((GlobalTabelModelProviderInterface)m_panel).getCrossSelectionInterface();
             }
+            ArrayList<ExtraDataType> extraDataTypeList = m_entryModel.getExtraDataTypes();
+             if (extraDataTypeList != null) {
+                 for (ExtraDataType extraDataType : extraDataTypeList) {
+                     if (extraDataType.getTypeClass().equals(parameterType)) {
+                         return ((GenericPanel) m_panel).getValue(parameterType, extraDataType.isList());
+                     }
+                 }
+             }
         }
         return super.getData(getArray, parameterType);
     }

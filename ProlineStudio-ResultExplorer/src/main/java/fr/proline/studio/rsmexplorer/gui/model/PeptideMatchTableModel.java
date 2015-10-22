@@ -8,6 +8,7 @@ import fr.proline.core.orm.msi.PeptideReadablePtmString;
 import fr.proline.core.orm.msi.SequenceMatch;
 import fr.proline.core.orm.msi.dto.DMsQuery;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
+import fr.proline.studio.comparedata.ExtraDataType;
 import fr.proline.studio.dam.tasks.DatabaseLoadPeptideMatchTask;
 import fr.proline.studio.filter.BooleanFilter;
 import fr.proline.studio.filter.ConvertValueInterface;
@@ -926,6 +927,28 @@ public class PeptideMatchTableModel extends LazyTableModel implements GlobalTabl
     @Override
     public GlobalTableModelInterface getFrozzenModel() {
         return this;
+    }
+    
+
+    @Override
+    public ArrayList<ExtraDataType> getExtraDataTypes() {
+        ArrayList<ExtraDataType> list = new ArrayList<>();
+        list.add(new ExtraDataType(DPeptideMatch.class, true));
+        registerSingleValuesAsExtraTypes(list);
+        return list;
+    }
+
+    @Override
+    public Object getValue(Class c) {
+        return getSingleValue(c);
+    }
+
+    @Override
+    public Object getValue(Class c, int row) {
+        if (c.equals(DPeptideMatch.class)) {
+            return m_peptideMatches[row];
+        }
+        return null;
     }
 
 }

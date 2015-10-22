@@ -5,6 +5,7 @@ import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseProteinsAndPeptidesTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dam.tasks.data.AdjacencyMatrixData;
+import fr.proline.studio.id.ProjectId;
 import fr.proline.studio.rsmexplorer.adjacencymatrix.visualize.Component;
 import fr.proline.studio.rsmexplorer.adjacencymatrix.visualize.DrawVisualization;
 import fr.proline.studio.rsmexplorer.adjacencymatrix.visualize.MatrixSelectionPanel;
@@ -79,6 +80,8 @@ public class DataBoxAdjacencyMatrixChoice extends AbstractDataBox {
     
     @Override
     public void setEntryData(Object data) {
+        m_panel.addSingleValue(data);
+        
         if (data instanceof ResultSummary) {
             m_rsm = (ResultSummary) data;
             dataChanged();

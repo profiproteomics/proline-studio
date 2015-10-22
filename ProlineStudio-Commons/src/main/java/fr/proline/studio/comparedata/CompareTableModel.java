@@ -8,6 +8,8 @@ import fr.proline.studio.graphics.PlotType;
 import fr.proline.studio.table.DecoratedTableModel;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.table.LazyData;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import javax.swing.table.TableCellRenderer;
@@ -225,6 +227,39 @@ public class CompareTableModel extends DecoratedTableModel implements GlobalTabl
         return this;
     }
 
+    @Override
+    public ArrayList<ExtraDataType> getExtraDataTypes() {
+        if (m_dataInterface == null) {
+            return null;
+        }
+        return m_dataInterface.getExtraDataTypes();
+    }
+
+    @Override
+    public Object getValue(Class c) {
+        if (m_dataInterface == null) {
+            return null;
+        }
+        return m_dataInterface.getValue(c);
+    }
+
+    @Override
+    public Object getValue(Class c, int row) {
+        if (m_dataInterface == null) {
+            return null;
+        }
+        return m_dataInterface.getValue(c, row);
+    }
+
+    @Override
+    public void addSingleValue(Object v) {
+        return; // should not be called
+    }
+    
+    @Override
+    public Object getSingleValue(Class c) {
+        return null; // should not be called
+    }
 
 
 

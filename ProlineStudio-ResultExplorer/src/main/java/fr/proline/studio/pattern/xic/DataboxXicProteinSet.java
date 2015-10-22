@@ -174,6 +174,7 @@ public class DataboxXicProteinSet extends AbstractDataBox {
 
     @Override
     public void setEntryData(Object data) {
+        m_panel.addSingleValue(data);
         m_dataset = (DDataset) data;
         dataChanged();
     }

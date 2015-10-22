@@ -2,6 +2,8 @@ package fr.proline.studio.rsmexplorer.gui.xic;
 
 import fr.proline.core.orm.lcms.Feature;
 import fr.proline.core.orm.lcms.Peakel;
+import fr.proline.core.orm.lcms.dto.DFeature;
+import fr.proline.studio.comparedata.ExtraDataType;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadLcMSTask;
 import fr.proline.studio.filter.DoubleFilter;
 import fr.proline.studio.filter.Filter;
@@ -501,6 +503,28 @@ public class PeakelTableModel extends LazyTableModel implements GlobalTableModel
         return this;
     }
 
+    @Override
+    public ArrayList<ExtraDataType> getExtraDataTypes() {
+        ArrayList<ExtraDataType> list = new ArrayList<>();
+        list.add(new ExtraDataType(Peakel.class, true));
+        list.add(new ExtraDataType(Feature.class, false));
+        registerSingleValuesAsExtraTypes(list);
+        return list;
+    }
 
+    @Override
+    public Object getValue(Class c) {
+        if (c.equals(Feature.class)) {
+            return m_feature;
+        }
+        return getSingleValue(c);
+    }
 
+    @Override
+    public Object getValue(Class c, int row) {
+        if (c.equals(Peakel.class)) {
+            return m_peakels.get(row);
+        }
+        return null;
+    }
 }

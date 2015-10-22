@@ -1,13 +1,9 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package fr.proline.mzscope.ui.model;
 
 import fr.proline.mzscope.model.ExtractionResult;
 import fr.proline.mzscope.model.ExtractionResult.Status;
 import fr.proline.mzscope.ui.StatusRenderer;
+import fr.proline.studio.comparedata.ExtraDataType;
 import fr.proline.studio.filter.Filter;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
@@ -32,6 +28,8 @@ public class ExtractionResultsTableModel extends DecoratedTableModel implements 
     final private static Logger logger = LoggerFactory.getLogger(ExtractionResultsTableModel.class);
 
     private final HashMap<Integer, TableCellRenderer> m_rendererMap = new HashMap();
+
+
 
     public enum Column {
 
@@ -62,16 +60,16 @@ public class ExtractionResultsTableModel extends DecoratedTableModel implements 
 
     }
 
-    private List<ExtractionResult> extractionResults = new ArrayList<>(0);
+    private List<ExtractionResult> m_extractionResults = new ArrayList<>(0);
 
     public void setExtractions(List<ExtractionResult> extractionResults) {
-        this.extractionResults = extractionResults;
+        this.m_extractionResults = extractionResults;
         fireTableDataChanged();
     }
 
     @Override
     public int getRowCount() {
-        return extractionResults.size();
+        return m_extractionResults.size();
     }
 
     @Override
@@ -98,9 +96,9 @@ public class ExtractionResultsTableModel extends DecoratedTableModel implements 
     public Object getValueAt(int rowIndex, int columnIndex) {
         switch (Column.values()[columnIndex]) {
             case MZ:
-                return extractionResults.get(rowIndex).getMz();
+                return m_extractionResults.get(rowIndex).getMz();
             case STATUS:
-                return extractionResults.get(rowIndex).getStatus();
+                return m_extractionResults.get(rowIndex).getStatus();
         }
         return null;
     }
@@ -250,6 +248,27 @@ public class ExtractionResultsTableModel extends DecoratedTableModel implements 
     @Override
     public String getExportColumnName(int col) {
         return Column.values()[col].getName();
+    }
+    
+    @Override
+    public ArrayList<ExtraDataType> getExtraDataTypes() {
+        ArrayList<ExtraDataType> list = new ArrayList<>();
+        list.add(new ExtraDataType(ExtractionResult.class, true));
+        registerSingleValuesAsExtraTypes(list);
+        return list;
+    }
+
+    @Override
+    public Object getValue(Class c) {
+        return null;
+    }
+
+    @Override
+    public Object getValue(Class c, int row) {
+        if (c.equals(ExtractionResult.class)) {
+            return m_extractionResults.get(row);
+        }
+        return null;
     }
 
 }

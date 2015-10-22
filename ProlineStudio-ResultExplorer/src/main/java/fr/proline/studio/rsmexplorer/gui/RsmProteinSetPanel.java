@@ -144,6 +144,11 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
     }
     
     @Override
+    public void addSingleValue(Object v) {
+        getGlobalTableModelInterface().addSingleValue(v);
+    }
+    
+    @Override
     public GlobalTableModelInterface getGlobalTableModelInterface() {
         return (GlobalTableModelInterface) m_proteinSetTable.getModel();
     }

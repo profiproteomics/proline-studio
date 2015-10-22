@@ -5,6 +5,7 @@ import fr.proline.core.orm.msi.PeptideReadablePtmString;
 import fr.proline.core.orm.msi.dto.DMsQuery;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
+import fr.proline.studio.comparedata.ExtraDataType;
 import fr.proline.studio.filter.ConvertValueInterface;
 import fr.proline.studio.filter.DoubleFilter;
 import fr.proline.studio.filter.Filter;
@@ -728,5 +729,29 @@ public class XicPeptideMatchTableModel extends LazyTableModel implements GlobalT
         return this;
     }
 
+    @Override
+    public ArrayList<ExtraDataType> getExtraDataTypes() {
+        ArrayList<ExtraDataType> list = new ArrayList<>();
+        list.add(new ExtraDataType(DPeptideMatch.class, true));
+        list.add(new ExtraDataType(QuantChannelInfo.class, false));
+        registerSingleValuesAsExtraTypes(list);
+        return list;
+    }
+
+    @Override
+    public Object getValue(Class c) {
+        if (c.equals(QuantChannelInfo.class)) {
+            return m_quantChannelInfo;
+        }
+        return getSingleValue(c);
+    }
+
+    @Override
+    public Object getValue(Class c, int row) {
+        if (c.equals(DPeptideMatch.class)) {
+            return m_peptideMatchList.get(row);
+        }
+        return null;
+    }
     
 }

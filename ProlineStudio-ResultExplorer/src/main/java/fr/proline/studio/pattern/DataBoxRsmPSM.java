@@ -125,8 +125,12 @@ public class DataBoxRsmPSM extends AbstractDataBox {
  
     @Override
     public void setEntryData(Object data) {
+        
+        m_panel.addSingleValue(data);
+        
         if (data instanceof ResultSummary) {
             m_rsm = (ResultSummary) data;
+            m_panel.addSingleValue(data);
             dataChanged();
         }
     }

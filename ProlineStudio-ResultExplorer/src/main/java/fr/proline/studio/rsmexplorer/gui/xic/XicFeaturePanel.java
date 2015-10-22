@@ -327,6 +327,11 @@ public class XicFeaturePanel  extends HourglassPanel implements DataBoxPanelInte
     }
     
     @Override
+    public void addSingleValue(Object v) {
+        getGlobalTableModelInterface().addSingleValue(v);
+    }
+    
+    @Override
     public GlobalTableModelInterface getGlobalTableModelInterface() {
         return (GlobalTableModelInterface) m_featureTable.getModel();
     }

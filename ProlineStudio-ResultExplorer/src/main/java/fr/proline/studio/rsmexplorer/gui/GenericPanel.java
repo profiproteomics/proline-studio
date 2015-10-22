@@ -1,6 +1,7 @@
 package fr.proline.studio.rsmexplorer.gui;
 
 import fr.proline.studio.comparedata.CompareDataInterface;
+import fr.proline.studio.comparedata.ExtraDataType;
 import fr.proline.studio.comparedata.GlobalTabelModelProviderInterface;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.export.ExportModelInterface;
@@ -23,10 +24,12 @@ import java.awt.GridBagLayout;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
+import java.util.ArrayList;
 import javax.swing.JLayeredPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JToolBar;
+import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.TableModelListener;
 import org.jdesktop.swingx.JXTable;
 
@@ -210,6 +213,17 @@ public class GenericPanel extends JPanel implements DataBoxPanelInterface, Globa
     public void setLoaded(int id) {}
 
     @Override
+    public void addSingleValue(Object v) {
+        GlobalTableModelInterface model = getGlobalTableModelInterface();
+        if (model != null) {
+            getGlobalTableModelInterface().addSingleValue(v);
+        } else {
+            //JPM.TODO
+            System.err.println("getGlobalTableModelInterface null");
+        }
+    }
+    
+    @Override
     public GlobalTableModelInterface getGlobalTableModelInterface() {
         return ((CompoundTableModel) m_dataTable.getModel()).getBaseModel();
     }
@@ -224,6 +238,9 @@ public class GenericPanel extends JPanel implements DataBoxPanelInterface, Globa
         return m_dataTable;
     }
 
+    public Object getValue(Class c, boolean isList) {
+        return m_dataTable.getValue(c, isList);
+    }
     
     private class DataTable extends LazyTable implements ExportModelInterface {
 
@@ -271,5 +288,43 @@ public class GenericPanel extends JPanel implements DataBoxPanelInterface, Globa
             return ((ExportModelInterface) getModel()).getExportColumnName(col);
         }
 
+        @Override
+        public void valueChanged(ListSelectionEvent e) {
+
+            super.valueChanged(e);
+
+            CompoundTableModel compoundTableModel = ((CompoundTableModel) getModel());
+            ArrayList<ExtraDataType> extraDataTypeList = compoundTableModel.getExtraDataTypes();
+             if (extraDataTypeList != null) {
+                 for (ExtraDataType extraDataType : extraDataTypeList) {
+                     if (extraDataType.isList()) {
+                         m_dataBox.propagateDataChanged(extraDataType.getTypeClass());
+                     }
+                 }
+             }
+        }
+        
+         public Object getValue(Class c, boolean isList) {
+             CompoundTableModel compoundTableModel = ((CompoundTableModel) getModel());
+             if (isList) {
+                 
+                 int selectedIndex = getSelectionModel().getMinSelectionIndex();
+
+                 if (selectedIndex == -1) {
+                     return null;
+                 }
+        
+                int indexInModelSelected = convertRowIndexToModel(selectedIndex);
+                indexInModelSelected = compoundTableModel.convertCompoundRowToBaseModelRow(indexInModelSelected);
+        
+        
+                return ((GlobalTableModelInterface) compoundTableModel.getBaseModel()).getValue(c, indexInModelSelected);
+
+             } else {
+                 return compoundTableModel.getValue(c);
+             }
+             
+         }
+        
     }
 }

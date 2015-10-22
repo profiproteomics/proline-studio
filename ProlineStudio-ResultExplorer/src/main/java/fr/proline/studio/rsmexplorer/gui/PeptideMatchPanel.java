@@ -87,6 +87,11 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
     }
     
     @Override
+    public void addSingleValue(Object v) {
+        getGlobalTableModelInterface().addSingleValue(v);
+    }
+
+    @Override
     public GlobalTableModelInterface getGlobalTableModelInterface() {
         return (GlobalTableModelInterface) m_peptideMatchTable.getModel();
     }

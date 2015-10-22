@@ -200,5 +200,77 @@ public abstract class AbstractJoinDataModel extends AbstractTableModel implement
     public int uniqueId2Row(long id) {
         return (int) id;
     }
+    
+    
+    @Override
+    public ArrayList<ExtraDataType> getExtraDataTypes() {
+        ArrayList<ExtraDataType> list = null;
+        
+        ArrayList<ExtraDataType> list1 = m_data1.getExtraDataTypes();
+        if (list1 != null) {
+            list = new ArrayList<>(list1);
+        }
+        
+        ArrayList<ExtraDataType> list2 = m_data1.getExtraDataTypes();
+        if (list2 != null) {
+            if (list == null) {
+                list = new ArrayList<>(list2);
+            } else {
+                list.addAll(list2);
+            }
+        }
+
+        return list;
+        
+    }
+
+    @Override
+    public Object getValue(Class c) {
+        if (!joinPossible()) {
+            return null;
+        }
+
+        Object o = m_data1.getValue(c);
+        if (o != null) {
+            return o;
+        }
+        
+        o = m_data2.getValue(c);
+        if (o != null) {
+            return o;
+        }
+        
+        return null;
+    }
+
+    @Override
+    public Object getValue(Class c, int rowIndex) {
+        if (!joinPossible()) {
+            return null;
+        }
+
+        Object key = m_allKeys.get(rowIndex);
+        
+        Integer row = m_keyToRow1.get(key);
+        if (row != null) {
+            return m_data1.getValue(c, rowIndex);
+        }
+        row = m_keyToRow2.get(key);
+        if (row != null) {
+            return m_data2.getValue(c, rowIndex);
+        }
+        
+        return null;
+    }
+    
+    @Override
+    public void addSingleValue(Object v) {
+        // should not be called
+    }
+
+    @Override
+    public Object getSingleValue(Class c) {
+        return null; // should not be called
+    }
 
 }

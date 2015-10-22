@@ -448,6 +448,11 @@ public class MatrixPanel extends HourglassPanel implements DataBoxPanelInterface
     public AbstractDataBox getDataBox() {
         return m_dataBox;
     }
+    
+    @Override
+    public void addSingleValue(Object v) {
+        // not used for the moment JPM.TODO ?
+    }
 
     @Override
     public ActionListener getRemoveAction(SplittedPanelContainer splittedPanel) {

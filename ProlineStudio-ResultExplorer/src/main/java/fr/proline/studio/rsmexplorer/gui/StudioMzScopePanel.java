@@ -183,6 +183,11 @@ public class StudioMzScopePanel extends HourglassPanel implements DataBoxPanelIn
     public AbstractDataBox getDataBox() {
         return m_dataBox;
     }
+    
+    @Override
+    public void addSingleValue(Object v) {
+        // should not be used
+    }
 
     @Override
     public ActionListener getRemoveAction(SplittedPanelContainer splittedPanel) {

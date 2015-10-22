@@ -5,6 +5,7 @@ import fr.proline.studio.table.LazyTableModel;
 import fr.proline.studio.table.LazyTable;
 import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.core.orm.msi.dto.DProteinSet;
+import fr.proline.studio.comparedata.ExtraDataType;
 import fr.proline.studio.dam.tasks.DatabaseProteinSetsTask;
 import fr.proline.studio.filter.*;
 import fr.proline.studio.graphics.PlotInformation;
@@ -639,6 +640,27 @@ public class ProteinSetTableModel extends LazyTableModel implements GlobalTableM
 
     @Override
     public PlotInformation getPlotInformation() {
+        return null;
+    }
+    
+    @Override
+    public ArrayList<ExtraDataType> getExtraDataTypes() {
+        ArrayList<ExtraDataType> list = new ArrayList<>();
+        list.add(new ExtraDataType(DProteinSet.class, true));
+        registerSingleValuesAsExtraTypes(list);
+        return list;
+    }
+
+    @Override
+    public Object getValue(Class c) {
+        return getSingleValue(c);
+    }
+
+    @Override
+    public Object getValue(Class c, int row) {
+        if (c.equals(DProteinSet.class)) {
+            return m_proteinSets[row];
+        }
         return null;
     }
     

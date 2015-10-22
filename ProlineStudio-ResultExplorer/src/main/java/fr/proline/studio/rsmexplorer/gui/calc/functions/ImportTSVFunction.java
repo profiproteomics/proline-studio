@@ -3,6 +3,7 @@ package fr.proline.studio.rsmexplorer.gui.calc.functions;
 
 
 import au.com.bytecode.opencsv.CSVReader;
+import fr.proline.studio.comparedata.ExtraDataType;
 import fr.proline.studio.filter.DoubleFilter;
 import fr.proline.studio.filter.Filter;
 import fr.proline.studio.filter.LongFilter;
@@ -478,6 +479,21 @@ public class ImportTSVFunction extends AbstractFunction {
         @Override
         public int getInfoColumn() {
             return 0;
+        }
+
+        @Override
+        public ArrayList<ExtraDataType> getExtraDataTypes() {
+            return null;
+        }
+
+        @Override
+        public Object getValue(Class c) {
+            return getSingleValue(c);
+        }
+
+        @Override
+        public Object getValue(Class c, int row) {
+            return null;
         }
         
     }

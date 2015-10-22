@@ -125,6 +125,11 @@ public class RsetAllPanel extends HourglassPanel implements DataBoxPanelInterfac
         return m_dataBox;
     }
     
+    @Override
+    public void addSingleValue(Object v) {
+        ((DecoratedTableModel) m_resultSetTable.getModel()).addSingleValue(v);
+    }
+    
     private class ResultSetTable extends DecoratedMarkerTable {
 
         

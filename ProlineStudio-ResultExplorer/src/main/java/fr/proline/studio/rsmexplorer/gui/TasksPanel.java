@@ -1,5 +1,6 @@
 package fr.proline.studio.rsmexplorer.gui;
 
+import fr.proline.studio.comparedata.ExtraDataType;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import fr.proline.studio.dam.taskinfo.TaskInfoManager;
 import fr.proline.studio.filter.ConvertValueInterface;
@@ -235,6 +236,11 @@ public class TasksPanel extends HourglassPanel implements DataBoxPanelInterface 
     @Override
     public AbstractDataBox getDataBox() {
         return m_dataBox;
+    }
+    
+    @Override
+    public void addSingleValue(Object v) {
+        // should not be used
     }
 
     @Override
@@ -595,6 +601,27 @@ public class TasksPanel extends HourglassPanel implements DataBoxPanelInterface 
         @Override
         public GlobalTableModelInterface getFrozzenModel() {
             return this;
+        }
+
+        @Override
+        public ArrayList<ExtraDataType> getExtraDataTypes() {
+            ArrayList<ExtraDataType> list = new ArrayList<>();
+            list.add(new ExtraDataType(TaskInfo.class, true));
+            registerSingleValuesAsExtraTypes(list);
+            return list;
+        }
+
+        @Override
+        public Object getValue(Class c) {
+            return getSingleValue(c);
+        }
+
+        @Override
+        public Object getValue(Class c, int row) {
+            if (c.equals(TaskInfo.class)) {
+                return m_taskInfoList.get(row);
+            }
+            return null;
         }
 
     }

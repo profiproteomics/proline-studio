@@ -1,5 +1,6 @@
 package fr.proline.studio.rsmexplorer.gui.calc.functions;
 
+import fr.proline.studio.id.ProjectId;
 import fr.proline.studio.parameter.ParameterError;
 import fr.proline.studio.parameter.ParameterList;
 import fr.proline.studio.pattern.WindowBox;
@@ -75,6 +76,7 @@ public abstract class AbstractFunction implements CheckParameterInterface {
     
     public abstract void process(AbstractGraphObject[] graphObjects, FunctionGraphNode functionGraphNode, boolean display);
     
+    
     public GlobalTableModelInterface getGlobalTableModelInterface() {
         return m_globalTableModelInterface;
     }
@@ -89,7 +91,9 @@ public abstract class AbstractFunction implements CheckParameterInterface {
         
     protected void display(String dataName, String functionName) {
         WindowBox windowBox = WindowBoxFactory.getModelWindowBox(dataName, functionName);
-        windowBox.setEntryData(-1, m_globalTableModelInterface);
+        ProjectId projectId = (ProjectId) m_globalTableModelInterface.getSingleValue(ProjectId.class);
+        long id = (projectId!=null) ? projectId.getId() : -1l;
+        windowBox.setEntryData(id, m_globalTableModelInterface);
         DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(windowBox);
         win.open();
         win.requestActive();

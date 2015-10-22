@@ -83,11 +83,10 @@
                     <publicPackages>
                         <publicPackage>fr.proline.repository</publicPackage>
                         <publicPackage>fr.proline.studio.dam.*</publicPackage>
+                        <publicPackage>fr.proline.studio.id</publicPackage>
                         <publicPackage>fr.proline.studio.repositorymgr</publicPackage>
                         <publicPackage>fr.proline.studio.repositorymgr.action</publicPackage>
                         <publicPackage>org.openide.awt</publicPackage>
-                        <publicPackage>org.openide.util.*</publicPackage>
-                        <publicPackage>javax.persistence.*</publicPackage>
                     </publicPackages>
                 </configuration>
             </plugin>

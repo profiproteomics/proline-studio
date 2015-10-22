@@ -366,6 +366,11 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
     }
     
     @Override
+    public void addSingleValue(Object v) {
+        getGlobalTableModelInterface().addSingleValue(v);
+    }
+    
+    @Override
     public GlobalTableModelInterface getGlobalTableModelInterface() {
         return (GlobalTableModelInterface) m_quantPeptideTable.getModel();
     }

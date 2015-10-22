@@ -148,6 +148,9 @@ public class DataBoxRsmProteinSetOfPeptides extends AbstractDataBox {
  
     @Override
     public void setEntryData(Object data) {
+        
+        m_panel.addSingleValue(data);
+        
         m_rsm = (ResultSummary) data;
         dataChanged();
     }

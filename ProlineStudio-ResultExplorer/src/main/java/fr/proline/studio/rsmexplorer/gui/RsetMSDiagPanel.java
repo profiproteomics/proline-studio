@@ -34,7 +34,6 @@ import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.progress.ProgressInterface;
 import fr.proline.studio.rsmexplorer.gui.MSDiagTable_GenericTable.*;
-import fr.proline.studio.table.CompoundTableModel;
 import fr.proline.studio.utils.IconManager;
 
 
@@ -331,9 +330,14 @@ public class RsetMSDiagPanel extends HourglassPanel implements DataBoxPanelInter
 
 	
     @Override
-	public AbstractDataBox getDataBox() {
-	       return m_dataBox;
-	}
+    public AbstractDataBox getDataBox() {
+        return m_dataBox;
+    }
+
+    @Override
+    public void addSingleValue(Object v) {
+        // should not be called
+    }
 	   
     @Override
     public ActionListener getSaveAction(SplittedPanelContainer splittedPanel) {

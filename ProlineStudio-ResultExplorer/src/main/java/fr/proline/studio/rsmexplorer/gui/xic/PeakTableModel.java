@@ -1,9 +1,11 @@
 package fr.proline.studio.rsmexplorer.gui.xic;
 
 import fr.proline.core.orm.lcms.Feature;
+import fr.proline.core.orm.lcms.MapTime;
 import fr.proline.core.orm.lcms.Peakel;
 import fr.proline.core.orm.lcms.Peak;
 import fr.proline.studio.comparedata.CompareDataInterface;
+import fr.proline.studio.comparedata.ExtraDataType;
 import fr.proline.studio.filter.DoubleFilter;
 import fr.proline.studio.filter.Filter;
 import fr.proline.studio.graphics.PlotInformation;
@@ -47,8 +49,6 @@ public class PeakTableModel extends LazyTableModel implements GlobalTableModelIn
     private Integer m_isotopeIndex = null;
 
 
-    private boolean m_isFiltering = false;
-    private boolean m_filteringAsked = false;
     
     private String m_modelName;
 
@@ -137,13 +137,12 @@ public class PeakTableModel extends LazyTableModel implements GlobalTableModelIn
     }
 
     public void setData(Long taskId, Feature feature, Peakel peakel, Integer isotopeIndex, List<Peak> peaks, Color color, String title) {
-        this.m_peaks = peaks;
-        this.m_feature = feature;
-        this.m_peakel = peakel;
-        this.m_isotopeIndex = isotopeIndex ;
-        this.m_color = color;
-        this.m_title = title;
-        m_isFiltering = false;
+        m_peaks = peaks;
+        m_feature = feature;
+        m_peakel = peakel;
+        m_isotopeIndex = isotopeIndex ;
+        m_color = color;
+        m_title = title;
 
         m_taskId = taskId;
 
@@ -361,6 +360,25 @@ public class PeakTableModel extends LazyTableModel implements GlobalTableModelIn
         return this;
     }
 
+    @Override
+    public ArrayList<ExtraDataType> getExtraDataTypes() {
+        ArrayList<ExtraDataType> list = new ArrayList<>();
+        list.add(new ExtraDataType(Peak.class, true));
+        registerSingleValuesAsExtraTypes(list);
+        return list;
+    }
 
+    @Override
+    public Object getValue(Class c) {
+        return getSingleValue(c);
+    }
+
+    @Override
+    public Object getValue(Class c, int row) {
+        if (c.equals(Peak.class)) {
+            return m_peaks.get(row);
+        }
+        return null;
+    }
 
 }

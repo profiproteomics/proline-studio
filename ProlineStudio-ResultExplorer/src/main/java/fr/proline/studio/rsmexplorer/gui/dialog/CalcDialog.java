@@ -2,6 +2,7 @@ package fr.proline.studio.rsmexplorer.gui.dialog;
 
 
 
+import fr.proline.studio.id.ProjectId;
 import fr.proline.studio.pattern.WindowBox;
 import fr.proline.studio.pattern.WindowBoxFactory;
 import fr.proline.studio.python.data.ColData;
@@ -17,6 +18,7 @@ import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
 import fr.proline.studio.rsmexplorer.gui.calc.DataTree;
 import fr.proline.studio.rsmexplorer.gui.renderer.DefaultRightAlignRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.DoubleRenderer;
+import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.table.TableDefaultRendererManager;
 import fr.proline.studio.utils.IconManager;
 import java.awt.Color;
@@ -241,7 +243,12 @@ public class CalcDialog extends JDialog {
                         t.addColumn(col, new DoubleRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)),4,true,true));
                     } else if (o instanceof Table) {
                         WindowBox windowBox = WindowBoxFactory.getModelWindowBox(null, resultVariable.getName());
-                        windowBox.setEntryData(-1, ((Table)o).getModel() );
+                        
+                        GlobalTableModelInterface model = ((Table)o).getModel();
+                        ProjectId projectId = (ProjectId) model.getSingleValue(ProjectId.class);
+                        long id = (projectId!=null) ? projectId.getId() : -1l;
+                        
+                        windowBox.setEntryData(id, model );
                         DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(windowBox);
                         win.open();
                         win.requestActive();

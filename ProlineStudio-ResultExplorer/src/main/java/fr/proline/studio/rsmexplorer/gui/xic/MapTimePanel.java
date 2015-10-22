@@ -160,6 +160,12 @@ public class MapTimePanel extends HourglassPanel implements DataBoxPanelInterfac
     public CrossSelectionInterface getCrossSelectionInterface() {
         return m_timeTable;
     }
+    
+    @Override
+    public void addSingleValue(Object v) {
+        getGlobalTableModelInterface().addSingleValue(v);
+    }
+    
     @Override
     public GlobalTableModelInterface getGlobalTableModelInterface() {
         return (GlobalTableModelInterface) m_timeTable.getModel();

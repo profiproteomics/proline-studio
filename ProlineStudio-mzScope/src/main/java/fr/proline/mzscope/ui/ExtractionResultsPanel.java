@@ -203,6 +203,10 @@ public class ExtractionResultsPanel extends JPanel {
 
     private void startExtractions() {
         logger.info("startExtractions...");
+        if (extractions == null){
+            logger.info("no extractions!");
+            return;
+        }
         final List<IRawFile> rawfiles = RawFileManager.getInstance().getAllFiles();
         if ((extractionWorker == null) || extractionWorker.isDone()) {
             for (ExtractionResult extraction : extractions) {

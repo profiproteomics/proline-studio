@@ -56,8 +56,8 @@ public class PanelAsGrid extends JPanel implements ILayoutPanel{
     @Override
     public void setPanels(List<IWrappedPanel> panels, Integer nbCols) {
         this.m_panels = panels;
-        this.m_nbCols = (nbCols == null || nbCols <1)? DEFAULT_NB_COL: nbCols;
-        this.m_nbRows = (int) Math.ceil(panels.size() / m_nbCols) ;
+        this.m_nbCols = (nbCols == null || nbCols <1)? Math.max((int) Math.ceil(Math.sqrt(panels.size())), 1): nbCols;
+        this.m_nbRows = panels.size() % m_nbCols > 0 ? panels.size() / m_nbCols +1 : panels.size() / m_nbCols ;
         displayPanels();
     }
     
@@ -110,8 +110,8 @@ public class PanelAsGrid extends JPanel implements ILayoutPanel{
     }
     
     private void updateLayout(){
-        this.m_nbCols = Math.max((int) Math.ceil(m_panels.size() / 2), 1);
-        this.m_nbRows = (int) Math.ceil(m_panels.size() / m_nbCols) ;
+        this.m_nbCols = Math.max((int) Math.ceil(Math.sqrt(m_panels.size())), 1);
+        this.m_nbRows = m_panels.size() % m_nbCols > 0 ? m_panels.size() / m_nbCols +1 : m_panels.size() / m_nbCols  ;
         this.setLayout(new GridLayout(m_nbRows, m_nbCols));
         revalidate();
         repaint();

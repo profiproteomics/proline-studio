@@ -395,12 +395,13 @@ public class MzScopePanel extends JPanel implements IFeatureViewer, IExtractionE
 
     private void extractFeatures(final IRawFile rawFile, final FeaturesExtractionRequest params) {
         if ((selectedRawFilePanel != null) && (viewersTabPane.getSelectedIndex() >= 0)) {
-            final FeaturesPanel featurePanel = new FeaturesPanel(rawFile, this);
+            final FeaturesPanel featurePanel = new FeaturesPanel(this);
             final ButtonTabComponent tabComp = addFeatureTab(rawFile.getName(), featurePanel, params.getExtractionParamsString());
             tabComp.setWaitingState(true);
             fireExtractionEvent(new ExtractionEvent(this, ExtractionEvent.EXTRACTION_STARTED));
             final long start = System.currentTimeMillis();
-            SwingWorker worker = new SwingWorker<List<Feature>, Void>() {
+            SwingWorker worker;
+            worker = new SwingWorker<List<Feature>, Void>() {
                 @Override
                 protected List<Feature> doInBackground() throws Exception {
                     return rawFile.extractFeatures(params);
@@ -411,7 +412,11 @@ public class MzScopePanel extends JPanel implements IFeatureViewer, IExtractionE
                     try {
                         List<Feature> features = get();
                         logger.info("{} features/peakels extracted in {}", features.size(), (System.currentTimeMillis() - start) / 1000.0);
-                        featurePanel.setFeatures(features);
+                        Map<Integer, IRawFile> mapRawFileByFeatureId = new HashMap();
+                        features.stream().forEach((f) -> {
+                            mapRawFileByFeatureId.put(f.getId(), rawFile);
+                        });
+                        featurePanel.setFeatures(features, mapRawFileByFeatureId, false);
                         featuresTabPane.setSelectedComponent(featurePanel);
                         tabComp.setWaitingState(false);
                         fireExtractionEvent(new ExtractionEvent(this, ExtractionEvent.EXTRACTION_DONE));

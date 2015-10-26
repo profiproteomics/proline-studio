@@ -1,20 +1,30 @@
 package fr.proline.mzscope.ui.model;
 
 import fr.profi.mzdb.model.Feature;
+import fr.proline.mzscope.model.IRawFile;
+import fr.proline.mzscope.utils.NumberFormatter;
 import fr.proline.studio.comparedata.ExtraDataType;
 import fr.proline.studio.filter.DoubleFilter;
 import fr.proline.studio.filter.Filter;
 import fr.proline.studio.filter.IntegerFilter;
+import fr.proline.studio.filter.StringFilter;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
 import fr.proline.studio.table.DecoratedTableModel;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.table.LazyData;
+import fr.proline.studio.table.TableDefaultRendererManager;
+import fr.proline.studio.table.renderer.BigFloatRenderer;
+import fr.proline.studio.table.renderer.DefaultLeftAlignRenderer;
+import fr.proline.studio.table.renderer.DefaultRightAlignRenderer;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import javax.swing.JLabel;
 import javax.swing.table.TableCellRenderer;
+import org.jdesktop.swingx.renderer.DefaultTableRenderer;
 
 /**
  * table model for m_features / peaks
@@ -30,18 +40,22 @@ public class FeaturesTableModel extends DecoratedTableModel implements GlobalTab
     public static final int COLTYPE_FEATURE_SCAN_COUNT_COL = 5;
     public static final int COLTYPE_FEATURE_CHARGE_COL = 6;
     public static final int COLTYPE_FEATURE_PEAKELS_COUNT_COL = 7;
+    public static final int COLTYPE_FEATURE_RAWFILE = 8;
     
     
-   private static final String[] m_columnNames = {"m/z", "Elution","Duration", "Apex Int.", "Area", "MS Count", "charge", "peakels"};
-   private static final String[] m_columnTooltips = {"m/z", "Elution Time in min","Duration in min", "Apex Intensity", "Area", "MS Count", "Charge state", "Isotope peakels count"};
+   private static final String[] m_columnNames = {"m/z", "Elution","Duration", "Apex Int.", "Area", "MS Count", "Charge", "Peakels", "Raw File"};
+   private static final String[] m_columnTooltips = {"m/z", "Elution Time in min","Duration in min", "Apex Intensity", "Area", "MS Count", "Charge state", "Isotope peakels count", "Raw File Name"};
     
+   private final HashMap<Integer, TableCellRenderer> m_rendererMap = new HashMap();
 
     private List<Feature> m_features = new ArrayList<>();
+    private Map<Integer, IRawFile> m_mapRawFileByFeatureId = new HashMap();
     
     private String m_modelName;
 
-    public void setFeatures(List<Feature> features) {
+    public void setFeatures(List<Feature> features, Map<Integer, IRawFile> mapRawFileByFeatureId) {
         m_features = features;
+        m_mapRawFileByFeatureId = mapRawFileByFeatureId;
         fireTableDataChanged();
     }
 
@@ -74,6 +88,8 @@ public class FeaturesTableModel extends DecoratedTableModel implements GlobalTab
                return m_features.get(rowIndex).charge();
             case COLTYPE_FEATURE_PEAKELS_COUNT_COL:
                return m_features.get(rowIndex).getPeakelsCount();
+            case COLTYPE_FEATURE_RAWFILE: 
+                return m_mapRawFileByFeatureId.get(m_features.get(rowIndex).getId()).getName();
         }
         return null; // should not happen
     }
@@ -97,6 +113,8 @@ public class FeaturesTableModel extends DecoratedTableModel implements GlobalTab
             case COLTYPE_FEATURE_CHARGE_COL:
             case COLTYPE_FEATURE_PEAKELS_COUNT_COL:
                 return Integer.class;
+            case COLTYPE_FEATURE_RAWFILE: 
+                return String.class;
         }
         return null; // should not happen
     }
@@ -130,7 +148,7 @@ public class FeaturesTableModel extends DecoratedTableModel implements GlobalTab
 
     @Override
     public void sortingChanged(int col) {
-        return; // not used
+        // not used
     }
 
     @Override
@@ -194,7 +212,7 @@ public class FeaturesTableModel extends DecoratedTableModel implements GlobalTab
         filtersMap.put(COLTYPE_FEATURE_SCAN_COUNT_COL, new IntegerFilter(getColumnName(COLTYPE_FEATURE_SCAN_COUNT_COL), null, COLTYPE_FEATURE_SCAN_COUNT_COL));
         filtersMap.put(COLTYPE_FEATURE_PEAKELS_COUNT_COL, new IntegerFilter(getColumnName(COLTYPE_FEATURE_PEAKELS_COUNT_COL), null, COLTYPE_FEATURE_PEAKELS_COUNT_COL));
         filtersMap.put(COLTYPE_FEATURE_CHARGE_COL, new IntegerFilter(getColumnName(COLTYPE_FEATURE_CHARGE_COL), null, COLTYPE_FEATURE_CHARGE_COL));
-  
+        filtersMap.put(COLTYPE_FEATURE_RAWFILE, new StringFilter(getColumnName(COLTYPE_FEATURE_RAWFILE), null, COLTYPE_FEATURE_RAWFILE));
     }
 
     @Override
@@ -234,7 +252,32 @@ public class FeaturesTableModel extends DecoratedTableModel implements GlobalTab
 
     @Override
     public TableCellRenderer getRenderer(int col) {
-        return null;
+        if (m_rendererMap.containsKey(col)) {
+            return m_rendererMap.get(col);
+        }
+
+        TableCellRenderer renderer = null;
+        
+        switch (col) {
+            case COLTYPE_FEATURE_MZCOL:
+                renderer = new DefaultTableRenderer(new NumberFormatter("#.0000"), JLabel.RIGHT);
+                break;
+            case COLTYPE_FEATURE_ET_COL:
+            case COLTYPE_FEATURE_DURATION_COL:
+                renderer = new DefaultTableRenderer(new NumberFormatter("#0.00"), JLabel.RIGHT);
+                break;
+            case COLTYPE_FEATURE_APEX_INT_COL:
+            case COLTYPE_FEATURE_AREA_COL:
+                renderer = new BigFloatRenderer( new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 0 );
+                break;
+            case COLTYPE_FEATURE_RAWFILE: {
+                renderer = new DefaultLeftAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)) ;
+                break;
+            }
+        }
+        
+        m_rendererMap.put(col, renderer);
+        return renderer;
     }
 
     @Override

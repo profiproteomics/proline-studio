@@ -1,4 +1,4 @@
-package fr.proline.studio.rsmexplorer.gui.renderer;
+package fr.proline.studio.table.renderer;
 
 import fr.proline.studio.utils.DataFormat;
 import java.awt.Component;

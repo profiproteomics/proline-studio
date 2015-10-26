@@ -1,4 +1,4 @@
-package fr.proline.studio.rsmexplorer.gui.renderer;
+package fr.proline.studio.table.renderer;
 
 import java.awt.Component;
 import java.io.Serializable;

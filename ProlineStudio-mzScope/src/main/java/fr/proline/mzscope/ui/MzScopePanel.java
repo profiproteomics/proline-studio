@@ -55,7 +55,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author MB243701
  */
-public class MzScopePanel extends JPanel implements IFeatureViewer, IExtractionExecutor {
+public class MzScopePanel extends JPanel implements IFeatureViewer, IExtractionExecutor, IExtractionResults {
 
     private final static Logger logger = LoggerFactory.getLogger("ProlineStudio.mzScope.MzScopePanel");
 
@@ -108,7 +108,7 @@ public class MzScopePanel extends JPanel implements IFeatureViewer, IExtractionE
             this.mainLeftSplitPane.setDividerLocation(250);
             this.mainLeftSplitPane.setOrientation(JSplitPane.HORIZONTAL_SPLIT);
             this.mainLeftSplitPane.setOneTouchExpandable(true);
-            this.mainLeftSplitPane.setRightComponent(new ExtractionResultsPanel(ExtractionResultsPanel.TOOLBAR_ALIGN_VERTICAL));
+            this.mainLeftSplitPane.setRightComponent(new ExtractionResultsPanel(this, ExtractionResultsPanel.TOOLBAR_ALIGN_VERTICAL));
             this.mainLeftSplitPane.setLeftComponent(getExtractionPanel());
         }
 
@@ -687,6 +687,41 @@ public class MzScopePanel extends JPanel implements IFeatureViewer, IExtractionE
     
     public boolean exportAsMGF(IRawFile rawFile, String mgfFileName, PrecursorMzComputation precComp, float mzTolPPM ,float intensityCutoff, boolean exportProlineTitle ){
         return rawFile.exportAsMGF(mgfFileName, precComp, mzTolPPM, intensityCutoff, exportProlineTitle);
+    }
+
+    @Override
+    public void displayChromatogramAsSingleView(IRawFile rawfile, Chromatogram c) {
+        displayRawAction(rawfile, false);
+        List<AbstractRawFilePanel> list = mapRawFilePanelRawFile.get(rawfile);
+        if (list != null) {
+            for (AbstractRawFilePanel panel : list) {
+                if (panel instanceof SingleRawFilePanel) {
+                    panel.displayChromatogram(c, DisplayMode.REPLACE);
+                    viewersTabPane.setSelectedComponent(panel);
+                }
+            }
+        }
+    }
+
+    @Override
+    public void displayChromatogramAsMultiView(Map<IRawFile, Chromatogram> chromatogramByRawFile) {
+        TabbedMultiRawFilePanel panel = getTabbedMultiRawFilePanel();
+        if (panel == null){
+            displayAllRawAction();
+            panel = getTabbedMultiRawFilePanel();
+        }
+        panel.displayChromatograms(chromatogramByRawFile);
+    }
+    
+    private TabbedMultiRawFilePanel getTabbedMultiRawFilePanel(){
+        int nbT = viewersTabPane.getTabCount();
+        TabbedMultiRawFilePanel panel = null;
+        for(int i=0; i<nbT; i++){
+            if (viewersTabPane.getComponentAt(i) instanceof TabbedMultiRawFilePanel){
+                panel = (TabbedMultiRawFilePanel)viewersTabPane.getComponentAt(i);
+            }
+        }
+        return panel;
     }
     
 }

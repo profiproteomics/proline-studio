@@ -4,7 +4,7 @@ import fr.proline.mzscope.model.Ms1ExtractionRequest;
 
 
 /**
- * extraction param events (from the XICExtractionPanel)
+ * extraction param methods (from the XICExtractionPanel)
  *
  * @author MB243701
  */

@@ -403,5 +403,21 @@ public class TabbedMultiRawFilePanel extends JPanel implements IRawFilePanel {
 
         worker.execute();
     }
+    
+    public void displayChromatograms(Map<IRawFile, Chromatogram> chromatogramByRawFile) {
+        int nbTab = chromatogramContainerPanel.getTabCount();
+        for (Map.Entry<IRawFile, Chromatogram> entrySet : chromatogramByRawFile.entrySet()) {
+            IRawFile rawFile = entrySet.getKey();
+            Chromatogram chromato = entrySet.getValue();
+            for (int t = 0; t < nbTab; t++) {
+                String tabTitle = chromatogramContainerPanel.getTitleAt(t);
+                if (tabTitle.equals(rawFile.getName())) {  // see how to better get the tabComponent linked to a rawFile
+                 ChromatogramPanel chromatoPanel = (ChromatogramPanel) chromatogramContainerPanel.getComponentAt(t);
+                    chromatoPanel.displayChromatogram(chromato, DisplayMode.REPLACE);
+                    mapChromatogramForRawFile.put(rawFile, chromato);
+                }
+            }
+        }
+    }
 
 }

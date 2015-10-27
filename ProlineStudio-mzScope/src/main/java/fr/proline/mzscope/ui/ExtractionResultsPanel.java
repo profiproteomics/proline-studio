@@ -5,6 +5,7 @@
  */
 package fr.proline.mzscope.ui;
 
+import fr.proline.mzscope.MzScope;
 import fr.proline.mzscope.model.Chromatogram;
 import fr.proline.mzscope.ui.model.ExtractionResultsTableModel;
 import fr.proline.mzscope.model.ExtractionResult;
@@ -27,7 +28,9 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -54,6 +57,10 @@ public class ExtractionResultsPanel extends JPanel {
     private ExtractionResultsTableModel extractionResultsTableModel;
     private ExtractionResultsTable extractionResultsTable;
     private SwingWorker extractionWorker;
+    
+    private IExtractionResults extractionResults;
+    
+    private Map<ExtractionResult, Map<IRawFile, Chromatogram>> mapChromatogramByExtraction;
 
     private JFileChooser m_fchooser;
     private MarkerContainerPanel m_markerContainerPanel;
@@ -65,7 +72,8 @@ public class ExtractionResultsPanel extends JPanel {
     private int m_toolbarAlign = TOOLBAR_ALIGN_HORIZONTAL;
 
     
-    public ExtractionResultsPanel(int align) {
+    public ExtractionResultsPanel(IExtractionResults extractionResults, int align) {
+        this.extractionResults = extractionResults;
         m_toolbarAlign = align;
         initComponents();
 
@@ -226,11 +234,13 @@ public class ExtractionResultsPanel extends JPanel {
         }
         final List<IRawFile> rawfiles = RawFileManager.getInstance().getAllFiles();
         if ((extractionWorker == null) || extractionWorker.isDone()) {
+            mapChromatogramByExtraction = new HashMap();
             for (ExtractionResult extraction : extractions) {
                 extraction.setStatus(ExtractionResult.Status.REQUESTED);
+                mapChromatogramByExtraction.put(extraction, new HashMap());
             }
             extractionResultsTableModel.fireTableDataChanged();
-            extractionWorker = new SwingWorker<Integer, Chromatogram>() {
+            extractionWorker = new SwingWorker<Integer, List<Object>>() {
                 int count = 0;
 
                 @Override
@@ -241,7 +251,11 @@ public class ExtractionResultsPanel extends JPanel {
                             Chromatogram c = rawFile.getXIC(extraction.getRequest());
                             extraction.addChromatogram(c);
                             count++;
-                            publish(c);
+                            List<Object> o = new ArrayList();
+                            o.add(c);
+                            o.add(rawFile);
+                            o.add(extraction);
+                            publish(o);
                             logger.info("extraction done in " + (System.currentTimeMillis() - start));
                         }
                         extraction.setStatus(ExtractionResult.Status.DONE);
@@ -250,8 +264,13 @@ public class ExtractionResultsPanel extends JPanel {
                 }
 
                 @Override
-                protected void process(List<Chromatogram> chunks) {
+                protected void process(List<List<Object>> chunks) {
                     extractionResultsTableModel.fireTableDataChanged();
+                    List<Object> o = chunks.get(chunks.size() - 1);
+                    Chromatogram c = (Chromatogram)o.get(0);
+                    IRawFile rf = (IRawFile)o.get(1);
+                    ExtractionResult extraction = (ExtractionResult)o.get(2);
+                    mapChromatogramByExtraction.get(extraction).put(rf, c);
                 }
 
                 @Override
@@ -278,6 +297,24 @@ public class ExtractionResultsPanel extends JPanel {
             @Override
             public void mouseClicked(MouseEvent evt) {
                 logger.debug("Extraction Result table mouse clicked");
+                int selRow = extractionResultsTable.rowAtPoint(evt.getPoint());
+                if (selRow != -1){
+                    ExtractionResult extraction = extractionResultsTableModel.getExtractionResultAt(extractionResultsTable.convertRowIndexToModel(selRow));
+                    if (extraction != null && mapChromatogramByExtraction.containsKey(extraction)){
+                        Map<IRawFile, Chromatogram> mapChr = mapChromatogramByExtraction.get(extraction);
+                        final List<IRawFile> rawfiles = RawFileManager.getInstance().getAllFiles();
+                        int nbFiles = rawfiles.size();
+                        if (nbFiles == 1){
+                            // view singleRawFile
+                            if (mapChr.containsKey(rawfiles.get(0))){
+                                extractionResults.displayChromatogramAsSingleView(rawfiles.get(0), mapChr.get(rawfiles.get(0)));
+                            }
+                        }else{
+                            // view all file
+                            extractionResults.displayChromatogramAsMultiView(mapChr);
+                        }
+                    }
+                }
             }
         });
 

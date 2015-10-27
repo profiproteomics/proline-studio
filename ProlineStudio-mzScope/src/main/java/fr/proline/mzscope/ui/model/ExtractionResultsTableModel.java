@@ -61,6 +61,14 @@ public class ExtractionResultsTableModel extends DecoratedTableModel implements 
     }
 
     private List<ExtractionResult> m_extractionResults = new ArrayList<>(0);
+    
+    public ExtractionResult getExtractionResultAt(int rowId){
+        if (rowId > -1 && rowId < m_extractionResults.size()){
+            return m_extractionResults.get(rowId);
+        }else {
+            return null;
+        }
+    }
 
     public void setExtractions(List<ExtractionResult> extractionResults) {
         this.m_extractionResults = extractionResults;

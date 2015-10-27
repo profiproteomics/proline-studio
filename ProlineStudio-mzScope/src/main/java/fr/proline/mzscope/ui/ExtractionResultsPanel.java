@@ -89,6 +89,15 @@ public class ExtractionResultsPanel extends JPanel {
     private JToolBar getToolBar() {
         JToolBar toolbar = new JToolBar(m_toolbarAlign == TOOLBAR_ALIGN_HORIZONTAL? JToolBar.HORIZONTAL : JToolBar.VERTICAL);
         toolbar.setFloatable(false);
+        
+        JButton clearBtn = new JButton();
+        clearBtn.setIcon(IconManager.getIcon(IconManager.IconType.ERASER));
+        clearBtn.setToolTipText("Clear all values");
+        clearBtn.addActionListener((ActionEvent e) -> {
+            clearAllValues();
+        });
+        toolbar.add(clearBtn);
+        
         JButton importCSVBtn = new JButton();
         importCSVBtn.setIcon(IconManager.getIcon(IconManager.IconType.TABLE_IMPORT));
         importCSVBtn.setToolTipText("Import m/z values from a csv file...");
@@ -101,6 +110,7 @@ public class ExtractionResultsPanel extends JPanel {
 
         });
         toolbar.add(importCSVBtn);
+        
         JButton iRTBtn = new JButton("iRT");
         iRTBtn.setToolTipText("indexed Retention Time Standard");
         iRTBtn.addActionListener(new ActionListener() {
@@ -130,6 +140,13 @@ public class ExtractionResultsPanel extends JPanel {
         toolbar.add(m_exportButton);
         
         return toolbar;
+    }
+    
+    /**
+     * clear all extraction values
+     */
+    private void clearAllValues(){
+        setExtractionsValues(new ArrayList());
     }
 
     private void importCSVExtractions() {

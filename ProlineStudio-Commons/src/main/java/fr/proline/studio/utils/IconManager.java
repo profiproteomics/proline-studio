@@ -139,7 +139,8 @@ public class IconManager {
         UPDATE, 
         SPECTRUM, 
         NAVIGATE,
-        SELECT;
+        SELECT, 
+        ZOOM_FIT;
         
     }
     private final static HashMap<IconType, ImageIcon> m_iconMap = new HashMap<>();
@@ -520,6 +521,8 @@ public class IconManager {
                return "fr/proline/studio/images/navigate.png";    
             case SELECT: 
                return "fr/proline/studio/images/select.png";    
+            case ZOOM_FIT:
+                return "fr/proline/studio/images/magnifier-zoom-fit.png";
                 
         }
 

@@ -50,11 +50,18 @@ public class TabbedMultiRawFilePanel extends JPanel implements IRawFilePanel {
     private JToolBar m_toolbarPanel;
     private JPanel m_multiRawFilePanel;
     private JButton m_buttonLayout;
+    private JButton m_buttonZoom;
+    private final static String tooltipForceZoom = "Synchronize zoom on all plots";
+    private final static String tooltipZoom = "Remove zoom synchronization on all plots";
 
     private final List<IRawFile> rawfiles;
     private final Map<IRawFile, Chromatogram> mapChromatogramForRawFile;
     
     private final Map<IRawFile, IRawFileLoading> mapRawFileLoading;
+    private boolean isZoomSynchronized = true;
+    // keep percentage of the zoom and the average value zoomed
+    private double x;
+    private double zoomLevel;
     
     
     public TabbedMultiRawFilePanel(List<IRawFile> rawfiles) {
@@ -107,7 +114,11 @@ public class TabbedMultiRawFilePanel extends JPanel implements IRawFilePanel {
             m_toolbarPanel.setRollover(true);
         
             m_toolbarPanel.add(getButtonLayout());
+            //m_toolbarPanel.addSeparator();
             
+           // m_toolbarPanel.add(getButtonForceZoom());
+            
+            m_toolbarPanel.addSeparator();
             JButton displayTICbtn = new JButton("TIC");
             displayTICbtn.setToolTipText("Display TIC Chromatogram");
             displayTICbtn.addActionListener(new ActionListener() {
@@ -141,6 +152,18 @@ public class TabbedMultiRawFilePanel extends JPanel implements IRawFilePanel {
             });
         }
         return m_buttonLayout;
+    }
+    
+    private JButton getButtonForceZoom(){
+        if(m_buttonZoom == null){
+            m_buttonZoom = new JButton();
+            m_buttonZoom.setIcon(IconManager.getIcon(IconManager.IconType.ZOOM_FIT));
+            updateZoomToolTip();
+            m_buttonZoom.addActionListener((ActionEvent e) -> {
+                synchronizeZoom();
+            });
+        }
+        return m_buttonZoom;
     }
     
 
@@ -418,6 +441,15 @@ public class TabbedMultiRawFilePanel extends JPanel implements IRawFilePanel {
                 }
             }
         }
+    }
+    
+    private void synchronizeZoom(){
+        isZoomSynchronized = !isZoomSynchronized;
+        updateZoomToolTip();
+    }
+    
+    private void updateZoomToolTip(){
+        m_buttonZoom.setToolTipText(isZoomSynchronized?tooltipZoom : tooltipForceZoom);
     }
 
 }

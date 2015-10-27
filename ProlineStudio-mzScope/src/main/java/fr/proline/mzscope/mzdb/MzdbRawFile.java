@@ -373,14 +373,18 @@ public class MzdbRawFile implements IRawFile {
     }
 
     private List<Feature> extractFeatures(List<PutativeFeature> pfs, float tolPPM) {
-        List<Feature> result = null;
+        List<Feature> result = new ArrayList();
         try {
             // Instantiates a Run Slice Data provider
             RunSliceDataProvider rsdProv = new RunSliceDataProvider(reader.getLcMsRunSliceIterator());
             FeatureExtractorConfig extractorConfig = new FeatureExtractorConfig(tolPPM, 5, 1, 3, 1200.0f, 0.05f, Option.empty(), 90, Option.empty());
             MzDbFeatureExtractor extractor = new MzDbFeatureExtractor(reader, 5, 5, extractorConfig);
             // Extract features
-            result = scala.collection.JavaConversions.seqAsJavaList(extractor.extractFeatures(rsdProv, scala.collection.JavaConversions.asScalaBuffer(pfs), tolPPM));
+            // force the result in a java List to avoid UnsupportedOperationException on scala.collection...WrappedSequence
+            List<Feature> tmpresult = scala.collection.JavaConversions.seqAsJavaList(extractor.extractFeatures(rsdProv, scala.collection.JavaConversions.asScalaBuffer(pfs), tolPPM));
+            tmpresult.stream().forEach((f) -> {
+                result.add(f);
+            });
         } catch (SQLiteException | StreamCorruptedException ex) {
             logger.error("error while extracting features", ex);
         }

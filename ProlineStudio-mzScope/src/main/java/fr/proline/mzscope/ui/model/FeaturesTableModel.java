@@ -58,6 +58,15 @@ public class FeaturesTableModel extends DecoratedTableModel implements GlobalTab
         m_mapRawFileByFeatureId = mapRawFileByFeatureId;
         fireTableDataChanged();
     }
+    
+    public void addFeatures(List<Feature> features, Map<Integer, IRawFile> mapRawFileByFeatureId) {
+        m_features.addAll(features);
+        mapRawFileByFeatureId.entrySet().stream().forEach((entrySet) -> {
+            this.m_mapRawFileByFeatureId.put(entrySet.getKey(), entrySet.getValue());
+        });
+        fireTableDataChanged();
+    }
+    
 
    @Override
     public int getRowCount() {

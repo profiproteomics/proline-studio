@@ -323,8 +323,8 @@ public class MzScopePanel extends JPanel implements IFeatureViewer, IExtractionE
             registerRawFilePanel(rawfile, plotPanel);
         }
     }
-
-    public void displayRawAction(List<IRawFile> rawfiles) {
+    
+    private String getName(List<IRawFile> rawfiles){
         String name = "";
         if (rawfiles.size() > 1) {
             String prefix = Strings.commonPrefix(rawfiles.get(0).getName(), rawfiles.get(1).getName());
@@ -343,7 +343,12 @@ public class MzScopePanel extends JPanel implements IFeatureViewer, IExtractionE
         } else {
             name = rawfiles.get(0).getName();
         }
-        
+        return name;
+    }
+    
+
+    public void displayRawAction(List<IRawFile> rawfiles) {
+        String name = getName(rawfiles);
         
         AbstractRawFilePanel plotPanel = new MultiRawFilePanel(rawfiles);
         final ButtonTabComponent tabComp = addRawTab(name, plotPanel);
@@ -387,10 +392,57 @@ public class MzScopePanel extends JPanel implements IFeatureViewer, IExtractionE
         FeaturesExtractionRequest.Builder builder = dialog.getExtractionParams();
         if (builder != null) {
             builder.setExtractionMethod(FeaturesExtractionRequest.ExtractionMethod.EXTRACT_MS2_FEATURES);
-            for (IRawFile rawFile : rawfiles) {
-                extractFeatures(rawFile, builder.build());
-            }
+            FeaturesExtractionRequest params = builder.build();
+            extractFeatures(rawfiles, params);
         }
+    }
+    
+    private void extractFeatures(List<IRawFile> rawfiles, FeaturesExtractionRequest params) {
+        final FeaturesPanel featurePanel = new FeaturesPanel(this);
+        final ButtonTabComponent tabComp = addFeatureTab(getName(rawfiles), featurePanel, params.getExtractionParamsString());
+        tabComp.setWaitingState(true);
+        fireExtractionEvent(new ExtractionEvent(this, ExtractionEvent.EXTRACTION_STARTED));
+        final long start = System.currentTimeMillis();
+        SwingWorker worker = new SwingWorker<Integer, List<Feature>>() {
+            int count = 0;
+
+            @Override
+            protected Integer doInBackground() throws Exception {
+
+                for (IRawFile rawFile : rawfiles) {
+                    List<Feature> listF = rawFile.extractFeatures(params);
+                    count++;
+                    publish(listF);
+                }
+                return count;
+            }
+
+            @Override
+            protected void process(List<List<Feature>> list) {
+                List<Feature> listF = list.get(list.size() - 1);
+                logger.info("{} features/peakels extracted in {}", listF.size(), (System.currentTimeMillis() - start) / 1000.0);
+                Map<Integer, IRawFile> mapRawFileByFeatureId = new HashMap();
+                listF.stream().forEach((f) -> {
+                    mapRawFileByFeatureId.put(f.getId(), rawfiles.get(count-1));
+                });
+                if (count == 1) {
+                    featurePanel.setFeatures(listF, mapRawFileByFeatureId, rawfiles.size() > 1);
+                } else {
+                    featurePanel.addFeatures(listF, mapRawFileByFeatureId);
+                }
+            }
+
+            @Override
+            protected void done() {
+                logger.info("All features/peakels extracted in {}", (System.currentTimeMillis() - start) / 1000.0);
+                featuresTabPane.setSelectedComponent(featurePanel);
+                tabComp.setWaitingState(false);
+                fireExtractionEvent(new ExtractionEvent(this, ExtractionEvent.EXTRACTION_DONE));
+            }
+        };
+
+        worker.execute();
+        logger.debug("Feature extraction running ... ");
     }
 
     private void extractFeatures(final IRawFile rawFile, final FeaturesExtractionRequest params) {
@@ -444,9 +496,8 @@ public class MzScopePanel extends JPanel implements IFeatureViewer, IExtractionE
         FeaturesExtractionRequest.Builder builder = dialog.getExtractionParams();
         if (builder != null) {
             builder.setExtractionMethod(FeaturesExtractionRequest.ExtractionMethod.DETECT_PEAKELS);
-            for (IRawFile rawFile : rawfiles) {
-                extractFeatures(rawFile, builder.build());
-            }
+            FeaturesExtractionRequest params = builder.build();
+            extractFeatures(rawfiles, params);
         }
     }
 

@@ -113,6 +113,16 @@ public class FeaturesPanel extends JPanel implements RowSorterListener, MouseLis
         return toolbar;
     }
 
+    public void addFeatures(List<Feature> features, Map<Integer, IRawFile> mapRawFileByFeatureId) {
+        featureTableModel.addFeatures(features, mapRawFileByFeatureId);
+        this.features.addAll(features);
+        mapRawFileByFeatureId.entrySet().stream().forEach((entrySet) -> {
+            this.m_mapRawFileByFeatureId.put(entrySet.getKey(), entrySet.getValue());
+        });
+        m_markerContainerPanel.setMaxLineNumber(features.size());
+    }
+    
+    
     public void setFeatures(List<Feature> features, Map<Integer, IRawFile> mapRawFileByFeatureId, boolean displayRawFile) {
         modelSelectedIdxBeforeSort = -1;
         featureTableModel.setFeatures(features, mapRawFileByFeatureId);

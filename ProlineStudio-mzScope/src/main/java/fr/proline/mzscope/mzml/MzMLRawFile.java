@@ -116,5 +116,10 @@ public class MzMLRawFile implements IRawFile {
     public boolean exportAsMGF(String mgfFileName, PrecursorMzComputation precComp, float mzTolPPM ,float intensityCutoff, boolean exportProlineTitle ){
        return true;
     }
+    
+    @Override
+    public boolean isDIAFile(){
+        return false;
+    }
 
 }

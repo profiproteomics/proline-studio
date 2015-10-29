@@ -11,6 +11,8 @@ import fr.profi.mzdb.MzDbReader;
 import fr.profi.mzdb.SmartPeakelFinderConfig;
 import fr.profi.mzdb.algo.IsotopicPatternScorer;
 import fr.profi.mzdb.algo.feature.extraction.FeatureExtractorConfig;
+import fr.profi.mzdb.db.model.Run;
+import fr.profi.mzdb.db.model.params.param.CVParam;
 import fr.profi.mzdb.io.reader.provider.RunSliceDataProvider;
 import fr.profi.mzdb.io.writer.mgf.MgfWriter;
 import fr.profi.mzdb.io.writer.mgf.PrecursorMzComputation;
@@ -55,11 +57,15 @@ public class MzdbRawFile implements IRawFile {
     private static final Logger logger = LoggerFactory.getLogger(MzdbRawFile.class);
     final private static DecimalFormat massFormatter = new DecimalFormat("0.####");
     final private static DecimalFormat timeFormatter = new DecimalFormat("0.00");
+    
+    private final static String SWATH_ACQUISITION = "SWATH acquisition";
 
     private final File mzDbFile;
     private MzDbReader reader;
     private SpectrumHeader[] ms2SpectrumHeaders = null;
     private double[] ms2SpectrumHeaderByMz = null;
+    
+    private boolean isDIAFile;
 
     public MzdbRawFile(File file) {
         mzDbFile = file;
@@ -73,6 +79,9 @@ public class MzdbRawFile implements IRawFile {
     private void init() {
         try {
             reader = new MzDbReader(mzDbFile, true);
+            long start = System.currentTimeMillis();
+            isDIAFile= checkDIAFile();
+            logger.debug("MzdbRawFile "+getName()+(isDIAFile?" is ": " is not ")+" a DIA File in "+(System.currentTimeMillis() - start)+" ms");
         } catch (ClassNotFoundException | FileNotFoundException | SQLiteException e) {
             logger.error("cannot read file " + mzDbFile.getAbsolutePath(), e);
         }
@@ -147,6 +156,11 @@ public class MzdbRawFile implements IRawFile {
         return chromatogram;
     }
 
+    /**
+     *
+     * @param params
+     * @return
+     */
     @Override
     public Chromatogram getXIC(Ms1ExtractionRequest params) {
         long start = System.currentTimeMillis();
@@ -607,6 +621,32 @@ public class MzdbRawFile implements IRawFile {
             return false;
         }
         return true;
+    }
+    
+    private boolean checkDIAFile(){
+        try {
+            List<Run> runs = this.reader.getRuns();
+            if (runs != null){
+                for (Run run : runs) {
+                    List<CVParam> cvParams = run.getCVParams();
+                    if (cvParams != null){
+                        for (CVParam cvParam : cvParams) {
+                            if (cvParam.getValue().equals(SWATH_ACQUISITION)){
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (SQLiteException ex) {
+            logger.error("Check DIA: SQLiteException while reading runs", ex);
+        }
+        return false;
+    }
+    
+    @Override
+    public boolean isDIAFile(){
+        return this.isDIAFile;
     }
 
 }

@@ -220,5 +220,10 @@ public class ThreadedMzdbRawFile implements IRawFile {
       } 
       return false;
     }
+    
+    @Override
+    public boolean isDIAFile(){
+        return mzdbRawFile.isDIAFile();
+    }
 
 }

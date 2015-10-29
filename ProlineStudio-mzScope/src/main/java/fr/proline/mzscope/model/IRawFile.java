@@ -42,4 +42,6 @@ public interface IRawFile {
    public List<Float> getMsMsEvent(double minMz, double maxMz);
    
    public boolean exportAsMGF(String mgfFileName, PrecursorMzComputation precComp, float mzTolPPM ,float intensityCutoff, boolean exportProlineTitle );
+   
+   public boolean isDIAFile();
 }

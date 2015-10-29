@@ -104,13 +104,24 @@ public class MSDiag_BoxChart  extends HourglassPanel implements  ImageExporterIn
 	         final BoxAndWhiskerRenderer renderer = new BoxAndWhiskerRenderer(); //BarRenderer();
 	       
 	         renderer.setBaseToolTipGenerator(new StandardCategoryToolTipGenerator()); // info bulles on bars
-	         renderer.setSeriesFillPaint(0, new Color(128,60,60));
-	         renderer.setSeriesOutlinePaint(0, new Color(128,60,60));
+	         //renderer.setSeriesFillPaint(0, new Color(128,60,60));
+	         //renderer.setSeriesOutlinePaint(0, new Color(128,60,60));
 	        
-	         renderer.setFillBox(false);
-	         renderer.setSeriesOutlinePaint(0, Color.blue);
-	         renderer.setSeriesOutlineStroke(0, new BasicStroke(2f), true);
-	         renderer.setBaseOutlinePaint(Color.blue, true);
+	         renderer.setFillBox(true);
+	         //renderer.setSeriesOutlinePaint(0, Color.blue);
+	         //renderer.setSeriesOutlineStroke(0, new BasicStroke(2f), true);
+	         //renderer.setSeriesOutlinePaint(1, Color.orange);
+	         //renderer.setSeriesOutlinePaint(2, Color.red);
+	         renderer.setSeriesPaint(0, new Color(220,220,220/*254,60,60*/));
+		     renderer.setSeriesPaint(1, new Color(176,190,255));
+		     renderer.setSeriesPaint(2, new Color(132,153,255));
+		     renderer.setSeriesPaint(3, new Color(91,120,255));
+		     renderer.setSeriesPaint(4, new Color(64,98,255));
+		     renderer.setSeriesPaint(5, new Color(42,71,255));
+		     renderer.setSeriesPaint(6, new Color(11,191,220));
+		     renderer.setSeriesPaint(7, new Color(126,94,214));
+
+	         //renderer.setBaseOutlinePaint(Color.blue, true);
 	         renderer.setItemMargin(0.20);
 	         renderer.setMaximumBarWidth(1.0);
 	         renderer.setBaseLegendShape(new Rectangle2D.Double(-4.0, -4.0, 8.0, 8.0));
@@ -281,7 +292,7 @@ public class MSDiag_BoxChart  extends HourglassPanel implements  ImageExporterIn
 	        		Number maxOutlier = maxRegularValue; // not used
 	        		listOutliers = null; //new ArrayList(0); // not used
 	        		//listOutliers.add(55.0);
-	               System.out.println("min,max,mean,median:" + minRegularValue + "," + maxRegularValue+ "," + mean+ "," + median);
+	               //System.out.println("min,max,mean,median:" + minRegularValue + "," + maxRegularValue+ "," + mean+ "," + median);
 					m_dataSet.add(new BoxAndWhiskerItem(mean,median,q1,q3,minRegularValue,maxRegularValue,minOutlier,maxOutlier,listOutliers),catString,serieString);
 	        
 	        }

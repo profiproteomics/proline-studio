@@ -105,8 +105,8 @@ public class MSDiag_CategoryPlot  extends HourglassPanel implements  ImageExport
 	    	 
 	        NumberAxis numberaxis = new NumberAxis("X");   
 	         numberaxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());   
-	         NumberAxis numberaxis1 = new NumberAxis("Y");   
-	    	    	
+	        // NumberAxis numberaxis1 = new NumberAxis("Y");   
+	    	
 	    	m_chart = ChartFactory.createStackedBarChart3D(
 	                "",         // chart title
 	                "",               // domain axis label
@@ -248,7 +248,10 @@ public class MSDiag_CategoryPlot  extends HourglassPanel implements  ImageExport
 	        
 	        
 	        m_chart.getPlot().setBackgroundPaint(Color.white);
-
+	        m_chart.getCategoryPlot().getDomainAxis().setLabel(msdo.x_axis_description);
+	        m_chart.getCategoryPlot().getDomainAxis().setLabelFont(new Font("SansSerif", Font.PLAIN, 12));
+	        m_chart.getCategoryPlot().getRangeAxis().setLabel(msdo.y_axis_description);
+	        m_chart.getCategoryPlot().getRangeAxis().setLabelFont(new Font("SansSerif", Font.PLAIN, 12));
 	        int nbSeries = msdo.matrix[0].length;
 	        int nbCategories = msdo.matrix.length; // -1 because of 1st column is series names
 	        for (int serie = 1; serie < nbSeries; serie++) {

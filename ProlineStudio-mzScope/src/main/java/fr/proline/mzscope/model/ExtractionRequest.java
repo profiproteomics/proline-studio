@@ -13,115 +13,131 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
  */
 public class ExtractionRequest {
 
-   public static class Builder<T extends Builder<T>> {
+    public static class Builder<T extends Builder<T>> {
 
-      double minMz = 0.0;
-      double maxMz = 0.0;
-      float elutionTime = -1.0f;
-      float elutionTimeLowerBound = -1.0f;
-      float elutionTimeUpperBound = -1.0f;
-      
-      double mz = 0.0;
+        double minMz = 0.0;
+        double maxMz = 0.0;
+        float elutionTime = -1.0f;
+        float elutionTimeLowerBound = -1.0f;
+        float elutionTimeUpperBound = -1.0f;
 
-      @SuppressWarnings("unchecked")  // Smell 1
-      protected T self() {
-         return (T) this;            // Unchecked cast!
-      }
+        double parentMz = 0.0;
 
-      public T setMinMz(double minMz) {
-         this.minMz = minMz;
-         return self();
-      }
+        double mz = 0.0;
 
-      public T setMaxMz(double maxMz) {
-         this.maxMz = maxMz;
-         return self();
-      }
+        @SuppressWarnings("unchecked")  // Smell 1
+        protected T self() {
+            return (T) this;            // Unchecked cast!
+        }
 
-      public T setElutionTimeLowerBound(float startRT) {
-         this.elutionTimeLowerBound = startRT;
-         return self();
-      }
+        public T setMinMz(double minMz) {
+            this.minMz = minMz;
+            return self();
+        }
 
-      public T setElutionTimeUpperBound(float stopRT) {
-         this.elutionTimeUpperBound = stopRT;
-         return self();
-      }
-      
-      public T setMz(double mz){
-          this.mz = mz;
-          return self();
-      }
+        public T setMaxMz(double maxMz) {
+            this.maxMz = maxMz;
+            return self();
+        }
 
-      public double getMinMz() {
-         return minMz;
-      }
+        public T setParentMz(double parentMz) {
+            this.parentMz = parentMz;
+            return self();
+        }
 
-      public double getMaxMz() {
-         return maxMz;
-      }
-      
-      public double getMz(){
-          return mz;
-      }
-      
-      public ExtractionRequest build() {
+        public T setElutionTimeLowerBound(float startRT) {
+            this.elutionTimeLowerBound = startRT;
+            return self();
+        }
+
+        public T setElutionTimeUpperBound(float stopRT) {
+            this.elutionTimeUpperBound = stopRT;
+            return self();
+        }
+
+        public T setMz(double mz) {
+            this.mz = mz;
+            return self();
+        }
+
+        public double getMinMz() {
+            return minMz;
+        }
+
+        public double getMaxMz() {
+            return maxMz;
+        }
+
+        public double getMz() {
+            return mz;
+        }
+
+        public double getParentMz() {
+            return parentMz;
+        }
+
+        public ExtractionRequest build() {
             return new ExtractionRequest(this);
-      }
-   }
+        }
+    }
 
-   private final double minMz;
-   private final double maxMz;
-   
-   private final double mz;
-   // values in seconds !! 
-   private final float elutionTimeLowerBound;
-   private final float elutionTimeUpperBound;
-   private final float elutionTime;
+    private final double minMz;
+    private final double maxMz;
 
-   protected ExtractionRequest(Builder builder) {
-      this.maxMz = builder.maxMz;
-      this.minMz = builder.minMz;
-      this.elutionTimeLowerBound = builder.elutionTimeLowerBound;
-      this.elutionTimeUpperBound = builder.elutionTimeUpperBound;
-      this.elutionTime = builder.elutionTime;
-      this.mz = builder.mz;
-   }
-   
-   @Override
-   public String toString() {
-      return ToStringBuilder.reflectionToString(this);
-   }
+    private final double mz;
+    // values in seconds !! 
+    private final float elutionTimeLowerBound;
+    private final float elutionTimeUpperBound;
+    private final float elutionTime;
 
-   @SuppressWarnings("rawtypes")       // Smell 2
-   public static Builder<?> builder() {
-      return new Builder();           // Raw type - no type argument!
-   }
+    private final double parentMz;
 
-   public double getMinMz() {
-      return minMz;
-   }
+    protected ExtractionRequest(Builder builder) {
+        this.maxMz = builder.maxMz;
+        this.minMz = builder.minMz;
+        this.elutionTimeLowerBound = builder.elutionTimeLowerBound;
+        this.elutionTimeUpperBound = builder.elutionTimeUpperBound;
+        this.elutionTime = builder.elutionTime;
+        this.mz = builder.mz;
+        this.parentMz = builder.parentMz;
+    }
 
-   public double getMaxMz() {
-      return maxMz;
-   }
-   
-   public double getMz(){
-       return mz;
-   }
+    @Override
+    public String toString() {
+        return ToStringBuilder.reflectionToString(this);
+    }
 
-   public float getElutionTimeLowerBound() {
-      return elutionTimeLowerBound;
-   }
+    @SuppressWarnings("rawtypes")       // Smell 2
+    public static Builder<?> builder() {
+        return new Builder();           // Raw type - no type argument!
+    }
 
-   public float getElutionTimeUpperBound() {
-      return elutionTimeUpperBound;
-   }
+    public double getMinMz() {
+        return minMz;
+    }
 
-   public float getElutionTime() {
-      return elutionTime;
-   }
+    public double getMaxMz() {
+        return maxMz;
+    }
 
-   
+    public double getMz() {
+        return mz;
+    }
+
+    public float getElutionTimeLowerBound() {
+        return elutionTimeLowerBound;
+    }
+
+    public float getElutionTimeUpperBound() {
+        return elutionTimeUpperBound;
+    }
+
+    public float getElutionTime() {
+        return elutionTime;
+    }
+
+    public double getParentMz() {
+        return parentMz;
+    }
 
 }

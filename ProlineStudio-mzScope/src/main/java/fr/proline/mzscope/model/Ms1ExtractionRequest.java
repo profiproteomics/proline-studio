@@ -54,6 +54,13 @@ public class Ms1ExtractionRequest extends ExtractionRequest {
          }
          return self();
       }
+      
+      @Override
+      public T setParentMz(double parentMz){
+          super.setParentMz(parentMz);
+          this.parentMz = parentMz;
+          return self();
+      }
 
       
       public T setMethod(XicMethod method) {

@@ -132,10 +132,11 @@ public class ChromatogramPanel extends JPanel implements PlotPanelListener {
          if (currentScanTime != null) {
             currentScanMarker.setValue(currentScanTime / 60.0);
          }
+         // TODO debug this part in DIA mode => freeze the appl?
          chromatogramPlotPanel.lockMinXValue();
          chromatogramPlotPanel.lockMinYValue();
       }
-      chromatogramPlotPanel.repaintUpdateDoubleBuffer();
+     chromatogramPlotPanel.repaintUpdateDoubleBuffer();
       return plotColor;
    }
 

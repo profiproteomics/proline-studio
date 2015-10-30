@@ -165,7 +165,12 @@ public class MzdbRawFile implements IRawFile {
         Chromatogram chromatogram = null;
         try {
             Peak[] peaks;
-            peaks = reader.getMsXicInMzRtRanges(params.getMinMz(), params.getMaxMz(), params.getElutionTimeLowerBound(), params.getElutionTimeUpperBound(), params.getMethod());
+            if (isDIAFile){
+                // TODO: tol in Da?
+                peaks = reader.getMsnXIC(params.getParentMz(), params.getMinMz(), 0.05, params.getElutionTimeLowerBound(), params.getElutionTimeUpperBound(), params.getMethod());
+            }else{
+                peaks = reader.getMsXicInMzRtRanges(params.getMinMz(), params.getMaxMz(), params.getElutionTimeLowerBound(), params.getElutionTimeUpperBound(), params.getMethod());
+            }
             chromatogram = createChromatoFromPeaks(peaks);
             chromatogram.minMz = params.getMinMz();
             chromatogram.maxMz = params.getMaxMz();

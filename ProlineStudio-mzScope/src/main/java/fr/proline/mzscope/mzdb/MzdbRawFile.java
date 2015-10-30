@@ -11,11 +11,10 @@ import fr.profi.mzdb.MzDbReader;
 import fr.profi.mzdb.SmartPeakelFinderConfig;
 import fr.profi.mzdb.algo.IsotopicPatternScorer;
 import fr.profi.mzdb.algo.feature.extraction.FeatureExtractorConfig;
-import fr.profi.mzdb.db.model.Run;
-import fr.profi.mzdb.db.model.params.param.CVParam;
 import fr.profi.mzdb.io.reader.provider.RunSliceDataProvider;
 import fr.profi.mzdb.io.writer.mgf.MgfWriter;
 import fr.profi.mzdb.io.writer.mgf.PrecursorMzComputation;
+import fr.profi.mzdb.model.AcquisitionMode;
 import fr.profi.mzdb.model.Feature;
 import fr.profi.mzdb.model.Peak;
 import fr.profi.mzdb.model.Peakel;
@@ -58,7 +57,6 @@ public class MzdbRawFile implements IRawFile {
     final private static DecimalFormat massFormatter = new DecimalFormat("0.####");
     final private static DecimalFormat timeFormatter = new DecimalFormat("0.00");
     
-    private final static String SWATH_ACQUISITION = "SWATH acquisition";
 
     private final File mzDbFile;
     private MzDbReader reader;
@@ -166,7 +164,8 @@ public class MzdbRawFile implements IRawFile {
         long start = System.currentTimeMillis();
         Chromatogram chromatogram = null;
         try {
-            Peak[] peaks = reader.getMsXicInMzRtRanges(params.getMinMz(), params.getMaxMz(), params.getElutionTimeLowerBound(), params.getElutionTimeUpperBound(), params.getMethod());
+            Peak[] peaks;
+            peaks = reader.getMsXicInMzRtRanges(params.getMinMz(), params.getMaxMz(), params.getElutionTimeLowerBound(), params.getElutionTimeUpperBound(), params.getMethod());
             chromatogram = createChromatoFromPeaks(peaks);
             chromatogram.minMz = params.getMinMz();
             chromatogram.maxMz = params.getMaxMz();
@@ -624,22 +623,13 @@ public class MzdbRawFile implements IRawFile {
     }
     
     private boolean checkDIAFile(){
-        try {
-            List<Run> runs = this.reader.getRuns();
-            if (runs != null){
-                for (Run run : runs) {
-                    List<CVParam> cvParams = run.getCVParams();
-                    if (cvParams != null){
-                        for (CVParam cvParam : cvParams) {
-                            if (cvParam.getValue().equals(SWATH_ACQUISITION)){
-                                return true;
-                            }
-                        }
-                    }
-                }
+        try{
+            AcquisitionMode acqMode = this.reader.getAcquisitionMode();
+            if (acqMode != null && acqMode.equals(AcquisitionMode.SWATH)){
+                return true;
             }
         } catch (SQLiteException ex) {
-            logger.error("Check DIA: SQLiteException while reading runs", ex);
+            logger.error("Check DIA: SQLiteException while reading acquisition mode", ex);
         }
         return false;
     }

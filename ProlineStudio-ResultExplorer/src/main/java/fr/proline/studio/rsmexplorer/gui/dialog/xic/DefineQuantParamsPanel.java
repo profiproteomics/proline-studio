@@ -719,7 +719,7 @@ public class DefineQuantParamsPanel extends JPanel{
                 
         c1.gridy++;
         c1.gridx = 0;
-        smootingPanel.add(new JLabel("alignment time interval:"), c1);
+        smootingPanel.add(new JLabel("alignment time interval (s):"), c1);
         c1.gridx++;  
         c1.weightx = 1;
         smootingPanel.add(m_alignmentSmoothingWinSizeTF, c1);

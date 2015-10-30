@@ -8,6 +8,7 @@ import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.rsmexplorer.gui.dialog.xic.DefineQuantParamsPanel;
+import fr.proline.studio.rsmexplorer.gui.dialog.xic.QuantProfileXICPanel;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.quantitation.QuantitationTree;
 import fr.proline.studio.rsmexplorer.tree.xic.XICDesignTree;
@@ -37,7 +38,10 @@ public class ExperimentalDesignPanel extends HourglassPanel implements DataBoxPa
     private ExportButton m_exportButton;
     private DefineQuantParamsPanel m_xicParamPanel;
     private JTabbedPane m_tabbedPane;
+    private QuantProfileXICPanel m_profilizerParamPanel;
     private JPanel m_confPanel;
+    
+    private JPanel m_refinedPanel;
     
     private DDataset m_dataset;
 
@@ -95,6 +99,8 @@ public class ExperimentalDesignPanel extends HourglassPanel implements DataBoxPa
         m_confPanel = new JPanel();
         m_confPanel.setLayout(new BorderLayout());
         
+        m_refinedPanel = new JPanel();
+        m_refinedPanel.setLayout(new BorderLayout());
         
         m_tabbedPane.add("Exp.Design", m_scrollPaneExpDesign);
         m_tabbedPane.add("Exp. Parameters", m_confPanel );
@@ -161,6 +167,23 @@ public class ExperimentalDesignPanel extends HourglassPanel implements DataBoxPa
             }else{
                 m_confPanel.removeAll();
                 m_confPanel.add(new JLabel("no configuration available"), BorderLayout.CENTER);
+            }
+            
+            if(m_dataset.getPostQuantProcessingConfig() != null){
+                m_refinedPanel.removeAll();
+                if (m_tabbedPane.getTabCount() == 2){
+                    m_tabbedPane.add("Refined Parameters", m_refinedPanel );
+                }
+                m_profilizerParamPanel = new QuantProfileXICPanel(true);
+                m_refinedPanel.add(m_profilizerParamPanel, BorderLayout.CENTER);
+                m_profilizerParamPanel.setRefinedParams(m_dataset.getPostQuantProcessingConfigAsMap());
+                
+            }else{
+                if (m_tabbedPane.getTabCount() == 3){
+                    m_tabbedPane.removeTabAt(2);
+                }
+                m_refinedPanel.removeAll();
+                m_refinedPanel.add(new JLabel("no configuration available"), BorderLayout.CENTER);
             }
         } catch (Exception ex) {
             m_logger.error("error while settings quanti params "+ex);

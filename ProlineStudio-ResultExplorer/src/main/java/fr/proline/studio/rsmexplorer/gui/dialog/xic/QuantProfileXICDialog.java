@@ -129,7 +129,7 @@ public class QuantProfileXICDialog extends DefaultDialog {
     }
     
     private void init() {
-        m_quantProfilePanel = new QuantProfileXICPanel();
+        m_quantProfilePanel = new QuantProfileXICPanel(false);
         
         this.setInternalComponent(m_quantProfilePanel);
     }

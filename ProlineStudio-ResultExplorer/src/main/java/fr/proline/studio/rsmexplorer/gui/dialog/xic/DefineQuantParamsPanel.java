@@ -14,12 +14,16 @@ import java.util.prefs.Preferences;
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import org.openide.util.NbPreferences;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Panel to set the different parameters for the XIC Quantitation
  * @author VD225637
  */
 public class DefineQuantParamsPanel extends JPanel{
+    
+    private static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
     
     private static DefineQuantParamsPanel m_singleton = null;
     private boolean m_readOnly;
@@ -383,11 +387,25 @@ public class DefineQuantParamsPanel extends JPanel{
                 break;
             }
         }
-        m_featureFilterValueTF.setText(""+Double.parseDouble(ftParams.get("value").toString()));
+        try{
+            m_featureFilterValueTF.setText(""+Double.parseDouble(ftParams.get("value").toString()));
+        }catch(NumberFormatException ex){
+            m_logger.error("error while settings quanti params "+ex);
+            m_featureFilterValueTF.setText("0.0");
+        }catch(NullPointerException ex){
+            m_logger.error("error while settings quanti params "+ex);
+            m_featureFilterValueTF.setText("0.0");
+        }
         
         Map<String,Object> ftMappingParams =(Map<String,Object>) quantParams.get("ft_mapping_params");
-        m_featureMappingMoZTolTF.setText(""+Double.parseDouble(ftMappingParams.get("moz_tol").toString()));
-        m_featureMappingTimeTolTF.setText(""+Double.parseDouble(ftMappingParams.get("time_tol").toString()));
+        try{
+            m_featureMappingMoZTolTF.setText(""+Double.parseDouble(ftMappingParams.get("moz_tol").toString()));
+            m_featureMappingTimeTolTF.setText(""+Double.parseDouble(ftMappingParams.get("time_tol").toString()));
+        }catch(NumberFormatException ex){
+            m_logger.error("error while settings quanti params "+ex);
+            m_featureMappingMoZTolTF.setText("10.0");
+            m_featureMappingTimeTolTF.setText("120.0");
+        }
         
         if (quantParams.containsKey("normalization_method")){
             for(int i=0; i<FEATURE_NORMALIZATION_KEYS.length; i++){

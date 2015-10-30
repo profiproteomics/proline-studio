@@ -573,6 +573,22 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                             
                 }
             }
+            // load ObjectTree corresponding to the POST_QUANT_PROCESSING_CONFIG
+            if (objectTreeIdByName != null && objectTreeIdByName.get("quantitation.post_quant_processing_config") != null){
+                Long objectId = objectTreeIdByName.get("quantitation.post_quant_processing_config");
+                String queryObject = "SELECT clobData FROM fr.proline.core.orm.uds.ObjectTree WHERE id=:objectId ";
+                Query qObject = entityManagerUDS.createQuery(queryObject);
+                qObject.setParameter("objectId", objectId);
+                try{
+                    String clobData = (String)qObject.getSingleResult();
+                    fr.proline.core.orm.uds.ObjectTree objectTree = new fr.proline.core.orm.uds.ObjectTree();
+                    objectTree.setId(objectId);
+                    objectTree.setClobData(clobData);
+                    dataset.setPostQuantProcessingConfig(objectTree);
+                }catch(NoResultException | NonUniqueResultException e){
+                            
+                }
+            }
 
             entityManagerMSI.getTransaction().commit();
             entityManagerUDS.getTransaction().commit();

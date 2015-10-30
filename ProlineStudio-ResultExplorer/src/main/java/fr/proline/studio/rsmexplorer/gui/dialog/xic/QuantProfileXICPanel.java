@@ -117,11 +117,11 @@ public class QuantProfileXICPanel extends JPanel {
         m_discardOxidizedPeptidesParameter = new BooleanParameter("discardOxidizedPeptides", "Discard Oxidized Peptides", m_discardOxidizedPeptidesChB, false);
         m_parameterList.add(m_discardOxidizedPeptidesParameter);
         
-        m_applyPepNormalizationChB = new JCheckBox("Apply Normalization");
+        m_applyPepNormalizationChB = new JCheckBox("Apply Normalization (median)");
         m_applyPepNormalizationParameter = new BooleanParameter("applyPepNormalization", "Apply Normalization on peptides", m_applyPepNormalizationChB, false);
         m_parameterList.add(m_applyPepNormalizationParameter);
 
-        m_applyProtNormalizationChB = new JCheckBox("Apply Normalization");
+        m_applyProtNormalizationChB = new JCheckBox("Apply Normalization (median)");
         m_applyProtNormalizationParameter = new BooleanParameter("applyProtNormalization", "Apply Normalization on proteins", m_applyProtNormalizationChB, false);
         m_parameterList.add(m_applyProtNormalizationParameter);
 

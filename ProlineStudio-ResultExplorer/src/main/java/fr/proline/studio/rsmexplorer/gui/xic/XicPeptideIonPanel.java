@@ -8,7 +8,7 @@ import fr.proline.studio.comparedata.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.export.ExportModelInterface;
-import fr.proline.studio.filter.FilterButtonV2;
+import fr.proline.studio.filter.FilterButton;
 import fr.proline.studio.filter.actions.ClearRestrainAction;
 import fr.proline.studio.filter.actions.RestrainAction;
 import fr.proline.studio.graphics.CrossSelectionInterface;
@@ -72,7 +72,7 @@ public class XicPeptideIonPanel  extends HourglassPanel implements DataBoxPanelI
     private DQuantitationChannel[] m_quantChannels;
     private boolean m_isXICMode;
     
-    private FilterButtonV2 m_filterButton;
+    private FilterButton m_filterButton;
     private ExportButton m_exportButton;
     private JButton m_columnVisibilityButton;
     private AddDataAnalyzerButton m_addCompareDataButton;
@@ -155,7 +155,7 @@ public class XicPeptideIonPanel  extends HourglassPanel implements DataBoxPanelI
         m_searchToggleButton = new SearchToggleButton(m_quantPeptideIonTable, m_quantPeptideIonTable, ((CompoundTableModel) m_quantPeptideIonTable.getModel()));
         toolbar.add(m_searchToggleButton);
         
-        m_filterButton = new FilterButtonV2(((CompoundTableModel) m_quantPeptideIonTable.getModel())) {
+        m_filterButton = new FilterButton(((CompoundTableModel) m_quantPeptideIonTable.getModel())) {
 
             @Override
             protected void filteringDone() {

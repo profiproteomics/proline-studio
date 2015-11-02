@@ -10,7 +10,7 @@ import fr.proline.studio.comparedata.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.export.ExportModelInterface;
-import fr.proline.studio.filter.FilterButtonV2;
+import fr.proline.studio.filter.FilterButton;
 import fr.proline.studio.filter.actions.ClearRestrainAction;
 import fr.proline.studio.filter.actions.RestrainAction;
 import fr.proline.studio.graphics.CrossSelectionInterface;
@@ -82,7 +82,7 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
     private MarkerContainerPanel m_markerContainerPanel;
     private boolean m_isXICMode;
 
-    private FilterButtonV2 m_filterButton;
+    private FilterButton m_filterButton;
     private ExportButton m_exportButton;
     private JButton m_columnVisibilityButton;
     private AddDataAnalyzerButton m_addCompareDataButton;
@@ -168,7 +168,7 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
         m_searchToggleButton = new SearchToggleButton(m_quantProteinSetTable, m_quantProteinSetTable, ((CompoundTableModel) m_quantProteinSetTable.getModel()));
         toolbar.add(m_searchToggleButton);
 
-        m_filterButton = new FilterButtonV2(((CompoundTableModel) m_quantProteinSetTable.getModel())) {
+        m_filterButton = new FilterButton(((CompoundTableModel) m_quantProteinSetTable.getModel())) {
 
             @Override
             protected void filteringDone() {

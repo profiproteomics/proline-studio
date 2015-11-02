@@ -5,7 +5,7 @@ import fr.profi.mzdb.model.Feature;
 import fr.proline.mzscope.model.IRawFile;
 import fr.proline.mzscope.mzdb.MzdbFeatureWrapper;
 import fr.proline.studio.export.ExportButton;
-import fr.proline.studio.filter.FilterButtonV2;
+import fr.proline.studio.filter.FilterButton;
 import fr.proline.studio.filter.actions.ClearRestrainAction;
 import fr.proline.studio.filter.actions.RestrainAction;
 import fr.proline.studio.markerbar.MarkerContainerPanel;
@@ -55,7 +55,7 @@ public class FeaturesPanel extends JPanel implements RowSorterListener, MouseLis
 
     private MarkerContainerPanel m_markerContainerPanel;
     // toolbar
-    private FilterButtonV2 m_filterButton;
+    private FilterButton m_filterButton;
     private ExportButton m_exportButton;
 
 
@@ -98,7 +98,7 @@ public class FeaturesPanel extends JPanel implements RowSorterListener, MouseLis
         JToolBar toolbar = new JToolBar(JToolBar.VERTICAL);
         toolbar.setFloatable(false);
 
-        m_filterButton = new FilterButtonV2(((CompoundTableModel) featureTable.getModel())) {
+        m_filterButton = new FilterButton(((CompoundTableModel) featureTable.getModel())) {
             @Override
             protected void filteringDone() {
                 //

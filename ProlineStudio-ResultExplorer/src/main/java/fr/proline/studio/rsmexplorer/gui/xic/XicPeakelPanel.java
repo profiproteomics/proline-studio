@@ -7,7 +7,7 @@ import fr.proline.studio.comparedata.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.export.ExportModelInterface;
-import fr.proline.studio.filter.FilterButtonV2;
+import fr.proline.studio.filter.FilterButton;
 import fr.proline.studio.filter.actions.ClearRestrainAction;
 import fr.proline.studio.filter.actions.RestrainAction;
 import fr.proline.studio.graphics.CrossSelectionInterface;
@@ -58,7 +58,7 @@ public class XicPeakelPanel  extends HourglassPanel implements DataBoxPanelInter
 
     private MarkerContainerPanel m_markerContainerPanel;
     
-    private FilterButtonV2 m_filterButton;
+    private FilterButton m_filterButton;
     private ExportButton m_exportButton;
     private JButton m_graphicsButton;
     
@@ -125,7 +125,7 @@ public class XicPeakelPanel  extends HourglassPanel implements DataBoxPanelInter
         JToolBar toolbar = new JToolBar(JToolBar.VERTICAL);
         toolbar.setFloatable(false);
 
-        m_filterButton = new FilterButtonV2(((CompoundTableModel) m_peakelTable.getModel())) {
+        m_filterButton = new FilterButton(((CompoundTableModel) m_peakelTable.getModel())) {
 
             @Override
             protected void filteringDone() {

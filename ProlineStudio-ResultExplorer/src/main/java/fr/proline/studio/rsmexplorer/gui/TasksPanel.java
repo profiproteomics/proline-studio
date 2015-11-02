@@ -5,7 +5,7 @@ import fr.proline.studio.dam.taskinfo.TaskInfo;
 import fr.proline.studio.dam.taskinfo.TaskInfoManager;
 import fr.proline.studio.filter.ConvertValueInterface;
 import fr.proline.studio.filter.Filter;
-import fr.proline.studio.filter.FilterButtonV2;
+import fr.proline.studio.filter.FilterButton;
 import fr.proline.studio.filter.IntegerFilter;
 import fr.proline.studio.filter.StringFilter;
 import fr.proline.studio.filter.ValueFilter;
@@ -157,7 +157,7 @@ public class TasksPanel extends HourglassPanel implements DataBoxPanelInterface 
         JToolBar toolbar = new JToolBar(JToolBar.VERTICAL);
         toolbar.setFloatable(false);
         
-        FilterButtonV2 filterButton = new FilterButtonV2(((CompoundTableModel) m_logTable.getModel())) {
+        FilterButton filterButton = new FilterButton(((CompoundTableModel) m_logTable.getModel())) {
 
             @Override
             protected void filteringDone() {

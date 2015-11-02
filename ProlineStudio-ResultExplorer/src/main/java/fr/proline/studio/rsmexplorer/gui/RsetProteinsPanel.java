@@ -24,7 +24,7 @@ import javax.swing.JScrollPane;
 import javax.swing.event.ListSelectionEvent;
 import fr.proline.studio.dam.tasks.*;
 import fr.proline.studio.export.ExportButton;
-import fr.proline.studio.filter.FilterButtonV2;
+import fr.proline.studio.filter.FilterButton;
 import fr.proline.studio.filter.actions.ClearRestrainAction;
 import fr.proline.studio.filter.actions.RestrainAction;
 import fr.proline.studio.graphics.CrossSelectionInterface;
@@ -61,7 +61,7 @@ public class RsetProteinsPanel extends HourglassPanel implements DataBoxPanelInt
 
     private SearchToggleButton m_searchToggleButton;
 
-    private FilterButtonV2 m_filterButton;
+    private FilterButton m_filterButton;
     private ExportButton m_exportButton;
     private AddDataAnalyzerButton m_addCompareDataButton;
 
@@ -167,7 +167,7 @@ public class RsetProteinsPanel extends HourglassPanel implements DataBoxPanelInt
         // Search Button
         m_searchToggleButton = new SearchToggleButton(m_proteinTable, m_proteinTable, ((CompoundTableModel) m_proteinTable.getModel()));
        
-        m_filterButton = new FilterButtonV2(((CompoundTableModel) m_proteinTable.getModel())) {
+        m_filterButton = new FilterButton(((CompoundTableModel) m_proteinTable.getModel())) {
 
             @Override
             protected void filteringDone() {

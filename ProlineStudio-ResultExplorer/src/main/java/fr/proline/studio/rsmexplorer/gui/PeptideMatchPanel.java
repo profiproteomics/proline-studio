@@ -9,7 +9,7 @@ import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.comparedata.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.export.ExportButton;
-import fr.proline.studio.filter.FilterButtonV2;
+import fr.proline.studio.filter.FilterButton;
 import fr.proline.studio.filter.actions.ClearRestrainAction;
 import fr.proline.studio.filter.actions.RestrainAction;
 import fr.proline.studio.graphics.CrossSelectionInterface;
@@ -62,7 +62,7 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
 
     private SearchToggleButton m_searchToggleButton;
     
-    private FilterButtonV2 m_filterButton;
+    private FilterButton m_filterButton;
     private ExportButton m_exportButton;
     private JButton m_graphicsButton;
     private AddDataAnalyzerButton m_addCompareDataButton;
@@ -274,7 +274,7 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
         // Search Button
         m_searchToggleButton = new SearchToggleButton(m_peptideMatchTable, m_peptideMatchTable, ((CompoundTableModel) m_peptideMatchTable.getModel()));
         
-        m_filterButton = new FilterButtonV2(((CompoundTableModel) m_peptideMatchTable.getModel())) {
+        m_filterButton = new FilterButton(((CompoundTableModel) m_peptideMatchTable.getModel())) {
 
             @Override
             protected void filteringDone() {

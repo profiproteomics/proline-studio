@@ -14,11 +14,11 @@ import org.openide.windows.WindowManager;
  * Button to access to filter dialog from a toolbar
  * @author JM235353
  */
-public abstract class FilterButtonV2 extends JButton implements ActionListener {
+public abstract class FilterButton extends JButton implements ActionListener {
     
     private FilterTableModelInterface m_tableModelFilterInterface;
     
-    public FilterButtonV2(FilterTableModelInterface tableModelFilterInterface) {
+    public FilterButton(FilterTableModelInterface tableModelFilterInterface) {
 
         setModelFilterInterface(tableModelFilterInterface);
         

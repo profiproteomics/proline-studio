@@ -5,7 +5,7 @@ import fr.proline.studio.comparedata.ExtraDataType;
 import fr.proline.studio.comparedata.GlobalTabelModelProviderInterface;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.export.ExportModelInterface;
-import fr.proline.studio.filter.FilterButtonV2;
+import fr.proline.studio.filter.FilterButton;
 import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.markerbar.MarkerContainerPanel;
@@ -42,7 +42,7 @@ public class GenericPanel extends JPanel implements DataBoxPanelInterface, Globa
     private AbstractDataBox m_dataBox;
 
 
-    private FilterButtonV2 m_filterButton;
+    private FilterButton m_filterButton;
     private ExportButton m_exportButton;
     private SearchToggleButton m_searchToggleButton;
     
@@ -149,7 +149,7 @@ public class GenericPanel extends JPanel implements DataBoxPanelInterface, Globa
         // Search Button
         m_searchToggleButton = new SearchToggleButton(m_dataTable, m_dataTable, ((CompoundTableModel) m_dataTable.getModel()));
         
-        m_filterButton = new FilterButtonV2((((CompoundTableModel) m_dataTable.getModel()))) {
+        m_filterButton = new FilterButton((((CompoundTableModel) m_dataTable.getModel()))) {
 
             @Override
             protected void filteringDone() {

@@ -10,7 +10,7 @@ import fr.proline.studio.comparedata.AddDataAnalyzerButton;
 import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.comparedata.GlobalTabelModelProviderInterface;
 import fr.proline.studio.export.ExportButton;
-import fr.proline.studio.filter.FilterButtonV2;
+import fr.proline.studio.filter.FilterButton;
 import fr.proline.studio.filter.actions.ClearRestrainAction;
 import fr.proline.studio.filter.actions.RestrainAction;
 import fr.proline.studio.graphics.CrossSelectionInterface;
@@ -49,7 +49,7 @@ public class RsmPeptidesOfProteinPanel extends HourglassPanel implements DataBox
     private PeptideTable m_peptidesTable;
     private JScrollPane m_scrollPane;
 
-    private FilterButtonV2 m_filterButton;
+    private FilterButton m_filterButton;
     private ExportButton m_exportButton;
     
     private DProteinMatch m_currentProteinMatch = null;
@@ -117,7 +117,7 @@ public class RsmPeptidesOfProteinPanel extends HourglassPanel implements DataBox
         JToolBar toolbar = new JToolBar(JToolBar.VERTICAL);
         toolbar.setFloatable(false);
 
-        m_filterButton = new FilterButtonV2(((CompoundTableModel) m_peptidesTable.getModel())) {
+        m_filterButton = new FilterButton(((CompoundTableModel) m_peptidesTable.getModel())) {
 
             @Override
             protected void filteringDone() {

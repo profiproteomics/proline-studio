@@ -21,6 +21,8 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Base class for axis
@@ -30,7 +32,7 @@ import javax.swing.JTextField;
 public abstract class Axis {
 
    protected static final Stroke DASHED = new BasicStroke(1.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_MITER, 10.0f, new float[]{2.0f, 2.0f}, 0.0f);
-
+private static final Logger m_logger = LoggerFactory.getLogger(Axis.class);
    protected String m_title = null;
    protected Font m_titleFont = null;
    protected FontMetrics m_titleFontMetrics;
@@ -249,7 +251,7 @@ public abstract class Axis {
    }
 
    public void setRange(double min, double max) {
-      if (!Double.isNaN(m_lockedMinValue) && (min < m_lockedMinValue)) {
+      if (!Double.isNaN(m_lockedMinValue) && (min < m_lockedMinValue) && m_lockedMinValue < max) {
          m_minValue = m_lockedMinValue;
       } else {
          m_minValue = min;

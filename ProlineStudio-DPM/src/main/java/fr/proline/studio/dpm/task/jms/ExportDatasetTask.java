@@ -128,6 +128,15 @@ public class ExportDatasetTask extends AbstractJMSTask {
                 }
                 finalExportParams.put("sample_additional", additionalsXmlString);
             }
+            if(m_exportParams.containsKey("protocol_steps")){            
+                finalExportParams.remove("protocol_steps");
+                List<CVParam> additionals =  (List<CVParam>) m_exportParams.get("protocol_steps");
+                List<String> additionalsXmlString = new ArrayList<>(additionals.size());
+                for(CVParam nextCVParam : additionals){
+                    additionalsXmlString.add(nextCVParam.toXMLString());
+                }
+                finalExportParams.put("protocol_steps", additionalsXmlString);            
+            }
             params.put("extra_params", finalExportParams); //Ou MZIDENTML ...
         } else {
             params.put("file_format", "TEMPLATED"); //Ou MZIDENTML ...

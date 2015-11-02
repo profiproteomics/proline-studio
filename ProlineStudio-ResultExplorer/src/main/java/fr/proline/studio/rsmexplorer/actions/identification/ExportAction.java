@@ -15,6 +15,8 @@ public class ExportAction extends AbstractRSMAction {
 
     private AbstractRSMAction m_exportDatasetAction; // Could be ExportDatasetAction or ExportDatasetJMSAction
     private AbstractRSMAction m_exportPrideAction;
+    private AbstractRSMAction m_exportSpectraAction;
+    
     
     private JMenu m_menu;
     
@@ -44,12 +46,21 @@ public class ExportAction extends AbstractRSMAction {
         } else {
             m_exportPrideAction = new ExportRSM2PrideAction(m_treeType);
         }
-
+        
+        if (m_isJMSDefined) {
+            m_exportSpectraAction = new ExportSpectraListJMSAction(m_treeType);
+        } else {
+            m_exportSpectraAction = null;
+        }
+        
         JMenuItem exportDatasetItem = new JMenuItem(m_exportDatasetAction);
         JMenuItem exportPrideItem = new JMenuItem(m_exportPrideAction);
-        
         m_menu.add(exportDatasetItem);
         m_menu.add(exportPrideItem);
+        if(m_exportSpectraAction!=null){
+            JMenuItem exportSpectraItem = new JMenuItem(m_exportSpectraAction);
+            m_menu.add(exportSpectraItem);
+        }
 
         return m_menu;
     }

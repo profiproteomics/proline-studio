@@ -1,5 +1,7 @@
 package fr.proline.studio.rsmexplorer.gui.model;
 
+import fr.proline.core.orm.msi.ResultSet;
+import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.dto.DMsQuery;
 import fr.proline.studio.comparedata.ExtraDataType;
 import fr.proline.studio.dam.tasks.DatabaseLoadMSQueriesTask;
@@ -9,6 +11,8 @@ import fr.proline.studio.filter.IntegerFilter;
 import fr.proline.studio.filter.StringFilter;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
+import fr.proline.studio.pattern.MsQueryInfoRSM;
+import fr.proline.studio.pattern.MsQueryInfoRset;
 import fr.proline.studio.table.renderer.DefaultLeftAlignRenderer;
 import fr.proline.studio.table.renderer.DefaultRightAlignRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.DoubleRenderer;
@@ -52,8 +56,12 @@ public class MSQueriesTableModel extends LazyTableModel implements GlobalTableMo
     
     private String m_modelName;
     
-    public MSQueriesTableModel(LazyTable table) {
+    private boolean m_rsmSource;
+    
+    public MSQueriesTableModel(LazyTable table, boolean rsmSource) {
         super(table);
+        
+        m_rsmSource = rsmSource;
     }
     
     public DMsQuery getMsQuery(int row) {
@@ -414,6 +422,11 @@ public class MSQueriesTableModel extends LazyTableModel implements GlobalTableMo
     public ArrayList<ExtraDataType> getExtraDataTypes() {
         ArrayList<ExtraDataType> list = new ArrayList<>();
         list.add(new ExtraDataType(DMsQuery.class, true));
+        if (m_rsmSource) {
+            list.add(new ExtraDataType(MsQueryInfoRSM.class, true));
+        } else {
+            list.add(new ExtraDataType(MsQueryInfoRset.class, true));
+        }
         registerSingleValuesAsExtraTypes(list);
         return list;
     }
@@ -427,6 +440,10 @@ public class MSQueriesTableModel extends LazyTableModel implements GlobalTableMo
     public Object getValue(Class c, int row) {
         if (c.equals(DMsQuery.class)) {
             return m_msqueries.get(row);
+        } else if (c.equals(MsQueryInfoRSM.class) && m_rsmSource) {
+            return new MsQueryInfoRSM(m_msqueries.get(row), (ResultSummary) getValue(ResultSummary.class));
+        } else if (c.equals(MsQueryInfoRset.class) && !m_rsmSource) {
+            return new MsQueryInfoRset(m_msqueries.get(row), (ResultSet) getValue(ResultSet.class));
         }
         return null;
     }

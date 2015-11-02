@@ -91,7 +91,7 @@ public class DataBoxMSQueriesForRset extends AbstractDataBox{
         };
         // ask asynchronous loading of data
         m_msQueriesList = new ArrayList();
-        m_nbPeptideMatchesByMsQueryIdMap= new HashMap<>();
+        m_nbPeptideMatchesByMsQueryIdMap = new HashMap<>();
         DatabaseLoadMSQueriesTask task = new DatabaseLoadMSQueriesTask(callback);
         task.initLoadMSQueries( getProjectId(), _rset, m_msQueriesList, m_nbPeptideMatchesByMsQueryIdMap);
         registerTask(task);

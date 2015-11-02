@@ -179,7 +179,7 @@ public class MSQueriesPanel extends HourglassPanel implements DataBoxPanelInterf
         m_scrollPane = new JScrollPane();
         
         m_msqueriesTable = new MSQueriesTable();
-        m_msqueriesTable.setModel(new CompoundTableModel(new MSQueriesTableModel((LazyTable)m_msqueriesTable), true));
+        m_msqueriesTable.setModel(new CompoundTableModel(new MSQueriesTableModel((LazyTable)m_msqueriesTable, m_fromRSM), true));
         CustomColumnControlButton customColumnControl = new CustomColumnControlButton(m_msqueriesTable);
         m_msqueriesTable.setColumnControl(customColumnControl);
         // hide the id column

@@ -61,10 +61,10 @@ public class TabbedMultiRawFilePanel extends JPanel implements IRawFilePanel {
     private final Map<IRawFile, IRawFileLoading> mapRawFileLoading;
     private boolean isZoomSynchronized = true;
     // keep percentage of the zoom and the relative value zoomed
-    private double relativeXValue;
-    private double zoomXLevel;
-    private double relativeYValue;
-    private double zoomYLevel;
+    private Double relativeXValue = Double.NaN;
+    private Double zoomXLevel = Double.NaN;
+    private Double relativeYValue = Double.NaN;
+    private Double zoomYLevel = Double.NaN;
     
     
     public TabbedMultiRawFilePanel(List<IRawFile> rawfiles) {
@@ -161,7 +161,7 @@ public class TabbedMultiRawFilePanel extends JPanel implements IRawFilePanel {
         if(m_buttonZoom == null){
             m_buttonZoom = new JButton();
             m_buttonZoom.setIcon(IconManager.getIcon(IconManager.IconType.ZOOM_FIT));
-            updateZoomToolTip();
+            updateZoomValues();
             m_buttonZoom.addActionListener((ActionEvent e) -> {
                 synchronizeZoom();
             });
@@ -309,6 +309,9 @@ public class TabbedMultiRawFilePanel extends JPanel implements IRawFilePanel {
                 ChromatogramPanel chromatoPanel = (ChromatogramPanel) chromatogramContainerPanel.getComponentAt(t);
                 c = chromatoPanel.displayChromatogram(chromato, mode);
                 mapChromatogramForRawFile.put(getRawFile(rawFileName), chromato);
+                if (isZoomSynchronized && (!zoomXLevel.isNaN() && !zoomYLevel.isNaN())) {
+                    chromatoPanel.updateAxisRange(zoomXLevel, relativeXValue, zoomYLevel, relativeYValue);
+                }
             }
         }
         return c;
@@ -446,9 +449,12 @@ public class TabbedMultiRawFilePanel extends JPanel implements IRawFilePanel {
             for (int t = 0; t < nbTab; t++) {
                 String tabTitle = chromatogramContainerPanel.getTitleAt(t);
                 if (tabTitle.equals(rawFile.getName())) {  // see how to better get the tabComponent linked to a rawFile
-                 ChromatogramPanel chromatoPanel = (ChromatogramPanel) chromatogramContainerPanel.getComponentAt(t);
+                    ChromatogramPanel chromatoPanel = (ChromatogramPanel) chromatogramContainerPanel.getComponentAt(t);
                     chromatoPanel.displayChromatogram(chromato, DisplayMode.REPLACE);
                     mapChromatogramForRawFile.put(rawFile, chromato);
+                    if (isZoomSynchronized && (!zoomXLevel.isNaN() && !zoomYLevel.isNaN())) {
+                        chromatoPanel.updateAxisRange(zoomXLevel, relativeXValue, zoomYLevel, relativeYValue);
+                    }
                 }
             }
         }
@@ -456,11 +462,17 @@ public class TabbedMultiRawFilePanel extends JPanel implements IRawFilePanel {
     
     private void synchronizeZoom(){
         isZoomSynchronized = !isZoomSynchronized;
-        updateZoomToolTip();
+        updateZoomValues();
     }
     
-    private void updateZoomToolTip(){
+    private void updateZoomValues(){
         m_buttonZoom.setToolTipText(isZoomSynchronized?tooltipZoom : tooltipForceZoom);
+        if(!isZoomSynchronized){
+            relativeXValue = Double.NaN;
+            zoomXLevel = Double.NaN;
+            relativeYValue = Double.NaN;
+            zoomYLevel = Double.NaN;
+        }
     }
     
     

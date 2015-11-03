@@ -287,10 +287,7 @@ public class ServerConnectionManager {
             @Override
             public void run(boolean success) {
                 if (success) {
-//                    JMSConnectionManager.getJMSConnectionManager().setJMSServerHost((String)databaseProperties.get(JMSConnectionManager.JMS_SERVER_HOST_PARAM_KEY));
-//                    if(databaseProperties.containsKey(JMSConnectionManager.JMS_SERVER_PORT_PARAM_KEY))
-//                        JMSConnectionManager.getJMSConnectionManager().setJMSServerPort((Integer)databaseProperties.get(JMSConnectionManager.JMS_SERVER_PORT_PARAM_KEY));
-                    setConnectionState(CONNECTION_DONE);                    
+             
                     // we now ask for the database connection
                     tryDatabaseConnection(connectionCallback, databaseProperties, projectUser);
                 } else {

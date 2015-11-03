@@ -36,6 +36,7 @@ import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
 import javax.swing.ToolTipManager;
 import javax.swing.UIManager;
+import javax.swing.event.EventListenerList;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 import org.slf4j.Logger;
@@ -104,6 +105,9 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
     private final static Color titleColor = Color.DARK_GRAY;
     
 //    public final FPSUtility fps = new FPSUtility(20);
+    
+    //events
+    private EventListenerList listenerList = new EventListenerList();
     
     public BasePlotPanel() {
         formatE.applyPattern("0.#####E0");
@@ -643,12 +647,22 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
 
             int action = m_zoomGesture.getAction();
             if (action == ZoomGesture.ACTION_ZOOM) {
+                double oldMinX = m_xAxis.getMinValue();
+                double oldMaxX = m_xAxis.getMaxValue();
+                double oldMinY = m_yAxis.getMinValue();
+                double oldMaxY = m_yAxis.getMaxValue();
                 m_xAxis.setRange(m_xAxis.pixelToValue(m_zoomGesture.getStartX()), m_xAxis.pixelToValue(m_zoomGesture.getEndX()));
                 m_yAxis.setRange(m_yAxis.pixelToValue(m_zoomGesture.getEndY()), m_yAxis.pixelToValue(m_zoomGesture.getStartY()));
                 m_updateDoubleBuffer = true;
+                fireUpdateAxisRange(oldMinX, oldMaxX, m_xAxis.getMinValue(), m_xAxis.getMaxValue(), oldMinY,oldMaxY, m_yAxis.getMinValue(), m_yAxis.getMaxValue() );
             } else if (action == ZoomGesture.ACTION_UNZOOM) {
                 if (!m_plots.isEmpty()){
+                    double oldMinX = m_xAxis.getMinValue();
+                    double oldMaxX = m_xAxis.getMaxValue();
+                    double oldMinY = m_yAxis.getMinValue();
+                    double oldMaxY = m_yAxis.getMaxValue();
                     updateAxis(m_plots.get(0));
+                    fireUpdateAxisRange(oldMinX, oldMaxX, m_xAxis.getMinValue(), m_xAxis.getMaxValue(), oldMinY,oldMaxY, m_yAxis.getMinValue(), m_yAxis.getMaxValue() );
                 }
                 m_updateDoubleBuffer = true;
             } else if (e.isPopupTrigger()) { // action == ZoomGesture.ACTION_NONE
@@ -691,6 +705,27 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
         for (PlotPanelListener l : m_listeners)
             l.plotPanelMouseClicked(e, xValue, yValue);
     }
+    
+    
+    protected void fireUpdateAxisRange(double oldMinX, double oldMaxX, double newMinX, double newMaxX, double oldMinY, double oldMaxY, double newMinY, double newMaxY) {
+       // Notify 
+        double[] oldX = new double[2];
+        oldX[0] = oldMinX;
+        oldX[1] = oldMaxX;
+        double[] newX = new double[2];
+        newX[0] = newMinX;
+        newX[1] = newMaxX;
+        double[] oldY = new double[2];
+        oldY[0] = oldMinY;
+        oldY[1] = oldMaxY;
+        double[] newY = new double[2];
+        newY[0] = newMinY;
+        newY[1] = newMaxY;
+        for (PlotPanelListener l : m_listeners){
+            l.updateAxisRange(oldX, newX,oldY, newY);
+        }
+    }
+    
 
     @Override
     public void mouseEntered(MouseEvent e) {}
@@ -721,12 +756,18 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
             m_zoomGesture.moveZooming(e.getX(), e.getY());
             repaint();
         } else if (m_panAxisGesture.isPanning()) {
+            double oldMinX = m_xAxis.getMinValue();
+            double oldMaxX = m_xAxis.getMaxValue();
+            double oldMinY = m_yAxis.getMinValue();
+            double oldMaxY = m_yAxis.getMaxValue();
           if (m_panAxisGesture.getPanningAxis() == PanAxisGesture.X_AXIS_PAN) {
              double delta = m_xAxis.pixelToValue(m_panAxisGesture.getPreviousX()) - m_xAxis.pixelToValue(e.getX());
              m_xAxis.setRange(m_xAxis.getMinValue() + delta, m_xAxis.getMaxValue() + delta);
+             fireUpdateAxisRange(oldMinX, oldMaxX, m_xAxis.getMinValue(), m_xAxis.getMaxValue(), oldMinY,oldMaxY, m_yAxis.getMinValue(), m_yAxis.getMaxValue() );
           } else {
              double delta = m_yAxis.pixelToValue(m_panAxisGesture.getPreviousY()) - m_yAxis.pixelToValue(e.getY());
              m_yAxis.setRange(m_yAxis.getMinValue() + delta, m_yAxis.getMaxValue() + delta);
+             fireUpdateAxisRange(oldMinX, oldMaxX, m_xAxis.getMinValue(), m_xAxis.getMaxValue(), oldMinY,oldMaxY, m_yAxis.getMinValue(), m_yAxis.getMaxValue() );
           }
           m_panAxisGesture.movePan(e.getX(), e.getY());
           m_updateDoubleBuffer = true;
@@ -871,6 +912,11 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
        if (m_plots == null || m_plots.isEmpty() || e == null) {
             return;
         }
+       double oldMinX = m_xAxis.getMinValue();
+       double oldMaxX = m_xAxis.getMaxValue();
+       double oldMinY = m_yAxis.getMinValue();
+       double oldMaxY = m_yAxis.getMaxValue();
+
         double factor = 0.20;
         double xValue = m_xAxis.pixelToValue(e.getX());
         double yValue = m_yAxis.pixelToValue(e.getY());
@@ -890,9 +936,10 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
            m_yAxis.setRange(newYmin, newYmax);
            repaintUpdateDoubleBuffer();
         }
+        fireUpdateAxisRange(oldMinX, oldMaxX, m_xAxis.getMinValue(), m_xAxis.getMaxValue(), oldMinY,oldMaxY, m_yAxis.getMinValue(), m_yAxis.getMaxValue() );
    }
-    
-    
+   
+   
     public class LogAction extends AbstractAction {
 
         private final Axis m_axis;

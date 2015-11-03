@@ -158,7 +158,9 @@ public class MzScopePanel extends JPanel implements IFeatureViewer, IExtractionE
 
     private void viewersTabPaneStateChanged(ChangeEvent evt) {
         this.selectedRawFilePanel = (IRawFilePanel) viewersTabPane.getSelectedComponent();
-        getExtractionPanel().setDIAEnabled(selectedRawFilePanel.getCurrentRawfile().isDIAFile());
+        if (selectedRawFilePanel != null && selectedRawFilePanel.getCurrentRawfile() != null){
+            getExtractionPanel().setDIAEnabled(selectedRawFilePanel.getCurrentRawfile().isDIAFile());
+        }
     }
 
     public Chromatogram getCurrentChromatogram() {

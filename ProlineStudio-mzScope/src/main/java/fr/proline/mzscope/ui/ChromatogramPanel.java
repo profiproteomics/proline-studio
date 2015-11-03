@@ -9,6 +9,7 @@ import fr.proline.mzscope.model.Chromatogram;
 import fr.proline.mzscope.model.IFeature;
 import fr.proline.mzscope.model.Ms1ExtractionRequest;
 import fr.proline.mzscope.model.MzScopePreferences;
+import fr.proline.mzscope.ui.event.AxisRangeChromatogramListener;
 import fr.proline.mzscope.ui.model.ChromatogramTableModel;
 import fr.proline.mzscope.utils.MzScopeConstants;
 import fr.proline.studio.graphics.BasePlotPanel;
@@ -49,6 +50,8 @@ public class ChromatogramPanel extends JPanel implements PlotPanelListener {
    protected Float currentScanTime = null;
    private PropertyChangeSupport changeSupport;
    
+   private List<AxisRangeChromatogramListener> m_listeners = new ArrayList<>();
+   
    public ChromatogramPanel() {
       listMsMsMarkers = new ArrayList();
       listChromatogram = new ArrayList();
@@ -67,6 +70,10 @@ public class ChromatogramPanel extends JPanel implements PlotPanelListener {
       chromatogramPlots = new ArrayList();
       this.add(plotPanel, BorderLayout.CENTER);
    }
+   
+   public void addListener(AxisRangeChromatogramListener listener) {
+        m_listeners.add(listener);
+    }
 
    public void showMSMSEvents(List<Float> listMsMsTime) {
       PlotLinear chromatogramPlot = chromatogramPlots.isEmpty() ? null : chromatogramPlots.get(0);
@@ -198,12 +205,46 @@ public class ChromatogramPanel extends JPanel implements PlotPanelListener {
       }
    }
 
+   @Override
    public void addPropertyChangeListener(PropertyChangeListener listener) {
       changeSupport.addPropertyChangeListener(listener);
    }
 
+   @Override
    public void removePropertyChangeListener(PropertyChangeListener listener) {
       changeSupport.removePropertyChangeListener(listener);
    }
+
+    @Override
+    public void updateAxisRange(double[] oldX,  double[] newX,  double[] oldY, double[] newY) {
+        fireUpdateAxisRange(oldX, newX, oldY, newY);
+    }
+    
+    
+    protected void fireUpdateAxisRange(double[] oldX,  double[] newX,  double[] oldY, double[] newY){
+        // Notify 
+        for (AxisRangeChromatogramListener l : m_listeners)
+            l.updateAxisRange(oldX, newX, oldY, newY);
+    }
+    
+    
+    public void updateAxisRange(double zoomXLevel, double relativeXValue, double zoomYLevel, double relativeYValue){
+        double oldXMin = chromatogramPlotPanel.getXAxis().getMinValue();
+        double oldXMax = chromatogramPlotPanel.getXAxis().getMaxValue();
+        double oldYMin = chromatogramPlotPanel.getYAxis().getMinValue();
+        double oldYMax = chromatogramPlotPanel.getYAxis().getMaxValue();
+        
+        double newRangeX = (double)(zoomXLevel * (oldXMax - oldXMin) / 100);
+        double x =   (double)(oldXMin + (relativeXValue * (oldXMax - oldXMin) / 100));
+        double newRangeY = (double)(zoomYLevel * (oldYMax - oldYMin) / 100);
+        double y =   (double)(oldYMin + (relativeYValue * (oldYMax - oldYMin) / 100));
+        double newXMin = x - (double)(newRangeX / 2);
+        double newXMax = x + (double)(newRangeX / 2);
+        double newYMin = y - (double)(newRangeY / 2);
+        double newYMax = y + (double)(newRangeY / 2);
+        chromatogramPlotPanel.getXAxis().setRange(newXMin, newXMax);
+        chromatogramPlotPanel.getYAxis().setRange(newYMin, newYMax);
+        chromatogramPlotPanel.repaintUpdateDoubleBuffer();
+    }
   
 }

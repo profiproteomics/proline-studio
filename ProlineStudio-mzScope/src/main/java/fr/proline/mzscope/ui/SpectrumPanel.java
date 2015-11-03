@@ -285,4 +285,9 @@ public class SpectrumPanel extends JPanel implements ScanHeaderListener, PlotPan
       return this.xicModeDisplay;
    }
 
+    @Override
+    public void updateAxisRange(double[] oldX, double[] newX,  double[] oldY,  double[] newY) {
+        
+    }
+
 }

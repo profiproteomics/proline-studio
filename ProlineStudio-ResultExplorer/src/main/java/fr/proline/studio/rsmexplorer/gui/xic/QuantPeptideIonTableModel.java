@@ -313,7 +313,7 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements GlobalT
                                     lazyData.setData(quantPeptideIon.getRawAbundance().isNaN() ? Float.valueOf(0) : quantPeptideIon.getRawAbundance());
                                     break;
                                 case COLTYPE_PSM:
-                                    lazyData.setData(quantPeptideIon.getPeptideMatchesCount());
+                                    lazyData.setData(quantPeptideIon.getPeptideMatchesCount() == null? Integer.valueOf(0) :quantPeptideIon.getPeptideMatchesCount() );
                                     break;
                             }
                         }

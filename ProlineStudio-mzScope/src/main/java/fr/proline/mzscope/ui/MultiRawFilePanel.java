@@ -59,7 +59,10 @@ public class MultiRawFilePanel extends AbstractRawFilePanel {
 
     @Override
     public IRawFile getCurrentRawfile() {
-        return getRawFile(chromatogramPanel.getCurrentChromatogram().rawFilename);
+        if (chromatogramPanel.getCurrentChromatogram() != null){
+            return getRawFile(chromatogramPanel.getCurrentChromatogram().rawFilename);
+        }
+        return null;
     }
 
     @Override

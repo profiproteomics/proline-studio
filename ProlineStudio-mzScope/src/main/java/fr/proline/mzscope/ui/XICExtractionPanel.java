@@ -201,7 +201,7 @@ public class XICExtractionPanel extends JPanel{
         if (parentMassTF == null) {
             parentMassTF = new JTextField();
             parentMassTF.setName("massRangeTF");
-            parentMassTF.setToolTipText("parent mass range to extract with the specified tolerance");
+            parentMassTF.setToolTipText("parent mass range to extract");
             parentMassTF.setColumns(10);
             parentMassTF.setPreferredSize(new Dimension(parentMassTF.getPreferredSize().width, 16));
             parentMassTF.addActionListener(new ActionListener() {
@@ -286,10 +286,12 @@ public class XICExtractionPanel extends JPanel{
             if (!hasDIAPanel){
                 mainPanel.add(getPanelParentMass());
             }
+            massRangeLabel.setText("Fragment Mass range:");
         }else{
             if (hasDIAPanel){
                 mainPanel.remove(getPanelParentMass());
             }
+            massRangeLabel.setText("Mass range:");
         }
         mainPanel.revalidate();
         mainPanel.repaint();

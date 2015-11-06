@@ -1,10 +1,18 @@
 package fr.proline.studio.dam.tasks;
 
 
+import fr.proline.core.orm.msi.Peptide;
 import fr.proline.core.orm.msi.PeptideInstance;
+import fr.proline.core.orm.msi.PeptideSet;
 import fr.proline.core.orm.msi.ResultSummary;
+import fr.proline.core.orm.msi.SequenceMatch;
+import fr.proline.core.orm.msi.dto.DMsQuery;
+import fr.proline.core.orm.msi.dto.DPeptideInstance;
+import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.core.orm.msi.dto.DProteinSet;
+import fr.proline.core.orm.msi.dto.DSpectrum;
+import fr.proline.core.orm.ps.PeptidePtm;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.core.orm.util.DataStoreConnectorFactory;
 import fr.proline.studio.dam.taskinfo.TaskError;
@@ -146,6 +154,12 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
 
             Long rsmId = m_rsm.getId();
 
+            //JPM.TEST 
+
+
+            
+            //JPM.TEST 
+            
             // Load Protein Sets
             // SELECT ps FROM PeptideSet pepset JOIN pepset.proteinSet as ps WHERE ps.resultSummary.id=:rsmId AND ps.isValidated=true ORDER BY pepset.score DESC
             TypedQuery<DProteinSet> proteinSetsQuery = entityManagerMSI.createQuery("SELECT new fr.proline.core.orm.msi.dto.DProteinSet(ps.id, ps.representativeProteinMatchId ,ps.resultSummary.id) FROM PeptideSet pepset JOIN pepset.proteinSet as ps WHERE ps.resultSummary.id=:rsmId AND ps.isValidated=true ORDER BY pepset.score DESC", DProteinSet.class);
@@ -180,7 +194,7 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
                  *
                  */
                 // slice the task and get the first one
-                SubTask subTask = m_subTaskManager.sliceATaskAndGetFirst(SUB_TASK_TYPICAL_PROTEIN, m_proteinMatchIds.size(), SLICE_SIZE);
+                 SubTask subTask = m_subTaskManager.sliceATaskAndGetFirst(SUB_TASK_TYPICAL_PROTEIN, m_proteinMatchIds.size(), SLICE_SIZE);
 
                 // execute the first slice now
                 typicalProteinMatch(entityManagerMSI, subTask);
@@ -220,7 +234,7 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
 
             if (nbProteinSets > 0) {
                 // slice the task and get the first one
-                SubTask subTask = m_subTaskManager.sliceATaskAndGetFirst(SUB_TASK_SAMESET_SUBSET_COUNT, m_proteinSetIds.size(), SLICE_SIZE);
+                 SubTask subTask = m_subTaskManager.sliceATaskAndGetFirst(SUB_TASK_SAMESET_SUBSET_COUNT, m_proteinSetIds.size(), SLICE_SIZE);
 
                 // execute the first slice now
                 sameSetAndSubSetCount(entityManagerMSI, m_proteinSetIds, subTask);
@@ -247,6 +261,8 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
         return true;
     }
 
+
+    
     private boolean fetchDataMainTaskForPSetNumber() {
         
         

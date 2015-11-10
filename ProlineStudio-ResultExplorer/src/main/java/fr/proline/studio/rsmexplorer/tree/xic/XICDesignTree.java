@@ -137,7 +137,10 @@ public class XICDesignTree extends AbstractTree {
                 
                 SelectRawFileDialog selectRawFileDialog = SelectRawFileDialog.getSelectRawFileDialog(CreateXICDialog.getDialog(null));
                 selectRawFileDialog.init(potentialRawFiles, runInfoData.getRawFileSouce());
-                selectRawFileDialog.centerToWindow(CreateXICDialog.getDialog(null));
+                //selectRawFileDialog.centerToWindow(CreateXICDialog.getDialog(null));
+                int x = (int)(CreateXICDialog.getDialog(null).getLocationOnScreen().getX() + CreateXICDialog.getDialog(null).getWidth() /2);
+                int y = (int)(CreateXICDialog.getDialog(null).getLocationOnScreen().getY());
+                selectRawFileDialog.setLocation(x, y);
                 selectRawFileDialog.setVisible(true);
                 if (selectRawFileDialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {
                     

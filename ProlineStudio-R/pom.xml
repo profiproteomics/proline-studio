@@ -4,7 +4,7 @@
     <parent>
     <artifactId>ProlineStudio-parent</artifactId>
     <groupId>fr.proline</groupId>
-    <version>0.4.3-SNAPSHOT</version>
+    <version>0.4.3</version>
   </parent>
 
 
@@ -122,13 +122,14 @@
         <dependency> 
         <groupId>org.slf4j</groupId>
         <artifactId>slf4j-api</artifactId>  
+        <version>1.7.12</version>
         <!-- Version inherited from ProFI-Pom -->
       </dependency>  
       
       <dependency>
             <groupId>org.swinglabs.swingx</groupId>
             <artifactId>swingx-all</artifactId>
-            <version>1.6.3</version>
+            <version>1.6.5-1</version>
             <type>jar</type>
         </dependency>
         
@@ -172,7 +173,6 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>nbm-maven-plugin</artifactId>
-                <version>3.7</version>
                 <extensions>true</extensions>
                 <configuration>
                     <publicPackages>

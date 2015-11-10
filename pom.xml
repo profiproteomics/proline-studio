@@ -9,9 +9,8 @@
         <version>0.0.6</version>
     </parent>
 
-    <groupId>fr.proline</groupId>
     <artifactId>ProlineStudio-parent</artifactId>
-    <version>0.4.3-SNAPSHOT</version> <!-- ProlineStudio version -->
+    <version>0.4.3</version> <!-- ProlineStudio version -->
     <packaging>pom</packaging>
 
     <name>ProlineStudio-parent</name>
@@ -31,12 +30,12 @@
     </modules>
 
     <properties>
-        <netbeans.version>RELEASE711</netbeans.version>
+        <netbeans.version>RELEASE802</netbeans.version>
         <brandingToken>prolinestudio</brandingToken>
     </properties>
 
     <scm>
-        <connection>scm:svn:https://bioproj.extra.cea.fr/svn/proline/ProlineStudio/tags/0.4.2</connection>
+        <connection>scm:svn:https://bioproj.extra.cea.fr/svn/proline/ProlineStudio/tags/0.4.3</connection>
     </scm>
  
 
@@ -48,48 +47,8 @@
             <artifactId>junit</artifactId>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>org.jfree</groupId>
-            <artifactId>jfreechart</artifactId>
-            <version>1.0.17</version>
-        </dependency>
-        <dependency>
-            <groupId>org.jfree</groupId>
-            <artifactId>jfreesvg</artifactId>
-            <version>1.9</version>
-        </dependency>
     
-        <dependency>
-            <groupId>batik</groupId>
-            <artifactId>batik-dom</artifactId>
-            <version>1.6</version>
-        </dependency> 
 
-        <dependency>
-            <groupId>batik</groupId>
-            <artifactId>batik-svggen</artifactId>
-            <version>1.6</version>
-        </dependency>
-        <dependency>
-            <groupId>batik</groupId>
-            <artifactId>batik-ext</artifactId>
-            <version>1.6</version>
-        </dependency>
-        <dependency>
-            <groupId>batik</groupId>
-            <artifactId>batik-xml</artifactId>
-            <version>1.6</version>
-        </dependency>
-        <dependency>
-            <groupId>batik</groupId>
-            <artifactId>batik-awt-util</artifactId>
-            <version>1.6</version>
-        </dependency>
-        <dependency>
-            <groupId>batik</groupId>
-            <artifactId>batik-util</artifactId>
-            <version>1.6</version>
-        </dependency>
 
 	
     </dependencies>
@@ -114,6 +73,7 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-jar-plugin</artifactId>
                     <!-- Version inherited from ProFI-Pom -->
+                    <version>2.6</version>
                     <configuration>
                         <!-- to have the jar plugin pickup the nbm generated manifest -->
                         <useDefaultManifestFile>true</useDefaultManifestFile>
@@ -123,12 +83,19 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.3</version>
                     <!-- Version inherited from ProFI-Pom -->
                     <configuration>
-                        <source>1.7</source> <!-- Java version : 1.7 -->
-                        <target>1.7</target>
+                        <compilerVersion>1.8</compilerVersion>
+                        <source>1.8</source> <!-- Java version : 1.8 -->
+                        <target>1.8</target>
                     </configuration>
                 </plugin>
+                <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>2.18.1</version> <!-- Latest version checked on 03 September 2015 -->
+        </plugin>
         
                 <!--  Maven Release for branches and tags -->
 
@@ -136,7 +103,7 @@
 
                 <plugin>
                     <artifactId>maven-release-plugin</artifactId>
-                    <version>2.5.1</version>
+                    <version>2.5.2</version>
                     <configuration>
                         <providerImplementations>
                             <svn>javasvn</svn>

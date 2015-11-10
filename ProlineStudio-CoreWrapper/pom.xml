@@ -5,7 +5,7 @@
     <parent>
         <artifactId>ProlineStudio-parent</artifactId>
         <groupId>fr.proline</groupId>
-        <version>0.4.3-SNAPSHOT</version>
+        <version>0.4.3</version>
     </parent>
 
     <groupId>fr.proline</groupId>
@@ -22,12 +22,12 @@
 
     <dependencies>
 
-        <!-- Other dependencies -->
+        <!-- Other dependencies 
         <dependency>
             <groupId>commons-collections</groupId>
             <artifactId>commons-collections</artifactId>
             <version>3.1</version>
-        </dependency>
+        </dependency>-->
 
 
 
@@ -52,12 +52,6 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>Proline-OM</artifactId>
             <version>${core.version}</version>
-            <exclusions>
-                <exclusion>
-                    <artifactId>commons-collections</artifactId>
-                    <groupId>commons-collections</groupId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
@@ -142,6 +136,7 @@
                         <publicPackage>fr.proline.core.orm.uds.dto</publicPackage>
                         <publicPackage>fr.proline.core.orm.uds.repository</publicPackage>
                         <publicPackage>fr.proline.core.orm.util</publicPackage>
+                        <publicPackage>fr.proline.core.orm.lcms.dto</publicPackage>
                         <publicPackage>fr.proline.core.parser.lcms</publicPackage>
                         <publicPackage>fr.proline.core.parser.lcms.impl</publicPackage>
                         <publicPackage>fr.proline.core.service.lcms</publicPackage>
@@ -182,6 +177,9 @@
                         <publicPackage>org.w3c.dom</publicPackage>
                         <publicPackage>org.w3c.dom.html</publicPackage>
                         <publicPackage>org.w3c.dom.ls</publicPackage>
+                        <publicPackage>org.dom4j.tree.*</publicPackage>
+                        <publicPackage>org.w3c.dom.events.*</publicPackage>
+                        <publicPackage>org.dom4j.*</publicPackage>
                         <publicPackage>org.xml.sax</publicPackage>
                         <publicPackage>org.xml.sax.ext</publicPackage>
                         <publicPackage>org.xml.sax.helpers</publicPackage>

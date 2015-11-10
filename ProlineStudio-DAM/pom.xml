@@ -5,7 +5,7 @@
   <parent>
     <artifactId>ProlineStudio-parent</artifactId>
     <groupId>fr.proline</groupId>
-    <version>0.4.3-SNAPSHOT</version>
+    <version>0.4.3</version>
   </parent>
 
     <groupId>fr.proline</groupId>
@@ -33,6 +33,11 @@
             </exclusions>   -->
         </dependency> 
   
+       <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-openide-util</artifactId>
+            <version>${netbeans.version}</version>
+        </dependency>
 
         <!-- ProlineStudio dependencies -->
         <dependency>
@@ -45,6 +50,26 @@
             <artifactId>ProlineStudio-Logger</artifactId>
             <version>${project.version}</version>
         </dependency>
+        
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+        </dependency>
+        
+        <dependency> 
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId> 
+            <version>1.7.12</version> 
+            <!-- Version inherited from ProFI-Pom -->
+        </dependency> 
+
+        <dependency>
+            <groupId>org.hibernate.javax.persistence</groupId>
+            <artifactId>hibernate-jpa-2.0-api</artifactId>
+            <version>1.0.1.Final</version>
+        </dependency>
+
+        
     </dependencies>
 
     <build>
@@ -63,6 +88,7 @@
                         <publicPackage>fr.proline.studio.repositorymgr.action</publicPackage>
                         <publicPackage>org.openide.awt</publicPackage>
                         <publicPackage>org.openide.util.*</publicPackage>
+                        <publicPackage>javax.persistence.*</publicPackage>
                     </publicPackages>
                 </configuration>
             </plugin>

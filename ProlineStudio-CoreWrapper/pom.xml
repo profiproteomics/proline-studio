@@ -178,6 +178,8 @@
                         <publicPackage>org.slf4j.impl.*</publicPackage>
                         <publicPackage>org.apache.commons.*</publicPackage>
                         <publicPackage>com.fasterxml.*</publicPackage>
+                        <publicPackage>javax.jms.*</publicPackage>
+                        <publicPackage>javax.inject.*</publicPackage>
                     </publicPackages>
                 </configuration>
             </plugin>

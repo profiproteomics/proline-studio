@@ -110,7 +110,8 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
         DataBoxRSMPSMForMsQuery(38),
         DataBoxRsetPeptideSpectrumValues(39),
         DataBoxMSQueriesForRset(40), 
-        DataBoxRsetPSMForMsQuery(41);
+        DataBoxRsetPSMForMsQuery(41),
+        DataBoxPTMProteinSite(42);
         
         int m_type;
         private static HashMap<Integer, DataboxType> m_databoxTypeMap = null;
@@ -201,6 +202,8 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
                     return new DataBoxMSQueriesForRset();
                 case DataBoxRsetPSMForMsQuery:
                     return new DataboxRsetPSMForMsQuery();
+                case DataBoxPTMProteinSite:
+                    return new DataBoxPTMProteinSite();
             }
             return null; // should not happen
         }

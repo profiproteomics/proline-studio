@@ -370,17 +370,7 @@ public class ProteinSetTableModel extends LazyTableModel implements GlobalTableM
     }
 
     public int findRow(long proteinSetId) {
-        
-        /*if (m_filteredIds != null) {
-            int nb = m_filteredIds.size();
-            for (int i = 0; i < nb; i++) {
-                if (proteinSetId == m_proteinSets[m_filteredIds.get(i)].getId()) {
-                    return i;
-                }
-            }
-            return -1;
-        }*/
-        
+
         int nb = m_proteinSets.length;
         for (int i=0;i<nb;i++) {
             if (proteinSetId == m_proteinSets[i].getId()) {

@@ -20,9 +20,20 @@ public class PercentageRenderer implements TableCellRenderer {
     @Override
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
 
-        Float f = (Float) value;
-        String formatedValue = ((f == null) || (f.isNaN())) ? "" : DataFormat.format(f.floatValue(), 2)+" %";
-
+        ;
+        String formatedValue;
+        if (value == null) {
+            formatedValue = "";
+        } else if (value instanceof Float) {
+            Float f = (Float) value;
+            formatedValue = (f.isNaN()) ? "" : DataFormat.format(f.floatValue(), 2)+" %";
+            
+        } else {
+            Double d = (Double) value;
+            Float f = d.floatValue();
+            formatedValue =  (f.isNaN()) ? "" : DataFormat.format(f.floatValue(), 2)+" %";
+        }
+        
         
 
         return m_defaultRenderer.getTableCellRendererComponent(table, formatedValue, isSelected, hasFocus, row, column);

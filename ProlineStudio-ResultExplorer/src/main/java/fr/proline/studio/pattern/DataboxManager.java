@@ -21,7 +21,7 @@ public class DataboxManager {
     private final AbstractDataBox[] m_dataBoxStartingArray = { new DataBoxRsetAll(), new DataBoxRsetPSM(), new DataBoxRsetAllProteinMatch(),
                                                  new DataBoxRsmPSM(), new DataBoxRsmPeptideInstances(), new DataBoxAdjacencyMatrixChoice(),
                                                  new DataBoxRsmAllProteinSet(), new DataboxXicPeptideSet(), new DataboxXicPeptideIon(), new DataboxXicProteinSet(), 
-                                                new DataBoxMSQueriesForRSM(), new DataBoxMSQueriesForRset()};
+                                                new DataBoxMSQueriesForRSM(), new DataBoxMSQueriesForRset(), new DataBoxPTMProteinSite() };
     
     private final AbstractDataBox[] m_dataBoxContinuingArray = { new DataBoxRsetPeptideSpectrum(), new DataBoxRsetPeptideSpectrumValues(),
                                                  new DataBoxRsetProteinsForPeptideMatch(),

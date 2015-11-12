@@ -53,6 +53,7 @@ public class RsmPeptidesOfProteinPanel extends HourglassPanel implements DataBox
     private ExportButton m_exportButton;
     
     private DProteinMatch m_currentProteinMatch = null;
+    private DPeptideMatch m_currentPeptideMatch = null;
     
     private AddDataAnalyzerButton m_addCompareDataButton;
     
@@ -166,28 +167,51 @@ public class RsmPeptidesOfProteinPanel extends HourglassPanel implements DataBox
         
     }
     
-    public void setData(DProteinMatch proteinMatch, ResultSummary rsm) {
+    public void setData(DProteinMatch proteinMatch, DPeptideMatch peptideMatch, ResultSummary rsm) {
 
-        if (proteinMatch == m_currentProteinMatch) {
+        if ((proteinMatch == m_currentProteinMatch) && (peptideMatch == m_currentPeptideMatch)) {
             return;
         }
 
-        m_currentProteinMatch = proteinMatch;
+        boolean proteinMatchChanged = (proteinMatch != m_currentProteinMatch);
+        if (proteinMatchChanged) {
+            
+            m_currentProteinMatch = proteinMatch;
+            
+            if ((proteinMatch == null) || (rsm == null)) {
+                ((PeptideTableModel) ((CompoundTableModel) m_peptidesTable.getModel()).getBaseModel()).setData(null);
+            } else {
+                PeptideSet peptideSet = proteinMatch.getPeptideSet(rsm.getId());
+                DPeptideInstance[] peptideInstances = peptideSet.getTransientDPeptideInstances();
 
-        if ((proteinMatch == null) || (rsm == null)) {
-            ((PeptideTableModel)((CompoundTableModel) m_peptidesTable.getModel()).getBaseModel()).setData(null);
-        } else {
-            PeptideSet peptideSet = proteinMatch.getPeptideSet(rsm.getId());
-            DPeptideInstance[] peptideInstances = peptideSet.getTransientDPeptideInstances();
+                ((PeptideTableModel) ((CompoundTableModel) m_peptidesTable.getModel()).getBaseModel()).setData(peptideInstances);
 
-            ((PeptideTableModel)((CompoundTableModel) m_peptidesTable.getModel()).getBaseModel()).setData(peptideInstances);
-
-            // select the first peptide
-            if ((peptideInstances != null) && (peptideInstances.length > 0)) {
-                m_peptidesTable.getSelectionModel().setSelectionInterval(0, 0);
             }
+            
         }
         
+        boolean peptideMatchChanged = (peptideMatch != m_currentPeptideMatch);
+        
+        if (!peptideMatchChanged && proteinMatchChanged) {
+            // select first peptide
+            PeptideSet peptideSet = proteinMatch.getPeptideSet(rsm.getId());
+            DPeptideInstance[] peptideInstances = peptideSet.getTransientDPeptideInstances();
+            if ((peptideInstances != null) && (peptideInstances.length > 0)) {
+
+                m_peptidesTable.getSelectionModel().setSelectionInterval(0, 0);
+            }
+        } else if (peptideMatchChanged && !proteinMatchChanged) {
+            // search peptide
+            // Select the Row
+            int row = ((PeptideTableModel) (((CompoundTableModel) m_peptidesTable.getModel()).getBaseModel())).findRow(peptideMatch.getId());
+            if (row != -1) {
+                row = ((CompoundTableModel) m_peptidesTable.getModel()).convertBaseModelRowToCompoundRow(row);
+            }
+
+            m_peptidesTable.getSelectionModel().setSelectionInterval(row, row);
+            m_peptidesTable.scrollRowToVisible(row);
+        }
+
     }
     
     @Override
@@ -241,6 +265,8 @@ public class RsmPeptidesOfProteinPanel extends HourglassPanel implements DataBox
         public PeptideTable() {
             
         } 
+        
+
 
         
         /** 

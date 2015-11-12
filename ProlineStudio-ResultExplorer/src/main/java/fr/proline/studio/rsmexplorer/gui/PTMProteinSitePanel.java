@@ -1,14 +1,13 @@
 package fr.proline.studio.rsmexplorer.gui;
 
 
-
-import fr.proline.core.orm.msi.ResultSet;
-import fr.proline.core.orm.msi.ResultSummary;
-import fr.proline.core.orm.msi.dto.DProteinSet;
+import fr.proline.core.orm.msi.dto.DPeptideMatch;
+import fr.proline.core.orm.msi.dto.DProteinMatch;
+import fr.proline.core.orm.msi.dto.DProteinPTMSite;
 import fr.proline.studio.comparedata.AddDataAnalyzerButton;
 import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.comparedata.GlobalTabelModelProviderInterface;
-import fr.proline.studio.dam.tasks.*;
+import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.filter.FilterButton;
 import fr.proline.studio.filter.actions.ClearRestrainAction;
@@ -18,46 +17,49 @@ import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.markerbar.BookmarkMarker;
 import fr.proline.studio.markerbar.MarkerContainerPanel;
-import fr.proline.studio.pattern.*;
+import fr.proline.studio.pattern.AbstractDataBox;
+import fr.proline.studio.pattern.DataBoxPanelInterface;
+import fr.proline.studio.pattern.DataMixerWindowBoxManager;
 import fr.proline.studio.python.data.TableInfo;
-import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
-import fr.proline.studio.rsmexplorer.gui.model.ProteinSetTableModel;
+import fr.proline.studio.rsmexplorer.gui.model.PtmProtenSiteTableModel;
 import fr.proline.studio.search.SearchToggleButton;
 import fr.proline.studio.table.CompoundTableModel;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.table.ImportTableSelectionInterface;
 import fr.proline.studio.table.LazyTable;
 import fr.proline.studio.table.TablePopupMenu;
-import fr.proline.studio.utils.IconManager;
-import java.awt.*;
-import java.awt.event.ActionEvent;
+import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Image;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
+import java.util.ArrayList;
 import java.util.HashSet;
-import javax.swing.*;
+import javax.swing.ImageIcon;
+import javax.swing.JLayeredPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JToolBar;
+import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.TableModelListener;
 import org.jdesktop.swingx.JXTable;
-import org.openide.windows.TopComponent;
 
 /**
- * In : Window which display Protein Sets of a Result Summary
- * - Panel used to display Protein Sets (at the top)
- * 
+ *
  * @author JM235353
  */
-public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelInterface, GlobalTabelModelProviderInterface {
-
+public class PTMProteinSitePanel extends HourglassPanel implements DataBoxPanelInterface, GlobalTabelModelProviderInterface {
+    
     private AbstractDataBox m_dataBox;
     
-    private JScrollPane m_proteinSetScrollPane;
-    private ProteinSetTable m_proteinSetTable;
+    private JScrollPane m_ptmProteinSiteScrollPane;
+    private PTMProteinSiteTable m_ptmProteinSiteTable;
 
     private MarkerContainerPanel m_markerContainerPanel;
-    
-    private final boolean m_firstPanel;
-    private JButton m_decoyButton;
 
     private SearchToggleButton m_searchToggleButton;
     
@@ -66,55 +68,44 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
     private AddDataAnalyzerButton m_addCompareDataButton;
     
     /**
-     * Creates new form RsmProteinSetPanel
+     * Creates new form PTMProteinSitePanel
      */
-    public RsmProteinSetPanel(boolean firstPanel) {
-        
-        m_firstPanel = firstPanel;
-        
+    public PTMProteinSitePanel() {
+
         initComponents();
 
     }
 
-    public void setData(Long taskId, DProteinSet[] proteinSets, boolean finished) {
+    public void setData(Long taskId, ArrayList<DProteinPTMSite> proteinPTMSiteArray, boolean finished) {
         
         // update toolbar
-        boolean mergedData = false;
-        ResultSummary rsm = (ResultSummary) m_dataBox.getData(false, ResultSummary.class);
-        if (rsm != null) {
+        //ResultSummary rsm = (ResultSummary) m_dataBox.getData(false, ResultSummary.class);
 
-            if (m_firstPanel) {
-                m_decoyButton.setEnabled(rsm.getDecotResultSummary() != null);
-            }
-            ResultSet.Type rsType = rsm.getResultSet().getType();
-            mergedData = (rsType == ResultSet.Type.USER) || (rsType == ResultSet.Type.DECOY_USER); // Merge or Decoy Merge
-        }
  
-        ((ProteinSetTableModel) ((CompoundTableModel)m_proteinSetTable.getModel()).getBaseModel()).setData(taskId, proteinSets, mergedData);
+        ((PtmProtenSiteTableModel) ((CompoundTableModel)m_ptmProteinSiteTable.getModel()).getBaseModel()).setData(taskId, proteinPTMSiteArray);
 
         // select the first row
-        if ((proteinSets != null) && (proteinSets.length > 0)) {
-            m_proteinSetTable.getSelectionModel().setSelectionInterval(0, 0);
-            m_markerContainerPanel.setMaxLineNumber(proteinSets.length);
-            
-            if (!m_firstPanel) {
-                m_markerContainerPanel.removeAllMarkers();
-            }
+        if ((proteinPTMSiteArray != null) && (proteinPTMSiteArray.size() > 0)) {
+            m_ptmProteinSiteTable.getSelectionModel().setSelectionInterval(0, 0);
+            m_markerContainerPanel.setMaxLineNumber(proteinPTMSiteArray.size());
+
         }
         
         if (finished) {
-            m_proteinSetTable.setSortable(true);
+            m_ptmProteinSiteTable.setSortable(true);
         }
     }
 
     public void dataUpdated(SubTask subTask, boolean finished) {
-        m_proteinSetTable.dataUpdated(subTask, finished);
+        m_ptmProteinSiteTable.dataUpdated(subTask, finished);
     }
 
-    public DProteinSet getSelectedProteinSet() {
+
+    
+    public DProteinPTMSite getSelectedProteinPTMSite() {
 
         // Retrieve Selected Row
-        int selectedRow = m_proteinSetTable.getSelectedRow();
+        int selectedRow = m_ptmProteinSiteTable.getSelectedRow();
 
 
         // nothing selected
@@ -124,14 +115,14 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
         }
 
         // convert according to the sorting
-        selectedRow = m_proteinSetTable.convertRowIndexToModel(selectedRow);
+        selectedRow = m_ptmProteinSiteTable.convertRowIndexToModel(selectedRow);
 
-        CompoundTableModel compoundTableModel = ((CompoundTableModel)m_proteinSetTable.getModel());
+        CompoundTableModel compoundTableModel = ((CompoundTableModel)m_ptmProteinSiteTable.getModel());
         selectedRow = compoundTableModel.convertCompoundRowToBaseModelRow(selectedRow);
 
-        // Retrieve ProteinSet selected
-        ProteinSetTableModel tableModel = (ProteinSetTableModel) compoundTableModel.getBaseModel();
-        return tableModel.getProteinSet(selectedRow);
+        // Retrieve ProteinPTMSite selected
+        PtmProtenSiteTableModel tableModel = (PtmProtenSiteTableModel) compoundTableModel.getBaseModel();
+        return tableModel.getProteinPTMSite(selectedRow);
     }
 
     @Override
@@ -150,17 +141,17 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
     
     @Override
     public GlobalTableModelInterface getGlobalTableModelInterface() {
-        return (GlobalTableModelInterface) m_proteinSetTable.getModel();
+        return (GlobalTableModelInterface) m_ptmProteinSiteTable.getModel();
     }
     
     @Override
     public JXTable getGlobalAssociatedTable() {
-        return m_proteinSetTable;
+        return m_ptmProteinSiteTable;
     }
     
     @Override
     public CrossSelectionInterface getCrossSelectionInterface() {
-        return m_proteinSetTable;
+        return m_ptmProteinSiteTable;
     }
     
     @Override
@@ -177,26 +168,13 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
     public ActionListener getSaveAction(SplittedPanelContainer splittedPanel) {
         return m_dataBox.getSaveAction(splittedPanel);
     }
-        
-    private String getTopComponentName() {
-        Container c = getParent();
-        while ((c != null) && !(c instanceof TopComponent)) {
-            c = c.getParent();
-        }
-        if ((c != null) && (c instanceof TopComponent)) {
-            return ((TopComponent) c).getName();
-        }
-        return "";
-    }
 
-    
-    
     private void initComponents() {
 
 
         setLayout(new BorderLayout());
 
-        final JPanel proteinSetPanel = createProteinSetPanel();
+        final JPanel proteinPTMSitePanel = createProteinPTMSitePanel();
 
 
         final JLayeredPane layeredPane = new JLayeredPane();
@@ -207,7 +185,7 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
             public void componentResized(ComponentEvent e) {
                 final Component c = e.getComponent();
 
-                proteinSetPanel.setBounds(0, 0, c.getWidth(), c.getHeight());
+                proteinPTMSitePanel.setBounds(0, 0, c.getWidth(), c.getHeight());
                 layeredPane.revalidate();
                 layeredPane.repaint();
 
@@ -227,75 +205,39 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
         });
         add(layeredPane, BorderLayout.CENTER);
 
-        layeredPane.add(proteinSetPanel, JLayeredPane.DEFAULT_LAYER);
+        layeredPane.add(proteinPTMSitePanel, JLayeredPane.DEFAULT_LAYER);
         layeredPane.add(m_searchToggleButton.getSearchPanel(), JLayeredPane.PALETTE_LAYER);
 
 
     }
     
     
-    private JPanel createProteinSetPanel() {
+    private JPanel createProteinPTMSitePanel() {
         
-        JPanel proteinSetPanel = new JPanel();
-        proteinSetPanel.setBounds(0, 0, 500, 400);
-        proteinSetPanel.setLayout(new BorderLayout());
+        JPanel proteinPTMSitePanel = new JPanel();
+        proteinPTMSitePanel.setBounds(0, 0, 500, 400);
+        proteinPTMSitePanel.setLayout(new BorderLayout());
         
         JPanel internalPanel = createInternalPanel();
 
         JToolBar toolbar = initToolbar();
-        proteinSetPanel.add(toolbar, BorderLayout.WEST);
-        proteinSetPanel.add(internalPanel, BorderLayout.CENTER);
+        proteinPTMSitePanel.add(toolbar, BorderLayout.WEST);
+        proteinPTMSitePanel.add(internalPanel, BorderLayout.CENTER);
 
 
-        return proteinSetPanel;
+        return proteinPTMSitePanel;
     }
     
     private JToolBar initToolbar() {
         JToolBar toolbar = new JToolBar(JToolBar.VERTICAL);
         toolbar.setFloatable(false);
-        
-        if (m_firstPanel) {
-            
-            // Decoy Button
-            m_decoyButton = new JButton(IconManager.getIcon(IconManager.IconType.DATASET_RSM_DECOY));
-            m_decoyButton.setToolTipText("Display Decoy Data");
-            m_decoyButton.setEnabled(false);
 
-            m_decoyButton.addActionListener(new ActionListener() {
-
-                @Override
-                public void actionPerformed(ActionEvent e) {
-
-                    ResultSummary rsm = (ResultSummary) m_dataBox.getData(false, ResultSummary.class);
-                    ResultSummary decoyRsm = rsm.getDecotResultSummary();
-                    if (decoyRsm == null) {
-                        return;
-                    }
-
-                    String savedWindow = SaveDataBoxActionListener.saveParentContainer("tmp", m_decoyButton);
-                    
-                    AbstractDataBox[] databoxes = WindowSavedManager.readBoxes(savedWindow);
-                    WindowBox wbox = WindowBoxFactory.getFromBoxesWindowBox("Decoy " + getTopComponentName(), databoxes, true, false, WindowSavedManager.SAVE_WINDOW_FOR_RSM);
-                    wbox.setEntryData(m_dataBox.getProjectId(), decoyRsm);
-
-                    // open a window to display the window box
-                    DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
-                    win.open();
-                    win.requestActive();
-
-                }
-            });
-
-           
-            toolbar.add(m_decoyButton);
-            
-        }
         
         // Search Button
-        m_searchToggleButton = new SearchToggleButton(m_proteinSetTable, m_proteinSetTable, ((CompoundTableModel) m_proteinSetTable.getModel()));
+        m_searchToggleButton = new SearchToggleButton(m_ptmProteinSiteTable, m_ptmProteinSiteTable, ((CompoundTableModel) m_ptmProteinSiteTable.getModel()));
         toolbar.add(m_searchToggleButton);
         
-        m_filterButton = new FilterButton(((CompoundTableModel) m_proteinSetTable.getModel())) {
+        m_filterButton = new FilterButton(((CompoundTableModel) m_ptmProteinSiteTable.getModel())) {
 
             @Override
             protected void filteringDone() {
@@ -304,12 +246,12 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
             
         };
 
-        m_exportButton = new ExportButton(((CompoundTableModel) m_proteinSetTable.getModel()), "Protein Sets", m_proteinSetTable);
+        m_exportButton = new ExportButton(((CompoundTableModel) m_ptmProteinSiteTable.getModel()), "Protein Sets", m_ptmProteinSiteTable);
 
         toolbar.add(m_filterButton);
         toolbar.add(m_exportButton);
 
-        m_addCompareDataButton = new AddDataAnalyzerButton(((CompoundTableModel) m_proteinSetTable.getModel())) {
+        m_addCompareDataButton = new AddDataAnalyzerButton(((CompoundTableModel) m_ptmProteinSiteTable.getModel())) {
            
             @Override
             public void actionPerformed() {
@@ -338,23 +280,20 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
         c.insets = new java.awt.Insets(5, 5, 5, 5);
         
         // create objects
-        m_proteinSetScrollPane = new JScrollPane();
+        m_ptmProteinSiteScrollPane = new JScrollPane();
         
-        m_proteinSetTable = new ProteinSetTable();
-        m_proteinSetTable.setModel(new CompoundTableModel(new ProteinSetTableModel((LazyTable)m_proteinSetTable), true));
+        m_ptmProteinSiteTable = new PTMProteinSiteTable();
+        m_ptmProteinSiteTable.setModel(new CompoundTableModel(new PtmProtenSiteTableModel((LazyTable)m_ptmProteinSiteTable), true));
         // hide the id column
-        m_proteinSetTable.getColumnExt(m_proteinSetTable.convertColumnIndexToView(ProteinSetTableModel.COLTYPE_PROTEIN_SET_ID)).setVisible(false);
+        m_ptmProteinSiteTable.getColumnExt(m_ptmProteinSiteTable.convertColumnIndexToView(PtmProtenSiteTableModel.COLTYPE_PROTEIN_ID)).setVisible(false);
         
 
-        m_markerContainerPanel = new MarkerContainerPanel(m_proteinSetScrollPane, (ProteinSetTable) m_proteinSetTable);
+        m_markerContainerPanel = new MarkerContainerPanel(m_ptmProteinSiteScrollPane, (PTMProteinSiteTable) m_ptmProteinSiteTable);
         
-        m_proteinSetScrollPane.setViewportView(m_proteinSetTable);
-        m_proteinSetTable.setFillsViewportHeight(true);
-        m_proteinSetTable.setViewport(m_proteinSetScrollPane.getViewport());
-        
-        m_proteinSetTable.displayColumnAsPercentage(ProteinSetTableModel.COLTYPE_PROTEIN_SCORE);
-
-
+        m_ptmProteinSiteScrollPane.setViewportView(m_ptmProteinSiteTable);
+        m_ptmProteinSiteTable.setFillsViewportHeight(true);
+        m_ptmProteinSiteTable.setViewport(m_ptmProteinSiteScrollPane.getViewport());
+       
 
         c.gridx = 0;
         c.gridy = 0;
@@ -368,16 +307,14 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
         return internalPanel;
     }                 
     
-    public void selectData(HashSet data) {
-        m_proteinSetTable.importSelection(data);
-    }
+    
 
     
-    private class ProteinSetTable extends LazyTable implements ImportTableSelectionInterface, CrossSelectionInterface  {
+    private class PTMProteinSiteTable extends LazyTable implements ImportTableSelectionInterface, CrossSelectionInterface  {
 
         
-        public ProteinSetTable() {
-            super(m_proteinSetScrollPane.getVerticalScrollBar() );
+        public PTMProteinSiteTable() {
+            super(m_ptmProteinSiteScrollPane.getVerticalScrollBar() );
 
         }
         
@@ -399,45 +336,17 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
                 return;
             }
  
-            m_dataBox.propagateDataChanged(DProteinSet.class);
+            m_dataBox.propagateDataChanged(DProteinMatch.class);
+            m_dataBox.propagateDataChanged(DPeptideMatch.class);
+            m_dataBox.propagateDataChanged(DProteinPTMSite.class);
 
         }
-        
-        /*public boolean selectProteinSet(Long proteinSetId, String searchText) {
-            ProteinSetTableModel tableModel = (ProteinSetTableModel) ((CompoundTableModel)getModel()).getBaseModel();
-            int row = tableModel.findRow(proteinSetId);
-            if (row == -1) {
-                return false;
-            }
-            row = ((CompoundTableModel)getModel()).convertBaseModelRowToCompoundRow(row);
-            if (row == -1) {
-                return false;
-            }
-            
-            // JPM.hack we need to keep the search text
-            // to be able to give it if needed to the panel
-            // which display proteins of a protein set
-            //m_searchTextBeingDone = searchText;
-            
-            // must convert row index if there is a sorting
-            row = convertRowIndexToView(row);
-            
-            // select the row
-            getSelectionModel().setSelectionInterval(row, row);
-            
-            // scroll to the row
-            scrollRowToVisible(row);
 
-            //m_searchTextBeingDone = null;
-            
-            return true;
-        }
-        //private String m_searchTextBeingDone = null;*/
 
 
         public void dataUpdated(SubTask subTask, boolean finished) {
             
-            LastAction keepLastAction = m_lastAction;
+            LazyTable.LastAction keepLastAction = m_lastAction;
             try {
             
             
@@ -449,7 +358,7 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
             
             selectionWillBeRestored(true);
             try {
-                ((ProteinSetTableModel) (((CompoundTableModel) getModel()).getBaseModel())).dataUpdated();
+                ((PtmProtenSiteTableModel) (((CompoundTableModel) getModel()).getBaseModel())).dataUpdated();
             } finally {
                 selectionWillBeRestored(false);
             }
@@ -465,7 +374,7 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
                 
                 // if the subtask correspond to the loading of the data of the sorted column,
                 // we keep the row selected visible
-                if (((keepLastAction == LastAction.ACTION_SELECTING ) || (keepLastAction == LastAction.ACTION_SORTING)) && (subTask.getSubTaskId() == ((CompoundTableModel) getModel()).getSubTaskId( getSortedColumnIndex() )) ) {
+                if (((keepLastAction == LazyTable.LastAction.ACTION_SELECTING ) || (keepLastAction == LazyTable.LastAction.ACTION_SORTING)) && (subTask.getSubTaskId() == ((CompoundTableModel) getModel()).getSubTaskId( getSortedColumnIndex() )) ) {
                     scrollRowToVisible(rowSelectedInView);
                 }
                     
@@ -504,10 +413,10 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
             selectionTableModel.clearSelection();
             
             int firstRow = -1;
-            ProteinSetTableModel model = (ProteinSetTableModel) ((CompoundTableModel) m_proteinSetTable.getModel()).getBaseModel();
+            PtmProtenSiteTableModel model = (PtmProtenSiteTableModel) ((CompoundTableModel) m_ptmProteinSiteTable.getModel()).getBaseModel();
             int rowCount = model.getRowCount();
             for (int i=0;i<rowCount;i++) {
-                Object v = model.getValueAt(i, ProteinSetTableModel.COLTYPE_PROTEIN_SET_ID);
+                Object v = model.getValueAt(i, PtmProtenSiteTableModel.COLTYPE_PROTEIN_ID);
                 if (selectedData.remove(v)) {
                     if (firstRow == -1) {
                         firstRow = i;

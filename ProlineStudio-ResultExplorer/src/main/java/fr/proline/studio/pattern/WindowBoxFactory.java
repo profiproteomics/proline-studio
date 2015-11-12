@@ -134,6 +134,18 @@ public class WindowBoxFactory {
         
     }
     
+    public static WindowBox getPTMProteinSiteWindowBox(String dataName) {
+
+        AbstractDataBox[] boxes = new AbstractDataBox[3];
+        boxes[0] = new DataBoxPTMProteinSite();
+        boxes[0].setDataName(dataName);
+        boxes[1] = new DataBoxRsmPeptidesOfProtein();
+        boxes[2] = new DataBoxRsmProteinAndPeptideSequence();
+
+        IconManager.IconType iconType = IconManager.IconType.DATASET_RSM;
+        return new WindowBox(boxes[0].getFullName(), generatePanel(boxes), boxes[0], IconManager.getImage(iconType));
+    }
+    
     
     public static WindowBox getRsmPSMWindowBox(String dataName, boolean isDecoy, boolean mergedData) {
         // create boxes

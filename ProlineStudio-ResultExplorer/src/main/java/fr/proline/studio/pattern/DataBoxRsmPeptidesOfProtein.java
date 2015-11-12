@@ -67,10 +67,11 @@ public class DataBoxRsmPeptidesOfProtein extends AbstractDataBox {
     @Override
     public void dataChanged() {
         final DProteinMatch proteinMatch = (DProteinMatch) m_previousDataBox.getData(false, DProteinMatch.class);
+        final DPeptideMatch peptideMatch = (DPeptideMatch) m_previousDataBox.getData(false, DPeptideMatch.class);
         final ResultSummary rsm = (ResultSummary) m_previousDataBox.getData(false, ResultSummary.class);
 
         if (proteinMatch == null) {
-            ((RsmPeptidesOfProteinPanel) m_panel).setData(null, null);
+            ((RsmPeptidesOfProteinPanel) m_panel).setData(null, null, null);
             return;
         }
 
@@ -88,9 +89,9 @@ public class DataBoxRsmPeptidesOfProtein extends AbstractDataBox {
             public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
 
                 if (success) {
-                    ((RsmPeptidesOfProteinPanel) m_panel).setData(proteinMatch, rsm);
+                    ((RsmPeptidesOfProteinPanel) m_panel).setData(proteinMatch, peptideMatch, rsm);
                 } else {
-                    ((RsmPeptidesOfProteinPanel) m_panel).setData(null, null);
+                    ((RsmPeptidesOfProteinPanel) m_panel).setData(null, null, null);
                 }
                 
                 setLoaded(loadingId);

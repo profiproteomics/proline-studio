@@ -494,7 +494,7 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
 
         }
 
-        public boolean selectProteinSet(Long proteinSetId, String searchText) {
+        /*public boolean selectProteinSet(Long proteinSetId, String searchText) {
 
             QuantProteinSetTableModel tableModel = (QuantProteinSetTableModel) ((CompoundTableModel) getModel()).getBaseModel();
             int row = tableModel.findRow(proteinSetId);
@@ -524,7 +524,7 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
 
             return true;
         }
-        String searchTextBeingDone = null;
+        String searchTextBeingDone = null;*/
 
         public void dataUpdated(SubTask subTask, boolean finished) {
 

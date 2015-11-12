@@ -71,6 +71,23 @@ public class PeptideTableModel extends DecoratedTableModel implements GlobalTabl
 
     }
     
+    public int findRow(long peptideMatchId) {
+
+        if (m_peptideInstances ==null) {
+            return -1;
+        }
+        
+        int nb = m_peptideInstances.length;
+        for (int i=0;i<nb;i++) {
+            DPeptideInstance peptideInstance = m_peptideInstances[i];
+            if (peptideInstance.getBestPeptideMatch().getId() == peptideMatchId) {
+                return i;
+            }
+        }
+        return -1;
+        
+    }
+    
     @Override
     public int getColumnCount() {
         return m_columnNames.length;

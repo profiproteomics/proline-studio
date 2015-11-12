@@ -30,7 +30,7 @@ public class ExportPrideDialog extends DefaultDialog {
         setTitle("Export to PRIDE format Wizard");
         setResizable(true);
     
-        // setHelpURL("http://biodev.extra.cea.fr/docs/proline/doku.php?id=how_to:studio:spectralcount");
+        setHelpURL("http://biodev.extra.cea.fr/docs/proline/doku.php?id=how_to:studio:exportdata");
         setButtonName(DefaultDialog.BUTTON_OK, "Next");
         setButtonIcon(DefaultDialog.BUTTON_OK, IconManager.getIcon(IconManager.IconType.ARROW));
         

@@ -110,7 +110,7 @@ public class ExportPrideDialog extends DefaultDialog {
             }
                 
             startTask(m_task);
-            return true;
+            return false;
         }
 
     }

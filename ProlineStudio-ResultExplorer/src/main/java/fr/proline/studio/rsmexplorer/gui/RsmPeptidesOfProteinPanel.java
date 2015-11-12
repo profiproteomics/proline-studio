@@ -190,26 +190,30 @@ public class RsmPeptidesOfProteinPanel extends HourglassPanel implements DataBox
             
         }
         
-        boolean peptideMatchChanged = (peptideMatch != m_currentPeptideMatch);
         
-        if (!peptideMatchChanged && proteinMatchChanged) {
-            // select first peptide
-            PeptideSet peptideSet = proteinMatch.getPeptideSet(rsm.getId());
-            DPeptideInstance[] peptideInstances = peptideSet.getTransientDPeptideInstances();
-            if ((peptideInstances != null) && (peptideInstances.length > 0)) {
+        
+        if (proteinMatch != null) {
 
-                m_peptidesTable.getSelectionModel().setSelectionInterval(0, 0);
-            }
-        } else if (peptideMatchChanged && !proteinMatchChanged) {
+            boolean peptideMatchChanged = (peptideMatch != m_currentPeptideMatch);
+            if (!peptideMatchChanged && proteinMatchChanged) {
+                // select first peptide
+                PeptideSet peptideSet = proteinMatch.getPeptideSet(rsm.getId());
+                DPeptideInstance[] peptideInstances = peptideSet.getTransientDPeptideInstances();
+                if ((peptideInstances != null) && (peptideInstances.length > 0)) {
+
+                    m_peptidesTable.getSelectionModel().setSelectionInterval(0, 0);
+                }
+            } else if (peptideMatchChanged && !proteinMatchChanged) {
             // search peptide
-            // Select the Row
-            int row = ((PeptideTableModel) (((CompoundTableModel) m_peptidesTable.getModel()).getBaseModel())).findRow(peptideMatch.getId());
-            if (row != -1) {
-                row = ((CompoundTableModel) m_peptidesTable.getModel()).convertBaseModelRowToCompoundRow(row);
-            }
+                // Select the Row
+                int row = ((PeptideTableModel) (((CompoundTableModel) m_peptidesTable.getModel()).getBaseModel())).findRow(peptideMatch.getId());
+                if (row != -1) {
+                    row = ((CompoundTableModel) m_peptidesTable.getModel()).convertBaseModelRowToCompoundRow(row);
+                }
 
-            m_peptidesTable.getSelectionModel().setSelectionInterval(row, row);
-            m_peptidesTable.scrollRowToVisible(row);
+                m_peptidesTable.getSelectionModel().setSelectionInterval(row, row);
+                m_peptidesTable.scrollRowToVisible(row);
+            }
         }
 
     }

@@ -23,7 +23,6 @@ import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import fr.proline.studio.rsmexplorer.tree.quantitation.QuantitationTree;
-import fr.proline.studio.utils.StringUtils;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -50,7 +49,7 @@ public class SpectralCountAction extends AbstractRSMAction {
     private boolean m_isJMSDefined;
 
     public SpectralCountAction(boolean isJMSDefined) {
-        super(StringUtils.getActionName(NbBundle.getMessage(SpectralCountAction.class, "CTL_CompareWithSCAction"), isJMSDefined), AbstractTree.TreeType.TREE_IDENTIFICATION);
+        super(NbBundle.getMessage(SpectralCountAction.class, "CTL_CompareWithSCAction"), AbstractTree.TreeType.TREE_IDENTIFICATION);
         this.m_isJMSDefined = isJMSDefined;
     }
 

@@ -46,7 +46,7 @@ public abstract class AbstractJMSTask  extends AbstractLongTask implements Messa
 
     protected static final Logger m_loggerProline = LoggerFactory.getLogger("ProlineStudio.DPM.Task");
     
-    public static final String TASK_LIST_INFO = "JMS";
+    public static final String TASK_LIST_INFO = "Services JMS";
     
 
     /* To count received messages */

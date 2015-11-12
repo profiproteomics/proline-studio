@@ -14,7 +14,6 @@ import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
-import fr.proline.studio.utils.StringUtils;
 import java.util.HashMap;
 import javax.swing.tree.DefaultTreeModel;
 import org.openide.util.NbBundle;
@@ -28,7 +27,7 @@ import org.openide.windows.WindowManager;
 public class FilterRSMProteinSetsJMSAction extends AbstractRSMAction{
       
     public FilterRSMProteinSetsJMSAction() {
-        super(StringUtils.getActionName(NbBundle.getMessage(FilterRSMProteinSetsJMSAction.class, "CTL_FilterRSMProteinSetsAction"), true), AbstractTree.TreeType.TREE_IDENTIFICATION);
+        super(NbBundle.getMessage(FilterRSMProteinSetsJMSAction.class, "CTL_FilterRSMProteinSetsAction"), AbstractTree.TreeType.TREE_IDENTIFICATION);
     }
 
     @Override

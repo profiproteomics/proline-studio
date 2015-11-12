@@ -24,7 +24,6 @@ import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import fr.proline.studio.rsmexplorer.tree.xic.XICDesignTree;
-import fr.proline.studio.utils.StringUtils;
 import java.util.*;
 import javax.swing.JOptionPane;
 import javax.swing.tree.DefaultTreeModel;
@@ -45,13 +44,13 @@ public class CreateXICAction extends AbstractRSMAction {
     private boolean m_isJMSDefined;
 
     public CreateXICAction(boolean isJMSDefined) {
-        super(StringUtils.getActionName(NbBundle.getMessage(CreateXICAction.class, "CTL_CreateXIC"), isJMSDefined), AbstractTree.TreeType.TREE_QUANTITATION);
+        super(NbBundle.getMessage(CreateXICAction.class, "CTL_CreateXIC"), AbstractTree.TreeType.TREE_QUANTITATION);
         m_fromExistingXIC = false;
         m_isJMSDefined = isJMSDefined;
     }
 
     public CreateXICAction(boolean fromExistingXIC, boolean isJMSDefined) {
-        super(StringUtils.getActionName(NbBundle.getMessage(CreateXICAction.class, "CTL_CreateXIC_Clone"), isJMSDefined), AbstractTree.TreeType.TREE_QUANTITATION);
+        super(NbBundle.getMessage(CreateXICAction.class, "CTL_CreateXIC_Clone"), AbstractTree.TreeType.TREE_QUANTITATION);
         m_fromExistingXIC = true;
         m_isJMSDefined = isJMSDefined;
     }

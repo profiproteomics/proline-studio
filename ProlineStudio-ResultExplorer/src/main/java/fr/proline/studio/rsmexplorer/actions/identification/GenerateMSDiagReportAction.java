@@ -19,7 +19,6 @@ import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree.TreeType;
 import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
-import fr.proline.studio.utils.StringUtils;
 
 import javax.swing.tree.DefaultTreeModel;
 
@@ -33,7 +32,7 @@ import org.openide.windows.WindowManager;
 public class GenerateMSDiagReportAction extends AbstractRSMAction {
 
     public GenerateMSDiagReportAction(TreeType treeType, boolean isJMSDefined) {
-        super(StringUtils.getActionName(NbBundle.getMessage(GenerateMSDiagReportAction.class, "CTL_GenerateMSDiagReportAction"), isJMSDefined), treeType);
+        super(NbBundle.getMessage(GenerateMSDiagReportAction.class, "CTL_GenerateMSDiagReportAction"), treeType);
     }
 
     @Override

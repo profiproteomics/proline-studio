@@ -9,7 +9,6 @@ import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
-import fr.proline.studio.utils.StringUtils;
 import java.util.HashMap;
 import org.openide.util.NbBundle;
 import org.openide.windows.WindowManager;
@@ -26,11 +25,11 @@ public class ExportSpectraListJMSAction extends AbstractRSMAction {
 
 
     public ExportSpectraListJMSAction(AbstractTree.TreeType treeType) {
-        super(StringUtils.getActionName(NbBundle.getMessage(ExportSpectraListJMSAction.class, "CTL_ExportSpectraListAction"), true), treeType);
+        super(NbBundle.getMessage(ExportSpectraListJMSAction.class, "CTL_ExportSpectraListAction"), treeType);
     }
     
     public ExportSpectraListJMSAction(AbstractTree.TreeType treeType, boolean exportTitle) {
-        super(StringUtils.getActionName(NbBundle.getMessage(ExportSpectraListJMSAction.class, "CTL_ExportAction")+" "+NbBundle.getMessage(ExportSpectraListJMSAction.class, "CTL_ExportSpectraListAction"), true) , treeType);
+        super(NbBundle.getMessage(ExportSpectraListJMSAction.class, "CTL_ExportAction")+" "+NbBundle.getMessage(ExportSpectraListJMSAction.class, "CTL_ExportSpectraListAction") , treeType);
     }
 
     @Override

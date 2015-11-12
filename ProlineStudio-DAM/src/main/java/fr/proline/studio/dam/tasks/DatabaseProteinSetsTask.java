@@ -1,18 +1,10 @@
 package fr.proline.studio.dam.tasks;
 
 
-import fr.proline.core.orm.msi.Peptide;
 import fr.proline.core.orm.msi.PeptideInstance;
-import fr.proline.core.orm.msi.PeptideSet;
 import fr.proline.core.orm.msi.ResultSummary;
-import fr.proline.core.orm.msi.SequenceMatch;
-import fr.proline.core.orm.msi.dto.DMsQuery;
-import fr.proline.core.orm.msi.dto.DPeptideInstance;
-import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.core.orm.msi.dto.DProteinSet;
-import fr.proline.core.orm.msi.dto.DSpectrum;
-import fr.proline.core.orm.ps.PeptidePtm;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.core.orm.util.DataStoreConnectorFactory;
 import fr.proline.studio.dam.taskinfo.TaskError;
@@ -154,11 +146,6 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
 
             Long rsmId = m_rsm.getId();
 
-            //JPM.TEST 
-
-
-            
-            //JPM.TEST 
             
             // Load Protein Sets
             // SELECT ps FROM PeptideSet pepset JOIN pepset.proteinSet as ps WHERE ps.resultSummary.id=:rsmId AND ps.isValidated=true ORDER BY pepset.score DESC
@@ -531,7 +518,7 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
         // FROM PeptideInstance pi, PeptideSetPeptideInstanceItem ps_to_pi, PeptideSetProteinMatchMap ps_to_pm
         // WHERE ps_to_pm.id.proteinMatchId IN (:proteinMatchIds) AND ps_to_pm.resultSummary.id=:rsmId AND ps_to_pm.id.peptideSetId=ps_to_pi.id.peptideSetId AND ps_to_pm.resultSummary.id=ps_to_pi.resultSummary.id AND ps_to_pi.id.peptideInstanceId=pi.id
         // GROUP BY ps_to_pm.id.proteinMatchId
-        String spectralCountQueryString = "SELECT ps_to_pm.id.proteinMatchId, sum(pi.totalLeavesMatchCount) FROM PeptideInstance pi, PeptideSetPeptideInstanceItem ps_to_pi, PeptideSetProteinMatchMap ps_to_pm WHERE ps_to_pm.id.proteinMatchId IN (:proteinMatchIds) AND ps_to_pm.resultSummary.id=:rsmId AND ps_to_pm.id.peptideSetId=ps_to_pi.id.peptideSetId AND ps_to_pm.resultSummary.id=ps_to_pi.resultSummary.id AND ps_to_pi.id.peptideInstanceId=pi.id GROUP BY ps_to_pm.id.proteinMatchId";
+        String spectralCountQueryString = "SELECT ps_to_pm.id.proteinMatchId, sum(pi.totalLeavesMatchCount), sum(pi.peptideMatchCount) FROM PeptideInstance pi, PeptideSetPeptideInstanceItem ps_to_pi, PeptideSetProteinMatchMap ps_to_pm WHERE ps_to_pm.id.proteinMatchId IN (:proteinMatchIds) AND ps_to_pm.resultSummary.id=:rsmId AND ps_to_pm.id.peptideSetId=ps_to_pi.id.peptideSetId AND ps_to_pm.resultSummary.id=ps_to_pi.resultSummary.id AND ps_to_pi.id.peptideInstanceId=pi.id GROUP BY ps_to_pm.id.proteinMatchId";
         Query spectralCountQuery = entityManagerMSI.createQuery(spectralCountQueryString);
         spectralCountQuery.setParameter("proteinMatchIds", sliceOfProteinMatchIds);
         spectralCountQuery.setParameter("rsmId", m_rsm.getId());
@@ -541,7 +528,12 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
             Object[] cur = spectralCountResIt.next();
             Long proteinMatchId = (Long) cur[0];
             Integer spectralCount = ((Long) cur[1]).intValue();
-            spectralCountMap.put(proteinMatchId, spectralCount);
+            Integer peptideMatchCount = ((Long) cur[2]).intValue();  //OLD VALUE for compatibility because with old rsm, totalLeavesMatchCount<0
+            if (spectralCount>0) {
+                spectralCountMap.put(proteinMatchId, spectralCount);
+            } else {
+                spectralCountMap.put(proteinMatchId, peptideMatchCount);
+            }
         }
 
         for (int i = subTask.getStartIndex(); i <= subTask.getStopIndex(); i++) {
@@ -582,7 +574,7 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
         // FROM PeptideInstance pi, PeptideSetPeptideInstanceItem ps_to_pi, PeptideSetProteinMatchMap ps_to_pm
         // WHERE ps_to_pm.id.proteinMatchId IN (:proteinMatchIds) AND ps_to_pm.resultSummary.id=:rsmId AND ps_to_pm.id.peptideSetId=ps_to_pi.id.peptideSetId AND ps_to_pm.resultSummary.id=ps_to_pi.resultSummary.id AND ps_to_pi.id.peptideInstanceId=pi.id AND pi.validatedProteinSetCount=1
         // GROUP BY ps_to_pm.id.proteinMatchId
-        String specificSpectralCountQueryString = "SELECT ps_to_pm.id.proteinMatchId, sum(pi.totalLeavesMatchCount) FROM PeptideInstance pi, PeptideSetPeptideInstanceItem ps_to_pi, PeptideSetProteinMatchMap ps_to_pm WHERE ps_to_pm.id.proteinMatchId IN (:proteinMatchIds) AND ps_to_pm.resultSummary.id=:rsmId AND ps_to_pm.id.peptideSetId=ps_to_pi.id.peptideSetId AND ps_to_pm.resultSummary.id=ps_to_pi.resultSummary.id AND ps_to_pi.id.peptideInstanceId=pi.id AND pi.validatedProteinSetCount=1 GROUP BY ps_to_pm.id.proteinMatchId";
+        String specificSpectralCountQueryString = "SELECT ps_to_pm.id.proteinMatchId, sum(pi.totalLeavesMatchCount), sum(pi.peptideMatchCount) FROM PeptideInstance pi, PeptideSetPeptideInstanceItem ps_to_pi, PeptideSetProteinMatchMap ps_to_pm WHERE ps_to_pm.id.proteinMatchId IN (:proteinMatchIds) AND ps_to_pm.resultSummary.id=:rsmId AND ps_to_pm.id.peptideSetId=ps_to_pi.id.peptideSetId AND ps_to_pm.resultSummary.id=ps_to_pi.resultSummary.id AND ps_to_pi.id.peptideInstanceId=pi.id AND pi.validatedProteinSetCount=1 GROUP BY ps_to_pm.id.proteinMatchId";
 
         Query specificSpectralCountQuery = entityManagerMSI.createQuery(specificSpectralCountQueryString);
         specificSpectralCountQuery.setParameter("proteinMatchIds", sliceOfProteinMatchIds);
@@ -594,7 +586,12 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
             Object[] cur = specificSpectralCountResIt.next();
             Long proteinMatchId = (Long) cur[0];
             Integer specificSpectralCount = ((Long) cur[1]).intValue();
-            spectralCountMap.put(proteinMatchId, specificSpectralCount);
+            Integer peptideMatchCount = ((Long) cur[2]).intValue();  //OLD VALUE for compatibility because with old rsm, totalLeavesMatchCount<0
+            if (specificSpectralCount>0) {
+                spectralCountMap.put(proteinMatchId, specificSpectralCount);
+            } else {
+                spectralCountMap.put(proteinMatchId, peptideMatchCount);
+            }
         }
 
         if (specificSpectralCountRes.size()<sliceOfProteinMatchIds.size()) {

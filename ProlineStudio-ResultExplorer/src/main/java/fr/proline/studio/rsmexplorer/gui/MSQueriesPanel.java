@@ -183,7 +183,7 @@ public class MSQueriesPanel extends HourglassPanel implements DataBoxPanelInterf
         CustomColumnControlButton customColumnControl = new CustomColumnControlButton(m_msqueriesTable);
         m_msqueriesTable.setColumnControl(customColumnControl);
         // hide the id column
-        m_msqueriesTable.getColumnExt(m_msqueriesTable.convertColumnIndexToView(MSQueriesTableModel.COLTYPE_MSQUERY_ID)).setVisible(false);
+        m_msqueriesTable.getColumnExt(m_msqueriesTable.convertColumnIndexToView(MSQueriesTableModel.COLTYPE_MSQUERY_INITIAL_ID)).setVisible(false);
         
        
         m_msqueriesTable.setSortable(false);
@@ -218,7 +218,7 @@ public class MSQueriesPanel extends HourglassPanel implements DataBoxPanelInterf
         int nbQ = msQueries.size();
         m_titleLabel.setText(TABLE_TITLE +" ("+msQueries.size()+")");
         m_msqueriesTable.getColumnExt(m_msqueriesTable.convertColumnIndexToView(MSQueriesTableModel.COLTYPE_MSQUERY_INITIAL_ID)).setVisible(false);
-        m_msqueriesTable.getColumnExt(m_msqueriesTable.convertColumnIndexToView(MSQueriesTableModel.COLTYPE_MSQUERY_ID)).setVisible(false);
+        //m_msqueriesTable.getColumnExt(m_msqueriesTable.convertColumnIndexToView(MSQueriesTableModel.COLTYPE_MSQUERY_ID)).setVisible(false);
         m_markerContainerPanel.setMaxLineNumber(nbQ);
         // select the first row
         if ((nbQ > 0)) {

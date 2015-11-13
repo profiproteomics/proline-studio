@@ -76,7 +76,7 @@ public class DisplayRsmAction extends AbstractRSMAction {
         m_menu.add(displayRsmPSMItem);
         m_menu.add(displayRsmPeptidesItem);
         m_menu.add(displayRsmProteinSetsItem);
-        //m_menu.add(displayPtmProteinSiteItem);
+        m_menu.add(displayPtmProteinSiteItem);
         m_menu.add(displayAdjacencyMatrixItem);
         m_menu.addSeparator();
         m_menu.add(displayUserWindowItem);

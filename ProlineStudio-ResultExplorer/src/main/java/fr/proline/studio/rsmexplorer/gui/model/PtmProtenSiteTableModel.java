@@ -1,6 +1,7 @@
 package fr.proline.studio.rsmexplorer.gui.model;
 
 
+import fr.proline.core.orm.msi.dto.DInfoPTM;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.msi.dto.DPeptidePTM;
 import fr.proline.core.orm.msi.dto.DProteinMatch;
@@ -12,6 +13,7 @@ import fr.proline.studio.filter.IntegerFilter;
 import fr.proline.studio.filter.StringFilter;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
+import fr.proline.studio.rsmexplorer.gui.renderer.DoubleRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.PercentageRenderer;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.table.LazyTable;
@@ -34,13 +36,22 @@ public class PtmProtenSiteTableModel extends LazyTableModel implements GlobalTab
 
     public static final int COLTYPE_PROTEIN_ID = 0;
     public static final int COLTYPE_PROTEIN_NAME = 1;
-    public static final int COLTYPE_PROTEIN_SITE = 2;
-    public static final int COLTYPE_PEPTIDE_NAME = 3;
-    public static final int COLTYPE_PEPTIDE_PTM = 4;
+    public static final int COLTYPE_PEPTIDE_NAME = 2;
+    public static final int COLTYPE_PEPTIDE_PTM = 3;
+    public static final int COLTYPE_DELTA_MASS_PTM = 4;
     public static final int COLTYPE_PTM_PROBA = 5;
-    public static final int COLTYPE_PTM_SITE = 6;
-    public static final int COLTYPE_SITE_PROBA = 7;
-    private static final String[] m_columnNames = {"Id", "Protein", "Protein Site", "Peptide", "PTM", "PTM Probability", "PTM Site", "Site Probability"};
+    public static final int COLTYPE_MODIFICATION = 6;
+    public static final int COLTYPE_RESIDUE_AA = 7;
+    public static final int COLTYPE_DELTA_MASS_MODIFICATION = 8;
+    public static final int COLTYPE_MODIFICATION_LOC = 9;
+    public static final int COLTYPE_PROTEIN_LOC = 10;
+    public static final int COLTYPE_MODIFICATION_PROBA = 11;
+    
+
+    
+    
+    private static final String[] m_columnNames = {"Id", "Protein", "Peptide", "PTM", "PTM D.Mass", "PTM Probability", "Modification", "Residue", "Modification D.Mass", "Modification Loc.", "Protein Loc.", "Modification Probability"};
+    private static final String[] m_columnTooltips =  {"Protein Id", "Protein", "Peptide", "Full PTM", "PTM Delta Mass", "PTM Probability", "One of the Modifications", "Modification Residue", "Modification Delta Mass", "Modification Location", "Protein Location of the Modification", "Modification Probability"};
     
     private ArrayList<DProteinPTMSite> m_proteinPTMSiteArray = null;
 
@@ -65,7 +76,7 @@ public class PtmProtenSiteTableModel extends LazyTableModel implements GlobalTab
     
     @Override
     public String getToolTipForHeader(int col) {
-            return getColumnName(col);
+            return m_columnTooltips[col];
     }
     
     @Override
@@ -82,16 +93,21 @@ public class PtmProtenSiteTableModel extends LazyTableModel implements GlobalTab
             case COLTYPE_PROTEIN_NAME:
             case COLTYPE_PEPTIDE_NAME:
             case COLTYPE_PEPTIDE_PTM:
+            case COLTYPE_MODIFICATION:
                 return String.class;
-            case COLTYPE_PROTEIN_SITE:
-            case COLTYPE_PTM_SITE:
+            case COLTYPE_MODIFICATION_LOC:
+            case COLTYPE_PROTEIN_LOC:
                 return Integer.class;
             case COLTYPE_PTM_PROBA:
-            case COLTYPE_SITE_PROBA:
+            case COLTYPE_MODIFICATION_PROBA:
+            case COLTYPE_DELTA_MASS_PTM:
+            case COLTYPE_DELTA_MASS_MODIFICATION:
                 return Double.class;
-
+            case COLTYPE_RESIDUE_AA:
+                return Character.class;
         }
 
+        
         return null;
     }
     
@@ -142,19 +158,36 @@ public class PtmProtenSiteTableModel extends LazyTableModel implements GlobalTab
                 return peptideMatch.getPeptide().getSequence();
             case COLTYPE_PEPTIDE_PTM:
                 return peptideMatch.getPeptide().getPtmString();
-            case COLTYPE_PROTEIN_SITE:
+            case COLTYPE_MODIFICATION: {
+                DInfoPTM infoPtm = DInfoPTM.getInfoPTMMap().get(peptidePtm.getIdPtmSpecificity());
+                return infoPtm.getPtmShortName();
+            }
+            case COLTYPE_MODIFICATION_LOC:
+                return Integer.valueOf((int) peptidePtm.getSeqPosition());
+            case COLTYPE_PROTEIN_LOC:
                 int start = peptideMatch.getSequenceMatch().getId().getStart();
                 int locationOnPeptide = (int) peptidePtm.getSeqPosition();  // DInfoPTM.getInfoPTMMap().get(peptidePtm.getIdPtmSpecificity()).getLocationSpecificity();
                 int proteinSite = start+locationOnPeptide;
                 return Integer.valueOf(proteinSite);
-            case COLTYPE_PTM_SITE:
-                return Integer.valueOf((int) peptidePtm.getSeqPosition());
             case COLTYPE_PTM_PROBA:
-            case COLTYPE_SITE_PROBA:
                 return 0d; //JPM.TODO
-
+            case COLTYPE_MODIFICATION_PROBA:
+                return 0d; //JPM.TODO
+            case COLTYPE_DELTA_MASS_PTM:
+                return proteinPTMSite.getDeltaMassPTM();
+                
+            case COLTYPE_DELTA_MASS_MODIFICATION: {
+                DInfoPTM infoPtm = DInfoPTM.getInfoPTMMap().get(peptidePtm.getIdPtmSpecificity());
+                return infoPtm.getMonoMass();
+            }
+            case COLTYPE_RESIDUE_AA: {
+                DInfoPTM infoPtm = DInfoPTM.getInfoPTMMap().get(peptidePtm.getIdPtmSpecificity());
+                return infoPtm.getRresidueAASpecificity();
+            }
         }
 
+        
+        
         return null; // should never happen
     }
     private static final StringBuilder m_sb = new StringBuilder(20);
@@ -334,20 +367,26 @@ public class PtmProtenSiteTableModel extends LazyTableModel implements GlobalTab
         switch (col) {
             case COLTYPE_PROTEIN_NAME:
             case COLTYPE_PEPTIDE_NAME:
-            case COLTYPE_PEPTIDE_PTM: {
+            case COLTYPE_PEPTIDE_PTM:
+            case COLTYPE_MODIFICATION: {
                 renderer = new DefaultLeftAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class));
                 break;
             }
             case COLTYPE_PTM_PROBA:
-            case COLTYPE_SITE_PROBA: {
+            case COLTYPE_MODIFICATION_PROBA: {
                 renderer = new PercentageRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)));
                 break;
+            }
+            case COLTYPE_DELTA_MASS_PTM:
+            case COLTYPE_DELTA_MASS_MODIFICATION: {
+                renderer = new DoubleRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 4);
             }
 
         }
         m_rendererMap.put(col, renderer);
         return renderer;
- 
+
+        
     }
     private final HashMap<Integer, TableCellRenderer> m_rendererMap = new HashMap();
 

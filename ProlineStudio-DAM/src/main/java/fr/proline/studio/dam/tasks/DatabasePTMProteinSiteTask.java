@@ -98,7 +98,7 @@ public class DatabasePTMProteinSiteTask extends AbstractDatabaseTask {
                             // SELECT sm.bestPeptideMatchId, pi, pm.id, pm.rank, pm.charge, pm.deltaMoz, pm.experimentalMoz, pm.missedCleavage, pm.score, pm.resultSet.id, p, sm, ms.id, ms.initialId, pm.cdPrettyRank, pm.sdPrettyRank, sp.firstTime, sp.precursorIntensity, sp.title
                 // FROM fr.proline.core.orm.msi.SequenceMatch sm, fr.proline.core.orm.msi.PeptideInstancePeptideMatchMap pipm, fr.proline.core.orm.msi.PeptideMatch pm, fr.proline.core.orm.msi.PeptideInstance pi, fr.proline.core.orm.msi.Peptide p, fr.proline.core.orm.msi.MsQuery ms, fr.proline.core.orm.msi.Spectrum sp   
                 // WHERE sm.id.proteinMatchId IN (:proteinMatchList) AND sm.bestPeptideMatchId=pipm.id.peptideMatchId AND pipm.id.peptideInstanceId=pi.id AND pipm.resultSummary.id=:rsmId AND pipm.id.peptideMatchId=pm.id AND pm.peptideId=p.id AND pm.msQuery=ms AND ms.spectrum=sp
-                Query peptidesQuery = entityManagerMSI.createQuery("SELECT pi, pm.id, pm.rank, pm.charge, pm.deltaMoz, pm.experimentalMoz, pm.missedCleavage, pm.score, pm.resultSet.id, p, sm, ms.id, ms.initialId, pm.cdPrettyRank, pm.sdPrettyRank, sp.firstTime, sp.precursorIntensity, sp.title, sm.id.proteinMatchId\n"
+                Query peptidesQuery = entityManagerMSI.createQuery("SELECT pi, pm.id, pm.rank, pm.charge, pm.deltaMoz, pm.experimentalMoz, pm.missedCleavage, pm.score, pm.resultSet.id, p, sm, ms.id, ms.initialId, pm.cdPrettyRank, pm.sdPrettyRank, pm.serializedProperties, sp.firstTime, sp.precursorIntensity, sp.title, sm.id.proteinMatchId\n"
                         + "              FROM fr.proline.core.orm.msi.SequenceMatch sm, fr.proline.core.orm.msi.PeptideInstancePeptideMatchMap pipm, fr.proline.core.orm.msi.PeptideMatch pm, fr.proline.core.orm.msi.PeptideInstance pi, fr.proline.core.orm.msi.Peptide p, fr.proline.core.orm.msi.MsQuery ms, fr.proline.core.orm.msi.Spectrum sp   \n"
                         + "              WHERE sm.id.proteinMatchId IN (:proteinMatchList) AND sm.bestPeptideMatchId=pipm.id.peptideMatchId AND pipm.id.peptideInstanceId=pi.id AND pipm.resultSummary.id=:rsmId AND pipm.id.peptideMatchId=pm.id AND pm.peptideId=p.id AND pm.msQuery=ms AND ms.spectrum=sp");
                 peptidesQuery.setParameter("rsmId", rsmId);
@@ -122,10 +122,11 @@ public class DatabasePTMProteinSiteTask extends AbstractDatabaseTask {
                     Long pmResultSetId = (Long) resCur[8];
                     Integer pmCdPrettyRank = (Integer) resCur[13];
                     Integer pmSdPrettyRank = (Integer) resCur[14];
-                    Float firstTime = (Float) resCur[15];
-                    Float precursorIntensity = (Float) resCur[16];
-                    String title = (String) resCur[17];
-                    Long proteinMatchId = (Long) resCur[18];
+                    String serializedProperties = (String) resCur[15];
+                    Float firstTime = (Float) resCur[16];
+                    Float precursorIntensity = (Float) resCur[17];
+                    String title = (String) resCur[18];
+                    Long proteinMatchId = (Long) resCur[19];
 
                     DSpectrum spectrum = new DSpectrum();
                     spectrum.setFirstTime(firstTime);
@@ -134,6 +135,7 @@ public class DatabasePTMProteinSiteTask extends AbstractDatabaseTask {
 
                     DPeptideMatch pm = new DPeptideMatch(pmId, pmRank, pmCharge, pmDeltaMoz, pmExperimentalMoz, pmMissedCleavage, pmScore, pmResultSetId, pmCdPrettyRank, pmSdPrettyRank);
                     pm.setRetentionTime(firstTime);
+                    pm.setSerializedProperties(serializedProperties);
                     peptideMatchArray.add(pm);
 
                     Peptide p = (Peptide) resCur[9];
@@ -196,8 +198,13 @@ public class DatabasePTMProteinSiteTask extends AbstractDatabaseTask {
                     if (peptidePTMArray == null) {
                         continue;
                     }
+                    double deltaMass  = 0;
                     for (DPeptidePTM peptidePTM : peptidePTMArray) {
-                        m_proteinPTMSiteArray.add(new DProteinPTMSite(proteinMatch, peptideMatch, peptidePTM));
+                        DInfoPTM infoPtm = DInfoPTM.getInfoPTMMap().get(peptidePTM.getIdPtmSpecificity());
+                        deltaMass += infoPtm.getMonoMass();
+                    }
+                    for (DPeptidePTM peptidePTM : peptidePTMArray) {
+                        m_proteinPTMSiteArray.add(new DProteinPTMSite(proteinMatch, peptideMatch, peptidePTM, deltaMass));
                     }
                 }
             }

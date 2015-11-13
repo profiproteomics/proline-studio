@@ -108,6 +108,8 @@ public class DataSetNode extends AbstractNode {
                     return true;
                 }
             }
+        }else if (datasetType == Dataset.DatasetType.QUANTITATION){
+            return true; //rsType is Quantitation but, a SC or a XIC is necessarily a merge
         }
         return false;
     }

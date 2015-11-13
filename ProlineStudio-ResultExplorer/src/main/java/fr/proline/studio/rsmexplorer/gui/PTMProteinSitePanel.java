@@ -77,11 +77,7 @@ public class PTMProteinSitePanel extends HourglassPanel implements DataBoxPanelI
     }
 
     public void setData(Long taskId, ArrayList<DProteinPTMSite> proteinPTMSiteArray, boolean finished) {
-        
-        // update toolbar
-        //ResultSummary rsm = (ResultSummary) m_dataBox.getData(false, ResultSummary.class);
 
- 
         ((PtmProtenSiteTableModel) ((CompoundTableModel)m_ptmProteinSiteTable.getModel()).getBaseModel()).setData(taskId, proteinPTMSiteArray);
 
         // select the first row

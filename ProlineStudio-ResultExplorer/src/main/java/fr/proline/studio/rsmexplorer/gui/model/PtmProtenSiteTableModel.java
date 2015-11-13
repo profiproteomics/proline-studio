@@ -1,16 +1,23 @@
 package fr.proline.studio.rsmexplorer.gui.model;
 
 
+
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonPrimitive;
 import fr.proline.core.orm.msi.dto.DInfoPTM;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.msi.dto.DPeptidePTM;
 import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.core.orm.msi.dto.DProteinPTMSite;
 import fr.proline.studio.comparedata.ExtraDataType;
+import fr.proline.studio.filter.ConvertValueInterface;
 import fr.proline.studio.filter.DoubleFilter;
 import fr.proline.studio.filter.Filter;
 import fr.proline.studio.filter.IntegerFilter;
 import fr.proline.studio.filter.StringFilter;
+import fr.proline.studio.filter.ValueFilter;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
 import fr.proline.studio.rsmexplorer.gui.renderer.DoubleRenderer;
@@ -26,6 +33,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.TreeSet;
 import javax.swing.table.TableCellRenderer;
 
 /**
@@ -54,11 +64,12 @@ public class PtmProtenSiteTableModel extends LazyTableModel implements GlobalTab
     private static final String[] m_columnTooltips =  {"Protein Id", "Protein", "Peptide", "Full PTM", "PTM Delta Mass", "PTM Probability", "One of the Modifications", "Modification Residue", "Modification Delta Mass", "Modification Location", "Protein Location of the Modification", "Modification Probability"};
     
     private ArrayList<DProteinPTMSite> m_proteinPTMSiteArray = null;
-
+    private String[] m_modificationsArray = null;
+    private HashMap<String, Integer> m_modificationsMap = null;
+    
     private String m_modelName;
     
-    private boolean m_mergedData = false;
-    
+
     public PtmProtenSiteTableModel(LazyTable table) {
         super(table);
     }
@@ -169,10 +180,71 @@ public class PtmProtenSiteTableModel extends LazyTableModel implements GlobalTab
                 int locationOnPeptide = (int) peptidePtm.getSeqPosition();  // DInfoPTM.getInfoPTMMap().get(peptidePtm.getIdPtmSpecificity()).getLocationSpecificity();
                 int proteinSite = start+locationOnPeptide;
                 return Integer.valueOf(proteinSite);
-            case COLTYPE_PTM_PROBA:
-                return 0d; //JPM.TODO
-            case COLTYPE_MODIFICATION_PROBA:
-                return 0d; //JPM.TODO
+            case COLTYPE_PTM_PROBA: {
+                
+                return 0.0d;
+            }
+            case COLTYPE_MODIFICATION_PROBA: {
+                
+                //JPM.TODO : to be done in the task beforehand
+                String properties = peptideMatch.getSerializedProperties();
+                
+                if (properties != null) {
+
+                    try {
+                    JsonParser parser = new JsonParser();
+
+                    JsonObject jsonObject = parser.parse(properties).getAsJsonObject();
+                    JsonObject ptmPropertiesObject = jsonObject.getAsJsonObject("ptm_site_properties");
+                    if (ptmPropertiesObject != null) {
+                        JsonObject mascotPtmPropertiesObject = ptmPropertiesObject.getAsJsonObject("mascot_ptm_site_properties");
+                        if (mascotPtmPropertiesObject != null) {
+                            JsonObject siteProbabilities = mascotPtmPropertiesObject.getAsJsonObject("site_probabilities");
+                            if (siteProbabilities != null) {
+                                Set<Entry<String, JsonElement>> entrySet = siteProbabilities.entrySet();
+                                for (Map.Entry<String, JsonElement> entry : entrySet) {
+                                    String key = entry.getKey();
+                                    int modificationPos = -1;
+                                    if (key.indexOf("N-term") != -1) {
+                                        modificationPos = 0;
+                                    } else if (key.indexOf("C-term") != -1) {
+                                        modificationPos = peptideMatch.getPeptide().getSequence().length();
+                                    } else {
+                                        int startIndex = key.indexOf('(');
+                                        if (startIndex != -1) {
+                                            startIndex++;
+                                            char c = key.charAt(startIndex);
+                                            while (c >= 'A' && c <= 'Z') {
+                                                startIndex++;
+                                                c = key.charAt(startIndex);
+                                            }
+                                            int endIndex = key.indexOf(')');
+                                            if (endIndex != -1) {
+                                                String modificationPosString = key.substring(startIndex, endIndex);
+                                                modificationPos = Integer.valueOf(modificationPosString);
+
+                                            }
+                                        }
+                                    }
+                                    if (modificationPos == peptidePtm.getSeqPosition()) {
+                                        JsonPrimitive value = siteProbabilities.getAsJsonPrimitive(key);
+                                        double percentage = value.getAsDouble()*100;
+                                        return percentage;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    } catch (Exception e) {
+                        // should not happen
+                        //System.err.println(e.getMessage());
+                    }
+
+                    // should not happen
+                }
+                
+                return null;
+            }
             case COLTYPE_DELTA_MASS_PTM:
                 return proteinPTMSite.getDeltaMassPTM();
                 
@@ -201,9 +273,35 @@ public class PtmProtenSiteTableModel extends LazyTableModel implements GlobalTab
         m_proteinPTMSiteArray = proteinPTMSiteArray;
         m_taskId = taskId;
  
+        calculateData();
+        
         fireTableDataChanged();
 
     }
+    
+    
+    private void calculateData() {
+        
+        // List of different modifications
+        TreeSet<String> s = new TreeSet<>();
+        int nbRows = getRowCount();
+        for (int i=0;i<nbRows;i++) {
+            String modification = (String) getValueAt(i, COLTYPE_MODIFICATION);
+            s.add(modification);
+        }
+        
+        m_modificationsArray = s.toArray(new String[s.size()]);
+        
+        m_modificationsMap = new HashMap<>();
+        for (int i=0;i<m_modificationsArray.length;i++) {
+            m_modificationsMap.put( m_modificationsArray[i], i);
+        }
+        
+        
+        // Count for each type of modification, the number of modifications
+        
+    }
+    
 
     public void dataUpdated() {
 
@@ -314,21 +412,37 @@ public class PtmProtenSiteTableModel extends LazyTableModel implements GlobalTab
    @Override
     public void addFilters(LinkedHashMap<Integer, Filter> filtersMap) {
 
-        int colIdx = 0;
+        filtersMap.put(COLTYPE_PROTEIN_NAME, new StringFilter(getColumnName(COLTYPE_PROTEIN_NAME), null,COLTYPE_PROTEIN_NAME));
+        filtersMap.put(COLTYPE_PEPTIDE_NAME, new StringFilter(getColumnName(COLTYPE_PEPTIDE_NAME), null,COLTYPE_PEPTIDE_NAME));
+        filtersMap.put(COLTYPE_PEPTIDE_PTM, new StringFilter(getColumnName(COLTYPE_PEPTIDE_PTM), null,COLTYPE_PEPTIDE_PTM));
+        filtersMap.put(COLTYPE_DELTA_MASS_PTM, new DoubleFilter(getColumnName(COLTYPE_DELTA_MASS_PTM), null, COLTYPE_DELTA_MASS_PTM));
+        filtersMap.put(COLTYPE_PTM_PROBA, new DoubleFilter(getColumnName(COLTYPE_PTM_PROBA), null, COLTYPE_PTM_PROBA));
+        //filtersMap.put(COLTYPE_MODIFICATION, new StringFilter(getColumnName(COLTYPE_MODIFICATION), null, COLTYPE_MODIFICATION));
         
-        colIdx++; // COLTYPE_PROTEIN_SET_ID
         
-        filtersMap.put(colIdx, new StringFilter(getColumnName(colIdx), null, colIdx)); colIdx++; // COLTYPE_PROTEIN_SET_NAME
-        filtersMap.put(colIdx, new StringFilter(getColumnName(colIdx), null, colIdx)); colIdx++; // COLTYPE_PROTEIN_SET_DESCRIPTION
-        filtersMap.put(colIdx, new DoubleFilter(getColumnName(colIdx), null, colIdx));  colIdx++; // COLTYPE_PROTEIN_SCORE
-        colIdx++; // COLTYPE_PROTEINS_COUNT
-        filtersMap.put(colIdx, new IntegerFilter(getColumnName(colIdx), null, colIdx));  colIdx++; // COLTYPE_PEPTIDES_COUNT
-        filtersMap.put(colIdx, new IntegerFilter(getColumnName(colIdx), null, colIdx));  colIdx++; // COLTYPE_SPECTRAL_COUNT
-        /*if (m_mergedData) {
-            filtersMap.put(colIdx, new IntegerFilter(getColumnName(colIdx), null, colIdx)); colIdx++; // COLTYPE_BASIC_SPECTRAL_COUNT
-        }*/
-        filtersMap.put(colIdx, new IntegerFilter(getColumnName(colIdx), null, colIdx));  colIdx++; // COLTYPE_SPECIFIC_SPECTRAL_COUNT
-        filtersMap.put(colIdx, new IntegerFilter(getColumnName(colIdx), null, colIdx));  colIdx++; // COLTYPE_UNIQUE_SEQUENCES_COUNT
+       ConvertValueInterface modificationConverter = new ConvertValueInterface() {
+           @Override
+           public Object convertValue(Object o) {
+               if (o == null) {
+                   return null;
+               }
+               
+               return m_modificationsMap.get((String)o);
+
+           }
+
+       };
+        filtersMap.put(COLTYPE_MODIFICATION, new ValueFilter(getColumnName(COLTYPE_MODIFICATION), m_modificationsArray, null, ValueFilter.ValueFilterType.EQUAL, modificationConverter, COLTYPE_MODIFICATION));
+            
+        
+        
+        filtersMap.put(COLTYPE_RESIDUE_AA, new StringFilter(getColumnName(COLTYPE_RESIDUE_AA), null, COLTYPE_RESIDUE_AA));
+        filtersMap.put(COLTYPE_DELTA_MASS_MODIFICATION, new DoubleFilter(getColumnName(COLTYPE_DELTA_MASS_MODIFICATION), null, COLTYPE_DELTA_MASS_MODIFICATION));
+        filtersMap.put(COLTYPE_MODIFICATION_LOC, new IntegerFilter(getColumnName(COLTYPE_MODIFICATION_LOC), null, COLTYPE_MODIFICATION_LOC));
+        filtersMap.put(COLTYPE_PROTEIN_LOC, new IntegerFilter(getColumnName(COLTYPE_PROTEIN_LOC), null, COLTYPE_PROTEIN_LOC));
+        filtersMap.put(COLTYPE_MODIFICATION_PROBA, new DoubleFilter(getColumnName(COLTYPE_MODIFICATION_PROBA), null, COLTYPE_MODIFICATION_PROBA));
+
+        
     }
 
     @Override

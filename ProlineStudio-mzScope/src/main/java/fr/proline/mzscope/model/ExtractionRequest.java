@@ -22,6 +22,8 @@ public class ExtractionRequest {
         float elutionTimeUpperBound = -1.0f;
 
         double parentMz = 0.0;
+        double minParentMz = 0.0;
+        double maxParentMz = 0.0;
 
         double mz = 0.0;
 
@@ -42,6 +44,16 @@ public class ExtractionRequest {
 
         public T setParentMz(double parentMz) {
             this.parentMz = parentMz;
+            return self();
+        }
+        
+        public T setMinParentMz(double minParentMz) {
+            this.minParentMz = minParentMz;
+            return self();
+        }
+        
+        public T setMaxParentMz(double maxParentMz) {
+            this.maxParentMz = maxParentMz;
             return self();
         }
 
@@ -76,6 +88,14 @@ public class ExtractionRequest {
             return parentMz;
         }
 
+        public double getMinParentMz() {
+            return minParentMz;
+        }
+
+        public double getMaxParentMz() {
+            return maxParentMz;
+        }
+
         public ExtractionRequest build() {
             return new ExtractionRequest(this);
         }
@@ -91,6 +111,8 @@ public class ExtractionRequest {
     private final float elutionTime;
 
     private final double parentMz;
+    private final double minParentMz;
+    private final double maxParentMz;
 
     protected ExtractionRequest(Builder builder) {
         this.maxMz = builder.maxMz;
@@ -100,6 +122,8 @@ public class ExtractionRequest {
         this.elutionTime = builder.elutionTime;
         this.mz = builder.mz;
         this.parentMz = builder.parentMz;
+        this.minParentMz = builder.minParentMz;
+        this.maxParentMz = builder.maxParentMz;
     }
 
     @Override
@@ -138,6 +162,14 @@ public class ExtractionRequest {
 
     public double getParentMz() {
         return parentMz;
+    }
+
+    public double getMinParentMz() {
+        return minParentMz;
+    }
+
+    public double getMaxParentMz() {
+        return maxParentMz;
     }
 
 }

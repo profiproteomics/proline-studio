@@ -339,9 +339,17 @@ public class MzdbRawFile implements IRawFile {
         try {
             Iterator<RunSlice> runSlices;
             if (params.getMinMz() == 0 && params.getMaxMz() == 0) {
-                runSlices = getMzDbReader().getLcMsRunSliceIterator();
+                if(isDIAFile){
+                    runSlices = getMzDbReader().getLcMsnRunSliceIterator(params.getMinParentMz(), params.getMaxParentMz());
+                }else{
+                    runSlices = getMzDbReader().getLcMsRunSliceIterator();
+                }
             } else {
-                runSlices = getMzDbReader().getLcMsRunSliceIterator(params.getMinMz(), params.getMaxMz());
+                if (isDIAFile){
+                    runSlices = getMzDbReader().getLcMsnRunSliceIterator(params.getMinParentMz(), params.getMaxParentMz(), params.getMinMz(), params.getMaxMz());
+                }else{
+                    runSlices = getMzDbReader().getLcMsRunSliceIterator(params.getMinMz(), params.getMaxMz());
+                }
             }
             Peakel[] peakels = detector.detectPeakels(runSlices);
             for (Peakel peakel : peakels) {

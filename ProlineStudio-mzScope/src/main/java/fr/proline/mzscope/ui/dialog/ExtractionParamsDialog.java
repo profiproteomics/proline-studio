@@ -64,6 +64,14 @@ public class ExtractionParamsDialog extends JDialog {
     private JPanel panelBaseline;
     private JCheckBox removeBaselineCB;
     
+    private JPanel panelParentMass;
+    private JLabel labelParentMinMz;
+    private JLabel labelParentMaxMz;
+    private JTextField parentMinMzTF;
+    private JTextField parentMaxMzTF;
+    
+    private boolean isDIA;
+    
 
     /**
      * Creates new form ExtractionParamsDialog
@@ -71,8 +79,9 @@ public class ExtractionParamsDialog extends JDialog {
      * @param parent
      * @param modal
      */
-    public ExtractionParamsDialog(Frame parent, boolean modal) {
+    public ExtractionParamsDialog(Frame parent, boolean modal, boolean isDIA) {
         super(parent, modal);
+        this.isDIA = isDIA;
         initComponents();
         toleranceTF.setText(Float.toString(MzScopePreferences.getInstance().getMzPPMTolerance()));
         getRootPane().setDefaultButton(okBtn);
@@ -107,6 +116,9 @@ public class ExtractionParamsDialog extends JDialog {
             mainPanel.add(getTolerancePanel());
             mainPanel.add(getBaselineRemoverPanel());
             mainPanel.add(getPanelBounds());
+            if (isDIA){
+                mainPanel.add(getParentMassPanel());
+            }
             mainPanel.add(getButtonPanel());
         }
         return mainPanel;
@@ -247,6 +259,9 @@ public class ExtractionParamsDialog extends JDialog {
             labelMinMz = new JLabel();
             labelMinMz.setName("labelMinMz");
             labelMinMz.setText("minimum m/z:");
+            if (isDIA){
+                labelMinMz.setText("Fragment minimum m/z:");
+            }
         }
         return labelMinMz;
     }
@@ -256,6 +271,9 @@ public class ExtractionParamsDialog extends JDialog {
             labelMaxMz = new JLabel();
             labelMaxMz.setName("labelMaxMz");
             labelMaxMz.setText("maximum m/z:");
+            if (isDIA){
+                labelMaxMz.setText("Fragment maximum m/z:");
+            }
         }
         return labelMaxMz;
     }
@@ -336,6 +354,77 @@ public class ExtractionParamsDialog extends JDialog {
             });
         }
         return massRB;
+    }
+    
+    private JPanel getParentMassPanel() {
+        if (panelParentMass == null) {
+            panelParentMass = new JPanel();
+            panelParentMass.setName("panelParentMass");
+            panelParentMass.setLayout(new BoxLayout(panelParentMass, BoxLayout.Y_AXIS));
+            
+            JPanel pmin = new JPanel();
+            pmin.setLayout(new FlowLayout(FlowLayout.LEFT));
+            pmin.add(getLabelParentMinMz());
+            pmin.add(getParentMinMzTF());
+            panelParentMass.add(pmin);
+            JPanel pmax = new JPanel();
+            pmax.setLayout(new FlowLayout(FlowLayout.LEFT));
+            pmax.add(getLabelParentMaxMz());
+            pmax.add(getParentMaxMzTF());
+            panelParentMass.add(pmax);
+
+        }
+        return panelParentMass;
+    }
+    
+    private JTextField getParentMinMzTF() {
+        if (parentMinMzTF == null) {
+            parentMinMzTF = new JTextField();
+            parentMinMzTF.setName("parentMinMzTF");
+            parentMinMzTF.setText("0.0");
+            parentMinMzTF.setColumns(5);
+            parentMinMzTF.addFocusListener(new FocusAdapter() {
+                @Override
+                public void focusGained(FocusEvent evt) {
+                    parentMinMzTF.selectAll();
+                }
+            });
+        }
+        return parentMinMzTF;
+    }
+
+    private JTextField getParentMaxMzTF() {
+        if (parentMaxMzTF == null) {
+            parentMaxMzTF = new JTextField();
+            parentMaxMzTF.setName("parentMaxMzTF");
+            parentMaxMzTF.setText("0.0");
+            parentMaxMzTF.setColumns(5);
+            parentMaxMzTF.addFocusListener(new FocusAdapter() {
+                @Override
+                public void focusGained(FocusEvent evt) {
+                    parentMaxMzTF.selectAll();
+                }
+            });
+        }
+        return parentMaxMzTF;
+    }
+    
+    private JLabel getLabelParentMinMz() {
+        if (labelParentMinMz == null) {
+            labelParentMinMz = new JLabel();
+            labelParentMinMz.setName("labelParentMinMz");
+            labelParentMinMz.setText("Parent minimum m/z:");
+        }
+        return labelParentMinMz;
+    }
+
+    private JLabel getLabelParentMaxMz() {
+        if (labelParentMaxMz == null) {
+            labelParentMaxMz = new JLabel();
+            labelParentMaxMz.setName("labelParentMaxMz");
+            labelParentMaxMz.setText("Parent maximum m/z:");
+        }
+        return labelParentMaxMz;
     }
 
     private JPanel getButtonPanel() {
@@ -444,7 +533,22 @@ public class ExtractionParamsDialog extends JDialog {
         }
 
         extractionParams.setRemoveBaseline(removeBaselineCB.isSelected());
-
+        
+        if (isDIA){
+            try {
+                extractionParams.setMinParentMz(Double.parseDouble(parentMinMzTF.getText()));
+            } catch (NumberFormatException e) {
+                JOptionPane.showMessageDialog(this, "Parent min m/z value is incorrect: " + parentMinMzTF.getText());
+                return;
+            }
+            try {
+                extractionParams.setMaxParentMz(Double.parseDouble(parentMaxMzTF.getText()));
+            } catch (NumberFormatException e) {
+                JOptionPane.showMessageDialog(this, "Parent max m/z value is incorrect: " + parentMaxMzTF.getText());
+                return;
+            }
+        }
+        
         setVisible(false);
     }
 
@@ -485,7 +589,7 @@ public class ExtractionParamsDialog extends JDialog {
         EventQueue.invokeLater(new Runnable() {
             @Override
             public void run() {
-                ExtractionParamsDialog dialog = new ExtractionParamsDialog(new JFrame(), true);
+                ExtractionParamsDialog dialog = new ExtractionParamsDialog(new JFrame(), true, true);
                 dialog.setExtractionParamsTitle("Extraction Parameters");
                 dialog.addWindowListener(new WindowAdapter() {
                     @Override

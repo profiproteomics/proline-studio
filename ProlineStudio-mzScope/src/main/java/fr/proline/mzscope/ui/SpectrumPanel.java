@@ -7,7 +7,7 @@ import fr.proline.mzscope.model.Ms1ExtractionRequest;
 import fr.proline.mzscope.model.MzScopePreferences;
 import fr.proline.mzscope.model.Spectrum;
 import fr.proline.mzscope.ui.event.ScanHeaderListener;
-import static fr.proline.mzscope.utils.MzScopeConstants.DisplayMode;
+import fr.proline.mzscope.utils.MzScopeConstants.DisplayMode;
 import fr.proline.mzscope.utils.SpectrumUtils;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.graphics.PlotAbstract;
@@ -146,7 +146,6 @@ public class SpectrumPanel extends JPanel implements ScanHeaderListener, PlotPan
         }
 
         if (refIdx < pattern.isotopeCount()) {
-            double delta = 0.5 * (spectrumPlotPanel.getXAxis().getMaxValue() - spectrumPlotPanel.getXAxis().getMinValue()) / 100;
             float abundance = currentScan.getSpectrumData().getIntensityList()[idx];
             float normAbundance = (Float) pattern.mzAbundancePairs()[refIdx]._2;
             for (Tuple2 t : pattern.mzAbundancePairs()) {

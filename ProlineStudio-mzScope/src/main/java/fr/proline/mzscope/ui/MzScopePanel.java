@@ -388,7 +388,8 @@ public class MzScopePanel extends JPanel implements IFeatureViewer, IExtractionE
     }
 
     public void extractFeatures(List<IRawFile> rawfiles) {
-        ExtractionParamsDialog dialog = new ExtractionParamsDialog(this.parentFrame, true);
+        boolean isDIA = isDIAFiles(rawfiles);
+        ExtractionParamsDialog dialog = new ExtractionParamsDialog(this.parentFrame, true, isDIA);
         dialog.setExtractionParamsTitle("Extract Features Parameters");
         dialog.setLocationRelativeTo(this);
         dialog.showExtractionParamsDialog();
@@ -492,7 +493,8 @@ public class MzScopePanel extends JPanel implements IFeatureViewer, IExtractionE
     }
 
     public void detectPeakels(List<IRawFile> rawfiles) {
-        ExtractionParamsDialog dialog = new ExtractionParamsDialog(this.parentFrame, true);
+        boolean isDIA = isDIAFiles(rawfiles);
+        ExtractionParamsDialog dialog = new ExtractionParamsDialog(this.parentFrame, true, isDIA);
         dialog.setExtractionParamsTitle("Detect Peakels Parameters");
         dialog.setLocationRelativeTo(this);
         dialog.showExtractionParamsDialog();
@@ -509,7 +511,8 @@ public class MzScopePanel extends JPanel implements IFeatureViewer, IExtractionE
     }
 
     public void detectFeatures(List<IRawFile> rawfiles) {
-        ExtractionParamsDialog dialog = new ExtractionParamsDialog(this.parentFrame, true);
+        boolean isDIA = isDIAFiles(rawfiles);
+        ExtractionParamsDialog dialog = new ExtractionParamsDialog(this.parentFrame, true, isDIA);
         dialog.setExtractionParamsTitle("Detect Features Parameters");
         dialog.setLocationRelativeTo(this);
         dialog.showExtractionParamsDialog();
@@ -725,6 +728,13 @@ public class MzScopePanel extends JPanel implements IFeatureViewer, IExtractionE
             }
         }
         return panel;
+    }
+    
+    private boolean isDIAFiles(List<IRawFile> rawfiles){
+        if (rawfiles.stream().anyMatch((rf) -> (rf.isDIAFile()))) {
+            return true;
+        }
+        return false;
     }
     
 }

@@ -37,6 +37,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashSet;
 import javax.swing.ImageIcon;
 import javax.swing.JLayeredPane;
@@ -46,6 +47,8 @@ import javax.swing.JToolBar;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.TableModelListener;
+import javax.swing.table.TableModel;
+import javax.swing.table.TableRowSorter;
 import org.jdesktop.swingx.JXTable;
 
 /**
@@ -282,6 +285,36 @@ public class PTMProteinSitePanel extends HourglassPanel implements DataBoxPanelI
         m_ptmProteinSiteTable.setModel(new CompoundTableModel(new PtmProtenSiteTableModel((LazyTable)m_ptmProteinSiteTable), true));
         // hide the id column
         m_ptmProteinSiteTable.getColumnExt(m_ptmProteinSiteTable.convertColumnIndexToView(PtmProtenSiteTableModel.COLTYPE_PROTEIN_ID)).setVisible(false);
+        
+        TableRowSorter<TableModel> sorter = new TableRowSorter<>(m_ptmProteinSiteTable.getModel());
+        m_ptmProteinSiteTable.setRowSorter(sorter);
+            
+        sorter.setComparator(PtmProtenSiteTableModel.COLTYPE_MODIFICATION_LOC, new Comparator<String>() {
+
+            @Override
+            public int compare(String s1, String s2) {
+                int pos1;
+                if (s1.compareTo("N-term") == 0) {
+                    pos1 = -1;
+                } else if (s1.compareTo("C-term") == 0) {
+                    pos1 = Integer.MAX_VALUE;
+                } else {
+                    pos1 = Integer.valueOf(s1);
+                }
+                int pos2;
+                if (s2.compareTo("N-term") == 0) {
+                    pos2 = 0;
+                } else if (s2.compareTo("C-term") == 0) {
+                    pos2 = Integer.MAX_VALUE;
+                } else {
+                    pos2 = Integer.valueOf(s2);
+                }
+
+                return pos2-pos1;
+            }
+ 
+                
+        });
         
 
         m_markerContainerPanel = new MarkerContainerPanel(m_ptmProteinSiteScrollPane, (PTMProteinSiteTable) m_ptmProteinSiteTable);

@@ -221,7 +221,7 @@ public class FilterTableModel extends DecoratedTableModel implements FilterTable
         data = filter.convertValue(data);
 
         if (data == null) {
-            return true; // should not happen
+            return false;
         }
 
         switch (filter.getFilterType()) {

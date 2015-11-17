@@ -34,6 +34,8 @@ public class ValidationTask extends AbstractServiceTask {
     public static String PEP_LENGTH_FILTER_NAME = "Length";
     public static String MASCOT_EVAL_FILTER_KEY = "MASCOT_EVALUE";
     public static String MASCOT_EVAL_FILTER_NAME = "e-Value";
+    public static String MASCOT_ADJUSTED_EVAL_FILTER_KEY = "MASCOT_ADJUSTED_EVALUE";
+    public static String MASCOT_ADJUSTED_EVAL_FILTER_NAME = "Adjusted e-Value";
     public static String MASCOT_IT_SCORE_FILTER_KEY = "SCORE_IT_P-VALUE";
     public static String MASCOT_IT_SCORE_FILTER_NAME = "Identity p-Value";
     public static String MASCOT_HT_SCORE_FILTER_KEY = "SCORE_HT_P-VALUE";
@@ -88,6 +90,12 @@ public class ValidationTask extends AbstractServiceTask {
                 filterCfg.put("threshold", Float.valueOf(m_argumentsMap.get(MASCOT_EVAL_FILTER_KEY)));
                 pepFilters.add(filterCfg);
             }
+            if (m_argumentsMap.containsKey(MASCOT_ADJUSTED_EVAL_FILTER_KEY)) {
+                HashMap filterCfg = new HashMap();
+                filterCfg.put("parameter", MASCOT_ADJUSTED_EVAL_FILTER_KEY);
+                filterCfg.put("threshold", Float.valueOf(m_argumentsMap.get(MASCOT_ADJUSTED_EVAL_FILTER_KEY)));
+                pepFilters.add(filterCfg);
+            }
             if (m_argumentsMap.containsKey(PEP_LENGTH_FILTER_KEY)) {
                 HashMap filterCfg = new HashMap();
                 filterCfg.put("parameter", PEP_LENGTH_FILTER_KEY);
@@ -130,8 +138,6 @@ public class ValidationTask extends AbstractServiceTask {
                 params.put("pep_match_validator_config", pepMatchValidator);
             }
 
-            
-            
             if (m_argumentsMap.containsKey("use_td_competition")) {
                 params.put("use_td_competition", Boolean.parseBoolean(m_argumentsMap.get("use_td_competition")) );
             }

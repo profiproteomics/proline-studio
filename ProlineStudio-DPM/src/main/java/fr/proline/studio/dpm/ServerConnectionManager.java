@@ -135,7 +135,7 @@ public class ServerConnectionManager {
                     JMSConnectionManager.getJMSConnectionManager().getJMSConnection();
                 } catch (Exception e) {
                     setConnectionState(CONNECTION_FAILED);
-                    m_connectionError = new TaskError(e);
+                    m_connectionError = new TaskError(e.getMessage());
                     
                     if (connectionCallback != null) {
                         connectionCallback.run();

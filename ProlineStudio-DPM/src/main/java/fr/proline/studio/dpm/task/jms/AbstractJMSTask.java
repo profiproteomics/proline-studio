@@ -36,6 +36,9 @@ public abstract class AbstractJMSTask  extends AbstractLongTask implements Messa
     protected MessageConsumer m_responseConsumer = null;
     protected TemporaryQueue m_replyQueue = null;
     
+//    protected Queue m_expireQueue = null;
+//    protected MessageConsumer m_expireConsumer = null;
+    
     protected JMSState m_currentState = null;
     
     protected int m_id;
@@ -51,8 +54,6 @@ public abstract class AbstractJMSTask  extends AbstractLongTask implements Messa
 
     /* To count received messages */
     public final AtomicInteger MESSAGE_COUNT_SEQUENCE = new AtomicInteger(0);
-
-    
 
     
     public AbstractJMSTask(AbstractJMSCallback callback/*, boolean synchronous*/, TaskInfo taskInfo) {
@@ -71,8 +72,6 @@ public abstract class AbstractJMSTask  extends AbstractLongTask implements Messa
     public void askJMS() throws JMSException {
         m_startRun = System.currentTimeMillis();
         try {
-           // VDS : already in constructor ?
-            //m_id = m_idIncrement++;
 
             /*
              * Thread specific : Session, Producer, Consumer ...
@@ -82,13 +81,18 @@ public abstract class AbstractJMSTask  extends AbstractLongTask implements Messa
 
             // Step 6. Create a JMS Message Producer (Producer MUST be confined in current Thread)
             m_producer = m_session.createProducer(JMSConnectionManager.getJMSConnectionManager().getServiceQueue());
+
+            
             m_replyQueue = m_session.createTemporaryQueue();
             m_responseConsumer = m_session.createConsumer(m_replyQueue);
-
             m_responseConsumer.setMessageListener(this);
 
+//            m_expireQueue = JMSConnectionManager.getJMSConnectionManager().getExpireQueue();
+//            m_expireConsumer = m_session.createConsumer(m_expireQueue);
+//            m_expireConsumer.setMessageListener(getExpireMessageListener());
+            
             m_currentState = JMSState.STATE_WAITING;
-
+//            m_loggerProline.info("  ***** Create message "+this.getClass().getName()+" reply to ID "+m_replyQueue.toString());
             taskRun();
         } catch (Exception ex) {
             m_loggerProline.error("Error sending JMS Message", ex);
@@ -97,7 +101,10 @@ public abstract class AbstractJMSTask  extends AbstractLongTask implements Messa
             callback(false);
         }
     }
-    
+//    
+//    protected MessageListener getExpireMessageListener(){        
+//        return new DefaultExpireMessageListener(this);
+//    }
     /**
      * Called when the task must be started. The implementation should call
      * setTaskInfoRequest to register request informations
@@ -118,6 +125,16 @@ public abstract class AbstractJMSTask  extends AbstractLongTask implements Messa
      */
     public abstract void taskDone(final Message jmsMessage) throws Exception;
     
+//
+//    /**
+//     * Called when the task has expired 
+//     * @param jmsMessage
+//     * @throws Exception 
+//     */
+//    public void taskExpired(final Message jmsMessage) throws Exception {
+//        runMessageFailed("Message expired : "+jmsMessage.getJMSMessageID());
+//    }
+
     /**
      * Method called by the ServiceStatusThread
      * to check if the service is done
@@ -136,6 +153,10 @@ public abstract class AbstractJMSTask  extends AbstractLongTask implements Messa
         
         try {
             taskDone(jmsMessage);
+        } catch (JSONRPC2Error jsonE) {
+            m_currentState = JMSState.STATE_FAILED;
+            m_loggerProline.error("JSON Error handling JMS Message", jsonE);
+            m_taskError = new TaskError(jsonE.getMessage());
         } catch (Exception e) {
             m_currentState = JMSState.STATE_FAILED;
             m_loggerProline.error("Error handling JMS Message", e);
@@ -160,6 +181,17 @@ public abstract class AbstractJMSTask  extends AbstractLongTask implements Messa
         }
         
     }
+    
+//    public final void runMessageFailed(String errorMsg){         
+//        long endRun = System.currentTimeMillis();
+//        this.m_taskInfo.setDuration(endRun-m_startRun);
+//
+//        m_currentState = JMSState.STATE_FAILED;
+//        m_loggerProline.error(errorMsg);
+//        m_taskError = new TaskError(errorMsg);
+//        
+//        callback(false);
+//    }
     
 
     /**
@@ -326,5 +358,39 @@ public abstract class AbstractJMSTask  extends AbstractLongTask implements Messa
 	}
 
     }
+
+    
+//    class DefaultExpireMessageListener implements MessageListener {
+// 
+//         
+//        private AbstractJMSTask m_callerTask = null;
+//        public DefaultExpireMessageListener(AbstractJMSTask task) {
+//            m_callerTask = task;
+//        }
+//        
+//
+//        @Override
+//        public void onMessage(Message msg) {
+//            try {
+//                m_loggerProline.error("EXPIRE LISTENER Receiving message n° " + MESSAGE_COUNT_SEQUENCE.incrementAndGet() + " : " + formatMessage(msg));
+//                m_callerTask.taskExpired(msg);  
+//                
+//            }catch (Exception ex) {
+//                m_loggerProline.error("Error running JMS Message acknowledge", ex);
+//            }
+//            
+//            try {
+//                msg.acknowledge();
+//            } catch (JMSException jmsex) {
+//                m_loggerProline.error("Error running JMS Message acknowledge", jmsex);
+//            }
+//            
+//        }
+//        
+//    }
+    
+       
+        
+    
     
 }

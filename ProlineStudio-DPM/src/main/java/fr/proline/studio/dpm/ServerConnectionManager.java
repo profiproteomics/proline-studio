@@ -136,6 +136,11 @@ public class ServerConnectionManager {
                 } catch (Exception e) {
                     setConnectionState(CONNECTION_FAILED);
                     m_connectionError = new TaskError(e);
+                    
+                    if (connectionCallback != null) {
+                        connectionCallback.run();
+                    }
+                    
                     return;
                     //throw new RuntimeException("Error creating connection to JMS Server "+e.getMessage());
                 }
@@ -145,30 +150,6 @@ public class ServerConnectionManager {
 
         } else {  //WebCore Connection
 
-            // pre-check to avoid to try a connection when the parameters are not set
-            if (serverURL.length() <= HTTP_URL_PREFFIX.length()) {
-                setConnectionState(CONNECTION_FAILED);
-                m_connectionError = new TaskError("Server Connection", "Invalid Server Host URL");
-                return;
-            }
-
-            //VDS TO BE REMOVED => STILL USED ?
-            // check if the user has not already tried to connect with the same parameters
-            // and the project user was unknown
-//            if ((m_previousServerURL.compareTo(serverURL) ==0 ) &&
-//                (m_previousUserPassword.compareTo(userPassword) ==0 ) &&
-//                (m_previousErrorId == DatabaseConnectionTask.ERROR_USER_UNKNOWN)) {
-//                // special case, we only check the project user
-//                    tryProjectUser(connectionCallback, projectUser);
-//                    return;
-//            }
-//            
-//                // keep settings used to try to connect
-//            m_previousServerURL = serverURL;
-//            m_previousUserPassword = userPassword;
-//            m_previousProjectUser = projectUser;
-//            m_previousErrorId = -1;
-//       //VDS TO BE REMOVED => END STILL USED ?
             setConnectionState(CONNECTION_ASKED);
 
             // First, we check the user password      

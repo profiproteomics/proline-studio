@@ -1,9 +1,9 @@
 package fr.proline.mzscope.mzdb;
 
-import fr.profi.mzdb.io.writer.mgf.PrecursorMzComputation;
 import fr.profi.mzdb.model.Feature;
 import fr.proline.mzscope.model.Chromatogram;
 import fr.proline.mzscope.model.FeaturesExtractionRequest;
+import fr.proline.mzscope.model.IExportParameters;
 import fr.proline.mzscope.model.IRawFile;
 import fr.proline.mzscope.model.Ms1ExtractionRequest;
 import fr.proline.mzscope.model.Spectrum;
@@ -212,11 +212,11 @@ public class ThreadedMzdbRawFile implements IRawFile {
     }
     
     @Override
-    public boolean exportAsMGF(String mgfFileName, PrecursorMzComputation precComp, float mzTolPPM ,float intensityCutoff, boolean exportProlineTitle ){
+    public boolean exportRawFile(String mgfFileName, IExportParameters exportParams ){
         try {
-         return service.submit(() -> mzdbRawFile.exportAsMGF(mgfFileName, precComp, mzTolPPM, intensityCutoff, exportProlineTitle)).get();
+         return service.submit(() -> mzdbRawFile.exportRawFile(mgfFileName, exportParams)).get();
       } catch (InterruptedException | ExecutionException ex ) {
-         logger.error("exportAsMGF call fail", ex);
+         logger.error("export  call fail", ex);
       } 
       return false;
     }

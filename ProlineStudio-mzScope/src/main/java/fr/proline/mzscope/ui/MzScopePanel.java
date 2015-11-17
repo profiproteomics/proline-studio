@@ -11,12 +11,13 @@ import fr.proline.mzscope.map.ui.LcMsViewerUI;
 import fr.proline.mzscope.model.BaseFeature;
 import fr.proline.mzscope.model.Chromatogram;
 import fr.proline.mzscope.model.FeaturesExtractionRequest;
+import fr.proline.mzscope.model.IExportParameters;
 import fr.proline.mzscope.model.IFeature;
 import fr.proline.mzscope.model.IRawFile;
 import fr.proline.mzscope.model.Ms1ExtractionRequest;
 import fr.proline.mzscope.model.MzScopeCallback;
 import fr.proline.mzscope.model.MzScopePreferences;
-import fr.proline.mzscope.ui.dialog.ExportMGFDialog;
+import fr.proline.mzscope.ui.dialog.ExportRawFileDialog;
 import fr.proline.mzscope.ui.dialog.ExtractionParamsDialog;
 import fr.proline.mzscope.ui.event.ExtractionEvent;
 import fr.proline.mzscope.ui.event.ExtractionStateListener;
@@ -665,8 +666,8 @@ public class MzScopePanel extends JPanel implements IFeatureViewer, IExtractionE
 	viewerUI.getController().changeViewport(new LcMsViewport(390, 440, 1000, 1150));
     }
     
-    public void exportAsMGF(IRawFile rawFile){
-        ExportMGFDialog exportDialog = ExportMGFDialog.getDialog(parentFrame, rawFile.getName());
+    public void export(IRawFile rawFile){
+        ExportRawFileDialog exportDialog = ExportRawFileDialog.getDialog(parentFrame, rawFile.getName());
         exportDialog.setLocationRelativeTo(parentFrame);
         ProgressTask task = new DefaultDialog.ProgressTask() {
 
@@ -682,7 +683,7 @@ public class MzScopePanel extends JPanel implements IFeatureViewer, IExtractionE
 
             @Override
             protected Object doInBackground() throws Exception {
-                exportAsMGF(rawFile, exportDialog.getMgfFileName(), exportDialog.getPrecComp(), exportDialog.getMzTolPPM(), exportDialog.getIntensityCutoff(), exportDialog.isExportProlineTitle());
+                exportRawFile(rawFile, exportDialog.getOutputFileName(), exportDialog.getExportParams() );
                 setProgress(100);
                 return null;
             }
@@ -691,8 +692,8 @@ public class MzScopePanel extends JPanel implements IFeatureViewer, IExtractionE
         exportDialog.setVisible(true);
     }
     
-    public boolean exportAsMGF(IRawFile rawFile, String mgfFileName, PrecursorMzComputation precComp, float mzTolPPM ,float intensityCutoff, boolean exportProlineTitle ){
-        return rawFile.exportAsMGF(mgfFileName, precComp, mzTolPPM, intensityCutoff, exportProlineTitle);
+    public boolean exportRawFile(IRawFile rawFile, String exportFileName, IExportParameters exportParams ){
+        return rawFile.exportRawFile(exportFileName, exportParams);
     }
 
     @Override

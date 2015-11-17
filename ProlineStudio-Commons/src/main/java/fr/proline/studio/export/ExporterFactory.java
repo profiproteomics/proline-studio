@@ -14,6 +14,7 @@ public class ExporterFactory {
     public static final int EXPORT_IMAGE2 = 4;
     public static final int EXPORT_XIC = 5;
     public static final int EXPORT_MGF = 6;
+    public static final int EXPORT_TSV = 7;
 
     private static ArrayList<ExporterInfo> m_listTable = null;
     private static ArrayList<ExporterInfo> m_listImage = null;
@@ -28,7 +29,8 @@ public class ExporterFactory {
         CSV,
         PNG,
         SVG, 
-        MGF
+        MGF, 
+        TSV
     };
     
     public static  ArrayList<ExporterInfo> getList(int exportType) {
@@ -101,10 +103,10 @@ public class ExporterFactory {
             if (m_listMGF != null) {
                 return m_listMGF;
             }
-            m_listMGF = new ArrayList<>(1);
+            m_listMGF = new ArrayList<>(2);
 
             m_listMGF.add(new ExporterInfo(ExporterType.MGF, "MGF (.mgf)", "mgf"));
-
+            m_listMGF.add(new ExporterInfo(ExporterType.TSV, "TSV (.tsv)", "tsv"));
 
             return m_listMGF; 
         }
@@ -123,6 +125,10 @@ public class ExporterFactory {
             m_fileExtension = fileExtension;
         
 
+        }
+
+        public ExporterType geType() {
+            return m_type;
         }
         
         public String getName() {

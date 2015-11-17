@@ -12,6 +12,7 @@ import fr.profi.mzdb.SmartPeakelFinderConfig;
 import fr.profi.mzdb.algo.IsotopicPatternScorer;
 import fr.profi.mzdb.algo.feature.extraction.FeatureExtractorConfig;
 import fr.profi.mzdb.io.reader.provider.RunSliceDataProvider;
+import fr.profi.mzdb.io.writer.MsSpectrumTSVWriter;
 import fr.profi.mzdb.io.writer.mgf.MgfWriter;
 import fr.profi.mzdb.io.writer.mgf.PrecursorMzComputation;
 import fr.profi.mzdb.model.AcquisitionMode;
@@ -25,9 +26,14 @@ import fr.profi.mzdb.model.SpectrumHeader;
 import fr.profi.mzdb.model.SpectrumSlice;
 import fr.proline.mzscope.model.Chromatogram;
 import fr.proline.mzscope.model.FeaturesExtractionRequest;
+import fr.proline.mzscope.model.IExportParameters;
+import fr.proline.mzscope.model.IExportParameters.ExportType;
 import fr.proline.mzscope.model.Spectrum;
 import fr.proline.mzscope.model.IRawFile;
 import fr.proline.mzscope.model.Ms1ExtractionRequest;
+import fr.proline.mzscope.ui.MgfExportParameters;
+import fr.proline.mzscope.ui.ScanHeaderExportParameters;
+import fr.proline.mzscope.ui.ScanHeaderType;
 import fr.proline.mzscope.utils.SpectrumUtils;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -615,23 +621,75 @@ public class MzdbRawFile implements IRawFile {
     }
 
     @Override
-    public boolean exportAsMGF(String mgfFileName, PrecursorMzComputation precComp, float mzTolPPM, float intensityCutoff, boolean exportProlineTitle) {
-        try {
+    public boolean exportRawFile(String outputFileName, IExportParameters exportParams) {
+        
             long start = System.currentTimeMillis();
-            logger.debug("MGF writer start for " + this.getName() + ": mgfFilePath=" + mgfFileName + ", precursorMzComputation=" + precComp.getUserParamName() + ", mzTol=" + mzTolPPM + ", intensityCutoff=" + intensityCutoff + ", exportProlineTitle=" + exportProlineTitle);
-            MgfWriter writer = new MgfWriter(this.getFile().getAbsolutePath());
-            writer.write(mgfFileName, precComp, mzTolPPM, intensityCutoff, exportProlineTitle);
-            logger.debug(" mgf created in " + (System.currentTimeMillis() - start) + " ms");
-        } catch (SQLiteException | ClassNotFoundException ex) {
-            logger.error("SQLiteException or ClassNotFoundException while exporting mgf file", ex);
-            return false;
-        } catch (FileNotFoundException ex) {
-            logger.error("FileNotFoundException while exporting mgf file: ", ex);
-            return false;
-        } catch (IOException ex) {
-            logger.error("IOException while exporting mgf file:", ex);
-            return false;
-        }
+            ExportType exportType = exportParams.getExportType();
+            switch (exportType){
+                case MGF :{
+                    try {
+                        MgfExportParameters mgfExportParam = (MgfExportParameters)exportParams;
+                        logger.debug("MGF writer start for " + this.getName() + ": mgfFilePath=" + outputFileName 
+                                + ", precursorMzComputation=" + mgfExportParam.getPrecComp().getUserParamName() +
+                                ", mzTol=" + mgfExportParam.getMzTolPPM() 
+                                + ", intensityCutoff=" + mgfExportParam.getIntensityCutoff() 
+                                + ", exportProlineTitle=" + mgfExportParam.isExportProlineTitle());
+                        MgfWriter writer = new MgfWriter(this.getFile().getAbsolutePath());
+                        writer.write(outputFileName, mgfExportParam.getPrecComp(),  mgfExportParam.getMzTolPPM(), mgfExportParam.getIntensityCutoff(), mgfExportParam.isExportProlineTitle());
+                        logger.debug(" mgf created in " + (System.currentTimeMillis() - start) + " ms");
+                    } catch (SQLiteException | ClassNotFoundException ex) {
+                        logger.error("SQLiteException or ClassNotFoundException while exporting mgf file", ex);
+                        return false;
+                    } catch (FileNotFoundException ex) {
+                        logger.error("FileNotFoundException while exporting mgf file: ", ex);
+                        return false;
+                    }catch (IOException ex) {
+                        logger.error("IOException while exporting mgf file: ", ex);
+                        return false;
+                    }
+                    break;
+                }
+                case SCAN_HEADER:{
+                    ScanHeaderExportParameters scanHeaderExportParam = (ScanHeaderExportParameters)exportParams;
+                    ScanHeaderType type = scanHeaderExportParam.getScanHeadertype();
+                    File outFile = new File(outputFileName);
+                    SpectrumHeader[] spectrumHeaders;
+                    switch (type){
+                        case MS1:{
+                            try{
+                                spectrumHeaders = reader.getMs1SpectrumHeaders();
+                            }catch(SQLiteException ex){
+                                logger.error("SQLiteException while exporting spectrum Header file", ex);
+                                return false;
+                            }
+                            break;
+                        }
+                        case MS2:{
+                            try{
+                                spectrumHeaders = reader.getMs2SpectrumHeaders();
+                            }catch(SQLiteException ex){
+                                logger.error("SQLiteException while exporting scpectrum Header file", ex);
+                                return false;
+                            }
+                            break;
+                        }
+                        default:{
+                            spectrumHeaders = new SpectrumHeader[0];
+                            // should not happen;
+                        }
+                    }
+                    // runId is set to -1
+                    MsSpectrumTSVWriter.writeRun(spectrumHeaders, -1, outFile);
+                    logger.debug(" scan header file created in " + (System.currentTimeMillis() - start) + " ms");
+                    break;
+                }
+                default:{
+                    //should not happen
+                    break;
+                }
+            }
+            
+        
         return true;
     }
     

@@ -1,9 +1,9 @@
 package fr.proline.mzscope.mzml;
 
-import fr.profi.mzdb.io.writer.mgf.PrecursorMzComputation;
 import fr.profi.mzdb.model.Feature;
 import fr.proline.mzscope.model.Chromatogram;
 import fr.proline.mzscope.model.FeaturesExtractionRequest;
+import fr.proline.mzscope.model.IExportParameters;
 import fr.proline.mzscope.model.IRawFile;
 import fr.proline.mzscope.model.Ms1ExtractionRequest;
 import fr.proline.mzscope.model.Spectrum;
@@ -113,7 +113,7 @@ public class MzMLRawFile implements IRawFile {
    }
    
    @Override
-    public boolean exportAsMGF(String mgfFileName, PrecursorMzComputation precComp, float mzTolPPM ,float intensityCutoff, boolean exportProlineTitle ){
+    public boolean exportRawFile(String mgfFileName, IExportParameters exportParams ){
        return true;
     }
     

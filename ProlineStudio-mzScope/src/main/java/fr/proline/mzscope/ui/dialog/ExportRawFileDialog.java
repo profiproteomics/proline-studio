@@ -6,11 +6,19 @@
 package fr.proline.mzscope.ui.dialog;
 
 import fr.profi.mzdb.io.writer.mgf.PrecursorMzComputation;
+import fr.proline.mzscope.model.IExportParameters;
+import fr.proline.mzscope.model.IExportParameters.ExportType;
 import fr.proline.mzscope.model.MzScopePreferences;
+import fr.proline.mzscope.ui.MgfExportParameters;
+import fr.proline.mzscope.ui.ScanHeaderExportParameters;
+import fr.proline.mzscope.ui.ScanHeaderType;
 import fr.proline.studio.export.ExportDialog;
 import fr.proline.studio.export.ExporterFactory;
+import fr.proline.studio.export.ExporterFactory.ExporterInfo;
+import fr.proline.studio.export.ExporterFactory.ExporterType;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.utils.IconManager;
+import java.awt.BorderLayout;
 import java.awt.Dialog;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -35,20 +43,25 @@ import javax.swing.JTextField;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 /**
- * export a rawFile as MGF file
+ * export a rawFile as MGF file or tsv (ScanHeader)
  *
  * @author MB243701
  */
-public class ExportMGFDialog extends DefaultDialog {
+public class ExportRawFileDialog extends DefaultDialog {
 
-    private static ExportMGFDialog singletonMGFDialog = null;
+    private static ExportRawFileDialog singletonExportDialog = null;
     
-
+    private ExportType selectedExportType;
+    
     private JFileChooser fchooser;
 
     private JTextField fileTextField;
     private List<FileNameExtensionFilter> filterList = new ArrayList<>();
     private JComboBox exportTypeCombobox;
+    private JPanel panelExportParams;
+    private JPanel panelMgfParam;
+    private JPanel panelScanHeaderParam;
+    
     private JTextField mzTolField;
     private JComboBox precursorCombobox ;
     private JTextField intensityCutoffField ;
@@ -57,24 +70,32 @@ public class ExportMGFDialog extends DefaultDialog {
     private Map<Integer, PrecursorMzComputation> mapPrecursor;
     private String[] precursorList;
     
+    private JComboBox scanHeaderCombobox;
+    private String[] scanHeaderList;
+    private Map<Integer, ScanHeaderType> mapScanHeader;
+    
     private DefaultDialog.ProgressTask m_task ;
     
     private float mzTolPPM  = 10.0f;
     private PrecursorMzComputation precComp = PrecursorMzComputation.MAIN_PRECURSOR_MZ;
     private float intensityCutoff = 0f;
     private boolean exportProlineTitle = false;
-    private String mgfFileName;
+    
+    private ScanHeaderType scanHeaderType = ScanHeaderType.MS2;
+    
+    
+    private String outputFileName;
 
-    public static ExportMGFDialog getDialog(Window parent,  String title) {
-        if (singletonMGFDialog == null) {
-            singletonMGFDialog = new ExportMGFDialog(parent, title);
+    public static ExportRawFileDialog getDialog(Window parent,  String title) {
+        if (singletonExportDialog == null) {
+            singletonExportDialog = new ExportRawFileDialog(parent, title);
         }
-        return singletonMGFDialog;
+        return singletonExportDialog;
     }
 
-    private ExportMGFDialog(Window parent, String title) {
+    private ExportRawFileDialog(Window parent, String title) {
         super(parent, Dialog.ModalityType.APPLICATION_MODAL);
-        setTitle("Export MGF "+title);
+        setTitle("Export "+title);
         setHelpURL("http://biodev.extra.cea.fr/docs/proline/doku.php?id=how_to:studio:mzscope");
         EnumSet<PrecursorMzComputation> precursorSet = EnumSet.allOf( PrecursorMzComputation.class );
         precursorList = new String[precursorSet.size()];
@@ -86,18 +107,38 @@ public class ExportMGFDialog extends DefaultDialog {
             i++;
         }
         
+        EnumSet<ScanHeaderType> scanHeaderSet =  EnumSet.allOf(ScanHeaderType.class);
+        scanHeaderList = new String[scanHeaderSet.size()];
+        mapScanHeader = new HashMap();
+        i=0;
+        for (ScanHeaderType s: scanHeaderSet){
+            scanHeaderList[i] = s.getName();
+            mapScanHeader.put(i, s);
+            i++;
+        }
+        
         setInternalComponent(createExportPanel());
         setButtonName(BUTTON_OK, "Export");
 
         fchooser = new JFileChooser();
         fchooser.setMultiSelectionEnabled(false);
+        
+        setExportParamsPanel();
 
     }
     
 
     private JPanel createExportPanel() {
-        JPanel exportPanel = new JPanel(new GridBagLayout());
+        JPanel exportPanel = new JPanel();
+        exportPanel.setLayout(new BorderLayout());
+        
+        JPanel panelType = new JPanel(new GridBagLayout());
 
+        panelExportParams = new JPanel(new BorderLayout());
+        panelMgfParam = createMgfParamPanel();
+        panelScanHeaderParam = createScanHeaderParamPanel();
+        
+        
         GridBagConstraints c = new GridBagConstraints();
         c.anchor = GridBagConstraints.NORTHWEST;
         c.fill = GridBagConstraints.BOTH;
@@ -107,7 +148,7 @@ public class ExportMGFDialog extends DefaultDialog {
         c.gridy = 0;
         c.gridwidth = 2;
         fileTextField = new JTextField(30);
-        exportPanel.add(fileTextField, c);
+        panelType.add(fileTextField, c);
 
         final JButton addFileButton = new JButton(IconManager.getIcon(IconManager.IconType.OPEN_FILE));
         addFileButton.setMargin(new java.awt.Insets(2, 2, 2, 2));
@@ -158,61 +199,152 @@ public class ExportMGFDialog extends DefaultDialog {
 
         c.gridx += 2;
         c.gridwidth = 1;
-        exportPanel.add(addFileButton, c);
+        panelType.add(addFileButton, c);
 
         exportTypeCombobox = new JComboBox(ExporterFactory.getList(ExporterFactory.EXPORT_MGF).toArray());
+        exportTypeCombobox.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+                ExporterFactory.ExporterInfo exporterInfo = (ExporterFactory.ExporterInfo) exportTypeCombobox.getSelectedItem();
+                ExporterType type = exporterInfo.geType() ;
+                if (type.equals(ExporterFactory.ExporterType.MGF)){
+                    selectedExportType = ExportType.MGF;
+                }else if (type.equals(ExporterFactory.ExporterType.TSV)){
+                    selectedExportType = ExportType.SCAN_HEADER;
+                }
+                setExportParamsPanel();
+            }
+        }); 
         exportTypeCombobox.setSelectedIndex(0);
 
         c.gridy++;
         c.gridx = 0;
         c.gridwidth = 1;
-        exportPanel.add(new JLabel("Export Type:"), c);
+        panelType.add(new JLabel("Export Type:"), c);
 
         c.gridx++;
         c.gridwidth = 2;
-        exportPanel.add(exportTypeCombobox, c);
+        panelType.add(exportTypeCombobox, c);
         
-        c.gridy++;
+        exportPanel.add(panelType, BorderLayout.NORTH);
+        
+        exportPanel.add(panelExportParams, BorderLayout.CENTER);
+        
+
+        return exportPanel;
+    }
+    
+    
+    private void setExportParamsPanel(){
+        panelExportParams.removeAll();
+        String extension = "";
+        ArrayList<ExporterInfo> info = ExporterFactory.getList(ExporterFactory.EXPORT_MGF);
+        ExporterInfo mgfInfo = null;
+        ExporterInfo scanHeaderInfo = null;
+        for (ExporterInfo i : info) {
+            if (i.geType().equals(ExporterType.MGF)){
+                mgfInfo = i;
+            }else if (i.geType().equals(ExporterType.TSV)){
+                scanHeaderInfo = i;
+            }
+        }
+        switch (selectedExportType){
+            case MGF:{
+                panelExportParams.add(panelMgfParam, BorderLayout.CENTER);
+                if (mgfInfo != null){
+                    extension = mgfInfo.getFileExtension();
+                }
+                break;
+            }
+            case SCAN_HEADER:{
+                panelExportParams.add(panelScanHeaderParam, BorderLayout.CENTER);
+                if (scanHeaderInfo != null){
+                    extension = scanHeaderInfo.getFileExtension();
+                }
+                break;
+            }
+            default:{
+                // should not happen
+                break;
+            }
+        }
+        if (!fileTextField.getText().trim().isEmpty()&&!fileTextField.getText().trim().endsWith("."+extension) ){
+            fileTextField.setText(fileTextField.getText().trim()+"."+extension);
+        }
+        panelExportParams.revalidate();
+        panelExportParams.repaint();
+    }
+    
+    private JPanel createMgfParamPanel(){
+        JPanel panelMgf = new JPanel(new GridBagLayout());
+        GridBagConstraints c = new GridBagConstraints();
+        c.anchor = GridBagConstraints.LINE_START;
+        c.fill = GridBagConstraints.BOTH;
+        c.insets = new java.awt.Insets(5, 5, 5, 5);
+        
+        c.gridy=0;
         c.gridx = 0;
         c.gridwidth = 1;
-        exportPanel.add(new JLabel("m/z tolerance (ppm):"), c);
+        panelMgf.add(new JLabel("m/z tolerance (ppm):"), c);
         
         c.gridx++;
         c.gridwidth = 2;
         mzTolField = new JTextField();
         mzTolField.setText(Float.toString(MzScopePreferences.getInstance().getMzPPMTolerance()));
-        exportPanel.add(mzTolField, c);
+        panelMgf.add(mzTolField, c);
         
         c.gridy++;
         c.gridx = 0;
         c.gridwidth = 1;
-        exportPanel.add(new JLabel("Precursor m/z computation:"), c);
+        panelMgf.add(new JLabel("Precursor m/z computation:"), c);
         c.gridx++;
         c.gridwidth = 2;
         
         precursorCombobox = new JComboBox(precursorList);
         precursorCombobox.setSelectedIndex(1); //MAIN_PRECURSOR_MZ by default
-        exportPanel.add(precursorCombobox, c);
+        panelMgf.add(precursorCombobox, c);
         
         c.gridy++;
         c.gridx = 0;
         c.gridwidth = 1;
-        exportPanel.add(new JLabel("Intensity Cutoff:"), c);
+        panelMgf.add(new JLabel("Intensity Cutoff:"), c);
         
         c.gridx++;
         c.gridwidth = 2;
         intensityCutoffField = new JTextField();
         intensityCutoffField.setText(new Float(0.0).toString());
-        exportPanel.add(intensityCutoffField, c);
+        panelMgf.add(intensityCutoffField, c);
         
         c.gridy++;
         c.gridx = 0;
         c.gridwidth = 3;
         cbExportProlineTitle = new JCheckBox("Export Proline Title");
         cbExportProlineTitle.setSelected(false);
-        exportPanel.add(cbExportProlineTitle, c);
-
-        return exportPanel;
+        panelMgf.add(cbExportProlineTitle, c);
+        
+        return panelMgf;
+    }
+    
+    private JPanel createScanHeaderParamPanel(){
+        JPanel panelScanHeader = new JPanel(new GridBagLayout());
+        GridBagConstraints c = new GridBagConstraints();
+        c.anchor = GridBagConstraints.LINE_START;
+        c.fill = GridBagConstraints.BOTH;
+        c.insets = new java.awt.Insets(5, 5, 5, 5);
+        
+        c.gridy=0;
+        c.gridx = 0;
+        c.gridwidth = 1;
+        panelScanHeader.add(new JLabel("Spectrum Header Level:"), c);
+        c.gridx++;
+        c.gridwidth = 2;
+        
+        scanHeaderCombobox = new JComboBox(scanHeaderList);
+        scanHeaderCombobox.setSelectedIndex(1); //MS2 by default
+        panelScanHeader.add(scanHeaderCombobox, c);
+        
+        return panelScanHeader;
     }
     
     public void setTask(DefaultDialog.ProgressTask task) {
@@ -266,9 +398,35 @@ public class ExportMGFDialog extends DefaultDialog {
             }
         }
         
+        outputFileName = fileName;
         // checkParameters
+        boolean isOk = true;
+        switch (selectedExportType){
+            case MGF:{
+                isOk =  checkMgfParams();
+                break;
+            }
+            case SCAN_HEADER: {
+                isOk =  checkScanHeaderParams();
+                break;
+            }
+            default:{
+                // should not happen
+                break;
+            }
+        }
+        if (!isOk){
+            return false;
+        }
         
-        mgfFileName = fileName;
+        
+    
+        startTask(m_task);
+        return false;
+    }
+    
+    private boolean checkMgfParams(){
+        
         try {
             mzTolPPM = Float.parseFloat(mzTolField.getText());
         } catch (NumberFormatException e) {
@@ -288,32 +446,39 @@ public class ExportMGFDialog extends DefaultDialog {
             return false;
         }
         exportProlineTitle = cbExportProlineTitle.isSelected();
-        
-        
+        return true;
+    }
     
-        startTask(m_task);
-        return false;
+    private boolean checkScanHeaderParams(){
+        try{
+            scanHeaderType = mapScanHeader.get(scanHeaderCombobox.getSelectedIndex());
+        }catch(Exception e){
+            highlight(scanHeaderCombobox);
+            return false;
+        }
+        return true;
+    }
+    
+    public String getOutputFileName(){
+        return outputFileName;
+    }
+    
+    public IExportParameters getExportParams(){
+        switch(selectedExportType){
+            case MGF:{
+                MgfExportParameters mgfExport = new MgfExportParameters(precComp, mzTolPPM, intensityCutoff, exportProlineTitle);
+                return mgfExport;
+            }case SCAN_HEADER:{
+                ScanHeaderExportParameters scanHeaderExport = new ScanHeaderExportParameters(scanHeaderType);
+                return scanHeaderExport;
+            }
+            default:{
+                //should not happen
+                return null;
+            }
+        }
     }
 
-    public float getMzTolPPM() {
-        return mzTolPPM;
-    }
-
-    public PrecursorMzComputation getPrecComp() {
-        return precComp;
-    }
-
-    public float getIntensityCutoff() {
-        return intensityCutoff;
-    }
-
-    public boolean isExportProlineTitle() {
-        return exportProlineTitle;
-    }
-
-    public String getMgfFileName() {
-        return mgfFileName;
-    }
 
     
     

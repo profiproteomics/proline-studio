@@ -51,7 +51,7 @@ public class ServerConnectionManager {
     private String m_userPassword;
     private boolean m_passwordNeeded;
     //VDS TO BE REMOVED => Full JMS
-    private boolean m_jmsServer;
+    //private boolean m_jmsServer;
 
     //VDS TO BE REMOVED => Still Used !?
 //    private String m_previousServerURL = "";
@@ -83,7 +83,7 @@ public class ServerConnectionManager {
         m_userPassword = preferences.get(KEY_USER_PASSWORD, "");
 
         m_passwordNeeded = preferences.getBoolean(KEY_PASSWORD_NEEDED, false);
-        m_jmsServer = preferences.getBoolean(KEY_IS_JMSSERVER, false);
+        //m_jmsServer = preferences.getBoolean(KEY_IS_JMSSERVER, false);
     }
 
     public void saveParameters() {
@@ -94,7 +94,7 @@ public class ServerConnectionManager {
         preferences.put(KEY_USER_PASSWORD, m_userPassword);
 
         preferences.putBoolean(KEY_PASSWORD_NEEDED, m_passwordNeeded);
-        preferences.putBoolean(KEY_IS_JMSSERVER, m_jmsServer);
+        //preferences.putBoolean(KEY_IS_JMSSERVER, m_jmsServer);
 
         try {
             preferences.flush();
@@ -104,13 +104,14 @@ public class ServerConnectionManager {
     }
 
     private void tryServerConnection() {
-        tryServerConnection(null, m_serverURL, m_projectUser, m_userPassword, false, m_jmsServer);
+        tryServerConnection(null, m_serverURL, m_projectUser, m_userPassword, false);
     }
 
-    public void tryServerConnection(final Runnable connectionCallback, final String serverURL, final String projectUser, String userPassword, final boolean changingUser, final boolean isJMSServer) {
+    public void tryServerConnection(final Runnable connectionCallback, final String serverURL, final String projectUser, String userPassword, final boolean changingUser) {
 
+        boolean isJMSServer = ! serverURL.startsWith("http");
+        
         m_passwordNeeded = !userPassword.isEmpty();
-        m_jmsServer = isJMSServer;
 
         if (isJMSServer) {
 
@@ -140,7 +141,7 @@ public class ServerConnectionManager {
                 }
             }
 
-            userAuthenticateJMS(connectionCallback, projectUser, userPassword, changingUser);
+            userAuthenticateJMS(connectionCallback, serverURL, projectUser, userPassword, changingUser);
 
         } else {  //WebCore Connection
 
@@ -192,7 +193,7 @@ public class ServerConnectionManager {
         return hostAndPort;
     }
 
-    private void userAuthenticateJMS(final Runnable connectionCallback, final String projectUser, String userPassword, final boolean changingUser) {
+    private void userAuthenticateJMS(final Runnable connectionCallback, final String serverURL, final String projectUser, String userPassword, final boolean changingUser) {
         final String[] databasePassword = new String[1];
         AbstractJMSCallback callback = new AbstractJMSCallback() {
 
@@ -204,11 +205,14 @@ public class ServerConnectionManager {
             @Override
             public void run(boolean success) {
                 if (success) {
+                    m_serverURL = serverURL;
                     if (changingUser) { // No need to get DBConnection (use previous one). skip further steps
                         // save connection parameters
                         saveParameters();
                         setConnectionState(CONNECTION_DONE);
 
+                        m_serverURL = serverURL;
+                        
                         if (connectionCallback != null) {
                             connectionCallback.run();
                         }
@@ -231,7 +235,7 @@ public class ServerConnectionManager {
 
     }
 
-    private void userAuthenticateWC(final Runnable connectionCallback, final String serverURL, final String projectUser, String userPassword, final boolean changingUser) {
+    private void userAuthenticateWC(final Runnable connectionCallback, final String serverURL, final String projectUser, final String userPassword, final boolean changingUser) {
         final String[] databasePassword = new String[1];
         AbstractServiceCallback callback = new AbstractServiceCallback() {
 
@@ -242,7 +246,8 @@ public class ServerConnectionManager {
 
             @Override
             public void run(boolean success) {
-                if (success) {
+              if (success) {
+                    m_serverURL = serverURL;
                     if (changingUser) { // No need to get DBConnection (use previous one). skip further steps
                         // save connection parameters
                         saveParameters();
@@ -259,11 +264,32 @@ public class ServerConnectionManager {
                     }
 
                 } else {
+
                     setConnectionState(CONNECTION_FAILED);
                     m_connectionError = getTaskError();
-                    if (connectionCallback != null) {
+                    
+                    
+                    // try JMS Connection instead
+                    boolean jmsTry = false;
+                    if (!changingUser) {
+                        int indexStart = serverURL.indexOf("http://");
+                        if (indexStart != -1) {
+                            indexStart += "http://".length();
+                            int indexStop = serverURL.lastIndexOf(":");
+                            if (indexStop > indexStart) {
+                                String jmsServer = serverURL.substring(indexStart, indexStop);
+                                tryServerConnection(connectionCallback, jmsServer, projectUser, userPassword, changingUser);
+                                jmsTry = true;
+                            }
+                        }
+                    }
+                    
+                    if ((!jmsTry) && (connectionCallback != null)) {
                         connectionCallback.run();
                     }
+                    
+                    
+
                 }
             }
         };
@@ -441,9 +467,9 @@ public class ServerConnectionManager {
         return m_userPassword;
     }
 
-    public Boolean isJMSServer() {
+    /*public Boolean isJMSServer() {
         return m_jmsServer;
-    }
+    }*/
 
     public void setServerURL(String serverURL) {
         m_serverURL = serverURL;
@@ -461,9 +487,9 @@ public class ServerConnectionManager {
         m_passwordNeeded = passwordNeeded;
     }
 
-    public void setIsJMSServer(boolean isJMSServer) {
+    /*public void setIsJMSServer(boolean isJMSServer) {
         m_jmsServer = isJMSServer;
-    }
+    }*/
 
     public synchronized boolean isConnectionFailed() {
         return (m_connectionState == CONNECTION_FAILED);

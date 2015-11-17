@@ -36,7 +36,7 @@ public class ServerConnectionDialog extends ConnectionDialog {
     }
     
     private ServerConnectionDialog(Window parent) {
-        super(parent, "Server Connection", " Server Parameter ", "Server Host :", true);
+        super(parent, "Server Connection", " Server Parameter ", "Server Host :");
 
         setHelpURL("http://biodev.extra.cea.fr/docs/proline/doku.php?id=how_to:studio:startsession");
 
@@ -57,7 +57,7 @@ public class ServerConnectionDialog extends ConnectionDialog {
         String password = serverConnectionManager.getUserPassword();
         m_passwordField.setText(password);
         m_rememberPasswordCheckBox.setSelected(!password.isEmpty());
-        m_isJMSServerCheckBox.setSelected(serverConnectionManager.isJMSServer());
+        
 
     }
     
@@ -108,7 +108,7 @@ public class ServerConnectionDialog extends ConnectionDialog {
         setBusy(true);
         
         String serverURL = m_serverURLTextField.getText();        
-        if (!m_isJMSServerCheckBox.isSelected() && ! serverURL.endsWith("/")) {
+        if (serverURL.startsWith("http") && ! serverURL.endsWith("/")) {
             //JPM.WART : server URL must ends with a "/"
             // if the user forgets it, the error is really strange (exception with no message reported)
             serverURL = serverURL+"/";
@@ -117,8 +117,7 @@ public class ServerConnectionDialog extends ConnectionDialog {
         
         final String projectUser  = m_userTextField.getText();
         final String password = new String(m_passwordField.getPassword());
-        final boolean isJMSServer = m_isJMSServerCheckBox.isSelected();
-        
+
         
         Runnable callback = new Runnable() {
 
@@ -133,7 +132,9 @@ public class ServerConnectionDialog extends ConnectionDialog {
                     JOptionPane.showMessageDialog(m_singletonDialog, connectionError, "Database Connection Error", JOptionPane.ERROR_MESSAGE);
                 } else if (serverManager.isConnectionDone()) {
                     
+                    m_serverURLTextField.setText(serverManager.getServerURL()); // could have been automaticaly changed
 
+                    
                     storeDefaults();
                     setVisible(false);     
                     
@@ -188,7 +189,7 @@ public class ServerConnectionDialog extends ConnectionDialog {
         
         
         ServerConnectionManager serverManager = ServerConnectionManager.getServerConnectionManager();
-        serverManager.tryServerConnection(callback, serverURL, projectUser, password, changingUser, isJMSServer);
+        serverManager.tryServerConnection(callback, serverURL, projectUser, password, changingUser);
         
     }
     

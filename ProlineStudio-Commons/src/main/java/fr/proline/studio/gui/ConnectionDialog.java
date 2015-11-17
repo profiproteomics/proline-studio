@@ -17,24 +17,11 @@ public abstract class ConnectionDialog extends DefaultDialog {
     protected JTextField m_userTextField;
     protected JPasswordField m_passwordField;
     protected JCheckBox m_rememberPasswordCheckBox;
-    protected JCheckBox m_isJMSServerCheckBox;
-    protected boolean m_showJMSOption;
+
 
     protected ConnectionDialog(Window parent, String title, String serverParameterLabel, String serverHostLabel) {
         super(parent, Dialog.ModalityType.APPLICATION_MODAL);
-        m_showJMSOption = false;
 
-        setTitle(title);
-
-        JPanel internalPanel = createInternalPanel(serverParameterLabel, serverHostLabel, null);
-        
-        setInternalComponent(internalPanel);
-
-    }
-    
-    protected ConnectionDialog(Window parent, String title, String serverParameterLabel, String serverHostLabel, Boolean showJMSOption) {
-        super(parent, Dialog.ModalityType.APPLICATION_MODAL);
-        m_showJMSOption = showJMSOption;
 
         setTitle(title);
 
@@ -44,6 +31,7 @@ public abstract class ConnectionDialog extends DefaultDialog {
         setInternalComponent(internalPanel);
 
     }
+
     
     private JPanel createInternalPanel(String serverParameterLabel, String serverHostLabel, String serverHostToolTip) {
 
@@ -96,14 +84,6 @@ public abstract class ConnectionDialog extends DefaultDialog {
         c.gridx = 1;
         c.weightx = 1;
         URLPanel.add(m_serverURLTextField, c);
-        
-        if(m_showJMSOption){
-            c.gridx = 0;
-            c.gridy++;
-            c.gridwidth = 2;
-            m_isJMSServerCheckBox = new JCheckBox("JMS Server");
-            URLPanel.add(m_isJMSServerCheckBox, c);
-        }
         
         return URLPanel;
     }
@@ -168,11 +148,6 @@ public abstract class ConnectionDialog extends DefaultDialog {
         String serverURL = m_serverURLTextField.getText();
         if (serverURL.isEmpty()) {
             setStatus(true, "You must fill the Server URL");
-            highlight(m_serverURLTextField);
-            return false;
-        }
-        if (!m_isJMSServerCheckBox.isSelected() && serverURL.length() <= "http://".length()) {
-            setStatus(true, "The Server URL is incorrect");
             highlight(m_serverURLTextField);
             return false;
         }

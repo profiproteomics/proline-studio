@@ -48,8 +48,8 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
     
 //    private final static String[] FDR_ESTIMATOR_VALUES = {null, "Default", "Competition Based"};
 //    private final static String[] FDR_ESTIMATOR_VALUES_ASSOCIATED_KEYS = {null, "false", "true"};
-    private final static String[] FDR_ON_VALUES = {null, "Score", "e-Value", "Identity p-Value", "Homology p-Value"};
-    private final static String[] FDR_ON_VALUES_ASSOCIATED_KEYS = {null, "SCORE", "MASCOT_EVALUE", "SCORE_IT_P-VALUE", "SCORE_HT_P-VALUE"};
+    private final static String[] FDR_ON_VALUES = {null, "Score", "e-Value","Adjusted e-Value",  "Identity p-Value", "Homology p-Value"};
+    private final static String[] FDR_ON_VALUES_ASSOCIATED_KEYS = {null, "SCORE", "MASCOT_EVALUE",  "MASCOT_ADJUSTED_EVALUE", "SCORE_IT_P-VALUE", "SCORE_HT_P-VALUE"};
     
     private final static  String[] SCORING_TYPE_OPTIONS = { "Standard", "Mascot Modified Mudpit" };
     private final static  String[] SCORING_TYPE_VALUES = { "mascot:standard score", "mascot:modified mudpit score" };
@@ -667,24 +667,26 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
     }
 
     private void createParameters() {
-        m_psmPrefilterParameters = new AbstractParameter[9];
+        m_psmPrefilterParameters = new AbstractParameter[10];
         m_psmPrefilterParameters[0] = null;
         m_psmPrefilterParameters[1] = new IntegerParameter(ValidationTask.RANK_FILTER_KEY, ValidationTask.RANK_FILTER_NAME, new JTextField(6), new Integer(5), new Integer(0), new Integer(10));
         m_psmPrefilterParameters[1].setAssociatedData("<=");
         m_psmPrefilterParameters[2] = new IntegerParameter(ValidationTask.PEP_LENGTH_FILTER_KEY, ValidationTask.PEP_LENGTH_FILTER_NAME, new JTextField(6), new Integer(4), new Integer(4), null);
         m_psmPrefilterParameters[2].setAssociatedData(">=");
-        m_psmPrefilterParameters[3] = new DoubleParameter(ValidationTask.SCORE_FILTER_KEY, ValidationTask.SCORE_FILTER_NAME, new JTextField(6), new Double(0), new Double(0), (Double) null);
+        m_psmPrefilterParameters[3] = new DoubleParameter(ValidationTask.SCORE_FILTER_KEY, ValidationTask.SCORE_FILTER_NAME, new JTextField(6), new Double(0), new Double(0), null);
         m_psmPrefilterParameters[3].setAssociatedData(">=");
         m_psmPrefilterParameters[4] = new DoubleParameter(ValidationTask.MASCOT_EVAL_FILTER_KEY, ValidationTask.MASCOT_EVAL_FILTER_NAME, new JTextField(6), new Double(1), new Double(0), new Double(1));
         m_psmPrefilterParameters[4].setAssociatedData("<=");
-        m_psmPrefilterParameters[5] = new DoubleParameter(ValidationTask.MASCOT_IT_SCORE_FILTER_KEY, ValidationTask.MASCOT_IT_SCORE_FILTER_NAME, new JTextField(6), new Double(0.05), new Double(0), new Double(1));
-        m_psmPrefilterParameters[5].setAssociatedData("=");   
-        m_psmPrefilterParameters[6] = new DoubleParameter(ValidationTask.MASCOT_HT_SCORE_FILTER_KEY, ValidationTask.MASCOT_HT_SCORE_FILTER_NAME, new JTextField(6), new Double(0.05), new Double(0), new Double(1));
-        m_psmPrefilterParameters[6].setAssociatedData("=");
+        m_psmPrefilterParameters[5] = new DoubleParameter(ValidationTask.MASCOT_ADJUSTED_EVAL_FILTER_KEY, ValidationTask.MASCOT_ADJUSTED_EVAL_FILTER_NAME, new JTextField(6), new Double(1), new Double(0), new Double(1));
+        m_psmPrefilterParameters[5].setAssociatedData("<=");
+        m_psmPrefilterParameters[6] = new DoubleParameter(ValidationTask.MASCOT_IT_SCORE_FILTER_KEY, ValidationTask.MASCOT_IT_SCORE_FILTER_NAME, new JTextField(6), new Double(0.05), new Double(0), new Double(1));
+        m_psmPrefilterParameters[6].setAssociatedData("=");   
+        m_psmPrefilterParameters[7] = new DoubleParameter(ValidationTask.MASCOT_HT_SCORE_FILTER_KEY, ValidationTask.MASCOT_HT_SCORE_FILTER_NAME, new JTextField(6), new Double(0.05), new Double(0), new Double(1));
+        m_psmPrefilterParameters[7].setAssociatedData("=");
         JCheckBox singlePerQueryCB = new JCheckBox("post FDR");
-        m_psmPrefilterParameters[7] = new BooleanParameter(ValidationTask.SINGLE_PSM_QUERY_FILTER_KEY, ValidationTask.SINGLE_PSM_QUERY_FILTER_NAME, singlePerQueryCB, false);
-        m_psmPrefilterParameters[7].setAssociatedData(":");        
-        m_psmPrefilterParameters[8] = new NoneParameter(ValidationTask.SINGLE_PSM_RANK_FILTER_KEY, ValidationTask.SINGLE_PSM_RANK_FILTER_NAME);
+        m_psmPrefilterParameters[8] = new BooleanParameter(ValidationTask.SINGLE_PSM_QUERY_FILTER_KEY, ValidationTask.SINGLE_PSM_QUERY_FILTER_NAME, singlePerQueryCB, false);
+        m_psmPrefilterParameters[8].setAssociatedData(":");        
+        m_psmPrefilterParameters[9] = new NoneParameter(ValidationTask.SINGLE_PSM_RANK_FILTER_KEY, ValidationTask.SINGLE_PSM_RANK_FILTER_NAME);
 //        m_psmPrefilterParameters[8].setAssociatedData("=");
         for (AbstractParameter p : m_psmPrefilterParameters) {
             if (p == null) {

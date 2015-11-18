@@ -33,7 +33,7 @@ public class GetDBConnectionTemplateTask extends AbstractJMSTask {
     private HashMap<Object, Object> m_databaseProperties;  // out parameter
 
     public GetDBConnectionTemplateTask(AbstractJMSCallback callback, String password, HashMap<Object, Object> databaseProperties) {
-        super(callback, new TaskInfo("Get informatin from JMS Server ", false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_HIGH));
+        super(callback, new TaskInfo("Get information from JMS Server ", false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_HIGH));
         
         m_password = password;
         m_databaseProperties = databaseProperties;

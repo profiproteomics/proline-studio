@@ -1,9 +1,11 @@
 package fr.proline.studio.rsmexplorer.actions.identification;
 
+import fr.proline.core.orm.uds.Dataset;
 import fr.proline.core.orm.uds.Project;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.DatabaseDataManager;
+import fr.proline.studio.dam.data.DataSetData;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
@@ -31,12 +33,13 @@ import org.openide.windows.WindowManager;
 /**
  * Action to validate or re-validate a Search Result
  *
- * TEST JMS VERSION.... CRACRA ET A REPRENDRE ! 
  * 
  * @author jm235353
  */
 public class ValidateJMSAction extends AbstractRSMAction {
 
+    Long rsm=null;
+    
     public ValidateJMSAction() {
         super(NbBundle.getMessage(ValidateJMSAction.class, "CTL_ValidateAction"), AbstractTree.TreeType.TREE_IDENTIFICATION);
     }
@@ -52,7 +55,7 @@ public class ValidateJMSAction extends AbstractRSMAction {
             DataSetNode dataSetNode = (DataSetNode) selectedNodes[i];
             DDataset d = dataSetNode.getDataset();
             datasetList.add(d);
-
+            rsm=d.getResultSummaryId(); 
             if (dataSetNode.hasResultSummary()) {
                 nbAlreadyValidated++;
             }
@@ -112,7 +115,7 @@ public class ValidateJMSAction extends AbstractRSMAction {
                 final DDataset d = dataSetNode.getDataset();
 
                 if (dataSetNode.hasResultSummary()) {
-
+                    rsm=dataSetNode.getResultSummaryId();
                     // we remove the result Summary and we start validation
                     
                     AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
@@ -163,9 +166,8 @@ public class ValidateJMSAction extends AbstractRSMAction {
 
                 } else {
                     //JPM.TODO : manage error with errorMessage
+                    //JPM.TODO : manage error with errorMessage
                     dataSetNode.setIsChanging(false);
-
-
                     IdentificationTree tree = IdentificationTree.getCurrentTree();
                     DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
                     treeModel.nodeChanged(dataSetNode);
@@ -251,6 +253,7 @@ public class ValidateJMSAction extends AbstractRSMAction {
             setEnabled(false);
             return;
         }
+
         
         // note : we can ask for the validation of multiple ResultSet in one time
 
@@ -258,24 +261,47 @@ public class ValidateJMSAction extends AbstractRSMAction {
         for (int i = 0; i < nbSelectedNodes; i++) {
             AbstractNode node = selectedNodes[i];
 
-            // parent node is being created, we can not validate it (for the moment)
+            // if node is being created, we can not validate it (for the moment)
             if (node.isChanging()) {
                 setEnabled(false);
                 return;
             }
 
-            // parent node must be a dataset
+            // node must be a dataset
             if (node.getType() != AbstractNode.NodeTypes.DATA_SET) {
                 setEnabled(false);
                 return;
             }
 
-            // parent node must have a ResultSet
+            // node must have a ResultSet
             DataSetNode dataSetNode = (DataSetNode) node;
             if (!dataSetNode.hasResultSet()) {
                 setEnabled(false);
                 return;
             }
+            
+            // if merge DS : forbidden (re)validation on RSM merge
+            DataSetData datasetData = (DataSetData) dataSetNode.getData();
+            Dataset.DatasetType datasetType = datasetData.getDatasetType();
+            if ( Dataset.DatasetType.AGGREGATE.equals(datasetType) && dataSetNode.hasResultSummary()) {
+                DDataset.MergeInformation mergeInfo = datasetData.getDataset().getMergeInformation();
+                if (mergeInfo.compareTo(DDataset.MergeInformation.MERGE_IDENTIFICATION_SUMMARY) == 0) {
+                    setEnabled(false);
+                    return;
+                }
+            } 
+            
+            // parent node
+            AbstractNode parentNode = (AbstractNode) dataSetNode.getParent();
+            if (parentNode.getType() == AbstractNode.NodeTypes.DATA_SET) {
+                DataSetNode parentDatasetNode = (DataSetNode) parentNode;
+                if (parentDatasetNode.hasResultSet()) {
+                    // parent is already merged (RSM or Rset), we forbid to validata a son
+                    setEnabled(false);
+                    return;
+                }
+            }
+            
         }
 
         setEnabled(true);

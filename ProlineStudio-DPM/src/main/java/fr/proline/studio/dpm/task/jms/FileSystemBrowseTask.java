@@ -109,7 +109,8 @@ public class FileSystemBrowseTask extends AbstractJMSTask {
                     if (isDir) {
                         f = new ServerFile((String) fileMap.get("path"), (String) fileMap.get("name"), true, 0, 0);
                     } else {
-                        f = new ServerFile((String) fileMap.get("path"), (String) fileMap.get("name"), false, (Long) fileMap.get("lastmodified"), (Long) fileMap.get("size"));
+                        Long size = (fileMap.containsKey("size") ?(Long) fileMap.get("size") : 0 );
+                        f = new ServerFile((String) fileMap.get("path"), (String) fileMap.get("name"), false, (Long) fileMap.get("lastmodified"), size);
                     }
                     m_files.add(f);
                 }

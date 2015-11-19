@@ -82,7 +82,8 @@ public class FileSystemBrowseTask extends AbstractServiceTask {
                     if (isDir) {
                         f = new ServerFile((String) fileMap.get("path"), (String) fileMap.get("name"), true, 0, 0);
                     } else {
-                        f = new ServerFile((String) fileMap.get("path"), (String) fileMap.get("name"), false, ((BigDecimal) fileMap.get("lastmodified")).longValue(), ((BigDecimal) fileMap.get("size")).longValue());
+                        Long size = (fileMap.containsKey("size") ?(((BigDecimal) fileMap.get("size")).longValue()) : 0 );
+                        f = new ServerFile((String) fileMap.get("path"), (String) fileMap.get("name"), false, ((BigDecimal) fileMap.get("lastmodified")).longValue(), size);
                     }
                     m_files.add(f);
                 }

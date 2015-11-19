@@ -207,7 +207,11 @@ public class AggregateAction extends AbstractRSMAction {
                     setEnabled(false);
                 return;
                 }
-
+                // not on a merged 
+               if(((DataSetNode) node).hasResultSet() || ((DataSetNode) node).hasResultSummary()){
+                    setEnabled(false);
+                    return;
+               }
             }
             
         }

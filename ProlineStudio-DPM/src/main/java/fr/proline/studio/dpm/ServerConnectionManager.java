@@ -31,7 +31,6 @@ public class ServerConnectionManager {
     private static final String KEY_PROJECT_USER = "projectUser";
     private static final String KEY_USER_PASSWORD = "databasePassword";
     private static final String KEY_PASSWORD_NEEDED = "passwordNeeded";
-    private static final String KEY_IS_JMSSERVER = "isJMSServer"; //VDS TO BE REMOVED
 
     public static final int NOT_CONNECTED = 0;
     public static final int CONNECTION_ASKED = 1;
@@ -50,14 +49,7 @@ public class ServerConnectionManager {
     private String m_databasePassword;
     private String m_userPassword;
     private boolean m_passwordNeeded;
-    //VDS TO BE REMOVED => Full JMS
-    //private boolean m_jmsServer;
 
-    //VDS TO BE REMOVED => Still Used !?
-//    private String m_previousServerURL = "";
-//    private String m_previousProjectUser = "";
-//    private String m_previousUserPassword = "";    
-//    private int m_previousErrorId = -1;
     private HashMap<Object, Object> m_serverConnectionParam;
 
     private static ServerConnectionManager m_connectionManager = null;
@@ -94,7 +86,6 @@ public class ServerConnectionManager {
         preferences.put(KEY_USER_PASSWORD, m_userPassword);
 
         preferences.putBoolean(KEY_PASSWORD_NEEDED, m_passwordNeeded);
-        //preferences.putBoolean(KEY_IS_JMSSERVER, m_jmsServer);
 
         try {
             preferences.flush();
@@ -205,6 +196,7 @@ public class ServerConnectionManager {
                 } else {
                     setConnectionState(CONNECTION_FAILED);
                     m_connectionError = getTaskError();
+                    JMSConnectionManager.getJMSConnectionManager().closeConnection();
                     if (connectionCallback != null) {
                         connectionCallback.run();
                     }

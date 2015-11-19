@@ -32,7 +32,7 @@ public class TaskInfoManager {
         m_taskToBeUpdated = new ArrayList<>();
     }
     
-    public void add(TaskInfo taskInfo) {
+    public synchronized void add(TaskInfo taskInfo) {
         m_tasks.add(taskInfo);
         if (m_tasks.size()>MAX_SIZE) {
             m_tasks.remove(m_tasks.last());
@@ -40,7 +40,7 @@ public class TaskInfoManager {
         m_curUpdate++;
     }
     
-    public void clear() {
+    public synchronized void clear() {
         TreeSet<TaskInfo> tasks = new  TreeSet<>();
         for (TaskInfo task : m_tasks) {
             if (task.isFinished() && task.isSuccess()) {
@@ -64,7 +64,7 @@ public class TaskInfoManager {
         m_curUpdate++;
     }
     
-    public void cancel(TaskInfo taskInfo) {
+    public synchronized void cancel(TaskInfo taskInfo) {
         m_tasks.remove(taskInfo);
         m_curUpdate++;
     }

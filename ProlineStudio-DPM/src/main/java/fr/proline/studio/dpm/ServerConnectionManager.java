@@ -113,30 +113,33 @@ public class ServerConnectionManager {
                 return;
             }
 
+            // reconnect even if changing user
+            JMSConnectionManager.getJMSConnectionManager().closeConnection();
+            
             setConnectionState(CONNECTION_ASKED);
-            if (!changingUser) {
-                //Configure JMSConnectionManager and try to connect to server
-                try {
-                    String[] jmsHostAndPort = parseJMSServerURL(serverURL);
-                    JMSConnectionManager.getJMSConnectionManager().setJMSServerHost(jmsHostAndPort[0]);
-                    if (jmsHostAndPort[1] != null) {
-                        JMSConnectionManager.getJMSConnectionManager().setJMSServerPort(Integer.parseInt(jmsHostAndPort[1]));
-                    }
-                    //Try to connect to server
-                    JMSConnectionManager.getJMSConnectionManager().getJMSConnection();
-                } catch (Exception e) {
-                    setConnectionState(CONNECTION_FAILED);
-                    JMSConnectionManager.getJMSConnectionManager().closeConnection();
-                    m_connectionError = new TaskError(e.getMessage());
-                    
-                    if (connectionCallback != null) {
-                        connectionCallback.run();
-                    }
-                    
-                    return;
-                    //throw new RuntimeException("Error creating connection to JMS Server "+e.getMessage());
+
+            //Configure JMSConnectionManager and try to connect to server
+            try {
+                String[] jmsHostAndPort = parseJMSServerURL(serverURL);
+                JMSConnectionManager.getJMSConnectionManager().setJMSServerHost(jmsHostAndPort[0]);
+                if (jmsHostAndPort[1] != null) {
+                    JMSConnectionManager.getJMSConnectionManager().setJMSServerPort(Integer.parseInt(jmsHostAndPort[1]));
                 }
+                //Try to connect to server
+                JMSConnectionManager.getJMSConnectionManager().getJMSConnection();
+            } catch (Exception e) {
+                setConnectionState(CONNECTION_FAILED);
+                JMSConnectionManager.getJMSConnectionManager().closeConnection();
+                m_connectionError = new TaskError(e.getMessage());
+
+                if (connectionCallback != null) {
+                    connectionCallback.run();
+                }
+
+                return;
+                //throw new RuntimeException("Error creating connection to JMS Server "+e.getMessage());
             }
+
 
             userAuthenticateJMS(connectionCallback, serverURL, projectUser, userPassword, changingUser);
 

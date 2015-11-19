@@ -63,7 +63,7 @@ public class ServerConnectionManager {
 
     public ServerConnectionManager() {
         restoreParameters();
-        tryServerConnection();
+        //tryServerConnection();
 
     }
 
@@ -126,6 +126,7 @@ public class ServerConnectionManager {
                     JMSConnectionManager.getJMSConnectionManager().getJMSConnection();
                 } catch (Exception e) {
                     setConnectionState(CONNECTION_FAILED);
+                    JMSConnectionManager.getJMSConnectionManager().closeConnection();
                     m_connectionError = new TaskError(e.getMessage());
                     
                     if (connectionCallback != null) {
@@ -245,9 +246,9 @@ public class ServerConnectionManager {
                     // try JMS Connection instead
                     boolean jmsTry = false;
                     if (!changingUser) {
-                        int indexStart = serverURL.indexOf("http://");
+                        int indexStart = serverURL.indexOf(HTTP_URL_PREFFIX);
                         if (indexStart != -1) {
-                            indexStart += "http://".length();
+                            indexStart += HTTP_URL_PREFFIX.length();
                             int indexStop = serverURL.lastIndexOf(":");
                             if (indexStop > indexStart) {
                                 String jmsServer = serverURL.substring(indexStart, indexStop);

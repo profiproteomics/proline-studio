@@ -165,10 +165,12 @@ public class JMSConnectionManager {
         if (m_connection != null) {           
             try {
                 m_connection.close();
-                m_connection = null;
+                
                 m_loggerProline.info("JMS Connection closed");
             } catch (Exception exClose) {
                 m_loggerProline.error("Error closing JMS Connection", exClose);
+            } finally {
+                m_connection = null;
             }
         }
         

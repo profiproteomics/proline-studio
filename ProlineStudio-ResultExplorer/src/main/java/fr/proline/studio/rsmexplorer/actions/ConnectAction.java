@@ -53,7 +53,7 @@ public class ConnectAction  extends AbstractAction implements ContextAwareAction
             if (connectAction) {
                 m_action.putValue(Action.NAME, NbBundle.getMessage(ConnectAction.class, "CTL_ConnectAction"));
             } else {
-                m_action.putValue(Action.NAME, "Disconnect...");
+                m_action.putValue(Action.NAME, "Change User...");
             }
         }
     }

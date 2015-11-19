@@ -154,11 +154,7 @@ public class RsetAllPanel extends HourglassPanel implements DataBoxPanelInterfac
 
                 @Override
                 public void mouseReleased(MouseEvent e) {
-                    /*if (SwingUtilities.isRightMouseButton(e)) {
-                        getPopup().show(e.getComponent(), e.getX(), e.getY());
-                    }*/
-                    
-                    
+ 
                 }
                 
                 @Override
@@ -189,7 +185,21 @@ public class RsetAllPanel extends HourglassPanel implements DataBoxPanelInterfac
                     }
                     // -- end
 
-
+                    if (e.isControlDown()) {
+                        m_resultSetTable.addRowSelectionInterval(row, row);
+                    } else if  (e.isShiftDown()) {
+                        int minIndex = m_resultSetTable.getSelectionModel().getMinSelectionIndex();
+                        if ((minIndex == -1) || (row<minIndex)) {
+                            minIndex = row;
+                        }
+                        int maxIndex = m_resultSetTable.getSelectionModel().getMaxSelectionIndex();
+                        if ((maxIndex == -1) || (row>maxIndex)) {
+                            maxIndex = row;
+                        }
+                        m_resultSetTable.setRowSelectionInterval(minIndex, maxIndex);
+                    } else {
+                        m_resultSetTable.setRowSelectionInterval(row, row);
+                    }
                         
                     getTransferHandler().exportAsDrag(m_resultSetTable, e, TransferHandler.COPY);
 

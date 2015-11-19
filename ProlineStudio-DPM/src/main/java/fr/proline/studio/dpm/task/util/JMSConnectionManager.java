@@ -1,5 +1,6 @@
 package fr.proline.studio.dpm.task.util;
 
+import fr.proline.studio.dpm.jms.AccessJMSManagerThread;
 import java.util.HashMap;
 import java.util.Map;
 import javax.jms.Connection;
@@ -164,6 +165,10 @@ public class JMSConnectionManager {
 
         if (m_connection != null) {           
             try {
+                
+                // need to cleanup jms thread
+                AccessJMSManagerThread.getAccessJMSManagerThread().cleanup();
+                
                 m_connection.close();
                 
                 m_loggerProline.info("JMS Connection closed");

@@ -29,16 +29,7 @@ public class AccessJMSManagerThread extends Thread {
     
     private AccessJMSManagerThread() {
         super("AccessJMSManagerThread"); // useful for debugging
-        try {
-            // Get JMS Connection
-            m_connection = JMSConnectionManager.getJMSConnectionManager().getJMSConnection();
-            m_connection.start(); // Explicitely start connection to begin Consumer reception 
-            m_session = m_connection.createSession(false, Session.CLIENT_ACKNOWLEDGE);
-        } catch (JMSException je) {
-            LoggerFactory.getLogger("ProlineStudio.DPM").error("Unexpected exception when initializing JMS Connection", je);
-        } catch (Exception e){
-            LoggerFactory.getLogger("ProlineStudio.DPM").error("Unexpected exception when initializing JMS Connection", e);
-        }
+        initSession();
     }
     
     public Session getSession(){
@@ -70,6 +61,9 @@ public class AccessJMSManagerThread extends Thread {
                 //Thread.sleep(500);
                 //System.out.println("Action : "+action.getClass().toString()+" "+System.currentTimeMillis());
 
+                // init session if needed
+                initSession();
+                
                 // fetch data
                 task.askJMS();
 
@@ -82,6 +76,21 @@ public class AccessJMSManagerThread extends Thread {
         }
     }
     
+    
+    private void initSession() {
+        if (m_connection == null) {
+            try {
+                // Get JMS Connection
+                m_connection = JMSConnectionManager.getJMSConnectionManager().getJMSConnection();
+                m_connection.start(); // Explicitely start connection to begin Consumer reception 
+                m_session = m_connection.createSession(false, Session.CLIENT_ACKNOWLEDGE);
+            } catch (JMSException je) {
+                LoggerFactory.getLogger("ProlineStudio.DPM").error("Unexpected exception when initializing JMS Connection", je);
+            } catch (Exception e) {
+                LoggerFactory.getLogger("ProlineStudio.DPM").error("Unexpected exception when initializing JMS Connection", e);
+            }
+        }
+    }
     
     /**
      * Add a task to be done
@@ -96,5 +105,23 @@ public class AccessJMSManagerThread extends Thread {
             m_taskList.add(task);
             notifyAll();
         }
+    }
+    
+    public void cleanup() {
+        if (m_session != null) {
+            synchronized (this) {
+                try {
+                    m_session.close();
+
+                    m_taskList.clear();
+                } catch (Exception e) {
+
+                } finally {
+                    m_session = null;
+                    m_connection = null;
+                }
+            }
+        }
+        
     }
 }

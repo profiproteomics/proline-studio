@@ -6,6 +6,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
+import fr.proline.core.orm.msi.PeptideReadablePtmString;
 import fr.proline.core.orm.msi.dto.DInfoPTM;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.msi.dto.DPeptidePTM;
@@ -21,6 +22,7 @@ import fr.proline.studio.filter.ValueFilter;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
 import fr.proline.studio.rsmexplorer.gui.renderer.DoubleRenderer;
+import fr.proline.studio.rsmexplorer.gui.renderer.PeptideRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.PercentageRenderer;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.table.LazyTable;
@@ -106,8 +108,9 @@ public class PtmProtenSiteTableModel extends LazyTableModel implements GlobalTab
         switch (col){
             case COLTYPE_PROTEIN_ID:
                 return Long.class;
-            case COLTYPE_PROTEIN_NAME:
             case COLTYPE_PEPTIDE_NAME:
+                return DPeptideMatch.class;
+            case COLTYPE_PROTEIN_NAME:
             case COLTYPE_PEPTIDE_PTM:
             case COLTYPE_MODIFICATION:
             case COLTYPE_MODIFICATION_LOC:
@@ -171,9 +174,14 @@ public class PtmProtenSiteTableModel extends LazyTableModel implements GlobalTab
             case COLTYPE_PROTEIN_NAME:
                 return proteinMatch.getAccession();
             case COLTYPE_PEPTIDE_NAME:
-                return peptideMatch.getPeptide().getSequence();
+                return peptideMatch;
             case COLTYPE_PEPTIDE_PTM:
-                return peptideMatch.getPeptide().getPtmString();
+                String ptm = "";
+                PeptideReadablePtmString ptmString = peptideMatch.getPeptide().getTransientData().getPeptideReadablePtmString();
+                if (ptmString != null) {
+                    ptm = ptmString.getReadablePtmString();
+                }
+            return ptm;
             case COLTYPE_MODIFICATION: {
                 DInfoPTM infoPtm = DInfoPTM.getInfoPTMMap().get(peptidePtm.getIdPtmSpecificity());
                 return infoPtm.getPtmShortName();
@@ -505,20 +513,18 @@ public class PtmProtenSiteTableModel extends LazyTableModel implements GlobalTab
 
     @Override
     public Class getDataColumnClass(int columnIndex) {
+        if (columnIndex == COLTYPE_PEPTIDE_NAME) {
+            return String.class;
+        }
         return getColumnClass(columnIndex);
     }
 
     @Override
     public Object getDataValueAt(int rowIndex, int columnIndex) {
-        return getValueAt(rowIndex, columnIndex);
-        /*Object data = getValueAt(rowIndex, columnIndex);
-        if (data instanceof LazyData) {
-            data = ((LazyData) data).getData();
-            if (data instanceof ProteinCount) {
-                return ((ProteinCount) data).getNbProteins();
-            }
+        if (columnIndex == COLTYPE_PEPTIDE_NAME) {
+            return ((DPeptideMatch) getValueAt(rowIndex, columnIndex)).getPeptide().getSequence();
         }
-        return data;*/
+        return getValueAt(rowIndex, columnIndex);
     }
 
     @Override
@@ -546,7 +552,19 @@ public class PtmProtenSiteTableModel extends LazyTableModel implements GlobalTab
     public void addFilters(LinkedHashMap<Integer, Filter> filtersMap) {
 
         filtersMap.put(COLTYPE_PROTEIN_NAME, new StringFilter(getColumnName(COLTYPE_PROTEIN_NAME), null, COLTYPE_PROTEIN_NAME));
-        filtersMap.put(COLTYPE_PEPTIDE_NAME, new StringFilter(getColumnName(COLTYPE_PEPTIDE_NAME), null, COLTYPE_PEPTIDE_NAME));
+        
+        ConvertValueInterface peptideConverter = new ConvertValueInterface() {
+            @Override
+            public Object convertValue(Object o) {
+                if (o == null) {
+                    return null;
+                }
+                return ((DPeptideMatch) o).getPeptide().getSequence();
+            }
+            
+        };
+        filtersMap.put(COLTYPE_PEPTIDE_NAME, new StringFilter(getColumnName(COLTYPE_PEPTIDE_NAME), peptideConverter, COLTYPE_PEPTIDE_NAME));
+
         filtersMap.put(COLTYPE_PEPTIDE_PTM, new StringFilter(getColumnName(COLTYPE_PEPTIDE_PTM), null, COLTYPE_PEPTIDE_PTM));
         filtersMap.put(COLTYPE_DELTA_MASS_PTM, new DoubleFilter(getColumnName(COLTYPE_DELTA_MASS_PTM), null, COLTYPE_DELTA_MASS_PTM));
         filtersMap.put(COLTYPE_PTM_PROBA, new DoubleFilter(getColumnName(COLTYPE_PTM_PROBA), null, COLTYPE_PTM_PROBA));
@@ -620,12 +638,18 @@ public class PtmProtenSiteTableModel extends LazyTableModel implements GlobalTab
 
         TableCellRenderer renderer = null;
         switch (col) {
+            case COLTYPE_PEPTIDE_NAME: {
+                renderer = new PeptideRenderer();
+                break;
+            }
             case COLTYPE_PROTEIN_NAME:
-            case COLTYPE_PEPTIDE_NAME:
             case COLTYPE_PEPTIDE_PTM:
-            case COLTYPE_MODIFICATION:
-            case COLTYPE_MODIFICATION_LOC: {
+            case COLTYPE_MODIFICATION: {
                 renderer = new DefaultLeftAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class));
+                break;
+            }
+            case COLTYPE_MODIFICATION_LOC: {
+                renderer = new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class));
                 break;
             }
             case COLTYPE_PTM_PROBA:

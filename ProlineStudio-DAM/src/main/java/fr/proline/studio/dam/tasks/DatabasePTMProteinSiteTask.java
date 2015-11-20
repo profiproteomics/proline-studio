@@ -2,6 +2,7 @@ package fr.proline.studio.dam.tasks;
 
 import fr.proline.core.orm.msi.Peptide;
 import fr.proline.core.orm.msi.PeptideInstance;
+import fr.proline.core.orm.msi.PeptideReadablePtmString;
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.SequenceMatch;
 import fr.proline.core.orm.msi.dto.DMsQuery;
@@ -88,7 +89,7 @@ public class DatabasePTMProteinSiteTask extends AbstractDatabaseTask {
                 proteinMatchMap.put(id, proteinMatch);
             }
             
-            HashSet<Long> allPeptidesIds = new HashSet();
+            HashMap<Long, Peptide> allPeptidesMap = new HashMap();
 
             ArrayList<DPeptideMatch> peptideMatchArray = new ArrayList<>();
             
@@ -99,8 +100,8 @@ public class DatabasePTMProteinSiteTask extends AbstractDatabaseTask {
                 // FROM fr.proline.core.orm.msi.SequenceMatch sm, fr.proline.core.orm.msi.PeptideInstancePeptideMatchMap pipm, fr.proline.core.orm.msi.PeptideMatch pm, fr.proline.core.orm.msi.PeptideInstance pi, fr.proline.core.orm.msi.Peptide p, fr.proline.core.orm.msi.MsQuery ms, fr.proline.core.orm.msi.Spectrum sp   
                 // WHERE sm.id.proteinMatchId IN (:proteinMatchList) AND sm.bestPeptideMatchId=pipm.id.peptideMatchId AND pipm.id.peptideInstanceId=pi.id AND pipm.resultSummary.id=:rsmId AND pipm.id.peptideMatchId=pm.id AND pm.peptideId=p.id AND pm.msQuery=ms AND ms.spectrum=sp
                 Query peptidesQuery = entityManagerMSI.createQuery("SELECT pi, pm.id, pm.rank, pm.charge, pm.deltaMoz, pm.experimentalMoz, pm.missedCleavage, pm.score, pm.resultSet.id, p, sm, ms.id, ms.initialId, pm.cdPrettyRank, pm.sdPrettyRank, pm.serializedProperties, sp.firstTime, sp.precursorIntensity, sp.title, sm.id.proteinMatchId\n"
-                        + "              FROM fr.proline.core.orm.msi.SequenceMatch sm, fr.proline.core.orm.msi.PeptideInstancePeptideMatchMap pipm, fr.proline.core.orm.msi.PeptideMatch pm, fr.proline.core.orm.msi.PeptideInstance pi, fr.proline.core.orm.msi.Peptide p, fr.proline.core.orm.msi.MsQuery ms, fr.proline.core.orm.msi.Spectrum sp   \n"
-                        + "              WHERE sm.id.proteinMatchId IN (:proteinMatchList) AND sm.bestPeptideMatchId=pipm.id.peptideMatchId AND pipm.id.peptideInstanceId=pi.id AND pipm.resultSummary.id=:rsmId AND pipm.id.peptideMatchId=pm.id AND pm.peptideId=p.id AND pm.msQuery=ms AND ms.spectrum=sp");
+                        + "              FROM fr.proline.core.orm.msi.SequenceMatch sm, fr.proline.core.orm.msi.PeptideInstancePeptideMatchMap pipm, fr.proline.core.orm.msi.PeptideMatch pm, fr.proline.core.orm.msi.PeptideInstance pi, fr.proline.core.orm.msi.Peptide p, fr.proline.core.orm.msi.MsQuery ms, fr.proline.core.orm.msi.Spectrum sp  \n"
+                        + "              WHERE sm.id.proteinMatchId IN (:proteinMatchList) AND sm.bestPeptideMatchId=pipm.id.peptideMatchId AND pipm.id.peptideInstanceId=pi.id AND pipm.resultSummary.id=:rsmId AND pipm.id.peptideMatchId=pm.id AND pm.peptideId=p.id AND pm.msQuery=ms AND ms.spectrum=sp ");
                 peptidesQuery.setParameter("rsmId", rsmId);
                 peptidesQuery.setParameter("proteinMatchList", subTask.getSubList(typicalProteinMatchesIdsArray));
                 
@@ -139,7 +140,8 @@ public class DatabasePTMProteinSiteTask extends AbstractDatabaseTask {
                     peptideMatchArray.add(pm);
 
                     Peptide p = (Peptide) resCur[9];
-                    allPeptidesIds.add(p.getId());
+                    p.getTransientData().setPeptideReadablePtmStringLoaded();
+                    allPeptidesMap.put(p.getId(), p);
 
                     SequenceMatch sm = (SequenceMatch) resCur[10];
                     Long msqId = (Long) resCur[11];
@@ -151,7 +153,7 @@ public class DatabasePTMProteinSiteTask extends AbstractDatabaseTask {
                     dpi.setBestPeptideMatch(pm);
 
                     pm.setSequenceMatch(sm);
-                    //p.getTransientData().setPeptideReadablePtmStringLoaded();
+
 
                     pm.setPeptide(p);
                     pm.setMsQuery(msq);
@@ -170,6 +172,24 @@ public class DatabasePTMProteinSiteTask extends AbstractDatabaseTask {
                 
             }
             
+            
+            // Retrieve PeptideReadablePtmString
+            Long rsetId = m_rsm.getResultSet().getId();
+            Query ptmStingQuery = entityManagerMSI.createQuery("SELECT p.id, ptmString FROM fr.proline.core.orm.msi.Peptide p, fr.proline.core.orm.msi.PeptideReadablePtmString ptmString WHERE p.id IN (:listId) AND ptmString.peptide=p AND ptmString.resultSet.id=:rsetId");
+            ptmStingQuery.setParameter("listId", allPeptidesMap.keySet());
+            ptmStingQuery.setParameter("rsetId", rsetId);
+
+            List<Object[]> ptmStrings = ptmStingQuery.getResultList();
+            Iterator<Object[]> it = ptmStrings.iterator();
+            while (it.hasNext()) {
+                Object[] res = it.next();
+                Long peptideId = (Long) res[0];
+                PeptideReadablePtmString ptmString = (PeptideReadablePtmString) res[1];
+                Peptide peptide = allPeptidesMap.get(peptideId);
+                peptide.getTransientData().setPeptideReadablePtmString(ptmString);
+            }
+            
+            
             for (DProteinMatch pm : proteinMatchMap.values()) {
                 ArrayList<DPeptideInstance> peptideInstanceList = proteinMatchIdToPeptideInstancehMap.get(pm.getId());
                 DPeptideInstance[] peptideInstanceArray = peptideInstanceList.toArray(new DPeptideInstance[peptideInstanceList.size()]);
@@ -180,7 +200,7 @@ public class DatabasePTMProteinSiteTask extends AbstractDatabaseTask {
             fetchGenericPTMData();
             
             // fetch Specific Data for the Peptides Found
-            HashMap<Long, ArrayList<DPeptidePTM>> ptmMap = fetchPTMDataForPeptides(new ArrayList(allPeptidesIds));
+            HashMap<Long, ArrayList<DPeptidePTM>> ptmMap = fetchPTMDataForPeptides(new ArrayList(allPeptidesMap.keySet()));
         
             for (DPeptideMatch pm : peptideMatchArray) {
                 Peptide p = pm.getPeptide();

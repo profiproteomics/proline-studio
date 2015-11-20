@@ -3,6 +3,7 @@ package fr.proline.studio.rsmexplorer.gui.renderer;
 import fr.proline.core.orm.msi.Peptide;
 import fr.proline.core.orm.msi.SequenceMatch;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
+import fr.proline.core.orm.msi.dto.DPeptidePTM;
 import fr.proline.core.orm.ps.PeptidePtm;
 import fr.proline.studio.export.ExportTextInterface;
 import fr.proline.studio.utils.GlobalValues;
@@ -47,7 +48,7 @@ public class PeptideRenderer extends DefaultTableCellRenderer implements ExportT
 
             
             
-            HashMap<Integer, PeptidePtm> ptmMap = peptide.getTransientData().getPeptidePtmMap();
+            HashMap<Integer, DPeptidePTM> ptmMap = peptide.getTransientData().getDPeptidePtmMap();
             if (ptmMap != null) {
                 m_displaySB.append("<HTML>");
             }
@@ -67,18 +68,18 @@ public class PeptideRenderer extends DefaultTableCellRenderer implements ExportT
 
                     boolean nTerOrCterModification = false;
                     if (i == 0) {
-                        PeptidePtm nterPtm = ptmMap.get(0);
+                        DPeptidePTM nterPtm = ptmMap.get(0);
                         if (nterPtm != null) {
                             nTerOrCterModification = true;
                         }
                     } else if (i == nb - 1) {
-                        PeptidePtm cterPtm = ptmMap.get(-1);
+                        DPeptidePTM cterPtm = ptmMap.get(-1);
                         if (cterPtm != null) {
                             nTerOrCterModification = true;
                         }
                     }
 
-                    PeptidePtm ptm = ptmMap.get(i + 1);
+                    DPeptidePTM ptm = ptmMap.get(i + 1);
                     boolean aminoAcidModification = (ptm != null);
 
                     if (nTerOrCterModification || aminoAcidModification) {

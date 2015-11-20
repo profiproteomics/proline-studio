@@ -12,7 +12,6 @@ import fr.proline.studio.dam.tasks.DatabasePTMProteinSiteTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.rsmexplorer.gui.PTMProteinSitePanel;
-import fr.proline.studio.table.GlobalTableModelInterface;
 import java.util.ArrayList;
 
 /**

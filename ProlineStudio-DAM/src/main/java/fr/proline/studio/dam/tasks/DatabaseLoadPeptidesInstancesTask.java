@@ -13,6 +13,7 @@ import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.core.orm.msi.dto.DProteinSet;
 import fr.proline.core.orm.msi.dto.DPeptideInstance;
+import fr.proline.core.orm.msi.dto.DPeptidePTM;
 import fr.proline.core.orm.msi.dto.DSpectrum;
 import fr.proline.core.orm.ps.PeptidePtm;
 import fr.proline.core.orm.util.DataStoreConnectorFactory;
@@ -554,21 +555,22 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseSlicerTas
     
     protected static void fetchPtmData(EntityManager entityManagerPS, HashMap<Long, Peptide> peptideMap) {
 
-        TypedQuery<PeptidePtm> ptmQuery = entityManagerPS.createQuery("SELECT ptm FROM fr.proline.core.orm.ps.PeptidePtm ptm WHERE ptm.peptide.id IN (:peptideIds)", PeptidePtm.class);
+        TypedQuery<DPeptidePTM> ptmQuery = entityManagerPS.createQuery("SELECT new fr.proline.core.orm.msi.dto.DPeptidePTM(pptm.peptide.id, pptm.specificity.id, pptm.seqPosition) FROM fr.proline.core.orm.ps.PeptidePtm pptm WHERE pptm.peptide.id IN (:peptideIds)", DPeptidePTM.class);
         ptmQuery.setParameter("peptideIds", peptideMap.keySet());
-        List<PeptidePtm> ptmList = ptmQuery.getResultList();
+        List<DPeptidePTM> ptmList = ptmQuery.getResultList();
 
-        Iterator<PeptidePtm> it = ptmList.iterator();
+        Iterator<DPeptidePTM> it = ptmList.iterator();
         while (it.hasNext()) {
-            PeptidePtm ptm = it.next();
+            DPeptidePTM ptm = it.next();
 
-            Peptide p = peptideMap.get(ptm.getPeptide().getId());
-            HashMap<Integer, PeptidePtm> map = p.getTransientData().getPeptidePtmMap();
+            Peptide p = peptideMap.get(ptm.getIdPeptide());
+            HashMap<Integer, DPeptidePTM> map = p.getTransientData().getDPeptidePtmMap();
             if (map == null) {
                 map = new HashMap<>();
-                p.getTransientData().setPeptidePtmMap(map);
+                p.getTransientData().setDPeptidePtmMap(map);
             }
-            map.put(ptm.getSeqPosition(), ptm);
+            
+            map.put((int) ptm.getSeqPosition(), ptm);
 
         }
 

@@ -183,8 +183,18 @@ public class DatabasePTMProteinSiteTask extends AbstractDatabaseTask {
             HashMap<Long, ArrayList<DPeptidePTM>> ptmMap = fetchPTMDataForPeptides(new ArrayList(allPeptidesIds));
         
             for (DPeptideMatch pm : peptideMatchArray) {
-                Long idPeptide = pm.getPeptide().getId();
+                Peptide p = pm.getPeptide();
+                Long idPeptide = p.getId();
                 pm.setPeptidePTMArray(ptmMap.get(idPeptide));
+                
+                HashMap<Integer, DPeptidePTM> mapToPtm = new HashMap<>();
+                ArrayList<DPeptidePTM> ptmList = ptmMap.get(p.getId());
+                if (ptmList != null) {
+                    for (DPeptidePTM peptidePTM : ptmList) {
+                        mapToPtm.put((int) peptidePTM.getSeqPosition(), peptidePTM);
+                    }
+                    p.getTransientData().setDPeptidePtmMap(mapToPtm);
+                }
             }
             
             
@@ -206,6 +216,8 @@ public class DatabasePTMProteinSiteTask extends AbstractDatabaseTask {
                     for (DPeptidePTM peptidePTM : peptidePTMArray) {
                         m_proteinPTMSiteArray.add(new DProteinPTMSite(proteinMatch, peptideMatch, peptidePTM, deltaMass));
                     }
+                    
+                    
                 }
             }
             
@@ -300,6 +312,7 @@ public class DatabasePTMProteinSiteTask extends AbstractDatabaseTask {
                     }
                     list.add(ptm);
                     
+                    //Peptide
                     
                 }
  

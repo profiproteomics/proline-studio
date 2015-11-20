@@ -5,6 +5,7 @@ import fr.proline.core.orm.msi.Peptide;
 import fr.proline.core.orm.msi.SequenceMatchPK;
 import fr.proline.core.orm.msi.dto.DPeptideInstance;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
+import fr.proline.core.orm.msi.dto.DPeptidePTM;
 import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.core.orm.ps.PeptidePtm;
 import fr.proline.module.seq.BioSequenceProvider;
@@ -254,13 +255,13 @@ public class RsmProteinAndPeptideSequencePanel extends HourglassPanel implements
                 }
             }
             
-            HashMap<Integer,PeptidePtm> ptmMap = p.getPeptide().getTransientData().getPeptidePtmMap();
+            HashMap<Integer,DPeptidePTM> ptmMap = p.getPeptide().getTransientData().getDPeptidePtmMap();
             if (ptmMap != null) {
-                Collection<PeptidePtm> peptidePtms = ptmMap.values();
-                Iterator<PeptidePtm> it = peptidePtms.iterator();
+                Collection<DPeptidePTM> peptidePtms = ptmMap.values();
+                Iterator<DPeptidePTM> it = peptidePtms.iterator();
                 while (it.hasNext()) {
-                    PeptidePtm ptm = it.next();
-                    int pos = ptm.getSeqPosition();
+                    DPeptidePTM ptm = it.next();
+                    int pos = (int) ptm.getSeqPosition();
                     if (pos == 0){
                         // Nter
                         highlights[start-1] |= HIGHLIGHT_NTER_OR_CTER_MODIFICATION;

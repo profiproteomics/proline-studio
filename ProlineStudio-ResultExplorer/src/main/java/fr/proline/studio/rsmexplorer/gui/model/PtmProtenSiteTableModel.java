@@ -31,6 +31,7 @@ import fr.proline.studio.table.renderer.DefaultRightAlignRenderer;
 import fr.proline.studio.utils.IconManager;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -352,7 +353,86 @@ public class PtmProtenSiteTableModel extends LazyTableModel implements GlobalTab
         
         
         // Count for each type of modification, the number of modifications
+        /* JPM.TODO int rowCount = getRowCount();
+        int start = 0;
+        DProteinMatch proteinMatchPrev = null;
+        for (int i=0;i<rowCount;i++) {
+            DProteinPTMSite proteinPTMSite = m_proteinPTMSiteArray.get(i);
+            DProteinMatch proteinMatch = proteinPTMSite.getPoteinMatch();
+            if (proteinMatchPrev == null) {
+                proteinMatchPrev = proteinMatch;
+                continue;
+            } else if (proteinMatchPrev == proteinMatch) {
+                continue;
+            } else {
+                int stop = i-1;
+                manageProteinMatchCalculation(proteinMatchPrev, start, stop);
+                
+                proteinMatchPrev = proteinMatch;
+                start = i;
+            }
+        }
+        int stop = rowCount-1;
+        if (stop>=start) {
+            manageProteinMatchCalculation(proteinMatchPrev, start, stop);
+        }*/
         
+    }
+    
+    private void manageProteinMatchCalculation(DProteinMatch proteinMatch, int start, int stop) {
+        /*  JPM.TODO
+        HashMap<DPeptideMatch, HashMap<DProteinPTMSite, Integer>> peptideMatchesMap = new HashMap<>();
+        
+        for (int i=start;i<=stop;i++) {
+            DProteinPTMSite proteinPTMSite = m_proteinPTMSiteArray.get(i);
+            DPeptideMatch peptideMatch = proteinPTMSite.getPeptideMatch();
+            
+            HashMap<DProteinPTMSite, Integer> ptmMap = peptideMatchesMap.get(peptideMatchesMap);
+            if (ptmMap == null) {
+                ptmMap = new HashMap<>();
+                peptideMatchesMap.put(peptideMatch, ptmMap);
+            }
+            ptmMap.put(proteinPTMSite, i);
+
+            
+        }
+        
+        for (int i=start;i<=stop;i++) {
+            DProteinPTMSite proteinPTMSite = m_proteinPTMSiteArray.get(i);
+            DPeptideMatch peptideMatch = proteinPTMSite.getPeptideMatch();
+            String sequenceMatch = peptideMatch.getPeptide().getSequence();
+            int sequenceLength = sequenceMatch.length();
+            
+            int lengthMax = -1;
+            DPeptideMatch surroundingPeptide = null;
+            for (int j=start;j<=stop;j++) {
+                if (j==i) {
+                    continue;
+                }
+                DProteinPTMSite proteinPTMSite2 = m_proteinPTMSiteArray.get(i);
+                DPeptideMatch peptideMatch2 = proteinPTMSite2.getPeptideMatch();
+                if (peptideMatch2 == peptideMatch) {
+                    continue; // smae peptide
+                }
+                String sequenceMatch2 = peptideMatch2.getPeptide().getSequence();
+                int sequenceLength2 = sequenceMatch2.length();
+                
+                if ((lengthMax<sequenceLength2) && (sequenceLength<sequenceLength2) && (sequenceMatch2.contains(sequenceMatch))) {
+                    // we have found a bigger peptide
+                    surroundingPeptide = peptideMatch2;
+                    lengthMax = sequenceLength2;
+                }
+                
+            }
+            
+            if (surroundingPeptide == null) {
+                // no surrounding peptide found, we count all the ptm modifications
+                DPeptidePTM peptidePTM = proteinPTMSite.getPeptidePTM();
+            } else {
+                // a surrounding peptide has been found, we count the ptm modifications not found in surrounding peptide
+            }
+            
+        }*/
     }
     
 

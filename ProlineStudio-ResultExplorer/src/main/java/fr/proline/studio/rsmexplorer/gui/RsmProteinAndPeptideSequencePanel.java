@@ -1,13 +1,12 @@
 package fr.proline.studio.rsmexplorer.gui;
 
 
-import fr.proline.core.orm.msi.Peptide;
+
 import fr.proline.core.orm.msi.SequenceMatchPK;
 import fr.proline.core.orm.msi.dto.DPeptideInstance;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.msi.dto.DPeptidePTM;
 import fr.proline.core.orm.msi.dto.DProteinMatch;
-import fr.proline.core.orm.ps.PeptidePtm;
 import fr.proline.module.seq.BioSequenceProvider;
 import fr.proline.module.seq.dto.BioSequenceWrapper;
 import fr.proline.studio.dam.DatabaseDataManager;
@@ -16,7 +15,6 @@ import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
-import fr.proline.studio.table.DecoratedTableModel;
 import fr.proline.studio.utils.DataFormat;
 import fr.proline.studio.utils.GlobalValues;
 import java.awt.*;

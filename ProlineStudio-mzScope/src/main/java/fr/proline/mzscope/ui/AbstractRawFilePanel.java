@@ -26,6 +26,7 @@ import javax.swing.JSplitPane;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 import javax.swing.SwingWorker;
+import org.openide.util.Exceptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -305,10 +306,17 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFilePan
 
             @Override
             protected void done() {
-               chromatogramPanel.displayFeature(f);
-               displayScan(getCurrentRawfile().getSpectrumId(f.getElutionTime()));
-               if (rawFileLoading != null){
-                rawFileLoading.setWaitingState(false);
+               try {
+                  displayChromatogram(get(), DisplayMode.REPLACE);
+                  chromatogramPanel.displayFeature(f);
+                  displayScan(getCurrentRawfile().getSpectrumId(f.getElutionTime()));
+                  if (rawFileLoading != null){
+                     rawFileLoading.setWaitingState(false);
+                  }
+               } catch (InterruptedException ex) {
+                  Exceptions.printStackTrace(ex);
+               } catch (ExecutionException ex) {
+                  Exceptions.printStackTrace(ex);
                }
             }
         };

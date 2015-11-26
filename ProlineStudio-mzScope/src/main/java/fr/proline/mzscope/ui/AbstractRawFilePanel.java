@@ -26,7 +26,6 @@ import javax.swing.JSplitPane;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 import javax.swing.SwingWorker;
-import org.openide.util.Exceptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -314,9 +313,9 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFilePan
                      rawFileLoading.setWaitingState(false);
                   }
                } catch (InterruptedException ex) {
-                  Exceptions.printStackTrace(ex);
+                  logger.error("Error while extraction feature chromatogram", ex);
                } catch (ExecutionException ex) {
-                  Exceptions.printStackTrace(ex);
+                  logger.error("Error while extraction feature chromatogram", ex);
                }
             }
         };

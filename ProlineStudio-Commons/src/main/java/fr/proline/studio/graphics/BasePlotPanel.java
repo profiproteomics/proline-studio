@@ -178,11 +178,11 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
             // set correct size
             figuresXHeight = m_xAxis.getMiniMumAxisHeight(figuresXHeight);
             m_xAxis.setSize(GAP_FIGURES_Y+GAP_AXIS_TITLE+GAP_AXIS_LINE, height-figuresXHeight -GAP_AXIS_TITLE  /*-GAP_TOP_AXIS*/, width-GAP_FIGURES_Y-GAP_AXIS_TITLE-GAP_END_AXIS, figuresXHeight + GAP_AXIS_TITLE+GAP_AXIS_LINE);
-            if ((m_xAxis.getMinValue() == tab[0] && m_xAxis.getMaxValue() == tab[1])) {
+            /*if ((m_xAxis.getMinValue() == tab[0] && m_xAxis.getMaxValue() == tab[1])) {
                 double rightMargin = m_margins.right == 0 ? 0.0 : Math.abs(m_xAxis.pixelToValue(0) -  m_xAxis.pixelToValue(m_margins.right));
                 double leftMargin =  m_margins.left == 0 ? 0.0 : Math.abs(m_xAxis.pixelToValue(0) -  m_xAxis.pixelToValue(m_margins.left));
                 m_xAxis.setRange(tab[0] - leftMargin,tab[1] + rightMargin);
-            }
+            }*/
             
             m_plotArea.x = m_xAxis.m_x+1;
             m_plotArea.width = m_xAxis.m_width;
@@ -193,11 +193,11 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
         if (m_yAxis != null) {
             
             m_yAxis.setSize(0, GAP_END_AXIS+titleY, GAP_FIGURES_Y+GAP_AXIS_TITLE+GAP_AXIS_LINE/*+GAP_TOP_AXIS*/, height-figuresXHeight-GAP_AXIS_TITLE-GAP_END_AXIS-titleY);
-            if ((m_yAxis.getMinValue() == tab[2] && m_yAxis.getMaxValue() == tab[3])) {
+            /*if ((m_yAxis.getMinValue() == tab[2] && m_yAxis.getMaxValue() == tab[3])) {
                 double topMargin = m_margins.top == 0 ? 0.0 : Math.abs(m_yAxis.pixelToValue(0) -  m_yAxis.pixelToValue(m_margins.top));
                 double bottomMargin =  m_margins.bottom == 0 ? 0.0 : Math.abs(m_yAxis.pixelToValue(0) -  m_yAxis.pixelToValue(m_margins.bottom));
                 m_yAxis.setRange(tab[2] - bottomMargin,tab[3] + topMargin);
-            }
+            }*/
             m_plotArea.y = m_yAxis.m_y+1;
             m_plotArea.height = m_yAxis.m_height;
             m_yAxis.paint(g2d);

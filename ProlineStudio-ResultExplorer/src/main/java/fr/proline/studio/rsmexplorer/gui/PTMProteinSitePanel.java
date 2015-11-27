@@ -316,6 +316,29 @@ public class PTMProteinSitePanel extends HourglassPanel implements DataBoxPanelI
                 
         });
         
+        sorter.setComparator(PtmProtenSiteTableModel.COLTYPE_PROTEIN_LOC, new Comparator<String>() {
+
+            @Override
+            public int compare(String s1, String s2) {
+                int pos1;
+                if (s1.isEmpty()) { // N-term or C-term Peptide
+                    pos1 = Integer.MAX_VALUE;
+                } else {
+                    pos1 = Integer.valueOf(s1);
+                }
+                int pos2;
+                if (s2.isEmpty()) { // N-term or C-term Peptide
+                    pos2 = Integer.MAX_VALUE;
+                } else {
+                    pos2 = Integer.valueOf(s2);
+                }
+
+                return pos2-pos1;
+            }
+ 
+                
+        });
+        
 
         m_markerContainerPanel = new MarkerContainerPanel(m_ptmProteinSiteScrollPane, (PTMProteinSiteTable) m_ptmProteinSiteTable);
         

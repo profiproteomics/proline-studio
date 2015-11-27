@@ -192,6 +192,9 @@ public class DatabasePTMProteinSiteTask extends AbstractDatabaseTask {
             
             for (DProteinMatch pm : proteinMatchMap.values()) {
                 ArrayList<DPeptideInstance> peptideInstanceList = proteinMatchIdToPeptideInstancehMap.get(pm.getId());
+                if (peptideInstanceList == null) {
+                    continue; // JPM.BUG ???, it is odd, it can happens, to be checked
+                }
                 DPeptideInstance[] peptideInstanceArray = peptideInstanceList.toArray(new DPeptideInstance[peptideInstanceList.size()]);
                 pm.getPeptideSet(rsmId).setTransientDPeptideInstances(peptideInstanceArray);
             }
@@ -220,24 +223,25 @@ public class DatabasePTMProteinSiteTask extends AbstractDatabaseTask {
             
             // create the list of DProteinPTMSite
             for (DProteinMatch proteinMatch : typicalProteinMatchesArray) {
-                DPeptideInstance[]  peptideInstanceList = proteinMatch.getPeptideSet(rsmId).getTransientDPeptideInstances();
-                for (int i=0;i<peptideInstanceList.length;i++) {
-                    DPeptideInstance peptideInstance = peptideInstanceList[i];
-                    DPeptideMatch peptideMatch = peptideInstance.getBestPeptideMatch();
-                    ArrayList<DPeptidePTM> peptidePTMArray = peptideMatch.getPeptidePTMArray();
-                    if (peptidePTMArray == null) {
-                        continue;
+                DPeptideInstance[] peptideInstanceList = proteinMatch.getPeptideSet(rsmId).getTransientDPeptideInstances();
+                if (peptideInstanceList != null) {
+                    for (int i = 0; i < peptideInstanceList.length; i++) {
+                        DPeptideInstance peptideInstance = peptideInstanceList[i];
+                        DPeptideMatch peptideMatch = peptideInstance.getBestPeptideMatch();
+                        ArrayList<DPeptidePTM> peptidePTMArray = peptideMatch.getPeptidePTMArray();
+                        if (peptidePTMArray == null) {
+                            continue;
+                        }
+                        double deltaMass = 0;
+                        for (DPeptidePTM peptidePTM : peptidePTMArray) {
+                            DInfoPTM infoPtm = DInfoPTM.getInfoPTMMap().get(peptidePTM.getIdPtmSpecificity());
+                            deltaMass += infoPtm.getMonoMass();
+                        }
+                        for (DPeptidePTM peptidePTM : peptidePTMArray) {
+                            m_proteinPTMSiteArray.add(new DProteinPTMSite(proteinMatch, peptideMatch, peptidePTM, deltaMass));
+                        }
+
                     }
-                    double deltaMass  = 0;
-                    for (DPeptidePTM peptidePTM : peptidePTMArray) {
-                        DInfoPTM infoPtm = DInfoPTM.getInfoPTMMap().get(peptidePTM.getIdPtmSpecificity());
-                        deltaMass += infoPtm.getMonoMass();
-                    }
-                    for (DPeptidePTM peptidePTM : peptidePTMArray) {
-                        m_proteinPTMSiteArray.add(new DProteinPTMSite(proteinMatch, peptideMatch, peptidePTM, deltaMass));
-                    }
-                    
-                    
                 }
             }
             

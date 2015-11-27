@@ -213,15 +213,20 @@ public class PtmProtenSiteTableModel extends LazyTableModel implements GlobalTab
                     JsonParser parser = new JsonParser();
 
                     JsonObject jsonObject = parser.parse(properties).getAsJsonObject();
-                    JsonObject ptmPropertiesObject = jsonObject.getAsJsonObject("ptm_site_properties");
+                    JsonObject ptmPropertiesObject = jsonObject.getAsJsonObject("ptm_site_properties");  // JPM.COMPATIBILITY : this var no longer exists in new databases
+
                     if (ptmPropertiesObject != null) {
-                        JsonObject mascotPtmPropertiesObject = ptmPropertiesObject.getAsJsonObject("mascot_ptm_site_properties");
-                        if (mascotPtmPropertiesObject != null) {
-                            JsonPrimitive globalPercentage = mascotPtmPropertiesObject.getAsJsonPrimitive("mascot_delta_score");
-                            if (globalPercentage != null) {
-                                return globalPercentage.getAsDouble()*100;
-                            }
+                        
+                        JsonPrimitive globalPercentage = ptmPropertiesObject.getAsJsonPrimitive("mascot_delta_score");
+                        if (globalPercentage == null) {
+                            JsonObject mascotPtmPropertiesObject = ptmPropertiesObject.getAsJsonObject("mascot_ptm_site_properties");
+                            globalPercentage = mascotPtmPropertiesObject.getAsJsonPrimitive("mascot_delta_score");
                         }
+                        
+                        if (globalPercentage != null) {
+                            return globalPercentage.getAsDouble() * 100;
+                        }
+
                     }
                     } catch (Exception e) {
                         // should not happen
@@ -244,45 +249,50 @@ public class PtmProtenSiteTableModel extends LazyTableModel implements GlobalTab
                     JsonParser parser = new JsonParser();
 
                     JsonObject jsonObject = parser.parse(properties).getAsJsonObject();
-                    JsonObject ptmPropertiesObject = jsonObject.getAsJsonObject("ptm_site_properties");
+                    JsonObject ptmPropertiesObject = jsonObject.getAsJsonObject("ptm_site_properties");  // JPM.COMPATIBILITY : this var no longer exists in new databases
                     if (ptmPropertiesObject != null) {
-                        JsonObject mascotPtmPropertiesObject = ptmPropertiesObject.getAsJsonObject("mascot_ptm_site_properties");
-                        if (mascotPtmPropertiesObject != null) {
-                            JsonObject siteProbabilities = mascotPtmPropertiesObject.getAsJsonObject("site_probabilities");
-                            if (siteProbabilities != null) {
-                                Set<Entry<String, JsonElement>> entrySet = siteProbabilities.entrySet();
-                                for (Map.Entry<String, JsonElement> entry : entrySet) {
-                                    String key = entry.getKey();
-                                    int modificationPos = -1;
-                                    if (key.indexOf("N-term") != -1) {
-                                        modificationPos = 0;
-                                    } else if (key.indexOf("C-term") != -1) {
-                                        modificationPos = peptideMatch.getPeptide().getSequence().length();
-                                    } else {
-                                        int startIndex = key.indexOf('(');
-                                        if (startIndex != -1) {
+                        
+                        JsonObject siteProbabilities = ptmPropertiesObject.getAsJsonObject("mascot_probability_by_site");
+                        if (siteProbabilities == null) {
+                            JsonObject mascotPtmPropertiesObject = ptmPropertiesObject.getAsJsonObject("mascot_ptm_site_properties");
+                            if (mascotPtmPropertiesObject != null) {
+                                siteProbabilities = mascotPtmPropertiesObject.getAsJsonObject("site_probabilities");
+                            }
+                        }
+                        if (siteProbabilities != null) {
+                            Set<Entry<String, JsonElement>> entrySet = siteProbabilities.entrySet();
+                            for (Map.Entry<String, JsonElement> entry : entrySet) {
+                                String key = entry.getKey();
+                                int modificationPos = -1;
+                                if (key.indexOf("N-term") != -1) {
+                                    modificationPos = 0;
+                                } else if (key.indexOf("C-term") != -1) {
+                                    modificationPos = peptideMatch.getPeptide().getSequence().length();
+                                } else {
+                                    int startIndex = key.indexOf('(');
+                                    if (startIndex != -1) {
+                                        startIndex++;
+                                        char c = key.charAt(startIndex);
+                                        while (c >= 'A' && c <= 'Z') {
                                             startIndex++;
-                                            char c = key.charAt(startIndex);
-                                            while (c >= 'A' && c <= 'Z') {
-                                                startIndex++;
-                                                c = key.charAt(startIndex);
-                                            }
-                                            int endIndex = key.indexOf(')');
-                                            if (endIndex != -1) {
-                                                String modificationPosString = key.substring(startIndex, endIndex);
-                                                modificationPos = Integer.valueOf(modificationPosString);
+                                            c = key.charAt(startIndex);
+                                        }
+                                        int endIndex = key.indexOf(')');
+                                        if (endIndex != -1) {
+                                            String modificationPosString = key.substring(startIndex, endIndex);
+                                            modificationPos = Integer.valueOf(modificationPosString);
 
-                                            }
                                         }
                                     }
-                                    if (modificationPos == peptidePtm.getSeqPosition()) {
-                                        JsonPrimitive value = siteProbabilities.getAsJsonPrimitive(key);
-                                        double percentage = value.getAsDouble()*100;
-                                        return percentage;
-                                    }
+                                }
+                                if (modificationPos == peptidePtm.getSeqPosition()) {
+                                    JsonPrimitive value = siteProbabilities.getAsJsonPrimitive(key);
+                                    double percentage = value.getAsDouble() * 100;
+                                    return percentage;
                                 }
                             }
                         }
+
                     }
                     } catch (Exception e) {
                         // should not happen

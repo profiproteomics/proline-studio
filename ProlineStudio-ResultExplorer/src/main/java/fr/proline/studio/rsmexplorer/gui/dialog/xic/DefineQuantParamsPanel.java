@@ -239,7 +239,7 @@ public class DefineQuantParamsPanel extends JPanel{
         
         m_normalizationCB = new JComboBox(FEATURE_NORMALIZATION_VALUES);
         m_normalizationCB.setEnabled(!m_readOnly);
-        m_normalizationParameter = new ObjectParameter<>("normalization", "Normalization", m_normalizationCB, FEATURE_NORMALIZATION_VALUES, FEATURE_NORMALIZATION_KEYS,  2, null);
+        m_normalizationParameter = new ObjectParameter<>("normalization", "Normalization", m_normalizationCB, FEATURE_NORMALIZATION_VALUES, FEATURE_NORMALIZATION_KEYS,  0, null);
         m_parameterList.add(m_normalizationParameter);
 
 //        m_detectFeatureChB = new JCheckBox("Detect all features");

@@ -114,8 +114,8 @@ public class IdTransferHandler extends TransferHandler {
                  AbstractNode parentNode = (AbstractNode) curNode.getParent();
                  if (parentNode instanceof DataSetNode) {
                      DataSetNode parentDatasetNode = (DataSetNode) parentNode;
-                     if ((parentDatasetNode.hasResultSet()) || (parentDatasetNode.hasResultSummary())) {
-                         // parent is a merged dataset : no transfer possible
+                     if ((parentDatasetNode.hasResultSet()) || (parentDatasetNode.hasResultSummary()) || parentDatasetNode.isChanging()) {
+                         // parent is a merged dataset or in a current merge: no transfer possible
                          return null;
                      }
                  }

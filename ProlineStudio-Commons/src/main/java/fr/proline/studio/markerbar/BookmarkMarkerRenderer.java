@@ -9,7 +9,7 @@ import java.awt.Color;
 public class BookmarkMarkerRenderer extends DefaultMarkerRenderer {
     
     public BookmarkMarkerRenderer() {
-        super(new Color(63,126,223));
+        super(new Color(129, 151, 215));
     }
     
     

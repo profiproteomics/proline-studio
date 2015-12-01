@@ -81,7 +81,6 @@ public class MarkerBar extends AbstractBar implements MouseListener, MouseMotion
     public void paint(Graphics g) {
 
         initFontForLineNumbers(g); // must be done even if line numbers are not displayed at the beginning
-        
         g.setColor(m_almostWhiteColor);
         g.fillRect(1, 1, getWidth()-2, getHeight()-2);
         
@@ -127,7 +126,9 @@ public class MarkerBar extends AbstractBar implements MouseListener, MouseMotion
         // display lines
         if ((m_displayLineNumbers) && (firstVisibleRow!=-1)) {
             
-            g.setColor(Color.black);
+            ((Graphics2D)g).setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+            g.setFont(m_lineNumbersFont);
+            g.setColor(Color.gray);
             for (int i = firstVisibleRow; i <= lastVisibleRow; i++) {
                 int y1 = componentInterface.getRowYStart(i);
                 int y2 = componentInterface.getRowYStop(i);
@@ -145,7 +146,7 @@ public class MarkerBar extends AbstractBar implements MouseListener, MouseMotion
 
     private void initFontForLineNumbers(Graphics g) {
         if (m_lineNumbersFont == null) {
-            m_lineNumbersFont = new Font("SansSerif", Font.PLAIN, 10);
+            m_lineNumbersFont = new Font("SansSerif", Font.PLAIN, 9);
             m_lineNumbersFontMercrics = g.getFontMetrics(m_lineNumbersFont);
             m_fontAscent = m_lineNumbersFontMercrics.getAscent();
             m_fontDescent = m_lineNumbersFontMercrics.getDescent();

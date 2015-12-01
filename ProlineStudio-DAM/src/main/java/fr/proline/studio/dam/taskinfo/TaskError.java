@@ -39,6 +39,7 @@ public class TaskError {
     }
 
     
+    @Override
     public String toString() {
         if (m_errorText == null) {
             return m_errorTitle;

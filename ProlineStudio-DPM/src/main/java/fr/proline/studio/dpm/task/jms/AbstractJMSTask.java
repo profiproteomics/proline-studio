@@ -153,10 +153,10 @@ public abstract class AbstractJMSTask  extends AbstractLongTask implements Messa
         
         try {
             taskDone(jmsMessage);
-        } catch (JSONRPC2Error jsonE) {
-            m_currentState = JMSState.STATE_FAILED;
-            m_loggerProline.error("JSON Error handling JMS Message", jsonE);
-            m_taskError = new TaskError(jsonE.getMessage());
+//        } catch (JSONRPC2Error jsonE) {
+//            m_currentState = JMSState.STATE_FAILED;
+//            m_loggerProline.error("JSON Error handling JMS Message", jsonE);
+//            m_taskError = new TaskError(jsonE.getMessage());
         } catch (Exception e) {
             m_currentState = JMSState.STATE_FAILED;
             m_loggerProline.error("Error handling JMS Message", e);

@@ -129,7 +129,7 @@ public class ServerConnectionDialog extends ConnectionDialog {
                 if (serverManager.isConnectionFailed() ) {
                     TaskError connectionError = serverManager.getConnectionError();
                     setStatus(true, connectionError.getErrorTitle());
-                    JOptionPane.showMessageDialog(m_singletonDialog, connectionError, "Database Connection Error", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(m_singletonDialog, connectionError.getErrorTitle(), "Database Connection Error", JOptionPane.ERROR_MESSAGE);
                 } else if (serverManager.isConnectionDone()) {
                     
                     m_serverURLTextField.setText(serverManager.getServerURL()); // could have been automaticaly changed

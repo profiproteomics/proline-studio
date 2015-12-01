@@ -16,7 +16,6 @@ import fr.proline.studio.comparedata.ExtraDataType;
 import fr.proline.studio.filter.ConvertValueInterface;
 import fr.proline.studio.filter.DoubleFilter;
 import fr.proline.studio.filter.Filter;
-import fr.proline.studio.filter.IntegerFilter;
 import fr.proline.studio.filter.StringFilter;
 import fr.proline.studio.filter.ValueFilter;
 import fr.proline.studio.graphics.PlotInformation;
@@ -33,7 +32,7 @@ import fr.proline.studio.table.renderer.DefaultRightAlignRenderer;
 import fr.proline.studio.utils.IconManager;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -76,9 +75,12 @@ public class PtmProtenSiteTableModel extends LazyTableModel implements GlobalTab
     
     private String m_modelName;
     
-
+    private String m_modificationInfo = "";
+    
     public PtmProtenSiteTableModel(LazyTable table) {
         super(table);
+        
+
     }
 
     
@@ -345,8 +347,11 @@ public class PtmProtenSiteTableModel extends LazyTableModel implements GlobalTab
 
     }
     
+    public String getModificationsInfo() {
+        return m_modificationInfo;
+    }
     
-    private void calculateData() {
+    public void calculateData() {
         
         // List of different modifications and residues
         TreeSet<String> modificationTreeSet = new TreeSet<>();
@@ -378,10 +383,33 @@ public class PtmProtenSiteTableModel extends LazyTableModel implements GlobalTab
         
         
         // Count for each type of modification, the number of modifications
-        /* JPM.TODO int rowCount = getRowCount();
+        HashMap<String, Integer> globalDistinctModificationsMap = groupProteinMatch();
+        
+        StringBuilder sb = new StringBuilder();
+        Iterator<String> it = globalDistinctModificationsMap.keySet().iterator();
+        while (it.hasNext()) {
+            String modification = it.next();
+            Integer nbModifications = globalDistinctModificationsMap.get(modification);
+            sb.append(modification).append(":").append(nbModifications);
+            if (it.hasNext()) {
+                sb.append("   ");
+            }
+        }
+        
+        m_modificationInfo = sb.toString();
+        
+    }
+
+    private HashMap<String, Integer> groupProteinMatch() {
+        
+        HashMap<String, Integer> globalDistinctModificationsMap = new HashMap<>();
+        
+        // group all the same protein Match
+        
+        int rowCount = getRowCount();
         int start = 0;
         DProteinMatch proteinMatchPrev = null;
-        for (int i=0;i<rowCount;i++) {
+        for (int i = 0; i < rowCount; i++) {
             DProteinPTMSite proteinPTMSite = m_proteinPTMSiteArray.get(i);
             DProteinMatch proteinMatch = proteinPTMSite.getPoteinMatch();
             if (proteinMatchPrev == null) {
@@ -390,18 +418,77 @@ public class PtmProtenSiteTableModel extends LazyTableModel implements GlobalTab
             } else if (proteinMatchPrev == proteinMatch) {
                 continue;
             } else {
-                int stop = i-1;
-                manageProteinMatchCalculation(proteinMatchPrev, start, stop);
-                
+                int stop = i - 1;
+                groupPeptideMatch(globalDistinctModificationsMap, proteinMatchPrev, start, stop);
+
                 proteinMatchPrev = proteinMatch;
                 start = i;
             }
         }
-        int stop = rowCount-1;
-        if (stop>=start) {
-            manageProteinMatchCalculation(proteinMatchPrev, start, stop);
-        }*/
+        int stop = rowCount - 1;
+        if (stop >= start) {
+            groupPeptideMatch(globalDistinctModificationsMap, proteinMatchPrev, start, stop);
+        }
         
+        return globalDistinctModificationsMap;
+    }
+    
+    private void groupPeptideMatch(HashMap<String, Integer> globalDistinctModificationsMap, DProteinMatch proteinMatch, int i1, int i2) {
+        
+        // group all the same peptide match and create a map for each with modifications
+        HashMap<DPeptideMatch, HashMap<String, String>> peptideMatchMap = new HashMap<>();
+        HashMap<String, String> distinctModificationsMap = new HashMap<>();
+        
+        int start = i1;
+        DPeptideMatch peptideMatchPrev = null;
+        for (int i = i1; i <= i2; i++) {
+            DProteinPTMSite proteinPTMSite = m_proteinPTMSiteArray.get(i);
+            DPeptideMatch peptideMatch = proteinPTMSite.getPeptideMatch();
+            
+            if (peptideMatchPrev == null) {
+                peptideMatchPrev = peptideMatch;
+                continue;
+            } else if (peptideMatchPrev == peptideMatch) {
+                continue;
+            } else {
+                int stop = i - 1;
+                peptideMatchFound(peptideMatchMap, distinctModificationsMap, peptideMatchPrev, start, stop);
+
+                peptideMatchPrev = peptideMatch;
+                start = i;
+            }
+            
+        }
+        
+        int stop = i2;
+        if (stop >= start) {
+            peptideMatchFound(peptideMatchMap, distinctModificationsMap, peptideMatchPrev, start, stop);
+        }
+        
+        Iterator<String> it = distinctModificationsMap.values().iterator();
+        while (it.hasNext()) {
+            String modification = it.next();
+            Integer nb = globalDistinctModificationsMap.get(modification);
+            if (nb == null) {
+                globalDistinctModificationsMap.put(modification, 1);
+            } else {
+                globalDistinctModificationsMap.put(modification, nb+1);
+            }
+        }
+        
+
+    }
+    
+    private void peptideMatchFound(HashMap<DPeptideMatch, HashMap<String, String>> peptideMatchMap, HashMap<String, String> distinctModificationsMap, DPeptideMatch peptideMatch, int i1, int i2) {
+        HashMap<String, String> modificiationMap = new HashMap<>();
+        peptideMatchMap.put(peptideMatch, modificiationMap);
+        for (int i = i1; i <= i2; i++) {
+            String proteinLoc = (String) getValueAt(i, COLTYPE_PROTEIN_LOC);
+            String modification = (String) getValueAt(i, COLTYPE_MODIFICATION);
+            String modificationKey = modification+proteinLoc;
+            modificiationMap.put(modificationKey, modification);
+            distinctModificationsMap.put(modificationKey, modification);
+        }
     }
     
     private void manageProteinMatchCalculation(DProteinMatch proteinMatch, int start, int stop) {

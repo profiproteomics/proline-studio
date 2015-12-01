@@ -40,12 +40,15 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
 import javax.swing.ImageIcon;
+import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTextField;
 import javax.swing.JToolBar;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
@@ -61,6 +64,8 @@ public class PTMProteinSitePanel extends HourglassPanel implements DataBoxPanelI
     
     private JScrollPane m_ptmProteinSiteScrollPane;
     private PTMProteinSiteTable m_ptmProteinSiteTable;
+    
+    private JTextField m_countModificationTextField;
 
     private MarkerContainerPanel m_markerContainerPanel;
 
@@ -81,7 +86,9 @@ public class PTMProteinSitePanel extends HourglassPanel implements DataBoxPanelI
 
     public void setData(Long taskId, ArrayList<DProteinPTMSite> proteinPTMSiteArray, boolean finished) {
 
-        ((PtmProtenSiteTableModel) ((CompoundTableModel)m_ptmProteinSiteTable.getModel()).getBaseModel()).setData(taskId, proteinPTMSiteArray);
+        PtmProtenSiteTableModel model = ((PtmProtenSiteTableModel) ((CompoundTableModel)m_ptmProteinSiteTable.getModel()).getBaseModel());
+        
+        model.setData(taskId, proteinPTMSiteArray);
 
         // select the first row
         if ((proteinPTMSiteArray != null) && (proteinPTMSiteArray.size() > 0)) {
@@ -90,6 +97,10 @@ public class PTMProteinSitePanel extends HourglassPanel implements DataBoxPanelI
 
         }
         
+        
+        m_countModificationTextField.setText(model.getModificationsInfo());
+        
+        
         if (finished) {
             m_ptmProteinSiteTable.setSortable(true);
         }
@@ -97,6 +108,9 @@ public class PTMProteinSitePanel extends HourglassPanel implements DataBoxPanelI
 
     public void dataUpdated(SubTask subTask, boolean finished) {
         m_ptmProteinSiteTable.dataUpdated(subTask, finished);
+        
+        PtmProtenSiteTableModel model = ((PtmProtenSiteTableModel) ((CompoundTableModel)m_ptmProteinSiteTable.getModel()).getBaseModel());
+        m_countModificationTextField.setText(model.getModificationsInfo());
     }
 
 
@@ -345,14 +359,29 @@ public class PTMProteinSitePanel extends HourglassPanel implements DataBoxPanelI
         m_ptmProteinSiteScrollPane.setViewportView(m_ptmProteinSiteTable);
         m_ptmProteinSiteTable.setFillsViewportHeight(true);
         m_ptmProteinSiteTable.setViewport(m_ptmProteinSiteScrollPane.getViewport());
-       
+
+        
+        m_countModificationTextField = new JTextField();
+        m_countModificationTextField.setEditable(false);
 
         c.gridx = 0;
         c.gridy = 0;
         c.weightx = 1;
         c.weighty = 1;
-        c.gridwidth = 3;
+        c.gridwidth = 2;
         internalPanel.add(m_markerContainerPanel, c);
+        
+        
+        c.gridy++;
+        c.weightx = 0;
+        c.weighty = 0;
+        c.gridwidth = 1;
+        internalPanel.add(new JLabel("Non Redundant Modifications : "), c);
+        
+        
+        c.gridx++;
+        c.weightx = 1;
+        internalPanel.add(m_countModificationTextField, c);
         
 
         
@@ -368,6 +397,25 @@ public class PTMProteinSitePanel extends HourglassPanel implements DataBoxPanelI
         public PTMProteinSiteTable() {
             super(m_ptmProteinSiteScrollPane.getVerticalScrollBar() );
 
+        }
+        
+        @Override
+        public void tableChanged(TableModelEvent e) {
+            super.tableChanged(e);
+            
+            try {
+            
+            if ((m_ptmProteinSiteTable != null) && (m_countModificationTextField != null)) {
+                PtmProtenSiteTableModel model = ((PtmProtenSiteTableModel) ((CompoundTableModel)m_ptmProteinSiteTable.getModel()).getBaseModel());
+                if (model != null) {
+                   model.calculateData();
+                   m_countModificationTextField.setText(model.getModificationsInfo()); 
+                }
+            }
+            
+            } catch (Exception e2) {
+                e2.printStackTrace();
+            }
         }
         
         @Override

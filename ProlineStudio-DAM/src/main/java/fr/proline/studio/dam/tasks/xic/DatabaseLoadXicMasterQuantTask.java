@@ -513,6 +513,8 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                 ResultSummary rsm = entityManagerMSI.find(ResultSummary.class, resultSummaryId);
                 dataset.setResultSummaryId(resultSummaryId);
                 dataset.setResultSummary(rsm);
+                dataset.setResultSet(rsm.getResultSet());
+                dataset.setResultSetId(rsm.getResultSet().getId());
 
             }
             dataset.setMasterQuantitationChannels(masterQuantitationChannels);

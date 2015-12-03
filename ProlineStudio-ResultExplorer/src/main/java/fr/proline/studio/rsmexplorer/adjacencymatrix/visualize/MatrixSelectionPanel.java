@@ -173,7 +173,7 @@ public class MatrixSelectionPanel extends HourglassPanel implements DataBoxPanel
             int nbProteins = proteinSet.size();
             for (int i=0;i<nbProteins;i++) {
                 LightProteinMatch pm = proteinSet.get(i);
-                if (((StringFilter) filter).filter((String)pm.getAccession())) {
+                if (((StringFilter) filter).filter((String)pm.getAccession(), null)) {
                     return true;
                 }
             }
@@ -183,7 +183,7 @@ public class MatrixSelectionPanel extends HourglassPanel implements DataBoxPanel
             int nbPeptides = peptideSet.size();
             for (int i=0;i<nbPeptides;i++) {
                 LightPeptideMatch pm = peptideSet.get(i);
-                if (((StringFilter) filter).filter((String)pm.getSequence())) {
+                if (((StringFilter) filter).filter((String)pm.getSequence(), null)) {
                     return true;
                 }
             }

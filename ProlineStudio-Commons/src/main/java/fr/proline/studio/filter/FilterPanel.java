@@ -116,6 +116,8 @@ public class FilterPanel extends JPanel {
 
                 c.weightx = 0;
                 c.gridwidth = 1;
+                c.weighty = 0;
+                c.fill = GridBagConstraints.HORIZONTAL;
                 c.gridx++;
                 JButton removeButton = new JButton(IconManager.getIcon(IconManager.IconType.CROSS_SMALL7));
                 removeButton.setMargin(new java.awt.Insets(2, 2, 2, 2));

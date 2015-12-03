@@ -18,7 +18,7 @@ public class IntegerFilter extends Filter {
     private Integer m_max;
 
     public IntegerFilter(String variableName, ConvertValueInterface convertValueInterface, int modelColumn) {
-        super(FilterType.FILTER_INTEGER, variableName, convertValueInterface, modelColumn);
+        super(variableName, convertValueInterface, modelColumn);
     }
 
     @Override
@@ -30,7 +30,11 @@ public class IntegerFilter extends Filter {
         return clone;
     }
     
-    public boolean filter(int value) {
+    @Override
+    public boolean filter(Object v1, Object v2) {
+        
+        int value = (Integer) v1;
+        
         if (m_min != null) {
             if (value < m_min.intValue()) {
                 return false;

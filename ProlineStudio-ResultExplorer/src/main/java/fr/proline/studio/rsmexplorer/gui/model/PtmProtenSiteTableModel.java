@@ -18,6 +18,7 @@ import fr.proline.studio.filter.DoubleFilter;
 import fr.proline.studio.filter.Filter;
 import fr.proline.studio.filter.StringFilter;
 import fr.proline.studio.filter.ValueFilter;
+import fr.proline.studio.filter.ValueListAssociatedStringFilter;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
 import fr.proline.studio.rsmexplorer.gui.renderer.DoubleRenderer;
@@ -686,8 +687,10 @@ public class PtmProtenSiteTableModel extends LazyTableModel implements GlobalTab
             }
 
         };
-        filtersMap.put(COLTYPE_MODIFICATION, new ValueFilter(getColumnName(COLTYPE_MODIFICATION), m_modificationsArray, null, ValueFilter.ValueFilterType.EQUAL, modificationConverter, COLTYPE_MODIFICATION));
+        //filtersMap.put(COLTYPE_MODIFICATION, new ValueFilter(getColumnName(COLTYPE_MODIFICATION), m_modificationsArray, null, ValueFilter.ValueFilterType.EQUAL, modificationConverter, COLTYPE_MODIFICATION));
 
+        filtersMap.put(COLTYPE_MODIFICATION, new ValueListAssociatedStringFilter(getColumnName(COLTYPE_MODIFICATION), m_modificationsArray, modificationConverter, COLTYPE_MODIFICATION, COLTYPE_RESIDUE_AA));
+        
         ConvertValueInterface residueConverter = new ConvertValueInterface() {
             @Override
             public Object convertValue(Object o) {

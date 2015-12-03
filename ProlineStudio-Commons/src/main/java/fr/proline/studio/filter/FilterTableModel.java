@@ -214,41 +214,27 @@ public class FilterTableModel extends DecoratedTableModel implements FilterTable
         if ((filter == null) || (!filter.isUsed())) {
             return true;
         }
-        return filter(filter, row, col);
+        
+        int extraCol = filter.getExtraModelColumn();
+        
+        return filter(filter, row, col, extraCol);
     }
-    private boolean filter(Filter filter, int row, int col) {
-        Object data = getValueAt(row, col);
-        data = filter.convertValue(data);
+    private boolean filter(Filter filter, int row, int col1, int col2) {
+        Object data1 = getValueAt(row, col1);
+        data1 = filter.convertValue(data1);
 
-        if (data == null) {
+        if (data1 == null) {
             return false;
         }
-
-        switch (filter.getFilterType()) {
-            case FILTER_STRING: {
-                return ((StringFilter) filter).filter((String)data);
-            }
-            case FILTER_INTEGER: {
-                return ((IntegerFilter) filter).filter((Integer)data);
-            }
-            case FILTER_DOUBLE: {
-                return ((DoubleFilter) filter).filter(((Number)data).doubleValue());
-            }
-            case FILTER_STRING_DIFF: {
-                return ((StringDiffFilter) filter).filter((String)data);
-            }
-            case FILTER_VALUE: {
-                return ((ValueFilter) filter).filter((Integer)data);
-            }
-            case FILTER_BOOLEAN: {
-                return ((BooleanFilter) filter).filter((Boolean)data);
-            }
-            case FILTER_LONG: {
-                return ((LongFilter) filter).filter((Long)data);
-            }
-        }
         
-        return true; // should never happen
+        Object data2 = null;
+        if (col2 != -1) {
+            data2 = getValueAt(row, col2);
+
+        }
+
+        return filter.filter(data1, data2);
+
     }
 
     @Override
@@ -429,7 +415,7 @@ public class FilterTableModel extends DecoratedTableModel implements FilterTable
                 }
                 
                 int col = filter.getModelColumn();
-                boolean found = filter(filter, searchRow, col);
+                boolean found = filter(filter, searchRow, col, -1);
                 if (found) {
                     m_searchIds.add(searchRow);
                 }

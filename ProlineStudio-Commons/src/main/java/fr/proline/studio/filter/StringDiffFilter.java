@@ -23,7 +23,7 @@ public class StringDiffFilter extends Filter {
     
     
     public StringDiffFilter(String variableName, ConvertValueInterface convertValueInterface, int modelColumn) {
-        super(FilterType.FILTER_STRING_DIFF, variableName, convertValueInterface, modelColumn);
+        super(variableName, convertValueInterface, modelColumn);
     }
 
     @Override
@@ -36,10 +36,13 @@ public class StringDiffFilter extends Filter {
         return clone;
     }
     
-    public boolean filter(String value) {
+    @Override
+    public boolean filter(Object v1, Object v2) {
         if (m_filterText == null) {
             return true;
         }
+        
+        String value = (String) v1;
 
         Matcher matcher = m_searchPattern.matcher(value);
         boolean found = matcher.matches();

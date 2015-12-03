@@ -19,7 +19,7 @@ public class StringFilter extends Filter {
     private Pattern m_searchPattern;
 
     public StringFilter(String variableName, ConvertValueInterface convertValueInterface, int modelColumn) {
-        super(FilterType.FILTER_STRING, variableName, convertValueInterface, modelColumn);
+        super(variableName, convertValueInterface, modelColumn);
     }
 
     @Override
@@ -31,11 +31,14 @@ public class StringFilter extends Filter {
         return clone;
     }
     
-    public boolean filter(String value) {
+    @Override
+    public boolean filter(Object v1, Object v2) {
         if (m_filterText == null) {
             return true;
         }
 
+        String value = (String) v1;
+        
         Matcher matcher = m_searchPattern.matcher(value);
 
         return matcher.matches();
@@ -127,7 +130,7 @@ public class StringFilter extends Filter {
             vTextField = new JTextField(8);
             vTextField.setToolTipText("<html>Search is based on wildcards:<br>  '*' : can replace all characters<br>  '?' : can replace one character<br><br>Use 'FOO*' to search a string starting with FOO. </html>");
             if (m_filterText != null) {
-                vTextField.setText(m_filterText.toString());
+                vTextField.setText(m_filterText);
             }
             registerComponent(SEARCH_TEXT, vTextField);
         }

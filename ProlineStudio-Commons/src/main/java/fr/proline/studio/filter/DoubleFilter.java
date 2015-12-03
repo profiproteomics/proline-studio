@@ -19,7 +19,7 @@ public class DoubleFilter extends Filter {
     private Double m_max;
 
     public DoubleFilter(String variableName, ConvertValueInterface convertValueInterface, int modelColumn) {
-        super(FilterType.FILTER_DOUBLE ,variableName, convertValueInterface, modelColumn);
+        super(variableName, convertValueInterface, modelColumn);
 
         m_valueKeys = new ArrayList<>(2);
         m_valueKeys.add(VALUE_MIN);
@@ -118,7 +118,10 @@ public class DoubleFilter extends Filter {
         return hasChanged;
     }
 
-    public boolean filter(double value) {
+    @Override
+    public boolean filter(Object v1, Object v2) {
+        
+        double value = ((Number) v1).doubleValue();
         
         if (value != value) { // NaN
             return false;

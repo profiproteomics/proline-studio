@@ -13,15 +13,7 @@ import javax.swing.JPanel;
  */
 public abstract class Filter {
 
-    public enum FilterType {
-        FILTER_INTEGER,
-        FILTER_STRING,
-        FILTER_STRING_DIFF,
-        FILTER_VALUE,
-        FILTER_DOUBLE, 
-        FILTER_BOOLEAN,
-        FILTER_LONG
-    }
+
     
     protected ArrayList<Integer> m_valueKeys = null;
     protected HashMap<Integer, Component> m_components = null;
@@ -29,19 +21,26 @@ public abstract class Filter {
     protected String m_variableName;
     protected boolean m_used;
     protected boolean m_defined;
-    
-    protected final FilterType m_type;
+
     
     protected final int m_modelColumn;
     
+    protected final int m_extraModelColumn;
+    
     protected final ConvertValueInterface m_convertValueInterface;
     
-    public Filter(FilterType type, String variableName, ConvertValueInterface convertValueInterface, int modelColumn) {
-        m_type = type;
+    
+    public Filter(String variableName, ConvertValueInterface convertValueInterface, int modelColumn) {
+        this(variableName, convertValueInterface, modelColumn, -1);
+    }
+    public Filter(String variableName, ConvertValueInterface convertValueInterface, int modelColumn, int extraModelColumn) {
         m_variableName = variableName;
         m_convertValueInterface = convertValueInterface;
         m_modelColumn = modelColumn;
+        m_extraModelColumn = extraModelColumn;
     }
+    
+    public abstract boolean filter(Object v1, Object v2);
     
     public abstract Filter cloneFilter();
     public void setValuesForClone(Filter clone) {
@@ -55,6 +54,10 @@ public abstract class Filter {
         return m_modelColumn;
     }
     
+    public int getExtraModelColumn() {
+        return m_extraModelColumn;
+    }
+    
     public Object convertValue(Object o) {
         if (o instanceof LazyData) {
             o = ((LazyData) o).getData();
@@ -65,10 +68,7 @@ public abstract class Filter {
         }
         return m_convertValueInterface.convertValue(o);
     }
-    
-    public FilterType getFilterType() {
-        return m_type;
-    }
+
     
     public abstract FilterStatus checkValues();
     

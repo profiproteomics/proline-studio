@@ -21,7 +21,7 @@ public class BooleanFilter extends Filter{
     private Boolean m_bValue = null;
     
     public BooleanFilter(String variableName, ConvertValueInterface convertValueInterface, int modelColumn) {
-        super(FilterType.FILTER_BOOLEAN, variableName, convertValueInterface, modelColumn);
+        super(variableName, convertValueInterface, modelColumn);
     }
     
     @Override
@@ -89,7 +89,11 @@ public class BooleanFilter extends Filter{
         m_bValue = null;
     }
     
-    public boolean filter(Boolean value) {
+    @Override
+    public boolean filter(Object v1, Object v2) {
+        
+        Boolean value = (Boolean) v1;
+        
         if (m_bValue != null &&  value != null){
             return m_bValue.equals(value);
         }

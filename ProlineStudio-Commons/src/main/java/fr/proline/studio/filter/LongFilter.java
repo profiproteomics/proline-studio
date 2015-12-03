@@ -17,7 +17,7 @@ public class LongFilter extends Filter {
     private Long m_max;
 
     public LongFilter(String variableName, ConvertValueInterface convertValueInterface, int modelColumn) {
-        super(FilterType.FILTER_LONG, variableName, convertValueInterface, modelColumn);
+        super(variableName, convertValueInterface, modelColumn);
     }
 
     @Override
@@ -29,7 +29,11 @@ public class LongFilter extends Filter {
         return clone;
     }
     
-    public boolean filter(long value) {
+    @Override
+    public boolean filter(Object v1, Object v2) {
+        
+        long value = (Long) v1;
+        
         if (m_min != null) {
             if (value < m_min.longValue()) {
                 return false;

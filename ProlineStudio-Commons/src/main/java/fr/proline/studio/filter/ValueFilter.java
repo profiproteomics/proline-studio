@@ -31,7 +31,7 @@ public class ValueFilter extends Filter {
     }
     
     public ValueFilter(String variableName, Object[] values, ImageIcon[] displayIcons, ValueFilterType type, ConvertValueInterface convertValueInterface, int modelColumn) {
-        super(FilterType.FILTER_VALUE, variableName, convertValueInterface, modelColumn);
+        super(variableName, convertValueInterface, modelColumn);
         
         m_values = values;
         m_displayIcons = displayIcons;
@@ -47,7 +47,10 @@ public class ValueFilter extends Filter {
     }
     
 
-    public boolean filter(int index) {
+    @Override
+    public boolean filter(Object v1, Object v2) {
+        
+        int index = (Integer) v1;
 
         if (m_type == ValueFilterType.GREATER_EQUAL) {
             return index >= m_index;

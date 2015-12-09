@@ -1,13 +1,17 @@
 package fr.proline.studio.rsmexplorer.gui;
 
+import fr.proline.core.orm.msi.ResultSet;
+import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.uds.Project;
 import fr.proline.core.orm.uds.UserAccount;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.DatabaseDataManager;
 import fr.proline.studio.dam.data.AbstractData;
+import fr.proline.studio.dam.data.ClearProjectData;
 import fr.proline.studio.dam.data.ProjectIdentificationData;
 import fr.proline.studio.dam.data.ProjectQuantitationData;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
+import fr.proline.studio.dam.tasks.DatabaseClearProjectTask;
 import fr.proline.studio.dam.tasks.DatabaseProjectTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dpm.AccessServiceThread;
@@ -15,19 +19,31 @@ import fr.proline.studio.dpm.jms.AccessJMSManagerThread;
 import fr.proline.studio.dpm.task.AbstractServiceCallback;
 import fr.proline.studio.dpm.task.CreateProjectTask;
 import fr.proline.studio.dpm.task.jms.AbstractJMSCallback;
+import fr.proline.studio.dpm.task.jms.ClearProjectTask;
 import fr.proline.studio.dpm.task.util.JMSConnectionManager;
 import fr.proline.studio.gui.DefaultDialog;
+import fr.proline.studio.pattern.DataParameter;
+import fr.proline.studio.pattern.GroupParameter;
+import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
 import fr.proline.studio.rsmexplorer.PropertiesTopComponent;
 import fr.proline.studio.rsmexplorer.actions.ConnectAction;
 import fr.proline.studio.rsmexplorer.gui.dialog.AddProjectDialog;
+import fr.proline.studio.rsmexplorer.gui.dialog.ClearProjectDialog;
 import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
 import fr.proline.studio.rsmexplorer.tree.quantitation.QuantitationTree;
 import fr.proline.studio.utils.IconManager;
 import fr.proline.studio.utils.PropertiesProviderInterface;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 import java.util.prefs.Preferences;
 import javax.swing.*;
 import javax.swing.plaf.basic.BasicComboBoxRenderer;
@@ -35,6 +51,7 @@ import org.openide.nodes.Node;
 import org.openide.nodes.PropertySupport;
 import org.openide.nodes.Sheet;
 import org.openide.util.NbPreferences;
+import org.openide.windows.TopComponent;
 import org.openide.windows.WindowManager;
 import org.slf4j.LoggerFactory;
 
@@ -48,6 +65,7 @@ public class ProjectExplorerPanel extends JPanel {
     private JButton m_addProjectButton;
     private JButton m_editProjectButton;
     private JButton m_propertiesProjectButton;
+    private JButton m_clearProjectButton;
     private JComboBox<ProjectItem> m_projectsComboBox = null;
     private JScrollPane m_identificationTreeScrollPane = null;
     private JScrollPane m_quantitationTreeScrollPane = null;
@@ -78,7 +96,6 @@ public class ProjectExplorerPanel extends JPanel {
 
         m_quantitationTreeScrollPane = new JScrollPane();
         m_quantitationTreeScrollPane.getViewport().setBackground(Color.white);
-        
 
         // ---- Add Objects to panel
         c.gridx = 0;
@@ -90,7 +107,6 @@ public class ProjectExplorerPanel extends JPanel {
         c.weightx = 0;
         add(buttonsPanel, c);
 
-
         JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, m_identificationTreeScrollPane, m_quantitationTreeScrollPane);
         splitPane.setResizeWeight(0.5);
 
@@ -101,17 +117,17 @@ public class ProjectExplorerPanel extends JPanel {
         c.gridwidth = 2;
         add(splitPane, c);
 
-
     }
-    
+
     public Project getSelectedProject() {
-        
+
         ProjectItem pi = (ProjectItem) m_projectsComboBox.getSelectedItem();
-        
-        if(pi.m_projectIdentificationData ==null)
+
+        if (pi.m_projectIdentificationData == null) {
             return null;
-        else
+        } else {
             return pi.m_projectIdentificationData.getProject();
+        }
     }
 
     public void clearAll() {
@@ -119,9 +135,9 @@ public class ProjectExplorerPanel extends JPanel {
         ConnectAction.setConnectionType(true, true);
 
         m_projectsComboBox.removeAllItems();
-        
+
         m_identificationTreeScrollPane.setViewportView(null);
-        
+
         m_quantitationTreeScrollPane.setViewportView(null);
     }
 
@@ -144,11 +160,15 @@ public class ProjectExplorerPanel extends JPanel {
         m_editProjectButton.setToolTipText("Edit Project Name and Description");
         m_editProjectButton.setEnabled(false);
 
-
         m_addProjectButton = new JButton(IconManager.getIcon(IconManager.IconType.PLUS_SMALL_10X10));
         m_addProjectButton.setMargin(new java.awt.Insets(2, 2, 2, 2));
         m_addProjectButton.setToolTipText("Create a New Project");
         m_addProjectButton.setEnabled(false);
+
+        m_clearProjectButton = new JButton(IconManager.getIcon(IconManager.IconType.ERASER_SMALL11));
+        m_clearProjectButton.setMargin(new java.awt.Insets(2, 2, 2, 2));
+        m_clearProjectButton.setToolTipText("Clear Project (Search Result and Identification Summaries)...");
+        m_clearProjectButton.setEnabled(false);
 
         c.gridx = 0;
         c.gridy = 0;
@@ -161,7 +181,10 @@ public class ProjectExplorerPanel extends JPanel {
         c.gridx++;
         buttonsPanel.add(m_addProjectButton, c);
 
-        // Interractions
+        c.gridx++;
+        //buttonsPanel.add(m_clearProjectButton, c);
+
+        // Interactions
         m_addProjectButton.addActionListener(new ActionListener() {
 
             @Override
@@ -207,7 +230,7 @@ public class ProjectExplorerPanel extends JPanel {
                     m_projectsComboBox.setSelectedItem(projectItem);
 
                     boolean isJMSDefined = JMSConnectionManager.getJMSConnectionManager().isJMSDefined();
-                    if (isJMSDefined){
+                    if (isJMSDefined) {
                         AbstractJMSCallback callback = new AbstractJMSCallback() {
 
                             @Override
@@ -241,7 +264,7 @@ public class ProjectExplorerPanel extends JPanel {
 
                         fr.proline.studio.dpm.task.jms.CreateProjectTask task = new fr.proline.studio.dpm.task.jms.CreateProjectTask(callback, projectName, projectDescription, owner.getId(), projectIdentificationData, projectQuantitationData);
                         AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
-                    }else{
+                    } else {
                         AbstractServiceCallback callback = new AbstractServiceCallback() {
 
                             @Override
@@ -321,7 +344,7 @@ public class ProjectExplorerPanel extends JPanel {
                                 project.setName(projectName);
                                 project.setDescription(projectDescription);
                                 m_projectsComboBox.repaint();
-                            }else{
+                            } else {
                                 projectItem.setIsChanging(false);
                                 project.setName(oldName);
                                 m_projectsComboBox.repaint();
@@ -349,7 +372,6 @@ public class ProjectExplorerPanel extends JPanel {
 
                 String dialogName = "Properties : " + projectName;
 
-
                 final PropertiesTopComponent win = new PropertiesTopComponent(dialogName);
                 ProjectItem[] projectItemArray = new ProjectItem[1];
                 projectItemArray[0] = projectItem;
@@ -357,17 +379,155 @@ public class ProjectExplorerPanel extends JPanel {
                 win.open();
                 win.requestActive();
 
+            }
+        });
+
+        m_clearProjectButton.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                ProjectItem projectItem = (ProjectItem) m_projectsComboBox.getSelectedItem();
+                ProjectIdentificationData projectData = projectItem.getProjectIdentificationData();
+                final Project project = projectData.getProject();
+                List<ClearProjectData> data = new ArrayList();
+                List<ClearProjectData> openedData = ProjectExplorerPanel.getOpenedData(project.getId());
+                AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
+
+                    @Override
+                    public boolean mustBeCalledInAWT() {
+                        return true;
+                    }
+
+                    @Override
+                    public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
+                        openClearProjectDialog(project, data);
+                    }
+                };
+                DatabaseClearProjectTask task = new DatabaseClearProjectTask(callback);
+                task.initLoadDataToClearProject(project, data, openedData);
+                AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
 
             }
         });
 
-
-
         return buttonsPanel;
     }
-
-
     
+    /**
+     * returns the list of rs/rsm opened in the application for a given project
+     * @param projectId
+     * @return 
+     */
+    public static  List<ClearProjectData> getOpenedData(long projectId) {
+        List<ClearProjectData> openedData = new ArrayList();
+        // remove data which are opened in windows
+        Set<TopComponent> tcs = TopComponent.getRegistry().getOpened();
+        Iterator<TopComponent> itTop = tcs.iterator();
+        while (itTop.hasNext()) {
+            TopComponent topComponent = itTop.next();
+            if (topComponent instanceof DataBoxViewerTopComponent) {
+                long pId = ((DataBoxViewerTopComponent) topComponent).getProjectId();
+                if (pId == projectId) {
+                    HashSet<GroupParameter> inParam = ((DataBoxViewerTopComponent) topComponent).getInParameters();
+                    inParam.stream().forEach((inp) -> {
+                        ArrayList<DataParameter> listP = inp.getParameterList();
+                        for (DataParameter dataParam : listP) {
+                            if (dataParam.equalsData(ResultSummary.class)) {
+                                ResultSummary rsm = (ResultSummary) ((DataBoxViewerTopComponent) topComponent).getData(false, ResultSummary.class);
+                                openedData.add(new ClearProjectData(projectId, rsm));
+                                openedData.add(new ClearProjectData(projectId, rsm.getResultSet()));
+                            } else if (dataParam.equalsData(ResultSet.class)) {
+                                ResultSet rs = (ResultSet) ((DataBoxViewerTopComponent) topComponent).getData(false, ResultSet.class);
+                                openedData.add(new ClearProjectData(projectId, rs));
+                            }
+                        }
+                    });
+                    ArrayList<GroupParameter> outParam = ((DataBoxViewerTopComponent) topComponent).getOutParameters();
+                    outParam.stream().forEach((outp) -> {
+                        ArrayList<DataParameter> listP = outp.getParameterList();
+                        for (DataParameter dataParam : listP) {
+                            if (dataParam.equalsData(ResultSummary.class)) {
+                                ResultSummary rsm = (ResultSummary) ((DataBoxViewerTopComponent) topComponent).getData(false, ResultSummary.class);
+                                openedData.add(new ClearProjectData(projectId, rsm));
+                                openedData.add(new ClearProjectData(projectId, rsm.getResultSet()));
+                            } else if (dataParam.equalsData(ResultSet.class)) {
+                                ResultSet rs = (ResultSet) ((DataBoxViewerTopComponent) topComponent).getData(false, ResultSet.class);
+                                openedData.add(new ClearProjectData(projectId, rs));
+                            }
+                        }
+                    });
+                }
+            }
+        }
+        return openedData;
+    }
+
+    public void openClearProjectDialog(Project project, java.util.List<ClearProjectData> data) {
+                 
+        ClearProjectDialog clearProjectDialog = new ClearProjectDialog(WindowManager.getDefault().getMainWindow(), project, data);
+        int x = (int) m_clearProjectButton.getLocationOnScreen().getX() + m_clearProjectButton.getWidth();
+        int y = (int) m_clearProjectButton.getLocationOnScreen().getY() + m_clearProjectButton.getHeight();
+        clearProjectDialog.setLocation(x, y);
+
+        DefaultDialog.ProgressTask task = new DefaultDialog.ProgressTask() {
+            @Override
+            public int getMinValue() {
+                return 0;
+            }
+
+            @Override
+            public int getMaxValue() {
+                return 100;
+            }
+
+            @Override
+            protected Object doInBackground() throws Exception {
+
+                if ((clearProjectDialog.canModifyValues())) {
+                    java.util.List<ClearProjectData> dataToClear = clearProjectDialog.getSelectedData();
+
+                    java.util.List<Long> rsmIds = new ArrayList();
+                    java.util.List<Long> rsIds = new ArrayList();
+                    dataToClear.stream().forEach((d) -> {
+                        if (d.isResultSet()) {
+                            rsIds.add(d.getResultSet().getId());
+                        } else if (d.isResultSummary()) {
+                            rsmIds.add(d.getResultSummary().getId());
+                        }
+                    });
+
+                    boolean isJMSDefined = JMSConnectionManager.getJMSConnectionManager().isJMSDefined();
+                    if (isJMSDefined) {
+                        AbstractJMSCallback clearCallBack = new AbstractJMSCallback() {
+
+                            @Override
+                            public boolean mustBeCalledInAWT() {
+                                return true;
+                            }
+
+                            @Override
+                            public void run(boolean success) {
+                                setProgress(100);
+                            }
+
+                        };
+                        ClearProjectTask clearTaskDb = new ClearProjectTask(clearCallBack, project.getId(), rsmIds, rsIds);
+                        AccessJMSManagerThread.getAccessJMSManagerThread().addTask(clearTaskDb);
+                    }else{
+                        setProgress(100);
+                    }
+                }
+                return null;
+            }
+        };
+
+        clearProjectDialog.setTask(task);
+        clearProjectDialog.setVisible(true);
+
+    }
+    
+    
+
     public void startLoadingProjects() {
 
         ConnectAction.setConnectionType(true, false);
@@ -406,7 +566,6 @@ public class ProjectExplorerPanel extends JPanel {
 
                         m_addProjectButton.setEnabled(true);
 
-
                         m_projectsComboBox.addActionListener(new ActionListener() {
 
                             @Override
@@ -417,14 +576,15 @@ public class ProjectExplorerPanel extends JPanel {
                                 if ((item != null) && (item.getProjectIdentificationData() != null) && (!item.isChanging())) {
                                     m_editProjectButton.setEnabled(true);
                                     m_propertiesProjectButton.setEnabled(true);
+                                    m_clearProjectButton.setEnabled(true);
 
                                     Preferences preferences = NbPreferences.root();
                                     preferences.put("DefaultSelectedProject", item.getProjectIdentificationData().getName());
                                 } else {
                                     m_editProjectButton.setEnabled(false);
                                     m_propertiesProjectButton.setEnabled(false);
+                                    m_clearProjectButton.setEnabled(false);
                                 }
-
 
                             }
                         });
@@ -447,7 +607,6 @@ public class ProjectExplorerPanel extends JPanel {
 
             }
         };
-
 
         DatabaseProjectTask task = new DatabaseProjectTask(callback);
         task.initLoadProject(DatabaseDataManager.getDatabaseDataManager().getLoggedUserName(), projectList);
@@ -529,7 +688,7 @@ public class ProjectExplorerPanel extends JPanel {
         public ProjectIdentificationData getProjectIdentificationData() {
             return m_projectIdentificationData;
         }
-        
+
         public ProjectQuantitationData getProjectQuantitationData() {
             return m_projectQuantitationData;
         }
@@ -559,7 +718,6 @@ public class ProjectExplorerPanel extends JPanel {
             try {
 
                 Sheet.Set propGroup = Sheet.createPropertiesSet();
-
 
                 Node.Property prop = new PropertySupport.Reflection<>(p, Long.class, "getId", null);
                 prop.setName("id");

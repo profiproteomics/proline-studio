@@ -431,5 +431,15 @@ public class CompoundTableModel extends AbstractTableModel implements GlobalTabl
     public Object getSingleValue(Class c) {
         return m_lastModel.getSingleValue(c);
     }
+    
+    @Override
+    public boolean isCellEditable(int rowIndex, int columnIndex) {
+        return m_lastModel.isCellEditable(rowIndex, columnIndex);
+    }
+    
+    @Override
+    public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+        m_lastModel.setValueAt(aValue, rowIndex, columnIndex);
+    }
 
 }

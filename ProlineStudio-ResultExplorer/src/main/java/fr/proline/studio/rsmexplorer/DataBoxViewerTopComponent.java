@@ -1,11 +1,13 @@
 package fr.proline.studio.rsmexplorer;
 
+import fr.proline.studio.pattern.GroupParameter;
 import fr.proline.studio.pattern.WindowBox;
 import fr.proline.studio.python.data.TableInfo;
 import java.awt.Graphics;
 import java.awt.GridLayout;
 import java.awt.Image;
 import java.util.ArrayList;
+import java.util.HashSet;
 import org.openide.windows.TopComponent;
 
 /**
@@ -75,5 +77,21 @@ public class DataBoxViewerTopComponent extends TopComponent {
     }
     private boolean firstPaint = true;
 
+    
+    public HashSet<GroupParameter> getInParameters(){
+        return m_windowBox.getEntryBox().getInParameters();
+    }
+    
+    public ArrayList<GroupParameter> getOutParameters(){
+        return m_windowBox.getEntryBox().getOutParameters();
+    }
+    
+    public Object getData(boolean getArray, Class parameterType){
+        return m_windowBox.getEntryBox().getData(getArray, parameterType);
+    }
+    
+    public long getProjectId(){
+        return m_windowBox.getEntryBox().getProjectId();
+    }
 
 }

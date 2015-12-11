@@ -2,6 +2,7 @@ package fr.proline.studio.dam.tasks;
 
 
 import fr.proline.core.orm.msi.PeptideInstance;
+import fr.proline.core.orm.msi.ResultSet;
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.core.orm.msi.dto.DProteinSet;
@@ -532,7 +533,14 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
             if (spectralCount>0) {
                 spectralCountMap.put(proteinMatchId, spectralCount);
             } else {
-                spectralCountMap.put(proteinMatchId, peptideMatchCount);
+
+                ResultSet.Type rsType = m_rsm.getResultSet().getType();
+                boolean mergedData = (rsType == ResultSet.Type.USER) || (rsType == ResultSet.Type.DECOY_USER); // Merge or Decoy Merge
+                if (!mergedData) {
+                    spectralCountMap.put(proteinMatchId, peptideMatchCount);
+                } else {
+                    spectralCountMap.put(proteinMatchId, -1);
+                }
             }
         }
 
@@ -590,7 +598,15 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
             if (specificSpectralCount>0) {
                 spectralCountMap.put(proteinMatchId, specificSpectralCount);
             } else {
-                spectralCountMap.put(proteinMatchId, peptideMatchCount);
+                
+                ResultSet.Type rsType = m_rsm.getResultSet().getType();
+                boolean mergedData = (rsType == ResultSet.Type.USER) || (rsType == ResultSet.Type.DECOY_USER); // Merge or Decoy Merge
+                if (!mergedData) {
+                    spectralCountMap.put(proteinMatchId, peptideMatchCount);
+                } else {
+                    spectralCountMap.put(proteinMatchId, -1);
+                }
+
             }
         }
 

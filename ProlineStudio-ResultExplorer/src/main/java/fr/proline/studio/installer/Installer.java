@@ -22,7 +22,7 @@ public class Installer extends VersionInstaller {
     @Override
     public void restored() {
 
-        String buildnumber = "1.2  Milestone 2 ("+moduleBuildDate+")"; //specify if alpha (or nothing = release)
+        String buildnumber = "1.2  Milestone 3 ("+moduleBuildDate+")"; //specify if alpha (or nothing = release)
         //String buildnumber = "1.1";
         
         // set the proline version for the application title

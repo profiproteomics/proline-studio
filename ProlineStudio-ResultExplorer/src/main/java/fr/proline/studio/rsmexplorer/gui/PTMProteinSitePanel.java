@@ -301,10 +301,11 @@ public class PTMProteinSitePanel extends HourglassPanel implements DataBoxPanelI
         m_ptmProteinSiteScrollPane = new JScrollPane();
         
         m_ptmProteinSiteTable = new PTMProteinSiteTable();
-        m_ptmProteinSiteTable.setModel(new CompoundTableModel(new PtmProtenSiteTableModel((LazyTable)m_ptmProteinSiteTable), true));
+        PtmProtenSiteTableModel model = new PtmProtenSiteTableModel((LazyTable)m_ptmProteinSiteTable);
+        m_ptmProteinSiteTable.setModel(new CompoundTableModel(model, true));
         // hide the id column
         m_ptmProteinSiteTable.getColumnExt(m_ptmProteinSiteTable.convertColumnIndexToView(PtmProtenSiteTableModel.COLTYPE_PROTEIN_ID)).setVisible(false);
-        
+        m_ptmProteinSiteTable.displayColumnAsPercentage(PtmProtenSiteTableModel.COLTYPE_PEPTIDE_SCORE);
         TableRowSorter<TableModel> sorter = new TableRowSorter<>(m_ptmProteinSiteTable.getModel());
         m_ptmProteinSiteTable.setRowSorter(sorter);
             
@@ -335,24 +336,11 @@ public class PTMProteinSitePanel extends HourglassPanel implements DataBoxPanelI
                 
         });
         
-        sorter.setComparator(PtmProtenSiteTableModel.COLTYPE_PROTEIN_LOC, new Comparator<String>() {
+        sorter.setComparator(PtmProtenSiteTableModel.COLTYPE_PROTEIN_LOC, new Comparator<Integer>() {
 
             @Override
-            public int compare(String s1, String s2) {
-                int pos1;
-                if (s1.isEmpty()) { // N-term or C-term Peptide
-                    pos1 = Integer.MAX_VALUE;
-                } else {
-                    pos1 = Integer.valueOf(s1);
-                }
-                int pos2;
-                if (s2.isEmpty()) { // N-term or C-term Peptide
-                    pos2 = Integer.MAX_VALUE;
-                } else {
-                    pos2 = Integer.valueOf(s2);
-                }
-
-                return pos2-pos1;
+            public int compare(Integer s1, Integer s2) {
+                return s1-s2;
             }
  
                 

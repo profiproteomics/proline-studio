@@ -231,7 +231,7 @@ public class PtmProteinSiteTableModelProcessing {
         HashMap<String, String> modificiationMap = new HashMap<>();
         peptideMatchMap.put(peptideMatch, modificiationMap);
         for (int i = i1; i <= i2; i++) {
-            String proteinLoc = (String) model.getValueAt(i, PtmProtenSiteTableModel.COLTYPE_PROTEIN_LOC);
+            Integer proteinLoc = (Integer) model.getValueAt(i, PtmProtenSiteTableModel.COLTYPE_PROTEIN_LOC);
             String modification = (String) model.getValueAt(i, PtmProtenSiteTableModel.COLTYPE_MODIFICATION);
             String modificationKey = modification + proteinLoc;
             modificiationMap.put(modificationKey, modification);

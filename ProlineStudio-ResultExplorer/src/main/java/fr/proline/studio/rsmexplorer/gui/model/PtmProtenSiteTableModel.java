@@ -16,12 +16,14 @@ import fr.proline.studio.comparedata.ExtraDataType;
 import fr.proline.studio.filter.ConvertValueInterface;
 import fr.proline.studio.filter.DoubleFilter;
 import fr.proline.studio.filter.Filter;
+import fr.proline.studio.filter.IntegerFilter;
 import fr.proline.studio.filter.StringFilter;
 import fr.proline.studio.filter.ValueFilter;
 import fr.proline.studio.filter.ValueListAssociatedStringFilter;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
 import fr.proline.studio.rsmexplorer.gui.renderer.DoubleRenderer;
+import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.PeptideRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.PercentageRenderer;
 import fr.proline.studio.table.GlobalTableModelInterface;
@@ -49,35 +51,37 @@ public class PtmProtenSiteTableModel extends LazyTableModel implements GlobalTab
     public static final int COLTYPE_PROTEIN_ID = 0;
     public static final int COLTYPE_PROTEIN_NAME = 1;
     public static final int COLTYPE_PEPTIDE_NAME = 2;
-    public static final int COLTYPE_PEPTIDE_PTM = 3;
-    public static final int COLTYPE_DELTA_MASS_PTM = 4;
-    public static final int COLTYPE_PTM_PROBA = 5;
-    public static final int COLTYPE_MODIFICATION = 6;
-    public static final int COLTYPE_RESIDUE_AA = 7;
-    public static final int COLTYPE_DELTA_MASS_MODIFICATION = 8;
-    public static final int COLTYPE_MODIFICATION_LOC = 9;
-    public static final int COLTYPE_PROTEIN_LOC = 10;
-    public static final int COLTYPE_MODIFICATION_PROBA = 11;
+    public static final int COLTYPE_PEPTIDE_SCORE = 3;
+    public static final int COLTYPE_PEPTIDE_PTM = 4;
+    public static final int COLTYPE_DELTA_MASS_PTM = 5;
+    public static final int COLTYPE_PTM_PROBA = 6;
+    public static final int COLTYPE_MODIFICATION = 7;
+    public static final int COLTYPE_RESIDUE_AA = 8;
+    public static final int COLTYPE_DELTA_MASS_MODIFICATION = 9;
+    public static final int COLTYPE_MODIFICATION_LOC = 10;
+    public static final int COLTYPE_PROTEIN_LOC = 11;
+    public static final int COLTYPE_PROTEIN_NTERM_CTERM = 12;
+    public static final int COLTYPE_MODIFICATION_PROBA = 13;
     
-    public static final int COLTYPE_HIDDEN_PROTEIN_PTM = 12; // hidden column, must be the last
+    public static final int COLTYPE_HIDDEN_PROTEIN_PTM = 14; // hidden column, must be the last
     
 
     
     
-    private static final String[] m_columnNames = {"Id", "Protein", "Peptide", "PTM", "PTM D.Mass", "PTM Probability", "Modification", "Residue", "Modification D.Mass", "Modification Loc.", "Protein Loc.", "Modification Probability"};
-    private static final String[] m_columnTooltips =  {"Protein Id", "Protein", "Peptide", "Full PTM", "PTM Delta Mass", "PTM Probability", "Modification", "Modification Residue", "Modification Delta Mass", "Modification Location", "Protein Location of the Modification", "Modification Probability"};
+    private static final String[] m_columnNames = {"Id", "Protein", "Peptide", "Score", "PTM", "PTM D.Mass", "PTM Probability", "Modification", "Residue", "Modification D.Mass", "Modification Loc.", "Protein Loc.", "Protein N/C-term", "Modification Probability"};
+    private static final String[] m_columnTooltips =  {"Protein Id", "Protein", "Peptide", "Score", "Full PTM", "PTM Delta Mass", "PTM Probability", "Modification", "Modification Residue", "Modification Delta Mass", "Modification Location", "Protein Location of the Modification", "Protein N/C-term", "Modification Probability"};
     
     
     private ArrayList<DProteinPTMSite> m_arrayInUse = null;
     private ArrayList<DProteinPTMSite> m_proteinPTMSiteArray = new ArrayList<>();
-    private ArrayList<DProteinPTMSite> m_proteinPTMSiteNoRedundantArray = new ArrayList<>();
-    private HashSet<DProteinPTMSite> m_proteinPTMSiteNoRedundantSet = new HashSet<>();
+    private final ArrayList<DProteinPTMSite> m_proteinPTMSiteNoRedundantArray = new ArrayList<>();
+    private final HashSet<DProteinPTMSite> m_proteinPTMSiteNoRedundantSet = new HashSet<>();
     
-    private ArrayList<String> m_modificationsArray = new ArrayList<>();
-    private HashMap<String, Integer> m_modificationsMap = new HashMap<>();
+    private final ArrayList<String> m_modificationsArray = new ArrayList<>();
+    private final HashMap<String, Integer> m_modificationsMap = new HashMap<>();
     
-    private ArrayList<Character> m_residuesArray = new ArrayList<>();
-    private HashMap<Character, Integer> m_residuesMap = new HashMap<>();
+    private final ArrayList<Character> m_residuesArray = new ArrayList<>();
+    private final HashMap<Character, Integer> m_residuesMap = new HashMap<>();
     
     private String m_modelName;
     
@@ -141,13 +145,17 @@ public class PtmProtenSiteTableModel extends LazyTableModel implements GlobalTab
             case COLTYPE_PEPTIDE_PTM:
             case COLTYPE_MODIFICATION:
             case COLTYPE_MODIFICATION_LOC:
-            case COLTYPE_PROTEIN_LOC:
+            case COLTYPE_PROTEIN_NTERM_CTERM:
                 return String.class;
+            case COLTYPE_PROTEIN_LOC:
+                return Integer.class;
             case COLTYPE_PTM_PROBA:
             case COLTYPE_MODIFICATION_PROBA:
             case COLTYPE_DELTA_MASS_PTM:
             case COLTYPE_DELTA_MASS_MODIFICATION:
                 return Double.class;
+            case COLTYPE_PEPTIDE_SCORE:
+                return Float.class;
             case COLTYPE_RESIDUE_AA:
                 return Character.class;
         }
@@ -201,6 +209,8 @@ public class PtmProtenSiteTableModel extends LazyTableModel implements GlobalTab
                 return proteinMatch.getAccession();
             case COLTYPE_PEPTIDE_NAME:
                 return peptideMatch;
+            case COLTYPE_PEPTIDE_SCORE:
+                return peptideMatch.getScore();
             case COLTYPE_PEPTIDE_PTM:
                 String ptm = "";
                 PeptideReadablePtmString ptmString = peptideMatch.getPeptide().getTransientData().getPeptideReadablePtmString();
@@ -224,17 +234,19 @@ public class PtmProtenSiteTableModel extends LazyTableModel implements GlobalTab
                 return String.valueOf((int) peptidePtm.getSeqPosition());
             }
             case COLTYPE_PROTEIN_LOC: {
-                
-                DInfoPTM infoPtm = DInfoPTM.getInfoPTMMap().get(peptidePtm.getIdPtmSpecificity());
-                String locationSpecitifcity = infoPtm.getLocationSpecificity();
-                if (locationSpecitifcity.contains("-term")) {
-                    return "";
-                }
-                
+
                 int start = peptideMatch.getSequenceMatch().getId().getStart();
                 int locationOnPeptide = (int) peptidePtm.getSeqPosition(); 
                 int proteinSite = start+locationOnPeptide-1;
-                return String.valueOf(proteinSite);
+                return proteinSite;
+            }
+            case COLTYPE_PROTEIN_NTERM_CTERM: {
+                DInfoPTM infoPtm = DInfoPTM.getInfoPTMMap().get(peptidePtm.getIdPtmSpecificity());
+                String locationSpecitifcity = infoPtm.getLocationSpecificity();
+                if (locationSpecitifcity.contains("-term")) {
+                    return locationSpecitifcity;
+                }
+                return "";
             }
             case COLTYPE_PTM_PROBA: {
                 
@@ -471,7 +483,7 @@ public class PtmProtenSiteTableModel extends LazyTableModel implements GlobalTab
             
         };
         filtersMap.put(COLTYPE_PEPTIDE_NAME, new StringFilter(getColumnName(COLTYPE_PEPTIDE_NAME), peptideConverter, COLTYPE_PEPTIDE_NAME));
-
+        filtersMap.put(COLTYPE_PEPTIDE_SCORE, new DoubleFilter(getColumnName(COLTYPE_PEPTIDE_SCORE), null, COLTYPE_PEPTIDE_SCORE));
         filtersMap.put(COLTYPE_PEPTIDE_PTM, new StringFilter(getColumnName(COLTYPE_PEPTIDE_PTM), null, COLTYPE_PEPTIDE_PTM));
         filtersMap.put(COLTYPE_DELTA_MASS_PTM, new DoubleFilter(getColumnName(COLTYPE_DELTA_MASS_PTM), null, COLTYPE_DELTA_MASS_PTM));
         filtersMap.put(COLTYPE_PTM_PROBA, new DoubleFilter(getColumnName(COLTYPE_PTM_PROBA), null, COLTYPE_PTM_PROBA));
@@ -509,7 +521,9 @@ public class PtmProtenSiteTableModel extends LazyTableModel implements GlobalTab
         filtersMap.put(COLTYPE_RESIDUE_AA, new ValueFilter(getColumnName(COLTYPE_RESIDUE_AA), m_residuesArray.toArray(new Character[m_residuesArray.size()]), null, ValueFilter.ValueFilterType.EQUAL, residueConverter, COLTYPE_RESIDUE_AA));
         filtersMap.put(COLTYPE_DELTA_MASS_MODIFICATION, new DoubleFilter(getColumnName(COLTYPE_DELTA_MASS_MODIFICATION), null, COLTYPE_DELTA_MASS_MODIFICATION));
         filtersMap.put(COLTYPE_MODIFICATION_LOC, new StringFilter(getColumnName(COLTYPE_MODIFICATION_LOC), null, COLTYPE_MODIFICATION_LOC));
-        filtersMap.put(COLTYPE_PROTEIN_LOC, new StringFilter(getColumnName(COLTYPE_PROTEIN_LOC), null, COLTYPE_PROTEIN_LOC));
+        filtersMap.put(COLTYPE_PROTEIN_LOC, new IntegerFilter(getColumnName(COLTYPE_PROTEIN_LOC), null, COLTYPE_PROTEIN_LOC));
+        filtersMap.put(COLTYPE_PROTEIN_NTERM_CTERM, new StringFilter(getColumnName(COLTYPE_PROTEIN_NTERM_CTERM), null, COLTYPE_PROTEIN_NTERM_CTERM));
+
         filtersMap.put(COLTYPE_MODIFICATION_PROBA, new DoubleFilter(getColumnName(COLTYPE_MODIFICATION_PROBA), null, COLTYPE_MODIFICATION_PROBA));
 
     }
@@ -559,8 +573,12 @@ public class PtmProtenSiteTableModel extends LazyTableModel implements GlobalTab
                 break;
             }
             case COLTYPE_MODIFICATION_LOC:
-            case COLTYPE_PROTEIN_LOC: {
+            case COLTYPE_PROTEIN_NTERM_CTERM: {
                 renderer = new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class));
+                break;
+            }
+            case COLTYPE_PROTEIN_LOC: {
+                renderer = new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(Integer.class));
                 break;
             }
             case COLTYPE_PTM_PROBA:
@@ -571,6 +589,11 @@ public class PtmProtenSiteTableModel extends LazyTableModel implements GlobalTab
             case COLTYPE_DELTA_MASS_PTM:
             case COLTYPE_DELTA_MASS_MODIFICATION: {
                 renderer = new DoubleRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 4);
+                break;
+            }
+            case COLTYPE_PEPTIDE_SCORE: {
+                renderer = new FloatRenderer( new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)) );
+                break;
             }
 
         }

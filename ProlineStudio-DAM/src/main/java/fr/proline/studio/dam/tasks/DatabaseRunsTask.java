@@ -39,7 +39,7 @@ public class DatabaseRunsTask extends AbstractDatabaseTask {
     private final static int SEARCH_RAWFILE = 2;
     private final static int LOAD_RAWFILE = 3;
     private final static int REGISTER_IDENTIFICATION_DATASET_RUN = 4;
-    
+     
      
     public DatabaseRunsTask(AbstractDatabaseCallback callback){
         super(callback, null);
@@ -225,8 +225,8 @@ public class DatabaseRunsTask extends AbstractDatabaseTask {
         try {
             entityManagerUDS.getTransaction().begin();
             
-            // Search peptideMatches with the searched name
-            TypedQuery<RawFile> searchQuery = entityManagerUDS.createQuery("SELECT rawfile FROM RawFile rawfile WHERE rawfile.rawFileName LIKE :search ORDER BY rawfile.rawFileName ASC", RawFile.class);
+            // Search rawFile with the searched identifier
+            TypedQuery<RawFile> searchQuery = entityManagerUDS.createQuery("SELECT rawfile FROM RawFile rawfile WHERE rawfile.identifier LIKE :search ORDER BY rawfile.identifier ASC", RawFile.class);
             
             String searchStringSql = m_searchString.replaceAll("\\*", "%").replaceAll("\\?","_");
             searchQuery.setParameter("search", searchStringSql);

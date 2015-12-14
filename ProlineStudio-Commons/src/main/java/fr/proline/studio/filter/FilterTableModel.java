@@ -168,7 +168,7 @@ public class FilterTableModel extends DecoratedTableModel implements FilterTable
     }
 
     @Override
-    public void filter() {
+    public boolean filter() {
         
         // reinit search
         m_searchIds = null;
@@ -206,6 +206,8 @@ public class FilterTableModel extends DecoratedTableModel implements FilterTable
         } catch (Exception e) {
             //e.printStackTrace();
         }
+        
+        return true;
     }
 
     @Override

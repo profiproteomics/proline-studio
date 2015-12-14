@@ -142,11 +142,12 @@ public class CompoundTableModel extends AbstractTableModel implements GlobalTabl
     }
 
     @Override
-    public void filter() {
+    public boolean filter() {
         if (m_filterModel == null) {
-            return;
+            return false;
         }
         m_filterModel.filter();
+        return true;
     }
 
     @Override

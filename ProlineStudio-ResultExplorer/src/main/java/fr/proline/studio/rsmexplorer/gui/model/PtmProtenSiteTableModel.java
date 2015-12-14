@@ -18,7 +18,7 @@ import fr.proline.studio.filter.DoubleFilter;
 import fr.proline.studio.filter.Filter;
 import fr.proline.studio.filter.StringFilter;
 import fr.proline.studio.filter.ValueFilter;
-//import fr.proline.studio.filter.ValueListAssociatedStringFilter;
+import fr.proline.studio.filter.ValueListAssociatedStringFilter;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
 import fr.proline.studio.rsmexplorer.gui.renderer.DoubleRenderer;
@@ -33,12 +33,11 @@ import fr.proline.studio.table.renderer.DefaultRightAlignRenderer;
 import fr.proline.studio.utils.IconManager;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.TreeSet;
 import javax.swing.table.TableCellRenderer;
 
 /**
@@ -60,28 +59,53 @@ public class PtmProtenSiteTableModel extends LazyTableModel implements GlobalTab
     public static final int COLTYPE_PROTEIN_LOC = 10;
     public static final int COLTYPE_MODIFICATION_PROBA = 11;
     
+    public static final int COLTYPE_HIDDEN_PROTEIN_PTM = 12; // hidden column, must be the last
+    
 
     
     
     private static final String[] m_columnNames = {"Id", "Protein", "Peptide", "PTM", "PTM D.Mass", "PTM Probability", "Modification", "Residue", "Modification D.Mass", "Modification Loc.", "Protein Loc.", "Modification Probability"};
     private static final String[] m_columnTooltips =  {"Protein Id", "Protein", "Peptide", "Full PTM", "PTM Delta Mass", "PTM Probability", "Modification", "Modification Residue", "Modification Delta Mass", "Modification Location", "Protein Location of the Modification", "Modification Probability"};
     
-    private ArrayList<DProteinPTMSite> m_proteinPTMSiteArray = null;
     
-    private String[] m_modificationsArray = null;
-    private HashMap<String, Integer> m_modificationsMap = null;
+    private ArrayList<DProteinPTMSite> m_arrayInUse = null;
+    private ArrayList<DProteinPTMSite> m_proteinPTMSiteArray = new ArrayList<>();
+    private ArrayList<DProteinPTMSite> m_proteinPTMSiteNoRedundantArray = new ArrayList<>();
+    private HashSet<DProteinPTMSite> m_proteinPTMSiteNoRedundantSet = new HashSet<>();
     
-    private Character[] m_residuesArray = null;
-    private HashMap<Character, Integer> m_residuesMap = null;
+    private ArrayList<String> m_modificationsArray = new ArrayList<>();
+    private HashMap<String, Integer> m_modificationsMap = new HashMap<>();
+    
+    private ArrayList<Character> m_residuesArray = new ArrayList<>();
+    private HashMap<Character, Integer> m_residuesMap = new HashMap<>();
     
     private String m_modelName;
     
     private String m_modificationInfo = "";
     
+    private boolean m_hideRedundantPeptides = false;
+    
     public PtmProtenSiteTableModel(LazyTable table) {
         super(table);
+    }
+    
+    
+    
+    public boolean hideRedundantsPeptides(boolean hide) {
+        boolean changed = m_hideRedundantPeptides ^ hide;
         
-
+        
+        if (changed) {
+            m_hideRedundantPeptides = hide;
+            if (hide) {
+                m_arrayInUse = m_proteinPTMSiteNoRedundantArray;
+            } else {
+                m_arrayInUse = m_proteinPTMSiteArray;
+            }
+            fireTableDataChanged();
+        }
+        
+        return changed;
     }
 
     
@@ -155,17 +179,17 @@ public class PtmProtenSiteTableModel extends LazyTableModel implements GlobalTab
     
     @Override
     public int getRowCount() {
-        if (m_proteinPTMSiteArray == null) {
+        if (m_arrayInUse == null) {
             return 0;
         }
 
-        return m_proteinPTMSiteArray.size();
+        return m_arrayInUse.size();
     }
 
     @Override
     public Object getValueAt(int row, int col) {
 
-        DProteinPTMSite proteinPTMSite = m_proteinPTMSiteArray.get(row);
+        DProteinPTMSite proteinPTMSite = m_arrayInUse.get(row);
         DProteinMatch proteinMatch = proteinPTMSite.getPoteinMatch();
         DPeptideMatch peptideMatch = proteinPTMSite.getPeptideMatch();
         DPeptidePTM peptidePtm = proteinPTMSite.getPeptidePTM();
@@ -274,9 +298,9 @@ public class PtmProtenSiteTableModel extends LazyTableModel implements GlobalTab
                             for (Map.Entry<String, JsonElement> entry : entrySet) {
                                 String key = entry.getKey();
                                 int modificationPos = -1;
-                                if (key.indexOf("N-term") != -1) {
+                                if (key.contains("N-term")) {
                                     modificationPos = 0;
-                                } else if (key.indexOf("C-term") != -1) {
+                                } else if (key.contains("C-term")) {
                                     modificationPos = peptideMatch.getPeptide().getSequence().length();
                                 } else {
                                     int startIndex = key.indexOf('(');
@@ -325,6 +349,8 @@ public class PtmProtenSiteTableModel extends LazyTableModel implements GlobalTab
                 DInfoPTM infoPtm = DInfoPTM.getInfoPTMMap().get(peptidePtm.getIdPtmSpecificity());
                 return infoPtm.getRresidueAASpecificity();
             }
+            case COLTYPE_HIDDEN_PROTEIN_PTM:
+                return proteinPTMSite;
         }
 
         
@@ -340,9 +366,14 @@ public class PtmProtenSiteTableModel extends LazyTableModel implements GlobalTab
     
     public void setData(Long taskId, ArrayList<DProteinPTMSite> proteinPTMSiteArray) {
         m_proteinPTMSiteArray = proteinPTMSiteArray;
+        m_arrayInUse = m_proteinPTMSiteArray;
         m_taskId = taskId;
  
-        calculateData();
+        m_modificationInfo = PtmProteinSiteTableModelProcessing.calculateData(this, m_modificationsArray, m_residuesArray, m_residuesMap, proteinPTMSiteArray, m_proteinPTMSiteNoRedundantArray, m_modificationsMap);
+
+        m_proteinPTMSiteNoRedundantSet.clear();
+        m_proteinPTMSiteNoRedundantSet.addAll(m_proteinPTMSiteNoRedundantArray);
+
         
         fireTableDataChanged();
 
@@ -352,201 +383,11 @@ public class PtmProtenSiteTableModel extends LazyTableModel implements GlobalTab
         return m_modificationInfo;
     }
     
-    public void calculateData() {
-        
-        // List of different modifications and residues
-        TreeSet<String> modificationTreeSet = new TreeSet<>();
-        TreeSet<Character> residueTreeSet = new TreeSet<>();
-        int nbRows = getRowCount();
-        for (int i=0;i<nbRows;i++) {
-            String modification = (String) getValueAt(i, COLTYPE_MODIFICATION);
-            modificationTreeSet.add(modification);
-            
-            Character residue = (Character) getValueAt(i, COLTYPE_RESIDUE_AA);
-            if (residue != null) {
-                residueTreeSet.add(residue);
-            }
-        }
-        
-        m_modificationsArray = modificationTreeSet.toArray(new String[modificationTreeSet.size()]);
-
-        m_modificationsMap = new HashMap<>();
-        for (int i=0;i<m_modificationsArray.length;i++) {
-            m_modificationsMap.put( m_modificationsArray[i], i);
-        }
-        
-        // List of different residues
-        m_residuesArray = residueTreeSet.toArray(new Character[residueTreeSet.size()]);
-        m_residuesMap = new HashMap<>();
-        for (int i=0;i<m_residuesArray.length;i++) {
-            m_residuesMap.put( m_residuesArray[i], i);
-        }
-        
-        
-        // Count for each type of modification, the number of modifications
-        HashMap<String, Integer> globalDistinctModificationsMap = groupProteinMatch();
-        
-        StringBuilder sb = new StringBuilder();
-        Iterator<String> it = globalDistinctModificationsMap.keySet().iterator();
-        while (it.hasNext()) {
-            String modification = it.next();
-            Integer nbModifications = globalDistinctModificationsMap.get(modification);
-            sb.append(modification).append(":").append(nbModifications);
-            if (it.hasNext()) {
-                sb.append("   ");
-            }
-        }
-        
-        m_modificationInfo = sb.toString();
-        
+    public HashSet<DProteinPTMSite> getPTMSiteNoRedundantSet() {
+        return m_proteinPTMSiteNoRedundantSet;
     }
 
-    private HashMap<String, Integer> groupProteinMatch() {
-        
-        HashMap<String, Integer> globalDistinctModificationsMap = new HashMap<>();
-        
-        // group all the same protein Match
-        
-        int rowCount = getRowCount();
-        int start = 0;
-        DProteinMatch proteinMatchPrev = null;
-        for (int i = 0; i < rowCount; i++) {
-            DProteinPTMSite proteinPTMSite = m_proteinPTMSiteArray.get(i);
-            DProteinMatch proteinMatch = proteinPTMSite.getPoteinMatch();
-            if (proteinMatchPrev == null) {
-                proteinMatchPrev = proteinMatch;
-                continue;
-            } else if (proteinMatchPrev == proteinMatch) {
-                continue;
-            } else {
-                int stop = i - 1;
-                groupPeptideMatch(globalDistinctModificationsMap, proteinMatchPrev, start, stop);
-
-                proteinMatchPrev = proteinMatch;
-                start = i;
-            }
-        }
-        int stop = rowCount - 1;
-        if (stop >= start) {
-            groupPeptideMatch(globalDistinctModificationsMap, proteinMatchPrev, start, stop);
-        }
-        
-        return globalDistinctModificationsMap;
-    }
-    
-    private void groupPeptideMatch(HashMap<String, Integer> globalDistinctModificationsMap, DProteinMatch proteinMatch, int i1, int i2) {
-        
-        // group all the same peptide match and create a map for each with modifications
-        HashMap<DPeptideMatch, HashMap<String, String>> peptideMatchMap = new HashMap<>();
-        HashMap<String, String> distinctModificationsMap = new HashMap<>();
-        
-        int start = i1;
-        DPeptideMatch peptideMatchPrev = null;
-        for (int i = i1; i <= i2; i++) {
-            DProteinPTMSite proteinPTMSite = m_proteinPTMSiteArray.get(i);
-            DPeptideMatch peptideMatch = proteinPTMSite.getPeptideMatch();
-            
-            if (peptideMatchPrev == null) {
-                peptideMatchPrev = peptideMatch;
-                continue;
-            } else if (peptideMatchPrev == peptideMatch) {
-                continue;
-            } else {
-                int stop = i - 1;
-                peptideMatchFound(peptideMatchMap, distinctModificationsMap, peptideMatchPrev, start, stop);
-
-                peptideMatchPrev = peptideMatch;
-                start = i;
-            }
-            
-        }
-        
-        int stop = i2;
-        if (stop >= start) {
-            peptideMatchFound(peptideMatchMap, distinctModificationsMap, peptideMatchPrev, start, stop);
-        }
-        
-        Iterator<String> it = distinctModificationsMap.values().iterator();
-        while (it.hasNext()) {
-            String modification = it.next();
-            Integer nb = globalDistinctModificationsMap.get(modification);
-            if (nb == null) {
-                globalDistinctModificationsMap.put(modification, 1);
-            } else {
-                globalDistinctModificationsMap.put(modification, nb+1);
-            }
-        }
-        
-
-    }
-    
-    private void peptideMatchFound(HashMap<DPeptideMatch, HashMap<String, String>> peptideMatchMap, HashMap<String, String> distinctModificationsMap, DPeptideMatch peptideMatch, int i1, int i2) {
-        HashMap<String, String> modificiationMap = new HashMap<>();
-        peptideMatchMap.put(peptideMatch, modificiationMap);
-        for (int i = i1; i <= i2; i++) {
-            String proteinLoc = (String) getValueAt(i, COLTYPE_PROTEIN_LOC);
-            String modification = (String) getValueAt(i, COLTYPE_MODIFICATION);
-            String modificationKey = modification+proteinLoc;
-            modificiationMap.put(modificationKey, modification);
-            distinctModificationsMap.put(modificationKey, modification);
-        }
-    }
-    
-    private void manageProteinMatchCalculation(DProteinMatch proteinMatch, int start, int stop) {
-        /*  JPM.TODO
-        HashMap<DPeptideMatch, HashMap<DProteinPTMSite, Integer>> peptideMatchesMap = new HashMap<>();
-        
-        for (int i=start;i<=stop;i++) {
-            DProteinPTMSite proteinPTMSite = m_proteinPTMSiteArray.get(i);
-            DPeptideMatch peptideMatch = proteinPTMSite.getPeptideMatch();
-            
-            HashMap<DProteinPTMSite, Integer> ptmMap = peptideMatchesMap.get(peptideMatchesMap);
-            if (ptmMap == null) {
-                ptmMap = new HashMap<>();
-                peptideMatchesMap.put(peptideMatch, ptmMap);
-            }
-            ptmMap.put(proteinPTMSite, i);
-
-            
-        }
-        
-        for (int i=start;i<=stop;i++) {
-            DProteinPTMSite proteinPTMSite = m_proteinPTMSiteArray.get(i);
-            DPeptideMatch peptideMatch = proteinPTMSite.getPeptideMatch();
-            String sequenceMatch = peptideMatch.getPeptide().getSequence();
-            int sequenceLength = sequenceMatch.length();
-            
-            int lengthMax = -1;
-            DPeptideMatch surroundingPeptide = null;
-            for (int j=start;j<=stop;j++) {
-                if (j==i) {
-                    continue;
-                }
-                DProteinPTMSite proteinPTMSite2 = m_proteinPTMSiteArray.get(i);
-                DPeptideMatch peptideMatch2 = proteinPTMSite2.getPeptideMatch();
-                if (peptideMatch2 == peptideMatch) {
-                    continue; // smae peptide
-                }
-                String sequenceMatch2 = peptideMatch2.getPeptide().getSequence();
-                int sequenceLength2 = sequenceMatch2.length();
-                
-                if ((lengthMax<sequenceLength2) && (sequenceLength<sequenceLength2) && (sequenceMatch2.contains(sequenceMatch))) {
-                    // we have found a bigger peptide
-                    surroundingPeptide = peptideMatch2;
-                    lengthMax = sequenceLength2;
-                }
-                
-            }
-            
-            if (surroundingPeptide == null) {
-                // no surrounding peptide found, we count all the ptm modifications
-                DPeptidePTM peptidePTM = proteinPTMSite.getPeptidePTM();
-            } else {
-                // a surrounding peptide has been found, we count the ptm modifications not found in surrounding peptide
-            }
-            
-        }*/
-    }
+ 
     
 
     public void dataUpdated() {
@@ -557,48 +398,9 @@ public class PtmProtenSiteTableModel extends LazyTableModel implements GlobalTab
 
     public DProteinPTMSite getProteinPTMSite(int i) {
 
-        return m_proteinPTMSiteArray.get(i);
+        return m_arrayInUse.get(i);
     }
 
-
-    /*public int findRow(long proteinSetId) {
-
-        int nb = m_proteinPTMSiteArray.size();
-        for (int i=0;i<nb;i++) {
-            if (proteinSetId == m_proteinSets[i].getId()) {
-                return i;
-            }
-        }
-        return -1;
-        
-    }*/
-    
-    
-    /*public void sortAccordingToModel(ArrayList<Long> proteinSetIds, CompoundTableModel compoundTableModel) {
-        
-        if (m_proteinSets == null) {
-            // data not loaded 
-            return;
-        }
-        
-        HashSet<Long> proteinSetIdMap = new HashSet<>(proteinSetIds.size());
-        proteinSetIdMap.addAll(proteinSetIds);
-        
-        int nb = m_table.getRowCount();
-        int iCur = 0;
-        for (int iView=0;iView<nb;iView++) {
-            int iModel = m_table.convertRowIndexToModel(iView);
-            if (compoundTableModel != null) {
-                iModel = compoundTableModel.convertCompoundRowToBaseModelRow(iModel);
-            }
-            // Retrieve Protein Set
-            DProteinSet ps = getProteinSet(iModel);
-            if (  proteinSetIdMap.contains(ps.getId())  ) {
-                proteinSetIds.set(iCur++,ps.getId());
-            }
-        }
-
-    }*/
 
 
     @Override
@@ -687,9 +489,10 @@ public class PtmProtenSiteTableModel extends LazyTableModel implements GlobalTab
             }
 
         };
-        filtersMap.put(COLTYPE_MODIFICATION, new ValueFilter(getColumnName(COLTYPE_MODIFICATION), m_modificationsArray, null, ValueFilter.ValueFilterType.EQUAL, modificationConverter, COLTYPE_MODIFICATION));
 
-        //filtersMap.put(COLTYPE_MODIFICATION, new ValueListAssociatedStringFilter(getColumnName(COLTYPE_MODIFICATION), m_modificationsArray, modificationConverter, COLTYPE_MODIFICATION, COLTYPE_RESIDUE_AA));
+
+
+        filtersMap.put(COLTYPE_MODIFICATION, new ValueListAssociatedStringFilter(getColumnName(COLTYPE_MODIFICATION), m_modificationsArray.toArray(new String[m_modificationsArray.size()]), modificationConverter, COLTYPE_MODIFICATION, COLTYPE_RESIDUE_AA));
         
         ConvertValueInterface residueConverter = new ConvertValueInterface() {
             @Override
@@ -703,7 +506,7 @@ public class PtmProtenSiteTableModel extends LazyTableModel implements GlobalTab
             }
 
         };
-        filtersMap.put(COLTYPE_RESIDUE_AA, new ValueFilter(getColumnName(COLTYPE_RESIDUE_AA), m_residuesArray, null, ValueFilter.ValueFilterType.EQUAL, residueConverter, COLTYPE_RESIDUE_AA));
+        filtersMap.put(COLTYPE_RESIDUE_AA, new ValueFilter(getColumnName(COLTYPE_RESIDUE_AA), m_residuesArray.toArray(new Character[m_residuesArray.size()]), null, ValueFilter.ValueFilterType.EQUAL, residueConverter, COLTYPE_RESIDUE_AA));
         filtersMap.put(COLTYPE_DELTA_MASS_MODIFICATION, new DoubleFilter(getColumnName(COLTYPE_DELTA_MASS_MODIFICATION), null, COLTYPE_DELTA_MASS_MODIFICATION));
         filtersMap.put(COLTYPE_MODIFICATION_LOC, new StringFilter(getColumnName(COLTYPE_MODIFICATION_LOC), null, COLTYPE_MODIFICATION_LOC));
         filtersMap.put(COLTYPE_PROTEIN_LOC, new StringFilter(getColumnName(COLTYPE_PROTEIN_LOC), null, COLTYPE_PROTEIN_LOC));
@@ -864,13 +667,13 @@ public class PtmProtenSiteTableModel extends LazyTableModel implements GlobalTab
     @Override
     public Object getValue(Class c, int row) {
         if (c.equals(DProteinPTMSite.class)) {
-            return m_proteinPTMSiteArray.get(row);
+            return m_arrayInUse.get(row);
         }
         if (c.equals(DProteinMatch.class)) {
-            return m_proteinPTMSiteArray.get(row).getPoteinMatch();
+            return m_arrayInUse.get(row).getPoteinMatch();
         }
         if (c.equals(DPeptideMatch.class)) {
-            return m_proteinPTMSiteArray.get(row);
+            return m_arrayInUse.get(row);
         }
         return null;
     }

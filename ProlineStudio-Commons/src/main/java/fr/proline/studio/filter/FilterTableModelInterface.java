@@ -18,7 +18,7 @@ public interface FilterTableModelInterface extends GlobalTableModelInterface, Fi
     
     public Filter getColumnFilter(int col);
 
-    public void filter(); 
+    public boolean filter(); 
     
     public boolean filter(int row);
     

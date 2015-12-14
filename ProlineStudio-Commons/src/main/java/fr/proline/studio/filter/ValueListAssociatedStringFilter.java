@@ -69,7 +69,7 @@ public class ValueListAssociatedStringFilter extends Filter {
         }
         
         String onText = m_onTextValues[index];
-        if (onText == null) {
+        if ((onText == null) || (onText.isEmpty())) {
             return true;
         }
 

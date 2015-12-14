@@ -132,10 +132,12 @@ public abstract class DecoratedMarkerTable extends DecoratedTable implements Mar
             return;
         }
 
+        int modelRowCount = getModel().getRowCount() - 1;
+        
         m_lastVisibleRow = rowAtPoint(new Point(0, viewRect.y + viewRect.height - 1));
-        if (m_lastVisibleRow == -1) {
+        if ((m_lastVisibleRow == -1) || (m_lastVisibleRow>modelRowCount)) {
             // Handle empty space below last row
-            m_lastVisibleRow = getModel().getRowCount() - 1;
+            m_lastVisibleRow = modelRowCount;
         }
  
     }

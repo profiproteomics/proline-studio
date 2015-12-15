@@ -1,5 +1,5 @@
 
-package fr.proline.studio.rsmexplorer.gui;
+package fr.proline.studio.rsmexplorer.gui.model;
 
 import fr.proline.studio.comparedata.ExtraDataType;
 import fr.proline.studio.dam.data.ClearProjectData;

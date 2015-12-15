@@ -160,7 +160,7 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
             AbstractNode.NodeTypes nodeType = node.getType();
             if (nodeType == AbstractNode.NodeTypes.DATA_SET) {
                 DataSetNode dataSetNode = (DataSetNode) node;
-                if (dataSetNode.isInTrash()) {
+                if ((dataSetNode.isInTrash()) || (dataSetNode.isChanging())) {
                     return false;
                 }
                 return true;

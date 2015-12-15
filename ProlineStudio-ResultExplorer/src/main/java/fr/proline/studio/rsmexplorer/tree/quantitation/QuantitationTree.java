@@ -1,6 +1,8 @@
 package fr.proline.studio.rsmexplorer.tree.quantitation;
 
+import fr.proline.core.orm.uds.Project;
 import fr.proline.core.orm.uds.dto.DDataset;
+import fr.proline.studio.dam.DatabaseDataManager;
 import fr.proline.studio.dam.data.AbstractData;
 import fr.proline.studio.rsmexplorer.actions.identification.CreateXICAction;
 import fr.proline.studio.rsmexplorer.actions.identification.AbstractRSMAction;
@@ -21,6 +23,7 @@ import fr.proline.studio.rsmexplorer.actions.identification.ExportDatasetJMSActi
 import fr.proline.studio.rsmexplorer.actions.xic.ComputeQuantitationProfileAction;
 import fr.proline.studio.rsmexplorer.actions.xic.DisplayExperimentalDesignAction;
 import fr.proline.studio.rsmexplorer.actions.xic.DisplayXICAction;
+import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
 import fr.proline.studio.rsmexplorer.tree.*;
 import fr.proline.studio.rsmexplorer.tree.xic.XICBiologicalGroupNode;
 import fr.proline.studio.rsmexplorer.tree.xic.XICBiologicalSampleAnalysisNode;
@@ -438,6 +441,34 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
 
     }
 
+    @Override
+    public boolean isPathEditable(TreePath path) {
+
+        Project selectedProject = ProjectExplorerPanel.getProjectExplorerPanel().getSelectedProject();
+        if (!DatabaseDataManager.getDatabaseDataManager().ownProject(selectedProject)) {
+            return false;
+        }
+
+        if (isEditable()) {
+
+            if (path.getPathCount() == 1) {
+                // root is not editable
+                return false;
+            }
+
+            AbstractNode node = (AbstractNode) path.getLastPathComponent();
+            AbstractNode.NodeTypes nodeType = node.getType();
+            if (nodeType == AbstractNode.NodeTypes.DATA_SET) {
+                DataSetNode dataSetNode = (DataSetNode) node;
+                if ((dataSetNode.isInTrash()) || (dataSetNode.isChanging())) {
+                    return false;
+                }
+                return true;
+            }
+        }
+        return false;
+    }
+    
     // popUpMenu: delete (move to the quantitation trash)
     public void moveToTrash(AbstractNode[] selectedNodes) {
 

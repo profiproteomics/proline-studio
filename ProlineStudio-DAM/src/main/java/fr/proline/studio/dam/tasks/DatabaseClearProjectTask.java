@@ -213,13 +213,13 @@ public class DatabaseClearProjectTask extends AbstractDatabaseTask {
             List<ResultSet> listResultSetMsi = new ArrayList();
             String queryRsMsi = "SELECT rs "
                     + "FROM fr.proline.core.orm.msi.ResultSet rs  "
-                    + "WHERE rs.id NOT IN (:list) AND rs.decoyResultSet.id IS NOT NULL ";
+                    + "WHERE rs.id NOT IN (:list) AND rs.type not like 'DECOY%' ";
             if (!openedRsId.isEmpty()){
                 queryRsMsi += " AND rs.id NOT IN (:openedRslist) ";
             }
             queryRsMsi += " ORDER BY rs.id ";
             if (listResultSetIdsUds.isEmpty()) {
-                queryRsMsi = "SELECT rs FROM fr.proline.core.orm.msi.ResultSet rs WHERE rs.decoyResultSet.id IS NOT NULL ";
+                queryRsMsi = "SELECT rs FROM fr.proline.core.orm.msi.ResultSet rs WHERE rs.type not like 'DECOY%' ";
                 if (!openedRsId.isEmpty()){
                     queryRsMsi += " AND  rs.id NOT IN (:openedRslist) ";
                 }
@@ -233,25 +233,29 @@ public class DatabaseClearProjectTask extends AbstractDatabaseTask {
                 queryAllRsMsi.setParameter("openedRslist", openedRsId);
             }
             listResultSetMsi = queryAllRsMsi.getResultList();
+            List<Long> listResultSetMsiIds = new ArrayList();
+            for (ResultSet rs : listResultSetMsi) {
+                listResultSetMsiIds.add(rs.getId());
+            }
             // rsm
             List<ResultSummary> listRSMMsi = new ArrayList();
             String queryRSMMsi = "SELECT rsm "
                     + "FROM fr.proline.core.orm.msi.ResultSummary rsm  "
-                    + "WHERE rsm.resultSet.id NOT IN (:list) AND rsm.decotResultSummary.id IS NOT NULL ";
+                    + "WHERE rsm.resultSet.id IN (:list) ";
             if (!openedRsmId.isEmpty()){
                 queryRSMMsi += " AND rsm.id NOT IN (:openedRsmList) ";
             }
-            if (listResultSetIdsUds.isEmpty()) {
-                queryRSMMsi = "SELECT rsm FROM fr.proline.core.orm.msi.ResultSummary rsm WHERE rsm.decotResultSummary.id IS NOT NULL ";
+            if (listResultSetMsi.isEmpty()) {
+                queryRSMMsi = "SELECT rsm FROM fr.proline.core.orm.msi.ResultSummary rsm   ";
                 if (!openedRsmId.isEmpty()){
-                    queryRSMMsi += " AND rsm.id NOT IN (:openedRsmList) ";
+                    queryRSMMsi += " WHERE rsm.id NOT IN (:openedRsmList) ";
                 }
             }
             
             queryRSMMsi += " ORDER BY rsm.id ";
             TypedQuery<ResultSummary> queryAllRSMMsi = entityManagerMSI.createQuery(queryRSMMsi, ResultSummary.class);
-            if (!listResultSetIdsUds.isEmpty()) {
-                queryAllRSMMsi.setParameter("list", listResultSetIdsUds);
+            if (!listResultSetMsi.isEmpty()) {
+                queryAllRSMMsi.setParameter("list", listResultSetMsiIds);
             }
             if (!openedRsmId.isEmpty()){
                 queryAllRSMMsi.setParameter("openedRsmList", openedRsmId);

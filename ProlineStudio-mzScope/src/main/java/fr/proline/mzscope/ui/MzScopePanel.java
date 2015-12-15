@@ -2,7 +2,6 @@ package fr.proline.mzscope.ui;
 
 import fr.proline.mzscope.utils.ButtonTabComponent;
 import com.google.common.base.Strings;
-import fr.profi.mzdb.io.writer.mgf.PrecursorMzComputation;
 import fr.profi.mzdb.model.Feature;
 import fr.proline.mzscope.map.LcMsMap;
 import fr.proline.mzscope.map.LcMsViewer;

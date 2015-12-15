@@ -14,7 +14,6 @@ import fr.profi.mzdb.algo.feature.extraction.FeatureExtractorConfig;
 import fr.profi.mzdb.io.reader.provider.RunSliceDataProvider;
 import fr.profi.mzdb.io.writer.MsSpectrumTSVWriter;
 import fr.profi.mzdb.io.writer.mgf.MgfWriter;
-import fr.profi.mzdb.io.writer.mgf.PrecursorMzComputation;
 import fr.profi.mzdb.model.AcquisitionMode;
 import fr.profi.mzdb.model.Feature;
 import fr.profi.mzdb.model.Peak;
@@ -503,6 +502,8 @@ public class MzdbRawFile implements IRawFile {
             //logger.debug("mzdb Spectrum length {} rebuilded in Spectrum length {} ", mzList.length, xAxisData.size());
         } catch (SQLiteException | StreamCorruptedException ex) {
             logger.error("enable to retrieve Spectrum data", ex);
+        }catch(Exception e){
+            logger.error("Error while retrieving Spectrum data", e);
         }
         return spectrum;
     }

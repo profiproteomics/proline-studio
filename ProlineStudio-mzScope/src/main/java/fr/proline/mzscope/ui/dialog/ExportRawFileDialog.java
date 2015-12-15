@@ -5,7 +5,7 @@
  */
 package fr.proline.mzscope.ui.dialog;
 
-import fr.profi.mzdb.io.writer.mgf.PrecursorMzComputation;
+import fr.profi.mzdb.io.writer.mgf.PrecursorMzComputationEnum;
 import fr.proline.mzscope.model.IExportParameters;
 import fr.proline.mzscope.model.IExportParameters.ExportType;
 import fr.proline.mzscope.model.MzScopePreferences;
@@ -67,7 +67,7 @@ public class ExportRawFileDialog extends DefaultDialog {
     private JTextField intensityCutoffField ;
     private JCheckBox cbExportProlineTitle;
     
-    private Map<Integer, PrecursorMzComputation> mapPrecursor;
+    private Map<Integer, PrecursorMzComputationEnum> mapPrecursor;
     private String[] precursorList;
     
     private JComboBox scanHeaderCombobox;
@@ -77,7 +77,7 @@ public class ExportRawFileDialog extends DefaultDialog {
     private DefaultDialog.ProgressTask m_task ;
     
     private float mzTolPPM  = 10.0f;
-    private PrecursorMzComputation precComp = PrecursorMzComputation.MAIN_PRECURSOR_MZ;
+    private PrecursorMzComputationEnum precComp = PrecursorMzComputationEnum.MAIN_PRECURSOR_MZ;
     private float intensityCutoff = 0f;
     private boolean exportProlineTitle = false;
     
@@ -97,11 +97,11 @@ public class ExportRawFileDialog extends DefaultDialog {
         super(parent, Dialog.ModalityType.APPLICATION_MODAL);
         setTitle("Export "+title);
         setHelpURL("http://biodev.extra.cea.fr/docs/proline/doku.php?id=how_to:studio:mzscope");
-        EnumSet<PrecursorMzComputation> precursorSet = EnumSet.allOf( PrecursorMzComputation.class );
+        EnumSet<PrecursorMzComputationEnum> precursorSet = EnumSet.allOf( PrecursorMzComputationEnum.class );
         precursorList = new String[precursorSet.size()];
         mapPrecursor = new HashMap();
         int i=0;
-        for (PrecursorMzComputation p: precursorSet){
+        for (PrecursorMzComputationEnum p: precursorSet){
             precursorList[i] = p.getUserParamName();
             mapPrecursor.put(i, p);
             i++;

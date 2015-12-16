@@ -213,7 +213,12 @@ public class DatabaseClearProjectTask extends AbstractDatabaseTask {
             List<ResultSet> listResultSetMsi = new ArrayList();
             String queryRsMsi = "SELECT rs "
                     + "FROM fr.proline.core.orm.msi.ResultSet rs  "
-                    + "WHERE rs.id NOT IN (:list) AND rs.type not like 'DECOY%' ";
+                    + "WHERE rs.type not like 'DECOY%' AND ";
+            if (hasDs){
+                queryRsMsi += " rs.id  IN (:list) ";
+            }else{
+                queryRsMsi += " rs.id  NOT IN (:list) ";
+            }
             if (!openedRsId.isEmpty()){
                 queryRsMsi += " AND rs.id NOT IN (:openedRslist) ";
             }

@@ -24,6 +24,7 @@ import fr.proline.studio.table.renderer.DefaultRightAlignRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.MsQueryRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.PeptideRenderer;
+import fr.proline.studio.rsmexplorer.gui.renderer.ScoreRenderer;
 import fr.proline.studio.table.CompoundTableModel;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.table.TableDefaultRendererManager;
@@ -63,6 +64,8 @@ public class PeptideInstanceTableModel extends LazyTableModel implements GlobalT
     private PeptideInstance[] m_peptideInstances = null;
 
     private String m_modelName;
+    
+    private ScoreRenderer m_scoreRenderer = new ScoreRenderer();
     
     public PeptideInstanceTableModel(LazyTable table) {
         super(table);
@@ -311,22 +314,21 @@ public class PeptideInstanceTableModel extends LazyTableModel implements GlobalT
         if (m_peptideInstances == null) {
             return;
         }
-        
-        RelativePainterHighlighter.NumberRelativizer relativizer = m_table.getRelativizer();
-        if (relativizer == null) {
+
+        if (m_scoreRenderer == null) {
             return;
         }
 
-        double maxScore = 0;
+        float maxScore = 0;
         int size = m_peptideInstances.length;
         for (int i = 0; i < size; i++) {
             PeptideInstance peptideInstance = m_peptideInstances[i];
-            double score = ((DPeptideMatch)peptideInstance.getTransientData().getBestPeptideMatch()).getScore();
+            float score = ((DPeptideMatch)peptideInstance.getTransientData().getBestPeptideMatch()).getScore();
             if (score > maxScore) {
                 maxScore = score;
             }
         }
-        relativizer.setMax(maxScore);
+        m_scoreRenderer.setMaxValue(maxScore);
 
     }
     
@@ -545,7 +547,10 @@ public class PeptideInstanceTableModel extends LazyTableModel implements GlobalT
                 renderer = new FloatRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 4);
                 break;
             } 
-            case COLTYPE_PEPTIDE_SCORE:
+            case COLTYPE_PEPTIDE_SCORE: {
+                renderer = m_scoreRenderer;
+                break;
+            }
             case COLTYPE_PEPTIDE_PPM:
             case COLTYPE_PEPTIDE_RETENTION_TIME: {
                 renderer = new FloatRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)));

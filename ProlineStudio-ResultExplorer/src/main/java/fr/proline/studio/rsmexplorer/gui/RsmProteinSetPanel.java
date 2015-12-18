@@ -352,7 +352,7 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
         m_proteinSetTable.setFillsViewportHeight(true);
         m_proteinSetTable.setViewport(m_proteinSetScrollPane.getViewport());
         
-        m_proteinSetTable.displayColumnAsPercentage(ProteinSetTableModel.COLTYPE_PROTEIN_SCORE);
+        //m_proteinSetTable.displayColumnAsPercentage(ProteinSetTableModel.COLTYPE_PROTEIN_SCORE);
 
 
 

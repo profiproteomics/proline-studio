@@ -59,7 +59,7 @@ public abstract class DecoratedTable extends JXTable implements CrossSelectionIn
 
     
 
-    public void displayColumnAsPercentage(int column) {
+    /*public void displayColumnAsPercentage(int column) {
         displayColumnAsPercentage(column, AbstractLayoutPainter.HorizontalAlignment.RIGHT);
     }
     public void displayColumnAsPercentage(int column, AbstractLayoutPainter.HorizontalAlignment alignment) {
@@ -74,11 +74,11 @@ public abstract class DecoratedTable extends JXTable implements CrossSelectionIn
         highlighter.setHighlightPredicate(new HighlightPredicate.ColumnHighlightPredicate(column));
         addHighlighter(highlighter);
 
-    }
+    }*/
     
-    public RelativePainterHighlighter.NumberRelativizer getRelativizer() {
+    /*public RelativePainterHighlighter.NumberRelativizer getRelativizer() {
         return m_relativizer;
-    }
+    }*/
     
     public String getToolTipForHeader(int modelColumn) {
         return ((DecoratedTableModelInterface) getModel()).getToolTipForHeader(modelColumn);

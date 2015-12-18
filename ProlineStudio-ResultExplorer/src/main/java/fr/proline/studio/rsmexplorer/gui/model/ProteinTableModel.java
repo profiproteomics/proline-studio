@@ -11,6 +11,7 @@ import fr.proline.studio.table.renderer.DefaultLeftAlignRenderer;
 import fr.proline.studio.table.renderer.DefaultRightAlignRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.SamesetRenderer;
+import fr.proline.studio.rsmexplorer.gui.renderer.ScoreRenderer;
 import fr.proline.studio.table.DecoratedTableModel;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.table.LazyData;
@@ -58,10 +59,11 @@ public class ProteinTableModel extends DecoratedTableModel implements GlobalTabl
     private Long m_rsmId = null;
     private long m_representativeProteinMatchId;
 
-    private boolean m_isFiltering = false;
-    private boolean m_filteringAsked = false;
+
     private ProgressInterface m_progressInterface = null;
 
+    private ScoreRenderer m_scoreRenderer = new ScoreRenderer();
+    
     private String m_modelName;
     
     public ProteinTableModel(ProgressInterface progressInterface) {
@@ -385,7 +387,10 @@ public class ProteinTableModel extends DecoratedTableModel implements GlobalTabl
                 renderer = new SamesetRenderer();
                 break;
             }
-            case PROTEIN_SCORE:
+            case PROTEIN_SCORE: {
+                renderer = m_scoreRenderer;
+                break;
+            }
             case PROTEIN_MASS: {
                 renderer = new FloatRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)));
                 break;

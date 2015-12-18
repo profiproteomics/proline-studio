@@ -110,7 +110,7 @@ public class RsmProteinsOfProteinSetPanel extends HourglassPanel implements Data
 
         
         
-        m_proteinTable.displayColumnAsPercentage(ProteinTableModel.Column.PROTEIN_SCORE.ordinal());
+        //m_proteinTable.displayColumnAsPercentage(ProteinTableModel.Column.PROTEIN_SCORE.ordinal());
 
         
         URLCellRenderer urlRenderer = (URLCellRenderer) model.getRenderer(ProteinTableModel.Column.PROTEIN_NAME.ordinal());

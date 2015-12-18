@@ -23,6 +23,7 @@ import fr.proline.studio.table.renderer.DefaultRightAlignRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.MsQueryRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.PeptideRenderer;
+import fr.proline.studio.rsmexplorer.gui.renderer.ScoreRenderer;
 import fr.proline.studio.table.CompoundTableModel;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.table.TableDefaultRendererManager;
@@ -81,6 +82,7 @@ public class PeptideMatchTableModel extends LazyTableModel implements GlobalTabl
     private final boolean m_isDecoyAndValidated;
     private final boolean m_isMerged;
 
+    private ScoreRenderer m_scoreRenderer = new ScoreRenderer();
 
     private String m_modelName;
     
@@ -585,24 +587,24 @@ public class PeptideMatchTableModel extends LazyTableModel implements GlobalTabl
             return;
         }
         
-        RelativePainterHighlighter.NumberRelativizer relativizer = m_table.getRelativizer();
-        if (relativizer == null) {
+
+        if (m_scoreRenderer == null) {
             return;
         }
      
-        double maxScore = 0;
+        float maxScore = 0;
         int size = m_peptideMatches.length;
         for (int i = 0; i < size; i++) {
             DPeptideMatch peptideMatch = m_peptideMatches[i];
             if (peptideMatch == null) {
                 continue;
             }
-            double score = peptideMatch.getScore();
+            float score = peptideMatch.getScore();
             if (score > maxScore) {
                 maxScore = score;
             }
         }
-        relativizer.setMax(maxScore);
+        m_scoreRenderer.setMaxValue(maxScore);
 
     }
     
@@ -913,7 +915,10 @@ public class PeptideMatchTableModel extends LazyTableModel implements GlobalTabl
                 renderer = new MsQueryRenderer();
                 break;
             }
-            case COLTYPE_PEPTIDE_SCORE:
+            case COLTYPE_PEPTIDE_SCORE: {
+                renderer = m_scoreRenderer;
+                break;
+            }
             case COLTYPE_PEPTIDE_PPM: {
                 renderer = new FloatRenderer( new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)) );
                 break;

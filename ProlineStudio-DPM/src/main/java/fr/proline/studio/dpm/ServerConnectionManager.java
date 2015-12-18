@@ -70,7 +70,7 @@ public class ServerConnectionManager {
     private void restoreParameters() {
         Preferences preferences = NbPreferences.root();
 
-        m_serverURL = preferences.get(KEY_SERVER_URL, HTTP_URL_PREFFIX);
+        m_serverURL = preferences.get(KEY_SERVER_URL, "");
         m_projectUser = preferences.get(KEY_PROJECT_USER, "");
         m_userPassword = preferences.get(KEY_USER_PASSWORD, "");
 

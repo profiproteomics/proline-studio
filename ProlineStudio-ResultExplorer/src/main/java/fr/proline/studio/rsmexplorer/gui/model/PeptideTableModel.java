@@ -19,6 +19,7 @@ import fr.proline.studio.rsmexplorer.gui.renderer.DoubleRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.MsQueryRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.PeptideRenderer;
+import fr.proline.studio.rsmexplorer.gui.renderer.ScoreRenderer;
 import fr.proline.studio.table.DecoratedTableModel;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.table.LazyData;
@@ -62,7 +63,7 @@ public class PeptideTableModel extends DecoratedTableModel implements GlobalTabl
     
     private DPeptideInstance[] m_peptideInstances = null;
 
-
+    private ScoreRenderer m_scoreRenderer = new ScoreRenderer();
 
     private String m_modelName;
     
@@ -593,7 +594,10 @@ public class PeptideTableModel extends DecoratedTableModel implements GlobalTabl
                 renderer = new PeptideRenderer();
                 break;
             }
-            case COLTYPE_PEPTIDE_SCORE:
+            case COLTYPE_PEPTIDE_SCORE: {
+                renderer = m_scoreRenderer;
+                break;
+            }
             case COLTYPE_PEPTIDE_PPM: {
                 renderer = new FloatRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)));
                 break;

@@ -18,6 +18,7 @@ import fr.proline.studio.table.renderer.DefaultRightAlignRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.MsQueryRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.PeptideRenderer;
+import fr.proline.studio.rsmexplorer.gui.renderer.ScoreRenderer;
 import fr.proline.studio.table.CompoundTableModel;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.table.LazyData;
@@ -63,7 +64,10 @@ public class XicPeptideMatchTableModel extends LazyTableModel implements GlobalT
     private List<DPeptideMatch> m_peptideMatchList;
     private QuantChannelInfo m_quantChannelInfo;
 
+    private ScoreRenderer m_scoreRenderer = new ScoreRenderer();
+    
     private String m_modelName;
+
 
     public XicPeptideMatchTableModel(LazyTable table) {
         super(table);
@@ -694,7 +698,10 @@ public class XicPeptideMatchTableModel extends LazyTableModel implements GlobalT
                 renderer = new DefaultLeftAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class));
                 break;
             }
-            case COLTYPE_PEPTIDE_SCORE:
+            case COLTYPE_PEPTIDE_SCORE: {
+                renderer = m_scoreRenderer;
+                break;
+            }
             case COLTYPE_PEPTIDE_RETENTION_TIME:
             case COLTYPE_PEPTIDE_ION_PARENT_INTENSITY:
             case COLTYPE_PEPTIDE_PPM: {

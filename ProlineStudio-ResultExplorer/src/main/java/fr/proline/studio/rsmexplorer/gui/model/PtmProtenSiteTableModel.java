@@ -23,9 +23,9 @@ import fr.proline.studio.filter.ValueListAssociatedStringFilter;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
 import fr.proline.studio.rsmexplorer.gui.renderer.DoubleRenderer;
-import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.PeptideRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.PercentageRenderer;
+import fr.proline.studio.rsmexplorer.gui.renderer.ScoreRenderer;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.table.LazyTable;
 import fr.proline.studio.table.LazyTableModel;
@@ -88,6 +88,8 @@ public class PtmProtenSiteTableModel extends LazyTableModel implements GlobalTab
     private String m_modificationInfo = "";
     
     private boolean m_hideRedundantPeptides = false;
+    
+    private ScoreRenderer m_scoreRenderer = new ScoreRenderer();
     
     public PtmProtenSiteTableModel(LazyTable table) {
         super(table);
@@ -592,7 +594,7 @@ public class PtmProtenSiteTableModel extends LazyTableModel implements GlobalTab
                 break;
             }
             case COLTYPE_PEPTIDE_SCORE: {
-                renderer = new FloatRenderer( new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)) );
+                renderer = m_scoreRenderer;
                 break;
             }
 

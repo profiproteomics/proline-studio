@@ -11,9 +11,8 @@ import fr.proline.studio.filter.*;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
 import fr.proline.studio.table.renderer.DefaultLeftAlignRenderer;
-import fr.proline.studio.table.renderer.DefaultRightAlignRenderer;
-import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.ProteinCountRenderer;
+import fr.proline.studio.rsmexplorer.gui.renderer.ScoreRenderer;
 import fr.proline.studio.table.CompoundTableModel;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.table.TableDefaultRendererManager;
@@ -58,6 +57,8 @@ public class ProteinSetTableModel extends LazyTableModel implements GlobalTableM
     private String m_modelName;
     
     private boolean m_mergedData = false;
+    
+    private ScoreRenderer m_scoreRenderer = new ScoreRenderer();
     
     public ProteinSetTableModel(LazyTable table) {
         super(table);
@@ -328,12 +329,11 @@ public class ProteinSetTableModel extends LazyTableModel implements GlobalTableM
             return;
         }
         
-        RelativePainterHighlighter.NumberRelativizer relativizer = m_table.getRelativizer();
-        if (relativizer == null) {
+        if (m_scoreRenderer == null) {
             return;
         }
 
-        double maxScore = 0;
+        float maxScore = 0;
         int size = m_proteinSets.length;
         for (int i = 0; i < size; i++) {
             
@@ -343,13 +343,13 @@ public class ProteinSetTableModel extends LazyTableModel implements GlobalTableM
             DProteinMatch proteinMatch = proteinSet.getTypicalProteinMatch();
             if (proteinMatch != null) {
                 long rsmId = proteinSet.getResultSummaryId();
-                double score = proteinMatch.getPeptideSet(rsmId).getScore();
+                float score = proteinMatch.getPeptideSet(rsmId).getScore();
                 if (score > maxScore) {
                     maxScore = score;
                 }
             }
         }
-        relativizer.setMax(maxScore);
+        m_scoreRenderer.setMaxValue(maxScore);
 
     }
     
@@ -562,7 +562,7 @@ public class ProteinSetTableModel extends LazyTableModel implements GlobalTableM
                 break;
             }
             case COLTYPE_PROTEIN_SCORE: {
-                renderer = new FloatRenderer( new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)));
+                renderer = m_scoreRenderer;
                 break;
             }
             case COLTYPE_PROTEINS_COUNT: {

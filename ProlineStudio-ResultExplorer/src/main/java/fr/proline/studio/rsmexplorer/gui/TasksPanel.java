@@ -16,6 +16,7 @@ import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.rsmexplorer.gui.renderer.PercentageRenderer;
+import fr.proline.studio.rsmexplorer.gui.renderer.ScoreRenderer;
 import fr.proline.studio.table.CompoundTableModel;
 import fr.proline.studio.table.DecoratedMarkerTable;
 import fr.proline.studio.table.DecoratedTableModel;
@@ -266,9 +267,9 @@ public class TasksPanel extends HourglassPanel implements DataBoxPanelInterface 
             setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
             setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
 
-            displayColumnAsPercentage(LogTableModel.COLTYPE_PERCENTAGE, AbstractLayoutPainter.HorizontalAlignment.LEFT);
-            getRelativizer().setMin(0);
-            getRelativizer().setMax(100);
+            //displayColumnAsPercentage(LogTableModel.COLTYPE_PERCENTAGE, AbstractLayoutPainter.HorizontalAlignment.LEFT);
+            //getRelativizer().setMin(0);
+            //getRelativizer().setMax(100);
             
             setDefaultRenderer(Float.class, new PercentageRenderer( getDefaultRenderer(String.class)) );
         }
@@ -595,6 +596,9 @@ public class TasksPanel extends HourglassPanel implements DataBoxPanelInterface 
 
         @Override
         public TableCellRenderer getRenderer(int col) {
+            if (col == COLTYPE_PERCENTAGE) {
+                return new ScoreRenderer();
+            }
             return null;
         }
 

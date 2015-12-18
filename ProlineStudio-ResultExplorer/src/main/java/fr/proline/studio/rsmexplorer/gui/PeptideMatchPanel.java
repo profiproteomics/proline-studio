@@ -382,7 +382,7 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
         PeptideMatchTableModel peptideMatchTableModel = new PeptideMatchTableModel((LazyTable)m_peptideMatchTable, m_forRSM, !(m_startingPanel || m_proteinMatchUnknown), m_isDecoyAndValidated, m_mergedData);
         CompoundTableModel compoundTableModel = new CompoundTableModel(peptideMatchTableModel, true);
         m_peptideMatchTable.setModel(compoundTableModel);
-        m_peptideMatchTable.displayColumnAsPercentage(peptideMatchTableModel.convertColToColUsed(PeptideMatchTableModel.COLTYPE_PEPTIDE_SCORE));
+        //m_peptideMatchTable.displayColumnAsPercentage(peptideMatchTableModel.convertColToColUsed(PeptideMatchTableModel.COLTYPE_PEPTIDE_SCORE));
 
         m_peptideMatchTable.getColumnExt(m_peptideMatchTable.convertColumnIndexToView(PeptideMatchTableModel.COLTYPE_PEPTIDE_ID)).setVisible(false);
         

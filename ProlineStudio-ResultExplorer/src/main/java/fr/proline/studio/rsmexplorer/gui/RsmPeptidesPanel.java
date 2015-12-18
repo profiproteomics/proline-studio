@@ -364,7 +364,7 @@ public class RsmPeptidesPanel extends HourglassPanel implements DataBoxPanelInte
          */
         public PeptideInstanceTable() {
             super(m_scrollPane.getVerticalScrollBar());
-            displayColumnAsPercentage(PeptideInstanceTableModel.COLTYPE_PEPTIDE_SCORE);
+            //displayColumnAsPercentage(PeptideInstanceTableModel.COLTYPE_PEPTIDE_SCORE);
 
         }
 

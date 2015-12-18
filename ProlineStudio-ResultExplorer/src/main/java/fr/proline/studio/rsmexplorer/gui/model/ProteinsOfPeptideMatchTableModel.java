@@ -16,6 +16,7 @@ import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
 import fr.proline.studio.table.renderer.DefaultRightAlignRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
+import fr.proline.studio.rsmexplorer.gui.renderer.ScoreRenderer;
 import fr.proline.studio.table.CompoundTableModel;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.table.LazyData;
@@ -45,6 +46,8 @@ public class ProteinsOfPeptideMatchTableModel extends LazyTableModel implements 
     private DProteinMatch[] m_proteinMatchArray = null;
 
     private String m_modelName;
+    
+    private ScoreRenderer m_scoreRenderer = new ScoreRenderer();
     
     public ProteinsOfPeptideMatchTableModel(LazyTable table) {
         super(table);
@@ -152,21 +155,20 @@ public class ProteinsOfPeptideMatchTableModel extends LazyTableModel implements 
             return;
         }
 
-        RelativePainterHighlighter.NumberRelativizer relativizer = m_table.getRelativizer();
-        if (relativizer == null) {
+        if (m_scoreRenderer == null) {
             return;
         }
 
-        double maxScore = 0;
+        float maxScore = 0;
         int size = m_proteinMatchArray.length;
         for (int i = 0; i < size; i++) {
             DProteinMatch proteinMatch = m_proteinMatchArray[i];
-            double score = proteinMatch.getScore();
+            float score = proteinMatch.getScore();
             if (score > maxScore) {
                 maxScore = score;
             }
         }
-        relativizer.setMax(maxScore);
+        m_scoreRenderer.setMaxValue(maxScore);
 
     }
     
@@ -355,7 +357,10 @@ public class ProteinsOfPeptideMatchTableModel extends LazyTableModel implements 
                 renderer = new URLCellRenderer("URL_Template_Protein_Accession", "http://www.uniprot.org/uniprot/", COLTYPE_PROTEIN_NAME);
                 break;
             }
-            case COLTYPE_PROTEIN_SCORE:
+            case COLTYPE_PROTEIN_SCORE: {
+                renderer = m_scoreRenderer;
+                break;
+            }
             case COLTYPE_PROTEIN_MASS: {
                 renderer = new FloatRenderer( new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)) );
                 break;

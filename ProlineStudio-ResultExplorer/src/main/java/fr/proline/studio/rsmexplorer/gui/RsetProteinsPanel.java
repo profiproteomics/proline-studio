@@ -408,7 +408,7 @@ public class RsetProteinsPanel extends HourglassPanel implements DataBoxPanelInt
         public ProteinTable() {
             super(m_proteinScrollPane.getVerticalScrollBar());
 
-            displayColumnAsPercentage(ProteinsOfPeptideMatchTableModel.COLTYPE_PROTEIN_SCORE);
+            //displayColumnAsPercentage(ProteinsOfPeptideMatchTableModel.COLTYPE_PROTEIN_SCORE);
 
         }
 

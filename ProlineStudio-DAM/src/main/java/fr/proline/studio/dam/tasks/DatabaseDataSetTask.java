@@ -502,8 +502,9 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
             
 
     
-            
-            m_project.getTransientData().setChildrenNumber(m_list.size());
+            if (m_identificationDataset) {
+                m_project.getTransientData().setChildrenNumber(m_list.size());
+            }
             
             // add the UDS connection to the Netbeans Service
             ExternalDb msiDb = ExternalDbRepository.findExternalByTypeAndProject(entityManagerUDS, ProlineDatabaseType.MSI, entityManagerUDS.merge(m_project));
@@ -1515,7 +1516,9 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
 
                 } else if (parentObject instanceof Project) {
                     parentProject = (Project) parentObject;
-                    parentProject.getTransientData().setChildrenNumber(nbDataset);
+                    if (identificationTree) {
+                        parentProject.getTransientData().setChildrenNumber(nbDataset);
+                    }
                     
                     // order the children which can have been moved
                     for (int i = 0; i < mergedDatasetList.size(); i++) {

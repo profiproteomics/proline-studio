@@ -87,40 +87,54 @@ public class DatabaseProteinsAndPeptidesTask extends AbstractDatabaseTask {
             HashMap<Long, ArrayList<Long>> proteinToPeptideIdMap = new HashMap<>();
             HashSet<Long> peptidesSet = new HashSet<>();
             
-            Query proteinMatch2PepMatchQuery = entityManagerMSI.createQuery("SELECT pm.id, pepm.id FROM ProteinMatch pm, PeptideSetProteinMatchMap pepset_to_pm, PeptideMatch pepm, PeptideSetPeptideInstanceItem ps_to_pi, PeptideInstance pi WHERE pm.id IN (:pmlist) AND pepset_to_pm.resultSummary.id=:rsmId   AND pepset_to_pm.id.proteinMatchId=pm.id AND pepset_to_pm.id.peptideSetId=ps_to_pi.id.peptideSetId AND ps_to_pi.id.peptideInstanceId = pi.id AND pi.bestPeptideMatchId=pepm.id");
-            proteinMatch2PepMatchQuery.setParameter("pmlist", proteinMathIdList);
-            proteinMatch2PepMatchQuery.setParameter("rsmId", m_rsm.getId());
-            List<Object[]> resList = proteinMatch2PepMatchQuery.getResultList();
-            it = resList.iterator();
-            while (it.hasNext()) {
-                Object[] res = it.next();
-                Long proteinMatchId = (Long) res[0];
-                Long peptideMatchId = (Long) res[1];
-                ArrayList<Long> peptideArray = proteinToPeptideIdMap.get(proteinMatchId);
-                if (peptideArray == null) {
-                    peptideArray = new ArrayList<>();
-                    proteinToPeptideIdMap.put(proteinMatchId, peptideArray);
+            final int SLICE_SIZE = 1000;
+            SubTaskManager subTaskManager = new SubTaskManager(1);
+            SubTask subTask = subTaskManager.sliceATaskAndGetFirst(0, proteinMathIdList.size(), SLICE_SIZE);
+            while (subTask != null) {
+
+                Query proteinMatch2PepMatchQuery = entityManagerMSI.createQuery("SELECT pm.id, pepm.id FROM ProteinMatch pm, PeptideSetProteinMatchMap pepset_to_pm, PeptideMatch pepm, PeptideSetPeptideInstanceItem ps_to_pi, PeptideInstance pi WHERE pm.id IN (:pmlist) AND pepset_to_pm.resultSummary.id=:rsmId   AND pepset_to_pm.id.proteinMatchId=pm.id AND pepset_to_pm.id.peptideSetId=ps_to_pi.id.peptideSetId AND ps_to_pi.id.peptideInstanceId = pi.id AND pi.bestPeptideMatchId=pepm.id");
+                proteinMatch2PepMatchQuery.setParameter("pmlist", subTask.getSubList(proteinMathIdList));
+                proteinMatch2PepMatchQuery.setParameter("rsmId", m_rsm.getId());
+                List<Object[]> resList = proteinMatch2PepMatchQuery.getResultList();
+                it = resList.iterator();
+                while (it.hasNext()) {
+                    Object[] res = it.next();
+                    Long proteinMatchId = (Long) res[0];
+                    Long peptideMatchId = (Long) res[1];
+                    ArrayList<Long> peptideArray = proteinToPeptideIdMap.get(proteinMatchId);
+                    if (peptideArray == null) {
+                        peptideArray = new ArrayList<>();
+                        proteinToPeptideIdMap.put(proteinMatchId, peptideArray);
+                    }
+                    peptideArray.add(peptideMatchId);
+                    peptidesSet.add(peptideMatchId);
                 }
-                peptideArray.add(peptideMatchId);
-                peptidesSet.add(peptideMatchId);
+
+                subTask = subTaskManager.getNextSubTask();
             }
             
-            
-            Query peptideMatchQuery = entityManagerMSI.createQuery("SELECT pepm.id, pepm.score, pepm.cdPrettyRank, pep.sequence FROM PeptideMatch pepm, Peptide pep WHERE pepm.id IN (:pepList) AND pepm.peptideId=pep.id");
-            peptideMatchQuery.setParameter("pepList", new ArrayList<Long>(peptidesSet));
-            resList = peptideMatchQuery.getResultList();
-            it = resList.iterator();
-            while (it.hasNext()) {
-                Object[] res = it.next();
-                Long peptideMatchId = (Long) res[0];
-                Float score = (Float) res[1];
-                Integer cdPrettyRank = (Integer) res[2];
-                String sequence = (String) res[3];
-                
-                LightPeptideMatch peptideMatch = new LightPeptideMatch(peptideMatchId, score, cdPrettyRank, sequence);
-                
-                peptideMatchMap.put(peptideMatchId, peptideMatch);
-                allPeptides.add(peptideMatch);
+            ArrayList peptides = new ArrayList(peptidesSet);
+            subTaskManager = new SubTaskManager(1);
+            subTask = subTaskManager.sliceATaskAndGetFirst(0, peptides.size(), SLICE_SIZE);
+            while (subTask != null) {
+                Query peptideMatchQuery = entityManagerMSI.createQuery("SELECT pepm.id, pepm.score, pepm.cdPrettyRank, pep.sequence FROM PeptideMatch pepm, Peptide pep WHERE pepm.id IN (:pepList) AND pepm.peptideId=pep.id");
+                peptideMatchQuery.setParameter("pepList", subTask.getSubList(peptides));
+                List<Object[]> resList = peptideMatchQuery.getResultList();
+                it = resList.iterator();
+                while (it.hasNext()) {
+                    Object[] res = it.next();
+                    Long peptideMatchId = (Long) res[0];
+                    Float score = (Float) res[1];
+                    Integer cdPrettyRank = (Integer) res[2];
+                    String sequence = (String) res[3];
+
+                    LightPeptideMatch peptideMatch = new LightPeptideMatch(peptideMatchId, score, cdPrettyRank, sequence);
+
+                    peptideMatchMap.put(peptideMatchId, peptideMatch);
+                    allPeptides.add(peptideMatch);
+                }
+
+                subTask = subTaskManager.getNextSubTask();
             }
             
             Iterator<Long> itProteinId = proteinToPeptideIdMap.keySet().iterator();

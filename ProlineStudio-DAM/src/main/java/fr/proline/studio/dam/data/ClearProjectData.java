@@ -9,7 +9,6 @@ import fr.proline.core.orm.msi.MsiSearch;
 import fr.proline.core.orm.msi.ResultSet;
 import fr.proline.core.orm.msi.ResultSummary;
 import java.sql.Timestamp;
-import java.util.List;
 
 /**
  * data from a project that could be removed
@@ -30,6 +29,7 @@ public class ClearProjectData {
     private ResultSet m_rs;
     
     private boolean m_isSelected;
+    private boolean m_isEditable;
     
 
     public ClearProjectData(long m_projectId, ResultSet m_rs) {
@@ -37,6 +37,7 @@ public class ClearProjectData {
         this.m_rs = m_rs;
         this.m_rsm = null;
         this.m_isSelected = false;
+        this.m_isEditable = true;
     }
 
     public ClearProjectData(long m_projectId, ResultSummary m_rsm) {
@@ -44,6 +45,7 @@ public class ClearProjectData {
         this.m_rs = null;
         this.m_rsm = m_rsm;
         this.m_isSelected = true;
+        this.m_isEditable = true;
     }
     
     
@@ -141,5 +143,14 @@ public class ClearProjectData {
     public void setSelected(boolean isSelected){
         this.m_isSelected = isSelected;
     }
+
+    public boolean isEditable() {
+        return m_isEditable;
+    }
+
+    public void setIsEditable(boolean isEditable) {
+        this.m_isEditable = isEditable;
+    }
+    
     
 }

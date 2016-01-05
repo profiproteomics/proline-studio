@@ -299,6 +299,9 @@ public class DataClearProjectTableModel extends DecoratedTableModel implements G
     
     @Override
     public boolean isCellEditable(int rowIndex, int columnIndex) {
+        if (!m_dataToClear.get(rowIndex).isEditable()){
+            return false;
+        }
         switch (columnIndex){
             case COLTYPE_DATA_IS_SELECTED:
                 return true;

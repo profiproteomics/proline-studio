@@ -58,6 +58,7 @@ import org.slf4j.LoggerFactory;
 /**
  *
  * @author JM235353
+ * NB : The button to clear rs/rsm is ready but for now it is not added in the interface. To be added, uncomment the line 187
  */
 public class ProjectExplorerPanel extends JPanel {
 
@@ -182,6 +183,7 @@ public class ProjectExplorerPanel extends JPanel {
         buttonsPanel.add(m_addProjectButton, c);
 
         c.gridx++;
+        // uncomment this line to give access to clear rs/rsm project
         //buttonsPanel.add(m_clearProjectButton, c);
 
         // Interactions

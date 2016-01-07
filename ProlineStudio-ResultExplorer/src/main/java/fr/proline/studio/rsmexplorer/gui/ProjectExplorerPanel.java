@@ -462,7 +462,7 @@ public class ProjectExplorerPanel extends JPanel {
         return openedData;
     }
 
-    public void openClearProjectDialog(Project project, java.util.List<ClearProjectData> data) {
+    public void openClearProjectDialog(Project project, List<ClearProjectData> data) {
                  
         ClearProjectDialog clearProjectDialog = new ClearProjectDialog(WindowManager.getDefault().getMainWindow(), project, data);
         int x = (int) m_clearProjectButton.getLocationOnScreen().getX() + m_clearProjectButton.getWidth();
@@ -484,10 +484,10 @@ public class ProjectExplorerPanel extends JPanel {
             protected Object doInBackground() throws Exception {
 
                 if ((clearProjectDialog.canModifyValues())) {
-                    java.util.List<ClearProjectData> dataToClear = clearProjectDialog.getSelectedData();
+                    List<ClearProjectData> dataToClear = clearProjectDialog.getSelectedData();
 
-                    java.util.List<Long> rsmIds = new ArrayList();
-                    java.util.List<Long> rsIds = new ArrayList();
+                    List<Long> rsmIds = new ArrayList();
+                    List<Long> rsIds = new ArrayList();
                     dataToClear.stream().forEach((d) -> {
                         if (d.isResultSet()) {
                             rsIds.add(d.getResultSet().getId());

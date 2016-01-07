@@ -131,7 +131,7 @@ public class DatabaseClearProjectTask extends AbstractDatabaseTask {
             listResultSetIdsUds = queryAllRsUds.getResultList();
             // Get rsm used in quanti
             List<Long> listRsmIdsUds = new ArrayList();
-            String queryRsmUds = "SELECT DISTINCT(mqc.quantResultSummaryId) "
+            String queryRsmUds = "SELECT DISTINCT(mqc .quantResultSummaryId) "
                 + "FROM fr.proline.core.orm.uds.MasterQuantitationChannel mqc, fr.proline.core.orm.uds.Dataset ds "
                 + "WHERE mqc.dataset.id =ds.id AND "
                 + "mqc.quantResultSummaryId IS NOT NULL AND "
@@ -146,21 +146,24 @@ public class DatabaseClearProjectTask extends AbstractDatabaseTask {
                 queryAllRsmUds.setParameter("list", datasetIds);
             }
             listRsmIdsUds = queryAllRsmUds.getResultList();
-            String queryRsmUds2 = "SELECT DISTINCT(qc.identResultSummaryId) "
-                + "FROM fr.proline.core.orm.uds.QuantitationChannel qc, fr.proline.core.orm.uds.Dataset ds "
-                + "WHERE qc.dataset.id =ds.id AND "
-                + "qc.identResultSummaryId IS NOT NULL AND "
-                + "ds.project.id=:projectId   ";
-            if (hasDs){
-                queryRsmUds2+= "AND ds.id IN (:list)  ";
+            // check in the quant channel to clear project or if it's identification dataset
+            if (!hasDs || (hasDs && listRsmIdsUds.isEmpty())){
+                String queryRsmUds2 = "SELECT DISTINCT(qc.identResultSummaryId) "
+                        + "FROM fr.proline.core.orm.uds.QuantitationChannel qc, fr.proline.core.orm.uds.Dataset ds "
+                        + "WHERE qc.dataset.id =ds.id AND "
+                        + "qc.identResultSummaryId IS NOT NULL AND "
+                        + "ds.project.id=:projectId   ";
+                if (hasDs) {
+                    queryRsmUds2 += "AND ds.id IN (:list)  ";
+                }
+                queryRsmUds2 += "ORDER BY qc.identResultSummaryId";
+                TypedQuery<Long> queryAllRsmUds2 = entityManagerUDS.createQuery(queryRsmUds2, Long.class);
+                queryAllRsmUds2.setParameter("projectId", projectId);
+                if (hasDs) {
+                    queryAllRsmUds2.setParameter("list", datasetIds);
+                }
+                listRsmIdsUds.addAll(queryAllRsmUds2.getResultList());
             }
-            queryRsmUds2+= "ORDER BY qc.identResultSummaryId";
-            TypedQuery<Long> queryAllRsmUds2 = entityManagerUDS.createQuery(queryRsmUds2, Long.class);
-            queryAllRsmUds2.setParameter("projectId", projectId);
-            if (hasDs){
-                queryAllRsmUds2.setParameter("list", datasetIds);
-            }
-            listRsmIdsUds.addAll(queryAllRsmUds2.getResultList());
             // TODO get the rsm referenced in serialized properties of SC
             
             entityManagerUDS.getTransaction().commit();
@@ -209,11 +212,12 @@ public class DatabaseClearProjectTask extends AbstractDatabaseTask {
                 }
                 listResultSetIdsUds.addAll(sqlQueryDecoyRs.getResultList());
             }
+            // => listResultSetIdsUds contains all rsId to del in case of empty trash to not to del in case of clear project
             //rs
             List<ResultSet> listResultSetMsi = new ArrayList();
             String queryRsMsi = "SELECT rs "
                     + "FROM fr.proline.core.orm.msi.ResultSet rs  "
-                    + "WHERE rs.type not like 'DECOY%' AND ";
+                    + "WHERE  ";
             if (hasDs){
                 queryRsMsi += " rs.id  IN (:list) ";
             }else{
@@ -223,10 +227,10 @@ public class DatabaseClearProjectTask extends AbstractDatabaseTask {
                 queryRsMsi += " AND rs.id NOT IN (:openedRslist) ";
             }
             queryRsMsi += " ORDER BY rs.id ";
-            if (listResultSetIdsUds.isEmpty()) {
-                queryRsMsi = "SELECT rs FROM fr.proline.core.orm.msi.ResultSet rs WHERE rs.type not like 'DECOY%' ";
+            if (!hasDs && listResultSetIdsUds.isEmpty()) {
+                queryRsMsi = "SELECT rs FROM fr.proline.core.orm.msi.ResultSet rs   ";
                 if (!openedRsId.isEmpty()){
-                    queryRsMsi += " AND  rs.id NOT IN (:openedRslist) ";
+                    queryRsMsi += " WHERE rs.id NOT IN (:openedRslist) ";
                 }
                 queryRsMsi += " ORDER BY rs.id ";
             }
@@ -237,7 +241,9 @@ public class DatabaseClearProjectTask extends AbstractDatabaseTask {
             if (!openedRsId.isEmpty()){
                 queryAllRsMsi.setParameter("openedRslist", openedRsId);
             }
-            listResultSetMsi = queryAllRsMsi.getResultList();
+            if (!(hasDs && listResultSetIdsUds.isEmpty())){
+                listResultSetMsi = queryAllRsMsi.getResultList();
+            }
             List<Long> listResultSetMsiIds = new ArrayList();
             for (ResultSet rs : listResultSetMsi) {
                 listResultSetMsiIds.add(rs.getId());
@@ -250,13 +256,6 @@ public class DatabaseClearProjectTask extends AbstractDatabaseTask {
             if (!openedRsmId.isEmpty()){
                 queryRSMMsi += " AND rsm.id NOT IN (:openedRsmList) ";
             }
-            if (listResultSetMsi.isEmpty()) {
-                queryRSMMsi = "SELECT rsm FROM fr.proline.core.orm.msi.ResultSummary rsm   ";
-                if (!openedRsmId.isEmpty()){
-                    queryRSMMsi += " WHERE rsm.id NOT IN (:openedRsmList) ";
-                }
-            }
-            
             queryRSMMsi += " ORDER BY rsm.id ";
             TypedQuery<ResultSummary> queryAllRSMMsi = entityManagerMSI.createQuery(queryRSMMsi, ResultSummary.class);
             if (!listResultSetMsi.isEmpty()) {
@@ -265,16 +264,28 @@ public class DatabaseClearProjectTask extends AbstractDatabaseTask {
             if (!openedRsmId.isEmpty()){
                 queryAllRSMMsi.setParameter("openedRsmList", openedRsmId);
             }
-            listRSMMsi = queryAllRSMMsi.getResultList();
+            if (!listResultSetMsi.isEmpty()) {
+                listRSMMsi = queryAllRSMMsi.getResultList();
+            }
             entityManagerMSI.getTransaction().commit();
                 
             // data
             // merge result data
             for (ResultSet rs : listResultSetMsi) {
-                dataToClear.add(new ClearProjectData(projectId, rs));
+                ClearProjectData clearData = new ClearProjectData(projectId, rs);
+                if(rs.getType().equals(ResultSet.Type.QUANTITATION)){
+                   clearData.setSelected(true);
+                   clearData.setIsEditable(false);
+                }
+                dataToClear.add(clearData);
             }
             for (ResultSummary rsm : listRSMMsi) {
-                dataToClear.add(new ClearProjectData(projectId, rsm));
+                ClearProjectData clearData = new ClearProjectData(projectId, rsm);
+                if(rsm.getResultSet() != null && rsm.getResultSet().getType().equals(ResultSet.Type.QUANTITATION)){
+                   clearData.setSelected(true);
+                   clearData.setIsEditable(false);
+                }
+                dataToClear.add(clearData);
             }
         }catch (Exception e) {
             m_logger.error(getClass().getSimpleName() + " failed", e);
@@ -299,13 +310,14 @@ public class DatabaseClearProjectTask extends AbstractDatabaseTask {
         boolean result = true;
         EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().getEntityManagerFactory().createEntityManager();
         try {
-            entityManagerUDS.getTransaction().begin();
             Dataset ds = entityManagerUDS.find(Dataset.class, m_trashId);
             List<Dataset> children = ds.getChildren();
-            children.stream().forEach((d) -> {
-                m_trashDatasetIds.add(d.getId());
-            });
-            entityManagerUDS.getTransaction().commit();
+            do{
+                children.stream().forEach((d) -> {
+                    m_trashDatasetIds.add(d.getId());
+                });
+                children = loadChildren(children);
+            }while(!children.isEmpty());
         }catch (Exception e) {
             m_logger.error(getClass().getSimpleName() + " failed", e);
             m_taskError = new TaskError(e);
@@ -319,6 +331,16 @@ public class DatabaseClearProjectTask extends AbstractDatabaseTask {
             entityManagerUDS.close();
         }
         return result;
+    }
+    
+    private List<Dataset> loadChildren( List<Dataset> datasets){
+        List<Dataset> allChildren = new ArrayList();
+        for(Dataset ds : datasets){
+            List<Dataset> children = ds.getChildren();
+            allChildren.addAll(children);
+        }
+        
+        return allChildren;
     }
     
 }

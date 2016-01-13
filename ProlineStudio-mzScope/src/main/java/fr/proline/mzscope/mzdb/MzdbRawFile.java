@@ -247,15 +247,9 @@ public class MzdbRawFile implements IRawFile {
             }
             Peakel[] peakels = detector.detectPeakels(runSlices);
 
-            Iterator<RunSlice> tmpRunSlices = (minMz == 0 && maxMz == 0) ? getMzDbReader().getLcMsRunSliceIterator() : getMzDbReader().getLcMsRunSliceIterator(minMz, maxMz);
-            double min = Double.MAX_VALUE;
-            double max = Double.MIN_VALUE;
-            for (; tmpRunSlices.hasNext();) {
-                RunSlice rs = tmpRunSlices.next();
-                min = Math.min(min, rs.getHeader().getBeginMz());
-                max = Math.max(max, rs.getHeader().getEndMz());
-            }
-            logger.info("Real bounds : " + min + " - " + max);
+             Iterator<RunSlice> tmpRunSlices = (minMz == 0 && maxMz == 0) ? getMzDbReader().getLcMsRunSliceIterator() : getMzDbReader().getLcMsRunSliceIterator(minMz, maxMz);
+             logSliceBounds(tmpRunSlices);
+             
             Arrays.sort(peakels, new Comparator<Peakel>() {
                 @Override
                 public int compare(Peakel p1, Peakel p2) {
@@ -267,12 +261,21 @@ public class MzdbRawFile implements IRawFile {
         } catch (SQLiteException | StreamCorruptedException ex) {
             logger.error("Error while getting LcMs RunSlice Iterator: " + ex);
         }
-
-        logger.info("Features detected : " + result.size());
         return result;
 
     }
 
+   private void logSliceBounds(Iterator<RunSlice> tmpRunSlices) {
+      double min = Double.MAX_VALUE;
+      double max = Double.MIN_VALUE;
+      for (; tmpRunSlices.hasNext();) {
+         RunSlice rs = tmpRunSlices.next();
+         min = Math.min(min, rs.getHeader().getBeginMz());
+         max = Math.max(max, rs.getHeader().getEndMz());
+      }
+      logger.info("Real bounds : " + min + " - " + max);
+   }
+    
     private List<Feature> deisotopePeakels(Peakel[] peakels, float mzTolPPM) throws StreamCorruptedException, SQLiteException {
         List<Feature> result = new ArrayList<>();
         boolean[] assigned = new boolean[peakels.length];
@@ -334,7 +337,6 @@ public class MzdbRawFile implements IRawFile {
     }
 
     private List<Feature> detectPeakels(FeaturesExtractionRequest params) {
-
         List<Feature> result = new ArrayList<>();
         int msLevel = 1;
         FeatureDetectorConfig detectorConfig = new FeatureDetectorConfig(msLevel, params.getMzTolPPM(), 5, new SmartPeakelFinderConfig(5, 3, false, 10, false, params.isRemoveBaseline()));
@@ -374,7 +376,6 @@ public class MzdbRawFile implements IRawFile {
         } catch (SQLiteException | StreamCorruptedException ex) {
             logger.error("Error while getting LcMs RunSlice Iterator: " + ex);
         }
-
         return result;
     }
 
@@ -631,12 +632,12 @@ public class MzdbRawFile implements IRawFile {
                     try {
                         MgfExportParameters mgfExportParam = (MgfExportParameters)exportParams;
                         logger.debug("MGF writer start for " + this.getName() + ": mgfFilePath=" + outputFileName 
-                                + ", precursorMzComputation=" + mgfExportParam.getPrecComp().getUserParamName() +
+                                + ", precursorMzComputation=" + mgfExportParam.getPrecComp().getParamName() +
                                 ", mzTol=" + mgfExportParam.getMzTolPPM() 
                                 + ", intensityCutoff=" + mgfExportParam.getIntensityCutoff() 
                                 + ", exportProlineTitle=" + mgfExportParam.isExportProlineTitle());
                         MgfWriter writer = new MgfWriter(this.getFile().getAbsolutePath());
-                        writer.write(outputFileName, mgfExportParam.getPrecComp(),  mgfExportParam.getMzTolPPM(), mgfExportParam.getIntensityCutoff(), mgfExportParam.isExportProlineTitle());
+                        writer.write(outputFileName, mgfExportParam.getPrecComp(), mgfExportParam.getIntensityCutoff(), mgfExportParam.isExportProlineTitle());
                         logger.debug(" mgf created in " + (System.currentTimeMillis() - start) + " ms");
                     } catch (SQLiteException | ClassNotFoundException ex) {
                         logger.error("SQLiteException or ClassNotFoundException while exporting mgf file", ex);

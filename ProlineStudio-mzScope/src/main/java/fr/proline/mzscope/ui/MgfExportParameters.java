@@ -1,6 +1,6 @@
 package fr.proline.mzscope.ui;
 
-import fr.profi.mzdb.io.writer.mgf.PrecursorMzComputationEnum;
+import fr.profi.mzdb.io.writer.mgf.IPrecursorComputation;
 import fr.proline.mzscope.model.IExportParameters;
 
 /**
@@ -9,7 +9,7 @@ import fr.proline.mzscope.model.IExportParameters;
  */
 public class MgfExportParameters implements IExportParameters{
 
-    private PrecursorMzComputationEnum precComp;
+    private IPrecursorComputation precComp;
     
     private float mzTolPPM;
     private float intensityCutoff;
@@ -18,7 +18,7 @@ public class MgfExportParameters implements IExportParameters{
     public MgfExportParameters() {
     }
 
-    public MgfExportParameters(PrecursorMzComputationEnum precComp, float mzTolPPM, float intensityCutoff, boolean exportProlineTitle) {
+    public MgfExportParameters(IPrecursorComputation precComp, float mzTolPPM, float intensityCutoff, boolean exportProlineTitle) {
         this.precComp = precComp;
         this.mzTolPPM = mzTolPPM;
         this.intensityCutoff = intensityCutoff;
@@ -32,11 +32,11 @@ public class MgfExportParameters implements IExportParameters{
         return IExportParameters.ExportType.MGF;
     }
 
-    public PrecursorMzComputationEnum getPrecComp() {
+    public IPrecursorComputation getPrecComp() {
         return precComp;
     }
 
-    public void setPrecComp(PrecursorMzComputationEnum precComp) {
+    public void setPrecComp(IPrecursorComputation precComp) {
         this.precComp = precComp;
     }
 

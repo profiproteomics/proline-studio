@@ -5,7 +5,11 @@
  */
 package fr.proline.mzscope.ui.dialog;
 
+
+import fr.profi.mzdb.io.writer.mgf.DefaultPrecursorComputer;
+import fr.profi.mzdb.io.writer.mgf.IPrecursorComputation;
 import fr.profi.mzdb.io.writer.mgf.PrecursorMzComputationEnum;
+import fr.profi.mzdb.io.writer.mgf.IsolationWindowPrecursorExtractor;
 import fr.proline.mzscope.model.IExportParameters;
 import fr.proline.mzscope.model.IExportParameters.ExportType;
 import fr.proline.mzscope.model.MzScopePreferences;
@@ -67,7 +71,6 @@ public class ExportRawFileDialog extends DefaultDialog {
     private JTextField intensityCutoffField ;
     private JCheckBox cbExportProlineTitle;
     
-    private Map<Integer, PrecursorMzComputationEnum> mapPrecursor;
     private String[] precursorList;
     
     private JComboBox scanHeaderCombobox;
@@ -77,13 +80,11 @@ public class ExportRawFileDialog extends DefaultDialog {
     private DefaultDialog.ProgressTask m_task ;
     
     private float mzTolPPM  = 10.0f;
-    private PrecursorMzComputationEnum precComp = PrecursorMzComputationEnum.MAIN_PRECURSOR_MZ;
+    private IPrecursorComputation precComp = null;
     private float intensityCutoff = 0f;
     private boolean exportProlineTitle = false;
-    
     private ScanHeaderType scanHeaderType = ScanHeaderType.MS2;
-    
-    
+   
     private String outputFileName;
 
     public static ExportRawFileDialog getDialog(Window parent,  String title) {
@@ -98,15 +99,14 @@ public class ExportRawFileDialog extends DefaultDialog {
         setTitle("Export "+title);
         setHelpURL("http://biodev.extra.cea.fr/docs/proline/doku.php?id=how_to:studio:mzscope");
         EnumSet<PrecursorMzComputationEnum> precursorSet = EnumSet.allOf( PrecursorMzComputationEnum.class );
-        precursorList = new String[precursorSet.size()];
-        mapPrecursor = new HashMap();
+        precursorList = new String[precursorSet.size()+1];
         int i=0;
         for (PrecursorMzComputationEnum p: precursorSet){
             precursorList[i] = p.getUserParamName();
-            mapPrecursor.put(i, p);
             i++;
         }
         
+        precursorList[i] = ISOLATION_WINDOW_PRECURSOR;        
         EnumSet<ScanHeaderType> scanHeaderSet =  EnumSet.allOf(ScanHeaderType.class);
         scanHeaderList = new String[scanHeaderSet.size()];
         mapScanHeader = new HashMap();
@@ -126,6 +126,7 @@ public class ExportRawFileDialog extends DefaultDialog {
         setExportParamsPanel();
 
     }
+   private static final String ISOLATION_WINDOW_PRECURSOR = "Proline refined precursor mz";
     
 
     private JPanel createExportPanel() {
@@ -434,7 +435,7 @@ public class ExportRawFileDialog extends DefaultDialog {
             return false;
         }
         try{
-            precComp = mapPrecursor.get(precursorCombobox.getSelectedIndex());
+            precComp = buildPrecursorComputer();
         }catch(Exception e){
             highlight(precursorCombobox);
             return false;
@@ -447,6 +448,22 @@ public class ExportRawFileDialog extends DefaultDialog {
         }
         exportProlineTitle = cbExportProlineTitle.isSelected();
         return true;
+    }
+    
+    private IPrecursorComputation buildPrecursorComputer() {
+      IPrecursorComputation precComp = null;
+      String item = (String)precursorCombobox.getSelectedItem();
+      if (item.equals(ISOLATION_WINDOW_PRECURSOR)) {
+         precComp = new IsolationWindowPrecursorExtractor(mzTolPPM);
+      }
+      EnumSet<PrecursorMzComputationEnum> precursorSet = EnumSet.allOf( PrecursorMzComputationEnum.class );
+      for (PrecursorMzComputationEnum p: precursorSet){
+         if (item.equals(p.getUserParamName())) {
+            precComp = new DefaultPrecursorComputer(p, mzTolPPM);
+            break;
+         }
+      }
+      return precComp;
     }
     
     private boolean checkScanHeaderParams(){

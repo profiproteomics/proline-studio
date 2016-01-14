@@ -8,6 +8,8 @@ import fr.proline.studio.dpm.task.util.JMSConnectionManager;
 import fr.proline.studio.gui.InfoDialog;
 import fr.proline.studio.gui.OptionDialog;
 import fr.proline.studio.rserver.RServerManager;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 import org.openide.windows.WindowManager;
 
 /**
@@ -22,6 +24,17 @@ public class Installer extends VersionInstaller {
     @Override
     public void restored() {
 
+        // JPM.HACK for mack : mac file chooser doest not work correctly for custom system file
+        String OS = System.getProperty("os.name").toLowerCase();
+        if (OS.indexOf("mac") >= 0) {
+
+            try {
+                // Set cross-platform Java L&F (also called "Metal")
+                UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
+            } catch (Exception e) {
+            }
+        }
+        
         String buildnumber = "1.2  Milestone 3 ("+moduleBuildDate+")"; //specify if alpha (or nothing = release)
         //String buildnumber = "1.1";
         

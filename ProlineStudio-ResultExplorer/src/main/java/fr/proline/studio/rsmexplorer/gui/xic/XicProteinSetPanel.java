@@ -100,7 +100,7 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
         initComponents();
         CompoundTableModel model = (CompoundTableModel) m_quantProteinSetTable.getModel();
 
-        URLCellRenderer renderer = (URLCellRenderer) model.getRenderer(QuantProteinSetTableModel.COLTYPE_PROTEIN_SET_NAME);
+        URLCellRenderer renderer = (URLCellRenderer) model.getRenderer(0, QuantProteinSetTableModel.COLTYPE_PROTEIN_SET_NAME);
         m_quantProteinSetTable.addMouseListener(renderer);
         m_quantProteinSetTable.addMouseMotionListener(renderer);
     }

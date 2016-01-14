@@ -518,7 +518,7 @@ public class RsetAllPanel extends HourglassPanel implements DataBoxPanelInterfac
         }
 
         @Override
-        public TableCellRenderer getRenderer(int col) {
+        public TableCellRenderer getRenderer(int row, int col) {
             return null;
         }
         

@@ -781,7 +781,7 @@ public class FeatureTableModel extends LazyTableModel implements GlobalTableMode
     }
 
     @Override
-    public TableCellRenderer getRenderer(int col) {
+    public TableCellRenderer getRenderer(int row, int col) {
 
         if (m_rendererMap.containsKey(col)) {
             return m_rendererMap.get(col);

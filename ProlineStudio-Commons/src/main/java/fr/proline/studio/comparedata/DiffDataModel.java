@@ -286,7 +286,7 @@ public class DiffDataModel extends AbstractJoinDataModel {
     }
     
     @Override
-    public TableCellRenderer getRenderer(int col) {
+    public TableCellRenderer getRenderer(int row, int col) {
         //JPM.TODO
         return null;
     }

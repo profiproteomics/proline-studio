@@ -251,11 +251,11 @@ public class ExprTableModel extends DecoratedTableModel implements ChildModelInt
     }
 
     @Override
-    public TableCellRenderer getRenderer(int col) {
+    public TableCellRenderer getRenderer(int row, int col) {
         if (col >= m_parentModel.getColumnCount()) {
             return m_colRenderer;
         }
-        return m_parentModel.getRenderer(col);   
+        return m_parentModel.getRenderer(row, col);   
     }
 
     @Override

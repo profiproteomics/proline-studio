@@ -251,7 +251,7 @@ public class ProteinQuantTableModel extends LazyTableModel implements  GlobalTab
     }
 
     @Override
-    public TableCellRenderer getRenderer(int col) {
+    public TableCellRenderer getRenderer(int row, int col) {
         return null;
     }
 

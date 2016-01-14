@@ -461,7 +461,7 @@ public class PeakelTableModel extends LazyTableModel implements GlobalTableModel
     }
 
     @Override
-    public TableCellRenderer getRenderer(int col) {
+    public TableCellRenderer getRenderer(int row, int col) {
 
         if (m_rendererMap.containsKey(col)) {
             return m_rendererMap.get(col);

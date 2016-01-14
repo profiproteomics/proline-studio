@@ -207,8 +207,8 @@ public class CompareTableModel extends DecoratedTableModel implements GlobalTabl
     }
 
     @Override
-    public TableCellRenderer getRenderer(int col) {
-        return m_dataInterface.getRenderer(col);
+    public TableCellRenderer getRenderer(int row, int col) {
+        return m_dataInterface.getRenderer(row, col);
     }
 
     @Override

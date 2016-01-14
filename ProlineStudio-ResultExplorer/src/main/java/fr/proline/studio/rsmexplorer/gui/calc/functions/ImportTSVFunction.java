@@ -346,7 +346,7 @@ public class ImportTSVFunction extends AbstractFunction {
         }
 
         @Override
-        public TableCellRenderer getRenderer(int col) {
+        public TableCellRenderer getRenderer(int row, int col) {
             if (m_columTypes[col] == String.class) {
                 return new DefaultLeftAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class));
             } else if  (m_columTypes[col] == Long.class) {

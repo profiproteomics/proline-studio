@@ -372,7 +372,7 @@ public class RsetProteinsPanel extends HourglassPanel implements DataBoxPanelInt
         CompoundTableModel model = new CompoundTableModel(new ProteinsOfPeptideMatchTableModel(m_proteinTable), true);
         m_proteinTable.setModel(model);
 
-        URLCellRenderer renderer = (URLCellRenderer) model.getRenderer(ProteinsOfPeptideMatchTableModel.COLTYPE_PROTEIN_NAME);
+        URLCellRenderer renderer = (URLCellRenderer) model.getRenderer(0, ProteinsOfPeptideMatchTableModel.COLTYPE_PROTEIN_NAME);
         m_proteinTable.addMouseListener(renderer);
         m_proteinTable.addMouseMotionListener(renderer);
 

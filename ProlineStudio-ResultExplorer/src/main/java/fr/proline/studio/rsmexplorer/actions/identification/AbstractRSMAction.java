@@ -27,6 +27,10 @@ public abstract class AbstractRSMAction extends AbstractAction {
     }
     
     
+    public boolean isIdentificationTree() {
+        return m_treeType == AbstractTree.TreeType.TREE_IDENTIFICATION;
+    }
+    
     @Override
     public void actionPerformed(ActionEvent e) {
 

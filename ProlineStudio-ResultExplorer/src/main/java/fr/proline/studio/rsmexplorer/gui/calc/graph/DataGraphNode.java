@@ -91,7 +91,7 @@ public class DataGraphNode extends GraphNode {
 
     @Override
     public void askDisplay() {
-        WindowBox windowBox = WindowBoxFactory.getModelWindowBox(m_tableInfo.getDataName(), m_tableInfo.getTypeName());
+        WindowBox windowBox = WindowBoxFactory.getGenericWindowBox(m_tableInfo.getDataName(), m_tableInfo.getTypeName(), false);
         
         GlobalTableModelInterface model = m_tableInfo.getModel();
         ProjectId projectId = (ProjectId) model.getSingleValue(ProjectId.class);

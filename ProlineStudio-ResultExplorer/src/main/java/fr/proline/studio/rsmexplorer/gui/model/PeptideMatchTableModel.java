@@ -891,7 +891,7 @@ public class PeptideMatchTableModel extends LazyTableModel implements GlobalTabl
     }
 
     @Override
-    public TableCellRenderer getRenderer(int col) {
+    public TableCellRenderer getRenderer(int row, int col) {
         col =  m_colUsed.get(col);
         
         if (m_rendererMap.containsKey(col)) {

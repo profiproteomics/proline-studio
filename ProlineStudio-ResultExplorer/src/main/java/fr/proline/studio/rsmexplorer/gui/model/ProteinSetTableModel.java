@@ -546,7 +546,7 @@ public class ProteinSetTableModel extends LazyTableModel implements GlobalTableM
     }
 
     @Override
-    public TableCellRenderer getRenderer(int col) {
+    public TableCellRenderer getRenderer(int row, int col) {
         
         col =  m_colUsed[col];
         

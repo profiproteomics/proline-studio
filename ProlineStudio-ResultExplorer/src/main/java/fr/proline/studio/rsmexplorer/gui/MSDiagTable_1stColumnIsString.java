@@ -175,7 +175,7 @@ public class MSDiagTable_1stColumnIsString extends DecoratedTable {
 	        }
 
         @Override
-        public TableCellRenderer getRenderer(int col) {
+        public TableCellRenderer getRenderer(int row, int col) {
             return null;
         }
 

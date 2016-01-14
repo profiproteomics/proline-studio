@@ -242,7 +242,7 @@ public class CalcDialog extends JDialog {
                         Table t = col.getTable();
                         t.addColumn(col, new DoubleRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)),4,true,true));
                     } else if (o instanceof Table) {
-                        WindowBox windowBox = WindowBoxFactory.getModelWindowBox(null, resultVariable.getName());
+                        WindowBox windowBox = WindowBoxFactory.getGenericWindowBox(null, resultVariable.getName(), false);
                         
                         GlobalTableModelInterface model = ((Table)o).getModel();
                         ProjectId projectId = (ProjectId) model.getSingleValue(ProjectId.class);

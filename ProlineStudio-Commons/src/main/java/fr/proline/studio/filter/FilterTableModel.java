@@ -373,8 +373,8 @@ public class FilterTableModel extends DecoratedTableModel implements FilterTable
     }
 
     @Override
-    public TableCellRenderer getRenderer(int col) {
-        return m_tableModelSource.getRenderer(col);
+    public TableCellRenderer getRenderer(int row, int col) {
+        return m_tableModelSource.getRenderer(row, col);
     }
 
     @Override

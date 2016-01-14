@@ -344,8 +344,8 @@ public class ProteinsOfPeptideMatchTableModel extends LazyTableModel implements 
         return getColumnName(col);
     }
 
- @Override
-    public TableCellRenderer getRenderer(int col) {
+    @Override
+    public TableCellRenderer getRenderer(int row, int col) {
 
         if (m_rendererMap.containsKey(col)) {
             return m_rendererMap.get(col);

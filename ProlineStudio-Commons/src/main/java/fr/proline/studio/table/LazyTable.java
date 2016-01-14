@@ -35,6 +35,8 @@ public abstract class LazyTable extends DecoratedMarkerTable implements Adjustme
     }
     protected LastAction m_lastAction = LastAction.ACTION_NONE;
 
+    private boolean m_sortForbidden = false;
+    
     public LazyTable(JScrollBar verticalScrollbar) {
 
         setDefaultRenderer(LazyData.class, new LazyTableCellRenderer());
@@ -49,6 +51,10 @@ public abstract class LazyTable extends DecoratedMarkerTable implements Adjustme
             @Override
             public void mouseClicked(MouseEvent e) {
 
+                if (m_sortForbidden) {
+                    return;
+                }
+                
                 if (!isSortable()) {
 
                     ProgressInterface progressInterface = (ProgressInterface) table.getModel();
@@ -93,6 +99,11 @@ public abstract class LazyTable extends DecoratedMarkerTable implements Adjustme
         setSortable(false);
     }
 
+    public void forbidSort(boolean sortForbidden) {
+        m_sortForbidden = sortForbidden;
+        setSortable(false);
+    }
+    
     /**
      * Called when sorting is changed by the user
      *
@@ -168,7 +179,7 @@ public abstract class LazyTable extends DecoratedMarkerTable implements Adjustme
         if (model instanceof GlobalTableModelInterface) {
             int columnInModel = convertColumnIndexToModel(column);
 
-            TableCellRenderer renderer = ((GlobalTableModelInterface) model).getRenderer(columnInModel);
+            TableCellRenderer renderer = ((GlobalTableModelInterface) model).getRenderer(row, columnInModel);
             if (renderer != null) {
                 Class columnClass = model.getColumnClass(columnInModel);
                 if (columnClass.equals(LazyData.class)) {

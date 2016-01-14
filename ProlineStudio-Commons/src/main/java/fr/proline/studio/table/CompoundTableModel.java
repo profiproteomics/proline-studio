@@ -348,8 +348,8 @@ public class CompoundTableModel extends AbstractTableModel implements GlobalTabl
     }
 
     @Override
-    public TableCellRenderer getRenderer(int col) {
-        return m_lastModel.getRenderer(col);
+    public TableCellRenderer getRenderer(int row, int col) {
+        return m_lastModel.getRenderer(row, col);
     }
 
     @Override

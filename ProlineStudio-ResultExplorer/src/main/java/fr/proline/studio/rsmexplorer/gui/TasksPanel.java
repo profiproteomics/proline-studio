@@ -595,7 +595,7 @@ public class TasksPanel extends HourglassPanel implements DataBoxPanelInterface 
         }
 
         @Override
-        public TableCellRenderer getRenderer(int col) {
+        public TableCellRenderer getRenderer(int row, int col) {
             if (col == COLTYPE_PERCENTAGE) {
                 return new ScoreRenderer();
             }

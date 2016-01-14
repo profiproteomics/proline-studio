@@ -50,11 +50,11 @@ public class GenericPanel extends JPanel implements DataBoxPanelInterface, Globa
     private DataTable m_dataTable;
     private MarkerContainerPanel m_markerContainerPanel;
     
-    public GenericPanel() {
+    public GenericPanel(boolean removeStripAndSort) {
         
         setLayout(new BorderLayout());
 
-        final JPanel resultPanel = createResultPanel();
+        final JPanel resultPanel = createResultPanel(removeStripAndSort);
 
         final JLayeredPane layeredPane = new JLayeredPane();
 
@@ -88,13 +88,13 @@ public class GenericPanel extends JPanel implements DataBoxPanelInterface, Globa
         layeredPane.add(m_searchToggleButton.getSearchPanel(), JLayeredPane.PALETTE_LAYER);
     }
     
-    private JPanel createResultPanel() {
+    private JPanel createResultPanel(boolean removeStripAndSort) {
         JPanel resultPanel = new JPanel();
         resultPanel.setLayout(new BorderLayout());
         resultPanel.setBounds(0, 0, 500, 400);
 
 
-        JPanel internalPanel = initComponents();
+        JPanel internalPanel = initComponents(removeStripAndSort);
         resultPanel.add(internalPanel, BorderLayout.CENTER);
 
         JToolBar toolbar = initToolbar();
@@ -104,7 +104,7 @@ public class GenericPanel extends JPanel implements DataBoxPanelInterface, Globa
     }
     
     
-    private JPanel initComponents() {
+    private JPanel initComponents(boolean removeStripAndSort) {
 
 
         JPanel internalPanel = new JPanel();
@@ -121,6 +121,12 @@ public class GenericPanel extends JPanel implements DataBoxPanelInterface, Globa
 
         m_dataTable = new DataTable();
         m_dataTable.setModel(new CompoundTableModel(null, true));
+        if (removeStripAndSort) {
+            m_dataTable.removeStriping();
+
+            m_dataTable.forbidSort(true);
+            m_dataTable.setRowSorter(null);
+        }
         
 
 
@@ -217,9 +223,6 @@ public class GenericPanel extends JPanel implements DataBoxPanelInterface, Globa
         GlobalTableModelInterface model = getGlobalTableModelInterface();
         if (model != null) {
             getGlobalTableModelInterface().addSingleValue(v);
-        } else {
-            //JPM.TODO
-            System.err.println("getGlobalTableModelInterface null");
         }
     }
     

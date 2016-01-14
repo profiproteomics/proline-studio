@@ -380,7 +380,7 @@ public class DataBoxChooserDialog extends DefaultDialog {
         }
 
         @Override
-        public TableCellRenderer getRenderer(int col) {
+        public TableCellRenderer getRenderer(int row, int col) {
             return null;
         }
     }

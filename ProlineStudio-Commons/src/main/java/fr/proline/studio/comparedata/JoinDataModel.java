@@ -320,23 +320,23 @@ public class JoinDataModel extends AbstractJoinDataModel {
     }
 
     @Override
-    public TableCellRenderer getRenderer(int col) {
+    public TableCellRenderer getRenderer(int row, int col) {
          if (!joinPossible()) {
             return null;
         }
         
          if (col == 0) {
-             return m_data1.getRenderer(m_selectedKey1);
+             return m_data1.getRenderer(row, m_selectedKey1);
          }
 
         col--;
         if (col<m_allColumns1.size()) {
 
-            return m_data1.getRenderer(m_allColumns1.get(col));
+            return m_data1.getRenderer(row, m_allColumns1.get(col));
         }
         col-=m_allColumns1.size();
         if (col<m_allColumns2.size()) {
-            return m_data2.getRenderer(m_allColumns2.get(col));
+            return m_data2.getRenderer(row, m_allColumns2.get(col));
         }
         return null;
     }

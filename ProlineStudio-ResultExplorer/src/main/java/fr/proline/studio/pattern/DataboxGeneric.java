@@ -12,17 +12,20 @@ import java.util.ArrayList;
  *
  * @author JM235353
  */
-public class DataboxCalculationResult extends AbstractDataBox {
+public class DataboxGeneric extends AbstractDataBox {
 
     private GlobalTableModelInterface m_entryModel = null;
     
-    public DataboxCalculationResult(String dataName, String typeName) {
+    private boolean m_removeStripAndSort;
+    
+    public DataboxGeneric(String dataName, String typeName, boolean removeStripAndSort) {
         super(DataboxType.DataboxCompareResult);
         
         // Name of this databox
         m_dataName = dataName;
         m_typeName = typeName;
         m_description = typeName;
+        m_removeStripAndSort = removeStripAndSort;
         
         // Register Possible in parameters
         // One ResultSummary
@@ -42,7 +45,7 @@ public class DataboxCalculationResult extends AbstractDataBox {
     
     @Override
     public void createPanel() {
-        GenericPanel p = new GenericPanel();
+        GenericPanel p = new GenericPanel(m_removeStripAndSort);
         p.setName(m_typeName);
         p.setDataBox(this);
         m_panel = p;

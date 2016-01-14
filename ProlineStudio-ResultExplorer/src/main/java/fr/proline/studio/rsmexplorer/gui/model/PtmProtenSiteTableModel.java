@@ -556,7 +556,7 @@ public class PtmProtenSiteTableModel extends LazyTableModel implements GlobalTab
     }
 
     @Override
-    public TableCellRenderer getRenderer(int col) {
+    public TableCellRenderer getRenderer(int row, int col) {
 
         if (m_rendererMap.containsKey(col)) {
             return m_rendererMap.get(col);

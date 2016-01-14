@@ -63,6 +63,7 @@ public class DatabaseRsetProperties extends AbstractDatabaseTask {
                 SearchSetting searchSetting = msiSearch.getSearchSetting();
 
                 SearchSetting mergedSearchSetting = entityManagerMSI.merge(searchSetting);
+                
                 Set<Enzyme> enzymeSet = mergedSearchSetting.getEnzymes();
                 Iterator<Enzyme> it = enzymeSet.iterator();
                 while (it.hasNext()) { // to avoid lazy fetching problem
@@ -70,6 +71,14 @@ public class DatabaseRsetProperties extends AbstractDatabaseTask {
                 }
                 searchSetting.setEnzymes(enzymeSet);
 
+                Set<UsedPtm> usedPtmSet = mergedSearchSetting.getUsedPtms();
+                Iterator<UsedPtm> itPtm = usedPtmSet.iterator();
+                while (itPtm.hasNext()) { // to avoid lazy fetching problem
+                    itPtm.next();
+                }
+                searchSetting.setUsedPtms(usedPtmSet);
+                
+                
                 // Load SeqDatabase
                 Set<SearchSettingsSeqDatabaseMap> setDatabaseMapSet = mergedSearchSetting.getSearchSettingsSeqDatabaseMaps();
                 Iterator<SearchSettingsSeqDatabaseMap> itSeqDbMap = setDatabaseMapSet.iterator();

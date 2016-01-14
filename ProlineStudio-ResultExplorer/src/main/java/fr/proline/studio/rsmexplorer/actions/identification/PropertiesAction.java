@@ -7,8 +7,12 @@ import fr.proline.core.orm.uds.QuantitationLabel;
 import fr.proline.core.orm.uds.QuantitationMethod;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.core.orm.uds.dto.DMasterQuantitationChannel;
-import fr.proline.core.orm.uds.dto.DQuantitationChannel;
+import fr.proline.core.orm.uds.dto.DQuantitationChannel;;
+import fr.proline.studio.pattern.WindowBox;
+import fr.proline.studio.pattern.WindowBoxFactory;
+import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
 import fr.proline.studio.rsmexplorer.PropertiesTopComponent;
+import fr.proline.studio.rsmexplorer.gui.model.PropertiesTableModel;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
@@ -39,9 +43,10 @@ public class PropertiesAction extends AbstractRSMAction {
     public void actionPerformed(final AbstractNode[] selectedNodes, int x, int y) {
 
          String dialogName;
+         String name = "";
          if (selectedNodes.length == 1) {
              AbstractNode firstNode = selectedNodes[0];
-             String name = firstNode.getData().getName();
+             name = firstNode.getData().getName();
              dialogName = "Properties : " + name;
          } else {
              dialogName = "Properties";
@@ -51,6 +56,18 @@ public class PropertiesAction extends AbstractRSMAction {
          win.open();
          win.requestActive();
          
+        PropertiesTableModel model = null;
+        // new Properties window only for identification
+        if (isIdentificationTree()) {
+            WindowBox windowBox = WindowBoxFactory.getGenericWindowBox(name, "Properties", true);
+            model = new PropertiesTableModel();
+            windowBox.setEntryData(-1l, model);
+            DataBoxViewerTopComponent win2 = new DataBoxViewerTopComponent(windowBox);
+            win2.open();
+            win2.requestActive();
+        }
+        final PropertiesTableModel _model = model;
+                
          // load data for properties
          DataLoadedCallback dataLoadedCallback = new DataLoadedCallback(selectedNodes.length) {
 
@@ -61,7 +78,18 @@ public class PropertiesAction extends AbstractRSMAction {
 
                     win.setProperties(selectedNodes);
 
-
+                    ArrayList<DDataset> datasetList = new ArrayList<>();
+                    for (AbstractNode node : selectedNodes) {
+                        if (node instanceof DataSetNode) {
+                            DDataset dataset = ((DataSetNode)node).getDataset();
+                            datasetList.add(dataset);
+                        }
+                    }
+                    
+                    if (_model != null) {
+                        _model.setData(datasetList);
+                    }
+                    
                 }
             }
              
@@ -80,8 +108,7 @@ public class PropertiesAction extends AbstractRSMAction {
     public void updateEnabled(AbstractNode[] selectedNodes) {
 
         int nbSelectedNodes = selectedNodes.length;
-        
-        
+
         // properties action is enabled only if selected nodes
         // are of the same type and are of type PROJECT or DATA_SET
         AbstractNode.NodeTypes currentType = null;

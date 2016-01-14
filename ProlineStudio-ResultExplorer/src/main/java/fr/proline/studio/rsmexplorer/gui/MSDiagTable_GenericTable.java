@@ -160,7 +160,7 @@ public class MSDiagTable_GenericTable extends DecoratedTable {
 	        }
 
         @Override
-        public TableCellRenderer getRenderer(int col) {
+        public TableCellRenderer getRenderer(int row, int col) {
             return null;
         }
 

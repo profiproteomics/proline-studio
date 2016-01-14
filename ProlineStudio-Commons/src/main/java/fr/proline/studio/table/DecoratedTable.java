@@ -16,11 +16,8 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableModel;
 import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.JXTableHeader;
-import org.jdesktop.swingx.decorator.HighlightPredicate;
+import org.jdesktop.swingx.decorator.Highlighter;
 import org.jdesktop.swingx.decorator.HighlighterFactory;
-import org.jdesktop.swingx.painter.AbstractLayoutPainter;
-import org.jdesktop.swingx.painter.MattePainter;
-import org.jdesktop.swingx.util.PaintUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,13 +35,17 @@ public abstract class DecoratedTable extends JXTable implements CrossSelectionIn
     
     private TablePopupMenu m_popupMenu;
     
+    private Highlighter m_stripingHighlighter = null;
+
     public DecoratedTable() {
 
         // allow user to hide/show columns
         setColumnControlVisible(true);
 
         // highlight one line of two
-        addHighlighter(HighlighterFactory.createSimpleStriping());
+        m_stripingHighlighter = HighlighterFactory.createSimpleStriping();
+        addHighlighter(m_stripingHighlighter);
+
         setGridColor(Color.lightGray);
         setRowHeight(16);
         setSortOrderCycle(SortOrder.ASCENDING, SortOrder.DESCENDING, SortOrder.UNSORTED);
@@ -55,6 +56,10 @@ public abstract class DecoratedTable extends JXTable implements CrossSelectionIn
         if (popup != null) {
             setTablePopup(popup);
         }
+    }
+    
+    public void removeStriping() {
+        removeHighlighter(m_stripingHighlighter);
     }
 
     
@@ -200,7 +205,7 @@ public abstract class DecoratedTable extends JXTable implements CrossSelectionIn
         TableModel model = getModel();
         if (model instanceof GlobalTableModelInterface) {
             int columnInModel = convertColumnIndexToModel(column);
-            TableCellRenderer renderer = ((GlobalTableModelInterface) model).getRenderer(columnInModel);
+            TableCellRenderer renderer = ((GlobalTableModelInterface) model).getRenderer(row, columnInModel);
             if (renderer != null) {
                 return renderer;
             }

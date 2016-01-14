@@ -1,7 +1,6 @@
 package fr.proline.studio.rsmexplorer.gui.calc.functions;
 
 import fr.proline.studio.id.ProjectId;
-import fr.proline.studio.parameter.ParameterError;
 import fr.proline.studio.parameter.ParameterList;
 import fr.proline.studio.pattern.WindowBox;
 import fr.proline.studio.pattern.WindowBoxFactory;
@@ -15,8 +14,6 @@ import fr.proline.studio.rsmexplorer.gui.calc.parameters.FunctionParametersDialo
 import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.utils.IconManager;
 import java.awt.Color;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import javax.swing.ImageIcon;
 import org.openide.windows.WindowManager;
 
@@ -90,7 +87,7 @@ public abstract class AbstractFunction implements CheckParameterInterface {
 
         
     protected void display(String dataName, String functionName) {
-        WindowBox windowBox = WindowBoxFactory.getModelWindowBox(dataName, functionName);
+        WindowBox windowBox = WindowBoxFactory.getGenericWindowBox(dataName, functionName, false);
         ProjectId projectId = (ProjectId) m_globalTableModelInterface.getSingleValue(ProjectId.class);
         long id = (projectId!=null) ? projectId.getId() : -1l;
         windowBox.setEntryData(id, m_globalTableModelInterface);

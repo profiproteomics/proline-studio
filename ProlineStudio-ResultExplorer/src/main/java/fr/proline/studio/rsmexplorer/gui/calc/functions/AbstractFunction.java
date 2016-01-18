@@ -87,7 +87,7 @@ public abstract class AbstractFunction implements CheckParameterInterface {
 
         
     protected void display(String dataName, String functionName) {
-        WindowBox windowBox = WindowBoxFactory.getGenericWindowBox(dataName, functionName, false);
+        WindowBox windowBox = WindowBoxFactory.getGenericWindowBox(dataName, functionName, IconManager.IconType.CHALKBOARD, false);
         ProjectId projectId = (ProjectId) m_globalTableModelInterface.getSingleValue(ProjectId.class);
         long id = (projectId!=null) ? projectId.getId() : -1l;
         windowBox.setEntryData(id, m_globalTableModelInterface);

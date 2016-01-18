@@ -16,6 +16,7 @@ import fr.proline.studio.rsmexplorer.gui.model.PropertiesTableModel;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
+import fr.proline.studio.utils.IconManager;
 import fr.proline.studio.utils.SerializedPropertiesUtil;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.Timestamp;
@@ -59,7 +60,7 @@ public class PropertiesAction extends AbstractRSMAction {
         PropertiesTableModel model = null;
         // new Properties window only for identification
         if (isIdentificationTree()) {
-            WindowBox windowBox = WindowBoxFactory.getGenericWindowBox(name, "Properties", true);
+            WindowBox windowBox = WindowBoxFactory.getGenericWindowBox(name, "Properties", IconManager.IconType.DOCUMENT_LIST, true);
             model = new PropertiesTableModel();
             windowBox.setEntryData(-1l, model);
             DataBoxViewerTopComponent win2 = new DataBoxViewerTopComponent(windowBox);

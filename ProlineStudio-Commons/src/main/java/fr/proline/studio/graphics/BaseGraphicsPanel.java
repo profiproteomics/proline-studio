@@ -108,9 +108,9 @@ public class BaseGraphicsPanel extends HourglassPanel implements GridListener {
             }
         });
         
-        JButton colorPicker = new JButton(IconManager.getIcon(IconManager.IconType.SETTINGS));
-        colorPicker.setFocusPainted(false);
-        colorPicker.addActionListener(new ActionListener() {
+        JButton settingsButton = new JButton(IconManager.getIcon(IconManager.IconType.SETTINGS));
+        settingsButton.setFocusPainted(false);
+        settingsButton.addActionListener(new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -191,7 +191,7 @@ public class BaseGraphicsPanel extends HourglassPanel implements GridListener {
         
         // add buttons to toolbar
         toolbar.add(m_gridButton);
-        toolbar.add(colorPicker);
+        toolbar.add(settingsButton);
         toolbar.addSeparator(); // ----
         toolbar.add(lockButton);
         toolbar.add(importSelectionButton);

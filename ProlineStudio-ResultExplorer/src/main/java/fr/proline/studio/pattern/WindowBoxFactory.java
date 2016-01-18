@@ -382,12 +382,13 @@ public class WindowBoxFactory {
     }
 
     
-    public static WindowBox getGenericWindowBox(String dataName, String functionName, boolean removeStripAndSort) {
+    
+    public static WindowBox getGenericWindowBox(String dataName, String functionName, IconManager.IconType iconType , boolean removeStripAndSort) {
         AbstractDataBox[] boxes = new AbstractDataBox[1];
         boxes[0] = new DataboxGeneric(dataName, functionName, removeStripAndSort);
         
         String windowName = (dataName==null) ? functionName : dataName+" "+functionName;
-        WindowBox winBox = new WindowBox(windowName, generatePanel(boxes), boxes[0], IconManager.getImage(IconManager.IconType.CHALKBOARD));
+        WindowBox winBox = new WindowBox(windowName, generatePanel(boxes), boxes[0], IconManager.getImage(iconType));
         
         return winBox;
     }

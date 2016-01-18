@@ -84,9 +84,7 @@ public class PropertiesTableModel extends DecoratedTableModel implements GlobalT
             group = new SearchResultInformationGroup(startRow); m_dataGroupList.add(group); startRow+=group.getRowCount();
             group = new IdentificationSummaryInformationGroup(startRow, datasetArrayList); m_dataGroupList.add(group); startRow+=group.getRowCount();
             group = new SqlIdGroup(startRow); m_dataGroupList.add(group); startRow+=group.getRowCount();
-            //group = new IdentificationSummaryGroup(startRow); m_dataGroupList.add(group); startRow+=group.getRowCount();
-            
-            
+
         }
         
         fireTableStructureChanged();
@@ -551,7 +549,6 @@ public class PropertiesTableModel extends DecoratedTableModel implements GlobalT
 
             DDataset dataset = m_datasetArrayList.get(columnIndex);
             ResultSet rset = dataset.getResultSet();
-            ResultSet rsetDecoy = (rset==null) ? null : rset.getDecoyResultSet();
             
             MsiSearch msiSearch = (rset==null) ? null : rset.getMsiSearch();
             SearchSetting searchSetting = (msiSearch == null) ? null : msiSearch.getSearchSetting();
@@ -559,9 +556,6 @@ public class PropertiesTableModel extends DecoratedTableModel implements GlobalT
             if (searchSetting instanceof MsmsSearch) {
                 msmsSearch = (MsmsSearch) searchSetting;
             }
-            InstrumentConfig instrumentConfig = (searchSetting==null) ? null : searchSetting.getInstrumentConfig();
-            Peaklist peaklist = (msiSearch == null) ? null : msiSearch.getPeaklist();
-            PeaklistSoftware peaklistSoftware = (peaklist == null) ? null : peaklist.getPeaklistSoftware();
             ResultSummary rsm = dataset.getResultSummary();
             if (rsm == null) {
                 return "";
@@ -610,6 +604,9 @@ public class PropertiesTableModel extends DecoratedTableModel implements GlobalT
                     return (searchSetting == null) ? "" : searchSetting.getMaxMissedCleavages().toString();
                 }
                 case ROWTYPE_FIXED_MODIFICATIONS: {
+                    if (searchSetting == null) {
+                        return "";
+                    }
                     Set<UsedPtm> usedPtmSet = searchSetting.getUsedPtms();
                     Iterator<UsedPtm> it = usedPtmSet.iterator();
                     while (it.hasNext()) {
@@ -627,6 +624,9 @@ public class PropertiesTableModel extends DecoratedTableModel implements GlobalT
                     
                 }
                 case ROWTYPE_VARIABLE_MODIFICATIONS: {
+                    if (searchSetting == null) {
+                        return "";
+                    }
                     Set<UsedPtm> usedPtmSet = searchSetting.getUsedPtms();
                     Iterator<UsedPtm> it = usedPtmSet.iterator();
                     while (it.hasNext()) {
@@ -678,7 +678,7 @@ public class PropertiesTableModel extends DecoratedTableModel implements GlobalT
     }
     
     
-        /**
+    /**
      * SearchPropertiesGroup
      */
     public class SearchResultInformationGroup extends DataGroup {
@@ -737,19 +737,32 @@ public class PropertiesTableModel extends DecoratedTableModel implements GlobalT
                 case ROWTYPE_QUERIES_NUMBER:
                     return "NA";
                 case ROWTYPE_PSM_NUMBER: {
-                    return rset.getTransientData().getPeptideMatchesCount().toString();
+                    Object data = rset.getTransientData().getPeptideMatchesCount();
+                    if (data == null) {
+                        return "";
+                    }
+                    return data.toString();
                 }
                 case ROWTYPE_PEPTIDE_NUMBER:
                     return "NA";
-                case ROWTYPE_PROTEIN_NUMBER:
-                    return rset.getTransientData().getProteinMatchesCount().toString();
+                case ROWTYPE_PROTEIN_NUMBER: {
+                    Object data = rset.getTransientData().getProteinMatchesCount();
+                    if (data == null) {
+                        return "";
+                    }
+                    return data.toString();
+                }
                 case ROWTYPE_DECOY_QUERIES_NUMBER:
                     return "NA";
                 case ROWTYPE_DECOY_PSM_NUMBER: {
                     if (rsetDecoy == null) {
                         return "";
                     }
-                    return rsetDecoy.getTransientData().getPeptideMatchesCount().toString();
+                    Object data = rsetDecoy.getTransientData().getPeptideMatchesCount();
+                    if (data == null) {
+                        return "";
+                    }
+                    return data.toString();
                 }
                 case ROWTYPE_DECOY_PEPTIDE_NUMBER:
                     return "NA";
@@ -757,7 +770,11 @@ public class PropertiesTableModel extends DecoratedTableModel implements GlobalT
                     if (rsetDecoy == null) {
                         return "";
                     }
-                    return rsetDecoy.getTransientData().getProteinMatchesCount().toString();
+                    Object data = rsetDecoy.getTransientData().getProteinMatchesCount();
+                    if (data == null) {
+                        return "";
+                    }
+                    return data.toString();
                 }
 
             }
@@ -805,7 +822,7 @@ public class PropertiesTableModel extends DecoratedTableModel implements GlobalT
             // retrieve information on maps
             TreeSet<String> keysSet = new TreeSet<>();
             int nbDataset = datasetArrayList.size();
-            ArrayList<HashMap<String, String>> mapArray = new ArrayList<>(nbDataset);
+
             
             try {
                 for (int i = 0; i < nbDataset; i++) {
@@ -864,17 +881,11 @@ public class PropertiesTableModel extends DecoratedTableModel implements GlobalT
 
             DDataset dataset = m_datasetArrayList.get(columnIndex);
             ResultSet rset = dataset.getResultSet();
-            ResultSet rsetDecoy = (rset==null) ? null : rset.getDecoyResultSet();
+
             
             MsiSearch msiSearch = (rset==null) ? null : rset.getMsiSearch();
             SearchSetting searchSetting = (msiSearch == null) ? null : msiSearch.getSearchSetting();
-            MsmsSearch msmsSearch =  null;
-            if (searchSetting instanceof MsmsSearch) {
-                msmsSearch = (MsmsSearch) searchSetting;
-            }
-            InstrumentConfig instrumentConfig = (searchSetting==null) ? null : searchSetting.getInstrumentConfig();
-            Peaklist peaklist = (msiSearch == null) ? null : msiSearch.getPeaklist();
-            PeaklistSoftware peaklistSoftware = (peaklist == null) ? null : peaklist.getPeaklistSoftware();
+
             ResultSummary rsm = dataset.getResultSummary();
             if (rsm == null) {
                 return "";
@@ -983,17 +994,12 @@ public class PropertiesTableModel extends DecoratedTableModel implements GlobalT
 
             DDataset dataset = m_datasetArrayList.get(columnIndex);
             ResultSet rset = dataset.getResultSet();
-            ResultSet rsetDecoy = (rset==null) ? null : rset.getDecoyResultSet();
 
             ResultSummary rsm = dataset.getResultSummary();
-            ResultSummary rsmDecoy = (rsm==null) ? null : rsm.getDecotResultSummary();
 
             MsiSearch msiSearch = (rset==null) ? null : rset.getMsiSearch();
             SearchSetting searchSetting = (msiSearch == null) ? null : msiSearch.getSearchSetting();
-            MsmsSearch msmsSearch =  null;
-            if (searchSetting instanceof MsmsSearch) {
-                msmsSearch = (MsmsSearch) searchSetting;
-            }
+
             InstrumentConfig instrumentConfig = (searchSetting==null) ? null : searchSetting.getInstrumentConfig();
             Peaklist peaklist = (msiSearch == null) ? null : msiSearch.getPeaklist();
             PeaklistSoftware peaklistSoftware = (peaklist == null) ? null : peaklist.getPeaklistSoftware();

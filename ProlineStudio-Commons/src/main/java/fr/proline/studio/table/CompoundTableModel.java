@@ -212,12 +212,18 @@ public class CompoundTableModel extends AbstractTableModel implements GlobalTabl
 
     @Override
     public boolean isLoaded() {
-
+        if (m_lastModel == null) {
+            return false;
+        }
+        
         return m_lastModel.isLoaded();
     }
 
     @Override
     public int getLoadingPercentage() {
+        if (m_lastModel == null) {
+            return 0;
+        }
         return m_lastModel.getLoadingPercentage();
     }
 

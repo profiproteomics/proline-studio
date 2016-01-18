@@ -71,6 +71,9 @@ public class MarkerContainerPanel extends JPanel implements ViewChangeListener, 
             }
         });
         
+        sp.getViewport().setBackground(Color.white);
+        sp.setBackground(Color.white);
+        
         initDefaultRenderers();
 
     }

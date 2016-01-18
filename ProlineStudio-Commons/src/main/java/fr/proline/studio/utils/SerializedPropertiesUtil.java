@@ -19,10 +19,9 @@ import org.openide.nodes.Sheet;
 public class SerializedPropertiesUtil {
 
     public static void getProperties(HashMap<String, String> propertiesList, String name, Map<String, Object> serializedPropertiesMap) {
-
-        m_sb = new StringBuilder();
+        
         getPropertiesImpl(propertiesList, name, serializedPropertiesMap);
-        m_sb = null;
+        m_sb.setLength(0);
     }
 
     /**
@@ -64,11 +63,12 @@ public class SerializedPropertiesUtil {
 
     public static void getProperties(Sheet sheet, String name, Map serializedPropertiesMap) {
 
-        m_sb = new StringBuilder();
         getPropertiesImpl(sheet, name, serializedPropertiesMap);
-        m_sb = null;
+
+        m_sb.setLength(0);
+        
     }
-    private static StringBuilder m_sb;
+    private static final StringBuilder m_sb = new StringBuilder();
 
     /**
      * If the First Map contains only maps, we remove the first map and use the

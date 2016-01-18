@@ -3,16 +3,23 @@ package fr.proline.studio.table;
 import com.thierry.filtering.TableSelection;
 import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.graphics.CrossSelectionInterface;
+import fr.proline.studio.parameter.BooleanParameter;
+import fr.proline.studio.parameter.ParameterList;
+import fr.proline.studio.parameter.SettingsInterface;
 import fr.proline.studio.utils.RelativePainterHighlighter;
 import java.awt.Color;
 import java.awt.Point;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import javax.swing.JCheckBox;
 import javax.swing.ListSelectionModel;
 import javax.swing.SortOrder;
+import javax.swing.SwingUtilities;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableColumn;
+import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.JXTableHeader;
@@ -27,7 +34,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author JM235353
  */
-public abstract class DecoratedTable extends JXTable implements CrossSelectionInterface {
+public abstract class DecoratedTable extends JXTable implements CrossSelectionInterface, SettingsInterface {
 
     protected static final Logger m_loggerProline = LoggerFactory.getLogger("ProlineStudio");
    
@@ -37,6 +44,10 @@ public abstract class DecoratedTable extends JXTable implements CrossSelectionIn
     
     private Highlighter m_stripingHighlighter = null;
 
+    private BooleanParameter m_autoSizeColumnParameter = null;
+    private ArrayList<ParameterList> m_parameterListArray = null;
+    private static final String AUTOSIZE_COLUMN_KEY = "AUTOSIZE_COLUMN";
+    
     public DecoratedTable() {
 
         // allow user to hide/show columns
@@ -56,6 +67,18 @@ public abstract class DecoratedTable extends JXTable implements CrossSelectionIn
         if (popup != null) {
             setTablePopup(popup);
         }
+        
+        initParameters();
+    }
+    
+    protected void initParameters() {
+        ParameterList parameterTableList = new ParameterList("Table Parameters");
+
+        m_autoSizeColumnParameter = new BooleanParameter(AUTOSIZE_COLUMN_KEY, "Auto-size Columns", JCheckBox.class, Boolean.TRUE);
+        parameterTableList.add(m_autoSizeColumnParameter);
+
+        m_parameterListArray = new ArrayList<>(1);
+        m_parameterListArray.add(parameterTableList);
     }
     
     public void removeStriping() {
@@ -212,6 +235,43 @@ public abstract class DecoratedTable extends JXTable implements CrossSelectionIn
         }
 
         return super.getCellRenderer(row, column);
+    }
+    
+    @Override
+    public ArrayList<ParameterList> getParameters() {
+        return m_parameterListArray;
+    }
+    
+    @Override
+    public void parametersChanged() {
+        boolean autosize = ((Boolean) m_autoSizeColumnParameter.getObjectValue());
+
+        if (autosize) {
+            setAutoResizeMode(JXTable.AUTO_RESIZE_ALL_COLUMNS);
+        } else {
+            final int MIN_WIDTH = 240;
+            setAutoResizeMode(JXTable.AUTO_RESIZE_OFF);
+            
+            SwingUtilities.invokeLater(new Runnable() {
+
+                @Override
+                public void run() {
+                    int colCount = getColumnCount();
+                    TableColumnModel columnModel = getColumnModel();
+                    for (int i = 0; i < colCount; i++) {
+                        TableColumn col = columnModel.getColumn(i);
+                        int width = col.getWidth();
+                        if (width < MIN_WIDTH) {
+                            col.setWidth(MIN_WIDTH);
+                            col.setPreferredWidth(MIN_WIDTH);
+                        }
+                    }
+                }
+                
+            });
+            
+
+        }
     }
     
 }

@@ -16,7 +16,7 @@ public class DataboxGeneric extends AbstractDataBox {
 
     private GlobalTableModelInterface m_entryModel = null;
     
-    private boolean m_removeStripAndSort;
+    private final boolean m_removeStripAndSort;
     
     public DataboxGeneric(String dataName, String typeName, boolean removeStripAndSort) {
         super(DataboxType.DataboxCompareResult);

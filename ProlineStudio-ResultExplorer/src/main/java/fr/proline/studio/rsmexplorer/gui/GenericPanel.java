@@ -9,6 +9,7 @@ import fr.proline.studio.filter.FilterButton;
 import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.markerbar.MarkerContainerPanel;
+import fr.proline.studio.parameter.SettingsButton;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.progress.ProgressInterface;
@@ -42,6 +43,7 @@ public class GenericPanel extends JPanel implements DataBoxPanelInterface, Globa
     private AbstractDataBox m_dataBox;
 
 
+    private SettingsButton m_settingsButton;
     private FilterButton m_filterButton;
     private ExportButton m_exportButton;
     private SearchToggleButton m_searchToggleButton;
@@ -152,6 +154,9 @@ public class GenericPanel extends JPanel implements DataBoxPanelInterface, Globa
         JToolBar toolbar = new JToolBar(JToolBar.VERTICAL);
         toolbar.setFloatable(false);
 
+
+        m_settingsButton = new SettingsButton(((ProgressInterface) m_dataTable.getModel()), m_dataTable);
+        
         // Search Button
         m_searchToggleButton = new SearchToggleButton(m_dataTable, m_dataTable, ((CompoundTableModel) m_dataTable.getModel()));
         
@@ -167,6 +172,7 @@ public class GenericPanel extends JPanel implements DataBoxPanelInterface, Globa
 
         toolbar.add(m_searchToggleButton);
         toolbar.add(m_filterButton);
+        toolbar.add(m_settingsButton);
         toolbar.add(m_exportButton);
 
         return toolbar;
@@ -177,6 +183,7 @@ public class GenericPanel extends JPanel implements DataBoxPanelInterface, Globa
 
         CompoundTableModel model = new CompoundTableModel(dataInterface, true);
         m_dataTable.setModel(model);
+        m_settingsButton.setProgressInterface(model); // model changed
         m_filterButton.setModelFilterInterface(model);
         m_exportButton.setProgressInterface(model);
         m_searchToggleButton.init(m_dataTable, m_dataTable, model);

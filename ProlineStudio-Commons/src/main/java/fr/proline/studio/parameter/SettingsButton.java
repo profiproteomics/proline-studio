@@ -43,7 +43,7 @@ public class SettingsButton extends JButton implements ActionListener {
         
         if ((m_progressInterface != null) && (!m_progressInterface.isLoaded())) {
 
-            ProgressBarDialog dialog = ProgressBarDialog.getDialog(WindowManager.getDefault().getMainWindow(), m_progressInterface, "Data loading", "Export is not available while data is loading. Please Wait.");
+            ProgressBarDialog dialog = ProgressBarDialog.getDialog(WindowManager.getDefault().getMainWindow(), m_progressInterface, "Data loading", "Settings dialog is not available while data is loading. Please Wait.");
             dialog.setLocation(getLocationOnScreen().x + getWidth() + 5, getLocationOnScreen().y + getHeight() + 5);
             dialog.setVisible(true);
 

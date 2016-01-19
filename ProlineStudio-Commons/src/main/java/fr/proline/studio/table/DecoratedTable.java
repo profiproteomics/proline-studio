@@ -3,7 +3,9 @@ package fr.proline.studio.table;
 import com.thierry.filtering.TableSelection;
 import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.graphics.CrossSelectionInterface;
+import fr.proline.studio.parameter.AbstractLinkedParameters;
 import fr.proline.studio.parameter.BooleanParameter;
+import fr.proline.studio.parameter.IntegerParameter;
 import fr.proline.studio.parameter.MultiObjectParameter;
 import fr.proline.studio.parameter.ParameterList;
 import fr.proline.studio.parameter.SettingsInterface;
@@ -14,6 +16,8 @@ import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JCheckBox;
+import javax.swing.JSlider;
+import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.SortOrder;
 import javax.swing.SwingUtilities;
@@ -48,9 +52,11 @@ public abstract class DecoratedTable extends JXTable implements CrossSelectionIn
     private Highlighter m_stripingHighlighter = null;
 
     private BooleanParameter m_autoSizeColumnParameter = null;
+    private IntegerParameter m_columnWidthParameter = null;
     private MultiObjectParameter m_columnsVisibilityParameter = null;
     private ArrayList<ParameterList> m_parameterListArray = null;
-    private static final String AUTOSIZE_COLUMN_KEY = "AUTOSIZE_COLUMN";
+    private static final String AUTOSIZE_COLUMN_KEY = "AUTOSIZE_COLUMN_KEY";
+    private static final String COLUMN_WIDTH_KEY = "COLUMN_WIDTH_KEY";
     private static final String COLUMNS_VISIBILITY_KEY = "COLUMNS_VISIBILITY_KEY";
     
     public DecoratedTable() {
@@ -80,27 +86,68 @@ public abstract class DecoratedTable extends JXTable implements CrossSelectionIn
         ParameterList parameterTableList = new ParameterList("Table Parameters");
 
         m_autoSizeColumnParameter = new BooleanParameter(AUTOSIZE_COLUMN_KEY, "Auto-size Columns", JCheckBox.class, (getAutoResizeMode() != JXTable.AUTO_RESIZE_OFF));
-        parameterTableList.add(m_autoSizeColumnParameter);
+        
 
+        
+        
+        
         List<TableColumn> columns = getColumns(true);
         int colCount = columns.size();
         Object[] objectArray1 = new Object[colCount];
         Object[] associatedObjectArray1 = new Object[colCount];
         boolean[] selection = new boolean[colCount];
 
+        int nbVisible = 0;
+        int totalWidth = 0;
         for (int i = 0; i < colCount; i++) {
             TableColumnExt column = (TableColumnExt) columns.get(i);
             objectArray1[i] = column.getHeaderValue().toString();
             associatedObjectArray1[i] = column;
-            selection[i] = column.isVisible();
+            boolean visible = column.isVisible();
+            selection[i] = visible;
+            if (visible) {
+                totalWidth += column.getWidth();
+                nbVisible++;
+            }
         }
+        
+        final int MAX_WIDTH = 500;
+        int meanWidth = totalWidth / nbVisible;
+        if (meanWidth<30) {
+            meanWidth = 30;
+        } else if (meanWidth>MAX_WIDTH) {
+            meanWidth = MAX_WIDTH;
+        }
+        m_columnWidthParameter = new IntegerParameter(COLUMN_WIDTH_KEY, "Column Width", JTextField.class, meanWidth, 30, MAX_WIDTH);
 
+        
+        
+        
         m_columnsVisibilityParameter = new MultiObjectParameter(COLUMNS_VISIBILITY_KEY, "Columns Visibility", null, objectArray1, associatedObjectArray1, selection, null);
-        parameterTableList.add(m_columnsVisibilityParameter);
+        
 
+        AbstractLinkedParameters linkedParameters = new AbstractLinkedParameters(parameterTableList) {
+            @Override
+            public void valueChanged(String value) {
+                showParameter(m_columnWidthParameter, (value.compareTo("false") == 0));
+
+                updataParameterListPanel();
+            }
+
+        };
+        
+        parameterTableList.add(m_autoSizeColumnParameter);
+        parameterTableList.add(m_columnWidthParameter);
+        parameterTableList.add(m_columnsVisibilityParameter);        
+        
+        
+        
         m_parameterListArray = new ArrayList<>(1);
         m_parameterListArray.add(parameterTableList);
 
+        parameterTableList.getPanel(); // generate panel at once
+        m_autoSizeColumnParameter.setLinkedParameters(linkedParameters); // link parameter, it will modify the panel
+        linkedParameters.valueChanged("true");
     }
     
     public void removeStriping() {
@@ -278,22 +325,19 @@ public abstract class DecoratedTable extends JXTable implements CrossSelectionIn
         if (autosize) {
             setAutoResizeMode(JXTable.AUTO_RESIZE_ALL_COLUMNS);
         } else {
-            final int MIN_WIDTH = 240;
             setAutoResizeMode(JXTable.AUTO_RESIZE_OFF);
             
             SwingUtilities.invokeLater(new Runnable() {
 
                 @Override
                 public void run() {
+                    int width = ((Integer) m_columnWidthParameter.getObjectValue()).intValue();
                     int colCount = getColumnCount();
                     TableColumnModel columnModel = getColumnModel();
                     for (int i = 0; i < colCount; i++) {
                         TableColumn col = columnModel.getColumn(i);
-                        int width = col.getWidth();
-                        if (width < MIN_WIDTH) {
-                            col.setWidth(MIN_WIDTH);
-                            col.setPreferredWidth(MIN_WIDTH);
-                        }
+                        col.setWidth(width);
+                        col.setPreferredWidth(width);
                     }
                 }
                 

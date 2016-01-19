@@ -73,6 +73,7 @@ public class BooleanParameter extends AbstractParameter {
         if (m_graphicalType.equals(JCheckBox.class)) {
             JCheckBox checkBox = (JCheckBox) m_parameterComponent;
             checkBox.setSelected(m_defaultValue);
+
         }
     }
     

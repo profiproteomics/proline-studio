@@ -9,6 +9,8 @@ import fr.proline.studio.filter.FilterButton;
 import fr.proline.studio.filter.actions.ClearRestrainAction;
 import fr.proline.studio.filter.actions.RestrainAction;
 import fr.proline.studio.markerbar.MarkerContainerPanel;
+import fr.proline.studio.parameter.SettingsButton;
+import fr.proline.studio.progress.ProgressInterface;
 import fr.proline.studio.table.AbstractTableAction;
 import fr.proline.studio.table.CompoundTableModel;
 import fr.proline.studio.table.DecoratedMarkerTable;
@@ -40,27 +42,26 @@ import org.slf4j.LoggerFactory;
  */
 public class FeaturesPanel extends JPanel implements RowSorterListener, MouseListener {
 
-    final private static Logger logger = LoggerFactory.getLogger(FeaturesPanel.class);
-
-    private List<Feature> features = new ArrayList<Feature>();
+    private List<Feature> m_features = new ArrayList<>();
     private Map<Integer, IRawFile> m_mapRawFileByFeatureId = new HashMap();
     
-    private int modelSelectedIdxBeforeSort = -1;
+    private int m_modelSelectedIdxBeforeSort = -1;
 
-    private FeatureTable featureTable;
-    private FeaturesTableModel featureTableModel;
-    private IFeatureViewer featureViewer;
+    private FeatureTable m_featureTable;
+    private FeaturesTableModel m_featureTableModel;
+    private IFeatureViewer m_featureViewer;
     
-    private JScrollPane jScrollPane;
+    private JScrollPane m_jScrollPane;
 
     private MarkerContainerPanel m_markerContainerPanel;
     // toolbar
+    private SettingsButton m_settingsButton;
     private FilterButton m_filterButton;
     private ExportButton m_exportButton;
 
 
     public FeaturesPanel(IFeatureViewer featureViewer) {
-        this.featureViewer = featureViewer;
+        m_featureViewer = featureViewer;
         
         initComponents();
 
@@ -68,27 +69,27 @@ public class FeaturesPanel extends JPanel implements RowSorterListener, MouseLis
 
     private void initComponents() {
         setLayout(new BorderLayout());
-        featureTableModel = new FeaturesTableModel();
-        jScrollPane = new JScrollPane();
-        featureTable = new FeatureTable();
-        CompoundTableModel compoundTableModel = new CompoundTableModel(featureTableModel, true);
-        featureTable.setModel(compoundTableModel);
+        m_featureTableModel = new FeaturesTableModel();
+        m_jScrollPane = new JScrollPane();
+        m_featureTable = new FeatureTable();
+        CompoundTableModel compoundTableModel = new CompoundTableModel(m_featureTableModel, true);
+        m_featureTable.setModel(compoundTableModel);
 
-        featureTable.addMouseListener(new MouseAdapter() {
+        m_featureTable.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent evt) {
                 featureTableMouseClicked(evt);
             }
         });
-        featureTable.getRowSorter().addRowSorterListener(this);
+        m_featureTable.getRowSorter().addRowSorterListener(this);
 
-        jScrollPane.setViewportView(featureTable);
-        featureTable.setFillsViewportHeight(true);
-        featureTable.setViewport(jScrollPane.getViewport());
+        m_jScrollPane.setViewportView(m_featureTable);
+        m_featureTable.setFillsViewportHeight(true);
+        m_featureTable.setViewport(m_jScrollPane.getViewport());
 
         JToolBar toolbar = initToolbar();
 
-        m_markerContainerPanel = new MarkerContainerPanel(jScrollPane, featureTable);
+        m_markerContainerPanel = new MarkerContainerPanel(m_jScrollPane, m_featureTable);
 
         this.add(toolbar, BorderLayout.WEST);
         this.add(m_markerContainerPanel, BorderLayout.CENTER);
@@ -98,24 +99,27 @@ public class FeaturesPanel extends JPanel implements RowSorterListener, MouseLis
         JToolBar toolbar = new JToolBar(JToolBar.VERTICAL);
         toolbar.setFloatable(false);
 
-        m_filterButton = new FilterButton(((CompoundTableModel) featureTable.getModel())) {
+        m_settingsButton = new SettingsButton(((ProgressInterface) m_featureTable.getModel()), m_featureTable);
+        
+        m_filterButton = new FilterButton(((CompoundTableModel) m_featureTable.getModel())) {
             @Override
             protected void filteringDone() {
                 //
             }
         };
 
-        m_exportButton = new ExportButton(((CompoundTableModel) featureTable.getModel()), "Features-Peakels", featureTable);
+        m_exportButton = new ExportButton(((CompoundTableModel) m_featureTable.getModel()), "Features-Peakels", m_featureTable);
 
         toolbar.add(m_filterButton);
+        toolbar.add(m_settingsButton);
         toolbar.add(m_exportButton);
 
         return toolbar;
     }
 
     public void addFeatures(List<Feature> features, Map<Integer, IRawFile> mapRawFileByFeatureId) {
-        featureTableModel.addFeatures(features, mapRawFileByFeatureId);
-        this.features.addAll(features);
+        m_featureTableModel.addFeatures(features, mapRawFileByFeatureId);
+        this.m_features.addAll(features);
         mapRawFileByFeatureId.entrySet().stream().forEach((entrySet) -> {
             this.m_mapRawFileByFeatureId.put(entrySet.getKey(), entrySet.getValue());
         });
@@ -124,30 +128,30 @@ public class FeaturesPanel extends JPanel implements RowSorterListener, MouseLis
     
     
     public void setFeatures(List<Feature> features, Map<Integer, IRawFile> mapRawFileByFeatureId, boolean displayRawFile) {
-        modelSelectedIdxBeforeSort = -1;
-        featureTableModel.setFeatures(features, mapRawFileByFeatureId);
-        this.features = features;
+        m_modelSelectedIdxBeforeSort = -1;
+        m_featureTableModel.setFeatures(features, mapRawFileByFeatureId);
+        this.m_features = features;
         this.m_mapRawFileByFeatureId = mapRawFileByFeatureId;
         m_markerContainerPanel.setMaxLineNumber(features.size());
         // hide RawFileName column
-        featureTable.getColumnExt(featureTable.convertColumnIndexToView(FeaturesTableModel.COLTYPE_FEATURE_RAWFILE)).setVisible(displayRawFile);
+        m_featureTable.getColumnExt(m_featureTable.convertColumnIndexToView(FeaturesTableModel.COLTYPE_FEATURE_RAWFILE)).setVisible(displayRawFile);
     }
 
     private void featureTableMouseClicked(MouseEvent evt) {
-        if ((features != null) && (!features.isEmpty()) && (m_mapRawFileByFeatureId != null)
-                && (evt.getClickCount() == 2) && (featureTable.getSelectedRow() != -1)) {
+        if ((m_features != null) && (!m_features.isEmpty()) && (m_mapRawFileByFeatureId != null)
+                && (evt.getClickCount() == 2) && (m_featureTable.getSelectedRow() != -1)) {
             // Retrieve Selected Row
-            int selectedRow = featureTable.getSelectedRow();
-            Feature f = features.get(getModelRowId(selectedRow));
-            featureViewer.displayFeatureInRawFile(new MzdbFeatureWrapper(f), m_mapRawFileByFeatureId.get(f.getId()));
+            int selectedRow = m_featureTable.getSelectedRow();
+            Feature f = m_features.get(getModelRowId(selectedRow));
+            m_featureViewer.displayFeatureInRawFile(new MzdbFeatureWrapper(f), m_mapRawFileByFeatureId.get(f.getId()));
         }
     }
     
     private int getModelRowId(int rowId){
-        CompoundTableModel compoundTableModel = (CompoundTableModel) featureTable.getModel();
+        CompoundTableModel compoundTableModel = (CompoundTableModel) m_featureTable.getModel();
         if (compoundTableModel.getRowCount() != 0) {
             // convert according to the sorting
-            rowId = featureTable.convertRowIndexToModel(rowId);
+            rowId = m_featureTable.convertRowIndexToModel(rowId);
             rowId = compoundTableModel.convertCompoundRowToBaseModelRow(rowId);
         }
         return rowId;
@@ -155,17 +159,17 @@ public class FeaturesPanel extends JPanel implements RowSorterListener, MouseLis
 
     @Override
     public void sorterChanged(RowSorterEvent e) {
-        if (featureTable.getSelectedRow() == -1) {
+        if (m_featureTable.getSelectedRow() == -1) {
             return;
         }
         if (e.getType() == RowSorterEvent.Type.SORT_ORDER_CHANGED) {
             // Retrieve Selected Row
-            modelSelectedIdxBeforeSort = featureTable.getSelectedRow();
-            modelSelectedIdxBeforeSort = getModelRowId(modelSelectedIdxBeforeSort);
-        } else if (modelSelectedIdxBeforeSort != -1) {
-            int idx =modelSelectedIdxBeforeSort;
+            m_modelSelectedIdxBeforeSort = m_featureTable.getSelectedRow();
+            m_modelSelectedIdxBeforeSort = getModelRowId(m_modelSelectedIdxBeforeSort);
+        } else if (m_modelSelectedIdxBeforeSort != -1) {
+            int idx =m_modelSelectedIdxBeforeSort;
             idx = getModelRowId(idx);
-            featureTable.scrollRectToVisible(new Rectangle(featureTable.getCellRect(idx, 0, true)));
+            m_featureTable.scrollRectToVisible(new Rectangle(m_featureTable.getCellRect(idx, 0, true)));
         }
     }
 
@@ -178,8 +182,8 @@ public class FeaturesPanel extends JPanel implements RowSorterListener, MouseLis
     public void mousePressed(MouseEvent e) {
         // selects the row at which point the mouse is clicked
         Point point = e.getPoint();
-        int currentRow = featureTable.rowAtPoint(point);
-        featureTable.setRowSelectionInterval(currentRow, currentRow);
+        int currentRow = m_featureTable.rowAtPoint(point);
+        m_featureTable.setRowSelectionInterval(currentRow, currentRow);
     }
 
     @Override
@@ -287,13 +291,13 @@ public class FeaturesPanel extends JPanel implements RowSorterListener, MouseLis
 
 
         public void displayInRawFile(int rowIndex) {
-            Feature f = features.get(rowIndex);
-            featureViewer.displayFeatureInRawFile(new MzdbFeatureWrapper(f), m_mapRawFileByFeatureId.get(f.getId()));
+            Feature f = m_features.get(rowIndex);
+            m_featureViewer.displayFeatureInRawFile(new MzdbFeatureWrapper(f), m_mapRawFileByFeatureId.get(f.getId()));
         }
 
         public void displayInCurrentRawFile(int rowIndex) {
-            Feature f = features.get(rowIndex);
-            featureViewer.displayFeatureInCurrentRawFile(new MzdbFeatureWrapper(f));
+            Feature f = m_features.get(rowIndex);
+            m_featureViewer.displayFeatureInCurrentRawFile(new MzdbFeatureWrapper(f));
         }
 
         @Override

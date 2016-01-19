@@ -14,6 +14,7 @@ import fr.proline.studio.filter.actions.RestrainAction;
 import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
+import fr.proline.studio.parameter.SettingsButton;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.pattern.DataMixerWindowBoxManager;
@@ -51,6 +52,7 @@ public class RsmProteinsOfProteinSetPanel extends HourglassPanel implements Data
     private ProteinTable m_proteinTable;
     private JScrollPane m_scrollPane;
 
+    private SettingsButton m_settingsButton;
     private FilterButton m_filterButton;
     private ExportButton m_exportButton;
     private AddDataAnalyzerButton m_addCompareDataButton;
@@ -143,6 +145,9 @@ public class RsmProteinsOfProteinSetPanel extends HourglassPanel implements Data
         JToolBar toolbar = new JToolBar(JToolBar.VERTICAL);
         toolbar.setFloatable(false);
 
+        m_settingsButton = new SettingsButton(((ProgressInterface) m_proteinTable.getModel()), m_proteinTable);
+        
+        
         m_filterButton = new FilterButton(((CompoundTableModel) m_proteinTable.getModel())) {
 
             @Override
@@ -169,6 +174,7 @@ public class RsmProteinsOfProteinSetPanel extends HourglassPanel implements Data
         
         
         toolbar.add(m_filterButton);
+        toolbar.add(m_settingsButton);
         toolbar.add(m_exportButton);
         toolbar.add(m_addCompareDataButton);
 

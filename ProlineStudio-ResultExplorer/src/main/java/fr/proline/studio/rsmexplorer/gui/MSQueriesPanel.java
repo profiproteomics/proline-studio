@@ -13,11 +13,13 @@ import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.markerbar.MarkerContainerPanel;
+import fr.proline.studio.parameter.SettingsButton;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.pattern.DataMixerWindowBoxManager;
 import fr.proline.studio.pattern.MsQueryInfoRSM;
 import fr.proline.studio.pattern.MsQueryInfoRset;
+import fr.proline.studio.progress.ProgressInterface;
 import fr.proline.studio.python.data.TableInfo;
 import fr.proline.studio.rsmexplorer.gui.model.MSQueriesTableModel;
 import fr.proline.studio.table.CompoundTableModel;
@@ -58,6 +60,7 @@ public class MSQueriesPanel extends HourglassPanel implements DataBoxPanelInterf
     
     private MarkerContainerPanel m_markerContainerPanel;
     
+    private SettingsButton m_settingsButton;
     private FilterButton m_filterButton;
     private ExportButton m_exportButton;
     private AddDataAnalyzerButton m_addCompareDataButton;
@@ -130,6 +133,7 @@ public class MSQueriesPanel extends HourglassPanel implements DataBoxPanelInterf
         JToolBar toolbar = new JToolBar(JToolBar.VERTICAL);
         toolbar.setFloatable(false);
 
+        m_settingsButton = new SettingsButton(((ProgressInterface) m_msqueriesTable.getModel()), m_msqueriesTable);
         
         m_filterButton = new FilterButton(((CompoundTableModel) m_msqueriesTable.getModel())) {
 
@@ -143,6 +147,7 @@ public class MSQueriesPanel extends HourglassPanel implements DataBoxPanelInterf
         m_exportButton = new ExportButton(((CompoundTableModel) m_msqueriesTable.getModel()), "MsQueries", m_msqueriesTable);
 
         toolbar.add(m_filterButton);
+        toolbar.add(m_settingsButton);
         toolbar.add(m_exportButton);
         
         

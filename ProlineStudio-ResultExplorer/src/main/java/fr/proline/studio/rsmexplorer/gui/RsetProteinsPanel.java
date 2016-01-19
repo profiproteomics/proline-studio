@@ -28,7 +28,9 @@ import fr.proline.studio.filter.FilterButton;
 import fr.proline.studio.filter.actions.ClearRestrainAction;
 import fr.proline.studio.filter.actions.RestrainAction;
 import fr.proline.studio.graphics.CrossSelectionInterface;
+import fr.proline.studio.parameter.SettingsButton;
 import fr.proline.studio.pattern.*;
+import fr.proline.studio.progress.ProgressInterface;
 import fr.proline.studio.python.data.TableInfo;
 import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
 import fr.proline.studio.search.SearchToggleButton;
@@ -61,6 +63,7 @@ public class RsetProteinsPanel extends HourglassPanel implements DataBoxPanelInt
 
     private SearchToggleButton m_searchToggleButton;
 
+    private SettingsButton m_settingsButton;
     private FilterButton m_filterButton;
     private ExportButton m_exportButton;
     private AddDataAnalyzerButton m_addCompareDataButton;
@@ -163,6 +166,8 @@ public class RsetProteinsPanel extends HourglassPanel implements DataBoxPanelInt
                 }
             });
         }
+        
+        m_settingsButton = new SettingsButton(((ProgressInterface) m_proteinTable.getModel()), m_proteinTable);
 
         // Search Button
         m_searchToggleButton = new SearchToggleButton(m_proteinTable, m_proteinTable, ((CompoundTableModel) m_proteinTable.getModel()));
@@ -197,6 +202,7 @@ public class RsetProteinsPanel extends HourglassPanel implements DataBoxPanelInt
         }
         toolbar.add(m_searchToggleButton);
         toolbar.add(m_filterButton);
+        toolbar.add(m_settingsButton);
         toolbar.add(m_exportButton);
         toolbar.add(m_addCompareDataButton);
         

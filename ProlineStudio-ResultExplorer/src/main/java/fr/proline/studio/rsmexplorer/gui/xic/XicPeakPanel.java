@@ -13,11 +13,13 @@ import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.markerbar.MarkerContainerPanel;
+import fr.proline.studio.parameter.SettingsButton;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.pattern.WindowBox;
 import fr.proline.studio.pattern.WindowBoxFactory;
 import fr.proline.studio.progress.ProgressBarDialog;
+import fr.proline.studio.progress.ProgressInterface;
 import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
 import fr.proline.studio.table.CompoundTableModel;
 import fr.proline.studio.table.GlobalTableModelInterface;
@@ -58,6 +60,7 @@ public class XicPeakPanel  extends HourglassPanel implements DataBoxPanelInterfa
 
     private MarkerContainerPanel m_markerContainerPanel;
     
+    private SettingsButton m_settingsButton;
     private FilterButton m_filterButton;
     private ExportButton m_exportButton;
     private JButton m_graphicsButton;
@@ -125,6 +128,8 @@ public class XicPeakPanel  extends HourglassPanel implements DataBoxPanelInterfa
         JToolBar toolbar = new JToolBar(JToolBar.VERTICAL);
         toolbar.setFloatable(false);
 
+        m_settingsButton = new SettingsButton(((ProgressInterface) m_peakTable.getModel()), m_peakTable);
+        
         m_filterButton = new FilterButton(((CompoundTableModel) m_peakTable.getModel())) {
 
             @Override
@@ -136,6 +141,7 @@ public class XicPeakPanel  extends HourglassPanel implements DataBoxPanelInterfa
         m_exportButton = new ExportButton(((CompoundTableModel) m_peakTable.getModel()), "Peaks", m_peakTable);
 
         toolbar.add(m_filterButton);
+        toolbar.add(m_settingsButton);
         toolbar.add(m_exportButton);
         
         // graphics button

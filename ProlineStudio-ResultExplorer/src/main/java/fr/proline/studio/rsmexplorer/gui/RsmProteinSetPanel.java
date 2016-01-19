@@ -18,7 +18,9 @@ import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.markerbar.BookmarkMarker;
 import fr.proline.studio.markerbar.MarkerContainerPanel;
+import fr.proline.studio.parameter.SettingsButton;
 import fr.proline.studio.pattern.*;
+import fr.proline.studio.progress.ProgressInterface;
 import fr.proline.studio.python.data.TableInfo;
 import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
 import fr.proline.studio.rsmexplorer.gui.model.ProteinSetTableModel;
@@ -61,6 +63,7 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
 
     private SearchToggleButton m_searchToggleButton;
     
+    private SettingsButton m_settingsButton;
     private FilterButton m_filterButton;
     private ExportButton m_exportButton;
     private AddDataAnalyzerButton m_addCompareDataButton;
@@ -291,6 +294,9 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
             
         }
         
+        m_settingsButton = new SettingsButton(((ProgressInterface) m_proteinSetTable.getModel()), m_proteinSetTable);
+        
+        
         // Search Button
         m_searchToggleButton = new SearchToggleButton(m_proteinSetTable, m_proteinSetTable, ((CompoundTableModel) m_proteinSetTable.getModel()));
         toolbar.add(m_searchToggleButton);
@@ -307,6 +313,7 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
         m_exportButton = new ExportButton(((CompoundTableModel) m_proteinSetTable.getModel()), "Protein Sets", m_proteinSetTable);
 
         toolbar.add(m_filterButton);
+        toolbar.add(m_settingsButton);
         toolbar.add(m_exportButton);
 
         m_addCompareDataButton = new AddDataAnalyzerButton(((CompoundTableModel) m_proteinSetTable.getModel())) {

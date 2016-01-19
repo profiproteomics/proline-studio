@@ -15,8 +15,10 @@ import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.markerbar.MarkerContainerPanel;
+import fr.proline.studio.parameter.SettingsButton;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
+import fr.proline.studio.progress.ProgressInterface;
 import fr.proline.studio.table.CompoundTableModel;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.table.LazyTable;
@@ -54,6 +56,7 @@ public class XicPeptideMatchPanel extends HourglassPanel implements DataBoxPanel
 
     private MarkerContainerPanel m_markerContainerPanel;
 
+    private SettingsButton m_settingsButton;
     private FilterButton m_filterButton;
     private ExportButton m_exportButton;
 
@@ -122,6 +125,8 @@ public class XicPeptideMatchPanel extends HourglassPanel implements DataBoxPanel
         JToolBar toolbar = new JToolBar(JToolBar.VERTICAL);
         toolbar.setFloatable(false);
 
+        m_settingsButton = new SettingsButton(((ProgressInterface) m_psmTable.getModel()), m_psmTable);
+        
         m_filterButton = new FilterButton(((CompoundTableModel) m_psmTable.getModel())) {
 
             @Override
@@ -133,6 +138,7 @@ public class XicPeptideMatchPanel extends HourglassPanel implements DataBoxPanel
         m_exportButton = new ExportButton(((CompoundTableModel) m_psmTable.getModel()), "PSM", m_psmTable);
 
         toolbar.add(m_filterButton);
+        toolbar.add(m_settingsButton);
         toolbar.add(m_exportButton);
 
         return toolbar;

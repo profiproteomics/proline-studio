@@ -16,12 +16,14 @@ import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.markerbar.MarkerContainerPanel;
 import fr.proline.studio.mzscope.AddMzScopeButton;
 import fr.proline.studio.mzscope.MzScopeInterface;
+import fr.proline.studio.parameter.SettingsButton;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.pattern.MzScopeWindowBoxManager;
 import fr.proline.studio.pattern.WindowBox;
 import fr.proline.studio.pattern.WindowBoxFactory;
 import fr.proline.studio.progress.ProgressBarDialog;
+import fr.proline.studio.progress.ProgressInterface;
 import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
 import fr.proline.studio.table.CompoundTableModel;
 import fr.proline.studio.table.GlobalTableModelInterface;
@@ -62,6 +64,7 @@ public class XicFeaturePanel  extends HourglassPanel implements DataBoxPanelInte
 
     private MarkerContainerPanel m_markerContainerPanel;
 
+    private SettingsButton m_settingsButton;
     private FilterButton m_filterButton;
     private ExportButton m_exportButton;
     private JButton m_graphicsButton;
@@ -143,6 +146,8 @@ public class XicFeaturePanel  extends HourglassPanel implements DataBoxPanelInte
         JToolBar toolbar = new JToolBar(JToolBar.VERTICAL);
         toolbar.setFloatable(false);
        
+        m_settingsButton = new SettingsButton(((ProgressInterface) m_featureTable.getModel()), m_featureTable);
+        
         m_filterButton = new FilterButton(((CompoundTableModel) m_featureTable.getModel())) {
 
             @Override
@@ -154,6 +159,7 @@ public class XicFeaturePanel  extends HourglassPanel implements DataBoxPanelInte
         m_exportButton = new ExportButton(((CompoundTableModel) m_featureTable.getModel()), "Features", m_featureTable);
 
         toolbar.add(m_filterButton);
+        toolbar.add(m_settingsButton);
         toolbar.add(m_exportButton);
         
         // graphics button

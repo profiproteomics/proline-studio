@@ -20,6 +20,7 @@ import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
 import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
+import fr.proline.studio.parameter.SettingsButton;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.pattern.DataMixerWindowBoxManager;
@@ -74,6 +75,7 @@ public class RsetPeptideSpectrumValuesPanel extends HourglassPanel implements Da
 
     private JScrollPane m_scrollPane;
 
+    private SettingsButton m_settingsButton;
     private FilterButton m_filterButton;
     private ExportButton m_exportButton;
     private AddDataAnalyzerButton m_addCompareDataButton;
@@ -136,6 +138,8 @@ public class RsetPeptideSpectrumValuesPanel extends HourglassPanel implements Da
         JToolBar toolbar = new JToolBar(JToolBar.VERTICAL);
         toolbar.setFloatable(false);
 
+        m_settingsButton = new SettingsButton(((ProgressInterface) m_spectrumValuesTable.getModel()), m_spectrumValuesTable);
+        
         m_filterButton = new FilterButton(((CompoundTableModel) m_spectrumValuesTable.getModel())) {
 
             @Override
@@ -160,6 +164,7 @@ public class RsetPeptideSpectrumValuesPanel extends HourglassPanel implements Da
         };
 
         toolbar.add(m_filterButton);
+        toolbar.add(m_settingsButton);
         toolbar.add(m_exportButton);
         toolbar.add(m_addCompareDataButton);
 

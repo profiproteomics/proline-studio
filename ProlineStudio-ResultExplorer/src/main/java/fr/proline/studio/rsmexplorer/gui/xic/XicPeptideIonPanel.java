@@ -17,9 +17,11 @@ import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.JCheckBoxList;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.markerbar.MarkerContainerPanel;
+import fr.proline.studio.parameter.SettingsButton;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.pattern.DataMixerWindowBoxManager;
+import fr.proline.studio.progress.ProgressInterface;
 import fr.proline.studio.python.data.TableInfo;
 import fr.proline.studio.search.SearchToggleButton;
 import fr.proline.studio.table.CompoundTableModel;
@@ -72,6 +74,7 @@ public class XicPeptideIonPanel  extends HourglassPanel implements DataBoxPanelI
     private DQuantitationChannel[] m_quantChannels;
     private boolean m_isXICMode;
     
+    private SettingsButton m_settingsButton;
     private FilterButton m_filterButton;
     private ExportButton m_exportButton;
     private JButton m_columnVisibilityButton;
@@ -155,6 +158,8 @@ public class XicPeptideIonPanel  extends HourglassPanel implements DataBoxPanelI
         m_searchToggleButton = new SearchToggleButton(m_quantPeptideIonTable, m_quantPeptideIonTable, ((CompoundTableModel) m_quantPeptideIonTable.getModel()));
         toolbar.add(m_searchToggleButton);
         
+        m_settingsButton = new SettingsButton(((ProgressInterface) m_quantPeptideIonTable.getModel()), m_quantPeptideIonTable);
+        
         m_filterButton = new FilterButton(((CompoundTableModel) m_quantPeptideIonTable.getModel())) {
 
             @Override
@@ -167,6 +172,7 @@ public class XicPeptideIonPanel  extends HourglassPanel implements DataBoxPanelI
         m_exportButton = new ExportButton(((CompoundTableModel) m_quantPeptideIonTable.getModel()), "Peptides Ions", m_quantPeptideIonTable);
 
         toolbar.add(m_filterButton);
+        toolbar.add(m_settingsButton);
         toolbar.add(m_exportButton);
         
         m_columnVisibilityButton = new JButton();

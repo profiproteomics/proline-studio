@@ -16,8 +16,10 @@ import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.markerbar.MarkerContainerPanel;
+import fr.proline.studio.parameter.SettingsButton;
 import fr.proline.studio.pattern.*;
 import fr.proline.studio.progress.ProgressBarDialog;
+import fr.proline.studio.progress.ProgressInterface;
 import fr.proline.studio.python.data.TableInfo;
 import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
 import fr.proline.studio.rsmexplorer.gui.model.PeptideMatchTableModel;
@@ -62,6 +64,7 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
 
     private SearchToggleButton m_searchToggleButton;
     
+    private SettingsButton m_settingsButton;
     private FilterButton m_filterButton;
     private ExportButton m_exportButton;
     private JButton m_graphicsButton;
@@ -270,6 +273,7 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
             });
         }
 
+        m_settingsButton = new SettingsButton(((ProgressInterface) m_peptideMatchTable.getModel()), m_peptideMatchTable);
         
         // Search Button
         m_searchToggleButton = new SearchToggleButton(m_peptideMatchTable, m_peptideMatchTable, ((CompoundTableModel) m_peptideMatchTable.getModel()));
@@ -336,6 +340,7 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
         }
         toolbar.add(m_searchToggleButton);
         toolbar.add(m_filterButton);
+        toolbar.add(m_settingsButton);
         toolbar.add(m_exportButton);
         toolbar.add(m_addCompareDataButton);
         

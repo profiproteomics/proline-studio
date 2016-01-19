@@ -17,12 +17,14 @@ import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.JCheckBoxList;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.markerbar.MarkerContainerPanel;
+import fr.proline.studio.parameter.SettingsButton;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.pattern.DataMixerWindowBoxManager;
 import fr.proline.studio.pattern.WindowBox;
 import fr.proline.studio.pattern.WindowBoxFactory;
 import fr.proline.studio.progress.ProgressBarDialog;
+import fr.proline.studio.progress.ProgressInterface;
 import fr.proline.studio.python.data.TableInfo;
 import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
 import fr.proline.studio.search.SearchToggleButton;
@@ -85,6 +87,7 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
     private DQuantitationChannel[] m_quantChannels;
     private boolean m_isXICMode;
 
+    private SettingsButton m_settingsButton;
     private FilterButton m_filterButton;
     private ExportButton m_exportButton;
     private JButton m_columnVisibilityButton;
@@ -171,6 +174,8 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
         m_searchToggleButton = new SearchToggleButton(m_quantPeptideTable, m_quantPeptideTable, ((CompoundTableModel) m_quantPeptideTable.getModel()));
         toolbar.add(m_searchToggleButton);
         
+        m_settingsButton = new SettingsButton(((ProgressInterface) m_quantPeptideTable.getModel()), m_quantPeptideTable);
+        
         m_filterButton = new FilterButton(((CompoundTableModel) m_quantPeptideTable.getModel())) {
 
             @Override
@@ -183,6 +188,7 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
         m_exportButton = new ExportButton(((CompoundTableModel) m_quantPeptideTable.getModel()), "Peptides", m_quantPeptideTable);
 
         toolbar.add(m_filterButton);
+        toolbar.add(m_settingsButton);
         toolbar.add(m_exportButton);
         
         m_columnVisibilityButton = new JButton();

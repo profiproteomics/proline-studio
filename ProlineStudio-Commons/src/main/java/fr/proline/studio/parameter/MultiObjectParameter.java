@@ -1,6 +1,7 @@
 package fr.proline.studio.parameter;
 
 import fr.proline.studio.gui.JCheckBoxList;
+import java.awt.Dimension;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.*;
@@ -17,22 +18,22 @@ public class MultiObjectParameter<E> extends AbstractParameter {
 
     private E[] m_objects;
     private Object[] m_associatedObjects = null;
-    private int[] m_defaultIndex = null;
+    private boolean[] m_defaultSelection = null;
     private AbstractParameterToString<E> m_paramToString = null;
 
 
-    public MultiObjectParameter(String key, String name, E[] objects, int[] defaultIndex, AbstractParameterToString<E> paramToString) {
+    public MultiObjectParameter(String key, String name, E[] objects, boolean[] selection, AbstractParameterToString<E> paramToString) {
         super(key, name, Integer.class, JCheckBoxList.class);
         m_objects = objects;
-        m_defaultIndex = defaultIndex;
+        m_defaultSelection = selection;
         m_paramToString = paramToString;
         
     }
     
-    public MultiObjectParameter(String key, String name, JCheckBoxList checkBoxList, E[] objects, Object[] associatedObjects, int[] defaultIndex, AbstractParameterToString<E> paramToString) {
+    public MultiObjectParameter(String key, String name, JCheckBoxList checkBoxList, E[] objects, Object[] associatedObjects, boolean[] selection, AbstractParameterToString<E> paramToString) {
         super(key, name, Integer.class, JCheckBoxList.class);
         m_objects = objects;
-        m_defaultIndex = defaultIndex;
+        m_defaultSelection = selection;
         m_paramToString = paramToString;
         if (checkBoxList == null) {
             checkBoxList = (JCheckBoxList)getComponent(null);
@@ -44,17 +45,15 @@ public class MultiObjectParameter<E> extends AbstractParameter {
     }
     
     @Override
+    public boolean componentNeedsScrollPane() {
+        return true;
+    }
+    
+    @Override
     public JComponent getComponent(Object value) {
 
         if (m_parameterComponent != null) {
             if (m_graphicalType.equals(JCheckBoxList.class)) {
-                
-                JCheckBoxList checkBoxList = ((JCheckBoxList) m_parameterComponent);
-
-                // not used for this component for the moment
-                /*if ((value == null) || (! selectItem(combobox, value))) {
-                    combobox.setSelectedIndex(m_defaultIndex);
-                }*/
 
                 return m_parameterComponent;
             }
@@ -65,18 +64,18 @@ public class MultiObjectParameter<E> extends AbstractParameter {
         if (m_graphicalType.equals(JCheckBoxList.class)) {
             ArrayList<E> list = new ArrayList<>();
             ArrayList<Boolean> visibilityList = new ArrayList<>();
-            for (E obj : m_objects) {
+            for (int i=0;i<m_objects.length;i++) {
+                E obj = m_objects[i];
                 list.add(obj);
-                visibilityList.add(Boolean.FALSE);
+                if (m_defaultSelection != null) {
+                    visibilityList.add( m_defaultSelection[i] ? Boolean.TRUE : Boolean.FALSE);
+                } else {
+                    visibilityList.add(Boolean.FALSE);
+                }
             }
+            
             JCheckBoxList checkboxList = new JCheckBoxList(list, visibilityList);
-            
-            //checkboxList.setCellRenderer(new ParameterComboboxRenderer(m_paramToString));
-            
-            // not used for this component for the moment
-            /*if ((value == null) || (! selectItem(combobox, value))) {
-                    combobox.setSelectedIndex(m_defaultIndex);
-            }*/
+
             m_parameterComponent = checkboxList;
             return checkboxList;
         }
@@ -115,7 +114,7 @@ public class MultiObjectParameter<E> extends AbstractParameter {
         
         if (m_graphicalType.equals(JCheckBoxList.class)) {
             
-            List selectedList = ((JCheckBoxList) m_parameterComponent).getSelectedValuesList();
+            List selectedList = ((JCheckBoxList) m_parameterComponent).getSelectedItems();
             if (selectedList.isEmpty()) {
                 return new ParameterError("No selection done", m_parameterComponent);
             }
@@ -151,7 +150,7 @@ public class MultiObjectParameter<E> extends AbstractParameter {
     }
     
 
-    public Object getAssociatedSelectedObjectValue() {
+    public Object getAssociatedValues(boolean selected) {
         
         if (m_associatedObjects == null) {
             return getObjectValue();
@@ -160,7 +159,7 @@ public class MultiObjectParameter<E> extends AbstractParameter {
         if (m_graphicalType.equals(JCheckBoxList.class)) {
             
             JCheckBoxList checkBoxList = ((JCheckBoxList) m_parameterComponent);
-            int[] indices = checkBoxList.getSelectedIndices();
+            int[] indices = selected ? checkBoxList.getSelectedIndices() : checkBoxList.getNonSelectedIndices();
                  
             ArrayList associatedSelectedList = new ArrayList(indices.length);
             for (int i : indices) {

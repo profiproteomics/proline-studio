@@ -123,6 +123,31 @@ public class JCheckBoxList<E> extends JList {
         return rv;
     }
 
+    public int[] getNonSelectedIndices() {
+        
+        int nbNonSelected = 0;
+        int size = getListSize();
+        for (int i = 0; i < size; i++) {
+            CheckListItem item = (CheckListItem) getModel().getElementAt(i);
+            if (!item.isSelected()) {
+                nbNonSelected++;
+            }
+        }
+        
+
+        int[] rv = new int[nbNonSelected];
+        int j = 0;
+        for (int i = 0; i < size; i++) {
+            CheckListItem item = (CheckListItem) getModel().getElementAt(i);
+            if (!item.isSelected()) {
+                rv[j] = i;
+                j++;
+            }
+        }
+        
+        return rv;
+    }
+    
     private static class CheckListItem<E> {
 
         private E m_item;

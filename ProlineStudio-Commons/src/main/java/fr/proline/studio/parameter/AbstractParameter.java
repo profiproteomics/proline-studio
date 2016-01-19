@@ -47,6 +47,9 @@ public abstract class AbstractParameter {
     public JComponent getComponent() {
         return m_parameterComponent;
     }
+    public boolean componentNeedsScrollPane() {
+        return false;
+    }
     public abstract JComponent getComponent(Object value);
     public abstract void initDefault();
     

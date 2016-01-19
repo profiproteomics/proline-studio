@@ -4,6 +4,7 @@ import com.thierry.filtering.TableSelection;
 import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.parameter.BooleanParameter;
+import fr.proline.studio.parameter.MultiObjectParameter;
 import fr.proline.studio.parameter.ParameterList;
 import fr.proline.studio.parameter.SettingsInterface;
 import fr.proline.studio.utils.RelativePainterHighlighter;
@@ -11,6 +12,7 @@ import java.awt.Color;
 import java.awt.Point;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.util.List;
 import javax.swing.JCheckBox;
 import javax.swing.ListSelectionModel;
 import javax.swing.SortOrder;
@@ -25,6 +27,7 @@ import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.JXTableHeader;
 import org.jdesktop.swingx.decorator.Highlighter;
 import org.jdesktop.swingx.decorator.HighlighterFactory;
+import org.jdesktop.swingx.table.TableColumnExt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,8 +48,10 @@ public abstract class DecoratedTable extends JXTable implements CrossSelectionIn
     private Highlighter m_stripingHighlighter = null;
 
     private BooleanParameter m_autoSizeColumnParameter = null;
+    private MultiObjectParameter m_columnsVisibilityParameter = null;
     private ArrayList<ParameterList> m_parameterListArray = null;
     private static final String AUTOSIZE_COLUMN_KEY = "AUTOSIZE_COLUMN";
+    private static final String COLUMNS_VISIBILITY_KEY = "COLUMNS_VISIBILITY_KEY";
     
     public DecoratedTable() {
 
@@ -67,18 +72,35 @@ public abstract class DecoratedTable extends JXTable implements CrossSelectionIn
         if (popup != null) {
             setTablePopup(popup);
         }
-        
-        initParameters();
+
     }
     
     protected void initParameters() {
+
         ParameterList parameterTableList = new ParameterList("Table Parameters");
 
-        m_autoSizeColumnParameter = new BooleanParameter(AUTOSIZE_COLUMN_KEY, "Auto-size Columns", JCheckBox.class, Boolean.TRUE);
+        m_autoSizeColumnParameter = new BooleanParameter(AUTOSIZE_COLUMN_KEY, "Auto-size Columns", JCheckBox.class, (getAutoResizeMode() != JXTable.AUTO_RESIZE_OFF));
         parameterTableList.add(m_autoSizeColumnParameter);
+
+        List<TableColumn> columns = getColumns(true);
+        int colCount = columns.size();
+        Object[] objectArray1 = new Object[colCount];
+        Object[] associatedObjectArray1 = new Object[colCount];
+        boolean[] selection = new boolean[colCount];
+
+        for (int i = 0; i < colCount; i++) {
+            TableColumnExt column = (TableColumnExt) columns.get(i);
+            objectArray1[i] = column.getHeaderValue().toString();
+            associatedObjectArray1[i] = column;
+            selection[i] = column.isVisible();
+        }
+
+        m_columnsVisibilityParameter = new MultiObjectParameter(COLUMNS_VISIBILITY_KEY, "Columns Visibility", null, objectArray1, associatedObjectArray1, selection, null);
+        parameterTableList.add(m_columnsVisibilityParameter);
 
         m_parameterListArray = new ArrayList<>(1);
         m_parameterListArray.add(parameterTableList);
+
     }
     
     public void removeStriping() {
@@ -239,13 +261,20 @@ public abstract class DecoratedTable extends JXTable implements CrossSelectionIn
     
     @Override
     public ArrayList<ParameterList> getParameters() {
+        initParameters(); // must be done each time, because they can be changed in another way
+        // than with the parameter dialog
+
         return m_parameterListArray;
     }
     
     @Override
     public void parametersChanged() {
+        
+        
         boolean autosize = ((Boolean) m_autoSizeColumnParameter.getObjectValue());
 
+        
+        
         if (autosize) {
             setAutoResizeMode(JXTable.AUTO_RESIZE_ALL_COLUMNS);
         } else {
@@ -272,6 +301,17 @@ public abstract class DecoratedTable extends JXTable implements CrossSelectionIn
             
 
         }
+        
+        
+        List selectedColumns =(List) m_columnsVisibilityParameter.getAssociatedValues(true);
+        List nonSelectedColumns =(List) m_columnsVisibilityParameter.getAssociatedValues(false);
+        for (Object column : selectedColumns) {
+            ((TableColumnExt)column).setVisible(true);
+        }
+        for (Object column : nonSelectedColumns) {
+            ((TableColumnExt)column).setVisible(false);
+        }
+        
     }
     
 }

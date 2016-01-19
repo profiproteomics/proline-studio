@@ -732,6 +732,9 @@ public class PropertiesTableModel extends DecoratedTableModel implements GlobalT
             ResultSet rset = dataset.getResultSet();
             ResultSet rsetDecoy = (rset==null) ? null : rset.getDecoyResultSet();
 
+            if (rset == null) {
+                return "";
+            }
 
             switch (rowIndex) {
                 case ROWTYPE_QUERIES_NUMBER:

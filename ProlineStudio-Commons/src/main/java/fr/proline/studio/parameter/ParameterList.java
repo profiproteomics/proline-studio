@@ -1,5 +1,6 @@
 package fr.proline.studio.parameter;
 
+import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.util.ArrayList;
@@ -9,6 +10,7 @@ import javax.swing.BorderFactory;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import org.openide.util.NbPreferences;
 
 /**
@@ -90,14 +92,38 @@ public class ParameterList extends ArrayList<AbstractParameter> {
                     cFrame.insets = new java.awt.Insets(5, 5, 5, 5);
                     cFrame.weightx = 1;
                     comp = parameter.getComponent(parameterValue);
-                    framedPanel.add(comp, cFrame);
+                    JScrollPane scroll = null;
+                    if (parameter.componentNeedsScrollPane()) {
+                        scroll = new JScrollPane(comp) {
+
+                            private Dimension maximumSize = new Dimension(360, 400);
+
+                            @Override
+                            public Dimension getMaximumSize() {
+                                return maximumSize;
+                            }
+                        };
+                    }
+                    framedPanel.add((scroll!=null) ? scroll : comp, cFrame);
                     m_parametersPanel.add(framedPanel, c);
                     c.gridwidth = 1;
                 } else {
                     c.gridx = 1;
                     c.weightx = 1;
                     comp = parameter.getComponent(parameterValue);
-                    m_parametersPanel.add(comp, c);
+                    JScrollPane scroll = null;
+                    if (parameter.componentNeedsScrollPane()) {
+                        scroll = new JScrollPane(comp) {
+
+                            private Dimension maximumSize = new Dimension(360, 400);
+
+                            @Override
+                            public Dimension getMaximumSize() {
+                                return maximumSize;
+                            }
+                        };
+                    }
+                    m_parametersPanel.add((scroll!=null) ? scroll : comp, c);
                 }
                 if ((l != null) && (comp !=null)) {
                     m_associatedLabels.put(comp, l);

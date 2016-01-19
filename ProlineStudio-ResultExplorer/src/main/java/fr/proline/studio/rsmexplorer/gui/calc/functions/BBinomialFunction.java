@@ -57,8 +57,8 @@ public class BBinomialFunction extends AbstractFunction {
             return;
         }
         
-        List colList1 =(List) m_columnsParameter1.getAssociatedSelectedObjectValue();
-        List colList2 =(List) m_columnsParameter2.getAssociatedSelectedObjectValue();
+        List colList1 =(List) m_columnsParameter1.getAssociatedValues(true);
+        List colList2 =(List) m_columnsParameter2.getAssociatedValues(true);
         if ((colList1 == null) || (colList1.isEmpty()) || (colList2 == null) || (colList2.isEmpty())) {
             //m_state = GraphNode.NodeState.UNSET;
             return;
@@ -158,8 +158,8 @@ public class BBinomialFunction extends AbstractFunction {
             return false;
         }
 
-        List colList1 = (List) m_columnsParameter1.getAssociatedSelectedObjectValue();
-        List colList2 = (List) m_columnsParameter2.getAssociatedSelectedObjectValue();
+        List colList1 = (List) m_columnsParameter1.getAssociatedValues(true);
+        List colList2 = (List) m_columnsParameter2.getAssociatedValues(true);
         if ((colList1 == null) || (colList1.isEmpty()) || (colList2 == null) || (colList2.isEmpty())) {
             return false;
         }

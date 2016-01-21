@@ -190,6 +190,10 @@ public class GenericPanel extends JPanel implements DataBoxPanelInterface, Globa
 
         m_markerContainerPanel.setMaxLineNumber(model.getRowCount());
     }
+    
+    public void setMaxLineNumber(int nb) {
+        m_markerContainerPanel.setMaxLineNumber(nb);
+    }
 
     @Override
     public void setDataBox(AbstractDataBox dataBox) {

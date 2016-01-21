@@ -7,11 +7,13 @@ import fr.proline.core.orm.uds.QuantitationLabel;
 import fr.proline.core.orm.uds.QuantitationMethod;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.core.orm.uds.dto.DMasterQuantitationChannel;
-import fr.proline.core.orm.uds.dto.DQuantitationChannel;;
+import fr.proline.core.orm.uds.dto.DQuantitationChannel;import fr.proline.studio.pattern.DataboxGeneric;
+;
 import fr.proline.studio.pattern.WindowBox;
 import fr.proline.studio.pattern.WindowBoxFactory;
 import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
 import fr.proline.studio.rsmexplorer.PropertiesTopComponent;
+import fr.proline.studio.rsmexplorer.gui.GenericPanel;
 import fr.proline.studio.rsmexplorer.gui.model.PropertiesTableModel;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
@@ -59,6 +61,7 @@ public class PropertiesAction extends AbstractRSMAction {
          
         PropertiesTableModel model = null;
         // new Properties window only for identification
+        GenericPanel genericPanel =  null;
         if (isIdentificationTree()) {
             WindowBox windowBox = WindowBoxFactory.getGenericWindowBox(name, "Properties", IconManager.IconType.DOCUMENT_LIST, true);
             model = new PropertiesTableModel();
@@ -66,10 +69,17 @@ public class PropertiesAction extends AbstractRSMAction {
             DataBoxViewerTopComponent win2 = new DataBoxViewerTopComponent(windowBox);
             win2.open();
             win2.requestActive();
+            
+            //JPM.HACK ! Impossible to set the max number of lines differently in this case
+            DataboxGeneric databoxGeneric = ((DataboxGeneric)windowBox.getEntryBox());
+            genericPanel = (GenericPanel) databoxGeneric.getPanel();
         }
         final PropertiesTableModel _model = model;
-                
+        final GenericPanel _genericPanel = genericPanel;
+        
          // load data for properties
+         
+        final 
          DataLoadedCallback dataLoadedCallback = new DataLoadedCallback(selectedNodes.length) {
 
             @Override
@@ -89,6 +99,7 @@ public class PropertiesAction extends AbstractRSMAction {
                     
                     if (_model != null) {
                         _model.setData(datasetList);
+                        _genericPanel.setMaxLineNumber(_model.getRowCount());
                     }
                     
                 }

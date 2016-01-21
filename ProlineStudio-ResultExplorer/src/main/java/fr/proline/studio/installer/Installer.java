@@ -8,8 +8,9 @@ import fr.proline.studio.dpm.task.util.JMSConnectionManager;
 import fr.proline.studio.gui.InfoDialog;
 import fr.proline.studio.gui.OptionDialog;
 import fr.proline.studio.rserver.RServerManager;
+import java.awt.Frame;
+import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
 import org.openide.windows.WindowManager;
 
 /**
@@ -24,16 +25,9 @@ public class Installer extends VersionInstaller {
     @Override
     public void restored() {
 
-        // JPM.HACK for mack : mac file chooser doest not work correctly for custom system file
-        String OS = System.getProperty("os.name").toLowerCase();
-        if (OS.indexOf("mac") >= 0) {
+        // for Mac : we need to use Metal UI, otherwise the browse file on server does not work
+        forceMetalUIForMac();
 
-            try {
-                // Set cross-platform Java L&F (also called "Metal")
-                UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
-            } catch (Exception e) {
-            }
-        }
         
         String buildnumber = "1.2  Milestone 3 ("+moduleBuildDate+")"; //specify if alpha (or nothing = release)
         //String buildnumber = "1.1";
@@ -44,6 +38,33 @@ public class Installer extends VersionInstaller {
         // initialize the connection to the server as soon as possible
         ServerConnectionManager.getServerConnectionManager();
         
+    }
+    
+    private void forceMetalUIForMac() {
+        String OS = System.getProperty("os.name").toLowerCase();
+        if (OS.contains("mac")) {
+            SwingUtilities.invokeLater(new Runnable() {
+
+                @Override
+                public void run() {
+
+                    try {
+                        UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
+                        Frame f = WindowManager.getDefault().getMainWindow();
+                        if (f == null) {
+                            // should never be null
+                            forceMetalUIForMac();
+                        } else {
+                            SwingUtilities.updateComponentTreeUI(f);
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+
+                }
+
+            });
+        }
     }
     
     @Override

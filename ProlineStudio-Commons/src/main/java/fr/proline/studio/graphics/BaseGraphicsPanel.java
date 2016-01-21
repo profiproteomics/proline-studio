@@ -5,8 +5,7 @@ import fr.proline.studio.comparedata.LockedDataModel;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.graphics.BasePlotPanel.GridListener;
 import fr.proline.studio.gui.HourglassPanel;
-import fr.proline.studio.parameter.DefaultParameterDialog;
-import fr.proline.studio.parameter.ParameterList;
+import fr.proline.studio.parameter.SettingsButton;
 import fr.proline.studio.utils.IconManager;
 import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
@@ -23,7 +22,6 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
-import org.openide.windows.WindowManager;
 
 /**
  *
@@ -108,29 +106,8 @@ public class BaseGraphicsPanel extends HourglassPanel implements GridListener {
             }
         });
         
-        JButton settingsButton = new JButton(IconManager.getIcon(IconManager.IconType.SETTINGS));
-        settingsButton.setFocusPainted(false);
-        settingsButton.addActionListener(new ActionListener() {
+        SettingsButton settingsButton = new SettingsButton(null, m_plotPanel);
 
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                ArrayList<ParameterList> parameterListArray = m_plotPanel.getParameters();
-                if (parameterListArray == null) {
-                    return;
-                }
-                DefaultParameterDialog parameterDialog = new DefaultParameterDialog(WindowManager.getDefault().getMainWindow(), "Plot Parameters", parameterListArray);
-                parameterDialog.setLocationRelativeTo(m_plotPanel);
-                parameterDialog.setVisible(true);
-                
-                if (parameterDialog.getButtonClicked() == DefaultParameterDialog.BUTTON_OK) {
-                    m_plotPanel.parametersChanged();
-                }
-                
-                
-                
-                
-            }
-        });
         
         final JButton importSelectionButton  = new JButton(IconManager.getIcon(IconManager.IconType.IMPORT_TABLE_SELECTION));
         importSelectionButton.setToolTipText( "Import Selection from Previous View");

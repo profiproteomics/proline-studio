@@ -3,6 +3,7 @@ package fr.proline.studio.graphics;
 import fr.proline.studio.graphics.Axis.EnumXInterface;
 import fr.proline.studio.graphics.Axis.EnumYInterface;
 import fr.proline.studio.parameter.ParameterList;
+import fr.proline.studio.parameter.SettingsInterface;
 import fr.proline.studio.utils.StringUtils;
 import java.awt.Color;
 import java.awt.Cursor;
@@ -46,7 +47,7 @@ import org.slf4j.LoggerFactory;
  * Panel to display data with an X and Y Axis
  * @author JM235353
  */
-public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionListener, MouseWheelListener, EnumXInterface, EnumYInterface {
+public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionListener, MouseWheelListener, EnumXInterface, EnumYInterface, SettingsInterface {
     
     private static final Logger m_logger = LoggerFactory.getLogger(BasePlotPanel.class);
    
@@ -303,6 +304,7 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
         g.drawString(m_coordY, px, (py + 15));
     }
     
+    @Override
     public ArrayList<ParameterList> getParameters() {
         if (m_plots == null) {
             return null;
@@ -314,6 +316,7 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
         return null;
     }
     
+    @Override
     public void parametersChanged() {
         if (m_plots!= null) {
             for (int i=0;i<m_plots.size();i++) {

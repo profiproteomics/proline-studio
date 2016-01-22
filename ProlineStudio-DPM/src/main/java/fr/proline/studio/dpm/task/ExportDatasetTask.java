@@ -24,23 +24,35 @@ import java.util.Map;
  */
 public class ExportDatasetTask extends AbstractServiceTask {
 
+     public enum ExporterFormat {
+        PRIDE,
+        TEMPLATED,
+        SPECTRA_LIST
+    };
+        
     private static final String m_request = "dps.msi/export_result_summaries/";
     private static final String m_version = "0.3";
     private List<DDataset> m_datasetList;
     private List<String> m_filePathResult;
     private HashMap<String, Object> m_exportParams;
-    private boolean m_export2Pride;
+    private ExporterFormat m_exportFormat;
     private String m_configStr;
 
     /* export dataset constructor*/
     public ExportDatasetTask(AbstractServiceCallback callback, List<DDataset> listDataset, String configStr, List<String> filePathInfo) {
-        super(callback, false /**
-                 * asynchronous
-                 */
-                , new TaskInfo("Export Dataset for " + listDataset.size() + " datasets", true, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_HIGH));
+        super(callback, false /*** asynchronous*/, new TaskInfo("Export Dataset for " + listDataset.size() + " datasets", true, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_HIGH));
         m_datasetList = listDataset;
         m_filePathResult = filePathInfo;
-        m_export2Pride = false;
+        m_exportFormat = ExporterFormat.TEMPLATED;
+        m_exportParams = null;
+        m_configStr = configStr;
+    }
+    
+    public ExportDatasetTask(AbstractServiceCallback callback, List<DDataset> listDataset, String configStr, List<String> filePathInfo, ExporterFormat exportFormat) {
+        super(callback, false /*** asynchronous*/, new TaskInfo("Export Dataset for " + listDataset.size() + " datasets", true, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_HIGH));
+        m_datasetList = listDataset;
+        m_filePathResult = filePathInfo;
+        m_exportFormat = exportFormat;
         m_exportParams = null;
         m_configStr = configStr;
     }
@@ -56,9 +68,11 @@ public class ExportDatasetTask extends AbstractServiceTask {
             setWsVersion(m_version);
 
             Map<String, Object> params = new HashMap<>();
-            if (m_export2Pride) {
-                params.put("file_format", "PRIDE"); //Ou MZIDENTML ...
-                HashMap<String, Object> finalExportParams = new HashMap<>();
+            params.put("file_format", m_exportFormat.toString());
+            Map<String, Object> extraParams = new HashMap<>();
+            switch (m_exportFormat) {
+            case PRIDE: {
+                 HashMap<String, Object> finalExportParams = new HashMap<>();
                 finalExportParams.putAll(m_exportParams);
                 if (m_exportParams.containsKey("sample_additional")) {
                     finalExportParams.remove("sample_additional");
@@ -79,10 +93,22 @@ public class ExportDatasetTask extends AbstractServiceTask {
                     finalExportParams.put("protocol_steps", additionalsXmlString);
 
                 }
-                params.put("extra_params", finalExportParams); //Ou MZIDENTML ...
-            } else {
-                params.put("file_format", "TEMPLATED"); //Ou MZIDENTML ...
+                extraParams = finalExportParams;
+                break;
             }
+            
+            case TEMPLATED:  {
+               extraParams.put("config", m_configStr);
+               break;
+            }
+            
+            case  SPECTRA_LIST:  {               
+               extraParams.putAll(m_exportParams);
+               break;
+            }
+            }
+            
+            params.put("extra_params", extraParams);
             // **** Pour la version FILE :"file_name" & "file_directory" 
             params.put("output_mode", "STREAM"); // *** ou STREAM
 
@@ -99,11 +125,6 @@ public class ExportDatasetTask extends AbstractServiceTask {
                 rsmIdents.add(rsmIdent);
             }
             params.put("rsm_identifiers", rsmIdents);
-
-            Map<String, Object> extraParams = new HashMap<>();
-
-            extraParams.put("config", m_configStr);
-            params.put("extra_params", extraParams);
 
             request.setParameters(params);
 

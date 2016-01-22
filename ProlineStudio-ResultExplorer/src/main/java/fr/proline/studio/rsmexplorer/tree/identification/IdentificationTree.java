@@ -633,7 +633,7 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
                 
                 m_mainActions.add(null);  // separator
                 
-                if (JMSConnectionManager.getJMSConnectionManager().isJMSDefined()) {
+                if (isJMSDefined) {
                     ImportSearchResultAsDatasetJMSAction identificationAction = new ImportSearchResultAsDatasetJMSAction();
                     m_mainActions.add(identificationAction);
                 } else {
@@ -674,7 +674,7 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
                 }
                 
                 if (isJMSDefined) {
-                    GenerateSpectrumMatchesJMSAction generateSpectrumMatchesAction = new GenerateSpectrumMatchesJMSAction();
+                    GenerateSpectrumMatchesJMSAction generateSpectrumMatchesAction = new GenerateSpectrumMatchesJMSAction(AbstractTree.TreeType.TREE_IDENTIFICATION);
                     m_mainActions.add(generateSpectrumMatchesAction);
                 } else {
                     GenerateSpectrumMatchesAction generateSpectrumMatchesAction = new GenerateSpectrumMatchesAction();
@@ -694,8 +694,6 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
                 
                 PropertiesAction propertiesAction = new PropertiesAction(AbstractTree.TreeType.TREE_IDENTIFICATION);
                 m_mainActions.add(propertiesAction);
-                
-                
                 
 
                 

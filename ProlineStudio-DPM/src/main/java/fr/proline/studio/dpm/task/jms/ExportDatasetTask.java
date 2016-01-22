@@ -27,13 +27,18 @@ import javax.jms.TextMessage;
  */
 public class ExportDatasetTask extends AbstractJMSTask {
 
+    public enum ExporterFormat {
+        PRIDE,
+        TEMPLATED,
+        SPECTRA_LIST
+    };
     private static String m_serviceName = "proline/dps/msi/ExportResultSummary";
     private static final String m_version = "2.0";
     
     private List<DDataset> m_datasetList;
     private List<String> m_filePathResult;
     private HashMap<String, Object> m_exportParams;
-    private boolean m_export2Pride;
+    private ExporterFormat m_exportFormat;
     private String m_configStr;
     private List<String> m_JMSNodeID;
 
@@ -43,11 +48,21 @@ public class ExportDatasetTask extends AbstractJMSTask {
         m_datasetList = listDataset;
         m_filePathResult = filePathInfo;
         m_JMSNodeID = jmsNodeID;
-        m_export2Pride = false;
+        m_exportFormat = ExporterFormat.TEMPLATED;
         m_exportParams = null;
         m_configStr = configStr;
     }
     
+    public ExportDatasetTask(AbstractJMSCallback callback, List<DDataset> listDataset, String configStr, List<String> filePathInfo, List<String> jmsNodeID, ExporterFormat exportFormat, HashMap<String, Object> exportParams) {
+        super(callback, new TaskInfo("Export Dataset for " + listDataset.size() + " datasets", true, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_HIGH));
+        
+        m_datasetList = listDataset;
+        m_filePathResult = filePathInfo;
+        m_JMSNodeID = jmsNodeID;
+        m_exportFormat = exportFormat;
+        m_exportParams = exportParams;
+        m_configStr = configStr;
+    }
     
     @Override
     public void taskRun() throws JMSException {
@@ -115,34 +130,50 @@ public class ExportDatasetTask extends AbstractJMSTask {
     
     private HashMap<String, Object> createParams() {
         HashMap<String, Object> params = new HashMap<>();
-        if (m_export2Pride) {
-            params.put("file_format", "PRIDE"); //Ou MZIDENTML ...
-            HashMap<String, Object> finalExportParams = new HashMap<>();
-            finalExportParams.putAll(m_exportParams);
-            if (m_exportParams.containsKey("sample_additional")) {
-                finalExportParams.remove("sample_additional");
-                List<CVParam> additionals = (List<CVParam>) m_exportParams.get("sample_additional");
-                List<String> additionalsXmlString = new ArrayList<>(additionals.size());
-                for (CVParam nextCVParam : additionals) {
-                    additionalsXmlString.add(nextCVParam.toXMLString());
-                }
-                finalExportParams.put("sample_additional", additionalsXmlString);
-            }
-            if(m_exportParams.containsKey("protocol_steps")){            
-                finalExportParams.remove("protocol_steps");
-                List<CVParam> additionals =  (List<CVParam>) m_exportParams.get("protocol_steps");
-                List<String> additionalsXmlString = new ArrayList<>(additionals.size());
-                for(CVParam nextCVParam : additionals){
-                    additionalsXmlString.add(nextCVParam.toXMLString());
-                }
-                finalExportParams.put("protocol_steps", additionalsXmlString);            
-            }
-            params.put("extra_params", finalExportParams); //Ou MZIDENTML ...
-        } else {
-            params.put("file_format", "TEMPLATED"); //Ou MZIDENTML ...
-        }
+        params.put("file_format", m_exportFormat.toString());
         // **** Pour la version FILE :"file_name" & "file_directory" 
         params.put("output_mode", "STREAM"); // *** ou STREAM
+
+        Map<String, Object> extraParams = new HashMap<>();
+
+        switch (m_exportFormat) {
+            case TEMPLATED: {
+                extraParams.put("config", m_configStr);
+                break;
+            }
+            case PRIDE: {
+               
+                HashMap<String, Object> finalExportParams = new HashMap<>();
+                finalExportParams.putAll(m_exportParams);
+                if (m_exportParams.containsKey("sample_additional")) {
+                    finalExportParams.remove("sample_additional");
+                    List<CVParam> additionals = (List<CVParam>) m_exportParams.get("sample_additional");
+                    List<String> additionalsXmlString = new ArrayList<>(additionals.size());
+                    for (CVParam nextCVParam : additionals) {
+                        additionalsXmlString.add(nextCVParam.toXMLString());
+                    }
+                    finalExportParams.put("sample_additional", additionalsXmlString);
+                }
+                if (m_exportParams.containsKey("protocol_steps")) {
+                    finalExportParams.remove("protocol_steps");
+                    List<CVParam> additionals = (List<CVParam>) m_exportParams.get("protocol_steps");
+                    List<String> additionalsXmlString = new ArrayList<>(additionals.size());
+                    for (CVParam nextCVParam : additionals) {
+                        additionalsXmlString.add(nextCVParam.toXMLString());
+                    }
+                    finalExportParams.put("protocol_steps", additionalsXmlString);
+                }
+                extraParams = finalExportParams;                
+                 break;
+            }
+            
+            case SPECTRA_LIST:{
+                if(m_exportParams != null)
+                    extraParams.putAll(m_exportParams);
+                break;
+            }
+        }
+
 
         List<Map<String, Object>> rsmIdents = new ArrayList();
         for (DDataset dataset : m_datasetList) {
@@ -157,10 +188,7 @@ public class ExportDatasetTask extends AbstractJMSTask {
             rsmIdents.add(rsmIdent);
         }
         params.put("rsm_identifiers", rsmIdents);
-
-        Map<String, Object> extraParams = new HashMap<>();
-
-        extraParams.put("config", m_configStr);
+       
         params.put("extra_params", extraParams);
         return params;
     }

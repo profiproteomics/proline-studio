@@ -11,8 +11,11 @@ import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
+import fr.proline.studio.rsmexplorer.tree.quantitation.QuantitationTree;
 import javax.swing.tree.DefaultTreeModel;
 import org.openide.util.NbBundle;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Action to Merge data from a set of Search Results (rset) or Identification Summaries (rsm)
@@ -20,15 +23,29 @@ import org.openide.util.NbBundle;
  */
 public class GenerateSpectrumMatchesAction extends AbstractRSMAction {
 
-    public GenerateSpectrumMatchesAction() {
-        super(NbBundle.getMessage(GenerateSpectrumMatchesAction.class, "CTL_GenerateSpectrumMatchesAction"), AbstractTree.TreeType.TREE_IDENTIFICATION);
+    protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
+
+    public GenerateSpectrumMatchesAction(AbstractTree.TreeType selectedTree) {
+        super(NbBundle.getMessage(GenerateSpectrumMatchesAction.class, "CTL_GenerateSpectrumMatchesAction"), selectedTree);
     }
 
    
     @Override
     public void actionPerformed(final AbstractNode[] selectedNodes, int x, int y) {
         
-        IdentificationTree tree = IdentificationTree.getCurrentTree();
+        AbstractTree.TreeType source = getSourceTreeType();
+        AbstractTree tree = null;
+        switch (source) {
+            case TREE_IDENTIFICATION:
+                tree = IdentificationTree.getCurrentTree(); 
+                break;
+            case TREE_QUANTITATION:
+                tree = QuantitationTree.getCurrentTree(); 
+                break;
+            default:
+                m_logger.warn("Unexpected source tree for this action ! "+source.name());
+                return; 
+        }
         final DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
         
         int nbNodes = selectedNodes.length;

@@ -143,7 +143,7 @@ public class ExportDialog extends DefaultDialog  {
         
         String defaultExportPath;
         Preferences preferences = NbPreferences.root();
-        if ((m_exportType == ExporterFactory.EXPORT_TABLE) || (m_exportType == ExporterFactory.EXPORT_FROM_SERVER) || (m_exportType == ExporterFactory.EXPORT_XIC)) {
+        if ((m_exportType == ExporterFactory.EXPORT_TABLE) || (m_exportType == ExporterFactory.EXPORT_FROM_SERVER) || (m_exportType == ExporterFactory.EXPORT_XIC)  || (m_exportType == ExporterFactory.EXPORT_SPECTRA) ) {
            defaultExportPath = preferences.get("DefaultExcelExportPath", "");
         } else { // IMAGE
            defaultExportPath = preferences.get("DefaultImageExportPath", "");
@@ -323,7 +323,7 @@ public class ExportDialog extends DefaultDialog  {
 
             Preferences preferences = NbPreferences.root();
             preferences.put("DefaultExcelExportPath", f.getAbsoluteFile().getParentFile().getName());
-        } else if (m_exportType == ExporterFactory.EXPORT_FROM_SERVER || m_exportType == ExporterFactory.EXPORT_XIC) {
+        } else if (m_exportType == ExporterFactory.EXPORT_FROM_SERVER || m_exportType == ExporterFactory.EXPORT_XIC || m_exportType == ExporterFactory.EXPORT_SPECTRA) {
 
             startTask(m_singletonServerDialog.m_task);
             

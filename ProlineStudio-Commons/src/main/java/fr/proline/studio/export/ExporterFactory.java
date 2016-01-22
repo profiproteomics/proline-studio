@@ -14,7 +14,8 @@ public class ExporterFactory {
     public static final int EXPORT_IMAGE2 = 4;
     public static final int EXPORT_XIC = 5;
     public static final int EXPORT_MGF = 6;
-    public static final int EXPORT_TSV = 7;
+    public static final int EXPORT_TSV = 7; //VDS : NOT USED !!!! 
+    public static final int EXPORT_SPECTRA = 8;
 
     private static ArrayList<ExporterInfo> m_listTable = null;
     private static ArrayList<ExporterInfo> m_listImage = null;
@@ -22,6 +23,7 @@ public class ExporterFactory {
     private static ArrayList<ExporterInfo> m_listImage2 = null;
     private static ArrayList<ExporterInfo> m_listXic = null;
     private static ArrayList<ExporterInfo> m_listMGF = null;
+    private static ArrayList<ExporterInfo> m_listSpectra = null;
     
     public enum ExporterType {
         EXCEL_XML,
@@ -49,6 +51,16 @@ public class ExporterFactory {
            
 
             return m_listTable;
+            
+       } else if (exportType == EXPORT_SPECTRA) {
+             if (m_listSpectra != null) {
+                return m_listSpectra;
+            }
+            m_listSpectra = new ArrayList<>(1);           
+            m_listSpectra.add(new ExporterInfo(ExporterType.TSV, "TSV (.tsv)", "tsv"));
+
+            return m_listSpectra;    
+            
         } else if (exportType == EXPORT_IMAGE) {
             if (m_listImage != null) {
                return m_listImage;

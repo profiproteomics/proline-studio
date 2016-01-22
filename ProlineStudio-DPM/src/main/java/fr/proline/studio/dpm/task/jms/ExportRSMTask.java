@@ -20,14 +20,14 @@ import javax.jms.Message;
 import javax.jms.TextMessage;
 
 /**
- * Task to export RSM data into "template" files
+ * Task to export RSM data into Pride or SpectraList formay
  *
+ * WILL BE REMOVED WHEN COMPLETE USE OF ExportDatasetTask
  * @author VD225637
  */
 public class ExportRSMTask extends AbstractJMSTask {
 
     public enum ExporterFormat {
-
         PRIDE,
         TEMPLATED,
         SPECTRA_LIST

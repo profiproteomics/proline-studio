@@ -1,11 +1,16 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
 package fr.proline.studio.rsmexplorer.actions.identification;
 
 import fr.proline.core.orm.uds.dto.DDataset;
-import fr.proline.studio.dpm.jms.AccessJMSManagerThread;
-import fr.proline.studio.dpm.task.jms.AbstractJMSCallback;
-import fr.proline.studio.dpm.task.jms.DownloadFileTask;
-import fr.proline.studio.dpm.task.jms.ExportDatasetTask;
-import fr.proline.studio.dpm.task.jms.ExportRSMTask;
+import fr.proline.studio.dpm.AccessServiceThread;
+import fr.proline.studio.dpm.task.AbstractServiceCallback;
+import fr.proline.studio.dpm.task.DownloadFileTask;
+import fr.proline.studio.dpm.task.ExportDatasetTask;
+import fr.proline.studio.dpm.task.ExportDatasetTask.ExporterFormat;
 import fr.proline.studio.export.ExportDialog;
 import fr.proline.studio.export.ExporterFactory;
 import fr.proline.studio.gui.DefaultDialog;
@@ -13,7 +18,6 @@ import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import org.openide.util.NbBundle;
 import org.openide.windows.WindowManager;
@@ -21,30 +25,29 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Export Spectra Lib from DataSet Using JMS
+ *
+ * * Export Spectra Lib from DataSet Using WC
  * @author VD225637
  */
-public class ExportSpectraListJMSAction extends AbstractRSMAction {
- 
+public class ExportSpectraListAction extends AbstractRSMAction {
+    
     protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
 
-
-    public ExportSpectraListJMSAction(AbstractTree.TreeType treeType) {
+     
+    public ExportSpectraListAction(AbstractTree.TreeType treeType) {
         super(NbBundle.getMessage(ExportSpectraListJMSAction.class, "CTL_ExportSpectraListAction"), treeType);
     }
     
-    public ExportSpectraListJMSAction(AbstractTree.TreeType treeType, boolean exportTitle) {
+    public ExportSpectraListAction(AbstractTree.TreeType treeType, boolean exportTitle) {
         super(NbBundle.getMessage(ExportSpectraListJMSAction.class, "CTL_ExportAction")+" "+NbBundle.getMessage(ExportSpectraListJMSAction.class, "CTL_ExportSpectraListAction") , treeType);
     }
-
+    
     @Override
     public void actionPerformed(final AbstractNode[] selectedNodes, final int x, final int y) {
-
+        
         final DataSetNode dataSetNode = (DataSetNode) selectedNodes[0];
         final ExportDialog  dialog = ExportDialog.getDialog(WindowManager.getDefault().getMainWindow(), false, ExporterFactory.EXPORT_SPECTRA);
-
-//        final LoadWaitingDialog loadWaitingDialog = new LoadWaitingDialog(WindowManager.getDefault().getMainWindow());
-
+    
         DefaultDialog.ProgressTask task = new DefaultDialog.ProgressTask() {
             @Override
             public int getMinValue() {
@@ -58,7 +61,8 @@ public class ExportSpectraListJMSAction extends AbstractRSMAction {
 
             @Override
             protected Object doInBackground() throws Exception {
-                final AbstractJMSCallback downloadCallback = new AbstractJMSCallback() {
+                
+                final AbstractServiceCallback downloadCallback = new AbstractServiceCallback() {
 
                     @Override
                     public boolean mustBeCalledInAWT() {
@@ -81,9 +85,8 @@ public class ExportSpectraListJMSAction extends AbstractRSMAction {
 
                 // used as out parameter for the service
                 final List<String>  _filePath = new ArrayList();;
-                final List<String> _jmsNodeId = new ArrayList();
 
-                AbstractJMSCallback exportCallback = new AbstractJMSCallback() {
+                AbstractServiceCallback exportCallback = new AbstractServiceCallback() {
 
                     @Override
                     public boolean mustBeCalledInAWT() {
@@ -99,8 +102,8 @@ public class ExportSpectraListJMSAction extends AbstractRSMAction {
                                 fileName += ".tsv";
                             }
                             if (_filePath.size() == 1) {
-                                DownloadFileTask task = new DownloadFileTask(downloadCallback, fileName, _filePath.get(0), _jmsNodeId.get(0));
-                                AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
+                                DownloadFileTask task = new DownloadFileTask(downloadCallback, fileName, _filePath.get(0));
+                                AccessServiceThread.getAccessServiceThread().addTask(task);
                             }                            
 
                         } else {
@@ -114,8 +117,8 @@ public class ExportSpectraListJMSAction extends AbstractRSMAction {
                 
                 List<DDataset> dsets = new ArrayList<>();
                 dsets.add(dataSetNode.getDataset());
-                ExportDatasetTask task = new ExportDatasetTask(exportCallback, dsets, null, _filePath, _jmsNodeId, ExportDatasetTask.ExporterFormat.SPECTRA_LIST, null);
-                AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
+                ExportDatasetTask task = new ExportDatasetTask(exportCallback, dsets, null, _filePath, ExporterFormat.SPECTRA_LIST);
+                AccessServiceThread.getAccessServiceThread().addTask(task);
 
                 return null;
             }
@@ -123,32 +126,11 @@ public class ExportSpectraListJMSAction extends AbstractRSMAction {
 
         dialog.setTask(task);
         dialog.setLocation(x, y);
-        dialog.setVisible(true);        
+        dialog.setVisible(true);    
     }
-    
-//    public String getDatasetName(String fileName, AbstractNode[] selectedNodes){
-//        int id0 = fileName.indexOf("-");
-//        int id1 = fileName.lastIndexOf("_");
-//        if (id0 > -1 && id1 > -1&& id0<id1){
-//            String dsIdStr = fileName.substring(id0+1, id1);
-//            try{
-//                Long dsId  = Long.parseLong(dsIdStr);
-//                for (AbstractNode node : selectedNodes) {
-//                    if (((DataSetNode)node).getDataset().getId() == dsId){
-//                        return "_"+((DataSetNode)node).getDataset().getName()+"_";
-//                    }
-//                }
-//            }catch(NumberFormatException e){
-//                
-//            }
-//            
-//        }
-//        return "";
-//    }
-
+   
     @Override
     public void updateEnabled(AbstractNode[] selectedNodes) {
-
         int nbSelectedNodes = selectedNodes.length;
 
         if (nbSelectedNodes != 1) {
@@ -162,13 +144,11 @@ public class ExportSpectraListJMSAction extends AbstractRSMAction {
             setEnabled(false);
             return;
         }
-       
+
         if (node.isChanging()) {
             setEnabled(false);
             return;
         }
-
-
 
         // We can only export a RSM
         DataSetNode datasetNode = (DataSetNode) node;
@@ -176,7 +156,7 @@ public class ExportSpectraListJMSAction extends AbstractRSMAction {
             setEnabled(false);
             return;
         }
-            
+
         setEnabled(true);
     }
 }

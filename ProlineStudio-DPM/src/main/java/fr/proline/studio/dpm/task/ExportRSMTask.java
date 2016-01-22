@@ -81,7 +81,7 @@ public class ExportRSMTask extends AbstractServiceTask {
                 finalExportParams.put("protocol_steps", additionalsXmlString);
 
             }
-            params.put("extra_params", finalExportParams); //Ou MZIDENTML ...
+            params.put("extra_params", finalExportParams); 
         } else {
 
             params.put("file_format", "TEMPLATED"); //Ou MZIDENTML ...

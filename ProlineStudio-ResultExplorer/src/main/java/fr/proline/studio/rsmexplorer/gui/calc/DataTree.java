@@ -12,8 +12,11 @@ import fr.proline.studio.rsmexplorer.gui.calc.functions.JoinFunction;
 import fr.proline.studio.rsmexplorer.gui.calc.functions.PValueFunction;
 import fr.proline.studio.rsmexplorer.gui.calc.functions.TtdFunction;
 import fr.proline.studio.rsmexplorer.gui.calc.graphics.AbstractGraphic;
+import fr.proline.studio.rsmexplorer.gui.calc.graphics.BoxPlotGraphic;
 import fr.proline.studio.rsmexplorer.gui.calc.graphics.CalibrationPlotGraphic;
+import fr.proline.studio.rsmexplorer.gui.calc.graphics.DensityPlotGraphic;
 import fr.proline.studio.rsmexplorer.gui.calc.graphics.ScatterGraphic;
+import fr.proline.studio.rsmexplorer.gui.calc.graphics.VarianceDistPlotGraphic;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.utils.IconManager;
 import java.awt.Color;
@@ -168,11 +171,20 @@ public abstract class DataTree extends JTree {
     
     private void fillGraphicNodes(ParentGraphicNode parentGraphicNode) {
         
-        GraphicNode calibrationPlotNode = new GraphicNode(new CalibrationPlotGraphic(null));
-        parentGraphicNode.add(calibrationPlotNode);
+        GraphicNode node = new GraphicNode(new BoxPlotGraphic(null));
+        parentGraphicNode.add(node);
         
-        GraphicNode scatterNode = new GraphicNode(new ScatterGraphic(null));
-        parentGraphicNode.add(scatterNode);
+        node = new GraphicNode(new CalibrationPlotGraphic(null));
+        parentGraphicNode.add(node);
+        
+        node = new GraphicNode(new DensityPlotGraphic(null));
+        parentGraphicNode.add(node);
+        
+        node = new GraphicNode(new ScatterGraphic(null));
+        parentGraphicNode.add(node);
+        
+        node = new GraphicNode(new VarianceDistPlotGraphic(null));
+        parentGraphicNode.add(node);
         
         DefaultTreeModel model = (DefaultTreeModel) getModel();
         model.nodeStructureChanged(parentGraphicNode);

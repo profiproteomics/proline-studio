@@ -27,7 +27,9 @@ import org.rosuda.REngine.REXPGenericVector;
  */
 public class StatsRImplementation {
 
-        
+    private static final String LIB_DAPAR = "dapar"; 
+    private static final String LIB_CP4P = "cp4p"; 
+    
     public static PyObject adjustP(Col pvaluesCol, String pi0Parameter, PyFloat alpha, PyInteger nbins, PyFloat pz) throws Exception {
 
         RServerManager serverR = RServerManager.getRServerManager();
@@ -86,7 +88,7 @@ public class StatsRImplementation {
         
         // write file
         
-        serverR.parseAndEval("library(cp4p)"); 
+        serverR.parseAndEval("library("+LIB_CP4P+")"); 
         
         
         String cmdReadCSV = "testadjustp<-read.delim('"+path+"',header=F, sep=';')";
@@ -205,7 +207,7 @@ public class StatsRImplementation {
 
         // load library to do the calculation
         RServerManager serverR = RServerManager.getRServerManager();
-        serverR.parseAndEval("library(dapar)");  //JPM.TODO
+        serverR.parseAndEval("library("+LIB_DAPAR+")"); 
 
         // read Matrix Data
         StatsUtil.readMatrixData(matrixTempFile);
@@ -252,4 +254,85 @@ public class StatsRImplementation {
         return StatsUtil.createImage(imageTempFile, cmd);
 
     }
+    
+    public static PythonImage densityPlot(PyTuple p) throws Exception {
+
+        // needs R for this calculation
+        StatsUtil.startRSever();
+
+        // PyTuple to Col Array
+        ColRef[] cols = StatsUtil.colTupleToColArray(p);
+
+        // Create a temp file with a matrix containing cols data
+        File matrixTempFile = StatsUtil.columnsToMatrixTempFile(cols);
+
+        // Create a temp file for the image
+        File imageTempFile = StatsUtil.createImageTempFile();
+
+        // do the boxplot in R
+        PythonImage image = _densityPlot(matrixTempFile, imageTempFile);
+
+        // delete temp files
+        matrixTempFile.delete();
+        imageTempFile.delete();
+
+        return image;
+
+    }
+
+    private static PythonImage _densityPlot(File matrixTempFile, File imageTempFile) throws Exception {
+
+        // load library to do the calculation
+        RServerManager serverR = RServerManager.getRServerManager();
+        serverR.parseAndEval("library("+LIB_DAPAR+")"); 
+
+        // read Matrix Data
+        StatsUtil.readMatrixData(matrixTempFile);
+
+        // create image
+        return StatsUtil.createImage(imageTempFile, "densityPlotD(p=" + StatsUtil.MATRIX_VARIABLE + "[,1:1])");
+
+    }
+    
+    
+    public static PythonImage varianceDistPlot(PyTuple p) throws Exception {
+
+        // needs R for this calculation
+        StatsUtil.startRSever();
+
+        // PyTuple to Col Array
+        ColRef[] cols = StatsUtil.colTupleToColArray(p);
+
+        // Create a temp file with a matrix containing cols data
+        File matrixTempFile = StatsUtil.columnsToMatrixTempFile(cols);
+
+        // Create a temp file for the image
+        File imageTempFile = StatsUtil.createImageTempFile();
+
+        // do the boxplot in R
+        PythonImage image = _varianceDistPlot(matrixTempFile, imageTempFile);
+
+        // delete temp files
+        matrixTempFile.delete();
+        imageTempFile.delete();
+
+        return image;
+
+    }
+
+    private static PythonImage _varianceDistPlot(File matrixTempFile, File imageTempFile) throws Exception {
+
+        // load library to do the calculation
+        RServerManager serverR = RServerManager.getRServerManager();
+        serverR.parseAndEval("library("+LIB_DAPAR+")"); 
+
+        // read Matrix Data
+        StatsUtil.readMatrixData(matrixTempFile);
+
+        // create image
+        return StatsUtil.createImage(imageTempFile, "varianceDistD(p=" + StatsUtil.MATRIX_VARIABLE + "[,1:1])");
+
+    }
+    
+    
 }

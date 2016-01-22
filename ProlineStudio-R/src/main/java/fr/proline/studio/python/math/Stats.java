@@ -59,6 +59,10 @@ public class Stats {
     public static PyObject calibrationPlot(Col pvaluesCol, PyString pi0Method, PyInteger nbins, PyFloat pz) throws Exception {
         return StatsRImplementation.calibrationPlot(pvaluesCol, pi0Method, nbins, pz);
     }
+    
+    public static PythonImage densityPlot(PyTuple p) throws Exception {
+        return StatsRImplementation.densityPlot(p);
+    }
 
     public static ColData pvalue(PyTuple p1, PyTuple p2) throws MathException {
         return StatsImplementation.pvalue(p1, p2);
@@ -66,6 +70,10 @@ public class Stats {
 
     public static ColData ttd(PyTuple p1, PyTuple p2) throws MathException {
         return StatsImplementation.ttd(p1, p2);
+    }
+    
+    public static PythonImage varianceDistPlot(PyTuple p) throws Exception {
+        return StatsRImplementation.varianceDistPlot(p);
     }
 
 }

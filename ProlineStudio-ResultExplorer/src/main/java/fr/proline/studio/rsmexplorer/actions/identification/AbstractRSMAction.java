@@ -26,6 +26,13 @@ public abstract class AbstractRSMAction extends AbstractAction {
         m_treeType = treeType;
     }
     
+    /**
+     * Return the AbstractTree.TreeType from which the action has been called.
+     * @return 
+     */
+    protected AbstractTree.TreeType getSourceTreeType(){
+        return m_treeType;
+    }
     
     public boolean isIdentificationTree() {
         return m_treeType == AbstractTree.TreeType.TREE_IDENTIFICATION;

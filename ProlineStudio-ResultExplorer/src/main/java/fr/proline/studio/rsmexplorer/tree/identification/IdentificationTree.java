@@ -677,7 +677,7 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
                     GenerateSpectrumMatchesJMSAction generateSpectrumMatchesAction = new GenerateSpectrumMatchesJMSAction(AbstractTree.TreeType.TREE_IDENTIFICATION);
                     m_mainActions.add(generateSpectrumMatchesAction);
                 } else {
-                    GenerateSpectrumMatchesAction generateSpectrumMatchesAction = new GenerateSpectrumMatchesAction();
+                    GenerateSpectrumMatchesAction generateSpectrumMatchesAction = new GenerateSpectrumMatchesAction(AbstractTree.TreeType.TREE_IDENTIFICATION);
                     m_mainActions.add(generateSpectrumMatchesAction);
                 }
                 

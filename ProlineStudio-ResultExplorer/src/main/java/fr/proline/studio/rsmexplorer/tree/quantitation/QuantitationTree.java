@@ -312,7 +312,7 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
                         GenerateSpectrumMatchesJMSAction generateSpectrumMatchesAction = new GenerateSpectrumMatchesJMSAction(AbstractTree.TreeType.TREE_QUANTITATION);
                         m_mainActions.add(generateSpectrumMatchesAction);
                     } else {
-                        GenerateSpectrumMatchesAction generateSpectrumMatchesAction = new GenerateSpectrumMatchesAction();
+                        GenerateSpectrumMatchesAction generateSpectrumMatchesAction = new GenerateSpectrumMatchesAction(AbstractTree.TreeType.TREE_QUANTITATION);
                         m_mainActions.add(generateSpectrumMatchesAction);
                     }
 

@@ -27,7 +27,7 @@ import org.rosuda.REngine.REXPGenericVector;
  */
 public class StatsRImplementation {
 
-    private static final String LIB_DAPAR = "dapar"; 
+    private static final String LIB_PROSTAR = "prostar"; 
     private static final String LIB_CP4P = "cp4p"; 
     
     public static PyObject adjustP(Col pvaluesCol, String pi0Parameter, PyFloat alpha, PyInteger nbins, PyFloat pz) throws Exception {
@@ -207,7 +207,7 @@ public class StatsRImplementation {
 
         // load library to do the calculation
         RServerManager serverR = RServerManager.getRServerManager();
-        serverR.parseAndEval("library("+LIB_DAPAR+")"); 
+        serverR.parseAndEval("library("+LIB_PROSTAR+")"); 
 
         // read Matrix Data
         StatsUtil.readMatrixData(matrixTempFile);
@@ -284,7 +284,7 @@ public class StatsRImplementation {
 
         // load library to do the calculation
         RServerManager serverR = RServerManager.getRServerManager();
-        serverR.parseAndEval("library("+LIB_DAPAR+")"); 
+        serverR.parseAndEval("library("+LIB_PROSTAR+")"); 
 
         // read Matrix Data
         StatsUtil.readMatrixData(matrixTempFile);
@@ -324,7 +324,7 @@ public class StatsRImplementation {
 
         // load library to do the calculation
         RServerManager serverR = RServerManager.getRServerManager();
-        serverR.parseAndEval("library("+LIB_DAPAR+")"); 
+        serverR.parseAndEval("library("+LIB_PROSTAR+")"); 
 
         // read Matrix Data
         StatsUtil.readMatrixData(matrixTempFile);

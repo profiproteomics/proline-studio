@@ -20,6 +20,8 @@ import fr.proline.studio.rsmexplorer.actions.identification.DisplayRsetAction;
 import fr.proline.studio.rsmexplorer.actions.identification.ExportAction;
 import fr.proline.studio.rsmexplorer.actions.identification.ExportDatasetAction;
 import fr.proline.studio.rsmexplorer.actions.identification.ExportDatasetJMSAction;
+import fr.proline.studio.rsmexplorer.actions.identification.GenerateSpectrumMatchesAction;
+import fr.proline.studio.rsmexplorer.actions.identification.GenerateSpectrumMatchesJMSAction;
 import fr.proline.studio.rsmexplorer.actions.xic.ComputeQuantitationProfileAction;
 import fr.proline.studio.rsmexplorer.actions.xic.DisplayExperimentalDesignAction;
 import fr.proline.studio.rsmexplorer.actions.xic.DisplayXICAction;
@@ -195,151 +197,154 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
             actions = m_multiActions;
         }else{
         
-        if (isRootPopup) {
-            if (m_rootPopup == null) {
-                // create the actions
-                m_rootActions = new ArrayList<>(1);  // <--- get in sync
-                boolean isJSMDefined = JMSConnectionManager.getJMSConnectionManager().isJMSDefined();
-                CreateXICAction createXICAction = new CreateXICAction(isJSMDefined);
+            if (isRootPopup) {
+                if (m_rootPopup == null) {
+                    // create the actions
+                    m_rootActions = new ArrayList<>(1);  // <--- get in sync
+                    boolean isJSMDefined = JMSConnectionManager.getJMSConnectionManager().isJMSDefined();
+                    CreateXICAction createXICAction = new CreateXICAction(isJSMDefined);
 
-                m_rootActions.add(createXICAction);
+                    m_rootActions.add(createXICAction);
 
-                // add actions to popup
-                m_rootPopup = new JPopupMenu();
-                for (int i = 0; i < m_rootActions.size(); i++) {
-                    AbstractRSMAction action = m_rootActions.get(i);
-                    if (action == null) {
-                        m_rootPopup.addSeparator();
-                    } else {
-                        m_rootPopup.add(action.getPopupPresenter());
+                    // add actions to popup
+                    m_rootPopup = new JPopupMenu();
+                    for (int i = 0; i < m_rootActions.size(); i++) {
+                        AbstractRSMAction action = m_rootActions.get(i);
+                        if (action == null) {
+                            m_rootPopup.addSeparator();
+                        } else {
+                            m_rootPopup.add(action.getPopupPresenter());
+                        }
                     }
                 }
-            }
 
-            popup = m_rootPopup;
-            actions = m_rootActions;
-        } else if (trashNodeSelected) {
+                popup = m_rootPopup;
+                actions = m_rootActions;
+            } else if (trashNodeSelected) {
 
+                // creation of the popup if needed
+                if (m_trashPopup == null) {
+                    // create the actions
+                    m_trashActions = new ArrayList<>(1);  // <--- get in sync
+
+                    EmptyTrashAction emtpyTrashAction = new EmptyTrashAction(AbstractTree.TreeType.TREE_QUANTITATION);
+                    m_trashActions.add(emtpyTrashAction);
+
+                    m_trashPopup = new JPopupMenu();
+
+                    m_trashPopup.add(emtpyTrashAction.getPopupPresenter());
+                }
+
+                popup = m_trashPopup;
+                actions = m_trashActions;
+            } else if (xicSampleAnalysisNodeSelected){
             // creation of the popup if needed
-            if (m_trashPopup == null) {
-                // create the actions
-                m_trashActions = new ArrayList<>(1);  // <--- get in sync
+                if (m_identPopup == null){
 
-                EmptyTrashAction emtpyTrashAction = new EmptyTrashAction(AbstractTree.TreeType.TREE_QUANTITATION);
-                m_trashActions.add(emtpyTrashAction);
+                    m_identActions = new ArrayList<>(6);  // <--- get in sync
 
-                m_trashPopup = new JPopupMenu();
+                    boolean isJMSDefined = JMSConnectionManager.getJMSConnectionManager().isJMSDefined();
 
-                m_trashPopup.add(emtpyTrashAction.getPopupPresenter());
-            }
+                    DisplayRsetAction displayRsetAction = new DisplayRsetAction(AbstractTree.TreeType.TREE_QUANTITATION, isJMSDefined);
+                    m_identActions.add(displayRsetAction);
 
-            popup = m_trashPopup;
-            actions = m_trashActions;
-        } else if (xicSampleAnalysisNodeSelected){
-            // creation of the popup if needed
-            if (m_identPopup == null){
-                
-                m_identActions = new ArrayList<>(6);  // <--- get in sync
+                    DisplayRsmAction displayRsmAction = new DisplayRsmAction(AbstractTree.TreeType.TREE_QUANTITATION);
+                    m_identActions.add(displayRsmAction);
 
-                boolean isJMSDefined = JMSConnectionManager.getJMSConnectionManager().isJMSDefined();
+                    m_identActions.add(null);  // separator
 
-                DisplayRsetAction displayRsetAction = new DisplayRsetAction(AbstractTree.TreeType.TREE_QUANTITATION, isJMSDefined);
-                m_identActions.add(displayRsetAction);
+                    ExportAction exportAction = new ExportAction(AbstractTree.TreeType.TREE_QUANTITATION, isJMSDefined);
+                    m_identActions.add(exportAction);
 
-                DisplayRsmAction displayRsmAction = new DisplayRsmAction(AbstractTree.TreeType.TREE_QUANTITATION);
-                m_identActions.add(displayRsmAction);
-                
-                m_identActions.add(null);  // separator
-                
-                ExportAction exportAction = new ExportAction(AbstractTree.TreeType.TREE_QUANTITATION, isJMSDefined);
-                m_identActions.add(exportAction);
-                
-                
-                m_identActions.add(null);  // separator
-                
-                PropertiesAction propertiesAction = new PropertiesAction(AbstractTree.TreeType.TREE_QUANTITATION);
-                m_identActions.add(propertiesAction);
-                
-                // add actions to popup
-                m_identPopup = new JPopupMenu();
-                for (int i = 0; i < m_identActions.size(); i++) {
-                    AbstractRSMAction action = m_identActions.get(i);
-                    if (action == null) {
-                        m_identPopup.addSeparator();
-                    } else {
-                        m_identPopup.add(action.getPopupPresenter());
+
+                    m_identActions.add(null);  // separator
+
+                    PropertiesAction propertiesAction = new PropertiesAction(AbstractTree.TreeType.TREE_QUANTITATION);
+                    m_identActions.add(propertiesAction);
+
+                    // add actions to popup
+                    m_identPopup = new JPopupMenu();
+                    for (int i = 0; i < m_identActions.size(); i++) {
+                        AbstractRSMAction action = m_identActions.get(i);
+                        if (action == null) {
+                            m_identPopup.addSeparator();
+                        } else {
+                            m_identPopup.add(action.getPopupPresenter());
+                        }
                     }
                 }
-            }
-            popup = m_identPopup;
-            actions = m_identActions;
-        }else {
-            if (m_mainPopup == null) {
-                // create the actions
-                m_mainActions = new ArrayList<>(13);  // <--- get in sync
-                boolean isJSMDefined = JMSConnectionManager.getJMSConnectionManager().isJMSDefined();
-                
-                DisplayXICAction displayXICAction = new DisplayXICAction();
-                m_mainActions.add(displayXICAction);
-                
-                DisplayRsmAction displayRsmAction = new DisplayRsmAction(AbstractTree.TreeType.TREE_QUANTITATION);
-                m_mainActions.add(displayRsmAction);
-                
-                DisplayExperimentalDesignAction expDesignAction = new DisplayExperimentalDesignAction();
-                m_mainActions.add(expDesignAction);
-                
-                m_mainActions.add(null);  // separator
-                
-                RenameAction renameQuantitationAction = new RenameAction(AbstractTree.TreeType.TREE_QUANTITATION);
-                m_mainActions.add(renameQuantitationAction);
+                popup = m_identPopup;
+                actions = m_identActions;
+            }else {
+                if (m_mainPopup == null) {
+                    // create the actions
+                    m_mainActions = new ArrayList<>(15);  // <--- get in sync
+                    boolean isJMSDefined = JMSConnectionManager.getJMSConnectionManager().isJMSDefined();
 
-                DeleteAction deleteAction = new DeleteAction(AbstractTree.TreeType.TREE_QUANTITATION);
-                m_mainActions.add(deleteAction);
-                
-                m_mainActions.add(null);  // separator
-                
-                ComputeQuantitationProfileAction computeQuantProfileAction = new ComputeQuantitationProfileAction(isJSMDefined);
-                m_mainActions.add(computeQuantProfileAction);
-                
-                CreateXICAction createXICAction = new CreateXICAction(true, isJSMDefined);
-                m_mainActions.add(createXICAction);
+                    DisplayXICAction displayXICAction = new DisplayXICAction();
+                    m_mainActions.add(displayXICAction);
 
-                m_mainActions.add(null);  // separator
-                
-                if (isJSMDefined) {
-                    ExportDatasetJMSAction exportDatasetAction = new ExportDatasetJMSAction(AbstractTree.TreeType.TREE_QUANTITATION, true);
-                    m_mainActions.add(exportDatasetAction);
-                }else{
-                    ExportDatasetAction exportDatasetAction = new ExportDatasetAction(AbstractTree.TreeType.TREE_QUANTITATION, true);
-                    m_mainActions.add(exportDatasetAction);
-                }     
-                
-                m_mainActions.add(null);  // separator
+                    DisplayRsmAction displayRsmAction = new DisplayRsmAction(AbstractTree.TreeType.TREE_QUANTITATION);
+                    m_mainActions.add(displayRsmAction);
 
-                PropertiesAction propertiesAction = new PropertiesAction(AbstractTree.TreeType.TREE_QUANTITATION);
-                m_mainActions.add(propertiesAction);
-                
-                
+                    DisplayExperimentalDesignAction expDesignAction = new DisplayExperimentalDesignAction();
+                    m_mainActions.add(expDesignAction);
 
-                // add actions to popup
-                m_mainPopup = new JPopupMenu();
-                for (int i = 0; i < m_mainActions.size(); i++) {
-                    AbstractRSMAction action = m_mainActions.get(i);
-                    if (action == null) {
-                        m_mainPopup.addSeparator();
+                    m_mainActions.add(null);  // separator
+
+                    RenameAction renameQuantitationAction = new RenameAction(AbstractTree.TreeType.TREE_QUANTITATION);
+                    m_mainActions.add(renameQuantitationAction);
+
+                    DeleteAction deleteAction = new DeleteAction(AbstractTree.TreeType.TREE_QUANTITATION);
+                    m_mainActions.add(deleteAction);
+
+                    m_mainActions.add(null);  // separator
+
+                    ComputeQuantitationProfileAction computeQuantProfileAction = new ComputeQuantitationProfileAction(isJMSDefined);
+                    m_mainActions.add(computeQuantProfileAction);
+
+                    CreateXICAction createXICAction = new CreateXICAction(true, isJMSDefined);
+                    m_mainActions.add(createXICAction);
+
+                    m_mainActions.add(null);  // separator
+
+                    if (isJMSDefined) {
+                        GenerateSpectrumMatchesJMSAction generateSpectrumMatchesAction = new GenerateSpectrumMatchesJMSAction(AbstractTree.TreeType.TREE_QUANTITATION);
+                        m_mainActions.add(generateSpectrumMatchesAction);
                     } else {
-                        m_mainPopup.add(action.getPopupPresenter());
+                        GenerateSpectrumMatchesAction generateSpectrumMatchesAction = new GenerateSpectrumMatchesAction();
+                        m_mainActions.add(generateSpectrumMatchesAction);
+                    }
+
+                     m_mainActions.add(null);  // separator
+
+                    ExportAction exportAction = new ExportAction(AbstractTree.TreeType.TREE_QUANTITATION, isJMSDefined);
+                    m_mainActions.add(exportAction);
+
+                    m_mainActions.add(null);  // separator
+
+                    PropertiesAction propertiesAction = new PropertiesAction(AbstractTree.TreeType.TREE_QUANTITATION);
+                    m_mainActions.add(propertiesAction);
+
+
+
+                    // add actions to popup
+                    m_mainPopup = new JPopupMenu();
+                    for (int i = 0; i < m_mainActions.size(); i++) {
+                        AbstractRSMAction action = m_mainActions.get(i);
+                        if (action == null) {
+                            m_mainPopup.addSeparator();
+                        } else {
+                            m_mainPopup.add(action.getPopupPresenter());
+                        }
                     }
                 }
+
+                popup = m_mainPopup;
+                actions = m_mainActions;
+
             }
-
-            popup = m_mainPopup;
-            actions = m_mainActions;
-
         }
-        }
-
-
 
 
 

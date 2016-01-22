@@ -13,7 +13,8 @@ import org.openide.util.NbBundle;
  */
 public class ExportAction extends AbstractRSMAction {
 
-    private AbstractRSMAction m_exportDatasetAction; // Could be ExportDatasetAction or ExportDatasetJMSAction
+     // Could be ExportXXXAction or ExportXXXJMSAction
+    private AbstractRSMAction m_exportDatasetAction; 
     private AbstractRSMAction m_exportPrideAction;
     private AbstractRSMAction m_exportSpectraAction;
     
@@ -40,12 +41,14 @@ public class ExportAction extends AbstractRSMAction {
             m_exportDatasetAction = new ExportDatasetAction(m_treeType);
         }
         
-        
-        if (m_isJMSDefined) {
-            m_exportPrideAction = new ExportRSM2PrideJMSAction(m_treeType);
-        } else {
-            m_exportPrideAction = new ExportRSM2PrideAction(m_treeType);
-        }
+        if(AbstractTree.TreeType.TREE_IDENTIFICATION.equals(m_treeType)){    
+            if (m_isJMSDefined) {
+                m_exportPrideAction = new ExportRSM2PrideJMSAction(m_treeType);
+            } else {
+                m_exportPrideAction = new ExportRSM2PrideAction(m_treeType);
+            }
+        } else 
+            m_exportPrideAction = null;
         
         if (m_isJMSDefined) {
             m_exportSpectraAction = new ExportSpectraListJMSAction(m_treeType);
@@ -54,9 +57,12 @@ public class ExportAction extends AbstractRSMAction {
         }
         
         JMenuItem exportDatasetItem = new JMenuItem(m_exportDatasetAction);
-        JMenuItem exportPrideItem = new JMenuItem(m_exportPrideAction);
         m_menu.add(exportDatasetItem);
-        m_menu.add(exportPrideItem);
+        if(m_exportPrideAction!=null){
+            JMenuItem exportPrideItem = new JMenuItem(m_exportPrideAction);
+            m_menu.add(exportPrideItem);
+        }
+
         if(m_exportSpectraAction!=null){
             JMenuItem exportSpectraItem = new JMenuItem(m_exportSpectraAction);
             m_menu.add(exportSpectraItem);
@@ -69,10 +75,14 @@ public class ExportAction extends AbstractRSMAction {
     public void updateEnabled(AbstractNode[] selectedNodes) {
 
         m_exportDatasetAction.updateEnabled(selectedNodes);
-        m_exportPrideAction.updateEnabled(selectedNodes);
+        if(m_exportPrideAction!=null){
+            m_exportPrideAction.updateEnabled(selectedNodes);
+        }
+        if(m_exportSpectraAction!=null){
+            m_exportSpectraAction.updateEnabled(selectedNodes);
+        }       
         
-        
-        boolean isEnabled = m_exportDatasetAction.isEnabled() ||  m_exportPrideAction.isEnabled();
+        boolean isEnabled = m_exportDatasetAction.isEnabled() || (m_exportPrideAction != null && m_exportPrideAction.isEnabled()) ||  (m_exportSpectraAction != null && m_exportSpectraAction.isEnabled());
         setEnabled(isEnabled);
         m_menu.setEnabled(isEnabled);
     }

@@ -1,22 +1,27 @@
 package fr.proline.studio.rsmexplorer.actions.identification;
 
+import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dpm.jms.AccessJMSManagerThread;
 import fr.proline.studio.dpm.task.jms.AbstractJMSCallback;
 import fr.proline.studio.dpm.task.jms.DownloadFileTask;
+import fr.proline.studio.dpm.task.jms.ExportDatasetTask;
 import fr.proline.studio.dpm.task.jms.ExportRSMTask;
 import fr.proline.studio.export.ExportDialog;
+import fr.proline.studio.export.ExporterFactory;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import org.openide.util.NbBundle;
 import org.openide.windows.WindowManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
+ * Export Spectra Lib from DataSet Using JMS
  * @author VD225637
  */
 public class ExportSpectraListJMSAction extends AbstractRSMAction {
@@ -36,7 +41,7 @@ public class ExportSpectraListJMSAction extends AbstractRSMAction {
     public void actionPerformed(final AbstractNode[] selectedNodes, final int x, final int y) {
 
         final DataSetNode dataSetNode = (DataSetNode) selectedNodes[0];
-        final ExportDialog  dialog = ExportDialog.getDialog(WindowManager.getDefault().getMainWindow(), false);
+        final ExportDialog  dialog = ExportDialog.getDialog(WindowManager.getDefault().getMainWindow(), false, ExporterFactory.EXPORT_SPECTRA);
 
 //        final LoadWaitingDialog loadWaitingDialog = new LoadWaitingDialog(WindowManager.getDefault().getMainWindow());
 
@@ -75,8 +80,8 @@ public class ExportSpectraListJMSAction extends AbstractRSMAction {
                 };
 
                 // used as out parameter for the service
-                final String[] _filePath = new String[1];
-                final String[] _jmsNodeId = new String[1];
+                final List<String>  _filePath = new ArrayList();;
+                final List<String> _jmsNodeId = new ArrayList();
 
                 AbstractJMSCallback exportCallback = new AbstractJMSCallback() {
 
@@ -93,8 +98,8 @@ public class ExportSpectraListJMSAction extends AbstractRSMAction {
                             if (!fileName.endsWith(".tsv") && !fileName.endsWith(".TSV")) {
                                 fileName += ".tsv";
                             }
-                            if (_filePath.length == 1) {
-                                DownloadFileTask task = new DownloadFileTask(downloadCallback, fileName, _filePath[0], _jmsNodeId[0]);
+                            if (_filePath.size() == 1) {
+                                DownloadFileTask task = new DownloadFileTask(downloadCallback, fileName, _filePath.get(0), _jmsNodeId.get(0));
                                 AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
                             }                            
 
@@ -106,8 +111,10 @@ public class ExportSpectraListJMSAction extends AbstractRSMAction {
                     }
                 };
 
-                HashMap<String,Object> exportConfig = new HashMap<>();
-                ExportRSMTask task = new ExportRSMTask(exportCallback, dataSetNode.getDataset(), false, _filePath, _jmsNodeId, ExportRSMTask.ExporterFormat.SPECTRA_LIST, exportConfig);
+                
+                List<DDataset> dsets = new ArrayList<>();
+                dsets.add(dataSetNode.getDataset());
+                ExportDatasetTask task = new ExportDatasetTask(exportCallback, dsets, null, _filePath, _jmsNodeId, ExportDatasetTask.ExporterFormat.SPECTRA_LIST, null);
                 AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
 
                 return null;

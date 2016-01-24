@@ -37,6 +37,11 @@ import fr.proline.studio.pattern.AbstractDataBox;
 // 
 public class RsetPeptideSpectrumAnnotations {
 
+    private static final int ABC_SERIE_LABEL_YPOS = 0;
+    private static final int ABC_SERIE_LABEL_XPOS = 1;
+    private static final int XYZ_SERIE_LABEL_YPOS = 2;
+    private static final int XYZ_SERIE_LABEL_XPOS = 3;
+
     private AbstractDataBox m_dataBox;
     private DefaultXYDataset m_dataSet;
     private JFreeChart m_chart;
@@ -78,13 +83,11 @@ public class RsetPeptideSpectrumAnnotations {
         DMsQuery msQuery = m_peptideMatch.isMsQuerySet() ? m_peptideMatch.getMsQuery() : null;
         DSpectrum spectrum = msQuery.isSpectrumFullySet() ? msQuery.getDSpectrum() : null;
 
-        PeptideFragmentationData.TheoreticalFragmentSeries_AW[] fragSer = m_peptideFragmentationData.getFragmentSeries();
-        PeptideFragmentationData.FragmentMatch_AW[] fragMa = m_peptideFragmentationData.getFragmentMatch();
+        PeptideFragmentationData.TheoreticalFragmentSeries[] fragSer = m_peptideFragmentationData.getFragmentSeries();
+        PeptideFragmentationData.FragmentMatch[] fragMa = m_peptideFragmentationData.getFragmentMatch();
 
-
-
-        byte[] intensityByteArray = spectrum.getIntensityList(); // package$EasyLzma$.MODULE$.uncompress(spectrum.getIntensityList());
-        byte[] massByteArray = spectrum.getMozList(); // package$EasyLzma$.MODULE$.uncompress(spectrum.getMozList());
+        byte[] intensityByteArray = spectrum.getIntensityList(); 
+        byte[] massByteArray = spectrum.getMozList(); 
         ByteBuffer intensityByteBuffer = ByteBuffer.wrap(intensityByteArray).order(ByteOrder.LITTLE_ENDIAN);
         FloatBuffer intensityFloatBuffer = intensityByteBuffer.asFloatBuffer();
         double[] intensityDoubleArray = new double[intensityFloatBuffer.remaining()];
@@ -109,26 +112,13 @@ public class RsetPeptideSpectrumAnnotations {
             data[1][i] = intensityDoubleArray[i];
         }
 
+        String peptideSequence = m_peptideMatch.getPeptide().getSequence();
+        int sizeMaxSeries = peptideSequence.length();
 
-
-
-        int sizeMaxSeries = 0;
-        for (int i = 0; i < fragSer.length; i++) { // TODO: en fait les frag
-            // series b s'appliquent aussi a b++ etc. donc
-            // va falloir faire un tableau de positions au lieu de juste Bposition
-            if (fragSer[i].masses.length > sizeMaxSeries) {
-                sizeMaxSeries = fragSer[i].masses.length;
-            }
-
-        }
-
-        double[][] fragTableTheo = new double[11][sizeMaxSeries + 1];
-        float[][] fragTableTheoCharge = new float[11][sizeMaxSeries + 1];
-        double[][] fragTable = new double[11][sizeMaxSeries + 1];
+        double[][] fragTableTheo = new double[4][sizeMaxSeries + 1];
+        double[][] fragTable = new double[4][sizeMaxSeries + 1];
 
         // **-*-*-* HERE READING Data from Objects *-*-*-*-**-
-
-        String peptideSequence = m_peptideMatch.getPeptide().getSequence();
 
         removeAnnotations();
         XYTextAnnotation xyta;
@@ -137,10 +127,8 @@ public class RsetPeptideSpectrumAnnotations {
         double minY = (float) plot.getRangeAxis().getLowerBound(); // this is the Y data range
         double maxY = (float) plot.getRangeAxis().getUpperBound();
 
-
         Color abc_serie_color = new Color(51, 153, 255);
         Color xyz_serie_color = new Color(255, 85, 85);
-
 
         int j = 0;
         // ************************************************************
@@ -217,68 +205,42 @@ public class RsetPeptideSpectrumAnnotations {
 
 
         if (xyzSerieName.contains("z+1")) {
-            xyzSerieName = "z"; // we keep only the char sequence instead of
-        }									// full (ex: z+1 -> z)
-        // à noter que 2 manières de faire les match. soit par égalité de
-        // masse théo et match, ou bien par numéro de position sur le match.
-        // exemple b(2) signifie sur le 2e element théorique ca matche. !!!
-        // 1ere solution employée ici.
-        // int i=0;
-        // Here: filling the fragTables (theo and measured, before
-        // displaying)
-        j = 0;
-        double roundTol = 0.000001;
-        int nbFound = 0;
+            xyzSerieName = "z"; // we keep only the char sequence instead of full (ex: z+1 -> z)
+        }									
+ 
+        // Here: filling the fragTables (theo and measured, before displaying)
+
         int nbThroughB = 0;
         int nbThroughY = 0;
         
         for (j = 0; j < fragSer.length; j++) {
-        	fragSer[j].computeChargeFromLabel();
             // loop through theoFragment series here
             for (int k = 0; k < fragSer[j].masses.length; k++) {
                 // loop through m_masses for each fragment series
-            	 fragTableTheo[0][nbThroughB] = maxY - (maxY - minY) * 0.15;
-                 // intensity for b ions
-                 fragTableTheo[1][nbThroughB] = fragSer[j].masses[k];
-                 fragTableTheoCharge[0][nbThroughB] = fragSer[j].charge;
-                 fragTableTheo[5][nbThroughY] = maxY - (maxY - minY) * 0.25; // intensity
-                 fragTableTheo[6][nbThroughY] = fragSer[j].masses[k];
-                 fragTableTheoCharge[5][nbThroughY] = fragSer[j].charge;
+            	 fragTableTheo[ABC_SERIE_LABEL_YPOS][nbThroughB] = maxY - (maxY - minY) * 0.15; // intensity for b ions
+                 fragTableTheo[ABC_SERIE_LABEL_XPOS][nbThroughB] = fragSer[j].masses[k];
+                 fragTableTheo[XYZ_SERIE_LABEL_YPOS][nbThroughY] = maxY - (maxY - minY) * 0.25; // intensity for y ions
+                 fragTableTheo[XYZ_SERIE_LABEL_XPOS][nbThroughY] = fragSer[j].masses[k];
                  for (int i = 0; i < fragMa.length; i++) {
                     // find matching fragMatches with theoFragSeries
-                    fragMa[i].computeChargeFromLabel();
                     if (j == positionIonABC) {
-                    	if(    fragMa[i].charge == fragSer[j].charge
-    							&& fragMa[i].countSeq('*') == fragSer[j].countSeq('*')
-    							&& fragMa[i].countSeq('0') == fragSer[j].countSeq('0'))
-	                    {
-                    		if ((fragMa[i].calculated_moz - roundTol <= (fragSer[j].masses[k]))
-	                                && (fragMa[i].calculated_moz + roundTol >= fragSer[j].masses[k])) {
-	                            nbFound++;
-	                            fragTable[0][nbThroughB] = fragMa[i].intensity;
-	                            fragTable[1][nbThroughB] = fragSer[j].masses[k];
-	                            ;
-	                        } else {
-	                        }
-  
-		                }
+                    	if ((fragMa[i].getCharge() == fragSer[j].getCharge())
+                                && fragMa[i].getSeriesName().equals(fragSer[j].frag_series) 
+                                && fragMa[i].getPosition() == nbThroughB+1 ) {
+	                            fragTable[ABC_SERIE_LABEL_YPOS][nbThroughB] = fragMa[i].intensity;
+	                            fragTable[ABC_SERIE_LABEL_XPOS][nbThroughB] = fragSer[j].masses[k];    
+		          }
                     }
                     if (j == positionIonXYZ) {
-                    	if(    fragMa[i].charge == fragSer[j].charge
-    							&& fragMa[i].countSeq('*') == fragSer[j].countSeq('*')
-    							&& fragMa[i].countSeq('0') == fragSer[j].countSeq('0'))
-    	                 {
-	                        if ((fragMa[i].calculated_moz - roundTol <= fragSer[j].masses[k])
-	                                && (fragMa[i].calculated_moz + roundTol >= fragSer[j].masses[k])) {
-	                            nbFound++;
-	                            fragTable[5][nbThroughY] = fragMa[i].intensity;
-	                            fragTable[6][nbThroughY] = fragSer[j].masses[k];
-	                        } else {
-	                        }
+                    	if ( (fragMa[i].getCharge() == fragSer[j].getCharge()) 
+                                && fragMa[i].getSeriesName().equals(fragSer[j].frag_series) 
+                                && (sizeMaxSeries - fragMa[i].getPosition()) == nbThroughY ) {
+	                            fragTable[XYZ_SERIE_LABEL_YPOS][nbThroughY] = fragMa[i].intensity;
+	                            fragTable[XYZ_SERIE_LABEL_XPOS][nbThroughY] = fragSer[j].masses[k];
                     	}
                     }
-
                 }
+                 
                 if (j == positionIonABC) {
                     nbThroughB++;
                 }
@@ -288,20 +250,16 @@ public class RsetPeptideSpectrumAnnotations {
             }
         }
 
-        double abcPrev = fragTable[1][0] - SpectrumFragmentationUtil.getMassFromAminoAcid(peptideSequence.charAt(0));;
+        double abcPrev = fragTable[ABC_SERIE_LABEL_XPOS][0] - SpectrumFragmentationUtil.getMassFromAminoAcid(peptideSequence.charAt(0));;
 
-        boolean xyzPrevFound = false; // indicates if last iteration was a
-        // match or not. (if yes then highlight the AA)
+        boolean xyzPrevFound = false; // indicates if last iteration was a match or not. (if yes then highlight the AA)
         boolean abcPrevFound = false;
-
         String surroundingCharacters = "";
-
-       
+        
         if (!abcSerieName.equals("")) {
         	 if(peptideSequence.length() < sizeABCserie )  // fill sequence in case of length problem. should not happen
  	        {
- 	        	LoggerFactory.getLogger(
- 	                    "ProlineStudio.ResultExplorer").error(
+ 	        	LoggerFactory.getLogger("ProlineStudio.ResultExplorer").error(
  	                    "AW: strange, serie length is not same length as sequence length...serie length:"
  	                    + sizeABCserie + " for sequence " + peptideSequence);
  	        	for(int filler = 0 ; filler < (sizeABCserie - peptideSequence.length()); filler++) {
@@ -321,14 +279,14 @@ public class RsetPeptideSpectrumAnnotations {
                 }
 
                 // draw the outlined AA : B series
-                if ((fragTable[1][i] != 0) || ((i == sizeABCserie - 1) && abcPrevFound)) // if some data
+                if ((fragTable[ABC_SERIE_LABEL_XPOS][i] != 0) || ((i == sizeABCserie - 1) && abcPrevFound)) // if some data
                 {
                     if (i == (sizeABCserie - 1)) { // if last element to be highlighted
                         abcPrevFound = true;
-                        fragTable[1][i] = abcPrev + SpectrumFragmentationUtil.getMassFromAminoAcid(peptideSequence.charAt(i));
+                        fragTable[ABC_SERIE_LABEL_XPOS][i] = abcPrev + SpectrumFragmentationUtil.getMassFromAminoAcid(peptideSequence.charAt(i));
                     }
                     String aa = "" + peptideSequence.charAt(i);
-                    xyta = new XYTextAnnotation(surroundingCharacters + aa + surroundingCharacters, (abcPrev + fragTable[1][i]) / 2, maxY - (maxY - minY) * 0.15);
+                    xyta = new XYTextAnnotation(surroundingCharacters + aa + surroundingCharacters, (abcPrev + fragTable[ABC_SERIE_LABEL_XPOS][i]) / 2, maxY - (maxY - minY) * 0.15);
                     if (abcPrevFound || i == 0 || i == (sizeABCserie - 1)) {
                         // 2 consecutives fragments matching, or first element or last element, then highlight the AA
                         xyta.setPaint(Color.white);
@@ -340,7 +298,7 @@ public class RsetPeptideSpectrumAnnotations {
                     }
                     xyta.setFont(new Font(null, Font.BOLD, 11));
                     plot.addAnnotation(xyta);
-                    abcPrev = fragTableTheo[1][i]; // 
+                    abcPrev = fragTableTheo[ABC_SERIE_LABEL_XPOS][i]; // 
                     abcPrevFound = true;
 
                     if (!(i == sizeABCserie - 1)) {
@@ -348,9 +306,8 @@ public class RsetPeptideSpectrumAnnotations {
                         // draw the triangle above the b number peak &
                         // draw the b number over the peak
                         final XYPointerAnnotation pointer = new XYPointerAnnotation(abcSerieName + (i + 1),
-                                fragTableTheo[1][i],
-                                fragTable[0][i] + (maxY - minY) * 0.055,
-                                6.0 * Math.PI / 4.0);
+                                fragTableTheo[ABC_SERIE_LABEL_XPOS][i],
+                                fragTable[ABC_SERIE_LABEL_YPOS][i] + (maxY - minY) * 0.055, 6.0 * Math.PI / 4.0);
                         pointer.setBaseRadius(5.0);
                         pointer.setTipRadius(0.0);
                         pointer.setArrowWidth(2);
@@ -359,8 +316,8 @@ public class RsetPeptideSpectrumAnnotations {
                         pointer.setPaint(abc_serie_color);
                         pointer.setTextAnchor(TextAnchor.BOTTOM_CENTER);
                         pointer.setToolTipText("<html>"
-                                + "m/z: " + fragTable[1][i] + "<br>"
-                                + "intensity: " + fragTable[0][i]
+                                + "m/z: " + fragTable[ABC_SERIE_LABEL_XPOS][i] + "<br>"
+                                + "intensity: " + fragTable[ABC_SERIE_LABEL_YPOS][i]
                                 + "</html>");
                         plot.addAnnotation(pointer);
 
@@ -368,10 +325,10 @@ public class RsetPeptideSpectrumAnnotations {
                         float yAboveBar = (float) ((maxY - minY) * 0.091);
                         float dash[] = {5.0f};
                         // draw only dashline if the y or b tag is not above the y/b line
-                        if (fragTable[0][i] + yAboveBar < fragTableTheo[0][i]) {
+                        if (fragTable[ABC_SERIE_LABEL_YPOS][i] + yAboveBar < fragTableTheo[ABC_SERIE_LABEL_YPOS][i]) {
                             BasicStroke stk = new BasicStroke(0.1f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 5.0f, dash, 0.5f);
-                            XYLineAnnotation line = new XYLineAnnotation(fragTableTheo[1][i], fragTable[0][i] + yAboveBar, fragTableTheo[1][i],
-                                    fragTableTheo[0][i], stk, abc_serie_color);
+                            XYLineAnnotation line = new XYLineAnnotation(fragTableTheo[ABC_SERIE_LABEL_XPOS][i], fragTable[ABC_SERIE_LABEL_YPOS][i] + yAboveBar, fragTableTheo[ABC_SERIE_LABEL_XPOS][i],
+                                    fragTableTheo[ABC_SERIE_LABEL_YPOS][i], stk, abc_serie_color);
                             plot.addAnnotation(line);
                         }
                     }
@@ -380,18 +337,18 @@ public class RsetPeptideSpectrumAnnotations {
                     abcPrevFound = false;
                     String aa = "" + peptideSequence.charAt(i);
                     if (i == sizeABCserie - 1) { // last element not highlighted
-                        fragTableTheo[1][i] = abcPrev + SpectrumFragmentationUtil.getMassFromAminoAcid(peptideSequence.charAt(i));
+                        fragTableTheo[ABC_SERIE_LABEL_XPOS][i] = abcPrev + SpectrumFragmentationUtil.getMassFromAminoAcid(peptideSequence.charAt(i));
                     }
                     if (i == 0) {
-                        abcPrev = fragTableTheo[1][0] - SpectrumFragmentationUtil.getMassFromAminoAcid(peptideSequence.charAt(i));
+                        abcPrev = fragTableTheo[ABC_SERIE_LABEL_XPOS][0] - SpectrumFragmentationUtil.getMassFromAminoAcid(peptideSequence.charAt(i));
                     }
-                    xyta = new XYTextAnnotation(surroundingCharacters + aa + surroundingCharacters, (abcPrev + fragTableTheo[1][i]) / 2, maxY - (maxY - minY) * 0.15);
+                    xyta = new XYTextAnnotation(surroundingCharacters + aa + surroundingCharacters, (abcPrev + fragTableTheo[ABC_SERIE_LABEL_XPOS][i]) / 2, maxY - (maxY - minY) * 0.15);
                     xyta.setPaint(abc_serie_color);
                     xyta.setFont(new Font(null, Font.BOLD, 11));
                     xyta.setBackgroundPaint(Color.white);
                     plot.addAnnotation(xyta);
 
-                    abcPrev = fragTableTheo[1][i];
+                    abcPrev = fragTableTheo[ABC_SERIE_LABEL_XPOS][i];
                     abcPrevFound = false;
                 }
             }
@@ -399,7 +356,6 @@ public class RsetPeptideSpectrumAnnotations {
 
         //--------------------- xyz
         double xyzPrev = 0;
-        //if(fragTable[6][0] != 0))	
         if (!xyzSerieName.equals("")) {
             for (int i = sizeXYZserie - 1; i >= 0; i--) { // loop through the series points
 
@@ -414,14 +370,14 @@ public class RsetPeptideSpectrumAnnotations {
                 }
 
                 // draw the outlined AA : Y series
-                if ((fragTable[6][i] != 0) || ((i == 0) && xyzPrevFound)) // if some data
+                if ((fragTable[XYZ_SERIE_LABEL_XPOS][i] != 0) || ((i == 0) && xyzPrevFound)) // if some data
                 {
                     if (i == 0) { // if last element to be highlighted
                         xyzPrevFound = true;
-                        fragTable[6][i] = xyzPrev + SpectrumFragmentationUtil.getMassFromAminoAcid(peptideSequence.charAt(i));
+                        fragTable[XYZ_SERIE_LABEL_XPOS][i] = xyzPrev + SpectrumFragmentationUtil.getMassFromAminoAcid(peptideSequence.charAt(i));
                     }
                     String aa = "" + peptideSequence.charAt(i);
-                    xyta = new XYTextAnnotation(surroundingCharacters + aa + surroundingCharacters, (xyzPrev + fragTable[6][i]) / 2, maxY - (maxY - minY) * 0.25);
+                    xyta = new XYTextAnnotation(surroundingCharacters + aa + surroundingCharacters, (xyzPrev + fragTable[XYZ_SERIE_LABEL_XPOS][i]) / 2, maxY - (maxY - minY) * 0.25);
                     if (xyzPrevFound
                             || i == sizeXYZserie - 1
                             || i == 0) {// 2 consecutives fragments matching,
@@ -435,7 +391,7 @@ public class RsetPeptideSpectrumAnnotations {
                     }
                     xyta.setFont(new Font(null, Font.BOLD, 11));
                     plot.addAnnotation(xyta);
-                    xyzPrev = fragTableTheo[6][i]; // 
+                    xyzPrev = fragTableTheo[XYZ_SERIE_LABEL_XPOS][i]; // 
                     xyzPrevFound = true;
 
                     if (!(i == 0)) { // do not draw triangle and number if last element
@@ -443,12 +399,12 @@ public class RsetPeptideSpectrumAnnotations {
                         // draw the triangle above the b number peak
                         xyta = new XYTextAnnotation("" /*
                                  * "\u25BE"
-                                 */, fragTableTheo[6][i], fragTable[5][i] + (maxY - minY) * 0.01);
+                                 */, fragTableTheo[XYZ_SERIE_LABEL_XPOS][i], fragTable[XYZ_SERIE_LABEL_YPOS][i] + (maxY - minY) * 0.01);
                         xyta.setPaint(xyz_serie_color);
                         plot.addAnnotation(xyta);
                         final XYPointerAnnotation pointer = new XYPointerAnnotation(xyzSerieName + (sizeXYZserie - i),
-                                fragTableTheo[6][i],
-                                fragTable[5][i] + (maxY - minY) * 0.01,
+                                fragTableTheo[XYZ_SERIE_LABEL_XPOS][i],
+                                fragTable[XYZ_SERIE_LABEL_YPOS][i] + (maxY - minY) * 0.01,
                                 6.0 * Math.PI / 4.0);
                         pointer.setBaseRadius(5.0);
                         pointer.setTipRadius(0.0);
@@ -458,8 +414,8 @@ public class RsetPeptideSpectrumAnnotations {
                         pointer.setPaint(xyz_serie_color);
                         pointer.setTextAnchor(TextAnchor.BOTTOM_CENTER);
                         pointer.setToolTipText("<html>"
-                                + "m/z: " + fragTable[6][i] + "<br>"
-                                + "intensity: " + fragTable[5][i]
+                                + "m/z: " + fragTable[XYZ_SERIE_LABEL_XPOS][i] + "<br>"
+                                + "intensity: " + fragTable[XYZ_SERIE_LABEL_YPOS][i]
                                 + "</html>");
                         plot.addAnnotation(pointer);
 
@@ -468,10 +424,10 @@ public class RsetPeptideSpectrumAnnotations {
                         float yAboveBar = (float) ((maxY - minY) * 0.041);
                         float dash[] = {5.0f};
                         // draw only dashline if the y or b tag is not above the y/b line
-                        if (fragTable[5][i] + yAboveBar < fragTableTheo[5][i]) {
+                        if (fragTable[XYZ_SERIE_LABEL_YPOS][i] + yAboveBar < fragTableTheo[XYZ_SERIE_LABEL_YPOS][i]) {
                             BasicStroke stk = new BasicStroke(0.1f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 5.0f, dash, 0.5f);
-                            XYLineAnnotation line = new XYLineAnnotation(fragTableTheo[6][i], fragTable[5][i] + yAboveBar, fragTableTheo[6][i],
-                                    fragTableTheo[5][i], stk, xyz_serie_color);
+                            XYLineAnnotation line = new XYLineAnnotation(fragTableTheo[XYZ_SERIE_LABEL_XPOS][i], fragTable[XYZ_SERIE_LABEL_YPOS][i] + yAboveBar, fragTableTheo[XYZ_SERIE_LABEL_XPOS][i],
+                                    fragTableTheo[XYZ_SERIE_LABEL_YPOS][i], stk, xyz_serie_color);
                             plot.addAnnotation(line);
                         }
                     }
@@ -479,18 +435,18 @@ public class RsetPeptideSpectrumAnnotations {
                 {
                     String aa = "" + peptideSequence.charAt(i);
                     if (i == 0) { // first element not highlighted
-                        fragTableTheo[6][i] = xyzPrev + SpectrumFragmentationUtil.getMassFromAminoAcid(peptideSequence.charAt(i));
+                        fragTableTheo[XYZ_SERIE_LABEL_XPOS][i] = xyzPrev + SpectrumFragmentationUtil.getMassFromAminoAcid(peptideSequence.charAt(i));
                     }
                     if (i == sizeXYZserie - 1) {
-                        xyzPrev = fragTableTheo[6][i] - SpectrumFragmentationUtil.getMassFromAminoAcid(peptideSequence.charAt(i));
+                        xyzPrev = fragTableTheo[XYZ_SERIE_LABEL_XPOS][i] - SpectrumFragmentationUtil.getMassFromAminoAcid(peptideSequence.charAt(i));
                     }
-                    xyta = new XYTextAnnotation(surroundingCharacters + aa + surroundingCharacters, (xyzPrev + fragTableTheo[6][i]) / 2, maxY - (maxY - minY) * 0.25);
+                    xyta = new XYTextAnnotation(surroundingCharacters + aa + surroundingCharacters, (xyzPrev + fragTableTheo[XYZ_SERIE_LABEL_XPOS][i]) / 2, maxY - (maxY - minY) * 0.25);
                     xyta.setPaint(xyz_serie_color);
                     xyta.setFont(new Font(null, Font.BOLD, 11));
                     xyta.setBackgroundPaint(Color.white);
                     plot.addAnnotation(xyta);
 
-                    xyzPrev = fragTableTheo[6][i];
+                    xyzPrev = fragTableTheo[XYZ_SERIE_LABEL_XPOS][i];
                     xyzPrevFound = false;
                 }
             }

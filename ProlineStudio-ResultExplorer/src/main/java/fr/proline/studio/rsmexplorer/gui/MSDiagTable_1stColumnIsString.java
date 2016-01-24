@@ -9,8 +9,8 @@ import javax.swing.JTable;
 
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 
-import fr.proline.studio.rsmexplorer.gui.spectrum.PeptideFragmentationData.FragmentMatch_AW;
-import fr.proline.studio.rsmexplorer.gui.spectrum.PeptideFragmentationData.TheoreticalFragmentSeries_AW;
+import fr.proline.studio.rsmexplorer.gui.spectrum.PeptideFragmentationData.FragmentMatch;
+import fr.proline.studio.rsmexplorer.gui.spectrum.PeptideFragmentationData.TheoreticalFragmentSeries;
 import fr.proline.studio.table.DecoratedTable;
 import fr.proline.studio.table.DecoratedTableModel;
 import fr.proline.studio.table.TablePopupMenu;
@@ -85,7 +85,7 @@ public class MSDiagTable_1stColumnIsString extends DecoratedTable {
 			 * 
 			 */
 			private static final long serialVersionUID = 1L;
-			private  TheoreticalFragmentSeries_AW[] m_fragSer;
+			private  TheoreticalFragmentSeries[] m_fragSer;
 	        private String m_peptideSequence;
 	        private int m_nbRows;
 	        private String[][] m_matrix;

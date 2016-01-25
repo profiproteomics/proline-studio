@@ -103,7 +103,8 @@ public class ExportDatasetTask extends AbstractServiceTask {
             }
             
             case  SPECTRA_LIST:  {               
-               extraParams.putAll(m_exportParams);
+               if(m_exportParams != null)
+                extraParams.putAll(m_exportParams);
                break;
             }
             }

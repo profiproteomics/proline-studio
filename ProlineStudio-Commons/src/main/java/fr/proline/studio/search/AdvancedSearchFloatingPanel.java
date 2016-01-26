@@ -4,20 +4,27 @@ import fr.proline.studio.filter.Filter;
 import fr.proline.studio.utils.IconManager;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Container;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.KeyEventPostProcessor;
+import java.awt.KeyboardFocusManager;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 import javax.swing.JToggleButton;
 
 /**
@@ -203,12 +210,49 @@ public class AdvancedSearchFloatingPanel extends JPanel {
         m_searchOptionPanel.removeAll();
         c.gridx = 0;
         f.createComponents(m_searchOptionPanel, c);
+        
+        // add listeners to text field for return key
+        addListener(m_searchOptionPanel);
+        
         revalidate();
         Dimension d = getPreferredSize();
         if (firstTime) {
             setBounds(0, 0, (int) d.getWidth(), (int) d.getHeight());
         } else {
             setBounds(getX(), getY(), (int) d.getWidth(), (int) d.getHeight());
+        }
+    }
+    
+    private void addListener(Container container) {
+        for (Component c : container.getComponents()) {
+            if (c instanceof JTextField) {
+                final JTextField tf = ((JTextField) c);
+                tf.addActionListener(new ActionListener() {
+
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        m_searchButton.doClick();
+                    }
+                }
+                );
+                tf.addFocusListener(new FocusListener() {
+
+                    @Override
+                    public void focusGained(FocusEvent e) {
+                        if (!e.isTemporary()) {
+                            tf.selectAll();
+                            
+                        }
+                    }
+
+                    @Override
+                    public void focusLost(FocusEvent e) {
+                    }
+                    
+                });
+            } else if (c instanceof Container) {
+                addListener((Container) c);
+            }
         }
     }
     

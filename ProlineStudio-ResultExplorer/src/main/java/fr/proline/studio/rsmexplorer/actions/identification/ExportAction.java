@@ -53,7 +53,7 @@ public class ExportAction extends AbstractRSMAction {
         if (m_isJMSDefined) {
             m_exportSpectraAction = new ExportSpectraListJMSAction(m_treeType);
         } else {
-            m_exportSpectraAction = null;
+            m_exportSpectraAction = new ExportSpectraListAction(m_treeType);
         }
         
         JMenuItem exportDatasetItem = new JMenuItem(m_exportDatasetAction);

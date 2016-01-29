@@ -1,6 +1,5 @@
 package fr.proline.studio.rsmexplorer.gui.spectrum;
 
-
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
@@ -8,14 +7,10 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import javax.swing.JTable;
 
-
-
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
-import fr.proline.studio.filter.actions.ClearRestrainAction;
-import fr.proline.studio.filter.actions.RestrainAction;
 
-import fr.proline.studio.rsmexplorer.gui.spectrum.PeptideFragmentationData.FragmentMatch_AW;
-import fr.proline.studio.rsmexplorer.gui.spectrum.PeptideFragmentationData.TheoreticalFragmentSeries_AW;
+import fr.proline.studio.rsmexplorer.gui.spectrum.PeptideFragmentationData.FragmentMatch;
+import fr.proline.studio.rsmexplorer.gui.spectrum.PeptideFragmentationData.TheoreticalFragmentSeries;
 import fr.proline.studio.table.DecoratedTable;
 import fr.proline.studio.table.DecoratedTableModel;
 import fr.proline.studio.table.TablePopupMenu;
@@ -25,19 +20,17 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import org.jdesktop.swingx.table.TableColumnExt;
 
-
 public class RsetPeptideFragmentationTable extends DecoratedTable {
 
     /**
      * Created by AW
      */
-
     private FragTableCustomRenderer m_fragTableRenderer;
 
     private boolean m_fragmentsIntensityVisible = false;
-    
+
     public RsetPeptideFragmentationTable() {
-        
+
         RsetPeptideFragmentationTable.FragmentationTableModel fragmentationTableModel = new RsetPeptideFragmentationTable.FragmentationTableModel();
 
         m_fragTableRenderer = new RsetPeptideFragmentationTable.FragTableCustomRenderer();
@@ -45,19 +38,16 @@ public class RsetPeptideFragmentationTable extends DecoratedTable {
         setModel(fragmentationTableModel);
         setDefaultRenderer(Double.class, m_fragTableRenderer);
         setSortable(false);
-        
+
         updateFragmentsIntensityVisibility(false);
     }
 
-
-
-
     public void setData(DPeptideMatch pepMatch, PeptideFragmentationData petpideFragmentationData) {
- 
+
         setAllColumnsVisibles(); //JPM.HACK : bug between columns visibility and update of the model of a JXTable
-        
+
         FragmentationTableModel fragmentationTableModel = ((FragmentationTableModel) getModel());
-        
+
         if (petpideFragmentationData == null) {
             fragmentationTableModel.reinitData();
             m_fragTableRenderer.setSelectMatrix(fragmentationTableModel.getMatrix());
@@ -68,18 +58,15 @@ public class RsetPeptideFragmentationTable extends DecoratedTable {
             updateFragmentsIntensityVisibility();
         }
 
-        
-
     }
-
 
     public final void updateFragmentsIntensityVisibility() {
         updateFragmentsIntensityVisibility(m_fragmentsIntensityVisible);
     }
+
     public final void updateFragmentsIntensityVisibility(boolean visible) {
 
         m_fragmentsIntensityVisible = visible;
-        
         final String intensityStringIdentifier = "(I)";
 
         // get all columns including hidden ones
@@ -107,11 +94,10 @@ public class RsetPeptideFragmentationTable extends DecoratedTable {
 
                 tce.setVisible(true);
 
-
             }
         }
     }
-    
+
     @Override
     public TablePopupMenu initPopupMenu() {
         return null;
@@ -123,11 +109,9 @@ public class RsetPeptideFragmentationTable extends DecoratedTable {
         // nothing to do
     }
 
-
-
     public static class FragmentationTableModel extends DecoratedTableModel {
 
-        private  TheoreticalFragmentSeries_AW[] m_fragSer;
+        private TheoreticalFragmentSeries[] m_fragSer;
         private String m_peptideSequence;
         private int m_sizeMaxSeries;
         private String[][] m_matrix;
@@ -141,9 +125,9 @@ public class RsetPeptideFragmentationTable extends DecoratedTable {
         public void reinitData() {
             initData();
             fireTableStructureChanged();
-                    
+
         }
-        
+
         private void initData() {
             m_fragSer = null;
             m_peptideSequence = null;
@@ -152,14 +136,13 @@ public class RsetPeptideFragmentationTable extends DecoratedTable {
             m_matrixIntensity = null;
             m_columnNames = null;
         }
-        
-        
+
         public void setData(PeptideFragmentationData petpideFragmentationData, String peptideSequence) {
-            
+
             initData();
-            
+
             m_fragSer = petpideFragmentationData.getFragmentSeries();
-            FragmentMatch_AW[] fragMa = petpideFragmentationData.getFragmentMatch();
+            FragmentMatch[] fragMa = petpideFragmentationData.getFragmentMatch();
             m_peptideSequence = peptideSequence;
 
             int sizeMaxSeries = 0;
@@ -182,9 +165,10 @@ public class RsetPeptideFragmentationTable extends DecoratedTable {
                     case 'c':
                         if (m_fragSer[i].frag_series.length() > 1) {
                             // then it is either a ++ or a b-H2O and so on...
-                        } else { // it's a 'a/b/c' ion
-                        	if(!abcSerieName.equals("b")) {// only if b not already defined, else we keep b
-                        		abcSerieName = "" + m_fragSer[i].frag_series.charAt(0);
+                        } else // it's a 'a/b/c' ion
+                        {
+                            if (!abcSerieName.equals("b")) {// only if b not already defined, else we keep b
+                                abcSerieName = "" + m_fragSer[i].frag_series.charAt(0);
                             }
                         }
                         break;
@@ -195,11 +179,12 @@ public class RsetPeptideFragmentationTable extends DecoratedTable {
                     case 'z':
                         if (m_fragSer[i].frag_series.length() > 1) {
                             // then it is either a ++ or a b-H2O and so on...
-                        } else { // it's a 'v/w/x/y/z' ion
-                        	if(!xyzSerieName.equals("y")) {// only if b not already defined, else we keep b
-                        		xyzSerieName = "" + m_fragSer[i].frag_series.charAt(0);
-    	                        
-                        	}
+                        } else // it's a 'v/w/x/y/z' ion
+                        {
+                            if (!xyzSerieName.equals("y")) {// only if b not already defined, else we keep b
+                                xyzSerieName = "" + m_fragSer[i].frag_series.charAt(0);
+
+                            }
                         }
                         break;
                     default:
@@ -212,14 +197,14 @@ public class RsetPeptideFragmentationTable extends DecoratedTable {
             m_columnNames[i++] = "amino acid";
             m_columnNames[i++] = abcSerieName + " ion";
 
-            for (TheoreticalFragmentSeries_AW currentFrag : m_fragSer) {
+            for (TheoreticalFragmentSeries currentFrag : m_fragSer) {
                 m_columnNames[i++] = currentFrag.frag_series + " (M)";
             }
 
             m_columnNames[i] = xyzSerieName + " ion";
             i++;
 
-            for (TheoreticalFragmentSeries_AW currentFragSer : m_fragSer) {
+            for (TheoreticalFragmentSeries currentFragSer : m_fragSer) {
                 m_columnNames[i] = currentFragSer.frag_series + " (I)";
                 i++;
             }
@@ -227,51 +212,28 @@ public class RsetPeptideFragmentationTable extends DecoratedTable {
             m_matrix = new String[sizeMaxSeries][m_columnNames.length];
             m_matrixIntensity = new double[sizeMaxSeries][m_columnNames.length];
 
-            double roundTol = 0.0001; // could be put to zero but in case some rounding happens at other's code.
-            int nbFound = 0;
+            for (int j = 0; j < m_fragSer.length; j++) { // loop through theoFragment series here
+                for (int k = 0; k < m_fragSer[j].masses.length; k++) { // loop through masses for each fragment series
+                    for (i = 0; i < fragMa.length; i++) { // find matching fragMatches with theoFragSeries
+                        if ((fragMa[i].getCharge() == m_fragSer[j].getCharge()) && fragMa[i].getSeriesName().equals(m_fragSer[j].frag_series)) {
 
-            for (int j = 0; j < m_fragSer.length; j++) { // loop through
-                // theoFragment series
-                // here
-                for (int k = 0; k < m_fragSer[j].masses.length; k++) { // loop
-                    // through
-                    // masses
-                    // for
-                    // each
-                    // fragment
-                    // series
-                    for (i = 0; i < fragMa.length; i++) { // find matching
-                        // fragMatches with
-                        // theoFragSeries
-                    	fragMa[i].computeChargeFromLabel();
-						m_fragSer[j].computeChargeFromLabel();
-						if(    fragMa[i].charge == m_fragSer[j].charge
-								&& fragMa[i].countSeq('*') == m_fragSer[j].countSeq('*')
-								&& fragMa[i].countSeq('0') == m_fragSer[j].countSeq('0'))
-	                    {
-                			if ((fragMa[i].calculated_moz - roundTol <= (m_fragSer[j].masses[k]))
-	                                && (fragMa[i].calculated_moz + roundTol >= m_fragSer[j].masses[k])) {
-	                            nbFound++;
-	                            if (m_fragSer[j].frag_series.toUpperCase().contains(
-	                                    "A")
-	                                    || m_fragSer[j].frag_series.toUpperCase().contains("B")
-	                                    || m_fragSer[j].frag_series.toUpperCase().contains("C")) {
-	                                m_matrix[k][j + 2] = "ABC";
-	
-	                            } else if (m_fragSer[j].frag_series.toUpperCase().contains("X")
-	                                    || m_fragSer[j].frag_series.toUpperCase().contains("Y")
-	                                    || m_fragSer[j].frag_series.toUpperCase().contains("Z")) {
-	                                m_matrix[k][j + 2] = "XYZ";
-	                            } else {
-	                                // immonium or anything else than abc,v,w,xyz
-	                            }
-	                            m_matrixIntensity[k][j + 2] = fragMa[i].intensity; // assign matching peak intensity
-	                            m_matrix[k][j + 2] += "intensity";
-	
-		                    } else {
-			                }
-                    	}
-                    	
+                            if ((m_fragSer[j].frag_series.toUpperCase().contains("A")
+                                    || m_fragSer[j].frag_series.toUpperCase().contains("B")
+                                    || m_fragSer[j].frag_series.toUpperCase().contains("C")) && (fragMa[i].getPosition() == k + 1)) {
+                                m_matrix[k][j + 2] = "ABC";
+                                m_matrixIntensity[k][j + 2] = fragMa[i].intensity; // assign matching peak intensity
+                                m_matrix[k][j + 2] += "intensity";
+                            } else if ((m_fragSer[j].frag_series.toUpperCase().contains("X")
+                                    || m_fragSer[j].frag_series.toUpperCase().contains("Y")
+                                    || m_fragSer[j].frag_series.toUpperCase().contains("Z")) && ((sizeMaxSeries - fragMa[i].getPosition()) == k)) {
+                                m_matrix[k][j + 2] = "XYZ";
+                                m_matrixIntensity[k][j + 2] = fragMa[i].intensity; // assign matching peak intensity
+                                m_matrix[k][j + 2] += "intensity";
+                            } else {
+                                // immonium or anything else than abc,v,w,xyz
+                            }
+                        }
+
                     }
                 }
             }
@@ -292,7 +254,7 @@ public class RsetPeptideFragmentationTable extends DecoratedTable {
         public String getToolTipForHeader(int col) {
             return getColumnName(col);
         }
-        
+
         @Override
         public String getTootlTipValue(int row, int col) {
             return null;
@@ -350,7 +312,7 @@ public class RsetPeptideFragmentationTable extends DecoratedTable {
             }
 
             if (columnIndex < m_fragSer.length + 3) { // return mass value
-                TheoreticalFragmentSeries_AW currentFragSer = m_fragSer[columnIndex - 2];
+                TheoreticalFragmentSeries currentFragSer = m_fragSer[columnIndex - 2];
 
                 if (currentFragSer.masses[rowIndex] != 0) {
                     return (double) Math.round(currentFragSer.masses[rowIndex] * 10000) / 10000;
@@ -359,9 +321,9 @@ public class RsetPeptideFragmentationTable extends DecoratedTable {
                 }
             } else if (columnIndex > m_fragSer.length + 2 && columnIndex < m_columnNames.length)// return intensity value
             {
-                
+
                 if (m_matrixIntensity[rowIndex][columnIndex - m_fragSer.length - 1] > 0) {
-                   return  new BigDecimal(m_matrixIntensity[rowIndex][columnIndex- m_fragSer.length - 1], new MathContext(3));
+                    return new BigDecimal(m_matrixIntensity[rowIndex][columnIndex - m_fragSer.length - 1], new MathContext(3));
                 } else {
                     return null;
                 }
@@ -375,19 +337,19 @@ public class RsetPeptideFragmentationTable extends DecoratedTable {
         public TableCellRenderer getRenderer(int row, int col) {
             return null;
         }
-        
+
     }
 
     public static class FragTableCustomRenderer extends org.jdesktop.swingx.renderer.DefaultTableRenderer {
-        
+
         private static final long serialVersionUID = 1L;
         private String[][] m_selectMatrix = new String[100][100];
         private Font m_fontPlain = null;
         private Font m_fontBold = null;
         private final static Color LIGHT_BLUE_COLOR = new Color(51, 153, 255);
         private final static Color LIGHT_RED_COLOR = new Color(255, 85, 85);
-        private final static Color EXTRA_LIGHT_BLUE_COLOR = new Color(175, 255,255);
-        private final static Color EXTRA_LIGHT_RED_COLOR = new Color(255, 230,230);
+        private final static Color EXTRA_LIGHT_BLUE_COLOR = new Color(175, 255, 255);
+        private final static Color EXTRA_LIGHT_RED_COLOR = new Color(255, 230, 230);
 
         void setSelectMatrix(String[][] matx) {
             m_selectMatrix = matx;
@@ -417,15 +379,10 @@ public class RsetPeptideFragmentationTable extends DecoratedTable {
 
             if (m_selectMatrix[row][column] != null) {
 
-                if (m_selectMatrix[row][column].contains("ABC")) { // highlight
-                    // the cell
-                    // if true
-                    // in
-                    // selectMatrix
+                if (m_selectMatrix[row][column].contains("ABC")) { // highlight the cell if true in selectMatrix
                     foregroundColor = (isSelected) ? EXTRA_LIGHT_BLUE_COLOR : LIGHT_BLUE_COLOR;
                 } else if (m_selectMatrix[row][column].contains("XYZ")) {
-                    foregroundColor = (isSelected) ? EXTRA_LIGHT_RED_COLOR
-                            : LIGHT_RED_COLOR;
+                    foregroundColor = (isSelected) ? EXTRA_LIGHT_RED_COLOR : LIGHT_RED_COLOR;
                 } else {
                     foregroundColor = (isSelected) ? Color.white : Color.black;
                 }

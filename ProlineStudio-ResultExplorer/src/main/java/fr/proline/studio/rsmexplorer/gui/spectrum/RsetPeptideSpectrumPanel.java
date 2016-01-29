@@ -18,7 +18,6 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JToolBar;
 
-import org.apache.batik.svggen.SVGGraphics2DIOException;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.ChartUtilities;
@@ -71,7 +70,10 @@ import java.awt.event.ActionEvent;
 import javax.swing.JButton;
 import org.openide.windows.WindowManager;
 
+import org.jfree.graphics2d.svg.*;
+
 import org.slf4j.Logger;
+import org.w3c.dom.DOMException;
 
 /**
  * Panel used to display a Spectrum of a PeptideMatch
@@ -267,27 +269,19 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
             LoggerFactory.getLogger("ProlineStudio.ResultExplorer").error("writeToPNG", e);
         }
     }
-    
+ 
+
     public void writeToSVG(String file) {
-        writeToSVG_batik(file);
+        SVGGraphics2D g2 = new SVGGraphics2D(m_spectrumPanel.getWidth(), m_spectrumPanel.getHeight());
+        m_spectrumPanel.paint(g2);
+
+        try {
+            SVGUtils.writeToSVG(new File(file), g2.getSVGElement());
+        } catch (Exception ex) {
+        }
     }
     
-    public void writeToSVG_batik(String fileName) {
-        DOMImplementation mySVGDOM = org.apache.batik.dom.GenericDOMImplementation.getDOMImplementation();
-        Document document = mySVGDOM.createDocument(null, "svg", null);
-        org.apache.batik.svggen.SVGGraphics2D my_svg_generator = new org.apache.batik.svggen.SVGGraphics2D(document);
-        //m_chart.draw(my_svg_generator, new Rectangle2D.Double(0, 0, 800,600), null);
-        // draw a rectangle of the size that determines the scale of the axis graduations.
-        m_chart.draw(my_svg_generator, new Rectangle2D.Double(0, 0, m_spectrumPanel.getWidth(), m_spectrumPanel.getHeight()), null);
-        
-        
-        try {
-            my_svg_generator.stream(fileName);
-        } catch (SVGGraphics2DIOException e) {
-            LoggerFactory.getLogger("ProlineStudio.ResultExplorer").error("writeToSVG_batik", e);
-        }
-        
-    }
+
     
     private void generateSpectrumMatch() {
         if (JMSConnectionManager.getJMSConnectionManager().isJMSDefined()) {

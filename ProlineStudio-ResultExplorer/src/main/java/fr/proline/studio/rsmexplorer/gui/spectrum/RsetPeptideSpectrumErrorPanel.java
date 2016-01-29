@@ -17,7 +17,7 @@ import java.nio.FloatBuffer;
 import javax.swing.JToolBar;
 import javax.swing.JPanel;
 
-import org.apache.batik.svggen.SVGGraphics2DIOException;
+
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.ChartUtilities;
@@ -50,6 +50,8 @@ import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
+import org.jfree.graphics2d.svg.SVGGraphics2D;
+import org.jfree.graphics2d.svg.SVGUtils;
 
 
 /**
@@ -226,45 +228,15 @@ public class RsetPeptideSpectrumErrorPanel extends HourglassPanel implements Dat
     }
 
     public void writeToSVG(String file) {
-        //	writeToSVG_jfreesvg();
-        writeToSVG_batik(file);
-
-    }
-
-//	     public void writeToSVG_jfreesvg() {  
-    //
-//				File f = new File("svg_temp.svg");
-//				SVGGraphics2D g2 = new SVGGraphics2D(800, 600);
-//		        Rectangle r = new Rectangle(0, 0,800,600);
-//		        m_chart.draw(g2, r);
-//		        m_svgChart = g2;
-//		        m_svgFile = f;
-//		//        m_picWrapper.setFile(m_svgFile);
-//		        
-//		        try {
-//					SVGUtils.writeToSVG(f, m_svgChart.getSVGElement());
-//				} catch (IOException e) {
-//					e.printStackTrace();
-//				}	
-    //
-//			
-//		}
-    public void writeToSVG_batik(String fileName) {
-        DOMImplementation mySVGDOM = org.apache.batik.dom.GenericDOMImplementation.getDOMImplementation();
-        Document document = mySVGDOM.createDocument(null, "svg", null);
-        org.apache.batik.svggen.SVGGraphics2D my_svg_generator = new org.apache.batik.svggen.SVGGraphics2D(document);
-        //m_chart.draw(my_svg_generator, new Rectangle2D.Double(0, 0, 800,600), null);
-        // draw a rectangle of the size that determines the scale of the axis graduations.
-        m_chart.draw(my_svg_generator, new Rectangle2D.Double(0, 0, m_spectrumPanel.getWidth(), m_spectrumPanel.getHeight()), null);
-
+        SVGGraphics2D g2 = new SVGGraphics2D(m_spectrumPanel.getWidth(), m_spectrumPanel.getHeight());
+        m_spectrumPanel.paint(g2);
 
         try {
-            my_svg_generator.stream(fileName);
-        } catch (SVGGraphics2DIOException e) {
-            LoggerFactory.getLogger("ProlineStudio.ResultExplorer").error("writeToSVG_batik", e);
+            SVGUtils.writeToSVG(new File(file), g2.getSVGElement());
+        } catch (Exception ex) {
         }
-
     }
+
 
     private void constructSpectrumErrorChart(DPeptideMatch pm) {
 

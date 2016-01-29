@@ -19,13 +19,11 @@ import javax.swing.JTabbedPane;
 import javax.swing.JToolBar;
 
 import org.jdesktop.swingx.JXTable;
-import org.openide.awt.Toolbar;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
 
-import fr.proline.studio.rsmexplorer.gui.MSDiagOutput_AW;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.export.ImageExporterInterface;
 import fr.proline.studio.gui.HourglassPanel;

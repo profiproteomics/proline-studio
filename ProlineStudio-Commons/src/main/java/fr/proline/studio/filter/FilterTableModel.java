@@ -363,7 +363,8 @@ public class FilterTableModel extends DecoratedTableModel implements FilterTable
 
     @Override
     public void tableChanged(TableModelEvent e) {
-        filter();
+        // cancel restrain and redo filter
+        restrain(null);
     }
     
     

@@ -27,7 +27,7 @@ import org.rosuda.REngine.REXPGenericVector;
  */
 public class StatsRImplementation {
 
-    private static final String LIB_PROSTAR = "prostar"; 
+    private static final String LIB_PROSTAR = "DAPAR"; 
     private static final String LIB_CP4P = "cp4p"; 
     
     public static PyObject adjustP(Col pvaluesCol, String pi0Parameter, PyFloat alpha, PyInteger nbins, PyFloat pz) throws Exception {
@@ -137,7 +137,7 @@ public class StatsRImplementation {
         ColRef[] cols = StatsUtil.colTupleToColArray(p1, p2);
 
         // Create a temp file with a matrix containing cols data
-        File matrixTempFile = StatsUtil.columnsToMatrixTempFile(cols);
+        File matrixTempFile = StatsUtil.columnsToMatrixTempFile(cols, false);
 
         // do the calculation
         Table t = cols[0].getTable();
@@ -158,7 +158,7 @@ public class StatsRImplementation {
         serverR.parseAndEval("library(ibb)");
 
         // read Matrix Data
-        StatsUtil.readMatrixData(matrixTempFile);
+        StatsUtil.readMatrixData(matrixTempFile, false);
 
         // do calculation
         int nbCols = nbCols1 + nbCols2;
@@ -187,7 +187,7 @@ public class StatsRImplementation {
         ColRef[] cols = StatsUtil.colTupleToColArray(p);
 
         // Create a temp file with a matrix containing cols data
-        File matrixTempFile = StatsUtil.columnsToMatrixTempFile(cols);
+        File matrixTempFile = StatsUtil.columnsToMatrixTempFile(cols, true);
 
         // Create a temp file for the image
         File imageTempFile = StatsUtil.createImageTempFile();
@@ -210,10 +210,10 @@ public class StatsRImplementation {
         serverR.parseAndEval("library("+LIB_PROSTAR+")"); 
 
         // read Matrix Data
-        StatsUtil.readMatrixData(matrixTempFile);
+        StatsUtil.readMatrixData(matrixTempFile, true);
 
         // create image
-        return StatsUtil.createImage(imageTempFile, "boxPlotD(p=" + StatsUtil.MATRIX_VARIABLE + "[,1:1])");
+        return StatsUtil.createImage(imageTempFile, "boxPlotD(" + StatsUtil.MATRIX_VARIABLE + "[,1:1])");
 
     }
     
@@ -243,10 +243,10 @@ public class StatsRImplementation {
 
         // load library to do the calculation
         RServerManager serverR = RServerManager.getRServerManager();
-        serverR.parseAndEval("library(cp4p)");
+        serverR.parseAndEval("library("+LIB_CP4P+")"); 
     
         // read Matrix Data
-        StatsUtil.readMatrixData(matrixTempFile);
+        StatsUtil.readMatrixData(matrixTempFile, false);
 
         // create image
         String pi0Parameter = "pi0.method=\""+pi0Method.toString()+"\"";
@@ -264,7 +264,7 @@ public class StatsRImplementation {
         ColRef[] cols = StatsUtil.colTupleToColArray(p);
 
         // Create a temp file with a matrix containing cols data
-        File matrixTempFile = StatsUtil.columnsToMatrixTempFile(cols);
+        File matrixTempFile = StatsUtil.columnsToMatrixTempFile(cols, true);
 
         // Create a temp file for the image
         File imageTempFile = StatsUtil.createImageTempFile();
@@ -287,10 +287,10 @@ public class StatsRImplementation {
         serverR.parseAndEval("library("+LIB_PROSTAR+")"); 
 
         // read Matrix Data
-        StatsUtil.readMatrixData(matrixTempFile);
+        StatsUtil.readMatrixData(matrixTempFile, true);
 
         // create image
-        return StatsUtil.createImage(imageTempFile, "densityPlotD(p=" + StatsUtil.MATRIX_VARIABLE + "[,1:1])");
+        return StatsUtil.createImage(imageTempFile, "densityPlotD(" + StatsUtil.MATRIX_VARIABLE + "[,1:1])");
 
     }
     
@@ -304,7 +304,7 @@ public class StatsRImplementation {
         ColRef[] cols = StatsUtil.colTupleToColArray(p);
 
         // Create a temp file with a matrix containing cols data
-        File matrixTempFile = StatsUtil.columnsToMatrixTempFile(cols);
+        File matrixTempFile = StatsUtil.columnsToMatrixTempFile(cols, true);
 
         // Create a temp file for the image
         File imageTempFile = StatsUtil.createImageTempFile();
@@ -327,10 +327,10 @@ public class StatsRImplementation {
         serverR.parseAndEval("library("+LIB_PROSTAR+")"); 
 
         // read Matrix Data
-        StatsUtil.readMatrixData(matrixTempFile);
+        StatsUtil.readMatrixData(matrixTempFile, true);
 
         // create image
-        return StatsUtil.createImage(imageTempFile, "varianceDistD(p=" + StatsUtil.MATRIX_VARIABLE + "[,1:1])");
+        return StatsUtil.createImage(imageTempFile, "varianceDistD(" + StatsUtil.MATRIX_VARIABLE + "[,1:1])");
 
     }
     

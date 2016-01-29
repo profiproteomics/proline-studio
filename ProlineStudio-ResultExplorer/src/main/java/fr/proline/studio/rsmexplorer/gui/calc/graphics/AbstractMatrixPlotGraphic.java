@@ -81,12 +81,15 @@ public abstract class AbstractMatrixPlotGraphic extends AbstractGraphic {
 
 
             StringBuilder codeSB = new StringBuilder();
-            codeSB.append(m_functionName+"=Stats."+m_functionName+"(");
+            codeSB.append(m_functionName+"=Stats."+m_functionName+"((");
             for (int i = 0; i < parameters.length; i++) {
                 codeSB.append(parameters[i].getName());
+                if (i<parameters.length-1) {
+                    codeSB.append(',');
+                }
             }
 
-            codeSB.append(')');
+            codeSB.append("))");
 
             CalcCallback callback = new CalcCallback() {
 

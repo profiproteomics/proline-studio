@@ -31,7 +31,7 @@ public class StatsUtil {
     }
     
     
-    public static File columnsToMatrixTempFile(ColRef[] cols) throws Exception {
+    public static File columnsToMatrixTempFile(ColRef[] cols, boolean header) throws Exception {
         
         int nbRow = cols[0].getRowCount();
         
@@ -39,6 +39,15 @@ public class StatsUtil {
         tempFile.deleteOnExit();
         FileWriter fw = new FileWriter(tempFile);
         
+        if (header) {
+            for (int j=0;j<cols.length;j++) {
+                ColRef c = cols[j];
+                fw.write(c.getColumnName());
+                if (j<cols.length-1) {
+                    fw.write(';');
+                }
+            }
+        }
         
         for (int i = 0; i < nbRow; i++) {
             for (int j=0;j<cols.length;j++) {
@@ -141,9 +150,11 @@ public class StatsUtil {
         return f.getCanonicalPath().replaceAll("\\\\", "/");
     }
     
-    public static void readMatrixData(File matrixTempFile) throws Exception {
+    public static void readMatrixData(File matrixTempFile, boolean header) throws Exception {
         RServerManager serverR = RServerManager.getRServerManager();
-        String cmdReadCSV = MATRIX_VARIABLE+"<-read.delim('"+getPath(matrixTempFile)+"',header=F, sep=';')";
+        
+        char headerChar = (header) ? 'T' : 'F';
+        String cmdReadCSV = MATRIX_VARIABLE+"<-read.delim('"+getPath(matrixTempFile)+"',header="+headerChar+", sep=';')";
         serverR.parseAndEval(cmdReadCSV);
     }
     

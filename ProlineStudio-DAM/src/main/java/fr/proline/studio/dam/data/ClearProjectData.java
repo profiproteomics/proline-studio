@@ -82,8 +82,25 @@ public class ClearProjectData {
     }
     
     public String getType(){
-        if (isResultSummary()){
-            return TYPE_RSM;
+       if (isResultSummary()){
+            String rsmType = "";
+            switch (m_rsm.getResultSet().getType()){
+                case SEARCH:
+                    break;
+                case DECOY_SEARCH:
+                    rsmType = "DECOY";
+                    break;
+                case USER:
+                    break;
+                case DECOY_USER:
+                    rsmType = "DECOY";
+                    break;
+                case QUANTITATION:
+                    rsmType = "QUANTITATION";
+                    break;
+            }
+            
+            return TYPE_RSM+ " ("+rsmType+")";
         }
         return TYPE_RS + " ("+m_rs.getType()+")";
     }

@@ -42,8 +42,8 @@ public class EmptyTrashAction extends AbstractRSMAction {
     }
     
 
-    @Override
-    public void actionPerformed(AbstractNode[] selectedNodes, int x, int y) {
+//    @Override
+    public void actionPerformedWOClearRsRSM(AbstractNode[] selectedNodes, int x, int y) {
 
         // selected node is the Trash
         final AbstractNode n = selectedNodes[0];
@@ -114,14 +114,13 @@ public class EmptyTrashAction extends AbstractRSMAction {
     }
   
     
-    //TODO: replace current actionPerformed with this method to connect the clear rs/rsm data on the empty trash action
-    //@Override
-    public void actionPerformedWithClearRsRsm(AbstractNode[] selectedNodes, int x, int y) {
+    //TODO: replace current actionPerformed with this method to connect the clear rs/rsm data on the empty trash action : actionPerformedWithClearRsRsm
+    @Override
+    public void actionPerformed(AbstractNode[] selectedNodes, int x, int y) {
 
         // selected node is the Trash
         final AbstractNode n = selectedNodes[0];
-        DataSetNode datasetNode = (DataSetNode) n;
-        final DDataset trashDataset = datasetNode.getDataset();
+        final DDataset trashDataset = ((DataSetNode) n).getDataset();
 
         AbstractTree tree = null;
         boolean identDs = false;
@@ -136,23 +135,14 @@ public class EmptyTrashAction extends AbstractRSMAction {
         if (tree == null) {
             return;
         }
+        
         final DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
-
         n.setIsChanging(true);
 
-        Long projectId = trashDataset.getProject().getId();
-        List<ClearProjectData> listDataToClear = new ArrayList();
-        List<Long> datasetIds = new ArrayList();
-        List<ClearProjectData> openedData = ProjectExplorerPanel.getOpenedData(projectId);
-
-        AbstractDatabaseCallback callbackLoadTrash = new AbstractDatabaseCallback() {
-            @Override
-            public boolean mustBeCalledInAWT() {
-                return true;
-            }
-
-            @Override
-            public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
+        Project project = trashDataset.getProject();
+        Long projectId = project.getId();
+        List<ClearProjectData> listDataToClear = new ArrayList();        
+        List<ClearProjectData> openedData = ProjectExplorerPanel.getOpenedData(project);
 
                 AbstractDatabaseCallback loadClearCallback = new AbstractDatabaseCallback() {
 
@@ -237,30 +227,19 @@ public class EmptyTrashAction extends AbstractRSMAction {
                                     treeModel.nodeChanged(n);
                                 }
                                 
-                                
                             }
                         };
                         // remove dataset
                         DatabaseDataSetTask task = new DatabaseDataSetTask(callback);
                         task.initEmptyTrash(trashDataset, identificationDataset);
                         AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
-                                
-
                         
                     }
                 };
                 // load clear data
                 DatabaseClearProjectTask clearDsTask = new DatabaseClearProjectTask(loadClearCallback);
-                clearDsTask.initLoadDataToClearTrash(projectId, datasetIds, listDataToClear, openedData);
+                clearDsTask.initLoadDataToClearTrash(projectId, listDataToClear, openedData);
                 AccessDatabaseThread.getAccessDatabaseThread().addTask(clearDsTask);
-
-            }
-        };
-
-        // load ds and all rsm/rs which are in the trash
-        DatabaseClearProjectTask taskLoadTrash = new DatabaseClearProjectTask(callbackLoadTrash);
-        taskLoadTrash.initLoadDataInTrash(projectId, trashDataset.getId(), datasetIds);
-        AccessDatabaseThread.getAccessDatabaseThread().addTask(taskLoadTrash);
 
     }
     

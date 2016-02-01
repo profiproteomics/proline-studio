@@ -15,6 +15,8 @@ import java.awt.GridBagLayout;
 import java.util.List;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.table.TableColumn;
+import javax.swing.table.TableColumnModel;
 
 /**
  * Panel used to clear project (rsm and rs)
@@ -58,7 +60,15 @@ public class ClearProjectPanel extends JPanel{
         c.gridwidth = 3;
         internalPanel.add(m_scrollPane, c);
         
-        this.add(internalPanel, BorderLayout.CENTER);
+        TableColumnModel columnModel = m_dataTable.getColumnModel();   
+        TableColumn col = columnModel.getColumn(1);
+        col.setWidth(20);
+        col.setPreferredWidth(20);
+        col = columnModel.getColumn(2);
+        col.setWidth(100);
+        col.setPreferredWidth(200);
+        
+        this.add(internalPanel, BorderLayout.CENTER);       
     }
     
     public void setData(List<ClearProjectData> dataToClear){

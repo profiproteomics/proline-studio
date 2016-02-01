@@ -57,8 +57,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  *
- * @author JM235353
- * NB : The button to clear rs/rsm is ready but for now it is not added in the interface. To be added, uncomment the line 187
+ * @author JM235353 NB : The button to clear rs/rsm is ready but for now it is
+ * not added in the interface. To be added, uncomment the line 187
  */
 public class ProjectExplorerPanel extends JPanel {
 
@@ -184,124 +184,15 @@ public class ProjectExplorerPanel extends JPanel {
 
         c.gridx++;
         // uncomment this line to give access to clear rs/rsm project
-        //buttonsPanel.add(m_clearProjectButton, c);
+        buttonsPanel.add(m_clearProjectButton, c);
 
         // Interactions
         m_addProjectButton.addActionListener(new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent e) {
+                addProjectActionPerformed();
 
-                AddProjectDialog dialog = AddProjectDialog.getAddProjectDialog(WindowManager.getDefault().getMainWindow());
-                int x = (int) m_addProjectButton.getLocationOnScreen().getX() + m_addProjectButton.getWidth();
-                int y = (int) m_addProjectButton.getLocationOnScreen().getY() + m_addProjectButton.getHeight();
-                dialog.setLocation(x, y);
-                dialog.setVisible(true);
-
-                if ((dialog.getButtonClicked() == DefaultDialog.BUTTON_OK) && (dialog.canModifyValues())) {
-
-                    // data needed to create the project
-                    String projectName = dialog.getProjectName();
-                    String projectDescription = dialog.getProjectDescription();
-                    UserAccount owner = DatabaseDataManager.getDatabaseDataManager().getLoggedUser();
-                    final ArrayList<UserAccount> userAccountList = dialog.getUserAccountList();
-
-                    // look where to put the node (alphabetical order)
-                    int insertionIndex = 0;
-                    ComboBoxModel<ProjectItem> model = m_projectsComboBox.getModel();
-                    int nbChildren = model.getSize();
-                    for (int i = 0; i < nbChildren; i++) {
-                        ProjectItem item = model.getElementAt(i);
-
-                        String itemProjectName = item.toString();
-                        if (projectName.compareToIgnoreCase(itemProjectName) >= 0) {
-                            insertionIndex = i + 1;
-                        } else {
-                            break;
-                        }
-
-                    }
-
-                    // Create a temporary node in the Project List
-                    ProjectIdentificationData projectIdentificationData = new ProjectIdentificationData(projectName);
-                    ProjectQuantitationData projectQuantitationData = new ProjectQuantitationData(projectName);
-                    final ProjectItem projectItem = new ProjectItem(projectIdentificationData, projectQuantitationData);
-                    projectItem.setIsChanging(true);
-
-                    m_projectsComboBox.insertItemAt(projectItem, insertionIndex);
-                    m_projectsComboBox.setSelectedItem(projectItem);
-
-                    boolean isJMSDefined = JMSConnectionManager.getJMSConnectionManager().isJMSDefined();
-                    if (isJMSDefined) {
-                        AbstractJMSCallback callback = new AbstractJMSCallback() {
-
-                            @Override
-                            public boolean mustBeCalledInAWT() {
-                                return true;
-                            }
-
-                            @Override
-                            public void run(boolean success) {
-                                if (success) {
-                                    projectItem.setIsChanging(false);
-                                    getProjectExplorerPanel().selectProject(projectItem);
-                                    m_projectsComboBox.repaint();
-                                    m_projectsComboBox.setSelectedIndex(m_projectsComboBox.getSelectedIndex());
-
-                                    if (!userAccountList.isEmpty()) {
-                                        // we must add the user account list
-                                        DatabaseProjectTask task = new DatabaseProjectTask(null);
-                                        Project p = projectItem.getProjectIdentificationData().getProject();
-                                        task.initChangeSettingsOfProject(p, p.getName(), p.getDescription(), userAccountList);
-                                        AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
-
-                                    }
-
-                                } else {
-                                    //JPM.TODO : manage error with errorMessage
-                                    m_projectsComboBox.removeItem(projectItem);
-                                }
-                            }
-                        };
-
-                        fr.proline.studio.dpm.task.jms.CreateProjectTask task = new fr.proline.studio.dpm.task.jms.CreateProjectTask(callback, projectName, projectDescription, owner.getId(), projectIdentificationData, projectQuantitationData);
-                        AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
-                    } else {
-                        AbstractServiceCallback callback = new AbstractServiceCallback() {
-
-                            @Override
-                            public boolean mustBeCalledInAWT() {
-                                return true;
-                            }
-
-                            @Override
-                            public void run(boolean success) {
-                                if (success) {
-                                    projectItem.setIsChanging(false);
-                                    getProjectExplorerPanel().selectProject(projectItem);
-                                    m_projectsComboBox.repaint();
-                                    m_projectsComboBox.setSelectedIndex(m_projectsComboBox.getSelectedIndex());
-
-                                    if (!userAccountList.isEmpty()) {
-                                        // we must add the user account list
-                                        DatabaseProjectTask task = new DatabaseProjectTask(null);
-                                        Project p = projectItem.getProjectIdentificationData().getProject();
-                                        task.initChangeSettingsOfProject(p, p.getName(), p.getDescription(), userAccountList);
-                                        AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
-
-                                    }
-
-                                } else {
-                                    //JPM.TODO : manage error with errorMessage
-                                    m_projectsComboBox.removeItem(projectItem);
-                                }
-                            }
-                        };
-
-                        CreateProjectTask task = new CreateProjectTask(callback, projectName, projectDescription, owner.getId(), projectIdentificationData, projectQuantitationData);
-                        AccessServiceThread.getAccessServiceThread().addTask(task);
-                    }
-                }
             }
         });
 
@@ -309,57 +200,8 @@ public class ProjectExplorerPanel extends JPanel {
 
             @Override
             public void actionPerformed(ActionEvent e) {
+                editProjectActionPerformed();
 
-                final ProjectItem projectItem = (ProjectItem) m_projectsComboBox.getSelectedItem();
-                ProjectIdentificationData projectData = projectItem.getProjectIdentificationData();
-                final Project project = projectData.getProject();
-                final String oldName = project.getName();
-
-                AddProjectDialog dialog = AddProjectDialog.getModifyProjectDialog(WindowManager.getDefault().getMainWindow(), project);
-                int x = (int) m_addProjectButton.getLocationOnScreen().getX() + m_addProjectButton.getWidth();
-                int y = (int) m_addProjectButton.getLocationOnScreen().getY() + m_addProjectButton.getHeight();
-                dialog.setLocation(x, y);
-                dialog.setVisible(true);
-
-                if ((dialog.getButtonClicked() == DefaultDialog.BUTTON_OK) && (dialog.canModifyValues())) {
-
-                    // data needed to create the project
-                    final String projectName = dialog.getProjectName();
-                    final String projectDescription = dialog.getProjectDescription();
-                    ArrayList<UserAccount> userAccountList = dialog.getUserAccountList();
-
-                    projectItem.setIsChanging(true);
-                    project.setName(projectName + "...");
-                    m_projectsComboBox.repaint();
-
-                    AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
-
-                        @Override
-                        public boolean mustBeCalledInAWT() {
-                            return true;
-                        }
-
-                        @Override
-                        public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
-                            if (success) {
-                                projectItem.setIsChanging(false);
-                                project.setName(projectName);
-                                project.setDescription(projectDescription);
-                                m_projectsComboBox.repaint();
-                            } else {
-                                projectItem.setIsChanging(false);
-                                project.setName(oldName);
-                                m_projectsComboBox.repaint();
-                            }
-                        }
-                    };
-
-                    // ask asynchronous loading of data
-                    DatabaseProjectTask task = new DatabaseProjectTask(callback);
-                    task.initChangeSettingsOfProject(project, projectName, projectDescription, userAccountList);
-                    AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
-
-                }
             }
         });
 
@@ -367,20 +209,7 @@ public class ProjectExplorerPanel extends JPanel {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-
-                ProjectItem projectItem = (ProjectItem) m_projectsComboBox.getSelectedItem();
-                ProjectIdentificationData projectData = projectItem.getProjectIdentificationData();
-                String projectName = projectData.getName();
-
-                String dialogName = "Properties : " + projectName;
-
-                final PropertiesTopComponent win = new PropertiesTopComponent(dialogName);
-                ProjectItem[] projectItemArray = new ProjectItem[1];
-                projectItemArray[0] = projectItem;
-                win.setProperties(projectItemArray);
-                win.open();
-                win.requestActive();
-
+                showPropertiesProjectActionPerformed();
             }
         });
 
@@ -388,12 +217,56 @@ public class ProjectExplorerPanel extends JPanel {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                ProjectItem projectItem = (ProjectItem) m_projectsComboBox.getSelectedItem();
-                ProjectIdentificationData projectData = projectItem.getProjectIdentificationData();
-                final Project project = projectData.getProject();
-                List<ClearProjectData> data = new ArrayList();
-                List<ClearProjectData> openedData = ProjectExplorerPanel.getOpenedData(project.getId());
-                AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
+                clearProjectActionPerformed();
+            }
+        });
+
+        return buttonsPanel;
+    }
+
+    private void addProjectActionPerformed() {
+        AddProjectDialog dialog = AddProjectDialog.getAddProjectDialog(WindowManager.getDefault().getMainWindow());
+        int x = (int) m_addProjectButton.getLocationOnScreen().getX() + m_addProjectButton.getWidth();
+        int y = (int) m_addProjectButton.getLocationOnScreen().getY() + m_addProjectButton.getHeight();
+        dialog.setLocation(x, y);
+        dialog.setVisible(true);
+
+        if ((dialog.getButtonClicked() == DefaultDialog.BUTTON_OK) && (dialog.canModifyValues())) {
+
+            // data needed to create the project
+            String projectName = dialog.getProjectName();
+            String projectDescription = dialog.getProjectDescription();
+            UserAccount owner = DatabaseDataManager.getDatabaseDataManager().getLoggedUser();
+            final ArrayList<UserAccount> userAccountList = dialog.getUserAccountList();
+
+            // look where to put the node (alphabetical order)
+            int insertionIndex = 0;
+            ComboBoxModel<ProjectItem> model = m_projectsComboBox.getModel();
+            int nbChildren = model.getSize();
+            for (int i = 0; i < nbChildren; i++) {
+                ProjectItem item = model.getElementAt(i);
+
+                String itemProjectName = item.toString();
+                if (projectName.compareToIgnoreCase(itemProjectName) >= 0) {
+                    insertionIndex = i + 1;
+                } else {
+                    break;
+                }
+
+            }
+
+            // Create a temporary node in the Project List
+            ProjectIdentificationData projectIdentificationData = new ProjectIdentificationData(projectName);
+            ProjectQuantitationData projectQuantitationData = new ProjectQuantitationData(projectName);
+            final ProjectItem projectItem = new ProjectItem(projectIdentificationData, projectQuantitationData);
+            projectItem.setIsChanging(true);
+
+            m_projectsComboBox.insertItemAt(projectItem, insertionIndex);
+            m_projectsComboBox.setSelectedItem(projectItem);
+
+            boolean isJMSDefined = JMSConnectionManager.getJMSConnectionManager().isJMSDefined();
+            if (isJMSDefined) {
+                AbstractJMSCallback callback = new AbstractJMSCallback() {
 
                     @Override
                     public boolean mustBeCalledInAWT() {
@@ -401,33 +274,180 @@ public class ProjectExplorerPanel extends JPanel {
                     }
 
                     @Override
-                    public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
-                        openClearProjectDialog(project, data);
+                    public void run(boolean success) {
+                        if (success) {
+                            projectItem.setIsChanging(false);
+                            getProjectExplorerPanel().selectProject(projectItem);
+                            m_projectsComboBox.repaint();
+                            m_projectsComboBox.setSelectedIndex(m_projectsComboBox.getSelectedIndex());
+
+                            if (!userAccountList.isEmpty()) {
+                                // we must add the user account list
+                                DatabaseProjectTask task = new DatabaseProjectTask(null);
+                                Project p = projectItem.getProjectIdentificationData().getProject();
+                                task.initChangeSettingsOfProject(p, p.getName(), p.getDescription(), userAccountList);
+                                AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
+
+                            }
+
+                        } else {
+                            //JPM.TODO : manage error with errorMessage
+                            m_projectsComboBox.removeItem(projectItem);
+                        }
                     }
                 };
-                DatabaseClearProjectTask task = new DatabaseClearProjectTask(callback);
-                task.initLoadDataToClearProject(project, data, openedData);
-                AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
 
+                fr.proline.studio.dpm.task.jms.CreateProjectTask task = new fr.proline.studio.dpm.task.jms.CreateProjectTask(callback, projectName, projectDescription, owner.getId(), projectIdentificationData, projectQuantitationData);
+                AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
+            } else {
+                AbstractServiceCallback callback = new AbstractServiceCallback() {
+
+                    @Override
+                    public boolean mustBeCalledInAWT() {
+                        return true;
+                    }
+
+                    @Override
+                    public void run(boolean success) {
+                        if (success) {
+                            projectItem.setIsChanging(false);
+                            getProjectExplorerPanel().selectProject(projectItem);
+                            m_projectsComboBox.repaint();
+                            m_projectsComboBox.setSelectedIndex(m_projectsComboBox.getSelectedIndex());
+
+                            if (!userAccountList.isEmpty()) {
+                                // we must add the user account list
+                                DatabaseProjectTask task = new DatabaseProjectTask(null);
+                                Project p = projectItem.getProjectIdentificationData().getProject();
+                                task.initChangeSettingsOfProject(p, p.getName(), p.getDescription(), userAccountList);
+                                AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
+
+                            }
+
+                        } else {
+                            //JPM.TODO : manage error with errorMessage
+                            m_projectsComboBox.removeItem(projectItem);
+                        }
+                    }
+                };
+
+                CreateProjectTask task = new CreateProjectTask(callback, projectName, projectDescription, owner.getId(), projectIdentificationData, projectQuantitationData);
+                AccessServiceThread.getAccessServiceThread().addTask(task);
             }
-        });
-
-        return buttonsPanel;
+        }
     }
-    
+
+    private void editProjectActionPerformed() {
+
+        final ProjectItem projectItem = (ProjectItem) m_projectsComboBox.getSelectedItem();
+        ProjectIdentificationData projectData = projectItem.getProjectIdentificationData();
+        final Project project = projectData.getProject();
+        final String oldName = project.getName();
+
+        AddProjectDialog dialog = AddProjectDialog.getModifyProjectDialog(WindowManager.getDefault().getMainWindow(), project);
+        int x = (int) m_addProjectButton.getLocationOnScreen().getX() + m_addProjectButton.getWidth();
+        int y = (int) m_addProjectButton.getLocationOnScreen().getY() + m_addProjectButton.getHeight();
+        dialog.setLocation(x, y);
+        dialog.setVisible(true);
+
+        if ((dialog.getButtonClicked() == DefaultDialog.BUTTON_OK) && (dialog.canModifyValues())) {
+
+            // data needed to create the project
+            final String projectName = dialog.getProjectName();
+            final String projectDescription = dialog.getProjectDescription();
+            ArrayList<UserAccount> userAccountList = dialog.getUserAccountList();
+
+            projectItem.setIsChanging(true);
+            project.setName(projectName + "...");
+            m_projectsComboBox.repaint();
+
+            AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
+
+                @Override
+                public boolean mustBeCalledInAWT() {
+                    return true;
+                }
+
+                @Override
+                public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
+                    if (success) {
+                        projectItem.setIsChanging(false);
+                        project.setName(projectName);
+                        project.setDescription(projectDescription);
+                        m_projectsComboBox.repaint();
+                    } else {
+                        projectItem.setIsChanging(false);
+                        project.setName(oldName);
+                        m_projectsComboBox.repaint();
+                    }
+                }
+            };
+
+            // ask asynchronous loading of data
+            DatabaseProjectTask task = new DatabaseProjectTask(callback);
+            task.initChangeSettingsOfProject(project, projectName, projectDescription, userAccountList);
+            AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
+
+        }
+    }
+
+    private void showPropertiesProjectActionPerformed() {
+
+        ProjectItem projectItem = (ProjectItem) m_projectsComboBox.getSelectedItem();
+        ProjectIdentificationData projectData = projectItem.getProjectIdentificationData();
+        String projectName = projectData.getName();
+
+        String dialogName = "Properties : " + projectName;
+
+        final PropertiesTopComponent win = new PropertiesTopComponent(dialogName);
+        ProjectItem[] projectItemArray = new ProjectItem[1];
+        projectItemArray[0] = projectItem;
+        win.setProperties(projectItemArray);
+        win.open();
+        win.requestActive();
+
+    }
+
+    private void clearProjectActionPerformed() {
+        ProjectItem projectItem = (ProjectItem) m_projectsComboBox.getSelectedItem();
+        ProjectIdentificationData projectData = projectItem.getProjectIdentificationData();
+        final Project project = projectData.getProject();
+        List<ClearProjectData> data = new ArrayList();
+        List<ClearProjectData> openedData = ProjectExplorerPanel.getOpenedData(project);
+        AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
+
+            @Override
+            public boolean mustBeCalledInAWT() {
+                return true;
+            }
+
+            @Override
+            public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
+                openClearProjectDialog(project, data);
+            }
+        };
+        DatabaseClearProjectTask task = new DatabaseClearProjectTask(callback);
+        task.initLoadDataToClearProject(project, data, openedData);
+        AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
+
+    }
+
     /**
      * returns the list of rs/rsm opened in the application for a given project
+     *
      * @param projectId
-     * @return 
+     * @return
      */
-    public static  List<ClearProjectData> getOpenedData(long projectId) {
+    public static List<ClearProjectData> getOpenedData(Project project) {
         List<ClearProjectData> openedData = new ArrayList();
+        long projectId = project.getId();
+        String allImportedWindowsName = project.getName() + " : All Imported";
+
         // remove data which are opened in windows
-        Set<TopComponent> tcs = TopComponent.getRegistry().getOpened();
-        Iterator<TopComponent> itTop = tcs.iterator();
+        Iterator<TopComponent> itTop = TopComponent.getRegistry().getOpened().iterator();
         while (itTop.hasNext()) {
             TopComponent topComponent = itTop.next();
-            if (topComponent instanceof DataBoxViewerTopComponent) {
+            if (topComponent instanceof DataBoxViewerTopComponent && !(topComponent.getName().startsWith(allImportedWindowsName))) {
                 long pId = ((DataBoxViewerTopComponent) topComponent).getProjectId();
                 if (pId == projectId) {
                     HashSet<GroupParameter> inParam = ((DataBoxViewerTopComponent) topComponent).getInParameters();
@@ -465,7 +485,7 @@ public class ProjectExplorerPanel extends JPanel {
     }
 
     public void openClearProjectDialog(Project project, List<ClearProjectData> data) {
-                 
+
         ClearProjectDialog clearProjectDialog = new ClearProjectDialog(WindowManager.getDefault().getMainWindow(), project, data);
         int x = (int) m_clearProjectButton.getLocationOnScreen().getX() + m_clearProjectButton.getWidth();
         int y = (int) m_clearProjectButton.getLocationOnScreen().getY() + m_clearProjectButton.getHeight();
@@ -515,7 +535,7 @@ public class ProjectExplorerPanel extends JPanel {
                         };
                         ClearProjectTask clearTaskDb = new ClearProjectTask(clearCallBack, project.getId(), rsmIds, rsIds);
                         AccessJMSManagerThread.getAccessJMSManagerThread().addTask(clearTaskDb);
-                    }else{
+                    } else {
                         setProgress(100);
                     }
                 }
@@ -527,8 +547,6 @@ public class ProjectExplorerPanel extends JPanel {
         clearProjectDialog.setVisible(true);
 
     }
-    
-    
 
     public void startLoadingProjects() {
 

@@ -424,9 +424,14 @@ public class CompoundTableModel extends AbstractTableModel implements GlobalTabl
     }
 
     @Override
-    public Object getValue(Class c, int rowIndex) {
+    public Object getRowValue(Class c, int rowIndex) {
 
-        return m_lastModel.getValue(c, rowIndex);
+        return m_lastModel.getRowValue(c, rowIndex);
+    }
+    
+    @Override
+    public Object getColValue(Class c, int col) {
+        return m_lastModel.getColValue(c, col);
     }
     
     @Override

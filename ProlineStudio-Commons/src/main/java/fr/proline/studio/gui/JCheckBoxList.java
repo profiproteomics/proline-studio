@@ -82,6 +82,20 @@ public class JCheckBoxList<E> extends JList {
         }
     }
     
+    @Override
+    public void clearSelection() {
+        int size = getListSize();
+        for (int i=0;i<size;i++) {
+            CheckListItem item = (CheckListItem) getModel().getElementAt(i);
+            item.setSelected(false);
+        }
+    }
+    
+    public void selectItem(int index) {
+        CheckListItem item = (CheckListItem) getModel().getElementAt(index);
+        item.setSelected(true);
+    }
+    
     public List<E> getSelectedItems() {
         
         ArrayList list = new ArrayList();

@@ -308,10 +308,15 @@ public class FeaturesTableModel extends DecoratedTableModel implements GlobalTab
     }
 
     @Override
-    public Object getValue(Class c, int row) {
+    public Object getRowValue(Class c, int row) {
         if (c.equals(Feature.class)) {
             return m_features.get(row);
         }
+        return null;
+    }
+    
+    @Override
+    public Object getColValue(Class c, int col) {
         return null;
     }
     

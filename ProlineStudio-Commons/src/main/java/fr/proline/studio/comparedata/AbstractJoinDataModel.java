@@ -244,7 +244,7 @@ public abstract class AbstractJoinDataModel extends AbstractTableModel implement
     }
 
     @Override
-    public Object getValue(Class c, int rowIndex) {
+    public Object getRowValue(Class c, int rowIndex) {
         if (!joinPossible()) {
             return null;
         }
@@ -253,11 +253,11 @@ public abstract class AbstractJoinDataModel extends AbstractTableModel implement
         
         Integer row = m_keyToRow1.get(key);
         if (row != null) {
-            return m_data1.getValue(c, rowIndex);
+            return m_data1.getRowValue(c, rowIndex);
         }
         row = m_keyToRow2.get(key);
         if (row != null) {
-            return m_data2.getValue(c, rowIndex);
+            return m_data2.getRowValue(c, rowIndex);
         }
         
         return null;

@@ -2,6 +2,7 @@ package fr.proline.studio.parameter;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 
@@ -13,7 +14,7 @@ public class BooleanParameter extends AbstractParameter {
 
     private final Boolean m_defaultValue;
     
-    private AbstractLinkedParameters m_linkedParameters = null;
+    private ArrayList<AbstractLinkedParameters> m_linkedParametersList = null;
 
     public BooleanParameter(String key, String name, Class graphicalType, Boolean defaultValue) {
         super(key, name, Boolean.class, graphicalType);
@@ -107,17 +108,21 @@ public class BooleanParameter extends AbstractParameter {
         return LabelVisibility.NO_VISIBLE;
     }
     
-    public void setLinkedParameters(AbstractLinkedParameters linkedParameters) {
+    public void addLinkedParameters(final AbstractLinkedParameters linkedParameters) {
 
         // create parameterComponent if needed
         getComponent(null);
 
-        m_linkedParameters = linkedParameters;
+        if (m_linkedParametersList == null) {
+            m_linkedParametersList = new ArrayList<>(1);
+        }
+        m_linkedParametersList.add(linkedParameters);
+ 
         if (m_parameterComponent instanceof JCheckBox) {
             ((JCheckBox) m_parameterComponent).addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    m_linkedParameters.valueChanged(getStringValue());
+                    linkedParameters.valueChanged(getStringValue(), getObjectValue());
                 }
 
             });

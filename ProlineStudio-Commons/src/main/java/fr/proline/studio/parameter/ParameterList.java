@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.prefs.Preferences;
 import javax.swing.BorderFactory;
+import javax.swing.Box;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -21,6 +22,7 @@ public class ParameterList extends ArrayList<AbstractParameter> {
 
     private String m_name;
     private JPanel m_parametersPanel;
+    private boolean m_enable = true;
 
     private final HashMap<JComponent, JLabel> m_associatedLabels = new HashMap<>();
     
@@ -133,6 +135,12 @@ public class ParameterList extends ArrayList<AbstractParameter> {
             c.gridy++;
 
         }
+        
+        c.gridx = 0;
+        c.gridy++;
+        c.weightx = 0;
+        c.weighty = 1;
+        m_parametersPanel.add(Box.createVerticalGlue(), c);
 
         return m_parametersPanel;
     }
@@ -307,4 +315,12 @@ public class ParameterList extends ArrayList<AbstractParameter> {
         }
     }
     
+    public void enableList(boolean v) {
+        m_enable = v;
+    }
+    
+    public boolean isEnable() {
+        return m_enable;
+    }
+     
 }

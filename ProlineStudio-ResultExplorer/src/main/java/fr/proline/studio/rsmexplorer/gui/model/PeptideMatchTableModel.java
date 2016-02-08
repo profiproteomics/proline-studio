@@ -965,10 +965,15 @@ public class PeptideMatchTableModel extends LazyTableModel implements GlobalTabl
     }
 
     @Override
-    public Object getValue(Class c, int row) {
+    public Object getRowValue(Class c, int row) {
         if (c.equals(DPeptideMatch.class)) {
             return m_peptideMatches[row];
         }
+        return null;
+    }
+    
+    @Override
+    public Object getColValue(Class c, int col) {
         return null;
     }
 

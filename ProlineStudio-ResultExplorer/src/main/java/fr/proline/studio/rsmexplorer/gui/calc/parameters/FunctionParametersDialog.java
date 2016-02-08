@@ -93,19 +93,27 @@ public class FunctionParametersDialog extends DefaultDialog {
             return false;
         }
         
-        
-        if (m_currentPanelNumber == m_parameterList.length-1) {
-            // we were on the last panel : ok is called and all parameters are correctly set 
-            return true;
-        } else {
-            
-            m_currentPanelNumber++;
-            replaceInternaleComponent(createInternalPanel(m_currentPanelNumber));
-            initOkButton(m_currentPanelNumber,  m_parameterList.length);
-            revalidate();
-            repaint();
+        while (true) {
+            if (m_currentPanelNumber == m_parameterList.length - 1) {
+                // we were on the last panel : ok is called and all parameters are correctly set 
+                return true;
+            } else {
 
-            return false;
+                m_currentPanelNumber++;
+                
+                // An entire panel with parameters can have been desabled
+                if (!m_parameterList[m_currentPanelNumber].isEnable()) {
+                    continue;
+                }
+                
+                replaceInternaleComponent(createInternalPanel(m_currentPanelNumber));
+                initOkButton(m_currentPanelNumber, m_parameterList.length);
+                repack();
+                revalidate();
+                repaint();
+
+                return false;
+            }
         }
         
     }

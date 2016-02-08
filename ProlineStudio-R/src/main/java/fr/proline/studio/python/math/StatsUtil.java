@@ -145,6 +145,27 @@ public class StatsUtil {
 
         return cols;
     }
+    public static ColRef[] colTupleToColArray(PyTuple p1, PyTuple p2, PyTuple p3) {
+        Object[] objArray1 = p1.getArray();
+        int nb1 = objArray1.length;
+        Object[] objArray2 = p2.getArray();
+        int nb2 = objArray2.length;
+        Object[] objArray3 = p3.getArray();
+        int nb3 = objArray3.length;
+
+        ColRef[] cols = new ColRef[nb1 + nb2 + nb3];
+        for (int i = 0; i < nb1; i++) {
+            cols[i] = ((ColRef) objArray1[i]);
+        }
+        for (int i = 0; i < nb2; i++) {
+            cols[nb1 + i] = ((ColRef) objArray2[i]);
+        }
+        for (int i = 0; i < nb3; i++) {
+            cols[nb1 + nb2 + i] = ((ColRef) objArray3[i]);
+        }
+
+        return cols;
+    }
     
     public static String getPath(File f) throws Exception {
         return f.getCanonicalPath().replaceAll("\\\\", "/");

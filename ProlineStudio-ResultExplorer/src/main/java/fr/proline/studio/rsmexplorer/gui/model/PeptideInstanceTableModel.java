@@ -597,12 +597,16 @@ public class PeptideInstanceTableModel extends LazyTableModel implements GlobalT
     }
 
     @Override
-    public Object getValue(Class c, int row) {
+    public Object getRowValue(Class c, int row) {
         if (c.equals(PeptideInstance.class)) {
             return m_peptideInstances[row];
         }
         return null;
     }
     
+    @Override
+    public Object getColValue(Class c, int col) {
+        return null;
+    }
     
 }

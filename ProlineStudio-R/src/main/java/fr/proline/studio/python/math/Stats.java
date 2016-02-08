@@ -41,7 +41,11 @@ public class Stats {
     }
 
     public static ColData bbinomial(PyTuple p1, PyTuple p2) throws Exception {
-        return StatsRImplementation.bbinomial(p1, p2);
+        return StatsRImplementation.bbinomial(p1, p2, null);
+    }
+    
+    public static ColData bbinomial(PyTuple p1, PyTuple p2, PyTuple p3) throws Exception {
+        return StatsRImplementation.bbinomial(p1, p2, p3);
     }
 
     public static PythonImage boxPlot(PyTuple p) throws Exception {

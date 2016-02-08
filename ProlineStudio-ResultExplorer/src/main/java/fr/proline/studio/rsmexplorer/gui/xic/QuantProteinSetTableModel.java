@@ -25,6 +25,8 @@ import fr.proline.studio.table.LazyData;
 import fr.proline.studio.table.LazyTable;
 import fr.proline.studio.table.LazyTableModel;
 import fr.proline.studio.table.TableDefaultRendererManager;
+import fr.proline.studio.types.QuantitationType;
+import fr.proline.studio.types.XicGroup;
 import fr.proline.studio.utils.StringUtils;
 import fr.proline.studio.utils.URLCellRenderer;
 import java.awt.Color;
@@ -62,6 +64,8 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
     
     private static final String[] m_columnNamesQC = { "Status","Peptide Number", "Sel. level", "Pep. match count", "Raw abundance", "Abundance"};
     private static final String[] m_toolTipQC = {"Status","Peptide Number",  "Selection level", "Peptides match count", "Raw abundance", "Abundance"  };
+    
+    
     
     private static final String[] m_columnNamesQC_SC = {"Status","Peptide Number",  "Sel. level",  "Basic SC",  "Specific SC", "Weighted SC",};
     private static final String[] m_toolTipQC_SC = { "Status", "Peptide Number","Selection level", "Basic Spectral Count", "Specific Spectral Count","Weighted Spectral Count",  };
@@ -460,10 +464,10 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
      
     
     public void setData(Long taskId, DQuantitationChannel[] quantChannels, List<DMasterQuantProteinSet> proteinSets, boolean isXICMode ) {
-        this.m_quantChannels = quantChannels ;
-        this.m_quantChannelNumber = quantChannels.length;
-        this.m_proteinSets = proteinSets;
-        this.m_isXICMode = isXICMode;
+        m_quantChannels = quantChannels ;
+        m_quantChannelNumber = quantChannels.length;
+        m_proteinSets = proteinSets;
+        m_isXICMode = isXICMode;
         fireTableStructureChanged();
         
         m_taskId = taskId;
@@ -978,11 +982,54 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
     }
 
     @Override
-    public Object getValue(Class c, int row) {
+    public Object getRowValue(Class c, int row) {
         if (c.equals(DMasterQuantProteinSet.class)) {
             return m_proteinSets.get(row);
         }
         return null;
     }
     
+    @Override
+    public Object getColValue(Class c, int col) {
+        if (c.equals(XicGroup.class)) {
+            if (col <= LAST_STATIC_COLUMN) {
+                return null;
+            } else {
+                int nbQc = (col - m_columnNames.length) / m_columnNamesQC.length;
+                return new XicGroup(m_quantChannels[nbQc].getBiologicalGroupId());
+            }
+
+            
+        }
+        if (c.equals(QuantitationType.class)) {
+            if (col <= LAST_STATIC_COLUMN) {
+                return null;
+            } else {
+                int nbQc = (col - m_columnNames.length) / m_columnNamesQC.length;
+                int id = col - m_columnNames.length - (nbQc * m_columnNamesQC.length);
+                if (m_isXICMode) {
+                    switch (id) {
+                        case COLTYPE_ABUNDANCE:
+                            return QuantitationType.getQuantitationType(QuantitationType.ABUNDANCE);
+                        case COLTYPE_RAW_ABUNDANCE:
+                            return QuantitationType.getQuantitationType(QuantitationType.RAW_ABUNDANCE);
+                    }
+                } else {
+                    switch (id) {
+                        case COLTYPE_PSM:
+                            return QuantitationType.getQuantitationType(QuantitationType.BASIC_SC);
+                        case COLTYPE_RAW_ABUNDANCE:
+                            return QuantitationType.getQuantitationType(QuantitationType.SPECIFIC_SC);
+                        case COLTYPE_ABUNDANCE:
+                            return QuantitationType.getQuantitationType(QuantitationType.WEIGHTED_SC);
+                    }
+                }
+
+                
+                return null;
+            }
+
+        }
+        return null;
+    }
 }

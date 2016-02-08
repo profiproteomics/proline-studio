@@ -23,7 +23,7 @@ public abstract class AbstractLinkedParameters {
         return m_parameterList;
     }
     
-    public abstract void valueChanged(String value);
+    public abstract void valueChanged(String value, Object associatedValue);
     
     public void showParameter(AbstractParameter parameter, boolean show) {
         JComponent comp = parameter.getComponent(null);
@@ -32,6 +32,10 @@ public abstract class AbstractLinkedParameters {
         if (l != null) {
             l.setVisible(show);
         }
+    }
+    
+    public void enableList(boolean v) {
+        m_parameterList.enableList(v);
     }
     
     protected void updataParameterListPanel() {

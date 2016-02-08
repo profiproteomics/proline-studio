@@ -1,6 +1,12 @@
 package fr.proline.studio.rsmexplorer.gui.calc.functions;
 
+import fr.proline.core.orm.uds.BiologicalGroup;
+import fr.proline.core.orm.uds.GroupSetup;
+import fr.proline.core.orm.uds.dto.DDataset;
+import fr.proline.studio.gui.JCheckBoxList;
+import fr.proline.studio.parameter.AbstractLinkedParameters;
 import fr.proline.studio.parameter.MultiObjectParameter;
+import fr.proline.studio.parameter.ObjectParameter;
 import fr.proline.studio.parameter.ParameterError;
 import fr.proline.studio.parameter.ParameterList;
 import fr.proline.studio.python.data.ColData;
@@ -18,7 +24,12 @@ import fr.proline.studio.table.renderer.DefaultRightAlignRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.DoubleRenderer;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.table.TableDefaultRendererManager;
+import fr.proline.studio.types.QuantitationType;
+import fr.proline.studio.types.XicGroup;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -27,11 +38,18 @@ import java.util.List;
  */
 public class BBinomialFunction extends AbstractFunction {
 
-    private static final String SEL_COLS1 = "SEL_COLS1";
-    private static final String SEL_COLS2 = "SEL_COLS2";
+    private static final String NBGROUPS_KEY = "NBGROUPS";
+    private static final String QUANTITATIONTYPE_KEY = "QUANTITATIONTYPE";
+    private static final String SEL_COLS_PREFIX = "SEL_COLS";
     
-    private MultiObjectParameter m_columnsParameter1 = null;
-    private MultiObjectParameter m_columnsParameter2 = null;
+    private static final int MIN_GROUPS = 2;
+    private static final int MAX_GROUPS = 3;
+    
+    
+    
+    private ObjectParameter m_nbGroupsParameter = null;
+    private ObjectParameter m_quantitationTypeParameter = null;
+    private MultiObjectParameter[] m_columnsParameterArray = null;
     
     public BBinomialFunction(GraphPanel panel) {
         super(panel);
@@ -52,16 +70,18 @@ public class BBinomialFunction extends AbstractFunction {
         
         setInError(false, null);
         
-        if (m_columnsParameter1 == null) {
-            //m_state = GraphNode.NodeState.UNSET;
+        if (m_columnsParameterArray == null) {
             return;
         }
         
-        List colList1 =(List) m_columnsParameter1.getAssociatedValues(true);
-        List colList2 =(List) m_columnsParameter2.getAssociatedValues(true);
-        if ((colList1 == null) || (colList1.isEmpty()) || (colList2 == null) || (colList2.isEmpty())) {
-            //m_state = GraphNode.NodeState.UNSET;
-            return;
+        int nbColList = ((Integer) m_nbGroupsParameter.getAssociatedObjectValue()).intValue();
+        int nbCols = 0;
+        for (int i=0;i<nbColList;i++) {
+            List colList = (List) m_columnsParameterArray[i].getAssociatedValues(true);
+            if ((colList == null) || (colList.isEmpty()))  {
+                return;
+            }
+            nbCols += colList.size();
         }
 
         // check if we have already processed
@@ -79,36 +99,41 @@ public class BBinomialFunction extends AbstractFunction {
             GlobalTableModelInterface srcModel = graphObjects[0].getGlobalTableModelInterface();
             final Table sourceTable = new Table(srcModel);
 
-            ResultVariable[] parameters = new ResultVariable[colList1.size()+colList2.size()];
+            ResultVariable[] parameters = new ResultVariable[nbCols];
 
-            for (int i = 0; i < colList1.size(); i++) {
-                Integer colIndex = (Integer) colList1.get(i);
-                ColRef col = sourceTable.getCol(colIndex);
-                parameters[i] = new ResultVariable(col);
+            int nbSizeDone = 0;
+            for (int j = 0; j < nbColList; j++) {
+                List colList = (List) m_columnsParameterArray[j].getAssociatedValues(true);
+                for (int i = 0; i < colList.size(); i++) {
+                    Integer colIndex = (Integer) colList.get(i);
+                    ColRef col = sourceTable.getCol(colIndex);
+                    parameters[i+nbSizeDone] = new ResultVariable(col);
+                }
+                nbSizeDone += colList.size();
             }
 
-            for (int i = 0; i < colList2.size(); i++) {
-                Integer colIndex = (Integer) colList2.get(i);
-                ColRef col = sourceTable.getCol(colIndex);
-                parameters[i+colList1.size()] = new ResultVariable(col);
-            }
 
             StringBuilder codeSB = new StringBuilder();
-            codeSB.append("bbinomial=Stats.bbinomial((");
-            for (int i=0;i<colList1.size();i++) {
-                codeSB.append(parameters[i].getName());
-                if (i<colList1.size()-1) {
-                    codeSB.append(',');
+            codeSB.append("bbinomial=Stats.bbinomial(");
+            
+            nbSizeDone = 0;
+            for (int j = 0; j < nbColList; j++) {
+                codeSB.append('(');
+                List colList = (List) m_columnsParameterArray[j].getAssociatedValues(true);
+                for (int i = 0; i < colList.size(); i++) {
+                    codeSB.append(parameters[i+nbSizeDone].getName());
+                    if (i < colList.size() - 1) {
+                        codeSB.append(',');
+                    }
+                }
+                nbSizeDone += colList.size();
+                codeSB.append(')');
+                if (j < m_columnsParameterArray.length - 1) {
+                  codeSB.append(',');  
                 }
             }
-            codeSB.append("),(");
-            for (int i=0;i<colList2.size();i++) {
-                codeSB.append(parameters[i+colList1.size()].getName());
-                if (i<colList2.size()-1) {
-                    codeSB.append(',');
-                }
-            }
-            codeSB.append("))");
+            codeSB.append(')');
+
 
             
             CalcCallback callback = new CalcCallback() {
@@ -154,15 +179,18 @@ public class BBinomialFunction extends AbstractFunction {
     
     @Override
     public boolean settingsDone() {
-        if (m_columnsParameter1 == null) {
+        if (m_columnsParameterArray == null) {
             return false;
         }
 
-        List colList1 = (List) m_columnsParameter1.getAssociatedValues(true);
-        List colList2 = (List) m_columnsParameter2.getAssociatedValues(true);
-        if ((colList1 == null) || (colList1.isEmpty()) || (colList2 == null) || (colList2.isEmpty())) {
-            return false;
+        int nbColList = ((Integer) m_nbGroupsParameter.getAssociatedObjectValue()).intValue();
+        for (int i=0;i<nbColList;i++) {
+            List colList = (List) m_columnsParameterArray[i].getAssociatedValues(true);
+            if ((colList == null) || (colList.isEmpty()))  {
+                return false;
+            }
         }
+        
 
         return true;
     }
@@ -177,38 +205,212 @@ public class BBinomialFunction extends AbstractFunction {
 
     @Override
     public void generateDefaultParameters(AbstractGraphObject[] graphObjects) {
+        
         GlobalTableModelInterface model1 = graphObjects[0].getGlobalTableModelInterface();
         int nbColumns = model1.getColumnCount();
-        int nbColumnsKept = 0;
+        
+        
+        
+        ArrayList<Integer> columnKept = new ArrayList<>();
+        HashSet<QuantitationType> m_quantitationsSet = new HashSet<>();
         for (int i = 0; i < nbColumns; i++) {
-            Class c = model1.getDataColumnClass(i);
-            if (c.equals(Float.class) || c.equals(Double.class)) {
-                nbColumnsKept++;
+            QuantitationType quantitationType = (QuantitationType) model1.getColValue(QuantitationType.class, i);
+            if (quantitationType != null) {
+                columnKept.add(i);
+                m_quantitationsSet.add(quantitationType);
             }
         }
+        boolean hasQuantitationTypeParameter = !m_quantitationsSet.isEmpty();
+
+        
+        if (columnKept.isEmpty()) {
+            for (int i = 0; i < nbColumns; i++) {
+                Class c = model1.getDataColumnClass(i);
+                if (c.equals(Float.class) || c.equals(Double.class) || c.equals(Integer.class) || c.equals(Long.class)) {
+                    columnKept.add(i);
+                }
+            }
+        }
+        int nbColumnsKept = columnKept.size();
         Object[] objectArray1 = new Object[nbColumnsKept];
         Object[] associatedObjectArray1 = new Object[nbColumnsKept];
-        int iKept = 0;
-        for (int i = 0; i < nbColumns; i++) {
-            Class c = model1.getDataColumnClass(i);
-            if (c.equals(Float.class) || c.equals(Double.class)) {
-                objectArray1[iKept] = model1.getColumnName(i);
-                associatedObjectArray1[iKept] = i+1;  // +1 because it is used in python calc expression
-                iKept++;
+        for (int i = 0; i < nbColumnsKept; i++) {
+            objectArray1[i] = model1.getColumnName(columnKept.get(i));
+            associatedObjectArray1[i] = columnKept.get(i)+1;  // +1 because it is used in python calc expression
+        }
+        
+        
+
+        
+        int nbGroups = MIN_GROUPS; // default value
+        String[] groupNameList = { "First Group", "Second Group", "Third Group" };
+
+        boolean[][] selection = new boolean[MAX_GROUPS][nbColumnsKept];
+        for (boolean[] row: selection) {
+            Arrays.fill(row, false);
+        }
+        
+        int nbGroupsFound = -1;
+        DDataset dataset = (DDataset) model1.getSingleValue(DDataset.class);
+        if (dataset != null) {
+            GroupSetup groupSetup = dataset.getGroupSetup();
+            if (groupSetup != null) {
+                List<BiologicalGroup> listBiologicalGroups = groupSetup.getBiologicalGroups();
+                nbGroups = listBiologicalGroups.size();
+
+                if ((nbGroups >= MIN_GROUPS) || (nbGroups <= MAX_GROUPS)) {
+                    nbGroupsFound = nbGroups;
+                    for (int i=0;i<nbGroups;i++) {
+                        groupNameList[i] = listBiologicalGroups.get(i).getName()+ " Group";
+                    }
+                    
+                    HashMap<Long, Integer> groupMap = new HashMap<>();  // id group -> numéro de group
+                    for (int i = 0; i < nbColumnsKept; i++) {
+                        QuantitationType quantitationType = (QuantitationType) model1.getColValue(QuantitationType.class, columnKept.get(i));
+                        if ((quantitationType.getType() == QuantitationType.WEIGHTED_SC) || (quantitationType.getType() == QuantitationType.ABUNDANCE)) {
+                            XicGroup group = (XicGroup) model1.getColValue(XicGroup.class, columnKept.get(i));
+                            if (!groupMap.containsKey(group.getId())) {
+                                groupMap.put(group.getId(), groupMap.size()); 
+                            }
+                        }
+                    }
+                    
+                    
+                    if (groupMap.size() == nbGroups) { // should be always true
+                        for (int j = 0; j < nbGroups; j++) {
+                            for (int i = 0; i < nbColumnsKept; i++) {
+                                QuantitationType quantitationType = (QuantitationType) model1.getColValue(QuantitationType.class, columnKept.get(i));
+                                XicGroup group = (XicGroup) model1.getColValue(XicGroup.class, columnKept.get(i));
+                                if (((quantitationType.getType() == QuantitationType.WEIGHTED_SC)|| (quantitationType.getType() == QuantitationType.ABUNDANCE)) && (groupMap.get(group.getId()) == j)) {
+                                    selection[j][i] = true;
+                                }
+                            }
+                        }
+                    }
+
+      
+                } else {
+                    nbGroups = MIN_GROUPS;
+                }
+
             }
         }
         
-        m_columnsParameter1 = new MultiObjectParameter(SEL_COLS1, "First Column Group", null, objectArray1, associatedObjectArray1, null, null);
-        m_columnsParameter2 = new MultiObjectParameter(SEL_COLS2, "Second Column Group", null, objectArray1, associatedObjectArray1, null, null);
-     
-        ParameterList parameterList1 = new ParameterList("bbinomial1");
-        ParameterList parameterList2 = new ParameterList("bbinomial2");
-        m_parameters = new ParameterList[2];
-        m_parameters[0] = parameterList1;
-        m_parameters[1] = parameterList2;
+        String[] groupArray = { "2 Groups", "3 Groups" };
+        Object[] groupAssociatedArray = { 2, 3 };
+        m_nbGroupsParameter = new ObjectParameter(NBGROUPS_KEY, "Number of Groups", null, groupArray, groupAssociatedArray, (nbGroups == 2) ? 0 : 1, null);
+
+        QuantitationType[] quantitationArray = m_quantitationsSet.toArray( new QuantitationType[0] );
+        Integer[] quantitationTypeArray = new Integer[quantitationArray.length];
+        int quantitationSelected = -1;
+        for (int i=0;i<quantitationArray.length;i++) {
+            quantitationTypeArray[i] = quantitationArray[i].getType();
+            if ((quantitationTypeArray[i] == QuantitationType.WEIGHTED_SC) || (quantitationTypeArray[i] == QuantitationType.ABUNDANCE)) {
+                // WEIGHTED_SC type is pre-selected
+                quantitationSelected = i;
+                
+            }
+        }
+        if (hasQuantitationTypeParameter) {
+            m_quantitationTypeParameter = new ObjectParameter(QUANTITATIONTYPE_KEY, "Quantitation Type", null, quantitationArray, quantitationTypeArray, quantitationSelected, null);
+        }
         
-        parameterList1.add(m_columnsParameter1);
-        parameterList2.add(m_columnsParameter2);
+        m_columnsParameterArray = new MultiObjectParameter[MAX_GROUPS];
+        for (int i=0;i<MAX_GROUPS;i++) {
+            m_columnsParameterArray[i] = new MultiObjectParameter(SEL_COLS_PREFIX+i, groupNameList[i], null, objectArray1, associatedObjectArray1, selection[i], null);
+        }
+
+
+        
+
+        m_parameters = new ParameterList[4];
+        m_parameters[0] = new ParameterList("group and quantitation");
+        m_parameters[0].add(m_nbGroupsParameter);
+        if (hasQuantitationTypeParameter) {
+            m_parameters[0].add(m_quantitationTypeParameter);
+        }
+        m_parameters[0].getPanel(); // generate panel at once (needed for showParameter)
+        for (int i=0;i<MAX_GROUPS;i++) {  // 3 groups max
+            m_parameters[i+1] = new ParameterList("bbinomial"+i);
+            m_parameters[i+1].add(m_columnsParameterArray[i]);
+        }
+
+         
+        
+        final int _nbGroupsFound = nbGroupsFound;
+        AbstractLinkedParameters nbGroupslinkedParameters = new AbstractLinkedParameters(m_parameters[MAX_GROUPS]) {
+            @Override
+            public void valueChanged(String value, Object associatedValue) {
+                                  enableList(value.compareTo("3") == 0);
+            }
+
+        };
+        m_nbGroupsParameter.addLinkedParameters(nbGroupslinkedParameters); // link parameter, it will modify the panel
+
+        AbstractLinkedParameters quantitationVisibilityParameters = new AbstractLinkedParameters(m_parameters[0]) {
+            @Override
+            public void valueChanged(String value, Object associatedValue) {
+                if (m_quantitationTypeParameter != null)  {
+                    showParameter(m_quantitationTypeParameter, (((Integer) associatedValue) == _nbGroupsFound)); 
+                }
+            }
+
+        };
+        m_nbGroupsParameter.addLinkedParameters(quantitationVisibilityParameters); // link parameter, it will modify the panel
+        
+        
+        if (hasQuantitationTypeParameter) {
+            final int _nbGroups = nbGroups;
+            for (int i = 0; i < MAX_GROUPS; i++) {
+                final int _groudIndex = i;
+                AbstractLinkedParameters quantitationTypelinkedParameters = new AbstractLinkedParameters(m_parameters[i]) {
+                    
+                    private boolean doingValueChanged = false;
+                    
+                    @Override
+                    public void valueChanged(String value, Object associatedValue) {
+
+                        if (doingValueChanged) {
+                            return;
+                        }
+                        try {
+                            doingValueChanged = true;
+
+                            JCheckBoxList cb = (JCheckBoxList) m_columnsParameterArray[_groudIndex].getComponent();
+                            cb.clearSelection();
+
+                            Integer quantitationChoosen = (Integer) associatedValue;
+
+                            HashMap<Long, Integer> groupMap = new HashMap<>();  // id group -> numéro de group
+                            for (int i = 0; i < nbColumnsKept; i++) {
+                                QuantitationType quantitationType = (QuantitationType) model1.getColValue(QuantitationType.class, columnKept.get(i));
+                                if ((quantitationType.getType() == QuantitationType.WEIGHTED_SC) || (quantitationType.getType() == QuantitationType.ABUNDANCE)) {
+                                    XicGroup group = (XicGroup) model1.getColValue(XicGroup.class, columnKept.get(i));
+                                    if (!groupMap.containsKey(group.getId())) {
+                                        groupMap.put(group.getId(), groupMap.size());
+                                    }
+                                }
+                            }
+
+                            if (groupMap.size() == _nbGroups) { // should be always true
+                                for (int i = 0; i < nbColumnsKept; i++) {
+                                    QuantitationType quantitationType = (QuantitationType) model1.getColValue(QuantitationType.class, columnKept.get(i));
+                                    XicGroup group = (XicGroup) model1.getColValue(XicGroup.class, columnKept.get(i));
+                                    if ((quantitationType.getType() == quantitationChoosen) && (groupMap.get(group.getId()) == _groudIndex)) {
+                                        cb.selectItem(i);
+                                    }
+                                }
+                            }
+
+                        } finally {
+                            doingValueChanged = false;
+                        }
+
+                    }
+                };
+                m_quantitationTypeParameter.addLinkedParameters(quantitationTypelinkedParameters);
+            }
+        }
         
     }
 

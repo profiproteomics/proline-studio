@@ -270,10 +270,15 @@ public class MapTimeTableModel  extends LazyTableModel implements GlobalTableMod
     }
 
     @Override
-    public Object getValue(Class c, int row) {
+    public Object getRowValue(Class c, int row) {
         if (c.equals(MapTime.class)) {
             return m_mapTimes.get(row);
         }
+        return null;
+    }
+    
+    @Override
+    public Object getColValue(Class c, int col) {
         return null;
     }
     

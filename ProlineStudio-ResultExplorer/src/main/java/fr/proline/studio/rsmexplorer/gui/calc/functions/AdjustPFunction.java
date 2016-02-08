@@ -204,7 +204,7 @@ public class AdjustPFunction extends AbstractFunction {
         
         AbstractLinkedParameters linkedParameters = new AbstractLinkedParameters(parameterList1) {
             @Override
-            public void valueChanged(String value) {
+            public void valueChanged(String value, Object associatedValue) {
                 showParameter(m_numericValueParameter, (value.compareTo("Numeric Value") == 0));
                 showParameter(m_alphaParameter, (value.compareTo("bky") == 0));
                 showParameter(m_nbinsParameter, ((value.compareTo("jiang") == 0) || (value.compareTo("histo") == 0)));
@@ -226,7 +226,7 @@ public class AdjustPFunction extends AbstractFunction {
         parameterList1.add(m_pzParameter);
         
         parameterList1.getPanel(); // generate panel at once
-        m_pi0MethodParameter.setLinkedParameters(linkedParameters); // link parameter, it will modify the panel
+        m_pi0MethodParameter.addLinkedParameters(linkedParameters); // link parameter, it will modify the panel
 
 
     }

@@ -554,7 +554,7 @@ public class PropertiesAction extends AbstractRSMAction {
                 "Assigned Queries Count") {
 
             @Override
-            public Object getValue() throws InvocationTargetException {
+            public Object getRowValue() throws InvocationTargetException {
                 return rset.getTransientData().getMSQueriesCount();
             }
         };

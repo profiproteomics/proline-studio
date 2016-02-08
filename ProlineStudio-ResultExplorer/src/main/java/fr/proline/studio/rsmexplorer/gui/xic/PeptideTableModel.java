@@ -289,10 +289,15 @@ public class PeptideTableModel extends LazyTableModel implements  GlobalTableMod
     }
 
     @Override
-    public Object getValue(Class c, int row) {
+    public Object getRowValue(Class c, int row) {
         if (c.equals(DQuantitationChannel.class)) {
             return m_quantChannels[row];
         }
+        return null;
+    }
+    
+    @Override
+    public Object getColValue(Class c, int col) {
         return null;
     }
     

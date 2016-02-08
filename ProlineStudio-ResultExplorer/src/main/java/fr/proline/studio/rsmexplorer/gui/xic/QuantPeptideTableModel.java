@@ -979,10 +979,15 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
     }
 
     @Override
-    public Object getValue(Class c, int row) {
+    public Object getRowValue(Class c, int row) {
         if (c.equals(DMasterQuantPeptide.class)) {
             return m_quantPeptides.get(row);
         }
+        return null;
+    }
+    
+    @Override
+    public Object getColValue(Class c, int col) {
         return null;
     }
 

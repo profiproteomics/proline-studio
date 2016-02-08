@@ -346,5 +346,10 @@ public class JoinDataModel extends AbstractJoinDataModel {
         return this;
     }
     
+    @Override
+    public Object getColValue(Class c, int col) {
+        return null; // could be enhanced
+    }
+    
     
 }

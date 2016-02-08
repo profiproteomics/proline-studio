@@ -196,7 +196,7 @@ public class FunctionGraphNode extends GraphNode {
 
     
     @Override
-    public void settings() {
+    public boolean settings() {
         
         AbstractGraphObject[] graphObjectArray;
         if (m_inConnectors != null) {
@@ -217,6 +217,8 @@ public class FunctionGraphNode extends GraphNode {
         if (settingsChanged) {
             super.propagateSourceChanged();
         }
+        
+        return settingsChanged;
     }
 
     @Override

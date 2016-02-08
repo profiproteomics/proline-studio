@@ -285,10 +285,15 @@ public class MapTableModel extends LazyTableModel implements GlobalTableModelInt
     }
 
     @Override
-    public Object getValue(Class c, int row) {
+    public Object getRowValue(Class c, int row) {
         if (c.equals(Map.class)) {
             return m_maps.get(row);
         }
+        return null;
+    }
+    
+    @Override
+    public Object getColValue(Class c, int col) {
         return null;
     }
 

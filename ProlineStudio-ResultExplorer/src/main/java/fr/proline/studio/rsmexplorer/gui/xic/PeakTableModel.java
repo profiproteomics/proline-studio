@@ -374,10 +374,15 @@ public class PeakTableModel extends LazyTableModel implements GlobalTableModelIn
     }
 
     @Override
-    public Object getValue(Class c, int row) {
+    public Object getRowValue(Class c, int row) {
         if (c.equals(Peak.class)) {
             return m_peaks.get(row);
         }
+        return null;
+    }
+    
+    @Override
+    public Object getColValue(Class c, int col) {
         return null;
     }
 

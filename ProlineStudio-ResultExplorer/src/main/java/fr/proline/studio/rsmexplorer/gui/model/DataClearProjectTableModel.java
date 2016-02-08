@@ -243,7 +243,12 @@ public class DataClearProjectTableModel extends DecoratedTableModel implements G
     }
 
     @Override
-    public Object getValue(Class c, int row) {
+    public Object getRowValue(Class c, int row) {
+        return null;
+    }
+    
+    @Override
+    public Object getColValue(Class c, int col) {
         return null;
     }
 

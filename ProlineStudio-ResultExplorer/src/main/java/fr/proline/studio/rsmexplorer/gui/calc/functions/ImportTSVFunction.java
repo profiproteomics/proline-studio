@@ -268,7 +268,7 @@ public class ImportTSVFunction extends AbstractFunction {
         
         AbstractLinkedParameters linkedParameters = new AbstractLinkedParameters(m_parameterList) {
             @Override
-            public void valueChanged(String value) {
+            public void valueChanged(String value, Object associatedValue) {
                 showParameter(m_separatorParameter, (value.compareTo("false") == 0));
 
                 updataParameterListPanel();
@@ -278,7 +278,7 @@ public class ImportTSVFunction extends AbstractFunction {
         
         m_parameterList.getPanel(); // generate panel at once
         linkedParameters.showParameter(m_separatorParameter, false); // separator parameter not visible by default
-        m_automaticSeparatorParameter.setLinkedParameters(linkedParameters); // link parameter, it will modify the panel
+        m_automaticSeparatorParameter.addLinkedParameters(linkedParameters); // link parameter, it will modify the panel
         
     }
     
@@ -492,7 +492,12 @@ public class ImportTSVFunction extends AbstractFunction {
         }
 
         @Override
-        public Object getValue(Class c, int row) {
+        public Object getRowValue(Class c, int row) {
+            return null;
+        }
+        
+        @Override
+        public Object getColValue(Class c, int col) {
             return null;
         }
         

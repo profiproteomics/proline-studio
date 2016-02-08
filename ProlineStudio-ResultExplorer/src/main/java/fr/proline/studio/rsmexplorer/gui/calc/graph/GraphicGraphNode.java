@@ -164,7 +164,7 @@ public class GraphicGraphNode extends GraphNode {
 
     
     @Override
-    public void settings() {
+    public boolean settings() {
         
         AbstractGraphObject[] graphObjectArray = new AbstractGraphObject[m_inConnectors.size()];
         int i = 0;
@@ -180,6 +180,8 @@ public class GraphicGraphNode extends GraphNode {
         if (settingsChanged) {
             super.propagateSourceChanged();
         }
+        
+        return settingsChanged;
     }
 
     @Override

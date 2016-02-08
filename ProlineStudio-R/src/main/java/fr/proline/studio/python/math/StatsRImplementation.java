@@ -128,13 +128,13 @@ public class StatsRImplementation {
 
     }
     
-    public static ColData bbinomial(PyTuple p1, PyTuple p2) throws Exception {
+    public static ColData bbinomial(PyTuple p1, PyTuple p2, PyTuple p3) throws Exception {
 
         // needs R for this calculation
         StatsUtil.startRSever();
 
         // PyTuple to Col Array
-        ColRef[] cols = StatsUtil.colTupleToColArray(p1, p2);
+        ColRef[] cols = (p3!=null) ? StatsUtil.colTupleToColArray(p1, p2, p3) : StatsUtil.colTupleToColArray(p1, p2);
 
         // Create a temp file with a matrix containing cols data
         File matrixTempFile = StatsUtil.columnsToMatrixTempFile(cols, false);
@@ -143,7 +143,8 @@ public class StatsRImplementation {
         Table t = cols[0].getTable();
         int nb1 = p1.size();
         int nb2 = p2.size();
-        ColData c = _bbinomialR(t, matrixTempFile, nb1, nb2);
+        int nb3 = (p3 == null) ? 0 : p3.size();
+        ColData c = _bbinomialR(t, matrixTempFile, nb1, nb2, nb3);
 
         // delete temp files
         matrixTempFile.delete();
@@ -151,7 +152,7 @@ public class StatsRImplementation {
         return c;
     }
 
-    private static ColData _bbinomialR(Table t, File matrixTempFile, int nbCols1, int nbCols2) throws Exception {
+    private static ColData _bbinomialR(Table t, File matrixTempFile, int nbCols1, int nbCols2, int nbCols3) throws Exception {
 
         // load library to do the calculation
         RServerManager serverR = RServerManager.getRServerManager();
@@ -161,8 +162,12 @@ public class StatsRImplementation {
         StatsUtil.readMatrixData(matrixTempFile, false);
 
         // do calculation
-        int nbCols = nbCols1 + nbCols2;
-        String cmdBB = "resbinomial<-bb.test(x=" + StatsUtil.MATRIX_VARIABLE + "[,1:" + nbCols + "], tx=colSums(" + StatsUtil.MATRIX_VARIABLE + "[,1:" + nbCols + "]), group=c(rep('C1'," + nbCols1 + "),rep('C2'," + nbCols2 + ")),n.threads=0)";
+        int nbCols = nbCols1 + nbCols2 + nbCols3;
+        String forCol3 = "";
+        if (nbCols3>0) {
+            forCol3 = ",rep('C3'," + nbCols3 + ")";
+        }
+        String cmdBB = "resbinomial<-bb.test(x=" + StatsUtil.MATRIX_VARIABLE + "[,1:" + nbCols + "], tx=colSums(" + StatsUtil.MATRIX_VARIABLE + "[,1:" + nbCols + "]), group=c(rep('C1'," + nbCols1 + "),rep('C2'," + nbCols2 + ")"+forCol3+"),n.threads=0)";
         REXPGenericVector resVector = (REXPGenericVector) serverR.parseAndEval(cmdBB);
 
         Object o = resVector.asNativeJavaObject();

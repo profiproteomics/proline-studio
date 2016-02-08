@@ -297,6 +297,9 @@ public class DiffDataModel extends AbstractJoinDataModel {
     }
     
     
-
+    @Override
+    public Object getColValue(Class c, int col) {
+        return null; // could be enhanced
+    }
     
 }

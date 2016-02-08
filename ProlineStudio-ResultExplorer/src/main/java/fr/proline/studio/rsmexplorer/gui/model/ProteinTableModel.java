@@ -430,10 +430,15 @@ public class ProteinTableModel extends DecoratedTableModel implements GlobalTabl
     }
 
     @Override
-    public Object getValue(Class c, int row) {
+    public Object getRowValue(Class c, int row) {
         if (c.equals(DProteinMatch.class)) {
             return getProteinMatch(row);
         }
+        return null;
+    }
+    
+    @Override
+    public Object getColValue(Class c, int col) {
         return null;
     }
 }

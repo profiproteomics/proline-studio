@@ -437,7 +437,7 @@ public class MSQueriesTableModel extends LazyTableModel implements GlobalTableMo
     }
 
     @Override
-    public Object getValue(Class c, int row) {
+    public Object getRowValue(Class c, int row) {
         if (c.equals(DMsQuery.class)) {
             return m_msqueries.get(row);
         } else if (c.equals(MsQueryInfoRSM.class) && m_rsmSource) {
@@ -445,6 +445,11 @@ public class MSQueriesTableModel extends LazyTableModel implements GlobalTableMo
         } else if (c.equals(MsQueryInfoRset.class) && !m_rsmSource) {
             return new MsQueryInfoRset(m_msqueries.get(row), (ResultSet) getValue(ResultSet.class));
         }
+        return null;
+    }
+    
+    @Override
+    public Object getColValue(Class c, int col) {
         return null;
     }
 }

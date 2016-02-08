@@ -690,7 +690,7 @@ public class PtmProtenSiteTableModel extends LazyTableModel implements GlobalTab
     }
 
     @Override
-    public Object getValue(Class c, int row) {
+    public Object getRowValue(Class c, int row) {
         if (c.equals(DProteinPTMSite.class)) {
             return m_arrayInUse.get(row);
         }
@@ -700,6 +700,11 @@ public class PtmProtenSiteTableModel extends LazyTableModel implements GlobalTab
         if (c.equals(DPeptideMatch.class)) {
             return m_arrayInUse.get(row);
         }
+        return null;
+    }
+    
+    @Override
+    public Object getColValue(Class c, int col) {
         return null;
     }
     

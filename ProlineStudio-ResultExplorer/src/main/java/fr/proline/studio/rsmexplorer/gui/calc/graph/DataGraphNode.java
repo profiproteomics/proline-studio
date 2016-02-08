@@ -105,8 +105,9 @@ public class DataGraphNode extends GraphNode {
     }
 
     @Override
-    public void settings() {
+    public boolean settings() {
         // nothing to do
+        return true;
     }
 
     @Override

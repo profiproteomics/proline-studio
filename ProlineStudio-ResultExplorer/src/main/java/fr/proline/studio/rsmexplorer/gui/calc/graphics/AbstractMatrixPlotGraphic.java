@@ -81,7 +81,7 @@ public abstract class AbstractMatrixPlotGraphic extends AbstractGraphic {
 
 
             StringBuilder codeSB = new StringBuilder();
-            codeSB.append(m_functionName+"=Stats."+m_functionName+"((");
+            codeSB.append("plot=Stats."+m_functionName+"((");
             for (int i = 0; i < parameters.length; i++) {
                 codeSB.append(parameters[i].getName());
                 if (i<parameters.length-1) {
@@ -98,7 +98,7 @@ public abstract class AbstractMatrixPlotGraphic extends AbstractGraphic {
                     if (variables != null) {
                         // look for res
                         for (ResultVariable var : variables) {
-                            if (var.getName().compareTo("boxPlot") == 0) {
+                            if (var.getName().compareTo("plot") == 0) {
                                 // we have found the result
                                 PythonImage image = (PythonImage) var.getValue();
                                 m_generatedImage = image.getImage();

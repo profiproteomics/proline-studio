@@ -244,11 +244,19 @@ public class CompareTableModel extends DecoratedTableModel implements GlobalTabl
     }
 
     @Override
-    public Object getValue(Class c, int row) {
+    public Object getRowValue(Class c, int row) {
         if (m_dataInterface == null) {
             return null;
         }
-        return m_dataInterface.getValue(c, row);
+        return m_dataInterface.getRowValue(c, row);
+    }
+    
+    @Override
+    public Object getColValue(Class c, int col) {
+        if (m_dataInterface == null) {
+            return null;
+        }
+        return m_dataInterface.getColValue(c, col);
     }
 
     @Override

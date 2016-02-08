@@ -448,13 +448,18 @@ public class FilterTableModel extends DecoratedTableModel implements FilterTable
     }
 
     @Override
-    public Object getValue(Class c, int rowIndex) {
+    public Object getRowValue(Class c, int rowIndex) {
 
         int rowFiltered = rowIndex;
         if ((!m_isFiltering) && (m_filteredIds != null)) {
             rowFiltered = m_filteredIds.get(rowIndex).intValue();
         }
-        return m_tableModelSource.getValue(c, rowFiltered);
+        return m_tableModelSource.getRowValue(c, rowFiltered);
+    }
+    
+    @Override
+    public Object getColValue(Class c, int col) {
+        return m_tableModelSource.getColValue(c, col);
     }
     
     @Override

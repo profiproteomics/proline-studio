@@ -274,8 +274,13 @@ public class ExprTableModel extends DecoratedTableModel implements ChildModelInt
     }
 
     @Override
-    public Object getValue(Class c, int row) {
-        return m_parentModel.getValue(c, row);
+    public Object getRowValue(Class c, int row) {
+        return m_parentModel.getRowValue(c, row);
+    }
+    
+    @Override
+    public Object getColValue(Class c, int col) {
+        return m_parentModel.getColValue(c, col);
     }
  
 }

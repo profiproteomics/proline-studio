@@ -129,7 +129,7 @@ public abstract class DecoratedTable extends JXTable implements CrossSelectionIn
 
         AbstractLinkedParameters linkedParameters = new AbstractLinkedParameters(parameterTableList) {
             @Override
-            public void valueChanged(String value) {
+            public void valueChanged(String value, Object associatedValue) {
                 showParameter(m_columnWidthParameter, (value.compareTo((autoResized) ? "false" : "true") == 0));
 
                 updataParameterListPanel();
@@ -147,8 +147,8 @@ public abstract class DecoratedTable extends JXTable implements CrossSelectionIn
         m_parameterListArray.add(parameterTableList);
 
         parameterTableList.getPanel(); // generate panel at once
-        m_autoSizeColumnParameter.setLinkedParameters(linkedParameters); // link parameter, it will modify the panel
-        linkedParameters.valueChanged("true");  //JPM.TOOD true or false
+        m_autoSizeColumnParameter.addLinkedParameters(linkedParameters); // link parameter, it will modify the panel
+        linkedParameters.valueChanged("true", Boolean.TRUE);  //JPM.TOOD true or false
     }
     
     public void removeStriping() {

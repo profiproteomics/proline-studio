@@ -1,7 +1,6 @@
 package fr.proline.studio.rsmexplorer.gui.calc.graph;
 
 import fr.proline.studio.gui.InfoDialog;
-import fr.proline.studio.gui.OptionDialog;
 import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -151,7 +150,7 @@ public abstract class GraphNode extends AbstractGraphObject {
     //public abstract NodeState getState();
     public abstract void process(boolean display);
     public abstract void askDisplay();
-    public abstract void settings();
+    public abstract boolean settings();
 
         
     @Override
@@ -356,12 +355,12 @@ public abstract class GraphNode extends AbstractGraphObject {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            m_graphNode.settings();
+            boolean settingsChanged = m_graphNode.settings();
             m_graphPanel.repaint();
             
             // JPM ??? ask for the calculation now if possible
             // remove these lines if I change my mind
-            if (m_graphNode.settingsDone()) {
+            if (settingsChanged && m_graphNode.settingsDone()) {
                 m_graphNode.process(false);
             }
             

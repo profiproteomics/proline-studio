@@ -88,7 +88,7 @@ public class CalcInterpreterThread extends Thread {
                     }
                     interpreter.exec(code);
 
-                    ArrayList<ResultVariable> resultVariableArray = new ArrayList<>();
+                     ArrayList<ResultVariable> resultVariableArray = new ArrayList<>();
 
                     PyStringMap locals = (PyStringMap) interpreter.getLocals();
                     PyList keysList = locals.keys();

@@ -16,16 +16,13 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import javax.swing.table.TableCellRenderer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 
 /**
  *
  * @author CB205360
  */
 public class ExtractionResultsTableModel extends DecoratedTableModel implements GlobalTableModelInterface {
-
-    final private static Logger logger = LoggerFactory.getLogger(ExtractionResultsTableModel.class);
 
     private final HashMap<Integer, TableCellRenderer> m_rendererMap = new HashMap();
 
@@ -272,11 +269,17 @@ public class ExtractionResultsTableModel extends DecoratedTableModel implements 
     }
 
     @Override
-    public Object getValue(Class c, int row) {
+    public Object getRowValue(Class c, int row) {
         if (c.equals(ExtractionResult.class)) {
             return m_extractionResults.get(row);
         }
         return null;
     }
+    
+    @Override
+    public Object getColValue(Class c, int col) {
+        return null;
+    }
+
 
 }

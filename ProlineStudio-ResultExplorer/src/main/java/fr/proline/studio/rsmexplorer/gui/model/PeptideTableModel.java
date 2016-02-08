@@ -649,10 +649,15 @@ public class PeptideTableModel extends DecoratedTableModel implements GlobalTabl
     }
 
     @Override
-    public Object getValue(Class c, int row) {
+    public Object getRowValue(Class c, int row) {
         if (c.equals(DPeptideInstance.class)) {
             return m_peptideInstances[row];
         }
+        return null;
+    }
+    
+    @Override
+    public Object getColValue(Class c, int col) {
         return null;
     }
     

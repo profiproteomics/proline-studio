@@ -332,7 +332,7 @@ public class GenericPanel extends JPanel implements DataBoxPanelInterface, Globa
                 indexInModelSelected = compoundTableModel.convertCompoundRowToBaseModelRow(indexInModelSelected);
         
         
-                return ((GlobalTableModelInterface) compoundTableModel.getBaseModel()).getValue(c, indexInModelSelected);
+                return ((GlobalTableModelInterface) compoundTableModel.getBaseModel()).getRowValue(c, indexInModelSelected);
 
              } else {
                  return compoundTableModel.getValue(c);

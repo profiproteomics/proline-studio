@@ -12,10 +12,14 @@ public interface ExtraDataInterface {
     
     public Object getValue(Class c);
     
-    public Object getValue(Class c, int row);
+    public Object getRowValue(Class c, int row);
+    
+    public Object getColValue(Class c, int col);
     
     public void addSingleValue(Object v);
     
     public Object getSingleValue(Class c);
+    
+    
     
 }

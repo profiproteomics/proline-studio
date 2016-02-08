@@ -521,10 +521,15 @@ public class PeakelTableModel extends LazyTableModel implements GlobalTableModel
     }
 
     @Override
-    public Object getValue(Class c, int row) {
+    public Object getRowValue(Class c, int row) {
         if (c.equals(Peakel.class)) {
             return m_peakels.get(row);
         }
+        return null;
+    }
+    
+    @Override
+    public Object getColValue(Class c, int col) {
         return null;
     }
 }

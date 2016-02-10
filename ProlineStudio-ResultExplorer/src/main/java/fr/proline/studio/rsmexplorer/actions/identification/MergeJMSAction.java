@@ -21,9 +21,14 @@ import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.prefs.Preferences;
+import static javax.swing.Action.NAME;
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.tree.DefaultTreeModel;
 import org.openide.util.NbBundle;
+import org.openide.util.NbPreferences;
 
 /**
  * Action to Merge data from a set of Search Results (rset) or Identification Summaries (rsm)
@@ -31,10 +36,48 @@ import org.openide.util.NbBundle;
  */
 public class MergeJMSAction extends AbstractRSMAction {
 
+    private JMenu m_menu;
+    private ConfigurableMergeAction m_aggregationMergeAction;
+    private ConfigurableMergeAction m_unionMergeAction;
+    
     public MergeJMSAction() {
         super(NbBundle.getMessage(MergeJMSAction.class, "CTL_MergeAction"), AbstractTree.TreeType.TREE_IDENTIFICATION);
     }
+    
+    @Override
+    public JMenuItem getPopupPresenter() {
+        m_menu = new JMenu((String) getValue(NAME));
+        m_aggregationMergeAction = new ConfigurableMergeAction(MergeTask.Config.AGGREGATION);
+        m_unionMergeAction = new ConfigurableMergeAction(MergeTask.Config.UNION);
+        JMenuItem mergeAggregateItem = new JMenuItem(m_aggregationMergeAction);
+        JMenuItem mergeUnionItem = new JMenuItem(m_unionMergeAction);
+        m_menu.add(mergeAggregateItem);
+        m_menu.add(mergeUnionItem);
 
+        return m_menu;
+    }
+    
+     @Override
+    public void updateEnabled(AbstractNode[] selectedNodes) {
+
+        m_aggregationMergeAction.updateEnabled(selectedNodes);
+        m_unionMergeAction.updateEnabled(selectedNodes);
+        
+        boolean isEnabled = m_aggregationMergeAction.isEnabled() ||  m_unionMergeAction.isEnabled();
+        setEnabled(isEnabled);
+        m_menu.setEnabled(isEnabled);
+    }
+}
+
+class ConfigurableMergeAction extends AbstractRSMAction {
+    
+    private MergeTask.Config m_configuration;
+    
+    public ConfigurableMergeAction(MergeTask.Config config) {
+        super(config.getValue(), AbstractTree.TreeType.TREE_IDENTIFICATION);
+        m_configuration = config;
+    }
+    
     @Override
     public void actionPerformed(final AbstractNode[] selectedNodes, int x, int y) {
 
@@ -139,7 +182,7 @@ public class MergeJMSAction extends AbstractRSMAction {
             }
         };
 
-        MergeTask task = new MergeTask(callback, projectId);
+        MergeTask task = new MergeTask(callback, projectId, m_configuration);
         if (mergeOnRsm) {
              task.initMergeRsm(idList, datasetName, _resultSetId, _resultSummaryId);
         } else {
@@ -183,9 +226,12 @@ public class MergeJMSAction extends AbstractRSMAction {
 
     }
 
-      @Override
+    @Override
     public void updateEnabled(AbstractNode[] selectedNodes) {
 
+        Preferences preferences = NbPreferences.root();
+        Boolean showHiddenFunctionnality =  preferences.getBoolean("Profi", false);
+        
         // to execute this action, the user must be the owner of the project
         Project selectedProject = ProjectExplorerPanel.getProjectExplorerPanel().getSelectedProject();
         if (!DatabaseDataManager.getDatabaseDataManager().ownProject(selectedProject)) {
@@ -253,6 +299,7 @@ public class MergeJMSAction extends AbstractRSMAction {
             }
         }
 
-        setEnabled(true);
+        setEnabled(m_configuration.equals(MergeTask.Config.AGGREGATION) || showHiddenFunctionnality );
     }
+    
 }

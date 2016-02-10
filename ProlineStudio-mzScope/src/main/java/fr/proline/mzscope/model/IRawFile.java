@@ -14,13 +14,13 @@ public interface IRawFile {
    
    public File getFile();
 
-   public Chromatogram getXIC(Ms1ExtractionRequest params);
+   public Chromatogram getXIC(MsnExtractionRequest params);
    
    public Chromatogram getTIC();
 
    public Chromatogram getBPI();
 
-   public List<Feature> extractFeatures(FeaturesExtractionRequest params);
+   public List<IFeature> extractFeatures(FeaturesExtractionRequest params);
    
    public Spectrum getSpectrum(int spectrumIndex);
 

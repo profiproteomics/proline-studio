@@ -3,7 +3,7 @@ package fr.proline.mzscope.ui;
 import fr.proline.mzscope.ui.model.ScanTableModel;
 import fr.profi.ms.model.TheoreticalIsotopePattern;
 import fr.profi.mzdb.algo.IsotopicPatternScorer;
-import fr.proline.mzscope.model.Ms1ExtractionRequest;
+import fr.proline.mzscope.model.MsnExtractionRequest;
 import fr.proline.mzscope.model.MzScopePreferences;
 import fr.proline.mzscope.model.Spectrum;
 import fr.proline.mzscope.ui.event.ScanHeaderListener;
@@ -47,7 +47,7 @@ public class SpectrumPanel extends JPanel implements ScanHeaderListener, PlotPan
 
    private static final Logger logger = LoggerFactory.getLogger(SpectrumPanel.class);
    
-   private final IRawFilePanel rawFilePanel;
+   private final IRawFileViewer rawFilePanel;
 
    protected BasePlotPanel spectrumPlotPanel;
    protected JToolBar spectrumToolbar;
@@ -60,7 +60,7 @@ public class SpectrumPanel extends JPanel implements ScanHeaderListener, PlotPan
    
    private List<AbstractMarker> ipMarkers = new ArrayList();
 
-   public SpectrumPanel(IRawFilePanel rawFilePanel) {
+   public SpectrumPanel(IRawFileViewer rawFilePanel) {
       super();
       this.rawFilePanel = rawFilePanel;
    }
@@ -168,33 +168,37 @@ public class SpectrumPanel extends JPanel implements ScanHeaderListener, PlotPan
     }
 
         
-   @Override
-   public void plotPanelMouseClicked(MouseEvent e, double xValue, double yValue) {
-      if (e.getClickCount() == 2) {
-         if ((e.getModifiers() & KeyEvent.ALT_MASK) == 0 && xicModeDisplay != DisplayMode.OVERLAY) {
-            scanPlot.clearMarkers();
-            scanPlot.addMarker(positionMarker);
-         }
-         positionMarker.setValue(xValue);
-         positionMarker.setVisible(true);
-         double domain = xValue;
-         float ppmTol = MzScopePreferences.getInstance().getMzPPMTolerance();
-         double maxMz = domain + domain * ppmTol / 1e6;
-         double minMz = domain - domain * ppmTol / 1e6;
-         scanPlot.addMarker(new IntervalMarker(spectrumPlotPanel, Color.orange, Color.RED, minMz, maxMz));
-         
-         Ms1ExtractionRequest params = Ms1ExtractionRequest.builder().setMinMz(minMz).setMaxMz(maxMz).build();
-        if ((e.getModifiers() & KeyEvent.ALT_MASK) != 0) {
-            rawFilePanel.extractAndDisplayChromatogram(params, DisplayMode.OVERLAY, null);
-        } else {
-           rawFilePanel.extractAndDisplayChromatogram(params, xicModeDisplay, null);
+    @Override
+    public void plotPanelMouseClicked(MouseEvent e, double xValue, double yValue) {
+        if (e.getClickCount() == 2) {
+            if ((e.getModifiers() & KeyEvent.ALT_MASK) == 0 && xicModeDisplay != DisplayMode.OVERLAY) {
+                scanPlot.clearMarkers();
+                scanPlot.addMarker(positionMarker);
+            }
+                positionMarker.setValue(xValue);
+                positionMarker.setVisible(true);
+                double mz = xValue;
+                float ppmTol = (currentScan.getMsLevel() == 1) ? MzScopePreferences.getInstance().getMzPPMTolerance() :  MzScopePreferences.getInstance().getFragmentMzPPMTolerance();  
+                double maxMz = mz + mz * ppmTol / 1e6;
+                double minMz = mz - mz * ppmTol / 1e6;
+                scanPlot.addMarker(new IntervalMarker(spectrumPlotPanel, Color.orange, Color.RED, minMz, maxMz));
+                MsnExtractionRequest.Builder builder = MsnExtractionRequest.builder();
+                if (currentScan.getMsLevel() == 1) {
+                    builder.setMinMz(minMz).setMaxMz(maxMz);
+                } else {
+                    builder.setMz(currentScan.getPrecursorMz()).setFragmentMz(mz).setFragmentMzTolPPM(ppmTol);
+                }
+                if ((e.getModifiers() & KeyEvent.ALT_MASK) != 0) {
+                    rawFilePanel.extractAndDisplayChromatogram(builder.build(), DisplayMode.OVERLAY, null);
+                } else {
+                    rawFilePanel.extractAndDisplayChromatogram(builder.build(), xicModeDisplay, null);
+                }
+
+        } else if (SwingUtilities.isLeftMouseButton(e)) {
+            positionMarker.setValue(xValue);
+            positionMarker.setVisible(true);
         }
-                  
-      } else if (SwingUtilities.isLeftMouseButton(e)) {
-         positionMarker.setValue(xValue);
-         positionMarker.setVisible(true);
-      }
-   }
+    }
 
    @Override
    public void updateScanIndex(Integer scanIndex) {
@@ -232,7 +236,7 @@ public class SpectrumPanel extends JPanel implements ScanHeaderListener, PlotPan
          Color plotColor = rawFilePanel.getPlotColor(rawFilePanel.getCurrentRawfile().getName());
          ScanTableModel scanModel = new ScanTableModel(scan);
          scanModel.setColor(plotColor);
-         if (scan.getDataType() == Spectrum.ScanType.CENTROID) { // mslevel2
+         if (scan.getDataType() == Spectrum.ScanType.CENTROID) { 
             //stick plot
             scanPlot = new PlotStick(spectrumPlotPanel, scanModel, null, ScanTableModel.COLTYPE_SCAN_MASS, ScanTableModel.COLTYPE_SCAN_INTENSITIES);
             ((PlotStick) scanPlot).setStrokeFixed(true);

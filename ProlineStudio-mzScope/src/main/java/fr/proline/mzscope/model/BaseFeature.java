@@ -25,12 +25,16 @@ public class BaseFeature implements IFeature {
    private int ms1Count = 0;
    private double mz;
    private int peakelsCount = 0;
-
-   public BaseFeature(double mz, float elutionTime, float firstElutionTime, float lastElutionTime) {
+   private IRawFile rawFile;
+   private int msLevel;
+   
+   public BaseFeature(double mz, float elutionTime, float firstElutionTime, float lastElutionTime, IRawFile rawfile, int msLevel) {
       this.elutionTime = elutionTime;
       this.firstElutionTime = firstElutionTime;
       this.lastElutionTime = lastElutionTime;
       this.mz = mz;
+      this.rawFile = rawfile;
+      this.msLevel = msLevel;
    }
 
    public float getArea() {
@@ -87,7 +91,7 @@ public class BaseFeature implements IFeature {
    }
 
    @Override
-   public int getMs1Count() {
+   public int getScanCount() {
       return ms1Count;
    }
 
@@ -114,4 +118,26 @@ public class BaseFeature implements IFeature {
       return peakelsCount;
    }
 
+    @Override
+    public IRawFile getRawFile() {
+        return rawFile;
+    }
+
+    @Override
+    public void setRawFile(IRawFile rawfile) {
+        this.rawFile = rawfile;
+    }
+
+    
+    @Override
+    public int getMsLevel() {
+        return msLevel;
+    }
+
+    @Override
+    public double getParentMz() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    
 }

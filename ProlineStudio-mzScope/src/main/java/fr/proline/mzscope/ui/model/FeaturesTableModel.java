@@ -1,6 +1,7 @@
 package fr.proline.mzscope.ui.model;
 
 import fr.profi.mzdb.model.Feature;
+import fr.proline.mzscope.model.IFeature;
 import fr.proline.mzscope.model.IRawFile;
 import fr.proline.mzscope.utils.NumberFormatter;
 import fr.proline.studio.comparedata.ExtraDataType;
@@ -48,22 +49,17 @@ public class FeaturesTableModel extends DecoratedTableModel implements GlobalTab
     
    private final HashMap<Integer, TableCellRenderer> m_rendererMap = new HashMap();
 
-    private List<Feature> m_features = new ArrayList<>();
-    private Map<Integer, IRawFile> m_mapRawFileByFeatureId = new HashMap();
+    private List<IFeature> m_features = new ArrayList<>();
     
     private String m_modelName;
 
-    public void setFeatures(List<Feature> features, Map<Integer, IRawFile> mapRawFileByFeatureId) {
+    public void setFeatures(List<IFeature> features) {
         m_features = features;
-        m_mapRawFileByFeatureId = mapRawFileByFeatureId;
         fireTableDataChanged();
     }
     
-    public void addFeatures(List<Feature> features, Map<Integer, IRawFile> mapRawFileByFeatureId) {
+    public void addFeatures(List<IFeature> features) {
         m_features.addAll(features);
-        mapRawFileByFeatureId.entrySet().stream().forEach((entrySet) -> {
-            this.m_mapRawFileByFeatureId.put(entrySet.getKey(), entrySet.getValue());
-        });
         fireTableDataChanged();
     }
     
@@ -86,19 +82,19 @@ public class FeaturesTableModel extends DecoratedTableModel implements GlobalTab
             case COLTYPE_FEATURE_ET_COL:
                 return m_features.get(rowIndex).getElutionTime()/60.0;
             case COLTYPE_FEATURE_DURATION_COL:
-                return m_features.get(rowIndex).getBasePeakel().calcDuration()/60.0;
+                return m_features.get(rowIndex).getDuration()/60.0;
             case COLTYPE_FEATURE_APEX_INT_COL:
-                return m_features.get(rowIndex).getBasePeakel().getApexIntensity();
+                return m_features.get(rowIndex).getApexIntensity();
             case COLTYPE_FEATURE_AREA_COL:
                 return m_features.get(rowIndex).getArea();
             case COLTYPE_FEATURE_SCAN_COUNT_COL:
-                return m_features.get(rowIndex).getMs1Count();
+                return m_features.get(rowIndex).getScanCount();
             case COLTYPE_FEATURE_CHARGE_COL:
-               return m_features.get(rowIndex).charge();
+               return m_features.get(rowIndex).getCharge();
             case COLTYPE_FEATURE_PEAKELS_COUNT_COL:
                return m_features.get(rowIndex).getPeakelsCount();
             case COLTYPE_FEATURE_RAWFILE: 
-                return m_mapRawFileByFeatureId.get(m_features.get(rowIndex).getId()).getName();
+                return m_features.get(rowIndex).getRawFile().getName();
         }
         return null; // should not happen
     }

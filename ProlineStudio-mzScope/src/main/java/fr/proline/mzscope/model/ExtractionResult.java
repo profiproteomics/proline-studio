@@ -25,11 +25,11 @@ public class ExtractionResult {
       NONE, REQUESTED, DONE
    };
 
-   private Ms1ExtractionRequest request;
+   private MsnExtractionRequest request;
    private List<Pair<Chromatogram, Object>> chromatograms;
    private Status status = Status.NONE;
 
-   public ExtractionResult(Ms1ExtractionRequest request) {
+   public ExtractionResult(MsnExtractionRequest request) {
       this.request = request;
    }
    
@@ -84,7 +84,7 @@ public class ExtractionResult {
       return result;
    }
    
-   public Ms1ExtractionRequest getRequest() {
+   public MsnExtractionRequest getRequest() {
       return request;
    }
    

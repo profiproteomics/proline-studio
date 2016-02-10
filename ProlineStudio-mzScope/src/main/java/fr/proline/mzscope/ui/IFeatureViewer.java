@@ -1,7 +1,6 @@
 package fr.proline.mzscope.ui;
 
 import fr.proline.mzscope.model.IFeature;
-import fr.proline.mzscope.model.IRawFile;
 
 /**
  * feature/peak selected in the FeatureTable and should be display 
@@ -11,9 +10,8 @@ public interface IFeatureViewer {
     /**
      * display Feature in the raw file corresponding to the rawFile
      * @param f 
-     * @param rawFile 
      */
-    public void displayFeatureInRawFile(IFeature f, IRawFile rawFile);
+    public void displayFeatureInRawFile(IFeature f);
     
     /**
      * display Feature in the current raw file

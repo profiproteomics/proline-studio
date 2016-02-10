@@ -1,9 +1,8 @@
 package fr.proline.mzscope.ui;
 
-import fr.proline.mzscope.model.Ms1ExtractionRequest;
+import fr.proline.mzscope.model.MsnExtractionRequest;
 import fr.proline.mzscope.model.MzScopePreferences;
 import java.awt.BorderLayout;
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
@@ -28,25 +27,25 @@ public class XICExtractionPanel extends JPanel{
     private JScrollPane scrollPane;
     private JPanel internalPanel;
     private JPanel mainPanel;
-    private JPanel panelMassRange;
-    private JLabel massRangeLabel;
+    
+    private JPanel massRangePanel;
     private JTextField massRangeTF;
-    private JPanel panelTolerance;
-    private JLabel toleranceLabel;
-    private JLabel toleranceUnitLabel;
+    private JPanel tolerancePanel;
     private JTextField toleranceTF;
-    private JPanel panelParentMassRange;
-    private JLabel parentMassLabel;
-    private JTextField  parentMassTF;
     
-    private boolean isDIA = false;
-
-   private final IExtractionExecutor extractionExecutor;
+    private JPanel fragmentMassRangePanel;
+    private JTextField  fragmentMassRangeTF;
+    private JPanel fragmentTolerancePanel;
+    private JTextField fragmentToleranceTF;
     
-    public XICExtractionPanel(IExtractionExecutor extractionExecutor) {
+    private final IMzScopeController appController;
+    
+    public XICExtractionPanel(IMzScopeController appController) {
         initComponents();
-        this.extractionExecutor = extractionExecutor;
-        toleranceTF.setText(Float.toString(MzScopePreferences.getInstance().getMzPPMTolerance()));
+        this.appController = appController;
+        toleranceTF.setText(Integer.toString(Math.round(MzScopePreferences.getInstance().getMzPPMTolerance())));
+        fragmentToleranceTF.setText(Integer.toString(Math.round(MzScopePreferences.getInstance().getFragmentMzPPMTolerance())));
+        
     }
 
     private void initComponents() {
@@ -57,7 +56,6 @@ public class XICExtractionPanel extends JPanel{
     private JScrollPane getScrollPane() {
         if (scrollPane == null) {
             scrollPane = new JScrollPane(getInternalPanel());
-            scrollPane.setName("scrollPane");
             this.add(scrollPane);
         }
         return scrollPane;
@@ -66,7 +64,6 @@ public class XICExtractionPanel extends JPanel{
     private JPanel getInternalPanel(){
         if (internalPanel == null) {
             internalPanel = new JPanel();
-            internalPanel.setName("internalPanel");
             internalPanel.setLayout(new BorderLayout());
             internalPanel.add(getMainPanel(), BorderLayout.PAGE_START);
         }
@@ -75,48 +72,32 @@ public class XICExtractionPanel extends JPanel{
     
     private JPanel getMainPanel() {
         if (mainPanel == null) {
-            mainPanel = new JPanel(new FlowLayout(FlowLayout.LEADING, 5, 2));
-            mainPanel.setName("mainPanel");
-            mainPanel.add(getPanelMass());
-            mainPanel.add(getPanelTolerance());
-            if (isDIA){
-                mainPanel.add(getPanelParentMass());
-            }
+            mainPanel = new JPanel(new FlowLayout(FlowLayout.LEADING));
+            mainPanel.add(getlMassRangePanel());
+            mainPanel.add(getTolerancePanel());
+            mainPanel.add(getFragmentMassRangePanel());
+            mainPanel.add(getFragmentTolerancePanel());
         }
         return mainPanel;
     }
 
-    private JPanel getPanelMass() {
-        if (panelMassRange == null) {
-            panelMassRange = new JPanel();
-            panelMassRange.setName("panelMassRange");
-            panelMassRange.setLayout(new FlowLayout(FlowLayout.LEADING));
-            panelMassRange.add(getMassRangeLabel());
-            panelMassRange.add(getMassRangeTF());
+    private JPanel getlMassRangePanel() {
+        if (massRangePanel == null) {
+            massRangePanel = new JPanel();
+            massRangePanel.setLayout(new FlowLayout(FlowLayout.LEADING));
+            JLabel massRangeLabel = new JLabel();
+            massRangeLabel.setText("Mass :");
+            massRangePanel.add(massRangeLabel);
+            massRangePanel.add(getMassRangeTF());
         }
-        return panelMassRange;
+        return massRangePanel;
     }
 
-    private JLabel getMassRangeLabel() {
-        if (massRangeLabel == null) {
-            massRangeLabel = new JLabel();
-            massRangeLabel.setName("massRangeLabel");
-            massRangeLabel.setText("Mass range:");
-            if(isDIA){
-                massRangeLabel.setText("Fragment Mass range:");
-            }
-        }
-        return massRangeLabel;
-    }
 
     private JTextField getMassRangeTF() {
         if (massRangeTF == null) {
             massRangeTF = new JTextField();
-            massRangeTF.setName("massRangeTF");
             massRangeTF.setToolTipText("mass range to extract with the specified tolerance");
-            if (isDIA){
-                massRangeTF.setToolTipText("Ion fragment mass range to extract with the specified tolerance");
-            }
             massRangeTF.setColumns(10);
             massRangeTF.setPreferredSize(new Dimension(massRangeTF.getPreferredSize().width, 16));
             massRangeTF.addActionListener(new ActionListener() {
@@ -129,42 +110,26 @@ public class XICExtractionPanel extends JPanel{
         return massRangeTF;
     }
 
-    private JPanel getPanelTolerance() {
-        if (panelTolerance == null) {
-            panelTolerance = new JPanel();
-            panelTolerance.setName("panelTolerance");
-            panelTolerance.setLayout(new FlowLayout(FlowLayout.LEADING));
-            panelTolerance.add(getToleranceLabel());
-            panelTolerance.add(getToleranceTF());
-            panelTolerance.add(getToleranceUnitLabel());
+    private JPanel getTolerancePanel() {
+        if (tolerancePanel == null) {
+            tolerancePanel = new JPanel();
+            tolerancePanel.setLayout(new FlowLayout(FlowLayout.LEADING));
+            JLabel toleranceLabel = new JLabel();
+            toleranceLabel.setText("+/-");
+            tolerancePanel.add(toleranceLabel);
+            tolerancePanel.add(getToleranceTF());
+            JLabel toleranceUnitLabel = new JLabel();
+            toleranceUnitLabel.setText("ppm");
+            tolerancePanel.add(toleranceUnitLabel);
             
         }
-        return panelTolerance;
-    }
-
-    private JLabel getToleranceLabel() {
-        if (toleranceLabel == null) {
-            toleranceLabel = new JLabel();
-            toleranceLabel.setName("toleranceLabel");
-            toleranceLabel.setText("+/-");
-        }
-        return toleranceLabel;
-    }
-
-   private JLabel getToleranceUnitLabel() {
-        if (toleranceUnitLabel == null) {
-            toleranceUnitLabel = new JLabel();
-            toleranceUnitLabel.setName("toleranceUnitLabel");
-            toleranceUnitLabel.setText("ppm");
-        }
-        return toleranceUnitLabel;
+        return tolerancePanel;
     }
 
     private JTextField getToleranceTF() {
         if (toleranceTF == null) {
             toleranceTF = new JTextField();
-            toleranceTF.setName("toleranceTF");
-            toleranceTF.setColumns(5);
+            toleranceTF.setColumns(3);
             toleranceTF.setPreferredSize(new Dimension(toleranceTF.getPreferredSize().width, 16));
             toleranceTF.setToolTipText("Tolerance in ppm");
             toleranceTF.addActionListener(new ActionListener() {
@@ -177,55 +142,80 @@ public class XICExtractionPanel extends JPanel{
         return toleranceTF;
     }
     
-    private JPanel getPanelParentMass() {
-        if (panelParentMassRange == null) {
-            panelParentMassRange = new JPanel();
-            panelParentMassRange.setName("panelParentMassRange");
-            panelParentMassRange.setLayout(new FlowLayout(FlowLayout.LEADING));
-            panelParentMassRange.add(getParentMassLabel());
-            panelParentMassRange.add(getParentMassTF());
+    private JPanel getFragmentMassRangePanel() {
+        if (fragmentMassRangePanel == null) {
+            fragmentMassRangePanel = new JPanel();
+            fragmentMassRangePanel.setLayout(new FlowLayout(FlowLayout.LEADING));
+            JLabel fragmentMassLabel = new JLabel();
+            fragmentMassLabel.setText("Parent Mass:");
+            fragmentMassRangePanel.add(fragmentMassLabel);
+            fragmentMassRangePanel.add(getFragmentMassRangeTF());
         }
-        return panelParentMassRange;
+        return fragmentMassRangePanel;
     }
     
-    private JLabel getParentMassLabel() {
-        if (parentMassLabel == null) {
-            parentMassLabel = new JLabel();
-            parentMassLabel.setName("parentMassLabel");
-            parentMassLabel.setText("Parent Mass:");
-        }
-        return parentMassLabel;
-    }
-
-    private JTextField getParentMassTF() {
-        if (parentMassTF == null) {
-            parentMassTF = new JTextField();
-            parentMassTF.setName("massRangeTF");
-            parentMassTF.setToolTipText("parent mass range to extract");
-            parentMassTF.setColumns(10);
-            parentMassTF.setPreferredSize(new Dimension(parentMassTF.getPreferredSize().width, 16));
-            parentMassTF.addActionListener(new ActionListener() {
+ 
+    private JTextField getFragmentMassRangeTF() {
+        if (fragmentMassRangeTF == null) {
+            fragmentMassRangeTF = new JTextField();
+            fragmentMassRangeTF.setToolTipText("parent mass range to extract");
+            fragmentMassRangeTF.setColumns(10);
+            fragmentMassRangeTF.setPreferredSize(new Dimension(fragmentMassRangeTF.getPreferredSize().width, 16));
+            fragmentMassRangeTF.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent evt) {
                     startExtraction();
                 }
             });
         }
-        return parentMassTF;
+        return fragmentMassRangeTF;
     }
     
+       private JPanel getFragmentTolerancePanel() {
+        if (fragmentTolerancePanel == null) {
+            fragmentTolerancePanel = new JPanel();
+            fragmentTolerancePanel.setLayout(new FlowLayout(FlowLayout.LEADING));
+            JLabel gramentToleranceLabel = new JLabel();
+            gramentToleranceLabel.setText("+/-");
+            fragmentTolerancePanel.add(gramentToleranceLabel);
+            fragmentTolerancePanel.add(getFragmentToleranceTF());
+            JLabel fragmentToleranceUnitLabel = new JLabel();
+            fragmentToleranceUnitLabel.setText("ppm");
+            fragmentTolerancePanel.add(fragmentToleranceUnitLabel);
+            
+        }
+        return fragmentTolerancePanel;
+    }
+
+    private JTextField getFragmentToleranceTF() {
+        if (fragmentToleranceTF == null) {
+            fragmentToleranceTF = new JTextField();
+            fragmentToleranceTF.setColumns(3);
+            fragmentToleranceTF.setPreferredSize(new Dimension(fragmentToleranceTF.getPreferredSize().width, 16));
+            fragmentToleranceTF.setToolTipText("Tolerance in ppm");
+            fragmentToleranceTF.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent evt) {
+                    startExtraction();
+                }
+            });
+        }
+        return fragmentToleranceTF;
+    }
+
 
     private void startExtraction() {
         if (massRangeTF.getText() == null || massRangeTF.getText().isEmpty()){
             return;
         }
+        MsnExtractionRequest.Builder builder = MsnExtractionRequest.builder();
         String text = massRangeTF.getText().trim();
-        double minMz = Double.NaN;
-        double maxMz = Double.NaN;
+        double firstMzValue = Double.NaN;
+        double secondMzValue = Double.NaN;
         float ppm;
         String[] masses = text.split("-");
         try{
-            minMz = Double.parseDouble(masses[0]);
+            firstMzValue = Double.parseDouble(masses[0]); // will be updated later in this method
         }catch(NumberFormatException e){
             JOptionPane.showMessageDialog(this, "The mass is incorrect: "+masses[0]);
             return;
@@ -237,64 +227,61 @@ public class XICExtractionPanel extends JPanel{
             JOptionPane.showMessageDialog(this, "The tolerance is incorrect: "+toleranceTF.getText().trim());
             return;
         }
-        if (masses.length == 1 && !isDIA) {
-            MzScopePreferences.getInstance().setMzPPMTolerance(ppm);
-            maxMz = minMz + minMz * ppm / 1e6;
-            minMz -= minMz * ppm / 1e6;
-            
-        } else if (!isDIA){
+        if (masses.length == 1) {
+            builder.setMz(firstMzValue);
+            builder.setMzTolPPM(ppm);
+        } else {
             try{
-                maxMz = Double.parseDouble(masses[1]);
+                secondMzValue = Double.parseDouble(masses[1]);
+                builder.setMinMz(firstMzValue);
+                builder.setMaxMz(secondMzValue);
             }catch(NumberFormatException e){
                 JOptionPane.showMessageDialog(this, "The max mass is incorrect: "+masses[1]);
                 return;
             }
         }
-        Double parentMz = Double.NaN;
-        if (isDIA){
-            maxMz = minMz;
-            if (parentMassTF.getText() == null || parentMassTF.getText().isEmpty() ){
-                return;
-            }
+
+        if (fragmentMassRangeTF.isEnabled() && fragmentMassRangeTF.getText() != null && !fragmentMassRangeTF.getText().isEmpty() ){
+        text = fragmentMassRangeTF.getText().trim();
+        masses = text.split("-");
+        try{
+            firstMzValue = Double.parseDouble(masses[0]); // will be updated later in this method
+        }catch(NumberFormatException e){
+            JOptionPane.showMessageDialog(this, "The mass is incorrect: "+masses[0]);
+            return;
+        }
+        try{
+            ppm = Float.parseFloat(fragmentToleranceTF.getText().trim());
+        }catch(NumberFormatException e){
+            JOptionPane.showMessageDialog(this, "The tolerance is incorrect: "+fragmentToleranceTF.getText().trim());
+            return;
+        }
+        if (masses.length == 1) {
+            builder.setFragmentMz(firstMzValue);
+            builder.setFragmentMzTolPPM(ppm);
+        } else {
             try{
-                parentMz = Double.parseDouble(parentMassTF.getText());
+                secondMzValue = Double.parseDouble(masses[1]);
+                builder.setFragmentMinMz(firstMzValue);
+                builder.setFragmentMaxMz(secondMzValue);
             }catch(NumberFormatException e){
-                JOptionPane.showMessageDialog(this, "The parent mass is incorrect: "+parentMassTF.getText().trim());
+                JOptionPane.showMessageDialog(this, "The max mass is incorrect: "+masses[1]);
                 return;
             }
         }
+
+
+        }
         
-        if (extractionExecutor != null) {
-            extractionExecutor.extractChromatogramMass(Ms1ExtractionRequest.builder().setMinMz(minMz).setMaxMz(maxMz).setMzTolPPM(ppm).setParentMz(parentMz).build());
+        IRawFileViewer currentViewer = appController.getCurrentRawFileViewer();
+        if (currentViewer != null) {
+            currentViewer.extractAndDisplayChromatogram(builder.build(), currentViewer.getXicModeDisplay(), null);
         }
     }
 
     public void setDIAEnabled(boolean diaEnabled){
-        this.isDIA = diaEnabled;
-        updatePanel();
+        getFragmentMassRangeTF().setEnabled(diaEnabled);
+        getFragmentToleranceTF().setEditable(diaEnabled);
     }
-    
-    private void updatePanel(){
-        boolean hasDIAPanel = false;
-        for (Component cmp : mainPanel.getComponents()) {
-            if (cmp.getName().equals("panelParentMassRange")){
-                hasDIAPanel = true;
-                break;
-            }
-        }
-        if (isDIA ){
-            if (!hasDIAPanel){
-                mainPanel.add(getPanelParentMass());
-            }
-            massRangeLabel.setText("Fragment Mass range:");
-        }else{
-            if (hasDIAPanel){
-                mainPanel.remove(getPanelParentMass());
-            }
-            massRangeLabel.setText("Mass range:");
-        }
-        mainPanel.revalidate();
-        mainPanel.repaint();
-    }
-    
+        
 }

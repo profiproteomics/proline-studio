@@ -7,7 +7,7 @@ package fr.proline.mzscope.ui;
 
 import fr.proline.mzscope.model.Chromatogram;
 import fr.proline.mzscope.model.IFeature;
-import fr.proline.mzscope.model.Ms1ExtractionRequest;
+import fr.proline.mzscope.model.MsnExtractionRequest;
 import fr.proline.mzscope.model.MzScopePreferences;
 import fr.proline.mzscope.ui.event.AxisRangeChromatogramListener;
 import fr.proline.mzscope.ui.model.ChromatogramTableModel;
@@ -149,7 +149,7 @@ public class ChromatogramPanel extends JPanel implements PlotPanelListener {
 
    public void displayFeature(final IFeature f) {
       double ppm = MzScopePreferences.getInstance().getMzPPMTolerance();
-      final Ms1ExtractionRequest.Builder builder = Ms1ExtractionRequest.builder().setMzTolPPM((float) ppm);
+      final MsnExtractionRequest.Builder builder = MsnExtractionRequest.builder().setMzTolPPM((float) ppm);
       builder.setMaxMz(f.getMz() + f.getMz() * ppm / 1e6).setMinMz(f.getMz() - f.getMz() * ppm / 1e6);
       PlotLinear chromatogramPlot = chromatogramPlots.isEmpty() ? null : chromatogramPlots.get(0);
       if (chromatogramPlot != null) {

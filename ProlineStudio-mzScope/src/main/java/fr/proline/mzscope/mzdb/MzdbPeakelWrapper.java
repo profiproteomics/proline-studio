@@ -7,7 +7,7 @@
 package fr.proline.mzscope.mzdb;
 
 import fr.proline.mzscope.model.IFeature;
-import fr.profi.mzdb.model.Feature;
+import fr.profi.mzdb.model.Peakel;
 import fr.proline.mzscope.model.IRawFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,69 +16,79 @@ import org.slf4j.LoggerFactory;
  *
  * @author CB205360
  */
-public class MzdbFeatureWrapper implements IFeature {
+public class MzdbPeakelWrapper implements IFeature {
 
-    final private static Logger logger = LoggerFactory.getLogger(MzdbFeatureWrapper.class);
+    final private static Logger logger = LoggerFactory.getLogger(MzdbPeakelWrapper.class);
     
-    private final Feature mzdbFeature;
+    private final Peakel peakel;
     //TODO set to final as soon as setRawFile will remove
     private IRawFile rawFile;
     private final int msLevel;
+    private double parentMz;
     
-   public MzdbFeatureWrapper(Feature mzdbFeature, IRawFile rawfile, int msLevel) {
-      this.mzdbFeature = mzdbFeature;
+    public MzdbPeakelWrapper(Peakel mzdbPeakel, IRawFile rawfile) {
+      this(mzdbPeakel,rawfile,1);
+   }
+    
+    public MzdbPeakelWrapper(Peakel mzdbPeakel, IRawFile rawfile, double parentMz) {
+      this(mzdbPeakel,rawfile,2);
+      this.parentMz = parentMz;
+   }
+    
+   public MzdbPeakelWrapper(Peakel mzdbPeakel, IRawFile rawfile, int msLevel) {
+      this.peakel = mzdbPeakel;
       this.rawFile = rawfile;
       this.msLevel = msLevel;
    }
 
    @Override
    public float getArea() {
-      return mzdbFeature.getArea();
+      return peakel.getArea();
    }
 
    @Override
    public int getScanCount() {
-      return mzdbFeature.getMs1Count();
+      return peakel.getSpectrumIds().length();
    }
 
    @Override
    public int getPeakelsCount() {
-      return mzdbFeature.getPeakelsCount();
+      return 1;
    }
 
    @Override
    public double getMz() {
-      return mzdbFeature.getMz();
+      return peakel.getMz();
    }
 
    @Override
    public int getCharge() {
-      return mzdbFeature.getCharge();
+      return 0;
    }
 
    @Override
    public float getElutionTime() {
-      return mzdbFeature.getElutionTime();
+      return peakel.getElutionTime();
    }
    
    @Override
    public float getDuration() {
-      return mzdbFeature.getBasePeakel().calcDuration();
+      return peakel.calcDuration();
    }
     
    @Override
    public float getApexIntensity() {
-      return mzdbFeature.getBasePeakel().getApexIntensity();
+      return peakel.getApexIntensity();
    }
    
    @Override
    public float getFirstElutionTime() {
-      return mzdbFeature.getBasePeakel().getFirstElutionTime();
+      return peakel.getFirstElutionTime();
    }
 
    @Override
    public float getLastElutionTime() {
-      return mzdbFeature.getBasePeakel().getLastElutionTime();
+      return peakel.getLastElutionTime();
    }
 
     @Override
@@ -96,9 +106,8 @@ public class MzdbFeatureWrapper implements IFeature {
         return msLevel;
     }
 
-    @Override
     public double getParentMz() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return parentMz;
     }
    
 }

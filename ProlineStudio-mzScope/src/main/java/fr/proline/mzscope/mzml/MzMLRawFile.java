@@ -1,11 +1,11 @@
 package fr.proline.mzscope.mzml;
 
-import fr.profi.mzdb.model.Feature;
 import fr.proline.mzscope.model.Chromatogram;
 import fr.proline.mzscope.model.FeaturesExtractionRequest;
 import fr.proline.mzscope.model.IExportParameters;
+import fr.proline.mzscope.model.IFeature;
 import fr.proline.mzscope.model.IRawFile;
-import fr.proline.mzscope.model.Ms1ExtractionRequest;
+import fr.proline.mzscope.model.MsnExtractionRequest;
 import fr.proline.mzscope.model.Spectrum;
 import java.io.File;
 import java.util.List;
@@ -59,7 +59,7 @@ public class MzMLRawFile implements IRawFile {
    }
     
    @Override
-   public Chromatogram getXIC(Ms1ExtractionRequest params) {
+   public Chromatogram getXIC(MsnExtractionRequest params) {
       Chromatogram chromatogram  = XICExtractor.extract(scans, (float)params.getMinMz(), (float)params.getMaxMz());      
       return chromatogram;      
    }
@@ -98,7 +98,7 @@ public class MzMLRawFile implements IRawFile {
    }
 
    @Override
-   public List<Feature> extractFeatures(FeaturesExtractionRequest params) {
+   public List<IFeature> extractFeatures(FeaturesExtractionRequest params) {
       throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
    }
 

@@ -3,7 +3,7 @@ package fr.proline.mzscope.ui;
 import fr.proline.mzscope.model.Chromatogram;
 import fr.proline.mzscope.model.IFeature;
 import fr.proline.mzscope.model.IRawFile;
-import fr.proline.mzscope.model.Ms1ExtractionRequest;
+import fr.proline.mzscope.model.MsnExtractionRequest;
 import fr.proline.mzscope.model.MzScopeCallback;
 import fr.proline.mzscope.model.MzScopePreferences;
 import fr.proline.mzscope.utils.MzScopeConstants.DisplayMode;
@@ -66,7 +66,7 @@ public class MultiRawFilePanel extends AbstractRawFilePanel {
     }
 
     @Override
-    public void extractAndDisplayChromatogram(final Ms1ExtractionRequest params, DisplayMode mode, MzScopeCallback callback) {
+    public void extractAndDisplayChromatogram(final MsnExtractionRequest params, DisplayMode mode, MzScopeCallback callback) {
        // in this implementation displayMode is ignored : always REPLACE since we will extract one Chromatogram per RawFile
         SwingWorker worker = new SwingWorker<Integer, Chromatogram>() {
             int count = 0;
@@ -188,7 +188,7 @@ public class MultiRawFilePanel extends AbstractRawFilePanel {
             protected Integer doInBackground() throws Exception {
                 //return getCurrentRawfile().getXIC(minMz, maxMz);
                 for (IRawFile rawFile : rawFiles) {
-                    Ms1ExtractionRequest params = Ms1ExtractionRequest.builder().setMaxMz(maxMz).setMinMz(minMz).build();
+                    MsnExtractionRequest params = MsnExtractionRequest.builder().setMaxMz(maxMz).setMinMz(minMz).build();
                     Chromatogram c = rawFile.getXIC(params);
                     count++;
                     publish(c);

@@ -5,12 +5,11 @@
  */
 package fr.proline.mzscope.ui;
 
-import fr.proline.mzscope.MzScope;
 import fr.proline.mzscope.model.Chromatogram;
 import fr.proline.mzscope.ui.model.ExtractionResultsTableModel;
 import fr.proline.mzscope.model.ExtractionResult;
 import fr.proline.mzscope.model.IRawFile;
-import fr.proline.mzscope.model.Ms1ExtractionRequest;
+import fr.proline.mzscope.model.MsnExtractionRequest;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.markerbar.MarkerContainerPanel;
 import fr.proline.studio.table.CompoundTableModel;
@@ -58,22 +57,19 @@ public class ExtractionResultsPanel extends JPanel {
     private ExtractionResultsTable extractionResultsTable;
     private SwingWorker extractionWorker;
     
-    private IExtractionResults extractionResults;
-    
+    private IExtractionResultsViewer extractionResultsViewer;
     private Map<ExtractionResult, Map<IRawFile, Chromatogram>> mapChromatogramByExtraction;
 
     private JFileChooser m_fchooser;
     private MarkerContainerPanel m_markerContainerPanel;
     private ExportButton m_exportButton;
     
-    
     public final static int TOOLBAR_ALIGN_VERTICAL = 0;
     public final static int TOOLBAR_ALIGN_HORIZONTAL = 1;
     private int m_toolbarAlign = TOOLBAR_ALIGN_HORIZONTAL;
 
-    
-    public ExtractionResultsPanel(IExtractionResults extractionResults, int align) {
-        this.extractionResults = extractionResults;
+    public ExtractionResultsPanel(IExtractionResultsViewer extractionResults, int align) {
+        this.extractionResultsViewer = extractionResults;
         m_toolbarAlign = align;
         initComponents();
 
@@ -204,9 +200,9 @@ public class ExtractionResultsPanel extends JPanel {
     }
 
     private void setExtractionsValues(List<Double> values) {
-        List<Ms1ExtractionRequest> list = new ArrayList<>();
+        List<MsnExtractionRequest> list = new ArrayList<>();
         for (Double v : values) {
-            list.add(Ms1ExtractionRequest.builder().setMzTolPPM(10.0f).setMz(v).build());
+            list.add(MsnExtractionRequest.builder().setMzTolPPM(10.0f).setMz(v).build());
         }
         setExtractions(list);
     }
@@ -215,9 +211,9 @@ public class ExtractionResultsPanel extends JPanel {
         return extractions;
     }
 
-    public void setExtractions(List<Ms1ExtractionRequest> extractionRequests) {
+    public void setExtractions(List<MsnExtractionRequest> extractionRequests) {
         List<ExtractionResult> results = new ArrayList<>();
-        for (Ms1ExtractionRequest request : extractionRequests) {
+        for (MsnExtractionRequest request : extractionRequests) {
             ExtractionResult extractionResult = new ExtractionResult(request);
             results.add(extractionResult);
         }
@@ -307,11 +303,11 @@ public class ExtractionResultsPanel extends JPanel {
                         if (nbFiles == 1){
                             // view singleRawFile
                             if (mapChr.containsKey(rawfiles.get(0))){
-                                extractionResults.displayChromatogramAsSingleView(rawfiles.get(0), mapChr.get(rawfiles.get(0)));
+                                extractionResultsViewer.displayChromatogramAsSingleView(rawfiles.get(0), mapChr.get(rawfiles.get(0)));
                             }
                         }else{
                             // view all file
-                            extractionResults.displayChromatogramAsMultiView(mapChr);
+                            extractionResultsViewer.displayChromatogramAsMultiView(mapChr);
                         }
                     }
                 }
@@ -348,19 +344,19 @@ public class ExtractionResultsPanel extends JPanel {
 
     }
 
-    private static List<Ms1ExtractionRequest> buildIRTRequest() {
-        List<Ms1ExtractionRequest> list = new ArrayList<>();
-        list.add(Ms1ExtractionRequest.builder().setMzTolPPM(10.0f).setMz(487.257).build());
-        list.add(Ms1ExtractionRequest.builder().setMzTolPPM(10.0f).setMz(547.297).build());
-        list.add(Ms1ExtractionRequest.builder().setMzTolPPM(10.0f).setMz(622.853).build());
-        list.add(Ms1ExtractionRequest.builder().setMzTolPPM(10.0f).setMz(636.869).build());
-        list.add(Ms1ExtractionRequest.builder().setMzTolPPM(10.0f).setMz(644.822).build());
-        list.add(Ms1ExtractionRequest.builder().setMzTolPPM(10.0f).setMz(669.838).build());
-        list.add(Ms1ExtractionRequest.builder().setMzTolPPM(10.0f).setMz(683.827).build());
-        list.add(Ms1ExtractionRequest.builder().setMzTolPPM(10.0f).setMz(683.853).build());
-        list.add(Ms1ExtractionRequest.builder().setMzTolPPM(10.0f).setMz(699.338).build());
-        list.add(Ms1ExtractionRequest.builder().setMzTolPPM(10.0f).setMz(726.835).build());
-        list.add(Ms1ExtractionRequest.builder().setMzTolPPM(10.0f).setMz(776.929).build());
+    private static List<MsnExtractionRequest> buildIRTRequest() {
+        List<MsnExtractionRequest> list = new ArrayList<>();
+        list.add(MsnExtractionRequest.builder().setMzTolPPM(10.0f).setMz(487.257).build());
+        list.add(MsnExtractionRequest.builder().setMzTolPPM(10.0f).setMz(547.297).build());
+        list.add(MsnExtractionRequest.builder().setMzTolPPM(10.0f).setMz(622.853).build());
+        list.add(MsnExtractionRequest.builder().setMzTolPPM(10.0f).setMz(636.869).build());
+        list.add(MsnExtractionRequest.builder().setMzTolPPM(10.0f).setMz(644.822).build());
+        list.add(MsnExtractionRequest.builder().setMzTolPPM(10.0f).setMz(669.838).build());
+        list.add(MsnExtractionRequest.builder().setMzTolPPM(10.0f).setMz(683.827).build());
+        list.add(MsnExtractionRequest.builder().setMzTolPPM(10.0f).setMz(683.853).build());
+        list.add(MsnExtractionRequest.builder().setMzTolPPM(10.0f).setMz(699.338).build());
+        list.add(MsnExtractionRequest.builder().setMzTolPPM(10.0f).setMz(726.835).build());
+        list.add(MsnExtractionRequest.builder().setMzTolPPM(10.0f).setMz(776.929).build());
         return list;
     }
 }

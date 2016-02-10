@@ -15,18 +15,20 @@ public class ExtractionRequest {
 
     public static class Builder<T extends Builder<T>> {
 
+        double mz = 0.0;
         double minMz = 0.0;
         double maxMz = 0.0;
+
         float elutionTime = -1.0f;
         float elutionTimeLowerBound = -1.0f;
         float elutionTimeUpperBound = -1.0f;
 
-        double parentMz = 0.0;
-        double minParentMz = 0.0;
-        double maxParentMz = 0.0;
+        double fragmentMz = -1.0;
+        double fragmentMinMz = -1.0;
+        double fragmentMaxMz = -1.0;
 
-        double mz = 0.0;
-
+        int msLevel = 1;
+         
         @SuppressWarnings("unchecked")  // Smell 1
         protected T self() {
             return (T) this;            // Unchecked cast!
@@ -42,18 +44,18 @@ public class ExtractionRequest {
             return self();
         }
 
-        public T setParentMz(double parentMz) {
-            this.parentMz = parentMz;
+        public T setFragmentMz(double parentMz) {
+            this.fragmentMz = parentMz;
             return self();
         }
-        
-        public T setMinParentMz(double minParentMz) {
-            this.minParentMz = minParentMz;
+
+        public T setFragmentMinMz(double minMz) {
+            this.fragmentMinMz = minMz;
             return self();
         }
-        
-        public T setMaxParentMz(double maxParentMz) {
-            this.maxParentMz = maxParentMz;
+
+        public T setFragmentMaxMz(double maxMz) {
+            this.fragmentMaxMz = maxMz;
             return self();
         }
 
@@ -72,6 +74,10 @@ public class ExtractionRequest {
             return self();
         }
 
+        public T setMsLevel(int level) {
+            this.msLevel = level;
+            return self();
+        }
         public double getMinMz() {
             return minMz;
         }
@@ -84,16 +90,16 @@ public class ExtractionRequest {
             return mz;
         }
 
-        public double getParentMz() {
-            return parentMz;
+        public double getFragmentMz() {
+            return fragmentMz;
         }
 
-        public double getMinParentMz() {
-            return minParentMz;
+        public double getFragmentMinMz() {
+            return fragmentMinMz;
         }
 
-        public double getMaxParentMz() {
-            return maxParentMz;
+        public double getFragmentMaxMz() {
+            return fragmentMaxMz;
         }
 
         public ExtractionRequest build() {
@@ -103,27 +109,30 @@ public class ExtractionRequest {
 
     private final double minMz;
     private final double maxMz;
-
     private final double mz;
+    
     // values in seconds !! 
     private final float elutionTimeLowerBound;
     private final float elutionTimeUpperBound;
     private final float elutionTime;
 
-    private final double parentMz;
-    private final double minParentMz;
-    private final double maxParentMz;
+    private final double fragmentMz;
+    private final double fragmentMinMz;
+    private final double fragmentMaxMz;
 
+    private final int msLevel;
+    
     protected ExtractionRequest(Builder builder) {
-        this.maxMz = builder.maxMz;
-        this.minMz = builder.minMz;
+        this.maxMz = builder.getMaxMz();
+        this.minMz = builder.getMinMz();
         this.elutionTimeLowerBound = builder.elutionTimeLowerBound;
         this.elutionTimeUpperBound = builder.elutionTimeUpperBound;
         this.elutionTime = builder.elutionTime;
-        this.mz = builder.mz;
-        this.parentMz = builder.parentMz;
-        this.minParentMz = builder.minParentMz;
-        this.maxParentMz = builder.maxParentMz;
+        this.mz = builder.getMz();
+        this.fragmentMz = builder.getFragmentMz();
+        this.fragmentMinMz = builder.getFragmentMinMz();
+        this.fragmentMaxMz = builder.getFragmentMaxMz();
+        this.msLevel = builder.msLevel;
     }
 
     @Override
@@ -160,16 +169,24 @@ public class ExtractionRequest {
         return elutionTime;
     }
 
-    public double getParentMz() {
-        return parentMz;
+    public double getFragmentMz() {
+        return fragmentMz;
     }
 
-    public double getMinParentMz() {
-        return minParentMz;
+    public double getFragmentMinMz() {
+        return fragmentMinMz;
     }
 
-    public double getMaxParentMz() {
-        return maxParentMz;
+    public double getFragmentMaxMz() {
+        return fragmentMaxMz;
+    }
+
+    public int getMsLevel() {
+        return msLevel;
+    }
+
+    public boolean isMsnExtraction() {
+        return msLevel > 1;
     }
 
 }

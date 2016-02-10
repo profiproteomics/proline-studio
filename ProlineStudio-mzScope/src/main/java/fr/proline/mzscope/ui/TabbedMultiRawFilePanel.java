@@ -3,7 +3,7 @@ package fr.proline.mzscope.ui;
 import fr.proline.mzscope.model.Chromatogram;
 import fr.proline.mzscope.model.IFeature;
 import fr.proline.mzscope.model.IRawFile;
-import fr.proline.mzscope.model.Ms1ExtractionRequest;
+import fr.proline.mzscope.model.MsnExtractionRequest;
 import fr.proline.mzscope.model.MzScopeCallback;
 import fr.proline.mzscope.model.Spectrum;
 import fr.proline.mzscope.ui.event.AxisRangeChromatogramListener;
@@ -38,7 +38,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author CB205360
  */
-public class TabbedMultiRawFilePanel extends JPanel implements IRawFilePanel {
+public class TabbedMultiRawFilePanel extends JPanel implements IRawFileViewer {
 
     final private static Logger logger = LoggerFactory.getLogger(TabbedMultiRawFilePanel.class);
 
@@ -258,7 +258,7 @@ public class TabbedMultiRawFilePanel extends JPanel implements IRawFilePanel {
     }
 
     @Override
-    public void extractAndDisplayChromatogram(final Ms1ExtractionRequest params, DisplayMode mode, MzScopeCallback callback) {
+    public void extractAndDisplayChromatogram(final MsnExtractionRequest params, DisplayMode mode, MzScopeCallback callback) {
         // in this implementation displayMode is ignored : always REPLACE since we will extract one Chromatogram per RawFile
         SwingWorker worker = new SwingWorker<Integer, Chromatogram>() {
             int count = 0;
@@ -500,6 +500,11 @@ public class TabbedMultiRawFilePanel extends JPanel implements IRawFilePanel {
                 }
             }
         }
+    }
+
+    @Override
+    public DisplayMode getXicModeDisplay() {
+        return DisplayMode.REPLACE;
     }
 
 }

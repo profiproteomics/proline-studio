@@ -4,22 +4,17 @@ package fr.proline.mzscope.model;
  *
  * @author CB205360
  */
-public class FeaturesExtractionRequest extends ExtractionRequest {
+public class FeaturesExtractionRequest extends MsnExtractionRequest {
 
    public enum ExtractionMethod {
       EXTRACT_MS2_FEATURES, DETECT_PEAKELS, DETECT_FEATURES
    };
 
-   public static class Builder<T extends Builder<T>> extends ExtractionRequest.Builder<T> {
+   public static class Builder<T extends Builder<T>> extends MsnExtractionRequest.Builder<T> {
 
-      float mzTolPPM = 10.0f;
       ExtractionMethod extractionMethod;
       boolean removeBaseline;
-
-      public T setMzTolPPM(float mzTolPPM) {
-         this.mzTolPPM = mzTolPPM;
-         return self();
-      }
+     
 
       public T setExtractionMethod(ExtractionMethod extractionMethod) {
          this.extractionMethod = extractionMethod;
@@ -30,11 +25,7 @@ public class FeaturesExtractionRequest extends ExtractionRequest {
          this.removeBaseline = removeBaseline;
          return self();
       }
-
-      public float getMzTolPPM() {
-         return mzTolPPM;
-      }
-      
+       
       public FeaturesExtractionRequest build() {
             return new FeaturesExtractionRequest(this);
       }
@@ -46,13 +37,10 @@ public class FeaturesExtractionRequest extends ExtractionRequest {
    }
 
    private ExtractionMethod extractionMethod;
-   private  float mzTolPPM = 10.0f;
-   // algorithm extraction configurable specificities
    private boolean removeBaseline;
 
    protected FeaturesExtractionRequest(Builder builder) {
       super(builder);
-      this.mzTolPPM = builder.mzTolPPM;
       this.extractionMethod = builder.extractionMethod;
       this.removeBaseline = builder.removeBaseline;
    } 
@@ -60,15 +48,10 @@ public class FeaturesExtractionRequest extends ExtractionRequest {
    public ExtractionMethod getExtractionMethod() {
       return extractionMethod;
    }
-
-   public float getMzTolPPM() {
-      return mzTolPPM;
-   }
-
+   
    public boolean isRemoveBaseline() {
       return removeBaseline;
    }
-   
    
    public String getExtractionParamsString(){
        StringBuilder sb = new StringBuilder();
@@ -91,7 +74,7 @@ public class FeaturesExtractionRequest extends ExtractionRequest {
        sb.append(em);
        sb.append(": <br/>");
        sb.append("m/z tolerance (ppm): ");
-       sb.append(Float.toString(mzTolPPM));
+       sb.append(Float.toString(getMzTolPPM()));
        sb.append("<br/>");
        if (isRemoveBaseline()){
            sb.append("Use Peakels baseline remover <br/>");

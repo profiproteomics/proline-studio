@@ -25,10 +25,19 @@ public interface IFeature {
 
    float getLastElutionTime();
 
-   int getMs1Count();
+   int getScanCount();
 
    double getMz();
 
    int getPeakelsCount();
+   
+   IRawFile getRawFile();
+   
+   // TODO : to be removed as soon as ThreadedMzdbRawFile is removed
+   void setRawFile(IRawFile rawfile);
+   
+   int getMsLevel();
+   
+   double getParentMz();
    
 }

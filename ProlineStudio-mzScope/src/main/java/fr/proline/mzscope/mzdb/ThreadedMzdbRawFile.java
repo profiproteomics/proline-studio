@@ -1,11 +1,11 @@
 package fr.proline.mzscope.mzdb;
 
-import fr.profi.mzdb.model.Feature;
 import fr.proline.mzscope.model.Chromatogram;
 import fr.proline.mzscope.model.FeaturesExtractionRequest;
 import fr.proline.mzscope.model.IExportParameters;
+import fr.proline.mzscope.model.IFeature;
 import fr.proline.mzscope.model.IRawFile;
-import fr.proline.mzscope.model.Ms1ExtractionRequest;
+import fr.proline.mzscope.model.MsnExtractionRequest;
 import fr.proline.mzscope.model.Spectrum;
 import java.io.File;
 import java.util.List;
@@ -141,13 +141,15 @@ public class ThreadedMzdbRawFile implements IRawFile {
    }
 
    @Override
-   public List<Feature> extractFeatures(final FeaturesExtractionRequest params) {
+   public List<IFeature> extractFeatures(final FeaturesExtractionRequest params) {
      try {
          logger.info("extract feature starting");
-         Future<List<Feature>> future = service.submit(new Callable<List<Feature>>() {
+         Future<List<IFeature>> future = service.submit(new Callable<List<IFeature>>() {
             @Override
-            public List<Feature> call() {
-               return mzdbRawFile.extractFeatures(params);
+            public List<IFeature> call() {
+               List<IFeature> result = mzdbRawFile.extractFeatures(params);
+               result.stream().forEach( f -> f.setRawFile(ThreadedMzdbRawFile.this));
+               return result;
             }
          });
          logger.info("waiting for feature extraction ... ");
@@ -175,7 +177,7 @@ public class ThreadedMzdbRawFile implements IRawFile {
    }
    
    @Override
-    public Chromatogram getXIC(final Ms1ExtractionRequest params) {
+    public Chromatogram getXIC(final MsnExtractionRequest params) {
       try {
          return service.submit(new Callable<Chromatogram>() {
             @Override

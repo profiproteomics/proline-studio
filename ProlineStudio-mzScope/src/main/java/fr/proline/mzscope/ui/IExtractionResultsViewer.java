@@ -13,7 +13,7 @@ import java.util.Map;
  *
  * @author MB243701
  */
-public interface IExtractionResults {
+public interface IExtractionResultsViewer {
     
     public void displayChromatogramAsSingleView(IRawFile rawfile, Chromatogram c);
     

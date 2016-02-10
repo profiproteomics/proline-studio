@@ -27,9 +27,10 @@ import fr.proline.mzscope.model.Chromatogram;
 import fr.proline.mzscope.model.FeaturesExtractionRequest;
 import fr.proline.mzscope.model.IExportParameters;
 import fr.proline.mzscope.model.IExportParameters.ExportType;
+import fr.proline.mzscope.model.IFeature;
 import fr.proline.mzscope.model.Spectrum;
 import fr.proline.mzscope.model.IRawFile;
-import fr.proline.mzscope.model.Ms1ExtractionRequest;
+import fr.proline.mzscope.model.MsnExtractionRequest;
 import fr.proline.mzscope.ui.MgfExportParameters;
 import fr.proline.mzscope.ui.ScanHeaderExportParameters;
 import fr.proline.mzscope.ui.ScanHeaderType;
@@ -61,7 +62,6 @@ public class MzdbRawFile implements IRawFile {
     private static final Logger logger = LoggerFactory.getLogger(MzdbRawFile.class);
     final private static DecimalFormat massFormatter = new DecimalFormat("0.####");
     final private static DecimalFormat timeFormatter = new DecimalFormat("0.00");
-    
 
     private final File mzDbFile;
     private MzDbReader reader;
@@ -165,25 +165,28 @@ public class MzdbRawFile implements IRawFile {
      * @return
      */
     @Override
-    public Chromatogram getXIC(Ms1ExtractionRequest params) {
+    public Chromatogram getXIC(MsnExtractionRequest params) {
         long start = System.currentTimeMillis();
         Chromatogram chromatogram = null;
+        logger.info("Extract XIC with params : " + params.toString());
+
         try {
             Peak[] peaks;
-            if (isDIAFile){
-                // TODO: tol in Da?
-                peaks = reader.getMsnXIC(params.getParentMz(), params.getMinMz(), 0.05, params.getElutionTimeLowerBound(), params.getElutionTimeUpperBound(), params.getMethod());
-            }else{
+            if (params.getMsLevel() > 1){
+                peaks = reader.getMsnXIC(params.getMz(), params.getFragmentMz(), params.getFragmentMzTolPPM()*params.getFragmentMz()/1e6, params.getElutionTimeLowerBound(), params.getElutionTimeUpperBound(), params.getMethod());
+            } else {
                 peaks = reader.getMsXicInMzRtRanges(params.getMinMz(), params.getMaxMz(), params.getElutionTimeLowerBound(), params.getElutionTimeUpperBound(), params.getMethod());
             }
-            chromatogram = createChromatoFromPeaks(peaks);
-            chromatogram.minMz = params.getMinMz();
-            chromatogram.maxMz = params.getMaxMz();
+            chromatogram = createChromatoFromPeaks(peaks, params.getMsLevel() );
+            chromatogram.minMz = (params.getMsLevel() == 1) ? params.getMinMz() : params.getFragmentMinMz();
+            chromatogram.maxMz = (params.getMsLevel() == 1) ? params.getMaxMz() : params.getFragmentMaxMz();
             StringBuilder builder = new StringBuilder("Mass range: ");
-            builder.append(massFormatter.format(params.getMinMz())).append("-").append(massFormatter.format(params.getMaxMz()));
+            builder.append(massFormatter.format(chromatogram.minMz)).append("-").append(massFormatter.format(chromatogram.maxMz));
+            if (params.getMsLevel() > 1) {
+                builder.append(" (").append(massFormatter.format(params.getMz()));
+            }
             chromatogram.title = builder.toString();
-            logger.info("mzdb chromatogram extracted : {} - {} over time {} - {} in {} ms", massFormatter.format(params.getMinMz()),
-                    massFormatter.format(params.getMaxMz()), params.getElutionTimeLowerBound(), params.getElutionTimeUpperBound(), (System.currentTimeMillis() - start));
+            logger.info("mzdb chromatogram extracted in {} ms", (System.currentTimeMillis() - start));
 
         } catch (SQLiteException | StreamCorruptedException e) {
             logger.error("Error during chromatogram extraction", e);
@@ -191,7 +194,7 @@ public class MzdbRawFile implements IRawFile {
         return chromatogram;
     }
 
-    private Chromatogram createChromatoFromPeaks(Peak[] peaks) {
+    private Chromatogram createChromatoFromPeaks(Peak[] peaks, int msLevel) {
         Chromatogram chromatogram = null;
         List<Double> xAxisData = new ArrayList<>(peaks.length);
         List<Double> yAxisData = new ArrayList<>(peaks.length);
@@ -199,11 +202,11 @@ public class MzdbRawFile implements IRawFile {
             int previousSpectrumId = (int) peaks[0].getLcContext().getSpectrumId();
             for (Peak peak : peaks) {
                 int spectrumId = (int) peak.getLcContext().getSpectrumId();
-                if (previousSpectrumId != getPreviousSpectrumId(spectrumId, 1)) {
+                if ((msLevel == 1) && (previousSpectrumId != getPreviousSpectrumId(spectrumId, msLevel))) {
                     // there is a gap between peaks, add 0 values after the previous peak and before this one
-                    xAxisData.add(reader.getSpectrumHeaderById().get((long) getNextSpectrumId(previousSpectrumId, 1)).getElutionTime() / 60.0);
+                    xAxisData.add(reader.getSpectrumHeaderById().get((long) getNextSpectrumId(previousSpectrumId, msLevel)).getElutionTime() / 60.0);
                     yAxisData.add(0.0);
-                    xAxisData.add(reader.getSpectrumHeaderById().get((long) getPreviousSpectrumId(spectrumId, 1)).getElutionTime() / 60.0);
+                    xAxisData.add(reader.getSpectrumHeaderById().get((long) getPreviousSpectrumId(spectrumId, msLevel)).getElutionTime() / 60.0);
                     yAxisData.add(0.0);
                 }
                 double rt = peak.getLcContext().getElutionTime() / 60.0;
@@ -222,7 +225,7 @@ public class MzdbRawFile implements IRawFile {
     }
 
     @Override
-    public List<Feature> extractFeatures(FeaturesExtractionRequest params) {
+    public List<IFeature> extractFeatures(FeaturesExtractionRequest params) {
         switch (params.getExtractionMethod()) {
             case EXTRACT_MS2_FEATURES:
                 return extractFeaturesFromMs2(params.getMzTolPPM());
@@ -234,8 +237,8 @@ public class MzdbRawFile implements IRawFile {
         return null;
     }
 
-    private List<Feature> detectFeatures(float mzTolPPM, double minMz, double maxMz) {
-        List<Feature> result = new ArrayList<>();
+    private List<IFeature> detectFeatures(float mzTolPPM, double minMz, double maxMz) {
+        List<IFeature> result = new ArrayList<>();
         FeatureDetectorConfig detectorConfig = new FeatureDetectorConfig(1, mzTolPPM, 5, new SmartPeakelFinderConfig(5, 3, false, 10, false, true));
         MzDbFeatureDetector detector = new MzDbFeatureDetector(reader, detectorConfig);
         try {
@@ -276,8 +279,8 @@ public class MzdbRawFile implements IRawFile {
       logger.info("Real bounds : " + min + " - " + max);
    }
     
-    private List<Feature> deisotopePeakels(Peakel[] peakels, float mzTolPPM) throws StreamCorruptedException, SQLiteException {
-        List<Feature> result = new ArrayList<>();
+    private List<IFeature> deisotopePeakels(Peakel[] peakels, float mzTolPPM) throws StreamCorruptedException, SQLiteException {
+        List<IFeature> result = new ArrayList<>();
         boolean[] assigned = new boolean[peakels.length];
         Arrays.fill(assigned, false);
         Pair<Double, Integer> peakelIndexesByMz[] = new Pair[peakels.length];
@@ -322,7 +325,7 @@ public class MzdbRawFile implements IRawFile {
                 }
 //               logger.info("Creates feature with "+l.size()+" peakels at mz="+l.get(0).getMz()+ " from peakel "+peakels[k].getMz()+ " at "+peakels[k].getApexElutionTime()/60.0);
                 Feature feature = new Feature(l.get(0).getMz(), bestPattern.charge(), JavaConverters.asScalaBufferConverter(l).asScala(), true);
-                result.add(feature);
+                result.add(new MzdbFeatureWrapper(feature, this, 1));
             }
         }
 
@@ -330,45 +333,53 @@ public class MzdbRawFile implements IRawFile {
         return result;
     }
 
-    private List<Feature> deisotopePeakelsV2(Peakel[] peakels, float mzTolPPM) {
-        MzDbFeatureDetector detector = new MzDbFeatureDetector(reader, new FeatureDetectorConfig(1, mzTolPPM, 3, new SmartPeakelFinderConfig(5, 3, false, 10, false, true)));
-        Feature[] result = detector._deisotopePeakelsV2(peakels);
-        return Arrays.asList(result);
-    }
+    private List<IFeature> detectPeakels(FeaturesExtractionRequest params) {
 
-    private List<Feature> detectPeakels(FeaturesExtractionRequest params) {
-        List<Feature> result = new ArrayList<>();
-        int msLevel = 1;
-        FeatureDetectorConfig detectorConfig = new FeatureDetectorConfig(msLevel, params.getMzTolPPM(), 5, new SmartPeakelFinderConfig(5, 3, false, 10, false, params.isRemoveBaseline()));
-        // hack : change SmartPeakelFinder configuration that will be used by the UnsupervisedPeakelDetector
+        List<IFeature> result = new ArrayList<>();
         logger.info("Extract peakels with params : " + params.toString());
-        MzDbFeatureDetector detector = new MzDbFeatureDetector(reader, detectorConfig);
+
         try {
             Iterator<RunSlice> runSlices;
-            if (params.getMinMz() == 0 && params.getMaxMz() == 0) {
-                if(isDIAFile){
-                    runSlices = getMzDbReader().getLcMsnRunSliceIterator(params.getMinParentMz(), params.getMaxParentMz());
+            if (params.getMinMz() <= 0 && params.getMaxMz() <= 0) {
+                if(params.isMsnExtraction()){
+                    runSlices = getMzDbReader().getLcMsnRunSliceIterator(params.getMinMz(), params.getMaxMz());
                 }else{
                     runSlices = getMzDbReader().getLcMsRunSliceIterator();
                 }
             } else {
-                if (isDIAFile){
-                    runSlices = getMzDbReader().getLcMsnRunSliceIterator(params.getMinParentMz(), params.getMaxParentMz(), params.getMinMz(), params.getMaxMz());
+                if (params.isMsnExtraction()){
+                    if (params.getFragmentMinMz() <= 0 && params.getFragmentMaxMz() <= 0) {
+                        runSlices = getMzDbReader().getLcMsnRunSliceIterator(params.getMinMz(), params.getMaxMz());
+                    } else {
+                        runSlices = getMzDbReader().getLcMsnRunSliceIterator(params.getMinMz(), params.getMaxMz(), params.getFragmentMinMz(), params.getFragmentMaxMz());
+                    }
                 }else{
                     runSlices = getMzDbReader().getLcMsRunSliceIterator(params.getMinMz(), params.getMaxMz());
                 }
             }
+            
+            
+            FeatureDetectorConfig detectorConfig = null;
+            if (params.isMsnExtraction()) {
+                detectorConfig = new FeatureDetectorConfig(2, params.getMzTolPPM(), 5, new SmartPeakelFinderConfig(5, 3, false, 10, false, params.isRemoveBaseline()));
+            } else {
+                detectorConfig = new FeatureDetectorConfig(1, params.getMzTolPPM(), 5, new SmartPeakelFinderConfig(5, 3, false, 10, false, params.isRemoveBaseline()));                
+            }
+            
+            MzDbFeatureDetector detector = new MzDbFeatureDetector(reader, detectorConfig);
+            
             Peakel[] peakels = detector.detectPeakels(runSlices);
+            double min = (params.getMsLevel() == 1) ? params.getMinMz() : params.getFragmentMinMz();
+            double max = (params.getMsLevel() == 1) ? params.getMaxMz() : params.getFragmentMaxMz();
+            
             for (Peakel peakel : peakels) {
-                ArrayList<Peakel> l = new ArrayList<>();
-                l.add(peakel);
                 //creates a fake Feature associated to this peakel in order to always display Features
-                Feature feature = new Feature(peakel.getMz(), 0, JavaConverters.asScalaBufferConverter(l).asScala(), false);
-                if (params.getMinMz() == 0 && params.getMaxMz() == 0) {
+                IFeature feature = (params.getMsLevel() == 1) ? new MzdbPeakelWrapper(peakel, this) : new MzdbPeakelWrapper(peakel, this, getMzDbReader().getSpectrumHeader(peakel.getApexSpectrumId()).getPrecursorMz());
+                if (min <= 0 && max <= 0) {
                     result.add(feature);
                 } else {
                     //check that the feature is in the mass range
-                    if (feature.getMz() >= params.getMinMz() && feature.getMz() <= params.getMaxMz()) {
+                    if (feature.getMz() >= min && feature.getMz() <= max) {
                         result.add(feature);
                     }
                 }
@@ -379,8 +390,8 @@ public class MzdbRawFile implements IRawFile {
         return result;
     }
 
-    private List<Feature> extractFeaturesFromMs2(float tolPPM) {
-        List<Feature> result = null;
+    private List<IFeature> extractFeaturesFromMs2(float tolPPM) {
+        List<IFeature> result = null;
         try {
             logger.info("retrieve spectrum headers...");
             SpectrumHeader[] ms2SpectrumHeaders = reader.getMs2SpectrumHeaders();
@@ -397,7 +408,10 @@ public class MzdbRawFile implements IRawFile {
                 ));
 
             }
-            result = extractFeatures(pfs, tolPPM);
+            List<Feature> mzdbResult = extractFeatures(pfs, tolPPM);
+            for(Feature f : mzdbResult) {
+                result.add(new MzdbFeatureWrapper(f, this, 1));
+            }
         } catch (SQLiteException ex) {
             logger.error("error while extracting features", ex);
         }
@@ -429,6 +443,7 @@ public class MzdbRawFile implements IRawFile {
         try {
             fr.profi.mzdb.model.Spectrum rawSpectrum = reader.getSpectrum((long) spectrumIndex);
             SpectrumData data = rawSpectrum.getData();
+            Spectrum.ScanType scanType = (rawSpectrum.getHeader().getMsLevel() == 2) ?  Spectrum.ScanType.CENTROID : Spectrum.ScanType.PROFILE;
             final double[] mzList = data.getMzList();
             final double[] leftSigma = new double[mzList.length];
             final double[] rightSigma = new double[mzList.length];
@@ -436,7 +451,7 @@ public class MzdbRawFile implements IRawFile {
             List<Float> xAxisData = new ArrayList<Float>(mzList.length);
             List<Float> yAxisData = new ArrayList<Float>(mzList.length);
             for (int count = 0; count < mzList.length; count++) {
-                if ((data.getLeftHwhmList() != null)) {
+                if ((data.getLeftHwhmList() != null) && data.getLeftHwhmList()[count] > 0) {
                     leftSigma[count] = 2.0 * data.getLeftHwhmList()[count] / 2.35482;
                     double x = mzList[count] - 4.0 * leftSigma[count];
                     //search for the first left value less than x
@@ -457,10 +472,12 @@ public class MzdbRawFile implements IRawFile {
                         xAxisData.add((float) x);
                         yAxisData.add((float) y);
                     }
+                } else {
+                    scanType = Spectrum.ScanType.CENTROID;
                 }
                 xAxisData.add((float) mzList[count]);
                 yAxisData.add(intensityList[count]);
-                if (data.getRightHwhmList() != null) {
+                if (data.getRightHwhmList() != null && data.getRightHwhmList()[count] > 0) {
                     rightSigma[count] = 2.0 * data.getRightHwhmList()[count] / 2.35482;
                     double x = mzList[count] + rightSigma[count] / 2.0;
                     if (!xAxisData.isEmpty()) {
@@ -480,10 +497,12 @@ public class MzdbRawFile implements IRawFile {
                         xAxisData.add((float) x);
                         yAxisData.add((float) y);
                     }
+                }  else {
+                    scanType = Spectrum.ScanType.CENTROID;
                 }
 
             }
-            spectrum = new Spectrum(spectrumIndex, rawSpectrum.getHeader().getElutionTime(), Doubles.toArray(xAxisData), Floats.toArray(yAxisData), rawSpectrum.getHeader().getMsLevel());
+            spectrum = new Spectrum(spectrumIndex, rawSpectrum.getHeader().getElutionTime(), Doubles.toArray(xAxisData), Floats.toArray(yAxisData), rawSpectrum.getHeader().getMsLevel(), scanType);
             StringBuilder builder = new StringBuilder(getName());
 
             if (spectrum.getMsLevel() == 2) {

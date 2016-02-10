@@ -1,6 +1,6 @@
 package fr.proline.mzscope.ui;
 
-import fr.proline.mzscope.model.Ms1ExtractionRequest;
+import fr.proline.mzscope.model.MsnExtractionRequest;
 
 
 /**
@@ -10,6 +10,6 @@ import fr.proline.mzscope.model.Ms1ExtractionRequest;
  */
 public interface IExtractionExecutor  {
 
-    public void extractChromatogramMass(Ms1ExtractionRequest params); 
+    public void extractChromatogramMass(MsnExtractionRequest params); 
 
 }

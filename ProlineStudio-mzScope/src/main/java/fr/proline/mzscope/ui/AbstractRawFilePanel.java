@@ -2,7 +2,7 @@ package fr.proline.mzscope.ui;
 
 import fr.proline.mzscope.model.Chromatogram;
 import fr.proline.mzscope.model.IFeature;
-import fr.proline.mzscope.model.Ms1ExtractionRequest;
+import fr.proline.mzscope.model.MsnExtractionRequest;
 import fr.proline.mzscope.model.MzScopeCallback;
 import fr.proline.mzscope.model.MzScopePreferences;
 import fr.proline.mzscope.model.Spectrum;
@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
  * composed by 2 main components: ChromatogramPanel and SpectrumPanel (if scan is displayed)
  * @author CB205360
  */
-public abstract class AbstractRawFilePanel extends JPanel implements IRawFilePanel, KeyEventDispatcher {
+public abstract class AbstractRawFilePanel extends JPanel implements IRawFileViewer, KeyEventDispatcher {
 
     final private static Logger logger = LoggerFactory.getLogger("ProlineStudio.mzScope.AbstractRawFilePanel");
     
@@ -258,7 +258,7 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFilePan
     }
     
     @Override
-    public void extractAndDisplayChromatogram(Ms1ExtractionRequest params, final DisplayMode mode, final MzScopeCallback callback) {
+    public void extractAndDisplayChromatogram(MsnExtractionRequest params, final DisplayMode mode, final MzScopeCallback callback) {
         if (rawFileLoading != null){
             rawFileLoading.setWaitingState(true);
         }
@@ -290,8 +290,17 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFilePan
     @Override
     public void displayFeature(final IFeature f) {
         double ppm = MzScopePreferences.getInstance().getMzPPMTolerance();
-        final Ms1ExtractionRequest.Builder builder = Ms1ExtractionRequest.builder().setMzTolPPM((float)ppm);
-        builder.setMaxMz(f.getMz() + f.getMz() * ppm / 1e6).setMinMz(f.getMz() - f.getMz() * ppm / 1e6);
+        final MsnExtractionRequest.Builder builder = MsnExtractionRequest.builder().setMzTolPPM((float)ppm);
+        
+        if (f.getMsLevel() == 1) {
+            builder.setMz(f.getMz());
+        } else {
+            builder.setMz(f.getParentMz());
+            ppm = MzScopePreferences.getInstance().getFragmentMzPPMTolerance();
+            builder.setFragmentMzTolPPM((float)ppm);
+            builder.setFragmentMz(f.getMz());
+        }
+        
         // TODO : made this configurable un feature panel : extract around peakel rt or full time range
         //builder.setElutionTimeLowerBound(f.getBasePeakel().getFirstElutionTime()-5*60).setElutionTimeUpperBound(f.getBasePeakel().getLastElutionTime()+5*60);
         if (rawFileLoading != null){
@@ -306,7 +315,7 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFilePan
             @Override
             protected void done() {
                try {
-                  displayChromatogram(get(), DisplayMode.REPLACE);
+                  displayChromatogram(get(), getXicModeDisplay());
                   chromatogramPanel.displayFeature(f);
                   displayScan(getCurrentRawfile().getSpectrumId(f.getElutionTime()));
                   if (rawFileLoading != null){

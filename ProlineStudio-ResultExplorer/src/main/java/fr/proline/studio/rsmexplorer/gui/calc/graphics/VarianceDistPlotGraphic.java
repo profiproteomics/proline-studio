@@ -9,9 +9,9 @@ import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
 public class VarianceDistPlotGraphic extends AbstractMatrixPlotGraphic {
 
     public VarianceDistPlotGraphic(GraphPanel panel) {
-        super(panel, "varianceDistPlot");
+        super(panel, "varianceDistPlot", "varianceDistPlot");
     }
-   
+
     @Override
     public String getName() {
         return "Variance Dist Plot";
@@ -22,5 +22,14 @@ public class VarianceDistPlotGraphic extends AbstractMatrixPlotGraphic {
         return new VarianceDistPlotGraphic(p);
     }
 
+    @Override
+    public int getMinGroups() {
+        return 2;
+    }
+
+    @Override
+    public int getMaxGroups() {
+        return 3;
+    }
 
 }

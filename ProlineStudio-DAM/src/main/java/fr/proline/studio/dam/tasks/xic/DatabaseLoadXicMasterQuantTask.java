@@ -548,6 +548,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                                 for(DQuantitationChannel dqch :listQch ){
                                     if (dqch.getId() == qchS.getId()){
                                         dqch.setBiologicalGroupId(biolGroup.getId());
+                                        //dqch.setBiologicalGroupName(biolGroup.getName());  //JPM.TODO
                                         sortedQch.add(dqch);
                                         break;
                                     }

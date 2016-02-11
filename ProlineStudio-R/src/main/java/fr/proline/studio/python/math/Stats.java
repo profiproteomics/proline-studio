@@ -48,10 +48,31 @@ public class Stats {
         return StatsRImplementation.bbinomial(p1, p2, p3);
     }
 
-    public static PythonImage boxPlot(PyTuple p) throws Exception {
-        return StatsRImplementation.boxPlot(p);
+    public static PythonImage boxPlot(PyTuple p1, PyTuple p2, PyTuple labels) throws Exception {
+        return StatsRImplementation.boxPlot(p1, p2, null, labels);
     }
 
+    public static PythonImage boxPlot(PyTuple p1, PyTuple p2, PyTuple p3, PyTuple labels) throws Exception {
+        return StatsRImplementation.boxPlot(p1, p2, p3, labels);
+    }
+
+    public static PythonImage densityPlot(PyTuple p1, PyTuple p2, PyTuple labels) throws Exception {
+        return StatsRImplementation.densityPlot(p1, p2, null, labels);
+    }
+
+    public static PythonImage densityPlot(PyTuple p1, PyTuple p2, PyTuple p3, PyTuple labels) throws Exception {
+        return StatsRImplementation.densityPlot(p1, p2, p3, labels);
+    }
+
+    public static PythonImage varianceDistPlot(PyTuple p1, PyTuple p2, PyTuple labels) throws Exception {
+        return StatsRImplementation.varianceDistPlot(p1, p2, null, labels);
+    }
+
+    public static PythonImage varianceDistPlot(PyTuple p1, PyTuple p2, PyTuple p3, PyTuple labels) throws Exception {
+        return StatsRImplementation.varianceDistPlot(p1, p2, p3, labels);
+    }
+
+    
     public static PyObject calibrationPlot(Col pvalues) throws Exception {
         return calibrationPlot(pvalues, new PyString("pounds"));
     }
@@ -64,9 +85,6 @@ public class Stats {
         return StatsRImplementation.calibrationPlot(pvaluesCol, pi0Method, nbins, pz);
     }
     
-    public static PythonImage densityPlot(PyTuple p) throws Exception {
-        return StatsRImplementation.densityPlot(p);
-    }
 
     public static ColData pvalue(PyTuple p1, PyTuple p2) throws MathException {
         return StatsImplementation.pvalue(p1, p2);
@@ -76,8 +94,6 @@ public class Stats {
         return StatsImplementation.ttd(p1, p2);
     }
     
-    public static PythonImage varianceDistPlot(PyTuple p) throws Exception {
-        return StatsRImplementation.varianceDistPlot(p);
-    }
+
 
 }

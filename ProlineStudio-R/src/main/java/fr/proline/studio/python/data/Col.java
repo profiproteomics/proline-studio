@@ -39,6 +39,10 @@ public abstract class Col extends PyObject {
         return m_columnName;
     }
     
+    public String getExportColumnName() {
+        return m_columnName;
+    }
+    
     public abstract Col mutable();
 
     /**

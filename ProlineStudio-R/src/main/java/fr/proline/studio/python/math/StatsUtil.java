@@ -8,6 +8,8 @@ import fr.proline.studio.table.LazyData;
 import java.io.File;
 import java.io.FileWriter;
 import org.python.core.Py;
+import org.python.core.PyObject;
+import org.python.core.PyString;
 import org.python.core.PyTuple;
 
 /**
@@ -42,11 +44,12 @@ public class StatsUtil {
         if (header) {
             for (int j=0;j<cols.length;j++) {
                 ColRef c = cols[j];
-                fw.write(c.getColumnName());
+                fw.write(c.getExportColumnName());
                 if (j<cols.length-1) {
                     fw.write(';');
                 }
             }
+            fw.write('\n');
         }
         
         for (int i = 0; i < nbRow; i++) {
@@ -166,6 +169,37 @@ public class StatsUtil {
 
         return cols;
     }
+    
+     public static String stringTupleToRVector(PyTuple p) {
+         StringBuilder sb = new StringBuilder();
+         
+         sb.append("c(");
+         Object[] stringArray = p.getArray();
+         int nb = stringArray.length;
+         for (int i=0;i<nb;i++) {
+             String s = stringArray[i].toString();
+             if (i>0) {
+                 sb.append(',');
+             }
+             sb.append('"').append(s).append('"');
+         }
+         
+         sb.append(')');
+         
+         return sb.toString();
+     }
+     
+     public static PyTuple colNamesToTuple(ColRef[] cols) {
+         
+         int nb = cols.length;
+         PyObject[] colNames = new PyObject[nb];
+         for (int i=0;i<nb;i++) {
+             colNames[i] = new PyString(cols[i].getExportColumnName());
+         }
+         
+         return new PyTuple(colNames);
+
+     }
     
     public static String getPath(File f) throws Exception {
         return f.getCanonicalPath().replaceAll("\\\\", "/");

@@ -6,14 +6,24 @@ package fr.proline.studio.types;
  */
 public class XicGroup {
 
-    private long m_id;
+    private Long m_id;
+    private String m_name;
     
-    public XicGroup(long id) {
-        m_id = id;
+    public XicGroup(Long id, String name) {
+        if (id == null) {
+            m_id = -1l; // JPM.WART temporary wart for Spectral Count
+        } else {
+            m_id = id;
+        }
+        m_name = name;
     }
     
     public long getId() {
         return m_id;
+    }
+    
+    public String getName() {
+        return m_name;
     }
 
     

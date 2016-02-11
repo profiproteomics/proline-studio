@@ -996,7 +996,7 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
                 return null;
             } else {
                 int nbQc = (col - m_columnNames.length) / m_columnNamesQC.length;
-                return new XicGroup(m_quantChannels[nbQc].getBiologicalGroupId());
+                return new XicGroup(m_quantChannels[nbQc].getBiologicalGroupId(), null); //biologicalGroupName.getBiologicalGroupName(); JPM.TODO
             }
 
             

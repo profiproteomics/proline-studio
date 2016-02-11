@@ -71,6 +71,13 @@ public class ColRef extends Col {
         return m_columnName;
     }
     
+    @Override
+    public String getExportColumnName() {
+        if ((m_columnName == null) || (m_columnName.isEmpty())) {
+           return m_tableModel.getExportColumnName(m_modelCol); 
+        }
+        return m_columnName;
+    }
 
 
 }

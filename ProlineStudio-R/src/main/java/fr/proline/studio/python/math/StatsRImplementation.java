@@ -183,13 +183,13 @@ public class StatsRImplementation {
 
     }
     
-    public static PythonImage boxPlot(PyTuple p) throws Exception {
+    public static PythonImage boxPlot(PyTuple p1, PyTuple p2, PyTuple p3, PyTuple labels) throws Exception {
 
         // needs R for this calculation
         StatsUtil.startRSever();
 
         // PyTuple to Col Array
-        ColRef[] cols = StatsUtil.colTupleToColArray(p);
+        ColRef[] cols = (p3!=null) ? StatsUtil.colTupleToColArray(p1, p2, p3) : StatsUtil.colTupleToColArray(p1, p2);
 
         // Create a temp file with a matrix containing cols data
         File matrixTempFile = StatsUtil.columnsToMatrixTempFile(cols, true);
@@ -198,7 +198,7 @@ public class StatsRImplementation {
         File imageTempFile = StatsUtil.createImageTempFile();
 
         // do the boxplot in R
-        PythonImage image = _boxPlotR(matrixTempFile, imageTempFile);
+        PythonImage image = _boxPlotR(matrixTempFile, imageTempFile, StatsUtil.colNamesToTuple(cols), labels);
 
         // delete temp files
         matrixTempFile.delete();
@@ -208,7 +208,7 @@ public class StatsRImplementation {
 
     }
 
-    private static PythonImage _boxPlotR(File matrixTempFile, File imageTempFile) throws Exception {
+    private static PythonImage _boxPlotR(File matrixTempFile, File imageTempFile, PyTuple columnsName, PyTuple labels) throws Exception {
 
         // load library to do the calculation
         RServerManager serverR = RServerManager.getRServerManager();
@@ -217,8 +217,9 @@ public class StatsRImplementation {
         // read Matrix Data
         StatsUtil.readMatrixData(matrixTempFile, true);
 
+
         // create image
-        return StatsUtil.createImage(imageTempFile, "boxPlotD(" + StatsUtil.MATRIX_VARIABLE + "[,1:1])");
+        return StatsUtil.createImage(imageTempFile, "boxPlotD(" + StatsUtil.MATRIX_VARIABLE /*+ ",dataForXAxis="+StatsUtil.stringTupleToRVector(columnsName)*/ + ",labels="+StatsUtil.stringTupleToRVector(labels)+")");
 
     }
     
@@ -260,13 +261,13 @@ public class StatsRImplementation {
 
     }
     
-    public static PythonImage densityPlot(PyTuple p) throws Exception {
+    public static PythonImage densityPlot(PyTuple p1, PyTuple p2, PyTuple p3, PyTuple labels) throws Exception {
 
         // needs R for this calculation
         StatsUtil.startRSever();
 
         // PyTuple to Col Array
-        ColRef[] cols = StatsUtil.colTupleToColArray(p);
+        ColRef[] cols = (p3!=null) ? StatsUtil.colTupleToColArray(p1, p2, p3) : StatsUtil.colTupleToColArray(p1, p2);
 
         // Create a temp file with a matrix containing cols data
         File matrixTempFile = StatsUtil.columnsToMatrixTempFile(cols, true);
@@ -274,8 +275,8 @@ public class StatsRImplementation {
         // Create a temp file for the image
         File imageTempFile = StatsUtil.createImageTempFile();
 
-        // do the boxplot in R
-        PythonImage image = _densityPlot(matrixTempFile, imageTempFile);
+        // do the densityPlot in R
+        PythonImage image = _densityPlotR(matrixTempFile, imageTempFile, labels);
 
         // delete temp files
         matrixTempFile.delete();
@@ -285,7 +286,7 @@ public class StatsRImplementation {
 
     }
 
-    private static PythonImage _densityPlot(File matrixTempFile, File imageTempFile) throws Exception {
+    private static PythonImage _densityPlotR(File matrixTempFile, File imageTempFile, PyTuple labels) throws Exception {
 
         // load library to do the calculation
         RServerManager serverR = RServerManager.getRServerManager();
@@ -295,18 +296,19 @@ public class StatsRImplementation {
         StatsUtil.readMatrixData(matrixTempFile, true);
 
         // create image
-        return StatsUtil.createImage(imageTempFile, "densityPlotD(" + StatsUtil.MATRIX_VARIABLE + "[,1:1])");
+        return StatsUtil.createImage(imageTempFile, "densityPlotD(" + StatsUtil.MATRIX_VARIABLE /*+ ",dataForXAxis="+StatsUtil.stringTupleToRVector(columnsName)*/ + ",labels="+StatsUtil.stringTupleToRVector(labels)+")");
+
 
     }
+
     
-    
-    public static PythonImage varianceDistPlot(PyTuple p) throws Exception {
+    public static PythonImage varianceDistPlot(PyTuple p1, PyTuple p2, PyTuple p3, PyTuple labels) throws Exception {
 
         // needs R for this calculation
         StatsUtil.startRSever();
 
         // PyTuple to Col Array
-        ColRef[] cols = StatsUtil.colTupleToColArray(p);
+        ColRef[] cols = (p3!=null) ? StatsUtil.colTupleToColArray(p1, p2, p3) : StatsUtil.colTupleToColArray(p1, p2);
 
         // Create a temp file with a matrix containing cols data
         File matrixTempFile = StatsUtil.columnsToMatrixTempFile(cols, true);
@@ -314,8 +316,8 @@ public class StatsRImplementation {
         // Create a temp file for the image
         File imageTempFile = StatsUtil.createImageTempFile();
 
-        // do the boxplot in R
-        PythonImage image = _varianceDistPlot(matrixTempFile, imageTempFile);
+        // do the varianceDist Plot in R
+        PythonImage image = _varianceDistPlot(matrixTempFile, imageTempFile, StatsUtil.colNamesToTuple(cols), labels);
 
         // delete temp files
         matrixTempFile.delete();
@@ -324,8 +326,10 @@ public class StatsRImplementation {
         return image;
 
     }
+ 
+    
 
-    private static PythonImage _varianceDistPlot(File matrixTempFile, File imageTempFile) throws Exception {
+    private static PythonImage _varianceDistPlot(File matrixTempFile, File imageTempFile, PyTuple columnsName, PyTuple labels) throws Exception {
 
         // load library to do the calculation
         RServerManager serverR = RServerManager.getRServerManager();
@@ -335,9 +339,9 @@ public class StatsRImplementation {
         StatsUtil.readMatrixData(matrixTempFile, true);
 
         // create image
-        return StatsUtil.createImage(imageTempFile, "varianceDistD(" + StatsUtil.MATRIX_VARIABLE + "[,1:1])");
+        return StatsUtil.createImage(imageTempFile, "varianceDistD(" + StatsUtil.MATRIX_VARIABLE + ",labels="+StatsUtil.stringTupleToRVector(labels)+")");
 
     }
-    
+
     
 }

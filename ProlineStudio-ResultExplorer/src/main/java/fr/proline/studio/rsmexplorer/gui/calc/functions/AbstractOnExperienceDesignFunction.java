@@ -134,7 +134,7 @@ public abstract class AbstractOnExperienceDesignFunction extends AbstractFunctio
                 }
                 nbSizeDone += colList.size();
                 codeSB.append(')');
-                if (j < m_columnsParameterArray.length - 1) {
+                if (j < nbColList - 1) {
                   codeSB.append(',');  
                 }
             }
@@ -439,13 +439,6 @@ public abstract class AbstractOnExperienceDesignFunction extends AbstractFunctio
         // need to recalculate model
         m_globalTableModelInterface = null;
     }
-
-    /*@Override
-    public AbstractFunction cloneFunction(GraphPanel p) {
-        return new BBinomialFunction(p);
-    }*/
-
-
 
 
 

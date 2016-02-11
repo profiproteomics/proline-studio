@@ -10,6 +10,7 @@ import fr.proline.core.orm.msi.ResultSet;
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.SearchSetting;
 import fr.proline.core.orm.msi.PeaklistSoftware;
+import fr.proline.core.orm.msi.PtmSpecificity;
 import fr.proline.core.orm.msi.UsedPtm;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.comparedata.ExtraDataType;
@@ -620,13 +621,24 @@ public class PropertiesTableModel extends DecoratedTableModel implements GlobalT
                             if (m_sb.length()>0) {
                                 m_sb.append(", ");
                             }
-                            m_sb.append(usedPtm.getShortName());
+                            String shortName = usedPtm.getShortName();
+                            m_sb.append(shortName);
+                            if (shortName.indexOf('(') == -1) {
+                                PtmSpecificity ptmSpecificity = usedPtm.getPtmSpecificity();
+                                if (ptmSpecificity != null) {
+                                    Character c = ptmSpecificity.getResidue();
+                                    if (c != null) {
+                                        m_sb.append('(').append(c).append(')');
+                                    }
+                                }
+                            }
                         }
-                        String modifications = m_sb.toString();
-                        m_sb.setLength(0);
-                        return modifications;
+                        
                     }
-                    
+                    String modifications = m_sb.toString();
+                    m_sb.setLength(0);
+                    return modifications;
+
                 }
                 case ROWTYPE_VARIABLE_MODIFICATIONS: {
                     if (searchSetting == null) {
@@ -640,12 +652,25 @@ public class PropertiesTableModel extends DecoratedTableModel implements GlobalT
                             if (m_sb.length() > 0) {
                                 m_sb.append(", ");
                             }
-                            m_sb.append(usedPtm.getShortName());
+                            
+                            String shortName = usedPtm.getShortName();
+                            m_sb.append(shortName);
+                            if (shortName.indexOf('(') == -1) {
+                                PtmSpecificity ptmSpecificity = usedPtm.getPtmSpecificity();
+                                if (ptmSpecificity != null) {
+                                    Character c = ptmSpecificity.getResidue();
+                                    if (c != null) {
+                                        m_sb.append('(').append(c).append(')');
+                                    }
+                                }
+                            }
+                            
                         }
-                        String modifications = m_sb.toString();
-                        m_sb.setLength(0);
-                        return modifications;
+                        
                     }
+                    String modifications = m_sb.toString();
+                    m_sb.setLength(0);
+                    return modifications;
                 }
                 case ROWTYPE_PEPTIDE_CHARGE_STATES: {
                     return (searchSetting == null) ? "" : searchSetting.getPeptideChargeStates();

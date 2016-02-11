@@ -496,12 +496,13 @@ public class PropertiesTableModel extends DecoratedTableModel implements GlobalT
         private static final int ROWTYPE_MAX_MISSED_CLIVAGE = 7;
         private static final int ROWTYPE_FIXED_MODIFICATIONS = 8;
         private static final int ROWTYPE_VARIABLE_MODIFICATIONS = 9;
-        private static final int ROWTYPE_PEPTIDE_CHARGE_STATES = 10;
-        private static final int ROWTYPE_PEPTIDE_MASS_ERROR_TOLERANCE = 11;
-        private static final int ROWTYPE_PEPTIDE_MASS_ERROR_TOLERANCE_UNIT = 12;
-        private static final int ROWTYPE_FRAGMENT_CHARGE_STATES = 13;
-        private static final int ROWTYPE_FRAGMENT_MASS_ERROR_TOLERANCE = 14;
-        private static final int ROWTYPE_FRAGMENT_MASS_ERROR_TOLERANCE_UNIT = 15;
+        private static final int ROWTYPE_FRAGMENT_MASS_TOLERANCE = 10;
+        private static final int ROWTYPE_PEPTIDE_CHARGE_STATES = 11;
+        private static final int ROWTYPE_PEPTIDE_MASS_ERROR_TOLERANCE = 12;
+        private static final int ROWTYPE_PEPTIDE_MASS_ERROR_TOLERANCE_UNIT = 13;
+        private static final int ROWTYPE_FRAGMENT_CHARGE_STATES = 14;
+        private static final int ROWTYPE_FRAGMENT_MASS_ERROR_TOLERANCE = 15;
+        private static final int ROWTYPE_FRAGMENT_MASS_ERROR_TOLERANCE_UNIT = 16;
         
         private static final int ROW_COUNT = 13; // get in sync
         private final Color GROUP_COLOR_BACKGROUND = new Color(254,163,71);
@@ -533,6 +534,8 @@ public class PropertiesTableModel extends DecoratedTableModel implements GlobalT
                     return "Fixed Modifications";
                 case ROWTYPE_VARIABLE_MODIFICATIONS:
                     return "Variable Modifications";
+                case ROWTYPE_FRAGMENT_MASS_TOLERANCE:
+                    return "Fragment Mass Tolerance";
                 case ROWTYPE_PEPTIDE_CHARGE_STATES:
                     return "Peptide Charge States";
                 case ROWTYPE_PEPTIDE_MASS_ERROR_TOLERANCE:
@@ -671,6 +674,12 @@ public class PropertiesTableModel extends DecoratedTableModel implements GlobalT
                     String modifications = m_sb.toString();
                     m_sb.setLength(0);
                     return modifications;
+                }
+                case ROWTYPE_FRAGMENT_MASS_TOLERANCE: {
+                    if (msmsSearch == null) {
+                        return "";
+                    }
+                    return msmsSearch.getFragmentMassErrorTolerance() + " " + msmsSearch.getFragmentMassErrorToleranceUnit();
                 }
                 case ROWTYPE_PEPTIDE_CHARGE_STATES: {
                     return (searchSetting == null) ? "" : searchSetting.getPeptideChargeStates();

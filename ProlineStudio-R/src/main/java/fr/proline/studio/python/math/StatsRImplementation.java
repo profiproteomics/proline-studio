@@ -219,7 +219,7 @@ public class StatsRImplementation {
 
 
         // create image
-        return StatsUtil.createImage(imageTempFile, "boxPlotD(" + StatsUtil.MATRIX_VARIABLE /*+ ",dataForXAxis="+StatsUtil.stringTupleToRVector(columnsName)*/ + ",labels="+StatsUtil.stringTupleToRVector(labels)+")");
+        return StatsUtil.createImage(imageTempFile, "boxPlotD(" + StatsUtil.MATRIX_VARIABLE + ",dataForXAxis=data.frame(Label="+StatsUtil.stringTupleToRVector(columnsName)+"),labels="+StatsUtil.stringTupleToRVector(labels)+")");
 
     }
     
@@ -296,7 +296,7 @@ public class StatsRImplementation {
         StatsUtil.readMatrixData(matrixTempFile, true);
 
         // create image
-        return StatsUtil.createImage(imageTempFile, "densityPlotD(" + StatsUtil.MATRIX_VARIABLE /*+ ",dataForXAxis="+StatsUtil.stringTupleToRVector(columnsName)*/ + ",labels="+StatsUtil.stringTupleToRVector(labels)+")");
+        return StatsUtil.createImage(imageTempFile, "densityPlotD(" + StatsUtil.MATRIX_VARIABLE +",labels="+StatsUtil.stringTupleToRVector(labels)+")");
 
 
     }

@@ -273,7 +273,8 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
 
     public void writeToSVG(String file) {
         SVGGraphics2D g2 = new SVGGraphics2D(m_spectrumPanel.getWidth(), m_spectrumPanel.getHeight());
-        m_spectrumPanel.paint(g2);
+    
+        m_chart.draw(g2, m_spectrumPanel.getBounds());
 
         try {
             SVGUtils.writeToSVG(new File(file), g2.getSVGElement());

@@ -9,6 +9,7 @@ import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import fr.proline.studio.dpm.jms.AccessJMSManagerThread;
 import static fr.proline.studio.dpm.task.jms.AbstractJMSTask.m_loggerProline;
+import fr.proline.studio.dpm.task.FilterRSMProtSetsTask;
 import fr.proline.studio.dpm.task.util.JMSConnectionManager;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -41,10 +42,7 @@ public class ValidationTask extends AbstractJMSTask  {
     public static String SINGLE_PSM_RANK_FILTER_KEY = "SINGLE_PSM_PER_RANK";
     public static String SINGLE_PSM_RANK_FILTER_NAME = "Single PSM per Rank";               
     
-    //Protein PreFilter
-    public static String SPECIFIC_PEP_FILTER_KEY = "SPECIFIC_PEP";
-    public static String SPECIFIC_PEP_FILTER_NAME = "Specific Peptides";   
-    
+
     private DDataset m_dataset = null;
     private String m_description;  //Not used on server side
     private HashMap<String, String> m_argumentsMap;
@@ -203,11 +201,14 @@ public class ValidationTask extends AbstractJMSTask  {
         // Protein Pre-Filters
         ArrayList proteinFilters = new ArrayList();
 
-        if (m_argumentsMap.containsKey(SPECIFIC_PEP_FILTER_KEY)) {
-            HashMap filterCfg = new HashMap();
-            filterCfg.put("parameter", SPECIFIC_PEP_FILTER_KEY);
-            filterCfg.put("threshold", Integer.valueOf(m_argumentsMap.get(SPECIFIC_PEP_FILTER_KEY)));
-            proteinFilters.add(filterCfg);
+        for (int i=0;i<FilterRSMProtSetsTask.FILTER_KEYS.length;i++) {
+            String filterKey = FilterRSMProtSetsTask.FILTER_KEYS[i];
+            if (m_argumentsMap.containsKey(filterKey)) {
+                HashMap filterCfg = new HashMap();
+                filterCfg.put("parameter", filterKey);
+                filterCfg.put("threshold", Integer.valueOf(m_argumentsMap.get(filterKey)));
+                proteinFilters.add(filterCfg);
+            }
         }
 
         params.put("prot_set_filters", proteinFilters);

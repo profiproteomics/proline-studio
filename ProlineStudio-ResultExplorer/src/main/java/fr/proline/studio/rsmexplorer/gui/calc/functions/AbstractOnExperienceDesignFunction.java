@@ -85,35 +85,31 @@ public abstract class AbstractOnExperienceDesignFunction extends AbstractFunctio
     @Override
     public void process(AbstractGraphObject[] graphObjects, FunctionGraphNode functionGraphNode, ProcessCallbackInterface callback) {
         
-                int nbColList;
+        int nbColList;
         int nbCols;
-        try {
 
-            // check if we have already processed
-            if (m_globalTableModelInterface != null) {
+        // check if we have already processed
+        if (m_globalTableModelInterface != null) {
+            callback.finished(functionGraphNode);
+            return;
+        }
 
-                return;
-            }
+        setInError(false, null);
 
-            setInError(false, null);
+        if (m_columnsParameterArray == null) {
+            callback.finished(functionGraphNode);
+            return;
+        }
 
-            if (m_columnsParameterArray == null) {
+        nbColList = ((Integer) m_nbGroupsParameter.getAssociatedObjectValue()).intValue();
+        nbCols = 0;
+        for (int i = 0; i < nbColList; i++) {
+            List colList = (List) m_columnsParameterArray[i].getAssociatedValues(true);
+            if ((colList == null) || (colList.isEmpty())) {
                 callback.finished(functionGraphNode);
                 return;
             }
-
-            nbColList = ((Integer) m_nbGroupsParameter.getAssociatedObjectValue()).intValue();
-            nbCols = 0;
-            for (int i = 0; i < nbColList; i++) {
-                List colList = (List) m_columnsParameterArray[i].getAssociatedValues(true);
-                if ((colList == null) || (colList.isEmpty())) {
-                    return;
-                }
-                nbCols += colList.size();
-            }
-
-        } finally {
-            callback.finished(functionGraphNode);
+            nbCols += colList.size();
         }
 
         setCalculating(true);
@@ -195,6 +191,7 @@ public abstract class AbstractOnExperienceDesignFunction extends AbstractFunctio
             setInError(new CalcError(e, null, -1));
 
             setCalculating(false);
+            callback.finished(functionGraphNode);
         }
 
     }

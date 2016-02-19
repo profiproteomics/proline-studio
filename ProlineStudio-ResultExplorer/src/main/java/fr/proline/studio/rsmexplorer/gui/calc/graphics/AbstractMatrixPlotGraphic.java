@@ -201,6 +201,7 @@ public abstract class AbstractMatrixPlotGraphic extends AbstractGraphic {
         } catch (Exception e) {
             setInError(new CalcError(e, null, -1));
             setCalculating(false);
+            callback.finished(graphicGraphNode);
         }
     }
 

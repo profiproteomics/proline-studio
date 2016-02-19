@@ -135,13 +135,13 @@ public class DataAnalyzerPanel extends JPanel implements DataBoxPanelInterface {
         JToolBar toolbar = new JToolBar(JToolBar.HORIZONTAL);
         toolbar.setFloatable(false);
         
-        JButton playButton = new JButton("Process Graph",IconManager.getIcon(IconManager.IconType.CONTROL_PLAY));
+        final JButton playButton = new JButton("Process Graph",IconManager.getIcon(IconManager.IconType.CONTROL_PLAY));
         //playButton.setToolTipText("Process Graph");
-        playButton.setFocusPainted(false);
         playButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                ProcessEngine.getProcessEngine().run(m_graphPanel.getNodes(), m_graphPanel);
+                playButton.setEnabled(false);
+                ProcessEngine.getProcessEngine().run(m_graphPanel.getNodes(), m_graphPanel, playButton);
             }
         });
         

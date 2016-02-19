@@ -77,6 +77,7 @@ public class JoinFunction extends AbstractFunction {
         try {
             // check if we have already processed
             if (m_globalTableModelInterface != null) {
+                callback.finished(functionGraphNode);
                 return;
             }
 

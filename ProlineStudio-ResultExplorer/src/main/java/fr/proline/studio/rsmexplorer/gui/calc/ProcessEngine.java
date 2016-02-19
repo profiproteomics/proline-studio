@@ -3,6 +3,7 @@ package fr.proline.studio.rsmexplorer.gui.calc;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphNode;
 import java.util.ArrayList;
 import java.util.LinkedList;
+import javax.swing.JButton;
 import javax.swing.JPanel;
 
 /**
@@ -13,13 +14,13 @@ public class ProcessEngine implements ProcessCallbackInterface {
     
     private static ProcessEngine m_processEngine = null;
     
-    private boolean m_running = false;
+    
     private JPanel m_panel;
+    private JButton m_playButton;
     
-    private LinkedList<GraphNode> m_processingNodeList = new LinkedList<>();
+    private final LinkedList<GraphNode> m_processingNodeList = new LinkedList<>();
     
-    private ProcessEngine() {
-        
+    private ProcessEngine() {  
     }
     
     public static ProcessEngine getProcessEngine() {
@@ -30,9 +31,10 @@ public class ProcessEngine implements ProcessCallbackInterface {
         return m_processEngine;
     }
     
-    public void run(LinkedList<GraphNode> graphNodeArray, JPanel p) {
+    public void run(LinkedList<GraphNode> graphNodeArray, JPanel p, JButton playButton) {
 
         m_panel = p;
+        m_playButton = playButton;
         
         // look for nodes with no in to initialize the processing
         m_processingNodeList.clear();
@@ -51,10 +53,10 @@ public class ProcessEngine implements ProcessCallbackInterface {
         firstNode.process(this);
     }
     
-    public void stop() {
+    /*public void stop() {
         m_processingNodeList.clear();
         m_panel = null;
-    }
+    }*/
     
     
     @Override
@@ -73,9 +75,10 @@ public class ProcessEngine implements ProcessCallbackInterface {
             GraphNode firstNode = m_processingNodeList.pollFirst();
             firstNode.process(this);
         } else {
-            //JPM.TODO
             // processing is finished
+            m_playButton.setEnabled(true);
             m_panel = null;
+            m_playButton = null;
         }
     }
 }

@@ -19,6 +19,10 @@ import fr.proline.studio.rsmexplorer.gui.renderer.CompareValueRenderer;
 import fr.proline.studio.table.renderer.DefaultLeftAlignRenderer;
 import fr.proline.studio.table.renderer.DefaultRightAlignRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
+import static fr.proline.studio.rsmexplorer.gui.xic.QuantProteinSetTableModel.COLTYPE_ABUNDANCE;
+import static fr.proline.studio.rsmexplorer.gui.xic.QuantProteinSetTableModel.COLTYPE_PSM;
+import static fr.proline.studio.rsmexplorer.gui.xic.QuantProteinSetTableModel.COLTYPE_RAW_ABUNDANCE;
+import static fr.proline.studio.rsmexplorer.gui.xic.QuantProteinSetTableModel.LAST_STATIC_COLUMN;
 import fr.proline.studio.table.CompoundTableModel;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.utils.CyclicColorPalette;
@@ -26,6 +30,8 @@ import fr.proline.studio.table.LazyData;
 import fr.proline.studio.table.LazyTable;
 import fr.proline.studio.table.LazyTableModel;
 import fr.proline.studio.table.TableDefaultRendererManager;
+import fr.proline.studio.types.QuantitationType;
+import fr.proline.studio.types.XicGroup;
 import fr.proline.studio.utils.StringUtils;
 import java.awt.Color;
 import java.util.ArrayList;
@@ -988,6 +994,45 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
     
     @Override
     public Object getColValue(Class c, int col) {
+        if (c.equals(XicGroup.class)) {
+            if (col <= LAST_STATIC_COLUMN) {
+                return null;
+            } else {
+                int nbQc = (col - m_columnNames.length) / m_columnNamesQC.length;
+                return new XicGroup(m_quantChannels[nbQc].getBiologicalGroupId(), null); //biologicalGroupName.getBiologicalGroupName(); JPM.TODO
+            }
+
+            
+        }
+        if (c.equals(QuantitationType.class)) {
+            if (col <= LAST_STATIC_COLUMN) {
+                return null;
+            } else {
+                int nbQc = (col - m_columnNames.length) / m_columnNamesQC.length;
+                int id = col - m_columnNames.length - (nbQc * m_columnNamesQC.length);
+                if (m_isXICMode) {
+                    switch (id) {
+                        case COLTYPE_ABUNDANCE:
+                            return QuantitationType.getQuantitationType(QuantitationType.ABUNDANCE);
+                        case COLTYPE_RAW_ABUNDANCE:
+                            return QuantitationType.getQuantitationType(QuantitationType.RAW_ABUNDANCE);
+                    }
+                } else {
+                    switch (id) {
+                        case COLTYPE_PSM:
+                            return QuantitationType.getQuantitationType(QuantitationType.BASIC_SC);
+                        case COLTYPE_RAW_ABUNDANCE:
+                            return QuantitationType.getQuantitationType(QuantitationType.SPECIFIC_SC);
+                        case COLTYPE_ABUNDANCE:
+                            return QuantitationType.getQuantitationType(QuantitationType.WEIGHTED_SC);
+                    }
+                }
+
+                
+                return null;
+            }
+
+        }
         return null;
     }
 

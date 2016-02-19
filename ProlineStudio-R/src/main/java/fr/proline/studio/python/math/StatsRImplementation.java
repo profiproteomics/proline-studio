@@ -167,7 +167,7 @@ public class StatsRImplementation {
         if (nbCols3>0) {
             forCol3 = ",rep('C3'," + nbCols3 + ")";
         }
-        String cmdBB = "resbinomial<-bb.test(x=" + StatsUtil.MATRIX_VARIABLE + "[,1:" + nbCols + "], tx=colSums(" + StatsUtil.MATRIX_VARIABLE + "[,1:" + nbCols + "]), group=c(rep('C1'," + nbCols1 + "),rep('C2'," + nbCols2 + ")"+forCol3+"),n.threads=0)";
+        String cmdBB = "resbinomial<-bb.test(x=" + StatsUtil.MATRIX_VARIABLE + "[,1:" + nbCols + "], tx=colSums(" + StatsUtil.MATRIX_VARIABLE + "[,1:" + nbCols + "]), group=c(rep('C1'," + nbCols1 + "),rep('C2'," + nbCols2 + ")"+forCol3+"),n.threads=-2)";
         REXPGenericVector resVector = (REXPGenericVector) serverR.parseAndEval(cmdBB);
 
         Object o = resVector.asNativeJavaObject();

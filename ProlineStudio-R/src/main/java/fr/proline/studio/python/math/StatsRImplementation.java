@@ -137,7 +137,7 @@ public class StatsRImplementation {
         ColRef[] cols = (p3!=null) ? StatsUtil.colTupleToColArray(p1, p2, p3) : StatsUtil.colTupleToColArray(p1, p2);
 
         // Create a temp file with a matrix containing cols data
-        File matrixTempFile = StatsUtil.columnsToMatrixTempFile(cols, false);
+        File matrixTempFile = StatsUtil.columnsToMatrixTempFile(cols, false, false);
 
         // do the calculation
         Table t = cols[0].getTable();
@@ -192,7 +192,7 @@ public class StatsRImplementation {
         ColRef[] cols = (p3!=null) ? StatsUtil.colTupleToColArray(p1, p2, p3) : StatsUtil.colTupleToColArray(p1, p2);
 
         // Create a temp file with a matrix containing cols data
-        File matrixTempFile = StatsUtil.columnsToMatrixTempFile(cols, true);
+        File matrixTempFile = StatsUtil.columnsToMatrixTempFile(cols, true, true);
 
         // Create a temp file for the image
         File imageTempFile = StatsUtil.createImageTempFile();
@@ -270,7 +270,7 @@ public class StatsRImplementation {
         ColRef[] cols = (p3!=null) ? StatsUtil.colTupleToColArray(p1, p2, p3) : StatsUtil.colTupleToColArray(p1, p2);
 
         // Create a temp file with a matrix containing cols data
-        File matrixTempFile = StatsUtil.columnsToMatrixTempFile(cols, true);
+        File matrixTempFile = StatsUtil.columnsToMatrixTempFile(cols, true, true);
 
         // Create a temp file for the image
         File imageTempFile = StatsUtil.createImageTempFile();
@@ -311,7 +311,7 @@ public class StatsRImplementation {
         ColRef[] cols = (p3!=null) ? StatsUtil.colTupleToColArray(p1, p2, p3) : StatsUtil.colTupleToColArray(p1, p2);
 
         // Create a temp file with a matrix containing cols data
-        File matrixTempFile = StatsUtil.columnsToMatrixTempFile(cols, true);
+        File matrixTempFile = StatsUtil.columnsToMatrixTempFile(cols, true, true);
 
         // Create a temp file for the image
         File imageTempFile = StatsUtil.createImageTempFile();

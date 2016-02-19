@@ -33,7 +33,7 @@ public class StatsUtil {
     }
     
     
-    public static File columnsToMatrixTempFile(ColRef[] cols, boolean header) throws Exception {
+    public static File columnsToMatrixTempFile(ColRef[] cols, boolean header, boolean log) throws Exception {
         
         int nbRow = cols[0].getRowCount();
         
@@ -68,6 +68,10 @@ public class StatsUtil {
                 } else {
                     d = 0;
                 }
+                if (log) {
+                    d = StrictMath.log(d);
+                }
+
                 fw.write(String.valueOf(d));
                 if (j<cols.length-1) {
                     fw.write(';');

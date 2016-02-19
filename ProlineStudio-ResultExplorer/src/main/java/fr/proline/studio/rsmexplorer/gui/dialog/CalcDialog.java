@@ -240,7 +240,7 @@ public class CalcDialog extends JDialog {
                     if (o instanceof ColData) {
                         ColData col = (ColData) o;
                         Table t = col.getTable();
-                        t.addColumn(col, new DoubleRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)),4,true,true));
+                        t.addColumn(col, null, new DoubleRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)),4,true,true));
                     } else if (o instanceof Table) {
                         WindowBox windowBox = WindowBoxFactory.getGenericWindowBox(null, resultVariable.getName(), IconManager.IconType.CHALKBOARD, false);
                         

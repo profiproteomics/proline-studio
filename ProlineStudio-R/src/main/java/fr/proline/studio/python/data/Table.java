@@ -118,9 +118,9 @@ public class Table extends PyObject {
     
 
     public void addColumn(Col col) {
-        addColumn(col, null);
+        addColumn(col, null, null);
     }
-    public void addColumn(Col col, TableCellRenderer colRenderer) {
+    public void addColumn(Col col, Object colExtraInfo, TableCellRenderer colRenderer) {
 
         
         JXTable table = m_tableMap.get(m_index);
@@ -136,7 +136,7 @@ public class Table extends PyObject {
 
             TableModel model = table.getModel();
             if (model instanceof CompoundTableModel) {
-                ((CompoundTableModel) model).addModel(new ExprTableModel(col, colRenderer, ((CompoundTableModel) model).getLastNonFilterModel()));
+                ((CompoundTableModel) model).addModel(new ExprTableModel(col, colExtraInfo, colRenderer, ((CompoundTableModel) model).getLastNonFilterModel()));
             }
 
             columns = table.getColumns(true);
@@ -147,7 +147,7 @@ public class Table extends PyObject {
             }
         } else {
             // we have only the model
-            m_model = new ExprTableModel(col, colRenderer, m_model);
+            m_model = new ExprTableModel(col, colExtraInfo, colRenderer, m_model);
         }
 
     }

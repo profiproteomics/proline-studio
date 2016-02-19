@@ -2,6 +2,7 @@ package fr.proline.studio.rsmexplorer.gui.calc.graph;
 
 
 import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
+import fr.proline.studio.rsmexplorer.gui.calc.ProcessCallbackInterface;
 import fr.proline.studio.rsmexplorer.gui.calc.functions.AbstractFunction;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.utils.IconManager;
@@ -84,7 +85,7 @@ public class FunctionGraphNode extends GraphNode {
             return IconManager.getIcon(IconManager.IconType.WARNING);
         }
         if (!settingsDone()) {
-            return IconManager.getIcon(IconManager.IconType.WARNING);
+            return IconManager.getIcon(IconManager.IconType.SETTINGS);
         }
         
         if (m_function.isCalculating()) {
@@ -96,8 +97,10 @@ public class FunctionGraphNode extends GraphNode {
         if (m_function.calculationDone()) {
             return IconManager.getIcon(IconManager.IconType.TICK_CIRCLE);
         }
-        
-        return null;
+        if (m_function.isSettingsBeingDone()) {
+            return IconManager.getIcon(IconManager.IconType.SETTINGS);
+        }
+        return IconManager.getIcon(IconManager.IconType.CONTROL_PAUSE);
 
     }
     
@@ -137,7 +140,7 @@ public class FunctionGraphNode extends GraphNode {
                 }
             }
         }
-        return (countSettingsDone == 0);
+        return (countSettingsDone == 0); 
     }
     
     @Override
@@ -154,23 +157,23 @@ public class FunctionGraphNode extends GraphNode {
         if (!settingsDone()) {
             return false;
         }
-        
-        if (m_function.calculationDone()) {
-            return true;
-        }
-        
-        // we try to process
-        process(false);
-        
+
         return m_function.calculationDone();
     }
 
     @Override
-    public void process(boolean display) {
+    public void process(ProcessCallbackInterface callback) {
+
         if (!isConnected()) {
+            callback.finished(this);
             return;
         }
 
+        if (!m_function.settingsDone()) {
+            callback.finished(this);
+            return;
+        }
+        
         AbstractGraphObject[] graphObjectArray;
         
         if (m_inConnectors != null) {
@@ -178,20 +181,20 @@ public class FunctionGraphNode extends GraphNode {
             int i = 0;
             for (GraphConnector connector : m_inConnectors) {
                 GraphNode graphNode = connector.getLinkedSourceGraphNode();
-                graphNode.process(false);
                 graphObjectArray[i++] = graphNode;
             }
         } else {
             graphObjectArray = new AbstractGraphObject[0];
         }
         
-        m_function.process(graphObjectArray, this, display);
+        m_function.process(graphObjectArray, this, callback);
+
         
     }
 
     @Override
     public void askDisplay() {
-        process(true);
+        m_function.askDisplay(this);
     }
 
     
@@ -204,7 +207,7 @@ public class FunctionGraphNode extends GraphNode {
             int i = 0;
             for (GraphConnector connector : m_inConnectors) {
                 GraphNode graphNode = connector.getLinkedSourceGraphNode();
-                graphNode.process(false);  // need to process previous nodes to be able to do settings
+                //graphNode.process(null);  // need to process previous nodes to be able to do settings
                 graphObjectArray[i++] = graphNode;
             }
         } else {

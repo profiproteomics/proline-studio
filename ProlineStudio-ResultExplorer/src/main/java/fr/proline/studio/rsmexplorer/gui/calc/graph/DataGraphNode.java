@@ -6,6 +6,7 @@ import fr.proline.studio.pattern.WindowBoxFactory;
 import fr.proline.studio.python.data.TableInfo;
 import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
 import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
+import fr.proline.studio.rsmexplorer.gui.calc.ProcessCallbackInterface;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.utils.IconManager;
 import java.awt.Color;
@@ -111,8 +112,10 @@ public class DataGraphNode extends GraphNode {
     }
 
     @Override
-    public void process(boolean display) {
+    public void process(ProcessCallbackInterface callback) {
         // nothing to do
+        callback.finished(this);
+
     }
 
     @Override
@@ -122,7 +125,7 @@ public class DataGraphNode extends GraphNode {
 
 
 
-
+    
 
     
 }

@@ -1,6 +1,7 @@
 package fr.proline.studio.rsmexplorer.gui.calc.functions;
 
 import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
+import fr.proline.studio.types.PValue;
 
 
 /**
@@ -10,7 +11,7 @@ import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
 public class PValueFunction extends AbstractOnExperienceDesignFunction {
 
     public PValueFunction(GraphPanel panel) {
-        super(panel, "pvalue", "pvalue", "pvalue");
+        super(panel, "pvalue", "pvalue", "pvalue", new PValue());
     }
 
     @Override

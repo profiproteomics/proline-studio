@@ -15,6 +15,7 @@ import fr.proline.studio.python.interpreter.CalcInterpreterTask;
 import fr.proline.studio.python.interpreter.CalcInterpreterThread;
 import fr.proline.studio.python.interpreter.ResultVariable;
 import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
+import fr.proline.studio.rsmexplorer.gui.calc.ProcessCallbackInterface;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.AbstractGraphObject;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphicGraphNode;
 import fr.proline.studio.table.GlobalTableModelInterface;
@@ -44,7 +45,18 @@ public class CalibrationPlotGraphic extends AbstractGraphic {
         super(panel);
     }
     
+    @Override
+    public void inLinkDeleted() {
+        super.inLinkDeleted();
+        m_columnsParameter1 = null;
+        m_pi0MethodParameter = null;
+        m_numericValueParameter = null;
+        m_nbinsParameter = null;
+        m_pzParameter = null;
+    }
         
+
+    
     @Override
     public String getName() {
         if (m_pi0MethodParameter == null) {
@@ -60,26 +72,29 @@ public class CalibrationPlotGraphic extends AbstractGraphic {
         return columnNameSb.toString();
     }
     
-        @Override
-    public void process(final AbstractGraphObject[] graphObjects, GraphicGraphNode graphicGraphNode, final boolean display) {
+    @Override
+    public void process(final AbstractGraphObject[] graphObjects, GraphicGraphNode graphicGraphNode, final ProcessCallbackInterface callback) {
+
+        // check if we have already processed
+        if (m_generatedImage != null) {
+            callback.finished(graphicGraphNode);
+            return;
+        }
+
         setInError(false, null);
         
         if (m_columnsParameter1 == null) {
+            callback.finished(graphicGraphNode);
             return;
         }
 
         Integer colIndex =(Integer) m_columnsParameter1.getAssociatedObjectValue();
         if ((colIndex == null) || (colIndex == -1)) {
+            callback.finished(graphicGraphNode);
             return;
         }
         
-        // check if we have already processed
-        if (m_generatedImage != null) {
-            if (display) {
-                display(graphObjects[0].getDataName(), getName());
-            }
-            return;
-        }
+
 
         setCalculating(true);
    
@@ -110,33 +125,34 @@ public class CalibrationPlotGraphic extends AbstractGraphic {
             codeSB.append(",").append(m_pzParameter.getStringValue());
             codeSB.append(')');
 
-            CalcCallback callback = new CalcCallback() {
+            CalcCallback calcCallback = new CalcCallback() {
 
                 @Override
                 public void run(ArrayList<ResultVariable> variables, CalcError error) {
-                    if (variables != null) {
-                        // look for res
-                        for (ResultVariable var : variables) {
-                            if (var.getName().compareTo("calibrationPlot") == 0) {
-                                // we have found the result
-                                PythonImage image = (PythonImage) var.getValue();
-                                m_generatedImage = image.getImage();
+                    try {
+                        if (variables != null) {
+                            // look for res
+                            for (ResultVariable var : variables) {
+                                if (var.getName().compareTo("calibrationPlot") == 0) {
+                                    // we have found the result
+                                    PythonImage image = (PythonImage) var.getValue();
+                                    m_generatedImage = image.getImage();
 
-                                if (display) {
-                                    display(graphObjects[0].getDataName(), var.getName());
                                 }
                             }
+                        } else if (error != null) {
+                            //JPM.TODO
+                            setInError(error);
                         }
-                    } else if (error != null) {
-                        //JPM.TODO
-                        setInError(error);
+                        setCalculating(false);
+                    } finally {
+                        callback.finished(graphicGraphNode);
                     }
-                    setCalculating(false);
                 }
 
             };
 
-            CalcInterpreterTask task = new CalcInterpreterTask(codeSB.toString(), parameters, callback);
+            CalcInterpreterTask task = new CalcInterpreterTask(codeSB.toString(), parameters, calcCallback);
 
             CalcInterpreterThread.getCalcInterpreterThread().addTask(task);
 
@@ -239,7 +255,7 @@ public class CalibrationPlotGraphic extends AbstractGraphic {
     }
 
     @Override
-    public ParameterError checkParameters() {
+    public ParameterError checkParameters(AbstractGraphObject[] graphObjects) {
         return null;
     }
 

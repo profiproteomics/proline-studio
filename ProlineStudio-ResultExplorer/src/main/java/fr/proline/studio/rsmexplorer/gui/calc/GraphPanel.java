@@ -42,6 +42,10 @@ public class GraphPanel extends JPanel implements MouseListener, MouseMotionList
         setTransferHandler(new DataTreeTransferHandler(this));
     }
     
+    public LinkedList<GraphNode> getNodes() {
+        return m_graphNodeArray;
+    }
+    
     public void addGraphNode(GraphNode graphNode) {
        int posX = 0;
        int posY = 0;
@@ -218,7 +222,6 @@ public class GraphPanel extends JPanel implements MouseListener, MouseMotionList
                     }
                 }
 
-                //JPM.TODO
                 m_selectedConnector = null;
                 setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
                 repaint();

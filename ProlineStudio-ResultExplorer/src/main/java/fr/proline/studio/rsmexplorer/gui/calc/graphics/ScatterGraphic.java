@@ -5,6 +5,7 @@ import fr.proline.studio.parameter.ObjectParameter;
 import fr.proline.studio.parameter.ParameterError;
 import fr.proline.studio.parameter.ParameterList;
 import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
+import fr.proline.studio.rsmexplorer.gui.calc.ProcessCallbackInterface;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.AbstractGraphObject;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphicGraphNode;
 import fr.proline.studio.table.GlobalTableModelInterface;
@@ -32,14 +33,27 @@ public class ScatterGraphic extends AbstractGraphic {
     }
 
     @Override
-    public void process(AbstractGraphObject[] graphObjects, GraphicGraphNode graphicGraphNode, boolean display) {
+    public void inLinkDeleted() {
+        super.inLinkDeleted();
+        m_columnsParameter1 = null;
+        m_columnsParameter2 = null;
+    }
+    
+    @Override
+    public void process(AbstractGraphObject[] graphObjects, GraphicGraphNode graphicGraphNode, ProcessCallbackInterface callback) {
         
-        Object o1 = m_columnsParameter1.getAssociatedObjectValue();
-        Object o2 = m_columnsParameter2.getAssociatedObjectValue();
-        
-        m_graphicsModelInterface = new LockedDataGraphicsModel(graphObjects[0].getGlobalTableModelInterface(), PlotType.SCATTER_PLOT, (Integer) o1, (Integer) o2);
-        if (display) {
-            display(graphicGraphNode.getPreviousDataName(), getName());
+        try {
+
+            if (m_graphicsModelInterface != null) {
+                return;
+            }
+
+            Object o1 = m_columnsParameter1.getAssociatedObjectValue();
+            Object o2 = m_columnsParameter2.getAssociatedObjectValue();
+
+            m_graphicsModelInterface = new LockedDataGraphicsModel(graphObjects[0].getGlobalTableModelInterface(), PlotType.SCATTER_PLOT, (Integer) o1, (Integer) o2);
+        } finally {
+            callback.finished(graphicGraphNode);
         }
     }
 
@@ -80,7 +94,7 @@ public class ScatterGraphic extends AbstractGraphic {
     }
 
     @Override
-    public ParameterError checkParameters() {
+    public ParameterError checkParameters(AbstractGraphObject[] graphObjects) {
         return null;
     }
 
@@ -96,7 +110,7 @@ public class ScatterGraphic extends AbstractGraphic {
 
     @Override
     public boolean calculationDone() {
-        return true;
+        return (m_graphicsModelInterface != null);
     }
 
     @Override

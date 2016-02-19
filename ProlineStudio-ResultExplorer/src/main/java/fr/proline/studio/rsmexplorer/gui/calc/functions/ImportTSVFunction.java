@@ -18,6 +18,7 @@ import fr.proline.studio.parameter.ParameterList;
 import fr.proline.studio.parameter.StringParameter;
 import fr.proline.studio.python.interpreter.CalcError;
 import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
+import fr.proline.studio.rsmexplorer.gui.calc.ProcessCallbackInterface;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.AbstractGraphObject;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.FunctionGraphNode;
 import fr.proline.studio.table.renderer.DefaultLeftAlignRenderer;
@@ -116,136 +117,139 @@ public class ImportTSVFunction extends AbstractFunction {
     }
     
     @Override
-    public void process(AbstractGraphObject[] graphObjects, FunctionGraphNode functionGraphNode, boolean display) {
+    public void process(AbstractGraphObject[] graphObjects, FunctionGraphNode functionGraphNode, ProcessCallbackInterface callback) {
 
-        // check if we have already processed
-        if (m_globalTableModelInterface != null) {
-            if (display) {
-                display(m_fileParameter.getStringValue(), getName());
-            }
-            return;
-        }
-
-        setCalculating(true);
-        setInError(false, null);
-        
-        //JPM.TODO : should be done in a thread *****************************************************
-        
         try {
-            String filePath = ((String) m_fileParameter.getObjectValue()).trim();
 
-            CSVReader reader;
-            boolean automaticSeparator = (Boolean) m_automaticSeparatorParameter.getObjectValue();
-            if (automaticSeparator) {
-                if (filePath.endsWith("csv")) {
-                    reader = new CSVReader(new FileReader(filePath), ',');
-                } else {
-                    reader = new CSVReader(new FileReader(filePath), '\t');
-                }
-            } else {
-                char separator;
-                String separatorString = m_separatorParameter.getStringValue();
-                if (separatorString.length() == 1) {
-                    separator = separatorString.charAt(0);
-                } else if (separatorString.compareTo("\\t") == 0) {
-                    separator = '\t';
-                } else  {
-                    // we try with tab for the moment 
-                    separator = '\t';
-                }
-                reader = new CSVReader(new FileReader(filePath), separator);
+            // check if we have already processed
+            if (m_globalTableModelInterface != null) {
+                return;
             }
-            
 
-            
-            // read column headers
-            String[] headerLine = reader.readNext();
-            if (headerLine == null) {
-                throw new IOException("No Data found in File");
-            }
-            
-            int nbColumns = headerLine.length;
-           
-            // read lines, skip empty ones and check the number of columns
-            ArrayList<String[]> allDataLines = new ArrayList<>();
-            String[] dataLine;
-            int line = 2;
-            while ((dataLine = reader.readNext()) != null) {
-                
-                int nbColumsCur = dataLine.length;
-                if (nbColumsCur == 0) {
-                    // continue : empty line
-                }
-                
-                if (nbColumns != nbColumsCur) {
-                    throw new IOException("Number of columns differ in file at line "+line);
-                }
-                
-                allDataLines.add(dataLine);
-                
-                line++;
-                
-            }
-            
-            // check the type of columns
-            int nbRows = allDataLines.size();
-            Class[] columTypes = new Class[nbColumns];
-            for (int col = 0;col<nbColumns;col++) {
-                
-                boolean canBeLong = true;
-                boolean canBeDouble = true;
-                for (int row = 0; row<nbRows; row++) {
-                    String data = allDataLines.get(row)[col];
-                    if (canBeLong) {
-                        try {
-                            Long.parseLong(data);
-                        } catch (NumberFormatException nfe) {
-                            canBeLong = false;
-                        }
-                    }
-                    if ((!canBeLong) && (canBeDouble)) {
-                        try {
-                            Double.parseDouble(data);
-                        } catch (NumberFormatException nfe) {
-                            canBeDouble = false;
-                            break;
-                        }
-                    }
-                }
-                if (canBeLong) {
-                   columTypes[col] = Long.class; 
-                } else if (canBeDouble) {
-                    columTypes[col] = Double.class; 
-                } else {
-                    columTypes[col] = String.class; 
-                }
-            }
-            
-            // create the model
-            Object[][] data = new Object[nbRows][nbColumns];
-            for (int row = 0;row<nbRows;row++) {
-                for (int col = 0;col<nbColumns;col++) {
-                    String value = allDataLines.get(row)[col];
-                    if (columTypes[col].equals(Long.class)) {
-                        data[row][col] = Long.parseLong(value);
-                    } else if (columTypes[col].equals(Double.class)) {
-                        data[row][col] = Double.parseDouble(value);
+            try {
+
+                setCalculating(true);
+                setInError(false, null);
+
+        //JPM.TODO : should be done in a thread *****************************************************
+                String filePath = ((String) m_fileParameter.getObjectValue()).trim();
+
+                CSVReader reader;
+                boolean automaticSeparator = (Boolean) m_automaticSeparatorParameter.getObjectValue();
+                if (automaticSeparator) {
+                    if (filePath.endsWith("csv")) {
+                        reader = new CSVReader(new FileReader(filePath), ',');
                     } else {
-                        data[row][col] = value;
+                        reader = new CSVReader(new FileReader(filePath), '\t');
                     }
-                    
+                } else {
+                    char separator;
+                    String separatorString = m_separatorParameter.getStringValue();
+                    if (separatorString.length() == 1) {
+                        separator = separatorString.charAt(0);
+                    } else if (separatorString.compareTo("\\t") == 0) {
+                        separator = '\t';
+                    } else {
+                        // we try with tab for the moment 
+                        separator = '\t';
+                    }
+                    reader = new CSVReader(new FileReader(filePath), separator);
                 }
+
+                // read column headers
+                String[] headerLine = reader.readNext();
+                if (headerLine == null) {
+                    throw new IOException("No Data found in File");
+                }
+
+                int nbColumns = headerLine.length;
+
+                // read lines, skip empty ones and check the number of columns
+                ArrayList<String[]> allDataLines = new ArrayList<>();
+                String[] dataLine;
+                int line = 2;
+                while ((dataLine = reader.readNext()) != null) {
+
+                    int nbColumsCur = dataLine.length;
+                    if (nbColumsCur == 0) {
+                        // continue : empty line
+                    }
+
+                    if (nbColumns != nbColumsCur) {
+                        throw new IOException("Number of columns differ in file at line " + line);
+                    }
+
+                    allDataLines.add(dataLine);
+
+                    line++;
+
+                }
+
+                // check the type of columns
+                int nbRows = allDataLines.size();
+                Class[] columTypes = new Class[nbColumns];
+                for (int col = 0; col < nbColumns; col++) {
+
+                    boolean canBeLong = true;
+                    boolean canBeDouble = true;
+                    for (int row = 0; row < nbRows; row++) {
+                        String data = allDataLines.get(row)[col];
+                        if (canBeLong) {
+                            try {
+                                Long.parseLong(data);
+                            } catch (NumberFormatException nfe) {
+                                canBeLong = false;
+                            }
+                        }
+                        if ((!canBeLong) && (canBeDouble)) {
+                            try {
+                                Double.parseDouble(data);
+                            } catch (NumberFormatException nfe) {
+                                canBeDouble = false;
+                                break;
+                            }
+                        }
+                    }
+                    if (canBeLong) {
+                        columTypes[col] = Long.class;
+                    } else if (canBeDouble) {
+                        columTypes[col] = Double.class;
+                    } else {
+                        columTypes[col] = String.class;
+                    }
+                }
+
+                // create the model
+                Object[][] data = new Object[nbRows][nbColumns];
+                for (int row = 0; row < nbRows; row++) {
+                    for (int col = 0; col < nbColumns; col++) {
+                        String value = allDataLines.get(row)[col];
+                        if (columTypes[col].equals(Long.class)) {
+                            data[row][col] = Long.parseLong(value);
+                        } else if (columTypes[col].equals(Double.class)) {
+                            data[row][col] = Double.parseDouble(value);
+                        } else {
+                            data[row][col] = value;
+                        }
+
+                    }
+                }
+                m_globalTableModelInterface = new LoadedDataModel(headerLine, columTypes, data);
+
+            } catch (Exception e) {
+                setInError(new CalcError(e, null, -1));
             }
-            m_globalTableModelInterface = new LoadedDataModel(headerLine, columTypes, data);
-            
-        } catch (Exception e) {
-            setInError(new CalcError(e, null, -1));
+            setCalculating(false);
+
+        } finally {
+            callback.finished(functionGraphNode);
         }
-        setCalculating(false);
-        
-        if (display) {
-            display(m_fileParameter.getStringValue(), getName());
-        }
+
+    }
+    
+    @Override
+    public void askDisplay(FunctionGraphNode functionGraphNode) {
+        display(m_fileParameter.getStringValue(), getName());
     }
     
     @Override
@@ -283,7 +287,7 @@ public class ImportTSVFunction extends AbstractFunction {
     }
     
     @Override
-    public ParameterError checkParameters() {
+    public ParameterError checkParameters(AbstractGraphObject[] graphObjects) {
 
         ParameterError error =  m_fileParameter.checkParameter();
 

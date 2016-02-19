@@ -140,7 +140,10 @@ public class IconManager {
         SPECTRUM, 
         NAVIGATE,
         SELECT, 
-        ZOOM_FIT;
+        ZOOM_FIT,
+        CONTROL_PLAY,
+        CONTROL_STOP,
+        CONTROL_PAUSE;
         
     }
     private final static HashMap<IconType, ImageIcon> m_iconMap = new HashMap<>();
@@ -523,6 +526,12 @@ public class IconManager {
                return "fr/proline/studio/images/select.png";    
             case ZOOM_FIT:
                 return "fr/proline/studio/images/magnifier-zoom-fit.png";
+            case CONTROL_PLAY:
+                return "fr/proline/studio/images/control.png";
+            case CONTROL_STOP:
+                return "fr/proline/studio/images/control-stop.png";
+            case CONTROL_PAUSE:
+                return "fr/proline/studio/images/control-pause.png";
                 
         }
 

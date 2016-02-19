@@ -18,6 +18,7 @@ import fr.proline.studio.python.interpreter.CalcInterpreterTask;
 import fr.proline.studio.python.interpreter.CalcInterpreterThread;
 import fr.proline.studio.python.interpreter.ResultVariable;
 import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
+import fr.proline.studio.rsmexplorer.gui.calc.ProcessCallbackInterface;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.AbstractGraphObject;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphicGraphNode;
 import fr.proline.studio.table.GlobalTableModelInterface;
@@ -46,7 +47,7 @@ public abstract class AbstractMatrixPlotGraphic extends AbstractGraphic {
     private final String m_functionName;
     private final String m_pythonCall;
     
-    private ArrayList<String> m_groupNames = new ArrayList<>();
+    private final ArrayList<String> m_groupNames = new ArrayList<>();
     
     public AbstractMatrixPlotGraphic(GraphPanel panel, String functionName, String pythonCall) {
         super(panel);
@@ -55,6 +56,14 @@ public abstract class AbstractMatrixPlotGraphic extends AbstractGraphic {
         m_pythonCall = pythonCall;
     }
 
+    @Override
+    public void inLinkDeleted() {
+        super.inLinkDeleted();
+        m_nbGroupsParameter= null;
+        m_quantitationTypeParameter= null;
+        m_columnsParameterArray = null;
+    }
+    
     public abstract int getMinGroups();
     public abstract int getMaxGroups();
     
@@ -62,19 +71,24 @@ public abstract class AbstractMatrixPlotGraphic extends AbstractGraphic {
     public String getName() {
         return m_functionName;
     }
-    
-    @Override
-    public void inLinkDeleted() {
-        super.inLinkDeleted();
-        m_columnsParameterArray = null;
-    }
+
 
     
     @Override
-    public void process(final AbstractGraphObject[] graphObjects, GraphicGraphNode graphicGraphNode, final boolean display) {
+    public void process(final AbstractGraphObject[] graphObjects, GraphicGraphNode graphicGraphNode, final ProcessCallbackInterface callback) {
+        
+        
+        
+        // check if we have already processed
+        if (m_generatedImage != null) {
+            callback.finished(graphicGraphNode);
+            return;
+        }
+        
         setInError(false, null);
         
         if (m_columnsParameterArray == null) {
+            callback.finished(graphicGraphNode);
             return;
         }
         
@@ -83,18 +97,13 @@ public abstract class AbstractMatrixPlotGraphic extends AbstractGraphic {
         for (int i=0;i<nbColList;i++) {
             List colList = (List) m_columnsParameterArray[i].getAssociatedValues(true);
             if ((colList == null) || (colList.isEmpty()))  {
+                callback.finished(graphicGraphNode);
                 return;
             }
             nbCols += colList.size();
         }
         
-        // check if we have already processed
-        if (m_generatedImage != null) {
-            if (display) {
-                display(graphObjects[0].getDataName(), getName());
-            }
-            return;
-        }
+
 
         setCalculating(true);
    
@@ -159,10 +168,11 @@ public abstract class AbstractMatrixPlotGraphic extends AbstractGraphic {
             
             codeSB.append(')');
 
-            CalcCallback callback = new CalcCallback() {
+            CalcCallback calcCallback = new CalcCallback() {
 
                 @Override
                 public void run(ArrayList<ResultVariable> variables, CalcError error) { 
+                    try {
                     if (variables != null) {
                         // look for res
                         for (ResultVariable var : variables) {
@@ -171,20 +181,20 @@ public abstract class AbstractMatrixPlotGraphic extends AbstractGraphic {
                                 PythonImage image = (PythonImage) var.getValue();
                                 m_generatedImage = image.getImage();
 
-                                if (display) {
-                                    display(graphObjects[0].getDataName(), var.getName());
-                                }
                             }
                         }
                     } else if (error != null) {
                         setInError(error);
                     }
                     setCalculating(false);
+                    } finally {
+                        callback.finished(graphicGraphNode);
+                    }
                 }
 
             };
 
-            CalcInterpreterTask task = new CalcInterpreterTask(codeSB.toString(), parameters, callback);
+            CalcInterpreterTask task = new CalcInterpreterTask(codeSB.toString(), parameters, calcCallback);
 
             CalcInterpreterThread.getCalcInterpreterThread().addTask(task);
 
@@ -457,7 +467,7 @@ public abstract class AbstractMatrixPlotGraphic extends AbstractGraphic {
     }
 
     @Override
-    public ParameterError checkParameters() {
+    public ParameterError checkParameters(AbstractGraphObject[] graphObjects) {
         return null;
     }
 

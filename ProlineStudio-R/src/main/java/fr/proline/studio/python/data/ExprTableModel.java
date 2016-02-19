@@ -23,11 +23,13 @@ import javax.swing.table.TableCellRenderer;
 public class ExprTableModel extends DecoratedTableModel implements ChildModelInterface {
 
     private final Col m_column;
+    private final Object m_colExtraInfo;
     private GlobalTableModelInterface m_parentModel;
     private TableCellRenderer m_colRenderer = null;
 
-    public ExprTableModel(Col column, TableCellRenderer colRenderer, GlobalTableModelInterface parentModel) {
+    public ExprTableModel(Col column, Object colExtraInfo, TableCellRenderer colRenderer, GlobalTableModelInterface parentModel) {
         m_column = column;
+        m_colExtraInfo = colExtraInfo;
         m_colRenderer = colRenderer;
         m_parentModel = parentModel;
     }
@@ -280,6 +282,9 @@ public class ExprTableModel extends DecoratedTableModel implements ChildModelInt
     
     @Override
     public Object getColValue(Class c, int col) {
+        if ( (col == m_parentModel.getColumnCount()) && (m_colExtraInfo != null) && (c.equals(m_colExtraInfo.getClass()))) {
+            return m_colExtraInfo;
+        }
         return m_parentModel.getColValue(c, col);
     }
  

@@ -2,6 +2,7 @@ package fr.proline.studio.rsmexplorer.gui.calc.graph;
 
 import fr.proline.studio.gui.InfoDialog;
 import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
+import fr.proline.studio.rsmexplorer.gui.calc.ProcessCallbackInterface;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Font;
@@ -52,6 +53,13 @@ public abstract class GraphNode extends AbstractGraphObject {
         m_graphPanel = panel;
     }
 
+    public boolean hasInConnector() {
+        if ((m_inConnectors == null) || (m_inConnectors.isEmpty())) {
+            return false;
+        }
+        return true;
+    }
+    
     public void propagateSourceChanged() {
         if (m_outConnector != null) {
             m_outConnector.propagateSourceChanged();
@@ -146,9 +154,9 @@ public abstract class GraphNode extends AbstractGraphObject {
     public abstract ImageIcon getIcon();
     public abstract ImageIcon getStatusIcon();
     
-    public abstract boolean isConnected();
-    //public abstract NodeState getState();
-    public abstract void process(boolean display);
+
+    public abstract void process(ProcessCallbackInterface callback);
+
     public abstract void askDisplay();
     public abstract boolean settings();
 
@@ -330,7 +338,7 @@ public abstract class GraphNode extends AbstractGraphObject {
             super("Display");
             m_graphNode = graphNode;
             
-            setEnabled(graphNode.isConnected() && graphNode.settingsDone());
+            setEnabled(graphNode.calculationDone());
 
         }
 
@@ -355,15 +363,9 @@ public abstract class GraphNode extends AbstractGraphObject {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            boolean settingsChanged = m_graphNode.settings();
+            m_graphNode.settings();
             m_graphPanel.repaint();
-            
-            // JPM ??? ask for the calculation now if possible
-            // remove these lines if I change my mind
-            if (settingsChanged && m_graphNode.settingsDone()) {
-                m_graphNode.process(false);
-            }
-            
+
         }
     }
     
@@ -387,5 +389,11 @@ public abstract class GraphNode extends AbstractGraphObject {
         }
     }
 
+    public LinkedList<GraphNode> getOutLinkedGraphNodes() {
+        if (!calculationDone()) {
+            return null;
+        }
+        return (m_outConnector == null) ? null : m_outConnector.getOutLinkedGraphNodes();
+    }
     
 }

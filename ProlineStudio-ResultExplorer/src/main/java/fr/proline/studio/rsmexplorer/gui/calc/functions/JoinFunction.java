@@ -7,6 +7,7 @@ import fr.proline.studio.parameter.ParameterList;
 import fr.proline.studio.python.data.Table;
 import fr.proline.studio.python.interpreter.CalcError;
 import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
+import fr.proline.studio.rsmexplorer.gui.calc.ProcessCallbackInterface;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.AbstractGraphObject;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.FunctionGraphNode;
 import fr.proline.studio.table.GlobalTableModelInterface;
@@ -34,7 +35,6 @@ public class JoinFunction extends AbstractFunction {
     @Override
     public void inLinkDeleted() {
         super.inLinkDeleted();
-        m_parameterList = null;
         m_paramColumn1 = null;
         m_paramColumn2 = null;
     }
@@ -52,6 +52,9 @@ public class JoinFunction extends AbstractFunction {
     
     @Override
     public boolean settingsDone() {
+        if (m_parameterList == null) {
+            return false;
+        }
         return ((m_paramColumn1 != null) && (m_paramColumn2 != null));
     }
     
@@ -68,57 +71,60 @@ public class JoinFunction extends AbstractFunction {
     public AbstractFunction cloneFunction(GraphPanel panel) {
         return new JoinFunction(panel);
     }
-    
+
     @Override
-    public void process(AbstractGraphObject[] graphObjects, FunctionGraphNode functionGraphNode, boolean display) {
-
-        // check if we have already processed
-        if (m_globalTableModelInterface != null) {
-            if (display) {
-                display(functionGraphNode.getPreviousDataName(), getName());
-            }
-            return;
-        }
-        
-        setCalculating(true);
-        setInError(false, null);
-        
+    public void process(AbstractGraphObject[] graphObjects, FunctionGraphNode functionGraphNode, ProcessCallbackInterface callback) {
         try {
-            Table t1 = new Table(graphObjects[0].getGlobalTableModelInterface());
-            Table t2 = new Table(graphObjects[1].getGlobalTableModelInterface());
-
-            Table joinedTable;
-            if ((m_paramColumn1 != null) && (m_paramColumn2 != null)) {
-                Integer key1 = (Integer) m_paramColumn1.getAssociatedObjectValue();
-                Integer key2 = (Integer) m_paramColumn2.getAssociatedObjectValue();
-                joinedTable = Table.join(t1, t2, key1, key2);
-            } else {
-                joinedTable = Table.join(t1, t2);
+            // check if we have already processed
+            if (m_globalTableModelInterface != null) {
+                return;
             }
 
-            m_globalTableModelInterface = joinedTable.getModel();
-        } catch (Exception e) {
-            //JPM.TODO
-            setInError(new CalcError(e, null, -1));
-        }
-        
-        setCalculating(false);
-        
-        if (display) {
-            display(functionGraphNode.getPreviousDataName(), getName());
-        }
-    }
-    
+            setCalculating(true);
+            setInError(false, null);
 
+            try {
+                Table t1 = new Table(graphObjects[0].getGlobalTableModelInterface());
+                Table t2 = new Table(graphObjects[1].getGlobalTableModelInterface());
+
+                Table joinedTable;
+                if ((m_paramColumn1 != null) && (m_paramColumn2 != null)) {
+                    Integer key1 = (Integer) m_paramColumn1.getAssociatedObjectValue();
+                    Integer key2 = (Integer) m_paramColumn2.getAssociatedObjectValue();
+                    joinedTable = Table.join(t1, t2, key1, key2);
+                } else {
+                    joinedTable = Table.join(t1, t2);
+                }
+
+                m_globalTableModelInterface = joinedTable.getModel();
+            } catch (Exception e) {
+                setInError(new CalcError(e, null, -1));
+            }
+
+            setCalculating(false);
+
+        } finally {
+            callback.finished(functionGraphNode);
+        }
+
+    }
+
+    @Override
+    public void askDisplay(FunctionGraphNode functionGraphNode) {
+        display(functionGraphNode.getPreviousDataName(), getName());
+    }
     
     @Override
     public void generateDefaultParameters(AbstractGraphObject[] graphObjects) {
+
         
-        if (m_globalTableModelInterface == null) {
+        GlobalTableModelInterface modelForDefaultKey = m_globalTableModelInterface;
+        
+        if (modelForDefaultKey == null) {
             Table t1 = new Table(graphObjects[0].getGlobalTableModelInterface());
             Table t2 = new Table(graphObjects[1].getGlobalTableModelInterface());
             Table joinedTable = Table.join(t1, t2);
-            m_globalTableModelInterface = joinedTable.getModel();
+            modelForDefaultKey = joinedTable.getModel();
         }
 
         GlobalTableModelInterface model1 = graphObjects[0].getGlobalTableModelInterface();
@@ -162,35 +168,45 @@ public class JoinFunction extends AbstractFunction {
                 iKept++;
             }
         }
-        
-        m_paramColumn1 = new ObjectParameter(JOIN_COL1, graphObjects[0].getFullName() +" Join Column Key", new JComboBox(objectArray1), objectArray1, associatedObjectArray1, ((AbstractJoinDataModel)m_globalTableModelInterface).getSelectedKey1(), null);
-        m_paramColumn2 = new ObjectParameter(JOIN_COL2, graphObjects[1].getFullName() +" Join Column Key", new JComboBox(objectArray2), objectArray2, associatedObjectArray2, ((AbstractJoinDataModel)m_globalTableModelInterface).getSelectedKey2(), null);
+
+        m_paramColumn1 = new ObjectParameter(JOIN_COL1, graphObjects[0].getFullName() + " Join Column Key", new JComboBox(objectArray1), objectArray1, associatedObjectArray1, ((AbstractJoinDataModel) modelForDefaultKey).getSelectedKey1(), null);
+        m_paramColumn2 = new ObjectParameter(JOIN_COL2, graphObjects[1].getFullName() + " Join Column Key", new JComboBox(objectArray2), objectArray2, associatedObjectArray2, ((AbstractJoinDataModel) modelForDefaultKey).getSelectedKey2(), null);
         m_parameterList = new ParameterList("Join");
         m_parameters = new ParameterList[1];
         m_parameters[0] = m_parameterList;
-        
+
         m_parameterList.add(m_paramColumn1);
         m_parameterList.add(m_paramColumn2);
-        
+
     }
-    
+
     @Override
-    public ParameterError checkParameters() {
+    public ParameterError checkParameters(AbstractGraphObject[] graphObjects) {
         Integer key1 = (Integer) m_paramColumn1.getAssociatedObjectValue();
         Integer key2 = (Integer) m_paramColumn2.getAssociatedObjectValue();
-        boolean checkKeys = ((AbstractJoinDataModel)m_globalTableModelInterface).checkKeys(key1, key2);
         
+        GlobalTableModelInterface modelForDefaultKey = m_globalTableModelInterface;
+        
+        if (modelForDefaultKey == null) {
+            Table t1 = new Table(graphObjects[0].getGlobalTableModelInterface());
+            Table t2 = new Table(graphObjects[1].getGlobalTableModelInterface());
+            Table joinedTable = Table.join(t1, t2);
+            modelForDefaultKey = joinedTable.getModel();
+        }
+        
+        boolean checkKeys = ((AbstractJoinDataModel) modelForDefaultKey).checkKeys(key1, key2);
+
         ParameterError error = null;
         if (!checkKeys) {
-            error = new ParameterError("Selected Keys are not compatible", m_parameterList.getPanel() );
+            error = new ParameterError("Selected Keys are not compatible", m_parameterList.getPanel());
         }
         return error;
     }
-    
+
     @Override
     public void userParametersChanged() {
         m_globalTableModelInterface = null;
 
     }
-    
+
 }

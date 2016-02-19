@@ -1,6 +1,7 @@
 package fr.proline.studio.rsmexplorer.gui.calc.graph;
 
 import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
+import fr.proline.studio.rsmexplorer.gui.calc.ProcessCallbackInterface;
 import fr.proline.studio.rsmexplorer.gui.calc.graphics.AbstractGraphic;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.utils.IconManager;
@@ -72,7 +73,7 @@ public class GraphicGraphNode extends GraphNode {
             return IconManager.getIcon(IconManager.IconType.WARNING);
         }
         if (!settingsDone()) {
-            return IconManager.getIcon(IconManager.IconType.WARNING);
+            return IconManager.getIcon(IconManager.IconType.SETTINGS);
         }
         
         if (m_graphic.isCalculating()) {
@@ -84,8 +85,11 @@ public class GraphicGraphNode extends GraphNode {
         if (m_graphic.calculationDone()) {
             return IconManager.getIcon(IconManager.IconType.TICK_CIRCLE);
         }
+        if (m_graphic.isSettingsBeingDone()) {
+            return IconManager.getIcon(IconManager.IconType.SETTINGS);
+        }
 
-        return IconManager.getIcon(IconManager.IconType.TICK_CIRCLE);
+        return IconManager.getIcon(IconManager.IconType.CONTROL_PAUSE);
 
     }
     
@@ -136,30 +140,45 @@ public class GraphicGraphNode extends GraphNode {
             return false;
         }
         
+        if (!m_graphic.calculationDone()) {
+            return false;
+        }
+        
         return true;
     }
 
     @Override
-    public void process(boolean display) {
-        if (!isConnected()) {
-            return;
-        }
+    public void process(ProcessCallbackInterface callback) {
+        
+        try {
+            if (!isConnected()) {
+                return;
+            }
 
-        AbstractGraphObject[] graphObjectArray = new AbstractGraphObject[m_inConnectors.size()];
-        int i = 0;
-        for (GraphConnector connector : m_inConnectors) {
-            GraphNode graphNode = connector.getLinkedSourceGraphNode();
-            graphNode.process(false);
-            graphObjectArray[i++] = graphNode;
+            AbstractGraphObject[] graphObjectArray = new AbstractGraphObject[m_inConnectors.size()];
+            int i = 0;
+            for (GraphConnector connector : m_inConnectors) {
+                GraphNode graphNode = connector.getLinkedSourceGraphNode();
+                graphObjectArray[i++] = graphNode;
+            }
+
+            m_graphic.process(graphObjectArray, this, callback);
+
+        } finally {
+            callback.finished(this);
         }
-        
-        m_graphic.process(graphObjectArray, this, display);
-        
     }
 
     @Override
     public void askDisplay() {
-        process(true);
+        
+        String dataName = "";
+        if (m_inConnectors.size()>0) {
+            GraphNode graphNode = m_inConnectors.get(0).getLinkedSourceGraphNode();
+            dataName = graphNode.getDataName();
+        }
+
+        m_graphic.display(dataName);
     }
 
     
@@ -170,7 +189,7 @@ public class GraphicGraphNode extends GraphNode {
         int i = 0;
         for (GraphConnector connector : m_inConnectors) {
             GraphNode graphNode = connector.getLinkedSourceGraphNode();
-            graphNode.process(false);  // need to process previous nodes to be able to do settings
+            //graphNode.process(false, null);  // need to process previous nodes to be able to do settings  //JPM.TODO
             graphObjectArray[i++] = graphNode;
         }
         

@@ -37,6 +37,18 @@ public class GraphConnector extends AbstractGraphObject {
         m_graphNode = graphNode;
     }
     
+    public LinkedList<GraphNode> getOutLinkedGraphNodes() {
+        if (!m_out) {
+            return null;
+        }
+        
+        LinkedList<GraphNode> outLinkedGraphNodes = new LinkedList<>();
+        for (GraphConnector inConnector : m_connections) {
+            outLinkedGraphNodes.add(inConnector.getGraphNode());
+        }
+        
+        return outLinkedGraphNodes;
+    }
     
     @Override
     public String getFullName() {

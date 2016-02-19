@@ -64,7 +64,7 @@ public class DataAnalyzerPanel extends JPanel implements DataBoxPanelInterface {
         c.fill = GridBagConstraints.BOTH;
         c.insets = new java.awt.Insets(5, 5, 5, 5);
 
-        m_graphPanel = new GraphPanel();
+        
 
         // create tree objects
         
@@ -106,12 +106,9 @@ public class DataAnalyzerPanel extends JPanel implements DataBoxPanelInterface {
         c2.weighty = 1;
         treePanel.add(treeScrollPane, c2);
         
-        // create graph objects
-        JScrollPane graphScrollPane = new JScrollPane();
-        graphScrollPane.setBackground(Color.white);
-        graphScrollPane.setViewportView(m_graphPanel);
+
         
-        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, treePanel, graphScrollPane);
+        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, treePanel, createGraphZonePanel());
 
         c.gridx = 0;
         c.gridy = 0;
@@ -122,6 +119,54 @@ public class DataAnalyzerPanel extends JPanel implements DataBoxPanelInterface {
 
         return internalPanel;
 
+    }
+    
+    private JPanel createGraphZonePanel() {
+        JPanel graphZonePanel = new JPanel();
+        
+
+        graphZonePanel.setLayout(new GridBagLayout());
+        GridBagConstraints c = new GridBagConstraints();
+        c.anchor = GridBagConstraints.NORTHWEST;
+        c.fill = GridBagConstraints.BOTH;
+        c.insets = new java.awt.Insets(5, 5, 5, 5);
+        
+        
+        JToolBar toolbar = new JToolBar(JToolBar.HORIZONTAL);
+        toolbar.setFloatable(false);
+        
+        JButton playButton = new JButton("Process Graph",IconManager.getIcon(IconManager.IconType.CONTROL_PLAY));
+        //playButton.setToolTipText("Process Graph");
+        playButton.setFocusPainted(false);
+        playButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                ProcessEngine.getProcessEngine().run(m_graphPanel.getNodes(), m_graphPanel);
+            }
+        });
+        
+        toolbar.add(playButton);
+        
+        // create graph objects
+        m_graphPanel = new GraphPanel();
+        JScrollPane graphScrollPane = new JScrollPane();
+        graphScrollPane.setBackground(Color.white);
+        graphScrollPane.setViewportView(m_graphPanel);
+        
+        
+        c.gridx = 0;
+        c.gridy = 0;
+        
+        graphZonePanel.add(toolbar, c);
+        
+        c.gridy++;
+        c.weightx = 1;
+        c.weighty = 1;
+        graphZonePanel.add(graphScrollPane, c);
+        
+        graphZonePanel.setBackground(toolbar.getBackground());
+        
+        return graphZonePanel;
     }
 
     

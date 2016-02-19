@@ -7,6 +7,7 @@ import fr.proline.studio.pattern.WindowBoxFactory;
 import fr.proline.studio.python.interpreter.CalcError;
 import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
 import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
+import fr.proline.studio.rsmexplorer.gui.calc.ProcessCallbackInterface;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.AbstractGraphObject;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.FunctionGraphNode;
 import fr.proline.studio.rsmexplorer.gui.calc.parameters.CheckParameterInterface;
@@ -29,6 +30,7 @@ public abstract class AbstractFunction implements CheckParameterInterface {
     
     private boolean m_calculating = false;
     private boolean m_inError = false;
+    private boolean m_settingsBeingDone = false;
     private String m_errorMessage = null;
     
     protected GraphPanel m_panel;
@@ -40,7 +42,11 @@ public abstract class AbstractFunction implements CheckParameterInterface {
     public void inLinkDeleted() {
         m_parameters = null;
         m_globalTableModelInterface = null;
+        
+        //inLinkDeletedSubClass();
     }
+    
+    //public abstract void inLinkDeletedSubClass();
     
     protected void setCalculating(boolean v) {
         if (v ^ m_calculating) {
@@ -71,8 +77,9 @@ public abstract class AbstractFunction implements CheckParameterInterface {
     public abstract String getName();
     public abstract int getNumberOfInParameters();
     
-    public abstract void process(AbstractGraphObject[] graphObjects, FunctionGraphNode functionGraphNode, boolean display);
+    public abstract void process(AbstractGraphObject[] graphObjects, FunctionGraphNode functionGraphNode, ProcessCallbackInterface callback);
     
+    public abstract void askDisplay(FunctionGraphNode functionGraphNode);
     
     public GlobalTableModelInterface getGlobalTableModelInterface() {
         return m_globalTableModelInterface;
@@ -104,6 +111,9 @@ public abstract class AbstractFunction implements CheckParameterInterface {
     public boolean inError() {
         return m_inError;
     }
+    public boolean isSettingsBeingDone() {
+        return m_settingsBeingDone;
+    }
     
     public boolean settings(AbstractGraphObject[] graphObjects) {
         if (m_parameters == null) {
@@ -113,14 +123,19 @@ public abstract class AbstractFunction implements CheckParameterInterface {
             return false;
         }
 
-        FunctionParametersDialog dialog = new FunctionParametersDialog(getName(), WindowManager.getDefault().getMainWindow(), m_parameters, this);
-        dialog.centerToWindow(WindowManager.getDefault().getMainWindow());
-        dialog.setVisible(true);
-        if (dialog.getButtonClicked() == FunctionParametersDialog.BUTTON_OK) {
-            userParametersChanged();
-            return true;
+        m_settingsBeingDone = true;
+        try {
+            FunctionParametersDialog dialog = new FunctionParametersDialog(getName(), WindowManager.getDefault().getMainWindow(), m_parameters, this, graphObjects);
+            dialog.centerToWindow(WindowManager.getDefault().getMainWindow());
+            dialog.setVisible(true);
+            if (dialog.getButtonClicked() == FunctionParametersDialog.BUTTON_OK) {
+                userParametersChanged();
+                return true;
+            }
+            return false;
+        } finally {
+            m_settingsBeingDone = false;
         }
-        return false;
     }
 
     

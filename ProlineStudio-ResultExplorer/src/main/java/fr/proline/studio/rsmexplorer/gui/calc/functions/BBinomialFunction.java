@@ -1,6 +1,7 @@
 package fr.proline.studio.rsmexplorer.gui.calc.functions;
 
 import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
+import fr.proline.studio.types.PValue;
 
 
 
@@ -11,7 +12,7 @@ import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
 public class BBinomialFunction extends AbstractOnExperienceDesignFunction {
 
     public BBinomialFunction(GraphPanel panel) {
-        super(panel, "bbinomial", "bbinomial", "bbinomial");
+        super(panel, "bbinomial", "bbinomial", "bbinomial", new PValue());
     }
 
     @Override

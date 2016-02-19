@@ -15,12 +15,14 @@ import fr.proline.studio.python.interpreter.CalcInterpreterTask;
 import fr.proline.studio.python.interpreter.CalcInterpreterThread;
 import fr.proline.studio.python.interpreter.ResultVariable;
 import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
+import fr.proline.studio.rsmexplorer.gui.calc.ProcessCallbackInterface;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.AbstractGraphObject;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.FunctionGraphNode;
 import fr.proline.studio.table.renderer.DefaultRightAlignRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.DoubleRenderer;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.table.TableDefaultRendererManager;
+import fr.proline.studio.types.PValue;
 import java.util.ArrayList;
 import javax.swing.JSpinner;
 import javax.swing.JTextField;
@@ -51,6 +53,17 @@ public class AdjustPFunction extends AbstractFunction {
     }
     
     @Override
+    public void inLinkDeleted() {
+        super.inLinkDeleted();
+        m_columnsParameter1 = null;
+        m_pi0MethodParameter = null;
+        m_numericValueParameter = null;
+        m_alphaParameter = null;
+        m_nbinsParameter = null;
+        m_pzParameter = null;
+    }
+    
+    @Override
     public String getName() {
         if (m_pi0MethodParameter == null) {
             return "AdjustP";
@@ -71,23 +84,23 @@ public class AdjustPFunction extends AbstractFunction {
     }
 
     @Override
-    public void process(AbstractGraphObject[] graphObjects, final FunctionGraphNode functionGraphNode, final boolean display) {
+    public void process(AbstractGraphObject[] graphObjects, final FunctionGraphNode functionGraphNode, ProcessCallbackInterface callback) {
         setInError(false, null);
         
-        if (m_columnsParameter1 == null) {
+        if (m_parameters == null) {
+            callback.finished(functionGraphNode);
             return;
         }
 
         Integer colIndex =(Integer) m_columnsParameter1.getAssociatedObjectValue();
         if ((colIndex == null) || (colIndex == -1)) {
+            callback.finished(functionGraphNode);
             return;
         }
         
         // check if we have already processed
         if (m_globalTableModelInterface != null) {
-            if (display) {
-                display(functionGraphNode.getPreviousDataName(), getName());
-            }
+            callback.finished(functionGraphNode);
             return;
         }
 
@@ -126,45 +139,54 @@ public class AdjustPFunction extends AbstractFunction {
             
             final String columnName = columnNameSb.toString();
             
-            CalcCallback callback = new CalcCallback() {
+            CalcCallback calcCallback = new CalcCallback() {
 
                 @Override
                 public void run(ArrayList<ResultVariable> variables, CalcError error) {
-                    if (variables != null) {
-                        // look for res
-                        for (ResultVariable var : variables) {
-                            if (var.getName().compareTo("adjustP") == 0) {
-                                // we have found the result
-                                ColData col = (ColData) var.getValue();
-                                // give a specific column name
-                                col.setColumnName(columnName);
-                                sourceTable.addColumn(col, new DoubleRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)),4,true,true));
-                                
-                                
-                                m_globalTableModelInterface = sourceTable.getModel();
-                                
-                                if (display) {
-                                    display(functionGraphNode.getPreviousDataName(), var.getName());
+                    try {
+                        if (variables != null) {
+                            // look for res
+                            for (ResultVariable var : variables) {
+                                if (var.getName().compareTo("adjustP") == 0) {
+                                    // we have found the result
+                                    ColData col = (ColData) var.getValue();
+                                    // give a specific column name
+                                    col.setColumnName(columnName);
+                                    sourceTable.addColumn(col, new PValue(), new DoubleRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 4, true, true));
+
+                                    m_globalTableModelInterface = sourceTable.getModel();
+
+                                    /*if (display) {
+                                     display(functionGraphNode.getPreviousDataName(), var.getName());
+                                     }*/
                                 }
                             }
+                        } else if (error != null) {
+                            setInError(error);
                         }
-                    } else if (error != null) {
-                        setInError(error);
+                        setCalculating(false);
+                    } finally {
+                        callback.finished(functionGraphNode);
                     }
-                    setCalculating(false);
                 }
 
             };
 
-            CalcInterpreterTask task = new CalcInterpreterTask(codeSB.toString(), parameters, callback);
+            CalcInterpreterTask task = new CalcInterpreterTask(codeSB.toString(), parameters, calcCallback);
 
             CalcInterpreterThread.getCalcInterpreterThread().addTask(task);
 
         } catch (Exception e) {
             setInError(new CalcError(e, null, -1));
             setCalculating(false);
+            callback.finished(functionGraphNode);
         }
 
+    }
+    
+    @Override
+    public void askDisplay(FunctionGraphNode functionGraphNode) {
+        display(functionGraphNode.getPreviousDataName(), getName());
     }
 
     @Override
@@ -197,7 +219,7 @@ public class AdjustPFunction extends AbstractFunction {
         String[] pi0Values = { "Numeric Value", "abh", "bky", "jiang", "histo", "langaas", "pounds", "slim", "st.boot", "st.spline" };
         m_pi0MethodParameter = new ObjectParameter(PI0PARAMETER, "pi0 Method", pi0Values, 0, null);
         
-        m_numericValueParameter = new DoubleParameter(NUMERICVALUEARAMETER, "Pi0 Value", JTextField.class, 1d, 0d, 1d);
+        m_numericValueParameter = new DoubleParameter(NUMERICVALUEARAMETER, "Pi0 Value", JTextField.class, 1d, 0d, 1d); 
         m_alphaParameter = new DoubleParameter(ALPHAPARAMETER, "Alpha", JTextField.class, 0.05, 0d, 1d);
         m_nbinsParameter = new IntegerParameter(NBBINSPARAMETER, "Number of Bins", JSpinner.class, 20, 5, 100);
         m_pzParameter = new DoubleParameter(PZPARAMETER, "Pz", JTextField.class, 0.05, 0.01, 0.1);
@@ -252,6 +274,11 @@ public class AdjustPFunction extends AbstractFunction {
 
     @Override
     public boolean settingsDone() {
+        
+        if (m_parameters == null) {
+            return false;
+        }
+        
         if (m_columnsParameter1 == null) {
             return false;
         }
@@ -265,7 +292,7 @@ public class AdjustPFunction extends AbstractFunction {
     }
 
     @Override
-    public ParameterError checkParameters() {
+    public ParameterError checkParameters(AbstractGraphObject[] graphObjects) {
         return null;
     }
     

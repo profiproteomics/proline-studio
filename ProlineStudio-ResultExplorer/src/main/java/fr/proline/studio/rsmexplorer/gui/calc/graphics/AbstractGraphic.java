@@ -1,6 +1,5 @@
 package fr.proline.studio.rsmexplorer.gui.calc.graphics;
 
-import fr.proline.studio.parameter.ParameterError;
 import fr.proline.studio.parameter.ParameterList;
 import fr.proline.studio.pattern.WindowBox;
 import fr.proline.studio.pattern.WindowBoxFactory;
@@ -8,14 +7,13 @@ import fr.proline.studio.python.interpreter.CalcError;
 import fr.proline.studio.rserver.dialog.ImageViewerTopComponent;
 import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
 import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
+import fr.proline.studio.rsmexplorer.gui.calc.ProcessCallbackInterface;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.AbstractGraphObject;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphicGraphNode;
 import fr.proline.studio.rsmexplorer.gui.calc.parameters.CheckParameterInterface;
 import fr.proline.studio.rsmexplorer.gui.calc.parameters.FunctionParametersDialog;
 import fr.proline.studio.utils.IconManager;
 import java.awt.Image;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import javax.swing.ImageIcon;
 import org.openide.windows.WindowManager;
 
@@ -32,6 +30,7 @@ public abstract class AbstractGraphic implements CheckParameterInterface {
     protected ParameterList[] m_parameters = null;
 
     private boolean m_calculating = false;
+    private boolean m_settingsBeingDone = false;
     private boolean m_inError = false;
     private String m_errorMessage = null;
     
@@ -54,14 +53,15 @@ public abstract class AbstractGraphic implements CheckParameterInterface {
         return m_graphicsModelInterface;
     }
 
-    public abstract void process(AbstractGraphObject[] graphObjects, GraphicGraphNode graphicGraphNode, boolean display);
+    public abstract void process(AbstractGraphObject[] graphObjects, GraphicGraphNode graphicGraphNode, ProcessCallbackInterface callback);
     public abstract void generateDefaultParameters(AbstractGraphObject[] graphObjects);
     public abstract void userParametersChanged();
     public abstract AbstractGraphic cloneGraphic(GraphPanel p);
     
 
         
-    protected void display(String dataName, String functionName) {
+    public void display(String dataName) {
+        String functionName = getName();
         if (m_generatedImage != null) {
             ImageViewerTopComponent win = new ImageViewerTopComponent(dataName + " " + functionName, m_generatedImage);
             win.open();
@@ -81,6 +81,9 @@ public abstract class AbstractGraphic implements CheckParameterInterface {
     }
     public boolean inError() {
         return m_inError;
+    }
+    public boolean isSettingsBeingDone() {
+        return m_settingsBeingDone;
     }
     
     protected void setCalculating(boolean v) {
@@ -119,14 +122,19 @@ public abstract class AbstractGraphic implements CheckParameterInterface {
             return false;
         }
 
-        FunctionParametersDialog dialog = new FunctionParametersDialog(getName(), WindowManager.getDefault().getMainWindow(), m_parameters, this);
-        dialog.centerToWindow(WindowManager.getDefault().getMainWindow());
-        dialog.setVisible(true);
-        if (dialog.getButtonClicked() == FunctionParametersDialog.BUTTON_OK) {
-            userParametersChanged();
-            return true;
+        m_settingsBeingDone = true;
+        try {
+            FunctionParametersDialog dialog = new FunctionParametersDialog(getName(), WindowManager.getDefault().getMainWindow(), m_parameters, this, graphObjects);
+            dialog.centerToWindow(WindowManager.getDefault().getMainWindow());
+            dialog.setVisible(true);
+            if (dialog.getButtonClicked() == FunctionParametersDialog.BUTTON_OK) {
+                userParametersChanged();
+                return true;
+            }
+            return false;
+        } finally {
+            m_settingsBeingDone = false;
         }
-        return false;
     }
 
     

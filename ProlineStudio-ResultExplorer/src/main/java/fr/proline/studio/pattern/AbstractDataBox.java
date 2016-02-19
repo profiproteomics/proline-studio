@@ -92,7 +92,7 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
         DataboxRsmPSMOfPeptide(20),
         DataboxXicProteinSet(21),
         DataboxRsetMSDiag(22),
-        DataboxSelectCompareData(23),
+        //DataboxSelectCompareData(23),
         DataboxCompareResult(24),
         DataboxXicPeptideSet(25),
         DataboxXicPeptideIon(26),
@@ -170,8 +170,6 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
                     return new DataboxXicPeptideSet();
                 case DataboxRsetMSDiag:
                 	return new DataBoxRsetMSDiag(null);
-                case DataboxSelectCompareData:
-                    return new DataboxSelectCompareData();
                 case DataboxXicPeptideIon:
                     return new DataboxXicPeptideIon();
                 case DataboxGraphics:

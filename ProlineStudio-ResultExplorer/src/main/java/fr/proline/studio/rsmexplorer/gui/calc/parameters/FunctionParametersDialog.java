@@ -3,7 +3,7 @@ package fr.proline.studio.rsmexplorer.gui.calc.parameters;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.parameter.ParameterError;
 import fr.proline.studio.parameter.ParameterList;
-import fr.proline.studio.rsmexplorer.gui.calc.functions.AbstractFunction;
+import fr.proline.studio.rsmexplorer.gui.calc.graph.AbstractGraphObject;
 import fr.proline.studio.utils.IconManager;
 import java.awt.Dialog;
 import java.awt.GridBagConstraints;
@@ -19,14 +19,16 @@ public class FunctionParametersDialog extends DefaultDialog {
     
     private final ParameterList[] m_parameterList;
     private final CheckParameterInterface m_checkParamInterface;
+    private final AbstractGraphObject[] m_graphObjects;
     
     private int m_currentPanelNumber = 0;
     
-    public FunctionParametersDialog(String name, Window parent, ParameterList[] parameterList, CheckParameterInterface checkParamInterface) {
+    public FunctionParametersDialog(String name, Window parent, ParameterList[] parameterList, CheckParameterInterface checkParamInterface, AbstractGraphObject[] graphObjects) {
         super(parent, Dialog.ModalityType.APPLICATION_MODAL);
 
         m_parameterList = parameterList;
         m_checkParamInterface = checkParamInterface;
+        m_graphObjects = graphObjects;
         
         setTitle(name+" Settings");
 
@@ -84,7 +86,7 @@ public class FunctionParametersDialog extends DefaultDialog {
         ParameterError error = m_parameterList[m_currentPanelNumber].checkParameters();
         // report error
         if (error == null) {
-            error = m_checkParamInterface.checkParameters();
+            error = m_checkParamInterface.checkParameters(m_graphObjects);
         }
 
         if (error != null) {

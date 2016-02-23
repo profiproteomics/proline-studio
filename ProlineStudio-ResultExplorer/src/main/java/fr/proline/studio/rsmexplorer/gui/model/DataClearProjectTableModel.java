@@ -37,7 +37,7 @@ public class DataClearProjectTableModel extends DecoratedTableModel implements G
     
     
     private static final String[] m_columnNames = {"Selected", "Id", "Type", "Search Result Name",  "Peaklist Path", "MSISearch File Name", "MSISearch File Directory", "SearchDate"};
-    private static final String[] m_toolTipColumns = {"Selected to be deleted", "Id of Search Result/Identification Summary", "Type: Search Result or Identification Summary", "Search Result Name", "Peaklist Path", "MSISearch File Name", "MSISearch File Directory","MSISearch Date"};
+    private static final String[] m_toolTipColumns = {"Should be selected to be deleted", "Id of Search Result/Identification Summary", "Type: Search Result or Identification Summary and decoy or quantitation data", "Search Result Name", "Peaklist Path", "MSISearch File Name", "MSISearch File Directory","MSISearch Date"};
      
 
     private List<ClearProjectData> m_dataToClear;

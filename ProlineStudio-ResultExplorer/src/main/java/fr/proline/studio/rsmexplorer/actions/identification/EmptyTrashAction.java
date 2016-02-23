@@ -42,8 +42,8 @@ public class EmptyTrashAction extends AbstractRSMAction {
     }
     
 
-    @Override
-    public void actionPerformed(AbstractNode[] selectedNodes, int x, int y) {
+//    @Override
+    public void actionPerformedWOClearRsRSM(AbstractNode[] selectedNodes, int x, int y) {
 
         // selected node is the Trash
         final AbstractNode n = selectedNodes[0];
@@ -115,13 +115,12 @@ public class EmptyTrashAction extends AbstractRSMAction {
   
     
     //TODO: replace current actionPerformed with this method to connect the clear rs/rsm data on the empty trash action
-    //@Override
-    public void actionPerformedWithClearRsRsm(AbstractNode[] selectedNodes, int x, int y) {
+    @Override
+    public void actionPerformed(AbstractNode[] selectedNodes, int x, int y) {
 
         // selected node is the Trash
         final AbstractNode n = selectedNodes[0];
-        DataSetNode datasetNode = (DataSetNode) n;
-        final DDataset trashDataset = datasetNode.getDataset();
+        final DDataset trashDataset = ((DataSetNode) n).getDataset();
 
         AbstractTree tree = null;
         boolean identDs = false;
@@ -136,16 +135,17 @@ public class EmptyTrashAction extends AbstractRSMAction {
         if (tree == null) {
             return;
         }
-        final DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
 
+        final DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
         n.setIsChanging(true);
 
-        Long projectId = trashDataset.getProject().getId();
+        Project project = trashDataset.getProject();
+        Long projectId = project.getId();
         List<ClearProjectData> listDataToClear = new ArrayList();
-        List<Long> datasetIds = new ArrayList();
-        List<ClearProjectData> openedData = ProjectExplorerPanel.getOpenedData(projectId);
+        List<ClearProjectData> openedData = ProjectExplorerPanel.getOpenedData(project);
 
-        AbstractDatabaseCallback callbackLoadTrash = new AbstractDatabaseCallback() {
+        AbstractDatabaseCallback loadClearCallback = new AbstractDatabaseCallback() {
+
             @Override
             public boolean mustBeCalledInAWT() {
                 return true;
@@ -153,9 +153,7 @@ public class EmptyTrashAction extends AbstractRSMAction {
 
             @Override
             public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
-
-                AbstractDatabaseCallback loadClearCallback = new AbstractDatabaseCallback() {
-
+                AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
                     @Override
                     public boolean mustBeCalledInAWT() {
                         return true;
@@ -163,104 +161,85 @@ public class EmptyTrashAction extends AbstractRSMAction {
 
                     @Override
                     public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
-                        AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
-                            @Override
-                            public boolean mustBeCalledInAWT() {
-                                return true;
-                            }
+                        n.setIsChanging(false);
+                        if (success) {
 
-                            @Override
-                            public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
-                                n.setIsChanging(false);
-                                if (success) {
+                            n.removeAllChildren();
+                            treeModel.nodeStructureChanged(n);
 
-                                    n.removeAllChildren();
-                                    treeModel.nodeStructureChanged(n);
-                                    
-                                    ClearProjectDialog clearProjectDialog = new ClearProjectDialog(WindowManager.getDefault().getMainWindow(), trashDataset.getProject(), listDataToClear);
-                                    clearProjectDialog.setLocation(x, y);
-                                    DefaultDialog.ProgressTask task = new DefaultDialog.ProgressTask() {
-                                        @Override
-                                        public int getMinValue() {
-                                            return 0;
-                                        }
+                            ClearProjectDialog clearProjectDialog = new ClearProjectDialog(WindowManager.getDefault().getMainWindow(), trashDataset.getProject(), listDataToClear);
+                            clearProjectDialog.setLocation(x, y);
+                            DefaultDialog.ProgressTask task = new DefaultDialog.ProgressTask() {
+                                @Override
+                                public int getMinValue() {
+                                    return 0;
+                                }
 
-                                        @Override
-                                        public int getMaxValue() {
-                                            return 100;
-                                        }
+                                @Override
+                                public int getMaxValue() {
+                                    return 100;
+                                }
 
-                                        @Override
-                                        protected Object doInBackground() throws Exception {
-                                            if ((clearProjectDialog.canModifyValues())) {
-                                                List<ClearProjectData> dataToClear = clearProjectDialog.getSelectedData();
+                                @Override
+                                protected Object doInBackground() throws Exception {
+                                    if ((clearProjectDialog.canModifyValues())) {
+                                        List<ClearProjectData> dataToClear = clearProjectDialog.getSelectedData();
 
-                                                List<Long> rsmIds = new ArrayList();
-                                                List<Long> rsIds = new ArrayList();
-                                                dataToClear.stream().forEach((d) -> {
-                                                    if (d.isResultSet()) {
-                                                        rsIds.add(d.getResultSet().getId());
-                                                    } else if (d.isResultSummary()) {
-                                                        rsmIds.add(d.getResultSummary().getId());
-                                                    }
-                                                });
+                                        List<Long> rsmIds = new ArrayList();
+                                        List<Long> rsIds = new ArrayList();
+                                        dataToClear.stream().forEach((d) -> {
+                                            if (d.isResultSet()) {
+                                                rsIds.add(d.getResultSet().getId());
+                                            } else if (d.isResultSummary()) {
+                                                rsmIds.add(d.getResultSummary().getId());
+                                            }
+                                        });
 
-                                                boolean isJMSDefined = JMSConnectionManager.getJMSConnectionManager().isJMSDefined();
-                                                if (isJMSDefined) {
-                                                    AbstractJMSCallback clearCallBack = new AbstractJMSCallback() {
+                                        boolean isJMSDefined = JMSConnectionManager.getJMSConnectionManager().isJMSDefined();
+                                        if (isJMSDefined) {
+                                            AbstractJMSCallback clearCallBack = new AbstractJMSCallback() {
 
-                                                        @Override
-                                                        public boolean mustBeCalledInAWT() {
-                                                            return true;
-                                                        }
+                                                @Override
+                                                public boolean mustBeCalledInAWT() {
+                                                    return true;
+                                                }
 
-                                                        @Override
-                                                        public void run(boolean success) {
-                                                            setProgress(100);
-                                                        }
-
-                                                    };
-                                                    // clear db on server's side
-                                                    ClearProjectTask clearTaskDb = new ClearProjectTask(clearCallBack, projectId, rsmIds, rsIds);
-                                                    AccessJMSManagerThread.getAccessJMSManagerThread().addTask(clearTaskDb);
-                                                } else {
+                                                @Override
+                                                public void run(boolean success) {
                                                     setProgress(100);
                                                 }
-                                            }
-                                            return null;
-                                        }
-                                    };
-                                    clearProjectDialog.setTask(task);
-                                    clearProjectDialog.setVisible(true);
-                        
-                                } else {
-                                    treeModel.nodeChanged(n);
-                                }
-                                
-                                
-                            }
-                        };
-                        // remove dataset
-                        DatabaseDataSetTask task = new DatabaseDataSetTask(callback);
-                        task.initEmptyTrash(trashDataset, identificationDataset);
-                        AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
-                                
 
-                        
+                                            };
+                                            // clear db on server's side
+                                            ClearProjectTask clearTaskDb = new ClearProjectTask(clearCallBack, projectId, rsmIds, rsIds);
+                                            AccessJMSManagerThread.getAccessJMSManagerThread().addTask(clearTaskDb);
+                                        } else {
+                                            setProgress(100);
+                                        }
+                                    }
+                                    return null;
+                                }
+                            };
+                            clearProjectDialog.setTask(task);
+                            clearProjectDialog.setVisible(true);
+
+                        } else {
+                            treeModel.nodeChanged(n);
+                        }
+
                     }
                 };
-                // load clear data
-                DatabaseClearProjectTask clearDsTask = new DatabaseClearProjectTask(loadClearCallback);
-                clearDsTask.initLoadDataToClearTrash(projectId, datasetIds, listDataToClear, openedData);
-                AccessDatabaseThread.getAccessDatabaseThread().addTask(clearDsTask);
+                // remove dataset
+                DatabaseDataSetTask task = new DatabaseDataSetTask(callback);
+                task.initEmptyTrash(trashDataset, identificationDataset);
+                AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
 
             }
         };
-
-        // load ds and all rsm/rs which are in the trash
-        DatabaseClearProjectTask taskLoadTrash = new DatabaseClearProjectTask(callbackLoadTrash);
-        taskLoadTrash.initLoadDataInTrash(projectId, trashDataset.getId(), datasetIds);
-        AccessDatabaseThread.getAccessDatabaseThread().addTask(taskLoadTrash);
+        // load clear data
+        DatabaseClearProjectTask clearDsTask = new DatabaseClearProjectTask(loadClearCallback);
+        clearDsTask.initLoadDataToClearTrash(projectId, listDataToClear, openedData);
+        AccessDatabaseThread.getAccessDatabaseThread().addTask(clearDsTask);
 
     }
     

@@ -60,7 +60,7 @@ public class DisplayAllRsetAction extends AbstractRSMAction {
     private TopComponent findTopComponent(String name) {
         Set<TopComponent> openTopComponents = WindowManager.getDefault().getRegistry().getOpened();
         for (TopComponent tc : openTopComponents) {
-            if (tc.getName().compareTo(name) == 0) {
+            if (tc.getName().startsWith(name)) {
                 return tc;
             }
         }

@@ -7,6 +7,8 @@ import java.awt.GridBagLayout;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.prefs.Preferences;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.swing.*;
 import org.openide.util.NbPreferences;
 
@@ -21,11 +23,12 @@ public class ChangeTypicalProteinPanel extends javax.swing.JPanel {
     
     private JTextField[] m_regexTextFields = null;
     private JComboBox[] m_regexTargetComboboxs = null;
+    private JCheckBox[] m_allowFullRegexCheckBoxs = null;
 
     public ChangeTypicalProteinPanel() {         
         m_regexTextFields = new JTextField[NBR_MAX_RULES];
         m_regexTargetComboboxs = new JComboBox[NBR_MAX_RULES];
-        
+        m_allowFullRegexCheckBoxs = new JCheckBox[NBR_MAX_RULES];
         createPanel();
     }
         
@@ -96,6 +99,10 @@ public class ChangeTypicalProteinPanel extends javax.swing.JPanel {
         c.gridx++;
         rulePanel.add(m_regexTargetComboboxs[ruleIndex], c);
                 
+        c.gridx = 0;
+        c.gridy++;
+        m_allowFullRegexCheckBoxs[ruleIndex] = new JCheckBox("advanced RegEx", false);
+        rulePanel.add(m_allowFullRegexCheckBoxs[ruleIndex], c);
         
         return rulePanel;
     }
@@ -104,6 +111,7 @@ public class ChangeTypicalProteinPanel extends javax.swing.JPanel {
         for(int i=0; i<NBR_MAX_RULES; i++){
             m_regexTextFields[i].setEnabled(enabled);
             m_regexTargetComboboxs[i].setEnabled(enabled);
+            m_allowFullRegexCheckBoxs[i].setEnabled(enabled);
         }
     }
     
@@ -111,7 +119,11 @@ public class ChangeTypicalProteinPanel extends javax.swing.JPanel {
         ArrayList<ChangeTypicalRule> m_changeTypicalRules = new ArrayList<>(NBR_MAX_RULES);
         for(int i=0; i<NBR_MAX_RULES; i++){
             if(!m_regexTextFields[i].getText().trim().isEmpty() && !m_regexTextFields[i].getText().trim().equals("*")){
-                m_changeTypicalRules.add(i, new ChangeTypicalRule(wildcardToRegex(m_regexTextFields[i].getText().trim()), m_regexTargetComboboxs[i].getSelectedIndex() == 0));
+                if(m_allowFullRegexCheckBoxs[i].isSelected()){
+                    m_changeTypicalRules.add(i, new ChangeTypicalRule(m_regexTextFields[i].getText().trim(), m_regexTargetComboboxs[i].getSelectedIndex() == 0));
+                } else {
+                    m_changeTypicalRules.add(i, new ChangeTypicalRule(wildcardToRegex(m_regexTextFields[i].getText().trim()), m_regexTargetComboboxs[i].getSelectedIndex() == 0));
+                }
             }
         }
         return m_changeTypicalRules;
@@ -119,7 +131,6 @@ public class ChangeTypicalProteinPanel extends javax.swing.JPanel {
     
     private String wildcardToRegex(String text) {
         String escapedText = "^"+escapeRegex(text)+"$";
-        
         String wildcardsFilter = escapedText.replaceAll("\\*", ".*").replaceAll("\\?", ".");
         return wildcardsFilter;
     } 

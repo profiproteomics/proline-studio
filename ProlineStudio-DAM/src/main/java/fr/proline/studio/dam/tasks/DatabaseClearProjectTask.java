@@ -107,8 +107,8 @@ public class DatabaseClearProjectTask extends AbstractDatabaseTask {
     private boolean loadDataToClear(long projectId, boolean clearTrashDataOnly, List<ClearProjectData> dataToClear, List<ClearProjectData> openedData){
         boolean result = true;
 
-        EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(projectId).getEntityManagerFactory().createEntityManager();
-        EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().getEntityManagerFactory().createEntityManager();
+        EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(projectId).createEntityManager();
+        EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().createEntityManager();
         try {
             
             List<Long> dsInTrash = new ArrayList<>();
@@ -409,7 +409,7 @@ public class DatabaseClearProjectTask extends AbstractDatabaseTask {
     private boolean loadDataInTrash(Long trash_Id, List<Long> trashDatasetIds) {
         m_logger.info("loadDataInTrash "+trash_Id);
         boolean result = true;
-        EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().getEntityManagerFactory().createEntityManager();
+        EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().createEntityManager();
         try {
             Dataset ds = entityManagerUDS.find(Dataset.class, trash_Id);
             List<Dataset> children = ds.getChildren();

@@ -151,7 +151,7 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseSlicerTas
             return true; // nothing to do : should not happen
         }
 
-        EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(m_projectId).getEntityManagerFactory().createEntityManager();
+        EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(m_projectId).createEntityManager();
         try {
 
             entityManagerMSI.getTransaction().begin();
@@ -187,7 +187,7 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseSlicerTas
         
          HashMap<Long, Peptide> peptideMap = new HashMap<>();
         
-        EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(m_projectId).getEntityManagerFactory().createEntityManager();
+        EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(m_projectId).createEntityManager();
 
         try {
 
@@ -354,7 +354,7 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseSlicerTas
     public boolean fetchDataForPeptideMatch() {
 
         HashMap<Long, Peptide> peptideMap = new HashMap<>();
-        EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(m_projectId).getEntityManagerFactory().createEntityManager();
+        EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(m_projectId).createEntityManager();
 
         try {
 
@@ -388,7 +388,7 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseSlicerTas
  
         
         if (!peptideMap.isEmpty()) {
-            EntityManager entityManagerPS = DataStoreConnectorFactory.getInstance().getPsDbConnector().getEntityManagerFactory().createEntityManager();  
+            EntityManager entityManagerPS = DataStoreConnectorFactory.getInstance().getPsDbConnector().createEntityManager();  
             try {
 
                 entityManagerPS.getTransaction().begin();

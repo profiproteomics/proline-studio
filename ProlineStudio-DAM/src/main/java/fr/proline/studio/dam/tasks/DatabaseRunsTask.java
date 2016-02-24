@@ -133,7 +133,7 @@ public class DatabaseRunsTask extends AbstractDatabaseTask {
     }
     
     public boolean fetchRunForRsm() {
-        EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().getEntityManagerFactory().createEntityManager();
+        EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().createEntityManager();
         try {
             entityManagerUDS.getTransaction().begin();
             //Get Run and Raw File
@@ -166,7 +166,7 @@ public class DatabaseRunsTask extends AbstractDatabaseTask {
 
     
     public boolean fetchPeaklistPath() {
-        EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(m_projectId).getEntityManagerFactory().createEntityManager();
+        EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(m_projectId).createEntityManager();
         try {
 
             entityManagerMSI.getTransaction().begin();
@@ -221,7 +221,7 @@ public class DatabaseRunsTask extends AbstractDatabaseTask {
     }
     
     public boolean searchRawFile() {
-        EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().getEntityManagerFactory().createEntityManager();
+        EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().createEntityManager();
         try {
             entityManagerUDS.getTransaction().begin();
             
@@ -256,7 +256,7 @@ public class DatabaseRunsTask extends AbstractDatabaseTask {
     }
     
     private boolean loadRawFile() {
-        EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().getEntityManagerFactory().createEntityManager();
+        EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().createEntityManager();
         try {
             entityManagerUDS.getTransaction().begin();
 
@@ -285,7 +285,7 @@ public class DatabaseRunsTask extends AbstractDatabaseTask {
     }
     
     public boolean registerIdentificationDatasetRun() {
-        EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().getEntityManagerFactory().createEntityManager();
+        EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().createEntityManager();
         try {
             entityManagerUDS.getTransaction().begin();
             IdentificationDataset idf = entityManagerUDS.find(IdentificationDataset.class, m_datasetId);

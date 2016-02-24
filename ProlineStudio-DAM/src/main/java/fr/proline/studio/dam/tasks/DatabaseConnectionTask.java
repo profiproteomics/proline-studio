@@ -145,7 +145,7 @@ public class DatabaseConnectionTask extends AbstractDatabaseTask {
                 
                 // Load needed static data from UDS
                 
-                EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().getEntityManagerFactory().createEntityManager();
+                EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().createEntityManager();
 
                 // Load all users
                 try {
@@ -212,7 +212,7 @@ public class DatabaseConnectionTask extends AbstractDatabaseTask {
                 }
                 
                 // load needed UDS Data
-                EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().getEntityManagerFactory().createEntityManager();
+                EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().createEntityManager();
                 if (!loadUDSData(entityManagerUDS)) {
                     return false;
                 }
@@ -220,12 +220,12 @@ public class DatabaseConnectionTask extends AbstractDatabaseTask {
             } else if (action == MSI_CONNECTION) {
                 try {
                     // MSI Connection
-                    EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(m_projectId).getEntityManagerFactory().createEntityManager();
+                    EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(m_projectId).createEntityManager();
                     entityManagerMSI.close();
 
                     
                     // PS Connection
-                    EntityManager entityManagerPS = DataStoreConnectorFactory.getInstance().getPsDbConnector().getEntityManagerFactory().createEntityManager();
+                    EntityManager entityManagerPS = DataStoreConnectorFactory.getInstance().getPsDbConnector().createEntityManager();
                     entityManagerPS.close();
                 } catch (Exception e) {
                     m_logger.error(getClass().getSimpleName() + " failed", e);
@@ -235,7 +235,7 @@ public class DatabaseConnectionTask extends AbstractDatabaseTask {
             } /*else if (action == PDI_CONNECTION) {
                 try {
                     // MSI Connection
-                    EntityManager entityManagerPDI = DataStoreConnectorFactory.getInstance().getPdiDbConnector().getEntityManagerFactory().createEntityManager();
+                    EntityManager entityManagerPDI = DataStoreConnectorFactory.getInstance().getPdiDbConnector().createEntityManager();
                     entityManagerPDI.close();
 
                 } catch (Exception e) {

@@ -64,7 +64,7 @@ public class DatabasePTMProteinSiteTask extends AbstractDatabaseTask {
     }
 
     private boolean fetchAllProteinSets() {
-        EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(m_projectId).getEntityManagerFactory().createEntityManager();
+        EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(m_projectId).createEntityManager();
         try {
 
             entityManagerMSI.getTransaction().begin();
@@ -269,7 +269,7 @@ public class DatabasePTMProteinSiteTask extends AbstractDatabaseTask {
             return true; // already loaded
         }
 
-        EntityManager entityManagerPS = DataStoreConnectorFactory.getInstance().getPsDbConnector().getEntityManagerFactory().createEntityManager();
+        EntityManager entityManagerPS = DataStoreConnectorFactory.getInstance().getPsDbConnector().createEntityManager();
         try {
 
             entityManagerPS.getTransaction().begin();
@@ -307,7 +307,7 @@ public class DatabasePTMProteinSiteTask extends AbstractDatabaseTask {
     private HashMap<Long, ArrayList<DPeptidePTM>> fetchPTMDataForPeptides(ArrayList<Long> allPeptidesIds) {
 
 
-        EntityManager entityManagerPS = DataStoreConnectorFactory.getInstance().getPsDbConnector().getEntityManagerFactory().createEntityManager();
+        EntityManager entityManagerPS = DataStoreConnectorFactory.getInstance().getPsDbConnector().createEntityManager();
         try {
 
             entityManagerPS.getTransaction().begin();

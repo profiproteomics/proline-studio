@@ -35,7 +35,7 @@ public class DatabaseObjectTreeTask extends AbstractDatabaseTask {
         boolean result = true;
         ObjectTree ot = null;
 
-        EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(m_projectId).getEntityManagerFactory().createEntityManager();
+        EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(m_projectId).createEntityManager();
         try {
             entityManagerMSI.getTransaction().begin();
 

@@ -96,7 +96,7 @@ public class DatabaseLoadMSQueriesTask extends AbstractDatabaseSlicerTask {
      * @return
      */
     private boolean fetchDataMSQueriesMainTask() {
-        EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(m_projectId).getEntityManagerFactory().createEntityManager();
+        EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(m_projectId).createEntityManager();
         try {
             entityManagerMSI.getTransaction().begin();
             if (m_resultSet != null){
@@ -173,7 +173,7 @@ public class DatabaseLoadMSQueriesTask extends AbstractDatabaseSlicerTask {
             return true; // nothing to do : should not happen
         }
 
-        EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(m_projectId).getEntityManagerFactory().createEntityManager();
+        EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(m_projectId).createEntityManager();
         try {
             entityManagerMSI.getTransaction().begin();
             switch (slice.getSubTaskId()) {

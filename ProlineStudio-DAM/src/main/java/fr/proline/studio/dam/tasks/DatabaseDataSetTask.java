@@ -389,7 +389,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
         HashMap<Long, DDataset> ddatasetMap = new HashMap<>();
         ArrayList<Long> rsetIdList = new ArrayList<>();
         
-        EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().getEntityManagerFactory().createEntityManager();  
+        EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().createEntityManager();  
         try {
             entityManagerUDS.getTransaction().begin();
 
@@ -563,7 +563,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
 
         ArrayList<Long> rsetIdList = new ArrayList<>();
         
-        EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().getEntityManagerFactory().createEntityManager();  
+        EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().createEntityManager();  
         try {
             entityManagerUDS.getTransaction().begin();
 
@@ -657,7 +657,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
         private boolean completeMergeInfo(Long projectId, ArrayList<Long> rsetIdList) {
         if (!m_list.isEmpty() && !rsetIdList.isEmpty()) {
             // fetch if there is a merged rsm
-            EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(projectId).getEntityManagerFactory().createEntityManager();
+            EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(projectId).createEntityManager();
             try {
 
                 entityManagerMSI.getTransaction().begin();
@@ -721,7 +721,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
             projectId = m_datasetList.get(0).getProject().getId();
         }
         
-        EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(projectId).getEntityManagerFactory().createEntityManager();       
+        EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(projectId).createEntityManager();       
         try {
 
             entityManagerMSI.getTransaction().begin();
@@ -754,9 +754,9 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
     }
         
     public boolean fetchQuantitation() {
-        EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().getEntityManagerFactory().createEntityManager();       
-        EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(m_project.getId()).getEntityManagerFactory().createEntityManager();
-        EntityManager entityManagerLCMS = DataStoreConnectorFactory.getInstance().getLcMsDbConnector(m_project.getId()).getEntityManagerFactory().createEntityManager();
+        EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().createEntityManager();       
+        EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(m_project.getId()).createEntityManager();
+        EntityManager entityManagerLCMS = DataStoreConnectorFactory.getInstance().getLcMsDbConnector(m_project.getId()).createEntityManager();
         try {
 
             entityManagerUDS.getTransaction().begin();
@@ -878,7 +878,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
         Long rsmId = rsm.getId();
 
         
-        EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().getEntityManagerFactory().createEntityManager();  
+        EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().createEntityManager();  
         try {
             entityManagerUDS.getTransaction().begin();
 
@@ -911,7 +911,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
     
     private boolean fetchDataset() {
                 
-        EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().getEntityManagerFactory().createEntityManager();
+        EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().createEntityManager();
 
         try {
             entityManagerUDS.getTransaction().begin();
@@ -958,7 +958,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
     
     private boolean fetchDatasetWithIDAndRSMInfo() {
         
-        EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().getEntityManagerFactory().createEntityManager();  
+        EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().createEntityManager();  
         
         try {
             entityManagerUDS.getTransaction().begin();
@@ -1080,7 +1080,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
     private boolean renameDataset() {
         
             
-        EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().getEntityManagerFactory().createEntityManager();  
+        EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().createEntityManager();  
         try {
             entityManagerUDS.getTransaction().begin();
 
@@ -1111,7 +1111,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
     private boolean clearDataset() {
 
 
-        EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().getEntityManagerFactory().createEntityManager();
+        EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().createEntityManager();
         try {
             entityManagerUDS.getTransaction().begin();
 
@@ -1147,7 +1147,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
                  
         synchronized(WRITE_DATASET_LOCK) {
         
-            EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().getEntityManagerFactory().createEntityManager();
+            EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().createEntityManager();
             try {
                 entityManagerUDS.getTransaction().begin();
 
@@ -1252,7 +1252,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
         
         synchronized(WRITE_DATASET_LOCK) {
         
-            EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().getEntityManagerFactory().createEntityManager();
+            EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().createEntityManager();
             try {
                 entityManagerUDS.getTransaction().begin();
 
@@ -1287,7 +1287,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
 
         synchronized (WRITE_DATASET_LOCK) {
 
-            EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().getEntityManagerFactory().createEntityManager();
+            EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().createEntityManager();
             try {
                 entityManagerUDS.getTransaction().begin();
 
@@ -1327,7 +1327,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
 
         synchronized (WRITE_DATASET_LOCK) {
 
-            EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().getEntityManagerFactory().createEntityManager();
+            EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().createEntityManager();
             try {
                 entityManagerUDS.getTransaction().begin();
 
@@ -1363,7 +1363,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
 
     private boolean emptyTrash() {
         synchronized (WRITE_DATASET_LOCK) {
-            EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().getEntityManagerFactory().createEntityManager();
+            EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().createEntityManager();
             try {
                 entityManagerUDS.getTransaction().begin();
 
@@ -1431,7 +1431,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
      * @return 
      */
     public static boolean updateDatasetAndProjectsTree(LinkedHashMap<Object, ArrayList<DDataset>> databaseObjectsToModify, boolean identificationTree) {
-        EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().getEntityManagerFactory().createEntityManager();
+        EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().createEntityManager();
         try {
             entityManagerUDS.getTransaction().begin();
 

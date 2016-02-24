@@ -52,7 +52,7 @@ public class DatabaseLoadSpectrumsTask extends AbstractDatabaseTask {
     @Override
     public boolean fetchData() {
 
-        EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(m_projectId).getEntityManagerFactory().createEntityManager();
+        EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(m_projectId).createEntityManager();
         try {
 
             entityManagerMSI.getTransaction().begin();

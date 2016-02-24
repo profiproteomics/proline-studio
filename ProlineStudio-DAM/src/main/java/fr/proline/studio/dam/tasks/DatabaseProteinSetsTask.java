@@ -140,7 +140,7 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
      * @return
      */
     private boolean fetchDataMainTaskForRSM() {
-        EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(m_projectId).getEntityManagerFactory().createEntityManager();
+        EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(m_projectId).createEntityManager();
         try {
 
             entityManagerMSI.getTransaction().begin();
@@ -256,7 +256,7 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
         
         m_projectId = m_dataset.getProject().getId();
         
-        EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(m_projectId).getEntityManagerFactory().createEntityManager();
+        EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(m_projectId).createEntityManager();
         try {
 
             entityManagerMSI.getTransaction().begin();
@@ -290,7 +290,7 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
     
     
     private boolean fetchDataMainTaskForPeptideInstance() {
-        EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(m_projectId).getEntityManagerFactory().createEntityManager();
+        EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(m_projectId).createEntityManager();
         try {
 
             entityManagerMSI.getTransaction().begin();
@@ -411,7 +411,7 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
         if (slice == null) {
             return true; // nothing to do : should not happen
         }
-        EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(m_projectId).getEntityManagerFactory().createEntityManager();
+        EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(m_projectId).createEntityManager();
         
         try {
 

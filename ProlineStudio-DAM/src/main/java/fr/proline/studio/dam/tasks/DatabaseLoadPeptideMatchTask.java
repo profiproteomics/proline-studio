@@ -190,7 +190,7 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
     
     public boolean fetchAllRsetMainTask() {
 
-        EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(m_projectId).getEntityManagerFactory().createEntityManager();
+        EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(m_projectId).createEntityManager();
         try {
 
             entityManagerMSI.getTransaction().begin();
@@ -289,7 +289,7 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
     
     public boolean fetchPeptidesForProteinRsetMainTask() {
 
-        EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(m_projectId).getEntityManagerFactory().createEntityManager();
+        EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(m_projectId).createEntityManager();
         try {
 
             entityManagerMSI.getTransaction().begin();
@@ -398,7 +398,7 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
     
     public boolean fetchAllRsmMainTask() {
         
-        EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(m_projectId).getEntityManagerFactory().createEntityManager();
+        EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(m_projectId).createEntityManager();
         try {
 
             entityManagerMSI.getTransaction().begin();
@@ -516,7 +516,7 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
     
     private boolean fetchPeptidesForProteinSetRsmMainTask() {
 
-        EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(m_projectId).getEntityManagerFactory().createEntityManager();
+        EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(m_projectId).createEntityManager();
         try {
 
             entityManagerMSI.getTransaction().begin();
@@ -665,7 +665,7 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
     
     private boolean fetchPSMForPeptideInstanceMainTask()  {
 
-        EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(m_projectId).getEntityManagerFactory().createEntityManager();
+        EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(m_projectId).createEntityManager();
         try {
 
             entityManagerMSI.getTransaction().begin();
@@ -793,7 +793,7 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
             return true; // nothing to do : should not happen
         }
 
-        EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(m_projectId).getEntityManagerFactory().createEntityManager();
+        EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(m_projectId).createEntityManager();
         try {
 
             entityManagerMSI.getTransaction().begin();
@@ -914,7 +914,7 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
                 peptideMap.put(peptide.getId(), peptide);
             }
             
-            EntityManager entityManagerPS = DataStoreConnectorFactory.getInstance().getPsDbConnector().getEntityManagerFactory().createEntityManager();
+            EntityManager entityManagerPS = DataStoreConnectorFactory.getInstance().getPsDbConnector().createEntityManager();
             try {
 
                 entityManagerPS.getTransaction().begin();
@@ -1127,7 +1127,7 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
     }
     
     public boolean fetchPSMForMsQueryMainTask() {
-        EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(m_projectId).getEntityManagerFactory().createEntityManager();
+        EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(m_projectId).createEntityManager();
         try {
             entityManagerMSI.getTransaction().begin();
 

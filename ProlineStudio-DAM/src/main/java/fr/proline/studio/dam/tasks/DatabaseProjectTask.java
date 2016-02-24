@@ -89,7 +89,7 @@ public class DatabaseProjectTask extends AbstractDatabaseTask {
 
     private boolean loadProject() {
 
-        EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().getEntityManagerFactory().createEntityManager();
+        EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().createEntityManager();
         boolean result = true;
         try {
             entityManagerUDS.getTransaction().begin();
@@ -139,7 +139,7 @@ public class DatabaseProjectTask extends AbstractDatabaseTask {
 
     private boolean changeProjectSettings() {
 
-        EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().getEntityManagerFactory().createEntityManager();
+        EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().createEntityManager();
         try {
             entityManagerUDS.getTransaction().begin();
 

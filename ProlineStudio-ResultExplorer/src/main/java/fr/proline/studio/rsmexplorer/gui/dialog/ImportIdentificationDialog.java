@@ -974,9 +974,9 @@ public class ImportIdentificationDialog extends DefaultDialog {
     
     private ParameterList createMascotParser() {
         ParameterList parameterList = new ParameterList(MASCOT_PARSER);
-        parameterList.add(new DoubleParameter("ion.score.cutoff", "Ion Score Cutoff", JTextField.class, new Double(0.0), new Double(0), null));
+//        parameterList.add(new DoubleParameter("ion.score.cutoff", "Ion Score Cutoff", JTextField.class, new Double(0.0), new Double(0), null));
         parameterList.add(new DoubleParameter("subset.threshold", "Subset Threshold", JTextField.class, new Double(1.0), new Double(0), new Double(1)));
-        parameterList.add(new StringParameter("mascot.server.url", "Mascot Server URL (including /cgi/)", JTextField.class, "http://www.matrixscience.com/cgi/", null, null));
+//        parameterList.add(new StringParameter("mascot.server.url", "Mascot Server URL (including /cgi/)", JTextField.class, "http://www.matrixscience.com/cgi/", null, null));
         
         return parameterList;
     }

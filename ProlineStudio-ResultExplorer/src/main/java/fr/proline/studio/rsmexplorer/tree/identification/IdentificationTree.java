@@ -40,7 +40,7 @@ import fr.proline.studio.rsmexplorer.actions.identification.FilterRSMProteinSets
 import fr.proline.studio.rsmexplorer.actions.identification.GenerateSpectrumMatchesJMSAction;
 import fr.proline.studio.rsmexplorer.actions.identification.ImportSearchResultAsDatasetAction;
 import fr.proline.studio.rsmexplorer.actions.identification.ImportSearchResultAsDatasetJMSAction;
-//import fr.proline.studio.rsmexplorer.actions.identification.UpdatePeaklistSoftwareAction;
+import fr.proline.studio.rsmexplorer.actions.identification.UpdatePeaklistSoftwareAction;
 import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import fr.proline.studio.rsmexplorer.tree.ChildFactory;
@@ -685,15 +685,12 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
                     m_mainActions.add(generateSpectrumMatchesAction);
                 }
                 
-//                if(isJMSDefined){
-//                    UpdatePeaklistSoftwareAction updatePeaklistSoftAction = new UpdatePeaklistSoftwareAction();
-//                    m_mainActions.add(updatePeaklistSoftAction);
-//                }                
-//                        
-//                if(isJMSDefined){
+                if(isJMSDefined){
+                    UpdatePeaklistSoftwareAction updatePeaklistSoftAction = new UpdatePeaklistSoftwareAction();
+                    m_mainActions.add(updatePeaklistSoftAction);
 //                    RetrieveBioSeqJMSAction retrieveBioSeqAction = new RetrieveBioSeqJMSAction();
 //                    m_mainActions.add(retrieveBioSeqAction);
-//                }
+                }                
                 
                 m_mainActions.add(null);  // separator
                 SpectralCountAction spectralCountAction = new SpectralCountAction(isJMSDefined);

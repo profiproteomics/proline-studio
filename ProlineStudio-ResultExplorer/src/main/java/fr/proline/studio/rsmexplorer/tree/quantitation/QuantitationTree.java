@@ -202,7 +202,7 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
                     // create the actions
                     m_rootActions = new ArrayList<>(1);  // <--- get in sync
                     boolean isJSMDefined = JMSConnectionManager.getJMSConnectionManager().isJMSDefined();
-                    CreateXICAction createXICAction = new CreateXICAction(isJSMDefined);
+                    CreateXICAction createXICAction = new CreateXICAction(false, isJSMDefined);
 
                     m_rootActions.add(createXICAction);
 

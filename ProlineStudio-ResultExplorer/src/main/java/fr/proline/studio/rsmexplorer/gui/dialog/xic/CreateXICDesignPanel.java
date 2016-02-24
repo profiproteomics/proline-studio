@@ -20,11 +20,13 @@ public class CreateXICDesignPanel extends JPanel {
     private static CreateXICDesignPanel m_singleton = null;
     
     private AbstractNode m_rootNode;
+    private IdentificationTree m_selectionTree;
     
-    public static CreateXICDesignPanel getPanel(AbstractNode rootNode) {
-        if((m_singleton == null) || (!m_singleton.m_rootNode.equals(rootNode))){
-            m_singleton = new CreateXICDesignPanel(rootNode);
+    public static CreateXICDesignPanel getPanel(AbstractNode rootNode, IdentificationTree selectionTree) {
+        if((m_singleton == null) || (!m_singleton.m_rootNode.equals(rootNode)) || (!m_singleton.m_selectionTree.equals(selectionTree))){
+            m_singleton = new CreateXICDesignPanel(rootNode,selectionTree);
         }
+       
         return m_singleton;
     }
     
@@ -35,9 +37,9 @@ public class CreateXICDesignPanel extends JPanel {
         throw new IllegalAccessError(" Panel not initialized yet ! ");
     }
     
-    private CreateXICDesignPanel(AbstractNode rootNode) {
+    private CreateXICDesignPanel(AbstractNode rootNode, IdentificationTree selectionTree) {
         m_rootNode = rootNode;
-        
+        m_selectionTree = selectionTree;
         JPanel wizardPanel = createWizardPanel();
         JPanel mainPanel = createMainPanel(rootNode);
         
@@ -174,8 +176,14 @@ public class CreateXICDesignPanel extends JPanel {
         c.weightx = 1;
         c.weighty = 1;
 
-
-        XICSelectionTree tree = new XICSelectionTree(IdentificationTree.getCurrentTree().copyRootNodeForSelection(), true);
+        AbstractNode rootSelectionNode = null;
+        if(m_selectionTree == null)
+            rootSelectionNode = IdentificationTree.getCurrentTree().copyRootNodeForSelection();
+        else 
+            rootSelectionNode = m_selectionTree.copyRootNodeForSelection();
+        
+        
+        XICSelectionTree tree = new XICSelectionTree(rootSelectionNode, true);
         JScrollPane treeScrollPane = new JScrollPane();
         treeScrollPane.setViewportView(tree);
 

@@ -21,6 +21,7 @@ import fr.proline.studio.parameter.ParameterList;
 import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
+import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
 import fr.proline.studio.rsmexplorer.tree.xic.XICBiologicalSampleAnalysisNode;
 import fr.proline.studio.rsmexplorer.tree.xic.XICRunNode;
 import fr.proline.studio.settings.FilePreferences;
@@ -55,7 +56,8 @@ public class CreateXICDialog extends DefaultDialog {
     private static CreateXICDialog m_singletonDialog = null;
     
     private AbstractNode m_finalXICDesignNode = null;
-
+    private IdentificationTree m_selectionTree = null;
+    
     public static CreateXICDialog getDialog(Window parent) {
         if (m_singletonDialog == null) {
             m_singletonDialog = new CreateXICDialog(parent);
@@ -77,6 +79,11 @@ public class CreateXICDialog extends DefaultDialog {
         
     }
     
+    public void setSelectableIdentTree(IdentificationTree selectionTree){
+//        final IdentificationTree childTree = IdentificationTree.getCurrentTree().copyDataSetRootSubTree(refDatasetNode.getDataset(), refDatasetNode.getDataset().getProject().getId());
+        this.m_selectionTree = selectionTree;        
+    }
+    
     public void displayDesignTree() {
         displayDesignTree(new DataSetNode(new DataSetData("XIC", Dataset.DatasetType.QUANTITATION, Aggregation.ChildNature.QUANTITATION_FRACTION)));
     }
@@ -91,7 +98,7 @@ public class CreateXICDialog extends DefaultDialog {
         setButtonVisible(BUTTON_SAVE, false);
         setButtonVisible(BUTTON_BACK, false);
 
-        replaceInternaleComponent(CreateXICDesignPanel.getPanel(m_finalXICDesignNode));
+        replaceInternaleComponent(CreateXICDesignPanel.getPanel(m_finalXICDesignNode, m_selectionTree));
         revalidate();
         repaint();
          

@@ -114,7 +114,7 @@ public class CreateProjectTask extends AbstractJMSTask {
                 m_loggerProline.debug("Result :\n" + result);
             }
             Long projectId = (Long) result;
-            EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().getEntityManagerFactory().createEntityManager();
+            EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().createEntityManager();
             try {
                 entityManagerUDS.getTransaction().begin();
 

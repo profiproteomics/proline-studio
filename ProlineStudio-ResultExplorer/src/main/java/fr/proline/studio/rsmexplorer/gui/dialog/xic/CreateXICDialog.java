@@ -176,7 +176,7 @@ public class CreateXICDialog extends DefaultDialog {
         
         Project project;
         String errorMsg = null;
-        EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().getEntityManagerFactory().createEntityManager();
+        EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().createEntityManager();
         
         try {
             project = entityManagerUDS.find(Project.class, pID);

@@ -61,7 +61,7 @@ public class RegisterRawFileTask extends AbstractJMSTask {
         m_runInfoData = runInfo;
         
         // first we check if the Raw File exists already or not 
-        entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().getEntityManagerFactory().createEntityManager();
+        entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().createEntityManager();
     }
     
     
@@ -170,7 +170,7 @@ public class RegisterRawFileTask extends AbstractJMSTask {
             }
             Long runId = (Long) result;
             
-            entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().getEntityManagerFactory().createEntityManager();
+            entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().createEntityManager();
             try {
                 entityManagerUDS.getTransaction().begin();
 

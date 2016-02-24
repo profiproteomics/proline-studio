@@ -50,7 +50,7 @@ public class RegisterRawFileTask extends AbstractServiceTask {
     public boolean askService() {
         
         // first we check if the Raw File exists already or not 
-        EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().getEntityManagerFactory().createEntityManager();
+        EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().createEntityManager();
         try {
             entityManagerUDS.getTransaction().begin();
         
@@ -146,7 +146,7 @@ public class RegisterRawFileTask extends AbstractServiceTask {
             return false;
         }
         
-        entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().getEntityManagerFactory().createEntityManager();
+        entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().createEntityManager();
         try {
             entityManagerUDS.getTransaction().begin();
         

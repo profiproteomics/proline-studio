@@ -142,7 +142,7 @@ public class XICRunNode extends AbstractNode {
         
         // look if we find a Raw File
         if (dataset.getType() == Dataset.DatasetType.IDENTIFICATION) {
-            EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().getEntityManagerFactory().createEntityManager();
+            EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().createEntityManager();
             try {
                 entityManagerUDS.getTransaction().begin();
 

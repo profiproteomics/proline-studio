@@ -19,6 +19,7 @@ import fr.proline.studio.rsmexplorer.actions.identification.ChangeTypicalProtein
 import fr.proline.studio.rsmexplorer.actions.identification.ImportSearchResultAsRsetJMSAction;
 import fr.proline.studio.rsmexplorer.actions.identification.MergeJMSAction;
 import fr.proline.studio.rsmexplorer.actions.identification.ValidateJMSAction;
+//import fr.proline.studio.rsmexplorer.actions.identification.RetrieveBioSeqJMSAction;
 import fr.proline.core.orm.msi.ResultSet;
 import fr.proline.core.orm.uds.Project;
 import fr.proline.core.orm.uds.dto.DDataset;
@@ -32,12 +33,14 @@ import fr.proline.studio.dpm.task.util.JMSConnectionManager;
 import fr.proline.studio.gui.DatasetAction;
 import fr.proline.studio.rsmexplorer.actions.identification.AggregateAction;
 import fr.proline.studio.rsmexplorer.actions.identification.ClearDatasetAction;
+import fr.proline.studio.rsmexplorer.actions.identification.CreateXICAction;
 import fr.proline.studio.rsmexplorer.actions.identification.ExportAction;
 import fr.proline.studio.rsmexplorer.actions.identification.FilterRSMProteinSetsAction;
 import fr.proline.studio.rsmexplorer.actions.identification.FilterRSMProteinSetsJMSAction;
 import fr.proline.studio.rsmexplorer.actions.identification.GenerateSpectrumMatchesJMSAction;
 import fr.proline.studio.rsmexplorer.actions.identification.ImportSearchResultAsDatasetAction;
 import fr.proline.studio.rsmexplorer.actions.identification.ImportSearchResultAsDatasetJMSAction;
+//import fr.proline.studio.rsmexplorer.actions.identification.UpdatePeaklistSoftwareAction;
 import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import fr.proline.studio.rsmexplorer.tree.ChildFactory;
@@ -607,7 +610,7 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
                 // create the actions
 
 
-                m_mainActions = new ArrayList<>(19);  // <--- get in sync
+                m_mainActions = new ArrayList<>(24);  // <--- get in sync
 
                 boolean isJMSDefined = JMSConnectionManager.getJMSConnectionManager().isJMSDefined();
 
@@ -673,6 +676,7 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
                     m_mainActions.add(changeTypicalProteinAction);
                 }
                 
+                m_mainActions.add(null);  // separator
                 if (isJMSDefined) {
                     GenerateSpectrumMatchesJMSAction generateSpectrumMatchesAction = new GenerateSpectrumMatchesJMSAction(AbstractTree.TreeType.TREE_IDENTIFICATION);
                     m_mainActions.add(generateSpectrumMatchesAction);
@@ -681,8 +685,22 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
                     m_mainActions.add(generateSpectrumMatchesAction);
                 }
                 
+//                if(isJMSDefined){
+//                    UpdatePeaklistSoftwareAction updatePeaklistSoftAction = new UpdatePeaklistSoftwareAction();
+//                    m_mainActions.add(updatePeaklistSoftAction);
+//                }                
+//                        
+//                if(isJMSDefined){
+//                    RetrieveBioSeqJMSAction retrieveBioSeqAction = new RetrieveBioSeqJMSAction();
+//                    m_mainActions.add(retrieveBioSeqAction);
+//                }
+                
+                m_mainActions.add(null);  // separator
                 SpectralCountAction spectralCountAction = new SpectralCountAction(isJMSDefined);
                 m_mainActions.add(spectralCountAction);
+                
+               CreateXICAction createXICAction = new CreateXICAction(false, isJMSDefined,AbstractTree.TreeType.TREE_IDENTIFICATION);
+                m_mainActions.add(createXICAction);
                 
                 m_mainActions.add(null);  // separator
                 

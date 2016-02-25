@@ -21,7 +21,6 @@ import static fr.proline.studio.dpm.task.jms.AbstractJMSTask.m_loggerProline;
 import fr.proline.studio.dpm.task.util.JMSConnectionManager;
 import java.io.File;
 import java.util.HashMap;
-import java.util.Map;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.TextMessage;

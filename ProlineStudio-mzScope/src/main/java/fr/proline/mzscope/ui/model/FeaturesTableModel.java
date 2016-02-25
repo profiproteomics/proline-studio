@@ -2,7 +2,6 @@ package fr.proline.mzscope.ui.model;
 
 import fr.profi.mzdb.model.Feature;
 import fr.proline.mzscope.model.IFeature;
-import fr.proline.mzscope.model.IRawFile;
 import fr.proline.mzscope.utils.NumberFormatter;
 import fr.proline.studio.comparedata.ExtraDataType;
 import fr.proline.studio.filter.DoubleFilter;

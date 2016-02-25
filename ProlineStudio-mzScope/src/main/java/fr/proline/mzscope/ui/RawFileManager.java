@@ -36,6 +36,13 @@ public class RawFileManager {
         files = new HashMap<String,IRawFile>();
     }
 
+    public IRawFile addRawFile(IRawFile rawFile) {
+        currentFile = rawFile;
+        files.put(rawFile.getName(), currentFile);
+        logger.info("Rawfile {} added to RawFileManager",rawFile.getFile().getAbsolutePath());
+        return rawFile;
+    }
+    
     public IRawFile addRawFile(File file) { 
        if (file.getAbsolutePath().toLowerCase().endsWith(".mzdb")) {
             currentFile = new ThreadedMzdbRawFile(file);

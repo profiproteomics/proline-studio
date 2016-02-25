@@ -56,7 +56,7 @@
             <version>0.4.0-SNAPSHOT</version> 
         </dependency>
         
-        <dependency>
+       <!--  <dependency>
             <groupId>fr.proline</groupId>
             <artifactId>PM-MSDiag</artifactId>
             <version>0.4.0-SNAPSHOT</version>
@@ -64,12 +64,12 @@
         
 
    
-        <dependency>
+       <dependency>
             <groupId>fr.proline</groupId>
             <artifactId>Proline-OM</artifactId>
             <version>${core.version}</version>
             <type>test-jar</type>
-        </dependency> <!-- JPM.TODO : to remove when we no longer use ResultSet Generator -->
+        </dependency>  JPM.TODO : to remove when we no longer use ResultSet Generator -->
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>ProlineStudio-Logger</artifactId>

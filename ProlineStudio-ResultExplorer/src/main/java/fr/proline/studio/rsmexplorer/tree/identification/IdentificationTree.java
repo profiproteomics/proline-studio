@@ -685,12 +685,12 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
                     m_mainActions.add(generateSpectrumMatchesAction);
                 }
                 
-                if(isJMSDefined){
-                    UpdatePeaklistSoftwareAction updatePeaklistSoftAction = new UpdatePeaklistSoftwareAction();
-                    m_mainActions.add(updatePeaklistSoftAction);
-//                    RetrieveBioSeqJMSAction retrieveBioSeqAction = new RetrieveBioSeqJMSAction();
-//                    m_mainActions.add(retrieveBioSeqAction);
-                }                
+//                if(isJMSDefined){
+//                    UpdatePeaklistSoftwareAction updatePeaklistSoftAction = new UpdatePeaklistSoftwareAction();
+//                    m_mainActions.add(updatePeaklistSoftAction);
+////                    RetrieveBioSeqJMSAction retrieveBioSeqAction = new RetrieveBioSeqJMSAction();
+////                    m_mainActions.add(retrieveBioSeqAction);
+//                }                
                 
                 m_mainActions.add(null);  // separator
                 SpectralCountAction spectralCountAction = new SpectralCountAction(isJMSDefined);

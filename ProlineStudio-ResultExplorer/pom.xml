@@ -255,11 +255,11 @@
             <type>nbm-file</type>
         </dependency>
         
-        <!-- <dependency>
+        <dependency>
             <groupId>org.netbeans.api</groupId>
             <artifactId>org-netbeans-modules-csl-api</artifactId>
             <version>${netbeans.version}</version>
-        </dependency> -->
+        </dependency>
         
         <dependency>
             <groupId>org.netbeans.api</groupId>

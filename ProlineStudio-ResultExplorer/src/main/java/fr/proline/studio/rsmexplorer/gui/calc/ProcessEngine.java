@@ -1,7 +1,6 @@
 package fr.proline.studio.rsmexplorer.gui.calc;
 
 import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphNode;
-import java.util.ArrayList;
 import java.util.LinkedList;
 import javax.swing.JButton;
 import javax.swing.JPanel;
@@ -48,17 +47,21 @@ public class ProcessEngine implements ProcessCallbackInterface {
 
     }
     
+    public void runANode(GraphNode node, JPanel p) {
+        
+        m_panel = p;
+        m_playButton = null;
+        
+        m_processingNodeList.add(node);
+        
+        processNodes();
+    }
+    
     private void processNodes() {
         GraphNode firstNode = m_processingNodeList.pollFirst();
         firstNode.process(this);
     }
-    
-    /*public void stop() {
-        m_processingNodeList.clear();
-        m_panel = null;
-    }*/
-    
-    
+
     @Override
     public void finished(GraphNode node) {
         
@@ -76,9 +79,12 @@ public class ProcessEngine implements ProcessCallbackInterface {
             firstNode.process(this);
         } else {
             // processing is finished
-            m_playButton.setEnabled(true);
+            if (m_playButton!= null) {
+                m_playButton.setEnabled(true);
+                m_playButton = null;
+            }
             m_panel = null;
-            m_playButton = null;
+            
         }
     }
 }

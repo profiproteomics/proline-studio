@@ -94,6 +94,12 @@ public class GraphicGraphNode extends GraphNode {
     }
     
     @Override
+    public boolean canBeProcessed() {
+        return ! ((!isConnected()) || (!settingsDone()) || (m_graphic.isCalculating()) || (m_graphic.inError()) || (m_graphic.calculationDone()) || (m_graphic.isSettingsBeingDone()));
+
+    }
+    
+    @Override
     public void propagateSourceChanged() {
         m_graphic.inLinkDeleted();
         super.propagateSourceChanged();

@@ -105,6 +105,12 @@ public class FunctionGraphNode extends GraphNode {
     }
     
     @Override
+    public boolean canBeProcessed() {
+        return ! ((!isConnected()) || (!settingsDone()) || (m_function.isCalculating()) || (m_function.inError()) || (m_function.calculationDone()) || (m_function.isSettingsBeingDone()));
+
+    }
+    
+    @Override
     public void propagateSourceChanged() {
         m_function.inLinkDeleted();
         super.propagateSourceChanged();
@@ -161,6 +167,8 @@ public class FunctionGraphNode extends GraphNode {
         return m_function.calculationDone();
     }
 
+
+    
     @Override
     public void process(ProcessCallbackInterface callback) {
 

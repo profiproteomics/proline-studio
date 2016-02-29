@@ -123,6 +123,11 @@ public class DataGraphNode extends GraphNode {
         return m_tableInfo.getModel();
     }
 
+    @Override
+    public boolean canBeProcessed() {
+        return true;
+    }
+
 
 
     

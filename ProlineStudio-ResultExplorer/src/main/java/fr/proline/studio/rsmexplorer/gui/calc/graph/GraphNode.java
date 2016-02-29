@@ -3,6 +3,7 @@ package fr.proline.studio.rsmexplorer.gui.calc.graph;
 import fr.proline.studio.gui.InfoDialog;
 import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
 import fr.proline.studio.rsmexplorer.gui.calc.ProcessCallbackInterface;
+import fr.proline.studio.rsmexplorer.gui.calc.ProcessEngine;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Font;
@@ -153,6 +154,7 @@ public abstract class GraphNode extends AbstractGraphObject {
     public abstract Color getFrameColor();
     public abstract ImageIcon getIcon();
     public abstract ImageIcon getStatusIcon();
+    public abstract boolean canBeProcessed();
     
 
     public abstract void process(ProcessCallbackInterface callback);
@@ -289,6 +291,7 @@ public abstract class GraphNode extends AbstractGraphObject {
         JPopupMenu popup = new JPopupMenu();
         popup.add(new DisplayAction(this, nbConnections));
         popup.add(new SettingsAction(this, nbConnections));
+        popup.add(new ProcessAction(this));
         popup.add(new ErrorAction(this));
         popup.addSeparator();
         popup.add(new DeleteAction(panel, this));
@@ -368,7 +371,26 @@ public abstract class GraphNode extends AbstractGraphObject {
 
         }
     }
-    
+
+    public class ProcessAction extends AbstractAction {
+
+        private GraphNode m_graphNode = null;
+
+        public ProcessAction(GraphNode graphNode) {
+            super("Process");
+
+            m_graphNode = graphNode;
+            setEnabled(graphNode.canBeProcessed());
+
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+
+            ProcessEngine.getProcessEngine().runANode(m_graphNode, m_graphPanel);
+        }
+    }
+            
     public class ErrorAction extends AbstractAction {
         private GraphNode m_graphNode = null;
         

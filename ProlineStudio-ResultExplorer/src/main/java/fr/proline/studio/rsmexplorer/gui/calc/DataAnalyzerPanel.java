@@ -24,7 +24,7 @@ import javax.swing.JButton;
 
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
-import javax.swing.JToolBar;
+
 
 
 /**
@@ -47,8 +47,6 @@ public class DataAnalyzerPanel extends JPanel implements DataBoxPanelInterface {
         JPanel internalPanel = initComponents();
         add(internalPanel, BorderLayout.CENTER);
 
-        JToolBar toolbar = initToolbar();
-        add(toolbar, BorderLayout.WEST);
     }
     
     
@@ -132,11 +130,10 @@ public class DataAnalyzerPanel extends JPanel implements DataBoxPanelInterface {
         c.insets = new java.awt.Insets(5, 5, 5, 5);
         
         
-        JToolBar toolbar = new JToolBar(JToolBar.HORIZONTAL);
-        toolbar.setFloatable(false);
+        //JToolBar toolbar = new JToolBar(JToolBar.HORIZONTAL);
+        //toolbar.setFloatable(false);
         
         final JButton playButton = new JButton("Process Graph",IconManager.getIcon(IconManager.IconType.CONTROL_PLAY));
-        //playButton.setToolTipText("Process Graph");
         playButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -145,7 +142,7 @@ public class DataAnalyzerPanel extends JPanel implements DataBoxPanelInterface {
             }
         });
         
-        toolbar.add(playButton);
+        //toolbar.add(playButton);
         
         // create graph objects
         m_graphPanel = new GraphPanel();
@@ -157,27 +154,26 @@ public class DataAnalyzerPanel extends JPanel implements DataBoxPanelInterface {
         c.gridx = 0;
         c.gridy = 0;
         
-        graphZonePanel.add(toolbar, c);
+        graphZonePanel.add(playButton, c);
         
+        c.gridx++;
+        c.weightx = 1;
+        graphZonePanel.add(Box.createHorizontalGlue(), c);
+        
+        c.gridx = 0;
+        c.gridwidth = 2;
         c.gridy++;
         c.weightx = 1;
         c.weighty = 1;
         graphZonePanel.add(graphScrollPane, c);
         
-        graphZonePanel.setBackground(toolbar.getBackground());
+        graphZonePanel.setBackground(playButton.getBackground());
         
         return graphZonePanel;
     }
 
     
-    private JToolBar initToolbar() {
-        JToolBar toolbar = new JToolBar(JToolBar.VERTICAL);
-        toolbar.setFloatable(false);
-
-        //JPM.TODO
-
-        return toolbar;
-    }
+  
 
     public void addTableInfoToGraph(TableInfo tableInfo) {
         DataGraphNode graphNode = new DataGraphNode(tableInfo, m_graphPanel);

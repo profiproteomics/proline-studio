@@ -11,11 +11,11 @@ import fr.proline.studio.dam.DatabaseDataManager;
 import fr.proline.studio.gui.DefaultDialog;
 import java.awt.Color;
 import java.awt.Dialog;
-import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Window;
 import java.util.HashMap;
+import javax.swing.BorderFactory;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -51,7 +51,6 @@ public class UpdatePeaklistSoftDialog extends DefaultDialog {
 //        setButtonVisible(BUTTON_SAVE, true);
         
         setResizable(true);
-        setMinimumSize(new Dimension(200, 240));
 
         setInternalComponent(createInternalPanel());   
         pack();
@@ -59,9 +58,9 @@ public class UpdatePeaklistSoftDialog extends DefaultDialog {
 
     private JPanel createInternalPanel() {
          
-        JPanel panel = new JPanel();        
-        GridBagConstraints c = new GridBagConstraints();
-        panel.setLayout(new GridBagLayout());
+        JPanel panel = new JPanel(new GridBagLayout()); 
+        panel.setBorder(BorderFactory.createTitledBorder("Peaklist Softwares"));
+        GridBagConstraints c = new GridBagConstraints();        
         c.anchor = GridBagConstraints.NORTHWEST;
         c.fill = GridBagConstraints.BOTH;
         c.insets = new java.awt.Insets(5, 5, 5, 5);
@@ -96,7 +95,7 @@ public class UpdatePeaklistSoftDialog extends DefaultDialog {
             }
         }      
         panel.add(m_peaklistSoftwaresComboBox, c);        
-        
+        panel.revalidate();
         return panel;
     }
     
@@ -115,5 +114,20 @@ public class UpdatePeaklistSoftDialog extends DefaultDialog {
             
         return null;
     }
+     
+    
+    @Override
+    protected boolean okCalled() {
+        return checkParameters();
+    }
 
+    private boolean checkParameters() {
+        // check parameters
+        if (m_peaklistSoftwaresComboBox.getSelectedItem() == null) {
+            setStatus(true, "Specify Peaklist software to use");
+            highlight(m_peaklistSoftwaresComboBox);
+            return false;
+        }
+        return true;
+    }
 }

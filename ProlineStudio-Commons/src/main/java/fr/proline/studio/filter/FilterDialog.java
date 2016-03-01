@@ -51,6 +51,10 @@ public class FilterDialog extends DefaultDialog {
         initPrefilterSelectedPanel();
     }
     
+    public Filter[] getFilters() {
+        return m_filters;
+    }
+    
     private JPanel createFilterPanel() {
         
         m_filterPanel = new FilterPanel(this);

@@ -30,7 +30,7 @@ public abstract class AbstractFunction implements CheckParameterInterface {
     
     private boolean m_calculating = false;
     private boolean m_inError = false;
-    private boolean m_settingsBeingDone = false;
+    protected boolean m_settingsBeingDone = false;
     private String m_errorMessage = null;
     
     protected GraphPanel m_panel;

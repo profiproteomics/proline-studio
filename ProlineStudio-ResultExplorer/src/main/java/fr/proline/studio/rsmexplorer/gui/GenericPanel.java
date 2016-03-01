@@ -260,7 +260,10 @@ public class GenericPanel extends JPanel implements DataBoxPanelInterface, Globa
 
         public DataTable() {
             super(m_dataScrollPane.getVerticalScrollBar());
+            
+            setSortable(true);
         }
+
 
         @Override
         public void addTableModelListener(TableModelListener l) {
@@ -284,7 +287,8 @@ public class GenericPanel extends JPanel implements DataBoxPanelInterface, Globa
 
         @Override
         public boolean isLoaded() {
-            return ((CompoundTableModel) getModel()).isLoaded();
+            CompoundTableModel model = ((CompoundTableModel) getModel());
+            return (model==null) ? false : model.isLoaded();
         }
 
         @Override

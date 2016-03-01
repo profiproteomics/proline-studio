@@ -65,19 +65,18 @@ public class FilterFunction extends AbstractFunction {
 
     @Override
     public void process(AbstractGraphObject[] graphObjects, FunctionGraphNode functionGraphNode, ProcessCallbackInterface callback) {
+        
+        // check if we have already processed
+        if (m_calculationDone) {
+            callback.finished(functionGraphNode);
+            return;
+        }
         try {
-            // check if we have already processed
-            if (m_calculationDone) {
-                callback.finished(functionGraphNode);
-                return;
-            }
-
             setCalculating(true);
             setInError(false, null);
 
-                            
             ((FilterTableModelInterface) m_globalTableModelInterface).filter();
-            
+
             setCalculating(false);
 
         } finally {

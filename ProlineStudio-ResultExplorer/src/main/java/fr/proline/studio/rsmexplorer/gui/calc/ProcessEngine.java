@@ -64,8 +64,10 @@ public class ProcessEngine implements ProcessCallbackInterface {
 
     @Override
     public void finished(GraphNode node) {
+  
         
         m_panel.repaint();
+        
         
         LinkedList<GraphNode> nextNodes = node.getOutLinkedGraphNodes();
         if (nextNodes != null) {

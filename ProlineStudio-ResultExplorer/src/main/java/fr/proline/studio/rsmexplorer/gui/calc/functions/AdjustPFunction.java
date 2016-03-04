@@ -203,10 +203,15 @@ public class AdjustPFunction extends AbstractFunction {
         Object[] objectArray1 = new Object[nbColumnsKept];
         Object[] associatedObjectArray1 = new Object[nbColumnsKept];
         int iKept = 0;
+        int selectedIndex1 = -1;
         for (int i = 0; i < nbColumns; i++) {
             Class c = model1.getDataColumnClass(i);
             if (c.equals(Float.class) || c.equals(Double.class)) {
                 objectArray1[iKept] = model1.getColumnName(i);
+                PValue pvalue = (PValue) model1.getColValue(PValue.class, i);
+                if (pvalue != null) {
+                    selectedIndex1 = iKept;
+                }
                 associatedObjectArray1[iKept] = i+1;  // +1 because it is used in python calc expression
                 iKept++;
             }
@@ -214,7 +219,7 @@ public class AdjustPFunction extends AbstractFunction {
 
         ParameterList parameterList1 = new ParameterList("param1");
         
-        m_columnsParameter1 = new ObjectParameter(SEL_COLS1, "P Values Column", null, objectArray1, associatedObjectArray1, -1, null);
+        m_columnsParameter1 = new ObjectParameter(SEL_COLS1, "P Values Column", null, objectArray1, associatedObjectArray1, selectedIndex1, null);
 
         String[] pi0Values = { "Numeric Value", "abh", "bky", "jiang", "histo", "langaas", "pounds", "slim", "st.boot", "st.spline" };
         m_pi0MethodParameter = new ObjectParameter(PI0PARAMETER, "pi0 Method", pi0Values, 0, null);

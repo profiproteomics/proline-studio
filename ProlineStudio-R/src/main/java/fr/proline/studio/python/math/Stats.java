@@ -3,6 +3,7 @@ package fr.proline.studio.python.math;
 import fr.proline.studio.python.data.Col;
 import fr.proline.studio.python.data.ColData;
 import fr.proline.studio.python.data.PythonImage;
+import fr.proline.studio.python.data.Table;
 
 import org.apache.commons.math.MathException;
 
@@ -90,6 +91,14 @@ public class Stats {
         return StatsImplementation.pvalue(p1, p2);
     }
 
+    
+    public static Table quantifilter(PyTuple p1, PyTuple p2, PyTuple p3, Table t, PyInteger option, PyInteger threshold) throws MathException {
+        return StatsImplementation.quantifilter(p1, p2, p3, t, option, threshold);
+    }
+    public static Table quantifilter(PyTuple p1, PyTuple p2, Table t, PyInteger option, PyInteger threshold) throws MathException {
+        return StatsImplementation.quantifilter(p1, p2, null, t, option, threshold);
+    }
+    
     public static ColData ttd(PyTuple p1, PyTuple p2) throws MathException {
         return StatsImplementation.ttd(p1, p2);
     }

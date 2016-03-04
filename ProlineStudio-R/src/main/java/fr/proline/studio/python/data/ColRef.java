@@ -28,6 +28,10 @@ public class ColRef extends Col {
         m_tableModel = model;
     }
     
+    public int getModelCol() {
+        return m_modelCol;
+    }
+    
     @Override
     public Col mutable() {
         int nb = __len__();

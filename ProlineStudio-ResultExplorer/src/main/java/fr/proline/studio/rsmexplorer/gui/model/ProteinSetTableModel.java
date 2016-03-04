@@ -501,7 +501,7 @@ public class ProteinSetTableModel extends LazyTableModel implements GlobalTableM
         
         colIdx++; // COLTYPE_PROTEIN_SET_ID
         
-        filtersMap.put(colIdx, new StringFilter(getColumnName(colIdx), null, colIdx)); colIdx++; // COLTYPE_PROTEIN_SET_NAME
+        filtersMap.put(colIdx, new StringDiffFilter(getColumnName(colIdx), null, colIdx)); colIdx++; // COLTYPE_PROTEIN_SET_NAME
         filtersMap.put(colIdx, new StringFilter(getColumnName(colIdx), null, colIdx)); colIdx++; // COLTYPE_PROTEIN_SET_DESCRIPTION
         filtersMap.put(colIdx, new DoubleFilter(getColumnName(colIdx), null, colIdx));  colIdx++; // COLTYPE_PROTEIN_SCORE
         colIdx++; // COLTYPE_PROTEINS_COUNT

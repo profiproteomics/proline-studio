@@ -11,6 +11,7 @@ import fr.proline.studio.rsmexplorer.gui.calc.functions.FilterFunction;
 import fr.proline.studio.rsmexplorer.gui.calc.functions.ImportTSVFunction;
 import fr.proline.studio.rsmexplorer.gui.calc.functions.JoinFunction;
 import fr.proline.studio.rsmexplorer.gui.calc.functions.PValueFunction;
+import fr.proline.studio.rsmexplorer.gui.calc.functions.QuantiFilterFunction;
 import fr.proline.studio.rsmexplorer.gui.calc.functions.TtdFunction;
 import fr.proline.studio.rsmexplorer.gui.calc.graphics.AbstractGraphic;
 import fr.proline.studio.rsmexplorer.gui.calc.graphics.BoxPlotGraphic;
@@ -169,8 +170,10 @@ public abstract class DataTree extends JTree {
         FunctionNode filterFunction = new FunctionNode(new FilterFunction(null));
         parentFunctionNode.add(filterFunction);
         
+        FunctionNode quantiFilterFunction = new FunctionNode(new QuantiFilterFunction(null));
+        parentFunctionNode.add(quantiFilterFunction);
         
-        
+
         DefaultTreeModel model = (DefaultTreeModel) getModel();
         model.nodeStructureChanged(parentFunctionNode);
     }

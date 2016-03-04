@@ -11,6 +11,7 @@ import fr.proline.studio.dam.tasks.DatabaseProteinMatchesTask;
 import fr.proline.studio.filter.DoubleFilter;
 import fr.proline.studio.filter.Filter;
 import fr.proline.studio.filter.IntegerFilter;
+import fr.proline.studio.filter.StringDiffFilter;
 import fr.proline.studio.filter.StringFilter;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
@@ -248,7 +249,7 @@ public class ProteinsOfPeptideMatchTableModel extends LazyTableModel implements 
     @Override
     public void addFilters(LinkedHashMap<Integer, Filter> filtersMap) {
 
-        filtersMap.put(COLTYPE_PROTEIN_NAME, new StringFilter(getColumnName(COLTYPE_PROTEIN_NAME), null, COLTYPE_PROTEIN_NAME));
+        filtersMap.put(COLTYPE_PROTEIN_NAME, new StringDiffFilter(getColumnName(COLTYPE_PROTEIN_NAME), null, COLTYPE_PROTEIN_NAME));
         filtersMap.put(COLTYPE_PROTEIN_SCORE, new DoubleFilter(getColumnName(COLTYPE_PROTEIN_SCORE), null, COLTYPE_PROTEIN_SCORE));
         filtersMap.put(COLTYPE_PROTEIN_PEPTIDES_COUNT, new IntegerFilter(getColumnName(COLTYPE_PROTEIN_PEPTIDES_COUNT), null, COLTYPE_PROTEIN_PEPTIDES_COUNT));
         filtersMap.put(COLTYPE_PROTEIN_MASS, new DoubleFilter(getColumnName(COLTYPE_PROTEIN_MASS), null, COLTYPE_PROTEIN_MASS));

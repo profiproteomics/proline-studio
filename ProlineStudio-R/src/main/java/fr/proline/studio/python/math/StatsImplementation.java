@@ -1,27 +1,20 @@
 package fr.proline.studio.python.math;
 
-import fr.proline.studio.python.data.Col;
+
 import fr.proline.studio.python.data.ColData;
 import fr.proline.studio.python.data.ColRef;
 import fr.proline.studio.python.data.Table;
-import fr.proline.studio.rserver.RServerManager;
+import fr.proline.studio.python.model.QuantiFilterModel;
+
 import fr.proline.studio.table.LazyData;
-import java.io.File;
-import java.io.FileWriter;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Set;
 import org.apache.commons.math.MathException;
 import org.apache.commons.math.stat.descriptive.DescriptiveStatistics;
 import org.apache.commons.math.stat.inference.TTest;
 import org.apache.commons.math.stat.inference.TTestImpl;
-import org.python.core.Py;
-import org.python.core.PyFloat;
 import org.python.core.PyInteger;
-import org.python.core.PyObject;
 import org.python.core.PyTuple;
-import org.rosuda.REngine.REXPGenericVector;
+
 
 /**
  *
@@ -89,6 +82,36 @@ public class StatsImplementation {
         return new ColData(t, resArray, null);
     }
 
+    public static Table quantifilter(PyTuple p1, PyTuple p2, PyTuple p3, Table t, PyInteger option, PyInteger threshold) throws MathException {
+
+        ColRef[] cols = (p3!=null) ? StatsUtil.colTupleToColArray(p1, p2, p3) : StatsUtil.colTupleToColArray(p1, p2);
+        
+        int nbGroup1 = p1.size();
+        int nbGroup2 = p2.size();
+        int nbGroup3 = (p3 == null) ? 0 : p3.size();
+        int nbTotal = nbGroup1+nbGroup2+nbGroup3;
+        int[] groupIndex = new int[nbTotal];
+        int[] colsIndex = new int[nbTotal];
+        for (int i=0;i<nbGroup1;i++) {
+            groupIndex[i] = 1;
+            colsIndex[i] = cols[i].getModelCol();
+        }
+        for (int i=nbGroup1;i<nbGroup1+nbGroup2;i++) {
+            groupIndex[i] = 2;
+            colsIndex[i] = cols[i].getModelCol();
+        }
+        for (int i=nbGroup1+nbGroup2;i<nbGroup1+nbGroup2+nbGroup3;i++) {
+            groupIndex[i] = 3;
+            colsIndex[i] = cols[i].getModelCol();
+        }
+        
+
+        
+        QuantiFilterModel quantiFilterModelModel = new QuantiFilterModel(t.getModel(), colsIndex, groupIndex, option.getValue(), threshold.getValue());
+        quantiFilterModelModel.filter();
+        return new Table(quantiFilterModelModel);
+    }
+    
     private static DescriptiveStatistics _toDescriptiveStatistics(PyTuple p, int row) {
         final double LOG2 = Math.log(2.0d);
 

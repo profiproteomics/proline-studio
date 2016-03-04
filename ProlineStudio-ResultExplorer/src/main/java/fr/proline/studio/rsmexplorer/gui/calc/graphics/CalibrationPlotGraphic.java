@@ -19,6 +19,7 @@ import fr.proline.studio.rsmexplorer.gui.calc.ProcessCallbackInterface;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.AbstractGraphObject;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphicGraphNode;
 import fr.proline.studio.table.GlobalTableModelInterface;
+import fr.proline.studio.types.PValue;
 import java.util.ArrayList;
 import javax.swing.JSpinner;
 import javax.swing.JTextField;
@@ -28,7 +29,7 @@ import javax.swing.JTextField;
  * @author jm235353
  */
 public class CalibrationPlotGraphic extends AbstractGraphic {
-    private static final String SEL_COLS1 = "SEL_COLS1";
+    private static final String PVALUE = "PVALUE";
     private static final String PI0PARAMETER = "PI0PARAMETER";
     private static final String NBBINSPARAMETER = "NBBINSPARAMETER";
     private static final String PZPARAMETER = "PZPARAMETER";
@@ -177,10 +178,15 @@ public class CalibrationPlotGraphic extends AbstractGraphic {
         Object[] objectArray1 = new Object[nbColumnsKept];
         Object[] associatedObjectArray1 = new Object[nbColumnsKept];
         int iKept = 0;
+        int selectedIndex1 = -1;
         for (int i = 0; i < nbColumns; i++) {
             Class c = model1.getDataColumnClass(i);
             if (c.equals(Float.class) || c.equals(Double.class)) {
                 objectArray1[iKept] = model1.getColumnName(i);
+                PValue pvalue = (PValue) model1.getColValue(PValue.class, i);
+                if (pvalue != null) {
+                    selectedIndex1 = iKept;
+                }
                 associatedObjectArray1[iKept] = i+1;  // +1 because it is used in python calc expression
                 iKept++;
             }
@@ -188,7 +194,7 @@ public class CalibrationPlotGraphic extends AbstractGraphic {
 
         ParameterList parameterList1 = new ParameterList("param1");
         
-        m_columnsParameter1 = new ObjectParameter(SEL_COLS1, "P Values Column", null, objectArray1, associatedObjectArray1, -1, null);
+        m_columnsParameter1 = new ObjectParameter(PVALUE, "P Values Column", null, objectArray1, associatedObjectArray1, selectedIndex1, null);
 
         String[] pi0Values = { "ALL","Numeric Value", "abh", "jiang", "histo", "langaas", "pounds", "slim", "st.boot", "st.spline" };
         m_pi0MethodParameter = new ObjectParameter(PI0PARAMETER, "pi0 Method", pi0Values, 0, null);

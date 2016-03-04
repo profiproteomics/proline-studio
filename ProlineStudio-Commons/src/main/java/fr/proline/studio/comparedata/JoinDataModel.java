@@ -164,7 +164,11 @@ public class JoinDataModel extends AbstractJoinDataModel {
         if (columnIndex == 0) {
             Integer row = m_keyToRow1.get(key);
             if (row == null) {
-                return null;
+                row = m_keyToRow2.get(key);
+                if (row == null) {
+                    return key;
+                }
+                return m_data2.getValueAt(row, m_selectedKey2);
             }
             return m_data1.getValueAt(row, m_selectedKey1);
         }

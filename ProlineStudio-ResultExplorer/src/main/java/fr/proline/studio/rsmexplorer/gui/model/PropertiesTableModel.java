@@ -51,9 +51,12 @@ public class PropertiesTableModel extends DecoratedTableModel implements GlobalT
     public static final int COLTYPE_PROPERTY_NAME = 1;
     
     private static final String[] m_columnNames = {"Group", "Type"};
-    
-    
-    private ArrayList<DDataset> m_datasetArrayList = null;
+
+    private ArrayList<String> m_datasetNameArray = null;
+    private ArrayList<Long> m_projectIdArray = null;
+    private ArrayList<Long> m_datasetIdArray = null;
+    private ArrayList<ResultSet> m_rsetArray = null;
+    private ArrayList<ResultSummary> m_rsmArray = null;
     
     private ArrayList<DataGroup> m_dataGroupList = null;
     private HashMap<Integer, DataGroup> m_dataGroupMap = null;
@@ -72,7 +75,24 @@ public class PropertiesTableModel extends DecoratedTableModel implements GlobalT
     }
     
     public void setData(ArrayList<DDataset> datasetArrayList) {
-        m_datasetArrayList = datasetArrayList;
+
+        int nbDataset = datasetArrayList.size();
+        m_datasetNameArray = new ArrayList<>(nbDataset);
+        m_rsetArray = new ArrayList<>(nbDataset);
+        m_rsmArray = new ArrayList<>(nbDataset);
+        m_projectIdArray = new ArrayList<>(nbDataset);
+        m_datasetIdArray = new ArrayList<>(nbDataset);
+        for (int i=0;i<nbDataset;i++) {
+            DDataset dataset = datasetArrayList.get(i);
+            m_datasetNameArray.add(dataset.getName());
+            m_projectIdArray.add(dataset.getProject().getId());
+            m_datasetIdArray.add(dataset.getId());
+            m_rsetArray.add(dataset.getResultSet());
+            m_rsmArray.add(dataset.getResultSummary());
+        }
+
+        
+        
         m_rowCount = -1; // will be recalculated later
          
         if (m_dataGroupList == null) {
@@ -96,15 +116,15 @@ public class PropertiesTableModel extends DecoratedTableModel implements GlobalT
         if (col<=COLTYPE_PROPERTY_NAME) {
             return m_columnNames[col];
         }
-        return m_datasetArrayList.get(col-2).getName();
+        return m_datasetNameArray.get(col-2);
     }
     
     @Override
     public int getColumnCount() {
-        if (m_datasetArrayList == null) {
+        if (m_datasetNameArray == null) {
             return 2;
         }
-        return 2+m_datasetArrayList.size();
+        return 2+m_datasetNameArray.size();
     }
     
     @Override
@@ -417,8 +437,8 @@ public class PropertiesTableModel extends DecoratedTableModel implements GlobalT
         @Override
         public String getGroupValueAt(int rowIndex, int columnIndex) {
 
-            DDataset dataset = m_datasetArrayList.get(columnIndex);
-            ResultSet rset = dataset.getResultSet();
+
+            ResultSet rset = m_rsetArray.get(columnIndex);
             ResultSet rsetDecoy = (rset==null) ? null : rset.getDecoyResultSet();
             
             MsiSearch msiSearch = (rset==null) ? null : rset.getMsiSearch();
@@ -426,7 +446,7 @@ public class PropertiesTableModel extends DecoratedTableModel implements GlobalT
             InstrumentConfig instrumentConfig = (searchSetting==null) ? null : searchSetting.getInstrumentConfig();
             Peaklist peaklist = (msiSearch == null) ? null : msiSearch.getPeaklist();
             PeaklistSoftware peaklistSoftware = (peaklist == null) ? null : peaklist.getPeaklistSoftware();
-            ResultSummary rsm = dataset.getResultSummary();
+            ResultSummary rsm = m_rsmArray.get(columnIndex);
 
 
             switch (rowIndex) {
@@ -556,8 +576,7 @@ public class PropertiesTableModel extends DecoratedTableModel implements GlobalT
         @Override
         public String getGroupValueAt(int rowIndex, int columnIndex) {
 
-            DDataset dataset = m_datasetArrayList.get(columnIndex);
-            ResultSet rset = dataset.getResultSet();
+            ResultSet rset = m_rsetArray.get(columnIndex);
             
             MsiSearch msiSearch = (rset==null) ? null : rset.getMsiSearch();
             SearchSetting searchSetting = (msiSearch == null) ? null : msiSearch.getSearchSetting();
@@ -565,7 +584,7 @@ public class PropertiesTableModel extends DecoratedTableModel implements GlobalT
             if (searchSetting instanceof MsmsSearch) {
                 msmsSearch = (MsmsSearch) searchSetting;
             }
-            ResultSummary rsm = dataset.getResultSummary();
+            ResultSummary rsm = m_rsmArray.get(columnIndex);
             if (rsm == null) {
                 return "";
             }
@@ -767,8 +786,7 @@ public class PropertiesTableModel extends DecoratedTableModel implements GlobalT
         @Override
         public String getGroupValueAt(int rowIndex, int columnIndex) {
 
-            DDataset dataset = m_datasetArrayList.get(columnIndex);
-            ResultSet rset = dataset.getResultSet();
+            ResultSet rset = m_rsetArray.get(columnIndex);
             ResultSet rsetDecoy = (rset==null) ? null : rset.getDecoyResultSet();
 
             if (rset == null) {
@@ -921,14 +939,13 @@ public class PropertiesTableModel extends DecoratedTableModel implements GlobalT
         @Override
         public String getGroupValueAt(int rowIndex, int columnIndex) {
 
-            DDataset dataset = m_datasetArrayList.get(columnIndex);
-            ResultSet rset = dataset.getResultSet();
+            ResultSet rset = m_rsetArray.get(columnIndex);
 
             
             MsiSearch msiSearch = (rset==null) ? null : rset.getMsiSearch();
             SearchSetting searchSetting = (msiSearch == null) ? null : msiSearch.getSearchSetting();
 
-            ResultSummary rsm = dataset.getResultSummary();
+            ResultSummary rsm = m_rsmArray.get(columnIndex);
             if (rsm == null) {
                 return "";
             }
@@ -1034,10 +1051,9 @@ public class PropertiesTableModel extends DecoratedTableModel implements GlobalT
         @Override
         public String getGroupValueAt(int rowIndex, int columnIndex) {
 
-            DDataset dataset = m_datasetArrayList.get(columnIndex);
-            ResultSet rset = dataset.getResultSet();
+            ResultSet rset = m_rsetArray.get(columnIndex);
 
-            ResultSummary rsm = dataset.getResultSummary();
+            ResultSummary rsm = m_rsmArray.get(columnIndex);
 
             MsiSearch msiSearch = (rset==null) ? null : rset.getMsiSearch();
             SearchSetting searchSetting = (msiSearch == null) ? null : msiSearch.getSearchSetting();
@@ -1046,12 +1062,11 @@ public class PropertiesTableModel extends DecoratedTableModel implements GlobalT
             Peaklist peaklist = (msiSearch == null) ? null : msiSearch.getPeaklist();
             PeaklistSoftware peaklistSoftware = (peaklist == null) ? null : peaklist.getPeaklistSoftware();
 
-            
             switch (rowIndex) {
                 case ROWTYPE_PROJECT_ID:
-                    return String.valueOf(dataset.getProject().getId());
+                    return String.valueOf(m_projectIdArray.get(columnIndex));
                 case ROWTYPE_DATASET_ID:
-                    return String.valueOf(dataset.getId());
+                    return String.valueOf(m_datasetIdArray.get(columnIndex));
                 case ROWTYPE_RSET_ID:
                     return (rset==null) ? "" : String.valueOf(rset.getId());
                 case ROWTYPE_RSM_ID:

@@ -26,14 +26,16 @@ public class AuthenticateUserTask extends AbstractJMSTask {
     private String m_userName;
     private String m_password;
     private String[] m_databasePassword;
-
+    private static int TASK_TIMEOUT_MS = 20000;
+            
     public AuthenticateUserTask(AbstractJMSCallback callback, String m_userName, String m_password, String[] m_databasePassword) {
-        super(callback, new TaskInfo("Check User " + m_userName, false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_HIGH));
+        super(callback, true,new TaskInfo("Check User " + m_userName, false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_HIGH));
         this.m_userName = m_userName;
         this.m_password = m_password;
         this.m_databasePassword = m_databasePassword;
+        super.setResponseTimeout(TASK_TIMEOUT_MS);
     }
-
+    
     @Override
     public void taskRun() throws JMSException {
 
@@ -46,11 +48,9 @@ public class AuthenticateUserTask extends AbstractJMSTask {
         message.setJMSReplyTo(m_replyQueue);
         message.setStringProperty(JMSConnectionManager.PROLINE_SERVICE_NAME_KEY, "proline/admin/UserAccount");        
         setTaskInfoRequest(message.getText());
-
         //  Send the Message
-        m_producer.send(message);
-        m_loggerProline.info("Message [{}] sent", message.getJMSMessageID());
-
+        m_producer.send(message,Message.DEFAULT_DELIVERY_MODE,8,TASK_TIMEOUT_MS+5000);
+        m_loggerProline.info("Message [{}] sent", message.getJMSMessageID()+" m_id "+m_id+ " getJMSCorrelationID "+message.getJMSCorrelationID());
     }
 
     private HashMap<String, Object> createParams() {

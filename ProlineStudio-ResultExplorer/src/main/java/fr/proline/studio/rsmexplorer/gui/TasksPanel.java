@@ -15,6 +15,7 @@ import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
+import fr.proline.studio.rsmexplorer.gui.dialog.SystemInfoDialog;
 import fr.proline.studio.rsmexplorer.gui.renderer.PercentageRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.ScoreRenderer;
 import fr.proline.studio.table.CompoundTableModel;
@@ -40,9 +41,8 @@ import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.*;
-import org.jdesktop.swingx.JXTable;
-import org.jdesktop.swingx.painter.AbstractLayoutPainter;
 import org.jdesktop.swingx.renderer.DefaultTableRenderer;
+import org.openide.windows.WindowManager;
 
 /**
  * Panel used to display all logged tasks
@@ -52,7 +52,6 @@ import org.jdesktop.swingx.renderer.DefaultTableRenderer;
 public class TasksPanel extends HourglassPanel implements DataBoxPanelInterface {
 
     private final static ImageIcon[] PUBLIC_STATE_ICONS = { IconManager.getIcon(IconManager.IconType.HOUR_GLASS_MINI16), IconManager.getIcon(IconManager.IconType.ARROW_RIGHT_SMALL), IconManager.getIcon(IconManager.IconType.CROSS_BLUE_SMALL16), IconManager.getIcon(IconManager.IconType.TICK_SMALL), IconManager.getIcon(IconManager.IconType.CROSS_SMALL16)};
-   
     
     private AbstractDataBox m_dataBox;
     private LogTable m_logTable;
@@ -70,7 +69,6 @@ public class TasksPanel extends HourglassPanel implements DataBoxPanelInterface 
         c.weightx = 1;
         c.weighty = 1;
         add(createToolbarPanel(), c);
-
 
     }
 
@@ -166,9 +164,10 @@ public class TasksPanel extends HourglassPanel implements DataBoxPanelInterface 
             
         };
         EraserButton taskEraserButton = new EraserButton();
-        
+        GetSystemInfoButton systemInfoButton = new GetSystemInfoButton();
         toolbar.add(filterButton);
-        toolbar.add(taskEraserButton);
+        toolbar.add(taskEraserButton);        
+        toolbar.add(systemInfoButton);
         
         return toolbar;
     }
@@ -724,8 +723,24 @@ public class TasksPanel extends HourglassPanel implements DataBoxPanelInterface 
             updateData();
         }
     }
+    
+    public class GetSystemInfoButton extends JButton implements ActionListener {
 
+        public GetSystemInfoButton() {
 
+            setIcon(IconManager.getIcon(IconManager.IconType.INFORMATION));
+            setToolTipText("Get System information");
 
+            addActionListener(this);
+        }
 
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            SystemInfoDialog dialog =  SystemInfoDialog.getDialog(WindowManager.getDefault().getMainWindow());
+            dialog.updateInfo();
+            dialog.setVisible(true);
+        }
+    }
 }
+   
+   

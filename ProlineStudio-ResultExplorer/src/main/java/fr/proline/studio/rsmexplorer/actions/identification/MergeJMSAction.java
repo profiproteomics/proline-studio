@@ -47,12 +47,17 @@ public class MergeJMSAction extends AbstractRSMAction {
     @Override
     public JMenuItem getPopupPresenter() {
         m_menu = new JMenu((String) getValue(NAME));
+        Preferences preferences = NbPreferences.root();
+        Boolean showHiddenFunctionnality =  preferences.getBoolean("Profi", false);
+
         m_aggregationMergeAction = new ConfigurableMergeAction(MergeTask.Config.AGGREGATION);
         m_unionMergeAction = new ConfigurableMergeAction(MergeTask.Config.UNION);
         JMenuItem mergeAggregateItem = new JMenuItem(m_aggregationMergeAction);
-        JMenuItem mergeUnionItem = new JMenuItem(m_unionMergeAction);
         m_menu.add(mergeAggregateItem);
-        m_menu.add(mergeUnionItem);
+        if(showHiddenFunctionnality){
+            JMenuItem mergeUnionItem = new JMenuItem(m_unionMergeAction);    
+            m_menu.add(mergeUnionItem);
+        }
 
         return m_menu;
     }

@@ -1,16 +1,11 @@
 package fr.proline.studio.dpm.task.jms;
 
-
-import com.thetransactioncompany.jsonrpc2.*;
-import fr.profi.util.StringUtils;
 import fr.proline.studio.dam.taskinfo.AbstractLongTask;
 import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import fr.proline.studio.dpm.jms.AccessJMSManagerThread;
 import fr.proline.studio.dpm.task.util.JMSConnectionManager;
-import java.util.Enumeration;
-import java.util.Map;
-import java.util.Set;
+import fr.proline.studio.dpm.task.util.JMSMessageUtil;
 import java.util.concurrent.atomic.AtomicInteger;
 import javax.jms.*;
 import javax.swing.SwingUtilities;
@@ -35,15 +30,16 @@ public abstract class AbstractJMSTask  extends AbstractLongTask implements Messa
     protected MessageProducer m_producer = null;
     protected MessageConsumer m_responseConsumer = null;
     protected TemporaryQueue m_replyQueue = null;
-    
-//    protected Queue m_expireQueue = null;
-//    protected MessageConsumer m_expireConsumer = null;
-    
+        
     protected JMSState m_currentState = null;
     
     protected int m_id;
     protected TaskError m_taskError = null;
-     private long m_startRun = -1;
+    private long m_startRun = -1;
+    
+    protected boolean m_synchronous;
+    private int responseTimeout = 10000;
+        
     
     protected static int m_idIncrement = 0;
 
@@ -55,14 +51,29 @@ public abstract class AbstractJMSTask  extends AbstractLongTask implements Messa
     /* To count received messages */
     public final AtomicInteger MESSAGE_COUNT_SEQUENCE = new AtomicInteger(0);
 
-    
-    public AbstractJMSTask(AbstractJMSCallback callback/*, boolean synchronous*/, TaskInfo taskInfo) {
+    public AbstractJMSTask(AbstractJMSCallback callback, TaskInfo taskInfo) {
         super(taskInfo);
         
         m_callback = callback;
-        //m_synchronous = synchronous;
-        
         m_id = m_idIncrement++;
+        m_synchronous = false;
+    }
+       
+    public AbstractJMSTask(AbstractJMSCallback callback,  boolean synchronous, TaskInfo taskInfo) {
+        super(taskInfo);
+        
+        m_callback = callback;
+        m_id = m_idIncrement++;
+        m_synchronous = synchronous;
+    }
+    
+    /**
+     * Specify the timeout value (in milliseconds) to wait for message. This is only used for synchronuous tasks.
+     * Default value is 10000 ms.
+     * @param timeout 
+     */
+    protected void setResponseTimeout(int timeout){
+        responseTimeout = timeout;
     }
     
     /**
@@ -81,19 +92,18 @@ public abstract class AbstractJMSTask  extends AbstractLongTask implements Messa
 
             // Step 6. Create a JMS Message Producer (Producer MUST be confined in current Thread)
             m_producer = m_session.createProducer(JMSConnectionManager.getJMSConnectionManager().getServiceQueue());
-
             
             m_replyQueue = m_session.createTemporaryQueue();
             m_responseConsumer = m_session.createConsumer(m_replyQueue);
-            m_responseConsumer.setMessageListener(this);
+            if(!m_synchronous)
+                m_responseConsumer.setMessageListener(this);
 
-//            m_expireQueue = JMSConnectionManager.getJMSConnectionManager().getExpireQueue();
-//            m_expireConsumer = m_session.createConsumer(m_expireQueue);
-//            m_expireConsumer.setMessageListener(getExpireMessageListener());
-            
             m_currentState = JMSState.STATE_WAITING;
-//            m_loggerProline.info("  ***** Create message "+this.getClass().getName()+" reply to ID "+m_replyQueue.toString());
             taskRun();
+            if(m_synchronous){
+              Message responseMsg  =  m_responseConsumer.receive(responseTimeout);
+              onMessage(responseMsg);
+            }
         } catch (Exception ex) {
             m_loggerProline.error("Error sending JMS Message", ex);
             m_currentState = JMSState.STATE_FAILED;
@@ -101,10 +111,7 @@ public abstract class AbstractJMSTask  extends AbstractLongTask implements Messa
             callback(false);
         }
     }
-//    
-//    protected MessageListener getExpireMessageListener(){        
-//        return new DefaultExpireMessageListener(this);
-//    }
+
     /**
      * Called when the task must be started. The implementation should call
      * setTaskInfoRequest to register request informations
@@ -125,15 +132,6 @@ public abstract class AbstractJMSTask  extends AbstractLongTask implements Messa
      */
     public abstract void taskDone(final Message jmsMessage) throws Exception;
     
-//
-//    /**
-//     * Called when the task has expired 
-//     * @param jmsMessage
-//     * @throws Exception 
-//     */
-//    public void taskExpired(final Message jmsMessage) throws Exception {
-//        runMessageFailed("Message expired : "+jmsMessage.getJMSMessageID());
-//    }
 
     /**
      * Method called by the ServiceStatusThread
@@ -147,20 +145,25 @@ public abstract class AbstractJMSTask  extends AbstractLongTask implements Messa
     
     @Override
     public final void onMessage(final Message jmsMessage) {       
-        m_loggerProline.info("Receiving message n° " + MESSAGE_COUNT_SEQUENCE.incrementAndGet() + " : " + formatMessage(jmsMessage));
+        
         long endRun = System.currentTimeMillis();
         this.m_taskInfo.setDuration(endRun-m_startRun);
         
-        try {
-            taskDone(jmsMessage);
-//        } catch (JSONRPC2Error jsonE) {
-//            m_currentState = JMSState.STATE_FAILED;
-//            m_loggerProline.error("JSON Error handling JMS Message", jsonE);
-//            m_taskError = new TaskError(jsonE.getMessage());
-        } catch (Exception e) {
+        if(jmsMessage != null) {
+            m_loggerProline.info("Receiving message n° " + MESSAGE_COUNT_SEQUENCE.incrementAndGet() + " : " + JMSMessageUtil.formatMessage(jmsMessage));
+        
+            try {
+                taskDone(jmsMessage);
+            } catch (Exception e) {
+                m_currentState = JMSState.STATE_FAILED;
+                m_loggerProline.error("Error handling JMS Message", e);
+                m_taskError = new TaskError(e);
+            }
+        } else {
+            String msg = "Error receiving message n° " + MESSAGE_COUNT_SEQUENCE.incrementAndGet() + ": timeout should have occured " ;
+            m_loggerProline.info(msg);
             m_currentState = JMSState.STATE_FAILED;
-            m_loggerProline.error("Error handling JMS Message", e);
-            m_taskError = new TaskError(e);
+            m_taskError = new TaskError(new RuntimeException(msg));
         }
         
         if (m_currentState == JMSState.STATE_FAILED) {
@@ -174,26 +177,18 @@ public abstract class AbstractJMSTask  extends AbstractLongTask implements Messa
              callback(false);
         }
         
+                        
         try {
-            jmsMessage.acknowledge();
+            if(jmsMessage != null)
+                jmsMessage.acknowledge();
         } catch (JMSException ex) {
             m_loggerProline.error("Error running JMS Message acknowledge", ex);
         }
         
     }
     
-//    public final void runMessageFailed(String errorMsg){         
-//        long endRun = System.currentTimeMillis();
-//        this.m_taskInfo.setDuration(endRun-m_startRun);
-//
-//        m_currentState = JMSState.STATE_FAILED;
-//        m_loggerProline.error(errorMsg);
-//        m_taskError = new TaskError(errorMsg);
-//        
-//        callback(false);
-//    }
-    
 
+        
     /**
      * Method called after the service has been done
      *
@@ -228,169 +223,5 @@ public abstract class AbstractJMSTask  extends AbstractLongTask implements Messa
         }
     }
     
-    
-    /**
-     * Formats some Header filds, Properties and Body of the given JMS Message to print usefull debug info.
-     */
-    protected String formatMessage(final Message message) {
-
-	if (message == null) {
-	    throw new IllegalArgumentException("Message is null");
-	}
-
-	final StringBuilder buff = new StringBuilder(MESSAGE_BUFFER_SIZE);
-
-	try {
-	    buff.append(message.getClass().getName()).append("  ").append(message.getJMSMessageID());
-	    buff.append(StringUtils.LINE_SEPARATOR);
-
-	    buff.append(TAB).append("JMSCorrelationID ");
-	    append(buff, message.getJMSCorrelationID());
-	    buff.append(StringUtils.LINE_SEPARATOR);
-
-	    buff.append(TAB).append("JMSTimestamp ")
-		    .append(String.format(DATE_FORMAT, message.getJMSTimestamp()));
-	    buff.append(StringUtils.LINE_SEPARATOR);
-
-	    buff.append(TAB).append("JMSDestination ");
-	    append(buff, message.getJMSDestination());
-	    buff.append(StringUtils.LINE_SEPARATOR);
-
-	    buff.append(TAB).append("JMSReplyTo ");
-	    append(buff, message.getJMSReplyTo());
-	    buff.append(StringUtils.LINE_SEPARATOR);
-
-	    final Enumeration<String> nameEnum = message.getPropertyNames();
-
-	    while (nameEnum.hasMoreElements()) {
-		final String propertyName = nameEnum.nextElement();
-		buff.append(TAB).append('[').append(propertyName).append("] : ");
-
-		final String propertyValue = message.getStringProperty(propertyName);
-
-		if (propertyValue == null) {
-		    buff.append("NULL");
-		} else {
-		    buff.append('[').append(propertyValue).append(']');
-		}
-
-		buff.append(StringUtils.LINE_SEPARATOR);
-	    }
-
-	    if (message instanceof TextMessage) {
-		buff.append(TAB).append(((TextMessage) message).getText());
-	    }
-
-	    buff.append(StringUtils.LINE_SEPARATOR);
-	} catch (Exception ex) {
-	    m_loggerProline.error("Error retrieving JMS Message header or content", ex);
-	}
-
-	return buff.toString();
-    }
-    private static final String TAB = "    ";
-    private static final String DATE_FORMAT = "%td/%<tm/%<tY %<tH:%<tM:%<tS.%<tL";
-    private static final int MESSAGE_BUFFER_SIZE = 2048;
-    
-    private static void append(final StringBuilder sb, final Object obj) {
-	assert (sb != null) : "append() sb is null";
-
-	if (obj == null) {
-	    sb.append("NULL");
-	} else {
-	    sb.append(obj);
-	}
-
-    } 
-    
-    protected void traceJSONResponse(final String jsonString) throws JSONRPC2ParseException {
-	final JSONRPC2Message jsonMessage = JSONRPC2Message.parse(jsonString);
-
-	if (jsonMessage instanceof JSONRPC2Notification) {
-	    final JSONRPC2Notification jsonNotification = (JSONRPC2Notification) jsonMessage;
-
-	    m_loggerProline.debug("JSON Notification method: " + jsonNotification.getMethod());
-
-	    final Map<String, Object> namedParams = jsonNotification.getNamedParams();
-
-	    if ((namedParams != null) && !namedParams.isEmpty()) {
-		final StringBuilder buff = new StringBuilder("Params: ");
-
-		boolean first = true;
-
-		final Set<Map.Entry<String, Object>> entries = namedParams.entrySet();
-
-		for (final Map.Entry<String, Object> entry : entries) {
-
-		    if (first) {
-			first = false;
-		    } else {
-			buff.append(" | ");
-		    }
-
-		    buff.append(entry.getKey());
-		    buff.append(" : ").append(entry.getValue());
-		}
-
-		m_loggerProline.debug(buff.toString());
-	    }
-
-	} else if (jsonMessage instanceof JSONRPC2Response) {
-	    final JSONRPC2Response jsonResponse = (JSONRPC2Response) jsonMessage;
-
-	    m_loggerProline.debug("JSON Response Id: " + jsonResponse.getID());
-
-	    final JSONRPC2Error jsonError = jsonResponse.getError();
-
-	    if (jsonError != null) {
-		m_loggerProline.error("JSON Error code {}, message : \"{}\"", jsonError.getCode(), jsonError.getMessage());
-		m_loggerProline.error("JSON Throwable", jsonError);
-	    }
-
-	    final Object result = jsonResponse.getResult();
-
-	    if (result == null) {
-		m_loggerProline.debug("No result");
-	    } else {
-		m_loggerProline.debug("Result :\n" + result);
-	    }
-
-	}
-
-    }
-
-    
-//    class DefaultExpireMessageListener implements MessageListener {
-// 
-//         
-//        private AbstractJMSTask m_callerTask = null;
-//        public DefaultExpireMessageListener(AbstractJMSTask task) {
-//            m_callerTask = task;
-//        }
-//        
-//
-//        @Override
-//        public void onMessage(Message msg) {
-//            try {
-//                m_loggerProline.error("EXPIRE LISTENER Receiving message n° " + MESSAGE_COUNT_SEQUENCE.incrementAndGet() + " : " + formatMessage(msg));
-//                m_callerTask.taskExpired(msg);  
-//                
-//            }catch (Exception ex) {
-//                m_loggerProline.error("Error running JMS Message acknowledge", ex);
-//            }
-//            
-//            try {
-//                msg.acknowledge();
-//            } catch (JMSException jmsex) {
-//                m_loggerProline.error("Error running JMS Message acknowledge", jmsex);
-//            }
-//            
-//        }
-//        
-//    }
-    
-       
-        
-    
-    
+                 
 }

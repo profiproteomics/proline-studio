@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 import org.openide.util.NbPreferences;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -39,7 +40,8 @@ public class ServerConnectionManager {
 
     //VDS TO BE REMOVED => Full JMS
     private static final String HTTP_URL_PREFFIX = "http://";
-
+    protected static final Logger m_loggerProline = LoggerFactory.getLogger("ProlineStudio.DPM.Task");
+    
     private int m_connectionState = NOT_CONNECTED;
 
     private TaskError m_connectionError = null;
@@ -62,9 +64,7 @@ public class ServerConnectionManager {
     }
 
     public ServerConnectionManager() {
-        restoreParameters();
-        //tryServerConnection();
-
+        restoreParameters();        
     }
 
     private void restoreParameters() {
@@ -94,9 +94,6 @@ public class ServerConnectionManager {
         }
     }
 
-    private void tryServerConnection() {
-        tryServerConnection(null, m_serverURL, m_projectUser, m_userPassword, false);
-    }
 
     public void tryServerConnection(final Runnable connectionCallback, final String serverURL, final String projectUser, String userPassword, final boolean changingUser) {
 
@@ -207,6 +204,7 @@ public class ServerConnectionManager {
                 }
             }
         };
+        m_loggerProline.debug(" ---- WILL RUN AuthenticateUserTask ");
         AuthenticateUserTask task = new AuthenticateUserTask(callback, projectUser, userPassword, databasePassword);
         AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
 
@@ -333,50 +331,9 @@ public class ServerConnectionManager {
                 }
             }
         };
-
+        m_loggerProline.debug(" ---- WILL RUN GetDBConnectionTemplateTask with  "+databasePassword);
         GetDBConnectionTemplateTask task = new GetDBConnectionTemplateTask(callback, databasePassword, databaseProperties);
         AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
-    }
-
-    private void tryProjectUser(final Runnable connectionCallback, String projectUser) {
-        setConnectionState(CONNECTION_ASKED);
-
-        // ask for the connection
-        AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
-
-            @Override
-            public boolean mustBeCalledInAWT() {
-                return true;
-            }
-
-            @Override
-            public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
-
-                if (success) {
-                    // save connection parameters
-                    saveParameters();
-                    setConnectionState(CONNECTION_DONE);
-                } else {
-                    //VDS TO BE REMOVED => STILL USED ?
-//                    m_previousErrorId = getErrorId();
-
-                    setConnectionState(CONNECTION_FAILED);
-                    m_connectionError = getTaskError();
-
-                }
-
-                if (connectionCallback != null) {
-                    connectionCallback.run();
-                }
-
-            }
-        };
-
-        // ask asynchronous loading of data
-        DatabaseConnectionTask connectionTask = new DatabaseConnectionTask(callback);
-        connectionTask.initCheckProjectUser(projectUser);
-
-        AccessDatabaseThread.getAccessDatabaseThread().addTask(connectionTask);
     }
 
     private void tryDatabaseConnection(final Runnable connectionCallback, HashMap<Object, Object> databaseProperties, String projectUser) {
@@ -399,11 +356,7 @@ public class ServerConnectionManager {
                     saveParameters();
                     setConnectionState(CONNECTION_DONE);
 
-                    // ask connection to PDI
-                    //connectionToPdiDB();
                 } else {
-                      //VDS TO BE REMOVED => STILL USED ?
-//                    m_previousErrorId = getErrorId();
 
                     setConnectionState(CONNECTION_FAILED);
                     m_connectionError = getTaskError();
@@ -417,7 +370,7 @@ public class ServerConnectionManager {
 
             }
         };
-
+        
         // ask asynchronous loading of data
         DatabaseConnectionTask connectionTask = new DatabaseConnectionTask(callback);
         connectionTask.initConnectionToUDS(databaseProperties, projectUser);
@@ -444,9 +397,6 @@ public class ServerConnectionManager {
         return m_userPassword;
     }
 
-    /*public Boolean isJMSServer() {
-        return m_jmsServer;
-    }*/
 
     public void setServerURL(String serverURL) {
         m_serverURL = serverURL;
@@ -463,10 +413,6 @@ public class ServerConnectionManager {
     public void setPasswordNeeded(boolean passwordNeeded) {
         m_passwordNeeded = passwordNeeded;
     }
-
-    /*public void setIsJMSServer(boolean isJMSServer) {
-        m_jmsServer = isJMSServer;
-    }*/
 
     public synchronized boolean isConnectionFailed() {
         return (m_connectionState == CONNECTION_FAILED);

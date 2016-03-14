@@ -111,6 +111,10 @@ public abstract class AbstractFunction implements CheckParameterInterface {
     public boolean inError() {
         return m_inError;
     }
+    public void resetError() {
+        m_inError = false;
+        m_errorMessage = null;
+    }
     public boolean isSettingsBeingDone() {
         return m_settingsBeingDone;
     }

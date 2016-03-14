@@ -226,6 +226,7 @@ public class FunctionGraphNode extends GraphNode {
         
         boolean settingsChanged = m_function.settings(graphObjectArray);
         if (settingsChanged) {
+            m_function.resetError();
             super.propagateSourceChanged();
         }
         

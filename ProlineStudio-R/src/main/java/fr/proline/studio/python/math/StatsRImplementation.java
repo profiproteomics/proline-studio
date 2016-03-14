@@ -3,6 +3,7 @@ package fr.proline.studio.python.math;
 import fr.proline.studio.python.data.Col;
 import fr.proline.studio.python.data.ColData;
 import fr.proline.studio.python.data.ColRef;
+import fr.proline.studio.python.data.ExprTableModel;
 import fr.proline.studio.python.data.PythonImage;
 import fr.proline.studio.python.data.Table;
 import fr.proline.studio.rserver.RServerManager;
@@ -19,7 +20,9 @@ import org.python.core.PyInteger;
 import org.python.core.PyObject;
 import org.python.core.PyString;
 import org.python.core.PyTuple;
+import org.rosuda.REngine.REXPDouble;
 import org.rosuda.REngine.REXPGenericVector;
+import org.rosuda.REngine.RList;
 
 /**
  *
@@ -343,5 +346,89 @@ public class StatsRImplementation {
 
     }
 
+    public static Table normalize(PyTuple p1, PyTuple p2, PyTuple p3, PyTuple labels, PyString normalizeFamily, PyString normalizeOption) throws Exception {
+
+        // needs R for this calculation
+        StatsUtil.startRSever();
+
+        // PyTuple to Col Array
+        ColRef[] cols = (p3 != null) ? StatsUtil.colTupleToColArray(p1, p2, p3) : StatsUtil.colTupleToColArray(p1, p2);
+
+        // Create a temp file with a matrix containing cols data
+        File matrixTempFile = StatsUtil.columnsToMatrixTempFile(cols, false, false);
+
+        // do the calculation
+        Table t = cols[0].getTable();
+        int nb1 = p1.size();
+        int nb2 = p2.size();
+        int nb3 = (p3 == null) ? 0 : p3.size();
+        Table resTable = _normalizeR(t, matrixTempFile, labels, cols, normalizeFamily, normalizeOption);
+
+        // delete temp files
+        matrixTempFile.delete();
+
+        return resTable;
+    }
+
+    private static Table _normalizeR(Table t, File matrixTempFile, PyTuple labels, ColRef[] cols, PyString normalizeFamily, PyString normalizeOption) throws Exception {
+
+        // load library to do the calculation
+        RServerManager serverR = RServerManager.getRServerManager();
+        serverR.parseAndEval("library("+LIB_PROSTAR+")"); 
+
+        // read Matrix Data
+        StatsUtil.readMatrixData(matrixTempFile, false);
+
+        String cmdBB = "normalizeD(" + StatsUtil.MATRIX_VARIABLE + ","+StatsUtil.stringTupleToRVector(labels)+ ",\""+normalizeFamily+ "\",\""+normalizeOption+"\")";
+        
+        Object res = serverR.parseAndEval(cmdBB);
+        
+        ExprTableModel model = new ExprTableModel(t.getModel());
+        Table resTable = new Table(model);
+        HashMap<Integer, Col> modifiedColumns = new HashMap<>();
+        
+        if (res instanceof REXPDouble) {
+            REXPDouble matrixDouble = (REXPDouble) res;
+            double[][] d = matrixDouble.asDoubleMatrix();
+
+            int nbRows = d.length;
+            int nbCols = cols.length;
+
+            ArrayList<ArrayList<Double>> valuesForCol = new ArrayList<>();
+            for (int j = 0; j < nbCols; j++) {
+                valuesForCol.add(new ArrayList<>());
+            }
+            for (int i = 0; i < nbRows; i++) {
+                for (int j = 0; j < nbCols; j++) {
+                    valuesForCol.get(j).add(d[i][j]);
+                }
+            }
+
+            for (int j = 0; j < nbCols; j++) {
+                modifiedColumns.put(cols[j].getModelCol(), new ColData(resTable, valuesForCol.get(j), "norm(" + cols[j].getExportColumnName() + ")"));
+            }
+
+
+        } else {
+            REXPGenericVector matrix = (REXPGenericVector) res;
+
+            RList list = (RList) matrix.asList();
+            for (int i = 0; i < list.size(); i++) {
+                REXPDouble resDoubleArray = (REXPDouble) list.get(i);
+                double[] d = resDoubleArray.asDoubles();
+                ArrayList<Double> values = new ArrayList<>();
+                for (int j = 0; j < d.length; j++) {
+                    values.add(d[j]);
+                }
+                modifiedColumns.put(cols[i].getModelCol(), new ColData(resTable, values, "norm(" + cols[i].getExportColumnName() + ")"));
+            }
+
+            model.modifyColumnValues(modifiedColumns);
+
+        }
+
+        return resTable;
+
+    }
     
 }

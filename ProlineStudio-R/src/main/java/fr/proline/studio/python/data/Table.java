@@ -56,6 +56,18 @@ public class Table extends PyObject {
         return m_model;
     }
     
+    public int getNbCols() {
+        if (m_model != null) {
+            return m_model.getColumnCount();
+        }
+
+        if (m_colums != null) {
+            return m_colums.size();
+        }
+        
+        return 0;
+    }
+    
     public ColRef getCol(int colIndex) {
         if (m_colums == null) {
             m_colums = new HashMap<>();
@@ -158,9 +170,9 @@ public class Table extends PyObject {
         return new Table(joinDataModel);
     }
     
-    public static Table join(Table t1, Table t2, Integer key1, Integer key2) {
+    public static Table join(Table t1, Table t2, Integer key1, Integer key2, Boolean showSourceColumn) {
         JoinDataModel joinDataModel = new JoinDataModel();
-        joinDataModel.setData(t1.getModel(), t2.getModel(), key1, key2);
+        joinDataModel.setData(t1.getModel(), t2.getModel(), key1, key2, showSourceColumn);
         return new Table(joinDataModel);
     }
     
@@ -170,9 +182,9 @@ public class Table extends PyObject {
         return new Table(diffDataModel);
     }
     
-    public static Table diff(Table t1, Table t2, Integer key1, Integer key2) {
+    public static Table diff(Table t1, Table t2, Integer key1, Integer key2, Boolean showSourceColumn) {
         DiffDataModel diffDataModel = new DiffDataModel();
-        diffDataModel.setData(t1.getModel(), t2.getModel(), key1, key2);
+        diffDataModel.setData(t1.getModel(), t2.getModel(), key1, key2, showSourceColumn);
         return new Table(diffDataModel);
     }
 }

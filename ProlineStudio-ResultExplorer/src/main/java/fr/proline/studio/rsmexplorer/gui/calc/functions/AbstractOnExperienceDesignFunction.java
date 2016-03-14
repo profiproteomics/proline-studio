@@ -54,6 +54,8 @@ public abstract class AbstractOnExperienceDesignFunction extends AbstractFunctio
     
     private Table m_sourceTable = null;
     
+    private final ArrayList<String> m_groupNames = new ArrayList<>();
+    
     public AbstractOnExperienceDesignFunction(GraphPanel panel, String functionName, String resultName, String pythonCall, Object colExtraInfo) {
         super(panel);
         
@@ -158,6 +160,30 @@ public abstract class AbstractOnExperienceDesignFunction extends AbstractFunctio
                     codeSB.append(',');
                 }
             }
+            
+            if (addLabelParameter()) {
+
+                codeSB.append(",(");
+                // labels of groups 
+                boolean first = true;
+                for (int j = 0; j < nbColList; j++) {
+                    List colList = (List) m_columnsParameterArray[j].getAssociatedValues(true);
+                    for (int i = 0; i < colList.size(); i++) {
+                        if (first) {
+                            first = false;
+                        } else {
+                            codeSB.append(',');
+                        }
+                        if (m_groupNames.size() == nbColList) {
+                            codeSB.append("\"" + m_groupNames.get(j) + "\"");
+                        } else {
+                            codeSB.append("\"group" + j + "\"");
+                        }
+                    }
+                }
+                codeSB.append(")");
+            }
+            
             String extraValues = getExtraValuesForFunctionCall();
             if (extraValues != null) {
                 codeSB.append(extraValues);
@@ -307,6 +333,8 @@ public abstract class AbstractOnExperienceDesignFunction extends AbstractFunctio
                     }
 
                     if (hasQuantitationTypeParameter) {
+                        
+                        m_groupNames.clear();
                         HashMap<Long, Integer> groupMap = new HashMap<>();  // id group -> numéro de group
                         for (int i = 0; i < nbColumnsKept; i++) {
                             QuantitationType quantitationType = (QuantitationType) model1.getColValue(QuantitationType.class, columnKept.get(i));
@@ -314,6 +342,10 @@ public abstract class AbstractOnExperienceDesignFunction extends AbstractFunctio
                                 XicGroup group = (XicGroup) model1.getColValue(XicGroup.class, columnKept.get(i));
                                 if (!groupMap.containsKey(group.getId())) {
                                     groupMap.put(group.getId(), groupMap.size());
+                                    String name = group.getName();
+                                    if (name != null) {
+                                        m_groupNames.add(group.getName());
+                                    }
                                 }
                             }
                         }
@@ -488,5 +520,9 @@ public abstract class AbstractOnExperienceDesignFunction extends AbstractFunctio
 
     public ResultVariable[] getExtraVariables(Table sourceTable) {
         return null;
+    }
+    
+    public boolean addLabelParameter() {
+        return false;
     }
 }

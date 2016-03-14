@@ -21,6 +21,8 @@ public abstract class AbstractJoinDataModel extends AbstractTableModel implement
 
     protected int m_selectedKey1 = -1;
     protected int m_selectedKey2 = -1;
+    protected boolean m_showSourceColumn;
+
     
         
     protected ArrayList m_allKeys;
@@ -32,6 +34,8 @@ public abstract class AbstractJoinDataModel extends AbstractTableModel implement
     public void setData(GlobalTableModelInterface data1, GlobalTableModelInterface data2) {
         m_data1 = data1;
         m_data2 = data2;
+        
+        m_showSourceColumn = false;
 
         selectKeys();
 
@@ -40,11 +44,12 @@ public abstract class AbstractJoinDataModel extends AbstractTableModel implement
         }
     }
     
-    public void setData(GlobalTableModelInterface data1, GlobalTableModelInterface data2, Integer key1, Integer key2) {
+    public void setData(GlobalTableModelInterface data1, GlobalTableModelInterface data2, Integer key1, Integer key2, Boolean showSourceColumn) {
         m_data1 = data1;
         m_data2 = data2;
         m_selectedKey1 = key1;
         m_selectedKey2 = key2;
+        m_showSourceColumn = showSourceColumn;
 
         if (joinPossible()) {
             join();

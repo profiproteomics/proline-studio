@@ -10,6 +10,7 @@ import fr.proline.studio.rsmexplorer.gui.calc.functions.DiffFunction;
 import fr.proline.studio.rsmexplorer.gui.calc.functions.FilterFunction;
 import fr.proline.studio.rsmexplorer.gui.calc.functions.ImportTSVFunction;
 import fr.proline.studio.rsmexplorer.gui.calc.functions.JoinFunction;
+import fr.proline.studio.rsmexplorer.gui.calc.functions.NormalizationFunction;
 import fr.proline.studio.rsmexplorer.gui.calc.functions.PValueFunction;
 import fr.proline.studio.rsmexplorer.gui.calc.functions.QuantiFilterFunction;
 import fr.proline.studio.rsmexplorer.gui.calc.functions.TtdFunction;
@@ -173,6 +174,8 @@ public abstract class DataTree extends JTree {
         FunctionNode quantiFilterFunction = new FunctionNode(new QuantiFilterFunction(null));
         parentFunctionNode.add(quantiFilterFunction);
         
+        FunctionNode normalizationFunction = new FunctionNode(new NormalizationFunction(null));
+        parentFunctionNode.add(normalizationFunction);
 
         DefaultTreeModel model = (DefaultTreeModel) getModel();
         model.nodeStructureChanged(parentFunctionNode);

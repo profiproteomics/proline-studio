@@ -147,7 +147,7 @@ public abstract class AbstractMatrixPlotGraphic extends AbstractGraphic {
             }
             
             codeSB.append(",(");
-            // groups 
+            // labels of groups 
             boolean first = true;
             for (int j = 0; j < nbColList; j++) {
                 List colList = (List) m_columnsParameterArray[j].getAssociatedValues(true);

@@ -4,6 +4,7 @@ import fr.proline.studio.python.data.Col;
 import fr.proline.studio.python.data.ColData;
 import fr.proline.studio.python.data.PythonImage;
 import fr.proline.studio.python.data.Table;
+import fr.proline.studio.rserver.RServerManager;
 
 import org.apache.commons.math.MathException;
 
@@ -99,10 +100,21 @@ public class Stats {
         return StatsImplementation.quantifilter(p1, p2, null, t, option, threshold);
     }
     
+    public static Table normalize(PyTuple p1, PyTuple p2, PyTuple p3, PyTuple labels, PyString normalizeFamily, PyString normalizeOption) throws Exception {
+        return StatsRImplementation.normalize(p1, p2, p3, labels, normalizeFamily, normalizeOption);
+    }
+
+    public static Table normalize(PyTuple p1, PyTuple p2, PyTuple labels, PyString normalizeFamily, PyString normalizeOption) throws Exception {
+        return StatsRImplementation.normalize(p1, p2, null, labels, normalizeFamily, normalizeOption);
+    }
+    
     public static ColData ttd(PyTuple p1, PyTuple p2) throws MathException {
         return StatsImplementation.ttd(p1, p2);
     }
     
-
+    public void Testdapar() throws Exception {
+        RServerManager serverR = RServerManager.getRServerManager();
+        serverR.parseAndEval("library(DAPAR)");
+    }
 
 }

@@ -68,7 +68,7 @@ public class DiffDataModel extends AbstractJoinDataModel {
 
     @Override
     public int getColumnCount() {
-        return 1+m_allColumns1.size();
+        return 1+m_allColumns1.size() + (m_showSourceColumn ? 1 : 0);
     }
 
     @Override
@@ -87,6 +87,14 @@ public class DiffDataModel extends AbstractJoinDataModel {
             }
         }
         
+        if (m_showSourceColumn) {
+            if (columnIndex == 1) {
+                return "Source";
+            } else {
+                columnIndex--;
+            }
+        }
+        
         columnIndex--;
         return m_data1.getDataColumnIdentifier(m_allColumns1.get(columnIndex));
   
@@ -101,7 +109,15 @@ public class DiffDataModel extends AbstractJoinDataModel {
         Class c = null;
         if (columnIndex == 0) {
             c = m_data1.getDataColumnClass(m_selectedKey1);
-        } else {
+        } else if (m_showSourceColumn) {
+            if (columnIndex == 1) {
+                c = String.class;
+            } else {
+                columnIndex--;
+            }
+        }
+
+        if (c == null) {
             columnIndex--;
             if (columnIndex < m_allColumns1.size()) {
                 c = m_data1.getDataColumnClass(m_allColumns1.get(columnIndex));
@@ -133,6 +149,24 @@ public class DiffDataModel extends AbstractJoinDataModel {
         if (columnIndex == 0) {
             return key;
         }
+        
+        if (m_showSourceColumn) {
+            if (columnIndex == 1) {
+                Integer row1 = m_keyToRow1.get(key);
+                Integer row2 = m_keyToRow2.get(key);
+                if ((row1 == null) && (row2 != null)) {
+                    return m_data2.getName();
+                } else if ((row1 != null) && (row2 == null)) {
+                    return m_data1.getName();
+                } else {
+                    return m_data1.getName() + "," + m_data2.getName();
+                }
+
+            } else {
+                columnIndex--;
+            }
+        }
+        
         
         columnIndex--;
         

@@ -15,6 +15,8 @@ public abstract class Col extends PyObject {
     
     protected String m_columnName = null;
     
+    protected String m_tooltip = null;
+    
     protected Table m_table = null;
     
     public Col(Table table) {
@@ -37,6 +39,14 @@ public abstract class Col extends PyObject {
     
     public String getColumnName() {
         return m_columnName;
+    }
+    
+    public void setTooltip(String tooltip) {
+        m_tooltip = tooltip;
+    }
+
+    public String getTooltip() {
+        return m_tooltip;
     }
     
     public String getExportColumnName() {

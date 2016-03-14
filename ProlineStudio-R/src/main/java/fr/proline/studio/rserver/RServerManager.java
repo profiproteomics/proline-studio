@@ -376,18 +376,12 @@ public class RServerManager {
         }
     }
     
-    /*public REXP eval(String code) throws RServerException {
+    /*public void eval(String code) throws RServerException {
         
         try {
             m_connection.eval("try(" + code + ",silent=TRUE)");
-            if (result.inherits("try-error")) {
-                RServerException e = new RServerException(result.asString());
-                LoggerFactory.getLogger("ProlineStudio.Commons").error(getClass().getSimpleName() + " failed", e);
-                throw e;
-            }
-        
-            return result;
-        } catch (REXPMismatchException | REngineException e) {
+
+        } catch (Exception e) {
             LoggerFactory.getLogger("ProlineStudio.Commons").error(getClass().getSimpleName() + " failed", e);
             throw new RServerException(e.getMessage());
         }

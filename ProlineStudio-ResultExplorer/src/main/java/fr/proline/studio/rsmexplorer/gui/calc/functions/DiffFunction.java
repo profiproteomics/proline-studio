@@ -1,6 +1,7 @@
  package fr.proline.studio.rsmexplorer.gui.calc.functions;
 
 import fr.proline.studio.comparedata.AbstractJoinDataModel;
+import fr.proline.studio.parameter.BooleanParameter;
 import fr.proline.studio.parameter.ObjectParameter;
 import fr.proline.studio.parameter.ParameterError;
 import fr.proline.studio.parameter.ParameterList;
@@ -11,6 +12,7 @@ import fr.proline.studio.rsmexplorer.gui.calc.ProcessCallbackInterface;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.AbstractGraphObject;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.FunctionGraphNode;
 import fr.proline.studio.table.GlobalTableModelInterface;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 
 /**
@@ -21,10 +23,12 @@ public class DiffFunction extends AbstractFunction {
 
     private static final String JOIN_COL1 = "JOIN_COL1";
     private static final String JOIN_COL2 = "JOIN_COL2";
+    private static final String SOURCE_COL = "SOURCE_COL";
 
     private ParameterList m_parameterList;
     private ObjectParameter m_paramColumn1;
     private ObjectParameter m_paramColumn2;
+    private BooleanParameter m_addSourceCol;
     
     public DiffFunction(GraphPanel panel) {
         super(panel);
@@ -83,13 +87,16 @@ public class DiffFunction extends AbstractFunction {
 
             try {
                 Table t1 = new Table(graphObjects[0].getGlobalTableModelInterface());
+                graphObjects[0].getGlobalTableModelInterface().setName(graphObjects[0].getFullName());
                 Table t2 = new Table(graphObjects[1].getGlobalTableModelInterface());
+                graphObjects[1].getGlobalTableModelInterface().setName(graphObjects[1].getFullName());
 
                 Table diffTable;
                 if ((m_paramColumn1 != null) && (m_paramColumn2 != null)) {
                     Integer key1 = (Integer) m_paramColumn1.getAssociatedObjectValue();
                     Integer key2 = (Integer) m_paramColumn2.getAssociatedObjectValue();
-                    diffTable = Table.diff(t1, t2, key1, key2);
+                    Boolean showSourceColumn = (Boolean) m_addSourceCol.getObjectValue();
+                    diffTable = Table.diff(t1, t2, key1, key2, showSourceColumn);
                 } else {
                     diffTable = Table.diff(t1, t2);
                 }
@@ -166,12 +173,14 @@ public class DiffFunction extends AbstractFunction {
 
         m_paramColumn1 = new ObjectParameter(JOIN_COL1, graphObjects[0].getFullName() + " Join Column Key", new JComboBox(objectArray1), objectArray1, associatedObjectArray1, ((AbstractJoinDataModel) modelForDefaultKey).getSelectedKey1(), null);
         m_paramColumn2 = new ObjectParameter(JOIN_COL2, graphObjects[1].getFullName() + " Join Column Key", new JComboBox(objectArray2), objectArray2, associatedObjectArray2, ((AbstractJoinDataModel) modelForDefaultKey).getSelectedKey2(), null);
+        m_addSourceCol = new BooleanParameter(SOURCE_COL, "Add Source Info", JCheckBox.class, true);
         m_parameterList = new ParameterList("Diff");
         m_parameters = new ParameterList[1];
         m_parameters[0] = m_parameterList;
 
         m_parameterList.add(m_paramColumn1);
         m_parameterList.add(m_paramColumn2);
+        m_parameterList.add(m_addSourceCol);
 
     }
 

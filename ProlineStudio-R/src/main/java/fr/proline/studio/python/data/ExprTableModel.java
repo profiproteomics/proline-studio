@@ -10,6 +10,7 @@ import fr.proline.studio.table.DecoratedTableModel;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.table.LazyData;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import javax.swing.event.TableModelEvent;
@@ -22,16 +23,30 @@ import javax.swing.table.TableCellRenderer;
  */
 public class ExprTableModel extends DecoratedTableModel implements ChildModelInterface {
 
-    private final Col m_column;
-    private final Object m_colExtraInfo;
     private GlobalTableModelInterface m_parentModel;
-    private TableCellRenderer m_colRenderer = null;
+    
+    private Col m_extraColumn = null;
+    private Object m_colExtraInfo = null;
+    private TableCellRenderer m_colExtraRenderer = null;
+    
+    private HashMap<Integer, Col> m_modifiedColumns = null;
 
-    public ExprTableModel(Col column, Object colExtraInfo, TableCellRenderer colRenderer, GlobalTableModelInterface parentModel) {
-        m_column = column;
-        m_colExtraInfo = colExtraInfo;
-        m_colRenderer = colRenderer;
+    public ExprTableModel(GlobalTableModelInterface parentModel) {
         m_parentModel = parentModel;
+    }
+    public ExprTableModel(Col column, Object colExtraInfo, TableCellRenderer colRenderer, GlobalTableModelInterface parentModel) {
+        this(parentModel);
+        setExtraColumn(column, colExtraInfo, colRenderer);
+    }
+    
+    public final void setExtraColumn(Col column, Object colExtraInfo, TableCellRenderer colRenderer) {
+        m_extraColumn = column;
+        m_colExtraInfo = colExtraInfo;
+        m_colExtraRenderer = colRenderer;
+    }
+    
+    public final void modifyColumnValues(HashMap<Integer, Col> modifiedColumns) {
+        m_modifiedColumns = modifiedColumns;
     }
     
     @Override
@@ -41,14 +56,22 @@ public class ExprTableModel extends DecoratedTableModel implements ChildModelInt
 
     @Override
     public int getColumnCount() {
-        return m_parentModel.getColumnCount()+1;
+        return m_parentModel.getColumnCount()+ ((m_extraColumn!=null) ? 1 : 0);
     }
 
     @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
         if (columnIndex>=m_parentModel.getColumnCount()) {
-            return m_column.getValueAt(rowIndex);
+            return m_extraColumn.getValueAt(rowIndex);
         }
+        
+        if (m_modifiedColumns!=null) {
+            Col c = m_modifiedColumns.get(columnIndex);
+            if (c != null) {
+                return c.getValueAt(rowIndex);
+            }
+        }
+        
         return m_parentModel.getValueAt(rowIndex, columnIndex);
     }
     
@@ -57,14 +80,27 @@ public class ExprTableModel extends DecoratedTableModel implements ChildModelInt
         if (columnIndex>=m_parentModel.getColumnCount()) {
             return Double.class;
         }
+        
+        if ((m_modifiedColumns != null) && (m_modifiedColumns.containsKey(columnIndex))) {
+            return Double.class;
+        }
+        
         return m_parentModel.getColumnClass(columnIndex);
     }
 
     @Override
     public String getColumnName(int columnIndex) {
-         if (columnIndex>=m_parentModel.getColumnCount()) {
-            return m_column.getColumnName();
+        if (columnIndex>=m_parentModel.getColumnCount()) {
+            return m_extraColumn.getColumnName();
         }
+         
+        if (m_modifiedColumns!=null) {
+            Col c = m_modifiedColumns.get(columnIndex);
+            if (c != null) {
+                return c.getColumnName();
+            }
+        }
+         
         return m_parentModel.getColumnName(columnIndex);
     }
     
@@ -78,6 +114,14 @@ public class ExprTableModel extends DecoratedTableModel implements ChildModelInt
         if (col>=m_parentModel.getColumnCount()) {
             return null; // no lazy data
         }
+        
+        if (m_modifiedColumns != null) {
+            Col c = m_modifiedColumns.get(col);
+            if (c != null) {
+                return null; // no lazy data
+            }
+        }
+        
         return m_parentModel.getLazyData(row, col);
     }
 
@@ -110,6 +154,14 @@ public class ExprTableModel extends DecoratedTableModel implements ChildModelInt
         if (col>=m_parentModel.getColumnCount()) {
             return getColumnName(col);
         }
+        
+        if (m_modifiedColumns != null) {
+            Col c = m_modifiedColumns.get(col);
+            if (c != null) {
+                return c.getColumnName();
+            }
+        }
+        
         return m_parentModel.getToolTipForHeader(col);
     }
 
@@ -118,6 +170,14 @@ public class ExprTableModel extends DecoratedTableModel implements ChildModelInt
         if (col>=m_parentModel.getColumnCount()) {
             return null;
         }
+        
+        if (m_modifiedColumns != null) {
+            Col c = m_modifiedColumns.get(col);
+            if (c != null) {
+                return c.getTooltip();
+            }
+        }
+        
         return m_parentModel.getTootlTipValue(row, col);
     }
 
@@ -126,6 +186,14 @@ public class ExprTableModel extends DecoratedTableModel implements ChildModelInt
         if (columnIndex >= m_parentModel.getColumnCount()) {
             return getColumnName(columnIndex);
         }
+        
+        if (m_modifiedColumns != null) {
+            Col c = m_modifiedColumns.get(columnIndex);
+            if (c != null) {
+                return c.getColumnName();
+            }
+        }
+        
         return m_parentModel.getDataColumnIdentifier(columnIndex);
     }
 
@@ -134,14 +202,27 @@ public class ExprTableModel extends DecoratedTableModel implements ChildModelInt
         if (columnIndex >= m_parentModel.getColumnCount()) {
             return Double.class;
         }
+        
+        if ((m_modifiedColumns != null) && (m_modifiedColumns.containsKey(columnIndex))) {
+            return Double.class;
+        }
+        
         return m_parentModel.getDataColumnClass(columnIndex);
     }
 
     @Override
     public Object getDataValueAt(int rowIndex, int columnIndex) {
         if (columnIndex>=m_parentModel.getColumnCount()) {
-            return m_column.getValueAt(rowIndex);
+            return m_extraColumn.getValueAt(rowIndex);
         }
+        
+        if (m_modifiedColumns != null) {
+            Col c = m_modifiedColumns.get(columnIndex);
+            if (c != null) {
+                return c.getValueAt(rowIndex);
+            }
+        }
+        
         return m_parentModel.getDataValueAt(rowIndex, columnIndex);
     }
 
@@ -183,7 +264,7 @@ public class ExprTableModel extends DecoratedTableModel implements ChildModelInt
         
         Integer key = m_parentModel.getColumnCount();
         if (!filtersMap.containsKey(key)) {
-            filtersMap.put(m_parentModel.getColumnCount(), new DoubleFilter(m_column.getColumnName(),null, getColumnCount()-1));
+            filtersMap.put(m_parentModel.getColumnCount(), new DoubleFilter(m_extraColumn.getColumnName(),null, getColumnCount()-1));
         }
     }
 
@@ -221,6 +302,19 @@ public class ExprTableModel extends DecoratedTableModel implements ChildModelInt
             }
             return ((Double) o).toString();
         }
+        
+        if (m_modifiedColumns != null) {
+            Col c = m_modifiedColumns.get(col);
+            if (c != null) {
+                Object d = c.getValueAt(row);
+                if (d == null) {
+                    return "";
+                } else {
+                    return d.toString();
+                }
+            }
+        }
+        
         return m_parentModel.getExportRowCell(row, col);
     }
 
@@ -229,6 +323,14 @@ public class ExprTableModel extends DecoratedTableModel implements ChildModelInt
         if (col >= m_parentModel.getColumnCount()) {
             return getColumnName(col);
         }
+        
+        if (m_modifiedColumns != null) {
+            Col c = m_modifiedColumns.get(col);
+            if (c != null) {
+                return getColumnName(col);
+            }
+        }
+        
         return m_parentModel.getExportColumnName(col);   
     }
 
@@ -255,7 +357,7 @@ public class ExprTableModel extends DecoratedTableModel implements ChildModelInt
     @Override
     public TableCellRenderer getRenderer(int row, int col) {
         if (col >= m_parentModel.getColumnCount()) {
-            return m_colRenderer;
+            return m_colExtraRenderer;
         }
         return m_parentModel.getRenderer(row, col);   
     }

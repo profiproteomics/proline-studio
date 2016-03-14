@@ -179,6 +179,7 @@
                         <publicPackage>fr.proline.studio.python.data</publicPackage>
                         <publicPackage>fr.proline.studio.python.interpreter</publicPackage>
                         <publicPackage>fr.proline.studio.python.math</publicPackage>
+                        <publicPackage>fr.proline.studio.python.model</publicPackage>
                         <publicPackage>fr.proline.studio.python.util</publicPackage>
                         <publicPackage>fr.proline.studio.rserver</publicPackage>
                         <publicPackage>fr.proline.studio.rserver.dialog</publicPackage>

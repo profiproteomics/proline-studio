@@ -54,7 +54,7 @@ public class QuantiFilterFunction extends AbstractOnExperienceDesignFunction {
         
         m_groupsParameter = new ObjectParameter(GROUP_SEL, "Missing Values Algorithm", null, options, associatedOptions, -1, null);
         
-        m_intensityThreshold = new IntegerParameter(INTENSITY_VALUE, "Intensity Threshold", JTextField.class, 0, 0, null);
+        m_intensityThreshold = new IntegerParameter(INTENSITY_VALUE, "Number of Intensity Values", JTextField.class, 0, 0, null);
         
         parameterList.add(m_groupsParameter);
         parameterList.add(m_intensityThreshold);
@@ -74,5 +74,6 @@ public class QuantiFilterFunction extends AbstractOnExperienceDesignFunction {
         ResultVariable[] resultVariables = { m_tableResultVariable };
         return resultVariables;
     }
+
 }
     

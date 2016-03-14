@@ -108,6 +108,14 @@ public class Stats {
         return StatsRImplementation.normalize(p1, p2, null, labels, normalizeFamily, normalizeOption);
     }
     
+    public static Table mvimputation(PyTuple p1, PyTuple p2, PyTuple p3, PyString method) throws Exception {
+        return StatsRImplementation.mvimputation(p1, p2, p3, method);
+    }
+
+    public static Table mvimputation(PyTuple p1, PyTuple p2, PyString method) throws Exception {
+        return StatsRImplementation.mvimputation(p1, p2, null, method);
+    }
+    
     public static ColData ttd(PyTuple p1, PyTuple p2) throws MathException {
         return StatsImplementation.ttd(p1, p2);
     }

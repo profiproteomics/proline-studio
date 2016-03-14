@@ -35,7 +35,7 @@ public class NormalizationFunction extends AbstractOnExperienceDesignFunction {
     private ResultVariable m_tableResultVariable = null;
     
     public NormalizationFunction(GraphPanel panel) {
-        super(panel, "Normalization", "normalize", "normalize", null);
+        super(panel, "Normalize", "normalize", "normalize", null);
     }
     
     @Override

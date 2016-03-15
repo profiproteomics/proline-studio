@@ -116,6 +116,10 @@ public class Stats {
         return StatsRImplementation.mvimputation(p1, p2, null, method);
     }
     
+    public static Table diffanalysis(PyTuple p1, PyTuple p2, PyTuple labels, PyString diffAnalysisType) throws Exception {
+        return StatsRImplementation.diffanalysis(p1, p2, labels, diffAnalysisType);
+    }
+    
     public static ColData ttd(PyTuple p1, PyTuple p2) throws MathException {
         return StatsImplementation.ttd(p1, p2);
     }

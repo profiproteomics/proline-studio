@@ -14,7 +14,7 @@ import fr.proline.studio.table.DecoratedTableModel;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.table.LazyData;
 import fr.proline.studio.table.TableDefaultRendererManager;
-import fr.proline.studio.table.renderer.BigFloatRenderer;
+import fr.proline.studio.table.renderer.BigFloatOrDoubleRenderer;
 import fr.proline.studio.table.renderer.DefaultLeftAlignRenderer;
 import fr.proline.studio.table.renderer.DefaultRightAlignRenderer;
 import java.util.ArrayList;
@@ -272,7 +272,7 @@ public class FeaturesTableModel extends DecoratedTableModel implements GlobalTab
                 break;
             case COLTYPE_FEATURE_APEX_INT_COL:
             case COLTYPE_FEATURE_AREA_COL:
-                renderer = new BigFloatRenderer( new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 0 );
+                renderer = new BigFloatOrDoubleRenderer( new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 0 );
                 break;
             case COLTYPE_FEATURE_RAWFILE: {
                 renderer = new DefaultLeftAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)) ;

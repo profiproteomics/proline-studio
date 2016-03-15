@@ -25,6 +25,7 @@ import fr.proline.studio.table.renderer.DefaultRightAlignRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.DoubleRenderer;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.table.TableDefaultRendererManager;
+import fr.proline.studio.types.GroupSelection;
 import fr.proline.studio.types.QuantitationType;
 import fr.proline.studio.types.XicGroup;
 import java.util.ArrayList;
@@ -105,17 +106,24 @@ public abstract class AbstractOnExperienceDesignFunction extends AbstractFunctio
             return;
         }
 
+        final GroupSelection groupSelection = new GroupSelection();
+        
         nbColList = ((Integer) m_nbGroupsParameter.getAssociatedObjectValue()).intValue();
         nbCols = 0;
         for (int i = 0; i < nbColList; i++) {
-            List colList = (List) m_columnsParameterArray[i].getAssociatedValues(true);
+            ArrayList colList = (ArrayList) m_columnsParameterArray[i].getAssociatedValues(true);
             if ((colList == null) || (colList.isEmpty())) {
                 callback.finished(functionGraphNode);
                 return;
             }
+            
+            groupSelection.addGroup(colList);
+            
             nbCols += colList.size();
         }
 
+        
+        
         setCalculating(true);
 
         try {
@@ -212,6 +220,9 @@ public abstract class AbstractOnExperienceDesignFunction extends AbstractFunctio
                                         m_globalTableModelInterface = t.getModel();
                                     }
 
+                                    // save the group selection in the result
+                                    m_globalTableModelInterface.addSingleValue(groupSelection);
+                                    
                                 }
                             }
                         } else if (error != null) {

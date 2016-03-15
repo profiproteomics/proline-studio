@@ -61,6 +61,9 @@ public class ExprTableModel extends DecoratedTableModel implements ChildModelInt
 
     @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
+        
+        try {
+        
         if (columnIndex>=m_parentModel.getColumnCount()) {
             return m_extraColumn.getValueAt(rowIndex);
         }
@@ -73,6 +76,11 @@ public class ExprTableModel extends DecoratedTableModel implements ChildModelInt
         }
         
         return m_parentModel.getValueAt(rowIndex, columnIndex);
+        
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
     
     @Override

@@ -12,7 +12,7 @@ import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
 import fr.proline.studio.mzscope.MzScopeInterface;
 import fr.proline.studio.mzscope.MzdbInfo;
-import fr.proline.studio.table.renderer.BigFloatRenderer;
+import fr.proline.studio.table.renderer.BigFloatOrDoubleRenderer;
 import fr.proline.studio.table.renderer.DefaultLeftAlignRenderer;
 import fr.proline.studio.table.renderer.DefaultRightAlignRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.DoubleRenderer;
@@ -806,7 +806,7 @@ public class FeatureTableModel extends LazyTableModel implements GlobalTableMode
             case COLTYPE_FEATURE_APEX_INTENSITY:
             case COLTYPE_FEATURE_INTENSITY:
             case COLTYPE_FEATURE_DURATION: {
-                renderer = new FontRenderer( new BigFloatRenderer( new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 0 ));
+                renderer = new FontRenderer( new BigFloatOrDoubleRenderer( new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 0 ));
                 break;
             }
             case COLTYPE_FEATURE_ELUTION_TIME:

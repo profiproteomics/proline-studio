@@ -14,7 +14,7 @@ import fr.proline.studio.filter.StringDiffFilter;
 import fr.proline.studio.filter.StringFilter;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
-import fr.proline.studio.table.renderer.BigFloatRenderer;
+import fr.proline.studio.table.renderer.BigFloatOrDoubleRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.CompareValueRenderer;
 import fr.proline.studio.table.renderer.DefaultLeftAlignRenderer;
 import fr.proline.studio.table.renderer.DefaultRightAlignRenderer;
@@ -949,7 +949,7 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
                     case COLTYPE_ABUNDANCE:
                     case COLTYPE_RAW_ABUNDANCE: {
                         if (m_isXICMode){
-                            renderer = new BigFloatRenderer( new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 0 );
+                            renderer = new BigFloatOrDoubleRenderer( new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 0 );
                         }else{
                             renderer = new FloatRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)));
                         }

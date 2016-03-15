@@ -500,4 +500,95 @@ public class StatsRImplementation {
 
     }
 
+    public static Table diffanalysis(PyTuple p1, PyTuple p2, PyTuple labels, PyString diffAnalysisType) throws Exception {
+
+        // needs R for this calculation
+        StatsUtil.startRSever();
+
+        // PyTuple to Col Array
+        ColRef[] cols = StatsUtil.colTupleToColArray(p1, p2);
+
+        // Create a temp file with a matrix containing cols data
+        File matrixTempFile = StatsUtil.columnsToMatrixTempFile(cols, false, false);
+
+        // do the calculation
+        Table t = cols[0].getTable();
+        Table resTable = _diffanalysisR(t, matrixTempFile, labels, cols, diffAnalysisType);
+
+        // delete temp files
+        matrixTempFile.delete();
+
+        return resTable;
+    }
+
+    private static Table _diffanalysisR(Table t, File matrixTempFile, PyTuple labels, ColRef[] cols, PyString diffAnalysisType) throws Exception {
+
+        // load library to do the calculation
+        RServerManager serverR = RServerManager.getRServerManager();
+        serverR.parseAndEval("library(" + LIB_PROSTAR + ")");
+
+        // read Matrix Data
+        StatsUtil.readMatrixData(matrixTempFile, false);
+
+        String cmdBB = null;
+        String diffAnalysisTypeString = diffAnalysisType.toString();
+        if (diffAnalysisTypeString.compareTo("Limma") == 0) {
+            //cmdBB = "diffAnaLimma(" + StatsUtil.MATRIX_VARIABLE +"," + "samplesData" + "," + StatsUtil.stringTupleToRVector(labels) + ",\"" + normalizeFamily + "\",\"" + normalizeOption + "\")";
+            // JPM.TODO
+        } else if (diffAnalysisTypeString.compareTo("Welch") == 0) {
+            cmdBB = "diffAnaWelch(" + StatsUtil.MATRIX_VARIABLE + "," + StatsUtil.stringTupleToRVector(labels) + ",\"" + "group0" + "\",\"" + "group1" + "\")";
+            
+        }
+
+        String functionForColName = diffAnalysisTypeString.toLowerCase();
+        
+        Object res = serverR.parseAndEval(cmdBB);
+
+        ExprTableModel model = new ExprTableModel(t.getModel());
+        Table resTable = new Table(model);
+        HashMap<Integer, Col> modifiedColumns = new HashMap<>();
+
+        if (res instanceof REXPDouble) {
+            REXPDouble matrixDouble = (REXPDouble) res;
+            double[][] d = matrixDouble.asDoubleMatrix();
+
+            int nbRows = d.length;
+            int nbCols = cols.length;
+
+            ArrayList<ArrayList<Double>> valuesForCol = new ArrayList<>();
+            for (int j = 0; j < nbCols; j++) {
+                valuesForCol.add(new ArrayList<>());
+            }
+            for (int i = 0; i < nbRows; i++) {
+                for (int j = 0; j < nbCols; j++) {
+                    valuesForCol.get(j).add(d[i][j]);
+                }
+            }
+
+            for (int j = 0; j < nbCols; j++) {
+                modifiedColumns.put(cols[j].getModelCol(), new ColData(resTable, valuesForCol.get(j), functionForColName+"(" + cols[j].getExportColumnName() + ")"));
+            }
+
+        } else {
+            REXPGenericVector matrix = (REXPGenericVector) res;
+
+            RList list = (RList) matrix.asList();
+            for (int i = 0; i < list.size(); i++) {
+                REXPDouble resDoubleArray = (REXPDouble) list.get(i);
+                double[] d = resDoubleArray.asDoubles();
+                ArrayList<Double> values = new ArrayList<>();
+                for (int j = 0; j < d.length; j++) {
+                    values.add(d[j]);
+                }
+                modifiedColumns.put(cols[i].getModelCol(), new ColData(resTable, values, functionForColName+"(" + cols[i].getExportColumnName() + ")"));
+            }
+
+        }
+
+        model.modifyColumnValues(modifiedColumns);
+
+        return resTable;
+
+    }
+
 }

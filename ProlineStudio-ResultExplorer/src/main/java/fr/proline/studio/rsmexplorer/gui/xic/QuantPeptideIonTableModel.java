@@ -12,15 +12,11 @@ import fr.proline.studio.filter.IntegerFilter;
 import fr.proline.studio.filter.StringDiffFilter;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
-import fr.proline.studio.table.renderer.BigFloatRenderer;
+import fr.proline.studio.table.renderer.BigFloatOrDoubleRenderer;
 import fr.proline.studio.table.renderer.DefaultLeftAlignRenderer;
 import fr.proline.studio.table.renderer.DefaultRightAlignRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.DoubleRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.TimeRenderer;
-import static fr.proline.studio.rsmexplorer.gui.xic.QuantPeptideTableModel.COLTYPE_ABUNDANCE;
-import static fr.proline.studio.rsmexplorer.gui.xic.QuantPeptideTableModel.COLTYPE_PSM;
-import static fr.proline.studio.rsmexplorer.gui.xic.QuantPeptideTableModel.COLTYPE_RAW_ABUNDANCE;
-import static fr.proline.studio.rsmexplorer.gui.xic.QuantPeptideTableModel.LAST_STATIC_COLUMN;
 import fr.proline.studio.table.CompoundTableModel;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.utils.CyclicColorPalette;
@@ -786,7 +782,7 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements GlobalT
                         
                     case COLTYPE_ABUNDANCE:
                     case COLTYPE_RAW_ABUNDANCE: {
-                       renderer = new BigFloatRenderer( new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 0 );
+                       renderer = new BigFloatOrDoubleRenderer( new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 0 );
                        break;
 
                     }

@@ -98,7 +98,7 @@ public class DataFormat {
     }
     
     
-    public static String formatWithGroupingSep(Float f, int nbFractionDigits) {
+    public static String formatWithGroupingSep(Number f, int nbFractionDigits) {
         if (f == null) {
             return null;
         }
@@ -111,8 +111,9 @@ public class DataFormat {
         decimalFormat.setMaximumFractionDigits(nbFractionDigits);
         decimalFormat.setMinimumFractionDigits(nbFractionDigits);
         
-        return decimalFormat.format((double) f);
+        return decimalFormat.format(f.doubleValue());
     }
+    
     
     
 }

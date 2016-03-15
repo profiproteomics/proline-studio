@@ -1,6 +1,6 @@
 package fr.proline.studio.rsmexplorer.gui.calc.functions;
 
-import fr.proline.studio.parameter.AbstractLinkedParameters;
+
 import fr.proline.studio.parameter.ObjectParameter;
 import fr.proline.studio.parameter.ParameterList;
 import fr.proline.studio.python.data.Table;

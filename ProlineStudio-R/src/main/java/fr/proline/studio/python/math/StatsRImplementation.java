@@ -540,13 +540,13 @@ public class StatsRImplementation {
             
         }
 
-        String functionForColName = diffAnalysisTypeString.toLowerCase();
+        //String functionForColName = diffAnalysisTypeString.toLowerCase();
         
         Object res = serverR.parseAndEval(cmdBB);
 
         ExprTableModel model = new ExprTableModel(t.getModel());
         Table resTable = new Table(model);
-        HashMap<Integer, Col> modifiedColumns = new HashMap<>();
+        //HashMap<Integer, Col> modifiedColumns = new HashMap<>();
 
         if (res instanceof REXPDouble) {
             REXPDouble matrixDouble = (REXPDouble) res;
@@ -566,7 +566,13 @@ public class StatsRImplementation {
             }
 
             for (int j = 0; j < nbCols; j++) {
-                modifiedColumns.put(cols[j].getModelCol(), new ColData(resTable, valuesForCol.get(j), functionForColName+"(" + cols[j].getExportColumnName() + ")"));
+                String colName = null;
+                if (j == 0) {
+                    colName = diffAnalysisTypeString+" PValue";
+                } else if (j == 1) {
+                    colName = diffAnalysisTypeString+" log Ratio";
+                }
+                model.addExtraColumn(new ColData(resTable, valuesForCol.get(j), colName), null, null);
             }
 
         } else {
@@ -580,12 +586,20 @@ public class StatsRImplementation {
                 for (int j = 0; j < d.length; j++) {
                     values.add(d[j]);
                 }
-                modifiedColumns.put(cols[i].getModelCol(), new ColData(resTable, values, functionForColName+"(" + cols[i].getExportColumnName() + ")"));
+                String colName = null;
+                if (i == 0) {
+                    colName = diffAnalysisTypeString+" PValue";
+                } else if (i == 1) {
+                    colName = diffAnalysisTypeString+" log Ratio";
+                }
+                
+                model.addExtraColumn(new ColData(resTable, values, colName), null, null);
+                //modifiedColumns.put(cols[i].getModelCol(), new ColData(resTable, values, functionForColName+"(" + cols[i].getExportColumnName() + ")"));
             }
 
         }
 
-        model.modifyColumnValues(modifiedColumns);
+        //model.modifyColumnValues(modifiedColumns);
 
         return resTable;
 

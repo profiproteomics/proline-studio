@@ -124,9 +124,32 @@ public class Stats {
         return StatsImplementation.ttd(p1, p2);
     }
     
-    public void Testdapar() throws Exception {
+    public static PyObject computeFDR(Col pvalues, Col logFC, PyFloat pvalueThreshold, PyFloat logFCThreshold) throws Exception {
+        return computeFDR(pvalues, logFC, pvalueThreshold, logFCThreshold, new PyFloat(1));
+    }
+
+    public static PyObject computeFDR(Col pvalues, Col logFC, PyFloat pvalueThreshold, PyFloat logFCThreshold, PyFloat pi0Method) throws Exception {
+        return computeFDR(pvalues, logFC, pvalueThreshold, logFCThreshold, pi0Method, new PyFloat(0.05), new PyInteger(20), new PyFloat(0.05));
+    }
+
+    public static PyObject computeFDR(Col pvalues, Col logFC, PyFloat pvalueThreshold, PyFloat logFCThreshold, PyString pi0Method) throws Exception {
+        return computeFDR(pvalues, logFC, pvalueThreshold, logFCThreshold, pi0Method, new PyFloat(0.05), new PyInteger(20), new PyFloat(0.05));
+    }
+
+    public static PyObject computeFDR(Col pvalues, Col logFC, PyFloat pvalueThreshold, PyFloat logFCThreshold, PyFloat pi0Method, PyFloat alpha, PyInteger nbins, PyFloat pz) throws Exception {
+        String pi0Parameter = "pi0Method=" + pi0Method.toString();
+        return StatsRImplementation.computeFDR(pvalues, logFC, pvalueThreshold, logFCThreshold, pi0Parameter, alpha, nbins, pz);
+    }
+
+    public static PyObject computeFDR(Col pvalues, Col logFC, PyFloat pvalueThreshold, PyFloat logFCThreshold, PyString pi0Method, PyFloat alpha, PyInteger nbins, PyFloat pz) throws Exception {
+        String pi0Parameter = "pi0Method=\"" + pi0Method.toString() + "\"";
+        return StatsRImplementation.computeFDR(pvalues, logFC, pvalueThreshold, logFCThreshold, pi0Parameter, alpha, nbins, pz);
+    }
+    
+    
+    /*public void Testdapar() throws Exception {
         RServerManager serverR = RServerManager.getRServerManager();
         serverR.parseAndEval("library(DAPAR)");
-    }
+    }*/
 
 }

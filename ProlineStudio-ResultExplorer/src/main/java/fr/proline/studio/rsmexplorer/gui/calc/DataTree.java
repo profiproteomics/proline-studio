@@ -6,6 +6,7 @@ import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
 import fr.proline.studio.rsmexplorer.gui.calc.functions.AbstractFunction;
 import fr.proline.studio.rsmexplorer.gui.calc.functions.AdjustPFunction;
 import fr.proline.studio.rsmexplorer.gui.calc.functions.BBinomialFunction;
+import fr.proline.studio.rsmexplorer.gui.calc.functions.ComputeFDRFunction;
 import fr.proline.studio.rsmexplorer.gui.calc.functions.DiffAnalysisFunction;
 import fr.proline.studio.rsmexplorer.gui.calc.functions.DiffFunction;
 import fr.proline.studio.rsmexplorer.gui.calc.functions.FilterFunction;
@@ -184,6 +185,10 @@ public abstract class DataTree extends JTree {
 
         FunctionNode diffAnalysisFunction = new FunctionNode(new DiffAnalysisFunction(null));
         parentFunctionNode.add(diffAnalysisFunction);
+        
+        FunctionNode computeFDRFunction = new FunctionNode(new ComputeFDRFunction(null));
+        parentFunctionNode.add(computeFDRFunction);
+        
         
         DefaultTreeModel model = (DefaultTreeModel) getModel();
         model.nodeStructureChanged(parentFunctionNode);

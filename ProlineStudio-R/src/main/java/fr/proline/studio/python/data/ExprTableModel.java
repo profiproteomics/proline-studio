@@ -411,6 +411,7 @@ public class ExprTableModel extends DecoratedTableModel implements ChildModelInt
             if ((colExtraInfo != null) && (c.equals(colExtraInfo.getClass()))) {
                 return colExtraInfo;
             }
+            return null;
         }
 
         return m_parentModel.getColValue(c, col);

@@ -8,6 +8,8 @@ import fr.proline.studio.python.data.PythonImage;
 import fr.proline.studio.python.data.Table;
 import fr.proline.studio.rserver.RServerManager;
 import fr.proline.studio.table.LazyData;
+import fr.proline.studio.types.LogRatio;
+import fr.proline.studio.types.PValue;
 import java.io.File;
 import java.io.FileWriter;
 import java.util.ArrayList;
@@ -569,10 +571,12 @@ public class StatsRImplementation {
                 String colName = null;
                 if (j == 0) {
                     colName = diffAnalysisTypeString+" PValue";
+                    model.addExtraColumn(new ColData(resTable, valuesForCol.get(j), colName), new PValue(), null);
                 } else if (j == 1) {
                     colName = diffAnalysisTypeString+" log Ratio";
+                    model.addExtraColumn(new ColData(resTable, valuesForCol.get(j), colName), new LogRatio(), null);
                 }
-                model.addExtraColumn(new ColData(resTable, valuesForCol.get(j), colName), null, null);
+                
             }
 
         } else {
@@ -587,13 +591,16 @@ public class StatsRImplementation {
                     values.add(d[j]);
                 }
                 String colName = null;
+                Object colExtraInfo = null;
                 if (i == 0) {
                     colName = diffAnalysisTypeString+" PValue";
+                    colExtraInfo = new PValue();
                 } else if (i == 1) {
                     colName = diffAnalysisTypeString+" log Ratio";
+                    colExtraInfo = new LogRatio();
                 }
                 
-                model.addExtraColumn(new ColData(resTable, values, colName), null, null);
+                model.addExtraColumn(new ColData(resTable, values, colName), colExtraInfo, null);
                 //modifiedColumns.put(cols[i].getModelCol(), new ColData(resTable, values, functionForColName+"(" + cols[i].getExportColumnName() + ")"));
             }
 
@@ -602,6 +609,95 @@ public class StatsRImplementation {
         //model.modifyColumnValues(modifiedColumns);
 
         return resTable;
+
+    }
+    
+    
+    public static PyObject computeFDR(Col pvaluesCol, Col logFCCol, PyFloat pvalueThreshold, PyFloat logFCThreshold, String pi0Parameter, PyFloat alpha, PyInteger nbins, PyFloat pz) throws Exception {
+
+        RServerManager serverR = RServerManager.getRServerManager();
+        boolean RStarted = serverR.startRProcessWithRetry();
+        if (!RStarted) {
+            throw Py.RuntimeError("Server R not found");
+        }
+
+        serverR.connect();
+
+        int nbRow = pvaluesCol.getRowCount();
+
+        Table t = pvaluesCol.getTable();
+
+        File tempFile = File.createTempFile("computeFDR", "csv");
+        tempFile.deleteOnExit();
+        FileWriter fw = new FileWriter(tempFile);
+
+        for (int i = 0; i < nbRow; i++) {
+            Object pvalueO = pvaluesCol.getValueAt(i);
+            if (pvalueO instanceof LazyData) {
+                pvalueO = ((LazyData) pvalueO).getData();
+            }
+            double pvalueDouble;
+            if ((pvalueO != null) && (pvalueO instanceof Number)) {
+                pvalueDouble = ((Number) pvalueO).doubleValue();
+                if (pvalueDouble != pvalueDouble) {
+                    pvalueDouble = 0; // NaN values
+                }
+            } else {
+                pvalueDouble = 0;
+            }
+            
+            Object logFCO = logFCCol.getValueAt(i);
+            if (logFCO instanceof LazyData) {
+                logFCO = ((LazyData) logFCO).getData();
+            }
+            double logFCDouble;
+            if ((logFCO != null) && (logFCO instanceof Number)) {
+                logFCDouble = ((Number) logFCO).doubleValue();
+                if (logFCDouble != logFCDouble) {
+                    logFCDouble = 0; // NaN values
+                }
+            } else {
+                logFCDouble = 0;
+            }
+            
+            
+            fw.write(String.valueOf(pvalueDouble));
+            fw.write(';');
+            fw.write(String.valueOf(logFCDouble));
+            fw.write('\n');
+
+        }
+
+        fw.close();
+
+        PyFloat d = _computeFDR(t, tempFile, pvalueThreshold, logFCThreshold, pi0Parameter, alpha, nbins, pz);
+
+        tempFile.delete();
+
+        return d;
+
+    }
+
+    private static PyFloat _computeFDR(Table t, File f, PyFloat pvalueThreshold, PyFloat logFCThreshold, String pi0Parameter, PyFloat alpha, PyInteger nbins, PyFloat pz) throws Exception {
+
+        RServerManager serverR = RServerManager.getRServerManager();
+
+        String path = f.getCanonicalPath().replaceAll("\\\\", "/");
+
+        // write file
+        serverR.parseAndEval("library(" + LIB_PROSTAR + ")");
+
+
+        String cmdReadCSV = "computeFDRValues<-read.delim('" + path + "',header=F, sep=';', col.names=c(\"P.Value\",\"logFC\"))";
+        serverR.parseAndEval(cmdReadCSV);
+
+        String cmdBB1 = "computedFDR<-diffAnaComputeFDR(computeFDRValues, " +pvalueThreshold.toString()+","+logFCThreshold.toString()+"," + pi0Parameter  + ")";
+        
+        REXPDouble fdr = (REXPDouble) serverR.parseAndEval(cmdBB1);
+
+    
+        return new PyFloat(fdr.asDouble());
+
 
     }
 

@@ -1,6 +1,7 @@
 package fr.proline.studio.python.math;
 
 
+import fr.proline.studio.python.data.Col;
 import fr.proline.studio.python.data.ColData;
 import fr.proline.studio.python.data.ColRef;
 import fr.proline.studio.python.data.Table;
@@ -12,6 +13,7 @@ import org.apache.commons.math.MathException;
 import org.apache.commons.math.stat.descriptive.DescriptiveStatistics;
 import org.apache.commons.math.stat.inference.TTest;
 import org.apache.commons.math.stat.inference.TTestImpl;
+import org.python.core.Py;
 import org.python.core.PyInteger;
 import org.python.core.PyTuple;
 
@@ -22,6 +24,37 @@ import org.python.core.PyTuple;
  */
 public class StatsImplementation {
 
+    
+    public static ColData log(Col values) {
+
+        int nbRow = values.getRowCount();
+        
+        ArrayList<Double> resultArray = new ArrayList<>(nbRow);
+
+        for (int i = 0; i < nbRow; i++) {
+            Object o = values.getValueAt(i);
+            if (o instanceof LazyData) {
+                o = ((LazyData) o).getData();
+            }
+            double d;
+            if ((o != null) && (o instanceof Number)) {
+                d = ((Number) o).doubleValue();
+                if ((d != d) || (d<=0)) {
+                    d =  Double.NaN;
+                } else {
+                    d = StrictMath.log(d);
+                }
+            } else {
+                d = Double.NaN;
+            }
+            resultArray.add(d);
+
+            
+        }
+        
+        return new ColData(values.getTable(), resultArray, "log("+values.getExportColumnName()+")");
+    }
+    
     public static ColData ttd(PyTuple p1, PyTuple p2) throws MathException {
 
         Table t = ((ColRef) p1.get(0)).getTable();

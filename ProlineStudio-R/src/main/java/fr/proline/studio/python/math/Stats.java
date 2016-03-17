@@ -4,10 +4,7 @@ import fr.proline.studio.python.data.Col;
 import fr.proline.studio.python.data.ColData;
 import fr.proline.studio.python.data.PythonImage;
 import fr.proline.studio.python.data.Table;
-import fr.proline.studio.rserver.RServerManager;
-
 import org.apache.commons.math.MathException;
-
 import org.python.core.PyFloat;
 import org.python.core.PyInteger;
 import org.python.core.PyObject;
@@ -20,6 +17,10 @@ import org.python.core.PyTuple;
  */
 public class Stats {
 
+    public static ColData log(Col values) {
+        return StatsImplementation.log(values);
+    }
+    
     public static PyObject adjustP(Col pvalues) throws Exception {
         return adjustP(pvalues, new PyFloat(1));
     }

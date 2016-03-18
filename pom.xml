@@ -6,11 +6,11 @@
     <parent>
         <artifactId>ProFI-Pom</artifactId>
         <groupId>fr.proline</groupId>
-        <version>0.1.0-SNAPSHOT</version>
+        <version>0.1.0</version>
     </parent>
 
     <artifactId>ProlineStudio-parent</artifactId>
-    <version>0.5.0-SNAPSHOT</version> <!-- ProlineStudio version -->
+    <version>0.5.0</version> <!-- ProlineStudio version -->
     <packaging>pom</packaging>
 
     <name>ProlineStudio-parent</name>
@@ -35,7 +35,7 @@
     </properties>
 
     <scm>
-        <connection>scm:svn:https://bioproj.extra.cea.fr/svn/proline/ProlineStudio/branches/0.5.0-RCandidates</connection>
+        <connection>scm:svn:https://bioproj.extra.cea.fr/svn/proline/ProlineStudio/tags/0.5.0</connection>
     </scm>
  
 

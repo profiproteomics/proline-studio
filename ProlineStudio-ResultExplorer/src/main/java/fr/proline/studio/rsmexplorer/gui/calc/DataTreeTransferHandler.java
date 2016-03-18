@@ -7,6 +7,7 @@ import fr.proline.studio.rsmexplorer.gui.calc.graph.DataGraphNode;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.FunctionGraphNode;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphicGraphNode;
 import fr.proline.studio.rsmexplorer.gui.calc.graphics.AbstractGraphic;
+import fr.proline.studio.rsmexplorer.gui.calc.macros.AbstractMacro;
 import java.awt.Point;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
@@ -45,7 +46,7 @@ public class DataTreeTransferHandler extends TransferHandler {
             for (int i=0;i<nbSelectedNode;i++) {
                 DataNode node = selectedNodes[i];
                 DataNode.DataNodeType nodeType = node.getType();
-                if ((nodeType != DataNode.DataNodeType.VIEW_DATA) && (nodeType != DataNode.DataNodeType.FUNCTION) && (nodeType != DataNode.DataNodeType.GRAPHIC)) {
+                if ((nodeType != DataNode.DataNodeType.VIEW_DATA) && (nodeType != DataNode.DataNodeType.FUNCTION) && (nodeType != DataNode.DataNodeType.GRAPHIC) && (nodeType != DataNode.DataNodeType.MACRO)) {
                     return null;
                 }
             } 
@@ -123,6 +124,11 @@ public class DataTreeTransferHandler extends TransferHandler {
                             AbstractGraphic graphic = ((DataTree.GraphicNode) node).getGraphic().cloneGraphic(m_graphPanel);
                             GraphicGraphNode graphNode = new GraphicGraphNode(m_graphPanel, graphic);
                             graphPanel.addGraphNode(graphNode, x, y);
+                            break;
+                        }
+                        case MACRO: {
+                            AbstractMacro macro = ((DataTree.MacroNode) node).getMacro();
+                            graphPanel.addMacroToGraph(macro, x, y);
                             break;
                         }
 

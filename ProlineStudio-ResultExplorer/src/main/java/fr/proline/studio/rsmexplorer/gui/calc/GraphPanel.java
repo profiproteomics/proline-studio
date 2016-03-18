@@ -1,11 +1,16 @@
 package fr.proline.studio.rsmexplorer.gui.calc;
 
+import fr.proline.studio.python.data.TableInfo;
+import fr.proline.studio.rsmexplorer.gui.calc.functions.AbstractFunction;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.AbstractGraphObject;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.DataGraphNode;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.FunctionGraphNode;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphConnector;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphLink;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphNode;
+import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphicGraphNode;
+import fr.proline.studio.rsmexplorer.gui.calc.graphics.AbstractGraphic;
+import fr.proline.studio.rsmexplorer.gui.calc.macros.AbstractMacro;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Graphics;
@@ -16,6 +21,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import javax.swing.JComponent;
@@ -92,6 +98,68 @@ public class GraphPanel extends JPanel implements MouseListener, MouseMotionList
         repaint();
     }
  
+    public void addMacroToGraph(AbstractMacro macro, int x, int y) {
+        addMacroToGraph(macro, new Point(x, y));
+    }
+    public void addMacroToGraph(AbstractMacro macro, Point position) {
+        ArrayList<DataTree.DataNode> nodes = macro.getNodes();
+
+        HashMap<DataTree.DataNode, GraphNode> graphNodeMap = new HashMap<>();
+        
+        boolean firstNode = true;
+        
+        for (DataTree.DataNode node : nodes) {
+            DataTree.DataNode.DataNodeType type = node.getType();
+            int levelX = macro.getLevelX(node);
+            int levelY = macro.getLevelY(node);
+
+            GraphNode graphNode = null;
+            switch (type) {
+                case VIEW_DATA: {
+                    DataTree.ViewDataNode dataNode = ((DataTree.ViewDataNode) node);
+                    TableInfo tableInfo = dataNode.getTableInfo();
+                    graphNode = new DataGraphNode(tableInfo, this);
+                    break;
+                }
+                case FUNCTION: {
+                    DataTree.FunctionNode functionNode = (DataTree.FunctionNode) node;
+                    AbstractFunction function = functionNode.getFunction().cloneFunction(this);
+                    graphNode = new FunctionGraphNode(function, this);
+                    break;
+                }
+                case GRAPHIC: {
+                    DataTree.GraphicNode graphicNode = (DataTree.GraphicNode) node;
+                    AbstractGraphic graphic = graphicNode.getGraphic().cloneGraphic(this);
+                    graphNode = new GraphicGraphNode(this, graphic);
+                    break;
+                }
+            }
+            if ((firstNode) && (position == null)) {
+                position = new Point();
+                firstNode = false;
+                position = getNextGraphNodePosition(graphNode);
+                if (position.x<GraphNode.WIDTH*1.4) {
+                    position.x = (int) (GraphNode.WIDTH*1.4);
+                }
+                if (position.y<GraphNode.HEIGHT*1.4) {
+                    position.y = (int) (GraphNode.HEIGHT*1.4);
+                }
+            }
+            graphNodeMap.put(node, graphNode);
+            addGraphNode(graphNode, position.x+(int) (levelX*GraphNode.WIDTH* 2.2), position.y+levelY*GraphNode.HEIGHT*2);
+        }
+
+        for (DataTree.DataNode node : nodes) {
+            
+            GraphNode nodeOut = graphNodeMap.get(node);
+            ArrayList<DataTree.DataNode> links = macro.getLinks(node);
+            for (DataTree.DataNode linkedNode : links) {
+                GraphNode nodeIn = graphNodeMap.get(linkedNode);
+                nodeOut.connectTo(nodeIn);
+            }
+        }
+        
+    }
     
     public void bringToFront(GraphNode graphObject) {
         m_graphNodeArray.remove(graphObject);

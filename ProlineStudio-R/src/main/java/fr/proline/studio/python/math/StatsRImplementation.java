@@ -1,5 +1,7 @@
 package fr.proline.studio.python.math;
 
+import fr.proline.studio.graphics.PlotType;
+import static fr.proline.studio.graphics.PlotType.SCATTER_PLOT;
 import fr.proline.studio.python.data.Col;
 import fr.proline.studio.python.data.ColData;
 import fr.proline.studio.python.data.ColRef;
@@ -546,7 +548,24 @@ public class StatsRImplementation {
         
         Object res = serverR.parseAndEval(cmdBB);
 
-        ExprTableModel model = new ExprTableModel(t.getModel());
+        final int colPValue = t.getModel().getColumnCount();
+        final int colLogFC = colPValue+1;
+        ExprTableModel model = new ExprTableModel(t.getModel()) {
+            @Override
+            public int getBestXAxisColIndex(PlotType plotType) {
+                if (plotType == SCATTER_PLOT) {
+                    return colLogFC;
+                }
+                return super.getBestXAxisColIndex(plotType);
+            }
+            @Override
+            public int getBestYAxisColIndex(PlotType plotType) {
+                if (plotType == SCATTER_PLOT) {
+                    return colPValue;
+                }
+                return super.getBestYAxisColIndex(plotType);
+            }
+        };
         Table resTable = new Table(model);
         //HashMap<Integer, Col> modifiedColumns = new HashMap<>();
 

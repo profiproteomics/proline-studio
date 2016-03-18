@@ -60,6 +60,10 @@ public class ScatterGraphic extends AbstractGraphic {
     @Override
     public void generateDefaultParameters(AbstractGraphObject[] graphObjects) {
         GlobalTableModelInterface model1 = graphObjects[0].getGlobalTableModelInterface();
+        int bestXColumnIndex = model1.getBestXAxisColIndex(PlotType.SCATTER_PLOT);
+        int bestYColumnIndex = model1.getBestYAxisColIndex(PlotType.SCATTER_PLOT);
+        int selectedIndexX = -1;
+        int selectedIndexY = -1;
         int nbColumns = model1.getColumnCount();
         int nbColumnsKept = 0;
         for (int i = 0; i < nbColumns; i++) {
@@ -76,12 +80,17 @@ public class ScatterGraphic extends AbstractGraphic {
             if (c.equals(Integer.class) || c.equals(Float.class) || c.equals(Double.class)) {
                 objectArray1[iKept] = model1.getColumnName(i);
                 associatedObjectArray1[iKept] = i;
+                if (i == bestXColumnIndex) {
+                    selectedIndexX = iKept;
+                } else if (i == bestYColumnIndex) {
+                    selectedIndexY = iKept;
+                }
                 iKept++;
             }
         }
         
-        m_columnsParameter1 = new ObjectParameter(SEL_COLS1, "Column for X Axis", null, objectArray1, associatedObjectArray1, -1, null);
-        m_columnsParameter2 = new ObjectParameter(SEL_COLS2, "Column for Y Axis", null, objectArray1, associatedObjectArray1, -1, null);
+        m_columnsParameter1 = new ObjectParameter(SEL_COLS1, "Column for X Axis", null, objectArray1, associatedObjectArray1, selectedIndexX, null);
+        m_columnsParameter2 = new ObjectParameter(SEL_COLS2, "Column for Y Axis", null, objectArray1, associatedObjectArray1, selectedIndexY, null);
      
         ParameterList parameterList1 = new ParameterList("graphic1");
         ParameterList parameterList2 = new ParameterList("graphic2");

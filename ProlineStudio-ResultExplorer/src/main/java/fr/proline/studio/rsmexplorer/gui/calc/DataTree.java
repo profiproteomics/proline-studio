@@ -24,6 +24,8 @@ import fr.proline.studio.rsmexplorer.gui.calc.graphics.CalibrationPlotGraphic;
 import fr.proline.studio.rsmexplorer.gui.calc.graphics.DensityPlotGraphic;
 import fr.proline.studio.rsmexplorer.gui.calc.graphics.ScatterGraphic;
 import fr.proline.studio.rsmexplorer.gui.calc.graphics.VarianceDistPlotGraphic;
+import fr.proline.studio.rsmexplorer.gui.calc.macros.AbstractMacro;
+import fr.proline.studio.rsmexplorer.gui.calc.macros.ProStarMacro;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.utils.IconManager;
 import java.awt.Color;
@@ -53,6 +55,7 @@ import org.openide.windows.TopComponent;
 public abstract class DataTree extends JTree {
 
     private ParentDataNode m_parentDataNode = null;
+    private ParentMacrosNode m_parentMacrosNode = null;
     private ParentFunctionNode m_parentFunctionNode = null;
     private ParentGraphicNode m_parentGraphicNode = null;
 
@@ -67,6 +70,10 @@ public abstract class DataTree extends JTree {
             m_parentDataNode = new ParentDataNode();
             fillDataNodes(m_parentDataNode);
             root.add(m_parentDataNode); 
+            
+            m_parentMacrosNode = new ParentMacrosNode();
+            fillMacrosNodes(m_parentMacrosNode);
+            root.add(m_parentMacrosNode);
             
             m_parentFunctionNode = new ParentFunctionNode();
             fillFunctionNodes(m_parentFunctionNode);
@@ -147,6 +154,11 @@ public abstract class DataTree extends JTree {
         
         DefaultTreeModel model = (DefaultTreeModel) getModel();
         model.nodeStructureChanged(parentNode);   
+    }
+    
+    private void fillMacrosNodes(ParentMacrosNode parentMacrosNode) {
+        ProStarMacro proStar = new ProStarMacro();
+        parentMacrosNode.add( new MacroNode(proStar));
     }
     
     private void fillFunctionNodes(ParentFunctionNode parentFunctionNode) {
@@ -239,8 +251,10 @@ public abstract class DataTree extends JTree {
         public enum DataNodeType {
             ROOT_DATA_MIXER,
             PARENT_DATA,
+            PARENT_MACROS,
             PARENT_FUNCTION,
             FUNCTION,
+            MACRO,
             PARENT_GRAPHIC,
             GRAPHIC,
             WINDOW_DATA,
@@ -309,6 +323,22 @@ public abstract class DataTree extends JTree {
         }
     }
     
+    public static class ParentMacrosNode extends DataNode {
+
+        public ParentMacrosNode() {
+            super(DataNodeType.PARENT_MACROS);
+        }
+        
+        @Override
+        public ImageIcon getIcon() {
+            return IconManager.getIcon(IconManager.IconType.GEAR);
+        }
+
+        @Override
+        public String toString() {
+            return "Macros";
+        }
+    }
 
 
     public static class ParentFunctionNode extends DataNode {
@@ -344,6 +374,30 @@ public abstract class DataTree extends JTree {
             return "Graphics";
         }
     } 
+    
+    public static class MacroNode extends DataNode {
+
+        private AbstractMacro m_macro = null;
+
+        public MacroNode(AbstractMacro macro) {
+            super(DataNode.DataNodeType.MACRO);
+            m_macro = macro;
+        }
+
+        public AbstractMacro getMacro() {
+            return m_macro;
+        }
+
+        @Override
+        public ImageIcon getIcon() {
+            return IconManager.getIcon(IconManager.IconType.GEAR);
+        }
+
+        @Override
+        public String toString() {
+            return m_macro.getName();
+        }
+    }
     
     public static class FunctionNode extends DataNode {
 

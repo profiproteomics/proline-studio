@@ -10,6 +10,10 @@ import fr.proline.studio.python.data.TableInfo;
 import fr.proline.studio.rsmexplorer.gui.calc.functions.AbstractFunction;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.DataGraphNode;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.FunctionGraphNode;
+import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphNode;
+import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphicGraphNode;
+import fr.proline.studio.rsmexplorer.gui.calc.graphics.AbstractGraphic;
+import fr.proline.studio.rsmexplorer.gui.calc.macros.AbstractMacro;
 import fr.proline.studio.utils.IconManager;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -17,8 +21,11 @@ import java.awt.Dimension;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.HashMap;
 import javax.swing.Box;
 import javax.swing.JButton;
 
@@ -185,6 +192,60 @@ public class DataAnalyzerPanel extends JPanel implements DataBoxPanelInterface {
         m_graphPanel.addGraphNode(graphNode);
     }
     
+    public void addMacroToGraph(AbstractMacro macro) {
+        ArrayList<DataTree.DataNode> nodes = macro.getNodes();
+
+        HashMap<DataTree.DataNode, GraphNode> graphNodeMap = new HashMap<>();
+        
+        boolean firstNode = true;
+        Point position = null;
+        
+        for (DataTree.DataNode node : nodes) {
+            DataTree.DataNode.DataNodeType type = node.getType();
+            int levelX = macro.getLevelX(node);
+            int levelY = macro.getLevelY(node);
+
+            GraphNode graphNode = null;
+            switch (type) {
+                case FUNCTION: {
+                    DataTree.FunctionNode functionNode = (DataTree.FunctionNode) node;
+                    AbstractFunction function = functionNode.getFunction().cloneFunction(m_graphPanel);
+                    graphNode = new FunctionGraphNode(function, m_graphPanel);
+                    break;
+                }
+                case GRAPHIC: {
+                    DataTree.GraphicNode graphicNode = (DataTree.GraphicNode) node;
+                    AbstractGraphic graphic = graphicNode.getGraphic().cloneGraphic(m_graphPanel);
+                    graphNode = new GraphicGraphNode(m_graphPanel, graphic);
+                    break;
+                }
+            }
+            if (firstNode) {
+                firstNode = false;
+                position = m_graphPanel.getNextGraphNodePosition(graphNode);
+                if (position.x<GraphNode.WIDTH*1.4) {
+                    position.x = (int) (GraphNode.WIDTH*1.4);
+                }
+                if (position.y<GraphNode.HEIGHT*1.4) {
+                    position.y = (int) (GraphNode.HEIGHT*1.4);
+                }
+            }
+            graphNodeMap.put(node, graphNode);
+            m_graphPanel.addGraphNode(graphNode, position.x+(int) (levelX*GraphNode.WIDTH* 2.2), position.y+levelY*GraphNode.HEIGHT*2);
+        }
+
+        for (DataTree.DataNode node : nodes) {
+            
+            GraphNode nodeOut = graphNodeMap.get(node);
+            ArrayList<DataTree.DataNode> links = macro.getLinks(node);
+            for (DataTree.DataNode linkedNode : links) {
+                GraphNode nodeIn = graphNodeMap.get(linkedNode);
+                nodeOut.connectTo(nodeIn);
+            }
+        }
+        
+    }
+    
     @Override
     public void setDataBox(AbstractDataBox dataBox) {
         m_dataBox = dataBox;
@@ -245,6 +306,11 @@ public class DataAnalyzerPanel extends JPanel implements DataBoxPanelInterface {
                 case FUNCTION: {
                     AbstractFunction function = ((FunctionNode) node).getFunction().cloneFunction(m_graphPanel);
                     addFunctionToGraph(function);
+                    break;
+                }
+                case MACRO: {
+                    AbstractMacro macro = ((MacroNode) node).getMacro();
+                    addMacroToGraph(macro);
                     break;
                 }
 

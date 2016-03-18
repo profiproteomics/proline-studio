@@ -54,6 +54,26 @@ public abstract class GraphNode extends AbstractGraphObject {
         m_graphPanel = panel;
     }
 
+    private GraphConnector getFirstFreeConnector() {
+        if (m_inConnectors == null) {
+            return null;
+        }
+        
+        for (GraphConnector inConnector : m_inConnectors) {
+            if (inConnector.isConnected()) {
+                continue;
+            }
+            return inConnector;
+        }
+        return null;
+    }
+    
+    public void connectTo(GraphNode inGraphNode) {
+        GraphConnector inConnector = inGraphNode.getFirstFreeConnector();
+        m_outConnector.addConnection(inConnector);
+        inConnector.addConnection(m_outConnector);
+    }
+    
     public boolean hasInConnector() {
         if ((m_inConnectors == null) || (m_inConnectors.isEmpty())) {
             return false;

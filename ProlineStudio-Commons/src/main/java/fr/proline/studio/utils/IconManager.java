@@ -143,7 +143,8 @@ public class IconManager {
         ZOOM_FIT,
         CONTROL_PLAY,
         CONTROL_STOP,
-        CONTROL_PAUSE;
+        CONTROL_PAUSE,
+        GEAR;
         
     }
     private final static HashMap<IconType, ImageIcon> m_iconMap = new HashMap<>();
@@ -532,6 +533,8 @@ public class IconManager {
                 return "fr/proline/studio/images/control-stop.png";
             case CONTROL_PAUSE:
                 return "fr/proline/studio/images/control-pause.png";
+            case GEAR:
+                return "fr/proline/studio/images/gear.png";
                 
         }
 

@@ -10,10 +10,12 @@ import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Point;
 import java.awt.RenderingHints;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import javax.swing.JComponent;
@@ -46,31 +48,43 @@ public class GraphPanel extends JPanel implements MouseListener, MouseMotionList
         return m_graphNodeArray;
     }
     
-    public void addGraphNode(GraphNode graphNode) {
-       int posX = 0;
-       int posY = 0;
-       if (!m_graphNodeArray.isEmpty()) {
-           
-           GraphNode lastGraphNode = m_graphNodeArray.getLast();
-           posX = lastGraphNode.getCenterX();
-           posY = lastGraphNode.getCenterY() + GraphNode.HEIGHT*2;
-           int height = getHeight();
-           if (height > 60) {
-               // could be ==0 when the panel has just been created
-               if (posY > height - GraphNode.HEIGHT) {
-                   posY = height - GraphNode.HEIGHT;
-               }
-           }
-           
-           if ((lastGraphNode instanceof DataGraphNode) && (graphNode instanceof FunctionGraphNode)) {
-               posX += GraphNode.WIDTH*2.2;
-               posY = lastGraphNode.getCenterY();
-               
-           }
-           
-       }
+    public Point getNextGraphNodePosition(GraphNode graphNode) {
+        int posX = 0;
+        int posY = 0;
+        if (!m_graphNodeArray.isEmpty()) {
 
-       addGraphNode(graphNode, posX, posY);
+            GraphNode lastGraphNode = m_graphNodeArray.getLast();
+            posX = lastGraphNode.getCenterX();
+            posY = lastGraphNode.getCenterY() + GraphNode.HEIGHT * 2;
+            int height = getHeight();
+            if (height > 60) {
+                // could be ==0 when the panel has just been created
+                if (posY > height - GraphNode.HEIGHT) {
+                    posY = height - GraphNode.HEIGHT;
+                }
+            }
+
+            if ((lastGraphNode instanceof DataGraphNode) && (graphNode instanceof FunctionGraphNode)) {
+                posX += GraphNode.WIDTH * 2.2;
+                posY = lastGraphNode.getCenterY();
+
+            }
+
+        }
+
+        return new Point(posX, posY);
+    }
+    
+    public void addGraphNodes(ArrayList<GraphNode> graphNodes) {
+        for (GraphNode node : graphNodes) {
+            addGraphNode(node);
+        }
+    }
+    
+    public void addGraphNode(GraphNode graphNode) {
+       Point position = getNextGraphNodePosition(graphNode);
+
+       addGraphNode(graphNode, position.x, position.y);
     }
     public void addGraphNode(GraphNode graphNode, int x, int y) {
         graphNode.setCenter(x, y);

@@ -15,7 +15,7 @@ import fr.proline.studio.mzscope.MzdbInfo;
 import fr.proline.studio.table.renderer.BigFloatOrDoubleRenderer;
 import fr.proline.studio.table.renderer.DefaultLeftAlignRenderer;
 import fr.proline.studio.table.renderer.DefaultRightAlignRenderer;
-import fr.proline.studio.rsmexplorer.gui.renderer.DoubleRenderer;
+import fr.proline.studio.table.renderer.DoubleRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.FontRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.TimeRenderer;
 import fr.proline.studio.table.CompoundTableModel;

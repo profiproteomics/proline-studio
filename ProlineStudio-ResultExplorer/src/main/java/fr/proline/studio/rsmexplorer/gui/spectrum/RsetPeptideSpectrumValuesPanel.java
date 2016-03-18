@@ -27,7 +27,7 @@ import fr.proline.studio.pattern.DataMixerWindowBoxManager;
 import fr.proline.studio.progress.ProgressInterface;
 import fr.proline.studio.python.data.TableInfo;
 import fr.proline.studio.table.renderer.DefaultRightAlignRenderer;
-import fr.proline.studio.rsmexplorer.gui.renderer.DoubleRenderer;
+import fr.proline.studio.table.renderer.DoubleRenderer;
 import fr.proline.studio.table.CompoundTableModel;
 import fr.proline.studio.table.DecoratedTable;
 import fr.proline.studio.table.DecoratedTableModel;

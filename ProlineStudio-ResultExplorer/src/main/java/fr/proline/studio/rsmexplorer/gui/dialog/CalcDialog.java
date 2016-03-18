@@ -17,7 +17,7 @@ import fr.proline.studio.rserver.dialog.ImageViewerTopComponent;
 import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
 import fr.proline.studio.rsmexplorer.gui.calc.DataTree;
 import fr.proline.studio.table.renderer.DefaultRightAlignRenderer;
-import fr.proline.studio.rsmexplorer.gui.renderer.DoubleRenderer;
+import fr.proline.studio.table.renderer.DoubleRenderer;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.table.TableDefaultRendererManager;
 import fr.proline.studio.utils.IconManager;

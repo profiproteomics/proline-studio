@@ -22,7 +22,7 @@ import fr.proline.studio.filter.ValueFilter;
 import fr.proline.studio.filter.ValueListAssociatedStringFilter;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
-import fr.proline.studio.rsmexplorer.gui.renderer.DoubleRenderer;
+import fr.proline.studio.table.renderer.DoubleRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.PeptideRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.PercentageRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.ScoreRenderer;

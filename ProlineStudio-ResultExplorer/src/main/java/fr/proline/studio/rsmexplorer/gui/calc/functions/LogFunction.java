@@ -3,6 +3,7 @@ package fr.proline.studio.rsmexplorer.gui.calc.functions;
 import fr.proline.studio.parameter.AbstractLinkedParameters;
 import fr.proline.studio.parameter.DoubleParameter;
 import fr.proline.studio.parameter.IntegerParameter;
+import fr.proline.studio.parameter.MultiObjectParameter;
 import fr.proline.studio.parameter.ObjectParameter;
 import fr.proline.studio.parameter.ParameterError;
 import fr.proline.studio.parameter.ParameterList;
@@ -18,7 +19,7 @@ import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
 import fr.proline.studio.rsmexplorer.gui.calc.ProcessCallbackInterface;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.AbstractGraphObject;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.FunctionGraphNode;
-import fr.proline.studio.rsmexplorer.gui.renderer.DoubleRenderer;
+import fr.proline.studio.table.renderer.DoubleRenderer;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.table.TableDefaultRendererManager;
 import fr.proline.studio.table.renderer.DefaultRightAlignRenderer;
@@ -33,7 +34,7 @@ public class LogFunction  extends AbstractFunction {
     private static final String SEL_COL1 = "SEL_COL1";
 
     
-    private ObjectParameter m_columnsParameter1 = null;
+    private MultiObjectParameter m_columnsParameter1 = null;
 
     public LogFunction(GraphPanel panel) {
         super(panel);
@@ -64,11 +65,12 @@ public class LogFunction  extends AbstractFunction {
             return;
         }
 
-        Integer colIndex =(Integer) m_columnsParameter1.getAssociatedObjectValue();
-        if ((colIndex == null) || (colIndex == -1)) {
+        ArrayList colList = (ArrayList) m_columnsParameter1.getAssociatedValues(true);
+        if ((colList == null) || (colList.isEmpty())) {
             callback.finished(functionGraphNode);
             return;
         }
+
         
         // check if we have already processed
         if (m_globalTableModelInterface != null) {
@@ -83,16 +85,32 @@ public class LogFunction  extends AbstractFunction {
             GlobalTableModelInterface srcModel = graphObjects[0].getGlobalTableModelInterface();
             final Table sourceTable = new Table(srcModel);
 
-            ResultVariable[] parameters = new ResultVariable[1];
-            ColRef col = sourceTable.getCol(colIndex);
-            parameters[0] = new ResultVariable(col);
+
+            int nbCols = colList.size();
+            ResultVariable[] parameters = new ResultVariable[nbCols+1];
+
+            for (int i=0;i<nbCols;i++) {
+                ColRef col = sourceTable.getCol((Integer)colList.get(i));
+                parameters[i] = new ResultVariable(col);
+            }
+            
+            parameters[nbCols] = new ResultVariable(sourceTable);
+            
+            
 
 
             StringBuilder codeSB = new StringBuilder();
             codeSB.append("logColumn=Stats.log(");
-            for (int i = 0; i < parameters.length; i++) {
+            codeSB.append(parameters[nbCols].getName());
+            codeSB.append(",(");
+            for (int i = 0; i < parameters.length-1; i++) {
                 codeSB.append(parameters[i].getName());
+                if (i< parameters.length-2) {
+                    codeSB.append(",");
+                }
             }
+            codeSB.append(")");
+            
 
             codeSB.append(')');
  
@@ -106,12 +124,15 @@ public class LogFunction  extends AbstractFunction {
                             for (ResultVariable var : variables) {
                                 if (var.getName().compareTo("logColumn") == 0) {
                                     // we have found the result
-                                    ColData col = (ColData) var.getValue();
+                                    Table resTable = (Table) var.getValue();
+                                    
+                                    
+                                    //ColData col = (ColData) var.getValue();
                                     // give a specific column name
                                     //col.setColumnName(columnName);
-                                    sourceTable.addColumn(col, null, new DoubleRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 4, true, true));
+                                    //sourceTable.addColumn(col, null, new DoubleRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 4, true, true));
 
-                                    m_globalTableModelInterface = sourceTable.getModel();
+                                    m_globalTableModelInterface = resTable.getModel();
 
                                 }
                             }
@@ -168,7 +189,7 @@ public class LogFunction  extends AbstractFunction {
 
         ParameterList parameterList1 = new ParameterList("param1");
         
-        m_columnsParameter1 = new ObjectParameter(SEL_COL1, "Column", null, objectArray1, associatedObjectArray1, -1, null);
+        m_columnsParameter1 = new MultiObjectParameter(SEL_COL1, "Columns to log", null, objectArray1, associatedObjectArray1, null, null);
 
 
         m_parameters = new ParameterList[1];
@@ -208,8 +229,8 @@ public class LogFunction  extends AbstractFunction {
             return false;
         }
         
-        Integer colIndex =(Integer) m_columnsParameter1.getAssociatedObjectValue();
-        if ((colIndex == null) || (colIndex == -1)) {
+        ArrayList colList = (ArrayList) m_columnsParameter1.getAssociatedValues(true);
+        if ((colList == null) || (colList.isEmpty())) {
             return false;
         }
 

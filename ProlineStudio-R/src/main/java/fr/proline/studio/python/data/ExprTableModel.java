@@ -9,6 +9,9 @@ import fr.proline.studio.table.ChildModelInterface;
 import fr.proline.studio.table.DecoratedTableModel;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.table.LazyData;
+import fr.proline.studio.table.TableDefaultRendererManager;
+import fr.proline.studio.table.renderer.DefaultRightAlignRenderer;
+import fr.proline.studio.table.renderer.DoubleRenderer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -25,15 +28,12 @@ public class ExprTableModel extends DecoratedTableModel implements ChildModelInt
 
     private GlobalTableModelInterface m_parentModel;
     
-    /*private Col m_extraColumn = null;
-    private Object m_colExtraInfo = null;
-    private TableCellRenderer m_colExtraRenderer = null;
-    */
+    private static DoubleRenderer DOUBLE_RENDERER = new DoubleRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 4, true, true);
     
     private HashMap<Integer, Col> m_modifiedColumns = null;
-    private ArrayList<Col> m_extraColumns = new ArrayList();
-    private ArrayList<Object> m_extraColumnInfos = new ArrayList();
-    private ArrayList<TableCellRenderer> m_extraColumnRenderers = new ArrayList();
+    private final ArrayList<Col> m_extraColumns = new ArrayList();
+    private final ArrayList<Object> m_extraColumnInfos = new ArrayList();
+    private final ArrayList<TableCellRenderer> m_extraColumnRenderers = new ArrayList();
     
 
     public ExprTableModel(GlobalTableModelInterface parentModel) {
@@ -376,6 +376,13 @@ public class ExprTableModel extends DecoratedTableModel implements ChildModelInt
         int parentCount = m_parentModel.getColumnCount();
         if (col >= parentCount) {
             return m_extraColumnRenderers.get(col - parentCount);
+        }
+        
+        if (m_modifiedColumns != null) {
+            Col c = m_modifiedColumns.get(col);
+            if (c != null) {
+                return DOUBLE_RENDERER;
+            }
         }
         
         return m_parentModel.getRenderer(row, col);   

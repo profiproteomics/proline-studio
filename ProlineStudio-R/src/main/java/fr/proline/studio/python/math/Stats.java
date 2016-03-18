@@ -21,6 +21,11 @@ public class Stats {
         return StatsImplementation.log(values);
     }
     
+    public static Table log(Table t, PyTuple pcols) {
+        return StatsImplementation.log(t, pcols);
+    }
+    
+    
     public static PyObject adjustP(Col pvalues) throws Exception {
         return adjustP(pvalues, new PyFloat(1));
     }

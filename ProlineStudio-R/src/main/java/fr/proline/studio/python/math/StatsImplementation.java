@@ -4,11 +4,13 @@ package fr.proline.studio.python.math;
 import fr.proline.studio.python.data.Col;
 import fr.proline.studio.python.data.ColData;
 import fr.proline.studio.python.data.ColRef;
+import fr.proline.studio.python.data.ExprTableModel;
 import fr.proline.studio.python.data.Table;
 import fr.proline.studio.python.model.QuantiFilterModel;
 
 import fr.proline.studio.table.LazyData;
 import java.util.ArrayList;
+import java.util.HashMap;
 import org.apache.commons.math.MathException;
 import org.apache.commons.math.stat.descriptive.DescriptiveStatistics;
 import org.apache.commons.math.stat.inference.TTest;
@@ -53,6 +55,25 @@ public class StatsImplementation {
         }
         
         return new ColData(values.getTable(), resultArray, "log("+values.getExportColumnName()+")");
+    }
+    
+    public static Table log(Table sourceTable, PyTuple pcols) {
+
+        ExprTableModel model = new ExprTableModel(sourceTable.getModel());
+        Table resTable = new Table(model);
+        HashMap<Integer, Col> modifiedColumns = new HashMap<>();
+        
+        Object[] objArray = pcols.getArray();
+        int nb = objArray.length;
+        for (int i = 0; i < nb; i++) {
+            ColRef c = ((ColRef) objArray[i]);
+            ColData cLogged = log(c);
+            modifiedColumns.put(c.getModelCol(), cLogged);
+        }
+        
+        model.modifyColumnValues(modifiedColumns);
+
+        return resTable;
     }
     
     public static ColData ttd(PyTuple p1, PyTuple p2) throws MathException {

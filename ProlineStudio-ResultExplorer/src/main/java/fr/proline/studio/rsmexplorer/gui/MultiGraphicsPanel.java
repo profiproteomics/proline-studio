@@ -412,6 +412,7 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
 
         m_valuesList = valuesList;
         m_crossSelectionInterfaceList = crossSelectionInterfaceList;
+        m_plotGraphicsList.clear();
         
         if (valuesList == null) {
             return;

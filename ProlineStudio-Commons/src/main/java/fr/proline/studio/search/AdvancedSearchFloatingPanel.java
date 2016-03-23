@@ -11,15 +11,16 @@ import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.awt.KeyEventPostProcessor;
-import java.awt.KeyboardFocusManager;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
-import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+import java.util.List;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -157,6 +158,15 @@ public class AdvancedSearchFloatingPanel extends JPanel {
         addMouseMotionListener(dragGestureAdapter);
         addMouseListener(dragGestureAdapter);
         
+        addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentShown(ComponentEvent e) {
+                List<JTextField> list = new ArrayList<>();
+                getJTextFields(m_searchOptionPanel, list);
+                list.get(0).requestFocusInWindow();
+            }
+            
+        }) ;
         setVisible(false);
 
     }
@@ -222,36 +232,46 @@ public class AdvancedSearchFloatingPanel extends JPanel {
             setBounds(getX(), getY(), (int) d.getWidth(), (int) d.getHeight());
         }
     }
-    
+
     private void addListener(Container container) {
-        for (Component c : container.getComponents()) {
-            if (c instanceof JTextField) {
-                final JTextField tf = ((JTextField) c);
-                tf.addActionListener(new ActionListener() {
+        List<JTextField> textFields = new ArrayList<>();
+        getJTextFields(container, textFields);
+        for (final JTextField tf : textFields) {
+            tf.addActionListener(new ActionListener() {
 
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                        m_searchButton.doClick();
-                    }
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    m_searchButton.doClick();
                 }
-                );
-                tf.addFocusListener(new FocusListener() {
+            }
+            );
+            tf.addFocusListener(new FocusListener() {
 
-                    @Override
-                    public void focusGained(FocusEvent e) {
-                        if (!e.isTemporary()) {
+                @Override
+                public void focusGained(FocusEvent e) {
+                    if (!e.isTemporary()) {
+                        if ((tf.getText() != null) && tf.getText().endsWith("*")) {
+                            tf.select(0, tf.getText().length()-1);
+                        } else {
                             tf.selectAll();
-                            
                         }
                     }
+                }
 
-                    @Override
-                    public void focusLost(FocusEvent e) {
-                    }
-                    
-                });
+                @Override
+                public void focusLost(FocusEvent e) {
+                }
+
+            });
+        }
+    }
+    
+    private void getJTextFields(Container container, List<JTextField> list) {
+        for (Component c : container.getComponents()) {
+            if (c instanceof JTextField) {
+                list.add((JTextField) c);
             } else if (c instanceof Container) {
-                addListener((Container) c);
+                getJTextFields((Container) c, list);
             }
         }
     }

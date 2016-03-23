@@ -188,11 +188,9 @@ public class MSQueriesPanel extends HourglassPanel implements DataBoxPanelInterf
         CustomColumnControlButton customColumnControl = new CustomColumnControlButton(m_msqueriesTable);
         m_msqueriesTable.setColumnControl(customColumnControl);
         // hide the id column
-        m_msqueriesTable.getColumnExt(m_msqueriesTable.convertColumnIndexToView(MSQueriesTableModel.COLTYPE_MSQUERY_INITIAL_ID)).setVisible(false);
-        
+        m_msqueriesTable.getColumnExt(m_msqueriesTable.convertColumnIndexToView(MSQueriesTableModel.COLTYPE_MSQUERY_ID)).setVisible(false);
        
         m_msqueriesTable.setSortable(false);
-
         m_markerContainerPanel = new MarkerContainerPanel(m_scrollPane,  (MSQueriesTable) m_msqueriesTable);
         
         m_scrollPane.setViewportView(m_msqueriesTable);

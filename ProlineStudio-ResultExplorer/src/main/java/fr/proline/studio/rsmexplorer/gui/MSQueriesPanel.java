@@ -220,7 +220,7 @@ public class MSQueriesPanel extends HourglassPanel implements DataBoxPanelInterf
         ((MSQueriesTableModel) ((CompoundTableModel) m_msqueriesTable.getModel()).getBaseModel()).setData(taskId, msQueries, nbPeptideMatchesByMsQueryIdMap);
         int nbQ = msQueries.size();
         m_titleLabel.setText(TABLE_TITLE +" ("+msQueries.size()+")");
-        m_msqueriesTable.getColumnExt(m_msqueriesTable.convertColumnIndexToView(MSQueriesTableModel.COLTYPE_MSQUERY_INITIAL_ID)).setVisible(false);
+        m_msqueriesTable.getColumnExt(m_msqueriesTable.convertColumnIndexToView(MSQueriesTableModel.COLTYPE_MSQUERY_ID)).setVisible(false);
         //m_msqueriesTable.getColumnExt(m_msqueriesTable.convertColumnIndexToView(MSQueriesTableModel.COLTYPE_MSQUERY_ID)).setVisible(false);
         m_markerContainerPanel.setMaxLineNumber(nbQ);
         // select the first row

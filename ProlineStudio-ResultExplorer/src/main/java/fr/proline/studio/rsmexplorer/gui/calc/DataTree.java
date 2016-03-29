@@ -202,9 +202,11 @@ public abstract class DataTree extends JTree {
         FunctionNode computeFDRFunction = new FunctionNode(new ComputeFDRFunction(null));
         parentFunctionNode.add(computeFDRFunction);
         
-        FunctionNode logFunction = new FunctionNode(new LogFunction(null));
+        FunctionNode logFunction = new FunctionNode(new LogFunction(null, false));
         parentFunctionNode.add(logFunction);
         
+        FunctionNode log10Function = new FunctionNode(new LogFunction(null, true));
+        parentFunctionNode.add(log10Function);
         
         
         DefaultTreeModel model = (DefaultTreeModel) getModel();

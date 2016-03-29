@@ -30,6 +30,18 @@ public class Stats {
         return StatsImplementation.log(t, column);
     }
     
+    public static ColData log10(Col values) {
+        return StatsImplementation.log10(values);
+    }
+
+    public static Table log10(Table t, PyTuple pcols) {
+        return StatsImplementation.log10(t, pcols);
+    }
+
+    public static Table log10(Table t, ColRef column) {
+        return StatsImplementation.log10(t, column);
+    }
+    
     
     public static PyObject adjustP(Col pvalues) throws Exception {
         return adjustP(pvalues, new PyFloat(1));

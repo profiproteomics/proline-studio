@@ -1,13 +1,9 @@
 package fr.proline.studio.rsmexplorer.gui.calc.functions;
 
-import fr.proline.studio.parameter.AbstractLinkedParameters;
-import fr.proline.studio.parameter.DoubleParameter;
-import fr.proline.studio.parameter.IntegerParameter;
+
 import fr.proline.studio.parameter.MultiObjectParameter;
-import fr.proline.studio.parameter.ObjectParameter;
 import fr.proline.studio.parameter.ParameterError;
 import fr.proline.studio.parameter.ParameterList;
-import fr.proline.studio.python.data.ColData;
 import fr.proline.studio.python.data.ColRef;
 import fr.proline.studio.python.data.Table;
 import fr.proline.studio.python.interpreter.CalcCallback;
@@ -33,8 +29,12 @@ public class LogFunction  extends AbstractFunction {
     
     private MultiObjectParameter m_columnsParameter1 = null;
 
-    public LogFunction(GraphPanel panel) {
+    private final boolean m_log10;
+    
+    public LogFunction(GraphPanel panel, boolean log10) {
         super(panel);
+        
+        m_log10 = log10;
     }
     
     @Override
@@ -97,7 +97,12 @@ public class LogFunction  extends AbstractFunction {
 
 
             StringBuilder codeSB = new StringBuilder();
-            codeSB.append("logColumn=Stats.log(");
+            if (m_log10) {
+                codeSB.append("logColumn=Stats.log10(");
+            } else {
+                codeSB.append("logColumn=Stats.log(");
+            }
+            
             codeSB.append(parameters[nbCols].getName());
             
             int nbColsToLog = parameters.length-1;
@@ -211,7 +216,7 @@ public class LogFunction  extends AbstractFunction {
 
     @Override
     public AbstractFunction cloneFunction(GraphPanel p) {
-        return new LogFunction(p);
+        return new LogFunction(p, m_log10);
     }
 
     @Override

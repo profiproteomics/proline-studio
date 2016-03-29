@@ -15,7 +15,6 @@ import org.apache.commons.math.MathException;
 import org.apache.commons.math.stat.descriptive.DescriptiveStatistics;
 import org.apache.commons.math.stat.inference.TTest;
 import org.apache.commons.math.stat.inference.TTestImpl;
-import org.python.core.Py;
 import org.python.core.PyInteger;
 import org.python.core.PyTuple;
 
@@ -26,8 +25,38 @@ import org.python.core.PyTuple;
  */
 public class StatsImplementation {
 
+    public static ColData neg(Col values) {
+
+        int nbRow = values.getRowCount();
+
+        ArrayList<Double> resultArray = new ArrayList<>(nbRow);
+
+        for (int i = 0; i < nbRow; i++) {
+            Object o = values.getValueAt(i);
+            if (o instanceof LazyData) {
+                o = ((LazyData) o).getData();
+            }
+            double d;
+            if ((o != null) && (o instanceof Number)) {
+                d = ((Number) o).doubleValue();
+                d = -d;
+            } else {
+                d = Double.NaN;
+            }
+            resultArray.add(d);
+
+        }
+
+        return new ColData(values.getTable(), resultArray, "-" + values.getExportColumnName());
+    }
     
+    public static ColData log10(Col values) {
+        return log(values, true);
+    }
     public static ColData log(Col values) {
+        return log(values, false);
+    }
+    private static ColData log(Col values, boolean log10) {
 
         int nbRow = values.getRowCount();
         
@@ -44,7 +73,7 @@ public class StatsImplementation {
                 if ((d != d) || (d<=0)) {
                     d =  Double.NaN;
                 } else {
-                    d = StrictMath.log(d);
+                    d = (log10) ? StrictMath.log10(d) : StrictMath.log(d);
                 }
             } else {
                 d = Double.NaN;
@@ -54,10 +83,18 @@ public class StatsImplementation {
             
         }
         
-        return new ColData(values.getTable(), resultArray, "log("+values.getExportColumnName()+")");
+        String logfunction = (log10) ? "log10(" : "log(";
+        return new ColData(values.getTable(), resultArray, logfunction+values.getExportColumnName()+")");
     }
     
+    public static Table log10(Table sourceTable, PyTuple pcols) {
+        return log(sourceTable, pcols, true);
+    }
+
     public static Table log(Table sourceTable, PyTuple pcols) {
+        return log(sourceTable, pcols, false);
+    }
+    private static Table log(Table sourceTable, PyTuple pcols, boolean log10) {
 
         ExprTableModel model = new ExprTableModel(sourceTable.getModel());
         Table resTable = new Table(model);
@@ -67,7 +104,7 @@ public class StatsImplementation {
         int nb = objArray.length;
         for (int i = 0; i < nb; i++) {
             ColRef c = ((ColRef) objArray[i]);
-            ColData cLogged = log(c);
+            ColData cLogged = log(c, log10);
             modifiedColumns.put(c.getModelCol(), cLogged);
         }
         
@@ -76,13 +113,20 @@ public class StatsImplementation {
         return resTable;
     }
     
+    public static Table log10(Table sourceTable, ColRef column) {
+        return log(sourceTable, column, true);
+    }
+
     public static Table log(Table sourceTable, ColRef column) {
+        return log(sourceTable, column, false);
+    }
+    public static Table log(Table sourceTable, ColRef column, boolean log10) {
 
         ExprTableModel model = new ExprTableModel(sourceTable.getModel());
         Table resTable = new Table(model);
         HashMap<Integer, Col> modifiedColumns = new HashMap<>();
         
-        ColData cLogged = log(column);
+        ColData cLogged = log(column, log10);
         modifiedColumns.put(column.getModelCol(), cLogged);
 
         

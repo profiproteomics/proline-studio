@@ -114,7 +114,11 @@ public class DoubleParameter extends AbstractParameter {
 
     @Override
     public String getStringValue() {
-        return getObjectValue().toString();
+        String v = getObjectValue().toString();
+        if (!v.contains(".")) {
+            v = v+".0";  // JPM.WART : force to have a double (needed for python usage)
+        }
+        return v;
     }
 
     @Override

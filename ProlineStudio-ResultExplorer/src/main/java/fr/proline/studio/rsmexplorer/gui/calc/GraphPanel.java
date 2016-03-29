@@ -13,6 +13,7 @@ import fr.proline.studio.rsmexplorer.gui.calc.graphics.AbstractGraphic;
 import fr.proline.studio.rsmexplorer.gui.calc.macros.AbstractMacro;
 import java.awt.Color;
 import java.awt.Cursor;
+import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
@@ -34,6 +35,9 @@ import javax.swing.JPopupMenu;
  */
 public class GraphPanel extends JPanel implements MouseListener, MouseMotionListener {
     
+    private static final int DEFAULT_PANEL_WIDTH = 400;
+    private static final int DEFAULT_PANEL_HEIGHT = 400;
+    
     private final LinkedList<GraphNode> m_graphNodeArray = new LinkedList<>();
     
     private int m_mouseDragX;
@@ -44,10 +48,17 @@ public class GraphPanel extends JPanel implements MouseListener, MouseMotionList
     
     private int m_curMoveCursor = Cursor.DEFAULT_CURSOR;
 
+    private Dimension m_preferredSize = new Dimension(DEFAULT_PANEL_WIDTH, DEFAULT_PANEL_HEIGHT); // minimum size at the beginning
+    
     public GraphPanel() {
         addMouseListener(this);
         addMouseMotionListener(this);
         setTransferHandler(new DataTreeTransferHandler(this));
+    }
+    
+    @Override
+    public Dimension getPreferredSize() {
+        return m_preferredSize;
     }
     
     public LinkedList<GraphNode> getNodes() {
@@ -95,6 +106,16 @@ public class GraphPanel extends JPanel implements MouseListener, MouseMotionList
     public void addGraphNode(GraphNode graphNode, int x, int y) {
         graphNode.setCenter(x, y);
         m_graphNodeArray.add(graphNode);
+        
+        // increase panel size if needed
+        int newPanelWidth = Math.max(x + 140, m_preferredSize.width);
+        int newPanelHeight = Math.max(y + 140, m_preferredSize.height);
+        if ((newPanelWidth > m_preferredSize.width) || (newPanelHeight > m_preferredSize.height)) {
+            m_preferredSize.width = newPanelWidth;
+            m_preferredSize.height = newPanelHeight;
+            revalidate();
+        }
+        
         repaint();
     }
  
@@ -168,6 +189,38 @@ public class GraphPanel extends JPanel implements MouseListener, MouseMotionList
     
     public void removeGraphNode(AbstractGraphObject graphObject) {
         m_graphNodeArray.remove(graphObject);
+        
+        
+        // decrease panel size if needed
+        if (m_graphNodeArray.isEmpty()) {
+            m_preferredSize.width = DEFAULT_PANEL_WIDTH;
+            m_preferredSize.height = DEFAULT_PANEL_HEIGHT;
+            revalidate();
+        } else {
+
+            int maxX = 0;
+            int maxY = 0;
+            for (GraphNode node : m_graphNodeArray) {
+                int x = node.getX();
+                int y = node.getY();
+                if (x > maxX) {
+                    maxX = x;
+                }
+                if (y > maxY) {
+                    maxY = y;
+                }
+            }
+
+            int newPanelWidth = maxX + 140;
+            int newPanelHeight = maxY + 140;
+
+            if ((newPanelWidth < m_preferredSize.width) || (newPanelHeight < m_preferredSize.height)) {
+                m_preferredSize.width = newPanelWidth;
+                m_preferredSize.height = newPanelHeight;
+                revalidate();
+            }
+        }
+        
         repaint();
     }
     

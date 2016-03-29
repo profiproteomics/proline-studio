@@ -107,6 +107,13 @@ public abstract class GraphNode extends AbstractGraphObject {
         return m_y+HEIGHT/2;
     }
 
+    public int getX() {
+        return m_x;
+    }
+    
+    public int getY() {
+        return m_y;
+    }
     
     public abstract String getErrorMessage();
     

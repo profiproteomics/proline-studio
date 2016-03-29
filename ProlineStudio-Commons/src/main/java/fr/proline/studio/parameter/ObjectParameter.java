@@ -187,6 +187,9 @@ public class ObjectParameter<E> extends AbstractParameter {
         if (m_graphicalType.equals(JComboBox.class)) {
             if (m_parameterComponent == null) {
                 // JComboBox not already created
+                if (m_defaultIndex != -1) {
+                    return m_associatedObjects[m_defaultIndex];
+                }
                 return null;
             }
             int index = ((JComboBox) m_parameterComponent).getSelectedIndex();

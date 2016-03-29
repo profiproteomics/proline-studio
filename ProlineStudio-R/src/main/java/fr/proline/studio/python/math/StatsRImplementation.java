@@ -544,8 +544,6 @@ public class StatsRImplementation {
             
         }
 
-        //String functionForColName = diffAnalysisTypeString.toLowerCase();
-        
         Object res = serverR.parseAndEval(cmdBB);
 
         final int colPValue = t.getModel().getColumnCount()+1;

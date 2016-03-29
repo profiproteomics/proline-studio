@@ -473,7 +473,7 @@ public abstract class AbstractOnExperienceDesignFunction extends AbstractFunctio
                             doingValueChanged = true;
 
                             JCheckBoxList cb = (JCheckBoxList) m_columnsParameterArray[_groudIndex].getComponent();
-                            cb.clearSelection();
+                            cb.reinitSelection();
 
                             Integer quantitationChoosen = (Integer) associatedValue;
 

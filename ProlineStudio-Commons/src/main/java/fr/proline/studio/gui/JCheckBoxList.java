@@ -81,9 +81,8 @@ public class JCheckBoxList<E> extends JList {
             repaint(getCellBounds(index, index));
         }
     }
-    
-    @Override
-    public void clearSelection() {
+
+    public void reinitSelection() {
         int size = getListSize();
         for (int i=0;i<size;i++) {
             CheckListItem item = (CheckListItem) getModel().getElementAt(i);

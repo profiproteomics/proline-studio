@@ -2,6 +2,7 @@ package fr.proline.studio.python.math;
 
 import fr.proline.studio.python.data.Col;
 import fr.proline.studio.python.data.ColData;
+import fr.proline.studio.python.data.ColRef;
 import fr.proline.studio.python.data.PythonImage;
 import fr.proline.studio.python.data.Table;
 import org.apache.commons.math.MathException;
@@ -23,6 +24,10 @@ public class Stats {
     
     public static Table log(Table t, PyTuple pcols) {
         return StatsImplementation.log(t, pcols);
+    }
+    
+    public static Table log(Table t, ColRef column) {
+        return StatsImplementation.log(t, column);
     }
     
     

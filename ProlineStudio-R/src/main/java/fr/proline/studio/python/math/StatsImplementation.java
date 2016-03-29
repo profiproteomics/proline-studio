@@ -76,6 +76,21 @@ public class StatsImplementation {
         return resTable;
     }
     
+    public static Table log(Table sourceTable, ColRef column) {
+
+        ExprTableModel model = new ExprTableModel(sourceTable.getModel());
+        Table resTable = new Table(model);
+        HashMap<Integer, Col> modifiedColumns = new HashMap<>();
+        
+        ColData cLogged = log(column);
+        modifiedColumns.put(column.getModelCol(), cLogged);
+
+        
+        model.modifyColumnValues(modifiedColumns);
+
+        return resTable;
+    }
+    
     public static ColData ttd(PyTuple p1, PyTuple p2) throws MathException {
 
         Table t = ((ColRef) p1.get(0)).getTable();

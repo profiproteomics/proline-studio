@@ -19,10 +19,7 @@ import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
 import fr.proline.studio.rsmexplorer.gui.calc.ProcessCallbackInterface;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.AbstractGraphObject;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.FunctionGraphNode;
-import fr.proline.studio.table.renderer.DoubleRenderer;
 import fr.proline.studio.table.GlobalTableModelInterface;
-import fr.proline.studio.table.TableDefaultRendererManager;
-import fr.proline.studio.table.renderer.DefaultRightAlignRenderer;
 import java.util.ArrayList;
 
 /**
@@ -102,14 +99,21 @@ public class LogFunction  extends AbstractFunction {
             StringBuilder codeSB = new StringBuilder();
             codeSB.append("logColumn=Stats.log(");
             codeSB.append(parameters[nbCols].getName());
-            codeSB.append(",(");
-            for (int i = 0; i < parameters.length-1; i++) {
-                codeSB.append(parameters[i].getName());
-                if (i< parameters.length-2) {
-                    codeSB.append(",");
+            
+            int nbColsToLog = parameters.length-1;
+            if (nbColsToLog>1) {
+                codeSB.append(",(");
+                for (int i = 0; i < parameters.length - 1; i++) {
+                    codeSB.append(parameters[i].getName());
+                    if (i < parameters.length - 2) {
+                        codeSB.append(",");
+                    }
                 }
+                codeSB.append(")");
+            } else {
+                codeSB.append(",");
+                codeSB.append(parameters[0].getName());
             }
-            codeSB.append(")");
             
 
             codeSB.append(')');

@@ -23,6 +23,7 @@ import fr.proline.studio.table.renderer.DoubleRenderer;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.table.TableDefaultRendererManager;
 import fr.proline.studio.types.PValue;
+import fr.proline.studio.types.PvalueAdjusted;
 import java.util.ArrayList;
 import javax.swing.JSpinner;
 import javax.swing.JTextField;
@@ -152,7 +153,7 @@ public class AdjustPFunction extends AbstractFunction {
                                     ColData col = (ColData) var.getValue();
                                     // give a specific column name
                                     col.setColumnName(columnName);
-                                    sourceTable.addColumn(col, new PValue(), new DoubleRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 4, true, true));
+                                    sourceTable.addColumn(col, new PvalueAdjusted(), new DoubleRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 4, true, true));
 
                                     m_globalTableModelInterface = sourceTable.getModel();
 

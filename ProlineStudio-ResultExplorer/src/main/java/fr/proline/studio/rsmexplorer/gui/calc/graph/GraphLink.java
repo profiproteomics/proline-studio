@@ -174,7 +174,7 @@ public class GraphLink extends AbstractConnectedGraphObject {
     }
 
     @Override
-    public AbstractConnectedGraphObject inside(int x, int y) {
+    public AbstractGraphObject inside(int x, int y) {
         
         m_p.setLocation(x, y);
         

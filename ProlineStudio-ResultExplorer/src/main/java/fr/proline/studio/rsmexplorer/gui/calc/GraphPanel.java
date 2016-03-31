@@ -3,9 +3,11 @@ package fr.proline.studio.rsmexplorer.gui.calc;
 import fr.proline.studio.python.data.TableInfo;
 import fr.proline.studio.rsmexplorer.gui.calc.functions.AbstractFunction;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.AbstractConnectedGraphObject;
+import fr.proline.studio.rsmexplorer.gui.calc.graph.AbstractGraphObject;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.DataGraphNode;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.FunctionGraphNode;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphConnector;
+import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphGroup;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphLink;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphNode;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphicGraphNode;
@@ -23,6 +25,7 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import javax.swing.JComponent;
@@ -40,9 +43,10 @@ public class GraphPanel extends JPanel implements MouseListener, MouseMotionList
     
     private final LinkedList<GraphNode> m_graphNodeArray = new LinkedList<>();
     
+    
     private int m_mouseDragX;
     private int m_mouseDragY;
-    private AbstractConnectedGraphObject m_selectedObject = null;
+    private AbstractGraphObject m_selectedObject = null;
     private GraphConnector m_selectedConnector = null;
     private GraphLink m_selectedLink = null;
     
@@ -67,7 +71,7 @@ public class GraphPanel extends JPanel implements MouseListener, MouseMotionList
     
     public Point getNextGraphNodePosition(GraphNode graphNode) {
         int posX = 0;
-        int posY = 0;
+        int posY = 120;
         if (!m_graphNodeArray.isEmpty()) {
 
             GraphNode lastGraphNode = m_graphNodeArray.getLast();
@@ -123,6 +127,9 @@ public class GraphPanel extends JPanel implements MouseListener, MouseMotionList
         addMacroToGraph(macro, new Point(x, y));
     }
     public void addMacroToGraph(AbstractMacro macro, Point position) {
+        
+        GraphGroup group = new GraphGroup(macro.getName());
+        
         ArrayList<DataTree.DataNode> nodes = macro.getNodes();
 
         HashMap<DataTree.DataNode, GraphNode> graphNodeMap = new HashMap<>();
@@ -168,17 +175,23 @@ public class GraphPanel extends JPanel implements MouseListener, MouseMotionList
             }
             graphNodeMap.put(node, graphNode);
             addGraphNode(graphNode, position.x+(int) (levelX*GraphNode.WIDTH* 2.2), position.y+levelY*GraphNode.HEIGHT*2);
+            
+            group.addObject(graphNode);
         }
 
         for (DataTree.DataNode node : nodes) {
             
             GraphNode nodeOut = graphNodeMap.get(node);
             ArrayList<DataTree.DataNode> links = macro.getLinks(node);
-            for (DataTree.DataNode linkedNode : links) {
-                GraphNode nodeIn = graphNodeMap.get(linkedNode);
-                nodeOut.connectTo(nodeIn);
+            if (links != null) {
+                for (DataTree.DataNode linkedNode : links) {
+                    GraphNode nodeIn = graphNodeMap.get(linkedNode);
+                    nodeOut.connectTo(nodeIn);
+                }
             }
         }
+        
+        
         
     }
     
@@ -234,8 +247,14 @@ public class GraphPanel extends JPanel implements MouseListener, MouseMotionList
         g.fillRect(0, 0, getWidth(), getHeight());
         
         for (AbstractConnectedGraphObject graphNode : m_graphNodeArray) {
+            GraphGroup group = graphNode.getGroup();
+            if ((group!=null) && (!m_paintedGroups.contains(group))) {
+                m_paintedGroups.add(group);
+                group.draw(g);
+            }
             graphNode.draw(g);
         }
+        m_paintedGroups.clear();
 
         if (m_selectedConnector != null) {
             int x = m_selectedConnector.getXConnection();
@@ -245,6 +264,7 @@ public class GraphPanel extends JPanel implements MouseListener, MouseMotionList
         }
 
     }
+    private final HashSet<GraphGroup> m_paintedGroups = new HashSet<>();
 
     @Override
     public void mouseClicked(MouseEvent e) {
@@ -262,7 +282,7 @@ public class GraphPanel extends JPanel implements MouseListener, MouseMotionList
         while (it.hasNext()) {
             AbstractConnectedGraphObject graphNode = it.next();
             
-            AbstractConnectedGraphObject overObject = graphNode.inside(x, y);
+            AbstractGraphObject overObject = graphNode.inside(x, y);
             if (overObject != null) {
                 AbstractConnectedGraphObject.TypeGraphObject type = overObject.getType();
                 switch (type) {
@@ -339,7 +359,7 @@ public class GraphPanel extends JPanel implements MouseListener, MouseMotionList
             } else if (m_selectedConnector != null) {
                 int x = e.getX();
                 int y = e.getY();
-                AbstractConnectedGraphObject overObject = null;
+                AbstractGraphObject overObject = null;
                 Iterator<GraphNode> it = m_graphNodeArray.descendingIterator();
                 while (it.hasNext()) {
                     AbstractConnectedGraphObject graphNode = it.next();

@@ -40,12 +40,7 @@ public abstract class GraphNode extends AbstractConnectedGraphObject {
     protected int m_x = 0;
     protected int m_y = 0;
 
-    protected static Font m_font = null;
-    protected static Font m_fontBold = null;
-    
-    protected static int m_hgtBold;
-    protected static int m_hgtPlain;
-    protected static int m_ascentBold;
+
     
     protected GraphPanel m_graphPanel = null;
 
@@ -97,6 +92,10 @@ public abstract class GraphNode extends AbstractConnectedGraphObject {
             m_y = 40;
         }
         setConnectorsPosition();
+        
+        if (m_group != null) {
+            m_group.objectMoved();
+        }
     }
     
     public int getCenterX() {
@@ -113,6 +112,14 @@ public abstract class GraphNode extends AbstractConnectedGraphObject {
     
     public int getY() {
         return m_y;
+    }
+    
+    public int getXEnd() {
+        return m_x+WIDTH;
+    }
+    
+    public int getYEnd() {
+        return m_y+HEIGHT;
     }
     
     public abstract String getErrorMessage();
@@ -251,18 +258,18 @@ public abstract class GraphNode extends AbstractConnectedGraphObject {
     }
 
     @Override
-    public AbstractConnectedGraphObject inside(int x, int y) {
+    public AbstractGraphObject inside(int x, int y) {
         
         if (m_inConnectors != null) {
             for (GraphConnector connector : m_inConnectors) {
-                AbstractConnectedGraphObject object = connector.inside(x, y);
+                AbstractGraphObject object = connector.inside(x, y);
                 if (object != null) {
                     return object;
                 }
             }
         }
         if (m_outConnector != null) {
-            AbstractConnectedGraphObject object = m_outConnector.inside(x, y);
+            AbstractGraphObject object = m_outConnector.inside(x, y);
             if (object != null) {
                 return object;
             }
@@ -281,6 +288,10 @@ public abstract class GraphNode extends AbstractConnectedGraphObject {
         m_x += dx;
         m_y += dy;
         setConnectorsPosition();
+        
+        if (m_group != null) {
+            m_group.objectMoved();
+        }
     }
     
     private void setConnectorsPosition() {
@@ -307,6 +318,11 @@ public abstract class GraphNode extends AbstractConnectedGraphObject {
         }
         if (m_outConnector != null) {
             m_outConnector.delete();
+        }
+        
+        if (m_group != null) {
+            m_group.removeObject(this);
+            m_group = null;
         }
     }
     

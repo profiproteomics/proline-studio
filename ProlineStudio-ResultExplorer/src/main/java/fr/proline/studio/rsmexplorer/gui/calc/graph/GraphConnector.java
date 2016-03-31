@@ -195,7 +195,7 @@ public class GraphConnector extends AbstractConnectedGraphObject {
      
     
     @Override
-    public AbstractConnectedGraphObject inside(int x, int y) {
+    public AbstractGraphObject inside(int x, int y) {
         // triangle is taken as a square
         final int DELTA = 3;
         if ((x+DELTA>=m_x) && (y+DELTA>=m_y) && (x-DELTA<=m_x+WIDTH) && (y-DELTA<=m_y+HEIGHT)) {

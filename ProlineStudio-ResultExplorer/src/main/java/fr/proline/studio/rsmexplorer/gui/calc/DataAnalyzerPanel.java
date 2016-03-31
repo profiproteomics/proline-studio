@@ -10,7 +10,6 @@ import fr.proline.studio.python.data.TableInfo;
 import fr.proline.studio.rsmexplorer.gui.calc.functions.AbstractFunction;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.DataGraphNode;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.FunctionGraphNode;
-import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphNode;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphicGraphNode;
 import fr.proline.studio.rsmexplorer.gui.calc.graphics.AbstractGraphic;
 import fr.proline.studio.rsmexplorer.gui.calc.macros.AbstractMacro;
@@ -21,11 +20,8 @@ import java.awt.Dimension;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
-import java.util.HashMap;
 import javax.swing.Box;
 import javax.swing.JButton;
 

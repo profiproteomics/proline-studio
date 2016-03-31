@@ -10,6 +10,7 @@ import fr.proline.studio.python.data.PythonImage;
 import fr.proline.studio.python.data.Table;
 import fr.proline.studio.rserver.RServerManager;
 import fr.proline.studio.table.LazyData;
+import fr.proline.studio.types.LogInfo;
 import fr.proline.studio.types.LogRatio;
 import fr.proline.studio.types.PValue;
 import java.io.File;
@@ -415,7 +416,7 @@ public class StatsRImplementation {
 
         }
         
-        model.modifyColumnValues(modifiedColumns);
+        model.modifyColumnValues(modifiedColumns, null);
 
         return resTable;
 
@@ -498,7 +499,7 @@ public class StatsRImplementation {
 
         }
         
-        model.modifyColumnValues(modifiedColumns);
+        model.modifyColumnValues(modifiedColumns, null);
 
         return resTable;
 
@@ -590,11 +591,15 @@ public class StatsRImplementation {
                     ColData pvalueCol = new ColData(resTable, valuesForCol.get(j), colName);
                     ColData log10PvalueCol = StatsImplementation.log10(pvalueCol);
                     ColData minusLog10PvalueCol = StatsImplementation.neg(log10PvalueCol);
-                    model.addExtraColumn(pvalueCol, new PValue(), null);
-                    model.addExtraColumn(minusLog10PvalueCol, new PValue(), null);
+                    model.addExtraColumn(pvalueCol, null);
+                    model.addExtraColumnInfo(new PValue());
+                    model.addExtraColumn(minusLog10PvalueCol, null);
+                    model.addExtraColumnInfo(new PValue());
+                    model.addExtraColumnInfo(new LogInfo(LogInfo.LogState.LOG10));
                 } else if (j == 1) {
                     colName = diffAnalysisTypeString+" log Ratio";
-                    model.addExtraColumn(new ColData(resTable, valuesForCol.get(j), colName), new LogRatio(), null);
+                    model.addExtraColumn(new ColData(resTable, valuesForCol.get(j), colName), null);
+                    model.addExtraColumnInfo(new LogRatio());
                 }
                 
             }
@@ -618,12 +623,16 @@ public class StatsRImplementation {
                     ColData pvalueCol = new ColData(resTable, values, colName);
                     ColData log10PvalueCol = StatsImplementation.log10(pvalueCol);
                     ColData minusLog10PvalueCol = StatsImplementation.neg(log10PvalueCol);
-                    model.addExtraColumn(pvalueCol, colExtraInfo, null);
-                    model.addExtraColumn(minusLog10PvalueCol, colExtraInfo, null);
+                    model.addExtraColumn(pvalueCol, null);
+                    model.addExtraColumnInfo(colExtraInfo);
+                    model.addExtraColumn(minusLog10PvalueCol, null);
+                    model.addExtraColumnInfo(colExtraInfo);
+                    model.addExtraColumnInfo(new LogInfo(LogInfo.LogState.LOG10));
                 } else if (i == 1) {
                     colName = diffAnalysisTypeString+" log Ratio";
                     colExtraInfo = new LogRatio();
-                    model.addExtraColumn(new ColData(resTable, values, colName), colExtraInfo, null);
+                    model.addExtraColumn(new ColData(resTable, values, colName), null);
+                    model.addExtraColumnInfo(colExtraInfo);
                 }
                 
             }

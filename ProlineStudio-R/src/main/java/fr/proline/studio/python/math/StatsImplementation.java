@@ -9,6 +9,7 @@ import fr.proline.studio.python.data.Table;
 import fr.proline.studio.python.model.QuantiFilterModel;
 
 import fr.proline.studio.table.LazyData;
+import fr.proline.studio.types.LogInfo;
 import java.util.ArrayList;
 import java.util.HashMap;
 import org.apache.commons.math.MathException;
@@ -99,6 +100,7 @@ public class StatsImplementation {
         ExprTableModel model = new ExprTableModel(sourceTable.getModel());
         Table resTable = new Table(model);
         HashMap<Integer, Col> modifiedColumns = new HashMap<>();
+        HashMap<Integer, Object> modifiedColumnsExtraInfo = new HashMap<>();
         
         Object[] objArray = pcols.getArray();
         int nb = objArray.length;
@@ -106,9 +108,10 @@ public class StatsImplementation {
             ColRef c = ((ColRef) objArray[i]);
             ColData cLogged = log(c, log10);
             modifiedColumns.put(c.getModelCol(), cLogged);
+            modifiedColumnsExtraInfo.put(c.getModelCol(), log10 ? new LogInfo(LogInfo.LogState.LOG10) : new LogInfo(LogInfo.LogState.LOG2));
         }
         
-        model.modifyColumnValues(modifiedColumns);
+        model.modifyColumnValues(modifiedColumns, modifiedColumnsExtraInfo);
 
         return resTable;
     }
@@ -125,12 +128,14 @@ public class StatsImplementation {
         ExprTableModel model = new ExprTableModel(sourceTable.getModel());
         Table resTable = new Table(model);
         HashMap<Integer, Col> modifiedColumns = new HashMap<>();
+        HashMap<Integer, Object> modifiedColumnsExtraInfo = new HashMap<>();
         
         ColData cLogged = log(column, log10);
         modifiedColumns.put(column.getModelCol(), cLogged);
-
+        modifiedColumnsExtraInfo.put(column.getModelCol(), log10 ? new LogInfo(LogInfo.LogState.LOG10) : new LogInfo(LogInfo.LogState.LOG2));
         
-        model.modifyColumnValues(modifiedColumns);
+        model.modifyColumnValues(modifiedColumns, modifiedColumnsExtraInfo);
+        
 
         return resTable;
     }

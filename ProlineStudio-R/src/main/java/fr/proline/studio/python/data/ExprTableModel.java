@@ -14,6 +14,7 @@ import fr.proline.studio.table.renderer.DefaultRightAlignRenderer;
 import fr.proline.studio.table.renderer.DoubleRenderer;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import javax.swing.event.TableModelEvent;
@@ -31,27 +32,46 @@ public class ExprTableModel extends DecoratedTableModel implements ChildModelInt
     private static DoubleRenderer DOUBLE_RENDERER = new DoubleRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 4, true, true);
     
     private HashMap<Integer, Col> m_modifiedColumns = null;
+    private HashMap<Integer, Object> m_modifiedColumnsExtraInfo = null;
+    
     private final ArrayList<Col> m_extraColumns = new ArrayList();
-    private final ArrayList<Object> m_extraColumnInfos = new ArrayList();
+    private final ArrayList<HashMap<Class, Object>> m_extraColumnInfos = new ArrayList();
     private final ArrayList<TableCellRenderer> m_extraColumnRenderers = new ArrayList();
     
 
     public ExprTableModel(GlobalTableModelInterface parentModel) {
         m_parentModel = parentModel;
     }
-    public ExprTableModel(Col column, Object colExtraInfo, TableCellRenderer colRenderer, GlobalTableModelInterface parentModel) {
+    public ExprTableModel(Col column, TableCellRenderer colRenderer, GlobalTableModelInterface parentModel) {
         this(parentModel);
-        addExtraColumn(column, colExtraInfo, colRenderer);
+        addExtraColumn(column, colRenderer);
     }
     
-    public final void addExtraColumn(Col column, Object colExtraInfo, TableCellRenderer colRenderer) {
+    public final void addExtraColumn(Col column, TableCellRenderer colRenderer) {
         m_extraColumns.add(column);
-        m_extraColumnInfos.add(colExtraInfo);
+        m_extraColumnInfos.add(null);
         m_extraColumnRenderers.add(colRenderer);
     }
     
-    public final void modifyColumnValues(HashMap<Integer, Col> modifiedColumns) {
+    public final void addExtraColumnInfo(Object colExtraInfo) {
+        
+        int lastIndex = m_extraColumnInfos.size()-1;
+        
+        HashMap<Class, Object> map = m_extraColumnInfos.get(lastIndex);
+        if (map == null) {
+            map = new HashMap<>();
+            m_extraColumnInfos.set(lastIndex, map);
+        }
+        
+        map.put(colExtraInfo.getClass(), colExtraInfo);
+
+    }
+
+
+    
+    public final void modifyColumnValues(HashMap<Integer, Col> modifiedColumns, HashMap<Integer, Object> modifiedColumnsExtraInfo) {
         m_modifiedColumns = modifiedColumns;
+        m_modifiedColumnsExtraInfo = modifiedColumnsExtraInfo;
     }
     
     @Override
@@ -412,10 +432,19 @@ public class ExprTableModel extends DecoratedTableModel implements ChildModelInt
     public Object getColValue(Class c, int col) {
         
         
+        if (m_modifiedColumnsExtraInfo!=null) {
+            Object colExtraInfo = m_modifiedColumnsExtraInfo.get(col);
+            if ((colExtraInfo != null) && (c.equals(colExtraInfo.getClass()))) {
+                return colExtraInfo;
+            }
+        }
+        
+        
         int parentCount = m_parentModel.getColumnCount();
         if (col >= parentCount) {
-            Object colExtraInfo = m_extraColumnInfos.get(col - parentCount);
-            if ((colExtraInfo != null) && (c.equals(colExtraInfo.getClass()))) {
+            HashMap<Class, Object> colExtraInfoMap = m_extraColumnInfos.get(col - parentCount);
+            if (colExtraInfoMap != null) {
+                Object colExtraInfo = colExtraInfoMap.get(c);
                 return colExtraInfo;
             }
             return null;

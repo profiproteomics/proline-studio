@@ -18,6 +18,7 @@ import fr.proline.studio.rsmexplorer.gui.calc.ProcessCallbackInterface;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.AbstractConnectedGraphObject;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.FunctionGraphNode;
 import fr.proline.studio.table.GlobalTableModelInterface;
+import fr.proline.studio.types.LogInfo;
 import fr.proline.studio.types.LogRatio;
 import fr.proline.studio.types.PValue;
 import java.util.ArrayList;
@@ -232,7 +233,10 @@ public class ComputeFDRFunction extends AbstractFunction {
                 pValueObjectArray[iKept] = model1.getColumnName(i);
                 PValue pvalue = (PValue) model1.getColValue(PValue.class, i);
                 if (pvalue != null) {
-                    selectedIndexPValue = iKept;
+                    LogInfo log = (LogInfo) model1.getColValue(LogInfo.class, i);
+                    if ((log == null) || (log.noLog())) {
+                        selectedIndexPValue = iKept;
+                    }
                 }
                 pValueAssociatedObjectArray[iKept] = i+1;  // +1 because it is used in python calc expression
                 iKept++;
@@ -322,7 +326,7 @@ public class ComputeFDRFunction extends AbstractFunction {
 
         m_pvalueThresholdParameter = new DoubleParameter(PVALUE_THRESHOLD, "PValue Threshold", JTextField.class, 0d, 0d, null);
         
-        m_logFCThresholdParameter = new DoubleParameter(LOGFC_THRESHOLD, "Log FC Threshold", JTextField.class, 0d, 0d, null);
+        m_logFCThresholdParameter = new DoubleParameter(LOGFC_THRESHOLD, "LogInfo FC Threshold", JTextField.class, 0d, 0d, null);
 
 
 

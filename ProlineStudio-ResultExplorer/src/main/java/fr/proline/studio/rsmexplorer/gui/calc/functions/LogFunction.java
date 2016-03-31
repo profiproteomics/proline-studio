@@ -134,12 +134,6 @@ public class LogFunction  extends AbstractFunction {
                                 if (var.getName().compareTo("logColumn") == 0) {
                                     // we have found the result
                                     Table resTable = (Table) var.getValue();
-                                    
-                                    
-                                    //ColData col = (ColData) var.getValue();
-                                    // give a specific column name
-                                    //col.setColumnName(columnName);
-                                    //sourceTable.addColumn(col, null, new DoubleRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 4, true, true));
 
                                     m_globalTableModelInterface = resTable.getModel();
 

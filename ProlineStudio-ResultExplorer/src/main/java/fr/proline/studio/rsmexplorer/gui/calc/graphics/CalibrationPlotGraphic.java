@@ -19,6 +19,7 @@ import fr.proline.studio.rsmexplorer.gui.calc.ProcessCallbackInterface;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.AbstractConnectedGraphObject;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphicGraphNode;
 import fr.proline.studio.table.GlobalTableModelInterface;
+import fr.proline.studio.types.LogInfo;
 import fr.proline.studio.types.PValue;
 import java.util.ArrayList;
 import javax.swing.JSpinner;
@@ -185,7 +186,10 @@ public class CalibrationPlotGraphic extends AbstractGraphic {
                 objectArray1[iKept] = model1.getColumnName(i);
                 PValue pvalue = (PValue) model1.getColValue(PValue.class, i);
                 if (pvalue != null) {
-                    selectedIndex1 = iKept;
+                    LogInfo log = (LogInfo) model1.getColValue(LogInfo.class, i);
+                    if ((log == null) || (log.noLog())) {
+                        selectedIndex1 = iKept;
+                    }
                 }
                 associatedObjectArray1[iKept] = i+1;  // +1 because it is used in python calc expression
                 iKept++;

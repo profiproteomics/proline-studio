@@ -9,7 +9,7 @@ import fr.proline.studio.python.data.Table;
 import fr.proline.studio.python.interpreter.CalcError;
 import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
 import fr.proline.studio.rsmexplorer.gui.calc.ProcessCallbackInterface;
-import fr.proline.studio.rsmexplorer.gui.calc.graph.AbstractGraphObject;
+import fr.proline.studio.rsmexplorer.gui.calc.graph.AbstractConnectedGraphObject;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.FunctionGraphNode;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import javax.swing.JCheckBox;
@@ -73,7 +73,7 @@ public class DiffFunction extends AbstractFunction {
     }
     
     @Override
-    public void process(AbstractGraphObject[] graphObjects, FunctionGraphNode functionGraphNode, ProcessCallbackInterface callback) {
+    public void process(AbstractConnectedGraphObject[] graphObjects, FunctionGraphNode functionGraphNode, ProcessCallbackInterface callback) {
 
         try {
 
@@ -118,7 +118,7 @@ public class DiffFunction extends AbstractFunction {
     }
     
     @Override
-    public void generateDefaultParameters(AbstractGraphObject[] graphObjects) {
+    public void generateDefaultParameters(AbstractConnectedGraphObject[] graphObjects) {
 
         GlobalTableModelInterface modelForDefaultKey = m_globalTableModelInterface;
         
@@ -185,7 +185,7 @@ public class DiffFunction extends AbstractFunction {
     }
 
     @Override
-    public ParameterError checkParameters(AbstractGraphObject[] graphObjects) {
+    public ParameterError checkParameters(AbstractConnectedGraphObject[] graphObjects) {
         Integer key1 = (Integer) m_paramColumn1.getAssociatedObjectValue();
         Integer key2 = (Integer) m_paramColumn2.getAssociatedObjectValue();
         

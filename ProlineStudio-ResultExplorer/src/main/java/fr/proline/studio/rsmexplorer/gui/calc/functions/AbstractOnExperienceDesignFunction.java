@@ -19,7 +19,7 @@ import fr.proline.studio.python.interpreter.CalcInterpreterTask;
 import fr.proline.studio.python.interpreter.CalcInterpreterThread;
 import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
 import fr.proline.studio.rsmexplorer.gui.calc.ProcessCallbackInterface;
-import fr.proline.studio.rsmexplorer.gui.calc.graph.AbstractGraphObject;
+import fr.proline.studio.rsmexplorer.gui.calc.graph.AbstractConnectedGraphObject;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.FunctionGraphNode;
 import fr.proline.studio.table.renderer.DefaultRightAlignRenderer;
 import fr.proline.studio.table.renderer.DoubleRenderer;
@@ -88,7 +88,7 @@ public abstract class AbstractOnExperienceDesignFunction extends AbstractFunctio
     }
 
     @Override
-    public void process(AbstractGraphObject[] graphObjects, FunctionGraphNode functionGraphNode, ProcessCallbackInterface callback) {
+    public void process(AbstractConnectedGraphObject[] graphObjects, FunctionGraphNode functionGraphNode, ProcessCallbackInterface callback) {
         
         int nbColList;
         int nbCols;
@@ -286,7 +286,7 @@ public abstract class AbstractOnExperienceDesignFunction extends AbstractFunctio
     }
 
     @Override
-    public void generateDefaultParameters(AbstractGraphObject[] graphObjects) {
+    public void generateDefaultParameters(AbstractConnectedGraphObject[] graphObjects) {
 
 
 
@@ -551,7 +551,7 @@ public abstract class AbstractOnExperienceDesignFunction extends AbstractFunctio
     }
 
     @Override
-    public ParameterError checkParameters(AbstractGraphObject[] graphObjects) {
+    public ParameterError checkParameters(AbstractConnectedGraphObject[] graphObjects) {
         return null;
     }
 

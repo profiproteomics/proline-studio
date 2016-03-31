@@ -1,7 +1,7 @@
 package fr.proline.studio.rsmexplorer.gui.calc.graph;
 
 import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
-import static fr.proline.studio.rsmexplorer.gui.calc.graph.AbstractGraphObject.STROKE_SELECTED;
+import static fr.proline.studio.rsmexplorer.gui.calc.graph.AbstractConnectedGraphObject.STROKE_SELECTED;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -21,7 +21,7 @@ import javax.swing.event.PopupMenuListener;
  * In reality, collectors are directly linked
  * @author JM235353
  */
-public class GraphLink extends AbstractGraphObject {
+public class GraphLink extends AbstractConnectedGraphObject {
     
     private GeneralPath m_path = null;
     private GraphConnector m_connector = null;
@@ -174,7 +174,7 @@ public class GraphLink extends AbstractGraphObject {
     }
 
     @Override
-    public AbstractGraphObject inside(int x, int y) {
+    public AbstractConnectedGraphObject inside(int x, int y) {
         
         m_p.setLocation(x, y);
         

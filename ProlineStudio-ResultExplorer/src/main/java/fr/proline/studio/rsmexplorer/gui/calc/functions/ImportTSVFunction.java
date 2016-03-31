@@ -19,7 +19,7 @@ import fr.proline.studio.parameter.StringParameter;
 import fr.proline.studio.python.interpreter.CalcError;
 import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
 import fr.proline.studio.rsmexplorer.gui.calc.ProcessCallbackInterface;
-import fr.proline.studio.rsmexplorer.gui.calc.graph.AbstractGraphObject;
+import fr.proline.studio.rsmexplorer.gui.calc.graph.AbstractConnectedGraphObject;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.FunctionGraphNode;
 import fr.proline.studio.table.renderer.DefaultLeftAlignRenderer;
 import fr.proline.studio.table.renderer.DefaultRightAlignRenderer;
@@ -117,7 +117,7 @@ public class ImportTSVFunction extends AbstractFunction {
     }
     
     @Override
-    public void process(AbstractGraphObject[] graphObjects, FunctionGraphNode functionGraphNode, ProcessCallbackInterface callback) {
+    public void process(AbstractConnectedGraphObject[] graphObjects, FunctionGraphNode functionGraphNode, ProcessCallbackInterface callback) {
 
         try {
 
@@ -253,7 +253,7 @@ public class ImportTSVFunction extends AbstractFunction {
     }
     
     @Override
-    public void generateDefaultParameters(AbstractGraphObject[] graphObjects) {
+    public void generateDefaultParameters(AbstractConnectedGraphObject[] graphObjects) {
 
         final String[] fileFilterNames = { "TSV File", "CSV File" };
         final String[] fileFilterExtensions = { "tsv", "csv" };
@@ -287,7 +287,7 @@ public class ImportTSVFunction extends AbstractFunction {
     }
     
     @Override
-    public ParameterError checkParameters(AbstractGraphObject[] graphObjects) {
+    public ParameterError checkParameters(AbstractConnectedGraphObject[] graphObjects) {
 
         ParameterError error =  m_fileParameter.checkParameter();
 

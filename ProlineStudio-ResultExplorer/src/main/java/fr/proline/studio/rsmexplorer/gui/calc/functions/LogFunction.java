@@ -13,7 +13,7 @@ import fr.proline.studio.python.interpreter.CalcInterpreterThread;
 import fr.proline.studio.python.interpreter.ResultVariable;
 import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
 import fr.proline.studio.rsmexplorer.gui.calc.ProcessCallbackInterface;
-import fr.proline.studio.rsmexplorer.gui.calc.graph.AbstractGraphObject;
+import fr.proline.studio.rsmexplorer.gui.calc.graph.AbstractConnectedGraphObject;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.FunctionGraphNode;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import java.util.ArrayList;
@@ -54,7 +54,7 @@ public class LogFunction  extends AbstractFunction {
     }
 
     @Override
-    public void process(AbstractGraphObject[] graphObjects, final FunctionGraphNode functionGraphNode, ProcessCallbackInterface callback) {
+    public void process(AbstractConnectedGraphObject[] graphObjects, final FunctionGraphNode functionGraphNode, ProcessCallbackInterface callback) {
         setInError(false, null);
         
         if (m_parameters == null) {
@@ -174,7 +174,7 @@ public class LogFunction  extends AbstractFunction {
     }
 
     @Override
-    public void generateDefaultParameters(AbstractGraphObject[] graphObjects) {
+    public void generateDefaultParameters(AbstractConnectedGraphObject[] graphObjects) {
         GlobalTableModelInterface model1 = graphObjects[0].getGlobalTableModelInterface();
         int nbColumns = model1.getColumnCount();
         int nbColumnsKept = 0;
@@ -247,7 +247,7 @@ public class LogFunction  extends AbstractFunction {
     }
 
     @Override
-    public ParameterError checkParameters(AbstractGraphObject[] graphObjects) {
+    public ParameterError checkParameters(AbstractConnectedGraphObject[] graphObjects) {
         return null;
     }
     

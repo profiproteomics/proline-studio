@@ -161,7 +161,7 @@ public class GraphicGraphNode extends GraphNode {
                 return;
             }
 
-            AbstractGraphObject[] graphObjectArray = new AbstractGraphObject[m_inConnectors.size()];
+            AbstractConnectedGraphObject[] graphObjectArray = new AbstractConnectedGraphObject[m_inConnectors.size()];
             int i = 0;
             for (GraphConnector connector : m_inConnectors) {
                 GraphNode graphNode = connector.getLinkedSourceGraphNode();
@@ -191,7 +191,7 @@ public class GraphicGraphNode extends GraphNode {
     @Override
     public boolean settings() {
         
-        AbstractGraphObject[] graphObjectArray = new AbstractGraphObject[m_inConnectors.size()];
+        AbstractConnectedGraphObject[] graphObjectArray = new AbstractConnectedGraphObject[m_inConnectors.size()];
         int i = 0;
         for (GraphConnector connector : m_inConnectors) {
             GraphNode graphNode = connector.getLinkedSourceGraphNode();

@@ -2,7 +2,7 @@ package fr.proline.studio.rsmexplorer.gui.calc;
 
 import fr.proline.studio.python.data.TableInfo;
 import fr.proline.studio.rsmexplorer.gui.calc.functions.AbstractFunction;
-import fr.proline.studio.rsmexplorer.gui.calc.graph.AbstractGraphObject;
+import fr.proline.studio.rsmexplorer.gui.calc.graph.AbstractConnectedGraphObject;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.DataGraphNode;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.FunctionGraphNode;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphConnector;
@@ -42,7 +42,7 @@ public class GraphPanel extends JPanel implements MouseListener, MouseMotionList
     
     private int m_mouseDragX;
     private int m_mouseDragY;
-    private AbstractGraphObject m_selectedObject = null;
+    private AbstractConnectedGraphObject m_selectedObject = null;
     private GraphConnector m_selectedConnector = null;
     private GraphLink m_selectedLink = null;
     
@@ -187,7 +187,7 @@ public class GraphPanel extends JPanel implements MouseListener, MouseMotionList
         m_graphNodeArray.add(graphObject);
     }
     
-    public void removeGraphNode(AbstractGraphObject graphObject) {
+    public void removeGraphNode(AbstractConnectedGraphObject graphObject) {
         m_graphNodeArray.remove(graphObject);
         
         
@@ -233,7 +233,7 @@ public class GraphPanel extends JPanel implements MouseListener, MouseMotionList
         g.setColor(Color.white);
         g.fillRect(0, 0, getWidth(), getHeight());
         
-        for (AbstractGraphObject graphNode : m_graphNodeArray) {
+        for (AbstractConnectedGraphObject graphNode : m_graphNodeArray) {
             graphNode.draw(g);
         }
 
@@ -260,11 +260,11 @@ public class GraphPanel extends JPanel implements MouseListener, MouseMotionList
 
         Iterator<GraphNode> it = m_graphNodeArray.descendingIterator();
         while (it.hasNext()) {
-            AbstractGraphObject graphNode = it.next();
+            AbstractConnectedGraphObject graphNode = it.next();
             
-            AbstractGraphObject overObject = graphNode.inside(x, y);
+            AbstractConnectedGraphObject overObject = graphNode.inside(x, y);
             if (overObject != null) {
-                AbstractGraphObject.TypeGraphObject type = overObject.getType();
+                AbstractConnectedGraphObject.TypeGraphObject type = overObject.getType();
                 switch (type) {
 
                     case GRAPH_NODE: {
@@ -339,14 +339,14 @@ public class GraphPanel extends JPanel implements MouseListener, MouseMotionList
             } else if (m_selectedConnector != null) {
                 int x = e.getX();
                 int y = e.getY();
-                AbstractGraphObject overObject = null;
+                AbstractConnectedGraphObject overObject = null;
                 Iterator<GraphNode> it = m_graphNodeArray.descendingIterator();
                 while (it.hasNext()) {
-                    AbstractGraphObject graphNode = it.next();
+                    AbstractConnectedGraphObject graphNode = it.next();
 
                     overObject = graphNode.inside(x, y);
                     if (overObject != null) {
-                        if (overObject.getType() == AbstractGraphObject.TypeGraphObject.CONNECTOR) {
+                        if (overObject.getType() == AbstractConnectedGraphObject.TypeGraphObject.CONNECTOR) {
                             GraphConnector connector = (GraphConnector) overObject;
                             if (m_selectedConnector.canBeLinked(connector)) {
                                 m_selectedConnector.addConnection(connector);
@@ -408,7 +408,7 @@ public class GraphPanel extends JPanel implements MouseListener, MouseMotionList
         int newCursor = Cursor.DEFAULT_CURSOR;
         Iterator<GraphNode> it = m_graphNodeArray.descendingIterator();
         while (it.hasNext()) {
-            AbstractGraphObject graphNode = it.next();
+            AbstractConnectedGraphObject graphNode = it.next();
             if (graphNode.inside(x, y) != null) {
                 newCursor = Cursor.HAND_CURSOR;
             }

@@ -26,7 +26,7 @@ import org.openide.windows.WindowManager;
  * Parent Node for all graph nodes
  * @author JM235353
  */
-public abstract class GraphNode extends AbstractGraphObject {
+public abstract class GraphNode extends AbstractConnectedGraphObject {
 
     
     public static final int WIDTH = 60;
@@ -251,18 +251,18 @@ public abstract class GraphNode extends AbstractGraphObject {
     }
 
     @Override
-    public AbstractGraphObject inside(int x, int y) {
+    public AbstractConnectedGraphObject inside(int x, int y) {
         
         if (m_inConnectors != null) {
             for (GraphConnector connector : m_inConnectors) {
-                AbstractGraphObject object = connector.inside(x, y);
+                AbstractConnectedGraphObject object = connector.inside(x, y);
                 if (object != null) {
                     return object;
                 }
             }
         }
         if (m_outConnector != null) {
-            AbstractGraphObject object = m_outConnector.inside(x, y);
+            AbstractConnectedGraphObject object = m_outConnector.inside(x, y);
             if (object != null) {
                 return object;
             }
@@ -343,10 +343,10 @@ public abstract class GraphNode extends AbstractGraphObject {
  
     public class DeleteAction  extends AbstractAction {
         
-        private AbstractGraphObject m_graphObject = null;
+        private AbstractConnectedGraphObject m_graphObject = null;
         private GraphPanel m_graphPanel = null;
         
-        public DeleteAction(GraphPanel panel, AbstractGraphObject graphObject) {
+        public DeleteAction(GraphPanel panel, AbstractConnectedGraphObject graphObject) {
             super("Delete");
             m_graphPanel = panel;
             m_graphObject = graphObject;

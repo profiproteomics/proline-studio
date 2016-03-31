@@ -10,7 +10,7 @@ import javax.swing.JPopupMenu;
  * Parent for all objects in a graph (nodes, connectors, links)
  * @author JM235353
  */
-public abstract class AbstractGraphObject {
+public abstract class AbstractConnectedGraphObject {
         
     protected static final BasicStroke STROKE_SELECTED = new BasicStroke(4);
     protected static final BasicStroke STROKE_NOT_SELECTED = new BasicStroke(2);
@@ -25,7 +25,7 @@ public abstract class AbstractGraphObject {
         LINK
     };
     
-    public AbstractGraphObject(TypeGraphObject type) {
+    public AbstractConnectedGraphObject(TypeGraphObject type) {
         m_type = type;
     }
    
@@ -46,7 +46,7 @@ public abstract class AbstractGraphObject {
     
     public abstract void draw(Graphics g);
     
-    public abstract AbstractGraphObject inside(int x, int y);
+    public abstract AbstractConnectedGraphObject inside(int x, int y);
     public abstract void move(int dx, int dy);
     
     public abstract void delete();

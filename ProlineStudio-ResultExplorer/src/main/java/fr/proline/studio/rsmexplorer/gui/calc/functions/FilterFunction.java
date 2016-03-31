@@ -7,7 +7,7 @@ import fr.proline.studio.filter.FilterTableModelInterface;
 import fr.proline.studio.parameter.ParameterError;
 import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
 import fr.proline.studio.rsmexplorer.gui.calc.ProcessCallbackInterface;
-import fr.proline.studio.rsmexplorer.gui.calc.graph.AbstractGraphObject;
+import fr.proline.studio.rsmexplorer.gui.calc.graph.AbstractConnectedGraphObject;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.FunctionGraphNode;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -64,7 +64,7 @@ public class FilterFunction extends AbstractFunction {
     }
 
     @Override
-    public void process(AbstractGraphObject[] graphObjects, FunctionGraphNode functionGraphNode, ProcessCallbackInterface callback) {
+    public void process(AbstractConnectedGraphObject[] graphObjects, FunctionGraphNode functionGraphNode, ProcessCallbackInterface callback) {
         
         // check if we have already processed
         if (m_calculationDone) {
@@ -92,7 +92,7 @@ public class FilterFunction extends AbstractFunction {
     }
 
     @Override
-    public void generateDefaultParameters(AbstractGraphObject[] graphObjects) {
+    public void generateDefaultParameters(AbstractConnectedGraphObject[] graphObjects) {
 
 
         m_globalTableModelInterface = new FilterTableModel(graphObjects[0].getGlobalTableModelInterface());
@@ -109,13 +109,13 @@ public class FilterFunction extends AbstractFunction {
     }
 
     @Override
-    public ParameterError checkParameters(AbstractGraphObject[] graphObjects) {
+    public ParameterError checkParameters(AbstractConnectedGraphObject[] graphObjects) {
 
         return null;
     }
 
     @Override
-    public boolean settings(AbstractGraphObject[] graphObjects) {
+    public boolean settings(AbstractConnectedGraphObject[] graphObjects) {
         if (m_filters == null) {
             generateDefaultParameters(graphObjects);
         }

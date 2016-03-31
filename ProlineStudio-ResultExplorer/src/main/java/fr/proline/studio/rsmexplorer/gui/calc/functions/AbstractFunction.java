@@ -8,7 +8,7 @@ import fr.proline.studio.python.interpreter.CalcError;
 import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
 import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
 import fr.proline.studio.rsmexplorer.gui.calc.ProcessCallbackInterface;
-import fr.proline.studio.rsmexplorer.gui.calc.graph.AbstractGraphObject;
+import fr.proline.studio.rsmexplorer.gui.calc.graph.AbstractConnectedGraphObject;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.FunctionGraphNode;
 import fr.proline.studio.rsmexplorer.gui.calc.parameters.CheckParameterInterface;
 import fr.proline.studio.rsmexplorer.gui.calc.parameters.FunctionParametersDialog;
@@ -77,7 +77,7 @@ public abstract class AbstractFunction implements CheckParameterInterface {
     public abstract String getName();
     public abstract int getNumberOfInParameters();
     
-    public abstract void process(AbstractGraphObject[] graphObjects, FunctionGraphNode functionGraphNode, ProcessCallbackInterface callback);
+    public abstract void process(AbstractConnectedGraphObject[] graphObjects, FunctionGraphNode functionGraphNode, ProcessCallbackInterface callback);
     
     public abstract void askDisplay(FunctionGraphNode functionGraphNode);
     
@@ -86,7 +86,7 @@ public abstract class AbstractFunction implements CheckParameterInterface {
     }
 
 
-    public abstract void generateDefaultParameters(AbstractGraphObject[] graphObjects);
+    public abstract void generateDefaultParameters(AbstractConnectedGraphObject[] graphObjects);
     
     public abstract void userParametersChanged();
     public abstract AbstractFunction cloneFunction(GraphPanel p);
@@ -119,7 +119,7 @@ public abstract class AbstractFunction implements CheckParameterInterface {
         return m_settingsBeingDone;
     }
     
-    public boolean settings(AbstractGraphObject[] graphObjects) {
+    public boolean settings(AbstractConnectedGraphObject[] graphObjects) {
         if (m_parameters == null) {
             generateDefaultParameters(graphObjects);
         }

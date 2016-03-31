@@ -1,7 +1,7 @@
 package fr.proline.studio.rsmexplorer.gui.calc.graph;
 
 import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
-import static fr.proline.studio.rsmexplorer.gui.calc.graph.AbstractGraphObject.STROKE_SELECTED;
+import static fr.proline.studio.rsmexplorer.gui.calc.graph.AbstractConnectedGraphObject.STROKE_SELECTED;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -15,7 +15,7 @@ import javax.swing.JPopupMenu;
  * In or Out Connector of a Graph Node 
  * @author JM235353
  */
-public class GraphConnector extends AbstractGraphObject {
+public class GraphConnector extends AbstractConnectedGraphObject {
 
     private static final int WIDTH = 10;
     private static final int HEIGHT = 10;
@@ -195,7 +195,7 @@ public class GraphConnector extends AbstractGraphObject {
      
     
     @Override
-    public AbstractGraphObject inside(int x, int y) {
+    public AbstractConnectedGraphObject inside(int x, int y) {
         // triangle is taken as a square
         final int DELTA = 3;
         if ((x+DELTA>=m_x) && (y+DELTA>=m_y) && (x-DELTA<=m_x+WIDTH) && (y-DELTA<=m_y+HEIGHT)) {

@@ -182,17 +182,17 @@ public class FunctionGraphNode extends GraphNode {
             return;
         }
         
-        AbstractGraphObject[] graphObjectArray;
+        AbstractConnectedGraphObject[] graphObjectArray;
         
         if (m_inConnectors != null) {
-            graphObjectArray = new AbstractGraphObject[m_inConnectors.size()];
+            graphObjectArray = new AbstractConnectedGraphObject[m_inConnectors.size()];
             int i = 0;
             for (GraphConnector connector : m_inConnectors) {
                 GraphNode graphNode = connector.getLinkedSourceGraphNode();
                 graphObjectArray[i++] = graphNode;
             }
         } else {
-            graphObjectArray = new AbstractGraphObject[0];
+            graphObjectArray = new AbstractConnectedGraphObject[0];
         }
         
         m_function.process(graphObjectArray, this, callback);
@@ -209,9 +209,9 @@ public class FunctionGraphNode extends GraphNode {
     @Override
     public boolean settings() {
         
-        AbstractGraphObject[] graphObjectArray;
+        AbstractConnectedGraphObject[] graphObjectArray;
         if (m_inConnectors != null) {
-            graphObjectArray = new AbstractGraphObject[m_inConnectors.size()];
+            graphObjectArray = new AbstractConnectedGraphObject[m_inConnectors.size()];
             int i = 0;
             for (GraphConnector connector : m_inConnectors) {
                 GraphNode graphNode = connector.getLinkedSourceGraphNode();
@@ -219,7 +219,7 @@ public class FunctionGraphNode extends GraphNode {
                 graphObjectArray[i++] = graphNode;
             }
         } else {
-            graphObjectArray = new AbstractGraphObject[0];
+            graphObjectArray = new AbstractConnectedGraphObject[0];
         }
         
         

@@ -156,11 +156,27 @@ public class GraphicGraphNode extends GraphNode {
     @Override
     public void process(ProcessCallbackInterface callback) {
         
-        try {
-            if (!isConnected()) {
-                return;
-            }
 
+        if (!isConnected()) {
+            callback.finished(this);
+            return;
+        }
+
+        if (!settingsDone()) {
+
+            // do settings
+            boolean settingsDone = settings();
+            m_graphPanel.repaint();
+
+            if (!settingsDone) {
+                callback.stopped(this);
+            } else {
+                callback.reprocess(this);
+            }
+            return;
+        }
+
+        try {
             AbstractConnectedGraphObject[] graphObjectArray = new AbstractConnectedGraphObject[m_inConnectors.size()];
             int i = 0;
             for (GraphConnector connector : m_inConnectors) {
@@ -201,7 +217,7 @@ public class GraphicGraphNode extends GraphNode {
         
         
         
-        boolean settingsChanged = m_graphic.settings(graphObjectArray);
+        boolean settingsChanged = m_graphic.settings(graphObjectArray, this);
         if (settingsChanged) {
             super.propagateSourceChanged();
         }

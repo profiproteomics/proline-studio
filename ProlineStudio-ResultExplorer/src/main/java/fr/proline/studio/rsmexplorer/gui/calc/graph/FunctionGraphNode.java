@@ -178,7 +178,16 @@ public class FunctionGraphNode extends GraphNode {
         }
 
         if (!m_function.settingsDone()) {
-            callback.finished(this);
+            
+            // do settings
+            boolean settingsDone = settings();
+            m_graphPanel.repaint();
+            
+            if (!settingsDone) {
+                callback.stopped(this);
+            } else {
+                callback.reprocess(this);
+            }
             return;
         }
         
@@ -215,7 +224,6 @@ public class FunctionGraphNode extends GraphNode {
             int i = 0;
             for (GraphConnector connector : m_inConnectors) {
                 GraphNode graphNode = connector.getLinkedSourceGraphNode();
-                //graphNode.process(null);  // need to process previous nodes to be able to do settings
                 graphObjectArray[i++] = graphNode;
             }
         } else {
@@ -224,7 +232,7 @@ public class FunctionGraphNode extends GraphNode {
         
         
         
-        boolean settingsChanged = m_function.settings(graphObjectArray);
+        boolean settingsChanged = m_function.settings(graphObjectArray, this);
         if (settingsChanged) {
             m_function.resetError();
             super.propagateSourceChanged();

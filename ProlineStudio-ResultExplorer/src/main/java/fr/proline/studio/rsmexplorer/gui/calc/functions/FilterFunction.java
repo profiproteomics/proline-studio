@@ -9,6 +9,7 @@ import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
 import fr.proline.studio.rsmexplorer.gui.calc.ProcessCallbackInterface;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.AbstractConnectedGraphObject;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.FunctionGraphNode;
+import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphNode;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import org.openide.windows.WindowManager;
@@ -115,12 +116,13 @@ public class FilterFunction extends AbstractFunction {
     }
 
     @Override
-    public boolean settings(AbstractConnectedGraphObject[] graphObjects) {
+    public boolean settings(AbstractConnectedGraphObject[] graphObjects, GraphNode node) {
         if (m_filters == null) {
             generateDefaultParameters(graphObjects);
         }
 
         FilterDialog dialog = FilterDialog.getDialog(WindowManager.getDefault().getMainWindow());
+        dialog.setImageInfo(m_panel, node.getX()-90, node.getY()-50, node.getXEnd()-node.getX()+180, node.getYEnd()-node.getY()+100);
         dialog.centerToWindow(WindowManager.getDefault().getMainWindow());
         dialog.setFilers(m_filters);
 

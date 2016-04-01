@@ -40,7 +40,7 @@ public abstract class GraphNode extends AbstractConnectedGraphObject {
     protected int m_x = 0;
     protected int m_y = 0;
 
-
+    
     
     protected GraphPanel m_graphPanel = null;
 
@@ -135,6 +135,12 @@ public abstract class GraphNode extends AbstractConnectedGraphObject {
         String dataName = getDataName();
         String typeName = getTypeName();
 
+        if (m_hightlighted) {
+            g2.setColor(getFrameColor().brighter());
+            g.fillRoundRect(m_x-5, m_y-5, WIDTH+10, HEIGHT+10, 8, 8);
+        }
+        
+        
         LinearGradientPaint gradient = getBackgroundGradient();
         g2.setPaint(gradient);
         g.fillRoundRect(m_x, m_y, WIDTH, HEIGHT, 8, 8);
@@ -142,7 +148,7 @@ public abstract class GraphNode extends AbstractConnectedGraphObject {
         g.setColor(getFrameColor());
         
         Stroke previousStroke = g2.getStroke();
-        BasicStroke stroke = m_selected ? STROKE_SELECTED : STROKE_NOT_SELECTED;
+        BasicStroke stroke = (m_selected || m_hightlighted) ? STROKE_SELECTED : STROKE_NOT_SELECTED;
         g2.setStroke(stroke);
         g.drawRoundRect(m_x, m_y, WIDTH, HEIGHT, 8, 8);
         g2.setStroke(previousStroke);

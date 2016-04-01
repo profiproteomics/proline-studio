@@ -6,9 +6,12 @@ import fr.proline.studio.parameter.ParameterList;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.AbstractConnectedGraphObject;
 import fr.proline.studio.utils.IconManager;
 import java.awt.Dialog;
+import java.awt.Dimension;
+import java.awt.Graphics;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Window;
+import java.awt.image.BufferedImage;
 import javax.swing.JPanel;
 
 /**
@@ -20,6 +23,8 @@ public class FunctionParametersDialog extends DefaultDialog {
     private final ParameterList[] m_parameterList;
     private final CheckParameterInterface m_checkParamInterface;
     private final AbstractConnectedGraphObject[] m_graphObjects;
+    
+    
     
     private int m_currentPanelNumber = 0;
     
@@ -38,6 +43,8 @@ public class FunctionParametersDialog extends DefaultDialog {
 
         initOkButton(m_currentPanelNumber, m_parameterList.length);
     }
+    
+
     
     private void initOkButton(int panelNumber, int nbPanels) {
         if (nbPanels == 1) {
@@ -66,6 +73,7 @@ public class FunctionParametersDialog extends DefaultDialog {
         c.insets = new java.awt.Insets(5, 5, 5, 5);
 
         ParameterList parameterList = m_parameterList[panelNumber];
+
         
         c.gridx = 0;
         c.gridy = 0;
@@ -119,6 +127,8 @@ public class FunctionParametersDialog extends DefaultDialog {
         }
         
     }
+    
+
     
     
 }

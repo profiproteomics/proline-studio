@@ -23,6 +23,7 @@ public abstract class AbstractGraphObject {
     protected static int m_ascentBold;
     
     protected boolean m_selected = false;
+    protected boolean m_hightlighted = false;
     
     protected TypeGraphObject m_type;
     
@@ -52,6 +53,12 @@ public abstract class AbstractGraphObject {
     public void setSelected(boolean s) {
         m_selected = s;
     }
+    
+    public void setHighlighted(boolean h) {
+        m_hightlighted = h;
+    }
+    
+    
     
     public abstract JPopupMenu createPopup(final GraphPanel panel);
 

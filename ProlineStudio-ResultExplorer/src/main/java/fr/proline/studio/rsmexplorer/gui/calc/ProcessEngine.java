@@ -59,12 +59,36 @@ public class ProcessEngine implements ProcessCallbackInterface {
     
     private void processNodes() {
         GraphNode firstNode = m_processingNodeList.pollFirst();
+        firstNode.setHighlighted(true);
+        m_panel.repaint();
         firstNode.process(this);
     }
 
     @Override
+    public void reprocess(GraphNode node) {
+        node.process(this);
+    }
+    
+    
+    @Override
+    public void stopped(GraphNode node) {
+        node.setHighlighted(false);
+        m_panel.repaint();
+        
+        m_processingNodeList.clear();
+
+        // processing is finished
+        if (m_playButton != null) {
+            m_playButton.setEnabled(true);
+            m_playButton = null;
+        }
+        m_panel = null;
+    }
+    
+    @Override
     public void finished(GraphNode node) {
   
+        node.setHighlighted(false);
         
         m_panel.repaint();
         
@@ -78,6 +102,8 @@ public class ProcessEngine implements ProcessCallbackInterface {
         
         if (! m_processingNodeList.isEmpty()) {
             GraphNode firstNode = m_processingNodeList.pollFirst();
+            firstNode.setHighlighted(true);
+            m_panel.repaint();
             firstNode.process(this);
         } else {
             // processing is finished
@@ -89,4 +115,7 @@ public class ProcessEngine implements ProcessCallbackInterface {
             
         }
     }
+
+
+
 }

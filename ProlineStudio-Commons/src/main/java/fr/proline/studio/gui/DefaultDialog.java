@@ -4,6 +4,7 @@ import fr.proline.studio.utils.IconManager;
 import fr.proline.studio.utils.MiscellaneousUtils;
 import java.awt.*;
 import java.awt.event.*;
+import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.net.URL;
@@ -27,6 +28,7 @@ public class DefaultDialog extends javax.swing.JDialog {
     private static final int BUTTONS_NUMBER = 7; // ---- get in sync
     
     private JPanel m_internalPanel;
+    private ImagePanel m_imageInfoPanel;
     
     private JButton[] m_buttons;
 
@@ -100,6 +102,11 @@ public class DefaultDialog extends javax.swing.JDialog {
 
     public void setHelpURL(String helpURL) {
         m_helpURL = helpURL;
+    }
+    
+    public void setImageInfo(JPanel sourcePanel, int x, int y, int width, int height) {
+        m_imageInfoPanel.setVisible(true);
+        m_imageInfoPanel.setImageInfo(sourcePanel, x, y, width, height);
     }
     
     @Override
@@ -250,8 +257,13 @@ public class DefaultDialog extends javax.swing.JDialog {
         c.fill = GridBagConstraints.BOTH;
         c.anchor = GridBagConstraints.NORTHWEST;
         c.weightx = 1;
-        c.weighty = 1;
 
+        m_imageInfoPanel = new ImagePanel();
+        m_imageInfoPanel.setVisible(false);
+        add(m_imageInfoPanel, c);
+        
+        c.gridy++;
+        c.weighty = 1;
         m_internalPanel = new JPanel();
         m_internalPanel.setLayout(new GridBagLayout());
         add(m_internalPanel, c);
@@ -800,6 +812,48 @@ public class DefaultDialog extends javax.swing.JDialog {
         public abstract int getMinValue();
         public abstract int getMaxValue();
         
+    }
+    
+    private class ImagePanel extends JPanel {
+
+        private BufferedImage m_bi = null;
+        private final Dimension m_dimension = new Dimension(0, 0);
+
+        public ImagePanel() {
+        }
+
+        @Override
+        public Dimension getPreferredSize() {
+            return m_dimension;
+        }
+        
+        public void paint(Graphics g) {
+            if (m_bi == null) {
+                return;
+            }
+            
+            g.setColor(Color.white);
+            g.fillRect(0, 0, getWidth(), getHeight());
+            
+            
+            int xImage = (getWidth()-m_bi.getWidth())/2;
+            int yImage = 1;
+            g.drawImage(m_bi, xImage, yImage, null);
+            
+            g.setColor(Color.darkGray);
+            g.drawRect(xImage-1,yImage-1,m_bi.getWidth()+1,m_bi.getHeight()+1);
+            
+        }
+
+        public void setImageInfo(JPanel sourcePanel, int x, int y, int width, int height) {
+            m_bi = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+            m_dimension.width = width+2;
+            m_dimension.height = height+2;
+            Graphics g = m_bi.getGraphics();
+            g.translate(-x, -y);
+            sourcePanel.paint(g);
+        }
+
     }
     
 }

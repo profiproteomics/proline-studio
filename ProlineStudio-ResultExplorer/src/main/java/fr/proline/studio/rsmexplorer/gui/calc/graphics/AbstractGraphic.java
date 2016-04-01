@@ -9,6 +9,7 @@ import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
 import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
 import fr.proline.studio.rsmexplorer.gui.calc.ProcessCallbackInterface;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.AbstractConnectedGraphObject;
+import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphNode;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphicGraphNode;
 import fr.proline.studio.rsmexplorer.gui.calc.parameters.CheckParameterInterface;
 import fr.proline.studio.rsmexplorer.gui.calc.parameters.FunctionParametersDialog;
@@ -113,7 +114,7 @@ public abstract class AbstractGraphic implements CheckParameterInterface {
         return m_errorMessage;
     }
     
-    public boolean settings(AbstractConnectedGraphObject[] graphObjects) {
+    public boolean settings(AbstractConnectedGraphObject[] graphObjects, GraphNode node) {
         
         if (m_parameters == null) {
             generateDefaultParameters(graphObjects);
@@ -125,6 +126,7 @@ public abstract class AbstractGraphic implements CheckParameterInterface {
         m_settingsBeingDone = true;
         try {
             FunctionParametersDialog dialog = new FunctionParametersDialog(getName(), WindowManager.getDefault().getMainWindow(), m_parameters, this, graphObjects);
+            dialog.setImageInfo(m_panel, node.getX()-60, node.getY()-40, node.getXEnd()-node.getX()+120, node.getYEnd()-node.getY()+80);
             dialog.centerToWindow(WindowManager.getDefault().getMainWindow());
             dialog.setVisible(true);
             if (dialog.getButtonClicked() == FunctionParametersDialog.BUTTON_OK) {

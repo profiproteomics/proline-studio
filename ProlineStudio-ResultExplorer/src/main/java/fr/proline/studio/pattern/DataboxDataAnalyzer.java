@@ -3,15 +3,18 @@ package fr.proline.studio.pattern;
 
 import fr.proline.studio.python.data.TableInfo;
 import fr.proline.studio.rsmexplorer.gui.calc.DataAnalyzerPanel;
+import fr.proline.studio.rsmexplorer.gui.calc.ProcessEngine;
+import fr.proline.studio.rsmexplorer.gui.calc.ProcessEngineInfo;
+import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphNode;
 
 /**
  *
  * @author JM235353
  */
-public class DataboxDataMixer extends AbstractDataBox {
+public class DataboxDataAnalyzer extends AbstractDataBox {
 
-    public DataboxDataMixer() {
-        super(DataboxType.DataboxDataMixer);
+    public DataboxDataAnalyzer() {
+        super(DataboxType.DataboxDataAnalyzer);
 
         // Name of this databox
         m_typeName = "Data Analyzer";
@@ -37,6 +40,17 @@ public class DataboxDataMixer extends AbstractDataBox {
         if (data instanceof TableInfo) {
             ((DataAnalyzerPanel) m_panel).addTableInfoToGraph((TableInfo) data);
         }
+    }
+
+    @Override
+    public Object getData(boolean getArray, Class parameterType) {
+        if (parameterType != null) {
+            if (parameterType.equals(ProcessEngineInfo.class)) {
+                return ((DataAnalyzerPanel) m_panel).getProcessEngineInfoToDisplay();
+            }
+
+        }
+        return super.getData(getArray, parameterType);
     }
 
 }

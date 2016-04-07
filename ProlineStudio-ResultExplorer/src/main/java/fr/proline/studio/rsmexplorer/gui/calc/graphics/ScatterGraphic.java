@@ -114,7 +114,9 @@ public class ScatterGraphic extends AbstractGraphic {
 
     @Override
     public AbstractGraphic cloneGraphic(GraphPanel p) {
-        return new ScatterGraphic(p);
+        AbstractGraphic clone = new ScatterGraphic(p);
+        clone.cloneInfo(this);
+        return clone;
     }
 
     @Override

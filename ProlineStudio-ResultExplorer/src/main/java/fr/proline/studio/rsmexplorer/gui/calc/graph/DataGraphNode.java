@@ -106,6 +106,18 @@ public class DataGraphNode extends GraphNode {
     }
 
     @Override
+    public WindowBox getDisplayWindowBox() {
+        WindowBox windowBox = WindowBoxFactory.getGenericWindowBox(m_tableInfo.getDataName(), m_tableInfo.getTypeName(), IconManager.IconType.CHALKBOARD, false);
+
+        GlobalTableModelInterface model = m_tableInfo.getModel();
+        ProjectId projectId = (ProjectId) model.getSingleValue(ProjectId.class);
+        long id = (projectId != null) ? projectId.getId() : -1l;
+
+        windowBox.setEntryData(id, model);
+        return windowBox;
+    }
+
+    @Override
     public boolean settings() {
         // nothing to do
         return true;
@@ -128,7 +140,10 @@ public class DataGraphNode extends GraphNode {
         return true;
     }
 
-
+    @Override
+    public boolean isAutoDisplayDuringProcess() {
+        return false;
+    }
 
     
 

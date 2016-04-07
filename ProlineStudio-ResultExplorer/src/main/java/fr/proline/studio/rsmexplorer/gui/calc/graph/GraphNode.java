@@ -1,6 +1,7 @@
 package fr.proline.studio.rsmexplorer.gui.calc.graph;
 
 import fr.proline.studio.gui.InfoDialog;
+import fr.proline.studio.pattern.WindowBox;
 import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
 import fr.proline.studio.rsmexplorer.gui.calc.ProcessCallbackInterface;
 import fr.proline.studio.rsmexplorer.gui.calc.ProcessEngine;
@@ -200,6 +201,8 @@ public abstract class GraphNode extends AbstractConnectedGraphObject {
     public abstract void process(ProcessCallbackInterface callback);
 
     public abstract void askDisplay();
+    public abstract WindowBox getDisplayWindowBox();
+    public abstract boolean isAutoDisplayDuringProcess();
     public abstract boolean settings();
 
         
@@ -338,7 +341,8 @@ public abstract class GraphNode extends AbstractConnectedGraphObject {
         int nbConnections = (m_inConnectors == null) ? 0 : m_inConnectors.size();
         
         JPopupMenu popup = new JPopupMenu();
-        popup.add(new DisplayAction(this, nbConnections));
+        popup.add(new DisplayBelowAction(this, nbConnections));
+        popup.add(new DisplayInNewWindowAction(this, nbConnections));
         popup.add(new SettingsAction(this, nbConnections));
         popup.add(new ProcessAction(this));
         popup.add(new ErrorAction(this));
@@ -382,12 +386,12 @@ public abstract class GraphNode extends AbstractConnectedGraphObject {
         }
     }
     
-    public class DisplayAction extends AbstractAction {
+    public class DisplayInNewWindowAction extends AbstractAction {
 
         private GraphNode m_graphNode = null;
 
-        public DisplayAction(GraphNode graphNode, int nbInConnections) {
-            super("Display");
+        public DisplayInNewWindowAction(GraphNode graphNode, int nbInConnections) {
+            super("Display in New Window");
             m_graphNode = graphNode;
             
             setEnabled(graphNode.calculationDone());
@@ -397,7 +401,26 @@ public abstract class GraphNode extends AbstractConnectedGraphObject {
         @Override
         public void actionPerformed(ActionEvent e) {
             m_graphNode.askDisplay();
-            m_graphPanel.repaint();
+            m_graphPanel.repaint(); 
+        }
+    }
+    
+    public class DisplayBelowAction extends AbstractAction {
+
+        private GraphNode m_graphNode = null;
+
+        public DisplayBelowAction(GraphNode graphNode, int nbInConnections) {
+            super("Display");
+            m_graphNode = graphNode;
+            
+            setEnabled(graphNode.calculationDone());
+
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+
+             m_graphPanel.displayBelow(m_graphNode, true, m_graphNode.getFullName());
         }
     }
     

@@ -22,7 +22,9 @@ public class DensityPlotGraphic extends AbstractMatrixPlotGraphic {
 
     @Override
     public AbstractGraphic cloneGraphic(GraphPanel p) {
-        return new DensityPlotGraphic(p);
+        AbstractGraphic clone = new DensityPlotGraphic(p);
+        clone.cloneInfo(this);
+        return clone;
     }
 
     @Override

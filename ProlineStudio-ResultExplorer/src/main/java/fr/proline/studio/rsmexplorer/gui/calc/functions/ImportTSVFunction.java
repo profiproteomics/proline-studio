@@ -16,6 +16,7 @@ import fr.proline.studio.parameter.FileParameter;
 import fr.proline.studio.parameter.ParameterError;
 import fr.proline.studio.parameter.ParameterList;
 import fr.proline.studio.parameter.StringParameter;
+import fr.proline.studio.pattern.WindowBox;
 import fr.proline.studio.python.interpreter.CalcError;
 import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
 import fr.proline.studio.rsmexplorer.gui.calc.ProcessCallbackInterface;
@@ -250,6 +251,11 @@ public class ImportTSVFunction extends AbstractFunction {
     @Override
     public void askDisplay(FunctionGraphNode functionGraphNode) {
         display(m_fileParameter.getStringValue(), getName());
+    }
+    
+    @Override
+    public WindowBox getDisplayWindowBox(FunctionGraphNode functionGraphNode) {
+        return getDisplayWindowBox(functionGraphNode.getPreviousDataName(), getName());
     }
     
     @Override

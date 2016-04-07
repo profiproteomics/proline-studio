@@ -221,7 +221,7 @@ public class StatsUtil {
         
         RServerManager serverR = RServerManager.getRServerManager();
         
-        String cmdBB1 = "png(\""+StatsUtil.getPath(imageTempFile)+"\",width=800, height=800)";
+        String cmdBB1 = "png(\""+StatsUtil.getPath(imageTempFile)+"\",width=500, height=500)";
         String cmdBB2 = cmd;
         String cmdBB3 = "dev.off()";
         serverR.parseAndEval(cmdBB1);

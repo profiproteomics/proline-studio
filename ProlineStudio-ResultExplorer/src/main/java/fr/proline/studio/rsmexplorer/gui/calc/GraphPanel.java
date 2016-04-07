@@ -43,6 +43,7 @@ public class GraphPanel extends JPanel implements MouseListener, MouseMotionList
     
     private final LinkedList<GraphNode> m_graphNodeArray = new LinkedList<>();
     
+    private final DataAnalyzerPanel m_dataAnalyzerPanel;
     
     private int m_mouseDragX;
     private int m_mouseDragY;
@@ -52,12 +53,18 @@ public class GraphPanel extends JPanel implements MouseListener, MouseMotionList
     
     private int m_curMoveCursor = Cursor.DEFAULT_CURSOR;
 
-    private Dimension m_preferredSize = new Dimension(DEFAULT_PANEL_WIDTH, DEFAULT_PANEL_HEIGHT); // minimum size at the beginning
+    private final Dimension m_preferredSize = new Dimension(DEFAULT_PANEL_WIDTH, DEFAULT_PANEL_HEIGHT); // minimum size at the beginning
     
-    public GraphPanel() {
+    public GraphPanel(DataAnalyzerPanel dataAnalyzerPanel) {
         addMouseListener(this);
         addMouseMotionListener(this);
         setTransferHandler(new DataTreeTransferHandler(this));
+        
+        m_dataAnalyzerPanel = dataAnalyzerPanel;
+    }
+    
+    public void displayBelow(GraphNode node, boolean newTab, String name) {
+        m_dataAnalyzerPanel.displayBelow(node, newTab, name);
     }
     
     @Override

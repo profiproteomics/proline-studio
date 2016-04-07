@@ -1,6 +1,7 @@
 package fr.proline.studio.rsmexplorer.gui.calc.graph;
 
 
+import fr.proline.studio.pattern.WindowBox;
 import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
 import fr.proline.studio.rsmexplorer.gui.calc.ProcessCallbackInterface;
 import fr.proline.studio.rsmexplorer.gui.calc.functions.AbstractFunction;
@@ -213,6 +214,16 @@ public class FunctionGraphNode extends GraphNode {
     public void askDisplay() {
         m_function.askDisplay(this);
     }
+    
+    @Override
+    public WindowBox getDisplayWindowBox() {
+        return m_function.getDisplayWindowBox(this);
+    }
+    
+    @Override
+    public boolean isAutoDisplayDuringProcess() {
+        return m_function.isAutoDisplayDuringProcess();
+    }
 
     
     @Override
@@ -246,4 +257,6 @@ public class FunctionGraphNode extends GraphNode {
         return m_function.getGlobalTableModelInterface();
     }
  
+
+    
 }

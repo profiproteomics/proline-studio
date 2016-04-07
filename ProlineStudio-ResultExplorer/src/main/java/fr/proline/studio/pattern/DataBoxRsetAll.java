@@ -16,7 +16,7 @@ import javax.swing.event.ChangeEvent;
  * Databox for all Rset of a project
  * @author JM235353
  */
-public class DataBoxRsetAll extends AbstractDataBox{
+public class DataBoxRsetAll extends AbstractDataBox {
     
     private Project m_project = null;
     

@@ -21,7 +21,7 @@ public class DataMixerWindowBoxManager {
         
 
         if (m_windowBox == null) {
-            m_windowBox = WindowBoxFactory.getDataMixerWindowBox();
+            m_windowBox = WindowBoxFactory.getDataAnalyzerWindowBox();
             if (tableInfo != null) {
                 
                 GlobalTableModelInterface model = tableInfo.getModel();

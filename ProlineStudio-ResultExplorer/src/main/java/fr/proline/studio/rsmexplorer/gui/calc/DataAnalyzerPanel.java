@@ -10,6 +10,7 @@ import fr.proline.studio.python.data.TableInfo;
 import fr.proline.studio.rsmexplorer.gui.calc.functions.AbstractFunction;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.DataGraphNode;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.FunctionGraphNode;
+import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphNode;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphicGraphNode;
 import fr.proline.studio.rsmexplorer.gui.calc.graphics.AbstractGraphic;
 import fr.proline.studio.rsmexplorer.gui.calc.macros.AbstractMacro;
@@ -148,7 +149,7 @@ public class DataAnalyzerPanel extends JPanel implements DataBoxPanelInterface {
         //toolbar.add(playButton);
         
         // create graph objects
-        m_graphPanel = new GraphPanel();
+        m_graphPanel = new GraphPanel(this);
         JScrollPane graphScrollPane = new JScrollPane();
         graphScrollPane.setBackground(Color.white);
         graphScrollPane.setViewportView(m_graphPanel);
@@ -274,6 +275,18 @@ public class DataAnalyzerPanel extends JPanel implements DataBoxPanelInterface {
         }
 
     }
+    
+    public void displayBelow(GraphNode node, boolean inNewTab, String name) {
+        m_WillDisplayProcessEngineInfo = new ProcessEngineInfo(node, inNewTab, name);
+        m_dataBox.propagateDataChanged(ProcessEngineInfo.class);
+        
+    }
+    public ProcessEngineInfo getProcessEngineInfoToDisplay() {
+        ProcessEngineInfo processEngineInfo = m_WillDisplayProcessEngineInfo;
+        m_WillDisplayProcessEngineInfo= null;
+        return processEngineInfo;
+    }
+    private ProcessEngineInfo m_WillDisplayProcessEngineInfo = null;
     
 
     

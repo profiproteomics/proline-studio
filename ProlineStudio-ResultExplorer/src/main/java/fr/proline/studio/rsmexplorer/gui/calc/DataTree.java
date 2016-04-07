@@ -299,7 +299,7 @@ public abstract class DataTree extends JTree {
 
         @Override
         public ImageIcon getIcon() {
-            return IconManager.getIcon(IconManager.IconType.DATA_MIXER);
+            return IconManager.getIcon(IconManager.IconType.DATA_ANALYZER);
         }
 
         @Override

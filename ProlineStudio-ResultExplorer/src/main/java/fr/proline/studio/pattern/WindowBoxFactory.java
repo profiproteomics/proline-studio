@@ -12,6 +12,7 @@ import fr.proline.studio.pattern.xic.DataboxXicPeptideIon;
 import fr.proline.studio.pattern.xic.DataboxXicPeptideSet;
 import fr.proline.studio.pattern.xic.DataboxXicProteinSet;
 import fr.proline.studio.utils.IconManager;
+import java.awt.Image;
 
 import javax.swing.JComponent;
 import javax.swing.JPanel;
@@ -372,12 +373,23 @@ public class WindowBoxFactory {
         return winBox;
     }
 
-    public static WindowBox getDataMixerWindowBox() {
+    public static WindowBox getDataAnalyzerWindowBox() {
+        AbstractDataBox[] boxes = new AbstractDataBox[2];
+        boxes[0] = new DataboxDataAnalyzer();
+        boxes[1] = new DataBoxDataAnalyzerResults();
+
+        WindowBox winBox = new WindowBox("Data Analyzer", generatePanel(boxes, false), boxes[0], IconManager.getImage(IconManager.IconType.DATA_ANALYZER));
+
+        return winBox;
+    }
+    
+    public static WindowBox getImageWindowBox(String dataName, Image img) {
         AbstractDataBox[] boxes = new AbstractDataBox[1];
-        boxes[0] = new DataboxDataMixer();
+        boxes[0] = new DataBoxImage();
 
-        WindowBox winBox = new WindowBox("Data Analyzer", generatePanel(boxes), boxes[0], IconManager.getImage(IconManager.IconType.DATA_MIXER));
-
+        WindowBox winBox = new WindowBox(dataName+" Image", generatePanel(boxes, false), boxes[0], IconManager.getImage(IconManager.IconType.WAVE));
+        winBox.setEntryData(-1, img);
+        
         return winBox;
     }
 
@@ -411,6 +423,9 @@ public class WindowBoxFactory {
     }
 
     private static SplittedPanelContainer generatePanel(AbstractDataBox[] boxes) {
+        return generatePanel(boxes, true);
+    }
+    private static SplittedPanelContainer generatePanel(AbstractDataBox[] boxes, boolean includeSaveAndAddButtonsInToolbar) {
 
         // link boxes together
         int nb = boxes.length - 1;
@@ -468,7 +483,7 @@ public class WindowBoxFactory {
         }
 
 
-        SplittedPanelContainer splittedPanel = new SplittedPanelContainer();
+        SplittedPanelContainer splittedPanel = new SplittedPanelContainer(includeSaveAndAddButtonsInToolbar);
 
 
         for (int i = 0; i < nbContainerPanels; i++) {

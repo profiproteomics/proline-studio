@@ -26,8 +26,12 @@ public class ProStarMacro extends AbstractMacro {
         addNode(new DataTree.FunctionNode(new NormalizationFunction(null)), 3, 0); addLink(2,0,3,0);
         addNode(new DataTree.FunctionNode(new MissingValuesImputationFunction(null)), 4, 0); addLink(3,0,4,0);
         addNode(new DataTree.FunctionNode(new DiffAnalysisFunction(null)), 5, 0); addLink(4,0,5,0);
-        addNode(new DataTree.GraphicNode(new CalibrationPlotGraphic(null)), 6, 0); addLink(5,0,6,0);
-        addNode(new DataTree.GraphicNode(new ScatterGraphic(null)), 6, 1); addLink(5,0,6,1);
+        
+        CalibrationPlotGraphic cpg = new CalibrationPlotGraphic(null); cpg.setAutoDisplayDuringProcess();
+        addNode(new DataTree.GraphicNode(cpg), 6, 0); addLink(5,0,6,0);
+        
+        ScatterGraphic sg = new ScatterGraphic(null); sg.setAutoDisplayDuringProcess();
+        addNode(new DataTree.GraphicNode(sg), 6, 1); addLink(5,0,6,1);
         addNode(new DataTree.FunctionNode(new ComputeFDRFunction(null)), 6, 2); addLink(5,0,6,2);
 
         

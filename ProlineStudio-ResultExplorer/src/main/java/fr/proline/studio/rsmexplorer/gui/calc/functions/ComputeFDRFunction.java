@@ -6,6 +6,7 @@ import fr.proline.studio.parameter.IntegerParameter;
 import fr.proline.studio.parameter.ObjectParameter;
 import fr.proline.studio.parameter.ParameterError;
 import fr.proline.studio.parameter.ParameterList;
+import fr.proline.studio.pattern.WindowBox;
 import fr.proline.studio.python.data.ColRef;
 import fr.proline.studio.python.data.Table;
 import fr.proline.studio.python.interpreter.CalcCallback;
@@ -208,6 +209,11 @@ public class ComputeFDRFunction extends AbstractFunction {
     @Override
     public void askDisplay(FunctionGraphNode functionGraphNode) {
         JOptionPane.showMessageDialog(m_panel, "FDR Value= "+m_fdrResult.toString(), "FDR", JOptionPane.INFORMATION_MESSAGE);
+    }
+    
+    @Override
+    public WindowBox getDisplayWindowBox(FunctionGraphNode functionGraphNode) {
+        return null; //JPM.TODO
     }
     
     

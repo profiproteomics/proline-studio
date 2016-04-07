@@ -1,5 +1,6 @@
 package fr.proline.studio.rsmexplorer.gui.calc;
 
+import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphGroup;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphNode;
 import java.util.LinkedList;
 import javax.swing.JButton;
@@ -13,8 +14,10 @@ public class ProcessEngine implements ProcessCallbackInterface {
     
     private static ProcessEngine m_processEngine = null;
     
+    private int m_processEngineKey = 0;
+    private String m_currentMacro = null;
     
-    private JPanel m_panel;
+    private GraphPanel m_panel;
     private JButton m_playButton;
     
     private final LinkedList<GraphNode> m_processingNodeList = new LinkedList<>();
@@ -30,8 +33,17 @@ public class ProcessEngine implements ProcessCallbackInterface {
         return m_processEngine;
     }
     
-    public void run(LinkedList<GraphNode> graphNodeArray, JPanel p, JButton playButton) {
+    public String getProcessName() {
+        if (m_currentMacro != null) {
+            return m_currentMacro;
+        } else {
+            return "Results";
+        }
+    }
+    
+    public void run(LinkedList<GraphNode> graphNodeArray, GraphPanel p, JButton playButton) {
 
+        m_processEngineKey++;
         m_panel = p;
         m_playButton = playButton;
         
@@ -47,7 +59,14 @@ public class ProcessEngine implements ProcessCallbackInterface {
 
     }
     
-    public void runANode(GraphNode node, JPanel p) {
+    public Integer getProcessEngineKey(boolean bumpKey) {
+        if (bumpKey) {
+            m_processEngineKey++;
+        }
+        return m_processEngineKey;
+    }
+    
+    public void runANode(GraphNode node, GraphPanel p) {
         
         m_panel = p;
         m_playButton = null;
@@ -59,16 +78,28 @@ public class ProcessEngine implements ProcessCallbackInterface {
     
     private void processNodes() {
         GraphNode firstNode = m_processingNodeList.pollFirst();
-        firstNode.setHighlighted(true);
-        m_panel.repaint();
-        firstNode.process(this);
+        process(firstNode);
     }
 
     @Override
     public void reprocess(GraphNode node) {
-        node.process(this);
+        process(node);
     }
     
+    private void process(GraphNode node) {
+        
+        node.setHighlighted(true);
+        m_panel.repaint();
+        
+        GraphGroup group = node.getGroup();
+        if (group != null) {
+            m_currentMacro = group.getGroupName();
+        } else {
+            m_currentMacro = null;
+        }
+        
+        node.process(this);
+    }
     
     @Override
     public void stopped(GraphNode node) {
@@ -90,6 +121,10 @@ public class ProcessEngine implements ProcessCallbackInterface {
   
         node.setHighlighted(false);
         
+        if (node.isAutoDisplayDuringProcess()) {
+            m_panel.displayBelow(node, false, null);
+        }
+        
         m_panel.repaint();
         
         
@@ -102,9 +137,7 @@ public class ProcessEngine implements ProcessCallbackInterface {
         
         if (! m_processingNodeList.isEmpty()) {
             GraphNode firstNode = m_processingNodeList.pollFirst();
-            firstNode.setHighlighted(true);
-            m_panel.repaint();
-            firstNode.process(this);
+            process(firstNode);
         } else {
             // processing is finished
             if (m_playButton!= null) {
@@ -112,9 +145,11 @@ public class ProcessEngine implements ProcessCallbackInterface {
                 m_playButton = null;
             }
             m_panel = null;
+            m_currentMacro = null;
             
         }
     }
+
 
 
 

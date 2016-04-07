@@ -19,7 +19,9 @@ public class VarianceDistPlotGraphic extends AbstractMatrixPlotGraphic {
 
     @Override
     public AbstractGraphic cloneGraphic(GraphPanel p) {
-        return new VarianceDistPlotGraphic(p);
+        AbstractGraphic clone = new VarianceDistPlotGraphic(p);
+        clone.cloneInfo(this);
+        return clone;
     }
 
     @Override

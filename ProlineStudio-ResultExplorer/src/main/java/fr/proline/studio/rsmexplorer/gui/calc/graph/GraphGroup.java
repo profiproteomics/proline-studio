@@ -38,6 +38,10 @@ public class GraphGroup extends AbstractGraphObject {
         m_groupName = groupName;
     }
     
+    public String getGroupName() {
+        return m_groupName;
+    }
+    
     public void addObject(GraphNode graphNode ){
         m_groupedGraphNodes.add(graphNode);
         graphNode.setGroup(this);

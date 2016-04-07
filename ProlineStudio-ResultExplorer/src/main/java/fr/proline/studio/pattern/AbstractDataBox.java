@@ -101,7 +101,7 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
         DataboxMultiGraphics(29),
         DataboxPSMOfMasterQuantPeptide(30),
         DataBoxMzScope(31),
-        DataboxDataMixer(32),
+        DataboxDataAnalyzer(32),
         DataboxExperimentalDesign(33),
         DataBoxAdjacencyMatrix(34),
         DataBoxAdjacencyMatrixChoice(35),
@@ -111,7 +111,9 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
         DataBoxRsetPeptideSpectrumValues(39),
         DataBoxMSQueriesForRset(40), 
         DataBoxRsetPSMForMsQuery(41),
-        DataBoxPTMProteinSite(42);
+        DataBoxPTMProteinSite(42),
+        DataBoxDataAnalyzerResults(43),
+        DataBoxImage(44);
         
         int m_type;
         private static HashMap<Integer, DataboxType> m_databoxTypeMap = null;
@@ -202,6 +204,10 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
                     return new DataboxRsetPSMForMsQuery();
                 case DataBoxPTMProteinSite:
                     return new DataBoxPTMProteinSite();
+                case DataBoxDataAnalyzerResults:
+                    return new DataBoxDataAnalyzerResults();
+                case DataBoxImage:
+                    return new DataBoxImage();
             }
             return null; // should not happen
         }
@@ -569,7 +575,9 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
         }
     }
     
-
+    public ArrayList<AbstractDataBox> getNextDataBoxArray() {
+        return m_nextDataBoxArray;
+    }
     
 
 }

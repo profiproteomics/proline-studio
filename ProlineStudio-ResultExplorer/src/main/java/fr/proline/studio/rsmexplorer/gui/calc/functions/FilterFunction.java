@@ -5,6 +5,7 @@ import fr.proline.studio.filter.FilterDialog;
 import fr.proline.studio.filter.FilterTableModel;
 import fr.proline.studio.filter.FilterTableModelInterface;
 import fr.proline.studio.parameter.ParameterError;
+import fr.proline.studio.pattern.WindowBox;
 import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
 import fr.proline.studio.rsmexplorer.gui.calc.ProcessCallbackInterface;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.AbstractConnectedGraphObject;
@@ -90,6 +91,11 @@ public class FilterFunction extends AbstractFunction {
     @Override
     public void askDisplay(FunctionGraphNode functionGraphNode) {
         display(functionGraphNode.getPreviousDataName(), getName());
+    }
+    
+    @Override
+    public WindowBox getDisplayWindowBox(FunctionGraphNode functionGraphNode) {
+        return getDisplayWindowBox(functionGraphNode.getPreviousDataName(), getName());
     }
 
     @Override

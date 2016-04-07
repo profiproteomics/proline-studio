@@ -74,6 +74,34 @@ public class WindowBox {
         }
     }
 
+    public void addDatabox(AbstractDataBox nextDatabox) {
 
-    
+        AbstractDataBox curBox = m_entryBox;
+        
+        AbstractDataBox nextCurBox = null;
+        while (true) {
+            ArrayList<AbstractDataBox> nextArray = curBox.getNextDataBoxArray();
+            if ((nextArray != null) && (!nextArray.isEmpty())) {
+                curBox = (AbstractDataBox) nextArray.get(0);
+            } else {
+                break;
+            }
+        }
+
+        curBox.addNextDataBox(nextDatabox);
+        nextDatabox.createPanel();
+
+            // add the new panel to the window (below, as a tabb, or as splitted
+            //if (dialog.addBelow()) {
+            //m_windowPanel.registerAddedPanel((JPanel) nextDatabox.getPanel());
+            //} else if (dialog.addTabbed()) {
+                //m_windowPanel.registerAddedPanelAsTab((JPanel) nextDatabox.getPanel());
+                
+            //} else {
+                // splitted
+                m_windowPanel.registerAddedPanelAsSplitted((JPanel) nextDatabox.getPanel());
+            //}
+
+            nextDatabox.dataChanged();
+    }
 }

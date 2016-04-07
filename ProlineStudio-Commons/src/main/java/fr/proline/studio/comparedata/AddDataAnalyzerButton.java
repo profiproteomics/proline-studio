@@ -20,7 +20,7 @@ public abstract class AddDataAnalyzerButton  extends JButton implements ActionLi
 
         m_progressInterface = progressInterface;
 
-        setIcon(IconManager.getIcon(IconManager.IconType.ADD_DATA_MIXER));
+        setIcon(IconManager.getIcon(IconManager.IconType.ADD_DATA_ANALYZER));
         setToolTipText("Add Data to Data Analyzer...");
 
         addActionListener(this);

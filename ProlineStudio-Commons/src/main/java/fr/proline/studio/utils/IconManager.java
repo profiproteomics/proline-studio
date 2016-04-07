@@ -112,8 +112,8 @@ public class IconManager {
         ARROW_DOWN, 
         ARROW_RIGHT,
         ARROW_UP,
-        ADD_DATA_MIXER,
-        DATA_MIXER,
+        ADD_DATA_ANALYZER,
+        DATA_ANALYZER,
         GRID,
         IMPORT_TABLE_SELECTION,
         EXPORT_TABLE_SELECTION,
@@ -469,9 +469,9 @@ public class IconManager {
                return "fr/proline/studio/images/arrow-right.png";
             case ARROW_UP:
                return "fr/proline/studio/images/arrow-up.png";
-           case ADD_DATA_MIXER:
+           case ADD_DATA_ANALYZER:
                return "fr/proline/studio/images/addDataMixer.png";
-           case DATA_MIXER:
+           case DATA_ANALYZER:
                return "fr/proline/studio/images/data-mixer.png";
            case GRID:
                return "fr/proline/studio/images/grid.png";

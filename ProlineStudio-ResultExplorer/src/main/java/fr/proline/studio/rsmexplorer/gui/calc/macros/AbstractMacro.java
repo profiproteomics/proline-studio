@@ -46,6 +46,7 @@ public abstract class AbstractMacro {
         }
         outNodes.add(node2);
     }
+
     
     public ArrayList<DataNode> getNodes() {
         return m_macroNodes;

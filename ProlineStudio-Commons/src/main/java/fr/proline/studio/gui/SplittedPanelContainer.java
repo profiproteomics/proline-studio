@@ -67,7 +67,10 @@ public class SplittedPanelContainer extends JPanel {
     
     private boolean m_aPanelMaximized = false;
     
-    public SplittedPanelContainer() {   
+    private final boolean m_includeSaveAndAddButtonsInToolbar;
+    
+    public SplittedPanelContainer(boolean includeSaveAndAddButtonsInToolbar) {   
+        m_includeSaveAndAddButtonsInToolbar = includeSaveAndAddButtonsInToolbar;
     }
 
     public void generateListOfPanels(ArrayList<JPanel> panelList, ArrayList<PanelLayout> layoutList) {
@@ -206,7 +209,21 @@ public class SplittedPanelContainer extends JPanel {
 
         splittedBottomPanel.replaceEmbededPanel(sp);
         
-        sp.setDividerLocation(getWidth()/2);
+        int width = getWidth();
+        if (width>0) {
+            sp.setDividerLocation(getWidth()/2);
+        } else {
+            final JSplitPane _sp = sp;
+            JPanel _p = this;
+            SwingUtilities.invokeLater(new Runnable() {
+
+                @Override
+                public void run() {
+                    _sp.setDividerLocation(_p.getWidth()/2);
+                }
+                
+            });
+        }
         
         revalidate();
         repaint();
@@ -937,17 +954,17 @@ public class SplittedPanelContainer extends JPanel {
             } else {
                 if (firstPanel) {
                     if ((m_embededPanel instanceof JTabbedPane) || (m_embededPanel instanceof JSplitPane)) {
-                        m_removeButton.setVisible(true);
+                        m_removeButton.setVisible(m_includeSaveAndAddButtonsInToolbar);
                     } else {
                         m_removeButton.setVisible(false);
                     }
                 } else {
-                    m_removeButton.setVisible(true);
+                    m_removeButton.setVisible(m_includeSaveAndAddButtonsInToolbar);
                 }
             }
 
-            m_addButton.setVisible(lastPanel);
-            m_saveButton.setVisible(lastPanel);
+            m_addButton.setVisible(lastPanel && m_includeSaveAndAddButtonsInToolbar);
+            m_saveButton.setVisible(lastPanel && m_includeSaveAndAddButtonsInToolbar);
 
 
         }

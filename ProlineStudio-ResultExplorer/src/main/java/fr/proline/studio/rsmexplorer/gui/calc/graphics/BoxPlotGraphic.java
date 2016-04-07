@@ -31,7 +31,9 @@ public class BoxPlotGraphic extends AbstractMatrixPlotGraphic {
 
     @Override
     public AbstractGraphic cloneGraphic(GraphPanel p) {
-        return new BoxPlotGraphic(p);
+        AbstractGraphic clone = new BoxPlotGraphic(p);
+        clone.cloneInfo(this);
+        return clone;
     }
 
 

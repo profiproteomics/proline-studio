@@ -34,6 +34,8 @@ public abstract class AbstractFunction implements CheckParameterInterface {
     protected boolean m_settingsBeingDone = false;
     private String m_errorMessage = null;
     
+    private boolean m_autoDisplayDuringProcess = false;
+    
     protected GraphPanel m_panel;
     
     public AbstractFunction(GraphPanel panel) {
@@ -43,11 +45,16 @@ public abstract class AbstractFunction implements CheckParameterInterface {
     public void inLinkDeleted() {
         m_parameters = null;
         m_globalTableModelInterface = null;
-        
-        //inLinkDeletedSubClass();
+
+    }
+
+    public void setAutoDisplayDuringProcess() {
+        m_autoDisplayDuringProcess = true;
     }
     
-    //public abstract void inLinkDeletedSubClass();
+    public boolean isAutoDisplayDuringProcess() {
+        return m_autoDisplayDuringProcess;
+    }
     
     protected void setCalculating(boolean v) {
         if (v ^ m_calculating) {
@@ -81,6 +88,7 @@ public abstract class AbstractFunction implements CheckParameterInterface {
     public abstract void process(AbstractConnectedGraphObject[] graphObjects, FunctionGraphNode functionGraphNode, ProcessCallbackInterface callback);
     
     public abstract void askDisplay(FunctionGraphNode functionGraphNode);
+    public abstract WindowBox getDisplayWindowBox(FunctionGraphNode functionGraphNode);
     
     public GlobalTableModelInterface getGlobalTableModelInterface() {
         return m_globalTableModelInterface;
@@ -102,6 +110,14 @@ public abstract class AbstractFunction implements CheckParameterInterface {
         DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(windowBox);
         win.open();
         win.requestActive();
+    }
+    
+    protected WindowBox getDisplayWindowBox(String dataName, String functionName) {
+        WindowBox windowBox = WindowBoxFactory.getGenericWindowBox(dataName, functionName, IconManager.IconType.CHALKBOARD, false);
+        ProjectId projectId = (ProjectId) m_globalTableModelInterface.getSingleValue(ProjectId.class);
+        long id = (projectId!=null) ? projectId.getId() : -1l;
+        windowBox.setEntryData(id, m_globalTableModelInterface);
+        return windowBox;
     }
     
     public abstract boolean calculationDone();

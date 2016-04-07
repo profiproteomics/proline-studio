@@ -6,6 +6,7 @@ import fr.proline.studio.parameter.IntegerParameter;
 import fr.proline.studio.parameter.ObjectParameter;
 import fr.proline.studio.parameter.ParameterError;
 import fr.proline.studio.parameter.ParameterList;
+import fr.proline.studio.pattern.WindowBox;
 import fr.proline.studio.python.data.ColData;
 import fr.proline.studio.python.data.ColRef;
 import fr.proline.studio.python.data.Table;
@@ -188,6 +189,11 @@ public class AdjustPFunction extends AbstractFunction {
     @Override
     public void askDisplay(FunctionGraphNode functionGraphNode) {
         display(functionGraphNode.getPreviousDataName(), getName());
+    }
+    
+    @Override
+    public WindowBox getDisplayWindowBox(FunctionGraphNode functionGraphNode) {
+        return getDisplayWindowBox(functionGraphNode.getPreviousDataName(), getName());
     }
 
     @Override

@@ -240,7 +240,9 @@ public class CalibrationPlotGraphic extends AbstractGraphic {
 
     @Override
     public AbstractGraphic cloneGraphic(GraphPanel p) {
-        return new CalibrationPlotGraphic(p);
+        AbstractGraphic clone = new CalibrationPlotGraphic(p);
+        clone.cloneInfo(this);
+        return clone;
     }
 
     @Override

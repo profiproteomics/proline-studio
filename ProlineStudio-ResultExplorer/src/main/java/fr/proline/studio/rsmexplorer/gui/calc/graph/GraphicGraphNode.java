@@ -1,5 +1,6 @@
 package fr.proline.studio.rsmexplorer.gui.calc.graph;
 
+import fr.proline.studio.pattern.WindowBox;
 import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
 import fr.proline.studio.rsmexplorer.gui.calc.ProcessCallbackInterface;
 import fr.proline.studio.rsmexplorer.gui.calc.graphics.AbstractGraphic;
@@ -176,19 +177,15 @@ public class GraphicGraphNode extends GraphNode {
             return;
         }
 
-        try {
-            AbstractConnectedGraphObject[] graphObjectArray = new AbstractConnectedGraphObject[m_inConnectors.size()];
-            int i = 0;
-            for (GraphConnector connector : m_inConnectors) {
-                GraphNode graphNode = connector.getLinkedSourceGraphNode();
-                graphObjectArray[i++] = graphNode;
-            }
-
-            m_graphic.process(graphObjectArray, this, callback);
-
-        } finally {
-            callback.finished(this);
+        AbstractConnectedGraphObject[] graphObjectArray = new AbstractConnectedGraphObject[m_inConnectors.size()];
+        int i = 0;
+        for (GraphConnector connector : m_inConnectors) {
+            GraphNode graphNode = connector.getLinkedSourceGraphNode();
+            graphObjectArray[i++] = graphNode;
         }
+
+        m_graphic.process(graphObjectArray, this, callback);
+
     }
 
     @Override
@@ -202,7 +199,23 @@ public class GraphicGraphNode extends GraphNode {
 
         m_graphic.display(dataName);
     }
+    
+    @Override
+    public WindowBox getDisplayWindowBox() {
+        String dataName = "";
+        if (m_inConnectors.size()>0) {
+            GraphNode graphNode = m_inConnectors.get(0).getLinkedSourceGraphNode();
+            dataName = graphNode.getDataName();
+        }
 
+        return m_graphic.getDisplayWindowBox(dataName);
+    }
+
+    @Override
+    public boolean isAutoDisplayDuringProcess() {
+        return m_graphic.isAutoDisplayDuringProcess();
+    }
+    
     
     @Override
     public boolean settings() {

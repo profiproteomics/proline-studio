@@ -35,10 +35,17 @@ public abstract class AbstractGraphic implements CheckParameterInterface {
     private boolean m_inError = false;
     private String m_errorMessage = null;
     
+    private boolean m_autoDisplayDuringProcess = false;
+    
     protected GraphPanel m_panel;
+
     
     public AbstractGraphic(GraphPanel panel) {
         m_panel = panel;
+    }
+    
+    public void cloneInfo(AbstractGraphic src) {
+        m_autoDisplayDuringProcess = src.m_autoDisplayDuringProcess;
     }
 
     public void inLinkDeleted() {
@@ -60,6 +67,14 @@ public abstract class AbstractGraphic implements CheckParameterInterface {
     public abstract AbstractGraphic cloneGraphic(GraphPanel p);
     
 
+    
+    public void setAutoDisplayDuringProcess() {
+        m_autoDisplayDuringProcess = true;
+    }
+    
+    public boolean isAutoDisplayDuringProcess() {
+        return m_autoDisplayDuringProcess;
+    }
         
     public void display(String dataName) {
         String functionName = getName();
@@ -72,6 +87,15 @@ public abstract class AbstractGraphic implements CheckParameterInterface {
             DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(windowBox);
             win.open();
             win.requestActive();
+        }
+    }
+    
+    public  WindowBox getDisplayWindowBox(String dataName) {
+        String functionName = getName();
+        if (m_generatedImage != null) {
+            return WindowBoxFactory.getImageWindowBox(dataName+" "+functionName, m_generatedImage);
+        } else {
+            return WindowBoxFactory.getGraphicsWindowBox(dataName, m_graphicsModelInterface);
         }
     }
     

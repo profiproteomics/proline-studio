@@ -1,10 +1,10 @@
 package fr.proline.studio.rsmexplorer.gui.calc;
 
+import fr.proline.studio.gui.ClosableTabPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.pattern.WindowBox;
-import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphNode;
 import java.awt.BorderLayout;
 import java.awt.event.ActionListener;
 import java.util.HashMap;
@@ -19,9 +19,9 @@ public class DataAnalyzerResultsPanel extends JPanel implements DataBoxPanelInte
 
     private AbstractDataBox m_dataBox;
     
-    private JTabbedPane m_tabbedPane = new JTabbedPane(); 
+    private final JTabbedPane m_tabbedPane = new JTabbedPane(); 
     
-    private HashMap<Integer, WindowBox> m_processKeyToWindowBoxMap = new HashMap<>();
+    private final HashMap<Integer, WindowBox> m_processKeyToWindowBoxMap = new HashMap<>();
     
     public DataAnalyzerResultsPanel() {
         initComponents();
@@ -47,8 +47,11 @@ public class DataAnalyzerResultsPanel extends JPanel implements DataBoxPanelInte
         } else {
             m_processKeyToWindowBoxMap.put(processEngineKey, windowBox);
             String processName = processEngineInfo.getProcessName();
-            m_tabbedPane.addTab(processEngineKey+": "+processName, windowBox.getPanel());
-            m_tabbedPane.setSelectedIndex(m_tabbedPane.getTabCount()-1);
+            
+            m_tabbedPane.addTab(null, windowBox.getPanel());
+            ClosableTabPanel closableTabPanel = new ClosableTabPanel(m_tabbedPane, processEngineKey+": "+processName, processEngineKey.toString());
+            m_tabbedPane.setTabComponentAt(m_tabbedPane.getTabCount()-1, closableTabPanel);
+
         }
         
         

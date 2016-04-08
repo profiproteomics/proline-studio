@@ -1,5 +1,6 @@
 package fr.proline.studio.rsmexplorer.gui.calc.graph;
 
+import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.id.ProjectId;
 import fr.proline.studio.pattern.WindowBox;
 import fr.proline.studio.pattern.WindowBoxFactory;
@@ -141,8 +142,8 @@ public class DataGraphNode extends GraphNode {
     }
 
     @Override
-    public boolean isAutoDisplayDuringProcess() {
-        return false;
+    public SplittedPanelContainer.PanelLayout getAutoDisplayLayoutDuringProcess() {
+        return null;
     }
 
     

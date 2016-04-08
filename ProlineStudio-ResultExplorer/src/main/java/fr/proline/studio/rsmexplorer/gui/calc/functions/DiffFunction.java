@@ -69,8 +69,10 @@ public class DiffFunction extends AbstractFunction {
     }
     
     @Override
-    public AbstractFunction cloneFunction(GraphPanel panel) {
-        return new DiffFunction(panel);
+    public AbstractFunction cloneFunction(GraphPanel p) {
+        AbstractFunction clone = new DiffFunction(p);
+        clone.cloneInfo(this);
+        return clone;
     }
     
     @Override

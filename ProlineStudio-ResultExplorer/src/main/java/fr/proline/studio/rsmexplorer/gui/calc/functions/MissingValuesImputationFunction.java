@@ -40,7 +40,9 @@ public class MissingValuesImputationFunction extends AbstractOnExperienceDesignF
 
     @Override
     public AbstractFunction cloneFunction(GraphPanel p) {
-        return new MissingValuesImputationFunction(p);
+        AbstractFunction clone = new MissingValuesImputationFunction(p);
+        clone.cloneInfo(this);
+        return clone;
     }
     
     @Override

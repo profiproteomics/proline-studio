@@ -273,7 +273,9 @@ public class AdjustPFunction extends AbstractFunction {
 
     @Override
     public AbstractFunction cloneFunction(GraphPanel p) {
-        return new AdjustPFunction(p);
+        AbstractFunction clone = new AdjustPFunction(p);
+        clone.cloneInfo(this);
+        return clone;
     }
 
     @Override

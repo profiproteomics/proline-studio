@@ -61,8 +61,10 @@ public class FilterFunction extends AbstractFunction {
     }
 
     @Override
-    public AbstractFunction cloneFunction(GraphPanel panel) {
-        return new FilterFunction(panel);
+    public AbstractFunction cloneFunction(GraphPanel p) {
+        AbstractFunction clone = new FilterFunction(p);
+        clone.cloneInfo(this);
+        return clone;
     }
 
     @Override

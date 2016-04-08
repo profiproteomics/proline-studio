@@ -226,7 +226,9 @@ public class LogFunction  extends AbstractFunction {
 
     @Override
     public AbstractFunction cloneFunction(GraphPanel p) {
-        return new LogFunction(p, m_log10);
+        AbstractFunction clone = new LogFunction(p, m_log10);
+        clone.cloneInfo(this);
+        return clone;
     }
 
     @Override

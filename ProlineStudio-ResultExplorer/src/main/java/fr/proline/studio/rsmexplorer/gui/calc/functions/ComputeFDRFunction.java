@@ -9,6 +9,7 @@ import fr.proline.studio.parameter.ParameterList;
 import fr.proline.studio.pattern.WindowBox;
 import fr.proline.studio.python.data.ColRef;
 import fr.proline.studio.python.data.Table;
+import fr.proline.studio.python.data.ValuesTableModel;
 import fr.proline.studio.python.interpreter.CalcCallback;
 import fr.proline.studio.python.interpreter.CalcError;
 import fr.proline.studio.python.interpreter.CalcInterpreterTask;
@@ -59,7 +60,7 @@ public class ComputeFDRFunction extends AbstractFunction {
     private IntegerParameter m_nbinsParameter = null;
     private DoubleParameter m_pzParameter = null;
     
-    private Double m_fdrResult = null;
+    
     
     private ResultVariable m_fdrResultVariable = null;
     
@@ -70,7 +71,6 @@ public class ComputeFDRFunction extends AbstractFunction {
         @Override
     public void inLinkDeleted() {
         super.inLinkDeleted();
-        m_fdrResult = null;
         m_pValueColumnParameter = null;
         m_logFCColumnParameter = null;
         m_pvalueThresholdParameter = null;
@@ -124,7 +124,7 @@ public class ComputeFDRFunction extends AbstractFunction {
         }
         
         // check if we have already processed
-        if (m_fdrResult != null) {
+        if (m_globalTableModelInterface != null) {
             callback.finished(functionGraphNode);
             return;
         }
@@ -178,9 +178,13 @@ public class ComputeFDRFunction extends AbstractFunction {
                                 if (var.getName().compareTo("computedFDR") == 0) {
                                     // we have found the result
                                     PyFloat fdr = (PyFloat) var.getValue();
-                                    m_fdrResult = fdr.getValue();
+                                    ArrayList<String> valuesName = new ArrayList<>(1);
+                                    valuesName.add("FDR");
+                                    ArrayList<String> values = new ArrayList<>(1);
+                                    values.add(fdr.toString());
+                                    
+                                    m_globalTableModelInterface = new ValuesTableModel(valuesName, values);
 
-                                    //m_globalTableModelInterface = sourceTable.getModel();
                                 }
                             }
                         } else if (error != null) {
@@ -208,12 +212,12 @@ public class ComputeFDRFunction extends AbstractFunction {
     
     @Override
     public void askDisplay(FunctionGraphNode functionGraphNode) {
-        JOptionPane.showMessageDialog(m_panel, "FDR Value= "+m_fdrResult.toString(), "FDR", JOptionPane.INFORMATION_MESSAGE);
+        display(functionGraphNode.getPreviousDataName(), getName());
     }
     
     @Override
     public WindowBox getDisplayWindowBox(FunctionGraphNode functionGraphNode) {
-        return null; //JPM.TODO
+        return getDisplayWindowBox(functionGraphNode.getPreviousDataName(), getName());
     }
     
     
@@ -321,7 +325,9 @@ public class ComputeFDRFunction extends AbstractFunction {
     
     @Override
     public AbstractFunction cloneFunction(GraphPanel p) {
-        return new ComputeFDRFunction(p);
+        AbstractFunction clone = new ComputeFDRFunction(p);
+        clone.cloneInfo(this);
+        return clone;
     }
     
     /*
@@ -402,7 +408,7 @@ public class ComputeFDRFunction extends AbstractFunction {
     
     @Override
     public boolean calculationDone() {
-        if (m_fdrResult != null) {
+        if (m_globalTableModelInterface != null) {
             return true;
         }
         return false;
@@ -411,7 +417,7 @@ public class ComputeFDRFunction extends AbstractFunction {
     @Override
     public void userParametersChanged() {
         // need to recalculate model
-        m_fdrResult = null;
+        m_globalTableModelInterface = null;
     }
     
     @Override

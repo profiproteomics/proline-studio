@@ -113,8 +113,10 @@ public class ImportTSVFunction extends AbstractFunction {
     }
     
     @Override
-    public AbstractFunction cloneFunction(GraphPanel panel) {
-        return new ImportTSVFunction(panel);
+    public AbstractFunction cloneFunction(GraphPanel p) {
+        AbstractFunction clone = new ImportTSVFunction(p);
+        clone.cloneInfo(this);
+        return clone;
     }
     
     @Override

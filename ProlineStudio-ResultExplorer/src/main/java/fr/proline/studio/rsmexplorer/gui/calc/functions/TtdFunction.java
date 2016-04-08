@@ -25,7 +25,9 @@ public class TtdFunction extends AbstractOnExperienceDesignFunction {
     
     @Override
     public AbstractFunction cloneFunction(GraphPanel p) {
-        return new TtdFunction(p);
+        AbstractFunction clone = new TtdFunction(p);
+        clone.cloneInfo(this);
+        return clone;
     }
 
 }

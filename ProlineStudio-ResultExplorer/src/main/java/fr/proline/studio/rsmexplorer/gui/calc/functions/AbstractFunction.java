@@ -1,5 +1,6 @@
 package fr.proline.studio.rsmexplorer.gui.calc.functions;
 
+import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.id.ProjectId;
 import fr.proline.studio.parameter.ParameterList;
 import fr.proline.studio.pattern.WindowBox;
@@ -34,7 +35,7 @@ public abstract class AbstractFunction implements CheckParameterInterface {
     protected boolean m_settingsBeingDone = false;
     private String m_errorMessage = null;
     
-    private boolean m_autoDisplayDuringProcess = false;
+    private SplittedPanelContainer.PanelLayout m_autoDisplayLayoutDuringProcess = null;
     
     protected GraphPanel m_panel;
     
@@ -48,12 +49,12 @@ public abstract class AbstractFunction implements CheckParameterInterface {
 
     }
 
-    public void setAutoDisplayDuringProcess() {
-        m_autoDisplayDuringProcess = true;
+    public void setAutoDisplayLayoutDuringProcess(SplittedPanelContainer.PanelLayout layout) {
+        m_autoDisplayLayoutDuringProcess = layout;
     }
     
-    public boolean isAutoDisplayDuringProcess() {
-        return m_autoDisplayDuringProcess;
+    public SplittedPanelContainer.PanelLayout getAutoDisplayLayoutDuringProcess() {
+        return m_autoDisplayLayoutDuringProcess;
     }
     
     protected void setCalculating(boolean v) {
@@ -173,5 +174,8 @@ public abstract class AbstractFunction implements CheckParameterInterface {
         return null;
     }
     
+    public void cloneInfo(AbstractFunction src) {
+        m_autoDisplayLayoutDuringProcess = src.m_autoDisplayLayoutDuringProcess;
+    }
     
 }

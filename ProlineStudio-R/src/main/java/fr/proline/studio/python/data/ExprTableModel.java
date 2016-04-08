@@ -14,7 +14,6 @@ import fr.proline.studio.table.renderer.DefaultRightAlignRenderer;
 import fr.proline.studio.table.renderer.DoubleRenderer;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import javax.swing.event.TableModelEvent;

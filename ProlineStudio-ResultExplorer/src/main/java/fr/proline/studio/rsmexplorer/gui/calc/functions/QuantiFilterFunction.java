@@ -39,7 +39,9 @@ public class QuantiFilterFunction extends AbstractOnExperienceDesignFunction {
 
     @Override
     public AbstractFunction cloneFunction(GraphPanel p) {
-        return new QuantiFilterFunction(p);
+        AbstractFunction clone = new QuantiFilterFunction(p);
+        clone.cloneInfo(this);
+        return clone;
     }
     
     @Override

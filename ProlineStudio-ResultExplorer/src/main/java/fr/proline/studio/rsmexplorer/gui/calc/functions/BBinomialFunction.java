@@ -27,7 +27,9 @@ public class BBinomialFunction extends AbstractOnExperienceDesignFunction {
     
     @Override
     public AbstractFunction cloneFunction(GraphPanel p) {
-        return new BBinomialFunction(p);
+        AbstractFunction clone = new BBinomialFunction(p);
+        clone.cloneInfo(this);
+        return clone;
     }
 
 

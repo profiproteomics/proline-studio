@@ -1,5 +1,6 @@
 package fr.proline.studio.rsmexplorer.gui.calc;
 
+import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.python.data.TableInfo;
 import fr.proline.studio.rsmexplorer.gui.calc.functions.AbstractFunction;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.AbstractConnectedGraphObject;
@@ -63,8 +64,8 @@ public class GraphPanel extends JPanel implements MouseListener, MouseMotionList
         m_dataAnalyzerPanel = dataAnalyzerPanel;
     }
     
-    public void displayBelow(GraphNode node, boolean newTab, String name) {
-        m_dataAnalyzerPanel.displayBelow(node, newTab, name);
+    public void displayBelow(GraphNode node, boolean newTab, String name, SplittedPanelContainer.PanelLayout layout) {
+        m_dataAnalyzerPanel.displayBelow(node, newTab, name, layout);
     }
     
     @Override

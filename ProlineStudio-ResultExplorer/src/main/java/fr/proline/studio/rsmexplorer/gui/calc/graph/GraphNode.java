@@ -1,6 +1,7 @@
 package fr.proline.studio.rsmexplorer.gui.calc.graph;
 
 import fr.proline.studio.gui.InfoDialog;
+import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.pattern.WindowBox;
 import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
 import fr.proline.studio.rsmexplorer.gui.calc.ProcessCallbackInterface;
@@ -202,7 +203,7 @@ public abstract class GraphNode extends AbstractConnectedGraphObject {
 
     public abstract void askDisplay();
     public abstract WindowBox getDisplayWindowBox();
-    public abstract boolean isAutoDisplayDuringProcess();
+    public abstract SplittedPanelContainer.PanelLayout getAutoDisplayLayoutDuringProcess();
     public abstract boolean settings();
 
         
@@ -420,7 +421,7 @@ public abstract class GraphNode extends AbstractConnectedGraphObject {
         @Override
         public void actionPerformed(ActionEvent e) {
 
-             m_graphPanel.displayBelow(m_graphNode, true, m_graphNode.getFullName());
+             m_graphPanel.displayBelow(m_graphNode, true, m_graphNode.getFullName(), null);
         }
     }
     

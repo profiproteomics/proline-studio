@@ -1,5 +1,6 @@
 package fr.proline.studio.rsmexplorer.gui.calc.graphics;
 
+import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.parameter.ParameterList;
 import fr.proline.studio.pattern.WindowBox;
 import fr.proline.studio.pattern.WindowBoxFactory;
@@ -35,7 +36,7 @@ public abstract class AbstractGraphic implements CheckParameterInterface {
     private boolean m_inError = false;
     private String m_errorMessage = null;
     
-    private boolean m_autoDisplayDuringProcess = false;
+    private SplittedPanelContainer.PanelLayout m_autoDisplayLayoutDuringProcess = null;
     
     protected GraphPanel m_panel;
 
@@ -45,7 +46,7 @@ public abstract class AbstractGraphic implements CheckParameterInterface {
     }
     
     public void cloneInfo(AbstractGraphic src) {
-        m_autoDisplayDuringProcess = src.m_autoDisplayDuringProcess;
+        m_autoDisplayLayoutDuringProcess = src.m_autoDisplayLayoutDuringProcess;
     }
 
     public void inLinkDeleted() {
@@ -68,12 +69,12 @@ public abstract class AbstractGraphic implements CheckParameterInterface {
     
 
     
-    public void setAutoDisplayDuringProcess() {
-        m_autoDisplayDuringProcess = true;
+    public void setAutoDisplayLayoutDuringProcess(SplittedPanelContainer.PanelLayout layout) {
+        m_autoDisplayLayoutDuringProcess = layout;
     }
     
-    public boolean isAutoDisplayDuringProcess() {
-        return m_autoDisplayDuringProcess;
+    public SplittedPanelContainer.PanelLayout getAutoDisplayLayoutDuringProcess() {
+        return m_autoDisplayLayoutDuringProcess;
     }
         
     public void display(String dataName) {

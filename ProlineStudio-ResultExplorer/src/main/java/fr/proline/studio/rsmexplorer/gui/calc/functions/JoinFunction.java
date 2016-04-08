@@ -72,8 +72,10 @@ public class JoinFunction extends AbstractFunction {
     
 
     @Override
-    public AbstractFunction cloneFunction(GraphPanel panel) {
-        return new JoinFunction(panel);
+    public AbstractFunction cloneFunction(GraphPanel p) {
+        AbstractFunction clone = new JoinFunction(p);
+        clone.cloneInfo(this);
+        return clone;
     }
 
     @Override

@@ -1,5 +1,6 @@
 package fr.proline.studio.rsmexplorer.gui.calc.macros;
 
+import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.rsmexplorer.gui.calc.DataTree;
 import fr.proline.studio.rsmexplorer.gui.calc.functions.ComputeFDRFunction;
 import fr.proline.studio.rsmexplorer.gui.calc.functions.DiffAnalysisFunction;
@@ -27,12 +28,14 @@ public class ProStarMacro extends AbstractMacro {
         addNode(new DataTree.FunctionNode(new MissingValuesImputationFunction(null)), 4, 0); addLink(3,0,4,0);
         addNode(new DataTree.FunctionNode(new DiffAnalysisFunction(null)), 5, 0); addLink(4,0,5,0);
         
-        CalibrationPlotGraphic cpg = new CalibrationPlotGraphic(null); cpg.setAutoDisplayDuringProcess();
+        CalibrationPlotGraphic cpg = new CalibrationPlotGraphic(null); cpg.setAutoDisplayLayoutDuringProcess(SplittedPanelContainer.PanelLayout.VERTICAL);
         addNode(new DataTree.GraphicNode(cpg), 6, 0); addLink(5,0,6,0);
         
-        ScatterGraphic sg = new ScatterGraphic(null); sg.setAutoDisplayDuringProcess();
+        ScatterGraphic sg = new ScatterGraphic(null); sg.setAutoDisplayLayoutDuringProcess(SplittedPanelContainer.PanelLayout.HORIZONTAL);
         addNode(new DataTree.GraphicNode(sg), 6, 1); addLink(5,0,6,1);
-        addNode(new DataTree.FunctionNode(new ComputeFDRFunction(null)), 6, 2); addLink(5,0,6,2);
+        
+        ComputeFDRFunction FDRFunction = new ComputeFDRFunction(null); FDRFunction.setAutoDisplayLayoutDuringProcess(SplittedPanelContainer.PanelLayout.VERTICAL);
+        addNode(new DataTree.FunctionNode(FDRFunction), 6, 2); addLink(5,0,6,2);
 
         
     }

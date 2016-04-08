@@ -25,7 +25,9 @@ public class PValueFunction extends AbstractOnExperienceDesignFunction {
 
     @Override
     public AbstractFunction cloneFunction(GraphPanel p) {
-        return new PValueFunction(p);
+        AbstractFunction clone = new PValueFunction(p);
+        clone.cloneInfo(this);
+        return clone;
     }
 
 

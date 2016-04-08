@@ -41,7 +41,9 @@ public class DiffAnalysisFunction extends AbstractOnExperienceDesignFunction {
 
     @Override
     public AbstractFunction cloneFunction(GraphPanel p) {
-        return new DiffAnalysisFunction(p);
+        AbstractFunction clone = new DiffAnalysisFunction(p);
+        clone.cloneInfo(this);
+        return clone;
     }
     
     @Override

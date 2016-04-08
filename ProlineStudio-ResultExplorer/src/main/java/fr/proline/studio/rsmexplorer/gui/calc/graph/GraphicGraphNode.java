@@ -1,5 +1,6 @@
 package fr.proline.studio.rsmexplorer.gui.calc.graph;
 
+import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.pattern.WindowBox;
 import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
 import fr.proline.studio.rsmexplorer.gui.calc.ProcessCallbackInterface;
@@ -212,8 +213,8 @@ public class GraphicGraphNode extends GraphNode {
     }
 
     @Override
-    public boolean isAutoDisplayDuringProcess() {
-        return m_graphic.isAutoDisplayDuringProcess();
+    public SplittedPanelContainer.PanelLayout getAutoDisplayLayoutDuringProcess() {
+        return m_graphic.getAutoDisplayLayoutDuringProcess();
     }
     
     

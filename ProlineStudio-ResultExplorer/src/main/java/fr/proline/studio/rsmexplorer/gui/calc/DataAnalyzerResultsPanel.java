@@ -43,7 +43,7 @@ public class DataAnalyzerResultsPanel extends JPanel implements DataBoxPanelInte
         Integer processEngineKey = processEngineInfo.getProcessKey();
         WindowBox existingWindowBox = m_processKeyToWindowBoxMap.get(processEngineKey);
         if (existingWindowBox != null) {
-            existingWindowBox.addDatabox(windowBox.getEntryBox());
+            existingWindowBox.addDatabox(windowBox.getEntryBox(), processEngineInfo.getLayout());
         } else {
             m_processKeyToWindowBoxMap.put(processEngineKey, windowBox);
             String processName = processEngineInfo.getProcessName();

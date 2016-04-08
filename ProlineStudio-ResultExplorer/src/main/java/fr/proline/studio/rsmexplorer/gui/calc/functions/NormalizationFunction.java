@@ -50,7 +50,9 @@ public class NormalizationFunction extends AbstractOnExperienceDesignFunction {
 
     @Override
     public AbstractFunction cloneFunction(GraphPanel p) {
-        return new NormalizationFunction(p);
+        AbstractFunction clone = new NormalizationFunction(p);
+        clone.cloneInfo(this);
+        return clone;
     }
     
     @Override

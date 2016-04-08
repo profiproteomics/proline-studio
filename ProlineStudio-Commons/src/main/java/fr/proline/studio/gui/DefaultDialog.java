@@ -109,6 +109,11 @@ public class DefaultDialog extends javax.swing.JDialog {
         m_imageInfoPanel.setImageInfo(sourcePanel, x, y, width, height);
     }
     
+    public void hideInfoPanel() {
+        m_imageInfoPanel.setVisible(false);
+        revalidate();
+    }
+    
     @Override
     public void setVisible(boolean v) {
         pack();

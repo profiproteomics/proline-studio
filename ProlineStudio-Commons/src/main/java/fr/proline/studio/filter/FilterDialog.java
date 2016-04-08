@@ -23,7 +23,7 @@ public class FilterDialog extends DefaultDialog {
         if (m_singletonDialog == null) {
             m_singletonDialog = new FilterDialog(parent);
         }
-
+        m_singletonDialog.hideInfoPanel();
         return m_singletonDialog;
     }
 

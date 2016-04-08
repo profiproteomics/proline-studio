@@ -51,7 +51,7 @@ public class DataAnalyzerResultsPanel extends JPanel implements DataBoxPanelInte
             m_tabbedPane.addTab(null, windowBox.getPanel());
             ClosableTabPanel closableTabPanel = new ClosableTabPanel(m_tabbedPane, processEngineKey+": "+processName, processEngineKey.toString());
             m_tabbedPane.setTabComponentAt(m_tabbedPane.getTabCount()-1, closableTabPanel);
-
+            m_tabbedPane.setSelectedIndex(m_tabbedPane.getTabCount()-1);
         }
         
         

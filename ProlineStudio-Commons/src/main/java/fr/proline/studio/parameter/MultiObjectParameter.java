@@ -21,6 +21,7 @@ public class MultiObjectParameter<E> extends AbstractParameter {
     private boolean[] m_defaultSelection = null;
     private AbstractParameterToString<E> m_paramToString = null;
 
+    private boolean m_mustSelectOneObject = true;
 
     public MultiObjectParameter(String key, String name, E[] objects, boolean[] selection, AbstractParameterToString<E> paramToString) {
         super(key, name, Integer.class, JCheckBoxList.class);
@@ -42,6 +43,10 @@ public class MultiObjectParameter<E> extends AbstractParameter {
         m_associatedObjects = associatedObjects;
         //checkBoxList.setCellRenderer(new ParameterComboboxRenderer(paramToString));
 
+    }
+    
+    public void setNoSelectionAllowed() {
+        m_mustSelectOneObject = false;
     }
     
     @Override
@@ -115,7 +120,7 @@ public class MultiObjectParameter<E> extends AbstractParameter {
         if (m_graphicalType.equals(JCheckBoxList.class)) {
             
             List selectedList = ((JCheckBoxList) m_parameterComponent).getSelectedItems();
-            if (selectedList.isEmpty()) {
+            if ((m_mustSelectOneObject) && (selectedList.isEmpty())) {
                 return new ParameterError("No selection done", m_parameterComponent);
             }
 

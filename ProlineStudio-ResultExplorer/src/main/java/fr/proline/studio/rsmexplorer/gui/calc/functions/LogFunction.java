@@ -6,6 +6,7 @@ import fr.proline.studio.parameter.ParameterError;
 import fr.proline.studio.parameter.ParameterList;
 import fr.proline.studio.pattern.WindowBox;
 import fr.proline.studio.python.data.ColRef;
+import fr.proline.studio.python.data.ExprTableModel;
 import fr.proline.studio.python.data.Table;
 import fr.proline.studio.python.interpreter.CalcCallback;
 import fr.proline.studio.python.interpreter.CalcError;
@@ -28,7 +29,7 @@ public class LogFunction  extends AbstractFunction {
     private static final String SEL_COL1 = "SEL_COL1";
 
     
-    private MultiObjectParameter m_columnsParameter1 = null;
+    private MultiObjectParameter m_columnsParameter = null;
 
     private final boolean m_log10;
     
@@ -41,7 +42,7 @@ public class LogFunction  extends AbstractFunction {
     @Override
     public void inLinkDeleted() {
         super.inLinkDeleted();
-        m_columnsParameter1 = null;
+        m_columnsParameter = null;
     }
     
     @Override
@@ -63,8 +64,8 @@ public class LogFunction  extends AbstractFunction {
             return;
         }
 
-        ArrayList colList = (ArrayList) m_columnsParameter1.getAssociatedValues(true);
-        if ((colList == null) || (colList.isEmpty())) {
+        ArrayList colList = (ArrayList) m_columnsParameter.getAssociatedValues(true);
+        if (colList == null) {
             callback.finished(functionGraphNode);
             return;
         }
@@ -76,6 +77,13 @@ public class LogFunction  extends AbstractFunction {
             return;
         }
 
+        if (colList.isEmpty()) {
+            // no real calculation to do
+            m_globalTableModelInterface = new ExprTableModel(graphObjects[0].getGlobalTableModelInterface());
+            callback.finished(functionGraphNode);
+            return;
+        }
+        
         setCalculating(true);
    
         try {
@@ -199,13 +207,14 @@ public class LogFunction  extends AbstractFunction {
 
         ParameterList parameterList1 = new ParameterList("param1");
         
-        m_columnsParameter1 = new MultiObjectParameter(SEL_COL1, "Columns to log", null, objectArray1, associatedObjectArray1, null, null);
+        m_columnsParameter = new MultiObjectParameter(SEL_COL1, "Columns to log", null, objectArray1, associatedObjectArray1, null, null);
+        m_columnsParameter.setNoSelectionAllowed();
 
 
         m_parameters = new ParameterList[1];
         m_parameters[0] = parameterList1;
 
-        parameterList1.add(m_columnsParameter1);
+        parameterList1.add(m_columnsParameter);
 
     }
 
@@ -235,12 +244,12 @@ public class LogFunction  extends AbstractFunction {
             return false;
         }
         
-        if (m_columnsParameter1 == null) {
+        if (m_columnsParameter == null) {
             return false;
         }
         
-        ArrayList colList = (ArrayList) m_columnsParameter1.getAssociatedValues(true);
-        if ((colList == null) || (colList.isEmpty())) {
+        ArrayList colList = (ArrayList) m_columnsParameter.getAssociatedValues(true);
+        if (colList == null) {
             return false;
         }
 

@@ -6,6 +6,7 @@ import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphNode;
 import java.util.LinkedList;
 import javax.swing.JButton;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 
 /**
  *
@@ -138,8 +139,16 @@ public class ProcessEngine implements ProcessCallbackInterface {
         }
         
         if (! m_processingNodeList.isEmpty()) {
-            GraphNode firstNode = m_processingNodeList.pollFirst();
-            process(firstNode);
+            // invoke Later to let time to correctly do the result display needed
+            final GraphNode firstNode = m_processingNodeList.pollFirst();
+            SwingUtilities.invokeLater(new Runnable() {
+
+                @Override
+                public void run() {
+                    process(firstNode);
+                }
+            });
+            
         } else {
             // processing is finished
             if (m_playButton!= null) {

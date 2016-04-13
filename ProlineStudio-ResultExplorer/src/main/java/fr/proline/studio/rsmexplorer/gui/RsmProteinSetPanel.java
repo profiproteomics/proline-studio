@@ -87,7 +87,7 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
         if (rsm != null) {
 
             if (m_firstPanel) {
-                m_decoyButton.setEnabled(rsm.getDecotResultSummary() != null);
+                m_decoyButton.setEnabled(rsm.getDecoyResultSummary() != null);
             }
             ResultSet.Type rsType = rsm.getResultSet().getType();
             mergedData = (rsType == ResultSet.Type.USER) || (rsType == ResultSet.Type.DECOY_USER); // Merge or Decoy Merge
@@ -270,7 +270,7 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
                 public void actionPerformed(ActionEvent e) {
 
                     ResultSummary rsm = (ResultSummary) m_dataBox.getData(false, ResultSummary.class);
-                    ResultSummary decoyRsm = rsm.getDecotResultSummary();
+                    ResultSummary decoyRsm = rsm.getDecoyResultSummary();
                     if (decoyRsm == null) {
                         return;
                     }

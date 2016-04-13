@@ -111,7 +111,7 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
             if (m_forRSM) {
                 ResultSummary rsm = (ResultSummary) m_dataBox.getData(false, ResultSummary.class);
                 if (rsm != null) {
-                    m_decoyButton.setEnabled(rsm.getDecotResultSummary() != null);
+                    m_decoyButton.setEnabled(rsm.getDecoyResultSummary() != null);
                 }
             } else {
                 ResultSet rset = (ResultSet) m_dataBox.getData(false, ResultSet.class);
@@ -241,7 +241,7 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
                     WindowBox wbox;
                     if (m_forRSM) {
                         ResultSummary rsm = (ResultSummary) m_dataBox.getData(false, ResultSummary.class);
-                        ResultSummary decoyRsm = rsm.getDecotResultSummary();
+                        ResultSummary decoyRsm = rsm.getDecoyResultSummary();
                         if (decoyRsm == null) {
                             return;
                         }

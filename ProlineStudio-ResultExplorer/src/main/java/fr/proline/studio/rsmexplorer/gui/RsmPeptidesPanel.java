@@ -132,7 +132,7 @@ public class RsmPeptidesPanel extends HourglassPanel implements DataBoxPanelInte
             public void actionPerformed(ActionEvent e) {
 
                 ResultSummary rsm = (ResultSummary) m_dataBox.getData(false, ResultSummary.class);
-                ResultSummary decoyRsm = rsm.getDecotResultSummary();
+                ResultSummary decoyRsm = rsm.getDecoyResultSummary();
                 if (decoyRsm == null) {
                     return;
                 }
@@ -312,7 +312,7 @@ public class RsmPeptidesPanel extends HourglassPanel implements DataBoxPanelInte
 
         ResultSummary rsm = (ResultSummary) m_dataBox.getData(false, ResultSummary.class);
         if (rsm != null) {
-            m_decoyButton.setEnabled(rsm.getDecotResultSummary() != null);
+            m_decoyButton.setEnabled(rsm.getDecoyResultSummary() != null);
         }
 
         ((PeptideInstanceTableModel) ((CompoundTableModel) m_peptideInstanceTable.getModel()).getBaseModel()).setData(taskId, peptideInstances);

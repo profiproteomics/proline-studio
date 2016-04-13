@@ -38,7 +38,6 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
     private int action;
     private static final int LOAD_PROTEIN_SET_FOR_RSM = 0;
     private static final int LOAD_PROTEIN_SET_FOR_PEPTIDE_INSTANCE = 1;
-    private static final int LOAD_PROTEIN_SET_NUMBER = 2;
     
     private long m_projectId = -1;
     private ResultSummary m_rsm = null;
@@ -63,12 +62,6 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
         action = LOAD_PROTEIN_SET_FOR_RSM;
     }
     
-    public void initCountProteinSets(DDataset dataset) {
-        init(SUB_TASK_COUNT, new TaskInfo("Count Number of Protein Sets of Identification Summary "+dataset.getName(), false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_LOW));
-        m_dataset = dataset;
-        action = LOAD_PROTEIN_SET_NUMBER;
-    }
-
     public void initLoadProteinSetForPeptideInstance(long projectId, PeptideInstance peptideInstance) {        
         init(SUB_TASK_COUNT, new TaskInfo("Load Protein Sets for Peptide Instance "+peptideInstance.getId(), false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_LOW));
         m_projectId = projectId;
@@ -89,9 +82,6 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
             case LOAD_PROTEIN_SET_FOR_PEPTIDE_INSTANCE:
                 m_peptideInstance.getTransientData().setProteinSetArray(null);
                 break;
-            case LOAD_PROTEIN_SET_NUMBER:
-                m_rsm.getTransientData().setNumberOfProteinSet(null);
-                break;
         }
     }
     
@@ -102,9 +92,6 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
                 return (m_rsm.getTransientData().getProteinSetArray() == null);
             case LOAD_PROTEIN_SET_FOR_PEPTIDE_INSTANCE:
                 return (m_peptideInstance.getTransientData().getProteinSetArray() == null);
-            case LOAD_PROTEIN_SET_NUMBER:
-                m_rsm = m_dataset.getResultSummary();
-                return (m_rsm.getTransientData().getNumberOfProteinSet() == null);
         }
         return false; // should not happen
     }
@@ -127,9 +114,7 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
             } else {
                 return fetchDataSubTaskFor();
             }
-        } else if (action == LOAD_PROTEIN_SET_NUMBER) {
-            return fetchDataMainTaskForPSetNumber();
-        }
+        } 
         return true; // should not happen
     }
 
@@ -248,46 +233,6 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
 
         return true;
     }
-
-
-    
-    private boolean fetchDataMainTaskForPSetNumber() {
-        
-        
-        m_projectId = m_dataset.getProject().getId();
-        
-        EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(m_projectId).createEntityManager();
-        try {
-
-            entityManagerMSI.getTransaction().begin();
-
-            Long rsmId = m_rsm.getId();
-
-            // Count Protein Sets
-            TypedQuery<Long> countProteinSetsQuery = entityManagerMSI.createQuery("SELECT count(ps) FROM ProteinSet ps WHERE ps.resultSummary.id=:rsmId AND ps.isValidated=true", Long.class);
-            countProteinSetsQuery.setParameter("rsmId", rsmId);
-            Long proteinSetNumber = countProteinSetsQuery.getSingleResult();
-
-            m_rsm.getTransientData().setNumberOfProteinSet(Integer.valueOf(proteinSetNumber.intValue()));
-            
-            entityManagerMSI.getTransaction().commit();
-        } catch (Exception e) {
-            m_logger.error(getClass().getSimpleName()+" failed", e);
-            m_taskError = new TaskError(e);
-            try {
-                entityManagerMSI.getTransaction().rollback();
-            } catch (Exception rollbackException) {
-                m_logger.error(getClass().getSimpleName() + " failed : potential network problem", rollbackException);
-            }
-            return false;
-        } finally {
-            entityManagerMSI.close();
-        }
-
-
-        return true;
-    }
-    
     
     private boolean fetchDataMainTaskForPeptideInstance() {
         EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(m_projectId).createEntityManager();

@@ -949,15 +949,15 @@ public class PropertiesTableModel extends DecoratedTableModel implements GlobalT
             if (rsm == null) {
                 return "";
             }
-            ResultSummary rsmDecoy = rsm.getDecotResultSummary();
+            ResultSummary rsmDecoy = rsm.getDecoyResultSummary();
 
             switch (rowIndex) {
                 case ROWTYPE_PROTEINSET_NUMBER:
                     return String.valueOf(rsm.getTransientData().getNumberOfProteinSet());
                 case ROWTYPE_PSM_NUMBER:
-                    return "NA";
+                    return String.valueOf(rsm.getTransientData().getNumberOfPeptideMatches());
                 case ROWTYPE_PEPTIDE_NUMBER:
-                    return "NA";
+                    return String.valueOf(rsm.getTransientData().getNumberOfPeptides());
                 case ROWTYPE_PROTEIN_NUMBER:
                     return "NA";
                 case ROWTYPE_PROTEINSET_DECOY_NUMBER:
@@ -970,9 +970,15 @@ public class PropertiesTableModel extends DecoratedTableModel implements GlobalT
                     }
                     return String.valueOf(number);
                 case ROWTYPE_PSM_DECOY_NUMBER:
-                    return "NA";
+                    if (rsmDecoy == null) {
+                        return "";
+                    }
+                    return String.valueOf(rsmDecoy.getTransientData().getNumberOfPeptideMatches());
                 case ROWTYPE_PEPTIDE_DECOY_NUMBER:
-                    return "NA";
+                    if (rsmDecoy == null) {
+                        return "";
+                    }
+                    return String.valueOf(rsmDecoy.getTransientData().getNumberOfPeptides());
                 case ROWTYPE_PROTEIN_DECOY_NUMBER:
                     return "NA";
                 default: {

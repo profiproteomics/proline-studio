@@ -261,8 +261,6 @@ public class DataSetNode extends AbstractNode {
         // we must load resultSet and resultSummary
         final DDataset dataSet = ((DataSetData) getData()).getDataset();
         
-
-        
         AbstractDatabaseCallback dbCallback = new AbstractDatabaseCallback() {
 
             @Override
@@ -307,10 +305,8 @@ public class DataSetNode extends AbstractNode {
 
                 // Task 3 : Count number of Protein Sets for Rsm
                 if (dataSet.getResultSummaryId() != null) {
-                    DatabaseProteinSetsTask task3 = new DatabaseProteinSetsTask(dbCallback);
-                    task3.initCountProteinSets(dataSet);
+                    DatabaseRsummaryProperties task3 = new DatabaseRsummaryProperties(dbCallback, dataSet.getProject().getId(), dataSet);
                     task3.setPriority(Priority.HIGH_3); // highest priority
-
                     task2.setConsecutiveTask(task3);
                 }
             }

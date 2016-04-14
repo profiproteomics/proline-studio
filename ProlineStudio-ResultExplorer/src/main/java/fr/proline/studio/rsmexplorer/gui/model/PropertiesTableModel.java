@@ -745,13 +745,12 @@ public class PropertiesTableModel extends DecoratedTableModel implements GlobalT
         private static final int ROWTYPE_PSM_NUMBER = 1;
         private static final int ROWTYPE_PEPTIDE_NUMBER = 2;
         private static final int ROWTYPE_PROTEIN_NUMBER = 3;
-        private static final int ROWTYPE_DECOY_QUERIES_NUMBER = 4;
-        private static final int ROWTYPE_DECOY_PSM_NUMBER = 5;
-        private static final int ROWTYPE_DECOY_PEPTIDE_NUMBER = 6;
-        private static final int ROWTYPE_DECOY_PROTEIN_NUMBER = 7;
+        private static final int ROWTYPE_DECOY_PSM_NUMBER = 4;
+        private static final int ROWTYPE_DECOY_PEPTIDE_NUMBER = 5;
+        private static final int ROWTYPE_DECOY_PROTEIN_NUMBER = 6;
 
         
-        private static final int ROW_COUNT = 8; // get in sync
+        private static final int ROW_COUNT = 7; // get in sync
         private final Color GROUP_COLOR_BACKGROUND = new Color(76,166,107);
         
         public SearchResultInformationGroup(int rowStart) {
@@ -769,8 +768,6 @@ public class PropertiesTableModel extends DecoratedTableModel implements GlobalT
                     return "Peptide Number";
                 case ROWTYPE_PROTEIN_NUMBER:
                     return "Protein Number";
-                case ROWTYPE_DECOY_QUERIES_NUMBER:
-                    return "Queries Decoy Number";
                 case ROWTYPE_DECOY_PSM_NUMBER:
                     return "PSM Decoy Number";
                 case ROWTYPE_DECOY_PEPTIDE_NUMBER:
@@ -788,14 +785,18 @@ public class PropertiesTableModel extends DecoratedTableModel implements GlobalT
 
             ResultSet rset = m_rsetArray.get(columnIndex);
             ResultSet rsetDecoy = (rset==null) ? null : rset.getDecoyResultSet();
-
+            MsiSearch msiSearch = (rset==null) ? null : rset.getMsiSearch();
+            
             if (rset == null) {
                 return "";
             }
 
             switch (rowIndex) {
                 case ROWTYPE_QUERIES_NUMBER:
-                    return "NA";
+                    if (msiSearch == null) {
+                        return "";
+                    }
+                    return String.valueOf(msiSearch.getQueriesCount());
                 case ROWTYPE_PSM_NUMBER: {
                     Object data = rset.getTransientData().getPeptideMatchesCount();
                     if (data == null) {
@@ -812,8 +813,6 @@ public class PropertiesTableModel extends DecoratedTableModel implements GlobalT
                     }
                     return data.toString();
                 }
-                case ROWTYPE_DECOY_QUERIES_NUMBER:
-                    return "NA";
                 case ROWTYPE_DECOY_PSM_NUMBER: {
                     if (rsetDecoy == null) {
                         return "";

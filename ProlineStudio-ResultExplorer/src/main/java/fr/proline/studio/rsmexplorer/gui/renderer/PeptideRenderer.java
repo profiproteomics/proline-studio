@@ -42,9 +42,7 @@ public class PeptideRenderer extends DefaultTableCellRenderer implements ExportT
     private String constructPeptideDisplay(DPeptideMatch peptideMatch) {
 
         Peptide peptide = peptideMatch.getPeptide();
-        SequenceMatch sequenceMatch = peptideMatch.getSequenceMatch();
-
-        if (sequenceMatch != null) {
+        if (peptide.getTransientData() != null) {
 
             
             

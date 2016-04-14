@@ -239,30 +239,14 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseSlicerTas
             int nbPeptides = peptideInstanceList.size();
             PeptideInstance[] peptideInstances = peptideInstanceList.toArray(new PeptideInstance[nbPeptides]);
             m_rsm.getTransientData().setPeptideInstanceArray(peptideInstances);
-
             
-            // Retrieve PeptideReadablePtmString
-            Long rsetId = m_rsm.getResultSet().getId();
-            Query ptmStingQuery = entityManagerMSI.createQuery("SELECT p.id, ptmString FROM fr.proline.core.orm.msi.Peptide p, fr.proline.core.orm.msi.PeptideReadablePtmString ptmString WHERE p.id IN (:listId) AND ptmString.peptide=p AND ptmString.resultSet.id=:rsetId");
-            ptmStingQuery.setParameter("listId", peptideMap.keySet());
-            ptmStingQuery.setParameter("rsetId", rsetId);
-
-            List<Object[]> ptmStrings = ptmStingQuery.getResultList();
-            Iterator<Object[]> it = ptmStrings.iterator();
-            while (it.hasNext()) {
-                Object[] res = it.next();
-                Long peptideId = (Long) res[0];
-                PeptideReadablePtmString ptmString = (PeptideReadablePtmString) res[1];
-                Peptide peptide = peptideMap.get(peptideId);
-                peptide.getTransientData().setPeptideReadablePtmString(ptmString);
-            }
+            fetchReadablePtmData(entityManagerMSI, m_rsm.getResultSet().getId(), peptideMap);
 
             // slice the task and get the first one
             SubTask subTask = m_subTaskManager.sliceATaskAndGetFirst( SUB_TASK_PROTEINSET_NAME_LIST, nbPeptides, SLICE_SIZE );
 
             // execute the first slice now
             fetchProteinSetName(entityManagerMSI, subTask);
-            
             
             // slice the task and get the first one
             subTask = m_subTaskManager.sliceATaskAndGetFirst( SUB_TASK_MSQUERY, nbPeptides, SLICE_SIZE );
@@ -385,29 +369,12 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseSlicerTas
             entityManagerMSI.close();
         }
         
- 
-        
-        if (!peptideMap.isEmpty()) {
-            EntityManager entityManagerPS = DataStoreConnectorFactory.getInstance().getPsDbConnector().createEntityManager();  
-            try {
-
-                entityManagerPS.getTransaction().begin();
-
-                fetchPtmData(entityManagerPS, peptideMap);
-
-                entityManagerPS.getTransaction().commit();
-            } catch (Exception e) {
-                m_logger.error(getClass().getSimpleName() + " failed", e);
-                m_taskError = new TaskError(e);
-                try {
-                    entityManagerPS.getTransaction().rollback();
-                } catch (Exception rollbackException) {
-                    m_logger.error(getClass().getSimpleName() + " failed : potential network problem", rollbackException);
-                }
-                return false;
-            } finally {
-                entityManagerPS.close();
-            }
+        try {
+            fetchPtmDataFromPSdb(peptideMap);
+        } catch (Exception e) {
+            m_logger.error(getClass().getSimpleName() + " failed", e);
+            m_taskError = new TaskError(e);
+            return false;
         }
         
         return true;
@@ -488,21 +455,7 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseSlicerTas
             peptideInstanceList.add(dpi);
         }
 
-        // Retrieve PeptideReadablePtmString
-        Long rsetId = rsm.getResultSet().getId();
-        Query ptmStingQuery = entityManagerMSI.createQuery("SELECT p.id, ptmString FROM fr.proline.core.orm.msi.Peptide p, fr.proline.core.orm.msi.PeptideReadablePtmString ptmString WHERE p.id IN (:listId) AND ptmString.peptide=p AND ptmString.resultSet.id=:rsetId");
-        ptmStingQuery.setParameter("listId", peptideMapForPtm.keySet());
-        ptmStingQuery.setParameter("rsetId", rsetId);
-
-        List<Object[]> ptmStrings = ptmStingQuery.getResultList();
-        Iterator<Object[]> it = ptmStrings.iterator();
-        while (it.hasNext()) {
-            Object[] res = it.next();
-            Long peptideId = (Long) res[0];
-            PeptideReadablePtmString ptmString = (PeptideReadablePtmString) res[1];
-            Peptide peptide = peptideMapForPtm.get(peptideId);
-            peptide.getTransientData().setPeptideReadablePtmString(ptmString);
-        }
+        fetchReadablePtmData(entityManagerMSI, rsm.getResultSet().getId(), peptideMapForPtm);
 
         
         int nbPeptides = peptideInstanceList.size();
@@ -551,28 +504,55 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseSlicerTas
         }
 
     }
-    
-    protected static void fetchPtmData(EntityManager entityManagerPS, HashMap<Long, Peptide> peptideMap) {
 
-        TypedQuery<DPeptidePTM> ptmQuery = entityManagerPS.createQuery("SELECT new fr.proline.core.orm.msi.dto.DPeptidePTM(pptm.peptide.id, pptm.specificity.id, pptm.seqPosition) FROM fr.proline.core.orm.ps.PeptidePtm pptm WHERE pptm.peptide.id IN (:peptideIds)", DPeptidePTM.class);
-        ptmQuery.setParameter("peptideIds", peptideMap.keySet());
-        List<DPeptidePTM> ptmList = ptmQuery.getResultList();
-
-        Iterator<DPeptidePTM> it = ptmList.iterator();
+    public static void fetchReadablePtmData(EntityManager entityManagerMSI, Long rsetId, HashMap<Long, Peptide> peptideMap) {
+        // Retrieve PeptideReadablePtmString
+        Query ptmStingQuery = entityManagerMSI.createQuery("SELECT p.id, ptmString FROM fr.proline.core.orm.msi.Peptide p, fr.proline.core.orm.msi.PeptideReadablePtmString ptmString WHERE p.id IN (:listId) AND ptmString.peptide=p AND ptmString.resultSet.id=:rsetId");
+        ptmStingQuery.setParameter("listId", peptideMap.keySet());
+        ptmStingQuery.setParameter("rsetId", rsetId);
+        
+        List<Object[]> ptmStrings = ptmStingQuery.getResultList();
+        Iterator<Object[]> it = ptmStrings.iterator();
         while (it.hasNext()) {
-            DPeptidePTM ptm = it.next();
-
-            Peptide p = peptideMap.get(ptm.getIdPeptide());
-            HashMap<Integer, DPeptidePTM> map = p.getTransientData().getDPeptidePtmMap();
-            if (map == null) {
-                map = new HashMap<>();
-                p.getTransientData().setDPeptidePtmMap(map);
-            }
-            
-            map.put((int) ptm.getSeqPosition(), ptm);
-
+            Object[] res = it.next();
+            Long peptideId = (Long) res[0];
+            PeptideReadablePtmString ptmString = (PeptideReadablePtmString) res[1];
+            Peptide peptide = peptideMap.get(peptideId);
+            peptide.getTransientData().setPeptideReadablePtmString(ptmString);
         }
+    }
+    
+    public static void fetchPtmDataFromPSdb(HashMap<Long, Peptide> peptideMap) {
 
+        if (!peptideMap.isEmpty()) {
+            EntityManager entityManagerPS = DataStoreConnectorFactory.getInstance().getPsDbConnector().createEntityManager();
+            try {
+                entityManagerPS.getTransaction().begin();
+                TypedQuery<DPeptidePTM> ptmQuery = entityManagerPS.createQuery("SELECT new fr.proline.core.orm.msi.dto.DPeptidePTM(pptm.peptide.id, pptm.specificity.id, pptm.seqPosition) FROM fr.proline.core.orm.ps.PeptidePtm pptm WHERE pptm.peptide.id IN (:peptideIds)", DPeptidePTM.class);
+                ptmQuery.setParameter("peptideIds", peptideMap.keySet());
+                List<DPeptidePTM> ptmList = ptmQuery.getResultList();
 
+                Iterator<DPeptidePTM> it = ptmList.iterator();
+                while (it.hasNext()) {
+                    DPeptidePTM ptm = it.next();
+
+                    Peptide p = peptideMap.get(ptm.getIdPeptide());
+                    HashMap<Integer, DPeptidePTM> map = p.getTransientData().getDPeptidePtmMap();
+                    if (map == null) {
+                        map = new HashMap<>();
+                        p.getTransientData().setDPeptidePtmMap(map);
+                    }
+
+                    map.put((int) ptm.getSeqPosition(), ptm);
+
+                }
+                entityManagerPS.getTransaction().commit();
+            } catch (Exception e) {
+                entityManagerPS.getTransaction().rollback();
+                throw (e);
+            } finally {
+                entityManagerPS.close();
+            }
+        }
     }
 }

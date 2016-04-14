@@ -37,6 +37,7 @@ import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.AbstractDatabaseSlicerTask;
+import fr.proline.studio.dam.tasks.DatabaseLoadPeptidesInstancesTask;
 import fr.proline.studio.dam.tasks.DatabaseProteinsFromProteinSetTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import java.util.ArrayList;
@@ -637,9 +638,11 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                         // retrieve the proteinSet list with isValidated = true
                         QuantitationMethod quantitationMethod = m_dataset.getQuantitationMethod();
                         boolean isSC = quantitationMethod != null && (quantitationMethod.getAbundanceUnit().compareTo("spectral_counts") == 0);
-                        Query proteinSetsQuery = entityManagerMSI.createQuery("SELECT ps.id  FROM PeptideSet pepset JOIN pepset.proteinSet as ps WHERE ps.resultSummary.id=:rsmId AND ps.isValidated=true ORDER BY pepset.score DESC");
+                        Query proteinSetsQuery = entityManagerMSI.createQuery("SELECT ps.id  FROM PeptideSet pepset JOIN pepset.proteinSet as ps "
+                                                + " WHERE ps.resultSummary.id=:rsmId AND ps.isValidated=true ORDER BY pepset.score DESC");
                         if (isSC){
-                           proteinSetsQuery = entityManagerMSI.createQuery("SELECT ps.id  FROM PeptideSet pepset JOIN pepset.proteinSet as ps WHERE ps.resultSummary.id=:rsmId AND ps.isValidated=true AND ps.masterQuantComponentId is not null ORDER BY pepset.score DESC");
+                           proteinSetsQuery = entityManagerMSI.createQuery("SELECT ps.id  FROM PeptideSet pepset JOIN pepset.proteinSet as ps "
+                                                + " WHERE ps.resultSummary.id=:rsmId AND ps.isValidated=true AND ps.masterQuantComponentId is not null ORDER BY pepset.score DESC");
                         }
                         proteinSetsQuery.setParameter("rsmId", resultSummaryId);
                         List<Long> proteinSets = proteinSetsQuery.getResultList();
@@ -753,8 +756,6 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                             m_peptideInstanceIds.add(-pepNonIdentId);
                             m_masterQuantPeptideList.add(f);
                         }
-
-                        //fetchPeptideInstanceData(entityManagerMSI, m_peptideInstanceIds);
                         // slice the task and get the first one
                         SubTask subTask = m_subTaskManager.sliceATaskAndGetFirst(SUB_TASK_PEPTIDE_INSTANCE, m_peptideInstanceIds.size(), SLICE_SIZE);
 
@@ -872,7 +873,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
             if (listMasterQuantitationChannels != null && !listMasterQuantitationChannels.isEmpty()) {
                 for (DMasterQuantitationChannel masterQuantitationChannel : listMasterQuantitationChannels) {
                     Long resultSummaryId = masterQuantitationChannel.getQuantResultSummaryId();
-
+                    
                     //resultSummary
                     if (resultSummaryId != null) {
                         // load peptideInstance
@@ -933,6 +934,8 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
      * @return
      */
     private boolean fetchPeptideInstanceData(EntityManager entityManagerMSI, List<Long> listPeptideInstanceIds) {
+        
+        HashMap<Long, Peptide> peptideMap = new HashMap<>();
         // map qcId rsmId
         Map<Long, Long> rsmIdVsQcId = new HashMap<>();
         List<Long> rsmIdList = new ArrayList();
@@ -976,12 +979,24 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
             DPeptideMatch pm = new DPeptideMatch(pmId, pmRank, pmCharge, pmDeltaMoz, pmExperimentalMoz, pmMissedCleavage, pmScore, pmResultSetId, pmCdPrettyRank, pmSdPrettyRank);
 
             Peptide p = (Peptide) resCur[11];
-
+            p.getTransientData().setPeptideReadablePtmStringLoaded();
+            peptideMap.put(p.getId(), p);
+            
             dpi.setBestPeptideMatch(pm);
 
             pm.setPeptide(p);
 
             peptideInstanceList.add(dpi);
+        }
+        
+        DatabaseLoadPeptidesInstancesTask.fetchReadablePtmData(entityManagerMSI, m_dataset.getResultSetId(), peptideMap);
+        
+        try {
+            DatabaseLoadPeptidesInstancesTask.fetchPtmDataFromPSdb(peptideMap);
+        } catch (Exception e) {
+            m_logger.error(getClass().getSimpleName() + " failed", e);
+            m_taskError = new TaskError(e);
+            return false;
         }
 
         int nbMP = m_masterQuantPeptideList.size();
@@ -1112,8 +1127,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                     o.setPeptideInstanceId(masterQuantPeptide.getPeptideInstanceId());
                     o.setPeptideInstance(peptideInstance);
                     // load PSM count for each peptide instance in the different quantChannels
-                    String queryCountPSM = "SELECT pi.peptideMatchCount, pi.resultSummary.id "
-                            + "FROM PeptideInstance pi "
+                    String queryCountPSM = "SELECT pi.peptideMatchCount, pi.resultSummary.id FROM PeptideInstance pi "
                             + "WHERE pi.resultSummary.id in (:listRsm) AND pi.peptide.id =:pepId ";
                     Query queryPSM = entityManagerMSI.createQuery(queryCountPSM);
                     queryPSM.setParameter("listRsm", rsmIdList);

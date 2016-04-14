@@ -913,27 +913,14 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
                 indexArray++;
                 peptideMap.put(peptide.getId(), peptide);
             }
-            
-            EntityManager entityManagerPS = DataStoreConnectorFactory.getInstance().getPsDbConnector().createEntityManager();
+
             try {
-
-                entityManagerPS.getTransaction().begin();
-
-                DatabaseLoadPeptidesInstancesTask.fetchPtmData(entityManagerPS, peptideMap);
-
-                entityManagerPS.getTransaction().commit();
+                DatabaseLoadPeptidesInstancesTask.fetchPtmDataFromPSdb(peptideMap);
             } catch (Exception e) {
                 m_logger.error(getClass().getSimpleName() + " failed", e);
                 m_taskError = new TaskError(e);
-                try {
-                    entityManagerPS.getTransaction().rollback();
-                } catch (Exception rollbackException) {
-                    m_logger.error(getClass().getSimpleName() + " failed : potential network problem", rollbackException);
-                }
-            } finally {
-                entityManagerPS.close();
             }
-            
+       
             
         } else {
 

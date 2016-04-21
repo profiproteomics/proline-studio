@@ -117,9 +117,9 @@ public class GraphConnector extends AbstractConnectedGraphObject {
     public void addConnection(GraphConnector connector) {
         if ((!m_out) && (!m_connections.isEmpty())) {
             // for in connector, only one connection is accepted
-            GraphConnector previousConnector = m_connections.getFirst();
-            previousConnector.removeConnection(this);
-            m_connections.clear();
+            //GraphConnector previousConnector = m_connections.getFirst();
+            //previousConnector.removeConnection(this);
+            deleteInLink();
         }
         m_connections.add(connector);
     }

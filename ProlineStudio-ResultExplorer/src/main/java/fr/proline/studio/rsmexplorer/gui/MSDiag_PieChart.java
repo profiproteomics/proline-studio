@@ -1,16 +1,13 @@
 package fr.proline.studio.rsmexplorer.gui;
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.geom.Rectangle2D;
 import java.io.File;
-import java.io.IOException;
 import java.text.DecimalFormat;
 
 import javax.swing.JToolBar;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
-import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.labels.PieSectionLabelGenerator;
 import org.jfree.chart.labels.StandardPieSectionLabelGenerator;
@@ -19,14 +16,8 @@ import org.jfree.data.general.DefaultPieDataset;
 import org.slf4j.LoggerFactory;
 
 
-import org.w3c.dom.DOMImplementation;
-import org.w3c.dom.Document;
-
 import fr.proline.studio.export.ExportButton;
-import fr.proline.studio.export.ImageExporterInterface;
 import fr.proline.studio.gui.HourglassPanel;
-import org.jfree.graphics2d.svg.SVGGraphics2D;
-import org.jfree.graphics2d.svg.SVGUtils;
 
 import org.slf4j.Logger;
 
@@ -35,36 +26,20 @@ import org.slf4j.Logger;
  *
  * @author AW
  */
-public class MSDiag_PieChart extends HourglassPanel implements  ImageExporterInterface {
+public class MSDiag_PieChart extends HourglassPanel {
     
     public static final String SERIES_NAME = "Pie chart";
     
     protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
     private static final long serialVersionUID = 1L;
 
-    private DefaultPieDataset m_dataSet;
-    private JFreeChart m_chart;
-    private File m_pngFile;
+    private final DefaultPieDataset m_dataSet;
+    private final JFreeChart m_chart;
  
     private javax.swing.JPanel m_pieChartPanel;
 
-	private RsetMSDiagPanel m_msdiagPanel;
- 
-     
-    @Override // declared in ProlineStudioCommons ImageExporterInterface
-    public void generateSvgImage(String file) {
-        writeToSVG(file);
-    }
-    
-    @Override // declared in ProlineStudioCommons ImageExporterInterface
-    public void generatePngImage(String file) {
-        writeToPNG(file);
-    }
-    
-    @Override
-    public String getSupportedFormats() {
-        return "png,svg";
-    }
+    private final RsetMSDiagPanel m_msdiagPanel;
+
    
 
     /**
@@ -115,7 +90,7 @@ public class MSDiag_PieChart extends HourglassPanel implements  ImageExporterInt
         FlipButton flipModeButton = new FlipButton("flip button text", m_msdiagPanel);
         toolbar.add(flipModeButton);
         
-        ExportButton exportImageButton = new ExportButton("pieChart", (ImageExporterInterface) this);
+        ExportButton exportImageButton = new ExportButton("pieChart", m_pieChartPanel);
         toolbar.add(exportImageButton);
        
         
@@ -127,25 +102,7 @@ public class MSDiag_PieChart extends HourglassPanel implements  ImageExporterInt
         
         constructPieChart(msdo);
      }
-    
-    public void writeToPNG(String fileName) {
-        m_pngFile = new File(fileName);
-        try {
-            ChartUtilities.saveChartAsPNG(m_pngFile, m_chart, m_pieChartPanel.getWidth(), m_pieChartPanel.getHeight());
-        } catch (IOException e) {
-            LoggerFactory.getLogger("ProlineStudio.ResultExplorer").error("writeToPNG", e);
-        }
-    }
-    
-    public void writeToSVG(String file) {
-        SVGGraphics2D g2 = new SVGGraphics2D(m_pieChartPanel.getWidth(), m_pieChartPanel.getHeight());
-        m_pieChartPanel.paint(g2);
 
-        try {
-            SVGUtils.writeToSVG(new File(file), g2.getSVGElement());
-        } catch (Exception ex) {
-        }
-    }
 
    
     

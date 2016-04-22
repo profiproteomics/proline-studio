@@ -7,8 +7,6 @@ import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.event.ActionListener;
 import java.awt.geom.Rectangle2D;
-import java.io.File;
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.DoubleBuffer;
@@ -20,7 +18,6 @@ import javax.swing.JPanel;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
-import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.event.PlotChangeEvent;
@@ -37,21 +34,16 @@ import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 import org.slf4j.LoggerFactory;
 
-import org.w3c.dom.DOMImplementation;
-import org.w3c.dom.Document;
 
 import fr.proline.core.orm.msi.Peptide;
 import fr.proline.core.orm.msi.dto.DSpectrum;
 import fr.proline.core.orm.msi.dto.DMsQuery;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.studio.export.ExportButton;
-import fr.proline.studio.export.ImageExporterInterface;
 import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
-import org.jfree.graphics2d.svg.SVGGraphics2D;
-import org.jfree.graphics2d.svg.SVGUtils;
 
 
 /**
@@ -59,7 +51,7 @@ import org.jfree.graphics2d.svg.SVGUtils;
  *
  * @author JM235353 + AW
  */
-public class RsetPeptideSpectrumErrorPanel extends HourglassPanel implements DataBoxPanelInterface, ImageExporterInterface, SplittedPanelContainer.ReactiveTabbedComponent {
+public class RsetPeptideSpectrumErrorPanel extends HourglassPanel implements DataBoxPanelInterface, SplittedPanelContainer.ReactiveTabbedComponent {
 
 
     private AbstractDataBox m_dataBox;
@@ -71,29 +63,14 @@ public class RsetPeptideSpectrumErrorPanel extends HourglassPanel implements Dat
     private double m_spectrumMaxX = 0;
     private double m_spectrumMinY = 0;
     private double m_spectrumMaxY = 0;
-    private DefaultXYDataset m_dataSet;
-    private JFreeChart m_chart;
-    private File m_pngFile;
+    private final DefaultXYDataset m_dataSet;
+    private final JFreeChart m_chart;
     private JPanel m_spectrumPanel;
 
     private RsetPeptideSpectrumErrorAnnotations m_spectrumErrorAnnotations = null;
     
     private static final String SERIES_NAME = "spectrumData";
-    
-    @Override // declared in ProlineStudioCommons ImageExporterInterface
-    public void generateSvgImage(String file) {
-        writeToSVG(file);
-    }
 
-    @Override // declared in ProlineStudioCommons ImageExporterInterface
-    public void generatePngImage(String file) {
-        writeToPNG(file);
-    }
-
-    @Override
-    public String getSupportedFormats() {
-        return "png,svg";
-    }
 
 
     /**
@@ -112,7 +89,7 @@ public class RsetPeptideSpectrumErrorPanel extends HourglassPanel implements Dat
         XYPlot plot = (XYPlot) m_chart.getPlot();
         plot.getRangeAxis().setUpperMargin(0.2);
 
-        float maxXvalue = 0;
+        float maxXvalue;
         maxXvalue = (float) m_chart.getXYPlot().getDomainAxis().getUpperBound();
 
         m_chart.getXYPlot().getDomainAxis().setDefaultAutoRange(new Range(0, maxXvalue * 1.60));
@@ -140,7 +117,7 @@ public class RsetPeptideSpectrumErrorPanel extends HourglassPanel implements Dat
             public void restoreAutoBounds() {
 
                 XYPlot plot = (XYPlot) getChart().getPlot();
-                double domainStart = plot.getDomainAxis().getDefaultAutoRange().getLowerBound();;
+                double domainStart = plot.getDomainAxis().getDefaultAutoRange().getLowerBound();
                 double domainEnd = plot.getDomainAxis().getDefaultAutoRange().getUpperBound();
                 double rangeStart = plot.getRangeAxis().getDefaultAutoRange().getLowerBound();
                 double rangeEnd = plot.getRangeAxis().getDefaultAutoRange().getUpperBound();
@@ -173,7 +150,7 @@ public class RsetPeptideSpectrumErrorPanel extends HourglassPanel implements Dat
         JToolBar toolbar = new JToolBar(JToolBar.VERTICAL);
         toolbar.setFloatable(false);
 
-        ExportButton exportImageButton = new ExportButton("Spectre", (ImageExporterInterface) this);
+        ExportButton exportImageButton = new ExportButton("Spectre", m_spectrumPanel);
         toolbar.add(exportImageButton);
         return toolbar;
 
@@ -216,26 +193,7 @@ public class RsetPeptideSpectrumErrorPanel extends HourglassPanel implements Dat
     private PeptideFragmentationData m_peptideFragmentationDataPostponed = null;
 
 
-    public void writeToPNG(String fileName) {
-        m_pngFile = new File(fileName);
-        try {
-            ChartUtilities.saveChartAsPNG(m_pngFile, m_chart, m_spectrumPanel.getWidth(), m_spectrumPanel.getHeight());
-        } catch (IOException e) {
-            LoggerFactory.getLogger("ProlineStudio.ResultExplorer").error("writeToPNG", e);
-        }
 
-
-    }
-
-    public void writeToSVG(String file) {
-        SVGGraphics2D g2 = new SVGGraphics2D(m_spectrumPanel.getWidth(), m_spectrumPanel.getHeight());
-        m_spectrumPanel.paint(g2);
-
-        try {
-            SVGUtils.writeToSVG(new File(file), g2.getSVGElement());
-        } catch (Exception ex) {
-        }
-    }
 
 
     private void constructSpectrumErrorChart(DPeptideMatch pm) {

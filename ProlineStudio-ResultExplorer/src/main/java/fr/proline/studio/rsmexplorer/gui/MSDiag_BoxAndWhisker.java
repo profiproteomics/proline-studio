@@ -5,14 +5,11 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.geom.Rectangle2D;
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 
 import javax.swing.JToolBar;
 
 import org.jfree.chart.ChartPanel;
-import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.CategoryAxis;
 import org.jfree.chart.axis.CategoryLabelPositions;
@@ -28,12 +25,7 @@ import org.slf4j.LoggerFactory;
 
 
 import fr.proline.studio.export.ExportButton;
-import fr.proline.studio.export.ImageExporterInterface;
 import fr.proline.studio.gui.HourglassPanel;
-
-import org.jfree.graphics2d.svg.SVGGraphics2D;
-import org.jfree.graphics2d.svg.SVGUtils;
-
 
 import org.slf4j.Logger;
 
@@ -42,33 +34,18 @@ import org.slf4j.Logger;
  *
  * @author AW
  */
-public class MSDiag_BoxAndWhisker extends HourglassPanel implements ImageExporterInterface {
+public class MSDiag_BoxAndWhisker extends HourglassPanel {
 
     public static final String SERIES_NAME = "Chromatogram";
 
     protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
     private static final long serialVersionUID = 1L;
-    private DefaultBoxAndWhiskerCategoryDataset m_dataSet;
-    private JFreeChart m_chart;
-    private File m_pngFile;
+    private final DefaultBoxAndWhiskerCategoryDataset m_dataSet;
+    private final JFreeChart m_chart;
     private javax.swing.JPanel m_chromatogragmPanel;
 
-    private CategoryPlot m_subplot; // the plot that holds the range values data
+    private final CategoryPlot m_subplot; // the plot that holds the range values data
 
-    @Override // declared in ProlineStudioCommons ImageExporterInterface
-    public void generateSvgImage(String file) {
-        writeToSVG(file);
-    }
-
-    @Override // declared in ProlineStudioCommons ImageExporterInterface
-    public void generatePngImage(String file) {
-        writeToPNG(file);
-    }
-
-    @Override
-    public String getSupportedFormats() {
-        return "png,svg";
-    }
 
     /**
      * Creates new form MSDiag_PieChart
@@ -109,7 +86,7 @@ public class MSDiag_BoxAndWhisker extends HourglassPanel implements ImageExporte
                 CategoryLabelPositions.createUpRotationLabelPositions(Math.PI / 4.0)
         );
         final CombinedDomainCategoryPlot plot = new CombinedDomainCategoryPlot(domainAxis);
-        ;
+
         plot.add(m_subplot, 1);
 
         m_chart = new JFreeChart(
@@ -156,7 +133,7 @@ public class MSDiag_BoxAndWhisker extends HourglassPanel implements ImageExporte
 	        //m_picWrapper = new ExportPictureWrapper();
         //m_picWrapper.setFile(m_svgFile);
 
-        ExportButton exportImageButton = new ExportButton("pieChart", (ImageExporterInterface) this);
+        ExportButton exportImageButton = new ExportButton("pieChart", m_chromatogragmPanel);
         toolbar.add(exportImageButton);
 
         return toolbar;
@@ -169,24 +146,6 @@ public class MSDiag_BoxAndWhisker extends HourglassPanel implements ImageExporte
 
     }
 
-    public void writeToPNG(String fileName) {
-        m_pngFile = new File(fileName);
-        try {
-            ChartUtilities.saveChartAsPNG(m_pngFile, m_chart, m_chromatogragmPanel.getWidth(), m_chromatogragmPanel.getHeight());
-        } catch (IOException e) {
-            LoggerFactory.getLogger("ProlineStudio.ResultExplorer").error("writeToPNG", e);
-        }
-    }
-
-    public void writeToSVG(String file) {
-        SVGGraphics2D g2 = new SVGGraphics2D(m_chromatogragmPanel.getWidth(), m_chromatogragmPanel.getHeight());
-        m_chromatogragmPanel.paint(g2);
-
-        try {
-            SVGUtils.writeToSVG(new File(file), g2.getSVGElement());
-        } catch (Exception ex) {
-        }
-    }
 
     private void constructChromatogram(MSDiagOutput_AW msdo) {
 
@@ -213,7 +172,6 @@ public class MSDiag_BoxAndWhisker extends HourglassPanel implements ImageExporte
         //String serieTable[] = new String[msdo.matrix[0].length];
         int nbSeries = msdo.matrix[0].length;
 
-        ArrayList<Double> listOutliers = new ArrayList();
         Comparable<String> serieString;
         Comparable<String> catString;
         for (int serie = 1; serie < nbSeries; serie++) { // lines of data table
@@ -233,7 +191,7 @@ public class MSDiag_BoxAndWhisker extends HourglassPanel implements ImageExporte
             double maxRegularValue = (double) (msdo.matrix[serie][2]);
             double minOutlier = minRegularValue; // not used
             double maxOutlier = maxRegularValue; // not used
-            listOutliers = new ArrayList(0); // not used
+            ArrayList<Double> listOutliers = new ArrayList(0); // not used
 
             m_dataSet.add(new BoxAndWhiskerItem(mean, median, q1, q3, minRegularValue, maxRegularValue, minOutlier, maxOutlier, listOutliers), serieString, catString);
 

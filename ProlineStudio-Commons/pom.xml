@@ -95,8 +95,12 @@
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>  
             <!-- Version inherited from ProFI-Pom -->
-        </dependency> 
-
+        </dependency>
+        <dependency>
+            <groupId>org.jfree</groupId>
+            <artifactId>jfreesvg</artifactId>
+            <version>3.0</version>
+        </dependency>
     </dependencies>
 
     <build>

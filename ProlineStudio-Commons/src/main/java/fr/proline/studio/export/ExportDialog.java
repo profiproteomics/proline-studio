@@ -22,6 +22,7 @@ import org.jdesktop.swingx.JXTable;
 import org.openide.util.NbPreferences;
 import org.slf4j.LoggerFactory;
 
+import org.jfree.graphics2d.svg.*;
 
 /**
  * Dialog used to export an image or a table
@@ -44,10 +45,9 @@ public class ExportDialog extends DefaultDialog  {
 
     private JXTable m_table = null;
     private JPanel m_panel = null;
-    private ImageExporterInterface m_imageExporter = null;
-    
+
     private JFileChooser m_fchooser;
-    private List<FileNameExtensionFilter> m_filterList = new ArrayList<>();
+    private final List<FileNameExtensionFilter> m_filterList = new ArrayList<>();
     
     private DefaultDialog.ProgressTask m_task = null;
     
@@ -74,23 +74,11 @@ public class ExportDialog extends DefaultDialog  {
         }
 
         m_singletonImageDialog.m_panel = panel;
-        m_singletonImageDialog.m_imageExporter = null;
         m_singletonImageDialog.m_exportName = exportName;
 
         return m_singletonImageDialog;
     }
-    
-    public static ExportDialog getDialog(Window parent, JPanel panel, ImageExporterInterface imageExporter, String exportName) {
-        if (m_singletonImage2Dialog == null) {
-            m_singletonImage2Dialog = new ExportDialog(parent, ExporterFactory.EXPORT_IMAGE2);
-        }
 
-        m_singletonImage2Dialog.m_panel = panel;
-        m_singletonImage2Dialog.m_imageExporter = imageExporter;
-        m_singletonImage2Dialog.m_exportName = exportName;
-
-        return m_singletonImage2Dialog;
-    }
     
     
     public static ExportDialog getDialog(Window parent, Boolean showExportAllPSMsOption) {
@@ -135,8 +123,7 @@ public class ExportDialog extends DefaultDialog  {
 
         
         
-        setButtonName(BUTTON_OK, ((m_exportType == ExporterFactory.EXPORT_IMAGE)
-        					   || (m_exportType == ExporterFactory.EXPORT_IMAGE2)) ? "Export Image" : "Export");
+        setButtonName(BUTTON_OK, (m_exportType == ExporterFactory.EXPORT_IMAGE) ? "Export Image" : "Export");
 
         
 
@@ -331,46 +318,63 @@ public class ExportDialog extends DefaultDialog  {
             preferences.put("DefaultExcelExportPath", f.getAbsoluteFile().getParentFile().getName());
             
         } else if (m_exportType == ExporterFactory.EXPORT_IMAGE) {
-            BufferedImage bi = new BufferedImage(m_panel.getSize().width, m_panel.getSize().height, BufferedImage.TYPE_INT_ARGB);
-            Graphics g = bi.createGraphics();
-            m_panel.paint(g);
-            g.dispose();
-            try {
-                ImageIO.write(bi, "png", new File(fileName));
-            } catch (IOException e) {
-                LoggerFactory.getLogger("ProlineStudio.ResultExplorer").error("Error exporting png", e);
+            ExporterFactory.ExporterInfo exporterInfo = (ExporterFactory.ExporterInfo) m_exporTypeCombobox.getSelectedItem();
+
+            ExporterFactory.ExporterType exporterType = exporterInfo.geType();
+            
+            String absolutePath = f.getAbsolutePath();
+            if (absolutePath.endsWith(".png")) {
+                // we force type to png
+                exporterType = ExporterFactory.ExporterType.PNG;
+                m_exporTypeCombobox.setSelectedItem(ExporterFactory.EXPORTER_INFO_PNG);
+            } else if (absolutePath.endsWith(".svg")) {
+                // we force type to svg
+                exporterType = ExporterFactory.ExporterType.SVG;
+                m_exporTypeCombobox.setSelectedItem(ExporterFactory.EXPORTER_INFO_SVG);
+            } else if (exporterType == ExporterFactory.ExporterType.PNG) {
+                // we add png to end of file
+                f = new File(absolutePath+".png");
+            } else if (exporterType == ExporterFactory.ExporterType.SVG) {
+                // we add png to end of file
+                f = new File(absolutePath+".svg");
             }
+            
+            m_fileTextField.setText(f.getAbsolutePath());
+            
+            if (exporterType == ExporterFactory.ExporterType.PNG) {
 
-            Preferences preferences = NbPreferences.root();
-            preferences.put("DefaultExcelImagePath", f.getAbsoluteFile().getParentFile().getName());
-            return true;
-        } else if (m_exportType == ExporterFactory.EXPORT_IMAGE2) {
-        	
-            try {
-                ExporterFactory.ExporterInfo exporterInfo = (ExporterFactory.ExporterInfo) m_exporTypeCombobox.getSelectedItem();
-
-                if (exporterInfo.getName().contains("png")) {
-
-                    LoggerFactory.getLogger("ProlineStudio.ResultExplorer").info("exporting png file...to: " + f.toPath().toString());
-                    m_imageExporter.generatePngImage(fileName);
-
-                } else if (exporterInfo.getName().contains("svg")) { // svg output
-
-                    LoggerFactory.getLogger("ProlineStudio.ResultExplorer").info("exporting svg file...to: " + f.toPath().toString());
-                    m_imageExporter.generateSvgImage(fileName);
-
+                BufferedImage bi = new BufferedImage(m_panel.getSize().width, m_panel.getSize().height, BufferedImage.TYPE_INT_ARGB);
+                Graphics g = bi.createGraphics();
+                m_panel.paint(g);
+                g.dispose();
+                try {
+                    ImageIO.write(bi, "png", f);
+                } catch (IOException e) {
+                    LoggerFactory.getLogger("ProlineStudio.ResultExplorer").error("Error exporting png", e);
                 }
 
-               
-            } catch (Exception e) {
-            	LoggerFactory.getLogger("ProlineStudio.ResultExplorer").error("error " + e.getMessage() + " while exporting picture");
+                Preferences preferences = NbPreferences.root();
+                preferences.put("DefaultExcelImagePath", f.getAbsoluteFile().getParentFile().getName());
+
+            } else if (exporterType == ExporterFactory.ExporterType.SVG) {
+
+                SVGGraphics2D g2 = new SVGGraphics2D(m_panel.getWidth(), m_panel.getHeight());
+                m_panel.paint(g2);
+
+                try {
+                    SVGUtils.writeToSVG(f, g2.getSVGElement());
+                } catch (Exception ex) {
+                    LoggerFactory.getLogger("ProlineStudio.ResultExplorer").error("Error exporting svg", ex);
+                }
+                
+                g2.dispose();
+
+                Preferences preferences = NbPreferences.root();
+                preferences.put("DefaultExcelImagePath", f.getAbsoluteFile().getParentFile().getName());
+
             }
-            
-            Preferences preferences = NbPreferences.root();
-            preferences.put("DefaultExcelImagePath", f.getAbsoluteFile().getParentFile().getName());
-            
             return true;
-        } 
+        }
         
         
         return false;

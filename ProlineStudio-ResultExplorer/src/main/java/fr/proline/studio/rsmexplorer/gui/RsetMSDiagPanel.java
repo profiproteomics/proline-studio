@@ -4,7 +4,6 @@ package fr.proline.studio.rsmexplorer.gui;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionListener;
 import java.nio.ByteBuffer;
@@ -25,7 +24,6 @@ import org.slf4j.LoggerFactory;
 import com.google.gson.Gson;
 
 import fr.proline.studio.export.ExportButton;
-import fr.proline.studio.export.ImageExporterInterface;
 import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.pattern.AbstractDataBox;
@@ -40,7 +38,7 @@ import fr.proline.studio.utils.IconManager;
  *
  * @author AW
  */
-public class RsetMSDiagPanel extends HourglassPanel implements DataBoxPanelInterface, ImageExporterInterface  {
+public class RsetMSDiagPanel extends HourglassPanel implements DataBoxPanelInterface {
     
     protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
     private static final long serialVersionUID = 1L;
@@ -51,20 +49,7 @@ public class RsetMSDiagPanel extends HourglassPanel implements DataBoxPanelInter
 	private JXTable m_table; // table model for exporting table
 	private ExportButton m_exportButton;
     public  FlipButton m_flipModeButton;
-    @Override // declared in ProlineStudioCommons ImageExporterInterface
-    public void generateSvgImage(String file) {
-       // writeToSVG(file);
-    }
-    
-    @Override // declared in ProlineStudioCommons ImageExporterInterface
-    public void generatePngImage(String file) {
-       // writeToPNG(file);
-    }
-    
-    @Override
-    public String getSupportedFormats() {
-        return "png,svg";
-    }
+
     
     /**
      * Creates new form RsetMSDiagPanel
@@ -164,7 +149,7 @@ public class RsetMSDiagPanel extends HourglassPanel implements DataBoxPanelInter
 		         	
 		        	Gson gson = new Gson();
 		        	
-		        	HashMap<String,String> msOutputHashMap = new HashMap<String,String>();
+		        	HashMap<String,String> msOutputHashMap = new HashMap<>();
 		        	msOutputHashMap = gson.fromJson(messageHashMapJson, msOutputHashMap.getClass());
 		        	
 		        	if(msOutputHashMap != null) {

@@ -8,7 +8,6 @@ import java.awt.Graphics2D;
 import java.awt.event.ActionListener;
 import java.awt.geom.Rectangle2D;
 import java.io.File;
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.DoubleBuffer;
@@ -20,7 +19,6 @@ import javax.swing.JToolBar;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
-import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.event.PlotChangeEvent;
@@ -37,10 +35,6 @@ import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 import org.slf4j.LoggerFactory;
 
-//import org.freehep.graphicsio.emf.EMFGraphics2D;
-
-import org.w3c.dom.DOMImplementation;
-import org.w3c.dom.Document;
 
 import fr.proline.core.orm.msi.Peptide;
 import fr.proline.core.orm.msi.dto.DSpectrum;
@@ -55,7 +49,6 @@ import fr.proline.studio.dpm.task.GenerateSpectrumMatchTask;
 import fr.proline.studio.dpm.task.jms.AbstractJMSCallback;
 import fr.proline.studio.dpm.task.util.JMSConnectionManager;
 import fr.proline.studio.export.ExportButton;
-import fr.proline.studio.export.ImageExporterInterface;
 import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.pattern.AbstractDataBox;
@@ -70,17 +63,16 @@ import java.awt.event.ActionEvent;
 import javax.swing.JButton;
 import org.openide.windows.WindowManager;
 
-import org.jfree.graphics2d.svg.*;
 
 import org.slf4j.Logger;
-import org.w3c.dom.DOMException;
+
 
 /**
  * Panel used to display a Spectrum of a PeptideMatch
  *
  * @author JM235353
  */
-public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxPanelInterface, ImageExporterInterface {
+public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxPanelInterface {
     
     public static final String SERIES_NAME = "spectrumData";
     
@@ -92,9 +84,9 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
     private double m_spectrumMaxX = 0;
     private double m_spectrumMinY = 0;
     private double m_spectrumMaxY = 0;
-    private DefaultXYDataset m_dataSet;
-    private JFreeChart m_chart;
-    private File m_pngFile;
+    private final DefaultXYDataset m_dataSet;
+    private final JFreeChart m_chart;
+
     private DPeptideMatch m_previousPeptideMatch = null;
     private boolean m_previousFragmentationSet = false;
     private javax.swing.JPanel m_spectrumPanel;
@@ -105,21 +97,7 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
     private String m_spectrumTitle;
     
     private RsetPeptideSpectrumAnnotations m_spectrumAnnotations = null;
-    
-    @Override // declared in ProlineStudioCommons ImageExporterInterface
-    public void generateSvgImage(String file) {
-        writeToSVG(file);
-    }
-    
-    @Override // declared in ProlineStudioCommons ImageExporterInterface
-    public void generatePngImage(String file) {
-        writeToPNG(file);
-    }
-    
-    @Override
-    public String getSupportedFormats() {
-        return "png,svg";
-    }
+
    
 
     /**
@@ -207,7 +185,7 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
         //m_picWrapper = new ExportPictureWrapper();
         //m_picWrapper.setFile(m_svgFile);
 
-        ExportButton exportImageButton = new ExportButton("Spectre", (ImageExporterInterface) this);
+        ExportButton exportImageButton = new ExportButton("Spectre", m_spectrumPanel);
         toolbar.add(exportImageButton);
         
         m_generateMatchButton = new JButton();
@@ -260,29 +238,7 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
         m_spectrumAnnotations.addAnnotations();
         m_chart.setNotify(true);
     }
-    
-    public void writeToPNG(String fileName) {
-        m_pngFile = new File(fileName);
-        try {
-            ChartUtilities.saveChartAsPNG(m_pngFile, m_chart, m_spectrumPanel.getWidth(), m_spectrumPanel.getHeight());
-        } catch (IOException e) {
-            LoggerFactory.getLogger("ProlineStudio.ResultExplorer").error("writeToPNG", e);
-        }
-    }
- 
 
-    public void writeToSVG(String file) {
-        
-        SVGGraphics2D g2 = new SVGGraphics2D(m_spectrumPanel.getWidth(), m_spectrumPanel.getHeight());
-    
-        m_chart.draw(g2, m_spectrumPanel.getBounds());
-
-        try {
-            SVGUtils.writeToSVG(new File(file), g2.getSVGElement());
-        } catch (Exception ex) {
-        }
-    }
-    
 
     
     private void generateSpectrumMatch() {

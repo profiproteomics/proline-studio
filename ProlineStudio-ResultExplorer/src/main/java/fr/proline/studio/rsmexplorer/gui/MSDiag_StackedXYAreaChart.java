@@ -3,14 +3,11 @@ package fr.proline.studio.rsmexplorer.gui;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Font;
-import java.io.File;
-import java.io.IOException;
 
 import javax.swing.JToolBar;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
-import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.NumberAxis;
 
@@ -22,11 +19,7 @@ import org.jfree.data.xy.CategoryTableXYDataset;
 import org.slf4j.LoggerFactory;
 
 import fr.proline.studio.export.ExportButton;
-import fr.proline.studio.export.ImageExporterInterface;
 import fr.proline.studio.gui.HourglassPanel;
-import javax.swing.JPanel;
-import org.jfree.graphics2d.svg.SVGGraphics2D;
-import org.jfree.graphics2d.svg.SVGUtils;
 
 import org.slf4j.Logger;
 
@@ -35,7 +28,7 @@ import org.slf4j.Logger;
  *
  * @author AW
  */
-public class MSDiag_StackedXYAreaChart extends HourglassPanel implements ImageExporterInterface {
+public class MSDiag_StackedXYAreaChart extends HourglassPanel {
 
     public static final String SERIES_NAME = "Chromatogram";
 
@@ -44,23 +37,6 @@ public class MSDiag_StackedXYAreaChart extends HourglassPanel implements ImageEx
     private final CategoryTableXYDataset m_dataSet;
     private final JFreeChart m_chart;
     private ChartPanel m_chromatogragmPanel;
-
-    private File m_pngFile;
-
-    @Override // declared in ProlineStudioCommons ImageExporterInterface
-    public void generateSvgImage(String file) {
-        writeToSVG(file);
-    }
-
-    @Override // declared in ProlineStudioCommons ImageExporterInterface
-    public void generatePngImage(String file) {
-        writeToPNG(file);
-    }
-
-    @Override
-    public String getSupportedFormats() {
-        return "png,svg";
-    }
 
     /**
      * Creates new form MSDiag_PieChart
@@ -147,7 +123,7 @@ public class MSDiag_StackedXYAreaChart extends HourglassPanel implements ImageEx
         JToolBar toolbar = new JToolBar(JToolBar.VERTICAL);
         toolbar.setFloatable(false);
 
-        ExportButton exportImageButton = new ExportButton("chart", (ImageExporterInterface) this);
+        ExportButton exportImageButton = new ExportButton("chart", m_chromatogragmPanel);
         toolbar.add(exportImageButton);
 
         return toolbar;
@@ -160,24 +136,6 @@ public class MSDiag_StackedXYAreaChart extends HourglassPanel implements ImageEx
 
     }
 
-    public void writeToPNG(String fileName) {
-        m_pngFile = new File(fileName);
-        try {
-            ChartUtilities.saveChartAsPNG(m_pngFile, m_chart, m_chromatogragmPanel.getWidth(), m_chromatogragmPanel.getHeight());
-        } catch (IOException e) {
-            LoggerFactory.getLogger("ProlineStudio.ResultExplorer").error("writeToPNG", e);
-        }
-    }
-
-    public void writeToSVG(String file) {
-        SVGGraphics2D g2 = new SVGGraphics2D(m_chromatogragmPanel.getWidth(), m_chromatogragmPanel.getHeight());
-        m_chromatogragmPanel.paint(g2);
-
-        try {
-            SVGUtils.writeToSVG(new File(file), g2.getSVGElement());
-        } catch (Exception ex) {
-        }
-    }
 
     private void constructChromatogram(MSDiagOutput_AW msdo) {
 

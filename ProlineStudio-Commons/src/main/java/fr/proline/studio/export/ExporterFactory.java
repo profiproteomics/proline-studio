@@ -11,19 +11,20 @@ public class ExporterFactory {
     public static final int EXPORT_TABLE = 1;
     public static final int EXPORT_IMAGE = 2;
     public static final int EXPORT_FROM_SERVER = 3;
-    public static final int EXPORT_IMAGE2 = 4;
-    public static final int EXPORT_XIC = 5;
-    public static final int EXPORT_MGF = 6;
-    public static final int EXPORT_TSV = 7; //VDS : NOT USED !!!! 
-    public static final int EXPORT_SPECTRA = 8;
+    public static final int EXPORT_XIC = 4;
+    public static final int EXPORT_MGF = 5;
+    public static final int EXPORT_TSV = 6; //VDS : NOT USED !!!! 
+    public static final int EXPORT_SPECTRA = 7;
 
     private static ArrayList<ExporterInfo> m_listTable = null;
     private static ArrayList<ExporterInfo> m_listImage = null;
-    private static ArrayList<ExporterInfo> m_listServer= null;
-    private static ArrayList<ExporterInfo> m_listImage2 = null;
+    private static ArrayList<ExporterInfo> m_listServer = null;
     private static ArrayList<ExporterInfo> m_listXic = null;
     private static ArrayList<ExporterInfo> m_listMGF = null;
     private static ArrayList<ExporterInfo> m_listSpectra = null;
+    
+    public static final ExporterInfo EXPORTER_INFO_PNG = new ExporterInfo(ExporterType.PNG, "PNG (.png)", "png");
+    public static final ExporterInfo EXPORTER_INFO_SVG = new ExporterInfo(ExporterType.SVG, "SVG (.svg)", "svg");
     
     public enum ExporterType {
         EXCEL_XML,
@@ -65,28 +66,15 @@ public class ExporterFactory {
             if (m_listImage != null) {
                return m_listImage;
            }
-           m_listImage = new ArrayList<>(1);
+           m_listImage = new ArrayList<>(2);
 
 
-           m_listImage.add(new ExporterInfo(ExporterType.PNG, "PNG (.png)", "png"));
+           m_listImage.add(EXPORTER_INFO_PNG);
+           m_listImage.add(EXPORTER_INFO_SVG);
           
            return m_listImage;
            
-        } else if (exportType == EXPORT_IMAGE2) {
-            if (m_listImage2 != null) {
-               return m_listImage2;
-           }
-           m_listImage2 = new ArrayList<>(2);
-
-
-           m_listImage2.add(new ExporterInfo(ExporterType.PNG, "PNG (.png)", "png"));
-          // m_listImage2.add(new ExporterInfo(ExporterType.PNG, "3000x2000 pixels PNG (.png)", "png"));
-           m_listImage2.add(new ExporterInfo(ExporterType.PNG, "SVG (.svg)", "svg"));
-          // m_listImage2.add(new ExporterInfo(ExporterType.PNG, "SVG jfreesvg (.svg)", "svg"));
-          // m_listImage.add(new ExporterInfo(ExporterType.PNG, "WMF (.WMF)", "wmf"));
-
-           return m_listImage2;
-        }else if (exportType == EXPORT_XIC) {
+        }  else if (exportType == EXPORT_XIC) {
             if (m_listXic != null) {
                 return m_listXic;
             }
@@ -127,9 +115,9 @@ public class ExporterFactory {
     
     public static class ExporterInfo {
         
-        private ExporterType m_type;
-        private String m_name;
-        private String m_fileExtension;
+        private final ExporterType m_type;
+        private final String m_name;
+        private final String m_fileExtension;
         
         public ExporterInfo(ExporterType type, String name, String fileExtension) {
             m_type = type;

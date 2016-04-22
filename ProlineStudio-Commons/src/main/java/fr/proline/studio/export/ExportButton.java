@@ -22,8 +22,7 @@ public class ExportButton extends JButton implements ActionListener {
     private final String m_exportName;
     private JXTable m_table = null;
     private JPanel m_panel = null;
-    private ImageExporterInterface  m_imageExporter = null;
-    
+
     private ProgressInterface m_progressInterface = null;
             
     public ExportButton(ProgressInterface progressInterface, String exportName, JXTable table) {
@@ -43,28 +42,14 @@ public class ExportButton extends JButton implements ActionListener {
     public final void setProgressInterface(ProgressInterface progressInterface) {
         m_progressInterface = progressInterface;
     }
-    
-    
-    public ExportButton(String exportName,  ImageExporterInterface exportablePicture) {
 
-
-        m_exportName = exportName;
-        m_panel = null;
-        m_imageExporter = exportablePicture;
-
-        setIcon(IconManager.getIcon(IconManager.IconType.EXPORT_IMAGE));
-        setToolTipText("Export Image...");
-
-        addActionListener(this);
-    }
     
     public ExportButton(String exportName, JPanel panel) {
 
 
         m_exportName = exportName;
         m_panel = panel;
-        m_imageExporter = null;
-
+        
         setIcon(IconManager.getIcon(IconManager.IconType.EXPORT_IMAGE));
         setToolTipText("Export Image...");
 
@@ -94,11 +79,8 @@ public class ExportButton extends JButton implements ActionListener {
             dialog = ExportDialog.getDialog(WindowManager.getDefault().getMainWindow(), m_table, m_exportName);
         }
 
-        else if (m_imageExporter == null){ // then png output only
+        else { // then png / svg output only
             dialog = ExportDialog.getDialog(WindowManager.getDefault().getMainWindow(), m_panel, m_exportName);
-        }
-        else { 
-            dialog = ExportDialog.getDialog(WindowManager.getDefault().getMainWindow(), m_panel, m_imageExporter, m_exportName);
         }
         
         dialog.setLocation(getLocationOnScreen().x + getWidth() + 5, getLocationOnScreen().y + getHeight() + 5);

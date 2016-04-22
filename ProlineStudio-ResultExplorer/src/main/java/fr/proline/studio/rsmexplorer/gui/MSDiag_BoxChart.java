@@ -4,14 +4,11 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.geom.Rectangle2D;
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 
 import javax.swing.JToolBar;
 
 import org.jfree.chart.ChartPanel;
-import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.CategoryAxis;
 import org.jfree.chart.axis.CategoryLabelPositions;
@@ -27,10 +24,7 @@ import org.slf4j.LoggerFactory;
 
 
 import fr.proline.studio.export.ExportButton;
-import fr.proline.studio.export.ImageExporterInterface;
 import fr.proline.studio.gui.HourglassPanel;
-import org.jfree.graphics2d.svg.SVGGraphics2D;
-import org.jfree.graphics2d.svg.SVGUtils;
 
 import org.slf4j.Logger;
 
@@ -39,35 +33,20 @@ import org.slf4j.Logger;
  *
  * @author AW
  */
-public class MSDiag_BoxChart extends HourglassPanel implements ImageExporterInterface {
+public class MSDiag_BoxChart extends HourglassPanel {
 
     public static final String SERIES_NAME = "BoxChart";
 
     protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
     private static final long serialVersionUID = 1L;
-    private DefaultBoxAndWhiskerCategoryDataset m_dataSet;
-    private JFreeChart m_chart;
-    private File m_pngFile;
+    private final DefaultBoxAndWhiskerCategoryDataset m_dataSet;
+    private final JFreeChart m_chart;
     private javax.swing.JPanel m_boxChartPanel;
 
-    private CategoryPlot m_subplot; // the plot that holds the range values data
+    private final CategoryPlot m_subplot; // the plot that holds the range values data
 
-    private RsetMSDiagPanel m_msdiagPanel;
+    private final RsetMSDiagPanel m_msdiagPanel;
 
-    @Override // declared in ProlineStudioCommons ImageExporterInterface
-    public void generateSvgImage(String file) {
-        writeToSVG(file);
-    }
-
-    @Override // declared in ProlineStudioCommons ImageExporterInterface
-    public void generatePngImage(String file) {
-        writeToPNG(file);
-    }
-
-    @Override
-    public String getSupportedFormats() {
-        return "png,svg";
-    }
 
     /**
      * Creates new form MSDiag_PieChart
@@ -120,7 +99,7 @@ public class MSDiag_BoxChart extends HourglassPanel implements ImageExporterInte
                 CategoryLabelPositions.createUpRotationLabelPositions(Math.PI / 4.0)
         );
         final CombinedDomainCategoryPlot plot = new CombinedDomainCategoryPlot(domainAxis);
-        ;
+
         plot.add(m_subplot, 1);
 
         m_chart = new JFreeChart(
@@ -168,7 +147,7 @@ public class MSDiag_BoxChart extends HourglassPanel implements ImageExporterInte
         //m_picWrapper.setFile(m_svgFile);
         FlipButton flipModeButton = new FlipButton("flip button text", m_msdiagPanel);
         toolbar.add(flipModeButton);
-        ExportButton exportImageButton = new ExportButton("pieChart", (ImageExporterInterface) this);
+        ExportButton exportImageButton = new ExportButton("pieChart", m_boxChartPanel);
         toolbar.add(exportImageButton);
 
         return toolbar;
@@ -181,24 +160,6 @@ public class MSDiag_BoxChart extends HourglassPanel implements ImageExporterInte
 
     }
 
-    public void writeToPNG(String fileName) {
-        m_pngFile = new File(fileName);
-        try {
-            ChartUtilities.saveChartAsPNG(m_pngFile, m_chart, m_boxChartPanel.getWidth(), m_boxChartPanel.getHeight());
-        } catch (IOException e) {
-            LoggerFactory.getLogger("ProlineStudio.ResultExplorer").error("writeToPNG", e);
-        }
-    }
-
-    public void writeToSVG(String file) {
-        SVGGraphics2D g2 = new SVGGraphics2D(m_boxChartPanel.getWidth(), m_boxChartPanel.getHeight());
-        m_boxChartPanel.paint(g2);
-
-        try {
-            SVGUtils.writeToSVG(new File(file), g2.getSVGElement());
-        } catch (Exception ex) {
-        }
-    }
 
     private void constructBoxChart(MSDiagOutput_AW msdo) {
 
@@ -225,7 +186,7 @@ public class MSDiag_BoxChart extends HourglassPanel implements ImageExporterInte
         //String serieTable[] = new String[msdo.matrix[0].length];
         int nbSeries = msdo.matrix.length;
 
-        ArrayList<Double> listOutliers = new ArrayList();
+        ArrayList<Double> listOutliers;
         Comparable<String> serieString;
         Comparable<String> catString;
         for (int serie = 0; serie < nbSeries; serie++) { // lines of data table

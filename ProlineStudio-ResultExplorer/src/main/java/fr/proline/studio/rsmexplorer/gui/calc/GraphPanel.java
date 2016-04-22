@@ -130,6 +130,7 @@ public class GraphPanel extends JPanel implements MouseListener, MouseMotionList
         
         repaint();
     }
+
  
     public void addMacroToGraph(AbstractMacro macro, int x, int y) {
         addMacroToGraph(macro, new Point(x, y));
@@ -213,12 +214,20 @@ public class GraphPanel extends JPanel implements MouseListener, MouseMotionList
         
         
         // decrease panel size if needed
+        recalculatePanelDimension();
+
+        
+        repaint();
+    }
+    
+    
+    private void recalculatePanelDimension() {
+
         if (m_graphNodeArray.isEmpty()) {
             m_preferredSize.width = DEFAULT_PANEL_WIDTH;
             m_preferredSize.height = DEFAULT_PANEL_HEIGHT;
             revalidate();
         } else {
-
             int maxX = 0;
             int maxY = 0;
             for (GraphNode node : m_graphNodeArray) {
@@ -235,14 +244,13 @@ public class GraphPanel extends JPanel implements MouseListener, MouseMotionList
             int newPanelWidth = maxX + 140;
             int newPanelHeight = maxY + 140;
 
-            if ((newPanelWidth < m_preferredSize.width) || (newPanelHeight < m_preferredSize.height)) {
+            if ((newPanelWidth != m_preferredSize.width) || (newPanelHeight != m_preferredSize.height)) {
                 m_preferredSize.width = newPanelWidth;
                 m_preferredSize.height = newPanelHeight;
                 revalidate();
             }
         }
-        
-        repaint();
+
     }
     
     @Override
@@ -420,6 +428,7 @@ public class GraphPanel extends JPanel implements MouseListener, MouseMotionList
             m_selectedObject.move(x-m_mouseDragX, y-m_mouseDragY);
             m_mouseDragX = x;
             m_mouseDragY = y;
+            recalculatePanelDimension();
             repaint();
         } else if (m_selectedConnector != null) {
             m_mouseDragX = e.getX();

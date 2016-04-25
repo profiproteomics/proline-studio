@@ -47,7 +47,11 @@ public class LogFunction  extends AbstractFunction {
     
     @Override
     public String getName() {
-        return "Log";
+        if (m_log10) {
+            return "Log10";
+        } else {
+            return "Log2";
+        }
     }
 
     @Override

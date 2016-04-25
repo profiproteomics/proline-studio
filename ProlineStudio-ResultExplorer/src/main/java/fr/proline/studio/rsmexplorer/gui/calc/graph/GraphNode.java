@@ -175,6 +175,9 @@ public abstract class GraphNode extends AbstractConnectedGraphObject {
         g.drawString(typeName, xText, yText);
         
         if (dataName != null) {
+            if (dataName.length() > 17) {
+                dataName = dataName.substring(0, 17) + "."; // limit data name
+            }
             stringWidth = metricsBold.stringWidth(dataName);
             xText = m_x+(WIDTH-stringWidth)/2;
             yText = yText - m_hgtBold;

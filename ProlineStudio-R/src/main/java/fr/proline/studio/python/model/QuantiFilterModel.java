@@ -33,7 +33,11 @@ public class QuantiFilterModel extends FilterTableModel   {
         if (m_option == WHOLE_GROUPS) {
             int count = 0;
             for (int i=0;i<m_colsIndex.length;i++) {
-                count += ((Number) getDataValueAt(row, m_colsIndex[i])).intValue();
+                double quantitation = ((Number) getDataValueAt(row, m_colsIndex[i])).doubleValue();
+                if (quantitation > 10e-10) {
+                    // positive value;
+                    count++;
+                }
             }
             return (count>=m_threshold);
         }
@@ -49,7 +53,11 @@ public class QuantiFilterModel extends FilterTableModel   {
                     }
                 }
                 prevGroup = groupCur;
-                count += ((Number) getDataValueAt(row, m_colsIndex[i])).intValue();
+                double quantitation = ((Number) getDataValueAt(row, m_colsIndex[i])).doubleValue();
+                if (quantitation > 10e-10) {
+                    // positive value;
+                    count++;
+                }
             }
             return true;
         }
@@ -67,7 +75,11 @@ public class QuantiFilterModel extends FilterTableModel   {
                     }
                 }
                 prevGroup = groupCur;
-                count += ((Number) getDataValueAt(row, m_colsIndex[i])).intValue();
+                double quantitation = ((Number) getDataValueAt(row, m_colsIndex[i])).doubleValue();
+                if (quantitation > 10e-10) {
+                    // positive value;
+                    count++;
+                }
             }
             return trueForOneGroup;
         }

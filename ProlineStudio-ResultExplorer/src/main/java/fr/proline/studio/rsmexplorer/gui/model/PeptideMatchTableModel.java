@@ -774,8 +774,8 @@ public class PeptideMatchTableModel extends LazyTableModel implements GlobalTabl
 
     @Override
     public Class getDataColumnClass(int columnIndex) {
-        columnIndex =  m_colUsed.get(columnIndex);
-        switch (columnIndex) {
+        int realColumnIndex =  m_colUsed.get(columnIndex);
+        switch (realColumnIndex) {
             case COLTYPE_PEPTIDE_PREVIOUS_AA:
             case COLTYPE_PEPTIDE_NAME:
             case COLTYPE_PEPTIDE_NEXT_AA:

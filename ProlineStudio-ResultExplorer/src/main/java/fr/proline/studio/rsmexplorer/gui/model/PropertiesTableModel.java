@@ -405,9 +405,9 @@ public class PropertiesTableModel extends DecoratedTableModel implements GlobalT
         private static final int ROWTYPE_SEARCH_RESULT_NAME = 1;
         private static final int ROWTYPE_INSTRUMENT_NAME = 2;
         private static final int ROWTYPE_TARGET_DECOY_MODE = 3;
-        private static final int ROWTYPE_TARGET_DECOY_RULE = 4;
-        private static final int ROWTYPE_PEAKLIST_SOFTWARE_NAME = 5;
-        private static final int ROW_COUNT = 6; // get in sync
+        //private static final int ROWTYPE_TARGET_DECOY_RULE = 4;
+        private static final int ROWTYPE_PEAKLIST_SOFTWARE_NAME = 4;
+        private static final int ROW_COUNT = 5; // get in sync
         private final Color GROUP_COLOR_BACKGROUND = new Color(0,0,0);
         
         public GeneralInformationGroup(int rowStart) {
@@ -425,8 +425,8 @@ public class PropertiesTableModel extends DecoratedTableModel implements GlobalT
                     return "Instrument Name";
                 case ROWTYPE_TARGET_DECOY_MODE:
                     return "Target Decoy Mode";
-                case ROWTYPE_TARGET_DECOY_RULE:
-                    return "Decoy Rule";
+                /*case ROWTYPE_TARGET_DECOY_RULE:
+                    return "Decoy Rule";*/
                 case ROWTYPE_PEAKLIST_SOFTWARE_NAME:
                     return "Peaklist Software Name";
             }
@@ -477,9 +477,9 @@ public class PropertiesTableModel extends DecoratedTableModel implements GlobalT
                         return "";
                     }
                 }
-                case ROWTYPE_TARGET_DECOY_RULE: {
+                /*case ROWTYPE_TARGET_DECOY_RULE: {
                     return "NA";
-                }
+                }*/
                 case ROWTYPE_PEAKLIST_SOFTWARE_NAME:
                     return (peaklistSoftware==null) ? "" : peaklistSoftware.getName();
                     
@@ -510,21 +510,21 @@ public class PropertiesTableModel extends DecoratedTableModel implements GlobalT
         private static final int ROWTYPE_SEARCH_DATE = 1;
         private static final int ROWTYPE_SOFTWARE_NAME = 2;
         private static final int ROWTYPE_SOFTWARE_VERSION = 3;
-        private static final int ROWTYPE_DATABASE_NAME = 4;
-        private static final int ROWTYPE_TAXONOMY = 5;
-        private static final int ROWTYPE_ENZYME = 6;
-        private static final int ROWTYPE_MAX_MISSED_CLIVAGE = 7;
-        private static final int ROWTYPE_FIXED_MODIFICATIONS = 8;
-        private static final int ROWTYPE_VARIABLE_MODIFICATIONS = 9;
-        private static final int ROWTYPE_FRAGMENT_MASS_TOLERANCE = 10;
-        private static final int ROWTYPE_PEPTIDE_CHARGE_STATES = 11;
-        private static final int ROWTYPE_PEPTIDE_MASS_ERROR_TOLERANCE = 12;
-        private static final int ROWTYPE_PEPTIDE_MASS_ERROR_TOLERANCE_UNIT = 13;
-        private static final int ROWTYPE_FRAGMENT_CHARGE_STATES = 14;
-        private static final int ROWTYPE_FRAGMENT_MASS_ERROR_TOLERANCE = 15;
-        private static final int ROWTYPE_FRAGMENT_MASS_ERROR_TOLERANCE_UNIT = 16;
+        //private static final int ROWTYPE_DATABASE_NAME = 4;
+        private static final int ROWTYPE_TAXONOMY = 4;
+        private static final int ROWTYPE_ENZYME = 5;
+        private static final int ROWTYPE_MAX_MISSED_CLIVAGE = 6;
+        private static final int ROWTYPE_FIXED_MODIFICATIONS = 7;
+        private static final int ROWTYPE_VARIABLE_MODIFICATIONS = 8;
+        private static final int ROWTYPE_FRAGMENT_MASS_TOLERANCE = 9;
+        private static final int ROWTYPE_PEPTIDE_CHARGE_STATES = 10;
+        private static final int ROWTYPE_PEPTIDE_MASS_ERROR_TOLERANCE = 11;
+        //private static final int ROWTYPE_PEPTIDE_MASS_ERROR_TOLERANCE_UNIT = 12;
+        private static final int ROWTYPE_FRAGMENT_CHARGE_STATES = 12;
+        private static final int ROWTYPE_FRAGMENT_MASS_ERROR_TOLERANCE = 13;
+        //private static final int ROWTYPE_FRAGMENT_MASS_ERROR_TOLERANCE_UNIT = 15;
         
-        private static final int ROW_COUNT = 13; // get in sync
+        private static final int ROW_COUNT = 14; // get in sync
         private final Color GROUP_COLOR_BACKGROUND = new Color(254,163,71);
         
         public SearchPropertiesGroup(int rowStart) {
@@ -542,8 +542,8 @@ public class PropertiesTableModel extends DecoratedTableModel implements GlobalT
                     return "Software Name";
                 case ROWTYPE_SOFTWARE_VERSION:
                     return "Software Version";
-                case ROWTYPE_DATABASE_NAME:
-                    return "Database Name";
+                /*case ROWTYPE_DATABASE_NAME:
+                    return "Database Name";*/
                 case ROWTYPE_TAXONOMY:
                     return "Taxonomy";
                 case ROWTYPE_ENZYME:
@@ -560,14 +560,14 @@ public class PropertiesTableModel extends DecoratedTableModel implements GlobalT
                     return "Peptide Charge States";
                 case ROWTYPE_PEPTIDE_MASS_ERROR_TOLERANCE:
                     return "Peptide Mass Error Tolerance";
-                case ROWTYPE_PEPTIDE_MASS_ERROR_TOLERANCE_UNIT:
-                    return "Peptide Mass Error Tolerance Unit";
+                /*case ROWTYPE_PEPTIDE_MASS_ERROR_TOLERANCE_UNIT:
+                    return "Peptide Mass Error Tolerance Unit";*/
                 case ROWTYPE_FRAGMENT_CHARGE_STATES:
                     return "Fragment Charge States";
                 case ROWTYPE_FRAGMENT_MASS_ERROR_TOLERANCE:
                     return "Fragment Mass Error Tolerance";
-                case ROWTYPE_FRAGMENT_MASS_ERROR_TOLERANCE_UNIT:
-                    return "Fragment Mass Error Tolerance Unit";
+                /*case ROWTYPE_FRAGMENT_MASS_ERROR_TOLERANCE_UNIT:
+                    return "Fragment Mass Error Tolerance Unit";*/
             }
             
             return null;
@@ -608,9 +608,9 @@ public class PropertiesTableModel extends DecoratedTableModel implements GlobalT
                 case ROWTYPE_SOFTWARE_VERSION: {
                     return (searchSetting==null) ? "" : searchSetting.getSoftwareVersion();
                 }
-                case ROWTYPE_DATABASE_NAME: {
+                /*case ROWTYPE_DATABASE_NAME: {
                     return "NA";
-                }
+                }*/
                 case ROWTYPE_TAXONOMY: {
                     return (searchSetting == null) ? "" : searchSetting.getTaxonomy();
                 }
@@ -704,20 +704,20 @@ public class PropertiesTableModel extends DecoratedTableModel implements GlobalT
                     return (searchSetting == null) ? "" : searchSetting.getPeptideChargeStates();
                 }
                 case ROWTYPE_PEPTIDE_MASS_ERROR_TOLERANCE: {
-                    return (searchSetting == null) ? "" : searchSetting.getPeptideMassErrorTolerance().toString();
+                    return (searchSetting == null) ? "" : searchSetting.getPeptideMassErrorTolerance().toString()+" "+searchSetting.getPeptideMassErrorToleranceUnit();
                 }
-                case ROWTYPE_PEPTIDE_MASS_ERROR_TOLERANCE_UNIT: {
+                /*case ROWTYPE_PEPTIDE_MASS_ERROR_TOLERANCE_UNIT: {
                     return (searchSetting == null) ? "" : searchSetting.getPeptideMassErrorToleranceUnit();
-                }   
+                }*/  
                 case ROWTYPE_FRAGMENT_CHARGE_STATES: {
                     return (msmsSearch == null) ? "" : msmsSearch.getFragmentChargeStates();
                 }
                 case ROWTYPE_FRAGMENT_MASS_ERROR_TOLERANCE: {
-                    return (msmsSearch == null) ? "" : String.valueOf(msmsSearch.getFragmentMassErrorTolerance());
+                    return (msmsSearch == null) ? "" : String.valueOf(msmsSearch.getFragmentMassErrorTolerance())+" "+msmsSearch.getFragmentMassErrorToleranceUnit();
                 }
-                case ROWTYPE_FRAGMENT_MASS_ERROR_TOLERANCE_UNIT: {
+                /*case ROWTYPE_FRAGMENT_MASS_ERROR_TOLERANCE_UNIT: {
                     return (msmsSearch == null) ? "" : msmsSearch.getFragmentMassErrorToleranceUnit();
-                }
+                }*/
             }
             
             return null;
@@ -743,14 +743,14 @@ public class PropertiesTableModel extends DecoratedTableModel implements GlobalT
         
         private static final int ROWTYPE_QUERIES_NUMBER = 0;
         private static final int ROWTYPE_PSM_NUMBER = 1;
-        private static final int ROWTYPE_PEPTIDE_NUMBER = 2;
-        private static final int ROWTYPE_PROTEIN_NUMBER = 3;
-        private static final int ROWTYPE_DECOY_PSM_NUMBER = 4;
-        private static final int ROWTYPE_DECOY_PEPTIDE_NUMBER = 5;
-        private static final int ROWTYPE_DECOY_PROTEIN_NUMBER = 6;
+        //private static final int ROWTYPE_PEPTIDE_NUMBER = 2;
+        private static final int ROWTYPE_PROTEIN_NUMBER = 2;
+        private static final int ROWTYPE_DECOY_PSM_NUMBER = 3;
+        //private static final int ROWTYPE_DECOY_PEPTIDE_NUMBER = 4;
+        private static final int ROWTYPE_DECOY_PROTEIN_NUMBER = 4;
 
         
-        private static final int ROW_COUNT = 7; // get in sync
+        private static final int ROW_COUNT = 5; // get in sync
         private final Color GROUP_COLOR_BACKGROUND = new Color(76,166,107);
         
         public SearchResultInformationGroup(int rowStart) {
@@ -764,14 +764,14 @@ public class PropertiesTableModel extends DecoratedTableModel implements GlobalT
                     return "Queries Number";
                 case ROWTYPE_PSM_NUMBER:
                     return "PSM Number";
-                case ROWTYPE_PEPTIDE_NUMBER:
-                    return "Peptide Number";
+                /*case ROWTYPE_PEPTIDE_NUMBER:
+                    return "Peptide Number";*/
                 case ROWTYPE_PROTEIN_NUMBER:
                     return "Protein Number";
                 case ROWTYPE_DECOY_PSM_NUMBER:
                     return "PSM Decoy Number";
-                case ROWTYPE_DECOY_PEPTIDE_NUMBER:
-                    return "Peptide Decoy Number";
+                /*case ROWTYPE_DECOY_PEPTIDE_NUMBER:
+                    return "Peptide Decoy Number";*/
                 case ROWTYPE_DECOY_PROTEIN_NUMBER:
                     return "Protein Decoy Number";
 
@@ -804,8 +804,8 @@ public class PropertiesTableModel extends DecoratedTableModel implements GlobalT
                     }
                     return data.toString();
                 }
-                case ROWTYPE_PEPTIDE_NUMBER:
-                    return "NA";
+                /*case ROWTYPE_PEPTIDE_NUMBER:
+                    return "NA";*/
                 case ROWTYPE_PROTEIN_NUMBER: {
                     Object data = rset.getTransientData().getProteinMatchesCount();
                     if (data == null) {
@@ -823,8 +823,8 @@ public class PropertiesTableModel extends DecoratedTableModel implements GlobalT
                     }
                     return data.toString();
                 }
-                case ROWTYPE_DECOY_PEPTIDE_NUMBER:
-                    return "NA";
+                /*case ROWTYPE_DECOY_PEPTIDE_NUMBER:
+                    return "NA";*/
                 case ROWTYPE_DECOY_PROTEIN_NUMBER: {
                     if (rsetDecoy == null) {
                         return "";
@@ -862,14 +862,14 @@ public class PropertiesTableModel extends DecoratedTableModel implements GlobalT
         private static final int ROWTYPE_PROTEINSET_NUMBER = 0;
         private static final int ROWTYPE_PSM_NUMBER = 1;
         private static final int ROWTYPE_PEPTIDE_NUMBER= 2;
-        private static final int ROWTYPE_PROTEIN_NUMBER = 3;
-        private static final int ROWTYPE_PROTEINSET_DECOY_NUMBER = 4;
-        private static final int ROWTYPE_PSM_DECOY_NUMBER = 5;
-        private static final int ROWTYPE_PEPTIDE_DECOY_NUMBER= 6;
-        private static final int ROWTYPE_PROTEIN_DECOY_NUMBER = 7;
+        //private static final int ROWTYPE_PROTEIN_NUMBER = 3;
+        private static final int ROWTYPE_PROTEINSET_DECOY_NUMBER = 3;
+        private static final int ROWTYPE_PSM_DECOY_NUMBER = 4;
+        private static final int ROWTYPE_PEPTIDE_DECOY_NUMBER= 5;
+        //private static final int ROWTYPE_PROTEIN_DECOY_NUMBER = 7;
 
         
-        private static final int ROW_COUNT = 8; // get in sync
+        private static final int ROW_COUNT = 6; // get in sync
         private final Color GROUP_COLOR_BACKGROUND = new Color(71,163,254);
         
         private ArrayList<String> m_valuesName = new ArrayList<>();
@@ -919,16 +919,16 @@ public class PropertiesTableModel extends DecoratedTableModel implements GlobalT
                     return "PSM Number";
                 case ROWTYPE_PEPTIDE_NUMBER:
                     return "Peptide Number";
-                case ROWTYPE_PROTEIN_NUMBER:
-                    return "Protein Number";
+                /*case ROWTYPE_PROTEIN_NUMBER:
+                    return "Protein Number";*/
                 case ROWTYPE_PROTEINSET_DECOY_NUMBER:
                     return "Protein Sets Decoy Number";
                 case ROWTYPE_PSM_DECOY_NUMBER:
                     return "PSM Decoy Number";
                 case ROWTYPE_PEPTIDE_DECOY_NUMBER:
                     return "Peptide Decoy Number";
-                case ROWTYPE_PROTEIN_DECOY_NUMBER:
-                    return "Protein Decoy Number";
+                /*case ROWTYPE_PROTEIN_DECOY_NUMBER:
+                    return "Protein Decoy Number";*/
                 default:
                     return m_valuesName.get(rowIndex-ROW_COUNT);
             }
@@ -957,8 +957,8 @@ public class PropertiesTableModel extends DecoratedTableModel implements GlobalT
                     return String.valueOf(rsm.getTransientData().getNumberOfPeptideMatches());
                 case ROWTYPE_PEPTIDE_NUMBER:
                     return String.valueOf(rsm.getTransientData().getNumberOfPeptides());
-                case ROWTYPE_PROTEIN_NUMBER:
-                    return "NA";
+                /*case ROWTYPE_PROTEIN_NUMBER:
+                    return "NA";*/
                 case ROWTYPE_PROTEINSET_DECOY_NUMBER:
                     if (rsmDecoy == null) {
                         return "";
@@ -978,8 +978,8 @@ public class PropertiesTableModel extends DecoratedTableModel implements GlobalT
                         return "";
                     }
                     return String.valueOf(rsmDecoy.getTransientData().getNumberOfPeptides());
-                case ROWTYPE_PROTEIN_DECOY_NUMBER:
-                    return "NA";
+                /*case ROWTYPE_PROTEIN_DECOY_NUMBER:
+                    return "NA";*/
                 default: {
                     String key = m_valuesName.get(rowIndex-ROW_COUNT);
                     String value = m_valuesMap.get(columnIndex).get(key);

@@ -22,7 +22,6 @@ import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
-import fr.proline.studio.rsmexplorer.tree.xic.XICBiologicalSampleAnalysisNode;
 import fr.proline.studio.rsmexplorer.tree.xic.XICRunNode;
 import fr.proline.studio.settings.FilePreferences;
 import fr.proline.studio.settings.SettingsDialog;
@@ -48,7 +47,8 @@ public class CreateXICDialog extends DefaultDialog {
 
     
     private static final int STEP_PANEL_CREATE_XIC_DESIGN = 0;
-    private static final int STEP_PANEL_DEFINE_XIC_PARAMS = 1;
+    private static final int STEP_PANEL_DEFINE_RAW_FILES = 1;
+    private static final int STEP_PANEL_DEFINE_XIC_PARAMS = 2;
     private int m_step = STEP_PANEL_CREATE_XIC_DESIGN;
     
     private static final String SETTINGS_KEY = "XIC";
@@ -80,9 +80,10 @@ public class CreateXICDialog extends DefaultDialog {
     }
     
     public void setSelectableIdentTree(IdentificationTree selectionTree){
-//        final IdentificationTree childTree = IdentificationTree.getCurrentTree().copyDataSetRootSubTree(refDatasetNode.getDataset(), refDatasetNode.getDataset().getProject().getId());
-        this.m_selectionTree = selectionTree;        
+        m_selectionTree = selectionTree;        
     }
+    
+    
     
     public void displayDesignTree() {
         displayDesignTree(new DataSetNode(new DataSetData("XIC", Dataset.DatasetType.QUANTITATION, Aggregation.ChildNature.QUANTITATION_FRACTION)));
@@ -98,11 +99,50 @@ public class CreateXICDialog extends DefaultDialog {
         setButtonVisible(BUTTON_SAVE, false);
         setButtonVisible(BUTTON_BACK, false);
 
+        // Update and Replace panel
         replaceInternaleComponent(CreateXICDesignPanel.getPanel(m_finalXICDesignNode, m_selectionTree));
         revalidate();
         repaint();
          
     }
+    
+    
+    public void displayDefineRawFiles() {
+        m_step = STEP_PANEL_DEFINE_RAW_FILES;
+        
+        setButtonName(DefaultDialog.BUTTON_OK, "Next");
+        setButtonIcon(DefaultDialog.BUTTON_OK, IconManager.getIcon(IconManager.IconType.ARROW));
+        setButtonVisible(BUTTON_LOAD, false);
+        setButtonVisible(BUTTON_SAVE, false);
+        setButtonVisible(BUTTON_BACK, true);
+        
+        // Update and Replace panel
+        SelectRawFilesPanel selectRawFilesPanel =  SelectRawFilesPanel.getPanel(m_finalXICDesignNode);
+        replaceInternaleComponent(selectRawFilesPanel);
+        revalidate();
+        repaint();
+        
+        
+    }
+    
+    public void displayDefineXICParams() {
+        m_step = STEP_PANEL_DEFINE_XIC_PARAMS;
+        
+        setButtonName(DefaultDialog.BUTTON_OK, org.openide.util.NbBundle.getMessage(DefaultDialog.class, "DefaultDialog.okButton.text"));
+        setButtonIcon(DefaultDialog.BUTTON_OK, IconManager.getIcon(IconManager.IconType.OK));
+        
+        setButtonVisible(BUTTON_BACK, true);
+        setButtonVisible(BUTTON_LOAD, true);
+        setButtonVisible(BUTTON_SAVE, true);
+        
+        // Update and Replace panel
+        DefineQuantParamsPanel quantPanel = DefineQuantParamsPanel.getDefineQuantPanel();
+        quantPanel.resetScrollbar();
+        replaceInternaleComponent(quantPanel);
+        revalidate();
+        repaint();
+    }
+    
     
     
     
@@ -490,34 +530,27 @@ public class CreateXICDialog extends DefaultDialog {
     protected boolean okCalled() {
 
         if (m_step == STEP_PANEL_CREATE_XIC_DESIGN)  {
-            if ((!checkDesignStructure(m_finalXICDesignNode)) || (!checkRawFiles(m_finalXICDesignNode)) || (!checkBiologicalGroupName(m_finalXICDesignNode))) {
+            if ((!checkDesignStructure(m_finalXICDesignNode)) || (!checkBiologicalGroupName(m_finalXICDesignNode))) {
                 return false;
             }
 
-            // change to ok button
-            setButtonName(DefaultDialog.BUTTON_OK, "OK");
-            setButtonIcon(DefaultDialog.BUTTON_OK, IconManager.getIcon(IconManager.IconType.OK));
-            setButtonVisible(BUTTON_BACK, true);
-            setButtonVisible(BUTTON_LOAD, true);
-            setButtonVisible(BUTTON_SAVE, true);
-            
-            //Update panel
-         
-            DefineQuantParamsPanel quantPanel =  DefineQuantParamsPanel.getDefineQuantPanel();
-            quantPanel.resetScrollbar();
-            replaceInternaleComponent(quantPanel);
-            revalidate();
-            repaint();
-
-            m_step = STEP_PANEL_DEFINE_XIC_PARAMS;
+            displayDefineRawFiles();
             
             return false;
-        } else { //STEP_PANEL_DEFINE_QUANT_PARAMS
+        } else if (m_step == STEP_PANEL_DEFINE_RAW_FILES) {
+            
+            if (!checkRawFiles()) {
+                return false;
+            }
+            
+            displayDefineXICParams();
+            
+            return false;
+        } else { //STEP_PANEL_DEFINE_XIC_PARAMS
             
             if (!checkQuantParameters()) {
                 return false;
             }
-
 
             // Save Parameters  
             ParameterList parameterList = DefineQuantParamsPanel.getDefineQuantPanel().getParameterList();
@@ -606,8 +639,21 @@ public class CreateXICDialog extends DefaultDialog {
     
      @Override
     protected boolean backCalled() {
-         displayDesignTree(m_finalXICDesignNode);
-         return true;
+        if (m_step == STEP_PANEL_DEFINE_RAW_FILES) {
+
+            displayDesignTree(m_finalXICDesignNode);
+
+            return false;
+        } else if (m_step == STEP_PANEL_DEFINE_XIC_PARAMS) {
+            
+            displayDefineRawFiles();
+            
+            return false;
+        }
+        
+        return false;
+
+
      }
     
     private boolean checkDesignStructure(AbstractNode parentNode) {
@@ -687,7 +733,15 @@ public class CreateXICDialog extends DefaultDialog {
         return true;
     }
     
-    private boolean checkRawFiles(AbstractNode node) {
+    private boolean checkRawFiles() {
+        boolean check = SelectRawFilesPanel.getPanel().check(this);
+        if (!check) {
+            setStatus(true, "You must specify a Raw(mzDb) File for each Sample Analysis.");
+        }
+        return check;
+    }
+    
+    /*private boolean checkRawFiles(AbstractNode node) {
         AbstractNode.NodeTypes type = node.getType();
         if (type == AbstractNode.NodeTypes.BIOLOGICAL_SAMPLE_ANALYSIS) {
             XICBiologicalSampleAnalysisNode sampleAnalysisNode = (XICBiologicalSampleAnalysisNode) node;
@@ -707,7 +761,7 @@ public class CreateXICDialog extends DefaultDialog {
         }
 
         return true;
-    }
+    }*/
     
     private void showErrorOnNode(AbstractNode node, String error) {
 

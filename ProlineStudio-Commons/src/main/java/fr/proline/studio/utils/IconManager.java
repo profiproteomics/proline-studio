@@ -94,6 +94,8 @@ public class IconManager {
         WAND_HAT,
         FILE,
         FOLDER,
+        FOLDER_EXPANDED,
+        COMPUTER_NETWORK,
         FRAGMENTATION,
         BIOLOGICAL_GROUP,
         BIOLOGICAL_SAMPLE,
@@ -433,7 +435,11 @@ public class IconManager {
                 return "fr/proline/studio/images/document.png";
             case FOLDER:
                 return "fr/proline/studio/images/folder-horizontal.png";
-             case FRAGMENTATION:
+            case FOLDER_EXPANDED:
+                return "fr/proline/studio/images/folder-horizontal-open.png";
+            case COMPUTER_NETWORK:
+                return "fr/proline/studio/images/computer-network.png";
+            case FRAGMENTATION:
                 return "fr/proline/studio/images/fragmentation.png";
             case BIOLOGICAL_GROUP:
                 return "fr/proline/studio/images/biologicalGroup.png";

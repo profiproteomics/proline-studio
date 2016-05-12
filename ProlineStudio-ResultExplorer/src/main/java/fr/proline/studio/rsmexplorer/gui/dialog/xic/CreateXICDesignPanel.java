@@ -19,11 +19,15 @@ public class CreateXICDesignPanel extends JPanel {
     
     private static CreateXICDesignPanel m_singleton = null;
     
-    private AbstractNode m_rootNode;
-    private IdentificationTree m_selectionTree;
+    private final AbstractNode m_rootNode;
+    private final IdentificationTree m_selectionTree;
     
     public static CreateXICDesignPanel getPanel(AbstractNode rootNode, IdentificationTree selectionTree) {
-        if((m_singleton == null) || (!m_singleton.m_rootNode.equals(rootNode)) || (!m_singleton.m_selectionTree.equals(selectionTree))){
+        if((m_singleton == null) || 
+           (!m_singleton.m_rootNode.equals(rootNode)) ||
+           ((m_singleton.m_selectionTree!=null) && (selectionTree==null)) ||
+           ((m_singleton.m_selectionTree==null) && (selectionTree!=null)) ||
+           ((m_singleton.m_selectionTree!=null) && (!m_singleton.m_selectionTree.equals(selectionTree)))) {
             m_singleton = new CreateXICDesignPanel(rootNode,selectionTree);
         }
        
@@ -101,8 +105,7 @@ public class CreateXICDesignPanel extends JPanel {
         cFrame.gridy++;
         cFrame.weighty = 1;
         framePanel.add(sp, cFrame);
-        
-        
+
         c.gridx = 0;
         c.gridy = 0;
         c.weightx = 1;
@@ -110,6 +113,8 @@ public class CreateXICDesignPanel extends JPanel {
         c.anchor = GridBagConstraints.NORTHWEST;
         c.fill = GridBagConstraints.BOTH;
         mainPanel.add(framePanel, c);
+        
+        
         
         
         return mainPanel;

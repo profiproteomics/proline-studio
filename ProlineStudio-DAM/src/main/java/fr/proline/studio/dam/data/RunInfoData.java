@@ -96,9 +96,10 @@ public class RunInfoData extends AbstractData {
         
         String name = m_rawFileSource.getName();
         if (name != null) {
-            return "Raw File : "+name;
+            return name;
         }
-   
+
+        
         if (m_message != null) {
             return m_message;
         }
@@ -148,7 +149,10 @@ public class RunInfoData extends AbstractData {
                  return m_linkedRawFile.getMzDbFileName();
              }
              if (m_selectedRawFile != null) {
-                 return m_selectedRawFile.getMzDbFileName();
+                 String name = m_selectedRawFile.getMzDbFileName();
+                 if (name != null) {
+                     return name;
+                 }
              }
              if (m_rawFileOnDisk != null) {
                  return m_rawFileOnDisk.getName();

@@ -28,15 +28,9 @@ public class SelectRawFileDialog extends DefaultDialog {
 
     
     
-    private JRadioButton m_rbFileFromDatabaseRb = null;
-    private JRadioButton m_rbFileFromServerRb = null;
-    
-    private JTextField m_textField = null;
-    private JButton m_addFileButton = null;
+    private JLabel m_rbFileFromDatabaseLabel = null;
     private JList m_jlist;
-    
-    private File m_selectedRawFile = null;
-    private JFileChooser m_fileChooser = null;
+
     
     private static SelectRawFileDialog m_singleton = null;
 
@@ -64,52 +58,27 @@ public class SelectRawFileDialog extends DefaultDialog {
     
     public void init(ArrayList<RawFile> rawFileList, RunInfoData.RawFileSource rawFileSource) {
 
-        
-        
-
-        
-        
         RawFile linkedRawFile = rawFileSource.getLinkedRawFile();
         if (linkedRawFile != null) {
             addRawFileInList(rawFileList, linkedRawFile);
-            m_rbFileFromDatabaseRb.setSelected(true);
-            enableFileSelection(false);
-            m_textField.setText("");
-            m_selectedRawFile = null;
             return;
         }
         
         RawFile selectedRawFile = rawFileSource.getSelectedRawFile();
         if (selectedRawFile != null) {
             addRawFileInList(rawFileList, selectedRawFile);
-            m_rbFileFromDatabaseRb.setSelected(true);
-            enableFileSelection(false);
-            m_textField.setText("");
-            m_selectedRawFile = null;
             return;
         }
         
         File rawFileOnDisk = rawFileSource.getRawFileOnDisk();
         if (rawFileOnDisk != null) {
             addRawFileInList(rawFileList, null);
-            m_rbFileFromServerRb.setSelected(true);
-            enableFileSelection(true);
-            m_textField.setText(rawFileOnDisk.getPath());
-            m_selectedRawFile = rawFileOnDisk;
             return;
         }
         
         addRawFileInList(rawFileList, null);
-        
-        m_selectedRawFile = null;
-        m_textField.setText("");
-        if (rawFileList.isEmpty()) {
-            m_rbFileFromServerRb.setSelected(true); 
-            enableFileSelection(true);
-        } else {
-            m_rbFileFromDatabaseRb.setSelected(true);
-            enableFileSelection(false);
-        }
+
+
         
 
     }
@@ -152,43 +121,12 @@ public class SelectRawFileDialog extends DefaultDialog {
         c.fill = GridBagConstraints.BOTH;
         c.insets = new java.awt.Insets(5, 5, 5, 5);
 
-        
-        m_rbFileFromServerRb = new JRadioButton("Raw File from Server");
-        m_rbFileFromDatabaseRb = new JRadioButton("Registered Raw File In Database");
-        ButtonGroup group = new ButtonGroup();
-        group.add(m_rbFileFromServerRb);
-        group.add(m_rbFileFromDatabaseRb);
-        
-        m_rbFileFromServerRb.addActionListener(new ActionListener() {
 
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                enableFileSelection(true);
-            }
-            
-        });
-        m_rbFileFromDatabaseRb.addActionListener(new ActionListener() {
+        m_rbFileFromDatabaseLabel = new JLabel("Registered Raw File In Database");
 
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                enableFileSelection(false);
-            }
-            
-        });
-        
-        JPanel filePanel = getFilePanel();
-   
         c.gridx = 0;
         c.gridy = 0;
-        internalPanel.add(m_rbFileFromServerRb, c);
-        
-        c.gridy++;
-        c.weightx = 1.0;
-        internalPanel.add(filePanel, c);
-        
-        c.gridy++;
-        c.weightx = 0;
-        internalPanel.add(m_rbFileFromDatabaseRb, c);
+        internalPanel.add(m_rbFileFromDatabaseLabel, c);
         
         
         m_jlist = new JList();
@@ -207,118 +145,37 @@ public class SelectRawFileDialog extends DefaultDialog {
         };
 
         c.gridy++;
-         c.weightx = 1.0;
+        c.weightx = 1.0;
         c.weighty = 1.0;
         internalPanel.add(fileListScrollPane, c);
 
         return internalPanel;
     }
-    private void enableFileSelection(boolean enable) {
-        m_textField.setEnabled(enable);
-        m_addFileButton.setEnabled(enable);
-        m_jlist.setEnabled(!enable);
-    }
-
-    private JPanel getFilePanel() {
-
-        JPanel panel = new JPanel(new FlowLayout());
-
-        m_textField = new JTextField(30);
-        m_textField.setEditable(false);
-
-        m_addFileButton = new JButton(IconManager.getIcon(IconManager.IconType.OPEN_FILE));
-        m_addFileButton.setMargin(new java.awt.Insets(2, 2, 2, 2));
-        m_addFileButton.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-
-                if (m_fileChooser == null) {
-                    m_fileChooser = createFileChooser();
-                }
-
-                int result = m_fileChooser.showOpenDialog(m_addFileButton);
-                if (result == JFileChooser.APPROVE_OPTION) {
-
-                    File file = m_fileChooser.getSelectedFile();
-                    m_textField.setText(file.getPath());
-                    m_selectedRawFile = file;
-                }
-            }
-        });
 
 
-        panel.add(m_textField);
-        panel.add(m_addFileButton);
 
 
-        return panel;
-
-
-    }
-
-    private JFileChooser createFileChooser() {
-        
-        ServerFile defaultDirectory = null;
-        // -- get mzDB root path
-        ArrayList<String> roots = ServerFileSystemView.getServerFileSystemView().getLabels(RootInfo.TYPE_MZDB_FILES);
-        if ((roots == null) || (roots.isEmpty())) {
-            // check that the server has sent me at least one root path
-            LoggerFactory.getLogger("ProlineStudio.ResultExplorer").error("Server has returned no Root Path for mzDB Files. There is a problem with the server installation, please contact your administrator.");
-        } else {
-
-            String filePath = roots.get(0);
-            if (filePath != null) {
-                ServerFile f = new ServerFile(filePath, filePath, true, 0, 0);
-                if (f.isDirectory()) {
-                    defaultDirectory = f;
-                }
-            }
-        }
-
-        JFileChooser fileChooser = (defaultDirectory == null) ? new JFileChooser(ServerFileSystemView.getServerFileSystemView()) : new JFileChooser(defaultDirectory, ServerFileSystemView.getServerFileSystemView());
-        fileChooser.setMultiSelectionEnabled(false);
-        return fileChooser;
-
-    }
     
     @Override
     protected boolean okCalled() {
 
-        if (m_rbFileFromDatabaseRb.isSelected()) {
-            Object rawFileObject = m_jlist.getSelectedValue();
-            if (rawFileObject == null) {
-                setStatus(true, "You must select a Raw File");
-                highlight(m_jlist);
-                return false;
-            }
-        } else if (m_rbFileFromServerRb.isSelected()) {
-            if (m_selectedRawFile == null) {
-                setStatus(true, "You must select a Raw File from the Server");
-                highlight(m_textField);
-                return false;
-            }
+        Object rawFileObject = m_jlist.getSelectedValue();
+        if (rawFileObject == null) {
+            setStatus(true, "You must select a Raw File");
+            highlight(m_jlist);
+            return false;
         }
-        
+
+
         return true;
 
     }
 
     public RawFile getSelectedRawFile() {
-        if (m_rbFileFromDatabaseRb.isSelected()) {
-            return (RawFile) m_jlist.getSelectedValue();
-        } else {
-            return null;
-        }
+        return (RawFile) m_jlist.getSelectedValue();
+
     }
-    
-    public File getSelectedDiskFile() {
-        if (m_rbFileFromServerRb.isSelected()) {
-            return m_selectedRawFile;
-        } else {
-            return null;
-        }
-    }
+
     
     @Override
     protected boolean cancelCalled() {

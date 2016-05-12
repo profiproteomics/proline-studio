@@ -39,8 +39,6 @@ import javax.swing.tree.TreePath;
 public class XICDesignTree extends AbstractTree {
 
     private static XICDesignTree m_designTree = null;
-    //private boolean m_rootPathError = false;
-    //private ServerFile m_defaultDirectory = null;
 
     public static XICDesignTree getDesignTree() {
         return m_designTree;
@@ -108,7 +106,7 @@ public class XICDesignTree extends AbstractTree {
 
     @Override
     public void mouseClicked(MouseEvent e) {
-        if (SwingUtilities.isLeftMouseButton(e)) {
+        /*if (SwingUtilities.isLeftMouseButton(e)) {
             
             TreePath path = getPathForLocation(e.getX(), e.getY());
             if (path == null) {
@@ -157,50 +155,12 @@ public class XICDesignTree extends AbstractTree {
                         ((DefaultTreeModel)getModel()).nodeChanged(runNode);
                         return;
                     }
-                    File rawFileOnDisk = selectRawFileDialog.getSelectedDiskFile();
-                    if (rawFileOnDisk != null) {
-                        runNode.setRawFile(rawFileOnDisk);
-                    }
                 }
-                
-                /*if (runInfoData.hasPotentialRawFiles()) {
-                    // select one of the raw files
-                    SelectRawFileDialog selectRawFileDialog = SelectRawFileDialog.getSelectRawFileDialog(CreateXICDialog.getDialog(null));
-                    selectRawFileDialog.init(runInfoData.getPotentialRawFiles());
-                    selectRawFileDialog.centerToWindow(CreateXICDialog.getDialog(null));
-                    selectRawFileDialog.setVisible(true);
-                    if (selectRawFileDialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {
-                        RawFile rawFile = selectRawFileDialog.getSelectedRawFile();
-                        runInfoData.setRawFile(rawFile);
-                        runInfoData.setRun(rawFile.getRuns().get(0));
-                        runInfoData.setRawFilePath(rawFile.getDirectory()+File.separator+rawFile.getRawFileName());
-                        runInfoData.setRunInfoInDatabase(true);
-                        runNode.warnParent(false);
-                        ((DefaultTreeModel)getModel()).nodeChanged(runNode);
-                    } else {
-                        return;
-                    }
-                } else {
 
-                    if (m_fileChooser == null) {
-                        if ((m_defaultDirectory != null) && (m_defaultDirectory.isDirectory())) {
-                            m_fileChooser = new JFileChooser(m_defaultDirectory, ServerFileSystemView.getServerFileSystemView());
-                        } else {
-                            // should not happen in fact
-                            m_fileChooser = new JFileChooser(ServerFileSystemView.getServerFileSystemView());
-                        }
-                    }
-                    int result = m_fileChooser.showOpenDialog(this);
-                    if (result == JFileChooser.APPROVE_OPTION) {
-
-                        runNode.setRawFile(m_fileChooser.getSelectedFile());
-                    }
-                }*/
             }
 
-        }
+        }*/
     }
-    //private JFileChooser m_fileChooser = null;
 
     @Override
     public void mousePressed(MouseEvent e) {

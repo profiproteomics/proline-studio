@@ -13,12 +13,12 @@ public class ServerFile extends File {
     
     private char SEPARATOR = '/'; // default separator
     
-    private boolean m_isDirectory;
-    private long m_lastModified;
-    private long m_length;
+    private final boolean m_isDirectory;
+    private final long m_lastModified;
+    private final long m_length;
     
-    private String m_serverFilePath;
-    private String m_serverFileName;
+    private final String m_serverFilePath;
+    private final String m_serverFileName;
     
     
    /* public ServerFile() {
@@ -184,13 +184,17 @@ public class ServerFile extends File {
     
     @Override
     public File[] listFiles() {
-        // not done for the moment (look if it is needed)
-        throw new UnsupportedOperationException("listFiles Not supported.");
+
+        if (m_isDirectory) {
+            return ServerFileSystemView.getServerFileSystemView().getFiles(this, false);
+            
+        }
+        
+        return null;
     }
     
     @Override
     public File[] listFiles(FilenameFilter filter) {
-        // not done for the moment (look if it is needed)
         throw new UnsupportedOperationException("listFiles Not supported.");
     }
     

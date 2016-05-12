@@ -1,11 +1,9 @@
 package fr.proline.studio.rsmexplorer.tree.xic;
 
 import fr.proline.core.orm.uds.Dataset;
-import fr.proline.core.orm.uds.IdentificationDataset;
 import fr.proline.core.orm.uds.RawFile;
 import fr.proline.core.orm.uds.Run;
 import fr.proline.core.orm.uds.dto.DDataset;
-import fr.proline.core.orm.util.DataStoreConnectorFactory;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.data.AbstractData;
 import fr.proline.studio.dam.data.RunInfoData;
@@ -13,11 +11,10 @@ import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseRunsTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
-import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import fr.proline.studio.utils.IconManager;
+import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.ArrayList;
-import javax.persistence.EntityManager;
 import javax.swing.ImageIcon;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.MutableTreeNode;
@@ -301,7 +298,7 @@ public class XICRunNode extends AbstractNode {
     public void loadDataForProperties(Runnable callback) {
     }
 
-    public void setRawFile(final File selectedFile) {
+    public void setRawFile(final File selectedFile, ActionListener doneCallback) {
 
         // we search the raw file in the database, if we found it, we set this one
         // if we do not find it, we use the one choosed by the user
@@ -345,6 +342,10 @@ public class XICRunNode extends AbstractNode {
                 }
                 setIsChanging(false);
                 m_treeModel.nodeChanged(_this);
+
+                if (doneCallback != null) {
+                    doneCallback.actionPerformed(null);
+                }
                 
                 warnParent(false);
             }

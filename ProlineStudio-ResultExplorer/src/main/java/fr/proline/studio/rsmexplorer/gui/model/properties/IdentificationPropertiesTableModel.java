@@ -1,4 +1,4 @@
-package fr.proline.studio.rsmexplorer.gui.model;
+package fr.proline.studio.rsmexplorer.gui.model.properties;
 
 
 import fr.proline.core.orm.msi.Enzyme;
@@ -13,69 +13,40 @@ import fr.proline.core.orm.msi.PeaklistSoftware;
 import fr.proline.core.orm.msi.PtmSpecificity;
 import fr.proline.core.orm.msi.UsedPtm;
 import fr.proline.core.orm.uds.dto.DDataset;
-import fr.proline.studio.comparedata.ExtraDataType;
-import fr.proline.studio.filter.Filter;
-import fr.proline.studio.filter.StringFilter;
-import fr.proline.studio.graphics.PlotInformation;
-import fr.proline.studio.graphics.PlotType;
-import fr.proline.studio.table.DecoratedTableModel;
-import fr.proline.studio.table.GlobalTableModelInterface;
-import fr.proline.studio.table.LazyData;
 import fr.proline.studio.utils.SerializedPropertiesUtil;
 import java.awt.Color;
-import java.awt.Component;
 import java.io.File;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
-import javax.swing.JLabel;
-import javax.swing.JTable;
-import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.TableCellRenderer;
 
 
 /**
  *
  * @author JM235353
  */
-public class PropertiesTableModel extends DecoratedTableModel implements GlobalTableModelInterface {
+public class IdentificationPropertiesTableModel extends AbstractPropertiesTableModel {
 
-    public static final int COLTYPE_GROUP_NAME = 0;
-    public static final int COLTYPE_PROPERTY_NAME = 1;
     
-    private static final String[] m_columnNames = {"Group", "Type"};
-
-    private ArrayList<String> m_datasetNameArray = null;
-    private ArrayList<Long> m_projectIdArray = null;
-    private ArrayList<Long> m_datasetIdArray = null;
     private ArrayList<ResultSet> m_rsetArray = null;
     private ArrayList<ResultSummary> m_rsmArray = null;
-    
-    private ArrayList<DataGroup> m_dataGroupList = null;
-    private HashMap<Integer, DataGroup> m_dataGroupMap = null;
-    private int m_rowCount = -1;
-    
-    private String m_modelName; 
 
-    private final PropertiesRenderer m_propertiesOkRenderer = new PropertiesRenderer(false);
-    private final PropertiesRenderer m_propertiesNonOkRenderer = new PropertiesRenderer(true);
-    
-    private JTable m_table = null;
-    
-    private StringBuilder m_sb = new StringBuilder();
-    
-    public PropertiesTableModel() {
+    private final StringBuilder m_sb = new StringBuilder();
+
+    public IdentificationPropertiesTableModel() {
+        
     }
     
     public void setData(ArrayList<DDataset> datasetArrayList) {
 
+        m_datasetArrayList = datasetArrayList;
+        
         int nbDataset = datasetArrayList.size();
         m_datasetNameArray = new ArrayList<>(nbDataset);
         m_rsetArray = new ArrayList<>(nbDataset);
@@ -111,290 +82,13 @@ public class PropertiesTableModel extends DecoratedTableModel implements GlobalT
         fireTableStructureChanged();
     }
     
-    @Override
-    public String getColumnName(int col) {
-        if (col<=COLTYPE_PROPERTY_NAME) {
-            return m_columnNames[col];
-        }
-        return m_datasetNameArray.get(col-2);
-    }
-    
-    @Override
-    public int getColumnCount() {
-        if (m_datasetNameArray == null) {
-            return 2;
-        }
-        return 2+m_datasetNameArray.size();
-    }
-    
-    @Override
-    public int getRowCount() {
-        if (m_rowCount != -1) {
-            return m_rowCount;
-        }
-        if (m_dataGroupList == null) {
-            return 0;
-        }
-        
-        // calculate row count
-        m_rowCount = 0;
-        
-        for (DataGroup dataGroup : m_dataGroupList) {
-            int start = m_rowCount;
-            m_rowCount += dataGroup.getRowCount();
-            for (int i=start;i<m_rowCount;i++) {
-                m_dataGroupMap.put(i, dataGroup);
-            }
-        }
-        
-        return m_rowCount;
-    }
-    
-    @Override
-    public Object getValueAt(int rowIndex, int columnIndex) {
-        DataGroup dataGroup = m_dataGroupMap.get(rowIndex);
-        String v = (String) dataGroup.getValueAt(rowIndex, columnIndex);
-        if (v == null) {
-            v = "";
-        }
-        return v;
-    }
+
+
+
+
     
     
-
-    @Override
-    public String getToolTipForHeader(int col) {
-        return getColumnName(col);
-    }
-
-    @Override
-    public String getTootlTipValue(int row, int col) {
-        return null;
-    }
-
-    @Override
-    public TableCellRenderer getRenderer(int row, int col) {
-        
-        DataGroup dataGroup = m_dataGroupMap.get(row);
-        boolean isFirstRow = dataGroup.isFirstRow(row);
-        if (isFirstRow) {
-            return dataGroup.getRenderer(row);
-        } else if (col == COLTYPE_GROUP_NAME) {
-            return dataGroup.getRenderer(row);
-        } else if (col == COLTYPE_PROPERTY_NAME) {
-            int nbCol = getColumnCount();
-            if (nbCol>COLTYPE_PROPERTY_NAME+2) {
-                String value = (String) getValueAt(row, COLTYPE_PROPERTY_NAME+1);
-                for (int i = COLTYPE_PROPERTY_NAME + 2; i < nbCol; i++) {
-                    String valueCur = (String) getValueAt(row, i);
-                    if (value.compareTo(valueCur) != 0) {
-                        return m_propertiesNonOkRenderer;
-                    }
-                }
-            }
-        }
-        
-        return m_propertiesOkRenderer;
-
-    }
-
-    @Override
-    public GlobalTableModelInterface getFrozzenModel() {
-        return this;
-    }
-
-    @Override
-    public Long getTaskId() {
-        return -1l;
-    }
-
-    @Override
-    public LazyData getLazyData(int row, int col) {
-        return null;
-    }
-
-    @Override
-    public void givePriorityTo(Long taskId, int row, int col) {   
-    }
-
-    @Override
-    public void sortingChanged(int col) {
-        return; // not used
-    }
-
-    @Override
-    public int getSubTaskId(int col) {
-        return -1;
-    }
-
-    @Override
-    public String getDataColumnIdentifier(int columnIndex) {
-        return getColumnName(columnIndex);
-    }
-
-    @Override
-    public Class getDataColumnClass(int columnIndex) {
-        return getColumnClass(columnIndex);
-    }
-
-    @Override
-    public Object getDataValueAt(int rowIndex, int columnIndex) {
-        return getValueAt(rowIndex, columnIndex);
-    }
-
-    @Override
-    public int[] getKeysColumn() {
-        return null;
-    }
-
-    @Override
-    public int getInfoColumn() {
-        return COLTYPE_GROUP_NAME;
-    }
-
-    @Override
-    public void setName(String name) {
-        m_modelName = name;
-    }
-
-    @Override
-    public String getName() {
-        return m_modelName;
-    }
-
-    @Override
-    public Map<String, Object> getExternalData() {
-        return null;
-    }
-
-    @Override
-    public PlotInformation getPlotInformation() {
-        return null;
-    }
-
-    @Override
-    public ArrayList<ExtraDataType> getExtraDataTypes() {
-        return null;
-    }
-
-    @Override
-    public Object getValue(Class c) {
-        return null;
-    }
-
-    @Override
-    public Object getRowValue(Class c, int row) {
-        return null;
-    }
     
-    @Override
-    public Object getColValue(Class c, int col) {
-        return null;
-    }
-
-    @Override
-    public void addFilters(LinkedHashMap<Integer, Filter> filtersMap) {
-        filtersMap.put(COLTYPE_GROUP_NAME, new StringFilter(getColumnName(COLTYPE_GROUP_NAME), null, COLTYPE_GROUP_NAME));
-        filtersMap.put(COLTYPE_PROPERTY_NAME, new StringFilter(getColumnName(COLTYPE_PROPERTY_NAME), null, COLTYPE_PROPERTY_NAME));
-    }
-
-    @Override
-    public boolean isLoaded() {
-        return true;
-    }
-
-    @Override
-    public int getLoadingPercentage() {
-        return 100;
-    }
-
-    @Override
-    public PlotType getBestPlotType() {
-        return null;
-    }
-
-    @Override
-    public int getBestXAxisColIndex(PlotType plotType) {
-        return -1;
-    }
-
-    @Override
-    public int getBestYAxisColIndex(PlotType plotType) {
-        return -1;
-    }
-
-    @Override
-    public String getExportRowCell(int row, int col) {
-        return null;
-    }
-
-    @Override
-    public String getExportColumnName(int col) {
-        return getColumnName(col);
-    }
-    
-    
-    public abstract class DataGroup {
-
-        private String m_name;
-        protected int m_rowStart;
-        
-        private PropertiesRenderer m_groupRenderer = new PropertiesRenderer(false);
-        private PropertiesRenderer m_groupSubRenderer = new PropertiesRenderer(false);
-        
-        public DataGroup(String name, int rowStart) {
-            m_name = name;
-            m_rowStart = rowStart;
-        }
-
-        private String getName(int row) {
-            if (row == m_rowStart) {
-                return m_name;
-            }
-            if ((m_table==null) || m_table.getRowSorter().getSortKeys().isEmpty()) {
-                return ""; // no sorting, for group name, we show no text
-            }
-            return m_name;
-        }
-        
-        public TableCellRenderer getRenderer(int row) {
-            if (row == m_rowStart) {
-                return m_groupRenderer;
-            } else {
-                return m_groupSubRenderer;
-            }
-        }
-        
-        public Object getValueAt(int rowIndex, int columnIndex) {
-            if (columnIndex == COLTYPE_GROUP_NAME) {
-                return getName(rowIndex);
-            }
-            if (rowIndex == m_rowStart) {
-                return "";
-            }
-            
-            if (columnIndex == COLTYPE_PROPERTY_NAME) {
-                return getGroupNameAt(rowIndex-m_rowStart-1);
-            }
-            
-            return getGroupValueAt(rowIndex-m_rowStart-1, columnIndex-2);
-        }
-        
-        public boolean isFirstRow(int row) {
-            return row == m_rowStart;
-        }
-
-        
-        public abstract String getGroupValueAt(int rowIndex, int columnIndex);
-        public abstract String getGroupNameAt(int rowIndex);
-        public abstract Color getGroupColor(int row);
-        
-        public int getRowCount() {
-            return getRowCountImpl()+1;
-        }
-        
-        public abstract int getRowCountImpl();
-    }
     
      /**
      * GeneralInformationGroup
@@ -854,8 +548,8 @@ public class PropertiesTableModel extends DecoratedTableModel implements GlobalT
 
     }
     
-        /**
-     * SearchPropertiesGroup
+    /**
+     * IdentificationSummaryInformationGroup
      */
     public class IdentificationSummaryInformationGroup extends DataGroup {
         
@@ -1105,49 +799,6 @@ public class PropertiesTableModel extends DecoratedTableModel implements GlobalT
     }
     
     
-    public class PropertiesRenderer extends DefaultTableCellRenderer {
-
-        private final boolean m_nonOkRenderer;
-        private final Color COLOR_DIFFERENT = new Color(253,241,184);
-        
-        public PropertiesRenderer(boolean nonOkenderer) {
-            m_nonOkRenderer = nonOkenderer;
-        }
-
-        @Override
-        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-            m_table = table;
-
-            
-            super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-            setHorizontalAlignment(JLabel.RIGHT);
-
-            if (!isSelected) {
-                if (m_nonOkRenderer) {
-                    setBackground(COLOR_DIFFERENT);
-                    setForeground(Color.black);
-                } else if (column == COLTYPE_GROUP_NAME) {
-                    DataGroup dataGroup = m_dataGroupMap.get(row);
-                    if (dataGroup.isFirstRow(row)) {
-                        setBackground(dataGroup.getGroupColor(row));
-                        setForeground(Color.white);
-                    } else {
-                        setBackground(javax.swing.UIManager.getColor("Table.background"));
-                        setForeground(javax.swing.UIManager.getColor("Table.foreground"));
-                    }
-                } else {
-                    setBackground(javax.swing.UIManager.getColor("Table.background"));
-                    setForeground(javax.swing.UIManager.getColor("Table.foreground"));
-                }
-            } else {
-                setBackground(javax.swing.UIManager.getColor("Table.selectionBackground"));
-                setForeground(javax.swing.UIManager.getColor("Table.selectionForeground"));
-            }
-
-            return this;
-
-        }
-
-    }
+    
 
 }

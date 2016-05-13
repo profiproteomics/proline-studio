@@ -21,7 +21,9 @@ import fr.proline.studio.table.AbstractTableAction;
 import fr.proline.studio.table.DecoratedMarkerTable;
 import fr.proline.studio.table.DecoratedTableModel;
 import fr.proline.studio.table.TablePopupMenu;
+import fr.proline.studio.utils.IconManager;
 import fr.proline.studio.utils.PropertiesProviderInterface;
+import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.datatransfer.Transferable;
@@ -51,9 +53,22 @@ public class RsetAllPanel extends HourglassPanel implements DataBoxPanelInterfac
 
     }
     
-      private void initComponents() {
+    private void initComponents() {
+        setLayout(new BorderLayout());
 
-        setLayout(new GridBagLayout());
+        JPanel internalPanel = initInternalPanel();
+        add(internalPanel, BorderLayout.CENTER);
+
+        JToolBar toolbar = initToolbar();
+        add(toolbar, BorderLayout.WEST);
+
+    }
+    
+      private JPanel initInternalPanel() {
+
+          JPanel internalPanel = new JPanel();
+          
+        internalPanel.setLayout(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();
         c.anchor = GridBagConstraints.NORTHWEST;
         c.fill = GridBagConstraints.BOTH;
@@ -77,10 +92,32 @@ public class RsetAllPanel extends HourglassPanel implements DataBoxPanelInterfac
         c.weightx = 1;
         c.weighty = 1;
         c.gridwidth = 3;
-        add(m_markerContainerPanel, c);
+        internalPanel.add(m_markerContainerPanel, c);
         
+        return internalPanel;
+        
+    }
+      
 
-        
+      
+      
+    private JToolBar initToolbar() {
+        JToolBar toolbar = new JToolBar(JToolBar.VERTICAL);
+        toolbar.setFloatable(false);
+
+        JButton refreshButton = new JButton(IconManager.getIcon(IconManager.IconType.REFRESH));
+        refreshButton.setToolTipText("Refresh");
+        refreshButton.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                m_dataBox.dataChanged();
+            }
+        });
+
+        toolbar.add(refreshButton);
+
+        return toolbar;
     }
     
     public void setData(long taskId, ArrayList<ResultSet> resultSetList) {

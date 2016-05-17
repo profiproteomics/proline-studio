@@ -1,9 +1,11 @@
 package fr.proline.studio.rsmexplorer.gui.xic;
 
+import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.dto.DMasterQuantProteinSet;
 import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.core.orm.msi.dto.DProteinSet;
 import fr.proline.core.orm.msi.dto.DQuantProteinSet;
+import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
 import fr.proline.studio.comparedata.ExtraDataType;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadXicMasterQuantTask;
@@ -28,6 +30,7 @@ import fr.proline.studio.table.LazyTableModel;
 import fr.proline.studio.table.TableDefaultRendererManager;
 import fr.proline.studio.types.QuantitationType;
 import fr.proline.studio.types.XicGroup;
+import fr.proline.studio.types.XicMode;
 import fr.proline.studio.utils.StringUtils;
 import fr.proline.studio.utils.URLCellRenderer;
 import java.awt.Color;
@@ -972,7 +975,12 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
     @Override
     public ArrayList<ExtraDataType> getExtraDataTypes() {
         ArrayList<ExtraDataType> list = new ArrayList<>();
+        list.add(new ExtraDataType(DProteinSet.class, true));
         list.add(new ExtraDataType(DMasterQuantProteinSet.class, true));
+        list.add(new ExtraDataType(DDataset.class, false));
+        list.add(new ExtraDataType(QuantChannelInfo.class, false));
+        list.add(new ExtraDataType(ResultSummary.class, false));
+        list.add(new ExtraDataType(XicMode.class, false));
         registerSingleValuesAsExtraTypes(list);
         return list;
     }
@@ -986,6 +994,11 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
     public Object getRowValue(Class c, int row) {
         if (c.equals(DMasterQuantProteinSet.class)) {
             return m_proteinSets.get(row);
+        }
+        if (c.equals(DProteinSet.class)) {
+           DMasterQuantProteinSet masterQuantProteinSet = m_proteinSets.get(row);
+           return (masterQuantProteinSet != null) ? masterQuantProteinSet.getProteinSet() : null;
+
         }
         return null;
     }

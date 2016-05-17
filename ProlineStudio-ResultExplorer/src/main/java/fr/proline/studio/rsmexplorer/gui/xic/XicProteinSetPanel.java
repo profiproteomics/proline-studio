@@ -60,7 +60,6 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
-import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.TableModelListener;
@@ -97,7 +96,6 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
     private JLabel m_titleLabel;
     private final String TABLE_TITLE = "Proteins Sets";
 
-    private DQuantitationChannel[] m_quantChannels;
 
     public XicProteinSetPanel() {
         initComponents();
@@ -275,7 +273,7 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
     }
 
     public void setData(Long taskId, DQuantitationChannel[] quantChannels, List<DMasterQuantProteinSet> proteinSets, boolean isXICMode, boolean finished) {
-        m_quantChannels = quantChannels;
+
         m_isXICMode = isXICMode;
         ((QuantProteinSetTableModel) ((CompoundTableModel) m_quantProteinSetTable.getModel()).getBaseModel()).setData(taskId, quantChannels, proteinSets, isXICMode);
         //m_quantProteinSetTable.setColumnControlVisible(((QuantProteinSetTableModel) ((CompoundTableModel) m_quantProteinSetTable.getModel()).getBaseModel()).getColumnCount() < NB_MAX_COLUMN_CONTROL);

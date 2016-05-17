@@ -22,6 +22,7 @@ import fr.proline.studio.pattern.GroupParameter;
 import fr.proline.studio.rsmexplorer.gui.xic.PeptidePanel;
 import fr.proline.studio.rsmexplorer.gui.xic.QuantChannelInfo;
 import fr.proline.studio.rsmexplorer.gui.xic.XicPeptidePanel;
+import fr.proline.studio.types.XicMode;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -105,7 +106,7 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
             if (m_proteinSet == null || m_proteinSet.equals(oldProteinSet)) {
                 return;
             }
-            m_isXICMode = (Boolean) m_previousDataBox.getData(false, Boolean.class);
+            m_isXICMode = ((XicMode) m_previousDataBox.getData(false, XicMode.class)).isXicMode();
         }
 
         final int loadingId = setLoading();

@@ -20,6 +20,7 @@ import fr.proline.studio.pattern.GroupParameter;
 import fr.proline.studio.rsmexplorer.gui.xic.ProteinQuantPanel;
 import fr.proline.studio.rsmexplorer.gui.xic.QuantChannelInfo;
 import fr.proline.studio.rsmexplorer.gui.xic.XicProteinSetPanel;
+import fr.proline.studio.types.XicMode;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -59,6 +60,9 @@ public class DataboxXicProteinSet extends AbstractDataBox {
         outParameter.addParameter(DMasterQuantProteinSet.class, true);
         outParameter.addParameter(DDataset.class, true);
         outParameter.addParameter(ResultSummary.class, false);
+        outParameter.addParameter(QuantChannelInfo.class, false);
+        outParameter.addParameter(XicMode.class, false);
+        
         registerOutParameter(outParameter);
 
         outParameter = new GroupParameter();
@@ -73,6 +77,7 @@ public class DataboxXicProteinSet extends AbstractDataBox {
         outParameter.addParameter(CrossSelectionInterface.class, true);
         registerOutParameter(outParameter);
 
+        
     }
 
     public boolean isXICMode() {
@@ -80,7 +85,10 @@ public class DataboxXicProteinSet extends AbstractDataBox {
     }
 
     public void setXICMode(boolean isXICMode) {
-        this.m_isXICMode = isXICMode;
+        m_isXICMode = isXICMode;
+        if (m_panel != null) {
+            m_panel.addSingleValue(new XicMode((isXICMode)));
+        }
     }
 
     @Override
@@ -89,6 +97,8 @@ public class DataboxXicProteinSet extends AbstractDataBox {
         p.setName(m_typeName);
         p.setDataBox(this);
         m_panel = p;
+        
+        m_panel.addSingleValue(new XicMode((m_isXICMode)));
     }
 
     @Override
@@ -127,6 +137,7 @@ public class DataboxXicProteinSet extends AbstractDataBox {
                             m_quantChannelInfo.setAllMapAlignments(m_allMapAlignments);
                             m_quantChannelInfo.setMapAlignments(m_mapAlignments);
                             m_quantChannelInfo.setAllMaps(m_allMaps);
+                            m_panel.addSingleValue(m_quantChannelInfo);
 
                             // proteins set 
                             //DMasterQuantProteinSet[] masterQuantProteinSetArray = new DMasterQuantProteinSet[m_masterQuantProteinSetList.size()];
@@ -203,8 +214,8 @@ public class DataboxXicProteinSet extends AbstractDataBox {
             if (parameterType.equals(CrossSelectionInterface.class)) {
                 return ((GlobalTabelModelProviderInterface) m_panel).getCrossSelectionInterface();
             }
-            if (parameterType.equals(Boolean.class)) {
-                return isXICMode();
+            if (parameterType.equals(XicMode.class)) {
+                return new XicMode(isXICMode());
             }
 
         }

@@ -7,7 +7,11 @@ package fr.proline.studio.rsmexplorer.actions.identification;
 
 import fr.proline.core.orm.uds.Project;
 import fr.proline.core.orm.uds.dto.DDataset;
+import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.DatabaseDataManager;
+import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
+import fr.proline.studio.dam.tasks.SubTask;
+import fr.proline.studio.dam.tasks.xic.DatabaseLoadXicMasterQuantTask;
 import fr.proline.studio.dpm.jms.AccessJMSManagerThread;
 import fr.proline.studio.dpm.task.jms.AbstractJMSCallback;
 import fr.proline.studio.dpm.task.jms.GenerateSpectrumMatchTask;
@@ -78,8 +82,33 @@ public class GenerateSpectrumMatchesJMSAction extends AbstractRSMAction {
              Long resultSummaryId = dataset.getResultSummaryId();
             // TODO : if resultSummaryId != null open a dialog to choose between generate spectrum matches for the whole resultSet or only RSM
             Long resultSetId = dataset.getResultSetId();
-            GenerateSpectrumMatchTask task = new GenerateSpectrumMatchTask(callback, dataset.getName(), projectId, resultSetId, resultSummaryId, null);
-            AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
+            if ((resultSetId == null) && (dataset.isQuantiXIC())) { // can happen for XIC
+                // we read more info with resultSetId
+
+                AbstractDatabaseCallback rsetIdCallback = new AbstractDatabaseCallback() {
+
+                    @Override
+                    public boolean mustBeCalledInAWT() {
+                        return true;
+                    }
+
+                    @Override
+                    public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
+                        if (success) {
+                            GenerateSpectrumMatchTask task = new GenerateSpectrumMatchTask(callback, dataset.getName(), projectId, dataset.getResultSetId(), resultSummaryId, null);
+                            AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
+                        }
+                    }
+                };
+
+                DatabaseLoadXicMasterQuantTask task = new DatabaseLoadXicMasterQuantTask(rsetIdCallback);
+                task.initLoadQuantChannels(dataset.getProject().getId(), dataset);
+                AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
+
+            } else {
+                GenerateSpectrumMatchTask task = new GenerateSpectrumMatchTask(callback, dataset.getName(), projectId, resultSetId, resultSummaryId, null);
+                AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
+            }
         }
         
         

@@ -65,6 +65,10 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
         // Register possible out parameters
         GroupParameter outParameter = new GroupParameter();
         outParameter.addParameter(DMasterQuantPeptide.class, false);
+        outParameter.addParameter(XicMode.class, false);
+        outParameter.addParameter(DDataset.class, false);
+        outParameter.addParameter(ResultSummary.class, false);
+        outParameter.addParameter(QuantChannelInfo.class, false);
         registerOutParameter(outParameter);
 
         outParameter = new GroupParameter();
@@ -82,7 +86,10 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
     }
 
     public void setXICMode(boolean isXICMode) {
-        this.m_isXICMode = isXICMode;
+        m_isXICMode = isXICMode;
+        if (m_panel != null) {
+            m_panel.addSingleValue(new XicMode((isXICMode)));
+        }
     }
 
     @Override
@@ -91,6 +98,8 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
         p.setName(m_typeName);
         p.setDataBox(this);
         m_panel = p;
+        
+        m_panel.addSingleValue(new XicMode((m_isXICMode)));
     }
 
     @Override
@@ -150,6 +159,7 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
                                 m_quantChannelInfo.setAllMapAlignments(m_allMapAlignments);
                                 m_quantChannelInfo.setMapAlignments(m_mapAlignments);
                                 m_quantChannelInfo.setAllMaps(m_allMaps);
+                                m_panel.addSingleValue(m_quantChannelInfo);
 
                                 ((XicPeptidePanel) m_panel).setData(taskId, m_proteinSet != null, quantitationChannelArray, m_masterQuantPeptideList, m_isXICMode, finished);
                                 
@@ -219,8 +229,8 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
             if (parameterType.equals(CrossSelectionInterface.class)) {
                 return ((GlobalTabelModelProviderInterface) m_panel).getCrossSelectionInterface();
             }
-            if (parameterType.equals(Boolean.class)) {
-                return isXICMode();
+            if (parameterType.equals(XicMode.class)) {
+                return new XicMode(isXICMode());
             }
         }
         return super.getData(getArray, parameterType);

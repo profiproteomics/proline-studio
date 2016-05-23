@@ -58,7 +58,7 @@ public class DataboxXicProteinSet extends AbstractDataBox {
         GroupParameter outParameter = new GroupParameter();
         outParameter.addParameter(DProteinSet.class, true);
         outParameter.addParameter(DMasterQuantProteinSet.class, true);
-        outParameter.addParameter(DDataset.class, true);
+        outParameter.addParameter(DDataset.class, false);
         outParameter.addParameter(ResultSummary.class, false);
         outParameter.addParameter(QuantChannelInfo.class, false);
         outParameter.addParameter(XicMode.class, false);

@@ -20,6 +20,7 @@ import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.GroupParameter;
 import fr.proline.studio.rsmexplorer.gui.xic.QuantChannelInfo;
 import fr.proline.studio.rsmexplorer.gui.xic.XicPeptideIonPanel;
+import fr.proline.studio.types.XicMode;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -66,7 +67,7 @@ public class DataboxXicPeptideIon extends AbstractDataBox {
         registerOutParameter(outParameter);
 
         outParameter = new GroupParameter();
-        outParameter.addParameter(DDataset.class, true);
+        outParameter.addParameter(DDataset.class, false);
         registerOutParameter(outParameter);
 
         outParameter = new GroupParameter();
@@ -81,6 +82,8 @@ public class DataboxXicPeptideIon extends AbstractDataBox {
         p.setName(m_typeName);
         p.setDataBox(this);
         m_panel = p;
+        
+        m_panel.addSingleValue(new XicMode((m_isXICMode)));
     }
 
     @Override
@@ -95,7 +98,7 @@ public class DataboxXicPeptideIon extends AbstractDataBox {
             if (m_masterQuantPeptide == null || m_masterQuantPeptide.equals(oldPeptide)) {
                 return;
             }
-            m_isXICMode = (Boolean) m_previousDataBox.getData(false, Boolean.class);
+            m_isXICMode = ((XicMode) m_previousDataBox.getData(false, XicMode.class)).isXicMode();
         }
         final int loadingId = setLoading();
 
@@ -182,7 +185,10 @@ public class DataboxXicPeptideIon extends AbstractDataBox {
     }
 
     public void setXICMode(boolean isXICMode) {
-        this.m_isXICMode = isXICMode;
+        m_isXICMode = isXICMode;
+        if (m_panel != null) {
+            m_panel.addSingleValue(new XicMode((isXICMode)));
+        }
     }
 
     @Override

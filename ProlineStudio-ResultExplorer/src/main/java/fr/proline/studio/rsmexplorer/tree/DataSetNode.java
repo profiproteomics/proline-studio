@@ -155,7 +155,7 @@ public class DataSetNode extends AbstractNode {
     
     public boolean hasResultSet() {
         DDataset dataSet = ((DataSetData) getData()).getDataset();
-        return (dataSet.getResultSetId() != null);
+        return (dataSet.getResultSetId() != null) || (dataSet.isQuantiXIC());
     }
     
     public Long getResultSetId() {

@@ -11,6 +11,7 @@ import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
 import fr.proline.studio.comparedata.ExtraDataType;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadXicMasterQuantTask;
+import fr.proline.studio.filter.ConvertValueInterface;
 import fr.proline.studio.filter.DoubleFilter;
 import fr.proline.studio.filter.Filter;
 import fr.proline.studio.filter.IntegerFilter;
@@ -452,7 +453,7 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
                     if (peptideInstance.getBestPeptideMatch() != null) {
                         lazyData.setData(peptideInstance.getBestPeptideMatch());
                     }else {
-                        lazyData.setData("");
+                        lazyData.setData(null);
                     }
                 }
                 return lazyData;
@@ -738,7 +739,18 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
     
    @Override
    public void addFilters(LinkedHashMap<Integer, Filter> filtersMap) {
-        filtersMap.put(COLTYPE_PEPTIDE_NAME, new StringDiffFilter(getColumnName(COLTYPE_PEPTIDE_NAME), null, COLTYPE_PEPTIDE_NAME));
+       
+       ConvertValueInterface peptideConverter = new ConvertValueInterface() {
+           @Override
+           public Object convertValue(Object o) {
+               if (o == null) {
+                   return null;
+               }
+               return ((DPeptideMatch) o).getPeptide().getSequence();
+           }
+
+       };
+        filtersMap.put(COLTYPE_PEPTIDE_NAME, new StringDiffFilter(getColumnName(COLTYPE_PEPTIDE_NAME), peptideConverter, COLTYPE_PEPTIDE_NAME));
         filtersMap.put(COLTYPE_PEPTIDE_PTM, new StringFilter(getColumnName(COLTYPE_PEPTIDE_PTM), null, COLTYPE_PEPTIDE_PTM));
         filtersMap.put(COLTYPE_PEPTIDE_PROTEINSET_COUNT, new IntegerFilter(getColumnName(COLTYPE_PEPTIDE_PROTEINSET_COUNT), null, COLTYPE_PEPTIDE_PROTEINSET_COUNT));
         filtersMap.put(COLTYPE_PEPTIDE_CLUSTER, new StringFilter(getColumnName(COLTYPE_PEPTIDE_CLUSTER), null, COLTYPE_PEPTIDE_CLUSTER));

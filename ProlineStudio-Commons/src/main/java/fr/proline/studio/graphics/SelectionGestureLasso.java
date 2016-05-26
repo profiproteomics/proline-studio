@@ -90,6 +90,10 @@ public class SelectionGestureLasso extends AbstractSelectionGesture {
         return path;
     }
     
+    public Polygon getSelectionPolygon() {
+        return m_selectionPolygon;
+    }
+    
     public void paint(Graphics g) {
         if (!m_isSelecting) {
             return;

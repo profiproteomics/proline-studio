@@ -620,7 +620,19 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
                 mustRepaint = true;
             } else if (action == SelectionGestureLasso.ACTION_SURROUND) {
 
-                Path2D.Double  selectionShape =  m_selectionGesture.getSelectionPath();
+                Path2D.Double path = new Path2D.Double();
+                
+                Polygon p =  m_selectionGesture.getSelectionPolygon();
+                double valueX = m_xAxis.pixelToValue(p.xpoints[0]);
+                double valueY = m_yAxis.pixelToValue(p.ypoints[0]);
+                path.moveTo(valueX, valueY);
+                for (int i = 1; i < p.npoints; i++) {
+                    valueX = m_xAxis.pixelToValue(p.xpoints[i]);
+                    valueY = m_yAxis.pixelToValue(p.ypoints[i]);
+                    path.lineTo(valueX, valueY);
+                }
+                path.closePath();
+                
 
                 double xMin = m_xAxis.pixelToValue(m_selectionGesture.getMinX());
                 double xMax = m_xAxis.pixelToValue(m_selectionGesture.getMaxX());
@@ -628,7 +640,7 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
                 double yMax = m_yAxis.pixelToValue(m_selectionGesture.getMinY());
                 
                 if (!m_plots.isEmpty()){
-                    m_plots.get(0).select(selectionShape, xMin, xMax, yMin, yMax, isCtrlOrShiftDown);
+                    m_plots.get(0).select(path, xMin, xMax, yMin, yMax, isCtrlOrShiftDown);
                 }
                 m_updateDoubleBuffer = true;
                 mustRepaint = true;

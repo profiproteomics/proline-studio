@@ -29,7 +29,7 @@ public class GraphicGraphNode extends GraphNode {
         m_graphic = graphic;
         
         m_inConnectors = new LinkedList<>();
-        m_inConnectors.add(new GraphConnector(this, false));
+        m_inConnectors.add(new GraphConnector(this, false, panel));
     }
 
     @Override

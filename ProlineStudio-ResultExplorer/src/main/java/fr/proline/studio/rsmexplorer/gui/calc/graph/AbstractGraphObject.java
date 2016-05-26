@@ -54,6 +54,10 @@ public abstract class AbstractGraphObject {
         m_selected = s;
     }
     
+    public boolean isSelected() {
+        return m_selected;
+    }
+    
     public void setHighlighted(boolean h) {
         m_hightlighted = h;
     }

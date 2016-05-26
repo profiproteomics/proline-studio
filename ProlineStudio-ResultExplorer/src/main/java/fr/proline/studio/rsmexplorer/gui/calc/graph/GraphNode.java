@@ -339,6 +339,12 @@ public abstract class GraphNode extends AbstractConnectedGraphObject {
         }
     }
     
+    public void deleteAction() {
+        delete();
+        m_graphPanel.removeGraphNode(this);
+        m_graphPanel.repaint();
+    }
+    
     @Override
     public JPopupMenu createPopup(final GraphPanel panel) {
         
@@ -351,7 +357,7 @@ public abstract class GraphNode extends AbstractConnectedGraphObject {
         popup.add(new ProcessAction(this));
         popup.add(new ErrorAction(this));
         popup.addSeparator();
-        popup.add(new DeleteAction(panel, this));
+        popup.add(new DeleteAction());
         popup.addPopupMenuListener(new PopupMenuListener() {
 
             @Override
@@ -372,21 +378,14 @@ public abstract class GraphNode extends AbstractConnectedGraphObject {
     }
  
     public class DeleteAction  extends AbstractAction {
-        
-        private AbstractConnectedGraphObject m_graphObject = null;
-        private GraphPanel m_graphPanel = null;
-        
-        public DeleteAction(GraphPanel panel, AbstractConnectedGraphObject graphObject) {
+
+        public DeleteAction() {
             super("Delete");
-            m_graphPanel = panel;
-            m_graphObject = graphObject;
         }
         
         @Override
         public void actionPerformed(ActionEvent e) {
-            m_graphObject.delete();
-            m_graphPanel.removeGraphNode(m_graphObject);
-            m_graphPanel.repaint();
+            deleteAction();
         }
     }
     

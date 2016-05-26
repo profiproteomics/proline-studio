@@ -31,7 +31,7 @@ public class DataGraphNode extends GraphNode {
         super(panel);
         m_tableInfo = tableInfo;
         
-        m_outConnector = new GraphConnector(this, true);
+        m_outConnector = new GraphConnector(this, true, panel);
     }
 
     @Override

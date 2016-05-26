@@ -26,13 +26,13 @@ public class FunctionGraphNode extends GraphNode {
     public FunctionGraphNode(AbstractFunction function, GraphPanel panel) {
         super(panel);
         m_function = function;
-        m_outConnector = new GraphConnector(this, true);
+        m_outConnector = new GraphConnector(this, true, panel);
         
         int nbParameters = function.getNumberOfInParameters();
         if (nbParameters > 0) {
             m_inConnectors = new LinkedList<>();
             for (int i = 0; i < nbParameters; i++) {
-                m_inConnectors.add(new GraphConnector(this, false));
+                m_inConnectors.add(new GraphConnector(this, false, panel));
             }
         }
     }

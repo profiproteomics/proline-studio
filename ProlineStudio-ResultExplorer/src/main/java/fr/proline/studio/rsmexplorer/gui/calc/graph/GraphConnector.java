@@ -29,12 +29,15 @@ public class GraphConnector extends AbstractConnectedGraphObject {
     private final GraphNode m_graphNode;
     private GraphLink m_link = null;
     
+    protected GraphPanel m_graphPanel = null;
+    
     private final LinkedList<GraphConnector> m_connections = new LinkedList(); 
     
-    public GraphConnector(GraphNode graphNode, boolean out) {
+    public GraphConnector(GraphNode graphNode, boolean out, GraphPanel panel) {
         super(TypeGraphObject.CONNECTOR);
         m_out = out;
         m_graphNode = graphNode;
+        m_graphPanel = panel;
     }
     
     public LinkedList<GraphNode> getOutLinkedGraphNodes() {
@@ -179,7 +182,7 @@ public class GraphConnector extends AbstractConnectedGraphObject {
         if ((!m_out) && (!m_connections.isEmpty())) {
             GraphConnector connector = m_connections.getFirst();
             if (m_link == null) {
-                m_link = new GraphLink(this);
+                m_link = new GraphLink(this, m_graphPanel);
             }
             m_link.setLink(getXConnection(), getYConnection(), connector.getXConnection(), connector.getYConnection());
 
@@ -262,6 +265,10 @@ public class GraphConnector extends AbstractConnectedGraphObject {
     @Override
     public String getPreviousDataName() {
         return null;
+    }
+    
+    public void deleteAction() {
+        // never deleted directly by an action
     }
     
 }

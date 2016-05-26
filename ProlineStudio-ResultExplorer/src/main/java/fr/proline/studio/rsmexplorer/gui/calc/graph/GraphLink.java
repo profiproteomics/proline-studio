@@ -32,9 +32,12 @@ public class GraphLink extends AbstractConnectedGraphObject {
     private int m_y1;
     private int m_y2;
     
-    public GraphLink(GraphConnector connector) {
+    protected GraphPanel m_graphPanel = null;
+    
+    public GraphLink(GraphConnector connector, GraphPanel panel) {
         super(TypeGraphObject.LINK);
         m_connector = connector;
+        m_graphPanel = panel;
     }
     
     @Override
@@ -266,7 +269,7 @@ public class GraphLink extends AbstractConnectedGraphObject {
     @Override
     public JPopupMenu createPopup(final GraphPanel panel) {
         JPopupMenu popup = new JPopupMenu();
-        popup.add(new DeleteAction(panel, this));
+        popup.add(new DeleteAction());
         popup.addPopupMenuListener(new PopupMenuListener() {
 
             @Override
@@ -297,22 +300,21 @@ public class GraphLink extends AbstractConnectedGraphObject {
         return null;
     }
  
+    public void deleteAction() {
+        m_connector.deleteInLink();
+        m_graphPanel.repaint();
+    }
+    
     public class DeleteAction  extends AbstractAction {
         
-        private GraphLink m_graphLink = null;
-        private GraphPanel m_graphPanel = null;
-        
-        public DeleteAction(GraphPanel panel, GraphLink graphLink) {
+
+        public DeleteAction() {
             super("Delete");
-            m_graphPanel = panel;
-            m_graphLink = graphLink;
         }
         
         @Override
         public void actionPerformed(ActionEvent e) {
-            
-            m_graphLink.m_connector.deleteInLink();
-            m_graphPanel.repaint();
+            deleteAction();
         }
     }
 }

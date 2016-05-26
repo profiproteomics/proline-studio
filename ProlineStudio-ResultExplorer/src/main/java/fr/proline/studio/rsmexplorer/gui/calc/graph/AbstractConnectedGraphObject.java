@@ -34,4 +34,7 @@ public abstract class AbstractConnectedGraphObject extends AbstractGraphObject {
     public abstract String getFullName();
   
     public abstract GlobalTableModelInterface getGlobalTableModelInterface();
+    
+    
+    public abstract void deleteAction();
 }

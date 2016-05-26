@@ -16,6 +16,7 @@ import java.awt.Point;
 import java.awt.Polygon;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
+import java.awt.Shape;
 import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.MouseEvent;
@@ -59,7 +60,7 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
     private ArrayList<PlotAbstract> m_plots = null;
     
     private final ZoomGesture m_zoomGesture = new ZoomGesture();
-    private final SelectionGesture m_selectionGesture = new SelectionGesture();
+    private final SelectionGestureLasso m_selectionGesture = new SelectionGestureLasso();
     private final PanAxisGesture m_panAxisGesture = new PanAxisGesture();
     private final MoveGesture m_moveGesture = new MoveGesture();
     
@@ -607,7 +608,7 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
             boolean isCtrlOrShiftDown = ((modifier & (InputEvent.SHIFT_MASK | InputEvent.CTRL_MASK)) != 0);
 
             int action = m_selectionGesture.getAction();
-            if (action == SelectionGesture.ACTION_CLICK) {
+            if (action == SelectionGestureLasso.ACTION_CLICK) {
                 Point p = m_selectionGesture.getClickPoint();
                 double valueX = m_xAxis.pixelToValue(p.x);
                 double valueY = m_yAxis.pixelToValue(p.y);
@@ -617,27 +618,17 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
                 }
                 m_updateDoubleBuffer = true;
                 mustRepaint = true;
-            } else if (action == SelectionGesture.ACTION_SURROUND) {
-                Path2D.Double path = new Path2D.Double();
-                
-                Polygon p =  m_selectionGesture.getSelectionPolygon();
-                double valueX = m_xAxis.pixelToValue(p.xpoints[0]);
-                double valueY = m_yAxis.pixelToValue(p.ypoints[0]);
-                path.moveTo(valueX, valueY);
-                for (int i = 1; i < p.npoints; i++) {
-                    valueX = m_xAxis.pixelToValue(p.xpoints[i]);
-                    valueY = m_yAxis.pixelToValue(p.ypoints[i]);
-                    path.lineTo(valueX, valueY);
-                }
-                path.closePath();
-                
+            } else if (action == SelectionGestureLasso.ACTION_SURROUND) {
+
+                Path2D.Double  selectionShape =  m_selectionGesture.getSelectionPath();
+
                 double xMin = m_xAxis.pixelToValue(m_selectionGesture.getMinX());
                 double xMax = m_xAxis.pixelToValue(m_selectionGesture.getMaxX());
                 double yMin = m_yAxis.pixelToValue(m_selectionGesture.getMaxY()); // inversion of min max is normal between pixel and Y Axis
                 double yMax = m_yAxis.pixelToValue(m_selectionGesture.getMinY());
                 
                 if (!m_plots.isEmpty()){
-                    m_plots.get(0).select(path, xMin, xMax, yMin, yMax, isCtrlOrShiftDown);
+                    m_plots.get(0).select(selectionShape, xMin, xMax, yMin, yMax, isCtrlOrShiftDown);
                 }
                 m_updateDoubleBuffer = true;
                 mustRepaint = true;

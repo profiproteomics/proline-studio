@@ -1,39 +1,26 @@
 package fr.proline.studio.graphics;
 
 import fr.proline.studio.utils.CyclicColorPalette;
-import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.Polygon;
+import java.awt.geom.Path2D;
 
 /**
  * Used to manage selection gesture
  * @author JM235353
  */
-public class SelectionGesture {
-    public static final int ACTION_NONE = 0;
-    public static final int ACTION_CLICK = 1;
-    public static final int ACTION_SURROUND = 2;
-    
+public class SelectionGestureLasso extends AbstractSelectionGesture {
+
     private final Polygon m_selectionPolygon = new Polygon();
+
+
+
     
-    private boolean m_isSelecting = false;
-    private int m_action = ACTION_NONE;
-    
-    private static final int MIN_SURROUND_DELTA = 10;
-    
-    private int m_minX;
-    private int m_maxX;
-    private int m_minY;
-    private int m_maxY;
-    
-    public SelectionGesture() {
-        
+    public SelectionGestureLasso() {
     }
-    
-    public boolean isSelecting() {
-        return m_isSelecting;
-    }
+
+
     
     public void startSelection(int x, int y) {
         m_selectionPolygon.reset();
@@ -44,11 +31,12 @@ public class SelectionGesture {
     }
     
     public void continueSelection(int x, int y) {
-        
-        int lastIndex = m_selectionPolygon.npoints-1;
-        if ((m_selectionPolygon.xpoints[lastIndex] != x) ||  (m_selectionPolygon.ypoints[lastIndex] != y)) {
+
+        int lastIndex = m_selectionPolygon.npoints - 1;
+        if ((m_selectionPolygon.xpoints[lastIndex] != x) || (m_selectionPolygon.ypoints[lastIndex] != y)) {
             m_selectionPolygon.addPoint(x, y);
         }
+
     }
     
     public void stopSelection(int x, int y) {
@@ -85,13 +73,21 @@ public class SelectionGesture {
         }
 
     }
-   
-    public Polygon getSelectionPolygon() {
-        return m_selectionPolygon;
-    }
+
     
     public Point getClickPoint() {
         return new Point(m_selectionPolygon.xpoints[m_selectionPolygon.npoints-1], m_selectionPolygon.ypoints[m_selectionPolygon.npoints-1]);
+    }
+    
+    public Path2D.Double getSelectionPath() {
+
+        Path2D.Double path = new Path2D.Double();
+        path.moveTo(m_selectionPolygon.xpoints[0], m_selectionPolygon.xpoints[0]);
+        for (int i = 1; i < m_selectionPolygon.npoints; i++) {
+            path.lineTo(m_selectionPolygon.xpoints[i], m_selectionPolygon.ypoints[i]);
+        }
+        path.closePath();
+        return path;
     }
     
     public void paint(Graphics g) {

@@ -1,5 +1,7 @@
 package fr.proline.studio.rsmexplorer.gui.calc;
 
+import fr.proline.studio.graphics.SelectionGestureLasso;
+import fr.proline.studio.graphics.SelectionGestureSquare;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.python.data.TableInfo;
 import fr.proline.studio.rsmexplorer.gui.calc.functions.AbstractFunction;
@@ -20,12 +22,15 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
+import java.awt.Polygon;
 import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
+import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.awt.geom.Path2D;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -57,6 +62,7 @@ public class GraphPanel extends JPanel implements MouseListener, MouseMotionList
     private AbstractConnectedGraphObject m_overObject = null;
     private GraphConnector m_selectedConnector = null;
     private GraphLink m_selectedLink = null;
+    private final SelectionGestureSquare m_selectionGesture = new SelectionGestureSquare();
     
     private int m_curMoveCursor = Cursor.DEFAULT_CURSOR;
 
@@ -284,6 +290,8 @@ public class GraphPanel extends JPanel implements MouseListener, MouseMotionList
             g.setColor(Color.black);
             g.drawLine(x, y, m_mouseDragX, m_mouseDragY);
         }
+        
+        m_selectionGesture.paint(g);
 
     }
     private final HashSet<GraphGroup> m_paintedGroups = new HashSet<>();
@@ -384,6 +392,8 @@ public class GraphPanel extends JPanel implements MouseListener, MouseMotionList
                     }
                 }
                 break;
+            } else {
+                m_selectionGesture.startSelection(x, y);
             }
 
         }
@@ -430,13 +440,13 @@ public class GraphPanel extends JPanel implements MouseListener, MouseMotionList
             
         } else {
 
-            if ((m_overObject == null) && (!m_selectedObjectsArray.isEmpty())) {
+            /*if ((m_overObject == null) && (!m_selectedObjectsArray.isEmpty())) {
 
-                clearGraphNodeSelection();
+                //clearGraphNodeSelection();
 
                 setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
                 repaint();
-            }
+            }*/
 
             if (m_selectedConnector != null) {
                 int x = e.getX();
@@ -467,6 +477,43 @@ public class GraphPanel extends JPanel implements MouseListener, MouseMotionList
                 m_selectedLink = null;
                 setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
                 repaint();
+            } else if (m_selectionGesture.isSelecting()) {
+                m_selectionGesture.stopSelection(e.getX(), e.getY());
+                int action = m_selectionGesture.getAction();
+                if (action == SelectionGestureLasso.ACTION_SURROUND) {
+
+                     Path2D.Double  selectionShape =  m_selectionGesture.getSelectionPath();
+
+                    int modifier = e.getModifiers();
+                    boolean isCtrlOrShiftDown = ((modifier & (InputEvent.SHIFT_MASK | InputEvent.CTRL_MASK)) != 0);
+                    if (!isCtrlOrShiftDown) {
+                        clearGraphNodeSelection();
+                    }
+                    
+                    for (GraphNode node : m_graphNodeArray) {
+                        if (node.isSelected()) {
+                            continue;
+                        }
+
+                        int x1 = node.getX();
+                        int y1 = node.getY();
+                        int x2 = node.getXEnd();
+                        int y2 = node.getYEnd();
+
+                        if (selectionShape.contains(x1, y1, x2 - x1, y2 - y1))  {
+                            m_selectedObjectsArray.add(node);
+                            node.setSelected(true);
+                        }
+                    }
+
+                     
+                } else if ((m_overObject == null) && (!m_selectedObjectsArray.isEmpty())) {
+
+                    clearGraphNodeSelection();
+                    setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+                    
+                }
+                repaint();
             }
         }
         
@@ -490,9 +537,11 @@ public class GraphPanel extends JPanel implements MouseListener, MouseMotionList
             return;
         }
         
+        int x = e.getX();
+        int y = e.getY();
+        
         if (m_overObject != null) {
-            int x = e.getX();
-            int y = e.getY();
+            
             int nbObjectSelected = m_selectedObjectsArray.size();
             for (int i=0;i<nbObjectSelected;i++) {
                 m_selectedObjectsArray.get(i).move(x-m_mouseDragX, y-m_mouseDragY);
@@ -502,8 +551,11 @@ public class GraphPanel extends JPanel implements MouseListener, MouseMotionList
             recalculatePanelDimension();
             repaint();
         } else if (m_selectedConnector != null) {
-            m_mouseDragX = e.getX();
-            m_mouseDragY = e.getY();
+            m_mouseDragX = x;
+            m_mouseDragY = y;
+            repaint();
+        } else if (m_selectionGesture.isSelecting()) {
+            m_selectionGesture.continueSelection(x, y);
             repaint();
         }
     }

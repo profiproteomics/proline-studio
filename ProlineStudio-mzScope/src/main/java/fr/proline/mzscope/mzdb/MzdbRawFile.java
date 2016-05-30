@@ -361,7 +361,7 @@ public class MzdbRawFile implements IRawFile {
             
             FeatureDetectorConfig detectorConfig = null;
             if (params.isMsnExtraction()) {
-                detectorConfig = new FeatureDetectorConfig(2, params.getMzTolPPM(), 5, new SmartPeakelFinderConfig(5, 3, false, 10, false, params.isRemoveBaseline()));
+                detectorConfig = new FeatureDetectorConfig(2, params.getFragmentMzTolPPM(), 5, new SmartPeakelFinderConfig(5, 3, false, 10, false, params.isRemoveBaseline()));
             } else {
                 detectorConfig = new FeatureDetectorConfig(1, params.getMzTolPPM(), 5, new SmartPeakelFinderConfig(5, 3, false, 10, false, params.isRemoveBaseline()));                
             }

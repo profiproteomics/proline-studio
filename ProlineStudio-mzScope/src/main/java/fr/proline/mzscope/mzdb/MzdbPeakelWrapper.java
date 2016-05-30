@@ -48,7 +48,7 @@ public class MzdbPeakelWrapper implements IFeature {
 
    @Override
    public int getScanCount() {
-      return peakel.getSpectrumIds().length();
+      return peakel.getSpectrumIds().length;
    }
 
    @Override

@@ -38,6 +38,12 @@
             <groupId>fr.profi</groupId>
             <artifactId>mzdb-processing</artifactId>
             <version>0.5.0-SNAPSHOT</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>joda-time</groupId>
+                    <artifactId>joda-time</artifactId>                    
+                </exclusion>  
+            </exclusions>
         </dependency>
         
         <!-- Proline Studio Commons -->
@@ -187,6 +193,7 @@
                         <publicPackage>com.google.common.*</publicPackage>
                         <publicPackage>org.apache.xerces.parsers.*</publicPackage>
                         <publicPackage>org.apache.xml.serialize.*</publicPackage> 
+                       <!--  <publicPackage>org.joda.time.*</publicPackage>  -->
                     </publicPackages>
                 </configuration>
             </plugin>

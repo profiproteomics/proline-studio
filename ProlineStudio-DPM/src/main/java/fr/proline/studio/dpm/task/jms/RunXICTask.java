@@ -24,9 +24,6 @@ public class RunXICTask extends AbstractJMSTask {
     private static final String m_existingRSM_version = "2.0";
     
     private Long[] m_xicQuantiResult = null;
-    private HashMap<String, ArrayList<String>> m_samplesByGroup;
-    private HashMap<String, ArrayList<String>> m_samplesAnalysisBySample;
-    private HashMap<String, Long> m_rsmIdBySampleAnalysis;
     private String m_quantiDSName;
     private Long m_pId;
     private Map<String,Object> m_quantParams;
@@ -75,17 +72,17 @@ public class RunXICTask extends AbstractJMSTask {
         params.put("experimental_design", m_expDesignParams);
         
         //extraire ref rsm/ds id from quant config
-         if (m_useExistingRSM && !(m_quantParams.containsKey("ref_rsm_id") && m_quantParams.containsKey("ref_ds_id") )) 
-             throw new RuntimeException(" Identification Summary and dataset references not specified");
-         else {
-            Object refRsm = m_quantParams.get("ref_rsm_id");
-            Object refDs = m_quantParams.get("ref_ds_id");
-            
-            m_quantParams.remove("ref_rsm_id");
-            m_quantParams.remove("ref_ds_id");
-            params.put("ref_rsm_id", refRsm);
-            params.put("ref_ds_id", refDs);
-        }
+//         if (m_useExistingRSM && !(m_quantParams.containsKey("ref_rsm_id") && m_quantParams.containsKey("ref_ds_id") )) 
+//             throw new RuntimeException(" Identification Summary and dataset references not specified");
+//         else {
+//            Object refRsm = m_quantParams.get("ref_rsm_id");
+//            Object refDs = m_quantParams.get("ref_ds_id");
+//            
+//            m_quantParams.remove("ref_rsm_id");
+//            m_quantParams.remove("ref_ds_id");
+//            params.put("ref_rsm_id", refRsm);
+//            params.put("ref_ds_id", refDs);
+//        }
         params.put("quantitation_config", m_quantParams);
         return params;
     }

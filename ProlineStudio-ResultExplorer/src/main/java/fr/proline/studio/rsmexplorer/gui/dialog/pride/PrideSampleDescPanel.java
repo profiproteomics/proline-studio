@@ -27,11 +27,12 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
-import no.uib.olsdialog.OLSDialog;
-import no.uib.olsdialog.OLSInputable;
+import uk.ac.ebi.pride.toolsuite.ols.dialog.OLSDialog;
+import uk.ac.ebi.pride.toolsuite.ols.dialog.OLSInputable;
 import org.apache.commons.lang3.StringUtils;
 import org.openide.windows.WindowManager;
 import org.slf4j.LoggerFactory;
+import uk.ac.ebi.pride.utilities.ols.web.service.model.Term;
 
 /**
  *
@@ -265,23 +266,22 @@ public class PrideSampleDescPanel extends PrideWizardPanel implements OLSInputab
     
     
     @Override
-    public void insertOLSResult(String field, String selectedValue, String accession,
-        String ontologyShort, String ontologyLong, int modifiedRow, String mappedTerm, Map<String, String> metadata) {
+    public void insertOLSResult(String field, Term selectedValue, Term accession, String ontologyShort, String ontologyLong, int modifiedRow, String mappedTerm, List<String> metadata){
         LoggerFactory.getLogger("ProlineStudio.ResultExplorer").debug("field : {}, selectedValue : {}  , accession : {} , ontologyShort : {} ontologyLong: {},  modifiedRow : {} mappedTerm: {} , nbr other : {}"
                 , field, selectedValue, accession, ontologyShort, ontologyLong, modifiedRow, mappedTerm, metadata);
         if(field == null)
             return;
         if(field.equals(SPECIES_FIELD)){
-            CVParam newParam = new CVParam(ontologyShort, accession ,selectedValue,"" );
+            CVParam newParam = new CVParam(ontologyShort, accession.getLabel() ,selectedValue.getLabel(),"" );
             m_sampleSpeciesCBModel.addElement(newParam);
             m_sampleSpeciesCB.setSelectedItem(newParam);
         } else  if(field.equals(TISSUE_FIELD)){
-            CVParam newParam = new CVParam(ontologyShort, accession ,selectedValue,"" );
+            CVParam newParam = new CVParam(ontologyShort, accession.getLabel() ,selectedValue.getLabel(),"" );
             int newElemIndex = m_sampleTissueCBList.getListSize();
             m_sampleTissueCBList.addItem(newElemIndex, newParam, Boolean.TRUE);
             m_sampleTissueCBList.ensureIndexIsVisible(newElemIndex);
         }else {// if(field.equals(CELLTYPE_FIELD)){
-            CVParam newParam = new CVParam(ontologyShort, accession ,selectedValue,"" );           
+            CVParam newParam = new CVParam(ontologyShort, accession.getLabel() ,selectedValue.getLabel(),"" );           
             int newElemIndex = m_sampleCellCBList.getListSize();
             m_sampleCellCBList.addItem(newElemIndex, newParam, Boolean.TRUE);
             m_sampleCellCBList.ensureIndexIsVisible(newElemIndex);

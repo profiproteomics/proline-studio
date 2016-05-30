@@ -20,15 +20,18 @@ import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.table.AbstractTableModel;
-import no.uib.olsdialog.OLSDialog;
-import no.uib.olsdialog.OLSInputable;
+//import no.uib.olsdialog.OLSDialog;
+//import no.uib.olsdialog.OLSInputable;
+import uk.ac.ebi.pride.toolsuite.ols.dialog.OLSDialog;
+import uk.ac.ebi.pride.toolsuite.ols.dialog.OLSInputable;
+
 import org.apache.commons.lang3.StringUtils;
 import org.openide.windows.WindowManager;
 import org.slf4j.LoggerFactory;
+import uk.ac.ebi.pride.utilities.ols.web.service.model.Term;
 
 /**
  *
@@ -37,7 +40,7 @@ import org.slf4j.LoggerFactory;
 public class PrideProtocolDescPanel extends PrideWizardPanel implements OLSInputable {
 
     private static PrideProtocolDescPanel m_panel = null;
-    private JTextArea m_protocolDescriptionTextArea;
+//    private JTextArea m_protocolDescriptionTextArea;
     private JTextField m_protocolNameTextField;
     private JTable m_stepsDescriptionTable;
 
@@ -165,7 +168,7 @@ public class PrideProtocolDescPanel extends PrideWizardPanel implements OLSInput
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                OLSDialog olsDia = new OLSDialog((JDialog) SwingUtilities.getAncestorOfClass(JDialog.class, PrideProtocolDescPanel.getPrideProtocolDescPanel()),
+                new OLSDialog((JDialog) SwingUtilities.getAncestorOfClass(JDialog.class, PrideProtocolDescPanel.getPrideProtocolDescPanel()),
                         PrideProtocolDescPanel.getPrideProtocolDescPanel(), true, STEPS_FIELD, "", null);
             }
         });
@@ -191,7 +194,9 @@ public class PrideProtocolDescPanel extends PrideWizardPanel implements OLSInput
     }
 
     @Override
-    public void insertOLSResult(String field, String selectedValue, String accession, String ontologyShort, String ontologyLong, int modifiedRow, String mappedTerm, Map<String, String> metadata) {
+//    public void insertOLSResult(String field, String selectedValue, String accession, String ontologyShort, String ontologyLong, int modifiedRow, String mappedTerm, Map<String, String> metadata) {
+    
+    public void insertOLSResult(String field, Term selectedValue, Term accession, String ontologyShort, String ontologyLong, int modifiedRow, String mappedTerm, List<String> metadata) {
         LoggerFactory.getLogger("ProlineStudio.ResultExplorer").debug("field : {}, selectedValue : {}  , accession : {} , ontologyShort : {} ontologyLong: {},  modifiedRow : {} mappedTerm: {} , nbr other : {}", field, selectedValue, accession, ontologyShort, ontologyLong, modifiedRow, mappedTerm, metadata);
 
         if (field == null) {
@@ -199,7 +204,8 @@ public class PrideProtocolDescPanel extends PrideWizardPanel implements OLSInput
         }
 
         if (field.equals(STEPS_FIELD)) {
-            CVParam newParam = new CVParam(ontologyShort, accession, selectedValue, "");
+            CVParam newParam = new CVParam(ontologyShort, accession.getLabel(), selectedValue.getLabel(), "");
+//                        CVParam newParam = new CVParam(ontologyShort, accession, selectedValue, "");
             if (modifiedRow == -1) {
                 ((StepDescriptionTableModel) this.m_stepsDescriptionTable.getModel()).addCVParam(newParam);
             } else {
@@ -212,7 +218,7 @@ public class PrideProtocolDescPanel extends PrideWizardPanel implements OLSInput
     public Window getWindow() {
         return WindowManager.getDefault().getMainWindow();
     }
-
+ 
     class StepDescriptionTableModel extends AbstractTableModel {
 
         public static final int STEP_DESCR_INDEX_COLINDEX = 0;

@@ -2,12 +2,10 @@ package fr.proline.studio.rsmexplorer.gui.dialog.pride;
 
 import fr.proline.studio.utils.IconManager;
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.util.HashMap;
-import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 

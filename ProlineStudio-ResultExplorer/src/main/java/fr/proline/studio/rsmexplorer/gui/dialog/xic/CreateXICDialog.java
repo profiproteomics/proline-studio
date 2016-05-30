@@ -50,6 +50,7 @@ public class CreateXICDialog extends DefaultDialog {
     private static final int STEP_PANEL_DEFINE_RAW_FILES = 1;
     private static final int STEP_PANEL_DEFINE_XIC_PARAMS = 2;
     private int m_step = STEP_PANEL_CREATE_XIC_DESIGN;
+    private DDataset m_refDataset = null;
     
     private static final String SETTINGS_KEY = "XIC";
     
@@ -83,7 +84,9 @@ public class CreateXICDialog extends DefaultDialog {
         m_selectionTree = selectionTree;        
     }
     
-    
+    public void setParentDataset(DDataset parentDS){
+        m_refDataset = parentDS;
+    }
     
     public void displayDesignTree() {
         displayDesignTree(new DataSetNode(new DataSetData("XIC", Dataset.DatasetType.QUANTITATION, Aggregation.ChildNature.QUANTITATION_FRACTION)));
@@ -456,8 +459,7 @@ public class CreateXICDialog extends DefaultDialog {
             biologicalSampleList.add(biologicalSampleParams);
                     
             List<String> splAnalysis = _samplesAnalysisBySample.get(nextSpl);
-            for(int i =0; i<splAnalysis.size(); i++){
-                String nextSplAnalysis = splAnalysis.get(i);
+            for (String nextSplAnalysis : splAnalysis) {
                 Map<String, Object> quantChannelParams = new HashMap<>();
                 quantChannelParams.put("number", splAnalysisNumber++);
                 quantChannelParams.put("sample_number", splNbr);
@@ -474,6 +476,10 @@ public class CreateXICDialog extends DefaultDialog {
         masterQuantChannelParams.put("number", 1);
         masterQuantChannelParams.put("name", m_finalXICDesignNode.getData().getName());
         masterQuantChannelParams.put("quant_channels", quantChanneList);
+        if(m_refDataset!=null){
+            masterQuantChannelParams.put("identDatasetId", m_refDataset.getId());
+            masterQuantChannelParams.put("identResultSummaryId", m_refDataset.getResultSummaryId());
+        }
         masterQuantChannelsList.add(masterQuantChannelParams);
        
         experimentalDesignParams.put("master_quant_channels", masterQuantChannelsList);
@@ -618,8 +624,7 @@ public class CreateXICDialog extends DefaultDialog {
 
                     Preferences preferences = NbPreferences.root();
                     String[] keys = filePreferences.keys();
-                    for (int i = 0; i < keys.length; i++) {
-                        String key = keys[i];
+                    for (String key : keys) {
                         String value = filePreferences.get(key, null);
                         preferences.put(key, value);
                     }

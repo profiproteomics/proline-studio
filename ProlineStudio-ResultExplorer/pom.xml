@@ -18,11 +18,15 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
     
-    <repositories>
+ <repositories>
+        
         <repository>
-            <id>ebi-repo</id>
-            <name>The EBI Maven2 repository</name>
-            <url>http://www.ebi.ac.uk/~maven/m2repo</url>
+            <id>nexus-ebi-release-repo</id>
+            <url>http://www.ebi.ac.uk/Tools/maven/repos/content/groups/ebi-repo/</url>
+        </repository>
+        <repository>
+            <id>nexus-ebi-snapshot-repo</id>
+            <url>http://www.ebi.ac.uk/Tools/maven/repos/content/groups/ebi-snapshots/</url>
         </repository>
     </repositories>
 
@@ -370,7 +374,7 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
         </dependency>
-        
+           <!--
         <dependency>
             <groupId>no.uib</groupId>
             <artifactId>ols-dialog</artifactId>
@@ -382,8 +386,21 @@
                 </exclusion>            
             </exclusions>
         </dependency>
+        -->
         
-        <!--  batik -->
+         <dependency>
+            <groupId>uk.ac.ebi.pride.toolsuite</groupId>
+            <artifactId>ols-dialog</artifactId>
+            <version>3.4.6</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>jfree</groupId>
+                    <artifactId>jfreechart</artifactId>
+                </exclusion>            
+            </exclusions>
+        </dependency>
+              
+        <!-- batik -->
         <!--  <dependency>
             <groupId>org.apache.xmlgraphics</groupId>
             <artifactId>batik-dom</artifactId>

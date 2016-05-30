@@ -8,7 +8,6 @@ import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.prefs.Preferences;
 import javax.swing.*;
@@ -107,8 +106,7 @@ public class DefineQuantParamsPanel extends JPanel{
         m_parameterList = new ParameterList("XicParameters");
         createParameters();
         m_parameterList.updateIsUsed(NbPreferences.root());
-        for (Iterator<AbstractParameter> iterator = m_parameterList.iterator(); iterator.hasNext();) {
-            AbstractParameter param = iterator.next();
+        for (AbstractParameter param : m_parameterList) {
             param.setUsed(true);
         }
         
@@ -389,10 +387,7 @@ public class DefineQuantParamsPanel extends JPanel{
         }
         try{
             m_featureFilterValueTF.setText(""+Double.parseDouble(ftParams.get("value").toString()));
-        }catch(NumberFormatException ex){
-            m_logger.error("error while settings quanti params "+ex);
-            m_featureFilterValueTF.setText("0.0");
-        }catch(NullPointerException ex){
+        }catch(NumberFormatException | NullPointerException ex){
             m_logger.error("error while settings quanti params "+ex);
             m_featureFilterValueTF.setText("0.0");
         }

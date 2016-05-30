@@ -367,22 +367,51 @@ public class WindowBoxFactory {
         AbstractDataBox[] boxes = new AbstractDataBox[2];
         boxes[0] = new DataBoxTaskList();
         boxes[1] = new DataBoxTaskDescription();
-
+        
         WindowBox winBox = new WindowBox("Tasks Log", generatePanel(boxes), boxes[0], null);
 
         return winBox;
     }
-
+    
+    public static WindowBox getSystemTaskLogWindowBox() {
+        AbstractDataBox[] boxes = new AbstractDataBox[1];
+        boxes[0] = new DataBoxSystemTasks();
+        
+        WindowBox winBox = new WindowBox("System Tasks Log", generatePanel(boxes), boxes[0], null);
+        return winBox;
+    }
+    
     public static WindowBox getDataAnalyzerWindowBox() {
         AbstractDataBox[] boxes = new AbstractDataBox[2];
         boxes[0] = new DataboxDataAnalyzer();
         boxes[1] = new DataBoxDataAnalyzerResults();
-
-        WindowBox winBox = new WindowBox("Data Analyzer", generatePanel(boxes, false), boxes[0], IconManager.getImage(IconManager.IconType.DATA_ANALYZER));
+          WindowBox winBox = new WindowBox("Data Analyzer", generatePanel(boxes, false), boxes[0], IconManager.getImage(IconManager.IconType.DATA_ANALYZER));
 
         return winBox;
     }
     
+    
+    public static WindowBox getQueueMonitoringWindowBox() {
+        AbstractDataBox[] boxes = new AbstractDataBox[1];
+        boxes[0] = new DataBoxQueueMonitoring();
+        
+        WindowBox winBox = new WindowBox("Queue Message List", generatePanel(boxes), boxes[0], null);
+
+        return winBox;
+    }
+       
+    public static WindowBox[] getSystemMonitoringWindowBox() {
+        WindowBox[] m_windowBoxes = new WindowBox[3];
+        m_windowBoxes[0] = WindowBoxFactory.getTaskListWindowBox();
+        m_windowBoxes[1] = WindowBoxFactory.getSystemTaskLogWindowBox();
+        m_windowBoxes[2] = WindowBoxFactory.getQueueMonitoringWindowBox();
+                        
+     
+        return m_windowBoxes;
+    }
+        
+    
+   
     public static WindowBox getImageWindowBox(String dataName, Image img) {
         AbstractDataBox[] boxes = new AbstractDataBox[1];
         boxes[0] = new DataBoxImage();

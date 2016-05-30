@@ -216,7 +216,7 @@ public class DatabaseLoadMSQueriesTask extends AbstractDatabaseSlicerTask {
             resultList = queryMSQueries.getResultList();
         }
         
-        String querySp = "SELECT msq.id, sp.firstTime, sp.precursorIntensity, sp.title "
+        String querySp = "SELECT msq.id, sp.firstScan, sp.lastScan, sp.firstTime, sp.lastTime, sp.precursorIntensity, sp.title "
                 + "FROM fr.proline.core.orm.msi.Spectrum sp, fr.proline.core.orm.msi.MsQuery msq "
                 + "WHERE sp.id = msq.spectrum.id AND "
                 + "msq.id IN (:listId) ";
@@ -226,12 +226,18 @@ public class DatabaseLoadMSQueriesTask extends AbstractDatabaseSlicerTask {
         if (listMSQueriesId != null && !listMSQueriesId.isEmpty()) {
             List<Object[]> rsSp = querySpectrum.getResultList();
             for (Object[] o: rsSp){
-                Float firstTime = (Float) o[1];
-                Float precursorIntensity = (Float) o[2];
-                String title = (String) o[3];
+                Integer firstScan = (Integer) o[1];
+                Integer lastScan = (Integer) o[2];
+                Float firstTime = (Float) o[3];
+                Float lastTime = (Float) o[4];
+                Float precursorIntensity = (Float) o[5];
+                String title = (String) o[6];
 
                 DSpectrum spectrum = new DSpectrum();
+                spectrum.setFirstScan(firstScan);
+                spectrum.setLastScan(lastScan);
                 spectrum.setFirstTime(firstTime);
+                spectrum.setLastTime(lastTime);
                 spectrum.setPrecursorIntensity(precursorIntensity);
                 spectrum.setTitle(title);
                 spectrumMap.put((Long)o[0], spectrum);

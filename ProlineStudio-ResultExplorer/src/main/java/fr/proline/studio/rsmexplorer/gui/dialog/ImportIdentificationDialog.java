@@ -50,8 +50,9 @@ public class ImportIdentificationDialog extends DefaultDialog {
     private static final String OMSSA_PARSER = "Omssa Parser";
     private static final String MASCOT_PARSER = "Mascot";
     private static final String XTANDEM_PARSER = "X!Tandem Parser";
+    private static final String MZ_IDENT_PARSER = "MzIdentML";
     
-    private final static String[] PARSER_NAMES = {MASCOT_PARSER, OMSSA_PARSER, XTANDEM_PARSER};
+    private final static String[] PARSER_NAMES = {MASCOT_PARSER, OMSSA_PARSER, XTANDEM_PARSER, MZ_IDENT_PARSER };
     // ABU : added a map to consider the case when a parser handles more than one extensions
     // the key is the extension, the value is the id of the parser in the other arrays
     private static final Map<String, Integer> EXTENSION_TO_PARSER = new HashMap<>();
@@ -60,10 +61,11 @@ public class ImportIdentificationDialog extends DefaultDialog {
     	EXTENSION_TO_PARSER.put("omx", 1);
     	EXTENSION_TO_PARSER.put("omx.bz2", 1);
     	EXTENSION_TO_PARSER.put("xml", 2);
+        EXTENSION_TO_PARSER.put("mzid", 3);
     }
 //    private final static String[] FILE_EXTENSIONS = {"dat", "omx"};
-    private final static String[] FILE_EXTENSIONS_DESCRIPTION = {"Mascot Identification Result", "Omssa Identification Result", "X!Tandem Identification Result"};
-    private final static String[] PARSER_IDS = { "mascot.dat", "omssa.omx", "xtandem.xml" };
+    private final static String[] FILE_EXTENSIONS_DESCRIPTION = {"Mascot Identification Result", "Omssa Identification Result", "X!Tandem Identification Result","MZIdentML Identification Result"};
+    private final static String[] PARSER_IDS = { "mascot.dat", "omssa.omx", "xtandem.xml", "mzidentml.mzid" };
     
     private final static String[] DECOY_VALUES = {null, "No Decoy", "Software Engine Decoy", "Concatenated Decoy"};
     private final static String[] DECOY_VALUES_ASSOCIATED_KEYS = DECOY_VALUES;
@@ -690,7 +692,7 @@ public class ImportIdentificationDialog extends DefaultDialog {
         m_parserParametersPanel.add(parameterList.getPanel(), c);
 
 //        // allow spectrum matches for all parsers except Mascot
-//        boolean allowSaveSpectrumMatches = (parameterList.toString().compareTo(MASCOT_PARSER) != 0);
+//        boolean allowSaveSpectrumMatches = (mzIdentiParameterList.toString().compareTo(MASCOT_PARSER) != 0);
 //        m_saveSpectrumCheckBox.setEnabled(allowSaveSpectrumMatches);
 //        if (!allowSaveSpectrumMatches) {
 //            m_saveSpectrumCheckBox.setSelected(false);
@@ -965,10 +967,11 @@ public class ImportIdentificationDialog extends DefaultDialog {
     
     
     private ParameterList[] createParameters() {
-        ParameterList[] plArray = new ParameterList[3];
+        ParameterList[] plArray = new ParameterList[4];
         plArray[0] = createMascotParser();
         plArray[1] = createOmssaParser();
         plArray[2] = createXtandemParser();
+        plArray[3] = createMzIdentParser();
         return plArray;
     }
     
@@ -1011,6 +1014,14 @@ public class ImportIdentificationDialog extends DefaultDialog {
         return parameterList;
     }
     
+    private ParameterList createMzIdentParser() {
+        ParameterList mzIdentParameterList = new ParameterList(MZ_IDENT_PARSER);
+        
+        Preferences preferences = NbPreferences.root();
+        mzIdentParameterList.add(new StringParameter("Test",  "Test", JTextField.class, preferences.get("MzIdentParser.test", ""),0,20));
+        
+        return mzIdentParameterList;
+    }
     
     
     private ParameterList createSourceParameters() {

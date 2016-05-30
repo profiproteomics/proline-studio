@@ -29,10 +29,10 @@ preferredID = "TaskLogTopComponent")
     "CTL_TaskLogTopComponent=Tasks Log",
     "HINT_TaskLogTopComponent=Tasks Log"
 })
-public class TaskLogTopComponent extends DataBoxViewerTopComponent {
+public class TaskLogTopComponent extends MultiDataBoxViewerTopComponent {
     
     public TaskLogTopComponent() {
-        super(WindowBoxFactory.getTaskListWindowBox());
+        super(WindowBoxFactory.getSystemMonitoringWindowBox(),"Task and System infos");
         
         setName(Bundle.CTL_TaskLogTopComponent());
         setToolTipText(Bundle.HINT_TaskLogTopComponent());

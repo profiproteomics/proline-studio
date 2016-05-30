@@ -401,11 +401,13 @@ public class WindowBoxFactory {
     }
        
     public static WindowBox[] getSystemMonitoringWindowBox() {
-        WindowBox[] m_windowBoxes = new WindowBox[3];
-        m_windowBoxes[0] = WindowBoxFactory.getTaskListWindowBox();
-        m_windowBoxes[1] = WindowBoxFactory.getSystemTaskLogWindowBox();
-        m_windowBoxes[2] = WindowBoxFactory.getQueueMonitoringWindowBox();
+//        WindowBox[] m_windowBoxes = new WindowBox[3];
+//        m_windowBoxes[0] = WindowBoxFactory.getTaskListWindowBox();
+//        m_windowBoxes[1] = WindowBoxFactory.getSystemTaskLogWindowBox();
+//        m_windowBoxes[2] = WindowBoxFactory.getQueueMonitoringWindowBox();
                         
+        WindowBox[] m_windowBoxes = new WindowBox[1];
+        m_windowBoxes[0] = WindowBoxFactory.getTaskListWindowBox();
      
         return m_windowBoxes;
     }

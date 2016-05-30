@@ -43,8 +43,6 @@ public class CreateXICAction extends AbstractRSMAction {
 
     private boolean m_fromExistingXIC = false;
     private boolean m_mergedDSDefined = false;
-    private Long m_parentRSMID = null;
-    private DDataset m_refDataset = null;
     private boolean m_isJMSDefined;
 
 
@@ -100,18 +98,18 @@ public class CreateXICAction extends AbstractRSMAction {
 
         } else {
             AbstractNode n = selectedNodes[0];
+            DDataset refDataset = null;
             if(! n.isRoot() && DataSetNode.class.isInstance(n)){
                 DataSetNode node = (DataSetNode) n;
                 DataSetData dataset = (DataSetData) node.getData();
                 Dataset.DatasetType dsType = dataset.getDatasetType();
                 if( node.hasResultSummary() && 
                         (dsType.equals(Dataset.DatasetType.IDENTIFICATION) || dsType.equals(Dataset.DatasetType.AGGREGATE))) {
-                    m_mergedDSDefined = true;
-                    m_parentRSMID = dataset.getDataset().getResultSummaryId();
-                    m_refDataset =  dataset.getDataset();
+                    m_mergedDSDefined = true;                        
+                    refDataset =  dataset.getDataset();                    
                 }
             }
-            createXICDialog(null, x, y);
+            createXICDialog(refDataset, x, y);
         }
     }
 
@@ -119,8 +117,9 @@ public class CreateXICAction extends AbstractRSMAction {
         Long pID = ProjectExplorerPanel.getProjectExplorerPanel().getSelectedProject().getId();
         CreateXICDialog dialog = CreateXICDialog.getDialog(WindowManager.getDefault().getMainWindow());
         if(m_mergedDSDefined){
-            IdentificationTree childTree = IdentificationTree.getCurrentTree().copyDataSetRootSubTree(m_refDataset, m_refDataset.getProject().getId());
+            IdentificationTree childTree = IdentificationTree.getCurrentTree().copyDataSetRootSubTree(dataset, dataset.getProject().getId());
             dialog.setSelectableIdentTree(childTree);
+            dialog.setParentDataset(dataset);
         } else {
             dialog.setSelectableIdentTree(null);
         }
@@ -145,13 +144,6 @@ public class CreateXICAction extends AbstractRSMAction {
             if (quantParams == null) {
                 errorMsg = "Null Quantitation parameters !";
             }
-
-            //Add reference RSM/DS Id if specified
-            if(m_mergedDSDefined){
-                quantParams.put("ref_rsm_id", m_parentRSMID);
-                quantParams.put("ref_ds_id", m_refDataset.getId());
-            }
-                
             
             if (dialog.getDesignRSMNode() == null) {
                 errorMsg = "No experimental design defined";

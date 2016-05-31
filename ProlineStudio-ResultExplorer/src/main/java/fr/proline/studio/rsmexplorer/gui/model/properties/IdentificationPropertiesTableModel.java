@@ -53,13 +53,18 @@ public class IdentificationPropertiesTableModel extends AbstractPropertiesTableM
         m_rsmArray = new ArrayList<>(nbDataset);
         m_projectIdArray = new ArrayList<>(nbDataset);
         m_datasetIdArray = new ArrayList<>(nbDataset);
+        boolean hasRsm = false;
         for (int i=0;i<nbDataset;i++) {
             DDataset dataset = datasetArrayList.get(i);
             m_datasetNameArray.add(dataset.getName());
             m_projectIdArray.add(dataset.getProject().getId());
             m_datasetIdArray.add(dataset.getId());
             m_rsetArray.add(dataset.getResultSet());
-            m_rsmArray.add(dataset.getResultSummary());
+            ResultSummary rsm = dataset.getResultSummary();
+            m_rsmArray.add(rsm);
+            if (rsm != null) {
+                hasRsm = true;
+            }
         }
 
         
@@ -74,7 +79,9 @@ public class IdentificationPropertiesTableModel extends AbstractPropertiesTableM
             DataGroup group = new GeneralInformationGroup(startRow); m_dataGroupList.add(group); startRow+=group.getRowCount();
             group = new SearchPropertiesGroup(startRow); m_dataGroupList.add(group); startRow+=group.getRowCount();
             group = new SearchResultInformationGroup(startRow); m_dataGroupList.add(group); startRow+=group.getRowCount();
-            group = new IdentificationSummaryInformationGroup(startRow, datasetArrayList); m_dataGroupList.add(group); startRow+=group.getRowCount();
+            if (hasRsm) {
+                group = new IdentificationSummaryInformationGroup(startRow, datasetArrayList); m_dataGroupList.add(group); startRow+=group.getRowCount();
+            } 
             group = new SqlIdGroup(startRow); m_dataGroupList.add(group); startRow+=group.getRowCount();
 
         }

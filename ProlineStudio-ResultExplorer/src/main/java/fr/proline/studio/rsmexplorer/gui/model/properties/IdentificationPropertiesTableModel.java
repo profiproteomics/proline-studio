@@ -278,10 +278,10 @@ public class IdentificationPropertiesTableModel extends AbstractPropertiesTableM
             if (searchSetting instanceof MsmsSearch) {
                 msmsSearch = (MsmsSearch) searchSetting;
             }
-            ResultSummary rsm = m_rsmArray.get(columnIndex);
+            /*ResultSummary rsm = m_rsmArray.get(columnIndex);
             if (rsm == null) {
                 return "";
-            }
+            }*/
 
             switch (rowIndex) {
                 case ROWTYPE_RESULT_FILE_NAME: {
@@ -631,12 +631,6 @@ public class IdentificationPropertiesTableModel extends AbstractPropertiesTableM
         
         @Override
         public String getGroupValueAt(int rowIndex, int columnIndex) {
-
-            ResultSet rset = m_rsetArray.get(columnIndex);
-
-            
-            MsiSearch msiSearch = (rset==null) ? null : rset.getMsiSearch();
-            SearchSetting searchSetting = (msiSearch == null) ? null : msiSearch.getSearchSetting();
 
             ResultSummary rsm = m_rsmArray.get(columnIndex);
             if (rsm == null) {

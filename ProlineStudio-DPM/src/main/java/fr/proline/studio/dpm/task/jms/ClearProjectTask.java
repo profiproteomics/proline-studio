@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package fr.proline.studio.dpm.task.jms;
 
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Error;
@@ -28,12 +23,12 @@ public class ClearProjectTask extends AbstractJMSTask {
     private static final String m_serviceName = "proline/dps/msi/DeleteOrphanData";
     //private static final String m_version = "2.0";    
     
-    private Long m_projectId;
-    private List<Long> m_resultSummaryIds;
-    private List<Long> m_resultSetIds;
+    private final Long m_projectId;
+    private final List<Long> m_resultSummaryIds;
+    private final List<Long> m_resultSetIds;
     
     public ClearProjectTask(AbstractJMSCallback callback,  Long projectId,  List<Long> resultSummaryIds, List<Long> resultSetIds) {
-        super(callback, new TaskInfo("Clear data for projectId "+projectId, true, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_HIGH));
+        super(callback, new TaskInfo("Clean up data for projectId "+projectId, true, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_HIGH));
         m_projectId = projectId;   
         m_resultSummaryIds = resultSummaryIds;
         m_resultSetIds = resultSetIds;

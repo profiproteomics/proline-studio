@@ -38,7 +38,7 @@ public class ClearProjectDialog extends DefaultDialog {
 
         setResizable(true);
 
-        setTitle("Clear Project "+m_project.getName());
+        setTitle("Clean up Project "+m_project.getName());
 
         setHelpURL("http://biodev.extra.cea.fr/docs/proline/doku.php?id=how_to:studio:clearproject");
 

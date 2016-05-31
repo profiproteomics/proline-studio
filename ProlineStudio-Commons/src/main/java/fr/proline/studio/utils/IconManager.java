@@ -44,7 +44,7 @@ public class IconManager {
         DELETE,
         QUESTION,
         ERASER,
-        ERASER_SMALL11,
+        CLEAN_UP,
         OPEN_FILE,
         EXCLAMATION,
         INFORMATION,
@@ -335,8 +335,8 @@ public class IconManager {
                 return "fr/proline/studio/images/question.png";
             case ERASER:
                 return "fr/proline/studio/images/eraser.png";
-            case ERASER_SMALL11:
-                return "fr/proline/studio/images/eraser11x11.png";
+            case CLEAN_UP:
+                return "fr/proline/studio/images/broom.png";
             case OPEN_FILE:
                 return "fr/proline/studio/images/folder-open-document.png";
             case EXCLAMATION:

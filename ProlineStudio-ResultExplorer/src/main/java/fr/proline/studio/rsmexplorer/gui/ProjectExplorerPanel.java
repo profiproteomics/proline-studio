@@ -166,9 +166,9 @@ public class ProjectExplorerPanel extends JPanel {
         m_addProjectButton.setToolTipText("Create a New Project");
         m_addProjectButton.setEnabled(false);
 
-        m_clearProjectButton = new JButton(IconManager.getIcon(IconManager.IconType.ERASER_SMALL11));
+        m_clearProjectButton = new JButton(IconManager.getIcon(IconManager.IconType.CLEAN_UP));
         m_clearProjectButton.setMargin(new java.awt.Insets(2, 2, 2, 2));
-        m_clearProjectButton.setToolTipText("Clear Project (Search Result and Identification Summaries)...");
+        m_clearProjectButton.setToolTipText("Clean Up Project (Remove unused Search Result and Id. Summaries)...");
         m_clearProjectButton.setEnabled(false);
 
         c.gridx = 0;

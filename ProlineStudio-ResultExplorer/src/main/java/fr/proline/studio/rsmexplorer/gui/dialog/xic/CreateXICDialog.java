@@ -477,8 +477,8 @@ public class CreateXICDialog extends DefaultDialog {
         masterQuantChannelParams.put("name", m_finalXICDesignNode.getData().getName());
         masterQuantChannelParams.put("quant_channels", quantChanneList);
         if(m_refDataset!=null){
-            masterQuantChannelParams.put("identDatasetId", m_refDataset.getId());
-            masterQuantChannelParams.put("identResultSummaryId", m_refDataset.getResultSummaryId());
+            masterQuantChannelParams.put("ident_dataset_id", m_refDataset.getId());
+            masterQuantChannelParams.put("ident_result_summary_id", m_refDataset.getResultSummaryId());
         }
         masterQuantChannelsList.add(masterQuantChannelParams);
        

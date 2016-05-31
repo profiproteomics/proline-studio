@@ -261,13 +261,13 @@ public class DatabaseClearProjectTask extends AbstractDatabaseTask {
             
             // get the decoy rsm for ident listed RSM
             if (!listRsmIdsUds.isEmpty()) {
-                String queryRsmDecoy = "SELECT rsm.decotResultSummary.id "
+                String queryRsmDecoy = "SELECT rsm.decoyResultSummary.id "
                         + "FROM fr.proline.core.orm.msi.ResultSummary rsm "
-                        + "WHERE rsm.decotResultSummary.id IS NOT NULL AND rsm.id IN (:list) ";
+                        + "WHERE rsm.decoyResultSummary.id IS NOT NULL AND rsm.id IN (:list) ";
                 if (!openedRsmId.isEmpty()) {
-                    queryRsmDecoy += " AND (rsm.id NOT IN (:openedRsmlist) AND rsm.decotResultSummary.id NOT IN (:openedRsmlist)) ";
+                    queryRsmDecoy += " AND (rsm.id NOT IN (:openedRsmlist) AND rsm.decoyResultSummary.id NOT IN (:openedRsmlist)) ";
                 }
-                queryRsmDecoy += " ORDER BY rsm.decotResultSummary.id";
+                queryRsmDecoy += " ORDER BY rsm.decoyResultSummary.id";
 
                 TypedQuery<Long> sqlQueryDecoyRsm = entityManagerMSI.createQuery(queryRsmDecoy, Long.class);
                 sqlQueryDecoyRsm.setParameter("list", listRsmIdsUds);

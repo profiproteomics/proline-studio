@@ -451,7 +451,7 @@ public abstract class AbstractMatrixPlotGraphic extends AbstractGraphic {
 
     @Override
     public boolean settingsDone() {
-        if (m_columnsParameterArray == null) {
+        if ((m_parameters==null) || (m_columnsParameterArray == null)) {
             return false;
         }
 

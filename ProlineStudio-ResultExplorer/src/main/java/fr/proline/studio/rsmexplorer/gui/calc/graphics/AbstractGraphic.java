@@ -141,7 +141,9 @@ public abstract class AbstractGraphic implements CheckParameterInterface {
     
     public boolean settings(AbstractConnectedGraphObject[] graphObjects, GraphNode node) {
         
-        if (m_parameters == null) {
+        
+        boolean thereIsNoParameterAtStart = (m_parameters == null);
+        if (thereIsNoParameterAtStart) {
             generateDefaultParameters(graphObjects);
         }
         if (m_parameters == null) {
@@ -157,6 +159,9 @@ public abstract class AbstractGraphic implements CheckParameterInterface {
             if (dialog.getButtonClicked() == FunctionParametersDialog.BUTTON_OK) {
                 userParametersChanged();
                 return true;
+            }
+            if (thereIsNoParameterAtStart) {
+                m_parameters = null; // JPM.HACK : we do not keep default parameters, to avoid that default parameters are used at the next execution
             }
             return false;
         } finally {

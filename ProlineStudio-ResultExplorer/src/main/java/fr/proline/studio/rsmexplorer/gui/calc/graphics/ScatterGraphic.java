@@ -126,7 +126,7 @@ public class ScatterGraphic extends AbstractGraphic {
 
     @Override
     public boolean settingsDone() {
-        if (m_columnsParameter1 == null) {
+        if ((m_parameters==null) || (m_columnsParameter1 == null)) {
             return false;
         }
 

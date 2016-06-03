@@ -33,7 +33,7 @@ public class DataboxManager {
                                                  new DataboxGraphics(), new DataboxPSMOfMasterQuantPeptide() , 
                                                  new DataboxXicPeptideSet(), new DataboxXicPeptideIon(), new DataboxChildFeature(), new DataboxMultiGraphics(false, false), 
                                                  new DataboxMapAlignment(),
-                                                 new DataBoxAdjacencyMatrix() , 
+                                                 new DataBoxAdjacencyMatrixChoice() , new DataBoxAdjacencyMatrix(),
                                                 new DataboxRSMPSMForMsQuery(), new DataboxRsetPSMForMsQuery()};
     
     private DataboxManager() {

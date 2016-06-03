@@ -1,5 +1,6 @@
 package fr.proline.studio.rsmexplorer.adjacencymatrix.visualize;
 
+import fr.proline.core.orm.msi.dto.DProteinSet;
 import fr.proline.studio.dam.tasks.data.AdjacencyMatrixData;
 import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
@@ -17,6 +18,9 @@ import fr.proline.studio.search.SearchToggleButton;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
@@ -61,6 +65,8 @@ public class MatrixSelectionPanel extends HourglassPanel implements DataBoxPanel
     
     private static final int PROTEIN = 0;
     private static final int PEPTIDE = 1;
+    
+    private String proteinSetName = "";
     
     public MatrixSelectionPanel() {
         setLoading(0);
@@ -211,8 +217,12 @@ public class MatrixSelectionPanel extends HourglassPanel implements DataBoxPanel
         if (modelRowIndex == -1) {
             return;
         }
+        selectCluster(modelRowIndex);
         
-        MatrixImageButton imageButton = m_curImageButtonArray.get(modelRowIndex);
+    }
+    
+    private void selectCluster(int index) {
+        MatrixImageButton imageButton = m_curImageButtonArray.get(index);
         imageButton.doClick();
         
         Rectangle visibleRectangle = m_scrollPane.getBounds();
@@ -298,7 +308,7 @@ public class MatrixSelectionPanel extends HourglassPanel implements DataBoxPanel
         return m_drawVisualization;
     }
     
-    public void setData(AdjacencyMatrixData matrixData) {
+    public void setData(AdjacencyMatrixData matrixData, DProteinSet proteinSet) {
         
         m_drawVisualization = new DrawVisualization();
         
@@ -306,10 +316,54 @@ public class MatrixSelectionPanel extends HourglassPanel implements DataBoxPanel
 
         m_internalPanel.initPanel();
         
+        selectProteinSet(proteinSet);
+        
         setLoaded(0);
         
         revalidate(); 
         repaint();
+    }
+    public void setData(DProteinSet proteinSet) {
+        if (proteinSet == null) {
+            return;
+        }
+        selectProteinSet(proteinSet);
+        repaint();
+    }
+    
+    private void selectProteinSet(DProteinSet proteinSet) {
+        
+        
+        if (proteinSet == null) {
+            proteinSetName = "";
+            return;
+        }
+        
+        proteinSetName = proteinSet.getTypicalProteinMatch().getAccession();
+        
+        int nbComponents = m_componentList.size();
+        for (int i=0;i<nbComponents;i++) {
+            Component c = m_componentList.get(i);
+            ArrayList<LightProteinMatch> proteinSetList = c.proteinSet;
+            int nbProteins = proteinSetList.size();
+            for (int j=0;j<nbProteins;j++) {
+                LightProteinMatch pm = proteinSetList.get(j);
+                if (proteinSet.getProteinMatchId() == pm.getId()) {
+                    selectCluster(i);
+                    return;
+                }
+            }
+        }
+        
+        // protein set not in a cluster
+        if (m_currentImageButton != null) {
+            m_currentImageButton.setSelection(false);
+            m_currentImageButton = null;
+            setCurrentComponent(null);
+            m_dataBox.propagateDataChanged(Component.class);
+        }
+        
+   
     }
     
     private ArrayList<Component> filterComponents(ArrayList<Component> cList) {
@@ -392,6 +446,40 @@ public class MatrixSelectionPanel extends HourglassPanel implements DataBoxPanel
         }
     }
 
+    public void paint(Graphics g) {
+        super.paint(g);
+
+        if (m_currentComponent == null) {
+            if (m_displayFont == null) {
+                m_displayFont = new Font("SansSerif", Font.BOLD, 12);
+                m_metrics = g.getFontMetrics(m_displayFont);
+                
+            }
+            g.setFont(m_displayFont);
+            
+            final int PAD = 10;
+            final int INTERNAL_PAD = 5;
+            final int BOX_HEIGHT = INTERNAL_PAD * 2 + 16;
+
+            int visibleHeight = getVisibleRect().height;
+
+            String text = proteinSetName.length() > 0 ? "No Cluster Found for " + proteinSetName : proteinSetName;
+            FontMetrics metrics = g.getFontMetrics(m_displayFont);
+            int stringWidth = metrics.stringWidth(text);
+            int fontAscent = m_metrics.getAscent();
+
+            g.setColor(Color.white);
+            g.fillRect(PAD, visibleHeight - BOX_HEIGHT - PAD, stringWidth + INTERNAL_PAD * 4, BOX_HEIGHT);
+            g.setColor(Color.darkGray);
+            g.drawRect(PAD + 2, visibleHeight - BOX_HEIGHT - PAD + 2, stringWidth + INTERNAL_PAD * 4 - 4, BOX_HEIGHT - 4);
+
+            g.setColor(Color.black);
+            g.drawString(text, PAD+INTERNAL_PAD*2, visibleHeight-BOX_HEIGHT-PAD+INTERNAL_PAD+fontAscent);
+        }
+
+    }
+    private Font m_displayFont = null;
+    private FontMetrics m_metrics = null;
 
     
 }

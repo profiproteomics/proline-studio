@@ -1,11 +1,11 @@
 package fr.proline.studio.pattern;
 
 import fr.proline.core.orm.msi.ResultSummary;
+import fr.proline.core.orm.msi.dto.DProteinSet;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseProteinsAndPeptidesTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dam.tasks.data.AdjacencyMatrixData;
-import fr.proline.studio.id.ProjectId;
 import fr.proline.studio.rsmexplorer.adjacencymatrix.visualize.Component;
 import fr.proline.studio.rsmexplorer.adjacencymatrix.visualize.DrawVisualization;
 import fr.proline.studio.rsmexplorer.adjacencymatrix.visualize.MatrixSelectionPanel;
@@ -17,6 +17,7 @@ import fr.proline.studio.rsmexplorer.adjacencymatrix.visualize.MatrixSelectionPa
 public class DataBoxAdjacencyMatrixChoice extends AbstractDataBox {
     
     private ResultSummary m_rsm = null;
+    private boolean dataLoadedForRSM = false;
     
     public DataBoxAdjacencyMatrixChoice() {
         super(DataboxType.DataBoxAdjacencyMatrixChoice);
@@ -29,7 +30,9 @@ public class DataBoxAdjacencyMatrixChoice extends AbstractDataBox {
         // One ResultSummary
         GroupParameter inParameter = new GroupParameter();
         inParameter.addParameter(ResultSummary.class, false);
+        inParameter.addParameter(DProteinSet.class, false);
         registerInParameter(inParameter);
+        
         
         // Register possible out parameters
         GroupParameter outParameter = new GroupParameter();
@@ -52,7 +55,10 @@ public class DataBoxAdjacencyMatrixChoice extends AbstractDataBox {
     public void dataChanged() {
 
         final ResultSummary _rsm = (m_rsm != null) ? m_rsm : (ResultSummary) m_previousDataBox.getData(false, ResultSummary.class);
-
+        
+        
+        final DProteinSet _proteinSet = (m_previousDataBox==null) ? null : (DProteinSet) m_previousDataBox.getData(false, DProteinSet.class);
+        
         final AdjacencyMatrixData matrixData = new AdjacencyMatrixData();
         
         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
@@ -65,7 +71,7 @@ public class DataBoxAdjacencyMatrixChoice extends AbstractDataBox {
             @Override
             public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
 
-                ((MatrixSelectionPanel) m_panel).setData(matrixData);
+                ((MatrixSelectionPanel) m_panel).setData(matrixData, _proteinSet);
                 
                 if (finished) {
                     unregisterTask(taskId);
@@ -74,7 +80,12 @@ public class DataBoxAdjacencyMatrixChoice extends AbstractDataBox {
         };
 
         // ask asynchronous loading of data
-        registerTask(new DatabaseProteinsAndPeptidesTask(callback, getProjectId(), _rsm, matrixData));
+        if (!dataLoadedForRSM) {
+            registerTask(new DatabaseProteinsAndPeptidesTask(callback, getProjectId(), _rsm, matrixData));
+            dataLoadedForRSM = true;
+        } else {
+            ((MatrixSelectionPanel) m_panel).setData(_proteinSet);
+        }
 
     }
     

@@ -124,8 +124,8 @@ public class MatrixPanel extends HourglassPanel implements DataBoxPanelInterface
         m_peptideToProteinMap = m_drawVisualization.get_peptideToProteinMap();
         m_component = c;
 
-        int rowCount = m_component.getPeptideSize();
-        int columnCount = m_component.getProteinSize();
+        int rowCount = (m_component==null) ? 0 : m_component.getPeptideSize();
+        int columnCount = (m_component==null) ? 0 : m_component.getProteinSize();
 
         m_cells = new ArrayList<>(columnCount * rowCount);
         m_peptideCells = new ArrayList<>(rowCount);	//pepide score
@@ -137,18 +137,22 @@ public class MatrixPanel extends HourglassPanel implements DataBoxPanelInterface
 
         m_peptideScore = new Float[rowCount];
         int index = 0;
-        for (LightPeptideMatch peptideMatch : m_component.peptideSet) {
+        if (m_component != null) {
+            for (LightPeptideMatch peptideMatch : m_component.peptideSet) {
 
-            m_peptideScore[index] = peptideMatch.getScore();
-            m_peptideRank[index] = peptideMatch.getCDPrettyRank();
-            index++;
+                m_peptideScore[index] = peptideMatch.getScore();
+                m_peptideRank[index] = peptideMatch.getCDPrettyRank();
+                index++;
+            }
         }
 
         m_proteinScore = new Float[columnCount];
         index = 0;
-        for (LightProteinMatch proteinMatch : m_component.proteinSet) {
-            m_proteinScore[index] = proteinMatch.getScore();
-            index++;
+        if (m_component != null) {
+            for (LightProteinMatch proteinMatch : m_component.proteinSet) {
+                m_proteinScore[index] = proteinMatch.getScore();
+                index++;
+            }
         }
 
         m_firstPaint = true;
@@ -237,13 +241,42 @@ public class MatrixPanel extends HourglassPanel implements DataBoxPanelInterface
 
             int width = getWidth();
             int height = getHeight();
+            
+            
 
             Graphics2D g2d = (Graphics2D) g;
             g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
             g2d.setColor(Color.white);
             g2d.fillRect(0, 0, width, height);
 
+            
             if (m_component == null) {
+                
+                if (m_displayFont == null) {
+                    m_displayFont = new Font("SansSerif", Font.BOLD, 12);
+                    m_metrics = g.getFontMetrics(m_displayFont);
+                }
+                g.setFont(m_displayFont);
+                
+
+                final int PAD = 10;
+                final int INTERNAL_PAD = 5;
+                final int BOX_HEIGHT = INTERNAL_PAD * 2 + 16;
+
+                String text = "No Cluster Selected";
+                int stringWidth = m_metrics.stringWidth(text);
+                int fontAscent = m_metrics.getAscent();
+                
+                int visibleHeight = getVisibleRect().height;
+
+                g.setColor(Color.white);
+                g.fillRect(PAD, visibleHeight - BOX_HEIGHT - PAD, stringWidth + INTERNAL_PAD * 4, BOX_HEIGHT);
+                g.setColor(Color.darkGray);
+                g.drawRect(PAD + 2, visibleHeight - BOX_HEIGHT - PAD + 2, stringWidth + INTERNAL_PAD * 4 - 4, BOX_HEIGHT - 4);
+
+                g.setColor(Color.black);
+                g.drawString(text, PAD+INTERNAL_PAD*2, visibleHeight-BOX_HEIGHT-PAD+INTERNAL_PAD+fontAscent);
+
                 return;
             }
 
@@ -404,6 +437,7 @@ public class MatrixPanel extends HourglassPanel implements DataBoxPanelInterface
             }
  
 
+
             if (m_firstPaint) {
                 setPreferredSize(new Dimension(matrixTotalWidth+VISIBILITY_MARGE_SIZE, matrixTotalHeight+VISIBILITY_MARGE_SIZE));
                 m_firstPaint = false;
@@ -412,7 +446,12 @@ public class MatrixPanel extends HourglassPanel implements DataBoxPanelInterface
             }
 
         }
+        private Font m_displayFont = null;
+        private FontMetrics m_metrics = null;
 
+
+
+        
 
         private void drawRotatedLine(Graphics g, double x, double y, double theta, String label) {
 
@@ -636,5 +675,7 @@ public class MatrixPanel extends HourglassPanel implements DataBoxPanelInterface
         }
         
     }
+    
+
     
 }

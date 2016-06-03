@@ -48,7 +48,6 @@ public class ConnectedComponents {
 
 
         if (m_proteins == null && m_peptides == null) {
-            System.out.println("Empty data");
             componentSet = null;
 
             return componentSet;

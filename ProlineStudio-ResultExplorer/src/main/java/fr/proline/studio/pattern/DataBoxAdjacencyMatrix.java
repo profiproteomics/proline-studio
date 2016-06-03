@@ -1,18 +1,9 @@
 package fr.proline.studio.pattern;
 
-import fr.proline.core.orm.msi.ResultSummary;
-import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
-import fr.proline.studio.dam.tasks.DatabaseProteinsAndPeptidesTask;
-import fr.proline.studio.dam.tasks.SubTask;
-import fr.proline.studio.dam.tasks.data.AdjacencyMatrixData;
-import fr.proline.studio.gui.HourglassPanel;
-import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.rsmexplorer.adjacencymatrix.visualize.Component;
 import fr.proline.studio.rsmexplorer.adjacencymatrix.visualize.DrawVisualization;
 import fr.proline.studio.rsmexplorer.adjacencymatrix.visualize.MatrixPanel;
-import fr.proline.studio.rsmexplorer.adjacencymatrix.visualize.MatrixSelectionPanel;
-import java.awt.event.ActionListener;
-//import fr.proline.studio.rsmexplorer.adjacentmatrix.visualize.MatrixSelectionPanel;
+
 
 
 /**
@@ -20,8 +11,6 @@ import java.awt.event.ActionListener;
  * @author JM235353
  */
 public class DataBoxAdjacencyMatrix extends AbstractDataBox {
-    
-    private ResultSummary m_rsm = null;
     
     public DataBoxAdjacencyMatrix() {
         super(DataboxType.DataBoxAdjacencyMatrix);

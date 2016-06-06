@@ -92,6 +92,7 @@ public class ServerConnectionManager {
         } catch (BackingStoreException e) {
             LoggerFactory.getLogger("ProlineStudio.DPM").error("Saving Server Connection Parameters Failed", e);
         }
+        JMSConnectionManager.getJMSConnectionManager().saveParameters();
     }
 
 

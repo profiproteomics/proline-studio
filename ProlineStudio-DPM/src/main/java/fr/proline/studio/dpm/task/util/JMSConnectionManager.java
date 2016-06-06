@@ -3,6 +3,8 @@ package fr.proline.studio.dpm.task.util;
 import fr.proline.studio.dpm.jms.AccessJMSManagerThread;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.prefs.BackingStoreException;
+import java.util.prefs.Preferences;
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.JMSContext;
@@ -16,6 +18,8 @@ import org.hornetq.api.jms.HornetQJMSClient;
 import org.hornetq.api.jms.JMSFactoryType;
 import org.hornetq.core.remoting.impl.netty.NettyConnectorFactory;
 import org.hornetq.core.remoting.impl.netty.TransportConstants;
+import org.openide.util.Exceptions;
+import org.openide.util.NbPreferences;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,7 +33,8 @@ public class JMSConnectionManager {
     
     protected static final Logger m_loggerProline = LoggerFactory.getLogger("ProlineStudio.DPM.Task");
 
-    public static final String SERVICE_REQUEST_QUEUE_NAME = "ProlineServiceRequestQueue";
+    public static final String DEFAULT_SERVICE_REQUEST_QUEUE_NAME = "ProlineServiceRequestQueue";
+    public static final String SERVICE_REQUEST_QUEUE_NAME_KEY = "JMSProlineQueueName";
     
     public static final String SERVICE_MONITORING_NOTIFICATION_TOPIC_NAME = "ProlineServiceMonitoringNotificationTopic";
 
@@ -73,6 +78,19 @@ public class JMSConnectionManager {
             m_jmsConnectionManager = new JMSConnectionManager();
         }
         return m_jmsConnectionManager;
+    }
+    
+
+    public void saveParameters() {
+        if(m_serviceQueue != null) {
+            Preferences preferences = NbPreferences.root();
+            try {
+                preferences.put(SERVICE_REQUEST_QUEUE_NAME_KEY, m_serviceQueue.getQueueName());
+                preferences.flush();
+            } catch (BackingStoreException | JMSException e) {
+                LoggerFactory.getLogger("ProlineStudio.DPM").error("Saving Server Connection Parameters Failed", e);
+            }
+        }
     }
     
     public boolean isJMSDefined(){
@@ -139,7 +157,11 @@ public class JMSConnectionManager {
                 throw new RuntimeException("JMS Host not defined ! ");
             
             // Step 1. Directly instantiate the JMS Queue object.
-	    m_serviceQueue = HornetQJMSClient.createQueue(SERVICE_REQUEST_QUEUE_NAME);            
+            //Get JMS Queue Name from preference 
+            Preferences preferences = NbPreferences.root();
+            String queueName =  preferences.get(SERVICE_REQUEST_QUEUE_NAME_KEY, DEFAULT_SERVICE_REQUEST_QUEUE_NAME);
+            m_loggerProline.info(" Use JMS Queure "+queueName);
+	    m_serviceQueue = HornetQJMSClient.createQueue(queueName);            
             m_notificationTopic = HornetQJMSClient.createTopic(SERVICE_MONITORING_NOTIFICATION_TOPIC_NAME);
  
 	    // Step 2. Instantiate the TransportConfiguration object which contains the knowledge of what

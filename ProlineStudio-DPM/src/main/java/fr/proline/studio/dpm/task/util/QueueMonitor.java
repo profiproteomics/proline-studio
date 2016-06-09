@@ -5,11 +5,6 @@
  */
 package fr.proline.studio.dpm.task.util;
 
-import static fr.proline.studio.dpm.task.util.JMSConnectionManager.SERVICE_REQUEST_QUEUE_NAME;
-import java.util.Enumeration;
-import javax.jms.JMSContext;
-import javax.jms.JMSException;
-import javax.jms.Message;
 import javax.jms.QueueBrowser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

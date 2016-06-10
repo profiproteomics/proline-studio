@@ -58,7 +58,7 @@ public class PeptideTableModel extends DecoratedTableModel implements GlobalTabl
     public static final int COLTYPE_PEPTIDE_MSQUERY = 18;
     public static final int COLTYPE_SPECTRUM_TITLE = 19;
     private static final String[] m_columnNames = {"Id", "Prev. AA", "Peptide", "Next AA", "PTM", "Score", "Start", "Stop", "Calc. Mass", "Exp. MoZ", "Ppm", "Charge", "Missed Cl.", "Rank", "RT", "Protein Set Count", "Protein Sets", "Ion Parent Int.", "MsQuery", "Spectrum Title"};
-    private static final String[] m_columnTooltips = {"Peptide Inst. Id", "Previous Amino Acid","Peptide", "Next Amino Acid", "Post Translational Modifications", "Score", "Start", "Stop", "Calculated Mass", "Experimental Mass to Charge Ration", "parts-per-million", "Charge", "Missed Clivage", "Rank", "Retention Time", "Protein Set Count", "Protein Sets", "Ion Parent Intensity", "MsQuery", "Spectrum Title"};
+    private static final String[] m_columnTooltips = {"Peptide Inst. Id", "Previous Amino Acid","Peptide", "Next Amino Acid", "Post Translational Modifications", "Score", "Start", "Stop", "Calculated Mass", "Experimental Mass to Charge Ration", "parts-per-million", "Charge", "Missed Clivage", "Pretty Rank", "Retention Time", "Protein Set Count", "Protein Sets", "Ion Parent Intensity", "MsQuery", "Spectrum Title"};
     
     
     private DPeptideInstance[] m_peptideInstances = null;

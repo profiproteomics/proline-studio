@@ -27,7 +27,7 @@ public class ValidationTask extends AbstractServiceTask {
     
         //PSM PreFilter
     public static String RANK_FILTER_KEY = "RANK";
-    public static String RANK_FILTER_NAME = "Rank";
+    public static String RANK_FILTER_NAME = "Pretty Rank";
     public static String SCORE_FILTER_KEY = "SCORE";
     public static String SCORE_FILTER_NAME = "Score";
     public static String PEP_LENGTH_FILTER_KEY = "PEP_SEQ_LENGTH";

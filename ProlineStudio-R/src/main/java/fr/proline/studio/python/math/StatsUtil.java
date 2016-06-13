@@ -193,6 +193,13 @@ public class StatsUtil {
          return sb.toString();
      }
      
+     public static String RVectorToRFactor(String rVector) {
+         StringBuilder sb = new StringBuilder();
+         sb.append("factor(").append(rVector).append(')');
+         return sb.toString();
+     }
+     
+     
      public static PyTuple colNamesToTuple(ColRef[] cols) {
          
          int nb = cols.length;

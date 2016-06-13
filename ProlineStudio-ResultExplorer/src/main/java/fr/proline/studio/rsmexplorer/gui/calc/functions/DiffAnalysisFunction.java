@@ -51,7 +51,7 @@ public class DiffAnalysisFunction extends AbstractOnExperienceDesignFunction {
 
         ParameterList parameterList = new ParameterList("diff analysis options");
 
-        String[] diffAnalysisTypes = { /*DIFF_ANALYSIS_LIMMA,*/ DIFF_ANALYSIS_WELCH  };  //JPM.TODO
+        String[] diffAnalysisTypes = { DIFF_ANALYSIS_LIMMA, DIFF_ANALYSIS_WELCH  };
 
         
         

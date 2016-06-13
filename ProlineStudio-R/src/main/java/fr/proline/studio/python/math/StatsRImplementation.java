@@ -528,27 +528,9 @@ public class StatsRImplementation {
 
     private static Table _diffanalysisR(Table t, File matrixTempFile, PyTuple labels, ColRef[] cols, PyString diffAnalysisType) throws Exception {
 
-        // load library to do the calculation
-        RServerManager serverR = RServerManager.getRServerManager();
-        serverR.parseAndEval("library(" + LIB_PROSTAR + ")");
-
-        // read Matrix Data
-        StatsUtil.readMatrixData(matrixTempFile, false);
-
-        String cmdBB = null;
-        String diffAnalysisTypeString = diffAnalysisType.toString();
-        if (diffAnalysisTypeString.compareTo("Limma") == 0) {
-            //cmdBB = "diffAnaLimma(" + StatsUtil.MATRIX_VARIABLE +"," + "samplesData" + "," + StatsUtil.stringTupleToRVector(labels) + ",\"" + normalizeFamily + "\",\"" + normalizeOption + "\")";
-            // JPM.TODO
-        } else if (diffAnalysisTypeString.compareTo("Welch") == 0) {
-            cmdBB = "diffAnaWelch(" + StatsUtil.MATRIX_VARIABLE + "," + StatsUtil.stringTupleToRVector(labels) + ",\"" + "group0" + "\",\"" + "group1" + "\")";
-            
-        }
-
-        Object res = serverR.parseAndEval(cmdBB);
-
-        final int colPValue = t.getModel().getColumnCount()+1;
-        final int colLogFC = colPValue+1;
+        // Prepare Model
+        final int colPValue = t.getModel().getColumnCount() + 1;
+        final int colLogFC = colPValue + 1;
         ExprTableModel model = new ExprTableModel(t.getModel()) {
             @Override
             public int getBestXAxisColIndex(PlotType plotType) {
@@ -557,6 +539,7 @@ public class StatsRImplementation {
                 }
                 return super.getBestXAxisColIndex(plotType);
             }
+
             @Override
             public int getBestYAxisColIndex(PlotType plotType) {
                 if (plotType == SCATTER_PLOT) {
@@ -566,79 +549,135 @@ public class StatsRImplementation {
             }
         };
         Table resTable = new Table(model);
- 
-        if (res instanceof REXPDouble) {
-            REXPDouble matrixDouble = (REXPDouble) res;
-            double[][] d = matrixDouble.asDoubleMatrix();
 
-            int nbRows = d.length;
-            int nbCols = cols.length;
+        // load library to do the calculation
+        RServerManager serverR = RServerManager.getRServerManager();
+        serverR.parseAndEval("library(" + LIB_PROSTAR + ")");
+        serverR.parseAndEval("library(limma)");
 
-            ArrayList<ArrayList<Double>> valuesForCol = new ArrayList<>();
-            for (int j = 0; j < nbCols; j++) {
-                valuesForCol.add(new ArrayList<>());
-            }
+        // read Matrix Data
+        StatsUtil.readMatrixData(matrixTempFile, false);
+
+        
+        String diffAnalysisTypeString = diffAnalysisType.toString();
+        if (diffAnalysisTypeString.compareTo("Limma") == 0) {
+
+            int nbValues = labels.getArray().length;
+
+            String cmdBB = "limmaObject <- limmaCompleteTest(" + StatsUtil.MATRIX_VARIABLE + "," + StatsUtil.RVectorToRFactor(StatsUtil.stringTupleToRVector(labels)) + "," + "factor(1:" + nbValues + ")" + "," + "factor(1:" + nbValues + ")" + ")";
+            serverR.parseAndEval(cmdBB);
+
+            Object resPValue = serverR.parseAndEval("limmaObject$P.Value");
+            Object resLogFC = serverR.parseAndEval("limmaObject$logFC");
+   
+            double[] pvaluesArray =  ((REXPDouble) resPValue).asDoubles();
+            double[] logFCArray =  ((REXPDouble) resLogFC).asDoubles();
+
+            int nbRows = pvaluesArray.length;
+
+            ArrayList<Double> valuesForCol = new ArrayList<>(nbRows);
+
             for (int i = 0; i < nbRows; i++) {
+                valuesForCol.add(pvaluesArray[i]);
+            }
+
+            String colName = diffAnalysisTypeString + " PValue";
+            ColData pvalueCol = new ColData(resTable, valuesForCol, colName);
+            ColData log10PvalueCol = StatsImplementation.log10(pvalueCol);
+            ColData minusLog10PvalueCol = StatsImplementation.neg(log10PvalueCol);
+            model.addExtraColumn(pvalueCol, null);
+            model.addExtraColumnInfo(new PValue());
+            model.addExtraColumn(minusLog10PvalueCol, null);
+            model.addExtraColumnInfo(new PValue());
+            model.addExtraColumnInfo(new LogInfo(LogInfo.LogState.LOG10));
+
+            valuesForCol.clear();
+            for (int i = 0; i < nbRows; i++) {
+                valuesForCol.add(logFCArray[i]);
+            }
+
+            colName = diffAnalysisTypeString + " log Ratio";
+            model.addExtraColumn(new ColData(resTable, valuesForCol, colName), null);
+            model.addExtraColumnInfo(new LogRatio());
+         
+
+        } else if (diffAnalysisTypeString.compareTo("Welch") == 0) {
+            String cmdBB = "diffAnaWelch(" + StatsUtil.MATRIX_VARIABLE + "," + StatsUtil.stringTupleToRVector(labels) + ",\"" + "group0" + "\",\"" + "group1" + "\")";
+
+            Object res = serverR.parseAndEval(cmdBB);
+
+            if (res instanceof REXPDouble) {
+                REXPDouble matrixDouble = (REXPDouble) res;
+                double[][] d = matrixDouble.asDoubleMatrix();
+
+                int nbRows = d.length;
+                int nbCols = cols.length;
+
+                ArrayList<ArrayList<Double>> valuesForCol = new ArrayList<>();
                 for (int j = 0; j < nbCols; j++) {
-                    valuesForCol.get(j).add(d[i][j]);
+                    valuesForCol.add(new ArrayList<>());
                 }
+                for (int i = 0; i < nbRows; i++) {
+                    for (int j = 0; j < nbCols; j++) {
+                        valuesForCol.get(j).add(d[i][j]);
+                    }
+                }
+
+                for (int j = 0; j < nbCols; j++) {
+                    String colName = null;
+                    if (j == 0) {
+                        colName = diffAnalysisTypeString + " PValue";
+                        ColData pvalueCol = new ColData(resTable, valuesForCol.get(j), colName);
+                        ColData log10PvalueCol = StatsImplementation.log10(pvalueCol);
+                        ColData minusLog10PvalueCol = StatsImplementation.neg(log10PvalueCol);
+                        model.addExtraColumn(pvalueCol, null);
+                        model.addExtraColumnInfo(new PValue());
+                        model.addExtraColumn(minusLog10PvalueCol, null);
+                        model.addExtraColumnInfo(new PValue());
+                        model.addExtraColumnInfo(new LogInfo(LogInfo.LogState.LOG10));
+                    } else if (j == 1) {
+                        colName = diffAnalysisTypeString + " log Ratio";
+                        model.addExtraColumn(new ColData(resTable, valuesForCol.get(j), colName), null);
+                        model.addExtraColumnInfo(new LogRatio());
+                    }
+
+                }
+
+            } else {
+                REXPGenericVector matrix = (REXPGenericVector) res;
+
+                RList list = (RList) matrix.asList();
+                for (int i = 0; i < list.size(); i++) {
+                    REXPDouble resDoubleArray = (REXPDouble) list.get(i);
+                    double[] d = resDoubleArray.asDoubles();
+                    ArrayList<Double> values = new ArrayList<>();
+                    for (int j = 0; j < d.length; j++) {
+                        values.add(d[j]);
+                    }
+                    String colName = null;
+                    Object colExtraInfo = null;
+                    if (i == 0) {
+                        colName = diffAnalysisTypeString + " PValue";
+                        colExtraInfo = new PValue();
+                        ColData pvalueCol = new ColData(resTable, values, colName);
+                        ColData log10PvalueCol = StatsImplementation.log10(pvalueCol);
+                        ColData minusLog10PvalueCol = StatsImplementation.neg(log10PvalueCol);
+                        model.addExtraColumn(pvalueCol, null);
+                        model.addExtraColumnInfo(colExtraInfo);
+                        model.addExtraColumn(minusLog10PvalueCol, null);
+                        model.addExtraColumnInfo(colExtraInfo);
+                        model.addExtraColumnInfo(new LogInfo(LogInfo.LogState.LOG10));
+                    } else if (i == 1) {
+                        colName = diffAnalysisTypeString + " log Ratio";
+                        colExtraInfo = new LogRatio();
+                        model.addExtraColumn(new ColData(resTable, values, colName), null);
+                        model.addExtraColumnInfo(colExtraInfo);
+                    }
+
+                }
+
             }
-
-            for (int j = 0; j < nbCols; j++) {
-                String colName = null;
-                if (j == 0) {
-                    colName = diffAnalysisTypeString+" PValue";
-                    ColData pvalueCol = new ColData(resTable, valuesForCol.get(j), colName);
-                    ColData log10PvalueCol = StatsImplementation.log10(pvalueCol);
-                    ColData minusLog10PvalueCol = StatsImplementation.neg(log10PvalueCol);
-                    model.addExtraColumn(pvalueCol, null);
-                    model.addExtraColumnInfo(new PValue());
-                    model.addExtraColumn(minusLog10PvalueCol, null);
-                    model.addExtraColumnInfo(new PValue());
-                    model.addExtraColumnInfo(new LogInfo(LogInfo.LogState.LOG10));
-                } else if (j == 1) {
-                    colName = diffAnalysisTypeString+" log Ratio";
-                    model.addExtraColumn(new ColData(resTable, valuesForCol.get(j), colName), null);
-                    model.addExtraColumnInfo(new LogRatio());
-                }
-                
-            }
-
-        } else {
-            REXPGenericVector matrix = (REXPGenericVector) res;
-
-            RList list = (RList) matrix.asList();
-            for (int i = 0; i < list.size(); i++) {
-                REXPDouble resDoubleArray = (REXPDouble) list.get(i);
-                double[] d = resDoubleArray.asDoubles();
-                ArrayList<Double> values = new ArrayList<>();
-                for (int j = 0; j < d.length; j++) {
-                    values.add(d[j]);
-                }
-                String colName = null;
-                Object colExtraInfo = null;
-                if (i == 0) {
-                    colName = diffAnalysisTypeString+" PValue";
-                    colExtraInfo = new PValue();
-                    ColData pvalueCol = new ColData(resTable, values, colName);
-                    ColData log10PvalueCol = StatsImplementation.log10(pvalueCol);
-                    ColData minusLog10PvalueCol = StatsImplementation.neg(log10PvalueCol);
-                    model.addExtraColumn(pvalueCol, null);
-                    model.addExtraColumnInfo(colExtraInfo);
-                    model.addExtraColumn(minusLog10PvalueCol, null);
-                    model.addExtraColumnInfo(colExtraInfo);
-                    model.addExtraColumnInfo(new LogInfo(LogInfo.LogState.LOG10));
-                } else if (i == 1) {
-                    colName = diffAnalysisTypeString+" log Ratio";
-                    colExtraInfo = new LogRatio();
-                    model.addExtraColumn(new ColData(resTable, values, colName), null);
-                    model.addExtraColumnInfo(colExtraInfo);
-                }
-                
-            }
-
         }
-
 
         return resTable;
 

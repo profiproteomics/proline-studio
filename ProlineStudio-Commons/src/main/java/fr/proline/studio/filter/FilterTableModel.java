@@ -375,7 +375,11 @@ public class FilterTableModel extends DecoratedTableModel implements FilterTable
 
     @Override
     public TableCellRenderer getRenderer(int row, int col) {
-        return m_tableModelSource.getRenderer(row, col);
+        int rowFiltered = row;
+        if ((!m_isFiltering) && (m_filteredIds != null)) {
+            rowFiltered = m_filteredIds.get(row).intValue();
+        }
+        return m_tableModelSource.getRenderer(rowFiltered, col);
     }
 
     @Override

@@ -306,7 +306,8 @@ public class MzdbRawFile implements IRawFile {
                     i++;
                 }
                 SpectrumData data = slices[i].getData();
-                Tuple2<Object, TheoreticalIsotopePattern>[] putativePatterns = IsotopicPatternScorer.calclIsotopicPatternHypotheses(data, peakels[k].getMz(), mzTolPPM);
+
+                Tuple2<Object, TheoreticalIsotopePattern>[] putativePatterns = IsotopicPatternScorer.calcIsotopicPatternHypotheses(data, peakels[k].getMz(), mzTolPPM);
                 //TreeMap<Double, TheoreticalIsotopePattern> putativePatterns = IsotopePattern.getOrderedIPHypothesis(data, peakels[k].getMz());
                 TheoreticalIsotopePattern bestPattern = putativePatterns[0]._2;
                 List<Peakel> l = new ArrayList<>(bestPattern.isotopeCount() + 1);

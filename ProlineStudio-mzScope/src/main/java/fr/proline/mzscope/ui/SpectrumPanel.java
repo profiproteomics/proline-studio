@@ -118,7 +118,7 @@ public class SpectrumPanel extends JPanel implements ScanHeaderListener, PlotPan
            if (currentScan.getSpectrumData().getLeftHwhmList()[nearestPeakIdx] > 0.0f)
                ppmTol = (float) (1e6 * currentScan.getSpectrumData().getLeftHwhmList()[nearestPeakIdx] / currentScan.getSpectrumData().getMzList()[nearestPeakIdx]);
         }
-        Tuple2<Object, TheoreticalIsotopePattern>[] putativePatterns = IsotopicPatternScorer.calclIsotopicPatternHypotheses(currentScan.getSpectrumData(), positionMarker.getValue(), ppmTol);
+        Tuple2<Object, TheoreticalIsotopePattern>[] putativePatterns = IsotopicPatternScorer.calcIsotopicPatternHypotheses(currentScan.getSpectrumData(), positionMarker.getValue(), ppmTol);
 
         logger.info("scanId=" + currentScan.getIndex() + ", mz = " + positionMarker.getValue() + ", ppm = " + ppmTol);
         for (Tuple2<Object, TheoreticalIsotopePattern> t : putativePatterns) {

@@ -24,7 +24,6 @@ import fr.proline.studio.types.LogInfo;
 import fr.proline.studio.types.LogRatio;
 import fr.proline.studio.types.PValue;
 import java.util.ArrayList;
-import javax.swing.JOptionPane;
 import javax.swing.JSpinner;
 import javax.swing.JTextField;
 import org.python.core.PyFloat;
@@ -60,10 +59,7 @@ public class ComputeFDRFunction extends AbstractFunction {
     private IntegerParameter m_nbinsParameter = null;
     private DoubleParameter m_pzParameter = null;
     
-    
-    
-    private ResultVariable m_fdrResultVariable = null;
-    
+
     public ComputeFDRFunction(GraphPanel panel) {
         super(panel);
     }
@@ -181,7 +177,7 @@ public class ComputeFDRFunction extends AbstractFunction {
                                     ArrayList<String> valuesName = new ArrayList<>(1);
                                     valuesName.add("FDR");
                                     ArrayList<String> values = new ArrayList<>(1);
-                                    values.add(fdr.toString());
+                                    values.add(fdr.toString()+"%");
                                     
                                     m_globalTableModelInterface = new ValuesTableModel(valuesName, values);
 
@@ -275,7 +271,7 @@ public class ComputeFDRFunction extends AbstractFunction {
         m_pValueColumnParameter = new ObjectParameter(PVALUE_COL_PARAMETER, "P Values Column", null, pValueObjectArray, pValueAssociatedObjectArray, selectedIndexPValue, null);
         m_logFCColumnParameter = new ObjectParameter(LOGFC_COL_PARAMETER, "Log FC Column", null, logFCObjectArray, logFCAssociatedObjectArray, selectedIndexLogFC, null);
 
-        m_pvalueThresholdParameter = new DoubleParameter(PVALUE_THRESHOLD, "PValue Threshold", JTextField.class, 0d, 0d, null);
+        m_pvalueThresholdParameter = new DoubleParameter(PVALUE_THRESHOLD, "-Log10(PValue) Threshold", JTextField.class, 0d, 0d, null);
         m_logFCThresholdParameter = new DoubleParameter(LOGFC_THRESHOLD, "Log FC Threshold", JTextField.class, 0d, 0d, null);
 
         

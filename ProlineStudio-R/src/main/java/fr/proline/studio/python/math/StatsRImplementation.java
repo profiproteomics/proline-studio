@@ -684,7 +684,7 @@ public class StatsRImplementation {
     }
     
     
-    public static PyObject computeFDR(Col pvaluesCol, Col logFCCol, PyFloat pvalueThreshold, PyFloat logFCThreshold, String pi0Parameter, PyFloat alpha, PyInteger nbins, PyFloat pz) throws Exception {
+    public static PyObject computeFDR(Col pvaluesCol, Col logFCCol, PyFloat minusLogPvalueThreshold, PyFloat logFCThreshold, String pi0Parameter, PyFloat alpha, PyInteger nbins, PyFloat pz) throws Exception {
 
         RServerManager serverR = RServerManager.getRServerManager();
         boolean RStarted = serverR.startRProcessWithRetry();
@@ -695,8 +695,6 @@ public class StatsRImplementation {
         serverR.connect();
 
         int nbRow = pvaluesCol.getRowCount();
-
-        Table t = pvaluesCol.getTable();
 
         File tempFile = File.createTempFile("computeFDR", "csv");
         tempFile.deleteOnExit();
@@ -741,7 +739,7 @@ public class StatsRImplementation {
 
         fw.close();
 
-        PyFloat d = _computeFDR(t, tempFile, pvalueThreshold, logFCThreshold, pi0Parameter, alpha, nbins, pz);
+        PyFloat d = _computeFDR(tempFile, minusLogPvalueThreshold, logFCThreshold, pi0Parameter, alpha, nbins, pz);
 
         tempFile.delete();
 
@@ -749,8 +747,11 @@ public class StatsRImplementation {
 
     }
 
-    private static PyFloat _computeFDR(Table t, File f, PyFloat pvalueThreshold, PyFloat logFCThreshold, String pi0Parameter, PyFloat alpha, PyInteger nbins, PyFloat pz) throws Exception {
+    private static PyFloat _computeFDR(File f, PyFloat minusLogPvalueThreshold, PyFloat logFCThreshold, String pi0Parameter, PyFloat alpha, PyInteger nbins, PyFloat pz) throws Exception {
 
+         // calculate PValue
+        double pValue = Math.pow(10, -minusLogPvalueThreshold.getValue());
+        
         RServerManager serverR = RServerManager.getRServerManager();
 
         String path = f.getCanonicalPath().replaceAll("\\\\", "/");
@@ -762,12 +763,12 @@ public class StatsRImplementation {
         String cmdReadCSV = "computeFDRValues<-read.delim('" + path + "',header=F, sep=';', col.names=c(\"P.Value\",\"logFC\"))";
         serverR.parseAndEval(cmdReadCSV);
 
-        String cmdBB1 = "computedFDR<-diffAnaComputeFDR(computeFDRValues, " +pvalueThreshold.toString()+","+logFCThreshold.toString()+"," + pi0Parameter  + ")";
+        String cmdBB1 = "computedFDR<-diffAnaComputeFDR(computeFDRValues, " +pValue+","+logFCThreshold.toString()+"," + pi0Parameter  + ")";
         
         REXPDouble fdr = (REXPDouble) serverR.parseAndEval(cmdBB1);
 
     
-        return new PyFloat(fdr.asDouble());
+        return new PyFloat(fdr.asDouble()*100); // convert to percentage
 
 
     }

@@ -2,10 +2,12 @@ package fr.proline.studio.rsmexplorer.gui.model.properties;
 
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.comparedata.ExtraDataType;
+import fr.proline.studio.filter.ConvertValueInterface;
 import fr.proline.studio.filter.Filter;
 import fr.proline.studio.filter.StringFilter;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
+import fr.proline.studio.rsmexplorer.gui.model.properties.DataGroup.GroupObject;
 import fr.proline.studio.table.DecoratedTableModel;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.table.LazyData;
@@ -95,10 +97,10 @@ public abstract class AbstractPropertiesTableModel extends DecoratedTableModel i
     @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
         DataGroup dataGroup = m_dataGroupMap.get(rowIndex);
-        String v = (String) dataGroup.getValueAt(rowIndex, columnIndex);
-        if (v == null) {
+        GroupObject v = (GroupObject) dataGroup.getValueAt(rowIndex, columnIndex);
+        /*if (v == null) {
             v = "";
-        }
+        }*/
         return v;
     }
 
@@ -115,8 +117,10 @@ public abstract class AbstractPropertiesTableModel extends DecoratedTableModel i
     @Override
     public TableCellRenderer getRenderer(int row, int col) {
 
-        DataGroup dataGroup = m_dataGroupMap.get(row);
-        boolean isFirstRow = dataGroup.isFirstRow(row);
+        GroupObject groupObject = (GroupObject) getValueAt(row, col);
+        
+        DataGroup dataGroup = groupObject.m_group;
+        boolean isFirstRow = groupObject.m_coloredRow;
         if (isFirstRow) {
             return dataGroup.getRenderer(row);
         } else if (col == DataGroup.COLTYPE_GROUP_NAME) {
@@ -235,8 +239,17 @@ public abstract class AbstractPropertiesTableModel extends DecoratedTableModel i
 
     @Override
     public void addFilters(LinkedHashMap<Integer, Filter> filtersMap) {
-        filtersMap.put(DataGroup.COLTYPE_GROUP_NAME, new StringFilter(getColumnName(DataGroup.COLTYPE_GROUP_NAME), null, DataGroup.COLTYPE_GROUP_NAME));
-        filtersMap.put(DataGroup.COLTYPE_PROPERTY_NAME, new StringFilter(getColumnName(DataGroup.COLTYPE_PROPERTY_NAME), null, DataGroup.COLTYPE_PROPERTY_NAME));
+        
+        ConvertValueInterface convertValueInterface = new ConvertValueInterface() {
+            @Override
+            public Object convertValue(Object o) {
+                return ((DataGroup.GroupObject) o).m_valueFiltering;
+            }
+            
+        };
+        
+        filtersMap.put(DataGroup.COLTYPE_GROUP_NAME, new StringFilter(getColumnName(DataGroup.COLTYPE_GROUP_NAME), convertValueInterface, DataGroup.COLTYPE_GROUP_NAME));
+        filtersMap.put(DataGroup.COLTYPE_PROPERTY_NAME, new StringFilter(getColumnName(DataGroup.COLTYPE_PROPERTY_NAME), convertValueInterface, DataGroup.COLTYPE_PROPERTY_NAME));
     }
 
     @Override

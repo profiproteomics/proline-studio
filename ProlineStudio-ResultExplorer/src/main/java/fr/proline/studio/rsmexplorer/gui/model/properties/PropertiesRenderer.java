@@ -1,5 +1,6 @@
 package fr.proline.studio.rsmexplorer.gui.model.properties;
 
+import fr.proline.studio.rsmexplorer.gui.model.properties.DataGroup.GroupObject;
 import fr.proline.studio.table.CompoundTableModel;
 import java.awt.Color;
 import java.awt.Component;
@@ -25,7 +26,11 @@ public class PropertiesRenderer extends DefaultTableCellRenderer {
     @Override
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
 
-        super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+        GroupObject groupObject = (GroupObject) value;
+        DataGroup dataGroup = (groupObject==null) ? null : groupObject.m_group;
+        String valueString = (groupObject == null) ? "" : groupObject.m_valueRendering;
+        
+        super.getTableCellRendererComponent(table, valueString, isSelected, hasFocus, row, column);
         setHorizontalAlignment(JLabel.RIGHT);
 
         m_table = table;
@@ -35,9 +40,8 @@ public class PropertiesRenderer extends DefaultTableCellRenderer {
                 setBackground(COLOR_DIFFERENT);
                 setForeground(Color.black);
             } else if (column == DataGroup.COLTYPE_GROUP_NAME) {
-                CompoundTableModel model =(CompoundTableModel) table.getModel();
-                DataGroup dataGroup = ((AbstractPropertiesTableModel)model.getBaseModel()).getDataGroupMap().get(row);
-                if (dataGroup.isFirstRow(row)) {
+
+                if (groupObject.m_coloredRow) {
                     setBackground(dataGroup.getGroupColor(row));
                     setForeground(Color.white);
                 } else {

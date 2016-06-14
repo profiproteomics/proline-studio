@@ -33,16 +33,18 @@ public abstract class DataGroup {
         m_groupSubRenderer = new PropertiesRenderer(false);
     }
 
-    private String getName(int row) {
+    private GroupObject getName(int row) {
         if (row == m_rowStart) {
-            return m_name;
+            GroupObject object = new GroupObject(m_name, this);
+            object.setColoredRow();
+            return object;
         }
         
         JTable table = m_groupRenderer.getTable(); //JPM.WART
         if ((table == null) || table.getRowSorter().getSortKeys().isEmpty()) {
-            return ""; // no sorting, for group name, we show no text
+            return new GroupObject("", m_name, this); // no sorting, for group name, we show no text
         }
-        return m_name;
+        return new GroupObject(m_name, this);
     }
 
     public TableCellRenderer getRenderer(int row) {
@@ -58,7 +60,9 @@ public abstract class DataGroup {
             return getName(rowIndex);
         }
         if (rowIndex == m_rowStart) {
-            return "";
+            GroupObject object = new GroupObject("", this);
+            object.setColoredRow();
+            return object;
         }
 
         if (columnIndex == COLTYPE_PROPERTY_NAME) {
@@ -72,9 +76,9 @@ public abstract class DataGroup {
         return row == m_rowStart;
     }
 
-    public abstract String getGroupValueAt(int rowIndex, int columnIndex);
+    public abstract GroupObject getGroupValueAt(int rowIndex, int columnIndex);
 
-    public abstract String getGroupNameAt(int rowIndex);
+    public abstract GroupObject getGroupNameAt(int rowIndex);
 
     public abstract Color getGroupColor(int row);
 
@@ -83,4 +87,36 @@ public abstract class DataGroup {
     }
 
     public abstract int getRowCountImpl();
+    
+    
+    public class GroupObject {
+        
+        public String m_valueRendering;
+        public String m_valueFiltering;
+        public DataGroup m_group;
+        public boolean m_coloredRow = false;
+        
+        public GroupObject(String value, DataGroup group) {
+            m_valueRendering = value;
+            m_valueFiltering = value;
+            m_group = group;
+        }
+
+        public void setColoredRow() {
+            m_coloredRow = true;
+        }
+        
+        public GroupObject(String valueRendering, String valueFiltering, DataGroup group) {
+            m_valueRendering = valueRendering;
+            m_valueFiltering = valueFiltering;
+            m_group = group;
+        }
+        
+        public String stringForFilter() {
+            return m_valueFiltering;
+        }
+        public String stringForRendering() {
+            return m_valueRendering;
+        }
+    }
 }

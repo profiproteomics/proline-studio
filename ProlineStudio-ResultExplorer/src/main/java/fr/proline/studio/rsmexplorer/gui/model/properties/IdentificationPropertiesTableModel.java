@@ -116,27 +116,27 @@ public class IdentificationPropertiesTableModel extends AbstractPropertiesTableM
         }
         
         @Override
-        public String getGroupNameAt(int rowIndex) {
+        public GroupObject getGroupNameAt(int rowIndex) {
             switch (rowIndex) {
                 case ROWTYPE_RAW_FILE_NAME:
-                    return "Raw File Name";
+                    return new GroupObject("Raw File Name", this);
                 case ROWTYPE_SEARCH_RESULT_NAME:
-                    return "Search Result Name";
+                    return new GroupObject("Search Result Name", this);
                 case ROWTYPE_INSTRUMENT_NAME:
-                    return "Instrument Name";
+                    return new GroupObject("Instrument Name", this);
                 case ROWTYPE_TARGET_DECOY_MODE:
-                    return "Target Decoy Mode";
+                    return new GroupObject("Target Decoy Mode", this);
                 /*case ROWTYPE_TARGET_DECOY_RULE:
                     return "Decoy Rule";*/
                 case ROWTYPE_PEAKLIST_SOFTWARE_NAME:
-                    return "Peaklist Software Name";
+                    return new GroupObject("Peaklist Software Name", this);
             }
             
             return null;
         }
         
         @Override
-        public String getGroupValueAt(int rowIndex, int columnIndex) {
+        public GroupObject getGroupValueAt(int rowIndex, int columnIndex) {
 
 
             ResultSet rset = m_rsetArray.get(columnIndex);
@@ -147,42 +147,41 @@ public class IdentificationPropertiesTableModel extends AbstractPropertiesTableM
             InstrumentConfig instrumentConfig = (searchSetting==null) ? null : searchSetting.getInstrumentConfig();
             Peaklist peaklist = (msiSearch == null) ? null : msiSearch.getPeaklist();
             PeaklistSoftware peaklistSoftware = (peaklist == null) ? null : peaklist.getPeaklistSoftware();
-            ResultSummary rsm = m_rsmArray.get(columnIndex);
 
 
             switch (rowIndex) {
                 case ROWTYPE_RAW_FILE_NAME:
                     if (peaklist==null) {
-                        return "";
+                        return new GroupObject("", this);
                     } else {
                         String path = peaklist.getPath();
                         File f = new File(path);
-                        return f.getName();
+                        return new GroupObject(f.getName(), this);
                     }
                 case ROWTYPE_SEARCH_RESULT_NAME:
-                    return (rset==null) ? "" : rset.getName();
+                    return new GroupObject((rset==null) ? "" : rset.getName(), this);
                 case ROWTYPE_INSTRUMENT_NAME:
-                    return (instrumentConfig == null) ? "" : instrumentConfig.getName();
+                    return new GroupObject((instrumentConfig == null) ? "" : instrumentConfig.getName(), this);
                 case ROWTYPE_TARGET_DECOY_MODE: {
                     if (rsetDecoy == null) {
-                        return "";
+                        return new GroupObject("", this);
                     }
                     try {
                         Map<String, Object> map = rsetDecoy.getSerializedPropertiesAsMap();
                         Object o = map.get("target_decoy_mode");
                         if (o == null) {
-                            return "";
+                            return new GroupObject("", this);
                         }
-                        return o.toString();
+                        return new GroupObject(o.toString(), this);
                     } catch (Exception e) {
-                        return "";
+                        return new GroupObject("", this);
                     }
                 }
                 /*case ROWTYPE_TARGET_DECOY_RULE: {
                     return "NA";
                 }*/
                 case ROWTYPE_PEAKLIST_SOFTWARE_NAME:
-                    return (peaklistSoftware==null) ? "" : peaklistSoftware.getName();
+                    return new GroupObject((peaklistSoftware==null) ? "" : peaklistSoftware.getName(), this);
                     
             }
             
@@ -233,40 +232,40 @@ public class IdentificationPropertiesTableModel extends AbstractPropertiesTableM
         }
         
         @Override
-        public String getGroupNameAt(int rowIndex) {
+        public GroupObject getGroupNameAt(int rowIndex) {
             switch (rowIndex) {
                 case ROWTYPE_RESULT_FILE_NAME:
-                    return "Result File Name";
+                    return new GroupObject("Result File Name",this);
                 case ROWTYPE_SEARCH_DATE:
-                    return "Search Date";
+                    return new GroupObject("Search Date",this);
                 case ROWTYPE_SOFTWARE_NAME:
-                    return "Software Name";
+                    return new GroupObject("Software Name",this);
                 case ROWTYPE_SOFTWARE_VERSION:
-                    return "Software Version";
+                    return new GroupObject("Software Version",this);
                 /*case ROWTYPE_DATABASE_NAME:
                     return "Database Name";*/
                 case ROWTYPE_TAXONOMY:
-                    return "Taxonomy";
+                    return new GroupObject("Taxonomy",this);
                 case ROWTYPE_ENZYME:
-                    return "Enzyme";
+                    return new GroupObject("Enzyme",this);
                 case ROWTYPE_MAX_MISSED_CLIVAGE:
-                    return "Max Missed Clivage";
+                    return new GroupObject("Max Missed Clivage",this);
                 case ROWTYPE_FIXED_MODIFICATIONS:
-                    return "Fixed Modifications";
+                    return new GroupObject("Fixed Modifications",this);
                 case ROWTYPE_VARIABLE_MODIFICATIONS:
-                    return "Variable Modifications";
+                    return new GroupObject("Variable Modifications",this);
                 case ROWTYPE_FRAGMENT_MASS_TOLERANCE:
-                    return "Fragment Mass Tolerance";
+                    return new GroupObject("Fragment Mass Tolerance",this);
                 case ROWTYPE_PEPTIDE_CHARGE_STATES:
-                    return "Peptide Charge States";
+                    return new GroupObject("Peptide Charge States",this);
                 case ROWTYPE_PEPTIDE_MASS_ERROR_TOLERANCE:
-                    return "Peptide Mass Error Tolerance";
+                    return new GroupObject("Peptide Mass Error Tolerance",this);
                 /*case ROWTYPE_PEPTIDE_MASS_ERROR_TOLERANCE_UNIT:
                     return "Peptide Mass Error Tolerance Unit";*/
                 case ROWTYPE_FRAGMENT_CHARGE_STATES:
-                    return "Fragment Charge States";
+                    return new GroupObject("Fragment Charge States",this);
                 case ROWTYPE_FRAGMENT_MASS_ERROR_TOLERANCE:
-                    return "Fragment Mass Error Tolerance";
+                    return new GroupObject("Fragment Mass Error Tolerance",this);
                 /*case ROWTYPE_FRAGMENT_MASS_ERROR_TOLERANCE_UNIT:
                     return "Fragment Mass Error Tolerance Unit";*/
             }
@@ -275,7 +274,7 @@ public class IdentificationPropertiesTableModel extends AbstractPropertiesTableM
         }
         
         @Override
-        public String getGroupValueAt(int rowIndex, int columnIndex) {
+        public GroupObject getGroupValueAt(int rowIndex, int columnIndex) {
 
             ResultSet rset = m_rsetArray.get(columnIndex);
             
@@ -292,28 +291,28 @@ public class IdentificationPropertiesTableModel extends AbstractPropertiesTableM
 
             switch (rowIndex) {
                 case ROWTYPE_RESULT_FILE_NAME: {
-                    return (msiSearch==null) ? "" : msiSearch.getResultFileName();
+                    return new GroupObject((msiSearch==null) ? "" : msiSearch.getResultFileName(),this);
                 }
                 case ROWTYPE_SEARCH_DATE: {
                     if (msiSearch==null) {
-                        return "";
+                        return new GroupObject("",this);
                     }
                     Timestamp timeStamp = msiSearch.getDate();
                     DateFormat df = DateFormat.getDateInstance(DateFormat.LONG, Locale.getDefault());
                     final String dateFormatted = df.format(timeStamp);
-                    return dateFormatted;
+                    return new GroupObject(dateFormatted,this);
                 }
                 case ROWTYPE_SOFTWARE_NAME: {
-                    return (searchSetting==null) ? "" : searchSetting.getSoftwareName();
+                    return new GroupObject((searchSetting==null) ? "" : searchSetting.getSoftwareName(),this);
                 }
                 case ROWTYPE_SOFTWARE_VERSION: {
-                    return (searchSetting==null) ? "" : searchSetting.getSoftwareVersion();
+                    return new GroupObject((searchSetting==null) ? "" : searchSetting.getSoftwareVersion(),this);
                 }
                 /*case ROWTYPE_DATABASE_NAME: {
                     return "NA";
                 }*/
                 case ROWTYPE_TAXONOMY: {
-                    return (searchSetting == null) ? "" : searchSetting.getTaxonomy();
+                    return new GroupObject((searchSetting == null) ? "" : searchSetting.getTaxonomy(),this);
                 }
                 case ROWTYPE_ENZYME: {
                     String enzyme = "";
@@ -327,14 +326,14 @@ public class IdentificationPropertiesTableModel extends AbstractPropertiesTableM
                             enzyme += ((Enzyme)it.next()).getName();
                         }
                     }
-                    return enzyme;
+                    return new GroupObject(enzyme,this);
                 }
                 case ROWTYPE_MAX_MISSED_CLIVAGE: {
-                    return (searchSetting == null) ? "" : searchSetting.getMaxMissedCleavages().toString();
+                    return new GroupObject((searchSetting == null) ? "" : searchSetting.getMaxMissedCleavages().toString(),this);
                 }
                 case ROWTYPE_FIXED_MODIFICATIONS: {
                     if (searchSetting == null) {
-                        return "";
+                        return new GroupObject("",this);
                     }
                     Set<UsedPtm> usedPtmSet = searchSetting.getUsedPtms();
                     Iterator<UsedPtm> it = usedPtmSet.iterator();
@@ -360,12 +359,12 @@ public class IdentificationPropertiesTableModel extends AbstractPropertiesTableM
                     }
                     String modifications = m_sb.toString();
                     m_sb.setLength(0);
-                    return modifications;
+                    return new GroupObject(modifications,this);
 
                 }
                 case ROWTYPE_VARIABLE_MODIFICATIONS: {
                     if (searchSetting == null) {
-                        return "";
+                        return new GroupObject("",this);
                     }
                     Set<UsedPtm> usedPtmSet = searchSetting.getUsedPtms();
                     Iterator<UsedPtm> it = usedPtmSet.iterator();
@@ -393,28 +392,28 @@ public class IdentificationPropertiesTableModel extends AbstractPropertiesTableM
                     }
                     String modifications = m_sb.toString();
                     m_sb.setLength(0);
-                    return modifications;
+                    return new GroupObject(modifications,this);
                 }
                 case ROWTYPE_FRAGMENT_MASS_TOLERANCE: {
                     if (msmsSearch == null) {
-                        return "";
+                        return new GroupObject("",this);
                     }
-                    return msmsSearch.getFragmentMassErrorTolerance() + " " + msmsSearch.getFragmentMassErrorToleranceUnit();
+                    return new GroupObject(msmsSearch.getFragmentMassErrorTolerance() + " " + msmsSearch.getFragmentMassErrorToleranceUnit(),this);
                 }
                 case ROWTYPE_PEPTIDE_CHARGE_STATES: {
-                    return (searchSetting == null) ? "" : searchSetting.getPeptideChargeStates();
+                    return new GroupObject((searchSetting == null) ? "" : searchSetting.getPeptideChargeStates(),this);
                 }
                 case ROWTYPE_PEPTIDE_MASS_ERROR_TOLERANCE: {
-                    return (searchSetting == null) ? "" : searchSetting.getPeptideMassErrorTolerance().toString()+" "+searchSetting.getPeptideMassErrorToleranceUnit();
+                    return new GroupObject((searchSetting == null) ? "" : searchSetting.getPeptideMassErrorTolerance().toString()+" "+searchSetting.getPeptideMassErrorToleranceUnit(),this);
                 }
                 /*case ROWTYPE_PEPTIDE_MASS_ERROR_TOLERANCE_UNIT: {
                     return (searchSetting == null) ? "" : searchSetting.getPeptideMassErrorToleranceUnit();
                 }*/  
                 case ROWTYPE_FRAGMENT_CHARGE_STATES: {
-                    return (msmsSearch == null) ? "" : msmsSearch.getFragmentChargeStates();
+                    return new GroupObject((msmsSearch == null) ? "" : msmsSearch.getFragmentChargeStates(),this);
                 }
                 case ROWTYPE_FRAGMENT_MASS_ERROR_TOLERANCE: {
-                    return (msmsSearch == null) ? "" : String.valueOf(msmsSearch.getFragmentMassErrorTolerance())+" "+msmsSearch.getFragmentMassErrorToleranceUnit();
+                    return new GroupObject((msmsSearch == null) ? "" : String.valueOf(msmsSearch.getFragmentMassErrorTolerance())+" "+msmsSearch.getFragmentMassErrorToleranceUnit(),this);
                 }
                 /*case ROWTYPE_FRAGMENT_MASS_ERROR_TOLERANCE_UNIT: {
                     return (msmsSearch == null) ? "" : msmsSearch.getFragmentMassErrorToleranceUnit();
@@ -459,22 +458,22 @@ public class IdentificationPropertiesTableModel extends AbstractPropertiesTableM
         }
         
         @Override
-        public String getGroupNameAt(int rowIndex) {
+        public GroupObject getGroupNameAt(int rowIndex) {
             switch (rowIndex) {
                 case ROWTYPE_QUERIES_NUMBER:
-                    return "Queries Number";
+                    return new GroupObject("Queries Number",this);
                 case ROWTYPE_PSM_NUMBER:
-                    return "PSM Number";
+                    return new GroupObject("PSM Number",this);
                 /*case ROWTYPE_PEPTIDE_NUMBER:
                     return "Peptide Number";*/
                 case ROWTYPE_PROTEIN_NUMBER:
-                    return "Protein Number";
+                    return new GroupObject("Protein Number",this);
                 case ROWTYPE_DECOY_PSM_NUMBER:
-                    return "PSM Decoy Number";
+                    return new GroupObject("PSM Decoy Number",this);
                 /*case ROWTYPE_DECOY_PEPTIDE_NUMBER:
                     return "Peptide Decoy Number";*/
                 case ROWTYPE_DECOY_PROTEIN_NUMBER:
-                    return "Protein Decoy Number";
+                    return new GroupObject("Protein Decoy Number",this);
 
             }
             
@@ -482,59 +481,59 @@ public class IdentificationPropertiesTableModel extends AbstractPropertiesTableM
         }
         
         @Override
-        public String getGroupValueAt(int rowIndex, int columnIndex) {
+        public GroupObject getGroupValueAt(int rowIndex, int columnIndex) {
 
             ResultSet rset = m_rsetArray.get(columnIndex);
             ResultSet rsetDecoy = (rset==null) ? null : rset.getDecoyResultSet();
             MsiSearch msiSearch = (rset==null) ? null : rset.getMsiSearch();
             
             if (rset == null) {
-                return "";
+                return new GroupObject("",this);
             }
 
             switch (rowIndex) {
                 case ROWTYPE_QUERIES_NUMBER:
                     if (msiSearch == null) {
-                        return "";
+                        return new GroupObject("",this);
                     }
-                    return String.valueOf(msiSearch.getQueriesCount());
+                    return new GroupObject(String.valueOf(msiSearch.getQueriesCount()),this);
                 case ROWTYPE_PSM_NUMBER: {
                     Object data = rset.getTransientData().getPeptideMatchesCount();
                     if (data == null) {
-                        return "";
+                        return new GroupObject("",this);
                     }
-                    return data.toString();
+                    return new GroupObject(data.toString(),this);
                 }
                 /*case ROWTYPE_PEPTIDE_NUMBER:
                     return "NA";*/
                 case ROWTYPE_PROTEIN_NUMBER: {
                     Object data = rset.getTransientData().getProteinMatchesCount();
                     if (data == null) {
-                        return "";
+                        return new GroupObject("",this);
                     }
-                    return data.toString();
+                    return new GroupObject(data.toString(),this);
                 }
                 case ROWTYPE_DECOY_PSM_NUMBER: {
                     if (rsetDecoy == null) {
-                        return "";
+                        return new GroupObject("",this);
                     }
                     Object data = rsetDecoy.getTransientData().getPeptideMatchesCount();
                     if (data == null) {
-                        return "";
+                        return new GroupObject("",this);
                     }
-                    return data.toString();
+                    return new GroupObject(data.toString(),this);
                 }
                 /*case ROWTYPE_DECOY_PEPTIDE_NUMBER:
                     return "NA";*/
                 case ROWTYPE_DECOY_PROTEIN_NUMBER: {
                     if (rsetDecoy == null) {
-                        return "";
+                        return new GroupObject("",this);
                     }
                     Object data = rsetDecoy.getTransientData().getProteinMatchesCount();
                     if (data == null) {
-                        return "";
+                        return new GroupObject("",this);
                     }
-                    return data.toString();
+                    return new GroupObject(data.toString(),this);
                 }
 
             }
@@ -612,67 +611,67 @@ public class IdentificationPropertiesTableModel extends AbstractPropertiesTableM
         }
         
         @Override
-        public String getGroupNameAt(int rowIndex) {
+        public GroupObject getGroupNameAt(int rowIndex) {
             switch (rowIndex) {
                 case ROWTYPE_PROTEINSET_NUMBER:
-                    return "Protein Sets Number";
+                    return new GroupObject("Protein Sets Number",this);
                 case ROWTYPE_PSM_NUMBER:
-                    return "PSM Number";
+                    return new GroupObject("PSM Number",this);
                 case ROWTYPE_PEPTIDE_NUMBER:
-                    return "Peptide Number";
+                    return new GroupObject("Peptide Number",this);
                 /*case ROWTYPE_PROTEIN_NUMBER:
                     return "Protein Number";*/
                 case ROWTYPE_PROTEINSET_DECOY_NUMBER:
-                    return "Protein Sets Decoy Number";
+                    return new GroupObject("Protein Sets Decoy Number",this);
                 case ROWTYPE_PSM_DECOY_NUMBER:
-                    return "PSM Decoy Number";
+                    return new GroupObject("PSM Decoy Number",this);
                 case ROWTYPE_PEPTIDE_DECOY_NUMBER:
-                    return "Peptide Decoy Number";
+                    return new GroupObject("Peptide Decoy Number",this);
                 /*case ROWTYPE_PROTEIN_DECOY_NUMBER:
                     return "Protein Decoy Number";*/
                 default:
-                    return m_valuesName.get(rowIndex-ROW_COUNT);
+                    return new GroupObject(m_valuesName.get(rowIndex-ROW_COUNT),this);
             }
 
         }
         
         @Override
-        public String getGroupValueAt(int rowIndex, int columnIndex) {
+        public GroupObject getGroupValueAt(int rowIndex, int columnIndex) {
 
             ResultSummary rsm = m_rsmArray.get(columnIndex);
             if (rsm == null) {
-                return "";
+                return new GroupObject("",this);
             }
             ResultSummary rsmDecoy = rsm.getDecoyResultSummary();
 
             switch (rowIndex) {
                 case ROWTYPE_PROTEINSET_NUMBER:
-                    return String.valueOf(rsm.getTransientData().getNumberOfProteinSet());
+                    return new GroupObject(String.valueOf(rsm.getTransientData().getNumberOfProteinSet()),this);
                 case ROWTYPE_PSM_NUMBER:
-                    return String.valueOf(rsm.getTransientData().getNumberOfPeptideMatches());
+                    return new GroupObject(String.valueOf(rsm.getTransientData().getNumberOfPeptideMatches()),this);
                 case ROWTYPE_PEPTIDE_NUMBER:
-                    return String.valueOf(rsm.getTransientData().getNumberOfPeptides());
+                    return new GroupObject(String.valueOf(rsm.getTransientData().getNumberOfPeptides()),this);
                 /*case ROWTYPE_PROTEIN_NUMBER:
                     return "NA";*/
                 case ROWTYPE_PROTEINSET_DECOY_NUMBER:
                     if (rsmDecoy == null) {
-                        return "";
+                        return new GroupObject("",this);
                     }
                     Integer number = rsmDecoy.getTransientData().getNumberOfProteinSet();
                     if (number == null) {
-                        return "";
+                        return new GroupObject("",this);
                     }
-                    return String.valueOf(number);
+                    return new GroupObject(String.valueOf(number),this);
                 case ROWTYPE_PSM_DECOY_NUMBER:
                     if (rsmDecoy == null) {
-                        return "";
+                        return new GroupObject("",this);
                     }
-                    return String.valueOf(rsmDecoy.getTransientData().getNumberOfPeptideMatches());
+                    return new GroupObject(String.valueOf(rsmDecoy.getTransientData().getNumberOfPeptideMatches()),this);
                 case ROWTYPE_PEPTIDE_DECOY_NUMBER:
                     if (rsmDecoy == null) {
-                        return "";
+                        return new GroupObject("",this);
                     }
-                    return String.valueOf(rsmDecoy.getTransientData().getNumberOfPeptides());
+                    return new GroupObject(String.valueOf(rsmDecoy.getTransientData().getNumberOfPeptides()),this);
                 /*case ROWTYPE_PROTEIN_DECOY_NUMBER:
                     return "NA";*/
                 default: {
@@ -681,7 +680,7 @@ public class IdentificationPropertiesTableModel extends AbstractPropertiesTableM
                     if (value == null) {
                         value = "";
                     }
-                    return value;
+                    return new GroupObject(value,this);
                 }
 
             }
@@ -722,34 +721,34 @@ public class IdentificationPropertiesTableModel extends AbstractPropertiesTableM
         }
         
         @Override
-        public String getGroupNameAt(int rowIndex) {
+        public GroupObject getGroupNameAt(int rowIndex) {
             switch (rowIndex) {
 
                 case ROWTYPE_PROJECT_ID:
-                    return "Project id";
+                    return new GroupObject("Project id",this);
                 case ROWTYPE_DATASET_ID:
-                    return "Dataset id";
+                    return new GroupObject("Dataset id",this);
                 case ROWTYPE_RSET_ID:
-                    return "ResultSet id";
+                    return new GroupObject("ResultSet id",this);
                 case ROWTYPE_RSM_ID:
-                    return "ResultSummary id";
+                    return new GroupObject("ResultSummary id",this);
                 case ROWTYPE_MSI_SEARCH_ID:
-                    return "Msi Search id";
+                    return new GroupObject("Msi Search id",this);
                 case ROWTYPE_PEAKLIST_SEARCH_ID:
-                    return "Peaklist Search id";
+                    return new GroupObject("Peaklist Search id",this);
                 case ROWTYPE_PEAKLIST_SOFTWARE_ID:
-                    return "Peaklist Software id";
+                    return new GroupObject("Peaklist Software id",this);
                 case ROWTYPE_SEARCH_SETTINGS_ID:
-                    return "Search Settings id";
+                    return new GroupObject("Search Settings id",this);
                 case ROWTYPE_INSTRUMENT_CONFIGURATION_ID:
-                    return "Instrument Configuration id";
+                    return new GroupObject("Instrument Configuration id",this);
             }
 
             return null;
         }
         
         @Override
-        public String getGroupValueAt(int rowIndex, int columnIndex) {
+        public GroupObject getGroupValueAt(int rowIndex, int columnIndex) {
 
             ResultSet rset = m_rsetArray.get(columnIndex);
 
@@ -764,23 +763,23 @@ public class IdentificationPropertiesTableModel extends AbstractPropertiesTableM
 
             switch (rowIndex) {
                 case ROWTYPE_PROJECT_ID:
-                    return String.valueOf(m_projectIdArray.get(columnIndex));
+                    return new GroupObject(String.valueOf(m_projectIdArray.get(columnIndex)),this);
                 case ROWTYPE_DATASET_ID:
-                    return String.valueOf(m_datasetIdArray.get(columnIndex));
+                    return new GroupObject(String.valueOf(m_datasetIdArray.get(columnIndex)),this);
                 case ROWTYPE_RSET_ID:
-                    return (rset==null) ? "" : String.valueOf(rset.getId());
+                    return new GroupObject((rset==null) ? "" : String.valueOf(rset.getId()),this);
                 case ROWTYPE_RSM_ID:
-                    return (rsm==null) ? "" : String.valueOf(rsm.getId());
+                    return new GroupObject((rsm==null) ? "" : String.valueOf(rsm.getId()),this);
                 case ROWTYPE_MSI_SEARCH_ID:
-                    return (msiSearch==null) ? "" : String.valueOf(msiSearch.getId());
+                    return new GroupObject((msiSearch==null) ? "" : String.valueOf(msiSearch.getId()),this);
                 case ROWTYPE_PEAKLIST_SEARCH_ID:
-                    return (peaklist==null) ? "" : String.valueOf(peaklist.getId());
+                    return new GroupObject((peaklist==null) ? "" : String.valueOf(peaklist.getId()),this);
                 case ROWTYPE_PEAKLIST_SOFTWARE_ID:
-                    return (peaklistSoftware==null) ? "" : String.valueOf(peaklistSoftware.getId());
+                    return new GroupObject((peaklistSoftware==null) ? "" : String.valueOf(peaklistSoftware.getId()),this);
                 case ROWTYPE_SEARCH_SETTINGS_ID:
-                    return (searchSetting==null) ? "" : String.valueOf(searchSetting.getId());
+                    return new GroupObject((searchSetting==null) ? "" : String.valueOf(searchSetting.getId()),this);
                 case ROWTYPE_INSTRUMENT_CONFIGURATION_ID:
-                    return (instrumentConfig==null) ? "" : String.valueOf(instrumentConfig.getId());
+                    return new GroupObject((instrumentConfig==null) ? "" : String.valueOf(instrumentConfig.getId()),this);
             }
             
             return null;

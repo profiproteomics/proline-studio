@@ -2,9 +2,12 @@ package fr.proline.studio.pattern;
 
 import fr.proline.core.orm.msi.ResultSet;
 import fr.proline.core.orm.msi.dto.DMsQuery;
+import fr.proline.studio.comparedata.CompareDataInterface;
+import fr.proline.studio.comparedata.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseLoadMSQueriesTask;
 import fr.proline.studio.dam.tasks.SubTask;
+import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.rsmexplorer.gui.MSQueriesPanel;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -48,7 +51,10 @@ public class DataBoxMSQueriesForRset extends AbstractDataBox{
         outParameter = new GroupParameter();
         outParameter.addParameter(MsQueryInfoRset.class, false);
         registerOutParameter(outParameter);
-
+        
+        outParameter = new GroupParameter();
+        outParameter.addParameter(CompareDataInterface.class, false);
+        registerOutParameter(outParameter);
        
     }
     
@@ -86,6 +92,7 @@ public class DataBoxMSQueriesForRset extends AbstractDataBox{
                
                 if (finished) {
                     unregisterTask(taskId);
+                    propagateDataChanged(CompareDataInterface.class);
                 }
             }
         };
@@ -120,6 +127,12 @@ public class DataBoxMSQueriesForRset extends AbstractDataBox{
             if (parameterType.equals(MsQueryInfoRset.class)) {
                 DMsQuery msq = ((MSQueriesPanel)m_panel).getSelectedMsQuery();
                 return new MsQueryInfoRset(msq, m_rset);
+            }
+            if(parameterType.equals(CompareDataInterface.class)){
+                return ((GlobalTabelModelProviderInterface) m_panel).getGlobalTableModelInterface();
+            }
+            if (parameterType.equals(CrossSelectionInterface.class)) {
+                return ((GlobalTabelModelProviderInterface)m_panel).getCrossSelectionInterface();
             }
         }
         return super.getData(getArray, parameterType);

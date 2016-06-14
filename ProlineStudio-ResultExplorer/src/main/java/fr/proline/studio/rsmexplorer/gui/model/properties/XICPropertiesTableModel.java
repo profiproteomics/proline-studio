@@ -127,27 +127,27 @@ public class XICPropertiesTableModel extends AbstractPropertiesTableModel {
         }
 
         @Override
-        public String getGroupNameAt(int rowIndex) {
+        public GroupObject getGroupNameAt(int rowIndex) {
             switch (rowIndex) {
                 case ROWTYPE_XIC_ID:
-                    return "XIC id";
+                    return new GroupObject("XIC id", this);
                 case ROWTYPE_XIC_DESCRIPTION:
-                    return "XIC Description";
+                    return new GroupObject("XIC Description", this);
             }
 
             return null;
         }
 
         @Override
-        public String getGroupValueAt(int rowIndex, int columnIndex) {
+        public GroupObject getGroupValueAt(int rowIndex, int columnIndex) {
 
             DDataset dataset = m_datasetArrayList.get(columnIndex);
 
             switch (rowIndex) {
                 case ROWTYPE_XIC_ID:
-                    return String.valueOf(dataset.getId());
+                    return new GroupObject(String.valueOf(dataset.getId()), this);
                 case ROWTYPE_XIC_DESCRIPTION:
-                    return dataset.getDescription();
+                    return new GroupObject(dataset.getDescription(), this);
             }
 
             return null;
@@ -179,37 +179,37 @@ public class XICPropertiesTableModel extends AbstractPropertiesTableModel {
         }
 
         @Override
-        public String getGroupNameAt(int rowIndex) {
+        public GroupObject getGroupNameAt(int rowIndex) {
             switch (rowIndex) {
                 case ROWTYPE_IDENTIFICATION_SUMMARY_ID:
-                    return "Identification Summary id";
+                    return new GroupObject("Identification Summary id", this);
                 case ROWTYPE_DESCRIPTION:
-                    return "Description";
+                    return new GroupObject("Description", this);
                 case ROWTYPE_DATE:
-                    return "Date";
+                    return new GroupObject("Date", this);
             }
 
             return null;
         }
 
         @Override
-        public String getGroupValueAt(int rowIndex, int columnIndex) {
+        public GroupObject getGroupValueAt(int rowIndex, int columnIndex) {
 
             DDataset dataset = m_datasetArrayList.get(columnIndex);
             ResultSummary rsm = dataset.getResultSummary();
             if (rsm == null) {
-                return "";
+                return new GroupObject("", this);
             }
 
             switch (rowIndex) {
                 case ROWTYPE_IDENTIFICATION_SUMMARY_ID:
-                    return String.valueOf(rsm.getId());
+                    return new GroupObject(String.valueOf(rsm.getId()), this);
                 case ROWTYPE_DESCRIPTION:
-                    return rsm.getDescription();
+                    return new GroupObject(rsm.getDescription(), this);
                 case ROWTYPE_DATE:
                     Timestamp timeStamp = rsm.getModificationTimestamp();
                     DateFormat df = DateFormat.getDateInstance(DateFormat.LONG, Locale.getDefault());
-                    return df.format(timeStamp);
+                    return new GroupObject(df.format(timeStamp), this);
             }
 
             return null;
@@ -272,20 +272,20 @@ public class XICPropertiesTableModel extends AbstractPropertiesTableModel {
         }
         
         @Override
-        public String getGroupNameAt(int rowIndex) {
-            return m_valuesName.get(rowIndex);
+        public GroupObject getGroupNameAt(int rowIndex) {
+            return new GroupObject(m_valuesName.get(rowIndex), this);
 
         }
         
         @Override
-        public String getGroupValueAt(int rowIndex, int columnIndex) {
+        public GroupObject getGroupValueAt(int rowIndex, int columnIndex) {
 
             String key = m_valuesName.get(rowIndex);
             String value = m_valuesMap.get(columnIndex).get(key);
             if (value == null) {
                 value = "";
             }
-            return value;
+            return new GroupObject(value, this);
 
         }
 
@@ -318,21 +318,21 @@ public class XICPropertiesTableModel extends AbstractPropertiesTableModel {
         }
 
         @Override
-        public String getGroupNameAt(int rowIndex) {
+        public GroupObject getGroupNameAt(int rowIndex) {
             switch (rowIndex) {
                 case ROWTYPE_QUANTI_METHOD_NAME:
-                    return "Name";
+                    return new GroupObject("Name", this);
                 case ROWTYPE_QUANTI_METHOD_TYPE:
-                    return "Type";
+                    return new GroupObject("Type", this);
                 case ROWTYPE_QUANTI_METHOD_ABUNDANCE_UNIT:
-                    return "Abundance Unit";
+                    return new GroupObject("Abundance Unit", this);
             }
 
             return null;
         }
 
         @Override
-        public String getGroupValueAt(int rowIndex, int columnIndex) {
+        public GroupObject getGroupValueAt(int rowIndex, int columnIndex) {
 
             DDataset dataset = m_datasetArrayList.get(columnIndex);
             QuantitationMethod quantMethod = dataset.getQuantitationMethod();
@@ -341,19 +341,19 @@ public class XICPropertiesTableModel extends AbstractPropertiesTableModel {
             switch (rowIndex) {
                 case ROWTYPE_QUANTI_METHOD_NAME:
                     if (quantMethod == null) {
-                        return "";
+                        return new GroupObject("", this);
                     }
-                    return quantMethod.getName();
+                    return new GroupObject(quantMethod.getName(), this);
                 case ROWTYPE_QUANTI_METHOD_TYPE:
                     if (quantMethod == null) {
-                        return "";
+                        return new GroupObject("", this);
                     }
-                    return quantMethod.getType();
+                    return new GroupObject(quantMethod.getType(), this);
                 case ROWTYPE_QUANTI_METHOD_ABUNDANCE_UNIT:
                     if (quantMethod == null) {
-                        return "";
+                        return new GroupObject("", this);
                     }
-                    return quantMethod.getAbundanceUnit();
+                    return new GroupObject(quantMethod.getAbundanceUnit(), this);
             }
 
             return null;
@@ -392,26 +392,26 @@ public class XICPropertiesTableModel extends AbstractPropertiesTableModel {
         }
 
         @Override
-        public String getGroupNameAt(int rowIndex) {
+        public GroupObject getGroupNameAt(int rowIndex) {
             switch (rowIndex) {
                 case ROWTYPE_MASTER_QUANTICHANNEL_ID:
-                    return "Master Quantitation id";
+                    return new GroupObject("Master Quantitation id", this);
                 case ROWTYPE_MASTER_QUANTICHANNEL_NAME:
-                    return "Name";
+                    return new GroupObject("Name", this);
                 case ROWTYPE_MASTER_QUANTICHANNEL_NAME_SERIALIZEDPROPERTIES:
-                    return "Serialized Properties";
+                    return new GroupObject("Serialized Properties", this);
             }
 
             return null;
         }
 
         @Override
-        public String getGroupValueAt(int rowIndex, int columnIndex) {
+        public GroupObject getGroupValueAt(int rowIndex, int columnIndex) {
 
             DDataset dataset = m_datasetArrayList.get(columnIndex);
             List<DMasterQuantitationChannel> quantitationChannels = dataset.getMasterQuantitationChannels();
             if ((quantitationChannels == null) || (quantitationChannels.size()<=m_number)) {
-                return "";
+                return new GroupObject("", this);
             }
             
             DMasterQuantitationChannel masterQuantitationChannel = quantitationChannels.get(m_number);
@@ -419,19 +419,19 @@ public class XICPropertiesTableModel extends AbstractPropertiesTableModel {
             switch (rowIndex) {
                 case ROWTYPE_MASTER_QUANTICHANNEL_ID:
                     if (masterQuantitationChannel == null) {
-                        return "";
+                        return new GroupObject("", this);
                     }
-                return String.valueOf(masterQuantitationChannel.getId());
+                return new GroupObject(String.valueOf(masterQuantitationChannel.getId()), this);
                 case ROWTYPE_MASTER_QUANTICHANNEL_NAME:
                     if (masterQuantitationChannel == null) {
-                        return "";
+                        return new GroupObject("", this);
                     }
-                    return masterQuantitationChannel.getName();
+                    return new GroupObject(masterQuantitationChannel.getName(), this);
                 case ROWTYPE_MASTER_QUANTICHANNEL_NAME_SERIALIZEDPROPERTIES:
                     if (masterQuantitationChannel == null) {
-                        return "";
+                        return new GroupObject("", this);
                     }
-                    return masterQuantitationChannel.getSerializedProperties();
+                    return new GroupObject(masterQuantitationChannel.getSerializedProperties(), this);
             }
 
             return null;
@@ -474,30 +474,30 @@ public class XICPropertiesTableModel extends AbstractPropertiesTableModel {
         }
 
         @Override
-        public String getGroupNameAt(int rowIndex) {
+        public GroupObject getGroupNameAt(int rowIndex) {
             switch (rowIndex) {
                 case ROWTYPE_QUANTICHANNEL_ID:
-                    return "Quantitation Channel id";
+                    return new GroupObject("Quantitation Channel id", this);
                 case ROWTYPE_RESULT_FILE_NAME:
-                    return "Result File Name";
+                    return new GroupObject("Result File Name", this);
                 case ROWTYPE_RAW_FILE_PATH:
-                    return "Raw File Path";
+                    return new GroupObject("Raw File Path", this);
                 case ROWTYPE_MZDB_RAW_FILE_NAME:
-                    return "Mzdb Raw File Name";
+                    return new GroupObject("Mzdb Raw File Name", this);
                 case ROWTYPE_IDENTIFICATION_RSM_ID : 
-                    return "Identification Summary Id";
+                    return new GroupObject("Identification Summary Id", this);
             }
 
             return null;
         }
 
         @Override
-        public String getGroupValueAt(int rowIndex, int columnIndex) {
+        public GroupObject getGroupValueAt(int rowIndex, int columnIndex) {
 
             DDataset dataset = m_datasetArrayList.get(columnIndex);
             List<DMasterQuantitationChannel> masterQuantitationChannels = dataset.getMasterQuantitationChannels();
             if ((masterQuantitationChannels == null) || (masterQuantitationChannels.size()<=m_numberMaster)) {
-                return "";
+                return new GroupObject("", this);
             }
             
             DMasterQuantitationChannel masterQuantitationChannel = masterQuantitationChannels.get(m_numberMaster);
@@ -505,25 +505,25 @@ public class XICPropertiesTableModel extends AbstractPropertiesTableModel {
             List<DQuantitationChannel> quantitationChannels =  masterQuantitationChannel.getQuantitationChannels();
             
             if (quantitationChannels.size() <= m_numberChannel) {
-                return "";
+                return new GroupObject("", this);
             }
 
             DQuantitationChannel quantitationChannel = quantitationChannels.get(m_numberChannel);
             if (quantitationChannel == null) {
-                return "";
+                return new GroupObject("", this);
             }
 
             switch (rowIndex) {
                 case ROWTYPE_QUANTICHANNEL_ID:
-                    return String.valueOf(quantitationChannel.getId());
+                    return new GroupObject(String.valueOf(quantitationChannel.getId()), this);
                 case ROWTYPE_RESULT_FILE_NAME:
-                    return quantitationChannel.getResultFileName();
+                    return new GroupObject(quantitationChannel.getResultFileName(), this);
                 case ROWTYPE_RAW_FILE_PATH:
-                    return quantitationChannel.getRawFilePath();
+                    return new GroupObject(quantitationChannel.getRawFilePath(), this);
                 case ROWTYPE_MZDB_RAW_FILE_NAME:
-                    return quantitationChannel.getMzdbFileName();
+                    return new GroupObject(quantitationChannel.getMzdbFileName(), this);
                 case ROWTYPE_IDENTIFICATION_RSM_ID:
-                    return String.valueOf(quantitationChannel.getIdentResultSummaryId());
+                    return new GroupObject(String.valueOf(quantitationChannel.getIdentResultSummaryId()), this);
             }
 
             return null;
@@ -564,24 +564,24 @@ public class XICPropertiesTableModel extends AbstractPropertiesTableModel {
         }
 
         @Override
-        public String getGroupNameAt(int rowIndex) {
+        public GroupObject getGroupNameAt(int rowIndex) {
             switch (rowIndex) {
                 case ROWTYPE_BIOLOGICAL_SAMPLE_ID:
-                    return "Biological Sample id";
+                    return new GroupObject("Biological Sample id", this);
                 case ROWTYPE_BIOLOGICAL_SAMPLE_NAME:
-                    return "Biological Sample Name";
+                    return new GroupObject("Biological Sample Name", this);
             }
 
             return null;
         }
 
         @Override
-        public String getGroupValueAt(int rowIndex, int columnIndex) {
+        public GroupObject getGroupValueAt(int rowIndex, int columnIndex) {
 
             DDataset dataset = m_datasetArrayList.get(columnIndex);
             List<DMasterQuantitationChannel> masterQuantitationChannels = dataset.getMasterQuantitationChannels();
             if ((masterQuantitationChannels == null) || (masterQuantitationChannels.size()<=m_numberMaster)) {
-                return "";
+                return new GroupObject("", this);
             }
             
             DMasterQuantitationChannel masterQuantitationChannel = masterQuantitationChannels.get(m_numberMaster);
@@ -589,20 +589,20 @@ public class XICPropertiesTableModel extends AbstractPropertiesTableModel {
             List<DQuantitationChannel> quantitationChannels =  masterQuantitationChannel.getQuantitationChannels();
             
             if (quantitationChannels.size() <= m_numberChannel) {
-                return "";
+                return new GroupObject("", this);
             }
 
             DQuantitationChannel quantitationChannel = quantitationChannels.get(m_numberChannel);
             BiologicalSample biologicalSample = quantitationChannel.getBiologicalSample();
             if (biologicalSample == null) {
-                return "";
+                return new GroupObject("", this);
             }
 
             switch (rowIndex) {
                 case ROWTYPE_BIOLOGICAL_SAMPLE_ID:
-                    return String.valueOf(biologicalSample.getId());
+                    return new GroupObject(String.valueOf(biologicalSample.getId()), this);
                 case ROWTYPE_BIOLOGICAL_SAMPLE_NAME:
-                    return biologicalSample.getName();
+                    return new GroupObject(biologicalSample.getName(), this);
             }
 
             return null;

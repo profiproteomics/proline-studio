@@ -344,7 +344,7 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
                 }
                 
                 c.gridx++;               
-                JLabel prefilterNameLabel = new JLabel(p.getName());
+                JLabel prefilterNameLabel = new JLabel(p.getDisplayName());
                 prefilterNameLabel.setHorizontalAlignment(JLabel.RIGHT);
                 m_psmPrefiltersSelectedPanel.add(prefilterNameLabel, c);
 
@@ -670,6 +670,7 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
         m_psmPrefilterParameters = new AbstractParameter[10];
         m_psmPrefilterParameters[0] = null;
         m_psmPrefilterParameters[1] = new IntegerParameter(ValidationTask.RANK_FILTER_KEY, ValidationTask.RANK_FILTER_NAME, new JTextField(6), new Integer(5), new Integer(0), new Integer(10));
+        m_psmPrefilterParameters[1].setDisplayName("Pretty Rank");
         m_psmPrefilterParameters[1].setAssociatedData("<=");
         m_psmPrefilterParameters[2] = new IntegerParameter(ValidationTask.PEP_LENGTH_FILTER_KEY, ValidationTask.PEP_LENGTH_FILTER_NAME, new JTextField(6), new Integer(4), new Integer(4), null);
         m_psmPrefilterParameters[2].setAssociatedData(">=");

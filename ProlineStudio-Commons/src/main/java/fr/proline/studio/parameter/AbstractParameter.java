@@ -10,6 +10,7 @@ public abstract class AbstractParameter {
 
     protected String m_key;
     protected String m_name;
+    protected String m_displayName;
     protected Class m_type;
     protected Class m_graphicalType;
     protected JComponent m_parameterComponent = null;
@@ -32,6 +33,17 @@ public abstract class AbstractParameter {
         m_graphicalType = graphicalType;
     }
 
+    public void setDisplayName(String superName) {
+        m_displayName = superName;
+    }
+    
+    public String getDisplayName() {
+        if (m_displayName != null) {
+            return m_displayName;
+        }
+        return m_name;
+    }
+    
     public void setCompulsory(boolean v) {
         m_compulsory = v;
     }

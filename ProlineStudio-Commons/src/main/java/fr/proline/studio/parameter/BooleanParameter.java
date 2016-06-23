@@ -54,7 +54,7 @@ public class BooleanParameter extends AbstractParameter {
 
             // --- CheckBox ---
 
-            JCheckBox checkBox = new JCheckBox(getName());
+            JCheckBox checkBox = new JCheckBox(getDisplayName());
             checkBox.setSelected(startValue);
 
             m_parameterComponent = checkBox;

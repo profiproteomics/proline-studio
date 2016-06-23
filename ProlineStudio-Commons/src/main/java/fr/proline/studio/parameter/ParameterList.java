@@ -87,7 +87,7 @@ public class ParameterList extends ArrayList<AbstractParameter> {
                     c.gridwidth = 2;
                     c.weightx = 1;
                     JPanel framedPanel = new JPanel(new GridBagLayout());
-                    framedPanel.setBorder(BorderFactory.createTitledBorder(" " + parameter.getName() + " "));
+                    framedPanel.setBorder(BorderFactory.createTitledBorder(" " + parameter.getDisplayName() + " "));
                     GridBagConstraints cFrame = new GridBagConstraints();
                     cFrame.anchor = GridBagConstraints.NORTHWEST;
                     cFrame.fill = GridBagConstraints.BOTH;
@@ -164,7 +164,7 @@ public class ParameterList extends ArrayList<AbstractParameter> {
             
             c.gridx = 0;
             c.weightx = 0;
-            JLabel l = new JLabel(parameter.getName()+" :");
+            JLabel l = new JLabel(parameter.getDisplayName()+" :");
             l.setHorizontalAlignment(JLabel.RIGHT);
             p.add(l, c);
 

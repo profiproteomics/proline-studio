@@ -109,7 +109,7 @@ public class FilterProteinSetPanel extends JPanel {
                 }
 
                 c.gridx++;
-                JLabel prefilterNameLabel = new JLabel(p.getName());
+                JLabel prefilterNameLabel = new JLabel(p.getDisplayName());
                 prefilterNameLabel.setHorizontalAlignment(JLabel.RIGHT);
                 m_proteinPrefiltersSelectedPanel.add(prefilterNameLabel, c);
 

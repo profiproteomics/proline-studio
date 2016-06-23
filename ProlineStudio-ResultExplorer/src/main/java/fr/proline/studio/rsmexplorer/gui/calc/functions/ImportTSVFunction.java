@@ -288,7 +288,7 @@ public class ImportTSVFunction extends AbstractFunction {
             
         };
         
-        m_parameterList.getPanel(); // generate panel at once
+        m_parameterList.getPanel(true); // generate panel at once
         linkedParameters.showParameter(m_separatorParameter, false); // separator parameter not visible by default
         m_automaticSeparatorParameter.addLinkedParameters(linkedParameters); // link parameter, it will modify the panel
         

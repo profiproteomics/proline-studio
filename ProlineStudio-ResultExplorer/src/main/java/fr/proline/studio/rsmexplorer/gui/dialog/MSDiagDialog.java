@@ -182,7 +182,7 @@ public class MSDiagDialog extends DefaultDialog {
         c.weighty = 1;
         
         ParameterList parameterList = (ParameterList) m_parserComboBox.getSelectedItem();
-        m_parserParametersPanel.add(parameterList.getPanel(), c);
+        m_parserParametersPanel.add(parameterList.getPanel(true), c);
 
     }
     

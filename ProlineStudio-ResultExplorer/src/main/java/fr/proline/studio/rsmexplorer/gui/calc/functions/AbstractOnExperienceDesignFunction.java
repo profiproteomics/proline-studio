@@ -464,7 +464,7 @@ public abstract class AbstractOnExperienceDesignFunction extends AbstractFunctio
             if (hasQuantitationTypeParameter) {
                 m_parameters[0].add(m_quantitationTypeParameter);
             }
-            m_parameters[0].getPanel(); // generate panel at once (needed for showParameter)
+            m_parameters[0].getPanel(true); // generate panel at once (needed for showParameter)
             for (int i = 0; i < getMaxGroups(); i++) {  // 3 groups max
                 m_parameters[i + 1] = new ParameterList("bbinomial" + i);
                 m_parameters[i + 1].add(m_columnsParameterArray[i]);

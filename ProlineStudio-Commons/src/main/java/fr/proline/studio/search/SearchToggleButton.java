@@ -39,7 +39,6 @@ public class SearchToggleButton extends JToggleButton {
      * @param tableModelFilterInterface 
      */
     public SearchToggleButton(ProgressInterface progressInterface, JXTable table, FilterTableModelInterface tableModelFilterInterface) {
-        
         init(progressInterface, table, tableModelFilterInterface);
         initGraphic(new Search());
     }
@@ -83,7 +82,7 @@ public class SearchToggleButton extends JToggleButton {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-
+                
                 if ((m_progressInterface != null) && (!m_progressInterface.isLoaded())) {
 
                     ProgressBarDialog dialog = ProgressBarDialog.getDialog(WindowManager.getDefault().getMainWindow(), m_progressInterface, "Data loading", "Search is not available while data is loading. Please Wait.");
@@ -108,6 +107,7 @@ public class SearchToggleButton extends JToggleButton {
 
                     m_searchPanel.setFilers(filters);
                 }
+                
                 m_searchPanel.setVisible(isSelected());
 
                 if (firstTime) {
@@ -124,6 +124,7 @@ public class SearchToggleButton extends JToggleButton {
     
     
     private class Search implements ApplySearchInterface {
+        
 
         @Override
         public void doSearch(Filter f, boolean firstSearch) {

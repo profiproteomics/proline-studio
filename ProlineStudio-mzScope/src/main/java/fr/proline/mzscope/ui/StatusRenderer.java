@@ -1,9 +1,11 @@
 package fr.proline.mzscope.ui;
 
 import fr.proline.mzscope.model.ExtractionResult.Status;
+import fr.proline.studio.export.ExportSubStringFont;
 import fr.proline.studio.export.ExportTextInterface;
 import fr.proline.studio.utils.IconManager;
 import java.awt.Component;
+import java.util.ArrayList;
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -15,8 +17,10 @@ import javax.swing.table.DefaultTableCellRenderer;
 public class StatusRenderer  extends DefaultTableCellRenderer implements ExportTextInterface{
     
     private String m_basicTextForExport = "";
+    private ArrayList<ExportSubStringFont> m_ExportSubStringFonts;
     
     public StatusRenderer() {
+        m_ExportSubStringFonts = new ArrayList<ExportSubStringFont>();
     }
     
     @Override
@@ -53,6 +57,11 @@ public class StatusRenderer  extends DefaultTableCellRenderer implements ExportT
     @Override
     public String getExportText() {
         return m_basicTextForExport;
+    }
+
+    @Override
+    public ArrayList<ExportSubStringFont> getSubStringFonts() {
+        return this.m_ExportSubStringFonts;
     }
     
 }

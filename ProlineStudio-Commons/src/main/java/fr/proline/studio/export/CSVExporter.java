@@ -3,6 +3,7 @@ package fr.proline.studio.export;
 import java.io.FileWriter;
 import java.io.IOException;
 import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.poi.hssf.usermodel.HSSFRichTextString;
 
 /**
  * Export data to CSV
@@ -43,12 +44,14 @@ public class CSVExporter implements ExporterInterface {
     }
 
     @Override
-    public void addCell(String t) throws IOException {
+    public void addCell(HSSFRichTextString t) throws IOException {
+        String text = t.getString();
+        
         if (m_curCell>0) {
             m_fw.write(separatorCSV);
         }
         m_curCell++;
-        m_fw.write(StringEscapeUtils.escapeCsv(t));
+        m_fw.write(StringEscapeUtils.escapeCsv(text));
     }
     
     @Override

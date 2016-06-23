@@ -45,7 +45,6 @@ public class ImportSearchResultAsRsetJMSAction extends AbstractRSMAction {
         IdProjectIdentificationNode projectNode = (IdProjectIdentificationNode) allImportedNode.getParent();
         Project project =  projectNode.getProject();
         
-        
         ImportIdentificationDialog dialog = ImportIdentificationDialog.getDialog(WindowManager.getDefault().getMainWindow());
         dialog.setLocation(x, y);
         dialog.setVisible(true);
@@ -113,9 +112,8 @@ public class ImportSearchResultAsRsetJMSAction extends AbstractRSMAction {
     }
     
     private void startImport(final Long projectId, final IdAllImportedNode allImportedNode, File[] filePaths, final DefaultTreeModel treeModel, String parserId, HashMap<String, String> parserArguments, String decoyRegex, long instrumentId, long peaklistSoftwareId,  boolean saveSpectrumMatches ) {
-
+        
         AbstractJMSCallback callback = new AbstractJMSCallback() {
-
             @Override
             public boolean mustBeCalledInAWT() {
                 return true;

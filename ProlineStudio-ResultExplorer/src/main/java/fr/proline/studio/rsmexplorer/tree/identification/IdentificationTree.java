@@ -38,7 +38,6 @@ import fr.proline.studio.rsmexplorer.actions.identification.ExportAction;
 import fr.proline.studio.rsmexplorer.actions.identification.FilterRSMProteinSetsAction;
 import fr.proline.studio.rsmexplorer.actions.identification.FilterRSMProteinSetsJMSAction;
 import fr.proline.studio.rsmexplorer.actions.identification.GenerateSpectrumMatchesJMSAction;
-import fr.proline.studio.rsmexplorer.actions.identification.ImportMaxQuantResultJMSAction;
 import fr.proline.studio.rsmexplorer.actions.identification.ImportSearchResultAsDatasetAction;
 import fr.proline.studio.rsmexplorer.actions.identification.ImportSearchResultAsDatasetJMSAction;
 import fr.proline.studio.rsmexplorer.actions.identification.UpdatePeaklistSoftwareAction;
@@ -218,7 +217,6 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
                 if ((datasetId != null) && (datasetId.longValue() == dsetId)) {
                     return dataSetNode;
                 }
-
             } else if (childType == AbstractNode.NodeTypes.PROJECT_IDENTIFICATION) {
                 IdProjectIdentificationNode projectNode = ((IdProjectIdentificationNode) childNode);
                 if (projectNode.getProject().getId() != projectId) {
@@ -566,7 +564,6 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
 
         } else if (allImportedNodeSelected && (nbNodes == 1)) {
             
-
             // creation of the popup if needed
             if (m_allImportedPopup == null) {
                 boolean isJMSDefined = JMSConnectionManager.getJMSConnectionManager().isJMSDefined();

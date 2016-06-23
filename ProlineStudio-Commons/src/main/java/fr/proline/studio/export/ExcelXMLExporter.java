@@ -4,6 +4,7 @@ package fr.proline.studio.export;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.apache.poi.hssf.usermodel.HSSFRichTextString;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.apache.poi.ss.usermodel.*;
 
@@ -47,11 +48,12 @@ public class ExcelXMLExporter implements ExporterInterface {
     }
     
     @Override
-    public void addCell(String t) {
+    public void addCell(HSSFRichTextString t) {
+        String text = t.getString();
         Cell cell = m_row.createCell(m_curCell);
         
-        if (NumberUtils.isNumber(t)) {
-            double d = Double.parseDouble(t);
+        if (NumberUtils.isNumber(text)) {
+            double d = Double.parseDouble(text);
             cell.setCellValue(d);
         } else {
             cell.setCellValue(t);

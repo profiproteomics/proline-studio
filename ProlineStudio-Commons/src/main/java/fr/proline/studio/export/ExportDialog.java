@@ -300,6 +300,8 @@ public class ExportDialog extends DefaultDialog  {
         }
 
         if (m_exportType == ExporterFactory.EXPORT_TABLE) {
+            
+            //#SHMADI
 
             final ExporterFactory.ExporterInfo exporterInfo = getExporterInfo();
 

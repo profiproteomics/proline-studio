@@ -34,7 +34,6 @@ import java.awt.Image;
 import java.awt.event.ActionListener;
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
-import javax.swing.table.TableColumn;
 import org.jdesktop.swingx.JXTable;
 
 /**

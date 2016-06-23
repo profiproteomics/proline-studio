@@ -1,8 +1,10 @@
 package fr.proline.studio.rsmexplorer.gui.renderer;
 
+import fr.proline.studio.export.ExportSubStringFont;
 import fr.proline.studio.export.ExportTextInterface;
 import fr.proline.studio.rsmexplorer.gui.model.ProteinSetTableModel;
 import java.awt.Component;
+import java.util.ArrayList;
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -14,8 +16,10 @@ import javax.swing.table.DefaultTableCellRenderer;
 public class ProteinCountRenderer extends DefaultTableCellRenderer implements ExportTextInterface {
 
     private String m_basicTextForExport = "";
+    private ArrayList<ExportSubStringFont> m_ExportSubStringFonts;
     
     public ProteinCountRenderer() {
+        m_ExportSubStringFonts = new ArrayList<ExportSubStringFont>();
     }
     
     @Override
@@ -43,6 +47,11 @@ public class ProteinCountRenderer extends DefaultTableCellRenderer implements Ex
     @Override
     public String getExportText() {
         return m_basicTextForExport;
+    }
+
+    @Override
+    public ArrayList<ExportSubStringFont> getSubStringFonts() {
+        return this.m_ExportSubStringFonts;
     }
     
     

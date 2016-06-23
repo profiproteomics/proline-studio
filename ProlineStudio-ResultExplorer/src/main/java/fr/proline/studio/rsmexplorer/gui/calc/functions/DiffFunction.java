@@ -210,7 +210,7 @@ public class DiffFunction extends AbstractFunction {
 
         ParameterError error = null;
         if (!checkKeys) {
-            error = new ParameterError("Selected Keys are not compatible", m_parameterList.getPanel());
+            error = new ParameterError("Selected Keys are not compatible", m_parameterList.getPanel(true));
         }
         return error;
     }

@@ -486,6 +486,7 @@ public abstract class GraphNode extends AbstractConnectedGraphObject {
         }
     }
 
+    
     public LinkedList<GraphNode> getOutLinkedGraphNodes() {
         if (!calculationDone()) {
             return null;

@@ -16,6 +16,7 @@ import org.openide.util.NbPreferences;
 
 /**
  * List of Parameters; possibility to generate a panel from this list
+ *
  * @author jm235353
  */
 public class ParameterList extends ArrayList<AbstractParameter> {
@@ -25,7 +26,7 @@ public class ParameterList extends ArrayList<AbstractParameter> {
     private boolean m_enable = true;
 
     private final HashMap<JComponent, JLabel> m_associatedLabels = new HashMap<>();
-    
+
     public ParameterList(String name) {
         m_name = name;
     }
@@ -35,16 +36,15 @@ public class ParameterList extends ArrayList<AbstractParameter> {
         return m_name;
     }
 
-    public JPanel getPanel() {
+    public JPanel getPanel(boolean usePrefixKey) {
 
         if (m_parametersPanel != null) {
             return m_parametersPanel;
         }
 
         Preferences preferences = NbPreferences.root();
-        String prefixKey = m_name.replaceAll(" ", "_")+".";
-        
-        
+        String prefixKey = m_name.replaceAll(" ", "_") + ".";
+
         m_parametersPanel = new JPanel();
         m_parametersPanel.setLayout(new GridBagLayout());
 
@@ -58,14 +58,13 @@ public class ParameterList extends ArrayList<AbstractParameter> {
         c.weightx = 0;
         c.weighty = 0;
 
-
         int nbParameters = size();
         for (int i = 0; i < nbParameters; i++) {
             AbstractParameter parameter = get(i);
 
             String parameterName = parameter.getName();
             String suffixKey = parameterName.replaceAll(" ", "_");
-            
+
             c.gridx = 0;
             c.weightx = 0;
             JLabel l = null;
@@ -75,12 +74,17 @@ public class ParameterList extends ArrayList<AbstractParameter> {
                 l.setHorizontalAlignment(JLabel.RIGHT);
                 m_parametersPanel.add(l, c);
             }
-            
-            
-            String parameterValue = preferences.get(prefixKey+suffixKey, null);
-            
+
+            String parameterValue;
+
+            if (usePrefixKey) {
+                parameterValue = preferences.get(prefixKey + suffixKey, null);
+            } else {
+                parameterValue = preferences.get(suffixKey, null);
+            }
+
             if (parameter.hasComponent()) {
-                
+
                 JComponent comp = null;
                 if (parameter.showLabel() == AbstractParameter.LabelVisibility.AS_BORDER_TITLE) {
                     c.gridx = 0;
@@ -106,7 +110,7 @@ public class ParameterList extends ArrayList<AbstractParameter> {
                             }
                         };
                     }
-                    framedPanel.add((scroll!=null) ? scroll : comp, cFrame);
+                    framedPanel.add((scroll != null) ? scroll : comp, cFrame);
                     m_parametersPanel.add(framedPanel, c);
                     c.gridwidth = 1;
                 } else {
@@ -125,9 +129,9 @@ public class ParameterList extends ArrayList<AbstractParameter> {
                             }
                         };
                     }
-                    m_parametersPanel.add((scroll!=null) ? scroll : comp, c);
+                    m_parametersPanel.add((scroll != null) ? scroll : comp, c);
                 }
-                if ((l != null) && (comp !=null)) {
+                if ((l != null) && (comp != null)) {
                     m_associatedLabels.put(comp, l);
                 }
             }
@@ -135,7 +139,7 @@ public class ParameterList extends ArrayList<AbstractParameter> {
             c.gridy++;
 
         }
-        
+
         c.gridx = 0;
         c.gridy++;
         c.weightx = 0;
@@ -144,41 +148,41 @@ public class ParameterList extends ArrayList<AbstractParameter> {
 
         return m_parametersPanel;
     }
-    
+
     public JLabel getAssociatedLabel(JComponent c) {
         return m_associatedLabels.get(c);
     }
-    
+
     public void completePanel(JPanel p, GridBagConstraints c) {
         Preferences preferences = NbPreferences.root();
-        String prefixKey = m_name.replaceAll(" ", "_")+".";
-        
-         int nbParameters = size();
+        String prefixKey = m_name.replaceAll(" ", "_") + ".";
+
+        int nbParameters = size();
         for (int i = 0; i < nbParameters; i++) {
             AbstractParameter parameter = get(i);
-            
+
             String parameterName = parameter.getName();
             String suffixKey = parameterName.replaceAll(" ", "_");
-            
+
             c.gridy++;
-            
+
             c.gridx = 0;
             c.weightx = 0;
-            JLabel l = new JLabel(parameter.getName()+" :");
+            JLabel l = new JLabel(parameter.getName() + " :");
             l.setHorizontalAlignment(JLabel.RIGHT);
             p.add(l, c);
 
-            String parameterValue = preferences.get(prefixKey+suffixKey, null);
-            
-            if(parameter.hasComponent()){
-              c.gridx = 1;
-              c.weightx = 1;
-              p.add(parameter.getComponent(parameterValue), c);
-            }           
+            String parameterValue = preferences.get(prefixKey + suffixKey, null);
+
+            if (parameter.hasComponent()) {
+                c.gridx = 1;
+                c.weightx = 1;
+                p.add(parameter.getComponent(parameterValue), c);
+            }
 
         }
     }
-    
+
     public void updateIsUsed(Preferences preferences) {
         String prefixKey = m_name.replaceAll(" ", "_") + ".";
 
@@ -187,24 +191,24 @@ public class ParameterList extends ArrayList<AbstractParameter> {
             AbstractParameter parameter = get(i);
 
             String parameterName = parameter.getName();
-                String suffixKey = parameterName.replaceAll(" ", "_");
-                String parameterValue = preferences.get(prefixKey + suffixKey, null);
-            
+            String suffixKey = parameterName.replaceAll(" ", "_");
+            String parameterValue = preferences.get(prefixKey + suffixKey, null);
+
             if (!parameter.isUsed()) {
                 if ((parameterValue != null) && (!parameterValue.isEmpty())) {
                     parameter.setUsed(true);
                 }
             } else {
                 if ((parameterValue == null) || (parameterValue.isEmpty())) {
-                    parameter.setUsed(false); 
+                    parameter.setUsed(false);
                 }
             }
-            
+
             //Used to initialize values            
             parameter.getComponent(parameterValue);
         }
     }
-    
+
     public void initDefaults() {
 
         int nbParameters = size();
@@ -214,58 +218,84 @@ public class ParameterList extends ArrayList<AbstractParameter> {
             parameter.initDefault();
         }
     }
-    
+
     public void saveParameters(Preferences preferences) {
 
-        String prefixKey = m_name.replaceAll(" ", "_")+".";
-        
+        String prefixKey = m_name.replaceAll(" ", "_") + ".";
+
         int nbParameters = size();
         for (int i = 0; i < nbParameters; i++) {
             AbstractParameter parameter = get(i);
 
             String parameterName = parameter.getName();
             String suffixKey = parameterName.replaceAll(" ", "_");
-        
-            String key = prefixKey+suffixKey;
-            
+
+            String key = prefixKey + suffixKey;
+
             if (parameter.isUsed()) {
                 String value = parameter.getStringValue();
                 preferences.put(key, value);
             } else {
                 preferences.remove(key);
             }
-            
+        }
+    }
+
+    public void saveParameters(Preferences preferences, Boolean usePrefixKey) {
+        String prefixKey = m_name.replaceAll(" ", "_") + ".";
+
+        int nbParameters = size();
+        for (int i = 0; i < nbParameters; i++) {
+
+            AbstractParameter currentParameter = this.get(i);
+
+            String parameterKey = currentParameter.getKey();
+            String suffixKey = parameterKey.replaceAll(" ", "_");
+
+            String key;
+            if (usePrefixKey) {
+                key = prefixKey + suffixKey;
+            } else {
+                key = suffixKey;
+            }
+
+            if (!currentParameter.isUsed()) {
+                preferences.remove(key);
+                continue;
+            }
+
+            preferences.put(key, currentParameter.getStringValue());
 
         }
     }
-    
+
     public void loadParameters(Preferences preferences) {
-        String prefixKey = m_name.replaceAll(" ", "_")+".";
-        
+        String prefixKey = m_name.replaceAll(" ", "_") + ".";
+
         int nbParameters = size();
         for (int i = 0; i < nbParameters; i++) {
             AbstractParameter parameter = get(i);
 
             String parameterName = parameter.getName();
             String suffixKey = parameterName.replaceAll(" ", "_");
-        
-            String key = prefixKey+suffixKey;
-            
+
+            String key = prefixKey + suffixKey;
+
             String value = preferences.get(key, null);
             if (value == null) {
                 continue;
             }
-            
+
             parameter.setValue(value);
 
         }
-        
+
         updateIsUsed(preferences);
     }
-    
+
     public HashMap<String, String> getValues() {
         HashMap<String, String> valuesMap = new HashMap<>();
-        
+
         int nbParameters = size();
         for (int i = 0; i < nbParameters; i++) {
             AbstractParameter parameter = get(i);
@@ -273,28 +303,27 @@ public class ParameterList extends ArrayList<AbstractParameter> {
             if (!parameter.isUsed()) {
                 continue;
             }
-            
+
             String key = parameter.getKey();
             String value = parameter.getStringValue();
             valuesMap.put(key, value);
         }
-        
+
         return valuesMap;
-        
+
     }
-    
+
     public AbstractParameter getParameter(String key) {
         int nbParameters = size();
         for (int i = 0; i < nbParameters; i++) {
             AbstractParameter parameter = get(i);
-            if (parameter.getKey().compareTo(key) ==0) {
+            if (parameter.getKey().compareTo(key) == 0) {
                 return parameter;
             }
         }
         return null;
     }
-    
-    
+
     public ParameterError checkParameters() {
         int nbParameters = size();
         for (int i = 0; i < nbParameters; i++) {
@@ -306,7 +335,7 @@ public class ParameterList extends ArrayList<AbstractParameter> {
         }
         return null;
     }
-    
+
     public void clean() {
         int nbParameters = size();
         for (int i = 0; i < nbParameters; i++) {
@@ -314,13 +343,13 @@ public class ParameterList extends ArrayList<AbstractParameter> {
             parameter.clean();
         }
     }
-    
+
     public void enableList(boolean v) {
         m_enable = v;
     }
-    
+
     public boolean isEnable() {
         return m_enable;
     }
-     
+
 }

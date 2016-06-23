@@ -689,7 +689,7 @@ public class ImportIdentificationDialog extends DefaultDialog {
         c.weighty = 1;
         
         ParameterList parameterList = (ParameterList) m_parserComboBox.getSelectedItem();
-        m_parserParametersPanel.add(parameterList.getPanel(), c);
+        m_parserParametersPanel.add(parameterList.getPanel(true), c);
 
 //        // allow spectrum matches for all parsers except Mascot
 //        boolean allowSaveSpectrumMatches = (mzIdentiParameterList.toString().compareTo(MASCOT_PARSER) != 0);

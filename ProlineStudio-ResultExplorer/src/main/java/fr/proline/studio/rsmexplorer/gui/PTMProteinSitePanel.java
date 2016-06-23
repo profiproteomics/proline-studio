@@ -308,6 +308,7 @@ public class PTMProteinSitePanel extends HourglassPanel implements DataBoxPanelI
         m_ptmProteinSiteTable = new PTMProteinSiteTable();
         PtmProtenSiteTableModel model = new PtmProtenSiteTableModel((LazyTable)m_ptmProteinSiteTable);
         m_ptmProteinSiteTable.setModel(new CompoundTableModel(model, true));
+        
         // hide the id column
         m_ptmProteinSiteTable.getColumnExt(m_ptmProteinSiteTable.convertColumnIndexToView(PtmProtenSiteTableModel.COLTYPE_PROTEIN_ID)).setVisible(false);
         //m_ptmProteinSiteTable.displayColumnAsPercentage(PtmProtenSiteTableModel.COLTYPE_PEPTIDE_SCORE);

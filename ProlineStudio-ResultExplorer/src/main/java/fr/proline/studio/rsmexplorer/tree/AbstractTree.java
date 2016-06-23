@@ -60,8 +60,6 @@ public abstract class AbstractTree extends JTree implements MouseListener {
     
     
     protected void startLoading(final AbstractNode nodeToLoad, final boolean identificationDataset) {
-
-        
         
         // check if the loading is necessary :
         // it is necessary only if we have an hour glass child

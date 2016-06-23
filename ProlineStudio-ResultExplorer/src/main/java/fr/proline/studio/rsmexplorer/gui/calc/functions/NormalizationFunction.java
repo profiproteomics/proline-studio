@@ -88,7 +88,7 @@ public class NormalizationFunction extends AbstractOnExperienceDesignFunction {
 
 
         
-        parameterList.getPanel(); // generate panel at once
+        parameterList.getPanel(true); // generate panel at once
         m_normalizationParameter.addLinkedParameters(linkedParameters); // link parameter, it will modify the panel
 
 

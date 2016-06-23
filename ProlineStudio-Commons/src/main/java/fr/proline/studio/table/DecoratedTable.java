@@ -146,7 +146,7 @@ public abstract class DecoratedTable extends JXTable implements CrossSelectionIn
         m_parameterListArray = new ArrayList<>(1);
         m_parameterListArray.add(parameterTableList);
 
-        parameterTableList.getPanel(); // generate panel at once
+        parameterTableList.getPanel(true); // generate panel at once
         m_autoSizeColumnParameter.addLinkedParameters(linkedParameters); // link parameter, it will modify the panel
         linkedParameters.valueChanged("true", Boolean.TRUE);  //JPM.TOOD true or false
     }

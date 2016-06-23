@@ -110,8 +110,8 @@ public class IconManager {
         DATASET_RSM_ERROR,
         LOAD_SETTINGS,
         SAVE_SETTINGS,
-        SAVE_WND, 
-        ARROW_DOWN, 
+        SAVE_WND,
+        ARROW_DOWN,
         ARROW_RIGHT,
         ARROW_UP,
         ADD_DATA_ANALYZER,
@@ -135,31 +135,33 @@ public class IconManager {
         TICK_CIRCLE,
         REFRESH,
         SETTINGS,
-        TABLE_IMPORT, 
-        FULL_SCREEN, 
-        PROGRESS, 
-        UPDATE, 
-        SPECTRUM, 
+        TABLE_IMPORT,
+        FULL_SCREEN,
+        PROGRESS,
+        UPDATE,
+        SPECTRUM,
         NAVIGATE,
-        SELECT, 
+        SELECT,
         ZOOM_FIT,
         CONTROL_PLAY,
         CONTROL_STOP,
         CONTROL_PAUSE,
-        GEAR;
-        
+        GEAR,
+        TOOLBOX,
+        TOOLBOX_PLUS,
+        TOOLBOX_MINUS,
+        SCREWDRIVER;  
     }
     private final static HashMap<IconType, ImageIcon> m_iconMap = new HashMap<>();
     private final static HashMap<IconType, ImageIcon> m_iconHourGlassMap = new HashMap<>();
     private final static HashMap<IconType, ImageIcon> m_grayedIconMap = new HashMap<>();
-    private final static HashMap<IconType, String> m_iconURLMap = new HashMap<>(); 
-    
-    
+    private final static HashMap<IconType, String> m_iconURLMap = new HashMap<>();
+
     public static Image getImage(IconType iconType) {
         ImageIcon icon = getIcon(iconType);
         return icon.getImage();
     }
-    
+
     public static ImageIcon getIcon(IconType iconType) {
 
         ImageIcon icon = m_iconMap.get(iconType);
@@ -173,7 +175,7 @@ public class IconManager {
     }
 
     public static ImageIcon getGrayedIcon(IconType iconType) {
-        
+
         ImageIcon grayedIcon = m_grayedIconMap.get(iconType);
         if (grayedIcon == null) {
             String path = getIconFilePath(iconType);
@@ -195,14 +197,14 @@ public class IconManager {
                     int blue = color & 0x000000FF;
                     int greyLevel = (int) Math.round(((double) (red + green + blue)) / 3.0);
                     // lighter grey
-                    greyLevel  += (int) 100;
-                    if (greyLevel>255) greyLevel = 255;
+                    greyLevel += (int) 100;
+                    if (greyLevel > 255) {
+                        greyLevel = 255;
+                    }
                     int grey = alpha + (greyLevel << 16) + (greyLevel << 8) + greyLevel;
                     im.setRGB(x, y, grey);
                 }
             }
-
- 
 
             grayedIcon = new ImageIcon(im);
             m_grayedIconMap.put(iconType, grayedIcon);
@@ -210,7 +212,7 @@ public class IconManager {
 
         return grayedIcon;
     }
-    
+
     public static ImageIcon getIconWithHourGlass(IconType iconType) {
 
         ImageIcon iconWithHourGlass = m_iconHourGlassMap.get(iconType);
@@ -234,8 +236,10 @@ public class IconManager {
                     int blue = color & 0x000000FF;
                     int greyLevel = (int) Math.round(((double) (red + green + blue)) / 3.0);
                     // lighter grey
-                    greyLevel  += (int) 100;
-                    if (greyLevel>255) greyLevel = 255;
+                    greyLevel += (int) 100;
+                    if (greyLevel > 255) {
+                        greyLevel = 255;
+                    }
                     int grey = alpha + (greyLevel << 16) + (greyLevel << 8) + greyLevel;
                     im.setRGB(x, y, grey);
                 }
@@ -258,7 +262,7 @@ public class IconManager {
     private static Image miniHourGlassImage = null;
 
     public static String getURLForIcon(IconType iconType) {
-        
+
         String imageURL = m_iconURLMap.get(iconType);
         if (imageURL == null) {
 
@@ -269,8 +273,6 @@ public class IconManager {
             Graphics2D bGr = bimage.createGraphics();
             bGr.drawImage(i, 0, 0, null);
             bGr.dispose();
-
-
 
             try {
                 File f = File.createTempFile("tmpicon", ".png", new File("."));
@@ -283,10 +285,10 @@ public class IconManager {
             } catch (Exception e) {
             }
         }
-        
+
         return imageURL;
     }
-    
+
     private static String getIconFilePath(IconType iconType) {
         switch (iconType) {
             case OK:
@@ -296,7 +298,7 @@ public class IconManager {
             case DEFAULT:
                 return "fr/proline/studio/images/arrow-circle.png";
             case TICK_SMALL:
-                return "fr/proline/studio/images/tick-small.png"; 
+                return "fr/proline/studio/images/tick-small.png";
             case SAME_SET:
                 return "fr/proline/studio/images/sameset.png";
             case SUB_SET:
@@ -362,11 +364,11 @@ public class IconManager {
             case TRASH:
                 return "fr/proline/studio/images/trash.png";
             case ALL_IMPORTED:
-                return "fr/proline/studio/images/all-imported.png"; 
+                return "fr/proline/studio/images/all-imported.png";
             case PROPERTIES:
-                return "fr/proline/studio/images/property.png"; 
+                return "fr/proline/studio/images/property.png";
             case ARROW_RIGHT_SMALL:
-                return "fr/proline/studio/images/arrow-right-small.png"; 
+                return "fr/proline/studio/images/arrow-right-small.png";
             case PLUS11:
                 return "fr/proline/studio/images/plus11x11.png";
             case MINUS11:
@@ -390,7 +392,7 @@ public class IconManager {
             case QUANT_XIC:
                 return "fr/proline/studio/images/chart-quantXic2.png";
             case QUANT_SC:
-                return "fr/proline/studio/images/chart-quantSC2.png";                
+                return "fr/proline/studio/images/chart-quantSC2.png";
             case BOOK:
                 return "fr/proline/studio/images/book.png";
             case BOOK_OPEN:
@@ -412,15 +414,15 @@ public class IconManager {
             case WAVE:
                 return "fr/proline/studio/images/wave.png";
             case COLUMNS_VISIBILITY:
-                return "fr/proline/studio/images/columnsVisibility11x11.png";      
+                return "fr/proline/studio/images/columnsVisibility11x11.png";
             case PLUS_SMALL_10X10:
-                return "fr/proline/studio/images/plus-small10x10.png";     
+                return "fr/proline/studio/images/plus-small10x10.png";
             case PROPERTY_SMALL_10X10:
-                return "fr/proline/studio/images/property-small10x10.png";    
+                return "fr/proline/studio/images/property-small10x10.png";
             case EDIT_SMALL_10X10:
-                return "fr/proline/studio/images/edit-small10x10.png";   
+                return "fr/proline/studio/images/edit-small10x10.png";
             case IDENTIFICATION:
-                return "fr/proline/studio/images/identification.png";  
+                return "fr/proline/studio/images/identification.png";
             case ARROW_8X7:
                 return "fr/proline/studio/images/arrow8x7.png";
             case ARROW:
@@ -464,73 +466,73 @@ public class IconManager {
             case DATASET_RSM_ERROR:
                 return "fr/proline/studio/images/dataset_rsm_error.png";
             case LOAD_SETTINGS:
-                return "fr/proline/studio/images/load-settings.png"; 
+                return "fr/proline/studio/images/load-settings.png";
             case SAVE_SETTINGS:
-                return "fr/proline/studio/images/save-settings.png"; 
+                return "fr/proline/studio/images/save-settings.png";
             case SAVE_WND:
                 return "fr/proline/studio/images/save11x11.png";
-           case ARROW_DOWN:
-               return "fr/proline/studio/images/arrow-down.png";
-           case ARROW_RIGHT:
-               return "fr/proline/studio/images/arrow-right.png";
+            case ARROW_DOWN:
+                return "fr/proline/studio/images/arrow-down.png";
+            case ARROW_RIGHT:
+                return "fr/proline/studio/images/arrow-right.png";
             case ARROW_UP:
-               return "fr/proline/studio/images/arrow-up.png";
-           case ADD_DATA_ANALYZER:
-               return "fr/proline/studio/images/addDataMixer.png";
-           case DATA_ANALYZER:
-               return "fr/proline/studio/images/data-mixer.png";
-           case GRID:
-               return "fr/proline/studio/images/grid.png";
-           case IMPORT_TABLE_SELECTION:
-               return "fr/proline/studio/images/importTableSelection.png";
-           case EXPORT_TABLE_SELECTION:
-               return "fr/proline/studio/images/exportTableSelection.png";
-           case LOCK:
-               return "fr/proline/studio/images/lock.png";
-           case UNLOCK:
-               return "fr/proline/studio/images/lock-unlock.png";
-           case COLOR_PICKER:
-               return "fr/proline/studio/images/color.png";
-           case CHART_ARROW:
-               return "fr/proline/studio/images/chart-arrow.png";
-           case CALCULATOR:
-               return "fr/proline/studio/images/calculator.png";
-           case CHART_PIE:
-               return "fr/proline/studio/images/chart-pie.png";
-           case EXECUTE:
-               return "fr/proline/studio/images/execute.png";
-           case STOP:
-               return "fr/proline/studio/images/stop.png";
-           case TABLES:
-               return "fr/proline/studio/images/tables.png";
-           case TABLE:
-               return "fr/proline/studio/images/table.png";
-           case COLUMN:
-               return "fr/proline/studio/images/table-column.png";
-           case CHALKBOARD:
-               return "fr/proline/studio/images/chalkboard-text.png";
-           case FUNCTION:
-               return "fr/proline/studio/images/function.png";
-           case TICK_CIRCLE:
-               return "fr/proline/studio/images/tick-circle.png";
-           case REFRESH:
-               return "fr/proline/studio/images/refresh.png";
-           case SETTINGS:
-               return "fr/proline/studio/images/settings.png";
-           case TABLE_IMPORT:
-               return "fr/proline/studio/images/table-import.png";
-            case FULL_SCREEN: 
-               return "fr/proline/studio/images/fullscreen.png";
-            case PROGRESS: 
-               return "fr/proline/studio/images/progress.gif";
-            case UPDATE: 
-               return "fr/proline/studio/images/update.png";
-            case SPECTRUM: 
-               return "fr/proline/studio/images/spectrum.png";
-            case NAVIGATE: 
-               return "fr/proline/studio/images/navigate.png";    
-            case SELECT: 
-               return "fr/proline/studio/images/select.png";    
+                return "fr/proline/studio/images/arrow-up.png";
+            case ADD_DATA_ANALYZER:
+                return "fr/proline/studio/images/addDataMixer.png";
+            case DATA_ANALYZER:
+                return "fr/proline/studio/images/data-mixer.png";
+            case GRID:
+                return "fr/proline/studio/images/grid.png";
+            case IMPORT_TABLE_SELECTION:
+                return "fr/proline/studio/images/importTableSelection.png";
+            case EXPORT_TABLE_SELECTION:
+                return "fr/proline/studio/images/exportTableSelection.png";
+            case LOCK:
+                return "fr/proline/studio/images/lock.png";
+            case UNLOCK:
+                return "fr/proline/studio/images/lock-unlock.png";
+            case COLOR_PICKER:
+                return "fr/proline/studio/images/color.png";
+            case CHART_ARROW:
+                return "fr/proline/studio/images/chart-arrow.png";
+            case CALCULATOR:
+                return "fr/proline/studio/images/calculator.png";
+            case CHART_PIE:
+                return "fr/proline/studio/images/chart-pie.png";
+            case EXECUTE:
+                return "fr/proline/studio/images/execute.png";
+            case STOP:
+                return "fr/proline/studio/images/stop.png";
+            case TABLES:
+                return "fr/proline/studio/images/tables.png";
+            case TABLE:
+                return "fr/proline/studio/images/table.png";
+            case COLUMN:
+                return "fr/proline/studio/images/table-column.png";
+            case CHALKBOARD:
+                return "fr/proline/studio/images/chalkboard-text.png";
+            case FUNCTION:
+                return "fr/proline/studio/images/function.png";
+            case TICK_CIRCLE:
+                return "fr/proline/studio/images/tick-circle.png";
+            case REFRESH:
+                return "fr/proline/studio/images/refresh.png";
+            case SETTINGS:
+                return "fr/proline/studio/images/settings.png";
+            case TABLE_IMPORT:
+                return "fr/proline/studio/images/table-import.png";
+            case FULL_SCREEN:
+                return "fr/proline/studio/images/fullscreen.png";
+            case PROGRESS:
+                return "fr/proline/studio/images/progress.gif";
+            case UPDATE:
+                return "fr/proline/studio/images/update.png";
+            case SPECTRUM:
+                return "fr/proline/studio/images/spectrum.png";
+            case NAVIGATE:
+                return "fr/proline/studio/images/navigate.png";
+            case SELECT:
+                return "fr/proline/studio/images/select.png";
             case ZOOM_FIT:
                 return "fr/proline/studio/images/magnifier-zoom-fit.png";
             case CONTROL_PLAY:
@@ -541,9 +543,15 @@ public class IconManager {
                 return "fr/proline/studio/images/control-pause.png";
             case GEAR:
                 return "fr/proline/studio/images/gear.png";
-                
+            case TOOLBOX:
+                return "fr/proline/studio/images/toolbox.png";
+            case TOOLBOX_PLUS:
+                return "fr/proline/studio/images/toolbox--plus.png";
+            case TOOLBOX_MINUS:
+                return "fr/proline/studio/images/toolbox--minus.png";     
+            case SCREWDRIVER:
+                return "fr/proline/studio/images/screwdriver.png";     
         }
-
 
         return null; // can not happen
     }

@@ -195,12 +195,13 @@ public class ImportSearchResultAsDatasetJMSAction extends AbstractRSMAction {
                 if (success) {
 
                     ImportSearchResultAsRsetJMSAction.fireListener(project.getId());
-
+                    
                     createDataset(identificationNode, project, parentDataset, datasetName, _resultSetId[0], getTaskInfo());
 
 
                 } else {
                     //JPM.TODO : manage error with errorMessage
+                    
                     treeModel.removeNodeFromParent(identificationNode);
                 }
             }
@@ -217,7 +218,7 @@ public class ImportSearchResultAsDatasetJMSAction extends AbstractRSMAction {
     
     private void createDataset(final DataSetNode identificationNode, Project project, DDataset parentDataset, String name, Long resultSetId, TaskInfo taskInfo) {
                                     
-
+        
         identificationNode.setIsChanging(false);
 
         IdentificationTree tree = IdentificationTree.getCurrentTree();

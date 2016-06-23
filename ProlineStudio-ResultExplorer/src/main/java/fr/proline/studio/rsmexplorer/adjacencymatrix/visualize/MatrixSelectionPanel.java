@@ -217,8 +217,7 @@ public class MatrixSelectionPanel extends HourglassPanel implements DataBoxPanel
         if (modelRowIndex == -1) {
             return;
         }
-        selectCluster(modelRowIndex);
-        
+        selectCluster(modelRowIndex);        
     }
     
     private void selectCluster(int index) {

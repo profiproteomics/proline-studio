@@ -4,10 +4,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import org.apache.commons.lang3.math.NumberUtils;
-import org.apache.poi.hssf.usermodel.HSSFFont;
-import org.apache.poi.hssf.usermodel.HSSFRichTextString;
-import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFFont;
+import org.apache.poi.xssf.usermodel.XSSFRichTextString;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 /**
  * Export data to xlsx
@@ -16,7 +16,7 @@ import org.apache.poi.ss.usermodel.*;
  */
 public class ExcelXMLExporter implements ExporterInterface {
 
-    private SXSSFWorkbook m_wb;
+    private XSSFWorkbook m_wb;
     private Sheet m_sheet;
     private int m_curRow = 0;
     private int m_curCell = 0;
@@ -31,7 +31,7 @@ public class ExcelXMLExporter implements ExporterInterface {
             filePath = filePath + ".xlsx";
         }
 
-        m_wb = new SXSSFWorkbook(512);
+        m_wb = new XSSFWorkbook();
         m_filePath = filePath;
     }
 
@@ -50,9 +50,9 @@ public class ExcelXMLExporter implements ExporterInterface {
     }
 
     @Override
-    public void addCell(HSSFRichTextString t, ArrayList<ExportSubStringFont> fonts) {
+    public void addCell(String t, ArrayList<ExportSubStringFont> fonts) {
 
-        System.out.println("breakpoint");
+        XSSFRichTextString rich = new XSSFRichTextString(t);
 
         for (int i = 0; i < fonts.size(); i++) {
 
@@ -60,22 +60,21 @@ public class ExcelXMLExporter implements ExporterInterface {
             int stopIndex = fonts.get(i).getStopIndex();
             short color = fonts.get(i).getColor();
 
-            //HSSFFont currentFont = (HSSFFont) m_wb.createFont();
+            XSSFFont currentFont = (XSSFFont) m_wb.createFont();
             
-            HSSFFont currentFont = null;
             
 
             if (currentFont != null) {
                 currentFont.setColor(color);
 
-                if (startIndex > 0 && stopIndex < t.getString().length()) {
-                    t.applyFont(startIndex, stopIndex, currentFont);
+                if (startIndex >= 0 && stopIndex < t.length()) {
+                    rich.applyFont(startIndex, stopIndex, currentFont);
                 }
             }
 
         }
 
-        String text = t.getString();
+        String text = rich.getString();
 
         Cell cell = m_row.createCell(m_curCell);
 
@@ -83,7 +82,7 @@ public class ExcelXMLExporter implements ExporterInterface {
             double d = Double.parseDouble(text);
             cell.setCellValue(d);
         } else {
-            cell.setCellValue(t);
+            cell.setCellValue(rich);
         }
         m_curCell++;
     }
@@ -92,9 +91,8 @@ public class ExcelXMLExporter implements ExporterInterface {
     public void end() throws IOException {
         FileOutputStream fileOut = new FileOutputStream(m_filePath);
         m_wb.write(fileOut);
+        fileOut.flush();
         fileOut.close();
-
-        m_wb.dispose();
     }
 
 }

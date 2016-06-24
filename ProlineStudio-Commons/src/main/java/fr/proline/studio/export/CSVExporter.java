@@ -4,7 +4,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import org.apache.commons.lang3.StringEscapeUtils;
-import org.apache.poi.hssf.usermodel.HSSFRichTextString;
 
 /**
  * Export data to CSV
@@ -45,14 +44,13 @@ public class CSVExporter implements ExporterInterface {
     }
 
     @Override
-    public void addCell(HSSFRichTextString t, ArrayList<ExportSubStringFont> fonts) throws IOException {
-        String text = t.getString();
+    public void addCell(String t, ArrayList<ExportSubStringFont> fonts) throws IOException {
         
         if (m_curCell>0) {
             m_fw.write(separatorCSV);
         }
         m_curCell++;
-        m_fw.write(StringEscapeUtils.escapeCsv(text));
+        m_fw.write(StringEscapeUtils.escapeCsv(t));
     }
     
     @Override

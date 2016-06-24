@@ -3,7 +3,6 @@ package fr.proline.studio.export;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import javax.swing.JOptionPane;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.poi.hssf.usermodel.HSSFFont;
 import org.apache.poi.hssf.usermodel.HSSFRichTextString;
@@ -63,7 +62,9 @@ public class Excel2003Exporter implements ExporterInterface {
     }
 
     @Override
-    public void addCell(HSSFRichTextString t, ArrayList<ExportSubStringFont> fonts) {
+    public void addCell(String t, ArrayList<ExportSubStringFont> fonts) {
+        
+        HSSFRichTextString rich = new HSSFRichTextString(t);
 
         for (int i = 0; i < fonts.size(); i++) {
 
@@ -74,19 +75,18 @@ public class Excel2003Exporter implements ExporterInterface {
             HSSFFont currentFont = (HSSFFont) m_wb.createFont();
             currentFont.setColor(color);
 
-            if (startIndex > 0 && stopIndex < t.getString().length()) {
-                t.applyFont(startIndex, stopIndex, currentFont);
+            if (startIndex >= 0 && stopIndex < t.length()) {
+                rich.applyFont(startIndex, stopIndex, currentFont);
             }
 
         }
 
-        String text = t.getString();
         Cell cell = m_row.createCell(m_curCell);
-        if (NumberUtils.isNumber(text)) {
-            double d = Double.parseDouble(text);
+        if (NumberUtils.isNumber(t)) {
+            double d = Double.parseDouble(t);
             cell.setCellValue(d);
         } else {
-            cell.setCellValue(t);
+            cell.setCellValue(rich);
         }
         m_curCell++;
 

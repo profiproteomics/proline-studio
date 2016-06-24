@@ -7,7 +7,6 @@ import javax.swing.AbstractButton;
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.table.TableCellRenderer;
-import org.apache.poi.hssf.usermodel.HSSFRichTextString;
 
 /**
  * Class used to do a local export of a table
@@ -38,8 +37,7 @@ public class ExportManager {
      return "";
      }
      */
-    private HSSFRichTextString componentToText(Component c) {
-        HSSFRichTextString richString;
+    private String componentToText(Component c) {
         String text = "";
 
         if (c instanceof ExportTextInterface) {
@@ -50,9 +48,7 @@ public class ExportManager {
             text = ((AbstractButton) c).getText();
         }
 
-        richString = new HSSFRichTextString(text);
-
-        return richString;
+        return text;
     }
     
     private ArrayList<ExportSubStringFont> componentToSubStringFonts(Component c){
@@ -88,13 +84,13 @@ public class ExportManager {
                 m_exporter.startRow();
                 for (int j = 0; j < nbCol; j++) {
                     String colName = ((ExportModelInterface) m_table).getExportColumnName(j);
-                    m_exporter.addCell(new HSSFRichTextString(colName), new ArrayList<ExportSubStringFont>());
+                    m_exporter.addCell(colName, new ArrayList<ExportSubStringFont>());
                 }
             } else {
                 m_exporter.startRow();
                 for (int j = 0; j < nbCol; j++) {
                     String colName = m_table.getColumnName(j);
-                    m_exporter.addCell(new HSSFRichTextString(colName), new ArrayList<ExportSubStringFont>());
+                    m_exporter.addCell(colName, new ArrayList<ExportSubStringFont>());
                 }
             }
 
@@ -108,7 +104,7 @@ public class ExportManager {
                 if (rowTextInterface) {
                     m_exporter.startRow();
                     for (int col = 0; col < nbCol; col++) {
-                        HSSFRichTextString text = new HSSFRichTextString(((ExportModelInterface) m_table).getExportRowCell(row, col));
+                        String text = ((ExportModelInterface) m_table).getExportRowCell(row, col);
                         if (text == null) {
                             TableCellRenderer renderer = m_table.getCellRenderer(row, col);
                             Component c = m_table.prepareRenderer(renderer, row, col);
@@ -123,7 +119,7 @@ public class ExportManager {
                     for (int col = 0; col < nbCol; col++) {
                         TableCellRenderer renderer = m_table.getCellRenderer(row, col);
                         Component c = m_table.prepareRenderer(renderer, row, col);
-                        HSSFRichTextString text = componentToText(c);
+                        String text = componentToText(c);
                         
                         m_exporter.addCell(text, componentToSubStringFonts(c));
                     }

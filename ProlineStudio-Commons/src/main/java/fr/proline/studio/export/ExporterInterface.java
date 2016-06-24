@@ -1,6 +1,7 @@
 package fr.proline.studio.export;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import org.apache.poi.hssf.usermodel.HSSFRichTextString;
 
 /**
@@ -15,7 +16,7 @@ public interface ExporterInterface {
 
     public void startRow() throws IOException;
 
-    public void addCell(HSSFRichTextString t) throws IOException;
+    public void addCell(HSSFRichTextString t, ArrayList<ExportSubStringFont> fonts) throws IOException;
 
     public void end() throws IOException;
 

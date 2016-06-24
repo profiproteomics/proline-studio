@@ -5,7 +5,7 @@
  */
 package fr.proline.studio.export;
 
-import org.apache.poi.hssf.usermodel.HSSFFont;
+import org.apache.poi.hssf.util.HSSFColor;
 
 /**
  *
@@ -14,16 +14,16 @@ import org.apache.poi.hssf.usermodel.HSSFFont;
 public class ExportSubStringFont {
 
     private int startIndex, stopIndex;
-    private HSSFFont font;
+    private short color;
 
     public ExportSubStringFont() {
         ;
     }
 
-    public ExportSubStringFont(int startIndex, int stopIndex, HSSFFont font) {
+    public ExportSubStringFont(int startIndex, int stopIndex, short color) {
         this.startIndex = startIndex;
         this.stopIndex = stopIndex;
-        this.font = font;
+        this.color = color;
     }
 
     public void setStartIndex(int startIndex) {
@@ -41,12 +41,13 @@ public class ExportSubStringFont {
     public int getStopIndex() {
         return this.stopIndex;
     }
-
-    public void setFont(HSSFFont font) {
-        this.font = font;
+    
+    public void setColor(short color){
+        this.color = color;
+    }
+    
+    public short getColor(){
+        return this.color;
     }
 
-    public HSSFFont getFont() {
-        return this.font;
-    }
 }

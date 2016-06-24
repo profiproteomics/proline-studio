@@ -1,10 +1,8 @@
 package fr.proline.studio.rsmexplorer.gui.renderer;
 
 import fr.proline.core.orm.msi.Peptide;
-import fr.proline.core.orm.msi.SequenceMatch;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.msi.dto.DPeptidePTM;
-import fr.proline.core.orm.ps.PeptidePtm;
 import fr.proline.studio.export.ExportSubStringFont;
 import fr.proline.studio.export.ExportTextInterface;
 import fr.proline.studio.utils.GlobalValues;
@@ -13,30 +11,27 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
-import org.apache.poi.hssf.usermodel.HSSFFont;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.hssf.util.HSSFColor;
 
 /**
  * Renderer for a Peptide in a Table Cell
+ *
  * @author JM235353
  */
 public class PeptideRenderer extends DefaultTableCellRenderer implements ExportTextInterface {
 
     private String m_basicTextForExport = "";
     private ArrayList<ExportSubStringFont> m_ExportSubStringFonts;
-    private HSSFWorkbook wb;
-    
+
     public void PeptideRenderer() {
-        wb = new HSSFWorkbook();
-        m_ExportSubStringFonts = new ArrayList<ExportSubStringFont>();
+        ;
     }
-    
+
     @Override
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
 
         String displayString;
-        
+
         if (value == null) {
             displayString = "";
         } else {
@@ -44,24 +39,21 @@ public class PeptideRenderer extends DefaultTableCellRenderer implements ExportT
 
             displayString = constructPeptideDisplay(pm);
         }
-        
+
         return super.getTableCellRendererComponent(table, displayString, isSelected, hasFocus, row, column);
     }
 
     private String constructPeptideDisplay(DPeptideMatch peptideMatch) {
         
+        m_ExportSubStringFonts = new ArrayList<ExportSubStringFont>();
 
         Peptide peptide = peptideMatch.getPeptide();
         if (peptide.getTransientData() != null) {
 
-            
-            
             HashMap<Integer, DPeptidePTM> ptmMap = peptide.getTransientData().getDPeptidePtmMap();
             if (ptmMap != null) {
                 m_displaySB.append("<HTML>");
             }
-
-
 
             String sequence = peptide.getSequence();
 
@@ -70,11 +62,8 @@ public class PeptideRenderer extends DefaultTableCellRenderer implements ExportT
                 m_exportSB.append(sequence);
             } else {
 
-
                 int nb = sequence.length();
                 for (int i = 0; i < nb; i++) {
-                    
-                    HSSFFont currentFont;
 
                     boolean nTerOrCterModification = false;
                     if (i == 0) {
@@ -93,25 +82,33 @@ public class PeptideRenderer extends DefaultTableCellRenderer implements ExportT
                     boolean aminoAcidModification = (ptm != null);
 
                     if (nTerOrCterModification || aminoAcidModification) {
-                        
-                        
+
                         if (nTerOrCterModification && aminoAcidModification) {
                             m_displaySB.append("<span style='color:").append(GlobalValues.HTML_COLOR_VIOLET).append("'>");
-                            //currentFont.setColor(HSSFColor.VIOLET.index);
+                                                     
+                            ExportSubStringFont newSubStringFont = new ExportSubStringFont(i, i + 1, HSSFColor.VIOLET.index);
+                            m_ExportSubStringFonts.add(newSubStringFont);        
+                            
                         } else if (nTerOrCterModification) {
                             m_displaySB.append("<span style='color:").append(GlobalValues.HTML_COLOR_GREEN).append("'>");
-                            //currentFont.setColor(HSSFColor.GREEN.index);
+                                       
+                            ExportSubStringFont newSubStringFont = new ExportSubStringFont(i, i + 1, HSSFColor.GREEN.index);
+                            m_ExportSubStringFonts.add(newSubStringFont);
+                        
                         } else if (aminoAcidModification) {
                             m_displaySB.append("<span style='color:").append(GlobalValues.HTML_COLOR_ORANGE).append("'>");
-                            //currentFont.setColor(HSSFColor.ORANGE.index);
+                
+                            ExportSubStringFont newSubStringFont = new ExportSubStringFont(i, i + 1, HSSFColor.ORANGE.index);
+                            m_ExportSubStringFonts.add(newSubStringFont);
+                            
                         }
+                        
+                        
+                        
+                        
                         m_displaySB.append(sequence.charAt(i));
                         m_displaySB.append("</span>");
-                        
-                        //ExportSubStringFont newSubStringFont = new ExportSubStringFont(i,i+1, currentFont);
-                        //m_ExportSubStringFonts.add(newSubStringFont);
-                        
-                        
+
                     } else {
                         m_displaySB.append(sequence.charAt(i));
                     }
@@ -121,14 +118,13 @@ public class PeptideRenderer extends DefaultTableCellRenderer implements ExportT
 
             }
 
-
             if (ptmMap != null) {
                 m_displaySB.append("</HTML>");
             }
 
             m_basicTextForExport = m_exportSB.toString();
             m_exportSB.setLength(0);
-            
+
             String res = m_displaySB.toString();
             m_displaySB.setLength(0);
             return res;
@@ -139,9 +135,8 @@ public class PeptideRenderer extends DefaultTableCellRenderer implements ExportT
         } else {
             m_basicTextForExport = peptide.getSequence();
         }
-        
-        return m_basicTextForExport;
 
+        return m_basicTextForExport;
 
     }
     private final StringBuilder m_displaySB = new StringBuilder();

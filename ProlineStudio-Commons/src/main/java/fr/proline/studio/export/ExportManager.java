@@ -41,10 +41,8 @@ public class ExportManager {
     private HSSFRichTextString componentToText(Component c) {
         HSSFRichTextString richString;
         String text = "";
-        ArrayList<ExportSubStringFont> fontsToApply = null;
 
         if (c instanceof ExportTextInterface) {
-            fontsToApply = ((ExportTextInterface) c).getSubStringFonts();
             text = ((ExportTextInterface) c).getExportText();
         } else if (c instanceof JLabel) {
             text = ((JLabel) c).getText();
@@ -54,24 +52,17 @@ public class ExportManager {
 
         richString = new HSSFRichTextString(text);
 
-        if (fontsToApply != null && fontsToApply.size() > 0) {
-            this.applyFonts(richString, fontsToApply);
-        }
-
         return richString;
     }
-
-    private void applyFonts(HSSFRichTextString text, ArrayList<ExportSubStringFont> fonts) {
-
-        if (fonts == null || fonts.size() < 1) {
-            return;
+    
+    private ArrayList<ExportSubStringFont> componentToSubStringFonts(Component c){
+        if(c instanceof ExportTextInterface){
+            return ((ExportTextInterface) c).getSubStringFonts();
+        }else{
+            return new ArrayList<ExportSubStringFont>();
         }
-
-        for (int i = 0; i < fonts.size(); i++) {
-            text.applyFont(fonts.get(i).getStartIndex(), fonts.get(i).getStopIndex(), fonts.get(i).getFont());
-        }
-
     }
+    
 
     public class ExportWorker extends DefaultDialog.ProgressTask {
 
@@ -97,13 +88,13 @@ public class ExportManager {
                 m_exporter.startRow();
                 for (int j = 0; j < nbCol; j++) {
                     String colName = ((ExportModelInterface) m_table).getExportColumnName(j);
-                    m_exporter.addCell(new HSSFRichTextString(colName));
+                    m_exporter.addCell(new HSSFRichTextString(colName), new ArrayList<ExportSubStringFont>());
                 }
             } else {
                 m_exporter.startRow();
                 for (int j = 0; j < nbCol; j++) {
                     String colName = m_table.getColumnName(j);
-                    m_exporter.addCell(new HSSFRichTextString(colName));
+                    m_exporter.addCell(new HSSFRichTextString(colName), new ArrayList<ExportSubStringFont>());
                 }
             }
 
@@ -123,7 +114,9 @@ public class ExportManager {
                             Component c = m_table.prepareRenderer(renderer, row, col);
                             text = componentToText(c);
                         }
-                        m_exporter.addCell(text);
+                        TableCellRenderer renderer = m_table.getCellRenderer(row, col);
+                        Component c = m_table.prepareRenderer(renderer, row, col);
+                        m_exporter.addCell(text,componentToSubStringFonts(c));
                     }
                 } else {
                     m_exporter.startRow();
@@ -131,7 +124,8 @@ public class ExportManager {
                         TableCellRenderer renderer = m_table.getCellRenderer(row, col);
                         Component c = m_table.prepareRenderer(renderer, row, col);
                         HSSFRichTextString text = componentToText(c);
-                        m_exporter.addCell(text);
+                        
+                        m_exporter.addCell(text, componentToSubStringFonts(c));
                     }
                 }
                 percentage = (int) Math.round((((double) (row + 1)) / nbRow) * 100);

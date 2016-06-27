@@ -10,18 +10,21 @@ import java.util.ArrayList;
 import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.UIManager;
-import javax.swing.table.TableCellRenderer;
+import fr.proline.studio.table.renderer.GrayableTableCellRenderer;
 
 /**
  * Class used to render a comparison between values in a JTable
  *
  * @author JM235353
  */
-public class CompareValueRenderer implements TableCellRenderer, ExportTextInterface {
+public class CompareValueRenderer implements GrayableTableCellRenderer, ExportTextInterface {
 
     private CompareValuePanel m_valuePanel = null;
     private ArrayList<ExportSubStringFont> m_ExportSubStringFonts;
 
+    private boolean m_grayed = false;
+    
+    
     private static Color STRIPPED_COLOR = UIManager.getColor("UIColorHighlighter.stripingBackground"); //JPM.WART
 
     public CompareValueRenderer(){
@@ -42,7 +45,7 @@ public class CompareValueRenderer implements TableCellRenderer, ExportTextInterf
         if (m_valuePanel == null) {
             m_valuePanel = new CompareValuePanel();
         }
-        m_valuePanel.init((CompareValue) value, selectionBackground);
+        m_valuePanel.init((CompareValue) value, selectionBackground, m_grayed);
         return m_valuePanel;
     }
 
@@ -55,6 +58,12 @@ public class CompareValueRenderer implements TableCellRenderer, ExportTextInterf
     public ArrayList<ExportSubStringFont> getSubStringFonts() {
         return this.m_ExportSubStringFonts;
     }
+    
+    @Override
+    public void setGrayed(boolean v) {
+        m_grayed = v;
+    }
+
 
     public abstract static class CompareValue implements Comparable<CompareValue> {
 
@@ -77,14 +86,17 @@ public class CompareValueRenderer implements TableCellRenderer, ExportTextInterf
 
         private CompareValue m_v;
         private Color m_selectionBackground;
+        private boolean m_grayed;
+        
 
         public CompareValuePanel() {
 
         }
 
-        public void init(CompareValue v, Color selectionBackground) {
+        public void init(CompareValue v, Color selectionBackground, boolean grayed) {
             m_v = v;
             m_selectionBackground = selectionBackground;
+            m_grayed = grayed;
         }
 
         @Override
@@ -104,7 +116,15 @@ public class CompareValueRenderer implements TableCellRenderer, ExportTextInterf
             int nbCols = m_v.getNumberColumns();
 
             for (int i = 0; i < nbCols; i++) {
-                g.setColor(m_v.getColor(i));
+                
+                if (m_grayed) {
+                    Color c = m_v.getColor(i);
+                    int gray = (int) (c.getRed() * 0.299 + c.getGreen() * 0.587 + c.getBlue() * 0.114);
+                    Color newColor = new Color(gray, gray, gray).brighter();
+                    g.setColor(newColor);
+                } else {
+                    g.setColor(m_v.getColor(i));
+                }
                 double maxValue = m_v.getMaximumValue();
                 double value = m_v.getValue(i);
                 int height = (int) Math.round((value / maxValue) * (DIM_Y - 2 * DELTA_Y));

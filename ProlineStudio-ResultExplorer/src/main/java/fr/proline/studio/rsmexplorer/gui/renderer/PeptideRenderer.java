@@ -6,22 +6,31 @@ import fr.proline.core.orm.msi.dto.DPeptidePTM;
 import fr.proline.studio.export.ExportSubStringFont;
 import fr.proline.studio.export.ExportTextInterface;
 import fr.proline.studio.utils.GlobalValues;
+import java.awt.Color;
 import java.awt.Component;
+import java.awt.Font;
+
 import java.util.ArrayList;
 import java.util.HashMap;
+import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
+import fr.proline.studio.table.renderer.GrayableTableCellRenderer;
 import org.apache.poi.hssf.util.HSSFColor;
+
 
 /**
  * Renderer for a Peptide in a Table Cell
  *
  * @author JM235353
  */
-public class PeptideRenderer extends DefaultTableCellRenderer implements ExportTextInterface {
+public class PeptideRenderer extends DefaultTableCellRenderer implements ExportTextInterface, GrayableTableCellRenderer {
 
     private String m_basicTextForExport = "";
+
+    private boolean m_grayed = false;
     private ArrayList<ExportSubStringFont> m_ExportSubStringFonts;
+
 
     public void PeptideRenderer() {
         ;
@@ -40,7 +49,13 @@ public class PeptideRenderer extends DefaultTableCellRenderer implements ExportT
             displayString = constructPeptideDisplay(pm);
         }
 
-        return super.getTableCellRendererComponent(table, displayString, isSelected, hasFocus, row, column);
+        JLabel l = (JLabel) super.getTableCellRendererComponent(table, displayString, isSelected, hasFocus, row, column);
+        if (m_grayed) {
+            l.setFont(l.getFont().deriveFont(Font.ITALIC));
+            l.setForeground(Color.lightGray);
+        }
+        
+        return l;
     }
 
     private String constructPeptideDisplay(DPeptideMatch peptideMatch) {
@@ -145,6 +160,11 @@ public class PeptideRenderer extends DefaultTableCellRenderer implements ExportT
     @Override
     public String getExportText() {
         return m_basicTextForExport;
+    }
+
+    @Override
+    public void setGrayed(boolean v) {
+        m_grayed = v;
     }
 
     @Override

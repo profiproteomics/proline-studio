@@ -35,13 +35,15 @@
                 <exclusion>
                     <groupId>commons-logging</groupId>
                     <artifactId>commons-logging</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.apache.httpcomponents</groupId>
-                    <artifactId>httpclient</artifactId>                    
-                </exclusion>                
+                </exclusion>              
             </exclusions>
         </dependency>
+<!--        <dependency>
+             <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>       
+            <version>4.5.2</version>
+            <scope>runtime</scope>
+        </dependency>-->
 
         <!-- Use SLF4J instead of Apache common-loggings -->
         <dependency>

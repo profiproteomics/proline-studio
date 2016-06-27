@@ -256,6 +256,13 @@ public class ServerConnectionManager {
                                 String jmsServer = serverURL.substring(indexStart, indexStop);
                                 tryServerConnection(connectionCallback, jmsServer, projectUser, userPassword, changingUser);
                                 jmsTry = true;
+                            } else { //assume no port specified
+                                indexStop = serverURL.lastIndexOf("/");
+                                if (indexStop > indexStart) {
+                                    String jmsServer = serverURL.substring(indexStart, indexStop);
+                                    tryServerConnection(connectionCallback, jmsServer, projectUser, userPassword, changingUser);
+                                    jmsTry = true;
+                                }
                             }
                         }
                     }

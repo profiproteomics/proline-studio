@@ -108,7 +108,7 @@ public class RetrieveBioSeqJMSAction extends AbstractRSMAction {
             }
         };
 
-        RetrieveBioSeqTask task = new RetrieveBioSeqTask(callback,rsmIds, projectId, false);
+        RetrieveBioSeqTask task = new RetrieveBioSeqTask(callback,rsmIds, projectId, true); //Assume if user ask there is problem so force update
         AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
 
     }

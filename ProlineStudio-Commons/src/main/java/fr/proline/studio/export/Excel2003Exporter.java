@@ -3,6 +3,7 @@ package fr.proline.studio.export;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.awt.Font;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.poi.hssf.usermodel.HSSFFont;
 import org.apache.poi.hssf.usermodel.HSSFRichTextString;
@@ -26,6 +27,8 @@ public class Excel2003Exporter implements ExporterInterface {
     private int m_pageCur = 1;
 
     private String m_filePath = null;
+    
+    private boolean m_decorated = false;
 
     @Override
     public void start(String filePath) {
@@ -63,7 +66,7 @@ public class Excel2003Exporter implements ExporterInterface {
 
     @Override
     public void addCell(String t, ArrayList<ExportSubStringFont> fonts) {
-        
+
         HSSFRichTextString rich = new HSSFRichTextString(t);
 
         for (int i = 0; i < fonts.size(); i++) {
@@ -73,20 +76,36 @@ public class Excel2003Exporter implements ExporterInterface {
             short color = fonts.get(i).getColor();
 
             HSSFFont currentFont = (HSSFFont) m_wb.createFont();
-            currentFont.setColor(color);
 
-            if (startIndex >= 0 && stopIndex < t.length()) {
-                rich.applyFont(startIndex, stopIndex, currentFont);
+            if (currentFont != null) {
+                currentFont.setColor(color);
+
+                if (fonts.get(i).getTextWeight() == Font.BOLD) {
+                    currentFont.setBold(true);
+                }else if(fonts.get(i).getTextWeight() == Font.ITALIC){
+                    currentFont.setItalic(true);
+                }
+
+                if (startIndex >= 0 && stopIndex <= t.length()) {
+                    rich.applyFont(startIndex, stopIndex, currentFont);
+                }
             }
-
         }
 
         Cell cell = m_row.createCell(m_curCell);
         if (NumberUtils.isNumber(t)) {
             double d = Double.parseDouble(t);
-            cell.setCellValue(d);
+            if (!this.getDecorated()) {
+                cell.setCellValue(d);
+            } else {
+                cell.setCellValue(rich);
+            }
         } else {
-            cell.setCellValue(rich);
+            if (!this.getDecorated()) {
+                cell.setCellValue(t);
+            } else {
+                cell.setCellValue(rich);
+            }
         }
         m_curCell++;
 
@@ -97,6 +116,16 @@ public class Excel2003Exporter implements ExporterInterface {
         FileOutputStream fileOut = new FileOutputStream(m_filePath);
         m_wb.write(fileOut);
         fileOut.close();
+    }
+
+    @Override
+    public void setDecorated(boolean decorated) {
+        this.m_decorated = decorated;
+    }
+
+    @Override
+    public boolean getDecorated() {
+        return this.m_decorated;
     }
 
 }

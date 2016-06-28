@@ -6,6 +6,8 @@ import fr.proline.studio.utils.IconManager;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileWriter;
@@ -26,18 +28,17 @@ import org.jfree.graphics2d.svg.*;
 
 /**
  * Dialog used to export an image or a table
+ *
  * @author JM235353
  */
-public class ExportDialog extends DefaultDialog  {
-
+public class ExportDialog extends DefaultDialog {
 
     private static ExportDialog m_singletonImageDialog = null;
-    private static ExportDialog m_singletonImage2Dialog = null;
     private static ExportDialog m_singletonExcelDialog = null;
     private static ExportDialog m_singletonServerDialog = null;
- 
+
     private int m_exportType;
-    
+
     private JTextField m_fileTextField;
     private JComboBox m_exporTypeCombobox;
     private JCheckBox m_exportAllPSMsChB;
@@ -48,13 +49,15 @@ public class ExportDialog extends DefaultDialog  {
 
     private JFileChooser m_fchooser;
     private final List<FileNameExtensionFilter> m_filterList = new ArrayList<>();
-    
+
     private DefaultDialog.ProgressTask m_task = null;
-    
+
     private String m_exportName = null;
-    
-      
-    
+
+    private JPanel m_decoratedPanel;
+    private JRadioButton m_yesDecorated;
+    private JRadioButton m_noDecorated;
+
     public static ExportDialog getDialog(Window parent, JXTable table, String exportName) {
         if (m_singletonExcelDialog == null) {
             m_singletonExcelDialog = new ExportDialog(parent, ExporterFactory.EXPORT_TABLE);
@@ -62,13 +65,11 @@ public class ExportDialog extends DefaultDialog  {
 
         m_singletonExcelDialog.m_table = table;
         m_singletonExcelDialog.m_exportName = exportName;
-        
+
         return m_singletonExcelDialog;
     }
-    
-  
-    
-    public static ExportDialog getDialog(Window parent, JPanel panel,  String exportName) {
+
+    public static ExportDialog getDialog(Window parent, JPanel panel, String exportName) {
         if (m_singletonImageDialog == null) {
             m_singletonImageDialog = new ExportDialog(parent, ExporterFactory.EXPORT_IMAGE);
         }
@@ -79,22 +80,20 @@ public class ExportDialog extends DefaultDialog  {
         return m_singletonImageDialog;
     }
 
-    
-    
     public static ExportDialog getDialog(Window parent, Boolean showExportAllPSMsOption) {
         if (m_singletonServerDialog == null) {
             m_singletonServerDialog = new ExportDialog(parent, ExporterFactory.EXPORT_FROM_SERVER, showExportAllPSMsOption);
-        } else if(!m_singletonServerDialog.m_showExportAllPSMsChB.equals(showExportAllPSMsOption)){
+        } else if (!m_singletonServerDialog.m_showExportAllPSMsChB.equals(showExportAllPSMsOption)) {
             m_singletonServerDialog = new ExportDialog(parent, ExporterFactory.EXPORT_FROM_SERVER, showExportAllPSMsOption);
         }
 
         return m_singletonServerDialog;
     }
-    
+
     public static ExportDialog getDialog(Window parent, Boolean showExportAllPSMsOption, int exportType) {
         if (m_singletonServerDialog == null) {
             m_singletonServerDialog = new ExportDialog(parent, exportType, showExportAllPSMsOption);
-        } else if(!m_singletonServerDialog.m_showExportAllPSMsChB.equals(showExportAllPSMsOption)){
+        } else if (!m_singletonServerDialog.m_showExportAllPSMsChB.equals(showExportAllPSMsOption)) {
             m_singletonServerDialog = new ExportDialog(parent, exportType, showExportAllPSMsOption);
         }
 
@@ -104,45 +103,65 @@ public class ExportDialog extends DefaultDialog  {
     public void setTask(DefaultDialog.ProgressTask task) {
         m_task = task;
     }
-    
-    
+
     private ExportDialog(Window parent, int type) {
-     this(parent, type, null);   
+        this(parent, type, null);
     }
-            
+
     private ExportDialog(Window parent, int type, Boolean showExportAllPSMsOption) {
         super(parent, Dialog.ModalityType.APPLICATION_MODAL);
         m_showExportAllPSMsChB = showExportAllPSMsOption;
         m_exportType = type;
-        
+
         setTitle("Export");
 
         setHelpURL("http://biodev.extra.cea.fr/docs/proline/doku.php?id=how_to:studio:exportdata");
 
         setInternalComponent(createExportPanel());
 
-        
-        
         setButtonName(BUTTON_OK, (m_exportType == ExporterFactory.EXPORT_IMAGE) ? "Export Image" : "Export");
 
-        
-
-        
         String defaultExportPath;
         Preferences preferences = NbPreferences.root();
-        if ((m_exportType == ExporterFactory.EXPORT_TABLE) || (m_exportType == ExporterFactory.EXPORT_FROM_SERVER) || (m_exportType == ExporterFactory.EXPORT_XIC)  || (m_exportType == ExporterFactory.EXPORT_SPECTRA) ) {
-           defaultExportPath = preferences.get("DefaultExcelExportPath", "");
+        if ((m_exportType == ExporterFactory.EXPORT_TABLE) || (m_exportType == ExporterFactory.EXPORT_FROM_SERVER) || (m_exportType == ExporterFactory.EXPORT_XIC) || (m_exportType == ExporterFactory.EXPORT_SPECTRA)) {
+            defaultExportPath = preferences.get("DefaultExcelExportPath", "");
         } else { // IMAGE
-           defaultExportPath = preferences.get("DefaultImageExportPath", "");
+            defaultExportPath = preferences.get("DefaultImageExportPath", "");
         }
-        if (defaultExportPath.length()>0) {
+        if (defaultExportPath.length() > 0) {
             m_fchooser = new JFileChooser(new File(defaultExportPath));
         } else {
             m_fchooser = new JFileChooser();
         }
         m_fchooser.setMultiSelectionEnabled(false);
-        
 
+    }
+
+    private JPanel createDecoratedRadioPanel() {
+        m_decoratedPanel = new JPanel();
+        m_decoratedPanel.setBorder(BorderFactory.createTitledBorder("Export Decorated"));
+        m_decoratedPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
+
+        m_yesDecorated = new JRadioButton("Yes");
+        m_noDecorated = new JRadioButton("No");
+        
+        ButtonGroup group = new ButtonGroup();
+        group.add(m_yesDecorated);
+        group.add(m_noDecorated);
+        
+        Preferences preferences = NbPreferences.root();
+        boolean rtfSelected = preferences.getBoolean("Export_Table_Decorated", Boolean.FALSE);
+        
+        if(rtfSelected){
+            m_yesDecorated.setSelected(true);
+        }else{
+            m_noDecorated.setSelected(true);
+        }
+
+        m_decoratedPanel.add(m_yesDecorated);
+        m_decoratedPanel.add(m_noDecorated);
+
+        return m_decoratedPanel;
     }
 
     public final JPanel createExportPanel() {
@@ -160,8 +179,6 @@ public class ExportDialog extends DefaultDialog  {
         m_fileTextField = new JTextField(30);
         exportPanel.add(m_fileTextField, c);
 
-
-
         final JButton addFileButton = new JButton(IconManager.getIcon(IconManager.IconType.OPEN_FILE));
         addFileButton.setMargin(new java.awt.Insets(2, 2, 2, 2));
         addFileButton.addActionListener(new ActionListener() {
@@ -169,26 +186,24 @@ public class ExportDialog extends DefaultDialog  {
             @Override
             public void actionPerformed(ActionEvent e) {
 
-                    
-
                 ExporterFactory.ExporterInfo exporterInfo = (ExporterFactory.ExporterInfo) m_exporTypeCombobox.getSelectedItem();
-                
+
                 if (exporterInfo != null) {
                     FileNameExtensionFilter filter = new FileNameExtensionFilter(exporterInfo.getName(), exporterInfo.getFileExtension());
                     FileNameExtensionFilter existFilter = getFilterWithSameExtensions(filter);
-                    
+
                     if (existFilter == null) {
                         m_fchooser.addChoosableFileFilter(filter);
                         m_filterList.add(filter);
                         m_fchooser.setFileFilter(filter);
-                    }else {
+                    } else {
                         m_fchooser.setFileFilter(existFilter);
                     }
                 }
 
                 String textFile = m_fileTextField.getText().trim();
 
-                if (textFile.length()>0) {
+                if (textFile.length() > 0) {
                     File currentFile = new File(textFile);
                     if (currentFile.isDirectory()) {
                         m_fchooser.setCurrentDirectory(currentFile);
@@ -197,38 +212,59 @@ public class ExportDialog extends DefaultDialog  {
                     }
                 }
 
-                
                 int result = m_fchooser.showOpenDialog(addFileButton);
                 if (result == JFileChooser.APPROVE_OPTION) {
                     File file = m_fchooser.getSelectedFile();
-                    
+
                     String absolutePath = file.getAbsolutePath();
                     String fileName = file.getName();
                     if (fileName.indexOf('.') == -1) {
-                        absolutePath += "."+exporterInfo.getFileExtension();
+                        absolutePath += "." + exporterInfo.getFileExtension();
                     }
                     m_fileTextField.setText(absolutePath);
                 }
             }
         });
 
-        c.gridx+=2;
+        c.gridx += 2;
         c.gridwidth = 1;
         exportPanel.add(addFileButton, c);
 
-        if((m_exportType == ExporterFactory.EXPORT_FROM_SERVER || m_exportType == ExporterFactory.EXPORT_XIC) && m_showExportAllPSMsChB  ){
+        if ((m_exportType == ExporterFactory.EXPORT_FROM_SERVER || m_exportType == ExporterFactory.EXPORT_XIC) && m_showExportAllPSMsChB) {
             //Allow specific parameter in this case
             c.gridy++;
             c.gridx = 0;
             c.gridwidth = 2;
-            m_exportAllPSMsChB = new JCheckBox(" Export all PSMs");
+            m_exportAllPSMsChB = new JCheckBox("Export all PSMs");
             exportPanel.add(m_exportAllPSMsChB, c);
         }
-        
-        
+
+        if (m_exportType == ExporterFactory.EXPORT_TABLE) {
+            //Allow specific parameter in this case
+            c.gridy++;
+            c.gridx = 0;
+            c.gridwidth = 2;
+            exportPanel.add(this.createDecoratedRadioPanel(), c);
+        }
+
         m_exporTypeCombobox = new JComboBox(ExporterFactory.getList(m_exportType).toArray());
         m_exporTypeCombobox.setSelectedIndex(0);
 
+        if (m_exportType == ExporterFactory.EXPORT_TABLE) {
+            m_exporTypeCombobox.addItemListener(new ItemListener() {
+                @Override
+                public void itemStateChanged(ItemEvent ie) {
+                    if (m_decoratedPanel == null) {
+                        return;
+                    }
+                    if (ie.getItem().toString().contains("CSV")) {
+                        m_decoratedPanel.setVisible(false);
+                    } else {
+                        m_decoratedPanel.setVisible(true);
+                    }
+                }
+            });
+        }
 
         c.gridy++;
         c.gridx = 0;
@@ -245,17 +281,27 @@ public class ExportDialog extends DefaultDialog  {
     public String getFileName() {
         return m_fileTextField.getText().trim();
     }
-    
-    public Boolean exportAllPSMs(){
-        if(m_exportType == ExporterFactory.EXPORT_FROM_SERVER)
+
+    public Boolean exportAllPSMs() {
+        if (m_exportType == ExporterFactory.EXPORT_FROM_SERVER) {
             return m_exportAllPSMsChB.isSelected();
-        else return null;
+        } else {
+            return null;
+        }
     }
-    
+
+    public Boolean exportDecorated() {
+        if (m_exportType == ExporterFactory.EXPORT_TABLE) {
+            return m_yesDecorated.isSelected();
+        } else {
+            return null;
+        }
+    }
+
     public ExporterFactory.ExporterInfo getExporterInfo() {
         return (ExporterFactory.ExporterInfo) m_exporTypeCombobox.getSelectedItem();
     }
-    
+
     @Override
     protected boolean okCalled() {
 
@@ -268,18 +314,18 @@ public class ExportDialog extends DefaultDialog  {
         }
 
         File f = new File(fileName);
-        
+
         if (f.exists()) {
             String message = "The file already exists. Do you want to overwrite it ?";
             String title = "Overwrite ?";
-            String[] options = {"Yes","No"};
+            String[] options = {"Yes", "No"};
             int reply = JOptionPane.showOptionDialog(this, message, title, JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE, null, options, "Yes");
             if (reply != JOptionPane.YES_OPTION) {
                 setStatus(true, "File already exists.");
                 return false;
             }
         }
-        
+
         FileWriter fw = null;
         try {
             fw = new FileWriter(f);
@@ -300,13 +346,11 @@ public class ExportDialog extends DefaultDialog  {
         }
 
         if (m_exportType == ExporterFactory.EXPORT_TABLE) {
-            
-            //#SHMADI
 
             final ExporterFactory.ExporterInfo exporterInfo = getExporterInfo();
 
             ExportManager exporter = new ExportManager(m_table);
-            ProgressTask exportTask = exporter.getTask(exporterInfo.getExporter(), m_exportName, fileName);
+            ProgressTask exportTask = exporter.getTask(exporterInfo.getExporter(), m_exportName, fileName, this.exportDecorated());
 
             startTask(exportTask);
 
@@ -315,15 +359,15 @@ public class ExportDialog extends DefaultDialog  {
         } else if (m_exportType == ExporterFactory.EXPORT_FROM_SERVER || m_exportType == ExporterFactory.EXPORT_XIC || m_exportType == ExporterFactory.EXPORT_SPECTRA) {
 
             startTask(m_singletonServerDialog.m_task);
-            
+
             Preferences preferences = NbPreferences.root();
             preferences.put("DefaultExcelExportPath", f.getAbsoluteFile().getParentFile().getName());
-            
+
         } else if (m_exportType == ExporterFactory.EXPORT_IMAGE) {
             ExporterFactory.ExporterInfo exporterInfo = (ExporterFactory.ExporterInfo) m_exporTypeCombobox.getSelectedItem();
 
             ExporterFactory.ExporterType exporterType = exporterInfo.geType();
-            
+
             String absolutePath = f.getAbsolutePath();
             if (absolutePath.endsWith(".png")) {
                 // we force type to png
@@ -335,14 +379,14 @@ public class ExportDialog extends DefaultDialog  {
                 m_exporTypeCombobox.setSelectedItem(ExporterFactory.EXPORTER_INFO_SVG);
             } else if (exporterType == ExporterFactory.ExporterType.PNG) {
                 // we add png to end of file
-                f = new File(absolutePath+".png");
+                f = new File(absolutePath + ".png");
             } else if (exporterType == ExporterFactory.ExporterType.SVG) {
                 // we add png to end of file
-                f = new File(absolutePath+".svg");
+                f = new File(absolutePath + ".svg");
             }
-            
+
             m_fileTextField.setText(f.getAbsolutePath());
-            
+
             if (exporterType == ExporterFactory.ExporterType.PNG) {
 
                 BufferedImage bi = new BufferedImage(m_panel.getSize().width, m_panel.getSize().height, BufferedImage.TYPE_INT_ARGB);
@@ -368,7 +412,7 @@ public class ExportDialog extends DefaultDialog  {
                 } catch (Exception ex) {
                     LoggerFactory.getLogger("ProlineStudio.ResultExplorer").error("Error exporting svg", ex);
                 }
-                
+
                 g2.dispose();
 
                 Preferences preferences = NbPreferences.root();
@@ -377,42 +421,36 @@ public class ExportDialog extends DefaultDialog  {
             }
             return true;
         }
-        
-        
+
         return false;
 
     }
-	
-    
+
     @Override
     public void setVisible(boolean v) {
-        
+
         if (!v) {
             m_table = null;
             m_panel = null;
-            m_exportName= null;
+            m_exportName = null;
         }
         super.setVisible(v);
     }
-    
-        
+
     @Override
     protected boolean cancelCalled() {
 
-
         return true;
     }
-    
-    
-    private FileNameExtensionFilter getFilterWithSameExtensions(FileNameExtensionFilter filter){
+
+    private FileNameExtensionFilter getFilterWithSameExtensions(FileNameExtensionFilter filter) {
         return ExportDialog.getFilterWithSameExtensions(filter, m_filterList);
     }
-    
-    
+
     /* compare filter based on the extensions, returns null if the filter is not already in the list, otherwise returns the object filter in the list*/
-    public  static FileNameExtensionFilter getFilterWithSameExtensions(FileNameExtensionFilter filter, List<FileNameExtensionFilter> filterList) {
+    public static FileNameExtensionFilter getFilterWithSameExtensions(FileNameExtensionFilter filter, List<FileNameExtensionFilter> filterList) {
         FileNameExtensionFilter existFilter = null;
-        
+
         String[] newExtension = filter.getExtensions();
         int nbNew = newExtension.length;
         for (FileNameExtensionFilter f : filterList) {

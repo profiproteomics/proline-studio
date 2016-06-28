@@ -8,16 +8,24 @@ import java.math.MathContext;
 import javax.swing.JTable;
 
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
+import fr.proline.studio.export.ExportSubStringFont;
+import fr.proline.studio.export.ExportTextInterface;
 
 import fr.proline.studio.rsmexplorer.gui.spectrum.PeptideFragmentationData.FragmentMatch;
 import fr.proline.studio.rsmexplorer.gui.spectrum.PeptideFragmentationData.TheoreticalFragmentSeries;
 import fr.proline.studio.table.DecoratedTable;
 import fr.proline.studio.table.DecoratedTableModel;
 import fr.proline.studio.table.TablePopupMenu;
+import fr.proline.studio.utils.GlobalValues;
+import java.util.ArrayList;
 import java.util.List;
+import javax.swing.JOptionPane;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
 
 import javax.swing.table.TableColumn;
+import org.apache.poi.hssf.util.HSSFColor;
+import org.jdesktop.swingx.renderer.DefaultTableRenderer;
 import org.jdesktop.swingx.table.TableColumnExt;
 
 public class RsetPeptideFragmentationTable extends DecoratedTable {
@@ -340,61 +348,74 @@ public class RsetPeptideFragmentationTable extends DecoratedTable {
 
     }
 
-    public static class FragTableCustomRenderer extends org.jdesktop.swingx.renderer.DefaultTableRenderer {
+    public static class FragTableCustomRenderer extends DefaultTableCellRenderer implements ExportTextInterface {
 
         private static final long serialVersionUID = 1L;
+
         private String[][] m_selectMatrix = new String[100][100];
-        private Font m_fontPlain = null;
-        private Font m_fontBold = null;
-        private final static Color LIGHT_BLUE_COLOR = new Color(51, 153, 255);
-        private final static Color LIGHT_RED_COLOR = new Color(255, 85, 85);
-        private final static Color EXTRA_LIGHT_BLUE_COLOR = new Color(175, 255, 255);
-        private final static Color EXTRA_LIGHT_RED_COLOR = new Color(255, 230, 230);
+
+        private String m_basicTextForExport = "";
+
+        private ArrayList<ExportSubStringFont> m_ExportSubStringFonts;
+        
+        private StringBuilder stringBuilder;
 
         void setSelectMatrix(String[][] matx) {
             m_selectMatrix = matx;
         }
 
         @Override
-        public Component getTableCellRendererComponent(JTable table,
-                Object value, boolean isSelected, boolean hasFocus, int row,
-                int column) {
-            Component component = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
 
-            // prepare needed fonts
-            if (m_fontPlain == null) {
-                m_fontPlain = component.getFont().deriveFont(Font.PLAIN);
-                m_fontBold = m_fontPlain.deriveFont(Font.BOLD);
+            if(stringBuilder==null){
+                stringBuilder = new StringBuilder();
+            }else{
+                stringBuilder.setLength(0);
             }
+            
+            m_ExportSubStringFonts = new ArrayList<ExportSubStringFont>();
 
-            // select font
-            if (m_selectMatrix[row][column] != null) {
-                component.setFont(m_fontBold);
+            if (value != null) {
+                m_basicTextForExport = value.toString();
             } else {
-                component.setFont(m_fontPlain);
+                m_basicTextForExport = "";
             }
 
-            // select color
-            Color foregroundColor;
-
             if (m_selectMatrix[row][column] != null) {
+                
+                stringBuilder.append("<HTML>");
 
-                if (m_selectMatrix[row][column].contains("ABC")) { // highlight the cell if true in selectMatrix
-                    foregroundColor = (isSelected) ? EXTRA_LIGHT_BLUE_COLOR : LIGHT_BLUE_COLOR;
+                if (m_selectMatrix[row][column].contains("ABC")) {
+                    ExportSubStringFont newSubStringFont = new ExportSubStringFont(0, m_basicTextForExport.length(), HSSFColor.LIGHT_BLUE.index, Font.BOLD);
+                    m_ExportSubStringFonts.add(newSubStringFont);                           
+                    stringBuilder.append("<span style='color:").append((isSelected) ? GlobalValues.HTML_COLOR_EXTRA_LIGHT_BLUE : GlobalValues.HTML_COLOR_LIGHT_BLUE).append("'>").append("<b>").append(m_basicTextForExport).append("</b>").append("</span>");
+
                 } else if (m_selectMatrix[row][column].contains("XYZ")) {
-                    foregroundColor = (isSelected) ? EXTRA_LIGHT_RED_COLOR : LIGHT_RED_COLOR;
-                } else {
-                    foregroundColor = (isSelected) ? Color.white : Color.black;
+                    ExportSubStringFont newSubStringFont = new ExportSubStringFont(0, m_basicTextForExport.length(), HSSFColor.RED.index, Font.BOLD);
+                    m_ExportSubStringFonts.add(newSubStringFont);                   
+                    stringBuilder.append("<span style='color:").append((isSelected) ? GlobalValues.HTML_COLOR_EXTRA_LIGHT_RED : GlobalValues.HTML_COLOR_LIGHT_RED).append("'>").append("<b>").append(m_basicTextForExport).append("</b>").append("</span>");                
                 }
+                
+                stringBuilder.append("</HTML>");
+
             } else {
-                // standard color:
-                foregroundColor = (isSelected) ? Color.white : Color.black;
+                stringBuilder.append(m_basicTextForExport);
             }
 
-            component.setForeground(foregroundColor);
-
+            Component component = super.getTableCellRendererComponent(table, stringBuilder.toString(), isSelected, hasFocus, row, column);
+            
             return component;
 
+        }
+
+        @Override
+        public String getExportText() {
+            return m_basicTextForExport;
+        }
+
+        @Override
+        public ArrayList<ExportSubStringFont> getSubStringFonts() {
+            return m_ExportSubStringFonts;
         }
     }
 }

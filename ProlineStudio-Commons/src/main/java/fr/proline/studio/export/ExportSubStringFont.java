@@ -5,7 +5,7 @@
  */
 package fr.proline.studio.export;
 
-import org.apache.poi.hssf.util.HSSFColor;
+import java.awt.Font;
 
 /**
  *
@@ -15,6 +15,7 @@ public class ExportSubStringFont {
 
     private int startIndex, stopIndex;
     private short color;
+    private int textWeight;
 
     public ExportSubStringFont() {
         ;
@@ -24,6 +25,20 @@ public class ExportSubStringFont {
         this.startIndex = startIndex;
         this.stopIndex = stopIndex;
         this.color = color;
+        this.textWeight = Font.PLAIN;
+    }
+
+    public ExportSubStringFont(int startIndex, int stopIndex, short color, int textWeight) {
+        this(startIndex, stopIndex, color);
+        this.textWeight = textWeight;
+    }
+
+    public void setTextWeight(int textWeight) {
+        this.textWeight = textWeight;
+    }
+
+    public int getTextWeight() {
+        return this.textWeight;
     }
 
     public void setStartIndex(int startIndex) {
@@ -41,12 +56,12 @@ public class ExportSubStringFont {
     public int getStopIndex() {
         return this.stopIndex;
     }
-    
-    public void setColor(short color){
+
+    public void setColor(short color) {
         this.color = color;
     }
-    
-    public short getColor(){
+
+    public short getColor() {
         return this.color;
     }
 

@@ -21,22 +21,10 @@ public class ExportManager {
         m_table = table;
     }
 
-    public ExportWorker getTask(ExporterInterface exporter, String name, String filePath) {
-        return new ExportWorker(exporter, name, filePath);
+    public ExportWorker getTask(ExporterInterface exporter, String name, String filePath, boolean decorated) {
+        return new ExportWorker(exporter, name, filePath, decorated);
     }
 
-    /*
-     private String componentToText(Component c) {
-     if (c instanceof ExportTextInterface) {
-     return ((ExportTextInterface)c).getExportText();
-     } else if (c instanceof JLabel) {
-     return ((JLabel) c).getText();
-     } else if (c instanceof AbstractButton) {
-     return ((AbstractButton) c).getText();
-     }
-     return "";
-     }
-     */
     private String componentToText(Component c) {
         String text = "";
 
@@ -65,17 +53,21 @@ public class ExportManager {
         private ExporterInterface m_exporter;
         private String m_name;
         private String m_filePath;
+        private boolean m_decorated;
 
-        public ExportWorker(ExporterInterface exporter, String name, String filePath) {
+        public ExportWorker(ExporterInterface exporter, String name, String filePath, boolean decorated) {
             m_exporter = exporter;
             m_name = name;
             m_filePath = filePath;
+            m_decorated = decorated;
         }
 
         @Override
         protected Object doInBackground() throws Exception {
             m_exporter.start(m_filePath);
             m_exporter.startSheet(m_name);
+            
+            m_exporter.setDecorated(m_decorated);
 
             // headers
             boolean columnTextInterface = (m_table instanceof ExportModelInterface);

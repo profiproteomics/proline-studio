@@ -3,6 +3,7 @@ package fr.proline.studio.export;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.awt.Font;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFFont;
@@ -23,6 +24,8 @@ public class ExcelXMLExporter implements ExporterInterface {
     private Row m_row;
 
     private String m_filePath = null;
+
+    private boolean m_decorated = false;
 
     @Override
     public void start(String filePath) {
@@ -61,13 +64,17 @@ public class ExcelXMLExporter implements ExporterInterface {
             short color = fonts.get(i).getColor();
 
             XSSFFont currentFont = (XSSFFont) m_wb.createFont();
-            
-            
 
             if (currentFont != null) {
                 currentFont.setColor(color);
 
-                if (startIndex >= 0 && stopIndex < t.length()) {
+                if (fonts.get(i).getTextWeight() == Font.BOLD) {
+                    currentFont.setBold(true);
+                } else if (fonts.get(i).getTextWeight() == java.awt.Font.ITALIC) {
+                    currentFont.setItalic(true);
+                }
+
+                if (startIndex >= 0 && stopIndex <= t.length()) {
                     rich.applyFont(startIndex, stopIndex, currentFont);
                 }
             }
@@ -80,9 +87,17 @@ public class ExcelXMLExporter implements ExporterInterface {
 
         if (NumberUtils.isNumber(text)) {
             double d = Double.parseDouble(text);
-            cell.setCellValue(d);
+            if (!this.getDecorated()) {
+                cell.setCellValue(d);
+            } else {
+                cell.setCellValue(rich);
+            }
         } else {
-            cell.setCellValue(rich);
+            if (!this.getDecorated()) {
+                cell.setCellValue(t);
+            } else {
+                cell.setCellValue(rich);
+            }
         }
         m_curCell++;
     }
@@ -93,6 +108,16 @@ public class ExcelXMLExporter implements ExporterInterface {
         m_wb.write(fileOut);
         fileOut.flush();
         fileOut.close();
+    }
+
+    @Override
+    public void setDecorated(boolean decorated) {
+        this.m_decorated = decorated;
+    }
+
+    @Override
+    public boolean getDecorated() {
+        return this.m_decorated;
     }
 
 }

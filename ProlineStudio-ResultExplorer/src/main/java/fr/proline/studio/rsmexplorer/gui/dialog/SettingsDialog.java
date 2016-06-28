@@ -92,7 +92,9 @@ public class SettingsDialog extends DefaultDialog implements TreeSelectionListen
         ObjectParameter nameSourceParameter = new ObjectParameter(ImportManager.DEFAULT_SEARCH_RESULT_NAME_SOURCE_KEY, "Imported data name based on", objectTable, 2, null);
         m_generalParameterList.add(nameSourceParameter);
         
-
+        BooleanParameter exportDecoratedParameter = new BooleanParameter("Export_Table_Decorated", "Export Decorated", JCheckBox.class, preferences.getBoolean("Export_Table_Decorated", Boolean.FALSE));
+        m_generalParameterList.add(exportDecoratedParameter);
+        
         return m_generalParameterList;
     }
 

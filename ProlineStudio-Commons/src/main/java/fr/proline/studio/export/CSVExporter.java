@@ -19,6 +19,8 @@ public class CSVExporter implements ExporterInterface {
     
     private  FileWriter m_fw;
     
+    boolean m_decorated = false;
+    
     @Override
     public void start(String filePath) throws java.io.IOException {
         
@@ -59,6 +61,16 @@ public class CSVExporter implements ExporterInterface {
             m_fw.write("\n");
         }
         m_fw.close();
+    }
+
+    @Override
+    public void setDecorated(boolean decorated) {
+        this.m_decorated = decorated;
+    }
+
+    @Override
+    public boolean getDecorated() {
+        return this.m_decorated;
     }
     
 

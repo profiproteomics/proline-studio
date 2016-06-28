@@ -18,5 +18,9 @@ public interface ExporterInterface {
     public void addCell(String t, ArrayList<ExportSubStringFont> fonts) throws IOException;
 
     public void end() throws IOException;
+    
+    public void setDecorated(boolean decorated);
+    
+    public boolean getDecorated();
 
 }

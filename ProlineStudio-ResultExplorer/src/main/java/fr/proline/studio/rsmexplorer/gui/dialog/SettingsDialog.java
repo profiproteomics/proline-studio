@@ -95,6 +95,9 @@ public class SettingsDialog extends DefaultDialog implements TreeSelectionListen
         BooleanParameter exportDecoratedParameter = new BooleanParameter("Export_Table_Decorated", "Export Decorated", JCheckBox.class, preferences.getBoolean("Export_Table_Decorated", Boolean.FALSE));
         m_generalParameterList.add(exportDecoratedParameter);
         
+        BooleanParameter xicTransferHandlerParameter = new BooleanParameter("XIC_Transfer_Handler_Retain_Structure", "XIC Drag & Drop retains structure", JCheckBox.class, preferences.getBoolean("XIC_Transfer_Handler_Retain_Structure", Boolean.TRUE));
+        m_generalParameterList.add(xicTransferHandlerParameter);
+        
         return m_generalParameterList;
     }
 

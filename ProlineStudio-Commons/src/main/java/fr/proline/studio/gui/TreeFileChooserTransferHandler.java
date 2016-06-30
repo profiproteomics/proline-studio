@@ -74,11 +74,15 @@ public class TreeFileChooserTransferHandler extends TransferHandler {
         try {
             JTable table = (JTable) support.getComponent();
             JTable.DropLocation dl = (JTable.DropLocation) support.getDropLocation();
-            int index = dl.getRow();
+            
+            int index = table.convertRowIndexToModel(dl.getRow());
+            
             int max = table.getModel().getRowCount();
             if (index < 0 || index > max) {
                 return false;
             }
+            
+            System.out.println("brekpoint");
 
             FilesTransferable transferable = (FilesTransferable) support.getTransferable().getTransferData(FilesTransferable.Files_FLAVOR);
             ArrayList<File> transferredFiles = transferable.getFiles();

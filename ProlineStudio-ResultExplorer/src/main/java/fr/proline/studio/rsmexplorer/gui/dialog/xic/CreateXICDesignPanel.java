@@ -59,7 +59,6 @@ public class CreateXICDesignPanel extends JPanel {
         c.weightx = 1;
         add(wizardPanel, c);
 
-
         c.gridy++;
         c.weighty = 1;
         

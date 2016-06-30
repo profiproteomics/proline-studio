@@ -11,76 +11,82 @@ import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.prefs.Preferences;
 import javax.swing.JComponent;
+import javax.swing.JOptionPane;
 import javax.swing.JTree;
 import javax.swing.TransferHandler;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
+import org.apache.commons.lang3.math.NumberUtils;
+import org.openide.util.NbPreferences;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Management of the drag and drop from the XICSelectionTree to the XIC XICDesignTree
+ * Management of the drag and drop from the XICSelectionTree to the XIC
+ * XICDesignTree
+ *
  * @author JM235353
  */
 public class XICTransferHandler extends TransferHandler {
-    
+
     private Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
-    
+
     private boolean m_isSelectionTree;
-    
+
     public XICTransferHandler(boolean isSelectionTree) {
         m_isSelectionTree = isSelectionTree;
     }
-    
+
     @Override
     public int getSourceActions(JComponent c) {
         return TransferHandler.MOVE;
     }
-    
-    
 
-    
     @Override
     protected Transferable createTransferable(JComponent c) {
 
         if (m_isSelectionTree) {
+
+            //JOptionPane.showMessageDialog(null,"Is selection tree.");
             XICSelectionTree tree = (XICSelectionTree) c;
 
             AbstractNode[] selectedNodes = tree.getSelectedNodes();
             ArrayList<DataSetNode> keptNodes = new ArrayList<>();
-            
+
             retrieveLeaves(keptNodes, selectedNodes);
-            
+
             if (keptNodes.isEmpty()) {
                 return null;
             }
 
             XICSelectionTransferable.TransferData data = new XICSelectionTransferable.TransferData();
             data.setDatasetList(keptNodes);
-            Integer transferKey =  XICSelectionTransferable.register(data);
+            Integer transferKey = XICSelectionTransferable.register(data);
 
             return new XICSelectionTransferable(transferKey);
 
-
-
-
         } else {
+            //JOptionPane.showMessageDialog(null,"It is NOT a selection tree.");
+
             XICDesignTree tree = (XICDesignTree) c;
 
             AbstractNode[] selectedNodes = tree.getSelectedNodes();
-            
+
             ArrayList<AbstractNode> keptNodes = new ArrayList<>();
-            
+
             // only the nodes of the same type can be transferred
             AbstractNode.NodeTypes commonType = null;
             int nbSelectedNode = selectedNodes.length;
-            for (int i=0;i<nbSelectedNode;i++) {
+            for (int i = 0; i < nbSelectedNode; i++) {
                 AbstractNode node = selectedNodes[i];
-               
+
                 AbstractNode.NodeTypes type = node.getType();
-                
-                if ((type != AbstractNode.NodeTypes.BIOLOGICAL_GROUP) && (type != AbstractNode.NodeTypes.BIOLOGICAL_SAMPLE_ANALYSIS) &&  (type !=AbstractNode.NodeTypes.BIOLOGICAL_SAMPLE)) {
+
+                if ((type != AbstractNode.NodeTypes.BIOLOGICAL_GROUP) && (type != AbstractNode.NodeTypes.BIOLOGICAL_SAMPLE_ANALYSIS) && (type != AbstractNode.NodeTypes.BIOLOGICAL_SAMPLE)) {
                     return null;
                 }
                 if (commonType != null) {
@@ -90,17 +96,14 @@ public class XICTransferHandler extends TransferHandler {
                 } else {
                     commonType = type;
                 }
-                
+
                 keptNodes.add(node);
-            } 
-            
-            
+            }
+
             XICSelectionTransferable.TransferData data = new XICSelectionTransferable.TransferData();
             data.setDesignList(keptNodes);
-            Integer transferKey =  XICSelectionTransferable.register(data);
+            Integer transferKey = XICSelectionTransferable.register(data);
 
-            
-            
             return new XICSelectionTransferable(transferKey);
 
         }
@@ -138,8 +141,7 @@ public class XICTransferHandler extends TransferHandler {
             }
         }
     }
-    
-    
+
     @Override
     protected void exportDone(JComponent source, Transferable data, int action) {
 
@@ -155,7 +157,7 @@ public class XICTransferHandler extends TransferHandler {
         if (!m_isSelectionTree) {
 
             support.setShowDropLocation(true);
-            
+
             if (support.isDataFlavorSupported(XICSelectionTransferable.RSMNodeList_FLAVOR)) {
 
                 // drop path
@@ -164,8 +166,7 @@ public class XICTransferHandler extends TransferHandler {
                     // should not happen
                     return false;
                 }
-                
-                
+
                 boolean designData;
                 AbstractNode.NodeTypes designNodeType = null;
                 try {
@@ -181,14 +182,13 @@ public class XICTransferHandler extends TransferHandler {
                     return false;
                 }
 
-
                 // Determine whether we accept the location
                 Object dropComponent = dropTreePath.getLastPathComponent();
                 if (designData) {
                     if (!(dropComponent instanceof AbstractNode)) {
                         return false;
                     }
-                    
+
                     AbstractNode.NodeTypes dropType = ((AbstractNode) dropComponent).getType();
                     switch (dropType) {
                         case DATA_SET:
@@ -199,7 +199,7 @@ public class XICTransferHandler extends TransferHandler {
                             return (designNodeType == AbstractNode.NodeTypes.BIOLOGICAL_SAMPLE_ANALYSIS);
                         default:
                             return false;
-                            
+
                     }
 
                 } else {
@@ -227,20 +227,17 @@ public class XICTransferHandler extends TransferHandler {
                 XICSelectionTransferable.TransferData data = XICSelectionTransferable.getData(transfer.getTransferKey());
                 return importNodes(support, data);
 
-
             } catch (UnsupportedFlavorException | IOException e) {
                 // should never happen
                 m_logger.error(getClass().getSimpleName() + " DnD error ", e);
                 return false;
             }
 
-            
         }
-        
+
         return false;
     }
 
-    
     private boolean importNodes(TransferSupport support, XICSelectionTransferable.TransferData data) {
 
         JTree.DropLocation location = ((JTree.DropLocation) support.getDropLocation());
@@ -248,7 +245,6 @@ public class XICTransferHandler extends TransferHandler {
         int childIndex = location.getChildIndex();
         AbstractNode dropRSMNode = (AbstractNode) dropTreePath.getLastPathComponent();
 
-        
         XICDesignTree tree = XICDesignTree.getDesignTree();
         DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
 
@@ -258,82 +254,168 @@ public class XICTransferHandler extends TransferHandler {
             childIndex = dropRSMNode.getChildCount();
         }
 
-
         ArrayList<DataSetNode> datasetList = (ArrayList<DataSetNode>) data.getDatasetList();
         if (datasetList != null) {
-            
+
             tree.expandNodeIfNeeded(dropRSMNode);
-            
-            String suffix = Integer.toString(dropRSMNode.getChildCount()+1);
+
+            String suffix = Integer.toString(dropRSMNode.getChildCount() + 1);
+
             // Issue 11312: if the dragged node is a merged node, we use its name as suffix
             if (datasetList != null && !datasetList.isEmpty()) {
-               // all dataset are in the same merged dataset parent
+                // all dataset are in the same merged dataset parent
                 DDataset parentNode = datasetList.get(0).getParentMergedDataset();
-                if (parentNode != null){
+                if (parentNode != null) {
                     int nb = datasetList.size();
                     boolean sameParent = true;
-                    for (int i=1; i<nb; i++) {
+                    for (int i = 1; i < nb; i++) {
                         DDataset p = datasetList.get(i).getParentMergedDataset();
-                        if (p != null && p.getId() != parentNode.getId()){
+
+                        //JOptionPane.showMessageDialog(null,"Parent:"+datasetList.get(i).getParent().toString()+" Child:"+datasetList.get(i).toString());
+                        if (p != null && p.getId() != parentNode.getId()) {
                             sameParent = false;
                             break;
                         }
                     }
                     if (sameParent) {
-                        suffix = parentNode.getName() ;
+                        suffix = parentNode.getName();
                     }
                 }
             }
+
             if (dropRSMNode instanceof DataSetNode) {
                 // top node, we create a group now
-                String groupName = "Group "+suffix;
+                String groupName = "Group " + suffix;
                 XICBiologicalGroupNode biologicalGroupNode = new XICBiologicalGroupNode(new DataSetData(groupName, Dataset.DatasetType.AGGREGATE, Aggregation.ChildNature.OTHER));
                 treeModel.insertNodeInto(biologicalGroupNode, dropRSMNode, childIndex);
                 dropRSMNode = biologicalGroupNode;
                 childIndex = 0;
                 tree.expandNodeIfNeeded(dropRSMNode);
             }
-            
-            if (dropRSMNode instanceof XICBiologicalGroupNode) {
-                // Group Node, we create a sample node
-                String sampleName = "Sample " + suffix;
-                XICBiologicalSampleNode biologicalSampleNode = new XICBiologicalSampleNode(new DataSetData(sampleName, Dataset.DatasetType.AGGREGATE, Aggregation.ChildNature.OTHER));
-                treeModel.insertNodeInto(biologicalSampleNode, dropRSMNode, childIndex);
-                dropRSMNode = biologicalSampleNode;
-                childIndex = 0;
-                tree.expandNodeIfNeeded(dropRSMNode);
-            }
-            
-            
-            if (dropRSMNode instanceof XICBiologicalSampleNode) {
-                int nbNodes = datasetList.size();
-                for (int i = 0; i < nbNodes; i++) {
-                    DataSetNode node = datasetList.get(i);
 
-                    // create the new node
-                    XICBiologicalSampleAnalysisNode sampleAnalysisNode = new XICBiologicalSampleAnalysisNode(node.getData());
+            Preferences preferences = NbPreferences.root();
+            boolean retainStructure = preferences.getBoolean("XIC_Transfer_Handler_Retain_Structure", Boolean.TRUE);
 
-                    // put a Run node in it
+            if (retainStructure) {
 
-                    XICRunNode runNode = new XICRunNode(new RunInfoData());
-                    sampleAnalysisNode.add(runNode);
-                    runNode.init(node.getDataset(), treeModel);
+            //<--------------------------------------------------------------------------------->
+                //Here I must intervene so that the mechanism changes!
+                if (dropRSMNode instanceof XICBiologicalGroupNode) {
 
-                    // add to new parent
-                    treeModel.insertNodeInto(sampleAnalysisNode, dropRSMNode, childIndex);
+                    //Here I divide Leafs into teams depending on their father (Luke I am your father!)
+                    Hashtable<String, ArrayList<DataSetNode>> samplesHashtable = new Hashtable<String, ArrayList<DataSetNode>>();
 
-                    childIndex++;
+                    for (int i = 0; i < datasetList.size(); i++) {
+                        DataSetNode node = datasetList.get(i);
 
+                        String currentParent = (node.getParent() == null) ? "null" : node.getParent().toString();
+
+                        if (samplesHashtable.containsKey(currentParent)) {
+                            samplesHashtable.get(currentParent).add(node);
+                        } else {
+                            ArrayList<DataSetNode> newSample = new ArrayList<DataSetNode>();
+                            newSample.add(node);
+                            samplesHashtable.put(currentParent, newSample);
+                        }
+
+                    }
+
+                    System.out.println("breakpoint");
+
+                    Enumeration<String> enumKey = samplesHashtable.keys();
+
+                    while (enumKey.hasMoreElements()) {
+                        String key = enumKey.nextElement();
+
+                        childIndex = 0;
+
+                        ArrayList<DataSetNode> currentSampleList = samplesHashtable.get(key);
+
+                        suffix = (key.contains("Identifications")) ? String.valueOf(dropRSMNode.getChildCount() + 1) : key;
+
+                        String sampleName = "Sample " + suffix;
+
+                        XICBiologicalSampleNode biologicalSampleNode = new XICBiologicalSampleNode(new DataSetData(sampleName, Dataset.DatasetType.AGGREGATE, Aggregation.ChildNature.OTHER));
+                        treeModel.insertNodeInto(biologicalSampleNode, dropRSMNode, childIndex);
+
+                        childIndex = 0;
+                        tree.expandNodeIfNeeded(biologicalSampleNode);
+
+                        for (int i = 0; i < currentSampleList.size(); i++) {
+
+                            // create the new node
+                            XICBiologicalSampleAnalysisNode sampleAnalysisNode = new XICBiologicalSampleAnalysisNode(currentSampleList.get(i).getData());
+
+                            // put a Run node in it
+                            XICRunNode runNode = new XICRunNode(new RunInfoData());
+                            sampleAnalysisNode.add(runNode);
+                            runNode.init(currentSampleList.get(i).getDataset(), treeModel);
+
+                            // add to new parent
+                            treeModel.insertNodeInto(sampleAnalysisNode, biologicalSampleNode, childIndex);
+                            childIndex++;
+
+                        }
+
+                    }
+                } else if (dropRSMNode instanceof XICBiologicalSampleNode) {
+
+                    for (int i = 0; i < datasetList.size(); i++) {
+
+                        // create the new node
+                        XICBiologicalSampleAnalysisNode sampleAnalysisNode = new XICBiologicalSampleAnalysisNode(datasetList.get(i).getData());
+
+                        // put a Run node in it
+                        XICRunNode runNode = new XICRunNode(new RunInfoData());
+                        sampleAnalysisNode.add(runNode);
+                        runNode.init(datasetList.get(i).getDataset(), treeModel);
+
+                        // add to new parent
+                        treeModel.insertNodeInto(sampleAnalysisNode, dropRSMNode, childIndex);
+                        childIndex++;
+
+                    }
                 }
-            }
-            
 
+            //<--------------------------------------------------------------------------------->        
+            } else {
+
+                if (dropRSMNode instanceof XICBiologicalGroupNode) {
+                    // Group Node, we create a sample node
+                    String sampleName = "Sample " + suffix;
+                    XICBiologicalSampleNode biologicalSampleNode = new XICBiologicalSampleNode(new DataSetData(sampleName, Dataset.DatasetType.AGGREGATE, Aggregation.ChildNature.OTHER));
+                    treeModel.insertNodeInto(biologicalSampleNode, dropRSMNode, childIndex);
+                    dropRSMNode = biologicalSampleNode;
+                    childIndex = 0;
+                    tree.expandNodeIfNeeded(dropRSMNode);
+                }
+
+                if (dropRSMNode instanceof XICBiologicalSampleNode) {
+                    int nbNodes = datasetList.size();
+                    for (int i = 0; i < nbNodes; i++) {
+                        DataSetNode node = datasetList.get(i);
+
+                        // create the new node
+                        XICBiologicalSampleAnalysisNode sampleAnalysisNode = new XICBiologicalSampleAnalysisNode(node.getData());
+
+                        // put a Run node in it
+                        XICRunNode runNode = new XICRunNode(new RunInfoData());
+                        sampleAnalysisNode.add(runNode);
+                        runNode.init(node.getDataset(), treeModel);
+
+                        // add to new parent
+                        treeModel.insertNodeInto(sampleAnalysisNode, dropRSMNode, childIndex);
+
+                        childIndex++;
+                    }
+                }
+
+            }
         } else {
             ArrayList<AbstractNode> rsmList = (ArrayList<AbstractNode>) data.getDesignList();
             int nbNodes = rsmList.size();
             for (int i = 0; i < nbNodes; i++) {
                 AbstractNode node = rsmList.get(i);
-
 
                 // specific case when the node is moved in its parent
                 int indexChild;
@@ -357,9 +439,6 @@ public class XICTransferHandler extends TransferHandler {
         }
         return true;
 
-
     }
-    
-    
-}
 
+}

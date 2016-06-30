@@ -782,7 +782,7 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements GlobalT
                         
                     case COLTYPE_ABUNDANCE:
                     case COLTYPE_RAW_ABUNDANCE: {
-                       renderer = new BigFloatOrDoubleRenderer( new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 0 );
+                       renderer = new BigFloatOrDoubleRenderer( new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 0);
                        break;
 
                     }

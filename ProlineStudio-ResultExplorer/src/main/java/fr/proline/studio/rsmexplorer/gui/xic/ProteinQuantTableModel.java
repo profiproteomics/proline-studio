@@ -7,22 +7,28 @@ import fr.proline.studio.comparedata.ExtraDataType;
 import fr.proline.studio.filter.Filter;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
+import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
+import static fr.proline.studio.rsmexplorer.gui.xic.PeptideTableModel.COLTYPE_RAW_ABUNDANCE;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.table.LazyData;
 import fr.proline.studio.table.LazyTable;
 import fr.proline.studio.table.LazyTableModel;
+import fr.proline.studio.table.TableDefaultRendererManager;
+import fr.proline.studio.table.renderer.BigFloatOrDoubleRenderer;
+import fr.proline.studio.table.renderer.DefaultRightAlignRenderer;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import javax.swing.table.TableCellRenderer;
 
 /**
- * data for one masterQuantProtein : for the different conditions (quant channels), abundances values
+ * data for one masterQuantProtein : for the different conditions (quant
+ * channels), abundances values
+ *
  * @author MB243701
  */
-public class ProteinQuantTableModel extends LazyTableModel implements  GlobalTableModelInterface {
-    
-    
+public class ProteinQuantTableModel extends LazyTableModel implements GlobalTableModelInterface {
+
     public static final int COLTYPE_QC_ID = 0;
     public static final int COLTYPE_QC_NAME = 1;
     public static final int COLTYPE_ABUNDANCE = 2;
@@ -30,19 +36,18 @@ public class ProteinQuantTableModel extends LazyTableModel implements  GlobalTab
     public static final int COLTYPE_PSM = 4;
     private static final String[] m_columnNames = {"Id", "Quant. Channel", "Abundance", "Raw Abundance", "Pep. match count"};
     private static final String[] m_columnNames_SC = {"Id", "Quant. Channel", "Abundance", "Specific SC", "Basic SC"};
-    
+
     private DMasterQuantProteinSet m_quantProtein = null;
     private DQuantitationChannel[] m_quantChannels = null;
 
     private String m_modelName;
 
-    private boolean  m_isXICMode = true;
-    
-    
+    private boolean m_isXICMode = true;
+
     public ProteinQuantTableModel(LazyTable table) {
         super(table);
     }
-    
+
     @Override
     public int getColumnCount() {
         return m_columnNames.length;
@@ -62,7 +67,7 @@ public class ProteinQuantTableModel extends LazyTableModel implements  GlobalTab
     public String getToolTipForHeader(int col) {
         return getColumnName(col);
     }
-    
+
     @Override
     public String getTootlTipValue(int row, int col) {
         return null;
@@ -74,9 +79,8 @@ public class ProteinQuantTableModel extends LazyTableModel implements  GlobalTab
             return 0;
         }
 
-        return m_quantChannels.length ;
+        return m_quantChannels.length;
     }
-
 
     @Override
     public Object getValueAt(int row, int col) {
@@ -88,10 +92,10 @@ public class ProteinQuantTableModel extends LazyTableModel implements  GlobalTab
         DQuantProteinSet quantProteinSet = quantProteinSetByQchIds.get(qc.getId());
         switch (col) {
             case COLTYPE_QC_ID: {
-                return qc.getId() ;
+                return qc.getId();
             }
             case COLTYPE_QC_NAME: {
-                return qc.getResultFileName() ;
+                return qc.getResultFileName();
             }
             case COLTYPE_ABUNDANCE: {
                 if (quantProteinSet == null || quantProteinSet.getAbundance() == null) {
@@ -109,34 +113,31 @@ public class ProteinQuantTableModel extends LazyTableModel implements  GlobalTab
                 if (quantProteinSet == null || quantProteinSet.getPeptideMatchesCount() == null) {
                     return null;
                 }
-                return  quantProteinSet.getPeptideMatchesCount();
+                return quantProteinSet.getPeptideMatchesCount();
             }
         }
         return null; // should never happen
     }
 
     public void setData(DQuantitationChannel[] quantChannels, DMasterQuantProteinSet proteinSet, boolean isXICMode) {
-        this.m_quantChannels  =quantChannels ;
-        this.m_quantProtein = proteinSet ;
+        this.m_quantChannels = quantChannels;
+        this.m_quantProtein = proteinSet;
         this.m_isXICMode = isXICMode;
-        
+
         fireTableDataChanged();
 
     }
-    
+
     public void dataUpdated() {
 
         // no need to do an updateMinMax : scores are known at once
         fireTableDataChanged();
     }
-    
-    
+
     @Override
     public void addFilters(LinkedHashMap<Integer, Filter> filtersMap) {
-        
+
     }
-
-
 
     @Override
     public boolean isLoaded() {
@@ -150,7 +151,7 @@ public class ProteinQuantTableModel extends LazyTableModel implements  GlobalTab
 
     @Override
     public String getDataColumnIdentifier(int columnIndex) {
-        return m_isXICMode? m_columnNames[columnIndex] : m_columnNames_SC[columnIndex];
+        return m_isXICMode ? m_columnNames[columnIndex] : m_columnNames_SC[columnIndex];
     }
 
     @Override
@@ -186,7 +187,7 @@ public class ProteinQuantTableModel extends LazyTableModel implements  GlobalTab
 
     @Override
     public int[] getKeysColumn() {
-        int[] keys = { COLTYPE_QC_ID };
+        int[] keys = {COLTYPE_QC_ID};
         return keys;
     }
 
@@ -252,7 +253,19 @@ public class ProteinQuantTableModel extends LazyTableModel implements  GlobalTab
 
     @Override
     public TableCellRenderer getRenderer(int row, int col) {
-        return null;
+        TableCellRenderer renderer = null;
+        switch (col) {
+
+            case COLTYPE_RAW_ABUNDANCE: {
+                if (m_isXICMode) {
+                    renderer = new BigFloatOrDoubleRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 0);
+                } else {
+                    renderer = new FloatRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 0);
+                }
+            }
+
+        }
+        return renderer;
     }
 
     @Override
@@ -284,11 +297,10 @@ public class ProteinQuantTableModel extends LazyTableModel implements  GlobalTab
         }
         return null;
     }
-    
+
     @Override
     public Object getColValue(Class c, int col) {
         return null;
     }
-    
-}
 
+}

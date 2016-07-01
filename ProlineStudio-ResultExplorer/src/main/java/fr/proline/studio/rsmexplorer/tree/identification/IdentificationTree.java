@@ -53,10 +53,12 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.event.MouseEvent;
 import java.util.*;
+import java.util.prefs.Preferences;
 import javax.swing.*;
 import javax.swing.event.TreeExpansionEvent;
 import javax.swing.event.TreeWillExpandListener;
 import javax.swing.tree.*;
+import org.openide.util.NbPreferences;
 
 /**
  * Tree of projects and datasets (identification type)
@@ -606,6 +608,8 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
             if (m_mainPopup == null) {
 
                 // create the actions
+                Preferences preferences = NbPreferences.root();
+                Boolean showHiddenFunctionnality =  preferences.getBoolean("Profi", false);
 
 
                 m_mainActions = new ArrayList<>(25);  // <--- get in sync
@@ -637,8 +641,10 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
                 if (isJMSDefined) {
                     ImportSearchResultAsDatasetJMSAction identificationAction = new ImportSearchResultAsDatasetJMSAction();
                     m_mainActions.add(identificationAction);
-              //      ImportMaxQuantResultJMSAction importMaxQuant = new ImportMaxQuantResultJMSAction();
-               //     m_mainActions.add(importMaxQuant);
+                    if(showHiddenFunctionnality) {
+                        ImportMaxQuantResultJMSAction importMaxQuant = new ImportMaxQuantResultJMSAction();
+                        m_mainActions.add(importMaxQuant);
+                    }
                     ValidateJMSAction validateJMSAction = new ValidateJMSAction();
                     m_mainActions.add(validateJMSAction);
                     MergeJMSAction mergeJmsAction = new MergeJMSAction();

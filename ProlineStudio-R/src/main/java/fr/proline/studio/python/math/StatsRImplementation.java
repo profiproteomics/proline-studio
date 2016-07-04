@@ -591,7 +591,7 @@ public class StatsRImplementation {
             model.addExtraColumnInfo(new PValue());
             model.addExtraColumnInfo(new LogInfo(LogInfo.LogState.LOG10));
 
-            valuesForCol.clear();
+            valuesForCol = new ArrayList<>(nbRows);
             for (int i = 0; i < nbRows; i++) {
                 valuesForCol.add(logFCArray[i]);
             }

@@ -9,45 +9,45 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import javax.swing.*;
 
-
-
 /**
  * Panel to create the XIC XICDesignTree by drag and drop
+ *
  * @author JM235353
  */
 public class CreateXICDesignPanel extends JPanel {
-    
+
     private static CreateXICDesignPanel m_singleton = null;
-    
+
     private final AbstractNode m_rootNode;
     private final IdentificationTree m_selectionTree;
     
     public static CreateXICDesignPanel getPanel(AbstractNode rootNode, IdentificationTree selectionTree) {
-        if((m_singleton == null) || 
-           (!m_singleton.m_rootNode.equals(rootNode)) ||
-           ((m_singleton.m_selectionTree!=null) && (selectionTree==null)) ||
-           ((m_singleton.m_selectionTree==null) && (selectionTree!=null)) ||
-           ((m_singleton.m_selectionTree!=null) && (!m_singleton.m_selectionTree.equals(selectionTree)))) {
-            m_singleton = new CreateXICDesignPanel(rootNode,selectionTree);
+        if ((m_singleton == null)
+                || (!m_singleton.m_rootNode.equals(rootNode))
+                || ((m_singleton.m_selectionTree != null) && (selectionTree == null))
+                || ((m_singleton.m_selectionTree == null) && (selectionTree != null))
+                || ((m_singleton.m_selectionTree != null) && (!m_singleton.m_selectionTree.equals(selectionTree)))) {
+            m_singleton = new CreateXICDesignPanel(rootNode, selectionTree);
         }
-       
+
         return m_singleton;
     }
-    
+
     public static CreateXICDesignPanel getPanel() {
         if (m_singleton != null) {
             return m_singleton;
         }
         throw new IllegalAccessError(" Panel not initialized yet ! ");
     }
-    
+
+
+
     private CreateXICDesignPanel(AbstractNode rootNode, IdentificationTree selectionTree) {
         m_rootNode = rootNode;
         m_selectionTree = selectionTree;
         JPanel wizardPanel = createWizardPanel();
         JPanel mainPanel = createMainPanel(rootNode);
-        
-        
+
         setLayout(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();
         c.anchor = GridBagConstraints.NORTHWEST;
@@ -61,11 +61,11 @@ public class CreateXICDesignPanel extends JPanel {
 
         c.gridy++;
         c.weighty = 1;
-        
+
         add(mainPanel, c);
 
     }
-    
+
     public final JPanel createMainPanel(AbstractNode rootNode) {
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new GridBagLayout());
@@ -73,22 +73,21 @@ public class CreateXICDesignPanel extends JPanel {
         c.anchor = GridBagConstraints.NORTHWEST;
         c.fill = GridBagConstraints.BOTH;
         c.insets = new java.awt.Insets(5, 5, 5, 5);
-        
+
         JPanel designTreePanel = createDesignTreePanel(rootNode);
         JPanel selectionTreePanel = createSelectionTreePanel();
-        
+
         JPanel framePanel = new JPanel(new GridBagLayout());
         framePanel.setBorder(BorderFactory.createTitledBorder(" XIC Design "));
-        
-        
+
         JSplitPane sp = new JSplitPane();
         sp.setLeftComponent(designTreePanel);
         sp.setRightComponent(selectionTreePanel);
         sp.setResizeWeight(0.5);
-        
+
         final GridBagConstraints cFrame = new GridBagConstraints();
         cFrame.insets = new java.awt.Insets(5, 5, 5, 5);
-        
+
         cFrame.gridx = 0;
         cFrame.gridy = 0;
         cFrame.gridwidth = 2;
@@ -97,7 +96,7 @@ public class CreateXICDesignPanel extends JPanel {
         cFrame.anchor = GridBagConstraints.NORTH;
         cFrame.fill = GridBagConstraints.NONE;
         framePanel.add(new JLabel("Drag & Drop", IconManager.getIcon(IconManager.IconType.DRAG_AND_DROP), JLabel.LEADING), cFrame);
-        
+
         cFrame.anchor = GridBagConstraints.NORTHWEST;
         cFrame.fill = GridBagConstraints.BOTH;
         cFrame.gridwidth = 1;
@@ -112,14 +111,9 @@ public class CreateXICDesignPanel extends JPanel {
         c.anchor = GridBagConstraints.NORTHWEST;
         c.fill = GridBagConstraints.BOTH;
         mainPanel.add(framePanel, c);
-        
-        
-        
-        
+
         return mainPanel;
     }
-    
-
 
     private JPanel createWizardPanel() {
         JPanel wizardPanel = new JPanel();
@@ -140,8 +134,7 @@ public class CreateXICDesignPanel extends JPanel {
 
         return wizardPanel;
     }
-    
-    
+
     private JPanel createDesignTreePanel(AbstractNode rootNode) {
         JPanel designTreePanel = new JPanel();
 
@@ -159,7 +152,6 @@ public class CreateXICDesignPanel extends JPanel {
         XICDesignTree tree = XICDesignTree.getDesignTree(rootNode);
         JScrollPane treeScrollPane = new JScrollPane();
         treeScrollPane.setViewportView(tree);
-
 
         designTreePanel.add(treeScrollPane, c);
 
@@ -181,12 +173,12 @@ public class CreateXICDesignPanel extends JPanel {
         c.weighty = 1;
 
         AbstractNode rootSelectionNode = null;
-        if(m_selectionTree == null)
+        if (m_selectionTree == null) {
             rootSelectionNode = IdentificationTree.getCurrentTree().copyRootNodeForSelection();
-        else 
+        } else {
             rootSelectionNode = m_selectionTree.copyRootNodeForSelection();
-        
-        
+        }
+
         XICSelectionTree tree = new XICSelectionTree(rootSelectionNode, true);
         JScrollPane treeScrollPane = new JScrollPane();
         treeScrollPane.setViewportView(tree);
@@ -197,6 +189,4 @@ public class CreateXICDesignPanel extends JPanel {
         return selectionTreePanel;
     }
 
-    
-    
 }

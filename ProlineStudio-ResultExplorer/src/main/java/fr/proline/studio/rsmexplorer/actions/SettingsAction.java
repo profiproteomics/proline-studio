@@ -1,6 +1,6 @@
 package fr.proline.studio.rsmexplorer.actions;
 
-import fr.proline.studio.rsmexplorer.gui.dialog.SettingsDialog;
+import fr.proline.studio.rsmexplorer.gui.dialog.ApplicationSettingsDialog;
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -38,7 +38,7 @@ public final class SettingsAction extends AbstractAction implements ActionListen
 
         Frame f = WindowManager.getDefault().getMainWindow();
 
-        SettingsDialog dialog = SettingsDialog.getDialog(f);
+        ApplicationSettingsDialog dialog = ApplicationSettingsDialog.getDialog(f);
         if (dialog.isVisible()) {
             return;
         }

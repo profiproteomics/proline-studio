@@ -25,9 +25,9 @@ import org.openide.util.NbPreferences;
  *
  * @author JM235353
  */
-public class SettingsDialog extends DefaultDialog implements TreeSelectionListener {
+public class ApplicationSettingsDialog extends DefaultDialog implements TreeSelectionListener {
 
-    private static SettingsDialog m_singletonDialog = null;
+    private static ApplicationSettingsDialog m_singletonDialog = null;
     private AbstractParameterListTree m_parameterListTree;
     private ParameterList m_jmsParameterList, m_generalParameterList, m_securityParameterList;
     private JPanel m_cards;
@@ -42,15 +42,15 @@ public class SettingsDialog extends DefaultDialog implements TreeSelectionListen
 
     private Preferences preferences;
 
-    public static SettingsDialog getDialog(Window parent) {
+    public static ApplicationSettingsDialog getDialog(Window parent) {
         if (m_singletonDialog == null) {
-            m_singletonDialog = new SettingsDialog(parent);
+            m_singletonDialog = new ApplicationSettingsDialog(parent);
         }
 
         return m_singletonDialog;
     }
 
-    public SettingsDialog(Window parent) {
+    public ApplicationSettingsDialog(Window parent) {
         super(parent, Dialog.ModalityType.MODELESS);
 
         setTitle(DIALOG_TITLE);

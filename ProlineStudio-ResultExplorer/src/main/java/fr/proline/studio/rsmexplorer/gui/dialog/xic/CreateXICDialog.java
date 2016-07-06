@@ -22,6 +22,7 @@ import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
+import fr.proline.studio.rsmexplorer.tree.xic.XICBiologicalSampleAnalysisNode;
 import fr.proline.studio.rsmexplorer.tree.xic.XICRunNode;
 import fr.proline.studio.settings.FilePreferences;
 import fr.proline.studio.settings.SettingsDialog;
@@ -34,6 +35,8 @@ import java.util.*;
 import java.util.prefs.Preferences;
 import javax.persistence.EntityManager;
 import javax.swing.JFileChooser;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 import org.openide.util.NbPreferences;
 import org.slf4j.LoggerFactory;
@@ -58,6 +61,8 @@ public class CreateXICDialog extends DefaultDialog {
     
     private AbstractNode m_finalXICDesignNode = null;
     private IdentificationTree m_selectionTree = null;
+    
+    private Hashtable<String, XICBiologicalSampleAnalysisNode> m_table;
     
     public static CreateXICDialog getDialog(Window parent) {
         if (m_singletonDialog == null) {
@@ -111,6 +116,7 @@ public class CreateXICDialog extends DefaultDialog {
     
     
     public void displayDefineRawFiles() {
+        
         m_step = STEP_PANEL_DEFINE_RAW_FILES;
         
         setButtonName(DefaultDialog.BUTTON_OK, "Next");
@@ -154,6 +160,55 @@ public class CreateXICDialog extends DefaultDialog {
     public void pack() {
         // forbid pack by overloading the method
     }
+    
+    
+    public Hashtable<String, XICBiologicalSampleAnalysisNode> getAllSamples() {
+        if (m_table == null) {
+            m_table = new Hashtable<String, XICBiologicalSampleAnalysisNode>();
+        } else {
+            m_table.clear();
+        }
+
+        //populate table with XICBiologicalSampleAnalysisNodes
+        
+        DefaultTreeModel model = (DefaultTreeModel) m_selectionTree.getModel();
+        DefaultMutableTreeNode root = (DefaultMutableTreeNode) model.getRoot();
+
+        accessNode(root);
+        
+        return m_table;
+    }
+
+    private void accessNode(DefaultMutableTreeNode node) {
+
+        for (int i = 0; i < node.getChildCount(); i++) {
+
+            DefaultMutableTreeNode childNode = (DefaultMutableTreeNode) node.getChildAt(i);
+
+            if (childNode.getChildCount() > 0) {
+                accessNode(childNode);
+            } else {
+
+                if (childNode instanceof XICBiologicalSampleAnalysisNode) {
+                    m_table.put(((XICBiologicalSampleAnalysisNode)childNode).toString(), (XICBiologicalSampleAnalysisNode)childNode);
+                }
+
+            }
+
+        }
+
+        if (node instanceof XICBiologicalSampleAnalysisNode) {
+            m_table.put(((XICBiologicalSampleAnalysisNode)node).toString(), (XICBiologicalSampleAnalysisNode)node);
+        }
+
+    }
+    
+    
+    
+    
+    
+    
+    
     
     public AbstractNode getDesignRSMNode(){
         return m_finalXICDesignNode;
@@ -738,6 +793,7 @@ public class CreateXICDialog extends DefaultDialog {
         return true;
     }
     
+    
     private boolean checkRawFiles() {
         boolean check = SelectRawFilesPanel.getPanel().check(this);
         if (!check) {
@@ -746,7 +802,9 @@ public class CreateXICDialog extends DefaultDialog {
         return check;
     }
     
-    /*private boolean checkRawFiles(AbstractNode node) {
+    
+    /*
+    private boolean checkRawFiles(AbstractNode node) {
         AbstractNode.NodeTypes type = node.getType();
         if (type == AbstractNode.NodeTypes.BIOLOGICAL_SAMPLE_ANALYSIS) {
             XICBiologicalSampleAnalysisNode sampleAnalysisNode = (XICBiologicalSampleAnalysisNode) node;
@@ -766,7 +824,8 @@ public class CreateXICDialog extends DefaultDialog {
         }
 
         return true;
-    }*/
+    }
+    */
     
     private void showErrorOnNode(AbstractNode node, String error) {
 

@@ -16,15 +16,19 @@ import fr.proline.studio.table.DecoratedMarkerTable;
 import fr.proline.studio.table.DecoratedTableModel;
 import fr.proline.studio.table.TablePopupMenu;
 import fr.proline.studio.utils.IconManager;
+import fr.proline.studio.utils.MiscellaneousUtils;
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Hashtable;
 import javax.swing.BorderFactory;
 import javax.swing.DropMode;
 import javax.swing.JLabel;
@@ -45,6 +49,8 @@ public class SelectRawFilesPanel extends JPanel {
 
     private FlatDesignTableModel m_model = null;
     private FlatDesignTable m_table = null;
+    private Hashtable<String, XICBiologicalSampleAnalysisNode> m_hashtable;
+    private XICDropZone m_dropZone;
 
     public static SelectRawFilesPanel getPanel(AbstractNode rootNode) {
         if (m_singleton == null) {
@@ -55,12 +61,14 @@ public class SelectRawFilesPanel extends JPanel {
 
         return m_singleton;
     }
-    
+
     public static SelectRawFilesPanel getPanel() {
         return m_singleton;
     }
 
     private SelectRawFilesPanel() {
+        m_hashtable = new Hashtable<String, XICBiologicalSampleAnalysisNode>();
+
         JPanel wizardPanel = createWizardPanel();
         JPanel mainPanel = createMainPanel();
 
@@ -92,10 +100,10 @@ public class SelectRawFilesPanel extends JPanel {
         int nbRows = m_model.getRowCount();
         for (int i = 0; i < nbRows; i++) {
             XICRunNode run = m_model.getXICRunNode(i);
-             if ((run == null) || (!((RunInfoData)((AbstractNode)run).getData()).hasRawFile())) {
-                 dialog.highlight(m_table, m_table.getCellRect(m_table.convertRowIndexToView(i), m_table.convertColumnIndexToView(FlatDesignTableModel.COLTYPE_RAW_FILE), true));
-                 return false;
-             }
+            if ((run == null) || (!((RunInfoData) ((AbstractNode) run).getData()).hasRawFile())) {
+                dialog.highlight(m_table, m_table.getCellRect(m_table.convertRowIndexToView(i), m_table.convertColumnIndexToView(FlatDesignTableModel.COLTYPE_RAW_FILE), true));
+                return false;
+            }
         }
         return true;
     }
@@ -170,7 +178,13 @@ public class SelectRawFilesPanel extends JPanel {
     }
 
     private JPanel createDesignTablePanel() {
+        JPanel panel = new JPanel();
+        //panel.setLayout(new BorderLayout());
+
+        panel.setLayout(new GridLayout(2, 1));
+
         JPanel designTablePanel = new JPanel();
+        //designTablePanel.setBorder(BorderFactory.createTitledBorder("Samples"));
 
         designTablePanel.setLayout(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();
@@ -194,7 +208,25 @@ public class SelectRawFilesPanel extends JPanel {
 
         designTablePanel.add(tableScrollPane, c);
 
-        return designTablePanel;
+        
+
+        panel.add(designTablePanel);
+        panel.add(this.createDropZonePanel());
+
+        return panel;
+    }
+    
+    private JPanel createDropZonePanel(){
+        JPanel panel = new JPanel();
+        panel.setLayout(new BorderLayout());
+        panel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
+        
+        m_dropZone = new XICDropZone();
+        m_dropZone.setTable(m_table);
+        
+        panel.add(m_dropZone, BorderLayout.CENTER);
+        
+        return panel;
     }
 
     private JPanel createFilePathPanel() {
@@ -227,7 +259,7 @@ public class SelectRawFilesPanel extends JPanel {
             setDragEnabled(true);
             setDropMode(DropMode.ON);
             setTransferHandler(new TreeFileChooserTransferHandler());
-            
+
             addMouseListener(this);
         }
 
@@ -255,46 +287,44 @@ public class SelectRawFilesPanel extends JPanel {
         @Override
         public void mouseClicked(MouseEvent e) {
             if (SwingUtilities.isLeftMouseButton(e)) {
-            
+
                 int row = rowAtPoint(e.getPoint());
                 int col = columnAtPoint(e.getPoint());
-                
+
                 if (row == -1 || col == -1) {
                     return;
                 }
-                
+
                 XICRunNode runNode = m_model.getXICRunNode(convertRowIndexToModel(row), convertColumnIndexToModel(col));
 
                 if (runNode.isChanging()) {
                     return;
                 }
-                
+
                 RunInfoData runInfoData = (RunInfoData) runNode.getData();
 
                 if (runInfoData.getRawFileSouce().getLinkedRawFile() != null) {
                     return; // already a registered raw file, the user can no longer change it
                 }
-                
+
                 ArrayList<RawFile> potentialRawFiles = runInfoData.getPotentialRawFiles();
                 if (potentialRawFiles == null) {
                     return;
                 }
-                
+
                 SelectRawFileDialog selectRawFileDialog = SelectRawFileDialog.getSelectRawFileDialog(CreateXICDialog.getDialog(null));
                 selectRawFileDialog.init(potentialRawFiles, runInfoData.getRawFileSouce());
                 //selectRawFileDialog.centerToWindow(CreateXICDialog.getDialog(null));
-                int x = (int)(CreateXICDialog.getDialog(null).getLocationOnScreen().getX() + CreateXICDialog.getDialog(null).getWidth() /2);
-                int y = (int)(CreateXICDialog.getDialog(null).getLocationOnScreen().getY());
+                int x = (int) (CreateXICDialog.getDialog(null).getLocationOnScreen().getX() + CreateXICDialog.getDialog(null).getWidth() / 2);
+                int y = (int) (CreateXICDialog.getDialog(null).getLocationOnScreen().getY());
                 selectRawFileDialog.setLocation(x, y);
                 selectRawFileDialog.setVisible(true);
                 if (selectRawFileDialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {
-                    
-                    
-    
+
                     RawFile rawFile = selectRawFileDialog.getSelectedRawFile();
                     if (rawFile != null) {
                         runInfoData.getRawFileSouce().setSelectedRawFile(rawFile);
-                       
+
                         runInfoData.setRun(rawFile.getRuns().get(0));
                         //runInfoData.setRawFilePath(rawFile.getDirectory()+File.separator+rawFile.getRawFileName());  //JPM.RUNINFODATA
                         //runInfoData.setRunInfoInDatabase(true);
@@ -305,9 +335,7 @@ public class SelectRawFilesPanel extends JPanel {
                     }
                 }
 
-        
-
-        }
+            }
         }
 
         @Override
@@ -328,7 +356,7 @@ public class SelectRawFilesPanel extends JPanel {
 
     }
 
-    private static class FlatDesignTableModel extends DecoratedTableModel implements TreeFileChooserTableModelInterface {
+    protected static class FlatDesignTableModel extends DecoratedTableModel implements TreeFileChooserTableModelInterface {
 
         public static final int COLTYPE_GROUP = 0;
         public static final int COLTYPE_SAMPLE = 1;
@@ -346,8 +374,6 @@ public class SelectRawFilesPanel extends JPanel {
         }
 
         private void parseTree(AbstractNode node) {
-
-            
 
             if (node.getType() == AbstractNode.NodeTypes.BIOLOGICAL_GROUP) {
                 parseGroup((XICBiologicalGroupNode) node);
@@ -434,20 +460,24 @@ public class SelectRawFilesPanel extends JPanel {
             }
             return null; // should not happen
         }
-        
+
         public XICRunNode getXICRunNode(int row) {
             NodeModelRow nodeModelRow = m_dataList.get(row);
-            return  nodeModelRow.m_run;
+            return nodeModelRow.m_run;
         }
-        
+
         public XICRunNode getXICRunNode(int row, int col) {
             if (col != COLTYPE_RAW_FILE) {
                 return null;
             }
             NodeModelRow nodeModelRow = m_dataList.get(row);
-            return  nodeModelRow.m_run;
+            return nodeModelRow.m_run;
         }
-    
+
+        public XICBiologicalSampleAnalysisNode getXICBiologicalSampleAnalysisNode(int row) {
+            NodeModelRow nodeModelRow = m_dataList.get(row);
+            return nodeModelRow.m_sampleAnalysis;
+        }
 
         @Override
         public String getToolTipForHeader(int col) {
@@ -486,6 +516,23 @@ public class SelectRawFilesPanel extends JPanel {
 
         }
 
+        public Hashtable<String, Integer> getModelShortages() {
+            Hashtable<String, Integer> shortagesTable = new Hashtable<String, Integer>();
+
+            int numberOfRows = this.getRowCount();
+            int numberOfColumns = this.getColumnCount();
+
+            for (int i = 0; i < numberOfRows; i++) {
+                if (this.getValueAt(i, numberOfColumns - 1).toString().contains("No Raw File")) {
+                    XICBiologicalSampleAnalysisNode currentAnalysisNode = this.getXICBiologicalSampleAnalysisNode(i);
+                    String[] suffix = {"raw", ".mzdb"};
+                    shortagesTable.put(MiscellaneousUtils.getFileName(currentAnalysisNode.getResultSet().getMsiSearch().getPeaklist().getPath(), suffix), i);
+                }
+            }
+            
+            return shortagesTable;
+        }
+
     }
 
     private static class NodeModelRow {
@@ -500,6 +547,10 @@ public class SelectRawFilesPanel extends JPanel {
             m_sample = sample;
             m_sampleAnalysis = sampleAnalysis;
             m_run = run;
+        }
+
+        public XICBiologicalSampleAnalysisNode getXICBiologicalSampleAnalysisNode() {
+            return m_sampleAnalysis;
         }
     }
 

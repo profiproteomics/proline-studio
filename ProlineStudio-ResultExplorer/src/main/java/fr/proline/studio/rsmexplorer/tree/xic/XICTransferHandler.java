@@ -15,12 +15,10 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.prefs.Preferences;
 import javax.swing.JComponent;
-import javax.swing.JOptionPane;
 import javax.swing.JTree;
 import javax.swing.TransferHandler;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
-import org.apache.commons.lang3.math.NumberUtils;
 import org.openide.util.NbPreferences;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -298,7 +296,7 @@ public class XICTransferHandler extends TransferHandler {
 
             if (retainStructure) {
 
-            //<--------------------------------------------------------------------------------->
+                //<--------------------------------------------------------------------------------->
                 //Here I must intervene so that the mechanism changes!
                 if (dropRSMNode instanceof XICBiologicalGroupNode) {
 
@@ -319,8 +317,6 @@ public class XICTransferHandler extends TransferHandler {
                         }
 
                     }
-
-                    System.out.println("breakpoint");
 
                     Enumeration<String> enumKey = samplesHashtable.keys();
 
@@ -377,7 +373,7 @@ public class XICTransferHandler extends TransferHandler {
                     }
                 }
 
-            //<--------------------------------------------------------------------------------->        
+                //<--------------------------------------------------------------------------------->        
             } else {
 
                 if (dropRSMNode instanceof XICBiologicalGroupNode) {

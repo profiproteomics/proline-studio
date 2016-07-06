@@ -2,7 +2,7 @@ package fr.proline.studio.rsmexplorer.actions;
 
 import fr.proline.studio.dpm.AccessServiceThread;
 import fr.proline.studio.rsmexplorer.gui.dialog.HelpDialog;
-import fr.proline.studio.rsmexplorer.gui.dialog.SettingsDialog;
+import fr.proline.studio.rsmexplorer.gui.dialog.ApplicationSettingsDialog;
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
@@ -49,7 +49,7 @@ public final class HelpAction extends AbstractAction implements /*LookupListener
 
         Frame f = WindowManager.getDefault().getMainWindow();
 
-        SettingsDialog optionsDialog = SettingsDialog.getDialog(f);
+        ApplicationSettingsDialog optionsDialog = ApplicationSettingsDialog.getDialog(f);
         if (optionsDialog.isVisible()) {
             return;
         }

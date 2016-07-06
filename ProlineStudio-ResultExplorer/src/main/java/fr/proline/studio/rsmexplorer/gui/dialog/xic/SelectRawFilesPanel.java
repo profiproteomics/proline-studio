@@ -66,6 +66,7 @@ public class SelectRawFilesPanel extends JPanel {
         return m_singleton;
     }
 
+    
     private SelectRawFilesPanel() {
         m_hashtable = new Hashtable<String, XICBiologicalSampleAnalysisNode>();
 

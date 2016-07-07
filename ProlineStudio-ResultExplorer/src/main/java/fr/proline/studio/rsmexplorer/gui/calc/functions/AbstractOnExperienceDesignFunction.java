@@ -361,7 +361,7 @@ public abstract class AbstractOnExperienceDesignFunction extends AbstractFunctio
             Object[] objectArray1 = new Object[nbColumnsKept];
             Object[] associatedObjectArray1 = new Object[nbColumnsKept];
             for (int i = 0; i < nbColumnsKept; i++) {
-                objectArray1[i] = sourceModel.getColumnName(columnKept.get(i));
+                objectArray1[i] = sourceModel.getColumnName(columnKept.get(i)).replaceAll("<br/>"," ");
                 associatedObjectArray1[i] = columnKept.get(i) + 1;  // +1 because it is used in python calc expression
             }
 

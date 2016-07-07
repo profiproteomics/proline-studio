@@ -94,16 +94,16 @@ public abstract class DecoratedTable extends JXTable implements CrossSelectionIn
         
         List<TableColumn> columns = getColumns(true);
         int colCount = columns.size();
-        Object[] objectArray1 = new Object[colCount];
-        Object[] associatedObjectArray1 = new Object[colCount];
+        Object[] columnNamesArray = new Object[colCount];
+        Object[] columnsArray = new Object[colCount];
         boolean[] selection = new boolean[colCount];
 
         int nbVisible = 0;
         int totalWidth = 0;
         for (int i = 0; i < colCount; i++) {
             TableColumnExt column = (TableColumnExt) columns.get(i);
-            objectArray1[i] = column.getHeaderValue().toString();
-            associatedObjectArray1[i] = column;
+            columnNamesArray[i] = column.getHeaderValue().toString().replaceAll("<br/>"," ");
+            columnsArray[i] = column;
             boolean visible = column.isVisible();
             selection[i] = visible;
             if (visible) {
@@ -124,7 +124,7 @@ public abstract class DecoratedTable extends JXTable implements CrossSelectionIn
         
         
         
-        m_columnsVisibilityParameter = new MultiObjectParameter(COLUMNS_VISIBILITY_KEY, "Columns Visibility", null, objectArray1, associatedObjectArray1, selection, null);
+        m_columnsVisibilityParameter = new MultiObjectParameter(COLUMNS_VISIBILITY_KEY, "Columns Visibility", null, columnNamesArray, columnsArray, selection, null);
         
 
         AbstractLinkedParameters linkedParameters = new AbstractLinkedParameters(parameterTableList) {

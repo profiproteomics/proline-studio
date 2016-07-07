@@ -10,6 +10,7 @@ import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import javax.persistence.EntityManager;
@@ -149,9 +150,10 @@ public class DatabaseProjectTask extends AbstractDatabaseTask {
             
             if (m_userAccountList != null) {
                 int nb = m_userAccountList.size();
-                //p.getProjectUserAccountMap().clear();
                 m_p.getProjectUserAccountMap().clear();
+                
                 // remove members if needed
+                LinkedList<UserAccount> userToBeRemovedList = new LinkedList<>();
                 for(ProjectUserAccountMap element : p.getProjectUserAccountMap()){
                     UserAccount userAccountFromProject = element.getUserAccount();
                     boolean isInList = false;
@@ -163,9 +165,15 @@ public class DatabaseProjectTask extends AbstractDatabaseTask {
                         }
                     }
                     if(!isInList){
-                        p.removeMember(userAccountFromProject);
+                        userToBeRemovedList.add(userAccountFromProject);
+                        
                     }
                 }
+                for (UserAccount userAccount : userToBeRemovedList) {
+                    p.removeMember(userAccount);
+                }
+                
+                
                 //add the new members
                 for (int i = 0; i < nb; i++) {
                     UserAccount userAccount = m_userAccountList.get(i);

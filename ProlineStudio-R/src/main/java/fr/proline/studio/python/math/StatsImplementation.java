@@ -74,7 +74,7 @@ public class StatsImplementation {
                 if ((d != d) || (d<=0)) {
                     d =  Double.NaN;
                 } else {
-                    d = (log10) ? StrictMath.log10(d) : StrictMath.log(d);
+                    d = (log10) ? StrictMath.log10(d) : StrictMath.log(d)/qlog2;
                 }
             } else {
                 d = Double.NaN;
@@ -87,6 +87,7 @@ public class StatsImplementation {
         String logfunction = (log10) ? "log10(" : "log(";
         return new ColData(values.getTable(), resultArray, logfunction+values.getExportColumnName()+")");
     }
+    private static double qlog2 = StrictMath.log(2);
     
     public static Table log10(Table sourceTable, PyTuple pcols) {
         return log(sourceTable, pcols, true);

@@ -54,7 +54,7 @@ public class StatsImplementation {
     public static ColData log10(Col values) {
         return log(values, true);
     }
-    public static ColData log(Col values) {
+    public static ColData log2(Col values) {
         return log(values, false);
     }
     private static ColData log(Col values, boolean log10) {
@@ -74,7 +74,7 @@ public class StatsImplementation {
                 if ((d != d) || (d<=0)) {
                     d =  Double.NaN;
                 } else {
-                    d = (log10) ? StrictMath.log10(d) : StrictMath.log(d)/qlog2;
+                    d = (log10) ? StrictMath.log10(d) : StrictMath.log(d)/LOG2;
                 }
             } else {
                 d = Double.NaN;
@@ -84,16 +84,16 @@ public class StatsImplementation {
             
         }
         
-        String logfunction = (log10) ? "log10(" : "log(";
+        String logfunction = (log10) ? "log10(" : "log2(";
         return new ColData(values.getTable(), resultArray, logfunction+values.getExportColumnName()+")");
     }
-    private static final double qlog2 = StrictMath.log(2);
+    private static final double LOG2 = StrictMath.log(2);
     
     public static Table log10(Table sourceTable, PyTuple pcols) {
         return log(sourceTable, pcols, true);
     }
 
-    public static Table log(Table sourceTable, PyTuple pcols) {
+    public static Table log2(Table sourceTable, PyTuple pcols) {
         return log(sourceTable, pcols, false);
     }
     private static Table log(Table sourceTable, PyTuple pcols, boolean log10) {
@@ -121,7 +121,7 @@ public class StatsImplementation {
         return log(sourceTable, column, true);
     }
 
-    public static Table log(Table sourceTable, ColRef column) {
+    public static Table log2(Table sourceTable, ColRef column) {
         return log(sourceTable, column, false);
     }
     public static Table log(Table sourceTable, ColRef column, boolean log10) {

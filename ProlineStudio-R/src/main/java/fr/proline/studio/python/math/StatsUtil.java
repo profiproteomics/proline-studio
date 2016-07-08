@@ -33,7 +33,7 @@ public class StatsUtil {
     }
     
     
-    public static File columnsToMatrixTempFile(ColRef[] cols, boolean header, boolean log) throws Exception {
+    public static File columnsToMatrixTempFile(ColRef[] cols, boolean header, boolean log2, boolean keepNaNForR) throws Exception {
         
         int nbRow = cols[0].getRowCount();
         
@@ -52,6 +52,8 @@ public class StatsUtil {
             fw.write('\n');
         }
         
+        final double LOG2 = StrictMath.log(2);
+        
         for (int i = 0; i < nbRow; i++) {
             for (int j=0;j<cols.length;j++) {
                 ColRef c = cols[j];
@@ -62,17 +64,23 @@ public class StatsUtil {
                 double d;
                 if ((o != null) && (o instanceof Number)) {
                     d = ((Number) o).doubleValue();
-                    if (d != d) {
-                        d = 0; // NaN values
+                    
+                    if (d != d) { // NaN values
+                        if (!keepNaNForR) {
+                            d = 0;
+                        }
                     }
                 } else {
                     d = 0;
                 }
-                if (log) {
-                    d = StrictMath.log(d);
+                if (log2) {
+                    d = StrictMath.log(d)/LOG2;
                 }
 
-                fw.write(String.valueOf(d));
+                if (d==d) { // not a NaN value
+                    fw.write(String.valueOf(d));
+                }  // for NaN value, we write nothing, it will become a NAN in R.
+                
                 if (j<cols.length-1) {
                     fw.write(';');
                 }

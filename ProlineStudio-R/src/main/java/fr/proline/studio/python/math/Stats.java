@@ -18,16 +18,16 @@ import org.python.core.PyTuple;
  */
 public class Stats {
 
-    public static ColData log(Col values) {
-        return StatsImplementation.log(values);
+    public static ColData log2(Col values) {
+        return StatsImplementation.log2(values);
     }
     
-    public static Table log(Table t, PyTuple pcols) {
-        return StatsImplementation.log(t, pcols);
+    public static Table log2(Table t, PyTuple pcols) {
+        return StatsImplementation.log2(t, pcols);
     }
     
-    public static Table log(Table t, ColRef column) {
-        return StatsImplementation.log(t, column);
+    public static Table log2(Table t, ColRef column) {
+        return StatsImplementation.log2(t, column);
     }
     
     public static ColData log10(Col values) {

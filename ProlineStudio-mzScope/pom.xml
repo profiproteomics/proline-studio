@@ -4,7 +4,7 @@
     <parent>
         <artifactId>ProlineStudio-parent</artifactId>
         <groupId>fr.proline</groupId>
-        <version>0.6.0-SNAPSHOT</version>
+        <version>0.6.0</version>
     </parent>
   
     <groupId>fr.proline</groupId>
@@ -26,7 +26,7 @@
         <dependency>
             <groupId>fr.profi</groupId>
             <artifactId>mzdb-access</artifactId>
-            <version>0.5.0-SNAPSHOT</version>
+            <version>0.5.0</version>
             <exclusions>
                 <exclusion>
                      <groupId>xerces</groupId>
@@ -37,7 +37,7 @@
         <dependency>
             <groupId>fr.profi</groupId>
             <artifactId>mzdb-processing</artifactId>
-            <version>0.5.0-SNAPSHOT</version>
+            <version>0.5.0</version>
             <exclusions>
                 <exclusion>
                     <groupId>joda-time</groupId>

@@ -113,7 +113,7 @@ public class LogFunction  extends AbstractFunction {
             if (m_log10) {
                 codeSB.append("logColumn=Stats.log10(");
             } else {
-                codeSB.append("logColumn=Stats.log(");
+                codeSB.append("logColumn=Stats.log2(");
             }
             
             codeSB.append(parameters[nbCols].getName());

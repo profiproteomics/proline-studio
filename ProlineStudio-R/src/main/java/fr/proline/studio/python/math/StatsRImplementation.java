@@ -567,6 +567,10 @@ public class StatsRImplementation {
             String cmdBB = "limmaObject <- limmaCompleteTest(" + StatsUtil.MATRIX_VARIABLE + "," + StatsUtil.RVectorToRFactor(StatsUtil.stringTupleToRVector(labels)) + "," + "factor(1:" + nbValues + ")" + "," + "factor(1:" + nbValues + ")" + ")";
             serverR.parseAndEval(cmdBB);
 
+            // order limma result according to index
+            cmdBB = "limmaObject<-limmaObject[order(as.numeric(rownames(limmaObject))),,drop=FALSE]";
+            serverR.parseAndEval(cmdBB);
+            
             Object resPValue = serverR.parseAndEval("limmaObject$P.Value");
             Object resLogFC = serverR.parseAndEval("limmaObject$logFC");
    
@@ -593,7 +597,7 @@ public class StatsRImplementation {
 
             valuesForCol = new ArrayList<>(nbRows);
             for (int i = 0; i < nbRows; i++) {
-                valuesForCol.add(logFCArray[i]);
+                valuesForCol.add(-logFCArray[i]); // minus to logFC to be consistent with WELCH
             }
 
             colName = diffAnalysisTypeString + " log Ratio";

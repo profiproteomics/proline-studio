@@ -43,7 +43,7 @@ public class JCheckBoxList<E> extends JList {
         addMouseListener(new MouseAdapter() {
 
             @Override
-            public void mouseClicked(MouseEvent event) {
+            public void mouseReleased(MouseEvent event) {
                 selectItem(event.getPoint());
             }
         });

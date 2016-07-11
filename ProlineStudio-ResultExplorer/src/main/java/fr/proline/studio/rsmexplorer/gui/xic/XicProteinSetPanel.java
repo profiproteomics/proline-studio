@@ -15,6 +15,7 @@ import fr.proline.studio.filter.actions.ClearRestrainAction;
 import fr.proline.studio.filter.actions.RestrainAction;
 import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.gui.DefaultDialog;
+import fr.proline.studio.gui.DefaultFloatingPanel;
 import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.JCheckBoxList;
 import fr.proline.studio.gui.SplittedPanelContainer;
@@ -67,6 +68,14 @@ import javax.swing.table.TableColumn;
 import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.table.TableColumnExt;
 import org.openide.windows.WindowManager;
+import fr.proline.studio.rsmexplorer.actions.xic.*;
+import fr.proline.studio.pattern.xic.*;
+import fr.proline.core.orm.uds.dto.DDataset;
+import fr.proline.studio.dam.AccessDatabaseThread;
+import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
+import fr.proline.studio.dam.tasks.xic.DatabaseModifyPeptideTask;
+import fr.proline.studio.rsmexplorer.DataBoxViewerManager;
+import fr.proline.studio.utils.ResultCallback;
 
 /**
  *
@@ -80,6 +89,8 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
     private JScrollPane m_proteinSetScrollPane;
     private QuantProteinSetTable m_quantProteinSetTable;
 
+    private DefaultFloatingPanel m_refineProteinsPanel;
+    
     private MarkerContainerPanel m_markerContainerPanel;
     private boolean m_isXICMode;
 
@@ -96,6 +107,7 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
     private JLabel m_titleLabel;
     private final String TABLE_TITLE = "Proteins Sets";
 
+    
 
     public XicProteinSetPanel() {
         initComponents();
@@ -111,6 +123,64 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
 
         final JPanel proteinSetPanel = createProteinSetPanel();
 
+  
+        
+        ResultCallback resultCallback = new ResultCallback() {
+            @Override
+            public void run(boolean success) {
+                m_refineProteinsPanel.actionFinished(success, success ? null : "Refine failed. Look to Tasks Log for more information.");
+
+                if (success) {
+
+                    final ArrayList<DMasterQuantProteinSet> masterQuantProteinSetModified = m_quantProteinSetTable.getModifiedQuantProteinSet();
+
+                    AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
+
+                        @Override
+                        public boolean mustBeCalledInAWT() {
+                            return true;
+                        }
+
+                        @Override
+                        public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
+
+                            if (!success) {
+                                return; // should not happen
+                            }
+
+                            // propagate modifications to the previous views
+                            DataBoxViewerManager.loadedDataModified(m_dataBox.getProjectId(), m_dataBox.getRsetId(), m_dataBox.getRsmId(), DMasterQuantProteinSet.class, masterQuantProteinSetModified, DataBoxViewerManager.REASON_PROTEINS_REFINED);
+                        }
+                    };
+
+                    // ask asynchronous loading of data
+                    DatabaseModifyPeptideTask task = new DatabaseModifyPeptideTask(callback);
+                    
+                    task.initRemovePeptideModifiedOnProtein(m_dataBox.getProjectId(), masterQuantProteinSetModified);
+                    AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
+                }
+                
+            }
+            
+        };
+        
+        ActionListener refineAction = new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                DataboxXicProteinSet databox = (DataboxXicProteinSet) m_dataBox;
+                long projectId = m_dataBox.getProjectId();
+                DDataset dataset = (DDataset) databox.getData(false, DDataset.class);
+                
+                boolean okCalled = ComputeQuantitationProfileAction.quantificationProfile(resultCallback, getX()+20, getY()+20, projectId, dataset, null, true);
+                if (okCalled) {
+                    m_refineProteinsPanel.actionStarted();
+                }
+            }
+            
+        };
+        
+        m_refineProteinsPanel = new DefaultFloatingPanel("Proteins need to be refined : ", "Refine", refineAction, IconManager.getIcon(IconManager.IconType.REFINE));
+        
         final JLayeredPane layeredPane = new JLayeredPane();
 
         layeredPane.addComponentListener(new ComponentListener() {
@@ -140,7 +210,10 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
         add(layeredPane, BorderLayout.CENTER);
 
         layeredPane.add(proteinSetPanel, JLayeredPane.DEFAULT_LAYER);
-        layeredPane.add(m_searchToggleButton.getSearchPanel(), JLayeredPane.PALETTE_LAYER);
+        layeredPane.add(m_searchToggleButton.getSearchPanel(), new Integer(JLayeredPane.PALETTE_LAYER+1));  
+        layeredPane.add(m_refineProteinsPanel, JLayeredPane.PALETTE_LAYER);  
+        
+        
 
     }
 
@@ -301,6 +374,20 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
     }
     private boolean m_hideFirstTime = true;
 
+    public void dataModified(ArrayList modificationsList, int reason) {
+
+        boolean modification = m_quantProteinSetTable.dataModified(modificationsList, reason);
+        
+        if (modification) {
+            if (reason == DataBoxViewerManager.REASON_PEPTIDE_SUPPRESSED) {
+                m_refineProteinsPanel.setLocation(getX() + 20, getY() + 20);
+                m_refineProteinsPanel.setVisible(true);
+            }
+
+        }
+    }
+    
+    
     public void dataUpdated(SubTask subTask, boolean finished) {
         m_quantProteinSetTable.dataUpdated(subTask, finished);
         if (m_hideFirstTime) {
@@ -377,6 +464,12 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
             super(m_proteinSetScrollPane.getVerticalScrollBar());
         }
 
+        public ArrayList<DMasterQuantProteinSet> getModifiedQuantProteinSet() {
+            return ((QuantProteinSetTableModel) (((CompoundTableModel) getModel()).getBaseModel())).getModifiedQuantProteinSet();
+        }
+        
+                    
+        
         @Override
         public void addTableModelListener(TableModelListener l) {
             getModel().addTableModelListener(l);
@@ -498,37 +591,6 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
 
         }
 
-        /*public boolean selectProteinSet(Long proteinSetId, String searchText) {
-
-            QuantProteinSetTableModel tableModel = (QuantProteinSetTableModel) ((CompoundTableModel) getModel()).getBaseModel();
-            int row = tableModel.findRow(proteinSetId);
-            if (row == -1) {
-                return false;
-            }
-            row = ((CompoundTableModel) getModel()).convertBaseModelRowToCompoundRow(row);
-            if (row == -1) {
-                return false;
-            }
-
-            // JPM.hack we need to keep the search text
-            // to be able to give it if needed to the panel
-            // which display proteins of a protein set
-            searchTextBeingDone = searchText;
-
-            // must convert row index if there is a sorting
-            row = convertRowIndexToView(row);
-
-            // select the row
-            getSelectionModel().setSelectionInterval(row, row);
-
-            // scroll to the row
-            scrollRowToVisible(row);
-
-            searchTextBeingDone = null;
-
-            return true;
-        }
-        String searchTextBeingDone = null;*/
 
         public void dataUpdated(SubTask subTask, boolean finished) {
 
@@ -543,6 +605,7 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
                 selectionWillBeRestored(true);
                 try {
                     ((QuantProteinSetTableModel) (((CompoundTableModel) getModel()).getBaseModel())).dataUpdated();
+                    
                 } finally {
                     selectionWillBeRestored(false);
                 }
@@ -571,6 +634,51 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
                 setSortable(true);
             }
         }
+        
+        
+        public boolean dataModified(ArrayList modificationsList, int reason) {
+
+            boolean modified = false;
+
+            LastAction keepLastAction = m_lastAction;
+            try {
+
+                // retrieve selected row
+                int rowSelected = getSelectionModel().getMinSelectionIndex();
+                int rowSelectedInModel = (rowSelected == -1) ? -1 : convertRowIndexToModel(rowSelected);
+
+                // Update Model (but protein set table must not react to the model update)
+                selectionWillBeRestored(true);
+                try {
+                    modified = ((QuantProteinSetTableModel) ((CompoundTableModel) m_quantProteinSetTable.getModel()).getBaseModel()).dataModified(modificationsList, reason);
+                } finally {
+                    selectionWillBeRestored(false);
+                }
+
+                // restore selected row
+                if (rowSelectedInModel != -1) {
+                    int rowSelectedInView = convertRowIndexToView(rowSelectedInModel);
+                    //getSelectionModel().setSelectionInterval(rowSelectedInView, rowSelectedInView);
+                    setSelection(rowSelectedInView);
+
+                    // if the subtask correspond to the loading of the data of the sorted column,
+                    // we keep the row selected visible
+                    if (((keepLastAction == LastAction.ACTION_SELECTING) || (keepLastAction == LastAction.ACTION_SORTING))) {
+                        scrollRowToVisible(rowSelectedInView);
+                    }
+
+                }
+
+            } finally {
+
+                m_lastAction = keepLastAction;
+
+            }
+
+            return modified;
+            
+        }
+        
 
         public void selectionWillBeRestored(boolean b) {
             selectionWillBeRestored = b;

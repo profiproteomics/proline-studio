@@ -26,6 +26,7 @@ import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import fr.proline.studio.rsmexplorer.tree.quantitation.QuantitationTree;
+import fr.proline.studio.utils.ResultCallback;
 import java.util.List;
 import java.util.Map;
 import javax.swing.JOptionPane;
@@ -56,12 +57,14 @@ public class ComputeQuantitationProfileAction extends AbstractRSMAction {
             JOptionPane.showMessageDialog(WindowManager.getDefault().getMainWindow(), "A project should be selected !", "Warning", JOptionPane.ERROR_MESSAGE);
             return;
         }
+        
         //project id
         final Long pID = ProjectExplorerPanel.getProjectExplorerPanel().getSelectedProject().getId();
-        final int posx = x;
-        final int posy = y;
+        
+        final int posX = x;
+        final int posY = y;
+        
         // only on one node
-        final AbstractNode node = selectedNodes[0];
         final DataSetNode datasetNode = (DataSetNode) selectedNodes[0];
         //dataset
         final DDataset dataSet = datasetNode.getDataset();
@@ -81,84 +84,14 @@ public class ComputeQuantitationProfileAction extends AbstractRSMAction {
                     if (dataSet.getPostQuantProcessingConfig() != null) {
                         String message = "Proteins Sets Abundances have already been refined.\nDo you want to continue?";
                         OptionDialog yesNoDialog = new OptionDialog(WindowManager.getDefault().getMainWindow(), "Refine Proteins Sets Abundances", message);
-                        yesNoDialog.setLocation(posx, posy);
+                        yesNoDialog.setLocation(posX, posY);
                         yesNoDialog.setVisible(true);
                         if (yesNoDialog.getButtonClicked() != DefaultDialog.BUTTON_OK) {
                             return;
                         }
                     }    
                     
-                    // dialog with the parameters for quantitation profiler
-                    QuantProfileXICDialog dialog = QuantProfileXICDialog.getDialog(WindowManager.getDefault().getMainWindow());
-                    dialog.setLocation(posx, posy);
-                    dialog.setVisible(true);
-                    
-                    // retreive parameters
-                    if (dialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {
-                        //User specified parameters
-                        String errorMsg = null;
-
-                        final Map<String, Object> quantParams = dialog.getQuantParams();
-                        if (quantParams == null) {
-                            errorMsg = "Null Quantitation parameters !";
-                        }
-
-                        if (errorMsg != null) {
-                            JOptionPane.showMessageDialog(dialog, errorMsg, "Warning", JOptionPane.ERROR_MESSAGE);
-                            return;
-                        }
-                        // only on one node
-                        node.setIsChanging(true);
-                        QuantitationTree tree = QuantitationTree.getCurrentTree();
-                        final DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
-                        treeModel.nodeChanged(node);
-                        //dataset
-                        final String xicName = dataSet.getName() ;
-                        
-                        List<DMasterQuantitationChannel> listMasterQuantChannels = datasetNode.getDataset().getMasterQuantitationChannels();
-                        if (listMasterQuantChannels != null && !listMasterQuantChannels.isEmpty()) {
-                            Long masterQuantChannelId = new Long(listMasterQuantChannels.get(0).getId());
-                            // CallBack for Xic Quantitation Service
-                            if(m_isJMSDefined){
-                                AbstractJMSCallback xicCallback = new AbstractJMSCallback() {
-
-                                    @Override
-                                    public boolean mustBeCalledInAWT() {
-                                        return true;
-                                    }
-
-                                    @Override
-                                    public void run(boolean success) {
-                                        if (success) {
-                                        }
-                                        node.setIsChanging(false);
-                                        treeModel.nodeChanged(node);
-                                    }
-                                };
-                                fr.proline.studio.dpm.task.jms.ComputeQuantProfileTask task = new fr.proline.studio.dpm.task.jms.ComputeQuantProfileTask(xicCallback, pID, masterQuantChannelId, quantParams, xicName);
-                                AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
-                            }else{
-                                AbstractServiceCallback xicCallback = new AbstractServiceCallback() {
-
-                                    @Override
-                                    public boolean mustBeCalledInAWT() {
-                                        return true;
-                                    }
-
-                                    @Override
-                                    public void run(boolean success) {
-                                        if (success) {
-                                        }
-                                        node.setIsChanging(false);
-                                        treeModel.nodeChanged(node);
-                                    }
-                                };
-
-                                ComputeQuantProfileTask task = new ComputeQuantProfileTask(xicCallback, pID, masterQuantChannelId, quantParams, xicName);
-                                AccessServiceThread.getAccessServiceThread().addTask(task);
-                            }
-                        }
-                    } //End OK entered   
+                    quantificationProfile(null, posX, posY, pID, dataSet, datasetNode, m_isJMSDefined);
                 }
             }
         };
@@ -167,6 +100,102 @@ public class ComputeQuantitationProfileAction extends AbstractRSMAction {
         loadTask.initLoadQuantitation(ProjectExplorerPanel.getProjectExplorerPanel().getSelectedProject(), dataSet);
         AccessDatabaseThread.getAccessDatabaseThread().addTask(loadTask);
           
+    }
+    
+    
+    public static boolean quantificationProfile(final ResultCallback resultCallback, int posx, int posy, Long pID, DDataset dataSet, DataSetNode datasetNode, boolean jms) {
+        // dialog with the parameters for quantitation profiler
+        QuantProfileXICDialog dialog = QuantProfileXICDialog.getDialog(WindowManager.getDefault().getMainWindow());
+        dialog.setLocation(posx, posy);
+        dialog.setVisible(true);
+
+        // retreive parameters
+        if (dialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {
+            //User specified parameters
+            String errorMsg = null;
+
+            final Map<String, Object> quantParams = dialog.getQuantParams();
+            if (quantParams == null) {
+                errorMsg = "Null Quantitation parameters !";
+            }
+
+            if (errorMsg != null) {
+                JOptionPane.showMessageDialog(dialog, errorMsg, "Warning", JOptionPane.ERROR_MESSAGE);
+                return false;
+            }
+            // only on one node
+            if (datasetNode != null) {
+                datasetNode.setIsChanging(true);
+                QuantitationTree tree = QuantitationTree.getCurrentTree();
+                DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
+                treeModel.nodeChanged(datasetNode);
+            }
+            
+            // dataset name
+            final String xicName = dataSet.getName();
+
+            List<DMasterQuantitationChannel> listMasterQuantChannels = dataSet.getMasterQuantitationChannels();
+            if (listMasterQuantChannels != null && !listMasterQuantChannels.isEmpty()) {
+                Long masterQuantChannelId = new Long(listMasterQuantChannels.get(0).getId());
+                // CallBack for Xic Quantitation Service
+                if (jms) {
+                    AbstractJMSCallback xicCallback = new AbstractJMSCallback() {
+
+                        @Override
+                        public boolean mustBeCalledInAWT() {
+                            return true;
+                        }
+
+                        @Override
+                        public void run(boolean success) {
+
+                            if (datasetNode != null) {
+                                QuantitationTree tree = QuantitationTree.getCurrentTree();
+                                DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
+                                datasetNode.setIsChanging(false);
+                                treeModel.nodeChanged(datasetNode);
+                            }
+                            
+                            if (resultCallback != null) {
+                                resultCallback.run(success);
+                            }
+                        }
+                    };
+                    fr.proline.studio.dpm.task.jms.ComputeQuantProfileTask task = new fr.proline.studio.dpm.task.jms.ComputeQuantProfileTask(xicCallback, pID, masterQuantChannelId, quantParams, xicName);
+                    AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
+                } else {
+                    AbstractServiceCallback xicCallback = new AbstractServiceCallback() {
+
+                        @Override
+                        public boolean mustBeCalledInAWT() {
+                            return true;
+                        }
+
+                        @Override
+                        public void run(boolean success) {
+
+                            if (datasetNode != null) {
+                                QuantitationTree tree = QuantitationTree.getCurrentTree();
+                                DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
+                                datasetNode.setIsChanging(false);
+                                treeModel.nodeChanged(datasetNode);
+                            }
+                            
+                            if (resultCallback != null) {
+                                resultCallback.run(success);
+                            }
+                        }
+                    };
+
+                    ComputeQuantProfileTask task = new ComputeQuantProfileTask(xicCallback, pID, masterQuantChannelId, quantParams, xicName);
+                    AccessServiceThread.getAccessServiceThread().addTask(task);
+                }
+            }
+            return true;
+        } //End OK entered   
+        else {
+            return false;
+        }
     }
 
     @Override

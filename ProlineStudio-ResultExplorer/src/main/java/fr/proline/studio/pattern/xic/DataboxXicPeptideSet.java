@@ -93,6 +93,22 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
     }
 
     @Override
+    public Long getRsetId() {
+        if (m_dataset == null) {
+            return null;
+        }
+        return m_dataset.getResultSetId();
+    }
+
+    @Override
+    public Long getRsmId() {
+        if (m_dataset == null) {
+            return null;
+        }
+        return m_dataset.getResultSummaryId();
+    }
+    
+    @Override
     public void createPanel() {
         XicPeptidePanel p = new XicPeptidePanel(false);
         p.setName(m_typeName);
@@ -104,10 +120,10 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
 
     @Override
     public void dataChanged() {
-        final boolean allProteinSet = m_previousDataBox == null;
+        final boolean allPeptides = m_previousDataBox == null;
         DProteinSet oldProteinSet = m_proteinSet;
 
-        if (!allProteinSet) {
+        if (!allPeptides) {
             m_proteinSet = (DProteinSet) m_previousDataBox.getData(false, DProteinSet.class);
             m_masterQuantProteinSet = (DMasterQuantProteinSet) m_previousDataBox.getData(false, DMasterQuantProteinSet.class);
             m_dataset = (DDataset) m_previousDataBox.getData(false, DDataset.class);
@@ -132,7 +148,7 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
 
                 if (subTask == null) {
 
-                    if (!allProteinSet) {
+                    if (!allPeptides) {
                         quantitationChannelArray = m_quantChannelInfo.getQuantChannels();
                         ((XicPeptidePanel) m_panel).setData(taskId, m_proteinSet != null, quantitationChannelArray, m_masterQuantPeptideList, m_isXICMode, finished);
                          
@@ -192,7 +208,7 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
         // ask asynchronous loading of data
         m_masterQuantPeptideList = new ArrayList();
         DatabaseLoadXicMasterQuantTask task = new DatabaseLoadXicMasterQuantTask(callback);
-        if (allProteinSet) {
+        if (allPeptides) {
             task.initLoadPeptides(getProjectId(), m_dataset, m_masterQuantPeptideList);
         } else {
             task.initLoadPeptides(getProjectId(), m_dataset, m_proteinSet, m_masterQuantProteinSet, m_masterQuantPeptideList);

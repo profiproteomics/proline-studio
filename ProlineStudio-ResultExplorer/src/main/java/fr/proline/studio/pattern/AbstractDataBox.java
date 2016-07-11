@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import org.jdesktop.swingx.JXTable;
@@ -317,6 +318,27 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
         return false;
     }
   
+    public boolean isDataProvider(Class dataType) {
+        Iterator<GroupParameter> it = m_outParameters.iterator();
+        while (it.hasNext()) {
+            GroupParameter parameter = it.next();
+            if (parameter.isDataDependant(dataType)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    public void loadedDataModified(Long rsetId, Long rsmId, Class dataType, ArrayList modificationsList, int reason) {
+        if (isDataProvider(dataType)) {
+            dataMustBeRecalculated(rsetId, rsmId, dataType, modificationsList, reason);
+        }
+        if (m_nextDataBoxArray != null) {
+            for (AbstractDataBox nextDataBox : m_nextDataBoxArray) {
+                nextDataBox.loadedDataModified(rsetId, rsmId, dataType, modificationsList, reason);
+            }
+        }
+    }
     
     public double calculateParameterCompatibilityDistance(ArrayList<GroupParameter> outParameters) {
         Iterator<GroupParameter> it = m_inParameters.iterator();
@@ -362,6 +384,17 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
     
     public abstract void dataChanged();
     
+    /**
+     * To be overriden if the modification in a following databox
+     * can lead to a modificiation of the data of the current databox.
+     * (for instance, disabling peptides -> modifications of protein set
+     * in the XIC View
+     * @param dataType 
+     */
+    public void dataMustBeRecalculated(Long rsetId, Long rsmId, Class dataType, ArrayList modificationsList, int reason) {
+        
+    }
+    
     public Object getData(boolean getArray, Class parameterType) {
         
         if ((parameterType!= null ) && (parameterType.equals(ProjectId.class))) {
@@ -406,6 +439,8 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
         }
         
     }
+ 
+    
     
     public void setProjectId(long projectId) {
         m_panel.addSingleValue(m_projectId);
@@ -418,6 +453,19 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
             return -1;
         }
         return projectId.getId();
+    }
+    
+    public Long getRsetId() {
+        if (m_previousDataBox != null) {
+            return m_previousDataBox.getRsetId();
+        }
+        return null;
+    }
+    public Long getRsmId() {
+        if (m_previousDataBox != null) {
+            return m_previousDataBox.getRsmId();
+        }
+        return null;
     }
     
     public DataBoxPanelInterface getPanel() {

@@ -7,6 +7,7 @@ import fr.proline.core.orm.msi.dto.DProteinSet;
 import fr.proline.core.orm.msi.dto.DQuantProteinSet;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
+import fr.proline.core.orm.util.JsonSerializer;
 import fr.proline.studio.comparedata.ExtraDataType;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadXicMasterQuantTask;
 import fr.proline.studio.filter.DoubleFilter;
@@ -16,6 +17,7 @@ import fr.proline.studio.filter.StringDiffFilter;
 import fr.proline.studio.filter.StringFilter;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
+import fr.proline.studio.rsmexplorer.DataBoxViewerManager;
 import fr.proline.studio.table.renderer.BigFloatOrDoubleRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.CompareValueRenderer;
 import fr.proline.studio.table.renderer.DefaultRightAlignRenderer;
@@ -28,6 +30,7 @@ import fr.proline.studio.table.LazyData;
 import fr.proline.studio.table.LazyTable;
 import fr.proline.studio.table.LazyTableModel;
 import fr.proline.studio.table.TableDefaultRendererManager;
+import fr.proline.studio.table.renderer.GrayedRenderer;
 import fr.proline.studio.types.QuantitationType;
 import fr.proline.studio.types.XicGroup;
 import fr.proline.studio.types.XicMode;
@@ -88,9 +91,7 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
     public QuantProteinSetTableModel(LazyTable table) {
         super(table);
     }
-    
- 
-    
+
     @Override
     public int getColumnCount() {
         if (m_quantChannels == null) {
@@ -234,9 +235,8 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
     public Object getValueAt(final int row, int col) {
 
         
-        // Retrieve Protein Set
+        // Retrieve MasterQuantProtein Set
         DMasterQuantProteinSet proteinSet = m_proteinSets.get(row);
-        //long rsmId = proteinSet.getResultSummaryId();
 
         switch (col) {
             case COLTYPE_PROTEIN_SET_ID: {
@@ -486,6 +486,36 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
         
         fireTableDataChanged();
 
+    }
+    
+    public boolean dataModified(ArrayList modificationsList, int reason) {
+        HashMap<Long, DMasterQuantProteinSet> modifiedMap = new HashMap<>(modificationsList.size());
+        for (int i=0;i<modificationsList.size();i++) {
+            DMasterQuantProteinSet masterQuantProteinSet = (DMasterQuantProteinSet) modificationsList.get(i);
+            modifiedMap.put(masterQuantProteinSet.getId(), masterQuantProteinSet);
+        }
+        
+        
+        
+        boolean modificationDone = false;
+        
+        for (int i = 0; i < m_proteinSets.size(); i++) {
+            DMasterQuantProteinSet masterQuantProteinSet = m_proteinSets.get(i);
+            Long id = masterQuantProteinSet.getId();
+            DMasterQuantProteinSet proteinSetModified = modifiedMap.get(id);
+            if (proteinSetModified != null) {
+                proteinSetModified.setProteinSet(masterQuantProteinSet.getProteinSet());
+                m_proteinSets.set(i, proteinSetModified);
+                modificationDone = true;
+            }
+        }
+
+        
+        if (modificationDone) {
+            fireTableDataChanged();
+        }
+        
+        return modificationDone;
     }
 
     public DMasterQuantProteinSet getQuantProteinSet(int i) {
@@ -911,12 +941,61 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
         return -1; //JPM.TODO
     }
 
+    
+    public ArrayList<DMasterQuantProteinSet> getModifiedQuantProteinSet() {
+        
+        ArrayList<DMasterQuantProteinSet> masterQuantProteinSetModified = new ArrayList<>();
+        try {
+            int nbRow = getRowCount();
+            for (int i = 0; i < nbRow; i++) {
+                DMasterQuantProteinSet proteinSet = m_proteinSets.get(i);
+                String serializedProperties = proteinSet.getSerializedProperties();
+                if (serializedProperties != null) {
+                    Map<String, Object> pmqSerializedMap = JsonSerializer.getMapper().readValue(serializedProperties, Map.class);
+                    if ((pmqSerializedMap != null) && (pmqSerializedMap.containsKey(DMasterQuantProteinSet.MASTER_QUANT_PROTEINSET_WITH_PEPTIDE_MODIFIED))) {
+                        masterQuantProteinSetModified.add(proteinSet);
+                    }
+                }
+            }
+
+        } catch (Exception e) {
+            // should not happen
+        }
+
+        
+        return masterQuantProteinSetModified;
+    }
+    
     @Override
     public TableCellRenderer getRenderer(int row, int col) {
 
-        if (m_rendererMap.containsKey(col)) {
-            return m_rendererMap.get(col);
+        if (m_proteinSets == null) {
+            return null;
         }
+        
+        DMasterQuantProteinSet proteinSet = m_proteinSets.get(row);
+        String serializedProperties = proteinSet.getSerializedProperties();
+        boolean grayed = false;
+        if (serializedProperties != null) {
+            try {
+
+                Map<String, Object> pmqSerializedMap = JsonSerializer.getMapper().readValue(serializedProperties, Map.class);
+                grayed = ((pmqSerializedMap != null) && (pmqSerializedMap.containsKey(DMasterQuantProteinSet.MASTER_QUANT_PROTEINSET_WITH_PEPTIDE_MODIFIED)));
+            } catch (Exception e) {
+
+            }
+            
+        }
+        if (grayed) {
+            if (m_rendererMapGrayed.containsKey(col)) {
+                return m_rendererMapGrayed.get(col);
+            }
+        } else {
+            if (m_rendererMap.containsKey(col)) {
+                return m_rendererMap.get(col);
+            }
+        }
+
 
         TableCellRenderer renderer = null;
 
@@ -962,10 +1041,20 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
         }
         
         
-        m_rendererMap.put(col, renderer);
+        if (grayed) {
+            if (renderer == null) {
+                return null;
+            }
+            renderer = new GrayedRenderer(renderer);
+           m_rendererMapGrayed.put(col, renderer);
+        } else {
+            m_rendererMap.put(col, renderer);
+        }
+        
         return renderer;
     }
     private final HashMap<Integer, TableCellRenderer> m_rendererMap = new HashMap();
+    private final HashMap<Integer, TableCellRenderer> m_rendererMapGrayed = new HashMap();
 
     @Override
     public GlobalTableModelInterface getFrozzenModel() {

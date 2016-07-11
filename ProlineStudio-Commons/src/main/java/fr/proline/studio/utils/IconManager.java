@@ -150,7 +150,8 @@ public class IconManager {
         TOOLBOX,
         TOOLBOX_PLUS,
         TOOLBOX_MINUS,
-        SCREWDRIVER;  
+        SCREWDRIVER,
+        REFINE;  
     }
     private final static HashMap<IconType, ImageIcon> m_iconMap = new HashMap<>();
     private final static HashMap<IconType, ImageIcon> m_iconHourGlassMap = new HashMap<>();
@@ -550,7 +551,9 @@ public class IconManager {
             case TOOLBOX_MINUS:
                 return "fr/proline/studio/images/toolbox--minus.png";     
             case SCREWDRIVER:
-                return "fr/proline/studio/images/screwdriver.png";     
+                return "fr/proline/studio/images/screwdriver.png";    
+            case REFINE:
+                return "fr/proline/studio/images/refine.png";
         }
 
         return null; // can not happen

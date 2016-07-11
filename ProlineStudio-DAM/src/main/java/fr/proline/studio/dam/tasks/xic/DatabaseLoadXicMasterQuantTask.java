@@ -5,6 +5,7 @@ import fr.proline.core.orm.msi.ObjectTree;
 import fr.proline.core.orm.msi.Peptide;
 import fr.proline.core.orm.msi.PeptideInstance;
 import fr.proline.core.orm.msi.PeptideReadablePtmString;
+import fr.proline.core.orm.msi.ProteinSet;
 import fr.proline.core.orm.msi.ResultSet;
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.dto.DCluster;
@@ -1303,7 +1304,8 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
         //masterQuantProteinSetsQuery.setParameter("rsmId", resultSummaryId); // NO NEED, and even if this constaint is added, the query become slow
         List<DMasterQuantProteinSet> listResult = masterQuantProteinSetsQuery.getResultList();
 
-        TypedQuery<DProteinSet> proteinSetQuery = entityManagerMSI.createQuery("SELECT new fr.proline.core.orm.msi.dto.DProteinSet(ps.id, ps.representativeProteinMatchId, ps.resultSummary.id) FROM ProteinSet ps WHERE ps.id=:psId ", DProteinSet.class);
+        
+        TypedQuery<DProteinSet> proteinSetQuery = entityManagerMSI.createQuery("SELECT new fr.proline.core.orm.msi.dto.DProteinSet(ps.id, ps.representativeProteinMatchId, ps.resultSummary.id, ps.serializedProperties) FROM ProteinSet ps WHERE ps.id=:psId ", DProteinSet.class);
         String queryProteinMatch = "SELECT new fr.proline.core.orm.msi.dto.DProteinMatch(pm.id, pm.accession,  pm.score, pm.peptideCount, pm.resultSet.id, pm.description) "
                 + "FROM ProteinMatch pm "
                 + "WHERE pm.id=:pmId";

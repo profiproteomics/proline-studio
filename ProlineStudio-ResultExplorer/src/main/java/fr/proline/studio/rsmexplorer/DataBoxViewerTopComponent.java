@@ -8,6 +8,7 @@ import java.awt.GridLayout;
 import java.awt.Image;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import org.openide.windows.TopComponent;
 
 /**
@@ -92,6 +93,10 @@ public class DataBoxViewerTopComponent extends TopComponent {
     
     public long getProjectId(){
         return m_windowBox.getEntryBox().getProjectId();
+    }
+    
+    public void loadedDataModified(Long rsetId, Long rsmId, Class c, ArrayList modificationsList, int reason) {
+        m_windowBox.getEntryBox().loadedDataModified(rsetId, rsmId, c, modificationsList, reason);
     }
 
 }

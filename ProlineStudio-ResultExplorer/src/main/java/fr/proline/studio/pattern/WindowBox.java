@@ -2,7 +2,6 @@ package fr.proline.studio.pattern;
 
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.python.data.TableInfo;
-import fr.proline.studio.table.GlobalTableModelInterface;
 import java.awt.Image;
 import java.util.ArrayList;
 import java.util.HashSet;

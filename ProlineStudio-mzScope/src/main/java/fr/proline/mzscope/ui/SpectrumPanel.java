@@ -1,4 +1,4 @@
-package fr.proline.mzscope.ui;
+  package fr.proline.mzscope.ui;
 
 import fr.proline.mzscope.ui.model.ScanTableModel;
 import fr.profi.ms.model.TheoreticalIsotopePattern;

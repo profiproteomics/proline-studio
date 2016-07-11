@@ -25,8 +25,8 @@ public class GroupParameter  {
     public boolean isDataDependant(Class dataType) {
         int nbParameters  = m_parameterList.size();
         for (int i=0;i<nbParameters;i++) {
-            DataParameter inParameter = m_parameterList.get(i);
-            if (inParameter.equalsData(dataType)) {
+            DataParameter parameter = m_parameterList.get(i);
+            if (parameter.equalsData(dataType)) {
                 return true;
             }
         }

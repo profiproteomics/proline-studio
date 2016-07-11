@@ -14,6 +14,8 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableModel;
 import org.openide.windows.WindowManager;
+import fr.proline.studio.table.renderer.GrayableTableCellRenderer;
+import fr.proline.studio.table.renderer.GrayedRenderer;
 
 /**
  * Table to deal with LazyData (data which will be loaded later)
@@ -184,12 +186,22 @@ public abstract class LazyTable extends DecoratedMarkerTable implements Adjustme
             if (renderer != null) {
                 Class columnClass = model.getColumnClass(columnInModel);
                 if (columnClass.equals(LazyData.class)) {
-                    TableCellRenderer registeredRenderer = m_rendererMap.get(columnInModel);
+                    
+                    m_sb.append(columnInModel);
+                    if (renderer instanceof GrayedRenderer) {
+                        m_sb.append("grayed" );
+                    }
+                    String key = m_sb.toString();
+                    m_sb.setLength(0);
+                    
+                    TableCellRenderer registeredRenderer = m_rendererMap.get(key);
                     if (registeredRenderer != null) {
                         return registeredRenderer;
                     }
+                    
+                    
                     renderer = new LazyTableCellRenderer(renderer);
-                    m_rendererMap.put(columnInModel, renderer);
+                    m_rendererMap.put(key, renderer);
                     return renderer;
                 } else {
                     return renderer;
@@ -199,5 +211,6 @@ public abstract class LazyTable extends DecoratedMarkerTable implements Adjustme
 
         return super.getCellRenderer(row, column);
     }
-    private final HashMap<Integer, TableCellRenderer> m_rendererMap = new HashMap();
+    private final HashMap<String, TableCellRenderer> m_rendererMap = new HashMap();
+    private final StringBuilder m_sb = new StringBuilder();
 }

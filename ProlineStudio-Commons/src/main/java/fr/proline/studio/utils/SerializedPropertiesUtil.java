@@ -109,7 +109,8 @@ public class SerializedPropertiesUtil {
 
     private static void createPropertyGroup(HashMap<String, String> propertiesList, String name, Map map) {
 
-        addProperties(propertiesList, null, map);
+        String nameParam = (name.compareTo("validation_properties") == 0) ? "validation_properties" : null; //JPM.WART : sometimes there is one more hierarchical level, and so validation_properties must be always displayed
+        addProperties(propertiesList, nameParam, map);
 
     }
 

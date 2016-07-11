@@ -35,6 +35,7 @@ public class FilterTableModel extends DecoratedTableModel implements FilterTable
     
     private boolean m_isFiltering = false;
 
+    private boolean m_valueBeingSet = false;
     
     public FilterTableModel(GlobalTableModelInterface tableModelSource) {
         setTableModelSource(tableModelSource);
@@ -154,6 +155,30 @@ public class FilterTableModel extends DecoratedTableModel implements FilterTable
         }
         return m_tableModelSource.getValueAt(rowFiltered, columnIndex);
     }
+    
+    @Override
+    public boolean isCellEditable(int rowIndex, int columnIndex) {
+        int rowFiltered = rowIndex;
+        if ((!m_isFiltering) && (m_filteredIds != null)) {
+            rowFiltered = m_filteredIds.get(rowIndex).intValue();
+        }
+        return m_tableModelSource.isCellEditable(rowFiltered, columnIndex);
+    }
+    
+    @Override
+    public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+        m_valueBeingSet = true;
+        try {
+            int rowFiltered = rowIndex;
+            if ((!m_isFiltering) && (m_filteredIds != null)) {
+                rowFiltered = m_filteredIds.get(rowIndex).intValue();
+            }
+            m_tableModelSource.setValueAt(aValue, rowFiltered, columnIndex);
+        } finally {
+            m_valueBeingSet = false;
+        }
+    }
+    
     @Override
     public Class getColumnClass(int columnIndex) {
         return m_tableModelSource.getColumnClass(columnIndex);
@@ -363,6 +388,10 @@ public class FilterTableModel extends DecoratedTableModel implements FilterTable
 
     @Override
     public void tableChanged(TableModelEvent e) {
+        if (m_valueBeingSet) {
+            return;
+        }
+        
         // cancel restrain and redo filter
         restrain(null);
     }

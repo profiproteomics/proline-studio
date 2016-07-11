@@ -16,7 +16,6 @@ import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JCheckBox;
-import javax.swing.JSlider;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.SortOrder;

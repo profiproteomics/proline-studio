@@ -92,6 +92,22 @@ public class DataboxXicProteinSet extends AbstractDataBox {
     }
 
     @Override
+    public Long getRsetId() {
+        if (m_dataset != null) {
+            return null;
+        }
+        return m_dataset.getResultSetId();
+    }
+
+    @Override
+    public Long getRsmId() {
+        if (m_dataset != null) {
+            return null;
+        }
+        return m_dataset.getResultSummaryId();
+    }
+    
+    @Override
     public void createPanel() {
         XicProteinSetPanel p = new XicProteinSetPanel();
         p.setName(m_typeName);
@@ -183,6 +199,27 @@ public class DataboxXicProteinSet extends AbstractDataBox {
     }
     //private Long m_previousTaskId = null;
 
+    /**
+     * To be overriden if the modification in a following databox can lead to a
+     * modificiation of the data of the current databox. (for instance,
+     * disabling peptides -> modifications of protein set in the XIC View
+     *
+     * @param dataType
+     */
+    @Override
+    public void dataMustBeRecalculated(Long rsetId, Long rsmId, Class dataType, ArrayList modificationsList, int reason) {
+        if (m_dataset.getResultSetId() != rsetId) {
+            return;
+        }
+        if (m_dataset.getResultSummaryId()!= rsmId) {
+            return;
+        }
+        if (dataType.equals(DMasterQuantProteinSet.class)) {
+            ((XicProteinSetPanel) m_panel).dataModified(modificationsList, reason);
+        }
+    }
+    
+    
     @Override
     public void setEntryData(Object data) {
         m_panel.addSingleValue(data);

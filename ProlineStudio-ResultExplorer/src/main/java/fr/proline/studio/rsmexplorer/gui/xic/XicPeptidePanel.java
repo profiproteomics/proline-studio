@@ -1,5 +1,6 @@
 package fr.proline.studio.rsmexplorer.gui.xic;
 
+import com.sun.webkit.Timer;
 import fr.proline.core.orm.msi.dto.DMasterQuantPeptide;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
 import fr.proline.studio.comparedata.AddDataAnalyzerButton;
@@ -60,7 +61,6 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
-import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 import javax.swing.ToolTipManager;
 import javax.swing.event.ListSelectionEvent;
@@ -102,7 +102,7 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
     private final boolean m_canGraph ;
 
     public XicPeptidePanel(boolean canGraph) {
-        this.m_canGraph = canGraph ;
+        m_canGraph = canGraph ;
         initComponents();
     }
     
@@ -269,7 +269,8 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
         m_peptideScrollPane = new JScrollPane();
         
         m_quantPeptideTable = new QuantPeptideTable();
-        m_quantPeptideTable.setModel(new CompoundTableModel(new QuantPeptideTableModel((LazyTable)m_quantPeptideTable), true));
+        QuantPeptideTableModel baseModel = new QuantPeptideTableModel((LazyTable) m_quantPeptideTable);
+        m_quantPeptideTable.setModel(new CompoundTableModel(baseModel, true));
         CustomColumnControlButton customColumnControl = new CustomColumnControlButton(m_quantPeptideTable);
         m_quantPeptideTable.setColumnControl(customColumnControl);
         // hide the id column
@@ -306,7 +307,7 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
         m_quantChannels = quantChannels;
         m_isXICMode = isXICMode;
         this.m_displayForProteinSet = displayForProteinSet;
-        ((QuantPeptideTableModel) ((CompoundTableModel) m_quantPeptideTable.getModel()).getBaseModel()).setData(taskId, quantChannels, peptides, m_isXICMode);
+        ((QuantPeptideTableModel) ((CompoundTableModel) m_quantPeptideTable.getModel()).getBaseModel()).setData(taskId, m_dataBox.getProjectId(), quantChannels, peptides, m_isXICMode);
         //m_quantPeptideTable.setColumnControlVisible(((QuantPeptideTableModel) ((CompoundTableModel) m_quantPeptideTable.getModel()).getBaseModel()).getColumnCount() < XicProteinSetPanel.NB_MAX_COLUMN_CONTROL);
         m_titleLabel.setText(TABLE_TITLE +" ("+peptides.size()+")");
         if (!m_isXICMode){
@@ -364,7 +365,9 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
     
     @Override
     public void setDataBox(AbstractDataBox dataBox) {
+        ((QuantPeptideTableModel) ((CompoundTableModel) m_quantPeptideTable.getModel()).getBaseModel()).setDatabox(dataBox);
         m_dataBox = dataBox;
+        
     }
     @Override
     public AbstractDataBox getDataBox() {

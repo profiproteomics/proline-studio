@@ -23,11 +23,17 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import javax.swing.AbstractAction;
+import javax.swing.Action;
 import javax.swing.Box;
+import javax.swing.InputMap;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
+import javax.swing.KeyStroke;
 
 
 
@@ -51,6 +57,20 @@ public class DataAnalyzerPanel extends JPanel implements DataBoxPanelInterface {
         JPanel internalPanel = initComponents();
         add(internalPanel, BorderLayout.CENTER);
 
+        
+        // Delete Key Action
+        KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0);
+        Action actionListener = new AbstractAction() {
+
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                m_graphPanel.deleteAllSelected();
+            }
+        };
+        InputMap inputMap = getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+        inputMap.put(stroke, "DELETE");
+        getActionMap().put("DELETE", actionListener);
+        
     }
     
     

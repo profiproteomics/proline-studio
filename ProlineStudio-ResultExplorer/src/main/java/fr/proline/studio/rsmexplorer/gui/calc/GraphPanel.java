@@ -579,7 +579,7 @@ public class GraphPanel extends JPanel implements MouseListener, MouseMotionList
         }
     }
     
-    private void deleteAllSelected() {
+    public void deleteAllSelected() {
         int nbObjectSelected = m_selectedObjectsArray.size();
         for (int i = 0; i < nbObjectSelected; i++) {
             m_selectedObjectsArray.get(i).deleteAction();

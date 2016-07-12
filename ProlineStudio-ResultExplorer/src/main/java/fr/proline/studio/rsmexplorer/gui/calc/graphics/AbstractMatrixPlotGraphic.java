@@ -4,6 +4,7 @@ import fr.proline.core.orm.uds.BiologicalGroup;
 import fr.proline.core.orm.uds.GroupSetup;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.gui.JCheckBoxList;
+import fr.proline.studio.gui.JCheckBoxListPanel;
 import fr.proline.studio.parameter.AbstractLinkedParameters;
 import fr.proline.studio.parameter.MultiObjectParameter;
 import fr.proline.studio.parameter.ObjectParameter;
@@ -392,7 +393,7 @@ public abstract class AbstractMatrixPlotGraphic extends AbstractGraphic {
                         try {
                             doingValueChanged = true;
 
-                            JCheckBoxList cb = (JCheckBoxList) m_columnsParameterArray[_groudIndex].getComponent();
+                            JCheckBoxList cb = ((JCheckBoxListPanel) m_columnsParameterArray[_groudIndex].getComponent()).getCheckBoxList();
                             cb.reinitSelection();
 
                             Integer quantitationChoosen = (Integer) associatedValue;

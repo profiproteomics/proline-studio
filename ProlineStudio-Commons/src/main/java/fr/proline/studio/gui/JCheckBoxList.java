@@ -90,6 +90,22 @@ public class JCheckBoxList<E> extends JList {
         }
     }
     
+    public void unselectAll() {
+        selectAll(false);
+    }
+    public void selectAll() {
+        selectAll(true);
+    }
+    
+    private void selectAll(boolean selection) {
+        ListModel m = getModel();
+        int nb = m.getSize();
+        for (int i=0;i<nb;i++) {
+            CheckListItem item = (CheckListItem) m.getElementAt(i);
+            item.setSelected(selection);
+        }
+    }
+    
     public void selectItem(int index) {
         CheckListItem item = (CheckListItem) getModel().getElementAt(index);
         item.setSelected(true);

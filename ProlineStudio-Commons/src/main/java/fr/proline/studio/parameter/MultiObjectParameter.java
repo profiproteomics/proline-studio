@@ -1,6 +1,7 @@
 package fr.proline.studio.parameter;
 
 import fr.proline.studio.gui.JCheckBoxList;
+import fr.proline.studio.gui.JCheckBoxListPanel;
 import java.awt.Dimension;
 import java.util.ArrayList;
 import java.util.List;
@@ -37,11 +38,13 @@ public class MultiObjectParameter<E> extends AbstractParameter {
         m_defaultSelection = selection;
         m_paramToString = paramToString;
         if (checkBoxList == null) {
-            checkBoxList = (JCheckBoxList)getComponent(null);
+            m_parameterComponent = (JCheckBoxListPanel) getComponent(null);
+        } else {
+            m_parameterComponent = new JCheckBoxListPanel(checkBoxList);
         }
-        m_parameterComponent = checkBoxList;
+
         m_associatedObjects = associatedObjects;
-        //checkBoxList.setCellRenderer(new ParameterComboboxRenderer(paramToString));
+
 
     }
     
@@ -81,8 +84,8 @@ public class MultiObjectParameter<E> extends AbstractParameter {
             
             JCheckBoxList checkboxList = new JCheckBoxList(list, visibilityList);
 
-            m_parameterComponent = checkboxList;
-            return checkboxList;
+            m_parameterComponent = new JCheckBoxListPanel(checkboxList);
+            return m_parameterComponent;
         }
 
         return null; // should not happen
@@ -119,7 +122,7 @@ public class MultiObjectParameter<E> extends AbstractParameter {
         
         if (m_graphicalType.equals(JCheckBoxList.class)) {
             
-            List selectedList = ((JCheckBoxList) m_parameterComponent).getSelectedItems();
+            List selectedList = ((JCheckBoxListPanel) m_parameterComponent).getCheckBoxList().getSelectedItems();
             if ((m_mustSelectOneObject) && (selectedList.isEmpty())) {
                 return new ParameterError("No selection done", m_parameterComponent);
             }
@@ -163,7 +166,7 @@ public class MultiObjectParameter<E> extends AbstractParameter {
         
         if (m_graphicalType.equals(JCheckBoxList.class)) {
             
-            JCheckBoxList checkBoxList = ((JCheckBoxList) m_parameterComponent);
+            JCheckBoxList checkBoxList = ((JCheckBoxListPanel) m_parameterComponent).getCheckBoxList();
             int[] indices = selected ? checkBoxList.getSelectedIndices() : checkBoxList.getNonSelectedIndices();
                  
             ArrayList associatedSelectedList = new ArrayList(indices.length);

@@ -71,11 +71,13 @@ import org.openide.windows.WindowManager;
 import fr.proline.studio.rsmexplorer.actions.xic.*;
 import fr.proline.studio.pattern.xic.*;
 import fr.proline.core.orm.uds.dto.DDataset;
+import fr.proline.core.orm.util.JsonSerializer;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.xic.DatabaseModifyPeptideTask;
 import fr.proline.studio.rsmexplorer.DataBoxViewerManager;
 import fr.proline.studio.utils.ResultCallback;
+import java.util.Map;
 
 /**
  *
@@ -368,6 +370,27 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
                 // hide Id column
                 m_quantProteinSetTable.getColumnExt(m_quantProteinSetTable.convertColumnIndexToView(QuantProteinSetTableModel.COLTYPE_PROTEIN_SET_ID)).setVisible(false);
                 m_hideFirstTime = false;
+            }
+            
+            // check if refine panel must be shown
+            try {
+                for (int i = 0; i < proteinSets.size(); i++) {
+                    DMasterQuantProteinSet masterQuantProteinSet = proteinSets.get(i);
+                    String serializedProperties = masterQuantProteinSet.getSerializedProperties();
+                    if (serializedProperties != null) {
+
+                        Map<String, Object> pmqSerializedMap = JsonSerializer.getMapper().readValue(serializedProperties, Map.class);
+                        if ((pmqSerializedMap != null) && (pmqSerializedMap.containsKey(DMasterQuantProteinSet.MASTER_QUANT_PROTEINSET_WITH_PEPTIDE_MODIFIED))) {
+                            // we must show refine panel
+                            m_refineProteinsPanel.setLocation(getX() + 20, getY() + 20);
+                            m_refineProteinsPanel.setVisible(true);
+                            break;
+                        }
+
+                    }
+                }
+            } catch (Exception e) {
+                // should never happen
             }
         }
 

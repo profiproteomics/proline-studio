@@ -472,11 +472,11 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
         m_quantChannelNumber = quantChannels.length;
         m_proteinSets = proteinSets;
         m_isXICMode = isXICMode;
-        fireTableStructureChanged();
+        
         
         m_taskId = taskId;
 
-        fireTableDataChanged();
+        fireTableStructureChanged();
     }
 
     

@@ -12,7 +12,7 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import com.almworks.sqlite4java.SQLiteException;
 
 import fr.profi.mzdb.MzDbReader;
-import fr.profi.mzdb.utils.concurrent.Callback;
+import fr.profi.mzdb.util.concurrent.Callback;
 import fr.proline.mzscope.map.LcMsViewerEvent.LcMsViewerEventType;
 import fr.proline.mzscope.map.color.IntensityPainter;
 import fr.proline.mzscope.math.Function1D;

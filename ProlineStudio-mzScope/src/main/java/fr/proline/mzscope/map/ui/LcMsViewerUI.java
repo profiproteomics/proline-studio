@@ -43,7 +43,7 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import fr.profi.mzdb.utils.concurrent.Callback;
+import fr.profi.mzdb.util.concurrent.Callback;
 import fr.proline.mzscope.map.LcMsMapChunk;
 import fr.proline.mzscope.map.LcMsViewer;
 import fr.proline.mzscope.map.LcMsViewerEvent;
@@ -691,7 +691,7 @@ public class LcMsViewerUI implements LcMsViewerListener, ComponentListener, Chan
     /*
      * (non-Javadoc)
      *
-     * @see fr.profi.mzdb.utils.future.FutureCallback#onCompletion(java.lang.Object)
+     * @see fr.profi.mzdb.util.future.FutureCallback#onCompletion(java.lang.Object)
      */
     /**
      * @return the currentChunk

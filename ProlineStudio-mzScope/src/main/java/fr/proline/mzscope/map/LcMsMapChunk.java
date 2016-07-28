@@ -15,8 +15,8 @@ import java.util.concurrent.Executors;
 
 import fr.profi.mzdb.MzDbReaderHelper;
 import fr.profi.mzdb.model.SpectrumSlice;
-import fr.profi.mzdb.utils.concurrent.CallableCallback;
-import fr.profi.mzdb.utils.concurrent.Callback;
+import fr.profi.mzdb.util.concurrent.CallableCallback;
+import fr.profi.mzdb.util.concurrent.Callback;
 import fr.proline.mzscope.map.color.IntensityPainter;
 import fr.proline.mzscope.math.Function1D;
 

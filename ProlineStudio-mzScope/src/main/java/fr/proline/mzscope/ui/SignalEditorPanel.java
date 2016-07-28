@@ -6,7 +6,7 @@ import fr.profi.mzdb.algo.signal.filtering.ISignalSmoother;
 import fr.profi.mzdb.algo.signal.filtering.PartialSavitzkyGolaySmoother;
 import fr.profi.mzdb.algo.signal.filtering.SavitzkyGolaySmoother;
 import fr.profi.mzdb.algo.signal.filtering.SavitzkyGolaySmoothingConfig;
-import fr.profi.mzdb.utils.math.DerivativeAnalysis;
+import fr.profi.mzdb.util.math.DerivativeAnalysis;
 import fr.proline.mzscope.model.Signal;
 import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.graphics.BasePlotPanel;

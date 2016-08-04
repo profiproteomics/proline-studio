@@ -16,7 +16,6 @@ public class DataBoxSystemTasks extends AbstractDataBox  {
       
     public DataBoxSystemTasks() {
         super(DataboxType.DataBoxSystemTasks);
-//        setLayout(SplittedPanelContainer.PanelLayout.TABBED);
         // Name of this databox
         m_typeName = "System Tasks List";
     }
@@ -26,7 +25,7 @@ public class DataBoxSystemTasks extends AbstractDataBox  {
         SystemTasksPanel p = new SystemTasksPanel();
         p.setName(m_typeName);
         p.setDataBox(this);
-        m_panel = p;
+        m_panel = p;        
     }
 
     @Override

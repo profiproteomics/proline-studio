@@ -377,7 +377,7 @@ public class WindowBoxFactory {
         AbstractDataBox[] boxes = new AbstractDataBox[1];
         boxes[0] = new DataBoxSystemTasks();
         
-        WindowBox winBox = new WindowBox("System Tasks Log", generatePanel(boxes), boxes[0], null);
+        WindowBox winBox = new WindowBox("Server Tasks Log", generatePanel(boxes), boxes[0], null);
         return winBox;
     }
     
@@ -390,24 +390,14 @@ public class WindowBoxFactory {
         return winBox;
     }
     
-    
-    public static WindowBox getQueueMonitoringWindowBox() {
-        AbstractDataBox[] boxes = new AbstractDataBox[1];
-        boxes[0] = new DataBoxQueueMonitoring();
-        
-        WindowBox winBox = new WindowBox("Queue Message List", generatePanel(boxes), boxes[0], null);
-
-        return winBox;
-    }
-       
+          
     public static WindowBox[] getSystemMonitoringWindowBox() {
-//        WindowBox[] m_windowBoxes = new WindowBox[3];
-//        m_windowBoxes[0] = WindowBoxFactory.getTaskListWindowBox();
-//        m_windowBoxes[1] = WindowBoxFactory.getSystemTaskLogWindowBox();
-//        m_windowBoxes[2] = WindowBoxFactory.getQueueMonitoringWindowBox();
-                        
-        WindowBox[] m_windowBoxes = new WindowBox[1];
+        WindowBox[] m_windowBoxes = new WindowBox[2];
         m_windowBoxes[0] = WindowBoxFactory.getTaskListWindowBox();
+        m_windowBoxes[1] = WindowBoxFactory.getSystemTaskLogWindowBox();
+                        
+//        WindowBox[] m_windowBoxes = new WindowBox[1];
+//        m_windowBoxes[0] = WindowBoxFactory.getTaskListWindowBox();
      
         return m_windowBoxes;
     }

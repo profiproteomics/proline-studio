@@ -1,11 +1,15 @@
 package fr.proline.studio.dpm.task.jms;
 
+import fr.proline.core.orm.uds.UserAccount;
+import fr.proline.studio.dam.DatabaseDataManager;
 import fr.proline.studio.dam.taskinfo.AbstractLongTask;
 import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import fr.proline.studio.dpm.jms.AccessJMSManagerThread;
 import fr.proline.studio.dpm.task.util.JMSConnectionManager;
 import fr.proline.studio.dpm.task.util.JMSMessageUtil;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.concurrent.atomic.AtomicInteger;
 import javax.jms.*;
 import javax.swing.SwingUtilities;
@@ -123,6 +127,25 @@ public abstract class AbstractJMSTask  extends AbstractLongTask implements Messa
     public void setTaskInfoRequest(String content) throws JMSException{
         m_taskInfo.setRequestURL(m_producer.getDestination().toString());
         m_taskInfo.setRequestContent(content);
+    }
+    
+    protected void addSourceToMessage(Message message) throws JMSException  {
+        
+        StringBuilder userLoginSB = new StringBuilder();
+        UserAccount user = DatabaseDataManager.getDatabaseDataManager().getLoggedUser();
+        if(user!=null)
+            userLoginSB.append(user.getLogin());
+        else
+            userLoginSB.append("Unknonw user");
+        String hostIP = "Unknown";
+        try { 
+            hostIP = InetAddress.getLocalHost().getHostAddress();
+        } catch(UnknownHostException uhe){
+           hostIP = "Unknown";
+        }
+        userLoginSB.append(" (host  ").append(hostIP).append(")");
+        message.setStringProperty(JMSConnectionManager.PROLINE_SERVICE_SOURCE_KEY, userLoginSB.toString());
+
     }
     
     /**

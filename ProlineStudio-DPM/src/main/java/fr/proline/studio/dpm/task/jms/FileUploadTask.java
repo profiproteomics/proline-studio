@@ -62,6 +62,8 @@ public class FileUploadTask extends AbstractJMSTask {
             message.setJMSReplyTo(m_replyQueue);
             message.setStringProperty(JMSConnectionManager.PROLINE_SERVICE_NAME_KEY, "proline/misc/FileUpload");
             message.setStringProperty("dest_file_name", uploadFile.getName());
+            addSourceToMessage(message);
+        
             in = new FileInputStream(uploadFile);
             BufferedInputStream inBuf = new BufferedInputStream(in);
             message.setObjectProperty(JMSConnectionManager.HORNET_Q_INPUT_STREAM_KEY, inBuf);

@@ -58,9 +58,6 @@ public class AccessJMSManagerThread extends Thread {
                     notifyAll();
                 }
 
-                //Thread.sleep(500);
-                //System.out.println("Action : "+action.getClass().toString()+" "+System.currentTimeMillis());
-
                 // init session if needed
                 initSession();
                 

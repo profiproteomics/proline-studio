@@ -31,6 +31,8 @@ import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dpm.task.util.JMSConnectionManager;
 import fr.proline.studio.gui.DatasetAction;
+//import fr.proline.studio.rsmexplorer.actions.CancelAction;
+//import fr.proline.studio.rsmexplorer.actions.WaitAction;
 import fr.proline.studio.rsmexplorer.actions.identification.AggregateAction;
 import fr.proline.studio.rsmexplorer.actions.identification.ClearDatasetAction;
 import fr.proline.studio.rsmexplorer.actions.identification.CreateXICAction;
@@ -38,6 +40,7 @@ import fr.proline.studio.rsmexplorer.actions.identification.ExportAction;
 import fr.proline.studio.rsmexplorer.actions.identification.FilterRSMProteinSetsAction;
 import fr.proline.studio.rsmexplorer.actions.identification.FilterRSMProteinSetsJMSAction;
 import fr.proline.studio.rsmexplorer.actions.identification.GenerateSpectrumMatchesJMSAction;
+import fr.proline.studio.rsmexplorer.actions.identification.ImportMaxQuantResultJMSAction;
 import fr.proline.studio.rsmexplorer.actions.identification.ImportSearchResultAsDatasetAction;
 import fr.proline.studio.rsmexplorer.actions.identification.ImportSearchResultAsDatasetJMSAction;
 import fr.proline.studio.rsmexplorer.actions.identification.UpdatePeaklistSoftwareAction;
@@ -52,10 +55,12 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.event.MouseEvent;
 import java.util.*;
+import java.util.prefs.Preferences;
 import javax.swing.*;
 import javax.swing.event.TreeExpansionEvent;
 import javax.swing.event.TreeWillExpandListener;
 import javax.swing.tree.*;
+import org.openide.util.NbPreferences;
 
 /**
  * Tree of projects and datasets (identification type)
@@ -568,7 +573,7 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
             if (m_allImportedPopup == null) {
                 boolean isJMSDefined = JMSConnectionManager.getJMSConnectionManager().isJMSDefined();
                 // create the actions
-                m_allImportedActions = new ArrayList<>(3);  // <--- get in sync
+                m_allImportedActions = new ArrayList<>(5);  // <--- get in sync
 
                 DisplayAllRsetAction allRsetAction = new DisplayAllRsetAction();
                 m_allImportedActions.add(allRsetAction);
@@ -578,10 +583,16 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
                 if (isJMSDefined) {
                     ImportSearchResultAsRsetJMSAction importJmsAction = new ImportSearchResultAsRsetJMSAction();
                     m_allImportedActions.add(importJmsAction);
+//                    WaitAction wAction = new WaitAction();                   
+//                    m_allImportedActions.add(wAction);
+//                    CancelAction cAction = new CancelAction();                   
+//                    m_allImportedActions.add(cAction);
+//                    
                 } else {
                     ImportSearchResultAsRsetAction importAction = new ImportSearchResultAsRsetAction();
                     m_allImportedActions.add(importAction);
                 }
+                
 
                 m_allImportedPopup = new JPopupMenu();
 
@@ -601,11 +612,11 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
             
             // creation of the popup if needed
             if (m_mainPopup == null) {
-
+                Preferences preferences = NbPreferences.root();
                 // create the actions
+                Boolean showHiddenFunctionnality =  preferences.getBoolean("Profi", false);
 
-
-                m_mainActions = new ArrayList<>(25);  // <--- get in sync
+                m_mainActions = new ArrayList<>(26);  // <--- get in sync
 
                 boolean isJMSDefined = JMSConnectionManager.getJMSConnectionManager().isJMSDefined();
                 
@@ -634,8 +645,10 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
                 if (isJMSDefined) {
                     ImportSearchResultAsDatasetJMSAction identificationAction = new ImportSearchResultAsDatasetJMSAction();
                     m_mainActions.add(identificationAction);
-              //      ImportMaxQuantResultJMSAction importMaxQuant = new ImportMaxQuantResultJMSAction();
-               //     m_mainActions.add(importMaxQuant);
+                    if(showHiddenFunctionnality) {
+                        ImportMaxQuantResultJMSAction importMaxQuant = new ImportMaxQuantResultJMSAction();
+                        m_mainActions.add(importMaxQuant);
+                    }
                     ValidateJMSAction validateJMSAction = new ValidateJMSAction();
                     m_mainActions.add(validateJMSAction);
                     MergeJMSAction mergeJmsAction = new MergeJMSAction();

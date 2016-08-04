@@ -11,6 +11,7 @@ import javax.jms.JMSContext;
 import javax.jms.JMSException;
 import javax.jms.MessageConsumer;
 import javax.jms.Queue;
+import javax.jms.QueueBrowser;
 import javax.jms.Session;
 import javax.jms.Topic;
 import org.hornetq.api.core.TransportConfiguration;
@@ -18,7 +19,6 @@ import org.hornetq.api.jms.HornetQJMSClient;
 import org.hornetq.api.jms.JMSFactoryType;
 import org.hornetq.core.remoting.impl.netty.NettyConnectorFactory;
 import org.hornetq.core.remoting.impl.netty.TransportConstants;
-import org.openide.util.Exceptions;
 import org.openide.util.NbPreferences;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,6 +43,8 @@ public class JMSConnectionManager {
     public static final String PROLINE_SERVICE_NAME_KEY = "Proline_ServiceName";
 
     public static final String PROLINE_SERVICE_VERSION_KEY = "Proline_ServiceVersion";
+    
+    public static final String PROLINE_SERVICE_SOURCE_KEY = "Proline_ServiceSource";
     
     public static final String HORNET_Q_SAVE_STREAM_KEY = "JMS_HQ_SaveStream";
     
@@ -69,6 +71,7 @@ public class JMSConnectionManager {
     private Session m_topicSession = null;
     private JMSContext m_jmsContext = null;
             
+    private QueueBrowser m_browser = null;
     private ServiceNotificationListener m_notifListener = null;
     private MessageConsumer m_topicSuscriber;
     private static JMSConnectionManager m_jmsConnectionManager = null;
@@ -190,9 +193,8 @@ public class JMSConnectionManager {
 	    m_topicSession = m_connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
             // Step 6. Create the subscription and the subscriber.
 	    m_topicSuscriber = m_topicSession.createConsumer(m_notificationTopic);
-            m_notifListener = new ServiceNotificationListener();
-	    m_topicSuscriber.setMessageListener(m_notifListener);
-            
+            m_notifListener = new ServiceNotificationListener();	 
+            m_topicSuscriber.setMessageListener(m_notifListener); //TODO : listen only when asked !?
         }catch(JMSException je){
                 
             if (m_connection != null) {
@@ -206,9 +208,19 @@ public class JMSConnectionManager {
             throw je;
         }
     }
-    
+       
     public ServiceNotificationListener getNotificationListener(){
         return m_notifListener;
+    }
+    
+    public QueueBrowser getQueueBrowser() {
+        if (m_browser == null) {
+            JMSContext jmsCtxt = getJMSContext();
+            if (jmsCtxt != null) {
+                m_browser = jmsCtxt.createBrowser(m_serviceQueue);
+            }
+        }
+        return m_browser;
     }
     
     public JMSContext getJMSContext(){

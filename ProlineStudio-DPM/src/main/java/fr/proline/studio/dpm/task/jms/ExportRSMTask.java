@@ -77,7 +77,8 @@ public class ExportRSMTask extends AbstractJMSTask {
         /* ReplyTo = Temporary Destination Queue for Server -> Client response */
         message.setJMSReplyTo(m_replyQueue);
         message.setStringProperty(JMSConnectionManager.PROLINE_SERVICE_NAME_KEY, "proline/dps/msi/ExportResultSummary");
-
+        addSourceToMessage(message);
+        
         setTaskInfoRequest(message.getText());
 
         //  Send the Message

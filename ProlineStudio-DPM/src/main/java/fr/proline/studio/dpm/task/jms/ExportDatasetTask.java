@@ -75,6 +75,7 @@ public class ExportDatasetTask extends AbstractJMSTask {
         message.setJMSReplyTo(m_replyQueue);
         message.setStringProperty(JMSConnectionManager.PROLINE_SERVICE_NAME_KEY, m_serviceName);
         message.setStringProperty(JMSConnectionManager.PROLINE_SERVICE_VERSION_KEY, m_version);
+        addSourceToMessage(message);
         
         setTaskInfoRequest(message.getText());
 	

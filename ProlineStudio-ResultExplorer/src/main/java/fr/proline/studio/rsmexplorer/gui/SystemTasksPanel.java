@@ -5,9 +5,11 @@
  */
 package fr.proline.studio.rsmexplorer.gui;
 
+import fr.profi.util.StringUtils;
 import fr.proline.studio.dpm.data.JMSNotificationMessage;
 import fr.proline.studio.dpm.task.jms.AbstractJMSCallback;
 import fr.proline.studio.dpm.task.util.JMSConnectionManager;
+import fr.proline.studio.dpm.task.util.JMSMessageUtil;
 import fr.proline.studio.dpm.task.util.ServiceNotificationListener;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.pattern.AbstractDataBox;
@@ -28,13 +30,22 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.Enumeration;
+import java.util.List;
+import javax.jms.JMSException;
+import javax.jms.Message;
+import javax.jms.QueueBrowser;
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JToolBar;
 import javax.swing.table.TableCellRenderer;
+import org.openide.windows.WindowManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -42,12 +53,21 @@ import javax.swing.table.TableCellRenderer;
  */
 public class SystemTasksPanel extends JPanel implements DataBoxPanelInterface {
 
+    protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
+   
     private AbstractDataBox m_dataBox;
-    private ArrayList<JMSNotificationMessage> receivedMsgs = new ArrayList<>();
     private SystemMessageTable m_messageTable;
-
+    private JButton m_refreshButton;
+    private JButton m_clearButton;
+    private boolean m_isRunning;
+    private QueueBrowser m_qBrowser = null;
+    private ServiceNotificationListener m_serviceListener = null;
+            
     public SystemTasksPanel() {
+
         setLayout(new GridBagLayout());
+        this.m_isRunning = false;
+        
         GridBagConstraints c = new GridBagConstraints();
         c.anchor = GridBagConstraints.NORTHWEST;
         c.fill = GridBagConstraints.BOTH;
@@ -55,22 +75,43 @@ public class SystemTasksPanel extends JPanel implements DataBoxPanelInterface {
 
         c.weightx = 1;
         c.weighty = 1;
-        add(createToolbarPanel(), c);
+        add(createToolbarPanel(), c);        
+        
     }
 
     private JToolBar initToolbar() {
         JToolBar toolbar = new JToolBar(JToolBar.VERTICAL);
         toolbar.setFloatable(false);
 
-        ConnectButton refreshButton = new ConnectButton();
-        toolbar.add(refreshButton);
+        m_refreshButton = new JButton(IconManager.getIcon(IconManager.IconType.EXECUTE));         
+        m_refreshButton.setToolTipText("Connect to System tasks logs");
+        m_refreshButton.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (!m_isRunning) {
+                    startCollectData();
+                } else {
+                    stopCollectData();
+                }
+            }
+        });       
+        toolbar.add(m_refreshButton);
         
-        ClearButton clearButton = new ClearButton();
-        toolbar.add(clearButton);
+        m_clearButton = new JButton(IconManager.getIcon(IconManager.IconType.ERASER));
+        m_clearButton.setToolTipText("Clear system tasks list");                      
+        m_clearButton.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                clearData();
+            }
+        });       
+        toolbar.add(m_clearButton);
 
         return toolbar;
     }
-
+    
     private JPanel createToolbarPanel() {
         JPanel toolbarPanel = new JPanel();
 
@@ -112,51 +153,87 @@ public class SystemTasksPanel extends JPanel implements DataBoxPanelInterface {
         return internalPanel;
 
     }
-//
-//    private String constructString() {
-//        StringBuilder sb = new StringBuilder();
-//        for (JMSNotificationMessage jmsMsg : receivedMsgs) {
-//            sb.append("Service : ").append(jmsMsg.getServiceName()).append("\n");
-//            sb.append("Event : ").append(jmsMsg.getEventType()).append("\n");
-//            sb.append("Date : ").append(jmsMsg.getEventDate().toString()).append("\n");
-//            sb.append("JsonRPC ID : ").append(jmsMsg.getJsonRPCMsgId()).append("\n");
-//            sb.append("Message ID : ").append(jmsMsg.getRequestMsgId()).append("\n");
-//
-//            sb.append("\n\n");
-//
-//        }
-//        return sb.toString();
-//    }
 
     public void clearData() {
-        receivedMsgs.clear();
        ((SystemMessageTableModel) m_messageTable.getModel()).setData(null);
     }
 
-    private void startCollectData() {
-        final JMSNotificationMessage[] sysInfoResult = new JMSNotificationMessage[1];
-        AbstractJMSCallback callback = new AbstractJMSCallback() {
-
-            @Override
-            public boolean mustBeCalledInAWT() {
-                return true;
+    private boolean checkJMSVariables(){
+        if(m_qBrowser == null){
+            m_qBrowser = JMSConnectionManager.getJMSConnectionManager().getQueueBrowser();
+            if(m_qBrowser == null){
+                JOptionPane.showMessageDialog( WindowManager.getDefault().getMainWindow(), "Unable to get JMS Queue Browser", "Server Tasks Logs error",JOptionPane.ERROR_MESSAGE);
+                return false;
             }
-
-            @Override
-            public void run(boolean success) {
-                receivedMsgs.add(sysInfoResult[0]);
-                ((SystemMessageTableModel) m_messageTable.getModel()).addData(sysInfoResult[0]);
-            }
-        };
-
-        ServiceNotificationListener listener = JMSConnectionManager.getJMSConnectionManager().getNotificationListener();
-        listener.setServiceNotifierCallback(callback, sysInfoResult);
+        }
+        if(m_serviceListener == null) {
+            m_serviceListener =  JMSConnectionManager.getJMSConnectionManager().getNotificationListener();
+             if(m_serviceListener == null) {
+                JOptionPane.showMessageDialog( WindowManager.getDefault().getMainWindow(), "Unable to get Notification Listener (JMS Connection problem ?!)", "Server Tasks Logs error",JOptionPane.ERROR_MESSAGE);
+                return false;                 
+             }
+        }
+        return true;
     }
     
-    private void stopCollectData() {
+    private void startCollectData() {
+      
+        if(checkJMSVariables()) {
+            final JMSNotificationMessage[] sysInfoResult = new JMSNotificationMessage[1];
+            AbstractJMSCallback callback = new AbstractJMSCallback() {
 
-        ServiceNotificationListener listener = JMSConnectionManager.getJMSConnectionManager().getNotificationListener();
-        listener.setServiceNotifierCallback(null, null);
+                @Override
+                public boolean mustBeCalledInAWT() {
+                    return true;
+                }
+
+                @Override
+                public void run(boolean success) {
+                    ((SystemMessageTableModel) m_messageTable.getModel()).addData(sysInfoResult[0]);
+                    browsePendingMessages();
+                }
+            };
+
+            m_serviceListener.setServiceNotifierCallback(callback, sysInfoResult);
+            m_isRunning = true;
+            m_refreshButton.setIcon(IconManager.getIcon(IconManager.IconType.STOP));
+            m_refreshButton.setToolTipText("Unconnect System tasks logs");
+        }
+    }
+    
+    private void browsePendingMessages() {
+        try {
+
+            Enumeration<Message> messageEnum = m_qBrowser.getEnumeration();
+            List<JMSNotificationMessage> pendingMsg = new ArrayList<>();
+
+	    while (messageEnum.hasMoreElements()) {
+		Message msg = messageEnum.nextElement();
+                JMSNotificationMessage notifMsg = JMSMessageUtil.buildJMSNotificationMessage(msg);
+                if(notifMsg != null){
+                    pendingMsg.add(notifMsg);
+                    m_logger.debug(notifMsg.toString());
+                } else 
+                    m_logger.debug("Invalid message in Queue ! "+msg);                
+	    }
+
+	    if (pendingMsg.size() > 0) {
+                ((SystemMessageTableModel) m_messageTable.getModel()).setPendingData(pendingMsg);                
+	    } else {
+		 m_logger.debug("Queue is empty !");  
+	    }
+            
+        } catch (Exception jmsE){
+           JOptionPane.showMessageDialog( WindowManager.getDefault().getMainWindow(), "Unable to browse pending messages (JMS Connection problem ?! : "+jmsE.getMessage()+")", "Server Tasks Logs error",JOptionPane.ERROR_MESSAGE);
+        }           
+    }
+    
+    
+    private void stopCollectData() {        
+        m_serviceListener.setServiceNotifierCallback(null, null);
+        m_isRunning = false;
+        m_refreshButton.setIcon(IconManager.getIcon(IconManager.IconType.EXECUTE));                
+        m_refreshButton.setToolTipText("Connect to System tasks logs");
     }
 
     @Override
@@ -204,46 +281,6 @@ public class SystemTasksPanel extends JPanel implements DataBoxPanelInterface {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
-    public class ClearButton extends JButton implements ActionListener {
-
-        public ClearButton() {
-
-            setIcon(IconManager.getIcon(IconManager.IconType.ERASER));
-            setToolTipText("Clear system tasks list");            
-            addActionListener(this);
-        }
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            clearData();
-        }
-    }
-
-    public class ConnectButton extends JButton implements ActionListener {
-
-        boolean isRunning = false;
-        
-        public ConnectButton() {
-
-            setIcon(IconManager.getIcon(IconManager.IconType.EXECUTE));
-            setToolTipText("Connect to System tasks logs");
-
-            addActionListener(this);
-        }
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            if(! isRunning){
-                startCollectData();
-                isRunning = true;
-                setIcon(IconManager.getIcon(IconManager.IconType.STOP));
-            } else {
-                stopCollectData();
-                isRunning = false;
-                setIcon(IconManager.getIcon(IconManager.IconType.EXECUTE));                
-            }
-        }
-    }
 
     class SystemMessageTable extends DecoratedTable {
         
@@ -252,12 +289,11 @@ public class SystemTasksPanel extends JPanel implements DataBoxPanelInterface {
             setDefaultRenderer(Date.class, new TableCellRenderer() {
 
                     @Override
-                    public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {                        
-                        SimpleDateFormat sf = new SimpleDateFormat("h:mm a - d MMM yyyy ");
+                    public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {    
+                        SimpleDateFormat sf = new SimpleDateFormat("h:mm:ss a - d MMM yyyy ");
                         return new JLabel(sf.format((Date)value));
                     }
-                }
-            );
+            });
         }
 
         @Override
@@ -275,19 +311,33 @@ public class SystemTasksPanel extends JPanel implements DataBoxPanelInterface {
     class SystemMessageTableModel extends DecoratedTableModel {
 
         public static final int COLTYPE_MESSAGE_JSON_RPC_ID = 0;
-        public static final int COLTYPE_MESSAGE_SERVICE_NAME = 1;
+        public static final int COLTYPE_MESSAGE_SERVICE_NAME = 1;        
         public static final int COLTYPE_MESSAGE_EVENT_TYPE = 2;
         public static final int COLTYPE_MESSAGE_EVENT_DATE = 3;
-        public static final int COLTYPE_MESSAGE_REQ_ID = 4;
+        public static final int COLTYPE_MESSAGE_SERVICE_SOURCE = 4;
+        public static final int COLTYPE_MESSAGE_REQ_ID = 5;
+        public static final int COLTYPE_MESSAGE_COMPLEMENTARY_DATA = 6;
 
-        private final String[] m_columnNames = {"JsonRPC Id", "Service Name", "Event", "Date", "Message ID"};
-        private final String[] m_columnTooltips = {"Identifier of JSON RPC message", "Proline Service Name", "Type of event on service", "Date of the event on the service", "Message ID"};
+        private final String[] m_columnNames = {"JsonRPC Id", "Service Name [Version]", "State", "Date", "Source", "Message ID", "Supplementary Data"};
+        private final String[] m_columnTooltips = {"Identifier of JSON RPC message", "Proline Service Name and Version", "Current Service State (START, FAIL, SUCCESS)", "Date of the event on the service", "The source (user/computer) of the service call","Message ID","All complementary data we can get"};
 
         private JMSNotificationMessage[] m_data = null;
 
         public void setData(JMSNotificationMessage[] data ){
             m_data = data;
             fireTableDataChanged();
+        }
+        
+        public void setPendingData(List<JMSNotificationMessage> data ){
+            List <JMSNotificationMessage> tmpMessages = new ArrayList();
+            for(JMSNotificationMessage nextMsg : m_data){
+                if(!nextMsg.getEventType().equals(JMSMessageUtil.PENDING_MESSAGE_STATUS)){
+                    tmpMessages.add(nextMsg);
+                }
+            }
+            tmpMessages.addAll(data);
+            m_data = tmpMessages.toArray(new JMSNotificationMessage[tmpMessages.size()]);
+            fireTableDataChanged();            
         }
         
         public void addData(JMSNotificationMessage msg ){
@@ -325,13 +375,20 @@ public class SystemTasksPanel extends JPanel implements DataBoxPanelInterface {
                 case COLTYPE_MESSAGE_JSON_RPC_ID:
                     return msg.getJsonRPCMsgId();  
                 case COLTYPE_MESSAGE_SERVICE_NAME:
-                    return msg.getServiceName();
+                    StringBuilder sb = new StringBuilder(msg.getServiceName());
+                    if(StringUtils.isNotEmpty( msg.getServiceVersion()))
+                        sb.append(" [").append(msg.getServiceVersion()).append("]");
+                    return sb.toString();
                 case COLTYPE_MESSAGE_EVENT_TYPE:
                     return msg.getEventType();
                 case COLTYPE_MESSAGE_EVENT_DATE:
                     return msg.getEventDate();
+                case COLTYPE_MESSAGE_SERVICE_SOURCE:
+                    return msg.getServiceSource();
                 case COLTYPE_MESSAGE_REQ_ID:
                     return msg.getRequestMsgId();
+                case COLTYPE_MESSAGE_COMPLEMENTARY_DATA:
+                    return (msg.getServiceInfo() != null) ? msg.getServiceInfo() : "-" ;
             }
             return null; // should never happen
         }
@@ -352,7 +409,9 @@ public class SystemTasksPanel extends JPanel implements DataBoxPanelInterface {
                 case COLTYPE_MESSAGE_JSON_RPC_ID:
                 case COLTYPE_MESSAGE_SERVICE_NAME:
                 case COLTYPE_MESSAGE_EVENT_TYPE:
+                case COLTYPE_MESSAGE_SERVICE_SOURCE:
                 case COLTYPE_MESSAGE_REQ_ID:
+                case COLTYPE_MESSAGE_COMPLEMENTARY_DATA:
                     return String.class;
                 case COLTYPE_MESSAGE_EVENT_DATE:
                     return Date.class;

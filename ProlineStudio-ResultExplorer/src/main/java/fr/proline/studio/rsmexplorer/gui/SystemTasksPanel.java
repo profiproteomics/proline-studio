@@ -217,11 +217,7 @@ public class SystemTasksPanel extends JPanel implements DataBoxPanelInterface {
                     m_logger.debug("Invalid message in Queue ! "+msg);                
 	    }
 
-	    if (pendingMsg.size() > 0) {
-                ((SystemMessageTableModel) m_messageTable.getModel()).setPendingData(pendingMsg);                
-	    } else {
-		 m_logger.debug("Queue is empty !");  
-	    }
+            ((SystemMessageTableModel) m_messageTable.getModel()).setPendingData(pendingMsg);                
             
         } catch (Exception jmsE){
            JOptionPane.showMessageDialog( WindowManager.getDefault().getMainWindow(), "Unable to browse pending messages (JMS Connection problem ?! : "+jmsE.getMessage()+")", "Server Tasks Logs error",JOptionPane.ERROR_MESSAGE);

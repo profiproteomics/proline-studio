@@ -46,7 +46,9 @@ public class AuthenticateUserTask extends AbstractJMSTask {
 
         /* ReplyTo = Temporary Destination Queue for Server -> Client response */
         message.setJMSReplyTo(m_replyQueue);
-        message.setStringProperty(JMSConnectionManager.PROLINE_SERVICE_NAME_KEY, "proline/admin/UserAccount");        
+        message.setStringProperty(JMSConnectionManager.PROLINE_SERVICE_NAME_KEY, "proline/admin/UserAccount");
+        addSourceToMessage(message);
+        
         setTaskInfoRequest(message.getText());
         //  Send the Message
         m_producer.send(message,Message.DEFAULT_DELIVERY_MODE,8,TASK_TIMEOUT_MS+5000);

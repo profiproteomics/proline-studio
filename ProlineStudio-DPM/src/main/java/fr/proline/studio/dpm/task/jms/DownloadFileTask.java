@@ -48,7 +48,8 @@ public class DownloadFileTask extends AbstractJMSTask {
         message.setJMSReplyTo(m_replyQueue);
         message.setStringProperty(JMSConnectionManager.PROLINE_SERVICE_NAME_KEY, "proline/misc/ResourceService");
         message.setStringProperty(JMSConnectionManager.PROLINE_NODE_ID_KEY, m_serverNodeId);
-	
+        addSourceToMessage(message);
+        
         setTaskInfoRequest(message.getText());
         
         //  Send the Message

@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import org.jdesktop.swingx.JXTable;
@@ -115,8 +114,7 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
         DataBoxPTMProteinSite(42),
         DataBoxDataAnalyzerResults(43),
         DataBoxImage(44),
-        DataBoxSystemTasks(45),
-        DataBoxQueueMonitoring(46);
+        DataBoxSystemTasks(45);
         
         int m_type;
         private static HashMap<Integer, DataboxType> m_databoxTypeMap = null;
@@ -213,8 +211,6 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
                     return new DataBoxImage();
                 case DataBoxSystemTasks:
                     return new DataBoxSystemTasks();
-                case DataBoxQueueMonitoring:
-                    return new DataBoxQueueMonitoring();
             }
             return null; // should not happen
         }

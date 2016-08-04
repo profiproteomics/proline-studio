@@ -51,6 +51,7 @@ public class RunXICTask extends AbstractJMSTask {
         /* ReplyTo = Temporary Destination Queue for Server -> Client response */
         message.setJMSReplyTo(m_replyQueue);
         message.setStringProperty(JMSConnectionManager.PROLINE_SERVICE_NAME_KEY, m_serviceName);
+        addSourceToMessage(message);              
         if(m_useExistingRSM)
             message.setStringProperty(JMSConnectionManager.PROLINE_SERVICE_VERSION_KEY, m_existingRSM_version);
                 

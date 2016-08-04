@@ -68,7 +68,8 @@ public class ValidationTask extends AbstractJMSTask  {
             /* ReplyTo = Temporary Destination Queue for Server -> Client response */
             message.setJMSReplyTo(m_replyQueue);
             message.setStringProperty(JMSConnectionManager.PROLINE_SERVICE_NAME_KEY, "proline/dps/msi/ValidateResultSet");
-	
+            addSourceToMessage(message);
+        
             setTaskInfoRequest(message.getText());
             
             // Step 8. Send the Message

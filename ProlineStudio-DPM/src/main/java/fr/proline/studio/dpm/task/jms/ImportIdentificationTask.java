@@ -8,6 +8,7 @@ import com.thetransactioncompany.jsonrpc2.JSONRPC2Response;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import fr.proline.studio.dpm.jms.AccessJMSManagerThread;
 import static fr.proline.studio.dpm.task.jms.AbstractJMSTask.m_loggerProline;
+//import static fr.proline.studio.dpm.task.jms.ValidationTask.RANK_FILTER_KEY;
 import fr.proline.studio.dpm.task.util.JMSConnectionManager;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -58,6 +59,8 @@ public class ImportIdentificationTask extends AbstractJMSTask {
 
         /* ReplyTo = Temporary Destination Queue for Server -> Client response */
         message.setJMSReplyTo(m_replyQueue);
+        //SERVICE - ImportValidateGenerateSpectrumMatches service TEST
+//        message.setStringProperty(JMSConnectionManager.PROLINE_SERVICE_NAME_KEY, "proline/dps/msi/ImportValidateGenerateSM");
 	  message.setStringProperty(JMSConnectionManager.PROLINE_SERVICE_NAME_KEY, "proline/dps/msi/ImportResultFiles");
         addSourceToMessage(message);
         
@@ -68,10 +71,33 @@ public class ImportIdentificationTask extends AbstractJMSTask {
 
     }
 
+  /*
+   * 
+ * Input params : TO BE VERIFIED, since test was old ! 
+ *  GLobal
+ *   project_id : The id of the project used for data importation.
+ *  Import Specific
+ *   use_decoy_regexp: true if result file is formated with decoy strategy RegExp, false if it is formated with the id of the rule to be used. 
+ *   result_files : The list of the result files to be imported, as IResultFileDescriptor object (format, path, peaklist_id (optionnal)) + protMatchDecoyRuleId or + decoyStrategy
+ *   instrument_config_id : id in datastore of the instrument config used for result file acquisition
+ *   peaklist_software_id : id in datastore of the software use to generate peaklist
+ *   importer_properties : Map of properties for importer, specific to result files format
+ * Validate Specific
+ *   pep_match_filters : List of PSM filters to use (parameter, threshold and post_validation)
+ *   pep_match_validator_config : PSM validation configuration (as PepMatchValidatorConfig : parameter, threshold, expectedFdr)
+ *   pep_set_score_type : PeptideSet Scoring to use, one of PepSetScoring (mascot:standard score, mascot:modified mudpit score)
+ *   prot_set_filters : List of ProteinSet filters to use (parameter, threshold)
+ *   prot_set_validator_config : ProteinSet validation configuration  (as ProtSetValidatorConfig : validation_method, parameter, thresholds, expectedFdr)
+ *Generate Spectrum Match specific 
+ *   generate_spectrum_matches : If true, generate fragment matches of MS/MS spectra for validated PSM.
+ *   force_insert : Specify if existing spectrum matches should be replaced 
+*/
+    
+    
     private HashMap<String, Object> createParams() {
         HashMap<String, Object> params = new HashMap<>();
         params.put("project_id", m_projectId);
-
+        params.put("use_decoy_regexp", true); //For ImportValidateGenerateSpectrumMatches test
         List args = new ArrayList();
 
         // add the file to parse
@@ -92,6 +118,19 @@ public class ImportIdentificationTask extends AbstractJMSTask {
         // parser arguments
         params.put("importer_properties", m_parserArguments);
 
+//        //VDS TEST : ADD Validation properties !//For ImportValidateGenerateSpectrumMatches test
+//        ArrayList pepFilters = new ArrayList();
+//        HashMap filterCfg = new HashMap();
+//        filterCfg.put("parameter", RANK_FILTER_KEY);
+//        filterCfg.put("threshold", 2);
+//        pepFilters.add(filterCfg);
+//        params.put("pep_match_filters", pepFilters);
+//        params.put("pep_set_score_type", "mascot:standard score");
+//        ArrayList proteinFilters = new ArrayList();
+//        params.put("prot_set_filters", proteinFilters);
+//        params.put("generate_spectrum_matches", true);
+//                
+//         
         return params;
     }
 

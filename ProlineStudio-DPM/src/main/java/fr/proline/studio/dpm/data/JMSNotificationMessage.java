@@ -27,16 +27,22 @@ public class JMSNotificationMessage {
     //Use Proline Node ?! 
     public static final String PENDING_MESSAGE_STATUS = "Pending";
     public static final String START_MESSAGE_STATUS = "Start";
+    public static final String ABORT_MESSAGE_STATUS = "Abort";
     public static final String SUCCES_MESSAGE_STATUS = "Success";
     public static final String FAILED_MESSAGE_STATUS = "Fail";
-    
-    static final HashMap<String,Integer> publicStateByEventType = new HashMap<>();
+        
+    public static final HashMap<String,Integer> publicStateByEventType = new HashMap<>();
     static{ 
         publicStateByEventType.put(PENDING_MESSAGE_STATUS, PUBLIC_STATE_WAITING);
+        publicStateByEventType.put(ABORT_MESSAGE_STATUS, PUBLIC_STATE_ABORTED);
         publicStateByEventType.put(START_MESSAGE_STATUS, PUBLIC_STATE_RUNNING);
         publicStateByEventType.put(SUCCES_MESSAGE_STATUS, PUBLIC_STATE_FINISHED);
         publicStateByEventType.put(FAILED_MESSAGE_STATUS, PUBLIC_STATE_FAILED);        
     };
+    
+    public static Integer getPublicStateFor(String eventStatus){
+        return publicStateByEventType.get(eventStatus);
+    }
     
     public JMSNotificationMessage(String serviceName, String serviceVersion, String serviceSource,
             String serviceInfo, Long  eventTimestamp, String jmsMsgId, String jsonRPCId, String eventType ){
@@ -73,6 +79,11 @@ public class JMSNotificationMessage {
 
     public String getEventType() {
         return m_eventType;
+    }
+    
+    public void setEventType(String eventType){//TODO USe Enums
+        if(publicStateByEventType.containsKey(eventType))
+            m_eventType = eventType;        
     }
 
     public String getServiceVersion() {

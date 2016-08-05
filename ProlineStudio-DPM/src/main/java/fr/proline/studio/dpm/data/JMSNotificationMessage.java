@@ -5,7 +5,9 @@
  */
 package fr.proline.studio.dpm.data;
 
+import static fr.proline.studio.dam.taskinfo.TaskInfo.*;
 import java.util.Date;
+import java.util.HashMap;
 
 /**
  *
@@ -18,17 +20,30 @@ public class JMSNotificationMessage {
     private String m_serviceSource;
     private String m_serviceInfo;
     private Date m_eventTime;
-    private String m_reqJMSMsgId;
+    private String m_jmsMsgId;
     private String m_jsonRPCMsgId;
     private String m_eventType;
     
-       
+    //Use Proline Node ?! 
+    public static final String PENDING_MESSAGE_STATUS = "Pending";
+    public static final String START_MESSAGE_STATUS = "Start";
+    public static final String SUCCES_MESSAGE_STATUS = "Success";
+    public static final String FAILED_MESSAGE_STATUS = "Fail";
+    
+    static final HashMap<String,Integer> publicStateByEventType = new HashMap<>();
+    static{ 
+        publicStateByEventType.put(PENDING_MESSAGE_STATUS, PUBLIC_STATE_WAITING);
+        publicStateByEventType.put(START_MESSAGE_STATUS, PUBLIC_STATE_RUNNING);
+        publicStateByEventType.put(SUCCES_MESSAGE_STATUS, PUBLIC_STATE_FINISHED);
+        publicStateByEventType.put(FAILED_MESSAGE_STATUS, PUBLIC_STATE_FAILED);        
+    };
+    
     public JMSNotificationMessage(String serviceName, String serviceVersion, String serviceSource,
-            String serviceInfo, Long  eventTimestamp, String reqJMSMsgId, String jsonRPCId, String eventType ){
+            String serviceInfo, Long  eventTimestamp, String jmsMsgId, String jsonRPCId, String eventType ){
         m_serviceName = serviceName;
         m_serviceVersion = serviceVersion;
         m_serviceSource = serviceSource;
-        m_reqJMSMsgId = reqJMSMsgId;
+        m_jmsMsgId = jmsMsgId;
         m_jsonRPCMsgId = jsonRPCId;
         m_serviceInfo = serviceInfo;
         m_eventType = eventType;
@@ -48,8 +63,8 @@ public class JMSNotificationMessage {
         return m_eventTime;
     }
 
-    public String getRequestMsgId() {
-        return m_reqJMSMsgId;
+    public String getServerUniqueMsgId() {
+        return m_jmsMsgId;
     }
 
     public String getJsonRPCMsgId() {
@@ -68,10 +83,13 @@ public class JMSNotificationMessage {
         return m_serviceSource;
     }
     
+    public Integer getPublicState(){
+        return publicStateByEventType.getOrDefault(m_eventType, PUBLIC_STATE_ABORTED);
+    }
 
     @Override
     public String toString(){
-        StringBuilder sb = new StringBuilder("Message ").append(getJsonRPCMsgId()).append(" / ").append(getRequestMsgId()).append(" : {");
+        StringBuilder sb = new StringBuilder("Message ").append(getJsonRPCMsgId()).append(" / ").append(getServerUniqueMsgId()).append(" : {");
         sb.append(getServiceName());
         if(m_serviceVersion != null)
             sb.append(" [Version ").append(m_serviceVersion).append("]");

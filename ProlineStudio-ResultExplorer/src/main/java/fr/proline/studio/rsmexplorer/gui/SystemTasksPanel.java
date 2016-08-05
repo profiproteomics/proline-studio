@@ -28,21 +28,22 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
-import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.QueueBrowser;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JToolBar;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableColumnModel;
 import org.openide.windows.WindowManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,11 +51,13 @@ import org.slf4j.LoggerFactory;
 /**
  *
  * @author VD225637
+ * TODO : Merge some code with TasksPanel !!
  */
 public class SystemTasksPanel extends JPanel implements DataBoxPanelInterface {
 
     protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
-   
+    private final static ImageIcon[] PUBLIC_STATE_ICONS = { IconManager.getIcon(IconManager.IconType.HOUR_GLASS_MINI16), IconManager.getIcon(IconManager.IconType.ARROW_RIGHT_SMALL), IconManager.getIcon(IconManager.IconType.CROSS_BLUE_SMALL16), IconManager.getIcon(IconManager.IconType.TICK_SMALL), IconManager.getIcon(IconManager.IconType.CROSS_SMALL16)};
+
     private AbstractDataBox m_dataBox;
     private SystemMessageTable m_messageTable;
     private JButton m_refreshButton;
@@ -139,6 +142,12 @@ public class SystemTasksPanel extends JPanel implements DataBoxPanelInterface {
 
         m_messageTable = new SystemMessageTable();
         m_messageTable.setModel(new SystemMessageTableModel());
+        
+        TableColumnModel columnModel = m_messageTable.getColumnModel();
+        columnModel.getColumn(SystemMessageTableModel.COLTYPE_MESSAGE_EVENT_DATE).setCellRenderer(new DateAndTimeRenderer());
+        columnModel.getColumn(SystemMessageTableModel.COLTYPE_MESSAGE_EVENT_TYPE).setCellRenderer(new EventTypeRenderer());
+        
+          
         // create objects
         JScrollPane scrollPane = new JScrollPane();
         scrollPane.setViewportView(m_messageTable);
@@ -155,7 +164,7 @@ public class SystemTasksPanel extends JPanel implements DataBoxPanelInterface {
     }
 
     public void clearData() {
-       ((SystemMessageTableModel) m_messageTable.getModel()).setData(null);
+       ((SystemMessageTableModel) m_messageTable.getModel()).resetData();
     }
 
     private boolean checkJMSVariables(){
@@ -189,7 +198,7 @@ public class SystemTasksPanel extends JPanel implements DataBoxPanelInterface {
 
                 @Override
                 public void run(boolean success) {
-                    ((SystemMessageTableModel) m_messageTable.getModel()).addData(sysInfoResult[0]);
+                    ((SystemMessageTableModel) m_messageTable.getModel()).addMessage(sysInfoResult[0]);
                     browsePendingMessages();
                 }
             };
@@ -217,7 +226,7 @@ public class SystemTasksPanel extends JPanel implements DataBoxPanelInterface {
                     m_logger.debug("Invalid message in Queue ! "+msg);                
 	    }
 
-            ((SystemMessageTableModel) m_messageTable.getModel()).setPendingData(pendingMsg);                
+            ((SystemMessageTableModel) m_messageTable.getModel()).addMessages(pendingMsg);                
             
         } catch (Exception jmsE){
            JOptionPane.showMessageDialog( WindowManager.getDefault().getMainWindow(), "Unable to browse pending messages (JMS Connection problem ?! : "+jmsE.getMessage()+")", "Server Tasks Logs error",JOptionPane.ERROR_MESSAGE);
@@ -282,14 +291,6 @@ public class SystemTasksPanel extends JPanel implements DataBoxPanelInterface {
         
         public SystemMessageTable(){
             super();
-            setDefaultRenderer(Date.class, new TableCellRenderer() {
-
-                    @Override
-                    public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {    
-                        SimpleDateFormat sf = new SimpleDateFormat("h:mm:ss a - d MMM yyyy ");
-                        return new JLabel(sf.format((Date)value));
-                    }
-            });
         }
 
         @Override
@@ -306,42 +307,47 @@ public class SystemTasksPanel extends JPanel implements DataBoxPanelInterface {
     
     class SystemMessageTableModel extends DecoratedTableModel {
 
-        public static final int COLTYPE_MESSAGE_JSON_RPC_ID = 0;
-        public static final int COLTYPE_MESSAGE_SERVICE_NAME = 1;        
-        public static final int COLTYPE_MESSAGE_EVENT_TYPE = 2;
+        public static final int COLTYPE_MESSAGE_EVENT_TYPE = 0;
+        public static final int COLTYPE_MESSAGE_JSON_RPC_ID = 1;
+        public static final int COLTYPE_MESSAGE_SERVICE_NAME = 2;        
         public static final int COLTYPE_MESSAGE_EVENT_DATE = 3;
         public static final int COLTYPE_MESSAGE_SERVICE_SOURCE = 4;
         public static final int COLTYPE_MESSAGE_REQ_ID = 5;
         public static final int COLTYPE_MESSAGE_COMPLEMENTARY_DATA = 6;
 
-        private final String[] m_columnNames = {"JsonRPC Id", "Service Name [Version]", "State", "Date", "Source", "Message ID", "Supplementary Data"};
-        private final String[] m_columnTooltips = {"Identifier of JSON RPC message", "Proline Service Name and Version", "Current Service State (START, FAIL, SUCCESS)", "Date of the event on the service", "The source (user/computer) of the service call","Message ID","All complementary data we can get"};
+        private final String[] m_columnNames = {"","Id", "Service Name [Version]",  "Date", "Source", "Message ID", "Supplementary Data"};
+        private final String[] m_columnTooltips = {"Current Service State (START, FAIL, SUCCESS, PENDING)","Identifier of JSON RPC message", "Proline Service Name and Version",  "Date of the event on the service", "The source (user/computer) of the service call","Message Server Unique ID","All complementary data we can get"};
 
-        private JMSNotificationMessage[] m_data = null;
+        private ArrayList<JMSNotificationMessage> m_notificationMsgs = new ArrayList<>();
+        private HashMap<String,Integer> indexByMsgId = new HashMap<>();
 
-        public void setData(JMSNotificationMessage[] data ){
-            m_data = data;
+        public void resetData( ){
+            m_notificationMsgs.clear();
+            indexByMsgId.clear();
+            fireTableDataChanged();
+        }
+ 
+        public void addMessage(JMSNotificationMessage msg ){           
+            addSingleMessage(msg);   
             fireTableDataChanged();
         }
         
-        public void setPendingData(List<JMSNotificationMessage> data ){
-            List <JMSNotificationMessage> tmpMessages = new ArrayList();
-            for(JMSNotificationMessage nextMsg : m_data){
-                if(!nextMsg.getEventType().equals(JMSMessageUtil.PENDING_MESSAGE_STATUS)){
-                    tmpMessages.add(nextMsg);
-                }
+        private void addSingleMessage(JMSNotificationMessage msg){
+             String msgId  = msg.getServerUniqueMsgId();
+            if(indexByMsgId.containsKey(msgId)){
+                int index= indexByMsgId.get(msgId);
+                m_notificationMsgs.set(index, msg);
+            } else {
+                m_notificationMsgs.add(msg);
+                indexByMsgId.put(msgId, m_notificationMsgs.size()-1);
             }
-            tmpMessages.addAll(data);
-            m_data = tmpMessages.toArray(new JMSNotificationMessage[tmpMessages.size()]);
-            fireTableDataChanged();            
         }
         
-        public void addData(JMSNotificationMessage msg ){
-            if(m_data != null)
-                m_data = Arrays.copyOf(m_data, m_data.length+1);
-            else
-                m_data = new JMSNotificationMessage[1];
-            m_data[m_data.length-1] = msg;
+        public void addMessages(List<JMSNotificationMessage> msgs ){
+            for(JMSNotificationMessage msg : msgs){
+                addSingleMessage(msg); 
+            }
+                           
             fireTableDataChanged();
         }
         
@@ -357,17 +363,19 @@ public class SystemTasksPanel extends JPanel implements DataBoxPanelInterface {
 
         @Override
         public int getRowCount() {
-            if (m_data == null) {
+            if (m_notificationMsgs == null) {
                 return 0;
             }
 
-            return m_data.length;
+            return m_notificationMsgs.size();
         }
 
         @Override
         public Object getValueAt(int rowIndex, int columnIndex) {
-            JMSNotificationMessage msg = m_data[rowIndex];
+            JMSNotificationMessage msg = m_notificationMsgs.get(rowIndex);
             switch (columnIndex) {
+                case COLTYPE_MESSAGE_EVENT_TYPE:
+                    return msg;
                 case COLTYPE_MESSAGE_JSON_RPC_ID:
                     return msg.getJsonRPCMsgId();  
                 case COLTYPE_MESSAGE_SERVICE_NAME:
@@ -375,14 +383,12 @@ public class SystemTasksPanel extends JPanel implements DataBoxPanelInterface {
                     if(StringUtils.isNotEmpty( msg.getServiceVersion()))
                         sb.append(" [").append(msg.getServiceVersion()).append("]");
                     return sb.toString();
-                case COLTYPE_MESSAGE_EVENT_TYPE:
-                    return msg.getEventType();
                 case COLTYPE_MESSAGE_EVENT_DATE:
                     return msg.getEventDate();
                 case COLTYPE_MESSAGE_SERVICE_SOURCE:
                     return msg.getServiceSource();
                 case COLTYPE_MESSAGE_REQ_ID:
-                    return msg.getRequestMsgId();
+                    return msg.getServerUniqueMsgId();
                 case COLTYPE_MESSAGE_COMPLEMENTARY_DATA:
                     return (msg.getServiceInfo() != null) ? msg.getServiceInfo() : "-" ;
             }
@@ -403,15 +409,15 @@ public class SystemTasksPanel extends JPanel implements DataBoxPanelInterface {
         public Class getColumnClass(int col) {
             switch (col) {
                 case COLTYPE_MESSAGE_JSON_RPC_ID:
-                case COLTYPE_MESSAGE_SERVICE_NAME:
-                case COLTYPE_MESSAGE_EVENT_TYPE:
+                case COLTYPE_MESSAGE_SERVICE_NAME:                
                 case COLTYPE_MESSAGE_SERVICE_SOURCE:
                 case COLTYPE_MESSAGE_REQ_ID:
                 case COLTYPE_MESSAGE_COMPLEMENTARY_DATA:
                     return String.class;
                 case COLTYPE_MESSAGE_EVENT_DATE:
                     return Date.class;
-
+                case COLTYPE_MESSAGE_EVENT_TYPE:    
+                    return JMSNotificationMessage.class;
             }
             return null; // should not happen
         }
@@ -421,5 +427,39 @@ public class SystemTasksPanel extends JPanel implements DataBoxPanelInterface {
             return new DefaultLeftAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(getColumnClass(col)));
         }
 
+    }
+    
+    public class DateAndTimeRenderer extends DefaultTableCellRenderer {
+
+        public DateAndTimeRenderer() {
+        }
+
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+
+            super.getTableCellRendererComponent(table, value, isSelected, false, row, column);
+            SimpleDateFormat sf = new SimpleDateFormat("h:mm:ss a - d MMM yyyy ");            
+            setText(sf.format((Date)value));
+
+            return this;
+        }
+    }
+    
+    public class EventTypeRenderer extends DefaultTableCellRenderer {
+
+        public EventTypeRenderer() {
+        }
+
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+
+            super.getTableCellRendererComponent(table, value, isSelected, false, row, column);
+
+            JMSNotificationMessage msg = (JMSNotificationMessage) value;
+            
+            setIcon(PUBLIC_STATE_ICONS[msg.getPublicState()]);
+            setText("");
+            return this;
+        }
     }
 }

@@ -9,6 +9,7 @@ import com.thetransactioncompany.jsonrpc2.JSONRPC2Error;
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Message;
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Notification;
 import com.thetransactioncompany.jsonrpc2.JSONRPC2ParseException;
+import com.thetransactioncompany.jsonrpc2.JSONRPC2Request;
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Response;
 import fr.profi.util.StringUtils;
 import fr.proline.studio.dpm.data.JMSNotificationMessage;
@@ -31,7 +32,8 @@ public class JMSMessageUtil {
     private static final String DATE_FORMAT = "%td/%<tm/%<tY %<tH:%<tM:%<tS.%<tL";
     private static final int MESSAGE_BUFFER_SIZE = 2048;
     
-    public static final String PENDING_MESSAGE_STATUS = "Pending";
+
+    
     
     public static JMSNotificationMessage buildJMSNotificationMessage(final Message message) {
         
@@ -44,7 +46,18 @@ public class JMSMessageUtil {
                 sMoreInfo = ((TextMessage) message).getText();
             Long sTimestamp = message.getJMSTimestamp();
             String jmsId = message.getJMSMessageID();
-            JMSNotificationMessage notifMsg = new  JMSNotificationMessage(sName,sVersion, sSource ,sMoreInfo, sTimestamp, jmsId,jmsId, PENDING_MESSAGE_STATUS);
+            
+            String jsonId = "";
+            if(TextMessage.class.isInstance(message)){
+                try {
+                    JSONRPC2Request jsonMsg = JSONRPC2Request.parse(((TextMessage)message).getText());                            
+                    jsonId= jsonMsg.getID().toString();
+                } catch (JSONRPC2ParseException ex) {
+                     jsonId = jmsId;
+                }                
+            }
+            
+            JMSNotificationMessage notifMsg = new  JMSNotificationMessage(sName,sVersion, sSource ,sMoreInfo, sTimestamp, jmsId,jsonId, JMSNotificationMessage.PENDING_MESSAGE_STATUS);
             return notifMsg;
         }catch(JMSException jmsE ){
             return null;

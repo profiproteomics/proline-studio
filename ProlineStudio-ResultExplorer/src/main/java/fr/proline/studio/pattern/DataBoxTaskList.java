@@ -20,7 +20,7 @@ public class DataBoxTaskList extends AbstractDataBox {
         super(DataboxType.DataBoxTaskList);
         
         // Name of this databox
-        m_typeName = "Tasks Log";
+        m_typeName = "User Tasks Log";
 
         // Register possible out parameters
         // One or Multiple PeptideMatch

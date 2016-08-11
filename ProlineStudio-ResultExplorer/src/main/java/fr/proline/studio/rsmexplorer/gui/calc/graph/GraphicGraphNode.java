@@ -95,6 +95,59 @@ public class GraphicGraphNode extends GraphNode {
 
     }
     
+       @Override
+    public boolean possibleAction() {
+        if (!isConnected()) {
+            return false;
+        }
+        if (!settingsDone()) {
+            return true;
+        }
+        if (m_graphic.isCalculating()) {
+            return false;
+        }
+        if (m_graphic.inError()) {
+            return true;
+        }
+        if (m_graphic.calculationDone()) {
+            return true;
+        }
+        if (m_graphic.isSettingsBeingDone()) {
+            return false;
+        }
+        // process
+        return true;
+    }
+    
+    @Override
+    public void doAction() {
+
+        m_graphNodeAction.setHighlighted(false);
+        
+        if (!settingsDone()) {
+            // settings
+            int nbConnections = (m_inConnectors == null) ? 0 : m_inConnectors.size();
+            new SettingsAction(this, nbConnections).actionPerformed(null);
+            return;
+        }
+
+        if (m_graphic.inError()) {
+            // display error
+            new ErrorAction(this).actionPerformed(null);
+            return;
+        }
+        if (m_graphic.calculationDone()) {
+            // display in new window
+            int nbConnections = (m_inConnectors == null) ? 0 : m_inConnectors.size();
+            new DisplayInNewWindowAction(this, nbConnections).actionPerformed(null);
+            return;
+        }
+
+        // process
+        new ProcessAction(this).actionPerformed(null);
+    }
+
+    
     @Override
     public boolean canBeProcessed() {
         return ! ((!isConnected()) || (!settingsDone()) || (m_graphic.isCalculating()) || (m_graphic.inError()) || (m_graphic.calculationDone()) || (m_graphic.isSettingsBeingDone()));

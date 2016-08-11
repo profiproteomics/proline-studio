@@ -91,6 +91,16 @@ public class DataGraphNode extends GraphNode {
     public ImageIcon getStatusIcon() {
         return null;
     }
+    
+    @Override
+    public boolean possibleAction() {
+        return false;
+    }
+    
+    @Override
+    public void doAction() {
+        // nothing to do
+    }
 
     @Override
     public void askDisplay() {

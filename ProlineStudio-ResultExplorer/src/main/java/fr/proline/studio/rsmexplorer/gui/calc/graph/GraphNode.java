@@ -38,10 +38,12 @@ public abstract class GraphNode extends AbstractConnectedGraphObject {
     protected LinkedList<GraphConnector> m_inConnectors = null;
     protected GraphConnector m_outConnector = null;
     
+    
    
     protected int m_x = 0;
     protected int m_y = 0;
 
+    protected GraphNodeAction m_graphNodeAction = new GraphNodeAction();
     
     
     protected GraphPanel m_graphPanel = null;
@@ -94,7 +96,7 @@ public abstract class GraphNode extends AbstractConnectedGraphObject {
             m_y = 40;
         }
         setConnectorsPosition();
-        
+
         if (m_group != null) {
             m_group.objectMoved();
         }
@@ -167,8 +169,35 @@ public abstract class GraphNode extends AbstractConnectedGraphObject {
         }
         ImageIcon statusIcon = getStatusIcon();
         if (statusIcon != null) {
-            g.drawImage(statusIcon.getImage(), m_x+MARGIN, m_y+HEIGHT-MARGIN-statusIcon.getIconHeight(), null);
+            
+            int wIcon = statusIcon.getIconWidth();
+            int hIcon = statusIcon.getIconHeight();
+            int xIcon = m_x+MARGIN;
+            int yIcon = m_y+HEIGHT-MARGIN-statusIcon.getIconHeight();
+            if (possibleAction()) {
+                m_graphNodeAction.setBounds(xIcon - 2, yIcon - 2, wIcon + 4, hIcon + 4);
+                m_graphNodeAction.setAction(true);
+                m_graphNodeAction.draw(g);
+            } else {
+                m_graphNodeAction.setAction(false);
+            }
+            
+            
+            
+            //final int LINE_LENGTH = 3;
+            g.drawImage(statusIcon.getImage(), xIcon, yIcon, null);
+            /*g.setColor(Color.black);
+            g.drawLine(xIcon-LINE_LENGTH, yIcon-LINE_LENGTH, xIcon,  yIcon-LINE_LENGTH);
+            g.drawLine(xIcon-LINE_LENGTH, yIcon-LINE_LENGTH, xIcon-LINE_LENGTH,  yIcon);
+            g.drawLine(xIcon+wIcon+LINE_LENGTH, yIcon+hIcon+LINE_LENGTH, xIcon+wIcon+LINE_LENGTH, yIcon+hIcon);
+            g.drawLine(xIcon+wIcon+LINE_LENGTH, yIcon+hIcon+LINE_LENGTH, xIcon+wIcon, yIcon+hIcon+LINE_LENGTH);*/
+            
+            
+            
+        } else {
+            m_graphNodeAction.setAction(false);
         }
+
         
         g.setFont(m_fontBold);
         g.setColor(Color.black);
@@ -199,6 +228,8 @@ public abstract class GraphNode extends AbstractConnectedGraphObject {
     public abstract Color getFrameColor();
     public abstract ImageIcon getIcon();
     public abstract ImageIcon getStatusIcon();
+    public abstract boolean possibleAction();
+    public abstract void doAction();
     public abstract boolean canBeProcessed();
     
 
@@ -287,8 +318,15 @@ public abstract class GraphNode extends AbstractConnectedGraphObject {
                 return object;
             }
         }
-        
-        
+
+       
+        AbstractGraphObject object = m_graphNodeAction.inside(x, y);
+        if (object != null) {
+
+            return object;
+        }
+       
+       
         if ((x>=m_x) && (y>=m_y) && (x<=m_x+WIDTH) && (y<=m_y+HEIGHT)) {
             return this;
         }
@@ -301,10 +339,14 @@ public abstract class GraphNode extends AbstractConnectedGraphObject {
         m_x += dx;
         m_y += dy;
         setConnectorsPosition();
-        
+
         if (m_group != null) {
             m_group.objectMoved();
         }
+    }
+    
+    public boolean hideAction() {
+        return m_graphNodeAction.setHighlighted(false);
     }
     
     private void setConnectorsPosition() {
@@ -339,6 +381,7 @@ public abstract class GraphNode extends AbstractConnectedGraphObject {
         }
     }
     
+    @Override
     public void deleteAction() {
         delete();
         m_graphPanel.removeGraphNode(this);
@@ -493,5 +536,8 @@ public abstract class GraphNode extends AbstractConnectedGraphObject {
         }
         return (m_outConnector == null) ? null : m_outConnector.getOutLinkedGraphNodes();
     }
+    
+    
+
     
 }

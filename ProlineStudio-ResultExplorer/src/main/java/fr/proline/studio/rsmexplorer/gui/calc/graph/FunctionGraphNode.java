@@ -107,6 +107,57 @@ public class FunctionGraphNode extends GraphNode {
     }
     
     @Override
+    public boolean possibleAction() {
+        if (!isConnected()) {
+            return false;
+        }
+        if (!settingsDone()) {
+            return true;
+        }
+        if (m_function.isCalculating()) {
+            return false;
+        }
+        if (m_function.inError()) {
+            return true;
+        }
+        if (m_function.calculationDone()) {
+            return true;
+        }
+        if (m_function.isSettingsBeingDone()) {
+            return false;
+        }
+        // process
+        return true;
+    }
+    
+    @Override
+    public void doAction() {
+
+        m_graphNodeAction.setHighlighted(false);
+        
+        if (!settingsDone()) {
+            // settings
+            int nbConnections = (m_inConnectors == null) ? 0 : m_inConnectors.size();
+            new SettingsAction(this, nbConnections).actionPerformed(null);
+            return;
+        }
+        if (m_function.inError()) {
+            // display error
+            new ErrorAction(this).actionPerformed(null);
+            return;
+        }
+        if (m_function.calculationDone()) {
+            // display in new window
+            int nbConnections = (m_inConnectors == null) ? 0 : m_inConnectors.size();
+            new DisplayInNewWindowAction(this, nbConnections).actionPerformed(null);
+            return;
+        }
+
+        // process
+        new ProcessAction(this).actionPerformed(null);
+    }
+
+    @Override
     public boolean canBeProcessed() {
         return ! ((!isConnected()) || (!settingsDone()) || (m_function.isCalculating()) || (m_function.inError()) || (m_function.calculationDone()) || (m_function.isSettingsBeingDone()));
 

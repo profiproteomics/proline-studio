@@ -22,6 +22,8 @@ public class ProcessEngine implements ProcessCallbackInterface {
     private GraphPanel m_panel;
     private JButton m_playButton;
     
+    private boolean m_runAll = true;
+    
     private final LinkedList<GraphNode> m_processingNodeList = new LinkedList<>();
     
     private ProcessEngine() {  
@@ -35,6 +37,10 @@ public class ProcessEngine implements ProcessCallbackInterface {
         return m_processEngine;
     }
     
+    public void setRunAll(boolean v) {
+        m_runAll = v;
+    }
+    
     public String getProcessName() {
         if (m_currentMacro != null) {
             return m_currentMacro;
@@ -45,6 +51,8 @@ public class ProcessEngine implements ProcessCallbackInterface {
     
     public void run(LinkedList<GraphNode> graphNodeArray, GraphPanel p, JButton playButton) {
 
+        setRunAll(true);
+        
         m_processEngineKey++;
         m_panel = p;
         m_playButton = playButton;
@@ -69,6 +77,8 @@ public class ProcessEngine implements ProcessCallbackInterface {
     }
     
     public void runANode(GraphNode node, GraphPanel p) {
+        
+        setRunAll(false);
         
         m_panel = p;
         m_playButton = null;
@@ -131,10 +141,12 @@ public class ProcessEngine implements ProcessCallbackInterface {
         m_panel.repaint();
         
         
-        LinkedList<GraphNode> nextNodes = node.getOutLinkedGraphNodes();
-        if (nextNodes != null) {
-            for (GraphNode nextNode : nextNodes) {
-                m_processingNodeList.add(nextNode);
+        if (m_runAll) {
+            LinkedList<GraphNode> nextNodes = node.getOutLinkedGraphNodes();
+            if (nextNodes != null) {
+                for (GraphNode nextNode : nextNodes) {
+                    m_processingNodeList.add(nextNode);
+                }
             }
         }
         

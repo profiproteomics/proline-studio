@@ -31,6 +31,7 @@ public abstract class AbstractGraphObject {
         GRAPH_NODE,
         CONNECTOR,
         LINK,
+        GRAPH_NODE_ACTION,
         GROUP
     };
     
@@ -58,8 +59,12 @@ public abstract class AbstractGraphObject {
         return m_selected;
     }
     
-    public void setHighlighted(boolean h) {
-        m_hightlighted = h;
+    public boolean setHighlighted(boolean h) {
+        if (h ^ m_hightlighted) {
+            m_hightlighted = h;
+            return true;
+        }
+        return false;
     }
     
     

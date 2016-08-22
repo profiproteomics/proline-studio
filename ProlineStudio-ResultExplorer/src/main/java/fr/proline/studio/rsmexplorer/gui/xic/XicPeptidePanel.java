@@ -1,6 +1,6 @@
 package fr.proline.studio.rsmexplorer.gui.xic;
 
-import com.sun.webkit.Timer;
+
 import fr.proline.core.orm.msi.dto.DMasterQuantPeptide;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
 import fr.proline.studio.comparedata.AddDataAnalyzerButton;
@@ -13,11 +13,11 @@ import fr.proline.studio.filter.FilterButton;
 import fr.proline.studio.filter.actions.ClearRestrainAction;
 import fr.proline.studio.filter.actions.RestrainAction;
 import fr.proline.studio.graphics.CrossSelectionInterface;
-import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.gui.HourglassPanel;
-import fr.proline.studio.gui.JCheckBoxList;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.markerbar.MarkerContainerPanel;
+import fr.proline.studio.parameter.ObjectParameter;
+import fr.proline.studio.parameter.ParameterList;
 import fr.proline.studio.parameter.SettingsButton;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
@@ -36,14 +36,11 @@ import fr.proline.studio.utils.IconManager;
 import fr.proline.studio.table.LazyTable;
 import fr.proline.studio.table.TablePopupMenu;
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Component;
-import java.awt.Dialog;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Image;
 import java.awt.Point;
-import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
@@ -51,16 +48,12 @@ import java.awt.event.ComponentListener;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
-import javax.swing.Box;
-import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
 import javax.swing.JPanel;
-import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
-import javax.swing.JSeparator;
 import javax.swing.JToolBar;
 import javax.swing.ToolTipManager;
 import javax.swing.event.ListSelectionEvent;
@@ -90,7 +83,6 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
     private SettingsButton m_settingsButton;
     private FilterButton m_filterButton;
     private ExportButton m_exportButton;
-    private JButton m_columnVisibilityButton;
     private JButton m_graphicsButton;
     private AddDataAnalyzerButton m_addCompareDataButton;
     private SearchToggleButton m_searchToggleButton;
@@ -101,6 +93,8 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
     
     private final boolean m_canGraph ;
 
+    private static final String OVERVIEW_KEY = "OVERVIEW_KEY";  
+    
     public XicPeptidePanel(boolean canGraph) {
         m_canGraph = canGraph ;
         initComponents();
@@ -190,22 +184,7 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
         toolbar.add(m_filterButton);
         toolbar.add(m_settingsButton);
         toolbar.add(m_exportButton);
-        
-        m_columnVisibilityButton = new JButton();
-        m_columnVisibilityButton.setIcon(IconManager.getIcon(IconManager.IconType.COLUMNS_VISIBILITY));
-        m_columnVisibilityButton.setToolTipText("Hide/Show Columns...");
-        m_columnVisibilityButton.setEnabled(false);
-        m_columnVisibilityButton.addActionListener(new ActionListener() {
 
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                XICPeptideColumnsVisibilityDialog dialog = new XICPeptideColumnsVisibilityDialog(WindowManager.getDefault().getMainWindow(), m_quantPeptideTable, (QuantPeptideTableModel)((CompoundTableModel) m_quantPeptideTable.getModel()).getBaseModel() );
-                dialog.setLocation(m_columnVisibilityButton.getLocationOnScreen().x +m_columnVisibilityButton.getWidth(), m_columnVisibilityButton.getLocationOnScreen().y + m_columnVisibilityButton.getHeight());
-                dialog.setVisible(true);
-            }
-
-        });
-        toolbar.add(m_columnVisibilityButton);
         
         // graphics button
         m_graphicsButton = new JButton(IconManager.getIcon(IconManager.IconType.CHART));
@@ -321,7 +300,7 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
 
         if (finished) {
             // allow to change column visibility
-            m_columnVisibilityButton.setEnabled(true);
+            //m_columnVisibilityButton.setEnabled(true);
             m_quantPeptideTable.setSortable(true);
         }
         if (qcChanged){
@@ -333,7 +312,7 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
         m_quantPeptideTable.dataUpdated(subTask, finished);
         if (finished) {
             // allow to change column visibility
-            m_columnVisibilityButton.setEnabled(true);
+            //m_columnVisibilityButton.setEnabled(true);
             m_quantPeptideTable.setSortable(true);
         }
     }
@@ -414,10 +393,74 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
     
     private class QuantPeptideTable extends LazyTable implements ExportModelInterface  {
 
+        private ObjectParameter m_overviewParameter = null;
+        
         public QuantPeptideTable() {
             super(m_peptideScrollPane.getVerticalScrollBar() );
 
         }
+        
+        @Override
+        public ArrayList<ParameterList> getParameters() {
+            ArrayList<ParameterList>  parameterListArray = super.getParameters();
+
+            ParameterList overviewParameterList = new ParameterList("Overview Parameters");
+            
+
+     
+            String[] overviewDisplay = { m_isXICMode ? "Overview on Pep. Match Count" : "Overview on Basic SC", "Overview on Abundance", m_isXICMode ?"Overview on Raw Abundance" : "Overview on Specific SC" };
+            Integer[] overviewValues = { 0, 1, 2 };
+            
+            List<TableColumn> columns = getColumns(true);
+            QuantPeptideTableModel quantPeptideTableModel = ((QuantPeptideTableModel) ((CompoundTableModel) m_quantPeptideTable.getModel()).getBaseModel());
+            int overviewType = quantPeptideTableModel.getOverviewType();
+            boolean overviewColumnVisible = ((TableColumnExt) columns.get(QuantPeptideTableModel.COLTYPE_OVERVIEW)).isVisible();
+            
+            int defaultIndex = 0;
+
+            if (!overviewColumnVisible) {
+                defaultIndex = 0;
+            } else {
+                switch (overviewType) {
+                    case QuantPeptideTableModel.COLTYPE_ABUNDANCE:
+                        defaultIndex = 1;
+                        break;
+                    case QuantPeptideTableModel.COLTYPE_RAW_ABUNDANCE:
+                        defaultIndex = 2;
+                        break;
+                    case QuantPeptideTableModel.COLTYPE_PSM:
+                        defaultIndex = 0;
+                        break;
+
+                }
+            }
+
+            m_overviewParameter = new ObjectParameter(OVERVIEW_KEY, "Overview", null, overviewDisplay, overviewValues, defaultIndex, null);
+            overviewParameterList.add(m_overviewParameter);
+            
+            parameterListArray.add(overviewParameterList);
+            
+            return parameterListArray;
+        }
+               
+        @Override
+        public void parametersChanged() {
+            super.parametersChanged();
+            
+            Integer index = (Integer) m_overviewParameter.getAssociatedObjectValue();
+            
+            QuantPeptideTableModel model = ((QuantPeptideTableModel) ((CompoundTableModel) m_quantPeptideTable.getModel()).getBaseModel());
+
+            if (index == 1) {
+                model.setOverviewType(QuantPeptideTableModel.COLTYPE_ABUNDANCE);
+            } else if (index == 2) {
+                model.setOverviewType(QuantPeptideTableModel.COLTYPE_RAW_ABUNDANCE);
+            } else if (index == 0) {
+                model.setOverviewType(QuantPeptideTableModel.COLTYPE_PSM);
+            } 
+   
+        }
+        
         
         @Override
         public void addTableModelListener(TableModelListener l) {
@@ -620,274 +663,7 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
         }
     }
 
-    
-    private class XICPeptideColumnsVisibilityDialog extends DefaultDialog {
 
-        private JCheckBoxList m_rsmList;
-        private JCheckBoxList m_xicList;
-        
-        private JRadioButton m_noOverviewRB;
-        private JRadioButton m_psmOverviewRB;
-        private JRadioButton m_abundanceOverviewRB;
-        private JRadioButton m_rawAbundanceOverviewRB;
-        
-
-        public XICPeptideColumnsVisibilityDialog(Window parent, QuantPeptideTable table, QuantPeptideTableModel quantPeptideTableModel) {
-            super(parent, Dialog.ModalityType.APPLICATION_MODAL);
-
-            // hide default and help buttons
-            setButtonVisible(BUTTON_HELP, false);
-
-            setStatusVisible(false);
-
-            setResizable(true);
-
-            setTitle("Select Columns to Display");
-
-            // Prepare data for RSM
-            List<String> rsmList = new ArrayList<>();
-            List<Boolean> visibilityRsmList = new ArrayList<>();
-
-            // Prepare data for different column types
-            int nbTypes = quantPeptideTableModel.getByQCCount();
-            List<String> typeList = new ArrayList<>();
-            List<Boolean> visibilityTypeList = new ArrayList<>();
-            boolean[] visibilityTypeArray = new boolean[nbTypes];
-            for (int i=0;i<nbTypes;i++) {
-                visibilityTypeArray[i] = false;
-            }
-            
-            
-            List<TableColumn> columns = table.getColumns(true);
-
-            int rsmCount = quantPeptideTableModel.getQCCount();
-            for (int i = 0; i < rsmCount; i++) {
-                int start = quantPeptideTableModel.getColumStart(i);
-                int stop = quantPeptideTableModel.getColumStop(i);
-
-                boolean rsmVisible = false;
-                for (int j = start; j <= stop; j++) {
-                    boolean columnVisible = ((TableColumnExt) columns.get(j)).isVisible();
-                    if (columnVisible) {
-                        rsmVisible = true;
-                        int type = j-start;
-                        visibilityTypeArray[type] |= columnVisible;
-                    }
-
-                    
-                }
-
-                String rsmName = quantPeptideTableModel.getQCName(i);
-                rsmList.add(rsmName);
-                visibilityRsmList.add(rsmVisible);
-
-            }
-            
-            for (int i = 0; i < nbTypes; i++) {
-                String name = quantPeptideTableModel.getByQCMColumnName(i);
-                typeList.add(name);
-                visibilityTypeList.add(visibilityTypeArray[i]);
-            }
-            
-             
-            int overviewType = quantPeptideTableModel.getOverviewType();
-            boolean overviewColumnVisible = ((TableColumnExt) columns.get(QuantPeptideTableModel.COLTYPE_OVERVIEW)).isVisible();
-            
-            
-            JPanel internalPanel = createInternalPanel(rsmList, visibilityRsmList, typeList, visibilityTypeList, overviewColumnVisible, overviewType);
-            setInternalComponent(internalPanel);
-
-
-            
-        }
-
-        private JPanel createInternalPanel(List<String> rsmList, List<Boolean> visibilityList, List<String> typeList, List<Boolean> visibilityTypeList,  boolean overviewColumnVisible, int overviewType) {
-            JPanel internalPanel = new JPanel();
-
-            internalPanel.setLayout(new GridBagLayout());
-            GridBagConstraints c = new GridBagConstraints();
-            c.anchor = GridBagConstraints.NORTHWEST; 
-            c.fill = GridBagConstraints.BOTH;
-            c.insets = new java.awt.Insets(5, 5, 5, 5);
-
-            JLabel idSummaryLabel = new JLabel("Quantitation channel");
-            JLabel informationLabel = new JLabel("Information");
-            JLabel overviewLabel = new JLabel("Overview");
-            
-            JSeparator separator1 = new JSeparator(JSeparator.VERTICAL);
-            JSeparator separator2 = new JSeparator(JSeparator.VERTICAL);
-
-            JScrollPane rsmScrollPane = new JScrollPane();
-            m_rsmList = new JCheckBoxList(rsmList, visibilityList);
-            rsmScrollPane.setViewportView(m_rsmList);
-
-            JScrollPane xicScrollPane = new JScrollPane();
-            m_xicList = new JCheckBoxList(typeList, visibilityTypeList); 
-            xicScrollPane.setViewportView(m_xicList);
-            
-            JScrollPane overviewScrollPane = new JScrollPane();
-            overviewScrollPane.setViewportView(createOverviewPanel(overviewColumnVisible, overviewType));
-
-            c.gridx = 0;
-            c.gridy = 0;
-            
-            internalPanel.add(idSummaryLabel, c);
-            
-            c.gridy++;
-            c.weightx = 1;
-            c.weighty = 1;
-            internalPanel.add(rsmScrollPane, c);
-
-            c.gridy = 0;
-            c.gridx++;
-            c.weightx = 0;
-            c.weighty = 1;
-            c.gridheight = 2;
-            internalPanel.add(separator1, c);
-            
-
-            c.gridx++;
-            c.gridheight = 1;
-            c.weightx = 0;
-            c.weighty = 0;
-            internalPanel.add(informationLabel, c);
-            
-            c.gridy++;
-            c.weightx = 1;
-            c.weighty = 1;
-            internalPanel.add(xicScrollPane, c);
-            
-            c.gridy = 0;
-            c.gridx++;
-            c.weightx = 0;
-            c.weighty = 1;
-            c.gridheight = 2;
-            internalPanel.add(separator2, c);
-            
-
-            c.gridx++;
-            c.gridheight = 1;
-            c.weightx = 0;
-            c.weighty = 0;
-            internalPanel.add(overviewLabel, c);
-            
-            c.gridy++;
-            c.weightx = 1;
-            c.weighty = 1;
-            internalPanel.add(overviewScrollPane, c);
-
-            return internalPanel;
-        }
-        
-        private JPanel createOverviewPanel(boolean overviewColumnVisible, int overviewType) {
-            JPanel overviewPanel = new JPanel();
-            overviewPanel.setBackground(Color.white);
-
-            overviewPanel.setLayout(new GridBagLayout());
-            GridBagConstraints c = new GridBagConstraints();
-            c.anchor = GridBagConstraints.NORTHWEST; 
-            c.fill = GridBagConstraints.BOTH;
-            c.insets = new java.awt.Insets(0, 0, 0, 0);
-            
-            m_noOverviewRB = new JRadioButton("No Overview");
-            m_psmOverviewRB = new JRadioButton(m_isXICMode ? "Overview on Pep. Match Count" : "Overview on Basic SC");
-            m_abundanceOverviewRB = new JRadioButton("Overview on Abundance");
-            m_rawAbundanceOverviewRB = new JRadioButton(m_isXICMode ?"Overview on Raw Abundance" : "Overview on Specific SC");
-            m_noOverviewRB.setBackground(Color.white);
-            m_psmOverviewRB.setBackground(Color.white);
-            m_abundanceOverviewRB.setBackground(Color.white);
-            m_rawAbundanceOverviewRB.setBackground(Color.white);
-            
-            ButtonGroup group = new ButtonGroup();
-            group.add(m_noOverviewRB);
-            group.add(m_psmOverviewRB);
-            group.add(m_abundanceOverviewRB);
-            group.add(m_rawAbundanceOverviewRB);
-            
-            if (!overviewColumnVisible) {
-                m_noOverviewRB.setSelected(true);
-            } else {
-                switch (overviewType) {
-                    case QuantPeptideTableModel.COLTYPE_ABUNDANCE:
-                        m_abundanceOverviewRB.setSelected(true);
-                        break;
-                    case QuantPeptideTableModel.COLTYPE_RAW_ABUNDANCE:
-                        m_rawAbundanceOverviewRB.setSelected(true);
-                        break;
-                    case QuantPeptideTableModel.COLTYPE_PSM:
-                        m_psmOverviewRB.setSelected(true);
-                        break;
-
-                }
-            }
-            
-            c.gridx = 0;
-            c.gridy = 0;
-            c.weightx = 1;
-            
-            overviewPanel.add(m_noOverviewRB, c);
-            
-            c.gridy++;
-            overviewPanel.add(m_psmOverviewRB, c);
-            
-            c.gridy++;
-            overviewPanel.add(m_rawAbundanceOverviewRB, c);
-            
-            c.gridy++;
-            overviewPanel.add(m_abundanceOverviewRB, c);
-            
-            c.gridy++;
-            c.weighty = 1;
-            overviewPanel.add(Box.createHorizontalGlue(), c);
-            
-            
-            return overviewPanel;
-        }
-
-       
-        
-        @Override
-        protected boolean okCalled() {
-
-            QuantPeptideTableModel model = ((QuantPeptideTableModel) ((CompoundTableModel) m_quantPeptideTable.getModel()).getBaseModel());
-            
-            int nbColumnsModel = model.getColumnCount();
-            List<TableColumn> columns = m_quantPeptideTable.getColumns(true);
-            for (int i=QuantPeptideTableModel.LAST_STATIC_COLUMN+1;i<nbColumnsModel;i++) {
-                int rsmCur = model.getQCNumber(i);
-                int type = model.getTypeNumber(i);
-                boolean visible = m_rsmList.isVisible(rsmCur) && m_xicList.isVisible(type);
-                boolean columnVisible = ((TableColumnExt) columns.get(i)).isVisible();
-                if (visible ^ columnVisible) {
-                    ((TableColumnExt) columns.get(i)).setVisible(visible);
-                }
-            }
-            
-            if (m_abundanceOverviewRB.isSelected()) {
-                model.setOverviewType(QuantPeptideTableModel.COLTYPE_ABUNDANCE);
-            } else if (m_rawAbundanceOverviewRB.isSelected()) {
-                model.setOverviewType(QuantPeptideTableModel.COLTYPE_RAW_ABUNDANCE);
-            }else if (m_psmOverviewRB.isSelected()) {
-                model.setOverviewType(QuantPeptideTableModel.COLTYPE_PSM);
-            }
-            
-            boolean overviewVisible = !m_noOverviewRB.isSelected();
-            boolean columnVisible = ((TableColumnExt) columns.get(QuantPeptideTableModel.COLTYPE_OVERVIEW)).isVisible();
-            if (overviewVisible ^ columnVisible) {
-                ((TableColumnExt) columns.get(QuantPeptideTableModel.COLTYPE_OVERVIEW)).setVisible(overviewVisible);
-            }
-
-
-            return true;
-        }
-
-        @Override
-        protected boolean cancelCalled() {
-
-            return true;
-        }
-
-    }
     
 
     

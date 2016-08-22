@@ -332,7 +332,7 @@ public abstract class AbstractMatrixPlotGraphic extends AbstractGraphic {
         
         m_columnsParameterArray = new MultiObjectParameter[getMaxGroups()];
         for (int i=0;i<getMaxGroups();i++) {
-            m_columnsParameterArray[i] = new MultiObjectParameter(SEL_COLS_PREFIX+i, groupNameList[i], null, objectArray1, associatedObjectArray1, selection[i], null);
+            m_columnsParameterArray[i] = new MultiObjectParameter(SEL_COLS_PREFIX+i, groupNameList[i], null, objectArray1, associatedObjectArray1, selection[i], null, true);
         }
 
 

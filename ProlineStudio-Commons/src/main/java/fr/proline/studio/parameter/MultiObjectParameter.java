@@ -2,7 +2,8 @@ package fr.proline.studio.parameter;
 
 import fr.proline.studio.gui.JCheckBoxList;
 import fr.proline.studio.gui.JCheckBoxListPanel;
-import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.*;
@@ -17,13 +18,16 @@ import javax.swing.*;
  */
 public class MultiObjectParameter<E> extends AbstractParameter {
 
-    private E[] m_objects;
+    private final E[] m_objects;
     private Object[] m_associatedObjects = null;
     private boolean[] m_defaultSelection = null;
     private AbstractParameterToString<E> m_paramToString = null;
 
+    private ArrayList<AbstractLinkedParameters> m_linkedParametersList = null;
+    
     private boolean m_mustSelectOneObject = true;
-
+    private boolean m_allowSelectAll = true;
+    
     public MultiObjectParameter(String key, String name, E[] objects, boolean[] selection, AbstractParameterToString<E> paramToString) {
         super(key, name, Integer.class, JCheckBoxList.class);
         m_objects = objects;
@@ -32,20 +36,30 @@ public class MultiObjectParameter<E> extends AbstractParameter {
         
     }
     
-    public MultiObjectParameter(String key, String name, JCheckBoxList checkBoxList, E[] objects, Object[] associatedObjects, boolean[] selection, AbstractParameterToString<E> paramToString) {
+    public MultiObjectParameter(String key, String name, JCheckBoxList checkBoxList, E[] objects, Object[] associatedObjects, boolean[] selection, AbstractParameterToString<E> paramToString, boolean allowSelectAll) {
         super(key, name, Integer.class, JCheckBoxList.class);
         m_objects = objects;
         m_defaultSelection = selection;
         m_paramToString = paramToString;
+        m_allowSelectAll = allowSelectAll;
         if (checkBoxList == null) {
             m_parameterComponent = (JCheckBoxListPanel) getComponent(null);
         } else {
-            m_parameterComponent = new JCheckBoxListPanel(checkBoxList);
+            m_parameterComponent = new JCheckBoxListPanel(checkBoxList, allowSelectAll);
         }
 
         m_associatedObjects = associatedObjects;
 
 
+    }
+    
+    public void setSelection(int i, boolean v) {
+        if (m_parameterComponent == null) {
+            return;
+        }
+        JCheckBoxList checkBoxList = ((JCheckBoxListPanel) m_parameterComponent).getCheckBoxList();
+        checkBoxList.selectItem(i, v);
+        
     }
     
     public void setNoSelectionAllowed() {
@@ -84,7 +98,7 @@ public class MultiObjectParameter<E> extends AbstractParameter {
             
             JCheckBoxList checkboxList = new JCheckBoxList(list, visibilityList);
 
-            m_parameterComponent = new JCheckBoxListPanel(checkboxList);
+            m_parameterComponent = new JCheckBoxListPanel(checkboxList, m_allowSelectAll);
             return m_parameterComponent;
         }
 
@@ -184,5 +198,31 @@ public class MultiObjectParameter<E> extends AbstractParameter {
         return LabelVisibility.AS_BORDER_TITLE;
     }
     
+    
+    public void addLinkedParameters(final AbstractLinkedParameters linkedParameters) {
+
+        // create parameterComponent if needed
+        getComponent(null);
+
+        if (m_linkedParametersList == null) {
+            m_linkedParametersList = new ArrayList<>(1);
+        }
+        m_linkedParametersList.add(linkedParameters);
+
+        if (m_parameterComponent instanceof JCheckBoxListPanel) {
+            
+            JCheckBoxList checkBoxList = ((JCheckBoxListPanel) m_parameterComponent).getCheckBoxList();
+            
+            checkBoxList.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    JCheckBoxList.CheckListItem item = (JCheckBoxList.CheckListItem) e.getSource();
+                    linkedParameters.valueChanged(item.toString(), item.isSelected());
+                }
+
+            });
+            initDefault();
+        }
+    }
     
 }

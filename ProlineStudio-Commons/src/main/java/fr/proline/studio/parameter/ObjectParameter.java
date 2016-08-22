@@ -17,7 +17,7 @@ public class ObjectParameter<E> extends AbstractParameter {
 
     private final E[] m_objects;
     private Object[] m_associatedObjects = null;
-    private int m_defaultIndex;
+    private final int m_defaultIndex;
     private AbstractParameterToString<E> m_paramToString = null;
 
     private ArrayList<AbstractLinkedParameters> m_linkedParametersList = null;

@@ -2,9 +2,12 @@ package fr.proline.studio.gui;
 
 import java.awt.Component;
 import java.awt.Point;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import javax.swing.DefaultListModel;
 import javax.swing.JCheckBox;
@@ -12,6 +15,7 @@ import javax.swing.JList;
 import javax.swing.ListCellRenderer;
 import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
+import javax.swing.event.EventListenerList;
 
 /**
  * JList for which each item is a checkBox.
@@ -23,8 +27,11 @@ import javax.swing.ListSelectionModel;
  */
 public class JCheckBoxList<E> extends JList {
 
-    DefaultListModel<CheckListItem<E>> model;
-        
+    private DefaultListModel<CheckListItem<E>> model;
+      
+    /** A list of event listeners for this component. */
+    private ArrayList<ActionListener> m_listenerList = new ArrayList(1);
+    
     public JCheckBoxList(List<? extends E> list, List<Boolean> visibilityList) {
         
         int size = list.size();
@@ -79,6 +86,12 @@ public class JCheckBoxList<E> extends JList {
             CheckListItem item = (CheckListItem) getModel().getElementAt(index);
             item.setSelected(!item.isSelected());
             repaint(getCellBounds(index, index));
+            
+            for (int i = 0;i<m_listenerList.size();i++) {
+                ActionEvent e = new ActionEvent(item, ActionEvent.ACTION_PERFORMED, null, 0, 0);
+                m_listenerList.get(i).actionPerformed(e);
+            }
+
         }
     }
 
@@ -109,6 +122,13 @@ public class JCheckBoxList<E> extends JList {
     public void selectItem(int index) {
         CheckListItem item = (CheckListItem) getModel().getElementAt(index);
         item.setSelected(true);
+        repaint(getCellBounds(index, index));
+    }
+    
+    public void selectItem(int index, boolean v) {
+        CheckListItem item = (CheckListItem) getModel().getElementAt(index);
+        item.setSelected(v);
+        repaint(getCellBounds(index, index));
     }
     
     public List<E> getSelectedItems() {
@@ -177,7 +197,16 @@ public class JCheckBoxList<E> extends JList {
         return rv;
     }
     
-    private static class CheckListItem<E> {
+    public void addActionListener(ActionListener l) {
+        m_listenerList.add(l);
+    }
+    
+    public void removeActionListener(ActionListener l) {
+        m_listenerList.remove(l);
+    }
+
+    
+    public static class CheckListItem<E> {
 
         private E m_item;
         private boolean m_selected;

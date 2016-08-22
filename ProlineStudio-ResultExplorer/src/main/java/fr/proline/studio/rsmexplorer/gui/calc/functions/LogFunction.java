@@ -211,7 +211,7 @@ public class LogFunction  extends AbstractFunction {
 
         ParameterList parameterList1 = new ParameterList("param1");
         
-        m_columnsParameter = new MultiObjectParameter(SEL_COL1, "Columns to log", null, objectArray1, associatedObjectArray1, null, null);
+        m_columnsParameter = new MultiObjectParameter(SEL_COL1, "Columns to log", null, objectArray1, associatedObjectArray1, null, null, true);
         m_columnsParameter.setNoSelectionAllowed();
 
 

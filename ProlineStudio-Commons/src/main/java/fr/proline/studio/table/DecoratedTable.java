@@ -2,6 +2,7 @@ package fr.proline.studio.table;
 
 import com.thierry.filtering.TableSelection;
 import fr.proline.studio.comparedata.CompareDataInterface;
+import fr.proline.studio.export.ExportModelInterface;
 import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.parameter.AbstractLinkedParameters;
 import fr.proline.studio.parameter.BooleanParameter;
@@ -14,7 +15,11 @@ import java.awt.Color;
 import java.awt.Point;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import javax.swing.JCheckBox;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
@@ -52,11 +57,13 @@ public abstract class DecoratedTable extends JXTable implements CrossSelectionIn
 
     private BooleanParameter m_autoSizeColumnParameter = null;
     private IntegerParameter m_columnWidthParameter = null;
+    private MultiObjectParameter m_columnsGroupVisibilityParameter = null;
     private MultiObjectParameter m_columnsVisibilityParameter = null;
     private ArrayList<ParameterList> m_parameterListArray = null;
     private static final String AUTOSIZE_COLUMN_KEY = "AUTOSIZE_COLUMN_KEY";
     private static final String COLUMN_WIDTH_KEY = "COLUMN_WIDTH_KEY";
     private static final String COLUMNS_VISIBILITY_KEY = "COLUMNS_VISIBILITY_KEY";
+    private static final String COLUMNS_GROUP_VISIBILITY_KEY = "COLUMNS_GROUP_VISIBILITY_KEY";
     
     public DecoratedTable() {
 
@@ -81,7 +88,7 @@ public abstract class DecoratedTable extends JXTable implements CrossSelectionIn
     }
     
     protected void initParameters() {
-
+ 
         ParameterList parameterTableList = new ParameterList("Table Parameters");
 
         final boolean autoResized = (getAutoResizeMode() != JXTable.AUTO_RESIZE_OFF);
@@ -89,26 +96,141 @@ public abstract class DecoratedTable extends JXTable implements CrossSelectionIn
         
 
         
-        
-        
         List<TableColumn> columns = getColumns(true);
         int colCount = columns.size();
         Object[] columnNamesArray = new Object[colCount];
         Object[] columnsArray = new Object[colCount];
         boolean[] selection = new boolean[colCount];
 
+        TableModel model = getModel();
+        ExportModelInterface exportableModel = null;
+        if (model instanceof ExportModelInterface) {
+            exportableModel = (ExportModelInterface) model;
+        }
+        
+        HashMap<String, Integer> similarColumnsNumberMap = new HashMap<>();
+        HashMap<String, Boolean> similarColumnsVisibilityMap = new HashMap<>();
+        HashMap<String, String> similarColumnsColorsMap = new HashMap<>();
+        
         int nbVisible = 0;
         int totalWidth = 0;
         for (int i = 0; i < colCount; i++) {
             TableColumnExt column = (TableColumnExt) columns.get(i);
             columnNamesArray[i] = column.getHeaderValue().toString().replaceAll("<br/>"," ");
             columnsArray[i] = column;
+            
             boolean visible = column.isVisible();
+            
+            if (exportableModel != null) {
+                
+                String columnFullName = model.getColumnName(column.getModelIndex());
+                String columnExportName = exportableModel.getExportColumnName(column.getModelIndex());
+                int indexSpace = columnExportName.lastIndexOf(' ');
+                if (indexSpace != -1) {
+                    columnExportName = columnExportName.substring(0, indexSpace);
+                }
+                if (columnExportName.length()>0) {
+                    Integer nb = similarColumnsNumberMap.get(columnExportName);
+                    if (nb == null) {
+                        similarColumnsNumberMap.put(columnExportName, 1);
+                        similarColumnsVisibilityMap.put(columnExportName, visible);
+                    } else {
+                        similarColumnsNumberMap.put(columnExportName, nb+1);
+                        if (!visible) {
+                            similarColumnsVisibilityMap.put(columnExportName, visible);
+                        }
+                    }
+                    
+                    int colorIndexStart = columnFullName.indexOf("<font color='", 0);
+                    int colorIndexStop = columnFullName.indexOf("</font>", 0);
+                    if ((colorIndexStart>-1) && (colorIndexStop>colorIndexStart)) {
+                        String colorName = columnFullName.substring(colorIndexStart,colorIndexStop+"</font>".length());
+                        String curColorName = similarColumnsColorsMap.get(columnExportName);
+                        if (curColorName != null) {
+                            if (curColorName.compareTo(colorName) != 0) {
+                                similarColumnsColorsMap.put(columnExportName, "");
+                            }
+                        } else {
+                            similarColumnsColorsMap.put(columnExportName, colorName);
+                        }
+                    } else {
+                        similarColumnsColorsMap.put(columnExportName, "");
+                    }
+                }
+                if (indexSpace != -1) {
+                    columnExportName = exportableModel.getExportColumnName(column.getModelIndex());
+                    columnExportName = columnExportName.substring(indexSpace, columnExportName.length());
+                    if (columnExportName.length() > 0) {
+                        Integer nb = similarColumnsNumberMap.get(columnExportName);
+                        if (nb == null) {
+                            similarColumnsNumberMap.put(columnExportName, 1);
+                            similarColumnsVisibilityMap.put(columnExportName, visible);
+                        } else {
+                            similarColumnsNumberMap.put(columnExportName, nb + 1);
+                            if (!visible) {
+                                similarColumnsVisibilityMap.put(columnExportName, visible);
+                            }
+                        }
+                        
+                        int colorIndexStart = columnFullName.indexOf("<font color='", 0);
+                        int colorIndexStop = columnFullName.indexOf("</font>", 0);
+                        if ((colorIndexStart > -1) && (colorIndexStop > colorIndexStart)) {
+                            String colorName = columnFullName.substring(colorIndexStart, colorIndexStop + "</font>".length());
+                            String curColorName = similarColumnsColorsMap.get(columnExportName);
+                            if (curColorName != null) {
+                                if (curColorName.compareTo(colorName) != 0) {
+                                    similarColumnsColorsMap.put(columnExportName, "");
+                                }
+                            } else {
+                                similarColumnsColorsMap.put(columnExportName, colorName);
+                            }
+                        } else {
+                            similarColumnsColorsMap.put(columnExportName, "");
+                        }
+                    }
+                }
+            }
+            
+            
             selection[i] = visible;
             if (visible) {
                 totalWidth += column.getWidth();
                 nbVisible++;
             }
+        }
+        
+        // suppression des lignes à un résultat dans similarColumnsNumberMap
+        Set<String> colNamesSet = similarColumnsNumberMap.keySet();
+        String[] colNamesArray = colNamesSet.toArray(new String[colNamesSet.size()]);
+        for (int i=0;i<colNamesArray.length;i++) {
+            String colName = colNamesArray[i];
+            Integer nb = similarColumnsNumberMap.get(colName);
+            if (nb<=1) {
+                similarColumnsNumberMap.remove(colName);
+                similarColumnsVisibilityMap.remove(colName);
+            }
+        }
+        ColumnGroup[] groups = null;
+        int nbGroups = similarColumnsNumberMap.size();
+        if (nbGroups>0) {
+            groups = new ColumnGroup[nbGroups];
+            Iterator<String> it = similarColumnsNumberMap.keySet().iterator();
+            int i=0;
+            while (it.hasNext()) {
+                String name = it.next();
+                String colorName = similarColumnsColorsMap.get(name);
+                groups[i] = new ColumnGroup((colorName.length()>0) ? "<html>"+colorName+name+"</html>" : name, similarColumnsVisibilityMap.get(name).booleanValue());
+                i++;
+            }
+            
+            Arrays.sort( groups );
+            Object[] columnGroupNamesArray = new Object[nbGroups];
+            boolean[] groupSelection = new boolean[nbGroups];
+            for (i=0;i<nbGroups;i++) {
+                columnGroupNamesArray[i] = groups[i].m_groupName;
+                groupSelection[i] = groups[i].m_selected;
+            }
+            m_columnsGroupVisibilityParameter = new MultiObjectParameter(COLUMNS_GROUP_VISIBILITY_KEY, "Columns Type Visibility", null, columnGroupNamesArray, null, groupSelection, null, false);
         }
         
         final int MAX_WIDTH = 500;
@@ -123,7 +245,7 @@ public abstract class DecoratedTable extends JXTable implements CrossSelectionIn
         
         
         
-        m_columnsVisibilityParameter = new MultiObjectParameter(COLUMNS_VISIBILITY_KEY, "Columns Visibility", null, columnNamesArray, columnsArray, selection, null);
+        m_columnsVisibilityParameter = new MultiObjectParameter(COLUMNS_VISIBILITY_KEY, "Columns Visibility", null, columnNamesArray, columnsArray, selection, null, true);
         
 
         AbstractLinkedParameters linkedParameters = new AbstractLinkedParameters(parameterTableList) {
@@ -136,46 +258,72 @@ public abstract class DecoratedTable extends JXTable implements CrossSelectionIn
 
         };
         
+        AbstractLinkedParameters linkedParameter2 = null;
+        if (m_columnsGroupVisibilityParameter != null) {
+            
+            final ExportModelInterface _exportableModel = exportableModel;
+            
+            linkedParameter2 = new AbstractLinkedParameters(parameterTableList) {
+                @Override
+                public void valueChanged(String value, Object associatedValue) {
+                    
+                    // color
+                    int colorRemoveStart = value.indexOf("</font>", 0);
+                    int colorRemoveStop = value.indexOf("</html>", 0);
+                    if ((colorRemoveStart>-1) && (colorRemoveStop>colorRemoveStart)) {
+                        value = value.substring(colorRemoveStart+"</font>".length(), colorRemoveStop);
+                    }
+                    
+                    for (int i = 0; i < colCount; i++) {
+                        TableColumnExt column = (TableColumnExt) columns.get(i);
+                        String columnExportName = _exportableModel.getExportColumnName(column.getModelIndex());
+                        int indexSpace = columnExportName.lastIndexOf(' ');
+                        if (indexSpace != -1) {
+                            columnExportName = columnExportName.substring(0, indexSpace);
+                        }
+                        if (columnExportName.compareTo(value) == 0) {
+                            m_columnsVisibilityParameter.setSelection(i, ((Boolean)associatedValue).booleanValue());
+                        }
+                        if (indexSpace != -1) {
+                            columnExportName = _exportableModel.getExportColumnName(column.getModelIndex());
+                            columnExportName = columnExportName.substring(indexSpace, columnExportName.length());
+                            if (columnExportName.compareTo(value) == 0) {
+                                m_columnsVisibilityParameter.setSelection(i, ((Boolean) associatedValue).booleanValue());
+                            }
+                        }
+                    }
+
+                }
+
+            };
+        }
+        
         parameterTableList.add(m_autoSizeColumnParameter);
         parameterTableList.add(m_columnWidthParameter);
-        parameterTableList.add(m_columnsVisibilityParameter);        
+        parameterTableList.add(m_columnsVisibilityParameter);      
+        if (m_columnsGroupVisibilityParameter != null) {
+            parameterTableList.add(m_columnsGroupVisibilityParameter);
+        }
         
         
         
-        m_parameterListArray = new ArrayList<>(1);
+        m_parameterListArray = new ArrayList<>(2);
         m_parameterListArray.add(parameterTableList);
 
         parameterTableList.getPanel(true); // generate panel at once
         m_autoSizeColumnParameter.addLinkedParameters(linkedParameters); // link parameter, it will modify the panel
         linkedParameters.valueChanged("true", Boolean.TRUE);  //JPM.TOOD true or false
+        
+        
+        if (m_columnsGroupVisibilityParameter != null) {
+            m_columnsGroupVisibilityParameter.addLinkedParameters(linkedParameter2);
+        }
     }
     
     public void removeStriping() {
         removeHighlighter(m_stripingHighlighter);
     }
 
-    
-
-    /*public void displayColumnAsPercentage(int column) {
-        displayColumnAsPercentage(column, AbstractLayoutPainter.HorizontalAlignment.RIGHT);
-    }
-    public void displayColumnAsPercentage(int column, AbstractLayoutPainter.HorizontalAlignment alignment) {
-        // Display of the Score Column as a percentage
-        Color base = PaintUtils.setSaturation(Color.GREEN, .7f);
-        MattePainter matte = new MattePainter(PaintUtils.setAlpha(base, 125));
-        RelativePainterHighlighter highlighter = new RelativePainterHighlighter(matte);
-        highlighter.setHorizontalAlignment(alignment);
-
-        m_relativizer = new RelativePainterHighlighter.NumberRelativizer(column, 0, 100);
-        highlighter.setRelativizer(m_relativizer);
-        highlighter.setHighlightPredicate(new HighlightPredicate.ColumnHighlightPredicate(column));
-        addHighlighter(highlighter);
-
-    }*/
-    
-    /*public RelativePainterHighlighter.NumberRelativizer getRelativizer() {
-        return m_relativizer;
-    }*/
     
     public String getToolTipForHeader(int modelColumn) {
         return ((DecoratedTableModelInterface) getModel()).getToolTipForHeader(modelColumn);
@@ -358,4 +506,20 @@ public abstract class DecoratedTable extends JXTable implements CrossSelectionIn
         
     }
     
+    public class ColumnGroup implements Comparable<ColumnGroup> {
+        public String m_groupName;
+        public boolean m_selected;
+        
+        public ColumnGroup(String groupName, boolean selected) {
+            m_groupName = groupName;
+            m_selected = selected;
+        }
+
+        @Override
+        public int compareTo(ColumnGroup o) {
+            return m_groupName.compareTo(o.m_groupName);
+        }
+        
+
+    }
 }

@@ -8,6 +8,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.JCheckBox;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 
 /**
  *
@@ -18,26 +19,30 @@ public class JCheckBoxListPanel extends JPanel {
     private JCheckBoxList m_checkBoxList = null;
     private JCheckBox m_selectAllCheckBox = null;
     
-    public JCheckBoxListPanel(JCheckBoxList checkBoxList) {
+    public JCheckBoxListPanel(JCheckBoxList checkBoxList, boolean showSelectAll) {
         setLayout(new GridBagLayout());
         setBackground(Color.white);
         
         m_checkBoxList = checkBoxList;
-        m_selectAllCheckBox = new JCheckBox("Select / Unselect All", IconManager.getIcon(IconManager.IconType.SELECTED_CHECKBOXES));
-        m_selectAllCheckBox.setBackground(Color.white);
         
-        m_selectAllCheckBox.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (m_selectAllCheckBox.isSelected()) {
-                    m_checkBoxList.selectAll();
-                } else {
-                    m_checkBoxList.unselectAll();
+        if (showSelectAll) {
+            m_selectAllCheckBox = new JCheckBox("Select / Unselect All", IconManager.getIcon(IconManager.IconType.SELECTED_CHECKBOXES));
+            m_selectAllCheckBox.setBackground(Color.white);
+            m_selectAllCheckBox.setFocusPainted(false);
+
+            m_selectAllCheckBox.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    if (m_selectAllCheckBox.isSelected()) {
+                        m_checkBoxList.selectAll();
+                    } else {
+                        m_checkBoxList.unselectAll();
+                    }
+                    repaint();
                 }
-                repaint();
-            }
-            
-        });
+
+            });
+        }
         
         GridBagConstraints c = new GridBagConstraints();
         c.anchor = GridBagConstraints.NORTHWEST;
@@ -49,11 +54,14 @@ public class JCheckBoxListPanel extends JPanel {
         c.gridy = 0;
         c.weightx = 1;
         c.weighty = 1;
-        add(m_checkBoxList, c);
+        JScrollPane scrollPane = new JScrollPane(m_checkBoxList);
+        add(scrollPane, c);
         
-        c.gridy++;
-        c.weighty = 0;
-        add(m_selectAllCheckBox, c);
+        if (showSelectAll) {
+            c.gridy++;
+            c.weighty = 0;
+            add(m_selectAllCheckBox, c);
+        }
   
     }
     

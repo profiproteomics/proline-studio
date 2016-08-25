@@ -602,11 +602,14 @@ public class PeptideTableModel extends DecoratedTableModel implements GlobalTabl
                 renderer = new FloatRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)));
                 break;
             }
+            case COLTYPE_PEPTIDE_RETENTION_TIME: {
+                renderer = new FloatRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 4);
+                break;
+            }
             case COLTYPE_PEPTIDE_START:
             case COLTYPE_PEPTIDE_STOP:
             case COLTYPE_PEPTIDE_CHARGE:
             case COLTYPE_PEPTIDE_MISSED_CLIVAGE: 
-            case COLTYPE_PEPTIDE_RETENTION_TIME:
             case COLTYPE_PEPTIDE_ION_PARENT_INTENSITY:
             case COLTYPE_PEPTIDE_PROTEIN_SET_COUNT: {
                 renderer = new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(Integer.class));

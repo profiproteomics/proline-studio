@@ -543,7 +543,8 @@ public class PeptideInstanceTableModel extends LazyTableModel implements GlobalT
                 break;
             }
             case COLTYPE_PEPTIDE_CALCULATED_MASS:
-            case COLTYPE_PEPTIDE_EXPERIMENTAL_MOZ: {
+            case COLTYPE_PEPTIDE_EXPERIMENTAL_MOZ:
+            case COLTYPE_PEPTIDE_RETENTION_TIME: {
                 renderer = new FloatRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 4);
                 break;
             } 
@@ -551,8 +552,7 @@ public class PeptideInstanceTableModel extends LazyTableModel implements GlobalT
                 renderer = m_scoreRenderer;
                 break;
             }
-            case COLTYPE_PEPTIDE_PPM:
-            case COLTYPE_PEPTIDE_RETENTION_TIME: {
+            case COLTYPE_PEPTIDE_PPM: {
                 renderer = new FloatRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)));
                 break;
             }

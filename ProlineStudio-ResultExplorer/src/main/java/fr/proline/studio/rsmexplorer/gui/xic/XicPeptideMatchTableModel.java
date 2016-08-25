@@ -702,12 +702,12 @@ public class XicPeptideMatchTableModel extends LazyTableModel implements GlobalT
                 renderer = m_scoreRenderer;
                 break;
             }
-            case COLTYPE_PEPTIDE_RETENTION_TIME:
             case COLTYPE_PEPTIDE_ION_PARENT_INTENSITY:
             case COLTYPE_PEPTIDE_PPM: {
                 renderer = new FloatRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)));
                 break;
             }
+            case COLTYPE_PEPTIDE_RETENTION_TIME:
             case COLTYPE_PEPTIDE_EXPERIMENTAL_MOZ:
             case COLTYPE_PEPTIDE_CALCULATED_MASS: {
                 renderer = new FloatRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 4);

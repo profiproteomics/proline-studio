@@ -116,6 +116,24 @@ public class QuantProfileXICDialog extends DefaultDialog {
         return false;
     }
     
+    
+    @Override
+    protected boolean okCalled() {
+
+        // check parameters
+        if (!checkParameters()) {
+            return false;
+        }
+
+        // save parameters
+        Preferences preferences = NbPreferences.root();
+        m_quantProfilePanel.getParameterList().saveParameters(preferences);
+
+        return true;
+
+    }
+
+    
     private boolean checkParameters() {
         // check parameters
         ParameterError error = m_quantProfilePanel.getParameterList().checkParameters();
@@ -130,8 +148,11 @@ public class QuantProfileXICDialog extends DefaultDialog {
     
     private void init() {
         m_quantProfilePanel = new QuantProfileXICPanel(false);
+        Preferences preferences = NbPreferences.root();
+        m_quantProfilePanel.getParameterList().loadParameters(preferences);
+
         
-        this.setInternalComponent(m_quantProfilePanel);
+        setInternalComponent(m_quantProfilePanel);
     }
     
     public Map<String,Object> getQuantParams(){

@@ -666,7 +666,11 @@ public class IdentificationPropertiesTableModel extends AbstractPropertiesTableM
                     if (rsmDecoy == null) {
                         return new GroupObject("",this);
                     }
-                    return new GroupObject(String.valueOf(rsmDecoy.getTransientData().getNumberOfPeptideMatches()),this);
+                    Integer psmDecoyNumber = rsmDecoy.getTransientData().getNumberOfPeptideMatches();
+                    if (psmDecoyNumber == null) {
+                        psmDecoyNumber = 0;
+                    }
+                    return new GroupObject(String.valueOf(psmDecoyNumber),this);
                 case ROWTYPE_PEPTIDE_DECOY_NUMBER:
                     if (rsmDecoy == null) {
                         return new GroupObject("",this);

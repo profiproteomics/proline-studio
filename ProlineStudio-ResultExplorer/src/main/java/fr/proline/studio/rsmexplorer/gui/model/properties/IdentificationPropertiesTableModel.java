@@ -129,7 +129,7 @@ public class IdentificationPropertiesTableModel extends AbstractPropertiesTableM
                 /*case ROWTYPE_TARGET_DECOY_RULE:
                     return "Decoy Rule";*/
                 case ROWTYPE_PEAKLIST_SOFTWARE_NAME:
-                    return new GroupObject("Peaklist Software Name", this);
+                    return new GroupObject("Peaklist Software", this);
             }
             
             return null;
@@ -147,8 +147,7 @@ public class IdentificationPropertiesTableModel extends AbstractPropertiesTableM
             InstrumentConfig instrumentConfig = (searchSetting==null) ? null : searchSetting.getInstrumentConfig();
             Peaklist peaklist = (msiSearch == null) ? null : msiSearch.getPeaklist();
             PeaklistSoftware peaklistSoftware = (peaklist == null) ? null : peaklist.getPeaklistSoftware();
-
-
+            
             switch (rowIndex) {
                 case ROWTYPE_RAW_FILE_NAME:
                     if (peaklist==null) {
@@ -180,8 +179,17 @@ public class IdentificationPropertiesTableModel extends AbstractPropertiesTableM
                 /*case ROWTYPE_TARGET_DECOY_RULE: {
                     return "NA";
                 }*/
-                case ROWTYPE_PEAKLIST_SOFTWARE_NAME:
-                    return new GroupObject((peaklistSoftware==null) ? "" : peaklistSoftware.getName(), this);
+                case ROWTYPE_PEAKLIST_SOFTWARE_NAME: {
+                    if (peaklistSoftware==null) {
+                        return new GroupObject("", this);
+                    }
+                    String name = peaklistSoftware.getName();
+                    String version = peaklistSoftware.getVersion();
+                    if ((version!=null) && (!version.isEmpty())) {
+                        name = name+" "+version;
+                    }
+                    return new GroupObject(name, this);
+                }
                     
             }
             

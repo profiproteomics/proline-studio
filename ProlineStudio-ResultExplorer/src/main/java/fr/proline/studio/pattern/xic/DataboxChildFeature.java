@@ -5,7 +5,8 @@ import fr.proline.core.orm.lcms.Peakel;
 import fr.proline.core.orm.lcms.Peak;
 import fr.proline.core.orm.lcms.ProcessedMap;
 import fr.proline.core.orm.lcms.dto.DFeature;
-import fr.proline.core.orm.msi.MasterQuantPeptideIon;
+import fr.proline.core.orm.msi.dto.DMasterQuantPeptideIon;
+
 import fr.proline.core.orm.uds.dto.DDataset;
 
 import fr.proline.studio.comparedata.CompareDataInterface;
@@ -32,8 +33,7 @@ import java.util.List;
  */
 public class DataboxChildFeature extends AbstractDataBox {
 
-    private MasterQuantPeptideIon m_masterQuantPeptideIon;
-    private DDataset m_dataset;
+    private DMasterQuantPeptideIon m_masterQuantPeptideIon;
     private List<DFeature> m_childFeatureList;
     private QuantChannelInfo m_quantChannelInfo;
     private List<Boolean> m_featureHasPeak;
@@ -51,7 +51,7 @@ public class DataboxChildFeature extends AbstractDataBox {
         // Register Possible in parameters
         // One Map 
         GroupParameter inParameter = new GroupParameter();
-        inParameter.addParameter(MasterQuantPeptideIon.class, false);
+        inParameter.addParameter(DMasterQuantPeptideIon.class, false);
         registerInParameter(inParameter);
 
         // Register possible out parameters
@@ -79,9 +79,8 @@ public class DataboxChildFeature extends AbstractDataBox {
 
     @Override
     public void dataChanged() {
-        MasterQuantPeptideIon oldIon = m_masterQuantPeptideIon;
-        m_masterQuantPeptideIon = (MasterQuantPeptideIon) m_previousDataBox.getData(false, MasterQuantPeptideIon.class);
-        m_dataset = (DDataset) m_previousDataBox.getData(false, DDataset.class);
+        DMasterQuantPeptideIon oldIon = m_masterQuantPeptideIon;
+        m_masterQuantPeptideIon = (DMasterQuantPeptideIon) m_previousDataBox.getData(false, DMasterQuantPeptideIon.class);
         m_quantChannelInfo = (QuantChannelInfo) m_previousDataBox.getData(false, QuantChannelInfo.class);
 
         if (m_masterQuantPeptideIon != null && (oldIon != null && m_masterQuantPeptideIon.equals(oldIon))) {
@@ -220,7 +219,7 @@ public class DataboxChildFeature extends AbstractDataBox {
     @Override
     public void setEntryData(Object data) {
         m_panel.addSingleValue(data);
-        m_masterQuantPeptideIon = (MasterQuantPeptideIon) data;
+        m_masterQuantPeptideIon = (DMasterQuantPeptideIon) data;
         dataChanged();
     }
 

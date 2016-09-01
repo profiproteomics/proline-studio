@@ -2,7 +2,6 @@ package fr.proline.studio.pattern.xic;
 
 import fr.proline.core.orm.lcms.MapAlignment;
 import fr.proline.core.orm.lcms.ProcessedMap;
-import fr.proline.core.orm.msi.MasterQuantPeptideIon;
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.dto.DMasterQuantPeptide;
 
@@ -11,6 +10,7 @@ import fr.proline.core.orm.uds.dto.DMasterQuantitationChannel;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
 import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.comparedata.GlobalTabelModelProviderInterface;
+import fr.proline.core.orm.msi.dto.DMasterQuantPeptideIon;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadLcMSTask;
@@ -32,7 +32,7 @@ public class DataboxXicPeptideIon extends AbstractDataBox {
 
     private DDataset m_dataset;
     private DMasterQuantPeptide m_masterQuantPeptide;
-    private List<MasterQuantPeptideIon> m_masterQuantPeptideIonList;
+    private List<DMasterQuantPeptideIon> m_masterQuantPeptideIonList;
     private DQuantitationChannel[] quantitationChannelArray = null;
 
     private QuantChannelInfo m_quantChannelInfo;
@@ -63,7 +63,7 @@ public class DataboxXicPeptideIon extends AbstractDataBox {
 
         // Register possible out parameters
         GroupParameter outParameter = new GroupParameter();
-        outParameter.addParameter(MasterQuantPeptideIon.class, false);
+        outParameter.addParameter(DMasterQuantPeptideIon.class, false);
         registerOutParameter(outParameter);
 
         outParameter = new GroupParameter();
@@ -204,7 +204,7 @@ public class DataboxXicPeptideIon extends AbstractDataBox {
             if (parameterType.equals(ResultSummary.class)) {
                 return m_dataset.getResultSummary();
             }
-            if (parameterType.equals(MasterQuantPeptideIon.class)) {
+            if (parameterType.equals(DMasterQuantPeptideIon.class)) {
                 return ((XicPeptideIonPanel) m_panel).getSelectedMasterQuantPeptideIon();
             }
             if (parameterType.equals(DDataset.class)) {

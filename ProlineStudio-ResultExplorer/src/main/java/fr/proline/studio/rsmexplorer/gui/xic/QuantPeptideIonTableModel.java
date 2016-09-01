@@ -1,17 +1,22 @@
 package fr.proline.studio.rsmexplorer.gui.xic;
 
-import fr.proline.core.orm.msi.MasterQuantPeptideIon;
+import fr.proline.core.orm.msi.PeptideReadablePtmString;
+import fr.proline.core.orm.msi.dto.DPeptideInstance;
+import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.msi.dto.DQuantPeptideIon;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
 import fr.proline.studio.comparedata.ExtraDataType;
+import fr.proline.core.orm.msi.dto.DMasterQuantPeptideIon;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadXicMasterQuantTask;
 import fr.proline.studio.filter.ConvertValueInterface;
 import fr.proline.studio.filter.Filter;
 import fr.proline.studio.filter.DoubleFilter;
 import fr.proline.studio.filter.IntegerFilter;
 import fr.proline.studio.filter.StringDiffFilter;
+import fr.proline.studio.filter.StringFilter;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
+import fr.proline.studio.rsmexplorer.gui.renderer.ScoreRenderer;
 import fr.proline.studio.table.renderer.BigFloatOrDoubleRenderer;
 import fr.proline.studio.table.renderer.DefaultLeftAlignRenderer;
 import fr.proline.studio.table.renderer.DefaultRightAlignRenderer;
@@ -43,13 +48,17 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements GlobalT
 
     public static final int COLTYPE_PEPTIDE_ION_ID = 0;
     public static final int COLTYPE_PEPTIDE_ION_NAME = 1;
-    public static final int COLTYPE_PEPTIDE_ION_CHARGE = 2;
-    public static final int COLTYPE_PEPTIDE_ION_MOZ = 3;
-    public static final int COLTYPE_PEPTIDE_ION_ELUTION_TIME = 4;
-    public static final int LAST_STATIC_COLUMN = COLTYPE_PEPTIDE_ION_ELUTION_TIME;
-    private static final String[] m_columnNames = {"Id", "Peptide Sequence", "Charge", "m/z", "<html>Elution<br/>Time (min)</html>"};
-    private static final String[] m_columnNamesForFilter = {"Id", "Peptide Sequence", "Charge", "m/z", "Elution Time"};
-    private static final String[] m_toolTipColumns = {"MasterQuantPeptideIon Id", "Identified Peptide Sequence", "Charge", "Mass to Charge Ratio", "Elution time"};
+    public static final int COLTYPE_PEPTIDE_PTM = 2;
+    public static final int COLTYPE_PEPTIDE_SCORE = 3;
+    public static final int COLTYPE_PEPTIDE_ION_CHARGE = 4;
+    public static final int COLTYPE_PEPTIDE_ION_MOZ = 5;
+    public static final int COLTYPE_PEPTIDE_ION_ELUTION_TIME = 6;
+    public static final int COLTYPE_PEPTIDE_PROTEIN_SET_COUNT = 7;
+    public static final int COLTYPE_PEPTIDE_PROTEIN_SET_NAMES = 8;
+    public static final int LAST_STATIC_COLUMN = COLTYPE_PEPTIDE_PROTEIN_SET_NAMES;
+    private static final String[] m_columnNames = {"Id", "Peptide Sequence", "PTM", "Score", "Charge", "m/z", "<html>Elution<br/>Time (min)</html>", "Protein Set Count", "Protein Sets"};
+    private static final String[] m_columnNamesForFilter = {"Id", "Peptide Sequence", "PTM", "Score", "Charge", "m/z", "Elution Time", "Protein Set Count", "Protein Sets"};
+    private static final String[] m_toolTipColumns = {"MasterQuantPeptideIon Id", "Identified Peptide Sequence", "Post Translational Modifications", "Score", "Charge", "Mass to Charge Ratio", "Elution time", "Protein Set Count", "Protein Sets"};
 
     public static final int COLTYPE_SELECTION_LEVEL = 0;
     public static final int COLTYPE_PSM = 1;
@@ -61,11 +70,12 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements GlobalT
     private static final String[] m_columnNamesQC_SC = {"Sel. level", "Basic SC", "Specific SC", "Abundance"};
     private static final String[] m_toolTipQC_SC = {"Selection level", "Basic Spectral Count","Specific Spectral Count",  "Abundance"};
 
-    private List<MasterQuantPeptideIon> m_quantPeptideIons = null;
+    private List<DMasterQuantPeptideIon> m_quantPeptideIons = null;
     private DQuantitationChannel[] m_quantChannels = null;
     private int m_quantChannelNumber;
     private boolean m_isXICMode = true;
 
+    private ScoreRenderer m_scoreRenderer = new ScoreRenderer();
     
     private String m_modelName;
 
@@ -84,7 +94,7 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements GlobalT
 
     @Override
     public String getColumnName(int col) {
-        if (col <= COLTYPE_PEPTIDE_ION_ELUTION_TIME) {
+        if (col <= LAST_STATIC_COLUMN) {
             return m_columnNames[col];
         } else if (m_quantChannels != null) {
             int nbQc = (col - m_columnNames.length) / m_columnNamesQC.length;
@@ -112,7 +122,7 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements GlobalT
     
     @Override
     public String getExportColumnName(int col) {
-        if (col <= COLTYPE_PEPTIDE_ION_ELUTION_TIME) {
+        if (col <= LAST_STATIC_COLUMN) {
             return m_columnNamesForFilter[col];
         } else if (m_quantChannels != null) {
             int nbQc = (col - m_columnNames.length) / m_columnNamesQC.length;
@@ -135,7 +145,7 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements GlobalT
     }
     
     public String getColumnNameForFilter(int col) {
-        if (col <= COLTYPE_PEPTIDE_ION_ELUTION_TIME) {
+        if (col <= LAST_STATIC_COLUMN) {
             return m_columnNamesForFilter[col];
         } else if (m_quantChannels != null) {
             int nbQc = (col - m_columnNames.length) / m_columnNamesQC.length;
@@ -148,7 +158,7 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements GlobalT
 
     @Override
     public String getToolTipForHeader(int col) {
-        if (col <= COLTYPE_PEPTIDE_ION_ELUTION_TIME) {
+        if (col <= LAST_STATIC_COLUMN) {
             return m_toolTipColumns[col];
         } else if (m_quantChannels != null) {
             int nbQc = (col - m_columnNames.length) / m_columnNamesQC.length;
@@ -205,7 +215,7 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements GlobalT
     public Object getValueAt(int row, int col) {
 
         // Retrieve Quant Peptide Ion
-        MasterQuantPeptideIon peptideIon = m_quantPeptideIons.get(row);
+        DMasterQuantPeptideIon peptideIon = m_quantPeptideIons.get(row);
 
         switch (col) {
             case COLTYPE_PEPTIDE_ION_ID: {
@@ -225,6 +235,89 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements GlobalT
                 }
                 return lazyData;
 
+            }
+            case COLTYPE_PEPTIDE_PTM: {
+                LazyData lazyData = getLazyData(row, col);
+                DPeptideInstance peptideInstance = peptideIon.getPeptideInstance();
+                if (peptideIon.getResultSummary() == null) {
+                    lazyData.setData(null);
+                    givePriorityTo(m_taskId, row, col);
+                } else if (peptideInstance == null) {
+                    lazyData.setData("");
+                    
+                }else if (peptideInstance.getBestPeptideMatch() != null) {
+                    boolean ptmStringLoaded = peptideInstance.getBestPeptideMatch().getPeptide().getTransientData().isPeptideReadablePtmStringLoaded();
+                    if (!ptmStringLoaded) {
+                        lazyData.setData(null);
+                    } else {
+                        String ptm = "";
+                        PeptideReadablePtmString ptmString = peptideInstance.getBestPeptideMatch().getPeptide().getTransientData().getPeptideReadablePtmString();
+                        if (ptmString != null) {
+                            ptm = ptmString.getReadablePtmString();
+                        }
+
+                        lazyData.setData(ptm);
+                    }
+                } else {
+                    lazyData.setData("");
+                }
+                return lazyData;
+            }
+            case COLTYPE_PEPTIDE_SCORE: {
+                // Retrieve typical Peptide Match
+                LazyData lazyData = getLazyData(row, col);
+                DPeptideInstance peptideInstance = peptideIon.getPeptideInstance();
+                if (peptideInstance == null) {
+                    lazyData.setData(null);
+                    givePriorityTo(m_taskId, row, col);
+                } else if (peptideInstance.getBestPeptideMatch() != null) {
+                    Float score = Float.valueOf((float) peptideInstance.getBestPeptideMatch().getScore());
+                    lazyData.setData(score);
+                } else {
+                    lazyData.setData(null);
+                }
+                return lazyData;
+               
+            }
+            case COLTYPE_PEPTIDE_PROTEIN_SET_COUNT: {
+                LazyData lazyData = getLazyData(row, col);
+                DPeptideInstance peptideInstance = peptideIon.getPeptideInstance();
+                if (peptideInstance == null) {
+                    lazyData.setData(null);
+                    givePriorityTo(m_taskId, row, col);
+                } else {
+                    lazyData.setData(peptideInstance.getValidatedProteinSetCount());
+                }
+                return lazyData;
+            }
+            case COLTYPE_PEPTIDE_PROTEIN_SET_NAMES: {
+
+                LazyData lazyData = getLazyData(row, col);
+
+                DPeptideInstance peptideInstance = peptideIon.getPeptideInstance();
+                if (peptideInstance == null) {
+                    lazyData.setData(null);
+                    givePriorityTo(m_taskId, row, col);
+                } else {
+                    DPeptideMatch peptideMatch = peptideInstance.getBestPeptideMatch();
+                    String[] proteinSetNames = peptideMatch.getProteinSetStringArray();
+                    if (proteinSetNames == null) {
+                        givePriorityTo(m_taskId, row, col);
+                        lazyData.setData(null);
+                    } else {
+                        for (int i = 0; i < proteinSetNames.length; i++) {
+                            String name = proteinSetNames[i];
+                            if (i < proteinSetNames.length - 1) {
+                                m_sb.append(name).append(", ");
+                            } else {
+                                m_sb.append(name);
+                            }
+                        }
+                        lazyData.setData(m_sb.toString());
+                        m_sb.setLength(0);
+                    }
+                }
+                return lazyData;
             }
             case COLTYPE_PEPTIDE_ION_CHARGE: {
                 LazyData lazyData = getLazyData(row, col);
@@ -326,18 +419,19 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements GlobalT
         }
         //return null; // should never happen
     }
+    private final StringBuilder m_sb = new StringBuilder();
 
-    public void setData(Long taskId, DQuantitationChannel[] quantChannels, List<MasterQuantPeptideIon> peptideIons, boolean isXICMode) {
+    public void setData(Long taskId, DQuantitationChannel[] quantChannels, List<DMasterQuantPeptideIon> peptideIons, boolean isXICMode) {
         boolean structureChanged = true;
         m_isXICMode = isXICMode;
-        if (this.m_quantChannels !=null && m_quantChannels.length == quantChannels.length ) {
+        if (m_quantChannels !=null && m_quantChannels.length == quantChannels.length ) {
             for (int i=0; i<m_quantChannels.length; i++) {
                 structureChanged = !(m_quantChannels[i].equals(quantChannels[i]));
             }
         }
-        this.m_quantPeptideIons = peptideIons;
-        this.m_quantChannels = quantChannels;
-        this.m_quantChannelNumber = quantChannels.length;
+        m_quantPeptideIons = peptideIons;
+        m_quantChannels = quantChannels;
+        m_quantChannelNumber = quantChannels.length;
         
         if (structureChanged) {
             fireTableStructureChanged();
@@ -355,7 +449,7 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements GlobalT
         fireTableDataChanged();
     }
 
-    public MasterQuantPeptideIon getPeptideIon(int i) {
+    public DMasterQuantPeptideIon getPeptideIon(int i) {
 
         return m_quantPeptideIons.get(i);
     }
@@ -391,7 +485,7 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements GlobalT
                 iModel = compoundTableModel.convertCompoundRowToBaseModelRow(iModel);
             }
             // Retrieve Peptide Ion
-            MasterQuantPeptideIon p = getPeptideIon(iModel);
+            DMasterQuantPeptideIon p = getPeptideIon(iModel);
             if (peptideIdMap.contains(p.getId())) {
                 peptideIds.set(iCur++, p.getId());
             }
@@ -403,8 +497,12 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements GlobalT
     @Override
     public void addFilters(LinkedHashMap<Integer, Filter> filtersMap) {
         filtersMap.put(COLTYPE_PEPTIDE_ION_NAME, new StringDiffFilter(getColumnNameForFilter(COLTYPE_PEPTIDE_ION_NAME), null, COLTYPE_PEPTIDE_ION_NAME));
+        filtersMap.put(COLTYPE_PEPTIDE_PTM, new StringFilter(getColumnName(COLTYPE_PEPTIDE_PTM), null, COLTYPE_PEPTIDE_PTM));
+        filtersMap.put(COLTYPE_PEPTIDE_SCORE, new DoubleFilter(getColumnName(COLTYPE_PEPTIDE_SCORE), null, COLTYPE_PEPTIDE_SCORE));
         filtersMap.put(COLTYPE_PEPTIDE_ION_CHARGE, new IntegerFilter(getColumnNameForFilter(COLTYPE_PEPTIDE_ION_CHARGE), null, COLTYPE_PEPTIDE_ION_CHARGE));
         filtersMap.put(COLTYPE_PEPTIDE_ION_MOZ, new DoubleFilter(getColumnNameForFilter(COLTYPE_PEPTIDE_ION_MOZ), null, COLTYPE_PEPTIDE_ION_MOZ));
+        filtersMap.put(COLTYPE_PEPTIDE_PROTEIN_SET_COUNT, new IntegerFilter(getColumnName(COLTYPE_PEPTIDE_PROTEIN_SET_COUNT), null, COLTYPE_PEPTIDE_PROTEIN_SET_COUNT));
+        filtersMap.put(COLTYPE_PEPTIDE_PROTEIN_SET_NAMES, new StringFilter(getColumnName(COLTYPE_PEPTIDE_PROTEIN_SET_NAMES), null, COLTYPE_PEPTIDE_PROTEIN_SET_NAMES));
         
         ConvertValueInterface minuteConverter = new ConvertValueInterface() {
             @Override
@@ -528,7 +626,7 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements GlobalT
         int rowFiltered = row;
 
         // Retrieve Quant Peptide Ion
-        MasterQuantPeptideIon peptideIon = m_quantPeptideIons.get(rowFiltered);
+        DMasterQuantPeptideIon peptideIon = m_quantPeptideIons.get(rowFiltered);
 
         switch (col) {
             case COLTYPE_PEPTIDE_ION_ID: {
@@ -546,11 +644,77 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements GlobalT
                 }
 
             }
+            case COLTYPE_PEPTIDE_PTM: {
+                DPeptideInstance peptideInstance = peptideIon.getPeptideInstance();
+                if (peptideInstance == null) {
+                    return "";
+                } else if (peptideInstance.getBestPeptideMatch() != null) {
+                    boolean ptmStringLoadeed = peptideInstance.getBestPeptideMatch().getPeptide().getTransientData().isPeptideReadablePtmStringLoaded();
+                    if (!ptmStringLoadeed) {
+                        return null;
+                    }
+                    String ptm = "";
+                    PeptideReadablePtmString ptmString = peptideInstance.getBestPeptideMatch().getPeptide().getTransientData().getPeptideReadablePtmString();
+                    if (ptmString != null) {
+                        ptm = ptmString.getReadablePtmString();
+                    }
+
+                    return ptm;
+                } else {
+                    return "";
+                }
+            }
+            case COLTYPE_PEPTIDE_SCORE: {
+                DPeptideInstance peptideInstance = peptideIon.getPeptideInstance();
+                if (peptideInstance == null) {
+                    return "";
+                    
+                } else if (peptideInstance.getBestPeptideMatch() != null) {
+                    float score = (float) peptideInstance.getBestPeptideMatch().getScore() ;
+                    return String.valueOf(score);
+                }
+                return "";
+               
+            }
+            case COLTYPE_PEPTIDE_PROTEIN_SET_COUNT: {
+
+                DPeptideInstance peptideInstance = peptideIon.getPeptideInstance();
+                if (peptideInstance == null) {
+                    return "";
+                } else {
+                    return String.valueOf(peptideInstance.getValidatedProteinSetCount());
+                }
+            }
+            case COLTYPE_PEPTIDE_PROTEIN_SET_NAMES: {
+
+                DPeptideInstance peptideInstance = peptideIon.getPeptideInstance();
+                if (peptideInstance == null) {
+                    return "";
+                } else {
+                    DPeptideMatch peptideMatch = peptideInstance.getBestPeptideMatch();
+                    String[] proteinSetNames = peptideMatch.getProteinSetStringArray();
+                    if (proteinSetNames == null) {
+                        return "";
+                    } else {
+                        for (int i = 0; i < proteinSetNames.length; i++) {
+                            String name = proteinSetNames[i];
+                            if (i < proteinSetNames.length - 1) {
+                                m_sb.append(name).append(", ");
+                            } else {
+                                m_sb.append(name);
+                            }
+                        }
+                        String t = m_sb.toString();
+                        m_sb.setLength(0);
+                        return t;
+                    }
+                }
+            }
             case COLTYPE_PEPTIDE_ION_CHARGE: {
                 if (peptideIon.getResultSummary() == null) {
                     return "";
                 } else {
-                    return ""+peptideIon.getCharge();
+                    return String.valueOf(peptideIon.getCharge());
                 }
 
             }
@@ -558,7 +722,7 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements GlobalT
                 if (peptideIon.getResultSummary() == null) {
                     return "";
                 } else {
-                    return ""+peptideIon.getMoz();
+                    return String.valueOf(peptideIon.getMoz());
                 }
 
             }
@@ -566,7 +730,7 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements GlobalT
                 if (peptideIon.getResultSummary() == null) {
                     return "";
                 } else {
-                    return ""+peptideIon.getElutionTime();
+                    return String.valueOf(peptideIon.getElutionTime());
                 }
 
             }
@@ -657,6 +821,12 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements GlobalT
                 return Long.class;
             }
             case COLTYPE_PEPTIDE_ION_NAME: {
+                return String.class;
+            }
+            case COLTYPE_PEPTIDE_SCORE: {
+                return Float.class;
+            }
+            case COLTYPE_PEPTIDE_PTM: {
                 return String.class;
             }
             case COLTYPE_PEPTIDE_ION_CHARGE: {
@@ -754,7 +924,8 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements GlobalT
 
         switch (col) {
 
-            case COLTYPE_PEPTIDE_ION_NAME: {
+            case COLTYPE_PEPTIDE_ION_NAME:
+            case COLTYPE_PEPTIDE_PTM: {
                 renderer = new DefaultLeftAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class));
                 break;
             }
@@ -768,6 +939,14 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements GlobalT
             }
             case COLTYPE_PEPTIDE_ION_ELUTION_TIME: {
                 renderer = new TimeRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)));
+                break;
+            }
+            case COLTYPE_PEPTIDE_SCORE: {
+                renderer = m_scoreRenderer;
+                break;
+            }
+            case COLTYPE_PEPTIDE_PROTEIN_SET_COUNT: {
+                renderer = new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(Integer.class));
                 break;
             }
             default: {
@@ -805,7 +984,7 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements GlobalT
     @Override
     public ArrayList<ExtraDataType> getExtraDataTypes() {
         ArrayList<ExtraDataType> list = new ArrayList<>();
-        list.add(new ExtraDataType(MasterQuantPeptideIon.class, true));
+        list.add(new ExtraDataType(DMasterQuantPeptideIon.class, true));
         registerSingleValuesAsExtraTypes(list);
         return list;
     }
@@ -817,7 +996,7 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements GlobalT
 
     @Override
     public Object getRowValue(Class c, int row) {
-        if (c.equals(MasterQuantPeptideIon.class)) {
+        if (c.equals(DMasterQuantPeptideIon.class)) {
             return m_quantPeptideIons.get(row);
         }
         return null;

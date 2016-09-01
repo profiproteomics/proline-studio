@@ -7,8 +7,8 @@ import fr.proline.core.orm.lcms.MasterFeatureItem;
 import fr.proline.core.orm.lcms.Peakel;
 import fr.proline.core.orm.lcms.ProcessedMap;
 import fr.proline.core.orm.lcms.dto.DFeature;
-import fr.proline.core.orm.msi.MasterQuantPeptideIon;
 import fr.proline.core.orm.msi.dto.DMasterQuantPeptide;
+import fr.proline.core.orm.msi.dto.DMasterQuantPeptideIon;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.core.orm.uds.dto.DMasterQuantitationChannel;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
@@ -60,7 +60,7 @@ public class DatabaseLoadLcMSTask extends AbstractDatabaseSlicerTask {
     private DMasterQuantPeptide m_masterQuantPeptide;
     private Feature m_masterFeature;
     private List<Feature> m_masterFeatureList;
-    private MasterQuantPeptideIon m_masterQuantPeptideIon;
+    private DMasterQuantPeptideIon m_masterQuantPeptideIon;
     private List<DFeature> m_childFeatureList;
     private List<MapAlignment> m_allMapAlignments;
     private Long m_alnRefMapId;
@@ -137,7 +137,7 @@ public class DatabaseLoadLcMSTask extends AbstractDatabaseSlicerTask {
         action = LOAD_FEATURE_FOR_MASTER;
     }
 
-    public void initLoadChildFeatureForPeptideIonWithPeakel(long projectId, MasterQuantPeptideIon masterQuantPeptideIon, List<DFeature> childFeatureList, List<List<Peakel>> peakelListPerFeature, List<MapAlignment> allMapAlignments, Long alnRefMapId, List<ProcessedMap> allProcessedMaps) {
+    public void initLoadChildFeatureForPeptideIonWithPeakel(long projectId, DMasterQuantPeptideIon masterQuantPeptideIon, List<DFeature> childFeatureList, List<List<Peakel>> peakelListPerFeature, List<MapAlignment> allMapAlignments, Long alnRefMapId, List<ProcessedMap> allProcessedMaps) {
         init(SUB_TASK_COUNT_CHILD_FEATURE, new TaskInfo("Load Child Features + peakels for PeptideIon "+ (masterQuantPeptideIon == null ? "" : (masterQuantPeptideIon.getId())) , false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_MEDIUM));
         m_projectId = projectId;
         m_masterQuantPeptideIon = masterQuantPeptideIon;

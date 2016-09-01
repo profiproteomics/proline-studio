@@ -1,10 +1,10 @@
 package fr.proline.studio.rsmexplorer.gui.xic;
 
-import fr.proline.core.orm.msi.MasterQuantPeptideIon;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
 import fr.proline.studio.comparedata.AddDataAnalyzerButton;
 import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.comparedata.GlobalTabelModelProviderInterface;
+import fr.proline.core.orm.msi.dto.DMasterQuantPeptideIon;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.export.ExportModelInterface;
@@ -223,7 +223,7 @@ public class XicPeptideIonPanel  extends HourglassPanel implements DataBoxPanelI
         return internalPanel;
     }                 
     
-    public void setData(Long taskId, DQuantitationChannel[] quantChannels,  List<MasterQuantPeptideIon> peptideIons, boolean isXICMode, boolean finished) {
+    public void setData(Long taskId, DQuantitationChannel[] quantChannels,  List<DMasterQuantPeptideIon> peptideIons, boolean isXICMode, boolean finished) {
         boolean qcChanged = true;
         if (m_quantChannels != null && m_quantChannels.length == quantChannels.length) {
             for (int q = 0; q < m_quantChannels.length; q++) {
@@ -316,7 +316,7 @@ public class XicPeptideIonPanel  extends HourglassPanel implements DataBoxPanelI
         return m_dataBox.getSaveAction(splittedPanel);
     }
 
-    public MasterQuantPeptideIon getSelectedMasterQuantPeptideIon() {
+    public DMasterQuantPeptideIon getSelectedMasterQuantPeptideIon() {
         return m_quantPeptideIonTable.getSelectedMasterQuantPeptideIon();
     }
 
@@ -352,7 +352,7 @@ public class XicPeptideIonPanel  extends HourglassPanel implements DataBoxPanelI
                 return;
             }
  
-            m_dataBox.propagateDataChanged(MasterQuantPeptideIon.class);
+            m_dataBox.propagateDataChanged(DMasterQuantPeptideIon.class);
 
         }
         
@@ -453,7 +453,7 @@ public class XicPeptideIonPanel  extends HourglassPanel implements DataBoxPanelI
         
 
 
-        public MasterQuantPeptideIon getSelectedMasterQuantPeptideIon() {
+        public DMasterQuantPeptideIon getSelectedMasterQuantPeptideIon() {
 
             // Retrieve Selected Row
             int selectedRow = getSelectedRow();

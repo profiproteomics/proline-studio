@@ -55,50 +55,47 @@ public class ExcelXMLExporter implements ExporterInterface {
     @Override
     public void addCell(String t, ArrayList<ExportSubStringFont> fonts) {
 
-        XSSFRichTextString rich = new XSSFRichTextString(t);
-
-        for (int i = 0; i < fonts.size(); i++) {
-
-            int startIndex = fonts.get(i).getStartIndex();
-            int stopIndex = fonts.get(i).getStopIndex();
-            short color = fonts.get(i).getColor();
-
-            XSSFFont currentFont = (XSSFFont) m_wb.createFont();
-
-            if (currentFont != null) {
-                currentFont.setColor(color);
-
-                if (fonts.get(i).getTextWeight() == Font.BOLD) {
-                    currentFont.setBold(true);
-                } else if (fonts.get(i).getTextWeight() == java.awt.Font.ITALIC) {
-                    currentFont.setItalic(true);
-                }
-
-                if (startIndex >= 0 && stopIndex <= t.length()) {
-                    rich.applyFont(startIndex, stopIndex, currentFont);
-                }
-            }
-
-        }
-
-        String text = rich.getString();
-
         Cell cell = m_row.createCell(m_curCell);
 
-        if (NumberUtils.isNumber(text)) {
-            double d = Double.parseDouble(text);
-            if (!this.getDecorated()) {
-                cell.setCellValue(d);
-            } else {
-                cell.setCellValue(rich);
+        if ((getDecorated()) && (fonts != null)) {
+            
+            XSSFRichTextString rich = new XSSFRichTextString(t);
+            
+            for (int i = 0; i < fonts.size(); i++) {
+
+                int startIndex = fonts.get(i).getStartIndex();
+                int stopIndex = fonts.get(i).getStopIndex();
+                short color = fonts.get(i).getColor();
+
+                XSSFFont currentFont = (XSSFFont) m_wb.createFont();
+
+                if (currentFont != null) {
+                    currentFont.setColor(color);
+
+                    if (fonts.get(i).getTextWeight() == Font.BOLD) {
+                        currentFont.setBold(true);
+                    } else if (fonts.get(i).getTextWeight() == java.awt.Font.ITALIC) {
+                        currentFont.setItalic(true);
+                    }
+
+                    if (startIndex >= 0 && stopIndex <= t.length()) {
+                        rich.applyFont(startIndex, stopIndex, currentFont);
+                    }
+                }
+
             }
+
+            cell.setCellValue(rich);
+        } else if (NumberUtils.isNumber(t)) {
+            double d = Double.parseDouble(t);
+
+            cell.setCellValue(d);
+
         } else {
-            if (!this.getDecorated()) {
-                cell.setCellValue(t);
-            } else {
-                cell.setCellValue(rich);
-            }
+            cell.setCellValue(t);
         }
+
+   
         m_curCell++;
     }
 

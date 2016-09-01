@@ -43,17 +43,17 @@ public class ExportManager {
         if(c instanceof ExportTextInterface){
             return ((ExportTextInterface) c).getSubStringFonts();
         }else{
-            return new ArrayList<ExportSubStringFont>();
+            return null;
         }
     }
     
 
     public class ExportWorker extends DefaultDialog.ProgressTask {
 
-        private ExporterInterface m_exporter;
-        private String m_name;
-        private String m_filePath;
-        private boolean m_decorated;
+        private final ExporterInterface m_exporter;
+        private final String m_name;
+        private final String m_filePath;
+        private final boolean m_decorated;
 
         public ExportWorker(ExporterInterface exporter, String name, String filePath, boolean decorated) {
             m_exporter = exporter;
@@ -76,13 +76,13 @@ public class ExportManager {
                 m_exporter.startRow();
                 for (int j = 0; j < nbCol; j++) {
                     String colName = ((ExportModelInterface) m_table).getExportColumnName(j);
-                    m_exporter.addCell(colName, new ArrayList<ExportSubStringFont>());
+                    m_exporter.addCell(colName, null);
                 }
             } else {
                 m_exporter.startRow();
                 for (int j = 0; j < nbCol; j++) {
                     String colName = m_table.getColumnName(j);
-                    m_exporter.addCell(colName, new ArrayList<ExportSubStringFont>());
+                    m_exporter.addCell(colName, null);
                 }
             }
 
@@ -91,8 +91,9 @@ public class ExportManager {
 
             int lastPercentage = 0;
             int percentage;
+            boolean rowTextInterface = (m_table instanceof ExportModelInterface);
             for (int row = 0; row < nbRow; row++) {
-                boolean rowTextInterface = (m_table instanceof ExportModelInterface);
+                
                 if (rowTextInterface) {
                     m_exporter.startRow();
                     for (int col = 0; col < nbCol; col++) {

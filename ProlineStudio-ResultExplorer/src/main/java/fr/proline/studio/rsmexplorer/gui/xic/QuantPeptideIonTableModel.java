@@ -630,7 +630,7 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements GlobalT
 
         switch (col) {
             case COLTYPE_PEPTIDE_ION_ID: {
-                return ""+peptideIon.getId();
+                return String.valueOf(peptideIon.getId());
             }
             case COLTYPE_PEPTIDE_ION_NAME: {
                 if (peptideIon.getResultSummary() == null) {

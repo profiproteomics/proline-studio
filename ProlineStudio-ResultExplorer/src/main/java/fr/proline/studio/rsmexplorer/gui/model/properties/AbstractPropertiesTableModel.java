@@ -113,12 +113,12 @@ public abstract class AbstractPropertiesTableModel extends DecoratedTableModel i
     public String getTootlTipValue(int row, int col) {
         return null;
     }
-    
+
     @Override
     public TableCellRenderer getRenderer(int row, int col) {
 
         GroupObject groupObject = (GroupObject) getValueAt(row, col);
-        
+
         DataGroup dataGroup = groupObject.m_group;
         boolean isFirstRow = groupObject.m_coloredRow;
         if (isFirstRow) {
@@ -128,10 +128,13 @@ public abstract class AbstractPropertiesTableModel extends DecoratedTableModel i
         } else if (col == DataGroup.COLTYPE_PROPERTY_NAME) {
             int nbCol = getColumnCount();
             if (nbCol > DataGroup.COLTYPE_PROPERTY_NAME + 2) {
-                String value = (String) getValueAt(row, DataGroup.COLTYPE_PROPERTY_NAME + 1);
+                String value = ((GroupObject) getValueAt(row, DataGroup.COLTYPE_PROPERTY_NAME + 1)).stringForFilter();
                 for (int i = DataGroup.COLTYPE_PROPERTY_NAME + 2; i < nbCol; i++) {
-                    String valueCur = (String) getValueAt(row, i);
-                    if (value.compareTo(valueCur) != 0) {
+                    String valueCur = ((GroupObject) getValueAt(row, i)).stringForFilter();
+                    if ((value == null) && (valueCur == null)) {
+                        continue;
+                    }
+                    if (((value != null) && (valueCur == null)) || ((value == null) && (valueCur != null)) || (value.compareTo(valueCur) != 0)) {
                         return m_propertiesNonOkRenderer;
                     }
                 }

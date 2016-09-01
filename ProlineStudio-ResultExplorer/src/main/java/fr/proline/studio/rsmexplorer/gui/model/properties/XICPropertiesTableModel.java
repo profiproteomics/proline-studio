@@ -93,7 +93,23 @@ public class XICPropertiesTableModel extends AbstractPropertiesTableModel {
             int startRow = 0;
             DataGroup group = new GeneralInformationGroup(startRow); m_dataGroupList.add(group); startRow += group.getRowCount();
             group = new IdentificationSummaryGroup(startRow); m_dataGroupList.add(group); startRow += group.getRowCount();
-            group = new QuantProcessingConfigGroup(startRow, datasetArrayList); m_dataGroupList.add(group); startRow+=group.getRowCount();
+            group = new QuantProcessingConfigGroup(startRow, datasetArrayList, false); m_dataGroupList.add(group); startRow+=group.getRowCount();
+
+            // check if we have a Post Quant Processing Config
+            boolean postQuantProcessingConfig = false;
+            for (int i = 0; i < nbDataset; i++) {
+                DDataset dataset = datasetArrayList.get(i);
+                try {
+                    Map<String, Object> objectTreeAsMap = dataset.getPostQuantProcessingConfigAsMap();
+                    if ((objectTreeAsMap != null) && (!objectTreeAsMap.isEmpty())) {
+                        postQuantProcessingConfig = true;
+                    }
+                } catch (Exception e) {
+                }
+            }
+            if (postQuantProcessingConfig) {
+                group = new QuantProcessingConfigGroup(startRow, datasetArrayList, true); m_dataGroupList.add(group); startRow+=group.getRowCount();
+            }
             group = new QuantitationMethodGroup(startRow); m_dataGroupList.add(group); startRow+=group.getRowCount();
             for (int i=0;i<maxMasterQuantitationChannels;i++) {
                 group = new MasterQuantitationChannelGroup(startRow, i); m_dataGroupList.add(group); startRow+=group.getRowCount();
@@ -234,14 +250,16 @@ public class XICPropertiesTableModel extends AbstractPropertiesTableModel {
      */
     public class QuantProcessingConfigGroup extends DataGroup {
 
-        private final Color GROUP_COLOR_BACKGROUND = new Color(76,166,107);
+        private Color m_groupColorBackground;
         
         private ArrayList<String> m_valuesName = new ArrayList<>();
         private HashMap<Integer, HashMap<String, String>> m_valuesMap = new HashMap<>();
         
-        public QuantProcessingConfigGroup(int rowStart, ArrayList<DDataset> datasetArrayList) {
-            super("Quantitation Processing Config", rowStart);
+        public QuantProcessingConfigGroup(int rowStart, ArrayList<DDataset> datasetArrayList, boolean post) {
+            super(post ? "Post Quantitation Processing Config" : "Quantitation Processing Config", rowStart);
 
+            m_groupColorBackground = (post) ? new Color(76,120,107) : new Color(76,166,107);
+            
             // retrieve information on maps
             TreeSet<String> keysSet = new TreeSet<>();
             int nbDataset = datasetArrayList.size();
@@ -249,12 +267,11 @@ public class XICPropertiesTableModel extends AbstractPropertiesTableModel {
             try {
                 for (int i = 0; i < nbDataset; i++) {
                     DDataset dataset = datasetArrayList.get(i);
-                    
-                    //fr.proline.core.orm.uds.ObjectTree objectTree = dataset.getQuantProcessingConfig();
-                    Map<String, Object> objectTreeAsMap = dataset.getQuantProcessingConfigAsMap();
+
+                    Map<String, Object> objectTreeAsMap = post ? dataset.getPostQuantProcessingConfigAsMap() : dataset.getQuantProcessingConfigAsMap();
 
                     HashMap<String, String> propertiesList = new HashMap<>();
-                    SerializedPropertiesUtil.getProperties(propertiesList, "Quantitation Processing Config", objectTreeAsMap);
+                    SerializedPropertiesUtil.getProperties(propertiesList, post ? "Post Quantitation Processing Config" : "Quantitation Processing Config", objectTreeAsMap);
 
                     m_valuesMap.put(Integer.valueOf(i), propertiesList);
                     
@@ -291,7 +308,7 @@ public class XICPropertiesTableModel extends AbstractPropertiesTableModel {
 
         @Override
         public Color getGroupColor(int row) {
-            return GROUP_COLOR_BACKGROUND;
+            return m_groupColorBackground;
         }
 
         @Override

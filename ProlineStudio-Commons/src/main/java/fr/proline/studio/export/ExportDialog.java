@@ -1,6 +1,7 @@
 package fr.proline.studio.export;
 
 import fr.proline.studio.gui.DefaultDialog;
+import fr.proline.studio.gui.InfoDialog;
 import fr.proline.studio.utils.IconManager;
 
 import java.awt.*;
@@ -12,6 +13,8 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.prefs.Preferences;
@@ -25,6 +28,7 @@ import org.openide.util.NbPreferences;
 import org.slf4j.LoggerFactory;
 
 import org.jfree.graphics2d.svg.*;
+import org.openide.windows.WindowManager;
 
 /**
  * Dialog used to export an image or a table
@@ -33,6 +37,7 @@ import org.jfree.graphics2d.svg.*;
  */
 public class ExportDialog extends DefaultDialog {
 
+    
     private static ExportDialog m_singletonImageDialog = null;
     private static ExportDialog m_singletonExcelDialog = null;
     private static ExportDialog m_singletonServerDialog = null;
@@ -58,6 +63,8 @@ public class ExportDialog extends DefaultDialog {
     private JRadioButton m_yesDecorated;
     private JRadioButton m_noDecorated;
 
+    private ExportManager m_exportManager = null;
+    
     public static ExportDialog getDialog(Window parent, JXTable table, String exportName) {
         if (m_singletonExcelDialog == null) {
             m_singletonExcelDialog = new ExportDialog(parent, ExporterFactory.EXPORT_TABLE);
@@ -349,8 +356,8 @@ public class ExportDialog extends DefaultDialog {
 
             final ExporterFactory.ExporterInfo exporterInfo = getExporterInfo();
 
-            ExportManager exporter = new ExportManager(m_table);
-            ProgressTask exportTask = exporter.getTask(exporterInfo.getExporter(), m_exportName, fileName, this.exportDecorated());
+            m_exportManager = new ExportManager(m_table);
+            ProgressTask exportTask = m_exportManager.getTask(exporterInfo.getExporter(), m_exportName, fileName, this.exportDecorated());
 
             startTask(exportTask);
 
@@ -396,7 +403,7 @@ public class ExportDialog extends DefaultDialog {
                 try {
                     ImageIO.write(bi, "png", f);
                 } catch (IOException e) {
-                    LoggerFactory.getLogger("ProlineStudio.ResultExplorer").error("Error exporting png", e);
+                    LoggerFactory.getLogger("ProlineStudio.Commons").error("Error exporting png", e);
                 }
 
                 Preferences preferences = NbPreferences.root();
@@ -430,9 +437,26 @@ public class ExportDialog extends DefaultDialog {
     public void setVisible(boolean v) {
 
         if (!v) {
+            
+            if (m_exportManager != null) {
+                Exception e = m_exportManager.getException();
+                if (e != null) {
+
+                    LoggerFactory.getLogger("ProlineStudio.Commons").error("Error during table export", e);
+                    StringWriter sw = new StringWriter();
+                    PrintWriter pw = new PrintWriter(sw);
+                    e.printStackTrace(pw);
+                    String message = sw.toString();
+                    InfoDialog errorDialog = new InfoDialog(WindowManager.getDefault().getMainWindow(), InfoDialog.InfoType.WARNING, "Error", message);
+                    errorDialog.setButtonVisible(InfoDialog.BUTTON_CANCEL, false);
+                    errorDialog.centerToWindow(WindowManager.getDefault().getMainWindow());
+                    errorDialog.setVisible(true);
+                }
+            }
             m_table = null;
             m_panel = null;
             m_exportName = null;
+            m_exportManager = null;
         }
         super.setVisible(v);
     }

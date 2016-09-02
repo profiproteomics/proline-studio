@@ -17,12 +17,25 @@ public class ExportManager {
 
     private final JTable m_table;
 
+    private ExportManager m_exportManager = null;
+    private Exception m_exportException = null;
+    
+    
     public ExportManager(JTable table) {
         m_table = table;
+        m_exportManager = this;
     }
 
     public ExportWorker getTask(ExporterInterface exporter, String name, String filePath, boolean decorated) {
         return new ExportWorker(exporter, name, filePath, decorated);
+    }
+    
+    public void setException(Exception e) {
+        m_exportException = e;
+    }
+
+    public Exception getException() {
+        return m_exportException;
     }
 
     private String componentToText(Component c) {
@@ -64,66 +77,72 @@ public class ExportManager {
 
         @Override
         protected Object doInBackground() throws Exception {
-            m_exporter.start(m_filePath);
-            m_exporter.startSheet(m_name);
             
-            m_exporter.setDecorated(m_decorated);
+            try {
+                m_exporter.start(m_filePath);
+                m_exporter.startSheet(m_name);
 
-            // headers
-            boolean columnTextInterface = (m_table instanceof ExportModelInterface);
-            int nbCol = m_table.getColumnCount();
-            if (columnTextInterface) {
-                m_exporter.startRow();
-                for (int j = 0; j < nbCol; j++) {
-                    String colName = ((ExportModelInterface) m_table).getExportColumnName(j);
-                    m_exporter.addCell(colName, null);
-                }
-            } else {
-                m_exporter.startRow();
-                for (int j = 0; j < nbCol; j++) {
-                    String colName = m_table.getColumnName(j);
-                    m_exporter.addCell(colName, null);
-                }
-            }
+                m_exporter.setDecorated(m_decorated);
 
-            // all rows
-            int nbRow = m_table.getRowCount();
-
-            int lastPercentage = 0;
-            int percentage;
-            boolean rowTextInterface = (m_table instanceof ExportModelInterface);
-            for (int row = 0; row < nbRow; row++) {
-                
-                if (rowTextInterface) {
+                // headers
+                boolean columnTextInterface = (m_table instanceof ExportModelInterface);
+                int nbCol = m_table.getColumnCount();
+                if (columnTextInterface) {
                     m_exporter.startRow();
-                    for (int col = 0; col < nbCol; col++) {
-                        String text = ((ExportModelInterface) m_table).getExportRowCell(row, col);
-                        if (text == null) {
-                            TableCellRenderer renderer = m_table.getCellRenderer(row, col);
-                            Component c = m_table.prepareRenderer(renderer, row, col);
-                            text = componentToText(c);
-                        }
-                        TableCellRenderer renderer = m_table.getCellRenderer(row, col);
-                        Component c = m_table.prepareRenderer(renderer, row, col);
-                        m_exporter.addCell(text,componentToSubStringFonts(c));
+                    for (int j = 0; j < nbCol; j++) {
+                        String colName = ((ExportModelInterface) m_table).getExportColumnName(j);
+                        m_exporter.addCell(colName, null);
                     }
                 } else {
                     m_exporter.startRow();
-                    for (int col = 0; col < nbCol; col++) {
-                        TableCellRenderer renderer = m_table.getCellRenderer(row, col);
-                        Component c = m_table.prepareRenderer(renderer, row, col);
-                        String text = componentToText(c);
-                        
-                        m_exporter.addCell(text, componentToSubStringFonts(c));
+                    for (int j = 0; j < nbCol; j++) {
+                        String colName = m_table.getColumnName(j);
+                        m_exporter.addCell(colName, null);
                     }
                 }
-                percentage = (int) Math.round((((double) (row + 1)) / nbRow) * 100);
-                if (percentage > lastPercentage) {
-                    setProgress(percentage);
-                    lastPercentage = percentage;
-                }
-            }
 
+                // all rows
+                int nbRow = m_table.getRowCount();
+
+                int lastPercentage = 0;
+                int percentage;
+                boolean rowTextInterface = (m_table instanceof ExportModelInterface);
+                for (int row = 0; row < nbRow; row++) {
+
+                    if (rowTextInterface) {
+                        m_exporter.startRow();
+                        for (int col = 0; col < nbCol; col++) {
+                            String text = ((ExportModelInterface) m_table).getExportRowCell(row, col);
+                            if (text == null) {
+                                TableCellRenderer renderer = m_table.getCellRenderer(row, col);
+                                Component c = m_table.prepareRenderer(renderer, row, col);
+                                text = componentToText(c);
+                            }
+                            TableCellRenderer renderer = m_table.getCellRenderer(row, col);
+                            Component c = m_table.prepareRenderer(renderer, row, col);
+                            m_exporter.addCell(text, componentToSubStringFonts(c));
+                        }
+                    } else {
+                        m_exporter.startRow();
+                        for (int col = 0; col < nbCol; col++) {
+                            TableCellRenderer renderer = m_table.getCellRenderer(row, col);
+                            Component c = m_table.prepareRenderer(renderer, row, col);
+                            String text = componentToText(c);
+
+                            m_exporter.addCell(text, componentToSubStringFonts(c));
+                        }
+                    }
+                    percentage = (int) Math.round((((double) (row + 1)) / nbRow) * 100);
+                    if (percentage > lastPercentage) {
+                        setProgress(percentage);
+                        lastPercentage = percentage;
+                    }
+                }
+
+            } catch (Exception e) {
+                m_exportManager.setException(e);
+            }
+            
             setProgress(getMaxValue());
 
             // end fild

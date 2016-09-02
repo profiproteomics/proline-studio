@@ -328,10 +328,9 @@ public class PeptideTableModel extends DecoratedTableModel implements GlobalTabl
             case COLTYPE_PEPTIDE_RETENTION_TIME: {
                 DPeptideMatch peptideMatch = (DPeptideMatch) peptideInstance.getBestPeptideMatch();
                 if (peptideMatch != null) {
-                    return peptideMatch.getRetentionTime();
-                } else {
-                    return peptideInstance.getElutionTime();
+                    return null;
                 }
+                return peptideMatch.getRetentionTime();
             }
             case COLTYPE_PEPTIDE_MSQUERY: {
                 DPeptideMatch peptideMatch = (DPeptideMatch) peptideInstance.getBestPeptideMatch();

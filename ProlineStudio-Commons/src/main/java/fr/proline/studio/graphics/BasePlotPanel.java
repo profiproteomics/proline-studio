@@ -453,7 +453,7 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
         if (plot.needsXAxis()) {
             
             XAxis xAxis = getXAxis();
-            xAxis.setLog(false);
+            //xAxis.setLog(false);  // we do no longer change the log setting
             xAxis.setSelected(false);
             xAxis.setRange(tab[0] ,tab[1]);
                       
@@ -461,7 +461,7 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
 
         if (plot.needsYAxis()) {
             YAxis yAxis = getYAxis();
-            yAxis.setLog(false);
+            //yAxis.setLog(false);  // we do no longer change the log setting
             yAxis.setSelected(false);
             yAxis.setRange(tab[2],tab[3]);
         }

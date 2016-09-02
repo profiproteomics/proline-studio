@@ -11,16 +11,16 @@ import org.apache.commons.lang3.StringEscapeUtils;
  */
 public class CSVExporter implements ExporterInterface {
 
-    private StringBuilder m_sb = new StringBuilder();
-    private static final char separatorCSV = ',';
+    private final StringBuilder m_sb = new StringBuilder();
+    private static final char CSV_SEPARATOR = ',';
 
     private int m_curRow = 0;
     private int m_curCell = 0;
     
     private  FileWriter m_fw;
     
-    boolean m_decorated = false;
-    
+    private boolean m_decorated = false;
+
     @Override
     public void start(String filePath) throws java.io.IOException {
         
@@ -49,7 +49,7 @@ public class CSVExporter implements ExporterInterface {
     public void addCell(String t, ArrayList<ExportSubStringFont> fonts) throws IOException {
         
         if (m_curCell>0) {
-            m_fw.write(separatorCSV);
+            m_fw.write(CSV_SEPARATOR);
         }
         m_curCell++;
         m_fw.write(StringEscapeUtils.escapeCsv(t));
@@ -65,14 +65,14 @@ public class CSVExporter implements ExporterInterface {
 
     @Override
     public void setDecorated(boolean decorated) {
-        this.m_decorated = decorated;
+        m_decorated = decorated;
     }
 
     @Override
     public boolean getDecorated() {
-        return this.m_decorated;
+        return m_decorated;
     }
-    
+
 
     
 }

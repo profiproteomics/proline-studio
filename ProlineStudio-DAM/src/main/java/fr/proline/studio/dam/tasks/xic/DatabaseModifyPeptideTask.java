@@ -197,7 +197,7 @@ public class DatabaseModifyPeptideTask extends AbstractDatabaseTask {
                     serializedMap = new HashMap();
                 }
                 serializedMap.put("MQComponent_SLevelChanged", Boolean.TRUE);
-                proteinSet.setSerializedPropertiesAsMap(serializedMap);
+                proteinSet.setSerializedPropertiesAsMap(serializedMap); 
                 entityManagerMSI.merge(proteinSet);*/
 
                 String queryDMasterQuantProteinSet = "SELECT new fr.proline.core.orm.msi.dto.DMasterQuantProteinSet"

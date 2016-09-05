@@ -23,7 +23,7 @@ public abstract class AbstractConnectedGraphObject extends AbstractGraphObject {
         return m_group;
     }
     
-    public abstract boolean isConnected();
+    public abstract boolean isConnected(boolean recursive);
     public abstract boolean canSetSettings();
     public abstract boolean settingsDone();
     public abstract boolean calculationDone();

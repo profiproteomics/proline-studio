@@ -41,11 +41,11 @@ public class GraphLink extends AbstractConnectedGraphObject {
     }
     
     @Override
-    public boolean isConnected() {
+    public boolean isConnected(boolean recursive) {
         if (m_connector == null) {
             return false;
         }
-        return m_connector.isConnected();
+        return m_connector.isConnected(recursive);
     }
 
     @Override

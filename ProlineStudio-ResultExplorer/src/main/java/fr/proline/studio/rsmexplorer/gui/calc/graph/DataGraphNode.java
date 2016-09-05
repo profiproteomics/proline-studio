@@ -45,7 +45,7 @@ public class DataGraphNode extends GraphNode {
     }
     
     @Override
-    public boolean isConnected() {
+    public boolean isConnected(boolean recursive) {
         return true;
     }
     @Override

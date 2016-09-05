@@ -71,11 +71,17 @@ public class GraphicGraphNode extends GraphNode {
     public ImageIcon getStatusIcon() {
 
         
-        if (!isConnected()) {
+        if (!isConnected(false)) {
             return IconManager.getIcon(IconManager.IconType.WARNING);
+        } else if (!isConnected(true)) {
+            return null;
         }
         if (!settingsDone()) {
-            return IconManager.getIcon(IconManager.IconType.SETTINGS);
+            if (canSetSettings()) {
+                return IconManager.getIcon(IconManager.IconType.SETTINGS);
+            } else {
+                return null;
+            }
         }
         
         if (m_graphic.isCalculating()) {
@@ -97,11 +103,11 @@ public class GraphicGraphNode extends GraphNode {
     
        @Override
     public boolean possibleAction() {
-        if (!isConnected()) {
+        if (!isConnected(true)) {
             return false;
         }
         if (!settingsDone()) {
-            return true;
+            return canSetSettings();
         }
         if (m_graphic.isCalculating()) {
             return false;
@@ -150,7 +156,7 @@ public class GraphicGraphNode extends GraphNode {
     
     @Override
     public boolean canBeProcessed() {
-        return ! ((!isConnected()) || (!settingsDone()) || (m_graphic.isCalculating()) || (m_graphic.inError()) || (m_graphic.calculationDone()) || (m_graphic.isSettingsBeingDone()));
+        return ! ((!isConnected(true)) || (!settingsDone()) || (m_graphic.isCalculating()) || (m_graphic.inError()) || (m_graphic.calculationDone()) || (m_graphic.isSettingsBeingDone()));
 
     }
     
@@ -161,21 +167,21 @@ public class GraphicGraphNode extends GraphNode {
     }
 
     @Override
-    public boolean isConnected() {
+    public boolean isConnected(boolean recursive) {
 
-        return m_inConnectors.get(0).isConnected();
+        return m_inConnectors.get(0).isConnected(recursive);
 
     }
     
     @Override
     public boolean canSetSettings() {
-        if (!isConnected()) {
+        if (!isConnected(true)) {
             return false;
         }
 
         GraphConnector connector = m_inConnectors.get(0);
 
-        if (connector.isConnected()) {
+        if (connector.isConnected(true)) {
 
             GraphNode graphNode = connector.getLinkedSourceGraphNode();
             if (graphNode.settingsDone() && graphNode.calculationDone()) {
@@ -193,7 +199,7 @@ public class GraphicGraphNode extends GraphNode {
     
     @Override
     public boolean calculationDone() {
-        if (!isConnected()) {
+        if (!isConnected(true)) {
             return false;
         }
         
@@ -212,7 +218,7 @@ public class GraphicGraphNode extends GraphNode {
     public void process(ProcessCallbackInterface callback) {
         
 
-        if (!isConnected()) {
+        if (!isConnected(true)) {
             callback.finished(this);
             return;
         }

@@ -59,7 +59,7 @@ public abstract class GraphNode extends AbstractConnectedGraphObject {
         }
         
         for (GraphConnector inConnector : m_inConnectors) {
-            if (inConnector.isConnected()) {
+            if (inConnector.isConnected(false)) {
                 continue;
             }
             return inConnector;

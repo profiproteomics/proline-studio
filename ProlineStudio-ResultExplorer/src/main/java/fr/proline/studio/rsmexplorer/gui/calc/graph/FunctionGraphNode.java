@@ -83,11 +83,18 @@ public class FunctionGraphNode extends GraphNode {
     @Override
     public ImageIcon getStatusIcon() {
         
-        if (!isConnected()) {
+        if (!isConnected(false)) {
             return IconManager.getIcon(IconManager.IconType.WARNING);
+        } else if (!isConnected(true)) {
+            return null;
         }
+        
         if (!settingsDone()) {
-            return IconManager.getIcon(IconManager.IconType.SETTINGS);
+            if (canSetSettings()) {
+                return IconManager.getIcon(IconManager.IconType.SETTINGS);
+            } else {
+                return null;
+            }
         }
         
         if (m_function.isCalculating()) {
@@ -108,11 +115,11 @@ public class FunctionGraphNode extends GraphNode {
     
     @Override
     public boolean possibleAction() {
-        if (!isConnected()) {
+        if (!isConnected(true)) {
             return false;
         }
         if (!settingsDone()) {
-            return true;
+            return canSetSettings();
         }
         if (m_function.isCalculating()) {
             return false;
@@ -159,7 +166,7 @@ public class FunctionGraphNode extends GraphNode {
 
     @Override
     public boolean canBeProcessed() {
-        return ! ((!isConnected()) || (!settingsDone()) || (m_function.isCalculating()) || (m_function.inError()) || (m_function.calculationDone()) || (m_function.isSettingsBeingDone()));
+        return ! ((!isConnected(true)) || (!settingsDone()) || (m_function.isCalculating()) || (m_function.inError()) || (m_function.calculationDone()) || (m_function.isSettingsBeingDone()));
 
     }
     
@@ -170,11 +177,11 @@ public class FunctionGraphNode extends GraphNode {
     }
 
     @Override
-    public boolean isConnected() {
+    public boolean isConnected(boolean recursive) {
         int countUnlinkedConnectors = m_function.getNumberOfInParameters();
         if (m_inConnectors != null) {
             for (GraphConnector connector : m_inConnectors) {
-                if (connector.isConnected()) {
+                if (connector.isConnected(recursive)) {
                     countUnlinkedConnectors--;
                 }
             }
@@ -184,13 +191,13 @@ public class FunctionGraphNode extends GraphNode {
     
     @Override
     public boolean canSetSettings() {
-        if (!isConnected()) {
+        if (!isConnected(true)) {
             return false;
         }
         int countSettingsDone = m_function.getNumberOfInParameters();
         if (m_inConnectors != null) {
             for (GraphConnector connector : m_inConnectors) {
-                if (connector.isConnected()) {
+                if (connector.isConnected(true)) {
 
                     GraphNode graphNode = connector.getLinkedSourceGraphNode();
                     if (graphNode.settingsDone() && graphNode.calculationDone()) {
@@ -209,7 +216,7 @@ public class FunctionGraphNode extends GraphNode {
     
     @Override
     public boolean calculationDone() {
-        if (!isConnected()) {
+        if (!isConnected(true)) {
             return false;
         }
         
@@ -225,7 +232,7 @@ public class FunctionGraphNode extends GraphNode {
     @Override
     public void process(ProcessCallbackInterface callback) {
 
-        if (!isConnected()) {
+        if (!isConnected(true)) {
             callback.finished(this);
             return;
         }

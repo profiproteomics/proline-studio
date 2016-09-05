@@ -74,12 +74,14 @@ public class GraphConnector extends AbstractConnectedGraphObject {
     
     
     @Override
-    public boolean isConnected() {
+    public boolean isConnected(boolean recursive) {
         if (m_connections.isEmpty()) {
             return false;
+        } else if (!recursive) {
+            return true;
         }
         GraphNode node = getLinkedSourceGraphNode();
-        return (node.isConnected());
+        return (node.isConnected(recursive));
     }
     
     @Override
@@ -93,7 +95,7 @@ public class GraphConnector extends AbstractConnectedGraphObject {
     }
     @Override
     public boolean calculationDone() {
-        if (!isConnected()) {
+        if (!isConnected(true)) {
             return false;
         }
         GraphNode node = getLinkedSourceGraphNode();

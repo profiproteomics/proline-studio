@@ -45,22 +45,22 @@ public class FeatureTableModel extends LazyTableModel implements GlobalTableMode
     public static final int COLTYPE_FEATURE_QC = 2;
     public static final int COLTYPE_FEATURE_MOZ = 3;
     public static final int COLTYPE_FEATURE_CHARGE = 4;
-    public static final int COLTYPE_FEATURE_ELUTION_TIME = 5;
+    public static final int COLTYPE_FEATURE_RETENTION_TIME = 5;
     public static final int COLTYPE_FEATURE_APEX_INTENSITY = 6;
     public static final int COLTYPE_FEATURE_INTENSITY = 7;
     public static final int COLTYPE_FEATURE_DURATION = 8;
     public static final int COLTYPE_FEATURE_QUALITY_SCORE = 9;
     public static final int COLTYPE_FEATURE_IS_OVERLAPPING = 10;
-    public static final int COLTYPE_FEATURE_PREDICTED_ELUTION_TIME = 11;
+    public static final int COLTYPE_FEATURE_PREDICTED_RETENTION_TIME = 11;
     public static final int COLTYPE_FEATURE_PEAKELS_COUNT = 12;
     
     public final static String SERIALIZED_PROP_PREDICTED_ELUTION_TIME = "predicted_elution_time";
     public final static String SERIALIZED_PROP_PEAKELS_COUNT = "peakels_count";
     
     
-    private static final String[] m_columnNames = {"Id", "Map", "Quant. Channel", "m/z", "Charge", "Elution Time (min)", "Apex Intensity", "Intensity", "Duration (sec)", "Quality Score", "Is Overlapping", "<html>Predicted<br/> El. Time (min)</html>", "#Peakels"};
-    private static final String[] m_toolTipColumns = {"Feature Id","Map name","Quantitation Channel ",  "Mass to Charge Ratio", "Charge", "Elution Time (min)", "Apex Intensity", "Intensity", "Duration (sec)", "Quality Score", "Is Overlapping", "Predicted Elution time in min", "Peakels count"};
-    private static final String[] m_columnNamesForExport = {"Id", "Map", "Quantitation Channel", "m/z", "Charge", "Elution Time (sec)", "Apex Intensity", "Intensity", "Duration (sec)", "Quality Score", "Is Overlapping", "Predicted Elution Time (sec)", "Peakels Count"};
+    private static final String[] m_columnNames = {"Id", "Map", "Quant. Channel", "m/z", "Charge", "RT", "Apex Intensity", "Intensity", "Duration (sec)", "Quality Score", "Is Overlapping", "Predicted RT", "#Peakels"};
+    private static final String[] m_toolTipColumns = {"Feature Id","Map name","Quantitation Channel ",  "Mass to Charge Ratio", "Charge", "Retention Time in minutes", "Apex Intensity", "Intensity", "Duration (sec)", "Quality Score", "Is Overlapping", "Predicted Retention time in min", "Peakels count"};
+    private static final String[] m_columnNamesForExport = {"Id", "Map", "Quantitation Channel", "m/z", "Charge", "Elution Time (sec)", "Apex Intensity", "Intensity", "Duration (sec)", "Quality Score", "Is Overlapping", "Predicted Retention Time (sec)", "Peakels Count"};
     
     
     private List<DFeature> m_features = null;
@@ -178,7 +178,7 @@ public class FeatureTableModel extends LazyTableModel implements GlobalTableMode
                 return lazyData;
 
             }
-            case COLTYPE_FEATURE_ELUTION_TIME: {
+            case COLTYPE_FEATURE_RETENTION_TIME: {
                 LazyData lazyData = getLazyData(row, col);
                 if (feature.getCharge() == null) {
                     lazyData.setData(null);
@@ -244,7 +244,7 @@ public class FeatureTableModel extends LazyTableModel implements GlobalTableMode
                 return lazyData;
 
             }
-            case COLTYPE_FEATURE_PREDICTED_ELUTION_TIME: {
+            case COLTYPE_FEATURE_PREDICTED_RETENTION_TIME: {
                 LazyData lazyData = getLazyData(row, col);
                 Map<String, Object> prop = null;
                 try {
@@ -379,12 +379,12 @@ public class FeatureTableModel extends LazyTableModel implements GlobalTableMode
             }
 
         };
-        filtersMap.put(COLTYPE_FEATURE_ELUTION_TIME, new DoubleFilter(getColumnName(COLTYPE_FEATURE_ELUTION_TIME), minuteConverter, COLTYPE_FEATURE_ELUTION_TIME));
+        filtersMap.put(COLTYPE_FEATURE_RETENTION_TIME, new DoubleFilter(getColumnName(COLTYPE_FEATURE_RETENTION_TIME), minuteConverter, COLTYPE_FEATURE_RETENTION_TIME));
         filtersMap.put(COLTYPE_FEATURE_APEX_INTENSITY, new DoubleFilter(getColumnName(COLTYPE_FEATURE_APEX_INTENSITY), null, COLTYPE_FEATURE_APEX_INTENSITY));
         filtersMap.put(COLTYPE_FEATURE_INTENSITY, new DoubleFilter(getColumnName(COLTYPE_FEATURE_INTENSITY), null, COLTYPE_FEATURE_INTENSITY));
         filtersMap.put(COLTYPE_FEATURE_DURATION, new DoubleFilter(getColumnName(COLTYPE_FEATURE_DURATION), null, COLTYPE_FEATURE_DURATION));
         filtersMap.put(COLTYPE_FEATURE_QUALITY_SCORE, new DoubleFilter(getColumnName(COLTYPE_FEATURE_QUALITY_SCORE), null, COLTYPE_FEATURE_QUALITY_SCORE));
-        filtersMap.put(COLTYPE_FEATURE_PREDICTED_ELUTION_TIME, new DoubleFilter(getColumnName(COLTYPE_FEATURE_PREDICTED_ELUTION_TIME), minuteConverter, COLTYPE_FEATURE_PREDICTED_ELUTION_TIME));
+        filtersMap.put(COLTYPE_FEATURE_PREDICTED_RETENTION_TIME, new DoubleFilter(getColumnName(COLTYPE_FEATURE_PREDICTED_RETENTION_TIME), minuteConverter, COLTYPE_FEATURE_PREDICTED_RETENTION_TIME));
         filtersMap.put(COLTYPE_FEATURE_PEAKELS_COUNT, new IntegerFilter(getColumnName(COLTYPE_FEATURE_PEAKELS_COUNT), null, COLTYPE_FEATURE_PEAKELS_COUNT));
 
     }
@@ -415,11 +415,11 @@ public class FeatureTableModel extends LazyTableModel implements GlobalTableMode
                 return String.class;
             case COLTYPE_FEATURE_MOZ:
                 return Double.class;
-            case COLTYPE_FEATURE_ELUTION_TIME:
+            case COLTYPE_FEATURE_RETENTION_TIME:
             case COLTYPE_FEATURE_APEX_INTENSITY:
             case COLTYPE_FEATURE_INTENSITY:
             case COLTYPE_FEATURE_DURATION:
-            case COLTYPE_FEATURE_PREDICTED_ELUTION_TIME:
+            case COLTYPE_FEATURE_PREDICTED_RETENTION_TIME:
                 return Float.class;
             case COLTYPE_FEATURE_IS_OVERLAPPING:
                 return Boolean.class;
@@ -454,7 +454,7 @@ public class FeatureTableModel extends LazyTableModel implements GlobalTableMode
                 return feature.getCharge();
 
             }
-            case COLTYPE_FEATURE_ELUTION_TIME: {
+            case COLTYPE_FEATURE_RETENTION_TIME: {
                 return feature.getElutionTime();
 
             }
@@ -478,7 +478,7 @@ public class FeatureTableModel extends LazyTableModel implements GlobalTableMode
                 return feature.getIsOverlapping();
 
             }
-            case COLTYPE_FEATURE_PREDICTED_ELUTION_TIME: {
+            case COLTYPE_FEATURE_PREDICTED_RETENTION_TIME: {
                 Map<String, Object> prop = null;
                 try {
                     prop = feature.getSerializedPropertiesAsMap();
@@ -539,7 +539,7 @@ public class FeatureTableModel extends LazyTableModel implements GlobalTableMode
             case HISTOGRAM_PLOT:
                 return COLTYPE_FEATURE_INTENSITY;
             case SCATTER_PLOT:
-                return COLTYPE_FEATURE_ELUTION_TIME;
+                return COLTYPE_FEATURE_RETENTION_TIME;
         }
         return -1;
     }
@@ -625,7 +625,7 @@ public class FeatureTableModel extends LazyTableModel implements GlobalTableMode
                 }
 
             }
-            case COLTYPE_FEATURE_ELUTION_TIME: {
+            case COLTYPE_FEATURE_RETENTION_TIME: {
                 if (feature.getCharge() == null) {
                     return "";
                 }else {
@@ -673,7 +673,7 @@ public class FeatureTableModel extends LazyTableModel implements GlobalTableMode
                 }
 
             }
-            case COLTYPE_FEATURE_PREDICTED_ELUTION_TIME: {
+            case COLTYPE_FEATURE_PREDICTED_RETENTION_TIME: {
                 Map<String, Object> prop = null;
                 try {
                     prop = feature.getSerializedPropertiesAsMap();
@@ -686,7 +686,7 @@ public class FeatureTableModel extends LazyTableModel implements GlobalTableMode
                         return ((Double)o).toString();
                     }
                 }
-                return ""+feature.getPredictedElutionTime();
+                return String.valueOf(feature.getPredictedElutionTime());
             }
             case COLTYPE_FEATURE_PEAKELS_COUNT: {
                 Map<String, Object> prop = null;
@@ -701,7 +701,7 @@ public class FeatureTableModel extends LazyTableModel implements GlobalTableMode
                         return ((Integer)o).toString();
                     }
                 }
-                return ""+feature.getPredictedElutionTime();
+                return String.valueOf(feature.getPredictedElutionTime());
             }
         }
         return ""; // should never happen
@@ -715,12 +715,7 @@ public class FeatureTableModel extends LazyTableModel implements GlobalTableMode
         return listIds; 
     }
     
-    
-    private Boolean hasFeaturePeaks(int row) {
 
-        // Retrieve Feature
-        return m_featureHasPeak.get(row);
-    }
     
     public Boolean isInItalic(int row, int col) {
         //return !hasFeaturePeaks(row);
@@ -730,7 +725,7 @@ public class FeatureTableModel extends LazyTableModel implements GlobalTableMode
             // fake feature
             return true;
         }else{
-            if (col == COLTYPE_FEATURE_PREDICTED_ELUTION_TIME){
+            if (col == COLTYPE_FEATURE_PREDICTED_RETENTION_TIME){
                 Map<String, Object> prop = null;
                 try {
                     prop = feature.getSerializedPropertiesAsMap();
@@ -809,8 +804,8 @@ public class FeatureTableModel extends LazyTableModel implements GlobalTableMode
                 renderer = new FontRenderer( new BigFloatOrDoubleRenderer( new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 0 ));
                 break;
             }
-            case COLTYPE_FEATURE_ELUTION_TIME:
-            case COLTYPE_FEATURE_PREDICTED_ELUTION_TIME: {
+            case COLTYPE_FEATURE_RETENTION_TIME:
+            case COLTYPE_FEATURE_PREDICTED_RETENTION_TIME: {
                 renderer = new FontRenderer( new TimeRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class))));
                 break;
             }

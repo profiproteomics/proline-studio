@@ -57,7 +57,7 @@ public class XicPeptideMatchTableModel extends LazyTableModel implements GlobalT
     
     
     private static final String[] m_columnNames = {"Id", "Quant. channel", "Peptide", "Score",  "MsQuery", "Rank", "Calc. Mass", "Exp. m/z", "Ppm" , "Charge", "Missed Cl.", "RT","Ion Parent Int.", "PTM"};
-    private static final String[] m_toolTipColumns = {"PeptideMatch Id", "Quantitation channel", "Peptide", "Score", "MsQuery", "Rank", "Calculated Mass", "Experimental Mass to Charge Ratio", "parts-per-million" , "Charge", "Missed Clivage", "Retention Time", "Ion Parent Intensity", "Post Translational Modifications"};
+    private static final String[] m_toolTipColumns = {"PeptideMatch Id", "Quantitation channel", "Peptide", "Score", "MsQuery", "Rank", "Calculated Mass", "Experimental Mass to Charge Ratio", "parts-per-million" , "Charge", "Missed Clivage", "Retention Time (min)", "Ion Parent Intensity", "Post Translational Modifications"};
         
     private DQuantitationChannel[] m_quantitationChannelArray = null;
     private Map<Long, List<Long>> m_peptideMatchListPerQC;

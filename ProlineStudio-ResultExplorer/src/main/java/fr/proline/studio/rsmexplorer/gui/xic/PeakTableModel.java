@@ -1,7 +1,6 @@
 package fr.proline.studio.rsmexplorer.gui.xic;
 
 import fr.proline.core.orm.lcms.Feature;
-import fr.proline.core.orm.lcms.MapTime;
 import fr.proline.core.orm.lcms.Peakel;
 import fr.proline.core.orm.lcms.Peak;
 import fr.proline.studio.comparedata.CompareDataInterface;
@@ -34,12 +33,12 @@ import javax.swing.table.TableCellRenderer;
 public class PeakTableModel extends LazyTableModel implements GlobalTableModelInterface {
 
     public static final int COLTYPE_PEAK_MOZ = 0;
-    public static final int COLTYPE_PEAK_ELUTION_TIME = 1;
+    public static final int COLTYPE_PEAK_RETENTION_TIME = 1;
     public static final int COLTYPE_PEAK_INTENSITY = 2;
     
     
-    private static final String[] m_columnNames = {"m/z", "Elution Time (min)", "Intensity"};
-    private static final String[] m_toolTipColumns = {"Mass to Charge Ratio", "Elution Time (min)", "Intensity"};
+    private static final String[] m_columnNames = {"m/z", "RT", "Intensity"};
+    private static final String[] m_toolTipColumns = {"Mass to Charge Ratio", "Retention Time in minutes", "Intensity"};
 
     private Feature m_feature = null;
     private Peakel m_peakel;
@@ -120,7 +119,7 @@ public class PeakTableModel extends LazyTableModel implements GlobalTableModelIn
                 return lazyData;
 
             }
-            case COLTYPE_PEAK_ELUTION_TIME: {
+            case COLTYPE_PEAK_RETENTION_TIME: {
                 LazyData lazyData = getLazyData(row, col);
                 lazyData.setData(peak.getElutionTime());
                 return lazyData;
@@ -178,7 +177,7 @@ public class PeakTableModel extends LazyTableModel implements GlobalTableModelIn
     @Override
     public void addFilters(LinkedHashMap<Integer, Filter> filtersMap) {
         filtersMap.put(COLTYPE_PEAK_MOZ, new DoubleFilter(getColumnName(COLTYPE_PEAK_MOZ), null, COLTYPE_PEAK_MOZ));
-        filtersMap.put(COLTYPE_PEAK_ELUTION_TIME, new DoubleFilter(getColumnName(COLTYPE_PEAK_ELUTION_TIME), null, COLTYPE_PEAK_ELUTION_TIME));
+        filtersMap.put(COLTYPE_PEAK_RETENTION_TIME, new DoubleFilter(getColumnName(COLTYPE_PEAK_RETENTION_TIME), null, COLTYPE_PEAK_RETENTION_TIME));
         filtersMap.put(COLTYPE_PEAK_INTENSITY, new DoubleFilter(getColumnName(COLTYPE_PEAK_INTENSITY), null, COLTYPE_PEAK_INTENSITY));
     }
     
@@ -206,7 +205,7 @@ public class PeakTableModel extends LazyTableModel implements GlobalTableModelIn
         switch (columnIndex){
             case COLTYPE_PEAK_MOZ:
                 return Double.class;
-            case COLTYPE_PEAK_ELUTION_TIME:
+            case COLTYPE_PEAK_RETENTION_TIME:
             case COLTYPE_PEAK_INTENSITY:
                 return Float.class;
         }
@@ -224,7 +223,7 @@ public class PeakTableModel extends LazyTableModel implements GlobalTableModelIn
                 return peak.getMoz();
 
             }
-            case COLTYPE_PEAK_ELUTION_TIME: {
+            case COLTYPE_PEAK_RETENTION_TIME: {
                 return peak.getElutionTime()/60;
 
             }
@@ -238,7 +237,7 @@ public class PeakTableModel extends LazyTableModel implements GlobalTableModelIn
 
     @Override
     public int[] getKeysColumn() {
-        int[] keys = { COLTYPE_PEAK_ELUTION_TIME };
+        int[] keys = { COLTYPE_PEAK_RETENTION_TIME };
         return keys;
     }
 
@@ -263,9 +262,9 @@ public class PeakTableModel extends LazyTableModel implements GlobalTableModelIn
             case HISTOGRAM_PLOT:
                 return COLTYPE_PEAK_INTENSITY;
             case SCATTER_PLOT:
-                return COLTYPE_PEAK_ELUTION_TIME;
+                return COLTYPE_PEAK_RETENTION_TIME;
             case LINEAR_PLOT:
-                return COLTYPE_PEAK_ELUTION_TIME;
+                return COLTYPE_PEAK_RETENTION_TIME;
         }
         return -1;
     }
@@ -277,7 +276,7 @@ public class PeakTableModel extends LazyTableModel implements GlobalTableModelIn
 
     @Override
     public int getInfoColumn() {
-        return COLTYPE_PEAK_ELUTION_TIME;
+        return COLTYPE_PEAK_RETENTION_TIME;
     }
     
     @Override
@@ -343,7 +342,7 @@ public class PeakTableModel extends LazyTableModel implements GlobalTableModelIn
                 renderer = new DoubleRenderer( new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)) );
                 break;
             }
-            case COLTYPE_PEAK_ELUTION_TIME:
+            case COLTYPE_PEAK_RETENTION_TIME:
             case COLTYPE_PEAK_INTENSITY: {
                 renderer = new FloatRenderer( new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)) );
                 break;

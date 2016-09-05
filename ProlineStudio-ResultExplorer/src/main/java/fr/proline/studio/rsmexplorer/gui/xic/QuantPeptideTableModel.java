@@ -524,7 +524,7 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
     public void setValueAt(Object aValue, int row, int col) {
 
         DMasterQuantPeptide masterQuantPeptide = m_quantPeptides.get(row);
-        masterQuantPeptide.setSelectionLevel(((Boolean) aValue) ? 2 : 1);
+        masterQuantPeptide.setSelectionLevel(((Boolean) aValue) ? 2 : 0);
 
         
         final ArrayList<DMasterQuantProteinSet> masterQuantProteinSetModified = new ArrayList<>();

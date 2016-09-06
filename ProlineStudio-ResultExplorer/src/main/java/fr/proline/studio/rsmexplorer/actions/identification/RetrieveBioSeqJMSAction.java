@@ -16,19 +16,23 @@ import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
+import fr.proline.studio.rsmexplorer.tree.quantitation.QuantitationTree;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.tree.DefaultTreeModel;
 import org.openide.util.NbBundle;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author VD225637
  */
 public class RetrieveBioSeqJMSAction extends AbstractRSMAction {
-
-    public RetrieveBioSeqJMSAction() {
-        super(NbBundle.getMessage(RetrieveBioSeqJMSAction.class, "CTL_RetrieveBioSeq"), AbstractTree.TreeType.TREE_IDENTIFICATION);
+    protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
+    
+    public RetrieveBioSeqJMSAction(AbstractTree.TreeType selectedTree) {
+        super(NbBundle.getMessage(RetrieveBioSeqJMSAction.class, "CTL_RetrieveBioSeq"), selectedTree);
     }
 
     @Override
@@ -71,8 +75,21 @@ public class RetrieveBioSeqJMSAction extends AbstractRSMAction {
 
     @Override
     public void actionPerformed(AbstractNode[] selectedNodes, int x, int y) {
-
-        IdentificationTree tree = IdentificationTree.getCurrentTree();
+       
+        AbstractTree.TreeType source = getSourceTreeType();
+        AbstractTree tree;
+        switch (source) {
+            case TREE_IDENTIFICATION:
+                tree = IdentificationTree.getCurrentTree(); 
+                break;
+            case TREE_QUANTITATION:
+                tree = QuantitationTree.getCurrentTree(); 
+                break;
+            default:
+                m_logger.warn("Unexpected source tree for this action ! "+source.name());
+                return; 
+        }
+        
         DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
         List<DataSetNode> datasets = new ArrayList<>();
         List<Long> rsmIds = new ArrayList<>();
@@ -108,7 +125,7 @@ public class RetrieveBioSeqJMSAction extends AbstractRSMAction {
             }
         };
 
-        RetrieveBioSeqTask task = new RetrieveBioSeqTask(callback,rsmIds, projectId, false);
+        RetrieveBioSeqTask task = new RetrieveBioSeqTask(callback,rsmIds, projectId, true);
         AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
 
     }

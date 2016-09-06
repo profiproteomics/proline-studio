@@ -42,7 +42,7 @@ public class GenerateSpectrumMatchesJMSAction extends AbstractRSMAction {
     public void actionPerformed(final AbstractNode[] selectedNodes, int x, int y) {
         
         AbstractTree.TreeType source = getSourceTreeType();
-        AbstractTree tree = null;
+        AbstractTree tree;
         switch (source) {
             case TREE_IDENTIFICATION:
                 tree = IdentificationTree.getCurrentTree(); 

@@ -662,7 +662,7 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
                     m_mainActions.add(generateSpectrumMatchesAction);
                     UpdatePeaklistSoftwareAction updatePeaklistSoftAction = new UpdatePeaklistSoftwareAction();
                     m_mainActions.add(updatePeaklistSoftAction);
-                    RetrieveBioSeqJMSAction retrieveBioSeqAction = new RetrieveBioSeqJMSAction();
+                    RetrieveBioSeqJMSAction retrieveBioSeqAction = new RetrieveBioSeqJMSAction(AbstractTree.TreeType.TREE_IDENTIFICATION);
                     m_mainActions.add(retrieveBioSeqAction);
 
                 } else {

@@ -22,6 +22,7 @@ import fr.proline.studio.rsmexplorer.actions.identification.ExportDatasetAction;
 import fr.proline.studio.rsmexplorer.actions.identification.ExportDatasetJMSAction;
 import fr.proline.studio.rsmexplorer.actions.identification.GenerateSpectrumMatchesAction;
 import fr.proline.studio.rsmexplorer.actions.identification.GenerateSpectrumMatchesJMSAction;
+import fr.proline.studio.rsmexplorer.actions.identification.RetrieveBioSeqJMSAction;
 import fr.proline.studio.rsmexplorer.actions.xic.ComputeQuantitationProfileAction;
 import fr.proline.studio.rsmexplorer.actions.xic.DisplayExperimentalDesignAction;
 import fr.proline.studio.rsmexplorer.actions.xic.DisplayXICAction;
@@ -167,11 +168,13 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
             if (m_multiPopup == null) {
                 boolean isJSMDefined = JMSConnectionManager.getJMSConnectionManager().isJMSDefined();
                 // create the actions
-                m_multiActions = new ArrayList<>(3);  // <--- get in sync
+                m_multiActions = new ArrayList<>(4);  // <--- get in sync
                 
                 if (isJSMDefined) {
                     ExportDatasetJMSAction exportDatasetAction = new ExportDatasetJMSAction(AbstractTree.TreeType.TREE_QUANTITATION, true);
                     m_multiActions.add(exportDatasetAction);
+                    RetrieveBioSeqJMSAction retrieveBioSeqAction = new RetrieveBioSeqJMSAction(AbstractTree.TreeType.TREE_QUANTITATION);
+                    m_multiActions.add(retrieveBioSeqAction);
                 }else{
                     ExportDatasetAction exportDatasetAction = new ExportDatasetAction(AbstractTree.TreeType.TREE_QUANTITATION, true);
                     m_multiActions.add(exportDatasetAction);
@@ -278,7 +281,7 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
             }else {
                 if (m_mainPopup == null) {
                     // create the actions
-                    m_mainActions = new ArrayList<>(15);  // <--- get in sync
+                    m_mainActions = new ArrayList<>(16);  // <--- get in sync
                     boolean isJMSDefined = JMSConnectionManager.getJMSConnectionManager().isJMSDefined();
 
                     DisplayXICAction displayXICAction = new DisplayXICAction();
@@ -311,6 +314,8 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
                     if (isJMSDefined) {
                         GenerateSpectrumMatchesJMSAction generateSpectrumMatchesAction = new GenerateSpectrumMatchesJMSAction(AbstractTree.TreeType.TREE_QUANTITATION);
                         m_mainActions.add(generateSpectrumMatchesAction);
+                        RetrieveBioSeqJMSAction retrieveBioSeqAction = new RetrieveBioSeqJMSAction(AbstractTree.TreeType.TREE_QUANTITATION);
+                        m_mainActions.add(retrieveBioSeqAction);
                     } else {
                         GenerateSpectrumMatchesAction generateSpectrumMatchesAction = new GenerateSpectrumMatchesAction(AbstractTree.TreeType.TREE_QUANTITATION);
                         m_mainActions.add(generateSpectrumMatchesAction);

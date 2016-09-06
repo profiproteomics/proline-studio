@@ -530,6 +530,8 @@ public class GraphPanel extends JPanel implements MouseListener, MouseMotionList
                 ((GraphNode)m_overObject).doAction();
                 repaint();
                 ((GraphNode)m_overObject).hideAction();  
+            } else if (m_overObject != null) {
+                setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
             }
         }
         
@@ -551,6 +553,37 @@ public class GraphPanel extends JPanel implements MouseListener, MouseMotionList
     public void mouseDragged(MouseEvent e) {
         
         if (e.isPopupTrigger()) {
+            return;
+        }
+        if (m_actionOnRelease) {
+            
+            // check if mouse is dragged outside the action zone
+            //boolean noOverObject = true;
+            boolean noOverActionObject = true;
+            Iterator<GraphNode> it = m_graphNodeArray.descendingIterator();
+            while (it.hasNext()) {
+                GraphNode graphNode = it.next();
+
+                int x = e.getX();
+                int y = e.getY();
+                AbstractGraphObject overObject = (AbstractGraphObject) graphNode.inside(x, y);
+                if (overObject != null) {
+                    //noOverObject = false;
+                    AbstractConnectedGraphObject.TypeGraphObject type = overObject.getType();
+                    if (type == AbstractConnectedGraphObject.TypeGraphObject.GRAPH_NODE_ACTION) {
+                        noOverActionObject = false;
+                    }
+                }
+            }
+            if (noOverActionObject) {
+                /// mouse has been dragged outside the action zone
+                m_overObject = null;
+                m_actionOnRelease = false;
+                setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+                repaint();
+            }
+            
+            
             return;
         }
         

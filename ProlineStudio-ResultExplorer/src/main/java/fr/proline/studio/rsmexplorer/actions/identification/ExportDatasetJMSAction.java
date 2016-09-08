@@ -33,9 +33,9 @@ public class ExportDatasetJMSAction extends AbstractRSMAction {
     public ExportDatasetJMSAction(AbstractTree.TreeType treeType) {
         super(NbBundle.getMessage(ExportDatasetJMSAction.class, "CTL_ExportDatasetAction"), treeType);
     }
-    
+
     public ExportDatasetJMSAction(AbstractTree.TreeType treeType, boolean exportTitle) {
-        super(NbBundle.getMessage(ExportDatasetJMSAction.class, "CTL_ExportAction")+" "+NbBundle.getMessage(ExportDatasetAction.class, "CTL_ExportDatasetAction") , treeType);
+        super(NbBundle.getMessage(ExportDatasetJMSAction.class, "CTL_ExportAction") + " " + NbBundle.getMessage(ExportDatasetAction.class, "CTL_ExportDatasetAction"), treeType);
     }
 
     @Override
@@ -51,7 +51,7 @@ public class ExportDatasetJMSAction extends AbstractRSMAction {
                 return 0;
             }
 
-            @Override 
+            @Override
             public int getMaxValue() {
                 return 100;
             }
@@ -67,7 +67,7 @@ public class ExportDatasetJMSAction extends AbstractRSMAction {
 
                     @Override
                     public void run(boolean success) {
-                        final CustomExportDialog dialog = CustomExportDialog.getDialog(WindowManager.getDefault().getMainWindow(), selectedNodes.length ==1 );
+                        final CustomExportDialog dialog = CustomExportDialog.getDialog(WindowManager.getDefault().getMainWindow(), selectedNodes.length == 1);
                         loadWaitingDialog.setVisible(false);
                         if (success) {
                             if (!m_config.isEmpty()) {
@@ -109,7 +109,7 @@ public class ExportDatasetJMSAction extends AbstractRSMAction {
                                             setProgress(100);
 
                                         } else {
-                                    // nothing to do
+                                            // nothing to do
                                             // failed
                                             setProgress(100);
                                         }
@@ -133,39 +133,50 @@ public class ExportDatasetJMSAction extends AbstractRSMAction {
 
                                             String fileName = dialog.getFileName();
                                             String extension = dialog.getFileExtension();
-                                            if (extension != null && !fileName.endsWith("."+extension)) {
-                                                fileName += "."+extension;
+                                            if (extension != null && !fileName.endsWith("." + extension)) {
+                                                fileName += "." + extension;
                                             }
-                                            if (_filePath.size() == 1){
+                                            if (_filePath.size() == 1) {
                                                 DownloadFileTask task = new DownloadFileTask(downloadCallback, fileName, _filePath.get(0), _jmsNodeId.get(0));
                                                 AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
-                                            }else {
+                                            } else {
                                                 int nb = 1;
+                                                //WARNING : This code parse the returned filename from Prolibe Server ExportRSM Service : It assume
+                                                // the returned name is formated as : <prefix>-<DS_ID>_random.<ext> and for multi export, will be modified as 
+                                                // Before <prefix>-<DS_ID>_<DS_name>_index.<ext> 
+                                                // After <DS_name>_<DS__ID>_index.<ext> : with <DS_name> limited to 20 characters.
                                                 for (String fp : _filePath) {
-                                                    int id = fp.lastIndexOf("\\");
-                                                    if (id == -1)
-                                                        id = fp.lastIndexOf("/");
+                                                    int idFileName = fp.lastIndexOf("\\");
+                                                    if (idFileName == -1) {
+                                                        idFileName = fp.lastIndexOf("/");
+                                                    }
                                                     int idUnderscore = fp.lastIndexOf("_");
                                                     int idExtC = fileName.lastIndexOf(".");
                                                     String fn = fileName;
-                                                    if (id != -1 && idUnderscore != -1 && idExtC != -1 ){
-                                                        fn = fileName.substring(0, idExtC) +"_"+fp.substring(id+1, idUnderscore)+"."+extension;
+                                                    if (idFileName != -1 && idUnderscore != -1 && idExtC != -1) { 
+                                                        //VDS: used ? Could we have more than 1 _filePath and dialog.isFileExportMode 
+                                                        fn = fileName.substring(0, idExtC) + "_" + fp.substring(idFileName + 1, idUnderscore) + "." + extension;
                                                     }
-                                                    if (!dialog.isFileExportMode()){
+                                                    if (!dialog.isFileExportMode()) { //multi export or tsv : VDS fn will be erased
                                                         String dirName = dialog.getFileName();
-                                                        if (!dirName.endsWith("\\")){
+                                                        if (!dirName.endsWith("\\")) {
                                                             dirName += "\\";
                                                         }
-                                                        String dsName = getDatasetName(fp.substring(id+1), selectedNodes);
-                                                        String t = fp.substring(id+1, idUnderscore);
-                                                        int id2 = t.lastIndexOf("/");
-                                                        if (id2 != -1){
-                                                            t = t.substring(id2+1);
-                                                        }
-                                                        fn = dirName+t+dsName+nb+"."+extension;
+                                                       
+                                                        //get DS Id and DS Name from fileName
+                                                        Long dsId = getDatasetId(fp.substring(idFileName+1));
+                                                        String dsName = getDatasetName(dsId, selectedNodes);
+                                                        
+//                                                        String t = fp.substring(fileNameIndex + 1, idUnderscore);
+//                                                        int id2 = t.lastIndexOf("/");
+//                                                        if (id2 != -1) {
+//                                                            t = t.substring(id2 + 1);
+//                                                        }
+//                                                        fn = dirName+t+dsName+nb+"."+extension;
+                                                        fn = dirName + dsName+"_"+ dsId.toString()+"_" + nb + "." + extension;
                                                     }
                                                     nb++;
-                                                    DownloadFileTask task = new DownloadFileTask(downloadCallback, fn, fp, _jmsNodeId.get(nb-2));
+                                                    DownloadFileTask task = new DownloadFileTask(downloadCallback, fn, fp, _jmsNodeId.get(nb - 2));
                                                     AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
                                                 }
                                             }
@@ -181,7 +192,7 @@ public class ExportDatasetJMSAction extends AbstractRSMAction {
                                 String exportConfig = dialog.getExportConfig();
                                 List<DDataset> listDataset = new ArrayList();
                                 for (AbstractNode node : selectedNodes) {
-                                    listDataset.add(((DataSetNode)node).getDataset());
+                                    listDataset.add(((DataSetNode) node).getDataset());
                                 }
                                 ExportDatasetTask task = new ExportDatasetTask(exportCallback, listDataset, exportConfig, _filePath, _jmsNodeId);
                                 AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
@@ -189,7 +200,7 @@ public class ExportDatasetJMSAction extends AbstractRSMAction {
                                 return null;
                             }
                         };
-                        
+
                         dialog.setTask(task);
                         dialog.setLocation(x, y);
 
@@ -199,11 +210,9 @@ public class ExportDatasetJMSAction extends AbstractRSMAction {
                             public void run() {
                                 dialog.setVisible(true);
                             }
-                            
+
                         });
-                        
-                        
-                        
+
                     }
                 };
                 GetExportInformationTask task = new GetExportInformationTask(getExportCallback, dataSetNode.getDataset(), m_config);
@@ -217,26 +226,54 @@ public class ExportDatasetJMSAction extends AbstractRSMAction {
         loadWaitingDialog.setVisible(true);
 
     }
-    
-    public String getDatasetName(String fileName, AbstractNode[] selectedNodes){
-        int id0 = fileName.indexOf("-");
-        int id1 = fileName.lastIndexOf("_");
-        if (id0 > -1 && id1 > -1&& id0<id1){
-            String dsIdStr = fileName.substring(id0+1, id1);
-            try{
-                Long dsId  = Long.parseLong(dsIdStr);
-                for (AbstractNode node : selectedNodes) {
-                    if (((DataSetNode)node).getDataset().getId() == dsId){
-                        return "_"+((DataSetNode)node).getDataset().getName()+"_";
-                    }
-                }
-            }catch(NumberFormatException e){
-                
+
+    private String getDatasetName(Long dsId, AbstractNode[] selectedNodes) {
+        for (AbstractNode node : selectedNodes) {
+            if (((DataSetNode) node).getDataset().getId() == dsId) {
+                return  ((DataSetNode) node).getDataset().getName();
             }
-            
         }
         return "";
     }
+    
+    /**
+     * Return the DS Id by parsing the server exported fileName
+     * @param fileName : name is formated as : <prefix>-<DS_ID>_random.<ext> 
+     * @return 
+     */
+    private Long getDatasetId(String fileName) {        
+        Long dsId = -1l;
+        int id0 = fileName.indexOf("-");
+        int id1 = fileName.lastIndexOf("_");
+        if (id0 > -1 && id1 > -1 && id0 < id1) {
+            String dsIdStr = fileName.substring(id0 + 1, id1);
+            try {
+                dsId = Long.parseLong(dsIdStr);
+            } catch (NumberFormatException e) {
+                dsId = -1l;
+            }
+        }
+        return dsId;
+    }
+//    public String getDatasetName(String fileName, AbstractNode[] selectedNodes) {
+//        int id0 = fileName.indexOf("-");
+//        int id1 = fileName.lastIndexOf("_");
+//        if (id0 > -1 && id1 > -1 && id0 < id1) {
+//            String dsIdStr = fileName.substring(id0 + 1, id1);
+//            try {
+//                Long dsId = Long.parseLong(dsIdStr);
+//                for (AbstractNode node : selectedNodes) {
+//                    if (((DataSetNode) node).getDataset().getId() == dsId) {
+//                        return "_" + ((DataSetNode) node).getDataset().getName() + "_";
+//                    }
+//                }
+//            } catch (NumberFormatException e) {
+//
+//            }
+//
+//        }
+//        return "";
+//    }
 
     @Override
     public void updateEnabled(AbstractNode[] selectedNodes) {
@@ -249,8 +286,8 @@ public class ExportDatasetJMSAction extends AbstractRSMAction {
         }
 
         int mode = -1;
-        if (selectedNodes[0] instanceof DataSetNode){
-            mode = ((DataSetNode)selectedNodes[0]).isQuantSC() ? 1 : (((DataSetNode)selectedNodes[0]).isQuantXIC()?2 : 0);
+        if (selectedNodes[0] instanceof DataSetNode) {
+            mode = ((DataSetNode) selectedNodes[0]).isQuantSC() ? 1 : (((DataSetNode) selectedNodes[0]).isQuantXIC() ? 2 : 0);
         }
         for (AbstractNode node : selectedNodes) {
             if (node.isChanging()) {
@@ -270,10 +307,10 @@ public class ExportDatasetJMSAction extends AbstractRSMAction {
                 setEnabled(false);
                 return;
             }
-            
+
             // node must have same nature (identification, xic or sc)
-            int currMode = (datasetNode.isQuantSC() ? 1 : (datasetNode.isQuantXIC()?2 : 0));
-            if (currMode != mode){
+            int currMode = (datasetNode.isQuantSC() ? 1 : (datasetNode.isQuantXIC() ? 2 : 0));
+            if (currMode != mode) {
                 setEnabled(false);
                 return;
             }

@@ -93,13 +93,21 @@ public class DataGraphNode extends GraphNode {
     }
     
     @Override
-    public boolean possibleAction() {
-        return false;
+    public ImageIcon getDisplayIcon() {
+        return IconManager.getIcon(IconManager.IconType.TABLE);
+    }
+    
+    @Override
+    public NodeAction possibleAction() {
+        return NodeAction.RESULT_ACTION;
     }
     
     @Override
     public void doAction() {
-        // nothing to do
+        m_graphNodeAction.setHighlighted(false);
+        
+        // process
+        askDisplay();
     }
 
     @Override

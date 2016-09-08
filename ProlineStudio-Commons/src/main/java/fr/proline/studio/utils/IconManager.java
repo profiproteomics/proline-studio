@@ -82,6 +82,7 @@ public class IconManager {
         SERVER_OFF,
         MSN_SET,
         WAVE,
+        PENCIL_RULER,
         COLUMNS_VISIBILITY,
         PLUS_SMALL_10X10,
         PROPERTY_SMALL_10X10,
@@ -415,6 +416,8 @@ public class IconManager {
                 return "fr/proline/studio/images/block.png";
             case WAVE:
                 return "fr/proline/studio/images/wave.png";
+            case PENCIL_RULER:
+                return "fr/proline/studio/images/pencil-ruler.png";
             case COLUMNS_VISIBILITY:
                 return "fr/proline/studio/images/columnsVisibility11x11.png";
             case PLUS_SMALL_10X10:

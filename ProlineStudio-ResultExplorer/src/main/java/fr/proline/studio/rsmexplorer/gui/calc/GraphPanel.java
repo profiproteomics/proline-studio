@@ -24,6 +24,7 @@ import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
@@ -36,17 +37,17 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import javax.swing.AbstractAction;
-import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
+import javax.swing.Timer;
 
 /**
  * Panel to display the Graph for the Data analyzer
  * @author JM235353
  */
-public class GraphPanel extends JPanel implements MouseListener, MouseMotionListener {
+public class GraphPanel extends JPanel implements MouseListener, MouseMotionListener, ActionListener {
     
     private static final int DEFAULT_PANEL_WIDTH = 400;
     private static final int DEFAULT_PANEL_HEIGHT = 400;
@@ -69,13 +70,20 @@ public class GraphPanel extends JPanel implements MouseListener, MouseMotionList
 
     private final Dimension m_preferredSize = new Dimension(DEFAULT_PANEL_WIDTH, DEFAULT_PANEL_HEIGHT); // minimum size at the beginning
     
-    public GraphPanel(DataAnalyzerPanel dataAnalyzerPanel) {
+    
+    private Timer m_timer;
+    
+    public GraphPanel(DataAnalyzerPanel dataAnalyzerPanel)  {
         
         setLayout(null); 
         
         addMouseListener(this);
         addMouseMotionListener(this);
         setTransferHandler(new DataTreeTransferHandler(this));
+        
+        m_timer = new Timer(20, this);
+        m_timer.setInitialDelay(200);
+        m_timer.start();
         
         m_dataAnalyzerPanel = dataAnalyzerPanel;
 
@@ -651,6 +659,11 @@ public class GraphPanel extends JPanel implements MouseListener, MouseMotionList
         popup.add(new DeleteAction());
 
         return popup;
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        repaint();
     }
         
     public class DeleteAction extends AbstractAction {

@@ -114,27 +114,36 @@ public class FunctionGraphNode extends GraphNode {
     }
     
     @Override
-    public boolean possibleAction() {
+    public ImageIcon getDisplayIcon() {
+        if (m_function.calculationDone()) {
+            return IconManager.getIcon(IconManager.IconType.TABLE);
+        } else {
+            return null;
+        }
+    }
+    
+    @Override
+    public NodeAction possibleAction() {
         if (!isConnected(true)) {
-            return false;
+            return NodeAction.NO_ACTION;
         }
         if (!settingsDone()) {
-            return canSetSettings();
+            return canSetSettings() ? NodeAction.STEP_ACTION : NodeAction.NO_ACTION;
         }
         if (m_function.isCalculating()) {
-            return false;
+            return NodeAction.NO_ACTION;
         }
         if (m_function.inError()) {
-            return true;
+            return NodeAction.ERROR_ACTION;
         }
         if (m_function.calculationDone()) {
-            return true;
+            return NodeAction.RESULT_ACTION;
         }
         if (m_function.isSettingsBeingDone()) {
-            return false;
+            return NodeAction.NO_ACTION;
         }
         // process
-        return true;
+        return NodeAction.STEP_ACTION;
     }
     
     @Override

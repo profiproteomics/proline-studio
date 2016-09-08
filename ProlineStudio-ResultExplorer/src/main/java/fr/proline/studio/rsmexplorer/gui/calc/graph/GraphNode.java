@@ -48,6 +48,16 @@ public abstract class GraphNode extends AbstractConnectedGraphObject {
     
     protected GraphPanel m_graphPanel = null;
 
+    private long m_startTime = System.currentTimeMillis();
+    
+    
+    public enum NodeAction {
+        NO_ACTION,
+        STEP_ACTION,
+        ERROR_ACTION,
+        RESULT_ACTION
+    }
+    
     public GraphNode(GraphPanel panel) {
         super(TypeGraphObject.GRAPH_NODE);
         m_graphPanel = panel;
@@ -167,6 +177,13 @@ public abstract class GraphNode extends AbstractConnectedGraphObject {
         if (icon != null) {
             g.drawImage(icon.getImage(), m_x+MARGIN, m_y+MARGIN, null);
         }
+
+        
+        NodeAction possibleAction = possibleAction();
+
+        m_graphNodeAction.setAction(possibleAction != NodeAction.NO_ACTION);
+
+
         ImageIcon statusIcon = getStatusIcon();
         if (statusIcon != null) {
             
@@ -174,30 +191,88 @@ public abstract class GraphNode extends AbstractConnectedGraphObject {
             int hIcon = statusIcon.getIconHeight();
             int xIcon = m_x+MARGIN;
             int yIcon = m_y+HEIGHT-MARGIN-statusIcon.getIconHeight();
-            if (possibleAction()) {
+            
+            
+             if ((possibleAction == NodeAction.STEP_ACTION) || (possibleAction == NodeAction.ERROR_ACTION)) {
                 m_graphNodeAction.setBounds(xIcon - 2, yIcon - 2, wIcon + 4, hIcon + 4);
                 m_graphNodeAction.setAction(true);
                 m_graphNodeAction.draw(g);
-            } else {
-                m_graphNodeAction.setAction(false);
             }
-            
-            
-            
-            //final int LINE_LENGTH = 3;
+
             g.drawImage(statusIcon.getImage(), xIcon, yIcon, null);
-            /*g.setColor(Color.black);
-            g.drawLine(xIcon-LINE_LENGTH, yIcon-LINE_LENGTH, xIcon,  yIcon-LINE_LENGTH);
-            g.drawLine(xIcon-LINE_LENGTH, yIcon-LINE_LENGTH, xIcon-LINE_LENGTH,  yIcon);
-            g.drawLine(xIcon+wIcon+LINE_LENGTH, yIcon+hIcon+LINE_LENGTH, xIcon+wIcon+LINE_LENGTH, yIcon+hIcon);
-            g.drawLine(xIcon+wIcon+LINE_LENGTH, yIcon+hIcon+LINE_LENGTH, xIcon+wIcon, yIcon+hIcon+LINE_LENGTH);*/
-            
-            
-            
-        } else {
-            m_graphNodeAction.setAction(false);
+
+            if ((possibleAction == NodeAction.STEP_ACTION) || (possibleAction == NodeAction.ERROR_ACTION)) {
+
+                final int LINE_LENGTH = 3;
+
+                g.setColor(getFrameColor().darker());
+
+                double coef = ((double) (System.currentTimeMillis() - m_startTime)) / 1000.0d;
+                coef = coef % 3;
+                if (coef >= 1) {
+                    coef = 0;
+                } else {
+                    coef = coef - ((int) coef);
+                }
+
+                double theta = Math.toRadians(180 * coef);
+                g2.rotate(theta, xIcon + wIcon / 2, yIcon + hIcon / 2);
+
+                g.drawLine(xIcon - LINE_LENGTH, yIcon - LINE_LENGTH, xIcon, yIcon - LINE_LENGTH);
+                g.drawLine(xIcon - LINE_LENGTH, yIcon - LINE_LENGTH, xIcon - LINE_LENGTH, yIcon);
+                g.drawLine(xIcon + wIcon + LINE_LENGTH, yIcon + hIcon + LINE_LENGTH, xIcon + wIcon + LINE_LENGTH, yIcon + hIcon);
+                g.drawLine(xIcon + wIcon + LINE_LENGTH, yIcon + hIcon + LINE_LENGTH, xIcon + wIcon, yIcon + hIcon + LINE_LENGTH);
+
+                g2.rotate(-theta, xIcon + wIcon / 2, yIcon + hIcon / 2);
+
+            }
+
         }
 
+        ImageIcon displayIcon = getDisplayIcon();
+        if (displayIcon != null) {
+            
+            int wIcon = displayIcon.getIconWidth();
+            int hIcon = displayIcon.getIconHeight();
+            int xIcon = m_x+WIDTH-MARGIN-displayIcon.getIconWidth();
+            int yIcon = m_y+HEIGHT-MARGIN-displayIcon.getIconHeight();
+            
+            
+            if (possibleAction == NodeAction.RESULT_ACTION) {
+                m_graphNodeAction.setBounds(xIcon - 2, yIcon - 2, wIcon + 4, hIcon + 4);
+                m_graphNodeAction.setAction(true);
+                m_graphNodeAction.draw(g);
+            }
+
+            g.drawImage(displayIcon.getImage(), xIcon, yIcon, null);
+
+            /*if (possibleAction == NodeAction.STEP_ACTION) {
+
+                final int LINE_LENGTH = 3;
+
+                g.setColor(getFrameColor().darker());
+
+                double coef = ((double) (System.currentTimeMillis() - m_startTime)) / 1000.0d;
+                coef = coef % 3;
+                if (coef >= 1) {
+                    coef = 0;
+                } else {
+                    coef = coef - ((int) coef);
+                }
+
+                double theta = Math.toRadians(180 * coef);
+                g2.rotate(theta, xIcon + wIcon / 2, yIcon + hIcon / 2);
+
+                g.drawLine(xIcon - LINE_LENGTH, yIcon - LINE_LENGTH, xIcon, yIcon - LINE_LENGTH);
+                g.drawLine(xIcon - LINE_LENGTH, yIcon - LINE_LENGTH, xIcon - LINE_LENGTH, yIcon);
+                g.drawLine(xIcon + wIcon + LINE_LENGTH, yIcon + hIcon + LINE_LENGTH, xIcon + wIcon + LINE_LENGTH, yIcon + hIcon);
+                g.drawLine(xIcon + wIcon + LINE_LENGTH, yIcon + hIcon + LINE_LENGTH, xIcon + wIcon, yIcon + hIcon + LINE_LENGTH);
+
+                g2.rotate(-theta, xIcon + wIcon / 2, yIcon + hIcon / 2);
+
+            }*/
+
+        }
         
         g.setFont(m_fontBold);
         g.setColor(Color.black);
@@ -228,7 +303,8 @@ public abstract class GraphNode extends AbstractConnectedGraphObject {
     public abstract Color getFrameColor();
     public abstract ImageIcon getIcon();
     public abstract ImageIcon getStatusIcon();
-    public abstract boolean possibleAction();
+    public abstract ImageIcon getDisplayIcon();
+    public abstract NodeAction possibleAction();
     public abstract void doAction();
     public abstract boolean canBeProcessed();
     

@@ -171,7 +171,7 @@ public abstract class AbstractGraphic implements CheckParameterInterface {
 
     
     public ImageIcon getIcon() {
-        return IconManager.getIcon(IconManager.IconType.WAVE);
+        return IconManager.getIcon(IconManager.IconType.PENCIL_RULER);
     }
     
 }

@@ -1362,14 +1362,14 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                 " AND pspmi.resultSummary.id=:rsmId ";
         Query queryStatusQ = entityManagerMSI.createQuery(queryStatus);
         List<DQuantitationChannel> listQC = new ArrayList();
-        Map<Long, Map<Long, String>> protMatchStatusByIdPepMatchByQcId = new HashMap();
-        Map<Long, Map<Long, Integer>> protMatchPepNumberByIdPepMatchByQcId = new HashMap();
+        Map<Long, Map<Long, String>> protMatchStatusByIdByQcId = new HashMap();
+        Map<Long, Map<Long, Integer>> protMatchPepNumberByIdByQcId = new HashMap();
         if (m_dataset != null && m_dataset.getMasterQuantitationChannels() != null && !m_dataset.getMasterQuantitationChannels().isEmpty()){
             listQC = m_dataset.getMasterQuantitationChannels().get(0).getQuantitationChannels();
             for (DQuantitationChannel qch : listQC) {
                 Long identQCRsmId = qch.getIdentResultSummaryId();
-                Map<Long, String> protMatchStatusByIdPepMatch = new HashMap();
-                Map<Long, Integer> protMatchPepNumberByIdPepMatch = new HashMap();
+                Map<Long, String> statusByProtMatchId = new HashMap();
+                Map<Long, Integer> pepNumberByProtMatchId = new HashMap();
                 queryStatusQ.setParameter("rsmId", identQCRsmId);
                 queryPepNumberQ.setParameter("rsmId", identQCRsmId);
                 List rStatus = queryStatusQ.getResultList();
@@ -1387,16 +1387,16 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                     } else{
                         protMatchStatus = "Sameset";
                     }
-                    protMatchStatusByIdPepMatch.put( proteinMatchId , protMatchStatus);
+                    statusByProtMatchId.put( proteinMatchId , protMatchStatus);
                 }
                 for (Object resPn : rPepNumber) {
                     Object[] res = (Object[]) resPn;
                     Long proteinMatchId = (Long)res[1];
                     Integer pepNumber = (Integer)res[0];
-                    protMatchPepNumberByIdPepMatch.put( proteinMatchId , pepNumber);
+                    pepNumberByProtMatchId.put( proteinMatchId , pepNumber);
                 }
-                protMatchStatusByIdPepMatchByQcId.put(qch.getId(), protMatchStatusByIdPepMatch);
-                protMatchPepNumberByIdPepMatchByQcId.put(qch.getId(), protMatchPepNumberByIdPepMatch);
+                protMatchStatusByIdByQcId.put(qch.getId(), statusByProtMatchId);
+                protMatchPepNumberByIdByQcId.put(qch.getId(), pepNumberByProtMatchId);
             }
         }
        
@@ -1452,21 +1452,21 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
             Map<Long, String> quantStatusByQchIds = new HashMap();
             Map<Long, Integer> quantPeptideNumberByQchIds = new HashMap();
             for (DQuantitationChannel qch : listQC) {
-                String status = "";
-                Integer pepNumber = 0;
+                String status = "Undefined";
+                Integer pepNumber = -1; //0;
                 quantStatusByQchIds.put(qch.getId(), status);
                 quantPeptideNumberByQchIds.put(qch.getId(), pepNumber);
                 if (masterQuantProteinSet.getQuantProteinSetByQchIds().containsKey(qch.getId())){
                     DQuantProteinSet protSetQch = masterQuantProteinSet.getQuantProteinSetByQchIds().get(qch.getId());
                     Long pmId = protSetQch.getProteinMatchId();// proteinMatchId in this qch
-                    if (protMatchStatusByIdPepMatchByQcId.containsKey(qch.getId())){
-                        Map<Long, String> protMatchStatusByIdPepMatch = protMatchStatusByIdPepMatchByQcId.get(qch.getId());
+                    if (protMatchStatusByIdByQcId.containsKey(qch.getId())){
+                        Map<Long, String> protMatchStatusByIdPepMatch = protMatchStatusByIdByQcId.get(qch.getId());
                         if (protMatchStatusByIdPepMatch.containsKey(pmId)){
                             status = protMatchStatusByIdPepMatch.get(pmId);
                         }
                     }
-                    if (protMatchPepNumberByIdPepMatchByQcId.containsKey(qch.getId())){
-                        Map<Long, Integer> protMatchPepNumberByIdPepMatch = protMatchPepNumberByIdPepMatchByQcId.get(qch.getId());
+                    if (protMatchPepNumberByIdByQcId.containsKey(qch.getId())){
+                        Map<Long, Integer> protMatchPepNumberByIdPepMatch = protMatchPepNumberByIdByQcId.get(qch.getId());
                         if (protMatchPepNumberByIdPepMatch.containsKey(pmId)){
                             pepNumber = protMatchPepNumberByIdPepMatch.get(pmId);
                         }

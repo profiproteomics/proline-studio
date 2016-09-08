@@ -69,13 +69,13 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
     public static final int COLTYPE_RAW_ABUNDANCE = 4;
     public static final int COLTYPE_ABUNDANCE = 5;
     
-    private static final String[] m_columnNamesQC = { "Status","Peptide Number", "Sel. level", "Pep. match count", "Raw abundance", "Abundance"};
-    private static final String[] m_toolTipQC = {"Status","Peptide Number",  "Selection level", "Peptides match count", "Raw abundance", "Abundance"  };
+    private static final String[] m_columnNamesQC = { "Status","Peptides Count", "Sel. level", "Pep. match count", "Raw abundance", "Abundance"};
+    private static final String[] m_toolTipQC = {"Status (typical, subset or sameset) of the protein in this condition","Number of different peptides for this condition",  "Selection level", "Peptides match count", "Raw abundance", "Abundance"  };
     
     
     
-    private static final String[] m_columnNamesQC_SC = {"Status","Peptide Number",  "Sel. level",  "Basic SC",  "Specific SC", "Weighted SC",};
-    private static final String[] m_toolTipQC_SC = { "Status", "Peptide Number","Selection level", "Basic Spectral Count", "Specific Spectral Count","Weighted Spectral Count",  };
+    private static final String[] m_columnNamesQC_SC = {"Status","Peptides Count",  "Sel. level",  "Basic SC",  "Specific SC", "Weighted SC",};
+    private static final String[] m_toolTipQC_SC = { "Status (typical, subset or sameset) of the protein in this condition", "Number of different peptides for this condition","Selection level", "Basic Spectral Count", "Specific Spectral Count","Weighted Spectral Count",  };
     
     private List<DMasterQuantProteinSet> m_proteinSets = null;
     private DQuantitationChannel[] m_quantChannels = null;
@@ -1020,7 +1020,18 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
                 int nbQc = (col - m_columnNames.length) / m_columnNamesQC.length;
                 int id = col - m_columnNames.length - (nbQc * m_columnNamesQC.length);
                 switch (id) {
+                    case COLTYPE_STATUS:
+                        if(m_isXICMode){
+                            renderer = new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class));
+                            renderer = new GrayedRenderer(renderer);
+                        }
+                        break;
                     case COLTYPE_PEP_NUMBER:
+                        renderer = new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(Integer.class));
+                        if(m_isXICMode){
+                            renderer = new GrayedRenderer(renderer);
+                        }
+                        break; 
                     case COLTYPE_SELECTION_LEVEL:
                     case COLTYPE_PSM: {
                         renderer = new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(Integer.class));

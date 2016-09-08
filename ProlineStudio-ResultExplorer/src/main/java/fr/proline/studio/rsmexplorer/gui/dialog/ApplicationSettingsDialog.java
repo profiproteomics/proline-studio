@@ -1,6 +1,8 @@
 package fr.proline.studio.rsmexplorer.gui.dialog;
 
 import fr.proline.studio.dpm.task.util.JMSConnectionManager;
+import static fr.proline.studio.dpm.task.util.JMSConnectionManager.DEFAULT_SERVICE_REQUEST_QUEUE_NAME;
+import static fr.proline.studio.dpm.task.util.JMSConnectionManager.SERVICE_REQUEST_QUEUE_NAME_KEY;
 import fr.proline.studio.gui.AbstractParameterListTree;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.parameter.BooleanParameter;
@@ -12,6 +14,7 @@ import fr.proline.studio.rsmexplorer.actions.identification.ImportManager;
 import java.awt.*;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 import javax.swing.*;
 import javax.swing.event.TreeSelectionEvent;
@@ -19,6 +22,7 @@ import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
 import org.openide.util.NbPreferences;
+import org.slf4j.LoggerFactory;
 
 /**
  * Help Dialog with links to the how to sections
@@ -75,8 +79,8 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
 
     private ParameterList getJMSParameterList() {
         m_jmsParameterList = new ParameterList(JMS_SETTINGS);
-
-        StringParameter defaultServiceRequestQueueName = new StringParameter(JMSConnectionManager.DEFAULT_SERVICE_REQUEST_QUEUE_NAME, "JMS Request Queue Name", JTextField.class, JMSConnectionManager.DEFAULT_SERVICE_REQUEST_QUEUE_NAME, 5, null);
+        String queueName =  NbPreferences.root().get(SERVICE_REQUEST_QUEUE_NAME_KEY, DEFAULT_SERVICE_REQUEST_QUEUE_NAME);
+        StringParameter defaultServiceRequestQueueName = new StringParameter(JMSConnectionManager.DEFAULT_SERVICE_REQUEST_QUEUE_NAME, "JMS Request Queue Name", JTextField.class, queueName, 5, null);
         m_jmsParameterList.add(defaultServiceRequestQueueName);
 
         return m_jmsParameterList;
@@ -215,18 +219,16 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
     private void saveExistingsLists() {
         Enumeration<String> enumKey = m_existingLists.keys();
 
-        int x = 0;
-
         while (enumKey.hasMoreElements()) {
-            
             String key = enumKey.nextElement();
-
             ParameterList currentList = m_existingLists.get(key);
-
             currentList.saveParameters(NbPreferences.root(), false);
-
         }
-
+        try {
+            NbPreferences.root().flush();
+         } catch (BackingStoreException e) {
+             LoggerFactory.getLogger("ProlineStudio.DPM").error("Saving Parameters Failed", e);
+         }
     }
 
 }

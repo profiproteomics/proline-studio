@@ -34,6 +34,7 @@ public class JMSConnectionManager {
     protected static final Logger m_loggerProline = LoggerFactory.getLogger("ProlineStudio.DPM.Task");
 
     public static final String DEFAULT_SERVICE_REQUEST_QUEUE_NAME = "ProlineServiceRequestQueue";
+    
     public static final String SERVICE_REQUEST_QUEUE_NAME_KEY = "JMSProlineQueueName";
     
     public static final String SERVICE_MONITORING_NOTIFICATION_TOPIC_NAME = "ProlineServiceMonitoringNotificationTopic";

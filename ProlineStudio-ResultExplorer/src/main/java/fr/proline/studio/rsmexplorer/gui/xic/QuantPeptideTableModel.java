@@ -282,7 +282,11 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
                 if (peptideInstance == null) {
                     return "";
                 } else {
-                    return String.valueOf(peptideInstance.getElutionTime());
+                    Float f = peptideInstance.getElutionTime();
+                    if (f == null) {
+                        return "";
+                    }
+                    return String.valueOf(f);
                 }
 
             }
@@ -517,7 +521,17 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
     
     @Override
     public boolean isCellEditable(int rowIndex, int columnIndex) {
-        return (columnIndex == COLTYPE_MQPEPTIDE_SELECTION_LEVEL);
+        if (columnIndex != COLTYPE_MQPEPTIDE_SELECTION_LEVEL) {
+            return false;
+        }
+        DMasterQuantPeptide peptide = m_quantPeptides.get(rowIndex);
+        DPeptideInstance peptideInstance = peptide.getPeptideInstance();
+        if (peptideInstance == null) {
+            return true;
+        }
+        Float f = peptideInstance.getElutionTime();
+        return (f!=null); // a peptide with an elutime is linked to a PeptideIon and MasterQuantComponent
+        
     }
     
     @Override
@@ -690,7 +704,11 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
                     lazyData.setData(null);
                     givePriorityTo(m_taskId, row, col);
                 } else {
-                    lazyData.setData(peptideInstance.getElutionTime());
+                    Float f = peptideInstance.getElutionTime();
+                    if (f == null) {
+                        f = Float.NaN;
+                    }
+                    lazyData.setData(f);
                 }
                 return lazyData;
 

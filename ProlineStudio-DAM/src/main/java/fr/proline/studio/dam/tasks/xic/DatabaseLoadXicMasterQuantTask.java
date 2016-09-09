@@ -1024,9 +1024,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
         }
 
         
-        ArrayList<Long> peptideMatchIds = new ArrayList<>(peptideMatchMap.size());
-        peptideMatchIds.addAll(peptideMatchMap.keySet());
-        fetchProteinSetName(entityManagerMSI, peptideMatchIds, peptideMatchMap);
+
 
 
         
@@ -1141,15 +1139,71 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
         }
 
         // no master quantPeptide: build a fake masterQuantPeptide to display the peptideInstance
+        List<DPeptideInstance> extendedPeptideInstanceList = null;
         for (int i = 0; i < nbMP; i++) {
             DMasterQuantPeptide masterQuantPeptide = m_masterQuantPeptideList.get(i);
             if (masterQuantPeptide.getId() == -1) {
+                if (extendedPeptideInstanceList == null) {
+                    extendedPeptideInstanceList = new ArrayList();
+                    
+                    String querySelect2 = "SELECT  pi, pm.id, pm.rank, pm.charge, pm.deltaMoz, pm.experimentalMoz, pm.missedCleavage, pm.score, pm.resultSet.id, pm.cdPrettyRank, pm.sdPrettyRank, p "
+                            + "FROM fr.proline.core.orm.msi.PeptideInstance pi,  "
+                            + "fr.proline.core.orm.msi.PeptideMatch pm, fr.proline.core.orm.msi.Peptide p  "
+                            + "WHERE pi.id IN (:listId) AND  "
+                            + "pi.bestPeptideMatchId=pm.id AND "
+                            + "pm.peptideId=p.id  "
+                            + "ORDER BY pm.score DESC";
+
+                          Query query2 = entityManagerMSI.createQuery(querySelect2);
+                    query2.setParameter("listId", listPeptideInstanceIds);
+                    List resultList2 = query2.getResultList();
+
+                    //HashMap<Long, DPeptideMatch> peptideMatchMap = new HashMap<>();
+                    itPeptidesQuery = resultList2.iterator();
+                    while (itPeptidesQuery.hasNext()) {
+                        Object[] resCur = itPeptidesQuery.next();
+                        PeptideInstance pi = (PeptideInstance) resCur[0];
+                        DPeptideInstance dpi = new DPeptideInstance(pi.getId(), pi.getPeptide().getId(), pi.getValidatedProteinSetCount(), null); //JPM.TODO
+                        dpi.setResultSummary(pi.getResultSummary());
+                        Long pmId = (Long) resCur[1];
+
+                        DPeptideMatch pm = peptideMatchMap.get(pmId);
+                        if (pm == null) {
+                            Integer pmRank = (Integer) resCur[2];
+                            Integer pmCharge = (Integer) resCur[3];
+                            Float pmDeltaMoz = (Float) resCur[4];
+                            Double pmExperimentalMoz = (Double) resCur[5];
+                            Integer pmMissedCleavage = (Integer) resCur[6];
+                            Float pmScore = (Float) resCur[7];
+                            Long pmResultSetId = (Long) resCur[8];
+                            Integer pmCdPrettyRank = (Integer) resCur[9];
+                            Integer pmSdPrettyRank = (Integer) resCur[10];
+                            pm = new DPeptideMatch(pmId, pmRank, pmCharge, pmDeltaMoz, pmExperimentalMoz, pmMissedCleavage, pmScore, pmResultSetId, pmCdPrettyRank, pmSdPrettyRank);
+                            //pm.setRetentionTime(elutionTime);
+                            peptideMatchMap.put(pmId, pm);
+                        }
+
+                        Peptide p = (Peptide) resCur[11];
+                        p.getTransientData().setPeptideReadablePtmStringLoaded();
+                        peptideMap.put(p.getId(), p);
+
+                        dpi.setBestPeptideMatch(pm);
+
+                        pm.setPeptide(p);
+
+                        extendedPeptideInstanceList.add(dpi);
+                    }
+                }
+
+
+                
                 //search index of peptideInstance
                 DPeptideInstance peptideInstance = null;
                 if (masterQuantPeptide.getPeptideInstanceId() > 0 && listPeptideInstanceIds.indexOf(masterQuantPeptide.getPeptideInstanceId()) != -1) {
+                    nbPI = extendedPeptideInstanceList.size();
                     for (int k = 0; k < nbPI; k++) {
-                        if (peptideInstanceList.get(k).getId() == masterQuantPeptide.getPeptideInstanceId()) {
-                            peptideInstance = peptideInstanceList.get(k);
+                        if (extendedPeptideInstanceList.get(k).getId() == masterQuantPeptide.getPeptideInstanceId()) {
+                            peptideInstance = extendedPeptideInstanceList.get(k);
                             break;
                         }
                     }
@@ -1231,6 +1285,11 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                 }
             }
         }
+
+        ArrayList<Long> peptideMatchIds = new ArrayList<>(peptideMatchMap.size());
+        peptideMatchIds.addAll(peptideMatchMap.keySet());
+        fetchProteinSetName(entityManagerMSI, peptideMatchIds, peptideMatchMap);
+        
         return true;
     }
 

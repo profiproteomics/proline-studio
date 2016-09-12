@@ -71,6 +71,7 @@ import fr.proline.studio.parameter.ParameterList;
 import fr.proline.studio.rsmexplorer.DataBoxViewerManager;
 import fr.proline.studio.utils.ResultCallback;
 import java.util.Map;
+import javax.swing.Icon;
 
 /**
  *
@@ -173,7 +174,12 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
             
         };
         
-        m_refineProteinsPanel = new DefaultFloatingPanel("Proteins need to be refined : ", "Refine", refineAction, IconManager.getIcon(IconManager.IconType.REFINE));
+        
+        String[] actionText = {"Refine"};
+        ActionListener[] actionListeners = { refineAction };
+        Icon[] icons = { IconManager.getIcon(IconManager.IconType.REFINE) };
+        
+        m_refineProteinsPanel = new DefaultFloatingPanel("Proteins need to be refined : ", actionText, actionListeners, icons);
         
         final JLayeredPane layeredPane = new JLayeredPane();
 

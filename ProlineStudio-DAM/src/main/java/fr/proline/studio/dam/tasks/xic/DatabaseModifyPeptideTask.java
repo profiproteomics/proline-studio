@@ -38,7 +38,7 @@ public class DatabaseModifyPeptideTask extends AbstractDatabaseTask {
 
     private int m_action;
     
-    private DMasterQuantPeptide m_masterQuantPeptide;
+    private ArrayList<DMasterQuantPeptide> m_masterQuantPeptideList;
     private ArrayList<DMasterQuantProteinSet> m_masterQuantProteinSetModified;
     private long m_projectId;
     
@@ -53,12 +53,12 @@ public class DatabaseModifyPeptideTask extends AbstractDatabaseTask {
 
     }
     
-    public void initDisablePeptide(long projectId, DMasterQuantPeptide masterQuantPeptide, ArrayList<DMasterQuantProteinSet> masterQuantProteinSetModified) {
+    public void initDisablePeptide(long projectId, ArrayList<DMasterQuantPeptide> masterQuantPeptideList, ArrayList<DMasterQuantProteinSet> masterQuantProteinSetModified) {
         setTaskInfo(new TaskInfo("Disable Peptide", true, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_MEDIUM));
         
         m_action = MODIFY_MASTER_QUANT_PEPTIDE;
         m_projectId = projectId;
-        m_masterQuantPeptide = masterQuantPeptide;
+        m_masterQuantPeptideList = masterQuantPeptideList;
         m_masterQuantProteinSetModified = masterQuantProteinSetModified;
         setPriority(Priority.TOP);
     }
@@ -177,16 +177,32 @@ public class DatabaseModifyPeptideTask extends AbstractDatabaseTask {
 
             entityManagerMSI.getTransaction().begin();
 
-            // Change the selection level of the peptide
-            MasterQuantComponent peptideMasterQuantComponent = entityManagerMSI.find(MasterQuantComponent.class, m_masterQuantPeptide.getId());
-            peptideMasterQuantComponent.setSelectionLevel(m_masterQuantPeptide.getSelectionLevel());
-            entityManagerMSI.merge(peptideMasterQuantComponent);
+            int nbPeptides = m_masterQuantPeptideList.size();
+            ArrayList<Long> peptideInstanceIdList = new ArrayList<>(nbPeptides);
+            for (int i=0;i<nbPeptides;i++) {
+                DMasterQuantPeptide masterQuantPeptide = m_masterQuantPeptideList.get(i);
+                int level = masterQuantPeptide.getSelectionLevel();
+                if (level == 0) {
+                    masterQuantPeptide.setSelectionLevel(2);
+                } else {
+                    masterQuantPeptide.setSelectionLevel(0);
+                }
+                // Change the selection level of the peptide
+                MasterQuantComponent peptideMasterQuantComponent = entityManagerMSI.find(MasterQuantComponent.class, masterQuantPeptide.getId());
+                peptideMasterQuantComponent.setSelectionLevel(masterQuantPeptide.getSelectionLevel());
+                entityManagerMSI.merge(peptideMasterQuantComponent);
+                
+                // Load Protein Sets which contain this peptide and modify them
+                DPeptideInstance peptideInstance = masterQuantPeptide.getPeptideInstance();   
+                long id = peptideInstance.getId();
+                peptideInstanceIdList.add(id);
+            }
+
+
 
             // Load Protein Sets which contain this peptide and modify them
-            DPeptideInstance peptideInstance = m_masterQuantPeptide.getPeptideInstance();   
-
-            TypedQuery<ProteinSet> proteinSetsQuery = entityManagerMSI.createQuery("SELECT prots FROM fr.proline.core.orm.msi.ProteinSet prots, fr.proline.core.orm.msi.PeptideSet peps, fr.proline.core.orm.msi.PeptideSetPeptideInstanceItem peps_to_pepi WHERE peps.proteinSet=prots AND peps.id=peps_to_pepi.id.peptideSetId AND peps_to_pepi.id.peptideInstanceId=:peptideInstanceId AND prots.isValidated=true ORDER BY peps.score DESC", ProteinSet.class);
-            proteinSetsQuery.setParameter("peptideInstanceId", peptideInstance.getId());
+            TypedQuery<ProteinSet> proteinSetsQuery = entityManagerMSI.createQuery("SELECT prots FROM fr.proline.core.orm.msi.ProteinSet prots, fr.proline.core.orm.msi.PeptideSet peps, fr.proline.core.orm.msi.PeptideSetPeptideInstanceItem peps_to_pepi WHERE peps.proteinSet=prots AND peps.id=peps_to_pepi.id.peptideSetId AND peps_to_pepi.id.peptideInstanceId IN (:peptideInstanceId) AND prots.isValidated=true ORDER BY peps.score DESC", ProteinSet.class);
+            proteinSetsQuery.setParameter("peptideInstanceId", peptideInstanceIdList);
            
             List<ProteinSet> proteinSets = proteinSetsQuery.getResultList();
             Iterator<ProteinSet> it = proteinSets.iterator();

@@ -24,6 +24,7 @@ import fr.proline.studio.filter.StringDiffFilter;
 import fr.proline.studio.filter.StringFilter;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
+import fr.proline.studio.gui.DefaultFloatingPanel;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.rsmexplorer.DataBoxViewerManager;
 import fr.proline.studio.table.renderer.BigFloatOrDoubleRenderer;
@@ -51,6 +52,7 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -106,6 +108,8 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
     private long m_projectId;
 
     private final ScoreRenderer m_scoreRenderer = new ScoreRenderer();
+    
+    private HashSet<Integer> m_modifiedLevels = new HashSet<>();
     
     public QuantPeptideTableModel(LazyTable table) {
         super(table);
@@ -537,6 +541,18 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
     @Override
     public void setValueAt(Object aValue, int row, int col) {
 
+        Integer rowKey = row;
+        if (m_modifiedLevels.contains(rowKey)) {
+            m_modifiedLevels.remove(rowKey);
+        } else {
+            m_modifiedLevels.add(rowKey);
+        }
+
+        ((XicPeptidePanel)m_databox.getPanel()).displayValidatePanel(!m_modifiedLevels.isEmpty());
+        
+        
+        
+        /*
         DMasterQuantPeptide masterQuantPeptide = m_quantPeptides.get(row);
         masterQuantPeptide.setSelectionLevel(((Boolean) aValue) ? 2 : 0);
 
@@ -568,7 +584,62 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
         AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
         
         
-        fireTableCellUpdated(row, col);
+        fireTableCellUpdated(row, col);*/
+    }
+    
+    public void cancelModifications() {
+        if (m_modifiedLevels.isEmpty()) {
+            return;
+        }
+        m_modifiedLevels.clear();
+        fireTableDataChanged();
+    }
+    
+    public void validateModifications(final DefaultFloatingPanel panel) {
+        if (m_modifiedLevels.isEmpty()) {
+            return;
+        }
+        
+        ArrayList<DMasterQuantPeptide> listToModify = new ArrayList<>();
+        Iterator<Integer> rowIt = m_modifiedLevels.iterator();
+        while (rowIt.hasNext()) {
+            Integer row = rowIt.next();
+            DMasterQuantPeptide masterQuantPeptide = m_quantPeptides.get(row);
+            listToModify.add(masterQuantPeptide);
+        }
+
+        final ArrayList<DMasterQuantProteinSet> masterQuantProteinSetModified = new ArrayList<>();
+        
+        AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
+
+            @Override
+            public boolean mustBeCalledInAWT() {
+                return true;
+            }
+
+            @Override
+            public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
+
+                if (!success) {
+                    panel.actionFinished(false, null); 
+                    return; // should not happen
+                }
+
+                // propagate modifications to the previous views
+                DataBoxViewerManager.loadedDataModified(m_projectId, m_databox.getRsetId(), m_databox.getRsmId(), DMasterQuantProteinSet.class, masterQuantProteinSetModified, DataBoxViewerManager.REASON_PEPTIDE_SUPPRESSED);
+            
+                fireTableDataChanged();
+                
+                panel.actionFinished(true, null); 
+            }
+        };
+
+        // ask asynchronous loading of data
+        DatabaseModifyPeptideTask task = new DatabaseModifyPeptideTask(callback);
+        task.initDisablePeptide(m_projectId, listToModify, masterQuantProteinSetModified);
+        AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
+        
+        
     }
     
     @Override
@@ -583,6 +654,9 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
                 return peptide.getId() == -1 ? "" : Long.toString(peptide.getId());
             }
             case COLTYPE_MQPEPTIDE_SELECTION_LEVEL: {
+                if (m_modifiedLevels.contains(row)) {
+                    return (peptide.getSelectionLevel() != 2); // FLIPPED value -> modified value not saved in database
+                }
                 return (peptide.getSelectionLevel() == 2); // 2 = enable ; 1 = peptide disabled by algorithm, 0 = peptide disabled by human
             }
             case COLTYPE_PEPTIDE_NAME: {

@@ -13,6 +13,7 @@ import fr.proline.studio.filter.FilterButton;
 import fr.proline.studio.filter.actions.ClearRestrainAction;
 import fr.proline.studio.filter.actions.RestrainAction;
 import fr.proline.studio.graphics.CrossSelectionInterface;
+import fr.proline.studio.gui.DefaultFloatingPanel;
 import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.markerbar.MarkerContainerPanel;
@@ -48,6 +49,7 @@ import java.awt.event.ComponentListener;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
+import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -75,6 +77,8 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
     private QuantPeptideTable m_quantPeptideTable;
 
     private MarkerContainerPanel m_markerContainerPanel;
+
+    private DefaultFloatingPanel m_validateModificationsPanel;
     
     private boolean m_displayForProteinSet;
     private DQuantitationChannel[] m_quantChannels;
@@ -100,6 +104,20 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
         initComponents();
     }
     
+    public void displayValidatePanel(boolean visible) {
+        
+        if (m_validateModificationsPanel.isVisible() ^ visible) {
+            if (visible) {
+                m_validateModificationsPanel.setLocation(getX() + 80, getY() + 20);
+                m_validateModificationsPanel.setVisible(true);
+            } else {
+                m_validateModificationsPanel.setVisible(false);
+            }
+        }
+        
+        
+    }
+    
     private void initComponents() {
         setLayout(new BorderLayout());
 
@@ -108,6 +126,32 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
         
         final JPanel peptidePanel = createPeptidePanel();
 
+        
+        ActionListener validateModificationsAction = new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                m_validateModificationsPanel.actionStarted();
+                m_quantPeptideTable.validateModifications();
+            }
+
+        };
+
+        ActionListener cancelModificationsAction = new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                m_validateModificationsPanel.actionStarted();
+                m_quantPeptideTable.cancelModifications();
+            }
+
+        };
+        
+        String[] actionText = {"Validate", "Cancel"};
+        ActionListener[] actionListeners = { validateModificationsAction, cancelModificationsAction };
+        Icon[] icons = { IconManager.getIcon(IconManager.IconType.OK), IconManager.getIcon(IconManager.IconType.CANCEL) };
+        
+        m_validateModificationsPanel = new DefaultFloatingPanel("Validate Modifications : ", actionText, actionListeners, icons);
+
+        
         final JLayeredPane layeredPane = new JLayeredPane();
 
         layeredPane.addComponentListener(new ComponentListener() {
@@ -137,8 +181,8 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
         add(layeredPane, BorderLayout.CENTER);
 
         layeredPane.add(peptidePanel, JLayeredPane.DEFAULT_LAYER);
-        layeredPane.add(m_searchToggleButton.getSearchPanel(), JLayeredPane.PALETTE_LAYER); 
-
+        layeredPane.add(m_searchToggleButton.getSearchPanel(), new Integer(JLayeredPane.PALETTE_LAYER+1));  
+        layeredPane.add(m_validateModificationsPanel, JLayeredPane.PALETTE_LAYER);  
 
     }
         
@@ -398,6 +442,17 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
         public QuantPeptideTable() {
             super(m_peptideScrollPane.getVerticalScrollBar() );
 
+        }
+        
+        public void validateModifications() {
+            QuantPeptideTableModel quantPeptideTableModel = ((QuantPeptideTableModel) ((CompoundTableModel) m_quantPeptideTable.getModel()).getBaseModel());
+            quantPeptideTableModel.validateModifications(m_validateModificationsPanel);
+        }
+        
+        public void cancelModifications() {
+            QuantPeptideTableModel quantPeptideTableModel = ((QuantPeptideTableModel) ((CompoundTableModel) m_quantPeptideTable.getModel()).getBaseModel());
+            quantPeptideTableModel.cancelModifications();
+            m_validateModificationsPanel.actionFinished(true, null);
         }
         
         @Override

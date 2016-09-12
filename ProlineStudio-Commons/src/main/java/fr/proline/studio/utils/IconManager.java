@@ -153,7 +153,8 @@ public class IconManager {
         TOOLBOX_MINUS,
         SCREWDRIVER,
         REFINE,
-        SELECTED_CHECKBOXES;  
+        SELECTED_CHECKBOXES,
+        MENU;  
     }
     private final static HashMap<IconType, ImageIcon> m_iconMap = new HashMap<>();
     private final static HashMap<IconType, ImageIcon> m_iconHourGlassMap = new HashMap<>();
@@ -560,6 +561,8 @@ public class IconManager {
                 return "fr/proline/studio/images/refine.png";
             case SELECTED_CHECKBOXES:
                 return "fr/proline/studio/images/selected-checkboxes.png";
+            case MENU:
+                return "fr/proline/studio/images/menu-down.png";
         }
 
         return null; // can not happen

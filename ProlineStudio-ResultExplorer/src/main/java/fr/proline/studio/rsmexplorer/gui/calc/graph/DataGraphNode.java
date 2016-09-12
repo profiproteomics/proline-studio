@@ -12,6 +12,7 @@ import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.utils.IconManager;
 import java.awt.Color;
 import javax.swing.ImageIcon;
+import javax.swing.JPopupMenu;
 
 
 /**
@@ -103,11 +104,22 @@ public class DataGraphNode extends GraphNode {
     }
     
     @Override
-    public void doAction() {
-        m_graphNodeAction.setHighlighted(false);
-        
-        // process
-        askDisplay();
+    public void doAction(int x, int y) {
+
+        if (m_graphNodeAction.isHighlighted()) {
+            m_graphNodeAction.setHighlighted(false);
+            m_graphNodeAction.setHighlighted(false);
+
+            // process
+            askDisplay();
+        } else if (m_menuAction.isHighlighted()) {
+            m_menuAction.setHighlighted(false);
+
+            JPopupMenu popup = createPopup(m_graphPanel);
+            if (popup != null) {
+                popup.show(m_graphPanel, x, y);
+            }
+        }
     }
 
     @Override

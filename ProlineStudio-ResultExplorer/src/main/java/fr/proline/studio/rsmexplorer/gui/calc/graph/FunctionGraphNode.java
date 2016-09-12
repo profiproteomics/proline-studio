@@ -11,6 +11,8 @@ import fr.proline.studio.utils.IconManager;
 import java.awt.Color;
 import java.util.LinkedList;
 import javax.swing.ImageIcon;
+import javax.swing.JComponent;
+import javax.swing.JPopupMenu;
 
 /**
  * Graph Node representing a Function
@@ -147,30 +149,38 @@ public class FunctionGraphNode extends GraphNode {
     }
     
     @Override
-    public void doAction() {
+    public void doAction(int x, int y) {
 
-        m_graphNodeAction.setHighlighted(false);
-        
-        if (!settingsDone()) {
-            // settings
-            int nbConnections = (m_inConnectors == null) ? 0 : m_inConnectors.size();
-            new SettingsAction(this, nbConnections).actionPerformed(null);
-            return;
-        }
-        if (m_function.inError()) {
-            // display error
-            new ErrorAction(this).actionPerformed(null);
-            return;
-        }
-        if (m_function.calculationDone()) {
-            // display in new window
-            int nbConnections = (m_inConnectors == null) ? 0 : m_inConnectors.size();
-            new DisplayInNewWindowAction(this, nbConnections).actionPerformed(null);
-            return;
-        }
+        if (m_graphNodeAction.isHighlighted()) {
+            m_graphNodeAction.setHighlighted(false);
 
-        // process
-        new ProcessAction(this).actionPerformed(null);
+            if (!settingsDone()) {
+                // settings
+                int nbConnections = (m_inConnectors == null) ? 0 : m_inConnectors.size();
+                new SettingsAction(this, nbConnections).actionPerformed(null);
+                return;
+            }
+            if (m_function.inError()) {
+                // display error
+                new ErrorAction(this).actionPerformed(null);
+                return;
+            }
+            if (m_function.calculationDone()) {
+                // display in new window
+                int nbConnections = (m_inConnectors == null) ? 0 : m_inConnectors.size();
+                new DisplayInNewWindowAction(this, nbConnections).actionPerformed(null);
+                return;
+            }
+
+            // process
+            new ProcessAction(this).actionPerformed(null);
+        } else if (m_menuAction.isHighlighted()) {
+            m_menuAction.setHighlighted(false);
+            JPopupMenu popup = createPopup(m_graphPanel);
+            if (popup != null) {
+                popup.show(m_graphPanel, x, y);
+            }
+        }
     }
 
     @Override

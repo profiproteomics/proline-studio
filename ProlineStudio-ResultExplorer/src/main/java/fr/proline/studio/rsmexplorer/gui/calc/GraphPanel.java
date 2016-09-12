@@ -535,7 +535,7 @@ public class GraphPanel extends JPanel implements MouseListener, MouseMotionList
                 }
                 repaint();
             } else if ((m_overObject != null) && (m_actionOnRelease)) {
-                ((GraphNode)m_overObject).doAction();
+                ((GraphNode)m_overObject).doAction(e.getX(), e.getY());
                 repaint();
                 ((GraphNode)m_overObject).hideAction();  
             } else if (m_overObject != null) {

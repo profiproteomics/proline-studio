@@ -6,6 +6,7 @@ import fr.proline.studio.pattern.WindowBox;
 import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
 import fr.proline.studio.rsmexplorer.gui.calc.ProcessCallbackInterface;
 import fr.proline.studio.rsmexplorer.gui.calc.ProcessEngine;
+import fr.proline.studio.utils.IconManager;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Font;
@@ -44,6 +45,7 @@ public abstract class GraphNode extends AbstractConnectedGraphObject {
     protected int m_y = 0;
 
     protected GraphNodeAction m_graphNodeAction = new GraphNodeAction();
+    protected GraphNodeAction m_menuAction = new GraphNodeAction();
     
     
     protected GraphPanel m_graphPanel = null;
@@ -61,6 +63,9 @@ public abstract class GraphNode extends AbstractConnectedGraphObject {
     public GraphNode(GraphPanel panel) {
         super(TypeGraphObject.GRAPH_NODE);
         m_graphPanel = panel;
+        
+        // menu always available 
+        m_menuAction.setAction(true);
     }
 
     private GraphConnector getFirstFreeConnector() {
@@ -179,6 +184,15 @@ public abstract class GraphNode extends AbstractConnectedGraphObject {
         }
 
         
+        ImageIcon menuIcon = IconManager.getIcon(IconManager.IconType.MENU);
+        int wIcon = menuIcon.getIconWidth();
+        int hIcon = menuIcon.getIconHeight();
+        int xIcon = m_x+WIDTH-MARGIN-menuIcon.getIconWidth();
+        int yIcon = m_y+MARGIN;
+        g.drawImage(menuIcon.getImage(), xIcon, yIcon, null);
+        m_menuAction.setBounds(xIcon - 2, yIcon - 2, wIcon + 4, hIcon + 4);
+        m_menuAction.draw(g);
+        
         NodeAction possibleAction = possibleAction();
 
         m_graphNodeAction.setAction(possibleAction != NodeAction.NO_ACTION);
@@ -187,10 +201,10 @@ public abstract class GraphNode extends AbstractConnectedGraphObject {
         ImageIcon statusIcon = getStatusIcon();
         if (statusIcon != null) {
             
-            int wIcon = statusIcon.getIconWidth();
-            int hIcon = statusIcon.getIconHeight();
-            int xIcon = m_x+MARGIN;
-            int yIcon = m_y+HEIGHT-MARGIN-statusIcon.getIconHeight();
+            wIcon = statusIcon.getIconWidth();
+            hIcon = statusIcon.getIconHeight();
+            xIcon = m_x+MARGIN;
+            yIcon = m_y+HEIGHT-MARGIN-statusIcon.getIconHeight();
             
             
              if ((possibleAction == NodeAction.STEP_ACTION) || (possibleAction == NodeAction.ERROR_ACTION)) {
@@ -232,10 +246,10 @@ public abstract class GraphNode extends AbstractConnectedGraphObject {
         ImageIcon displayIcon = getDisplayIcon();
         if (displayIcon != null) {
             
-            int wIcon = displayIcon.getIconWidth();
-            int hIcon = displayIcon.getIconHeight();
-            int xIcon = m_x+WIDTH-MARGIN-displayIcon.getIconWidth();
-            int yIcon = m_y+HEIGHT-MARGIN-displayIcon.getIconHeight();
+            wIcon = displayIcon.getIconWidth();
+            hIcon = displayIcon.getIconHeight();
+            xIcon = m_x+WIDTH-MARGIN-displayIcon.getIconWidth();
+            yIcon = m_y+HEIGHT-MARGIN-displayIcon.getIconHeight();
             
             
             if (possibleAction == NodeAction.RESULT_ACTION) {
@@ -305,7 +319,7 @@ public abstract class GraphNode extends AbstractConnectedGraphObject {
     public abstract ImageIcon getStatusIcon();
     public abstract ImageIcon getDisplayIcon();
     public abstract NodeAction possibleAction();
-    public abstract void doAction();
+    public abstract void doAction(int x, int y);
     public abstract boolean canBeProcessed();
     
 
@@ -401,6 +415,14 @@ public abstract class GraphNode extends AbstractConnectedGraphObject {
 
             return object;
         }
+        
+        object = m_menuAction.inside(x, y);
+        if (object != null) {
+
+            return object;
+        }
+        
+        
        
        
         if ((x>=m_x) && (y>=m_y) && (x<=m_x+WIDTH) && (y<=m_y+HEIGHT)) {
@@ -422,7 +444,7 @@ public abstract class GraphNode extends AbstractConnectedGraphObject {
     }
     
     public boolean hideAction() {
-        return m_graphNodeAction.setHighlighted(false);
+        return m_graphNodeAction.setHighlighted(false) | m_menuAction.setHighlighted(false);
     }
     
     private void setConnectorsPosition() {

@@ -67,6 +67,10 @@ public abstract class AbstractGraphObject {
         return false;
     }
     
+    public boolean isHighlighted() {
+        return m_hightlighted;
+    }
+    
     
     
     public abstract JPopupMenu createPopup(final GraphPanel panel);

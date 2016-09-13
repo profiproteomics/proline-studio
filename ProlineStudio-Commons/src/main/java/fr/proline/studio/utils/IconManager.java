@@ -154,7 +154,8 @@ public class IconManager {
         SCREWDRIVER,
         REFINE,
         SELECTED_CHECKBOXES,
-        MENU;  
+        MENU,
+        DOCUMENT_LARGE;
     }
     private final static HashMap<IconType, ImageIcon> m_iconMap = new HashMap<>();
     private final static HashMap<IconType, ImageIcon> m_iconHourGlassMap = new HashMap<>();
@@ -561,6 +562,8 @@ public class IconManager {
                 return "fr/proline/studio/images/refine.png";
             case SELECTED_CHECKBOXES:
                 return "fr/proline/studio/images/selected-checkboxes.png";
+            case DOCUMENT_LARGE:
+                return "fr/proline/studio/images/document-large.png";
             case MENU:
                 return "fr/proline/studio/images/menu-down.png";
         }

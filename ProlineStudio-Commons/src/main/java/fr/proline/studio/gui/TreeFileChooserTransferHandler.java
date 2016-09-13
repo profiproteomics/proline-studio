@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.*;
 import javax.swing.JComponent;
+import javax.swing.JOptionPane;
 import javax.swing.JTable;
 
 import javax.swing.TransferHandler;
@@ -69,6 +70,8 @@ public class TreeFileChooserTransferHandler extends TransferHandler {
     public boolean importData(TransferHandler.TransferSupport support) {
 
         if (support.getComponent() instanceof JTable) {
+
+            JOptionPane.showMessageDialog(null, "Manual/Explicit assosiation is an irreversible action that poses risk.", "Warning", JOptionPane.WARNING_MESSAGE);
 
             try {
                 JTable table = (JTable) support.getComponent();

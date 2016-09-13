@@ -51,6 +51,7 @@ public class SelectRawFilesPanel extends JPanel {
     private FlatDesignTable m_table = null;
     private Hashtable<String, XICBiologicalSampleAnalysisNode> m_hashtable;
     private XICDropZone m_dropZone;
+    private String[] suffix = {".raw", ".mzdb"};
 
     public static SelectRawFilesPanel getPanel(AbstractNode rootNode) {
         if (m_singleton == null) {
@@ -359,11 +360,15 @@ public class SelectRawFilesPanel extends JPanel {
 
     protected static class FlatDesignTableModel extends DecoratedTableModel implements TreeFileChooserTableModelInterface {
 
+        private String[] suffix = {".raw", ".mzdb"};
+        
         public static final int COLTYPE_GROUP = 0;
         public static final int COLTYPE_SAMPLE = 1;
         public static final int COLTYPE_SAMPLE_ANALYSIS = 2;
         public static final int COLTYPE_RAW_FILE = 3;
-        private static final String[] columnNames = {"Group", "Sample", "Sample Analysis", "Raw File"};
+        public static final int COLTYPE_PEAKLIST = 4;
+        
+        private static final String[] columnNames = {"Group", "Sample", "Sample Analysis", "Raw File", "Peaklist"};
 
         private final ArrayList<NodeModelRow> m_dataList = new ArrayList<>();
 
@@ -371,7 +376,6 @@ public class SelectRawFilesPanel extends JPanel {
             m_dataList.clear();
             parseTree(rootNode);
             fireTableDataChanged();
-
         }
 
         private void parseTree(AbstractNode node) {
@@ -457,6 +461,9 @@ public class SelectRawFilesPanel extends JPanel {
                 case COLTYPE_RAW_FILE: {
                     return nodeModelRow.m_run.toString();
                 }
+                case COLTYPE_PEAKLIST: {
+                    return MiscellaneousUtils.getFileName(nodeModelRow.getXICBiologicalSampleAnalysisNode().getResultSet().getMsiSearch().getPeaklist().getPath(), suffix);
+                }
 
             }
             return null; // should not happen
@@ -526,7 +533,6 @@ public class SelectRawFilesPanel extends JPanel {
             for (int i = 0; i < numberOfRows; i++) {
                 if (this.getValueAt(i, numberOfColumns - 1).toString().contains("No Raw File")) {
                     XICBiologicalSampleAnalysisNode currentAnalysisNode = this.getXICBiologicalSampleAnalysisNode(i);
-                    String[] suffix = {"raw", ".mzdb"};
                     shortagesTable.put(MiscellaneousUtils.getFileName(currentAnalysisNode.getResultSet().getMsiSearch().getPeaklist().getPath(), suffix), i);
                 }
             }

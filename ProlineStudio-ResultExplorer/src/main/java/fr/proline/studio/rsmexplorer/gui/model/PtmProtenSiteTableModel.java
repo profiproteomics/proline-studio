@@ -698,7 +698,7 @@ public class PtmProtenSiteTableModel extends LazyTableModel implements GlobalTab
             return m_arrayInUse.get(row).getPoteinMatch();
         }
         if (c.equals(DPeptideMatch.class)) {
-            return m_arrayInUse.get(row);
+            return ((DProteinPTMSite) m_arrayInUse.get(row)).getPeptideMatch();
         }
         return null;
     }

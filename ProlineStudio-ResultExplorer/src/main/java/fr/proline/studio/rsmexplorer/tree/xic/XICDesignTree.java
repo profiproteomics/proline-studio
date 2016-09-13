@@ -15,17 +15,13 @@ import fr.proline.studio.dam.data.DataSetData;
 import fr.proline.core.orm.uds.BiologicalSplSplAnalysisMap;
 import fr.proline.core.orm.uds.Run;
 import fr.proline.studio.dam.data.RunInfoData;
-import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.rsmexplorer.actions.identification.AbstractRSMAction;
 import fr.proline.studio.rsmexplorer.actions.xic.DeleteAction;
 import fr.proline.studio.rsmexplorer.actions.xic.RenameAction;
 import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
-import fr.proline.studio.rsmexplorer.gui.dialog.xic.CreateXICDialog;
-import fr.proline.studio.rsmexplorer.gui.dialog.xic.SelectRawFileDialog;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import java.awt.event.MouseEvent;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.*;
@@ -186,11 +182,7 @@ public class XICDesignTree extends AbstractTree {
         
         // retrieve selected nodes
         AbstractNode[] selectedNodes = getSelectedNodes();
-
-        int nbNodes = selectedNodes.length;
-
-        
-        
+      
         JPopupMenu popup;
         ArrayList<AbstractRSMAction> actions;
         
@@ -200,7 +192,7 @@ public class XICDesignTree extends AbstractTree {
         if (m_mainPopup == null) {
 
             // create the actions
-            m_mainActions = new ArrayList<>(12);  // <--- get in sync
+            m_mainActions = new ArrayList<>(3);  // <--- get in sync
 
             RenameAction renameAction = new RenameAction();
             m_mainActions.add(renameAction);
@@ -293,6 +285,8 @@ public class XICDesignTree extends AbstractTree {
                         DataSetData dsData = new DataSetData(name, Dataset.DatasetType.IDENTIFICATION, Aggregation.ChildNature.SAMPLE_ANALYSIS ); 
                         dsData.setDataset(dds);
                         XICBiologicalSampleAnalysisNode sampleAnalysisNode = new XICBiologicalSampleAnalysisNode(dsData);
+                        if(qCh.getName() != null)
+                            sampleAnalysisNode.setQuantChannelName(qCh.getName());
                         RunInfoData runInfoData = new RunInfoData();
                         RunInfoData.RawFileSource rawFileSource = new RunInfoData.RawFileSource();
                         RawFile rawFile = new RawFile();

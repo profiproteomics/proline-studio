@@ -10,6 +10,7 @@ import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
 import fr.proline.studio.rsmexplorer.tree.xic.XICDesignTree;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
+import fr.proline.studio.rsmexplorer.tree.xic.XICBiologicalSampleAnalysisNode;
 import javax.swing.tree.DefaultTreeModel;
 import org.openide.util.NbBundle;
 import org.openide.windows.WindowManager;
@@ -32,25 +33,41 @@ public class RenameAction extends AbstractRSMAction {
 
         
         AbstractNode.NodeTypes nodeType = n.getType();
-        if ((nodeType == AbstractNode.NodeTypes.BIOLOGICAL_GROUP)
-                || (nodeType == AbstractNode.NodeTypes.BIOLOGICAL_SAMPLE)
-                || (nodeType == AbstractNode.NodeTypes.DATA_SET)) {
+        
+        switch(nodeType){
+            case BIOLOGICAL_GROUP:
+            case BIOLOGICAL_SAMPLE:
+            case DATA_SET:
+                DataSetData data = ((DataSetData) n.getData());
 
-            DataSetData data = ((DataSetData) n.getData());
+                String name = data.getName();
+                String newName = showRenameDialog(name, x, y);
 
-            String name = data.getName();
-            String newName = showRenameDialog(name, x, y);
-            
-            if (newName == null) {
-                return;
-            }
+                if (newName == null) {
+                    return;
+                }
 
-            if (name.compareTo(newName) != 0) {
-                data.setTemporaryName(newName);
-                ((DefaultTreeModel) XICDesignTree.getDesignTree().getModel()).nodeChanged(n);
-            }
+                if (name.compareTo(newName) != 0) {
+                    data.setTemporaryName(newName);
+                    ((DefaultTreeModel) XICDesignTree.getDesignTree().getModel()).nodeChanged(n);
+                }
+                break;
+            case BIOLOGICAL_SAMPLE_ANALYSIS :
+                XICBiologicalSampleAnalysisNode bioSplAnaysisNode = ((XICBiologicalSampleAnalysisNode) n);
+                String qChName = bioSplAnaysisNode.getQuantChannelName();
+                String qChNewName = showRenameDialog(qChName, x, y);
+                
+                if (qChNewName == null) {
+                    return;
+                }
+                
+                if (qChName.compareTo(qChNewName) != 0) {
+                    bioSplAnaysisNode.setQuantChannelName(qChNewName);
+                    ((DefaultTreeModel) XICDesignTree.getDesignTree().getModel()).nodeChanged(n);
+                }
+            default:              
+                 break;
         }
-
 
     }
         
@@ -94,7 +111,8 @@ public class RenameAction extends AbstractRSMAction {
         AbstractNode.NodeTypes nodeType = node.getType();
         if ((nodeType != AbstractNode.NodeTypes.BIOLOGICAL_GROUP)
                 && (nodeType != AbstractNode.NodeTypes.BIOLOGICAL_SAMPLE)
-                && (nodeType != AbstractNode.NodeTypes.DATA_SET)) {
+                && (nodeType != AbstractNode.NodeTypes.DATA_SET)
+                && (nodeType != AbstractNode.NodeTypes.BIOLOGICAL_SAMPLE_ANALYSIS) ) {
             setEnabled(false);
             return;
         }

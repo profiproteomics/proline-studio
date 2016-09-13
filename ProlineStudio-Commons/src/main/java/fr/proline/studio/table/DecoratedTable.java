@@ -372,10 +372,10 @@ public abstract class DecoratedTable extends JXTable implements CrossSelectionIn
         String[] orderString = { "Ascending", "Descending" };
         SortOrder[] orderEnum = { SortOrder.ASCENDING, SortOrder.DESCENDING};
         
-        m_sortCol1Parameter = new ObjectParameter("COL_1_SORT", "First Sort Column", null, colNames, indexes, colIndex[0], null);
+        m_sortCol1Parameter = new ObjectParameter("COL_1_SORT", "First Sorting Column", null, colNames, indexes, colIndex[0], null);
         m_sortOrderCol1Parameter = new ObjectParameter("COL_1_ORDER", "", null, orderString, orderEnum, (sorterOrder[0] != SortOrder.DESCENDING) ? 0 : 1, null);
         m_sortOrderCol1Parameter.forceShowLabel(LabelVisibility.NO_VISIBLE);
-        m_sortCol2Parameter = new ObjectParameter("COL_2_SORT", "Second Sort Column", null, colNames, indexes, colIndex[1], null);
+        m_sortCol2Parameter = new ObjectParameter("COL_2_SORT", "Second Sorting Column", null, colNames, indexes, colIndex[1], null);
         m_sortOrderCol2Parameter = new ObjectParameter("COL_2_ORDER", "", null, orderString, orderEnum, (sorterOrder[1] != SortOrder.DESCENDING) ? 0 : 1, null);
         m_sortOrderCol2Parameter.forceShowLabel(LabelVisibility.NO_VISIBLE);
         

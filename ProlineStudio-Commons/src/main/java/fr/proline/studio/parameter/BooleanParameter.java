@@ -19,12 +19,16 @@ public class BooleanParameter extends AbstractParameter {
     public BooleanParameter(String key, String name, Class graphicalType, Boolean defaultValue) {
         super(key, name, Boolean.class, graphicalType);
         m_defaultValue = defaultValue;
+        
+        m_labelVisibility = LabelVisibility.NO_VISIBLE;
     }
     
     public BooleanParameter(String key, String name, JComponent component, Boolean defaultValue) {
         super(key, name, Boolean.class,  component.getClass());
         m_defaultValue = defaultValue;
         m_parameterComponent = component;
+        
+        m_labelVisibility = LabelVisibility.NO_VISIBLE;
     }
 
     @Override
@@ -102,11 +106,7 @@ public class BooleanParameter extends AbstractParameter {
         }
         return ""; // should not happen
     }
- 
-    @Override
-    public LabelVisibility showLabel() {
-        return LabelVisibility.NO_VISIBLE;
-    }
+
     
     public void addLinkedParameters(final AbstractLinkedParameters linkedParameters) {
 

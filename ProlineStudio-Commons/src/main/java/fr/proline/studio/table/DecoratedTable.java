@@ -5,9 +5,11 @@ import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.export.ExportModelInterface;
 import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.parameter.AbstractLinkedParameters;
+import fr.proline.studio.parameter.AbstractParameter.LabelVisibility;
 import fr.proline.studio.parameter.BooleanParameter;
 import fr.proline.studio.parameter.IntegerParameter;
 import fr.proline.studio.parameter.MultiObjectParameter;
+import fr.proline.studio.parameter.ObjectParameter;
 import fr.proline.studio.parameter.ParameterList;
 import fr.proline.studio.parameter.SettingsInterface;
 import fr.proline.studio.utils.RelativePainterHighlighter;
@@ -23,6 +25,8 @@ import java.util.Set;
 import javax.swing.JCheckBox;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
+import javax.swing.RowSorter;
+import javax.swing.RowSorter.SortKey;
 import javax.swing.SortOrder;
 import javax.swing.SwingUtilities;
 import javax.swing.table.AbstractTableModel;
@@ -31,6 +35,7 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
+import javax.swing.table.TableRowSorter;
 import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.JXTableHeader;
 import org.jdesktop.swingx.decorator.Highlighter;
@@ -60,6 +65,14 @@ public abstract class DecoratedTable extends JXTable implements CrossSelectionIn
     private MultiObjectParameter m_columnsGroupVisibilityParameter = null;
     private MultiObjectParameter m_columnsVisibilityParameter = null;
     private ArrayList<ParameterList> m_parameterListArray = null;
+    
+    private ObjectParameter m_sortCol1Parameter = null;
+    private ObjectParameter m_sortOrderCol1Parameter = null;
+    private ObjectParameter m_sortCol2Parameter = null;
+    private ObjectParameter m_sortOrderCol2Parameter = null;
+
+
+    
     private static final String AUTOSIZE_COLUMN_KEY = "AUTOSIZE_COLUMN_KEY";
     private static final String COLUMN_WIDTH_KEY = "COLUMN_WIDTH_KEY";
     private static final String COLUMNS_VISIBILITY_KEY = "COLUMNS_VISIBILITY_KEY";
@@ -307,7 +320,7 @@ public abstract class DecoratedTable extends JXTable implements CrossSelectionIn
         
         
         
-        m_parameterListArray = new ArrayList<>(2);
+        m_parameterListArray = new ArrayList<>(3);
         m_parameterListArray.add(parameterTableList);
 
         parameterTableList.getPanel(true); // generate panel at once
@@ -318,7 +331,101 @@ public abstract class DecoratedTable extends JXTable implements CrossSelectionIn
         if (m_columnsGroupVisibilityParameter != null) {
             m_columnsGroupVisibilityParameter.addLinkedParameters(linkedParameter2);
         }
+        
+        addSortingParameters();
     }
+    
+    
+    private void addSortingParameters() {
+        
+        TableModel model = getModel();
+
+        List<TableColumn> colums = getColumns(true);
+        int nbCols = colums.size();
+        
+        String[] colNames = new String[nbCols+1];
+        Integer[] indexes = new Integer[nbCols+1];
+        colNames[0] = "< No Sorting >";
+        indexes[0] = -1;
+        for (int i=0;i<nbCols;i++) {
+            indexes[i+1] = colums.get(i).getModelIndex();
+            colNames[i+1] = model.getColumnName(indexes[i+1]);
+        }
+
+        RowSorter<TableModel> sorter = (RowSorter<TableModel>) getRowSorter();
+
+        List<SortKey> sortKeys = (List<SortKey>) sorter.getSortKeys();
+        int numberOfSortingKeys = Math.min(sortKeys.size(), 2);
+        int[] colIndex = new int[2];
+        SortOrder[] sorterOrder = new SortOrder[2];
+        
+        for (int i=0;i<numberOfSortingKeys;i++) {
+            SortKey key = sortKeys.get(i);
+            colIndex[i] = key.getColumn()+1;
+            sorterOrder[i] = key.getSortOrder();
+        }
+        for (int i=numberOfSortingKeys;i<2;i++) {
+            colIndex[i] = 0;
+            sorterOrder[i] = SortOrder.ASCENDING;
+        }
+    
+        String[] orderString = { "Ascending", "Descending" };
+        SortOrder[] orderEnum = { SortOrder.ASCENDING, SortOrder.DESCENDING};
+        
+        m_sortCol1Parameter = new ObjectParameter("COL_1_SORT", "First Sort Column", null, colNames, indexes, colIndex[0], null);
+        m_sortOrderCol1Parameter = new ObjectParameter("COL_1_ORDER", "", null, orderString, orderEnum, (sorterOrder[0] != SortOrder.DESCENDING) ? 0 : 1, null);
+        m_sortOrderCol1Parameter.forceShowLabel(LabelVisibility.NO_VISIBLE);
+        m_sortCol2Parameter = new ObjectParameter("COL_2_SORT", "Second Sort Column", null, colNames, indexes, colIndex[1], null);
+        m_sortOrderCol2Parameter = new ObjectParameter("COL_2_ORDER", "", null, orderString, orderEnum, (sorterOrder[1] != SortOrder.DESCENDING) ? 0 : 1, null);
+        m_sortOrderCol2Parameter.forceShowLabel(LabelVisibility.NO_VISIBLE);
+        
+        ParameterList parameterTableList = new ParameterList("Sorting Parameters");
+        parameterTableList.add(m_sortCol1Parameter);
+        parameterTableList.add(m_sortOrderCol1Parameter);
+        parameterTableList.add(m_sortCol2Parameter);
+        parameterTableList.add(m_sortOrderCol2Parameter);
+        
+        parameterTableList.getPanel(true); // generate panel at once
+        
+        
+        AbstractLinkedParameters linkedParameters = new AbstractLinkedParameters(parameterTableList) {
+            @Override
+            public void valueChanged(String value, Object associatedValue) {
+                boolean show = ((Integer)associatedValue) != -1;
+                showParameter(m_sortOrderCol1Parameter, show);
+                
+                if (!show) {
+                    showParameter(m_sortCol2Parameter, false);
+                    showParameter(m_sortOrderCol2Parameter, false);
+                } else {
+                    showParameter(m_sortCol2Parameter, true);
+                    showParameter(m_sortOrderCol2Parameter,((Integer) m_sortCol2Parameter.getAssociatedObjectValue()) != -1);
+                }
+
+                updataParameterListPanel();
+            }
+
+        };
+        m_sortCol1Parameter.addLinkedParameters(linkedParameters); // link parameter, it will modify the panel
+        
+
+        AbstractLinkedParameters linkedParameters2 = new AbstractLinkedParameters(parameterTableList) {
+            @Override
+            public void valueChanged(String value, Object associatedValue) {
+                showParameter(m_sortOrderCol2Parameter, ((Integer)associatedValue) != -1);
+
+                updataParameterListPanel();
+            }
+
+        };
+        m_sortCol2Parameter.addLinkedParameters(linkedParameters2); // link parameter, it will modify the panel
+        
+        linkedParameters.valueChanged(colNames[colIndex[0]], indexes[colIndex[0]]);
+        linkedParameters2.valueChanged(colNames[colIndex[1]], indexes[colIndex[1]]);
+        
+        m_parameterListArray.add(parameterTableList);
+    }
+    
     
     public void removeStriping() {
         removeHighlighter(m_stripingHighlighter);
@@ -504,6 +611,23 @@ public abstract class DecoratedTable extends JXTable implements CrossSelectionIn
             ((TableColumnExt)column).setVisible(false);
         }
         
+        
+        ArrayList<SortKey> sortKeys = new ArrayList<>();
+        Integer modelColIndex1 = (Integer) m_sortCol1Parameter.getAssociatedObjectValue();
+        SortOrder sortOrder1 = (SortOrder) m_sortOrderCol1Parameter.getAssociatedObjectValue();
+        Integer modelColIndex2 = (Integer) m_sortCol2Parameter.getAssociatedObjectValue();
+        SortOrder sortOrder2 = (SortOrder) m_sortOrderCol2Parameter.getAssociatedObjectValue();
+        if (modelColIndex1 > -1) {
+            sortKeys.add(new SortKey(modelColIndex1, sortOrder1));
+            if (modelColIndex2 > -1) {
+                sortKeys.add(new SortKey(modelColIndex2, sortOrder2));
+            }
+        }
+        
+        
+        RowSorter<TableModel> sorter = (RowSorter<TableModel>) getRowSorter();
+        sorter.setSortKeys(sortKeys);
+        ((TableRowSorter)sorter).sort();
     }
     
     public class ColumnGroup implements Comparable<ColumnGroup> {

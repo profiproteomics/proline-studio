@@ -34,6 +34,7 @@ public class MultiObjectParameter<E> extends AbstractParameter {
         m_defaultSelection = selection;
         m_paramToString = paramToString;
         
+        m_labelVisibility = LabelVisibility.AS_BORDER_TITLE;
     }
     
     public MultiObjectParameter(String key, String name, JCheckBoxList checkBoxList, E[] objects, Object[] associatedObjects, boolean[] selection, AbstractParameterToString<E> paramToString, boolean allowSelectAll) {
@@ -50,6 +51,7 @@ public class MultiObjectParameter<E> extends AbstractParameter {
 
         m_associatedObjects = associatedObjects;
 
+        m_labelVisibility = LabelVisibility.AS_BORDER_TITLE;
 
     }
     
@@ -193,10 +195,6 @@ public class MultiObjectParameter<E> extends AbstractParameter {
         return null; // should not happen
     }
     
-    @Override
-    public LabelVisibility showLabel() {
-        return LabelVisibility.AS_BORDER_TITLE;
-    }
     
     
     public void addLinkedParameters(final AbstractLinkedParameters linkedParameters) {

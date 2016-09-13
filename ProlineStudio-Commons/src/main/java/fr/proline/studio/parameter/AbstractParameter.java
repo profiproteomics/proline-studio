@@ -16,6 +16,7 @@ public abstract class AbstractParameter {
     protected boolean m_used = true;
     protected boolean m_compulsory = true;
     protected Object m_associatedData = null;
+    protected LabelVisibility m_labelVisibility = LabelVisibility.VISIBLE;
 
     public enum LabelVisibility {
         NO_VISIBLE,
@@ -74,7 +75,11 @@ public abstract class AbstractParameter {
      * @return 
      */
     public LabelVisibility showLabel() {
-        return LabelVisibility.VISIBLE;
+        return m_labelVisibility;
+    }
+    
+    public void forceShowLabel(LabelVisibility labelVisibility) {
+        m_labelVisibility = labelVisibility;
     }
     
     /**

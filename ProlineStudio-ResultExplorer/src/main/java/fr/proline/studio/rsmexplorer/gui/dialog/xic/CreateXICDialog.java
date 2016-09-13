@@ -204,12 +204,7 @@ public class CreateXICDialog extends DefaultDialog {
     }
     
     
-    
-    
-    
-    
-    
-    
+     
     public AbstractNode getDesignRSMNode(){
         return m_finalXICDesignNode;
     }
@@ -453,14 +448,14 @@ public class CreateXICDialog extends DefaultDialog {
                 ArrayList<String> splAnalysisNames = new ArrayList<>();
                 while(identRSMs.hasMoreElements()){
                     //VD TODO TEST child type
-                    AbstractNode qChannelNode = (AbstractNode) identRSMs.nextElement();
-                    String spAnalysisName = qChannelNode.getData().getName();
-                    splAnalysisNames.add(spAnalysisName);
-                    if(!DataSetData.class.isInstance(qChannelNode.getData())){
+                    XICBiologicalSampleAnalysisNode qChannelName = (XICBiologicalSampleAnalysisNode) identRSMs.nextElement();
+                    String quantChName = qChannelName.getQuantChannelName();
+                    splAnalysisNames.add(quantChName);
+                    if(!DataSetData.class.isInstance(qChannelName.getData())){
                         errorMsg = "Invalide Sample Analysis specified ";
                         break;
                     }
-                    _rsmIdBySampleAnalysis.put(spAnalysisName, ((DataSetData)qChannelNode.getData()).getDataset().getResultSummaryId());                            
+                    _rsmIdBySampleAnalysis.put(quantChName, ((DataSetData)qChannelName.getData()).getDataset().getResultSummaryId());                            
                 }
                 _samplesAnalysisBySample.put(sampleName, splAnalysisNames);
             } //End go through group's sample
@@ -518,6 +513,7 @@ public class CreateXICDialog extends DefaultDialog {
                 Map<String, Object> quantChannelParams = new HashMap<>();
                 quantChannelParams.put("number", splAnalysisNumber++);
                 quantChannelParams.put("sample_number", splNbr);
+                quantChannelParams.put("name", nextSplAnalysis);
                 quantChannelParams.put("ident_result_summary_id", _rsmIdBySampleAnalysis.get(nextSplAnalysis));                    
                 quantChannelParams.put("run_id", _runIdByRSMId.get(_rsmIdBySampleAnalysis.get(nextSplAnalysis)));
                 quantChanneList.add(quantChannelParams);

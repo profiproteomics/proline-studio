@@ -80,7 +80,7 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
     private ParameterList getJMSParameterList() {
         m_jmsParameterList = new ParameterList(JMS_SETTINGS);
         String queueName =  NbPreferences.root().get(SERVICE_REQUEST_QUEUE_NAME_KEY, DEFAULT_SERVICE_REQUEST_QUEUE_NAME);
-        StringParameter defaultServiceRequestQueueName = new StringParameter(JMSConnectionManager.DEFAULT_SERVICE_REQUEST_QUEUE_NAME, "JMS Request Queue Name", JTextField.class, queueName, 5, null);
+        StringParameter defaultServiceRequestQueueName = new StringParameter(JMSConnectionManager.SERVICE_REQUEST_QUEUE_NAME_KEY, "JMS Request Queue Name", JTextField.class, queueName, 5, null);
         m_jmsParameterList.add(defaultServiceRequestQueueName);
 
         return m_jmsParameterList;

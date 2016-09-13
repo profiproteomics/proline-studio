@@ -107,6 +107,7 @@ class ConfigurableMergeAction extends AbstractRSMAction {
                      error = "Merge on an Dataset with only one Child is not possible";
                      }*/
 
+                    HashSet<Long> checkDifferentResultSetId = new HashSet<>();
                     ArrayList<Long> resultSetIdList = new ArrayList<>();
                     ArrayList<Long> resultSummaryIdList = new ArrayList<>();
                     for (int i = 0; i < nbChildren; i++) {
@@ -120,11 +121,16 @@ class ConfigurableMergeAction extends AbstractRSMAction {
                             break;
                         }
 
-                        resultSetIdList.add(childNode.getDataset().getResultSetId());
+                        Long rsetId = childNode.getDataset().getResultSetId();
+                        if (checkDifferentResultSetId.contains(rsetId)) {
+                            error = "Merge is not possible : several Search Results are identical";
+                            break;
+                        }
+                        checkDifferentResultSetId.add(rsetId);
+                        resultSetIdList.add(rsetId);
                         if (childNode.hasResultSummary()) {
                             resultSummaryIdList.add(childNode.getDataset().getResultSummaryId());
-                        }
-                    }
+                        }                    }
 
                     if (error != null) {
                         JOptionPane.showMessageDialog(IdentificationTree.getCurrentTree(), error, "Warning", JOptionPane.ERROR_MESSAGE);

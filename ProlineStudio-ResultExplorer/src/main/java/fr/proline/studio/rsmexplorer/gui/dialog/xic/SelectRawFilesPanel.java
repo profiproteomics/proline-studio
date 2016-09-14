@@ -26,6 +26,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Hashtable;
@@ -43,7 +44,7 @@ import javax.swing.table.TableCellRenderer;
  *
  * @author JM235353
  */
-public class SelectRawFilesPanel extends JPanel {
+public class SelectRawFilesPanel extends JPanel implements MouseMotionListener {
 
     private static SelectRawFilesPanel m_singleton = null;
 
@@ -60,6 +61,8 @@ public class SelectRawFilesPanel extends JPanel {
 
         m_singleton.setRootNode(rootNode);
 
+        
+        
         return m_singleton;
     }
 
@@ -89,6 +92,7 @@ public class SelectRawFilesPanel extends JPanel {
         c.weighty = 1;
 
         add(mainPanel, c);
+        
 
     }
 
@@ -214,6 +218,7 @@ public class SelectRawFilesPanel extends JPanel {
 
         panel.add(designTablePanel);
         panel.add(this.createDropZonePanel());
+        
 
         return panel;
     }
@@ -251,7 +256,19 @@ public class SelectRawFilesPanel extends JPanel {
 
         fileFilePathPanel.add(treeScrollPane, c);
 
+        tree.getTree().addMouseMotionListener(this);
+        
         return fileFilePathPanel;
+    }
+
+    @Override
+    public void mouseDragged(MouseEvent me) {
+        m_dropZone.highlight();
+    }
+
+    @Override
+    public void mouseMoved(MouseEvent me) {
+        ;
     }
 
     private class FlatDesignTable extends DecoratedMarkerTable implements MouseListener {

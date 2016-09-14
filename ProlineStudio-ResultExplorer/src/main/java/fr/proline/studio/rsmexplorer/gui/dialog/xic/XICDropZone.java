@@ -14,11 +14,8 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.GridLayout;
-import java.awt.dnd.DropTarget;
-import java.awt.dnd.DropTargetDragEvent;
-import java.awt.dnd.DropTargetDropEvent;
-import java.awt.dnd.DropTargetEvent;
-import java.awt.dnd.DropTargetListener;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -31,20 +28,20 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
+import javax.swing.Timer;
 import javax.swing.border.Border;
 
 /**
  *
  * @author AK249877
  */
-public class XICDropZone extends JPanel implements DropZoneInterface, DropTargetListener {
+public class XICDropZone extends JPanel implements DropZoneInterface, ActionListener {
 
     private Hashtable<String, File> m_samplesTable;
     private JLabel message;
     private JTable m_table;
     private FlatDesignTableModel m_model;
     private String[] suffix = {"raw", ".mzdb"};
-    private DropTarget m_dropTarget;
 
     private JList m_list;
     private DefaultListModel m_listModel;
@@ -54,6 +51,8 @@ public class XICDropZone extends JPanel implements DropZoneInterface, DropTarget
 
     private Border dashedBorder = BorderFactory.createDashedBorder(null);
     private Border defaultBorder = BorderFactory.createEmptyBorder();
+    
+    private Timer m_timer;
 
     public XICDropZone() {
         m_samplesTable = new Hashtable<String, File>();
@@ -65,10 +64,6 @@ public class XICDropZone extends JPanel implements DropZoneInterface, DropTarget
         this.add(this.initDetails());
         this.add(this.initDropArea());
 
-        this.setBorder(dashedBorder);
-
-        //m_dropTarget = new DropTarget(this, this);
-        
         setTransferHandler(new TreeFileChooserTransferHandler());
 
     }
@@ -123,7 +118,7 @@ public class XICDropZone extends JPanel implements DropZoneInterface, DropTarget
     private void updateTable() {
 
         Hashtable<String, Integer> shortages = m_model.getModelShortages();
-        
+
         Enumeration<String> enumKey = shortages.keys();
 
         while (enumKey.hasMoreElements()) {
@@ -147,14 +142,14 @@ public class XICDropZone extends JPanel implements DropZoneInterface, DropTarget
     private void updateLog(ArrayList<File> newSamples) {
         m_textArea.setText(null);
         StringBuilder stringBuilder = new StringBuilder();
-        
+
         stringBuilder.append("List was updated with ").append(newSamples.size()).append(" new files.\n\n");
-        
-        for(int i=0; i<newSamples.size(); i++){
+
+        for (int i = 0; i < newSamples.size(); i++) {
             stringBuilder.append(newSamples.get(i).toString());
             stringBuilder.append("\n");
         }
-        
+
         m_textArea.setText(stringBuilder.toString());
     }
 
@@ -206,6 +201,7 @@ public class XICDropZone extends JPanel implements DropZoneInterface, DropTarget
 
     @Override
     public void addSamples(Object o) {
+        this.highlight(false);
         if (o instanceof ArrayList) {
             ArrayList<File> sampleList = (ArrayList<File>) o;
             this.updateLog(sampleList);
@@ -217,29 +213,34 @@ public class XICDropZone extends JPanel implements DropZoneInterface, DropTarget
         }
     }
 
-    @Override
-    public void dragEnter(DropTargetDragEvent dtde) {
-        this.setBackground(Color.WHITE);
+    public void highlight(boolean b) {
+        if (b) {
+            m_dropArea.setBackground(Color.WHITE);
+            m_dropArea.setBorder(dashedBorder);
+        } else {
+            m_timer.stop();
+            m_dropArea.setBackground(null);
+            m_dropArea.setBorder(defaultBorder);
+        }
+    }
+    
+    public void highlight(){
+        
+        if(m_timer==null){
+            m_timer = new Timer(5000, this);
+            m_timer.start();
+            this.highlight(true);
+        }else{
+            m_timer.restart();
+            this.highlight(true);
+        }
+        
+        m_timer.setRepeats(false);
     }
 
     @Override
-    public void dragOver(DropTargetDragEvent dtde) {
-        ;
-    }
-
-    @Override
-    public void dropActionChanged(DropTargetDragEvent dtde) {
-        ;
-    }
-
-    @Override
-    public void dragExit(DropTargetEvent dte) {
-        this.setBackground(null);
-    }
-
-    @Override
-    public void drop(DropTargetDropEvent dtde) {
-        this.setBackground(null);
+    public void actionPerformed(ActionEvent ae) {
+        this.highlight(false);
     }
 
 }

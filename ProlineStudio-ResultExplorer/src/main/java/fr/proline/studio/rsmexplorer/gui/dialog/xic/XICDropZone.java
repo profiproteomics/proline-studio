@@ -13,6 +13,7 @@ import fr.proline.studio.utils.MiscellaneousUtils;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.GridLayout;
 import java.awt.dnd.DropTarget;
 import java.awt.dnd.DropTargetDragEvent;
 import java.awt.dnd.DropTargetDropEvent;
@@ -23,10 +24,13 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import javax.swing.BorderFactory;
+import javax.swing.DefaultListModel;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
+import javax.swing.JList;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.JTextArea;
 import javax.swing.border.Border;
 
 /**
@@ -42,25 +46,29 @@ public class XICDropZone extends JPanel implements DropZoneInterface, DropTarget
     private String[] suffix = {"raw", ".mzdb"};
     private DropTarget m_dropTarget;
 
+    private JList m_list;
+    private DefaultListModel m_listModel;
+    private JTextArea m_textArea;
+
+    private JPanel m_dropArea;
+
     private Border dashedBorder = BorderFactory.createDashedBorder(null);
     private Border defaultBorder = BorderFactory.createEmptyBorder();
 
     public XICDropZone() {
         m_samplesTable = new Hashtable<String, File>();
 
-        this.setToolTipText("Drag your .mzdb files in the drop zone");
+        this.setToolTipText("Drag your .mzdb files & folders in the drop zone");
 
-        this.setLayout(new BorderLayout());
+        this.setLayout(new GridLayout(1, 2));
 
-        message = new JLabel("", JLabel.CENTER);
-        message.setFont(new Font(message.getFont().getFontName(), Font.PLAIN, 12));
-        message.setForeground(Color.RED);
+        this.add(this.initDetails());
+        this.add(this.initDropArea());
 
-        this.add(new JLabel("<html><center><font size='6' color='green'>Drop Zone</font><br><font size='4' color='black'>Drop your .mzdb files & folders here</font></center></html>", IconManager.getIcon(IconManager.IconType.DOCUMENT_LARGE), JLabel.CENTER), BorderLayout.CENTER);
-        this.add(message, BorderLayout.SOUTH);
+        this.setBorder(dashedBorder);
 
-        m_dropTarget = new DropTarget(this, this);
-
+        //m_dropTarget = new DropTarget(this, this);
+        
         setTransferHandler(new TreeFileChooserTransferHandler());
 
     }
@@ -70,17 +78,59 @@ public class XICDropZone extends JPanel implements DropZoneInterface, DropTarget
         m_model = (FlatDesignTableModel) m_table.getModel();
     }
 
-    private void update() {
+    private JPanel initDropArea() {
+        m_dropArea = new JPanel();
+        m_dropArea.setLayout(new BorderLayout());
+
+        message = new JLabel("", JLabel.CENTER);
+        message.setFont(new Font(message.getFont().getFontName(), Font.PLAIN, 12));
+        message.setForeground(Color.RED);
+        message.setOpaque(false);
+
+        m_dropArea.add(new JLabel("<html><center><font size='6' color='green'>Drop Zone</font><br><font size='4' color='black'>Drop your .mzdb files & folders here</font></center></html>", IconManager.getIcon(IconManager.IconType.DOCUMENT_LARGE), JLabel.CENTER), BorderLayout.CENTER);
+        m_dropArea.add(message, BorderLayout.SOUTH);
+
+        return m_dropArea;
+    }
+
+    private JPanel initDetails() {
+
+        JPanel detailsPanel = new JPanel();
+        detailsPanel.setLayout(new GridLayout(2, 1));
+
+        JPanel logPanel = new JPanel();
+        logPanel.setLayout(new BorderLayout());
+        m_textArea = new JTextArea();
+        m_textArea.setEditable(false);
+        JScrollPane logScrollPane = new JScrollPane(m_textArea);
+        logPanel.setBorder(BorderFactory.createTitledBorder("Log"));
+        logPanel.add(logScrollPane);
+
+        JPanel listPanel = new JPanel();
+        listPanel.setLayout(new BorderLayout());
+        m_listModel = new DefaultListModel();
+        m_list = new JList(m_listModel);
+        JScrollPane listScrollPane = new JScrollPane(m_list);
+        listPanel.setBorder(BorderFactory.createTitledBorder("Not associated files"));
+        listPanel.add(listScrollPane);
+
+        detailsPanel.add(logPanel);
+        detailsPanel.add(listPanel);
+
+        return detailsPanel;
+    }
+
+    private void updateTable() {
 
         Hashtable<String, Integer> shortages = m_model.getModelShortages();
-
+        
         Enumeration<String> enumKey = shortages.keys();
 
         while (enumKey.hasMoreElements()) {
             String key = enumKey.nextElement();
-            if (m_samplesTable.containsKey(key.toUpperCase())) {
+            if (m_samplesTable.containsKey(key)) {
                 ArrayList<File> fileList = new ArrayList<File>();
-                fileList.add(m_samplesTable.get(key.toUpperCase()));
+                fileList.add(m_samplesTable.get(key));
                 int index = shortages.get(key);
                 m_model.setFiles(fileList, index);
             }
@@ -90,6 +140,36 @@ public class XICDropZone extends JPanel implements DropZoneInterface, DropTarget
             message.setText("You have " + m_model.getModelShortages().size() + " samples without the corresponding .mzdb file!");
         } else {
             message.setText("");
+        }
+
+    }
+
+    private void updateLog(ArrayList<File> newSamples) {
+        m_textArea.setText(null);
+        StringBuilder stringBuilder = new StringBuilder();
+        
+        stringBuilder.append("List was updated with ").append(newSamples.size()).append(" new files.\n\n");
+        
+        for(int i=0; i<newSamples.size(); i++){
+            stringBuilder.append(newSamples.get(i).toString());
+            stringBuilder.append("\n");
+        }
+        
+        m_textArea.setText(stringBuilder.toString());
+    }
+
+    private void updateList() {
+        m_listModel.removeAllElements();
+
+        Hashtable<String, Integer> shortages = m_model.getModelShortages();
+
+        Enumeration<String> enumKey = m_samplesTable.keys();
+
+        while (enumKey.hasMoreElements()) {
+            String key = enumKey.nextElement();
+            if (!shortages.containsKey(key)) {
+                m_listModel.addElement(key);
+            }
         }
 
     }
@@ -111,8 +191,8 @@ public class XICDropZone extends JPanel implements DropZoneInterface, DropTarget
     @Override
     public void addSample(Object sample) {
         if (sample instanceof File) {
-            if (!m_samplesTable.containsKey(MiscellaneousUtils.getFileName(((File) sample).toString().toUpperCase(), suffix))) {
-                m_samplesTable.put(MiscellaneousUtils.getFileName(((File) sample).toString().toUpperCase(), suffix), (File) sample);
+            if (!m_samplesTable.containsKey(MiscellaneousUtils.getFileName(((File) sample).toString().toLowerCase(), suffix))) {
+                m_samplesTable.put(MiscellaneousUtils.getFileName(((File) sample).toString().toLowerCase(), suffix), (File) sample);
             }
         }
     }
@@ -128,20 +208,18 @@ public class XICDropZone extends JPanel implements DropZoneInterface, DropTarget
     public void addSamples(Object o) {
         if (o instanceof ArrayList) {
             ArrayList<File> sampleList = (ArrayList<File>) o;
+            this.updateLog(sampleList);
             for (int i = 0; i < sampleList.size(); i++) {
                 this.addSample(sampleList.get(i));
             }
-            this.update();
-        } else if (o instanceof Hashtable) {
-            m_samplesTable = (Hashtable<String, File>) o;
-            this.update();
+            this.updateTable();
+            this.updateList();
         }
     }
 
     @Override
     public void dragEnter(DropTargetDragEvent dtde) {
         this.setBackground(Color.WHITE);
-        this.setBorder(dashedBorder);
     }
 
     @Override
@@ -151,18 +229,17 @@ public class XICDropZone extends JPanel implements DropZoneInterface, DropTarget
 
     @Override
     public void dropActionChanged(DropTargetDragEvent dtde) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        ;
     }
 
     @Override
     public void dragExit(DropTargetEvent dte) {
         this.setBackground(null);
-        this.setBorder(defaultBorder);
     }
 
     @Override
     public void drop(DropTargetDropEvent dtde) {
-        ;
+        this.setBackground(null);
     }
 
 }

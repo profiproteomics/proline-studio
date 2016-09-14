@@ -80,7 +80,7 @@ public class CreateXICDialog extends DefaultDialog {
         setHelpURL("http://biodev.extra.cea.fr/docs/proline/doku.php?id=how_to:studio:xic");
 
 
-        setSize(640, 500);
+        setSize(1024,768);
         setResizable(true);
         
     }

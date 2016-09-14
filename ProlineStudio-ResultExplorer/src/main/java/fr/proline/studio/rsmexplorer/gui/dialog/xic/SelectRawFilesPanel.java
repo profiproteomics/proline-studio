@@ -533,7 +533,7 @@ public class SelectRawFilesPanel extends JPanel {
             for (int i = 0; i < numberOfRows; i++) {
                 if (this.getValueAt(i, numberOfColumns - 1).toString().contains("No Raw File")) {
                     XICBiologicalSampleAnalysisNode currentAnalysisNode = this.getXICBiologicalSampleAnalysisNode(i);
-                    shortagesTable.put(MiscellaneousUtils.getFileName(currentAnalysisNode.getResultSet().getMsiSearch().getPeaklist().getPath(), suffix), i);
+                    shortagesTable.put(MiscellaneousUtils.getFileName(currentAnalysisNode.getResultSet().getMsiSearch().getPeaklist().getPath().toLowerCase(), suffix), i);
                 }
             }
             

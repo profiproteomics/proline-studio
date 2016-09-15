@@ -60,12 +60,12 @@ public class XICDropZone extends JPanel implements DropZoneInterface {
         m_transferHandler = transferHandler;
         m_samplesTable = new Hashtable<String, File>();
         
-        this.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10)));
+        this.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createTitledBorder("Automatic Raw File Association"),BorderFactory.createEmptyBorder(15, 15, 15, 15)));
         this.setToolTipText("Drag your .mzdb files & folders in the drop zone");
         this.setLayout(new BorderLayout());
         
         JPanel panel = new JPanel();
-        panel.setLayout(new GridLayout(1,2));
+        panel.setLayout(new GridLayout(1,2, 10, 10));
         panel.add(this.initDetails());
         panel.add(this.initDropArea());
         

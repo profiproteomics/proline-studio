@@ -25,7 +25,8 @@ public class DataBoxSystemTasks extends AbstractDataBox  {
         SystemTasksPanel p = new SystemTasksPanel();
         p.setName(m_typeName);
         p.setDataBox(this);
-        m_panel = p;        
+        p.initListener();
+        m_panel = p;               
     }
 
     @Override

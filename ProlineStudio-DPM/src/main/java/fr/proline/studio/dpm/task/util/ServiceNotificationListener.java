@@ -61,7 +61,7 @@ public class ServiceNotificationListener implements MessageListener {
                     JMSNotificationMessage msg = new JMSNotificationMessage(params.getOrDefault(NOTIFICATION_SERVICE_NAME_KEY, "Undefined").toString(),params.getOrDefault(NOTIFICATION_SERVICE_VERSION_KEY, "default").toString(),
                             params.getOrDefault(NOTIFICATION_SERVICE_SOURCE_KEY, "Unknown").toString(), params.getOrDefault(NOTIFICATION_SERVICE_MORE_INFO_KEY, "Unknown").toString(), (Long) params.getOrDefault(NOTIFICATION_TIMESTAMP_KEY,0l),
                             params.getOrDefault(NOTIFICATION_JMS_ID_KEY, "Unknown").toString(), params.getOrDefault(NOTIFICATION_JSON_REQ_ID_KEY,"Unknown").toString(), 
-                            params.get(NOTIFICATION_SERVICE_STATUS_KEY).toString());
+                            JMSNotificationMessage.MessageStatus.parseString(params.get(NOTIFICATION_SERVICE_STATUS_KEY).toString()) );
                     m_replyVal[0] =  msg;
                     if (m_callback.mustBeCalledInAWT()) {
                         // Callback must be executed in the Graphical thread (AWT)

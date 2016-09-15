@@ -35,7 +35,7 @@ public class JMSMessageUtil {
 
     
     
-    public static JMSNotificationMessage buildJMSNotificationMessage(final Message message) {
+    public static JMSNotificationMessage buildJMSNotificationMessage(final Message message, JMSNotificationMessage.MessageStatus status) {
         
         try {
             String sName = message.getStringProperty(JMSConnectionManager.PROLINE_SERVICE_NAME_KEY);
@@ -57,7 +57,7 @@ public class JMSMessageUtil {
                 }                
             }
             
-            JMSNotificationMessage notifMsg = new  JMSNotificationMessage(sName,sVersion, sSource ,sMoreInfo, sTimestamp, jmsId,jsonId, JMSNotificationMessage.PENDING_MESSAGE_STATUS);
+            JMSNotificationMessage notifMsg = new  JMSNotificationMessage(sName,sVersion, sSource ,sMoreInfo, sTimestamp, jmsId,jsonId, status);
             return notifMsg;
         }catch(JMSException jmsE ){
             return null;

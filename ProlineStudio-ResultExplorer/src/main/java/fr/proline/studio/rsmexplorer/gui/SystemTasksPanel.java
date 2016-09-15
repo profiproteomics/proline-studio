@@ -8,12 +8,15 @@ package fr.proline.studio.rsmexplorer.gui;
 import fr.profi.util.StringUtils;
 import fr.proline.studio.dpm.data.JMSNotificationMessage;
 import fr.proline.studio.dpm.task.jms.AbstractJMSCallback;
+import fr.proline.studio.dpm.task.jms.PurgeConsumer;
+import fr.proline.studio.dpm.task.util.ConnectionListener;
 import fr.proline.studio.dpm.task.util.JMSConnectionManager;
 import fr.proline.studio.dpm.task.util.JMSMessageUtil;
 import fr.proline.studio.dpm.task.util.ServiceNotificationListener;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
+import fr.proline.studio.table.AbstractTableAction;
 import fr.proline.studio.table.DecoratedTable;
 import fr.proline.studio.table.DecoratedTableModel;
 import fr.proline.studio.table.TableDefaultRendererManager;
@@ -41,6 +44,8 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JToolBar;
+import javax.swing.ListSelectionModel;
+import javax.swing.Timer;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumnModel;
@@ -53,7 +58,7 @@ import org.slf4j.LoggerFactory;
  * @author VD225637
  * TODO : Merge some code with TasksPanel !!
  */
-public class SystemTasksPanel extends JPanel implements DataBoxPanelInterface {
+public class SystemTasksPanel extends JPanel implements DataBoxPanelInterface, ConnectionListener {
 
     protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
     private final static ImageIcon[] PUBLIC_STATE_ICONS = { IconManager.getIcon(IconManager.IconType.HOUR_GLASS_MINI16), IconManager.getIcon(IconManager.IconType.ARROW_RIGHT_SMALL), IconManager.getIcon(IconManager.IconType.CROSS_BLUE_SMALL16), IconManager.getIcon(IconManager.IconType.TICK_SMALL), IconManager.getIcon(IconManager.IconType.CROSS_SMALL16)};
@@ -65,7 +70,10 @@ public class SystemTasksPanel extends JPanel implements DataBoxPanelInterface {
     private boolean m_isRunning;
     private QueueBrowser m_qBrowser = null;
     private ServiceNotificationListener m_serviceListener = null;
-            
+           
+    private static final int UPDATE_DELAY = 1000;
+    private Timer m_updateTimer = null;
+    
     public SystemTasksPanel() {
 
         setLayout(new GridBagLayout());
@@ -78,10 +86,15 @@ public class SystemTasksPanel extends JPanel implements DataBoxPanelInterface {
 
         c.weightx = 1;
         c.weighty = 1;
-        add(createToolbarPanel(), c);        
-        
+        add(createToolbarPanel(), c);                              
     }
 
+    public void initListener(){
+        JMSConnectionManager.getJMSConnectionManager().addConnectionListener(this);
+        int currentState =  JMSConnectionManager.getJMSConnectionManager().getConnectionState();
+        connectionStateChanged(currentState);
+    }
+    
     private JToolBar initToolbar() {
         JToolBar toolbar = new JToolBar(JToolBar.VERTICAL);
         toolbar.setFloatable(false);
@@ -171,23 +184,24 @@ public class SystemTasksPanel extends JPanel implements DataBoxPanelInterface {
         if(m_qBrowser == null){
             m_qBrowser = JMSConnectionManager.getJMSConnectionManager().getQueueBrowser();
             if(m_qBrowser == null){
-                JOptionPane.showMessageDialog( WindowManager.getDefault().getMainWindow(), "Unable to get JMS Queue Browser", "Server Tasks Logs error",JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog( WindowManager.getDefault().getMainWindow(), "Unable to get JMS Queue Browser. Try Later", "Server Tasks Logs error",JOptionPane.ERROR_MESSAGE);
                 return false;
             }
         }
         if(m_serviceListener == null) {
             m_serviceListener =  JMSConnectionManager.getJMSConnectionManager().getNotificationListener();
              if(m_serviceListener == null) {
-                JOptionPane.showMessageDialog( WindowManager.getDefault().getMainWindow(), "Unable to get Notification Listener (JMS Connection problem ?!)", "Server Tasks Logs error",JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog( WindowManager.getDefault().getMainWindow(), "Unable to get Notification Listener (JMS Connection problem ?!). Try Later", "Server Tasks Logs error",JOptionPane.ERROR_MESSAGE);
                 return false;                 
              }
         }
         return true;
     }
     
+ 
     private void startCollectData() {
       
-        if(checkJMSVariables()) {
+        if(!m_isRunning && checkJMSVariables()) {
             final JMSNotificationMessage[] sysInfoResult = new JMSNotificationMessage[1];
             AbstractJMSCallback callback = new AbstractJMSCallback() {
 
@@ -199,15 +213,35 @@ public class SystemTasksPanel extends JPanel implements DataBoxPanelInterface {
                 @Override
                 public void run(boolean success) {
                     ((SystemMessageTableModel) m_messageTable.getModel()).addMessage(sysInfoResult[0]);
-                    browsePendingMessages();
                 }
             };
 
             m_serviceListener.setServiceNotifierCallback(callback, sysInfoResult);
+            startBrowsePendingMsg();
             m_isRunning = true;
             m_refreshButton.setIcon(IconManager.getIcon(IconManager.IconType.STOP));
             m_refreshButton.setToolTipText("Unconnect System tasks logs");
         }
+    }
+    
+    private void stopBrowsingPendingMsg(){
+        m_updateTimer.stop();
+    }
+    
+    private void startBrowsePendingMsg(){
+        if (m_updateTimer == null) {
+            ActionListener taskPerformer = new ActionListener() {
+
+                @Override
+                public void actionPerformed(ActionEvent evt) {
+                    browsePendingMessages();
+                }
+            };
+            m_updateTimer = new Timer(UPDATE_DELAY, taskPerformer);
+
+        }
+        
+        m_updateTimer.start();
     }
     
     private void browsePendingMessages() {
@@ -218,7 +252,7 @@ public class SystemTasksPanel extends JPanel implements DataBoxPanelInterface {
 
 	    while (messageEnum.hasMoreElements()) {
 		Message msg = messageEnum.nextElement();
-                JMSNotificationMessage notifMsg = JMSMessageUtil.buildJMSNotificationMessage(msg);
+                JMSNotificationMessage notifMsg = JMSMessageUtil.buildJMSNotificationMessage(msg, JMSNotificationMessage.MessageStatus.PENDING);
                 if(notifMsg != null){
                     pendingMsg.add(notifMsg);
                     m_logger.debug(notifMsg.toString());
@@ -236,6 +270,7 @@ public class SystemTasksPanel extends JPanel implements DataBoxPanelInterface {
     
     private void stopCollectData() {        
         m_serviceListener.setServiceNotifierCallback(null, null);
+        stopBrowsingPendingMsg();
         m_isRunning = false;
         m_refreshButton.setIcon(IconManager.getIcon(IconManager.IconType.EXECUTE));                
         m_refreshButton.setToolTipText("Connect to System tasks logs");
@@ -286,16 +321,39 @@ public class SystemTasksPanel extends JPanel implements DataBoxPanelInterface {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
+    @Override
+    public void connectionStateChanged(int newStatus) {
+            switch(newStatus) {
+            case CONNECTION_DONE: 
+                if(!m_isRunning){
+                    m_qBrowser = null;
+                    m_serviceListener= null;
+                    startCollectData();
+                }
+                break;
+            case CONNECTION_FAILED :
+            case NOT_CONNECTED:
+                if(m_isRunning)
+                    stopCollectData();
+                break;                        
+        }        
+    }
+
 
     class SystemMessageTable extends DecoratedTable {
         
         public SystemMessageTable(){
             super();
+            setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+            setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
         }
 
         @Override
         public TablePopupMenu initPopupMenu() {
-            return null;
+            TablePopupMenu popupMenu = new TablePopupMenu();
+            popupMenu.addAction(new StopTaskAction());
+
+            return popupMenu;
         }
 
         @Override
@@ -326,6 +384,13 @@ public class SystemTasksPanel extends JPanel implements DataBoxPanelInterface {
             indexByMsgId.clear();
             fireTableDataChanged();
         }
+        
+        public JMSNotificationMessage getMessage(int row) {
+            if (m_notificationMsgs.size() <= row) {
+                return null;
+            }
+            return m_notificationMsgs.get(row);
+        }
  
         public void addMessage(JMSNotificationMessage msg ){           
             addSingleMessage(msg);   
@@ -333,7 +398,7 @@ public class SystemTasksPanel extends JPanel implements DataBoxPanelInterface {
         }
         
         private void addSingleMessage(JMSNotificationMessage msg){
-             String msgId  = msg.getServerUniqueMsgId();
+            String msgId  = msg.getServerUniqueMsgId();
             if(indexByMsgId.containsKey(msgId)){
                 int index= indexByMsgId.get(msgId);
                 m_notificationMsgs.set(index, msg);
@@ -460,6 +525,65 @@ public class SystemTasksPanel extends JPanel implements DataBoxPanelInterface {
             setIcon(PUBLIC_STATE_ICONS[msg.getPublicState()]);
             setText("");
             return this;
+        }
+    }
+    
+    
+    private class StopTaskAction extends AbstractTableAction {
+
+        public StopTaskAction() {
+            super("Remove System Task");
+        }
+
+        @Override
+        public void actionPerformed(int col, int row, int[] selectedRows, JTable table) {
+            SystemMessageTableModel tableModel = (SystemMessageTableModel) m_messageTable.getModel();
+            int nbSelectedRset = selectedRows.length;
+            if(nbSelectedRset != 1 ){
+                JOptionPane.showMessageDialog(WindowManager.getDefault().getMainWindow(),"Only one message can be aborted at the same time","Stop System Task Error",JOptionPane.ERROR_MESSAGE);
+                return;
+            }                
+            
+            int rowInModel = m_messageTable.convertRowIndexToModel(selectedRows[0]);
+            JMSNotificationMessage notifMsg  = tableModel.getMessage(rowInModel);
+            if(!notifMsg.getEventType().equals(JMSNotificationMessage.MessageStatus.PENDING )){
+                JOptionPane.showMessageDialog(WindowManager.getDefault().getMainWindow(),"Only Pending message can be aborted","Stop System Task Error",JOptionPane.ERROR_MESSAGE);
+                return;
+            }                  
+            
+            final JMSNotificationMessage[] sysInfoResult = new JMSNotificationMessage[1];
+            AbstractJMSCallback callback = new AbstractJMSCallback() {
+
+                @Override
+                public boolean mustBeCalledInAWT() {
+                    return true;
+                }
+
+                @Override
+                public void run(boolean success) {
+                    ((SystemMessageTableModel) m_messageTable.getModel()).addMessage(sysInfoResult[0]);
+                    browsePendingMessages();
+                }
+            };
+            PurgeConsumer purger = new PurgeConsumer(callback, notifMsg, sysInfoResult);
+            purger.clearMessage();
+        }
+
+        @Override
+        public void updateEnabled(int row, int col, int[] selectedRows, JTable table) {
+            SystemMessageTableModel tableModel = (SystemMessageTableModel) m_messageTable.getModel();
+            
+            boolean enable = true;
+            if(selectedRows.length != 1 )
+                enable = false;
+            else {
+                int rowInModel = m_messageTable.convertRowIndexToModel(selectedRows[0]);
+                JMSNotificationMessage notifMsg  = tableModel.getMessage(rowInModel);
+                if(!notifMsg.getEventType().equals(JMSNotificationMessage.MessageStatus.PENDING))
+                enable = false;
+            }
+            
+            setEnabled(enable);            
         }
     }
 }

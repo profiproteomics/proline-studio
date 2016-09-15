@@ -7,7 +7,6 @@ package fr.proline.studio.dpm.data;
 
 import static fr.proline.studio.dam.taskinfo.TaskInfo.*;
 import java.util.Date;
-import java.util.HashMap;
 
 /**
  *
@@ -22,30 +21,46 @@ public class JMSNotificationMessage {
     private Date m_eventTime;
     private String m_jmsMsgId;
     private String m_jsonRPCMsgId;
-    private String m_eventType;
+    private MessageStatus m_eventType;
     
     //Use Proline Node ?! 
-    public static final String PENDING_MESSAGE_STATUS = "Pending";
-    public static final String START_MESSAGE_STATUS = "Start";
-    public static final String ABORT_MESSAGE_STATUS = "Abort";
-    public static final String SUCCES_MESSAGE_STATUS = "Success";
-    public static final String FAILED_MESSAGE_STATUS = "Fail";
+    public enum MessageStatus {
+        PENDING("Pending",PUBLIC_STATE_WAITING),
+        STARTED("Start",PUBLIC_STATE_RUNNING),
+        ABORTED("Abort", PUBLIC_STATE_ABORTED),
+        SUCCES("Success",PUBLIC_STATE_FINISHED),
+        FAILED("Fail",PUBLIC_STATE_FAILED);
         
-    public static final HashMap<String,Integer> publicStateByEventType = new HashMap<>();
-    static{ 
-        publicStateByEventType.put(PENDING_MESSAGE_STATUS, PUBLIC_STATE_WAITING);
-        publicStateByEventType.put(ABORT_MESSAGE_STATUS, PUBLIC_STATE_ABORTED);
-        publicStateByEventType.put(START_MESSAGE_STATUS, PUBLIC_STATE_RUNNING);
-        publicStateByEventType.put(SUCCES_MESSAGE_STATUS, PUBLIC_STATE_FINISHED);
-        publicStateByEventType.put(FAILED_MESSAGE_STATUS, PUBLIC_STATE_FAILED);        
+        String m_value;
+        Integer m_publicState;
+        
+        MessageStatus(String value, Integer publicState) {
+            this.m_value = value;
+            this.m_publicState = publicState;
+        }
+        
+        public String getValue() {
+            return m_value;
+        }
+        
+        public Integer getPublicState(){
+            return m_publicState;
+        }
+        
+        public static MessageStatus parseString(String searchedVal){				
+            MessageStatus[] allMessageStatus = MessageStatus.values();
+				
+            for(MessageStatus nextMessageStatus : allMessageStatus){
+                if(nextMessageStatus.m_value.equals(searchedVal))
+                        return nextMessageStatus;
+            }
+            return null;
+        }
     };
     
-    public static Integer getPublicStateFor(String eventStatus){
-        return publicStateByEventType.get(eventStatus);
-    }
     
     public JMSNotificationMessage(String serviceName, String serviceVersion, String serviceSource,
-            String serviceInfo, Long  eventTimestamp, String jmsMsgId, String jsonRPCId, String eventType ){
+            String serviceInfo, Long  eventTimestamp, String jmsMsgId, String jsonRPCId, MessageStatus eventType ){
         m_serviceName = serviceName;
         m_serviceVersion = serviceVersion;
         m_serviceSource = serviceSource;
@@ -77,13 +92,12 @@ public class JMSNotificationMessage {
         return m_jsonRPCMsgId;
     }
 
-    public String getEventType() {
+    public MessageStatus getEventType() {
         return m_eventType;
     }
     
-    public void setEventType(String eventType){//TODO USe Enums
-        if(publicStateByEventType.containsKey(eventType))
-            m_eventType = eventType;        
+    public void setEventType(MessageStatus eventType){
+        m_eventType = eventType;        
     }
 
     public String getServiceVersion() {
@@ -95,7 +109,7 @@ public class JMSNotificationMessage {
     }
     
     public Integer getPublicState(){
-        return publicStateByEventType.getOrDefault(m_eventType, PUBLIC_STATE_ABORTED);
+        return m_eventType.getPublicState();
     }
 
     @Override

@@ -14,6 +14,7 @@ import javax.jms.Queue;
 import javax.jms.QueueBrowser;
 import javax.jms.Session;
 import javax.jms.Topic;
+import javax.swing.event.EventListenerList;
 import org.hornetq.api.core.TransportConfiguration;
 import org.hornetq.api.jms.HornetQJMSClient;
 import org.hornetq.api.jms.JMSFactoryType;
@@ -29,6 +30,8 @@ import org.slf4j.LoggerFactory;
 public class JMSConnectionManager {
  
     private JMSConnectionManager() {
+        listenersList = new EventListenerList();
+        connectionState = ConnectionListener.NOT_CONNECTED;
     }
     
     protected static final Logger m_loggerProline = LoggerFactory.getLogger("ProlineStudio.DPM.Task");
@@ -49,8 +52,7 @@ public class JMSConnectionManager {
     
     public static final String HORNET_Q_SAVE_STREAM_KEY = "JMS_HQ_SaveStream";
     
-    public static final String HORNET_Q_INPUT_STREAM_KEY = "JMS_HQ_InputStream";
-    
+    public static final String HORNET_Q_INPUT_STREAM_KEY = "JMS_HQ_InputStream";    
     
     public static final String PROLINE_PROCESS_METHOD_NAME = "process";
         
@@ -62,7 +64,9 @@ public class JMSConnectionManager {
     
     public static final String JMS_SERVER_PORT_PARAM_KEY = "jms.server.port";
     
-        
+    private final EventListenerList listenersList ;
+    private int connectionState;
+    
     public String m_jmsServerHost = null;/* Default = HornetQ Proline Prod Grenoble = "132.168.72.129" */
     public int m_jmsServerPort = 5445;
     
@@ -79,7 +83,7 @@ public class JMSConnectionManager {
     
     public static synchronized JMSConnectionManager getJMSConnectionManager() {
         if(m_jmsConnectionManager == null){
-            m_jmsConnectionManager = new JMSConnectionManager();
+            m_jmsConnectionManager = new JMSConnectionManager();            
         }
         return m_jmsConnectionManager;
     }
@@ -106,6 +110,23 @@ public class JMSConnectionManager {
         }
     }
     
+    public int getConnectionState(){
+        return connectionState;
+    }
+    
+   private void resetConnObjects(){
+        m_connection = null;
+        m_serviceQueue = null;  
+        m_notificationTopic = null;
+        m_topicSession = null;
+        m_jmsContext = null;
+        m_browser = null;
+        m_notifListener = null;
+        m_topicSuscriber = null;
+        connectionState = ConnectionListener.NOT_CONNECTED;
+        fireConnectionStateChanged(ConnectionListener.NOT_CONNECTED);
+   }
+   
     /**
      * Set the JMS Server Host.
      * Connection and session will be reseted
@@ -113,8 +134,7 @@ public class JMSConnectionManager {
      */
     public void setJMSServerHost(String jmsHost ){
         m_jmsServerHost = jmsHost;
-        m_connection = null;
-        m_serviceQueue = null;        
+        resetConnObjects();        
     }
     
     /**
@@ -124,8 +144,7 @@ public class JMSConnectionManager {
      */
     public void setJMSServerPort(int jmsPort){
         m_jmsServerPort = jmsPort;
-        m_connection = null;
-        m_serviceQueue = null;     
+        resetConnObjects(); 
     }
     
     public Connection getJMSConnection() throws Exception {
@@ -133,9 +152,7 @@ public class JMSConnectionManager {
         if(m_connection == null){
             try{
                 createConnection();    
-            }catch(Exception e){
-                m_connection = null;
-                m_serviceQueue = null;
+            }catch(Exception e){             
                 throw e;
             }            
         }        
@@ -146,9 +163,7 @@ public class JMSConnectionManager {
         if(m_serviceQueue == null){
             try{
                 createConnection();    
-            }catch(Exception e){
-                m_connection = null;
-                m_serviceQueue = null;
+            }catch(Exception e){              
                 throw e;
             }
         }
@@ -192,20 +207,25 @@ public class JMSConnectionManager {
             // Step 5. Create a JMS Session (Session MUST be confined in current Thread)
 	    // Not transacted, AUTO_ACKNOWLEDGE
 	    m_topicSession = m_connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-            // Step 6. Create the subscription and the subscriber.
+            // Step 6. Create the subscription and the subscriber.//TODO : create & listen only when asked !?
 	    m_topicSuscriber = m_topicSession.createConsumer(m_notificationTopic);
-            m_notifListener = new ServiceNotificationListener();	 
-            m_topicSuscriber.setMessageListener(m_notifListener); //TODO : listen only when asked !?
-        }catch(JMSException je){
-                
+            m_notifListener = new ServiceNotificationListener(); 
+            m_topicSuscriber.setMessageListener(m_notifListener); 
+            connectionState = ConnectionListener.CONNECTION_DONE;
+            fireConnectionStateChanged(ConnectionListener.CONNECTION_DONE);
+        }catch(JMSException je){            
             if (m_connection != null) {
                 try {
                     m_connection.close();
                     m_loggerProline.info("JMS Connection closed on error "+je.getMessage());
                 } catch (Exception exClose) {
                     m_loggerProline.error("Error closing JMS Connection", exClose);
+                } finally {
+                    resetConnObjects();
                 }
             }            
+            connectionState = ConnectionListener.CONNECTION_FAILED;
+            fireConnectionStateChanged(ConnectionListener.CONNECTION_FAILED);
             throw je;
         }
     }
@@ -236,8 +256,6 @@ public class JMSConnectionManager {
     }
     
     public void closeConnection(){
-
-
         if (m_connection != null) {           
             try {
                 
@@ -254,11 +272,30 @@ public class JMSConnectionManager {
                 m_connection = null;
             }
         }
-        
-        m_jmsServerHost = null;
-        m_serviceQueue = null;
-
+        resetConnObjects();
+        m_jmsServerHost = null;        
     }
 
+    //Listener Methods
+    public void addConnectionListener(ConnectionListener listener){
+        synchronized(listenersList){
+            listenersList.add(ConnectionListener.class, listener);
+        }
+    }
+
+    public void removeConnectionListener(ConnectionListener listener){
+        synchronized(listenersList){
+            listenersList.remove(ConnectionListener.class, listener);
+        }
+    }
+    
+    protected void fireConnectionStateChanged(int newConnState){
+        synchronized(listenersList){
+           ConnectionListener[] allListeners = listenersList.getListeners(ConnectionListener.class);
+           for(ConnectionListener nextOne : allListeners){
+               nextOne.connectionStateChanged(newConnState);
+           }
+        }
+    }
 
 }

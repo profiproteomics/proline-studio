@@ -35,7 +35,7 @@ public class TreeFileChooserPanel extends JPanel {
     protected TreeFileChooser m_tree;
     protected DefaultTreeModel m_model;
 
-    public TreeFileChooserPanel(FileSystemView fileSystemView) {
+    public TreeFileChooserPanel(FileSystemView fileSystemView, TreeFileChooserTransferHandler transferHandler) {
 
         setLayout(new GridBagLayout());
 
@@ -53,8 +53,11 @@ public class TreeFileChooserPanel extends JPanel {
         m_model = new DefaultTreeModel(top);
         m_tree = new TreeFileChooser(m_model);
 
-        TreeFileChooserTransferHandler handler = new TreeFileChooserTransferHandler();
-        m_tree.setTransferHandler(handler);
+        if (transferHandler != null) {
+            m_tree.setTransferHandler(transferHandler);
+        } else {
+            m_tree.setTransferHandler(new TreeFileChooserTransferHandler());
+        }
 
         m_tree.setDragEnabled(true);
 
@@ -86,8 +89,8 @@ public class TreeFileChooserPanel extends JPanel {
         add(s, c);
 
     }
-    
-    public JTree getTree(){
+
+    public JTree getTree() {
         return m_tree;
     }
 

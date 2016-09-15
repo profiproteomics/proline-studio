@@ -4,20 +4,13 @@ package fr.proline.studio.rsmexplorer.gui.dialog.xic;
 
 import fr.proline.core.orm.uds.RawFile;
 import fr.proline.studio.dam.data.RunInfoData;
-import fr.proline.studio.dpm.serverfilesystem.RootInfo;
-import fr.proline.studio.dpm.serverfilesystem.ServerFile;
 import fr.proline.studio.gui.DefaultDialog;
-import fr.proline.studio.dpm.serverfilesystem.ServerFileSystemView;
-import fr.proline.studio.utils.IconManager;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.File;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import javax.swing.*;
-import org.slf4j.LoggerFactory;
 
 
 /**

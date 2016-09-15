@@ -93,6 +93,6 @@ public class TabsPanelsFrameTest extends JFrame {
                 TabsPanelsFrameTest frameT = new TabsPanelsFrameTest();
                 frameT.setVisible(true);
             }
-        });
+        }); 
     }
 }

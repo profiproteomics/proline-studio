@@ -475,18 +475,18 @@
                 </executions>
 
                 <configuration>
-                  <file>${basedir}/src/main/resources/fr/proline/studio/installer/VersionInstaller.java.template</file>
-                  <outputFile>${basedir}/src/main/java/fr/proline/studio/installer/VersionInstaller.java</outputFile>
-                  <replacements>
-                    <replacement>
-                      <token>@build.date@</token>
-                      <value>${maven.build.timestamp}_${user.name}</value>
-                    </replacement>         
-                    <replacement>
-                      <token>@version@</token>
-                      <value>${project.version}</value>
-                    </replacement>                               
-                  </replacements>
+                    <file>${basedir}/src/main/resources/fr/proline/studio/installer/VersionInstaller.java.template</file>
+                    <outputFile>${basedir}/src/main/java/fr/proline/studio/installer/VersionInstaller.java</outputFile>
+                    <replacements>
+                        <replacement>
+                            <token>@build.date@</token>
+                            <value>${maven.build.timestamp}_${user.name}</value>
+                        </replacement>         
+                        <replacement>
+                            <token>@version@</token>
+                            <value>${project.version}</value>
+                        </replacement>                               
+                    </replacements>
                 </configuration>
 
             </plugin>

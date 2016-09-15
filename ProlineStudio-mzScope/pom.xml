@@ -29,7 +29,7 @@
             <version>0.6.0-SNAPSHOT</version>
             <exclusions>
                 <exclusion>
-                     <groupId>xerces</groupId>
+                    <groupId>xerces</groupId>
                     <artifactId>xercesImpl</artifactId> 
                 </exclusion>
             </exclusions>  
@@ -111,11 +111,11 @@
             <!-- Version inherited from ProFI-Pom -->
         </dependency>  
         <!--
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId> -->
-            <!-- <version>1.7.6</version>  -->
-           <!-- <exclusions>
+    <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-api</artifactId> -->
+        <!-- <version>1.7.6</version>  -->
+        <!-- <exclusions>
                 <exclusion> 
                     <groupId>org.slf4j</groupId>
                     <artifactId>slf4j-log4j12</artifactId>
@@ -141,14 +141,14 @@
         </dependency>
         
         <!--  JFree graph -->
-      <!--  <dependency>
+        <!--  <dependency>
             <groupId>org.jfree</groupId>
             <artifactId>jfreechart</artifactId>
             <version>1.0.17</version>
         </dependency>-->
         
         <!--  JFree common -->
-      <!--     <dependency>
+        <!--     <dependency>
             <groupId>org.jfree</groupId>
             <artifactId>jcommon</artifactId>
             <version>1.0.21</version>
@@ -193,7 +193,7 @@
                         <publicPackage>com.google.common.*</publicPackage>
                         <publicPackage>org.apache.xerces.parsers.*</publicPackage>
                         <publicPackage>org.apache.xml.serialize.*</publicPackage> 
-                       <!--  <publicPackage>org.joda.time.*</publicPackage>  -->
+                        <!--  <publicPackage>org.joda.time.*</publicPackage>  -->
                     </publicPackages>
                 </configuration>
             </plugin>

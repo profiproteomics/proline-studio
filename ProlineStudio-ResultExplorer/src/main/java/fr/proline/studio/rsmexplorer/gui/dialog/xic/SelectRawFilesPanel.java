@@ -44,7 +44,7 @@ import javax.swing.table.TableCellRenderer;
  *
  * @author JM235353
  */
-public class SelectRawFilesPanel extends JPanel implements MouseMotionListener {
+public class SelectRawFilesPanel extends JPanel {
 
     private static SelectRawFilesPanel m_singleton = null;
 
@@ -53,6 +53,7 @@ public class SelectRawFilesPanel extends JPanel implements MouseMotionListener {
     private Hashtable<String, XICBiologicalSampleAnalysisNode> m_hashtable;
     private XICDropZone m_dropZone;
     private String[] suffix = {".raw", ".mzdb"};
+    private TreeFileChooserTransferHandler m_transferHandler;
 
     public static SelectRawFilesPanel getPanel(AbstractNode rootNode) {
         if (m_singleton == null) {
@@ -61,17 +62,17 @@ public class SelectRawFilesPanel extends JPanel implements MouseMotionListener {
 
         m_singleton.setRootNode(rootNode);
 
-        
-        
         return m_singleton;
     }
 
     public static SelectRawFilesPanel getPanel() {
         return m_singleton;
     }
-
     
     private SelectRawFilesPanel() {
+
+        m_transferHandler = new TreeFileChooserTransferHandler();
+
         m_hashtable = new Hashtable<String, XICBiologicalSampleAnalysisNode>();
 
         JPanel wizardPanel = createWizardPanel();
@@ -92,7 +93,6 @@ public class SelectRawFilesPanel extends JPanel implements MouseMotionListener {
         c.weighty = 1;
 
         add(mainPanel, c);
-        
 
     }
 
@@ -214,25 +214,22 @@ public class SelectRawFilesPanel extends JPanel implements MouseMotionListener {
 
         designTablePanel.add(tableScrollPane, c);
 
-        
-
         panel.add(designTablePanel);
         panel.add(this.createDropZonePanel());
-        
 
         return panel;
     }
-    
-    private JPanel createDropZonePanel(){
+
+    private JPanel createDropZonePanel() {
         JPanel panel = new JPanel();
         panel.setLayout(new BorderLayout());
         panel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
-        
-        m_dropZone = new XICDropZone();
+
+        m_dropZone = new XICDropZone(m_transferHandler);
         m_dropZone.setTable(m_table);
-        
+
         panel.add(m_dropZone, BorderLayout.CENTER);
-        
+
         return panel;
     }
 
@@ -250,25 +247,13 @@ public class SelectRawFilesPanel extends JPanel implements MouseMotionListener {
         c.weightx = 1;
         c.weighty = 1;
 
-        TreeFileChooserPanel tree = new TreeFileChooserPanel(ServerFileSystemView.getServerFileSystemView());
+        TreeFileChooserPanel tree = new TreeFileChooserPanel(ServerFileSystemView.getServerFileSystemView(), m_transferHandler);
         JScrollPane treeScrollPane = new JScrollPane();
         treeScrollPane.setViewportView(tree);
 
         fileFilePathPanel.add(treeScrollPane, c);
 
-        tree.getTree().addMouseMotionListener(this);
-        
         return fileFilePathPanel;
-    }
-
-    @Override
-    public void mouseDragged(MouseEvent me) {
-        m_dropZone.highlight();
-    }
-
-    @Override
-    public void mouseMoved(MouseEvent me) {
-        ;
     }
 
     private class FlatDesignTable extends DecoratedMarkerTable implements MouseListener {
@@ -277,8 +262,7 @@ public class SelectRawFilesPanel extends JPanel implements MouseMotionListener {
         public FlatDesignTable() {
             setDragEnabled(true);
             setDropMode(DropMode.ON);
-            setTransferHandler(new TreeFileChooserTransferHandler());
-
+            setTransferHandler(m_transferHandler);
             addMouseListener(this);
         }
 
@@ -378,13 +362,13 @@ public class SelectRawFilesPanel extends JPanel implements MouseMotionListener {
     protected static class FlatDesignTableModel extends DecoratedTableModel implements TreeFileChooserTableModelInterface {
 
         private String[] suffix = {".raw", ".mzdb"};
-        
+
         public static final int COLTYPE_GROUP = 0;
         public static final int COLTYPE_SAMPLE = 1;
         public static final int COLTYPE_SAMPLE_ANALYSIS = 2;
         public static final int COLTYPE_RAW_FILE = 3;
         public static final int COLTYPE_PEAKLIST = 4;
-        
+
         private static final String[] columnNames = {"Group", "Sample", "Sample Analysis", "Raw File", "Peaklist"};
 
         private final ArrayList<NodeModelRow> m_dataList = new ArrayList<>();
@@ -553,7 +537,7 @@ public class SelectRawFilesPanel extends JPanel implements MouseMotionListener {
                     shortagesTable.put(MiscellaneousUtils.getFileName(currentAnalysisNode.getResultSet().getMsiSearch().getPeaklist().getPath().toLowerCase(), suffix), i);
                 }
             }
-            
+
             return shortagesTable;
         }
 

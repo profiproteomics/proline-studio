@@ -2,10 +2,10 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-    <artifactId>ProlineStudio-parent</artifactId>
-    <groupId>fr.proline</groupId>
-    <version>1.0.0-SNAPSHOT</version>
-  </parent>
+        <artifactId>ProlineStudio-parent</artifactId>
+        <groupId>fr.proline</groupId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
 
 
     <artifactId>ProlineStudio-R</artifactId>
@@ -44,7 +44,7 @@
     </repositories>
 
     <dependencies>
-         <dependency>
+        <dependency>
             <groupId>org.netbeans.api</groupId>
             <artifactId>org-netbeans-modules-settings</artifactId>
             <version>${netbeans.version}</version>
@@ -85,7 +85,7 @@
             <version>${netbeans.version}</version>
             <type>nbm</type>
         </dependency>
-         <dependency>
+        <dependency>
             <groupId>org.netbeans.api</groupId>
             <artifactId>org-netbeans-api-annotations-common</artifactId>
             <version>${netbeans.version}</version>
@@ -120,12 +120,12 @@
         </dependency>
         
         <dependency> 
-        <groupId>org.slf4j</groupId>
-        <artifactId>slf4j-api</artifactId>  
-        <!-- Version inherited from ProFI-Pom -->
-      </dependency>  
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>  
+            <!-- Version inherited from ProFI-Pom -->
+        </dependency>  
       
-      <dependency>
+        <dependency>
             <groupId>org.swinglabs.swingx</groupId>
             <artifactId>swingx-all</artifactId>
             <version>1.6.5-1</version>
@@ -133,34 +133,34 @@
         </dependency>
         
         <dependency>
-	  <groupId>org.python</groupId>
-	  <artifactId>jython</artifactId>
-	  <version>2.2</version>
+            <groupId>org.python</groupId>
+            <artifactId>jython</artifactId>
+            <version>2.2</version>
         </dependency>
         
         <dependency>
-	  <groupId>org.apache.commons</groupId>
-	  <artifactId>commons-math</artifactId>
-	  <version>2.0</version>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-math</artifactId>
+            <version>2.0</version>
         </dependency>
         
 
 
 
         
-       <!-- <dependency>
+        <!-- <dependency>
             <groupId>org.renjin</groupId>
             <artifactId>renjin-script-engine</artifactId>
             <version>0.7.0-RC7</version>
         </dependency> -->
         
         <!-- <dependency>
-      <groupId>org.renjin</groupId>  
-       <artifactId>renjin-script-engine</artifactId>  
-       <version>0.7.0-RC7</version> 
-      <scope>system</scope>
-<systemPath>D://renjin/renjin-script-engine-0.7.0-RC7-jar-with-dependencies.jar</systemPath>
-</dependency> -->
+              <groupId>org.renjin</groupId>  
+               <artifactId>renjin-script-engine</artifactId>  
+               <version>0.7.0-RC7</version> 
+              <scope>system</scope>
+        <systemPath>D://renjin/renjin-script-engine-0.7.0-RC7-jar-with-dependencies.jar</systemPath>
+        </dependency> -->
        
     </dependencies>
 

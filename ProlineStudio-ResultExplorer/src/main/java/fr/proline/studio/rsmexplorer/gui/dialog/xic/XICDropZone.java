@@ -35,7 +35,7 @@ import javax.swing.border.Border;
  *
  * @author AK249877
  */
-public class XICDropZone extends JPanel implements DropZoneInterface, ActionListener {
+public class XICDropZone extends JPanel implements DropZoneInterface {
 
     private Hashtable<String, File> m_samplesTable;
     private JLabel message;
@@ -53,18 +53,27 @@ public class XICDropZone extends JPanel implements DropZoneInterface, ActionList
     private Border defaultBorder = BorderFactory.createEmptyBorder();
     
     private Timer m_timer;
+    
+    private TreeFileChooserTransferHandler m_transferHandler;
 
-    public XICDropZone() {
+    public XICDropZone(TreeFileChooserTransferHandler transferHandler) {
+        m_transferHandler = transferHandler;
         m_samplesTable = new Hashtable<String, File>();
-
+        
+        this.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10)));
         this.setToolTipText("Drag your .mzdb files & folders in the drop zone");
+        this.setLayout(new BorderLayout());
+        
+        JPanel panel = new JPanel();
+        panel.setLayout(new GridLayout(1,2));
+        panel.add(this.initDetails());
+        panel.add(this.initDropArea());
+        
+        this.add(panel);
 
-        this.setLayout(new GridLayout(1, 2));
-
-        this.add(this.initDetails());
-        this.add(this.initDropArea());
-
-        setTransferHandler(new TreeFileChooserTransferHandler());
+        m_transferHandler.addComponent(m_dropArea);
+        
+        this.setTransferHandler(m_transferHandler);
 
     }
 
@@ -201,7 +210,6 @@ public class XICDropZone extends JPanel implements DropZoneInterface, ActionList
 
     @Override
     public void addSamples(Object o) {
-        this.highlight(false);
         if (o instanceof ArrayList) {
             ArrayList<File> sampleList = (ArrayList<File>) o;
             this.updateLog(sampleList);
@@ -212,35 +220,4 @@ public class XICDropZone extends JPanel implements DropZoneInterface, ActionList
             this.updateList();
         }
     }
-
-    public void highlight(boolean b) {
-        if (b) {
-            m_dropArea.setBackground(Color.WHITE);
-            m_dropArea.setBorder(dashedBorder);
-        } else {
-            m_timer.stop();
-            m_dropArea.setBackground(null);
-            m_dropArea.setBorder(defaultBorder);
-        }
-    }
-    
-    public void highlight(){
-        
-        if(m_timer==null){
-            m_timer = new Timer(5000, this);
-            m_timer.start();
-            this.highlight(true);
-        }else{
-            m_timer.restart();
-            this.highlight(true);
-        }
-        
-        m_timer.setRepeats(false);
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent ae) {
-        this.highlight(false);
-    }
-
 }

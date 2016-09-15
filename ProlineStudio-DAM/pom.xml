@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
+    <modelVersion>4.0.0</modelVersion>
 
-  <parent>
-    <artifactId>ProlineStudio-parent</artifactId>
-    <groupId>fr.proline</groupId>
-    <version>1.0.0-SNAPSHOT</version>
-  </parent>
+    <parent>
+        <artifactId>ProlineStudio-parent</artifactId>
+        <groupId>fr.proline</groupId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
 
     <groupId>fr.proline</groupId>
     <artifactId>ProlineStudio-DAM</artifactId>
@@ -25,7 +25,7 @@
             <artifactId>org-netbeans-modules-db</artifactId>
             <version>${netbeans.version}</version>
             <type>jar</type>
-<!--            <exclusions>
+            <!--            <exclusions>
                 <exclusion>
                     <artifactId>org-netbeans-modules-db-kit</artifactId>
                     <groupId>org.netbeans.modules</groupId>
@@ -33,7 +33,7 @@
             </exclusions>   -->
         </dependency> 
        
-       <dependency>
+        <dependency>
             <groupId>org.netbeans.api</groupId>
             <artifactId>org-openide-util</artifactId>
             <version>${netbeans.version}</version>

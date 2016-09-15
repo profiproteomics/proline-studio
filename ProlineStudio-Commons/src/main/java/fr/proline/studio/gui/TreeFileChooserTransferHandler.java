@@ -1,5 +1,6 @@
 package fr.proline.studio.gui;
 
+import java.awt.Color;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
@@ -19,6 +20,16 @@ import javax.swing.TransferHandler;
  * @author JM235353
  */
 public class TreeFileChooserTransferHandler extends TransferHandler {
+
+    private ArrayList<JComponent> m_components;
+
+    public TreeFileChooserTransferHandler() {
+        m_components = new ArrayList<JComponent>();
+    }
+
+    public void addComponent(JComponent component) {
+        m_components.add(component);
+    }
 
     //private Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
     @Override
@@ -45,33 +56,44 @@ public class TreeFileChooserTransferHandler extends TransferHandler {
 
     @Override
     protected void exportDone(JComponent source, Transferable data, int action) {
+        this.highlight(false);
     }
 
     @Override
     public boolean canImport(TransferHandler.TransferSupport support) {
 
         support.setShowDropLocation(true);
-        if (support.isDataFlavorSupported(FilesTransferable.Files_FLAVOR)) {
 
-            // drop path
+        if (support.isDataFlavorSupported(FilesTransferable.Files_FLAVOR)) {
             DropLocation dropLocation = support.getDropLocation();
             if (dropLocation instanceof JTable.DropLocation) {
                 return true;
             } else if (support.getComponent() instanceof DropZoneInterface) {
+                this.highlight(true);
                 return true;
             }
         }
 
+        this.highlight(false);
         return false;
+    }
 
+    private void highlight(boolean b) {
+        if (b) {
+            for (int i = 0; i < m_components.size(); i++) {
+                m_components.get(i).setBackground(Color.WHITE);
+            }
+        } else {
+            for (int i = 0; i < m_components.size(); i++) {
+                m_components.get(i).setBackground(null);
+            }
+        }
     }
 
     @Override
     public boolean importData(TransferHandler.TransferSupport support) {
 
         if (support.getComponent() instanceof JTable) {
-
-            JOptionPane.showMessageDialog(null, "Manual/Explicit assosiation is an irreversible action that poses risk.", "Warning", JOptionPane.WARNING_MESSAGE);
 
             try {
                 JTable table = (JTable) support.getComponent();
@@ -89,12 +111,15 @@ public class TreeFileChooserTransferHandler extends TransferHandler {
                 TreeFileChooserTableModelInterface model = (TreeFileChooserTableModelInterface) table.getModel();
                 model.setFiles(transferredFiles, index);
 
+                JOptionPane.showMessageDialog(null, "Manual/Explicit assosiation is an irreversible action that poses risk.", "Warning", JOptionPane.WARNING_MESSAGE);
+
             } catch (Exception e) {
                 //should not happen
                 return false;
             }
         } else if (support.getComponent() instanceof DropZoneInterface) {
             try {
+                
                 DropZoneInterface dropZone = (DropZoneInterface) support.getComponent();
 
                 FilesTransferable transferable = (FilesTransferable) support.getTransferable().getTransferData(FilesTransferable.Files_FLAVOR);
@@ -117,6 +142,7 @@ public class TreeFileChooserTransferHandler extends TransferHandler {
 
                     }
                 }
+                
                 dropZone.addSamples(samples);
 
             } catch (Exception e) {

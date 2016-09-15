@@ -148,7 +148,7 @@
                         <publicPackage>org.rosuda.REngine</publicPackage>
                         <publicPackage>org.rosuda.REngine.Rserve</publicPackage>
                         <publicPackage>org.rosuda.REngine.Rserve.protocol</publicPackage>
-                       <!-- <publicPackage>org.w3c.dom.*</publicPackage> -->
+                        <!-- <publicPackage>org.w3c.dom.*</publicPackage> -->
                         <publicPackage>org.xml.sax</publicPackage>
                         <publicPackage>org.xml.sax.ext</publicPackage>
                         <publicPackage>org.xml.sax.helpers</publicPackage>

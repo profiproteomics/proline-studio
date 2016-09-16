@@ -99,7 +99,9 @@ public class XICBiologicalSampleAnalysisNode extends DataSetNode {
     @Override
     public String toString() {
         //display Quant Chanel Name
-        return m_qcName;
+        if(m_qcName != null && !m_qcName.trim().isEmpty())
+            return m_qcName;
+        return super.toString();
     }
     
 }

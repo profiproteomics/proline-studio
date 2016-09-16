@@ -26,7 +26,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Hashtable;
@@ -52,6 +51,7 @@ public class SelectRawFilesPanel extends JPanel {
     private FlatDesignTable m_table = null;
     private Hashtable<String, XICBiologicalSampleAnalysisNode> m_hashtable;
     private XICDropZone m_dropZone;
+    private XICDropZoneInfo m_dropZoneInfo;
     private String[] suffix = {".raw", ".mzdb"};
     private TreeFileChooserTransferHandler m_transferHandler;
 
@@ -68,7 +68,7 @@ public class SelectRawFilesPanel extends JPanel {
     public static SelectRawFilesPanel getPanel() {
         return m_singleton;
     }
-    
+
     private SelectRawFilesPanel() {
 
         m_transferHandler = new TreeFileChooserTransferHandler();
@@ -222,14 +222,15 @@ public class SelectRawFilesPanel extends JPanel {
 
     private JPanel createDropZonePanel() {
         JPanel panel = new JPanel();
-        panel.setLayout(new BorderLayout());
-        panel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
-
+        panel.setLayout(new GridLayout(1, 2, 10, 10));
+        panel.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createTitledBorder("Automatic Raw File Association"), BorderFactory.createEmptyBorder(15, 15, 15, 15)));
+        
+        m_dropZoneInfo = new XICDropZoneInfo();
         m_dropZone = new XICDropZone(m_transferHandler);
         m_dropZone.setTable(m_table);
-
-        panel.add(m_dropZone, BorderLayout.CENTER);
-
+        m_dropZone.setDropZoneInfo(m_dropZoneInfo);
+        panel.add(m_dropZoneInfo);
+        panel.add(m_dropZone);
         return panel;
     }
 

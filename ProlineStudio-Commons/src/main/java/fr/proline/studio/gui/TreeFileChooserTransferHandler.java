@@ -21,14 +21,22 @@ import javax.swing.TransferHandler;
  */
 public class TreeFileChooserTransferHandler extends TransferHandler {
 
-    private ArrayList<JComponent> m_components;
+    private Hashtable<JComponent, JComponent> m_components;
 
     public TreeFileChooserTransferHandler() {
-        m_components = new ArrayList<JComponent>();
+        m_components = new Hashtable<JComponent, JComponent>();
     }
 
     public void addComponent(JComponent component) {
-        m_components.add(component);
+        m_components.put(component, component);
+    }
+    
+    public void clearHighlights(){
+        Enumeration<JComponent> enumKey = m_components.keys();
+        while (enumKey.hasMoreElements()) {
+            JComponent key = enumKey.nextElement();
+            key.setBackground(null);
+        }
     }
 
     //private Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
@@ -56,38 +64,26 @@ public class TreeFileChooserTransferHandler extends TransferHandler {
 
     @Override
     protected void exportDone(JComponent source, Transferable data, int action) {
-        this.highlight(false);
+        clearHighlights();
     }
 
     @Override
     public boolean canImport(TransferHandler.TransferSupport support) {
-
+        
         support.setShowDropLocation(true);
 
         if (support.isDataFlavorSupported(FilesTransferable.Files_FLAVOR)) {
             DropLocation dropLocation = support.getDropLocation();
             if (dropLocation instanceof JTable.DropLocation) {
                 return true;
-            } else if (support.getComponent() instanceof DropZoneInterface) {
-                this.highlight(true);
+            } else if (m_components.containsKey((JComponent)support.getComponent())) {
+                m_components.get((JComponent)support.getComponent()).setBackground(Color.WHITE);
                 return true;
-            }
+            }   
         }
 
-        this.highlight(false);
+        clearHighlights();
         return false;
-    }
-
-    private void highlight(boolean b) {
-        if (b) {
-            for (int i = 0; i < m_components.size(); i++) {
-                m_components.get(i).setBackground(Color.WHITE);
-            }
-        } else {
-            for (int i = 0; i < m_components.size(); i++) {
-                m_components.get(i).setBackground(null);
-            }
-        }
     }
 
     @Override

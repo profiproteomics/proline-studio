@@ -39,7 +39,7 @@ public class AuthenticateUserTask extends AbstractJMSTask {
     @Override
     public void taskRun() throws JMSException {
 
-        final JSONRPC2Request jsonRequest = new JSONRPC2Request(JMSConnectionManager.PROLINE_USER_AUTHENTICATE_METHOD_NAME, Integer.valueOf(m_id));
+        final JSONRPC2Request jsonRequest = new JSONRPC2Request(JMSConnectionManager.PROLINE_USER_AUTHENTICATE_METHOD_NAME, Integer.valueOf(m_taskInfo.getId()));
         jsonRequest.setNamedParams(createParams());
 
         final TextMessage message = AccessJMSManagerThread.getAccessJMSManagerThread().getSession().createTextMessage(jsonRequest.toJSONString());
@@ -47,12 +47,14 @@ public class AuthenticateUserTask extends AbstractJMSTask {
         /* ReplyTo = Temporary Destination Queue for Server -> Client response */
         message.setJMSReplyTo(m_replyQueue);
         message.setStringProperty(JMSConnectionManager.PROLINE_SERVICE_NAME_KEY, "proline/admin/UserAccount");
-        addSourceToMessage(message);
+        addSourceToMessage(message);     
+        addDescriptionToMessage(message);
         
         setTaskInfoRequest(message.getText());
         //  Send the Message
         m_producer.send(message,Message.DEFAULT_DELIVERY_MODE,8,TASK_TIMEOUT_MS+5000);
-        m_loggerProline.info("Message [{}] sent", message.getJMSMessageID()+" m_id "+m_id+ " getJMSCorrelationID "+message.getJMSCorrelationID());
+        m_loggerProline.debug("Message AuthenticateUserTask [{}] sent", message.getJMSMessageID());
+        m_taskInfo.setJmsMessageID(message.getJMSMessageID());
     }
 
     private HashMap<String, Object> createParams() {

@@ -107,7 +107,16 @@ public class TreeFileChooserTransferHandler extends TransferHandler {
                 TreeFileChooserTableModelInterface model = (TreeFileChooserTableModelInterface) table.getModel();
                 model.setFiles(transferredFiles, index);
 
-                JOptionPane.showMessageDialog(null, "Manual/Explicit assosiation is an irreversible action that poses risk.", "Warning", JOptionPane.WARNING_MESSAGE);
+                ArrayList<Integer> indices = new ArrayList<Integer>();
+                for(int i = 0; i<transferredFiles.size(); i++){
+                    indices.add(index+i);
+                }
+                
+                System.out.println("breakpoint");
+                
+                if(model.isCorruptionPossible(indices)){
+                    JOptionPane.showMessageDialog(null, "Existing links may be corrupted by the association(s).", "Warning", JOptionPane.WARNING_MESSAGE);
+                }
 
             } catch (Exception e) {
                 //should not happen

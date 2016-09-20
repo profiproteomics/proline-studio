@@ -17,7 +17,6 @@ import fr.proline.studio.table.DecoratedTableModel;
 import fr.proline.studio.table.TablePopupMenu;
 import fr.proline.studio.utils.IconManager;
 import fr.proline.studio.utils.MiscellaneousUtils;
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -533,13 +532,26 @@ public class SelectRawFilesPanel extends JPanel {
             int numberOfColumns = this.getColumnCount();
 
             for (int i = 0; i < numberOfRows; i++) {
-                if (this.getValueAt(i, numberOfColumns - 1).toString().contains("No Raw File")) {
+                if (this.getValueAt(i, numberOfColumns - 2).toString().contains("No Raw File")) {
                     XICBiologicalSampleAnalysisNode currentAnalysisNode = this.getXICBiologicalSampleAnalysisNode(i);
                     shortagesTable.put(MiscellaneousUtils.getFileName(currentAnalysisNode.getResultSet().getMsiSearch().getPeaklist().getPath().toLowerCase(), suffix), i);
                 }
             }
 
             return shortagesTable;
+        }
+
+        @Override
+        public boolean isCorruptionPossible(ArrayList<Integer> indices) {
+            int numberOfColumns = this.getColumnCount(); 
+            for (int i = 0; i < indices.size(); i++) {
+                String currentValue = this.getValueAt(indices.get(i), numberOfColumns - 2).toString();
+                System.out.println("breakpoint2");
+                if (!this.getValueAt(indices.get(i), numberOfColumns - 2).toString().contains("No Raw File")) {
+                    return true;
+                }
+            }
+            return false;
         }
 
     }

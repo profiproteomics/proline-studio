@@ -371,7 +371,7 @@ public class WindowBoxFactory {
         boxes[0] = new DataBoxTaskList();
         boxes[1] = new DataBoxTaskDescription();
         
-        WindowBox winBox = new WindowBox("Tasks Log", generatePanel(boxes), boxes[0], null);
+        WindowBox winBox = new WindowBox("User Tasks", generatePanel(boxes), boxes[0], null);
 
         return winBox;
     }
@@ -380,7 +380,7 @@ public class WindowBoxFactory {
         AbstractDataBox[] boxes = new AbstractDataBox[1];
         boxes[0] = new DataBoxSystemTasks();
         
-        WindowBox winBox = new WindowBox("Server Tasks Log", generatePanel(boxes), boxes[0], null);
+        WindowBox winBox = new WindowBox("Server Tasks", generatePanel(boxes), boxes[0], null);
         return winBox;
     }
     

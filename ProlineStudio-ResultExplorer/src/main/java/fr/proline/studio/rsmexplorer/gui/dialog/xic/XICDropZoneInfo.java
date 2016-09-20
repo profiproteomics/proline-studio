@@ -37,7 +37,7 @@ public class XICDropZoneInfo extends JPanel {
         model = new DefaultListModel();
         list = new JList(model);
         JScrollPane listPane = new JScrollPane(list);
-        listPane.setBorder(BorderFactory.createTitledBorder("Not associated files"));
+        listPane.setBorder(BorderFactory.createTitledBorder("Not associated dropped files"));
 
         this.add(logPane);
         this.add(listPane);

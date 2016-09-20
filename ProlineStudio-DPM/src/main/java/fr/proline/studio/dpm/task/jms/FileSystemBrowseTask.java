@@ -45,7 +45,7 @@ public class FileSystemBrowseTask extends AbstractJMSTask {
     public void taskRun() throws JMSException {
 
         // create the request
-        final JSONRPC2Request jsonRequest = new JSONRPC2Request("retrieve_directory_content", Integer.valueOf(m_id));
+        final JSONRPC2Request jsonRequest = new JSONRPC2Request("retrieve_directory_content", Integer.valueOf(m_taskInfo.getId()));
         jsonRequest.setNamedParams(createParams());
 
         final TextMessage message = AccessJMSManagerThread.getAccessJMSManagerThread().getSession().createTextMessage(jsonRequest.toJSONString());
@@ -53,7 +53,8 @@ public class FileSystemBrowseTask extends AbstractJMSTask {
         /* ReplyTo = Temporary Destination Queue for Server -> Client response */
         message.setJMSReplyTo(m_replyQueue);
         message.setStringProperty(JMSConnectionManager.PROLINE_SERVICE_NAME_KEY, "proline/misc/FileSystem");
-        addSourceToMessage(message);
+        addSourceToMessage(message);   
+        addDescriptionToMessage(message);
         
         setTaskInfoRequest(message.getText());
          
@@ -61,7 +62,7 @@ public class FileSystemBrowseTask extends AbstractJMSTask {
         // Send the Message
         m_producer.send(message);
         m_loggerProline.info("Message [{}] sent", message.getJMSMessageID());
-        
+        m_taskInfo.setJmsMessageID(message.getJMSMessageID());
     }
 
     private HashMap<String, Object> createParams() {

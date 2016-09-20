@@ -62,7 +62,8 @@ public class FileUploadTask extends AbstractJMSTask {
             message.setJMSReplyTo(m_replyQueue);
             message.setStringProperty(JMSConnectionManager.PROLINE_SERVICE_NAME_KEY, "proline/misc/FileUpload");
             message.setStringProperty("dest_file_name", uploadFile.getName());
-            addSourceToMessage(message);
+            addSourceToMessage(message);       
+            addDescriptionToMessage(message);
         
             in = new FileInputStream(uploadFile);
             BufferedInputStream inBuf = new BufferedInputStream(in);
@@ -71,6 +72,7 @@ public class FileUploadTask extends AbstractJMSTask {
             //  Send the Message
             m_producer.send(message);
             m_loggerProline.info("Message [{}] sent", message.getJMSMessageID());
+            m_taskInfo.setJmsMessageID(message.getJMSMessageID());
         } catch (FileNotFoundException ex) {
             throw new JMSException(ex.getMessage());
         } finally {

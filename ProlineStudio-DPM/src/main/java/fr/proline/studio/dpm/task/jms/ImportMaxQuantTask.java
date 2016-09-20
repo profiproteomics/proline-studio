@@ -48,7 +48,7 @@ public class ImportMaxQuantTask extends AbstractJMSTask {
     
     @Override
     public void taskRun() throws JMSException {
-        final JSONRPC2Request jsonRequest = new JSONRPC2Request(JMSConnectionManager.PROLINE_PROCESS_METHOD_NAME, Integer.valueOf(m_id));
+        final JSONRPC2Request jsonRequest = new JSONRPC2Request(JMSConnectionManager.PROLINE_PROCESS_METHOD_NAME, Integer.valueOf(m_taskInfo.getId()));
         jsonRequest.setNamedParams(createParams());
            
         final TextMessage message = AccessJMSManagerThread.getAccessJMSManagerThread().getSession().createTextMessage(jsonRequest.toJSONString());
@@ -56,12 +56,14 @@ public class ImportMaxQuantTask extends AbstractJMSTask {
         /* ReplyTo = Temporary Destination Queue for Server -> Client response */
         message.setJMSReplyTo(m_replyQueue);
         message.setStringProperty(JMSConnectionManager.PROLINE_SERVICE_NAME_KEY, "proline/dps/msi/ImportMaxQuantResults");
-        addSourceToMessage(message);
+        addSourceToMessage(message);  
+        addDescriptionToMessage(message);
         
         setTaskInfoRequest(message.getText());
         //  Send the Message
         m_producer.send(message);
         m_loggerProline.info("Message [{}] sent", message.getJMSMessageID());        
+        m_taskInfo.setJmsMessageID(message.getJMSMessageID());
     }
 
     @Override

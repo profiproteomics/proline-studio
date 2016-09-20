@@ -78,9 +78,9 @@ public class MergeTask extends AbstractJMSTask {
     public void taskRun() throws JMSException {
         JSONRPC2Request jsonRequest;
         if (m_action == MERGE_RSET) {
-            jsonRequest = new JSONRPC2Request("merge_result_sets", m_id);
+            jsonRequest = new JSONRPC2Request("merge_result_sets", m_taskInfo.getId());
         } else {
-            jsonRequest = new JSONRPC2Request("merge_result_summaries", m_id);
+            jsonRequest = new JSONRPC2Request("merge_result_summaries", m_taskInfo.getId());
         }
         jsonRequest.setNamedParams(createParams());
 
@@ -90,13 +90,15 @@ public class MergeTask extends AbstractJMSTask {
         message.setJMSReplyTo(m_replyQueue);
         message.setStringProperty(JMSConnectionManager.PROLINE_SERVICE_NAME_KEY, "proline/dps/msi/MergeResults");
         message.setStringProperty(JMSConnectionManager.PROLINE_SERVICE_VERSION_KEY, "2.0");
-        addSourceToMessage(message);
+        addSourceToMessage(message);      
+        addDescriptionToMessage(message);
         
         setTaskInfoRequest(message.getText());
 
         //  Send the Message
         m_producer.send(message);
         m_loggerProline.info("Message [{}] sent", message.getJMSMessageID());
+        m_taskInfo.setJmsMessageID(message.getJMSMessageID());
     }
 
     private HashMap<String, Object> createParams() {

@@ -41,6 +41,7 @@ public class JMSMessageUtil {
             String sName = message.getStringProperty(JMSConnectionManager.PROLINE_SERVICE_NAME_KEY);
             String sVersion  = message.getStringProperty(JMSConnectionManager.PROLINE_SERVICE_VERSION_KEY);
             String sSource  = message.getStringProperty(JMSConnectionManager.PROLINE_SERVICE_SOURCE_KEY);
+            String sDescription  = message.getStringProperty(JMSConnectionManager.PROLINE_SERVICE_DESCR_KEY);
             String sMoreInfo = null;
             if(TextMessage.class.isInstance(message))
                 sMoreInfo = ((TextMessage) message).getText();
@@ -57,7 +58,7 @@ public class JMSMessageUtil {
                 }                
             }
             
-            JMSNotificationMessage notifMsg = new  JMSNotificationMessage(sName,sVersion, sSource ,sMoreInfo, sTimestamp, jmsId,jsonId, status);
+            JMSNotificationMessage notifMsg = new  JMSNotificationMessage(sName,sVersion, sSource, sDescription, sMoreInfo, sTimestamp, jmsId,jsonId, status);
             return notifMsg;
         }catch(JMSException jmsE ){
             return null;

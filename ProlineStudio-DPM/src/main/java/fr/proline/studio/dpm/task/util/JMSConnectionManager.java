@@ -50,6 +50,8 @@ public class JMSConnectionManager {
     
     public static final String PROLINE_SERVICE_SOURCE_KEY = "Proline_ServiceSource";
     
+    public static final String PROLINE_SERVICE_DESCR_KEY = "Proline_ServiceDescription";
+                                                            
     public static final String HORNET_Q_SAVE_STREAM_KEY = "JMS_HQ_SaveStream";
     
     public static final String HORNET_Q_INPUT_STREAM_KEY = "JMS_HQ_InputStream";    
@@ -63,6 +65,8 @@ public class JMSConnectionManager {
     public static final String JMS_SERVER_HOST_PARAM_KEY = "jms.server.host";
     
     public static final String JMS_SERVER_PORT_PARAM_KEY = "jms.server.port";
+    
+    public static final int JMS_CANCELLED_TASK_ERROR_CODE = -32004;
     
     private final EventListenerList listenersList ;
     private int connectionState;

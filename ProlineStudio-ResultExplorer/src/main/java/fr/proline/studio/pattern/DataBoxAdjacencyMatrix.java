@@ -49,6 +49,6 @@ public class DataBoxAdjacencyMatrix extends AbstractDataBox {
         ((MatrixPanel) m_panel).setData(component, drawVisualization);
 
     }
-
+    
     
 }

@@ -69,6 +69,7 @@ import fr.proline.studio.dam.tasks.xic.DatabaseModifyPeptideTask;
 import fr.proline.studio.parameter.ObjectParameter;
 import fr.proline.studio.parameter.ParameterList;
 import fr.proline.studio.rsmexplorer.DataBoxViewerManager;
+import fr.proline.studio.rsmexplorer.actions.table.DisplayTablePopupMenu;
 import fr.proline.studio.utils.ResultCallback;
 import java.util.Map;
 import javax.swing.Icon;
@@ -555,7 +556,7 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
             getModel().addTableModelListener(l);
         }
 
-        @Override
+        /*@Override
         public TablePopupMenu initPopupMenu() {
             TablePopupMenu popupMenu = new TablePopupMenu();
 
@@ -576,15 +577,34 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
             });
 
             return popupMenu;
-        }
+        }*/
         private DisplayIdentificationProteinSetsAction m_idProteinSetAction;
 
-        // set as abstract
+        /*@Override
+        public void prepostPopupMenu() {
+            m_idProteinSetAction.setBox(m_dataBox);
+        }*/
+
+        
+        @Override
+        public TablePopupMenu initPopupMenu() {
+            m_popupMenu = new DisplayTablePopupMenu(XicProteinSetPanel.this);
+
+            m_idProteinSetAction = new DisplayIdentificationProteinSetsAction();
+            m_popupMenu.addAction(m_idProteinSetAction);
+            
+            return m_popupMenu;
+        }
+        private DisplayTablePopupMenu m_popupMenu;
+
+
+
         @Override
         public void prepostPopupMenu() {
             m_idProteinSetAction.setBox(m_dataBox);
+            m_popupMenu.prepostPopupMenu();
         }
-
+        
         /**
          * Called whenever the value of the selection changes.
          *

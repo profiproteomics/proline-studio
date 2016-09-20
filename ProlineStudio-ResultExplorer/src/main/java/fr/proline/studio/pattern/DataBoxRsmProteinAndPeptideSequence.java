@@ -82,4 +82,5 @@ public class DataBoxRsmProteinAndPeptideSequence extends AbstractDataBox {
         
         ((RsmProteinAndPeptideSequencePanel) m_panel).setData(resultSummary.getId() , proteinMatch, selectedPeptide, peptideInstances);
     }
+
 }

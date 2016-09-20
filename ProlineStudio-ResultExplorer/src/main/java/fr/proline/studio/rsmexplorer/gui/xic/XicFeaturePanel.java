@@ -25,6 +25,7 @@ import fr.proline.studio.pattern.WindowBoxFactory;
 import fr.proline.studio.progress.ProgressBarDialog;
 import fr.proline.studio.progress.ProgressInterface;
 import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
+import fr.proline.studio.rsmexplorer.actions.table.DisplayTablePopupMenu;
 import fr.proline.studio.table.CompoundTableModel;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.table.LazyTable;
@@ -604,52 +605,23 @@ public class XicFeaturePanel  extends HourglassPanel implements DataBoxPanelInte
         public String getExportRowCell(int row, int col) {
             return ((CompoundTableModel) m_featureTable.getModel()).getExportRowCell(convertRowIndexToModel(row), convertColumnIndexToModel(col));
         }
-        
-        //Implement table cell tool tips.
-//        @Override
-//        public String getToolTipText(MouseEvent e) {
-//            Point p = e.getPoint();
-//            int rowIndex = rowAtPoint(p);
-//            if (rowIndex<0) {
-//                return null;
-//            }
-//            int colIndex = columnAtPoint(p);
-//            if (colIndex<0) {
-//                return null;
-//            }
-//            int realColumnIndex = convertColumnIndexToModel(colIndex);
-//            int realRowIndex = convertRowIndexToModel(rowIndex);
-//
-//            return ((CompoundTableModel)getModel()).getTootlTipValue(realRowIndex, realColumnIndex);
-//        }
 
 
-        // called by super.DecoratedTable
         @Override
         public TablePopupMenu initPopupMenu() {
-            TablePopupMenu popupMenu = new TablePopupMenu();
+            m_popupMenu = new DisplayTablePopupMenu(XicFeaturePanel.this);
 
-            popupMenu.addAction(new RestrainAction() {
-                @Override
-                public void filteringDone() {
-                    m_dataBox.propagateDataChanged(CompareDataInterface.class);
-                }
-            });
-            popupMenu.addAction(new ClearRestrainAction() {
-                @Override
-                public void filteringDone() {
-                    m_dataBox.propagateDataChanged(CompareDataInterface.class);
-                }
-            });
-
-            return popupMenu;
+            return m_popupMenu;
         }
+        private DisplayTablePopupMenu m_popupMenu;
 
-        // set as abstract
+
+
         @Override
         public void prepostPopupMenu() {
-            // nothing to do
+            m_popupMenu.prepostPopupMenu();
         }
+        
 
         
     }

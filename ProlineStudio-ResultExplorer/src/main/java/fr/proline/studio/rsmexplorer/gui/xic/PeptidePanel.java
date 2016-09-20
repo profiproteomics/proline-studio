@@ -13,6 +13,8 @@ import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.markerbar.MarkerContainerPanel;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
+import fr.proline.studio.rsmexplorer.actions.table.DisplayTablePopupMenu;
+import fr.proline.studio.rsmexplorer.gui.RsmProteinSetPanel;
 import fr.proline.studio.table.CompoundTableModel;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.table.LazyTable;
@@ -299,28 +301,17 @@ public class PeptidePanel  extends HourglassPanel implements DataBoxPanelInterfa
         
         @Override
         public TablePopupMenu initPopupMenu() {
-            TablePopupMenu popupMenu = new TablePopupMenu();
+            m_popupMenu = new DisplayTablePopupMenu(PeptidePanel.this);
 
-            popupMenu.addAction(new RestrainAction() {
-                @Override
-                public void filteringDone() {
-                    m_dataBox.propagateDataChanged(CompareDataInterface.class);
-                }
-            });
-            popupMenu.addAction(new ClearRestrainAction() {
-                @Override
-                public void filteringDone() {
-                    m_dataBox.propagateDataChanged(CompareDataInterface.class);
-                }
-            });
-
-            return popupMenu;
+            return m_popupMenu;
         }
+        private DisplayTablePopupMenu m_popupMenu;
 
-        // set as abstract
+
+
         @Override
         public void prepostPopupMenu() {
-            // nothing to do
+            m_popupMenu.prepostPopupMenu();
         }
 
     }

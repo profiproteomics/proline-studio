@@ -1,6 +1,7 @@
 package fr.proline.studio.pattern;
 
 
+import fr.proline.core.orm.msi.Peptide;
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.dto.DPeptideInstance;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
@@ -138,6 +139,24 @@ public class DataBoxRsmPeptidesOfProtein extends AbstractDataBox {
             }
         }
         return super.getData(getArray, parameterType);
+    }
+    
+    @Override
+    public Class[] getImportantInParameterClass() {
+        Class[] classList = {DPeptideMatch.class};
+        return classList;
+    }
+
+    @Override
+    public String getImportantOutParameterValue() {
+        DPeptideMatch p = (DPeptideMatch) getData(false, DPeptideMatch.class);
+        if (p != null) {
+            Peptide peptide = p.getPeptide();
+            if (peptide != null) {
+                return peptide.getSequence();
+            }
+        }
+        return null;
     }
 
 }

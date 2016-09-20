@@ -1,6 +1,7 @@
 package fr.proline.studio.table;
 
 
+import java.awt.Component;
 import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
 import javax.swing.JMenuItem;
@@ -18,7 +19,7 @@ public abstract class AbstractTableAction extends AbstractAction {
         super(name);
     }
     
-    public JMenuItem getPopupPresenter() {
+    public Component getPopupPresenter() {
         return new JMenuItem(this);
     }
     
@@ -40,5 +41,7 @@ public abstract class AbstractTableAction extends AbstractAction {
 
     
     public abstract void updateEnabled(int row, int col, int[] selectedRows, JTable table);
+    
+
     
 }

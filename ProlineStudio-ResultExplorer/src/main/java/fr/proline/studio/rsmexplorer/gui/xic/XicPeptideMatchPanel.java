@@ -19,6 +19,7 @@ import fr.proline.studio.parameter.SettingsButton;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.progress.ProgressInterface;
+import fr.proline.studio.rsmexplorer.actions.table.DisplayTablePopupMenu;
 import fr.proline.studio.table.CompoundTableModel;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.table.LazyTable;
@@ -441,28 +442,17 @@ public class XicPeptideMatchPanel extends HourglassPanel implements DataBoxPanel
         
         @Override
         public TablePopupMenu initPopupMenu() {
-            TablePopupMenu popupMenu = new TablePopupMenu();
+            m_popupMenu = new DisplayTablePopupMenu(XicPeptideMatchPanel.this);
 
-            popupMenu.addAction(new RestrainAction() {
-                @Override
-                public void filteringDone() {
-                    m_dataBox.propagateDataChanged(CompareDataInterface.class);
-                }
-            });
-            popupMenu.addAction(new ClearRestrainAction() {
-                @Override
-                public void filteringDone() {
-                    m_dataBox.propagateDataChanged(CompareDataInterface.class);
-                }
-            });
-
-            return popupMenu;
+            return m_popupMenu;
         }
+        private DisplayTablePopupMenu m_popupMenu;
 
-        // set as abstract
+
+
         @Override
         public void prepostPopupMenu() {
-            // nothing to do
+            m_popupMenu.prepostPopupMenu();
         }
 
     }

@@ -25,7 +25,7 @@ public class AddDataBoxActionListener implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent event) {
-        DataBoxChooserDialog dialog = new DataBoxChooserDialog(WindowManager.getDefault().getMainWindow(), m_previousDatabox, false);
+        DataBoxChooserDialog dialog = new DataBoxChooserDialog(WindowManager.getDefault().getMainWindow(), m_previousDatabox, false, null);
         dialog.setLocationRelativeTo(WindowManager.getDefault().getMainWindow());
         dialog.setVisible(true);
         if (dialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {

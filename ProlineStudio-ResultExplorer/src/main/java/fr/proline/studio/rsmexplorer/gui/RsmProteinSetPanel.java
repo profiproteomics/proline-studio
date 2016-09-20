@@ -11,8 +11,6 @@ import fr.proline.studio.comparedata.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.tasks.*;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.filter.FilterButton;
-import fr.proline.studio.filter.actions.ClearRestrainAction;
-import fr.proline.studio.filter.actions.RestrainAction;
 import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
@@ -23,6 +21,7 @@ import fr.proline.studio.pattern.*;
 import fr.proline.studio.progress.ProgressInterface;
 import fr.proline.studio.python.data.TableInfo;
 import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
+import fr.proline.studio.rsmexplorer.actions.table.DisplayTablePopupMenu;
 import fr.proline.studio.rsmexplorer.gui.model.ProteinSetTableModel;
 import fr.proline.studio.search.SearchToggleButton;
 import fr.proline.studio.table.CompoundTableModel;
@@ -36,7 +35,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.TreeMap;
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.TableModelListener;
@@ -538,28 +540,17 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
 
         @Override
         public TablePopupMenu initPopupMenu() {
-            TablePopupMenu popupMenu = new TablePopupMenu();
+            m_popupMenu = new DisplayTablePopupMenu(RsmProteinSetPanel.this);
 
-            popupMenu.addAction(new RestrainAction() {
-                @Override
-                public void filteringDone() {
-                    m_dataBox.propagateDataChanged(CompareDataInterface.class);
-                }
-            });
-            popupMenu.addAction(new ClearRestrainAction() {
-                @Override
-                public void filteringDone() {
-                    m_dataBox.propagateDataChanged(CompareDataInterface.class);
-                }
-            });
-
-            return popupMenu;
+            return m_popupMenu;
         }
+        private DisplayTablePopupMenu m_popupMenu;
 
-        // set as abstract
+
+
         @Override
         public void prepostPopupMenu() {
-            // nothing to do
+            m_popupMenu.prepostPopupMenu();
         }
 
         

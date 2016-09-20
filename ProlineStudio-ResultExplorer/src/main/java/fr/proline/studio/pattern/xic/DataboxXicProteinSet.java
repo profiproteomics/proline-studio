@@ -4,6 +4,7 @@ import fr.proline.core.orm.lcms.MapAlignment;
 import fr.proline.core.orm.lcms.ProcessedMap;
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.dto.DMasterQuantProteinSet;
+import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.core.orm.msi.dto.DProteinSet;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.core.orm.uds.dto.DMasterQuantitationChannel;
@@ -295,5 +296,23 @@ public class DataboxXicProteinSet extends AbstractDataBox {
         ProteinQuantPanel aProtPanel = new ProteinQuantPanel();
         aProtPanel.setData(m_quantitationChannelArray, ((XicProteinSetPanel) m_panel).getSelectedMasterQuantProteinSet(), m_isXICMode);
         return aProtPanel;
+    }
+
+    @Override
+    public Class[] getImportantInParameterClass() {
+        Class[] classList = {DMasterQuantProteinSet.class, DProteinSet.class};
+        return classList;
+    }
+
+    @Override
+    public String getImportantOutParameterValue() {
+        DProteinSet p = (DProteinSet) getData(false, DProteinSet.class);
+        if (p != null) {
+            DProteinMatch pm = p.getTypicalProteinMatch();
+            if (pm != null) {
+                return pm.getAccession();
+            }
+        }
+        return null;
     }
 }

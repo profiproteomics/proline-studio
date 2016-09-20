@@ -21,6 +21,7 @@ import fr.proline.studio.pattern.MsQueryInfoRSM;
 import fr.proline.studio.pattern.MsQueryInfoRset;
 import fr.proline.studio.progress.ProgressInterface;
 import fr.proline.studio.python.data.TableInfo;
+import fr.proline.studio.rsmexplorer.actions.table.DisplayTablePopupMenu;
 import fr.proline.studio.rsmexplorer.gui.model.MSQueriesTableModel;
 import fr.proline.studio.table.CompoundTableModel;
 import fr.proline.studio.table.CustomColumnControlButton;
@@ -314,27 +315,17 @@ public class MSQueriesPanel extends HourglassPanel implements DataBoxPanelInterf
         
         @Override
         public TablePopupMenu initPopupMenu() {
-            TablePopupMenu popupMenu = new TablePopupMenu();
+            m_popupMenu = new DisplayTablePopupMenu(MSQueriesPanel.this);
 
-            popupMenu.addAction(new RestrainAction() {
-                @Override
-                public void filteringDone() {
-                    m_dataBox.propagateDataChanged(CompareDataInterface.class);
-                }
-            });
-            popupMenu.addAction(new ClearRestrainAction() {
-                @Override
-                public void filteringDone() {
-                    m_dataBox.propagateDataChanged(CompareDataInterface.class);
-                }
-            });
-
-            return popupMenu;
+            return m_popupMenu;
         }
+        private DisplayTablePopupMenu m_popupMenu;
+
+
 
         @Override
         public void prepostPopupMenu() {
-            // nothing to do
+            m_popupMenu.prepostPopupMenu();
         }
 
         @Override

@@ -138,4 +138,20 @@ public class DataBoxMSQueriesForRset extends AbstractDataBox{
         return super.getData(getArray, parameterType);
     }
     
+    @Override
+    public Class[] getImportantInParameterClass() {
+        Class[] classList = { DMsQuery.class, MsQueryInfoRSM.class };
+        return classList;
+    }
+
+    @Override
+    public String getImportantOutParameterValue() {
+        DMsQuery q = (DMsQuery) getData(false, DMsQuery.class);
+        if (q != null) {
+            int id = q.getInitialId();
+            return String.valueOf(id);
+        }
+        return null;
+    }
+    
 }

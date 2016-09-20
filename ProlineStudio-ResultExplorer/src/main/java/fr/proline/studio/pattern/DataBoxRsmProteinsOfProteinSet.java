@@ -126,4 +126,21 @@ public class DataBoxRsmProteinsOfProteinSet extends AbstractDataBox {
         }
         return super.getData(getArray, parameterType);
     }
+    
+    @Override
+    public Class[] getImportantInParameterClass() {
+        Class[] classList = {DProteinMatch.class};
+        return classList;
+    }
+
+    @Override
+    public String getImportantOutParameterValue() {
+        DProteinMatch pm = (DProteinMatch) getData(false, DProteinMatch.class);
+
+        if (pm != null) {
+            return pm.getAccession();
+        }
+
+        return null;
+    }
 }

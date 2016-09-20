@@ -2,6 +2,7 @@ package fr.proline.studio.pattern.xic;
 
 import fr.proline.core.orm.lcms.MapAlignment;
 import fr.proline.core.orm.lcms.ProcessedMap;
+import fr.proline.core.orm.msi.Peptide;
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.dto.DMasterQuantPeptide;
 
@@ -11,6 +12,8 @@ import fr.proline.core.orm.uds.dto.DQuantitationChannel;
 import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.comparedata.GlobalTabelModelProviderInterface;
 import fr.proline.core.orm.msi.dto.DMasterQuantPeptideIon;
+import fr.proline.core.orm.msi.dto.DPeptideInstance;
+import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadLcMSTask;
@@ -67,6 +70,10 @@ public class DataboxXicPeptideIon extends AbstractDataBox {
         registerOutParameter(outParameter);
 
         outParameter = new GroupParameter();
+        outParameter.addParameter(DPeptideMatch.class, false);
+        registerOutParameter(outParameter);
+        
+        outParameter = new GroupParameter();
         outParameter.addParameter(DDataset.class, false);
         registerOutParameter(outParameter);
 
@@ -74,6 +81,9 @@ public class DataboxXicPeptideIon extends AbstractDataBox {
         outParameter.addParameter(CompareDataInterface.class, true);
         registerOutParameter(outParameter);
 
+        
+        
+        
     }
 
     @Override
@@ -207,6 +217,17 @@ public class DataboxXicPeptideIon extends AbstractDataBox {
             if (parameterType.equals(DMasterQuantPeptideIon.class)) {
                 return ((XicPeptideIonPanel) m_panel).getSelectedMasterQuantPeptideIon();
             }
+            if (parameterType.equals(DPeptideMatch.class)) {
+                DMasterQuantPeptideIon qpi = ((XicPeptideIonPanel) m_panel).getSelectedMasterQuantPeptideIon();
+                if (qpi == null) {
+                    return null;
+                }
+                DPeptideInstance pi = qpi.getPeptideInstance();
+                if (pi == null) {
+                    return null;
+                }
+                return pi.getBestPeptideMatch();
+            }
             if (parameterType.equals(DDataset.class)) {
                 return m_dataset;
             }
@@ -226,5 +247,26 @@ public class DataboxXicPeptideIon extends AbstractDataBox {
     @Override
     public String getFullName() {
         return m_dataset.getName() + " " + getTypeName();
+    }
+
+    @Override
+    public Class[] getImportantInParameterClass() {
+        Class[] classList = {DMasterQuantPeptideIon.class, DPeptideMatch.class};
+        return classList;
+    }
+
+    @Override
+    public String getImportantOutParameterValue() {
+        DMasterQuantPeptideIon peptideIon = (DMasterQuantPeptideIon) getData(false, DMasterQuantPeptideIon.class);
+        if (peptideIon != null) {
+            DPeptideInstance peptideInstance = peptideIon.getPeptideInstance();
+            if (peptideInstance != null) {
+                Peptide peptide = peptideInstance.getPeptide();
+                if (peptide != null) {
+                    return peptide.getSequence();
+                }
+            }
+        }
+        return null;
     }
 }

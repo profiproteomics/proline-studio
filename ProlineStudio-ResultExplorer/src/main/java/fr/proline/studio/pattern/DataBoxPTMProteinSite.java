@@ -39,10 +39,6 @@ public class DataBoxPTMProteinSite extends AbstractDataBox {
 
         // Register possible out parameters
         // One or Multiple ProteinSet
-        /*GroupParameter outParameter = new GroupParameter();
-        outParameter.addParameter(DProteinSet.class, true);
-        outParameter.addParameter(ResultSummary.class, false);
-        registerOutParameter(outParameter);*/ //JPM.TODO
 
         GroupParameter outParameter = new GroupParameter();
         outParameter.addParameter(DProteinPTMSite.class, true);
@@ -183,8 +179,22 @@ public class DataBoxPTMProteinSite extends AbstractDataBox {
         m_rsm = (ResultSummary) data;
         dataChanged();
     }
-    
-   
 
+    @Override
+    public Class[] getImportantInParameterClass() {
+        Class[] classList = {DProteinMatch.class};
+        return classList;
+    }
+    
+    @Override
+    public String getImportantOutParameterValue() {
+        DProteinMatch p = (DProteinMatch) getData(false, DProteinMatch.class);
+        if (p != null) {
+            return p.getAccession();
+        }
+        return null;
+    }
+   
+    
 
 }

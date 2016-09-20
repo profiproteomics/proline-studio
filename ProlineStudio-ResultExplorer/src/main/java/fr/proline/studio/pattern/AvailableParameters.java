@@ -19,6 +19,10 @@ public class AvailableParameters {
         initAvailableParameters(box);
     }
     
+    public HashMap<DataParameter, Integer> getParametersMap() {
+        return m_availableParametersMap;
+    }
+    
     private void initAvailableParameters(AbstractDataBox box) {
         m_availableParametersMap = new HashMap<>();
         initAvailableParameters(box, 0);
@@ -41,10 +45,11 @@ public class AvailableParameters {
     }
     
     
-    public double calculateParameterCompatibilityDistance(AbstractDataBox box) {
+    public double calculateParameterCompatibilityDistance(AbstractDataBox box, Class compulsoryInParameterClass) {
         
         HashSet<GroupParameter> inParametersHashSet = box.getInParameters();
         
+        boolean foundCompulsoryInParameter = (compulsoryInParameterClass == null);
         double minAverageDistance = -1;
         Iterator<GroupParameter> it = inParametersHashSet.iterator();
         while (it.hasNext()) {
@@ -52,7 +57,13 @@ public class AvailableParameters {
             ArrayList<DataParameter> parameterList = groupParameter.getParameterList();
             int distanceCur = 0;
             for (int i=0;i<parameterList.size();i++) {
+                
                 DataParameter parameter = parameterList.get(i);
+                if ((!foundCompulsoryInParameter) && (compulsoryInParameterClass != null)) {
+                    Class parameterClass = parameter.getParameterClass();
+                    foundCompulsoryInParameter = parameterClass.equals(compulsoryInParameterClass);
+                }
+                
                 if (!parameter.isCompulsory()) {
                     continue;
                 }
@@ -75,6 +86,10 @@ public class AvailableParameters {
                 }
             }
             
+        }
+        
+        if (!foundCompulsoryInParameter) {
+            return -1;
         }
         
         return minAverageDistance;

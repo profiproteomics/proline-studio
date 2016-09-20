@@ -534,11 +534,12 @@ public abstract class DecoratedTable extends JXTable implements CrossSelectionIn
             addMouseListener(new TablePopupMouseAdapter(this));
         }
                     
-        popupMenu.preparePopup();
+        
         m_popupMenu = popupMenu;
     }
     
     public TablePopupMenu getTablePopup() {
+        m_popupMenu.preparePopup();
         return m_popupMenu;
     }
 

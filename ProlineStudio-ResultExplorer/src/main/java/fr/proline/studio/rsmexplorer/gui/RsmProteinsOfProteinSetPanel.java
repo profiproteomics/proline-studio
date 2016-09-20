@@ -9,8 +9,6 @@ import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.comparedata.GlobalTabelModelProviderInterface;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.filter.FilterButton;
-import fr.proline.studio.filter.actions.ClearRestrainAction;
-import fr.proline.studio.filter.actions.RestrainAction;
 import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
@@ -20,6 +18,7 @@ import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.pattern.DataMixerWindowBoxManager;
 import fr.proline.studio.progress.ProgressInterface;
 import fr.proline.studio.python.data.TableInfo;
+import fr.proline.studio.rsmexplorer.actions.table.DisplayTablePopupMenu;
 import fr.proline.studio.rsmexplorer.gui.model.ProteinTableModel;
 import fr.proline.studio.table.CompoundTableModel;
 import fr.proline.studio.table.DecoratedTable;
@@ -344,28 +343,17 @@ public class RsmProteinsOfProteinSetPanel extends HourglassPanel implements Data
         
         @Override
         public TablePopupMenu initPopupMenu() {
-            TablePopupMenu popupMenu = new TablePopupMenu();
+            m_popupMenu = new DisplayTablePopupMenu(RsmProteinsOfProteinSetPanel.this);
 
-            popupMenu.addAction(new RestrainAction() {
-                @Override
-                public void filteringDone() {
-                    m_dataBox.propagateDataChanged(CompareDataInterface.class);
-                }
-            });
-            popupMenu.addAction(new ClearRestrainAction() {
-                @Override
-                public void filteringDone() {
-                    m_dataBox.propagateDataChanged(CompareDataInterface.class);
-                }
-            });
-
-            return popupMenu;
+            return m_popupMenu;
         }
+        private DisplayTablePopupMenu m_popupMenu;
 
-        // set as abstract
+
+
         @Override
         public void prepostPopupMenu() {
-            // nothing to do
+            m_popupMenu.prepostPopupMenu();
         }
 
     }

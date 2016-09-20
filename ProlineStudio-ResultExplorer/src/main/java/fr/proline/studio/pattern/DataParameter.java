@@ -20,6 +20,14 @@ public class DataParameter {
         m_isCompulsory = isCompulsory;
     }
 
+    public Class getParameterClass() {
+        return m_c;
+    }
+    
+    public boolean getParameterIsList() {
+        return m_isList;
+    }
+    
     @Override
     public boolean equals(Object p) {
         if (p instanceof DataParameter) {

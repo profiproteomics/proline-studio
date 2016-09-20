@@ -2,6 +2,7 @@ package fr.proline.studio.pattern;
 
 
 import fr.proline.core.orm.msi.ResultSummary;
+import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.core.orm.msi.dto.DProteinSet;
 import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.comparedata.GlobalTabelModelProviderInterface;
@@ -150,6 +151,24 @@ public class DataBoxRsmAllProteinSet extends AbstractDataBox {
         m_dataToBeSelected = data;
     }
     private HashSet m_dataToBeSelected = null;
+
+    @Override
+    public Class[] getImportantInParameterClass() {
+        Class[] classList = {DProteinSet.class};
+        return classList;
+    }
+    
+    @Override
+    public String getImportantOutParameterValue() {
+        DProteinSet p = (DProteinSet) getData(false, DProteinSet.class);
+        if (p != null) {
+            DProteinMatch pm = p.getTypicalProteinMatch();
+            if (pm != null) {
+                return pm.getAccession();
+            }
+        }
+        return null;
+    }
 
 
 }

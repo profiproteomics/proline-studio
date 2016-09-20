@@ -114,7 +114,8 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
         DataBoxPTMProteinSite(42),
         DataBoxDataAnalyzerResults(43),
         DataBoxImage(44),
-        DataBoxSystemTasks(45);
+        DataBoxSystemTasks(45),
+        DataBoxFrozenCopy(46);
         
         int m_type;
         private static HashMap<Integer, DataboxType> m_databoxTypeMap = null;
@@ -211,6 +212,8 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
                     return new DataBoxImage();
                 case DataBoxSystemTasks:
                     return new DataBoxSystemTasks();
+                case DataBoxFrozenCopy:
+                    return null; // not used for frozen copy
             }
             return null; // should not happen
         }
@@ -349,10 +352,10 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
     }
     
     
-    public double calculateParameterCompatibilityDistance(AvailableParameters avalaibleParameters, AbstractDataBox nextDataBox) {
+    public double calculateParameterCompatibilityDistance(AvailableParameters avalaibleParameters, AbstractDataBox nextDataBox, Class compulsoryInParameterClass) {
         
         
-        return avalaibleParameters.calculateParameterCompatibilityDistance(nextDataBox);
+        return avalaibleParameters.calculateParameterCompatibilityDistance(nextDataBox, compulsoryInParameterClass);
 
     }
     
@@ -493,12 +496,7 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
         if (m_previousDataBox != null) {
             return m_previousDataBox.getDataName();
         }
-        /*if (m_fullName != null) {
-            int index = m_fullName.indexOf(m_typeName);
-            if (index != -1) {
-                return m_fullName.substring(0, index).trim();
-            }
-        }*/
+
         return null;
     }
     
@@ -629,5 +627,12 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
         return m_nextDataBoxArray;
     }
     
+    public Class[] getImportantInParameterClass() {
+        return null;
+    }
+    
+    public String getImportantOutParameterValue() {
+        return null;
+    }
 
 }

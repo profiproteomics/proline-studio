@@ -59,22 +59,43 @@ public class DataboxManager {
         return compatibilityList;
     }
     
-    public TreeMap<ParameterDistance, AbstractDataBox> findCompatibleDataboxList(AbstractDataBox previousDatabox) {
+   /* public TreeMap<ParameterDistance, AbstractDataBox> findCompatibleDataboxList(AbstractDataBox previousDatabox) {
+        return findCompatibleDataboxList(previousDatabox, null);
+    }*/
+    public TreeMap<ParameterDistance, AbstractDataBox> findCompatibleDataboxList(AbstractDataBox previousDatabox, Class[] importantInParameter) {
         
         AvailableParameters avalaibleParameters = new AvailableParameters(previousDatabox);
         
         TreeMap<ParameterDistance, AbstractDataBox> compatibilityList = new TreeMap<>();
-        for (int i=0;i<m_dataBoxContinuingArray.length;i++) {
+        if (importantInParameter != null) {
+            for (int j = 0; j < importantInParameter.length; j++) {
+                for (int i = 0; i < m_dataBoxContinuingArray.length; i++) {
 
-            AbstractDataBox databox =  m_dataBoxContinuingArray[i];
-            if (databox.getClass().equals(previousDatabox.getClass())) {
-                // do not allow the same databox twice
-                continue;
+                    AbstractDataBox databox = m_dataBoxContinuingArray[i];
+                    if (databox.getClass().equals(previousDatabox.getClass())) {
+                        // do not allow the same databox twice
+                        continue;
+                    }
+
+                    double averageDistance = previousDatabox.calculateParameterCompatibilityDistance(avalaibleParameters, databox, importantInParameter[j]);
+                    if (averageDistance >= 0) {
+                        compatibilityList.put(new ParameterDistance(averageDistance), databox);
+                    }
+                }
             }
-            
-            double averageDistance = previousDatabox.calculateParameterCompatibilityDistance(avalaibleParameters,databox);
-            if (averageDistance >=0) {
-                compatibilityList.put(new ParameterDistance(averageDistance), databox);
+        } else {
+            for (int i = 0; i < m_dataBoxContinuingArray.length; i++) {
+
+                AbstractDataBox databox = m_dataBoxContinuingArray[i];
+                if (databox.getClass().equals(previousDatabox.getClass())) {
+                    // do not allow the same databox twice
+                    continue;
+                }
+
+                double averageDistance = previousDatabox.calculateParameterCompatibilityDistance(avalaibleParameters, databox, null);
+                if (averageDistance >= 0) {
+                    compatibilityList.put(new ParameterDistance(averageDistance), databox);
+                }
             }
         }
         

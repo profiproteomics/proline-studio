@@ -2,9 +2,12 @@ package fr.proline.studio.pattern.xic;
 
 import fr.proline.core.orm.lcms.MapAlignment;
 import fr.proline.core.orm.lcms.ProcessedMap;
+import fr.proline.core.orm.msi.Peptide;
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.dto.DMasterQuantPeptide;
 import fr.proline.core.orm.msi.dto.DMasterQuantProteinSet;
+import fr.proline.core.orm.msi.dto.DPeptideInstance;
+import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.msi.dto.DProteinSet;
 
 import fr.proline.core.orm.uds.dto.DDataset;
@@ -69,6 +72,7 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
         outParameter.addParameter(DDataset.class, false);
         outParameter.addParameter(ResultSummary.class, false);
         outParameter.addParameter(QuantChannelInfo.class, false);
+        outParameter.addParameter(DPeptideMatch.class, false);
         registerOutParameter(outParameter);
 
         outParameter = new GroupParameter();
@@ -233,6 +237,17 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
             if (parameterType.equals(DMasterQuantPeptide.class)) {
                 return ((XicPeptidePanel) m_panel).getSelectedMasterQuantPeptide();
             }
+            if (parameterType.equals(DPeptideMatch.class)) {
+                DMasterQuantPeptide mqp = ((XicPeptidePanel) m_panel).getSelectedMasterQuantPeptide();
+                if (mqp == null) {
+                    return null;
+                }
+                DPeptideInstance pi = mqp.getPeptideInstance();
+                if (pi == null) {
+                    return null;
+                }
+                return pi.getBestPeptideMatch();
+            }
             if (parameterType.equals(DDataset.class)) {
                 return m_dataset;
             }
@@ -299,5 +314,30 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
             }
         }
         return list;
+    }
+    
+    @Override
+    public Class[] getImportantInParameterClass() {
+        Class[] classList = {DMasterQuantPeptide.class, DPeptideMatch.class};
+        return classList;
+    }
+
+    @Override
+    public String getImportantOutParameterValue() {
+        DMasterQuantPeptide mqp = (DMasterQuantPeptide) getData(false, DMasterQuantPeptide.class);
+        if (mqp != null) {
+            DPeptideInstance peptideInstance = mqp.getPeptideInstance();
+            
+            if (peptideInstance != null) {
+                DPeptideMatch pm = peptideInstance.getBestPeptideMatch();
+                if (pm != null) {
+                    Peptide peptide = pm.getPeptide();
+                    if (peptide != null) {
+                        return peptide.getSequence();
+                    }
+                }
+            }
+        }
+        return null;
     }
 }

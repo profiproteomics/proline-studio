@@ -51,14 +51,14 @@ public class DataBoxChooserDialog extends DefaultDialog {
         m_previousDatabox = null;
     }
     
-    public DataBoxChooserDialog(Window parent, AbstractDataBox previousDatabox, boolean firstView) {
+    public DataBoxChooserDialog(Window parent, AbstractDataBox previousDatabox, boolean firstView, Class[] importantInParameter) {
         super(parent, Dialog.ModalityType.APPLICATION_MODAL);
 
         setSize(800,320);
         
         setButtonVisible(BUTTON_HELP, false);
         
-        TreeMap<ParameterDistance, AbstractDataBox> dataBoxMap = DataboxManager.getDataboxManager().findCompatibleDataboxList(previousDatabox);
+        TreeMap<ParameterDistance, AbstractDataBox> dataBoxMap = DataboxManager.getDataboxManager().findCompatibleDataboxList(previousDatabox, importantInParameter);
 
         initDialog(dataBoxMap, firstView);
         

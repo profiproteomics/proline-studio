@@ -37,7 +37,6 @@ import org.openide.windows.WindowManager;
  */
 public class ExportDialog extends DefaultDialog {
 
-    
     private static ExportDialog m_singletonImageDialog = null;
     private static ExportDialog m_singletonExcelDialog = null;
     private static ExportDialog m_singletonServerDialog = null;
@@ -64,7 +63,7 @@ public class ExportDialog extends DefaultDialog {
     private JRadioButton m_noDecorated;
 
     private ExportManager m_exportManager = null;
-    
+
     public static ExportDialog getDialog(Window parent, JXTable table, String exportName) {
         if (m_singletonExcelDialog == null) {
             m_singletonExcelDialog = new ExportDialog(parent, ExporterFactory.EXPORT_TABLE);
@@ -73,6 +72,8 @@ public class ExportDialog extends DefaultDialog {
         m_singletonExcelDialog.m_table = table;
         m_singletonExcelDialog.m_exportName = exportName;
 
+        m_singletonExcelDialog.updateExportDecoration();
+        
         return m_singletonExcelDialog;
     }
 
@@ -83,7 +84,7 @@ public class ExportDialog extends DefaultDialog {
 
         m_singletonImageDialog.m_panel = panel;
         m_singletonImageDialog.m_exportName = exportName;
-
+        
         return m_singletonImageDialog;
     }
 
@@ -151,24 +152,30 @@ public class ExportDialog extends DefaultDialog {
 
         m_yesDecorated = new JRadioButton("Yes");
         m_noDecorated = new JRadioButton("No");
-        
+
         ButtonGroup group = new ButtonGroup();
         group.add(m_yesDecorated);
         group.add(m_noDecorated);
-        
-        Preferences preferences = NbPreferences.root();
-        boolean rtfSelected = preferences.getBoolean("Export_Table_Decorated", Boolean.FALSE);
-        
-        if(rtfSelected){
-            m_yesDecorated.setSelected(true);
-        }else{
-            m_noDecorated.setSelected(true);
-        }
 
+        this.updateExportDecoration();
+        
         m_decoratedPanel.add(m_yesDecorated);
         m_decoratedPanel.add(m_noDecorated);
 
         return m_decoratedPanel;
+    }
+
+    private void updateExportDecoration() {
+        if (m_yesDecorated != null && m_noDecorated != null) {
+            Preferences preferences = NbPreferences.root();
+            boolean rtfSelected = preferences.getBoolean("Export_Table_Decorated", Boolean.FALSE);
+
+            if (rtfSelected) {
+                m_yesDecorated.setSelected(true);
+            } else {
+                m_noDecorated.setSelected(true);
+            }
+        }
     }
 
     public final JPanel createExportPanel() {
@@ -437,7 +444,7 @@ public class ExportDialog extends DefaultDialog {
     public void setVisible(boolean v) {
 
         if (!v) {
-            
+
             if (m_exportManager != null) {
                 Exception e = m_exportManager.getException();
                 if (e != null) {

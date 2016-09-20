@@ -69,6 +69,18 @@ public class TaskInfoManager {
         m_curUpdate++;
     }
     
+    public synchronized TaskInfo getTaskInfoWithJMSId(String jmsId){
+        if(jmsId==null)
+            return null;
+        Iterator<TaskInfo> allTaskInfoIt = m_tasks.iterator();
+        while(allTaskInfoIt.hasNext()){
+            TaskInfo nextOne = allTaskInfoIt.next();
+            if(jmsId.equals(nextOne.getJmsMessageID()) )
+                return nextOne;
+        }
+        return null;
+    }
+    
     public synchronized void update(TaskInfo taskInfo) {
         m_taskToBeUpdated.add(taskInfo);
         m_curUpdate++;

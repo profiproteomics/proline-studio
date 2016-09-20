@@ -38,7 +38,7 @@ public class RetrieveBioSeqTask extends AbstractJMSTask {
     
     @Override
     public void taskRun() throws JMSException {
-        final JSONRPC2Request jsonRequest = new JSONRPC2Request(JMSConnectionManager.PROLINE_PROCESS_METHOD_NAME, Integer.valueOf(m_id));
+        final JSONRPC2Request jsonRequest = new JSONRPC2Request(JMSConnectionManager.PROLINE_PROCESS_METHOD_NAME, Integer.valueOf(m_taskInfo.getId()));
         jsonRequest.setNamedParams(createParams());
 
         final TextMessage message = AccessJMSManagerThread.getAccessJMSManagerThread().getSession().createTextMessage(jsonRequest.toJSONString());
@@ -46,14 +46,15 @@ public class RetrieveBioSeqTask extends AbstractJMSTask {
         /* ReplyTo = Temporary Destination Queue for Server -> Client response */
         message.setJMSReplyTo(m_replyQueue);
         message.setStringProperty(JMSConnectionManager.PROLINE_SERVICE_NAME_KEY, "proline/seq/RetrieveBioSeqForRSMs");
-        addSourceToMessage(message);
+        addSourceToMessage(message);  
+        addDescriptionToMessage(message);
         setTaskInfoRequest(message.getText());
 
         //  Send the Message        
         m_producer.send(message, Message .DEFAULT_DELIVERY_MODE, Message.DEFAULT_PRIORITY,50000);
         m_lastMsgId = message.getJMSMessageID();
         m_loggerProline.info("Message [{}] sent", m_lastMsgId);
-
+        m_taskInfo.setJmsMessageID(message.getJMSMessageID());
     }
 
     private HashMap<String, Object> createParams() {

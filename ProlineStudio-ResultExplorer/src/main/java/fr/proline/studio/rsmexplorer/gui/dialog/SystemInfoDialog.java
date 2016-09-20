@@ -95,5 +95,5 @@ public class SystemInfoDialog extends DefaultDialog {
         super.setVisible(v);
     }
 
-  
+ 
 }

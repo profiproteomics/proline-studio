@@ -3,6 +3,12 @@ package fr.proline.studio.rsmexplorer.gui;
 import fr.proline.studio.comparedata.ExtraDataType;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import fr.proline.studio.dam.taskinfo.TaskInfoManager;
+import fr.proline.studio.dpm.data.JMSNotificationMessage;
+import fr.proline.studio.dpm.task.jms.AbstractJMSCallback;
+import fr.proline.studio.dpm.task.jms.PurgeConsumer;
+import fr.proline.studio.dpm.task.util.ConnectionListener;
+import fr.proline.studio.dpm.task.util.JMSConnectionManager;
+import fr.proline.studio.dpm.task.util.ServiceNotificationListener;
 import fr.proline.studio.filter.ConvertValueInterface;
 import fr.proline.studio.filter.Filter;
 import fr.proline.studio.filter.FilterButton;
@@ -15,9 +21,10 @@ import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
-import fr.proline.studio.rsmexplorer.gui.dialog.SystemInfoDialog;
+import fr.proline.studio.rsmexplorer.gui.dialog.GetSystemInfoButtonAction;
 import fr.proline.studio.rsmexplorer.gui.renderer.PercentageRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.ScoreRenderer;
+import fr.proline.studio.table.AbstractTableAction;
 import fr.proline.studio.table.CompoundTableModel;
 import fr.proline.studio.table.DecoratedMarkerTable;
 import fr.proline.studio.table.DecoratedTableModel;
@@ -49,7 +56,7 @@ import org.openide.windows.WindowManager;
  *
  * @author JM235353
  */
-public class TasksPanel extends HourglassPanel implements DataBoxPanelInterface {
+public class TasksPanel extends HourglassPanel implements DataBoxPanelInterface, ConnectionListener {
 
     private final static ImageIcon[] PUBLIC_STATE_ICONS = { IconManager.getIcon(IconManager.IconType.HOUR_GLASS_MINI16), IconManager.getIcon(IconManager.IconType.ARROW_RIGHT_SMALL), IconManager.getIcon(IconManager.IconType.CROSS_BLUE_SMALL16), IconManager.getIcon(IconManager.IconType.TICK_SMALL), IconManager.getIcon(IconManager.IconType.CROSS_SMALL16)};
     
@@ -57,6 +64,10 @@ public class TasksPanel extends HourglassPanel implements DataBoxPanelInterface 
     private LogTable m_logTable;
 
     private boolean m_firstDisplay = true;
+     
+    private boolean m_isConnected2ServiceNotification;
+    private AbstractJMSCallback m_notifierCallback = null; //Callback to be called by ServiceNotificationListener(start listen Servive event Notif)
+    ServiceNotificationListener m_serviceListener = null;
     
     public TasksPanel() {
         
@@ -69,8 +80,59 @@ public class TasksPanel extends HourglassPanel implements DataBoxPanelInterface 
         c.weightx = 1;
         c.weighty = 1;
         add(createToolbarPanel(), c);
-
+        m_isConnected2ServiceNotification = false;
+        initListener();
     }
+    
+    /**
+     * Listener of JMS Connection state change : to connect/disconnect from topic
+     */
+    private void initListener(){
+        JMSConnectionManager.getJMSConnectionManager().addConnectionListener(this);
+        int currentState =  JMSConnectionManager.getJMSConnectionManager().getConnectionState();
+        connectionStateChanged(currentState);
+    }
+    
+    @Override
+    public void connectionStateChanged(int newStatus) {
+            switch(newStatus) {
+            case CONNECTION_DONE: 
+                if(!m_isConnected2ServiceNotification){
+                    final JMSNotificationMessage[] sysInfoResult = new JMSNotificationMessage[1];
+                    m_serviceListener = JMSConnectionManager.getJMSConnectionManager().getNotificationListener();
+                    if(m_serviceListener != null) {
+                        m_notifierCallback = new AbstractJMSCallback() {
+                            @Override
+                            public boolean mustBeCalledInAWT() {
+                                return true;
+                            }
+
+                            @Override
+                            public void run(boolean success) {
+                                if(sysInfoResult[0].getEventType().equals(JMSNotificationMessage.MessageStatus.STARTED)){
+                                    TaskInfo tiToUpdate = TaskInfoManager.getTaskInfoManager().getTaskInfoWithJMSId(sysInfoResult[0].getServerUniqueMsgId());
+                                    if(tiToUpdate != null)
+                                        tiToUpdate.setRunning(true);                                
+                                }
+                            }
+                        };
+                        m_serviceListener.addServiceNotifierCallback(m_notifierCallback, sysInfoResult);    
+                    }
+                    m_isConnected2ServiceNotification = true;
+                }
+                break;
+            case CONNECTION_FAILED :
+            case NOT_CONNECTED:
+                if(m_isConnected2ServiceNotification && m_serviceListener != null){
+                    m_serviceListener.removeCallback(m_notifierCallback);
+                    m_serviceListener = null;
+                    m_notifierCallback = null;
+                }                
+                m_isConnected2ServiceNotification = false;
+                break;                        
+        }        
+    }
+    
 
     private JPanel createToolbarPanel() {
         JPanel toolbarPanel = new JPanel();
@@ -164,7 +226,7 @@ public class TasksPanel extends HourglassPanel implements DataBoxPanelInterface 
             
         };
         EraserButton taskEraserButton = new EraserButton();
-        GetSystemInfoButton systemInfoButton = new GetSystemInfoButton();
+        GetSystemInfoButtonAction systemInfoButton = new GetSystemInfoButtonAction();
         toolbar.add(filterButton);
         toolbar.add(taskEraserButton);        
         toolbar.add(systemInfoButton);
@@ -270,7 +332,7 @@ public class TasksPanel extends HourglassPanel implements DataBoxPanelInterface 
             //getRelativizer().setMin(0);
             //getRelativizer().setMax(100);
             
-            setDefaultRenderer(Float.class, new PercentageRenderer( getDefaultRenderer(String.class)) );
+            setDefaultRenderer(Float.class, new PercentageRenderer( getDefaultRenderer(String.class)) );            
         }
 
         @Override
@@ -299,7 +361,10 @@ public class TasksPanel extends HourglassPanel implements DataBoxPanelInterface 
         
                 @Override
         public TablePopupMenu initPopupMenu() {
-            return null;
+            TablePopupMenu popupMenu = new TablePopupMenu(false);
+            popupMenu.addAction(new StopTaskAction());
+
+            return popupMenu;
         }
 
         // set as abstract
@@ -724,21 +789,48 @@ public class TasksPanel extends HourglassPanel implements DataBoxPanelInterface 
         }
     }
     
-    public class GetSystemInfoButton extends JButton implements ActionListener {
+    
+    private class StopTaskAction extends AbstractTableAction {
 
-        public GetSystemInfoButton() {
-
-            setIcon(IconManager.getIcon(IconManager.IconType.INFORMATION));
-            setToolTipText("Get System information");
-
-            addActionListener(this);
+        public StopTaskAction() {
+            super("Cancel pending task...");
         }
 
         @Override
-        public void actionPerformed(ActionEvent e) {
-            SystemInfoDialog dialog =  SystemInfoDialog.getDialog(WindowManager.getDefault().getMainWindow());
-            dialog.updateInfo();
-            dialog.setVisible(true);
+        public void actionPerformed(int col, int row, int[] selectedRows, JTable table) {           
+            int nbSelectedRset = selectedRows.length;
+            if(nbSelectedRset != 1 ){
+                JOptionPane.showMessageDialog(WindowManager.getDefault().getMainWindow(),"Only one task can be aborted at the same time","Cancel Task Error",JOptionPane.ERROR_MESSAGE);
+                return;
+            }                
+            TaskInfo currentTaskInfo = getSelectedTaskInfo();
+            if( currentTaskInfo.getPublicState() != TaskInfo.PUBLIC_STATE_WAITING){
+                JOptionPane.showMessageDialog(WindowManager.getDefault().getMainWindow(),"Only pending task can be aborted","Cancel Task Error",JOptionPane.ERROR_MESSAGE);
+                return;
+            }     
+            
+            if(fr.profi.util.StringUtils.isEmpty(currentTaskInfo.getJmsMessageID())){
+                JOptionPane.showMessageDialog(WindowManager.getDefault().getMainWindow(),"Only server side tasks can be aborted","Cancel Task Error",JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            
+            PurgeConsumer.getPurgeConsumer().clearMessage(currentTaskInfo.getJmsMessageID());
+        }
+
+        @Override
+        public void updateEnabled(int row, int col, int[] selectedRows, JTable table) {
+                               
+            boolean enable = true;
+            if(selectedRows.length != 1 )
+                enable = false;
+            else {
+                TaskInfo currentTaskInfo = getSelectedTaskInfo();
+                if( currentTaskInfo.getPublicState() != TaskInfo.PUBLIC_STATE_WAITING){
+                    enable = false;
+                }
+            }
+            
+            setEnabled(enable);            
         }
     }
 }

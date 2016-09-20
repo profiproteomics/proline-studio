@@ -25,14 +25,14 @@ persistenceType = TopComponent.PERSISTENCE_ALWAYS)
 @TopComponent.OpenActionRegistration(displayName = "#CTL_TaskLogAction",
 preferredID = "TaskLogTopComponent")
 @NbBundle.Messages({
-    "CTL_TaskLogAction=Tasks Log",
-    "CTL_TaskLogTopComponent=Tasks Log",
-    "HINT_TaskLogTopComponent=Tasks Log"
+    "CTL_TaskLogAction=Logs",
+    "CTL_TaskLogTopComponent=Logs",
+    "HINT_TaskLogTopComponent=Logs"
 })
 public class TaskLogTopComponent extends MultiDataBoxViewerTopComponent {
     
     public TaskLogTopComponent() {
-        super(WindowBoxFactory.getSystemMonitoringWindowBox(),"Task and System infos");
+        super(WindowBoxFactory.getSystemMonitoringWindowBox(),"Logs");
         
         setName(Bundle.CTL_TaskLogTopComponent());
         setToolTipText(Bundle.HINT_TaskLogTopComponent());

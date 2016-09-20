@@ -48,6 +48,7 @@ public class TaskInfo implements Comparable<TaskInfo> {
     private long m_duration = -1; // used for services where there is no start or end time
     
     private int m_id;
+    private String m_jmsMessageID = null;
     
     private boolean m_askBeforeExitingApp;
     
@@ -73,9 +74,7 @@ public class TaskInfo implements Comparable<TaskInfo> {
         m_id = INC_ID++;
         
         m_success = true;
-        m_taskError = null;
-        
-       
+        m_taskError = null;      
         
         m_askTimestamp = System.currentTimeMillis();  
     }
@@ -83,7 +82,15 @@ public class TaskInfo implements Comparable<TaskInfo> {
     public TaskInfo(TaskInfo src) {
         copy(src, this);
     }
-    
+
+    public String getJmsMessageID() {
+        return m_jmsMessageID;
+    }
+   
+    public void setJmsMessageID(String jmsMsgId){
+        this.m_jmsMessageID = jmsMsgId;
+    }
+
     public void setRunning(boolean saveTimestamp) {
         
         if ((m_state == STATE_RUNNING) || (m_updateState == STATE_RUNNING) || (m_updateState == STATE_FINISHED) || (m_updateState == STATE_ABORTED)) {
@@ -317,6 +324,7 @@ public class TaskInfo implements Comparable<TaskInfo> {
         to.m_percentage = from.m_percentage;
         to.m_requestContent = from.m_requestContent;
         to.m_requestURL = from.m_requestURL;      
+        to.m_jmsMessageID = from.m_jmsMessageID;
     }
     
     @Override

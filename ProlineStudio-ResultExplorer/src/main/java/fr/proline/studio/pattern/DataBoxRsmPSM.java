@@ -28,7 +28,7 @@ public class DataBoxRsmPSM extends AbstractDataBox {
     }
     
     public DataBoxRsmPSM(boolean mergedData) {
-        super(DataboxType.DataBoxRsmPSM);
+        super(DataboxType.DataBoxRsmPSM, DataboxStyle.STYLE_RSM);
 
         m_mergedData = mergedData;
         

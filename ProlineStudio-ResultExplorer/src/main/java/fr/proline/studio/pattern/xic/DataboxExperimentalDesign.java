@@ -20,7 +20,7 @@ public class DataboxExperimentalDesign extends AbstractDataBox {
     
     
     public DataboxExperimentalDesign() { 
-        super(DataboxType.DataboxExperimentalDesign);
+        super(DataboxType.DataboxExperimentalDesign, DataboxStyle.STYLE_XIC);
         
         // Name of this databox
         m_typeName = "Experimental Design";

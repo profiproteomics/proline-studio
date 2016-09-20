@@ -20,7 +20,7 @@ public class DataBoxAdjacencyMatrixChoice extends AbstractDataBox {
     private boolean dataLoadedForRSM = false;
     
     public DataBoxAdjacencyMatrixChoice() {
-        super(DataboxType.DataBoxAdjacencyMatrixChoice);
+        super(DataboxType.DataBoxAdjacencyMatrixChoice, DataboxStyle.STYLE_RSM);
         
         // Name of this databox
         m_typeName = "Proteins Adjacency Matrices";

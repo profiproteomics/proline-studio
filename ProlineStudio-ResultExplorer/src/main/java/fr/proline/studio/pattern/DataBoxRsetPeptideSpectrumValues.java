@@ -20,7 +20,7 @@ public class DataBoxRsetPeptideSpectrumValues extends AbstractDataBox {
     private DPeptideMatch m_previousPeptideMatch = null;
     
     public DataBoxRsetPeptideSpectrumValues() {
-        super(DataboxType.DataBoxRsetPeptideSpectrumValues);
+        super(DataboxType.DataBoxRsetPeptideSpectrumValues, DataboxStyle.STYLE_RSET);
 
         // Name of this databox
         m_typeName = "Spectrum Values";

@@ -10,7 +10,7 @@ import java.awt.Image;
 public class DataBoxImage extends AbstractDataBox {
 
     public DataBoxImage() {
-        super(DataboxType.DataBoxImage);
+        super(DataboxType.DataBoxImage, DataboxStyle.STYLE_UNKNOWN);
 
         // Name of this databox
         m_typeName = "Image Display";

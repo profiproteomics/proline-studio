@@ -33,7 +33,7 @@ public class DataboxRsetPSMForMsQuery extends AbstractDataBox{
     
     public DataboxRsetPSMForMsQuery(boolean mergedData) {
         
-        super(DataboxType.DataBoxRsetPSMForMsQuery);
+        super(DataboxType.DataBoxRsetPSMForMsQuery, DataboxStyle.STYLE_RSET);
         
         m_mergedData = mergedData;
         

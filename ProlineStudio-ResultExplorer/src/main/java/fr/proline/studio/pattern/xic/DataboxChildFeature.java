@@ -42,7 +42,7 @@ public class DataboxChildFeature extends AbstractDataBox {
     private List<List<List<Peak>>> m_peakList;
 
     public DataboxChildFeature() {
-        super(DataboxType.DataboxXicChildFeature);
+        super(DataboxType.DataboxXicChildFeature, DataboxStyle.STYLE_XIC);
 
         // Name of this databox
         m_typeName = "XIC Features";

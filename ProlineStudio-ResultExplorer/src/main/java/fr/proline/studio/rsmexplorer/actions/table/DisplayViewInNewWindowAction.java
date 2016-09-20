@@ -40,19 +40,14 @@ public class DisplayViewInNewWindowAction extends AbstractAction {
 
         dataBoxFrozenCopy.addNextDataBox(m_destinationBox);
 
-        char windowType = ' ';
-        if (m_sourceBox.getData(false, XicMode.class) != null) {
-            windowType = WindowSavedManager.SAVE_WINDOW_FOR_QUANTI;
-        } else if (m_sourceBox.getData(false, ResultSummary.class) != null) {
-            windowType = WindowSavedManager.SAVE_WINDOW_FOR_RSM;
-        } else if (m_sourceBox.getData(false, ResultSet.class) != null) {
-            windowType = WindowSavedManager.SAVE_WINDOW_FOR_RSET;
-        }
+
         String dataName = m_sourceBox.getImportantOutParameterValue();
         if ((dataName !=null) && (dataName.length()>12)) {
             dataName = dataName.substring(0,10)+"...";
         }
-        final WindowBox wbox = WindowBoxFactory.getUserDefinedWindowBox(dataName, dataName+": "+m_destinationBox.getDescription(), m_destinationBox, false, false, windowType);
+        
+        boolean isXic = (m_sourceBox.getStyle() == AbstractDataBox.DataboxStyle.STYLE_XIC);
+        final WindowBox wbox = WindowBoxFactory.getUserDefinedWindowBox(dataName, dataName+": "+m_destinationBox.getDescription(), m_destinationBox, false, isXic, ' ');
 
         // open a window to display the window box
         DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);

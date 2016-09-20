@@ -40,7 +40,7 @@ public class DataboxMapAlignment extends AbstractDataBox {
     private List<ProcessedMap> m_allMaps;
     
     public DataboxMapAlignment() {
-        super(DataboxType.DataBoxMapAlignment);
+        super(DataboxType.DataBoxMapAlignment, DataboxStyle.STYLE_XIC);
 
         // Name of this databox
         m_typeName = "XIC Map Alignment";

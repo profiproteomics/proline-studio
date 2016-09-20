@@ -23,7 +23,7 @@ public class DataBoxMSQueriesForRSM extends AbstractDataBox{
     private Map<Long, Integer> m_nbPeptideMatchesByMsQueryIdMap;
     
     public DataBoxMSQueriesForRSM() {
-        super(DataboxType.DataBoxMSQueriesForRSM);
+        super(DataboxType.DataBoxMSQueriesForRSM, DataboxStyle.STYLE_RSM);
 
         // Name of this databox
         m_typeName = "MSQueries";

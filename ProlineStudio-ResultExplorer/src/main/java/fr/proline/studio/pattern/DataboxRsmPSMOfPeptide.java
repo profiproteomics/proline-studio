@@ -25,7 +25,7 @@ public class DataboxRsmPSMOfPeptide extends AbstractDataBox {
     }
     
     public DataboxRsmPSMOfPeptide(boolean mergedData) {
-        super(DataboxType.DataboxRsmPSMOfPeptide);
+        super(DataboxType.DataboxRsmPSMOfPeptide, DataboxStyle.STYLE_RSM);
 
         m_mergedData = mergedData;
         

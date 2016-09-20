@@ -15,7 +15,7 @@ import fr.proline.studio.rsmexplorer.gui.RsmProteinAndPeptideSequencePanel;
 public class DataBoxRsmProteinAndPeptideSequence extends AbstractDataBox {
 
     public DataBoxRsmProteinAndPeptideSequence() {
-        super(DataboxType.DataBoxRsmProteinAndPeptideSequence);
+        super(DataboxType.DataBoxRsmProteinAndPeptideSequence, DataboxStyle.STYLE_RSM);
 
         // Name of this databox
         m_typeName = "Protein Sequence";

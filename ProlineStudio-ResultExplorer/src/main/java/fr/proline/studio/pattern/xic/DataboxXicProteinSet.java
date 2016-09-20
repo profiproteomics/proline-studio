@@ -42,7 +42,7 @@ public class DataboxXicProteinSet extends AbstractDataBox {
     private List<ProcessedMap> m_allMaps;
 
     public DataboxXicProteinSet() {
-        super(DataboxType.DataboxXicProteinSet);
+        super(DataboxType.DataboxXicProteinSet, DataboxStyle.STYLE_XIC);
 
         // Name of this databox
         m_typeName = "Quanti Protein Sets";
@@ -87,6 +87,7 @@ public class DataboxXicProteinSet extends AbstractDataBox {
 
     public void setXICMode(boolean isXICMode) {
         m_isXICMode = isXICMode;
+        m_style = (m_isXICMode) ? DataboxStyle.STYLE_XIC : DataboxStyle.STYLE_SC;
         if (m_panel != null) {
             m_panel.addSingleValue(new XicMode((isXICMode)));
         }

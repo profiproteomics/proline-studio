@@ -11,7 +11,7 @@ public class DataBoxTaskDescription extends AbstractDataBox {
 
     public DataBoxTaskDescription() {
 
-        super(DataboxType.DataBoxTaskDescription);
+        super(DataboxType.DataBoxTaskDescription, DataboxStyle.STYLE_UNKNOWN);
         
         // Name of this databox
         m_typeName = "Task";

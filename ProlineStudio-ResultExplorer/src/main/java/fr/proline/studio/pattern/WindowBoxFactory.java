@@ -31,17 +31,20 @@ public class WindowBoxFactory {
         boxes[0] = databox;
         boxes[0].setDataName(dataName);
 
-        IconManager.IconType iconType = IconManager.IconType.DATASET;
+        
+        Image icon = null;
         if (windowType == WindowSavedManager.SAVE_WINDOW_FOR_RSM) {
-            iconType = isDecoy ? IconManager.IconType.DATASET_RSM_DECOY : IconManager.IconType.DATASET_RSM;
+            icon = IconManager.getImage(isDecoy ? IconManager.IconType.DATASET_RSM_DECOY : IconManager.IconType.DATASET_RSM);
         } else if (windowType == WindowSavedManager.SAVE_WINDOW_FOR_RSET){
-            iconType = isDecoy ? IconManager.IconType.DATASET_RSET_DECOY : IconManager.IconType.DATASET_RSET;
-        }else if (windowType == WindowSavedManager.SAVE_WINDOW_FOR_QUANTI){
-            iconType = isXIC ? IconManager.IconType.QUANT_XIC : IconManager.IconType.QUANT_SC;
+            icon = IconManager.getImage(isDecoy ? IconManager.IconType.DATASET_RSET_DECOY : IconManager.IconType.DATASET_RSET);
+        } else if (windowType == WindowSavedManager.SAVE_WINDOW_FOR_QUANTI){
+            icon = IconManager.getImage(isXIC ? IconManager.IconType.QUANT_XIC : IconManager.IconType.QUANT_SC);
+        } else {
+            icon = databox.getDefaultIcon();
         }
 
         
-        WindowBox winBox = new WindowBox(windowName, generatePanel(boxes), boxes[0], IconManager.getImage(iconType));
+        WindowBox winBox = new WindowBox(windowName, generatePanel(boxes), boxes[0], icon);
 
         return winBox;
     }

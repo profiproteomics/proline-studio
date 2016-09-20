@@ -13,7 +13,7 @@ public class DataBoxRsetPeptideFragmentation extends AbstractDataBox {
     private DPeptideMatch m_previousPeptideMatch = null;
 
     public DataBoxRsetPeptideFragmentation() {
-        super(DataboxType.DataBoxRsetPeptideFragmentation);
+        super(DataboxType.DataBoxRsetPeptideFragmentation, DataboxStyle.STYLE_RSET);
         
         // Name of this databox
         m_typeName = "Fragmentation Table";

@@ -24,7 +24,7 @@ public class DataBoxRsmAllProteinSet extends AbstractDataBox {
 
     
     public DataBoxRsmAllProteinSet() { 
-        super(DataboxType.DataBoxRsmAllProteinSet);
+        super(DataboxType.DataBoxRsmAllProteinSet, DataboxStyle.STYLE_RSM);
         
         // Name of this databox
         m_typeName = "Protein Set";

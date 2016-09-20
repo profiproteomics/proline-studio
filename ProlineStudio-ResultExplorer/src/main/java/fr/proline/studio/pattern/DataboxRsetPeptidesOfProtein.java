@@ -31,7 +31,7 @@ public class DataboxRsetPeptidesOfProtein extends AbstractDataBox {
     }
     
     public DataboxRsetPeptidesOfProtein(boolean mergedData) {
-        super(DataboxType.DataboxRsetPeptidesOfProtein);
+        super(DataboxType.DataboxRsetPeptidesOfProtein, DataboxStyle.STYLE_RSET);
         
         m_mergedData = mergedData;
         

@@ -25,7 +25,7 @@ public class DataBoxRsmPeptidesOfProtein extends AbstractDataBox {
 
     
     public DataBoxRsmPeptidesOfProtein() {
-        super(DataboxType.DataBoxRsmPeptidesOfProtein);
+        super(DataboxType.DataBoxRsmPeptidesOfProtein, DataboxStyle.STYLE_RSM);
 
         // Name of this databox
         m_typeName = "Peptides";

@@ -39,7 +39,7 @@ public class DataboxRSMPSMForMsQuery extends AbstractDataBox{
     
     public DataboxRSMPSMForMsQuery(boolean mergedData) {
         
-        super(DataboxType.DataBoxRSMPSMForMsQuery);
+        super(DataboxType.DataBoxRSMPSMForMsQuery, DataboxStyle.STYLE_RSM);
         
         m_mergedData = mergedData;
         

@@ -24,7 +24,7 @@ public class DataBoxPTMProteinSite extends AbstractDataBox {
 
     
     public DataBoxPTMProteinSite() { 
-        super(DataboxType.DataBoxPTMProteinSite);
+        super(DataboxType.DataBoxPTMProteinSite, DataboxStyle.STYLE_RSM);
         
         // Name of this databox
         m_typeName = "PTM Protein Sites";

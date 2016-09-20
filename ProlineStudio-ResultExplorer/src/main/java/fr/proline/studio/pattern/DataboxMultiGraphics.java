@@ -21,7 +21,7 @@ public class DataboxMultiGraphics extends AbstractDataBox  {
     }
     
     public DataboxMultiGraphics(boolean defaultLocked, boolean canChooseColor) {
-         super(DataboxType.DataboxMultiGraphics);
+         super(DataboxType.DataboxMultiGraphics, DataboxStyle.STYLE_UNKNOWN);
 
          m_defaultLocked = defaultLocked;
          m_canChooseColor = canChooseColor ;

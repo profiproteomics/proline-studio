@@ -13,7 +13,7 @@ import fr.proline.studio.rsmexplorer.adjacencymatrix.visualize.MatrixPanel;
 public class DataBoxAdjacencyMatrix extends AbstractDataBox {
     
     public DataBoxAdjacencyMatrix() {
-        super(DataboxType.DataBoxAdjacencyMatrix);
+        super(DataboxType.DataBoxAdjacencyMatrix, DataboxStyle.STYLE_RSM);
         
         // Name of this databox
         m_typeName = "Proteins Adjacency Matrix";

@@ -12,7 +12,7 @@ public class DataBoxFrozenCopy extends AbstractDataBox {
     private HashMap<Class, HashMap<Boolean, Object>> m_frozenDataMap = new HashMap<>();
     
     public DataBoxFrozenCopy(AbstractDataBox srcDataBox) {
-        super(DataboxType.DataBoxMSQueriesForRSM);
+        super(DataboxType.DataBoxMSQueriesForRSM, srcDataBox.getStyle());
         
         AvailableParameters avalaibleParameters = new AvailableParameters(srcDataBox);
         

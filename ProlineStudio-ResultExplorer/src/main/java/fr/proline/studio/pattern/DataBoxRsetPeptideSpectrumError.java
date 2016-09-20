@@ -14,7 +14,7 @@ public class DataBoxRsetPeptideSpectrumError extends AbstractDataBox {
     private DPeptideMatch m_previousPeptideMatch = null;
     
     public DataBoxRsetPeptideSpectrumError() {
-        super(DataboxType.DataBoxRsetPeptideSpectrumError);
+        super(DataboxType.DataBoxRsetPeptideSpectrumError, DataboxStyle.STYLE_RSET);
         
         // Name of this databox
         m_typeName = "Spectrum Error";

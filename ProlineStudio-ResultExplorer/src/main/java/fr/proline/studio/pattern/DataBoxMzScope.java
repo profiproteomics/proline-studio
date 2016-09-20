@@ -29,7 +29,7 @@ public class DataBoxMzScope extends AbstractDataBox{
     private String m_mzdbDir;
     
      public DataBoxMzScope() {
-        super(DataboxType.DataBoxMzScope);
+        super(DataboxType.DataBoxMzScope, DataboxStyle.STYLE_UNKNOWN);
 
         // Name of this databox
         m_typeName = "MzScope";

@@ -14,7 +14,7 @@ import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphNode;
 public class DataboxDataAnalyzer extends AbstractDataBox {
 
     public DataboxDataAnalyzer() {
-        super(DataboxType.DataboxDataAnalyzer);
+        super(DataboxType.DataboxDataAnalyzer, DataboxStyle.STYLE_UNKNOWN);
 
         // Name of this databox
         m_typeName = "Data Analyzer";

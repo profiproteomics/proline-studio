@@ -26,7 +26,7 @@ public class DataboxRsmPSMOfProteinSet extends AbstractDataBox {
     }
     
     public DataboxRsmPSMOfProteinSet(boolean mergedData) {
-        super(DataboxType.DataboxRsmPSMOfProteinSet);
+        super(DataboxType.DataboxRsmPSMOfProteinSet, DataboxStyle.STYLE_RSM);
 
         m_mergedData = mergedData;
         

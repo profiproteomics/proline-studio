@@ -15,7 +15,7 @@ public class DataBoxSystemTasks extends AbstractDataBox  {
     
       
     public DataBoxSystemTasks() {
-        super(DataboxType.DataBoxSystemTasks);
+        super(DataboxType.DataBoxSystemTasks, DataboxStyle.STYLE_UNKNOWN);
         // Name of this databox
         m_typeName = "System Tasks List";
     }

@@ -34,7 +34,7 @@ public class DataboxPSMOfMasterQuantPeptide extends AbstractDataBox {
     private QuantChannelInfo m_quantChannelInfo;
 
     public DataboxPSMOfMasterQuantPeptide() {
-        super(DataboxType.DataboxPSMOfMasterQuantPeptide);
+        super(DataboxType.DataboxPSMOfMasterQuantPeptide, DataboxStyle.STYLE_XIC);
 
         // Name of this databox
         m_typeName = "PSM / Quanti. Peptide";

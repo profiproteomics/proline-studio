@@ -23,7 +23,7 @@ public class DataBoxRsetPeptideSpectrum extends AbstractDataBox {
     private PeptideFragmentationData m_fragmentationData = null;
     
     public DataBoxRsetPeptideSpectrum() {
-        super(DataboxType.DataBoxRsetPeptideSpectrum);
+        super(DataboxType.DataBoxRsetPeptideSpectrum, DataboxStyle.STYLE_RSET);
 
         // Name of this databox
         m_typeName = "Spectrum";

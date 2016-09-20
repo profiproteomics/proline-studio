@@ -25,7 +25,7 @@ public class DataBoxMSQueriesForRset extends AbstractDataBox{
     private Map<Long, Integer> m_nbPeptideMatchesByMsQueryIdMap;
     
     public DataBoxMSQueriesForRset() {
-        super(DataboxType.DataBoxMSQueriesForRset);
+        super(DataboxType.DataBoxMSQueriesForRset, DataboxStyle.STYLE_RSET);
 
         // Name of this databox
         m_typeName = "MSQueries";

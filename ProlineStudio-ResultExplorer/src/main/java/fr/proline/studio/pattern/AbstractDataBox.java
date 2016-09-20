@@ -15,12 +15,14 @@ import fr.proline.studio.pattern.xic.DataboxXicPeptideSet;
 import fr.proline.studio.pattern.xic.DataboxXicProteinSet;
 import fr.proline.studio.progress.ProgressInterface;
 import fr.proline.studio.python.data.TableInfo;
+import fr.proline.studio.utils.IconManager;
 import java.awt.Image;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import javax.swing.Icon;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import org.jdesktop.swingx.JXTable;
@@ -67,7 +69,16 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
     
     private Image m_icon;
     
+    protected DataboxStyle m_style;
     protected DataboxType m_type;
+    
+    public enum DataboxStyle {
+        STYLE_UNKNOWN,
+        STYLE_RSM,
+        STYLE_RSET,
+        STYLE_XIC,
+        STYLE_SC
+    }
     
     public enum DataboxType {
         DataBoxRsetAll(0),
@@ -238,8 +249,9 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
         
     }
     
-    public AbstractDataBox(DataboxType type) {
+    public AbstractDataBox(DataboxType type, DataboxStyle style) {
         m_type = type;
+        m_style = style;
         
         // Register possible out parameters
         GroupParameter outParameter = new GroupParameter();
@@ -249,6 +261,10 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
     
     public DataboxType getType() {
         return m_type;
+    }
+    
+    public DataboxStyle getStyle() {
+        return m_style;
     }
     
     public int getId() {
@@ -264,6 +280,22 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
     
     public Image getIcon() {
         return m_icon;
+    }
+    
+    public Image getDefaultIcon() {
+        switch(m_style) {
+            case STYLE_RSET:
+                return IconManager.getImage(IconManager.IconType.DATASET_RSET);
+            case STYLE_RSM:
+                return IconManager.getImage(IconManager.IconType.DATASET_RSM);
+            case STYLE_XIC:
+                return IconManager.getImage(IconManager.IconType.QUANT_XIC);
+            case STYLE_SC:
+                return IconManager.getImage(IconManager.IconType.QUANT_SC);
+            case STYLE_UNKNOWN:
+                return null;
+        }
+        return null;
     }
     
     protected void deleteThis() {

@@ -24,7 +24,7 @@ public class DataBoxRsmProteinsOfProteinSet extends AbstractDataBox {
     private long m_proteinSetCurId = -1;
 
     public DataBoxRsmProteinsOfProteinSet() {
-        super(DataboxType.DataBoxRsmProteinsOfProteinSet);
+        super(DataboxType.DataBoxRsmProteinsOfProteinSet, DataboxStyle.STYLE_RSM);
 
         // Name of this databox
         m_typeName = "Proteins";

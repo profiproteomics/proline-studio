@@ -19,7 +19,7 @@ public class DataboxGeneric extends AbstractDataBox {
     private final boolean m_removeStripAndSort;
     
     public DataboxGeneric(String dataName, String typeName, boolean removeStripAndSort) {
-        super(DataboxType.DataboxCompareResult);
+        super(DataboxType.DataboxCompareResult, DataboxStyle.STYLE_UNKNOWN);
         
         // Name of this databox
         m_dataName = dataName;

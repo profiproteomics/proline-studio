@@ -19,7 +19,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * RSMs Weighted Spectral Count result DataBox.
  *
  * @author JM235353
  */
@@ -31,15 +30,9 @@ public class DataBoxRsetMSDiag extends AbstractDataBox {
 
     protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
 
-    /**
-     *
-     * @param name : title of the created Windows
-     * @param readData : specify if the spectral count to display has to be
-     * retrieve from computing (false) or read back operation (true)
-     * @return
-     */
+
     public DataBoxRsetMSDiag(HashMap<String, String> resultMessageHashMap) {
-        super(DataboxType.DataboxRsetMSDiag);
+        super(DataboxType.DataboxRsetMSDiag, DataboxStyle.STYLE_RSET);
 
         m_messages_back = new ArrayList<>(2); // will contain the return data for msdiag (0: settings: 1:results)
 

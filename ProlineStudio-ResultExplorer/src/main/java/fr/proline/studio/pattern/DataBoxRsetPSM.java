@@ -29,7 +29,7 @@ public class DataBoxRsetPSM extends AbstractDataBox {
     }
     
     public DataBoxRsetPSM(boolean mergedData) {
-        super(DataboxType.DataBoxRsetPSM);
+        super(DataboxType.DataBoxRsetPSM, DataboxStyle.STYLE_RSET);
 
         m_mergedData = mergedData;
         

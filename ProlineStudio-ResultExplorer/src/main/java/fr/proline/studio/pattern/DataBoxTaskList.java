@@ -17,7 +17,7 @@ public class DataBoxTaskList extends AbstractDataBox {
     private Timer m_updateTimer = null;
     
     public DataBoxTaskList() {
-        super(DataboxType.DataBoxTaskList);
+        super(DataboxType.DataBoxTaskList, DataboxStyle.STYLE_UNKNOWN);
         
         // Name of this databox
         m_typeName = "User Tasks Log";

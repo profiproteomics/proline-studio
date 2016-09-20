@@ -20,7 +20,7 @@ public class DataBoxRsetAll extends AbstractDataBox {
     private Project m_project = null;
     
     public DataBoxRsetAll() {
-        super(DataboxType.DataBoxRsetAll);
+        super(DataboxType.DataBoxRsetAll, DataboxStyle.STYLE_RSET);
         
         
         // Name of this databox

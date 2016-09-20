@@ -2,6 +2,7 @@ package fr.proline.studio.pattern;
 
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.python.data.TableInfo;
+import fr.proline.studio.utils.IconManager;
 import java.awt.Image;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -20,12 +21,29 @@ public class WindowBox {
     private final SplittedPanelContainer m_windowPanel;
     private final AbstractDataBox m_entryBox;
 
-    
     public WindowBox(String name, SplittedPanelContainer windowPanel, AbstractDataBox entryBox, Image icon) {
         m_name = name;
         m_windowPanel = windowPanel;
         m_entryBox = entryBox;
-        m_entryBox.setIcon(icon);
+        if (icon == null) {
+            switch (entryBox.getStyle()) {
+                case STYLE_RSET:
+                    icon = IconManager.getImage(IconManager.IconType.DATASET_RSET);
+                    break;
+                case STYLE_RSM:
+                    icon = IconManager.getImage(IconManager.IconType.DATASET_RSM);
+                    break;
+                case STYLE_XIC:
+                    icon = IconManager.getImage(IconManager.IconType.QUANT_XIC);
+                    break;    
+                case STYLE_SC:
+                    icon = IconManager.getImage(IconManager.IconType.QUANT_SC);
+                    break;    
+            }
+        }
+        
+        m_entryBox.setIcon(icon); 
+        
     }
   
     public String getName(){

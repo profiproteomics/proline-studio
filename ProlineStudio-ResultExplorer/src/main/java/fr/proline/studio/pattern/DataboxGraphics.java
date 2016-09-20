@@ -19,7 +19,7 @@ public class DataboxGraphics extends AbstractDataBox  {
     }
     
     public DataboxGraphics(boolean defaultLocked) {
-         super(DataboxType.DataboxGraphics);
+         super(DataboxType.DataboxGraphics, DataboxStyle.STYLE_UNKNOWN);
 
          m_defaultLocked = defaultLocked;
          

@@ -47,7 +47,7 @@ public class DataboxXicPeptideIon extends AbstractDataBox {
     private boolean m_isXICMode = true;
 
     public DataboxXicPeptideIon() {
-        super(DataboxType.DataboxXicPeptideIon);
+        super(DataboxType.DataboxXicPeptideIon, DataboxStyle.STYLE_XIC);
 
         // Name of this databox
         m_typeName = "Quanti. Peptides Ions";
@@ -196,6 +196,7 @@ public class DataboxXicPeptideIon extends AbstractDataBox {
 
     public void setXICMode(boolean isXICMode) {
         m_isXICMode = isXICMode;
+        m_style = (m_isXICMode) ? DataboxStyle.STYLE_XIC : DataboxStyle.STYLE_SC;
         if (m_panel != null) {
             m_panel.addSingleValue(new XicMode((isXICMode)));
         }

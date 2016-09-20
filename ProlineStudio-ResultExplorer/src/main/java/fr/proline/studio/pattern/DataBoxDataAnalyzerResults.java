@@ -10,7 +10,7 @@ import fr.proline.studio.rsmexplorer.gui.calc.ProcessEngineInfo;
 public class DataBoxDataAnalyzerResults extends AbstractDataBox {
 
     public DataBoxDataAnalyzerResults() {
-        super(DataboxType.DataBoxDataAnalyzerResults);
+        super(DataboxType.DataBoxDataAnalyzerResults, DataboxStyle.STYLE_UNKNOWN);
 
         // Name of this databox
         m_typeName = "Data Analyzer Results";

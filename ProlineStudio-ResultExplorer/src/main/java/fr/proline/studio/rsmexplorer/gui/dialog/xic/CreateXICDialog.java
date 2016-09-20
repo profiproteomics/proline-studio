@@ -448,14 +448,17 @@ public class CreateXICDialog extends DefaultDialog {
                 ArrayList<String> splAnalysisNames = new ArrayList<>();
                 while(identRSMs.hasMoreElements()){
                     //VD TODO TEST child type
-                    XICBiologicalSampleAnalysisNode qChannelName = (XICBiologicalSampleAnalysisNode) identRSMs.nextElement();
-                    String quantChName = qChannelName.getQuantChannelName();
+                    XICBiologicalSampleAnalysisNode qChannelNode = (XICBiologicalSampleAnalysisNode) identRSMs.nextElement();
+                    String quantChName = qChannelNode.getQuantChannelName();
+                    if ((quantChName == null) || (quantChName.isEmpty())) {
+                        quantChName = qChannelNode.getData().getName();
+                    }
                     splAnalysisNames.add(quantChName);
-                    if(!DataSetData.class.isInstance(qChannelName.getData())){
+                    if(!DataSetData.class.isInstance(qChannelNode.getData())){
                         errorMsg = "Invalide Sample Analysis specified ";
                         break;
                     }
-                    _rsmIdBySampleAnalysis.put(quantChName, ((DataSetData)qChannelName.getData()).getDataset().getResultSummaryId());                            
+                    _rsmIdBySampleAnalysis.put(quantChName, ((DataSetData)qChannelNode.getData()).getDataset().getResultSummaryId());                            
                 }
                 _samplesAnalysisBySample.put(sampleName, splAnalysisNames);
             } //End go through group's sample

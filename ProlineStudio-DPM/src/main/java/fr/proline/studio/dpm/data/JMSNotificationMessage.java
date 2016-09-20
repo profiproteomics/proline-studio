@@ -17,6 +17,7 @@ public class JMSNotificationMessage {
     private String m_serviceName;
     private String m_serviceVersion;
     private String m_serviceSource;
+    private String m_serviceDescr;
     private String m_serviceInfo;
     private Date m_eventTime;
     private String m_jmsMsgId;
@@ -59,11 +60,12 @@ public class JMSNotificationMessage {
     };
     
     
-    public JMSNotificationMessage(String serviceName, String serviceVersion, String serviceSource,
+    public JMSNotificationMessage(String serviceName, String serviceVersion, String serviceSource, String serviceDescription,
             String serviceInfo, Long  eventTimestamp, String jmsMsgId, String jsonRPCId, MessageStatus eventType ){
         m_serviceName = serviceName;
         m_serviceVersion = serviceVersion;
         m_serviceSource = serviceSource;
+        m_serviceDescr = serviceDescription;
         m_jmsMsgId = jmsMsgId;
         m_jsonRPCMsgId = jsonRPCId;
         m_serviceInfo = serviceInfo;
@@ -78,6 +80,10 @@ public class JMSNotificationMessage {
     
     public String getServiceName() {
         return m_serviceName;
+    }
+    
+    public String getServiceDescription(){
+        return m_serviceDescr;
     }
 
     public Date getEventDate() {

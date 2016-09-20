@@ -1,5 +1,7 @@
 package fr.proline.studio.dpm.task.jms;
 
+import com.thetransactioncompany.jsonrpc2.JSONRPC2Error;
+import com.thetransactioncompany.jsonrpc2.JSONRPC2Response;
 import fr.proline.core.orm.uds.UserAccount;
 import fr.proline.studio.dam.DatabaseDataManager;
 import fr.proline.studio.dam.taskinfo.AbstractLongTask;
@@ -37,7 +39,7 @@ public abstract class AbstractJMSTask  extends AbstractLongTask implements Messa
         
     protected JMSState m_currentState = null;
     
-    protected int m_id;
+//    protected int m_id;
     protected TaskError m_taskError = null;
     private long m_startRun = -1;
     
@@ -59,7 +61,7 @@ public abstract class AbstractJMSTask  extends AbstractLongTask implements Messa
         super(taskInfo);
         
         m_callback = callback;
-        m_id = m_idIncrement++;
+//        m_id = m_idIncrement++;
         m_synchronous = false;
     }
        
@@ -67,7 +69,7 @@ public abstract class AbstractJMSTask  extends AbstractLongTask implements Messa
         super(taskInfo);
         
         m_callback = callback;
-        m_id = m_idIncrement++;
+//        m_id = m_idIncrement++;
         m_synchronous = synchronous;
     }
     
@@ -148,6 +150,10 @@ public abstract class AbstractJMSTask  extends AbstractLongTask implements Messa
 
     }
     
+    protected void addDescriptionToMessage(Message message) throws JMSException {    
+        message.setStringProperty(JMSConnectionManager.PROLINE_SERVICE_DESCR_KEY, m_taskInfo.getTaskDescription());
+    }
+    
     /**
      * Called when the task is done
      * @param jmsMessage
@@ -175,8 +181,15 @@ public abstract class AbstractJMSTask  extends AbstractLongTask implements Messa
         if(jmsMessage != null) {
             m_loggerProline.info("Receiving message n° " + MESSAGE_COUNT_SEQUENCE.incrementAndGet() + " : " + JMSMessageUtil.formatMessage(jmsMessage));
         
-            try {
+            try {                    
                 taskDone(jmsMessage);
+            } catch (JSONRPC2Error jsonErr) {
+                m_currentState = JMSState.STATE_FAILED;
+                m_loggerProline.error("Error handling JMS Message", jsonErr);
+                if(jsonErr.getCode() == JMSConnectionManager.JMS_CANCELLED_TASK_ERROR_CODE){
+                    m_taskInfo.setAborted();               
+                }
+                m_taskError = new TaskError(jsonErr);                    
             } catch (Exception e) {
                 m_currentState = JMSState.STATE_FAILED;
                 m_loggerProline.error("Error handling JMS Message", e);

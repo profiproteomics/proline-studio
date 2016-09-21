@@ -49,11 +49,6 @@ public final class HelpAction extends AbstractAction implements /*LookupListener
 
         Frame f = WindowManager.getDefault().getMainWindow();
 
-        ApplicationSettingsDialog optionsDialog = ApplicationSettingsDialog.getDialog(f);
-        if (optionsDialog.isVisible()) {
-            return;
-        }
-
         HelpDialog dialog = HelpDialog.getDialog(f);
         if (dialog.isVisible()) {
             return;

@@ -69,8 +69,9 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
         setSize(new Dimension(640, 480));
         this.setMinimumSize(new Dimension(480, 360));
         setResizable(true);
-
-        setButtonVisible(BUTTON_HELP, false);
+        
+        this.setHelpURL("https://bioproj.extra.cea.fr/docs/proline/doku.php?id=how_to:studio:preferences");
+        
         setButtonVisible(BUTTON_CANCEL, true);
         setButtonName(BUTTON_OK, "OK");
         setStatusVisible(true);

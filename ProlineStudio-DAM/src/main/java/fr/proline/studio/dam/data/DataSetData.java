@@ -50,7 +50,7 @@ public class DataSetData extends AbstractData {
         if (m_dataset.getResultSet().getMsiSearch() != null) {
             newName = (m_dataset.getResultSet().getMsiSearch().getResultFileName() == null) ? "" : m_dataset.getResultSet().getMsiSearch().getResultFileName();
             if(newName.contains(".")){
-                newName = newName.substring(0, newName.indexOf("."));
+                newName = newName.substring(0, newName.lastIndexOf("."));
             }
         }
         

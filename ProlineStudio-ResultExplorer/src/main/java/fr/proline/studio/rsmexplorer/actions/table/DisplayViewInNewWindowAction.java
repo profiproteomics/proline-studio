@@ -45,16 +45,19 @@ public class DisplayViewInNewWindowAction extends AbstractAction {
         if ((dataName !=null) && (dataName.length()>12)) {
             dataName = dataName.substring(0,10)+"...";
         }
-        
-        boolean isXic = (m_sourceBox.getStyle() == AbstractDataBox.DataboxStyle.STYLE_XIC);
-        final WindowBox wbox = WindowBoxFactory.getUserDefinedWindowBox(dataName, dataName+": "+m_destinationBox.getDescription(), m_destinationBox, false, isXic, ' ');
+
+        final WindowBox wbox = WindowBoxFactory.getDetailWindowBox(dataName, dataName+": "+m_destinationBox.getDescription(), m_destinationBox);
 
         // open a window to display the window box
         DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
         win.open();
         win.requestActive();
+        
+        Class[] classes = m_sourceBox.getImportantInParameterClass();
+        for (int i=0;i<classes.length;i++) {
+            dataBoxFrozenCopy.propagateDataChanged(classes[i]);
+        }
 
-        m_destinationBox.dataChanged();
 
 
     }

@@ -1,6 +1,7 @@
 package fr.proline.studio.pattern;
 
 
+import fr.proline.core.orm.msi.ResultSet;
 import fr.proline.studio.comparedata.CompareDataInterface;
 import java.util.HashMap;
 
@@ -48,6 +49,54 @@ public class WindowBoxFactory {
 
         return winBox;
     }
+    
+    public static WindowBox getDetailWindowBox(String dataName, String windowName, AbstractDataBox databox) {
+        AbstractDataBox[] boxes = createBoxArray(databox, dataName);
+
+        Image icon = databox.getDefaultIcon();
+
+        WindowBox winBox = new WindowBox(windowName, generatePanel(boxes), boxes[0], icon);
+
+        return winBox;
+    }
+    
+    private static AbstractDataBox[] createBoxArray(AbstractDataBox databox, String dataName) {
+        
+        ResultSet rset = (ResultSet) databox.getData(false, ResultSet.class);
+    
+        AbstractDataBox[] boxes;
+        if (databox instanceof DataBoxRsetProteinsForPeptideMatch) {
+            
+            boolean mergedData = false;
+            if (rset != null) {
+                ResultSet.Type rsType = rset.getType();
+                mergedData = (rsType == ResultSet.Type.USER) || (rsType == ResultSet.Type.DECOY_USER); // Merge or Decoy Merge
+            }
+            
+            boxes = new AbstractDataBox[2];
+            boxes[1] = new DataboxRsetPeptidesOfProtein(mergedData);
+
+        } else if (databox instanceof DataBoxRsetPeptideSpectrumValues) {
+            boxes = new AbstractDataBox[2];
+            boxes[1] = new DataBoxRsetPeptideSpectrum();
+        } else if (databox instanceof DataBoxRsetPeptideSpectrum) {
+            boxes = new AbstractDataBox[4];
+            boxes[1] = new DataBoxRsetPeptideSpectrumError();
+            boxes[2] = new DataBoxRsetPeptideFragmentation();
+            boxes[3] = new DataBoxRsetPeptideSpectrumValues();
+
+        } else {
+            boxes = new AbstractDataBox[1];
+        }
+        
+        boxes[0] = databox;
+        boxes[0].setDataName(dataName);
+        
+        
+        
+        return boxes;
+    }
+    
     
     public static WindowBox getPeptidesWindowBox(String dataName, boolean isDecoy, boolean isMerged) {
         return getPeptidesForRsetOnlyWindowBox(dataName, isDecoy, isMerged);

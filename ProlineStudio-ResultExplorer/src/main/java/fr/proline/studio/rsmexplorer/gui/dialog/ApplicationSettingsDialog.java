@@ -1,5 +1,6 @@
 package fr.proline.studio.rsmexplorer.gui.dialog;
 
+import fr.proline.studio.dam.data.ProjectIdentificationData;
 import fr.proline.studio.dpm.task.util.JMSConnectionManager;
 import static fr.proline.studio.dpm.task.util.JMSConnectionManager.DEFAULT_SERVICE_REQUEST_QUEUE_NAME;
 import static fr.proline.studio.dpm.task.util.JMSConnectionManager.SERVICE_REQUEST_QUEUE_NAME_KEY;
@@ -11,9 +12,14 @@ import fr.proline.studio.parameter.ParameterError;
 import fr.proline.studio.parameter.ParameterList;
 import fr.proline.studio.parameter.StringParameter;
 import fr.proline.studio.rsmexplorer.actions.identification.ImportManager;
+import fr.proline.studio.rsmexplorer.tree.AbstractNode;
+import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
 import java.awt.*;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 import javax.swing.*;
@@ -33,14 +39,13 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
 
     private static ApplicationSettingsDialog m_singletonDialog = null;
     private AbstractParameterListTree m_parameterListTree;
-    private ParameterList m_jmsParameterList, m_generalParameterList, m_securityParameterList;
+    private ParameterList m_jmsParameterList, m_generalParameterList;
     private JPanel m_cards;
     private Hashtable<String, JPanel> m_existingPanels;
     private Hashtable<String, ParameterList> m_existingLists;
 
     private static final String JMS_SETTINGS = "JMS Settings";
     private static final String GENERAL_SETTINGS = "General Settings";
-    private static final String SECURITY_SETTINGS = "Security Settings";
     private static final String DIALOG_TITLE = "Proline Studio Settings";
     private static final String TREE_ROOT_NAME = "Settings Categories";
 
@@ -105,13 +110,6 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
         return m_generalParameterList;
     }
 
-    private ParameterList getSecurityParameters() {
-        m_securityParameterList = new ParameterList(SECURITY_SETTINGS);
-        BooleanParameter rememberPasswordParameter = new BooleanParameter("Remember_Password", "Remember Password", JCheckBox.class, preferences.getBoolean("Remember_Password", Boolean.FALSE));
-        m_securityParameterList.add(rememberPasswordParameter);
-        return m_securityParameterList;
-    }
-
     private JComponent createInternalComponent() {
         JPanel externalPanel = new JPanel();
         externalPanel.setLayout(new GridLayout(1, 1));
@@ -125,7 +123,6 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
         m_parameterListTree = new AbstractParameterListTree(TREE_ROOT_NAME, this);
         m_parameterListTree.addNodes(this.getJMSParameterList());
         m_parameterListTree.addNodes(this.getGeneralParameters());
-        //m_parameterListTree.addNodes(this.getSecurityParameters());
         m_parameterListTree.expandAllRows();
 
         JScrollPane scrollPane = new JScrollPane(m_parameterListTree.getTree());
@@ -170,6 +167,17 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
             return false;
         }
         this.saveExistingsLists();
+   
+        HashMap<ProjectIdentificationData, IdentificationTree> treeMap = IdentificationTree.getTreeMap();
+        
+        Iterator it = treeMap.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry pair = (Map.Entry)it.next();
+            System.out.println(pair.getKey() + " = " + pair.getValue());
+            IdentificationTree.renameTreeNodes((AbstractNode)((IdentificationTree)pair.getValue()).getModel().getRoot(), (IdentificationTree) pair.getValue());
+            it.remove(); // avoids a ConcurrentModificationException
+        }
+        
         return true;
 
     }

@@ -47,20 +47,25 @@ public class DataSetData extends AbstractData {
 
         String newName = "";
 
+        if (m_dataset.getResultSet().getMsiSearch() != null) {
+            newName = (m_dataset.getResultSet().getMsiSearch().getResultFileName() == null) ? "" : m_dataset.getResultSet().getMsiSearch().getResultFileName();
+            if(newName.contains(".")){
+                newName = newName.substring(0, newName.indexOf("."));
+            }
+        }
+        
         if (m_dataset.getChildrenCount() < 1 && !m_dataset.isQuantiSC() && !m_dataset.isQuantiXIC()) {
 
             Preferences preferences = NbPreferences.root();
-            String preferenceValue = preferences.get("DefaultSearchResultNameSource", "MSI_SEARCH_FILE_NAME");
+            String naming = preferences.get("DefaultSearchResultNameSource", "MSI_SEARCH_FILE_NAME");
 
-            if (preferenceValue.equalsIgnoreCase("SEARCH_RESULT_NAME")) {
-                newName = m_dataset.getResultSet().getName();
-            } else if (preferenceValue.equalsIgnoreCase("PEAKLIST_PATH")) {
-                newName = m_dataset.getResultSet().getMsiSearch().getPeaklist().getPath();
+            if (naming.equalsIgnoreCase("SEARCH_RESULT_NAME")) {
+                newName = (m_dataset.getResultSet().getName());
+            } else if (naming.equalsIgnoreCase("PEAKLIST_PATH")) {
+                newName = (m_dataset.getResultSet().getMsiSearch().getPeaklist().getPath() == null) ? "" : m_dataset.getResultSet().getMsiSearch().getPeaklist().getPath();
                 if (newName.contains(File.separator)) {
-                    newName = newName.substring(m_dataset.getResultSet().getMsiSearch().getPeaklist().getPath().lastIndexOf(File.separator)+1);
+                    newName = newName.substring(newName.lastIndexOf(File.separator)+1);
                 }
-            } else if (preferenceValue.equalsIgnoreCase("MSI_SEARCH_FILE_NAME")) {
-                newName = m_dataset.getResultSet().getMsiSearch().getResultFileName().substring(0, m_dataset.getResultSet().getMsiSearch().getResultFileName().indexOf("."));
             }
 
             if (!newName.equalsIgnoreCase("")) {
@@ -155,7 +160,7 @@ public class DataSetData extends AbstractData {
 
     }
 
-    private void fetchRsetAndRsmForOneDataset(DDataset d) {
+    public static void fetchRsetAndRsmForOneDataset(DDataset d) {
 
         EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(d.getProject().getId()).createEntityManager();
 
@@ -169,6 +174,7 @@ public class DataSetData extends AbstractData {
 
                 // force initialization of lazy data (data will be needed for the display of properties)
                 MsiSearch msiSearch = rsetFound.getMsiSearch();
+
                 if (msiSearch != null) {
                     SearchSetting searchSetting = msiSearch.getSearchSetting();
                     Set<Enzyme> enzymeSet = searchSetting.getEnzymes();

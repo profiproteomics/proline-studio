@@ -428,6 +428,8 @@ public class ImportIdentificationPanel extends JPanel implements InternalPanelIn
                 m_previousParserIndex = parserIndex;
 
                 initParameters();
+                
+                m_dialog.provokeRepack();
 
             }
         });

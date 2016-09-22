@@ -25,14 +25,13 @@ import fr.proline.core.orm.uds.Project;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dam.DatabaseDataManager;
 import fr.proline.studio.dam.data.AbstractData;
+import fr.proline.studio.dam.data.DataSetData;
 import fr.proline.studio.dam.data.ProjectIdentificationData;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dpm.task.util.JMSConnectionManager;
 import fr.proline.studio.gui.DatasetAction;
-//import fr.proline.studio.rsmexplorer.actions.CancelAction;
-//import fr.proline.studio.rsmexplorer.actions.WaitAction;
 import fr.proline.studio.rsmexplorer.actions.identification.AggregateAction;
 import fr.proline.studio.rsmexplorer.actions.identification.ClearDatasetAction;
 import fr.proline.studio.rsmexplorer.actions.identification.CreateXICAction;
@@ -40,6 +39,7 @@ import fr.proline.studio.rsmexplorer.actions.identification.ExportAction;
 import fr.proline.studio.rsmexplorer.actions.identification.FilterRSMProteinSetsAction;
 import fr.proline.studio.rsmexplorer.actions.identification.FilterRSMProteinSetsJMSAction;
 import fr.proline.studio.rsmexplorer.actions.identification.GenerateSpectrumMatchesJMSAction;
+import fr.proline.studio.rsmexplorer.actions.identification.ImportManager;
 import fr.proline.studio.rsmexplorer.actions.identification.ImportMaxQuantResultJMSAction;
 import fr.proline.studio.rsmexplorer.actions.identification.ImportSearchResultAsDatasetAction;
 import fr.proline.studio.rsmexplorer.actions.identification.ImportSearchResultAsDatasetJMSAction;
@@ -54,12 +54,16 @@ import fr.proline.studio.utils.ActionRegistry;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.event.MouseEvent;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintStream;
 import java.util.*;
 import java.util.prefs.Preferences;
 import javax.swing.*;
 import javax.swing.event.TreeExpansionEvent;
 import javax.swing.event.TreeWillExpandListener;
 import javax.swing.tree.*;
+import org.openide.util.Exceptions;
 import org.openide.util.NbPreferences;
 
 /**
@@ -91,6 +95,62 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
 
     public static IdentificationTree getCurrentTree() {
         return m_currentTree;
+    }
+
+    public static void renameTreeNodes(AbstractNode root, IdentificationTree tree) {
+
+        Preferences preferences = NbPreferences.root();
+        String naming = preferences.get(ImportManager.DEFAULT_SEARCH_RESULT_NAME_SOURCE_KEY, ImportManager.MSI_SEARCH_FILE_NAME_SOURCE);
+
+        Enumeration<AbstractNode> e = root.depthFirstEnumeration();
+
+        while (e.hasMoreElements()) {
+
+            AbstractNode currentElement = e.nextElement();
+
+            if (currentElement.getType() == AbstractNode.NodeTypes.DATA_SET) {
+
+                DataSetData datasetData = (DataSetData) currentElement.getData();
+
+                if (datasetData.hasChildren()) {
+                    continue;
+                }
+
+                DDataset dataset = datasetData.getDataset();
+                DataSetData.fetchRsetAndRsmForOneDataset(dataset);
+
+                if (dataset == null || dataset.getResultSet() == null || dataset.getResultSet().getMsiSearch() == null) {
+                    continue;
+                }
+
+                String newName = "";
+
+                if (dataset.getResultSet().getMsiSearch() != null) {
+                    newName = (dataset.getResultSet().getMsiSearch().getResultFileName() == null) ? "" : dataset.getResultSet().getMsiSearch().getResultFileName();
+                    if (newName.contains(".")) {
+                        newName = newName.substring(0, newName.indexOf("."));
+                    }
+                }
+
+                if (naming.equalsIgnoreCase(ImportManager.SEARCH_RESULT_NAME_SOURCE)) {
+                    newName = dataset.getResultSet().getName();
+                } else if (naming.equalsIgnoreCase(ImportManager.PEAKLIST_PATH_SOURCE)) {
+                    newName = (dataset.getResultSet().getMsiSearch().getPeaklist().getPath() == null) ? "" : dataset.getResultSet().getMsiSearch().getPeaklist().getPath();
+                    if (newName.contains(File.separator)) {
+                        newName = newName.substring(newName.lastIndexOf(File.separator) + 1);
+                    }
+                }
+
+                if (!newName.equalsIgnoreCase("")) {
+                    dataset.setName(newName);
+                    tree.rename(currentElement, newName);
+                }
+
+            }
+        }
+
+        DefaultTreeModel model = (DefaultTreeModel) tree.getModel();
+        model.reload(root);
     }
 
     private IdentificationTree(ProjectIdentificationData projectData) {
@@ -135,6 +195,10 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
 
     public static void clearAll() {
         m_treeMap.clear();
+    }
+
+    public static HashMap<ProjectIdentificationData, IdentificationTree> getTreeMap() {
+        return m_treeMap;
     }
 
     public void removeRootChildren() {
@@ -371,7 +435,7 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
             return; // should not happen
         }
 
-            // we must keep only parent nodes
+        // we must keep only parent nodes
         // if a child and its parent are selected, we keep only the parent
         ArrayList<AbstractNode> keptNodes = new ArrayList<>(nbSelectedNode);
         keptNodes.add(selectedNodes[0]);
@@ -568,7 +632,7 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
             actions = m_trashActions;
 
         } else if (allImportedNodeSelected && (nbNodes == 1)) {
-            
+
             // creation of the popup if needed
             if (m_allImportedPopup == null) {
                 boolean isJMSDefined = JMSConnectionManager.getJMSConnectionManager().isJMSDefined();
@@ -592,7 +656,6 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
                     ImportSearchResultAsRsetAction importAction = new ImportSearchResultAsRsetAction();
                     m_allImportedActions.add(importAction);
                 }
-                
 
                 m_allImportedPopup = new JPopupMenu();
 
@@ -609,43 +672,43 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
             actions = m_allImportedActions;
 
         } else {
-            
+
             // creation of the popup if needed
             if (m_mainPopup == null) {
                 Preferences preferences = NbPreferences.root();
                 // create the actions
-                Boolean showHiddenFunctionnality =  preferences.getBoolean("Profi", false);
+                Boolean showHiddenFunctionnality = preferences.getBoolean("Profi", false);
 
                 m_mainActions = new ArrayList<>(26);  // <--- get in sync
 
                 boolean isJMSDefined = JMSConnectionManager.getJMSConnectionManager().isJMSDefined();
-                
+
                 DisplayRsetAction displayRsetAction = new DisplayRsetAction(AbstractTree.TreeType.TREE_IDENTIFICATION, isJMSDefined);
                 m_mainActions.add(displayRsetAction);
 
                 DisplayRsmAction displayRsmAction = new DisplayRsmAction(AbstractTree.TreeType.TREE_IDENTIFICATION);
                 m_mainActions.add(displayRsmAction);
-                
+
                 m_mainActions.add(null);  // separator
-                
+
                 AggregateAction aggregateAction = new AggregateAction();
                 m_mainActions.add(aggregateAction);
-                
+
                 RenameAction renameAction = new RenameAction(AbstractTree.TreeType.TREE_IDENTIFICATION);
                 m_mainActions.add(renameAction);
 
                 ClearDatasetAction clearAction = new ClearDatasetAction();
                 m_mainActions.add(clearAction);
-                
+
                 DeleteAction deleteAction = new DeleteAction(AbstractTree.TreeType.TREE_IDENTIFICATION);
                 m_mainActions.add(deleteAction);
-                
+
                 m_mainActions.add(null);  // separator
-                
+
                 if (isJMSDefined) {
                     ImportSearchResultAsDatasetJMSAction identificationAction = new ImportSearchResultAsDatasetJMSAction();
                     m_mainActions.add(identificationAction);
-                    if(showHiddenFunctionnality) {
+                    if (showHiddenFunctionnality) {
                         ImportMaxQuantResultJMSAction importMaxQuant = new ImportMaxQuantResultJMSAction();
                         m_mainActions.add(importMaxQuant);
                     }
@@ -681,27 +744,23 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
                     m_mainActions.add(generateSpectrumMatchesAction);
 
                 }
-                
+
                 m_mainActions.add(null);  // separator
                 SpectralCountAction spectralCountAction = new SpectralCountAction(isJMSDefined);
                 m_mainActions.add(spectralCountAction);
-                
-               CreateXICAction createXICAction = new CreateXICAction(false, isJMSDefined,AbstractTree.TreeType.TREE_IDENTIFICATION);
+
+                CreateXICAction createXICAction = new CreateXICAction(false, isJMSDefined, AbstractTree.TreeType.TREE_IDENTIFICATION);
                 m_mainActions.add(createXICAction);
-                
+
                 m_mainActions.add(null);  // separator
-                
+
                 ExportAction exportAction = new ExportAction(AbstractTree.TreeType.TREE_IDENTIFICATION, isJMSDefined);
                 m_mainActions.add(exportAction);
-                
-                
+
                 m_mainActions.add(null);  // separator
-                
+
                 PropertiesAction propertiesAction = new PropertiesAction(AbstractTree.TreeType.TREE_IDENTIFICATION);
                 m_mainActions.add(propertiesAction);
-                
-
-                
 
                 // add actions to popup
                 m_mainPopup = new JPopupMenu();
@@ -793,7 +852,6 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
         }
     }
 
-
     @Override
     public void mouseEntered(MouseEvent e) {
     }
@@ -810,7 +868,7 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
         @Override
         public Component getTreeCellRendererComponent(JTree tree, Object value, boolean sel, boolean expanded, boolean leaf, int row, boolean hasFocus) {
             JLabel l = (JLabel) super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
-            if ( ((AbstractNode) value).isDisabled()){
+            if (((AbstractNode) value).isDisabled()) {
                 l.setForeground(Color.LIGHT_GRAY);
             } else {
                 if (sel) {

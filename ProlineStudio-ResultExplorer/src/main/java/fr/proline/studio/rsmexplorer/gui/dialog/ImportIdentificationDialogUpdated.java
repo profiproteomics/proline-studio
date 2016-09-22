@@ -17,7 +17,7 @@ public class ImportIdentificationDialogUpdated extends DefaultDialog implements 
     private ImportIdentificationPanel m_identificationPanel;
 
     public static ImportIdentificationDialogUpdated getDialog(Window parent/*, long projectId*/) {
-        
+
         if (m_singletonDialog == null) {
             m_singletonDialog = new ImportIdentificationDialogUpdated(parent);
         }
@@ -31,7 +31,7 @@ public class ImportIdentificationDialogUpdated extends DefaultDialog implements 
         super(parent, Dialog.ModalityType.APPLICATION_MODAL);
 
         m_identificationPanel = new ImportIdentificationPanel(parent);
-        
+
         setTitle("Import Search Results");
 
         setHelpURL("http://biodev.extra.cea.fr/docs/proline/doku.php?id=how_to:studio:importmascot");
@@ -44,9 +44,9 @@ public class ImportIdentificationDialogUpdated extends DefaultDialog implements 
 
         setInternalComponent(m_identificationPanel);
         m_identificationPanel.setDialog(this);
-        
+
     }
-     
+
 
     private void reinitialize() {
         m_identificationPanel.reinitializePanel();
@@ -72,7 +72,6 @@ public class ImportIdentificationDialogUpdated extends DefaultDialog implements 
         return m_identificationPanel.loadTriggered();
     }
 
-
     @Override
     public void setDialogStatus(boolean b, String s) {
         setStatus(b, s);
@@ -83,6 +82,14 @@ public class ImportIdentificationDialogUpdated extends DefaultDialog implements 
         highlight(c);
     }
 
+    @Override
+    public void provokeRepack() {
+        this.repack();
+    }
 
+    @Override
+    public void provokeBusy(boolean b) {
+        ;
+    }
 
 }

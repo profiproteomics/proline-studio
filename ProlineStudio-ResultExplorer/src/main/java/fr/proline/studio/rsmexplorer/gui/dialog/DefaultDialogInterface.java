@@ -16,5 +16,9 @@ public interface DefaultDialogInterface {
     public void setDialogStatus(boolean b, String s);
     
     public void highlightPanelComponent(Component c);
+    
+    public void provokeRepack();
+    
+    public void provokeBusy(boolean b);
         
 }

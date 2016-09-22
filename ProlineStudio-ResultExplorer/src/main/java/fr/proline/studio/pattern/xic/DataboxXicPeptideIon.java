@@ -75,6 +75,7 @@ public class DataboxXicPeptideIon extends AbstractDataBox {
         
         outParameter = new GroupParameter();
         outParameter.addParameter(DDataset.class, false);
+        outParameter.addParameter(ResultSummary.class, false);
         registerOutParameter(outParameter);
 
         outParameter = new GroupParameter();

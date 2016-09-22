@@ -2,6 +2,7 @@ package fr.proline.studio.pattern;
 
 import fr.proline.core.orm.msi.ResultSet;
 import fr.proline.core.orm.msi.ResultSummary;
+import fr.proline.core.orm.uds.dto.DDataset;
 import java.util.HashMap;
 import java.util.Iterator;
 
@@ -35,6 +36,12 @@ public class DataBoxFrozenCopy extends AbstractDataBox {
         
         Class specificClass =  ResultSet.class;
         ResultSet rset = (ResultSet) srcDataBox.getData(false, specificClass);
+        if (rset == null) {
+            DDataset dataset = (DDataset) srcDataBox.getData(false, DDataset.class);
+            if (dataset!= null) {
+                rset = dataset.getResultSet();
+            }
+        }
         if (rset != null) {
             HashMap<Boolean, Object> map = m_frozenDataMap.get(specificClass);
             if (map == null) {
@@ -46,6 +53,12 @@ public class DataBoxFrozenCopy extends AbstractDataBox {
         
         specificClass =  ResultSummary.class;
         ResultSummary rsm = (ResultSummary) srcDataBox.getData(false, specificClass);
+        if (rsm == null) {
+            DDataset dataset = (DDataset) srcDataBox.getData(false, DDataset.class);
+            if (dataset!= null) {
+                rsm = dataset.getResultSummary();
+            }
+        }
         if (rsm != null) {
             HashMap<Boolean, Object> map = m_frozenDataMap.get(specificClass);
             if (map == null) {

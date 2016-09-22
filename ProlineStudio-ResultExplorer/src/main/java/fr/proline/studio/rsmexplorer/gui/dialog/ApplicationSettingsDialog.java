@@ -173,9 +173,7 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
         Iterator it = treeMap.entrySet().iterator();
         while (it.hasNext()) {
             Map.Entry pair = (Map.Entry)it.next();
-            System.out.println(pair.getKey() + " = " + pair.getValue());
             IdentificationTree.renameTreeNodes((AbstractNode)((IdentificationTree)pair.getValue()).getModel().getRoot(), (IdentificationTree) pair.getValue());
-            it.remove(); // avoids a ConcurrentModificationException
         }
         
         return true;

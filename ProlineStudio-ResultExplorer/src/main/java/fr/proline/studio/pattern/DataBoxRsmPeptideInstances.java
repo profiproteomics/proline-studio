@@ -158,7 +158,7 @@ public class DataBoxRsmPeptideInstances extends AbstractDataBox {
     
     @Override
     public Class[] getImportantInParameterClass() {
-        Class[] classList = {DPeptideMatch.class};
+        Class[] classList = {PeptideInstance.class, DPeptideMatch.class};
         return classList;
     }
 

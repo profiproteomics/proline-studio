@@ -85,6 +85,9 @@ public class WindowBoxFactory {
             boxes[2] = new DataBoxRsetPeptideFragmentation();
             boxes[3] = new DataBoxRsetPeptideSpectrumValues();
 
+        }  else if (databox instanceof DataBoxAdjacencyMatrixChoice) {
+            boxes = new AbstractDataBox[2];
+            boxes[1] = new DataBoxAdjacencyMatrix();
         } else {
             boxes = new AbstractDataBox[1];
         }

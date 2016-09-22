@@ -63,6 +63,7 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
         
         inParameter = new GroupParameter();
         inParameter.addParameter(DProteinSet.class, false);
+        inParameter.addParameter(XicMode.class, false);
         registerInParameter(inParameter);
 
         // Register possible out parameters

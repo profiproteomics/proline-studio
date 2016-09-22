@@ -97,7 +97,9 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
         return m_currentTree;
     }
 
-    public static void renameTreeNodes(AbstractNode root, IdentificationTree tree) {
+    public static boolean renameTreeNodes(AbstractNode root, IdentificationTree tree) {
+        
+        boolean emptyFound = false;
 
         Preferences preferences = NbPreferences.root();
         String naming = preferences.get(ImportManager.DEFAULT_SEARCH_RESULT_NAME_SOURCE_KEY, ImportManager.MSI_SEARCH_FILE_NAME_SOURCE);
@@ -144,6 +146,8 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
                 if (!newName.equalsIgnoreCase("")) {
                     dataset.setName(newName);
                     tree.rename(currentElement, newName);
+                }else{
+                    emptyFound = true;
                 }
 
             }
@@ -151,6 +155,8 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
 
         DefaultTreeModel model = (DefaultTreeModel) tree.getModel();
         model.reload(root);
+        
+        return emptyFound;
     }
 
     private IdentificationTree(ProjectIdentificationData projectData) {

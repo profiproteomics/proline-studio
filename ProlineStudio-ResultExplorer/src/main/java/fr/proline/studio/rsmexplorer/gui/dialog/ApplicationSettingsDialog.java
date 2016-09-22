@@ -6,6 +6,8 @@ import static fr.proline.studio.dpm.task.util.JMSConnectionManager.DEFAULT_SERVI
 import static fr.proline.studio.dpm.task.util.JMSConnectionManager.SERVICE_REQUEST_QUEUE_NAME_KEY;
 import fr.proline.studio.gui.AbstractParameterListTree;
 import fr.proline.studio.gui.DefaultDialog;
+import fr.proline.studio.gui.InfoDialog;
+import fr.proline.studio.gui.OptionDialog;
 import fr.proline.studio.parameter.BooleanParameter;
 import fr.proline.studio.parameter.ObjectParameter;
 import fr.proline.studio.parameter.ParameterError;
@@ -84,7 +86,7 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
 
     private ParameterList getJMSParameterList() {
         m_jmsParameterList = new ParameterList(JMS_SETTINGS);
-        String queueName =  NbPreferences.root().get(SERVICE_REQUEST_QUEUE_NAME_KEY, DEFAULT_SERVICE_REQUEST_QUEUE_NAME);
+        String queueName = NbPreferences.root().get(SERVICE_REQUEST_QUEUE_NAME_KEY, DEFAULT_SERVICE_REQUEST_QUEUE_NAME);
         StringParameter defaultServiceRequestQueueName = new StringParameter(JMSConnectionManager.SERVICE_REQUEST_QUEUE_NAME_KEY, "JMS Request Queue Name", JTextField.class, queueName, 5, null);
         m_jmsParameterList.add(defaultServiceRequestQueueName);
 
@@ -96,17 +98,17 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
 
         BooleanParameter gettingStartedParameter = new BooleanParameter("Hide_Getting_Started_Dialog", "Hide Getting Started Dialog On Startup", JCheckBox.class, preferences.getBoolean("Hide_Getting_Started_Dialog", Boolean.FALSE));
         m_generalParameterList.add(gettingStartedParameter);
-             
-        Object[] objectTable = {ImportManager.SEARCH_RESULT_NAME_SOURCE, ImportManager.PEAKLIST_PATH_SOURCE, ImportManager.MSI_SEARCH_FILE_NAME_SOURCE};             
+
+        Object[] objectTable = {ImportManager.SEARCH_RESULT_NAME_SOURCE, ImportManager.PEAKLIST_PATH_SOURCE, ImportManager.MSI_SEARCH_FILE_NAME_SOURCE};
         ObjectParameter nameSourceParameter = new ObjectParameter(ImportManager.DEFAULT_SEARCH_RESULT_NAME_SOURCE_KEY, "Imported data name based on", objectTable, 2, null);
         m_generalParameterList.add(nameSourceParameter);
-        
+
         BooleanParameter exportDecoratedParameter = new BooleanParameter("Export_Table_Decorated", "Export Decorated", JCheckBox.class, preferences.getBoolean("Export_Table_Decorated", Boolean.FALSE));
         m_generalParameterList.add(exportDecoratedParameter);
-        
+
         BooleanParameter xicTransferHandlerParameter = new BooleanParameter("XIC_Transfer_Handler_Retain_Structure", "XIC Drag & Drop retains structure", JCheckBox.class, preferences.getBoolean("XIC_Transfer_Handler_Retain_Structure", Boolean.TRUE));
         m_generalParameterList.add(xicTransferHandlerParameter);
-        
+
         return m_generalParameterList;
     }
 
@@ -167,15 +169,26 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
             return false;
         }
         this.saveExistingsLists();
-   
+
+        boolean showWarning = false;
+
         HashMap<ProjectIdentificationData, IdentificationTree> treeMap = IdentificationTree.getTreeMap();
-        
+
         Iterator it = treeMap.entrySet().iterator();
         while (it.hasNext()) {
-            Map.Entry pair = (Map.Entry)it.next();
-            IdentificationTree.renameTreeNodes((AbstractNode)((IdentificationTree)pair.getValue()).getModel().getRoot(), (IdentificationTree) pair.getValue());
+            Map.Entry pair = (Map.Entry) it.next();
+            if (IdentificationTree.renameTreeNodes((AbstractNode) ((IdentificationTree) pair.getValue()).getModel().getRoot(), (IdentificationTree) pair.getValue())) {
+                showWarning = true;
+            }
         }
-        
+
+        if (showWarning) {
+            InfoDialog errorDialog = new InfoDialog(m_singletonDialog, InfoDialog.InfoType.INFO, "Name Representation Warning", "For some datasets, the selected representation is not available. For those cases the default representation will be based on MSI Search Name.");
+            errorDialog.setButtonVisible(OptionDialog.BUTTON_CANCEL, false);
+            errorDialog.setLocationRelativeTo(m_singletonDialog);
+            errorDialog.setVisible(true);
+        }
+
         return true;
 
     }
@@ -232,9 +245,9 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
         }
         try {
             NbPreferences.root().flush();
-         } catch (BackingStoreException e) {
-             LoggerFactory.getLogger("ProlineStudio.DPM").error("Saving Parameters Failed", e);
-         }
+        } catch (BackingStoreException e) {
+            LoggerFactory.getLogger("ProlineStudio.DPM").error("Saving Parameters Failed", e);
+        }
     }
 
 }

@@ -5,17 +5,16 @@ import ch.usi.inf.sape.hac.experiment.Experiment;
 
 public class dissimilarityValue implements DissimilarityMeasure {
 
-    double[][] simMatrix;
+    private double[][] m_simMatrix;
 
     public dissimilarityValue(double[][] simMatrix) {
-        this.simMatrix = simMatrix;
+        m_simMatrix = simMatrix;
     }
 
     @Override
     public double computeDissimilarity(Experiment arg0, int arg1, int arg2) {
-        double disSimilarity = 1 - simMatrix[arg1][arg2];
+        double disSimilarity = 1 - m_simMatrix[arg1][arg2];
         return disSimilarity;
-
     }
 
 }

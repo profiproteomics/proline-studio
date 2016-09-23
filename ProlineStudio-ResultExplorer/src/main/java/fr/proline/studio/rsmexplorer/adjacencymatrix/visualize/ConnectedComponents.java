@@ -12,14 +12,12 @@ import fr.proline.studio.dam.tasks.data.LightProteinMatch;
 
 public class ConnectedComponents {
 
-    public ArrayList<LightProteinMatch> m_proteins = new ArrayList<>();
-    public ArrayList<LightPeptideMatch> m_peptides = new ArrayList<>();
-    public HashMap<LightProteinMatch, ArrayList<LightPeptideMatch>> m_proteinToPeptideMap = new HashMap<>();
-    public HashMap<LightPeptideMatch, ArrayList<LightProteinMatch>> m_peptideToProteinMap = new HashMap<>();
+    private ArrayList<LightProteinMatch> m_proteins = new ArrayList<>();
+    private ArrayList<LightPeptideMatch> m_peptides = new ArrayList<>();
+    private HashMap<LightProteinMatch, ArrayList<LightPeptideMatch>> m_proteinToPeptideMap = new HashMap<>();
+    private HashMap<LightPeptideMatch, ArrayList<LightProteinMatch>> m_peptideToProteinMap = new HashMap<>();
 
-    public ArrayList<fr.proline.studio.rsmexplorer.adjacencymatrix.visualize.Component> componentSet = new ArrayList<>();
-    int numberOfComponents = 0;
-    int maxIndex = 0, maxSize = 0;
+    private int m_maxIndex = 0, m_maxSize = 0;
 
     public ConnectedComponents(ArrayList<LightProteinMatch> proteins, ArrayList<LightPeptideMatch> peptides, HashMap<LightProteinMatch, ArrayList<LightPeptideMatch>> proteinToPeptideMap, HashMap<LightPeptideMatch, ArrayList<LightProteinMatch>> peptideToProteinMap) {
         m_proteins = proteins;
@@ -29,13 +27,17 @@ public class ConnectedComponents {
     }
 
     public int getLargestComponent() {
-        return maxIndex;
+        return m_maxIndex;
     }
 
-    public ArrayList<Component> getConnectedComponents() {
+    public ArrayList<Component> getConnectedComponents(boolean keepSameSet) {
 
-        int proteinIndex = 0, peptideIndex = 0, componentIndex = 0;
-        int check1 = 0, check2 = 0;
+        int proteinIndex = 0;
+        int peptideIndex = 0;
+        int componentIndex = 0;
+        
+        int check1 = 0;
+        int check2 = 0;
 
         int proteinSize = m_proteins.size();
         int peptideSize = m_peptides.size();
@@ -48,11 +50,11 @@ public class ConnectedComponents {
 
 
         if (m_proteins == null && m_peptides == null) {
-            componentSet = null;
-
-            return componentSet;
+            return null;
         }
 
+        ArrayList<fr.proline.studio.rsmexplorer.adjacencymatrix.visualize.Component> componentSet = new ArrayList<>();
+        
         LightProteinMatch proteinTemp = m_proteins.get(0);
         LightPeptideMatch peptideTemp = m_peptides.get(0);
 
@@ -110,9 +112,9 @@ public class ConnectedComponents {
             check1 = check1 + componentSet.get(componentIndex).getProteinSize();
             check2 = check2 + componentSet.get(componentIndex).getPeptideSize();
 
-            if (tempCheck1 + tempCheck2 > maxSize) {
-                maxIndex = componentIndex;
-                maxSize = tempCheck1 + tempCheck2;
+            if (tempCheck1 + tempCheck2 > m_maxSize) {
+                m_maxIndex = componentIndex;
+                m_maxSize = tempCheck1 + tempCheck2;
             }
 
             if (proteinIndex < proteinSize) {
@@ -141,6 +143,38 @@ public class ConnectedComponents {
 
         }
 
-        return componentSet;
+        
+        if (keepSameSet) {
+            return componentSet;
+        }
+        
+        return filterComponents(componentSet);
+    }
+    
+    
+    private ArrayList<Component> filterComponents(ArrayList<Component> cList) {
+        ArrayList<Component> subCList = new ArrayList<>();
+        for (Component temp : cList) {
+            if (temp.peptideSet.size() > 1 && temp.proteinSet.size() > 1) {
+                if (!fullMatch(temp)) {
+                    subCList.add(temp);
+                }
+            }
+        }
+
+        return subCList;
+    }
+
+    private boolean fullMatch(Component temp) {
+        for (LightPeptideMatch peptTemp : temp.peptideSet) {
+            ArrayList<LightProteinMatch> protList = m_peptideToProteinMap.get(peptTemp);
+            for (LightProteinMatch protTemp : temp.proteinSet) {
+                if (!protList.contains(protTemp)) {
+                    return false;
+                }
+            }
+
+        }
+        return true;
     }
 }

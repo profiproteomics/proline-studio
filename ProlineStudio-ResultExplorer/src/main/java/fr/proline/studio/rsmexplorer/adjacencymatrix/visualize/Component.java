@@ -12,6 +12,11 @@ public class Component {
     public ArrayList<LightProteinMatch> proteinSet = new ArrayList<>();
     public ArrayList<LightPeptideMatch> peptideSet = new ArrayList<>();
 
+    public Component() {
+        
+    }
+    
+    
     public int getProteinSize() {
         return proteinSet.size();
     }

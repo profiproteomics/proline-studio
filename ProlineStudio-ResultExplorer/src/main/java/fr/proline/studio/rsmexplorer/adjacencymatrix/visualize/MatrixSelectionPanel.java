@@ -244,7 +244,7 @@ public class MatrixSelectionPanel extends HourglassPanel implements DataBoxPanel
                         
         // search filter order
         m_peptideToProteinMap = m_drawVisualization.get_peptideToProteinMap();
-        m_componentList = filterComponents(m_drawVisualization.get_ComponentList());
+        m_componentList = m_drawVisualization.get_ComponentList();
 
         //Sort clist
         Collections.sort(m_componentList, new CustomComparator());
@@ -307,11 +307,11 @@ public class MatrixSelectionPanel extends HourglassPanel implements DataBoxPanel
         return m_drawVisualization;
     }
     
-    public void setData(AdjacencyMatrixData matrixData, DProteinSet proteinSet) {
+    public void setData(AdjacencyMatrixData matrixData, DProteinSet proteinSet, boolean keepSameSet) {
         
         m_drawVisualization = new DrawVisualization();
         
-        m_drawVisualization.setData(matrixData);
+        m_drawVisualization.setData(matrixData, keepSameSet);
 
         m_internalPanel.initPanel();
         
@@ -365,31 +365,7 @@ public class MatrixSelectionPanel extends HourglassPanel implements DataBoxPanel
    
     }
     
-    private ArrayList<Component> filterComponents(ArrayList<Component> cList) {
-        ArrayList<Component> subCList = new ArrayList<>();
-        for (Component temp : cList) {
-            if (temp.peptideSet.size() > 1 && temp.proteinSet.size() > 1) {
-                if (!fullMatch(temp)) {
-                    subCList.add(temp);
-                }
-            }
-        }
 
-        return subCList;
-    }
-    
-    private boolean fullMatch(Component temp) {
-        for (LightPeptideMatch peptTemp : temp.peptideSet) {
-            ArrayList<LightProteinMatch> protList = m_peptideToProteinMap.get(peptTemp);
-            for (LightProteinMatch protTemp : temp.proteinSet) {
-                if (!protList.contains(protTemp)) {
-                    return false;
-                }
-            }
-
-        }
-        return true;
-    }
     
     public void setCurrentComponent(Component c) {
         m_currentComponent = c;

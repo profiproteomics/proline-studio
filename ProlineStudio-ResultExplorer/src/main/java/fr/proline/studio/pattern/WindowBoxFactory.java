@@ -90,6 +90,7 @@ public class WindowBoxFactory {
             boxes[3].setLayout(SplittedPanelContainer.PanelLayout.TABBED);
 
         } else if (databox instanceof DataBoxAdjacencyMatrixChoice) {
+            ((DataBoxAdjacencyMatrixChoice) databox).setKeepSameset(true);
             boxes = new AbstractDataBox[2];
             boxes[1] = new DataBoxAdjacencyMatrix();
         } else if (databox instanceof DataBoxRsmProteinSetOfPeptides) {

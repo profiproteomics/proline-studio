@@ -19,6 +19,8 @@ public class DataBoxAdjacencyMatrixChoice extends AbstractDataBox {
     private ResultSummary m_rsm = null;
     private boolean dataLoadedForRSM = false;
     
+    private boolean m_keepSameSet = false;
+    
     public DataBoxAdjacencyMatrixChoice() {
         super(DataboxType.DataBoxAdjacencyMatrixChoice, DataboxStyle.STYLE_RSM);
         
@@ -39,6 +41,10 @@ public class DataBoxAdjacencyMatrixChoice extends AbstractDataBox {
         outParameter.addParameter(DrawVisualization.class, false);
         outParameter.addParameter(Component.class, false);
         registerOutParameter(outParameter);
+    }
+    
+    public void setKeepSameset(boolean keepSameSet) {
+        m_keepSameSet = keepSameSet;
     }
     
     @Override
@@ -71,7 +77,7 @@ public class DataBoxAdjacencyMatrixChoice extends AbstractDataBox {
             @Override
             public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
 
-                ((MatrixSelectionPanel) m_panel).setData(matrixData, _proteinSet);
+                ((MatrixSelectionPanel) m_panel).setData(matrixData, _proteinSet, m_keepSameSet);
                 
                 if (finished) {
                     unregisterTask(taskId);

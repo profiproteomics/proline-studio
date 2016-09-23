@@ -73,7 +73,6 @@ public class MatrixImageButton extends JButton {
 
             for (LightProteinMatch temp3 : proteinList) {
                 int protIndex = componentOfImage.proteinSet.indexOf(temp3);
-                //int z = [peptIndex*width+protIndex ;
                 flagArray[peptIndex][protIndex] = true;
             }
         }
@@ -120,7 +119,7 @@ public class MatrixImageButton extends JButton {
         
         Graphics2D g2d = (Graphics2D) g;
         
-        g2d.drawImage(m_image, 0, 0, null); // see javadoc for more info on the parameters
+        g2d.drawImage(m_image, 0, 0, null); 
         
         if (m_isSelected) {
             Dimension d = getPreferredSize();

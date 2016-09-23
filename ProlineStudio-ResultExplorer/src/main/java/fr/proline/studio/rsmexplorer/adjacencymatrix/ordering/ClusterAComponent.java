@@ -29,7 +29,7 @@ public class ClusterAComponent {
         m_drawVisualization = drawVisualization;
         ArrayList<Component> compList = m_drawVisualization.get_ComponentList();
         m_peptideToProteinMap = m_drawVisualization.get_peptideToProteinMap();
- 	 	//m_proteinToPeptideMap = tempObject.get_proteinToPeptideMap() ;
+
 
         for (Component tempComp : compList) {
             int[][] peptProtMap = getPeptProtMatrix(tempComp);
@@ -90,128 +90,15 @@ public class ClusterAComponent {
         clusterer.cluster(dendrogramBuilder);
         Dendrogram dendrogram = dendrogramBuilder.getDendrogram();
 
-        double[][] m = new double[colCount][colCount];
-        double[][] bt1 = new double[colCount][colCount];
-        double[][] bt2 = new double[colCount][colCount];
-		//DendrogramNode BJDendogram = barJoseph(dendrogram.getRoot(),similarityMatrix , m, bt1,bt2 );
 
-		//depth first Order component using tree
+	//depth first Order component using tree
         ArrayList<Integer> clusterOrder = new ArrayList<>();
         clusterOrder = getDendogramOrder(dendrogram.getRoot(), clusterOrder);
-	//	clusterOrder =	getDendogramOrder(BJDendogram,clusterOrder);
 
         return clusterOrder;
 
     }
 
-    private DendrogramNode barJoseph(DendrogramNode node, double[][] similarityMatrix, double[][] memoise,
-            double[][] bt1, double[][] bt2) {
-
-        if (node instanceof ObservationNode) {
-            int index = ((ObservationNode) node).getObservation();
-            memoise[index][index] = 0.0d;
-            bt1[index][index] = -1;
-            bt2[index][index] = -1;
-            return node;
-        } else if (node instanceof MergeNode) {
-            DendrogramNode leftTree = barJoseph(node.getLeft(), similarityMatrix, memoise, bt1, bt2);
-            DendrogramNode rightTree = barJoseph(node.getRight(), similarityMatrix, memoise, bt1, bt2);
-
-            ArrayList<Integer> LLleafnodes = new ArrayList<Integer>();
-            ArrayList<Integer> LRleafnodes = new ArrayList<Integer>();
-            ArrayList<Integer> RLleafnodes = new ArrayList<Integer>();
-            ArrayList<Integer> RRleafnodes = new ArrayList<Integer>();
-
-            if (leftTree != null) {
-                if (leftTree.getLeft() != null) {
-                    DendrogramNode LLTree = leftTree.getLeft();
-                    LLleafnodes = getDendogramOrder(LLTree, LLleafnodes);
-                }
-            }
-
-            if (leftTree != null) {
-                if (leftTree.getRight() != null) {
-                    DendrogramNode LRTree = leftTree.getRight();
-                    LRleafnodes = getDendogramOrder(LRTree, LRleafnodes);
-                }
-            }
-
-            if (rightTree != null) {
-                if (rightTree.getLeft() != null) {
-                    DendrogramNode RLTree = rightTree.getLeft();
-                    RLleafnodes = getDendogramOrder(RLTree, RLleafnodes);
-                }
-            }
-
-            if (rightTree != null) {
-                if (rightTree.getRight() != null) {
-                    DendrogramNode RRTree = rightTree.getRight();
-                    RRleafnodes = getDendogramOrder(RRTree, RRleafnodes);
-                }
-            }
-
-            ArrayList<Integer> Lleafnodes = new ArrayList<>();
-            Lleafnodes.addAll(LLleafnodes);
-            Lleafnodes.addAll(LRleafnodes);
-
-            ArrayList<Integer> Rleafnodes = new ArrayList<>();
-            Rleafnodes.addAll(RLleafnodes);
-            Rleafnodes.addAll(RRleafnodes);
-
-            double c = 0.0d;
-
-            /*		for(int v1Leaf : Lleafnodes)
-             {
-             for(int v2Leaf : Rleafnodes)
-             {
-             if(similarityMatrix[v1Leaf][v2Leaf] > c)
-             c = similarityMatrix[v1Leaf][v2Leaf] ;
-             }
-    				
-             } */
-            for (int lNode : Lleafnodes) {
-                for (int rNode : Rleafnodes) {
-                    ArrayList<Integer> mLeafnodes = new ArrayList<>();
-                    ArrayList<Integer> kLeafnodes = new ArrayList<>();
-
-                    if (LLleafnodes.contains(lNode)) {
-                        mLeafnodes = LRleafnodes;
-                    } else if (LRleafnodes.contains(lNode)) {
-                        mLeafnodes = LLleafnodes;
-                    }
-
-                    if (RLleafnodes.contains(rNode)) {
-                        kLeafnodes = RRleafnodes;
-                    } else if (RRleafnodes.contains(rNode)) {
-                        kLeafnodes = RLleafnodes;
-                    }
-
-                    double MValue = 0.0d;
-                    int maxM = -1, maxK = -1;
-
-                    for (int m : mLeafnodes) {
-                        for (int k : kLeafnodes) {
-                            double temp = memoise[lNode][m] + memoise[rNode][k] + similarityMatrix[m][k];
-
-                            if (temp > MValue) {
-                                MValue = temp;
-                                maxM = m;
-                                maxK = k;
-                            }
-                        }
-                    }
-
-                    memoise[lNode][rNode] = MValue;
-                    bt1[lNode][rNode] = maxM;
-                    bt2[lNode][rNode] = maxK;
-
-                }
-            }
-
-        }
-
-        return node;
-    }
 
     private ArrayList<Integer> getDendogramOrder(DendrogramNode d, ArrayList<Integer> order) {
 
@@ -251,7 +138,7 @@ public class ClusterAComponent {
             i++;
         }
 
-//row - Pept , col - Prot
+        //row - Pept , col - Prot
         return tempMatch;
     }
 

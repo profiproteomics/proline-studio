@@ -15,11 +15,11 @@ public class DrawVisualization {
     private ArrayList<Component> m_cList;
     private ConnectedComponents m_cObject;
 
-    public void setData(AdjacencyMatrixData adjacencyMatrixData) {
+    public void setData(AdjacencyMatrixData adjacencyMatrixData, boolean keepSameSet) {
         m_adjacencyMatrixData = adjacencyMatrixData;
 
         m_cObject = new ConnectedComponents(get_ProtineList(), get_PeptideList(), get_proteinToPeptideMap(), get_peptideToProteinMap());
-        m_cList = m_cObject.getConnectedComponents();
+        m_cList = m_cObject.getConnectedComponents(keepSameSet);
     }
 
     public int getLargestComponent() {

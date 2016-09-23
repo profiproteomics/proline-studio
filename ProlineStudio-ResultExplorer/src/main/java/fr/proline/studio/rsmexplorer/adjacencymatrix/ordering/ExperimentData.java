@@ -4,16 +4,15 @@ import ch.usi.inf.sape.hac.experiment.Experiment;
 
 public class ExperimentData implements Experiment {
 
-    int sizeOfArray;
+    private int m_sizeOfArray;
 
     public ExperimentData(int sizeOfArray) {
-        this.sizeOfArray = sizeOfArray;
+        m_sizeOfArray = sizeOfArray;
     }
 
     @Override
     public int getNumberOfObservations() {
-        // TODO Auto-generated method stub
-        return sizeOfArray;
+        return m_sizeOfArray;
     }
 
 }

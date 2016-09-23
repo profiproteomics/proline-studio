@@ -241,7 +241,7 @@ public class ParameterList extends ArrayList<AbstractParameter> {
         }
     }
 
-    public void saveParameters(Preferences preferences, Boolean usePrefixKey) {
+    public void saveParameters(Preferences preferences, boolean usePrefixKey) {
         String prefixKey = m_name.replaceAll(" ", "_") + ".";
 
         int nbParameters = size();
@@ -269,7 +269,7 @@ public class ParameterList extends ArrayList<AbstractParameter> {
         }
     }
 
-    public void loadParameters(Preferences preferences) {
+    public void loadParameters(Preferences preferences, boolean usePrefixKey) {
         String prefixKey = m_name.replaceAll(" ", "_") + ".";
 
         int nbParameters = size();
@@ -279,7 +279,12 @@ public class ParameterList extends ArrayList<AbstractParameter> {
             String parameterName = parameter.getName();
             String suffixKey = parameterName.replaceAll(" ", "_");
 
-            String key = prefixKey + suffixKey;
+            String key;
+            if (usePrefixKey) {
+                key = prefixKey + suffixKey;
+            } else {
+                key = suffixKey;
+            }
 
             String value = preferences.get(key, null);
             if (value == null) {

@@ -683,7 +683,7 @@ public class CreateXICDialog extends DefaultDialog {
                         preferences.put(key, value);
                     }
 
-                    DefineQuantParamsPanel.getDefineQuantPanel().getParameterList().loadParameters(filePreferences);
+                    DefineQuantParamsPanel.getDefineQuantPanel().getParameterList().loadParameters(filePreferences, true);
                     DefineQuantParamsPanel.getDefineQuantPanel().initXICMethod();
 
                 } catch (Exception e) {

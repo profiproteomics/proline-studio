@@ -376,7 +376,7 @@ public class ImportMaxQuantResultDialog extends DefaultDialog {
 
                     restoreInitialParameters(preferences);
 
-                    m_sourceParameterList.loadParameters(filePreferences);
+                    m_sourceParameterList.loadParameters(filePreferences, true);
 
                 } catch (Exception e) {
                     LoggerFactory.getLogger("ProlineStudio.ResultExplorer").error("Parsing of User Settings File Failed", e);

@@ -55,8 +55,6 @@ public class ObjectParameter<E> extends AbstractParameter {
             if (m_graphicalType.equals(JComboBox.class)) {
                 
                 JComboBox combobox = ((JComboBox) m_parameterComponent);
-
-                System.out.println("breakpoint");
                 
                 if ((value == null) || (! selectItem(combobox, value))) {
                     combobox.setSelectedIndex(m_defaultIndex);
@@ -72,7 +70,6 @@ public class ObjectParameter<E> extends AbstractParameter {
             JComboBox combobox = new JComboBox(m_objects);
             combobox.setRenderer(new ParameterComboboxRenderer(m_paramToString));
             
-            System.out.println("breakpoint");
             
             if ((value == null) || (! selectItem(combobox, value))) {
                     combobox.setSelectedIndex(m_defaultIndex);
@@ -85,10 +82,14 @@ public class ObjectParameter<E> extends AbstractParameter {
     }
 
     private boolean selectItem(JComboBox comboBox, Object value) {
+        
+        try{
+        
+        System.out.println("breakpoint2");
 
         String valueString = ( value == null) ? "" : value.toString();
         
-        System.out.println("breakpoint");
+            System.out.println("breakpoint3");
         
         int nb = comboBox.getItemCount();
         for (int i=0;i<nb;i++) {
@@ -97,6 +98,10 @@ public class ObjectParameter<E> extends AbstractParameter {
                 comboBox.setSelectedIndex(i);
                 return true;
             }
+        }
+        
+        }catch(Exception e){
+            JOptionPane.showMessageDialog(null, "SELECT ITEM EXCEPTION"+e);
         }
         return false;
     }

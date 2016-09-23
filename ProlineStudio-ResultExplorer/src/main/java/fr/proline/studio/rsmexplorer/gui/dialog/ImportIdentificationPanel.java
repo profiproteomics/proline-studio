@@ -957,8 +957,8 @@ public class ImportIdentificationPanel extends JPanel implements InternalPanelIn
                     restoreInitialParameters(preferences);
 
                     ParameterList parameterList = (ParameterList) m_parserComboBox.getSelectedItem();
-                    parameterList.loadParameters(filePreferences);
-                    m_sourceParameterList.loadParameters(filePreferences);
+                    parameterList.loadParameters(filePreferences, true);
+                    m_sourceParameterList.loadParameters(filePreferences, true);
 
                 } catch (Exception e) {
                     LoggerFactory.getLogger("ProlineStudio.ResultExplorer").error("Parsing of User Settings File Failed", e);

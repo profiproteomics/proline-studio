@@ -102,6 +102,7 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
 
         Object[] objectTable = {ImportManager.SEARCH_RESULT_NAME_SOURCE, ImportManager.PEAKLIST_PATH_SOURCE, ImportManager.MSI_SEARCH_FILE_NAME_SOURCE};
         ObjectParameter nameSourceParameter = new ObjectParameter(ImportManager.DEFAULT_SEARCH_RESULT_NAME_SOURCE_KEY, "Imported data name based on", objectTable, 2, null);
+        //nameSourceParameter.setValue(preferences.get(ImportManager.DEFAULT_SEARCH_RESULT_NAME_SOURCE_KEY, ImportManager.MSI_SEARCH_FILE_NAME_SOURCE));
         m_generalParameterList.add(nameSourceParameter);
 
         BooleanParameter exportDecoratedParameter = new BooleanParameter("Export_Table_Decorated", "Export Decorated", JCheckBox.class, preferences.getBoolean("Export_Table_Decorated", Boolean.FALSE));
@@ -110,6 +111,8 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
         BooleanParameter xicTransferHandlerParameter = new BooleanParameter("XIC_Transfer_Handler_Retain_Structure", "XIC Drag & Drop retains structure", JCheckBox.class, preferences.getBoolean("XIC_Transfer_Handler_Retain_Structure", Boolean.TRUE));
         m_generalParameterList.add(xicTransferHandlerParameter);
 
+        m_generalParameterList.loadParameters(preferences, false);
+        
         return m_generalParameterList;
     }
 
@@ -242,7 +245,7 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
         while (enumKey.hasMoreElements()) {
             String key = enumKey.nextElement();
             ParameterList currentList = m_existingLists.get(key);
-            currentList.saveParameters(NbPreferences.root(), false);
+            currentList.saveParameters(preferences, false);
         }
         try {
             NbPreferences.root().flush();

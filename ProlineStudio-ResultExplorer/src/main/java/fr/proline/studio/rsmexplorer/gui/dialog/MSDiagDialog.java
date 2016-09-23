@@ -271,7 +271,7 @@ public class MSDiagDialog extends DefaultDialog {
                     restoreInitialParameters(preferences);
                     
                     ParameterList parameterList = (ParameterList) m_parserComboBox.getSelectedItem();
-                    parameterList.loadParameters(filePreferences);
+                    parameterList.loadParameters(filePreferences, true);
                     //m_sourceParameterList.loadParameters(filePreferences);
                     
                 } catch (Exception e) {

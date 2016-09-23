@@ -178,7 +178,7 @@ public class FilterProtSetDialog extends DefaultDialog implements ComponentListe
                         preferences.put(key, value);
                     }
 
-                    m_parameterList.loadParameters(filePreferences);
+                    m_parameterList.loadParameters(filePreferences, true);
                     m_proteinPrefiltersPanel.initProteinFilterPanel();                  
 
                 } catch (Exception e) {

@@ -870,7 +870,7 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
                         preferences.put(key, value);
                     }
                     
-                    m_parameterList.loadParameters(filePreferences);
+                    m_parameterList.loadParameters(filePreferences, true);
                     restoreScoringTypeParameter(filePreferences);
                     restoreTypicalProteinParameters(filePreferences);
                     updateFdrObjects(m_fdrFilterParameter.isUsed());

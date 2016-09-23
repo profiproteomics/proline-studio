@@ -70,6 +70,10 @@ public class DataboxXicPeptideIon extends AbstractDataBox {
         registerOutParameter(outParameter);
 
         outParameter = new GroupParameter();
+        outParameter.addParameter(QuantChannelInfo.class, false);
+        registerOutParameter(outParameter);
+        
+        outParameter = new GroupParameter();
         outParameter.addParameter(DPeptideMatch.class, false);
         registerOutParameter(outParameter);
         
@@ -218,6 +222,11 @@ public class DataboxXicPeptideIon extends AbstractDataBox {
             }
             if (parameterType.equals(DMasterQuantPeptideIon.class)) {
                 return ((XicPeptideIonPanel) m_panel).getSelectedMasterQuantPeptideIon();
+            }
+            if (parameterType.equals(QuantChannelInfo.class)) {
+                if (m_quantChannelInfo != null) {
+                    return m_quantChannelInfo;
+                }
             }
             if (parameterType.equals(DPeptideMatch.class)) {
                 DMasterQuantPeptideIon qpi = ((XicPeptideIonPanel) m_panel).getSelectedMasterQuantPeptideIon();

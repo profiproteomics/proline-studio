@@ -79,24 +79,64 @@ public class WindowBoxFactory {
         } else if (databox instanceof DataBoxRsetPeptideSpectrumValues) {
             boxes = new AbstractDataBox[2];
             boxes[1] = new DataBoxRsetPeptideSpectrum();
+            boxes[1].setLayout(SplittedPanelContainer.PanelLayout.TABBED);
         } else if (databox instanceof DataBoxRsetPeptideSpectrum) {
             boxes = new AbstractDataBox[4];
             boxes[1] = new DataBoxRsetPeptideSpectrumError();
+            boxes[1].setLayout(SplittedPanelContainer.PanelLayout.TABBED);
             boxes[2] = new DataBoxRsetPeptideFragmentation();
+            boxes[2].setLayout(SplittedPanelContainer.PanelLayout.TABBED);
             boxes[3] = new DataBoxRsetPeptideSpectrumValues();
+            boxes[3].setLayout(SplittedPanelContainer.PanelLayout.TABBED);
 
-        }  else if (databox instanceof DataBoxAdjacencyMatrixChoice) {
+        } else if (databox instanceof DataBoxAdjacencyMatrixChoice) {
             boxes = new AbstractDataBox[2];
             boxes[1] = new DataBoxAdjacencyMatrix();
-        } else {
+        } else if (databox instanceof DataBoxRsmProteinSetOfPeptides) {
+            boxes = new AbstractDataBox[2];
+            boxes[1] = new DataBoxRsmProteinsOfProteinSet();
+            boxes[2] = new DataBoxRsmPeptidesOfProtein();
+        } else if (databox instanceof DataBoxRsmProteinsOfProteinSet) {
+            boxes = new AbstractDataBox[7];
+            boxes[1] = new DataBoxRsmPeptidesOfProtein();
+            boxes[2] = new DataBoxRsmProteinAndPeptideSequence();
+            boxes[3] = new DataBoxRsetPeptideSpectrum();
+            boxes[3].setLayout(SplittedPanelContainer.PanelLayout.TABBED);
+            boxes[4] = new DataBoxRsetPeptideSpectrumError();
+            boxes[4].setLayout(SplittedPanelContainer.PanelLayout.TABBED);
+            boxes[5] = new DataBoxRsetPeptideFragmentation();
+            boxes[5].setLayout(SplittedPanelContainer.PanelLayout.TABBED);
+            boxes[6] = new DataBoxRsetPeptideSpectrumValues();
+            boxes[6].setLayout(SplittedPanelContainer.PanelLayout.TABBED);
+
+        } else if (databox instanceof DataboxRsmPSMOfProteinSet) {
+            boxes = new AbstractDataBox[5];
+            boxes[1] = new DataBoxRsetPeptideSpectrum();
+            boxes[2] = new DataBoxRsetPeptideSpectrumError();
+            boxes[2].setLayout(SplittedPanelContainer.PanelLayout.TABBED);
+            boxes[3] = new DataBoxRsetPeptideFragmentation();
+            boxes[3].setLayout(SplittedPanelContainer.PanelLayout.TABBED);
+            boxes[4] = new DataBoxRsetPeptideSpectrumValues();
+            boxes[4].setLayout(SplittedPanelContainer.PanelLayout.TABBED);
+        } else if (databox instanceof DataBoxRsmPeptidesOfProtein) {
+            boxes = new AbstractDataBox[6];
+            boxes[1] = new DataBoxRsmProteinAndPeptideSequence();
+            boxes[2] = new DataBoxRsetPeptideSpectrum();
+            boxes[2].setLayout(SplittedPanelContainer.PanelLayout.TABBED);
+            boxes[3] = new DataBoxRsetPeptideSpectrumError();
+            boxes[3].setLayout(SplittedPanelContainer.PanelLayout.TABBED);
+            boxes[4] = new DataBoxRsetPeptideFragmentation();
+            boxes[4].setLayout(SplittedPanelContainer.PanelLayout.TABBED);
+            boxes[5] = new DataBoxRsetPeptideSpectrumValues();
+            boxes[5].setLayout(SplittedPanelContainer.PanelLayout.TABBED);
+        }
+        else {
             boxes = new AbstractDataBox[1];
         }
         
         boxes[0] = databox;
         boxes[0].setDataName(dataName);
-        
-        
-        
+
         return boxes;
     }
     

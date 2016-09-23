@@ -1,6 +1,7 @@
 package fr.proline.studio.pattern;
 
 import fr.proline.core.orm.msi.Peptide;
+import fr.proline.core.orm.msi.ResultSet;
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.studio.comparedata.CompareDataInterface;
@@ -48,6 +49,14 @@ public class DataBoxRsmPSM extends AbstractDataBox {
         outParameter.addParameter(DPeptideMatch.class, true);
         registerOutParameter(outParameter);
 
+        outParameter = new GroupParameter();
+        outParameter.addParameter(ResultSummary.class, true);
+        registerOutParameter(outParameter);
+        
+        outParameter = new GroupParameter();
+        outParameter.addParameter(ResultSet.class, true);
+        registerOutParameter(outParameter);
+        
         outParameter = new GroupParameter();
         outParameter.addParameter(CompareDataInterface.class, true);
         registerOutParameter(outParameter);
@@ -112,6 +121,14 @@ public class DataBoxRsmPSM extends AbstractDataBox {
             if (parameterType.equals(ResultSummary.class)) {
                 if (m_rsm != null) {
                     return m_rsm;
+                }
+            }
+            if (parameterType.equals(ResultSet.class)) {
+                if (m_rsm != null) {
+                    ResultSet rset = m_rsm.getResultSet();
+                    if (rset != null) {
+                        return rset;
+                    }
                 }
             }
             if (parameterType.equals(CompareDataInterface.class)) {

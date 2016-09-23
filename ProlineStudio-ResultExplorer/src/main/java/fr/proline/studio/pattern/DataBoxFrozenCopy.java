@@ -42,6 +42,12 @@ public class DataBoxFrozenCopy extends AbstractDataBox {
                 rset = dataset.getResultSet();
             }
         }
+        if (rset == null) {
+            ResultSummary rsm = (ResultSummary) srcDataBox.getData(false, specificClass);
+            if (rsm != null) {
+                rset = rsm.getResultSet();
+            }
+        }
         if (rset != null) {
             HashMap<Boolean, Object> map = m_frozenDataMap.get(specificClass);
             if (map == null) {

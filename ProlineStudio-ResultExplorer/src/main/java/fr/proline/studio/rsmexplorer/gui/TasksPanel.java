@@ -6,9 +6,7 @@ import fr.proline.studio.dam.taskinfo.TaskInfoManager;
 import fr.proline.studio.dpm.data.JMSNotificationMessage;
 import fr.proline.studio.dpm.task.jms.AbstractJMSCallback;
 import fr.proline.studio.dpm.task.jms.PurgeConsumer;
-import fr.proline.studio.dpm.task.util.ConnectionListener;
 import fr.proline.studio.dpm.task.util.JMSConnectionManager;
-import fr.proline.studio.dpm.task.util.ServiceNotificationListener;
 import fr.proline.studio.filter.ConvertValueInterface;
 import fr.proline.studio.filter.Filter;
 import fr.proline.studio.filter.FilterButton;
@@ -17,10 +15,6 @@ import fr.proline.studio.filter.StringFilter;
 import fr.proline.studio.filter.ValueFilter;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
-import fr.proline.studio.gui.HourglassPanel;
-import fr.proline.studio.gui.SplittedPanelContainer;
-import fr.proline.studio.pattern.AbstractDataBox;
-import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.rsmexplorer.gui.dialog.GetSystemInfoButtonAction;
 import fr.proline.studio.rsmexplorer.gui.renderer.PercentageRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.ScoreRenderer;
@@ -56,21 +50,14 @@ import org.openide.windows.WindowManager;
  *
  * @author JM235353
  */
-public class TasksPanel extends HourglassPanel implements DataBoxPanelInterface, ConnectionListener {
+public class TasksPanel extends AbstractTasksPanel {
 
-    private final static ImageIcon[] PUBLIC_STATE_ICONS = { IconManager.getIcon(IconManager.IconType.HOUR_GLASS_MINI16), IconManager.getIcon(IconManager.IconType.ARROW_RIGHT_SMALL), IconManager.getIcon(IconManager.IconType.CROSS_BLUE_SMALL16), IconManager.getIcon(IconManager.IconType.TICK_SMALL), IconManager.getIcon(IconManager.IconType.CROSS_SMALL16)};
-    
-    private AbstractDataBox m_dataBox;
     private LogTable m_logTable;
 
     private boolean m_firstDisplay = true;
-     
-    private boolean m_isConnected2ServiceNotification;
-    private AbstractJMSCallback m_notifierCallback = null; //Callback to be called by ServiceNotificationListener(start listen Servive event Notif)
-    ServiceNotificationListener m_serviceListener = null;
-    
+         
     public TasksPanel() {
-        
+        super();
         setLayout(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();
         c.anchor = GridBagConstraints.NORTHWEST;
@@ -80,59 +67,45 @@ public class TasksPanel extends HourglassPanel implements DataBoxPanelInterface,
         c.weightx = 1;
         c.weighty = 1;
         add(createToolbarPanel(), c);
-        m_isConnected2ServiceNotification = false;
-        initListener();
     }
     
-    /**
-     * Listener of JMS Connection state change : to connect/disconnect from topic
-     */
-    private void initListener(){
-        JMSConnectionManager.getJMSConnectionManager().addConnectionListener(this);
-        int currentState =  JMSConnectionManager.getJMSConnectionManager().getConnectionState();
-        connectionStateChanged(currentState);
-    }
     
     @Override
-    public void connectionStateChanged(int newStatus) {
-            switch(newStatus) {
-            case CONNECTION_DONE: 
-                if(!m_isConnected2ServiceNotification){
-                    final JMSNotificationMessage[] sysInfoResult = new JMSNotificationMessage[1];
-                    m_serviceListener = JMSConnectionManager.getJMSConnectionManager().getNotificationListener();
-                    if(m_serviceListener != null) {
-                        m_notifierCallback = new AbstractJMSCallback() {
-                            @Override
-                            public boolean mustBeCalledInAWT() {
-                                return true;
-                            }
+    protected AbstractJMSCallback getServiceNotificationCallback(JMSNotificationMessage[] sysInfoResult) {
+        AbstractJMSCallback notifierCallback = new AbstractJMSCallback() {
+            @Override
+            public boolean mustBeCalledInAWT() {
+                return true;
+            }
 
-                            @Override
-                            public void run(boolean success) {
-                                if(sysInfoResult[0].getEventType().equals(JMSNotificationMessage.MessageStatus.STARTED)){
-                                    TaskInfo tiToUpdate = TaskInfoManager.getTaskInfoManager().getTaskInfoWithJMSId(sysInfoResult[0].getServerUniqueMsgId());
-                                    if(tiToUpdate != null)
-                                        tiToUpdate.setRunning(true);                                
-                                }
-                            }
-                        };
-                        m_serviceListener.addServiceNotifierCallback(m_notifierCallback, sysInfoResult);    
+            @Override
+            public void run(boolean success) {
+                if (sysInfoResult[0].getEventType().equals(JMSNotificationMessage.MessageStatus.STARTED)) {
+                    TaskInfo tiToUpdate = TaskInfoManager.getTaskInfoManager().getTaskInfoWithJMSId(sysInfoResult[0].getServerUniqueMsgId());
+                    if (tiToUpdate != null) {
+                        tiToUpdate.setRunning(true);
                     }
-                    m_isConnected2ServiceNotification = true;
                 }
-                break;
-            case CONNECTION_FAILED :
-            case NOT_CONNECTED:
-                if(m_isConnected2ServiceNotification && m_serviceListener != null){
-                    m_serviceListener.removeCallback(m_notifierCallback);
-                    m_serviceListener = null;
-                    m_notifierCallback = null;
-                }                
-                m_isConnected2ServiceNotification = false;
-                break;                        
-        }        
+            }
+        };
+        return notifierCallback;
     }
     
+    //Nothing specific to do after cancel message was done : already taken into account be message response
+    @Override
+    protected AbstractJMSCallback getPurgeConsumerCallback(JMSNotificationMessage[] purgerResult){
+        return null;
+    }
+    
+    // default start data collect is enough
+    @Override
+    protected void startOtherDataCollecting(){
+    }
+    
+    // default stop data collect is enough
+    @Override
+    protected void stopOtherDataCollecting(){
+    }
 
     private JPanel createToolbarPanel() {
         JPanel toolbarPanel = new JPanel();
@@ -265,19 +238,17 @@ public class TasksPanel extends HourglassPanel implements DataBoxPanelInterface,
             m_logTable.setUpdating(false); // at the end reallow the update
             
             // TaskInfo selected can have been modified
-            m_dataBox.propagateDataChanged(TaskInfo.class);
+            super.getDataBox().propagateDataChanged(TaskInfo.class);
         } else if (aSelection) {
             // selection lost
             m_logTable.setUpdating(false); // allow first the update
             m_logTable.getSelectionModel().clearSelection();
             
             // TaskInfo selected can have been modified
-            m_dataBox.propagateDataChanged(TaskInfo.class);
+            super.getDataBox().propagateDataChanged(TaskInfo.class);
         } else {
             m_logTable.setUpdating(false);
         }
-
-        
 
     }
 
@@ -289,36 +260,6 @@ public class TasksPanel extends HourglassPanel implements DataBoxPanelInterface,
 
     }
     
-
-
-    @Override
-    public void setDataBox(AbstractDataBox dataBox) {
-        m_dataBox = dataBox;
-    }
-    @Override
-    public AbstractDataBox getDataBox() {
-        return m_dataBox;
-    }
-    
-    @Override
-    public void addSingleValue(Object v) {
-        // should not be used
-    }
-
-    @Override
-    public ActionListener getRemoveAction(SplittedPanelContainer splittedPanel) {
-        return m_dataBox.getRemoveAction(splittedPanel);
-    }
-
-    @Override
-    public ActionListener getAddAction(SplittedPanelContainer splittedPanel) {
-        return m_dataBox.getAddAction(splittedPanel);
-    }
-    
-    @Override
-    public ActionListener getSaveAction(SplittedPanelContainer splittedPanel) {
-        return m_dataBox.getSaveAction(splittedPanel);
-    }
 
     private class LogTable extends DecoratedMarkerTable {
 
@@ -351,7 +292,7 @@ public class TasksPanel extends HourglassPanel implements DataBoxPanelInterface,
             super.valueChanged(e);
 
             if (!m_isUpdating) {
-                m_dataBox.propagateDataChanged(TaskInfo.class);
+                getDataBox().propagateDataChanged(TaskInfo.class);
             }
         }
 

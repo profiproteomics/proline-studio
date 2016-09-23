@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import javax.swing.Icon;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import org.jdesktop.swingx.JXTable;
@@ -73,11 +72,11 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
     protected DataboxType m_type;
     
     public enum DataboxStyle {
-        STYLE_UNKNOWN,
+        STYLE_XIC,
+        STYLE_SC,
         STYLE_RSM,
         STYLE_RSET,
-        STYLE_XIC,
-        STYLE_SC
+        STYLE_UNKNOWN 
     }
     
     public enum DataboxType {

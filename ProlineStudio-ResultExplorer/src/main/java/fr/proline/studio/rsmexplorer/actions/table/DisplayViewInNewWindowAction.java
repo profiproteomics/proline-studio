@@ -1,16 +1,15 @@
 package fr.proline.studio.rsmexplorer.actions.table;
 
-import fr.proline.core.orm.msi.ResultSet;
-import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxFrozenCopy;
 import fr.proline.studio.pattern.WindowBox;
 import fr.proline.studio.pattern.WindowBoxFactory;
-import fr.proline.studio.pattern.WindowSavedManager;
 import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
-import fr.proline.studio.types.XicMode;
+import java.awt.Image;
 import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.ImageIcon;
 
 /**
  *
@@ -24,6 +23,12 @@ public class DisplayViewInNewWindowAction extends AbstractAction {
 
     public DisplayViewInNewWindowAction(AbstractDataBox sourceBox, AbstractDataBox destinationBox) {
         super(destinationBox.getDescription());
+        
+        Image img = destinationBox.getDefaultIcon();
+        if (img != null) {
+            putValue(Action.SMALL_ICON, new ImageIcon(img));
+        }
+        
         m_sourceBox = sourceBox;
         try {
             m_destinationBox = destinationBox.getClass().newInstance();

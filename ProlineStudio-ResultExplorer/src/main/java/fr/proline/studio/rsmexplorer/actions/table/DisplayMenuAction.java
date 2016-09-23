@@ -1,6 +1,7 @@
 package fr.proline.studio.rsmexplorer.actions.table;
 
 import fr.proline.studio.pattern.AbstractDataBox;
+import fr.proline.studio.pattern.AbstractDataBox.DataboxStyle;
 import fr.proline.studio.pattern.DataboxManager;
 import fr.proline.studio.pattern.ParameterDistance;
 import fr.proline.studio.table.AbstractTableAction;
@@ -9,6 +10,7 @@ import java.util.Iterator;
 import java.util.TreeMap;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
+import javax.swing.JSeparator;
 import javax.swing.JTable;
 
 /**
@@ -47,14 +49,26 @@ public class DisplayMenuAction extends AbstractTableAction {
 
         boolean hasSubActions = false;
             
-        TreeMap<ParameterDistance, AbstractDataBox> dataBoxMap = DataboxManager.getDataboxManager().findCompatibleDataboxList(dataBox, dataBox.getImportantInParameterClass());
-        Iterator<ParameterDistance> it = dataBoxMap.descendingKeySet().iterator();
-        while (it.hasNext()) {
-            AbstractDataBox destDatabox = dataBoxMap.get(it.next());
-            DisplayViewInNewWindowAction displayAction = new DisplayViewInNewWindowAction(dataBox, destDatabox);
-            JMenuItem displayOptionMenuItem = new JMenuItem(displayAction);
-            m_menu.add(displayOptionMenuItem);
-            hasSubActions = true;
+        DataboxStyle previousStyle = null;
+        for (DataboxStyle style : DataboxStyle.values()) {
+
+            TreeMap<ParameterDistance, AbstractDataBox> dataBoxMap = DataboxManager.getDataboxManager().findCompatibleDataboxList(dataBox, dataBox.getImportantInParameterClass());
+            Iterator<ParameterDistance> it = dataBoxMap.descendingKeySet().iterator();
+            while (it.hasNext()) {
+                AbstractDataBox destDatabox = dataBoxMap.get(it.next());
+                if (destDatabox.getStyle() != style) {
+                    continue;
+                }
+                if ((previousStyle != null) && (previousStyle != style)) {
+                    m_menu.addSeparator();
+                }
+                previousStyle = style;
+                DisplayViewInNewWindowAction displayAction = new DisplayViewInNewWindowAction(dataBox, destDatabox);
+                JMenuItem displayOptionMenuItem = new JMenuItem(displayAction);
+                m_menu.add(displayOptionMenuItem);
+                hasSubActions = true;
+            }
+
         }
         
         m_menu.setEnabled(hasSubActions);

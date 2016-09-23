@@ -105,6 +105,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
     private DMasterQuantPeptide m_masterQuantPeptideForPSM;
     private Map<Long, List<Long>> m_psmIdPerQC;
     private List<DPeptideMatch> m_peptideMatchList;
+    private boolean m_xic;
 
     // data kept for sub tasks
     private ArrayList<Long> m_peptideMatchIds = null;
@@ -140,16 +141,17 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
         action = LOAD_QUANT_CHANNELS_FOR_XIC;
     }
 
-    public void initLoadPeptides(long projectId, DDataset dataset, List<DMasterQuantPeptide> masterQuantPeptideList) {
+    public void initLoadPeptides(long projectId, DDataset dataset, List<DMasterQuantPeptide> masterQuantPeptideList, boolean xic) {
         init(SUB_TASK_NB, new TaskInfo("Load Peptides of XIC " + dataset.getName(), false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_MEDIUM));
 
         m_projectId = projectId;
         m_dataset = dataset;
         m_masterQuantPeptideList = masterQuantPeptideList;
+        m_xic = xic;
         action = LOAD_PEPTIDE_FOR_XIC;
     }
 
-    public void initLoadPeptides(long projectId, DDataset dataset, DProteinSet proteinSet, DMasterQuantProteinSet masterQuantProteinSet, List<DMasterQuantPeptide> masterQuantPeptideList) {
+    public void initLoadPeptides(long projectId, DDataset dataset, DProteinSet proteinSet, DMasterQuantProteinSet masterQuantProteinSet, List<DMasterQuantPeptide> masterQuantPeptideList, boolean xic) {
         String proteinSetName = "";
         if (proteinSet != null) {
             proteinSetName = DatabaseProteinsFromProteinSetTask.getProteinSetName(proteinSet);
@@ -160,6 +162,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
         m_masterQuantPeptideList = masterQuantPeptideList;
         m_dProteinSet = proteinSet;
         m_dMasterQuantProteinSet = masterQuantProteinSet;
+        m_xic = xic;
         action = LOAD_PEPTIDE_FOR_PROTEIN_SET;
     }
 
@@ -251,17 +254,17 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                 if (m_dataset.getMasterQuantitationChannels() == null || m_dataset.getMasterQuantitationChannels().isEmpty()) {
                     fetchDataQuantChannels(m_projectId, m_dataset, m_taskError);
                 }
-                return fetchDataPeptideMainTask();
+                return fetchDataPeptideMainTask(m_xic);
             } else {
                 // fetch data of SubTasks
-                return fetchPeptideInstanceDataSubTask();
+                return fetchPeptideInstanceDataSubTask(m_xic);
             }
 
         } else if (action == LOAD_PEPTIDE_FOR_PROTEIN_SET) {
             if (needToFetch()) {
                 // first data are fetched
                 //fetchDataQuantChannels(m_projectId, m_dataset, m_taskError);
-                return fetchDataPeptideForProteinSetMainTask();
+                return fetchDataPeptideForProteinSetMainTask(m_xic);
             }
 
         } else if (action == LOAD_PEPTIDE_ION_FOR_XIC) {
@@ -709,7 +712,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
      *
      * @return
      */
-    private boolean fetchDataPeptideMainTask() {
+    private boolean fetchDataPeptideMainTask(boolean xic) {
         EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(m_projectId).createEntityManager();
         try {
             entityManagerMSI.getTransaction().begin();
@@ -767,7 +770,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                         SubTask subTask = m_subTaskManager.sliceATaskAndGetFirst(SUB_TASK_PEPTIDE_INSTANCE, m_peptideInstanceIds.size(), SLICE_SIZE);
 
                         // execute the first slice now
-                        fetchPeptideInstanceData(subTask, entityManagerMSI);
+                        fetchPeptideInstanceData(subTask, entityManagerMSI, xic);
 
                     }// end resultSummaryId null
 
@@ -873,7 +876,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
      *
      * @return
      */
-    private boolean fetchDataPeptideForProteinSetMainTask() {
+    private boolean fetchDataPeptideForProteinSetMainTask(boolean xic) {
         EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(m_projectId).createEntityManager();
         try {
             entityManagerMSI.getTransaction().begin();
@@ -907,7 +910,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                         }
                         m_masterQuantPeptideList.addAll(listDMasterQuantPeptideFake);
 
-                        fetchPeptideInstanceData(entityManagerMSI, m_peptideInstanceIds);
+                        fetchPeptideInstanceData(entityManagerMSI, m_peptideInstanceIds, xic);
 
                     }// end resultSummaryId null
 
@@ -945,7 +948,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
      * @param listPeptideInstanceIds
      * @return
      */
-    private boolean fetchPeptideInstanceData(EntityManager entityManagerMSI, List<Long> listPeptideInstanceIds) {
+    private boolean fetchPeptideInstanceData(EntityManager entityManagerMSI, List<Long> listPeptideInstanceIds, boolean xic) {
         
         HashMap<Long, Peptide> peptideMap = new HashMap<>();
         // map qcId rsmId
@@ -961,14 +964,24 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
         }
         // load dPeptideInstance and PeptideMatch
         List<DPeptideInstance> peptideInstanceList = new ArrayList();
-        String querySelect = "SELECT  pi, pm.id, pm.rank, pm.charge, pm.deltaMoz, pm.experimentalMoz, pm.missedCleavage, pm.score, pm.resultSet.id, pm.cdPrettyRank, pm.sdPrettyRank, p, mqpi.elutionTime "
+        String querySelect;
+        if (xic) {
+            querySelect = "SELECT  pi, pm.id, pm.rank, pm.charge, pm.deltaMoz, pm.experimentalMoz, pm.missedCleavage, pm.score, pm.resultSet.id, pm.cdPrettyRank, pm.sdPrettyRank, p, mqpi.elutionTime "
                 + "FROM fr.proline.core.orm.msi.PeptideInstance pi,  "
-                + "fr.proline.core.orm.msi.PeptideMatch pm, fr.proline.core.orm.msi.Peptide p, fr.proline.core.orm.msi.MasterQuantPeptideIon mqpi  "
-                + "WHERE pi.id IN (:listId) AND  "
+                + "fr.proline.core.orm.msi.PeptideMatch pm, fr.proline.core.orm.msi.Peptide p, fr.proline.core.orm.msi.MasterQuantPeptideIon mqpi "
+                + "WHERE pi.id IN (:listId) AND "
                 + "pi.bestPeptideMatchId=pm.id AND "
                 + "pm.peptideId=p.id  AND  pi.id = mqpi.peptideInstance.id "
                 + "ORDER BY pm.score DESC";
-
+        } else { // Spectral Count
+            querySelect = "SELECT  pi, pm.id, pm.rank, pm.charge, pm.deltaMoz, pm.experimentalMoz, pm.missedCleavage, pm.score, pm.resultSet.id, pm.cdPrettyRank, pm.sdPrettyRank, p "
+                + "FROM fr.proline.core.orm.msi.PeptideInstance pi,  "
+                + "fr.proline.core.orm.msi.PeptideMatch pm, fr.proline.core.orm.msi.Peptide p "
+                + "WHERE pi.id IN (:listId) AND "
+                + "pi.bestPeptideMatchId=pm.id AND "
+                + "pm.peptideId=p.id "
+                + "ORDER BY pm.score DESC";
+        }
         
         Query query = entityManagerMSI.createQuery(querySelect);
         query.setParameter("listId", listPeptideInstanceIds);
@@ -979,7 +992,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
         while (itPeptidesQuery.hasNext()) {
             Object[] resCur = itPeptidesQuery.next();
             PeptideInstance pi = (PeptideInstance) resCur[0];
-            Float elutionTime = (Float) resCur[12];
+            Float elutionTime = (xic) ? (Float) resCur[12] : pi.getElutionTime();
             DPeptideInstance dpi = new DPeptideInstance(pi.getId(), pi.getPeptide().getId(), pi.getValidatedProteinSetCount(), elutionTime);
             dpi.setResultSummary(pi.getResultSummary());
             Long pmId = (Long) resCur[1];
@@ -1179,7 +1192,10 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                             Integer pmCdPrettyRank = (Integer) resCur[9];
                             Integer pmSdPrettyRank = (Integer) resCur[10];
                             pm = new DPeptideMatch(pmId, pmRank, pmCharge, pmDeltaMoz, pmExperimentalMoz, pmMissedCleavage, pmScore, pmResultSetId, pmCdPrettyRank, pmSdPrettyRank);
-                            //pm.setRetentionTime(elutionTime);
+                            
+                            if (!xic) {
+                                pm.setRetentionTime(pi.getElutionTime());
+                            }
                             peptideMatchMap.put(pmId, pm);
                         }
 
@@ -1555,7 +1571,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
      *
      * @return
      */
-    private boolean fetchPeptideInstanceDataSubTask() {
+    private boolean fetchPeptideInstanceDataSubTask(boolean xic) {
         SubTask slice = m_subTaskManager.getNextSubTask();
         if (slice == null) {
             return true; // nothing to do : should not happen
@@ -1566,7 +1582,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
             entityManagerMSI.getTransaction().begin();
             switch (slice.getSubTaskId()) {
                 case SUB_TASK_PEPTIDE_INSTANCE:
-                    fetchPeptideInstanceData(slice, entityManagerMSI);
+                    fetchPeptideInstanceData(slice, entityManagerMSI, xic);
                     break;
             }
             entityManagerMSI.getTransaction().commit();
@@ -1594,9 +1610,9 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
      * @param entityManagerMSI
      * @return
      */
-    private boolean fetchPeptideInstanceData(SubTask subTask, EntityManager entityManagerMSI) {
+    private boolean fetchPeptideInstanceData(SubTask subTask, EntityManager entityManagerMSI, boolean xic) {
         List<Long> sliceOfPeptideIds = subTask.getSubList(m_peptideInstanceIds);
-        return fetchPeptideInstanceData(entityManagerMSI, sliceOfPeptideIds);
+        return fetchPeptideInstanceData(entityManagerMSI, sliceOfPeptideIds, xic);
     }
 
     /**

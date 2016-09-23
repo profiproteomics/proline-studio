@@ -90,9 +90,13 @@ public class WindowBoxFactory {
             boxes[3].setLayout(SplittedPanelContainer.PanelLayout.TABBED);
 
         } else if (databox instanceof DataBoxAdjacencyMatrixChoice) {
-            ((DataBoxAdjacencyMatrixChoice) databox).setKeepSameset(true);
-            boxes = new AbstractDataBox[2];
-            boxes[1] = new DataBoxAdjacencyMatrix();
+            
+            DataBoxAdjacencyMatrixChoice adjacencyMatrixChoice = ((DataBoxAdjacencyMatrixChoice) databox);
+            adjacencyMatrixChoice.setKeepSameset(true);
+            adjacencyMatrixChoice.createPanel();  //JPM.WART
+            databox = new DataBoxAdjacencyMatrix();
+            adjacencyMatrixChoice.addNextDataBox(databox);
+            boxes = new AbstractDataBox[1];
         } else if (databox instanceof DataBoxRsmProteinSetOfPeptides) {
             boxes = new AbstractDataBox[2];
             boxes[1] = new DataBoxRsmProteinsOfProteinSet();

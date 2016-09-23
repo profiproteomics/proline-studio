@@ -140,7 +140,7 @@ public class DataBoxMSQueriesForRset extends AbstractDataBox{
     
     @Override
     public Class[] getImportantInParameterClass() {
-        Class[] classList = { DMsQuery.class, MsQueryInfoRSM.class };
+        Class[] classList = { DMsQuery.class, MsQueryInfoRset.class };
         return classList;
     }
 

@@ -1,6 +1,7 @@
 package fr.proline.studio.pattern;
 
 import fr.proline.core.orm.msi.ResultSummary;
+import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.core.orm.msi.dto.DProteinSet;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseProteinsAndPeptidesTask;
@@ -35,6 +36,11 @@ public class DataBoxAdjacencyMatrixChoice extends AbstractDataBox {
         inParameter.addParameter(DProteinSet.class, false);
         registerInParameter(inParameter);
         
+        inParameter = new GroupParameter();
+        inParameter.addParameter(ResultSummary.class, false);
+        inParameter.addParameter(DProteinMatch.class, false);
+        registerInParameter(inParameter);
+        
         
         // Register possible out parameters
         GroupParameter outParameter = new GroupParameter();
@@ -63,8 +69,18 @@ public class DataBoxAdjacencyMatrixChoice extends AbstractDataBox {
         final ResultSummary _rsm = (m_rsm != null) ? m_rsm : (ResultSummary) m_previousDataBox.getData(false, ResultSummary.class);
         
         
-        final DProteinSet _proteinSet = (m_previousDataBox==null) ? null : (DProteinSet) m_previousDataBox.getData(false, DProteinSet.class);
+        DProteinMatch proteinMatch = (m_previousDataBox==null) ? null : (DProteinMatch) m_previousDataBox.getData(false, DProteinMatch.class);
         
+        if (proteinMatch == null) {
+            DProteinSet proteinSet = (m_previousDataBox==null) ? null : (DProteinSet) m_previousDataBox.getData(false, DProteinSet.class);
+            if (proteinSet != null) {
+                proteinMatch = proteinSet.getTypicalProteinMatch();
+            }
+        }
+        
+        final DProteinMatch _proteinMatch = proteinMatch;
+        
+         
         final AdjacencyMatrixData matrixData = new AdjacencyMatrixData();
         
         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
@@ -77,7 +93,7 @@ public class DataBoxAdjacencyMatrixChoice extends AbstractDataBox {
             @Override
             public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
 
-                ((MatrixSelectionPanel) m_panel).setData(matrixData, _proteinSet, m_keepSameSet);
+                ((MatrixSelectionPanel) m_panel).setData(matrixData, _proteinMatch, m_keepSameSet);
                 
                 if (finished) {
                     unregisterTask(taskId);
@@ -90,7 +106,7 @@ public class DataBoxAdjacencyMatrixChoice extends AbstractDataBox {
             registerTask(new DatabaseProteinsAndPeptidesTask(callback, getProjectId(), _rsm, matrixData));
             dataLoadedForRSM = true;
         } else {
-            ((MatrixSelectionPanel) m_panel).setData(_proteinSet);
+            ((MatrixSelectionPanel) m_panel).setData(_proteinMatch);
         }
 
     }

@@ -1,6 +1,6 @@
 package fr.proline.studio.rsmexplorer.adjacencymatrix.visualize;
 
-import fr.proline.core.orm.msi.dto.DProteinSet;
+import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.studio.dam.tasks.data.AdjacencyMatrixData;
 import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
@@ -66,7 +66,7 @@ public class MatrixSelectionPanel extends HourglassPanel implements DataBoxPanel
     private static final int PROTEIN = 0;
     private static final int PEPTIDE = 1;
     
-    private String proteinSetName = "";
+    private String m_proteinName = "";
     
     public MatrixSelectionPanel() {
         setLoading(0);
@@ -307,7 +307,7 @@ public class MatrixSelectionPanel extends HourglassPanel implements DataBoxPanel
         return m_drawVisualization;
     }
     
-    public void setData(AdjacencyMatrixData matrixData, DProteinSet proteinSet, boolean keepSameSet) {
+    public void setData(AdjacencyMatrixData matrixData, DProteinMatch proteinMatch, boolean keepSameSet) {
         
         m_drawVisualization = new DrawVisualization();
         
@@ -315,30 +315,30 @@ public class MatrixSelectionPanel extends HourglassPanel implements DataBoxPanel
 
         m_internalPanel.initPanel();
         
-        selectProteinSet(proteinSet);
+        selectProtein(proteinMatch);
         
         setLoaded(0);
         
         revalidate(); 
         repaint();
     }
-    public void setData(DProteinSet proteinSet) {
-        if (proteinSet == null) {
+    public void setData(DProteinMatch proteinMatch) {
+        if (proteinMatch == null) {
             return;
         }
-        selectProteinSet(proteinSet);
+        selectProtein(proteinMatch);
         repaint();
     }
     
-    private void selectProteinSet(DProteinSet proteinSet) {
+    private void selectProtein(DProteinMatch proteinMatch) {
         
         
-        if (proteinSet == null) {
-            proteinSetName = "";
+        if (proteinMatch == null) {
+            m_proteinName = "";
             return;
         }
         
-        proteinSetName = proteinSet.getTypicalProteinMatch().getAccession();
+        m_proteinName = proteinMatch.getAccession();
         
         int nbComponents = m_componentList.size();
         for (int i=0;i<nbComponents;i++) {
@@ -347,7 +347,7 @@ public class MatrixSelectionPanel extends HourglassPanel implements DataBoxPanel
             int nbProteins = proteinSetList.size();
             for (int j=0;j<nbProteins;j++) {
                 LightProteinMatch pm = proteinSetList.get(j);
-                if (proteinSet.getProteinMatchId() == pm.getId()) {
+                if (proteinMatch.getId() == pm.getId()) {
                     selectCluster(i);
                     return;
                 }
@@ -438,7 +438,7 @@ public class MatrixSelectionPanel extends HourglassPanel implements DataBoxPanel
 
             int visibleHeight = getVisibleRect().height;
 
-            String text = proteinSetName.length() > 0 ? "No Cluster Found for " + proteinSetName : proteinSetName;
+            String text = m_proteinName.length() > 0 ? "No Cluster Found for " + m_proteinName : m_proteinName;
             FontMetrics metrics = g.getFontMetrics(m_displayFont);
             int stringWidth = metrics.stringWidth(text);
             int fontAscent = m_metrics.getAscent();

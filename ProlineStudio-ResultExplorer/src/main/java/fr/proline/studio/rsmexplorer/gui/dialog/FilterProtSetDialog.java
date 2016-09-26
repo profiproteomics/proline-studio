@@ -3,6 +3,7 @@ package fr.proline.studio.rsmexplorer.gui.dialog;
 import fr.proline.studio.dpm.task.FilterRSMProtSetsTask;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.parameter.AbstractParameter;
+import fr.proline.studio.parameter.DoubleParameter;
 import fr.proline.studio.parameter.IntegerParameter;
 import fr.proline.studio.parameter.ParameterError;
 import fr.proline.studio.parameter.ParameterList;
@@ -69,8 +70,18 @@ public class FilterProtSetDialog extends DefaultDialog implements ComponentListe
         m_proteinFilterParameters = new AbstractParameter[FilterRSMProtSetsTask.FILTER_KEYS.length + 1];
         m_proteinFilterParameters[0] = null;
         for (int index = 1; index <= FilterRSMProtSetsTask.FILTER_KEYS.length; index++) {
-            m_proteinFilterParameters[index] = new IntegerParameter(FilterRSMProtSetsTask.FILTER_KEYS[index - 1], FilterRSMProtSetsTask.FILTER_NAME[index - 1], new JTextField(6), new Integer(1), new Integer(1), null);
-            m_proteinFilterParameters[index].setAssociatedData(">=");
+            String filterKey = FilterRSMProtSetsTask.FILTER_KEYS[index - 1];
+            switch(filterKey){
+                case "SCORE":
+                    m_proteinFilterParameters[index] = new DoubleParameter(filterKey, FilterRSMProtSetsTask.FILTER_NAME[index - 1], new JTextField(6), new Double(10), new Double(1), null);
+                    m_proteinFilterParameters[index].setAssociatedData(">=");
+                    break;
+                default :
+                    m_proteinFilterParameters[index] = new IntegerParameter(filterKey, FilterRSMProtSetsTask.FILTER_NAME[index - 1], new JTextField(6), new Integer(1), new Integer(1), null);
+                    m_proteinFilterParameters[index].setAssociatedData(">=");
+                    break;
+            }
+
             AbstractParameter p = m_proteinFilterParameters[index];
             if (p != null) {
                 p.setUsed(false);

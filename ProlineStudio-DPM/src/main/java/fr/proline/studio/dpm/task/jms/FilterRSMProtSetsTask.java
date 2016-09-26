@@ -13,7 +13,6 @@ import static fr.proline.studio.dpm.task.jms.AbstractJMSTask.m_loggerProline;
 import fr.proline.studio.dpm.task.util.JMSConnectionManager;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.TextMessage;
@@ -69,7 +68,10 @@ public class FilterRSMProtSetsTask extends AbstractJMSTask {
             if (m_argumentsMap.containsKey(filterKey)) {
                 HashMap filterCfg = new HashMap();
                 filterCfg.put("parameter", filterKey);
-                filterCfg.put("threshold", Integer.valueOf(m_argumentsMap.get(filterKey)));
+                if(filterKey.equals("SCORE")) //TODO USE ENUM
+                    filterCfg.put("threshold", Double.valueOf(m_argumentsMap.get(filterKey)));
+                else
+                    filterCfg.put("threshold", Integer.valueOf(m_argumentsMap.get(filterKey)));
                 proteinFilters.add(filterCfg);
             }
         }

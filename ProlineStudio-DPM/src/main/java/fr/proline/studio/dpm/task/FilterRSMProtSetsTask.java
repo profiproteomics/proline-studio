@@ -24,8 +24,8 @@ public class FilterRSMProtSetsTask extends AbstractServiceTask {
     private HashMap<String, String> m_argumentsMap;
 
     //Protein PreFilter
-    public static String[] FILTER_KEYS = {"SPECIFIC_PEP","PEP_COUNT", "PEP_SEQ_COUNT"};
-    public static String[] FILTER_NAME = {"Specific Peptides","Peptides count", "Peptide sequence count"};
+    public static String[] FILTER_KEYS = {"SPECIFIC_PEP","PEP_COUNT", "PEP_SEQ_COUNT", "SCORE"};//TODO USE ENUM
+    public static String[] FILTER_NAME = {"Specific Peptides","Peptides count", "Peptide sequence count","Protein Set Score"};
 
     public FilterRSMProtSetsTask(AbstractServiceCallback callback,   DDataset dataset,HashMap<String, String> argumentsMap) {        
         super(callback, false /*asynchronous*/, new TaskInfo("Filter Protein Sets of Identifcation Summary "+dataset.getName(), true, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_HIGH));

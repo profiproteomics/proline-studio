@@ -700,8 +700,18 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
         m_proteinPrefilterParameters = new AbstractParameter[FilterRSMProtSetsTask.FILTER_KEYS.length + 1];
         m_proteinPrefilterParameters[0] = null;
          for (int index = 1; index <= FilterRSMProtSetsTask.FILTER_KEYS.length; index++) {
-            m_proteinPrefilterParameters[index] = new IntegerParameter(FilterRSMProtSetsTask.FILTER_KEYS[index - 1], FilterRSMProtSetsTask.FILTER_NAME[index - 1], new JTextField(6), new Integer(1), new Integer(1), null);
-            m_proteinPrefilterParameters[index].setAssociatedData(">=");
+            String filterKey = FilterRSMProtSetsTask.FILTER_KEYS[index - 1];
+            switch(filterKey){
+                case "SCORE":
+                    m_proteinPrefilterParameters[index] = new DoubleParameter(filterKey, FilterRSMProtSetsTask.FILTER_NAME[index - 1], new JTextField(6), new Double(10), new Double(1), null);
+                    m_proteinPrefilterParameters[index].setAssociatedData(">=");
+                    break;
+                default :
+                    m_proteinPrefilterParameters[index] = new IntegerParameter(filterKey, FilterRSMProtSetsTask.FILTER_NAME[index - 1], new JTextField(6), new Integer(1), new Integer(1), null);
+                    m_proteinPrefilterParameters[index].setAssociatedData(">=");
+                    break;
+            }
+             
             AbstractParameter p = m_proteinPrefilterParameters[index];
             if (p != null) {
                 p.setUsed(false);

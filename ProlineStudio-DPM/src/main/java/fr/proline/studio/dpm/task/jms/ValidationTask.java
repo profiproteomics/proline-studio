@@ -9,7 +9,7 @@ import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import fr.proline.studio.dpm.jms.AccessJMSManagerThread;
 import static fr.proline.studio.dpm.task.jms.AbstractJMSTask.m_loggerProline;
-import fr.proline.studio.dpm.task.FilterRSMProtSetsTask;
+import static fr.proline.studio.dpm.task.FilterRSMProtSetsTask.FILTER_KEYS;
 import fr.proline.studio.dpm.task.util.JMSConnectionManager;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -203,16 +203,17 @@ public class ValidationTask extends AbstractJMSTask  {
         // Protein Pre-Filters
         ArrayList proteinFilters = new ArrayList();
 
-        for (int i=0;i<FilterRSMProtSetsTask.FILTER_KEYS.length;i++) {
-            String filterKey = FilterRSMProtSetsTask.FILTER_KEYS[i];
+        for (String filterKey : FILTER_KEYS) {           
             if (m_argumentsMap.containsKey(filterKey)) {
                 HashMap filterCfg = new HashMap();
                 filterCfg.put("parameter", filterKey);
-                filterCfg.put("threshold", Integer.valueOf(m_argumentsMap.get(filterKey)));
+                if(filterKey.equals("SCORE")) //TODO USE ENUM
+                    filterCfg.put("threshold", Double.valueOf(m_argumentsMap.get(filterKey)));
+                else
+                    filterCfg.put("threshold", Integer.valueOf(m_argumentsMap.get(filterKey)));                
                 proteinFilters.add(filterCfg);
             }
         }
-
 
         params.put("prot_set_filters", proteinFilters);
 

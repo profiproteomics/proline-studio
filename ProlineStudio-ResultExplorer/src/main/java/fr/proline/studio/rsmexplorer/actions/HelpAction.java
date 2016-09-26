@@ -1,8 +1,6 @@
 package fr.proline.studio.rsmexplorer.actions;
 
-import fr.proline.studio.dpm.AccessServiceThread;
 import fr.proline.studio.rsmexplorer.gui.dialog.HelpDialog;
-import fr.proline.studio.rsmexplorer.gui.dialog.ApplicationSettingsDialog;
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;

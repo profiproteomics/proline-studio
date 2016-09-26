@@ -62,16 +62,9 @@ public class ExportDialog extends DefaultDialog {
     private String m_exportName = null;
 
     private JPanel m_decoratedPanel;
-    private JRadioButton m_yesDecorated;
-    private JRadioButton m_noDecorated;
-    
-    
-    
-    //NEW THINGS
     private ParameterList m_parameterList;
     private static final String PARAMETER_LIST_NAME = "General Application Settings";
     private BooleanParameter m_exportParameter;
-    private Preferences m_preferences;
 
     private ExportManager m_exportManager = null;
 
@@ -167,8 +160,6 @@ public class ExportDialog extends DefaultDialog {
         m_parameterList.add(m_exportParameter);
 
         m_decoratedPanel.add(m_parameterList.getPanel(true));
-        
-        
 
         return m_decoratedPanel;
     }

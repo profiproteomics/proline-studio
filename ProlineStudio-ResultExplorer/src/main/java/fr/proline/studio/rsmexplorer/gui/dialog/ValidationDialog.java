@@ -117,7 +117,7 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
         
         m_parameterList = new ParameterList("Validation");
         createParameters();
-        m_parameterList.updateIsUsed(NbPreferences.root());
+        m_parameterList.updateIsUsed(NbPreferences.root(), true);
 
         setInternalComponent(createInternalPanel());
 

@@ -105,7 +105,7 @@ public class DefineQuantParamsPanel extends JPanel{
         this.m_selectXICMethod = preferences.getBoolean("Profi", false);
         m_parameterList = new ParameterList("XicParameters");
         createParameters();
-        m_parameterList.updateIsUsed(NbPreferences.root());
+        m_parameterList.updateIsUsed(NbPreferences.root(), true);
         for (AbstractParameter param : m_parameterList) {
             param.setUsed(true);
         }

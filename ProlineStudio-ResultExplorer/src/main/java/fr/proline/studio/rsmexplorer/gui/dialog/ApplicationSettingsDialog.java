@@ -47,11 +47,11 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
     private Hashtable<String, ParameterList> m_existingLists;
 
     private static final String JMS_SETTINGS = "JMS Settings";
-    private static final String GENERAL_SETTINGS = "General Settings";
+    private static final String GENERAL_APPLICATION_SETTINGS = "General Application Settings";
     private static final String DIALOG_TITLE = "Proline Studio Settings";
     private static final String TREE_ROOT_NAME = "Settings Categories";
 
-    private Preferences preferences;
+    private Preferences m_preferences;
 
     public static ApplicationSettingsDialog getDialog(Window parent) {
         if (m_singletonDialog == null) {
@@ -66,12 +66,12 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
 
         setTitle(DIALOG_TITLE);
 
-        setSize(new Dimension(640, 480));
-        this.setMinimumSize(new Dimension(480, 360));
+        setSize(new Dimension(800, 480));
+        this.setMinimumSize(new Dimension(640, 360));
         setResizable(true);
-        
+
         this.setHelpURL("https://bioproj.extra.cea.fr/docs/proline/doku.php?id=how_to:studio:preferences");
-        
+
         setButtonVisible(BUTTON_CANCEL, true);
         setButtonName(BUTTON_OK, "OK");
         setStatusVisible(true);
@@ -79,8 +79,8 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
         m_existingPanels = new Hashtable<String, JPanel>();
         m_existingLists = new Hashtable<String, ParameterList>();
 
-        preferences = NbPreferences.root();
-
+        m_preferences = NbPreferences.root();        
+        
         setInternalComponent(this.createInternalComponent());
 
     }
@@ -95,28 +95,32 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
     }
 
     private ParameterList getGeneralParameters() {
-        m_generalParameterList = new ParameterList(GENERAL_SETTINGS);
 
-        BooleanParameter gettingStartedParameter = new BooleanParameter("Hide_Getting_Started_Dialog", "Hide Getting Started Dialog On Startup", JCheckBox.class, preferences.getBoolean("Hide_Getting_Started_Dialog", Boolean.FALSE));
-        m_generalParameterList.add(gettingStartedParameter);
+            m_generalParameterList = new ParameterList(GENERAL_APPLICATION_SETTINGS);
 
-        Object[] objectTable = {ImportManager.SEARCH_RESULT_NAME_SOURCE, ImportManager.PEAKLIST_PATH_SOURCE, ImportManager.MSI_SEARCH_FILE_NAME_SOURCE};
-        ObjectParameter nameSourceParameter = new ObjectParameter(ImportManager.DEFAULT_SEARCH_RESULT_NAME_SOURCE_KEY, "Imported data name based on", objectTable, 2, null);
-        //nameSourceParameter.setValue(preferences.get(ImportManager.DEFAULT_SEARCH_RESULT_NAME_SOURCE_KEY, ImportManager.MSI_SEARCH_FILE_NAME_SOURCE));
-        m_generalParameterList.add(nameSourceParameter);
+            JCheckBox gettingStartedCheckBox = new JCheckBox("Hide Getting Started Dialog On Startup");
+            BooleanParameter gettingStartedParameter = new BooleanParameter("Hide_Getting_Started_Dialog", "Hide Getting Started Dialog On Startup", gettingStartedCheckBox, false);
+            m_generalParameterList.add(gettingStartedParameter);
 
-        BooleanParameter exportDecoratedParameter = new BooleanParameter("Export_Table_Decorated", "Export Decorated", JCheckBox.class, preferences.getBoolean("Export_Table_Decorated", Boolean.FALSE));
-        m_generalParameterList.add(exportDecoratedParameter);
+            Object[] objectTable = {ImportManager.SEARCH_RESULT_NAME_SOURCE, ImportManager.PEAKLIST_PATH_SOURCE, ImportManager.MSI_SEARCH_FILE_NAME_SOURCE};
+            ObjectParameter nameSourceParameter = new ObjectParameter(ImportManager.DEFAULT_SEARCH_RESULT_NAME_SOURCE_KEY, "Default Search Result Name Source", objectTable, 2, null);
+            m_generalParameterList.add(nameSourceParameter);
 
-        BooleanParameter xicTransferHandlerParameter = new BooleanParameter("XIC_Transfer_Handler_Retain_Structure", "XIC Drag & Drop retains structure", JCheckBox.class, preferences.getBoolean("XIC_Transfer_Handler_Retain_Structure", Boolean.TRUE));
-        m_generalParameterList.add(xicTransferHandlerParameter);
+            JCheckBox decoratedCheckBox = new JCheckBox("Export Decorated");
+            BooleanParameter exportDecoratedParameter = new BooleanParameter("Export_Decorated", "Export Decorated", decoratedCheckBox, true);
+            m_generalParameterList.add(exportDecoratedParameter);
 
-        m_generalParameterList.loadParameters(preferences, false);
-        
+            JCheckBox xicCheckBox = new JCheckBox("XIC Transfer Handler Retains Structure");
+            BooleanParameter xicTransferHandlerParameter = new BooleanParameter("XIC_Transfer_Handler_Retains_Structure", "XIC Transfer Handler Retains Structure", xicCheckBox, true);
+            m_generalParameterList.add(xicTransferHandlerParameter);
+            
+            m_generalParameterList.loadParameters(NbPreferences.root(), true);
+
         return m_generalParameterList;
     }
 
     private JComponent createInternalComponent() {
+        
         JPanel externalPanel = new JPanel();
         externalPanel.setLayout(new GridLayout(1, 1));
         externalPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
@@ -212,7 +216,7 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
                 CardLayout cardLayout = (CardLayout) (m_cards.getLayout());
                 cardLayout.show(m_cards, panelKey);
             } else {
-                JPanel newPanel = m_parameterListTree.getList().get(panelKey).getPanel(false);
+                JPanel newPanel = m_parameterListTree.getList().get(panelKey).getPanel(true);
                 m_cards.add(newPanel, panelKey);
                 CardLayout cardLayout = (CardLayout) (m_cards.getLayout());
                 cardLayout.show(m_cards, panelKey);
@@ -245,7 +249,7 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
         while (enumKey.hasMoreElements()) {
             String key = enumKey.nextElement();
             ParameterList currentList = m_existingLists.get(key);
-            currentList.saveParameters(preferences, false);
+            currentList.saveParameters(NbPreferences.root(), true);
         }
         try {
             NbPreferences.root().flush();

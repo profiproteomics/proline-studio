@@ -8,11 +8,9 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.net.URL;
-import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 import javax.swing.*;
 import javax.swing.tree.*;
-import org.openide.util.Exceptions;
 import org.slf4j.LoggerFactory;
 import org.openide.util.NbPreferences;
 

@@ -243,7 +243,7 @@ public class ImportMaxQuantResultDialog extends DefaultDialog {
         allParametersPanel.setBorder(BorderFactory.createTitledBorder(" Parameters "));
 
         m_sourceParameterList = createSourceParameters();
-        m_sourceParameterList.updateIsUsed(NbPreferences.root());
+        m_sourceParameterList.updateIsUsed(NbPreferences.root(),true);
 
         GridBagConstraints c = new GridBagConstraints();
         c.anchor = GridBagConstraints.NORTHWEST;

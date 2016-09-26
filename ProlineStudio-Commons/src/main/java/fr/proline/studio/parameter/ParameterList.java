@@ -183,7 +183,7 @@ public class ParameterList extends ArrayList<AbstractParameter> {
         }
     }
 
-    public void updateIsUsed(Preferences preferences) {
+    public void updateIsUsed(Preferences preferences, boolean usePrefixKey) {
         String prefixKey = m_name.replaceAll(" ", "_") + ".";
 
         int nbParameters = size();
@@ -192,7 +192,16 @@ public class ParameterList extends ArrayList<AbstractParameter> {
 
             String parameterName = parameter.getName();
             String suffixKey = parameterName.replaceAll(" ", "_");
-            String parameterValue = preferences.get(prefixKey + suffixKey, null);
+
+            String key;
+
+            if (usePrefixKey) {
+                key = prefixKey + suffixKey;
+            } else {
+                key = suffixKey;
+            }
+
+            String parameterValue = preferences.get(key, null);
 
             if (!parameter.isUsed()) {
                 if ((parameterValue != null) && (!parameterValue.isEmpty())) {
@@ -242,34 +251,7 @@ public class ParameterList extends ArrayList<AbstractParameter> {
     }
 
     public void saveParameters(Preferences preferences, boolean usePrefixKey) {
-        String prefixKey = m_name.replaceAll(" ", "_") + ".";
 
-        int nbParameters = size();
-        for (int i = 0; i < nbParameters; i++) {
-
-            AbstractParameter currentParameter = this.get(i);
-
-            String parameterKey = currentParameter.getKey();
-            String suffixKey = parameterKey.replaceAll(" ", "_");
-
-            String key;
-            if (usePrefixKey) {
-                key = prefixKey + suffixKey;
-            } else {
-                key = suffixKey;
-            }
-
-            if (!currentParameter.isUsed()) {
-                preferences.remove(key);
-                continue;
-            }
-
-            preferences.put(key, currentParameter.getStringValue());
-
-        }
-    }
-
-    public void loadParameters(Preferences preferences, boolean usePrefixKey) {
         String prefixKey = m_name.replaceAll(" ", "_") + ".";
 
         int nbParameters = size();
@@ -286,7 +268,60 @@ public class ParameterList extends ArrayList<AbstractParameter> {
                 key = suffixKey;
             }
 
+            if (parameter.isUsed()) {
+                String value = parameter.getStringValue();
+                preferences.put(key, value);
+            } else {
+                preferences.remove(key);
+            }
+        }
+    }
+
+    public void saveParametersForTheFirstTime(Preferences preferences, boolean usePrefixKey) {
+
+        String prefixKey = m_name.replaceAll(" ", "_") + ".";
+
+        int nbParameters = size();
+        for (int i = 0; i < nbParameters; i++) {
+            AbstractParameter parameter = get(i);
+
+            String parameterName = parameter.getName();
+            String suffixKey = parameterName.replaceAll(" ", "_");
+
+            String key;
+            if (usePrefixKey) {
+                key = prefixKey + suffixKey;
+            } else {
+                key = suffixKey;
+            }
+            
+            String value = parameter.getStringValue();
+            preferences.put(key, value);
+
+        }
+    }
+
+    public void loadParameters(Preferences preferences, boolean usePrefixKey) {
+
+        String prefixKey = m_name.replaceAll(" ", "_") + ".";
+
+        int nbParameters = size();
+        for (int i = 0; i < nbParameters; i++) {
+            AbstractParameter parameter = get(i);
+
+            String parameterName = parameter.getName();
+            String suffixKey = parameterName.replaceAll(" ", "_");
+
+            String key;
+
+            if (usePrefixKey) {
+                key = prefixKey + suffixKey;
+            } else {
+                key = suffixKey;
+            }
+
             String value = preferences.get(key, null);
+
             if (value == null) {
                 continue;
             }
@@ -295,7 +330,7 @@ public class ParameterList extends ArrayList<AbstractParameter> {
 
         }
 
-        updateIsUsed(preferences);
+        updateIsUsed(preferences, usePrefixKey);
     }
 
     public HashMap<String, String> getValues() {

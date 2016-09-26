@@ -2,6 +2,8 @@ package fr.proline.studio.export;
 
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.gui.InfoDialog;
+import fr.proline.studio.parameter.BooleanParameter;
+import fr.proline.studio.parameter.ParameterList;
 import fr.proline.studio.utils.IconManager;
 
 import java.awt.*;
@@ -16,6 +18,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.prefs.Preferences;
 
@@ -61,6 +64,14 @@ public class ExportDialog extends DefaultDialog {
     private JPanel m_decoratedPanel;
     private JRadioButton m_yesDecorated;
     private JRadioButton m_noDecorated;
+    
+    
+    
+    //NEW THINGS
+    private ParameterList m_parameterList;
+    private static final String PARAMETER_LIST_NAME = "General Application Settings";
+    private BooleanParameter m_exportParameter;
+    private Preferences m_preferences;
 
     private ExportManager m_exportManager = null;
 
@@ -149,33 +160,21 @@ public class ExportDialog extends DefaultDialog {
         m_decoratedPanel = new JPanel();
         m_decoratedPanel.setBorder(BorderFactory.createTitledBorder("Export Decorated"));
         m_decoratedPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
-
-        m_yesDecorated = new JRadioButton("Yes");
-        m_noDecorated = new JRadioButton("No");
-
-        ButtonGroup group = new ButtonGroup();
-        group.add(m_yesDecorated);
-        group.add(m_noDecorated);
-
-        this.updateExportDecoration();
         
-        m_decoratedPanel.add(m_yesDecorated);
-        m_decoratedPanel.add(m_noDecorated);
+        m_parameterList = new ParameterList(PARAMETER_LIST_NAME);
+        
+        m_exportParameter = new BooleanParameter("Export_Decorated", "Export Decorated", JCheckBox.class, true);
+        m_parameterList.add(m_exportParameter);
+
+        m_decoratedPanel.add(m_parameterList.getPanel(true));
+        
+        
 
         return m_decoratedPanel;
     }
 
     private void updateExportDecoration() {
-        if (m_yesDecorated != null && m_noDecorated != null) {
-            Preferences preferences = NbPreferences.root();
-            boolean rtfSelected = preferences.getBoolean("Export_Table_Decorated", Boolean.FALSE);
-
-            if (rtfSelected) {
-                m_yesDecorated.setSelected(true);
-            } else {
-                m_noDecorated.setSelected(true);
-            }
-        }
+        m_parameterList.loadParameters(NbPreferences.root(), true);
     }
 
     public final JPanel createExportPanel() {
@@ -305,9 +304,9 @@ public class ExportDialog extends DefaultDialog {
     }
 
     public Boolean exportDecorated() {
-        if (m_exportType == ExporterFactory.EXPORT_TABLE) {
-            return m_yesDecorated.isSelected();
-        } else {
+        if(m_exportType == ExporterFactory.EXPORT_TABLE){
+            return (boolean)m_exportParameter.getObjectValue();
+        }else{
             return null;
         }
     }

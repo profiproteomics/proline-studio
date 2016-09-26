@@ -394,7 +394,7 @@ public class ImportIdentificationDialog extends DefaultDialog {
         parserPanel.add(m_parserComboBox, c);
 
         m_sourceParameterList = createSourceParameters();
-        m_sourceParameterList.updateIsUsed(NbPreferences.root());
+        m_sourceParameterList.updateIsUsed(NbPreferences.root(), true);
         
         c.gridx = 0;
         c.gridwidth = 1;

@@ -35,7 +35,7 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
     public static final int SUB_TASK_COUNT = 4; // <<----- get in sync
     
     
-    private int action;
+    private int m_action;
     private static final int LOAD_PROTEIN_SET_FOR_RSM = 0;
     private static final int LOAD_PROTEIN_SET_FOR_PEPTIDE_INSTANCE = 1;
     
@@ -59,7 +59,7 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
         init(SUB_TASK_COUNT, new TaskInfo("Load Protein Sets of Identification Summary "+rsm.getId(), false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_MEDIUM));
         m_projectId = projectId;
         m_rsm = rsm;
-        action = LOAD_PROTEIN_SET_FOR_RSM;
+        m_action = LOAD_PROTEIN_SET_FOR_RSM;
     }
     
     public void initLoadProteinSetForPeptideInstance(long projectId, PeptideInstance peptideInstance) {        
@@ -67,7 +67,7 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
         m_projectId = projectId;
         m_peptideInstance = peptideInstance;
         m_rsm = peptideInstance.getResultSummary();
-        action = LOAD_PROTEIN_SET_FOR_PEPTIDE_INSTANCE; 
+        m_action = LOAD_PROTEIN_SET_FOR_PEPTIDE_INSTANCE; 
     }
 
     
@@ -75,7 +75,7 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
     // must be implemented for all AbstractDatabaseSlicerTask 
     public void abortTask() {
         super.abortTask();
-        switch (action) {
+        switch (m_action) {
             case LOAD_PROTEIN_SET_FOR_RSM:
                 m_rsm.getTransientData().setProteinSetArray(null);
                 break;
@@ -87,7 +87,7 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
     
     @Override
     public boolean needToFetch() {
-        switch (action) {
+        switch (m_action) {
             case LOAD_PROTEIN_SET_FOR_RSM:
                 return (m_rsm.getTransientData().getProteinSetArray() == null);
             case LOAD_PROTEIN_SET_FOR_PEPTIDE_INSTANCE:
@@ -99,7 +99,7 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
     @Override
     public boolean fetchData() {
 
-        if (action == LOAD_PROTEIN_SET_FOR_RSM) {
+        if (m_action == LOAD_PROTEIN_SET_FOR_RSM) {
             if (needToFetch()) {
                 // first data are fetched
                 return fetchDataMainTaskForRSM();
@@ -107,7 +107,7 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
                 // fetch data of SubTasks
                 return fetchDataSubTaskFor();
             }
-        } else if (action == LOAD_PROTEIN_SET_FOR_PEPTIDE_INSTANCE) {
+        } else if (m_action == LOAD_PROTEIN_SET_FOR_PEPTIDE_INSTANCE) {
             if (needToFetch()) {
                 // first data are fetched
                 return fetchDataMainTaskForPeptideInstance();
@@ -405,11 +405,11 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
     private void typicalProteinMatch(EntityManager entityManagerMSI, SubTask subTask) {
 
         DProteinSet[] proteinSetArray = null;
-        if (action == LOAD_PROTEIN_SET_FOR_RSM) {
+        if (m_action == LOAD_PROTEIN_SET_FOR_RSM) {
             proteinSetArray = m_rsm.getTransientData().getProteinSetArray();
             
             
-        } else if (action == LOAD_PROTEIN_SET_FOR_PEPTIDE_INSTANCE) {
+        } else if (m_action == LOAD_PROTEIN_SET_FOR_PEPTIDE_INSTANCE) {
 
             proteinSetArray = m_peptideInstance.getTransientData().getProteinSetArray();
         }
@@ -446,10 +446,10 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
     private void spectralCount(EntityManager entityManagerMSI, SubTask subTask) {
 
         DProteinSet[] proteinSetArray = null;
-        if (action == LOAD_PROTEIN_SET_FOR_RSM) {
+        if (m_action == LOAD_PROTEIN_SET_FOR_RSM) {
 
             proteinSetArray = m_rsm.getTransientData().getProteinSetArray();
-        } else if (action == LOAD_PROTEIN_SET_FOR_PEPTIDE_INSTANCE) {
+        } else if (m_action == LOAD_PROTEIN_SET_FOR_PEPTIDE_INSTANCE) {
 
             proteinSetArray = m_peptideInstance.getTransientData().getProteinSetArray();
         }
@@ -510,9 +510,9 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
     private void specificSpectralCount(EntityManager entityManagerMSI, SubTask subTask) {
 
         DProteinSet[] proteinSetArray = null;
-        if (action == LOAD_PROTEIN_SET_FOR_RSM) {
+        if (m_action == LOAD_PROTEIN_SET_FOR_RSM) {
             proteinSetArray = m_rsm.getTransientData().getProteinSetArray();
-        } else if (action == LOAD_PROTEIN_SET_FOR_PEPTIDE_INSTANCE) {
+        } else if (m_action == LOAD_PROTEIN_SET_FOR_PEPTIDE_INSTANCE) {
             proteinSetArray = m_peptideInstance.getTransientData().getProteinSetArray();
         }
         

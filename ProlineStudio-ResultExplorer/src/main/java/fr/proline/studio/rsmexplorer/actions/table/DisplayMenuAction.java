@@ -2,6 +2,8 @@ package fr.proline.studio.rsmexplorer.actions.table;
 
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.AbstractDataBox.DataboxStyle;
+import fr.proline.studio.pattern.DataBoxAdjacencyMatrixChoice;
+import fr.proline.studio.pattern.DataBoxAdjacencyMatrix;
 import fr.proline.studio.pattern.DataboxManager;
 import fr.proline.studio.pattern.ParameterDistance;
 import fr.proline.studio.table.AbstractTableAction;
@@ -10,7 +12,6 @@ import java.util.Iterator;
 import java.util.TreeMap;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
-import javax.swing.JSeparator;
 import javax.swing.JTable;
 
 /**
@@ -63,7 +64,9 @@ public class DisplayMenuAction extends AbstractTableAction {
                     m_menu.addSeparator();
                 }
                 previousStyle = style;
-                DisplayViewInNewWindowAction displayAction = new DisplayViewInNewWindowAction(dataBox, destDatabox);
+                // JPM.WART for description
+                String description = (destDatabox instanceof DataBoxAdjacencyMatrixChoice) ?  DataBoxAdjacencyMatrix.DESCRIPTION : destDatabox.getDescription();
+                DisplayViewInNewWindowAction displayAction = new DisplayViewInNewWindowAction(dataBox, destDatabox, description);
                 JMenuItem displayOptionMenuItem = new JMenuItem(displayAction);
                 m_menu.add(displayOptionMenuItem);
                 hasSubActions = true;

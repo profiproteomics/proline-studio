@@ -107,6 +107,38 @@ public class MatrixSelectionPanel extends HourglassPanel implements DataBoxPanel
         layeredPane.add(m_searchToggleButton.getSearchPanel(), JLayeredPane.PALETTE_LAYER);
     }
     
+    @Override
+    public void setDataBox(AbstractDataBox dataBox) {
+        m_dataBox = dataBox;
+    }
+    
+    @Override
+    public AbstractDataBox getDataBox() {
+        return m_dataBox;
+    }
+    
+        
+    @Override
+    public void addSingleValue(Object v) {
+        // not used for the moment JPM.TODO ?
+    }
+
+    @Override
+    public ActionListener getRemoveAction(SplittedPanelContainer splittedPanel) {
+        return m_dataBox.getRemoveAction(splittedPanel);
+    }
+
+    @Override
+    public ActionListener getAddAction(SplittedPanelContainer splittedPanel) {
+       return m_dataBox.getAddAction(splittedPanel);
+    }
+
+    @Override
+    public ActionListener getSaveAction(SplittedPanelContainer splittedPanel) {
+        return m_dataBox.getSaveAction(splittedPanel);
+    }
+
+    
     private JPanel createMatrixPanel() {
         JPanel matrixPanel = new JPanel(new BorderLayout());
          matrixPanel.setBackground(Color.white);
@@ -175,7 +207,7 @@ public class MatrixSelectionPanel extends HourglassPanel implements DataBoxPanel
     private boolean filter(Filter filter, int index, int type) {
         if (type == PROTEIN) {
             Component c = m_componentList.get(index);
-            ArrayList<LightProteinMatch> proteinSet = c.proteinSet;
+            ArrayList<LightProteinMatch> proteinSet = c.proteinMatchArray;
             int nbProteins = proteinSet.size();
             for (int i=0;i<nbProteins;i++) {
                 LightProteinMatch pm = proteinSet.get(i);
@@ -185,7 +217,7 @@ public class MatrixSelectionPanel extends HourglassPanel implements DataBoxPanel
             }
         } else if (type == PEPTIDE) {
             Component c = m_componentList.get(index);
-            ArrayList<LightPeptideMatch> peptideSet = c.peptideSet;
+            ArrayList<LightPeptideMatch> peptideSet = c.peptideArray;
             int nbPeptides = peptideSet.size();
             for (int i=0;i<nbPeptides;i++) {
                 LightPeptideMatch pm = peptideSet.get(i);
@@ -199,15 +231,15 @@ public class MatrixSelectionPanel extends HourglassPanel implements DataBoxPanel
     
     @Override
     public LinkedHashMap<Integer, Filter> getFilters() {
-        
+
         LinkedHashMap<Integer, Filter> filtersMap = new LinkedHashMap<>(2);
-        
+
         StringFilter proteinFilter = new StringFilter("Protein", null, PROTEIN);
         filtersMap.put(PROTEIN, proteinFilter);
-        
+
         StringFilter peptideFilter = new StringFilter("Peptide", null, PEPTIDE);
         filtersMap.put(PEPTIDE, peptideFilter);
-        
+
         return filtersMap;
     }
 
@@ -217,103 +249,104 @@ public class MatrixSelectionPanel extends HourglassPanel implements DataBoxPanel
         if (modelRowIndex == -1) {
             return;
         }
-        selectCluster(modelRowIndex);        
+        selectCluster(modelRowIndex);
     }
-    
+
     private void selectCluster(int index) {
         MatrixImageButton imageButton = m_curImageButtonArray.get(index);
         imageButton.doClick();
-        
+
         Rectangle visibleRectangle = m_scrollPane.getBounds();
-        double x1 = visibleRectangle.getX()+m_scrollPane.getHorizontalScrollBar().getValue();
-        double x2 = x1+visibleRectangle.getWidth();
-        
+        double x1 = visibleRectangle.getX() + m_scrollPane.getHorizontalScrollBar().getValue();
+        double x2 = x1 + visibleRectangle.getWidth();
+
         Point imageButtonLocation = imageButton.getLocation();
-        
-        if ((imageButtonLocation.getX() < x1) || (imageButtonLocation.getX() + imageButton.getWidth() >x2)) {
+
+        if ((imageButtonLocation.getX() < x1) || (imageButtonLocation.getX() + imageButton.getWidth() > x2)) {
             m_scrollPane.getViewport().setViewPosition(imageButton.getLocation());
         }
     }
-    
+
     public class InternalPanel extends JPanel {
+
         private InternalPanel() {
             setBackground(Color.white);
         }
-        
-        private void initPanel() {
-                        
-        // search filter order
-        m_peptideToProteinMap = m_drawVisualization.get_peptideToProteinMap();
-        m_componentList = m_drawVisualization.get_ComponentList();
 
-        //Sort clist
-        Collections.sort(m_componentList, new CustomComparator());
+        private void initPanel(boolean doNotTakeFirstSelection) {
 
-        setLayout(new BorderLayout());
-        
-        // create objects
+            // search filter order
+            m_peptideToProteinMap = m_drawVisualization.get_peptideToProteinMap();
+            m_componentList = m_drawVisualization.get_ComponentList();
 
-        JPanel horizontalPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        horizontalPanel.setBackground(Color.white);
-        horizontalPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-        
-        int nbComponents = m_componentList.size();
-        m_curImageButtonArray  = new ArrayList<>(nbComponents);
-        for (int i=0;i<nbComponents;i++) {
-            final Component component = m_componentList.get(i);
-            final MatrixImageButton curImageButton = new MatrixImageButton(i, component, m_drawVisualization);
-            m_curImageButtonArray.add(curImageButton);
-            if (m_currentImageButton == null) {
-                m_currentComponent = component;
-                m_currentImageButton = curImageButton;
-                curImageButton.setSelection(true);
-            }
-            
-            curImageButton.addActionListener(new ActionListener() {
+            //Sort clist
+            Collections.sort(m_componentList, new CustomComparator());
 
-                @Override
-                public void actionPerformed(ActionEvent e) {
+            setLayout(new BorderLayout());
 
-                    if (m_currentImageButton != null) {
-                        m_currentImageButton.setSelection(false);
-                    }
-                    curImageButton.setSelection(true);
+            // create objects
+            JPanel horizontalPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+            horizontalPanel.setBackground(Color.white);
+            horizontalPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+
+            int nbComponents = m_componentList.size();
+            m_curImageButtonArray = new ArrayList<>(nbComponents);
+            for (int i = 0; i < nbComponents; i++) {
+                final Component component = m_componentList.get(i);
+                final MatrixImageButton curImageButton = new MatrixImageButton(i, component, m_drawVisualization);
+                m_curImageButtonArray.add(curImageButton);
+                if (m_currentImageButton == null) {
+                    m_currentComponent = component;
                     m_currentImageButton = curImageButton;
-
-                    setCurrentComponent(component);
-                    m_dataBox.propagateDataChanged(Component.class);
-
-                    repaint();
-
+                    curImageButton.setSelection(true);
                 }
 
-            });
-            
-            horizontalPanel.add(curImageButton);
+                curImageButton.addActionListener(new ActionListener() {
+
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+
+                        if (m_currentImageButton != null) {
+                            m_currentImageButton.setSelection(false);
+                        }
+                        curImageButton.setSelection(true);
+                        m_currentImageButton = curImageButton;
+
+                        setCurrentComponent(component);
+                        m_dataBox.propagateDataChanged(Component.class);
+
+                        repaint();
+
+                    }
+
+                });
+
+                horizontalPanel.add(curImageButton);
+            }
+
+            m_scrollPane = new JScrollPane(horizontalPanel);
+
+            // add panels to the MatrixSelectionPanel
+            add(m_scrollPane, BorderLayout.CENTER);
+
+            if (!doNotTakeFirstSelection) {
+                m_dataBox.propagateDataChanged(Component.class);
+            }
         }
 
-        m_scrollPane = new JScrollPane(horizontalPanel);
-
-        // add panels to the MatrixSelectionPanel
-        add(m_scrollPane, BorderLayout.CENTER);
-
-        m_dataBox.propagateDataChanged(Component.class);
-
-        }
     }
-
     
     public DrawVisualization getDrawVisualization() {
         return m_drawVisualization;
     }
     
-    public void setData(AdjacencyMatrixData matrixData, DProteinMatch proteinMatch, boolean keepSameSet) {
+    public void setData(AdjacencyMatrixData matrixData, DProteinMatch proteinMatch, boolean keepSameSet, boolean doNotTakeFirstSelection) {
         
         m_drawVisualization = new DrawVisualization();
         
         m_drawVisualization.setData(matrixData, keepSameSet);
 
-        m_internalPanel.initPanel();
+        m_internalPanel.initPanel(doNotTakeFirstSelection);
         
         selectProtein(proteinMatch);
         
@@ -322,7 +355,7 @@ public class MatrixSelectionPanel extends HourglassPanel implements DataBoxPanel
         revalidate(); 
         repaint();
     }
-    public void setData(DProteinMatch proteinMatch) {
+    public void setData(DProteinMatch proteinMatch, boolean doNotTakeFirstSelection) {
         if (proteinMatch == null) {
             return;
         }
@@ -343,7 +376,7 @@ public class MatrixSelectionPanel extends HourglassPanel implements DataBoxPanel
         int nbComponents = m_componentList.size();
         for (int i=0;i<nbComponents;i++) {
             Component c = m_componentList.get(i);
-            ArrayList<LightProteinMatch> proteinSetList = c.proteinSet;
+            ArrayList<LightProteinMatch> proteinSetList = c.proteinMatchArray;
             int nbProteins = proteinSetList.size();
             for (int j=0;j<nbProteins;j++) {
                 LightProteinMatch pm = proteinSetList.get(j);
@@ -375,35 +408,9 @@ public class MatrixSelectionPanel extends HourglassPanel implements DataBoxPanel
         return m_currentComponent;
     }
 
-    @Override
-    public void setDataBox(AbstractDataBox dataBox) {
-        m_dataBox = dataBox;
-    }
 
-    @Override
-    public AbstractDataBox getDataBox() {
-        return m_dataBox;
-    }
-    
-    @Override
-    public void addSingleValue(Object v) {
-        // not used for the moment JPM.TODO ?
-    }
 
-    @Override
-    public ActionListener getRemoveAction(SplittedPanelContainer splittedPanel) {
-        return m_dataBox.getRemoveAction(splittedPanel);
-    }
 
-    @Override
-    public ActionListener getAddAction(SplittedPanelContainer splittedPanel) {
-       return m_dataBox.getAddAction(splittedPanel);
-    }
-
-    @Override
-    public ActionListener getSaveAction(SplittedPanelContainer splittedPanel) {
-        return m_dataBox.getSaveAction(splittedPanel);
-    }
 
     
 

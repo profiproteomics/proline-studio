@@ -84,7 +84,7 @@ public class ConnectedComponents {
                         }
                     }
 
-                    componentSet.get(componentIndex).proteinSet.add(proteinTemp);
+                    componentSet.get(componentIndex).proteinMatchArray.add(proteinTemp);
 
                 }
 
@@ -101,7 +101,7 @@ public class ConnectedComponents {
                         }
                     }
 
-                    componentSet.get(componentIndex).peptideSet.add(peptideTemp);
+                    componentSet.get(componentIndex).peptideArray.add(peptideTemp);
 
                 }
 
@@ -155,7 +155,7 @@ public class ConnectedComponents {
     private ArrayList<Component> filterComponents(ArrayList<Component> cList) {
         ArrayList<Component> subCList = new ArrayList<>();
         for (Component temp : cList) {
-            if (temp.peptideSet.size() > 1 && temp.proteinSet.size() > 1) {
+            if (temp.peptideArray.size() > 1 && temp.proteinMatchArray.size() > 1) {
                 if (!fullMatch(temp)) {
                     subCList.add(temp);
                 }
@@ -166,9 +166,9 @@ public class ConnectedComponents {
     }
 
     private boolean fullMatch(Component temp) {
-        for (LightPeptideMatch peptTemp : temp.peptideSet) {
+        for (LightPeptideMatch peptTemp : temp.peptideArray) {
             ArrayList<LightProteinMatch> protList = m_peptideToProteinMap.get(peptTemp);
-            for (LightProteinMatch protTemp : temp.proteinSet) {
+            for (LightProteinMatch protTemp : temp.proteinMatchArray) {
                 if (!protList.contains(protTemp)) {
                     return false;
                 }

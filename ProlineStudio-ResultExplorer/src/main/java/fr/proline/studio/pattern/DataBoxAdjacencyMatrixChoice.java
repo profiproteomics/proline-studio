@@ -21,6 +21,7 @@ public class DataBoxAdjacencyMatrixChoice extends AbstractDataBox {
     private boolean dataLoadedForRSM = false;
     
     private boolean m_keepSameSet = false;
+    private boolean m_doNotTakeFirstSelection = false;  //JPM.WART : when we select later the matrix to be showed.
     
     public DataBoxAdjacencyMatrixChoice() {
         super(DataboxType.DataBoxAdjacencyMatrixChoice, DataboxStyle.STYLE_RSM);
@@ -51,6 +52,10 @@ public class DataBoxAdjacencyMatrixChoice extends AbstractDataBox {
     
     public void setKeepSameset(boolean keepSameSet) {
         m_keepSameSet = keepSameSet;
+    }
+    
+    public void doNotTakeFirstSelection(boolean doNotTakeFirstSelection) {
+        m_doNotTakeFirstSelection = doNotTakeFirstSelection;
     }
     
     @Override
@@ -93,21 +98,22 @@ public class DataBoxAdjacencyMatrixChoice extends AbstractDataBox {
             @Override
             public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
 
-                ((MatrixSelectionPanel) m_panel).setData(matrixData, _proteinMatch, m_keepSameSet);
-                
+
+                ((MatrixSelectionPanel) m_panel).setData(matrixData, _proteinMatch, m_keepSameSet, m_doNotTakeFirstSelection);
+                m_doNotTakeFirstSelection = false;
+
                 if (finished) {
                     unregisterTask(taskId);
                 }
             }
         };
 
-        // ask asynchronous loading of data
-        if (!dataLoadedForRSM) {
-            registerTask(new DatabaseProteinsAndPeptidesTask(callback, getProjectId(), _rsm, matrixData));
-            dataLoadedForRSM = true;
-        } else {
-            ((MatrixSelectionPanel) m_panel).setData(_proteinMatch);
-        }
+
+        registerTask(new DatabaseProteinsAndPeptidesTask(callback, getProjectId(), _rsm, matrixData));
+
+        ((MatrixSelectionPanel) m_panel).setData(_proteinMatch, m_doNotTakeFirstSelection);
+        m_doNotTakeFirstSelection = false;
+
 
     }
     

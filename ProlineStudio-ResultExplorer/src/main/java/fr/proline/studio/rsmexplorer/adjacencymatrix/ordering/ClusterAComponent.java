@@ -33,7 +33,7 @@ public class ClusterAComponent {
 
         for (Component tempComp : compList) {
             int[][] peptProtMap = getPeptProtMatrix(tempComp);
-            ArrayList<Integer> proteinOrder = clusterDataArray(tempComp.proteinSet.size(), peptProtMap);
+            ArrayList<Integer> proteinOrder = clusterDataArray(tempComp.proteinMatchArray.size(), peptProtMap);
 
             int[][] transpose = new int[peptProtMap[0].length][peptProtMap.length];
             for (int i = 0; i < peptProtMap.length; i++) {
@@ -42,22 +42,22 @@ public class ClusterAComponent {
                 }
             }
 
-            ArrayList<Integer> peptideOrder = clusterDataArray(tempComp.peptideSet.size(), transpose);
+            ArrayList<Integer> peptideOrder = clusterDataArray(tempComp.peptideArray.size(), transpose);
 
             ArrayList<LightProteinMatch> proteinSetTemp = new ArrayList<>();
             ArrayList<LightPeptideMatch> peptideSetTemp = new ArrayList<>();
 
             for (int index : proteinOrder) {
-                proteinSetTemp.add(tempComp.proteinSet.get(index));
+                proteinSetTemp.add(tempComp.proteinMatchArray.get(index));
             }
 
-            tempComp.proteinSet = proteinSetTemp;
+            tempComp.proteinMatchArray = proteinSetTemp;
 
             for (int index : peptideOrder) {
-                peptideSetTemp.add(tempComp.peptideSet.get(index));
+                peptideSetTemp.add(tempComp.peptideArray.get(index));
             }
 
-            tempComp.peptideSet = peptideSetTemp;
+            tempComp.peptideArray = peptideSetTemp;
         }
 
     }
@@ -119,13 +119,13 @@ public class ClusterAComponent {
             return null;
         }
 
-        int[][] tempMatch = new int[compTemp.peptideSet.size()][compTemp.proteinSet.size()];
+        int[][] tempMatch = new int[compTemp.peptideArray.size()][compTemp.proteinMatchArray.size()];
         int i = 0, j = 0;
-        for (LightPeptideMatch tempPept : compTemp.peptideSet) {
+        for (LightPeptideMatch tempPept : compTemp.peptideArray) {
             ArrayList<LightProteinMatch> proteinList = m_peptideToProteinMap.get(tempPept);
             j = 0;
 
-            for (LightProteinMatch tempProt : compTemp.proteinSet) {
+            for (LightProteinMatch tempProt : compTemp.proteinMatchArray) {
                 if (proteinList.contains(tempProt)) {
                     tempMatch[i][j] = 1;
                 } else {

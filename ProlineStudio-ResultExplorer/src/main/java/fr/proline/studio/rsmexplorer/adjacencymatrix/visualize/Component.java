@@ -9,8 +9,8 @@ import fr.proline.studio.dam.tasks.data.LightProteinMatch;
 
 public class Component {
 
-    public ArrayList<LightProteinMatch> proteinSet = new ArrayList<>();
-    public ArrayList<LightPeptideMatch> peptideSet = new ArrayList<>();
+    public ArrayList<LightProteinMatch> proteinMatchArray = new ArrayList<>();
+    public ArrayList<LightPeptideMatch> peptideArray = new ArrayList<>();
 
     public Component() {
         
@@ -18,11 +18,11 @@ public class Component {
     
     
     public int getProteinSize() {
-        return proteinSet.size();
+        return proteinMatchArray.size();
     }
 
     public int getPeptideSize() {
-        return peptideSet.size();
+        return peptideArray.size();
     }
 
 }

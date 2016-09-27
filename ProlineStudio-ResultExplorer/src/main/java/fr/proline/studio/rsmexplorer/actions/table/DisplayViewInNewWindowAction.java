@@ -21,8 +21,8 @@ public class DisplayViewInNewWindowAction extends AbstractAction {
     private AbstractDataBox m_destinationBox;
 
 
-    public DisplayViewInNewWindowAction(AbstractDataBox sourceBox, AbstractDataBox destinationBox) {
-        super(destinationBox.getDescription());
+    public DisplayViewInNewWindowAction(AbstractDataBox sourceBox, AbstractDataBox destinationBox, String description) {
+        super(description);
         
         Image img = destinationBox.getDefaultIcon();
         if (img != null) {

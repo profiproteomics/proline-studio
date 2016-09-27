@@ -93,10 +93,24 @@ public class WindowBoxFactory {
             
             DataBoxAdjacencyMatrixChoice adjacencyMatrixChoice = ((DataBoxAdjacencyMatrixChoice) databox);
             adjacencyMatrixChoice.setKeepSameset(true);
+            adjacencyMatrixChoice.doNotTakeFirstSelection(true);
             adjacencyMatrixChoice.createPanel();  //JPM.WART
             databox = new DataBoxAdjacencyMatrix();
             adjacencyMatrixChoice.addNextDataBox(databox);
-            boxes = new AbstractDataBox[1];
+            boxes = new AbstractDataBox[7];
+
+            boxes[1] = new DataBoxRsetPeptideSpectrum();
+            boxes[2] = new DataBoxRsetPeptideSpectrumError();
+            boxes[2].setLayout(SplittedPanelContainer.PanelLayout.TABBED);
+            boxes[3] = new DataBoxRsetPeptideFragmentation();
+            boxes[3].setLayout(SplittedPanelContainer.PanelLayout.TABBED);
+            boxes[4] = new DataBoxRsetPeptideSpectrumValues();
+            boxes[4].setLayout(SplittedPanelContainer.PanelLayout.TABBED);
+            
+            boxes[5] = new DataBoxRsmProteinAndPeptideSequence();
+            boxes[6] = new DataBoxRsmPeptidesOfProtein();
+            boxes[6].setLayout(SplittedPanelContainer.PanelLayout.TABBED);
+
         } else if (databox instanceof DataBoxRsmProteinSetOfPeptides) {
             boxes = new AbstractDataBox[2];
             boxes[1] = new DataBoxRsmProteinsOfProteinSet();

@@ -1,6 +1,8 @@
 package fr.proline.studio.pattern;
 
+import fr.proline.core.orm.msi.PeptideSet;
 import fr.proline.core.orm.msi.ResultSummary;
+import fr.proline.core.orm.msi.dto.DPeptideInstance;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
@@ -45,8 +47,15 @@ public class DataBoxAdjacencyMatrix extends AbstractDataBox {
         registerOutParameter(outParameter);
         
         outParameter = new GroupParameter();
+        outParameter.addParameter(DPeptideInstance.class, false);
+        registerOutParameter(outParameter);
+        
+        outParameter = new GroupParameter();
         outParameter.addParameter(DProteinMatch.class, false);
         registerOutParameter(outParameter);
+        
+        
+        
 
     }
     
@@ -65,9 +74,7 @@ public class DataBoxAdjacencyMatrix extends AbstractDataBox {
 
         Component component = (Component) m_previousDataBox.getData(false, Component.class);
         DrawVisualization drawVisualization = (DrawVisualization) m_previousDataBox.getData(false, DrawVisualization.class);
-        
-        ////////////
-        
+
         
         final ResultSummary _rsm = (ResultSummary) m_previousDataBox.getData(false, ResultSummary.class);
         
@@ -110,18 +117,6 @@ public class DataBoxAdjacencyMatrix extends AbstractDataBox {
         registerTask(new DatabaseProteinsAndPeptidesTask(callback, getProjectId(), _rsm, proteinMatchIdArray, peptideMatchIdArray, proteinMap, peptideMap));
 
         
-        ////////////
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
 
     }
     
@@ -134,6 +129,26 @@ public class DataBoxAdjacencyMatrix extends AbstractDataBox {
             }
             if (parameterType.equals(DProteinMatch.class)) {
                 return ((MatrixPanel)m_panel).getSelectedProteinMatch();
+            }
+            if (parameterType.equals(DPeptideInstance.class)) {
+                DPeptideMatch peptideMatch = ((MatrixPanel)m_panel).getSelectedPeptideMatch();
+                DProteinMatch pm = ((MatrixPanel)m_panel).getSelectedProteinMatch();
+                if ((pm != null) && (peptideMatch != null)) {
+                    ResultSummary rsm = (ResultSummary) m_previousDataBox.getData(false, ResultSummary.class);
+                    if (rsm != null) {
+                        PeptideSet peptideSet = pm.getPeptideSet(rsm.getId());
+                        DPeptideInstance[] peptideInstances = peptideSet.getTransientDPeptideInstances();
+                        if (peptideInstances != null) {
+                            for (DPeptideInstance peptideInstance : peptideInstances) {
+                                if (peptideInstance.getPeptideId() == peptideMatch.getPeptide().getId()) {
+                                    return peptideInstance;
+                                }
+                            }
+                        }
+                    }
+                    
+                }
+               
             }
         }
         return super.getData(getArray, parameterType);

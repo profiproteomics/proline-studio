@@ -23,12 +23,15 @@ import fr.proline.studio.rsmexplorer.tree.identification.IdProjectIdentification
 import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import fr.proline.studio.dpm.task.CertifyIdentificationTask;
+import fr.proline.studio.parameter.ObjectParameter;
+import fr.proline.studio.parameter.ParameterList;
 import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import javax.swing.tree.DefaultTreeModel;
 import org.openide.util.NbBundle;
+import org.openide.util.NbPreferences;
 import org.openide.windows.WindowManager;
 
 /**
@@ -37,6 +40,8 @@ import org.openide.windows.WindowManager;
  * @author JM235353
  */
 public class ImportSearchResultAsDatasetAction extends AbstractRSMAction {
+    
+    private static final String GENERAL_APPLICATION_SETTINGS = "General Application Settings";
 
     public ImportSearchResultAsDatasetAction() {
         super(NbBundle.getMessage(ImportSearchResultAsDatasetAction.class, "CTL_AddSearchResult"), AbstractTree.TreeType.TREE_IDENTIFICATION);
@@ -245,6 +250,61 @@ public class ImportSearchResultAsDatasetAction extends AbstractRSMAction {
                     identificationNode.setIsChanging(false);
                     ((DataSetData) identificationNode.getData()).setDataset(dataset);
                     treeModel.nodeChanged(identificationNode);
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    //<-------------------------------------- AND
+                    ParameterList parameterList = new ParameterList(GENERAL_APPLICATION_SETTINGS);
+                    Object[] objectTable = {ImportManager.SEARCH_RESULT_NAME_SOURCE, ImportManager.PEAKLIST_PATH_SOURCE, ImportManager.MSI_SEARCH_FILE_NAME_SOURCE};
+                    ObjectParameter parameter = new ObjectParameter(ImportManager.DEFAULT_SEARCH_RESULT_NAME_SOURCE_KEY, "Default Search Result Name Source", objectTable, 2, null);
+                    parameterList.add(parameter);
+                    parameterList.loadParameters(NbPreferences.root(), true);
+
+                    String naming = (String)parameter.getObjectValue();
+                    
+                    DataSetData.fetchRsetAndRsmForOneDataset(dataset);
+
+                    if (dataset == null || dataset.getResultSet() == null || dataset.getResultSet().getMsiSearch() == null) {
+                        return;
+                    }
+
+                    String newName = "";
+
+                    newName = (dataset.getResultSet().getMsiSearch().getResultFileName() == null) ? "" : dataset.getResultSet().getMsiSearch().getResultFileName();
+                    if (newName.contains(".")) {
+                        newName = newName.substring(0, newName.indexOf("."));
+                    }
+
+                    if (naming.equalsIgnoreCase(ImportManager.SEARCH_RESULT_NAME_SOURCE)) {
+                        newName = dataset.getResultSet().getName();
+                    } else if (naming.equalsIgnoreCase(ImportManager.PEAKLIST_PATH_SOURCE)) {
+                        newName = (dataset.getResultSet().getMsiSearch().getPeaklist().getPath() == null) ? "" : dataset.getResultSet().getMsiSearch().getPeaklist().getPath();
+                        if (newName.contains(File.separator)) {
+                            newName = newName.substring(newName.lastIndexOf(File.separator) + 1);
+                        }
+                    }
+
+                    if (!newName.equalsIgnoreCase("")) {
+
+                        identificationNode.rename(newName, tree);
+                        
+                        dataset.setName(newName);
+
+                        tree.rename(identificationNode, newName);
+
+                    }
+                    
+                    //<-------------------------------------- AND
+                    
+                    
+                    
+                    
+                    
                 } else {
                     // should not happen
                     treeModel.removeNodeFromParent(identificationNode);

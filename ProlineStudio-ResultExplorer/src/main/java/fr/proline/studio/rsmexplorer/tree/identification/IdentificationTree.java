@@ -43,6 +43,7 @@ import fr.proline.studio.rsmexplorer.actions.identification.ImportManager;
 import fr.proline.studio.rsmexplorer.actions.identification.ImportMaxQuantResultJMSAction;
 import fr.proline.studio.rsmexplorer.actions.identification.ImportSearchResultAsDatasetAction;
 import fr.proline.studio.rsmexplorer.actions.identification.ImportSearchResultAsDatasetJMSAction;
+import fr.proline.studio.rsmexplorer.actions.identification.SpecialRenameAction;
 import fr.proline.studio.rsmexplorer.actions.identification.UpdatePeaklistSoftwareAction;
 import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
@@ -55,15 +56,12 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.event.MouseEvent;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.PrintStream;
 import java.util.*;
 import java.util.prefs.Preferences;
 import javax.swing.*;
 import javax.swing.event.TreeExpansionEvent;
 import javax.swing.event.TreeWillExpandListener;
 import javax.swing.tree.*;
-import org.openide.util.Exceptions;
 import org.openide.util.NbPreferences;
 
 /**
@@ -98,7 +96,7 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
     }
 
     public static boolean renameTreeNodes(AbstractNode root, IdentificationTree tree) {
-        
+
         boolean emptyFound = false;
 
         Preferences preferences = NbPreferences.root();
@@ -146,7 +144,7 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
                 if (!newName.equalsIgnoreCase("")) {
                     dataset.setName(newName);
                     tree.rename(currentElement, newName);
-                }else{
+                } else {
                     emptyFound = true;
                 }
 
@@ -155,7 +153,7 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
 
         DefaultTreeModel model = (DefaultTreeModel) tree.getModel();
         model.reload(root);
-        
+
         return emptyFound;
     }
 
@@ -702,6 +700,9 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
 
                 RenameAction renameAction = new RenameAction(AbstractTree.TreeType.TREE_IDENTIFICATION);
                 m_mainActions.add(renameAction);
+
+                SpecialRenameAction specialRenameAction = new SpecialRenameAction(AbstractTree.TreeType.TREE_IDENTIFICATION);
+                m_mainActions.add(specialRenameAction);
 
                 ClearDatasetAction clearAction = new ClearDatasetAction();
                 m_mainActions.add(clearAction);

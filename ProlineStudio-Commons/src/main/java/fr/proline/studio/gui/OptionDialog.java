@@ -1,6 +1,5 @@
 package fr.proline.studio.gui;
 
-import fr.proline.studio.gui.DefaultDialog;
 import java.awt.*;
 import javax.swing.*;
 

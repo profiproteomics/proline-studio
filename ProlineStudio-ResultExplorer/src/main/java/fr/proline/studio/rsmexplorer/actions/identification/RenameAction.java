@@ -35,6 +35,8 @@ public class RenameAction extends AbstractRSMAction {
 
     @Override
     public void actionPerformed(AbstractNode[] selectedNodes, int x, int y) {
+        
+   
 
         // only one node selected for this action
         final AbstractNode n = selectedNodes[0];

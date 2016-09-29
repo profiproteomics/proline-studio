@@ -79,8 +79,8 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
         m_existingPanels = new Hashtable<String, JPanel>();
         m_existingLists = new Hashtable<String, ParameterList>();
 
-        m_preferences = NbPreferences.root();        
-        
+        m_preferences = NbPreferences.root();
+
         setInternalComponent(this.createInternalComponent());
 
     }
@@ -96,31 +96,31 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
 
     private ParameterList getGeneralParameters() {
 
-            m_generalParameterList = new ParameterList(GENERAL_APPLICATION_SETTINGS);
+        m_generalParameterList = new ParameterList(GENERAL_APPLICATION_SETTINGS);
 
-            JCheckBox gettingStartedCheckBox = new JCheckBox("Hide Getting Started Dialog On Startup");
-            BooleanParameter gettingStartedParameter = new BooleanParameter("Hide_Getting_Started_Dialog", "Hide Getting Started Dialog On Startup", gettingStartedCheckBox, false);
-            m_generalParameterList.add(gettingStartedParameter);
+        JCheckBox gettingStartedCheckBox = new JCheckBox("Hide Getting Started Dialog On Startup");
+        BooleanParameter gettingStartedParameter = new BooleanParameter("Hide_Getting_Started_Dialog", "Hide Getting Started Dialog On Startup", gettingStartedCheckBox, false);
+        m_generalParameterList.add(gettingStartedParameter);
 
-            Object[] objectTable = {ImportManager.SEARCH_RESULT_NAME_SOURCE, ImportManager.PEAKLIST_PATH_SOURCE, ImportManager.MSI_SEARCH_FILE_NAME_SOURCE};
-            ObjectParameter nameSourceParameter = new ObjectParameter(ImportManager.DEFAULT_SEARCH_RESULT_NAME_SOURCE_KEY, "Default Search Result Name Source", objectTable, 2, null);
-            m_generalParameterList.add(nameSourceParameter);
+        Object[] objectTable = {ImportManager.SEARCH_RESULT_NAME_SOURCE, ImportManager.PEAKLIST_PATH_SOURCE, ImportManager.MSI_SEARCH_FILE_NAME_SOURCE};
+        ObjectParameter nameSourceParameter = new ObjectParameter(ImportManager.DEFAULT_SEARCH_RESULT_NAME_SOURCE_KEY, "Default Search Result Name Source", objectTable, 2, null);
+        m_generalParameterList.add(nameSourceParameter);
 
-            JCheckBox decoratedCheckBox = new JCheckBox("Export Decorated");
-            BooleanParameter exportDecoratedParameter = new BooleanParameter("Export_Decorated", "Export Decorated", decoratedCheckBox, true);
-            m_generalParameterList.add(exportDecoratedParameter);
+        JCheckBox decoratedCheckBox = new JCheckBox("Export Decorated");
+        BooleanParameter exportDecoratedParameter = new BooleanParameter("Export_Decorated", "Export Decorated", decoratedCheckBox, true);
+        m_generalParameterList.add(exportDecoratedParameter);
 
-            JCheckBox xicCheckBox = new JCheckBox("XIC Transfer Handler Retains Structure");
-            BooleanParameter xicTransferHandlerParameter = new BooleanParameter("XIC_Transfer_Handler_Retains_Structure", "XIC Transfer Handler Retains Structure", xicCheckBox, true);
-            m_generalParameterList.add(xicTransferHandlerParameter);
-            
-            m_generalParameterList.loadParameters(NbPreferences.root(), true);
+        JCheckBox xicCheckBox = new JCheckBox("XIC Transfer Handler Retains Structure");
+        BooleanParameter xicTransferHandlerParameter = new BooleanParameter("XIC_Transfer_Handler_Retains_Structure", "XIC Transfer Handler Retains Structure", xicCheckBox, true);
+        m_generalParameterList.add(xicTransferHandlerParameter);
+
+        m_generalParameterList.loadParameters(NbPreferences.root(), true);
 
         return m_generalParameterList;
     }
 
     private JComponent createInternalComponent() {
-        
+
         JPanel externalPanel = new JPanel();
         externalPanel.setLayout(new GridLayout(1, 1));
         externalPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
@@ -178,25 +178,27 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
         }
         this.saveExistingsLists();
 
-        boolean showWarning = false;
+        /*
 
-        HashMap<ProjectIdentificationData, IdentificationTree> treeMap = IdentificationTree.getTreeMap();
+         boolean showWarning = false;
 
-        Iterator it = treeMap.entrySet().iterator();
-        while (it.hasNext()) {
-            Map.Entry pair = (Map.Entry) it.next();
-            if (IdentificationTree.renameTreeNodes((AbstractNode) ((IdentificationTree) pair.getValue()).getModel().getRoot(), (IdentificationTree) pair.getValue())) {
-                showWarning = true;
-            }
-        }
+         HashMap<ProjectIdentificationData, IdentificationTree> treeMap = IdentificationTree.getTreeMap();
 
-        if (showWarning) {
-            InfoDialog errorDialog = new InfoDialog(m_singletonDialog, InfoDialog.InfoType.INFO, "Name Representation Warning", "For some datasets, the selected representation is not available. For those cases the default representation will be based on MSI Search Name.");
-            errorDialog.setButtonVisible(OptionDialog.BUTTON_CANCEL, false);
-            errorDialog.setLocationRelativeTo(m_singletonDialog);
-            errorDialog.setVisible(true);
-        }
+         Iterator it = treeMap.entrySet().iterator();
+         while (it.hasNext()) {
+         Map.Entry pair = (Map.Entry) it.next();
+         if (IdentificationTree.renameTreeNodes((AbstractNode) ((IdentificationTree) pair.getValue()).getModel().getRoot(), (IdentificationTree) pair.getValue())) {
+         showWarning = true;
+         }
+         }
 
+         if (showWarning) {
+         InfoDialog errorDialog = new InfoDialog(m_singletonDialog, InfoDialog.InfoType.INFO, "Name Representation Warning", "For some datasets, the selected representation is not available. For those cases the default representation will be based on MSI Search Name.");
+         errorDialog.setButtonVisible(OptionDialog.BUTTON_CANCEL, false);
+         errorDialog.setLocationRelativeTo(m_singletonDialog);
+         errorDialog.setVisible(true);
+         }
+         */
         return true;
 
     }

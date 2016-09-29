@@ -62,9 +62,9 @@ public class ImportIdentificationTask extends AbstractJMSTask {
         //SERVICE - ImportValidateGenerateSpectrumMatches service TEST
 //        message.setStringProperty(JMSConnectionManager.PROLINE_SERVICE_NAME_KEY, "proline/dps/msi/ImportValidateGenerateSM");
 	  message.setStringProperty(JMSConnectionManager.PROLINE_SERVICE_NAME_KEY, "proline/dps/msi/ImportResultFiles");
-        addSourceToMessage(message);  
+        addSourceToMessage(message);
         addDescriptionToMessage(message);
-        
+
         setTaskInfoRequest(message.getText());
         //  Send the Message
         m_producer.send(message);
@@ -73,12 +73,12 @@ public class ImportIdentificationTask extends AbstractJMSTask {
     }
 
   /*
-   * 
- * Input params : TO BE VERIFIED, since test was old ! 
+   *
+ * Input params : TO BE VERIFIED, since test was old !
  *  GLobal
  *   project_id : The id of the project used for data importation.
  *  Import Specific
- *   use_decoy_regexp: true if result file is formated with decoy strategy RegExp, false if it is formated with the id of the rule to be used. 
+ *   use_decoy_regexp: true if result file is formated with decoy strategy RegExp, false if it is formated with the id of the rule to be used.
  *   result_files : The list of the result files to be imported, as IResultFileDescriptor object (format, path, peaklist_id (optionnal)) + protMatchDecoyRuleId or + decoyStrategy
  *   instrument_config_id : id in datastore of the instrument config used for result file acquisition
  *   peaklist_software_id : id in datastore of the software use to generate peaklist
@@ -89,12 +89,12 @@ public class ImportIdentificationTask extends AbstractJMSTask {
  *   pep_set_score_type : PeptideSet Scoring to use, one of PepSetScoring (mascot:standard score, mascot:modified mudpit score)
  *   prot_set_filters : List of ProteinSet filters to use (parameter, threshold)
  *   prot_set_validator_config : ProteinSet validation configuration  (as ProtSetValidatorConfig : validation_method, parameter, thresholds, expectedFdr)
- *Generate Spectrum Match specific 
+ *Generate Spectrum Match specific
  *   generate_spectrum_matches : If true, generate fragment matches of MS/MS spectra for validated PSM.
- *   force_insert : Specify if existing spectrum matches should be replaced 
+ *   force_insert : Specify if existing spectrum matches should be replaced
 */
-    
-    
+
+
     private HashMap<String, Object> createParams() {
         HashMap<String, Object> params = new HashMap<>();
         params.put("project_id", m_projectId);
@@ -130,8 +130,8 @@ public class ImportIdentificationTask extends AbstractJMSTask {
 //        ArrayList proteinFilters = new ArrayList();
 //        params.put("prot_set_filters", proteinFilters);
 //        params.put("generate_spectrum_matches", true);
-//                
-//         
+//
+//
         return params;
     }
 

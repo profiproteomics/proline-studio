@@ -1,16 +1,23 @@
 package fr.proline.mzscope.ui;
 
+import fr.profi.mzdb.model.Peakel;
 import fr.proline.mzscope.ui.model.FeaturesTableModel;
 import fr.proline.mzscope.model.IFeature;
+import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.filter.FilterButton;
 import fr.proline.studio.filter.actions.ClearRestrainAction;
 import fr.proline.studio.filter.actions.RestrainAction;
+import fr.proline.studio.graphics.BasePlotPanel;
+import fr.proline.studio.graphics.PlotInformation;
+import fr.proline.studio.graphics.PlotLinear;
 import fr.proline.studio.markerbar.MarkerContainerPanel;
 import fr.proline.studio.table.AbstractTableAction;
 import fr.proline.studio.table.CompoundTableModel;
 import fr.proline.studio.table.DecoratedMarkerTable;
 import fr.proline.studio.table.TablePopupMenu;
+import fr.proline.studio.utils.CyclicColorPalette;
+import fr.proline.studio.utils.DataFormat;
 import java.awt.BorderLayout;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -18,9 +25,12 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
 import javax.swing.JTable;
 import javax.swing.JToolBar;
 import javax.swing.event.RowSorterEvent;
@@ -44,7 +54,7 @@ public class FeaturesPanel extends JPanel implements RowSorterListener, MouseLis
     private FeatureTable featureTable;
     private FeaturesTableModel featureTableModel;
     private IFeatureViewer featureViewer;
-    
+    private BasePlotPanel graphPlot;
     private JScrollPane jScrollPane;
     private MarkerContainerPanel m_markerContainerPanel;
     
@@ -61,6 +71,10 @@ public class FeaturesPanel extends JPanel implements RowSorterListener, MouseLis
 
     private void initComponents() {
         setLayout(new BorderLayout());
+        
+        JPanel tablePanel = new JPanel();
+        tablePanel.setLayout(new BorderLayout());
+        
         featureTableModel = new FeaturesTableModel();
         jScrollPane = new JScrollPane();
         featureTable = new FeatureTable();
@@ -83,8 +97,16 @@ public class FeaturesPanel extends JPanel implements RowSorterListener, MouseLis
 
         m_markerContainerPanel = new MarkerContainerPanel(jScrollPane, featureTable);
 
-        this.add(toolbar, BorderLayout.WEST);
-        this.add(m_markerContainerPanel, BorderLayout.CENTER);
+        tablePanel.add(toolbar, BorderLayout.WEST);
+        tablePanel.add(m_markerContainerPanel, BorderLayout.CENTER);
+        
+        JSplitPane splitPane = new JSplitPane();
+        splitPane.setLeftComponent(tablePanel);
+        graphPlot = new BasePlotPanel();
+        splitPane.setRightComponent(graphPlot);
+        
+        this.add(splitPane, BorderLayout.CENTER);
+        
     }
 
     private JToolBar initToolbar() {
@@ -123,11 +145,20 @@ public class FeaturesPanel extends JPanel implements RowSorterListener, MouseLis
     }
 
     private void featureTableMouseClicked(MouseEvent evt) {
-        if ((features != null) && (!features.isEmpty()) && (evt.getClickCount() == 2) && (featureTable.getSelectedRow() != -1)) {
+        if ((features != null) && (!features.isEmpty()) && (featureTable.getSelectedRow() != -1)) {
             // Retrieve Selected Row
             int selectedRow = featureTable.getSelectedRow();
             IFeature f = features.get(getModelRowId(selectedRow));
-            featureViewer.displayFeatureInRawFile(f);
+            graphPlot.clearPlots();
+            int index = 0;
+            for (Peakel p : f.getPeakels()) {
+                PlotLinear plot = new PlotLinear(graphPlot, new PeakelWrapper(p, index++), null, 0, 1);
+                graphPlot.addPlot(plot);
+            }
+             graphPlot.repaint();
+            if (evt.getClickCount() == 2 ) {
+                featureViewer.displayFeatureInRawFile(f);
+            } 
         }
     }
     
@@ -290,4 +321,92 @@ public class FeaturesPanel extends JPanel implements RowSorterListener, MouseLis
         }
 
     }
+}
+
+class PeakelWrapper implements CompareDataInterface {
+
+    Peakel peakel;
+    int isotopeIndex;
+    
+    public PeakelWrapper(Peakel p, int i) {
+        peakel = p;
+        isotopeIndex = i;
+    }
+    
+     @Override
+   public int getRowCount() {
+      return peakel.getElutionTimes().length;
+   }
+
+   @Override
+   public int getColumnCount() {
+      return 2;
+   }
+
+   @Override
+   public String getDataColumnIdentifier(int columnIndex) {
+      return (columnIndex == 0) ? "rt" : "intensity";
+   }
+
+   @Override
+   public Class getDataColumnClass(int columnIndex) {
+      return Float.class;
+   }
+
+   @Override
+   public Object getDataValueAt(int rowIndex, int columnIndex) {
+      return (columnIndex == 0) ? peakel.getElutionTimes()[rowIndex] : peakel.getIntensityValues()[rowIndex];
+   }
+
+   @Override
+   public int[] getKeysColumn() {
+      return new int[]{0};
+   }
+
+   @Override
+   public int getInfoColumn() {
+      return 0;
+   }
+
+   @Override
+   public void setName(String name) {
+      throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+   }
+
+   @Override
+   public String getName() {
+      return "Elution peak";
+   }
+
+   @Override
+   public Map<String, Object> getExternalData() {
+      return null;
+   }
+
+   @Override
+   public PlotInformation getPlotInformation() {
+        PlotInformation plotInformation = new PlotInformation();
+        plotInformation.setPlotColor(CyclicColorPalette.getColor(1));
+        plotInformation.setPlotTitle("Elution peak");
+        plotInformation.setDrawPoints(false);
+        plotInformation.setDrawGap(true);
+        HashMap<String, String> plotInfo = new HashMap();
+        plotInfo.put("m/z", Double.toString(peakel.getApexMz()));
+        plotInfo.put("Apex Int.", DataFormat.formatWithGroupingSep(peakel.getApexIntensity(), 0));
+        plotInfo.put("Isotope index", Integer.toString(isotopeIndex));
+
+        plotInformation.setPlotInfo(plotInfo);
+        return plotInformation;
+   }
+
+    @Override
+    public long row2UniqueId(int rowIndex) {
+        return rowIndex;
+    }
+    
+    @Override
+    public int uniqueId2Row(long id) {
+        return (int) id;
+    }
+    
 }

@@ -110,4 +110,7 @@ public class MzdbPeakelWrapper implements IFeature {
         return parentMz;
     }
    
+    public Peakel[] getPeakels() {
+        return new Peakel[] { peakel };
+    }
 }

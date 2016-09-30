@@ -5,6 +5,7 @@
  */
 package fr.proline.mzscope.model;
 
+import fr.profi.mzdb.model.Peakel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -139,5 +140,7 @@ public class BaseFeature implements IFeature {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
-    
+     public Peakel[] getPeakels() {
+         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+     }
 }

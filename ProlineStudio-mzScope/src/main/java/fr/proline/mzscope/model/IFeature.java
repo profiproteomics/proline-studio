@@ -5,6 +5,8 @@
  */
 package fr.proline.mzscope.model;
 
+import fr.profi.mzdb.model.Peakel;
+
 /**
  *
  * @author CB205360
@@ -40,4 +42,6 @@ public interface IFeature {
    
    double getParentMz();
    
+   public Peakel[] getPeakels();
+
 }

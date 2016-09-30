@@ -15,7 +15,32 @@ public class FeaturesExtractionRequest extends MsnExtractionRequest {
       ExtractionMethod extractionMethod;
       boolean removeBaseline;
      
+      @Override
+      public T setMzTolPPM(float mzTolPPM) {
+         this.mzTolPPM = mzTolPPM;
+         return self();
+      }
 
+      @Override
+      public T setMz(double mz) {
+         this.mz = mz;
+         this.maxMz = (mz + mz * mzTolPPM / 1e6f);
+         this.minMz = (mz - mz * mzTolPPM / 1e6f);
+         return self();
+      }
+
+      @Override
+      public T setMaxMz(double maxMz) {
+         this.maxMz = maxMz; 
+         return self();
+      }
+
+      @Override
+      public T setMinMz(double minMz) {
+         this.minMz = minMz;
+         return self();
+      }
+      
       public T setExtractionMethod(ExtractionMethod extractionMethod) {
          this.extractionMethod = extractionMethod;
          return self();

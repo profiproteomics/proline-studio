@@ -8,6 +8,7 @@ package fr.proline.mzscope.mzdb;
 
 import fr.proline.mzscope.model.IFeature;
 import fr.profi.mzdb.model.Feature;
+import fr.profi.mzdb.model.Peakel;
 import fr.proline.mzscope.model.IRawFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -100,5 +101,9 @@ public class MzdbFeatureWrapper implements IFeature {
     public double getParentMz() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-   
+
+    @Override
+    public Peakel[] getPeakels() {
+        return mzdbFeature.getPeakels();
+    }
 }

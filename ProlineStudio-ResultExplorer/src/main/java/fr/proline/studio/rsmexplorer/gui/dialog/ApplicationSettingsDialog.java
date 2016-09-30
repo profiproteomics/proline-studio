@@ -1,27 +1,17 @@
 package fr.proline.studio.rsmexplorer.gui.dialog;
 
-import fr.proline.studio.dam.data.ProjectIdentificationData;
 import fr.proline.studio.dpm.task.util.JMSConnectionManager;
-import static fr.proline.studio.dpm.task.util.JMSConnectionManager.DEFAULT_SERVICE_REQUEST_QUEUE_NAME;
-import static fr.proline.studio.dpm.task.util.JMSConnectionManager.SERVICE_REQUEST_QUEUE_NAME_KEY;
 import fr.proline.studio.gui.AbstractParameterListTree;
 import fr.proline.studio.gui.DefaultDialog;
-import fr.proline.studio.gui.InfoDialog;
-import fr.proline.studio.gui.OptionDialog;
 import fr.proline.studio.parameter.BooleanParameter;
 import fr.proline.studio.parameter.ObjectParameter;
 import fr.proline.studio.parameter.ParameterError;
 import fr.proline.studio.parameter.ParameterList;
 import fr.proline.studio.parameter.StringParameter;
 import fr.proline.studio.rsmexplorer.actions.identification.ImportManager;
-import fr.proline.studio.rsmexplorer.tree.AbstractNode;
-import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
 import java.awt.*;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.Map;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 import javax.swing.*;
@@ -87,10 +77,10 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
 
     private ParameterList getJMSParameterList() {
         m_jmsParameterList = new ParameterList(JMS_SETTINGS);
-        String queueName = NbPreferences.root().get(SERVICE_REQUEST_QUEUE_NAME_KEY, DEFAULT_SERVICE_REQUEST_QUEUE_NAME);
-        StringParameter defaultServiceRequestQueueName = new StringParameter(JMSConnectionManager.SERVICE_REQUEST_QUEUE_NAME_KEY, "JMS Request Queue Name", JTextField.class, queueName, 5, null);
+        StringParameter defaultServiceRequestQueueName = new StringParameter(JMSConnectionManager.SERVICE_REQUEST_QUEUE_NAME_KEY, "JMSProlineQueueName", JTextField.class, "JMSProlineQueueName", 5, null);
         m_jmsParameterList.add(defaultServiceRequestQueueName);
-
+        m_jmsParameterList.loadParameters(m_preferences, true);
+        
         return m_jmsParameterList;
     }
 
@@ -114,7 +104,7 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
         BooleanParameter xicTransferHandlerParameter = new BooleanParameter("XIC_Transfer_Handler_Retains_Structure", "XIC Transfer Handler Retains Structure", xicCheckBox, true);
         m_generalParameterList.add(xicTransferHandlerParameter);
 
-        m_generalParameterList.loadParameters(NbPreferences.root(), true);
+        m_generalParameterList.loadParameters(m_preferences, true);
 
         return m_generalParameterList;
     }

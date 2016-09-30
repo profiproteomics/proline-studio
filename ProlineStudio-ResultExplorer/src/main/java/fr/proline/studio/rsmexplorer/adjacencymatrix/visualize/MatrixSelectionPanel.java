@@ -12,6 +12,7 @@ import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.filter.Filter;
 import fr.proline.studio.filter.FilterMapInterface;
 import fr.proline.studio.filter.StringFilter;
+import fr.proline.studio.rsmexplorer.adjacencymatrix.ordering.ClusterAComponent;
 import fr.proline.studio.search.ApplySearchInterface;
 import fr.proline.studio.search.SearchInterface;
 import fr.proline.studio.search.SearchToggleButton;
@@ -346,6 +347,8 @@ public class MatrixSelectionPanel extends HourglassPanel implements DataBoxPanel
         
         m_drawVisualization.setData(matrixData, keepSameSet);
 
+        ClusterAComponent.clusterComponent(m_drawVisualization);  // do the clustering
+        
         m_internalPanel.initPanel(doNotTakeFirstSelection);
         
         selectProtein(proteinMatch);

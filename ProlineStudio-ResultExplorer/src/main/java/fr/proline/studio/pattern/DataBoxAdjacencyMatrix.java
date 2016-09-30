@@ -61,8 +61,7 @@ public class DataBoxAdjacencyMatrix extends AbstractDataBox {
     
     @Override
     public void createPanel() {
-        
-        //JPM.TODO
+
         MatrixPanel p = new MatrixPanel(); 
         p.setName(m_typeName);
         p.setDataBox(this);

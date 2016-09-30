@@ -136,6 +136,11 @@ public class DataBoxAdjacencyMatrixChoice extends AbstractDataBox {
             if (parameterType.equals(DrawVisualization.class)) {
                 return ((MatrixSelectionPanel) m_panel).getDrawVisualization();
             }
+            if (parameterType.equals(ResultSummary.class)) {
+                if (m_rsm != null) {
+                    return m_rsm;
+                }
+            }
         }
         return super.getData(getArray, parameterType);
     }

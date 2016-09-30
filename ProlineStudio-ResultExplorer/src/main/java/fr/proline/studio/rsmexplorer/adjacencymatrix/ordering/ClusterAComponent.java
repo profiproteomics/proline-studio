@@ -21,18 +21,15 @@ import fr.proline.studio.rsmexplorer.adjacencymatrix.visualize.DrawVisualization
 
 public class ClusterAComponent {
 
-    private final DrawVisualization m_drawVisualization;
-    private HashMap<LightPeptideMatch, ArrayList<LightProteinMatch>> m_peptideToProteinMap = new HashMap<>();
 
-    public ClusterAComponent(DrawVisualization drawVisualization) {
+    public static void clusterComponent(DrawVisualization drawVisualization) {
 
-        m_drawVisualization = drawVisualization;
-        ArrayList<Component> compList = m_drawVisualization.get_ComponentList();
-        m_peptideToProteinMap = m_drawVisualization.get_peptideToProteinMap();
+        ArrayList<Component> compList = drawVisualization.get_ComponentList();
+        HashMap<LightPeptideMatch, ArrayList<LightProteinMatch>> peptideToProteinMap = drawVisualization.get_peptideToProteinMap();
 
 
         for (Component tempComp : compList) {
-            int[][] peptProtMap = getPeptProtMatrix(tempComp);
+            int[][] peptProtMap = getPeptProtMatrix(tempComp, peptideToProteinMap);
             ArrayList<Integer> proteinOrder = clusterDataArray(tempComp.proteinMatchArray.size(), peptProtMap);
 
             int[][] transpose = new int[peptProtMap[0].length][peptProtMap.length];
@@ -62,7 +59,7 @@ public class ClusterAComponent {
 
     }
 
-    public final ArrayList<Integer> clusterDataArray(int lengthData, int[][] peptProtMap) {
+    private static final ArrayList<Integer> clusterDataArray(int lengthData, int[][] peptProtMap) {
         int rowCount = peptProtMap.length, colCount = peptProtMap[0].length;
         double[][] similarityMatrix = new double[colCount][colCount];
         for (int i = 0; i < colCount; i++) {
@@ -100,7 +97,7 @@ public class ClusterAComponent {
     }
 
 
-    private ArrayList<Integer> getDendogramOrder(DendrogramNode d, ArrayList<Integer> order) {
+    private static ArrayList<Integer> getDendogramOrder(DendrogramNode d, ArrayList<Integer> order) {
 
         DendrogramNode root = d;
 
@@ -114,7 +111,7 @@ public class ClusterAComponent {
         return order;
     }
 
-    private int[][] getPeptProtMatrix(Component compTemp) {
+    private static int[][] getPeptProtMatrix(Component compTemp, HashMap<LightPeptideMatch, ArrayList<LightProteinMatch>> peptideToProteinMap) {
         if (compTemp == null) {
             return null;
         }
@@ -122,7 +119,7 @@ public class ClusterAComponent {
         int[][] tempMatch = new int[compTemp.peptideArray.size()][compTemp.proteinMatchArray.size()];
         int i = 0, j = 0;
         for (LightPeptideMatch tempPept : compTemp.peptideArray) {
-            ArrayList<LightProteinMatch> proteinList = m_peptideToProteinMap.get(tempPept);
+            ArrayList<LightProteinMatch> proteinList = peptideToProteinMap.get(tempPept);
             j = 0;
 
             for (LightProteinMatch tempProt : compTemp.proteinMatchArray) {

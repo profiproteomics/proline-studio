@@ -186,7 +186,7 @@ public class DatabaseProteinsAndPeptidesTask extends AbstractDatabaseTask {
             ArrayList<LightPeptideMatch> allPeptides = new ArrayList<>();
             
             
-            Query proteinMatchQuery = entityManagerMSI.createQuery("SELECT pm.id, pm.accession, pm.score FROM ProteinMatch pm, ProteinSetProteinMatchItem ps_to_pm, ProteinSet ps WHERE ps_to_pm.proteinMatch.id=pm.id AND ps_to_pm.resultSummary.id=:rsmId AND ps_to_pm.id.proteinMatchId=pm.id AND ps_to_pm.id.proteinSetId=ps.id AND ps.isValidated=true");
+            Query proteinMatchQuery = entityManagerMSI.createQuery("SELECT pm.id, pm.accession, pm.score, ps.id FROM ProteinMatch pm, ProteinSetProteinMatchItem ps_to_pm, ProteinSet ps WHERE ps_to_pm.proteinMatch.id=pm.id AND ps_to_pm.resultSummary.id=:rsmId AND ps_to_pm.id.proteinMatchId=pm.id AND ps_to_pm.id.proteinSetId=ps.id AND ps.isValidated=true");
             proteinMatchQuery.setParameter("rsmId", m_rsm.getId());
             
             List<Object[]> proteinMatchList = proteinMatchQuery.getResultList();
@@ -199,7 +199,8 @@ public class DatabaseProteinsAndPeptidesTask extends AbstractDatabaseTask {
                 proteinMathIdList.add(proteinMatchId);
                 String accession = (String) res[1];
                 Float score = (Float) res[2];
-                LightProteinMatch proteinMatch = new LightProteinMatch(proteinMatchId, accession, score);
+                Long proteinSetId = (Long) res[3];
+                LightProteinMatch proteinMatch = new LightProteinMatch(proteinMatchId, accession, score, proteinSetId);
                 proteinMatchMap.put(proteinMatchId, proteinMatch);
             }
 

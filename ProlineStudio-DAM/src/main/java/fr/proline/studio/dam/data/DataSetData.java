@@ -15,13 +15,10 @@ import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.AbstractDatabaseTask;
 import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadXicMasterQuantTask;
-import java.io.File;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.util.prefs.Preferences;
 import javax.persistence.EntityManager;
-import org.openide.util.NbPreferences;
 
 /**
  * Data for Dataset Node
@@ -38,7 +35,7 @@ public class DataSetData extends AbstractData {
     public DataSetData(DDataset dataSet) {
         m_dataType = DataTypes.DATA_SET;
         m_dataset = dataSet;
-
+        
         /*
          this.fetchRsetAndRsmForOneDataset(dataSet);
 

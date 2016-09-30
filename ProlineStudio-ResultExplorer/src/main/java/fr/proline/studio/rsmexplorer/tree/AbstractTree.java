@@ -6,6 +6,7 @@ import fr.proline.studio.dam.data.AbstractData;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.AbstractDatabaseTask.Priority;
 import fr.proline.studio.dam.tasks.SubTask;
+import fr.proline.studio.rsmexplorer.actions.identification.SpecialRenameAction;
 import fr.proline.studio.rsmexplorer.tree.quantitation.QuantitationTree;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -20,6 +21,9 @@ import javax.swing.tree.*;
  * @author JM235353
  */
 public abstract class AbstractTree extends JTree implements MouseListener {
+    
+    private SpecialRenameAction m_subscribedRenamer;
+    private int m_expected = -1;
  
     public enum TreeType {
 
@@ -33,6 +37,18 @@ public abstract class AbstractTree extends JTree implements MouseListener {
     protected RSMTreeModel m_model;
     protected RSMTreeSelectionModel m_selectionModel;
     protected HashMap<AbstractData, AbstractNode> loadingMap = new HashMap<>();
+    
+    public void subscribeRenamer(SpecialRenameAction subscribedRenamer){
+        this.m_subscribedRenamer = subscribedRenamer;
+    }
+    
+    public SpecialRenameAction getSubscribedRenamer(){
+        return this.m_subscribedRenamer;
+    }
+    
+    public void setExpected(int expected){
+        this.m_expected = expected;
+    }
     
     protected void initTree(AbstractNode top) {
         m_model = new RSMTreeModel(this, top);
@@ -152,15 +168,19 @@ public abstract class AbstractTree extends JTree implements MouseListener {
     
 
     public void loadAllAtOnce(final AbstractNode nodeToLoad, final boolean identificationDataset) {
+        
         if (nodeToLoad.getChildCount() == 0) {
+            this.m_expected--;
             return;
         }
+        
         AbstractNode childNode = (AbstractNode) nodeToLoad.getChildAt(0);
         if (childNode.getType() != AbstractNode.NodeTypes.HOUR_GLASS) {
             int nbChildren = nodeToLoad.getChildCount();
             for (int i = 0; i < nbChildren; i++) {
                 loadAllAtOnce((AbstractNode) nodeToLoad.getChildAt(i), identificationDataset);
             }
+            this.m_expected--;
             return; 
         }
         
@@ -219,8 +239,15 @@ public abstract class AbstractTree extends JTree implements MouseListener {
         m_model.nodeStructureChanged(parentNode);
 
         int nbChildren = parentNode.getChildCount();
+        
+        this.m_expected = m_expected + nbChildren -1;
+        
         for (int i=0;i<nbChildren;i++) {
             loadAllAtOnce((AbstractNode) parentNode.getChildAt(i), identificationDataset);
+        }
+        
+        if(m_expected==0){
+            this.m_subscribedRenamer.proceedWithRenaming();
         }
 
     }

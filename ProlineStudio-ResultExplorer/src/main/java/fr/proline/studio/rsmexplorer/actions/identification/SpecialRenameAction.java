@@ -29,6 +29,9 @@ public class SpecialRenameAction extends AbstractRSMAction {
 
     private static final String GENERAL_APPLICATION_SETTINGS = "General Application Settings";
     private String m_parameterValue;
+    private AbstractNode[] m_selectedNodes;
+    private String m_naming;
+    private AbstractTree m_tree;
 
     // tree type: could be Identification or Quantitation
     AbstractTree.TreeType m_treeType = null;
@@ -46,74 +49,90 @@ public class SpecialRenameAction extends AbstractRSMAction {
     @Override
     public void actionPerformed(AbstractNode[] selectedNodes, int x, int y) {
 
-            ArrayList<DataSetNode> validNodes = new ArrayList<DataSetNode>();
-            AbstractTree tree = IdentificationTree.getCurrentTree();
+        m_selectedNodes = selectedNodes;
 
-            String naming = showRenameDialog(x, y);
+        m_naming = showRenameDialog(x, y);
 
-            for (int i = 0; i < selectedNodes.length; i++) {
+        int initialExpected = 0;
 
-                if (selectedNodes[i].getType() == AbstractNode.NodeTypes.DATA_SET) {
+        m_tree = IdentificationTree.getCurrentTree();
+        m_tree.subscribeRenamer(this);
 
-                    DataSetNode datasetNode = (DataSetNode) selectedNodes[i];
+        for (int i = 0; i < selectedNodes.length; i++) {
+            if (selectedNodes[i].getType() == AbstractNode.NodeTypes.DATA_SET) {
+                initialExpected++;
+            }
+        }
 
-                    if (datasetNode.getChildCount() > 0) {
+        m_tree.setExpected(initialExpected);
 
-                        tree.loadAllAtOnce(datasetNode, true);
-                        
-                        Enumeration<AbstractNode> e = datasetNode.depthFirstEnumeration();
+        for (int i = 0; i < selectedNodes.length; i++) {
+            if (selectedNodes[i].getType() == AbstractNode.NodeTypes.DATA_SET) {
+                m_tree.loadAllAtOnce((DataSetNode) selectedNodes[i], true);
+            }
+        }
 
-                        while (e.hasMoreElements()) {
-                            AbstractNode currentElement = e.nextElement();
-                            if (currentElement.getType() == AbstractNode.NodeTypes.DATA_SET && currentElement.isLeaf() && currentElement.getChildCount() == 0) {
-                                validNodes.add((DataSetNode) currentElement);
-                            }
+    }
+
+    public void proceedWithRenaming() {
+
+        ArrayList<DataSetNode> toRename = new ArrayList<DataSetNode>();
+
+        for (int i = 0; i < m_selectedNodes.length; i++) {
+            if (m_selectedNodes[i].getType() == AbstractNode.NodeTypes.DATA_SET) {
+                DataSetNode datasetNode = (DataSetNode) m_selectedNodes[i];
+                
+                m_tree.expandNodeIfNeeded(datasetNode);
+                
+                if (datasetNode.getChildCount() > 0) {
+                    Enumeration<AbstractNode> e = datasetNode.depthFirstEnumeration();
+                    while (e.hasMoreElements()) {
+                        AbstractNode currentElement = e.nextElement();
+                        if (currentElement.getType() == AbstractNode.NodeTypes.DATA_SET && currentElement.isLeaf() && currentElement.getChildCount() == 0) {
+                            toRename.add((DataSetNode) currentElement);
+                        }else{
+                            m_tree.expandNodeIfNeeded(currentElement);
                         }
-                    } else {
-                        if (datasetNode.isLeaf()) {
-                            validNodes.add(datasetNode);
-                        }
+                    }
+                } else {
+                    if (datasetNode.isLeaf()) {
+                        toRename.add(datasetNode);
                     }
                 }
             }
+        }
 
-            for (int i = 0; i < validNodes.size(); i++) {
+        for (int i = 0; i < toRename.size(); i++) {
 
-                DDataset dataset = validNodes.get(i).getDataset();
-                DataSetData.fetchRsetAndRsmForOneDataset(dataset);
+            DDataset dataset = toRename.get(i).getDataset();
+            DataSetData.fetchRsetAndRsmForOneDataset(dataset);
 
-                if (dataset == null || dataset.getResultSet() == null || dataset.getResultSet().getMsiSearch() == null) {
-                    continue;
-                }
-
-                String newName = "";
-
-                newName = (dataset.getResultSet().getMsiSearch().getResultFileName() == null) ? "" : dataset.getResultSet().getMsiSearch().getResultFileName();
-                if (newName.contains(".")) {
-                    newName = newName.substring(0, newName.indexOf("."));
-                }
-
-                if (naming.equalsIgnoreCase(ImportManager.SEARCH_RESULT_NAME_SOURCE)) {
-                    newName = dataset.getResultSet().getName();
-                } else if (naming.equalsIgnoreCase(ImportManager.PEAKLIST_PATH_SOURCE)) {
-                    newName = (dataset.getResultSet().getMsiSearch().getPeaklist().getPath() == null) ? "" : dataset.getResultSet().getMsiSearch().getPeaklist().getPath();
-                    if (newName.contains(File.separator)) {
-                        newName = newName.substring(newName.lastIndexOf(File.separator) + 1);
-                    }
-                }
-
-                if (!newName.equalsIgnoreCase("")) {
-
-                    validNodes.get(i).rename(newName, tree);
-
-                    dataset.setName(newName);
-
-                    tree.rename(validNodes.get(i), newName);
-
-                }
-
+            if (dataset == null || dataset.getResultSet() == null || dataset.getResultSet().getMsiSearch() == null) {
+                continue;
             }
 
+            String newName = "";
+
+            newName = (dataset.getResultSet().getMsiSearch().getResultFileName() == null) ? "" : dataset.getResultSet().getMsiSearch().getResultFileName();
+            if (newName.contains(".")) {
+                newName = newName.substring(0, newName.indexOf("."));
+            }
+
+            if (m_naming.equalsIgnoreCase(ImportManager.SEARCH_RESULT_NAME_SOURCE)) {
+                newName = dataset.getResultSet().getName();
+            } else if (m_naming.equalsIgnoreCase(ImportManager.PEAKLIST_PATH_SOURCE)) {
+                newName = (dataset.getResultSet().getMsiSearch().getPeaklist().getPath() == null) ? "" : dataset.getResultSet().getMsiSearch().getPeaklist().getPath();
+                if (newName.contains(File.separator)) {
+                    newName = newName.substring(newName.lastIndexOf(File.separator) + 1);
+                }
+            }
+
+            if (!newName.equalsIgnoreCase("")) {
+                toRename.get(i).rename(newName, m_tree);
+                dataset.setName(newName);
+                m_tree.rename(toRename.get(i), newName);
+            }
+        }
     }
 
     private String showRenameDialog(int x, int y) {

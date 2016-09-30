@@ -1,9 +1,7 @@
 package fr.proline.studio.dam.data;
 
-import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.AbstractDatabaseTask;
-import fr.proline.studio.dam.tasks.AbstractDatabaseTask.Priority;
 import java.util.List;
 
 /**

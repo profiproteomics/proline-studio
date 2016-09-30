@@ -40,6 +40,7 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
     private static final String GENERAL_APPLICATION_SETTINGS = "General Application Settings";
     private static final String DIALOG_TITLE = "Proline Studio Settings";
     private static final String TREE_ROOT_NAME = "Settings Categories";
+    public static final String DEFAULT_SERVICE_REQUEST_QUEUE_NAME = "ProlineServiceRequestQueue";
 
     private Preferences m_preferences;
 
@@ -77,7 +78,7 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
 
     private ParameterList getJMSParameterList() {
         m_jmsParameterList = new ParameterList(JMS_SETTINGS);
-        StringParameter defaultServiceRequestQueueName = new StringParameter(JMSConnectionManager.SERVICE_REQUEST_QUEUE_NAME_KEY, "JMSProlineQueueName", JTextField.class, "JMSProlineQueueName", 5, null);
+        StringParameter defaultServiceRequestQueueName = new StringParameter(JMSConnectionManager.SERVICE_REQUEST_QUEUE_NAME_KEY, "JMSProlineQueueName", JTextField.class, DEFAULT_SERVICE_REQUEST_QUEUE_NAME, 5, null);
         m_jmsParameterList.add(defaultServiceRequestQueueName);
         m_jmsParameterList.loadParameters(m_preferences, true);
         

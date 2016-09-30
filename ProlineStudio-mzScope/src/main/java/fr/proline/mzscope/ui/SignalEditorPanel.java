@@ -72,7 +72,7 @@ public class SignalEditorPanel extends JPanel {
          public void actionPerformed(ActionEvent e) {
             
             List<Tuple2> input = toScalaArrayTuple();
-            int nbPoints = (input.size() <= 20) ? 5 : (input.size() < 50) ? 9 : 15;
+            int nbPoints = (input.size() <= 20) ? 5 : (input.size() < 50) ? 7 : 11;
             logger.info("display smoothed signal, SG nb smoothing points = "+nbPoints);
             PartialSavitzkyGolaySmoother psgSmoother = new PartialSavitzkyGolaySmoother(new SavitzkyGolaySmoothingConfig(5, 4, 1));
             smooth(input, psgSmoother);
@@ -137,7 +137,7 @@ public class SignalEditorPanel extends JPanel {
    private void detectSignificantMinMax() {
       for (Map.Entry<Signal, PlotLinear> e : m_smoothedSignals.entrySet()) {
          Signal s = e.getKey();
-         DerivativeAnalysis.ILocalDerivativeChange[] mm = DerivativeAnalysis.findSignificantMiniMaxi(s.getYSeries(),3,0.66f);
+         DerivativeAnalysis.ILocalDerivativeChange[] mm = DerivativeAnalysis.findSignificantMiniMaxi(s.getYSeries(),3,0.75f);
          for (int k = 0; k < mm.length; k++) {
             PlotLinear plot = e.getValue();
             plot.addMarker(new PointMarker(m_plotPanel.getBasePlotPanel(), new DataCoordinates(s.getXSeries()[mm[k].index()], s.getYSeries()[mm[k].index()]), plot.getPlotInformation().getPlotColor()));

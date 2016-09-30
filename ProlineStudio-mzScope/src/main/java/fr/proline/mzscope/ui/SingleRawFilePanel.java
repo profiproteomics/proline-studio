@@ -48,7 +48,7 @@ public class SingleRawFilePanel extends AbstractRawFilePanel {
 
    protected JToolBar updateToolbar() {
       chromatogramToolbar.addSeparator();
-      JButton editFeatureBtn = new JButton("Feat");
+      JButton editFeatureBtn = new JButton("Sig.");
       editFeatureBtn.setToolTipText("Edit Feature Chromatogram");
       editFeatureBtn.addActionListener(new ActionListener() {
          @Override

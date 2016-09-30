@@ -192,7 +192,7 @@ public class JMSConnectionManager {
             //Get JMS Queue Name from preference 
             
             m_parameterList = new ParameterList(JMS_SETTINGS);
-            StringParameter m_parameter = new StringParameter(JMSConnectionManager.SERVICE_REQUEST_QUEUE_NAME_KEY, "JMSProlineQueueName", JTextField.class, "JMSProlineQueueName", 5, null);
+            StringParameter m_parameter = new StringParameter(JMSConnectionManager.SERVICE_REQUEST_QUEUE_NAME_KEY, "JMSProlineQueueName", JTextField.class, DEFAULT_SERVICE_REQUEST_QUEUE_NAME, 5, null);
             m_parameterList.add(m_parameter);
             m_parameterList.loadParameters(NbPreferences.root(), true);
             String queueName = m_parameter.getStringValue();

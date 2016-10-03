@@ -173,14 +173,20 @@ public abstract class AbstractTree extends JTree implements MouseListener {
             this.m_expected--;
             return;
         }
+               
+        AbstractNode childNode = (AbstractNode) nodeToLoad.getChildAt(0);     
         
-        AbstractNode childNode = (AbstractNode) nodeToLoad.getChildAt(0);
         if (childNode.getType() != AbstractNode.NodeTypes.HOUR_GLASS) {
             int nbChildren = nodeToLoad.getChildCount();
+            
+            this.m_expected += nbChildren;
+            
             for (int i = 0; i < nbChildren; i++) {
                 loadAllAtOnce((AbstractNode) nodeToLoad.getChildAt(i), identificationDataset);
             }
+            
             this.m_expected--;
+                        
             return; 
         }
         

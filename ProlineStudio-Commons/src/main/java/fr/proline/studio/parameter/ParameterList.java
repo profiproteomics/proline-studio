@@ -268,6 +268,12 @@ public class ParameterList extends ArrayList<AbstractParameter> {
                 key = suffixKey;
             }
 
+            if (preferences.get(key, null) == null) {
+                String value = parameter.getStringValue();
+                preferences.put(key, value);
+                return;
+            }
+
             if (parameter.isUsed()) {
                 String value = parameter.getStringValue();
                 preferences.put(key, value);
@@ -294,7 +300,7 @@ public class ParameterList extends ArrayList<AbstractParameter> {
             } else {
                 key = suffixKey;
             }
-            
+
             String value = parameter.getStringValue();
             preferences.put(key, value);
 

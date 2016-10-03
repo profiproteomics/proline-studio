@@ -101,7 +101,7 @@ public class SpecialRenameAction extends AbstractRSMAction {
                 }
             }
         }
-
+        
         for (int i = 0; i < toRename.size(); i++) {
 
             DDataset dataset = toRename.get(i).getDataset();

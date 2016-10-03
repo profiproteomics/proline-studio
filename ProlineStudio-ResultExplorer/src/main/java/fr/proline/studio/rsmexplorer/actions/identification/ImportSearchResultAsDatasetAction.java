@@ -1,6 +1,5 @@
 package fr.proline.studio.rsmexplorer.actions.identification;
 
-
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import fr.proline.core.orm.uds.Aggregation;
 import fr.proline.core.orm.uds.Dataset;
@@ -36,11 +35,13 @@ import org.openide.windows.WindowManager;
 
 /**
  *
- * Action to import one or multiple identification, imported Rset are refered by a Dataset
+ * Action to import one or multiple identification, imported Rset are refered by
+ * a Dataset
+ *
  * @author JM235353
  */
 public class ImportSearchResultAsDatasetAction extends AbstractRSMAction {
-    
+
     private static final String GENERAL_APPLICATION_SETTINGS = "General Application Settings";
 
     public ImportSearchResultAsDatasetAction() {
@@ -52,7 +53,7 @@ public class ImportSearchResultAsDatasetAction extends AbstractRSMAction {
 
         // only one node selected for this action
         final AbstractNode n = selectedNodes[0];
-        
+
         // retrieve project id
         long projectId = 0;
         if (n.getType() == AbstractNode.NodeTypes.PROJECT_IDENTIFICATION) {
@@ -64,17 +65,16 @@ public class ImportSearchResultAsDatasetAction extends AbstractRSMAction {
 
         }
 
-        
         ImportIdentificationDialog dialog = ImportIdentificationDialog.getDialog(WindowManager.getDefault().getMainWindow());
         dialog.setLocation(x, y);
         dialog.setVisible(true);
 
         if (dialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {
-            
+
             // retrieve parameters
             File[] filePaths = dialog.getFilePaths();
             final HashMap<String, String> parserArguments = dialog.getParserArguments();
-            
+
             Project project = null;
             DDataset parentDataset = null;
             boolean isParentAProject = false;
@@ -88,27 +88,26 @@ public class ImportSearchResultAsDatasetAction extends AbstractRSMAction {
                 project = dataSetNode.getDataset().getProject();
                 parentDataset = dataSetNode.getDataset();
                 parentDatasetNode = dataSetNode;
-            } 
+            }
             final Project _project = project;
             final DDataset _parentDataset = parentDataset;
 
-                    
             final String parserId = dialog.getParserId();
             final String decoyRegex = dialog.getDecoyRegex();
             final long instrumentId = dialog.getInstrumentId();
             final long peaklistSoftwareId = dialog.getPeaklistSoftwareId();
             final boolean saveSpectrumMatches = false; // ABU old import parameter
-            
+
             IdentificationTree tree = IdentificationTree.getCurrentTree();
-            
+
             final ArrayList<DataSetNode> allIdentificationNodes = new ArrayList<>();
             final ArrayList<String> allDatasetNames = new ArrayList<>();
-            
+
             final DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
-            
+
             // Create dataset nodes for each files
             final int nbFiles = filePaths.length;
-            for (int i=0;i<nbFiles;i++) {
+            for (int i = 0; i < nbFiles; i++) {
                 File f = filePaths[i];
 
                 // Create temporary nodes for the identifications
@@ -119,30 +118,27 @@ public class ImportSearchResultAsDatasetAction extends AbstractRSMAction {
                 }
                 final String _datasetName = datasetName;
                 allDatasetNames.add(datasetName);
-                
-                DataSetData identificationData = new DataSetData(datasetName, Dataset.DatasetType.IDENTIFICATION, Aggregation.ChildNature.SAMPLE_ANALYSIS );  //JPM.TODO
-                
+
+                DataSetData identificationData = new DataSetData(datasetName, Dataset.DatasetType.IDENTIFICATION, Aggregation.ChildNature.SAMPLE_ANALYSIS);  //JPM.TODO
+
                 final DataSetNode identificationNode = new DataSetNode(identificationData);
                 identificationNode.setIsChanging(true);
                 allIdentificationNodes.add(identificationNode);
-                
-                
+
                 if (isParentAProject) {
-                    
-                    treeModel.insertNodeInto(identificationNode, n, n.getChildCount()-1);
+
+                    treeModel.insertNodeInto(identificationNode, n, n.getChildCount() - 1);
                 } else {
                     treeModel.insertNodeInto(identificationNode, n, n.getChildCount());
                 }
 
-
-                
             }
-            
-            if (nbFiles>0) {
+
+            if (nbFiles > 0) {
                 // expand the parent node to display its children
                 tree.expandNodeIfNeeded(n);
             }
-            
+
             // Pre-Import files
             final String[] pathArray = new String[nbFiles];
             for (int i = 0; i < nbFiles; i++) {
@@ -151,9 +147,8 @@ public class ImportSearchResultAsDatasetAction extends AbstractRSMAction {
                 pathArray[i] = f.getPath();
             }
 
- 
             final String[] result = new String[1];
-            
+
             AbstractServiceCallback callback = new AbstractServiceCallback() {
 
                 @Override
@@ -166,12 +161,12 @@ public class ImportSearchResultAsDatasetAction extends AbstractRSMAction {
 
                     if (success) {
                         // start all imports
-                        for (int i=0;i<nbFiles;i++) {
+                        for (int i = 0; i < nbFiles; i++) {
                             startImport(_project, allIdentificationNodes.get(i), _parentDataset, allDatasetNames.get(i), pathArray[i], treeModel, parserId, parserArguments, decoyRegex, instrumentId, peaklistSoftwareId, saveSpectrumMatches);
                         }
                     } else {
                         // delete all nodes
-                        for (int i=0;i<allIdentificationNodes.size();i++) {
+                        for (int i = 0; i < allIdentificationNodes.size(); i++) {
                             treeModel.removeNodeFromParent(allIdentificationNodes.get(i));
                         }
                     }
@@ -181,11 +176,9 @@ public class ImportSearchResultAsDatasetAction extends AbstractRSMAction {
             CertifyIdentificationTask task = new CertifyIdentificationTask(callback, parserId, parserArguments, pathArray, projectId, result);
             AccessServiceThread.getAccessServiceThread().addTask(task);
 
-
-
         }
     }
-    
+
     private void startImport(final Project project, final DataSetNode identificationNode, final DDataset parentDataset, final String datasetName, String canonicalPath, final DefaultTreeModel treeModel, String parserId, HashMap<String, String> parserArguments, String decoyRegex, long instrumentId, long peaklistSoftwareId, boolean saveSpectrumMatches) {
         // used as out parameter for the service
         final Long[] _resultSetId = new Long[1];
@@ -205,7 +198,6 @@ public class ImportSearchResultAsDatasetAction extends AbstractRSMAction {
 
                     createDataset(identificationNode, project, parentDataset, datasetName, _resultSetId[0], getTaskInfo());
 
-
                 } else {
                     //JPM.TODO : manage error with errorMessage
                     treeModel.removeNodeFromParent(identificationNode);
@@ -213,17 +205,12 @@ public class ImportSearchResultAsDatasetAction extends AbstractRSMAction {
             }
         };
 
-
         // use canonicalPath when it is possible to be sure to have an unique path
-
-
         ImportIdentificationTask task = new ImportIdentificationTask(callback, parserId, parserArguments, canonicalPath, decoyRegex, instrumentId, peaklistSoftwareId, saveSpectrumMatches, project.getId(), _resultSetId);
         AccessServiceThread.getAccessServiceThread().addTask(task);
     }
-    
-    
+
     private void createDataset(final DataSetNode identificationNode, Project project, DDataset parentDataset, String name, Long resultSetId, TaskInfo taskInfo) {
-                                    
 
         identificationNode.setIsChanging(false);
 
@@ -245,66 +232,13 @@ public class ImportSearchResultAsDatasetAction extends AbstractRSMAction {
 
                 if (success) {
 
-                    
                     DDataset dataset = createdDatasetList.get(0);
                     identificationNode.setIsChanging(false);
                     ((DataSetData) identificationNode.getData()).setDataset(dataset);
                     treeModel.nodeChanged(identificationNode);
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    //<-------------------------------------- AND
-                    ParameterList parameterList = new ParameterList(GENERAL_APPLICATION_SETTINGS);
-                    Object[] objectTable = {ImportManager.SEARCH_RESULT_NAME_SOURCE, ImportManager.PEAKLIST_PATH_SOURCE, ImportManager.MSI_SEARCH_FILE_NAME_SOURCE};
-                    ObjectParameter parameter = new ObjectParameter(ImportManager.DEFAULT_SEARCH_RESULT_NAME_SOURCE_KEY, "Default Search Result Name Source", objectTable, 2, null);
-                    parameterList.add(parameter);
-                    parameterList.loadParameters(NbPreferences.root(), true);
 
-                    String naming = (String)parameter.getObjectValue();
-                    
-                    DataSetData.fetchRsetAndRsmForOneDataset(dataset);
+                    ImportManager.importRenaming(dataset, identificationNode, tree);
 
-                    if (dataset == null || dataset.getResultSet() == null || dataset.getResultSet().getMsiSearch() == null) {
-                        return;
-                    }
-
-                    String newName = "";
-
-                    newName = (dataset.getResultSet().getMsiSearch().getResultFileName() == null) ? "" : dataset.getResultSet().getMsiSearch().getResultFileName();
-                    if (newName.contains(".")) {
-                        newName = newName.substring(0, newName.indexOf("."));
-                    }
-
-                    if (naming.equalsIgnoreCase(ImportManager.SEARCH_RESULT_NAME_SOURCE)) {
-                        newName = dataset.getResultSet().getName();
-                    } else if (naming.equalsIgnoreCase(ImportManager.PEAKLIST_PATH_SOURCE)) {
-                        newName = (dataset.getResultSet().getMsiSearch().getPeaklist().getPath() == null) ? "" : dataset.getResultSet().getMsiSearch().getPeaklist().getPath();
-                        if (newName.contains(File.separator)) {
-                            newName = newName.substring(newName.lastIndexOf(File.separator) + 1);
-                        }
-                    }
-
-                    if (!newName.equalsIgnoreCase("")) {
-
-                        identificationNode.rename(newName, tree);
-                        
-                        dataset.setName(newName);
-
-                        tree.rename(identificationNode, newName);
-
-                    }
-                    
-                    //<-------------------------------------- AND
-                    
-                    
-                    
-                    
-                    
                 } else {
                     // should not happen
                     treeModel.removeNodeFromParent(identificationNode);
@@ -313,16 +247,12 @@ public class ImportSearchResultAsDatasetAction extends AbstractRSMAction {
         };
 
         // ask asynchronous loading of data
-
-
-
         DatabaseDataSetTask task = new DatabaseDataSetTask(callback);
 
         task.initCreateDatasetForIdentification(project, parentDataset, Aggregation.ChildNature.SAMPLE_ANALYSIS, name, resultSetId, null, createdDatasetList, taskInfo);
         AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
 
     }
-    
 
     @Override
     public void updateEnabled(AbstractNode[] selectedNodes) {
@@ -333,17 +263,17 @@ public class ImportSearchResultAsDatasetAction extends AbstractRSMAction {
             setEnabled(false);
             return;
         }
-        
+
         int nbSelectedNodes = selectedNodes.length;
-        
+
         // identification must be added in one parent node (for the moment)
         if (nbSelectedNodes != 1) {
             setEnabled(false);
             return;
         }
-        
+
         AbstractNode node = selectedNodes[0];
-        
+
         // parent node is being created, we can not add an identification
         if (node.isChanging()) {
             setEnabled(false);
@@ -355,18 +285,17 @@ public class ImportSearchResultAsDatasetAction extends AbstractRSMAction {
             setEnabled(true);
             return;
         }
-        
+
         // we can add an identification only to a data set without a ResultSet or a ResultSummary
         if (node.getType() == AbstractNode.NodeTypes.DATA_SET) {
             DataSetNode dataSetNode = (DataSetNode) node;
-        
+
             setEnabled(!dataSetNode.hasResultSet() && !dataSetNode.hasResultSummary());
-            return;  
+            return;
         }
 
         setEnabled(false);
 
     }
-    
-    
+
 }

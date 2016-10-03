@@ -205,11 +205,15 @@ public class SelectRawFilesPanel extends JPanel {
         JScrollPane tableScrollPane = new JScrollPane();
         tableScrollPane.getViewport().setBackground(Color.white);
 
-        m_table = new FlatDesignTable();
-        m_model = new FlatDesignTableModel();
-        m_table.setModel(m_model);
+        try {
+            m_table = new FlatDesignTable();
+            m_model = new FlatDesignTableModel();
+            m_table.setModel(m_model);
 
-        tableScrollPane.setViewportView(m_table);
+            tableScrollPane.setViewportView(m_table);
+        } catch (Exception e) {
+            System.out.println(e);
+        }
 
         designTablePanel.add(tableScrollPane, c);
 
@@ -223,7 +227,7 @@ public class SelectRawFilesPanel extends JPanel {
         JPanel panel = new JPanel();
         panel.setLayout(new GridLayout(1, 2, 10, 10));
         panel.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createTitledBorder("Automatic Raw File Association"), BorderFactory.createEmptyBorder(15, 15, 15, 15)));
-        
+
         m_dropZoneInfo = new XICDropZoneInfo();
         m_dropZone = new XICDropZone(m_transferHandler);
         m_dropZone.setTable(m_table);
@@ -447,8 +451,9 @@ public class SelectRawFilesPanel extends JPanel {
 
         @Override
         public Object getValueAt(int rowIndex, int columnIndex) {
-            NodeModelRow nodeModelRow = m_dataList.get(rowIndex);
 
+            NodeModelRow nodeModelRow = m_dataList.get(rowIndex);
+            
             switch (columnIndex) {
                 case COLTYPE_GROUP: {
                     return nodeModelRow.m_group.toString();
@@ -463,10 +468,27 @@ public class SelectRawFilesPanel extends JPanel {
                     return nodeModelRow.m_run.toString();
                 }
                 case COLTYPE_PEAKLIST: {
-                    return MiscellaneousUtils.getFileName(nodeModelRow.getXICBiologicalSampleAnalysisNode().getResultSet().getMsiSearch().getPeaklist().getPath(), suffix);
+                    
+                    if (nodeModelRow == null) {
+                        return "nodeModelRow null";
+                    } else if (nodeModelRow.getXICBiologicalSampleAnalysisNode() == null) {
+                        return "getXICBiologicalSampleAnalysisNode null";
+                    } else if (nodeModelRow.m_sampleAnalysis.getResultSet() == null) {
+                        return "resultSet null";
+                    } else if (nodeModelRow.m_sampleAnalysis.getResultSet().getMsiSearch() == null) {
+                        return "MsiSearch null";
+                    } else if (nodeModelRow.m_sampleAnalysis.getResultSet().getMsiSearch().getPeaklist() == null) {
+                        return "Peaklist null";
+                    } else if (nodeModelRow.m_sampleAnalysis.getResultSet().getMsiSearch().getPeaklist().getPath() == null) {
+                        return "Peaklist Path null";
+                    } else {
+                        return MiscellaneousUtils.getFileName(nodeModelRow.m_sampleAnalysis.getResultSet().getMsiSearch().getPeaklist().getPath(), suffix);
+                    }
+                    
                 }
-
+                
             }
+
             return null; // should not happen
         }
 
@@ -543,7 +565,7 @@ public class SelectRawFilesPanel extends JPanel {
 
         @Override
         public boolean isCorruptionPossible(ArrayList<Integer> indices) {
-            int numberOfColumns = this.getColumnCount(); 
+            int numberOfColumns = this.getColumnCount();
             for (int i = 0; i < indices.size(); i++) {
                 String currentValue = this.getValueAt(indices.get(i), numberOfColumns - 2).toString();
                 System.out.println("breakpoint2");

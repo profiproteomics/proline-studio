@@ -165,6 +165,9 @@ public class DataSetNode extends AbstractNode {
     public ResultSet getResultSet() {
         // getResultSet() can return null if the resultSet has not been loaded previously
         DDataset dataSet = ((DataSetData) getData()).getDataset();
+        if(dataSet.getResultSet()==null){
+            DataSetData.fetchRsetAndRsmForOneDataset(dataSet);
+        }
         return dataSet.getResultSet();
     }
     

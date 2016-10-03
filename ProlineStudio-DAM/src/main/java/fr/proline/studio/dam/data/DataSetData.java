@@ -19,6 +19,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import javax.persistence.EntityManager;
+import javax.swing.JOptionPane;
 
 /**
  * Data for Dataset Node
@@ -35,42 +36,6 @@ public class DataSetData extends AbstractData {
     public DataSetData(DDataset dataSet) {
         m_dataType = DataTypes.DATA_SET;
         m_dataset = dataSet;
-        
-        /*
-         this.fetchRsetAndRsmForOneDataset(dataSet);
-
-         if (m_dataset.getResultSet() == null) {
-         return;
-         }
-
-         String newName = "";
-
-         if (m_dataset.getResultSet().getMsiSearch() != null) {
-         newName = (m_dataset.getResultSet().getMsiSearch().getResultFileName() == null) ? "" : m_dataset.getResultSet().getMsiSearch().getResultFileName();
-         if(newName.contains(".")){
-         newName = newName.substring(0, newName.lastIndexOf("."));
-         }
-         }
-        
-         if (m_dataset.getChildrenCount() < 1 && !m_dataset.isQuantiSC() && !m_dataset.isQuantiXIC()) {
-
-         Preferences preferences = NbPreferences.root();
-         String naming = preferences.get("DefaultSearchResultNameSource", "MSI_SEARCH_FILE_NAME");
-
-         if (naming.equalsIgnoreCase("SEARCH_RESULT_NAME")) {
-         newName = (m_dataset.getResultSet().getName());
-         } else if (naming.equalsIgnoreCase("PEAKLIST_PATH")) {
-         newName = (m_dataset.getResultSet().getMsiSearch().getPeaklist().getPath() == null) ? "" : m_dataset.getResultSet().getMsiSearch().getPeaklist().getPath();
-         if (newName.contains(File.separator)) {
-         newName = newName.substring(newName.lastIndexOf(File.separator)+1);
-         }
-         }
-
-         if (!newName.equalsIgnoreCase("")) {
-         m_dataset.setName(newName);
-         }
-         }
-         */
     }
 
     public DataSetData(String temporaryName, Dataset.DatasetType temporaryDatasetType, Aggregation.ChildNature temporaryAggregateType) {
@@ -159,7 +124,7 @@ public class DataSetData extends AbstractData {
     }
 
     public static void fetchRsetAndRsmForOneDataset(DDataset d) {
-
+        
         EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(d.getProject().getId()).createEntityManager();
 
         try {

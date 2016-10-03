@@ -43,7 +43,7 @@ import fr.proline.studio.rsmexplorer.actions.identification.ImportManager;
 import fr.proline.studio.rsmexplorer.actions.identification.ImportMaxQuantResultJMSAction;
 import fr.proline.studio.rsmexplorer.actions.identification.ImportSearchResultAsDatasetAction;
 import fr.proline.studio.rsmexplorer.actions.identification.ImportSearchResultAsDatasetJMSAction;
-import fr.proline.studio.rsmexplorer.actions.identification.SpecialRenameAction;
+import fr.proline.studio.rsmexplorer.actions.identification.RenameSearchResultAction;
 import fr.proline.studio.rsmexplorer.actions.identification.UpdatePeaklistSoftwareAction;
 import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
@@ -117,7 +117,10 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
                 }
 
                 DDataset dataset = datasetData.getDataset();
-                DataSetData.fetchRsetAndRsmForOneDataset(dataset);
+
+                if (dataset.getResultSet() == null) {
+                    DataSetData.fetchRsetAndRsmForOneDataset(dataset);
+                }
 
                 if (dataset == null || dataset.getResultSet() == null || dataset.getResultSet().getMsiSearch() == null) {
                     continue;
@@ -701,8 +704,8 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
                 RenameAction renameAction = new RenameAction(AbstractTree.TreeType.TREE_IDENTIFICATION);
                 m_mainActions.add(renameAction);
 
-                SpecialRenameAction specialRenameAction = new SpecialRenameAction(AbstractTree.TreeType.TREE_IDENTIFICATION);
-                m_mainActions.add(specialRenameAction);
+                RenameSearchResultAction renameSearchResultAction = new RenameSearchResultAction(AbstractTree.TreeType.TREE_IDENTIFICATION);
+                m_mainActions.add(renameSearchResultAction);
 
                 ClearDatasetAction clearAction = new ClearDatasetAction();
                 m_mainActions.add(clearAction);

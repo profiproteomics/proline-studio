@@ -25,7 +25,7 @@ import org.openide.windows.WindowManager;
  *
  * @author JM235353
  */
-public class SpecialRenameAction extends AbstractRSMAction {
+public class RenameSearchResultAction extends AbstractRSMAction {
 
     private static final String GENERAL_APPLICATION_SETTINGS = "General Application Settings";
     private String m_parameterValue;
@@ -41,8 +41,8 @@ public class SpecialRenameAction extends AbstractRSMAction {
      *
      * @param treeType
      */
-    public SpecialRenameAction(AbstractTree.TreeType treeType) {
-        super(NbBundle.getMessage(SpecialRenameAction.class, "CTL_SpecialRenameAction"), treeType);
+    public RenameSearchResultAction(AbstractTree.TreeType treeType) {
+        super(NbBundle.getMessage(RenameSearchResultAction.class, "CTL_RenameSearchResult"), treeType);
         this.m_treeType = treeType;
     }
 
@@ -81,16 +81,16 @@ public class SpecialRenameAction extends AbstractRSMAction {
         for (int i = 0; i < m_selectedNodes.length; i++) {
             if (m_selectedNodes[i].getType() == AbstractNode.NodeTypes.DATA_SET) {
                 DataSetNode datasetNode = (DataSetNode) m_selectedNodes[i];
-                
+
                 m_tree.expandNodeIfNeeded(datasetNode);
-                
+
                 if (datasetNode.getChildCount() > 0) {
                     Enumeration<AbstractNode> e = datasetNode.depthFirstEnumeration();
                     while (e.hasMoreElements()) {
                         AbstractNode currentElement = e.nextElement();
                         if (currentElement.getType() == AbstractNode.NodeTypes.DATA_SET && currentElement.isLeaf() && currentElement.getChildCount() == 0) {
                             toRename.add((DataSetNode) currentElement);
-                        }else{
+                        } else {
                             m_tree.expandNodeIfNeeded(currentElement);
                         }
                     }
@@ -101,11 +101,14 @@ public class SpecialRenameAction extends AbstractRSMAction {
                 }
             }
         }
-        
+
         for (int i = 0; i < toRename.size(); i++) {
 
             DDataset dataset = toRename.get(i).getDataset();
-            DataSetData.fetchRsetAndRsmForOneDataset(dataset);
+
+            if (dataset.getResultSet() == null) {
+                DataSetData.fetchRsetAndRsmForOneDataset(dataset);
+            }
 
             if (dataset == null || dataset.getResultSet() == null || dataset.getResultSet().getMsiSearch() == null) {
                 continue;
@@ -143,7 +146,7 @@ public class SpecialRenameAction extends AbstractRSMAction {
         parameterList.add(parameter);
         parameterList.loadParameters(NbPreferences.root(), true);
 
-        ParameterDialog dialog = new ParameterDialog(WindowManager.getDefault().getMainWindow(), "Rename Project Using...", parameter);
+        ParameterDialog dialog = new ParameterDialog(WindowManager.getDefault().getMainWindow(), "Rename Search Result(s)", parameter);
         dialog.setLocation(x, y);
         dialog.setVisible(true);
 
@@ -170,7 +173,7 @@ public class SpecialRenameAction extends AbstractRSMAction {
 
         AbstractNode node = selectedNodes[0];
         AbstractNode.NodeTypes nodeType = node.getType();
-        if ((nodeType != AbstractNode.NodeTypes.DATA_SET) && (nodeType != AbstractNode.NodeTypes.PROJECT_IDENTIFICATION)) {
+        if ((nodeType != AbstractNode.NodeTypes.DATA_SET) || (nodeType == AbstractNode.NodeTypes.PROJECT_IDENTIFICATION)) {
             setEnabled(false);
             return;
         }

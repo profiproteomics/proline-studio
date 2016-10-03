@@ -18,13 +18,14 @@ import javax.swing.tree.*;
 
 /**
  * Base Class for all trees with identification or quantification dataset
+ *
  * @author JM235353
  */
 public abstract class AbstractTree extends JTree implements MouseListener {
-    
+
     private SpecialRenameAction m_subscribedRenamer;
     private int m_expected = -1;
- 
+
     public enum TreeType {
 
         TREE_IDENTIFICATION,
@@ -32,31 +33,30 @@ public abstract class AbstractTree extends JTree implements MouseListener {
         TREE_SELECTION,
         TREE_XIC_DESIGN
     }
-    
-    
+
     protected RSMTreeModel m_model;
     protected RSMTreeSelectionModel m_selectionModel;
     protected HashMap<AbstractData, AbstractNode> loadingMap = new HashMap<>();
-    
-    public void subscribeRenamer(SpecialRenameAction subscribedRenamer){
+
+    public void subscribeRenamer(SpecialRenameAction subscribedRenamer) {
         this.m_subscribedRenamer = subscribedRenamer;
     }
-    
-    public SpecialRenameAction getSubscribedRenamer(){
+
+    public SpecialRenameAction getSubscribedRenamer() {
         return this.m_subscribedRenamer;
     }
-    
-    public void setExpected(int expected){
+
+    public void setExpected(int expected) {
         this.m_expected = expected;
     }
-    
+
     protected void initTree(AbstractNode top) {
         m_model = new RSMTreeModel(this, top);
         setModel(m_model);
 
         m_selectionModel = new RSMTreeSelectionModel();
         setSelectionModel(m_selectionModel);
-        
+
         // rendering of the tree
         putClientProperty("JTree.lineStyle", "Horizontal");
         setRowHeight(18);
@@ -73,10 +73,9 @@ public abstract class AbstractTree extends JTree implements MouseListener {
         // add tooltips 
         ToolTipManager.sharedInstance().registerComponent(this);
     }
-    
-    
+
     protected void startLoading(final AbstractNode nodeToLoad, final boolean identificationDataset) {
-        
+
         // check if the loading is necessary :
         // it is necessary only if we have an hour glass child
         // which correspond to data not already loaded
@@ -98,7 +97,7 @@ public abstract class AbstractTree extends JTree implements MouseListener {
             nodeToLoad.setIsChanging(true);
             m_model.nodeChanged(nodeToLoad);
         }
-        
+
         // Callback used only for the synchronization with the AccessDatabaseThread
         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
 
@@ -114,12 +113,12 @@ public abstract class AbstractTree extends JTree implements MouseListener {
 
                     @Override
                     public void run() {
-                        
+
                         if (nodeToLoad.getType() == AbstractNode.NodeTypes.TREE_PARENT) {
                             nodeToLoad.setIsChanging(false);
                             m_model.nodeChanged(nodeToLoad);
                         }
-                        
+
                         dataLoaded(parentData, childrenList);
 
                         if (loadingMap.isEmpty() && (selectionFromrsmArray != null)) {
@@ -127,11 +126,11 @@ public abstract class AbstractTree extends JTree implements MouseListener {
                             setSelection(selectionFromrsmArray);
                             selectionFromrsmArray = null;
                         }
-                        
+
                         if (identificationDataset) {
-                            IdentificationTree.getCurrentTree().loadTrash() ;
-                        }else {
-                            QuantitationTree.getCurrentTree().loadTrash() ;
+                            IdentificationTree.getCurrentTree().loadTrash();
+                        } else {
+                            QuantitationTree.getCurrentTree().loadTrash();
                         }
                     }
                 });
@@ -139,18 +138,14 @@ public abstract class AbstractTree extends JTree implements MouseListener {
             }
         };
 
-        
-
-        parentData.load(callback, childrenList,identificationDataset );
+        parentData.load(callback, childrenList, identificationDataset);
     }
-    
+
     protected void dataLoaded(AbstractData data, List<AbstractData> list) {
 
         AbstractNode parentNode = loadingMap.remove(data);
 
-
         parentNode.remove(0); // remove the first child which correspond to the hour glass
-
 
         int indexToInsert = 0;
         Iterator<AbstractData> it = list.iterator();
@@ -162,37 +157,38 @@ public abstract class AbstractTree extends JTree implements MouseListener {
 
         m_model.nodeStructureChanged(parentNode);
 
-
     }
-    
-    
 
     public void loadAllAtOnce(final AbstractNode nodeToLoad, final boolean identificationDataset) {
-        
+
         if (nodeToLoad.getChildCount() == 0) {
             this.m_expected--;
             return;
         }
-               
-        AbstractNode childNode = (AbstractNode) nodeToLoad.getChildAt(0);     
-        
+
+        AbstractNode childNode = (AbstractNode) nodeToLoad.getChildAt(0);
+
         if (childNode.getType() != AbstractNode.NodeTypes.HOUR_GLASS) {
             int nbChildren = nodeToLoad.getChildCount();
-            
+
             this.m_expected += nbChildren;
-            
+
             for (int i = 0; i < nbChildren; i++) {
                 loadAllAtOnce((AbstractNode) nodeToLoad.getChildAt(i), identificationDataset);
             }
-            
+
             this.m_expected--;
-                        
-            return; 
+
+            if (m_expected == 0) {
+                this.m_subscribedRenamer.proceedWithRenaming();
+            }
+
+            return;
         }
-        
+
         // register hour glass which is expanded
         loadingMap.put(nodeToLoad.getData(), nodeToLoad);
-        
+
         final ArrayList<AbstractData> childrenList = new ArrayList<>();
         final AbstractData parentData = nodeToLoad.getData();
 
@@ -200,7 +196,7 @@ public abstract class AbstractTree extends JTree implements MouseListener {
             nodeToLoad.setIsChanging(true);
             m_model.nodeChanged(nodeToLoad);
         }
-        
+
         // Callback used only for the synchronization with the AccessDatabaseThread
         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
 
@@ -221,18 +217,15 @@ public abstract class AbstractTree extends JTree implements MouseListener {
             }
         };
 
-        
-
         parentData.load(callback, childrenList, Priority.TOP, identificationDataset);
-        
+
     }
+
     protected void dataLoadedAtOnce(AbstractData data, List<AbstractData> list, boolean identificationDataset) {
 
         AbstractNode parentNode = loadingMap.remove(data);
 
-
         parentNode.remove(0); // remove the first child which correspond to the hour glass
-
 
         int indexToInsert = 0;
         Iterator<AbstractData> it = list.iterator();
@@ -245,59 +238,61 @@ public abstract class AbstractTree extends JTree implements MouseListener {
         m_model.nodeStructureChanged(parentNode);
 
         int nbChildren = parentNode.getChildCount();
-        
-        this.m_expected = m_expected + nbChildren -1;
-        
-        for (int i=0;i<nbChildren;i++) {
+
+        this.m_expected = m_expected + nbChildren - 1;
+
+        for (int i = 0; i < nbChildren; i++) {
             loadAllAtOnce((AbstractNode) parentNode.getChildAt(i), identificationDataset);
         }
-        
-        if(m_expected==0){
+
+        if (m_expected == 0) {
             this.m_subscribedRenamer.proceedWithRenaming();
         }
 
     }
-    
-    
+
     /**
-     * Set all nodes that don't belong to selectionPath to specified status (disabled or not)
-     * 
-     * @param disabled : true if none selection should be set to disable otherwise true
+     * Set all nodes that don't belong to selectionPath to specified status
+     * (disabled or not)
+     *
+     * @param disabled : true if none selection should be set to disable
+     * otherwise true
      */
     public void revertSelectionSetDisabled(boolean disabled) {
         TreePath[] selectedPaths = getSelectionPaths();
         List<AbstractNode> availableNodes = new ArrayList<>();
-        if(selectedPaths != null) {
-            for(TreePath selectedPath : selectedPaths){
+        if (selectedPaths != null) {
+            for (TreePath selectedPath : selectedPaths) {
                 Object[] pathElements = selectedPath.getPath();
-                for(Object nextElem :pathElements){
-                    AbstractNode nextNode = (AbstractNode)nextElem;
-                    if(!availableNodes.contains(nextNode))
+                for (Object nextElem : pathElements) {
+                    AbstractNode nextNode = (AbstractNode) nextElem;
+                    if (!availableNodes.contains(nextNode)) {
                         availableNodes.add(nextNode);
-                }        
+                    }
+                }
             }
         }
-        
-        AbstractNode rootNode = ( AbstractNode) m_model.getRoot();
-        if(!availableNodes.contains(rootNode)){
+
+        AbstractNode rootNode = (AbstractNode) m_model.getRoot();
+        if (!availableNodes.contains(rootNode)) {
             rootNode.setIsDisabled(disabled);
             m_model.nodeChanged(rootNode);
         }
-        childRevertSelectionSetDisabled(rootNode,availableNodes,disabled);
+        childRevertSelectionSetDisabled(rootNode, availableNodes, disabled);
     }
 
-    private void childRevertSelectionSetDisabled(AbstractNode parent, List<AbstractNode> enabledNodes,boolean disabled ){
+    private void childRevertSelectionSetDisabled(AbstractNode parent, List<AbstractNode> enabledNodes, boolean disabled) {
         int nbrChild = m_model.getChildCount(parent);
-        for(int i= 0; i<nbrChild; i++){
+        for (int i = 0; i < nbrChild; i++) {
             AbstractNode childNode = (AbstractNode) m_model.getChild(parent, i);
-            if(!enabledNodes.contains(childNode)){
+            if (!enabledNodes.contains(childNode)) {
                 childNode.setIsDisabled(disabled);
                 m_model.nodeChanged(childNode);
             }
-            childRevertSelectionSetDisabled(childNode,enabledNodes,disabled);
+            childRevertSelectionSetDisabled(childNode, enabledNodes, disabled);
         }
     }
-    
+
     public void setSelection(ArrayList<ResultSummary> rsmArray) {
 
         if (!loadingMap.isEmpty()) {
@@ -312,7 +307,6 @@ public abstract class AbstractTree extends JTree implements MouseListener {
         ArrayList<AbstractNode> nodePath = new ArrayList<>();
         nodePath.add(rootNode);
         setSelectionImpl(rootNode, nodePath, rsmArray, selectedPathArray);
-
 
         TreePath[] selectedPaths = selectedPathArray.toArray(new TreePath[selectedPathArray.size()]);
 
@@ -330,7 +324,6 @@ public abstract class AbstractTree extends JTree implements MouseListener {
                 DataSetNode dataSetNode = (DataSetNode) node;
                 Long rsmId = dataSetNode.getResultSummaryId();
                 if (rsmId != null) {
-
 
                     int size = rsmArray.size();
                     for (int i = 0; i < size; i++) {
@@ -352,33 +345,33 @@ public abstract class AbstractTree extends JTree implements MouseListener {
         }
         nodePath.remove(nodePath.size() - 1);
     }
-    
+
     /**
      * Return an array of all selected nodes of the tree
-     * @return 
+     *
+     * @return
      */
     public AbstractNode[] getSelectedNodes() {
         TreePath[] paths = getSelectionModel().getSelectionPaths();
-        
+
         int nbPath = paths.length;
-        
+
         AbstractNode[] nodes = new AbstractNode[nbPath];
-        
-        for (int i=0;i<nbPath;i++) {
+
+        for (int i = 0; i < nbPath; i++) {
             nodes[i] = (AbstractNode) paths[i].getLastPathComponent();
         }
 
         return nodes;
     }
-    
+
     public boolean isSelected(int row) {
         if (row == -1) {
             return false;
         }
         return getSelectionModel().isRowSelected(row);
     }
-    
-        
+
     protected void manageSelectionOnRightClick(MouseEvent e) {
 
         int[] selectedRows = getSelectionRows();
@@ -414,8 +407,7 @@ public abstract class AbstractTree extends JTree implements MouseListener {
             }
         }
     }
-    
-    
+
     public void expandNodeIfNeeded(AbstractNode n) {
         final TreePath pathToExpand = new TreePath(n.getPath());
         if (!isExpanded(pathToExpand)) {
@@ -429,25 +421,25 @@ public abstract class AbstractTree extends JTree implements MouseListener {
             });
         }
     }
-    
+
     public abstract void rename(AbstractNode rsmNode, String newName);
 
     @Override
     public String getToolTipText(MouseEvent evt) {
         int row = getRowForLocation(evt.getX(), evt.getY());
-        if (row  == -1) {
+        if (row == -1) {
             return null;
         }
         TreePath curPath = getPathForRow(row);
         AbstractNode node = (AbstractNode) curPath.getLastPathComponent();
         return node.getToolTipText();
 
-    } 
-    
+    }
+
     public class RSMTreeModel extends DefaultTreeModel {
 
         private AbstractTree m_parentTree = null;
-        
+
         public RSMTreeModel(AbstractTree parentTree, TreeNode root) {
             super(root, false);
             m_parentTree = parentTree;
@@ -467,7 +459,7 @@ public abstract class AbstractTree extends JTree implements MouseListener {
 
         }
     }
-    
+
     public static class RSMTreeSelectionModel extends DefaultTreeSelectionModel {
 
         public RSMTreeSelectionModel() {
@@ -477,18 +469,17 @@ public abstract class AbstractTree extends JTree implements MouseListener {
         @Override
         public void setSelectionPaths(TreePath[] pPaths) {
             List<TreePath> newSelectionList = new ArrayList<>();
-            for(TreePath path : pPaths){
+            for (TreePath path : pPaths) {
                 AbstractNode node = (AbstractNode) path.getLastPathComponent();
-                if(!node.isDisabled())
-                newSelectionList.add(path);
+                if (!node.isDisabled()) {
+                    newSelectionList.add(path);
+                }
             }
             super.setSelectionPaths(newSelectionList.toArray(new TreePath[newSelectionList.size()])); //To change body of generated methods, choose Tools | Templates.
         }
 
-  
-        
-        
     }
+
     public static class RSMTreeCellEditor extends DefaultTreeCellEditor {
 
         public RSMTreeCellEditor(JTree tree, DefaultTreeCellRenderer renderer) {
@@ -507,6 +498,5 @@ public abstract class AbstractTree extends JTree implements MouseListener {
             }
         }
     }
-    
-    
+
 }

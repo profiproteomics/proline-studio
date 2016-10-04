@@ -47,6 +47,8 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
     public static ApplicationSettingsDialog getDialog(Window parent) {
         if (m_singletonDialog == null) {
             m_singletonDialog = new ApplicationSettingsDialog(parent);
+        }else{
+            m_singletonDialog.updateSettings();
         }
 
         return m_singletonDialog;
@@ -94,7 +96,7 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
         m_generalParameterList.add(gettingStartedParameter);
 
         Object[] objectTable = {ImportManager.SEARCH_RESULT_NAME_SOURCE, ImportManager.PEAKLIST_PATH_SOURCE, ImportManager.MSI_SEARCH_FILE_NAME_SOURCE};
-        ObjectParameter nameSourceParameter = new ObjectParameter(ImportManager.DEFAULT_SEARCH_RESULT_NAME_SOURCE_KEY, "Default Search Result Name Source", objectTable, 2, null);
+        ObjectParameter nameSourceParameter = new ObjectParameter(ImportManager.DEFAULT_SEARCH_RESULT_NAME_SOURCE_KEY, "Next Imported ResultSet's name based on", objectTable, 2, null);
         m_generalParameterList.add(nameSourceParameter);
 
         JCheckBox decoratedCheckBox = new JCheckBox("Export Decorated");
@@ -140,7 +142,7 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
 
         JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, scrollPane, m_cards);
         splitPane.setOneTouchExpandable(true);
-        splitPane.setDividerLocation(150);
+        splitPane.setDividerLocation(200);
         splitPane.setOneTouchExpandable(false);
 
         Dimension minimumSize = new Dimension(200, 100);
@@ -202,6 +204,7 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
     @Override
     public void valueChanged(TreeSelectionEvent tse) {
         if (tse.getSource() == m_parameterListTree.getTree()) {
+            
             DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) m_parameterListTree.getTree().getLastSelectedPathComponent();
             String panelKey = selectedNode.getUserObject().toString();
 
@@ -249,6 +252,19 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
         } catch (BackingStoreException e) {
             LoggerFactory.getLogger("ProlineStudio.DPM").error("Saving Parameters Failed", e);
         }
+    }
+    
+    private void updateSettings(){
+        Enumeration<String> enumKey = m_existingLists.keys();
+        while (enumKey.hasMoreElements()) {
+            String key = enumKey.nextElement();
+            ParameterList currentList = m_existingLists.get(key);
+            currentList.loadParameters(NbPreferences.root(), true);
+        }
+    }
+    
+    private void resetTree(){
+        ;
     }
 
 }

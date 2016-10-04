@@ -43,7 +43,7 @@ import fr.proline.studio.rsmexplorer.actions.identification.ImportManager;
 import fr.proline.studio.rsmexplorer.actions.identification.ImportMaxQuantResultJMSAction;
 import fr.proline.studio.rsmexplorer.actions.identification.ImportSearchResultAsDatasetAction;
 import fr.proline.studio.rsmexplorer.actions.identification.ImportSearchResultAsDatasetJMSAction;
-import fr.proline.studio.rsmexplorer.actions.identification.RenameSearchResultAction;
+import fr.proline.studio.rsmexplorer.actions.identification.RenameRsetAction;
 import fr.proline.studio.rsmexplorer.actions.identification.UpdatePeaklistSoftwareAction;
 import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
@@ -701,11 +701,13 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
                 AggregateAction aggregateAction = new AggregateAction();
                 m_mainActions.add(aggregateAction);
 
+                /*
                 RenameAction renameAction = new RenameAction(AbstractTree.TreeType.TREE_IDENTIFICATION);
                 m_mainActions.add(renameAction);
+                */
 
-                RenameSearchResultAction renameSearchResultAction = new RenameSearchResultAction(AbstractTree.TreeType.TREE_IDENTIFICATION);
-                m_mainActions.add(renameSearchResultAction);
+                RenameRsetAction renameRsetAction = new RenameRsetAction(AbstractTree.TreeType.TREE_IDENTIFICATION);
+                m_mainActions.add(renameRsetAction);
 
                 ClearDatasetAction clearAction = new ClearDatasetAction();
                 m_mainActions.add(clearAction);

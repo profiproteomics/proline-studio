@@ -6,7 +6,7 @@ import fr.proline.studio.dam.data.AbstractData;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.AbstractDatabaseTask.Priority;
 import fr.proline.studio.dam.tasks.SubTask;
-import fr.proline.studio.rsmexplorer.actions.identification.RenameSearchResultAction;
+import fr.proline.studio.rsmexplorer.actions.identification.SetRsetNameAction;
 import fr.proline.studio.rsmexplorer.tree.quantitation.QuantitationTree;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -23,7 +23,7 @@ import javax.swing.tree.*;
  */
 public abstract class AbstractTree extends JTree implements MouseListener {
 
-    private RenameSearchResultAction m_subscribedRenamer;
+    private SetRsetNameAction m_subscribedRenamer;
     private int m_expected = -1;
 
     public enum TreeType {
@@ -38,11 +38,11 @@ public abstract class AbstractTree extends JTree implements MouseListener {
     protected RSMTreeSelectionModel m_selectionModel;
     protected HashMap<AbstractData, AbstractNode> loadingMap = new HashMap<>();
 
-    public void subscribeRenamer(RenameSearchResultAction subscribedRenamer) {
+    public void subscribeRenamer(SetRsetNameAction subscribedRenamer) {
         this.m_subscribedRenamer = subscribedRenamer;
     }
 
-    public RenameSearchResultAction getSubscribedRenamer() {
+    public SetRsetNameAction getSubscribedRenamer() {
         return this.m_subscribedRenamer;
     }
 

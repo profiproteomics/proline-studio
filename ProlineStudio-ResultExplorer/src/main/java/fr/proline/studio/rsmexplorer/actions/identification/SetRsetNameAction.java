@@ -25,7 +25,7 @@ import org.openide.windows.WindowManager;
  *
  * @author JM235353
  */
-public class RenameSearchResultAction extends AbstractRSMAction {
+public class SetRsetNameAction extends AbstractRSMAction {
 
     private static final String GENERAL_APPLICATION_SETTINGS = "General Application Settings";
     private String m_parameterValue;
@@ -41,9 +41,10 @@ public class RenameSearchResultAction extends AbstractRSMAction {
      *
      * @param treeType
      */
-    public RenameSearchResultAction(AbstractTree.TreeType treeType) {
-        super(NbBundle.getMessage(RenameSearchResultAction.class, "CTL_RenameSearchResult"), treeType);
+    public SetRsetNameAction(AbstractTree.TreeType treeType, String naming, String ctlProperty) {
+        super(NbBundle.getMessage(SetRsetNameAction.class, ctlProperty), treeType);
         this.m_treeType = treeType;
+        this.m_naming = naming;
     }
 
     @Override
@@ -51,24 +52,27 @@ public class RenameSearchResultAction extends AbstractRSMAction {
 
         m_selectedNodes = selectedNodes;
 
-        m_naming = showRenameDialog(x, y);
+        //m_naming = showRenameDialog(x, y);
 
-        int initialExpected = 0;
+        if (m_naming != null) {
 
-        m_tree = IdentificationTree.getCurrentTree();
-        m_tree.subscribeRenamer(this);
+            int initialExpected = 0;
 
-        for (int i = 0; i < selectedNodes.length; i++) {
-            if (selectedNodes[i].getType() == AbstractNode.NodeTypes.DATA_SET) {
-                initialExpected++;
+            m_tree = IdentificationTree.getCurrentTree();
+            m_tree.subscribeRenamer(this);
+
+            for (int i = 0; i < selectedNodes.length; i++) {
+                if (selectedNodes[i].getType() == AbstractNode.NodeTypes.DATA_SET) {
+                    initialExpected++;
+                }
             }
-        }
 
-        m_tree.setExpected(initialExpected);
+            m_tree.setExpected(initialExpected);
 
-        for (int i = 0; i < selectedNodes.length; i++) {
-            if (selectedNodes[i].getType() == AbstractNode.NodeTypes.DATA_SET) {
-                m_tree.loadAllAtOnce((DataSetNode) selectedNodes[i], true);
+            for (int i = 0; i < selectedNodes.length; i++) {
+                if (selectedNodes[i].getType() == AbstractNode.NodeTypes.DATA_SET) {
+                    m_tree.loadAllAtOnce((DataSetNode) selectedNodes[i], true);
+                }
             }
         }
 
@@ -177,9 +181,9 @@ public class RenameSearchResultAction extends AbstractRSMAction {
             setEnabled(false);
             return;
         }
-        
-        for(int i=0; i<selectedNodes.length; i++){
-            if(selectedNodes[i].getType()== AbstractNode.NodeTypes.PROJECT_IDENTIFICATION){
+
+        for (int i = 0; i < selectedNodes.length; i++) {
+            if (selectedNodes[i].getType() == AbstractNode.NodeTypes.PROJECT_IDENTIFICATION) {
                 setEnabled(false);
                 return;
             }

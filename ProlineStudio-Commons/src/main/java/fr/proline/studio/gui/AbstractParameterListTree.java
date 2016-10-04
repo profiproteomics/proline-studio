@@ -87,15 +87,7 @@ public class AbstractParameterListTree extends JPanel {
         while (e.hasMoreElements()) {
             DefaultMutableTreeNode node = e.nextElement();
             if (node.toString().equalsIgnoreCase(key)) {
-                TreePath path = new TreePath(node);
-                try {
-                    tree.setSelectionPath(path);
-                    tree.setSelectionRow(node.getParent().getIndex(node) + 1);
-                } catch (ArrayIndexOutOfBoundsException ex) {
-                    return;
-                } catch (NullPointerException ex) {
-                    return;
-                }
+                tree.setSelectionRow(node.getParent().getIndex(node) + 1);
                 return;
             }
         }

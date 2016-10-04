@@ -177,6 +177,13 @@ public class RenameSearchResultAction extends AbstractRSMAction {
             setEnabled(false);
             return;
         }
+        
+        for(int i=0; i<selectedNodes.length; i++){
+            if(selectedNodes[i].getType()== AbstractNode.NodeTypes.PROJECT_IDENTIFICATION){
+                setEnabled(false);
+                return;
+            }
+        }
 
         setEnabled(true);
 

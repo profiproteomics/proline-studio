@@ -6,7 +6,7 @@ import fr.proline.studio.dam.data.AbstractData;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.AbstractDatabaseTask.Priority;
 import fr.proline.studio.dam.tasks.SubTask;
-import fr.proline.studio.rsmexplorer.actions.identification.SpecialRenameAction;
+import fr.proline.studio.rsmexplorer.actions.identification.RenameSearchResultAction;
 import fr.proline.studio.rsmexplorer.tree.quantitation.QuantitationTree;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -23,7 +23,7 @@ import javax.swing.tree.*;
  */
 public abstract class AbstractTree extends JTree implements MouseListener {
 
-    private SpecialRenameAction m_subscribedRenamer;
+    private RenameSearchResultAction m_subscribedRenamer;
     private int m_expected = -1;
 
     public enum TreeType {
@@ -38,11 +38,11 @@ public abstract class AbstractTree extends JTree implements MouseListener {
     protected RSMTreeSelectionModel m_selectionModel;
     protected HashMap<AbstractData, AbstractNode> loadingMap = new HashMap<>();
 
-    public void subscribeRenamer(SpecialRenameAction subscribedRenamer) {
+    public void subscribeRenamer(RenameSearchResultAction subscribedRenamer) {
         this.m_subscribedRenamer = subscribedRenamer;
     }
 
-    public SpecialRenameAction getSubscribedRenamer() {
+    public RenameSearchResultAction getSubscribedRenamer() {
         return this.m_subscribedRenamer;
     }
 
@@ -163,6 +163,11 @@ public abstract class AbstractTree extends JTree implements MouseListener {
 
         if (nodeToLoad.getChildCount() == 0) {
             this.m_expected--;
+            if (identificationDataset && this.m_subscribedRenamer != null) {
+                if (m_expected == 0) {
+                    this.m_subscribedRenamer.proceedWithRenaming();
+                }
+            }
             return;
         }
 
@@ -179,8 +184,10 @@ public abstract class AbstractTree extends JTree implements MouseListener {
 
             this.m_expected--;
 
-            if (m_expected == 0) {
-                this.m_subscribedRenamer.proceedWithRenaming();
+            if (identificationDataset && this.m_subscribedRenamer != null) {
+                if (m_expected == 0) {
+                    this.m_subscribedRenamer.proceedWithRenaming();
+                }
             }
 
             return;
@@ -245,8 +252,10 @@ public abstract class AbstractTree extends JTree implements MouseListener {
             loadAllAtOnce((AbstractNode) parentNode.getChildAt(i), identificationDataset);
         }
 
-        if (m_expected == 0) {
-            this.m_subscribedRenamer.proceedWithRenaming();
+        if (identificationDataset && this.m_subscribedRenamer != null) {
+            if (m_expected == 0) {
+                this.m_subscribedRenamer.proceedWithRenaming();
+            }
         }
 
     }

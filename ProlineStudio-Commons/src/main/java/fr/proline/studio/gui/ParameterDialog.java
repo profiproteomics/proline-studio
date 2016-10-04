@@ -16,7 +16,7 @@ public class ParameterDialog extends DefaultDialog {
 
     public ParameterDialog(Window parent, String title, AbstractParameter parameter) {
         super(parent, Dialog.ModalityType.APPLICATION_MODAL);
-          
+      
         m_parameter = parameter;        
         
         setStatusVisible(false);
@@ -31,19 +31,14 @@ public class ParameterDialog extends DefaultDialog {
     private JPanel initInternalPanel() {
 
         JPanel internalPanel = new JPanel();
-        internalPanel.setLayout(new GridBagLayout());
-
-        GridBagConstraints c = new GridBagConstraints();
-        c.anchor = GridBagConstraints.NORTHWEST;
-        c.fill = GridBagConstraints.BOTH;
-        c.insets = new java.awt.Insets(5, 5, 5, 5);
-
-        c.gridx = 0;
-        c.gridy = 0;
-        c.weightx = 1.0;
-        c.weighty = 1.0;
+        internalPanel.setLayout(new FlowLayout());
         
-        internalPanel.add(m_parameter.getComponent(), c);
+        internalPanel.add(m_parameter.getComponent());
+        m_parameter.getComponent().setToolTipText("Selection only affects current renaming.");
+        
+        internalPanel.setPreferredSize(new Dimension(240, 80));
+        
+        internalPanel.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10), BorderFactory.createTitledBorder("According to")));
 
         return internalPanel;
     }

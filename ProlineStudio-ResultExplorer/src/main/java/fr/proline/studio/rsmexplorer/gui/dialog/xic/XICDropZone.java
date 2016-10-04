@@ -131,4 +131,10 @@ public class XICDropZone extends JPanel implements DropZoneInterface {
             }
         }
     }
+
+    @Override
+    public void clearDropZone() {
+        m_samplesTable.clear();
+        m_info.clearDropInfo();
+    }
 }

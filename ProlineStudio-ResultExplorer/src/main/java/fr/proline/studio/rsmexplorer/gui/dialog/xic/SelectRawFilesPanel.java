@@ -57,7 +57,11 @@ public class SelectRawFilesPanel extends JPanel {
     public static SelectRawFilesPanel getPanel(AbstractNode rootNode) {
         if (m_singleton == null) {
             m_singleton = new SelectRawFilesPanel();
+        }else{
+            m_singleton.resetDropZonePanel();
         }
+        
+
 
         m_singleton.setRootNode(rootNode);
 
@@ -235,6 +239,12 @@ public class SelectRawFilesPanel extends JPanel {
         panel.add(m_dropZoneInfo);
         panel.add(m_dropZone);
         return panel;
+    }
+    
+    private void resetDropZonePanel(){
+        if(m_dropZone!=null){
+            m_dropZone.clearDropZone();
+        }
     }
 
     private JPanel createFilePathPanel() {

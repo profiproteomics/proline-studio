@@ -62,5 +62,10 @@ public class XICDropZoneInfo extends JPanel {
         }
     }
     
+    public void clearDropInfo(){
+        model.removeAllElements();
+        log.setText(null);
+    }
+    
 
 }

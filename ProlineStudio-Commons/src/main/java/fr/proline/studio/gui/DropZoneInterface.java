@@ -23,4 +23,6 @@ public interface DropZoneInterface {
     
     public Hashtable getAllSamples();
     
+    public void clearDropZone();
+    
 }

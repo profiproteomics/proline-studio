@@ -1,8 +1,5 @@
 package fr.proline.studio.rsmexplorer.actions.identification;
 
-import fr.proline.core.orm.uds.Project;
-import fr.proline.studio.dam.DatabaseDataManager;
-import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree.TreeType;
 import javax.swing.JMenu;
@@ -37,19 +34,6 @@ public class RenameRsetAction extends AbstractRSMAction {
         m_peaklistAction = new SetRsetNameAction(m_treeType, ImportManager.PEAKLIST_PATH_SOURCE, "CTL_RenameRsetPeaklistAction");
         m_msiAction = new SetRsetNameAction(m_treeType, ImportManager.MSI_SEARCH_FILE_NAME_SOURCE, "CTL_RenameRsetMsiAction");
 
-        /*
-         ArrayList<String> savedWindowsList = WindowSavedManager.readSavedWindows();
-         int nb = savedWindowsList.size();
-         m_displaySavedWindowActionList = new ArrayList<>();
-         for (int i = 0; i < nb; i++) {
-         String wndSaved = savedWindowsList.get(i);
-         if (!WindowSavedManager.hasResultSetParameter(wndSaved)) {
-         continue;
-         }
-         String name = WindowSavedManager.getWindowName(wndSaved);
-         m_displaySavedWindowActionList.add(new DisplaySavedWindowAction(name, i, m_treeType));
-         }
-         */
         JMenuItem renameItem = new JMenuItem(m_renameAction);
         JMenuItem searchNameItem = new JMenuItem(m_searchNameAction);
         JMenuItem peaklistItem = new JMenuItem(m_peaklistAction);
@@ -63,16 +47,6 @@ public class RenameRsetAction extends AbstractRSMAction {
         m_menu.add(peaklistItem);
         m_menu.add(msiItem);
 
-
-        /*
-         int nbUserWindows = m_displaySavedWindowActionList.size();
-         if (nbUserWindows>0) {
-         m_menu.addSeparator();
-         }
-         for (int i = 0; i <nbUserWindows ; i++) {
-         m_menu.add(new JMenuItem(m_displaySavedWindowActionList.get(i)));
-         }
-         */
         return m_menu;
     }
 

@@ -47,9 +47,10 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
     public static ApplicationSettingsDialog getDialog(Window parent) {
         if (m_singletonDialog == null) {
             m_singletonDialog = new ApplicationSettingsDialog(parent);
-        }else{
-            m_singletonDialog.updateSettings();
         }
+        m_singletonDialog.updateSettings();
+
+        m_singletonDialog.resetTree();
 
         return m_singletonDialog;
     }
@@ -83,7 +84,7 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
         StringParameter defaultServiceRequestQueueName = new StringParameter(JMSConnectionManager.SERVICE_REQUEST_QUEUE_NAME_KEY, "JMSProlineQueueName", JTextField.class, DEFAULT_SERVICE_REQUEST_QUEUE_NAME, 5, null);
         m_jmsParameterList.add(defaultServiceRequestQueueName);
         m_jmsParameterList.loadParameters(m_preferences, true);
-        
+
         return m_jmsParameterList;
     }
 
@@ -103,7 +104,7 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
         BooleanParameter exportDecoratedParameter = new BooleanParameter("Export_Decorated", "Export Decorated", decoratedCheckBox, true);
         m_generalParameterList.add(exportDecoratedParameter);
 
-        JCheckBox xicCheckBox = new JCheckBox("XIC Transfer Handler Retains Structure");
+        JCheckBox xicCheckBox = new JCheckBox("Use dataset type to create Xic Design by DnD");
         BooleanParameter xicTransferHandlerParameter = new BooleanParameter("XIC_Transfer_Handler_Retains_Structure", "XIC Transfer Handler Retains Structure", xicCheckBox, true);
         m_generalParameterList.add(xicTransferHandlerParameter);
 
@@ -204,7 +205,7 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
     @Override
     public void valueChanged(TreeSelectionEvent tse) {
         if (tse.getSource() == m_parameterListTree.getTree()) {
-            
+
             DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) m_parameterListTree.getTree().getLastSelectedPathComponent();
             String panelKey = selectedNode.getUserObject().toString();
 
@@ -253,8 +254,8 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
             LoggerFactory.getLogger("ProlineStudio.DPM").error("Saving Parameters Failed", e);
         }
     }
-    
-    private void updateSettings(){
+
+    private void updateSettings() {
         Enumeration<String> enumKey = m_existingLists.keys();
         while (enumKey.hasMoreElements()) {
             String key = enumKey.nextElement();
@@ -262,9 +263,9 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
             currentList.loadParameters(NbPreferences.root(), true);
         }
     }
-    
-    private void resetTree(){
-        ;
+
+    private void resetTree() {
+        m_parameterListTree.selectNode(GENERAL_APPLICATION_SETTINGS);
     }
 
 }

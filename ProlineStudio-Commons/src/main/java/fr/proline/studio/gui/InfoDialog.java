@@ -126,19 +126,33 @@ public class InfoDialog extends DefaultDialog {
         c.gridx = 0;
         c.gridy = 0;
         if (m_message != null) {
+            
             c.gridwidth = 2;
-            String messageArray[] = m_message.split("\n");
-            Font font = null;
-            for (int i=0;i<messageArray.length;i++) {
-                JLabel messageLabel = new JLabel(messageArray[i]);
-                if (font == null) {
-                    font = messageLabel.getFont().deriveFont(14).deriveFont(Font.BOLD);
+            if (m_message.length() < 200) {
+                
+                String messageArray[] = m_message.split("\n");
+                Font font = null;
+                for (int i = 0; i < messageArray.length; i++) {
+                    JLabel messageLabel = new JLabel(messageArray[i]);
+                    if (font == null) {
+                        font = messageLabel.getFont().deriveFont(14).deriveFont(Font.BOLD);
+                    }
+                    messageLabel.setFont(font);
+
+                    messageLabel.setBackground(Color.white);
+                    infoPanel.add(messageLabel, c);
+                    c.gridy++;
                 }
-                messageLabel.setFont(font);
-                
-                
-                messageLabel.setBackground(Color.white);
-                infoPanel.add(messageLabel, c);
+            } else {
+                setResizable(true);
+                JScrollPane scrollPane = new JScrollPane();
+                JTextArea txtArea = new JTextArea(m_message);
+                txtArea.setEditable(false);
+                txtArea.setRows(20);
+                txtArea.setColumns(50);
+                scrollPane.setViewportView(txtArea);
+                txtArea.setCaretPosition(0);
+                infoPanel.add(scrollPane, c);
                 c.gridy++;
             }
             c.gridwidth = 1;

@@ -111,8 +111,9 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
     
     private HashSet<Integer> m_modifiedLevels = new HashSet<>();
     
-    public QuantPeptideTableModel(LazyTable table) {
+    public QuantPeptideTableModel(LazyTable table, boolean xicMode) {
         super(table);
+        m_isXICMode = xicMode;
     }
 
     public void setDatabox(AbstractDataBox databox) {
@@ -192,7 +193,11 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
                 return peptide.getId() == -1 ? "" : Long.toString(peptide.getId());
             }
             case COLTYPE_MQPEPTIDE_SELECTION_LEVEL: {
-                return  Boolean.toString(peptide.getSelectionLevel() == 2);
+                if (m_isXICMode) {
+                    return  Boolean.toString(peptide.getSelectionLevel() == 2);
+                } else {
+                    return "";
+                }
             }
             case COLTYPE_PEPTIDE_NAME: {
                 if (peptideInstance == null ) {
@@ -408,7 +413,11 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
         if (col == COLTYPE_PEPTIDE_ID) {
             return String.class;
         } else if (col == COLTYPE_MQPEPTIDE_SELECTION_LEVEL) {
-            return Boolean.class;
+            if (m_isXICMode) {
+                return Boolean.class;
+            } else {
+                return String.class;
+            }
         } else if (col == COLTYPE_OVERVIEW) {
             return CompareValueRenderer.CompareValue.class;
         }
@@ -525,6 +534,9 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
     
     @Override
     public boolean isCellEditable(int rowIndex, int columnIndex) {
+        if (!m_isXICMode) {
+            return false;
+        }
         if (columnIndex != COLTYPE_MQPEPTIDE_SELECTION_LEVEL) {
             return false;
         }
@@ -656,10 +668,14 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
                 return peptide.getId() == -1 ? "" : Long.toString(peptide.getId());
             }
             case COLTYPE_MQPEPTIDE_SELECTION_LEVEL: {
+                if (m_isXICMode) {
                 if (m_modifiedLevels.contains(row)) {
                     return (peptide.getSelectionLevel() != 2); // FLIPPED value -> modified value not saved in database
                 }
                 return (peptide.getSelectionLevel() == 2); // 2 = enable ; 1 = peptide disabled by algorithm, 0 = peptide disabled by human
+                } else {
+                    return "";
+                }
             }
             case COLTYPE_PEPTIDE_NAME: {
                 LazyData lazyData = getLazyData(row, col);
@@ -1203,7 +1219,11 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
                 return Long.class;
             }
             case COLTYPE_MQPEPTIDE_SELECTION_LEVEL: {
-                return Boolean.class;
+                if (m_isXICMode) {
+                    return Boolean.class;
+                } else {
+                    return String.class;
+                }
             }
             case COLTYPE_PEPTIDE_NAME: {
                 return LazyData.class;
@@ -1315,7 +1335,7 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
     @Override
     public TableCellRenderer getRenderer(int row, int col) {
 
-        Boolean peptideSelected = (Boolean) getValueAt(row, COLTYPE_MQPEPTIDE_SELECTION_LEVEL);
+        Boolean peptideSelected = (m_isXICMode) ? (Boolean) getValueAt(row, COLTYPE_MQPEPTIDE_SELECTION_LEVEL) : true;
         boolean grayed = !peptideSelected;
         
         if (grayed) {

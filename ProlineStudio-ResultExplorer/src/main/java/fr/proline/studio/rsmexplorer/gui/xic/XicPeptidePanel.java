@@ -100,9 +100,9 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
 
     private static final String OVERVIEW_KEY = "OVERVIEW_KEY";  
     
-    public XicPeptidePanel(boolean canGraph) {
+    public XicPeptidePanel(boolean canGraph, boolean xicMode) {
         m_canGraph = canGraph ;
-        initComponents();
+        initComponents(xicMode);
     }
     
     public void displayValidatePanel(boolean visible) {
@@ -119,13 +119,13 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
         
     }
     
-    private void initComponents() {
+    private void initComponents(boolean xicMode) {
         setLayout(new BorderLayout());
 
         ToolTipManager.sharedInstance().setInitialDelay(0);
         ToolTipManager.sharedInstance().setDismissDelay(5000);
         
-        final JPanel peptidePanel = createPeptidePanel();
+        final JPanel peptidePanel = createPeptidePanel(xicMode);
 
         
         ActionListener validateModificationsAction = new ActionListener() {
@@ -187,13 +187,13 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
 
     }
         
-    private JPanel createPeptidePanel() {
+    private JPanel createPeptidePanel(boolean xicMode) {
 
         JPanel peptidePanel = new JPanel();
         peptidePanel.setBounds(0, 0, 500, 400);
         peptidePanel.setLayout(new BorderLayout());
 
-        JPanel internalPanel = createInternalPanel();
+        JPanel internalPanel = createInternalPanel(xicMode);
 
         JToolBar toolbar = initToolbar();
         m_titleLabel = new JLabel(TABLE_TITLE);
@@ -279,7 +279,7 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
         return toolbar;
     }
     
-    private JPanel createInternalPanel() {
+    private JPanel createInternalPanel(boolean xicMode) {
 
         JPanel internalPanel = new JPanel();
         
@@ -293,12 +293,15 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
         m_peptideScrollPane = new JScrollPane();
         
         m_quantPeptideTable = new QuantPeptideTable();
-        QuantPeptideTableModel baseModel = new QuantPeptideTableModel((LazyTable) m_quantPeptideTable);
+        QuantPeptideTableModel baseModel = new QuantPeptideTableModel((LazyTable) m_quantPeptideTable, xicMode);
         m_quantPeptideTable.setModel(new CompoundTableModel(baseModel, true));
         CustomColumnControlButton customColumnControl = new CustomColumnControlButton(m_quantPeptideTable);
         m_quantPeptideTable.setColumnControl(customColumnControl);
         // hide the id column
         m_quantPeptideTable.getColumnExt(m_quantPeptideTable.convertColumnIndexToView(QuantPeptideTableModel.COLTYPE_PEPTIDE_ID)).setVisible(false);
+        if (!xicMode) {
+            m_quantPeptideTable.getColumnExt(m_quantPeptideTable.convertColumnIndexToView(QuantPeptideTableModel.COLTYPE_MQPEPTIDE_SELECTION_LEVEL)).setVisible(false);
+        }
         
         m_quantPeptideTable.setSortable(false);
 
@@ -383,6 +386,13 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
         boolean columnVisible = ((TableColumnExt) columns.get(QuantPeptideTableModel.COLTYPE_PEPTIDE_ID)).isVisible();
         if(columnVisible) {
             m_quantPeptideTable.getColumnExt(m_quantPeptideTable.convertColumnIndexToView(QuantPeptideTableModel.COLTYPE_PEPTIDE_ID)).setVisible(false);
+        }
+        if (!m_isXICMode) {
+            // hide Validate/Unvalidate peptide column for SC 
+            columnVisible = ((TableColumnExt) columns.get(QuantPeptideTableModel.COLTYPE_MQPEPTIDE_SELECTION_LEVEL)).isVisible();
+            if (columnVisible) {
+                m_quantPeptideTable.getColumnExt(m_quantPeptideTable.convertColumnIndexToView(QuantPeptideTableModel.COLTYPE_MQPEPTIDE_SELECTION_LEVEL)).setVisible(false);
+            }
         }
     }
 

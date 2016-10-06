@@ -116,7 +116,7 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
     
     @Override
     public void createPanel() {
-        XicPeptidePanel p = new XicPeptidePanel(false);
+        XicPeptidePanel p = new XicPeptidePanel(false, m_isXICMode);
         p.setName(m_typeName);
         p.setDataBox(this);
         m_panel = p;

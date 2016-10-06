@@ -16,6 +16,7 @@ import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import javax.swing.JOptionPane;
 import org.openide.util.NbBundle;
 import org.openide.util.NbPreferences;
 import org.openide.windows.WindowManager;
@@ -53,7 +54,6 @@ public class SetRsetNameAction extends AbstractRSMAction {
         m_selectedNodes = selectedNodes;
 
         //m_naming = showRenameDialog(x, y);
-
         if (m_naming != null) {
 
             int initialExpected = 0;
@@ -79,6 +79,8 @@ public class SetRsetNameAction extends AbstractRSMAction {
     }
 
     public void proceedWithRenaming() {
+
+        boolean fail = false;
 
         ArrayList<DataSetNode> toRename = new ArrayList<DataSetNode>();
 
@@ -138,7 +140,13 @@ public class SetRsetNameAction extends AbstractRSMAction {
                 toRename.get(i).rename(newName, m_tree);
                 dataset.setName(newName);
                 m_tree.rename(toRename.get(i), newName);
+            } else {
+                fail = true;
             }
+        }
+
+        if (fail) {
+            JOptionPane.showMessageDialog(null, "One or more ResultSet(s) were not renamed.", "Warning", JOptionPane.WARNING_MESSAGE);
         }
     }
 

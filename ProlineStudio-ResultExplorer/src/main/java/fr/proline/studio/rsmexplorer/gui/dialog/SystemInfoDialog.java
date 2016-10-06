@@ -13,6 +13,7 @@ import java.awt.Dialog;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Window;
+import java.util.StringTokenizer;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
@@ -77,7 +78,45 @@ public class SystemInfoDialog extends DefaultDialog {
 
             @Override
             public void run(boolean success) {
-                m_txtArea.setText(sysInfoResult[0]);
+                
+                String sysInfoText = sysInfoResult[0];
+
+                StringBuilder sb = new StringBuilder();
+                String serverURL = null;
+                String queueName = null;
+                StringTokenizer st = new StringTokenizer(sysInfoText,"\n");
+                while (st.hasMoreTokens()) {
+                    String line = st.nextToken();
+                    if (serverURL == null) {
+                        if ( line.indexOf("\"em1\"") != -1) {
+                            int index = line.lastIndexOf(',');
+                            if (index != -1) {
+                                serverURL = line.substring(index+1, line.length());
+                                sb.append("Server: ").append(serverURL).append("\n");
+                            }
+                        }
+                    }
+                    if (queueName == null) {
+                        if ( line.indexOf("\"JMSDestination\"") != -1) {
+                            String queueLabel = "HornetQQueue[";
+                            int index1 = line.lastIndexOf(queueLabel);
+                            int index2 = line.lastIndexOf(']');
+                            if ((index1 != -1) && (index2!=-1)) {
+                                queueName = line.substring(index1+queueLabel.length(), index2);
+                                sb.append("JMS Proline Queue: ").append(queueName).append("\n\n\n");
+                            }
+                        }
+                    }
+                    if ((serverURL != null) && (queueName != null)) {
+                        break;
+                    }
+                }
+                
+
+                sb.append(sysInfoText);
+                        
+                m_txtArea.setText(sb.toString());
+                m_txtArea.setCaretPosition(0);
                 revalidate();
                 repack();
             }

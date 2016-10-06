@@ -41,8 +41,7 @@ public class ImportManager {
     }
 
     public static void importRenaming(DDataset dataset, DataSetNode identificationNode, IdentificationTree tree) {
-        try{
-        
+
         ParameterList parameterList = new ParameterList(GENERAL_APPLICATION_SETTINGS);
         Object[] objectTable = {ImportManager.SEARCH_RESULT_NAME_SOURCE, ImportManager.PEAKLIST_PATH_SOURCE, ImportManager.MSI_SEARCH_FILE_NAME_SOURCE};
         ObjectParameter parameter = new ObjectParameter(ImportManager.DEFAULT_SEARCH_RESULT_NAME_SOURCE_KEY, "Default Search Result Name Source", objectTable, 2, null);
@@ -79,9 +78,8 @@ public class ImportManager {
             identificationNode.rename(newName, tree);
             dataset.setName(newName);
             tree.rename(identificationNode, newName);
-        }
-        }catch(Exception ex){
-            JOptionPane.showMessageDialog(null, ex);
+        } else {
+            JOptionPane.showMessageDialog(null, "Selected ResultSet was not transfered with the required name");
         }
     }
 

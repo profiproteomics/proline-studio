@@ -12,15 +12,12 @@ import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.AbstractDatabaseTask;
 import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
 import fr.proline.studio.dam.tasks.SubTask;
-import fr.proline.studio.parameter.ObjectParameter;
-import fr.proline.studio.parameter.ParameterList;
 import fr.proline.studio.rsmexplorer.actions.identification.ImportManager;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import fr.proline.studio.rsmexplorer.tree.HourGlassNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
-import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import javax.swing.JComponent;
@@ -28,7 +25,6 @@ import javax.swing.JTree;
 import javax.swing.TransferHandler;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
-import org.openide.util.NbPreferences;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,8 +34,6 @@ import org.slf4j.LoggerFactory;
  * @author JM235353
  */
 public class IdTransferHandler extends TransferHandler {
-
-    private static final String GENERAL_APPLICATION_SETTINGS = "General Application Settings";
 
     private Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
 

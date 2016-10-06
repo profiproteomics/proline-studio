@@ -97,7 +97,7 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
         m_generalParameterList.add(gettingStartedParameter);
 
         Object[] objectTable = {ImportManager.SEARCH_RESULT_NAME_SOURCE, ImportManager.PEAKLIST_PATH_SOURCE, ImportManager.MSI_SEARCH_FILE_NAME_SOURCE};
-        ObjectParameter nameSourceParameter = new ObjectParameter(ImportManager.DEFAULT_SEARCH_RESULT_NAME_SOURCE_KEY, "Next Imported ResultSet's name based on", objectTable, 2, null);
+        ObjectParameter nameSourceParameter = new ObjectParameter(ImportManager.DEFAULT_SEARCH_RESULT_NAME_SOURCE_KEY, "Default Search Result Name Source", objectTable, 2, null);
         m_generalParameterList.add(nameSourceParameter);
 
         JCheckBox decoratedCheckBox = new JCheckBox("Export Decorated");

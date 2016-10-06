@@ -41,46 +41,45 @@ public class ImportManager {
     }
 
     public static void importRenaming(DDataset dataset, DataSetNode identificationNode, IdentificationTree tree) {
+            ParameterList parameterList = new ParameterList(GENERAL_APPLICATION_SETTINGS);
+            Object[] objectTable = {ImportManager.SEARCH_RESULT_NAME_SOURCE, ImportManager.PEAKLIST_PATH_SOURCE, ImportManager.MSI_SEARCH_FILE_NAME_SOURCE};
+            ObjectParameter parameter = new ObjectParameter(ImportManager.DEFAULT_SEARCH_RESULT_NAME_SOURCE_KEY, "Default Search Result Name Source", objectTable, 2, null);
+            parameterList.add(parameter);
+            parameterList.loadParameters(NbPreferences.root(), true);
 
-        ParameterList parameterList = new ParameterList(GENERAL_APPLICATION_SETTINGS);
-        Object[] objectTable = {ImportManager.SEARCH_RESULT_NAME_SOURCE, ImportManager.PEAKLIST_PATH_SOURCE, ImportManager.MSI_SEARCH_FILE_NAME_SOURCE};
-        ObjectParameter parameter = new ObjectParameter(ImportManager.DEFAULT_SEARCH_RESULT_NAME_SOURCE_KEY, "Default Search Result Name Source", objectTable, 2, null);
-        parameterList.add(parameter);
-        parameterList.loadParameters(NbPreferences.root(), true);
+            String naming = (String) parameter.getObjectValue();
 
-        String naming = (String) parameter.getObjectValue();
-
-        if (dataset.getResultSet() == null) {
-            DataSetData.fetchRsetAndRsmForOneDataset(dataset);
-        }
-
-        if (dataset == null || dataset.getResultSet() == null || dataset.getResultSet().getMsiSearch() == null) {
-            return;
-        }
-
-        String newName = "";
-
-        newName = (dataset.getResultSet().getMsiSearch().getResultFileName() == null) ? "" : dataset.getResultSet().getMsiSearch().getResultFileName();
-        if (newName.contains(".")) {
-            newName = newName.substring(0, newName.indexOf("."));
-        }
-
-        if (naming.equalsIgnoreCase(ImportManager.SEARCH_RESULT_NAME_SOURCE)) {
-            newName = dataset.getResultSet().getName();
-        } else if (naming.equalsIgnoreCase(ImportManager.PEAKLIST_PATH_SOURCE)) {
-            newName = (dataset.getResultSet().getMsiSearch().getPeaklist().getPath() == null) ? "" : dataset.getResultSet().getMsiSearch().getPeaklist().getPath();
-            if (newName.contains(File.separator)) {
-                newName = newName.substring(newName.lastIndexOf(File.separator) + 1);
+            if (dataset.getResultSet() == null) {
+                DataSetData.fetchRsetAndRsmForOneDataset(dataset);
             }
-        }
 
-        if (!newName.equalsIgnoreCase("")) {
-            identificationNode.rename(newName, tree);
-            dataset.setName(newName);
-            tree.rename(identificationNode, newName);
-        } else {
-            JOptionPane.showMessageDialog(null, "Selected ResultSet was not transfered with the required name");
-        }
+            if (dataset == null || dataset.getResultSet() == null || dataset.getResultSet().getMsiSearch() == null) {
+                return;
+            }
+
+            String newName = "";
+
+            newName = (dataset.getResultSet().getMsiSearch().getResultFileName() == null) ? "" : dataset.getResultSet().getMsiSearch().getResultFileName();
+            if (newName.contains(".")) {
+                newName = newName.substring(0, newName.indexOf("."));
+            }
+
+            if (naming.equalsIgnoreCase(ImportManager.SEARCH_RESULT_NAME_SOURCE)) {
+                newName = dataset.getResultSet().getName();
+            } else if (naming.equalsIgnoreCase(ImportManager.PEAKLIST_PATH_SOURCE)) {
+                newName = (dataset.getResultSet().getMsiSearch().getPeaklist().getPath() == null) ? "" : dataset.getResultSet().getMsiSearch().getPeaklist().getPath();
+                if (newName.contains(File.separator)) {
+                    newName = newName.substring(newName.lastIndexOf(File.separator) + 1);
+                }
+            }
+
+            if (!newName.equalsIgnoreCase("")) {
+                identificationNode.rename(newName, tree);
+                dataset.setName(newName);
+                tree.rename(identificationNode, newName);
+            }else{
+                JOptionPane.showMessageDialog(null, "Selected ResultSet was not transfered with the required name");
+            }
     }
 
 }

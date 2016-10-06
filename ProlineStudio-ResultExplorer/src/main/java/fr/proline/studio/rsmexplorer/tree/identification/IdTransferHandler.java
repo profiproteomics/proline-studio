@@ -220,7 +220,7 @@ public class IdTransferHandler extends TransferHandler {
     }
 
     @Override
-    public boolean importData(TransferSupport support) {
+    public boolean importData(TransferHandler.TransferSupport support) {
 
         if (canImport(support)) {
 
@@ -244,7 +244,7 @@ public class IdTransferHandler extends TransferHandler {
         return false;
     }
 
-    private boolean importResultSets(TransferSupport support, IdTransferable.TransferData data) {
+    private boolean importResultSets(TransferHandler.TransferSupport support, IdTransferable.TransferData data) {
 
         JTree.DropLocation location = ((JTree.DropLocation) support.getDropLocation());
         TreePath dropTreePath = location.getPath();
@@ -339,7 +339,7 @@ public class IdTransferHandler extends TransferHandler {
         return true;
     }
 
-    private boolean importNodes(TransferSupport support, IdTransferable.TransferData data) {
+    private boolean importNodes(TransferHandler.TransferSupport support, IdTransferable.TransferData data) {
 
         JTree.DropLocation location = ((JTree.DropLocation) support.getDropLocation());
         TreePath dropTreePath = location.getPath();

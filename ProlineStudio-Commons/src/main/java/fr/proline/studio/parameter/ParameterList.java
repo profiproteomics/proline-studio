@@ -271,7 +271,7 @@ public class ParameterList extends ArrayList<AbstractParameter> {
             if (preferences.get(key, null) == null) {
                 String value = parameter.getStringValue();
                 preferences.put(key, value);
-                return;
+                continue;
             }
 
             if (parameter.isUsed()) {

@@ -144,6 +144,8 @@ public class InfoDialog extends DefaultDialog {
                     c.gridy++;
                 }
             } else {
+                c.weightx = 1;
+                c.weighty = 1;
                 setResizable(true);
                 JScrollPane scrollPane = new JScrollPane();
                 JTextArea txtArea = new JTextArea(m_message);
@@ -154,6 +156,8 @@ public class InfoDialog extends DefaultDialog {
                 txtArea.setCaretPosition(0);
                 infoPanel.add(scrollPane, c);
                 c.gridy++;
+                c.weightx = 0;
+                c.weighty = 0;
             }
             c.gridwidth = 1;
         }

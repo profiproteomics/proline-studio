@@ -45,6 +45,7 @@ public class SystemInfoDialog extends DefaultDialog {
         // create objects
         JScrollPane scrollPane = new JScrollPane();
         m_txtArea = new JTextArea();
+        m_txtArea.setEditable(false);
         m_txtArea.setRows(20);
         m_txtArea.setColumns(50);
         scrollPane.setViewportView(m_txtArea);

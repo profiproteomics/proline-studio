@@ -57,11 +57,9 @@ public class SelectRawFilesPanel extends JPanel {
     public static SelectRawFilesPanel getPanel(AbstractNode rootNode) {
         if (m_singleton == null) {
             m_singleton = new SelectRawFilesPanel();
-        }else{
+        } else {
             m_singleton.resetDropZonePanel();
         }
-        
-
 
         m_singleton.setRootNode(rootNode);
 
@@ -240,9 +238,9 @@ public class SelectRawFilesPanel extends JPanel {
         panel.add(m_dropZone);
         return panel;
     }
-    
-    private void resetDropZonePanel(){
-        if(m_dropZone!=null){
+
+    private void resetDropZonePanel() {
+        if (m_dropZone != null) {
             m_dropZone.clearDropZone();
         }
     }
@@ -463,7 +461,7 @@ public class SelectRawFilesPanel extends JPanel {
         public Object getValueAt(int rowIndex, int columnIndex) {
 
             NodeModelRow nodeModelRow = m_dataList.get(rowIndex);
-            
+
             switch (columnIndex) {
                 case COLTYPE_GROUP: {
                     return nodeModelRow.m_group.toString();
@@ -478,7 +476,7 @@ public class SelectRawFilesPanel extends JPanel {
                     return nodeModelRow.m_run.toString();
                 }
                 case COLTYPE_PEAKLIST: {
-                    
+
                     if (nodeModelRow == null) {
                         return "nodeModelRow null";
                     } else if (nodeModelRow.getXICBiologicalSampleAnalysisNode() == null) {
@@ -494,9 +492,9 @@ public class SelectRawFilesPanel extends JPanel {
                     } else {
                         return MiscellaneousUtils.getFileName(nodeModelRow.m_sampleAnalysis.getResultSet().getMsiSearch().getPeaklist().getPath(), suffix);
                     }
-                    
+
                 }
-                
+
             }
 
             return null; // should not happen
@@ -508,11 +506,12 @@ public class SelectRawFilesPanel extends JPanel {
         }
 
         public XICRunNode getXICRunNode(int row, int col) {
-            if (col != COLTYPE_RAW_FILE) {
-                return null;
+            if (col == COLTYPE_RAW_FILE || col == COLTYPE_PEAKLIST) {
+                NodeModelRow nodeModelRow = m_dataList.get(row);
+                return nodeModelRow.m_run;
             }
-            NodeModelRow nodeModelRow = m_dataList.get(row);
-            return nodeModelRow.m_run;
+            return null;
+
         }
 
         public XICBiologicalSampleAnalysisNode getXICBiologicalSampleAnalysisNode(int row) {
@@ -577,8 +576,6 @@ public class SelectRawFilesPanel extends JPanel {
         public boolean isCorruptionPossible(ArrayList<Integer> indices) {
             int numberOfColumns = this.getColumnCount();
             for (int i = 0; i < indices.size(); i++) {
-                String currentValue = this.getValueAt(indices.get(i), numberOfColumns - 2).toString();
-                System.out.println("breakpoint2");
                 if (!this.getValueAt(indices.get(i), numberOfColumns - 2).toString().contains("No Raw File")) {
                     return true;
                 }

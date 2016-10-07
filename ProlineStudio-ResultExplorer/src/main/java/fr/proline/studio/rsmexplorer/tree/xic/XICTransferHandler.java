@@ -344,7 +344,9 @@ public class XICTransferHandler extends TransferHandler {
 
                             // put a Run node in it
                             XICRunNode runNode = new XICRunNode(new RunInfoData());
-                            sampleAnalysisNode.add(runNode);
+
+                            //sampleAnalysisNode.add(runNode);
+                            
                             runNode.init(currentSampleList.get(i).getDataset(), treeModel);
 
                             // add to new parent

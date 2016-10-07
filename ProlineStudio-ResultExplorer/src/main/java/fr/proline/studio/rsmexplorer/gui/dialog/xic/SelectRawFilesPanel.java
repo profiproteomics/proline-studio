@@ -8,6 +8,7 @@ import fr.proline.studio.gui.TreeFileChooserPanel;
 import fr.proline.studio.gui.TreeFileChooserTableModelInterface;
 import fr.proline.studio.gui.TreeFileChooserTransferHandler;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
+import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
 import fr.proline.studio.rsmexplorer.tree.xic.XICBiologicalGroupNode;
 import fr.proline.studio.rsmexplorer.tree.xic.XICBiologicalSampleAnalysisNode;
 import fr.proline.studio.rsmexplorer.tree.xic.XICBiologicalSampleNode;
@@ -37,6 +38,7 @@ import javax.swing.JSplitPane;
 import javax.swing.SwingUtilities;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.TableCellRenderer;
+import javax.swing.tree.DefaultTreeModel;
 
 /**
  *
@@ -418,12 +420,20 @@ public class SelectRawFilesPanel extends JPanel {
             for (int i = 0; i < nbChildren; i++) {
                 AbstractNode child = (AbstractNode) sampleNode.getChildAt(i);
                 if (child.getType() == AbstractNode.NodeTypes.BIOLOGICAL_SAMPLE_ANALYSIS) {
+                    
+                    XICBiologicalSampleAnalysisNode sampleAnalysisNode = (XICBiologicalSampleAnalysisNode) child;
+                    
+                    XICRunNode runNode = new XICRunNode(new RunInfoData());
+                    sampleAnalysisNode.add(runNode);
+                    runNode.init(sampleAnalysisNode.getDataset(), (DefaultTreeModel) IdentificationTree.getCurrentTree().getModel());
+                    
                     parseRun(groupNode, sampleNode, (XICBiologicalSampleAnalysisNode) child);
                 }
             }
         }
 
         private void parseRun(XICBiologicalGroupNode groupNode, XICBiologicalSampleNode sampleNode, XICBiologicalSampleAnalysisNode sampleAnalysisNode) {
+            
             int nbChildren = sampleAnalysisNode.getChildCount();
             for (int i = 0; i < nbChildren; i++) {
                 AbstractNode child = (AbstractNode) sampleAnalysisNode.getChildAt(i);

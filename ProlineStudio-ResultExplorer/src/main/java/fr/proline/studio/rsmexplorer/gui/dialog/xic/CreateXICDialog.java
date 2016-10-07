@@ -664,15 +664,16 @@ public class CreateXICDialog extends DefaultDialog {
                     File settingsFile = settingsDialog.getSelectedFile();
                     FilePreferences filePreferences = new FilePreferences(settingsFile, null, "");
 
-                    Preferences preferences = NbPreferences.root();
-                    String[] keys = filePreferences.keys();
-                    for (String key : keys) {
-                        String value = filePreferences.get(key, null);
-                        preferences.put(key, value);
-                    }
-
-                    DefineQuantParamsPanel.getDefineQuantPanel().getParameterList().loadParameters(filePreferences, true);
-                    DefineQuantParamsPanel.getDefineQuantPanel().initXICMethod();
+                    DefineQuantParamsPanel.getDefineQuantPanel().loadParameters(filePreferences);
+//                    Preferences preferences = NbPreferences.root();
+//                    String[] keys = filePreferences.keys();
+//                    for (String key : keys) {
+//                        String value = filePreferences.get(key, null);
+//                        preferences.put(key, value);
+//                    }
+//
+//                    DefineQuantParamsPanel.getDefineQuantPanel().getParameterList().loadParameters(filePreferences, true);
+//                    DefineQuantParamsPanel.getDefineQuantPanel().initXICMethod();
 
                 } catch (Exception e) {
                     LoggerFactory.getLogger("ProlineStudio.ResultExplorer").error("Parsing of User Settings File Failed", e);

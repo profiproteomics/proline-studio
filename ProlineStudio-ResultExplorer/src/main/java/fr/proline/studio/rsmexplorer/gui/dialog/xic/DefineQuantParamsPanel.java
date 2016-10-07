@@ -1,6 +1,7 @@
 package fr.proline.studio.rsmexplorer.gui.dialog.xic;
 
 import fr.proline.studio.parameter.*;
+import fr.proline.studio.settings.FilePreferences;
 import fr.proline.studio.utils.IconManager;
 import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
@@ -9,6 +10,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
@@ -178,7 +180,7 @@ public class DefineQuantParamsPanel extends JPanel{
         
         m_alignmentSmoothingMethodCB = new JComboBox(ALIGNMENT_SMOOTHING_METHOD_VALUES);
         m_alignmentSmoothingMethodCB.setEnabled(!m_readOnly);
-        m_alignmentSmoothingMethodParameter = new ObjectParameter<>("alignmentSmoothingMethod", "Alignment Smoothing Method", m_alignmentSmoothingMethodCB, ALIGNMENT_SMOOTHING_METHOD_VALUES, ALIGNMENT_SMOOTHING_METHOD_KEYS,  2, null);
+        m_alignmentSmoothingMethodParameter = new ObjectParameter<>("alignmentSmoothingMethod", "Alignment Smoothing Method", m_alignmentSmoothingMethodCB, ALIGNMENT_SMOOTHING_METHOD_VALUES, ALIGNMENT_SMOOTHING_METHOD_KEYS,  0, null);
         m_parameterList.add(m_alignmentSmoothingMethodParameter);
 
         
@@ -225,13 +227,13 @@ public class DefineQuantParamsPanel extends JPanel{
         
         m_featureMappingMoZTolTF = new JTextField();
         m_featureMappingMoZTolTF.setEnabled(!m_readOnly);
-        DoubleParameter featureMappingMoZTolParameter = new DoubleParameter("featureMoZTol", "Feature moz tolerance", m_featureMappingMoZTolTF, new Double(10), new Double(0), null);
+        DoubleParameter featureMappingMoZTolParameter = new DoubleParameter("featureMoZTol", "Feature moz tolerance", m_featureMappingMoZTolTF, new Double(5), new Double(0), null);
         m_parameterList.add(featureMappingMoZTolParameter);
         
         
         m_featureMappingTimeTolTF = new JTextField();
         m_featureMappingTimeTolTF.setEnabled(!m_readOnly);
-        DoubleParameter featureMappingTimeTolParameter = new DoubleParameter("featureTimeTol", "Feature time tolerance", m_featureMappingTimeTolTF, new Double(120), new Double(0), null);
+        DoubleParameter featureMappingTimeTolParameter = new DoubleParameter("featureTimeTol", "Feature time tolerance", m_featureMappingTimeTolTF, new Double(60), new Double(0), null);
         m_parameterList.add(featureMappingTimeTolParameter);
         
         
@@ -250,7 +252,7 @@ public class DefineQuantParamsPanel extends JPanel{
         
         m_extractedXICFromCB = new JComboBox(FEATURE_EXTRACTED_XIC_VALUES);
         m_extractedXICFromCB.setEnabled(!m_readOnly);
-        m_extractedXICFromParameter = new ObjectParameter<>("extractedXICFrom", "ExtractedXICFrom", m_extractedXICFromCB, FEATURE_EXTRACTED_XIC_VALUES, FEATURE_EXTRACTED_XIC_KEYS,  0, null);
+        m_extractedXICFromParameter = new ObjectParameter<>("extractedXICFrom", "ExtractedXICFrom", m_extractedXICFromCB, FEATURE_EXTRACTED_XIC_VALUES, FEATURE_EXTRACTED_XIC_KEYS,  2, null);
         // do not allow to change the method of quanti
         if (!m_selectXICMethod){
             m_extractedXICFromCB.setEnabled(false);
@@ -281,6 +283,30 @@ public class DefineQuantParamsPanel extends JPanel{
     
     public ParameterList getParameterList() {
         return m_parameterList;
+    }
+    
+    
+    public void loadParameters(FilePreferences filePreferences) throws BackingStoreException{
+
+        Preferences preferences = NbPreferences.root();
+        String[] keys = filePreferences.keys();
+            for (String key : keys) {                
+                if(!m_selectXICMethod){
+                    String  extractedXICFromParameterKeyName = m_parameterList.getPrefixName()+m_extractedXICFromParameter.getName();
+                    String  detectPeakelsParameterKeyName = m_parameterList.getPrefixName()+m_detectPeakelsParameter.getName();
+                    if( (key.equals(extractedXICFromParameterKeyName)) || (key.equals(detectPeakelsParameterKeyName) ) )
+                        filePreferences.remove(key); // Don't load this parameter     
+                    else {
+                        String value = filePreferences.get(key, null);
+                        preferences.put(key, value);
+                    }
+                }  else {
+                    String value = filePreferences.get(key, null);
+                     preferences.put(key, value);
+                }
+            }
+
+            getParameterList().loadParameters(filePreferences, true); //Load params 
     }
     
             //-- quanti Params
@@ -412,18 +438,23 @@ public class DefineQuantParamsPanel extends JPanel{
         }else{
             m_normalizationCB.setSelectedIndex(0);
         }
-        if ((Boolean)quantParams.get("detect_features")){
-            m_extractedXICFromCB.setSelectedIndex(0);
-            m_detectPeakelChB.setSelected(false);
-        }else{
-            if ((Boolean)quantParams.get("start_from_validated_peptides")){
-                m_extractedXICFromCB.setSelectedIndex(2);
-                m_detectPeakelChB.setSelected(true);
-            }else{
-                m_extractedXICFromCB.setSelectedIndex(1);
+//        if(!m_selectXICMethod) { //Use default value any way
+//            m_extractedXICFromCB.setSelectedIndex(2);
+//            m_detectPeakelChB.setSelected(true);
+//        } else {
+            if ((Boolean)quantParams.get("detect_features")){
+                m_extractedXICFromCB.setSelectedIndex(0);
                 m_detectPeakelChB.setSelected(false);
+            }else{
+                if ((Boolean)quantParams.get("start_from_validated_peptides")){ //VDS à vérifier !! => 0?!
+                    m_extractedXICFromCB.setSelectedIndex(2);
+                    m_detectPeakelChB.setSelected(true);
+                }else{
+                    m_extractedXICFromCB.setSelectedIndex(1);
+                    m_detectPeakelChB.setSelected(false);
+                }
             }
-        }
+//        }
         initXICMethod();
     }
     
@@ -698,7 +729,7 @@ public class DefineQuantParamsPanel extends JPanel{
         alignmentPanel.add(new JLabel("mass interval:"), c);
         c.gridx++;     
         c.weightx = 1;
-        m_alignmentMassIntervalTF = new JTextField();
+            m_alignmentMassIntervalTF = new JTextField();
         m_alignmentMassIntervalTF.setText("20000"); //VDS TODO : hide ? see DBO description
         m_alignmentMassIntervalTF.setEditable(false);//VDS - DBO info :  Mass Interval (hidden / non-editable)
         m_alignmentMassIntervalTF.setEnabled(!m_readOnly);

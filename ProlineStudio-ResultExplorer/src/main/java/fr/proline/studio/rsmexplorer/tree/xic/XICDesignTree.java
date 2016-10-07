@@ -309,7 +309,6 @@ public class XICDesignTree extends AbstractTree {
                         rawFile.setRuns(runs);
                         XICRunNode runNode = new XICRunNode(runInfoData);
                         sampleAnalysisNode.add(runNode);
-                        sampleAnalysisNode.m_hasError = false;
                         model.insertNodeInto(sampleAnalysisNode, biologicalSampleNode, childSampleAnalysisIndex);
                         if(expandPath){
                             tree.expandPath( new TreePath(sampleAnalysisNode.getPath()));

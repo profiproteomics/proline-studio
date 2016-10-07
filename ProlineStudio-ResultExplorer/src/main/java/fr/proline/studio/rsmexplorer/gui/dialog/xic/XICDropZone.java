@@ -15,7 +15,9 @@ import java.awt.Color;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Iterator;
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -57,12 +59,12 @@ public class XICDropZone extends JPanel implements DropZoneInterface {
             return;
         }
 
-        Hashtable<String, Integer> shortages = m_model.getModelShortages();
-        Enumeration<String> enumKey = shortages.keys();
-        while (enumKey.hasMoreElements()) {
-            String key = enumKey.nextElement();
+        HashMap<String, Integer> shortages = m_model.getModelShortages();
+        Iterator<String> keyIterator = shortages.keySet().iterator();
+        while (keyIterator.hasNext()) {
+            String key = keyIterator.next();
             if (m_samplesTable.containsKey(key)) {
-                ArrayList<File> fileList = new ArrayList<File>();
+                ArrayList<File> fileList = new ArrayList<>();
                 fileList.add(m_samplesTable.get(key));
                 int index = shortages.get(key);
                 m_model.setFiles(fileList, index);
@@ -72,7 +74,7 @@ public class XICDropZone extends JPanel implements DropZoneInterface {
 
     private ArrayList<String> getNotAssociatedFilenames() {
         ArrayList<String> filenames = new ArrayList<String>();
-        Hashtable<String, Integer> shortages = m_model.getModelShortages();
+        HashMap<String, Integer> shortages = m_model.getModelShortages();
         Enumeration<String> enumKey = m_samplesTable.keys();
         while (enumKey.hasMoreElements()) {
             String key = enumKey.nextElement();

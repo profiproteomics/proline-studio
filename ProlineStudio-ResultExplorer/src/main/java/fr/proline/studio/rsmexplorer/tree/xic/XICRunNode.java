@@ -66,7 +66,6 @@ public class XICRunNode extends AbstractNode {
 
                             runInfoData.getRawFileSouce().setLinkedRawFile(rawFile);
                             runInfoData.setRun(runOut[0]);
-                            warnParent(false);
 
                         } else {
                             search(dataset);
@@ -233,10 +232,8 @@ public class XICRunNode extends AbstractNode {
                 RunInfoData runInfoData = ((RunInfoData) getData());
                 
                 if (m_rawFileList.isEmpty()) {
-                    warnParent(true);
                     runInfoData.setMessage("<html><font color='#FF0000'>No Raw File found, select one</font></html>");
                 } else if (m_rawFileList.size() == 1) {
-                    warnParent(false);
 
                     // TODO : how to choose the right rawfile or run instead of the first one ??
                     
@@ -247,7 +244,6 @@ public class XICRunNode extends AbstractNode {
                     //runInfoData.setRunInfoInDatabase(true);
                 } else {
                     runInfoData.setPotentialRawFiles(m_rawFileList);
-                    warnParent(true);
                     runInfoData.setMessage("<html><font color='#FF0000'>Multiple Raw Files found, select one</font></html>");
                 }
             }
@@ -260,16 +256,6 @@ public class XICRunNode extends AbstractNode {
         AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
     }
 
-    public final void warnParent(boolean error) {
-        TreeNode parentNode = getParent();
-        if (parentNode == null) {
-            return;
-        }
-        if (parentNode instanceof XICBiologicalSampleAnalysisNode) {
-            ((XICBiologicalSampleAnalysisNode) parentNode).setChildError(m_treeModel, error);
-        }
-    }
-    
     @Override
     public String toString() {
         AbstractData data = getData();
@@ -346,8 +332,7 @@ public class XICRunNode extends AbstractNode {
                 if (doneCallback != null) {
                     doneCallback.actionPerformed(null);
                 }
-                
-                warnParent(false);
+
             }
         };
 

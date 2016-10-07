@@ -27,7 +27,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Hashtable;
+import java.util.HashMap;
 import javax.swing.BorderFactory;
 import javax.swing.DropMode;
 import javax.swing.JLabel;
@@ -48,7 +48,7 @@ public class SelectRawFilesPanel extends JPanel {
 
     private FlatDesignTableModel m_model = null;
     private FlatDesignTable m_table = null;
-    private Hashtable<String, XICBiologicalSampleAnalysisNode> m_hashtable;
+    private HashMap<String, XICBiologicalSampleAnalysisNode> m_hashtable;
     private XICDropZone m_dropZone;
     private XICDropZoneInfo m_dropZoneInfo;
     private String[] suffix = {".raw", ".mzdb"};
@@ -74,7 +74,7 @@ public class SelectRawFilesPanel extends JPanel {
 
         m_transferHandler = new TreeFileChooserTransferHandler();
 
-        m_hashtable = new Hashtable<String, XICBiologicalSampleAnalysisNode>();
+        m_hashtable = new HashMap<String, XICBiologicalSampleAnalysisNode>();
 
         JPanel wizardPanel = createWizardPanel();
         JPanel mainPanel = createMainPanel();
@@ -343,7 +343,6 @@ public class SelectRawFilesPanel extends JPanel {
                         runInfoData.setRun(rawFile.getRuns().get(0));
                         //runInfoData.setRawFilePath(rawFile.getDirectory()+File.separator+rawFile.getRawFileName());  //JPM.RUNINFODATA
                         //runInfoData.setRunInfoInDatabase(true);
-                        runNode.warnParent(false);
                         //((DefaultTreeModel)getModel()).nodeChanged(runNode);
                         m_model.fireTableDataChanged();
                         return;
@@ -556,8 +555,8 @@ public class SelectRawFilesPanel extends JPanel {
 
         }
 
-        public Hashtable<String, Integer> getModelShortages() {
-            Hashtable<String, Integer> shortagesTable = new Hashtable<String, Integer>();
+        public HashMap<String, Integer> getModelShortages() {
+            HashMap<String, Integer> shortagesTable = new HashMap<String, Integer>();
 
             int numberOfRows = this.getRowCount();
             int numberOfColumns = this.getColumnCount();

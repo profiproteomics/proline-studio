@@ -16,21 +16,13 @@ import org.openide.nodes.Sheet;
  */
 public class XICBiologicalSampleAnalysisNode extends DataSetNode {
 
-    boolean m_hasError = true;
     String m_qcName ; //Name of the quantChannel associated to this BiologicalSampleAnalysis
            
     public XICBiologicalSampleAnalysisNode(AbstractData data) {
         super(AbstractNode.NodeTypes.BIOLOGICAL_SAMPLE_ANALYSIS, data);
         m_qcName = ((DataSetData) data).getName();        
     }
-    
-    public void setChildError(DefaultTreeModel m_treeModel, boolean error) {
-        if (m_hasError ^ error) {
-            m_hasError = error;
-            m_treeModel.nodeChanged(this);
-        }
-        
-    }
+
     
     public void setQuantChannelName(String qcName) {
         m_qcName = qcName;
@@ -69,11 +61,7 @@ public class XICBiologicalSampleAnalysisNode extends DataSetNode {
     
     @Override
     public ImageIcon getIcon() {
-        if (m_hasError) {
-            return getIcon(IconManager.IconType.DATASET_RSM_ERROR);
-        } else {
-            return getIcon(IconManager.IconType.DATASET_RSM);
-        }
+        return getIcon(IconManager.IconType.DATASET_RSM);
     }
 
     @Override

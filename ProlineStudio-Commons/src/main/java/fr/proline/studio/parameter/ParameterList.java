@@ -36,6 +36,10 @@ public class ParameterList extends ArrayList<AbstractParameter> {
         return m_name;
     }
 
+    public String getPrefixName(){
+       return m_name.replaceAll(" ", "_") + ".";
+    }
+
     public JPanel getPanel(boolean usePrefixKey) {
 
         if (m_parametersPanel != null) {

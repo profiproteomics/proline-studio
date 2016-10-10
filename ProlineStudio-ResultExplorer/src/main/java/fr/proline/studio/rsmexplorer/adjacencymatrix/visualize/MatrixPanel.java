@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import javax.swing.BorderFactory;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JToolBar;
@@ -337,9 +338,7 @@ public class MatrixPanel extends HourglassPanel implements DataBoxPanelInterface
         public void paint(Graphics g) {
 
             int width = getWidth();
-            int height = getHeight();
-            
-            
+            int height = getHeight();      
 
             Graphics2D g2d = (Graphics2D) g;
             g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
@@ -348,7 +347,9 @@ public class MatrixPanel extends HourglassPanel implements DataBoxPanelInterface
 
             
             if (m_component == null) {
-                
+                return;
+            }else if(m_component!=null && isLoading()){
+                                
                 if (m_displayFont == null) {
                     m_displayFont = new Font("SansSerif", Font.BOLD, 12);
                     m_metrics = g.getFontMetrics(m_displayFont);
@@ -373,7 +374,7 @@ public class MatrixPanel extends HourglassPanel implements DataBoxPanelInterface
 
                 g.setColor(Color.black);
                 g.drawString(text, PAD+INTERNAL_PAD*2, visibleHeight-BOX_HEIGHT-PAD+INTERNAL_PAD+fontAscent);
-
+                
                 return;
             }
 

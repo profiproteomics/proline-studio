@@ -7,7 +7,6 @@ import fr.proline.studio.rsmexplorer.actions.identification.DeleteAction;
 import fr.proline.studio.rsmexplorer.actions.identification.ValidateAction;
 import fr.proline.studio.rsmexplorer.actions.identification.ImportSearchResultAsRsetAction;
 import fr.proline.studio.rsmexplorer.actions.identification.AbstractRSMAction;
-import fr.proline.studio.rsmexplorer.actions.identification.RenameAction;
 import fr.proline.studio.rsmexplorer.actions.identification.SpectralCountAction;
 import fr.proline.studio.rsmexplorer.actions.identification.PropertiesAction;
 import fr.proline.studio.rsmexplorer.actions.identification.GenerateSpectrumMatchesAction;

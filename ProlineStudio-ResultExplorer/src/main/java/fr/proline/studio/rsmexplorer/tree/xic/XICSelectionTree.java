@@ -76,7 +76,6 @@ public class XICSelectionTree extends AbstractTree implements TreeWillExpandList
         if (nodeExpanded.getChildCount() > 0) {
             AbstractNode childNode = (AbstractNode) nodeExpanded.getChildAt(0);
             if (childNode.getType() == AbstractNode.NodeTypes.HOUR_GLASS) {
-
                 startLoading(nodeExpanded, false);
             }
         }

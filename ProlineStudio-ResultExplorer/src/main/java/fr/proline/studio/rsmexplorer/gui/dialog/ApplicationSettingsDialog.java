@@ -10,15 +10,22 @@ import fr.proline.studio.parameter.ParameterList;
 import fr.proline.studio.parameter.StringParameter;
 import fr.proline.studio.rsmexplorer.actions.identification.ImportManager;
 import java.awt.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 import javax.swing.*;
+import javax.swing.event.TreeExpansionEvent;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
+import javax.swing.event.TreeWillExpandListener;
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.ExpandVetoException;
 import javax.swing.tree.TreePath;
+import org.openide.util.Exceptions;
 import org.openide.util.NbPreferences;
 import org.slf4j.LoggerFactory;
 
@@ -27,7 +34,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author JM235353
  */
-public class ApplicationSettingsDialog extends DefaultDialog implements TreeSelectionListener {
+public class ApplicationSettingsDialog extends DefaultDialog implements TreeSelectionListener, TreeWillExpandListener {
 
     private static ApplicationSettingsDialog m_singletonDialog = null;
     private AbstractParameterListTree m_parameterListTree;
@@ -50,7 +57,7 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
         }
         m_singletonDialog.updateSettings();
 
-        m_singletonDialog.resetTree();
+        m_singletonDialog.selectDefault();
 
         return m_singletonDialog;
     }
@@ -127,7 +134,7 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
 
         panel.setBorder(BorderFactory.createTitledBorder(DIALOG_TITLE));
 
-        m_parameterListTree = new AbstractParameterListTree(TREE_ROOT_NAME, this);
+        m_parameterListTree = new AbstractParameterListTree(TREE_ROOT_NAME, this, this);
         m_parameterListTree.addNodes(this.getJMSParameterList());
         m_parameterListTree.addNodes(this.getGeneralParameters());
         m_parameterListTree.expandAllRows();
@@ -175,27 +182,6 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
         }
         this.saveExistingsLists();
 
-        /*
-
-         boolean showWarning = false;
-
-         HashMap<ProjectIdentificationData, IdentificationTree> treeMap = IdentificationTree.getTreeMap();
-
-         Iterator it = treeMap.entrySet().iterator();
-         while (it.hasNext()) {
-         Map.Entry pair = (Map.Entry) it.next();
-         if (IdentificationTree.renameTreeNodes((AbstractNode) ((IdentificationTree) pair.getValue()).getModel().getRoot(), (IdentificationTree) pair.getValue())) {
-         showWarning = true;
-         }
-         }
-
-         if (showWarning) {
-         InfoDialog errorDialog = new InfoDialog(m_singletonDialog, InfoDialog.InfoType.INFO, "Name Representation Warning", "For some datasets, the selected representation is not available. For those cases the default representation will be based on MSI Search Name.");
-         errorDialog.setButtonVisible(OptionDialog.BUTTON_CANCEL, false);
-         errorDialog.setLocationRelativeTo(m_singletonDialog);
-         errorDialog.setVisible(true);
-         }
-         */
         return true;
 
     }
@@ -267,8 +253,18 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
         }
     }
 
-    private void resetTree() {
+    private void selectDefault() {
         m_parameterListTree.selectNode(GENERAL_APPLICATION_SETTINGS);
+    }
+
+    @Override
+    public void treeWillExpand(TreeExpansionEvent tee) throws ExpandVetoException {
+        ;
+    }
+
+    @Override
+    public void treeWillCollapse(TreeExpansionEvent tee) throws ExpandVetoException {
+        ;
     }
 
 }

@@ -39,40 +39,36 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JToolBar;
 
-
 /**
  *
  * @author JM235353
  */
 public class MatrixSelectionPanel extends HourglassPanel implements DataBoxPanelInterface, SearchInterface, FilterMapInterface, ApplySearchInterface {
-    
-    private AbstractDataBox m_dataBox;
-    
-    private DrawVisualization m_drawVisualization = null; 
 
-    
-    private HashMap<LightPeptideMatch, ArrayList<LightProteinMatch>> m_peptideToProteinMap ;
+    private AbstractDataBox m_dataBox;
+
+    private DrawVisualization m_drawVisualization = null;
+
+    private HashMap<LightPeptideMatch, ArrayList<LightProteinMatch>> m_peptideToProteinMap;
     private ArrayList<Component> m_componentList;
     private ArrayList<MatrixImageButton> m_curImageButtonArray;
 
     private Component m_currentComponent = null;
     private MatrixImageButton m_currentImageButton = null;
-    
-    
+
     private InternalPanel m_internalPanel = null;
     private JScrollPane m_scrollPane = null;
-    
+
     private SearchToggleButton m_searchToggleButton;
-    
+
     private static final int PROTEIN = 0;
     private static final int PEPTIDE = 1;
-    
+
     private String m_proteinName = "";
-    
+
     public MatrixSelectionPanel() {
         setLoading(0);
         setLayout(new BorderLayout());
-
 
         final JPanel matrixPanel = createMatrixPanel();
 
@@ -107,18 +103,17 @@ public class MatrixSelectionPanel extends HourglassPanel implements DataBoxPanel
         layeredPane.add(matrixPanel, JLayeredPane.DEFAULT_LAYER);
         layeredPane.add(m_searchToggleButton.getSearchPanel(), JLayeredPane.PALETTE_LAYER);
     }
-    
+
     @Override
     public void setDataBox(AbstractDataBox dataBox) {
         m_dataBox = dataBox;
     }
-    
+
     @Override
     public AbstractDataBox getDataBox() {
         return m_dataBox;
     }
-    
-        
+
     @Override
     public void addSingleValue(Object v) {
         // not used for the moment JPM.TODO ?
@@ -131,7 +126,7 @@ public class MatrixSelectionPanel extends HourglassPanel implements DataBoxPanel
 
     @Override
     public ActionListener getAddAction(SplittedPanelContainer splittedPanel) {
-       return m_dataBox.getAddAction(splittedPanel);
+        return m_dataBox.getAddAction(splittedPanel);
     }
 
     @Override
@@ -139,29 +134,28 @@ public class MatrixSelectionPanel extends HourglassPanel implements DataBoxPanel
         return m_dataBox.getSaveAction(splittedPanel);
     }
 
-    
     private JPanel createMatrixPanel() {
         JPanel matrixPanel = new JPanel(new BorderLayout());
-         matrixPanel.setBackground(Color.white);
-         
-         m_internalPanel = new InternalPanel();
-         
+        matrixPanel.setBackground(Color.white);
+
+        m_internalPanel = new InternalPanel();
+
         JToolBar toolbar = initToolbar();
 
         matrixPanel.add(toolbar, BorderLayout.WEST);
         matrixPanel.add(m_internalPanel, BorderLayout.CENTER);
-        
+
         return matrixPanel;
     }
-    
+
     private JToolBar initToolbar() {
         JToolBar toolbar = new JToolBar(JToolBar.VERTICAL);
         toolbar.setFloatable(false);
 
         m_searchToggleButton = new SearchToggleButton(this, null, this, this); //JPM.TODO
-        
+
         ExportButton exportImageButton = new ExportButton("Adjacency Matrices", m_internalPanel);
-        
+
         toolbar.add(m_searchToggleButton);
         toolbar.add(exportImageButton);
 
@@ -170,19 +164,18 @@ public class MatrixSelectionPanel extends HourglassPanel implements DataBoxPanel
 
     @Override
     public int search(Filter f, boolean newSearch) {
-       
+
         if (m_searchIds == null) {
             m_searchIds = new ArrayList<>();
             newSearch = true;
         }
-            
+
         if (newSearch) {
             m_searchIndex = 0;
             m_searchIds.clear();
             int nb = m_componentList.size();
             for (int i = 0; i < nb; i++) {
 
-                
                 int type = f.getModelColumn();
                 boolean found = filter(f, i, type);
                 if (found) {
@@ -191,11 +184,11 @@ public class MatrixSelectionPanel extends HourglassPanel implements DataBoxPanel
             }
         } else {
             m_searchIndex++;
-            if (m_searchIndex>=m_searchIds.size()) {
+            if (m_searchIndex >= m_searchIds.size()) {
                 m_searchIndex = 0;
             }
         }
-        
+
         if (m_searchIds.isEmpty()) {
             return -1;
         }
@@ -204,15 +197,15 @@ public class MatrixSelectionPanel extends HourglassPanel implements DataBoxPanel
     }
     private ArrayList<Integer> m_searchIds = null;
     private int m_searchIndex = 0;
-    
+
     private boolean filter(Filter filter, int index, int type) {
         if (type == PROTEIN) {
             Component c = m_componentList.get(index);
             ArrayList<LightProteinMatch> proteinSet = c.proteinMatchArray;
             int nbProteins = proteinSet.size();
-            for (int i=0;i<nbProteins;i++) {
+            for (int i = 0; i < nbProteins; i++) {
                 LightProteinMatch pm = proteinSet.get(i);
-                if (((StringFilter) filter).filter((String)pm.getAccession(), null)) {
+                if (((StringFilter) filter).filter((String) pm.getAccession(), null)) {
                     return true;
                 }
             }
@@ -220,16 +213,16 @@ public class MatrixSelectionPanel extends HourglassPanel implements DataBoxPanel
             Component c = m_componentList.get(index);
             ArrayList<LightPeptideMatch> peptideSet = c.peptideArray;
             int nbPeptides = peptideSet.size();
-            for (int i=0;i<nbPeptides;i++) {
+            for (int i = 0; i < nbPeptides; i++) {
                 LightPeptideMatch pm = peptideSet.get(i);
-                if (((StringFilter) filter).filter((String)pm.getSequence(), null)) {
+                if (((StringFilter) filter).filter((String) pm.getSequence(), null)) {
                     return true;
                 }
             }
         }
         return false;
     }
-    
+
     @Override
     public LinkedHashMap<Integer, Filter> getFilters() {
 
@@ -336,28 +329,29 @@ public class MatrixSelectionPanel extends HourglassPanel implements DataBoxPanel
         }
 
     }
-    
+
     public DrawVisualization getDrawVisualization() {
         return m_drawVisualization;
     }
-    
+
     public void setData(AdjacencyMatrixData matrixData, DProteinMatch proteinMatch, boolean keepSameSet, boolean doNotTakeFirstSelection) {
-        
+
         m_drawVisualization = new DrawVisualization();
-        
+
         m_drawVisualization.setData(matrixData, keepSameSet);
 
         ClusterAComponent.clusterComponent(m_drawVisualization);  // do the clustering
-        
+
         m_internalPanel.initPanel(doNotTakeFirstSelection);
-        
+
         selectProtein(proteinMatch);
-        
+
         setLoaded(0);
-        
-        revalidate(); 
+
+        revalidate();
         repaint();
     }
+
     public void setData(DProteinMatch proteinMatch, boolean doNotTakeFirstSelection) {
         if (proteinMatch == null) {
             return;
@@ -365,23 +359,22 @@ public class MatrixSelectionPanel extends HourglassPanel implements DataBoxPanel
         selectProtein(proteinMatch);
         repaint();
     }
-    
+
     private void selectProtein(DProteinMatch proteinMatch) {
-        
-        
+
         if (proteinMatch == null) {
             m_proteinName = "";
             return;
         }
-        
+
         m_proteinName = proteinMatch.getAccession();
-        
+
         int nbComponents = m_componentList.size();
-        for (int i=0;i<nbComponents;i++) {
+        for (int i = 0; i < nbComponents; i++) {
             Component c = m_componentList.get(i);
             ArrayList<LightProteinMatch> proteinSetList = c.proteinMatchArray;
             int nbProteins = proteinSetList.size();
-            for (int j=0;j<nbProteins;j++) {
+            for (int j = 0; j < nbProteins; j++) {
                 LightProteinMatch pm = proteinSetList.get(j);
                 if (proteinMatch.getId() == pm.getId()) {
                     selectCluster(i);
@@ -389,7 +382,7 @@ public class MatrixSelectionPanel extends HourglassPanel implements DataBoxPanel
                 }
             }
         }
-        
+
         // protein set not in a cluster
         if (m_currentImageButton != null) {
             m_currentImageButton.setSelection(false);
@@ -397,26 +390,16 @@ public class MatrixSelectionPanel extends HourglassPanel implements DataBoxPanel
             setCurrentComponent(null);
             m_dataBox.propagateDataChanged(Component.class);
         }
-        
-   
-    }
-    
 
-    
+    }
+
     public void setCurrentComponent(Component c) {
         m_currentComponent = c;
     }
-    
+
     public Component getCurrentComponent() {
         return m_currentComponent;
     }
-
-
-
-
-
-    
-
 
     public class CustomComparator implements Comparator<Component> {
 
@@ -438,10 +421,10 @@ public class MatrixSelectionPanel extends HourglassPanel implements DataBoxPanel
             if (m_displayFont == null) {
                 m_displayFont = new Font("SansSerif", Font.BOLD, 12);
                 m_metrics = g.getFontMetrics(m_displayFont);
-                
+
             }
             g.setFont(m_displayFont);
-            
+
             final int PAD = 10;
             final int INTERNAL_PAD = 5;
             final int BOX_HEIGHT = INTERNAL_PAD * 2 + 16;
@@ -459,13 +442,11 @@ public class MatrixSelectionPanel extends HourglassPanel implements DataBoxPanel
             g.drawRect(PAD + 2, visibleHeight - BOX_HEIGHT - PAD + 2, stringWidth + INTERNAL_PAD * 4 - 4, BOX_HEIGHT - 4);
 
             g.setColor(Color.black);
-            g.drawString(text, PAD+INTERNAL_PAD*2, visibleHeight-BOX_HEIGHT-PAD+INTERNAL_PAD+fontAscent);
+            g.drawString(text, PAD + INTERNAL_PAD * 2, visibleHeight - BOX_HEIGHT - PAD + INTERNAL_PAD + fontAscent);
         }
 
     }
     private Font m_displayFont = null;
     private FontMetrics m_metrics = null;
 
-    
 }
-

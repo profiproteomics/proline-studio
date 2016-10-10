@@ -102,6 +102,7 @@ public class XICDesignTree extends AbstractTree {
 
     @Override
     public void mouseClicked(MouseEvent e) {
+        
         /*if (SwingUtilities.isLeftMouseButton(e)) {
             
             TreePath path = getPathForLocation(e.getX(), e.getY());

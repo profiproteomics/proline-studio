@@ -28,6 +28,10 @@ public class HourglassPanel extends JPanel implements ActionListener {
         setLoading(true);
     }
     
+    public boolean isLoading(){
+        return this.m_loading;
+    }
+    
     public void setLoading(int id) {
        setLoading(id, false);
     }

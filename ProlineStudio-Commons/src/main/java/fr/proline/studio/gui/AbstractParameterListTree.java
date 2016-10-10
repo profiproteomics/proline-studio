@@ -13,10 +13,9 @@ import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 import javax.swing.JTree;
 import javax.swing.event.TreeSelectionListener;
+import javax.swing.event.TreeWillExpandListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
-import javax.swing.tree.TreePath;
-import static org.openide.util.NbPreferences.root;
 
 /**
  *
@@ -25,22 +24,24 @@ import static org.openide.util.NbPreferences.root;
 public class AbstractParameterListTree extends JPanel {
 
     private String rootName;
-    private TreeSelectionListener listener;
+    private TreeSelectionListener m_selectionListener;
+    private TreeWillExpandListener m_expandListener;
     private JTree tree;
-    private DefaultMutableTreeNode rootNode;
+    private DefaultMutableTreeNode m_root;
     private Hashtable<String, ParameterList> m_parameters;
     private Hashtable<String, DefaultMutableTreeNode> m_nodes;
 
-    public AbstractParameterListTree(String rootName, TreeSelectionListener listener) {
+    public AbstractParameterListTree(String rootName, TreeSelectionListener listener, TreeWillExpandListener expandListener) {
         this.rootName = rootName;
-        this.listener = listener;
+        this.m_selectionListener = listener;
+        this.m_expandListener = expandListener;
         m_parameters = new Hashtable<String, ParameterList>();
         m_nodes = new Hashtable<String, DefaultMutableTreeNode>();
         this.createTree();
     }
 
     private void createTree() {
-        rootNode = new DefaultMutableTreeNode(rootName);
+        m_root = new DefaultMutableTreeNode(rootName);
 
         DefaultTreeCellRenderer renderer = new DefaultTreeCellRenderer();
         renderer.setLeafIcon(IconManager.getIcon(IconManager.IconType.SETTINGS));
@@ -48,17 +49,18 @@ public class AbstractParameterListTree extends JPanel {
         renderer.setClosedIcon(IconManager.getIcon(IconManager.IconType.TOOLBOX_PLUS));
         renderer.setOpenIcon(IconManager.getIcon(IconManager.IconType.TOOLBOX_MINUS));
 
-        tree = new JTree(rootNode);
+        tree = new JTree(m_root);
         tree.setCellRenderer(renderer);
         tree.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-        tree.addTreeSelectionListener(listener);
+        tree.addTreeSelectionListener(m_selectionListener);
+        tree.addTreeWillExpandListener(m_expandListener);
     }
 
     public void addNodes(ParameterList parameterList) {
         DefaultMutableTreeNode node = new DefaultMutableTreeNode(parameterList.toString());
         m_parameters.put(parameterList.toString(), parameterList);
         m_nodes.put(parameterList.toString(), node);
-        rootNode.add(node);
+        m_root.add(node);
     }
 
     public JTree getTree() {
@@ -87,7 +89,9 @@ public class AbstractParameterListTree extends JPanel {
         while (e.hasMoreElements()) {
             DefaultMutableTreeNode node = e.nextElement();
             if (node.toString().equalsIgnoreCase(key)) {
-                tree.setSelectionRow(node.getParent().getIndex(node) + 1);
+                if (node.getParent() != null) {
+                    tree.setSelectionRow(node.getParent().getIndex(node) + 1);
+                }
                 return;
             }
         }

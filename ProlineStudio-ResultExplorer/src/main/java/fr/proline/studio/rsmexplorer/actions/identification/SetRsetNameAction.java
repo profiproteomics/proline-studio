@@ -2,8 +2,11 @@ package fr.proline.studio.rsmexplorer.actions.identification;
 
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.core.orm.uds.Project;
+import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.DatabaseDataManager;
-import fr.proline.studio.dam.data.DataSetData;
+import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
+import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
+import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.gui.ParameterDialog;
 import fr.proline.studio.parameter.ObjectParameter;
@@ -13,7 +16,6 @@ import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import javax.swing.JOptionPane;
@@ -33,6 +35,8 @@ public class SetRsetNameAction extends AbstractRSMAction {
     private AbstractNode[] m_selectedNodes;
     private String m_naming;
     private AbstractTree m_tree;
+    private boolean fail = false;
+    private ArrayList<DataSetNode> toRename;
 
     // tree type: could be Identification or Quantitation
     AbstractTree.TreeType m_treeType = null;
@@ -80,9 +84,9 @@ public class SetRsetNameAction extends AbstractRSMAction {
 
     public void proceedWithRenaming() {
 
-        boolean fail = false;
+        fail = false;
 
-        ArrayList<DataSetNode> toRename = new ArrayList<DataSetNode>();
+        toRename = new ArrayList<DataSetNode>();
 
         for (int i = 0; i < m_selectedNodes.length; i++) {
             if (m_selectedNodes[i].getType() == AbstractNode.NodeTypes.DATA_SET) {
@@ -111,40 +115,38 @@ public class SetRsetNameAction extends AbstractRSMAction {
         for (int i = 0; i < toRename.size(); i++) {
 
             DDataset dataset = toRename.get(i).getDataset();
+            DataSetNode node = toRename.get(i);
 
-            if (dataset.getResultSet() == null) {
-                DataSetData.fetchRsetAndRsmForOneDataset(dataset);
-            }
+            // we have to load the result set
+            AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
 
-            if (dataset == null || dataset.getResultSet() == null || dataset.getResultSet().getMsiSearch() == null) {
-                continue;
-            }
+                @Override
+                public boolean mustBeCalledInAWT() {
+                    return true;
+                }
 
-            String newName = "";
+                @Override
+                public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
 
-            newName = (dataset.getResultSet().getMsiSearch().getResultFileName() == null) ? "" : dataset.getResultSet().getMsiSearch().getResultFileName();
-            if (newName.contains(".")) {
-                newName = newName.substring(0, newName.indexOf("."));
-            }
+                    if (IdentificationTree.renameNode(dataset, m_naming, node, m_tree)) {
+                        fail = true;
+                    }
 
-            if (m_naming.equalsIgnoreCase(ImportManager.SEARCH_RESULT_NAME_SOURCE)) {
-                newName = dataset.getResultSet().getName();
-            } else if (m_naming.equalsIgnoreCase(ImportManager.PEAKLIST_PATH_SOURCE)) {
-                newName = (dataset.getResultSet().getMsiSearch().getPeaklist().getPath() == null) ? "" : dataset.getResultSet().getMsiSearch().getPeaklist().getPath();
-                if (newName.contains(File.separator)) {
-                    newName = newName.substring(newName.lastIndexOf(File.separator) + 1);
+                }
+            };
+
+            if (dataset.getResultSet()==null) {
+                // ask asynchronous loading of data
+                DatabaseDataSetTask task = new DatabaseDataSetTask(callback);
+                task.initLoadRsetAndRsm(dataset);
+                AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
+            } else {
+                if (IdentificationTree.renameNode(dataset, m_naming, node, m_tree)) {
+                    fail = true;
                 }
             }
-
-            if (!newName.equalsIgnoreCase("")) {
-                toRename.get(i).rename(newName, m_tree);
-                dataset.setName(newName);
-                m_tree.rename(toRename.get(i), newName);
-            } else {
-                fail = true;
-            }
         }
-
+        
         if (fail) {
             JOptionPane.showMessageDialog(null, "One or more ResultSet(s) were not renamed.", "Warning", JOptionPane.WARNING_MESSAGE);
         }

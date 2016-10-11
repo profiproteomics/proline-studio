@@ -22,6 +22,7 @@ import fr.proline.studio.rsmexplorer.actions.identification.RetrieveBioSeqJMSAct
 import fr.proline.core.orm.msi.ResultSet;
 import fr.proline.core.orm.uds.Project;
 import fr.proline.core.orm.uds.dto.DDataset;
+import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.DatabaseDataManager;
 import fr.proline.studio.dam.data.AbstractData;
 import fr.proline.studio.dam.data.DataSetData;
@@ -71,6 +72,7 @@ import org.openide.util.NbPreferences;
 public class IdentificationTree extends AbstractTree implements TreeWillExpandListener {
 
     private boolean m_isMainTree;
+    private static boolean emptyFound = false;
 
     private static HashMap<ProjectIdentificationData, IdentificationTree> m_treeMap = new HashMap<>();
     private static IdentificationTree m_currentTree = null;
@@ -94,9 +96,42 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
         return m_currentTree;
     }
 
+    public static boolean renameNode(DDataset dataset, String naming, DataSetNode datasetNode, AbstractTree tree) {
+
+        if (dataset == null || dataset.getResultSet() == null || dataset.getResultSet().getMsiSearch() == null) {
+            return false;
+        }
+
+        String newName = "";
+
+        newName = (dataset.getResultSet().getMsiSearch().getResultFileName() == null) ? "" : dataset.getResultSet().getMsiSearch().getResultFileName();
+        if (newName.contains(".")) {
+            newName = newName.substring(0, newName.indexOf("."));
+        }
+
+        if (naming.equalsIgnoreCase(ImportManager.SEARCH_RESULT_NAME_SOURCE)) {
+            newName = dataset.getResultSet().getName();
+        } else if (naming.equalsIgnoreCase(ImportManager.PEAKLIST_PATH_SOURCE)) {
+            newName = (dataset.getResultSet().getMsiSearch().getPeaklist().getPath() == null) ? "" : dataset.getResultSet().getMsiSearch().getPeaklist().getPath();
+            if (newName.contains(File.separator)) {
+                newName = newName.substring(newName.lastIndexOf(File.separator) + 1);
+            }
+        }
+
+        if (!newName.equalsIgnoreCase("")) {
+            datasetNode.rename(newName, m_currentTree);
+            dataset.setName(newName);
+            m_currentTree.rename(datasetNode, newName);
+            return false;
+        } else {
+            return true;
+        }
+
+    }
+
     public static boolean renameTreeNodes(AbstractNode root, IdentificationTree tree) {
 
-        boolean emptyFound = false;
+        emptyFound = false;
 
         Preferences preferences = NbPreferences.root();
         String naming = preferences.get(ImportManager.DEFAULT_SEARCH_RESULT_NAME_SOURCE_KEY, ImportManager.MSI_SEARCH_FILE_NAME_SOURCE);
@@ -117,39 +152,36 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
 
                 DDataset dataset = datasetData.getDataset();
 
-                if (dataset.getResultSet() == null) {
-                    DataSetData.fetchRsetAndRsmForOneDataset(dataset);
-                }
+                DataSetNode node = (DataSetNode) currentElement;
 
-                if (dataset == null || dataset.getResultSet() == null || dataset.getResultSet().getMsiSearch() == null) {
-                    continue;
-                }
+                // we have to load the result set
+                AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
 
-                String newName = "";
-
-                if (dataset.getResultSet().getMsiSearch() != null) {
-                    newName = (dataset.getResultSet().getMsiSearch().getResultFileName() == null) ? "" : dataset.getResultSet().getMsiSearch().getResultFileName();
-                    if (newName.contains(".")) {
-                        newName = newName.substring(0, newName.indexOf("."));
+                    @Override
+                    public boolean mustBeCalledInAWT() {
+                        return true;
                     }
-                }
 
-                if (naming.equalsIgnoreCase(ImportManager.SEARCH_RESULT_NAME_SOURCE)) {
-                    newName = dataset.getResultSet().getName();
-                } else if (naming.equalsIgnoreCase(ImportManager.PEAKLIST_PATH_SOURCE)) {
-                    newName = (dataset.getResultSet().getMsiSearch().getPeaklist().getPath() == null) ? "" : dataset.getResultSet().getMsiSearch().getPeaklist().getPath();
-                    if (newName.contains(File.separator)) {
-                        newName = newName.substring(newName.lastIndexOf(File.separator) + 1);
+                    @Override
+                    public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
+                        if (IdentificationTree.renameNode(dataset, naming, node, m_currentTree)) {
+                            emptyFound = true;
+                        }
                     }
-                }
+                };
 
-                if (!newName.equalsIgnoreCase("")) {
-                    dataset.setName(newName);
-                    tree.rename(currentElement, newName);
+                if (dataset.getResultSet()==null) {
+                    // ask asynchronous loading of data
+                    DatabaseDataSetTask task = new DatabaseDataSetTask(callback);
+                    task.initLoadRsetAndRsm(dataset);
+                    AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
                 } else {
-                    emptyFound = true;
-                }
 
+                    if (IdentificationTree.renameNode(dataset, naming, node, m_currentTree)) {
+                        emptyFound = true;
+                    }
+
+                }
             }
         }
 
@@ -701,10 +733,9 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
                 m_mainActions.add(aggregateAction);
 
                 /*
-                RenameAction renameAction = new RenameAction(AbstractTree.TreeType.TREE_IDENTIFICATION);
-                m_mainActions.add(renameAction);
-                */
-
+                 RenameAction renameAction = new RenameAction(AbstractTree.TreeType.TREE_IDENTIFICATION);
+                 m_mainActions.add(renameAction);
+                 */
                 RenameRsetAction renameRsetAction = new RenameRsetAction(AbstractTree.TreeType.TREE_IDENTIFICATION);
                 m_mainActions.add(renameRsetAction);
 

@@ -301,6 +301,7 @@ public class XICDesignTree extends AbstractTree {
                         rawFile.setMzDbFileName(qCh.getMzdbFileName());
                         rawFileSource.setLinkedRawFile(rawFile);
                         runInfoData.setRawFileSource(rawFileSource);
+                        
                         List<Run> runs = new ArrayList();
                         Run run = new Run();
                         run.setId(-1); // explicitely set the runId to -1, to avoid to register runidentification (no need)

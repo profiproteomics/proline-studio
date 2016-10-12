@@ -8,6 +8,7 @@ import fr.proline.studio.gui.TreeFileChooserPanel;
 import fr.proline.studio.gui.TreeFileChooserTableModelInterface;
 import fr.proline.studio.gui.TreeFileChooserTransferHandler;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
+import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
 import fr.proline.studio.rsmexplorer.tree.xic.XICBiologicalGroupNode;
 import fr.proline.studio.rsmexplorer.tree.xic.XICBiologicalSampleAnalysisNode;
@@ -28,10 +29,12 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.HashMap;
 import javax.swing.BorderFactory;
 import javax.swing.DropMode;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
@@ -55,6 +58,7 @@ public class SelectRawFilesPanel extends JPanel {
     private XICDropZoneInfo m_dropZoneInfo;
     private String[] suffix = {".raw", ".mzdb"};
     private TreeFileChooserTransferHandler m_transferHandler;
+    private AbstractNode m_rootNode;
 
     public static SelectRawFilesPanel getPanel(AbstractNode rootNode) {
         if (m_singleton == null) {
@@ -100,6 +104,7 @@ public class SelectRawFilesPanel extends JPanel {
     }
 
     private void setRootNode(AbstractNode rootNode) {
+        this.m_rootNode = rootNode;
         m_model.setData(rootNode);
 
     }
@@ -244,6 +249,17 @@ public class SelectRawFilesPanel extends JPanel {
     private void resetDropZonePanel() {
         if (m_dropZone != null) {
             m_dropZone.clearDropZone();
+        }
+    }
+
+    public void pruneDesignTree() {
+        Enumeration<AbstractNode> e = this.m_rootNode.depthFirstEnumeration();
+        while (e.hasMoreElements()) {
+            AbstractNode currentElement = e.nextElement();
+            if (currentElement.getType() == AbstractNode.NodeTypes.BIOLOGICAL_SAMPLE_ANALYSIS) {
+                XICBiologicalSampleAnalysisNode sampleAnalysisNode = (XICBiologicalSampleAnalysisNode) currentElement;
+                sampleAnalysisNode.removeAllChildren();
+            }
         }
     }
 
@@ -420,20 +436,21 @@ public class SelectRawFilesPanel extends JPanel {
             for (int i = 0; i < nbChildren; i++) {
                 AbstractNode child = (AbstractNode) sampleNode.getChildAt(i);
                 if (child.getType() == AbstractNode.NodeTypes.BIOLOGICAL_SAMPLE_ANALYSIS) {
-                    
+
                     XICBiologicalSampleAnalysisNode sampleAnalysisNode = (XICBiologicalSampleAnalysisNode) child;
-                    
+
                     XICRunNode runNode = new XICRunNode(new RunInfoData());
                     sampleAnalysisNode.add(runNode);
                     runNode.init(sampleAnalysisNode.getDataset(), (DefaultTreeModel) IdentificationTree.getCurrentTree().getModel());
-                    
+
                     parseRun(groupNode, sampleNode, (XICBiologicalSampleAnalysisNode) child);
+
                 }
             }
         }
 
         private void parseRun(XICBiologicalGroupNode groupNode, XICBiologicalSampleNode sampleNode, XICBiologicalSampleAnalysisNode sampleAnalysisNode) {
-            
+
             int nbChildren = sampleAnalysisNode.getChildCount();
             for (int i = 0; i < nbChildren; i++) {
                 AbstractNode child = (AbstractNode) sampleAnalysisNode.getChildAt(i);

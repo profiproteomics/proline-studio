@@ -280,7 +280,6 @@ public class XICTransferHandler extends TransferHandler {
                     for (int i = 1; i < nb; i++) {
                         DDataset p = datasetList.get(i).getParentMergedDataset();
 
-                        //JOptionPane.showMessageDialog(null,"Parent:"+datasetList.get(i).getParent().toString()+" Child:"+datasetList.get(i).toString());
                         if (p != null && p.getId() != parentNode.getId()) {
                             sameParent = false;
                             break;
@@ -376,7 +375,7 @@ public class XICTransferHandler extends TransferHandler {
 
                         // put a Run node in it
                         XICRunNode runNode = new XICRunNode(new RunInfoData());
-                        sampleAnalysisNode.add(runNode);
+                        //sampleAnalysisNode.add(runNode);
                         runNode.init(datasetList.get(i).getDataset(), treeModel);
 
                         // add to new parent
@@ -409,7 +408,7 @@ public class XICTransferHandler extends TransferHandler {
 
                         // put a Run node in it
                         XICRunNode runNode = new XICRunNode(new RunInfoData());
-                        sampleAnalysisNode.add(runNode);
+                        //sampleAnalysisNode.add(runNode);
                         runNode.init(node.getDataset(), treeModel);
 
                         // add to new parent

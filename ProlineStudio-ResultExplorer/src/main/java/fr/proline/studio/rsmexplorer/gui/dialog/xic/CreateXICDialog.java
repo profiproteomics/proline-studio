@@ -59,6 +59,8 @@ public class CreateXICDialog extends DefaultDialog {
 
     private AbstractNode m_finalXICDesignNode = null;
     private IdentificationTree m_selectionTree = null;
+    
+    private SelectRawFilesPanel m_selectRawFilePanel;
 
     private Hashtable<String, XICBiologicalSampleAnalysisNode> m_table;
 
@@ -126,8 +128,8 @@ public class CreateXICDialog extends DefaultDialog {
 
         // Update and Replace panel
         try {
-            SelectRawFilesPanel selectRawFilesPanel = SelectRawFilesPanel.getPanel(m_finalXICDesignNode);
-            replaceInternaleComponent(selectRawFilesPanel);
+            m_selectRawFilePanel = SelectRawFilesPanel.getPanel(m_finalXICDesignNode);
+            replaceInternaleComponent(m_selectRawFilePanel);
             revalidate();
             repaint();
         } catch (Exception ex) {
@@ -697,6 +699,7 @@ public class CreateXICDialog extends DefaultDialog {
     protected boolean backCalled() {
         if (m_step == STEP_PANEL_DEFINE_RAW_FILES) {
 
+            m_selectRawFilePanel.pruneDesignTree();
             displayDesignTree(m_finalXICDesignNode);
 
             return false;

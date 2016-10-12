@@ -32,7 +32,6 @@ import java.awt.Dialog;
 import java.awt.Window;
 import java.io.File;
 import java.util.*;
-import java.util.prefs.Preferences;
 import javax.persistence.EntityManager;
 import javax.swing.JFileChooser;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -62,6 +61,8 @@ public class CreateXICDialog extends DefaultDialog {
     private IdentificationTree m_selectionTree = null;
 
     private Hashtable<String, XICBiologicalSampleAnalysisNode> m_table;
+
+    private Hashtable<String, XICBiologicalSampleAnalysisNode> m_duplicates;
 
     public static CreateXICDialog getDialog(Window parent) {
         if (m_singletonDialog == null) {
@@ -580,6 +581,13 @@ public class CreateXICDialog extends DefaultDialog {
     protected boolean okCalled() {
 
         if (m_step == STEP_PANEL_CREATE_XIC_DESIGN) {
+
+            if (m_duplicates == null) {
+                m_duplicates = new Hashtable<String, XICBiologicalSampleAnalysisNode>();
+            } else {
+                m_duplicates.clear();
+            }
+
             if ((!checkDesignStructure(m_finalXICDesignNode)) || (!checkBiologicalGroupName(m_finalXICDesignNode))) {
                 return false;
             }
@@ -725,6 +733,17 @@ public class CreateXICDialog extends DefaultDialog {
                     return false;
                 }
                 break;
+            case BIOLOGICAL_SAMPLE_ANALYSIS:
+                if (parentNode.isLeaf()) {
+                    if(m_duplicates.containsKey(parentNode.toString())){
+                        showErrorOnNode(parentNode, "Biological Sample Analysis is a duplicate. Please rename using right click!");
+                        return false;
+                    }else{
+                        m_duplicates.put(parentNode.toString(), (XICBiologicalSampleAnalysisNode) parentNode);
+                        return true;
+                    }
+                }
+                break;
         }
 
         Enumeration children = parentNode.children();
@@ -735,7 +754,9 @@ public class CreateXICDialog extends DefaultDialog {
                 return false;
             }
         }
-
+        
+        System.out.println("breakpoint");
+        
         return true;
     }
 

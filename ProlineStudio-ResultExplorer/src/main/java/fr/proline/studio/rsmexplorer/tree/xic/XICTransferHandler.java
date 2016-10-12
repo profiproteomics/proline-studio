@@ -5,8 +5,11 @@ import fr.proline.core.orm.uds.Dataset;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dam.data.DataSetData;
 import fr.proline.studio.dam.data.RunInfoData;
+import fr.proline.studio.parameter.BooleanParameter;
+import fr.proline.studio.parameter.ParameterList;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
+import java.awt.Color;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.IOException;
@@ -14,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.prefs.Preferences;
+import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JTree;
 import javax.swing.TransferHandler;
@@ -32,11 +36,20 @@ import org.slf4j.LoggerFactory;
 public class XICTransferHandler extends TransferHandler {
 
     private Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
-
     private boolean m_isSelectionTree;
+    private ParameterList m_parameterList;
+    private BooleanParameter m_parameter;
+    private static final String GENERAL_APPLICATION_SETTINGS = "General Application Settings";
+    
 
     public XICTransferHandler(boolean isSelectionTree) {
         m_isSelectionTree = isSelectionTree;
+        
+        m_parameterList = new ParameterList(GENERAL_APPLICATION_SETTINGS);
+        JCheckBox checkBox = new JCheckBox("Use dataset type to create Xic Design by DnD");
+        m_parameter = new BooleanParameter("XIC_Transfer_Handler_Retains_Structure", "XIC Transfer Handler Retains Structure", checkBox, true);
+        m_parameterList.add(m_parameter);
+        m_parameterList.loadParameters(NbPreferences.root(), true);
     }
 
     @Override
@@ -49,7 +62,6 @@ public class XICTransferHandler extends TransferHandler {
 
         if (m_isSelectionTree) {
 
-            //JOptionPane.showMessageDialog(null,"Is selection tree.");
             XICSelectionTree tree = (XICSelectionTree) c;
 
             AbstractNode[] selectedNodes = tree.getSelectedNodes();
@@ -68,7 +80,6 @@ public class XICTransferHandler extends TransferHandler {
             return new XICSelectionTransferable(transferKey);
 
         } else {
-            //JOptionPane.showMessageDialog(null,"It is NOT a selection tree.");
 
             XICDesignTree tree = (XICDesignTree) c;
 
@@ -291,8 +302,8 @@ public class XICTransferHandler extends TransferHandler {
                 tree.expandNodeIfNeeded(dropRSMNode);
             }
 
-            Preferences preferences = NbPreferences.root();
-            boolean retainStructure = preferences.getBoolean("XIC_Transfer_Handler_Retain_Structure", Boolean.TRUE);
+            m_parameterList.loadParameters(NbPreferences.root(), true);
+            boolean retainStructure = (boolean) m_parameter.getObjectValue();
 
             if (retainStructure) {
 

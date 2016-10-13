@@ -50,7 +50,7 @@ import org.jdesktop.swingx.table.TableColumnExt;
 import org.openide.windows.TopComponent;
 
 /**
- * Tree Panel for the DataMixel with data and functions
+ * Tree Panel for the DataAnalyzer with data and functions
  * @author JM235353
  */
 public abstract class DataTree extends JTree {
@@ -110,6 +110,10 @@ public abstract class DataTree extends JTree {
 
             }
         });
+        
+        for (int i = 0; i < getRowCount(); i++) {
+            expandRow(i);
+        }
     }
     
     public void updataDataNodes() {

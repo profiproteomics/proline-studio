@@ -7,6 +7,7 @@ import fr.proline.studio.comparedata.ExtraDataType;
 import fr.proline.studio.filter.DoubleFilter;
 import fr.proline.studio.filter.Filter;
 import fr.proline.studio.filter.LongFilter;
+import fr.proline.studio.filter.StringDiffFilter;
 import fr.proline.studio.filter.StringFilter;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
@@ -448,7 +449,7 @@ public class ImportTSVFunction extends AbstractFunction {
                 } else if (c.equals(Long.class)) {
                     filtersMap.put(i, new LongFilter(getColumnName(i), null, i));
                 } else if (c.equals(String.class)) {
-                    filtersMap.put(i, new StringFilter(getColumnName(i), null, i));
+                    filtersMap.put(i, new StringDiffFilter(getColumnName(i), null, i));
                 }
             }
         }

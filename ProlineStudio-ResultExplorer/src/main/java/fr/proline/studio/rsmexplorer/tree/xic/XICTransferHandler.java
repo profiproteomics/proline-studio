@@ -16,6 +16,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.prefs.Preferences;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
@@ -40,11 +42,10 @@ public class XICTransferHandler extends TransferHandler {
     private ParameterList m_parameterList;
     private BooleanParameter m_parameter;
     private static final String GENERAL_APPLICATION_SETTINGS = "General Application Settings";
-    
 
     public XICTransferHandler(boolean isSelectionTree) {
         m_isSelectionTree = isSelectionTree;
-        
+
         m_parameterList = new ParameterList(GENERAL_APPLICATION_SETTINGS);
         JCheckBox checkBox = new JCheckBox("Use dataset type to create Xic Design by DnD");
         m_parameter = new BooleanParameter("XIC_Transfer_Handler_Retains_Structure", "XIC Transfer Handler Retains Structure", checkBox, true);
@@ -293,11 +294,11 @@ public class XICTransferHandler extends TransferHandler {
 
             if (dropRSMNode instanceof DataSetNode) {
                 // top node, we create a group now
+                childIndex = 0;
                 String groupName = "Group " + suffix;
                 XICBiologicalGroupNode biologicalGroupNode = new XICBiologicalGroupNode(new DataSetData(groupName, Dataset.DatasetType.AGGREGATE, Aggregation.ChildNature.OTHER));
                 treeModel.insertNodeInto(biologicalGroupNode, dropRSMNode, childIndex);
                 dropRSMNode = biologicalGroupNode;
-                childIndex = 0;
                 tree.expandNodeIfNeeded(dropRSMNode);
             }
 
@@ -313,10 +314,15 @@ public class XICTransferHandler extends TransferHandler {
                     //Here I divide Leafs into teams depending on their father (Luke I am your father!)
                     Hashtable<String, ArrayList<DataSetNode>> samplesHashtable = new Hashtable<String, ArrayList<DataSetNode>>();
 
+                    LinkedHashSet<String> order = new LinkedHashSet<String>();
+
                     for (int i = 0; i < datasetList.size(); i++) {
+
                         DataSetNode node = datasetList.get(i);
 
                         String currentParent = (node.getParent() == null) ? "null" : node.getParent().toString();
+
+                        order.add(currentParent);
 
                         if (samplesHashtable.containsKey(currentParent)) {
                             samplesHashtable.get(currentParent).add(node);
@@ -327,13 +333,12 @@ public class XICTransferHandler extends TransferHandler {
                         }
 
                     }
+                    
+                    childIndex = 0;
 
-                    Enumeration<String> enumKey = samplesHashtable.keys();
-
-                    while (enumKey.hasMoreElements()) {
-                        String key = enumKey.nextElement();
-
-                        childIndex = 0;
+                    Iterator iter = order.iterator();
+                    while (iter.hasNext()) {
+                        String key = (String) iter.next();             
 
                         ArrayList<DataSetNode> currentSampleList = samplesHashtable.get(key);
 
@@ -356,7 +361,6 @@ public class XICTransferHandler extends TransferHandler {
                             XICRunNode runNode = new XICRunNode(new RunInfoData());
 
                             //sampleAnalysisNode.add(runNode);
-                            
                             runNode.init(currentSampleList.get(i).getDataset(), treeModel);
 
                             // add to new parent
@@ -364,6 +368,8 @@ public class XICTransferHandler extends TransferHandler {
                             childIndex++;
 
                         }
+
+                        childIndex -= currentSampleList.size()-1;
 
                     }
                 } else if (dropRSMNode instanceof XICBiologicalSampleNode) {

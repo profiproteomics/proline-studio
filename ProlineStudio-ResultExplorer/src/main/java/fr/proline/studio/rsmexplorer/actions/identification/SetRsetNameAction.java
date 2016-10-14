@@ -152,29 +152,6 @@ public class SetRsetNameAction extends AbstractRSMAction {
         }
     }
 
-    private String showRenameDialog(int x, int y) {
-
-        ParameterList parameterList = new ParameterList(GENERAL_APPLICATION_SETTINGS);
-        Object[] objectTable = {ImportManager.SEARCH_RESULT_NAME_SOURCE, ImportManager.PEAKLIST_PATH_SOURCE, ImportManager.MSI_SEARCH_FILE_NAME_SOURCE};
-        ObjectParameter parameter = new ObjectParameter(ImportManager.DEFAULT_SEARCH_RESULT_NAME_SOURCE_KEY, "Default Search Result Name Source", objectTable, 2, null);
-        parameterList.add(parameter);
-        parameterList.loadParameters(NbPreferences.root(), true);
-
-        ParameterDialog dialog = new ParameterDialog(WindowManager.getDefault().getMainWindow(), "Rename Search Result(s)", parameter);
-        dialog.setLocation(x, y);
-        dialog.setVisible(true);
-
-        if (dialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {
-            this.m_parameterValue = (String) dialog.getParameterValue();
-        }
-
-        if ((this.m_parameterValue != null) && (this.m_parameterValue.length() > 0)) {
-            return this.m_parameterValue;
-        }
-
-        return null;
-    }
-
     @Override
     public void updateEnabled(AbstractNode[] selectedNodes) {
 

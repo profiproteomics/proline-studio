@@ -753,8 +753,8 @@ public class StatsRImplementation {
 
     private static PyFloat _computeFDR(File f, PyFloat minusLogPvalueThreshold, PyFloat logFCThreshold, String pi0Parameter, PyFloat alpha, PyInteger nbins, PyFloat pz) throws Exception {
 
-         // calculate PValue
-        double pValue = Math.pow(10, -minusLogPvalueThreshold.getValue());
+         // !!!!!! Pvalue parameter in diffAnaComputeFDR is not a Pvalue in fact but -log10(PValue) !!!!!
+        double pValue = minusLogPvalueThreshold.getValue(); // Math.pow(10, -minusLogPvalueThreshold.getValue());
         
         RServerManager serverR = RServerManager.getRServerManager();
 

@@ -99,10 +99,9 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
         BooleanParameter gettingStartedParameter = new BooleanParameter("Hide_Getting_Started_Dialog", "Hide Getting Started Dialog On Startup", gettingStartedCheckBox, false);
         m_generalParameterList.add(gettingStartedParameter);
 
-        Object[] associatedTable = {"Search Name", "Peaklist", "Msi Search Filename"};
+        Object[] associatedTable = {"Search Name", "Peaklist", "Msi Search Filename", "Mascot Rule"};
         JComboBox comboBox = new JComboBox(associatedTable);
-        Object[] objectTable = {ImportManager.SEARCH_RESULT_NAME_SOURCE, ImportManager.PEAKLIST_PATH_SOURCE, ImportManager.MSI_SEARCH_FILE_NAME_SOURCE};
-        //ObjectParameter nameSourceParameter = new ObjectParameter(ImportManager.DEFAULT_SEARCH_RESULT_NAME_SOURCE_KEY, "Default Search Result Name Source", objectTable, 2, null);
+        Object[] objectTable = {ImportManager.SEARCH_RESULT_NAME_SOURCE, ImportManager.PEAKLIST_PATH_SOURCE, ImportManager.MSI_SEARCH_FILE_NAME_SOURCE, ImportManager.MASCOT_DAEMON_RULE};
         ObjectParameter nameSourceParameter = new ObjectParameter(ImportManager.DEFAULT_SEARCH_RESULT_NAME_SOURCE_KEY, "Default Search Result Name Source", comboBox, associatedTable, objectTable, 2, null);
         m_generalParameterList.add(nameSourceParameter);
 

@@ -14,7 +14,6 @@ import fr.proline.studio.parameter.ObjectParameter;
 import fr.proline.studio.parameter.ParameterList;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
-import java.io.File;
 import java.util.Hashtable;
 import javax.swing.JOptionPane;
 import org.openide.util.NbPreferences;
@@ -26,6 +25,7 @@ import org.openide.util.NbPreferences;
 public class ImportManager {
 
     public static final String DEFAULT_SEARCH_RESULT_NAME_SOURCE_KEY = "DefaultSearchResultNameSource";
+    public static final String MASCOT_DAEMON_RULE = "MASCOT_DAEMON_RULE";
     public static final String SEARCH_RESULT_NAME_SOURCE = "SEARCH_RESULT_NAME";
     public static final String PEAKLIST_PATH_SOURCE = "PEAKLIST_PATH";
     public static final String MSI_SEARCH_FILE_NAME_SOURCE = "MSI_SEARCH_FILE_NAME";
@@ -36,6 +36,7 @@ public class ImportManager {
             put(SEARCH_RESULT_NAME_SOURCE, true);
             put(PEAKLIST_PATH_SOURCE, true);
             put(MSI_SEARCH_FILE_NAME_SOURCE, true);
+            put(MASCOT_DAEMON_RULE, true);
         }
     };
 
@@ -45,7 +46,7 @@ public class ImportManager {
 
     public static void importRenaming(DDataset dataset, DataSetNode identificationNode, IdentificationTree tree) {
         ParameterList parameterList = new ParameterList(GENERAL_APPLICATION_SETTINGS);
-        Object[] objectTable = {ImportManager.SEARCH_RESULT_NAME_SOURCE, ImportManager.PEAKLIST_PATH_SOURCE, ImportManager.MSI_SEARCH_FILE_NAME_SOURCE};
+        Object[] objectTable = {ImportManager.SEARCH_RESULT_NAME_SOURCE, ImportManager.PEAKLIST_PATH_SOURCE, ImportManager.MSI_SEARCH_FILE_NAME_SOURCE, ImportManager.MASCOT_DAEMON_RULE};
         ObjectParameter parameter = new ObjectParameter(ImportManager.DEFAULT_SEARCH_RESULT_NAME_SOURCE_KEY, "Default Search Result Name Source", objectTable, 2, null);
         parameterList.add(parameter);
         parameterList.loadParameters(NbPreferences.root(), true);

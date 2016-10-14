@@ -109,18 +109,19 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
         if (newName.contains(".")) {
             newName = newName.substring(0, newName.indexOf("."));
         }
-
         if (naming.equalsIgnoreCase(ImportManager.SEARCH_RESULT_NAME_SOURCE)) {
+            newName = dataset.getResultSet().getName();
+        } else if (naming.equalsIgnoreCase(ImportManager.MASCOT_DAEMON_RULE)) {
             String nominee = dataset.getResultSet().getName();
             int leftBrackets = StringUtils.countMatches(nominee, "(");
             int rightBrackets = StringUtils.countMatches(nominee, ")");
-            
-            if(leftBrackets==rightBrackets && leftBrackets==1 && nominee.lastIndexOf(")")>nominee.lastIndexOf("(")){
-                newName = nominee.substring(nominee.lastIndexOf("(")+1, nominee.lastIndexOf(")"));
-            }else{
+
+            if (leftBrackets == rightBrackets && leftBrackets == 1 && nominee.lastIndexOf(")") > nominee.lastIndexOf("(")) {
+                newName = nominee.substring(nominee.lastIndexOf("(") + 1, nominee.lastIndexOf(")"));
+            } else {
                 newName = nominee;
             }
-                    
+
         } else if (naming.equalsIgnoreCase(ImportManager.PEAKLIST_PATH_SOURCE)) {
             newName = (dataset.getResultSet().getMsiSearch().getPeaklist().getPath() == null) ? "" : dataset.getResultSet().getMsiSearch().getPeaklist().getPath();
             if (newName.contains(File.separator)) {
@@ -180,7 +181,7 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
                     }
                 };
 
-                if (dataset.getResultSet()==null) {
+                if (dataset.getResultSet() == null) {
                     // ask asynchronous loading of data
                     DatabaseDataSetTask task = new DatabaseDataSetTask(callback);
                     task.initLoadRsetAndRsm(dataset);

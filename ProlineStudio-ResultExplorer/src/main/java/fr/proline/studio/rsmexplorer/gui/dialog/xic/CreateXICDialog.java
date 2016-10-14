@@ -694,7 +694,7 @@ public class CreateXICDialog extends DefaultDialog {
     @Override
     protected boolean backCalled() {
         if (m_step == STEP_PANEL_DEFINE_RAW_FILES) {
-
+            
             m_selectRawFilePanel.pruneDesignTree();
             displayDesignTree(m_finalXICDesignNode);
 

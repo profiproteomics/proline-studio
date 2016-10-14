@@ -62,6 +62,7 @@ import javax.swing.*;
 import javax.swing.event.TreeExpansionEvent;
 import javax.swing.event.TreeWillExpandListener;
 import javax.swing.tree.*;
+import org.apache.commons.lang3.StringUtils;
 import org.openide.util.NbPreferences;
 
 /**
@@ -110,7 +111,16 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
         }
 
         if (naming.equalsIgnoreCase(ImportManager.SEARCH_RESULT_NAME_SOURCE)) {
-            newName = dataset.getResultSet().getName();
+            String nominee = dataset.getResultSet().getName();
+            int leftBrackets = StringUtils.countMatches(nominee, "(");
+            int rightBrackets = StringUtils.countMatches(nominee, ")");
+            
+            if(leftBrackets==rightBrackets && leftBrackets==1 && nominee.lastIndexOf(")")>nominee.lastIndexOf("(")){
+                newName = nominee.substring(nominee.lastIndexOf("(")+1, nominee.lastIndexOf(")"));
+            }else{
+                newName = nominee;
+            }
+                    
         } else if (naming.equalsIgnoreCase(ImportManager.PEAKLIST_PATH_SOURCE)) {
             newName = (dataset.getResultSet().getMsiSearch().getPeaklist().getPath() == null) ? "" : dataset.getResultSet().getMsiSearch().getPeaklist().getPath();
             if (newName.contains(File.separator)) {

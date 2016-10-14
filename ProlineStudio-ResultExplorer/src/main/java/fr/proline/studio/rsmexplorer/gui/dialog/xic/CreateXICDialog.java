@@ -127,14 +127,10 @@ public class CreateXICDialog extends DefaultDialog {
         setButtonVisible(BUTTON_BACK, true);
 
         // Update and Replace panel
-        try {
             m_selectRawFilePanel = SelectRawFilesPanel.getPanel(m_finalXICDesignNode);
             replaceInternaleComponent(m_selectRawFilePanel);
             revalidate();
             repaint();
-        } catch (Exception ex) {
-            System.out.println(ex);
-        }
 
     }
 
@@ -705,6 +701,7 @@ public class CreateXICDialog extends DefaultDialog {
             return false;
         } else if (m_step == STEP_PANEL_DEFINE_XIC_PARAMS) {
 
+            m_selectRawFilePanel.pruneDesignTree();
             displayDefineRawFiles();
 
             return false;

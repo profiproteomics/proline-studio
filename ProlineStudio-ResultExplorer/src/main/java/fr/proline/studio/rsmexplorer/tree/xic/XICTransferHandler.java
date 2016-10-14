@@ -9,16 +9,13 @@ import fr.proline.studio.parameter.BooleanParameter;
 import fr.proline.studio.parameter.ParameterList;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
-import java.awt.Color;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
-import java.util.prefs.Preferences;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JTree;
@@ -273,22 +270,40 @@ public class XICTransferHandler extends TransferHandler {
 
             // Issue 11312: if the dragged node is a merged node, we use its name as suffix
             if (datasetList != null && !datasetList.isEmpty()) {
+                
                 // all dataset are in the same merged dataset parent
                 DDataset parentNode = datasetList.get(0).getParentMergedDataset();
+                AbstractNode ancestorNode = datasetList.get(0).getLowestAncestor();
+                
                 if (parentNode != null) {
+                    
                     int nb = datasetList.size();
+                    
                     boolean sameParent = true;
+                    boolean sameAncestor = true;
+                    
                     for (int i = 1; i < nb; i++) {
+                        
+                        AbstractNode a = datasetList.get(i).getLowestAncestor();
+                        
                         DDataset p = datasetList.get(i).getParentMergedDataset();
 
                         if (p != null && p.getId() != parentNode.getId()) {
                             sameParent = false;
-                            break;
                         }
+                        
+                        if(a == null || a != ancestorNode){
+                            sameAncestor = false;
+                        }
+                        
                     }
                     if (sameParent) {
                         suffix = parentNode.getName();
+                    }else if(sameAncestor){
+                        suffix = ancestorNode.toString();
                     }
+                    
+                    
                 }
             }
 

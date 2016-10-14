@@ -49,6 +49,14 @@ public abstract class AbstractNode extends DefaultMutableTreeNode implements Clo
         return m_type;
     }
     
+    public AbstractNode getLowestAncestor(){
+        AbstractNode ancestor = this;
+        while(ancestor.getParent()!=null && ancestor.getParent().getParent()!=null){
+            ancestor = (AbstractNode) ancestor.getParent();
+        }
+        return ancestor;
+    }
+    
     public AbstractData getData() {
         return (AbstractData) getUserObject();
     }

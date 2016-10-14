@@ -111,9 +111,14 @@ public abstract class DataTree extends JTree {
             }
         });
         
-        for (int i = 0; i < getRowCount(); i++) {
-            expandRow(i);
-        }
+        // expand first level of the tree
+        DefaultMutableTreeNode currentNode = root.getNextNode();
+        do {
+            if (currentNode.getLevel() == 1) {
+                expandPath(new TreePath(currentNode.getPath()));
+            }
+            currentNode = currentNode.getNextNode();
+        } while (currentNode != null);
     }
     
     public void updataDataNodes() {

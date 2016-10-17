@@ -248,7 +248,7 @@ public class MzdbRawFile implements IRawFile {
             } else {
                 runSlices = getMzDbReader().getLcMsRunSliceIterator(minMz, maxMz);
             }
-            Peakel[] peakels = detector.detectPeakels(runSlices);
+            Peakel[] peakels = detector.detectPeakels(runSlices,Option.empty());
 
              Iterator<RunSlice> tmpRunSlices = (minMz == 0 && maxMz == 0) ? getMzDbReader().getLcMsRunSliceIterator() : getMzDbReader().getLcMsRunSliceIterator(minMz, maxMz);
              logSliceBounds(tmpRunSlices);
@@ -369,7 +369,7 @@ public class MzdbRawFile implements IRawFile {
             
             MzDbFeatureDetector detector = new MzDbFeatureDetector(reader, detectorConfig);
             
-            Peakel[] peakels = detector.detectPeakels(runSlices);
+            Peakel[] peakels = detector.detectPeakels(runSlices,Option.empty());
             double min = (params.getMsLevel() == 1) ? params.getMinMz() : params.getFragmentMinMz();
             double max = (params.getMsLevel() == 1) ? params.getMaxMz() : params.getFragmentMaxMz();
             

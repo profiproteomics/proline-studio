@@ -7,10 +7,6 @@ import fr.proline.studio.dam.DatabaseDataManager;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
 import fr.proline.studio.dam.tasks.SubTask;
-import fr.proline.studio.gui.DefaultDialog;
-import fr.proline.studio.gui.ParameterDialog;
-import fr.proline.studio.parameter.ObjectParameter;
-import fr.proline.studio.parameter.ParameterList;
 import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
@@ -20,8 +16,6 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import javax.swing.JOptionPane;
 import org.openide.util.NbBundle;
-import org.openide.util.NbPreferences;
-import org.openide.windows.WindowManager;
 
 /**
  * Action to Rename a dataset

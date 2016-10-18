@@ -3,9 +3,7 @@ package fr.proline.studio.pattern;
 
 import fr.proline.studio.python.data.TableInfo;
 import fr.proline.studio.rsmexplorer.gui.calc.DataAnalyzerPanel;
-import fr.proline.studio.rsmexplorer.gui.calc.ProcessEngine;
 import fr.proline.studio.rsmexplorer.gui.calc.ProcessEngineInfo;
-import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphNode;
 
 /**
  *

@@ -1,5 +1,6 @@
 package fr.proline.studio.python.interpreter;
 
+import fr.proline.studio.python.data.ColBooleanData;
 import fr.proline.studio.python.data.ColDoubleData;
 import fr.proline.studio.python.data.PythonImage;
 import fr.proline.studio.python.data.Table;

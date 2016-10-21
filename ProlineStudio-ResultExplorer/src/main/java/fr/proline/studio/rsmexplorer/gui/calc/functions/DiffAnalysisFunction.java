@@ -36,7 +36,7 @@ public class DiffAnalysisFunction extends AbstractOnExperienceDesignFunction {
 
     @Override
     public int getMaxGroups() {
-        return 2;
+        return 8;
     }
 
     @Override

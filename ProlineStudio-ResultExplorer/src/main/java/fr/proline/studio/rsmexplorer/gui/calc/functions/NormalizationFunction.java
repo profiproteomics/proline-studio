@@ -45,7 +45,7 @@ public class NormalizationFunction extends AbstractOnExperienceDesignFunction {
 
     @Override
     public int getMaxGroups() {
-        return 3;
+        return 8;
     }
 
     @Override

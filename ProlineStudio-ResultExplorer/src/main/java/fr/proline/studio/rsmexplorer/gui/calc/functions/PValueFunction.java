@@ -20,7 +20,7 @@ public class PValueFunction extends AbstractOnExperienceDesignFunction {
     }
     @Override
     public int getMaxGroups() {
-        return 2;
+        return 8;
     }
 
     @Override

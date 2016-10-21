@@ -1005,11 +1005,9 @@ public class ImportIdentificationDialog extends DefaultDialog {
     
     private ParameterList createXtandemParser() {
         ParameterList parameterList = new ParameterList(XTANDEM_PARSER);
-        
-//        Preferences preferences = NbPreferences.root();
-//        parameterList.add(new FileParameter(ServerFileSystemView.getServerFileSystemView(), "usermod.xml.file", "Usermods file path", JTextField.class, preferences.get("Omssa_Parser.Usermods_file_path", ""), "Usermods XML File", "xml"));
-//        parameterList.add(new FileParameter(ServerFileSystemView.getServerFileSystemView(), "ptm.composition.file", "PTM composition file path", JTextField.class, preferences.get("Omssa_Parser.PTM_composition_file_path", ""), "PTM composition File", "txt"));
 
+        Preferences preferences = NbPreferences.root();
+        parameterList.add(new StringParameter("protein.parsing.rule",  "Protein parsing rule", JTextField.class, preferences.get("XtandemParser.protein_parsing_rule", ""),0,50));
         
         return parameterList;
     }

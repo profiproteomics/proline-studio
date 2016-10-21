@@ -44,7 +44,7 @@ public class ColRef extends Col {
                  resultArray.add(v.doubleValue());
             }
         }
-        return new ColData(m_table, resultArray, getColumnName());
+        return new ColDoubleData(m_table, resultArray, getColumnName());
     }
     
     @Override
@@ -81,6 +81,11 @@ public class ColRef extends Col {
            return m_tableModel.getExportColumnName(m_modelCol); 
         }
         return m_columnName;
+    }
+
+    @Override
+    public Class getColumnClass() {
+        return m_tableModel.getColumnClass(m_modelCol);
     }
 
 

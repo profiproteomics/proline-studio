@@ -7,17 +7,17 @@ import java.util.ArrayList;
  *
  * @author JM235353
  */
-public class ColData extends Col {
+public class ColDoubleData extends Col {
     
     private final ArrayList<Double> m_data;
     
-    public ColData(Table table, ArrayList<Double> data, String name) {
+    public ColDoubleData(Table table, ArrayList<Double> data, String name) {
         super(table);
         m_data = data;
         m_columnName = name;
     }
 
-    private ColData() {
+    private ColDoubleData() {
         super(null);
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
@@ -49,6 +49,10 @@ public class ColData extends Col {
         return m_data.size();
     }
     
+    @Override
+    public Class getColumnClass() {
+        return Double.class;
+    }
 
     
 }

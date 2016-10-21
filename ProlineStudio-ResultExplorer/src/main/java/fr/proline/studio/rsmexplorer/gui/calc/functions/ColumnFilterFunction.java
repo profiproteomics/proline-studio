@@ -115,7 +115,9 @@ public class ColumnFilterFunction extends AbstractFunction {
         setCalculating(true);
         
         try {
-            m_globalTableModelInterface = new FilterColumnTableModel(graphObjects[0].getGlobalTableModelInterface(), colListArray);
+
+            addModel(new FilterColumnTableModel(graphObjects[0].getGlobalTableModelInterface(), colListArray));
+
             
             setCalculating(false);
             callback.finished(functionGraphNode);
@@ -134,7 +136,7 @@ public class ColumnFilterFunction extends AbstractFunction {
     }
     
     @Override
-    public WindowBox getDisplayWindowBox(FunctionGraphNode functionGraphNode) {
+    public ArrayList<WindowBox> getDisplayWindowBox(FunctionGraphNode functionGraphNode) {
         return getDisplayWindowBox(functionGraphNode.getPreviousDataName(), getName());
     }
 

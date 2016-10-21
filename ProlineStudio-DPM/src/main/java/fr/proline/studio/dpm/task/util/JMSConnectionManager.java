@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.prefs.Preferences;
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
-import javax.jms.JMSContext;
 import javax.jms.JMSException;
 import javax.jms.MessageConsumer;
 import javax.jms.Queue;
@@ -32,15 +31,17 @@ import org.slf4j.LoggerFactory;
 public class JMSConnectionManager {
 
     private JMSConnectionManager() {
-        listenersList = new EventListenerList();
-        connectionState = ConnectionListener.NOT_CONNECTED;
+        m_connectionListenersList = new EventListenerList();
+        m_connectionState = ConnectionListener.NOT_CONNECTED;
     }
     
-    private ParameterList m_parameterList;
-    private static final String JMS_SETTINGS = "JMS Settings";
+    // paramaters management
+    private ParameterList m_jmsSettingsPList;
+    private static final String JMS_SETTINGS_PARAMLIST_KEY = "JMS Settings";
 
     protected static final Logger m_loggerProline = LoggerFactory.getLogger("ProlineStudio.DPM.Task");
 
+    //JMS Constants
     public static final String DEFAULT_SERVICE_REQUEST_QUEUE_NAME = "ProlineServiceRequestQueue";
 
     public static final String SERVICE_REQUEST_QUEUE_NAME_KEY = "JMSProlineQueueName";
@@ -73,18 +74,17 @@ public class JMSConnectionManager {
 
     public static final int JMS_CANCELLED_TASK_ERROR_CODE = -32004;
 
-    private final EventListenerList listenersList;
-    private int connectionState;
+    
+    private final EventListenerList m_connectionListenersList;//ConnectionListeners list
+    private int m_connectionState;//Connection current state
 
     public String m_jmsServerHost = null;/* Default = HornetQ Proline Prod Grenoble = "132.168.72.129" */
-
     public int m_jmsServerPort = 5445;
 
     private Connection m_connection = null;
     private Queue m_serviceQueue = null;
     private Topic m_notificationTopic = null;
-    private Session m_topicSession = null;
-    private JMSContext m_jmsContext = null;
+    private Session m_mainSession = null;
 
     private QueueBrowser m_browser = null;
     private ServiceNotificationListener m_notifListener = null;
@@ -101,15 +101,7 @@ public class JMSConnectionManager {
     public void saveParameters() {
         if (m_serviceQueue != null) {
             Preferences preferences = NbPreferences.root();
-            /*
-            try {
-                preferences.put(SERVICE_REQUEST_QUEUE_NAME_KEY, m_serviceQueue.getQueueName());
-                preferences.flush();
-            } catch (BackingStoreException | JMSException e) {
-                LoggerFactory.getLogger("ProlineStudio.DPM").error("Saving Server Connection Parameters Failed", e);
-            }
-            */
-            m_parameterList.saveParameters(preferences, true);
+            m_jmsSettingsPList.saveParameters(preferences, true);
         }
     }
 
@@ -123,19 +115,18 @@ public class JMSConnectionManager {
     }
 
     public int getConnectionState() {
-        return connectionState;
+        return m_connectionState;
     }
 
     private void resetConnObjects() {
         m_connection = null;
         m_serviceQueue = null;
         m_notificationTopic = null;
-        m_topicSession = null;
-        m_jmsContext = null;
+        m_mainSession = null;
         m_browser = null;
         m_notifListener = null;
         m_topicSuscriber = null;
-        connectionState = ConnectionListener.NOT_CONNECTED;
+        m_connectionState = ConnectionListener.NOT_CONNECTED;
         fireConnectionStateChanged(ConnectionListener.NOT_CONNECTED);
     }
 
@@ -159,6 +150,11 @@ public class JMSConnectionManager {
         resetConnObjects();
     }
 
+    /**
+     * Get Studio JMS Connection. Create one if necessary
+     * @return
+     * @throws Exception 
+     */
     public Connection getJMSConnection() throws Exception {
 
         if (m_connection == null) {
@@ -171,6 +167,11 @@ public class JMSConnectionManager {
         return m_connection;
     }
 
+    /**
+     * Get Proline Server servuce Queue, create JMS connection if necessary
+     * @return
+     * @throws Exception 
+     */
     public Queue getServiceQueue() throws Exception {
         if (m_serviceQueue == null) {
             try {
@@ -191,10 +192,10 @@ public class JMSConnectionManager {
             // Step 1. Directly instantiate the JMS Queue object.
             //Get JMS Queue Name from preference 
             
-            m_parameterList = new ParameterList(JMS_SETTINGS);
+            m_jmsSettingsPList = new ParameterList(JMS_SETTINGS_PARAMLIST_KEY);
             StringParameter m_parameter = new StringParameter(JMSConnectionManager.SERVICE_REQUEST_QUEUE_NAME_KEY, "JMSProlineQueueName", JTextField.class, DEFAULT_SERVICE_REQUEST_QUEUE_NAME, 5, null);
-            m_parameterList.add(m_parameter);
-            m_parameterList.loadParameters(NbPreferences.root(), true);
+            m_jmsSettingsPList.add(m_parameter);
+            m_jmsSettingsPList.loadParameters(NbPreferences.root(), true);
             String queueName = m_parameter.getStringValue();
 
             m_loggerProline.info(" Use JMS Queure " + queueName);
@@ -216,22 +217,19 @@ public class JMSConnectionManager {
             final ConnectionFactory cf = (ConnectionFactory) HornetQJMSClient
                     .createConnectionFactoryWithoutHA(JMSFactoryType.CF, transportConfiguration);
 
-            // Create a JMS v 2.0 Context
-            m_jmsContext = cf.createContext();
-
             // Step 4.Create a JMS Connection
             m_connection = cf.createConnection();
 
             // Step 5. Create a JMS Session (Session MUST be confined in current Thread)
             // Not transacted, AUTO_ACKNOWLEDGE
-            m_topicSession = m_connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+            m_mainSession = m_connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
             // Step 6. Create the subscription and the subscriber.//TODO : create & listen only when asked !?
-            m_topicSuscriber = m_topicSession.createConsumer(m_notificationTopic);
+            m_topicSuscriber = m_mainSession.createConsumer(m_notificationTopic);
             m_notifListener = new ServiceNotificationListener();
             m_topicSuscriber.setMessageListener(m_notifListener);
-            connectionState = ConnectionListener.CONNECTION_DONE;
+            m_connectionState = ConnectionListener.CONNECTION_DONE;
             fireConnectionStateChanged(ConnectionListener.CONNECTION_DONE);
-        } catch (JMSException je) {
+        } catch (RuntimeException | JMSException je) {
             if (m_connection != null) {
                 try {
                     m_connection.close();
@@ -242,7 +240,7 @@ public class JMSConnectionManager {
                     resetConnObjects();
                 }
             }
-            connectionState = ConnectionListener.CONNECTION_FAILED;
+            m_connectionState = ConnectionListener.CONNECTION_FAILED;
             fireConnectionStateChanged(ConnectionListener.CONNECTION_FAILED);
             throw je;
         }
@@ -251,26 +249,29 @@ public class JMSConnectionManager {
     public ServiceNotificationListener getNotificationListener() {
         return m_notifListener;
     }
-
+    
+    /**
+     * Get Proline Server service Queue QueueBrowser, create JMS connection if necessary
+     * @return
+     * @throws Exception 
+     */
     public QueueBrowser getQueueBrowser() {
         if (m_browser == null) {
-            JMSContext jmsCtxt = getJMSContext();
-            if (jmsCtxt != null) {
-                m_browser = jmsCtxt.createBrowser(m_serviceQueue);
+            if(m_mainSession == null){
+                try {
+                    createConnection();
+                } catch (JMSException ex) {
+                    return null;
+                }
+            }
+            
+            try {    
+                m_browser = m_mainSession.createBrowser(m_serviceQueue);
+            } catch (JMSException ex) {
+                m_browser = null;
             }
         }
         return m_browser;
-    }
-
-    public JMSContext getJMSContext() {
-        if (m_connection == null) {
-            try {
-                createConnection();
-            } catch (JMSException ex) {
-                return null;
-            }
-        }
-        return m_jmsContext;
     }
 
     public void closeConnection() {
@@ -280,7 +281,7 @@ public class JMSConnectionManager {
                 // need to cleanup jms thread
                 AccessJMSManagerThread.getAccessJMSManagerThread().cleanup();
                 m_topicSuscriber.close();
-                m_topicSession.close();
+                m_mainSession.close();
                 m_connection.close();
 
                 m_loggerProline.info("JMS Connection closed");
@@ -296,20 +297,20 @@ public class JMSConnectionManager {
 
     //Listener Methods
     public void addConnectionListener(ConnectionListener listener) {
-        synchronized (listenersList) {
-            listenersList.add(ConnectionListener.class, listener);
+        synchronized (m_connectionListenersList) {
+            m_connectionListenersList.add(ConnectionListener.class, listener);
         }
     }
 
     public void removeConnectionListener(ConnectionListener listener) {
-        synchronized (listenersList) {
-            listenersList.remove(ConnectionListener.class, listener);
+        synchronized (m_connectionListenersList) {
+            m_connectionListenersList.remove(ConnectionListener.class, listener);
         }
     }
 
     protected void fireConnectionStateChanged(int newConnState) {
-        synchronized (listenersList) {
-            ConnectionListener[] allListeners = listenersList.getListeners(ConnectionListener.class);
+        synchronized (m_connectionListenersList) {
+            ConnectionListener[] allListeners = m_connectionListenersList.getListeners(ConnectionListener.class);
             for (ConnectionListener nextOne : allListeners) {
                 nextOne.connectionStateChanged(newConnState);
             }

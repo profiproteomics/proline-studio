@@ -25,8 +25,10 @@ public class MultiObjectParameter<E> extends AbstractParameter {
 
     private ArrayList<AbstractLinkedParameters> m_linkedParametersList = null;
     
-    private boolean m_mustSelectOneObject = true;
+    private int m_nbCompulsorySelection = 1;
     private boolean m_allowSelectAll = true;
+    
+    
     
     public MultiObjectParameter(String key, String name, E[] objects, boolean[] selection, AbstractParameterToString<E> paramToString) {
         super(key, name, Integer.class, JCheckBoxList.class);
@@ -55,6 +57,17 @@ public class MultiObjectParameter<E> extends AbstractParameter {
 
     }
     
+    public void setCompulsory(int nbCompulsorySelection) {
+        m_compulsory = (nbCompulsorySelection>0);
+        m_nbCompulsorySelection = nbCompulsorySelection;
+    }
+    
+    @Override
+    public void setCompulsory(boolean v) {
+        m_compulsory = v;
+        m_nbCompulsorySelection = 0;
+    }
+    
     public void setSelection(int i, boolean v) {
         if (m_parameterComponent == null) {
             return;
@@ -63,10 +76,7 @@ public class MultiObjectParameter<E> extends AbstractParameter {
         checkBoxList.selectItem(i, v);
         
     }
-    
-    public void setNoSelectionAllowed() {
-        m_mustSelectOneObject = false;
-    }
+
     
     @Override
     public boolean componentNeedsScrollPane() {
@@ -139,10 +149,13 @@ public class MultiObjectParameter<E> extends AbstractParameter {
         if (m_graphicalType.equals(JCheckBoxList.class)) {
             
             List selectedList = ((JCheckBoxListPanel) m_parameterComponent).getCheckBoxList().getSelectedItems();
-            if ((m_mustSelectOneObject) && (selectedList.isEmpty())) {
+            if ((m_compulsory) && (selectedList.isEmpty())) {
                 return new ParameterError("No selection done", m_parameterComponent);
             }
-
+            int nb = selectedList.size();
+            if ((m_compulsory) && (nb<m_nbCompulsorySelection)) {
+                return new ParameterError("You must select at least "+m_nbCompulsorySelection+ "values", m_parameterComponent);
+            }
         }
         
         return null;

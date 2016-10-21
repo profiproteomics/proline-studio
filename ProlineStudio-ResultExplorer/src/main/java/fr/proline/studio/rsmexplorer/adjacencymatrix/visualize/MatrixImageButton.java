@@ -62,9 +62,9 @@ public class MatrixImageButton extends JButton {
             }
         }
 
-        HashMap<LightPeptideMatch, ArrayList<LightProteinMatch>> m_peptideToProteinMap = drawVisualization.get_peptideToProteinMap();
+        HashMap<LightPeptideMatch, ArrayList<LightProteinMatch>> m_peptideToProteinMap = drawVisualization.getPeptideToProteinMap();
 
-        ArrayList<LightPeptideMatch> peptideList = componentOfImage.peptideArray;
+        ArrayList<LightPeptideMatch> peptideList = componentOfImage.m_peptideArray;
         int peptIndex = -1;
 
         for (LightPeptideMatch temp2 : peptideList) {
@@ -72,7 +72,7 @@ public class MatrixImageButton extends JButton {
             ArrayList<LightProteinMatch> proteinList = m_peptideToProteinMap.get(temp2);
 
             for (LightProteinMatch temp3 : proteinList) {
-                int protIndex = componentOfImage.proteinMatchArray.indexOf(temp3);
+                int protIndex = componentOfImage.m_proteinMatchArray.indexOf(temp3);
                 flagArray[peptIndex][protIndex] = true;
             }
         }

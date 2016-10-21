@@ -105,7 +105,7 @@ public class ExprTableModel extends DecoratedTableModel implements ChildModelInt
     @Override
     public Class getColumnClass(int columnIndex) {
         if (columnIndex>=m_parentModel.getColumnCount()) {
-            return Double.class;
+            return m_extraColumns.get(columnIndex-m_parentModel.getColumnCount()).getColumnClass();
         }
         
         if ((m_modifiedColumns != null) && (m_modifiedColumns.containsKey(columnIndex))) {

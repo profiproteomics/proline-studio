@@ -17,6 +17,7 @@ import fr.proline.studio.rsmexplorer.gui.calc.parameters.FunctionParametersDialo
 import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.utils.IconManager;
 import java.awt.Color;
+import java.util.ArrayList;
 import javax.swing.ImageIcon;
 import org.openide.windows.WindowManager;
 
@@ -26,7 +27,7 @@ import org.openide.windows.WindowManager;
  */
 public abstract class AbstractFunction implements CheckParameterInterface {
 
-    protected GlobalTableModelInterface m_globalTableModelInterface;
+    protected ArrayList<GlobalTableModelInterface> m_globalTableModelInterface;
     
     protected ParameterList[] m_parameters = null;
     
@@ -89,12 +90,33 @@ public abstract class AbstractFunction implements CheckParameterInterface {
     public abstract void process(AbstractConnectedGraphObject[] graphObjects, FunctionGraphNode functionGraphNode, ProcessCallbackInterface callback);
     
     public abstract void askDisplay(FunctionGraphNode functionGraphNode);
-    public abstract WindowBox getDisplayWindowBox(FunctionGraphNode functionGraphNode);
+    public abstract ArrayList<WindowBox> getDisplayWindowBox(FunctionGraphNode functionGraphNode);
     
-    public GlobalTableModelInterface getGlobalTableModelInterface() {
+    public GlobalTableModelInterface getFirstGlobalTableModelInterface() {
+        if (m_globalTableModelInterface == null) {
+            return null;
+        }
+        return m_globalTableModelInterface.get(0);
+    }
+    
+    public ArrayList<GlobalTableModelInterface> getGlobalTableModelInterfaceList() {
         return m_globalTableModelInterface;
     }
+    
+    public int getNumberOfResults() {
+        if (m_globalTableModelInterface == null) {
+            return 0;
+        }
+        return m_globalTableModelInterface.size();
+    }
 
+    public void addModel(GlobalTableModelInterface model) {
+        if (m_globalTableModelInterface == null) {
+            m_globalTableModelInterface = new ArrayList<>();
+        }
+
+        m_globalTableModelInterface.add(model);
+    }
 
     public abstract void generateDefaultParameters(AbstractConnectedGraphObject[] graphObjects);
     
@@ -102,22 +124,36 @@ public abstract class AbstractFunction implements CheckParameterInterface {
     public abstract AbstractFunction cloneFunction(GraphPanel p);
     
 
-        
     protected void display(String dataName, String functionName) {
+        display(dataName, functionName, 0);
+    }
+    protected void display(String dataName, String functionName, int resultIndex) {
         WindowBox windowBox = WindowBoxFactory.getGenericWindowBox(dataName, functionName, IconManager.IconType.CHALKBOARD, false);
-        ProjectId projectId = (ProjectId) m_globalTableModelInterface.getSingleValue(ProjectId.class);
+        ProjectId projectId = (ProjectId) m_globalTableModelInterface.get(resultIndex).getSingleValue(ProjectId.class);
         long id = (projectId!=null) ? projectId.getId() : -1l;
-        windowBox.setEntryData(id, m_globalTableModelInterface);
+        windowBox.setEntryData(id, m_globalTableModelInterface.get(resultIndex));
         DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(windowBox);
         win.open();
         win.requestActive();
     }
     
-    protected WindowBox getDisplayWindowBox(String dataName, String functionName) {
+    protected ArrayList<WindowBox> getDisplayWindowBox(String dataName, String functionName) {
+        if (m_globalTableModelInterface == null) {
+            return null;
+        }
+        int size = m_globalTableModelInterface.size();
+        ArrayList<WindowBox> windowBoxList = new ArrayList<>(size);
+        for (int i=0;i<size;i++) {
+            windowBoxList.add(getDisplayWindowBox(dataName, functionName, i));
+        }
+        
+        return windowBoxList;
+    }
+    protected WindowBox getDisplayWindowBox(String dataName, String functionName, int resultIndex) {
         WindowBox windowBox = WindowBoxFactory.getGenericWindowBox(dataName, functionName, IconManager.IconType.CHALKBOARD, false);
-        ProjectId projectId = (ProjectId) m_globalTableModelInterface.getSingleValue(ProjectId.class);
+        ProjectId projectId = (ProjectId) m_globalTableModelInterface.get(resultIndex).getSingleValue(ProjectId.class);
         long id = (projectId!=null) ? projectId.getId() : -1l;
-        windowBox.setEntryData(id, m_globalTableModelInterface);
+        windowBox.setEntryData(id, m_globalTableModelInterface.get(resultIndex));
         return windowBox;
     }
     

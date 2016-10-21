@@ -11,6 +11,7 @@ import fr.proline.studio.rsmexplorer.gui.calc.ProcessCallbackInterface;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.utils.IconManager;
 import java.awt.Color;
+import java.util.ArrayList;
 import javax.swing.ImageIcon;
 import javax.swing.JPopupMenu;
 
@@ -137,7 +138,7 @@ public class DataGraphNode extends GraphNode {
     }
 
     @Override
-    public WindowBox getDisplayWindowBox() {
+    public ArrayList<WindowBox> getDisplayWindowBox() {
         WindowBox windowBox = WindowBoxFactory.getGenericWindowBox(m_tableInfo.getDataName(), m_tableInfo.getTypeName(), IconManager.IconType.CHALKBOARD, false);
 
         GlobalTableModelInterface model = m_tableInfo.getModel();
@@ -145,7 +146,10 @@ public class DataGraphNode extends GraphNode {
         long id = (projectId != null) ? projectId.getId() : -1l;
 
         windowBox.setEntryData(id, model);
-        return windowBox;
+        
+        ArrayList<WindowBox> windowBoxList = new ArrayList<>(1);
+        windowBoxList.add(windowBox);
+        return windowBoxList;
     }
 
     @Override

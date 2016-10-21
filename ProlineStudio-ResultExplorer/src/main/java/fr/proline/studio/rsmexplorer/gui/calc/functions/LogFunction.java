@@ -83,7 +83,7 @@ public class LogFunction  extends AbstractFunction {
 
         if (colList.isEmpty()) {
             // no real calculation to do
-            m_globalTableModelInterface = new ExprTableModel(graphObjects[0].getGlobalTableModelInterface());
+            addModel(new ExprTableModel(graphObjects[0].getGlobalTableModelInterface()));
             callback.finished(functionGraphNode);
             return;
         }
@@ -148,7 +148,7 @@ public class LogFunction  extends AbstractFunction {
                                     // we have found the result
                                     Table resTable = (Table) var.getValue();
 
-                                    m_globalTableModelInterface = resTable.getModel();
+                                    addModel(resTable.getModel());
 
                                 }
                             }
@@ -181,7 +181,7 @@ public class LogFunction  extends AbstractFunction {
     }
     
     @Override
-    public WindowBox getDisplayWindowBox(FunctionGraphNode functionGraphNode) {
+    public ArrayList<WindowBox> getDisplayWindowBox(FunctionGraphNode functionGraphNode) {
         return getDisplayWindowBox(functionGraphNode.getPreviousDataName(), getName());
     }
     
@@ -212,7 +212,7 @@ public class LogFunction  extends AbstractFunction {
         ParameterList parameterList1 = new ParameterList("param1");
         
         m_columnsParameter = new MultiObjectParameter(SEL_COL1, "Columns to log", null, objectArray1, associatedObjectArray1, null, null, true);
-        m_columnsParameter.setNoSelectionAllowed();
+        m_columnsParameter.setCompulsory(false);
 
 
         m_parameters = new ParameterList[1];

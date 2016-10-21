@@ -39,18 +39,22 @@ public abstract class AbstractTasksPanel extends HourglassPanel implements DataB
     protected final static ImageIcon[] PUBLIC_STATE_ICONS = { IconManager.getIcon(IconManager.IconType.HOUR_GLASS_MINI16), IconManager.getIcon(IconManager.IconType.ARROW_RIGHT_SMALL), IconManager.getIcon(IconManager.IconType.CROSS_BLUE_SMALL16), IconManager.getIcon(IconManager.IconType.TICK_SMALL), IconManager.getIcon(IconManager.IconType.CROSS_SMALL16)};
 
     private AbstractDataBox m_dataBox;
-    private boolean m_isRunning;
+    private boolean m_isConnected;
         
     private ServiceNotificationListener m_serviceListener = null;
     private AbstractJMSCallback m_notifierCallback = null; //Callback to be called by ServiceNotificationListener
     private AbstractJMSCallback m_purgerCallback = null; //Callback to be called by purger
 
     public AbstractTasksPanel(){
-        this.m_isRunning = false;
+        this.m_isConnected = false;
         initListener();
     }
     
    
+    protected boolean isMonitoringConnected(){
+        return m_isConnected;
+    }
+    
     /**
      * Listener of JMS Connection state change : to connect/disconnect from topic
      */
@@ -83,7 +87,7 @@ public abstract class AbstractTasksPanel extends HourglassPanel implements DataB
     public void connectionStateChanged(int newStatus) {
             switch(newStatus) {
             case CONNECTION_DONE: 
-                if(!m_isRunning){
+                if(!m_isConnected){
                     m_serviceListener= null;
                     if (checkJMSVariables()){
                         final JMSNotificationMessage[] sysInfoResult = new JMSNotificationMessage[1];
@@ -97,12 +101,12 @@ public abstract class AbstractTasksPanel extends HourglassPanel implements DataB
                         }
                         startOtherDataCollecting();
                     }
-                    m_isRunning = true;
+                    m_isConnected = true;
                 }
                 break;
             case CONNECTION_FAILED :
             case NOT_CONNECTED:
-                if(m_isRunning && m_serviceListener != null){
+                if(m_isConnected && m_serviceListener != null){
                     if(m_notifierCallback != null)
                         m_serviceListener.removeCallback(m_notifierCallback);
                     m_serviceListener = null;
@@ -112,7 +116,7 @@ public abstract class AbstractTasksPanel extends HourglassPanel implements DataB
                     m_purgerCallback = null;
                     stopOtherDataCollecting();
                 }           
-                m_isRunning = false;
+                m_isConnected = false;
                 break;                        
         }        
     }

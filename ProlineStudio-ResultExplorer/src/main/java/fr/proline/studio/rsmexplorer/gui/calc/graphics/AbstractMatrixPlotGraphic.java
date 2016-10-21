@@ -128,7 +128,7 @@ public abstract class AbstractMatrixPlotGraphic extends AbstractGraphic {
 
 
             StringBuilder codeSB = new StringBuilder();
-            codeSB.append("plot=Stats."+m_pythonCall+"(");
+            codeSB.append("plot=Stats."+m_pythonCall+"((");
             
             nbSizeDone = 0;
             for (int j = 0; j < nbColList; j++) {
@@ -147,7 +147,7 @@ public abstract class AbstractMatrixPlotGraphic extends AbstractGraphic {
                 }
             }
             
-            codeSB.append(",(");
+            codeSB.append("),(");
             // labels of groups 
             boolean first = true;
             for (int j = 0; j < nbColList; j++) {
@@ -246,7 +246,7 @@ public abstract class AbstractMatrixPlotGraphic extends AbstractGraphic {
 
         
         int nbGroups = getMinGroups(); // default value
-        String[] groupNameList = { "First Group", "Second Group", "Third Group" };
+        String[] groupNameList = {"First Group", "Second Group", "Third Group", "Fourth Group", "Fifth Group", "Sixth Group", "Seventh Group", "Eighth Group"};
 
         boolean[][] selection = new boolean[getMaxGroups()][nbColumnsKept];
         for (boolean[] row: selection) {
@@ -333,6 +333,7 @@ public abstract class AbstractMatrixPlotGraphic extends AbstractGraphic {
         m_columnsParameterArray = new MultiObjectParameter[getMaxGroups()];
         for (int i=0;i<getMaxGroups();i++) {
             m_columnsParameterArray[i] = new MultiObjectParameter(SEL_COLS_PREFIX+i, groupNameList[i], null, objectArray1, associatedObjectArray1, selection[i], null, true);
+            m_columnsParameterArray[i].setCompulsory(2); // at least two values in a group
         }
 
 
@@ -353,17 +354,19 @@ public abstract class AbstractMatrixPlotGraphic extends AbstractGraphic {
          
         final int _nbGroupsFound = nbGroupsFound;
         if (getMaxGroups() >= 3) {
-            
-            AbstractLinkedParameters nbGroupslinkedParameters = new AbstractLinkedParameters(m_parameters[getMaxGroups()]) {
-                @Override
-                public void valueChanged(String value, Object associatedValue) {
-                    enableList(value.compareTo("3") == 0);
-                }
+            for (int i = 3; i < getMaxGroups() + 1; i++) {
+                final Integer number = i;
+                AbstractLinkedParameters nbGroupslinkedParameters = new AbstractLinkedParameters(m_parameters[i]) {
+                    @Override
+                    public void valueChanged(String value, Object associatedValue) {
 
-            };
-            m_nbGroupsParameter.addLinkedParameters(nbGroupslinkedParameters); // link parameter, it will modify the panel
+                        enableList(((Integer) associatedValue) >= number);
+                    }
+
+                };
+                m_nbGroupsParameter.addLinkedParameters(nbGroupslinkedParameters); // link parameter, it will modify the panel
+            }
         }
-        
         AbstractLinkedParameters quantitationVisibilityParameters = new AbstractLinkedParameters(m_parameters[0]) {
             @Override
             public void valueChanged(String value, Object associatedValue) {

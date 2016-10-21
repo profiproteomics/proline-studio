@@ -31,7 +31,7 @@ public class VarianceDistPlotGraphic extends AbstractMatrixPlotGraphic {
 
     @Override
     public int getMaxGroups() {
-        return 3;
+        return 8;
     }
 
 }

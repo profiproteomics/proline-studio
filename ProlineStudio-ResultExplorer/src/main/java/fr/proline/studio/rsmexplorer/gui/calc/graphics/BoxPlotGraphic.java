@@ -21,7 +21,7 @@ public class BoxPlotGraphic extends AbstractMatrixPlotGraphic {
 
     @Override
     public int getMaxGroups() {
-        return 3;
+        return 8;
     }
    
     @Override

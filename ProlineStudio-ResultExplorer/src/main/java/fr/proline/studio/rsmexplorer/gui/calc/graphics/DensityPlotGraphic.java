@@ -34,7 +34,7 @@ public class DensityPlotGraphic extends AbstractMatrixPlotGraphic {
 
     @Override
     public int getMaxGroups() {
-        return 3;
+        return 8;
     }
 
 

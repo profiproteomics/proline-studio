@@ -201,7 +201,7 @@ public class MatrixSelectionPanel extends HourglassPanel implements DataBoxPanel
     private boolean filter(Filter filter, int index, int type) {
         if (type == PROTEIN) {
             Component c = m_componentList.get(index);
-            ArrayList<LightProteinMatch> proteinSet = c.proteinMatchArray;
+            ArrayList<LightProteinMatch> proteinSet = c.m_proteinMatchArray;
             int nbProteins = proteinSet.size();
             for (int i = 0; i < nbProteins; i++) {
                 LightProteinMatch pm = proteinSet.get(i);
@@ -211,7 +211,7 @@ public class MatrixSelectionPanel extends HourglassPanel implements DataBoxPanel
             }
         } else if (type == PEPTIDE) {
             Component c = m_componentList.get(index);
-            ArrayList<LightPeptideMatch> peptideSet = c.peptideArray;
+            ArrayList<LightPeptideMatch> peptideSet = c.m_peptideArray;
             int nbPeptides = peptideSet.size();
             for (int i = 0; i < nbPeptides; i++) {
                 LightPeptideMatch pm = peptideSet.get(i);
@@ -270,7 +270,7 @@ public class MatrixSelectionPanel extends HourglassPanel implements DataBoxPanel
         private void initPanel(boolean doNotTakeFirstSelection) {
 
             // search filter order
-            m_peptideToProteinMap = m_drawVisualization.get_peptideToProteinMap();
+            m_peptideToProteinMap = m_drawVisualization.getPeptideToProteinMap();
             m_componentList = m_drawVisualization.get_ComponentList();
 
             //Sort clist
@@ -372,7 +372,7 @@ public class MatrixSelectionPanel extends HourglassPanel implements DataBoxPanel
         int nbComponents = m_componentList.size();
         for (int i = 0; i < nbComponents; i++) {
             Component c = m_componentList.get(i);
-            ArrayList<LightProteinMatch> proteinSetList = c.proteinMatchArray;
+            ArrayList<LightProteinMatch> proteinSetList = c.m_proteinMatchArray;
             int nbProteins = proteinSetList.size();
             for (int j = 0; j < nbProteins; j++) {
                 LightProteinMatch pm = proteinSetList.get(j);

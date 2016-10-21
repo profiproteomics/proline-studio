@@ -7,6 +7,7 @@ import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.pattern.WindowBox;
 import java.awt.BorderLayout;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 import java.util.HashMap;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
@@ -39,21 +40,25 @@ public class DataAnalyzerResultsPanel extends JPanel implements DataBoxPanelInte
     
     public void displayGraphNode(ProcessEngineInfo processEngineInfo) {
         
-        WindowBox windowBox = processEngineInfo.getGraphNode().getDisplayWindowBox();
+        ArrayList<WindowBox> windowBoxList = processEngineInfo.getGraphNode().getDisplayWindowBox();
         Integer processEngineKey = processEngineInfo.getProcessKey();
-        WindowBox existingWindowBox = m_processKeyToWindowBoxMap.get(processEngineKey);
-        if (existingWindowBox != null) {
-            existingWindowBox.addDatabox(windowBox.getEntryBox(), processEngineInfo.getLayout());
-        } else {
-            m_processKeyToWindowBoxMap.put(processEngineKey, windowBox);
-            String processName = processEngineInfo.getProcessName();
-            
-            m_tabbedPane.addTab(null, windowBox.getPanel());
-            ClosableTabPanel closableTabPanel = new ClosableTabPanel(m_tabbedPane, processEngineKey+": "+processName, processEngineKey.toString());
-            m_tabbedPane.setTabComponentAt(m_tabbedPane.getTabCount()-1, closableTabPanel);
-            m_tabbedPane.setSelectedIndex(m_tabbedPane.getTabCount()-1);
-        }
         
+        for (int i = 0; i < windowBoxList.size(); i++) {
+            
+            WindowBox windowBox = windowBoxList.get(i);
+            WindowBox existingWindowBox = m_processKeyToWindowBoxMap.get(processEngineKey);
+            if (existingWindowBox != null) {
+                existingWindowBox.addDatabox(windowBox.getEntryBox(), processEngineInfo.getLayout());
+            } else {
+                m_processKeyToWindowBoxMap.put(processEngineKey, windowBox);
+                String processName = processEngineInfo.getProcessName();
+
+                m_tabbedPane.addTab(null, windowBox.getPanel());
+                ClosableTabPanel closableTabPanel = new ClosableTabPanel(m_tabbedPane, processEngineKey + ": " + processName, processEngineKey.toString());
+                m_tabbedPane.setTabComponentAt(m_tabbedPane.getTabCount() - 1, closableTabPanel);
+                m_tabbedPane.setSelectedIndex(m_tabbedPane.getTabCount() - 1);
+            }
+        }
         
     }
 

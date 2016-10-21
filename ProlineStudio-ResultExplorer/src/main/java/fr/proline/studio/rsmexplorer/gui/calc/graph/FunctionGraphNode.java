@@ -9,6 +9,7 @@ import fr.proline.studio.rsmexplorer.gui.calc.functions.AbstractFunction;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.utils.IconManager;
 import java.awt.Color;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
@@ -294,7 +295,7 @@ public class FunctionGraphNode extends GraphNode {
     }
     
     @Override
-    public WindowBox getDisplayWindowBox() {
+    public ArrayList<WindowBox> getDisplayWindowBox() {
         return m_function.getDisplayWindowBox(this);
     }
     
@@ -332,7 +333,7 @@ public class FunctionGraphNode extends GraphNode {
 
     @Override
     public GlobalTableModelInterface getGlobalTableModelInterface() {
-        return m_function.getGlobalTableModelInterface();
+        return m_function.getFirstGlobalTableModelInterface();
     }
  
 

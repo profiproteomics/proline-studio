@@ -11,6 +11,7 @@ import fr.proline.studio.rsmexplorer.gui.calc.ProcessCallbackInterface;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.AbstractConnectedGraphObject;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.FunctionGraphNode;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphNode;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import org.openide.windows.WindowManager;
@@ -79,7 +80,7 @@ public class FilterFunction extends AbstractFunction {
             setCalculating(true);
             setInError(false, null);
 
-            ((FilterTableModelInterface) m_globalTableModelInterface).filter();
+            ((FilterTableModelInterface) m_globalTableModelInterface.get(0)).filter();
 
             setCalculating(false);
 
@@ -96,17 +97,17 @@ public class FilterFunction extends AbstractFunction {
     }
     
     @Override
-    public WindowBox getDisplayWindowBox(FunctionGraphNode functionGraphNode) {
+    public ArrayList<WindowBox> getDisplayWindowBox(FunctionGraphNode functionGraphNode) {
         return getDisplayWindowBox(functionGraphNode.getPreviousDataName(), getName());
     }
 
     @Override
     public void generateDefaultParameters(AbstractConnectedGraphObject[] graphObjects) {
 
+        addModel(new FilterTableModel(graphObjects[0].getGlobalTableModelInterface()));
 
-        m_globalTableModelInterface = new FilterTableModel(graphObjects[0].getGlobalTableModelInterface());
         
-        LinkedHashMap<Integer, Filter> filtersMap = ((FilterTableModelInterface) m_globalTableModelInterface).getFilters();
+        LinkedHashMap<Integer, Filter> filtersMap = ((FilterTableModelInterface) m_globalTableModelInterface.get(0)).getFilters();
         m_filters = new Filter[filtersMap.size()];
         int index = 0;
         for (Map.Entry<Integer, Filter> entry : filtersMap.entrySet()) {
@@ -143,7 +144,7 @@ public class FilterFunction extends AbstractFunction {
                 userParametersChanged();
                 m_settingsDone = true;
 
-                ((FilterTableModel) m_globalTableModelInterface).fireTableDataChanged();
+                ((FilterTableModel) m_globalTableModelInterface.get(0)).fireTableDataChanged();
                 
                 return true;
             }

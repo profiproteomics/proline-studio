@@ -25,12 +25,12 @@ public class ClusterAComponent {
     public static void clusterComponent(DrawVisualization drawVisualization) {
 
         ArrayList<Component> compList = drawVisualization.get_ComponentList();
-        HashMap<LightPeptideMatch, ArrayList<LightProteinMatch>> peptideToProteinMap = drawVisualization.get_peptideToProteinMap();
+        HashMap<LightPeptideMatch, ArrayList<LightProteinMatch>> peptideToProteinMap = drawVisualization.getPeptideToProteinMap();
 
 
         for (Component tempComp : compList) {
-            int[][] peptProtMap = getPeptProtMatrix(tempComp, peptideToProteinMap);
-            ArrayList<Integer> proteinOrder = clusterDataArray(tempComp.proteinMatchArray.size(), peptProtMap);
+            int[][] peptProtMap = tempComp.getPeptProtMatrix(peptideToProteinMap);
+            ArrayList<Integer> proteinOrder = clusterDataArray(tempComp.m_proteinMatchArray.size(), peptProtMap);
 
             int[][] transpose = new int[peptProtMap[0].length][peptProtMap.length];
             for (int i = 0; i < peptProtMap.length; i++) {
@@ -39,22 +39,22 @@ public class ClusterAComponent {
                 }
             }
 
-            ArrayList<Integer> peptideOrder = clusterDataArray(tempComp.peptideArray.size(), transpose);
+            ArrayList<Integer> peptideOrder = clusterDataArray(tempComp.m_peptideArray.size(), transpose);
 
             ArrayList<LightProteinMatch> proteinSetTemp = new ArrayList<>();
             ArrayList<LightPeptideMatch> peptideSetTemp = new ArrayList<>();
 
             for (int index : proteinOrder) {
-                proteinSetTemp.add(tempComp.proteinMatchArray.get(index));
+                proteinSetTemp.add(tempComp.m_proteinMatchArray.get(index));
             }
 
-            tempComp.proteinMatchArray = proteinSetTemp;
+            tempComp.m_proteinMatchArray = proteinSetTemp;
 
             for (int index : peptideOrder) {
-                peptideSetTemp.add(tempComp.peptideArray.get(index));
+                peptideSetTemp.add(tempComp.m_peptideArray.get(index));
             }
 
-            tempComp.peptideArray = peptideSetTemp;
+            tempComp.m_peptideArray = peptideSetTemp;
         }
 
     }
@@ -116,13 +116,13 @@ public class ClusterAComponent {
             return null;
         }
 
-        int[][] tempMatch = new int[compTemp.peptideArray.size()][compTemp.proteinMatchArray.size()];
+        int[][] tempMatch = new int[compTemp.m_peptideArray.size()][compTemp.m_proteinMatchArray.size()];
         int i = 0, j = 0;
-        for (LightPeptideMatch tempPept : compTemp.peptideArray) {
+        for (LightPeptideMatch tempPept : compTemp.m_peptideArray) {
             ArrayList<LightProteinMatch> proteinList = peptideToProteinMap.get(tempPept);
             j = 0;
 
-            for (LightProteinMatch tempProt : compTemp.proteinMatchArray) {
+            for (LightProteinMatch tempProt : compTemp.m_proteinMatchArray) {
                 if (proteinList.contains(tempProt)) {
                     tempMatch[i][j] = 1;
                 } else {

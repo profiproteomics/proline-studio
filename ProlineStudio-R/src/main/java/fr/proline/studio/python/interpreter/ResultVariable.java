@@ -1,6 +1,6 @@
 package fr.proline.studio.python.interpreter;
 
-import fr.proline.studio.python.data.ColData;
+import fr.proline.studio.python.data.ColDoubleData;
 import fr.proline.studio.python.data.PythonImage;
 import fr.proline.studio.python.data.Table;
 import org.python.core.PyFloat;
@@ -28,7 +28,9 @@ public class ResultVariable {
 
     @Override
     public String toString() {
-        if (m_value instanceof ColData) {
+        if (m_value instanceof ColDoubleData) {
+            return m_name;
+        } else if (m_value instanceof ColBooleanData) {
             return m_name;
         } else if (m_value instanceof Table) {
           return m_name;  

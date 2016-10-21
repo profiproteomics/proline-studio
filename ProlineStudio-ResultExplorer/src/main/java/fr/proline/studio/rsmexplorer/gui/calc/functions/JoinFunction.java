@@ -13,6 +13,7 @@ import fr.proline.studio.rsmexplorer.gui.calc.ProcessCallbackInterface;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.AbstractConnectedGraphObject;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.FunctionGraphNode;
 import fr.proline.studio.table.GlobalTableModelInterface;
+import java.util.ArrayList;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 
@@ -106,7 +107,8 @@ public class JoinFunction extends AbstractFunction {
                     joinedTable = Table.join(t1, t2);
                 }
 
-                m_globalTableModelInterface = joinedTable.getModel();
+                addModel(joinedTable.getModel());
+
             } catch (Exception e) {
                 setInError(new CalcError(e, null, -1));
             }
@@ -125,7 +127,7 @@ public class JoinFunction extends AbstractFunction {
     }
     
     @Override
-    public WindowBox getDisplayWindowBox(FunctionGraphNode functionGraphNode) {
+    public ArrayList<WindowBox> getDisplayWindowBox(FunctionGraphNode functionGraphNode) {
         return getDisplayWindowBox(functionGraphNode.getPreviousDataName(), getName());
     }
     
@@ -133,7 +135,7 @@ public class JoinFunction extends AbstractFunction {
     public void generateDefaultParameters(AbstractConnectedGraphObject[] graphObjects) {
 
         
-        GlobalTableModelInterface modelForDefaultKey = m_globalTableModelInterface;
+        GlobalTableModelInterface modelForDefaultKey = getFirstGlobalTableModelInterface();
         
         if (modelForDefaultKey == null) {
             Table t1 = new Table(graphObjects[0].getGlobalTableModelInterface());
@@ -203,7 +205,7 @@ public class JoinFunction extends AbstractFunction {
         Integer key1 = (Integer) m_paramColumn1.getAssociatedObjectValue();
         Integer key2 = (Integer) m_paramColumn2.getAssociatedObjectValue();
         
-        GlobalTableModelInterface modelForDefaultKey = m_globalTableModelInterface;
+        GlobalTableModelInterface modelForDefaultKey = getFirstGlobalTableModelInterface();
         
         if (modelForDefaultKey == null) {
             Table t1 = new Table(graphObjects[0].getGlobalTableModelInterface());

@@ -132,6 +132,43 @@ public class StatsUtil {
         return imageFile;
     }
     
+    public static PyTuple[] colTupleToTuplesArray(PyTuple p) {
+        Object[] objArray1 = p.getArray();
+        int nb = objArray1.length;
+
+        PyTuple[] tuples = new PyTuple[nb];
+        for (int i = 0; i < nb; i++) {
+            tuples[i] = ((PyTuple) objArray1[i]);
+        }
+
+        return tuples;
+    }
+    
+    public static ColRef[] colTupleToColArray(PyTuple[] pArray) {
+        
+        int size = pArray.length;
+        int totalNb = 0;
+        for (int i=0;i<size;i++) {
+            PyTuple p = pArray[i];
+            Object[] objArray = p.getArray();
+            totalNb += objArray.length;
+        }
+        ColRef[] cols = new ColRef[totalNb];
+
+        int index = 0;
+        for (int i = 0; i < size; i++) {
+            PyTuple p = pArray[i];
+            Object[] objArray = p.getArray();
+            int nb = objArray.length;
+            for (int j = 0; j < nb; j++) {
+                cols[index] = ((ColRef) objArray[j]);
+                index++;
+            }
+        }
+
+        return cols;
+    }
+    
     public static ColRef[] colTupleToColArray(PyTuple p) {
         Object[] objArray1 = p.getArray();
         int nb1 = objArray1.length;
@@ -144,7 +181,7 @@ public class StatsUtil {
         return cols;
     }
     
-    public static ColRef[] colTupleToColArray(PyTuple p1, PyTuple p2) {
+    /*public static ColRef[] colTupleToColArray(PyTuple p1, PyTuple p2) {
         Object[] objArray1 = p1.getArray();
         int nb1 = objArray1.length;
         Object[] objArray2 = p2.getArray();
@@ -180,7 +217,7 @@ public class StatsUtil {
         }
 
         return cols;
-    }
+    }*/
     
      public static String stringTupleToRVector(PyTuple p) {
          StringBuilder sb = new StringBuilder();

@@ -1,7 +1,7 @@
 package fr.proline.studio.python.math;
 
 import fr.proline.studio.python.data.Col;
-import fr.proline.studio.python.data.ColData;
+import fr.proline.studio.python.data.ColDoubleData;
 import fr.proline.studio.python.data.ColRef;
 import fr.proline.studio.python.data.PythonImage;
 import fr.proline.studio.python.data.Table;
@@ -18,7 +18,7 @@ import org.python.core.PyTuple;
  */
 public class Stats {
 
-    public static ColData log2(Col values) {
+    public static ColDoubleData log2(Col values) {
         return StatsImplementation.log2(values);
     }
     
@@ -30,7 +30,7 @@ public class Stats {
         return StatsImplementation.log2(t, column);
     }
     
-    public static ColData log10(Col values) {
+    public static ColDoubleData log10(Col values) {
         return StatsImplementation.log10(values);
     }
 
@@ -65,36 +65,22 @@ public class Stats {
         return StatsRImplementation.adjustP(pvaluesCol, pi0Parameter, alpha, nbins, pz);
     }
 
-    public static ColData bbinomial(PyTuple p1, PyTuple p2) throws Exception {
-        return StatsRImplementation.bbinomial(p1, p2, null);
-    }
-    
-    public static ColData bbinomial(PyTuple p1, PyTuple p2, PyTuple p3) throws Exception {
-        return StatsRImplementation.bbinomial(p1, p2, p3);
+    public static ColDoubleData bbinomial(PyTuple p) throws Exception {
+        return StatsRImplementation.bbinomial(p);
     }
 
-    public static PythonImage boxPlot(PyTuple p1, PyTuple p2, PyTuple labels) throws Exception {
-        return StatsRImplementation.boxPlot(p1, p2, null, labels);
+
+    public static PythonImage boxPlot(PyTuple p, PyTuple labels) throws Exception {
+        return StatsRImplementation.boxPlot(p, labels);
     }
 
-    public static PythonImage boxPlot(PyTuple p1, PyTuple p2, PyTuple p3, PyTuple labels) throws Exception {
-        return StatsRImplementation.boxPlot(p1, p2, p3, labels);
+    public static PythonImage densityPlot(PyTuple p, PyTuple labels) throws Exception {
+        return StatsRImplementation.densityPlot(p, labels);
     }
 
-    public static PythonImage densityPlot(PyTuple p1, PyTuple p2, PyTuple labels) throws Exception {
-        return StatsRImplementation.densityPlot(p1, p2, null, labels);
-    }
 
-    public static PythonImage densityPlot(PyTuple p1, PyTuple p2, PyTuple p3, PyTuple labels) throws Exception {
-        return StatsRImplementation.densityPlot(p1, p2, p3, labels);
-    }
-
-    public static PythonImage varianceDistPlot(PyTuple p1, PyTuple p2, PyTuple labels) throws Exception {
-        return StatsRImplementation.varianceDistPlot(p1, p2, null, labels);
-    }
-
-    public static PythonImage varianceDistPlot(PyTuple p1, PyTuple p2, PyTuple p3, PyTuple labels) throws Exception {
-        return StatsRImplementation.varianceDistPlot(p1, p2, p3, labels);
+    public static PythonImage varianceDistPlot(PyTuple p, PyTuple labels) throws Exception {
+        return StatsRImplementation.varianceDistPlot(p, labels);
     }
 
     
@@ -111,39 +97,29 @@ public class Stats {
     }
     
 
-    public static ColData pvalue(PyTuple p1, PyTuple p2) throws MathException {
+    public static ColDoubleData pvalue(PyTuple p1, PyTuple p2) throws MathException {
         return StatsImplementation.pvalue(p1, p2);
     }
 
-    
-    public static Table quantifilter(PyTuple p1, PyTuple p2, PyTuple p3, Table t, PyInteger option, PyInteger threshold) throws MathException {
-        return StatsImplementation.quantifilter(p1, p2, p3, t, option, threshold);
-    }
-    public static Table quantifilter(PyTuple p1, PyTuple p2, Table t, PyInteger option, PyInteger threshold) throws MathException {
-        return StatsImplementation.quantifilter(p1, p2, null, t, option, threshold);
-    }
-    
-    public static Table normalize(PyTuple p1, PyTuple p2, PyTuple p3, PyTuple labels, PyString normalizeFamily, PyString normalizeOption) throws Exception {
-        return StatsRImplementation.normalize(p1, p2, p3, labels, normalizeFamily, normalizeOption);
+    public static Table quantifilter(PyTuple p, Table t, PyInteger option, PyInteger threshold) throws MathException {
+        return StatsImplementation.quantifilter(p, t, option, threshold);
     }
 
-    public static Table normalize(PyTuple p1, PyTuple p2, PyTuple labels, PyString normalizeFamily, PyString normalizeOption) throws Exception {
-        return StatsRImplementation.normalize(p1, p2, null, labels, normalizeFamily, normalizeOption);
+    
+    public static Table normalize(PyTuple p, PyTuple labels, PyString normalizeFamily, PyString normalizeOption) throws Exception {
+        return StatsRImplementation.normalize(p, labels, normalizeFamily, normalizeOption);
     }
     
-    public static Table mvimputation(PyTuple p1, PyTuple p2, PyTuple p3, PyString method) throws Exception {
-        return StatsRImplementation.mvimputation(p1, p2, p3, method);
+    public static Table mvimputation(PyTuple p1, PyString method) throws Exception {
+        return StatsRImplementation.mvimputation(p1, method);
     }
 
-    public static Table mvimputation(PyTuple p1, PyTuple p2, PyString method) throws Exception {
-        return StatsRImplementation.mvimputation(p1, p2, null, method);
+    
+    public static Table diffanalysis(PyTuple p, PyTuple labels, PyString diffAnalysisType) throws Exception {
+        return StatsRImplementation.diffanalysis(p, labels, diffAnalysisType);
     }
     
-    public static Table diffanalysis(PyTuple p1, PyTuple p2, PyTuple labels, PyString diffAnalysisType) throws Exception {
-        return StatsRImplementation.diffanalysis(p1, p2, labels, diffAnalysisType);
-    }
-    
-    public static ColData ttd(PyTuple p1, PyTuple p2) throws MathException {
+    public static ColDoubleData ttd(PyTuple p1, PyTuple p2) throws MathException {
         return StatsImplementation.ttd(p1, p2);
     }
     
@@ -169,6 +145,10 @@ public class Stats {
         return StatsRImplementation.computeFDR(pvalues, logFC, pvalueThreshold, logFCThreshold, pi0Parameter, alpha, nbins, pz);
     }
     
+    public static Table differentialProteins(Col pvalues, Col logFC, PyFloat pvalueThreshold, PyFloat logFCThreshold) throws Exception {
+
+        return StatsImplementation.differentialProteins(pvalues, logFC, pvalueThreshold, logFCThreshold);
+    }
     
     /*public void Testdapar() throws Exception {
         RServerManager serverR = RServerManager.getRServerManager();

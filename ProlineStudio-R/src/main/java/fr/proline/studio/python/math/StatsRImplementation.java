@@ -3,7 +3,7 @@ package fr.proline.studio.python.math;
 import fr.proline.studio.graphics.PlotType;
 import static fr.proline.studio.graphics.PlotType.SCATTER_PLOT;
 import fr.proline.studio.python.data.Col;
-import fr.proline.studio.python.data.ColData;
+import fr.proline.studio.python.data.ColDoubleData;
 import fr.proline.studio.python.data.ColRef;
 import fr.proline.studio.python.data.ExprTableModel;
 import fr.proline.studio.python.data.PythonImage;
@@ -77,7 +77,7 @@ public class StatsRImplementation {
 
         fw.close();
 
-        ColData c = _adjustP(t, tempFile, pi0Parameter, alpha, nbins, pz);
+        ColDoubleData c = _adjustP(t, tempFile, pi0Parameter, alpha, nbins, pz);
 
         tempFile.delete();
 
@@ -85,7 +85,7 @@ public class StatsRImplementation {
 
     }
 
-    private static ColData _adjustP(Table t, File f, String pi0Parameter, PyFloat alpha, PyInteger nbins, PyFloat pz) throws Exception {
+    private static ColDoubleData _adjustP(Table t, File f, String pi0Parameter, PyFloat alpha, PyInteger nbins, PyFloat pz) throws Exception {
 
         RServerManager serverR = RServerManager.getRServerManager();
 
@@ -125,27 +125,28 @@ public class StatsRImplementation {
             resArray.add(values[i]);
         }
 
-        return new ColData(t, resArray, null);
+        return new ColDoubleData(t, resArray, null);
 
     }
 
-    public static ColData bbinomial(PyTuple p1, PyTuple p2, PyTuple p3) throws Exception {
+    public static ColDoubleData bbinomial(PyTuple p) throws Exception {
 
         // needs R for this calculation
         StatsUtil.startRSever();
 
         // PyTuple to Col Array
-        ColRef[] cols = (p3 != null) ? StatsUtil.colTupleToColArray(p1, p2, p3) : StatsUtil.colTupleToColArray(p1, p2);
+        PyTuple[] pArray = StatsUtil.colTupleToTuplesArray(p);
+        ColRef[] cols = StatsUtil.colTupleToColArray(pArray);
 
         // Create a temp file with a matrix containing cols data
         File matrixTempFile = StatsUtil.columnsToMatrixTempFile(cols, false, false, false);
 
         // do the calculation
         Table t = cols[0].getTable();
-        int nb1 = p1.size();
-        int nb2 = p2.size();
-        int nb3 = (p3 == null) ? 0 : p3.size();
-        ColData c = _bbinomialR(t, matrixTempFile, nb1, nb2, nb3);
+        int nb1 = pArray[0].size();
+        int nb2 = pArray[1].size();
+        int nb3 = (pArray.length<=2) ? 0 : pArray[2].size();
+        ColDoubleData c = _bbinomialR(t, matrixTempFile, nb1, nb2, nb3);
 
         // delete temp files
         matrixTempFile.delete();
@@ -153,7 +154,7 @@ public class StatsRImplementation {
         return c;
     }
 
-    private static ColData _bbinomialR(Table t, File matrixTempFile, int nbCols1, int nbCols2, int nbCols3) throws Exception {
+    private static ColDoubleData _bbinomialR(Table t, File matrixTempFile, int nbCols1, int nbCols2, int nbCols3) throws Exception {
 
         // load library to do the calculation
         RServerManager serverR = RServerManager.getRServerManager();
@@ -180,17 +181,18 @@ public class StatsRImplementation {
             resArray.add(values[i]);
         }
 
-        return new ColData(t, resArray, null);
+        return new ColDoubleData(t, resArray, null);
 
     }
 
-    public static PythonImage boxPlot(PyTuple p1, PyTuple p2, PyTuple p3, PyTuple labels) throws Exception {
+    public static PythonImage boxPlot(PyTuple p, PyTuple labels) throws Exception {
 
         // needs R for this calculation
         StatsUtil.startRSever();
 
         // PyTuple to Col Array
-        ColRef[] cols = (p3 != null) ? StatsUtil.colTupleToColArray(p1, p2, p3) : StatsUtil.colTupleToColArray(p1, p2);
+        PyTuple[] pArray = StatsUtil.colTupleToTuplesArray(p);
+        ColRef[] cols = StatsUtil.colTupleToColArray(pArray);
 
         // Create a temp file with a matrix containing cols data
         File matrixTempFile = StatsUtil.columnsToMatrixTempFile(cols, true, true, true);
@@ -261,13 +263,14 @@ public class StatsRImplementation {
 
     }
 
-    public static PythonImage densityPlot(PyTuple p1, PyTuple p2, PyTuple p3, PyTuple labels) throws Exception {
+    public static PythonImage densityPlot(PyTuple p, PyTuple labels) throws Exception {
 
         // needs R for this calculation
         StatsUtil.startRSever();
 
         // PyTuple to Col Array
-        ColRef[] cols = (p3 != null) ? StatsUtil.colTupleToColArray(p1, p2, p3) : StatsUtil.colTupleToColArray(p1, p2);
+        PyTuple[] pArray = StatsUtil.colTupleToTuplesArray(p);
+        ColRef[] cols = StatsUtil.colTupleToColArray(pArray);
 
         // Create a temp file with a matrix containing cols data
         File matrixTempFile = StatsUtil.columnsToMatrixTempFile(cols, true, true, true);
@@ -300,13 +303,14 @@ public class StatsRImplementation {
 
     }
 
-    public static PythonImage varianceDistPlot(PyTuple p1, PyTuple p2, PyTuple p3, PyTuple labels) throws Exception {
+    public static PythonImage varianceDistPlot(PyTuple p, PyTuple labels) throws Exception {
 
         // needs R for this calculation
         StatsUtil.startRSever();
 
         // PyTuple to Col Array
-        ColRef[] cols = (p3 != null) ? StatsUtil.colTupleToColArray(p1, p2, p3) : StatsUtil.colTupleToColArray(p1, p2);
+        PyTuple[] pArray = StatsUtil.colTupleToTuplesArray(p);
+        ColRef[] cols = StatsUtil.colTupleToColArray(pArray);
 
         // Create a temp file with a matrix containing cols data
         File matrixTempFile = StatsUtil.columnsToMatrixTempFile(cols, true, true, true);
@@ -339,13 +343,14 @@ public class StatsRImplementation {
 
     }
 
-    public static Table normalize(PyTuple p1, PyTuple p2, PyTuple p3, PyTuple labels, PyString normalizeFamily, PyString normalizeOption) throws Exception {
+    public static Table normalize(PyTuple p, PyTuple labels, PyString normalizeFamily, PyString normalizeOption) throws Exception {
 
         // needs R for this calculation
         StatsUtil.startRSever();
 
         // PyTuple to Col Array
-        ColRef[] cols = (p3 != null) ? StatsUtil.colTupleToColArray(p1, p2, p3) : StatsUtil.colTupleToColArray(p1, p2);
+        PyTuple[] pArray = StatsUtil.colTupleToTuplesArray(p);
+        ColRef[] cols = StatsUtil.colTupleToColArray(pArray);
 
         // Create a temp file with a matrix containing cols data
         File matrixTempFile = StatsUtil.columnsToMatrixTempFile(cols, false, false, true);
@@ -395,7 +400,7 @@ public class StatsRImplementation {
             }
 
             for (int j = 0; j < nbCols; j++) {
-                modifiedColumns.put(cols[j].getModelCol(), new ColData(resTable, valuesForCol.get(j), "norm(" + cols[j].getExportColumnName() + ")"));
+                modifiedColumns.put(cols[j].getModelCol(), new ColDoubleData(resTable, valuesForCol.get(j), "norm(" + cols[j].getExportColumnName() + ")"));
             }
 
         } else {
@@ -409,7 +414,7 @@ public class StatsRImplementation {
                 for (int j = 0; j < d.length; j++) {
                     values.add(d[j]);
                 }
-                modifiedColumns.put(cols[i].getModelCol(), new ColData(resTable, values, "norm(" + cols[i].getExportColumnName() + ")"));
+                modifiedColumns.put(cols[i].getModelCol(), new ColDoubleData(resTable, values, "norm(" + cols[i].getExportColumnName() + ")"));
             }
 
             
@@ -422,13 +427,14 @@ public class StatsRImplementation {
 
     }
 
-    public static Table mvimputation(PyTuple p1, PyTuple p2, PyTuple p3, PyString method) throws Exception {
+    public static Table mvimputation(PyTuple p, PyString method) throws Exception {
 
         // needs R for this calculation
         StatsUtil.startRSever();
 
         // PyTuple to Col Array
-        ColRef[] cols = (p3 != null) ? StatsUtil.colTupleToColArray(p1, p2, p3) : StatsUtil.colTupleToColArray(p1, p2);
+        PyTuple[] pArray = StatsUtil.colTupleToTuplesArray(p);
+        ColRef[] cols = StatsUtil.colTupleToColArray(pArray);
 
         // Create a temp file with a matrix containing cols data
         File matrixTempFile = StatsUtil.columnsToMatrixTempFile(cols, false, false, true);
@@ -478,7 +484,7 @@ public class StatsRImplementation {
             }
 
             for (int j = 0; j < nbCols; j++) {
-                modifiedColumns.put(cols[j].getModelCol(), new ColData(resTable, valuesForCol.get(j), "mvi(" + cols[j].getExportColumnName() + ")"));
+                modifiedColumns.put(cols[j].getModelCol(), new ColDoubleData(resTable, valuesForCol.get(j), "mvi(" + cols[j].getExportColumnName() + ")"));
             }
 
         } else {
@@ -492,7 +498,7 @@ public class StatsRImplementation {
                 for (int j = 0; j < d.length; j++) {
                     values.add(d[j]);
                 }
-                modifiedColumns.put(cols[i].getModelCol(), new ColData(resTable, values, "mvi(" + cols[i].getExportColumnName() + ")"));
+                modifiedColumns.put(cols[i].getModelCol(), new ColDoubleData(resTable, values, "mvi(" + cols[i].getExportColumnName() + ")"));
             }
 
             
@@ -505,13 +511,14 @@ public class StatsRImplementation {
 
     }
 
-    public static Table diffanalysis(PyTuple p1, PyTuple p2, PyTuple labels, PyString diffAnalysisType) throws Exception {
+    public static Table diffanalysis(PyTuple p, PyTuple labels, PyString diffAnalysisType) throws Exception {
 
         // needs R for this calculation
         StatsUtil.startRSever();
 
         // PyTuple to Col Array
-        ColRef[] cols = StatsUtil.colTupleToColArray(p1, p2);
+        PyTuple[] pArray = StatsUtil.colTupleToTuplesArray(p);
+        ColRef[] cols = StatsUtil.colTupleToColArray(pArray);
 
         // Create a temp file with a matrix containing cols data
         File matrixTempFile = StatsUtil.columnsToMatrixTempFile(cols, false, false, true);
@@ -586,9 +593,9 @@ public class StatsRImplementation {
             }
 
             String colName = diffAnalysisTypeString + " PValue";
-            ColData pvalueCol = new ColData(resTable, valuesForCol, colName);
-            ColData log10PvalueCol = StatsImplementation.log10(pvalueCol);
-            ColData minusLog10PvalueCol = StatsImplementation.neg(log10PvalueCol);
+            ColDoubleData pvalueCol = new ColDoubleData(resTable, valuesForCol, colName);
+            ColDoubleData log10PvalueCol = StatsImplementation.log10(pvalueCol);
+            ColDoubleData minusLog10PvalueCol = StatsImplementation.neg(log10PvalueCol);
             model.addExtraColumn(pvalueCol, null);
             model.addExtraColumnInfo(new PValue());
             model.addExtraColumn(minusLog10PvalueCol, null);
@@ -601,7 +608,7 @@ public class StatsRImplementation {
             }
 
             colName = diffAnalysisTypeString + " log Ratio";
-            model.addExtraColumn(new ColData(resTable, valuesForCol, colName), null);
+            model.addExtraColumn(new ColDoubleData(resTable, valuesForCol, colName), null);
             model.addExtraColumnInfo(new LogRatio());
          
 
@@ -631,9 +638,9 @@ public class StatsRImplementation {
                     String colName = null;
                     if (j == 0) {
                         colName = diffAnalysisTypeString + " PValue";
-                        ColData pvalueCol = new ColData(resTable, valuesForCol.get(j), colName);
-                        ColData log10PvalueCol = StatsImplementation.log10(pvalueCol);
-                        ColData minusLog10PvalueCol = StatsImplementation.neg(log10PvalueCol);
+                        ColDoubleData pvalueCol = new ColDoubleData(resTable, valuesForCol.get(j), colName);
+                        ColDoubleData log10PvalueCol = StatsImplementation.log10(pvalueCol);
+                        ColDoubleData minusLog10PvalueCol = StatsImplementation.neg(log10PvalueCol);
                         model.addExtraColumn(pvalueCol, null);
                         model.addExtraColumnInfo(new PValue());
                         model.addExtraColumn(minusLog10PvalueCol, null);
@@ -641,7 +648,7 @@ public class StatsRImplementation {
                         model.addExtraColumnInfo(new LogInfo(LogInfo.LogState.LOG10));
                     } else if (j == 1) {
                         colName = diffAnalysisTypeString + " log Ratio";
-                        model.addExtraColumn(new ColData(resTable, valuesForCol.get(j), colName), null);
+                        model.addExtraColumn(new ColDoubleData(resTable, valuesForCol.get(j), colName), null);
                         model.addExtraColumnInfo(new LogRatio());
                     }
 
@@ -663,9 +670,9 @@ public class StatsRImplementation {
                     if (i == 0) {
                         colName = diffAnalysisTypeString + " PValue";
                         colExtraInfo = new PValue();
-                        ColData pvalueCol = new ColData(resTable, values, colName);
-                        ColData log10PvalueCol = StatsImplementation.log10(pvalueCol);
-                        ColData minusLog10PvalueCol = StatsImplementation.neg(log10PvalueCol);
+                        ColDoubleData pvalueCol = new ColDoubleData(resTable, values, colName);
+                        ColDoubleData log10PvalueCol = StatsImplementation.log10(pvalueCol);
+                        ColDoubleData minusLog10PvalueCol = StatsImplementation.neg(log10PvalueCol);
                         model.addExtraColumn(pvalueCol, null);
                         model.addExtraColumnInfo(colExtraInfo);
                         model.addExtraColumn(minusLog10PvalueCol, null);
@@ -674,7 +681,7 @@ public class StatsRImplementation {
                     } else if (i == 1) {
                         colName = diffAnalysisTypeString + " log Ratio";
                         colExtraInfo = new LogRatio();
-                        model.addExtraColumn(new ColData(resTable, values, colName), null);
+                        model.addExtraColumn(new ColDoubleData(resTable, values, colName), null);
                         model.addExtraColumnInfo(colExtraInfo);
                     }
 

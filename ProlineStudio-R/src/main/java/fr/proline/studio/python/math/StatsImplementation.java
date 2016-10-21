@@ -2,7 +2,8 @@ package fr.proline.studio.python.math;
 
 
 import fr.proline.studio.python.data.Col;
-import fr.proline.studio.python.data.ColData;
+import fr.proline.studio.python.data.ColBooleanData;
+import fr.proline.studio.python.data.ColDoubleData;
 import fr.proline.studio.python.data.ColRef;
 import fr.proline.studio.python.data.ExprTableModel;
 import fr.proline.studio.python.data.Table;
@@ -16,6 +17,7 @@ import org.apache.commons.math.MathException;
 import org.apache.commons.math.stat.descriptive.DescriptiveStatistics;
 import org.apache.commons.math.stat.inference.TTest;
 import org.apache.commons.math.stat.inference.TTestImpl;
+import org.python.core.PyFloat;
 import org.python.core.PyInteger;
 import org.python.core.PyTuple;
 
@@ -26,7 +28,7 @@ import org.python.core.PyTuple;
  */
 public class StatsImplementation {
 
-    public static ColData neg(Col values) {
+    public static ColDoubleData neg(Col values) {
 
         int nbRow = values.getRowCount();
 
@@ -48,16 +50,16 @@ public class StatsImplementation {
 
         }
 
-        return new ColData(values.getTable(), resultArray, "-" + values.getExportColumnName());
+        return new ColDoubleData(values.getTable(), resultArray, "-" + values.getExportColumnName());
     }
     
-    public static ColData log10(Col values) {
+    public static ColDoubleData log10(Col values) {
         return log(values, true);
     }
-    public static ColData log2(Col values) {
+    public static ColDoubleData log2(Col values) {
         return log(values, false);
     }
-    private static ColData log(Col values, boolean log10) {
+    private static ColDoubleData log(Col values, boolean log10) {
 
         int nbRow = values.getRowCount();
         
@@ -85,7 +87,7 @@ public class StatsImplementation {
         }
         
         String logfunction = (log10) ? "log10(" : "log2(";
-        return new ColData(values.getTable(), resultArray, logfunction+values.getExportColumnName()+")");
+        return new ColDoubleData(values.getTable(), resultArray, logfunction+values.getExportColumnName()+")");
     }
     private static final double LOG2 = StrictMath.log(2);
     
@@ -107,7 +109,7 @@ public class StatsImplementation {
         int nb = objArray.length;
         for (int i = 0; i < nb; i++) {
             ColRef c = ((ColRef) objArray[i]);
-            ColData cLogged = log(c, log10);
+            ColDoubleData cLogged = log(c, log10);
             modifiedColumns.put(c.getModelCol(), cLogged);
             modifiedColumnsExtraInfo.put(c.getModelCol(), log10 ? new LogInfo(LogInfo.LogState.LOG10) : new LogInfo(LogInfo.LogState.LOG2));
         }
@@ -131,7 +133,7 @@ public class StatsImplementation {
         HashMap<Integer, Col> modifiedColumns = new HashMap<>();
         HashMap<Integer, Object> modifiedColumnsExtraInfo = new HashMap<>();
         
-        ColData cLogged = log(column, log10);
+        ColDoubleData cLogged = log(column, log10);
         modifiedColumns.put(column.getModelCol(), cLogged);
         modifiedColumnsExtraInfo.put(column.getModelCol(), log10 ? new LogInfo(LogInfo.LogState.LOG10) : new LogInfo(LogInfo.LogState.LOG2));
         
@@ -141,7 +143,7 @@ public class StatsImplementation {
         return resTable;
     }
     
-    public static ColData ttd(PyTuple p1, PyTuple p2) throws MathException {
+    public static ColDoubleData ttd(PyTuple p1, PyTuple p2) throws MathException {
 
         Table t = ((ColRef) p1.get(0)).getTable();
 
@@ -162,10 +164,10 @@ public class StatsImplementation {
             ttdArray.add(ttd);
         }
 
-        return new ColData(t, ttdArray, null);
+        return new ColDoubleData(t, ttdArray, null);
     }
 
-    public static ColData pvalue(PyTuple p1, PyTuple p2) throws MathException {
+    public static ColDoubleData pvalue(PyTuple p1, PyTuple p2) throws MathException {
 
         Table t = ((ColRef) p1.get(0)).getTable();
 
@@ -198,32 +200,40 @@ public class StatsImplementation {
             resArray.add(pvalue);
         }
 
-        return new ColData(t, resArray, null);
+        return new ColDoubleData(t, resArray, null);
     }
 
-    public static Table quantifilter(PyTuple p1, PyTuple p2, PyTuple p3, Table t, PyInteger option, PyInteger threshold) throws MathException {
+    public static Table quantifilter(PyTuple p, Table t, PyInteger option, PyInteger threshold) throws MathException {
+        PyTuple[] pArray = StatsUtil.colTupleToTuplesArray(p);
+        return quantifilter(pArray, t, option, threshold);
+    }
+    
+    public static Table quantifilter(PyTuple[] pArray, Table t, PyInteger option, PyInteger threshold) throws MathException {
 
-        ColRef[] cols = (p3!=null) ? StatsUtil.colTupleToColArray(p1, p2, p3) : StatsUtil.colTupleToColArray(p1, p2);
+        ColRef[] cols = StatsUtil.colTupleToColArray(pArray);
         
-        int nbGroup1 = p1.size();
-        int nbGroup2 = p2.size();
-        int nbGroup3 = (p3 == null) ? 0 : p3.size();
-        int nbTotal = nbGroup1+nbGroup2+nbGroup3;
+        int size = pArray.length;
+        int[] nbGroups = new int[size];
+        int nbTotal = 0;
+        for (int i=0;i<size;i++) {
+            nbGroups[i] = pArray[i].size();
+            nbTotal += nbGroups[i];
+            
+        }
+
         int[] groupIndex = new int[nbTotal];
         int[] colsIndex = new int[nbTotal];
-        for (int i=0;i<nbGroup1;i++) {
-            groupIndex[i] = 1;
-            colsIndex[i] = cols[i].getModelCol();
+
+        int start = 0;
+        int end = 0;
+        for (int i = 0; i < size; i++) {
+            end += nbGroups[i];
+            for (int j = start; j < end; j++) {
+                groupIndex[j] = i+1;
+                colsIndex[j] = cols[j].getModelCol();
+            }
+            start = end;
         }
-        for (int i=nbGroup1;i<nbGroup1+nbGroup2;i++) {
-            groupIndex[i] = 2;
-            colsIndex[i] = cols[i].getModelCol();
-        }
-        for (int i=nbGroup1+nbGroup2;i<nbGroup1+nbGroup2+nbGroup3;i++) {
-            groupIndex[i] = 3;
-            colsIndex[i] = cols[i].getModelCol();
-        }
-        
 
         
         QuantiFilterModel quantiFilterModelModel = new QuantiFilterModel(t.getModel(), colsIndex, groupIndex, option.getValue(), threshold.getValue());
@@ -256,5 +266,61 @@ public class StatsImplementation {
         return m;
     }
     
+    public static Table differentialProteins(Col pvalues, Col logFC, PyFloat pvalueThreshold, PyFloat logFCThreshold) throws Exception {
+        
+        Table t = pvalues.getTable();
+        
+        ColBooleanData col = differentialProteinsCol(pvalues, logFC, pvalueThreshold, logFCThreshold);
+        
+        ExprTableModel model = new ExprTableModel(col, null, t.getModel());
+
+        return new Table(model);
+    }
+    
+    private static ColBooleanData differentialProteinsCol(Col pvalues, Col logFCs, PyFloat pvalueLogThreshold, PyFloat logFCThreshold) {
+
+        int nbRow = pvalues.getRowCount();
+        
+        ArrayList<Boolean> resultArray = new ArrayList<>(nbRow);
+
+        
+        
+        double pvalueThresholdDouble = StrictMath.pow(10, -pvalueLogThreshold.getValue());
+        double test = -StrictMath.log10(pvalueThresholdDouble);
+        double logFCThresholdDouble = logFCThreshold.getValue();
+        
+        for (int i = 0; i < nbRow; i++) {
+            
+            Object logFC = logFCs.getValueAt(i);
+            if (logFC instanceof LazyData) {
+                logFC = ((LazyData) logFC).getData();
+            }
+            double logFCDouble;
+            if ((logFC != null) && (logFC instanceof Number)) {
+                logFCDouble = ((Number) logFC).doubleValue();
+            } else {
+                logFCDouble = Double.NaN;
+            }
+            
+            Object pvalue = pvalues.getValueAt(i);
+            if (pvalue instanceof LazyData) {
+                pvalue = ((LazyData) pvalue).getData();
+            }
+            double pvalueDouble;
+            if ((pvalue != null) && (pvalue instanceof Number)) {
+                pvalueDouble = ((Number) pvalue).doubleValue();
+            } else {
+                pvalueDouble = Double.NaN;
+            }
+            
+            Boolean differentialProtein = ((pvalueDouble<=pvalueThresholdDouble) && ((logFCDouble>=logFCThresholdDouble) || (logFCDouble<=-logFCThresholdDouble)) );
+
+            resultArray.add(differentialProtein);
+
+            
+        }
+
+        return new ColBooleanData(pvalues.getTable(), resultArray, "Differential Proteins");
+    }
 
 }

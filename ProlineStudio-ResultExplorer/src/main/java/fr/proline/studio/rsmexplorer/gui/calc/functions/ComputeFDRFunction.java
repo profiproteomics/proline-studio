@@ -139,29 +139,41 @@ public class ComputeFDRFunction extends AbstractFunction {
             parameters[1] = new ResultVariable(logFCCol);
 
 
-            StringBuilder codeSB = new StringBuilder();
-            codeSB.append("computedFDR=Stats.computeFDR(");
+            StringBuilder codeSB1 = new StringBuilder();
+            StringBuilder codeSB2 = new StringBuilder();
+            
+            codeSB1.append("computedFDR=Stats.computeFDR(");
+            codeSB2.append("differentialProteins=Stats.differentialProteins(");
+            
+            StringBuilder codeSBFirstParameters = new StringBuilder();;
             for (int i = 0; i < parameters.length; i++) {
-                codeSB.append(parameters[i].getName());
-                codeSB.append(',');
+                codeSBFirstParameters.append(parameters[i].getName());
+                codeSBFirstParameters.append(',');
             }
 
-            codeSB.append(m_pvalueThresholdParameter.getStringValue());
-            codeSB.append(',');
-            codeSB.append(m_logFCThresholdParameter.getStringValue());
+            codeSBFirstParameters.append(m_pvalueThresholdParameter.getStringValue());
+            codeSBFirstParameters.append(',');
+            codeSBFirstParameters.append(m_logFCThresholdParameter.getStringValue());
+            
+            String firstParameters = codeSBFirstParameters.toString();
+            codeSB1.append(firstParameters);
+            codeSB2.append(firstParameters);
             
             
             String pi0Method = m_pi0MethodParameter.getStringValue();
             if (pi0Method.compareTo("Numeric Value") == 0) {
-                codeSB.append(',');
-                codeSB.append(m_numericValueParameter.getStringValue());
+                codeSB1.append(',');
+                codeSB1.append(m_numericValueParameter.getStringValue());
             } else {
-                codeSB.append(",\"").append(pi0Method).append("\"");
+                codeSB1.append(",\"").append(pi0Method).append("\"");
             }
-            codeSB.append(",").append(m_alphaParameter.getStringValue());
-            codeSB.append(",").append(m_nbinsParameter.getStringValue());
-            codeSB.append(",").append(m_pzParameter.getStringValue());
-            codeSB.append(')');
+            codeSB1.append(",").append(m_alphaParameter.getStringValue());
+            codeSB1.append(",").append(m_nbinsParameter.getStringValue());
+            codeSB1.append(",").append(m_pzParameter.getStringValue());
+            
+            
+            codeSB1.append(')');
+            codeSB2.append(')');
 
             CalcCallback calcCallback = new CalcCallback() {
 
@@ -179,7 +191,13 @@ public class ComputeFDRFunction extends AbstractFunction {
                                     ArrayList<String> values = new ArrayList<>(1);
                                     values.add(fdr.toString()+"%");
                                     
-                                    m_globalTableModelInterface = new ValuesTableModel(valuesName, values);
+                                    addModel(new ValuesTableModel(valuesName, values));
+
+                                } else if (var.getName().compareTo("differentialProteins") == 0) {
+                                    // we have found the result
+                                    Table resTable = (Table) var.getValue();
+
+                                    addModel(resTable.getModel());
 
                                 }
                             }
@@ -194,9 +212,10 @@ public class ComputeFDRFunction extends AbstractFunction {
 
             };
 
-            CalcInterpreterTask task = new CalcInterpreterTask(codeSB.toString(), parameters, calcCallback);
-
-            CalcInterpreterThread.getCalcInterpreterThread().addTask(task);
+            CalcInterpreterTask task1 = new CalcInterpreterTask(codeSB1.toString(), parameters, calcCallback);
+            CalcInterpreterThread.getCalcInterpreterThread().addTask(task1);
+            CalcInterpreterTask task2 = new CalcInterpreterTask(codeSB2.toString(), parameters, calcCallback);
+            CalcInterpreterThread.getCalcInterpreterThread().addTask(task2);
 
         } catch (Exception e) {
             setInError(new CalcError(e, null, -1));
@@ -208,11 +227,12 @@ public class ComputeFDRFunction extends AbstractFunction {
     
     @Override
     public void askDisplay(FunctionGraphNode functionGraphNode) {
-        display(functionGraphNode.getPreviousDataName(), getName());
+        display(functionGraphNode.getPreviousDataName(), getName(), 0);
+        display(functionGraphNode.getPreviousDataName(), getName(), 1);
     }
     
     @Override
-    public WindowBox getDisplayWindowBox(FunctionGraphNode functionGraphNode) {
+    public ArrayList<WindowBox> getDisplayWindowBox(FunctionGraphNode functionGraphNode) {
         return getDisplayWindowBox(functionGraphNode.getPreviousDataName(), getName());
     }
     

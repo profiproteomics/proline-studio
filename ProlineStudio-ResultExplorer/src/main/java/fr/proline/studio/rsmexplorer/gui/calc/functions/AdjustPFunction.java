@@ -7,7 +7,7 @@ import fr.proline.studio.parameter.ObjectParameter;
 import fr.proline.studio.parameter.ParameterError;
 import fr.proline.studio.parameter.ParameterList;
 import fr.proline.studio.pattern.WindowBox;
-import fr.proline.studio.python.data.ColData;
+import fr.proline.studio.python.data.ColDoubleData;
 import fr.proline.studio.python.data.ColRef;
 import fr.proline.studio.python.data.Table;
 import fr.proline.studio.python.interpreter.CalcCallback;
@@ -151,16 +151,13 @@ public class AdjustPFunction extends AbstractFunction {
                             for (ResultVariable var : variables) {
                                 if (var.getName().compareTo("adjustP") == 0) {
                                     // we have found the result
-                                    ColData col = (ColData) var.getValue();
+                                    ColDoubleData col = (ColDoubleData) var.getValue();
                                     // give a specific column name
                                     col.setColumnName(columnName);
                                     sourceTable.addColumn(col, new PvalueAdjusted(), new DoubleRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 4, true, true));
 
-                                    m_globalTableModelInterface = sourceTable.getModel();
+                                    addModel(sourceTable.getModel());
 
-                                    /*if (display) {
-                                     display(functionGraphNode.getPreviousDataName(), var.getName());
-                                     }*/
                                 }
                             }
                         } else if (error != null) {
@@ -192,7 +189,7 @@ public class AdjustPFunction extends AbstractFunction {
     }
     
     @Override
-    public WindowBox getDisplayWindowBox(FunctionGraphNode functionGraphNode) {
+    public ArrayList<WindowBox> getDisplayWindowBox(FunctionGraphNode functionGraphNode) {
         return getDisplayWindowBox(functionGraphNode.getPreviousDataName(), getName());
     }
 

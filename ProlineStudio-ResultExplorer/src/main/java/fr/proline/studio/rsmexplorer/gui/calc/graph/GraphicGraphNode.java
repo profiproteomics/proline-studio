@@ -8,6 +8,7 @@ import fr.proline.studio.rsmexplorer.gui.calc.graphics.AbstractGraphic;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.utils.IconManager;
 import java.awt.Color;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import javax.swing.ImageIcon;
 import javax.swing.JPopupMenu;
@@ -281,14 +282,17 @@ public class GraphicGraphNode extends GraphNode {
     }
     
     @Override
-    public WindowBox getDisplayWindowBox() {
+    public ArrayList<WindowBox> getDisplayWindowBox() {
         String dataName = "";
         if (m_inConnectors.size()>0) {
             GraphNode graphNode = m_inConnectors.get(0).getLinkedSourceGraphNode();
             dataName = graphNode.getDataName();
         }
 
-        return m_graphic.getDisplayWindowBox(dataName);
+        ArrayList<WindowBox> windowBoxList = new ArrayList<>(1);
+        windowBoxList.add(m_graphic.getDisplayWindowBox(dataName));
+        return windowBoxList;
+
     }
 
     @Override

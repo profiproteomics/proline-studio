@@ -17,6 +17,7 @@ import java.awt.LinearGradientPaint;
 import java.awt.Stroke;
 import java.awt.event.ActionEvent;
 import java.awt.geom.Point2D;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
@@ -326,7 +327,7 @@ public abstract class GraphNode extends AbstractConnectedGraphObject {
     public abstract void process(ProcessCallbackInterface callback);
 
     public abstract void askDisplay();
-    public abstract WindowBox getDisplayWindowBox();
+    public abstract ArrayList<WindowBox> getDisplayWindowBox();
     public abstract SplittedPanelContainer.PanelLayout getAutoDisplayLayoutDuringProcess();
     public abstract boolean settings();
 

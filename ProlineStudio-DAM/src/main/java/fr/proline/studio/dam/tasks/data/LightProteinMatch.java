@@ -7,9 +7,7 @@ public class LightProteinMatch {
     private final Float m_score;
 
     private Long m_proteinSetId = null;
-    
-    private LightPeptideMatch[] m_peptideMatches;
-    private long[] m_peptideMatchesId;
+
     
     public LightProteinMatch(long id, String accession, Float score, Long proteinSetId) {
         m_id = id;
@@ -42,20 +40,5 @@ public class LightProteinMatch {
         return m_score;
     }
 
-    public LightPeptideMatch[] getPeptideMatches() {
-        return m_peptideMatches;
-    }
-
-    public void setPeptideMatches(LightPeptideMatch[] peptideMatches) {
-        m_peptideMatches = peptideMatches;
-    }
-    
-    public long[] getPeptideMatchesId() {
-        return m_peptideMatchesId;
-    }
-
-    public void setPeptideMatchesId(long[] peptideMatchesId) {
-        m_peptideMatchesId = peptideMatchesId;
-    }
 
 }

@@ -238,7 +238,10 @@ public class ImportTSVFunction extends AbstractFunction {
 
                     }
                 }
-                m_globalTableModelInterface = new LoadedDataModel(headerLine, columTypes, data);
+                
+                addModel(new LoadedDataModel(headerLine, columTypes, data));
+
+
 
             } catch (Exception e) {
                 setInError(new CalcError(e, null, -1));
@@ -257,7 +260,7 @@ public class ImportTSVFunction extends AbstractFunction {
     }
     
     @Override
-    public WindowBox getDisplayWindowBox(FunctionGraphNode functionGraphNode) {
+    public ArrayList<WindowBox> getDisplayWindowBox(FunctionGraphNode functionGraphNode) {
         return getDisplayWindowBox(functionGraphNode.getPreviousDataName(), getName());
     }
     

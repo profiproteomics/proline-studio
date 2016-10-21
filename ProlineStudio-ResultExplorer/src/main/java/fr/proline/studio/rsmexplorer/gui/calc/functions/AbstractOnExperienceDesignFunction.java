@@ -11,7 +11,7 @@ import fr.proline.studio.parameter.ObjectParameter;
 import fr.proline.studio.parameter.ParameterError;
 import fr.proline.studio.parameter.ParameterList;
 import fr.proline.studio.pattern.WindowBox;
-import fr.proline.studio.python.data.ColData;
+import fr.proline.studio.python.data.ColDoubleData;
 import fr.proline.studio.python.data.ColRef;
 import fr.proline.studio.python.data.Table;
 import fr.proline.studio.python.interpreter.CalcCallback;
@@ -152,7 +152,7 @@ public abstract class AbstractOnExperienceDesignFunction extends AbstractFunctio
             }
 
             StringBuilder codeSB = new StringBuilder();
-            codeSB.append(m_resultName + "=Stats." + m_pythonCall + "(");
+            codeSB.append(m_resultName + "=Stats." + m_pythonCall + "((");
 
             nbSizeDone = 0;
             for (int j = 0; j < nbColList; j++) {
@@ -170,6 +170,7 @@ public abstract class AbstractOnExperienceDesignFunction extends AbstractFunctio
                     codeSB.append(',');
                 }
             }
+            codeSB.append(')');
             
             if (addLabelParameter()) {
 
@@ -211,19 +212,22 @@ public abstract class AbstractOnExperienceDesignFunction extends AbstractFunctio
                             // look for res
                             for (ResultVariable var : variables) {
                                 if (var.getName().compareTo(m_resultName) == 0) {
+
                                     // we have found the result
+                                    GlobalTableModelInterface model = null;
                                     Object res = var.getValue();
-                                    if (res instanceof ColData) {
-                                        ColData col = (ColData) var.getValue();
+                                    if (res instanceof ColDoubleData) {
+                                        ColDoubleData col = (ColDoubleData) var.getValue();
                                         sourceTable.addColumn(col, m_colExtraInfo, new DoubleRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 4, true, true));
-                                        m_globalTableModelInterface = sourceTable.getModel();
+                                        model = sourceTable.getModel();
                                     } else if (res instanceof Table) {
                                         Table t = (Table) var.getValue();
-                                        m_globalTableModelInterface = t.getModel();
+                                        model = t.getModel();
                                     }
 
                                     // save the group selection in the result
-                                    m_globalTableModelInterface.addSingleValue(groupSelection);
+                                    model.addSingleValue(groupSelection);
+                                    addModel(model);
                                     
                                 }
                             }
@@ -258,7 +262,7 @@ public abstract class AbstractOnExperienceDesignFunction extends AbstractFunctio
     }
 
     @Override
-    public WindowBox getDisplayWindowBox(FunctionGraphNode functionGraphNode) {
+    public ArrayList<WindowBox> getDisplayWindowBox(FunctionGraphNode functionGraphNode) {
         return getDisplayWindowBox(functionGraphNode.getPreviousDataName(), getName());
     }
 
@@ -324,6 +328,7 @@ public abstract class AbstractOnExperienceDesignFunction extends AbstractFunctio
                     selection[j] = true;
                 }
                 m_columnsParameterArray[i] = new MultiObjectParameter(SEL_COLS_PREFIX + i, "group " + i, null, selectedColsObject, selectedColsObject, selection, null, true);
+                m_columnsParameterArray[i].setCompulsory(2); // at least two values in a group
             }
             
             ParameterList extraParameterList = getExtraParameterList();
@@ -367,7 +372,7 @@ public abstract class AbstractOnExperienceDesignFunction extends AbstractFunctio
             }
 
             
-            String[] groupNameList = {"First Group", "Second Group", "Third Group"};
+            String[] groupNameList = {"First Group", "Second Group", "Third Group", "Fourth Group", "Fifth Group", "Sixth Group", "Seventh Group", "Eighth Group"};
 
             boolean[][] selection = new boolean[getMaxGroups()][nbColumnsKept];
             for (boolean[] row : selection) {
@@ -454,6 +459,7 @@ public abstract class AbstractOnExperienceDesignFunction extends AbstractFunctio
             m_columnsParameterArray = new MultiObjectParameter[getMaxGroups()];
             for (int i = 0; i < getMaxGroups(); i++) {
                 m_columnsParameterArray[i] = new MultiObjectParameter(SEL_COLS_PREFIX + i, groupNameList[i], null, objectArray1, associatedObjectArray1, selection[i], null, true);
+                m_columnsParameterArray[i].setCompulsory(2); // at least two values in a group
             }
 
             ParameterList extraParameterList = getExtraParameterList();
@@ -477,15 +483,18 @@ public abstract class AbstractOnExperienceDesignFunction extends AbstractFunctio
 
             final int _nbGroupsFound = nbGroupsFound;
             if (getMaxGroups() >= 3) {
+                for (int i = 3; i < getMaxGroups() + 1; i++) {
+                    final Integer number = i;
+                    AbstractLinkedParameters nbGroupslinkedParameters = new AbstractLinkedParameters(m_parameters[i]) {
+                        @Override
+                        public void valueChanged(String value, Object associatedValue) {
+                            
+                            enableList(((Integer)associatedValue)>=number);
+                        }
 
-                AbstractLinkedParameters nbGroupslinkedParameters = new AbstractLinkedParameters(m_parameters[getMaxGroups()]) {
-                    @Override
-                    public void valueChanged(String value, Object associatedValue) {
-                        enableList(value.compareTo("3") == 0);
-                    }
-
-                };
-                m_nbGroupsParameter.addLinkedParameters(nbGroupslinkedParameters); // link parameter, it will modify the panel
+                    };
+                    m_nbGroupsParameter.addLinkedParameters(nbGroupslinkedParameters); // link parameter, it will modify the panel
+                }
             }
 
             AbstractLinkedParameters quantitationVisibilityParameters = new AbstractLinkedParameters(m_parameters[0]) {

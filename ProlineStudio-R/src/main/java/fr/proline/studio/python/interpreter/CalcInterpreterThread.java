@@ -1,6 +1,6 @@
 package fr.proline.studio.python.interpreter;
 
-import fr.proline.studio.python.data.ColData;
+import fr.proline.studio.python.data.ColDoubleData;
 import fr.proline.studio.python.data.PythonImage;
 import fr.proline.studio.python.data.Table;
 import java.util.ArrayList;
@@ -96,14 +96,14 @@ public class CalcInterpreterThread extends Thread {
                     for (int i = 0; i < nbKeys; i++) {
                         PyObject key = keysList.__getitem__(i);
                         PyObject value = locals.get(key);
-                        if (value instanceof ColData) {
-                            ColData col = (ColData) value;
+                        if (value instanceof ColDoubleData) {
+                            ColDoubleData col = (ColDoubleData) value;
                             String columnName = col.getColumnName();
                             if ((columnName == null) || (columnName.isEmpty())) {
                                 col.setColumnName(key.toString());
                             }
                         }
-                        if ((value instanceof ColData) || (value instanceof PyInteger) || (value instanceof PyFloat) || (value instanceof Table) || (value instanceof PythonImage)) {
+                        if ((value instanceof ColDoubleData) || (value instanceof PyInteger) || (value instanceof PyFloat) || (value instanceof Table) || (value instanceof PythonImage)) {
 
                             resultVariableArray.add(new ResultVariable(key.toString(), value));
                         }

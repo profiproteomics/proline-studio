@@ -77,8 +77,8 @@ public class DataBoxAdjacencyMatrix extends AbstractDataBox {
         
         final ResultSummary _rsm = (ResultSummary) m_previousDataBox.getData(false, ResultSummary.class);
         
-        ArrayList<LightProteinMatch> proteinMatchArray = component.proteinMatchArray;
-        ArrayList<LightPeptideMatch> peptideMatchArray = component.peptideArray;
+        ArrayList<LightProteinMatch> proteinMatchArray = component.m_proteinMatchArray;
+        ArrayList<LightPeptideMatch> peptideMatchArray = component.m_peptideArray;
         
         int nbProteins = proteinMatchArray.size();
         ArrayList<Long> proteinMatchIdArray = new ArrayList<>(nbProteins);

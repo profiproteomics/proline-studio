@@ -5,7 +5,7 @@ package fr.proline.studio.rsmexplorer.gui.dialog;
 import fr.proline.studio.id.ProjectId;
 import fr.proline.studio.pattern.WindowBox;
 import fr.proline.studio.pattern.WindowBoxFactory;
-import fr.proline.studio.python.data.ColData;
+import fr.proline.studio.python.data.ColDoubleData;
 import fr.proline.studio.python.data.PythonImage;
 import fr.proline.studio.python.data.Table;
 import fr.proline.studio.python.interpreter.CalcCallback;
@@ -237,8 +237,8 @@ public class CalcDialog extends JDialog {
                         return;
                     }
                     PyObject o = resultVariable.getValue();
-                    if (o instanceof ColData) {
-                        ColData col = (ColData) o;
+                    if (o instanceof ColDoubleData) {
+                        ColDoubleData col = (ColDoubleData) o;
                         Table t = col.getTable();
                         t.addColumn(col, null, new DoubleRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)),4,true,true));
                     } else if (o instanceof Table) {

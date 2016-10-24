@@ -214,7 +214,7 @@ public class CalibrationPlotGraphic extends AbstractGraphic {
                 showParameter(m_nbinsParameter, ((value.compareTo("jiang") == 0) || (value.compareTo("histo") == 0)));
                 showParameter(m_pzParameter, (value.compareTo("slim") == 0));
 
-                updataParameterListPanel();
+                updateParameterListPanel();
             }
             
         };

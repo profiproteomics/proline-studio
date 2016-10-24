@@ -81,7 +81,7 @@ public class NormalizationFunction extends AbstractOnExperienceDesignFunction {
                 showParameter(m_familyStrongOptionParameter, (value.compareTo(FAMILY_STRONG_RESCALING) == 0));
                 showParameter(m_familyOthersOptionParameter, (value.compareTo(FAMILY_STRONG_RESCALING) != 0));
 
-                updataParameterListPanel();
+                updateParameterListPanel();
             }
             
         };

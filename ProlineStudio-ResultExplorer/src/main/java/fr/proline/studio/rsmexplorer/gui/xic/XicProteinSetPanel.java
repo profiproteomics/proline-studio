@@ -289,6 +289,7 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
                 DataMixerWindowBoxManager.addTableInfo(tableInfo);
             }
         };
+        
         toolbar.add(m_addCompareDataButton);
 
         m_calcButton = new JButton(IconManager.getIcon(IconManager.IconType.CALCULATOR));

@@ -4,11 +4,13 @@ import fr.proline.studio.dpm.task.util.JMSConnectionManager;
 import fr.proline.studio.gui.AbstractParameterListTree;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.parameter.BooleanParameter;
+import fr.proline.studio.parameter.IntegerParameter;
 import fr.proline.studio.parameter.ObjectParameter;
 import fr.proline.studio.parameter.ParameterError;
 import fr.proline.studio.parameter.ParameterList;
 import fr.proline.studio.parameter.StringParameter;
 import fr.proline.studio.rsmexplorer.actions.identification.ImportManager;
+import fr.proline.studio.table.DecoratedTable;
 import java.awt.*;
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -34,7 +36,7 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
 
     private static ApplicationSettingsDialog m_singletonDialog = null;
     private AbstractParameterListTree m_parameterListTree;
-    private ParameterList m_jmsParameterList, m_generalParameterList;
+    private ParameterList m_jmsParameterList, m_generalParameterList, m_tableParameters;
     private JPanel m_cards;
     private Hashtable<String, JPanel> m_existingPanels;
     private Hashtable<String, ParameterList> m_existingLists;
@@ -99,10 +101,10 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
         BooleanParameter gettingStartedParameter = new BooleanParameter("Hide_Getting_Started_Dialog", "Hide Getting Started Dialog On Startup", gettingStartedCheckBox, false);
         m_generalParameterList.add(gettingStartedParameter);
 
-        Object[] associatedTable = {"Search Name", "Peaklist", "Msi Search Filename", "Mascot Rule"};
-        JComboBox comboBox = new JComboBox(associatedTable);
-        Object[] objectTable = {ImportManager.SEARCH_RESULT_NAME_SOURCE, ImportManager.PEAKLIST_PATH_SOURCE, ImportManager.MSI_SEARCH_FILE_NAME_SOURCE, ImportManager.MASCOT_DAEMON_RULE};
-        ObjectParameter nameSourceParameter = new ObjectParameter(ImportManager.DEFAULT_SEARCH_RESULT_NAME_SOURCE_KEY, "Default Search Result Name Source", comboBox, associatedTable, objectTable, 2, null);
+        Object[] namingAssosiatedTable = {"Search Name", "Peaklist", "Msi Search Filename", "Mascot Rule"};
+        JComboBox namingComboBox = new JComboBox(namingAssosiatedTable);
+        Object[] namingObjectTable = {ImportManager.SEARCH_RESULT_NAME_SOURCE, ImportManager.PEAKLIST_PATH_SOURCE, ImportManager.MSI_SEARCH_FILE_NAME_SOURCE, ImportManager.MASCOT_DAEMON_RULE};
+        ObjectParameter nameSourceParameter = new ObjectParameter(ImportManager.DEFAULT_SEARCH_RESULT_NAME_SOURCE_KEY, "Default Search Result Name Source", namingComboBox, namingAssosiatedTable, namingObjectTable, 2, null);
         m_generalParameterList.add(nameSourceParameter);
 
         JCheckBox decoratedCheckBox = new JCheckBox("Export Decorated");
@@ -113,9 +115,24 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
         BooleanParameter xicTransferHandlerParameter = new BooleanParameter("XIC_Transfer_Handler_Retains_Structure", "XIC Transfer Handler Retains Structure", xicCheckBox, true);
         m_generalParameterList.add(xicTransferHandlerParameter);
 
-        m_generalParameterList.loadParameters(m_preferences, true);
-
         return m_generalParameterList;
+    }
+
+    private ParameterList getTableParameters() {
+        m_tableParameters = new ParameterList(DecoratedTable.TABLE_PARAMETERS);
+
+        Object[] associatedTable = {"Automatic Column Size", "Fixed Column Size", "Smart Column Size"};
+        JComboBox comboBox = new JComboBox(associatedTable);
+        Object[] objectTable = {DecoratedTable.AUTOMATIC_COLUMNS_SIZE, DecoratedTable.FIXED_COLUMNS_SIZE, DecoratedTable.SMART_COLUMNS_SIZE};
+        ObjectParameter columnsParameter = new ObjectParameter(DecoratedTable.DEFAULT_COLUMNS_ARRANGEMENT_KEY, DecoratedTable.DEFAULT_COLUMNS_ARRANGEMENT_KEY, comboBox, associatedTable, objectTable, 0, null);
+        m_tableParameters.add(columnsParameter);
+
+        IntegerParameter defaultFixedColumnSize = new IntegerParameter(DecoratedTable.DEFAULT_WIDTH_KEY, DecoratedTable.DEFAULT_WIDTH_KEY, JTextField.class, 30, 10, 300);
+        m_tableParameters.add(defaultFixedColumnSize);
+
+        m_tableParameters.loadParameters(m_preferences, true);
+        
+        return m_tableParameters;
     }
 
     private JComponent createInternalComponent() {
@@ -130,7 +147,8 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
         panel.setBorder(BorderFactory.createTitledBorder(DIALOG_TITLE));
 
         m_parameterListTree = new AbstractParameterListTree(TREE_ROOT_NAME, this, this);
-        m_parameterListTree.addNodes(this.getJMSParameterList());
+        m_parameterListTree.addNodes(this.getJMSParameterList());     
+        m_parameterListTree.addNodes(this.getTableParameters());
         m_parameterListTree.addNodes(this.getGeneralParameters());
         m_parameterListTree.expandAllRows();
 

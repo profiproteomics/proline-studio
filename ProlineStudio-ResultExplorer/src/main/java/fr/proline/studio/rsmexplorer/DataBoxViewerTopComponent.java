@@ -37,6 +37,10 @@ public class DataBoxViewerTopComponent extends TopComponent {
         setToolTipText(windowBox.getName()); 
 
     }
+    
+    public WindowBox getWindowBox(){
+        return this.m_windowBox;
+    }
 
     public void retrieveTableModels(ArrayList<TableInfo> list) {
         m_windowBox.retrieveTableModels(list);

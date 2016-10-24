@@ -287,7 +287,7 @@ public class ImportTSVFunction extends AbstractFunction {
             public void valueChanged(String value, Object associatedValue) {
                 showParameter(m_separatorParameter, (value.compareTo("false") == 0));
 
-                updataParameterListPanel();
+                updateParameterListPanel();
             }
             
         };

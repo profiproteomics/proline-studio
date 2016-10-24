@@ -12,7 +12,6 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import javax.swing.ImageIcon;
-import javax.swing.JComponent;
 import javax.swing.JPopupMenu;
 
 /**

@@ -40,6 +40,7 @@ public abstract class AddDataAnalyzerButton  extends JButton implements ActionLi
                 return;
             }
         }
+        
 
         actionPerformed();
 

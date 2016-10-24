@@ -45,6 +45,7 @@ public class DataAnalyzerPanel extends JPanel implements DataBoxPanelInterface {
 
     private AbstractDataBox m_dataBox;
 
+    private JScrollPane graphScrollPane;
     
     private GraphPanel m_graphPanel;
 
@@ -170,7 +171,7 @@ public class DataAnalyzerPanel extends JPanel implements DataBoxPanelInterface {
         
         // create graph objects
         m_graphPanel = new GraphPanel(this);
-        JScrollPane graphScrollPane = new JScrollPane();
+        graphScrollPane = new JScrollPane();
         graphScrollPane.setBackground(Color.white);
         graphScrollPane.setViewportView(m_graphPanel);
         
@@ -197,7 +198,15 @@ public class DataAnalyzerPanel extends JPanel implements DataBoxPanelInterface {
     }
 
     
-  
+    public void clearDataAnalyzerPanel(){
+        m_graphPanel.removeAllGraphNodes();
+    }
+    
+    public void resetViewpoint(){
+        if(graphScrollPane!=null){
+            graphScrollPane.getViewport().setViewPosition(m_graphPanel.getViewportProperPoint());
+        }
+    }
 
     public void addTableInfoToGraph(TableInfo tableInfo) {
         DataGraphNode graphNode = new DataGraphNode(tableInfo, m_graphPanel);

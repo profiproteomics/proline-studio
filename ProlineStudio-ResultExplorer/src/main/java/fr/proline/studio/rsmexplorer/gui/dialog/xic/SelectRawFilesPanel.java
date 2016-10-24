@@ -8,7 +8,6 @@ import fr.proline.studio.gui.TreeFileChooserPanel;
 import fr.proline.studio.gui.TreeFileChooserTableModelInterface;
 import fr.proline.studio.gui.TreeFileChooserTransferHandler;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
-import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
 import fr.proline.studio.rsmexplorer.tree.xic.XICBiologicalGroupNode;
 import fr.proline.studio.rsmexplorer.tree.xic.XICBiologicalSampleAnalysisNode;
@@ -34,7 +33,6 @@ import java.util.HashMap;
 import javax.swing.BorderFactory;
 import javax.swing.DropMode;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
@@ -390,7 +388,7 @@ public class SelectRawFilesPanel extends JPanel {
 
     protected static class FlatDesignTableModel extends DecoratedTableModel implements TreeFileChooserTableModelInterface {
 
-        private String[] suffix = {".raw", ".mzdb"};
+        private String[] suffix = {".raw", ".mzdb", ".wiff"};
 
         public static final int COLTYPE_GROUP = 0;
         public static final int COLTYPE_SAMPLE = 1;

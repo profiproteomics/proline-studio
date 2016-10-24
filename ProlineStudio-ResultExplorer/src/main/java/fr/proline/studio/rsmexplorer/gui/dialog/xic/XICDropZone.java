@@ -31,7 +31,7 @@ public class XICDropZone extends JPanel implements DropZoneInterface {
 
     private Hashtable<String, File> m_samplesTable;
     private FlatDesignTableModel m_model;
-    private String[] suffix = {".raw", ".mzdb"};
+    private String[] suffix = {".raw", ".mzdb", ".wiff"};
     private XICDropZoneInfo m_info;
     private TreeFileChooserTransferHandler m_transferHandler;
 

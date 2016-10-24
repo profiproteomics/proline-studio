@@ -2,6 +2,7 @@ package fr.proline.studio.rsmexplorer.gui.calc.macros;
 
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.rsmexplorer.gui.calc.DataTree;
+import fr.proline.studio.rsmexplorer.gui.calc.functions.ColumnFilterFunction;
 import fr.proline.studio.rsmexplorer.gui.calc.functions.ComputeFDRFunction;
 import fr.proline.studio.rsmexplorer.gui.calc.functions.DiffAnalysisFunction;
 import fr.proline.studio.rsmexplorer.gui.calc.functions.FilterFunction;
@@ -21,21 +22,22 @@ public class ProStarMacro extends AbstractMacro {
     public ProStarMacro() {
         
         // create nodes (functions or graphics) and links
-        addNode(new DataTree.FunctionNode(new FilterFunction(null)), 0, 0);
-        addNode(new DataTree.FunctionNode(new LogFunction(null, false)), 1, 0); addLink(0,0,1,0);
-        addNode(new DataTree.FunctionNode(new QuantiFilterFunction(null)), 2, 0); addLink(1,0,2,0);
-        addNode(new DataTree.FunctionNode(new NormalizationFunction(null)), 3, 0); addLink(2,0,3,0);
-        addNode(new DataTree.FunctionNode(new MissingValuesImputationFunction(null)), 4, 0); addLink(3,0,4,0);
-        addNode(new DataTree.FunctionNode(new DiffAnalysisFunction(null)), 5, 0); addLink(4,0,5,0);
+        addNode(new DataTree.FunctionNode(new ColumnFilterFunction(null)), 0, 0);
+        addNode(new DataTree.FunctionNode(new FilterFunction(null)), 1, 0); addLink(0,0,1,0);
+        addNode(new DataTree.FunctionNode(new LogFunction(null, false)), 2, 0); addLink(1,0,2,0);
+        addNode(new DataTree.FunctionNode(new QuantiFilterFunction(null)), 3, 0); addLink(2,0,3,0);
+        addNode(new DataTree.FunctionNode(new NormalizationFunction(null)), 4, 0); addLink(3,0,4,0);
+        addNode(new DataTree.FunctionNode(new MissingValuesImputationFunction(null)), 5, 0); addLink(4,0,5,0);
+        addNode(new DataTree.FunctionNode(new DiffAnalysisFunction(null)), 6, 0); addLink(5,0,6,0);
         
         CalibrationPlotGraphic cpg = new CalibrationPlotGraphic(null); cpg.setAutoDisplayLayoutDuringProcess(SplittedPanelContainer.PanelLayout.VERTICAL);
-        addNode(new DataTree.GraphicNode(cpg), 6, 0); addLink(5,0,6,0);
+        addNode(new DataTree.GraphicNode(cpg), 7, 0); addLink(6,0,7,0);
         
         ScatterGraphic sg = new ScatterGraphic(null); sg.setAutoDisplayLayoutDuringProcess(SplittedPanelContainer.PanelLayout.HORIZONTAL);
-        addNode(new DataTree.GraphicNode(sg), 6, 1); addLink(5,0,6,1);
+        addNode(new DataTree.GraphicNode(sg), 7, 1); addLink(6,0,7,1);
         
         ComputeFDRFunction FDRFunction = new ComputeFDRFunction(null); FDRFunction.setAutoDisplayLayoutDuringProcess(SplittedPanelContainer.PanelLayout.VERTICAL);
-        addNode(new DataTree.FunctionNode(FDRFunction), 6, 2); addLink(5,0,6,2);
+        addNode(new DataTree.FunctionNode(FDRFunction), 7, 2); addLink(6,0,7,2);
 
         
     }

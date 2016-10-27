@@ -333,7 +333,7 @@ public class ParameterList extends ArrayList<AbstractParameter> {
             String value = preferences.get(key, null);
 
             if (value == null) {
-                continue;
+                 continue;
             }
 
             parameter.setValue(value);

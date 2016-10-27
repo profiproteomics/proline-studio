@@ -24,15 +24,22 @@ public class NormalizationFunction extends AbstractOnExperienceDesignFunction {
     private static final String FAMILY_OTHERS_OPTION1 = "overall";
     private static final String FAMILY_OTHERS_OPTION2 = "within conditions";
     
-    private static final String NORMALIZATION_FAMILY = "NORMALIZATION_FAMILY";
-    private static final String NORMALIZATION_STRONG_OPTION = "NORMALIZATION_STRONG_OPTION";
-    private static final String NORMALIZATION_OTHERS_OPTION = "NORMALIZATION_OTHERS_OPTION";
+    private static final String NORMALIZATION_FAMILY_KEY = "NORMALIZATION_FAMILY";
+    private static final String NORMALIZATION_FAMILY_NAME = "Normalization Type";
+    
+    private static final String NORMALIZATION_STRONG_OPTION_KEY = "NORMALIZATION_STRONG_OPTION";
+    private static final String NORMALIZATION_OTHERS_OPTION_KEY = "NORMALIZATION_OTHERS_OPTION";
+    private static final String NORMALIZATION_OPTION_NAME = "Normalization Option";
+    
+    private static final String NORMALIZATION_FUNCTION_PARAMETER_LIST_NAME = "normalize options";
 
     private ObjectParameter m_normalizationParameter = null;
     private ObjectParameter m_familyStrongOptionParameter = null;
     private ObjectParameter m_familyOthersOptionParameter = null;
     
     private ResultVariable m_tableResultVariable = null;
+    
+    private ParameterList m_parameterList = null;
     
     public NormalizationFunction(GraphPanel panel) {
         super(panel, "Normalize", "normalize", "normalize", null);
@@ -58,24 +65,22 @@ public class NormalizationFunction extends AbstractOnExperienceDesignFunction {
     @Override
     public ParameterList getExtraParameterList() {
 
-        ParameterList parameterList = new ParameterList("normalize options");
+        m_parameterList = new ParameterList(NORMALIZATION_FUNCTION_PARAMETER_LIST_NAME);
 
         String[] normalizationFamily = { FAMILY_STRONG_RESCALING, FAMILY_MEDIAN_CENTERING, FAMILY_MEAN_CENTERING, FAMILY_MEAN_CENTERING_SCALING };
 
         String[] normalizationOption1Family = { FAMILY_STRONG_OPTION1, FAMILY_STRONG_OPTION2 };
-        String[] normalizationOption2Family = { FAMILY_OTHERS_OPTION1, FAMILY_OTHERS_OPTION2 };
+        String[] normalizationOption2Family = { FAMILY_OTHERS_OPTION1, FAMILY_OTHERS_OPTION2 };    
         
-        
-        m_normalizationParameter = new ObjectParameter(NORMALIZATION_FAMILY, "Normalization Type", null, normalizationFamily, null, 0, null);
-        m_familyStrongOptionParameter = new ObjectParameter(NORMALIZATION_STRONG_OPTION, "Normalization Option", null, normalizationOption1Family, null, 0, null);
-        m_familyOthersOptionParameter = new ObjectParameter(NORMALIZATION_OTHERS_OPTION, "Normalization Option", null, normalizationOption2Family, null, 0, null);
+        m_normalizationParameter = new ObjectParameter(NORMALIZATION_FAMILY_KEY, NORMALIZATION_FAMILY_NAME, null, normalizationFamily, null, 0, null);
+        m_familyStrongOptionParameter = new ObjectParameter(NORMALIZATION_STRONG_OPTION_KEY, NORMALIZATION_OPTION_NAME, null, normalizationOption1Family, null, 0, null);
+        m_familyOthersOptionParameter = new ObjectParameter(NORMALIZATION_OTHERS_OPTION_KEY, NORMALIZATION_OPTION_NAME, null, normalizationOption2Family, null, 0, null);
 
-        parameterList.add(m_normalizationParameter);
-        parameterList.add(m_familyStrongOptionParameter);
-        parameterList.add(m_familyOthersOptionParameter);
+        m_parameterList.add(m_normalizationParameter);
+        m_parameterList.add(m_familyStrongOptionParameter);
+        m_parameterList.add(m_familyOthersOptionParameter);
         
-        
-        AbstractLinkedParameters linkedParameters = new AbstractLinkedParameters(parameterList) {
+        AbstractLinkedParameters linkedParameters = new AbstractLinkedParameters(m_parameterList) {
             @Override
             public void valueChanged(String value, Object associatedValue) {
                 showParameter(m_familyStrongOptionParameter, (value.compareTo(FAMILY_STRONG_RESCALING) == 0));
@@ -85,15 +90,13 @@ public class NormalizationFunction extends AbstractOnExperienceDesignFunction {
             }
             
         };
-
-
         
-        parameterList.getPanel(true); // generate panel at once
+        m_parameterList.getPanel(true); // generate panel at once
         m_normalizationParameter.addLinkedParameters(linkedParameters); // link parameter, it will modify the panel
-
-
         
-        return parameterList;
+        //m_parameterList.loadParameters(NbPreferences.root(), true);
+        
+        return m_parameterList;
         
     }
     

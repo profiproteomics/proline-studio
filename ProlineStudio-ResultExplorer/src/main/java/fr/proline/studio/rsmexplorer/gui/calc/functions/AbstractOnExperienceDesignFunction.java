@@ -35,9 +35,11 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import org.openide.util.NbPreferences;
 
 /**
  * Abstract class for functions on Experience Disgn for the data analyzer
+ *
  * @author JM235353
  */
 public abstract class AbstractOnExperienceDesignFunction extends AbstractFunction {
@@ -49,25 +51,27 @@ public abstract class AbstractOnExperienceDesignFunction extends AbstractFunctio
     private ObjectParameter m_nbGroupsParameter = null;
     private ObjectParameter m_quantitationTypeParameter = null;
     private MultiObjectParameter[] m_columnsParameterArray = null;
-    
+
+    private ParameterList m_extraParameterList = null;
+
     private final String m_functionName;
     private final String m_resultName;
     private final String m_pythonCall;
     private final Object m_colExtraInfo;
-    
+
     private Table m_sourceTable = null;
-    
+
     private final ArrayList<String> m_groupNames = new ArrayList<>();
-    
+
     public AbstractOnExperienceDesignFunction(GraphPanel panel, String functionName, String resultName, String pythonCall, Object colExtraInfo) {
         super(panel);
-        
+
         m_resultName = resultName;
         m_functionName = functionName;
         m_pythonCall = pythonCall;
         m_colExtraInfo = colExtraInfo;
     }
-    
+
     @Override
     public void inLinkDeleted() {
         super.inLinkDeleted();
@@ -75,10 +79,11 @@ public abstract class AbstractOnExperienceDesignFunction extends AbstractFunctio
         m_quantitationTypeParameter = null;
         m_columnsParameterArray = null;
     }
-    
+
     public abstract int getMinGroups();
+
     public abstract int getMaxGroups();
-    
+
     @Override
     public String getName() {
         return m_functionName;
@@ -91,7 +96,7 @@ public abstract class AbstractOnExperienceDesignFunction extends AbstractFunctio
 
     @Override
     public void process(AbstractConnectedGraphObject[] graphObjects, FunctionGraphNode functionGraphNode, ProcessCallbackInterface callback) {
-        
+
         int nbColList;
         int nbCols;
 
@@ -109,7 +114,7 @@ public abstract class AbstractOnExperienceDesignFunction extends AbstractFunctio
         }
 
         final GroupSelection groupSelection = new GroupSelection();
-        
+
         nbColList = ((Integer) m_nbGroupsParameter.getAssociatedObjectValue()).intValue();
         nbCols = 0;
         for (int i = 0; i < nbColList; i++) {
@@ -118,14 +123,12 @@ public abstract class AbstractOnExperienceDesignFunction extends AbstractFunctio
                 callback.finished(functionGraphNode);
                 return;
             }
-            
+
             groupSelection.addGroup(colList);
-            
+
             nbCols += colList.size();
         }
 
-        
-        
         setCalculating(true);
 
         try {
@@ -135,7 +138,7 @@ public abstract class AbstractOnExperienceDesignFunction extends AbstractFunctio
 
             ResultVariable[] extraVariables = getExtraVariables(sourceTable);
             int nbExtraVariables = (extraVariables == null) ? 0 : extraVariables.length;
-            ResultVariable[] parameters = new ResultVariable[nbCols+nbExtraVariables];
+            ResultVariable[] parameters = new ResultVariable[nbCols + nbExtraVariables];
 
             int nbSizeDone = 0;
             for (int j = 0; j < nbColList; j++) {
@@ -147,8 +150,8 @@ public abstract class AbstractOnExperienceDesignFunction extends AbstractFunctio
                 }
                 nbSizeDone += colList.size();
             }
-            for (int i=0;i<nbExtraVariables;i++) {
-                parameters[nbSizeDone+i] = extraVariables[i];
+            for (int i = 0; i < nbExtraVariables; i++) {
+                parameters[nbSizeDone + i] = extraVariables[i];
             }
 
             StringBuilder codeSB = new StringBuilder();
@@ -171,7 +174,7 @@ public abstract class AbstractOnExperienceDesignFunction extends AbstractFunctio
                 }
             }
             codeSB.append(')');
-            
+
             if (addLabelParameter()) {
 
                 codeSB.append(",(");
@@ -194,7 +197,7 @@ public abstract class AbstractOnExperienceDesignFunction extends AbstractFunctio
                 }
                 codeSB.append(")");
             }
-            
+
             String extraValues = getExtraValuesForFunctionCall();
             if (extraValues != null) {
                 codeSB.append(extraValues);
@@ -228,10 +231,17 @@ public abstract class AbstractOnExperienceDesignFunction extends AbstractFunctio
                                     // save the group selection in the result
                                     model.addSingleValue(groupSelection);
                                     addModel(model);
-                                    
+
+                                    if (m_extraParameterList != null) {
+                                        m_extraParameterList.saveParameters(NbPreferences.root(), true);
+                                    }
+
                                 }
                             }
                         } else if (error != null) {
+                            if (m_extraParameterList != null) {
+                                m_extraParameterList.saveParameters(NbPreferences.root(), true);
+                            }
                             setInError(error);
                         }
                         setCalculating(false);
@@ -268,11 +278,11 @@ public abstract class AbstractOnExperienceDesignFunction extends AbstractFunctio
 
     @Override
     public boolean settingsDone() {
-        
+
         if (m_parameters == null) {
             return false;
         }
-        
+
         if (m_columnsParameterArray == null) {
             return false;
         }
@@ -299,15 +309,12 @@ public abstract class AbstractOnExperienceDesignFunction extends AbstractFunctio
     @Override
     public void generateDefaultParameters(AbstractConnectedGraphObject[] graphObjects) {
 
-
-
-        
         GlobalTableModelInterface sourceModel = graphObjects[0].getGlobalTableModelInterface();
-        
+
         boolean hasQuantitationTypeParameter = false;
         int nbGroupsFound = -1;
         int nbGroups = getMinGroups(); // default value
-        
+
         GroupSelection groupSelection = (GroupSelection) sourceModel.getSingleValue(GroupSelection.class);
         if (groupSelection != null) {
             nbGroupsFound = groupSelection.getNumberOfGroups();
@@ -330,16 +337,21 @@ public abstract class AbstractOnExperienceDesignFunction extends AbstractFunctio
                 m_columnsParameterArray[i] = new MultiObjectParameter(SEL_COLS_PREFIX + i, "group " + i, null, selectedColsObject, selectedColsObject, selection, null, true);
                 m_columnsParameterArray[i].setCompulsory(2); // at least two values in a group
             }
-            
-            ParameterList extraParameterList = getExtraParameterList();
-            int nbExtraParameterList = (extraParameterList == null) ? 0 : 1;
+
+            m_extraParameterList = getExtraParameterList();
+
+            if (m_extraParameterList != null) {
+                m_extraParameterList.loadParameters(NbPreferences.root(), true);
+            }
+
+            int nbExtraParameterList = (m_extraParameterList == null) ? 0 : 1;
 
             m_parameters = new ParameterList[nbExtraParameterList];
 
-            if (extraParameterList != null) {
-                m_parameters[0] = extraParameterList;
+            if (m_extraParameterList != null) {
+                m_parameters[0] = m_extraParameterList;
             }
-            
+
         } else {
 
             int nbColumns = sourceModel.getColumnCount();
@@ -367,11 +379,10 @@ public abstract class AbstractOnExperienceDesignFunction extends AbstractFunctio
             Object[] objectArray1 = new Object[nbColumnsKept];
             Object[] associatedObjectArray1 = new Object[nbColumnsKept];
             for (int i = 0; i < nbColumnsKept; i++) {
-                objectArray1[i] = sourceModel.getColumnName(columnKept.get(i)).replaceAll("<br/>"," ");
+                objectArray1[i] = sourceModel.getColumnName(columnKept.get(i)).replaceAll("<br/>", " ");
                 associatedObjectArray1[i] = columnKept.get(i) + 1;  // +1 because it is used in python calc expression
             }
 
-            
             String[] groupNameList = {"First Group", "Second Group", "Third Group", "Fourth Group", "Fifth Group", "Sixth Group", "Seventh Group", "Eighth Group"};
 
             boolean[][] selection = new boolean[getMaxGroups()][nbColumnsKept];
@@ -379,7 +390,6 @@ public abstract class AbstractOnExperienceDesignFunction extends AbstractFunctio
                 Arrays.fill(row, false);
             }
 
-            
             DDataset dataset = (DDataset) sourceModel.getSingleValue(DDataset.class);
             if (dataset != null) {
                 GroupSetup groupSetup = dataset.getGroupSetup();
@@ -462,8 +472,13 @@ public abstract class AbstractOnExperienceDesignFunction extends AbstractFunctio
                 m_columnsParameterArray[i].setCompulsory(2); // at least two values in a group
             }
 
-            ParameterList extraParameterList = getExtraParameterList();
-            int nbExtraParameterList = (extraParameterList == null) ? 0 : 1;
+            m_extraParameterList = getExtraParameterList();
+
+            if (m_extraParameterList != null) {
+                m_extraParameterList.loadParameters(NbPreferences.root(), true);
+            }
+
+            int nbExtraParameterList = (m_extraParameterList == null) ? 0 : 1;
 
             m_parameters = new ParameterList[getMaxGroups() + 1 + nbExtraParameterList];
             m_parameters[0] = new ParameterList("group and quantitation");
@@ -477,8 +492,8 @@ public abstract class AbstractOnExperienceDesignFunction extends AbstractFunctio
                 m_parameters[i + 1].add(m_columnsParameterArray[i]);
             }
 
-            if (extraParameterList != null) {
-                m_parameters[m_parameters.length - 1] = extraParameterList;
+            if (m_extraParameterList != null) {
+                m_parameters[m_parameters.length - 1] = m_extraParameterList;
             }
 
             final int _nbGroupsFound = nbGroupsFound;
@@ -488,8 +503,8 @@ public abstract class AbstractOnExperienceDesignFunction extends AbstractFunctio
                     AbstractLinkedParameters nbGroupslinkedParameters = new AbstractLinkedParameters(m_parameters[i]) {
                         @Override
                         public void valueChanged(String value, Object associatedValue) {
-                            
-                            enableList(((Integer)associatedValue)>=number);
+
+                            enableList(((Integer) associatedValue) >= number);
                         }
 
                     };
@@ -562,8 +577,6 @@ public abstract class AbstractOnExperienceDesignFunction extends AbstractFunctio
             }
         }
 
-        
-
     }
 
     @Override
@@ -576,11 +589,11 @@ public abstract class AbstractOnExperienceDesignFunction extends AbstractFunctio
         // need to recalculate model
         m_globalTableModelInterface = null;
     }
-    
+
     public ParameterList getExtraParameterList() {
         return null;
     }
-    
+
     public String getExtraValuesForFunctionCall() {
         return null;
     }
@@ -588,7 +601,7 @@ public abstract class AbstractOnExperienceDesignFunction extends AbstractFunctio
     public ResultVariable[] getExtraVariables(Table sourceTable) {
         return null;
     }
-    
+
     public boolean addLabelParameter() {
         return false;
     }

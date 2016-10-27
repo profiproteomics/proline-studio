@@ -6,6 +6,7 @@ import fr.proline.studio.parameter.ParameterList;
 import fr.proline.studio.python.data.Table;
 import fr.proline.studio.python.interpreter.ResultVariable;
 import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
+import org.openide.util.NbPreferences;
 
 /**
  *
@@ -13,12 +14,17 @@ import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
  */
 public class MissingValuesImputationFunction extends AbstractOnExperienceDesignFunction {
 
-    private static final String  MV_IMPUTATION_METHOD = "MV_IMPUTATION_METHOD";
+    private static final String  MV_IMPUTATION_METHOD_KEY = "MV_IMPUTATION_METHOD";
+    private static final String MV_IMPUTATION_METHOD_NAME = "Method";
     
     private static final String MV_IMPUTATION_METHOD_BPCA = "BPCA";
     private static final String MV_IMPUTATION_METHOD_KNN = "KNN";
     private static final String MV_IMPUTATION_METHOD_MLE = "MLE";
     private static final String MV_IMPUTATION_METHOD_QRILC = "QRILC";
+    
+    private static final String MISSING_VALUES_IMPUTATION_FUNCTION_PARAMETER_LIST_NAME = "mv imputation options";
+    
+    private ParameterList m_parameterList = null;
 
     private ObjectParameter m_methodParameter = null;
 
@@ -48,16 +54,17 @@ public class MissingValuesImputationFunction extends AbstractOnExperienceDesignF
     @Override
     public ParameterList getExtraParameterList() {
 
-        ParameterList parameterList = new ParameterList("mv imputation options");
+        m_parameterList = new ParameterList(MISSING_VALUES_IMPUTATION_FUNCTION_PARAMETER_LIST_NAME);
 
         String[] mvImputationMethods = { MV_IMPUTATION_METHOD_BPCA, MV_IMPUTATION_METHOD_KNN, MV_IMPUTATION_METHOD_MLE, MV_IMPUTATION_METHOD_QRILC };
+     
+        m_methodParameter = new ObjectParameter(MV_IMPUTATION_METHOD_KEY, MV_IMPUTATION_METHOD_NAME, null, mvImputationMethods, null, 0, null);
 
+        m_parameterList.add(m_methodParameter);
+
+        //m_parameterList.loadParameters(NbPreferences.root(), true);
         
-        m_methodParameter = new ObjectParameter(MV_IMPUTATION_METHOD, "Method", null, mvImputationMethods, null, 0, null);
-
-        parameterList.add(m_methodParameter);
-
-        return parameterList;
+        return m_parameterList;
         
     }
     

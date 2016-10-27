@@ -1,14 +1,20 @@
 package fr.proline.studio.rsmexplorer.gui.dialog.xic;
 
+import fr.proline.core.orm.msi.dto.DSpectrum;
 import fr.proline.studio.rsmexplorer.tree.xic.XICDesignTree;
 import fr.proline.core.orm.uds.Aggregation;
 import fr.proline.core.orm.uds.Dataset;
 import fr.proline.core.orm.uds.Project;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.core.orm.util.DataStoreConnectorFactory;
+import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.data.DataSetData;
 import fr.proline.studio.dam.data.RunInfoData;
+import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
+import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
+import fr.proline.studio.dam.tasks.DatabaseLoadSingleSpectrumFromPeaklistID;
 import fr.proline.studio.dam.tasks.DatabaseRunsTask;
+import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dpm.AccessServiceThread;
 import fr.proline.studio.dpm.jms.AccessJMSManagerThread;
 import fr.proline.studio.dpm.task.AbstractServiceCallback;
@@ -55,11 +61,17 @@ public class CreateXICDialog extends DefaultDialog {
 
     private static final String SETTINGS_KEY = "XIC";
 
+    private ArrayList<AbstractNode> m_spectrumNodes;
+    private ArrayList<AbstractNode> m_failedSpectrumNodes;
+    private DatabaseLoadSingleSpectrumFromPeaklistID m_spectrumTask;
+    private int m_currentSpectrumIndex = -1;
+    private boolean m_isSpectrumOK = true;
+
     private static CreateXICDialog m_singletonDialog = null;
 
     private AbstractNode m_finalXICDesignNode = null;
     private IdentificationTree m_selectionTree = null;
-    
+
     private SelectRawFilesPanel m_selectRawFilePanel;
 
     private Hashtable<String, XICBiologicalSampleAnalysisNode> m_table;
@@ -127,10 +139,10 @@ public class CreateXICDialog extends DefaultDialog {
         setButtonVisible(BUTTON_BACK, true);
 
         // Update and Replace panel
-            m_selectRawFilePanel = SelectRawFilesPanel.getPanel(m_finalXICDesignNode);
-            replaceInternaleComponent(m_selectRawFilePanel);
-            revalidate();
-            repaint();
+        m_selectRawFilePanel = SelectRawFilesPanel.getPanel(m_finalXICDesignNode);
+        replaceInternaleComponent(m_selectRawFilePanel);
+        revalidate();
+        repaint();
 
     }
 
@@ -590,8 +602,26 @@ public class CreateXICDialog extends DefaultDialog {
                 return false;
             }
 
-            displayDefineRawFiles();
+            if (m_spectrumNodes == null) {
+                m_spectrumNodes = new ArrayList<AbstractNode>();
+            } else {
+                m_spectrumNodes.clear();
+            }
 
+            if (m_failedSpectrumNodes == null) {
+                m_failedSpectrumNodes = new ArrayList<AbstractNode>();
+            } else {
+                m_failedSpectrumNodes.clear();
+            }
+
+            registerSpectrumNodes(m_finalXICDesignNode);
+
+            m_currentSpectrumIndex = 0;
+            m_isSpectrumOK = true;
+
+            this.checkSpectrum(m_spectrumNodes.get(m_currentSpectrumIndex));
+
+            //displayDefineRawFiles();
             return false;
         } else if (m_step == STEP_PANEL_DEFINE_RAW_FILES) {
 
@@ -694,7 +724,7 @@ public class CreateXICDialog extends DefaultDialog {
     @Override
     protected boolean backCalled() {
         if (m_step == STEP_PANEL_DEFINE_RAW_FILES) {
-            
+
             m_selectRawFilePanel.pruneDesignTree();
             displayDesignTree(m_finalXICDesignNode);
 
@@ -708,6 +738,122 @@ public class CreateXICDialog extends DefaultDialog {
         }
 
         return false;
+
+    }
+
+    private void registerSpectrumNodes(AbstractNode parentNode) {
+
+        Enumeration children = parentNode.children();
+        //Iterate over Groups
+        while (children.hasMoreElements()) {
+            AbstractNode currentChild = (AbstractNode) children.nextElement();
+            AbstractNode.NodeTypes type = currentChild.getType();
+            if (type == AbstractNode.NodeTypes.BIOLOGICAL_SAMPLE_ANALYSIS) {
+                m_spectrumNodes.add(currentChild);
+            } else {
+                registerSpectrumNodes(currentChild);
+            }
+        }
+    }
+
+    private void checkSpectrum(AbstractNode abstractNode) {
+        DataSetNode node = (DataSetNode) abstractNode;
+        DDataset dataset = node.getDataset();
+
+        AbstractDatabaseCallback rsetCallback = new AbstractDatabaseCallback() {
+
+            @Override
+            public boolean mustBeCalledInAWT() {
+                return true;
+            }
+
+            @Override
+            public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
+
+                if (success) {
+
+                    AbstractDatabaseCallback spectrumCallback = new AbstractDatabaseCallback() {
+                        @Override
+                        public boolean mustBeCalledInAWT() {
+                            return true;
+                        }
+
+                        @Override
+                        public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
+                            if (success) {
+                                DSpectrum currentSpectrum = m_spectrumTask.getSpectrum();
+
+                                if (currentSpectrum.getFirstScan() == null || currentSpectrum.getFirstTime() == null || currentSpectrum.getFirstScan() == 0 || currentSpectrum.getFirstTime() == 0) {
+                                    m_failedSpectrumNodes.add(m_spectrumNodes.get(m_currentSpectrumIndex));
+                                    m_isSpectrumOK = false;
+                                }
+
+                                if (m_currentSpectrumIndex == m_spectrumNodes.size() - 1) {
+                                    if (m_isSpectrumOK) {
+                                        displayDefineRawFiles();
+                                    } else {
+                                        showErrorOnNode(m_failedSpectrumNodes.get(0), "First Time or/and First Scan features not initialized. Remove the highlighted node from your design.");
+                                    }
+                                } else {
+                                    checkSpectrum(m_spectrumNodes.get(++m_currentSpectrumIndex));
+                                }
+                            }
+                        }
+                    };
+
+                    if (dataset.getResultSet() != null) {
+                        m_spectrumTask = new DatabaseLoadSingleSpectrumFromPeaklistID(spectrumCallback, dataset.getResultSet().getMsiSearch().getPeaklist().getId(), dataset.getProject().getId());
+                        AccessDatabaseThread.getAccessDatabaseThread().addTask(m_spectrumTask);
+                    }
+
+                }
+
+            }
+        };
+
+        if (dataset.getResultSet() == null) {
+            DatabaseDataSetTask rsetTask = new DatabaseDataSetTask(rsetCallback);
+            rsetTask.initLoadRsetAndRsm(dataset);
+            AccessDatabaseThread.getAccessDatabaseThread().addTask(rsetTask);
+        } else {
+            AbstractDatabaseCallback spectrumCallback = new AbstractDatabaseCallback() {
+                @Override
+                public boolean mustBeCalledInAWT() {
+                    return true;
+                }
+
+                @Override
+                public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
+                    if (success) {
+                        DSpectrum currentSpectrum = m_spectrumTask.getSpectrum();
+
+                        if (currentSpectrum.getFirstScan() == null || currentSpectrum.getFirstTime() == null || currentSpectrum.getFirstScan() == 0 || currentSpectrum.getFirstTime() == 0) {
+                            m_failedSpectrumNodes.add(m_spectrumNodes.get(m_currentSpectrumIndex));
+                            m_isSpectrumOK = false;
+                        }
+
+                        if (m_currentSpectrumIndex == m_spectrumNodes.size() - 1) {
+                            if (m_isSpectrumOK) {
+                                displayDefineRawFiles();
+                            } else {
+                                showErrorOnNode(m_failedSpectrumNodes.get(0), "First Time or/and First Scan features not initialized. Remove the highlighted node from your design.");
+                            }
+                        } else {
+                            checkSpectrum(m_spectrumNodes.get(++m_currentSpectrumIndex));
+                        }
+                    }
+                }
+            };
+
+            if (dataset.getResultSet() != null) {
+                m_spectrumTask = new DatabaseLoadSingleSpectrumFromPeaklistID(spectrumCallback, dataset.getResultSet().getMsiSearch().getPeaklist().getId(), dataset.getProject().getId());
+                AccessDatabaseThread.getAccessDatabaseThread().addTask(m_spectrumTask);
+            }
+
+            m_spectrumTask = new DatabaseLoadSingleSpectrumFromPeaklistID(spectrumCallback, dataset.getResultSet().getMsiSearch().getPeaklist().getId(), dataset.getProject().getId());
+            AccessDatabaseThread.getAccessDatabaseThread().addTask(m_spectrumTask);
+
+        }
 
     }
 
@@ -735,14 +881,15 @@ public class CreateXICDialog extends DefaultDialog {
                 break;
             case BIOLOGICAL_SAMPLE_ANALYSIS:
                 if (parentNode.isLeaf()) {
-                    if(m_duplicates.containsKey(parentNode.toString())){
+                    if (m_duplicates.containsKey(parentNode.toString())) {
                         showErrorOnNode(parentNode, "Biological Sample Analysis is a duplicate. Please rename using right click!");
                         return false;
-                    }else{
+                    } else {
                         m_duplicates.put(parentNode.toString(), (XICBiologicalSampleAnalysisNode) parentNode);
                         return true;
                     }
                 }
+
                 break;
         }
 
@@ -754,9 +901,7 @@ public class CreateXICDialog extends DefaultDialog {
                 return false;
             }
         }
-        
-        System.out.println("breakpoint");
-        
+
         return true;
     }
 

@@ -86,10 +86,11 @@ public abstract class DecoratedTable extends JXTable implements CrossSelectionIn
     public static final int SMART_COLUMNS_SIZE = 2;
     public static final String TABLE_PARAMETERS = "Table Parameters";
 
-    private static boolean m_alreadyLoaded = false;  
+    private static boolean m_alreadyLoaded = false;
     private static int m_width = -1;
     private static int m_selection = -1;
-    
+    private static int m_meanWidth = -1;
+
     private JComboBox m_arrangementComboBox;
     private JTextField m_widthTextField;
 
@@ -116,7 +117,7 @@ public abstract class DecoratedTable extends JXTable implements CrossSelectionIn
     }
 
     protected void initParameters() {
-        
+
         m_alreadyLoaded = false;
         m_width = -1;
         m_selection = -1;
@@ -130,7 +131,7 @@ public abstract class DecoratedTable extends JXTable implements CrossSelectionIn
 
         //SHOULD I DO SOMETHING WITH THIS?
         final boolean autoResized = (getAutoResizeMode() != JXTable.AUTO_RESIZE_OFF);
-        
+
         List<TableColumn> columns = getColumns(true);
         int colCount = columns.size();
         Object[] columnNamesArray = new Object[colCount];
@@ -268,41 +269,40 @@ public abstract class DecoratedTable extends JXTable implements CrossSelectionIn
         }
 
         final int MAX_WIDTH = 500;
-        int meanWidth = totalWidth / nbVisible;
-        if (meanWidth < 30) {
-            meanWidth = 30;
-        } else if (meanWidth > MAX_WIDTH) {
-            meanWidth = MAX_WIDTH;
+        m_meanWidth = totalWidth / nbVisible;
+        if (m_meanWidth < 30) {
+            m_meanWidth = 30;
+        } else if (m_meanWidth > MAX_WIDTH) {
+            m_meanWidth = MAX_WIDTH;
         }
 
-        
         m_widthTextField = new JTextField();
-        m_columnWidthParameter = new IntegerParameter(DEFAULT_WIDTH_KEY, DEFAULT_WIDTH_KEY, m_widthTextField, meanWidth, 10, MAX_WIDTH);
+        m_columnWidthParameter = new IntegerParameter(DEFAULT_WIDTH_KEY, DEFAULT_WIDTH_KEY, m_widthTextField, m_meanWidth, 10, MAX_WIDTH);
 
         m_columnsVisibilityParameter = new MultiObjectParameter(COLUMNS_VISIBILITY_KEY, "Columns Visibility", null, columnNamesArray, columnsArray, selection, null, true);
 
         parameterTableList.add(this.m_columnArrangementParameter);
         parameterTableList.add(this.m_columnWidthParameter);
-        
+
         parameterTableList.loadParameters(NbPreferences.root(), true);
 
         AbstractLinkedParameters linkedParameters = new AbstractLinkedParameters(parameterTableList) {
 
             @Override
             public void valueChanged(String value, Object associatedValue) {
-                
-                if(!m_alreadyLoaded){
+
+                if (!m_alreadyLoaded) {
                     parameterTableList.loadParameters(NbPreferences.root(), true);
                     m_alreadyLoaded = true;
                     m_width = Integer.parseInt(m_columnWidthParameter.getStringValue());
                     m_selection = Integer.parseInt(m_columnArrangementParameter.getStringValue());
                 }
-                
+
                 m_selection = Integer.parseInt(m_columnArrangementParameter.getStringValue());
-                
+
                 showParameter(m_columnWidthParameter, m_selection == DecoratedTable.FIXED_COLUMNS_SIZE, m_width);
                 updateParameterListPanel();
-               
+
             }
 
         };
@@ -452,6 +452,25 @@ public abstract class DecoratedTable extends JXTable implements CrossSelectionIn
         linkedParameters2.valueChanged(colNames[colIndex[1]], indexes[colIndex[1]]);
 
         m_parameterListArray.add(parameterTableList);
+    }
+
+    private void fixResize() {
+        setAutoResizeMode(JXTable.AUTO_RESIZE_OFF);
+        SwingUtilities.invokeLater(new Runnable() {
+
+            @Override
+            public void run() {
+
+                int width = ((Integer) m_columnWidthParameter.getObjectValue()).intValue();
+                int colCount = getColumnCount();
+                TableColumnModel columnModel = getColumnModel();
+                for (int i = 0; i < colCount; i++) {
+                    TableColumn col = columnModel.getColumn(i);
+                    col.setWidth(width);
+                    col.setPreferredWidth(width);
+                }
+            }
+        });
     }
 
     public void removeStriping() {
@@ -604,7 +623,7 @@ public abstract class DecoratedTable extends JXTable implements CrossSelectionIn
 
     @Override
     public void parametersChanged() {
-        
+
         int arrangement = Integer.parseInt(this.m_columnArrangementParameter.getStringValue());
 
         switch (arrangement) {
@@ -612,32 +631,27 @@ public abstract class DecoratedTable extends JXTable implements CrossSelectionIn
                 setAutoResizeMode(JXTable.AUTO_RESIZE_ALL_COLUMNS);
                 break;
             case DecoratedTable.FIXED_COLUMNS_SIZE:
-                setAutoResizeMode(JXTable.AUTO_RESIZE_OFF);
-
-                SwingUtilities.invokeLater(new Runnable() {
-
-                    @Override
-                    public void run() {
-                        
-                        boolean b = m_alreadyLoaded;
-                        
-                        int width = ((Integer) m_columnWidthParameter.getObjectValue()).intValue();
-                        int colCount = getColumnCount();
-                        TableColumnModel columnModel = getColumnModel();
-                        for (int i = 0; i < colCount; i++) {
-                            TableColumn col = columnModel.getColumn(i);
-                            col.setWidth(width);
-                            col.setPreferredWidth(width);
-                        }
-                    }
-
-                });
+                fixResize();
                 break;
             case DecoratedTable.SMART_COLUMNS_SIZE:
-                
-                
-                
-                break;
+
+                if (m_meanWidth == -1) {
+                    setAutoResizeMode(JXTable.AUTO_RESIZE_ALL_COLUMNS);
+                    break;
+                }
+
+                float width = ((Integer) m_columnWidthParameter.getObjectValue()).floatValue();
+                float meanWidth = (float) m_meanWidth;
+
+                if (meanWidth / width < 0.7) {
+                    fixResize();
+                    break;
+
+                } else {
+                    setAutoResizeMode(JXTable.AUTO_RESIZE_ALL_COLUMNS);
+                    break;
+                }
+
         }
 
         List selectedColumns = (List) m_columnsVisibilityParameter.getAssociatedValues(true);

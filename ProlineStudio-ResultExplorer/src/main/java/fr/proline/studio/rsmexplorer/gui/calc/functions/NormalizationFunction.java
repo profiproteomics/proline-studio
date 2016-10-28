@@ -29,7 +29,8 @@ public class NormalizationFunction extends AbstractOnExperienceDesignFunction {
     
     private static final String NORMALIZATION_STRONG_OPTION_KEY = "NORMALIZATION_STRONG_OPTION";
     private static final String NORMALIZATION_OTHERS_OPTION_KEY = "NORMALIZATION_OTHERS_OPTION";
-    private static final String NORMALIZATION_OPTION_NAME = "Normalization Option";
+    private static final String NORMALIZATION_OPTION_NAME_1 = "Normalization Option (Strong)";
+    private static final String NORMALIZATION_OPTION_NAME_2 = "Normalization Option (Others)";
     
     private static final String NORMALIZATION_FUNCTION_PARAMETER_LIST_NAME = "normalize options";
 
@@ -73,8 +74,8 @@ public class NormalizationFunction extends AbstractOnExperienceDesignFunction {
         String[] normalizationOption2Family = { FAMILY_OTHERS_OPTION1, FAMILY_OTHERS_OPTION2 };    
         
         m_normalizationParameter = new ObjectParameter(NORMALIZATION_FAMILY_KEY, NORMALIZATION_FAMILY_NAME, null, normalizationFamily, null, 0, null);
-        m_familyStrongOptionParameter = new ObjectParameter(NORMALIZATION_STRONG_OPTION_KEY, NORMALIZATION_OPTION_NAME, null, normalizationOption1Family, null, 0, null);
-        m_familyOthersOptionParameter = new ObjectParameter(NORMALIZATION_OTHERS_OPTION_KEY, NORMALIZATION_OPTION_NAME, null, normalizationOption2Family, null, 0, null);
+        m_familyStrongOptionParameter = new ObjectParameter(NORMALIZATION_STRONG_OPTION_KEY, NORMALIZATION_OPTION_NAME_1, null, normalizationOption1Family, null, 0, null);
+        m_familyOthersOptionParameter = new ObjectParameter(NORMALIZATION_OTHERS_OPTION_KEY, NORMALIZATION_OPTION_NAME_2, null, normalizationOption2Family, null, 0, null);
 
         m_parameterList.add(m_normalizationParameter);
         m_parameterList.add(m_familyStrongOptionParameter);

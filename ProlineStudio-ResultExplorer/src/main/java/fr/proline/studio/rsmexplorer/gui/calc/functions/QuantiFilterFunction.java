@@ -8,7 +8,6 @@ import fr.proline.studio.python.interpreter.ResultVariable;
 import fr.proline.studio.python.model.QuantiFilterModel;
 import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
 import javax.swing.JTextField;
-import org.openide.util.NbPreferences;
 
 /**
  *

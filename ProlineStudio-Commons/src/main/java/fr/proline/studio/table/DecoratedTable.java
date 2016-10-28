@@ -86,8 +86,9 @@ public abstract class DecoratedTable extends JXTable implements CrossSelectionIn
     public static final int SMART_COLUMNS_SIZE = 2;
     public static final String TABLE_PARAMETERS = "Table Parameters";
 
-    private static boolean m_alreadyLoaded = false;
-    private static int m_previousSelection = -1; 
+    private static boolean m_alreadyLoaded = false;  
+    private static int m_width = -1;
+    private static int m_selection = -1;
     
     private JComboBox m_arrangementComboBox;
     private JTextField m_widthTextField;
@@ -117,6 +118,8 @@ public abstract class DecoratedTable extends JXTable implements CrossSelectionIn
     protected void initParameters() {
         
         m_alreadyLoaded = false;
+        m_width = -1;
+        m_selection = -1;
 
         ParameterList parameterTableList = new ParameterList(TABLE_PARAMETERS);
 
@@ -291,15 +294,15 @@ public abstract class DecoratedTable extends JXTable implements CrossSelectionIn
                 if(!m_alreadyLoaded){
                     parameterTableList.loadParameters(NbPreferences.root(), true);
                     m_alreadyLoaded = true;
+                    m_width = Integer.parseInt(m_columnWidthParameter.getStringValue());
+                    m_selection = Integer.parseInt(m_columnArrangementParameter.getStringValue());
                 }
-
-                int columnArrangementValue = Integer.parseInt(m_columnArrangementParameter.getStringValue());
-
-                int columnWidthValue = Integer.parseInt(m_columnWidthParameter.getStringValue());
                 
-                showParameter(m_columnWidthParameter, columnArrangementValue == DecoratedTable.FIXED_COLUMNS_SIZE);
-
+                m_selection = Integer.parseInt(m_columnArrangementParameter.getStringValue());
+                
+                showParameter(m_columnWidthParameter, m_selection == DecoratedTable.FIXED_COLUMNS_SIZE, m_width);
                 updateParameterListPanel();
+               
             }
 
         };

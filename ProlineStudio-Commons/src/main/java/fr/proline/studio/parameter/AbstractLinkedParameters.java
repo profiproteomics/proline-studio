@@ -12,19 +12,19 @@ import javax.swing.JPanel;
  * @author jm235353
  */
 public abstract class AbstractLinkedParameters {
-    
+
     private ParameterList m_parameterList = null;
-    
+
     public AbstractLinkedParameters(ParameterList parameterList) {
         m_parameterList = parameterList;
     }
-    
+
     public ParameterList getParameterList() {
         return m_parameterList;
     }
-    
+
     public abstract void valueChanged(String value, Object associatedValue);
-    
+
     public void showParameter(AbstractParameter parameter, boolean show) {
         JComponent comp = parameter.getComponent(null);
         comp.setVisible(show);
@@ -33,14 +33,23 @@ public abstract class AbstractLinkedParameters {
             l.setVisible(show);
         }
     }
-    
+
+    public void showParameter(AbstractParameter parameter, boolean show, Object value) {
+        JComponent comp = parameter.getComponent(value);
+        comp.setVisible(show);
+        JLabel l = getParameterList().getAssociatedLabel(comp);
+        if (l != null) {
+            l.setVisible(show);
+        }
+    }
+
     public void enableList(boolean v) {
         m_parameterList.enableList(v);
     }
-    
+
     protected void updateParameterListPanel() {
         JPanel p = getParameterList().getPanel(true);
-        
+
         JDialog dialog = getParent(p);
         if (dialog != null) {
             if (dialog instanceof DefaultDialog) {
@@ -55,7 +64,7 @@ public abstract class AbstractLinkedParameters {
             }
         }
     }
-    
+
     private JDialog getParent(JComponent c) {
         Container container = c.getParent();
         while (true) {
@@ -68,5 +77,5 @@ public abstract class AbstractLinkedParameters {
             container = container.getParent();
         }
     }
-    
+
 }

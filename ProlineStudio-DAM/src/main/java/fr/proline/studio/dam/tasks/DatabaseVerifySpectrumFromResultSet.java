@@ -1,6 +1,5 @@
 package fr.proline.studio.dam.tasks;
 
-import fr.proline.core.orm.msi.dto.DSpectrum;
 import fr.proline.core.orm.util.DataStoreConnectorFactory;
 import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
@@ -11,17 +10,17 @@ import javax.persistence.TypedQuery;
 /**
  * Load Spectrum from a MsQuery
  *
- * @author JM235353
+ * @author AK
  */
-public class DatabaseLoadSingleSpectrumFromPeaklistID extends AbstractDatabaseTask {
+public class DatabaseVerifySpectrumFromResultSet extends AbstractDatabaseTask {
 
-    private long m_peaklistID = -1;
+    private long m_resultSetID = -1;
     private long m_projectID = -1;
-    private DSpectrum m_spectrum = null;
+    private long m_spectrumID = -1;
 
-    public DatabaseLoadSingleSpectrumFromPeaklistID(AbstractDatabaseCallback callback, long peaklistID, long projectID) {
-        super(callback, new TaskInfo("Load Spectrum for Peaklist ID " + peaklistID, false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_LOW));
-        m_peaklistID = peaklistID;
+    public DatabaseVerifySpectrumFromResultSet(AbstractDatabaseCallback callback, long resultSetID, long projectID) {
+        super(callback, new TaskInfo("Verify Spectrum for ResultSet ID " + resultSetID, false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_LOW));
+        m_resultSetID = resultSetID;
         m_projectID = projectID;
     }
 
@@ -39,13 +38,13 @@ public class DatabaseLoadSingleSpectrumFromPeaklistID extends AbstractDatabaseTa
             
             entityManagerMSI.getTransaction().begin();
 
-            TypedQuery<DSpectrum> spectrumQuery = entityManagerMSI.createQuery("SELECT new fr.proline.core.orm.msi.dto.DSpectrum(sp.id, sp.firstScan, sp.firstTime, sp.lastTime, sp.intensityList, sp.mozList, sp.precursorCharge, sp.precursorIntensity, sp.precursorMoz, sp.title) FROM fr.proline.core.orm.msi.Spectrum sp WHERE sp.peaklistId = " + m_peaklistID, DSpectrum.class);
+            TypedQuery<Long> spectrumQuery = entityManagerMSI.createQuery("SELECT spc.id FROM fr.proline.core.orm.msi.ResultSet AS rset, fr.proline.core.orm.msi.MsiSearch AS msi, fr.proline.core.orm.msi.Peaklist AS pl, Spectrum AS spc WHERE rset.msiSearch = msi AND rset.id = "+m_resultSetID+" AND msi.peaklist = pl AND spc.peaklistId = pl.id AND (spc.firstTime > 0 OR spc.firstCycle > 0 OR spc.firstScan > 0)", Long.class);
             spectrumQuery.setMaxResults(1);
             
-            List<DSpectrum> spectrumList = spectrumQuery.getResultList();
+            List<Long> spectrumIDs = spectrumQuery.getResultList();
 
-            if (!spectrumList.isEmpty()) {
-                m_spectrum = spectrumList.get(0);
+            if (!spectrumIDs.isEmpty()) {
+                m_spectrumID = spectrumIDs.get(0);
             }
 
             entityManagerMSI.getTransaction().commit();
@@ -68,7 +67,7 @@ public class DatabaseLoadSingleSpectrumFromPeaklistID extends AbstractDatabaseTa
         return true;
     }
 
-    public DSpectrum getSpectrum() {
-        return m_spectrum;
+    public long getSpectrumID() {
+        return m_spectrumID;
     }
 }

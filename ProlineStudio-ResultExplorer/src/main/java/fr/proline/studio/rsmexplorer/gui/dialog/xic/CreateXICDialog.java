@@ -14,6 +14,7 @@ import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
 import fr.proline.studio.dam.tasks.DatabaseLoadSingleSpectrumFromPeaklistID;
 import fr.proline.studio.dam.tasks.DatabaseRunsTask;
+import fr.proline.studio.dam.tasks.DatabaseVerifySpectrumFromResultSet;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dpm.AccessServiceThread;
 import fr.proline.studio.dpm.jms.AccessJMSManagerThread;
@@ -63,7 +64,7 @@ public class CreateXICDialog extends DefaultDialog {
 
     private ArrayList<AbstractNode> m_spectrumNodes;
     private ArrayList<AbstractNode> m_failedSpectrumNodes;
-    private DatabaseLoadSingleSpectrumFromPeaklistID m_spectrumTask;
+    private DatabaseVerifySpectrumFromResultSet m_spectrumTask;
     private int m_currentSpectrumIndex = -1;
     private boolean m_isSpectrumOK = true;
 
@@ -760,8 +761,7 @@ public class CreateXICDialog extends DefaultDialog {
         DataSetNode node = (DataSetNode) abstractNode;
         DDataset dataset = node.getDataset();
 
-        AbstractDatabaseCallback rsetCallback = new AbstractDatabaseCallback() {
-
+        AbstractDatabaseCallback spectrumCallback = new AbstractDatabaseCallback() {
             @Override
             public boolean mustBeCalledInAWT() {
                 return true;
@@ -769,91 +769,29 @@ public class CreateXICDialog extends DefaultDialog {
 
             @Override
             public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
-
                 if (success) {
+                    long currentSpectrumID = m_spectrumTask.getSpectrumID();
 
-                    AbstractDatabaseCallback spectrumCallback = new AbstractDatabaseCallback() {
-                        @Override
-                        public boolean mustBeCalledInAWT() {
-                            return true;
-                        }
-
-                        @Override
-                        public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
-                            if (success) {
-                                DSpectrum currentSpectrum = m_spectrumTask.getSpectrum();
-
-                                if (currentSpectrum.getFirstScan() == null || currentSpectrum.getFirstTime() == null || currentSpectrum.getFirstScan() == 0 || currentSpectrum.getFirstTime() == 0) {
-                                    m_failedSpectrumNodes.add(m_spectrumNodes.get(m_currentSpectrumIndex));
-                                    m_isSpectrumOK = false;
-                                }
-
-                                if (m_currentSpectrumIndex == m_spectrumNodes.size() - 1) {
-                                    if (m_isSpectrumOK) {
-                                        displayDefineRawFiles();
-                                    } else {
-                                        showErrorOnNode(m_failedSpectrumNodes.get(0), "First Time or/and First Scan features not initialized. Remove the highlighted node from your design.");
-                                    }
-                                } else {
-                                    checkSpectrum(m_spectrumNodes.get(++m_currentSpectrumIndex));
-                                }
-                            }
-                        }
-                    };
-
-                    if (dataset.getResultSet() != null) {
-                        m_spectrumTask = new DatabaseLoadSingleSpectrumFromPeaklistID(spectrumCallback, dataset.getResultSet().getMsiSearch().getPeaklist().getId(), dataset.getProject().getId());
-                        AccessDatabaseThread.getAccessDatabaseThread().addTask(m_spectrumTask);
+                    if (currentSpectrumID == -1) {
+                        m_failedSpectrumNodes.add(m_spectrumNodes.get(m_currentSpectrumIndex));
+                        m_isSpectrumOK = false;
                     }
 
+                    if (m_currentSpectrumIndex == m_spectrumNodes.size() - 1) {
+                        if (m_isSpectrumOK) {
+                            displayDefineRawFiles();
+                        } else {
+                            showErrorOnNode(m_failedSpectrumNodes.get(0), "At least of the following attributes {First Time, First Scan, First Cycle} must be initialized. Remove the highlighted node from your design.");
+                        }
+                    } else {
+                        checkSpectrum(m_spectrumNodes.get(++m_currentSpectrumIndex));
+                    }
                 }
-
             }
         };
 
-        if (dataset.getResultSet() == null) {
-            DatabaseDataSetTask rsetTask = new DatabaseDataSetTask(rsetCallback);
-            rsetTask.initLoadRsetAndRsm(dataset);
-            AccessDatabaseThread.getAccessDatabaseThread().addTask(rsetTask);
-        } else {
-            AbstractDatabaseCallback spectrumCallback = new AbstractDatabaseCallback() {
-                @Override
-                public boolean mustBeCalledInAWT() {
-                    return true;
-                }
-
-                @Override
-                public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
-                    if (success) {
-                        DSpectrum currentSpectrum = m_spectrumTask.getSpectrum();
-
-                        if (currentSpectrum.getFirstScan() == null || currentSpectrum.getFirstTime() == null || currentSpectrum.getFirstScan() == 0 || currentSpectrum.getFirstTime() == 0) {
-                            m_failedSpectrumNodes.add(m_spectrumNodes.get(m_currentSpectrumIndex));
-                            m_isSpectrumOK = false;
-                        }
-
-                        if (m_currentSpectrumIndex == m_spectrumNodes.size() - 1) {
-                            if (m_isSpectrumOK) {
-                                displayDefineRawFiles();
-                            } else {
-                                showErrorOnNode(m_failedSpectrumNodes.get(0), "First Time or/and First Scan features not initialized. Remove the highlighted node from your design.");
-                            }
-                        } else {
-                            checkSpectrum(m_spectrumNodes.get(++m_currentSpectrumIndex));
-                        }
-                    }
-                }
-            };
-
-            if (dataset.getResultSet() != null) {
-                m_spectrumTask = new DatabaseLoadSingleSpectrumFromPeaklistID(spectrumCallback, dataset.getResultSet().getMsiSearch().getPeaklist().getId(), dataset.getProject().getId());
-                AccessDatabaseThread.getAccessDatabaseThread().addTask(m_spectrumTask);
-            }
-
-            m_spectrumTask = new DatabaseLoadSingleSpectrumFromPeaklistID(spectrumCallback, dataset.getResultSet().getMsiSearch().getPeaklist().getId(), dataset.getProject().getId());
-            AccessDatabaseThread.getAccessDatabaseThread().addTask(m_spectrumTask);
-
-        }
+        m_spectrumTask = new DatabaseVerifySpectrumFromResultSet(spectrumCallback, dataset.getResultSetId(), dataset.getProject().getId());
+        AccessDatabaseThread.getAccessDatabaseThread().addTask(m_spectrumTask);
 
     }
 

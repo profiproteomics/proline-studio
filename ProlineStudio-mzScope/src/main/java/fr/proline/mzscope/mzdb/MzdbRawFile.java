@@ -47,6 +47,7 @@ import java.util.Iterator;
 import java.util.List;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.Option;
@@ -239,7 +240,7 @@ public class MzdbRawFile implements IRawFile {
 
     private List<IFeature> detectFeatures(float mzTolPPM, double minMz, double maxMz) {
         List<IFeature> result = new ArrayList<>();
-        FeatureDetectorConfig detectorConfig = new FeatureDetectorConfig(1, mzTolPPM, 5, new SmartPeakelFinderConfig(5, 3, false, 10, false, true));
+        FeatureDetectorConfig detectorConfig = new FeatureDetectorConfig(1, mzTolPPM, 5, new SmartPeakelFinderConfig(5, 3, 0.75f, false, 10, false, true));
         MzDbFeatureDetector detector = new MzDbFeatureDetector(reader, detectorConfig);
         try {
             Iterator<RunSlice> runSlices;
@@ -311,8 +312,9 @@ public class MzdbRawFile implements IRawFile {
                 //TreeMap<Double, TheoreticalIsotopePattern> putativePatterns = IsotopePattern.getOrderedIPHypothesis(data, peakels[k].getMz());
                 TheoreticalIsotopePattern bestPattern = putativePatterns[0]._2;
                 List<Peakel> l = new ArrayList<>(bestPattern.isotopeCount() + 1);
+                
                 for (Tuple2 t : bestPattern.mzAbundancePairs()) {
-                    int idx = findPeakIndex(peakels, peakelIndexesByMz, (double) t._1, peakels[k], mzTolPPM);
+                    int idx = findPeakIndexByCorrelation(peakels, peakelIndexesByMz, (double) t._1, peakels[k], mzTolPPM);
                     if (idx != -1) {
                         assigned[idx] = true;
                         l.add(peakels[idx]);
@@ -324,7 +326,7 @@ public class MzdbRawFile implements IRawFile {
                     logger.warn("Strange situation : peakel not found within isotopic pattern .... " + peakels[k].getMz());
                     l.add(peakels[k]);
                 }
-//               logger.info("Creates feature with "+l.size()+" peakels at mz="+l.get(0).getMz()+ " from peakel "+peakels[k].getMz()+ " at "+peakels[k].getApexElutionTime()/60.0);
+               logger.info("Creates feature with "+l.size()+" peakels at mz="+l.get(0).getMz()+ " from peakel "+peakels[k].getMz()+ " at "+peakels[k].getApexElutionTime()/60.0);                
                 Feature feature = new Feature(l.get(0).getMz(), bestPattern.charge(), JavaConverters.asScalaBufferConverter(l).asScala(), true);
                 result.add(new MzdbFeatureWrapper(feature, this, 1));
             }
@@ -362,14 +364,14 @@ public class MzdbRawFile implements IRawFile {
             
             FeatureDetectorConfig detectorConfig = null;
             if (params.isMsnExtraction()) {
-                detectorConfig = new FeatureDetectorConfig(2, params.getFragmentMzTolPPM(), 5, new SmartPeakelFinderConfig(5, 3, false, 10, false, params.isRemoveBaseline()));
+                detectorConfig = new FeatureDetectorConfig(2, params.getFragmentMzTolPPM(), 5, new SmartPeakelFinderConfig(5, 3, 0.75f, false, 10, false, params.isRemoveBaseline()));
             } else {
-                detectorConfig = new FeatureDetectorConfig(1, params.getMzTolPPM(), 5, new SmartPeakelFinderConfig(5, 3, false, 10, false, params.isRemoveBaseline()));                
+                detectorConfig = new FeatureDetectorConfig(1, params.getMzTolPPM(), 5, new SmartPeakelFinderConfig(5, 3, 0.75f, false, 10, false, params.isRemoveBaseline()));                
             }
             
             MzDbFeatureDetector detector = new MzDbFeatureDetector(reader, detectorConfig);
             
-            Peakel[] peakels = detector.detectPeakels(runSlices,Option.empty());
+            Peakel[] peakels = detector.detectPeakels(runSlices, Option.empty());
             double min = (params.getMsLevel() == 1) ? params.getMinMz() : params.getFragmentMinMz();
             double max = (params.getMsLevel() == 1) ? params.getMaxMz() : params.getFragmentMaxMz();
             
@@ -632,6 +634,84 @@ public class MzdbRawFile implements IRawFile {
         return resultIdx;
     }
 
+    private int findPeakIndexByCorrelation(Peakel[] peakels, Pair<Double, Integer>[] peakelIndexesByMz, double moz, Peakel referencePeakel, float mzTolPPM) {
+        double maxCorr = Double.MIN_VALUE;
+        int resultIdx = -1;
+        Comparator<Pair<Double, Integer>> c = new Comparator<Pair<Double, Integer>>() {
+    @Override
+            public int compare(Pair<Double, Integer> o1, Pair<Double, Integer> o2) {
+                return Double.compare(o1.getLeft(), o2.getLeft());
+            }
+        };
+        
+        int lowerIdx = Arrays.binarySearch(peakelIndexesByMz, new ImmutablePair<Double, Integer>(moz - (moz * mzTolPPM / 1e6), 0), c);
+        lowerIdx = (lowerIdx < 0) ? Math.max(0, ~lowerIdx - 1) : Math.max(0, lowerIdx - 1);
+        int upperIdx = Arrays.binarySearch(peakelIndexesByMz, new ImmutablePair<Double, Integer>(moz + (moz * mzTolPPM / 1e6), 0), c);
+        upperIdx = (upperIdx < 0) ? Math.min(peakelIndexesByMz.length - 1, ~upperIdx) : Math.min(peakelIndexesByMz.length - 1, upperIdx + 1);
+
+        for (int i = lowerIdx; i <= upperIdx; i++) {
+            int k = peakelIndexesByMz[i].getRight();
+            if ((1e6 * Math.abs(peakels[k].getMz() - moz) / moz < mzTolPPM) 
+                    && (peakels[k].getApexElutionTime() > referencePeakel.getFirstElutionTime()) 
+                    && (peakels[k].getApexElutionTime() < referencePeakel.getLastElutionTime()) ) {
+                double corr = correlation(referencePeakel, peakels[k]);
+                logger.debug("correlation "+referencePeakel.getMz()+ " with "+peakels[k].getMz()+" = "+corr);
+                if ( corr > 0.6 && (corr > maxCorr)) {
+                maxCorr = corr;
+                resultIdx = k;
+                }
+            }
+        }
+        return resultIdx;
+    }
+
+    /*
+    * Returns the absolute value of the correlation between 2 peakels
+    */
+    private double correlation(Peakel p1, Peakel p2) {
+        int p1Offset = 0;
+        int p2Offset = 0;
+
+        // not clean : some RT values can be missing in elutiontime array when intensity = 0
+        if (p1.getFirstElutionTime() < p2.getFirstElutionTime()) {
+            // search p2.firstElutionTime index in p1
+            int idx = Arrays.binarySearch(p1.getElutionTimes(), p2.getFirstElutionTime());
+            p2Offset = idx < 0 ? ~idx : idx;
+        } else {
+            // search p1.firstElutionTime in p2
+            int idx = Arrays.binarySearch(p2.getElutionTimes(), p1.getFirstElutionTime());
+            p1Offset = idx < 0 ? ~idx : idx;
+        }
+
+        float[] p1Values = p1.getIntensityValues();
+        float[] p2Values = p2.getIntensityValues();
+        
+        int length = Math.max(p1Values.length+p1Offset, p2Values.length+p2Offset);
+        
+        if (Math.abs(p1.getMz() - 651.36385)<1e-5 && Math.abs(p2.getMz() - 650.6159987649247) < 1e-5) {
+            logger.debug("Stop here");            
+        }
+        double[] y = new double[length];
+        Arrays.fill(y, 0.0);
+        double[] y1 = new double[length];
+        Arrays.fill(y1, 0.0);
+        
+        for (int k = 0; k < length; k++) {
+            if (k >= p1Offset && k < p1Values.length) {
+                y[k] = p1Values[k-p1Offset];
+            }
+            if (k >= p2Offset && k < p2Values.length) {
+                y1[k] = p2Values[k-p2Offset];
+            }
+        }
+        
+        PearsonsCorrelation pearson = new PearsonsCorrelation();
+        double corr = pearson.correlation(y, y1);
+        
+        return Math.abs(corr);
+    }
+
+    
     @Override
     public int getSpectrumCount() {
         try {

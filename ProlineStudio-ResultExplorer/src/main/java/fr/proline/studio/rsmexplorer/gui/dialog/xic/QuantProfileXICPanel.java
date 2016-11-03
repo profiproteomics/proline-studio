@@ -44,13 +44,13 @@ public class QuantProfileXICPanel extends JPanel {
     private JCheckBox m_useOnlySpecificPeptidesChB;
     private JCheckBox m_discardMissedCleavedPeptidesChB;
     private JCheckBox m_discardOxidizedPeptidesChB;
-    
+    private JCheckBox m_discardPeptidesSharingPeakelsChB;    
     private JCheckBox m_applyProfileClusteringChB;
     
     private JComboBox<String> m_abundanceSummarizerMethodCB;
     
-    private final static String[] ABUNDANCE_SUMMARIZER_METHOD_VALUES = {"Mean", "Mean of top 3 peptides", "Median", "Median Biological Profile", "Median Profile", "Sum"};
-    private final static String[] ABUNDANCE_SUMMARIZER_METHOD_KEYS = {"MEAN", "MEAN_OF_TOP3", "MEDIAN", "MEDIAN_BIOLOGICAL_PROFILE", "MEDIAN_PROFILE", "SUM"};
+    private final static String[] ABUNDANCE_SUMMARIZER_METHOD_VALUES = {"Mean", "Mean of top 3 peptides", "Median", "Median Biological Profile", "Median Profile", "Sum", "Median Ratio Fit"};
+    private final static String[] ABUNDANCE_SUMMARIZER_METHOD_KEYS = {"MEAN", "MEAN_OF_TOP3", "MEDIAN", "MEDIAN_BIOLOGICAL_PROFILE", "MEDIAN_PROFILE", "SUM", "LFQ"};
      
     private JTextField m_peptideStatTestsAlpha;
     private JCheckBox m_applyPepNormalizationChB;
@@ -70,6 +70,7 @@ public class QuantProfileXICPanel extends JPanel {
     private DoubleParameter m_proteinStatTestsAlphaParameter;
     private BooleanParameter m_discardMissedCleavedPeptidesParameter;
     private BooleanParameter m_discardOxidizedPeptidesParameter;
+    private BooleanParameter m_discardPeptidesSharingPeakelsParameter;    
     private BooleanParameter m_applyPepNormalizationParameter;
     private BooleanParameter m_applyProtNormalizationParameter;
     private BooleanParameter m_applyPepMissValInferenceParameter;
@@ -128,6 +129,11 @@ public class QuantProfileXICPanel extends JPanel {
         m_discardOxidizedPeptidesParameter = new BooleanParameter("discardOxidizedPeptides", "Discard Oxidized Peptides", m_discardOxidizedPeptidesChB, false);
         m_parameterList.add(m_discardOxidizedPeptidesParameter);
         
+        m_discardPeptidesSharingPeakelsChB = new JCheckBox("Discard Peptides sharing Peakels");
+        m_discardPeptidesSharingPeakelsChB.setEnabled(!m_readOnly);
+        m_discardPeptidesSharingPeakelsParameter = new BooleanParameter("discardPeptidesSharingPeakels", "Discard Peptides sharing Peakels", m_discardPeptidesSharingPeakelsChB, false);
+        m_parameterList.add(m_discardPeptidesSharingPeakelsParameter);
+        
         m_applyPepNormalizationChB = new JCheckBox("Apply Normalization (median)");
         m_applyPepNormalizationChB.setEnabled(!m_readOnly);
         m_applyPepNormalizationParameter = new BooleanParameter("applyPepNormalization", "Apply Normalization on peptides", m_applyPepNormalizationChB, false);
@@ -185,12 +191,12 @@ public class QuantProfileXICPanel extends JPanel {
         
         m_useOnlySpecificPeptidesChB = new JCheckBox("Use Only Specific Peptides");
         m_useOnlySpecificPeptidesChB.setEnabled(!m_readOnly);
-        m_useOnlySpecificPeptidesParameter = new BooleanParameter("useOnlySpecificPeptides", "Use Only Specific Peptides", m_useOnlySpecificPeptidesChB, false);
+        m_useOnlySpecificPeptidesParameter = new BooleanParameter("useOnlySpecificPeptides", "Use Only Specific Peptides", m_useOnlySpecificPeptidesChB, true);
         m_parameterList.add(m_useOnlySpecificPeptidesParameter);
         
         m_abundanceSummarizerMethodCB = new JComboBox(ABUNDANCE_SUMMARIZER_METHOD_VALUES);
         m_abundanceSummarizerMethodCB.setEnabled(!m_readOnly);
-        m_abundanceSummarizerMethodParameter = new ObjectParameter<>("abundanceSummarizerMethod", "Abundance Summarizer Method", m_abundanceSummarizerMethodCB, ABUNDANCE_SUMMARIZER_METHOD_VALUES, ABUNDANCE_SUMMARIZER_METHOD_KEYS,  0, null);
+        m_abundanceSummarizerMethodParameter = new ObjectParameter<>("abundanceSummarizerMethod", "Abundance Summarizer Method", m_abundanceSummarizerMethodCB, ABUNDANCE_SUMMARIZER_METHOD_VALUES, ABUNDANCE_SUMMARIZER_METHOD_KEYS,  5, null);
         m_parameterList.add(m_abundanceSummarizerMethodParameter);
         
     }
@@ -282,6 +288,10 @@ public class QuantProfileXICPanel extends JPanel {
         c.weightx = 1;
         pepPanel.add(m_discardOxidizedPeptidesChB, c);
         
+        // discardPeptidesSharingPeakels
+        c.gridy++;
+        c.weightx = 1;
+        pepPanel.add(m_discardPeptidesSharingPeakelsChB, c);
         
         northPanel.add(pepPanel, BorderLayout.NORTH);
         return northPanel;        
@@ -312,6 +322,12 @@ public class QuantProfileXICPanel extends JPanel {
         c.gridy++;
         c.weightx = 1;
         pepSelectionPanel.add(m_discardOxidizedPeptidesChB, c);
+        
+        // discardPeptidesSharingPeakels
+        c.gridy++;
+        c.weightx = 1;
+        pepSelectionPanel.add(m_discardPeptidesSharingPeakelsChB, c);
+        
         
         northPanel.add(pepSelectionPanel, BorderLayout.NORTH);
         return northPanel;        
@@ -521,6 +537,7 @@ public class QuantProfileXICPanel extends JPanel {
         params.put("use_only_specific_peptides", m_useOnlySpecificPeptidesChB.isSelected());
         params.put("discard_missed_cleaved_peptides", m_discardMissedCleavedPeptidesChB.isSelected());
         params.put("discard_oxidized_peptides", m_discardOxidizedPeptidesChB.isSelected());
+        params.put("discard_peptides_sharing_peakels", m_discardPeptidesSharingPeakelsChB.isSelected());        
         params.put("apply_profile_clustering", m_applyProfileClusteringChB.isSelected());
         params.put("abundance_summarizer_method", ABUNDANCE_SUMMARIZER_METHOD_KEYS[m_abundanceSummarizerMethodCB.getSelectedIndex()]);
           
@@ -614,6 +631,7 @@ public class QuantProfileXICPanel extends JPanel {
         m_useOnlySpecificPeptidesChB.setSelected(Boolean.valueOf(refinedParams.get("use_only_specific_peptides").toString()));
         m_discardMissedCleavedPeptidesChB.setSelected(Boolean.valueOf(refinedParams.get("discard_missed_cleaved_peptides").toString()));
         m_discardOxidizedPeptidesChB.setSelected(Boolean.valueOf(refinedParams.get("discard_oxidized_peptides").toString()));
+        m_discardPeptidesSharingPeakelsChB.setSelected(Boolean.valueOf(refinedParams.get("discard_peptides_sharing_peakels").toString()));
         
         //VDS TODO :If not completeMode should be set to false 
         m_applyProfileClusteringChB.setSelected(Boolean.valueOf(refinedParams.get("apply_profile_clustering").toString()));

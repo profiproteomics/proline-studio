@@ -266,7 +266,7 @@ public abstract class DecoratedTable extends JXTable implements CrossSelectionIn
                 groupSelection[i] = groups[i].m_selected;
             }
             m_columnsGroupVisibilityParameter = new MultiObjectParameter(COLUMNS_GROUP_VISIBILITY_KEY, "Columns Type Visibility", null, columnGroupNamesArray, null, groupSelection, null, false);
-            m_columnsGroupVisibilityParameter.setNoSelectionAllowed();
+            m_columnsGroupVisibilityParameter.setCompulsory(false);
         }
 
         final int MAX_WIDTH = 500;

@@ -6,12 +6,9 @@ import fr.proline.studio.parameter.ParameterList;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.AbstractConnectedGraphObject;
 import fr.proline.studio.utils.IconManager;
 import java.awt.Dialog;
-import java.awt.Dimension;
-import java.awt.Graphics;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Window;
-import java.awt.image.BufferedImage;
 import javax.swing.JPanel;
 
 /**

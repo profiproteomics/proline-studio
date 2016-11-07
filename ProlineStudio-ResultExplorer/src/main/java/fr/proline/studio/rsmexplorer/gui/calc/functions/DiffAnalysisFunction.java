@@ -5,7 +5,6 @@ import fr.proline.studio.parameter.ParameterList;
 import fr.proline.studio.python.data.Table;
 import fr.proline.studio.python.interpreter.ResultVariable;
 import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
-import org.openide.util.NbPreferences;
 
 /**
  *

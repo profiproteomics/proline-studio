@@ -1,12 +1,10 @@
 package fr.proline.studio.rsmexplorer.gui.calc.functions;
 
-import fr.proline.studio.parameter.AbstractLinkedParameters;
 import fr.proline.studio.parameter.ObjectParameter;
 import fr.proline.studio.parameter.ParameterList;
 import fr.proline.studio.python.data.Table;
 import fr.proline.studio.python.interpreter.ResultVariable;
 import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
-import org.openide.util.NbPreferences;
 
 /**
  *
@@ -61,9 +59,7 @@ public class MissingValuesImputationFunction extends AbstractOnExperienceDesignF
         m_methodParameter = new ObjectParameter(MV_IMPUTATION_METHOD_KEY, MV_IMPUTATION_METHOD_NAME, null, mvImputationMethods, null, 0, null);
 
         m_parameterList.add(m_methodParameter);
-
-        //m_parameterList.loadParameters(NbPreferences.root(), true);
-        
+    
         return m_parameterList;
         
     }

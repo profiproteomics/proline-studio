@@ -1037,7 +1037,10 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
                         renderer = new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(Integer.class));
                         break;
                     }
-                    case COLTYPE_ABUNDANCE:
+                    case COLTYPE_ABUNDANCE: {
+                        renderer = new BigFloatOrDoubleRenderer( new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 2);
+                        break;
+                    }
                     case COLTYPE_RAW_ABUNDANCE: {
                         if (m_isXICMode){
                             renderer = new BigFloatOrDoubleRenderer( new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 0 );

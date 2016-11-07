@@ -256,13 +256,17 @@ public class ProteinQuantTableModel extends LazyTableModel implements GlobalTabl
         TableCellRenderer renderer = null;
         switch (col) {
 
-            case COLTYPE_RAW_ABUNDANCE: {
+            case COLTYPE_ABUNDANCE:
+                renderer = new BigFloatOrDoubleRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 2);
+                break;
+
+            case COLTYPE_RAW_ABUNDANCE:
                 if (m_isXICMode) {
                     renderer = new BigFloatOrDoubleRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 0);
                 } else {
                     renderer = new FloatRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 0);
                 }
-            }
+                break;
 
         }
         return renderer;

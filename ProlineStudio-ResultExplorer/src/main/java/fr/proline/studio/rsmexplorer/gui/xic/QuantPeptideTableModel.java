@@ -77,40 +77,38 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
     public static final int COLTYPE_OVERVIEW = 10;
     public static final int COLTYPE_PEPTIDE_CLUSTER = 11;
     public static final int LAST_STATIC_COLUMN = COLTYPE_PEPTIDE_CLUSTER;
-    private static final String[] m_columnNames = {"Id", "Validate/Invalidate","Peptide Sequence", "PTM", "Score", "Charge", "m/z", "RT", "Protein Set Count", "Protein Sets", "Overview", "Cluster"};
+    private static final String[] m_columnNames = {"Id", "Validate/Invalidate", "Peptide Sequence", "PTM", "Score", "Charge", "m/z", "RT", "Protein Set Count", "Protein Sets", "Overview", "Cluster"};
     private static final String[] m_toolTipColumns = {"MasterQuantPeptide Id", "Validate or Invalidate Peptide", "Identified Peptide Sequence", "Post Translational Modifications", "Score", "Charge", "Mass to Charge Ratio", "Retention Time (min)", "Protein Set Count", "Protein Sets", "Overview", "Cluster Number"};
 
     public static final int COLTYPE_SELECTION_LEVEL = 0;
     public static final int COLTYPE_IDENT_PSM = 1;
     public static final int COLTYPE_PSM = 2;
     public static final int COLTYPE_RAW_ABUNDANCE = 3;
-    public static final int COLTYPE_ABUNDANCE =4 ;
-    
+    public static final int COLTYPE_ABUNDANCE = 4;
+
     private int m_overviewType = COLTYPE_ABUNDANCE;
 
-    private static final String[] m_columnNamesQC = {"Sel. level", "Ident. Pep. match count",  "Pep. match count","Raw abundance", "Abundance" };
-    private static final String[] m_toolTipQC = {"Selection level", "Identification peptides match count","Peptides match count",  "Raw abundance", "Abundance" };
-    
-    private static final String[] m_columnNamesQC_SC = {"Sel. level", "Ident. Pep. match count", "Basic SC",  "Specific SC", "Abundance" };
-    private static final String[] m_toolTipQC_SC = {"Selection level", "Identification peptides match count", "Basic Spectral Count", "Specific Spectral Count",  "Abundance" };
+    private static final String[] m_columnNamesQC = {"Sel. level", "Ident. Pep. match count", "Pep. match count", "Raw abundance", "Abundance"};
+    private static final String[] m_toolTipQC = {"Selection level", "Identification peptides match count", "Peptides match count", "Raw abundance", "Abundance"};
+
+    private static final String[] m_columnNamesQC_SC = {"Sel. level", "Ident. Pep. match count", "Basic SC", "Specific SC", "Abundance"};
+    private static final String[] m_toolTipQC_SC = {"Selection level", "Identification peptides match count", "Basic Spectral Count", "Specific Spectral Count", "Abundance"};
 
     private List<DMasterQuantPeptide> m_quantPeptides = null;
     private DQuantitationChannel[] m_quantChannels = null;
     private int m_quantChannelNumber;
 
-
     private String m_modelName;
 
     private AbstractDataBox m_databox;
-    
-    
+
     private boolean m_isXICMode;
     private long m_projectId;
 
     private final ScoreRenderer m_scoreRenderer = new ScoreRenderer();
-    
+
     private HashSet<Integer> m_modifiedLevels = new HashSet<>();
-    
+
     public QuantPeptideTableModel(LazyTable table, boolean xicMode) {
         super(table);
         m_isXICMode = xicMode;
@@ -119,7 +117,7 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
     public void setDatabox(AbstractDataBox databox) {
         m_databox = databox;
     }
-    
+
     @Override
     public int getColumnCount() {
         if (m_quantChannels == null) {
@@ -140,15 +138,15 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
             StringBuilder sb = new StringBuilder();
             String rsmHtmlColor = CyclicColorPalette.getHTMLColor(nbQc);
             sb.append("<html><font color='").append(rsmHtmlColor).append("'>&#x25A0;&nbsp;</font>");
-            if(m_isXICMode){
+            if (m_isXICMode) {
                 sb.append(m_columnNamesQC[id]);
-            }else{
+            } else {
                 sb.append(m_columnNamesQC_SC[id]);
             }
             sb.append("<br/>");
             sb.append(m_quantChannels[nbQc].getResultFileName());
             /*sb.append("<br/>");
-            sb.append(m_quantChannels[nbQc].getRawFileName());*/
+             sb.append(m_quantChannels[nbQc].getRawFileName());*/
 
             sb.append("</html>");
             return sb.toString();
@@ -156,7 +154,7 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
             return ""; // should not happen
         }
     }
-    
+
     @Override
     public String getExportColumnName(int col) {
         if (col <= LAST_STATIC_COLUMN) {
@@ -164,23 +162,23 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
         } else if (m_quantChannels != null) {
             int nbQc = (col - m_columnNames.length) / m_columnNamesQC.length;
             int id = col - m_columnNames.length - (nbQc * m_columnNamesQC.length);
-            
+
             StringBuilder sb = new StringBuilder();
-            if(m_isXICMode){
+            if (m_isXICMode) {
                 sb.append(m_columnNamesQC[id]);
-            }else{
+            } else {
                 sb.append(m_columnNamesQC_SC[id]);
             }
             sb.append(" ");
             sb.append(m_quantChannels[nbQc].getResultFileName());
-            
+
             return sb.toString();
-        }else {
+        } else {
             return ""; // should not happen
         }
-        
+
     }
-    
+
     @Override
     public String getExportRowCell(int row, int col) {
 
@@ -194,18 +192,18 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
             }
             case COLTYPE_MQPEPTIDE_SELECTION_LEVEL: {
                 if (m_isXICMode) {
-                    return  Boolean.toString(peptide.getSelectionLevel() == 2);
+                    return Boolean.toString(peptide.getSelectionLevel() == 2);
                 } else {
                     return "";
                 }
             }
             case COLTYPE_PEPTIDE_NAME: {
-                if (peptideInstance == null ) {
+                if (peptideInstance == null) {
                     return "";
                 } else {
                     if (peptideInstance.getBestPeptideMatch() != null) {
                         return peptideInstance.getBestPeptideMatch().getPeptide().getSequence();
-                    }else {
+                    } else {
                         return "";
                     }
                 }
@@ -216,7 +214,7 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
                 } else if (peptideInstance.getBestPeptideMatch() != null) {
                     boolean ptmStringLoadeed = peptideInstance.getBestPeptideMatch().getPeptide().getTransientData().isPeptideReadablePtmStringLoaded();
                     if (!ptmStringLoadeed) {
-                        return null; 
+                        return null;
                     }
                     String ptm = "";
                     PeptideReadablePtmString ptmString = peptideInstance.getBestPeptideMatch().getPeptide().getTransientData().getPeptideReadablePtmString();
@@ -239,7 +237,7 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
                 } else {
                     return "";
                 }
-               
+
             }
             case COLTYPE_PEPTIDE_PROTEIN_SET_COUNT: {
                 if (peptideInstance == null) {
@@ -301,15 +299,15 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
             }
             case COLTYPE_OVERVIEW:
                 return "";
-                
+
             case COLTYPE_PEPTIDE_CLUSTER: {
-                if (peptideInstance == null ) {
+                if (peptideInstance == null) {
                     return "";
                 } else {
                     DCluster cluster = peptide.getCluster();
                     if (cluster == null) {
                         return "";
-                    }else{
+                    } else {
                         return Integer.toString(cluster.getClusterId());
                     }
                 }
@@ -349,23 +347,33 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
                                 return Integer.toString(0);
                         }
                     } else {
-                        
+
                         DQuantPeptide quantPeptide = quantPeptideByQchIds.get(m_quantChannels[nbQc].getId());
                         if (quantPeptide == null) {
-                           switch (id) {
-                                case COLTYPE_SELECTION_LEVEL : return Integer.toString(0);
-                                case COLTYPE_ABUNDANCE : return Float.toString(0);
-                                case COLTYPE_RAW_ABUNDANCE : Float.toString(0);
-                                case COLTYPE_PSM : return Integer.toString(0);
-                                case COLTYPE_IDENT_PSM : return Integer.toString(0);
+                            switch (id) {
+                                case COLTYPE_SELECTION_LEVEL:
+                                    return Integer.toString(0);
+                                case COLTYPE_ABUNDANCE:
+                                    return Float.toString(0);
+                                case COLTYPE_RAW_ABUNDANCE:
+                                    Float.toString(0);
+                                case COLTYPE_PSM:
+                                    return Integer.toString(0);
+                                case COLTYPE_IDENT_PSM:
+                                    return Integer.toString(0);
                             }
                         } else {
                             switch (id) {
-                                case COLTYPE_SELECTION_LEVEL : return (quantPeptide.getSelectionLevel() == null?Integer.toString(0):Integer.toString(quantPeptide.getSelectionLevel()));
-                                case COLTYPE_ABUNDANCE : return ((quantPeptide.getAbundance() == null || quantPeptide.getAbundance().isNaN())? Float.toString(0):Float.toString(quantPeptide.getAbundance()));
-                                case COLTYPE_RAW_ABUNDANCE : return ((quantPeptide.getRawAbundance() == null || quantPeptide.getRawAbundance().isNaN())? Float.toString(0):Float.toString(quantPeptide.getRawAbundance()));
-                                case COLTYPE_PSM : return (quantPeptide.getPeptideMatchesCount()== null?Integer.toString(0):Integer.toString(quantPeptide.getPeptideMatchesCount()));
-                                case COLTYPE_IDENT_PSM : return (quantPeptide.getIdentPeptideMatchCount()== null?Integer.toString(0):Integer.toString(quantPeptide.getIdentPeptideMatchCount()));
+                                case COLTYPE_SELECTION_LEVEL:
+                                    return (quantPeptide.getSelectionLevel() == null ? Integer.toString(0) : Integer.toString(quantPeptide.getSelectionLevel()));
+                                case COLTYPE_ABUNDANCE:
+                                    return ((quantPeptide.getAbundance() == null || quantPeptide.getAbundance().isNaN()) ? Float.toString(0) : Float.toString(quantPeptide.getAbundance()));
+                                case COLTYPE_RAW_ABUNDANCE:
+                                    return ((quantPeptide.getRawAbundance() == null || quantPeptide.getRawAbundance().isNaN()) ? Float.toString(0) : Float.toString(quantPeptide.getRawAbundance()));
+                                case COLTYPE_PSM:
+                                    return (quantPeptide.getPeptideMatchesCount() == null ? Integer.toString(0) : Integer.toString(quantPeptide.getPeptideMatchesCount()));
+                                case COLTYPE_IDENT_PSM:
+                                    return (quantPeptide.getIdentPeptideMatchCount() == null ? Integer.toString(0) : Integer.toString(quantPeptide.getIdentPeptideMatchCount()));
                             }
                         }
                     }
@@ -378,7 +386,7 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
     @Override
     public String getToolTipForHeader(int col) {
         if (col == COLTYPE_OVERVIEW) {
-            return m_toolTipColumns[col]+" on "+(m_isXICMode ? m_toolTipQC[m_overviewType] : m_toolTipQC_SC[m_overviewType]) ;
+            return m_toolTipColumns[col] + " on " + (m_isXICMode ? m_toolTipQC[m_overviewType] : m_toolTipQC_SC[m_overviewType]);
         }
         if (col <= LAST_STATIC_COLUMN) {
             return m_toolTipColumns[col];
@@ -390,16 +398,15 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
             StringBuilder sb = new StringBuilder();
             String rsmHtmlColor = CyclicColorPalette.getHTMLColor(nbQc);
             sb.append("<html><font color='").append(rsmHtmlColor).append("'>&#x25A0;&nbsp;</font>");
-            if (m_isXICMode){
+            if (m_isXICMode) {
                 sb.append(m_toolTipQC[id]);
-            }else{
+            } else {
                 sb.append(m_toolTipQC_SC[id]);
             }
             sb.append("<br/>");
             sb.append(m_quantChannels[nbQc].getResultFileName());
             sb.append("<br/>");
             sb.append(rawFilePath);
-            
 
             sb.append("</html>");
             return sb.toString();
@@ -438,15 +445,16 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
     }
 
     /**
-     * returns the tooltip to display for a given row and a given col
-     * for the cluster returns the abundances list
+     * returns the tooltip to display for a given row and a given col for the
+     * cluster returns the abundances list
+     *
      * @param row
      * @param col
-     * @return 
+     * @return
      */
     @Override
     public String getTootlTipValue(int row, int col) {
-        if (m_quantPeptides == null || row <0) {
+        if (m_quantPeptides == null || row < 0) {
             return "";
         }
 
@@ -475,14 +483,14 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
                 // we suppose that the abundances are in the "good" order
                 for (Float abundance : abundances) {
                     sb.append("<td>");
-                    sb.append(abundance.isNaN()?"":abundance);
+                    sb.append(abundance.isNaN() ? "" : abundance);
                     sb.append("</td>");
                 }
                 sb.append("</tr></table>");
             }
             sb.append("</html>");
             return sb.toString();
-        } else if (cluster != null ) {
+        } else if (cluster != null) {
             int a = getAbundanceCol(col);
             if (a >= 0) {
                 StringBuilder sb = new StringBuilder();
@@ -503,7 +511,7 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
                     sb.append("</tr><tr> ");
                     // we suppose that the abundances are in the "good" order
                     sb.append("<td>");
-                    sb.append(abundances.get(a).isNaN()?"":abundances.get(a));
+                    sb.append(abundances.get(a).isNaN() ? "" : abundances.get(a));
                     sb.append("</td>");
                     sb.append("</tr></table>");
                 }
@@ -513,11 +521,13 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
         }
         return "";
     }
-    
+
     /**
-     * returns -1 if the col is not an Abundance Col, otherwise the id in the quantChannel tab
+     * returns -1 if the col is not an Abundance Col, otherwise the id in the
+     * quantChannel tab
+     *
      * @param col
-     * @return 
+     * @return
      */
     private int getAbundanceCol(int col) {
         if (m_quantChannels != null) {
@@ -530,8 +540,7 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
         }
         return -1;
     }
-    
-    
+
     @Override
     public boolean isCellEditable(int rowIndex, int columnIndex) {
         if (!m_isXICMode) {
@@ -546,10 +555,10 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
             return true;
         }
         Float f = peptideInstance.getElutionTime();
-        return (f!=null); // a peptide with an elutime is linked to a PeptideIon and MasterQuantComponent
-        
+        return (f != null); // a peptide with an elutime is linked to a PeptideIon and MasterQuantComponent
+
     }
-    
+
     @Override
     public void setValueAt(Object aValue, int row, int col) {
 
@@ -560,45 +569,43 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
             m_modifiedLevels.add(rowKey);
         }
 
-        ((XicPeptidePanel)m_databox.getPanel()).displayValidatePanel(!m_modifiedLevels.isEmpty());
-        
-        
-        
+        ((XicPeptidePanel) m_databox.getPanel()).displayValidatePanel(!m_modifiedLevels.isEmpty());
+
         /*
-        DMasterQuantPeptide masterQuantPeptide = m_quantPeptides.get(row);
-        masterQuantPeptide.setSelectionLevel(((Boolean) aValue) ? 2 : 0);
+         DMasterQuantPeptide masterQuantPeptide = m_quantPeptides.get(row);
+         masterQuantPeptide.setSelectionLevel(((Boolean) aValue) ? 2 : 0);
 
         
-        final ArrayList<DMasterQuantProteinSet> masterQuantProteinSetModified = new ArrayList<>();
+         final ArrayList<DMasterQuantProteinSet> masterQuantProteinSetModified = new ArrayList<>();
         
-        AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
+         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
 
-            @Override
-            public boolean mustBeCalledInAWT() {
-                return true;
-            }
+         @Override
+         public boolean mustBeCalledInAWT() {
+         return true;
+         }
 
-            @Override
-            public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
+         @Override
+         public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
 
-                if (!success) {
-                    return; // should not happen
-                }
+         if (!success) {
+         return; // should not happen
+         }
 
-                // propagate modifications to the previous views
-                DataBoxViewerManager.loadedDataModified(m_projectId, m_databox.getRsetId(), m_databox.getRsmId(), DMasterQuantProteinSet.class, masterQuantProteinSetModified, DataBoxViewerManager.REASON_PEPTIDE_SUPPRESSED);
-            }
-        };
+         // propagate modifications to the previous views
+         DataBoxViewerManager.loadedDataModified(m_projectId, m_databox.getRsetId(), m_databox.getRsmId(), DMasterQuantProteinSet.class, masterQuantProteinSetModified, DataBoxViewerManager.REASON_PEPTIDE_SUPPRESSED);
+         }
+         };
 
-        // ask asynchronous loading of data
-        DatabaseModifyPeptideTask task = new DatabaseModifyPeptideTask(callback);
-        task.initDisablePeptide(m_projectId, masterQuantPeptide, masterQuantProteinSetModified);
-        AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
+         // ask asynchronous loading of data
+         DatabaseModifyPeptideTask task = new DatabaseModifyPeptideTask(callback);
+         task.initDisablePeptide(m_projectId, masterQuantPeptide, masterQuantProteinSetModified);
+         AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
         
         
-        fireTableCellUpdated(row, col);*/
+         fireTableCellUpdated(row, col);*/
     }
-    
+
     public void cancelModifications() {
         if (m_modifiedLevels.isEmpty()) {
             return;
@@ -606,12 +613,12 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
         m_modifiedLevels.clear();
         fireTableDataChanged();
     }
-    
+
     public void validateModifications(final DefaultFloatingPanel panel) {
         if (m_modifiedLevels.isEmpty()) {
             return;
         }
-        
+
         ArrayList<DMasterQuantPeptide> listToModify = new ArrayList<>();
         Iterator<Integer> rowIt = m_modifiedLevels.iterator();
         while (rowIt.hasNext()) {
@@ -621,7 +628,7 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
         }
 
         final ArrayList<DMasterQuantProteinSet> masterQuantProteinSetModified = new ArrayList<>();
-        
+
         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
 
             @Override
@@ -633,18 +640,18 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
             public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
 
                 if (!success) {
-                    panel.actionFinished(false, null); 
+                    panel.actionFinished(false, null);
                     return; // should not happen
                 }
 
                 // propagate modifications to the previous views
                 DataBoxViewerManager.loadedDataModified(m_projectId, m_databox.getRsetId(), m_databox.getRsmId(), DMasterQuantProteinSet.class, masterQuantProteinSetModified, DataBoxViewerManager.REASON_PEPTIDE_SUPPRESSED);
-            
+
                 m_modifiedLevels.clear();
-                
+
                 fireTableDataChanged();
-                
-                panel.actionFinished(true, null); 
+
+                panel.actionFinished(true, null);
             }
         };
 
@@ -652,10 +659,9 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
         DatabaseModifyPeptideTask task = new DatabaseModifyPeptideTask(callback);
         task.initDisablePeptide(m_projectId, listToModify, masterQuantProteinSetModified);
         AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
-        
-        
+
     }
-    
+
     @Override
     public Object getValueAt(final int row, int col) {
 
@@ -669,39 +675,39 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
             }
             case COLTYPE_MQPEPTIDE_SELECTION_LEVEL: {
                 if (m_isXICMode) {
-                if (m_modifiedLevels.contains(row)) {
-                    return (peptide.getSelectionLevel() != 2); // FLIPPED value -> modified value not saved in database
-                }
-                return (peptide.getSelectionLevel() == 2); // 2 = enable ; 1 = peptide disabled by algorithm, 0 = peptide disabled by human
+                    if (m_modifiedLevels.contains(row)) {
+                        return (peptide.getSelectionLevel() != 2); // FLIPPED value -> modified value not saved in database
+                    }
+                    return (peptide.getSelectionLevel() == 2); // 2 = enable ; 1 = peptide disabled by algorithm, 0 = peptide disabled by human
                 } else {
                     return "";
                 }
             }
             case COLTYPE_PEPTIDE_NAME: {
                 LazyData lazyData = getLazyData(row, col);
-                if (peptideInstance == null ) {
+                if (peptideInstance == null) {
                     lazyData.setData(null);
                     givePriorityTo(m_taskId, row, col);
                 } else {
                     if (peptideInstance.getBestPeptideMatch() != null) {
                         lazyData.setData(peptideInstance.getBestPeptideMatch());
-                    }else {
+                    } else {
                         lazyData.setData(null);
                     }
                 }
                 return lazyData;
 
             }
-            
+
             case COLTYPE_PEPTIDE_PTM: {
                 LazyData lazyData = getLazyData(row, col);
                 if (peptideInstance == null) {
-                   lazyData.setData(null);
-                   givePriorityTo(m_taskId, row, col);
+                    lazyData.setData(null);
+                    givePriorityTo(m_taskId, row, col);
                 } else if (peptideInstance.getBestPeptideMatch() != null) {
                     boolean ptmStringLoaded = peptideInstance.getBestPeptideMatch().getPeptide().getTransientData().isPeptideReadablePtmStringLoaded();
                     if (!ptmStringLoaded) {
-                        return null; 
+                        return null;
                     }
                     String ptm = "";
                     PeptideReadablePtmString ptmString = peptideInstance.getBestPeptideMatch().getPeptide().getTransientData().getPeptideReadablePtmString();
@@ -713,7 +719,7 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
                 } else {
                     lazyData.setData("");
                 }
-                
+
                 return lazyData;
             }
             case COLTYPE_PEPTIDE_SCORE: {
@@ -780,7 +786,7 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
             }
             case COLTYPE_PEPTIDE_MOZ: {
                 LazyData lazyData = getLazyData(row, col);
-                
+
                 if (peptideInstance == null) {
                     lazyData.setData(null);
                     givePriorityTo(m_taskId, row, col);
@@ -810,7 +816,7 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
 
                     @Override
                     public int getNumberColumns() {
-                        return m_quantChannels.length ;
+                        return m_quantChannels.length;
                     }
 
                     @Override
@@ -823,16 +829,16 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
                         if (m_overviewType == -1) {
                             return 0; // should not happen
                         }
-                       int realCol = LAST_STATIC_COLUMN+1 + m_overviewType+col*m_columnNamesQC.length;
-                       LazyData lazyData = (LazyData)getValueAt(row, realCol);
-                       if (lazyData != null && lazyData.getData() != null){
+                        int realCol = LAST_STATIC_COLUMN + 1 + m_overviewType + col * m_columnNamesQC.length;
+                        LazyData lazyData = (LazyData) getValueAt(row, realCol);
+                        if (lazyData != null && lazyData.getData() != null) {
                             if (Number.class.isAssignableFrom(lazyData.getData().getClass())) {
-                                return ((Number)lazyData.getData()).floatValue();
+                                return ((Number) lazyData.getData()).floatValue();
                             }
-                       }
-                       return 0;
+                        }
+                        return 0;
                     }
-                    
+
                     public double getValueNoNaN(int col) {
                         double val = getValue(col);
                         if (val != val) { // NaN value
@@ -845,54 +851,54 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
                     public double getMaximumValue() {
                         int nbCols = getNumberColumns();
                         double maxValue = 0;
-                        for (int i=0;i<nbCols;i++) {
+                        for (int i = 0; i < nbCols; i++) {
                             double v = getValue(i);
-                            if (v>maxValue) {
+                            if (v > maxValue) {
                                 maxValue = v;
                             }
                         }
                         return maxValue;
-                        
+
                     }
 
                     @Override
                     public double calculateComparableValue() {
                         int nbColumns = getNumberColumns();
                         double mean = 0;
-                        for (int i=0;i<nbColumns;i++) {
+                        for (int i = 0; i < nbColumns; i++) {
                             mean += getValueNoNaN(i);
                         }
                         mean /= nbColumns;
-                        
+
                         double maxDiff = 0;
-                        for (int i=0;i<nbColumns;i++) {
-                            double diff = getValueNoNaN(i)-mean;
-                            if (diff<0) {
+                        for (int i = 0; i < nbColumns; i++) {
+                            double diff = getValueNoNaN(i) - mean;
+                            if (diff < 0) {
                                 diff = -diff;
                             }
-                            if (diff>maxDiff) {
+                            if (diff > maxDiff) {
                                 maxDiff = diff;
                             }
                         }
                         return maxDiff / mean;
                     }
-                    
+
                     @Override
                     public int compareTo(CompareValueRenderer.CompareValue o) {
                         return Double.compare(calculateComparableValue(), o.calculateComparableValue());
                     }
                 };
-                
+
             case COLTYPE_PEPTIDE_CLUSTER: {
                 LazyData lazyData = getLazyData(row, col);
-                if (peptideInstance == null ) {
+                if (peptideInstance == null) {
                     lazyData.setData(null);
                     givePriorityTo(m_taskId, row, col);
                 } else {
                     DCluster cluster = peptide.getCluster();
                     if (cluster == null) {
                         lazyData.setData("");
-                    }else{
+                    } else {
                         lazyData.setData(String.valueOf(cluster.getClusterId()));
                     }
                 }
@@ -910,27 +916,27 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
                     int id = col - m_columnNames.length - (nbQc * m_columnNamesQC.length);
                     Map<Long, DQuantPeptide> quantPeptideByQchIds = peptide.getQuantPeptideByQchIds();
                     if (quantPeptideByQchIds == null) {
-                         switch (id) {
-                                case COLTYPE_SELECTION_LEVEL:
-                                    lazyData.setData(Integer.valueOf(0));
-                                    break;
-                                case COLTYPE_ABUNDANCE:
-                                    lazyData.setData(Float.valueOf(0));
-                                    break;
-                                case COLTYPE_RAW_ABUNDANCE:
-                                    lazyData.setData(Float.valueOf(0));
-                                    break;
-                                case COLTYPE_PSM:
-                                    lazyData.setData(Integer.valueOf(0));
-                                    break;
-                                case COLTYPE_IDENT_PSM:
-                                    lazyData.setData(Integer.valueOf(0));
-                                    break;
-                            }
+                        switch (id) {
+                            case COLTYPE_SELECTION_LEVEL:
+                                lazyData.setData(Integer.valueOf(0));
+                                break;
+                            case COLTYPE_ABUNDANCE:
+                                lazyData.setData(Float.valueOf(0));
+                                break;
+                            case COLTYPE_RAW_ABUNDANCE:
+                                lazyData.setData(Float.valueOf(0));
+                                break;
+                            case COLTYPE_PSM:
+                                lazyData.setData(Integer.valueOf(0));
+                                break;
+                            case COLTYPE_IDENT_PSM:
+                                lazyData.setData(Integer.valueOf(0));
+                                break;
+                        }
                     } else {
                         DQuantPeptide quantPeptide = quantPeptideByQchIds.get(m_quantChannels[nbQc].getId());
                         if (quantPeptide == null) {
-                             switch (id) {
+                            switch (id) {
                                 case COLTYPE_SELECTION_LEVEL:
                                     lazyData.setData(Integer.valueOf(0));
                                     break;
@@ -974,13 +980,13 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
 
     }
     private final StringBuilder m_sb = new StringBuilder();
-    
+
     public void setData(Long taskId, long projectId, DQuantitationChannel[] quantChannels, List<DMasterQuantPeptide> peptides, boolean isXICMode) {
         boolean structureChanged = true;
         m_isXICMode = isXICMode;
         m_projectId = projectId;
-        if (this.m_quantChannels !=null && m_quantChannels.length == quantChannels.length ) {
-            for (int i=0; i<m_quantChannels.length; i++) {
+        if (this.m_quantChannels != null && m_quantChannels.length == quantChannels.length) {
+            for (int i = 0; i < m_quantChannels.length; i++) {
                 structureChanged = !(m_quantChannels[i].equals(quantChannels[i]));
             }
         }
@@ -1047,21 +1053,19 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
 
     }
 
+    @Override
+    public void addFilters(LinkedHashMap<Integer, Filter> filtersMap) {
 
-    
-   @Override
-   public void addFilters(LinkedHashMap<Integer, Filter> filtersMap) {
-       
-       ConvertValueInterface peptideConverter = new ConvertValueInterface() {
-           @Override
-           public Object convertValue(Object o) {
-               if (o == null) {
-                   return null;
-               }
-               return ((DPeptideMatch) o).getPeptide().getSequence();
-           }
+        ConvertValueInterface peptideConverter = new ConvertValueInterface() {
+            @Override
+            public Object convertValue(Object o) {
+                if (o == null) {
+                    return null;
+                }
+                return ((DPeptideMatch) o).getPeptide().getSequence();
+            }
 
-       };
+        };
         filtersMap.put(COLTYPE_PEPTIDE_NAME, new StringDiffFilter(getColumnName(COLTYPE_PEPTIDE_NAME), peptideConverter, COLTYPE_PEPTIDE_NAME));
         filtersMap.put(COLTYPE_PEPTIDE_PTM, new StringFilter(getColumnName(COLTYPE_PEPTIDE_PTM), null, COLTYPE_PEPTIDE_PTM));
         filtersMap.put(COLTYPE_PEPTIDE_SCORE, new DoubleFilter(getColumnName(COLTYPE_PEPTIDE_SCORE), null, COLTYPE_PEPTIDE_SCORE));
@@ -1071,7 +1075,7 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
         filtersMap.put(COLTYPE_PEPTIDE_PROTEIN_SET_NAMES, new StringFilter(getColumnName(COLTYPE_PEPTIDE_PROTEIN_SET_NAMES), null, COLTYPE_PEPTIDE_PROTEIN_SET_NAMES));
         filtersMap.put(COLTYPE_PEPTIDE_CLUSTER, new StringFilter(getColumnName(COLTYPE_PEPTIDE_CLUSTER), null, COLTYPE_PEPTIDE_CLUSTER));
         int nbCol = getColumnCount();
-        for (int i=LAST_STATIC_COLUMN+1; i< nbCol; i++){
+        for (int i = LAST_STATIC_COLUMN + 1; i < nbCol; i++) {
             int nbQc = (i - m_columnNames.length) / m_columnNamesQC.length;
             int id = i - m_columnNames.length - (nbQc * m_columnNamesQC.length);
             switch (id) {
@@ -1127,8 +1131,8 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
         String rsmHtmlColor = CyclicColorPalette.getHTMLColor(i);
         sb.append("<html><font color='").append(rsmHtmlColor).append("'>&#x25A0;&nbsp;</font>");
         sb.append(m_quantChannels[i].getResultFileName());
-       /* sb.append("<br/>");
-        sb.append(m_quantChannels[i].getRawFileName());*/
+        /* sb.append("<br/>");
+         sb.append(m_quantChannels[i].getRawFileName());*/
         sb.append("</html>");
 
         return sb.toString();
@@ -1153,12 +1157,12 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
 
         return m_quantPeptides.get(0).getQuantResultSummaryId();
     }
-    
+
     public void setOverviewType(int overviewType) {
         m_overviewType = overviewType;
         fireTableDataChanged();
     }
-    
+
     public int getOverviewType() {
         return m_overviewType;
     }
@@ -1174,22 +1178,20 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
         if (m_quantChannels != null) {
             for (int i = m_quantChannels.length - 1; i >= 0; i--) {
                 listIds.add(m_columnNames.length + COLTYPE_IDENT_PSM + (i * m_columnNamesQC.length));
-                if (m_isXICMode){
+                if (m_isXICMode) {
                     listIds.add(m_columnNames.length + COLTYPE_RAW_ABUNDANCE + (i * m_columnNamesQC.length));
-                }else{
+                } else {
                     listIds.add(m_columnNames.length + COLTYPE_ABUNDANCE + (i * m_columnNamesQC.length));
                 }
                 listIds.add(m_columnNames.length + COLTYPE_SELECTION_LEVEL + (i * m_columnNamesQC.length));
-                
+
             }
         }
-        if (!m_isXICMode){
+        if (!m_isXICMode) {
             listIds.add(COLTYPE_PEPTIDE_CLUSTER);
         }
         return listIds;
     }
-
- 
 
     @Override
     public String getDataColumnIdentifier(int columnIndex) {
@@ -1200,14 +1202,14 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
             int id = columnIndex - m_columnNames.length - (nbQc * m_columnNamesQC.length);
 
             StringBuilder sb = new StringBuilder();
-            if(m_isXICMode){
+            if (m_isXICMode) {
                 sb.append(m_columnNamesQC[id]);
-            }else{
+            } else {
                 sb.append(m_columnNamesQC_SC[id]);
             }
             sb.append(' ');
             sb.append(m_quantChannels[nbQc].getResultFileName());
-            
+
             return sb.toString();
         }
     }
@@ -1236,16 +1238,16 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
                 return Integer.class;
             }
             case COLTYPE_PEPTIDE_MOZ: {
-                return Double.class; 
+                return Double.class;
             }
             case COLTYPE_PEPTIDE_SCORE: {
                 return Float.class;
             }
             case COLTYPE_OVERVIEW: {
-                return CompareValueRenderer.CompareValue.class; 
+                return CompareValueRenderer.CompareValue.class;
             }
             case COLTYPE_PEPTIDE_CLUSTER: {
-                return String.class; 
+                return String.class;
             }
             default: {
                 int nbQc = (columnIndex - m_columnNames.length) / m_columnNamesQC.length;
@@ -1280,7 +1282,7 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
 
         DMasterQuantPeptide peptide = m_quantPeptides.get(rowIndex);
 
-        if(columnIndex == COLTYPE_PEPTIDE_ID) {
+        if (columnIndex == COLTYPE_PEPTIDE_ID) {
             return peptide.getId();
         }
         return data;
@@ -1288,13 +1290,13 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
 
     @Override
     public int[] getKeysColumn() {
-        int[] keys = { COLTYPE_PEPTIDE_NAME };
+        int[] keys = {COLTYPE_PEPTIDE_NAME};
         return keys;
     }
 
     @Override
     public int getInfoColumn() {
-         return COLTYPE_PEPTIDE_NAME;
+        return COLTYPE_PEPTIDE_NAME;
     }
 
     @Override
@@ -1337,7 +1339,7 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
 
         Boolean peptideSelected = (m_isXICMode) ? (Boolean) getValueAt(row, COLTYPE_MQPEPTIDE_SELECTION_LEVEL) : true;
         boolean grayed = !peptideSelected;
-        
+
         if (grayed) {
             if (m_rendererMapGrayed.containsKey(col)) {
                 return m_rendererMapGrayed.get(col);
@@ -1347,7 +1349,6 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
                 return m_rendererMap.get(col);
             }
         }
-
 
         TableCellRenderer renderer = null;
 
@@ -1365,7 +1366,7 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
                 break;
             }
             case COLTYPE_PEPTIDE_MOZ: {
-                renderer = new DoubleRenderer( new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 4);
+                renderer = new DoubleRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 4);
                 break;
             }
             case COLTYPE_PEPTIDE_RETENTION_TIME: {
@@ -1395,12 +1396,15 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
                         renderer = new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(Integer.class));
                         break;
                     }
-                    case COLTYPE_ABUNDANCE:
+                    case COLTYPE_ABUNDANCE: {
+                        renderer = new BigFloatOrDoubleRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 2);
+                        break;
+                    }
                     case COLTYPE_RAW_ABUNDANCE: {
-                        if (m_isXICMode){
-                            renderer = new BigFloatOrDoubleRenderer( new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 0 );
-                        }else{
-                            renderer = new FloatRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)),0);
+                        if (m_isXICMode) {
+                            renderer = new BigFloatOrDoubleRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 0);
+                        } else {
+                            renderer = new FloatRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 0);
                         }
                         break;
                     }
@@ -1409,17 +1413,17 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
 
             }
         }
-        
+
         if (grayed) {
             if (renderer == null) {
                 return null;
             }
             renderer = new GrayedRenderer(renderer);
-           m_rendererMapGrayed.put(col, renderer);
+            m_rendererMapGrayed.put(col, renderer);
         } else {
             m_rendererMap.put(col, renderer);
         }
-        
+
         return renderer;
     }
     private final HashMap<Integer, TableCellRenderer> m_rendererMap = new HashMap();
@@ -1454,7 +1458,7 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
         }
         return null;
     }
-    
+
     @Override
     public Object getColValue(Class c, int col) {
         if (c.equals(XicGroup.class)) {
@@ -1465,7 +1469,6 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
                 return new XicGroup(m_quantChannels[nbQc].getBiologicalGroupId(), null); //biologicalGroupName.getBiologicalGroupName(); JPM.TODO
             }
 
-            
         }
         if (c.equals(QuantitationType.class)) {
             if (col <= LAST_STATIC_COLUMN) {
@@ -1491,7 +1494,6 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
                     }
                 }
 
-                
                 return null;
             }
 

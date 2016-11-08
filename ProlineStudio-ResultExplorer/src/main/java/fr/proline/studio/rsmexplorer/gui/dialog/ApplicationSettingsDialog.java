@@ -3,6 +3,7 @@ package fr.proline.studio.rsmexplorer.gui.dialog;
 import fr.proline.studio.dpm.task.util.JMSConnectionManager;
 import fr.proline.studio.gui.AbstractParameterListTree;
 import fr.proline.studio.gui.DefaultDialog;
+import fr.proline.studio.parameter.AbstractLinkedParameters;
 import fr.proline.studio.parameter.BooleanParameter;
 import fr.proline.studio.parameter.IntegerParameter;
 import fr.proline.studio.parameter.ObjectParameter;
@@ -131,7 +132,24 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
         m_tableParameters.add(defaultFixedColumnSize);
 
         m_tableParameters.loadParameters(m_preferences, true);
-        
+
+        AbstractLinkedParameters linkedParameters = new AbstractLinkedParameters(m_tableParameters) {
+
+            @Override
+            public void valueChanged(String value, Object associatedValue) {
+                int m_width = Integer.parseInt(defaultFixedColumnSize.getStringValue());
+                int m_selection = Integer.parseInt(columnsParameter.getStringValue());
+                showParameter(defaultFixedColumnSize, m_selection == DecoratedTable.FIXED_COLUMNS_SIZE, m_width);
+                updateParameterListPanel();
+            }
+
+        };
+
+        columnsParameter.addLinkedParameters(linkedParameters);
+
+        int m_selection = Integer.parseInt(columnsParameter.getStringValue());
+        linkedParameters.valueChanged((String) associatedTable[m_selection], objectTable[m_selection]);
+
         return m_tableParameters;
     }
 
@@ -147,7 +165,7 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
         panel.setBorder(BorderFactory.createTitledBorder(DIALOG_TITLE));
 
         m_parameterListTree = new AbstractParameterListTree(TREE_ROOT_NAME, this, this);
-        m_parameterListTree.addNodes(this.getJMSParameterList());     
+        m_parameterListTree.addNodes(this.getJMSParameterList());
         m_parameterListTree.addNodes(this.getTableParameters());
         m_parameterListTree.addNodes(this.getGeneralParameters());
         m_parameterListTree.expandAllRows();

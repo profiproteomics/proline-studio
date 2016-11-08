@@ -4,6 +4,7 @@ import com.thierry.filtering.TableSelection;
 import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.export.ExportModelInterface;
 import fr.proline.studio.graphics.CrossSelectionInterface;
+import fr.proline.studio.gui.AdvancedSelectionPanel;
 import fr.proline.studio.parameter.AbstractLinkedParameters;
 import fr.proline.studio.parameter.AbstractParameter.LabelVisibility;
 import fr.proline.studio.parameter.IntegerParameter;
@@ -67,7 +68,6 @@ public abstract class DecoratedTable extends JXTable implements CrossSelectionIn
     private ObjectParameter m_columnArrangementParameter = null;
     private IntegerParameter m_columnWidthParameter = null;
 
-    private MultiObjectParameter m_columnsGroupVisibilityParameter = null;
     private MultiObjectParameter m_columnsVisibilityParameter = null;
     private ArrayList<ParameterList> m_parameterListArray = null;
 
@@ -129,8 +129,6 @@ public abstract class DecoratedTable extends JXTable implements CrossSelectionIn
         Object[] objectTable = {DecoratedTable.AUTOMATIC_COLUMNS_SIZE, DecoratedTable.FIXED_COLUMNS_SIZE, DecoratedTable.SMART_COLUMNS_SIZE};
         m_columnArrangementParameter = new ObjectParameter(DecoratedTable.DEFAULT_COLUMNS_ARRANGEMENT_KEY, DecoratedTable.DEFAULT_COLUMNS_ARRANGEMENT_KEY, m_arrangementComboBox, associatedTable, objectTable, 0, null);
 
-        //SHOULD I DO SOMETHING WITH THIS?
-        final boolean autoResized = (getAutoResizeMode() != JXTable.AUTO_RESIZE_OFF);
 
         List<TableColumn> columns = getColumns(true);
         int colCount = columns.size();
@@ -145,7 +143,6 @@ public abstract class DecoratedTable extends JXTable implements CrossSelectionIn
         }
 
         HashMap<String, Integer> similarColumnsNumberMap = new HashMap<>();
-        HashMap<String, Boolean> similarColumnsVisibilityMap = new HashMap<>();
         HashMap<String, String> similarColumnsColorsMap = new HashMap<>();
 
         int nbVisible = 0;
@@ -169,12 +166,8 @@ public abstract class DecoratedTable extends JXTable implements CrossSelectionIn
                     Integer nb = similarColumnsNumberMap.get(columnExportName);
                     if (nb == null) {
                         similarColumnsNumberMap.put(columnExportName, 1);
-                        similarColumnsVisibilityMap.put(columnExportName, visible);
                     } else {
                         similarColumnsNumberMap.put(columnExportName, nb + 1);
-                        if (!visible) {
-                            similarColumnsVisibilityMap.put(columnExportName, visible);
-                        }
                     }
 
                     int colorIndexStart = columnFullName.indexOf("<font color='", 0);
@@ -200,12 +193,8 @@ public abstract class DecoratedTable extends JXTable implements CrossSelectionIn
                         Integer nb = similarColumnsNumberMap.get(columnExportName);
                         if (nb == null) {
                             similarColumnsNumberMap.put(columnExportName, 1);
-                            similarColumnsVisibilityMap.put(columnExportName, visible);
                         } else {
                             similarColumnsNumberMap.put(columnExportName, nb + 1);
-                            if (!visible) {
-                                similarColumnsVisibilityMap.put(columnExportName, visible);
-                            }
                         }
 
                         int colorIndexStart = columnFullName.indexOf("<font color='", 0);
@@ -242,31 +231,24 @@ public abstract class DecoratedTable extends JXTable implements CrossSelectionIn
             Integer nb = similarColumnsNumberMap.get(colName);
             if (nb <= 1) {
                 similarColumnsNumberMap.remove(colName);
-                similarColumnsVisibilityMap.remove(colName);
             }
         }
-        ColumnGroup[] groups = null;
+        String[] groups = null;
+
         int nbGroups = similarColumnsNumberMap.size();
         if (nbGroups > 0) {
-            groups = new ColumnGroup[nbGroups];
+            groups = new String[nbGroups];
             Iterator<String> it = similarColumnsNumberMap.keySet().iterator();
             int i = 0;
             while (it.hasNext()) {
                 String name = it.next();
                 String colorName = similarColumnsColorsMap.get(name);
-                groups[i] = new ColumnGroup((colorName.length() > 0) ? "<html>" + colorName + name + "</html>" : name, similarColumnsVisibilityMap.get(name).booleanValue());
+                groups[i] = (colorName.length() > 0) ? "<html>" + colorName + name + "</html>" : name;
                 i++;
             }
 
             Arrays.sort(groups);
-            Object[] columnGroupNamesArray = new Object[nbGroups];
-            boolean[] groupSelection = new boolean[nbGroups];
-            for (i = 0; i < nbGroups; i++) {
-                columnGroupNamesArray[i] = groups[i].m_groupName;
-                groupSelection[i] = groups[i].m_selected;
-            }
-            m_columnsGroupVisibilityParameter = new MultiObjectParameter(COLUMNS_GROUP_VISIBILITY_KEY, "Columns Type Visibility", null, columnGroupNamesArray, null, groupSelection, null, false);
-            m_columnsGroupVisibilityParameter.setCompulsory(false);
+
         }
 
         final int MAX_WIDTH = 500;
@@ -280,8 +262,11 @@ public abstract class DecoratedTable extends JXTable implements CrossSelectionIn
         m_widthTextField = new JTextField();
         m_columnWidthParameter = new IntegerParameter(DEFAULT_WIDTH_KEY, DEFAULT_WIDTH_KEY, m_widthTextField, m_meanWidth, 10, MAX_WIDTH);
 
-        m_columnsVisibilityParameter = new MultiObjectParameter(COLUMNS_VISIBILITY_KEY, "Columns Visibility", null, columnNamesArray, columnsArray, selection, null, true);
+        m_columnsVisibilityParameter = new MultiObjectParameter(COLUMNS_VISIBILITY_KEY, "Columns Visibility", "Visible Columns", "Hidden Columns", AdvancedSelectionPanel.class, columnNamesArray, columnsArray, selection, null);
+        m_columnsVisibilityParameter.setFastSelectionValues(groups); 
+        
 
+        
         parameterTableList.add(this.m_columnArrangementParameter);
         parameterTableList.add(this.m_columnWidthParameter);
 
@@ -308,50 +293,8 @@ public abstract class DecoratedTable extends JXTable implements CrossSelectionIn
 
         };
 
-        AbstractLinkedParameters linkedParameter2 = null;
-        if (m_columnsGroupVisibilityParameter != null) {
-
-            final ExportModelInterface _exportableModel = exportableModel;
-
-            linkedParameter2 = new AbstractLinkedParameters(parameterTableList) {
-                @Override
-                public void valueChanged(String value, Object associatedValue) {
-
-                    // color
-                    int colorRemoveStart = value.indexOf("</font>", 0);
-                    int colorRemoveStop = value.indexOf("</html>", 0);
-                    if ((colorRemoveStart > -1) && (colorRemoveStop > colorRemoveStart)) {
-                        value = value.substring(colorRemoveStart + "</font>".length(), colorRemoveStop);
-                    }
-
-                    for (int i = 0; i < colCount; i++) {
-                        TableColumnExt column = (TableColumnExt) columns.get(i);
-                        String columnExportName = _exportableModel.getExportColumnName(column.getModelIndex());
-                        int indexSpace = columnExportName.lastIndexOf(' ');
-                        if (indexSpace != -1) {
-                            columnExportName = columnExportName.substring(0, indexSpace);
-                        }
-                        if (columnExportName.compareTo(value) == 0) {
-                            m_columnsVisibilityParameter.setSelection(i, ((Boolean) associatedValue).booleanValue());
-                        }
-                        if (indexSpace != -1) {
-                            columnExportName = _exportableModel.getExportColumnName(column.getModelIndex());
-                            columnExportName = columnExportName.substring(indexSpace, columnExportName.length());
-                            if (columnExportName.compareTo(value) == 0) {
-                                m_columnsVisibilityParameter.setSelection(i, ((Boolean) associatedValue).booleanValue());
-                            }
-                        }
-                    }
-
-                }
-
-            };
-        }
-
         parameterTableList.add(m_columnsVisibilityParameter);
-        if (m_columnsGroupVisibilityParameter != null) {
-            parameterTableList.add(m_columnsGroupVisibilityParameter);
-        }
+
 
         m_parameterListArray = new ArrayList<>();
         m_parameterListArray.add(parameterTableList);
@@ -360,9 +303,7 @@ public abstract class DecoratedTable extends JXTable implements CrossSelectionIn
         m_columnArrangementParameter.addLinkedParameters(linkedParameters);
         linkedParameters.valueChanged("true", Boolean.TRUE);  //JPM.TOOD true or false
 
-        if (m_columnsGroupVisibilityParameter != null) {
-            m_columnsGroupVisibilityParameter.addLinkedParameters(linkedParameter2);
-        }
+
 
         addSortingParameters();
     }
@@ -681,20 +622,4 @@ public abstract class DecoratedTable extends JXTable implements CrossSelectionIn
         ((TableRowSorter) sorter).sort();
     }
 
-    public class ColumnGroup implements Comparable<ColumnGroup> {
-
-        public String m_groupName;
-        public boolean m_selected;
-
-        public ColumnGroup(String groupName, boolean selected) {
-            m_groupName = groupName;
-            m_selected = selected;
-        }
-
-        @Override
-        public int compareTo(ColumnGroup o) {
-            return m_groupName.compareTo(o.m_groupName);
-        }
-
-    }
 }

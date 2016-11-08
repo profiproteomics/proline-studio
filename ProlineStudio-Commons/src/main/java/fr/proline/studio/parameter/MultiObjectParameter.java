@@ -1,10 +1,12 @@
 package fr.proline.studio.parameter;
 
+import fr.proline.studio.gui.AdvancedSelectionPanel;
 import fr.proline.studio.gui.JCheckBoxList;
 import fr.proline.studio.gui.JCheckBoxListPanel;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import javax.swing.*;
 
@@ -28,16 +30,25 @@ public class MultiObjectParameter<E> extends AbstractParameter {
     private int m_nbCompulsorySelection = 1;
     private boolean m_allowSelectAll = true;
     
+    private String m_selectedName;
+    private String m_unselectedName;
     
+    private String[] m_columnGroupNamesArray = null;
     
-    public MultiObjectParameter(String key, String name, E[] objects, boolean[] selection, AbstractParameterToString<E> paramToString) {
-        super(key, name, Integer.class, JCheckBoxList.class);
+    public MultiObjectParameter(String key, String name, String selectedName, String unselectedName, Class graphicalType, E[] objects, Object[] associatedObjects, boolean[] selection, AbstractParameterToString<E> paramToString) {
+        super(key, name, Integer.class, graphicalType);
         m_objects = objects;
+        m_associatedObjects = associatedObjects;
         m_defaultSelection = selection;
         m_paramToString = paramToString;
         
+        m_selectedName = selectedName;
+        m_unselectedName = unselectedName;
+        
         m_labelVisibility = LabelVisibility.AS_BORDER_TITLE;
     }
+    
+    
     
     public MultiObjectParameter(String key, String name, JCheckBoxList checkBoxList, E[] objects, Object[] associatedObjects, boolean[] selection, AbstractParameterToString<E> paramToString, boolean allowSelectAll) {
         super(key, name, Integer.class, JCheckBoxList.class);
@@ -57,6 +68,11 @@ public class MultiObjectParameter<E> extends AbstractParameter {
 
     }
     
+    public void setFastSelectionValues(String[] columnGroupNamesArray) {
+        m_columnGroupNamesArray = columnGroupNamesArray;
+    }
+
+    
     public void setCompulsory(int nbCompulsorySelection) {
         m_compulsory = (nbCompulsorySelection>0);
         m_nbCompulsorySelection = nbCompulsorySelection;
@@ -72,8 +88,13 @@ public class MultiObjectParameter<E> extends AbstractParameter {
         if (m_parameterComponent == null) {
             return;
         }
-        JCheckBoxList checkBoxList = ((JCheckBoxListPanel) m_parameterComponent).getCheckBoxList();
-        checkBoxList.selectItem(i, v);
+        
+        if (m_graphicalType.equals(JCheckBoxList.class)) {
+            JCheckBoxList checkBoxList = ((JCheckBoxListPanel) m_parameterComponent).getCheckBoxList();
+            checkBoxList.selectItem(i, v);
+        } else if (m_graphicalType.equals(AdvancedSelectionPanel.class)) {
+            
+        }
         
     }
 
@@ -87,51 +108,41 @@ public class MultiObjectParameter<E> extends AbstractParameter {
     public JComponent getComponent(Object value) {
 
         if (m_parameterComponent != null) {
-            if (m_graphicalType.equals(JCheckBoxList.class)) {
+            if (m_graphicalType.equals(JCheckBoxList.class) || m_graphicalType.equals(AdvancedSelectionPanel.class)) {
 
                 return m_parameterComponent;
             }
         }
 
+        ArrayList<E> list = new ArrayList<>();
+        ArrayList<Boolean> visibilityList = new ArrayList<>();
+        for (int i = 0; i < m_objects.length; i++) {
+            E obj = m_objects[i];
+            list.add(obj);
+            if (m_defaultSelection != null) {
+                visibilityList.add(m_defaultSelection[i] ? Boolean.TRUE : Boolean.FALSE);
+            } else {
+                visibilityList.add(Boolean.FALSE);
+            }
+        }
         
         
         if (m_graphicalType.equals(JCheckBoxList.class)) {
-            ArrayList<E> list = new ArrayList<>();
-            ArrayList<Boolean> visibilityList = new ArrayList<>();
-            for (int i=0;i<m_objects.length;i++) {
-                E obj = m_objects[i];
-                list.add(obj);
-                if (m_defaultSelection != null) {
-                    visibilityList.add( m_defaultSelection[i] ? Boolean.TRUE : Boolean.FALSE);
-                } else {
-                    visibilityList.add(Boolean.FALSE);
-                }
-            }
+            
             
             JCheckBoxList checkboxList = new JCheckBoxList(list, visibilityList);
 
             m_parameterComponent = new JCheckBoxListPanel(checkboxList, m_allowSelectAll);
-            return m_parameterComponent;
+            
+        } else if (m_graphicalType.equals(AdvancedSelectionPanel.class)) {
+            AdvancedSelectionPanel selectionPanel = new AdvancedSelectionPanel(m_selectedName, m_unselectedName, list, visibilityList);
+            selectionPanel.setFastSelectionValues(m_columnGroupNamesArray);
+            m_parameterComponent = selectionPanel;
         }
 
-        return null; // should not happen
+        return m_parameterComponent;
     }
 
-    /*private boolean selectItem(JCheckBoxList comboBox, Object value) {
-
-        String valueString = ( value == null) ? "" : value.toString();
-        
-        int nb = comboBox.getItemCount();
-        for (int i=0;i<nb;i++) {
-            String itemString = getStringValue(comboBox, i);
-            if (itemString.compareTo(valueString) == 0) {
-                comboBox.setSelectedIndex(i);
-                return true;
-            }
-        }
-        return false;
-    }*/
-    
     
     @Override
     public void initDefault() {
@@ -146,18 +157,22 @@ public class MultiObjectParameter<E> extends AbstractParameter {
             return null;
         }
         
-        if (m_graphicalType.equals(JCheckBoxList.class)) {
-            
-            List selectedList = ((JCheckBoxListPanel) m_parameterComponent).getCheckBoxList().getSelectedItems();
-            if ((m_compulsory) && (selectedList.isEmpty())) {
-                return new ParameterError("No selection done", m_parameterComponent);
-            }
-            int nb = selectedList.size();
-            if ((m_compulsory) && (nb<m_nbCompulsorySelection)) {
-                return new ParameterError("You must select at least "+m_nbCompulsorySelection+ "values", m_parameterComponent);
-            }
-        }
+        List selectedList = null;
+         if (m_graphicalType.equals(JCheckBoxList.class)) {
+            selectedList = ((JCheckBoxListPanel) m_parameterComponent).getCheckBoxList().getSelectedItems();
+         } else if (m_graphicalType.equals(AdvancedSelectionPanel.class)) {
+             selectedList = ((AdvancedSelectionPanel) m_parameterComponent).getSelectedItems();
+         }
         
+
+        if ((m_compulsory) && (selectedList.isEmpty())) {
+            return new ParameterError("No selection done", m_parameterComponent);
+        }
+        int nb = selectedList.size();
+        if ((m_compulsory) && (nb < m_nbCompulsorySelection)) {
+            return new ParameterError("You must select at least " + m_nbCompulsorySelection + "values", m_parameterComponent);
+        }
+
         return null;
     }
 
@@ -182,7 +197,12 @@ public class MultiObjectParameter<E> extends AbstractParameter {
             List<E> list = checkBoxList.getSelectedItems();
 
             return list;
-        }
+        }  else if (m_graphicalType.equals(AdvancedSelectionPanel.class)) {
+             List<E> list = ((AdvancedSelectionPanel) m_parameterComponent).getSelectedItems();
+             return list;
+         }
+        
+        
         return null; // should not happen
     }
     
@@ -193,19 +213,23 @@ public class MultiObjectParameter<E> extends AbstractParameter {
             return getObjectValue();
         }
         
+        int[] indices = null;
         if (m_graphicalType.equals(JCheckBoxList.class)) {
             
             JCheckBoxList checkBoxList = ((JCheckBoxListPanel) m_parameterComponent).getCheckBoxList();
-            int[] indices = selected ? checkBoxList.getSelectedIndices() : checkBoxList.getNonSelectedIndices();
-                 
-            ArrayList associatedSelectedList = new ArrayList(indices.length);
-            for (int i : indices) {
-                associatedSelectedList.add(m_associatedObjects[i]);
-            }
-
-            return associatedSelectedList;
+            indices = selected ? checkBoxList.getSelectedIndices() : checkBoxList.getNonSelectedIndices();
+        } else if (m_graphicalType.equals(AdvancedSelectionPanel.class)) {
+            AdvancedSelectionPanel selectionPanel = ((AdvancedSelectionPanel) m_parameterComponent);
+            indices = selected ? selectionPanel.getSelectedIndices() : selectionPanel.getNonSelectedIndices();
         }
-        return null; // should not happen
+        
+        ArrayList associatedSelectedList = new ArrayList(indices.length);
+        for (int i : indices) {
+            associatedSelectedList.add(m_associatedObjects[i]);
+        }
+
+        return associatedSelectedList;
+
     }
     
     
@@ -233,6 +257,8 @@ public class MultiObjectParameter<E> extends AbstractParameter {
 
             });
             initDefault();
+        } else if (m_parameterComponent instanceof AdvancedSelectionPanel) {
+            // JPM.TODO : not done for the moment, not used
         }
     }
     

@@ -96,9 +96,9 @@ public class DataboxXicPeptideIon extends AbstractDataBox {
         XicPeptideIonPanel p = new XicPeptideIonPanel();
         p.setName(m_typeName);
         p.setDataBox(this);
-        m_panel = p;
+        setDataBoxPanelInterface(p);
         
-        m_panel.addSingleValue(new XicMode((m_isXICMode)));
+        getDataBoxPanelInterface().addSingleValue(new XicMode((m_isXICMode)));
     }
 
     @Override
@@ -130,7 +130,7 @@ public class DataboxXicPeptideIon extends AbstractDataBox {
                 if (subTask == null) {
                     if (!allPeptides) {
                         quantitationChannelArray = m_quantChannelInfo.getQuantChannels();
-                        ((XicPeptideIonPanel) m_panel).setData(taskId, quantitationChannelArray, m_masterQuantPeptideIonList, m_isXICMode, finished);
+                        ((XicPeptideIonPanel) getDataBoxPanelInterface()).setData(taskId, quantitationChannelArray, m_masterQuantPeptideIonList, m_isXICMode, finished);
                     } else {
                         AbstractDatabaseCallback mapCallback = new AbstractDatabaseCallback() {
 
@@ -154,7 +154,7 @@ public class DataboxXicPeptideIon extends AbstractDataBox {
                                 m_quantChannelInfo.setMapAlignments(m_mapAlignments);
                                 m_quantChannelInfo.setAllMaps(m_allMaps);
 
-                                ((XicPeptideIonPanel) m_panel).setData(taskId, quantitationChannelArray, m_masterQuantPeptideIonList, m_isXICMode, finished);
+                                ((XicPeptideIonPanel) getDataBoxPanelInterface()).setData(taskId, quantitationChannelArray, m_masterQuantPeptideIonList, m_isXICMode, finished);
 
                                 if (finished) {
                                     unregisterTask(task2Id);
@@ -171,7 +171,7 @@ public class DataboxXicPeptideIon extends AbstractDataBox {
                     }
 
                 } else {
-                    ((XicPeptideIonPanel) m_panel).dataUpdated(subTask, finished);
+                    ((XicPeptideIonPanel) getDataBoxPanelInterface()).dataUpdated(subTask, finished);
                 }
 
                 setLoaded(loadingId);
@@ -202,14 +202,14 @@ public class DataboxXicPeptideIon extends AbstractDataBox {
     public void setXICMode(boolean isXICMode) {
         m_isXICMode = isXICMode;
         m_style = (m_isXICMode) ? DataboxStyle.STYLE_XIC : DataboxStyle.STYLE_SC;
-        if (m_panel != null) {
-            m_panel.addSingleValue(new XicMode((isXICMode)));
+        if (getDataBoxPanelInterface() != null) {
+            getDataBoxPanelInterface().addSingleValue(new XicMode((isXICMode)));
         }
     }
 
     @Override
     public void setEntryData(Object data) {
-        m_panel.addSingleValue(data);
+        getDataBoxPanelInterface().addSingleValue(data);
         m_dataset = (DDataset) data;
         dataChanged();
     }
@@ -221,7 +221,7 @@ public class DataboxXicPeptideIon extends AbstractDataBox {
                 return m_dataset.getResultSummary();
             }
             if (parameterType.equals(DMasterQuantPeptideIon.class)) {
-                return ((XicPeptideIonPanel) m_panel).getSelectedMasterQuantPeptideIon();
+                return ((XicPeptideIonPanel) getDataBoxPanelInterface()).getSelectedMasterQuantPeptideIon();
             }
             if (parameterType.equals(QuantChannelInfo.class)) {
                 if (m_quantChannelInfo != null) {
@@ -229,7 +229,7 @@ public class DataboxXicPeptideIon extends AbstractDataBox {
                 }
             }
             if (parameterType.equals(DPeptideMatch.class)) {
-                DMasterQuantPeptideIon qpi = ((XicPeptideIonPanel) m_panel).getSelectedMasterQuantPeptideIon();
+                DMasterQuantPeptideIon qpi = ((XicPeptideIonPanel) getDataBoxPanelInterface()).getSelectedMasterQuantPeptideIon();
                 if (qpi == null) {
                     return null;
                 }
@@ -243,10 +243,10 @@ public class DataboxXicPeptideIon extends AbstractDataBox {
                 return m_dataset;
             }
             if (parameterType.equals(CompareDataInterface.class)) {
-                return ((GlobalTabelModelProviderInterface) m_panel).getGlobalTableModelInterface();
+                return ((GlobalTabelModelProviderInterface) getDataBoxPanelInterface()).getGlobalTableModelInterface();
             }
             if (parameterType.equals(CrossSelectionInterface.class)) {
-                return ((GlobalTabelModelProviderInterface) m_panel).getCrossSelectionInterface();
+                return ((GlobalTabelModelProviderInterface) getDataBoxPanelInterface()).getCrossSelectionInterface();
             }
             if (parameterType.equals(QuantChannelInfo.class)) {
                 return m_quantChannelInfo;

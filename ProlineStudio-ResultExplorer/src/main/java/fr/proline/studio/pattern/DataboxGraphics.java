@@ -40,14 +40,14 @@ public class DataboxGraphics extends AbstractDataBox  {
         GraphicsPanel p = new GraphicsPanel(m_defaultLocked);
         p.setName(m_typeName);
         p.setDataBox(this);
-        m_panel = p;
+        setDataBoxPanelInterface(p);
     }
 
     @Override
     public void dataChanged() {
         final CompareDataInterface values = (m_values!=null) ? m_values : (CompareDataInterface) m_previousDataBox.getData(false, CompareDataInterface.class);
         final CrossSelectionInterface crossSelectionInterface = (m_values!=null) ? null : (CrossSelectionInterface) m_previousDataBox.getData(false, CrossSelectionInterface.class);
-        ((GraphicsPanel)m_panel).setData(values, crossSelectionInterface);
+        ((GraphicsPanel)getDataBoxPanelInterface()).setData(values, crossSelectionInterface);
     }
     
     @Override

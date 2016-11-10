@@ -56,7 +56,7 @@ public class DataBoxRsmAllProteinSet extends AbstractDataBox {
         RsmProteinSetPanel p = new RsmProteinSetPanel(true);
         p.setName(m_typeName);
         p.setDataBox(this);
-        m_panel = p;
+        setDataBoxPanelInterface(p);
     }
     
     @Override
@@ -79,14 +79,14 @@ public class DataBoxRsmAllProteinSet extends AbstractDataBox {
 
                 if (subTask == null) {
                     DProteinSet[] proteinSetArray = _rsm.getTransientData().getProteinSetArray();
-                    ((RsmProteinSetPanel) m_panel).setData(taskId, proteinSetArray, finished);
+                    ((RsmProteinSetPanel) getDataBoxPanelInterface()).setData(taskId, proteinSetArray, finished);
                     
                     if (m_dataToBeSelected != null) {
-                        ((RsmProteinSetPanel) m_panel).selectData(m_dataToBeSelected);
+                        ((RsmProteinSetPanel) getDataBoxPanelInterface()).selectData(m_dataToBeSelected);
                         m_dataToBeSelected = null;
                     }
                 } else {
-                    ((RsmProteinSetPanel) m_panel).dataUpdated(subTask, finished);
+                    ((RsmProteinSetPanel) getDataBoxPanelInterface()).dataUpdated(subTask, finished);
                     
                 }
 
@@ -120,7 +120,7 @@ public class DataBoxRsmAllProteinSet extends AbstractDataBox {
     public Object getData(boolean getArray, Class parameterType) {
         if (parameterType!= null ) {
             if (parameterType.equals(DProteinSet.class)) {
-                return ((RsmProteinSetPanel)m_panel).getSelectedProteinSet();
+                return ((RsmProteinSetPanel)getDataBoxPanelInterface()).getSelectedProteinSet();
             }
             if (parameterType.equals(ResultSummary.class)) {
                 if (m_rsm != null) {
@@ -128,10 +128,10 @@ public class DataBoxRsmAllProteinSet extends AbstractDataBox {
                 }
             }
             if (parameterType.equals(CompareDataInterface.class)) {
-                return ((GlobalTabelModelProviderInterface) m_panel).getGlobalTableModelInterface();
+                return ((GlobalTabelModelProviderInterface) getDataBoxPanelInterface()).getGlobalTableModelInterface();
             }
             if (parameterType.equals(CrossSelectionInterface.class)) {
-                return ((GlobalTabelModelProviderInterface)m_panel).getCrossSelectionInterface();
+                return ((GlobalTabelModelProviderInterface)getDataBoxPanelInterface()).getCrossSelectionInterface();
             }
         }
         return super.getData(getArray, parameterType);
@@ -140,7 +140,7 @@ public class DataBoxRsmAllProteinSet extends AbstractDataBox {
     @Override
     public void setEntryData(Object data) {
         
-        m_panel.addSingleValue(data);
+        getDataBoxPanelInterface().addSingleValue(data);
         
         m_rsm = (ResultSummary) data;
         dataChanged();

@@ -53,7 +53,7 @@ public class DataBoxRsmProteinsOfProteinSet extends AbstractDataBox {
         RsmProteinsOfProteinSetPanel p = new RsmProteinsOfProteinSetPanel();
         p.setName(m_typeName);
         p.setDataBox(this);
-        m_panel = p;
+        setDataBoxPanelInterface(p);
     }
     
     @Override
@@ -61,7 +61,7 @@ public class DataBoxRsmProteinsOfProteinSet extends AbstractDataBox {
         final DProteinSet proteinSet = (DProteinSet) m_previousDataBox.getData(false, DProteinSet.class);
 
         if (proteinSet == null) {
-            ((RsmProteinsOfProteinSetPanel)m_panel).setData(null, null);
+            ((RsmProteinsOfProteinSetPanel)getDataBoxPanelInterface()).setData(null, null);
             m_proteinSetCurId = -1;
             return;
         }
@@ -87,7 +87,7 @@ public class DataBoxRsmProteinsOfProteinSet extends AbstractDataBox {
             public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
 
 
-                ((RsmProteinsOfProteinSetPanel)m_panel).setData(proteinSet, null /*
+                ((RsmProteinsOfProteinSetPanel)getDataBoxPanelInterface()).setData(proteinSet, null /*
                          * searchedText
                          */); //JPM.TODO
                 
@@ -115,13 +115,13 @@ public class DataBoxRsmProteinsOfProteinSet extends AbstractDataBox {
     public Object getData(boolean getArray, Class parameterType) {
         if (parameterType != null) {
             if (parameterType.equals(DProteinMatch.class)) {
-                return ((RsmProteinsOfProteinSetPanel) m_panel).getSelectedProteinMatch();
+                return ((RsmProteinsOfProteinSetPanel) getDataBoxPanelInterface()).getSelectedProteinMatch();
             }
             if (parameterType.equals(CompareDataInterface.class)) {
-                return ((GlobalTabelModelProviderInterface) m_panel).getGlobalTableModelInterface();
+                return ((GlobalTabelModelProviderInterface) getDataBoxPanelInterface()).getGlobalTableModelInterface();
             }
             if (parameterType.equals(CrossSelectionInterface.class)) {
-                return ((GlobalTabelModelProviderInterface)m_panel).getCrossSelectionInterface();
+                return ((GlobalTabelModelProviderInterface)getDataBoxPanelInterface()).getCrossSelectionInterface();
             }
         }
         return super.getData(getArray, parameterType);

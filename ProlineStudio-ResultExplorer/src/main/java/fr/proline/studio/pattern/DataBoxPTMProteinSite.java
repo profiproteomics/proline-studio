@@ -68,7 +68,7 @@ public class DataBoxPTMProteinSite extends AbstractDataBox {
         PTMProteinSitePanel p = new PTMProteinSitePanel();
         p.setName(m_typeName);
         p.setDataBox(this);
-        m_panel = p;
+        setDataBoxPanelInterface(p);
     }
     
     @Override
@@ -88,20 +88,20 @@ public class DataBoxPTMProteinSite extends AbstractDataBox {
             @Override
             public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
 
-                ((PTMProteinSitePanel) m_panel).setData(taskId, proteinPTMSiteArray, finished);
+                ((PTMProteinSitePanel) getDataBoxPanelInterface()).setData(taskId, proteinPTMSiteArray, finished);
                 
                 //PTMProteinSitePanel //JPM.TODO
                 
                 /*if (subTask == null) {
                     DProteinSet[] proteinSetArray = m_rsm.getTransientData().getProteinSetArray();
-                    ((RsmProteinSetPanel) m_panel).setData(taskId, proteinSetArray, finished);
+                    ((RsmProteinSetPanel) getDataBoxPanelInterface()).setData(taskId, proteinSetArray, finished);
                     
                     if (m_dataToBeSelected != null) {
-                        ((RsmProteinSetPanel) m_panel).selectData(m_dataToBeSelected);
+                        ((RsmProteinSetPanel) getDataBoxPanelInterface()).selectData(m_dataToBeSelected);
                         m_dataToBeSelected = null;
                     }
                 } else {
-                    ((RsmProteinSetPanel) m_panel).dataUpdated(subTask, finished);
+                    ((RsmProteinSetPanel) getDataBoxPanelInterface()).dataUpdated(subTask, finished);
                     
                 }*/
                 
@@ -136,7 +136,7 @@ public class DataBoxPTMProteinSite extends AbstractDataBox {
     public Object getData(boolean getArray, Class parameterType) {
         if (parameterType!= null ) {
             /*if (parameterType.equals(DProteinSet.class)) {
-                return ((RsmProteinSetPanel)m_panel).getSelectedProteinSet();
+                return ((RsmProteinSetPanel)getDataBoxPanelInterface()).getSelectedProteinSet();
             }*/ //JPM.TODO
             if (parameterType.equals(ResultSummary.class)) {
                 if (m_rsm != null) {
@@ -146,26 +146,26 @@ public class DataBoxPTMProteinSite extends AbstractDataBox {
             
             
             if (parameterType.equals(DProteinMatch.class)) {
-                DProteinPTMSite proteinPtmSite = ((PTMProteinSitePanel)m_panel).getSelectedProteinPTMSite();
+                DProteinPTMSite proteinPtmSite = ((PTMProteinSitePanel)getDataBoxPanelInterface()).getSelectedProteinPTMSite();
                 if (proteinPtmSite != null) {
                     return proteinPtmSite.getPoteinMatch();
                 }
             }
             if (parameterType.equals(DPeptideMatch.class)) {
-                DProteinPTMSite proteinPtmSite = ((PTMProteinSitePanel)m_panel).getSelectedProteinPTMSite();
+                DProteinPTMSite proteinPtmSite = ((PTMProteinSitePanel) getDataBoxPanelInterface()).getSelectedProteinPTMSite();
                 if (proteinPtmSite != null) {
                     return proteinPtmSite.getPeptideMatch();
                 }
             }
             if (parameterType.equals(DProteinPTMSite.class)) {
-                return ((PTMProteinSitePanel)m_panel).getSelectedProteinPTMSite();
+                return ((PTMProteinSitePanel) getDataBoxPanelInterface()).getSelectedProteinPTMSite();
             }
  
             if (parameterType.equals(CompareDataInterface.class)) {
-                return ((GlobalTabelModelProviderInterface) m_panel).getGlobalTableModelInterface();
+                return ((GlobalTabelModelProviderInterface) getDataBoxPanelInterface()).getGlobalTableModelInterface();
             }
             if (parameterType.equals(CrossSelectionInterface.class)) {
-                return ((GlobalTabelModelProviderInterface)m_panel).getCrossSelectionInterface();
+                return ((GlobalTabelModelProviderInterface) getDataBoxPanelInterface()).getCrossSelectionInterface();
             }
         }
         return super.getData(getArray, parameterType);
@@ -174,7 +174,7 @@ public class DataBoxPTMProteinSite extends AbstractDataBox {
     @Override
     public void setEntryData(Object data) {
         
-        m_panel.addSingleValue(data);
+        getDataBoxPanelInterface().addSingleValue(data);
         
         m_rsm = (ResultSummary) data;
         dataChanged();

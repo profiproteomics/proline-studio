@@ -63,7 +63,7 @@ public class DataboxPSMOfMasterQuantPeptide extends AbstractDataBox {
         XicPeptideMatchPanel p = new XicPeptideMatchPanel();
         p.setName(m_typeName);
         p.setDataBox(this);
-        m_panel = p;
+        setDataBoxPanelInterface(p);
     }
 
     @Override
@@ -74,7 +74,7 @@ public class DataboxPSMOfMasterQuantPeptide extends AbstractDataBox {
         m_quantChannelInfo = (QuantChannelInfo) m_previousDataBox.getData(false, QuantChannelInfo.class);
 
         if (m_masterQuantPeptide == null) {
-            ((XicPeptideMatchPanel) m_panel).setData((long)-1, null, m_quantChannelInfo, null, null, true);
+            ((XicPeptideMatchPanel) getDataBoxPanelInterface()).setData((long)-1, null, m_quantChannelInfo, null, null, true);
             return;
         }
         final int loadingId = setLoading();
@@ -99,9 +99,9 @@ public class DataboxPSMOfMasterQuantPeptide extends AbstractDataBox {
                 listQuantChannel.toArray(quantitationChannelArray);
 
                 if (subTask == null) {
-                    ((XicPeptideMatchPanel) m_panel).setData(taskId, quantitationChannelArray, m_quantChannelInfo, m_peptideMatchList, m_peptideMatchIdListPerQC, finished);
+                    ((XicPeptideMatchPanel) getDataBoxPanelInterface()).setData(taskId, quantitationChannelArray, m_quantChannelInfo, m_peptideMatchList, m_peptideMatchIdListPerQC, finished);
                 } else {
-                    ((XicPeptideMatchPanel) m_panel).dataUpdated(subTask, finished);
+                    ((XicPeptideMatchPanel) getDataBoxPanelInterface()).dataUpdated(subTask, finished);
                 }
 
                 setLoaded(loadingId);
@@ -126,13 +126,13 @@ public class DataboxPSMOfMasterQuantPeptide extends AbstractDataBox {
     public Object getData(boolean getArray, Class parameterType) {
         if (parameterType != null) {
             if (parameterType.equals(DPeptideMatch.class)) {
-                return ((XicPeptideMatchPanel) m_panel).getSelectedPSM();
+                return ((XicPeptideMatchPanel) getDataBoxPanelInterface()).getSelectedPSM();
             }
             if (parameterType.equals(CompareDataInterface.class)) {
-                return ((GlobalTabelModelProviderInterface) m_panel).getGlobalTableModelInterface();
+                return ((GlobalTabelModelProviderInterface) getDataBoxPanelInterface()).getGlobalTableModelInterface();
             }
             if (parameterType.equals(CrossSelectionInterface.class)) {
-                return ((GlobalTabelModelProviderInterface) m_panel).getCrossSelectionInterface();
+                return ((GlobalTabelModelProviderInterface) getDataBoxPanelInterface()).getCrossSelectionInterface();
             }
         }
         return super.getData(getArray, parameterType);

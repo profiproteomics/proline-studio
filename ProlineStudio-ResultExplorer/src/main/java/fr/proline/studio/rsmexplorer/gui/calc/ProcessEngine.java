@@ -49,12 +49,12 @@ public class ProcessEngine implements ProcessCallbackInterface {
         }
     }
     
-    public void run(LinkedList<GraphNode> graphNodeArray, GraphPanel p, JButton playButton) {
+    public void run(LinkedList<GraphNode> graphNodeArray, GraphPanel panel, JButton playButton) {
 
         setRunAll(true);
         
         m_processEngineKey++;
-        m_panel = p;
+        m_panel = panel;
         m_playButton = playButton;
         
         // look for nodes with no in to initialize the processing
@@ -76,11 +76,11 @@ public class ProcessEngine implements ProcessCallbackInterface {
         return m_processEngineKey;
     }
     
-    public void runANode(GraphNode node, GraphPanel p) {
+    public void runANode(GraphNode node, GraphPanel panel) {
         
         setRunAll(false);
         
-        m_panel = p;
+        m_panel = panel;
         m_playButton = null;
         
         m_processingNodeList.add(node);

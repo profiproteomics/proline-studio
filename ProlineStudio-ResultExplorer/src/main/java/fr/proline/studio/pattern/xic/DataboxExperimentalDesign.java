@@ -44,7 +44,7 @@ public class DataboxExperimentalDesign extends AbstractDataBox {
         ExperimentalDesignPanel p = new ExperimentalDesignPanel();
         p.setName(m_typeName);
         p.setDataBox(this);
-        m_panel = p;
+        setDataBoxPanelInterface(p);
     }
 
     @Override
@@ -62,10 +62,10 @@ public class DataboxExperimentalDesign extends AbstractDataBox {
             public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
 
                 if (subTask == null) {
-                    ((ExperimentalDesignPanel) m_panel).setData(taskId, m_dataset, finished);
+                    ((ExperimentalDesignPanel) getDataBoxPanelInterface()).setData(taskId, m_dataset, finished);
                    
                 } else {
-                    ((ExperimentalDesignPanel) m_panel).dataUpdated(subTask, finished);
+                    ((ExperimentalDesignPanel) getDataBoxPanelInterface()).dataUpdated(subTask, finished);
                 }
 
                 setLoaded(loadingId);
@@ -87,7 +87,7 @@ public class DataboxExperimentalDesign extends AbstractDataBox {
     
     @Override
     public void setEntryData(Object data) {
-        m_panel.addSingleValue(data);
+        getDataBoxPanelInterface().addSingleValue(data);
         m_dataset = (DDataset) data;
         dataChanged();
     }

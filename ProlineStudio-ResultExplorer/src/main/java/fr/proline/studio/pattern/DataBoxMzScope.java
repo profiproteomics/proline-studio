@@ -74,13 +74,13 @@ public class DataBoxMzScope extends AbstractDataBox{
         StudioMzScopePanel p = new StudioMzScopePanel();
         p.setName(m_typeName);
         p.setDataBox(this);
-        m_panel = p;
+        setDataBoxPanelInterface(p);
     }
     
     @Override
     public void setEntryData(Object data) {
         
-        m_panel.addSingleValue(data);
+        getDataBoxPanelInterface().addSingleValue(data);
         
         mzScope = (MzScopeInterface) data;
 
@@ -117,9 +117,9 @@ public class DataBoxMzScope extends AbstractDataBox{
             public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
 
                 if (subTask == null) {
-                   //((StudioMzScopePanel) m_panel).setData(taskId, file, finished);
+                   //((StudioMzScopePanel) getDataBoxPanelInterface()).setData(taskId, file, finished);
                 } else {
-                    ((StudioMzScopePanel) m_panel).dataUpdated(subTask, finished);
+                    ((StudioMzScopePanel) getDataBoxPanelInterface()).dataUpdated(subTask, finished);
                 }
 
                 setLoaded(loadingId);
@@ -148,7 +148,7 @@ public class DataBoxMzScope extends AbstractDataBox{
                 infos.add(mzdbInfo);
             }
         }
-        ((StudioMzScopePanel) m_panel).setData((long)-1,  infos, true);
+        ((StudioMzScopePanel) getDataBoxPanelInterface()).setData((long)-1,  infos, true);
         setLoaded(loadingId);
     }
     

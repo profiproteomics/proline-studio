@@ -88,8 +88,8 @@ public class DataboxXicProteinSet extends AbstractDataBox {
     public void setXICMode(boolean isXICMode) {
         m_isXICMode = isXICMode;
         m_style = (m_isXICMode) ? DataboxStyle.STYLE_XIC : DataboxStyle.STYLE_SC;
-        if (m_panel != null) {
-            m_panel.addSingleValue(new XicMode((isXICMode)));
+        if (getDataBoxPanelInterface() != null) {
+            getDataBoxPanelInterface().addSingleValue(new XicMode((isXICMode)));
         }
     }
 
@@ -114,9 +114,9 @@ public class DataboxXicProteinSet extends AbstractDataBox {
         XicProteinSetPanel p = new XicProteinSetPanel();
         p.setName(m_typeName);
         p.setDataBox(this);
-        m_panel = p;
+        setDataBoxPanelInterface(p);
         
-        m_panel.addSingleValue(new XicMode((m_isXICMode)));
+        getDataBoxPanelInterface().addSingleValue(new XicMode((m_isXICMode)));
     }
 
     @Override
@@ -155,12 +155,12 @@ public class DataboxXicProteinSet extends AbstractDataBox {
                             m_quantChannelInfo.setAllMapAlignments(m_allMapAlignments);
                             m_quantChannelInfo.setMapAlignments(m_mapAlignments);
                             m_quantChannelInfo.setAllMaps(m_allMaps);
-                            m_panel.addSingleValue(m_quantChannelInfo);
+                            getDataBoxPanelInterface().addSingleValue(m_quantChannelInfo);
 
                             // proteins set 
                             //DMasterQuantProteinSet[] masterQuantProteinSetArray = new DMasterQuantProteinSet[m_masterQuantProteinSetList.size()];
                             //m_masterQuantProteinSetList.toArray(masterQuantProteinSetArray);
-                            ((XicProteinSetPanel) m_panel).setData(taskId, m_quantitationChannelArray, m_masterQuantProteinSetList, m_isXICMode, finished);
+                            ((XicProteinSetPanel) getDataBoxPanelInterface()).setData(taskId, m_quantitationChannelArray, m_masterQuantProteinSetList, m_isXICMode, finished);
                             if (finished) {
                                 unregisterTask(task2Id);
                             }
@@ -175,7 +175,7 @@ public class DataboxXicProteinSet extends AbstractDataBox {
                     registerTask(taskMap);
 
                 } else {
-                    ((XicProteinSetPanel) m_panel).dataUpdated(subTask, finished);
+                    ((XicProteinSetPanel) getDataBoxPanelInterface()).dataUpdated(subTask, finished);
                 }
                 setLoaded(loadingId);
 
@@ -217,14 +217,14 @@ public class DataboxXicProteinSet extends AbstractDataBox {
             return;
         }
         if (dataType.equals(DMasterQuantProteinSet.class)) {
-            ((XicProteinSetPanel) m_panel).dataModified(modificationsList, reason);
+            ((XicProteinSetPanel) getDataBoxPanelInterface()).dataModified(modificationsList, reason);
         }
     }
     
     
     @Override
     public void setEntryData(Object data) {
-        m_panel.addSingleValue(data);
+        getDataBoxPanelInterface().addSingleValue(data);
         m_dataset = (DDataset) data;
         dataChanged();
     }
@@ -242,16 +242,16 @@ public class DataboxXicProteinSet extends AbstractDataBox {
                 return m_quantChannelInfo;
             }
             if (parameterType.equals(DProteinSet.class)) {
-                return ((XicProteinSetPanel) m_panel).getSelectedProteinSet();
+                return ((XicProteinSetPanel) getDataBoxPanelInterface()).getSelectedProteinSet();
             }
             if (parameterType.equals(DMasterQuantProteinSet.class)) {
-                return ((XicProteinSetPanel) m_panel).getSelectedMasterQuantProteinSet();
+                return ((XicProteinSetPanel) getDataBoxPanelInterface()).getSelectedMasterQuantProteinSet();
             }
             if (parameterType.equals(CompareDataInterface.class)) {
-                return ((GlobalTabelModelProviderInterface) m_panel).getGlobalTableModelInterface();
+                return ((GlobalTabelModelProviderInterface) getDataBoxPanelInterface()).getGlobalTableModelInterface();
             }
             if (parameterType.equals(CrossSelectionInterface.class)) {
-                return ((GlobalTabelModelProviderInterface) m_panel).getCrossSelectionInterface();
+                return ((GlobalTabelModelProviderInterface) getDataBoxPanelInterface()).getCrossSelectionInterface();
             }
             if (parameterType.equals(XicMode.class)) {
                 return new XicMode(isXICMode());
@@ -295,7 +295,7 @@ public class DataboxXicProteinSet extends AbstractDataBox {
 
     private ProteinQuantPanel getProteinQuantTableModelList() {
         ProteinQuantPanel aProtPanel = new ProteinQuantPanel();
-        aProtPanel.setData(m_quantitationChannelArray, ((XicProteinSetPanel) m_panel).getSelectedMasterQuantProteinSet(), m_isXICMode);
+        aProtPanel.setData(m_quantitationChannelArray, ((XicProteinSetPanel) getDataBoxPanelInterface()).getSelectedMasterQuantProteinSet(), m_isXICMode);
         return aProtPanel;
     }
 

@@ -65,7 +65,7 @@ public class DataBoxAdjacencyMatrixChoice extends AbstractDataBox {
         MatrixSelectionPanel p = new MatrixSelectionPanel();
         p.setName(m_typeName);
         p.setDataBox(this);
-        m_panel = p;
+        setDataBoxPanelInterface(p);
     }
     
     @Override
@@ -99,7 +99,7 @@ public class DataBoxAdjacencyMatrixChoice extends AbstractDataBox {
             public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
 
 
-                ((MatrixSelectionPanel) m_panel).setData(matrixData, _proteinMatch, m_keepSameSet, m_doNotTakeFirstSelection);
+                ((MatrixSelectionPanel) getDataBoxPanelInterface()).setData(matrixData, _proteinMatch, m_keepSameSet, m_doNotTakeFirstSelection);
                 m_doNotTakeFirstSelection = false;
 
                 if (finished) {
@@ -111,7 +111,7 @@ public class DataBoxAdjacencyMatrixChoice extends AbstractDataBox {
 
         registerTask(new DatabaseProteinsAndPeptidesTask(callback, getProjectId(), _rsm, matrixData));
 
-        ((MatrixSelectionPanel) m_panel).setData(_proteinMatch, m_doNotTakeFirstSelection);
+        ((MatrixSelectionPanel) getDataBoxPanelInterface()).setData(_proteinMatch, m_doNotTakeFirstSelection);
         m_doNotTakeFirstSelection = false;
 
 
@@ -119,7 +119,7 @@ public class DataBoxAdjacencyMatrixChoice extends AbstractDataBox {
     
     @Override
     public void setEntryData(Object data) {
-        m_panel.addSingleValue(data);
+        getDataBoxPanelInterface().addSingleValue(data);
         
         if (data instanceof ResultSummary) {
             m_rsm = (ResultSummary) data;
@@ -131,10 +131,10 @@ public class DataBoxAdjacencyMatrixChoice extends AbstractDataBox {
     public Object getData(boolean getArray, Class parameterType) {
         if (parameterType!= null ) {
             if (parameterType.equals(Component.class)) {
-                return ((MatrixSelectionPanel) m_panel).getCurrentComponent();
+                return ((MatrixSelectionPanel) getDataBoxPanelInterface()).getCurrentComponent();
             }
             if (parameterType.equals(DrawVisualization.class)) {
-                return ((MatrixSelectionPanel) m_panel).getDrawVisualization();
+                return ((MatrixSelectionPanel) getDataBoxPanelInterface()).getDrawVisualization();
             }
             if (parameterType.equals(ResultSummary.class)) {
                 if (m_rsm != null) {

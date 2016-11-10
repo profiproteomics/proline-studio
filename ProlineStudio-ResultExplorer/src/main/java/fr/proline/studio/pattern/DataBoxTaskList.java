@@ -35,7 +35,7 @@ public class DataBoxTaskList extends AbstractDataBox {
         TasksPanel p = new TasksPanel();        
         p.setName(m_typeName);
         p.setDataBox(this);
-        m_panel = p;
+        setDataBoxPanelInterface(p);
     
     }
 
@@ -48,7 +48,7 @@ public class DataBoxTaskList extends AbstractDataBox {
     public Object getData(boolean getArray, Class parameterType) {
         if (parameterType!= null ) {
             if (parameterType.equals(TaskInfo.class)) {
-                return ((TasksPanel)m_panel).getSelectedTaskInfo();
+                return ((TasksPanel)getDataBoxPanelInterface()).getSelectedTaskInfo();
             }
 
         }
@@ -73,7 +73,7 @@ public class DataBoxTaskList extends AbstractDataBox {
 
                 @Override
                 public void actionPerformed(ActionEvent evt) {
-                    ((TasksPanel)m_panel).updateData();
+                    ((TasksPanel)getDataBoxPanelInterface()).updateData();
                 }
             };
             m_updateTimer = new Timer(UPDATE_DELAY, taskPerformer);

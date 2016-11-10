@@ -40,7 +40,7 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
 
     
     // Panel corresponding to this box
-    protected DataBoxPanelInterface m_panel;
+    private DataBoxPanelInterface m_panel;
     
     // In and out Parameters Registered
     private final HashSet<GroupParameter> m_inParameters = new HashSet<>();
@@ -258,6 +258,17 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
         registerOutParameter(outParameter);
     }
     
+    protected void setDataBoxPanelInterface(DataBoxPanelInterface panelInterface) {
+        m_panel = panelInterface;
+        if (m_panel != null) {
+            getDataBoxPanelInterface().addSingleValue(m_projectId);
+        }
+    }
+    
+    protected DataBoxPanelInterface getDataBoxPanelInterface() {
+        return m_panel;
+    }
+    
     public DataboxType getType() {
         return m_type;
     }
@@ -473,7 +484,9 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
     
     
     public void setProjectId(long projectId) {
-        m_panel.addSingleValue(m_projectId);
+        if (m_panel != null) {
+            getDataBoxPanelInterface().addSingleValue(m_projectId);
+        }
         m_projectId.setId(projectId);
     }
 
@@ -567,18 +580,18 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
     
     protected int setLoading(boolean andCalculating) {
         final int loadingId = m_loadingId++;
-        m_panel.setLoading(loadingId, andCalculating);
+        getDataBoxPanelInterface().setLoading(loadingId, andCalculating);
         return loadingId;
     }
     
     protected int setLoading() {
         final int loadingId = m_loadingId++;
-        m_panel.setLoading(loadingId);
+        getDataBoxPanelInterface().setLoading(loadingId);
         return loadingId;
     }
     
     protected void setLoaded(int loadingId) {
-        m_panel.setLoaded(loadingId);
+        getDataBoxPanelInterface().setLoaded(loadingId);
     }
     
     protected void selectDataWhenLoaded(HashSet data) {

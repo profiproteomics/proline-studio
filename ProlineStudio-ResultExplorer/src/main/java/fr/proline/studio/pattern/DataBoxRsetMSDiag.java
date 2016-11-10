@@ -58,7 +58,7 @@ public class DataBoxRsetMSDiag extends AbstractDataBox {
         RsetMSDiagPanel p = new RsetMSDiagPanel("please wait, retreiving data from server...");
         p.setName(m_typeName);
         p.setDataBox(this);
-        m_panel = p;
+        setDataBoxPanelInterface(p);
     }
 
     @Override
@@ -95,9 +95,9 @@ public class DataBoxRsetMSDiag extends AbstractDataBox {
                 public void run(boolean success) {
                     m_logger.debug("  get MSDiag data");
                     if (success) {
-                        ((RsetMSDiagPanel) m_panel).setData((String) m_messages_back.get(1)); // send last element containing JSON information (data to be represented)
+                        ((RsetMSDiagPanel) getDataBoxPanelInterface()).setData((String) m_messages_back.get(1)); // send last element containing JSON information (data to be represented)
                     } else {
-                        ((RsetMSDiagPanel) m_panel).setData(null);
+                        ((RsetMSDiagPanel) getDataBoxPanelInterface()).setData(null);
                     }
 
                     setLoaded(loadingId);
@@ -105,7 +105,7 @@ public class DataBoxRsetMSDiag extends AbstractDataBox {
             };
 
             fr.proline.studio.dpm.task.jms.GenerateMSDiagReportTask task = new fr.proline.studio.dpm.task.jms.GenerateMSDiagReportTask(callback, getProjectId(), rSetId, parameters, m_messages_back);
-            ((RsetMSDiagPanel) m_panel).setData("task running...please wait.(or come back later)");
+            ((RsetMSDiagPanel) getDataBoxPanelInterface()).setData("task running...please wait.(or come back later)");
             AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
         } else {
 
@@ -121,10 +121,10 @@ public class DataBoxRsetMSDiag extends AbstractDataBox {
                     m_logger.debug("  get MSDiag data");
                     if (success) {
 
-                        ((RsetMSDiagPanel) m_panel).setData((String) m_messages_back.get(1)); // send last element containing JSON information (data to be represented)
+                        ((RsetMSDiagPanel) getDataBoxPanelInterface()).setData((String) m_messages_back.get(1)); // send last element containing JSON information (data to be represented)
 
                     } else {
-                        ((RsetMSDiagPanel) m_panel).setData(null);
+                        ((RsetMSDiagPanel) getDataBoxPanelInterface()).setData(null);
 
                     }
 
@@ -134,7 +134,7 @@ public class DataBoxRsetMSDiag extends AbstractDataBox {
 
             AbstractServiceTask task = new GenerateMSDiagReportTask(callback, getProjectId(), rSetId, parameters, m_messages_back);
 
-            ((RsetMSDiagPanel) m_panel).setData("task running...please wait.(or come back later)");
+            ((RsetMSDiagPanel) getDataBoxPanelInterface()).setData("task running...please wait.(or come back later)");
 
             AccessServiceThread.getAccessServiceThread().addTask(task);
         }
@@ -143,7 +143,7 @@ public class DataBoxRsetMSDiag extends AbstractDataBox {
     @Override
     public void setEntryData(Object data) {
         
-        m_panel.addSingleValue(data);
+        getDataBoxPanelInterface().addSingleValue(data);
         
         if (data instanceof ResultSet) {
             m_rset = (ResultSet) data;

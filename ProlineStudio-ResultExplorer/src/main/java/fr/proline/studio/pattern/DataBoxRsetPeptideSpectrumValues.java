@@ -39,7 +39,7 @@ public class DataBoxRsetPeptideSpectrumValues extends AbstractDataBox {
         RsetPeptideSpectrumValuesPanel p = new RsetPeptideSpectrumValuesPanel();
         p.setName(m_typeName);
         p.setDataBox(this);
-        m_panel = p;
+        setDataBoxPanelInterface(p);
     }
 
     @Override
@@ -52,7 +52,7 @@ public class DataBoxRsetPeptideSpectrumValues extends AbstractDataBox {
         m_previousPeptideMatch = peptideMatch;
 
         if (peptideMatch == null) {
-            ((RsetPeptideSpectrumValuesPanel) m_panel).setData(null);
+            ((RsetPeptideSpectrumValuesPanel) getDataBoxPanelInterface()).setData(null);
             return;
         }
 
@@ -87,7 +87,7 @@ public class DataBoxRsetPeptideSpectrumValues extends AbstractDataBox {
                 @Override
                 public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
 
-                    ((RsetPeptideSpectrumValuesPanel) m_panel).setData(peptideMatch);
+                    ((RsetPeptideSpectrumValuesPanel) getDataBoxPanelInterface()).setData(peptideMatch);
                     
                     setLoaded(loadingId);
                     
@@ -111,7 +111,7 @@ public class DataBoxRsetPeptideSpectrumValues extends AbstractDataBox {
 
 
         } else {
-            ((RsetPeptideSpectrumValuesPanel) m_panel).setData(peptideMatch);
+            ((RsetPeptideSpectrumValuesPanel) getDataBoxPanelInterface()).setData(peptideMatch);
         }
     }
     private Long m_previousTaskId = null;

@@ -61,7 +61,7 @@ public class DataBoxRsetPSM extends AbstractDataBox {
         PeptideMatchPanel p = new PeptideMatchPanel(false, m_mergedData, true, true, false);
         p.setName(m_typeName);
         p.setDataBox(this);
-        m_panel = p;
+        setDataBoxPanelInterface(p);
     }
     
     @Override
@@ -87,9 +87,9 @@ public class DataBoxRsetPSM extends AbstractDataBox {
                     DPeptideMatch[] peptideMatchArray = _rset.getTransientData().getPeptideMatches();
                     long[] peptideMatchIdArray = _rset.getTransientData().getPeptideMatchIds();
                     
-                    ((PeptideMatchPanel)m_panel).setData(taskId, peptideMatchArray, peptideMatchIdArray, finished);
+                    ((PeptideMatchPanel)getDataBoxPanelInterface()).setData(taskId, peptideMatchArray, peptideMatchIdArray, finished);
                } else {
-                    ((PeptideMatchPanel)m_panel).dataUpdated(subTask, finished);
+                    ((PeptideMatchPanel)getDataBoxPanelInterface()).dataUpdated(subTask, finished);
                }
                
                setLoaded(loadingId);
@@ -121,7 +121,7 @@ public class DataBoxRsetPSM extends AbstractDataBox {
     public Object getData(boolean getArray, Class parameterType) {
         if (parameterType!= null ) {
             if (parameterType.equals(DPeptideMatch.class)) {
-                return ((PeptideMatchPanel)m_panel).getSelectedPeptideMatch();
+                return ((PeptideMatchPanel)getDataBoxPanelInterface()).getSelectedPeptideMatch();
             }
             if (parameterType.equals(ResultSet.class)) {
                 if (m_rset != null) {
@@ -130,10 +130,10 @@ public class DataBoxRsetPSM extends AbstractDataBox {
             }
 
             if (parameterType.equals(CompareDataInterface.class)) {
-                return ((GlobalTabelModelProviderInterface) m_panel).getGlobalTableModelInterface();
+                return ((GlobalTabelModelProviderInterface) getDataBoxPanelInterface()).getGlobalTableModelInterface();
             }
             if (parameterType.equals(CrossSelectionInterface.class)) {
-                return ((GlobalTabelModelProviderInterface)m_panel).getCrossSelectionInterface();
+                return ((GlobalTabelModelProviderInterface)getDataBoxPanelInterface()).getCrossSelectionInterface();
             }
             
         }
@@ -147,11 +147,11 @@ public class DataBoxRsetPSM extends AbstractDataBox {
         
         if (data instanceof ResultSet) {
             m_rset = (ResultSet) data;
-            m_panel.addSingleValue(m_rset);
+            getDataBoxPanelInterface().addSingleValue(m_rset);
             dataChanged();
         } else if (data instanceof ResultSummary) {
             m_rset = ((ResultSummary) data).getResultSet();
-            m_panel.addSingleValue(m_rset);
+            getDataBoxPanelInterface().addSingleValue(m_rset);
         }
     }
     

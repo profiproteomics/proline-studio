@@ -62,7 +62,7 @@ public class DataBoxRsmPeptideInstances extends AbstractDataBox {
         RsmPeptidesPanel p = new RsmPeptidesPanel();
         p.setName(m_typeName);
         p.setDataBox(this);
-        m_panel = p;
+        setDataBoxPanelInterface(p);
     }
     
     @Override
@@ -85,9 +85,9 @@ public class DataBoxRsmPeptideInstances extends AbstractDataBox {
                if (subTask == null) {
 
                     PeptideInstance[] peptideinstanceArray = _rsm.getTransientData().getPeptideInstanceArray();
-                    ((RsmPeptidesPanel)m_panel).setData(taskId, peptideinstanceArray, finished);
+                    ((RsmPeptidesPanel)getDataBoxPanelInterface()).setData(taskId, peptideinstanceArray, finished);
                } else {
-                    ((RsmPeptidesPanel)m_panel).dataUpdated(subTask, finished);
+                    ((RsmPeptidesPanel)getDataBoxPanelInterface()).dataUpdated(subTask, finished);
                }
                
                setLoaded(loadingId);
@@ -119,10 +119,10 @@ public class DataBoxRsmPeptideInstances extends AbstractDataBox {
     public Object getData(boolean getArray, Class parameterType) {
         if (parameterType!= null ) {
             if (parameterType.equals(PeptideInstance.class)) {
-                return ((RsmPeptidesPanel)m_panel).getSelectedPeptideInstance();
+                return ((RsmPeptidesPanel)getDataBoxPanelInterface()).getSelectedPeptideInstance();
             }
             if (parameterType.equals(DPeptideMatch.class)) {
-                PeptideInstance pi = ((RsmPeptidesPanel)m_panel).getSelectedPeptideInstance();
+                PeptideInstance pi = ((RsmPeptidesPanel)getDataBoxPanelInterface()).getSelectedPeptideInstance();
                 if (pi == null) {
                     return null;
                 }
@@ -134,10 +134,10 @@ public class DataBoxRsmPeptideInstances extends AbstractDataBox {
                 }
             }
             if (parameterType.equals(CompareDataInterface.class)) {
-                return ((GlobalTabelModelProviderInterface) m_panel).getGlobalTableModelInterface();
+                return ((GlobalTabelModelProviderInterface) getDataBoxPanelInterface()).getGlobalTableModelInterface();
             }
             if (parameterType.equals(CrossSelectionInterface.class)) {
-                return ((GlobalTabelModelProviderInterface) m_panel).getCrossSelectionInterface();
+                return ((GlobalTabelModelProviderInterface) getDataBoxPanelInterface()).getCrossSelectionInterface();
             }
             
             
@@ -148,7 +148,7 @@ public class DataBoxRsmPeptideInstances extends AbstractDataBox {
     @Override
     public void setEntryData(Object data) {
         
-        m_panel.addSingleValue(data);
+        getDataBoxPanelInterface().addSingleValue(data);
         
         if (data instanceof ResultSummary) {
             m_rsm = (ResultSummary) data;

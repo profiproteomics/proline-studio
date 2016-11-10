@@ -64,7 +64,7 @@ public class DataBoxMSQueriesForRset extends AbstractDataBox{
         MSQueriesPanel p = new MSQueriesPanel(false);
         p.setName(m_typeName);
         p.setDataBox(this);
-        m_panel = p;
+        setDataBoxPanelInterface(p);
     }
 
     @Override
@@ -83,9 +83,9 @@ public class DataBoxMSQueriesForRset extends AbstractDataBox{
             public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
                 if (subTask == null) {
                     
-                    ((MSQueriesPanel)m_panel).setData(taskId,m_msQueriesList, m_nbPeptideMatchesByMsQueryIdMap,  finished);
+                    ((MSQueriesPanel)getDataBoxPanelInterface()).setData(taskId,m_msQueriesList, m_nbPeptideMatchesByMsQueryIdMap,  finished);
                } else {
-                    ((MSQueriesPanel)m_panel).dataUpdated(subTask, finished);
+                    ((MSQueriesPanel)getDataBoxPanelInterface()).dataUpdated(subTask, finished);
                }
                
                setLoaded(loadingId);
@@ -107,7 +107,7 @@ public class DataBoxMSQueriesForRset extends AbstractDataBox{
     @Override
     public void setEntryData(Object data) {
         
-        m_panel.addSingleValue(data);
+        getDataBoxPanelInterface().addSingleValue(data);
         
         if (data instanceof ResultSet) {
             m_rset = (ResultSet) data;
@@ -119,20 +119,20 @@ public class DataBoxMSQueriesForRset extends AbstractDataBox{
     public Object getData(boolean getArray, Class parameterType) {
         if (parameterType != null) {
             if (parameterType.equals(DMsQuery.class)) {
-                return ((MSQueriesPanel)m_panel).getSelectedMsQuery();
+                return ((MSQueriesPanel)getDataBoxPanelInterface()).getSelectedMsQuery();
             }
             if (parameterType.equals(ResultSet.class)) {
                 return m_rset;
             }
             if (parameterType.equals(MsQueryInfoRset.class)) {
-                DMsQuery msq = ((MSQueriesPanel)m_panel).getSelectedMsQuery();
+                DMsQuery msq = ((MSQueriesPanel)getDataBoxPanelInterface()).getSelectedMsQuery();
                 return new MsQueryInfoRset(msq, m_rset);
             }
             if(parameterType.equals(CompareDataInterface.class)){
-                return ((GlobalTabelModelProviderInterface) m_panel).getGlobalTableModelInterface();
+                return ((GlobalTabelModelProviderInterface) getDataBoxPanelInterface()).getGlobalTableModelInterface();
             }
             if (parameterType.equals(CrossSelectionInterface.class)) {
-                return ((GlobalTabelModelProviderInterface)m_panel).getCrossSelectionInterface();
+                return ((GlobalTabelModelProviderInterface)getDataBoxPanelInterface()).getCrossSelectionInterface();
             }
         }
         return super.getData(getArray, parameterType);

@@ -63,7 +63,7 @@ public class DataBoxMSQueriesForRSM extends AbstractDataBox{
         MSQueriesPanel p = new MSQueriesPanel(true);
         p.setName(m_typeName);
         p.setDataBox(this);
-        m_panel = p;
+        setDataBoxPanelInterface(p);
     }
 
     @Override
@@ -83,9 +83,9 @@ public class DataBoxMSQueriesForRSM extends AbstractDataBox{
             public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
                 if (subTask == null) {
                     
-                    ((MSQueriesPanel)m_panel).setData(taskId,m_msQueriesList, m_nbPeptideMatchesByMsQueryIdMap,  finished);
+                    ((MSQueriesPanel)getDataBoxPanelInterface()).setData(taskId,m_msQueriesList, m_nbPeptideMatchesByMsQueryIdMap,  finished);
                } else {
-                    ((MSQueriesPanel)m_panel).dataUpdated(subTask, finished);
+                    ((MSQueriesPanel)getDataBoxPanelInterface()).dataUpdated(subTask, finished);
                }
                
                setLoaded(loadingId);
@@ -106,7 +106,7 @@ public class DataBoxMSQueriesForRSM extends AbstractDataBox{
     @Override
     public void setEntryData(Object data) {
         
-        m_panel.addSingleValue(data);
+        getDataBoxPanelInterface().addSingleValue(data);
         
         if (data instanceof ResultSummary) {
             m_rsm = (ResultSummary) data;
@@ -118,7 +118,7 @@ public class DataBoxMSQueriesForRSM extends AbstractDataBox{
     public Object getData(boolean getArray, Class parameterType) {
         if (parameterType != null) {
             if (parameterType.equals(DMsQuery.class)) {
-                return ((MSQueriesPanel)m_panel).getSelectedMsQuery();
+                return ((MSQueriesPanel)getDataBoxPanelInterface()).getSelectedMsQuery();
             }
             if (parameterType.equals(ResultSummary.class)) {
                 return m_rsm;
@@ -127,7 +127,7 @@ public class DataBoxMSQueriesForRSM extends AbstractDataBox{
                 return m_rsm.getResultSet();
             }
             if (parameterType.equals(MsQueryInfoRSM.class)) {
-                DMsQuery msq = ((MSQueriesPanel)m_panel).getSelectedMsQuery();
+                DMsQuery msq = ((MSQueriesPanel)getDataBoxPanelInterface()).getSelectedMsQuery();
                 return new MsQueryInfoRSM(msq, m_rsm);
             }
         }

@@ -38,7 +38,7 @@ public class DataBoxRsmProteinAndPeptideSequence extends AbstractDataBox {
         RsmProteinAndPeptideSequencePanel p = new RsmProteinAndPeptideSequencePanel();
         p.setName(m_typeName);
         p.setDataBox(this);
-        m_panel = p;
+        setDataBoxPanelInterface(p);
     }
 
     @Override
@@ -49,13 +49,13 @@ public class DataBoxRsmProteinAndPeptideSequence extends AbstractDataBox {
        
         
         if ((proteinMatch == null) || (resultSummary == null)) {
-            ((RsmProteinAndPeptideSequencePanel) m_panel).setData(null, null, null, null);
+            ((RsmProteinAndPeptideSequencePanel) getDataBoxPanelInterface()).setData(null, null, null, null);
             return;
         }
 
         PeptideSet peptideSet = proteinMatch.getPeptideSet(resultSummary.getId());
         if (peptideSet == null) {
-            ((RsmProteinAndPeptideSequencePanel) m_panel).setData(null, null, null, null);
+            ((RsmProteinAndPeptideSequencePanel) getDataBoxPanelInterface()).setData(null, null, null, null);
             return;
         }
         
@@ -80,7 +80,7 @@ public class DataBoxRsmProteinAndPeptideSequence extends AbstractDataBox {
         } 
         
         
-        ((RsmProteinAndPeptideSequencePanel) m_panel).setData(resultSummary.getId() , proteinMatch, selectedPeptide, peptideInstances);
+        ((RsmProteinAndPeptideSequencePanel) getDataBoxPanelInterface()).setData(resultSummary.getId() , proteinMatch, selectedPeptide, peptideInstances);
     }
 
 }

@@ -45,7 +45,7 @@ public class DataBoxRsetAll extends AbstractDataBox {
         RsetAllPanel p = new RsetAllPanel();
         p.setName(m_typeName);
         p.setDataBox(this);
-        m_panel = p;
+        setDataBoxPanelInterface(p);
         
         
     }
@@ -69,7 +69,7 @@ public class DataBoxRsetAll extends AbstractDataBox {
                 @Override
                 public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
 
-                    ((RsetAllPanel) m_panel).setData(taskId, resultSetArrayList);
+                    ((RsetAllPanel) getDataBoxPanelInterface()).setData(taskId, resultSetArrayList);
 
                     setLoaded(loadingId);
                     
@@ -91,7 +91,7 @@ public class DataBoxRsetAll extends AbstractDataBox {
     public Object getData(boolean getArray, Class parameterType) {
         if (parameterType!= null ) {
             if (parameterType.equals(ResultSet.class)) {
-                return ((RsetAllPanel)m_panel).getSelectedResultSet();
+                return ((RsetAllPanel)getDataBoxPanelInterface()).getSelectedResultSet();
             }
 
         }
@@ -101,7 +101,7 @@ public class DataBoxRsetAll extends AbstractDataBox {
     @Override
     public void setEntryData(Object data) {
         
-        m_panel.addSingleValue(data);
+        getDataBoxPanelInterface().addSingleValue(data);
         
         m_project = (Project) data;
 

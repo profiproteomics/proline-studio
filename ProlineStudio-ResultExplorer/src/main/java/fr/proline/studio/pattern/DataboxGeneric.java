@@ -48,7 +48,7 @@ public class DataboxGeneric extends AbstractDataBox {
         GenericPanel p = new GenericPanel(m_removeStripAndSort);
         p.setName(m_typeName);
         p.setDataBox(this);
-        m_panel = p;
+        setDataBoxPanelInterface(p);
     }
     
     @Override
@@ -79,7 +79,7 @@ public class DataboxGeneric extends AbstractDataBox {
             dataInterface = (GlobalTableModelInterface) m_previousDataBox.getData(false, GlobalTableModelInterface.class);
         }
 
-        ((GenericPanel) m_panel).setData(dataInterface);
+        ((GenericPanel) getDataBoxPanelInterface()).setData(dataInterface);
 
     }
     
@@ -87,16 +87,16 @@ public class DataboxGeneric extends AbstractDataBox {
     public Object getData(boolean getArray, Class parameterType) {
         if (parameterType != null) {
             if (parameterType.equals(CompareDataInterface.class)) {
-                return ((GlobalTabelModelProviderInterface) m_panel).getGlobalTableModelInterface();
+                return ((GlobalTabelModelProviderInterface) getDataBoxPanelInterface()).getGlobalTableModelInterface();
             }
             if (parameterType.equals(CrossSelectionInterface.class)) {
-                return ((GlobalTabelModelProviderInterface)m_panel).getCrossSelectionInterface();
+                return ((GlobalTabelModelProviderInterface)getDataBoxPanelInterface()).getCrossSelectionInterface();
             }
             ArrayList<ExtraDataType> extraDataTypeList = m_entryModel.getExtraDataTypes();
              if (extraDataTypeList != null) {
                  for (ExtraDataType extraDataType : extraDataTypeList) {
                      if (extraDataType.getTypeClass().equals(parameterType)) {
-                         return ((GenericPanel) m_panel).getValue(parameterType, extraDataType.isList());
+                         return ((GenericPanel) getDataBoxPanelInterface()).getValue(parameterType, extraDataType.isList());
                      }
                  }
              }

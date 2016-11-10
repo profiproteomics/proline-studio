@@ -25,7 +25,7 @@ public class DataboxDataAnalyzer extends AbstractDataBox {
         DataAnalyzerPanel p = new DataAnalyzerPanel();
         p.setName(m_typeName);
         p.setDataBox(this);
-        m_panel = p;
+        setDataBoxPanelInterface(p);
 
     }
 
@@ -36,7 +36,7 @@ public class DataboxDataAnalyzer extends AbstractDataBox {
     @Override
     public void setEntryData(Object data) {
         if (data instanceof TableInfo) {
-            ((DataAnalyzerPanel) m_panel).addTableInfoToGraph((TableInfo) data);
+            ((DataAnalyzerPanel) getDataBoxPanelInterface()).addTableInfoToGraph((TableInfo) data);
         }
     }
 
@@ -44,7 +44,7 @@ public class DataboxDataAnalyzer extends AbstractDataBox {
     public Object getData(boolean getArray, Class parameterType) {
         if (parameterType != null) {
             if (parameterType.equals(ProcessEngineInfo.class)) {
-                return ((DataAnalyzerPanel) m_panel).getProcessEngineInfoToDisplay();
+                return ((DataAnalyzerPanel) getDataBoxPanelInterface()).getProcessEngineInfoToDisplay();
             }
 
         }

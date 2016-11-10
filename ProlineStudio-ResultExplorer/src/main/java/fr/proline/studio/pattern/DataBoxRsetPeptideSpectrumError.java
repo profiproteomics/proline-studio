@@ -35,7 +35,7 @@ public class DataBoxRsetPeptideSpectrumError extends AbstractDataBox {
         RsetPeptideSpectrumErrorPanel p = new RsetPeptideSpectrumErrorPanel();
         p.setName(m_typeName);
         p.setDataBox(this);
-        m_panel = p;
+        setDataBoxPanelInterface(p);
     }
 
     @Override
@@ -51,11 +51,11 @@ public class DataBoxRsetPeptideSpectrumError extends AbstractDataBox {
 
         
         if (peptideMatch == null) {
-            ((RsetPeptideSpectrumErrorPanel) m_panel).setData(null, null);
+            ((RsetPeptideSpectrumErrorPanel) getDataBoxPanelInterface()).setData(null, null);
             return;
         }
 
-        ((RsetPeptideSpectrumErrorPanel) m_panel).setData(peptideMatch, fragmentationData);
+        ((RsetPeptideSpectrumErrorPanel) getDataBoxPanelInterface()).setData(peptideMatch, fragmentationData);
 
     }
     

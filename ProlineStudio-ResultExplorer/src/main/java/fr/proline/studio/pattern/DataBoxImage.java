@@ -21,7 +21,7 @@ public class DataBoxImage extends AbstractDataBox {
         ImagePanel p = new ImagePanel();
         p.setName(m_typeName);
         p.setDataBox(this);
-        m_panel = p;
+        setDataBoxPanelInterface(p);
     }
 
     @Override
@@ -32,7 +32,7 @@ public class DataBoxImage extends AbstractDataBox {
         @Override
     public void setEntryData(Object data) {
 
-        ((ImagePanel)m_panel).setImage((Image) data);
+        ((ImagePanel)getDataBoxPanelInterface()).setImage((Image) data);
 
         dataChanged();
 

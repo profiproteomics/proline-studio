@@ -33,7 +33,7 @@ public class DataBoxRsetPeptideFragmentation extends AbstractDataBox {
         RsetPeptideFragmentationTablePanel p = new RsetPeptideFragmentationTablePanel();
         p.setName(m_typeName);
         p.setDataBox(this);
-        m_panel = p;
+        setDataBoxPanelInterface(p);
     }
 
     @Override
@@ -47,11 +47,11 @@ public class DataBoxRsetPeptideFragmentation extends AbstractDataBox {
         m_previousPeptideMatch = peptideMatch;
 
         if (peptideMatch == null) {
-            ((RsetPeptideFragmentationTablePanel) m_panel).setData(null, null);
+            ((RsetPeptideFragmentationTablePanel) getDataBoxPanelInterface()).setData(null, null);
             return;
         }
 
-        ((RsetPeptideFragmentationTablePanel) m_panel).setData(peptideMatch, fragmentationData);
+        ((RsetPeptideFragmentationTablePanel) getDataBoxPanelInterface()).setData(peptideMatch, fragmentationData);
 
 
     }

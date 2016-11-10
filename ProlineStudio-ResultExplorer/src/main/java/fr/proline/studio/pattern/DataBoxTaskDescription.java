@@ -29,13 +29,13 @@ public class DataBoxTaskDescription extends AbstractDataBox {
         TaskDescriptionPanel p = new TaskDescriptionPanel();
         p.setName(m_typeName);
         p.setDataBox(this);
-        m_panel = p;
+        setDataBoxPanelInterface(p);
     }
 
     @Override
     public void dataChanged() {
         TaskInfo taskInfo = (TaskInfo) m_previousDataBox.getData(false, TaskInfo.class);
-        ((TaskDescriptionPanel)m_panel).setTaskInfo(taskInfo);
+        ((TaskDescriptionPanel)getDataBoxPanelInterface()).setTaskInfo(taskInfo);
     }
     
         

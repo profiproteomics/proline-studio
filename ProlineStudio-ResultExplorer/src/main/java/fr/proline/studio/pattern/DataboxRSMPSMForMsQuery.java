@@ -74,7 +74,7 @@ public class DataboxRSMPSMForMsQuery extends AbstractDataBox{
         PeptideMatchPanel p = new PeptideMatchPanel(true, m_mergedData, false, true, true); 
         p.setName(m_typeName);
         p.setDataBox(this);
-        m_panel = p;
+        setDataBoxPanelInterface(p);
     }
 
 
@@ -108,9 +108,9 @@ public class DataboxRSMPSMForMsQuery extends AbstractDataBox{
                         peptideMatchArray[i] = m_peptideMatches.get(i);
                         peptideMatchIdArray[i] = m_peptideMatches.get(i).getId();
                     }
-                    ((PeptideMatchPanel)m_panel).setData(taskId, peptideMatchArray, peptideMatchIdArray, finished);
+                    ((PeptideMatchPanel)getDataBoxPanelInterface()).setData(taskId, peptideMatchArray, peptideMatchIdArray, finished);
                } else {
-                    ((PeptideMatchPanel)m_panel).dataUpdated(subTask, finished);
+                    ((PeptideMatchPanel)getDataBoxPanelInterface()).dataUpdated(subTask, finished);
                 }
                
                 if (finished) {
@@ -133,13 +133,13 @@ public class DataboxRSMPSMForMsQuery extends AbstractDataBox{
     public Object getData(boolean getArray, Class parameterType) {
         if (parameterType!= null ) {
             if (parameterType.equals(DPeptideMatch.class)) {
-                return ((PeptideMatchPanel)m_panel).getSelectedPeptideMatch();
+                return ((PeptideMatchPanel)getDataBoxPanelInterface()).getSelectedPeptideMatch();
             }
             if (parameterType.equals(CompareDataInterface.class)) {
-                return ((GlobalTabelModelProviderInterface) m_panel).getGlobalTableModelInterface();
+                return ((GlobalTabelModelProviderInterface) getDataBoxPanelInterface()).getGlobalTableModelInterface();
             }
             if (parameterType.equals(CrossSelectionInterface.class)) {
-                return ((GlobalTabelModelProviderInterface)m_panel).getCrossSelectionInterface();
+                return ((GlobalTabelModelProviderInterface)getDataBoxPanelInterface()).getCrossSelectionInterface();
             }
         }
         return super.getData(getArray, parameterType);
@@ -148,15 +148,15 @@ public class DataboxRSMPSMForMsQuery extends AbstractDataBox{
     @Override
     public void setEntryData(Object data) {
         
-        m_panel.addSingleValue(data);
+        getDataBoxPanelInterface().addSingleValue(data);
         
         if (data instanceof MsQueryInfoRSM) {
             MsQueryInfoRSM o = (MsQueryInfoRSM) data;
             m_msQuery = o.getMsQuery();
             m_rset = o.getResultSet();
-            m_panel.addSingleValue(m_rset);
+            getDataBoxPanelInterface().addSingleValue(m_rset);
             m_rsm = o.getResultSummary();
-            m_panel.addSingleValue(m_rsm);
+            getDataBoxPanelInterface().addSingleValue(m_rsm);
             dataChanged();
         }
     }

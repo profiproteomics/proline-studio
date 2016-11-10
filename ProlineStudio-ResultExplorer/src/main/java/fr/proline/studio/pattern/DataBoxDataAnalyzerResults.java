@@ -30,14 +30,14 @@ public class DataBoxDataAnalyzerResults extends AbstractDataBox {
         DataAnalyzerResultsPanel p = new DataAnalyzerResultsPanel();
         p.setName(m_typeName);
         p.setDataBox(this);
-        m_panel = p;
+        setDataBoxPanelInterface(p);
     }
 
     @Override
     public void dataChanged() {
         final ProcessEngineInfo processEngineInfo = (ProcessEngineInfo) m_previousDataBox.getData(false, ProcessEngineInfo.class);
         if (processEngineInfo != null) {
-            ((DataAnalyzerResultsPanel) m_panel).displayGraphNode(processEngineInfo);
+            ((DataAnalyzerResultsPanel) getDataBoxPanelInterface()).displayGraphNode(processEngineInfo);
         }
     }
     

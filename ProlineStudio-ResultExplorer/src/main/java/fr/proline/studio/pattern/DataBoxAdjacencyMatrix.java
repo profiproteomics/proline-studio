@@ -65,7 +65,7 @@ public class DataBoxAdjacencyMatrix extends AbstractDataBox {
         MatrixPanel p = new MatrixPanel(); 
         p.setName(m_typeName);
         p.setDataBox(this);
-        m_panel = p;
+        setDataBoxPanelInterface(p);
     }
     
     @Override
@@ -106,7 +106,7 @@ public class DataBoxAdjacencyMatrix extends AbstractDataBox {
             @Override
             public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
 
-                ((MatrixPanel) m_panel).setData(component, drawVisualization, proteinMap, peptideMap);
+                ((MatrixPanel) getDataBoxPanelInterface()).setData(component, drawVisualization, proteinMap, peptideMap);
 
             }
         };
@@ -124,14 +124,14 @@ public class DataBoxAdjacencyMatrix extends AbstractDataBox {
     public Object getData(boolean getArray, Class parameterType) {
         if (parameterType!= null ) {
             if (parameterType.equals(DPeptideMatch.class)) {
-                return ((MatrixPanel)m_panel).getSelectedPeptideMatch();
+                return ((MatrixPanel)getDataBoxPanelInterface()).getSelectedPeptideMatch();
             }
             if (parameterType.equals(DProteinMatch.class)) {
-                return ((MatrixPanel)m_panel).getSelectedProteinMatch();
+                return ((MatrixPanel)getDataBoxPanelInterface()).getSelectedProteinMatch();
             }
             if (parameterType.equals(DPeptideInstance.class)) {
-                DPeptideMatch peptideMatch = ((MatrixPanel)m_panel).getSelectedPeptideMatch();
-                DProteinMatch pm = ((MatrixPanel)m_panel).getSelectedProteinMatch();
+                DPeptideMatch peptideMatch = ((MatrixPanel)getDataBoxPanelInterface()).getSelectedPeptideMatch();
+                DProteinMatch pm = ((MatrixPanel)getDataBoxPanelInterface()).getSelectedProteinMatch();
                 if ((pm != null) && (peptideMatch != null)) {
                     ResultSummary rsm = (ResultSummary) m_previousDataBox.getData(false, ResultSummary.class);
                     if (rsm != null) {

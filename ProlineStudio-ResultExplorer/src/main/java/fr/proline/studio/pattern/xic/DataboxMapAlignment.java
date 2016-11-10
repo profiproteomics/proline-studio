@@ -115,12 +115,12 @@ public class DataboxMapAlignment extends AbstractDataBox {
         MapAlignmentPanel p = new MapAlignmentPanel();
         p.setName(m_typeName);
         p.setDataBox(this);
-        m_panel = p;
+        setDataBoxPanelInterface(p);
     }
     
     @Override
     public void setEntryData(Object data) {
-        m_panel.addSingleValue(data);
+        getDataBoxPanelInterface().addSingleValue(data);
         m_dataset = (DDataset) data;
         dataChanged();
     }
@@ -152,7 +152,7 @@ public class DataboxMapAlignment extends AbstractDataBox {
                 m_quantChannelInfo.setAllMapAlignments(m_allMapAlignments);
                 m_quantChannelInfo.setMapAlignments(m_mapAlignments);
                 m_quantChannelInfo.setAllMaps(m_allMaps);
-                ((MapAlignmentPanel) m_panel).setData(m_quantChannelInfo, m_mapAlignments, m_allMaps, m_allMapAlignments, getCompareDataInterfaceList(), getCrossSelectionInterfaceList());
+                ((MapAlignmentPanel) getDataBoxPanelInterface()).setData(m_quantChannelInfo, m_mapAlignments, m_allMaps, m_allMapAlignments, getCompareDataInterfaceList(), getCrossSelectionInterfaceList());
                 
                 setLoaded(loadingId);
                 if (finished) {

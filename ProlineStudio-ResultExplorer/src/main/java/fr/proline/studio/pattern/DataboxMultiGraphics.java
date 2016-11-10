@@ -45,14 +45,14 @@ public class DataboxMultiGraphics extends AbstractDataBox  {
         MultiGraphicsPanel p = new MultiGraphicsPanel(m_defaultLocked, m_canChooseColor);
         p.setName(m_typeName);
         p.setDataBox(this);
-        m_panel = p;
+        setDataBoxPanelInterface(p);
     }
 
     @Override
     public void dataChanged() {
         final List<CompareDataInterface> valuesL = (List<CompareDataInterface>) m_previousDataBox.getData(false, CompareDataInterface.class, true);
         final List<CrossSelectionInterface> crossSelectionInterfaceL =  (List<CrossSelectionInterface>) m_previousDataBox.getData(false, CrossSelectionInterface.class, true);
-        ((MultiGraphicsPanel)m_panel).setData(valuesL, crossSelectionInterfaceL);
+        ((MultiGraphicsPanel)getDataBoxPanelInterface()).setData(valuesL, crossSelectionInterfaceL);
     }
     
     @Override

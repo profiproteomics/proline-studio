@@ -61,7 +61,7 @@ public class DataBoxRsmPeptidesOfProtein extends AbstractDataBox {
         RsmPeptidesOfProteinPanel p = new RsmPeptidesOfProteinPanel();
         p.setName(m_typeName);
         p.setDataBox(this);
-        m_panel = p;
+        setDataBoxPanelInterface(p);
     }
     
 
@@ -72,7 +72,7 @@ public class DataBoxRsmPeptidesOfProtein extends AbstractDataBox {
         final ResultSummary rsm = (ResultSummary) m_previousDataBox.getData(false, ResultSummary.class);
 
         if (proteinMatch == null) {
-            ((RsmPeptidesOfProteinPanel) m_panel).setData(null, null, null);
+            ((RsmPeptidesOfProteinPanel) getDataBoxPanelInterface()).setData(null, null, null);
             return;
         }
 
@@ -90,9 +90,9 @@ public class DataBoxRsmPeptidesOfProtein extends AbstractDataBox {
             public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
 
                 if (success) {
-                    ((RsmPeptidesOfProteinPanel) m_panel).setData(proteinMatch, peptideMatch, rsm);
+                    ((RsmPeptidesOfProteinPanel) getDataBoxPanelInterface()).setData(proteinMatch, peptideMatch, rsm);
                 } else {
-                    ((RsmPeptidesOfProteinPanel) m_panel).setData(null, null, null);
+                    ((RsmPeptidesOfProteinPanel) getDataBoxPanelInterface()).setData(null, null, null);
                 }
                 
                 setLoaded(loadingId);
@@ -123,19 +123,19 @@ public class DataBoxRsmPeptidesOfProtein extends AbstractDataBox {
     public Object getData(boolean getArray, Class parameterType) {
         if (parameterType!= null) {
             if (parameterType.equals(DPeptideInstance.class)) {
-                return ((RsmPeptidesOfProteinPanel) m_panel).getSelectedPeptide();
+                return ((RsmPeptidesOfProteinPanel) getDataBoxPanelInterface()).getSelectedPeptide();
             }
             if (parameterType.equals(DPeptideMatch.class)) {
-                DPeptideInstance pi = ((RsmPeptidesOfProteinPanel) m_panel).getSelectedPeptide();
+                DPeptideInstance pi = ((RsmPeptidesOfProteinPanel) getDataBoxPanelInterface()).getSelectedPeptide();
                 if (pi != null) {
                     return pi.getBestPeptideMatch();
                 }
             }
             if (parameterType.equals(CompareDataInterface.class)) {
-                return ((GlobalTabelModelProviderInterface) m_panel).getGlobalTableModelInterface();
+                return ((GlobalTabelModelProviderInterface) getDataBoxPanelInterface()).getGlobalTableModelInterface();
             }
             if (parameterType.equals(CrossSelectionInterface.class)) {
-                return ((GlobalTabelModelProviderInterface)m_panel).getCrossSelectionInterface();
+                return ((GlobalTabelModelProviderInterface)getDataBoxPanelInterface()).getCrossSelectionInterface();
             }
         }
         return super.getData(getArray, parameterType);

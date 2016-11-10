@@ -74,7 +74,7 @@ public class DataboxChildFeature extends AbstractDataBox {
         XicFeaturePanel p = new XicFeaturePanel(true);
         p.setName(m_typeName);
         p.setDataBox(this);
-        m_panel = p;
+        setDataBoxPanelInterface(p);
     }
 
     @Override
@@ -121,9 +121,9 @@ public class DataboxChildFeature extends AbstractDataBox {
                 }
 
                 if (subTask == null) {
-                    ((XicFeaturePanel) m_panel).setData(taskId, m_childFeatureList, m_quantChannelInfo, m_featureHasPeak, finished);
+                    ((XicFeaturePanel) getDataBoxPanelInterface()).setData(taskId, m_childFeatureList, m_quantChannelInfo, m_featureHasPeak, finished);
                 } else {
-                    ((XicFeaturePanel) m_panel).dataUpdated(subTask, finished);
+                    ((XicFeaturePanel) getDataBoxPanelInterface()).dataUpdated(subTask, finished);
                 }
 
                 setLoaded(loadingId);
@@ -155,7 +155,7 @@ public class DataboxChildFeature extends AbstractDataBox {
 
     private List<XicPeakPanel> getPeakTableModelList() {
         List<XicPeakPanel> list = new ArrayList();
-        int viewType = ((XicFeaturePanel) m_panel).getGraphViewType();
+        int viewType = ((XicFeaturePanel) getDataBoxPanelInterface()).getGraphViewType();
         if (m_childFeatureList != null) {
             switch (viewType) {
                 case VIEW_ALL_GRAPH_PEAKS: {
@@ -186,7 +186,7 @@ public class DataboxChildFeature extends AbstractDataBox {
                     break;
                 }
                 case VIEW_ALL_ISOTOPES_FOR_FEATURE: {
-                    Feature selectedFeature = ((XicFeaturePanel) m_panel).getSelectedFeature();
+                    Feature selectedFeature = ((XicFeaturePanel) getDataBoxPanelInterface()).getSelectedFeature();
                     if (selectedFeature != null) {
                         int id = m_childFeatureList.indexOf(selectedFeature);
                         if (id != -1) {
@@ -218,7 +218,7 @@ public class DataboxChildFeature extends AbstractDataBox {
 
     @Override
     public void setEntryData(Object data) {
-        m_panel.addSingleValue(data);
+        getDataBoxPanelInterface().addSingleValue(data);
         m_masterQuantPeptideIon = (DMasterQuantPeptideIon) data;
         dataChanged();
     }
@@ -227,16 +227,16 @@ public class DataboxChildFeature extends AbstractDataBox {
     public Object getData(boolean getArray, Class parameterType) {
         if (parameterType != null) {
             if (parameterType.equals(Feature.class)) {
-                return ((XicFeaturePanel) m_panel).getSelectedFeature();
+                return ((XicFeaturePanel) getDataBoxPanelInterface()).getSelectedFeature();
             }
             if (parameterType.equals(CompareDataInterface.class)) {
-                return ((GlobalTabelModelProviderInterface) m_panel).getGlobalTableModelInterface();
+                return ((GlobalTabelModelProviderInterface) getDataBoxPanelInterface()).getGlobalTableModelInterface();
             }
             if (parameterType.equals(CrossSelectionInterface.class)) {
-                return ((GlobalTabelModelProviderInterface) m_panel).getCrossSelectionInterface();
+                return ((GlobalTabelModelProviderInterface) getDataBoxPanelInterface()).getCrossSelectionInterface();
             }
             if (parameterType.equals(MzScopeInterface.class)) {
-                return ((XicFeaturePanel) m_panel).getMzScopeInterface();
+                return ((XicFeaturePanel) getDataBoxPanelInterface()).getMzScopeInterface();
             }
         }
         return super.getData(getArray, parameterType);

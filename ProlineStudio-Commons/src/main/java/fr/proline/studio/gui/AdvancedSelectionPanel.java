@@ -8,7 +8,11 @@ import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.DefaultComboBoxModel;
@@ -62,9 +66,10 @@ public class AdvancedSelectionPanel<E> extends JPanel  {
         c.gridx++;
         add(notSelectedPanel, c);
         
+        setFastSelectionValues(preparePrefixAndSuffix(objects));
     }
     
-    public void setFastSelectionValues(String[] columnGroupNamesArray) {
+    private void setFastSelectionValues(String[] columnGroupNamesArray) {
 
         if (columnGroupNamesArray == null) {
             return;
@@ -355,5 +360,122 @@ public class AdvancedSelectionPanel<E> extends JPanel  {
         return panel;
     }
 
+    private String[] preparePrefixAndSuffix(ArrayList<E> objects) {
+
+        HashMap<String, Integer> similarColumnsNumberMap = new HashMap<>();
+        HashMap<String, String> similarColumnsColorsMap = new HashMap<>();
+
+        int size = objects.size();
+        for (int i = 0; i < size; i++) {
+
+            String fullValue = objects.get(i).toString(); // potentially with html code
+            String nohtmlValue = fullValue;
+            
+            int colorIndexStart = fullValue.indexOf("<font color='", 0);
+            int colorIndexStop = fullValue.indexOf("</font>", 0);
+            if ((colorIndexStart!=-1) && (colorIndexStop > colorIndexStart)) {    
+                nohtmlValue = nohtmlValue.substring(0,colorIndexStart)+nohtmlValue.substring(colorIndexStop+"</font>".length(),nohtmlValue.length());
+            }
+                
+            int indexStart = nohtmlValue.indexOf('<');
+            int indexStop = nohtmlValue.indexOf('>');
+            while ((indexStart!=-1) && (indexStop > indexStart)) {
+                nohtmlValue = nohtmlValue.substring(0,indexStart)+nohtmlValue.substring(indexStop+1,nohtmlValue.length());
+                indexStart = nohtmlValue.indexOf('<');
+                indexStop = nohtmlValue.indexOf('>');
+            }
+
+            String prefix = nohtmlValue;
+
+            int indexSpace = prefix.lastIndexOf(' ');
+            if (indexSpace != -1) {
+                prefix = prefix.substring(0, indexSpace);
+            }
+            if (prefix.length() > 0) {
+                Integer nb = similarColumnsNumberMap.get(prefix);
+                if (nb == null) {
+                    similarColumnsNumberMap.put(prefix, 1);
+                } else {
+                    similarColumnsNumberMap.put(prefix, nb + 1);
+                }
+
+                colorIndexStart = fullValue.indexOf("<font color='", 0);
+                colorIndexStop = fullValue.indexOf("</font>", 0);
+                if ((colorIndexStart > -1) && (colorIndexStop > colorIndexStart)) {
+                    String colorName = fullValue.substring(colorIndexStart, colorIndexStop + "</font>".length());
+                    String curColorName = similarColumnsColorsMap.get(prefix);
+                    if (curColorName != null) {
+                        if (curColorName.compareTo(colorName) != 0) {
+                            similarColumnsColorsMap.put(prefix, "");
+                        }
+                    } else {
+                        similarColumnsColorsMap.put(prefix, colorName);
+                    }
+                } else {
+                    similarColumnsColorsMap.put(prefix, "");
+                }
+            }
+                if (indexSpace != -1) {
+
+                    String suffix  = nohtmlValue.substring(indexSpace, nohtmlValue.length());
+                    if (suffix.length() > 0) {
+                        Integer nb = similarColumnsNumberMap.get(suffix);
+                        if (nb == null) {
+                            similarColumnsNumberMap.put(suffix, 1);
+                        } else {
+                            similarColumnsNumberMap.put(suffix, nb + 1);
+                        }
+
+                        colorIndexStart = fullValue.indexOf("<font color='", 0);
+                        colorIndexStop = fullValue.indexOf("</font>", 0);
+                        if ((colorIndexStart > -1) && (colorIndexStop > colorIndexStart)) {
+                            String colorName = fullValue.substring(colorIndexStart, colorIndexStop + "</font>".length());
+                            String curColorName = similarColumnsColorsMap.get(suffix);
+                            if (curColorName != null) {
+                                if (curColorName.compareTo(colorName) != 0) {
+                                    similarColumnsColorsMap.put(suffix, "");
+                                }
+                            } else {
+                                similarColumnsColorsMap.put(suffix, colorName);
+                            }
+                        } else {
+                            similarColumnsColorsMap.put(suffix, "");
+                        }
+                    }
+                }
+     
+
+        }
+
+        // suppression des lignes à un résultat dans similarColumnsNumberMap
+        Set<String> colNamesSet = similarColumnsNumberMap.keySet();
+        String[] colNamesArray = colNamesSet.toArray(new String[colNamesSet.size()]);
+        for (int i = 0; i < colNamesArray.length; i++) {
+            String colName = colNamesArray[i];
+            Integer nb = similarColumnsNumberMap.get(colName);
+            if (nb <= 1) {
+                similarColumnsNumberMap.remove(colName);
+            }
+        }
+        String[] groups = null;
+
+        int nbGroups = similarColumnsNumberMap.size();
+        if (nbGroups > 0) {
+            groups = new String[nbGroups];
+            Iterator<String> it = similarColumnsNumberMap.keySet().iterator();
+            int i = 0;
+            while (it.hasNext()) {
+                String name = it.next();
+                String colorName = similarColumnsColorsMap.get(name);
+                groups[i] = ((colorName!=null) && (colorName.length() > 0)) ? "<html>" + colorName + name + "</html>" : name;
+                i++;
+            }
+
+            Arrays.sort(groups);
+
+        }
+        
+        return groups;
+    }
 
 }

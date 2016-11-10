@@ -68,9 +68,9 @@ public class MultiObjectParameter<E> extends AbstractParameter {
 
     }
     
-    public void setFastSelectionValues(String[] columnGroupNamesArray) {
+    /*public void setFastSelectionValues(String[] columnGroupNamesArray) {
         m_columnGroupNamesArray = columnGroupNamesArray;
-    }
+    }*/
 
     
     public void setCompulsory(int nbCompulsorySelection) {
@@ -136,7 +136,7 @@ public class MultiObjectParameter<E> extends AbstractParameter {
             
         } else if (m_graphicalType.equals(AdvancedSelectionPanel.class)) {
             AdvancedSelectionPanel selectionPanel = new AdvancedSelectionPanel(m_selectedName, m_unselectedName, list, visibilityList);
-            selectionPanel.setFastSelectionValues(m_columnGroupNamesArray);
+            //selectionPanel.setFastSelectionValues(m_columnGroupNamesArray);
             m_parameterComponent = selectionPanel;
         }
 

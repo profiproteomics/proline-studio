@@ -136,14 +136,7 @@ public abstract class DecoratedTable extends JXTable implements CrossSelectionIn
         Object[] columnsArray = new Object[colCount];
         boolean[] selection = new boolean[colCount];
 
-        TableModel model = getModel();
-        ExportModelInterface exportableModel = null;
-        if (model instanceof ExportModelInterface) {
-            exportableModel = (ExportModelInterface) model;
-        }
-
-        HashMap<String, Integer> similarColumnsNumberMap = new HashMap<>();
-        HashMap<String, String> similarColumnsColorsMap = new HashMap<>();
+        
 
         int nbVisible = 0;
         int totalWidth = 0;
@@ -153,69 +146,7 @@ public abstract class DecoratedTable extends JXTable implements CrossSelectionIn
             columnsArray[i] = column;
 
             boolean visible = column.isVisible();
-
-            if (exportableModel != null) {
-
-                String columnFullName = model.getColumnName(column.getModelIndex());
-                String columnExportName = exportableModel.getExportColumnName(column.getModelIndex());
-                int indexSpace = columnExportName.lastIndexOf(' ');
-                if (indexSpace != -1) {
-                    columnExportName = columnExportName.substring(0, indexSpace);
-                }
-                if (columnExportName.length() > 0) {
-                    Integer nb = similarColumnsNumberMap.get(columnExportName);
-                    if (nb == null) {
-                        similarColumnsNumberMap.put(columnExportName, 1);
-                    } else {
-                        similarColumnsNumberMap.put(columnExportName, nb + 1);
-                    }
-
-                    int colorIndexStart = columnFullName.indexOf("<font color='", 0);
-                    int colorIndexStop = columnFullName.indexOf("</font>", 0);
-                    if ((colorIndexStart > -1) && (colorIndexStop > colorIndexStart)) {
-                        String colorName = columnFullName.substring(colorIndexStart, colorIndexStop + "</font>".length());
-                        String curColorName = similarColumnsColorsMap.get(columnExportName);
-                        if (curColorName != null) {
-                            if (curColorName.compareTo(colorName) != 0) {
-                                similarColumnsColorsMap.put(columnExportName, "");
-                            }
-                        } else {
-                            similarColumnsColorsMap.put(columnExportName, colorName);
-                        }
-                    } else {
-                        similarColumnsColorsMap.put(columnExportName, "");
-                    }
-                }
-                if (indexSpace != -1) {
-                    columnExportName = exportableModel.getExportColumnName(column.getModelIndex());
-                    columnExportName = columnExportName.substring(indexSpace, columnExportName.length());
-                    if (columnExportName.length() > 0) {
-                        Integer nb = similarColumnsNumberMap.get(columnExportName);
-                        if (nb == null) {
-                            similarColumnsNumberMap.put(columnExportName, 1);
-                        } else {
-                            similarColumnsNumberMap.put(columnExportName, nb + 1);
-                        }
-
-                        int colorIndexStart = columnFullName.indexOf("<font color='", 0);
-                        int colorIndexStop = columnFullName.indexOf("</font>", 0);
-                        if ((colorIndexStart > -1) && (colorIndexStop > colorIndexStart)) {
-                            String colorName = columnFullName.substring(colorIndexStart, colorIndexStop + "</font>".length());
-                            String curColorName = similarColumnsColorsMap.get(columnExportName);
-                            if (curColorName != null) {
-                                if (curColorName.compareTo(colorName) != 0) {
-                                    similarColumnsColorsMap.put(columnExportName, "");
-                                }
-                            } else {
-                                similarColumnsColorsMap.put(columnExportName, colorName);
-                            }
-                        } else {
-                            similarColumnsColorsMap.put(columnExportName, "");
-                        }
-                    }
-                }
-            }
-
+            
             selection[i] = visible;
             if (visible) {
                 totalWidth += column.getWidth();
@@ -223,33 +154,8 @@ public abstract class DecoratedTable extends JXTable implements CrossSelectionIn
             }
         }
 
-        // suppression des lignes à un résultat dans similarColumnsNumberMap
-        Set<String> colNamesSet = similarColumnsNumberMap.keySet();
-        String[] colNamesArray = colNamesSet.toArray(new String[colNamesSet.size()]);
-        for (int i = 0; i < colNamesArray.length; i++) {
-            String colName = colNamesArray[i];
-            Integer nb = similarColumnsNumberMap.get(colName);
-            if (nb <= 1) {
-                similarColumnsNumberMap.remove(colName);
-            }
-        }
-        String[] groups = null;
 
-        int nbGroups = similarColumnsNumberMap.size();
-        if (nbGroups > 0) {
-            groups = new String[nbGroups];
-            Iterator<String> it = similarColumnsNumberMap.keySet().iterator();
-            int i = 0;
-            while (it.hasNext()) {
-                String name = it.next();
-                String colorName = similarColumnsColorsMap.get(name);
-                groups[i] = (colorName.length() > 0) ? "<html>" + colorName + name + "</html>" : name;
-                i++;
-            }
 
-            Arrays.sort(groups);
-
-        }
 
         final int MAX_WIDTH = 500;
         m_meanWidth = totalWidth / nbVisible;
@@ -263,7 +169,7 @@ public abstract class DecoratedTable extends JXTable implements CrossSelectionIn
         m_columnWidthParameter = new IntegerParameter(DEFAULT_WIDTH_KEY, DEFAULT_WIDTH_KEY, m_widthTextField, m_meanWidth, 10, MAX_WIDTH);
 
         m_columnsVisibilityParameter = new MultiObjectParameter(COLUMNS_VISIBILITY_KEY, "Columns Visibility", "Visible Columns", "Hidden Columns", AdvancedSelectionPanel.class, columnNamesArray, columnsArray, selection, null);
-        m_columnsVisibilityParameter.setFastSelectionValues(groups); 
+
         
 
         

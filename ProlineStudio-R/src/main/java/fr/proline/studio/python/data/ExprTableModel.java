@@ -53,6 +53,10 @@ public class ExprTableModel extends DecoratedTableModel implements ChildModelInt
     }
     
     public final void addExtraColumnInfo(Object colExtraInfo) {
+        if (colExtraInfo == null) {
+            return;
+        }
+        
         
         int lastIndex = m_extraColumnInfos.size()-1;
         

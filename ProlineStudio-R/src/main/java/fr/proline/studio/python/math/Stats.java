@@ -96,7 +96,10 @@ public class Stats {
         return StatsRImplementation.calibrationPlot(pvaluesCol, pi0Method, nbins, pz);
     }
     
-
+    public static ColDoubleData pvalue(PyTuple p) throws MathException {
+        PyTuple[] pArray = StatsUtil.colTupleToTuplesArray(p);
+        return pvalue(pArray[0], pArray[1]);
+    }
     public static ColDoubleData pvalue(PyTuple p1, PyTuple p2) throws MathException {
         return StatsImplementation.pvalue(p1, p2);
     }
@@ -119,6 +122,10 @@ public class Stats {
         return StatsRImplementation.diffanalysis(p, labels, diffAnalysisType);
     }
     
+    public static ColDoubleData ttd(PyTuple p) throws MathException {
+        PyTuple[] pArray = StatsUtil.colTupleToTuplesArray(p);
+        return ttd(pArray[0], pArray[1]);
+    }
     public static ColDoubleData ttd(PyTuple p1, PyTuple p2) throws MathException {
         return StatsImplementation.ttd(p1, p2);
     }

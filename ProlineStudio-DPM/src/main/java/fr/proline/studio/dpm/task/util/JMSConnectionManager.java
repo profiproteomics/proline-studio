@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.prefs.Preferences;
 import javax.jms.Connection;
-import javax.jms.ConnectionFactory;
 import javax.jms.JMSException;
 import javax.jms.MessageConsumer;
 import javax.jms.Queue;
@@ -21,6 +20,7 @@ import org.hornetq.api.jms.HornetQJMSClient;
 import org.hornetq.api.jms.JMSFactoryType;
 import org.hornetq.core.remoting.impl.netty.NettyConnectorFactory;
 import org.hornetq.core.remoting.impl.netty.TransportConstants;
+import org.hornetq.jms.client.HornetQConnectionFactory;
 import org.openide.util.NbPreferences;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -214,9 +214,10 @@ public class JMSConnectionManager {
                     NettyConnectorFactory.class.getName(), connectionParams);
 
             // Step 3 Directly instantiate the JMS ConnectionFactory object using that TransportConfiguration
-            final ConnectionFactory cf = (ConnectionFactory) HornetQJMSClient
+            final HornetQConnectionFactory cf = (HornetQConnectionFactory) HornetQJMSClient
                     .createConnectionFactoryWithoutHA(JMSFactoryType.CF, transportConfiguration);
-
+            cf.setReconnectAttempts(10);
+            
             // Step 4.Create a JMS Connection
             m_connection = cf.createConnection();
 

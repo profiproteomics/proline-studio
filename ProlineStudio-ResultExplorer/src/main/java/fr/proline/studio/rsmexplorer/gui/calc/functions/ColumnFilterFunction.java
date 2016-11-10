@@ -1,6 +1,7 @@
 package fr.proline.studio.rsmexplorer.gui.calc.functions;
 
 import fr.proline.studio.export.ExportModelInterface;
+import fr.proline.studio.gui.AdvancedSelectionPanel;
 import fr.proline.studio.parameter.AbstractLinkedParameters;
 import fr.proline.studio.parameter.MultiObjectParameter;
 import fr.proline.studio.parameter.ParameterError;
@@ -29,7 +30,7 @@ public class ColumnFilterFunction extends AbstractFunction {
     private static final String COLUMNS_VISIBILITY_KEY = "COLUMNS_VISIBILITY_KEY";
     private static final String COLUMNS_GROUP_VISIBILITY_KEY = "COLUMNS_GROUP_VISIBILITY_KEY";
     
-    private MultiObjectParameter m_columnsGroupVisibilityParameter = null;
+    //private MultiObjectParameter m_columnsGroupVisibilityParameter = null;
     private MultiObjectParameter m_columnsVisibilityParameter = null;
     
     public ColumnFilterFunction(GraphPanel panel) {
@@ -41,7 +42,7 @@ public class ColumnFilterFunction extends AbstractFunction {
         super.inLinkDeleted();
 
         m_columnsVisibilityParameter = null;
-        m_columnsGroupVisibilityParameter = null;
+        //m_columnsGroupVisibilityParameter = null;
     }
 
     @Override
@@ -152,166 +153,24 @@ public class ColumnFilterFunction extends AbstractFunction {
         if (model instanceof ExportModelInterface) {
             exportableModel = (ExportModelInterface) model;
         }
-    
 
         Object[] columnNamesArray = new Object[colCount];
         Integer[] columnNamesIndexArray = new Integer[colCount];
         boolean[] selection = new boolean[colCount];
-        
-        HashMap<String, Integer> similarColumnsNumberMap = new HashMap<>();
-        HashMap<String, String> similarColumnsColorsMap = new HashMap<>();
-        
+
+
         for (int i = 0; i < colCount; i++) {
             String columnFullName = model.getColumnName(i);
-            columnNamesArray[i] = columnFullName.replaceAll("<br/>"," ");
+            columnNamesArray[i] = columnFullName.replaceAll("<br/>", " ");
             columnNamesIndexArray[i] = i;
+
             selection[i] = true;
-            
-            if (exportableModel != null) {
-
-                String columnExportName = exportableModel.getExportColumnName(i);
-                int indexSpace = columnExportName.lastIndexOf(' ');
-                if (indexSpace != -1) {
-                    columnExportName = columnExportName.substring(0, indexSpace);
-                }
-                if (columnExportName.length()>0) {
-                    Integer nb = similarColumnsNumberMap.get(columnExportName);
-                    if (nb == null) {
-                        similarColumnsNumberMap.put(columnExportName, 1);
-                    } else {
-                        similarColumnsNumberMap.put(columnExportName, nb+1);
-                    }
-                    
-                    int colorIndexStart = columnFullName.indexOf("<font color='", 0);
-                    int colorIndexStop = columnFullName.indexOf("</font>", 0);
-                    if ((colorIndexStart>-1) && (colorIndexStop>colorIndexStart)) {
-                        String colorName = columnFullName.substring(colorIndexStart,colorIndexStop+"</font>".length());
-                        String curColorName = similarColumnsColorsMap.get(columnExportName);
-                        if (curColorName != null) {
-                            if (curColorName.compareTo(colorName) != 0) {
-                                similarColumnsColorsMap.put(columnExportName, "");
-                            }
-                        } else {
-                            similarColumnsColorsMap.put(columnExportName, colorName);
-                        }
-                    } else {
-                        similarColumnsColorsMap.put(columnExportName, "");
-                    }
-                }
-                if (indexSpace != -1) {
-                    columnExportName = exportableModel.getExportColumnName(i);
-                    columnExportName = columnExportName.substring(indexSpace, columnExportName.length());
-                    if (columnExportName.length() > 0) {
-                        Integer nb = similarColumnsNumberMap.get(columnExportName);
-                        if (nb == null) {
-                            similarColumnsNumberMap.put(columnExportName, 1);
-                        } else {
-                            similarColumnsNumberMap.put(columnExportName, nb + 1);
-                        }
-                        
-                        int colorIndexStart = columnFullName.indexOf("<font color='", 0);
-                        int colorIndexStop = columnFullName.indexOf("</font>", 0);
-                        if ((colorIndexStart > -1) && (colorIndexStop > colorIndexStart)) {
-                            String colorName = columnFullName.substring(colorIndexStart, colorIndexStop + "</font>".length());
-                            String curColorName = similarColumnsColorsMap.get(columnExportName);
-                            if (curColorName != null) {
-                                if (curColorName.compareTo(colorName) != 0) {
-                                    similarColumnsColorsMap.put(columnExportName, "");
-                                }
-                            } else {
-                                similarColumnsColorsMap.put(columnExportName, colorName);
-                            }
-                        } else {
-                            similarColumnsColorsMap.put(columnExportName, "");
-                        }
-                    }
-                }
-            }
-
         }
-        
-        // suppression des lignes à un résultat dans similarColumnsNumberMap
-        Set<String> colNamesSet = similarColumnsNumberMap.keySet();
-        String[] colNamesArray = colNamesSet.toArray(new String[colNamesSet.size()]);
-        for (int i = 0; i < colNamesArray.length; i++) {
-            String colName = colNamesArray[i];
-            Integer nb = similarColumnsNumberMap.get(colName);
-            if (nb <= 1) {
-                similarColumnsNumberMap.remove(colName);
-            }
-        }
-        String[] columnGroupNames = null;
-        int nbGroups = similarColumnsNumberMap.size();
-        if (nbGroups > 0) {
-            columnGroupNames = new String[nbGroups];
-            Iterator<String> it = similarColumnsNumberMap.keySet().iterator();
-            int i = 0;
-            while (it.hasNext()) {
-                String name = it.next();
-                String colorName = similarColumnsColorsMap.get(name);
-                columnGroupNames[i] = (colorName.length() > 0) ? "<html>" + colorName + name + "</html>" : name;
-                i++;
-            }
 
-            Arrays.sort( columnGroupNames );
-            Object[] columnGroupNamesArray = new Object[nbGroups];
-            boolean[] groupSelection = new boolean[nbGroups];
-            for (i = 0; i < nbGroups; i++) {
-                columnGroupNamesArray[i] = columnGroupNames[i];
-                groupSelection[i] = true;
-
-            }
-            m_columnsGroupVisibilityParameter = new MultiObjectParameter(COLUMNS_GROUP_VISIBILITY_KEY, "Columns Type Visibility", null, columnGroupNamesArray, null, groupSelection, null, false);
-        }
-        
-                
-        m_columnsVisibilityParameter = new MultiObjectParameter(COLUMNS_VISIBILITY_KEY, "Columns Visibility", null, columnNamesArray, columnNamesIndexArray, selection, null, true);
-        
-         AbstractLinkedParameters linkedParameter2 = null;
-        if (m_columnsGroupVisibilityParameter != null) {
-            
-            final ExportModelInterface _exportableModel = exportableModel;
-            
-            linkedParameter2 = new AbstractLinkedParameters(parameterTableList) {
-                @Override
-                public void valueChanged(String value, Object associatedValue) {
-                    
-                    // color
-                    int colorRemoveStart = value.indexOf("</font>", 0);
-                    int colorRemoveStop = value.indexOf("</html>", 0);
-                    if ((colorRemoveStart>-1) && (colorRemoveStop>colorRemoveStart)) {
-                        value = value.substring(colorRemoveStart+"</font>".length(), colorRemoveStop);
-                    }
-                    
-                    for (int i = 0; i < colCount; i++) {
-                        String columnExportName = _exportableModel.getExportColumnName(i);
-                        int indexSpace = columnExportName.lastIndexOf(' ');
-                        if (indexSpace != -1) {
-                            columnExportName = columnExportName.substring(0, indexSpace);
-                        }
-                        if (columnExportName.compareTo(value) == 0) {
-                            m_columnsVisibilityParameter.setSelection(i, ((Boolean)associatedValue).booleanValue());
-                        }
-                        if (indexSpace != -1) {
-                            columnExportName = _exportableModel.getExportColumnName(i);
-                            columnExportName = columnExportName.substring(indexSpace, columnExportName.length());
-                            if (columnExportName.compareTo(value) == 0) {
-                                m_columnsVisibilityParameter.setSelection(i, ((Boolean) associatedValue).booleanValue());
-                            }
-                        }
-                    }
-
-                }
-
-            };
-        }
-        
+        m_columnsVisibilityParameter = new MultiObjectParameter(COLUMNS_VISIBILITY_KEY, "Columns Visibility", "Visible Columns", "Hidden Columns", AdvancedSelectionPanel.class, columnNamesArray, columnNamesIndexArray, selection, null);
 
         parameterTableList.add(m_columnsVisibilityParameter);      
-        if (m_columnsGroupVisibilityParameter != null) {
-            parameterTableList.add(m_columnsGroupVisibilityParameter);
-        }
-        
+
         
         
         m_parameters = new ParameterList[1];
@@ -321,9 +180,9 @@ public class ColumnFilterFunction extends AbstractFunction {
 
         
         
-        if (m_columnsGroupVisibilityParameter != null) {
+        /*if (m_columnsGroupVisibilityParameter != null) {
             m_columnsGroupVisibilityParameter.addLinkedParameters(linkedParameter2);
-        }
+        }*/
         
 
 

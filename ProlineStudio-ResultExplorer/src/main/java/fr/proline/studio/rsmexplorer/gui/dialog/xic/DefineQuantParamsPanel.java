@@ -107,7 +107,7 @@ public class DefineQuantParamsPanel extends JPanel{
         this.m_selectXICMethod = preferences.getBoolean("Profi", false);
         m_parameterList = new ParameterList("XicParameters");
         createParameters();
-        m_parameterList.updateIsUsed(NbPreferences.root(), true);
+        m_parameterList.updateIsUsed(NbPreferences.root());
         for (AbstractParameter param : m_parameterList) {
             param.setUsed(true);
         }
@@ -306,7 +306,7 @@ public class DefineQuantParamsPanel extends JPanel{
                 }
             }
 
-            getParameterList().loadParameters(filePreferences, true); //Load params 
+            getParameterList().loadParameters(filePreferences); //Load params 
     }
     
             //-- quanti Params

@@ -176,7 +176,7 @@ public class ColumnFilterFunction extends AbstractFunction {
         m_parameters = new ParameterList[1];
         m_parameters[0] = parameterTableList;
 
-        parameterTableList.getPanel(true); // generate panel at once
+        parameterTableList.getPanel(); // generate panel at once
 
         
         

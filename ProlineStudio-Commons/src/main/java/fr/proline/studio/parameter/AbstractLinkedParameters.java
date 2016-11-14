@@ -48,7 +48,7 @@ public abstract class AbstractLinkedParameters {
     }
 
     protected void updateParameterListPanel() {
-        JPanel p = getParameterList().getPanel(true);
+        JPanel p = getParameterList().getPanel();
 
         JDialog dialog = getParent(p);
         if (dialog != null) {

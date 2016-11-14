@@ -49,7 +49,7 @@ public class ImportManager {
         Object[] objectTable = {ImportManager.SEARCH_RESULT_NAME_SOURCE, ImportManager.PEAKLIST_PATH_SOURCE, ImportManager.MSI_SEARCH_FILE_NAME_SOURCE, ImportManager.MASCOT_DAEMON_RULE};
         ObjectParameter parameter = new ObjectParameter(ImportManager.DEFAULT_SEARCH_RESULT_NAME_SOURCE_KEY, "Default Search Result Name Source", objectTable, 2, null);
         parameterList.add(parameter);
-        parameterList.loadParameters(NbPreferences.root(), true);
+        parameterList.loadParameters(NbPreferences.root());
 
         String naming = (String) parameter.getObjectValue();
 

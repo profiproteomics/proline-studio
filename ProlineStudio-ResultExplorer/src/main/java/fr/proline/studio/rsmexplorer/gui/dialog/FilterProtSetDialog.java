@@ -57,7 +57,7 @@ public class FilterProtSetDialog extends DefaultDialog implements ComponentListe
 
         m_parameterList = new ParameterList("ProtSet Filtering");
         createParameters();
-        m_parameterList.updateIsUsed(NbPreferences.root(), true);
+        m_parameterList.updateIsUsed(NbPreferences.root());
 
         setInternalComponent(createInternalPanel());
 
@@ -189,7 +189,7 @@ public class FilterProtSetDialog extends DefaultDialog implements ComponentListe
                         preferences.put(key, value);
                     }
 
-                    m_parameterList.loadParameters(filePreferences, true);
+                    m_parameterList.loadParameters(filePreferences);
                     m_proteinPrefiltersPanel.initProteinFilterPanel();                  
 
                 } catch (Exception e) {

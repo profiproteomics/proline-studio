@@ -388,7 +388,7 @@ public class ImportIdentificationPanel extends JPanel implements InternalPanelIn
         parserPanel.add(m_parserComboBox, c);
 
         m_sourceParameterList = createSourceParameters();
-        m_sourceParameterList.updateIsUsed(NbPreferences.root(), true);
+        m_sourceParameterList.updateIsUsed(NbPreferences.root());
 
         c.gridx = 0;
         c.gridwidth = 1;
@@ -611,7 +611,7 @@ public class ImportIdentificationPanel extends JPanel implements InternalPanelIn
         c.weighty = 1;
 
         ParameterList parameterList = (ParameterList) m_parserComboBox.getSelectedItem();
-        m_parserParametersPanel.add(parameterList.getPanel(true), c);
+        m_parserParametersPanel.add(parameterList.getPanel(), c);
 
     }
 
@@ -957,8 +957,8 @@ public class ImportIdentificationPanel extends JPanel implements InternalPanelIn
                     restoreInitialParameters(preferences);
 
                     ParameterList parameterList = (ParameterList) m_parserComboBox.getSelectedItem();
-                    parameterList.loadParameters(filePreferences, true);
-                    m_sourceParameterList.loadParameters(filePreferences, true);
+                    parameterList.loadParameters(filePreferences);
+                    m_sourceParameterList.loadParameters(filePreferences);
 
                 } catch (Exception e) {
                     LoggerFactory.getLogger("ProlineStudio.ResultExplorer").error("Parsing of User Settings File Failed", e);

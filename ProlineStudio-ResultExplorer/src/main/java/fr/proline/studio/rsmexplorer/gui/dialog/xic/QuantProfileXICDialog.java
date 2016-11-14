@@ -105,7 +105,7 @@ public class QuantProfileXICDialog extends DefaultDialog {
                         preferences.put(key, value);
                     }
                     
-                    m_quantProfilePanel.getParameterList().loadParameters(filePreferences, true);
+                    m_quantProfilePanel.getParameterList().loadParameters(filePreferences);
                 } catch (Exception e) {
                     LoggerFactory.getLogger("ProlineStudio.ResultExplorer").error("Parsing of User Settings File Failed", e);
                     setStatus(true, "Parsing of your Settings File failed");
@@ -149,7 +149,7 @@ public class QuantProfileXICDialog extends DefaultDialog {
     private void init() {
         m_quantProfilePanel = new QuantProfileXICPanel(false);
         Preferences preferences = NbPreferences.root();
-        m_quantProfilePanel.getParameterList().loadParameters(preferences, true);
+        m_quantProfilePanel.getParameterList().loadParameters(preferences);
 
         
         setInternalComponent(m_quantProfilePanel);

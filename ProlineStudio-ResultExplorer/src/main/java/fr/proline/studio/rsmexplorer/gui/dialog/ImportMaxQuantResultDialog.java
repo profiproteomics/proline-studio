@@ -243,7 +243,7 @@ public class ImportMaxQuantResultDialog extends DefaultDialog {
         allParametersPanel.setBorder(BorderFactory.createTitledBorder(" Parameters "));
 
         m_sourceParameterList = createSourceParameters();
-        m_sourceParameterList.updateIsUsed(NbPreferences.root(),true);
+        m_sourceParameterList.updateIsUsed(NbPreferences.root());
 
         GridBagConstraints c = new GridBagConstraints();
         c.anchor = GridBagConstraints.NORTHWEST;
@@ -376,7 +376,7 @@ public class ImportMaxQuantResultDialog extends DefaultDialog {
 
                     restoreInitialParameters(preferences);
 
-                    m_sourceParameterList.loadParameters(filePreferences, true);
+                    m_sourceParameterList.loadParameters(filePreferences);
 
                 } catch (Exception e) {
                     LoggerFactory.getLogger("ProlineStudio.ResultExplorer").error("Parsing of User Settings File Failed", e);

@@ -58,7 +58,7 @@ public class DiffAnalysisFunction extends AbstractOnExperienceDesignFunction {
 
         m_parameterList.add(m_diffAnalysisTypeParameter);
         
-        //m_parameterList.loadParameters(NbPreferences.root(), true);
+        //m_parameterList.loadParameters(NbPreferences.root());
 
         return m_parameterList;
 

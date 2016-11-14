@@ -89,7 +89,7 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
         m_jmsParameterList = new ParameterList(JMS_SETTINGS);
         StringParameter defaultServiceRequestQueueName = new StringParameter(JMSConnectionManager.SERVICE_REQUEST_QUEUE_NAME_KEY, "JMSProlineQueueName", JTextField.class, DEFAULT_SERVICE_REQUEST_QUEUE_NAME, 5, null);
         m_jmsParameterList.add(defaultServiceRequestQueueName);
-        m_jmsParameterList.loadParameters(m_preferences, true);
+        m_jmsParameterList.loadParameters(m_preferences);
 
         return m_jmsParameterList;
     }
@@ -131,7 +131,7 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
         IntegerParameter defaultFixedColumnSize = new IntegerParameter(DecoratedTable.DEFAULT_WIDTH_KEY, DecoratedTable.DEFAULT_WIDTH_KEY, JTextField.class, 30, 10, 300);
         m_tableParameters.add(defaultFixedColumnSize);
 
-        m_tableParameters.loadParameters(m_preferences, true);
+        m_tableParameters.loadParameters(m_preferences);
 
         AbstractLinkedParameters linkedParameters = new AbstractLinkedParameters(m_tableParameters) {
 
@@ -233,7 +233,7 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
                 CardLayout cardLayout = (CardLayout) (m_cards.getLayout());
                 cardLayout.show(m_cards, panelKey);
             } else {
-                JPanel newPanel = m_parameterListTree.getList().get(panelKey).getPanel(true);
+                JPanel newPanel = m_parameterListTree.getList().get(panelKey).getPanel();
                 m_cards.add(newPanel, panelKey);
                 CardLayout cardLayout = (CardLayout) (m_cards.getLayout());
                 cardLayout.show(m_cards, panelKey);
@@ -266,7 +266,7 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
         while (enumKey.hasMoreElements()) {
             String key = enumKey.nextElement();
             ParameterList currentList = m_existingLists.get(key);
-            currentList.saveParameters(NbPreferences.root(), true);
+            currentList.saveParameters(NbPreferences.root());
         }
         try {
             NbPreferences.root().flush();
@@ -280,7 +280,7 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
         while (enumKey.hasMoreElements()) {
             String key = enumKey.nextElement();
             ParameterList currentList = m_existingLists.get(key);
-            currentList.loadParameters(NbPreferences.root(), true);
+            currentList.loadParameters(NbPreferences.root());
         }
     }
 

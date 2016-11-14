@@ -33,13 +33,13 @@ public class DefaultParameterDialog extends DefaultDialog {
         }
         
         if (m_parameterListArray.size() == 1) {
-            JPanel p = m_parameterListArray.get(0).getPanel(true);
+            JPanel p = m_parameterListArray.get(0).getPanel();
             setInternalComponent(p);
         } else {
             m_tabbedPane = new JTabbedPane(); 
             for (int i=0;i<m_parameterListArray.size();i++) {
                 ParameterList parameter = m_parameterListArray.get(i);
-                m_tabbedPane.addTab(parameter.toString(), null, parameter.getPanel(true), null);
+                m_tabbedPane.addTab(parameter.toString(), null, parameter.getPanel(), null);
             }
             setInternalComponent(m_tabbedPane);
         }

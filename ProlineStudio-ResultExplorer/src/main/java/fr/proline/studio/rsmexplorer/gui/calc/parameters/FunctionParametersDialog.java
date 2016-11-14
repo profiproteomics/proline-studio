@@ -76,7 +76,7 @@ public class FunctionParametersDialog extends DefaultDialog {
         c.gridy = 0;
         c.weightx = 1;
         c.weighty = 1;
-        containerPanel.add(parameterList.getPanel(true), c);
+        containerPanel.add(parameterList.getPanel(), c);
         
         
         return containerPanel;

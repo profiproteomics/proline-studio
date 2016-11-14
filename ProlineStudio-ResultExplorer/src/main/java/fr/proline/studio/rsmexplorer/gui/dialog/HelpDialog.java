@@ -120,8 +120,8 @@ public class HelpDialog extends DefaultDialog implements MouseListener, MouseMot
         gettingStartedCheckBox.setBackground(Color.WHITE);
         m_parameter = new BooleanParameter("Hide_Getting_Started_Dialog", "Hide Getting Started Dialog On Startup", gettingStartedCheckBox, false);
         m_parameterList.add(m_parameter);
-        m_parameterList.loadParameters(NbPreferences.root(), true);
-        panel = m_parameterList.getPanel(true);
+        m_parameterList.loadParameters(NbPreferences.root());
+        panel = m_parameterList.getPanel();
         panel.setBackground(Color.WHITE);
         return panel;
     }
@@ -158,7 +158,7 @@ public class HelpDialog extends DefaultDialog implements MouseListener, MouseMot
 
     private void saveCheckbox() {
         Preferences preferences = NbPreferences.root();
-        m_parameterList.saveParameters(preferences, true);
+        m_parameterList.saveParameters(preferences);
     }
 
     private void checkMouseCursor(MouseEvent e) {

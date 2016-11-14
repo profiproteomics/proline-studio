@@ -71,7 +71,7 @@ public class QuantiFilterFunction extends AbstractOnExperienceDesignFunction {
         m_parameterList.add(m_groupsParameter);
         m_parameterList.add(m_intensityThreshold);
         
-        //m_parameterList.loadParameters(NbPreferences.root(), true);
+        //m_parameterList.loadParameters(NbPreferences.root());
         
         return m_parameterList;
         

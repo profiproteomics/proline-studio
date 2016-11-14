@@ -101,7 +101,7 @@ public class JMSConnectionManager {
     public void saveParameters() {
         if (m_serviceQueue != null) {
             Preferences preferences = NbPreferences.root();
-            m_jmsSettingsPList.saveParameters(preferences, true);
+            m_jmsSettingsPList.saveParameters(preferences);
         }
     }
 
@@ -195,7 +195,7 @@ public class JMSConnectionManager {
             m_jmsSettingsPList = new ParameterList(JMS_SETTINGS_PARAMLIST_KEY);
             StringParameter m_parameter = new StringParameter(JMSConnectionManager.SERVICE_REQUEST_QUEUE_NAME_KEY, "JMSProlineQueueName", JTextField.class, DEFAULT_SERVICE_REQUEST_QUEUE_NAME, 5, null);
             m_jmsSettingsPList.add(m_parameter);
-            m_jmsSettingsPList.loadParameters(NbPreferences.root(), true);
+            m_jmsSettingsPList.loadParameters(NbPreferences.root());
             String queueName = m_parameter.getStringValue();
 
             m_loggerProline.info(" Use JMS Queure " + queueName);

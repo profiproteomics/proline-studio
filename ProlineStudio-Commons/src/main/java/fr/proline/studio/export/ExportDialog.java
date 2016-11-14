@@ -159,13 +159,13 @@ public class ExportDialog extends DefaultDialog {
         m_exportParameter = new BooleanParameter("Export_Decorated", "Export Decorated", JCheckBox.class, true);
         m_parameterList.add(m_exportParameter);
 
-        m_decoratedPanel.add(m_parameterList.getPanel(true));
+        m_decoratedPanel.add(m_parameterList.getPanel());
 
         return m_decoratedPanel;
     }
 
     private void updateExportDecoration() {
-        m_parameterList.loadParameters(NbPreferences.root(), true);
+        m_parameterList.loadParameters(NbPreferences.root());
     }
 
     public final JPanel createExportPanel() {

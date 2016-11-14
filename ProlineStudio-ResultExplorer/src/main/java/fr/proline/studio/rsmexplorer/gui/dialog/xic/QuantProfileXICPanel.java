@@ -100,7 +100,7 @@ public class QuantProfileXICPanel extends JPanel {
         this.completeMode = preferences.getBoolean("Profi", false);
         m_parameterList = new ParameterList(QuantProfileXICDialog.SETTINGS_KEY);
         createParameters();
-        m_parameterList.updateIsUsed(NbPreferences.root(), true);
+        m_parameterList.updateIsUsed(NbPreferences.root());
         for (AbstractParameter param : m_parameterList) {
             param.setUsed(true);
         }
@@ -234,7 +234,7 @@ public class QuantProfileXICPanel extends JPanel {
                 }
             }
 
-            getParameterList().loadParameters(filePreferences, true); //Load params 
+            getParameterList().loadParameters(filePreferences); //Load params 
     }
       
       

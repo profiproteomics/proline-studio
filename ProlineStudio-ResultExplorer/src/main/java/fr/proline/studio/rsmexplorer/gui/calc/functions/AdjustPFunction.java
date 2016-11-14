@@ -256,7 +256,7 @@ public class AdjustPFunction extends AbstractFunction {
         parameterList1.add(m_nbinsParameter);
         parameterList1.add(m_pzParameter);
         
-        parameterList1.getPanel(true); // generate panel at once
+        parameterList1.getPanel(); // generate panel at once
         m_pi0MethodParameter.addLinkedParameters(linkedParameters); // link parameter, it will modify the panel
 
 

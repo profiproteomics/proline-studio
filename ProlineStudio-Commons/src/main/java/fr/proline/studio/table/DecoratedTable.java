@@ -176,7 +176,7 @@ public abstract class DecoratedTable extends JXTable implements CrossSelectionIn
         parameterTableList.add(this.m_columnArrangementParameter);
         parameterTableList.add(this.m_columnWidthParameter);
 
-        parameterTableList.loadParameters(NbPreferences.root(), true);
+        parameterTableList.loadParameters(NbPreferences.root());
 
         AbstractLinkedParameters linkedParameters = new AbstractLinkedParameters(parameterTableList) {
 
@@ -184,7 +184,7 @@ public abstract class DecoratedTable extends JXTable implements CrossSelectionIn
             public void valueChanged(String value, Object associatedValue) {
 
                 if (!m_alreadyLoaded) {
-                    parameterTableList.loadParameters(NbPreferences.root(), true);
+                    parameterTableList.loadParameters(NbPreferences.root());
                     m_alreadyLoaded = true;
                     m_width = Integer.parseInt(m_columnWidthParameter.getStringValue());
                     m_selection = Integer.parseInt(m_columnArrangementParameter.getStringValue());
@@ -205,7 +205,7 @@ public abstract class DecoratedTable extends JXTable implements CrossSelectionIn
         m_parameterListArray = new ArrayList<>();
         m_parameterListArray.add(parameterTableList);
 
-        parameterTableList.getPanel(true); // generate panel at once
+        parameterTableList.getPanel(); // generate panel at once
         m_columnArrangementParameter.addLinkedParameters(linkedParameters);
         linkedParameters.valueChanged("true", Boolean.TRUE);  //JPM.TOOD true or false
 
@@ -263,7 +263,7 @@ public abstract class DecoratedTable extends JXTable implements CrossSelectionIn
         parameterTableList.add(m_sortCol2Parameter);
         parameterTableList.add(m_sortOrderCol2Parameter);
 
-        parameterTableList.getPanel(true); // generate panel at once
+        parameterTableList.getPanel(); // generate panel at once
 
         AbstractLinkedParameters linkedParameters = new AbstractLinkedParameters(parameterTableList) {
             @Override

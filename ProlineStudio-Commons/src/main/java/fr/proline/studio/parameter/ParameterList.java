@@ -40,7 +40,7 @@ public class ParameterList extends ArrayList<AbstractParameter> {
        return m_name.replaceAll(" ", "_") + ".";
     }
 
-    public JPanel getPanel(boolean usePrefixKey) {
+    public JPanel getPanel() {
 
         if (m_parametersPanel != null) {
             return m_parametersPanel;
@@ -79,13 +79,8 @@ public class ParameterList extends ArrayList<AbstractParameter> {
                 m_parametersPanel.add(l, c);
             }
 
-            String parameterValue;
+            String parameterValue = preferences.get(prefixKey + suffixKey, null);
 
-            if (usePrefixKey) {
-                parameterValue = preferences.get(prefixKey + suffixKey, null);
-            } else {
-                parameterValue = preferences.get(suffixKey, null);
-            }
 
             if (parameter.hasComponent()) {
 
@@ -187,26 +182,45 @@ public class ParameterList extends ArrayList<AbstractParameter> {
         }
     }
 
-    public void updateIsUsed(Preferences preferences, boolean usePrefixKey) {
+    public void updateIsUsed(Preferences preferences) {
         String prefixKey = m_name.replaceAll(" ", "_") + ".";
 
         int nbParameters = size();
         for (int i = 0; i < nbParameters; i++) {
             AbstractParameter parameter = get(i);
 
-            String parameterName = parameter.getName();
-            String suffixKey = parameterName.replaceAll(" ", "_");
+            String parameterKey = parameter.getKey();
+            String suffixKey = parameterKey.replaceAll(" ", "_");
 
-            String key;
+            String key = prefixKey + suffixKey;
 
-            if (usePrefixKey) {
-                key = prefixKey + suffixKey;
-            } else {
-                key = suffixKey;
-            }
 
             String parameterValue = preferences.get(key, null);
 
+            //JPM.WART ------------
+            if (parameterValue == null) {
+                // no value found, for backward compatibility, load the parameter from the name as a key (there was a bug, name was used as the key)
+                parameterKey = parameter.getName();
+                suffixKey = parameterKey.replaceAll(" ", "_");
+
+                key = prefixKey + suffixKey;
+
+                parameterValue = preferences.get(key, null);
+            }
+            if (parameterValue == null) {
+                // no value found, for backward compatibility, load the parameter from the backward compatible key 
+                parameterKey = parameter.getBackwardCompatibleKey();
+                if (parameterKey != null) {
+                    suffixKey = parameterKey.replaceAll(" ", "_");
+
+                    key = prefixKey + suffixKey;
+
+                    parameterValue = preferences.get(key, null);
+                }
+            }
+            // -------------
+            
+            
             if (!parameter.isUsed()) {
                 if ((parameterValue != null) && (!parameterValue.isEmpty())) {
                     parameter.setUsed(true);
@@ -240,97 +254,81 @@ public class ParameterList extends ArrayList<AbstractParameter> {
         for (int i = 0; i < nbParameters; i++) {
             AbstractParameter parameter = get(i);
 
-            String parameterName = parameter.getName();
-            String suffixKey = parameterName.replaceAll(" ", "_");
+            
+            // JPM.WART remove any old parameter in the file (constructed with the name of the parameter instead of the key ----------
+            String parameterKey = parameter.getName();
+            String suffixKey = parameterKey.replaceAll(" ", "_");
+            String key = prefixKey + suffixKey;
+            preferences.remove(key);
+
+            parameterKey = parameter.getBackwardCompatibleKey();
+            if (parameterKey != null) {
+                suffixKey = parameterKey.replaceAll(" ", "_");
+
+                key = prefixKey + suffixKey;
+
+                preferences.remove(key);
+            }
+            // --------------
+            
+            
+            parameterKey = parameter.getKey();
+            suffixKey = parameterKey.replaceAll(" ", "_");
+
+            key = prefixKey + suffixKey;
+
+            if (parameter.isUsed()|| parameter.isCompulsory()) {
+                String value = parameter.getStringValue();
+                preferences.put(key, value);
+            } else {
+                preferences.remove(key);
+            }
+            
+            
+
+        }
+    }
+
+
+    public void loadParameters(Preferences preferences) {
+
+        String prefixKey = m_name.replaceAll(" ", "_") + ".";
+
+        int nbParameters = size();
+        for (int i = 0; i < nbParameters; i++) {
+            AbstractParameter parameter = get(i);
+
+            
+            // load the parameter from the correct key
+            String parameterKey = parameter.getKey();
+            String suffixKey = parameterKey.replaceAll(" ", "_");
 
             String key = prefixKey + suffixKey;
 
-            if (parameter.isUsed()) {
-                String value = parameter.getStringValue();
-                preferences.put(key, value);
-            } else {
-                preferences.remove(key);
-            }
-        }
-    }
-
-    public void saveParameters(Preferences preferences, boolean usePrefixKey) {
-
-        String prefixKey = m_name.replaceAll(" ", "_") + ".";
-
-        int nbParameters = size();
-        for (int i = 0; i < nbParameters; i++) {
-            AbstractParameter parameter = get(i);
-
-            String parameterName = parameter.getName();
-            String suffixKey = parameterName.replaceAll(" ", "_");
-
-            String key;
-            if (usePrefixKey) {
-                key = prefixKey + suffixKey;
-            } else {
-                key = suffixKey;
-            }
-
-            if (preferences.get(key, null) == null) {
-                String value = parameter.getStringValue();
-                preferences.put(key, value);
-                continue;
-            }
-
-            if (parameter.isUsed()) {
-                String value = parameter.getStringValue();
-                preferences.put(key, value);
-            } else {
-                preferences.remove(key);
-            }
-        }
-    }
-
-    public void saveParametersForTheFirstTime(Preferences preferences, boolean usePrefixKey) {
-
-        String prefixKey = m_name.replaceAll(" ", "_") + ".";
-
-        int nbParameters = size();
-        for (int i = 0; i < nbParameters; i++) {
-            AbstractParameter parameter = get(i);
-
-            String parameterName = parameter.getName();
-            String suffixKey = parameterName.replaceAll(" ", "_");
-
-            String key;
-            if (usePrefixKey) {
-                key = prefixKey + suffixKey;
-            } else {
-                key = suffixKey;
-            }
-
-            String value = parameter.getStringValue();
-            preferences.put(key, value);
-
-        }
-    }
-
-    public void loadParameters(Preferences preferences, boolean usePrefixKey) {
-
-        String prefixKey = m_name.replaceAll(" ", "_") + ".";
-
-        int nbParameters = size();
-        for (int i = 0; i < nbParameters; i++) {
-            AbstractParameter parameter = get(i);
-
-            String parameterName = parameter.getName();
-            String suffixKey = parameterName.replaceAll(" ", "_");
-
-            String key;
-
-            if (usePrefixKey) {
-                key = prefixKey + suffixKey;
-            } else {
-                key = suffixKey;
-            }
-
             String value = preferences.get(key, null);
+            
+            //JPM.WART ------------
+            if (value == null) {
+                // no value found, for backward compatibility, load the parameter from the name as a key (there was a bug, name was used as the key)
+                parameterKey = parameter.getName();
+                suffixKey = parameterKey.replaceAll(" ", "_");
+
+                key = prefixKey + suffixKey;
+
+                value = preferences.get(key, null);
+            }
+            if (value == null) {
+                // no value found, for backward compatibility, load the parameter from the backward compatible key 
+               parameterKey = parameter.getBackwardCompatibleKey();
+                if (parameterKey != null) {
+                    suffixKey = parameterKey.replaceAll(" ", "_");
+
+                    key = prefixKey + suffixKey;
+
+                    value = preferences.get(key, null);
+                }
+            }
+            // -------------
 
             if (value == null) {
                  continue;
@@ -340,7 +338,7 @@ public class ParameterList extends ArrayList<AbstractParameter> {
 
         }
 
-        updateIsUsed(preferences, usePrefixKey);
+        updateIsUsed(preferences);
     }
 
     public HashMap<String, String> getValues() {

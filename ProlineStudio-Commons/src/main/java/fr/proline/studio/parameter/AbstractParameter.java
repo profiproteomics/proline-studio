@@ -18,6 +18,9 @@ public abstract class AbstractParameter {
     protected Object m_associatedData = null;
     protected LabelVisibility m_labelVisibility = LabelVisibility.VISIBLE;
 
+    //JP.WART : use for backward compatibility to change the name of a parameter
+    protected String m_backwardCompatibleKey = null;
+    
     public enum LabelVisibility {
         NO_VISIBLE,
         VISIBLE,
@@ -45,6 +48,14 @@ public abstract class AbstractParameter {
         return m_key;
     }
 
+    public void setBackwardCompatibleKey(String backwardCompatibleKey) {
+        m_backwardCompatibleKey = backwardCompatibleKey;
+    }
+    
+    public String getBackwardCompatibleKey() {
+        return m_backwardCompatibleKey;
+    }
+    
     public JComponent getComponent() {
         return m_parameterComponent;
     }
@@ -96,6 +107,10 @@ public abstract class AbstractParameter {
     
     public void setUsed(boolean used) {
         m_used = used;
+    }
+    
+    public boolean isCompulsory() {
+        return m_compulsory;
     }
 
     

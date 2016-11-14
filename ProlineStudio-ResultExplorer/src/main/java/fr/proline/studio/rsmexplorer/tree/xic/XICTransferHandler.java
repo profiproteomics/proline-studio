@@ -47,7 +47,7 @@ public class XICTransferHandler extends TransferHandler {
         JCheckBox checkBox = new JCheckBox("Use dataset type to create Xic Design by DnD");
         m_parameter = new BooleanParameter("XIC_Transfer_Handler_Retains_Structure", "XIC Transfer Handler Retains Structure", checkBox, true);
         m_parameterList.add(m_parameter);
-        m_parameterList.loadParameters(NbPreferences.root(), true);
+        m_parameterList.loadParameters(NbPreferences.root());
     }
 
     @Override
@@ -317,7 +317,7 @@ public class XICTransferHandler extends TransferHandler {
                 tree.expandNodeIfNeeded(dropRSMNode);
             }
 
-            m_parameterList.loadParameters(NbPreferences.root(), true);
+            m_parameterList.loadParameters(NbPreferences.root());
             boolean retainStructure = (boolean) m_parameter.getObjectValue();
 
             if (retainStructure) {

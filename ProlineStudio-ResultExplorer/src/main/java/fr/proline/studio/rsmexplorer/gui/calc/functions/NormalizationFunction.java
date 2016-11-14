@@ -92,10 +92,10 @@ public class NormalizationFunction extends AbstractOnExperienceDesignFunction {
             
         };
         
-        m_parameterList.getPanel(true); // generate panel at once
+        m_parameterList.getPanel(); // generate panel at once
         m_normalizationParameter.addLinkedParameters(linkedParameters); // link parameter, it will modify the panel
         
-        //m_parameterList.loadParameters(NbPreferences.root(), true);
+        //m_parameterList.loadParameters(NbPreferences.root());
         
         return m_parameterList;
         

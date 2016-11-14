@@ -117,7 +117,7 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
         
         m_parameterList = new ParameterList("Validation");
         createParameters();
-        m_parameterList.updateIsUsed(NbPreferences.root(), true);
+        m_parameterList.updateIsUsed(NbPreferences.root());
 
         setInternalComponent(createInternalPanel());
 
@@ -671,6 +671,7 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
         m_psmPrefilterParameters[0] = null;
         m_psmPrefilterParameters[1] = new IntegerParameter(ValidationTask.RANK_FILTER_KEY, ValidationTask.RANK_FILTER_NAME, new JTextField(6), new Integer(5), new Integer(0), new Integer(10));
         m_psmPrefilterParameters[1].setAssociatedData("<=");
+        m_psmPrefilterParameters[1].setBackwardCompatibleKey("Rank"); 
         m_psmPrefilterParameters[2] = new IntegerParameter(ValidationTask.PEP_LENGTH_FILTER_KEY, ValidationTask.PEP_LENGTH_FILTER_NAME, new JTextField(6), new Integer(4), new Integer(4), null);
         m_psmPrefilterParameters[2].setAssociatedData(">=");
         m_psmPrefilterParameters[3] = new DoubleParameter(ValidationTask.SCORE_FILTER_KEY, ValidationTask.SCORE_FILTER_NAME, new JTextField(6), new Double(0), new Double(0), null);
@@ -880,7 +881,7 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
                         preferences.put(key, value);
                     }
                     
-                    m_parameterList.loadParameters(filePreferences, true);
+                    m_parameterList.loadParameters(filePreferences);
                     restoreScoringTypeParameter(filePreferences);
                     restoreTypicalProteinParameters(filePreferences);
                     updateFdrObjects(m_fdrFilterParameter.isUsed());

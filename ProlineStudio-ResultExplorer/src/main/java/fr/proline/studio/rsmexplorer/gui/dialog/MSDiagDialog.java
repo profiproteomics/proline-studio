@@ -182,7 +182,7 @@ public class MSDiagDialog extends DefaultDialog {
         c.weighty = 1;
         
         ParameterList parameterList = (ParameterList) m_parserComboBox.getSelectedItem();
-        m_parserParametersPanel.add(parameterList.getPanel(true), c);
+        m_parserParametersPanel.add(parameterList.getPanel(), c);
 
     }
     
@@ -271,8 +271,8 @@ public class MSDiagDialog extends DefaultDialog {
                     restoreInitialParameters(preferences);
                     
                     ParameterList parameterList = (ParameterList) m_parserComboBox.getSelectedItem();
-                    parameterList.loadParameters(filePreferences, true);
-                    //m_sourceParameterList.loadParameters(filePreferences);
+                    parameterList.loadParameters(filePreferences);
+
                     
                 } catch (Exception e) {
                     LoggerFactory.getLogger("ProlineStudio.ResultExplorer").error("Parsing of User Settings File Failed", e);

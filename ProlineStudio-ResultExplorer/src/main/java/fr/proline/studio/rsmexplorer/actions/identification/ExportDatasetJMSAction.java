@@ -166,7 +166,9 @@ public class ExportDatasetJMSAction extends AbstractRSMAction {
                                                         //get DS Id and DS Name from fileName
                                                         Long dsId = getDatasetId(fp.substring(idFileName+1));
                                                         String dsName = getDatasetName(dsId, selectedNodes);
-                                                        dsName = dsName.substring(0, 20);// keep only 20 first chars
+                                                        if (dsName.length()>20) {
+                                                            dsName = dsName.substring(0, 20);// keep only 20 first chars
+                                                        }
 //                                                        String t = fp.substring(fileNameIndex + 1, idUnderscore);
 //                                                        int id2 = t.lastIndexOf("/");
 //                                                        if (id2 != -1) {

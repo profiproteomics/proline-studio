@@ -37,7 +37,7 @@ public class JMSConnectionManager {
     
     // paramaters management
     private ParameterList m_jmsSettingsPList;
-    private static final String JMS_SETTINGS_PARAMLIST_KEY = "JMS Settings";
+    public static final String JMS_SETTINGS_PARAMLIST_KEY = "JMS Settings";
 
     protected static final Logger m_loggerProline = LoggerFactory.getLogger("ProlineStudio.DPM.Task");
 

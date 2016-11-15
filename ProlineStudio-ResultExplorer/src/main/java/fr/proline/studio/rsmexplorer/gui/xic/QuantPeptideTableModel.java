@@ -1228,9 +1228,10 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
                 }
             }
             case COLTYPE_PEPTIDE_NAME: {
-                return LazyData.class;
+                return String.class;
             }
-            case COLTYPE_PEPTIDE_PTM: {
+            case COLTYPE_PEPTIDE_PTM:
+            case COLTYPE_PEPTIDE_PROTEIN_SET_NAMES: {
                 return String.class;
             }
             case COLTYPE_PEPTIDE_CHARGE:
@@ -1248,6 +1249,9 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
             }
             case COLTYPE_PEPTIDE_CLUSTER: {
                 return String.class;
+            }
+            case COLTYPE_PEPTIDE_RETENTION_TIME: {
+                return Float.class;
             }
             default: {
                 int nbQc = (columnIndex - m_columnNames.length) / m_columnNamesQC.length;
@@ -1267,7 +1271,7 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
             }
         }
         return null; // should never happen
-
+ 
     }
 
     @Override

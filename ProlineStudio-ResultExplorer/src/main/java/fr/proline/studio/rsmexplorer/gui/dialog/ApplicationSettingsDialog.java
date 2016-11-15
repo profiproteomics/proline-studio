@@ -13,6 +13,9 @@ import fr.proline.studio.parameter.StringParameter;
 import fr.proline.studio.rsmexplorer.actions.identification.ImportManager;
 import fr.proline.studio.table.DecoratedTable;
 import java.awt.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.prefs.BackingStoreException;
@@ -25,6 +28,7 @@ import javax.swing.event.TreeWillExpandListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.ExpandVetoException;
 import javax.swing.tree.TreePath;
+import org.openide.util.Exceptions;
 import org.openide.util.NbPreferences;
 import org.slf4j.LoggerFactory;
 
@@ -37,26 +41,29 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
 
     private static ApplicationSettingsDialog m_singletonDialog = null;
     private AbstractParameterListTree m_parameterListTree;
-    private ParameterList m_jmsParameterList, m_generalParameterList, m_tableParameters;
+    private ParameterList m_jmsParameterList, m_generalParameterList, m_tablePrameterList, m_wizardParameterList;
     private JPanel m_cards;
     private Hashtable<String, JPanel> m_existingPanels;
     private Hashtable<String, ParameterList> m_existingLists;
 
-    private static final String JMS_SETTINGS = "JMS Settings";
     private static final String GENERAL_APPLICATION_SETTINGS = "General Application Settings";
     private static final String DIALOG_TITLE = "Proline Studio Settings";
     private static final String TREE_ROOT_NAME = "Settings Categories";
-    public static final String DEFAULT_SERVICE_REQUEST_QUEUE_NAME = "ProlineServiceRequestQueue";
+
+    private static final int SAME_OUTPUT_PATH = 0;
+    private static final int USER_SPECIFIED_OUTPUT = 1;
+
+    private static final String CONVERTER_OUTPUT_PATH_NAME = "raw2mzDB output";
+    private static final String CONVERTER_OUTPUT_PATH_KEY = "raw2mzDB_output";
 
     private Preferences m_preferences;
 
     public static ApplicationSettingsDialog getDialog(Window parent) {
         if (m_singletonDialog == null) {
             m_singletonDialog = new ApplicationSettingsDialog(parent);
+            m_singletonDialog.selectDefault();
         }
         m_singletonDialog.updateSettings();
-
-        m_singletonDialog.selectDefault();
 
         return m_singletonDialog;
     }
@@ -66,8 +73,8 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
 
         setTitle(DIALOG_TITLE);
 
-        setSize(new Dimension(800, 480));
-        this.setMinimumSize(new Dimension(640, 360));
+        setSize(new Dimension(1024, 480));
+        this.setMinimumSize(new Dimension(1024, 360));
         setResizable(true);
 
         this.setHelpURL("https://bioproj.extra.cea.fr/docs/proline/doku.php?id=how_to:studio:preferences");
@@ -86,9 +93,28 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
     }
 
     private ParameterList getJMSParameterList() {
-        m_jmsParameterList = new ParameterList(JMS_SETTINGS);
-        StringParameter defaultServiceRequestQueueName = new StringParameter(JMSConnectionManager.SERVICE_REQUEST_QUEUE_NAME_KEY, "JMSProlineQueueName", JTextField.class, DEFAULT_SERVICE_REQUEST_QUEUE_NAME, 5, null);
-        m_jmsParameterList.add(defaultServiceRequestQueueName);
+        m_jmsParameterList = new ParameterList(JMSConnectionManager.JMS_SETTINGS_PARAMLIST_KEY);
+
+        StringParameter serviceRequestQueueName = new StringParameter(JMSConnectionManager.SERVICE_REQUEST_QUEUE_NAME_KEY, "Service Request Queue Name", JTextField.class, JMSConnectionManager.SERVICE_REQUEST_QUEUE_NAME_KEY, 5, null);
+        m_jmsParameterList.add(serviceRequestQueueName);
+
+        /*
+        StringParameter prolineServiceName = new StringParameter(JMSConnectionManager.PROLINE_SERVICE_NAME_KEY, "Proline Service Name", JTextField.class, JMSConnectionManager.DEFAULT_PROLINE_SERVICE_NAME_VALUE, 5, null);
+        m_jmsParameterList.add(prolineServiceName);
+
+        StringParameter prolineServiceVersion = new StringParameter(JMSConnectionManager.PROLINE_SERVICE_VERSION_KEY, "Proline Service Version", JTextField.class, JMSConnectionManager.DEFAULT_PROLINE_SERVICE_VERSION_VALUE, 5, null);
+        m_jmsParameterList.add(prolineServiceVersion);
+
+        StringParameter jmsHost = new StringParameter(JMSConnectionManager.JMS_SERVER_HOST_PARAM_KEY, "JMS Server Host", JTextField.class, JMSConnectionManager.DEFAULT_JMS_SERVER_HOST_PARAM_VALUE, 5, null);
+        m_jmsParameterList.add(jmsHost);
+
+        StringParameter serverPort = new StringParameter(JMSConnectionManager.JMS_SERVER_PORT_PARAM_KEY, "JMS Server Port", JTextField.class, JMSConnectionManager.DEFAULT_JMS_SERVER_PORT_PARAM_VALUE, 5, null);
+        m_jmsParameterList.add(serverPort);
+
+        StringParameter hornetInputStream = new StringParameter(JMSConnectionManager.HORNET_Q_INPUT_STREAM_KEY, "HornetQ Input Stream", JTextField.class, JMSConnectionManager.DEFAULT_HORNET_Q_INPUT_STREAM_VALUE, 5, null);
+        m_jmsParameterList.add(hornetInputStream);
+        */
+
         m_jmsParameterList.loadParameters(m_preferences);
 
         return m_jmsParameterList;
@@ -116,30 +142,95 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
         BooleanParameter xicTransferHandlerParameter = new BooleanParameter("XIC_Transfer_Handler_Retains_Structure", "XIC Transfer Handler Retains Structure", xicCheckBox, true);
         m_generalParameterList.add(xicTransferHandlerParameter);
 
+        m_generalParameterList.loadParameters(m_preferences);
+
         return m_generalParameterList;
     }
 
+    private ParameterList getWizardParameters() {
+        try {
+
+            m_wizardParameterList = new ParameterList("mzDB Settings");
+
+            JCheckBox deleteRawCheckBox = new JCheckBox("Delete raw file after a successful conversion");
+            BooleanParameter deleteRawParameter = new BooleanParameter("Delete_raw_file_after_a_successful_conversion", "Delete raw file after a successful conversion", deleteRawCheckBox, false);
+            m_wizardParameterList.add(deleteRawParameter);
+
+            JCheckBox deleteMzdbCheckBox = new JCheckBox("Delete mzdb file after a successful upload");
+            BooleanParameter deleteMzdbParameter = new BooleanParameter("Delete_mzdb_file_after_a_successful_upload", "Delete mzdb file after a successful upload", deleteMzdbCheckBox, false);
+            m_wizardParameterList.add(deleteMzdbParameter);
+
+            StringParameter converterPath = new StringParameter("Converter_(.exe)", "Converter (.exe)", JTextField.class, "C:\\Users\\AK249877\\Documents\\NetBeansProjects\\mzDB-wizard\\target\\converter\\mzdb_x64_0.9.8d\\raw2mzDB.exe", 5, null);
+            m_wizardParameterList.add(converterPath);
+
+            m_wizardParameterList.loadParameters(m_preferences);
+
+            Object[] associatedTable = {"Same as raw file", "User specified"};
+            JComboBox comboBox = new JComboBox(associatedTable);
+            Object[] objectTable = {SAME_OUTPUT_PATH, USER_SPECIFIED_OUTPUT};
+            ObjectParameter converterOutputParameter = new ObjectParameter(CONVERTER_OUTPUT_PATH_KEY, CONVERTER_OUTPUT_PATH_NAME, comboBox, associatedTable, objectTable, 0, null);
+            m_wizardParameterList.add(converterOutputParameter);
+
+            StringParameter outputPath = new StringParameter("Output_path", "Output path", JTextField.class, "C:\\Users\\AK249877\\Documents\\NetBeansProjects\\mzDB-wizard\\target\\converter\\mzdb_x64_0.9.8d\\raw2mzDB.exe", 5, null);
+            m_wizardParameterList.add(outputPath);
+
+            m_wizardParameterList.loadParameters(m_preferences);
+            
+            
+
+            AbstractLinkedParameters linkedParameters = new AbstractLinkedParameters(m_wizardParameterList) {
+
+                @Override
+                public void valueChanged(String value, Object associatedValue) {
+                    int m_selection = Integer.parseInt(converterOutputParameter.getStringValue());
+                    showParameter(outputPath, m_selection == DecoratedTable.FIXED_COLUMNS_SIZE, outputPath.getStringValue());
+                    updateParameterListPanel();
+                }
+
+            };
+
+            converterOutputParameter.addLinkedParameters(linkedParameters);
+
+            int m_selection = Integer.parseInt(converterOutputParameter.getStringValue());
+            linkedParameters.valueChanged((String) associatedTable[m_selection], objectTable[m_selection]);
+                    
+
+        } catch (Exception ex) {
+            PrintWriter pw = null;
+            try {
+                pw = new PrintWriter(new File("D:\\bugs.txt"));
+            } catch (FileNotFoundException ex1) {
+                Exceptions.printStackTrace(ex1);
+            }
+            ex.printStackTrace(pw);
+            pw.close();
+        }
+
+        return m_wizardParameterList;
+
+    }
+
     private ParameterList getTableParameters() {
-        m_tableParameters = new ParameterList(DecoratedTable.TABLE_PARAMETERS);
+        m_tablePrameterList = new ParameterList(DecoratedTable.TABLE_PARAMETERS);
 
         Object[] associatedTable = {"Automatic Column Size", "Fixed Column Size", "Smart Column Size"};
         JComboBox comboBox = new JComboBox(associatedTable);
         Object[] objectTable = {DecoratedTable.AUTOMATIC_COLUMNS_SIZE, DecoratedTable.FIXED_COLUMNS_SIZE, DecoratedTable.SMART_COLUMNS_SIZE};
-        ObjectParameter columnsParameter = new ObjectParameter(DecoratedTable.DEFAULT_COLUMNS_ARRANGEMENT_KEY, DecoratedTable.DEFAULT_COLUMNS_ARRANGEMENT_KEY, comboBox, associatedTable, objectTable, 0, null);
-        m_tableParameters.add(columnsParameter);
+        ObjectParameter columnsParameter = new ObjectParameter(DecoratedTable.DEFAULT_COLUMNS_ARRANGEMENT_KEY, DecoratedTable.DEFAULT_COLUMNS_ARRANGEMENT_KEY, comboBox, associatedTable, objectTable, 2, null);
+        m_tablePrameterList.add(columnsParameter);
 
         IntegerParameter defaultFixedColumnSize = new IntegerParameter(DecoratedTable.DEFAULT_WIDTH_KEY, DecoratedTable.DEFAULT_WIDTH_KEY, JTextField.class, 30, 10, 300);
-        m_tableParameters.add(defaultFixedColumnSize);
+        m_tablePrameterList.add(defaultFixedColumnSize);
 
-        m_tableParameters.loadParameters(m_preferences);
+        m_tablePrameterList.loadParameters(m_preferences);
 
-        AbstractLinkedParameters linkedParameters = new AbstractLinkedParameters(m_tableParameters) {
+        AbstractLinkedParameters linkedParameters = new AbstractLinkedParameters(m_tablePrameterList) {
 
             @Override
             public void valueChanged(String value, Object associatedValue) {
                 int m_width = Integer.parseInt(defaultFixedColumnSize.getStringValue());
                 int m_selection = Integer.parseInt(columnsParameter.getStringValue());
-                showParameter(defaultFixedColumnSize, m_selection == DecoratedTable.FIXED_COLUMNS_SIZE, m_width);
+                showParameter(defaultFixedColumnSize, m_selection == DecoratedTable.FIXED_COLUMNS_SIZE || m_selection == DecoratedTable.SMART_COLUMNS_SIZE, m_width);
                 updateParameterListPanel();
             }
 
@@ -150,7 +241,7 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
         int m_selection = Integer.parseInt(columnsParameter.getStringValue());
         linkedParameters.valueChanged((String) associatedTable[m_selection], objectTable[m_selection]);
 
-        return m_tableParameters;
+        return m_tablePrameterList;
     }
 
     private JComponent createInternalComponent() {
@@ -166,6 +257,7 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
 
         m_parameterListTree = new AbstractParameterListTree(TREE_ROOT_NAME, this, this);
         m_parameterListTree.addNodes(this.getJMSParameterList());
+        m_parameterListTree.addNodes(this.getWizardParameters());
         m_parameterListTree.addNodes(this.getTableParameters());
         m_parameterListTree.addNodes(this.getGeneralParameters());
         m_parameterListTree.expandAllRows();

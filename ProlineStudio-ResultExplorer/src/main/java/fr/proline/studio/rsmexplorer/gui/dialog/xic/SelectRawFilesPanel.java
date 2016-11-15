@@ -219,7 +219,7 @@ public class SelectRawFilesPanel extends JPanel {
 
             tableScrollPane.setViewportView(m_table);
         } catch (Exception e) {
-            System.out.println(e);
+            //System.out.println(e);
         }
 
         designTablePanel.add(tableScrollPane, c);

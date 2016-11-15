@@ -39,7 +39,7 @@ public class PeptideFragmentationData {
                 FragmentationJsonProperties jsonProp = gson.fromJson(array, FragmentationJsonProperties.class);
 
                 if (jsonProp.frag_matches == null) {
-                    System.out.println("no fragment match");
+                    //System.out.println("no fragment match");
                     jsonProp.frag_matches = new FragmentMatch[0];
                 }
 

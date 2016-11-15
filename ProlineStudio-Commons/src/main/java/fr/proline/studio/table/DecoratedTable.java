@@ -2,7 +2,6 @@ package fr.proline.studio.table;
 
 import com.thierry.filtering.TableSelection;
 import fr.proline.studio.comparedata.CompareDataInterface;
-import fr.proline.studio.export.ExportModelInterface;
 import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.gui.AdvancedSelectionPanel;
 import fr.proline.studio.parameter.AbstractLinkedParameters;
@@ -14,6 +13,7 @@ import fr.proline.studio.parameter.ParameterList;
 import fr.proline.studio.parameter.SettingsInterface;
 import fr.proline.studio.utils.RelativePainterHighlighter;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.event.MouseEvent;
@@ -21,11 +21,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
+import javax.swing.DefaultRowSorter;
 import javax.swing.JComboBox;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
@@ -39,7 +36,6 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
-import javax.swing.table.TableRowSorter;
 import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.JXTableHeader;
 import org.jdesktop.swingx.decorator.Highlighter;
@@ -90,18 +86,18 @@ public abstract class DecoratedTable extends JXTable implements CrossSelectionIn
 
     private boolean m_firstPaint = true;
 
-    private static boolean m_alreadyLoaded = false;
-    private static int m_width = -1;
-    private static int m_selection = -1;
-    private static int m_meanWidth = -1;
-
+    private boolean m_alreadyLoaded = false;
+    private int m_width = -1;
+    private int m_selection = -1;
+    private int m_meanWidth = -1;
     private int m_totalWidth = 0;
+
+
     private int m_nbVisible = 0;
 
     private JComboBox m_arrangementComboBox;
     private JTextField m_widthTextField;
 
-    private ParameterList parameterTableList;
 
     public DecoratedTable() {
 
@@ -125,36 +121,42 @@ public abstract class DecoratedTable extends JXTable implements CrossSelectionIn
 
     }
 
-    /*
+    
     @Override
     public void paint(Graphics g) {
         super.paint(g);
 
-        if (m_firstPaint) {
-            parametersChanged();
-            m_firstPaint = false;
+        // JPM.HACK : to take in account parameters for table autosize/fixed size
+        // -------------------------
+        int width = getParent().getWidth();
+        if (Math.abs(m_totalWidth-width) > 50) {
+            m_firstPaint = true;
+            m_totalWidth = width;
         }
+        
+        if (m_firstPaint) {
+            m_firstPaint = false;
+            parametersChanged();  
+        }
+        // -------------------------
 
     }
-    */
+    
 
-    private void initParameterList() {
-        parameterTableList = new ParameterList(TABLE_PARAMETERS);
-        Object[] associatedTable = {"Automatic Column Size", "Fixed Column Size", "Smart Column Size"};
-        m_arrangementComboBox = new JComboBox(associatedTable);
-        Object[] objectTable = {DecoratedTable.AUTOMATIC_COLUMNS_SIZE, DecoratedTable.FIXED_COLUMNS_SIZE, DecoratedTable.SMART_COLUMNS_SIZE};
-        m_columnArrangementParameter = new ObjectParameter(DecoratedTable.DEFAULT_COLUMNS_ARRANGEMENT_KEY, DecoratedTable.DEFAULT_COLUMNS_ARRANGEMENT_KEY, m_arrangementComboBox, associatedTable, objectTable, 0, null);
-        //parameterTableList.add(m_columnArrangementParameter);
-        //parameterTableList.add(m_columnWidthParameter);
-    }
 
-    protected void initParameters() {
+
+    private void initParameters() {
 
         m_alreadyLoaded = false;
         m_width = -1;
         m_selection = -1;
 
-        initParameterList();
+        ParameterList parameterTableList = new ParameterList(TABLE_PARAMETERS);
+        Object[] associatedTable = {"Automatic Column Size", "Fixed Column Size", "Smart Column Size"};
+        m_arrangementComboBox = new JComboBox(associatedTable);
+        Object[] objectTable = {DecoratedTable.AUTOMATIC_COLUMNS_SIZE, DecoratedTable.FIXED_COLUMNS_SIZE, DecoratedTable.SMART_COLUMNS_SIZE};
+        m_columnArrangementParameter = new ObjectParameter(DecoratedTable.DEFAULT_COLUMNS_ARRANGEMENT_KEY, DecoratedTable.DEFAULT_COLUMNS_ARRANGEMENT_KEY, m_arrangementComboBox, associatedTable, objectTable, 0, null);
+        
 
         List<TableColumn> columns = getColumns(true);
         int colCount = columns.size();
@@ -163,7 +165,6 @@ public abstract class DecoratedTable extends JXTable implements CrossSelectionIn
         boolean[] selection = new boolean[colCount];
 
         m_nbVisible = 0;
-        m_totalWidth = 0;
         for (int i = 0; i < colCount; i++) {
             TableColumnExt column = (TableColumnExt) columns.get(i);
             columnNamesArray[i] = column.getHeaderValue().toString().replaceAll("<br/>", " ");
@@ -173,7 +174,6 @@ public abstract class DecoratedTable extends JXTable implements CrossSelectionIn
 
             selection[i] = visible;
             if (visible) {
-                m_totalWidth += column.getWidth();
                 m_nbVisible++;
             }
         }
@@ -184,6 +184,7 @@ public abstract class DecoratedTable extends JXTable implements CrossSelectionIn
         m_columnWidthParameter = new IntegerParameter(DEFAULT_WIDTH_KEY, DEFAULT_WIDTH_KEY, m_widthTextField, m_meanWidth, 10, MAX_WIDTH);
 
         m_columnsVisibilityParameter = new MultiObjectParameter(COLUMNS_VISIBILITY_KEY, "Columns Visibility", "Visible Columns", "Hidden Columns", AdvancedSelectionPanel.class, columnNamesArray, columnsArray, selection, null);
+
 
         parameterTableList.add(this.m_columnArrangementParameter);
         parameterTableList.add(this.m_columnWidthParameter);
@@ -224,7 +225,8 @@ public abstract class DecoratedTable extends JXTable implements CrossSelectionIn
     }
 
     private void calculateMeanWidth() {
-        m_meanWidth = m_totalWidth / m_nbVisible;
+        int totalWidth = m_totalWidth;
+        m_meanWidth = totalWidth / m_nbVisible;
         if (m_meanWidth < 30) {
             m_meanWidth = 30;
         } else if (m_meanWidth > MAX_WIDTH) {
@@ -471,35 +473,19 @@ public abstract class DecoratedTable extends JXTable implements CrossSelectionIn
 
     @Override
     public ArrayList<ParameterList> getParameters() {
-        try {
             initParameters(); // must be done each time, because they can be changed in another way
             // than with the parameter dialog
-        } catch (Exception ex) {
-            PrintWriter pw = null;
-            try {
-                pw = new PrintWriter(new File("D:\\bugs.txt"));
-            } catch (FileNotFoundException ex1) {
-                Exceptions.printStackTrace(ex1);
-            }
-            ex.printStackTrace(pw);
-            pw.close();
-        }
+
         return m_parameterListArray;
     }
 
     @Override
     public void parametersChanged() {
 
-        /*
-        if (parameterTableList == null) {
-            initParameterList();
+        
+        if (m_parameterListArray == null) {
+            initParameters();
         }
-        if (parameterTableList.isEmpty()) {
-            parameterTableList.add(m_columnArrangementParameter);
-            parameterTableList.add(m_columnWidthParameter);
-        }
-        parameterTableList.loadParameters(NbPreferences.root());
-        */
 
         int arrangement = Integer.parseInt(this.m_columnArrangementParameter.getStringValue());
 
@@ -554,9 +540,10 @@ public abstract class DecoratedTable extends JXTable implements CrossSelectionIn
             }
         }
 
-        RowSorter<TableModel> sorter = (RowSorter<TableModel>) getRowSorter();
+        DefaultRowSorter sorter = (DefaultRowSorter) getRowSorter();
         sorter.setSortKeys(sortKeys);
-        ((TableRowSorter) sorter).sort();
+        sorter.sort();
+
     }
 
 }

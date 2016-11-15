@@ -85,12 +85,10 @@ public class ObjectParameter<E> extends AbstractParameter {
         
         try{
         
-        System.out.println("breakpoint2");
+        
 
         String valueString = ( value == null) ? "" : value.toString();
-        
-            System.out.println("breakpoint3");
-        
+
         int nb = comboBox.getItemCount();
         for (int i=0;i<nb;i++) {
             String itemString = getStringValue(comboBox, i);

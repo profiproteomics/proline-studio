@@ -219,7 +219,7 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
         ObjectParameter columnsParameter = new ObjectParameter(DecoratedTable.DEFAULT_COLUMNS_ARRANGEMENT_KEY, DecoratedTable.DEFAULT_COLUMNS_ARRANGEMENT_KEY, comboBox, associatedTable, objectTable, 2, null);
         m_tablePrameterList.add(columnsParameter);
 
-        IntegerParameter defaultFixedColumnSize = new IntegerParameter(DecoratedTable.DEFAULT_WIDTH_KEY, DecoratedTable.DEFAULT_WIDTH_KEY, JTextField.class, 30, 10, 300);
+        IntegerParameter defaultFixedColumnSize = new IntegerParameter(DecoratedTable.DEFAULT_WIDTH_KEY, DecoratedTable.DEFAULT_WIDTH_KEY, JTextField.class, 80, 10, 300);
         m_tablePrameterList.add(defaultFixedColumnSize);
 
         m_tablePrameterList.loadParameters(m_preferences);
@@ -257,7 +257,7 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
 
         m_parameterListTree = new AbstractParameterListTree(TREE_ROOT_NAME, this, this);
         m_parameterListTree.addNodes(this.getJMSParameterList());
-        m_parameterListTree.addNodes(this.getWizardParameters());
+        //m_parameterListTree.addNodes(this.getWizardParameters());
         m_parameterListTree.addNodes(this.getTableParameters());
         m_parameterListTree.addNodes(this.getGeneralParameters());
         m_parameterListTree.expandAllRows();

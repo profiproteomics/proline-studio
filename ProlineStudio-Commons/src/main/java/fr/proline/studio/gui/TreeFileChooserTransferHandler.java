@@ -111,8 +111,7 @@ public class TreeFileChooserTransferHandler extends TransferHandler {
                 for(int i = 0; i<transferredFiles.size(); i++){
                     indices.add(index+i);
                 }
-                
-                System.out.println("breakpoint");
+
                 
                 if(model.isCorruptionPossible(indices)){
                     JOptionPane.showMessageDialog(null, "Existing links may be corrupted by the association(s).", "Warning", JOptionPane.WARNING_MESSAGE);

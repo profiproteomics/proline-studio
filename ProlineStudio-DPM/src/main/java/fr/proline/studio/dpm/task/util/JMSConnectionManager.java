@@ -79,7 +79,7 @@ public class JMSConnectionManager {
     private int m_connectionState;//Connection current state
 
     public String m_jmsServerHost = null;/* Default = HornetQ Proline Prod Grenoble = "132.168.72.129" */
-    public int m_jmsServerPort = 5445;
+    public static int m_jmsServerPort = 5445;
 
     private Connection m_connection = null;
     private Queue m_serviceQueue = null;

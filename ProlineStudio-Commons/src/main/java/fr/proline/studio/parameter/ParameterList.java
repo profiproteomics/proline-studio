@@ -36,7 +36,7 @@ public class ParameterList extends ArrayList<AbstractParameter> {
         return m_name;
     }
 
-    public String getPrefixName(){
+    public String getPrefixName() {
        return m_name.replaceAll(" ", "_") + ".";
     }
 
@@ -47,7 +47,7 @@ public class ParameterList extends ArrayList<AbstractParameter> {
         }
 
         Preferences preferences = NbPreferences.root();
-        String prefixKey = m_name.replaceAll(" ", "_") + ".";
+        String prefixKey = getPrefixName();
 
         m_parametersPanel = new JPanel();
         m_parametersPanel.setLayout(new GridBagLayout());
@@ -66,9 +66,6 @@ public class ParameterList extends ArrayList<AbstractParameter> {
         for (int i = 0; i < nbParameters; i++) {
             AbstractParameter parameter = get(i);
 
-            String parameterName = parameter.getName();
-            String suffixKey = parameterName.replaceAll(" ", "_");
-
             c.gridx = 0;
             c.weightx = 0;
             JLabel l = null;
@@ -79,7 +76,7 @@ public class ParameterList extends ArrayList<AbstractParameter> {
                 m_parametersPanel.add(l, c);
             }
 
-            String parameterValue = preferences.get(prefixKey + suffixKey, null);
+            String parameterValue = readParameter(preferences,parameter, prefixKey);
 
 
             if (parameter.hasComponent()) {
@@ -154,14 +151,13 @@ public class ParameterList extends ArrayList<AbstractParameter> {
 
     public void completePanel(JPanel p, GridBagConstraints c) {
         Preferences preferences = NbPreferences.root();
-        String prefixKey = m_name.replaceAll(" ", "_") + ".";
+        String prefixKey = getPrefixName();
 
         int nbParameters = size();
         for (int i = 0; i < nbParameters; i++) {
             AbstractParameter parameter = get(i);
 
-            String parameterName = parameter.getName();
-            String suffixKey = parameterName.replaceAll(" ", "_");
+            String parameterValue = readParameter(preferences,parameter, prefixKey);
 
             c.gridy++;
 
@@ -171,7 +167,6 @@ public class ParameterList extends ArrayList<AbstractParameter> {
             l.setHorizontalAlignment(JLabel.RIGHT);
             p.add(l, c);
 
-            String parameterValue = preferences.get(prefixKey + suffixKey, null);
 
             if (parameter.hasComponent()) {
                 c.gridx = 1;
@@ -182,42 +177,16 @@ public class ParameterList extends ArrayList<AbstractParameter> {
         }
     }
 
+
+    
     public void updateIsUsed(Preferences preferences) {
-        String prefixKey = m_name.replaceAll(" ", "_") + ".";
+        String prefixKey = getPrefixName();
 
         int nbParameters = size();
         for (int i = 0; i < nbParameters; i++) {
             AbstractParameter parameter = get(i);
 
-            String parameterKey = parameter.getKey();
-            String suffixKey = parameterKey.replaceAll(" ", "_");
-
-            String key = prefixKey + suffixKey;
-
-
-            String parameterValue = preferences.get(key, null);
-
-            //JPM.WART ------------
-            if (parameterValue == null) {
-                // no value found, for backward compatibility, load the parameter from the name as a key (there was a bug, name was used as the key)
-                parameterKey = parameter.getName();
-                suffixKey = parameterKey.replaceAll(" ", "_");
-
-                key = prefixKey + suffixKey;
-
-                parameterValue = preferences.get(key, null);
-            }
-            if (parameterValue == null) {
-                // no value found, for backward compatibility, load the parameter from the backward compatible key 
-                parameterKey = parameter.getBackwardCompatibleKey();
-                if (parameterKey != null) {
-                    suffixKey = parameterKey.replaceAll(" ", "_");
-
-                    key = prefixKey + suffixKey;
-
-                    parameterValue = preferences.get(key, null);
-                }
-            }
+            String parameterValue = readParameter(preferences,parameter, prefixKey);
             // -------------
             
             
@@ -236,6 +205,45 @@ public class ParameterList extends ArrayList<AbstractParameter> {
         }
     }
 
+    private String readParameter(Preferences preferences, AbstractParameter parameter, String prefixKey) {
+        
+        String parameterKey = parameter.getKey();
+        String suffixKey = parameterKey.replaceAll(" ", "_");
+
+        String key = prefixKey + suffixKey;
+
+        String parameterValue = preferences.get(key, null);
+
+        //JPM.WART ------------
+        if (parameterValue == null) {
+            // no value found, for backward compatibility, load the parameter from the name as a key (there was a bug, name was used as the key)
+            parameterKey = parameter.getName();
+            suffixKey = parameterKey.replaceAll(" ", "_");
+
+            key = prefixKey + suffixKey;
+
+            parameterValue = preferences.get(key, null);
+        }
+        if (parameterValue == null) {
+            // no value found, for backward compatibility, load the parameter from the backward compatible key 
+            parameterKey = parameter.getBackwardCompatibleKey();
+            if (parameterKey != null) {
+                suffixKey = parameterKey.replaceAll(" ", "_");
+
+                key = prefixKey + suffixKey;
+
+                parameterValue = preferences.get(key, null);
+            }
+        }
+        // -------------
+
+        return parameterValue;
+    }
+    private String readParameter(Preferences preferences, AbstractParameter parameter) {
+        String prefixKey = getPrefixName();
+        return readParameter(preferences, parameter, prefixKey);
+    }
+    
     public void initDefaults() {
 
         int nbParameters = size();
@@ -248,7 +256,7 @@ public class ParameterList extends ArrayList<AbstractParameter> {
 
     public void saveParameters(Preferences preferences) {
 
-        String prefixKey = m_name.replaceAll(" ", "_") + ".";
+        String prefixKey = getPrefixName();
 
         int nbParameters = size();
         for (int i = 0; i < nbParameters; i++) {
@@ -292,43 +300,13 @@ public class ParameterList extends ArrayList<AbstractParameter> {
 
     public void loadParameters(Preferences preferences) {
 
-        String prefixKey = m_name.replaceAll(" ", "_") + ".";
+        String prefixKey = getPrefixName();
 
         int nbParameters = size();
         for (int i = 0; i < nbParameters; i++) {
             AbstractParameter parameter = get(i);
 
-            
-            // load the parameter from the correct key
-            String parameterKey = parameter.getKey();
-            String suffixKey = parameterKey.replaceAll(" ", "_");
-
-            String key = prefixKey + suffixKey;
-
-            String value = preferences.get(key, null);
-            
-            //JPM.WART ------------
-            if (value == null) {
-                // no value found, for backward compatibility, load the parameter from the name as a key (there was a bug, name was used as the key)
-                parameterKey = parameter.getName();
-                suffixKey = parameterKey.replaceAll(" ", "_");
-
-                key = prefixKey + suffixKey;
-
-                value = preferences.get(key, null);
-            }
-            if (value == null) {
-                // no value found, for backward compatibility, load the parameter from the backward compatible key 
-               parameterKey = parameter.getBackwardCompatibleKey();
-                if (parameterKey != null) {
-                    suffixKey = parameterKey.replaceAll(" ", "_");
-
-                    key = prefixKey + suffixKey;
-
-                    value = preferences.get(key, null);
-                }
-            }
-            // -------------
+            String value = readParameter(preferences,parameter, prefixKey);
 
             if (value == null) {
                  continue;

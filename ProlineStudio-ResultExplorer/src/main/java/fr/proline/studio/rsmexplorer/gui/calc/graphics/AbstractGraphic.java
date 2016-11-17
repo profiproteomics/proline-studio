@@ -84,7 +84,7 @@ public abstract class AbstractGraphic implements CheckParameterInterface {
             win.open();
             win.requestActive();
         } else {
-            WindowBox windowBox = WindowBoxFactory.getGraphicsWindowBox(dataName, m_graphicsModelInterface);
+            WindowBox windowBox = WindowBoxFactory.getGraphicsWindowBox(dataName, m_graphicsModelInterface, true);
             DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(windowBox);
             win.open();
             win.requestActive();
@@ -96,7 +96,7 @@ public abstract class AbstractGraphic implements CheckParameterInterface {
         if (m_generatedImage != null) {
             return WindowBoxFactory.getImageWindowBox(dataName+" "+functionName, m_generatedImage);
         } else {
-            return WindowBoxFactory.getGraphicsWindowBox(dataName, m_graphicsModelInterface);
+            return WindowBoxFactory.getGraphicsWindowBox(dataName, m_graphicsModelInterface, true);
         }
     }
     

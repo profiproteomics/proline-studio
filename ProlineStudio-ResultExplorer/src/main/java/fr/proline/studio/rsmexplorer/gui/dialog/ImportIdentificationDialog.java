@@ -1067,7 +1067,7 @@ public class ImportIdentificationDialog extends DefaultDialog {
         });
         
         m_decoyComboBox = new JComboBox(DECOY_VALUES);
-        final ObjectParameter<String> decoyParameter = new ObjectParameter<>("decoy_accession", "Decoy", m_decoyComboBox, DECOY_VALUES, DECOY_VALUES_ASSOCIATED_KEYS, 0, null);
+        final ObjectParameter<String> decoyParameter = new ObjectParameter<>("decoy_type", "Decoy", m_decoyComboBox, DECOY_VALUES, DECOY_VALUES_ASSOCIATED_KEYS, 0, null);
         parameterList.add(decoyParameter);
         m_decoyComboBox.addActionListener(new ActionListener() {
 

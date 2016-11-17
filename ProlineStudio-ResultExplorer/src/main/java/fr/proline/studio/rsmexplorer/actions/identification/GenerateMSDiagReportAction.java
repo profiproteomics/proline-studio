@@ -108,7 +108,7 @@ public class GenerateMSDiagReportAction extends AbstractRSMAction {
         
             // prepare window box
             //WindowBox wbox = WindowBoxFactory.getMSDiagWindowBox(dataSet.getName()+" MSDiag" , resultMessages.get(0).toString());
-        	WindowBox wbox = WindowBoxFactory.getMSDiagWindowBox(dataSet.getName()+" Statistics" , (HashMap<String,String>) resultMessages.get(0));
+        	WindowBox wbox = WindowBoxFactory.getMSDiagWindowBox(dataSet.getName()+" Quality Control" , (HashMap<String,String>) resultMessages.get(0));
             wbox.setEntryData(dataSet.getProject().getId(), rset); 
             
             // open a window to display the window box
@@ -117,7 +117,7 @@ public class GenerateMSDiagReportAction extends AbstractRSMAction {
             win.requestActive();
         } else {
             
-            final WindowBox wbox = WindowBoxFactory.getMSDiagWindowBox(dataSet.getName()+" Statistics" , (HashMap<String,String>) resultMessages.get(0)); 
+            final WindowBox wbox = WindowBoxFactory.getMSDiagWindowBox(dataSet.getName()+" Quality Control" , (HashMap<String,String>) resultMessages.get(0)); 
             // open a window to display the window box
             DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
             win.open();

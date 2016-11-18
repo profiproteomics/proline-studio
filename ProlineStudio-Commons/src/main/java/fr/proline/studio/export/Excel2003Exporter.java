@@ -67,46 +67,45 @@ public class Excel2003Exporter implements ExporterInterface {
     @Override
     public void addCell(String t, ArrayList<ExportSubStringFont> fonts) {
 
-        HSSFRichTextString rich = new HSSFRichTextString(t);
-
-        for (int i = 0; i < fonts.size(); i++) {
-
-            int startIndex = fonts.get(i).getStartIndex();
-            int stopIndex = fonts.get(i).getStopIndex();
-            short color = fonts.get(i).getColor();
-
-            HSSFFont currentFont = (HSSFFont) m_wb.createFont();
-
-            if (currentFont != null) {
-                currentFont.setColor(color);
-
-                if (fonts.get(i).getTextWeight() == Font.BOLD) {
-                    currentFont.setBold(true);
-                }else if(fonts.get(i).getTextWeight() == Font.ITALIC){
-                    currentFont.setItalic(true);
-                }
-
-                if (startIndex >= 0 && stopIndex <= t.length()) {
-                    rich.applyFont(startIndex, stopIndex, currentFont);
-                }
-            }
-        }
-
         Cell cell = m_row.createCell(m_curCell);
-        if (NumberUtils.isNumber(t)) {
+
+        if ((getDecorated()) && (fonts != null)) {
+            
+            HSSFRichTextString rich = new HSSFRichTextString(t);
+            
+            for (int i = 0; i < fonts.size(); i++) {
+
+                int startIndex = fonts.get(i).getStartIndex();
+                int stopIndex = fonts.get(i).getStopIndex();
+                short color = fonts.get(i).getColor();
+
+                HSSFFont currentFont = (HSSFFont) m_wb.createFont();
+
+                if (currentFont != null) {
+                    currentFont.setColor(color);
+
+                    if (fonts.get(i).getTextWeight() == Font.BOLD) {
+                        currentFont.setBold(true);
+                    } else if (fonts.get(i).getTextWeight() == Font.ITALIC) {
+                        currentFont.setItalic(true);
+                    }
+
+                    if (startIndex >= 0 && stopIndex <= t.length()) {
+                        rich.applyFont(startIndex, stopIndex, currentFont);
+                    }
+                }
+            }
+            
+            cell.setCellValue(rich);
+        } else if (NumberUtils.isNumber(t)) {
             double d = Double.parseDouble(t);
-            if (!this.getDecorated()) {
-                cell.setCellValue(d);
-            } else {
-                cell.setCellValue(rich);
-            }
+
+            cell.setCellValue(d);
+
         } else {
-            if (!this.getDecorated()) {
-                cell.setCellValue(t);
-            } else {
-                cell.setCellValue(rich);
-            }
+            cell.setCellValue(t);
         }
+        
         m_curCell++;
 
     }
@@ -120,12 +119,12 @@ public class Excel2003Exporter implements ExporterInterface {
 
     @Override
     public void setDecorated(boolean decorated) {
-        this.m_decorated = decorated;
+        m_decorated = decorated;
     }
 
     @Override
     public boolean getDecorated() {
-        return this.m_decorated;
+        return m_decorated;
     }
 
 }

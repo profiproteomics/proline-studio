@@ -51,11 +51,11 @@ public class SelectRawFilesPanel extends JPanel {
 
     private FlatDesignTableModel m_model = null;
     private FlatDesignTable m_table = null;
-    private HashMap<String, XICBiologicalSampleAnalysisNode> m_hashtable;
+    private final HashMap<String, XICBiologicalSampleAnalysisNode> m_hashtable;
     private XICDropZone m_dropZone;
     private XICDropZoneInfo m_dropZoneInfo;
-    private String[] suffix = {".raw", ".mzdb"};
-    private TreeFileChooserTransferHandler m_transferHandler;
+    private final String[] SUFFIX = {".raw", ".mzdb"};
+    private final TreeFileChooserTransferHandler m_transferHandler;
     private AbstractNode m_rootNode;
 
     public static SelectRawFilesPanel getPanel(AbstractNode rootNode) {

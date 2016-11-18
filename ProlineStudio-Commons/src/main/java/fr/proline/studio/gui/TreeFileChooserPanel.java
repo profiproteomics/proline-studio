@@ -6,9 +6,15 @@ import java.awt.Component;
 import java.awt.Graphics;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import javax.swing.DefaultListModel;
 import javax.swing.Icon;
+import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -34,23 +40,27 @@ public class TreeFileChooserPanel extends JPanel {
 
     protected TreeFileChooser m_tree;
     protected DefaultTreeModel m_model;
+    private DefaultMutableTreeNode m_top;
+    private FileSystemView m_fileSystemView;
 
     public TreeFileChooserPanel(FileSystemView fileSystemView, TreeFileChooserTransferHandler transferHandler) {
 
+        m_fileSystemView = fileSystemView;
+
         setLayout(new GridBagLayout());
 
-        DefaultMutableTreeNode top = new DefaultMutableTreeNode(new IconData(IconManager.getIcon(IconManager.IconType.COMPUTER_NETWORK), null, "Server"));
+        m_top = new DefaultMutableTreeNode(new IconData(IconManager.getIcon(IconManager.IconType.COMPUTER_NETWORK), null, "Server"));
 
         DefaultMutableTreeNode node;
 
         File[] roots = fileSystemView.getRoots();
         for (int k = 0; k < roots.length; k++) {
             node = new DefaultMutableTreeNode(new IconData(IconManager.getIcon(IconManager.IconType.FOLDER), IconManager.getIcon(IconManager.IconType.FOLDER_EXPANDED), new FileNode(roots[k])));
-            top.add(node);
+            m_top.add(node);
             node.add(new DefaultMutableTreeNode(Boolean.TRUE));
         }
 
-        m_model = new DefaultTreeModel(top);
+        m_model = new DefaultTreeModel(m_top);
         m_tree = new TreeFileChooser(m_model);
 
         if (transferHandler != null) {
@@ -84,9 +94,42 @@ public class TreeFileChooserPanel extends JPanel {
 
         c.gridx = 0;
         c.gridy = 0;
-        c.weightx = 1;
-        c.weighty = 1;
+        c.gridheight = 3;
+        c.weightx = 1.0;
+        c.weighty = 1.0;
         add(s, c);
+
+        c.gridx++;
+        c.gridheight = 1;
+        c.weightx = 0;
+        c.weighty = 0;
+
+        JButton updateButton = new JButton(IconManager.getIcon(IconManager.IconType.UPDATE));
+        updateButton.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                updateTree();
+            }
+        });
+        add(updateButton, c);
+
+    }
+
+    private void updateTree() {
+        m_top.removeAllChildren();
+        m_model.reload(m_top);
+
+        DefaultMutableTreeNode node;
+
+        File[] roots = m_fileSystemView.getRoots();
+        for (int k = 0; k < roots.length; k++) {
+            node = new DefaultMutableTreeNode(new IconData(IconManager.getIcon(IconManager.IconType.FOLDER), IconManager.getIcon(IconManager.IconType.FOLDER_EXPANDED), new FileNode(roots[k])));
+            m_top.add(node);
+            node.add(new DefaultMutableTreeNode(Boolean.TRUE));
+        }
+
+        m_model.reload();
 
     }
 

@@ -612,8 +612,19 @@ public class GraphPanel extends JPanel implements MouseListener, MouseMotionList
         if (m_overObject != null) {
 
             int nbObjectSelected = m_selectedObjectsArray.size();
+            
+            
+            // correct the mouse drag, so the object can not go to negative values
+            int deltaX = x - m_mouseDragX;
+            int deltaY = y - m_mouseDragY;
             for (int i = 0; i < nbObjectSelected; i++) {
-                m_selectedObjectsArray.get(i).move(x - m_mouseDragX, y - m_mouseDragY);
+                deltaX = m_selectedObjectsArray.get(i).correctMoveX(deltaX);
+                deltaY = m_selectedObjectsArray.get(i).correctMoveY(deltaY);
+            }
+            
+            // move objects
+            for (int i = 0; i < nbObjectSelected; i++) {
+                m_selectedObjectsArray.get(i).move(deltaX, deltaY);
             }
             m_mouseDragX = x;
             m_mouseDragY = y;

@@ -444,6 +444,21 @@ public abstract class GraphNode extends AbstractConnectedGraphObject {
         }
     }
     
+    @Override
+    public int correctMoveX(int dx) {
+        if ((m_x+dx) <0) {
+            return -m_x;
+        } 
+        return dx;
+    }
+    @Override
+    public int correctMoveY(int dy) {
+        if ((m_y+dy) <0) {
+            return -m_y;
+        } 
+        return dy;
+    }
+    
     public boolean hideAction() {
         return m_graphNodeAction.setHighlighted(false) | m_menuAction.setHighlighted(false);
     }

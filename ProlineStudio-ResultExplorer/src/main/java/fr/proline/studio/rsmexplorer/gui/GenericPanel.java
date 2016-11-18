@@ -315,7 +315,7 @@ public class GenericPanel extends JPanel implements DataBoxPanelInterface, Globa
 
         @Override
         public String getExportRowCell(int row, int col) {
-            return ((ExportModelInterface) getModel()).getExportRowCell(row, col);
+            return ((ExportModelInterface) getModel()).getExportRowCell(convertRowIndexToModel(row), convertColumnIndexToModel(col));
         }
 
         @Override

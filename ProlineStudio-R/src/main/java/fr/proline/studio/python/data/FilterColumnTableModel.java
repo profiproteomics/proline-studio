@@ -145,11 +145,13 @@ public class FilterColumnTableModel extends DecoratedTableModel implements Child
     public int[] getKeysColumn() {
         
         int size = 0;
-        int[] parentKeysColumn = m_parentModel.getKeysColumn();;
-        for (int i=0;i<parentKeysColumn.length;i++) {
-            Integer inIndex = m_reverseColumnsKept.get(i);
-            if (inIndex != null) {
-                size++;
+        int[] parentKeysColumn = m_parentModel.getKeysColumn();
+        if (parentKeysColumn != null) {
+            for (int i = 0; i < parentKeysColumn.length; i++) {
+                Integer inIndex = m_reverseColumnsKept.get(i);
+                if (inIndex != null) {
+                    size++;
+                }
             }
         }
         

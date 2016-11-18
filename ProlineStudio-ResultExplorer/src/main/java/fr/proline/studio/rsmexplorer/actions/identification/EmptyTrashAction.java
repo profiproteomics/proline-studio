@@ -5,7 +5,6 @@ import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.DatabaseDataManager;
 import fr.proline.studio.dam.data.ClearProjectData;
-import fr.proline.studio.dam.taskinfo.TaskInfoManager;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseClearProjectTask;
 import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
@@ -26,7 +25,6 @@ import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import fr.proline.studio.rsmexplorer.tree.quantitation.QuantitationTree;
 import java.util.ArrayList;
 import java.util.List;
-import javax.swing.JOptionPane;
 import javax.swing.tree.DefaultTreeModel;
 import org.openide.util.NbBundle;
 import org.openide.windows.WindowManager;
@@ -179,7 +177,7 @@ public class EmptyTrashAction extends AbstractRSMAction {
                             n.removeAllChildren();
                             treeModel.nodeStructureChanged(n);
                             
-                            
+                            /*
                             // check if user also wants to delete from database
                             InfoDialog exitDialog = new InfoDialog(WindowManager.getDefault().getMainWindow(), InfoDialog.InfoType.WARNING, "Do you agree with this action?", "We suggest you also clean the database");
                             exitDialog.setButtonName(OptionDialog.BUTTON_OK, "Yes");
@@ -248,7 +246,7 @@ public class EmptyTrashAction extends AbstractRSMAction {
                             };
                             clearProjectDialog.setTask(task);
                             clearProjectDialog.setVisible(true);
-
+                            */
                         } else {
                             treeModel.nodeChanged(n);
                         }

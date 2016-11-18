@@ -16,7 +16,5 @@ public class GlobalValues {
     
     /*if true the help text will be redirected to proline.profiproteomics.fr , otherwise on biodev*/
     public final static  Boolean PUBLIC_RELEASE_VERSION = true;
-    
-
-    
+        
 }

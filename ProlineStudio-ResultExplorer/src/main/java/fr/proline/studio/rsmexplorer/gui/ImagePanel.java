@@ -1,5 +1,6 @@
 package fr.proline.studio.rsmexplorer.gui;
 
+import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.pattern.AbstractDataBox;
@@ -12,6 +13,7 @@ import java.awt.Image;
 import java.awt.event.ActionListener;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JToolBar;
 
 /**
  *
@@ -24,6 +26,8 @@ public class ImagePanel extends HourglassPanel implements DataBoxPanelInterface 
     private Dimension m_dimension = null;
     private Image m_img = null;
 
+    private ImageDisplayPanel m_displayPanel;
+    
     public ImagePanel() {
 
         setLayout(new BorderLayout());
@@ -31,14 +35,30 @@ public class ImagePanel extends HourglassPanel implements DataBoxPanelInterface 
         m_dimension = new Dimension(0, 0);
         m_img = null;
 
-        ImageDisplayPanel displayPanel = new ImageDisplayPanel();
+        m_displayPanel = new ImageDisplayPanel();
         JScrollPane scrollPane = new JScrollPane();
         scrollPane.setBackground(Color.white);
-        scrollPane.setViewportView(displayPanel);
+        scrollPane.setViewportView(m_displayPanel);
 
         add(scrollPane, BorderLayout.CENTER);
+        
+        JToolBar toolbar = initToolbar();
+        add(toolbar, BorderLayout.WEST);
     }
 
+    
+    public final JToolBar initToolbar() {
+            
+        JToolBar toolbar = new JToolBar(JToolBar.VERTICAL);
+        toolbar.setFloatable(false);
+
+        ExportButton exportImageButton = new ExportButton("Graphic", m_displayPanel);
+        toolbar.add(exportImageButton);
+
+        return toolbar;
+    }
+    
+    
     public void setImage(Image img) {
         m_img = img;
         m_dimension.width = img.getWidth(null);

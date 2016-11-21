@@ -178,7 +178,7 @@ public class ConvertRawDialog extends DefaultDialog {
             @Override
             public void valueChanged(String value, Object associatedValue) {
                 showParameter(m_deleteMzdb, uploadCheckbox.isSelected(), (boolean) m_deleteMzdb.getObjectValue());
-                showParameter(m_uploadLabelParameter, uploadCheckbox.isSelected(), (boolean) m_deleteMzdb.getObjectValue());
+                showParameter(m_uploadLabelParameter, uploadCheckbox.isSelected(), b);
                 updateParameterListPanel();
             }
 

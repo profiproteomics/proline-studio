@@ -199,9 +199,9 @@ public class WindowBoxFactory {
 
     }
 
-    public static WindowBox getGraphicsWindowBox(String fullName, AbstractDataBox srcDatabox) {
+    public static WindowBox getGraphicsWindowBox(String fullName, AbstractDataBox srcDatabox, boolean locked) {
         AbstractDataBox[] boxes = new AbstractDataBox[1];
-        boxes[0] = new DataboxGraphics(true);
+        boxes[0] = new DataboxGraphics(locked);
         srcDatabox.addNextDataBox(boxes[0]);
         IconManager.IconType iconType = IconManager.IconType.CHART;
         WindowBox winBox = new WindowBox(fullName, generatePanel(boxes), boxes[0], IconManager.getImage(iconType));
@@ -209,9 +209,9 @@ public class WindowBoxFactory {
         return winBox;
     }
 
-    public static WindowBox getGraphicsWindowBox(String fullName, CompareDataInterface srcDataInterface) {
+    public static WindowBox getGraphicsWindowBox(String fullName, CompareDataInterface srcDataInterface, boolean locked) {
         AbstractDataBox[] boxes = new AbstractDataBox[1];
-        boxes[0] = new DataboxGraphics(true);
+        boxes[0] = new DataboxGraphics(locked);
         IconManager.IconType iconType = IconManager.IconType.CHART;
         WindowBox winBox = new WindowBox(fullName, generatePanel(boxes), boxes[0], IconManager.getImage(iconType));
         boxes[0].setEntryData(srcDataInterface);

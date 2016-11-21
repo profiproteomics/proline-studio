@@ -57,6 +57,7 @@ public class ChangeTypicalProteinPanel extends javax.swing.JPanel {
         for(int i=0; i<NBR_MAX_RULES; i++){
             preferences.put("TypicalProteinRegex_"+i, m_regexTextFields[i].getText().trim());        
             preferences.putBoolean("TypicalProteinRegexOnAccession_"+i, (m_regexTargetComboboxs[i].getSelectedIndex() == 0));
+            preferences.putBoolean("TypicalProteinFullRegex_"+i, m_allowFullRegexCheckBoxs[i].isSelected());
         }
     }
     
@@ -71,6 +72,8 @@ public class ChangeTypicalProteinPanel extends javax.swing.JPanel {
             } else {
                 m_regexTargetComboboxs[i].setSelectedIndex(1);
             }
+            boolean fullRegex = preferences.getBoolean("TypicalProteinFullRegex_"+i, Boolean.FALSE);
+            m_allowFullRegexCheckBoxs[i].setSelected(fullRegex);
         }
     }
     

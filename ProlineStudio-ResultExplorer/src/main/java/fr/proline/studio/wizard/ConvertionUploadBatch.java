@@ -17,27 +17,23 @@ import java.util.concurrent.TimeUnit;
  *
  * @author AK249877
  */
-public class ConversionBatch implements Runnable, ConversionListener {
+public class ConvertionUploadBatch implements Runnable, ConversionListener {
 
     private ThreadPoolExecutor m_conversionExecutor, m_uploadExecutor;
     private ArrayList<File> m_rawFiles, m_mzdbFiles;
     private ConversionSettings m_conversionSettings;
-    private String m_destinationLabel;
+    private final String m_destinationLabel;
 
-    public ConversionBatch(ArrayList<File> rawFiles, ConversionSettings conversionSettings) {
+    public ConvertionUploadBatch(ArrayList<File> rawFiles, ConversionSettings conversionSettings, String destinationLabel) {
         m_rawFiles = rawFiles;
         m_conversionSettings = conversionSettings;
-
+        m_destinationLabel = destinationLabel;
+        
         m_conversionExecutor = (ThreadPoolExecutor) Executors.newFixedThreadPool(1);
 
         if (m_conversionSettings.getUploadAfterConversion()) {
             m_uploadExecutor = (ThreadPoolExecutor) Executors.newFixedThreadPool(5);
-            m_mzdbFiles = new ArrayList<File>();
-            
-            ArrayList<String> labels = ServerFileSystemView.getServerFileSystemView().getLabels(RootInfo.TYPE_MZDB_FILES);
-            if(labels.size()>0){
-                m_destinationLabel = labels.get(0);
-            }
+            m_mzdbFiles = new ArrayList<File>();          
         }
     }
 

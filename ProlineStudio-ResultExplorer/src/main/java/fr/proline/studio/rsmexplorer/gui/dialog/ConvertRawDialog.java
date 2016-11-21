@@ -5,16 +5,19 @@
  */
 package fr.proline.studio.rsmexplorer.gui.dialog;
 
+import fr.proline.studio.dpm.serverfilesystem.RootInfo;
+import fr.proline.studio.dpm.serverfilesystem.ServerFileSystemView;
 import fr.proline.studio.gui.DefaultDialog;
 import static fr.proline.studio.gui.DefaultDialog.BUTTON_CANCEL;
 import static fr.proline.studio.gui.DefaultDialog.BUTTON_OK;
 import fr.proline.studio.parameter.AbstractLinkedParameters;
 import fr.proline.studio.parameter.BooleanParameter;
+import fr.proline.studio.parameter.ObjectParameter;
 import fr.proline.studio.parameter.ParameterError;
 import fr.proline.studio.parameter.ParameterList;
 import fr.proline.studio.parameter.StringParameter;
 import fr.proline.studio.utils.IconManager;
-import fr.proline.studio.wizard.ConversionBatch;
+import fr.proline.studio.wizard.ConvertionUploadBatch;
 import fr.proline.studio.wizard.ConversionSettings;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -37,6 +40,7 @@ import javax.swing.Box;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JList;
 import javax.swing.JPanel;
@@ -57,13 +61,21 @@ public class ConvertRawDialog extends DefaultDialog {
     private JList m_fileList;
     private JScrollPane m_fileListScrollPane;
     private JButton m_addFileButton, m_removeFileButton;
-    private ParameterList m_parameterList;
+    private static ParameterList m_parameterList;
     private BooleanParameter m_deleteMzdb, m_deleteRaw, m_uploadMzdb;
     private StringParameter m_converterPath, m_outputPath;
+    private static ObjectParameter m_uploadLabelParameter;
 
     public static ConvertRawDialog getDialog(Window parent) {
         if (m_singletonDialog == null) {
             m_singletonDialog = new ConvertRawDialog(parent);
+        }else {
+            ArrayList<String> labels = ServerFileSystemView.getServerFileSystemView().getLabels(RootInfo.TYPE_MZDB_FILES);
+            Object[] associatedTable = labels.toArray(new String[labels.size()]);
+            Object[] objectTable = labels.toArray(new String[labels.size()]);
+            m_uploadLabelParameter.updateAssociatedObjects(associatedTable);
+            m_uploadLabelParameter.updateObjects(objectTable);
+            m_parameterList.loadParameters(NbPreferences.root());
         }
 
         return m_singletonDialog;
@@ -146,6 +158,14 @@ public class ConvertRawDialog extends DefaultDialog {
         JCheckBox uploadCheckbox = new JCheckBox("Upload .mzdb file successful conversion");
         m_uploadMzdb = new BooleanParameter("Upload_after_conversion", "Upload after conversion", uploadCheckbox, false);
         m_parameterList.add(m_uploadMzdb);
+        
+        ArrayList<String> labels = ServerFileSystemView.getServerFileSystemView().getLabels(RootInfo.TYPE_MZDB_FILES);
+
+        Object[] associatedTable = labels.toArray(new String[labels.size()]);
+        JComboBox namingComboBox = new JComboBox(associatedTable);
+        Object[] objectTable = labels.toArray(new String[labels.size()]);
+        m_uploadLabelParameter = new ObjectParameter("MZDB_MOUNT_LABEL", "Server's mounting point", namingComboBox, associatedTable, objectTable, 0, null);
+        m_parameterList.add(m_uploadLabelParameter);
 
         JCheckBox mzdbCheckbox = new JCheckBox("Delete mzdb file after a successful upload");
         m_deleteMzdb = new BooleanParameter("Delete_mzdb_file_after_a_successful_upload", "Delete mzdb file after a successful upload", mzdbCheckbox, false);
@@ -158,6 +178,7 @@ public class ConvertRawDialog extends DefaultDialog {
             @Override
             public void valueChanged(String value, Object associatedValue) {
                 showParameter(m_deleteMzdb, uploadCheckbox.isSelected(), (boolean) m_deleteMzdb.getObjectValue());
+                showParameter(m_uploadLabelParameter, uploadCheckbox.isSelected(), (boolean) m_deleteMzdb.getObjectValue());
                 updateParameterListPanel();
             }
 
@@ -304,10 +325,13 @@ public class ConvertRawDialog extends DefaultDialog {
         }
         
         ConversionSettings settings = new ConversionSettings(m_converterPath.getStringValue(), m_outputPath.getStringValue(), (boolean)m_deleteRaw.getObjectValue(), (boolean)m_uploadMzdb.getObjectValue(), (boolean)m_deleteMzdb.getObjectValue());
-        ConversionBatch conversionBatch = new ConversionBatch(rawFiles, settings);
+        ConvertionUploadBatch conversionBatch = new ConvertionUploadBatch(rawFiles, settings, m_uploadLabelParameter.getStringValue());
         
         Thread thread = new Thread(conversionBatch);
         thread.start();
+        
+        DefaultListModel listModel = (DefaultListModel) m_fileList.getModel();
+        listModel.removeAllElements();
         
         return true;
     }

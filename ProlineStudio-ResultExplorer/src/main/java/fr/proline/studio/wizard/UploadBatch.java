@@ -24,15 +24,12 @@ public class UploadBatch implements Runnable {
     private final boolean m_deleteMzdb;
     private String m_destinationLabel;
 
-    public UploadBatch(ArrayList<File> files, boolean deleteMzdb) {
-        m_deleteMzdb = deleteMzdb;
-        m_executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(5);
+    public UploadBatch(ArrayList<File> files, boolean deleteMzdb, String destinationLabel) {
         m_files = files;
+        m_deleteMzdb = deleteMzdb;
+        m_destinationLabel = destinationLabel;
+        m_executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(5);
 
-        ArrayList<String> labels = ServerFileSystemView.getServerFileSystemView().getLabels(RootInfo.TYPE_MZDB_FILES);
-        if (labels.size() > 0) {
-            m_destinationLabel = labels.get(0);
-        }
     }
 
     public void addFile(File f) {

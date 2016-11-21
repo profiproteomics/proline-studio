@@ -74,10 +74,10 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
         setTitle(DIALOG_TITLE);
 
         setSize(new Dimension(1024, 480));
-        this.setMinimumSize(new Dimension(1024, 360));
+        setMinimumSize(new Dimension(1024, 360));
         setResizable(true);
 
-        this.setHelpURL("https://bioproj.extra.cea.fr/docs/proline/doku.php?id=how_to:studio:preferences");
+        setHelpURL("https://bioproj.extra.cea.fr/docs/proline/doku.php?id=how_to:studio:preferences");
 
         setButtonVisible(BUTTON_CANCEL, true);
         setButtonName(BUTTON_OK, "OK");
@@ -88,14 +88,14 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
 
         m_preferences = NbPreferences.root();
 
-        setInternalComponent(this.createInternalComponent());
+        setInternalComponent(createInternalComponent());
 
     }
 
     private ParameterList getJMSParameterList() {
         m_jmsParameterList = new ParameterList(JMSConnectionManager.JMS_SETTINGS_PARAMLIST_KEY);
 
-        StringParameter serviceRequestQueueName = new StringParameter(JMSConnectionManager.SERVICE_REQUEST_QUEUE_NAME_KEY, "Service Request Queue Name", JTextField.class, JMSConnectionManager.SERVICE_REQUEST_QUEUE_NAME_KEY, 5, null);
+        StringParameter serviceRequestQueueName = new StringParameter(JMSConnectionManager.SERVICE_REQUEST_QUEUE_NAME_KEY, "Service Request Queue Name", JTextField.class, JMSConnectionManager.DEFAULT_SERVICE_REQUEST_QUEUE_NAME, 5, null);
         m_jmsParameterList.add(serviceRequestQueueName);
 
         /*
@@ -216,10 +216,10 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
         Object[] associatedTable = {"Automatic Column Size", "Fixed Column Size", "Smart Column Size"};
         JComboBox comboBox = new JComboBox(associatedTable);
         Object[] objectTable = {DecoratedTable.AUTOMATIC_COLUMNS_SIZE, DecoratedTable.FIXED_COLUMNS_SIZE, DecoratedTable.SMART_COLUMNS_SIZE};
-        ObjectParameter columnsParameter = new ObjectParameter(DecoratedTable.DEFAULT_COLUMNS_ARRANGEMENT_KEY, DecoratedTable.DEFAULT_COLUMNS_ARRANGEMENT_KEY, comboBox, associatedTable, objectTable, 2, null);
+        ObjectParameter columnsParameter = new ObjectParameter(DecoratedTable.DEFAULT_COLUMNS_ARRANGEMENT_KEY, DecoratedTable.DEFAULT_COLUMNS_ARRANGEMENT_NAME, comboBox, associatedTable, objectTable, 2, null);
         m_tablePrameterList.add(columnsParameter);
 
-        IntegerParameter defaultFixedColumnSize = new IntegerParameter(DecoratedTable.DEFAULT_WIDTH_KEY, DecoratedTable.DEFAULT_WIDTH_KEY, JTextField.class, 80, 10, 300);
+        IntegerParameter defaultFixedColumnSize = new IntegerParameter(DecoratedTable.DEFAULT_WIDTH_KEY, DecoratedTable.DEFAULT_WIDTH_NAME, JTextField.class, DecoratedTable.COLUMN_DEFAULT_WIDTH, DecoratedTable.COLUMN_MIN_WIDTH, DecoratedTable.COLUMN_MAX_WIDTH);
         m_tablePrameterList.add(defaultFixedColumnSize);
 
         m_tablePrameterList.loadParameters(m_preferences);
@@ -256,10 +256,10 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
         panel.setBorder(BorderFactory.createTitledBorder(DIALOG_TITLE));
 
         m_parameterListTree = new AbstractParameterListTree(TREE_ROOT_NAME, this, this);
-        m_parameterListTree.addNodes(this.getJMSParameterList());
-        //m_parameterListTree.addNodes(this.getWizardParameters());
-        m_parameterListTree.addNodes(this.getTableParameters());
-        m_parameterListTree.addNodes(this.getGeneralParameters());
+        m_parameterListTree.addNodes(getJMSParameterList());
+        //m_parameterListTree.addNodes(getWizardParameters());
+        m_parameterListTree.addNodes(getTableParameters());
+        m_parameterListTree.addNodes(getGeneralParameters());
         m_parameterListTree.expandAllRows();
 
         JScrollPane scrollPane = new JScrollPane(m_parameterListTree.getTree());
@@ -296,14 +296,14 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
 
     @Override
     protected boolean okCalled() {
-        ParameterError error = this.checkExistingLists();
+        ParameterError error = checkExistingLists();
         if (error != null) {
             setStatus(true, error.getErrorMessage());
             highlight(error.getParameterComponent());
             m_parameterListTree.getTree().setSelectionPath(new TreePath(TREE_ROOT_NAME));
             return false;
         }
-        this.saveExistingsLists();
+        saveExistingsLists();
 
         return true;
 

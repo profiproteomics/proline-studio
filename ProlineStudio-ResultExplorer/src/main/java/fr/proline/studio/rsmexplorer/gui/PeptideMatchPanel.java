@@ -325,7 +325,7 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
                         }
                     }
                     // prepare window box
-                    WindowBox wbox = WindowBoxFactory.getGraphicsWindowBox("Graphic", m_dataBox);
+                    WindowBox wbox = WindowBoxFactory.getGraphicsWindowBox("Graphic", m_dataBox, true);
 
                     // open a window to display the window box
                     DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);

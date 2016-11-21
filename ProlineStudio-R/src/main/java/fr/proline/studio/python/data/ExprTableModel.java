@@ -232,7 +232,7 @@ public class ExprTableModel extends DecoratedTableModel implements ChildModelInt
     @Override
     public Class getDataColumnClass(int columnIndex) {
         if (columnIndex >= m_parentModel.getColumnCount()) {
-            return Double.class;
+            return m_extraColumns.get(columnIndex-m_parentModel.getColumnCount()).getColumnClass();
         }
         
         if ((m_modifiedColumns != null) && (m_modifiedColumns.containsKey(columnIndex))) {
@@ -339,7 +339,7 @@ public class ExprTableModel extends DecoratedTableModel implements ChildModelInt
             if (o == null) {
                 return "";
             }
-            return ((Double) o).toString();
+            return o.toString();
         }
         
         if (m_modifiedColumns != null) {

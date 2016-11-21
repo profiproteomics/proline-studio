@@ -187,7 +187,7 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
                 case DataboxXicPeptideIon:
                     return new DataboxXicPeptideIon();
                 case DataboxGraphics:
-                    return new DataboxGraphics();
+                    return new DataboxGraphics(false);
                 case DataboxXicChildFeature:
                     return new DataboxChildFeature();
                 case DataboxMultiGraphics:

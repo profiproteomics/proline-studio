@@ -48,6 +48,12 @@ public abstract class AbstractGraphObject {
     
     public abstract AbstractGraphObject inside(int x, int y);
     public abstract void move(int dx, int dy);
+    public int correctMoveX(int dx) {
+        return dx;
+    }
+    public int correctMoveY(int dy) {
+        return dy;
+    }
     
     public abstract void delete();
 

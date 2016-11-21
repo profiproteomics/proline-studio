@@ -165,10 +165,12 @@ public class ConvertRawDialog extends DefaultDialog {
 
         m_uploadMzdb.addLinkedParameters(linkedParameters);
 
-        uploadCheckbox.setSelected(true);
-        uploadCheckbox.setSelected(false);
+        linkedParameters.valueChanged("", "");
 
-        return m_parameterList.getPanel();
+        JPanel parameterPanel = m_parameterList.getPanel();
+        parameterPanel.setBorder(BorderFactory.createTitledBorder(" Conversion & Upload Options "));
+        
+        return parameterPanel;
     }
 
     private JPanel createFileSelectionPanel() {

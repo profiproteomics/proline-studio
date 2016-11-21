@@ -93,7 +93,11 @@ public class UploadMzdbDialog extends DefaultDialog {
         m_parameter = new BooleanParameter("Delete_mzdb_file_after_a_successful_upload", "Delete mzdb file after a successful upload", checkbox, false);
         m_parameterList.add(m_parameter);
         m_parameterList.loadParameters(NbPreferences.root());
-        return m_parameterList.getPanel();
+        
+        JPanel parameterPanel = m_parameterList.getPanel();
+        parameterPanel.setBorder(BorderFactory.createTitledBorder(" Upload Options "));
+        
+        return parameterPanel;
     }
 
     private JPanel createFileSelectionPanel() {

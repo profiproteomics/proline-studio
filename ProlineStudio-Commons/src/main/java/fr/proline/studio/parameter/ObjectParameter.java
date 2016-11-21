@@ -15,7 +15,7 @@ import javax.swing.*;
  */
 public class ObjectParameter<E> extends AbstractParameter {
 
-    private final E[] m_objects;
+    private E[] m_objects;
     private Object[] m_associatedObjects = null;
     private final int m_defaultIndex;
     private AbstractParameterToString<E> m_paramToString = null;
@@ -46,6 +46,14 @@ public class ObjectParameter<E> extends AbstractParameter {
         if (paramToString != null) {
             comboBox.setRenderer(new ParameterComboboxRenderer(paramToString));
         }
+    }
+    
+    public void updateObjects(E[] objects){
+        m_objects = objects;
+    }
+    
+    public void updateAssociatedObjects(Object[] associatedObjects){
+        m_associatedObjects = associatedObjects;
     }
     
     @Override

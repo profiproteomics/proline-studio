@@ -35,6 +35,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.prefs.Preferences;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.DefaultListModel;
@@ -65,6 +66,7 @@ public class ConvertRawDialog extends DefaultDialog {
     private BooleanParameter m_deleteMzdb, m_deleteRaw, m_uploadMzdb;
     private StringParameter m_converterPath, m_outputPath;
     private static ObjectParameter m_uploadLabelParameter;
+    private String m_lastParentDirectory;
 
     public static ConvertRawDialog getDialog(Window parent) {
         if (m_singletonDialog == null) {
@@ -255,8 +257,11 @@ public class ConvertRawDialog extends DefaultDialog {
 
             @Override
             public void actionPerformed(ActionEvent e) {
+                
+                Preferences preferences = NbPreferences.root();
+                String initializationDirectory = preferences.get("mzDB_Settings.LAST_RAW_PATH", System.getProperty("user.home"));
 
-                JFileChooser fchooser = new JFileChooser();
+                JFileChooser fchooser = new JFileChooser(initializationDirectory);
 
                 fchooser.setMultiSelectionEnabled(true);
 
@@ -271,6 +276,10 @@ public class ConvertRawDialog extends DefaultDialog {
                     int nbFiles = files.length;
                     for (int i = 0; i < nbFiles; i++) {
                         ((DefaultListModel) m_fileList.getModel()).addElement(files[i]);
+                    }
+                    
+                    if(files.length>0){
+                        m_lastParentDirectory = files[0].getAbsolutePath();
                     }
                 }
             }
@@ -326,6 +335,9 @@ public class ConvertRawDialog extends DefaultDialog {
         
         ConversionSettings settings = new ConversionSettings(m_converterPath.getStringValue(), m_outputPath.getStringValue(), (boolean)m_deleteRaw.getObjectValue(), (boolean)m_uploadMzdb.getObjectValue(), (boolean)m_deleteMzdb.getObjectValue());
         ConvertionUploadBatch conversionBatch = new ConvertionUploadBatch(rawFiles, settings, m_uploadLabelParameter.getStringValue());
+        
+        Preferences preferences = NbPreferences.root();
+        preferences.put("mzDB_Settings.LAST_RAW_PATH", m_lastParentDirectory);
         
         Thread thread = new Thread(conversionBatch);
         thread.start();

@@ -14,7 +14,6 @@ import fr.proline.studio.parameter.BooleanParameter;
 import fr.proline.studio.parameter.ObjectParameter;
 import fr.proline.studio.parameter.ParameterError;
 import fr.proline.studio.parameter.ParameterList;
-import fr.proline.studio.rsmexplorer.actions.identification.ImportManager;
 import fr.proline.studio.utils.IconManager;
 import fr.proline.studio.wizard.UploadBatch;
 import java.awt.BorderLayout;
@@ -30,6 +29,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.prefs.Preferences;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.DefaultListModel;
@@ -58,6 +58,7 @@ public class UploadMzdbDialog extends DefaultDialog {
     private static ParameterList m_parameterList;
     private BooleanParameter m_deleteMzdbParameter;
     private static ObjectParameter m_uploadLabelParameter;
+    private String m_lastParentDirectory;
 
     public static UploadMzdbDialog getDialog(Window parent) {
         if (m_singletonDialog == null) {
@@ -183,8 +184,11 @@ public class UploadMzdbDialog extends DefaultDialog {
 
             @Override
             public void actionPerformed(ActionEvent e) {
+                
+                Preferences preferences = NbPreferences.root();
+                String initializationDirectory = preferences.get("mzDB_Settings.LAST_MZDB_PATH", System.getProperty("user.home"));
 
-                JFileChooser fchooser = new JFileChooser();
+                JFileChooser fchooser = new JFileChooser(initializationDirectory);
 
                 fchooser.setMultiSelectionEnabled(true);
 
@@ -199,6 +203,10 @@ public class UploadMzdbDialog extends DefaultDialog {
                     int nbFiles = files.length;
                     for (int i = 0; i < nbFiles; i++) {
                         ((DefaultListModel) m_fileList.getModel()).addElement(files[i]);
+                    }
+                    
+                    if(files.length>0){
+                        m_lastParentDirectory = files[0].getAbsolutePath();
                     }
                 }
             }
@@ -240,6 +248,9 @@ public class UploadMzdbDialog extends DefaultDialog {
         for (int i = 0; i < m_fileList.getModel().getSize(); i++) {
             mzdbFiles.add((File) m_fileList.getModel().getElementAt(i));
         }
+        
+        Preferences preferences = NbPreferences.root();
+        preferences.put("mzDB_Settings.LAST_MZDB_PATH", m_lastParentDirectory);
 
         UploadBatch uploadBatch = new UploadBatch(mzdbFiles, true, m_uploadLabelParameter.getStringValue());
         Thread thread = new Thread(uploadBatch);

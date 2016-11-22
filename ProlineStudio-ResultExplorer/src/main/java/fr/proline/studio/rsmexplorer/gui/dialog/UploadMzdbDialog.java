@@ -188,6 +188,11 @@ public class UploadMzdbDialog extends DefaultDialog {
                 Preferences preferences = NbPreferences.root();
                 String initializationDirectory = preferences.get("mzDB_Settings.LAST_MZDB_PATH", System.getProperty("user.home"));
 
+                File f = new File(initializationDirectory);
+                if(!(f.exists() && f.isDirectory())){
+                    initializationDirectory = System.getProperty("user.home");
+                }
+                
                 JFileChooser fchooser = new JFileChooser(initializationDirectory);
 
                 fchooser.setMultiSelectionEnabled(true);
@@ -206,7 +211,7 @@ public class UploadMzdbDialog extends DefaultDialog {
                     }
                     
                     if(files.length>0){
-                        m_lastParentDirectory = files[0].getAbsolutePath();
+                        m_lastParentDirectory = files[0].getParentFile().getAbsolutePath();
                     }
                 }
             }

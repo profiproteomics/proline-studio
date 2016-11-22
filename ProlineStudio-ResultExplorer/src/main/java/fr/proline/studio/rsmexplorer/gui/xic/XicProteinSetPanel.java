@@ -538,6 +538,11 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
         public void parametersChanged() {
             super.parametersChanged();
             
+            // parametersChanged() can be call soon, and so parameters could be not initialized
+            if (m_overviewParameter == null) {
+                return;
+            }
+
             Integer index = (Integer) m_overviewParameter.getAssociatedObjectValue();
             
             QuantProteinSetTableModel model = ((QuantProteinSetTableModel) ((CompoundTableModel) m_quantProteinSetTable.getModel()).getBaseModel());

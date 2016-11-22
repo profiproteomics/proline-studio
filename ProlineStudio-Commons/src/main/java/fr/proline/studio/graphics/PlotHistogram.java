@@ -236,6 +236,12 @@ public class PlotHistogram extends PlotAbstract {
     
     @Override
     public void parametersChanged() {
+        
+        // parametersChanged() can be call soon, and so parameters could be not initialized
+        if (m_binsParameter == null) {
+            return;
+        }
+        
         m_bins = ((Integer)m_binsParameter.getObjectValue());
         updataDataAccordingToBins();
         m_plotPanel.updateAxis(this);

@@ -328,6 +328,11 @@ public class PlotScatter extends PlotAbstract implements Axis.EnumXInterface, Ax
     
     private void updateJitter() {
         
+        // parametersChanged() can be call soon, and so parameters could be not initialized
+        if (m_compareDataInterface == null) {
+            return;
+        }
+        
         int size = m_compareDataInterface.getRowCount();
         if (size == 0) {
 

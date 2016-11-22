@@ -21,13 +21,12 @@ public class MzdbUploader implements Runnable, WorkerInterface {
     private final File m_file;
     private static int m_state = WorkerInterface.ACTIVE_STATE;
     private final StringBuilder m_logs;
-    private final boolean m_deleteMzdb;
-    private final String m_destinationLabel;
+    
+    private final UploadSettings m_uploadSettings;
 
-    public MzdbUploader(File file, boolean deleteMzdb, String destinationLabel) {
+    public MzdbUploader(File file, UploadSettings uploadSettings) {
         m_file = file;
-        m_deleteMzdb = deleteMzdb;
-        m_destinationLabel = destinationLabel;
+        m_uploadSettings = uploadSettings;
         m_logs = new StringBuilder();
     }
 
@@ -66,7 +65,7 @@ public class MzdbUploader implements Runnable, WorkerInterface {
                     if (m_state == WorkerInterface.ACTIVE_STATE) { 
                         m_state = WorkerInterface.FINISHED_STATE;
 
-                        if (m_deleteMzdb) {
+                        if (m_uploadSettings.getDeleteMzdb()) {
                             while (!m_file.canWrite() && !m_file.exists()) {
                                 try {
                                     Thread.sleep(1000);
@@ -91,7 +90,7 @@ public class MzdbUploader implements Runnable, WorkerInterface {
         };
 
         FileUploadTask task = new FileUploadTask(callback, m_file.getAbsolutePath(), result);
-        task.initUploadMZDB(m_destinationLabel);
+        task.initUploadMZDB(m_uploadSettings.getMountLabel(), m_uploadSettings.getCreateParentDirectory());
         AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
 
         this.m_run = false;

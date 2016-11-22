@@ -5,8 +5,6 @@
  */
 package fr.proline.studio.wizard;
 
-import fr.proline.studio.dpm.serverfilesystem.RootInfo;
-import fr.proline.studio.dpm.serverfilesystem.ServerFileSystemView;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.concurrent.Executors;
@@ -22,12 +20,10 @@ public class ConvertionUploadBatch implements Runnable, ConversionListener {
     private ThreadPoolExecutor m_conversionExecutor, m_uploadExecutor;
     private ArrayList<File> m_rawFiles, m_mzdbFiles;
     private ConversionSettings m_conversionSettings;
-    private final String m_destinationLabel;
 
-    public ConvertionUploadBatch(ArrayList<File> rawFiles, ConversionSettings conversionSettings, String destinationLabel) {
+    public ConvertionUploadBatch(ArrayList<File> rawFiles, ConversionSettings conversionSettings) {
         m_rawFiles = rawFiles;
         m_conversionSettings = conversionSettings;
-        m_destinationLabel = destinationLabel;
         
         m_conversionExecutor = (ThreadPoolExecutor) Executors.newFixedThreadPool(1);
 
@@ -45,10 +41,13 @@ public class ConvertionUploadBatch implements Runnable, ConversionListener {
             }
             m_conversionExecutor.execute(converter);
         } else if (f.getAbsolutePath().toLowerCase().endsWith(".mzdb")) {
-            if(m_destinationLabel==null){
+            if(m_conversionSettings.getUploadSettings().getMountLabel()==null){
                 return;
             }
-            MzdbUploader uploader = new MzdbUploader(f, m_conversionSettings.getDeleteMzdb(), m_destinationLabel);
+            
+            
+            
+            MzdbUploader uploader = new MzdbUploader(f, m_conversionSettings.getUploadSettings());
             m_uploadExecutor.execute(uploader);
         }
     }

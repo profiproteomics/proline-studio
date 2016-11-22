@@ -21,20 +21,19 @@ public class UploadBatch implements Runnable {
 
     private final ThreadPoolExecutor m_executor;
     private final ArrayList<File> m_files;
-    private final boolean m_deleteMzdb;
-    private String m_destinationLabel;
+    private final UploadSettings m_uploadSettings;
+    
 
-    public UploadBatch(ArrayList<File> files, boolean deleteMzdb, String destinationLabel) {
+    public UploadBatch(ArrayList<File> files, UploadSettings uploadSettings) {
         m_files = files;
-        m_deleteMzdb = deleteMzdb;
-        m_destinationLabel = destinationLabel;
+        m_uploadSettings = uploadSettings;
         m_executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(5);
 
     }
 
     public void addFile(File f) {
         if (f.getAbsolutePath().toLowerCase().endsWith(".mzdb")) {
-            MzdbUploader uploader = new MzdbUploader(f, m_deleteMzdb, m_destinationLabel);
+            MzdbUploader uploader = new MzdbUploader(f, m_uploadSettings);
             m_executor.execute(uploader);
         }
     }

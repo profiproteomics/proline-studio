@@ -19,6 +19,7 @@ import fr.proline.studio.parameter.StringParameter;
 import fr.proline.studio.utils.IconManager;
 import fr.proline.studio.wizard.ConvertionUploadBatch;
 import fr.proline.studio.wizard.ConversionSettings;
+import fr.proline.studio.wizard.UploadSettings;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -63,7 +64,7 @@ public class ConvertRawDialog extends DefaultDialog {
     private JScrollPane m_fileListScrollPane;
     private JButton m_addFileButton, m_removeFileButton;
     private static ParameterList m_parameterList;
-    private BooleanParameter m_deleteMzdb, m_deleteRaw, m_uploadMzdb;
+    private BooleanParameter m_deleteMzdb, m_deleteRaw, m_uploadMzdb, m_createParentDirectoryParameter;
     private StringParameter m_converterPath, m_outputPath;
     private static ObjectParameter m_uploadLabelParameter;
     private String m_lastParentDirectory;
@@ -118,7 +119,7 @@ public class ConvertRawDialog extends DefaultDialog {
         converterTextField.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                JFileChooser jFileChooser = new JFileChooser();
+                JFileChooser jFileChooser = new JFileChooser(converterTextField.getText());
                 jFileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
                 jFileChooser.setMultiSelectionEnabled(false);
                 jFileChooser.addChoosableFileFilter(new FileNameExtensionFilter(".exe", "exe"));
@@ -140,7 +141,7 @@ public class ConvertRawDialog extends DefaultDialog {
         outputTextField.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                JFileChooser jFileChooser = new JFileChooser();
+                JFileChooser jFileChooser = new JFileChooser(outputTextField.getText());
                 jFileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
                 jFileChooser.setMultiSelectionEnabled(false);
                 int result = jFileChooser.showOpenDialog(null);
@@ -154,11 +155,11 @@ public class ConvertRawDialog extends DefaultDialog {
         m_parameterList.add(m_outputPath);
 
         JCheckBox rawCheckbox = new JCheckBox("Delete raw file after a successful conversion");
-        m_deleteRaw = new BooleanParameter("Delete_raw_file_after_a_successful_conversion", "Delete raw file after a successful conversion", rawCheckbox, false);
+        m_deleteRaw = new BooleanParameter("DELETE_RAW", "Delete raw file after a successful conversion", rawCheckbox, false);
         m_parameterList.add(m_deleteRaw);
 
         JCheckBox uploadCheckbox = new JCheckBox("Upload .mzdb file successful conversion");
-        m_uploadMzdb = new BooleanParameter("Upload_after_conversion", "Upload after conversion", uploadCheckbox, false);
+        m_uploadMzdb = new BooleanParameter("UPLOAD_CONVERTED", "Upload after conversion", uploadCheckbox, false);
         m_parameterList.add(m_uploadMzdb);
         
         ArrayList<String> labels = ServerFileSystemView.getServerFileSystemView().getLabels(RootInfo.TYPE_MZDB_FILES);
@@ -170,8 +171,12 @@ public class ConvertRawDialog extends DefaultDialog {
         m_parameterList.add(m_uploadLabelParameter);
 
         JCheckBox mzdbCheckbox = new JCheckBox("Delete mzdb file after a successful upload");
-        m_deleteMzdb = new BooleanParameter("Delete_mzdb_file_after_a_successful_upload", "Delete mzdb file after a successful upload", mzdbCheckbox, false);
+        m_deleteMzdb = new BooleanParameter("DELETE_MZDB", "Delete mzdb file after a successful upload", mzdbCheckbox, false);
         m_parameterList.add(m_deleteMzdb);
+        
+        JCheckBox parentDirectoryCheckbox = new JCheckBox("Create Parent Directory in Destination");
+        m_createParentDirectoryParameter = new BooleanParameter("CREATE_PARENT_DIRECTORY", "Create Parent Directory in Destination", parentDirectoryCheckbox, false);
+        m_parameterList.add(m_createParentDirectoryParameter);
 
         m_parameterList.loadParameters(NbPreferences.root());
 
@@ -181,6 +186,7 @@ public class ConvertRawDialog extends DefaultDialog {
             public void valueChanged(String value, Object associatedValue) {
                 showParameter(m_deleteMzdb, uploadCheckbox.isSelected(), (boolean) m_deleteMzdb.getObjectValue());
                 showParameter(m_uploadLabelParameter, uploadCheckbox.isSelected(), (boolean) m_uploadMzdb.getObjectValue());
+                showParameter(m_createParentDirectoryParameter, uploadCheckbox.isSelected(), (boolean) m_createParentDirectoryParameter.getObjectValue());
                 updateParameterListPanel();
             }
 
@@ -338,8 +344,11 @@ public class ConvertRawDialog extends DefaultDialog {
             rawFiles.add((File) m_fileList.getModel().getElementAt(i));
         }
         
-        ConversionSettings settings = new ConversionSettings(m_converterPath.getStringValue(), m_outputPath.getStringValue(), (boolean)m_deleteRaw.getObjectValue(), (boolean)m_uploadMzdb.getObjectValue(), (boolean)m_deleteMzdb.getObjectValue());
-        ConvertionUploadBatch conversionBatch = new ConvertionUploadBatch(rawFiles, settings, m_uploadLabelParameter.getStringValue());
+        ConversionSettings conversionSettings = new ConversionSettings(m_converterPath.getStringValue(), m_outputPath.getStringValue(), (boolean)m_deleteRaw.getObjectValue(), (boolean)m_uploadMzdb.getObjectValue());
+        UploadSettings uploadSettings = new UploadSettings((boolean)m_deleteMzdb.getObjectValue(), (boolean) m_createParentDirectoryParameter.getObjectValue(), m_uploadLabelParameter.getStringValue());
+        conversionSettings.setUploadSettings(uploadSettings);
+        
+        ConvertionUploadBatch conversionBatch = new ConvertionUploadBatch(rawFiles, conversionSettings);
         
         Preferences preferences = NbPreferences.root();
         preferences.put("mzDB_Settings.LAST_RAW_PATH", m_lastParentDirectory);

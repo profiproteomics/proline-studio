@@ -43,9 +43,11 @@ public class FileUploadTask extends AbstractJMSTask {
 
     private int m_action = UPLOAD_GENERIC_FILE;
 
-    private String m_destinationLabel;
+    private String m_mountLabel;
     private String m_filePath;
     private String[] m_remoteFilePath = null;
+    private boolean m_createParentDirectory;
+    
 
     public FileUploadTask(AbstractJMSCallback callback, String filePath, String[] remoteFilePath) {
         super(callback, new TaskInfo("Upload file " + filePath, true, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_HIGH));
@@ -57,9 +59,10 @@ public class FileUploadTask extends AbstractJMSTask {
         m_action = UPLOAD_GENERIC_FILE;
     }
 
-    public void initUploadMZDB(String destinationLabel) {
+    public void initUploadMZDB(String mountLabel, boolean createParentDirectory) {
         m_action = UPLOAD_MZDB_FILE;
-        m_destinationLabel = destinationLabel;
+        m_mountLabel = mountLabel;
+        m_createParentDirectory = createParentDirectory;
     }
 
     @Override
@@ -84,11 +87,13 @@ public class FileUploadTask extends AbstractJMSTask {
             // Upload File on server side
             message.setJMSReplyTo(m_replyQueue);
             message.setStringProperty(JMSConnectionManager.PROLINE_SERVICE_NAME_KEY, "proline/misc/FileUpload");
+            
             message.setStringProperty("dest_file_name", uploadFile.getName());
             
             //this needs checking!
             if(m_action == UPLOAD_MZDB_FILE){
-                message.setStringProperty("dest_folder_path", m_destinationLabel);
+                String pathExtention = (m_createParentDirectory) ? File.separator+uploadFile.getParentFile().getName() : "";
+                message.setStringProperty("dest_folder_path", m_mountLabel + pathExtention);
             }
             
             addSourceToMessage(message);

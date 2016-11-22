@@ -12,14 +12,14 @@ package fr.proline.studio.wizard;
 public class ConversionSettings {
     
     private final String m_converterPath, m_outputPath;
-    private final boolean m_deleteRaw, m_uploadAfterConversion, m_deleteMzdb;
+    private final boolean m_deleteRaw, m_uploadAfterConversion;
+    private UploadSettings m_uploadSettings;
     
-    public ConversionSettings(String converterPath, String outputPath, boolean deleteRaw, boolean uploadAfterConversion, boolean deleteMzdb){
+    public ConversionSettings(String converterPath, String outputPath, boolean deleteRaw, boolean uploadAfterConversion){
         m_converterPath = converterPath;
         m_outputPath = outputPath;
         m_deleteRaw = deleteRaw;
         m_uploadAfterConversion = uploadAfterConversion;
-        m_deleteMzdb = deleteMzdb;
     }
     
     public String getConverterPath(){
@@ -38,8 +38,12 @@ public class ConversionSettings {
         return m_uploadAfterConversion;
     }
     
-    public boolean getDeleteMzdb(){
-        return m_deleteMzdb;
+    public void setUploadSettings(UploadSettings settings){
+        m_uploadSettings = settings;
+    }
+    
+    public UploadSettings getUploadSettings(){
+        return m_uploadSettings;
     }
     
 }

@@ -54,7 +54,7 @@ public class HelpDialog extends DefaultDialog implements MouseListener, MouseMot
 
     public static boolean showAtStart() {
         Preferences preferences = NbPreferences.root();
-        return !preferences.getBoolean("General_Application_Settings.Hide_Getting_Started_Dialog_On_Startup", Boolean.FALSE);
+        return !preferences.getBoolean("General_Application_Settings.Hide_Getting_Started_Dialog", Boolean.FALSE);
     }
 
     public HelpDialog(Window parent) {

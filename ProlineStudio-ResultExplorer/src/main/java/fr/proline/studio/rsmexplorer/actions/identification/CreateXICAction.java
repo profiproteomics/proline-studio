@@ -24,6 +24,7 @@ import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
+import fr.proline.studio.rsmexplorer.tree.xic.XICBiologicalSampleAnalysisNode;
 import fr.proline.studio.rsmexplorer.tree.xic.XICDesignTree;
 import java.util.*;
 import javax.swing.JOptionPane;
@@ -45,29 +46,28 @@ public class CreateXICAction extends AbstractRSMAction {
     private boolean m_mergedDSDefined = false;
     private boolean m_isJMSDefined;
 
-
-    static String getMessage(boolean fromExistingXIC, AbstractTree.TreeType sourceTree){
-        if(fromExistingXIC)
-           return NbBundle.getMessage(CreateXICAction.class, "CTL_CreateXIC_Clone");        
-        else if(sourceTree.equals(AbstractTree.TreeType.TREE_QUANTITATION))
-           return NbBundle.getMessage(CreateXICAction.class, "CTL_CreateXIC");
-        else 
-           return NbBundle.getMessage(CreateXICAction.class, "CTL_CreateXIC_Ident");
+    static String getMessage(boolean fromExistingXIC, AbstractTree.TreeType sourceTree) {
+        if (fromExistingXIC) {
+            return NbBundle.getMessage(CreateXICAction.class, "CTL_CreateXIC_Clone");
+        } else if (sourceTree.equals(AbstractTree.TreeType.TREE_QUANTITATION)) {
+            return NbBundle.getMessage(CreateXICAction.class, "CTL_CreateXIC");
+        } else {
+            return NbBundle.getMessage(CreateXICAction.class, "CTL_CreateXIC_Ident");
+        }
     }
-    
+
     public CreateXICAction(boolean fromExistingXIC, boolean isJMSDefined) {
         super(CreateXICAction.getMessage(fromExistingXIC, AbstractTree.TreeType.TREE_QUANTITATION), AbstractTree.TreeType.TREE_QUANTITATION);
         m_fromExistingXIC = fromExistingXIC;
         m_isJMSDefined = isJMSDefined;
     }
-    
+
     public CreateXICAction(boolean fromExistingXIC, boolean isJMSDefined, AbstractTree.TreeType sourceTree) {
         super(CreateXICAction.getMessage(fromExistingXIC, sourceTree), sourceTree);
         m_fromExistingXIC = fromExistingXIC;
         m_isJMSDefined = isJMSDefined;
     }
 
-    
     @Override
     public void actionPerformed(AbstractNode[] selectedNodes, int x, int y) {
 
@@ -99,14 +99,14 @@ public class CreateXICAction extends AbstractRSMAction {
         } else {
             AbstractNode n = selectedNodes[0];
             DDataset refDataset = null;
-            if(! n.isRoot() && DataSetNode.class.isInstance(n)){
+            if (!n.isRoot() && DataSetNode.class.isInstance(n)) {
                 DataSetNode node = (DataSetNode) n;
                 DataSetData dataset = (DataSetData) node.getData();
                 Dataset.DatasetType dsType = dataset.getDatasetType();
-                if( node.hasResultSummary() && 
-                        (dsType.equals(Dataset.DatasetType.IDENTIFICATION) || dsType.equals(Dataset.DatasetType.AGGREGATE))) {
-                    m_mergedDSDefined = true;                        
-                    refDataset =  dataset.getDataset();                    
+                if (node.hasResultSummary()
+                        && (dsType.equals(Dataset.DatasetType.IDENTIFICATION) || dsType.equals(Dataset.DatasetType.AGGREGATE))) {
+                    m_mergedDSDefined = true;
+                    refDataset = dataset.getDataset();
                 }
             }
             createXICDialog(refDataset, x, y);
@@ -116,7 +116,7 @@ public class CreateXICAction extends AbstractRSMAction {
     private void createXICDialog(DDataset dataset, int x, int y) {
         Long pID = ProjectExplorerPanel.getProjectExplorerPanel().getSelectedProject().getId();
         CreateXICDialog dialog = CreateXICDialog.getDialog(WindowManager.getDefault().getMainWindow());
-        if(m_mergedDSDefined){
+        if (m_mergedDSDefined) {
             IdentificationTree childTree = IdentificationTree.getCurrentTree().copyDataSetRootSubTree(dataset, dataset.getProject().getId());
             dialog.setSelectableIdentTree(childTree);
             dialog.setParentDataset(dataset);
@@ -127,7 +127,7 @@ public class CreateXICAction extends AbstractRSMAction {
         if (m_fromExistingXIC) {
             dialog.setDefaultDesignTree(dataset);
         }
-       
+
         dialog.setLocation(x, y);
         dialog.setVisible(true);
         final Long[] _xicQuantiDataSetId = new Long[1];
@@ -144,7 +144,7 @@ public class CreateXICAction extends AbstractRSMAction {
             if (quantParams == null) {
                 errorMsg = "Null Quantitation parameters !";
             }
-            
+
             if (dialog.getDesignRSMNode() == null) {
                 errorMsg = "No experimental design defined";
 
@@ -206,7 +206,7 @@ public class CreateXICAction extends AbstractRSMAction {
                     }
                 };
 
-                fr.proline.studio.dpm.task.jms.RunXICTask task = new fr.proline.studio.dpm.task.jms.RunXICTask(xicCallback,  m_mergedDSDefined, pID,  _quantiDS.getName(), quantParams, expParams, _xicQuantiDataSetId);
+                fr.proline.studio.dpm.task.jms.RunXICTask task = new fr.proline.studio.dpm.task.jms.RunXICTask(xicCallback, m_mergedDSDefined, pID, _quantiDS.getName(), quantParams, expParams, _xicQuantiDataSetId);
                 AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
             } else {
 

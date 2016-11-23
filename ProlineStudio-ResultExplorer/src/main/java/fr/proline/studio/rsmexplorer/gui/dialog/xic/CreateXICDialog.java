@@ -944,8 +944,9 @@ public class CreateXICDialog extends DefaultDialog {
     }
 
     public void setDefaultDesignTree(DDataset dataset) {
-        XICDesignTree.setExpDesign(dataset, (AbstractNode) XICDesignTree.getDesignTree().getModel().getRoot(), XICDesignTree.getDesignTree(), true);
-        XICDesignTree.getDesignTree().renameXicTitle(dataset.getName() + "-Copy");
+        XICDesignTree.setExpDesign(dataset, (AbstractNode) XICDesignTree.getDesignTree().getModel().getRoot(), XICDesignTree.getDesignTree(), false);
+        XICDesignTree.getDesignTree().renameXicTitle(dataset.getName() + "-Copy");      
+        
         try {
             DefineQuantParamsPanel.getDefineQuantPanel().setQuantParams(dataset.getQuantProcessingConfigAsMap());
         } catch (Exception ex) {

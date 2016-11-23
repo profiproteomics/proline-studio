@@ -99,22 +99,21 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
         m_jmsParameterList.add(serviceRequestQueueName);
 
         /*
-        StringParameter prolineServiceName = new StringParameter(JMSConnectionManager.PROLINE_SERVICE_NAME_KEY, "Proline Service Name", JTextField.class, JMSConnectionManager.DEFAULT_PROLINE_SERVICE_NAME_VALUE, 5, null);
-        m_jmsParameterList.add(prolineServiceName);
+         StringParameter prolineServiceName = new StringParameter(JMSConnectionManager.PROLINE_SERVICE_NAME_KEY, "Proline Service Name", JTextField.class, JMSConnectionManager.DEFAULT_PROLINE_SERVICE_NAME_VALUE, 5, null);
+         m_jmsParameterList.add(prolineServiceName);
 
-        StringParameter prolineServiceVersion = new StringParameter(JMSConnectionManager.PROLINE_SERVICE_VERSION_KEY, "Proline Service Version", JTextField.class, JMSConnectionManager.DEFAULT_PROLINE_SERVICE_VERSION_VALUE, 5, null);
-        m_jmsParameterList.add(prolineServiceVersion);
+         StringParameter prolineServiceVersion = new StringParameter(JMSConnectionManager.PROLINE_SERVICE_VERSION_KEY, "Proline Service Version", JTextField.class, JMSConnectionManager.DEFAULT_PROLINE_SERVICE_VERSION_VALUE, 5, null);
+         m_jmsParameterList.add(prolineServiceVersion);
 
-        StringParameter jmsHost = new StringParameter(JMSConnectionManager.JMS_SERVER_HOST_PARAM_KEY, "JMS Server Host", JTextField.class, JMSConnectionManager.DEFAULT_JMS_SERVER_HOST_PARAM_VALUE, 5, null);
-        m_jmsParameterList.add(jmsHost);
+         StringParameter jmsHost = new StringParameter(JMSConnectionManager.JMS_SERVER_HOST_PARAM_KEY, "JMS Server Host", JTextField.class, JMSConnectionManager.DEFAULT_JMS_SERVER_HOST_PARAM_VALUE, 5, null);
+         m_jmsParameterList.add(jmsHost);
 
-        StringParameter serverPort = new StringParameter(JMSConnectionManager.JMS_SERVER_PORT_PARAM_KEY, "JMS Server Port", JTextField.class, JMSConnectionManager.DEFAULT_JMS_SERVER_PORT_PARAM_VALUE, 5, null);
-        m_jmsParameterList.add(serverPort);
+         StringParameter serverPort = new StringParameter(JMSConnectionManager.JMS_SERVER_PORT_PARAM_KEY, "JMS Server Port", JTextField.class, JMSConnectionManager.DEFAULT_JMS_SERVER_PORT_PARAM_VALUE, 5, null);
+         m_jmsParameterList.add(serverPort);
 
-        StringParameter hornetInputStream = new StringParameter(JMSConnectionManager.HORNET_Q_INPUT_STREAM_KEY, "HornetQ Input Stream", JTextField.class, JMSConnectionManager.DEFAULT_HORNET_Q_INPUT_STREAM_VALUE, 5, null);
-        m_jmsParameterList.add(hornetInputStream);
-        */
-
+         StringParameter hornetInputStream = new StringParameter(JMSConnectionManager.HORNET_Q_INPUT_STREAM_KEY, "HornetQ Input Stream", JTextField.class, JMSConnectionManager.DEFAULT_HORNET_Q_INPUT_STREAM_VALUE, 5, null);
+         m_jmsParameterList.add(hornetInputStream);
+         */
         m_jmsParameterList.loadParameters(m_preferences);
 
         return m_jmsParameterList;
@@ -148,63 +147,48 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
     }
 
     private ParameterList getWizardParameters() {
-        try {
 
-            m_wizardParameterList = new ParameterList("mzDB Settings");
+        m_wizardParameterList = new ParameterList("mzDB Settings");
 
-            JCheckBox deleteRawCheckBox = new JCheckBox("Delete raw file after a successful conversion");
-            BooleanParameter deleteRawParameter = new BooleanParameter("Delete_raw_file_after_a_successful_conversion", "Delete raw file after a successful conversion", deleteRawCheckBox, false);
-            m_wizardParameterList.add(deleteRawParameter);
+        JCheckBox deleteRawCheckBox = new JCheckBox("Delete raw file after a successful conversion");
+        BooleanParameter deleteRawParameter = new BooleanParameter("Delete_raw_file_after_a_successful_conversion", "Delete raw file after a successful conversion", deleteRawCheckBox, false);
+        m_wizardParameterList.add(deleteRawParameter);
 
-            JCheckBox deleteMzdbCheckBox = new JCheckBox("Delete mzdb file after a successful upload");
-            BooleanParameter deleteMzdbParameter = new BooleanParameter("Delete_mzdb_file_after_a_successful_upload", "Delete mzdb file after a successful upload", deleteMzdbCheckBox, false);
-            m_wizardParameterList.add(deleteMzdbParameter);
+        JCheckBox deleteMzdbCheckBox = new JCheckBox("Delete mzdb file after a successful upload");
+        BooleanParameter deleteMzdbParameter = new BooleanParameter("Delete_mzdb_file_after_a_successful_upload", "Delete mzdb file after a successful upload", deleteMzdbCheckBox, false);
+        m_wizardParameterList.add(deleteMzdbParameter);
 
-            StringParameter converterPath = new StringParameter("Converter_(.exe)", "Converter (.exe)", JTextField.class, "C:\\Users\\AK249877\\Documents\\NetBeansProjects\\mzDB-wizard\\target\\converter\\mzdb_x64_0.9.8d\\raw2mzDB.exe", 5, null);
-            m_wizardParameterList.add(converterPath);
+        StringParameter converterPath = new StringParameter("Converter_(.exe)", "Converter (.exe)", JTextField.class, "C:\\Users\\AK249877\\Documents\\NetBeansProjects\\mzDB-wizard\\target\\converter\\mzdb_x64_0.9.8d\\raw2mzDB.exe", 5, null);
+        m_wizardParameterList.add(converterPath);
 
-            m_wizardParameterList.loadParameters(m_preferences);
+        m_wizardParameterList.loadParameters(m_preferences);
 
-            Object[] associatedTable = {"Same as raw file", "User specified"};
-            JComboBox comboBox = new JComboBox(associatedTable);
-            Object[] objectTable = {SAME_OUTPUT_PATH, USER_SPECIFIED_OUTPUT};
-            ObjectParameter converterOutputParameter = new ObjectParameter(CONVERTER_OUTPUT_PATH_KEY, CONVERTER_OUTPUT_PATH_NAME, comboBox, associatedTable, objectTable, 0, null);
-            m_wizardParameterList.add(converterOutputParameter);
+        Object[] associatedTable = {"Same as raw file", "User specified"};
+        JComboBox comboBox = new JComboBox(associatedTable);
+        Object[] objectTable = {SAME_OUTPUT_PATH, USER_SPECIFIED_OUTPUT};
+        ObjectParameter converterOutputParameter = new ObjectParameter(CONVERTER_OUTPUT_PATH_KEY, CONVERTER_OUTPUT_PATH_NAME, comboBox, associatedTable, objectTable, 0, null);
+        m_wizardParameterList.add(converterOutputParameter);
 
-            StringParameter outputPath = new StringParameter("Output_path", "Output path", JTextField.class, "C:\\Users\\AK249877\\Documents\\NetBeansProjects\\mzDB-wizard\\target\\converter\\mzdb_x64_0.9.8d\\raw2mzDB.exe", 5, null);
-            m_wizardParameterList.add(outputPath);
+        StringParameter outputPath = new StringParameter("Output_path", "Output path", JTextField.class, "C:\\Users\\AK249877\\Documents\\NetBeansProjects\\mzDB-wizard\\target\\converter\\mzdb_x64_0.9.8d\\raw2mzDB.exe", 5, null);
+        m_wizardParameterList.add(outputPath);
 
-            m_wizardParameterList.loadParameters(m_preferences);
-            
-            
+        m_wizardParameterList.loadParameters(m_preferences);
 
-            AbstractLinkedParameters linkedParameters = new AbstractLinkedParameters(m_wizardParameterList) {
+        AbstractLinkedParameters linkedParameters = new AbstractLinkedParameters(m_wizardParameterList) {
 
-                @Override
-                public void valueChanged(String value, Object associatedValue) {
-                    int m_selection = Integer.parseInt(converterOutputParameter.getStringValue());
-                    showParameter(outputPath, m_selection == DecoratedTable.FIXED_COLUMNS_SIZE, outputPath.getStringValue());
-                    updateParameterListPanel();
-                }
-
-            };
-
-            converterOutputParameter.addLinkedParameters(linkedParameters);
-
-            int m_selection = Integer.parseInt(converterOutputParameter.getStringValue());
-            linkedParameters.valueChanged((String) associatedTable[m_selection], objectTable[m_selection]);
-                    
-
-        } catch (Exception ex) {
-            PrintWriter pw = null;
-            try {
-                pw = new PrintWriter(new File("D:\\bugs.txt"));
-            } catch (FileNotFoundException ex1) {
-                Exceptions.printStackTrace(ex1);
+            @Override
+            public void valueChanged(String value, Object associatedValue) {
+                int m_selection = Integer.parseInt(converterOutputParameter.getStringValue());
+                showParameter(outputPath, m_selection == DecoratedTable.FIXED_COLUMNS_SIZE, outputPath.getStringValue());
+                updateParameterListPanel();
             }
-            ex.printStackTrace(pw);
-            pw.close();
-        }
+
+        };
+
+        converterOutputParameter.addLinkedParameters(linkedParameters);
+
+        int m_selection = Integer.parseInt(converterOutputParameter.getStringValue());
+        linkedParameters.valueChanged((String) associatedTable[m_selection], objectTable[m_selection]);
 
         return m_wizardParameterList;
 

@@ -131,39 +131,53 @@ public class RsetMSDiagPanel extends HourglassPanel implements DataBoxPanelInter
        
     private void launchMSDiag(String messageHashMapJson) {
         
-    	
+//    	System.out.println("ABU starting MSDiag");
+    	m_logger.debug("ABU starting MSDiag");
     	// data is encoded in JSON string, subformed of other json strings!!!
     	ImageIcon icon = IconManager.getIcon(IconManager.IconType.CHART_PIE);
-    	
     	
         final String SERIES_NAME = "MSDiag data";
         if(messageHashMapJson != null) {
         
 	        if (messageHashMapJson.length() == 0) {
 	        	// nothing to process
-	        } 
-	        else 
-	        {
-	        	 
+	        } else {
 		        if(messageHashMapJson.startsWith("{")) { // JSON data is there
-		         	
 		        	Gson gson = new Gson();
-		        	
 		        	HashMap<String,String> msOutputHashMap = new HashMap<>();
 		        	msOutputHashMap = gson.fromJson(messageHashMapJson, msOutputHashMap.getClass());
 		        	
 		        	if(msOutputHashMap != null) {
 			        	// go through all msOutputs
 			        	Iterator<String> msOutputHashMapIterator = msOutputHashMap.keySet().iterator();
+			        	java.util.ArrayList<MSDiagOutput_AW> msdiags = new java.util.ArrayList<MSDiagOutput_AW>();
 			        	while (msOutputHashMapIterator.hasNext()) {
 			        		String msOutputItem = msOutputHashMapIterator.next();
-			        		JScrollPane scrollPane = new JScrollPane();
-			        		String msOutputString =  msOutputHashMap.get(msOutputItem);
-			        		MSDiagOutput_AW msOutput = gson.fromJson(msOutputString, MSDiagOutput_AW.class);
+			        		m_logger.debug("ABU MSDIAG:\n"+msOutputHashMap.get(msOutputItem));
+			        		MSDiagOutput_AW msOutput = gson.fromJson(msOutputHashMap.get(msOutputItem), MSDiagOutput_AW.class);
 			        		if(msOutput != null) {
+			        			msdiags.add(msOutput);
+			        		}
+			        	}
+			        	for(int i = 0; i < msdiags.size(); i++) {
+//			        		System.out.println("ABU "+msdiags.get(i).description);
+			        		m_logger.debug("ABU "+msdiags.get(i).description+" ("+msdiags.get(i).getOrder()+")");
+			        	}
+//			        	System.out.println("ABU: Sorting QC plots...");
+			        	m_logger.debug("ABU: Sorting QC plots...");
+			        	msdiags.sort( (m1, m2) -> m1.getOrder().compareTo(m2.getOrder()) );
+			        	for(int i = 0; i < msdiags.size(); i++) {
+			        		MSDiagOutput_AW msOutput = msdiags.get(i);
+//			        		System.out.println("ABU "+msdiags.get(i).description);
+			        		m_logger.debug("ABU "+msdiags.get(i).description);
+			        	
+//			        	while (msOutputHashMapIterator.hasNext()) {
+//			        		String msOutputItem = msOutputHashMapIterator.next();
+			        		JScrollPane scrollPane = new JScrollPane();
+//			        		String msOutputString =  msOutputHashMap.get(msOutputItem);
+//			        		MSDiagOutput_AW msOutput = gson.fromJson(msOutputString, MSDiagOutput_AW.class);
+//			        		if(msOutput != null) {
 			        			if(m_displayType.equals("default")) {
-			        				 
-			        				
 			        				switch (msOutput.output_type.value) { // could be changed to use enum in MSDiagOutput_AW
 				        			case "chromatogram":
 										MSDiag_Chromatogram m_msdiagChromatogram = new MSDiag_Chromatogram(this);
@@ -192,8 +206,7 @@ public class RsetMSDiagPanel extends HourglassPanel implements DataBoxPanelInter
 										//scrollPane = new JScrollPane();
 								        scrollPane.setViewportView(m_msdiagCategoryPlot);
 								        m_tabbedPane.addTab(msOutput.description,icon, scrollPane);
-										break;
-															
+										break;			
 									case "pie":
 										MSDiag_PieChart m_msdiagPieChart = new MSDiag_PieChart(this);
 										m_msdiagPieChart.setData(msOutput);
@@ -201,33 +214,22 @@ public class RsetMSDiagPanel extends HourglassPanel implements DataBoxPanelInter
 								        scrollPane.setViewportView(m_msdiagPieChart);
 								        m_tabbedPane.addTab(msOutput.description,icon, scrollPane);
 										break;
-			
-									
 									default: 
 										// use table as default ---
-										
 									case "table":
 										MSDiagTable_GenericTable m_msdiagTable = new MSDiagTable_GenericTable(this);
 										m_msdiagTable.setModel(new MSdiagTable_GenericTableModel());
 										((MSdiagTable_GenericTableModel) m_msdiagTable.getModel()).setData(msOutput);
-										//---add it to the tabbed pane	
-										
+										//---add it to the tabbed pane
 								        scrollPane.setViewportView(m_msdiagTable);
-//									    m_tabbedPane.addTab(msOutput.description,icon, scrollPane);
-//									    m_table = m_msdiagTable;
-//										m_exportButton = new ExportButton((ProgressInterface) null,  "Peptide Match", m_table);
 										
 										JPanel localPanel = new JPanel();
-								       // JToolBar toolbar = new JToolBar(JToolBar.VERTICAL);
 									    JToolBar toolbar = initToolbar();
 									    m_flipModeButton.setEnabled(false);
-								        //add(m_tabbedpane, borderlayout.center);
-								        //add(toolbar, BorderLayout.WEST);
 								        toolbar.setFloatable(false);
 								        m_table = (JXTable) m_msdiagTable;
 										m_exportButton = new ExportButton((ProgressInterface) null,  "Peptide Match", m_table);
 										toolbar.add(m_exportButton);
-									   
 									    
 										localPanel.setLayout(new BorderLayout());
 								        localPanel.add(toolbar, BorderLayout.WEST);
@@ -236,14 +238,11 @@ public class RsetMSDiagPanel extends HourglassPanel implements DataBoxPanelInter
 								        
 									    break;
 									}
-			        			}
-		        				else {
-		        					
+			        			} else {
 		        					MSDiagTable_GenericTable m_msdiagTable = new MSDiagTable_GenericTable(this);
 									m_msdiagTable.setModel(new MSdiagTable_GenericTableModel());
 									((MSdiagTable_GenericTableModel) m_msdiagTable.getModel()).setData(msOutput);
-									//---add it to the tabbed pane	
-									
+									//---add it to the tabbed pane
 							        scrollPane.setViewportView(m_msdiagTable);
 							        JPanel localPanel = new JPanel();
 							        JToolBar toolbar = new JToolBar(JToolBar.VERTICAL);
@@ -257,23 +256,10 @@ public class RsetMSDiagPanel extends HourglassPanel implements DataBoxPanelInter
 							        localPanel.add(toolbar, BorderLayout.WEST);
 							        localPanel.add(scrollPane,BorderLayout.CENTER);
 							        m_tabbedPane.addTab(msOutput.description,icon, localPanel);
-							        
-								    //m_tabbedPane.addTab(msOutput.description,icon, scrollPane);
-								    
-								    
-								    
-									
 			        			}
-			        			
-			        		}
-			        			
-							
-							
-						}
-	        	
-	
+//			        		}
+		        		}
 				    	this.repaint();
-	        		
 		        	}
 	        	}
 	        }

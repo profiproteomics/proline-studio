@@ -439,7 +439,7 @@ public class SelectRawFilesPanel extends JPanel {
 
                     XICRunNode runNode = new XICRunNode(new RunInfoData());
                     sampleAnalysisNode.add(runNode);
-                    runNode.init(sampleAnalysisNode.getDataset(), (DefaultTreeModel) IdentificationTree.getCurrentTree().getModel());
+                    runNode.init(sampleAnalysisNode.getDataset(), (DefaultTreeModel) IdentificationTree.getCurrentTree().getModel(), this);
 
                     parseRun(groupNode, sampleNode, (XICBiologicalSampleAnalysisNode) child);
 

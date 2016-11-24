@@ -16,6 +16,7 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.ArrayList;
 import javax.swing.ImageIcon;
+import javax.swing.table.AbstractTableModel;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreeNode;
@@ -33,7 +34,7 @@ public class XICRunNode extends AbstractNode {
         super(NodeTypes.RUN, data);
     }
 
-    public void init(final DDataset dataset, DefaultTreeModel treeModel) {
+    public void init(final DDataset dataset, DefaultTreeModel treeModel, final AbstractTableModel tableModel) {
         m_treeModel = treeModel;
         
         setIsChanging(true);
@@ -68,11 +69,16 @@ public class XICRunNode extends AbstractNode {
                             runInfoData.setRun(runOut[0]);
 
                         } else {
-                            search(dataset);
+                            search(dataset, tableModel);
                         }
                     } else {
                         // it failed !
                         m_treeModel.removeNodeFromParent((MutableTreeNode) xicRunNode.getParent());
+                    }
+                    
+                    if (tableModel != null) {
+                        // a table model display data in this Xic Run Node, so it must be updated
+                        tableModel.fireTableDataChanged();
                     }
                     
                 }
@@ -82,11 +88,11 @@ public class XICRunNode extends AbstractNode {
             task.initLoadRawFile(dataset.getId(), rawfileFounds, runOut);
             AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
         } else {
-            search(dataset);
+            search(dataset, tableModel);
         }
     }
     
-    private void search(DDataset dataset) {
+    private void search(DDataset dataset, final AbstractTableModel tableModel) {
 
         Long rsetId = dataset.getResultSetId();
         
@@ -118,7 +124,7 @@ public class XICRunNode extends AbstractNode {
 
                 ((DefaultTreeModel) XICDesignTree.getDesignTree().getModel()).nodeChanged(_this);
 
-                search(searchString);
+                search(searchString, tableModel);
             }
         };
 
@@ -129,92 +135,10 @@ public class XICRunNode extends AbstractNode {
         AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
 
     }
-    
-    /*
-    public void initOLD(DDataset dataset, DefaultTreeModel treeModel) {
-        Long rsetId = dataset.getResultSetId();
-        
-        m_treeModel = treeModel;
-        
-        // look if we find a Raw File
-        if (dataset.getType() == Dataset.DatasetType.IDENTIFICATION) {
-            EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().createEntityManager();
-            try {
-                entityManagerUDS.getTransaction().begin();
 
-                IdentificationDataset identificationDataset = entityManagerUDS.find(IdentificationDataset.class, dataset.getId());
-                if (identificationDataset != null) {
-                    RunInfoData runInfoData = ((RunInfoData) getData());
-                    RawFile rawFile = identificationDataset.getRawFile();
-                    if (rawFile != null) {
-                        runInfoData.getRawFileSouce().setLinkedRawFile(rawFile);
-                        runInfoData.setRun(identificationDataset.getRun());
-                        //runInfoData.getRawFileSouce().setRawFileOnDisk(rawFile.getDirectory()+File.separator+rawFile.getRawFileName()); JPM.RUNINFODATA ???
-                        //runInfoData.setRunInfoInDatabase(true);
-                        warnParent(false);
-                        // everything is set
-                        return;
-                    }
-                }
-                entityManagerUDS.getTransaction().commit();
-
-            } catch (Exception e) {
-                m_logger.error(getClass().getSimpleName() + " failed", e);
-                try {
-                    entityManagerUDS.getTransaction().rollback();
-                } catch (Exception rollbackException) {
-                    m_logger.error(getClass().getSimpleName() + " failed : potential network problem", rollbackException);
-                }
-            } finally {
-                entityManagerUDS.close();
-            }
-        }
-
-        setIsChanging(true);
-
-        final String[] path = new String[1];
-
-        final XICRunNode _this = this;
-
-        AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
-
-            @Override
-            public boolean mustBeCalledInAWT() {
-                return true;
-            }
-
-            @Override
-            public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
-                //setIsChanging(false);
-
-                String searchString = path[0];
-                ((RunInfoData) getData()).setPeakListPath(searchString);
-                
-                if ((searchString == null) || (searchString.isEmpty())) {
-                    searchString = "*";
-                } else {
-                    searchString = "*" + searchString + "*";
-                }
-                
-                ((RunInfoData) getData()).setMessage("Search " + searchString);
-
-                ((DefaultTreeModel) XICDesignTree.getDesignTree().getModel()).nodeChanged(_this);
-                
-                search(searchString);
-            }
-        };
-
-
-        // ask asynchronous loading of data
-        Long projectId = dataset.getProject().getId();
-        DatabaseRunsTask task = new DatabaseRunsTask(callback);
-        task.initLoadPeakListPathForRset(projectId, rsetId, path);
-        AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
-
-    }*/
     
     
-    private void search(String searchString) {
+    private void search(String searchString, final AbstractTableModel tableModel) {
        
         final ArrayList<RawFile> m_rawFileList = new ArrayList<>();
         
@@ -246,6 +170,8 @@ public class XICRunNode extends AbstractNode {
                     runInfoData.setPotentialRawFiles(m_rawFileList);
                     runInfoData.setMessage("<html><font color='#FF0000'>Multiple Raw Files found, select one</font></html>");
                 }
+                
+                tableModel.fireTableDataChanged();
             }
         };
 

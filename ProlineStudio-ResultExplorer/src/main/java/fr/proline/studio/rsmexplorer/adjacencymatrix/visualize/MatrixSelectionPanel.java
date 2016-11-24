@@ -369,6 +369,10 @@ public class MatrixSelectionPanel extends HourglassPanel implements DataBoxPanel
 
         m_proteinName = proteinMatch.getAccession();
 
+        if (m_componentList == null) {
+            return;
+        }
+        
         int nbComponents = m_componentList.size();
         for (int i = 0; i < nbComponents; i++) {
             Component c = m_componentList.get(i);

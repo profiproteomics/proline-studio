@@ -1271,7 +1271,7 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
             }
         }
         return null; // should never happen
- 
+
     }
 
     @Override
@@ -1401,7 +1401,11 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
                         break;
                     }
                     case COLTYPE_ABUNDANCE: {
-                        renderer = new BigFloatOrDoubleRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 2);
+                        if (m_isXICMode) {
+                            renderer = new BigFloatOrDoubleRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 0);
+                        } else {
+                            renderer = new BigFloatOrDoubleRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 2);
+                        }
                         break;
                     }
                     case COLTYPE_RAW_ABUNDANCE: {

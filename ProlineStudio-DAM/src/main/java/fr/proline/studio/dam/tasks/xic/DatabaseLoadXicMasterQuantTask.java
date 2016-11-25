@@ -437,21 +437,8 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                         dqc.setResultFileName(resultFileName);
                         dqc.setRawFilePath(rawPath);
                         // search for run_identification rawFileName (mzdb fileName) in UDS
-//                        String queryUDS  = "SELECT ri.rawFile.mzdbFileName "
-//                                + "FROM fr.proline.core.orm.uds.IdentificationDataset ri, fr.proline.core.orm.uds.Dataset ds "
-//                                + "WHERE ri.id = ds.id AND "
-//                                + "ds.resultSummaryId =:rsmId AND "
-//                                + "ds.resultSetId =:rsId AND ds.project.id =:projectId ";
-//                        Query queryMzdb = entityManagerUDS.createQuery(queryUDS);
-//                        queryMzdb.setParameter("rsmId", qc.getIdentResultSummaryId());
-//                        queryMzdb.setParameter("rsId", rsId);
-//                        queryMzdb.setParameter("projectId", projectId);
-//                        
-                        
+
                         String mzdbFile = "";
-                        if (datasetDB.getId() == 6118) {
-                            m_logger.debug("this one !! ");
-                        }
                         try{
 //                            mzdbFile = (String) queryMzdb.getSingleResult();
                             mzdbFile = qc.getRun().getRawFile().getMzDbFileName();

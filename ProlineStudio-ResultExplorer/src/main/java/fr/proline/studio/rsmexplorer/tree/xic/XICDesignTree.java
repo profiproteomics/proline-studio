@@ -288,6 +288,8 @@ public class XICDesignTree extends AbstractTree {
                         XICBiologicalSampleAnalysisNode sampleAnalysisNode = new XICBiologicalSampleAnalysisNode(dsData);
                         if(qCh.getName() != null)
                             sampleAnalysisNode.setQuantChannelName(qCh.getName());
+                        
+                        
                         RunInfoData runInfoData = new RunInfoData();
                         RunInfoData.RawFileSource rawFileSource = new RunInfoData.RawFileSource();
                         RawFile rawFile = new RawFile();
@@ -309,8 +311,10 @@ public class XICDesignTree extends AbstractTree {
                         runInfoData.setRun(run);
                         runs.add(run);
                         rawFile.setRuns(runs);
+                        
                         XICRunNode runNode = new XICRunNode(runInfoData);
-                        sampleAnalysisNode.add(runNode);
+                        //sampleAnalysisNode.add(runNode);
+                        
                         model.insertNodeInto(sampleAnalysisNode, biologicalSampleNode, childSampleAnalysisIndex);
                         if(expandPath){
                             tree.expandPath( new TreePath(sampleAnalysisNode.getPath()));

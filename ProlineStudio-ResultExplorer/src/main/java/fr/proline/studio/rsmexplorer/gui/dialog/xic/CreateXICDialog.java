@@ -94,7 +94,7 @@ public class CreateXICDialog extends DefaultDialog {
 
         setHelpURL("http://biodev.extra.cea.fr/docs/proline/doku.php?id=how_to:studio:xic");
 
-        setSize(1024, 768);
+        setSize(1600, 768);
         setResizable(true);
 
     }
@@ -944,8 +944,9 @@ public class CreateXICDialog extends DefaultDialog {
     }
 
     public void setDefaultDesignTree(DDataset dataset) {
-        XICDesignTree.setExpDesign(dataset, (AbstractNode) XICDesignTree.getDesignTree().getModel().getRoot(), XICDesignTree.getDesignTree(), true);
-        XICDesignTree.getDesignTree().renameXicTitle(dataset.getName() + "-Copy");
+        XICDesignTree.setExpDesign(dataset, (AbstractNode) XICDesignTree.getDesignTree().getModel().getRoot(), XICDesignTree.getDesignTree(), false);
+        XICDesignTree.getDesignTree().renameXicTitle(dataset.getName() + "-Copy");      
+        
         try {
             DefineQuantParamsPanel.getDefineQuantPanel().setQuantParams(dataset.getQuantProcessingConfigAsMap());
         } catch (Exception ex) {

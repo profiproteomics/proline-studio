@@ -826,6 +826,7 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements GlobalT
             case COLTYPE_PEPTIDE_SCORE: {
                 return Float.class;
             }
+            case COLTYPE_PEPTIDE_PROTEIN_SET_NAMES:
             case COLTYPE_PEPTIDE_PTM: {
                 return String.class;
             }

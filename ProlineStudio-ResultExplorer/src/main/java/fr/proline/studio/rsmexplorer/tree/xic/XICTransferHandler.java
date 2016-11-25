@@ -376,7 +376,7 @@ public class XICTransferHandler extends TransferHandler {
                             XICRunNode runNode = new XICRunNode(new RunInfoData());
 
                             //sampleAnalysisNode.add(runNode);
-                            runNode.init(currentSampleList.get(i).getDataset(), treeModel);
+                            runNode.init(currentSampleList.get(i).getDataset(), treeModel, null);
 
                             // add to new parent
                             treeModel.insertNodeInto(sampleAnalysisNode, biologicalSampleNode, childIndex);
@@ -397,7 +397,7 @@ public class XICTransferHandler extends TransferHandler {
                         // put a Run node in it
                         XICRunNode runNode = new XICRunNode(new RunInfoData());
                         //sampleAnalysisNode.add(runNode);
-                        runNode.init(datasetList.get(i).getDataset(), treeModel);
+                        runNode.init(datasetList.get(i).getDataset(), treeModel, null);
 
                         // add to new parent
                         treeModel.insertNodeInto(sampleAnalysisNode, dropRSMNode, childIndex);
@@ -430,7 +430,7 @@ public class XICTransferHandler extends TransferHandler {
                         // put a Run node in it
                         XICRunNode runNode = new XICRunNode(new RunInfoData());
                         //sampleAnalysisNode.add(runNode);
-                        runNode.init(node.getDataset(), treeModel);
+                        runNode.init(node.getDataset(), treeModel, null);
 
                         // add to new parent
                         treeModel.insertNodeInto(sampleAnalysisNode, dropRSMNode, childIndex);

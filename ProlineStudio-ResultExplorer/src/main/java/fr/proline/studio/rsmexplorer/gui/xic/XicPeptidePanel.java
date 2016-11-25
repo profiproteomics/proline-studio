@@ -513,6 +513,11 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
         public void parametersChanged() {
             super.parametersChanged();
             
+            // parametersChanged() can be call soon, and so parameters could be not initialized
+            if (m_overviewParameter == null) {
+                return;
+            }
+            
             Integer index = (Integer) m_overviewParameter.getAssociatedObjectValue();
             
             QuantPeptideTableModel model = ((QuantPeptideTableModel) ((CompoundTableModel) m_quantPeptideTable.getModel()).getBaseModel());

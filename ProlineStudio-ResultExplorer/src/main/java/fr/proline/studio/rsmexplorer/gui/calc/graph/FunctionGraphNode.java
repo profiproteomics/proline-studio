@@ -111,7 +111,7 @@ public class FunctionGraphNode extends GraphNode {
         if (m_function.isSettingsBeingDone()) {
             return IconManager.getIcon(IconManager.IconType.SETTINGS);
         }
-        return IconManager.getIcon(IconManager.IconType.CONTROL_PAUSE);
+        return IconManager.getIcon(IconManager.IconType.CONTROL_PLAY);
 
     }
     

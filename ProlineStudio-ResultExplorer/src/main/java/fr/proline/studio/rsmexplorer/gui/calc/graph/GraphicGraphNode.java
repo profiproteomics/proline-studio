@@ -99,7 +99,7 @@ public class GraphicGraphNode extends GraphNode {
             return IconManager.getIcon(IconManager.IconType.SETTINGS);
         }
 
-        return IconManager.getIcon(IconManager.IconType.CONTROL_PAUSE);
+        return IconManager.getIcon(IconManager.IconType.CONTROL_PLAY);
 
     }
     

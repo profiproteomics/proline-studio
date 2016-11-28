@@ -10,6 +10,7 @@ import fr.proline.studio.rsmexplorer.gui.calc.functions.ColumnFilterFunction;
 import fr.proline.studio.rsmexplorer.gui.calc.functions.ComputeFDRFunction;
 import fr.proline.studio.rsmexplorer.gui.calc.functions.DiffAnalysisFunction;
 import fr.proline.studio.rsmexplorer.gui.calc.functions.DiffFunction;
+import fr.proline.studio.rsmexplorer.gui.calc.functions.ExpressionFunction;
 import fr.proline.studio.rsmexplorer.gui.calc.functions.FilterFunction;
 import fr.proline.studio.rsmexplorer.gui.calc.functions.ImportTSVFunction;
 import fr.proline.studio.rsmexplorer.gui.calc.functions.JoinFunction;
@@ -184,6 +185,9 @@ public abstract class DataTree extends JTree {
         
         FunctionNode filterFunction = new FunctionNode(new FilterFunction(null));
         tableFonctionsNode.add(filterFunction);
+        
+        FunctionNode expressionFunction = new FunctionNode(new ExpressionFunction(null));
+        tableFonctionsNode.add(expressionFunction);
         
         FunctionNode logFunction = new FunctionNode(new LogFunction(null, false));
         tableFonctionsNode.add(logFunction);

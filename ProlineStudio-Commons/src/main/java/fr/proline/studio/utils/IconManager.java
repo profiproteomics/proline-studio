@@ -157,7 +157,9 @@ public class IconManager {
         MENU,
         DOCUMENT_LARGE,
         SELECT_ALL,
-        CLEAR_ALL;
+        CLEAR_ALL,
+        UNDO,
+        REDO;
     }
     private final static HashMap<IconType, ImageIcon> m_iconMap = new HashMap<>();
     private final static HashMap<IconType, ImageIcon> m_iconHourGlassMap = new HashMap<>();
@@ -572,6 +574,10 @@ public class IconManager {
                 return "fr/proline/studio/images/selection-select.png";
             case CLEAR_ALL:
                 return "fr/proline/studio/images/broom_16x16.png";
+            case UNDO:
+                return "fr/proline/studio/images/undo.png";
+            case REDO:
+                return "fr/proline/studio/images/redo.png";
         }
 
         return null; // can not happen

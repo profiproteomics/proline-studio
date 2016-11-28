@@ -53,6 +53,33 @@ public class StatsImplementation {
         return new ColDoubleData(values.getTable(), resultArray, "-" + values.getExportColumnName());
     }
     
+    public static ColDoubleData abs(Col values) {
+
+        int nbRow = values.getRowCount();
+
+        ArrayList<Double> resultArray = new ArrayList<>(nbRow);
+
+        for (int i = 0; i < nbRow; i++) {
+            Object o = values.getValueAt(i);
+            if (o instanceof LazyData) {
+                o = ((LazyData) o).getData();
+            }
+            double d;
+            if ((o != null) && (o instanceof Number)) {
+                d = ((Number) o).doubleValue();
+                if (d<0) {
+                    d = -d;
+                }
+            } else {
+                d = Double.NaN;
+            }
+            resultArray.add(d);
+
+        }
+
+        return new ColDoubleData(values.getTable(), resultArray, "abs(" + values.getExportColumnName()+")");
+    }
+    
     public static ColDoubleData log10(Col values) {
         return log(values, true);
     }

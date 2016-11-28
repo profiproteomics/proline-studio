@@ -1,5 +1,6 @@
 package fr.proline.studio.python.interpreter;
 
+import fr.proline.studio.python.data.ColBooleanData;
 import fr.proline.studio.python.data.ColDoubleData;
 import fr.proline.studio.python.data.PythonImage;
 import fr.proline.studio.python.data.Table;
@@ -103,7 +104,14 @@ public class CalcInterpreterThread extends Thread {
                                 col.setColumnName(key.toString());
                             }
                         }
-                        if ((value instanceof ColDoubleData) || (value instanceof PyInteger) || (value instanceof PyFloat) || (value instanceof Table) || (value instanceof PythonImage)) {
+                        if (value instanceof ColBooleanData) {
+                            ColBooleanData col = (ColBooleanData) value;
+                            String columnName = col.getColumnName();
+                            if ((columnName == null) || (columnName.isEmpty())) {
+                                col.setColumnName(key.toString());
+                            }
+                        }
+                        if ((value instanceof ColDoubleData) || (value instanceof ColBooleanData) || (value instanceof PyInteger) || (value instanceof PyFloat) || (value instanceof Table) || (value instanceof PythonImage)) {
 
                             resultVariableArray.add(new ResultVariable(key.toString(), value));
                         }

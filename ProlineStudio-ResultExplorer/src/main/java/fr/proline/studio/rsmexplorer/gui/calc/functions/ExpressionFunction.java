@@ -179,7 +179,7 @@ public class ExpressionFunction extends AbstractFunction {
         m_functions.add(new ExpressionEntity(">=", ">=", null));
         m_functions.add(new ExpressionEntity("<", "<", null));
         m_functions.add(new ExpressionEntity("<=", "<=", null));
-        m_functions.add(new ExpressionEntity("=", "<==", null));
+        m_functions.add(new ExpressionEntity("=", "==", null));
         
         ArrayList<ExpressionEntity> m_variables = new ArrayList<>(colCount);
         

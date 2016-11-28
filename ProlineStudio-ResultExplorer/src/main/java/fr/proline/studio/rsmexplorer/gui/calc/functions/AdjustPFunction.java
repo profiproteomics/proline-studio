@@ -68,9 +68,9 @@ public class AdjustPFunction extends AbstractFunction {
     @Override
     public String getName() {
         if (m_pi0MethodParameter == null) {
-            return "AdjustP";
+            return "PValue Adjustment";
         }
-        StringBuilder columnNameSb = new StringBuilder("AdjustP ");
+        StringBuilder columnNameSb = new StringBuilder("PValue Adjustment ");
         String pi0Method = m_pi0MethodParameter.getStringValue();
         if (pi0Method.compareTo("Numeric Value") == 0) {
             columnNameSb.append(m_numericValueParameter.getStringValue());

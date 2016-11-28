@@ -9,10 +9,10 @@ import fr.proline.studio.types.PValue;
  * Beta Binomial Function for the data analyzer
  * @author JM235353
  */
-public class BBinomialFunction extends AbstractOnExperienceDesignFunction {
+public class SCDiffAnalysisFunction extends AbstractOnExperienceDesignFunction {
 
-    public BBinomialFunction(GraphPanel panel) {
-        super(panel, "bbinomial", "bbinomial", "bbinomial", new PValue());
+    public SCDiffAnalysisFunction(GraphPanel panel) {
+        super(panel, "SC Differential Analysis", "sc_diffanalysis", "bbinomial", new PValue());
     }
 
     @Override
@@ -27,7 +27,7 @@ public class BBinomialFunction extends AbstractOnExperienceDesignFunction {
     
     @Override
     public AbstractFunction cloneFunction(GraphPanel p) {
-        AbstractFunction clone = new BBinomialFunction(p);
+        AbstractFunction clone = new SCDiffAnalysisFunction(p);
         clone.cloneInfo(this);
         return clone;
     }

@@ -181,7 +181,7 @@ public class StatsImplementation {
 
             TTest tTest = new TTestImpl();
 
-            // calculate pvalue
+            // calculate Welch t-test pvalue
             double pvalue;
             try {
                 pvalue = -Math.log10(tTest.tTest(ds1.getValues(), ds2.getValues()));

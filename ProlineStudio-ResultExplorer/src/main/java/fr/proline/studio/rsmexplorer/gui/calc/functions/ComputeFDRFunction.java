@@ -81,9 +81,9 @@ public class ComputeFDRFunction extends AbstractFunction {
     @Override
     public String getName() {
         if (m_pi0MethodParameter == null) {
-            return "Compute FDR";
+            return "FDR Computation";
         }
-        StringBuilder columnNameSb = new StringBuilder("Compute FDR ");
+        StringBuilder columnNameSb = new StringBuilder("FDR Computation ");
         String pi0Method = m_pi0MethodParameter.getStringValue();
         if (pi0Method.compareTo("Numeric Value") == 0) {
             columnNameSb.append(m_numericValueParameter.getStringValue());

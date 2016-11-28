@@ -5,7 +5,7 @@ import fr.proline.studio.python.data.TableInfo;
 import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
 import fr.proline.studio.rsmexplorer.gui.calc.functions.AbstractFunction;
 import fr.proline.studio.rsmexplorer.gui.calc.functions.AdjustPFunction;
-import fr.proline.studio.rsmexplorer.gui.calc.functions.BBinomialFunction;
+import fr.proline.studio.rsmexplorer.gui.calc.functions.SCDiffAnalysisFunction;
 import fr.proline.studio.rsmexplorer.gui.calc.functions.ColumnFilterFunction;
 import fr.proline.studio.rsmexplorer.gui.calc.functions.ComputeFDRFunction;
 import fr.proline.studio.rsmexplorer.gui.calc.functions.DiffAnalysisFunction;
@@ -173,54 +173,61 @@ public abstract class DataTree extends JTree {
     
     private void fillFunctionNodes(ParentFunctionNode parentFunctionNode) {
         
-        FunctionNode adjustPFunction = new FunctionNode(new AdjustPFunction(null));
-        parentFunctionNode.add(adjustPFunction);
-        
-        FunctionNode diffFunction = new FunctionNode(new DiffFunction(null));
-        parentFunctionNode.add(diffFunction);
+        ParentFunctionNode tableFonctionsNode = new ParentFunctionNode("Table");
+        parentFunctionNode.add(tableFonctionsNode);
         
         FunctionNode tsvFunction = new FunctionNode(new ImportTSVFunction(null));
-        parentFunctionNode.add(tsvFunction);
+        tableFonctionsNode.add(tsvFunction);
         
-        FunctionNode joinFunction = new FunctionNode(new JoinFunction(null));
-        parentFunctionNode.add(joinFunction);
-        
-        FunctionNode bbinomialFunction = new FunctionNode(new BBinomialFunction(null));
-        parentFunctionNode.add(bbinomialFunction);
-
-        FunctionNode pvalueFunction = new FunctionNode(new PValueFunction(null));
-        parentFunctionNode.add(pvalueFunction);
-        
-        FunctionNode ttdFunction = new FunctionNode(new TtdFunction(null));
-        parentFunctionNode.add(ttdFunction);
-
         FunctionNode columnFilterFunction = new FunctionNode(new ColumnFilterFunction(null));
-        parentFunctionNode.add(columnFilterFunction);
+        tableFonctionsNode.add(columnFilterFunction);
         
         FunctionNode filterFunction = new FunctionNode(new FilterFunction(null));
-        parentFunctionNode.add(filterFunction);
-        
-        FunctionNode quantiFilterFunction = new FunctionNode(new QuantiFilterFunction(null));
-        parentFunctionNode.add(quantiFilterFunction);
-        
-        FunctionNode normalizationFunction = new FunctionNode(new NormalizationFunction(null));
-        parentFunctionNode.add(normalizationFunction);
-        
-        FunctionNode missingValuesImputationFunction = new FunctionNode(new MissingValuesImputationFunction(null));
-        parentFunctionNode.add(missingValuesImputationFunction);
-
-        FunctionNode diffAnalysisFunction = new FunctionNode(new DiffAnalysisFunction(null));
-        parentFunctionNode.add(diffAnalysisFunction);
-        
-        FunctionNode computeFDRFunction = new FunctionNode(new ComputeFDRFunction(null));
-        parentFunctionNode.add(computeFDRFunction);
+        tableFonctionsNode.add(filterFunction);
         
         FunctionNode logFunction = new FunctionNode(new LogFunction(null, false));
-        parentFunctionNode.add(logFunction);
+        tableFonctionsNode.add(logFunction);
         
         FunctionNode log10Function = new FunctionNode(new LogFunction(null, true));
-        parentFunctionNode.add(log10Function);
+        tableFonctionsNode.add(log10Function);
         
+        FunctionNode diffFunction = new FunctionNode(new DiffFunction(null));
+        tableFonctionsNode.add(diffFunction);
+        
+        FunctionNode joinFunction = new FunctionNode(new JoinFunction(null));
+        tableFonctionsNode.add(joinFunction);
+        
+        
+        
+        ParentFunctionNode statsFonctionsNode = new ParentFunctionNode("Statistics");
+        parentFunctionNode.add(statsFonctionsNode);
+        
+        FunctionNode quantiFilterFunction = new FunctionNode(new QuantiFilterFunction(null));
+        statsFonctionsNode.add(quantiFilterFunction);
+        
+        FunctionNode missingValuesImputationFunction = new FunctionNode(new MissingValuesImputationFunction(null));
+        statsFonctionsNode.add(missingValuesImputationFunction);
+        
+        FunctionNode normalizationFunction = new FunctionNode(new NormalizationFunction(null));
+        statsFonctionsNode.add(normalizationFunction);
+        
+        FunctionNode bbinomialFunction = new FunctionNode(new SCDiffAnalysisFunction(null));
+        statsFonctionsNode.add(bbinomialFunction);
+        
+        FunctionNode diffAnalysisFunction = new FunctionNode(new DiffAnalysisFunction(null));
+        statsFonctionsNode.add(diffAnalysisFunction);
+
+        FunctionNode adjustPFunction = new FunctionNode(new AdjustPFunction(null));
+        statsFonctionsNode.add(adjustPFunction);
+        
+        FunctionNode computeFDRFunction = new FunctionNode(new ComputeFDRFunction(null));
+        statsFonctionsNode.add(computeFDRFunction);
+
+//        FunctionNode pvalueFunction = new FunctionNode(new PValueFunction(null));
+//        parentFunctionNode.add(pvalueFunction);
+//        
+//        FunctionNode ttdFunction = new FunctionNode(new TtdFunction(null));
+//        parentFunctionNode.add(ttdFunction);
         
         DefaultTreeModel model = (DefaultTreeModel) getModel();
         model.nodeStructureChanged(parentFunctionNode);
@@ -358,8 +365,15 @@ public abstract class DataTree extends JTree {
 
     public static class ParentFunctionNode extends DataNode {
 
+        String name;
+        
         public ParentFunctionNode() {
+            this("Functions");
+        }
+        
+        public ParentFunctionNode(String label) {
             super(DataNodeType.PARENT_FUNCTION);
+            this.name = label;
         }
         
         @Override
@@ -369,7 +383,7 @@ public abstract class DataTree extends JTree {
 
         @Override
         public String toString() {
-            return "Functions";
+            return name;
         }
     }
     

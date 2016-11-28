@@ -42,7 +42,7 @@ public class FilterFunction extends AbstractFunction {
 
     @Override
     public String getName() {
-        return "Filter";
+        return "Rows Filter";
     }
 
     @Override

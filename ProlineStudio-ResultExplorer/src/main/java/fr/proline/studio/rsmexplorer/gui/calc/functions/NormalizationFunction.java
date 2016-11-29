@@ -6,6 +6,10 @@ import fr.proline.studio.parameter.ParameterList;
 import fr.proline.studio.python.data.Table;
 import fr.proline.studio.python.interpreter.ResultVariable;
 import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
+import fr.proline.studio.rsmexplorer.gui.calc.ProcessCallbackInterface;
+import fr.proline.studio.rsmexplorer.gui.calc.graph.AbstractConnectedGraphObject;
+import fr.proline.studio.rsmexplorer.gui.calc.graph.FunctionGraphNode;
+import fr.proline.studio.table.GlobalTableModelInterface;
 
 /**
  *
@@ -17,6 +21,8 @@ public class NormalizationFunction extends AbstractOnExperienceDesignFunction {
     private static final String FAMILY_MEDIAN_CENTERING = "Median Centering";
     private static final String FAMILY_MEAN_CENTERING = "Mean Centering";
     private static final String FAMILY_MEAN_CENTERING_SCALING = "Mean Centering Scaling";
+    private static final String FAMILY_NONE = "None";
+    
     
     private static final String FAMILY_STRONG_OPTION1 = "sum by columns";
     private static final String FAMILY_STRONG_OPTION2 = "quantiles";
@@ -68,7 +74,7 @@ public class NormalizationFunction extends AbstractOnExperienceDesignFunction {
 
         m_parameterList = new ParameterList(NORMALIZATION_FUNCTION_PARAMETER_LIST_NAME);
 
-        String[] normalizationFamily = { FAMILY_STRONG_RESCALING, FAMILY_MEDIAN_CENTERING, FAMILY_MEAN_CENTERING, FAMILY_MEAN_CENTERING_SCALING };
+        String[] normalizationFamily = { FAMILY_STRONG_RESCALING, FAMILY_MEDIAN_CENTERING, FAMILY_MEAN_CENTERING, FAMILY_MEAN_CENTERING_SCALING, FAMILY_NONE };
 
         String[] normalizationOption1Family = { FAMILY_STRONG_OPTION1, FAMILY_STRONG_OPTION2 };
         String[] normalizationOption2Family = { FAMILY_OTHERS_OPTION1, FAMILY_OTHERS_OPTION2 };    
@@ -84,9 +90,13 @@ public class NormalizationFunction extends AbstractOnExperienceDesignFunction {
         AbstractLinkedParameters linkedParameters = new AbstractLinkedParameters(m_parameterList) {
             @Override
             public void valueChanged(String value, Object associatedValue) {
+                if (value.compareTo(FAMILY_NONE) != 0) {
                 showParameter(m_familyStrongOptionParameter, (value.compareTo(FAMILY_STRONG_RESCALING) == 0));
                 showParameter(m_familyOthersOptionParameter, (value.compareTo(FAMILY_STRONG_RESCALING) != 0));
-
+                } else {
+                  showParameter(m_familyStrongOptionParameter,false);
+                  showParameter(m_familyOthersOptionParameter,false);  
+                }
                 updateParameterListPanel();
             }
             
@@ -107,7 +117,9 @@ public class NormalizationFunction extends AbstractOnExperienceDesignFunction {
         String normalizationParameter = m_normalizationParameter.getStringValue();
         if (normalizationParameter.compareTo(FAMILY_STRONG_RESCALING) == 0) {
             return ",\""+normalizationParameter+"\",\""+m_familyStrongOptionParameter.getStringValue()+"\"";  
-        } else {
+        } else if (normalizationParameter.compareTo(FAMILY_NONE) == 0) {
+            return ",\""+normalizationParameter+"\",\"\"";          
+        } else{
             return ",\""+normalizationParameter+"\",\""+m_familyOthersOptionParameter.getStringValue()+"\"";  
         }
 
@@ -123,5 +135,19 @@ public class NormalizationFunction extends AbstractOnExperienceDesignFunction {
     @Override
     public boolean addLabelParameter() {
         return true;
+    }
+    
+    @Override
+    public void process(AbstractConnectedGraphObject[] graphObjects, FunctionGraphNode functionGraphNode, ProcessCallbackInterface callback) {
+        String normalizationParameter = m_normalizationParameter.getStringValue();
+        if (normalizationParameter.compareTo(FAMILY_NONE) == 0) {
+            GlobalTableModelInterface srcModel = graphObjects[0].getGlobalTableModelInterface();
+            addModel(srcModel);
+            
+            callback.finished(functionGraphNode);
+            return;
+        } else {
+            super.process(graphObjects, functionGraphNode, callback);
+        }
     }
 }

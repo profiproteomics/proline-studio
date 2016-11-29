@@ -117,7 +117,12 @@ public class AdvancedSelectionPanel<E> extends JPanel  {
         for (int i = 0; i < nb; i++) {
             String valueCur = removeHtmlColor(listModel.getElementAt(i).toString());
 
-            int indexSpace = valueCur.lastIndexOf(' ');
+            if (valueCur.indexOf(value) != -1) {
+                sm.addSelectionInterval(i, i);
+                lastSelectedIndex = i;
+            }
+            
+            /*int indexSpace = valueCur.lastIndexOf(' ');
             if (indexSpace != -1) {
                 String prefix = valueCur.substring(0, indexSpace);
                 String suffix = valueCur.substring(indexSpace, valueCur.length());
@@ -125,7 +130,7 @@ public class AdvancedSelectionPanel<E> extends JPanel  {
                     sm.addSelectionInterval(i, i);
                     lastSelectedIndex = i;
                 }
-            }
+            }*/
 
         }
         list.ensureIndexIsVisible(lastSelectedIndex);
@@ -385,11 +390,12 @@ public class AdvancedSelectionPanel<E> extends JPanel  {
                 indexStop = nohtmlValue.indexOf('>');
             }
 
+            // PREFIX --------------
             String prefix = nohtmlValue;
 
-            int indexSpace = prefix.lastIndexOf(' ');
-            if (indexSpace != -1) {
-                prefix = prefix.substring(0, indexSpace);
+            int indexFirstSpace = prefix.indexOf(' ');
+            if (indexFirstSpace != -1) {
+                prefix = prefix.substring(0, indexFirstSpace);
             }
             if (prefix.length() > 0) {
                 Integer nb = similarColumnsNumberMap.get(prefix);
@@ -415,36 +421,46 @@ public class AdvancedSelectionPanel<E> extends JPanel  {
                     similarColumnsColorsMap.put(prefix, "");
                 }
             }
-                if (indexSpace != -1) {
+            
+            
+            // SUFFIX --------------
+            
+            String suffix = nohtmlValue;
+            int indexLastSpace = suffix.lastIndexOf(' ');
+            if (indexLastSpace != -1) {
+                suffix = nohtmlValue.substring(indexLastSpace, nohtmlValue.length());
+            }
 
-                    String suffix  = nohtmlValue.substring(indexSpace, nohtmlValue.length());
-                    if (suffix.length() > 0) {
-                        Integer nb = similarColumnsNumberMap.get(suffix);
-                        if (nb == null) {
-                            similarColumnsNumberMap.put(suffix, 1);
-                        } else {
-                            similarColumnsNumberMap.put(suffix, nb + 1);
-                        }
+            if (suffix.length() > 0) {
+                Integer nb = similarColumnsNumberMap.get(suffix);
+                if (nb == null) {
+                    similarColumnsNumberMap.put(suffix, 1);
+                } else {
+                    similarColumnsNumberMap.put(suffix, nb + 1);
+                }
 
-                        colorIndexStart = fullValue.indexOf("<font color='", 0);
-                        colorIndexStop = fullValue.indexOf("</font>", 0);
-                        if ((colorIndexStart > -1) && (colorIndexStop > colorIndexStart)) {
-                            String colorName = fullValue.substring(colorIndexStart, colorIndexStop + "</font>".length());
-                            String curColorName = similarColumnsColorsMap.get(suffix);
-                            if (curColorName != null) {
-                                if (curColorName.compareTo(colorName) != 0) {
-                                    similarColumnsColorsMap.put(suffix, "");
-                                }
-                            } else {
-                                similarColumnsColorsMap.put(suffix, colorName);
-                            }
-                        } else {
+                colorIndexStart = fullValue.indexOf("<font color='", 0);
+                colorIndexStop = fullValue.indexOf("</font>", 0);
+                if ((colorIndexStart > -1) && (colorIndexStop > colorIndexStart)) {
+                    String colorName = fullValue.substring(colorIndexStart, colorIndexStop + "</font>".length());
+                    String curColorName = similarColumnsColorsMap.get(suffix);
+                    if (curColorName != null) {
+                        if (curColorName.compareTo(colorName) != 0) {
                             similarColumnsColorsMap.put(suffix, "");
                         }
+                    } else {
+                        similarColumnsColorsMap.put(suffix, colorName);
                     }
+                } else {
+                    similarColumnsColorsMap.put(suffix, "");
                 }
-     
 
+            }
+    
+            // EXTENDED SUFFIX --------------
+            while (indexLastSpace != -1) {
+                indexLastSpace = addSuffix(indexLastSpace, nohtmlValue, fullValue, similarColumnsNumberMap, similarColumnsColorsMap );
+            }
         }
 
         // suppression des lignes à un résultat dans similarColumnsNumberMap
@@ -453,7 +469,7 @@ public class AdvancedSelectionPanel<E> extends JPanel  {
         for (int i = 0; i < colNamesArray.length; i++) {
             String colName = colNamesArray[i];
             Integer nb = similarColumnsNumberMap.get(colName);
-            if (nb <= 1) {
+            if ((nb <= 1) || (nb>size/2)) {
                 similarColumnsNumberMap.remove(colName);
             }
         }
@@ -478,4 +494,43 @@ public class AdvancedSelectionPanel<E> extends JPanel  {
         return groups;
     }
 
+    private int addSuffix(int indexLastSpace, String nohtmlValue, String fullValue, HashMap<String, Integer> similarColumnsNumberMap, HashMap<String, String> similarColumnsColorsMap) {
+        if (indexLastSpace != -1) {
+            String suffix = nohtmlValue;
+            int indexPreviousSpace = nohtmlValue.substring(0, indexLastSpace).lastIndexOf(' ');
+            if (indexPreviousSpace != -1) {
+                suffix = nohtmlValue.substring(indexPreviousSpace, nohtmlValue.length());
+
+                if (suffix.length() > 0) {
+                    Integer nb = similarColumnsNumberMap.get(suffix);
+                    if (nb == null) {
+                        similarColumnsNumberMap.put(suffix, 1);
+                    } else {
+                        similarColumnsNumberMap.put(suffix, nb + 1);
+                    }
+
+                    int colorIndexStart = fullValue.indexOf("<font color='", 0);
+                    int colorIndexStop = fullValue.indexOf("</font>", 0);
+                    if ((colorIndexStart > -1) && (colorIndexStop > colorIndexStart)) {
+                        String colorName = fullValue.substring(colorIndexStart, colorIndexStop + "</font>".length());
+                        String curColorName = similarColumnsColorsMap.get(suffix);
+                        if (curColorName != null) {
+                            if (curColorName.compareTo(colorName) != 0) {
+                                similarColumnsColorsMap.put(suffix, "");
+                            }
+                        } else {
+                            similarColumnsColorsMap.put(suffix, colorName);
+                        }
+                    } else {
+                        similarColumnsColorsMap.put(suffix, "");
+                    }
+
+                }
+            }
+            
+            return indexPreviousSpace;
+        }
+        
+        return -1;
+    }
 }

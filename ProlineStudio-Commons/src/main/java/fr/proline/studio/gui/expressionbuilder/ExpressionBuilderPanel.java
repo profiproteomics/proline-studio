@@ -5,20 +5,24 @@ import java.awt.Component;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
-import javax.swing.Box;
+import javax.swing.BorderFactory;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.DefaultListModel;
+import javax.swing.DefaultListSelectionModel;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
+import javax.swing.SwingUtilities;
 import org.jdesktop.swingx.JXTextField;
 
 /**
@@ -29,10 +33,7 @@ public class ExpressionBuilderPanel extends JPanel {
     
     private final ArrayList<ExpressionEntity> m_builtExpression = new ArrayList<>();
     private final ArrayList<ExpressionEntity> m_redoExpression = new ArrayList<>();
-    
-    //private final ArrayList<ExpressionEntity> m_functions = new ArrayList<>();
-    //private final ArrayList<ExpressionEntity> m_variables = new ArrayList<>();
-    
+
     private final JPanel m_functionsPanel;
     private final JPanel m_numberPanel;
     private final JScrollPane m_variablesListScrollPane;
@@ -43,13 +44,13 @@ public class ExpressionBuilderPanel extends JPanel {
     private final JButton m_clearButton;
     
     public ExpressionBuilderPanel() {
+        setBorder(BorderFactory.createTitledBorder(" Expression Builder "));
         setLayout(new GridBagLayout());
         
         GridBagConstraints c = new GridBagConstraints();
         c.gridx = 0;
         c.gridy = 0;
-        c.ipadx = 2;
-        c.ipady = 2;
+        c.insets = new Insets(2, 2, 2, 2);
         c.fill = GridBagConstraints.BOTH;
         c.anchor = GridBagConstraints.NORTHWEST;
 
@@ -160,10 +161,18 @@ public class ExpressionBuilderPanel extends JPanel {
     }
     
     private JPanel createFunctionPanel() {
-        JPanel functionsPanel = new JPanel(new FlowLayout());
+        JPanel functionsPanel = new JPanel(new GridBagLayout());
+        
+        m_functionsPanelConstraints = new GridBagConstraints();
+        m_functionsPanelConstraints.gridx = 0;
+        m_functionsPanelConstraints.gridy = 0;
+        m_functionsPanelConstraints.insets = new Insets(2, 2, 2, 2);
+        m_functionsPanelConstraints.fill = GridBagConstraints.BOTH;
+        m_functionsPanelConstraints.anchor = GridBagConstraints.NORTHWEST;
         
         return functionsPanel;
     }
+    private GridBagConstraints m_functionsPanelConstraints;
     
     private JPanel createNumberPanel() {
         JPanel numberPanel = new JPanel(new FlowLayout());
@@ -173,8 +182,7 @@ public class ExpressionBuilderPanel extends JPanel {
         GridBagConstraints c = new GridBagConstraints();
         c.gridx = 0;
         c.gridy = 0;
-        c.ipadx = 2;
-        c.ipady = 0;
+        c.insets = new Insets(2, 2, 2, 2);
         c.fill = GridBagConstraints.BOTH;
         c.anchor = GridBagConstraints.NORTHWEST;
         
@@ -183,7 +191,7 @@ public class ExpressionBuilderPanel extends JPanel {
         final JTextField numberTextField = new JTextField();
         
         
-        JButton addButton = new JButton(IconManager.getIcon(IconManager.IconType.PLUS));
+        JButton addButton = new JButton(IconManager.getIcon(IconManager.IconType.PLUS_16X16));
         addButton.setMargin(new java.awt.Insets(1, 1, 1, 1));
         addButton.addActionListener(new ActionListener() {
             @Override
@@ -231,6 +239,10 @@ public class ExpressionBuilderPanel extends JPanel {
     
     private JScrollPane createVariablesList() {
         m_variablesList = new JList(new DefaultListModel());
+        
+        // no selection allowed
+        m_variablesList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+
         JScrollPane scrollPane = new JScrollPane();
         scrollPane.setViewportView(m_variablesList);
         
@@ -239,11 +251,17 @@ public class ExpressionBuilderPanel extends JPanel {
                 JList list = (JList) evt.getSource();
                 if (evt.getClickCount() == 1) {
                     ExpressionEntity entity = (ExpressionEntity) list.getSelectedValue();
-                    list.setSelectedIndex(-1);
                     m_builtExpression.add(entity);
                     m_expressionTextField.setText(getDisplayExpression());
                     updateEnableButtons();
                 }
+                SwingUtilities.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        m_variablesList.clearSelection();
+                    }
+                    
+                });
             }
         });
         
@@ -263,7 +281,8 @@ public class ExpressionBuilderPanel extends JPanel {
             }
         });
         
-        m_functionsPanel.add(functionButton);
+        m_functionsPanelConstraints.gridx++;
+        m_functionsPanel.add(functionButton, m_functionsPanelConstraints);
     }
     
     public void addVariable(ExpressionEntity entity) {

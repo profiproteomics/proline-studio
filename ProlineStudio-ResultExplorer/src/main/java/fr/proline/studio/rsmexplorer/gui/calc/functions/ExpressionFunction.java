@@ -164,11 +164,7 @@ public class ExpressionFunction extends AbstractFunction {
 
         GlobalTableModelInterface model =  graphObjects[0].getGlobalTableModelInterface();
         int colCount = model.getColumnCount();
-        
-        ExportModelInterface exportableModel = null;
-        if (model instanceof ExportModelInterface) {
-            exportableModel = (ExportModelInterface) model;
-        }
+
 
         
         ArrayList<ExpressionEntity> m_functions = new ArrayList<>(20);

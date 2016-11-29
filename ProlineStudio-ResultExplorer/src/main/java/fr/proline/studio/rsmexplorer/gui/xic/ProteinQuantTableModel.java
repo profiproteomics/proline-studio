@@ -258,7 +258,7 @@ public class ProteinQuantTableModel extends LazyTableModel implements GlobalTabl
 
             case COLTYPE_ABUNDANCE:
                 if(m_isXICMode){
-                    renderer = new FloatRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 0);
+                    renderer = new BigFloatOrDoubleRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 0);
                 }else{
                     renderer = new FloatRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 2);
                 }

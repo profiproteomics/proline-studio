@@ -484,5 +484,261 @@ public abstract class Col extends PyObject {
         throw Py.TypeError("Type Mismatch for + " + left.getClass().getName());
     }
     
+    public PyObject __gt__(PyObject right) {
+        if (right instanceof Col) {
+
+            int nb = __len__();
+            if (right.__len__() != nb) {
+                throw Py.TypeError("Tried to compare Columns with different sizes");
+            }
+
+            ArrayList<Boolean> resultArray = new ArrayList<>(nb);
+            Col rightCol = (Col) right;
+            for (int i = 0; i < nb; i++) {
+                Object o1 = getValueAt(i);
+                Object o2 = rightCol.getValueAt(i);
+                if ((o1 == null) || (o2 == null)) {
+                    throw Py.TypeError("Col with null values");
+                }
+                if (!(o1 instanceof Number) || !(o2 instanceof Number)) {
+                    throw Py.TypeError("Col with non numeric values");
+                }
+                boolean b = ((Number) o1).doubleValue() > ((Number) o2).doubleValue();
+                resultArray.add(b);
+            }
+
+            return new ColBooleanData(m_table, resultArray, null);
+        } else if (right instanceof PyInteger) {
+
+            int v = ((PyInteger) right).getValue();
+
+            int nb = __len__();
+            ArrayList<Boolean> resultArray = new ArrayList<>(nb);
+            for (int i = 0; i < nb; i++) {
+                Object o1 = getValueAt(i);
+                if (o1 == null) {
+                    throw Py.TypeError("Col with null values");
+                }
+                if (!(o1 instanceof Number)) {
+                    throw Py.TypeError("Col with non numeric values");
+                }
+                boolean b = ((Number) o1).doubleValue() > v;
+                resultArray.add(b);
+            }
+            return new ColBooleanData(m_table, resultArray, null);
+        } else if (right instanceof PyFloat) {
+
+            double v = ((PyFloat) right).getValue();
+
+            int nb = __len__();
+            ArrayList<Boolean> resultArray = new ArrayList<>(nb);
+            for (int i = 0; i < nb; i++) {
+                Object o1 = getValueAt(i);
+                if (o1 == null) {
+                    throw Py.TypeError("Col with null values");
+                }
+                if (!(o1 instanceof Number)) {
+                    throw Py.TypeError("Col with non numeric values");
+                }
+                boolean b = ((Number) o1).doubleValue() > v;
+                resultArray.add(b);
+            }
+            return new ColBooleanData(m_table, resultArray, null);
+        }
+        throw Py.TypeError("Type Mismatch for + " + right.getClass().getName());
+    }
+     
+     public PyObject __ge__(PyObject right) {
+        if (right instanceof Col) {
+
+            int nb = __len__();
+            if (right.__len__() != nb) {
+                throw Py.TypeError("Tried to compare Columns with different sizes");
+            }
+
+            ArrayList<Boolean> resultArray = new ArrayList<>(nb);
+            Col rightCol = (Col) right;
+            for (int i = 0; i < nb; i++) {
+                Object o1 = getValueAt(i);
+                Object o2 = rightCol.getValueAt(i);
+                if ((o1 == null) || (o2 == null)) {
+                    throw Py.TypeError("Col with null values");
+                }
+                if (!(o1 instanceof Number) || !(o2 instanceof Number)) {
+                    throw Py.TypeError("Col with non numeric values");
+                }
+                boolean b = ((Number) o1).doubleValue() >= ((Number) o2).doubleValue();
+                resultArray.add(b);
+            }
+
+            return new ColBooleanData(m_table, resultArray, null);
+        } else if (right instanceof PyInteger) {
+
+            int v = ((PyInteger) right).getValue();
+
+            int nb = __len__();
+            ArrayList<Boolean> resultArray = new ArrayList<>(nb);
+            for (int i = 0; i < nb; i++) {
+                Object o1 = getValueAt(i);
+                if (o1 == null) {
+                    throw Py.TypeError("Col with null values");
+                }
+                if (!(o1 instanceof Number)) {
+                    throw Py.TypeError("Col with non numeric values");
+                }
+                boolean b = ((Number) o1).doubleValue() >= v;
+                resultArray.add(b);
+            }
+            return new ColBooleanData(m_table, resultArray, null);
+        } else if (right instanceof PyFloat) {
+
+            double v = ((PyFloat) right).getValue();
+
+            int nb = __len__();
+            ArrayList<Boolean> resultArray = new ArrayList<>(nb);
+            for (int i = 0; i < nb; i++) {
+                Object o1 = getValueAt(i);
+                if (o1 == null) {
+                    throw Py.TypeError("Col with null values");
+                }
+                if (!(o1 instanceof Number)) {
+                    throw Py.TypeError("Col with non numeric values");
+                }
+                boolean b = ((Number) o1).doubleValue() >= v;
+                resultArray.add(b);
+            }
+            return new ColBooleanData(m_table, resultArray, null);
+        }
+        throw Py.TypeError("Type Mismatch for + " + right.getClass().getName());
+    }
+     
+    public PyObject __lt__(PyObject right) {
+        if (right instanceof Col) {
+
+            int nb = __len__();
+            if (right.__len__() != nb) {
+                throw Py.TypeError("Tried to compare Columns with different sizes");
+            }
+
+            ArrayList<Boolean> resultArray = new ArrayList<>(nb);
+            Col rightCol = (Col) right;
+            for (int i = 0; i < nb; i++) {
+                Object o1 = getValueAt(i);
+                Object o2 = rightCol.getValueAt(i);
+                if ((o1 == null) || (o2 == null)) {
+                    throw Py.TypeError("Col with null values");
+                }
+                if (!(o1 instanceof Number) || !(o2 instanceof Number)) {
+                    throw Py.TypeError("Col with non numeric values");
+                }
+                boolean b = ((Number) o1).doubleValue() < ((Number) o2).doubleValue();
+                resultArray.add(b);
+            }
+
+            return new ColBooleanData(m_table, resultArray, null);
+        } else if (right instanceof PyInteger) {
+
+            int v = ((PyInteger) right).getValue();
+
+            int nb = __len__();
+            ArrayList<Boolean> resultArray = new ArrayList<>(nb);
+            for (int i = 0; i < nb; i++) {
+                Object o1 = getValueAt(i);
+                if (o1 == null) {
+                    throw Py.TypeError("Col with null values");
+                }
+                if (!(o1 instanceof Number)) {
+                    throw Py.TypeError("Col with non numeric values");
+                }
+                boolean b = ((Number) o1).doubleValue() < v;
+                resultArray.add(b);
+            }
+            return new ColBooleanData(m_table, resultArray, null);
+        } else if (right instanceof PyFloat) {
+
+            double v = ((PyFloat) right).getValue();
+
+            int nb = __len__();
+            ArrayList<Boolean> resultArray = new ArrayList<>(nb);
+            for (int i = 0; i < nb; i++) {
+                Object o1 = getValueAt(i);
+                if (o1 == null) {
+                    throw Py.TypeError("Col with null values");
+                }
+                if (!(o1 instanceof Number)) {
+                    throw Py.TypeError("Col with non numeric values");
+                }
+                boolean b = ((Number) o1).doubleValue() < v;
+                resultArray.add(b);
+            }
+            return new ColBooleanData(m_table, resultArray, null);
+        }
+        throw Py.TypeError("Type Mismatch for + " + right.getClass().getName());
+    }
+
+    public PyObject __le__(PyObject right) {
+        if (right instanceof Col) {
+
+            int nb = __len__();
+            if (right.__len__() != nb) {
+                throw Py.TypeError("Tried to compare Columns with different sizes");
+            }
+
+            ArrayList<Boolean> resultArray = new ArrayList<>(nb);
+            Col rightCol = (Col) right;
+            for (int i = 0; i < nb; i++) {
+                Object o1 = getValueAt(i);
+                Object o2 = rightCol.getValueAt(i);
+                if ((o1 == null) || (o2 == null)) {
+                    throw Py.TypeError("Col with null values");
+                }
+                if (!(o1 instanceof Number) || !(o2 instanceof Number)) {
+                    throw Py.TypeError("Col with non numeric values");
+                }
+                boolean b = ((Number) o1).doubleValue() <= ((Number) o2).doubleValue();
+                resultArray.add(b);
+            }
+
+            return new ColBooleanData(m_table, resultArray, null);
+        } else if (right instanceof PyInteger) {
+
+            int v = ((PyInteger) right).getValue();
+
+            int nb = __len__();
+            ArrayList<Boolean> resultArray = new ArrayList<>(nb);
+            for (int i = 0; i < nb; i++) {
+                Object o1 = getValueAt(i);
+                if (o1 == null) {
+                    throw Py.TypeError("Col with null values");
+                }
+                if (!(o1 instanceof Number)) {
+                    throw Py.TypeError("Col with non numeric values");
+                }
+                boolean b = ((Number) o1).doubleValue() <= v;
+                resultArray.add(b);
+            }
+            return new ColBooleanData(m_table, resultArray, null);
+        } else if (right instanceof PyFloat) {
+
+            double v = ((PyFloat) right).getValue();
+
+            int nb = __len__();
+            ArrayList<Boolean> resultArray = new ArrayList<>(nb);
+            for (int i = 0; i < nb; i++) {
+                Object o1 = getValueAt(i);
+                if (o1 == null) {
+                    throw Py.TypeError("Col with null values");
+                }
+                if (!(o1 instanceof Number)) {
+                    throw Py.TypeError("Col with non numeric values");
+                }
+                boolean b = ((Number) o1).doubleValue() <= v;
+                resultArray.add(b);
+            }
+            return new ColBooleanData(m_table, resultArray, null);
+        }
+        throw Py.TypeError("Type Mismatch for + " + right.getClass().getName());
+    }
+    
     public abstract Class getColumnClass();
 }

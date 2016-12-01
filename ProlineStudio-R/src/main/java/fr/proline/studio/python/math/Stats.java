@@ -18,6 +18,10 @@ import org.python.core.PyTuple;
  */
 public class Stats {
 
+    public static ColDoubleData abs(Col values) {
+        return StatsImplementation.abs(values);
+    }
+    
     public static ColDoubleData log2(Col values) {
         return StatsImplementation.log2(values);
     }
@@ -65,7 +69,7 @@ public class Stats {
         return StatsRImplementation.adjustP(pvaluesCol, pi0Parameter, alpha, nbins, pz);
     }
 
-    public static ColDoubleData bbinomial(PyTuple p) throws Exception {
+    public static Table bbinomial(PyTuple p) throws Exception {
         return StatsRImplementation.bbinomial(p);
     }
 

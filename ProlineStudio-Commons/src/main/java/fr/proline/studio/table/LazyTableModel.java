@@ -24,33 +24,25 @@ public abstract class LazyTableModel extends DecoratedTableModel implements Lazy
     
     /**
      * Return a LadyData to be used in the LazyTableModel.
-     * The LazyData instance is always the same when the table is not sorted.
-     * When the table is sorted the LazyData returned is different for each row.
-     * This is necessary for the compare used for the sorting
+     * The LazyData instance is the same for each column, but different for each row,
+     * due to sorting problems
      * @param row
      * @param col
      * @return 
      */
     public LazyData getLazyData(int row, int col) {
-        
-        int sortedColumn = ((LazyTable) m_table).getSortedColumnIndex();
-        sortedColumn = (sortedColumn == -1) ? -1 : m_table.convertColumnIndexToModel(sortedColumn);
-        
-        if ( sortedColumn == col) {
-            int nb = getRowCount();
-            if ((dataForSortedColumn == null) || (dataForSortedColumn.length != nb)) {
-                dataForSortedColumn = new LazyData[nb];
-                for (int i = 0; i < nb; i++) {
-                    dataForSortedColumn[i] = new LazyData();
-                }
-            }
-            return dataForSortedColumn[row];
-        }
 
-        return singleton;
+        int nb = getRowCount();
+        if ((m_lazyDataArray == null) || (m_lazyDataArray.length != nb)) {
+            m_lazyDataArray = new LazyData[nb];
+            for (int i = 0; i < nb; i++) {
+                m_lazyDataArray[i] = new LazyData();
+            }
+        }
+        return m_lazyDataArray[row];
+
     }
-    LazyData singleton = new LazyData();
-    LazyData[] dataForSortedColumn = null;
+    private LazyData[] m_lazyDataArray = null;
     
     /**
      * Give priority to the LazyData in (col,row) which is not already loaded

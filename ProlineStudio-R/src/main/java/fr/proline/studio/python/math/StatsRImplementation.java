@@ -37,7 +37,8 @@ public class StatsRImplementation {
 
     private static final String LIB_PROSTAR = "DAPAR";
     private static final String LIB_CP4P = "cp4p";
-
+    private static final double LOG2 = StrictMath.log(2);
+    
     public static PyObject adjustP(Col pvaluesCol, String pi0Parameter, PyFloat alpha, PyInteger nbins, PyFloat pz) throws Exception {
 
         RServerManager serverR = RServerManager.getRServerManager();
@@ -57,19 +58,7 @@ public class StatsRImplementation {
         FileWriter fw = new FileWriter(tempFile);
 
         for (int i = 0; i < nbRow; i++) {
-            Object o = pvaluesCol.getValueAt(i);
-            if (o instanceof LazyData) {
-                o = ((LazyData) o).getData();
-            }
-            double d;
-            if ((o != null) && (o instanceof Number)) {
-                d = ((Number) o).doubleValue();
-                if (d != d) {
-                    d = 0; // NaN values
-                }
-            } else {
-                d = 0;
-            }
+            double d = asDoubleValue(pvaluesCol, i);
             fw.write(String.valueOf(d));
             fw.write('\n');
 
@@ -83,6 +72,23 @@ public class StatsRImplementation {
 
         return c;
 
+    }
+
+    private static double asDoubleValue(Col pvaluesCol, int i) {
+        Object o = pvaluesCol.getValueAt(i);
+        if (o instanceof LazyData) {
+            o = ((LazyData) o).getData();
+        }
+        double d;
+        if ((o != null) && (o instanceof Number)) {
+            d = ((Number) o).doubleValue();
+            if (d != d) {
+                d = 0; // NaN values
+            }
+        } else {
+            d = 0;
+        }
+        return d;
     }
 
     private static ColDoubleData _adjustP(Table t, File f, String pi0Parameter, PyFloat alpha, PyInteger nbins, PyFloat pz) throws Exception {
@@ -129,7 +135,7 @@ public class StatsRImplementation {
 
     }
 
-    public static ColDoubleData bbinomial(PyTuple p) throws Exception {
+    public static Table bbinomial(PyTuple p) throws Exception {
 
         // needs R for this calculation
         StatsUtil.startRSever();
@@ -146,16 +152,42 @@ public class StatsRImplementation {
         int nb1 = pArray[0].size();
         int nb2 = pArray[1].size();
         int nb3 = (pArray.length<=2) ? 0 : pArray[2].size();
-        ColDoubleData c = _bbinomialR(t, matrixTempFile, nb1, nb2, nb3);
-
+        ExprTableModel model = new ExprTableModel(t.getModel());
+        Table resTable = _bbinomialR(t, matrixTempFile, nb1, nb2, nb3, model);
+        
         // delete temp files
         matrixTempFile.delete();
+        
+        // if bbinomial is calculated for 2 groups, automatically compute a log Ratio column.  
+        if (pArray.length<=2) {
+            int nbRows = t.getModel().getRowCount(); 
+            
+            ArrayList<Double> valuesForCol = new ArrayList<>(nbRows);
+            for (int row = 0; row < nbRows; row++) {
+                double n = 0.0;
+                int c = 0;
+                for (; c < nb1; c++) {
+                    n += asDoubleValue(cols[c], row) +1;
+                }
+                double d = 0.0;
+                for (; c < (nb1+nb2); c++) {
+                    d += asDoubleValue(cols[c], row) +1;
+                }
+                valuesForCol.add(StrictMath.log((n/nb1)/(d/nb2))/LOG2); 
+            }
 
-        return c;
+            String colName = "log Ratio";
+            model.addExtraColumn(new ColDoubleData(resTable, valuesForCol, colName), null);
+            model.addExtraColumnInfo(new LogRatio());
+        
+        }
+        return resTable;
     }
 
-    private static ColDoubleData _bbinomialR(Table t, File matrixTempFile, int nbCols1, int nbCols2, int nbCols3) throws Exception {
-
+    private static Table _bbinomialR(Table t, File matrixTempFile, int nbCols1, int nbCols2, int nbCols3, ExprTableModel model) throws Exception {
+        
+        Table resTable = new Table(model);
+        
         // load library to do the calculation
         RServerManager serverR = RServerManager.getRServerManager();
         serverR.parseAndEval("library(ibb)");
@@ -176,12 +208,36 @@ public class StatsRImplementation {
         HashMap map = (HashMap) o;
         double[] values = (double[]) map.keySet().toArray()[0];
 
-        ArrayList<Double> resArray = new ArrayList<>(values.length);
-        for (int i = 0; i < values.length; i++) {
-            resArray.add(values[i]);
-        }
+        
+        // previous code : 
+        
+//        ArrayList<Double> resArray = new ArrayList<>(values.length);
+//        for (int i = 0; i < values.length; i++) {
+//            resArray.add(values[i]);
+//        }
 
-        return new ColDoubleData(t, resArray, null);
+        
+        
+        int nbRows = values.length;
+
+            ArrayList<Double> valuesForCol = new ArrayList<>(nbRows);
+
+            for (int i = 0; i < nbRows; i++) {
+                valuesForCol.add(values[i]);
+            }
+
+            String colName = "bbinomial PValue";
+            ColDoubleData pvalueCol = new ColDoubleData(resTable, valuesForCol, colName);
+            ColDoubleData log10PvalueCol = StatsImplementation.log10(pvalueCol);
+            ColDoubleData minusLog10PvalueCol = StatsImplementation.neg(log10PvalueCol);
+            
+            model.addExtraColumn(pvalueCol, null);
+            model.addExtraColumnInfo(new PValue());
+            model.addExtraColumn(minusLog10PvalueCol, null);
+            model.addExtraColumnInfo(new PValue());
+            model.addExtraColumnInfo(new LogInfo(LogInfo.LogState.LOG10));
+        
+        return resTable;
 
     }
 
@@ -712,35 +768,8 @@ public class StatsRImplementation {
         FileWriter fw = new FileWriter(tempFile);
 
         for (int i = 0; i < nbRow; i++) {
-            Object pvalueO = pvaluesCol.getValueAt(i);
-            if (pvalueO instanceof LazyData) {
-                pvalueO = ((LazyData) pvalueO).getData();
-            }
-            double pvalueDouble;
-            if ((pvalueO != null) && (pvalueO instanceof Number)) {
-                pvalueDouble = ((Number) pvalueO).doubleValue();
-                if (pvalueDouble != pvalueDouble) {
-                    pvalueDouble = 0; // NaN values
-                }
-            } else {
-                pvalueDouble = 0;
-            }
-            
-            Object logFCO = logFCCol.getValueAt(i);
-            if (logFCO instanceof LazyData) {
-                logFCO = ((LazyData) logFCO).getData();
-            }
-            double logFCDouble;
-            if ((logFCO != null) && (logFCO instanceof Number)) {
-                logFCDouble = ((Number) logFCO).doubleValue();
-                if (logFCDouble != logFCDouble) {
-                    logFCDouble = 0; // NaN values
-                }
-            } else {
-                logFCDouble = 0;
-            }
-            
-            
+            double pvalueDouble = asDoubleValue(pvaluesCol, i);
+            double logFCDouble = asDoubleValue(logFCCol, i);
             fw.write(String.valueOf(pvalueDouble));
             fw.write(';');
             fw.write(String.valueOf(logFCDouble));

@@ -45,7 +45,7 @@ public class DiffFunction extends AbstractFunction {
     
     @Override
     public String getName() {
-        return "Diff";
+        return "Difference";
     }
 
     @Override

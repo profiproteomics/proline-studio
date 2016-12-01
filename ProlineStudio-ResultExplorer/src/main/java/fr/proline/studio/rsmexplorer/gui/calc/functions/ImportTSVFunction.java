@@ -95,7 +95,7 @@ public class ImportTSVFunction extends AbstractFunction {
     
     @Override
     public String getName() {
-        return "Import CSV/TSV";
+        return "CSV/TSV Import";
     }
 
     @Override

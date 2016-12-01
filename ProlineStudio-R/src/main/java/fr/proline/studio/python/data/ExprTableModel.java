@@ -1,6 +1,7 @@
 package fr.proline.studio.python.data;
 
 import fr.proline.studio.comparedata.ExtraDataType;
+import fr.proline.studio.filter.BooleanFilter;
 import fr.proline.studio.filter.DoubleFilter;
 import fr.proline.studio.filter.Filter;
 import fr.proline.studio.graphics.PlotInformation;
@@ -301,7 +302,12 @@ public class ExprTableModel extends DecoratedTableModel implements ChildModelInt
             Integer key = i + parentCount;
 
             if (!filtersMap.containsKey(key)) {
-                filtersMap.put(key, new DoubleFilter(m_extraColumns.get(i).getColumnName(), null, getColumnCount() - 1));
+                Class c = m_extraColumns.get(i).getColumnClass();
+                if (c.equals(Double.class)) {
+                    filtersMap.put(key, new DoubleFilter(m_extraColumns.get(i).getColumnName(), null, parentCount+i));
+                } else if (c.equals(Boolean.class)) {
+                    filtersMap.put(key, new BooleanFilter(m_extraColumns.get(i).getColumnName(), null, parentCount+i));
+                }
             }
         }
 

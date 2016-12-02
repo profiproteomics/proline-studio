@@ -14,6 +14,8 @@ public class BooleanParameter extends AbstractParameter {
 
     private final Boolean m_defaultValue;
     
+    private boolean m_valueSet = false;
+    
     private ArrayList<AbstractLinkedParameters> m_linkedParametersList = null;
 
     public BooleanParameter(String key, String name, Class graphicalType, Boolean defaultValue) {
@@ -50,6 +52,7 @@ public class BooleanParameter extends AbstractParameter {
             if (m_graphicalType.equals(JCheckBox.class)) {
                 if (startValue != null) {
                     ((JCheckBox) m_parameterComponent).setSelected(startValue);
+                    m_valueSet = true;
                 }
                 return m_parameterComponent;
             }
@@ -62,6 +65,7 @@ public class BooleanParameter extends AbstractParameter {
 
             JCheckBox checkBox = new JCheckBox(getName());
             checkBox.setSelected(startValue);
+            m_valueSet = true;
 
             m_parameterComponent = checkBox;
             return checkBox;
@@ -81,6 +85,7 @@ public class BooleanParameter extends AbstractParameter {
         if (m_graphicalType.equals(JCheckBox.class)) {
             JCheckBox checkBox = (JCheckBox) m_parameterComponent;
             checkBox.setSelected(m_defaultValue);
+            m_valueSet = true;
 
         }
     }
@@ -94,6 +99,7 @@ public class BooleanParameter extends AbstractParameter {
     public void setValue(String v) {
         if ((m_graphicalType.equals(JCheckBox.class)) && (m_parameterComponent!=null)) {
             ((JCheckBox)m_parameterComponent).setSelected(Boolean.parseBoolean(v));
+            m_valueSet = true;
         }
     }
     
@@ -129,7 +135,11 @@ public class BooleanParameter extends AbstractParameter {
                 }
 
             });
-            initDefault();
+            if (!m_valueSet) {
+                initDefault();
+            } else {
+                linkedParameters.valueChanged(getStringValue(), getObjectValue());
+            }
         }
     }
     

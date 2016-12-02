@@ -42,13 +42,15 @@ public class BooleanParameter extends AbstractParameter {
             } catch (NumberFormatException nfe) {
             }
         }
-        if (startValue == null) {
+        if ((startValue == null) && (m_parameterComponent == null)) {
             startValue = (m_defaultValue!=null) ? m_defaultValue : Boolean.TRUE;
         }
 
         if (m_parameterComponent != null) {
             if (m_graphicalType.equals(JCheckBox.class)) {
-                ((JCheckBox) m_parameterComponent).setSelected(startValue);
+                if (startValue != null) {
+                    ((JCheckBox) m_parameterComponent).setSelected(startValue);
+                }
                 return m_parameterComponent;
             }
         }
@@ -68,6 +70,7 @@ public class BooleanParameter extends AbstractParameter {
 
         return null;
     }
+    
     
     @Override
     public void initDefault() {

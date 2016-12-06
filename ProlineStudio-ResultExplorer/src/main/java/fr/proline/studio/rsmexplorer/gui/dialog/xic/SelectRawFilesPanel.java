@@ -230,7 +230,7 @@ public class SelectRawFilesPanel extends JPanel {
             m_model = new FlatDesignTableModel();
             m_table.setModel(m_model);
             m_table.getColumnModel().getColumn(FlatDesignTableModel.COLTYPE_ASSOCIATION_SOURCE).setCellRenderer(new ErrorClassificationRenderer());
-            
+            m_table.setRowHeight(25);
             tableScrollPane.setViewportView(m_table);
         } catch (Exception e) {
             //System.out.println(e);
@@ -735,7 +735,7 @@ public class SelectRawFilesPanel extends JPanel {
                     this.setIcon(IconManager.getIcon(IconManager.IconType.TICK_SMALL));
                     this.setToolTipText(AUTOMATIC_ASSOCIATION);
                 } else if (stringValue.equalsIgnoreCase(EXISTING_ASSOCIATION)) {
-                    this.setIcon(IconManager.getIcon(IconManager.IconType.DATASET));
+                    this.setIcon(IconManager.getIcon(IconManager.IconType.DATABASES_RELATION));
                     this.setToolTipText(EXISTING_ASSOCIATION);
                 }
 

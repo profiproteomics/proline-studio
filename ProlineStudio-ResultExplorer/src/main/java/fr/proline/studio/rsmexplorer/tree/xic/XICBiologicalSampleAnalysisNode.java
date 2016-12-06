@@ -7,7 +7,6 @@ import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import fr.proline.studio.utils.IconManager;
 import javax.swing.ImageIcon;
-import javax.swing.tree.DefaultTreeModel;
 import org.openide.nodes.Sheet;
 
 /**
@@ -16,13 +15,23 @@ import org.openide.nodes.Sheet;
  */
 public class XICBiologicalSampleAnalysisNode extends DataSetNode {
 
-    String m_qcName ; //Name of the quantChannel associated to this BiologicalSampleAnalysis
+    private String m_qcName ; //Name of the quantChannel associated to this BiologicalSampleAnalysis
+    private XICRunNode m_xicRunNode;
            
     public XICBiologicalSampleAnalysisNode(AbstractData data) {
         super(AbstractNode.NodeTypes.BIOLOGICAL_SAMPLE_ANALYSIS, data);
         m_qcName = ((DataSetData) data).getName();        
     }
 
+    //HACK so that we can access potential raw files when needed.
+    public void addXicRunNode(XICRunNode xicRunNode){
+        m_xicRunNode = xicRunNode;
+        super.add(m_xicRunNode);
+    }
+    
+    public XICRunNode getXicRunNode(){
+        return m_xicRunNode;
+    }
     
     public void setQuantChannelName(String qcName) {
         m_qcName = qcName;

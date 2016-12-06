@@ -1,6 +1,5 @@
 package fr.proline.studio.rsmexplorer.gui.dialog.xic;
 
-import fr.proline.core.orm.msi.dto.DSpectrum;
 import fr.proline.studio.rsmexplorer.tree.xic.XICDesignTree;
 import fr.proline.core.orm.uds.Aggregation;
 import fr.proline.core.orm.uds.Dataset;
@@ -11,8 +10,6 @@ import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.data.DataSetData;
 import fr.proline.studio.dam.data.RunInfoData;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
-import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
-import fr.proline.studio.dam.tasks.DatabaseLoadSingleSpectrumFromPeaklistID;
 import fr.proline.studio.dam.tasks.DatabaseRunsTask;
 import fr.proline.studio.dam.tasks.DatabaseVerifySpectrumFromResultSet;
 import fr.proline.studio.dam.tasks.SubTask;

@@ -16,6 +16,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import javax.swing.BorderFactory;
@@ -59,26 +60,58 @@ public class XICDropZone extends JPanel implements DropZoneInterface {
             return;
         }
 
-        HashMap<String, Integer> shortages = m_model.getModelShortages();
-        Iterator<String> keyIterator = shortages.keySet().iterator();
+        HashMap<Integer, HashSet<String>> shortages = m_model.getModelMultiShortages();
+        Iterator<Integer> keyIterator = shortages.keySet().iterator();
         while (keyIterator.hasNext()) {
-            String key = keyIterator.next();
-            if (m_samplesTable.containsKey(key)) {
-                ArrayList<File> fileList = new ArrayList<>();
-                fileList.add(m_samplesTable.get(key));
-                int index = shortages.get(key);
-                m_model.setFiles(fileList, index);
+
+            Integer key = keyIterator.next();
+
+            HashSet<String> currentHashSet = shortages.get(key);
+
+            for (String s : currentHashSet) {
+                if (m_samplesTable.containsKey(s)) {
+                    ArrayList<File> fileList = new ArrayList<>();
+                    fileList.add(m_samplesTable.get(s));
+                    m_model.setFiles(fileList, key);
+                }
             }
+
         }
+
+        /*
+         HashMap<String, Integer> shortages = m_model.getModelShortages();
+         Iterator<String> keyIterator = shortages.keySet().iterator();
+         while (keyIterator.hasNext()) {
+         String key = keyIterator.next();
+         if (m_samplesTable.containsKey(key)) {
+         ArrayList<File> fileList = new ArrayList<>();
+         fileList.add(m_samplesTable.get(key));
+         int index = shortages.get(key);
+         m_model.setFiles(fileList, index);
+         }
+         }
+         */
     }
 
     private ArrayList<String> getNotAssociatedFilenames() {
         ArrayList<String> filenames = new ArrayList<String>();
-        HashMap<String, Integer> shortages = m_model.getModelShortages();
+
+        HashSet<String> totalFileNames = new HashSet<String>();
+
+        HashMap<Integer, HashSet<String>> shortages = m_model.getModelMultiShortages();
+        Iterator<Integer> keyIterator = shortages.keySet().iterator();
+        while (keyIterator.hasNext()) {
+            Integer key = keyIterator.next();
+            HashSet<String> currentHashSet = shortages.get(key);
+            for (String s : currentHashSet) {
+                totalFileNames.add(s);
+            }
+        }
+
         Enumeration<String> enumKey = m_samplesTable.keys();
         while (enumKey.hasMoreElements()) {
             String key = enumKey.nextElement();
-            if (!shortages.containsKey(key)) {
+            if (!totalFileNames.contains(key)) {
                 filenames.add(key);
             }
         }

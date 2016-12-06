@@ -24,28 +24,29 @@ import org.openide.nodes.Sheet;
 
 /**
  * Tree Node representing a Run
+ *
  * @author JM235353
  */
 public class XICRunNode extends AbstractNode {
 
     private DefaultTreeModel m_treeModel = null;
-    
+
     public XICRunNode(AbstractData data) {
         super(NodeTypes.RUN, data);
     }
 
     public void init(final DDataset dataset, DefaultTreeModel treeModel, final AbstractTableModel tableModel) {
         m_treeModel = treeModel;
-        
+
         setIsChanging(true);
-        
+
         // look if we find a Raw File
         if (dataset.getType() == Dataset.DatasetType.IDENTIFICATION) {
-            
+
             final ArrayList<RawFile> rawfileFounds = new ArrayList<>(1);
             final Run[] runOut = new Run[1];
             final XICRunNode xicRunNode = this;
-            
+
             AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
 
                 @Override
@@ -75,12 +76,12 @@ public class XICRunNode extends AbstractNode {
                         // it failed !
                         m_treeModel.removeNodeFromParent((MutableTreeNode) xicRunNode.getParent());
                     }
-                    
+
                     if (tableModel != null) {
                         // a table model display data in this Xic Run Node, so it must be updated
                         tableModel.fireTableDataChanged();
                     }
-                    
+
                 }
             };
 
@@ -91,11 +92,11 @@ public class XICRunNode extends AbstractNode {
             search(dataset, tableModel);
         }
     }
-    
+
     private void search(DDataset dataset, final AbstractTableModel tableModel) {
 
         Long rsetId = dataset.getResultSetId();
-        
+
         final String[] path = new String[1];
 
         final XICRunNode _this = this;
@@ -136,12 +137,10 @@ public class XICRunNode extends AbstractNode {
 
     }
 
-    
-    
     private void search(String searchString, final AbstractTableModel tableModel) {
-       
+
         final ArrayList<RawFile> m_rawFileList = new ArrayList<>();
-        
+
         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
 
             @Override
@@ -154,13 +153,10 @@ public class XICRunNode extends AbstractNode {
                 setIsChanging(false);
 
                 RunInfoData runInfoData = ((RunInfoData) getData());
-                
-                if (m_rawFileList.isEmpty()) {
-                    runInfoData.setMessage("<html><font color='#FF0000'>No Raw File found, select one</font></html>");
-                } else if (m_rawFileList.size() == 1) {
 
-                    // TODO : how to choose the right rawfile or run instead of the first one ??
-                    
+                if (m_rawFileList.isEmpty()) {
+                    runInfoData.setMessage("<html><font color='#FF0000'>Missing Raw File</font></html>");
+                } else if (m_rawFileList.size() == 1) {
                     RawFile rawFile = m_rawFileList.get(0);
                     runInfoData.getRawFileSouce().setSelectedRawFile(rawFile);
                     runInfoData.setRun(rawFile.getRuns().get(0));
@@ -168,14 +164,17 @@ public class XICRunNode extends AbstractNode {
                     //runInfoData.setRunInfoInDatabase(true);
                 } else {
                     runInfoData.setPotentialRawFiles(m_rawFileList);
-                    runInfoData.setMessage("<html><font color='#FF0000'>Multiple Raw Files found, select one</font></html>");
+                    if (searchString.equalsIgnoreCase("*")) {
+                        runInfoData.setMessage("<html><font color='#FF0000'>Unavailable Peaklist</font></html>");
+                    } else {
+                        runInfoData.setMessage("<html><font color='#FF0000'>Multiple Raw Files</font></html>");
+                    }
                 }
-                
+
                 tableModel.fireTableDataChanged();
             }
         };
 
-        
         // ask asynchronous loading of data
         DatabaseRunsTask task = new DatabaseRunsTask(callback);
         task.initSearchRawFile(searchString, m_rawFileList);
@@ -186,11 +185,11 @@ public class XICRunNode extends AbstractNode {
     public String toString() {
         AbstractData data = getData();
         if (data == null) {
-            return "loading";
+            return "Loading";
         }
         return super.toString();
     }
-    
+
     @Override
     public ImageIcon getIcon() {
         return getIcon(IconManager.IconType.FILE); //JPM.TODO : to be changed
@@ -214,15 +213,14 @@ public class XICRunNode extends AbstractNode {
 
         // we search the raw file in the database, if we found it, we set this one
         // if we do not find it, we use the one choosed by the user
-
         setIsChanging(true);
         m_treeModel.nodeChanged(this);
-        
+
         String searchString = selectedFile.getName().substring(0, selectedFile.getName().lastIndexOf('.'));
 
         final ArrayList<RawFile> m_rawFileList = new ArrayList<>();
         final TreeNode _this = this;
-        
+
         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
 
             @Override
@@ -245,11 +243,11 @@ public class XICRunNode extends AbstractNode {
                 } else {
                     // we use the file choosen by the user
                     /*RawFile rawFile = new RawFile();
-                    rawFile.setDirectory(selectedFile.getPath());
-                    rawFile.setRawFileName(selectedFile.getName());
-                    runInfoData.setRawFile(rawFile);
-                    runInfoData.setRawFilePath(selectedFile.getPath());
-                    runInfoData.setRunInfoInDatabase(false);*/  //JPM.RUNINFODATA
+                     rawFile.setDirectory(selectedFile.getPath());
+                     rawFile.setRawFileName(selectedFile.getName());
+                     runInfoData.setRawFile(rawFile);
+                     runInfoData.setRawFilePath(selectedFile.getPath());
+                     runInfoData.setRunInfoInDatabase(false);*/  //JPM.RUNINFODATA
                     runInfoData.getRawFileSouce().setRawFileOnDisk(selectedFile);
                 }
                 setIsChanging(false);
@@ -262,20 +260,19 @@ public class XICRunNode extends AbstractNode {
             }
         };
 
-
         // ask asynchronous loading of data
         DatabaseRunsTask task = new DatabaseRunsTask(callback);
         task.initSearchRawFile(searchString, m_rawFileList);
         AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
 
     }
-    
+
     public String getPeakListPath() {
         RunInfoData data = ((RunInfoData) getData());
         if (data == null) {
             return null;
         }
-       return data.getPeakListPath();
+        return data.getPeakListPath();
     }
-    
+
 }

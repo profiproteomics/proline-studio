@@ -732,7 +732,7 @@ public class SelectRawFilesPanel extends JPanel {
                     this.setIcon(IconManager.getIcon(IconManager.IconType.DELETE));
                     this.setToolTipText(MISSING_ASSOCIATION);
                 } else if (stringValue.equalsIgnoreCase(AUTOMATIC_ASSOCIATION)) {
-                    this.setIcon(IconManager.getIcon(IconManager.IconType.TICK_SMALL));
+                    this.setIcon(IconManager.getIcon(IconManager.IconType.TARGET));
                     this.setToolTipText(AUTOMATIC_ASSOCIATION);
                 } else if (stringValue.equalsIgnoreCase(EXISTING_ASSOCIATION)) {
                     this.setIcon(IconManager.getIcon(IconManager.IconType.DATABASES_RELATION));

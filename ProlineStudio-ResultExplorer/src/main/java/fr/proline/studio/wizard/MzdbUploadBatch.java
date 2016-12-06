@@ -17,14 +17,14 @@ import java.util.concurrent.TimeUnit;
  *
  * @author AK249877
  */
-public class UploadBatch implements Runnable {
+public class MzdbUploadBatch implements Runnable {
 
     private final ThreadPoolExecutor m_executor;
     private final ArrayList<File> m_files;
-    private final UploadSettings m_uploadSettings;
+    private final MzdbUploadSettings m_uploadSettings;
     
 
-    public UploadBatch(ArrayList<File> files, UploadSettings uploadSettings) {
+    public MzdbUploadBatch(ArrayList<File> files, MzdbUploadSettings uploadSettings) {
         m_files = files;
         m_uploadSettings = uploadSettings;
         m_executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(5);

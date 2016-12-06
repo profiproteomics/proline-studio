@@ -1,6 +1,5 @@
 package fr.proline.studio.parameter;
 
-
 import fr.proline.studio.utils.IconManager;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
@@ -11,16 +10,21 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.filechooser.FileSystemView;
 
 /**
- * Parameter of type File, displayed as a Textfield with a button to open a file browser.
+ * Parameter of type File, displayed as a Textfield with a button to open a file
+ * browser.
+ *
  * @author jm235353
  */
 public class FileParameter extends AbstractParameter {
-
 
     private final FileSystemView m_fsv;
     private String m_defaultValue;
     private final String[] m_fileFilterName;
     private final String[] m_fileFilterExtension;
+
+    private int m_selectionMode = JFileChooser.FILES_AND_DIRECTORIES;
+    private boolean m_allFiles = true;
+    private File m_defaultDirectory = null;
 
     public FileParameter(FileSystemView fsv, String key, String name, Class graphicalType, String defaultValue, String[] fileFilterName, String[] fileFilterExtension) {
         super(key, name, String.class, graphicalType);
@@ -29,25 +33,25 @@ public class FileParameter extends AbstractParameter {
         m_fileFilterName = fileFilterName;
         m_fileFilterExtension = fileFilterExtension;
     }
-    
-
 
     @Override
     public JComponent getComponent(Object value) {
 
-        if (m_defaultValue == null) {
-            m_defaultValue = "";
+        String startValue = null;
+        if (value != null)  {
+            startValue = value.toString();
         }
-
+        if (startValue == null) {
+            startValue = (m_defaultValue!= null) ? m_defaultValue : "";
+        }
 
         if (m_graphicalType.equals(JTextField.class)) {
 
             // --- Slider ---
             JPanel panel = new JPanel(new FlowLayout());
-            
-            
+
             final JTextField textField = new JTextField(30);
-            textField.setText(m_defaultValue);
+            textField.setText(startValue);
 
             final JButton addFileButton = new JButton(IconManager.getIcon(IconManager.IconType.OPEN_FILE));
             addFileButton.setMargin(new java.awt.Insets(2, 2, 2, 2));
@@ -56,12 +60,18 @@ public class FileParameter extends AbstractParameter {
                 @Override
                 public void actionPerformed(ActionEvent e) {
 
-                    JFileChooser fchooser = (m_fsv!=null) ? new JFileChooser(m_fsv) : new JFileChooser();
-  
+                    JFileChooser fchooser = (m_fsv != null) ? new JFileChooser(m_fsv) : new JFileChooser();
+
                     fchooser.setMultiSelectionEnabled(false);
 
+                    if (m_defaultDirectory != null) {
+                        fchooser.setCurrentDirectory(m_defaultDirectory);
+                    }
+                    fchooser.setFileSelectionMode(m_selectionMode);
+                    fchooser.setAcceptAllFileFilterUsed(m_allFiles);
+
                     if (m_fileFilterName != null) {
-                        for (int i=0;i<m_fileFilterName.length;i++) {
+                        for (int i = 0; i < m_fileFilterName.length; i++) {
                             FileNameExtensionFilter filter = new FileNameExtensionFilter(m_fileFilterName[i], m_fileFilterExtension[i]);
                             fchooser.addChoosableFileFilter(filter);
                         }
@@ -75,8 +85,7 @@ public class FileParameter extends AbstractParameter {
                     }
                 }
             });
-            
-            
+
             panel.add(textField);
             panel.add(addFileButton);
 
@@ -87,7 +96,7 @@ public class FileParameter extends AbstractParameter {
 
         return null;
     }
-    
+
     @Override
     public void initDefault() {
         if (m_defaultValue == null) {
@@ -99,33 +108,31 @@ public class FileParameter extends AbstractParameter {
             textField.setText(m_defaultValue.toString());
         }
     }
-    
+
     @Override
     public ParameterError checkParameter() {
-        
+
         Integer value = null;
-        
+
         if (m_graphicalType.equals(JTextField.class)) {
             JTextField textField = (JTextField) m_parameterComponent;
             String path = textField.getText();
-            if(path.isEmpty()) {
-            	return new ParameterError(path+" file is missing", m_parameterComponent);
+            if (path.isEmpty()) {
+                return new ParameterError(path + " file is missing", m_parameterComponent);
             }
 
         }
-        
 
-        
         return null;
     }
 
     @Override
     public void setValue(String v) {
-        if ((m_graphicalType.equals(JTextField.class)) && (m_parameterComponent!=null)) {
-            ((JTextField)m_parameterComponent).setText(v);
+        if ((m_graphicalType.equals(JTextField.class)) && (m_parameterComponent != null)) {
+            ((JTextField) m_parameterComponent).setText(v);
         }
     }
-    
+
     @Override
     public String getStringValue() {
         return getObjectValue().toString();
@@ -134,16 +141,28 @@ public class FileParameter extends AbstractParameter {
     @Override
     public Object getObjectValue() {
         if (m_graphicalType.equals(JTextField.class)) {
-           return ((JTextField) m_parameterComponent).getText();
+            return ((JTextField) m_parameterComponent).getText();
         }
         return ""; // should not happen
     }
-    
+
     @Override
     public void clean() {
         if (m_graphicalType.equals(JTextField.class)) {
             JTextField textField = (JTextField) m_parameterComponent;
             textField.setText("");
         }
+    }
+
+    public void setSelectionMode(int selectionMode) {
+        m_selectionMode = selectionMode;
+    }
+
+    public void setAllFiles(boolean allFiles) {
+        m_allFiles = allFiles;
+    }
+
+    public void setDefaultDirectory(File defaultDirectory) {
+        m_defaultDirectory = defaultDirectory;
     }
 }

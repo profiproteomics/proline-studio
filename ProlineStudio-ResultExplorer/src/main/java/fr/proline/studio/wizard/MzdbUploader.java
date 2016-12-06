@@ -22,9 +22,9 @@ public class MzdbUploader implements Runnable, WorkerInterface {
     private static int m_state = WorkerInterface.ACTIVE_STATE;
     private final StringBuilder m_logs;
     
-    private final UploadSettings m_uploadSettings;
+    private final MzdbUploadSettings m_uploadSettings;
 
-    public MzdbUploader(File file, UploadSettings uploadSettings) {
+    public MzdbUploader(File file, MzdbUploadSettings uploadSettings) {
         m_file = file;
         m_uploadSettings = uploadSettings;
         m_logs = new StringBuilder();

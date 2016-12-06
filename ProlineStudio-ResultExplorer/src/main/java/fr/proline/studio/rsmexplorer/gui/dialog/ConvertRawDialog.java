@@ -12,16 +12,15 @@ import static fr.proline.studio.gui.DefaultDialog.BUTTON_CANCEL;
 import static fr.proline.studio.gui.DefaultDialog.BUTTON_OK;
 import fr.proline.studio.parameter.AbstractLinkedParameters;
 import fr.proline.studio.parameter.BooleanParameter;
+import fr.proline.studio.parameter.FileParameter;
 import fr.proline.studio.parameter.ObjectParameter;
 import fr.proline.studio.parameter.ParameterError;
 import fr.proline.studio.parameter.ParameterList;
-import fr.proline.studio.parameter.StringParameter;
 import fr.proline.studio.utils.IconManager;
 import fr.proline.studio.wizard.ConvertionUploadBatch;
 import fr.proline.studio.wizard.ConversionSettings;
-import fr.proline.studio.wizard.UploadSettings;
+import fr.proline.studio.wizard.MzdbUploadSettings;
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dialog;
 import java.awt.Dimension;
@@ -30,8 +29,6 @@ import java.awt.GridBagLayout;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -60,25 +57,31 @@ import org.openide.util.NbPreferences;
 public class ConvertRawDialog extends DefaultDialog {
 
     private static ConvertRawDialog m_singletonDialog = null;
-    private JList m_fileList;
+    private static JList m_fileList;
     private JScrollPane m_fileListScrollPane;
     private JButton m_addFileButton, m_removeFileButton;
     private static ParameterList m_parameterList;
     private BooleanParameter m_deleteMzdb, m_deleteRaw, m_uploadMzdb, m_createParentDirectoryParameter;
-    private StringParameter m_converterPath, m_outputPath;
+
+    private FileParameter m_converterFilePath, m_outputFilePath;
+
     private static ObjectParameter m_uploadLabelParameter;
     private String m_lastParentDirectory;
 
     public static ConvertRawDialog getDialog(Window parent) {
         if (m_singletonDialog == null) {
             m_singletonDialog = new ConvertRawDialog(parent);
-        }else {
+        } else {
             ArrayList<String> labels = ServerFileSystemView.getServerFileSystemView().getLabels(RootInfo.TYPE_MZDB_FILES);
             Object[] associatedTable = labels.toArray(new String[labels.size()]);
             Object[] objectTable = labels.toArray(new String[labels.size()]);
             m_uploadLabelParameter.updateAssociatedObjects(associatedTable);
             m_uploadLabelParameter.updateObjects(objectTable);
             m_parameterList.loadParameters(NbPreferences.root());
+            if(m_fileList!=null){
+                DefaultListModel model = (DefaultListModel) m_fileList.getModel();
+                model.clear();
+            }         
         }
 
         return m_singletonDialog;
@@ -111,48 +114,24 @@ public class ConvertRawDialog extends DefaultDialog {
     }
 
     private JPanel createParameterPanel() {
+        Preferences preferences = NbPreferences.root();
+
         m_parameterList = new ParameterList("mzDB Settings");
 
-        JTextField converterTextField = new JTextField();
-        converterTextField.setEditable(false);
-        converterTextField.setBackground(Color.WHITE);
-        converterTextField.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                JFileChooser jFileChooser = new JFileChooser(converterTextField.getText());
-                jFileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-                jFileChooser.setMultiSelectionEnabled(false);
-                jFileChooser.addChoosableFileFilter(new FileNameExtensionFilter(".exe", "exe"));
-                jFileChooser.setAcceptAllFileFilterUsed(false);
-
-                int result = jFileChooser.showOpenDialog(null);
-
-                if (result == JFileChooser.APPROVE_OPTION) {
-                    converterTextField.setText(jFileChooser.getSelectedFile().getAbsolutePath());
-                }
-            }
-        });
-        m_converterPath = new StringParameter("Converter_(.exe)", "Converter (.exe)", converterTextField, "", 5, null);
-        m_parameterList.add(m_converterPath);
-
-        JTextField outputTextField = new JTextField();
-        outputTextField.setEditable(false);
-        outputTextField.setBackground(Color.WHITE);
-        outputTextField.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                JFileChooser jFileChooser = new JFileChooser(outputTextField.getText());
-                jFileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-                jFileChooser.setMultiSelectionEnabled(false);
-                int result = jFileChooser.showOpenDialog(null);
-
-                if (result == JFileChooser.APPROVE_OPTION) {
-                    outputTextField.setText(jFileChooser.getSelectedFile().getAbsolutePath());
-                }
-            }
-        });
-        m_outputPath = new StringParameter("Output_path", "Output path", outputTextField, "", 5, null);
-        m_parameterList.add(m_outputPath);
+        String[] converterExtentions = {"exe"};
+        String[] converterFilterNames = {"raw2mzDB.exe"};
+        m_converterFilePath = new FileParameter(null, "Converter_(.exe)", "Converter (.exe)", JTextField.class, "", converterFilterNames, converterExtentions);
+        m_converterFilePath.setAllFiles(false);
+        m_converterFilePath.setSelectionMode(JFileChooser.FILES_ONLY);
+        m_converterFilePath.setDefaultDirectory(new File(preferences.get("mzDB_Settings.Converter_(.exe)", System.getProperty("user.home"))));
+        m_parameterList.add(m_converterFilePath);
+        
+        
+        m_outputFilePath = new FileParameter(null, "Output_Path", "Output Path", JTextField.class, "", null, null);
+        m_outputFilePath.setAllFiles(false);
+        m_outputFilePath.setSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        m_outputFilePath.setDefaultDirectory(new File(preferences.get("mzDB_Settings.Output_Path", System.getProperty("user.home"))));
+        m_parameterList.add(m_outputFilePath);
 
         JCheckBox rawCheckbox = new JCheckBox("Delete raw file after a successful conversion");
         m_deleteRaw = new BooleanParameter("DELETE_RAW", "Delete raw file after a successful conversion", rawCheckbox, false);
@@ -161,7 +140,7 @@ public class ConvertRawDialog extends DefaultDialog {
         JCheckBox uploadCheckbox = new JCheckBox("Upload .mzdb file successful conversion");
         m_uploadMzdb = new BooleanParameter("UPLOAD_CONVERTED", "Upload after conversion", uploadCheckbox, false);
         m_parameterList.add(m_uploadMzdb);
-        
+
         ArrayList<String> labels = ServerFileSystemView.getServerFileSystemView().getLabels(RootInfo.TYPE_MZDB_FILES);
 
         Object[] associatedTable = labels.toArray(new String[labels.size()]);
@@ -173,7 +152,7 @@ public class ConvertRawDialog extends DefaultDialog {
         JCheckBox mzdbCheckbox = new JCheckBox("Delete mzdb file after a successful upload");
         m_deleteMzdb = new BooleanParameter("DELETE_MZDB", "Delete mzdb file after a successful upload", mzdbCheckbox, false);
         m_parameterList.add(m_deleteMzdb);
-        
+
         JCheckBox parentDirectoryCheckbox = new JCheckBox("Create Parent Directory in Destination");
         m_createParentDirectoryParameter = new BooleanParameter("CREATE_PARENT_DIRECTORY", "Create Parent Directory in Destination", parentDirectoryCheckbox, false);
         m_parameterList.add(m_createParentDirectoryParameter);
@@ -184,21 +163,22 @@ public class ConvertRawDialog extends DefaultDialog {
 
             @Override
             public void valueChanged(String value, Object associatedValue) {
-                showParameter(m_deleteMzdb, uploadCheckbox.isSelected(), (boolean) m_deleteMzdb.getObjectValue());
-                showParameter(m_uploadLabelParameter, uploadCheckbox.isSelected(), (boolean) m_uploadMzdb.getObjectValue());
-                showParameter(m_createParentDirectoryParameter, uploadCheckbox.isSelected(), (boolean) m_createParentDirectoryParameter.getObjectValue());
+
+                showParameter(m_deleteMzdb, (boolean) m_uploadMzdb.getObjectValue(), (boolean) m_deleteMzdb.getObjectValue());
+                showParameter(m_uploadLabelParameter, (boolean) m_uploadMzdb.getObjectValue(), m_uploadLabelParameter.getObjectValue());
+                showParameter(m_createParentDirectoryParameter, (boolean) m_uploadMzdb.getObjectValue(), (boolean) m_createParentDirectoryParameter.getObjectValue());
                 updateParameterListPanel();
             }
 
         };
 
-        m_uploadMzdb.addLinkedParameters(linkedParameters);
-
-        linkedParameters.valueChanged("", "");
-
+        //linkedParameters.valueChanged("", "");
         JPanel parameterPanel = m_parameterList.getPanel();
         parameterPanel.setBorder(BorderFactory.createTitledBorder(" Conversion & Upload Options "));
-        
+
+        m_uploadMzdb.addLinkedParameters(linkedParameters);
+
+        //linkedParameters.valueChanged("", "");
         return parameterPanel;
     }
 
@@ -263,15 +243,15 @@ public class ConvertRawDialog extends DefaultDialog {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                
+
                 Preferences preferences = NbPreferences.root();
                 String initializationDirectory = preferences.get("mzDB_Settings.LAST_RAW_PATH", System.getProperty("user.home"));
 
                 File f = new File(initializationDirectory);
-                if(!(f.exists() && f.isDirectory())){
+                if (!(f.exists() && f.isDirectory())) {
                     initializationDirectory = System.getProperty("user.home");
                 }
-                
+
                 JFileChooser fchooser = new JFileChooser(initializationDirectory);
 
                 fchooser.setMultiSelectionEnabled(true);
@@ -288,8 +268,8 @@ public class ConvertRawDialog extends DefaultDialog {
                     for (int i = 0; i < nbFiles; i++) {
                         ((DefaultListModel) m_fileList.getModel()).addElement(files[i]);
                     }
-                    
-                    if(files.length>0){
+
+                    if (files.length > 0) {
                         m_lastParentDirectory = files[0].getParentFile().getAbsolutePath();
                     }
                 }
@@ -320,17 +300,25 @@ public class ConvertRawDialog extends DefaultDialog {
             highlight(m_fileList);
             return false;
         }
-        
-        if(!new File(m_converterPath.getStringValue()).exists()){
-            setStatus(true, "The selected executable no longer exists.");
-            highlight(m_converterPath.getComponent(m_converterPath.getStringValue()));
+
+        if (m_converterFilePath.getStringValue()==null || m_converterFilePath.getStringValue().length()==0) {
+            setStatus(true, "An appropriate executable must be selected.");
+            highlight(m_converterFilePath.getComponent(m_converterFilePath.getStringValue()));
             return false;
-        }else if(!new File(m_outputPath.getStringValue()).exists()){
+        } else if (!new File(m_converterFilePath.getStringValue()).exists()) {
+            setStatus(true, "The selected executable no longer exists.");
+            highlight(m_converterFilePath.getComponent(m_converterFilePath.getStringValue()));
+            return false;
+        } else if (m_outputFilePath.getStringValue()==null || m_outputFilePath.getStringValue().length()==0) {
+            setStatus(true, "An appropriate executable must be selected.");
+            highlight(m_outputFilePath.getComponent(m_outputFilePath.getStringValue()));
+            return false;
+        } else if (!new File(m_outputFilePath.getStringValue()).exists()) {
             setStatus(true, "The selected directory no longer exists.");
-            highlight(m_outputPath.getComponent(m_outputPath.getStringValue()));
+            highlight(m_outputFilePath.getComponent(m_outputFilePath.getStringValue()));
             return false;
         }
-        
+
         ParameterError error = m_parameterList.checkParameters();
         if (error != null) {
             setStatus(true, error.getErrorMessage());
@@ -338,27 +326,27 @@ public class ConvertRawDialog extends DefaultDialog {
             return false;
         }
         m_parameterList.saveParameters(NbPreferences.root());
-        
+
         ArrayList<File> rawFiles = new ArrayList<File>();
-        for(int i=0; i<m_fileList.getModel().getSize(); i++){
+        for (int i = 0; i < m_fileList.getModel().getSize(); i++) {
             rawFiles.add((File) m_fileList.getModel().getElementAt(i));
         }
-        
-        ConversionSettings conversionSettings = new ConversionSettings(m_converterPath.getStringValue(), m_outputPath.getStringValue(), (boolean)m_deleteRaw.getObjectValue(), (boolean)m_uploadMzdb.getObjectValue());
-        UploadSettings uploadSettings = new UploadSettings((boolean)m_deleteMzdb.getObjectValue(), (boolean) m_createParentDirectoryParameter.getObjectValue(), m_uploadLabelParameter.getStringValue());
+
+        ConversionSettings conversionSettings = new ConversionSettings(m_converterFilePath.getStringValue(), m_outputFilePath.getStringValue(), (boolean) m_deleteRaw.getObjectValue(), (boolean) m_uploadMzdb.getObjectValue());
+        MzdbUploadSettings uploadSettings = new MzdbUploadSettings((boolean) m_deleteMzdb.getObjectValue(), (boolean) m_createParentDirectoryParameter.getObjectValue(), m_uploadLabelParameter.getStringValue());
         conversionSettings.setUploadSettings(uploadSettings);
-        
+
         ConvertionUploadBatch conversionBatch = new ConvertionUploadBatch(rawFiles, conversionSettings);
-        
+
         Preferences preferences = NbPreferences.root();
         preferences.put("mzDB_Settings.LAST_RAW_PATH", m_lastParentDirectory);
-        
+
         Thread thread = new Thread(conversionBatch);
         thread.start();
-        
+
         DefaultListModel listModel = (DefaultListModel) m_fileList.getModel();
         listModel.removeAllElements();
-        
+
         return true;
     }
 

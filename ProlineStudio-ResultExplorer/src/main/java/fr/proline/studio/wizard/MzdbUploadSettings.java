@@ -9,12 +9,12 @@ package fr.proline.studio.wizard;
  *
  * @author AK249877
  */
-public class UploadSettings {
+public class MzdbUploadSettings {
     
     private boolean m_deleteMzdb, m_createParentDirectory;
     private String m_mountLabel;
     
-    public UploadSettings(boolean deleteMzdb, boolean createParentDirectory, String mountLabel){
+    public MzdbUploadSettings(boolean deleteMzdb, boolean createParentDirectory, String mountLabel){
         m_deleteMzdb = deleteMzdb;
         m_createParentDirectory = createParentDirectory;
         m_mountLabel = mountLabel;

@@ -15,8 +15,8 @@ import fr.proline.studio.parameter.ObjectParameter;
 import fr.proline.studio.parameter.ParameterError;
 import fr.proline.studio.parameter.ParameterList;
 import fr.proline.studio.utils.IconManager;
-import fr.proline.studio.wizard.UploadBatch;
-import fr.proline.studio.wizard.UploadSettings;
+import fr.proline.studio.wizard.MzdbUploadBatch;
+import fr.proline.studio.wizard.MzdbUploadSettings;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dialog;
@@ -53,7 +53,7 @@ import org.openide.util.NbPreferences;
 public class UploadMzdbDialog extends DefaultDialog {
 
     private static UploadMzdbDialog m_singletonDialog = null;
-    private JList m_fileList;
+    private static JList m_fileList;
     private JScrollPane m_fileListScrollPane;
     private JButton m_addFileButton, m_removeFileButton;
     private static ParameterList m_parameterList;
@@ -71,6 +71,10 @@ public class UploadMzdbDialog extends DefaultDialog {
             m_uploadLabelParameter.updateAssociatedObjects(associatedTable);
             m_uploadLabelParameter.updateObjects(objectTable);
             m_parameterList.loadParameters(NbPreferences.root());
+            if (m_fileList != null) {
+                DefaultListModel model = (DefaultListModel) m_fileList.getModel();
+                model.clear();
+            }
         }
 
         return m_singletonDialog;
@@ -107,7 +111,7 @@ public class UploadMzdbDialog extends DefaultDialog {
         JCheckBox deleteCheckbox = new JCheckBox("Delete mzdb file after a successful upload");
         m_deleteMzdbParameter = new BooleanParameter("DELETE_MZDB", "Delete mzdb file after a successful upload", deleteCheckbox, false);
         m_parameterList.add(m_deleteMzdbParameter);
-        
+
         JCheckBox parentDirectoryCheckbox = new JCheckBox("Create Parent Directory in Destination");
         m_createParentDirectoryParameter = new BooleanParameter("CREATE_PARENT_DIRECTORY", "Create Parent Directory in Destination", parentDirectoryCheckbox, false);
         m_parameterList.add(m_createParentDirectoryParameter);
@@ -189,15 +193,15 @@ public class UploadMzdbDialog extends DefaultDialog {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                
+
                 Preferences preferences = NbPreferences.root();
                 String initializationDirectory = preferences.get("mzDB_Settings.LAST_MZDB_PATH", System.getProperty("user.home"));
 
                 File f = new File(initializationDirectory);
-                if(!(f.exists() && f.isDirectory())){
+                if (!(f.exists() && f.isDirectory())) {
                     initializationDirectory = System.getProperty("user.home");
                 }
-                
+
                 JFileChooser fchooser = new JFileChooser(initializationDirectory);
 
                 fchooser.setMultiSelectionEnabled(true);
@@ -214,8 +218,8 @@ public class UploadMzdbDialog extends DefaultDialog {
                     for (int i = 0; i < nbFiles; i++) {
                         ((DefaultListModel) m_fileList.getModel()).addElement(files[i]);
                     }
-                    
-                    if(files.length>0){
+
+                    if (files.length > 0) {
                         m_lastParentDirectory = files[0].getParentFile().getAbsolutePath();
                     }
                 }
@@ -258,13 +262,13 @@ public class UploadMzdbDialog extends DefaultDialog {
         for (int i = 0; i < m_fileList.getModel().getSize(); i++) {
             mzdbFiles.add((File) m_fileList.getModel().getElementAt(i));
         }
-        
+
         Preferences preferences = NbPreferences.root();
         preferences.put("mzDB_Settings.LAST_MZDB_PATH", m_lastParentDirectory);
 
-        UploadSettings uploadSettings = new UploadSettings((boolean)m_deleteMzdbParameter.getObjectValue(), (boolean)m_createParentDirectoryParameter.getObjectValue(), m_uploadLabelParameter.getStringValue());
-        
-        UploadBatch uploadBatch = new UploadBatch(mzdbFiles, uploadSettings);
+        MzdbUploadSettings uploadSettings = new MzdbUploadSettings((boolean) m_deleteMzdbParameter.getObjectValue(), (boolean) m_createParentDirectoryParameter.getObjectValue(), m_uploadLabelParameter.getStringValue());
+
+        MzdbUploadBatch uploadBatch = new MzdbUploadBatch(mzdbFiles, uploadSettings);
         Thread thread = new Thread(uploadBatch);
         thread.start();
 

@@ -8,28 +8,29 @@ import javax.swing.JComponent;
 
 /**
  * Parameter of type Boolean, displayed as a Checkbox
+ *
  * @author JM235353
  */
 public class BooleanParameter extends AbstractParameter {
 
     private final Boolean m_defaultValue;
-    
+
     private boolean m_valueSet = false;
-    
+
     private ArrayList<AbstractLinkedParameters> m_linkedParametersList = null;
 
     public BooleanParameter(String key, String name, Class graphicalType, Boolean defaultValue) {
         super(key, name, Boolean.class, graphicalType);
         m_defaultValue = defaultValue;
-        
+
         m_labelVisibility = LabelVisibility.NO_VISIBLE;
     }
-    
+
     public BooleanParameter(String key, String name, JComponent component, Boolean defaultValue) {
-        super(key, name, Boolean.class,  component.getClass());
+        super(key, name, Boolean.class, component.getClass());
         m_defaultValue = defaultValue;
         m_parameterComponent = component;
-        
+
         m_labelVisibility = LabelVisibility.NO_VISIBLE;
     }
 
@@ -45,7 +46,7 @@ public class BooleanParameter extends AbstractParameter {
             }
         }
         if ((startValue == null) && (m_parameterComponent == null)) {
-            startValue = (m_defaultValue!=null) ? m_defaultValue : Boolean.TRUE;
+            startValue = (m_defaultValue != null) ? m_defaultValue : Boolean.TRUE;
         }
 
         if (m_parameterComponent != null) {
@@ -53,16 +54,19 @@ public class BooleanParameter extends AbstractParameter {
                 if (startValue != null) {
                     ((JCheckBox) m_parameterComponent).setSelected(startValue);
                     m_valueSet = true;
+                } else {
+                    if (!m_valueSet) {
+                        ((JCheckBox) m_parameterComponent).setSelected(false);
+                        m_valueSet = true;
+                    }
                 }
                 return m_parameterComponent;
             }
         }
-        
-        
+
         if (m_graphicalType.equals(JCheckBox.class)) {
 
             // --- CheckBox ---
-
             JCheckBox checkBox = new JCheckBox(getName());
             checkBox.setSelected(startValue);
             m_valueSet = true;
@@ -71,11 +75,9 @@ public class BooleanParameter extends AbstractParameter {
             return checkBox;
         }
 
-
         return null;
     }
-    
-    
+
     @Override
     public void initDefault() {
         if (m_defaultValue == null) {
@@ -89,20 +91,20 @@ public class BooleanParameter extends AbstractParameter {
 
         }
     }
-    
+
     @Override
-    public ParameterError checkParameter() {        
+    public ParameterError checkParameter() {
         return null;
     }
 
     @Override
     public void setValue(String v) {
-        if ((m_graphicalType.equals(JCheckBox.class)) && (m_parameterComponent!=null)) {
-            ((JCheckBox)m_parameterComponent).setSelected(Boolean.parseBoolean(v));
+        if ((m_graphicalType.equals(JCheckBox.class)) && (m_parameterComponent != null)) {
+            ((JCheckBox) m_parameterComponent).setSelected(Boolean.parseBoolean(v));
             m_valueSet = true;
         }
     }
-    
+
     @Override
     public String getStringValue() {
         return getObjectValue().toString();
@@ -111,12 +113,11 @@ public class BooleanParameter extends AbstractParameter {
     @Override
     public Object getObjectValue() {
         if (m_graphicalType.equals(JCheckBox.class)) {
-           return Boolean.valueOf(((JCheckBox) m_parameterComponent).isSelected());
+            return Boolean.valueOf(((JCheckBox) m_parameterComponent).isSelected());
         }
         return ""; // should not happen
     }
 
-    
     public void addLinkedParameters(final AbstractLinkedParameters linkedParameters) {
 
         // create parameterComponent if needed
@@ -126,7 +127,7 @@ public class BooleanParameter extends AbstractParameter {
             m_linkedParametersList = new ArrayList<>(1);
         }
         m_linkedParametersList.add(linkedParameters);
- 
+
         if (m_parameterComponent instanceof JCheckBox) {
             ((JCheckBox) m_parameterComponent).addActionListener(new ActionListener() {
                 @Override
@@ -142,7 +143,5 @@ public class BooleanParameter extends AbstractParameter {
             }
         }
     }
-    
-    
-}
 
+}

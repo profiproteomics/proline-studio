@@ -96,6 +96,14 @@ public class Stats {
         return calibrationPlot(pvalues, pi0Method, new PyInteger(20), new PyFloat(0.05));
     }
 
+    public static PyObject calibrationPlot(Col pvaluesCol, PyFloat pi0Method, PyInteger nbins, PyFloat pz) throws Exception {
+        
+        // numeric value for pi0Method
+        Double numericValue = pi0Method.getValue();
+        PyString pi0MethodString = new PyString(String.valueOf(numericValue));
+        return StatsRImplementation.calibrationPlot(pvaluesCol, pi0MethodString, nbins, pz);
+    }
+    
     public static PyObject calibrationPlot(Col pvaluesCol, PyString pi0Method, PyInteger nbins, PyFloat pz) throws Exception {
         return StatsRImplementation.calibrationPlot(pvaluesCol, pi0Method, nbins, pz);
     }

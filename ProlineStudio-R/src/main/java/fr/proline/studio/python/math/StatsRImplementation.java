@@ -313,7 +313,15 @@ public class StatsRImplementation {
         StatsUtil.readMatrixData(matrixTempFile, false);
 
         // create image
-        String pi0Parameter = "pi0.method=\"" + pi0Method.toString() + "\"";
+        String pi0Parameter;
+        String pi0String = pi0Method.toString();
+        try {
+            Double.parseDouble(pi0String);
+            pi0Parameter = "pi0.method=" + pi0Method.toString() + "";  // pi0 is a numeric value for numeric method
+        } catch (NumberFormatException nfe) {
+            pi0Parameter = "pi0.method=\"" + pi0Method.toString() + "\""; // pi0 is a method
+        }
+
         String cmd = "calibration.plot(p=" + StatsUtil.MATRIX_VARIABLE + "[,1:1], " + pi0Parameter + ", nbins=" + nbins.toString() + ", pz=" + pz.toString() + ")";
         return StatsUtil.createImage(imageTempFile, cmd);
 

@@ -196,7 +196,7 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
         Object[] associatedTable = {"Automatic Column Size", "Fixed Column Size", "Smart Column Size"};
         JComboBox comboBox = new JComboBox(associatedTable);
         Object[] objectTable = {DecoratedTable.AUTOMATIC_COLUMNS_SIZE, DecoratedTable.FIXED_COLUMNS_SIZE, DecoratedTable.SMART_COLUMNS_SIZE};
-        ObjectParameter columnsParameter = new ObjectParameter(DecoratedTable.DEFAULT_COLUMNS_ARRANGEMENT_KEY, DecoratedTable.DEFAULT_COLUMNS_ARRANGEMENT_NAME, comboBox, associatedTable, objectTable, 2, null);
+        ObjectParameter columnsParameter = new ObjectParameter(DecoratedTable.DEFAULT_COLUMNS_ARRANGEMENT_KEY, DecoratedTable.DEFAULT_COLUMNS_ARRANGEMENT_NAME, comboBox, associatedTable, objectTable, DecoratedTable.DEFAULT_COLUMNS_ARRANGEMENT_INDEX, null);
         m_tablePrameterList.add(columnsParameter);
 
         IntegerParameter defaultFixedColumnSize = new IntegerParameter(DecoratedTable.DEFAULT_WIDTH_KEY, DecoratedTable.DEFAULT_WIDTH_NAME, JTextField.class, DecoratedTable.COLUMN_DEFAULT_WIDTH, DecoratedTable.COLUMN_MIN_WIDTH, DecoratedTable.COLUMN_MAX_WIDTH);

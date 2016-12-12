@@ -107,7 +107,7 @@ public class ObjectParameter<E> extends AbstractParameter {
         }
         
         }catch(Exception e){
-            JOptionPane.showMessageDialog(null, "SELECT ITEM EXCEPTION"+e);
+            JOptionPane.showMessageDialog(null, "SELECT ITEM EXCEPTION "+e);
         }
         return false;
     }

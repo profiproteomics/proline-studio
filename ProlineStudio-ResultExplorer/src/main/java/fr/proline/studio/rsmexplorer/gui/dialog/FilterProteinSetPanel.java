@@ -11,6 +11,8 @@ import fr.proline.studio.utils.IconManager;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.JButton;
@@ -28,8 +30,8 @@ public class FilterProteinSetPanel extends JPanel {
     private JComboBox m_proteinPrefilterJComboBox = null;
     private JButton m_addProteinPrefilterButton = null;
     private AbstractParameter[] m_proteinFilterParameters;
-    
-    public FilterProteinSetPanel(String title,AbstractParameter[] proteinFilterParameters) {
+
+    public FilterProteinSetPanel(String title, AbstractParameter[] proteinFilterParameters) {
         super(new GridBagLayout());
         m_proteinFilterParameters = proteinFilterParameters;
         if (title != null && !title.isEmpty()) {
@@ -39,11 +41,10 @@ public class FilterProteinSetPanel extends JPanel {
         initProteinFilterPanel();
     }
 
-    
-    public AbstractParameter[] getProteinSetFilterParameters() {        
-        return m_proteinFilterParameters;        
+    public AbstractParameter[] getProteinSetFilterParameters() {
+        return m_proteinFilterParameters;
     }
-    
+
     private void createPanel() {
 
         GridBagConstraints c = new GridBagConstraints();
@@ -58,32 +59,49 @@ public class FilterProteinSetPanel extends JPanel {
 
         m_proteinPrefilterJComboBox = new JComboBox(m_proteinFilterParameters);
         m_proteinPrefilterJComboBox.setRenderer(new ParameterComboboxRenderer(null));
-        m_addProteinPrefilterButton = new JButton(IconManager.getIcon(IconManager.IconType.PLUS));
-        m_addProteinPrefilterButton.setMargin(new java.awt.Insets(2, 2, 2, 2));
+        //m_addProteinPrefilterButton = new JButton(IconManager.getIcon(IconManager.IconType.PLUS));
+        //m_addProteinPrefilterButton.setMargin(new java.awt.Insets(2, 2, 2, 2));
 
         c.gridx = 0;
         c.gridy++;
         c.weightx = 1;
         add(m_proteinPrefilterJComboBox, c);
 
+        /*
         c.gridx++;
         c.weightx = 0;
         add(m_addProteinPrefilterButton, c);
+        */
 
         c.gridx++;
         c.weightx = 1.0;
         add(Box.createHorizontalBox(), c);
 
-        m_addProteinPrefilterButton.addActionListener((ActionEvent e) -> {
-            AbstractParameter p = (AbstractParameter) m_proteinPrefilterJComboBox.getSelectedItem();
-            if (p == null) {
-                return;
+        /*
+         m_addProteinPrefilterButton.addActionListener((ActionEvent e) -> {
+         AbstractParameter p = (AbstractParameter) m_proteinPrefilterJComboBox.getSelectedItem();
+         if (p == null) {
+         return;
+         }
+         p.setUsed(true);
+         initProteinFilterPanel();
+         });
+         */
+        
+        m_proteinPrefilterJComboBox.addItemListener(new ItemListener() {
+
+            @Override
+            public void itemStateChanged(ItemEvent ie) {
+                AbstractParameter p = (AbstractParameter) m_proteinPrefilterJComboBox.getSelectedItem();
+                if (p == null) {
+                    return;
+                }
+                p.setUsed(true);
+                initProteinFilterPanel();
             }
-            p.setUsed(true);
-            initProteinFilterPanel();
         });
     }
-    
+
     protected void initProteinFilterPanel() {
 
         m_proteinPrefiltersSelectedPanel.removeAll();
@@ -128,7 +146,7 @@ public class FilterProteinSetPanel extends JPanel {
                 removeButton.setMargin(new java.awt.Insets(2, 2, 2, 2));
                 removeButton.addActionListener((ActionEvent e) -> {
                     p.setUsed(false);
-                    initProteinFilterPanel();                    
+                    initProteinFilterPanel();
                 });
                 m_proteinPrefiltersSelectedPanel.add(removeButton, c);
 
@@ -142,8 +160,8 @@ public class FilterProteinSetPanel extends JPanel {
 
         boolean hasUnusedParameters = (nbUsed != m_proteinFilterParameters.length);
         m_proteinPrefilterJComboBox.setVisible(hasUnusedParameters);
-        m_addProteinPrefilterButton.setVisible(hasUnusedParameters);
-        
+        //m_addProteinPrefilterButton.setVisible(hasUnusedParameters);
+
         revalidate();
     }
 

@@ -288,11 +288,10 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
         prefilterPanel.add(m_psmPrefilterJComboBox, c);
 
         /*
-        c.gridx++;
-        c.weightx = 0;
-        prefilterPanel.add(m_addPsmPrefilterButton, c);
-        */
-
+         c.gridx++;
+         c.weightx = 0;
+         prefilterPanel.add(m_addPsmPrefilterButton, c);
+         */
         c.gridx++;
         c.weightx = 1.0;
         prefilterPanel.add(Box.createHorizontalBox(), c);
@@ -311,7 +310,6 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
          }
          });
          */
-        
         m_psmPrefilterJComboBox.addItemListener(new ItemListener() {
 
             @Override
@@ -779,6 +777,20 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
     }
 
     private boolean checkParameters(boolean checkFDR) {
+
+        if (getArguments().isEmpty() && !m_fdrCheckbox.isSelected() && !m_proteinFdrCheckbox.isSelected()) {
+
+            InfoDialog emptyArgumentsDialog = new InfoDialog(WindowManager.getDefault().getMainWindow(), InfoDialog.InfoType.WARNING, "Warning", "You should not validate. Important arguments are not set.\nAre you sure you want to validate?");
+            emptyArgumentsDialog.setButtonName(OptionDialog.BUTTON_OK, "Yes");
+            emptyArgumentsDialog.setButtonName(OptionDialog.BUTTON_CANCEL, "No");
+            emptyArgumentsDialog.centerToWindow(m_singletonDialog);
+            emptyArgumentsDialog.setVisible(true);
+
+            if (emptyArgumentsDialog.getButtonClicked() == OptionDialog.BUTTON_CANCEL) {
+                return false;
+            }
+
+        }
 
         if (checkFDR) {
             boolean aFdrSelected = m_fdrCheckbox.isSelected() || m_proteinFdrCheckbox.isSelected();

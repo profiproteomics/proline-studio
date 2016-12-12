@@ -58,13 +58,13 @@ public class AdvancedSelectionPanel<E> extends JPanel  {
         
         c.gridx = 0;
         c.gridy = 0;
-        add(selectedPanel, c);
-        
+        add(notSelectedPanel, c);
+
         c.gridx++;
         add(midActionPanel, c);
         
         c.gridx++;
-        add(notSelectedPanel, c);
+        add(selectedPanel, c);
         
         setFastSelectionValues(preparePrefixAndSuffix(objects));
     }
@@ -256,7 +256,7 @@ public class AdvancedSelectionPanel<E> extends JPanel  {
         m_selectionComboBox = new JComboBox();
         m_selectionComboBox.setVisible(false);
         
-        arrowLeft.addActionListener(new ActionListener() {
+        arrowRight.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 List objectsToMoveList = m_unselectedList.getSelectedValuesList();
@@ -296,7 +296,7 @@ public class AdvancedSelectionPanel<E> extends JPanel  {
             }
         });
         
-        arrowRight.addActionListener(new ActionListener() {
+        arrowLeft.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 List objectsToMoveList = m_selectedList.getSelectedValuesList();

@@ -92,7 +92,7 @@ public abstract class AbstractFunction implements CheckParameterInterface {
     public abstract void askDisplay(FunctionGraphNode functionGraphNode);
     public abstract ArrayList<WindowBox> getDisplayWindowBox(FunctionGraphNode functionGraphNode);
     
-    public GlobalTableModelInterface getFirstGlobalTableModelInterface() {
+    public GlobalTableModelInterface getMainGlobalTableModelInterface() {
         if (m_globalTableModelInterface == null) {
             return null;
         }

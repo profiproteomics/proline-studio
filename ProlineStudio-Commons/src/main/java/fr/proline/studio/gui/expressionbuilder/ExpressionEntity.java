@@ -7,17 +7,21 @@ package fr.proline.studio.gui.expressionbuilder;
 public class ExpressionEntity {
 
     private String m_name;
+    private String m_nameDisplayed;
     private String m_code;
-    private Class m_type;
 
-    public ExpressionEntity(String name, String code, Class type) {
+    public ExpressionEntity(String name, String nameDisplayed, String code) {
         m_name = name;
+        m_nameDisplayed = nameDisplayed;
         m_code = code;
-        m_type = type;
     }
 
     public String getName() {
         return m_name;
+    }
+    
+    public String getNameDisplayed() {
+        return m_nameDisplayed;
     }
 
     public String getCode() {

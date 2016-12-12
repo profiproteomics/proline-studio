@@ -73,6 +73,9 @@ public abstract class DecoratedTable extends JXTable implements CrossSelectionIn
 
     public static final String DEFAULT_COLUMNS_ARRANGEMENT_KEY = "Columns_Arrangement";
     public static final String DEFAULT_COLUMNS_ARRANGEMENT_NAME = "Columns Arrangement";
+    
+    public static final int DEFAULT_COLUMNS_ARRANGEMENT_INDEX = 2;
+    
     public static final String DEFAULT_WIDTH_KEY = "Column_Width";
     public static final String DEFAULT_WIDTH_NAME = "Column Width";
     public static final int COLUMN_DEFAULT_WIDTH = 120;
@@ -165,7 +168,7 @@ public abstract class DecoratedTable extends JXTable implements CrossSelectionIn
         Object[] associatedTable = {"Automatic Column Size", "Fixed Column Size", "Smart Column Size"};
         m_arrangementComboBox = new JComboBox(associatedTable);
         Object[] objectTable = {DecoratedTable.AUTOMATIC_COLUMNS_SIZE, DecoratedTable.FIXED_COLUMNS_SIZE, DecoratedTable.SMART_COLUMNS_SIZE};
-        m_columnArrangementParameter = new ObjectParameter(DecoratedTable.DEFAULT_COLUMNS_ARRANGEMENT_KEY, DecoratedTable.DEFAULT_COLUMNS_ARRANGEMENT_NAME, m_arrangementComboBox, associatedTable, objectTable, 0, null);
+        m_columnArrangementParameter = new ObjectParameter(DecoratedTable.DEFAULT_COLUMNS_ARRANGEMENT_KEY, DecoratedTable.DEFAULT_COLUMNS_ARRANGEMENT_NAME, m_arrangementComboBox, associatedTable, objectTable, DecoratedTable.DEFAULT_COLUMNS_ARRANGEMENT_INDEX, null);
         
 
         List<TableColumn> columns = getColumns(true);
@@ -191,7 +194,7 @@ public abstract class DecoratedTable extends JXTable implements CrossSelectionIn
         calculateMeanWidth();
 
         m_widthTextField = new JTextField();
-        m_columnWidthParameter = new IntegerParameter(DEFAULT_WIDTH_KEY, DEFAULT_WIDTH_NAME, m_widthTextField, m_meanWidth, 10, COLUMN_MAX_WIDTH);
+        m_columnWidthParameter = new IntegerParameter(DEFAULT_WIDTH_KEY, DEFAULT_WIDTH_NAME, m_widthTextField, COLUMN_DEFAULT_WIDTH, 10, COLUMN_MAX_WIDTH);
 
         m_columnsVisibilityParameter = new MultiObjectParameter(COLUMNS_VISIBILITY_KEY, "Columns Visibility", "Visible Columns", "Hidden Columns", AdvancedSelectionPanel.class, columnNamesArray, columnsArray, selection, null);
 

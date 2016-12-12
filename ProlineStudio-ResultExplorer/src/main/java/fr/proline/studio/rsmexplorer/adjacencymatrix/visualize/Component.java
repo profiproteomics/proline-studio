@@ -31,20 +31,25 @@ public class Component {
     
     public int[][] getPeptProtMatrix(HashMap<LightPeptideMatch, ArrayList<LightProteinMatch>> peptideToProteinMap) {
 
-        int[][] tempMatch = new int[m_peptideArray.size()][m_proteinMatchArray.size()];
+        
+        int peptideSize = m_peptideArray.size();
+        int proteinSize = m_proteinMatchArray.size();
+        
+        HashMap<LightProteinMatch, Integer> proteinIndexMap = new HashMap<>(proteinSize);
+        int index = 0;
+        for (LightProteinMatch tempProt : m_proteinMatchArray) {
+            proteinIndexMap.put(tempProt, index);
+            index++;
+        }
+        
+        int[][] tempMatch = new int[peptideSize][proteinSize]; // full of 0
         int i = 0;
         for (LightPeptideMatch tempPept : m_peptideArray) {
             ArrayList<LightProteinMatch> proteinList = peptideToProteinMap.get(tempPept);
             int j = 0;
 
-            for (LightProteinMatch tempProt : m_proteinMatchArray) {
-                if (proteinList.contains(tempProt)) {
-                    tempMatch[i][j] = 1;
-                } else {
-                    tempMatch[i][j] = 0;
-                }
-
-                j++;
+            for(LightProteinMatch tempProt : proteinList) {
+                tempMatch[i][proteinIndexMap.get(tempProt)] = 1;
             }
 
             i++;

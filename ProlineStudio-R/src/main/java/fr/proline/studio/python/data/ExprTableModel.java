@@ -29,7 +29,7 @@ public class ExprTableModel extends DecoratedTableModel implements ChildModelInt
 
     private GlobalTableModelInterface m_parentModel;
     
-    private static DoubleRenderer DOUBLE_RENDERER = new DoubleRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 4, true, true);
+    public static DoubleRenderer DOUBLE_RENDERER = new DoubleRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 4, true, true);
     
     private HashMap<Integer, Col> m_modifiedColumns = null;
     private HashMap<Integer, Object> m_modifiedColumnsExtraInfo = null;

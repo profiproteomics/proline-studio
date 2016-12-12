@@ -1,7 +1,5 @@
 package fr.proline.studio.rsmexplorer.gui.calc.functions;
 
-import fr.proline.studio.export.ExportModelInterface;
-import fr.proline.studio.gui.expressionbuilder.ExpressionBuilderPanel;
 import fr.proline.studio.gui.expressionbuilder.ExpressionEntity;
 import fr.proline.studio.parameter.AbstractParameter;
 import fr.proline.studio.parameter.ExpressionParameter;
@@ -168,26 +166,25 @@ public class ExpressionFunction extends AbstractFunction {
 
         
         ArrayList<ExpressionEntity> m_functions = new ArrayList<>(20);
-        m_functions.add(new ExpressionEntity("(", "(", null));
-        m_functions.add(new ExpressionEntity(")", ")", null));
-        m_functions.add(new ExpressionEntity("abs", "Stats.abs", null));
-        m_functions.add(new ExpressionEntity(">", ">", null));
-        m_functions.add(new ExpressionEntity(">=", ">=", null));
-        m_functions.add(new ExpressionEntity("<", "<", null));
-        m_functions.add(new ExpressionEntity("<=", "<=", null));
-        m_functions.add(new ExpressionEntity("=", "==", null));
+        m_functions.add(new ExpressionEntity("(", "(", "("));
+        m_functions.add(new ExpressionEntity(")", ")", ")"));
+        m_functions.add(new ExpressionEntity("abs", "abs(", "Stats.abs("));
+        m_functions.add(new ExpressionEntity(">", ">", ">"));
+        m_functions.add(new ExpressionEntity(">=", ">=", ">="));
+        m_functions.add(new ExpressionEntity("<", "<", "<"));
+        m_functions.add(new ExpressionEntity("<=", "<=", "<="));
+        m_functions.add(new ExpressionEntity("=", "=", "=="));
         
         ArrayList<ExpressionEntity> m_variables = new ArrayList<>(colCount);
         
         for (int i = 0; i < colCount; i++) {
             String columnFullName = model.getColumnName(i);
             String name = columnFullName.replaceAll("<br/>", " ");
+            name = removeHtmlColor(name);
             int index = i+1;
             String code = "t["+index+"]";
 
-            Class c = model.getDataColumnClass(i);
-            
-            ExpressionEntity var = new ExpressionEntity(name, code, c);
+            ExpressionEntity var = new ExpressionEntity(name, name, code);
             
             m_variables.add(var);
         }
@@ -207,6 +204,16 @@ public class ExpressionFunction extends AbstractFunction {
         
     }
 
+    private String removeHtmlColor(String value) {
+        int colorRemoveStart = value.indexOf("</font>", 0);
+        int colorRemoveStop = value.indexOf("</html>", 0);
+        if ((colorRemoveStart > -1) && (colorRemoveStop > colorRemoveStart)) {
+            value = value.substring(colorRemoveStart + "</font>".length(), colorRemoveStop);
+        }
+
+        return value;
+    }
+    
     @Override
     public void userParametersChanged() {
          m_globalTableModelInterface = null;

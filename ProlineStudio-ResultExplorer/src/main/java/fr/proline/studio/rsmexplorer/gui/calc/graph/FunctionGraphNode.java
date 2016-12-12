@@ -332,7 +332,7 @@ public class FunctionGraphNode extends GraphNode {
 
     @Override
     public GlobalTableModelInterface getGlobalTableModelInterface() {
-        return m_function.getFirstGlobalTableModelInterface();
+        return m_function.getMainGlobalTableModelInterface();
     }
  
 

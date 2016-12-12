@@ -135,7 +135,7 @@ public class JoinFunction extends AbstractFunction {
     public void generateDefaultParameters(AbstractConnectedGraphObject[] graphObjects) {
 
         
-        GlobalTableModelInterface modelForDefaultKey = getFirstGlobalTableModelInterface();
+        GlobalTableModelInterface modelForDefaultKey = getMainGlobalTableModelInterface();
         
         if (modelForDefaultKey == null) {
             Table t1 = new Table(graphObjects[0].getGlobalTableModelInterface());
@@ -205,7 +205,7 @@ public class JoinFunction extends AbstractFunction {
         Integer key1 = (Integer) m_paramColumn1.getAssociatedObjectValue();
         Integer key2 = (Integer) m_paramColumn2.getAssociatedObjectValue();
         
-        GlobalTableModelInterface modelForDefaultKey = getFirstGlobalTableModelInterface();
+        GlobalTableModelInterface modelForDefaultKey = getMainGlobalTableModelInterface();
         
         if (modelForDefaultKey == null) {
             Table t1 = new Table(graphObjects[0].getGlobalTableModelInterface());

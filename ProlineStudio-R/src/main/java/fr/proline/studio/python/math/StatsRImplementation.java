@@ -177,7 +177,7 @@ public class StatsRImplementation {
             }
 
             String colName = "log Ratio";
-            model.addExtraColumn(new ColDoubleData(resTable, valuesForCol, colName), null);
+            model.addExtraColumn(new ColDoubleData(resTable, valuesForCol, colName), ExprTableModel.DOUBLE_RENDERER);
             model.addExtraColumnInfo(new LogRatio());
         
         }
@@ -231,9 +231,9 @@ public class StatsRImplementation {
             ColDoubleData log10PvalueCol = StatsImplementation.log10(pvalueCol);
             ColDoubleData minusLog10PvalueCol = StatsImplementation.neg(log10PvalueCol);
             
-            model.addExtraColumn(pvalueCol, null);
+            model.addExtraColumn(pvalueCol, ExprTableModel.DOUBLE_RENDERER);
             model.addExtraColumnInfo(new PValue());
-            model.addExtraColumn(minusLog10PvalueCol, null);
+            model.addExtraColumn(minusLog10PvalueCol, ExprTableModel.DOUBLE_RENDERER);
             model.addExtraColumnInfo(new PValue());
             model.addExtraColumnInfo(new LogInfo(LogInfo.LogState.LOG10));
         
@@ -660,9 +660,9 @@ public class StatsRImplementation {
             ColDoubleData pvalueCol = new ColDoubleData(resTable, valuesForCol, colName);
             ColDoubleData log10PvalueCol = StatsImplementation.log10(pvalueCol);
             ColDoubleData minusLog10PvalueCol = StatsImplementation.neg(log10PvalueCol);
-            model.addExtraColumn(pvalueCol, null);
+            model.addExtraColumn(pvalueCol, ExprTableModel.DOUBLE_RENDERER);
             model.addExtraColumnInfo(new PValue());
-            model.addExtraColumn(minusLog10PvalueCol, null);
+            model.addExtraColumn(minusLog10PvalueCol, ExprTableModel.DOUBLE_RENDERER);
             model.addExtraColumnInfo(new PValue());
             model.addExtraColumnInfo(new LogInfo(LogInfo.LogState.LOG10));
 
@@ -672,7 +672,7 @@ public class StatsRImplementation {
             }
 
             colName = diffAnalysisTypeString + " log Ratio";
-            model.addExtraColumn(new ColDoubleData(resTable, valuesForCol, colName), null);
+            model.addExtraColumn(new ColDoubleData(resTable, valuesForCol, colName), ExprTableModel.DOUBLE_RENDERER);
             model.addExtraColumnInfo(new LogRatio());
          
 
@@ -705,14 +705,14 @@ public class StatsRImplementation {
                         ColDoubleData pvalueCol = new ColDoubleData(resTable, valuesForCol.get(j), colName);
                         ColDoubleData log10PvalueCol = StatsImplementation.log10(pvalueCol);
                         ColDoubleData minusLog10PvalueCol = StatsImplementation.neg(log10PvalueCol);
-                        model.addExtraColumn(pvalueCol, null);
+                        model.addExtraColumn(pvalueCol, ExprTableModel.DOUBLE_RENDERER);
                         model.addExtraColumnInfo(new PValue());
-                        model.addExtraColumn(minusLog10PvalueCol, null);
+                        model.addExtraColumn(minusLog10PvalueCol, ExprTableModel.DOUBLE_RENDERER);
                         model.addExtraColumnInfo(new PValue());
                         model.addExtraColumnInfo(new LogInfo(LogInfo.LogState.LOG10));
                     } else if (j == 1) {
                         colName = diffAnalysisTypeString + " log Ratio";
-                        model.addExtraColumn(new ColDoubleData(resTable, valuesForCol.get(j), colName), null);
+                        model.addExtraColumn(new ColDoubleData(resTable, valuesForCol.get(j), colName), ExprTableModel.DOUBLE_RENDERER);
                         model.addExtraColumnInfo(new LogRatio());
                     }
 
@@ -737,15 +737,15 @@ public class StatsRImplementation {
                         ColDoubleData pvalueCol = new ColDoubleData(resTable, values, colName);
                         ColDoubleData log10PvalueCol = StatsImplementation.log10(pvalueCol);
                         ColDoubleData minusLog10PvalueCol = StatsImplementation.neg(log10PvalueCol);
-                        model.addExtraColumn(pvalueCol, null);
+                        model.addExtraColumn(pvalueCol, ExprTableModel.DOUBLE_RENDERER);
                         model.addExtraColumnInfo(colExtraInfo);
-                        model.addExtraColumn(minusLog10PvalueCol, null);
+                        model.addExtraColumn(minusLog10PvalueCol, ExprTableModel.DOUBLE_RENDERER);
                         model.addExtraColumnInfo(colExtraInfo);
                         model.addExtraColumnInfo(new LogInfo(LogInfo.LogState.LOG10));
                     } else if (i == 1) {
                         colName = diffAnalysisTypeString + " log Ratio";
                         colExtraInfo = new LogRatio();
-                        model.addExtraColumn(new ColDoubleData(resTable, values, colName), null);
+                        model.addExtraColumn(new ColDoubleData(resTable, values, colName), ExprTableModel.DOUBLE_RENDERER);
                         model.addExtraColumnInfo(colExtraInfo);
                     }
 

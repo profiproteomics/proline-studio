@@ -99,6 +99,14 @@ public class ComputeFDRFunction extends AbstractFunction {
     }
     
     @Override
+    public GlobalTableModelInterface getMainGlobalTableModelInterface() {
+        if (m_globalTableModelInterface == null) {
+            return null;
+        }
+        return m_globalTableModelInterface.get(1);
+    }
+    
+    @Override
     public void process(AbstractConnectedGraphObject[] graphObjects, final FunctionGraphNode functionGraphNode, ProcessCallbackInterface callback) {
         setInError(false, null);
         

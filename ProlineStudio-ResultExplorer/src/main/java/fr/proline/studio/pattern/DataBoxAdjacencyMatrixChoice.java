@@ -98,6 +98,7 @@ public class DataBoxAdjacencyMatrixChoice extends AbstractDataBox {
             @Override
             public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
 
+                try {
 
                 ((MatrixSelectionPanel) getDataBoxPanelInterface()).setData(matrixData, _proteinMatch, m_keepSameSet, m_doNotTakeFirstSelection);
                 m_doNotTakeFirstSelection = false;
@@ -105,14 +106,17 @@ public class DataBoxAdjacencyMatrixChoice extends AbstractDataBox {
                 if (finished) {
                     unregisterTask(taskId);
                 }
+                
+                } catch (Throwable t) {
+                    t.printStackTrace();
+                }
             }
         };
 
+        ((MatrixSelectionPanel) getDataBoxPanelInterface()).setData(_proteinMatch, m_doNotTakeFirstSelection);
 
         registerTask(new DatabaseProteinsAndPeptidesTask(callback, getProjectId(), _rsm, matrixData));
 
-        ((MatrixSelectionPanel) getDataBoxPanelInterface()).setData(_proteinMatch, m_doNotTakeFirstSelection);
-        m_doNotTakeFirstSelection = false;
 
 
     }

@@ -155,6 +155,7 @@ public class DatabaseProteinsAndPeptidesTask extends AbstractDatabaseTask {
                 tmpMap.clear();
             }
             
+            entityManagerMSI.getTransaction().commit();
         } catch (Exception e) {
             m_logger.error(getClass().getSimpleName() + " failed", e);
             m_taskError = new TaskError(e);

@@ -9,6 +9,7 @@ import java.util.LinkedList;
 import java.util.Queue;
 import fr.proline.studio.dam.tasks.data.LightPeptideMatch;
 import fr.proline.studio.dam.tasks.data.LightProteinMatch;
+import java.util.HashSet;
 
 public class ConnectedComponents {
 
@@ -35,31 +36,25 @@ public class ConnectedComponents {
         int proteinIndex = 0;
         int peptideIndex = 0;
         int componentIndex = 0;
-        
-        int check1 = 0;
-        int check2 = 0;
+
 
         int proteinSize = m_proteins.size();
         int peptideSize = m_peptides.size();
 
-        int[] proteinFlag = new int[proteinSize];
-        int[] peptideFlag = new int[peptideSize];
-
+        HashSet<LightProteinMatch> proteinFlagSet = new HashSet<>(proteinSize);
+        HashSet<LightPeptideMatch> peptideFlagSet = new HashSet<>(peptideSize);
+        
         Queue<LightProteinMatch> proteinQueue = new LinkedList<>();
         Queue<LightPeptideMatch> peptideQueue = new LinkedList<>();
 
 
-        if (m_proteins == null && m_peptides == null) {
-            return null;
-        }
-
-        ArrayList<fr.proline.studio.rsmexplorer.adjacencymatrix.visualize.Component> componentSet = new ArrayList<>();
+        ArrayList<Component> componentSet = new ArrayList<>();
         
         LightProteinMatch proteinTemp = m_proteins.get(0);
         LightPeptideMatch peptideTemp = m_peptides.get(0);
 
-        proteinQueue.add(m_proteins.get(0));
-        proteinFlag[0] = 1;
+        proteinQueue.add(proteinTemp);
+        proteinFlagSet.add(proteinTemp);
 
         componentIndex = -1;
 
@@ -73,14 +68,12 @@ public class ConnectedComponents {
                 while (!proteinQueue.isEmpty()) {
 
                     proteinTemp = proteinQueue.remove();
-                    ArrayList<LightPeptideMatch> peptideList = new ArrayList<>();
-                    peptideList = m_proteinToPeptideMap.get(proteinTemp);
+                    ArrayList<LightPeptideMatch> peptideList = m_proteinToPeptideMap.get(proteinTemp);
 
                     for (LightPeptideMatch temp1 : peptideList) {
-                        int tempIndex = m_peptides.indexOf(temp1);
-                        if (peptideFlag[tempIndex] == 0) {
+                        if (!peptideFlagSet.contains(temp1)) {
                             peptideQueue.add(temp1);
-                            peptideFlag[tempIndex] = 1;
+                            peptideFlagSet.add(temp1);
                         }
                     }
 
@@ -90,14 +83,12 @@ public class ConnectedComponents {
 
                 while (!peptideQueue.isEmpty()) {
                     peptideTemp = peptideQueue.remove();
-                    ArrayList<LightProteinMatch> proteinList = new ArrayList<>();
-                    proteinList = m_peptideToProteinMap.get(peptideTemp);
+                    ArrayList<LightProteinMatch> proteinList = m_peptideToProteinMap.get(peptideTemp);
 
                     for (LightProteinMatch temp2 : proteinList) {
-                        int tempIndex = m_proteins.indexOf(temp2);
-                        if (proteinFlag[tempIndex] == 0) {
+                        if (!proteinFlagSet.contains(temp2)) {
                             proteinQueue.add(temp2);
-                            proteinFlag[tempIndex] = 1;
+                            proteinFlagSet.add(temp2);
                         }
                     }
 
@@ -107,22 +98,21 @@ public class ConnectedComponents {
 
             }
 
-            int tempCheck1 = componentSet.get(componentIndex).getProteinSize();
-            int tempCheck2 = componentSet.get(componentIndex).getPeptideSize();
-            check1 = check1 + componentSet.get(componentIndex).getProteinSize();
-            check2 = check2 + componentSet.get(componentIndex).getPeptideSize();
+            int tempCheckSize = componentSet.get(componentIndex).getProteinSize()+componentSet.get(componentIndex).getPeptideSize();
 
-            if (tempCheck1 + tempCheck2 > m_maxSize) {
+
+            if (tempCheckSize > m_maxSize) {
                 m_maxIndex = componentIndex;
-                m_maxSize = tempCheck1 + tempCheck2;
+                m_maxSize = tempCheckSize;
             }
 
             if (proteinIndex < proteinSize) {
                 int i;
                 for (i = proteinIndex; i < proteinSize; i++) {
-                    if (proteinFlag[i] == 0) {
-                        proteinQueue.add(m_proteins.get(i));
-                        proteinFlag[i] = 1;
+                    LightProteinMatch proteinCur = m_proteins.get(i);
+                    if (!proteinFlagSet.contains(proteinCur)) {
+                        proteinQueue.add(proteinCur);
+                        proteinFlagSet.add(proteinCur);
                         break;
                     }
                 }
@@ -131,9 +121,10 @@ public class ConnectedComponents {
             } else {
                 int j;
                 for (j = peptideIndex; j < peptideSize; j++) {
-                    if (peptideFlag[j] == 0) {
-                        peptideQueue.add(m_peptides.get(j));
-                        peptideFlag[j] = 1;
+                    LightPeptideMatch peptideCur = m_peptides.get(j);
+                    if (!peptideFlagSet.contains(peptideCur)) {
+                        peptideQueue.add(peptideCur);
+                        peptideFlagSet.add(peptideCur);
                         break;
                     }
                 }
@@ -168,12 +159,9 @@ public class ConnectedComponents {
     private boolean fullMatch(Component temp) {
         for (LightPeptideMatch peptTemp : temp.m_peptideArray) {
             ArrayList<LightProteinMatch> protList = m_peptideToProteinMap.get(peptTemp);
-            for (LightProteinMatch protTemp : temp.m_proteinMatchArray) {
-                if (!protList.contains(protTemp)) {
-                    return false;
-                }
+            if (protList.size() != temp.m_proteinMatchArray.size()) {
+                return false;
             }
-
         }
         return true;
     }

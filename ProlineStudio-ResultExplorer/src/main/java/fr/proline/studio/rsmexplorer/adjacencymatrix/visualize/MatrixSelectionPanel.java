@@ -336,6 +336,8 @@ public class MatrixSelectionPanel extends HourglassPanel implements DataBoxPanel
 
     public void setData(AdjacencyMatrixData matrixData, DProteinMatch proteinMatch, boolean keepSameSet, boolean doNotTakeFirstSelection) {
 
+        try {
+        
         m_drawVisualization = new DrawVisualization();
 
         m_drawVisualization.setData(matrixData, keepSameSet);
@@ -350,14 +352,24 @@ public class MatrixSelectionPanel extends HourglassPanel implements DataBoxPanel
 
         revalidate();
         repaint();
+        
+        } catch (Throwable t) {
+                    t.printStackTrace();
+                }
     }
 
     public void setData(DProteinMatch proteinMatch, boolean doNotTakeFirstSelection) {
+        
+        try {
         if (proteinMatch == null) {
             return;
         }
         selectProtein(proteinMatch);
         repaint();
+        
+        } catch (Throwable t) {
+                    t.printStackTrace();
+                }
     }
 
     private void selectProtein(DProteinMatch proteinMatch) {

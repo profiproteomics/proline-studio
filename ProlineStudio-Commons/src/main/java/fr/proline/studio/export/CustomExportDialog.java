@@ -138,24 +138,21 @@ public class CustomExportDialog extends DefaultDialog implements CollapseListene
         setHelpURL("http://biodev.extra.cea.fr/docs/proline/doku.php?id=how_to:studio:exportdata");
 
 
+        Preferences preferences = NbPreferences.root();
+        String defaultExportPath = preferences.get("DefaultExcelExportPath", System.getProperty("user.home" ));
         
         m_tabTitleIdHashMap = new HashMap<>(); // this is used to store tab id/tab title matching
 
-        setInternalComponent(createCustomExportPanel());
+        setInternalComponent(createCustomExportPanel(defaultExportPath));
 
         setButtonName(BUTTON_OK, "Export");
 
         
-        Preferences preferences = NbPreferences.root();
-        String defaultExportPath = preferences.get("DefaultExcelExportPath", "");
-      
-        if (defaultExportPath.length() > 0) {
-            m_fchooser = new JFileChooser(new File(defaultExportPath));
-            m_exportFchooser = new JFileChooser(new File(defaultExportPath));
-        } else {
-            m_fchooser = new JFileChooser();
-            m_exportFchooser = new JFileChooser();
-        }
+        
+
+        m_fchooser = new JFileChooser(new File(defaultExportPath));
+        m_exportFchooser = new JFileChooser(new File(defaultExportPath));
+
 
 
         m_fchooser.addChoosableFileFilter(FILTER_EXCEL);
@@ -523,7 +520,7 @@ public class CustomExportDialog extends DefaultDialog implements CollapseListene
         return (fieldsId);
     }
 
-    public final JPanel createCustomExportPanel() {
+    public final JPanel createCustomExportPanel(String defaultExportPath) {
 
         final JPanel insidePanel = new JPanel(new GridBagLayout());
   
@@ -541,6 +538,7 @@ public class CustomExportDialog extends DefaultDialog implements CollapseListene
         c.gridx++;
         c.weightx = 1;
         m_fileTextField = new JTextField(50);
+        m_fileTextField.setText(defaultExportPath);
         insidePanel.add(m_fileTextField, c);
         c.weightx = 0;
 
@@ -1176,7 +1174,7 @@ public class CustomExportDialog extends DefaultDialog implements CollapseListene
         startTask(m_singletonDialog.m_task);
 
         Preferences preferences = NbPreferences.root();
-        preferences.put("DefaultExcelExportPath", f.getAbsoluteFile().getParentFile().getName());
+        preferences.put("DefaultExcelExportPath", f.getAbsoluteFile().getParentFile().getAbsolutePath());
 
         return false;
 

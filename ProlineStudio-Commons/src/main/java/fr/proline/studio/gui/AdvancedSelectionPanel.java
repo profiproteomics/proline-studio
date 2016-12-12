@@ -58,13 +58,13 @@ public class AdvancedSelectionPanel<E> extends JPanel  {
         
         c.gridx = 0;
         c.gridy = 0;
-        add(selectedPanel, c);
-        
+        add(notSelectedPanel, c);
+
         c.gridx++;
         add(midActionPanel, c);
         
         c.gridx++;
-        add(notSelectedPanel, c);
+        add(selectedPanel, c);
         
         setFastSelectionValues(preparePrefixAndSuffix(objects));
     }
@@ -117,7 +117,12 @@ public class AdvancedSelectionPanel<E> extends JPanel  {
         for (int i = 0; i < nb; i++) {
             String valueCur = removeHtmlColor(listModel.getElementAt(i).toString());
 
-            int indexSpace = valueCur.lastIndexOf(' ');
+            if (valueCur.indexOf(value) != -1) {
+                sm.addSelectionInterval(i, i);
+                lastSelectedIndex = i;
+            }
+            
+            /*int indexSpace = valueCur.lastIndexOf(' ');
             if (indexSpace != -1) {
                 String prefix = valueCur.substring(0, indexSpace);
                 String suffix = valueCur.substring(indexSpace, valueCur.length());
@@ -125,7 +130,7 @@ public class AdvancedSelectionPanel<E> extends JPanel  {
                     sm.addSelectionInterval(i, i);
                     lastSelectedIndex = i;
                 }
-            }
+            }*/
 
         }
         list.ensureIndexIsVisible(lastSelectedIndex);
@@ -251,7 +256,7 @@ public class AdvancedSelectionPanel<E> extends JPanel  {
         m_selectionComboBox = new JComboBox();
         m_selectionComboBox.setVisible(false);
         
-        arrowLeft.addActionListener(new ActionListener() {
+        arrowRight.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 List objectsToMoveList = m_unselectedList.getSelectedValuesList();
@@ -291,7 +296,7 @@ public class AdvancedSelectionPanel<E> extends JPanel  {
             }
         });
         
-        arrowRight.addActionListener(new ActionListener() {
+        arrowLeft.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 List objectsToMoveList = m_selectedList.getSelectedValuesList();
@@ -385,11 +390,12 @@ public class AdvancedSelectionPanel<E> extends JPanel  {
                 indexStop = nohtmlValue.indexOf('>');
             }
 
+            // PREFIX --------------
             String prefix = nohtmlValue;
 
-            int indexSpace = prefix.lastIndexOf(' ');
-            if (indexSpace != -1) {
-                prefix = prefix.substring(0, indexSpace);
+            int indexFirstSpace = prefix.indexOf(' ');
+            if (indexFirstSpace != -1) {
+                prefix = prefix.substring(0, indexFirstSpace);
             }
             if (prefix.length() > 0) {
                 Integer nb = similarColumnsNumberMap.get(prefix);
@@ -415,47 +421,49 @@ public class AdvancedSelectionPanel<E> extends JPanel  {
                     similarColumnsColorsMap.put(prefix, "");
                 }
             }
-                if (indexSpace != -1) {
-
-                    String suffix  = nohtmlValue.substring(indexSpace, nohtmlValue.length());
-                    if (suffix.length() > 0) {
-                        Integer nb = similarColumnsNumberMap.get(suffix);
-                        if (nb == null) {
-                            similarColumnsNumberMap.put(suffix, 1);
-                        } else {
-                            similarColumnsNumberMap.put(suffix, nb + 1);
-                        }
-
-                        colorIndexStart = fullValue.indexOf("<font color='", 0);
-                        colorIndexStop = fullValue.indexOf("</font>", 0);
-                        if ((colorIndexStart > -1) && (colorIndexStop > colorIndexStart)) {
-                            String colorName = fullValue.substring(colorIndexStart, colorIndexStop + "</font>".length());
-                            String curColorName = similarColumnsColorsMap.get(suffix);
-                            if (curColorName != null) {
-                                if (curColorName.compareTo(colorName) != 0) {
-                                    similarColumnsColorsMap.put(suffix, "");
-                                }
-                            } else {
-                                similarColumnsColorsMap.put(suffix, colorName);
-                            }
-                        } else {
-                            similarColumnsColorsMap.put(suffix, "");
-                        }
-                    }
-                }
-     
-
+            
+            
+            // ALL POTENTIAL SUFFIX --------------
+            int indexLastSpace = nohtmlValue.lastIndexOf(' ');
+            while (indexLastSpace != -1) {
+                indexLastSpace = addSuffix(indexLastSpace, nohtmlValue, fullValue, similarColumnsNumberMap, similarColumnsColorsMap );
+            }
         }
 
         // suppression des lignes à un résultat dans similarColumnsNumberMap
-        Set<String> colNamesSet = similarColumnsNumberMap.keySet();
-        String[] colNamesArray = colNamesSet.toArray(new String[colNamesSet.size()]);
-        for (int i = 0; i < colNamesArray.length; i++) {
-            String colName = colNamesArray[i];
-            Integer nb = similarColumnsNumberMap.get(colName);
-            if (nb <= 1) {
-                similarColumnsNumberMap.remove(colName);
+        Set<String> suffixSet = similarColumnsNumberMap.keySet();
+        String[] suffixArray = suffixSet.toArray(new String[suffixSet.size()]);
+        for (int i = 0; i < suffixArray.length; i++) {
+            String suffixCur = suffixArray[i];
+            if (!similarColumnsNumberMap.containsKey(suffixCur)) {
+                // suffix already suppressed
+                continue;
             }
+            Integer nb = similarColumnsNumberMap.get(suffixCur);
+            
+            if (nb <= 1) {
+                similarColumnsNumberMap.remove(suffixCur);
+                continue;
+            }
+            
+            for (int j=i+1;j<suffixArray.length;j++) {
+                String suffixCur2 = suffixArray[j];
+                if (((suffixCur.length()<suffixCur2.length()) && (suffixCur2.endsWith(suffixCur))) ||
+                        ((suffixCur.length()>suffixCur2.length()) && (suffixCur.endsWith(suffixCur2)))) {
+                    // suffixCur and suffixCur2 are similar  like "vs 5%" and "5%"
+                    Integer nb2 = similarColumnsNumberMap.get(suffixCur2);
+                    if (nb == nb2) {
+                        // suffixes correspond to the same column, we remove the shortest one
+                        if (suffixCur.length()<suffixCur2.length()) {
+                            similarColumnsNumberMap.remove(suffixCur);
+                        } else {
+                            similarColumnsNumberMap.remove(suffixCur2);
+                        }
+                    }
+                    
+                }
+            }
+            
         }
         String[] groups = null;
 
@@ -478,4 +486,43 @@ public class AdvancedSelectionPanel<E> extends JPanel  {
         return groups;
     }
 
+    private int addSuffix(int indexLastSpace, String nohtmlValue, String fullValue, HashMap<String, Integer> similarColumnsNumberMap, HashMap<String, String> similarColumnsColorsMap) {
+        if (indexLastSpace != -1) {
+            String suffix = nohtmlValue;
+            int indexPreviousSpace = nohtmlValue.substring(0, indexLastSpace).lastIndexOf(' ');
+            if (indexPreviousSpace != -1) {
+                suffix = nohtmlValue.substring(indexPreviousSpace, nohtmlValue.length());
+
+                if (suffix.length() > 0) {
+                    Integer nb = similarColumnsNumberMap.get(suffix);
+                    if (nb == null) {
+                        similarColumnsNumberMap.put(suffix, 1);
+                    } else {
+                        similarColumnsNumberMap.put(suffix, nb + 1);
+                    }
+
+                    int colorIndexStart = fullValue.indexOf("<font color='", 0);
+                    int colorIndexStop = fullValue.indexOf("</font>", 0);
+                    if ((colorIndexStart > -1) && (colorIndexStop > colorIndexStart)) {
+                        String colorName = fullValue.substring(colorIndexStart, colorIndexStop + "</font>".length());
+                        String curColorName = similarColumnsColorsMap.get(suffix);
+                        if (curColorName != null) {
+                            if (curColorName.compareTo(colorName) != 0) {
+                                similarColumnsColorsMap.put(suffix, "");
+                            }
+                        } else {
+                            similarColumnsColorsMap.put(suffix, colorName);
+                        }
+                    } else {
+                        similarColumnsColorsMap.put(suffix, "");
+                    }
+
+                }
+            }
+            
+            return indexPreviousSpace;
+        }
+        
+        return -1;
+    }
 }

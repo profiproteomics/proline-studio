@@ -311,9 +311,16 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
     protected void deleteThis() {
         
         // cancel task possibily running
-        AccessDatabaseThread.getAccessDatabaseThread().abortTasks(m_taskMap.keySet());
-     
-        m_taskMap.clear();
+        if (!m_taskMap.isEmpty()) {
+            AccessDatabaseThread.getAccessDatabaseThread().abortTasks(m_taskMap.keySet());
+            m_taskMap.clear();
+        }
+        
+         if (m_nextDataBoxArray != null) {
+            for (AbstractDataBox nextDataBox : m_nextDataBoxArray) {
+                nextDataBox.deleteThis();
+            }
+        }
     }
     
     /**

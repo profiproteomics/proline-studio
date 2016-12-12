@@ -129,22 +129,20 @@ public class ExportDialog extends DefaultDialog {
 
         setHelpURL("http://biodev.extra.cea.fr/docs/proline/doku.php?id=how_to:studio:exportdata");
 
-        setInternalComponent(createExportPanel());
-
-        setButtonName(BUTTON_OK, (m_exportType == ExporterFactory.EXPORT_IMAGE) ? "Export Image" : "Export");
-
         String defaultExportPath;
         Preferences preferences = NbPreferences.root();
         if ((m_exportType == ExporterFactory.EXPORT_TABLE) || (m_exportType == ExporterFactory.EXPORT_FROM_SERVER) || (m_exportType == ExporterFactory.EXPORT_XIC) || (m_exportType == ExporterFactory.EXPORT_SPECTRA)) {
-            defaultExportPath = preferences.get("DefaultExcelExportPath", "");
+            defaultExportPath = preferences.get("DefaultExcelExportPath", System.getProperty("user.home"));
         } else { // IMAGE
-            defaultExportPath = preferences.get("DefaultImageExportPath", "");
+            defaultExportPath = preferences.get("DefaultImageExportPath", System.getProperty("user.home"));
         }
-        if (defaultExportPath.length() > 0) {
-            m_fchooser = new JFileChooser(new File(defaultExportPath));
-        } else {
-            m_fchooser = new JFileChooser();
-        }
+        
+        setInternalComponent(createExportPanel(defaultExportPath));
+
+        setButtonName(BUTTON_OK, (m_exportType == ExporterFactory.EXPORT_IMAGE) ? "Export Image" : "Export");
+
+        
+        m_fchooser = new JFileChooser(new File(defaultExportPath));
         m_fchooser.setMultiSelectionEnabled(false);
 
     }
@@ -168,7 +166,7 @@ public class ExportDialog extends DefaultDialog {
         m_parameterList.loadParameters(NbPreferences.root());
     }
 
-    public final JPanel createExportPanel() {
+    public final JPanel createExportPanel(String defaultExportPath) {
 
         JPanel exportPanel = new JPanel(new GridBagLayout());
 
@@ -181,6 +179,7 @@ public class ExportDialog extends DefaultDialog {
         c.gridy = 0;
         c.gridwidth = 2;
         m_fileTextField = new JTextField(30);
+        m_fileTextField.setText(defaultExportPath);
         exportPanel.add(m_fileTextField, c);
 
         final JButton addFileButton = new JButton(IconManager.getIcon(IconManager.IconType.OPEN_FILE));
@@ -359,13 +358,13 @@ public class ExportDialog extends DefaultDialog {
             startTask(exportTask);
 
             Preferences preferences = NbPreferences.root();
-            preferences.put("DefaultExcelExportPath", f.getAbsoluteFile().getParentFile().getName());
+            preferences.put("DefaultExcelExportPath", f.getAbsoluteFile().getParentFile().getAbsolutePath());
         } else if (m_exportType == ExporterFactory.EXPORT_FROM_SERVER || m_exportType == ExporterFactory.EXPORT_XIC || m_exportType == ExporterFactory.EXPORT_SPECTRA) {
 
             startTask(m_singletonServerDialog.m_task);
 
             Preferences preferences = NbPreferences.root();
-            preferences.put("DefaultExcelExportPath", f.getAbsoluteFile().getParentFile().getName());
+            preferences.put("DefaultExcelExportPath", f.getAbsoluteFile().getParentFile().getAbsolutePath());
 
         } else if (m_exportType == ExporterFactory.EXPORT_IMAGE) {
             ExporterFactory.ExporterInfo exporterInfo = (ExporterFactory.ExporterInfo) m_exporTypeCombobox.getSelectedItem();
@@ -404,7 +403,7 @@ public class ExportDialog extends DefaultDialog {
                 }
 
                 Preferences preferences = NbPreferences.root();
-                preferences.put("DefaultExcelImagePath", f.getAbsoluteFile().getParentFile().getName());
+                preferences.put("DefaultExcelImagePath", f.getAbsoluteFile().getParentFile().getAbsolutePath());
 
             } else if (exporterType == ExporterFactory.ExporterType.SVG) {
 
@@ -420,7 +419,7 @@ public class ExportDialog extends DefaultDialog {
                 g2.dispose();
 
                 Preferences preferences = NbPreferences.root();
-                preferences.put("DefaultExcelImagePath", f.getAbsoluteFile().getParentFile().getName());
+                preferences.put("DefaultExcelImagePath", f.getAbsoluteFile().getParentFile().getAbsolutePath());
 
             }
             return true;

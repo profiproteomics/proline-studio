@@ -212,7 +212,7 @@ public class ExpressionBuilderPanel extends JPanel {
                 } catch (Exception e1) {  
                 }
                 if (parseWorks) {
-                    ExpressionEntity entity = new ExpressionEntity(text, text, null);
+                    ExpressionEntity entity = new ExpressionEntity(text, text, text);
                     m_builtExpression.add(entity);
                     m_expressionTextField.setText(getDisplayExpression());
                     updateEnableButtons();
@@ -301,7 +301,7 @@ public class ExpressionBuilderPanel extends JPanel {
     public String getDisplayExpression() {
         StringBuilder sb = new StringBuilder();
         for (ExpressionEntity entity : m_builtExpression) {
-            sb.append(entity.getName()).append(' ');
+            sb.append(entity.getNameDisplayed()).append(' ');
         }
         return sb.toString();
     }

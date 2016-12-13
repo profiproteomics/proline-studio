@@ -45,7 +45,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.filechooser.FileNameExtensionFilter;
-import org.openide.util.Exceptions;
 
 /**
  * export a rawFile as MGF file or tsv (ScanHeader)
@@ -101,7 +100,7 @@ public class ExportRawFileDialog extends DefaultDialog {
         try {
             setHelpURL(new File(".").getCanonicalPath() + File.separatorChar + "Documentation" + File.separatorChar + "Proline_UserGuide_1.4RC1.docx.html#id.nmf14n");
         } catch (IOException ex) {
-            Exceptions.printStackTrace(ex);
+            ;
         }
         EnumSet<PrecursorMzComputationEnum> precursorSet = EnumSet.allOf(PrecursorMzComputationEnum.class);
         precursorList = new String[precursorSet.size() + 1];

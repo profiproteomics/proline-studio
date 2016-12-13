@@ -14,9 +14,7 @@ import fr.proline.studio.rsmexplorer.actions.identification.ImportManager;
 import fr.proline.studio.table.DecoratedTable;
 import java.awt.*;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.prefs.BackingStoreException;
@@ -29,7 +27,6 @@ import javax.swing.event.TreeWillExpandListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.ExpandVetoException;
 import javax.swing.tree.TreePath;
-import org.openide.util.Exceptions;
 import org.openide.util.NbPreferences;
 import org.slf4j.LoggerFactory;
 
@@ -81,7 +78,7 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
         try {
             setHelpURL(new File(".").getCanonicalPath() + File.separatorChar + "Documentation" + File.separatorChar + "Proline_UserGuide_1.4RC1.docx.html#h.eb8nfjv41vkz");
         } catch (IOException ex) {
-            Exceptions.printStackTrace(ex);
+            ;
         }
 
         setButtonVisible(BUTTON_CANCEL, true);
@@ -152,60 +149,48 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
     }
 
     private ParameterList getWizardParameters() {
-        try {
 
-            m_wizardParameterList = new ParameterList("mzDB Settings");
+        m_wizardParameterList = new ParameterList("mzDB Settings");
 
-            JCheckBox deleteRawCheckBox = new JCheckBox("Delete raw file after a successful conversion");
-            BooleanParameter deleteRawParameter = new BooleanParameter("Delete_raw_file_after_a_successful_conversion", "Delete raw file after a successful conversion", deleteRawCheckBox, false);
-            m_wizardParameterList.add(deleteRawParameter);
+        JCheckBox deleteRawCheckBox = new JCheckBox("Delete raw file after a successful conversion");
+        BooleanParameter deleteRawParameter = new BooleanParameter("Delete_raw_file_after_a_successful_conversion", "Delete raw file after a successful conversion", deleteRawCheckBox, false);
+        m_wizardParameterList.add(deleteRawParameter);
 
-            JCheckBox deleteMzdbCheckBox = new JCheckBox("Delete mzdb file after a successful upload");
-            BooleanParameter deleteMzdbParameter = new BooleanParameter("Delete_mzdb_file_after_a_successful_upload", "Delete mzdb file after a successful upload", deleteMzdbCheckBox, false);
-            m_wizardParameterList.add(deleteMzdbParameter);
+        JCheckBox deleteMzdbCheckBox = new JCheckBox("Delete mzdb file after a successful upload");
+        BooleanParameter deleteMzdbParameter = new BooleanParameter("Delete_mzdb_file_after_a_successful_upload", "Delete mzdb file after a successful upload", deleteMzdbCheckBox, false);
+        m_wizardParameterList.add(deleteMzdbParameter);
 
-            StringParameter converterPath = new StringParameter("Converter_(.exe)", "Converter (.exe)", JTextField.class, "C:\\Users\\AK249877\\Documents\\NetBeansProjects\\mzDB-wizard\\target\\converter\\mzdb_x64_0.9.8d\\raw2mzDB.exe", 5, null);
-            m_wizardParameterList.add(converterPath);
+        StringParameter converterPath = new StringParameter("Converter_(.exe)", "Converter (.exe)", JTextField.class, "C:\\Users\\AK249877\\Documents\\NetBeansProjects\\mzDB-wizard\\target\\converter\\mzdb_x64_0.9.8d\\raw2mzDB.exe", 5, null);
+        m_wizardParameterList.add(converterPath);
 
-            m_wizardParameterList.loadParameters(m_preferences);
+        m_wizardParameterList.loadParameters(m_preferences);
 
-            Object[] associatedTable = {"Same as raw file", "User specified"};
-            JComboBox comboBox = new JComboBox(associatedTable);
-            Object[] objectTable = {SAME_OUTPUT_PATH, USER_SPECIFIED_OUTPUT};
-            ObjectParameter converterOutputParameter = new ObjectParameter(CONVERTER_OUTPUT_PATH_KEY, CONVERTER_OUTPUT_PATH_NAME, comboBox, associatedTable, objectTable, 0, null);
-            m_wizardParameterList.add(converterOutputParameter);
+        Object[] associatedTable = {"Same as raw file", "User specified"};
+        JComboBox comboBox = new JComboBox(associatedTable);
+        Object[] objectTable = {SAME_OUTPUT_PATH, USER_SPECIFIED_OUTPUT};
+        ObjectParameter converterOutputParameter = new ObjectParameter(CONVERTER_OUTPUT_PATH_KEY, CONVERTER_OUTPUT_PATH_NAME, comboBox, associatedTable, objectTable, 0, null);
+        m_wizardParameterList.add(converterOutputParameter);
 
-            StringParameter outputPath = new StringParameter("Output_path", "Output path", JTextField.class, "C:\\Users\\AK249877\\Documents\\NetBeansProjects\\mzDB-wizard\\target\\converter\\mzdb_x64_0.9.8d\\raw2mzDB.exe", 5, null);
-            m_wizardParameterList.add(outputPath);
+        StringParameter outputPath = new StringParameter("Output_path", "Output path", JTextField.class, "C:\\Users\\AK249877\\Documents\\NetBeansProjects\\mzDB-wizard\\target\\converter\\mzdb_x64_0.9.8d\\raw2mzDB.exe", 5, null);
+        m_wizardParameterList.add(outputPath);
 
-            m_wizardParameterList.loadParameters(m_preferences);
+        m_wizardParameterList.loadParameters(m_preferences);
 
-            AbstractLinkedParameters linkedParameters = new AbstractLinkedParameters(m_wizardParameterList) {
+        AbstractLinkedParameters linkedParameters = new AbstractLinkedParameters(m_wizardParameterList) {
 
-                @Override
-                public void valueChanged(String value, Object associatedValue) {
-                    int m_selection = Integer.parseInt(converterOutputParameter.getStringValue());
-                    showParameter(outputPath, m_selection == DecoratedTable.FIXED_COLUMNS_SIZE, outputPath.getStringValue());
-                    updateParameterListPanel();
-                }
-
-            };
-
-            converterOutputParameter.addLinkedParameters(linkedParameters);
-
-            int m_selection = Integer.parseInt(converterOutputParameter.getStringValue());
-            linkedParameters.valueChanged((String) associatedTable[m_selection], objectTable[m_selection]);
-
-        } catch (Exception ex) {
-            PrintWriter pw = null;
-            try {
-                pw = new PrintWriter(new File("D:\\bugs.txt"));
-            } catch (FileNotFoundException ex1) {
-                Exceptions.printStackTrace(ex1);
+            @Override
+            public void valueChanged(String value, Object associatedValue) {
+                int m_selection = Integer.parseInt(converterOutputParameter.getStringValue());
+                showParameter(outputPath, m_selection == DecoratedTable.FIXED_COLUMNS_SIZE, outputPath.getStringValue());
+                updateParameterListPanel();
             }
-            ex.printStackTrace(pw);
-            pw.close();
-        }
+
+        };
+
+        converterOutputParameter.addLinkedParameters(linkedParameters);
+
+        int m_selection = Integer.parseInt(converterOutputParameter.getStringValue());
+        linkedParameters.valueChanged((String) associatedTable[m_selection], objectTable[m_selection]);
 
         return m_wizardParameterList;
 

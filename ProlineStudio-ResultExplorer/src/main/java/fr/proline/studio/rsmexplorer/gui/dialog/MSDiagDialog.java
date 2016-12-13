@@ -13,7 +13,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import javax.swing.*;
 import java.util.prefs.Preferences;
-import org.openide.util.Exceptions;
 
 import org.openide.util.NbPreferences;
 import org.slf4j.LoggerFactory;
@@ -53,7 +52,7 @@ public class MSDiagDialog extends DefaultDialog {
         try {
             setHelpURL(new File(".").getCanonicalPath() + File.separatorChar + "Documentation" + File.separatorChar + "Proline_UserGuide_1.4RC1.docx.html#id.28h4qwu");
         } catch (IOException ex) {
-            Exceptions.printStackTrace(ex);
+            ;
         }
 
         setButtonVisible(BUTTON_LOAD, true);

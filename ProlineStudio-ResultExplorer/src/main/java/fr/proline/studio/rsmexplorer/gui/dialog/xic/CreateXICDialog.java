@@ -45,7 +45,6 @@ import javax.swing.JFileChooser;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
-import org.openide.util.Exceptions;
 import org.openide.util.NbPreferences;
 import org.slf4j.LoggerFactory;
 
@@ -97,7 +96,7 @@ public class CreateXICDialog extends DefaultDialog {
        try {
             setHelpURL(new File(".").getCanonicalPath() + File.separatorChar + "Documentation" + File.separatorChar + "Proline_UserGuide_1.4RC1.docx.html#id.2dlolyb");
         } catch (IOException ex) {
-            Exceptions.printStackTrace(ex);
+            ;
         }
 
         setSize(1600, 768);

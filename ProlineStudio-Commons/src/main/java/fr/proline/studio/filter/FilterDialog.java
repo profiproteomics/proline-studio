@@ -6,7 +6,6 @@ import java.awt.Window;
 import java.io.File;
 import java.io.IOException;
 import javax.swing.*;
-import org.openide.util.Exceptions;
 
 /**
  * Dialog to set the filters
@@ -36,7 +35,7 @@ public class FilterDialog extends DefaultDialog {
         try {
             setHelpURL(new File(".").getCanonicalPath() + File.separatorChar + "Documentation" + File.separatorChar + "Proline_UserGuide_1.4RC1.docx.html#id.2u6wntf");
         } catch (IOException ex) {
-            Exceptions.printStackTrace(ex);
+            ;
         }
 
         setInternalComponent(createFilterPanel());

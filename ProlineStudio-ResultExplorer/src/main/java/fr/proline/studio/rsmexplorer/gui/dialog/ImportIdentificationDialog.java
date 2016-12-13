@@ -32,7 +32,6 @@ import java.util.List;
 import java.util.prefs.Preferences;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import org.openide.util.Exceptions;
 import org.openide.util.NbPreferences;
 import org.slf4j.LoggerFactory;
 
@@ -120,7 +119,7 @@ public class ImportIdentificationDialog extends DefaultDialog {
         try {
             setHelpURL(new File(".").getCanonicalPath() + File.separatorChar + "Documentation" + File.separatorChar + "Proline_UserGuide_1.4RC1.docx.html#id.147n2zr");
         } catch (IOException ex) {
-            Exceptions.printStackTrace(ex);
+            ;
         }
         
         setButtonVisible(BUTTON_LOAD, true);

@@ -18,7 +18,6 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.Set;
 import javax.swing.*;
-import org.openide.util.Exceptions;
 import org.openide.windows.TopComponent;
 import org.openide.windows.WindowManager;
 
@@ -47,7 +46,7 @@ public class ServerConnectionDialog extends ConnectionDialog {
         try {
             setHelpURL(new File(".").getCanonicalPath() + File.separatorChar + "Documentation" + File.separatorChar + "Proline_UserGuide_1.4RC1.docx.html#id.1pxezwc");
         } catch (IOException ex) {
-            Exceptions.printStackTrace(ex);
+            ;
         }
 
         setButtonVisible(BUTTON_DEFAULT, true);

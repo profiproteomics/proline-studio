@@ -6,7 +6,6 @@ import java.awt.Dialog;
 import java.awt.Window;
 import java.io.File;
 import java.io.IOException;
-import org.openide.util.Exceptions;
 
 /**
  * Dialog to add an aggregate
@@ -39,7 +38,7 @@ public class AddAggregateDialog extends DefaultDialog {
         try {
             setHelpURL(new File(".").getCanonicalPath()+File.separatorChar+"Documentation"+File.separatorChar+"Proline_UserGuide_1.4RC1.docx.html#id.2p2csry");
         } catch (IOException ex) {
-            Exceptions.printStackTrace(ex);
+            ;
         }
 
         setButtonVisible(BUTTON_DEFAULT, true);

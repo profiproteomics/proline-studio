@@ -10,9 +10,7 @@ import java.awt.Window;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import javax.swing.JScrollPane;
 import javax.swing.tree.TreePath;
-import org.openide.util.Exceptions;
 
 /**
  *
@@ -41,7 +39,7 @@ public class SpectralCountDialog extends DefaultDialog {
         try {
             setHelpURL(new File(".").getCanonicalPath() + File.separatorChar + "Documentation" + File.separatorChar + "Proline_UserGuide_1.4RC1.docx.html#id.1egqt2p");
         } catch (IOException ex) {
-            Exceptions.printStackTrace(ex);
+            ;
         }
 
         setButtonName(DefaultDialog.BUTTON_OK, "Next");

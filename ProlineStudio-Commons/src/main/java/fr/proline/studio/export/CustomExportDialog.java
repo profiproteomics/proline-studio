@@ -37,7 +37,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import fr.proline.studio.gui.CollapsablePanel;
 import fr.proline.studio.gui.CollapseListener;
-import org.openide.util.Exceptions;
 
 
 /**
@@ -139,7 +138,7 @@ public class CustomExportDialog extends DefaultDialog implements CollapseListene
         try {
             setHelpURL(new File(".").getCanonicalPath()+File.separatorChar+"Documentation"+File.separatorChar+"Proline_UserGuide_1.4RC1.docx.html#id.37m2jsg");
         } catch (IOException ex) {
-            Exceptions.printStackTrace(ex);
+            ;
         }
 
 

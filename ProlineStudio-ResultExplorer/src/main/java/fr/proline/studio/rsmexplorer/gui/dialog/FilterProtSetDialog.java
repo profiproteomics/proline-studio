@@ -17,11 +17,13 @@ import java.awt.Window;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.prefs.Preferences;
 import javax.swing.JFileChooser;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import org.openide.util.Exceptions;
 import org.openide.util.NbPreferences;
 import org.slf4j.LoggerFactory;
 
@@ -50,7 +52,11 @@ public class FilterProtSetDialog extends DefaultDialog implements ComponentListe
         super(parent, Dialog.ModalityType.APPLICATION_MODAL);
         setTitle("ProteinSet Filtering");
 
-        setHelpURL("http://biodev.extra.cea.fr/docs/proline/doku.php?id=prolineconcepts:proteinsetsfilteringandvalidation");
+        try {
+            setHelpURL(new File(".").getCanonicalPath() + File.separatorChar + "Documentation" + File.separatorChar + "Proline_UserGuide_1.4RC1.docx.html#id.26in1rg");
+        } catch (IOException ex) {
+            Exceptions.printStackTrace(ex);
+        }
 
         setButtonVisible(BUTTON_LOAD, true);
         setButtonVisible(BUTTON_SAVE, true);

@@ -3,9 +3,12 @@ package fr.proline.studio.rsmexplorer.gui.dialog;
 import fr.proline.studio.dpm.data.ChangeTypicalRule;
 import fr.proline.studio.gui.DefaultDialog;
 import java.awt.*;
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
+import org.openide.util.Exceptions;
 import org.openide.util.NbPreferences;
 
 /**
@@ -13,7 +16,7 @@ import org.openide.util.NbPreferences;
  * @author JM235353
  */
 public class ChangeTypicalProteinDialog extends DefaultDialog {
-    
+
     private static ChangeTypicalProteinDialog m_singletonDialog = null;
     private ChangeTypicalProteinPanel changePanel = null;
 
@@ -24,13 +27,17 @@ public class ChangeTypicalProteinDialog extends DefaultDialog {
 
         return m_singletonDialog;
     }
-    
+
     public ChangeTypicalProteinDialog(Window parent) {
         super(parent, Dialog.ModalityType.APPLICATION_MODAL);
 
         setTitle("Change Typical Protein");
-        
-        setHelpURL("http://biodev.extra.cea.fr/docs/proline/doku.php?id=how_to:studio:changetypicalprot");
+
+        try {
+            setHelpURL(new File(".").getCanonicalPath() + File.separatorChar + "Documentation" + File.separatorChar + "Proline_UserGuide_1.4RC1.docx.html#id.111kx3o");
+        } catch (IOException ex) {
+            Exceptions.printStackTrace(ex);
+        }
 
         setStatusVisible(false);
 
@@ -38,9 +45,9 @@ public class ChangeTypicalProteinDialog extends DefaultDialog {
 
         restoreInitialParameters();
     }
-    
+
     private JPanel createInternalPanel() {
-        
+
         JPanel internalPanel = new JPanel(new GridBagLayout());
 
         GridBagConstraints c = new GridBagConstraints();
@@ -54,24 +61,20 @@ public class ChangeTypicalProteinDialog extends DefaultDialog {
         helpTxt.setRows(2);
         helpTxt.setForeground(Color.gray);
         internalPanel.add(helpTxt, c);
-        
+
         changePanel = new ChangeTypicalProteinPanel();
         c.gridy++;
-        c.gridwidth=2;
+        c.gridwidth = 2;
         internalPanel.add(changePanel, c);
-        
+
         return internalPanel;
     }
-    
-    
-    
+
     public List<ChangeTypicalRule> getChangeTypicalRules() {
         return changePanel.getChangeTypicalRules();
 
     }
-        
-     
-    
+
     @Override
     protected boolean okCalled() {
 
@@ -88,5 +91,5 @@ public class ChangeTypicalProteinDialog extends DefaultDialog {
         changePanel.restoreInitialParameters();
 
     }
-    
+
 }

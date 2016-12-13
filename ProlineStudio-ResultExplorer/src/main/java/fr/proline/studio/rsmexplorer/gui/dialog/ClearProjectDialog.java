@@ -40,7 +40,7 @@ public class ClearProjectDialog extends DefaultDialog {
 
         setTitle("Clean up Project "+m_project.getName());
 
-        setHelpURL("http://biodev.extra.cea.fr/docs/proline/doku.php?id=how_to:studio:clearproject");
+        //setHelpURL("http://biodev.extra.cea.fr/docs/proline/doku.php?id=how_to:studio:clearproject");
 
         setButtonVisible(BUTTON_DEFAULT, false);
         

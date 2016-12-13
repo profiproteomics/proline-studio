@@ -13,9 +13,11 @@ import fr.proline.studio.settings.SettingsUtils;
 import java.awt.Dialog;
 import java.awt.Window;
 import java.io.File;
+import java.io.IOException;
 import java.util.Map;
 import java.util.prefs.Preferences;
 import javax.swing.JFileChooser;
+import org.openide.util.Exceptions;
 import org.openide.util.NbPreferences;
 import org.slf4j.LoggerFactory;
 
@@ -45,7 +47,11 @@ public class QuantProfileXICDialog extends DefaultDialog {
 
         setTitle("Refine Proteins Sets Abundances");
 
-        setHelpURL("http://biodev.extra.cea.fr/docs/proline/doku.php?id=how_to:studio:xicprofilizer");
+        try {
+            setHelpURL(new File(".").getCanonicalPath() + File.separatorChar + "Documentation" + File.separatorChar + "Proline_UserGuide_1.4RC1.docx.html#id.2dlolyb");
+        } catch (IOException ex) {
+            Exceptions.printStackTrace(ex);
+        }
 
         setButtonVisible(BUTTON_LOAD, true);
         setButtonVisible(BUTTON_SAVE, true);

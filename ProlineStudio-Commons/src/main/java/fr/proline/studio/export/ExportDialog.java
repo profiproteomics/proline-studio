@@ -18,7 +18,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.prefs.Preferences;
 
@@ -31,6 +30,7 @@ import org.openide.util.NbPreferences;
 import org.slf4j.LoggerFactory;
 
 import org.jfree.graphics2d.svg.*;
+import org.openide.util.Exceptions;
 import org.openide.windows.WindowManager;
 
 /**
@@ -124,10 +124,14 @@ public class ExportDialog extends DefaultDialog {
         super(parent, Dialog.ModalityType.APPLICATION_MODAL);
         m_showExportAllPSMsChB = showExportAllPSMsOption;
         m_exportType = type;
-
+        
         setTitle("Export");
-
-        setHelpURL("http://biodev.extra.cea.fr/docs/proline/doku.php?id=how_to:studio:exportdata");
+        
+        try {
+            setHelpURL(new File(".").getCanonicalPath()+File.separatorChar+"Documentation"+File.separatorChar+"Proline_UserGuide_1.4RC1.docx.html#id.37m2jsg");
+        } catch (IOException ex) {
+            Exceptions.printStackTrace(ex);
+        }
 
         String defaultExportPath;
         Preferences preferences = NbPreferences.root();

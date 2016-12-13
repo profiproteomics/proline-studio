@@ -2,6 +2,9 @@ package fr.proline.studio.rsmexplorer.gui.dialog;
 
 import fr.proline.studio.gui.DefaultDialog;
 import java.awt.*;
+import java.io.File;
+import java.io.IOException;
+import org.openide.util.Exceptions;
 
 /**
  *
@@ -34,7 +37,11 @@ public class ImportIdentificationDialogUpdated extends DefaultDialog implements 
 
         setTitle("Import Search Results");
 
-        setHelpURL("http://biodev.extra.cea.fr/docs/proline/doku.php?id=how_to:studio:importmascot");
+        try {
+            setHelpURL(new File(".").getCanonicalPath() + File.separatorChar + "Documentation" + File.separatorChar + "Proline_UserGuide_1.4RC1.docx.html#id.147n2zr");
+        } catch (IOException ex) {
+            Exceptions.printStackTrace(ex);
+        }
 
         setButtonVisible(BUTTON_LOAD, true);
         setButtonVisible(BUTTON_SAVE, true);

@@ -5,7 +5,10 @@ import fr.proline.studio.utils.IconManager;
 import java.awt.Component;
 import java.awt.Dialog;
 import java.awt.Window;
+import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
+import org.openide.util.Exceptions;
 
 /**
  * Wizard used to set Pride properties using MS and PRIDE ontologies
@@ -18,26 +21,29 @@ public class ExportPrideDialog extends DefaultDialog {
     private static final int STEP_PANEL_PROTOCOL_DEF = 1;
     private static final int STEP_PANEL_SAMPLE_DEF = 2;
     private static final int STEP_PANEL_FILE_CHOOSER = 3;
-    
-    private int m_step = STEP_PANEL_EXPERIMENT_DEF;
-    
-    private DefaultDialog.ProgressTask m_task = null;
 
+    private int m_step = STEP_PANEL_EXPERIMENT_DEF;
+
+    private DefaultDialog.ProgressTask m_task = null;
 
     public ExportPrideDialog(Window parent) {
         super(parent, Dialog.ModalityType.APPLICATION_MODAL);
 
         setTitle("Export to PRIDE format Wizard");
         setResizable(true);
-    
-        setHelpURL("http://biodev.extra.cea.fr/docs/proline/doku.php?id=how_to:studio:exportdata");
+
+        try {
+            setHelpURL(new File(".").getCanonicalPath() + File.separatorChar + "Documentation" + File.separatorChar + "Proline_UserGuide_1.4RC1.docx.html#id.37m2jsg");
+        } catch (IOException ex) {
+            Exceptions.printStackTrace(ex);
+        }
+
         setButtonName(DefaultDialog.BUTTON_OK, "Next");
         setButtonIcon(DefaultDialog.BUTTON_OK, IconManager.getIcon(IconManager.IconType.ARROW));
-        
+
         //CREATE FIRST PANEL     
         setInternalComponent(PrideExpDescPanel.getPrideExpDescPanel());
     }
-    
 
     public void setTask(DefaultDialog.ProgressTask task) {
         m_task = task;
@@ -62,37 +68,36 @@ public class ExportPrideDialog extends DefaultDialog {
             if (!checkWizardParams(PrideExpDescPanel.getPrideExpDescPanel())) {
                 return false;
             }
-            
+
             replaceInternaleComponent(PrideProtocolDescPanel.getPrideProtocolDescPanel());
             setButtonVisible(BUTTON_BACK, true);
             revalidate();
-            repaint();          
-            
+            repaint();
+
             m_step = STEP_PANEL_PROTOCOL_DEF;
-            
+
             return false;
 
         } else if (m_step == STEP_PANEL_PROTOCOL_DEF) { // m_step == STEP_PANEL_PROTOCOL_DEF)
 
-
             if (!checkWizardParams(PrideProtocolDescPanel.getPrideProtocolDescPanel())) {
                 return false;
             }
-            
+
             replaceInternaleComponent(PrideSampleDescPanel.getPrideSampleDescPanel());
             revalidate();
-            repaint();          
-            
+            repaint();
+
             m_step = STEP_PANEL_SAMPLE_DEF;
             return false;
-            
-        } else if(m_step == STEP_PANEL_SAMPLE_DEF) {
-            
+
+        } else if (m_step == STEP_PANEL_SAMPLE_DEF) {
+
             // check values TODO
             if (!checkWizardParams(PrideSampleDescPanel.getPrideSampleDescPanel())) {
                 return false;
             }
-            
+
             // change to ok button before call to last panel
             setButtonName(DefaultDialog.BUTTON_OK, "OK");
             setButtonIcon(DefaultDialog.BUTTON_OK, IconManager.getIcon(IconManager.IconType.OK));
@@ -102,13 +107,13 @@ public class ExportPrideDialog extends DefaultDialog {
             repaint();
             m_step = STEP_PANEL_FILE_CHOOSER;
             return false;
-            
+
         } else { //STEP_PANEL_FILE_CHOOSER
-                    // check values TODO
+            // check values TODO
             if (!checkWizardParams(PrideFileSelectionPanel.getPrideFileSelectionPanel())) {
                 return false;
             }
-                
+
             startTask(m_task);
             return false;
         }
@@ -117,28 +122,26 @@ public class ExportPrideDialog extends DefaultDialog {
 
     @Override
     protected boolean backCalled() {
-     
-        if (m_step == STEP_PANEL_PROTOCOL_DEF) { 
+
+        if (m_step == STEP_PANEL_PROTOCOL_DEF) {
 
             replaceInternaleComponent(PrideExpDescPanel.getPrideExpDescPanel());
             setButtonVisible(BUTTON_BACK, false);
-            
 
             revalidate();
             repaint();
-            
+
             m_step = STEP_PANEL_EXPERIMENT_DEF;
             return true;
-            
-        } else if(m_step == STEP_PANEL_SAMPLE_DEF) {
-            
+
+        } else if (m_step == STEP_PANEL_SAMPLE_DEF) {
 
             replaceInternaleComponent(PrideProtocolDescPanel.getPrideProtocolDescPanel());
             revalidate();
-            repaint();            
+            repaint();
             m_step = STEP_PANEL_PROTOCOL_DEF;
             return true;
-            
+
         } else { //STEP_PANEL_FILE_CHOOSER
             setButtonName(DefaultDialog.BUTTON_OK, "Next");
             setButtonIcon(DefaultDialog.BUTTON_OK, IconManager.getIcon(IconManager.IconType.ARROW));
@@ -149,39 +152,37 @@ public class ExportPrideDialog extends DefaultDialog {
             m_step = STEP_PANEL_SAMPLE_DEF;
             return true;
         }
-        
+
     }
-    
-    
-   
+
     //TODO DEFINE ParameterList for PrideExpDescPanel ExperimentParams       
-    private boolean checkWizardParams( PrideWizardPanel panel){
-        Component c  = panel.checkExportPrideParams();
-   
-        if(c != null ){
+    private boolean checkWizardParams(PrideWizardPanel panel) {
+        Component c = panel.checkExportPrideParams();
+
+        if (c != null) {
             setStatus(true, panel.getErrorMessage());
             highlight(c);
             return false;
         }
         return true;
     }
-   
+
     @Override
     protected boolean cancelCalled() {
         return true;
     }
 
-    public String getFileName(){
-        return  PrideFileSelectionPanel.getPrideFileSelectionPanel().getFileName();
+    public String getFileName() {
+        return PrideFileSelectionPanel.getPrideFileSelectionPanel().getFileName();
     }
 
-    public HashMap<String,Object> getExportParams(){
-        HashMap<String,Object> params = new  HashMap<>();
+    public HashMap<String, Object> getExportParams() {
+        HashMap<String, Object> params = new HashMap<>();
         params.putAll(PrideProtocolDescPanel.getPrideProtocolDescPanel().getExportPrideParams());
         params.putAll(PrideExpDescPanel.getPrideExpDescPanel().getExportPrideParams());
         params.putAll(PrideSampleDescPanel.getPrideSampleDescPanel().getExportPrideParams());
-        
-        return  params;
+
+        return params;
     }
 
 }

@@ -15,6 +15,7 @@ import fr.proline.studio.table.DecoratedTable;
 import java.awt.*;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -77,7 +78,11 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
         setMinimumSize(new Dimension(1024, 360));
         setResizable(true);
 
-        setHelpURL("https://bioproj.extra.cea.fr/docs/proline/doku.php?id=how_to:studio:preferences");
+        try {
+            setHelpURL(new File(".").getCanonicalPath() + File.separatorChar + "Documentation" + File.separatorChar + "Proline_UserGuide_1.4RC1.docx.html#h.eb8nfjv41vkz");
+        } catch (IOException ex) {
+            Exceptions.printStackTrace(ex);
+        }
 
         setButtonVisible(BUTTON_CANCEL, true);
         setButtonName(BUTTON_OK, "OK");
@@ -99,22 +104,21 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
         m_jmsParameterList.add(serviceRequestQueueName);
 
         /*
-        StringParameter prolineServiceName = new StringParameter(JMSConnectionManager.PROLINE_SERVICE_NAME_KEY, "Proline Service Name", JTextField.class, JMSConnectionManager.DEFAULT_PROLINE_SERVICE_NAME_VALUE, 5, null);
-        m_jmsParameterList.add(prolineServiceName);
+         StringParameter prolineServiceName = new StringParameter(JMSConnectionManager.PROLINE_SERVICE_NAME_KEY, "Proline Service Name", JTextField.class, JMSConnectionManager.DEFAULT_PROLINE_SERVICE_NAME_VALUE, 5, null);
+         m_jmsParameterList.add(prolineServiceName);
 
-        StringParameter prolineServiceVersion = new StringParameter(JMSConnectionManager.PROLINE_SERVICE_VERSION_KEY, "Proline Service Version", JTextField.class, JMSConnectionManager.DEFAULT_PROLINE_SERVICE_VERSION_VALUE, 5, null);
-        m_jmsParameterList.add(prolineServiceVersion);
+         StringParameter prolineServiceVersion = new StringParameter(JMSConnectionManager.PROLINE_SERVICE_VERSION_KEY, "Proline Service Version", JTextField.class, JMSConnectionManager.DEFAULT_PROLINE_SERVICE_VERSION_VALUE, 5, null);
+         m_jmsParameterList.add(prolineServiceVersion);
 
-        StringParameter jmsHost = new StringParameter(JMSConnectionManager.JMS_SERVER_HOST_PARAM_KEY, "JMS Server Host", JTextField.class, JMSConnectionManager.DEFAULT_JMS_SERVER_HOST_PARAM_VALUE, 5, null);
-        m_jmsParameterList.add(jmsHost);
+         StringParameter jmsHost = new StringParameter(JMSConnectionManager.JMS_SERVER_HOST_PARAM_KEY, "JMS Server Host", JTextField.class, JMSConnectionManager.DEFAULT_JMS_SERVER_HOST_PARAM_VALUE, 5, null);
+         m_jmsParameterList.add(jmsHost);
 
-        StringParameter serverPort = new StringParameter(JMSConnectionManager.JMS_SERVER_PORT_PARAM_KEY, "JMS Server Port", JTextField.class, JMSConnectionManager.DEFAULT_JMS_SERVER_PORT_PARAM_VALUE, 5, null);
-        m_jmsParameterList.add(serverPort);
+         StringParameter serverPort = new StringParameter(JMSConnectionManager.JMS_SERVER_PORT_PARAM_KEY, "JMS Server Port", JTextField.class, JMSConnectionManager.DEFAULT_JMS_SERVER_PORT_PARAM_VALUE, 5, null);
+         m_jmsParameterList.add(serverPort);
 
-        StringParameter hornetInputStream = new StringParameter(JMSConnectionManager.HORNET_Q_INPUT_STREAM_KEY, "HornetQ Input Stream", JTextField.class, JMSConnectionManager.DEFAULT_HORNET_Q_INPUT_STREAM_VALUE, 5, null);
-        m_jmsParameterList.add(hornetInputStream);
-        */
-
+         StringParameter hornetInputStream = new StringParameter(JMSConnectionManager.HORNET_Q_INPUT_STREAM_KEY, "HornetQ Input Stream", JTextField.class, JMSConnectionManager.DEFAULT_HORNET_Q_INPUT_STREAM_VALUE, 5, null);
+         m_jmsParameterList.add(hornetInputStream);
+         */
         m_jmsParameterList.loadParameters(m_preferences);
 
         return m_jmsParameterList;
@@ -175,8 +179,6 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
             m_wizardParameterList.add(outputPath);
 
             m_wizardParameterList.loadParameters(m_preferences);
-            
-            
 
             AbstractLinkedParameters linkedParameters = new AbstractLinkedParameters(m_wizardParameterList) {
 
@@ -193,7 +195,6 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
 
             int m_selection = Integer.parseInt(converterOutputParameter.getStringValue());
             linkedParameters.valueChanged((String) associatedTable[m_selection], objectTable[m_selection]);
-                    
 
         } catch (Exception ex) {
             PrintWriter pw = null;

@@ -171,7 +171,9 @@ public class XICRunNode extends AbstractNode {
                     runInfoData.setMessage("<html><font color='#FF0000'>Multiple Raw Files found, select one</font></html>");
                 }
                 
-                tableModel.fireTableDataChanged();
+                if (tableModel != null) {
+                    tableModel.fireTableDataChanged();
+                }
             }
         };
 

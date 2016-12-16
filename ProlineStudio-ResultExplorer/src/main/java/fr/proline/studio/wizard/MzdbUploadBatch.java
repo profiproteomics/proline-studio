@@ -5,8 +5,6 @@
  */
 package fr.proline.studio.wizard;
 
-import fr.proline.studio.dpm.serverfilesystem.RootInfo;
-import fr.proline.studio.dpm.serverfilesystem.ServerFileSystemView;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.concurrent.Executors;

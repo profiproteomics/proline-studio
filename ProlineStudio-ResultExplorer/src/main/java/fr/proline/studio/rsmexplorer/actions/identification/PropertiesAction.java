@@ -14,7 +14,6 @@ import java.util.*;
 import fr.proline.studio.pattern.WindowBox;
 import fr.proline.studio.pattern.WindowBoxFactory;
 import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
-import fr.proline.studio.rsmexplorer.PropertiesTopComponent;
 import fr.proline.studio.rsmexplorer.gui.GenericPanel;
 import fr.proline.studio.rsmexplorer.gui.model.properties.AbstractPropertiesTableModel;
 import fr.proline.studio.rsmexplorer.gui.model.properties.XICPropertiesTableModel;
@@ -66,7 +65,7 @@ public class PropertiesAction extends AbstractRSMAction {
         // new Properties window
         AbstractPropertiesTableModel model = null;
 
-        WindowBox windowBox = WindowBoxFactory.getGenericWindowBox(name, "Properties", IconManager.IconType.DOCUMENT_LIST, true);
+        WindowBox windowBox = WindowBoxFactory.getGenericWindowBox(name, "Properties test", IconManager.IconType.DOCUMENT_LIST, true);
         model = isIdentificationTree() ? new IdentificationPropertiesTableModel() : new XICPropertiesTableModel();
         windowBox.setEntryData(-1l, model);
         DataBoxViewerTopComponent win2 = new DataBoxViewerTopComponent(windowBox);

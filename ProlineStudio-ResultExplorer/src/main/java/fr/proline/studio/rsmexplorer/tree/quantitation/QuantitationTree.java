@@ -34,6 +34,9 @@ import fr.proline.studio.rsmexplorer.tree.xic.XICBiologicalSampleNode;
 import fr.proline.studio.rsmexplorer.tree.xic.XICDesignTree;
 import fr.proline.studio.rsmexplorer.tree.xic.XICRunNode;
 import java.awt.event.MouseEvent;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.util.*;
 import javax.swing.*;
 import javax.swing.event.TreeExpansionEvent;
@@ -41,9 +44,11 @@ import javax.swing.event.TreeWillExpandListener;
 import javax.swing.tree.ExpandVetoException;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
+import org.openide.util.Exceptions;
 
 /**
  * Quantitation tree (Spectral count + XIC dataset)
+ *
  * @author JM235353
  */
 public class QuantitationTree extends AbstractTree implements TreeWillExpandListener {
@@ -124,12 +129,10 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
 
         int nbNodes = selectedNodes.length;
 
-
         if ((nbNodes == 0)) {
             return;
         }
-        
-        
+
         AbstractNode n = selectedNodes[0];
         boolean isRootPopup = n.isRoot();
 
@@ -153,53 +156,53 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
                 // do not show a popup on a node which is changing
                 return;
             }
-            if (selectedNodes[i] instanceof XICBiologicalGroupNode || selectedNodes[i] instanceof XICBiologicalSampleNode || selectedNodes[i] instanceof XICRunNode ){
+            if (selectedNodes[i] instanceof XICBiologicalGroupNode || selectedNodes[i] instanceof XICBiologicalSampleNode || selectedNodes[i] instanceof XICRunNode) {
                 // do not show  a popup on biological information
-                return ;
+                return;
             }
-            if (selectedNodes[i] instanceof XICBiologicalSampleAnalysisNode){
+            if (selectedNodes[i] instanceof XICBiologicalSampleAnalysisNode) {
                 xicSampleAnalysisNodeSelected = true;
             }
         }
         JPopupMenu popup;
         ArrayList<AbstractRSMAction> actions;
 
-        if ((nbNodes > 1) && !xicSampleAnalysisNodeSelected){
+        if ((nbNodes > 1) && !xicSampleAnalysisNodeSelected) {
             if (m_multiPopup == null) {
                 boolean isJSMDefined = JMSConnectionManager.getJMSConnectionManager().isJMSDefined();
                 // create the actions
                 m_multiActions = new ArrayList<>(4);  // <--- get in sync
-                
+
                 if (isJSMDefined) {
                     ExportDatasetJMSAction exportDatasetAction = new ExportDatasetJMSAction(AbstractTree.TreeType.TREE_QUANTITATION, true);
                     m_multiActions.add(exportDatasetAction);
                     RetrieveBioSeqJMSAction retrieveBioSeqAction = new RetrieveBioSeqJMSAction(AbstractTree.TreeType.TREE_QUANTITATION);
                     m_multiActions.add(retrieveBioSeqAction);
-                }else{
+                } else {
                     ExportDatasetAction exportDatasetAction = new ExportDatasetAction(AbstractTree.TreeType.TREE_QUANTITATION, true);
                     m_multiActions.add(exportDatasetAction);
-                }   
-                
+                }
+
                 m_multiActions.add(null);  // separator
-                
+
                 PropertiesAction propertiesAction = new PropertiesAction(AbstractTree.TreeType.TREE_QUANTITATION);
                 m_multiActions.add(propertiesAction);
-                
+
                 // add actions to popup
             }
             m_multiPopup = new JPopupMenu();
-                for (int i = 0; i < m_multiActions.size(); i++) {
-                    AbstractRSMAction action = m_multiActions.get(i);
-                    if (action == null) {
-                        m_multiPopup.addSeparator();
-                    } else {
-                        m_multiPopup.add(action.getPopupPresenter());
-                    }
+            for (int i = 0; i < m_multiActions.size(); i++) {
+                AbstractRSMAction action = m_multiActions.get(i);
+                if (action == null) {
+                    m_multiPopup.addSeparator();
+                } else {
+                    m_multiPopup.add(action.getPopupPresenter());
                 }
+            }
             popup = m_multiPopup;
             actions = m_multiActions;
-        }else{
-        
+        } else {
+
             if (isRootPopup) {
                 if (m_rootPopup == null) {
                     // create the actions
@@ -240,9 +243,9 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
 
                 popup = m_trashPopup;
                 actions = m_trashActions;
-            } else if (xicSampleAnalysisNodeSelected){
-            // creation of the popup if needed
-                if (m_identPopup == null){
+            } else if (xicSampleAnalysisNodeSelected) {
+                // creation of the popup if needed
+                if (m_identPopup == null) {
 
                     m_identActions = new ArrayList<>(6);  // <--- get in sync
 
@@ -258,7 +261,6 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
 
                     ExportAction exportAction = new ExportAction(AbstractTree.TreeType.TREE_QUANTITATION, isJMSDefined);
                     m_identActions.add(exportAction);
-
 
                     m_identActions.add(null);  // separator
 
@@ -278,7 +280,7 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
                 }
                 popup = m_identPopup;
                 actions = m_identActions;
-            }else {
+            } else {
                 if (m_mainPopup == null) {
                     // create the actions
                     m_mainActions = new ArrayList<>(16);  // <--- get in sync
@@ -321,7 +323,7 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
                         m_mainActions.add(generateSpectrumMatchesAction);
                     }
 
-                     m_mainActions.add(null);  // separator
+                    m_mainActions.add(null);  // separator
 
                     ExportAction exportAction = new ExportAction(AbstractTree.TreeType.TREE_QUANTITATION, isJMSDefined);
                     m_mainActions.add(exportAction);
@@ -330,8 +332,6 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
 
                     PropertiesAction propertiesAction = new PropertiesAction(AbstractTree.TreeType.TREE_QUANTITATION);
                     m_mainActions.add(propertiesAction);
-
-
 
                     // add actions to popup
                     m_mainPopup = new JPopupMenu();
@@ -351,8 +351,6 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
             }
         }
 
-
-
         // update of the enable/disable state
         for (AbstractRSMAction action : actions) {
             if (action == null) {
@@ -365,7 +363,6 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
         popup.show((JComponent) e.getSource(), e.getX(), e.getY());
     }
 
-    
     public static void reinitMainPopup() {
         Iterator<ProjectQuantitationData> it = m_treeMap.keySet().iterator();
         while (it.hasNext()) {
@@ -373,7 +370,7 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
             tree.m_mainPopup = null;
         }
     }
-    
+
     @Override
     public void mouseClicked(MouseEvent e) {
     }
@@ -478,147 +475,141 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
         }
         return false;
     }
-    
+
     // popUpMenu: delete (move to the quantitation trash)
     public void moveToTrash(AbstractNode[] selectedNodes) {
 
-        int nbSelectedNode = selectedNodes.length;
-        if (nbSelectedNode == 0) {
-            return; // should not happen
-        }
 
+            int nbSelectedNode = selectedNodes.length;
+            if (nbSelectedNode == 0) {
+                return; // should not happen
+            }
 
         // we must keep only parent nodes
-        // if a child and its parent are selected, we keep only the parent
-        ArrayList<AbstractNode> keptNodes = new ArrayList<>(nbSelectedNode);
-        keptNodes.add(selectedNodes[0]);
-        mainloop:
-        for (int i = 1; i < nbSelectedNode; i++) {
-            AbstractNode curNode = selectedNodes[i];
+            // if a child and its parent are selected, we keep only the parent
+            ArrayList<AbstractNode> keptNodes = new ArrayList<>(nbSelectedNode);
+            keptNodes.add(selectedNodes[0]);
+            mainloop:
+            for (int i = 1; i < nbSelectedNode; i++) {
+                AbstractNode curNode = selectedNodes[i];
 
-            // look for an ancestor
-            int nbKeptNodes = keptNodes.size();
-            for (int j = 0; j < nbKeptNodes; j++) {
+                // look for an ancestor
+                int nbKeptNodes = keptNodes.size();
+                for (int j = 0; j < nbKeptNodes; j++) {
 
-                AbstractNode curKeptNode = keptNodes.get(j);
-                if (curNode.isNodeAncestor(curKeptNode)) {
-                    // ancestor is already in kept node
-                    continue mainloop;
+                    AbstractNode curKeptNode = keptNodes.get(j);
+                    if (curNode.isNodeAncestor(curKeptNode)) {
+                        // ancestor is already in kept node
+                        continue mainloop;
+                    }
                 }
-            }
-            // look for children and remove them
-            for (int j = nbKeptNodes - 1; j >= 0; j--) {
+                // look for children and remove them
+                for (int j = nbKeptNodes - 1; j >= 0; j--) {
 
-                AbstractNode curKeptNode = keptNodes.get(j);
-                if (curKeptNode.isNodeAncestor(curNode)) {
-                    // we have found a children
-                    keptNodes.remove(j);
+                    AbstractNode curKeptNode = keptNodes.get(j);
+                    if (curKeptNode.isNodeAncestor(curNode)) {
+                        // we have found a children
+                        keptNodes.remove(j);
+                    }
                 }
+                keptNodes.add(curNode);
+
             }
-            keptNodes.add(curNode);
 
-        }
-
-
-
-        // search Project Node
-        QuantitationProjectNode projectNode = null;
-        AbstractNode parentNodeCur = (AbstractNode) keptNodes.get(0).getParent();
-        while (parentNodeCur != null) {
-            if (parentNodeCur instanceof QuantitationProjectNode) {
-                projectNode = (QuantitationProjectNode) parentNodeCur;
-                break;
-            }
-            parentNodeCur = (AbstractNode) parentNodeCur.getParent();
-        }
-
-        if (projectNode == null) {
-            return; // should not happen
-        }
-
-        // search trash (should be at the end)
-        DataSetNode trash = null;
-        int nbChildren = projectNode.getChildCount();
-        for (int i = nbChildren - 1; i >= 0; i--) {
-            AbstractNode childNode = (AbstractNode) projectNode.getChildAt(i);
-            if (childNode instanceof DataSetNode) {
-                DataSetNode datasetNode = (DataSetNode) childNode;
-                if (datasetNode.isTrash()) {
-                    trash = datasetNode;
+            // search Project Node
+            QuantitationProjectNode projectNode = null;
+            AbstractNode parentNodeCur = (AbstractNode) keptNodes.get(0).getParent();
+            while (parentNodeCur != null) {
+                if (parentNodeCur instanceof QuantitationProjectNode) {
+                    projectNode = (QuantitationProjectNode) parentNodeCur;
                     break;
                 }
-            }
-        }
-        if (trash == null) {
-            return; // should not happen
-        }
-
-        // move node to Trash
-        LinkedHashSet<AbstractNode> allParentNodeModified = new LinkedHashSet<>();
-
-
-        int nbKeptNodes = keptNodes.size();
-        for (int i = 0; i < nbKeptNodes; i++) {
-            AbstractNode nodeCur = keptNodes.get(i);
-            allParentNodeModified.add((AbstractNode) nodeCur.getParent());
-            m_model.removeNodeFromParent(nodeCur);
-            m_model.insertNodeInto(nodeCur, trash, trash.getChildCount());
-        }
-
-        // Trash must be added at the end : because the add of dataset must be done
-        // after children have been removed from their parents
-        allParentNodeModified.add(trash);
-
-        LinkedHashMap<Object, ArrayList<DDataset>> databaseObjectsToModify = new LinkedHashMap<>();
-
-        Iterator<AbstractNode> it = allParentNodeModified.iterator();
-        while (it.hasNext()) {
-
-            AbstractNode parentNode = it.next();
-
-            // get Parent Database Object
-            Object databaseParentObject = null;
-            AbstractNode.NodeTypes type = parentNode.getType();
-            if (type == AbstractNode.NodeTypes.DATA_SET) {
-                DataSetNode datasetNode = ((DataSetNode) parentNode);
-                databaseParentObject = datasetNode.getDataset();
-                //nodeToBeChanged.add(datasetNode);
-            } else if (type == AbstractNode.NodeTypes.PROJECT_QUANTITATION) {
-                QuantitationProjectNode projectNodeS = ((QuantitationProjectNode) parentNode);
-                databaseParentObject = projectNodeS.getProject();
+                parentNodeCur = (AbstractNode) parentNodeCur.getParent();
             }
 
+            if (projectNode == null) {
+                return; // should not happen
+            }
 
-
-            // get new Dataset children
-            int nb = parentNode.getChildCount();
-            ArrayList<DDataset> datasetList = new ArrayList<>(nb);
-            for (int i = 0; i < nb; i++) {
-                // we are sure that it is a Dataset
-                AbstractNode childNode = ((AbstractNode) parentNode.getChildAt(i));
+            // search trash (should be at the end)
+            DataSetNode trash = null;
+            int nbChildren = projectNode.getChildCount();
+            for (int i = nbChildren - 1; i >= 0; i--) {
+                AbstractNode childNode = (AbstractNode) projectNode.getChildAt(i);
                 if (childNode instanceof DataSetNode) {
-                    DDataset dataset = ((DataSetNode) childNode).getDataset();
-                    datasetList.add(dataset);
-                } else if (childNode instanceof HourGlassNode) {
-                    // (should not happen)
+                    DataSetNode datasetNode = (DataSetNode) childNode;
+                    if (datasetNode.isTrash()) {
+                        trash = datasetNode;
+                        break;
+                    }
                 }
             }
+            if (trash == null) {
+                return; // should not happen
+            }
 
-            // register this modification
-            databaseObjectsToModify.put(databaseParentObject, datasetList);
-        }
+            // move node to Trash
+            LinkedHashSet<AbstractNode> allParentNodeModified = new LinkedHashSet<>();
 
-        // ask the modification to the database at once (intricate to put in a thread in Dnd context)
-        DatabaseDataSetTask.updateDatasetAndProjectsTree(databaseObjectsToModify, false);
+            int nbKeptNodes = keptNodes.size();
+            for (int i = 0; i < nbKeptNodes; i++) {
+                AbstractNode nodeCur = keptNodes.get(i);
+                allParentNodeModified.add((AbstractNode) nodeCur.getParent());
+                m_model.removeNodeFromParent(nodeCur);
+                m_model.insertNodeInto(nodeCur, trash, trash.getChildCount());
+            }
 
+        // Trash must be added at the end : because the add of dataset must be done
+            // after children have been removed from their parents
+            allParentNodeModified.add(trash);
+
+            LinkedHashMap<Object, ArrayList<DDataset>> databaseObjectsToModify = new LinkedHashMap<>();
+
+            Iterator<AbstractNode> it = allParentNodeModified.iterator();
+            while (it.hasNext()) {
+
+                AbstractNode parentNode = it.next();
+
+                // get Parent Database Object
+                Object databaseParentObject = null;
+                AbstractNode.NodeTypes type = parentNode.getType();
+                if (type == AbstractNode.NodeTypes.DATA_SET) {
+                    DataSetNode datasetNode = ((DataSetNode) parentNode);
+                    databaseParentObject = datasetNode.getDataset();
+                    //nodeToBeChanged.add(datasetNode);
+                } else if (type == AbstractNode.NodeTypes.PROJECT_QUANTITATION) {
+                    QuantitationProjectNode projectNodeS = ((QuantitationProjectNode) parentNode);
+                    databaseParentObject = projectNodeS.getProject();
+                }
+
+                // get new Dataset children
+                int nb = parentNode.getChildCount();
+                ArrayList<DDataset> datasetList = new ArrayList<>(nb);
+                for (int i = 0; i < nb; i++) {
+                    // we are sure that it is a Dataset
+                    AbstractNode childNode = ((AbstractNode) parentNode.getChildAt(i));
+                    if (childNode instanceof DataSetNode) {
+                        DDataset dataset = ((DataSetNode) childNode).getDataset();
+                        datasetList.add(dataset);
+                    } else if (childNode instanceof HourGlassNode) {
+                        // (should not happen)
+                    }
+                }
+
+                // register this modification
+                databaseObjectsToModify.put(databaseParentObject, datasetList);
+            }
+
+            // ask the modification to the database at once (intricate to put in a thread in Dnd context)
+            DatabaseDataSetTask.updateDatasetAndProjectsTree(databaseObjectsToModify, false);
 
     }
-    
+
     // return the trash node
     private DataSetNode getTrashNode() {
         // search Project Node
         QuantitationProjectNode projectNode = null;
-        TreeNode root = (TreeNode)m_model.getRoot();
+        TreeNode root = (TreeNode) m_model.getRoot();
         if (root instanceof QuantitationProjectNode) {
             projectNode = (QuantitationProjectNode) root;
         }
@@ -643,15 +634,15 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
         if (trash == null) {
             return null; // should not happen
         }
-        return trash ;
+        return trash;
     }
 
     // load the trash node: called while loading project to display correctly the number of childs
     public void loadTrash() {
-        DataSetNode trashNode = getTrashNode() ;
+        DataSetNode trashNode = getTrashNode();
         if (trashNode != null) {
             // Callback used only for the synchronization with the AccessDatabaseThread
-             AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
+            AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
 
                 @Override
                 public boolean mustBeCalledInAWT() {
@@ -660,19 +651,20 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
 
                 @Override
                 public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
-                
+
                 }
             };
             QuantitationTree.getCurrentTree().loadInBackground(trashNode, callback);
         }
     }
-    
-    
+
     /**
-     * Load a node if needed. The node will not be expanded, but the data will be used
-     * @param nodeToLoad 
+     * Load a node if needed. The node will not be expanded, but the data will
+     * be used
+     *
+     * @param nodeToLoad
      */
-    public void loadInBackground(final AbstractNode nodeToLoad, final AbstractDatabaseCallback parentCallback ) {
+    public void loadInBackground(final AbstractNode nodeToLoad, final AbstractDatabaseCallback parentCallback) {
 
         // check if the loading is necessary :
         // it is necessary only if we have an hour glass child
@@ -693,7 +685,6 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
         final ArrayList<AbstractData> childrenList = new ArrayList<>();
         final AbstractData parentData = nodeToLoad.getData();
 
-
         // Callback used only for the synchronization with the AccessDatabaseThread
         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
 
@@ -709,30 +700,28 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
 
                     @Override
                     public void run() {
-                        
+
                         dataLoaded(parentData, childrenList);
-                        
+
                         // use of childrenList / parentData
-                       parentCallback.run(true, 0, null, true);
+                        parentCallback.run(true, 0, null, true);
                     }
                 });
 
             }
         };
 
-        
-
         parentData.load(callback, childrenList, false);
     }
-    
-    public int getQuantitationChildCount(){
+
+    public int getQuantitationChildCount() {
         AbstractNode root = (AbstractNode) m_model.getRoot();
         int nbC = root.getChildCount();
         int nb = 0;
-        for (int i=0; i< nbC; i++) {
+        for (int i = 0; i < nbC; i++) {
             TreeNode tnode = root.getChildAt(i);
             if (tnode instanceof DataSetNode) {
-                DataSetNode dsnode = (DataSetNode)tnode;
+                DataSetNode dsnode = (DataSetNode) tnode;
                 if (dsnode.isQuantitation()) {
                     nb++;
                 }
@@ -740,62 +729,60 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
         }
         return nb;
     }
-    
+
     public AbstractNode getQuantitationNode(int index) {
         AbstractNode root = (AbstractNode) m_model.getRoot();
         int nbC = root.getChildCount();
-        for (int i=0; i< nbC; i++) {
+        for (int i = 0; i < nbC; i++) {
             TreeNode tnode = root.getChildAt(i);
             if (tnode instanceof DataSetNode && index == i) {
-                return (AbstractNode)tnode;
+                return (AbstractNode) tnode;
             }
         }
         return null;
     }
-    
+
     public void clearQuantiSelection() {
         clearSelection();
     }
-    
-    
+
     /**
      * select or hightlight the nodes with a datasetId in the given list
-     * @param listIds 
+     *
+     * @param listIds
      */
-    public void selectQuantiNodeWithId (List<Long> listIds) {
+    public void selectQuantiNodeWithId(List<Long> listIds) {
         AbstractNode root = (AbstractNode) m_model.getRoot();
         int nbC = root.getChildCount();
-        for (int i=0; i< nbC; i++) {
+        for (int i = 0; i < nbC; i++) {
             TreeNode tnode = root.getChildAt(i);
             if (tnode instanceof DataSetNode) {
-                DataSetNode dsnode = (DataSetNode)tnode;
+                DataSetNode dsnode = (DataSetNode) tnode;
                 DDataset dataset = dsnode.getDataset();
                 if (listIds.contains(dataset.getId())) {
-                    addSelectionRow(i+1);
+                    addSelectionRow(i + 1);
                     //dsnode.setHighlighted(true);
                 }
             }
         }
         getCurrentTree().updateUI();
     }
-    
+
     public AbstractNode copyCurrentNodeForSelection() {
         AbstractNode[] nodes = getSelectedNodes();
-        if (nodes != null && nodes.length > 0){
+        if (nodes != null && nodes.length > 0) {
             return nodes[0].copyNode();
         }
         return null;
 
     }
-    
+
     @Override
     protected void dataLoaded(AbstractData data, List<AbstractData> list) {
 
         AbstractNode parentNode = loadingMap.remove(data);
 
-
         parentNode.remove(0); // remove the first child which correspond to the hour glass
-
 
         int indexToInsert = 0;
         Iterator<AbstractData> it = list.iterator();
@@ -806,10 +793,10 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
         }
         m_model.nodeStructureChanged(parentNode);
 
-        if (parentNode instanceof DataSetNode && ((DataSetNode)parentNode).isQuantXIC()){
-            XICDesignTree.setExpDesign(((DataSetNode)parentNode).getDataset(), parentNode,  this, false);
+        if (parentNode instanceof DataSetNode && ((DataSetNode) parentNode).isQuantXIC()) {
+            XICDesignTree.setExpDesign(((DataSetNode) parentNode).getDataset(), parentNode, this, false);
         }
 
     }
-    
+
 }

@@ -2,6 +2,7 @@ package fr.proline.studio.graphics;
 
 import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.comparedata.LockedDataModel;
+import fr.proline.studio.graphics.cursor.AbstractCursor;
 import fr.proline.studio.graphics.marker.AbstractMarker;
 import fr.proline.studio.parameter.ParameterList;
 import java.awt.Graphics2D;
@@ -26,6 +27,9 @@ public abstract class PlotAbstract implements Axis.EnumXInterface, Axis.EnumYInt
     protected BasePlotPanel m_plotPanel;
     
     private ArrayList<AbstractMarker> m_markersList = null;
+    
+    private ArrayList<AbstractCursor> m_cursorList = null;
+    
     protected boolean m_isPaintMarker = true;
 
     protected boolean m_locked = false;
@@ -91,26 +95,37 @@ public abstract class PlotAbstract implements Axis.EnumXInterface, Axis.EnumYInt
         }
         m_markersList.add(m);
     }
-    
-    private boolean isPaintMarker() {
-        return m_isPaintMarker;
+
+    public void addCursor(AbstractCursor c) {
+        if (m_cursorList == null) {
+            m_cursorList = new ArrayList<>();
+        }
+        m_cursorList.add(c);
     }
     
     public MoveableInterface getOverMovable(int x, int y) {
-         if (m_markersList == null) {
-             return null;
-         }
-        int nb = m_markersList.size();
-        for (int i = 0; i < nb; i++) {
-            AbstractMarker m = m_markersList.get(i);
-            if (m instanceof MoveableInterface) {
-                MoveableInterface movable = (MoveableInterface) m;
-                if (movable.isMoveable() && movable.inside(x, y)) {
-                    return movable;
+        if (m_markersList != null) {
+            int nb = m_markersList.size();
+            for (int i = 0; i < nb; i++) {
+                AbstractMarker m = m_markersList.get(i);
+                if (m instanceof MoveableInterface) {
+                    MoveableInterface movable = (MoveableInterface) m;
+                    if (movable.isMoveable() && movable.inside(x, y)) {
+                        return movable;
+                    }
                 }
             }
-
         }
+        if (m_cursorList != null) {
+            int nb = m_cursorList.size();
+            for (int i = 0; i < nb; i++) {
+                AbstractCursor c = m_cursorList.get(i);
+                    if (c.isMoveable() && c.inside(x, y)) {
+                        return c;
+                    }
+            }
+        }
+  
         return null;
     } 
     
@@ -145,6 +160,18 @@ public abstract class PlotAbstract implements Axis.EnumXInterface, Axis.EnumYInt
         int nb = m_markersList.size();
         for (int i=0;i<nb;i++) {
             m_markersList.get(i).paint(g);
+        }
+    }
+    
+    public void paintCursors(Graphics2D g) {
+
+        if (m_cursorList == null) {
+            return;
+        }
+
+        int nb = m_cursorList.size();
+        for (int i = 0; i < nb; i++) {
+            m_cursorList.get(i).paint(g);
         }
     }
     

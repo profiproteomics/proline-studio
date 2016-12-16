@@ -162,7 +162,8 @@ public class IconManager {
         REDO,
         PLUS_16X16,
         DATABASES_RELATION,
-        TARGET;
+        TARGET,
+        CONTROL_SMALL;
     }
     private final static HashMap<IconType, ImageIcon> m_iconMap = new HashMap<>();
     private final static HashMap<IconType, ImageIcon> m_iconHourGlassMap = new HashMap<>();
@@ -587,6 +588,8 @@ public class IconManager {
                 return "fr/proline/studio/images/databases-relation.png";
             case TARGET:
                 return "fr/proline/studio/images/target.png";
+            case CONTROL_SMALL:
+                return "fr/proline/studio/images/control-000-small.png";
         }
 
         return null; // can not happen

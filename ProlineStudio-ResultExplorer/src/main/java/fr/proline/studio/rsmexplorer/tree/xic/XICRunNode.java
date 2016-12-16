@@ -171,7 +171,9 @@ public class XICRunNode extends AbstractNode {
                     }
                 }
 
-                tableModel.fireTableDataChanged();
+                if (tableModel != null) {
+                    tableModel.fireTableDataChanged();
+                }
             }
         };
 

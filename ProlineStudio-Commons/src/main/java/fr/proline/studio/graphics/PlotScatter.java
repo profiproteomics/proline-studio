@@ -1,6 +1,7 @@
 package fr.proline.studio.graphics;
 
 import fr.proline.studio.comparedata.CompareDataInterface;
+import fr.proline.studio.graphics.cursor.VerticalCursor;
 import fr.proline.studio.graphics.marker.AbstractMarker;
 import fr.proline.studio.graphics.marker.LabelMarker;
 import fr.proline.studio.graphics.marker.coordinates.PercentageCoordinates;
@@ -740,11 +741,10 @@ public class PlotScatter extends PlotAbstract implements Axis.EnumXInterface, Ax
     @Override
     public JPopupMenu getPopupMenu(double x, double y) {
 
-        boolean onPoint = false;
+
         boolean onSelection = false;
         int index = findPoint(x, y);
         if (index != -1) {
-            onPoint = true;
             onSelection = m_selected[index];
         }
         long id = (index == -1) ? -1 : m_ids[index];
@@ -868,10 +868,25 @@ public class PlotScatter extends PlotAbstract implements Axis.EnumXInterface, Ax
         };
         deleteGroupAction.setEnabled(group != null);
         
+        AbstractAction addCursorAction = new AbstractAction("Add Cursor") {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                VerticalCursor c = new VerticalCursor(m_plotPanel, x);
+                addCursor(c);
+                m_plotPanel.repaint();
+            }
+        };
+
+        
+        
+        
         JPopupMenu menu = new JPopupMenu();
         menu.add(addGroupAction);
         menu.add(selectGroupAction);
         menu.add(deleteGroupAction);
+        menu.addSeparator();
+        menu.add(addCursorAction);
         
         return menu;
     }

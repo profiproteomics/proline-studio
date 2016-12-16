@@ -1,6 +1,8 @@
 package fr.proline.studio.python.data;
 
 import java.util.ArrayList;
+import org.python.core.Py;
+import org.python.core.PyObject;
 
 /**
  *
@@ -47,5 +49,10 @@ public class ColBooleanData extends Col {
     public Class getColumnClass() {
         return Boolean.class;
     }
+    
+
+
+
+    
     
 }

@@ -46,7 +46,7 @@ public class LinearPlotDemo extends JFrame {
       linear.addMarker(new PointMarker(basePlot, new DataCoordinates(1600, 2.5), Color.ORANGE));
 
       basePlot.setPlot(linear);
-      basePlot.setMargins(new Insets(10, 0, 10, 0));
+      //basePlot.setMargins(new Insets(10, 0, 10, 0));
       //basePlot.getYAxis().setRange(0.0, 2.0);
       basePlot.repaint();
       getContentPane().setLayout(new BorderLayout());

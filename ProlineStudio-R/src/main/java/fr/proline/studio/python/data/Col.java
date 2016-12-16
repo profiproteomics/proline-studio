@@ -6,12 +6,14 @@ import org.python.core.Py;
 import org.python.core.PyFloat;
 import org.python.core.PyInteger;
 import org.python.core.PyObject;
+import org.python.core.PyType;
 
 /**
  *
  * @author JM235353
  */
 public abstract class Col extends PyObject {
+
     
     protected String m_columnName = null;
     
@@ -739,6 +741,87 @@ public abstract class Col extends PyObject {
         }
         throw Py.TypeError("Type Mismatch for + " + right.getClass().getName());
     }
+    
+    @Override
+    public PyObject __invert__() {
+
+        int nb = __len__();
+
+        ArrayList<Boolean> resultArray = new ArrayList<>(nb);
+        for (int i = 0; i < nb; i++) {
+            Object o = getValueAt(i);
+
+            if (!(o instanceof Boolean)) {
+                throw Py.TypeError("Col with non boolean values");
+            }
+            boolean b = !((Boolean) o);
+            resultArray.add(b);
+        }
+
+        return new ColBooleanData(m_table, resultArray, null);
+    }
+
+    
+    @Override
+    public PyObject __and__(PyObject right) {
+        if (right instanceof ColBooleanData) {
+
+            int nb = __len__();
+            if (right.__len__() != nb) {
+                throw Py.TypeError("Tried to do 'and' with Columns with different sizes");
+            }
+
+            ArrayList<Boolean> resultArray = new ArrayList<>(nb);
+            Col rightCol = (Col) right;
+            for (int i = 0; i < nb; i++) {
+                Object o1 = getValueAt(i);
+                Object o2 = rightCol.getValueAt(i);
+                if ((o1 == null) || (o2 == null)) {
+                    throw Py.TypeError("Col with null values");
+                }
+                if (!(o1 instanceof Boolean) || !(o2 instanceof Boolean)) {
+                    throw Py.TypeError("Col with non boolean values");
+                }
+                boolean b = ((Boolean) o1) && ((Boolean) o2);
+                resultArray.add(b);
+            }
+
+            return new ColBooleanData(m_table, resultArray, null);
+        }
+        
+        throw Py.TypeError("Type Mismatch for + " + right.getClass().getName());
+    }
+    
+    @Override
+    public PyObject __or__(PyObject right) {
+        if (right instanceof ColBooleanData) {
+
+            int nb = __len__();
+            if (right.__len__() != nb) {
+                throw Py.TypeError("Tried to do 'and' with Columns with different sizes");
+            }
+
+            ArrayList<Boolean> resultArray = new ArrayList<>(nb);
+            Col rightCol = (Col) right;
+            for (int i = 0; i < nb; i++) {
+                Object o1 = getValueAt(i);
+                Object o2 = rightCol.getValueAt(i);
+                if ((o1 == null) || (o2 == null)) {
+                    throw Py.TypeError("Col with null values");
+                }
+                if (!(o1 instanceof Boolean) || !(o2 instanceof Boolean)) {
+                    throw Py.TypeError("Col with non boolean values");
+                }
+                boolean b = ((Boolean) o1) || ((Boolean) o2);
+                resultArray.add(b);
+            }
+
+            return new ColBooleanData(m_table, resultArray, null);
+        }
+        
+        throw Py.TypeError("Type Mismatch for + " + right.getClass().getName());
+    }
+
     
     public abstract Class getColumnClass();
 }

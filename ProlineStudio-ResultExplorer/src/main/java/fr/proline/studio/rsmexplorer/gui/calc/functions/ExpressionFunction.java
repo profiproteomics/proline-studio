@@ -23,6 +23,7 @@ import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.table.TableDefaultRendererManager;
 import fr.proline.studio.table.renderer.DefaultRightAlignRenderer;
 import fr.proline.studio.table.renderer.DoubleRenderer;
+import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import org.python.core.PyFloat;
 import org.python.core.PyInteger;
@@ -166,14 +167,7 @@ public class ExpressionFunction extends AbstractFunction {
 
         
         ArrayList<ExpressionEntity> m_functions = new ArrayList<>(20);
-        m_functions.add(new ExpressionEntity("(", "(", "("));
-        m_functions.add(new ExpressionEntity(")", ")", ")"));
         m_functions.add(new ExpressionEntity("abs", "abs(", "Stats.abs("));
-        m_functions.add(new ExpressionEntity(">", ">", ">"));
-        m_functions.add(new ExpressionEntity(">=", ">=", ">="));
-        m_functions.add(new ExpressionEntity("<", "<", "<"));
-        m_functions.add(new ExpressionEntity("<=", "<=", "<="));
-        m_functions.add(new ExpressionEntity("=", "=", "=="));
         
         ArrayList<ExpressionEntity> m_variables = new ArrayList<>(colCount);
         
@@ -189,7 +183,44 @@ public class ExpressionFunction extends AbstractFunction {
             m_variables.add(var);
         }
         
-        m_expressionParameter = new ExpressionParameter(EXPRESSION_KEY, "Expression", m_functions, m_variables);
+        ArrayList<ExpressionEntity> m_calcFunctions = new ArrayList<>(20);
+        m_calcFunctions.add(new ExpressionEntity("7", "7", "7"));
+        m_calcFunctions.add(new ExpressionEntity("8", "8", "8"));
+        m_calcFunctions.add(new ExpressionEntity("9", "9", "9"));
+        m_calcFunctions.add(new ExpressionEntity("/", "/", "/"));
+        
+        m_calcFunctions.add(new ExpressionEntity("4", "4", "4"));
+        m_calcFunctions.add(new ExpressionEntity("5", "5", "5"));
+        m_calcFunctions.add(new ExpressionEntity("6", "6", "6"));
+        m_calcFunctions.add(new ExpressionEntity("*", "*", "*"));
+        
+        m_calcFunctions.add(new ExpressionEntity("1", "1", "1"));
+        m_calcFunctions.add(new ExpressionEntity("2", "2", "2"));
+        m_calcFunctions.add(new ExpressionEntity("3", "3", "3"));
+        m_calcFunctions.add(new ExpressionEntity("-", "-", "-"));
+        
+        m_calcFunctions.add(new ExpressionEntity("0", "0", "0"));
+        m_calcFunctions.add(new ExpressionEntity(".", ".", "."));
+        m_calcFunctions.add(new ExpressionEntity("\u00B1", "\u00B1", "\u00B1"));
+        m_calcFunctions.add(new ExpressionEntity("+", "+", "+"));
+        
+        m_calcFunctions.add(new ExpressionEntity("(", "(", "("));
+        m_calcFunctions.add(new ExpressionEntity(")", ")", ")"));
+        m_calcFunctions.add(new ExpressionEntity(",", ", ", ","));
+        m_calcFunctions.add(new ExpressionEntity("and", " and ", " & "));
+        
+        m_calcFunctions.add(new ExpressionEntity("or", " or ", " | "));
+        m_calcFunctions.add(new ExpressionEntity("not", " not ", " ~"));
+        m_calcFunctions.add(new ExpressionEntity("=", " = ", "=="));
+        m_calcFunctions.add(new ExpressionEntity("!=", " != ", "!="));
+        
+        m_calcFunctions.add(new ExpressionEntity("<", " < ", "<"));
+        m_calcFunctions.add(new ExpressionEntity(">", " > ", ">"));
+        m_calcFunctions.add(new ExpressionEntity(">=", " >= ", ">="));
+        m_calcFunctions.add(new ExpressionEntity("<=", " <= ", "<="));
+        
+        
+        m_expressionParameter = new ExpressionParameter(EXPRESSION_KEY, "Expression", m_functions, m_variables, m_calcFunctions, 4);
         m_expressionParameter.forceShowLabel(AbstractParameter.LabelVisibility.NO_VISIBLE);
 
         parameterTableList.add(m_expressionParameter);      

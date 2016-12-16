@@ -14,12 +14,16 @@ public class ExpressionParameter extends AbstractParameter {
 
     private ArrayList<ExpressionEntity> m_functions = null;
     private ArrayList<ExpressionEntity> m_variables = null;
+    private ArrayList<ExpressionEntity> m_calcFunctions = null;
+    private int m_nbButtonsHorizontal;
     
-    public ExpressionParameter(String key, String name, ArrayList<ExpressionEntity> functions, ArrayList<ExpressionEntity> variables) {
+    public ExpressionParameter(String key, String name, ArrayList<ExpressionEntity> functions, ArrayList<ExpressionEntity> variables, ArrayList<ExpressionEntity> calcFunctions, int nbButtonsHorizontal) {
         super(key, name, String.class, ExpressionBuilderPanel.class);
         
         m_functions = functions;
         m_variables = variables;
+        m_calcFunctions = calcFunctions;
+        m_nbButtonsHorizontal = nbButtonsHorizontal;
     }
     
     @Override
@@ -30,7 +34,7 @@ public class ExpressionParameter extends AbstractParameter {
 
         if (m_graphicalType.equals(ExpressionBuilderPanel.class)) {
 
-            ExpressionBuilderPanel expressionBuilderPanel = new ExpressionBuilderPanel();
+            ExpressionBuilderPanel expressionBuilderPanel = new ExpressionBuilderPanel(m_nbButtonsHorizontal);
 
             for (ExpressionEntity entity : m_functions) {
                 expressionBuilderPanel.addFunction(entity);
@@ -40,6 +44,10 @@ public class ExpressionParameter extends AbstractParameter {
                 expressionBuilderPanel.addVariable(entity);
             }
             
+            for (ExpressionEntity entity : m_calcFunctions) {
+                expressionBuilderPanel.addCalcButton(entity);
+            }
+
             m_parameterComponent = expressionBuilderPanel;
             return expressionBuilderPanel;
         }

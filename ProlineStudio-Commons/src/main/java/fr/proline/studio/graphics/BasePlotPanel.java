@@ -10,13 +10,12 @@ import java.awt.Cursor;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Insets;
 import java.awt.MouseInfo;
 import java.awt.Point;
 import java.awt.Polygon;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
-import java.awt.Shape;
+
 import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.MouseEvent;
@@ -78,9 +77,7 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
     private boolean m_plotVerticalGrid = true;
     private boolean m_dataLocked = false;
     private boolean m_drawCursor = false;
-    
-    private Insets m_margins = new Insets(5, 0, 0, 0);
-    
+
     private GridListener m_gridListener = null;
     private List<PlotPanelListener> m_listeners = new ArrayList<>();
     
@@ -124,9 +121,6 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
         this.m_plotTitle= title;
     }
 
-   public void setMargins(Insets margins) {
-      this.m_margins = margins;
-   }
     
     @Override
     public void paint(Graphics g) {
@@ -261,6 +255,9 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
             }
             for (PlotAbstract plot : m_plots) {
                 plot.paintMarkers(g2d);
+            }
+            for (PlotAbstract plot : m_plots) {
+                plot.paintCursors(g2d);
             }
         }
 

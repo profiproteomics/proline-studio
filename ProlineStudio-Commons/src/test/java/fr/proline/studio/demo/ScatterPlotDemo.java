@@ -38,7 +38,7 @@ public class ScatterPlotDemo extends JFrame {
       PlotScatter scatter = new PlotScatter(basePlot, sample, null, 0, 3);
       basePlot.setPlot(scatter);
       basePlot.setDrawCursor(true);
-      basePlot.setMargins(new Insets(5, 0, 5, 0));
+      //basePlot.setMargins(new Insets(5, 0, 5, 0));
       basePlot.getXAxis().setRange(-4, 4);
       getContentPane().setLayout(new BorderLayout());
       split.setLeftComponent(plotPanel);

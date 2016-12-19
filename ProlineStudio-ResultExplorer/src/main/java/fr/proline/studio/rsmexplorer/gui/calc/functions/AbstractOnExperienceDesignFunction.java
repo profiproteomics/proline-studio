@@ -59,8 +59,6 @@ public abstract class AbstractOnExperienceDesignFunction extends AbstractFunctio
     private final String m_pythonCall;
     private final Object m_colExtraInfo;
 
-    private Table m_sourceTable = null;
-
     private final ArrayList<String> m_groupNames = new ArrayList<>();
 
     public AbstractOnExperienceDesignFunction(GraphPanel panel, String functionName, String resultName, String pythonCall, Object colExtraInfo) {

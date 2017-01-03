@@ -73,7 +73,8 @@ public class JMSConnectionManager {
     public static final String JMS_SERVER_PORT_PARAM_KEY = "jms.server.port";
 
     public static final int JMS_CANCELLED_TASK_ERROR_CODE = -32004;
-
+    
+    public static final int JMS_EXPIRED_MSG_ERROR_CODE = -32004;
     
     private final EventListenerList m_connectionListenersList;//ConnectionListeners list
     private int m_connectionState;//Connection current state

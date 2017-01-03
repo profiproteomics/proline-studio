@@ -32,8 +32,8 @@ public class ExpressionEntityTree  extends JTree {
         super(new RootFunctionNode(type));
 
         m_type = type;
-                
-        setPreferredSize(new Dimension(140, 120));
+
+        
         
         m_builderPanel = builderPanel;
         

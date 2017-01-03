@@ -80,6 +80,58 @@ public class StatsImplementation {
         return new ColDoubleData(values.getTable(), resultArray, "abs(" + values.getExportColumnName()+")");
     }
     
+    public static PyFloat mean(Col values) {
+
+        int nbRow = values.getRowCount();
+        double sum = 0;
+        
+        for (int i = 0; i < nbRow; i++) {
+            Object o = values.getValueAt(i);
+            if (o instanceof LazyData) {
+                o = ((LazyData) o).getData();
+            }
+            double d;
+            if ((o != null) && (o instanceof Number)) {
+                d = ((Number) o).doubleValue();
+            } else {
+                d = Double.NaN;
+            }
+            sum += d;
+
+        }
+        
+        double mean = sum/nbRow;
+
+        return new PyFloat(mean);
+    }
+    
+    public static PyFloat std(Col values) {
+
+        double mean = mean(values).getValue();
+        
+        int nbRow = values.getRowCount();
+        double sum2 = 0;
+        
+        for (int i = 0; i < nbRow; i++) {
+            Object o = values.getValueAt(i);
+            if (o instanceof LazyData) {
+                o = ((LazyData) o).getData();
+            }
+            double d;
+            if ((o != null) && (o instanceof Number)) {
+                d = ((Number) o).doubleValue();
+            } else {
+                d = Double.NaN;
+            }
+            
+            sum2 += (d-mean)*(d-mean);
+        }
+        
+        double std = StrictMath.sqrt(sum2/nbRow);
+
+        return new PyFloat(std);
+    }
+    
     public static ColDoubleData log10(Col values) {
         return log(values, true);
     }

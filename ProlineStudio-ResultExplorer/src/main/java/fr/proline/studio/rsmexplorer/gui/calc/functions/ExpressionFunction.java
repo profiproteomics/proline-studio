@@ -168,6 +168,10 @@ public class ExpressionFunction extends AbstractFunction {
         
         ArrayList<ExpressionEntity> m_functions = new ArrayList<>(20);
         m_functions.add(new ExpressionEntity("abs", "abs(", "Stats.abs("));
+        m_functions.add(new ExpressionEntity("mean", "mean(", "Stats.mean("));
+        m_functions.add(new ExpressionEntity("log2", "log2(", "Stats.log2("));
+        m_functions.add(new ExpressionEntity("log10", "log10(", "Stats.log10("));
+        m_functions.add(new ExpressionEntity("std", "std(", "Stats.std("));
         
         ArrayList<ExpressionEntity> m_variables = new ArrayList<>(colCount);
         

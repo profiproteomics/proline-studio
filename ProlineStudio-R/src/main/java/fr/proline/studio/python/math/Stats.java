@@ -22,6 +22,14 @@ public class Stats {
         return StatsImplementation.abs(values);
     }
     
+    public static PyFloat mean(Col values) {
+        return StatsImplementation.mean(values);
+    }
+    
+    public static PyFloat std(Col values) {
+        return StatsImplementation.std(values);
+    }
+    
     public static ColDoubleData log2(Col values) {
         return StatsImplementation.log2(values);
     }

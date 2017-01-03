@@ -743,7 +743,7 @@ public abstract class Col extends PyObject {
     }
     
     @Override
-    public PyObject __eq__(PyObject right) {
+    public PyObject __eq__(PyObject right) { 
         if (right instanceof Col) {
 
             int nb = __len__();

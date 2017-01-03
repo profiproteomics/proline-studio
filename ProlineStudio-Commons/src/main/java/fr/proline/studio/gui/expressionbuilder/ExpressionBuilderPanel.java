@@ -2,6 +2,7 @@ package fr.proline.studio.gui.expressionbuilder;
 
 import fr.proline.studio.utils.IconManager;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -236,6 +237,7 @@ public class ExpressionBuilderPanel extends JPanel {
         
         m_functionTree = new ExpressionEntityTree(this, ExpressionEntityTree.TreeType.FUNCTIONS);
         JScrollPane scrollPane = new JScrollPane(m_functionTree);
+        scrollPane.setPreferredSize(new Dimension(180, 220));
         
         functionsPanel.add(scrollPane, c);
         
@@ -255,6 +257,7 @@ public class ExpressionBuilderPanel extends JPanel {
 
         m_variableTree = new ExpressionEntityTree(this, ExpressionEntityTree.TreeType.VARIABLES);
         JScrollPane scrollPane = new JScrollPane(m_variableTree);
+        scrollPane.setPreferredSize(new Dimension(180, 220));
 
         variablesPanel.add(scrollPane, c);
 
@@ -328,30 +331,29 @@ public class ExpressionBuilderPanel extends JPanel {
                         String code = entityCur.getCode();
                         if (code.length() == 1) {
                             char c = code.charAt(0);
-                            if ((c<='0' || c>='9') && (c != '.')) {
+                            if ((c<'0' || c>'9') && (c != '.')) {
                                 // non numeric value
                                 if (c == '-') {
                                     // replace entity by +
                                     m_builtExpression.set(index, m_entityPlus);
-                                    break;
                                 } else if (c == '+') {
                                     // replace entity by -
                                     m_builtExpression.set(index, m_entityMinus);
-                                    break;
                                 } else {
                                     // insert entity -
-                                    m_builtExpression.add(index, m_entityMinus);
-                                    break;
+                                    m_builtExpression.add(index+1, m_entityMinus);
                                 }
+                                break;
                             }
-                        } else {
-                            // insert entity -
-                             m_builtExpression.add(index, m_entityMinus);
-                             break;
                         }
                         
                         index--;
                     }
+                    if (index<0) {
+                        // we arrived at the beginning
+                        m_builtExpression.add(0, m_entityMinus);
+                    }
+                    
 
                     m_expressionTextField.setText(getDisplayExpression());
                     updateEnableButtons();

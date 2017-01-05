@@ -41,6 +41,10 @@ public class ProcessEngine implements ProcessCallbackInterface {
         m_runAll = v;
     }
     
+    public boolean isRunAll() {
+        return m_runAll;
+    }
+    
     public String getProcessName() {
         if (m_currentMacro != null) {
             return m_currentMacro;
@@ -126,6 +130,7 @@ public class ProcessEngine implements ProcessCallbackInterface {
             m_playButton = null;
         }
         m_panel = null;
+        m_runAll = false;
     }
     
     @Override
@@ -169,6 +174,7 @@ public class ProcessEngine implements ProcessCallbackInterface {
             }
             m_panel = null;
             m_currentMacro = null;
+            m_runAll = false;
             
         }
     }

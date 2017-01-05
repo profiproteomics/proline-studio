@@ -4,6 +4,7 @@ import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.pattern.WindowBox;
 import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
 import fr.proline.studio.rsmexplorer.gui.calc.ProcessCallbackInterface;
+import fr.proline.studio.rsmexplorer.gui.calc.ProcessEngine;
 import fr.proline.studio.rsmexplorer.gui.calc.graphics.AbstractGraphic;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.utils.IconManager;
@@ -317,6 +318,9 @@ public class GraphicGraphNode extends GraphNode {
         boolean settingsChanged = m_graphic.settings(graphObjectArray, this);
         if (settingsChanged) {
             super.propagateSourceChanged();
+            if (!ProcessEngine.getProcessEngine().isRunAll()) {
+                ProcessEngine.getProcessEngine().runANode(this, m_graphPanel);
+            }
         }
         
         return settingsChanged;

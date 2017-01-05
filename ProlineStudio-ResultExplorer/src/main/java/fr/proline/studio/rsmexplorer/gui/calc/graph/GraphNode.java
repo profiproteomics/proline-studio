@@ -511,7 +511,7 @@ public abstract class GraphNode extends AbstractConnectedGraphObject {
         popup.add(new DisplayBelowAction(this, nbConnections));
         popup.add(new DisplayInNewWindowAction(this, nbConnections));
         popup.add(new SettingsAction(this, nbConnections));
-        popup.add(new ProcessAction(this));
+        //popup.add(new ProcessAction(this)); // JPM removed for the moment (auto-process set), but do not remove completely
         popup.add(new ErrorAction(this));
         popup.addSeparator();
         popup.add(new DeleteAction());

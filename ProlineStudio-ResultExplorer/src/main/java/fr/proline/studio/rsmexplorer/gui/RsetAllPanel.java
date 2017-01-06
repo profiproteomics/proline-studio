@@ -227,6 +227,7 @@ public class RsetAllPanel extends HourglassPanel implements DataBoxPanelInterfac
             m_markerContainerPanel.setMaxLineNumber(resultSetList.size());
         }
 
+        m_resultSetTable.setSortable(true);
     }
 
     public ResultSet getSelectedResultSet() {

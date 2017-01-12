@@ -76,7 +76,7 @@ public class ParameterList extends ArrayList<AbstractParameter> {
                 m_parametersPanel.add(l, c);
             }
 
-            String parameterValue = readParameter(preferences,parameter, prefixKey);
+            String parameterValue = readParameter(preferences, parameter, prefixKey);
 
 
             if (parameter.hasComponent()) {
@@ -208,6 +208,9 @@ public class ParameterList extends ArrayList<AbstractParameter> {
     private String readParameter(Preferences preferences, AbstractParameter parameter, String prefixKey) {
         
         String parameterKey = parameter.getKey();
+        if (parameterKey == null) {
+            return null; // not readable parameter like DisplayStubParameter
+        }
         String suffixKey = parameterKey.replaceAll(" ", "_");
 
         String key = prefixKey + suffixKey;

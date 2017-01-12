@@ -5,7 +5,10 @@ import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.util.ArrayList;
 import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.filechooser.FileSystemView;
 
@@ -17,6 +20,8 @@ import javax.swing.filechooser.FileSystemView;
  */
 public class FileParameter extends AbstractParameter {
 
+    private ArrayList<AbstractLinkedParameters> m_linkedParametersList = null;
+    
     private final FileSystemView m_fsv;
     private String m_defaultValue;
     private final String[] m_fileFilterName;
@@ -45,57 +50,60 @@ public class FileParameter extends AbstractParameter {
             startValue = (m_defaultValue!= null) ? m_defaultValue : "";
         }
 
-        if (m_graphicalType.equals(JTextField.class)) {
+        if (m_parameterComponent == null) {
+            if (m_graphicalType.equals(JTextField.class)) {
 
-            // --- Slider ---
-            JPanel panel = new JPanel(new FlowLayout());
+                // --- Slider ---
+                m_panel = new JPanel(new FlowLayout());
 
-            final JTextField textField = new JTextField(30);
-            textField.setText(startValue);
+                final JTextField textField = new JTextField(30);
+                textField.setText(startValue);
 
-            final JButton addFileButton = new JButton(IconManager.getIcon(IconManager.IconType.OPEN_FILE));
-            addFileButton.setMargin(new java.awt.Insets(2, 2, 2, 2));
-            addFileButton.addActionListener(new ActionListener() {
+                final JButton addFileButton = new JButton(IconManager.getIcon(IconManager.IconType.OPEN_FILE));
+                addFileButton.setMargin(new java.awt.Insets(2, 2, 2, 2));
+                addFileButton.addActionListener(new ActionListener() {
 
-                @Override
-                public void actionPerformed(ActionEvent e) {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
 
-                    JFileChooser fchooser = (m_fsv != null) ? new JFileChooser(m_fsv) : new JFileChooser();
+                        JFileChooser fchooser = (m_fsv != null) ? new JFileChooser(m_fsv) : new JFileChooser();
 
-                    fchooser.setMultiSelectionEnabled(false);
+                        fchooser.setMultiSelectionEnabled(false);
 
-                    if (m_defaultDirectory != null) {
-                        fchooser.setCurrentDirectory(m_defaultDirectory);
-                    }
-                    fchooser.setFileSelectionMode(m_selectionMode);
-                    fchooser.setAcceptAllFileFilterUsed(m_allFiles);
+                        if (m_defaultDirectory != null) {
+                            fchooser.setCurrentDirectory(m_defaultDirectory);
+                        }
+                        fchooser.setFileSelectionMode(m_selectionMode);
+                        fchooser.setAcceptAllFileFilterUsed(m_allFiles);
 
-                    if (m_fileFilterName != null) {
-                        for (int i = 0; i < m_fileFilterName.length; i++) {
-                            FileNameExtensionFilter filter = new FileNameExtensionFilter(m_fileFilterName[i], m_fileFilterExtension[i]);
-                            fchooser.addChoosableFileFilter(filter);
+                        if (m_fileFilterName != null) {
+                            for (int i = 0; i < m_fileFilterName.length; i++) {
+                                FileNameExtensionFilter filter = new FileNameExtensionFilter(m_fileFilterName[i], m_fileFilterExtension[i]);
+                                fchooser.addChoosableFileFilter(filter);
+                            }
+                        }
+
+                        int result = fchooser.showOpenDialog(addFileButton);
+                        if (result == JFileChooser.APPROVE_OPTION) {
+
+                            File file = fchooser.getSelectedFile();
+                            textField.setText(file.getPath());
                         }
                     }
+                });
 
-                    int result = fchooser.showOpenDialog(addFileButton);
-                    if (result == JFileChooser.APPROVE_OPTION) {
+                m_panel.add(textField);
+                m_panel.add(addFileButton);
 
-                        File file = fchooser.getSelectedFile();
-                        textField.setText(file.getPath());
-                    }
-                }
-            });
+                m_parameterComponent = textField;
 
-            panel.add(textField);
-            panel.add(addFileButton);
-
-            m_parameterComponent = textField;
-
-            return panel;
+                return m_panel;
+            }
         }
 
-        return null;
+        return m_panel;
     }
+    private JPanel m_panel = null;
 
     @Override
     public void initDefault() {
@@ -164,5 +172,44 @@ public class FileParameter extends AbstractParameter {
 
     public void setDefaultDirectory(File defaultDirectory) {
         m_defaultDirectory = defaultDirectory;
+    }
+    
+    public void addLinkedParameters(final AbstractLinkedParameters linkedParameters) {
+
+        // create parameterComponent if needed
+        getComponent(null);
+
+        if (m_linkedParametersList == null) {
+            m_linkedParametersList = new ArrayList<>(1);
+        }
+        m_linkedParametersList.add(linkedParameters);
+
+        if (m_parameterComponent instanceof JTextField) {
+            
+            
+            ((JTextField) m_parameterComponent).getDocument().addDocumentListener(new DocumentListener() {
+                public void changedUpdate(DocumentEvent e) {
+                    textChanged();
+                }
+
+                public void removeUpdate(DocumentEvent e) {
+                    textChanged();
+                }
+
+                public void insertUpdate(DocumentEvent e) {
+                    textChanged();
+                }
+
+                public void textChanged() {
+                    linkedParameters.valueChanged(getStringValue(), getObjectValue());
+                }
+            });
+
+            /*if (!m_valueSet) {
+                initDefault();
+            } else {
+                linkedParameters.valueChanged(getStringValue(), getObjectValue());
+            }*/
+        }
     }
 }

@@ -22,7 +22,7 @@ public class ProcessEngine implements ProcessCallbackInterface {
     private GraphPanel m_panel;
     private JButton m_playButton;
     
-    private boolean m_runAll = true;
+    private boolean m_runAll = false;
     
     private final LinkedList<GraphNode> m_processingNodeList = new LinkedList<>();
     

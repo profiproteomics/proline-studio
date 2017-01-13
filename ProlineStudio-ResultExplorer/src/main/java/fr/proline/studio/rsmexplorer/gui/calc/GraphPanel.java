@@ -69,6 +69,9 @@ public class GraphPanel extends JPanel implements MouseListener, MouseMotionList
     private final SelectionGestureSquare m_selectionGesture = new SelectionGestureSquare();
     private boolean m_actionOnRelease = false;
 
+    private boolean m_deselectionIfNoMoveNoPopup = false;
+    private boolean m_hasMovedOrPopup = false;
+    
     private int m_curMoveCursor = Cursor.DEFAULT_CURSOR;
 
     private final Dimension m_preferredSize = new Dimension(DEFAULT_PANEL_WIDTH, DEFAULT_PANEL_HEIGHT); // minimum size at the beginning
@@ -342,47 +345,30 @@ public class GraphPanel extends JPanel implements MouseListener, MouseMotionList
                 switch (type) {
 
                     case GRAPH_NODE: {
+                        
                         int modifiers = e.getModifiers();
-
-                        if (SwingUtilities.isLeftMouseButton(e) || SwingUtilities.isMiddleMouseButton(e)) {
-                            if (((modifiers & KeyEvent.CTRL_MASK) != 0) || ((modifiers & KeyEvent.SHIFT_MASK) != 0)) {
-                                // add or remove selection
-                                if (m_selectedObjectsArray.contains(overObject)) {
-                                    m_selectedObjectsArray.remove(overObject);
-                                    overObject.setSelected(false);
-                                } else {
-                                    m_selectedObjectsArray.add((AbstractConnectedGraphObject) overObject);
-                                    overObject.setSelected(true);
-                                }
-                            } else {
-                                // replace selection
+                        
+                        m_deselectionIfNoMoveNoPopup = false;
+                        
+                        if (!overObject.isSelected()) {
+                            if (((modifiers & KeyEvent.CTRL_MASK) == 0) && ((modifiers & KeyEvent.SHIFT_MASK) == 0)) {
                                 clearGraphNodeSelection();
-                                m_selectedObjectsArray.add((AbstractConnectedGraphObject) overObject);
-                                overObject.setSelected(true);
                             }
+                            m_selectedObjectsArray.add((AbstractConnectedGraphObject) overObject);
+                            overObject.setSelected(true);
                         } else {
-                            // Right mouse button
-
-                            if (((modifiers & KeyEvent.CTRL_MASK) != 0) || ((modifiers & KeyEvent.SHIFT_MASK) != 0)) {
-                                // add or remove selection
-                                if (m_selectedObjectsArray.contains((AbstractConnectedGraphObject) overObject)) {
-                                    // nothing to do
-                                } else {
-                                    m_selectedObjectsArray.add((AbstractConnectedGraphObject) overObject);
-                                    overObject.setSelected(true);
-                                }
-                            } else {
-
-                                if (m_selectedObjectsArray.contains(overObject)) {
-                                    // nothing to do
-                                } else {
-                                    // replace selection
-                                    clearGraphNodeSelection();
-                                    m_selectedObjectsArray.add((AbstractConnectedGraphObject) overObject);
-                                    overObject.setSelected(true);
-                                }
-                            }
+                            m_deselectionIfNoMoveNoPopup = true;
+                            m_hasMovedOrPopup = false;
                         }
+                        
+                        
+                        
+                        
+                        if (!m_selectedObjectsArray.contains(overObject)) {
+                            m_selectedObjectsArray.add((AbstractConnectedGraphObject) overObject);
+                            overObject.setSelected(true);
+                        }
+
 
                         m_overObject = (AbstractConnectedGraphObject) overObject;
 
@@ -448,6 +434,8 @@ public class GraphPanel extends JPanel implements MouseListener, MouseMotionList
 
         if (e.isPopupTrigger()) {
 
+            m_hasMovedOrPopup = true;
+            
             if (!m_selectedObjectsArray.isEmpty()) {
                 if (m_selectedObjectsArray.size() == 1) {
                     JPopupMenu popup = m_selectedObjectsArray.get(0).createPopup(this);
@@ -550,6 +538,15 @@ public class GraphPanel extends JPanel implements MouseListener, MouseMotionList
                 ((GraphNode) m_overObject).hideAction();
             } else if (m_overObject != null) {
                 setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+                
+                if ((m_deselectionIfNoMoveNoPopup) && (!m_hasMovedOrPopup)) {
+                    clearGraphNodeSelection();
+                    m_selectedObjectsArray.add((AbstractConnectedGraphObject) m_overObject);
+                    m_overObject.setSelected(true);
+                }
+
+            } else {
+                clearGraphNodeSelection();
             }
         }
 
@@ -609,6 +606,8 @@ public class GraphPanel extends JPanel implements MouseListener, MouseMotionList
 
         if (m_overObject != null) {
 
+            m_hasMovedOrPopup = true;
+            
             int nbObjectSelected = m_selectedObjectsArray.size();
             
             

@@ -515,22 +515,7 @@ public abstract class GraphNode extends AbstractConnectedGraphObject {
         popup.add(new ErrorAction(this));
         popup.addSeparator();
         popup.add(new DeleteAction());
-        popup.addPopupMenuListener(new PopupMenuListener() {
 
-            @Override
-            public void popupMenuCanceled(PopupMenuEvent popupMenuEvent) {
-            }
-
-            @Override
-            public void popupMenuWillBecomeInvisible(PopupMenuEvent popupMenuEvent) {
-                setSelected(false); 
-                panel.repaint();
-            }
-
-            @Override
-            public void popupMenuWillBecomeVisible(PopupMenuEvent popupMenuEvent) {
-            }
-        });
         return popup;
     }
  

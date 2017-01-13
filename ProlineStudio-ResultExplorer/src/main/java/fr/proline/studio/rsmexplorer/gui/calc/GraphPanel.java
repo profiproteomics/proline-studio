@@ -326,6 +326,11 @@ public class GraphPanel extends JPanel implements MouseListener, MouseMotionList
 
     }
 
+    
+    private int counter = 0;
+    
+    private boolean m_mousePressed = false;
+    
     @Override
     public void mousePressed(MouseEvent e) {
 
@@ -334,6 +339,8 @@ public class GraphPanel extends JPanel implements MouseListener, MouseMotionList
 
         boolean noOverObject = true;
 
+        m_mousePressed = true;
+        
         Iterator<GraphNode> it = m_graphNodeArray.descendingIterator();
         while (it.hasNext()) {
             GraphNode graphNode = it.next();
@@ -432,8 +439,22 @@ public class GraphPanel extends JPanel implements MouseListener, MouseMotionList
     @Override
     public void mouseReleased(MouseEvent e) {
 
+        boolean mousePressed = m_mousePressed;
+        m_mousePressed = false;
+        
         if (e.isPopupTrigger()) {
 
+            // JPM.HACK java bug, right click -> popup, right click again -> popup but mousePressed has not been called beforehand
+            if (!mousePressed) {
+                mousePressed(e);
+            }
+            
+        counter++;
+        if (counter % 3 == 0) {
+            System.out.println("ttt");
+        }
+            
+            
             m_hasMovedOrPopup = true;
             
             if (!m_selectedObjectsArray.isEmpty()) {

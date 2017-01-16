@@ -326,9 +326,6 @@ public class GraphPanel extends JPanel implements MouseListener, MouseMotionList
 
     }
 
-    
-    private int counter = 0;
-    
     private boolean m_mousePressed = false;
     
     @Override
@@ -440,7 +437,7 @@ public class GraphPanel extends JPanel implements MouseListener, MouseMotionList
     public void mouseReleased(MouseEvent e) {
 
         boolean mousePressed = m_mousePressed;
-        m_mousePressed = false;
+        m_mousePressed = false;   
         
         if (e.isPopupTrigger()) {
 
@@ -448,13 +445,7 @@ public class GraphPanel extends JPanel implements MouseListener, MouseMotionList
             if (!mousePressed) {
                 mousePressed(e);
             }
-            
-        counter++;
-        if (counter % 3 == 0) {
-            System.out.println("ttt");
-        }
-            
-            
+  
             m_hasMovedOrPopup = true;
             
             if (!m_selectedObjectsArray.isEmpty()) {

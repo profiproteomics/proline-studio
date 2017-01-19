@@ -1,11 +1,13 @@
 package fr.proline.studio.graphics;
 
+import fr.proline.studio.graphics.cursor.AbstractCursor;
 import fr.proline.studio.utils.CyclicColorPalette;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Stroke;
 import java.awt.geom.AffineTransform;
+import java.text.DecimalFormat;
 
 /**
  * X Axis
@@ -68,6 +70,77 @@ public class XAxis extends Axis {
             g.drawString(m_title, m_x+(m_width - titleWidth) / 2, baseline);
         }
 
+    }
+
+    
+    @Override
+    public void paintCursor(Graphics2D g, double x) {
+        
+        final int DELTA = 3;
+        
+        int integerDigits = m_ticks.getIntegerDigits();
+        int fractionalDigits = m_ticks.getFractionalDigits()+2;
+        double multForRounding = Math.pow(10, fractionalDigits);
+  
+        String label;
+        if (m_isEnum) {
+            label = m_plotPanel.getEnumValueX((int) Math.round(x), false); //JPM.WART
+            if (label == null) {
+                label = " ";
+            }
+        } else {
+            // round x
+            double xDisplay = (m_log) ? StrictMath.log10(x) : x;
+            if (fractionalDigits > 0) {
+                xDisplay = StrictMath.round(xDisplay * multForRounding) / multForRounding;
+            }
+
+            DecimalFormat df = selectDecimalFormat(fractionalDigits + 2, integerDigits);
+            
+            
+            
+            
+            label = df.format(xDisplay);
+
+        }
+        
+        int stringWidth = m_valuesFontMetrics.stringWidth(label);
+        
+        int posX = valueToPixel(x);
+        
+        int height = m_valuesFontMetrics.getHeight();
+        
+        Stroke prevStroke = g.getStroke();
+        g.setStroke(AbstractCursor.LINE2_STROKE);
+        
+        g.setColor(Color.white);
+        
+        // check paint at right
+        int rightLimitX = valueToPixel(m_maxValue);
+        int flagPositionX = posX+stringWidth+DELTA*2;
+        if (flagPositionX < rightLimitX) {
+            // Cursor X Flag painted at right
+            g.fillRect(posX, m_y + 4 + BasePlotPanel.GAP_AXIS_LINE - DELTA, stringWidth + DELTA * 2, height + DELTA * 2);
+
+            g.setColor(AbstractCursor.CURSOR_COLOR);
+            g.drawLine(posX, m_y, posX, m_y + 4 + BasePlotPanel.GAP_AXIS_LINE - DELTA);
+            g.drawRect(posX, m_y + 4 + BasePlotPanel.GAP_AXIS_LINE - DELTA, stringWidth + DELTA * 2, height + DELTA * 2);
+
+            g.drawString(label, posX + DELTA, m_y + height + 4 + BasePlotPanel.GAP_AXIS_LINE);
+        } else {
+            // Cursor X Flag painted at left
+            g.fillRect(posX-(stringWidth + DELTA * 2), m_y + 4 + BasePlotPanel.GAP_AXIS_LINE - DELTA, stringWidth + DELTA * 2, height + DELTA * 2);
+
+            g.setColor(AbstractCursor.CURSOR_COLOR);
+            g.drawLine(posX, m_y, posX, m_y + 4 + BasePlotPanel.GAP_AXIS_LINE - DELTA);
+            g.drawRect(posX-(stringWidth + DELTA * 2), m_y + 4 + BasePlotPanel.GAP_AXIS_LINE - DELTA, stringWidth + DELTA * 2, height + DELTA * 2);
+
+            g.drawString(label, posX-stringWidth - DELTA, m_y + height + 4 + BasePlotPanel.GAP_AXIS_LINE);
+        }
+
+
+        // restore stroke
+        g.setStroke(prevStroke);
     }
 
     /**
@@ -391,7 +464,7 @@ public class XAxis extends Axis {
 
     }
 
-        public void paintGrid(Graphics2D g, int x, int width, int y, int height) {
+    public void paintGrid(Graphics2D g, int x, int width, int y, int height) {
 
         if (m_log) {
             paintGridLog(g, y, height);

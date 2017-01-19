@@ -41,6 +41,10 @@ public class VerticalCursor extends AbstractCursor {
         g.setColor(CURSOR_COLOR);
         g.drawLine(m_positionX, y1, m_positionX, y2);
         
+        
+        // paint on xAxis
+        xAxis.paintCursor(g, m_value);
+        
         // restore stroke
         g.setStroke(prevStroke);
     }
@@ -54,7 +58,23 @@ public class VerticalCursor extends AbstractCursor {
     public void move(int deltaX, int deltaY) {
         m_positionX += deltaX;
         XAxis xAxis = m_plotPanel.getXAxis();
+        
         m_value = xAxis.pixelToValue(m_positionX);
+        
+        // avoid going outside of the X Axis at the left
+        double min = xAxis.getMinValue();
+        if (m_value<min) {
+            m_value = min;
+            m_positionX = xAxis.valueToPixel(min);
+        }
+        
+        // avoid going outside of the X Axis at the right
+        double max = xAxis.getMaxValue();
+        if (m_value>max) {
+            m_value = max;
+            m_positionX = xAxis.valueToPixel(max);
+        }
+        
     }
 
     @Override

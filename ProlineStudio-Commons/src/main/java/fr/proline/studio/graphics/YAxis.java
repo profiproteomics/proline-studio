@@ -79,6 +79,11 @@ public class YAxis extends Axis {
         
     }
 
+    @Override
+    public void paintCursor(Graphics2D g, double value) {
+
+    }
+    
     private void paintLinear(Graphics2D g, AxisTicks ticks) {
 
         m_minTick = ticks.getTickMin();

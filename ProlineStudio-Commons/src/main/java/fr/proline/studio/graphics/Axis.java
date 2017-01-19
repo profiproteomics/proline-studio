@@ -20,7 +20,6 @@ import java.text.DecimalFormat;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import org.openide.windows.WindowManager;
@@ -295,6 +294,8 @@ public abstract class Axis {
     }
 
     public abstract void paint(Graphics2D g);
+    
+    public abstract void paintCursor(Graphics2D g, double value);
 
     public abstract int valueToPixel(double v);
 

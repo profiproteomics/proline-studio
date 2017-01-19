@@ -28,7 +28,7 @@ public abstract class PlotAbstract implements Axis.EnumXInterface, Axis.EnumYInt
     
     private ArrayList<AbstractMarker> m_markersList = null;
     
-    private ArrayList<AbstractCursor> m_cursorList = null;
+    protected ArrayList<AbstractCursor> m_cursorList = null;
     
     protected boolean m_isPaintMarker = true;
 
@@ -102,6 +102,12 @@ public abstract class PlotAbstract implements Axis.EnumXInterface, Axis.EnumYInt
         }
         m_cursorList.add(c);
     }
+    public boolean removeCursor(AbstractCursor c) {
+        if (m_cursorList != null) {
+            return m_cursorList.remove(c);
+        }
+        return false;
+    }
     
     public MoveableInterface getOverMovable(int x, int y) {
         if (m_markersList != null) {
@@ -128,6 +134,9 @@ public abstract class PlotAbstract implements Axis.EnumXInterface, Axis.EnumYInt
   
         return null;
     } 
+    
+    
+    
     
     /**
      * remove the specified marker, returns true if the marker was in the list, false otherwise
@@ -171,8 +180,10 @@ public abstract class PlotAbstract implements Axis.EnumXInterface, Axis.EnumYInt
 
         int nb = m_cursorList.size();
         for (int i = 0; i < nb; i++) {
-            m_cursorList.get(i).paint(g);
+            AbstractCursor cursor = m_cursorList.get(i);
+            cursor.paint(g);
         }
+
     }
     
     public boolean needsDoubleBuffering() {

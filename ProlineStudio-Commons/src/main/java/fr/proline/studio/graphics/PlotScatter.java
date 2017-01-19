@@ -1,6 +1,7 @@
 package fr.proline.studio.graphics;
 
 import fr.proline.studio.comparedata.CompareDataInterface;
+import fr.proline.studio.graphics.cursor.AbstractCursor;
 import fr.proline.studio.graphics.cursor.VerticalCursor;
 import fr.proline.studio.graphics.marker.AbstractMarker;
 import fr.proline.studio.graphics.marker.LabelMarker;
@@ -868,6 +869,9 @@ public class PlotScatter extends PlotAbstract implements Axis.EnumXInterface, Ax
         };
         deleteGroupAction.setEnabled(group != null);
         
+        final MoveableInterface movableObject = getOverMovable(m_plotPanel.getXAxis().valueToPixel(x), m_plotPanel.getXAxis().valueToPixel(y));
+        boolean isOverCursor = (movableObject instanceof AbstractCursor);
+        
         AbstractAction addCursorAction = new AbstractAction("Add Cursor") {
 
             @Override
@@ -877,9 +881,18 @@ public class PlotScatter extends PlotAbstract implements Axis.EnumXInterface, Ax
                 m_plotPanel.repaint();
             }
         };
+        addCursorAction.setEnabled(!isOverCursor);
+        
+        AbstractAction deleteCursorAction = new AbstractAction("Delete Cursor") {
 
-        
-        
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                removeCursor((AbstractCursor) movableObject);
+                m_plotPanel.repaint();
+            }
+        };
+        deleteCursorAction.setEnabled(isOverCursor);
+
         
         JPopupMenu menu = new JPopupMenu();
         menu.add(addGroupAction);
@@ -887,6 +900,7 @@ public class PlotScatter extends PlotAbstract implements Axis.EnumXInterface, Ax
         menu.add(deleteGroupAction);
         menu.addSeparator();
         menu.add(addCursorAction);
+        menu.add(deleteCursorAction);
         
         return menu;
     }

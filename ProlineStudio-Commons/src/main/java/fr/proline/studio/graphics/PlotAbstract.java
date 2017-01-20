@@ -29,6 +29,7 @@ public abstract class PlotAbstract implements Axis.EnumXInterface, Axis.EnumYInt
     private ArrayList<AbstractMarker> m_markersList = null;
     
     protected ArrayList<AbstractCursor> m_cursorList = null;
+    protected AbstractCursor m_selectedCursor = null;
     
     protected boolean m_isPaintMarker = true;
 
@@ -42,6 +43,8 @@ public abstract class PlotAbstract implements Axis.EnumXInterface, Axis.EnumYInt
     public abstract boolean needsXAxis();
     public abstract boolean needsYAxis();
 
+    public abstract double getNearestXData(double x);
+    
     public abstract ArrayList<Long> getSelectedIds();
     public abstract void setSelectedIds(ArrayList<Long> selection);
     
@@ -96,15 +99,31 @@ public abstract class PlotAbstract implements Axis.EnumXInterface, Axis.EnumYInt
         m_markersList.add(m);
     }
 
+    public void selectCursor(AbstractCursor c) {
+        if (m_selectedCursor != null) {
+            m_selectedCursor.setSelected(false);
+        }
+        m_selectedCursor = c;
+        c.setSelected(true);
+    }
     public void addCursor(AbstractCursor c) {
         if (m_cursorList == null) {
             m_cursorList = new ArrayList<>();
         }
         m_cursorList.add(c);
+        selectCursor(c);
     }
     public boolean removeCursor(AbstractCursor c) {
         if (m_cursorList != null) {
-            return m_cursorList.remove(c);
+            m_cursorList.remove(c);
+        }
+        if (c == m_selectedCursor) {
+            if (!m_cursorList.isEmpty()) {
+                selectCursor(m_cursorList.get(m_cursorList.size()-1));
+            } else {
+                m_selectedCursor = null;
+            }
+            
         }
         return false;
     }
@@ -122,18 +141,23 @@ public abstract class PlotAbstract implements Axis.EnumXInterface, Axis.EnumYInt
                 }
             }
         }
+
+        return getOverCursor(x, y);
+    }
+    
+    public AbstractCursor getOverCursor(int x, int y) {
         if (m_cursorList != null) {
             int nb = m_cursorList.size();
-            for (int i = 0; i < nb; i++) {
+            for (int i = nb-1; i >=0; i--) { // Last cursor in the list is at the front, so we check it first
                 AbstractCursor c = m_cursorList.get(i);
-                    if (c.isMoveable() && c.inside(x, y)) {
-                        return c;
-                    }
+                if (c.isMoveable() && c.inside(x, y)) {
+                    return c;
+                }
             }
         }
-  
+
         return null;
-    } 
+    }
     
     
     

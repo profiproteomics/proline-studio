@@ -159,6 +159,11 @@ public class PlotHistogram extends PlotAbstract {
     }
     
     @Override
+    public double getNearestXData(double x) {
+        return x; //JPM.TODO
+    }
+    
+    @Override
     public ArrayList<Long> getSelectedIds() {
         
         ArrayList<Long> selectedIds = new ArrayList();

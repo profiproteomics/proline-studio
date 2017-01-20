@@ -295,7 +295,7 @@ public abstract class Axis {
 
     public abstract void paint(Graphics2D g);
     
-    public abstract void paintCursor(Graphics2D g, double value);
+    public abstract void paintCursor(Graphics2D g, double value, boolean selected);
 
     public abstract int valueToPixel(double v);
 

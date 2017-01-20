@@ -80,7 +80,7 @@ public class YAxis extends Axis {
     }
 
     @Override
-    public void paintCursor(Graphics2D g, double value) {
+    public void paintCursor(Graphics2D g, double value, boolean selected) {
 
     }
     

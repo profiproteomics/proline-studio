@@ -74,7 +74,7 @@ public class XAxis extends Axis {
 
     
     @Override
-    public void paintCursor(Graphics2D g, double x) {
+    public void paintCursor(Graphics2D g, double x, boolean selected) {
         
         final int DELTA = 3;
         
@@ -111,7 +111,7 @@ public class XAxis extends Axis {
         int height = m_valuesFontMetrics.getHeight();
         
         Stroke prevStroke = g.getStroke();
-        g.setStroke(AbstractCursor.LINE2_STROKE);
+        g.setStroke(selected ? AbstractCursor.LINE2_STROKE : AbstractCursor.LINE1_STROKE);
         
         g.setColor(Color.white);
         

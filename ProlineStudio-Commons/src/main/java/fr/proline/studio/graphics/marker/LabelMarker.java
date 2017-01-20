@@ -277,4 +277,13 @@ public class LabelMarker extends AbstractMarker implements MoveableInterface {
         return true;
     }
 
+    @Override
+    public void snapToData() {
+        return; // no snap to data for markers
+    }
+    
+    public void setSelected(boolean s) {
+        // no selection for markers
+    }
+
 }

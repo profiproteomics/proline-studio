@@ -2,6 +2,7 @@ package fr.proline.studio.graphics;
 
 import fr.proline.studio.graphics.Axis.EnumXInterface;
 import fr.proline.studio.graphics.Axis.EnumYInterface;
+import fr.proline.studio.graphics.cursor.AbstractCursor;
 import fr.proline.studio.parameter.ParameterList;
 import fr.proline.studio.parameter.SettingsInterface;
 import fr.proline.studio.utils.StringUtils;
@@ -377,11 +378,11 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
     }
     
     public void clearPlots() {
-        this.m_plots = new ArrayList();
+        m_plots = new ArrayList();
     }
     
     public boolean hasPlots() {
-       return this.m_plots.size() > 0;
+       return m_plots.size() > 0;
     }
     
     public void addPlot(PlotAbstract plot) {
@@ -529,15 +530,20 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
             
             if (SwingUtilities.isLeftMouseButton(e)) {
                 // check if we are over a moveable object
-                 MoveableInterface movable = null;
+                MoveableInterface movable = null;
+                PlotAbstract plotWithMovable = null;
                 for (PlotAbstract plot : m_plots) {
                     movable = plot.getOverMovable(x, y);
                     if (movable != null) {
+                        plotWithMovable = plot;
                         break;
                     }
                 }
                 if (movable != null) {
                     m_moveGesture.startMoving(x, y, movable);
+                    if (movable instanceof AbstractCursor) {
+                        plotWithMovable.selectCursor((AbstractCursor)movable);
+                    }
                     setCursor(new Cursor(Cursor.MOVE_CURSOR));
                 } else {
                     m_selectionGesture.startSelection(x, y);
@@ -910,6 +916,15 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
         return m_plots.get(0).getEnumValueY(index, fromData);
     }
 
+    public double getNearestXData(double x) {
+        if ((m_plots == null) || (m_plots.isEmpty())) {
+            return x;
+        }
+        
+        // look only to the first plot for the moment
+        return m_plots.get(0).getNearestXData(x);
+    }
+    
    @Override
    public void mouseWheelMoved(MouseWheelEvent e) {
        if (m_plots == null || m_plots.isEmpty() || e == null) {
@@ -990,7 +1005,7 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
 
     }
     
-        public class RangeAction extends AbstractAction {
+    public class RangeAction extends AbstractAction {
 
          private final Axis m_axis;
          private final boolean m_isXAxis;

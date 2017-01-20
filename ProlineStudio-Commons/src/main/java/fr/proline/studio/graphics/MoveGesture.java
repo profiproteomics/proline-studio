@@ -32,6 +32,7 @@ public class MoveGesture {
     
     public void stopMoving(int x, int y) {
         move(x, y);
+        m_moveableObject.snapToData();
         m_moveableObject = null;
     }
 }

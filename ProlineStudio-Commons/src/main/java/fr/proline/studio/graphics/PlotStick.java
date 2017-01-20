@@ -334,6 +334,11 @@ public class PlotStick extends PlotAbstract {
 
         return -1;
     }
+    
+    @Override  
+    public double getNearestXData(double x) {
+        return x; //JPM.TODO
+    }
 
     @Override
     public final void update() {

@@ -29,7 +29,7 @@ public class VerticalCursor extends AbstractCursor {
     public void paint(Graphics2D g) {
         
         Stroke prevStroke = g.getStroke();
-        g.setStroke(LINE2_STROKE);
+        g.setStroke(m_selected ? AbstractCursor.LINE2_STROKE : AbstractCursor.LINE1_STROKE);
         
         XAxis xAxis = m_plotPanel.getXAxis();
         YAxis yAxis = m_plotPanel.getYAxis();
@@ -43,7 +43,7 @@ public class VerticalCursor extends AbstractCursor {
         
         
         // paint on xAxis
-        xAxis.paintCursor(g, m_value);
+        xAxis.paintCursor(g, m_value, m_selected);
         
         // restore stroke
         g.setStroke(prevStroke);
@@ -80,5 +80,17 @@ public class VerticalCursor extends AbstractCursor {
     @Override
     public boolean isMoveable() {
         return true;
+    }
+
+    @Override
+    public void snapToData() {
+        if (!m_snapToData) {
+            return;
+        }
+        
+        
+        m_value = m_plotPanel.getNearestXData(m_value);
+        XAxis xAxis = m_plotPanel.getXAxis();
+        m_positionX = xAxis.valueToPixel(m_value);
     }
 }

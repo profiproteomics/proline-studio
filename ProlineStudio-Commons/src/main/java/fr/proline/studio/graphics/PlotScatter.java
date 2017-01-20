@@ -17,6 +17,7 @@ import java.awt.Graphics2D;
 import java.awt.Color;
 import java.awt.LinearGradientPaint;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.geom.Path2D;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -26,7 +27,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
-import javax.swing.AbstractAction;
+import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.JTextField;
 import org.openide.windows.WindowManager;
@@ -323,6 +325,42 @@ public class PlotScatter extends PlotAbstract implements Axis.EnumXInterface, Ax
         return nearestDataIndex;
     }
 
+    @Override
+    public double getNearestXData(double x) {
+
+        double distanceMin = Double.MAX_VALUE;
+        int nearestDataIndex = -1;
+        int size = m_dataX == null ? 0 : m_dataX.length;
+        for (int i = size - 1; i >= 0; i--) { // reverse loop to select first the data in foreground
+            double dataX = m_dataX[i];
+
+            
+            // take in account jitter
+            /*if (m_jitterX != null) {
+                XAxis xAxis = m_plotPanel.getXAxis();
+                int xWithJitter = xAxis.valueToPixel(dataX) + m_jitterX[i];
+                dataX = xAxis.pixelToValue(xWithJitter);
+            }*/ //JPM.TODO
+
+            double distanceX = (x-dataX);
+            if (distanceX<0) {
+                distanceX = -distanceX;
+            }
+
+            if (distanceMin > distanceX) {
+                distanceMin = distanceX;
+                nearestDataIndex = i;
+            }
+
+        }
+
+        if (nearestDataIndex != -1) {
+            return m_dataX[nearestDataIndex];
+        }
+
+        return x;
+    }
+    
     @Override
     public void parametersChanged() {
         updateJitter();
@@ -753,8 +791,8 @@ public class PlotScatter extends PlotAbstract implements Axis.EnumXInterface, Ax
         // search for group
         final GraphicDataGroup group = (id == -1) ? null : m_idsToGraphicDataGroup.get(id);
         
-        AbstractAction addGroupAction = new AbstractAction("Add Group") {
-
+        JMenuItem addGroupAction = new JMenuItem("Add Group");
+        addGroupAction.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
 
@@ -816,13 +854,13 @@ public class PlotScatter extends PlotAbstract implements Axis.EnumXInterface, Ax
                    
                 }
             }
-            
-        };
+        });
+
         
         addGroupAction.setEnabled(onSelection);
 
-        AbstractAction selectGroupAction = new AbstractAction("Select Group") {
-
+        JMenuItem selectGroupAction = new JMenuItem("Select Group");
+        selectGroupAction.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
 
@@ -843,12 +881,12 @@ public class PlotScatter extends PlotAbstract implements Axis.EnumXInterface, Ax
                 m_plotPanel.repaintUpdateDoubleBuffer();
 
             }
-        };
+        });
         selectGroupAction.setEnabled(group != null);
         
         
-        AbstractAction deleteGroupAction = new AbstractAction("Delete Group") {
-
+        JMenuItem deleteGroupAction = new JMenuItem("Delete Group");
+        deleteGroupAction.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 
@@ -866,32 +904,52 @@ public class PlotScatter extends PlotAbstract implements Axis.EnumXInterface, Ax
                 // repaint
                    m_plotPanel.repaintUpdateDoubleBuffer();
             }
-        };
+        });
+
         deleteGroupAction.setEnabled(group != null);
         
-        final MoveableInterface movableObject = getOverMovable(m_plotPanel.getXAxis().valueToPixel(x), m_plotPanel.getXAxis().valueToPixel(y));
-        boolean isOverCursor = (movableObject instanceof AbstractCursor);
+        AbstractCursor cursor = getOverCursor(m_plotPanel.getXAxis().valueToPixel(x), m_plotPanel.getXAxis().valueToPixel(y));
+        boolean isOverCursor = (cursor != null);
         
-        AbstractAction addCursorAction = new AbstractAction("Add Cursor") {
-
+        if (isOverCursor) {
+            // cursor must be selected
+            selectCursor(cursor);
+        }
+        
+        JMenuItem  addCursorAction = new JMenuItem ("Add Cursor");
+        addCursorAction.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 VerticalCursor c = new VerticalCursor(m_plotPanel, x);
                 addCursor(c);
                 m_plotPanel.repaint();
             }
-        };
+        });
+        
+        
         addCursorAction.setEnabled(!isOverCursor);
         
-        AbstractAction deleteCursorAction = new AbstractAction("Delete Cursor") {
-
+        JMenuItem deleteCursorAction = new JMenuItem("Delete Cursor");
+        deleteCursorAction.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                removeCursor((AbstractCursor) movableObject);
+                removeCursor(cursor);
                 m_plotPanel.repaint();
             }
-        };
+        });
         deleteCursorAction.setEnabled(isOverCursor);
+
+        JCheckBoxMenuItem snapToDataMenuItem = null;
+        if (isOverCursor) {
+            snapToDataMenuItem = new JCheckBoxMenuItem("Snap to Data");
+            snapToDataMenuItem.setSelected(cursor.isSnapToData());
+            snapToDataMenuItem.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    cursor.toggleSnapToData();
+                }
+            });
+        }
 
         
         JPopupMenu menu = new JPopupMenu();
@@ -901,6 +959,9 @@ public class PlotScatter extends PlotAbstract implements Axis.EnumXInterface, Ax
         menu.addSeparator();
         menu.add(addCursorAction);
         menu.add(deleteCursorAction);
+        if (snapToDataMenuItem != null) {
+            menu.add(snapToDataMenuItem);
+        }
         
         return menu;
     }

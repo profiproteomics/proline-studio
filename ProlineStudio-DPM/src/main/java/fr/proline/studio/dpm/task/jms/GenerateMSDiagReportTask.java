@@ -30,7 +30,7 @@ public class GenerateMSDiagReportTask extends AbstractJMSTask {
     public ArrayList<Object> m_resultMessages ; // 0: settings 1:data to be returned as json string
     
     public GenerateMSDiagReportTask(AbstractJMSCallback callback, Long projectId, Long resultSetId, Map<String, Object> msdiagParameters, ArrayList<Object> resultMessages) {
-        super(callback, new TaskInfo( ((resultSetId != null) ? "Generate Statistical Report for resultSet id "+ resultSetId : "Generate Statistical Report"), true, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_HIGH));
+        super(callback, new TaskInfo( ((resultSetId != null) ? "Generate Quality Control Report for resultSet id "+ resultSetId : "Generate Quality Control Report"), true, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_HIGH));
         m_projectId = projectId;
         m_resultSetId = resultSetId;
         m_resultMessages = resultMessages;

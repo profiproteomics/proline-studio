@@ -251,7 +251,7 @@ public class StatsRImplementation {
         ColRef[] cols = StatsUtil.colTupleToColArray(pArray);
 
         // Create a temp file with a matrix containing cols data
-        File matrixTempFile = StatsUtil.columnsToMatrixTempFile(cols, true, true, true);
+        File matrixTempFile = StatsUtil.columnsToMatrixTempFile(cols, true, false, true);
 
         // Create a temp file for the image
         File imageTempFile = StatsUtil.createImageTempFile();
@@ -337,7 +337,7 @@ public class StatsRImplementation {
         ColRef[] cols = StatsUtil.colTupleToColArray(pArray);
 
         // Create a temp file with a matrix containing cols data
-        File matrixTempFile = StatsUtil.columnsToMatrixTempFile(cols, true, true, true);
+        File matrixTempFile = StatsUtil.columnsToMatrixTempFile(cols, true, false, true);
 
         // Create a temp file for the image
         File imageTempFile = StatsUtil.createImageTempFile();
@@ -377,7 +377,7 @@ public class StatsRImplementation {
         ColRef[] cols = StatsUtil.colTupleToColArray(pArray);
 
         // Create a temp file with a matrix containing cols data
-        File matrixTempFile = StatsUtil.columnsToMatrixTempFile(cols, true, true, true);
+        File matrixTempFile = StatsUtil.columnsToMatrixTempFile(cols, true, false, true);
 
         // Create a temp file for the image
         File imageTempFile = StatsUtil.createImageTempFile();

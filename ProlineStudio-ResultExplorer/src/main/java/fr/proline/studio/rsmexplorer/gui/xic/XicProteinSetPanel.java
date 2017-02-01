@@ -108,10 +108,6 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
     public XicProteinSetPanel() {
         initComponents();
         CompoundTableModel model = (CompoundTableModel) m_quantProteinSetTable.getModel();
-
-        URLCellRenderer renderer = (URLCellRenderer) model.getRenderer(0, QuantProteinSetTableModel.COLTYPE_PROTEIN_SET_NAME);
-        m_quantProteinSetTable.addMouseListener(renderer);
-        m_quantProteinSetTable.addMouseMotionListener(renderer);
     }
 
     private void initComponents() {
@@ -351,6 +347,10 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
 
         m_isXICMode = isXICMode;
         ((QuantProteinSetTableModel) ((CompoundTableModel) m_quantProteinSetTable.getModel()).getBaseModel()).setData(taskId, quantChannels, proteinSets, isXICMode);
+        URLCellRenderer renderer = (URLCellRenderer) ((CompoundTableModel)m_quantProteinSetTable.getModel()).getRenderer(0, QuantProteinSetTableModel.COLTYPE_PROTEIN_SET_NAME);
+        m_quantProteinSetTable.addMouseListener(renderer);
+        m_quantProteinSetTable.addMouseMotionListener(renderer);
+        
         //m_quantProteinSetTable.setColumnControlVisible(((QuantProteinSetTableModel) ((CompoundTableModel) m_quantProteinSetTable.getModel()).getBaseModel()).getColumnCount() < NB_MAX_COLUMN_CONTROL);
         m_titleLabel.setText(TABLE_TITLE + " (" + proteinSets.size() + ")");
         // select the first row

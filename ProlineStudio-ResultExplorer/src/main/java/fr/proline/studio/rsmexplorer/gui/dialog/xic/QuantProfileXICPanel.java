@@ -49,7 +49,7 @@ public class QuantProfileXICPanel extends JPanel {
     
     private JComboBox<String> m_abundanceSummarizerMethodCB;
     
-    private final static String[] ABUNDANCE_SUMMARIZER_METHOD_VALUES = {"Mean", "Mean of top 3 peptides", "Median", "Median Biological Profile", "Median Profile", "Sum", "Median Ratio Fit"};
+    private final static String[] ABUNDANCE_SUMMARIZER_METHOD_VALUES = {"Mean", "Mean of top 3 peptides", "Median", "Median Biological Profile", "Median Profile", "Sum", "Median Ratio Fitting"};
     private final static String[] ABUNDANCE_SUMMARIZER_METHOD_KEYS = {"MEAN", "MEAN_OF_TOP3", "MEDIAN", "MEDIAN_BIOLOGICAL_PROFILE", "MEDIAN_PROFILE", "SUM", "LFQ"};
      
     private JTextField m_peptideStatTestsAlpha;

@@ -87,7 +87,7 @@ public class MSDiagDialog extends DefaultDialog {
 
     private JPanel createAllParametersPanel() {
         JPanel allParametersPanel = new JPanel(new GridBagLayout());
-        allParametersPanel.setBorder(BorderFactory.createTitledBorder(" Statistical Reports Settings "));
+        allParametersPanel.setBorder(BorderFactory.createTitledBorder(" Quality Control Reports Settings "));
         
         // create parserPanel
         JPanel settingsPanel = createSettingsPanel();

@@ -1,7 +1,13 @@
 package fr.proline.studio.parameter;
 
+import fr.proline.studio.gui.StringChooserPanel;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.ArrayList;
 import javax.swing.JComponent;
 import javax.swing.JTextField;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
 /**
  * Parameter of type Double, displayed as a Textfield
@@ -13,6 +19,8 @@ public class DoubleParameter extends AbstractParameter {
     private Double m_maxValue;
     private Double m_defaultValue;
 
+    private ArrayList<AbstractLinkedParameters> m_linkedParametersList = null;
+    
     public DoubleParameter(String key, String name, Class graphicalType, Double defaultValue, Double minValue, Double maxValue) {
         super(key, name, Double.class, graphicalType);
         m_defaultValue = defaultValue;
@@ -129,4 +137,43 @@ public class DoubleParameter extends AbstractParameter {
         return ""; // should not happen
     }
     
+    
+    public void addLinkedParameters(final AbstractLinkedParameters linkedParameters) {
+
+        // create parameterComponent if needed
+        getComponent(null);
+
+        if (m_linkedParametersList == null) {
+            m_linkedParametersList = new ArrayList<>(1);
+        }
+        m_linkedParametersList.add(linkedParameters);
+
+        if (m_graphicalType.equals(JTextField.class)) {
+
+            ((JTextField) m_parameterComponent).getDocument().addDocumentListener(new DocumentListener() {
+                public void changedUpdate(DocumentEvent e) {
+                    textChanged();
+                }
+
+                public void removeUpdate(DocumentEvent e) {
+                    textChanged();
+                }
+
+                public void insertUpdate(DocumentEvent e) {
+                    textChanged();
+                }
+
+                public void textChanged() {
+                    String valueString = (String) getObjectValue();
+                    try {
+                        Double d = Double.valueOf(valueString);
+                        linkedParameters.valueChanged(valueString, d);
+                    } catch (Exception e) {
+                    }
+                    
+                }
+            });
+
+        }
+    }
 }

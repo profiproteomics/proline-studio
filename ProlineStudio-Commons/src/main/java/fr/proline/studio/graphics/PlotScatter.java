@@ -2,6 +2,7 @@ package fr.proline.studio.graphics;
 
 import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.graphics.cursor.AbstractCursor;
+import fr.proline.studio.graphics.cursor.HorizontalCursor;
 import fr.proline.studio.graphics.cursor.VerticalCursor;
 import fr.proline.studio.graphics.marker.AbstractMarker;
 import fr.proline.studio.graphics.marker.LabelMarker;
@@ -359,6 +360,34 @@ public class PlotScatter extends PlotAbstract implements Axis.EnumXInterface, Ax
         }
 
         return x;
+    }
+    
+    @Override
+    public double getNearestYData(double y) {
+
+        double distanceMin = Double.MAX_VALUE;
+        int nearestDataIndex = -1;
+        int size = m_dataY == null ? 0 : m_dataY.length;
+        for (int i = size - 1; i >= 0; i--) { // reverse loop to select first the data in foreground
+            double dataY = m_dataY[i];
+
+            double distanceY = (y-dataY);
+            if (distanceY<0) {
+                distanceY = -distanceY;
+            }
+
+            if (distanceMin > distanceY) {
+                distanceMin = distanceY;
+                nearestDataIndex = i;
+            }
+
+        }
+
+        if (nearestDataIndex != -1) {
+            return m_dataY[nearestDataIndex];
+        }
+
+        return y;
     }
     
     @Override
@@ -908,7 +937,7 @@ public class PlotScatter extends PlotAbstract implements Axis.EnumXInterface, Ax
 
         deleteGroupAction.setEnabled(group != null);
         
-        AbstractCursor cursor = getOverCursor(m_plotPanel.getXAxis().valueToPixel(x), m_plotPanel.getXAxis().valueToPixel(y));
+        AbstractCursor cursor = getOverCursor(m_plotPanel.getXAxis().valueToPixel(x), m_plotPanel.getYAxis().valueToPixel(y));
         boolean isOverCursor = (cursor != null);
         
         if (isOverCursor) {
@@ -916,8 +945,8 @@ public class PlotScatter extends PlotAbstract implements Axis.EnumXInterface, Ax
             selectCursor(cursor);
         }
         
-        JMenuItem  addCursorAction = new JMenuItem ("Add Cursor");
-        addCursorAction.addActionListener(new ActionListener() {
+        JMenuItem  addVerticalCursorAction = new JMenuItem ("Add Vertical Cursor");
+        addVerticalCursorAction.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 VerticalCursor c = new VerticalCursor(m_plotPanel, x);
@@ -926,8 +955,19 @@ public class PlotScatter extends PlotAbstract implements Axis.EnumXInterface, Ax
             }
         });
         
+        JMenuItem  addHorizontalCursorAction = new JMenuItem ("Add Horizontal Cursor");
+        addHorizontalCursorAction.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                HorizontalCursor c = new HorizontalCursor(m_plotPanel, y);
+                addCursor(c);
+                m_plotPanel.repaint();
+            }
+        });
         
-        addCursorAction.setEnabled(!isOverCursor);
+        
+        addVerticalCursorAction.setEnabled(!isOverCursor);
+        addHorizontalCursorAction.setEnabled(!isOverCursor);
         
         JMenuItem deleteCursorAction = new JMenuItem("Delete Cursor");
         deleteCursorAction.addActionListener(new ActionListener() {
@@ -957,7 +997,8 @@ public class PlotScatter extends PlotAbstract implements Axis.EnumXInterface, Ax
         menu.add(selectGroupAction);
         menu.add(deleteGroupAction);
         menu.addSeparator();
-        menu.add(addCursorAction);
+        menu.add(addVerticalCursorAction);
+        menu.add(addHorizontalCursorAction);
         menu.add(deleteCursorAction);
         if (snapToDataMenuItem != null) {
             menu.add(snapToDataMenuItem);

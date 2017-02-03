@@ -367,6 +367,11 @@ public class PlotLinear extends PlotAbstract {
     public double getNearestXData(double x) {
         return x; //JPM.TODO
     }
+    
+    @Override
+    public double getNearestYData(double y) {
+        return y; //JPM.TODO
+    }
 
     @Override
     public final void update() {

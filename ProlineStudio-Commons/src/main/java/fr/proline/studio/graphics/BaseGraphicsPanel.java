@@ -15,6 +15,7 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.HashSet;
 import javax.swing.Box;
+import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -62,6 +63,14 @@ public class BaseGraphicsPanel extends HourglassPanel implements GridListener {
         JToolBar toolbar = initToolbar();
         add(toolbar, BorderLayout.WEST);
 
+    }
+    
+    public PlotAbstract getPlotGraphics() {
+        return m_plotGraphics;
+    }
+    
+    public JPanel getPlotPanel() {
+        return m_plotPanel;
     }
     
     public final JPanel createInternalPanel() {
@@ -359,6 +368,37 @@ public class BaseGraphicsPanel extends HourglassPanel implements GridListener {
         } finally {
             m_isUpdatingCbx = false;
         }
+    }
+    
+    public void setXColTypeIndex(int index) {
+        
+        DefaultComboBoxModel model = (DefaultComboBoxModel) m_valueXComboBox.getModel();
+
+        int count = model.getSize();
+        for (int i=0;i<count;i++) {
+            ReferenceIdName ref = (ReferenceIdName) model.getElementAt(i);
+            if (ref.getColumnIndex() == index) {
+                m_valueXComboBox.setSelectedIndex(index);
+                break;
+            }
+        }
+    }
+    public void setYColTypeIndex(int index) {
+        
+        DefaultComboBoxModel model = (DefaultComboBoxModel) m_valueYComboBox.getModel();
+        
+        
+        
+        int count = model.getSize();
+        for (int i=0;i<count;i++) {
+            ReferenceIdName ref = (ReferenceIdName) model.getElementAt(i);
+            if (ref.getColumnIndex() == index) {
+                m_valueYComboBox.setSelectedIndex(index);
+                break;
+            }
+        }
+        
+         
     }
     
     public void setData(CompareDataInterface values, CrossSelectionInterface crossSelectionInterface) {

@@ -925,6 +925,15 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
         return m_plots.get(0).getNearestXData(x);
     }
     
+        public double getNearestYData(double y) {
+        if ((m_plots == null) || (m_plots.isEmpty())) {
+            return y;
+        }
+        
+        // look only to the first plot for the moment
+        return m_plots.get(0).getNearestYData(y);
+    }
+    
    @Override
    public void mouseWheelMoved(MouseWheelEvent e) {
        if (m_plots == null || m_plots.isEmpty() || e == null) {

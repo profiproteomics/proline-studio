@@ -1,11 +1,13 @@
 package fr.proline.studio.graphics;
 
+import fr.proline.studio.graphics.cursor.AbstractCursor;
 import fr.proline.studio.utils.CyclicColorPalette;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Stroke;
 import java.awt.geom.AffineTransform;
+import java.text.DecimalFormat;
 
 /**
  * Y Axis
@@ -14,6 +16,8 @@ import java.awt.geom.AffineTransform;
  */
 public class YAxis extends Axis {
 
+    private AxisTicks m_ticks;
+    
     private int m_lastHeight;
     
     public YAxis(BasePlotPanel p) {
@@ -35,7 +39,7 @@ public class YAxis extends Axis {
 
         int maxTicks = m_height / 20;
 
-        AxisTicks ticks = new AxisTicks(m_minValue, m_maxValue, maxTicks, m_log, m_isInteger, m_isEnum);
+        m_ticks = new AxisTicks(m_minValue, m_maxValue, maxTicks, m_log, m_isInteger, m_isEnum);
 
         if (m_selected) {
             g.setColor(Color.white);
@@ -44,9 +48,9 @@ public class YAxis extends Axis {
         }
 
         if (m_log) {
-            paintLog(g, ticks);
+            paintLog(g, m_ticks);
         } else {
-            paintLinear(g, ticks);
+            paintLinear(g, m_ticks);
         }
         
         if (m_title != null) {
@@ -80,7 +84,72 @@ public class YAxis extends Axis {
     }
 
     @Override
-    public void paintCursor(Graphics2D g, double value, boolean selected) {
+    public void paintCursor(Graphics2D g, AbstractCursor cursor, boolean selected) {
+
+        final int DELTA = 3;
+        
+        double y = cursor.getValue();
+        
+        
+        int integerDigits = cursor.getIntegerDigits();
+        if (integerDigits == -1) {
+            integerDigits = m_ticks.getIntegerDigits();
+        }
+        int fractionalDigits = cursor.getFractionalDigits();
+        if (fractionalDigits == -1) {
+            fractionalDigits = m_ticks.getFractionalDigits()+2;
+        }
+
+        double multForRounding = Math.pow(10, fractionalDigits);
+        
+        String label;
+        int stringWidth;
+
+        int height;
+        if (m_isEnum) {
+            label = m_plotPanel.getEnumValueY((int) Math.round(y), false); //JPM.WART
+            stringWidth = m_valuesFontMetrics.stringWidth(label);
+            height = (int) Math.round(StrictMath.ceil(m_valuesFontMetrics.getLineMetrics(label, g).getHeight()));
+        } else {
+            // round y
+            double yDisplay = y;
+            if (fractionalDigits > 0) {
+                yDisplay = StrictMath.round(yDisplay * multForRounding) / multForRounding;
+            }
+            
+            DecimalFormat df = selectDecimalFormat(fractionalDigits + 2, integerDigits);
+            
+            cursor.setFormat(integerDigits, fractionalDigits, df);
+            
+            label = df.format(yDisplay);
+            stringWidth = m_valuesFontMetrics.stringWidth(label);
+            height = (int) Math.round(StrictMath.ceil(m_valuesFontMetrics.getLineMetrics(label, g).getHeight()));
+        }
+        
+        
+        Stroke prevStroke = g.getStroke();
+        g.setStroke(selected ? AbstractCursor.LINE2_STROKE : AbstractCursor.LINE1_STROKE);
+
+        g.setFont(m_valuesFont);
+
+        int halfAscent = m_valuesFontMetrics.getAscent() / 2;
+        
+        int pY = valueToPixel(y);
+
+        int x1 = m_x + m_width - stringWidth - 6-BasePlotPanel.GAP_AXIS_LINE-DELTA;
+        int x2 = m_x + m_width-BasePlotPanel.GAP_AXIS_LINE;
+        g.setColor(Color.white);
+        g.fillRect(x1, pY - halfAscent - DELTA, x2-x1, height + DELTA * 2);
+        
+        g.setColor(AbstractCursor.CURSOR_COLOR);
+        g.drawRect(x1, pY - halfAscent - DELTA, x2-x1, height + DELTA * 2);
+        
+        g.drawString(label, m_x + m_width - stringWidth - 6-BasePlotPanel.GAP_AXIS_LINE, pY + halfAscent);
+        g.drawLine(m_x + m_width-BasePlotPanel.GAP_AXIS_LINE, pY, m_x + m_width, pY);
+        
+        
+        // restore stroke
+        g.setStroke(prevStroke);
 
     }
     

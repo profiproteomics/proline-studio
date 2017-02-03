@@ -1,5 +1,6 @@
 package fr.proline.studio.graphics;
 
+import fr.proline.studio.graphics.cursor.AbstractCursor;
 import fr.proline.studio.gui.InfoDialog;
 import fr.proline.studio.utils.IconManager;
 import java.awt.BasicStroke;
@@ -17,6 +18,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -295,7 +297,7 @@ public abstract class Axis {
 
     public abstract void paint(Graphics2D g);
     
-    public abstract void paintCursor(Graphics2D g, double value, boolean selected);
+    public abstract void paintCursor(Graphics2D g, AbstractCursor cursor, boolean selected);
 
     public abstract int valueToPixel(double v);
 
@@ -347,7 +349,13 @@ public abstract class Axis {
                 pattern = "#";  // number like "3"
             }
         } else if (fractionalDigits > 3) { // 3 is 
-            pattern = ("0.0E0"); // scientific notation for numbers with too much fractionalDigits "0.0000532"
+            pattern = ("0.0"); // scientific notation for numbers with too much fractionalDigits "0.0000532"
+            fractionalDigits--;
+            while (fractionalDigits > 0) {
+                pattern += "#";
+                fractionalDigits--;
+            }
+            pattern += "E0";
         } else {
             pattern = "#.";
             while (fractionalDigits > 0) {
@@ -355,6 +363,12 @@ public abstract class Axis {
                 fractionalDigits--;
             }
         }
+        
+        DecimalFormat df = new DecimalFormat(pattern);
+        DecimalFormatSymbols sym = DecimalFormatSymbols.getInstance();
+        sym.setDecimalSeparator('.');
+        df.setDecimalFormatSymbols(sym);
+        
         return new DecimalFormat(pattern);
     }
 

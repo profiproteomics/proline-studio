@@ -3,7 +3,7 @@ package fr.proline.studio.graphics.cursor;
 import fr.proline.studio.graphics.BasePlotPanel;
 import fr.proline.studio.graphics.XAxis;
 import fr.proline.studio.graphics.YAxis;
-import java.awt.Color;
+import static fr.proline.studio.graphics.cursor.AbstractCursor.CURSOR_COLOR;
 import java.awt.Graphics2D;
 import java.awt.Stroke;
 import java.awt.event.ActionEvent;
@@ -13,11 +13,11 @@ import java.awt.event.ActionListener;
  *
  * @author JM235353
  */
-public class VerticalCursor extends AbstractCursor {
+public class HorizontalCursor extends AbstractCursor {
 
-    private int m_positionX;
- 
-    public VerticalCursor(BasePlotPanel plotPanel, double value) {
+    private int m_positionY;
+
+    public HorizontalCursor(BasePlotPanel plotPanel, double value) {
         super(plotPanel);
         m_value = value;
 
@@ -26,8 +26,8 @@ public class VerticalCursor extends AbstractCursor {
     public void setValue(double value) {
         
         m_value = value;
-        XAxis xAxis = m_plotPanel.getXAxis();
-        m_positionX = xAxis.valueToPixel(m_value);
+        YAxis yAxis = m_plotPanel.getYAxis();
+        m_positionY = yAxis.valueToPixel(m_value);
     }
     
     @Override
@@ -39,16 +39,16 @@ public class VerticalCursor extends AbstractCursor {
         XAxis xAxis = m_plotPanel.getXAxis();
         YAxis yAxis = m_plotPanel.getYAxis();
         
-        m_positionX = xAxis.valueToPixel(m_value);
-        int y1 = yAxis.valueToPixel(yAxis.getMinValue());
-        int y2 = yAxis.valueToPixel(yAxis.getMaxValue());
+        m_positionY = yAxis.valueToPixel(m_value);
+        int x1 = xAxis.valueToPixel(xAxis.getMinValue());
+        int x2 = xAxis.valueToPixel(xAxis.getMaxValue());
 
         g.setColor(CURSOR_COLOR);
-        g.drawLine(m_positionX, y1, m_positionX, y2);
+        g.drawLine(x1, m_positionY, x2, m_positionY);
         
         
         // paint on xAxis
-        xAxis.paintCursor(g, this, m_selected);
+        yAxis.paintCursor(g, this, m_selected);
         
         // restore stroke
         g.setStroke(prevStroke);
@@ -59,34 +59,34 @@ public class VerticalCursor extends AbstractCursor {
         if (!m_selectable) {
             return false;
         }
-        return ((x>=m_positionX-INSIDE_TOLERANCE) && (x<=m_positionX+INSIDE_TOLERANCE));
+        return ((y>=m_positionY-INSIDE_TOLERANCE) && (y<=m_positionY+INSIDE_TOLERANCE));
     }
 
     @Override
     public void move(int deltaX, int deltaY) {
-        m_positionX += deltaX;
-        XAxis xAxis = m_plotPanel.getXAxis();
+        m_positionY += deltaY;
+        YAxis yAxis = m_plotPanel.getYAxis();
         
-        m_value = xAxis.pixelToValue(m_positionX);
+        m_value = yAxis.pixelToValue(m_positionY);
         
         // avoid going outside of the X Axis at the left
-        double min = xAxis.getMinValue();
+        double min = yAxis.getMinValue();
         if ((m_minValue != null) && (m_minValue>min)) {
             min = m_minValue;
         }
         if (m_value<min) {
             m_value = min;
-            m_positionX = xAxis.valueToPixel(min);
+            m_positionY = yAxis.valueToPixel(min);
         }
         
         // avoid going outside of the X Axis at the right
-        double max = xAxis.getMaxValue();
+        double max = yAxis.getMaxValue();
         if ((m_maxValue != null) && (m_maxValue<max)) {
             max = m_maxValue;
         }
         if (m_value>max) {
             m_value = max;
-            m_positionX = xAxis.valueToPixel(max);
+            m_positionY = yAxis.valueToPixel(max);
         }
         
         if (m_actionListenerList !=null) {
@@ -110,10 +110,9 @@ public class VerticalCursor extends AbstractCursor {
         if (!m_snapToData) {
             return;
         }
-        
-        
+
         m_value = m_plotPanel.getNearestXData(m_value);
         XAxis xAxis = m_plotPanel.getXAxis();
-        m_positionX = xAxis.valueToPixel(m_value);
+        m_positionY = xAxis.valueToPixel(m_value);
     }
 }

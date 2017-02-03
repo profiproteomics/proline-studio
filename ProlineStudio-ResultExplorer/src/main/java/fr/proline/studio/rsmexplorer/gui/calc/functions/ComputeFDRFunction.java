@@ -1,11 +1,22 @@
 package fr.proline.studio.rsmexplorer.gui.calc.functions;
 
+import fr.proline.studio.graphics.BasePlotPanel;
+import fr.proline.studio.graphics.PlotAbstract;
+import fr.proline.studio.graphics.PlotType;
+import fr.proline.studio.graphics.cursor.AbstractCursor;
+import fr.proline.studio.graphics.cursor.HorizontalCursor;
+import fr.proline.studio.graphics.cursor.VerticalCursor;
 import fr.proline.studio.parameter.AbstractLinkedParameters;
+import fr.proline.studio.parameter.AbstractParameter;
+import fr.proline.studio.parameter.ComponentParameterInterface;
 import fr.proline.studio.parameter.DoubleParameter;
 import fr.proline.studio.parameter.IntegerParameter;
 import fr.proline.studio.parameter.ObjectParameter;
 import fr.proline.studio.parameter.ParameterError;
 import fr.proline.studio.parameter.ParameterList;
+import fr.proline.studio.parameter.ValuesFromComponentParameter;
+import fr.proline.studio.pattern.AbstractDataBox;
+import fr.proline.studio.pattern.DataboxGraphics;
 import fr.proline.studio.pattern.WindowBox;
 import fr.proline.studio.python.data.ColRef;
 import fr.proline.studio.python.data.Table;
@@ -15,17 +26,26 @@ import fr.proline.studio.python.interpreter.CalcError;
 import fr.proline.studio.python.interpreter.CalcInterpreterTask;
 import fr.proline.studio.python.interpreter.CalcInterpreterThread;
 import fr.proline.studio.python.interpreter.ResultVariable;
+import fr.proline.studio.rsmexplorer.gui.GraphicsPanel;
 import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
 import fr.proline.studio.rsmexplorer.gui.calc.ProcessCallbackInterface;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.AbstractConnectedGraphObject;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.FunctionGraphNode;
+import fr.proline.studio.rsmexplorer.gui.calc.graphics.LockedDataGraphicsModel;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.types.LogInfo;
 import fr.proline.studio.types.LogRatio;
 import fr.proline.studio.types.PValue;
+import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.math.BigDecimal;
 import java.util.ArrayList;
+import javax.swing.JComponent;
+import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 import org.python.core.PyFloat;
 
 /**
@@ -58,8 +78,13 @@ public class ComputeFDRFunction extends AbstractFunction {
     private DoubleParameter m_alphaParameter = null;
     private IntegerParameter m_nbinsParameter = null;
     private DoubleParameter m_pzParameter = null;
-    
+    private ValuesFromComponentParameter m_graphicalParameter = null;
 
+    private VerticalCursor m_verticalCursor = null;
+    private VerticalCursor m_mirrorVerticalCursor = null;
+    private HorizontalCursor m_horizontalCursor = null;
+    
+    
     public ComputeFDRFunction(GraphPanel panel) {
         super(panel);
     }
@@ -311,6 +336,9 @@ public class ComputeFDRFunction extends AbstractFunction {
         m_nbinsParameter = new IntegerParameter(NBBINSPARAMETER, "Number of Bins", JSpinner.class, 20, 5, 100);
         m_pzParameter = new DoubleParameter(PZPARAMETER, "Pz", JTextField.class, 0.05, 0.01, 0.1);
         
+        final GraphicsPanel graphicsPanel = createScatterParameter(model1);
+
+        
         AbstractLinkedParameters linkedParameters = new AbstractLinkedParameters(parameterList1) {
             @Override
             public void valueChanged(String value, Object associatedValue) {
@@ -320,6 +348,27 @@ public class ComputeFDRFunction extends AbstractFunction {
                 showParameter(m_pzParameter, (value.compareTo("slim") == 0));
 
                 updateParameterListPanel();
+            }
+            
+        };
+        
+        AbstractLinkedParameters graphicalLinkParameterVerticalCursor = new AbstractLinkedParameters(parameterList1) {
+            @Override
+            public void valueChanged(String value, Object associatedValue) {
+                Double d = (Double) associatedValue;
+                m_verticalCursor.setValue(d);
+                m_mirrorVerticalCursor.setValue(-d);
+                graphicsPanel.getPlotPanel().repaint();
+            }
+            
+        };
+        
+        AbstractLinkedParameters graphicalLinkParameterHorizontalCursor = new AbstractLinkedParameters(parameterList1) {
+            @Override
+            public void valueChanged(String value, Object associatedValue) {
+                Double d = (Double) associatedValue;
+                m_horizontalCursor.setValue(d);
+                graphicsPanel.getPlotPanel().repaint();
             }
             
         };
@@ -336,15 +385,106 @@ public class ComputeFDRFunction extends AbstractFunction {
         parameterList1.add(m_alphaParameter);
         parameterList1.add(m_nbinsParameter);
         parameterList1.add(m_pzParameter);
+        parameterList1.add(m_graphicalParameter);
         
         parameterList1.getPanel(); // generate panel at once
         m_pi0MethodParameter.addLinkedParameters(linkedParameters); // link parameter, it will modify the panel
-
+        m_logFCThresholdParameter.addLinkedParameters(graphicalLinkParameterVerticalCursor);
+        m_pvalueThresholdParameter.addLinkedParameters(graphicalLinkParameterHorizontalCursor);
+        
         // forbid to change values for some methods
         m_nbinsParameter.getComponent().setEnabled(false);
         m_pzParameter.getComponent().setEnabled(false);
         m_alphaParameter.getComponent().setEnabled(false);
 
+    }
+    
+    private GraphicsPanel createScatterParameter(GlobalTableModelInterface srcModel) {
+        int bestXColumnIndex = srcModel.getBestXAxisColIndex(PlotType.SCATTER_PLOT);
+        int bestYColumnIndex = srcModel.getBestYAxisColIndex(PlotType.SCATTER_PLOT);
+        
+        LockedDataGraphicsModel graphicsModelInterface = new LockedDataGraphicsModel(srcModel, PlotType.SCATTER_PLOT, (Integer) bestXColumnIndex, (Integer) bestYColumnIndex);
+        AbstractDataBox box = new DataboxGraphics(true);
+        box.createPanel();
+        box.setEntryData(graphicsModelInterface);
+        GraphicsPanel graphicsPanel = (GraphicsPanel) box.getPanel();
+        
+        PlotAbstract plot = graphicsPanel.getPlotGraphics();
+        final BasePlotPanel basePlotPanel = plot.getBasePlotPanel();
+        basePlotPanel.setPreferredSize(new Dimension(600,400));
+        
+
+        m_verticalCursor = new VerticalCursor(basePlotPanel, 0);
+        m_verticalCursor.setMinValue(new Double(0));
+        m_mirrorVerticalCursor = new VerticalCursor(basePlotPanel, 0);
+        m_mirrorVerticalCursor.setSelectable(false);
+        
+
+        m_horizontalCursor = new HorizontalCursor(basePlotPanel, 0);
+        m_horizontalCursor.setMinValue(new Double(0));
+
+        plot.addCursor(m_horizontalCursor);
+        plot.addCursor(m_mirrorVerticalCursor);
+        plot.addCursor(m_verticalCursor);
+        
+        
+        ComponentParameterInterface componentParameter = new ComponentParameterInterface() {
+            @Override
+            public JComponent getComponent() {
+                return basePlotPanel;
+            }
+
+            @Override
+            public ParameterError checkParameter() {
+                return null;
+            }
+
+            @Override
+            public String getStringValue() {
+                return String.valueOf(m_verticalCursor.getValue());
+            }
+
+            @Override
+            public Object getObjectValue() {
+                return m_verticalCursor.getValue();
+            }
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                AbstractCursor c = (AbstractCursor) e.getSource();
+                
+                if (c instanceof VerticalCursor) {
+                    String v = ((VerticalCursor)c).getFormattedValue();
+                    v = v.replaceAll(",", "."); //JPM.WART for 2,0E2
+                    double d = new BigDecimal(v).doubleValue();
+                    m_logFCThresholdParameter.setValue(String.valueOf(d));
+                } else if  (c instanceof HorizontalCursor) {
+                    String v = ((HorizontalCursor)c).getFormattedValue();
+                    v = v.replaceAll(",", "."); //JPM.WART for 2,0E2
+                    double d = new BigDecimal(v).doubleValue();
+                    m_pvalueThresholdParameter.setValue(String.valueOf(d));
+                }
+            }
+            
+        };
+        
+        m_verticalCursor.addActionListener(componentParameter);
+        m_verticalCursor.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                VerticalCursor c = (VerticalCursor) e.getSource();
+                double v = c.getValue();
+                m_mirrorVerticalCursor.setValue(-v);
+            }
+            
+        });
+        
+        m_horizontalCursor.addActionListener(componentParameter);
+        
+        m_graphicalParameter = new ValuesFromComponentParameter("LogFCAndPValue", "LogFCAndPValue", componentParameter); 
+        m_graphicalParameter.forceShowLabel(AbstractParameter.LabelVisibility.NO_VISIBLE);
+
+        return graphicsPanel;
     }
     
     @Override

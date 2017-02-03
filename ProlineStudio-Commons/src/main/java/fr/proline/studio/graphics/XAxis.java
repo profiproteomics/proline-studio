@@ -74,12 +74,23 @@ public class XAxis extends Axis {
 
     
     @Override
-    public void paintCursor(Graphics2D g, double x, boolean selected) {
-        
+    public void paintCursor(Graphics2D g, AbstractCursor cursor, boolean selected) {
+
         final int DELTA = 3;
         
-        int integerDigits = m_ticks.getIntegerDigits();
-        int fractionalDigits = m_ticks.getFractionalDigits()+2;
+        double x = cursor.getValue();
+
+        int integerDigits = cursor.getIntegerDigits();
+        if (integerDigits == -1) {
+            integerDigits = m_ticks.getIntegerDigits();
+        }
+        int fractionalDigits = cursor.getFractionalDigits();
+        if (fractionalDigits == -1) {
+            fractionalDigits = m_ticks.getFractionalDigits()+2;
+        }
+        
+        
+        
         double multForRounding = Math.pow(10, fractionalDigits);
   
         String label;
@@ -102,6 +113,7 @@ public class XAxis extends Axis {
             
             label = df.format(xDisplay);
 
+            cursor.setFormat(integerDigits, fractionalDigits, df);
         }
         
         int stringWidth = m_valuesFontMetrics.stringWidth(label);
@@ -141,6 +153,7 @@ public class XAxis extends Axis {
 
         // restore stroke
         g.setStroke(prevStroke);
+
     }
 
     /**

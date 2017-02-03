@@ -44,6 +44,7 @@ public abstract class PlotAbstract implements Axis.EnumXInterface, Axis.EnumYInt
     public abstract boolean needsYAxis();
 
     public abstract double getNearestXData(double x);
+    public abstract double getNearestYData(double y);
     
     public abstract ArrayList<Long> getSelectedIds();
     public abstract void setSelectedIds(ArrayList<Long> selection);
@@ -59,7 +60,9 @@ public abstract class PlotAbstract implements Axis.EnumXInterface, Axis.EnumYInt
         m_crossSelectionInterface = crossSelectionInterface;
     }
     
-    
+    public BasePlotPanel getBasePlotPanel() {
+        return m_plotPanel;
+    }
     
     public abstract String getToolTipText(double x, double y);
     

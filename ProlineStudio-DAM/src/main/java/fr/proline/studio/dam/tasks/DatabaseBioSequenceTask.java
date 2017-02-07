@@ -80,16 +80,18 @@ public class DatabaseBioSequenceTask extends AbstractDatabaseTask {
             values.add(accession);
         }
 
-        Map<String, List<BioSequenceWrapper>> result = BioSequenceProvider.findBioSequencesBySEDbIdentValues(values);
+        Map<String, BioSequenceProvider.SEDbIdentifierRelated> result = BioSequenceProvider.findSEDbIdentRelatedData(values);
 
         for (int i = 0; i < nbProteinMatches; i++) {
             DProteinMatch proteinMatch = proteinMatchList.get(i);
 
-            List<BioSequenceWrapper> bioSequenceWrapperList = result.get(proteinMatch.getAccession());
-            if (bioSequenceWrapperList == null) {
+            BioSequenceProvider.SEDbIdentifierRelated relatedObjects = result.get(proteinMatch.getAccession());
+            if(relatedObjects == null || relatedObjects.getBioSequenceWrappers() == null || relatedObjects.getBioSequenceWrappers().isEmpty()){
                 proteinMatch.setDBioSequence(null);
                 continue;
             }
+            
+            List<BioSequenceWrapper> bioSequenceWrapperList = relatedObjects.getBioSequenceWrappers();
 
             PeptideSet peptideSet = null;
             if (rsmId != null) {

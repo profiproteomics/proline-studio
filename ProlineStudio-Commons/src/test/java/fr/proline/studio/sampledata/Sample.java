@@ -1,7 +1,9 @@
 package fr.proline.studio.sampledata;
 
 import fr.proline.studio.comparedata.CompareDataInterface;
+import fr.proline.studio.comparedata.ExtraDataType;
 import fr.proline.studio.graphics.PlotInformation;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import javax.swing.table.TableModel;
@@ -88,6 +90,36 @@ public class Sample implements CompareDataInterface {
     @Override
     public int uniqueId2Row(long id) {
         return (int) id;
+    }
+
+    @Override
+    public ArrayList<ExtraDataType> getExtraDataTypes() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public Object getValue(Class c) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public Object getRowValue(Class c, int row) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public Object getColValue(Class c, int col) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void addSingleValue(Object v) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public Object getSingleValue(Class c) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
 }

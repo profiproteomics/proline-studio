@@ -34,7 +34,7 @@ public class VerticalCursor extends AbstractCursor {
     public void paint(Graphics2D g) {
         
         Stroke prevStroke = g.getStroke();
-        g.setStroke(m_selected ? AbstractCursor.LINE2_STROKE : AbstractCursor.LINE1_STROKE);
+        g.setStroke(m_selected ? AbstractCursor.LINE2_STROKE : m_stroke);
         
         XAxis xAxis = m_plotPanel.getXAxis();
         YAxis yAxis = m_plotPanel.getYAxis();
@@ -43,7 +43,7 @@ public class VerticalCursor extends AbstractCursor {
         int y1 = yAxis.valueToPixel(yAxis.getMinValue());
         int y2 = yAxis.valueToPixel(yAxis.getMaxValue());
 
-        g.setColor(CURSOR_COLOR);
+        g.setColor(m_color);
         g.drawLine(m_positionX, y1, m_positionX, y2);
         
         

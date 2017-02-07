@@ -417,7 +417,7 @@ public class BaseGraphicsPanel extends HourglassPanel implements GridListener {
     }
     private void setDataImpl(CompareDataInterface values, CrossSelectionInterface crossSelectionInterface) {
 
-        m_values = values;
+          m_values = values;
         m_crossSelectionInterface = crossSelectionInterface;
         
         if (values == null) {

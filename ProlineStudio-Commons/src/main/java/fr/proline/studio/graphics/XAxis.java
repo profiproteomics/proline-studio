@@ -123,7 +123,7 @@ public class XAxis extends Axis {
         int height = m_valuesFontMetrics.getHeight();
         
         Stroke prevStroke = g.getStroke();
-        g.setStroke(selected ? AbstractCursor.LINE2_STROKE : AbstractCursor.LINE1_STROKE);
+        g.setStroke(selected ? AbstractCursor.LINE2_STROKE : cursor.getStroke());
         
         g.setColor(Color.white);
         
@@ -134,7 +134,7 @@ public class XAxis extends Axis {
             // Cursor X Flag painted at right
             g.fillRect(posX, m_y + 4 + BasePlotPanel.GAP_AXIS_LINE - DELTA, stringWidth + DELTA * 2, height + DELTA * 2);
 
-            g.setColor(AbstractCursor.CURSOR_COLOR);
+            g.setColor(cursor.getColor());
             g.drawLine(posX, m_y, posX, m_y + 4 + BasePlotPanel.GAP_AXIS_LINE - DELTA);
             g.drawRect(posX, m_y + 4 + BasePlotPanel.GAP_AXIS_LINE - DELTA, stringWidth + DELTA * 2, height + DELTA * 2);
 
@@ -143,7 +143,7 @@ public class XAxis extends Axis {
             // Cursor X Flag painted at left
             g.fillRect(posX-(stringWidth + DELTA * 2), m_y + 4 + BasePlotPanel.GAP_AXIS_LINE - DELTA, stringWidth + DELTA * 2, height + DELTA * 2);
 
-            g.setColor(AbstractCursor.CURSOR_COLOR);
+            g.setColor(cursor.getColor());
             g.drawLine(posX, m_y, posX, m_y + 4 + BasePlotPanel.GAP_AXIS_LINE - DELTA);
             g.drawRect(posX-(stringWidth + DELTA * 2), m_y + 4 + BasePlotPanel.GAP_AXIS_LINE - DELTA, stringWidth + DELTA * 2, height + DELTA * 2);
 

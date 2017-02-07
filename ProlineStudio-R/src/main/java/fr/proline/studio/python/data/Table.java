@@ -149,7 +149,7 @@ public class Table extends PyObject {
             TableModel model = table.getModel();
             if (model instanceof CompoundTableModel) {
                 ExprTableModel exprModel = new ExprTableModel(col, colRenderer, ((CompoundTableModel) model).getLastNonFilterModel());
-                exprModel.addExtraColumnInfo(colExtraInfo);
+                exprModel.addExtraColumnInfo(m_model.getColumnCount()-1, colExtraInfo);
                 ((CompoundTableModel) model).addModel(exprModel);
             }
 
@@ -162,7 +162,7 @@ public class Table extends PyObject {
         } else {
             // we have only the model
             m_model = new ExprTableModel(col, colRenderer, m_model);
-            ((ExprTableModel)m_model).addExtraColumnInfo(colExtraInfo);
+            ((ExprTableModel)m_model).addExtraColumnInfo(m_model.getColumnCount()-1, colExtraInfo);
         }
 
     }

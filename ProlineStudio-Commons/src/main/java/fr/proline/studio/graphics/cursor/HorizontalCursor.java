@@ -3,11 +3,11 @@ package fr.proline.studio.graphics.cursor;
 import fr.proline.studio.graphics.BasePlotPanel;
 import fr.proline.studio.graphics.XAxis;
 import fr.proline.studio.graphics.YAxis;
-import static fr.proline.studio.graphics.cursor.AbstractCursor.CURSOR_COLOR;
 import java.awt.Graphics2D;
 import java.awt.Stroke;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import static fr.proline.studio.graphics.cursor.AbstractCursor.DEFAULT_CURSOR_COLOR;
 
 /**
  *
@@ -34,7 +34,7 @@ public class HorizontalCursor extends AbstractCursor {
     public void paint(Graphics2D g) {
         
         Stroke prevStroke = g.getStroke();
-        g.setStroke(m_selected ? AbstractCursor.LINE2_STROKE : AbstractCursor.LINE1_STROKE);
+        g.setStroke(m_selected ? AbstractCursor.LINE2_STROKE : m_stroke);
         
         XAxis xAxis = m_plotPanel.getXAxis();
         YAxis yAxis = m_plotPanel.getYAxis();
@@ -43,7 +43,7 @@ public class HorizontalCursor extends AbstractCursor {
         int x1 = xAxis.valueToPixel(xAxis.getMinValue());
         int x2 = xAxis.valueToPixel(xAxis.getMaxValue());
 
-        g.setColor(CURSOR_COLOR);
+        g.setColor(m_color);
         g.drawLine(x1, m_positionY, x2, m_positionY);
         
         

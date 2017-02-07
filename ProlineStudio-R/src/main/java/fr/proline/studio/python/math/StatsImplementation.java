@@ -365,7 +365,6 @@ public class StatsImplementation {
         
         
         double pvalueThresholdDouble = StrictMath.pow(10, -pvalueLogThreshold.getValue());
-        double test = -StrictMath.log10(pvalueThresholdDouble);
         double logFCThresholdDouble = logFCThreshold.getValue();
         
         for (int i = 0; i < nbRow; i++) {

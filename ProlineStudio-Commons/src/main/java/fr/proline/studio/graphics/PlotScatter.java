@@ -1,7 +1,10 @@
 package fr.proline.studio.graphics;
 
 import fr.proline.studio.comparedata.CompareDataInterface;
+import fr.proline.studio.comparedata.ExtraDataInterface;
 import fr.proline.studio.graphics.cursor.AbstractCursor;
+import fr.proline.studio.graphics.cursor.CursorInfo;
+import fr.proline.studio.graphics.cursor.CursorInfoList;
 import fr.proline.studio.graphics.cursor.HorizontalCursor;
 import fr.proline.studio.graphics.cursor.VerticalCursor;
 import fr.proline.studio.graphics.marker.AbstractMarker;
@@ -109,6 +112,9 @@ public class PlotScatter extends PlotAbstract implements Axis.EnumXInterface, Ax
         m_parameterListArray = new  ArrayList<>(2);
         m_parameterListArray.add(colorParameteList);
         m_parameterListArray.add(settingsParameterList);
+        
+
+        
     }
 
     
@@ -598,6 +604,28 @@ public class PlotScatter extends PlotAbstract implements Axis.EnumXInterface, Ax
         m_plotPanel.setXAxisTitle(m_compareDataInterface.getDataColumnIdentifier(m_colX));
         m_plotPanel.setYAxisTitle(m_compareDataInterface.getDataColumnIdentifier(m_colY));
 
+
+        if (m_compareDataInterface instanceof ExtraDataInterface) {
+            CursorInfoList cursorInfoList = (CursorInfoList) ((ExtraDataInterface) m_compareDataInterface).getColValue(CursorInfoList.class, m_colX);
+            if (cursorInfoList != null) {
+                for (CursorInfo info : cursorInfoList.getCursorInfoList()) {
+                    VerticalCursor cursor = new VerticalCursor(m_plotPanel, info.getValue());
+                    info.applyParametersToCursor(cursor);
+                    addCursor(cursor);
+                }
+            }
+            
+            cursorInfoList = (CursorInfoList) ((ExtraDataInterface) m_compareDataInterface).getColValue(CursorInfoList.class, m_colY);
+            if (cursorInfoList != null) {
+                for (CursorInfo info : cursorInfoList.getCursorInfoList()) {
+                    HorizontalCursor cursor = new HorizontalCursor(m_plotPanel, info.getValue());
+                    info.applyParametersToCursor(cursor);
+                    addCursor(cursor);
+                }
+            }
+        }
+
+        
 
         m_plotPanel.repaint();
     }

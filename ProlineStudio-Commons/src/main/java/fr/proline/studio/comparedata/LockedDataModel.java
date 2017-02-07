@@ -3,6 +3,7 @@ package fr.proline.studio.comparedata;
 import fr.proline.studio.graphics.BestGraphicsInterface;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
+import java.util.ArrayList;
 import java.util.Map;
 
 /**
@@ -149,6 +150,36 @@ public class LockedDataModel implements CompareDataInterface, BestGraphicsInterf
             }
         }
         return -1; // should never happen
+    }
+
+    @Override
+    public ArrayList<ExtraDataType> getExtraDataTypes() {
+        return m_src.getExtraDataTypes();
+    }
+
+    @Override
+    public Object getValue(Class c) {
+        return m_src.getValue(c);
+    }
+
+    @Override
+    public Object getRowValue(Class c, int row) {
+        return m_src.getRowValue(c, row);
+    }
+
+    @Override
+    public Object getColValue(Class c, int col) {
+        return m_src.getColValue(c, col);
+    }
+
+    @Override
+    public void addSingleValue(Object v) {
+        // not used
+    }
+
+    @Override
+    public Object getSingleValue(Class c) {
+        return m_src.getSingleValue(c);
     }
 
 }

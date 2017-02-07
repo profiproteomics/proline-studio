@@ -128,7 +128,7 @@ public class YAxis extends Axis {
         
         
         Stroke prevStroke = g.getStroke();
-        g.setStroke(selected ? AbstractCursor.LINE2_STROKE : AbstractCursor.LINE1_STROKE);
+        g.setStroke(selected ? AbstractCursor.LINE2_STROKE : cursor.getStroke());
 
         g.setFont(m_valuesFont);
 
@@ -141,7 +141,7 @@ public class YAxis extends Axis {
         g.setColor(Color.white);
         g.fillRect(x1, pY - halfAscent - DELTA, x2-x1, height + DELTA * 2);
         
-        g.setColor(AbstractCursor.CURSOR_COLOR);
+        g.setColor(cursor.getColor());
         g.drawRect(x1, pY - halfAscent - DELTA, x2-x1, height + DELTA * 2);
         
         g.drawString(label, m_x + m_width - stringWidth - 6-BasePlotPanel.GAP_AXIS_LINE, pY + halfAscent);

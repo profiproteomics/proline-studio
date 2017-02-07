@@ -1,6 +1,7 @@
 package fr.proline.studio.comparedata;
 
 import fr.proline.studio.graphics.PlotInformation;
+import java.util.ArrayList;
 import java.util.Map;
 
 /**
@@ -9,19 +10,19 @@ import java.util.Map;
  */
 public class StatsModel implements CompareDataInterface {
 
-    private final CompareDataInterface m_sourceDataInterface;
+    private final CompareDataInterface m_src;
     private final int m_colSelected;
 
     private String m_modelName;
 
     public StatsModel(CompareDataInterface sourceDataInterface, int colSelected) {
-        m_sourceDataInterface = sourceDataInterface;
+        m_src = sourceDataInterface;
         m_colSelected = colSelected;
     }
 
     @Override
     public int getRowCount() {
-        return m_sourceDataInterface.getRowCount();
+        return m_src.getRowCount();
     }
 
     @Override
@@ -31,17 +32,17 @@ public class StatsModel implements CompareDataInterface {
 
     @Override
     public String getDataColumnIdentifier(int columnIndex) {
-        return m_sourceDataInterface.getDataColumnIdentifier(m_colSelected);
+        return m_src.getDataColumnIdentifier(m_colSelected);
     }
 
     @Override
     public Class getDataColumnClass(int columnIndex) {
-        return m_sourceDataInterface.getDataColumnClass(m_colSelected);
+        return m_src.getDataColumnClass(m_colSelected);
     }
 
     @Override
     public Object getDataValueAt(int rowIndex, int columnIndex) {
-        return m_sourceDataInterface.getDataValueAt(rowIndex, columnIndex);
+        return m_src.getDataValueAt(rowIndex, columnIndex);
     }
 
     @Override
@@ -116,28 +117,58 @@ public class StatsModel implements CompareDataInterface {
 
     @Override
     public int getInfoColumn() {
-        return m_sourceDataInterface.getInfoColumn();
+        return m_src.getInfoColumn();
     }
     
     @Override
     public Map<String, Object> getExternalData() {
-        return m_sourceDataInterface.getExternalData();
+        return m_src.getExternalData();
     }
     
     
     @Override
     public PlotInformation getPlotInformation() {
-        return m_sourceDataInterface.getPlotInformation();
+        return m_src.getPlotInformation();
     }
 
     @Override
     public long row2UniqueId(int rowIndex) {
-        return m_sourceDataInterface.row2UniqueId(rowIndex);
+        return m_src.row2UniqueId(rowIndex);
     }
     
     @Override
     public int uniqueId2Row(long id) {
-        return m_sourceDataInterface.uniqueId2Row(id);
+        return m_src.uniqueId2Row(id);
+    }
+
+    @Override
+    public ArrayList<ExtraDataType> getExtraDataTypes() {
+        return m_src.getExtraDataTypes();
+    }
+
+    @Override
+    public Object getValue(Class c) {
+        return m_src.getValue(c);
+    }
+
+    @Override
+    public Object getRowValue(Class c, int row) {
+        return m_src.getRowValue(c, row);
+    }
+
+    @Override
+    public Object getColValue(Class c, int col) {
+        return m_src.getColValue(c, col);
+    }
+
+    @Override
+    public void addSingleValue(Object v) {
+        // not used
+    }
+
+    @Override
+    public Object getSingleValue(Class c) {
+        return m_src.getSingleValue(c);
     }
     
 }

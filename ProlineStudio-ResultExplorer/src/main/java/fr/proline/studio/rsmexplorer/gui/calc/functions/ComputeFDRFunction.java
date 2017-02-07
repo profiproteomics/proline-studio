@@ -4,6 +4,8 @@ import fr.proline.studio.graphics.BasePlotPanel;
 import fr.proline.studio.graphics.PlotAbstract;
 import fr.proline.studio.graphics.PlotType;
 import fr.proline.studio.graphics.cursor.AbstractCursor;
+import fr.proline.studio.graphics.cursor.CursorInfo;
+import fr.proline.studio.graphics.cursor.CursorInfoList;
 import fr.proline.studio.graphics.cursor.HorizontalCursor;
 import fr.proline.studio.graphics.cursor.VerticalCursor;
 import fr.proline.studio.parameter.AbstractLinkedParameters;
@@ -19,6 +21,7 @@ import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataboxGraphics;
 import fr.proline.studio.pattern.WindowBox;
 import fr.proline.studio.python.data.ColRef;
+import fr.proline.studio.python.data.ExprTableModel;
 import fr.proline.studio.python.data.Table;
 import fr.proline.studio.python.data.ValuesTableModel;
 import fr.proline.studio.python.interpreter.CalcCallback;
@@ -36,6 +39,7 @@ import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.types.LogInfo;
 import fr.proline.studio.types.LogRatio;
 import fr.proline.studio.types.PValue;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -230,7 +234,34 @@ public class ComputeFDRFunction extends AbstractFunction {
                                     // we have found the result
                                     Table resTable = (Table) var.getValue();
 
-                                    addModel(resTable.getModel());
+                                    ExprTableModel model = (ExprTableModel) resTable.getModel();
+                                    
+                                    GlobalTableModelInterface srcModel = graphObjects[0].getGlobalTableModelInterface();
+                                    int bestXColumnIndex = srcModel.getBestXAxisColIndex(PlotType.SCATTER_PLOT);
+                                    int bestYColumnIndex = srcModel.getBestYAxisColIndex(PlotType.SCATTER_PLOT);
+                                    
+                                    CursorInfoList cursorInfoListX = new CursorInfoList();
+                                    CursorInfo cursorInfo1 = new CursorInfo(m_verticalCursor.getValue());
+                                    cursorInfo1.setColor(Color.blue);
+                                    cursorInfo1.setStroke(AbstractCursor.LINE2_STROKE);
+                                    cursorInfo1.setSelectable(Boolean.FALSE);
+                                    cursorInfoListX.addCursorInfo(cursorInfo1);
+                                    CursorInfo cursorInfo2 = new CursorInfo(m_mirrorVerticalCursor.getValue());
+                                    cursorInfo2.setColor(Color.blue);
+                                    cursorInfo2.setStroke(AbstractCursor.LINE2_STROKE);
+                                    cursorInfo2.setSelectable(Boolean.FALSE);
+                                    cursorInfoListX.addCursorInfo(cursorInfo2);
+                                    model.addExtraColumnInfo(bestXColumnIndex, cursorInfoListX);
+                                    
+                                    CursorInfoList cursorInfoListY = new CursorInfoList();
+                                    CursorInfo cursorInfoY = new CursorInfo(m_horizontalCursor.getValue());
+                                    cursorInfoY.setColor(Color.blue);
+                                    cursorInfoY.setStroke(AbstractCursor.LINE2_STROKE);
+                                    cursorInfoY.setSelectable(Boolean.FALSE);
+                                    cursorInfoListY.addCursorInfo(cursorInfoY);
+                                    model.addExtraColumnInfo(bestYColumnIndex, cursorInfoListY);
+                                    
+                                    addModel(model);
 
                                 }
                             }
@@ -416,12 +447,17 @@ public class ComputeFDRFunction extends AbstractFunction {
 
         m_verticalCursor = new VerticalCursor(basePlotPanel, 0);
         m_verticalCursor.setMinValue(new Double(0));
+        m_verticalCursor.setColor(Color.blue);
+        m_verticalCursor.setStroke(AbstractCursor.LINE2_STROKE);
         m_mirrorVerticalCursor = new VerticalCursor(basePlotPanel, 0);
-        m_mirrorVerticalCursor.setSelectable(false);
+        m_mirrorVerticalCursor.setColor(Color.blue);
+        m_mirrorVerticalCursor.setStroke(AbstractCursor.LINE2_STROKE);
         
 
         m_horizontalCursor = new HorizontalCursor(basePlotPanel, 0);
         m_horizontalCursor.setMinValue(new Double(0));
+        m_horizontalCursor.setColor(Color.blue);
+        m_horizontalCursor.setStroke(AbstractCursor.LINE2_STROKE);
 
         plot.addCursor(m_horizontalCursor);
         plot.addCursor(m_mirrorVerticalCursor);
@@ -457,6 +493,9 @@ public class ComputeFDRFunction extends AbstractFunction {
                     String v = ((VerticalCursor)c).getFormattedValue();
                     v = v.replaceAll(",", "."); //JPM.WART for 2,0E2
                     double d = new BigDecimal(v).doubleValue();
+                    if (d<0) {
+                        d = -d;
+                    }
                     m_logFCThresholdParameter.setValue(String.valueOf(d));
                 } else if  (c instanceof HorizontalCursor) {
                     String v = ((HorizontalCursor)c).getFormattedValue();
@@ -468,16 +507,35 @@ public class ComputeFDRFunction extends AbstractFunction {
             
         };
         
-        m_verticalCursor.addActionListener(componentParameter);
+        
         m_verticalCursor.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 VerticalCursor c = (VerticalCursor) e.getSource();
                 double v = c.getValue();
+                 if (m_mirrorVerticalCursor.getValue() == -v) {
+                    return;
+                }
                 m_mirrorVerticalCursor.setValue(-v);
             }
             
         });
+        m_verticalCursor.addActionListener(componentParameter);
+        
+        m_mirrorVerticalCursor.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                VerticalCursor c = (VerticalCursor) e.getSource();
+                double v = c.getValue();
+                if (m_verticalCursor.getValue() == -v) {
+                    return;
+                }
+                m_verticalCursor.setValue(-v);
+            }
+            
+        });
+         m_mirrorVerticalCursor.addActionListener(componentParameter);
+        
         
         m_horizontalCursor.addActionListener(componentParameter);
         

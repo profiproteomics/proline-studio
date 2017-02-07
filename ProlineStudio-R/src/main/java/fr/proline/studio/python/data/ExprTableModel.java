@@ -15,6 +15,7 @@ import fr.proline.studio.table.renderer.DefaultRightAlignRenderer;
 import fr.proline.studio.table.renderer.DoubleRenderer;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import javax.swing.event.TableModelEvent;
@@ -30,12 +31,13 @@ public class ExprTableModel extends DecoratedTableModel implements ChildModelInt
     private GlobalTableModelInterface m_parentModel;
     
     public static DoubleRenderer DOUBLE_RENDERER = new DoubleRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 4, true, true);
+
+    // for a column Index gives back a Map of values according to a class
+    private HashMap<Integer, HashMap<Class, Object>> m_colValueMap = null;
     
     private HashMap<Integer, Col> m_modifiedColumns = null;
-    private HashMap<Integer, Object> m_modifiedColumnsExtraInfo = null;
-    
+
     private final ArrayList<Col> m_extraColumns = new ArrayList();
-    private final ArrayList<HashMap<Class, Object>> m_extraColumnInfos = new ArrayList();
     private final ArrayList<TableCellRenderer> m_extraColumnRenderers = new ArrayList();
     
 
@@ -49,25 +51,26 @@ public class ExprTableModel extends DecoratedTableModel implements ChildModelInt
     
     public final void addExtraColumn(Col column, TableCellRenderer colRenderer) {
         m_extraColumns.add(column);
-        m_extraColumnInfos.add(null);
         m_extraColumnRenderers.add(colRenderer);
     }
     
-    public final void addExtraColumnInfo(Object colExtraInfo) {
+    public final void addExtraColumnInfo(int colIndex, Object colExtraInfo) {
         if (colExtraInfo == null) {
             return;
         }
         
+        if (m_colValueMap == null) {
+            m_colValueMap = new HashMap<>();
+        }
+
+        Class c = colExtraInfo.getClass();
         
-        int lastIndex = m_extraColumnInfos.size()-1;
-        
-        HashMap<Class, Object> map = m_extraColumnInfos.get(lastIndex);
+        HashMap<Class, Object> map = m_colValueMap.get(colIndex);
         if (map == null) {
             map = new HashMap<>();
-            m_extraColumnInfos.set(lastIndex, map);
+            m_colValueMap.put(colIndex, map);
         }
-        
-        map.put(colExtraInfo.getClass(), colExtraInfo);
+        map.put(c, colExtraInfo);
 
     }
 
@@ -75,7 +78,28 @@ public class ExprTableModel extends DecoratedTableModel implements ChildModelInt
     
     public final void modifyColumnValues(HashMap<Integer, Col> modifiedColumns, HashMap<Integer, Object> modifiedColumnsExtraInfo) {
         m_modifiedColumns = modifiedColumns;
-        m_modifiedColumnsExtraInfo = modifiedColumnsExtraInfo;
+        
+        if (modifiedColumnsExtraInfo != null) {
+
+            if (m_colValueMap == null) {
+                m_colValueMap = new HashMap<>();
+            }
+        
+            Iterator<Integer> it = modifiedColumnsExtraInfo.keySet().iterator();
+            while (it.hasNext()) {
+                Integer colIndex = it.next();
+                Object value = modifiedColumnsExtraInfo.get(colIndex);
+                Class c = value.getClass();
+                
+                HashMap<Class, Object> map = m_colValueMap.get(colIndex);
+                if (map == null) {
+                    map = new HashMap<>();
+                    m_colValueMap.put(colIndex, map);
+                }
+                map.put(c, value);
+            }
+        }
+
     }
     
     @Override
@@ -440,26 +464,23 @@ public class ExprTableModel extends DecoratedTableModel implements ChildModelInt
     @Override
     public Object getColValue(Class c, int col) {
         
-        
-        if (m_modifiedColumnsExtraInfo!=null) {
-            Object colExtraInfo = m_modifiedColumnsExtraInfo.get(col);
-            if ((colExtraInfo != null) && (c.equals(colExtraInfo.getClass()))) {
-                return colExtraInfo;
-            }
+        if (m_colValueMap != null) {
+           HashMap<Class, Object> map = m_colValueMap.get(col);
+           if (map != null) {
+               Object value = map.get(c);
+               if (value != null) {
+                   return value;
+               }
+           }
         }
-        
         
         int parentCount = m_parentModel.getColumnCount();
-        if (col >= parentCount) {
-            HashMap<Class, Object> colExtraInfoMap = m_extraColumnInfos.get(col - parentCount);
-            if (colExtraInfoMap != null) {
-                Object colExtraInfo = colExtraInfoMap.get(c);
-                return colExtraInfo;
-            }
-            return null;
+        if (col < parentCount) {
+            return m_parentModel.getColValue(c, col);
         }
+        
+        return null;
 
-        return m_parentModel.getColValue(c, col);
     }
  
 }

@@ -15,7 +15,7 @@ import java.util.ArrayList;
  */
 public abstract class AbstractCursor implements MoveableInterface {
 
-    public final static Color CURSOR_COLOR = new Color(160,82,45);
+    public final static Color DEFAULT_CURSOR_COLOR = new Color(160,82,45);
     public final static BasicStroke LINE1_STROKE = new BasicStroke(1.0f);
     public final static BasicStroke LINE2_STROKE = new BasicStroke(2.0f);
     
@@ -41,10 +41,29 @@ public abstract class AbstractCursor implements MoveableInterface {
     protected int m_fractionalDigits = -1;
     protected DecimalFormat m_df = null;
     
+    protected Color m_color = DEFAULT_CURSOR_COLOR;
+    protected BasicStroke m_stroke = LINE1_STROKE;
+    
     public AbstractCursor(BasePlotPanel plotPanel) {
         m_plotPanel = plotPanel;
     }
 
+    public void setColor(Color c) {
+        m_color = c;
+    }
+    
+    public Color getColor() {
+        return m_color;
+    }
+    
+    public void setStroke(BasicStroke s) {
+        m_stroke = s;
+    }
+    
+    public BasicStroke getStroke() {
+        return m_stroke;
+    }
+    
     public double getValue() {
         return m_value;
     }

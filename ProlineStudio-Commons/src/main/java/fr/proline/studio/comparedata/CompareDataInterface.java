@@ -7,7 +7,7 @@ import java.util.Map;
  * JPM.TODO : rename this class
  * @author JM235353
  */
-public interface CompareDataInterface {
+public interface CompareDataInterface extends ExtraDataInterface {
     
     public static String EXTERNAL_DATA_VERTICAL_MARKER_VALUE = "VERTICAL_MARKER_VALUE"; // List<Double> as Object expected
     public static String EXTERNAL_DATA_VERTICAL_MARKER_TEXT = "VERTICAL_MARKER_TEXT"; // List<String> as Object expected, corresponding to the values

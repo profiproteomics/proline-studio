@@ -26,7 +26,7 @@ public class RunInfoData extends AbstractData {
     
     private ArrayList<RawFile> m_potentialRawFileList = null;
     
-    private boolean m_runInfoInDatabase = false;
+//    private boolean m_runInfoInDatabase = false;
     
     public RunInfoData() {
         
@@ -37,7 +37,7 @@ public class RunInfoData extends AbstractData {
     }
     
     public boolean hasPotentialRawFiles() {
-        return m_potentialRawFileList!=null;
+        return m_potentialRawFileList!=null && !m_potentialRawFileList.isEmpty() ;
     }
     
     public ArrayList<RawFile> getPotentialRawFiles() {
@@ -84,6 +84,7 @@ public class RunInfoData extends AbstractData {
             return true;
         } 
         RawFile selectedRawFile = m_rawFileSource.getSelectedRawFile();
+        //VDS : if getSelectedRawFile changed, this test is not necessary !
         if (selectedRawFile!=null && selectedRawFile.getOwnerId()!=0) {
             return true;
         }
@@ -130,6 +131,8 @@ public class RunInfoData extends AbstractData {
     
     public static class RawFileSource {
         
+        //VDTEST : use status / mask to get current source : already linked // associate to existing run/raw file in UDS //  associate to a file !may be defined in UDS !
+        
         private File m_rawFileOnDisk = null;
         private RawFile m_linkedRawFile = null;
         private RawFile m_selectedRawFile = null;
@@ -137,28 +140,27 @@ public class RunInfoData extends AbstractData {
         public RawFileSource() {
             
         }
-        
-        
+               
         
         public boolean hasRawFile() {
             return ((m_linkedRawFile!=null) || (m_selectedRawFile!=null) || (m_rawFileOnDisk!=null));
         }
         
-         public String getName() {
-             if (m_linkedRawFile != null) {
-                 return m_linkedRawFile.getMzDbFileName();
-             }
-             if (m_selectedRawFile != null) {
-                 String name = m_selectedRawFile.getMzDbFileName();
-                 if (name != null) {
-                     return name;
-                 }
-             }
-             if (m_rawFileOnDisk != null) {
-                 return m_rawFileOnDisk.getName();
-             }
-             return null;
-         }
+        public String getName() {
+            if (m_linkedRawFile != null) {
+                return m_linkedRawFile.getMzDbFileName();
+            }
+            if (m_selectedRawFile != null) {
+                String name = m_selectedRawFile.getMzDbFileName();
+                if (name != null) {
+                    return name;
+                }
+            }
+            if (m_rawFileOnDisk != null) {
+                return m_rawFileOnDisk.getName();
+            }
+            return null;
+        }
         
         public void setRawFileOnDisk(File rawFileOnDisk) {
             m_rawFileOnDisk = rawFileOnDisk;
@@ -182,6 +184,7 @@ public class RunInfoData extends AbstractData {
         }
         
         public RawFile getSelectedRawFile() {
+            //VDS : TO COMMENT Next session in order to have 2 methods : getSelectedRawFile and createRawFileFromFile...
             if ((m_selectedRawFile == null) && (m_rawFileOnDisk != null)) {
                 RawFile rawFile = new RawFile();
                 rawFile.setRawFileDirectory(m_rawFileOnDisk.getPath());
@@ -196,6 +199,7 @@ public class RunInfoData extends AbstractData {
                 rawFile.setMzDbFileName(m_rawFileOnDisk.getName());
                 m_selectedRawFile = rawFile;
             }
+            //VDS : END TO COMMENT 
             return m_selectedRawFile;
         }
        

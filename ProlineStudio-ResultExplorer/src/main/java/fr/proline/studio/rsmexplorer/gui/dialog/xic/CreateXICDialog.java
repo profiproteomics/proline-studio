@@ -11,7 +11,7 @@ import fr.proline.studio.dam.data.DataSetData;
 import fr.proline.studio.dam.data.RunInfoData;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseRunsTask;
-import fr.proline.studio.dam.tasks.DatabaseVerifySpectrumFromResultSet;
+import fr.proline.studio.dam.tasks.DatabaseVerifySpectrumFromResultSets;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dpm.AccessServiceThread;
 import fr.proline.studio.dpm.jms.AccessJMSManagerThread;
@@ -59,18 +59,13 @@ public class CreateXICDialog extends DefaultDialog {
 
     private static final String SETTINGS_KEY = "XIC";
 
-    private ArrayList<AbstractNode> m_spectrumNodes;
-    private ArrayList<AbstractNode> m_failedSpectrumNodes;
-    private DatabaseVerifySpectrumFromResultSet m_spectrumTask;
-    private int m_currentSpectrumIndex = -1;
-    private boolean m_isSpectrumOK = true;
-
     private static CreateXICDialog m_singletonDialog = null;
 
     private AbstractNode m_finalXICDesignNode = null;
     private IdentificationTree m_selectionTree = null;
 
     private SelectRawFilesPanel m_selectRawFilePanel;
+    private DatabaseVerifySpectrumFromResultSets m_spectrumTask;
 
     private Hashtable<String, XICBiologicalSampleAnalysisNode> m_table;
 
@@ -600,26 +595,10 @@ public class CreateXICDialog extends DefaultDialog {
                 return false;
             }
 
-            if (m_spectrumNodes == null) {
-                m_spectrumNodes = new ArrayList<AbstractNode>();
-            } else {
-                m_spectrumNodes.clear();
-            }
-
-            if (m_failedSpectrumNodes == null) {
-                m_failedSpectrumNodes = new ArrayList<AbstractNode>();
-            } else {
-                m_failedSpectrumNodes.clear();
-            }
-
-            registerSpectrumNodes(m_finalXICDesignNode);
-
-            m_currentSpectrumIndex = 0;
-            m_isSpectrumOK = true;
-
-            this.checkSpectrum(m_spectrumNodes.get(m_currentSpectrumIndex));
-
+            //Will run displayDefineRawFiles if Spectrum are OK ! 
+            this.checkSpectra();
             //displayDefineRawFiles();
+            
             return false;
         } else if (m_step == STEP_PANEL_DEFINE_RAW_FILES) {
 
@@ -739,26 +718,33 @@ public class CreateXICDialog extends DefaultDialog {
 
     }
 
-    private void registerSpectrumNodes(AbstractNode parentNode) {
-
+    private Map<Long, DataSetNode> getSampleAnalysisNodesPerRsId(AbstractNode parentNode) {
+        Map<Long,DataSetNode> spectraNodesPerRsId = new HashMap<>();
         Enumeration children = parentNode.children();
         //Iterate over Groups
         while (children.hasMoreElements()) {
             AbstractNode currentChild = (AbstractNode) children.nextElement();
             AbstractNode.NodeTypes type = currentChild.getType();
             if (type == AbstractNode.NodeTypes.BIOLOGICAL_SAMPLE_ANALYSIS) {
-                m_spectrumNodes.add(currentChild);
+                Long rsID= ((DataSetNode)currentChild).getDataset().getResultSetId();
+                spectraNodesPerRsId.put(rsID,(DataSetNode)currentChild);
             } else {
-                registerSpectrumNodes(currentChild);
+                spectraNodesPerRsId.putAll(getSampleAnalysisNodesPerRsId(currentChild));
             }
         }
+        return spectraNodesPerRsId;
     }
 
-    private void checkSpectrum(AbstractNode abstractNode) {
-        DataSetNode node = (DataSetNode) abstractNode;
-        DDataset dataset = node.getDataset();
-
-        AbstractDatabaseCallback spectrumCallback = new AbstractDatabaseCallback() {
+    private void checkSpectra() {
+      
+        Map<Long, DataSetNode> spectraNodesPerRsId = getSampleAnalysisNodesPerRsId(m_finalXICDesignNode);
+        Long projectId = spectraNodesPerRsId.values().iterator().next().getDataset().getProject().getId();
+        List<Long> resultSetIds = new ArrayList<>();
+        resultSetIds.addAll(spectraNodesPerRsId.keySet());
+        List<Long> failedRSIds = new ArrayList<>();
+        Map<Long, List<Long>> failedSpectraPerRSIds = new HashMap<>();        
+        
+        AbstractDatabaseCallback spectraTestCallback = new AbstractDatabaseCallback() {
             @Override
             public boolean mustBeCalledInAWT() {
                 return true;
@@ -767,31 +753,19 @@ public class CreateXICDialog extends DefaultDialog {
             @Override
             public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
                 if (success) {
-                    long currentSpectrumID = m_spectrumTask.getSpectrumID();
-
-                    if (currentSpectrumID == -1) {
-                        m_failedSpectrumNodes.add(m_spectrumNodes.get(m_currentSpectrumIndex));
-                        m_isSpectrumOK = false;
-                    }
-
-                    if (m_currentSpectrumIndex == m_spectrumNodes.size() - 1) {
-                        if (m_isSpectrumOK) {
-                            displayDefineRawFiles();
-                        } else {
-                            showErrorOnNode(m_failedSpectrumNodes.get(0), "At least of the following attributes {First Time, First Scan, First Cycle} must be initialized. Remove the highlighted node from your design.");
-                        }
-                    } else {
-                        checkSpectrum(m_spectrumNodes.get(++m_currentSpectrumIndex));
-                    }
+                    displayDefineRawFiles();
+                } else {
+                    //VDS TODO : Add popup or something to list all RS and all Spectra(if only few)  in RS that fails
+                    DataSetNode dsNode = spectraNodesPerRsId.get(failedRSIds.get(0));                    
+                    showErrorOnNode(dsNode, dsNode.getDataset().getName()+" at least one of the following attributes {First Time, First Scan, First Cycle} must be initialized. Remove the highlighted node from your design.");
                 }
             }
         };
 
-        m_spectrumTask = new DatabaseVerifySpectrumFromResultSet(spectrumCallback, dataset.getResultSetId(), dataset.getProject().getId());
+        m_spectrumTask = new DatabaseVerifySpectrumFromResultSets(spectraTestCallback, resultSetIds, projectId, failedRSIds,failedSpectraPerRSIds);
         AccessDatabaseThread.getAccessDatabaseThread().addTask(m_spectrumTask);
-
     }
-
+    
     private boolean checkDesignStructure(AbstractNode parentNode) {
         AbstractNode.NodeTypes type = parentNode.getType();
 

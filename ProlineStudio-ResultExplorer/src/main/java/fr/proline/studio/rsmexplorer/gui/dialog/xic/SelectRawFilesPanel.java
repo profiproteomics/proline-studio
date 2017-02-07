@@ -64,7 +64,6 @@ public class SelectRawFilesPanel extends JPanel {
 
     private FlatDesignTableModel m_model = null;
     private FlatDesignTable m_table = null;
-    private final HashMap<String, XICBiologicalSampleAnalysisNode> m_hashtable;
     private XICDropZone m_dropZone;
     private XICDropZoneInfo m_dropZoneInfo;
     private final String[] SUFFIX = {".raw", ".mzdb", ".wiff"};
@@ -90,8 +89,6 @@ public class SelectRawFilesPanel extends JPanel {
     private SelectRawFilesPanel() {
 
         m_transferHandler = new TreeFileChooserTransferHandler();
-
-        m_hashtable = new HashMap<String, XICBiologicalSampleAnalysisNode>();
 
         JPanel wizardPanel = createWizardPanel();
         JPanel mainPanel = createMainPanel();
@@ -230,7 +227,7 @@ public class SelectRawFilesPanel extends JPanel {
             m_model = new FlatDesignTableModel();
             m_table.setModel(m_model);
             m_table.getColumnModel().getColumn(FlatDesignTableModel.COLTYPE_ASSOCIATION_SOURCE).setCellRenderer(new ErrorClassificationRenderer());
-            m_table.setRowHeight(25);
+//            m_table.setRowHeight(25);
             tableScrollPane.setViewportView(m_table);
         } catch (Exception e) {
             //System.out.println(e);
@@ -452,6 +449,7 @@ public class SelectRawFilesPanel extends JPanel {
 
                     XICBiologicalSampleAnalysisNode sampleAnalysisNode = (XICBiologicalSampleAnalysisNode) child;
 
+                    //VDS : If allready existing XICRunNode!! 
                     XICRunNode runNode = new XICRunNode(new RunInfoData());
                     //sampleAnalysisNode.add(runNode);
                     //HACK new method so that runNode is available later when we want to retrieve the potential matching raw files! calls super.add()

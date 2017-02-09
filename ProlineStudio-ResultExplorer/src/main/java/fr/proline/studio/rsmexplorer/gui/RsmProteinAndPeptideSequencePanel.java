@@ -136,13 +136,15 @@ public class RsmProteinAndPeptideSequencePanel extends HourglassPanel implements
         values.add(accession);
  
 
-        Map<String, List<BioSequenceWrapper>> result = BioSequenceProvider.findBioSequencesBySEDbIdentValues(values);
- 
-        List<BioSequenceWrapper> bioSequenceWrapperList = result.get(accession);
-        if (bioSequenceWrapperList == null) {
+        Map<String, BioSequenceProvider.SEDbIdentifierRelated> result = BioSequenceProvider.findSEDbIdentRelatedData(values);
+        
+        BioSequenceProvider.SEDbIdentifierRelated relatedObjects = result.get(accession);
+        if ((relatedObjects == null) || (relatedObjects.getBioSequenceWrappers() == null))  {
             m_editorPane.setText("Protein Sequence not available in database");
             return;
         }
+        
+        List<BioSequenceWrapper> bioSequenceWrapperList = relatedObjects.getBioSequenceWrappers();
         
         BioSequenceWrapper biosequenceWrapperSelected = null;
         int nb = bioSequenceWrapperList.size();

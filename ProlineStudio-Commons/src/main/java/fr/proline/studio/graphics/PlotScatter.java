@@ -605,6 +605,8 @@ public class PlotScatter extends PlotAbstract implements Axis.EnumXInterface, Ax
         m_plotPanel.setYAxisTitle(m_compareDataInterface.getDataColumnIdentifier(m_colY));
 
 
+        removeAllCursors();
+        
         if (m_compareDataInterface instanceof ExtraDataInterface) {
             CursorInfoList cursorInfoList = (CursorInfoList) ((ExtraDataInterface) m_compareDataInterface).getColValue(CursorInfoList.class, m_colX);
             if (cursorInfoList != null) {

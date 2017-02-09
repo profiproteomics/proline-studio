@@ -131,6 +131,13 @@ public abstract class PlotAbstract implements Axis.EnumXInterface, Axis.EnumYInt
         return false;
     }
     
+    public void removeAllCursors() {
+        if (m_cursorList != null) {
+            m_cursorList.clear();
+            m_selectedCursor = null;
+        }
+    }
+    
     public MoveableInterface getOverMovable(int x, int y) {
         if (m_markersList != null) {
             int nb = m_markersList.size();

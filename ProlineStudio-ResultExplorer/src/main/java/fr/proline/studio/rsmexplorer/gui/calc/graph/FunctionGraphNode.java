@@ -300,7 +300,7 @@ public class FunctionGraphNode extends GraphNode {
     }
     
     @Override
-    public SplittedPanelContainer.PanelLayout getAutoDisplayLayoutDuringProcess() {
+    public ArrayList<SplittedPanelContainer.PanelLayout> getAutoDisplayLayoutDuringProcess() {
         return m_function.getAutoDisplayLayoutDuringProcess();
     }
 

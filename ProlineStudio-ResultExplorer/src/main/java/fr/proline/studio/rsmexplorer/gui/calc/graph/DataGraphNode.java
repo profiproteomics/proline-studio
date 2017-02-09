@@ -176,7 +176,7 @@ public class DataGraphNode extends GraphNode {
     }
 
     @Override
-    public SplittedPanelContainer.PanelLayout getAutoDisplayLayoutDuringProcess() {
+    public  ArrayList<SplittedPanelContainer.PanelLayout> getAutoDisplayLayoutDuringProcess() {
         return null;
     }
 

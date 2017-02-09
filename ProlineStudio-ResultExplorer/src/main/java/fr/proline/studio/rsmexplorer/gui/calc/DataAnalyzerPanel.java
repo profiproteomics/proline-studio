@@ -24,6 +24,7 @@ import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.util.ArrayList;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.Box;
@@ -305,7 +306,7 @@ public class DataAnalyzerPanel extends JPanel implements DataBoxPanelInterface {
 
     }
     
-    public void displayBelow(GraphNode node, boolean inNewTab, String name, SplittedPanelContainer.PanelLayout layout) {
+    public void displayBelow(GraphNode node, boolean inNewTab, String name,  ArrayList<SplittedPanelContainer.PanelLayout> layout) {
         m_WillDisplayProcessEngineInfo = new ProcessEngineInfo(node, inNewTab, name, layout);
         m_dataBox.propagateDataChanged(ProcessEngineInfo.class);
         

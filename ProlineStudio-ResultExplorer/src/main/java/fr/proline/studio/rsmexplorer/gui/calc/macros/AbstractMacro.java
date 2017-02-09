@@ -32,7 +32,7 @@ public abstract class AbstractMacro {
         
     }
     
-    public void addLink(int levelX1, int levelY1, int levelX2, int levelY2) {
+    public final void addLink(int levelX1, int levelY1, int levelX2, int levelY2) {
         String key1 = generateKey(levelX1, levelY1);
         String key2 = generateKey(levelX2, levelY2);
         

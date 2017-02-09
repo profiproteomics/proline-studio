@@ -36,7 +36,7 @@ public abstract class AbstractFunction implements CheckParameterInterface {
     protected boolean m_settingsBeingDone = false;
     private String m_errorMessage = null;
     
-    private SplittedPanelContainer.PanelLayout m_autoDisplayLayoutDuringProcess = null;
+    private ArrayList<SplittedPanelContainer.PanelLayout> m_autoDisplayLayoutDuringProcess = null;
     
     protected GraphPanel m_panel;
     
@@ -50,11 +50,11 @@ public abstract class AbstractFunction implements CheckParameterInterface {
 
     }
 
-    public void setAutoDisplayLayoutDuringProcess(SplittedPanelContainer.PanelLayout layout) {
+    public void setAutoDisplayLayoutDuringProcess(ArrayList<SplittedPanelContainer.PanelLayout> layout) {
         m_autoDisplayLayoutDuringProcess = layout;
     }
     
-    public SplittedPanelContainer.PanelLayout getAutoDisplayLayoutDuringProcess() {
+    public ArrayList<SplittedPanelContainer.PanelLayout> getAutoDisplayLayoutDuringProcess() {
         return m_autoDisplayLayoutDuringProcess;
     }
     

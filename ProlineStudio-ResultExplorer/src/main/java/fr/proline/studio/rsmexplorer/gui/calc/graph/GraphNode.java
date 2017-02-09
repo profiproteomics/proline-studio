@@ -328,7 +328,7 @@ public abstract class GraphNode extends AbstractConnectedGraphObject {
 
     public abstract void askDisplay();
     public abstract ArrayList<WindowBox> getDisplayWindowBox();
-    public abstract SplittedPanelContainer.PanelLayout getAutoDisplayLayoutDuringProcess();
+    public abstract ArrayList<SplittedPanelContainer.PanelLayout> getAutoDisplayLayoutDuringProcess();
     public abstract boolean settings();
 
         

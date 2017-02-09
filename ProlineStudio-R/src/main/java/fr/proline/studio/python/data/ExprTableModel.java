@@ -40,6 +40,13 @@ public class ExprTableModel extends DecoratedTableModel implements ChildModelInt
     private final ArrayList<Col> m_extraColumns = new ArrayList();
     private final ArrayList<TableCellRenderer> m_extraColumnRenderers = new ArrayList();
     
+    
+    private int m_bestXAxisColIndex = -1;
+    private int m_bestYAxisColIndex = -1;
+    private PlotType m_bestPlotType = null;
+    
+
+    
 
     public ExprTableModel(GlobalTableModelInterface parentModel) {
         m_parentModel = parentModel;
@@ -349,19 +356,35 @@ public class ExprTableModel extends DecoratedTableModel implements ChildModelInt
 
     @Override
     public PlotType getBestPlotType() {
+        if (m_bestPlotType != null) {
+            return m_bestPlotType;
+        }
         return m_parentModel.getBestPlotType();
     }
 
     @Override
     public int getBestXAxisColIndex(PlotType plotType) {
+        if (m_bestPlotType != null) {
+            return m_bestXAxisColIndex;
+        }
         return m_parentModel.getBestXAxisColIndex(plotType);
     }
 
     @Override
     public int getBestYAxisColIndex(PlotType plotType) {
+        if (m_bestPlotType != null) {
+            return m_bestYAxisColIndex;
+        }
         return m_parentModel.getBestYAxisColIndex(plotType);
     }
 
+    public void setBestPlot(int bestXAxisColIndex, int bestYAxisColIndex, PlotType bestPlotType) {
+        m_bestXAxisColIndex = bestXAxisColIndex;
+        m_bestYAxisColIndex = bestYAxisColIndex;
+        m_bestPlotType = bestPlotType;
+    }
+
+    
     @Override
     public String getExportRowCell(int row, int col) {
         if (col >= m_parentModel.getColumnCount()) {

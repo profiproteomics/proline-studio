@@ -534,6 +534,8 @@ public class WindowBoxFactory {
             iconType = isDecoy ? IconManager.IconType.DATASET_RSET_DECOY : IconManager.IconType.DATASET_RSET;
         } else if (windowType == WindowSavedManager.SAVE_WINDOW_FOR_QUANTI) {
             iconType = isXIC ? IconManager.IconType.QUANT_XIC : IconManager.IconType.QUANT_SC;
+        } else {
+            iconType = IconManager.IconType.CHALKBOARD;
         }
 
         WindowBox winBox = new WindowBox(title, generatePanel(boxes), boxes[0], IconManager.getImage(iconType));

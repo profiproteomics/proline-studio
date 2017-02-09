@@ -8,6 +8,8 @@ import fr.proline.studio.graphics.cursor.CursorInfo;
 import fr.proline.studio.graphics.cursor.CursorInfoList;
 import fr.proline.studio.graphics.cursor.HorizontalCursor;
 import fr.proline.studio.graphics.cursor.VerticalCursor;
+import fr.proline.studio.gui.SplittedPanelContainer;
+import fr.proline.studio.id.ProjectId;
 import fr.proline.studio.parameter.AbstractLinkedParameters;
 import fr.proline.studio.parameter.AbstractParameter;
 import fr.proline.studio.parameter.ComponentParameterInterface;
@@ -18,8 +20,11 @@ import fr.proline.studio.parameter.ParameterError;
 import fr.proline.studio.parameter.ParameterList;
 import fr.proline.studio.parameter.ValuesFromComponentParameter;
 import fr.proline.studio.pattern.AbstractDataBox;
+import fr.proline.studio.pattern.DataboxGeneric;
 import fr.proline.studio.pattern.DataboxGraphics;
 import fr.proline.studio.pattern.WindowBox;
+import fr.proline.studio.pattern.WindowBoxFactory;
+import fr.proline.studio.pattern.WindowSavedManager;
 import fr.proline.studio.python.data.ColRef;
 import fr.proline.studio.python.data.ExprTableModel;
 import fr.proline.studio.python.data.Table;
@@ -39,6 +44,7 @@ import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.types.LogInfo;
 import fr.proline.studio.types.LogRatio;
 import fr.proline.studio.types.PValue;
+import fr.proline.studio.utils.IconManager;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
@@ -216,6 +222,8 @@ public class ComputeFDRFunction extends AbstractFunction {
 
                 @Override
                 public void run(ArrayList<ResultVariable> variables, CalcError error) {
+                    
+                    boolean secondStepFinished = false;
                     try {
                         if (variables != null) {
                             // look for res
@@ -262,7 +270,8 @@ public class ComputeFDRFunction extends AbstractFunction {
                                     model.addExtraColumnInfo(bestYColumnIndex, cursorInfoListY);
                                     
                                     addModel(model);
-
+                                    
+                                    secondStepFinished = true;
                                 }
                             }
                         } else if (error != null) {
@@ -270,7 +279,9 @@ public class ComputeFDRFunction extends AbstractFunction {
                         }
                         setCalculating(false);
                     } finally {
-                        callback.finished(functionGraphNode);
+                        if (secondStepFinished) {
+                            callback.finished(functionGraphNode);
+                        }
                     }
                 }
 
@@ -289,7 +300,7 @@ public class ComputeFDRFunction extends AbstractFunction {
 
     }
     
-    @Override
+    @Override 
     public void askDisplay(FunctionGraphNode functionGraphNode) {
         display(functionGraphNode.getPreviousDataName(), getName(), 0);
         display(functionGraphNode.getPreviousDataName(), getName(), 1);
@@ -300,6 +311,48 @@ public class ComputeFDRFunction extends AbstractFunction {
         return getDisplayWindowBox(functionGraphNode.getPreviousDataName(), getName());
     }
     
+    
+    @Override
+    protected ArrayList<WindowBox> getDisplayWindowBox(String dataName, String functionName) {
+        
+        if (m_globalTableModelInterface == null) {
+            return null;
+        }
+
+        ArrayList<WindowBox> windowBoxList = new ArrayList<>(2);
+        windowBoxList.add(getDisplayWindowBox(dataName, functionName, 0));
+     
+        AbstractDataBox[] databoxes = new AbstractDataBox[2];
+        databoxes[0] = new DataboxGeneric(dataName, functionName, false);
+        databoxes[1] = new DataboxGraphics();
+        databoxes[1].setLayout(SplittedPanelContainer.PanelLayout.HORIZONTAL);
+        
+        
+        
+        String windowName = (dataName == null) ? functionName : dataName + " " + functionName;
+        WindowBox wbox = WindowBoxFactory.getFromBoxesWindowBox(windowName, databoxes, false, false, ' ');
+        
+        databoxes[0].setEntryData(m_globalTableModelInterface.get(1));
+        
+        windowBoxList.add(wbox);
+
+
+        return windowBoxList;
+        
+        
+        /*ArrayList<WindowBox> list = super.getDisplayWindowBox(dataName, functionName);
+
+        GlobalTableModelInterface model = m_globalTableModelInterface.get(1);
+
+        int bestXColumnIndex = model.getBestXAxisColIndex(PlotType.SCATTER_PLOT);
+        int bestYColumnIndex = model.getBestYAxisColIndex(PlotType.SCATTER_PLOT);
+        
+        LockedDataGraphicsModel graphicsModel = new LockedDataGraphicsModel(model, PlotType.SCATTER_PLOT, bestXColumnIndex, bestYColumnIndex);
+        
+        list.add(WindowBoxFactory.getGraphicsWindowBox(dataName, graphicsModel, true));
+        
+        return list;*/
+    }
     
     @Override
     public void generateDefaultParameters(AbstractConnectedGraphObject[] graphObjects) {

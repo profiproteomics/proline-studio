@@ -352,6 +352,7 @@ public class StatsImplementation {
         ColBooleanData col = differentialProteinsCol(pvalues, logFC, pvalueThreshold, logFCThreshold);
         
         ExprTableModel model = new ExprTableModel(col, null, t.getModel());
+        
 
         return new Table(model);
     }

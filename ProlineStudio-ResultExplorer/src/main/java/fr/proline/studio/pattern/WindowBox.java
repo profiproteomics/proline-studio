@@ -95,6 +95,7 @@ public class WindowBox {
 
         AbstractDataBox curBox = m_entryBox;
 
+
         while (true) {
             ArrayList<AbstractDataBox> nextArray = curBox.getNextDataBoxArray();
             if ((nextArray != null) && (!nextArray.isEmpty())) {
@@ -104,7 +105,9 @@ public class WindowBox {
             }
         }
 
-        curBox.addNextDataBox(nextDatabox);
+        if (!curBox.equals(nextDatabox)) {
+            curBox.addNextDataBox(nextDatabox);
+        }
         nextDatabox.createPanel();
 
         // add the new panel to the window (below, as a tabb, or as splitted

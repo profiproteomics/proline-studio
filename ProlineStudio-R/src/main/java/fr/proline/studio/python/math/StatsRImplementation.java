@@ -618,6 +618,10 @@ public class StatsRImplementation {
                 }
                 return super.getBestYAxisColIndex(plotType);
             }
+            
+            public PlotType getBestPlotType() {
+                return PlotType.SCATTER_PLOT;
+            }
         };
         Table resTable = new Table(model);
 

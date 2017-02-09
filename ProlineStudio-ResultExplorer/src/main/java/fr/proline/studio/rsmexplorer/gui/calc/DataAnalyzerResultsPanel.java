@@ -43,12 +43,25 @@ public class DataAnalyzerResultsPanel extends JPanel implements DataBoxPanelInte
         ArrayList<WindowBox> windowBoxList = processEngineInfo.getGraphNode().getDisplayWindowBox();
         Integer processEngineKey = processEngineInfo.getProcessKey();
         
+        ArrayList<SplittedPanelContainer.PanelLayout> layoutList = processEngineInfo.getLayout();
+        
         for (int i = 0; i < windowBoxList.size(); i++) {
             
             WindowBox windowBox = windowBoxList.get(i);
             WindowBox existingWindowBox = m_processKeyToWindowBoxMap.get(processEngineKey);
             if (existingWindowBox != null) {
-                existingWindowBox.addDatabox(windowBox.getEntryBox(), processEngineInfo.getLayout());
+                AbstractDataBox databox = windowBox.getEntryBox();
+                SplittedPanelContainer.PanelLayout layout = layoutList.get(i);
+                while (databox != null) {
+                    existingWindowBox.addDatabox(databox, layout);
+                    ArrayList<AbstractDataBox> list =  databox.getNextDataBoxArray();
+                    if ((list != null) && (!list.isEmpty())) {
+                        databox = list.get(0);
+                        layout = databox.getLayout();
+                    } else {
+                        databox = null;
+                    }
+                }
             } else {
                 m_processKeyToWindowBoxMap.put(processEngineKey, windowBox);
                 String processName = processEngineInfo.getProcessName();

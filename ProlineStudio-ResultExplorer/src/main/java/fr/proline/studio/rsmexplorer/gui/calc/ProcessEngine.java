@@ -3,6 +3,7 @@ package fr.proline.studio.rsmexplorer.gui.calc;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphGroup;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphNode;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import javax.swing.JButton;
 import javax.swing.JPanel;
@@ -138,7 +139,7 @@ public class ProcessEngine implements ProcessCallbackInterface {
   
         node.setHighlighted(false);
         
-        SplittedPanelContainer.PanelLayout layout = node.getAutoDisplayLayoutDuringProcess();
+         ArrayList<SplittedPanelContainer.PanelLayout> layout = node.getAutoDisplayLayoutDuringProcess();
         if (layout != null) {
             m_panel.displayBelow(node, false, null, layout);
         }

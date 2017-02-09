@@ -12,6 +12,7 @@ import fr.proline.studio.rsmexplorer.gui.calc.functions.NormalizationFunction;
 import fr.proline.studio.rsmexplorer.gui.calc.functions.QuantiFilterFunction;
 import fr.proline.studio.rsmexplorer.gui.calc.graphics.CalibrationPlotGraphic;
 import fr.proline.studio.rsmexplorer.gui.calc.graphics.ScatterGraphic;
+import java.util.ArrayList;
 
 /**
  *
@@ -30,13 +31,19 @@ public class ProStarMacro extends AbstractMacro {
         addNode(new DataTree.FunctionNode(new MissingValuesImputationFunction(null)), 5, 0); addLink(4,0,5,0);
         addNode(new DataTree.FunctionNode(new DiffAnalysisFunction(null)), 6, 0); addLink(5,0,6,0);
         
-        CalibrationPlotGraphic cpg = new CalibrationPlotGraphic(null); cpg.setAutoDisplayLayoutDuringProcess(SplittedPanelContainer.PanelLayout.VERTICAL);
+        ArrayList<SplittedPanelContainer.PanelLayout> layoutList = new ArrayList<>();
+        layoutList.add(SplittedPanelContainer.PanelLayout.VERTICAL);
+        CalibrationPlotGraphic cpg = new CalibrationPlotGraphic(null); cpg.setAutoDisplayLayoutDuringProcess(layoutList);
         addNode(new DataTree.GraphicNode(cpg), 7, 0); addLink(6,0,7,0);
         
-        ScatterGraphic sg = new ScatterGraphic(null); sg.setAutoDisplayLayoutDuringProcess(SplittedPanelContainer.PanelLayout.HORIZONTAL);
+        ScatterGraphic sg = new ScatterGraphic(null); //sg.setAutoDisplayLayoutDuringProcess(SplittedPanelContainer.PanelLayout.HORIZONTAL);
         addNode(new DataTree.GraphicNode(sg), 7, 1); addLink(6,0,7,1);
         
-        ComputeFDRFunction FDRFunction = new ComputeFDRFunction(null); FDRFunction.setAutoDisplayLayoutDuringProcess(SplittedPanelContainer.PanelLayout.VERTICAL);
+        layoutList = new ArrayList<>();
+        layoutList.add(SplittedPanelContainer.PanelLayout.HORIZONTAL);
+        layoutList.add(SplittedPanelContainer.PanelLayout.VERTICAL);
+        layoutList.add(SplittedPanelContainer.PanelLayout.HORIZONTAL);
+        ComputeFDRFunction FDRFunction = new ComputeFDRFunction(null); FDRFunction.setAutoDisplayLayoutDuringProcess(layoutList);
         addNode(new DataTree.FunctionNode(FDRFunction), 7, 2); addLink(6,0,7,2);
 
         

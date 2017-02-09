@@ -94,7 +94,7 @@ public class GraphPanel extends JPanel implements MouseListener, MouseMotionList
 
     }
 
-    public void displayBelow(GraphNode node, boolean newTab, String name, SplittedPanelContainer.PanelLayout layout) {
+    public void displayBelow(GraphNode node, boolean newTab, String name,  ArrayList<SplittedPanelContainer.PanelLayout> layout) {
         m_dataAnalyzerPanel.displayBelow(node, newTab, name, layout);
     }
 

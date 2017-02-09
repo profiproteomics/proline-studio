@@ -16,6 +16,7 @@ import fr.proline.studio.rsmexplorer.gui.calc.parameters.CheckParameterInterface
 import fr.proline.studio.rsmexplorer.gui.calc.parameters.FunctionParametersDialog;
 import fr.proline.studio.utils.IconManager;
 import java.awt.Image;
+import java.util.ArrayList;
 import javax.swing.ImageIcon;
 import org.openide.windows.WindowManager;
 
@@ -36,7 +37,7 @@ public abstract class AbstractGraphic implements CheckParameterInterface {
     private boolean m_inError = false;
     private String m_errorMessage = null;
     
-    private SplittedPanelContainer.PanelLayout m_autoDisplayLayoutDuringProcess = null;
+    private  ArrayList<SplittedPanelContainer.PanelLayout> m_autoDisplayLayoutDuringProcess = null;
     
     protected GraphPanel m_panel;
 
@@ -69,11 +70,11 @@ public abstract class AbstractGraphic implements CheckParameterInterface {
     
 
     
-    public void setAutoDisplayLayoutDuringProcess(SplittedPanelContainer.PanelLayout layout) {
+    public void setAutoDisplayLayoutDuringProcess( ArrayList<SplittedPanelContainer.PanelLayout> layout) {
         m_autoDisplayLayoutDuringProcess = layout;
     }
     
-    public SplittedPanelContainer.PanelLayout getAutoDisplayLayoutDuringProcess() {
+    public ArrayList<SplittedPanelContainer.PanelLayout> getAutoDisplayLayoutDuringProcess() {
         return m_autoDisplayLayoutDuringProcess;
     }
         

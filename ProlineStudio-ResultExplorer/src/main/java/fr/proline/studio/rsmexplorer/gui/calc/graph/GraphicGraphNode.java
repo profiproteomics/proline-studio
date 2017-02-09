@@ -297,7 +297,7 @@ public class GraphicGraphNode extends GraphNode {
     }
 
     @Override
-    public SplittedPanelContainer.PanelLayout getAutoDisplayLayoutDuringProcess() {
+    public  ArrayList<SplittedPanelContainer.PanelLayout> getAutoDisplayLayoutDuringProcess() {
         return m_graphic.getAutoDisplayLayoutDuringProcess();
     }
     

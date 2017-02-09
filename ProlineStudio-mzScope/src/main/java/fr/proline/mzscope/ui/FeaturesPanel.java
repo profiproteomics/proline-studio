@@ -4,6 +4,7 @@ import fr.profi.mzdb.model.Peakel;
 import fr.proline.mzscope.ui.model.FeaturesTableModel;
 import fr.proline.mzscope.model.IFeature;
 import fr.proline.studio.comparedata.CompareDataInterface;
+import fr.proline.studio.comparedata.ExtraDataType;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.filter.FilterButton;
 import fr.proline.studio.filter.actions.ClearRestrainAction;
@@ -407,6 +408,36 @@ class PeakelWrapper implements CompareDataInterface {
     @Override
     public int uniqueId2Row(long id) {
         return (int) id;
+    }
+
+    @Override
+    public ArrayList<ExtraDataType> getExtraDataTypes() {
+        return null;
+    }
+
+    @Override
+    public Object getValue(Class c) {
+        return null;
+    }
+
+    @Override
+    public Object getRowValue(Class c, int row) {
+        return null;
+    }
+
+    @Override
+    public Object getColValue(Class c, int col) {
+        return null;
+    }
+
+    @Override
+    public void addSingleValue(Object v) {
+        
+    }
+
+    @Override
+    public Object getSingleValue(Class c) {
+        return null;
     }
     
 }

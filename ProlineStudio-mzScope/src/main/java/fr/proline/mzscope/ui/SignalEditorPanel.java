@@ -9,6 +9,7 @@ import fr.profi.mzdb.algo.signal.filtering.SavitzkyGolaySmoothingConfig;
 import fr.profi.mzdb.util.math.DerivativeAnalysis;
 import fr.proline.mzscope.model.Signal;
 import fr.proline.studio.comparedata.CompareDataInterface;
+import fr.proline.studio.comparedata.ExtraDataType;
 import fr.proline.studio.graphics.BasePlotPanel;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotLinear;
@@ -253,6 +254,37 @@ class SignalWrapper implements CompareDataInterface {
     @Override
     public int uniqueId2Row(long id) {
         return (int) id;
+    }
+
+    
+    @Override
+    public ArrayList<ExtraDataType> getExtraDataTypes() {
+        return null;
+    }
+
+    @Override
+    public Object getValue(Class c) {
+        return null;
+    }
+
+    @Override
+    public Object getRowValue(Class c, int row) {
+        return null;
+    }
+
+    @Override
+    public Object getColValue(Class c, int col) {
+        return null;
+    }
+
+    @Override
+    public void addSingleValue(Object v) {
+        
+    }
+
+    @Override
+    public Object getSingleValue(Class c) {
+        return null;
     }
    
 }

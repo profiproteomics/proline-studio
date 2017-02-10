@@ -12,6 +12,7 @@ import fr.proline.studio.filter.FilterButton;
 import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
+import fr.proline.studio.markerbar.MarkerContainerPanel;
 import fr.proline.studio.parameter.SettingsButton;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
@@ -21,6 +22,7 @@ import fr.proline.studio.python.data.TableInfo;
 import fr.proline.studio.rsmexplorer.actions.table.DisplayTablePopupMenu;
 import fr.proline.studio.rsmexplorer.gui.model.ProteinTableModel;
 import fr.proline.studio.table.CompoundTableModel;
+import fr.proline.studio.table.DecoratedMarkerTable;
 import fr.proline.studio.table.DecoratedTable;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.table.TablePopupMenu;
@@ -33,6 +35,7 @@ import java.awt.Image;
 import java.awt.event.ActionListener;
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.TableModelListener;
 import org.jdesktop.swingx.JXTable;
 
 /**
@@ -54,6 +57,8 @@ public class RsmProteinsOfProteinSetPanel extends HourglassPanel implements Data
     private FilterButton m_filterButton;
     private ExportButton m_exportButton;
     private AddDataAnalyzerButton m_addCompareDataButton;
+    
+    private MarkerContainerPanel m_markerContainerPanel;
     
     /**
      * Creates new form RsmProteinsOfProteinSetPanel
@@ -106,11 +111,13 @@ public class RsmProteinsOfProteinSetPanel extends HourglassPanel implements Data
         m_proteinTable = new ProteinTable();
         CompoundTableModel model = new CompoundTableModel(new ProteinTableModel((ProgressInterface) m_proteinTable), true);
         m_proteinTable.setModel(model);
+        
+        
+        m_markerContainerPanel = new MarkerContainerPanel(m_scrollPane, m_proteinTable);
+        
         m_scrollPane.setViewportView(m_proteinTable);
-
-        
-        
-        //m_proteinTable.displayColumnAsPercentage(ProteinTableModel.Column.PROTEIN_SCORE.ordinal());
+        m_proteinTable.setFillsViewportHeight(true);
+        m_proteinTable.setViewport(m_scrollPane.getViewport());
 
         
         URLCellRenderer urlRenderer = (URLCellRenderer) model.getRenderer(0, ProteinTableModel.Column.PROTEIN_NAME.ordinal());
@@ -132,7 +139,7 @@ public class RsmProteinsOfProteinSetPanel extends HourglassPanel implements Data
         c.gridy++;
         c.gridwidth = 2;
         c.weighty = 1;
-        internalPanel.add(m_scrollPane, c);
+        internalPanel.add(m_markerContainerPanel, c);
         
         return internalPanel;
         
@@ -251,6 +258,8 @@ public class RsmProteinsOfProteinSetPanel extends HourglassPanel implements Data
         }
 
         m_proteinTable.getSelectionModel().setSelectionInterval(row, row);
+        m_markerContainerPanel.setMaxLineNumber(proteinSet.getSameSetCount()+proteinSet.getSubSetCount());
+        m_markerContainerPanel.removeAllMarkers();
 
         m_proteinTable.setSortable(true);
         
@@ -310,10 +319,15 @@ public class RsmProteinsOfProteinSetPanel extends HourglassPanel implements Data
 
 
 
-    private class ProteinTable extends DecoratedTable implements ProgressInterface {
+    private class ProteinTable extends DecoratedMarkerTable implements ProgressInterface {
 
         public ProteinTable() {
 
+        }
+
+        @Override
+        public void addTableModelListener(TableModelListener l) {
+            getModel().addTableModelListener(l);
         }
         
         /**

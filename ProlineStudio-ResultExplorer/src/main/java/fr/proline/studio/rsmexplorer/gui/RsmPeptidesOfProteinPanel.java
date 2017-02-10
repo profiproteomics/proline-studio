@@ -11,11 +11,10 @@ import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.comparedata.GlobalTabelModelProviderInterface;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.filter.FilterButton;
-import fr.proline.studio.filter.actions.ClearRestrainAction;
-import fr.proline.studio.filter.actions.RestrainAction;
 import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
+import fr.proline.studio.markerbar.MarkerContainerPanel;
 import fr.proline.studio.parameter.SettingsButton;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
@@ -25,7 +24,7 @@ import fr.proline.studio.python.data.TableInfo;
 import fr.proline.studio.rsmexplorer.actions.table.DisplayTablePopupMenu;
 import fr.proline.studio.rsmexplorer.gui.model.PeptideTableModel;
 import fr.proline.studio.table.CompoundTableModel;
-import fr.proline.studio.table.DecoratedTable;
+import fr.proline.studio.table.DecoratedMarkerTable;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.table.TablePopupMenu;
 import java.awt.BorderLayout;
@@ -38,6 +37,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JToolBar;
 import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.TableModelListener;
 import org.jdesktop.swingx.JXTable;
 
 /**
@@ -50,6 +50,8 @@ public class RsmPeptidesOfProteinPanel extends HourglassPanel implements DataBox
     
     private PeptideTable m_peptidesTable;
     private JScrollPane m_scrollPane;
+    
+    private MarkerContainerPanel m_markerContainerPanel;
 
     private SettingsButton m_settingsButton;
     private FilterButton m_filterButton;
@@ -102,17 +104,21 @@ public class RsmPeptidesOfProteinPanel extends HourglassPanel implements DataBox
         m_peptidesTable = new PeptideTable();
         m_peptidesTable.setModel(new CompoundTableModel(new PeptideTableModel(), true));
         m_peptidesTable.getColumnExt(m_peptidesTable.convertColumnIndexToView(PeptideTableModel.COLTYPE_PEPTIDE_ID)).setVisible(false);
-        //m_peptidesTable.displayColumnAsPercentage(PeptideTableModel.COLTYPE_PEPTIDE_SCORE);
 
 
         m_scrollPane = new JScrollPane();
+        
+        m_markerContainerPanel = new MarkerContainerPanel(m_scrollPane, m_peptidesTable);
+        
         m_scrollPane.setViewportView(m_peptidesTable);
-
+        m_peptidesTable.setFillsViewportHeight(true);
+        m_peptidesTable.setViewport(m_scrollPane.getViewport());
+        
         c.gridx = 0;
         c.gridy = 0;
         c.weightx = 1;
         c.weighty = 1;
-        internalPanel.add(m_scrollPane, c);
+        internalPanel.add(m_markerContainerPanel, c);
 
         return internalPanel;
     }
@@ -208,6 +214,9 @@ public class RsmPeptidesOfProteinPanel extends HourglassPanel implements DataBox
                 if ((peptideInstances != null) && (peptideInstances.length > 0)) {
 
                     m_peptidesTable.getSelectionModel().setSelectionInterval(0, 0);
+                    m_markerContainerPanel.setMaxLineNumber(peptideInstances.length);
+                    m_markerContainerPanel.removeAllMarkers();
+
                 }
             } else if (peptideMatchChanged && !proteinMatchChanged) {
             // search peptide
@@ -219,6 +228,7 @@ public class RsmPeptidesOfProteinPanel extends HourglassPanel implements DataBox
 
                 m_peptidesTable.getSelectionModel().setSelectionInterval(row, row);
                 m_peptidesTable.scrollRowToVisible(row);
+                
             }
         }
 
@@ -270,13 +280,16 @@ public class RsmPeptidesOfProteinPanel extends HourglassPanel implements DataBox
     }
 
     
-    private class PeptideTable extends DecoratedTable  {
+    private class PeptideTable extends DecoratedMarkerTable  {
         
         public PeptideTable() {
             
         } 
         
-
+        @Override
+        public void addTableModelListener(TableModelListener l) {
+            getModel().addTableModelListener(l);
+        }
 
         
         /** 

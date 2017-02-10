@@ -2,11 +2,8 @@ package fr.proline.studio.rsmexplorer.gui.xic;
 
 import fr.proline.core.orm.msi.dto.DMasterQuantPeptide;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
-import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.comparedata.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.tasks.SubTask;
-import fr.proline.studio.filter.actions.ClearRestrainAction;
-import fr.proline.studio.filter.actions.RestrainAction;
 import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
@@ -14,7 +11,6 @@ import fr.proline.studio.markerbar.MarkerContainerPanel;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.rsmexplorer.actions.table.DisplayTablePopupMenu;
-import fr.proline.studio.rsmexplorer.gui.RsmProteinSetPanel;
 import fr.proline.studio.table.CompoundTableModel;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.table.LazyTable;
@@ -49,8 +45,7 @@ public class PeptidePanel  extends HourglassPanel implements DataBoxPanelInterfa
     
     private boolean m_isXICMode;
     private DQuantitationChannel[] m_quantChannels;
-    private DMasterQuantPeptide m_peptide;
-    
+
      public PeptidePanel() {
         initComponents();
     }
@@ -159,7 +154,6 @@ public class PeptidePanel  extends HourglassPanel implements DataBoxPanelInterfa
     
     public void setData(DQuantitationChannel[] quantChannels,  DMasterQuantPeptide peptide, boolean isXICMode) {
         m_quantChannels = quantChannels;
-        m_peptide = peptide ;
         m_isXICMode = isXICMode;
         ((PeptideTableModel) ((CompoundTableModel) m_peptideTable.getModel()).getBaseModel()).setData( quantChannels, peptide, m_isXICMode);
         // select the first row
@@ -224,8 +218,7 @@ public class PeptidePanel  extends HourglassPanel implements DataBoxPanelInterfa
     }
     
     private class PeptideTable extends LazyTable {
-        
-        private boolean selectionWillBeRestored = false;
+
         
         public PeptideTable() {
             super(m_peptideScrollPane.getVerticalScrollBar() );
@@ -237,10 +230,7 @@ public class PeptidePanel  extends HourglassPanel implements DataBoxPanelInterfa
         public void addTableModelListener(TableModelListener l) {
             getModel().addTableModelListener(l);
         }
-        
-        public void selectionWillBeRestored(boolean b) {
-            selectionWillBeRestored = b;
-        }
+
         
         @Override
         public int getLoadingPercentage() {
@@ -264,12 +254,9 @@ public class PeptidePanel  extends HourglassPanel implements DataBoxPanelInterfa
 
             // Update Model (but protein set table must not react to the model update)
             
-            selectionWillBeRestored(true);
-            try {
-                ((PeptideTableModel) (((CompoundTableModel) getModel()).getBaseModel())).dataUpdated();
-            } finally {
-                selectionWillBeRestored(false);
-            }
+
+            ((PeptideTableModel) (((CompoundTableModel) getModel()).getBaseModel())).dataUpdated();
+
 
             
             

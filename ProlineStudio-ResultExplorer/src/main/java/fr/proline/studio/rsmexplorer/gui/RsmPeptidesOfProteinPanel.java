@@ -201,7 +201,7 @@ public class RsmPeptidesOfProteinPanel extends HourglassPanel implements DataBox
         if (proteinMatch != null) {
 
             boolean peptideMatchChanged = (peptideMatch != m_currentPeptideMatch);
-            if (!peptideMatchChanged && proteinMatchChanged) {
+            if ((!peptideMatchChanged || (peptideMatchChanged && (m_currentPeptideMatch==null))) && proteinMatchChanged) {
                 // select first peptide
                 PeptideSet peptideSet = proteinMatch.getPeptideSet(rsm.getId());
                 DPeptideInstance[] peptideInstances = peptideSet.getTransientDPeptideInstances();

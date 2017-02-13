@@ -2,8 +2,10 @@ package fr.proline.mzscope.ui.model;
 
 import fr.proline.mzscope.model.Spectrum;
 import fr.proline.studio.comparedata.CompareDataInterface;
+import fr.proline.studio.comparedata.ExtraDataType;
 import fr.proline.studio.graphics.PlotInformation;
 import java.awt.Color;
+import java.util.ArrayList;
 import java.util.Map;
 import javax.swing.table.AbstractTableModel;
 
@@ -139,5 +141,35 @@ public class ScanTableModel extends AbstractTableModel implements CompareDataInt
     @Override
     public int uniqueId2Row(long id) {
         return (int) id;
+    }
+
+    @Override
+    public ArrayList<ExtraDataType> getExtraDataTypes() {
+        return null;
+    }
+
+    @Override
+    public Object getValue(Class c) {
+        return null;
+    }
+
+    @Override
+    public Object getRowValue(Class c, int row) {
+        return null;
+    }
+
+    @Override
+    public Object getColValue(Class c, int col) {
+        return null;
+    }
+
+    @Override
+    public void addSingleValue(Object v) {
+        return;
+    }
+
+    @Override
+    public Object getSingleValue(Class c) {
+        return null;
     }
 }

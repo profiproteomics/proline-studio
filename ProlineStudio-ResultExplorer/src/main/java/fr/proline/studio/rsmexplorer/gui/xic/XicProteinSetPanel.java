@@ -1,5 +1,7 @@
 package fr.proline.studio.rsmexplorer.gui.xic;
 
+import fr.proline.studio.info.InfoInterface;
+import fr.proline.studio.info.InfoToggleButton;
 import fr.proline.core.orm.msi.dto.DMasterQuantProteinSet;
 import fr.proline.core.orm.msi.dto.DProteinSet;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
@@ -11,8 +13,6 @@ import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.export.ExportModelInterface;
 import fr.proline.studio.filter.FilterButton;
-import fr.proline.studio.filter.actions.ClearRestrainAction;
-import fr.proline.studio.filter.actions.RestrainAction;
 import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.gui.DefaultFloatingPanel;
 import fr.proline.studio.gui.HourglassPanel;
@@ -99,7 +99,8 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
     private JButton m_calcButton;
 
     private SearchToggleButton m_searchToggleButton;
-
+    private InfoToggleButton m_infoToggleButton;
+    
     private JLabel m_titleLabel;
     private final String TABLE_TITLE = "Proteins Sets";
 
@@ -207,7 +208,8 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
         add(layeredPane, BorderLayout.CENTER);
 
         layeredPane.add(proteinSetPanel, JLayeredPane.DEFAULT_LAYER);
-        layeredPane.add(m_searchToggleButton.getSearchPanel(), new Integer(JLayeredPane.PALETTE_LAYER+1));  
+        layeredPane.add(m_infoToggleButton.getInfoPanel(), new Integer(JLayeredPane.PALETTE_LAYER+1));  
+        layeredPane.add(m_searchToggleButton.getSearchPanel(), new Integer(JLayeredPane.PALETTE_LAYER+2));   
         layeredPane.add(m_refineProteinsPanel, JLayeredPane.PALETTE_LAYER);  
         
         
@@ -256,21 +258,6 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
         toolbar.add(m_settingsButton);
         toolbar.add(m_exportButton);
 
-        /*m_columnVisibilityButton = new JButton();
-        m_columnVisibilityButton.setIcon(IconManager.getIcon(IconManager.IconType.COLUMNS_VISIBILITY));
-        m_columnVisibilityButton.setToolTipText("Hide/Show Columns...");
-        m_columnVisibilityButton.setEnabled(false);
-        m_columnVisibilityButton.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                XICProteinSetColumnsVisibilityDialog dialog = new XICProteinSetColumnsVisibilityDialog(WindowManager.getDefault().getMainWindow(), m_quantProteinSetTable, ((QuantProteinSetTableModel) ((CompoundTableModel) m_quantProteinSetTable.getModel()).getBaseModel()));
-                dialog.setLocation(m_columnVisibilityButton.getLocationOnScreen().x + m_columnVisibilityButton.getWidth(), m_columnVisibilityButton.getLocationOnScreen().y + m_columnVisibilityButton.getHeight());
-                dialog.setVisible(true);
-            }
-
-        });
-        toolbar.add(m_columnVisibilityButton);*/
 
         m_addCompareDataButton = new AddDataAnalyzerButton(((CompoundTableModel) m_quantProteinSetTable.getModel())) {
 
@@ -288,6 +275,10 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
         
         toolbar.add(m_addCompareDataButton);
 
+        
+        m_infoToggleButton = new InfoToggleButton(m_quantProteinSetTable, m_quantProteinSetTable, m_quantProteinSetTable);
+        toolbar.add(m_infoToggleButton);
+        
         m_calcButton = new JButton(IconManager.getIcon(IconManager.IconType.CALCULATOR));
         m_calcButton.addActionListener(new ActionListener() {
 
@@ -481,7 +472,7 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
         return m_quantProteinSetTable;
     }
 
-    private class QuantProteinSetTable extends LazyTable implements ExportTableSelectionInterface, ExportModelInterface {
+    private class QuantProteinSetTable extends LazyTable implements ExportTableSelectionInterface, ExportModelInterface, InfoInterface {
 
         private ObjectParameter m_overviewParameter = null;
         
@@ -809,6 +800,11 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
         @Override
         public String getExportRowCell(int row, int col) {
             return ((CompoundTableModel) m_quantProteinSetTable.getModel()).getExportRowCell(convertRowIndexToModel(row), convertColumnIndexToModel(col));
+        }
+
+        @Override
+        public String getInfo() {
+            return m_quantProteinSetTable.getModel().getRowCount()+" Proteins Sets";
         }
 
     }

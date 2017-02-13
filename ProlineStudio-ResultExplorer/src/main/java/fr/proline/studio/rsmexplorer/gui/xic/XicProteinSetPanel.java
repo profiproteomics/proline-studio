@@ -100,15 +100,11 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
 
     private SearchToggleButton m_searchToggleButton;
     private InfoToggleButton m_infoToggleButton;
-    
-    private JLabel m_titleLabel;
-    private final String TABLE_TITLE = "Proteins Sets";
 
     private static final String OVERVIEW_KEY = "OVERVIEW_KEY";    
 
     public XicProteinSetPanel() {
         initComponents();
-        CompoundTableModel model = (CompoundTableModel) m_quantProteinSetTable.getModel();
     }
 
     private void initComponents() {
@@ -225,8 +221,7 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
         JPanel internalPanel = createInternalPanel();
 
         JToolBar toolbar = initToolbar();
-        m_titleLabel = new JLabel(TABLE_TITLE);
-        proteinSetPanel.add(m_titleLabel, BorderLayout.NORTH);
+
         proteinSetPanel.add(toolbar, BorderLayout.WEST);
         proteinSetPanel.add(internalPanel, BorderLayout.CENTER);
 
@@ -276,7 +271,7 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
         toolbar.add(m_addCompareDataButton);
 
         
-        m_infoToggleButton = new InfoToggleButton(m_quantProteinSetTable, m_quantProteinSetTable, m_quantProteinSetTable);
+        m_infoToggleButton = new InfoToggleButton(m_quantProteinSetTable, m_quantProteinSetTable);
         toolbar.add(m_infoToggleButton);
         
         m_calcButton = new JButton(IconManager.getIcon(IconManager.IconType.CALCULATOR));
@@ -342,8 +337,6 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
         m_quantProteinSetTable.addMouseListener(renderer);
         m_quantProteinSetTable.addMouseMotionListener(renderer);
         
-        //m_quantProteinSetTable.setColumnControlVisible(((QuantProteinSetTableModel) ((CompoundTableModel) m_quantProteinSetTable.getModel()).getBaseModel()).getColumnCount() < NB_MAX_COLUMN_CONTROL);
-        m_titleLabel.setText(TABLE_TITLE + " (" + proteinSets.size() + ")");
         // select the first row
         if ((proteinSets != null) && (proteinSets.size() > 0)) {
             m_quantProteinSetTable.getSelectionModel().setSelectionInterval(0, 0);
@@ -804,7 +797,7 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
 
         @Override
         public String getInfo() {
-            return m_quantProteinSetTable.getModel().getRowCount()+" Proteins Sets";
+            return getModel().getRowCount()+" Proteins Sets";
         }
 
     }

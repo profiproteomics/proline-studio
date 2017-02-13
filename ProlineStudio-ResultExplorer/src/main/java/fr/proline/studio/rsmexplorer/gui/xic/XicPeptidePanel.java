@@ -10,12 +10,12 @@ import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.export.ExportModelInterface;
 import fr.proline.studio.filter.FilterButton;
-import fr.proline.studio.filter.actions.ClearRestrainAction;
-import fr.proline.studio.filter.actions.RestrainAction;
 import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.gui.DefaultFloatingPanel;
 import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
+import fr.proline.studio.info.InfoInterface;
+import fr.proline.studio.info.InfoToggleButton;
 import fr.proline.studio.markerbar.MarkerContainerPanel;
 import fr.proline.studio.parameter.ObjectParameter;
 import fr.proline.studio.parameter.ParameterList;
@@ -91,11 +91,9 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
     private JButton m_graphicsButton;
     private AddDataAnalyzerButton m_addCompareDataButton;
     private SearchToggleButton m_searchToggleButton;
+    private InfoToggleButton m_infoToggleButton;
 
-    
-    private JLabel m_titleLabel;
-    private static final String TABLE_TITLE = "Peptides";
-    
+
     private final boolean m_canGraph ;
 
     private static final String OVERVIEW_KEY = "OVERVIEW_KEY";  
@@ -182,7 +180,8 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
         add(layeredPane, BorderLayout.CENTER);
 
         layeredPane.add(peptidePanel, JLayeredPane.DEFAULT_LAYER);
-        layeredPane.add(m_searchToggleButton.getSearchPanel(), new Integer(JLayeredPane.PALETTE_LAYER+1));  
+        layeredPane.add(m_infoToggleButton.getInfoPanel(), new Integer(JLayeredPane.PALETTE_LAYER+1));  
+        layeredPane.add(m_searchToggleButton.getSearchPanel(), new Integer(JLayeredPane.PALETTE_LAYER+2));  
         layeredPane.add(m_validateModificationsPanel, JLayeredPane.PALETTE_LAYER);  
 
     }
@@ -196,8 +195,6 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
         JPanel internalPanel = createInternalPanel(xicMode);
 
         JToolBar toolbar = initToolbar();
-        m_titleLabel = new JLabel(TABLE_TITLE);
-        peptidePanel.add(m_titleLabel, BorderLayout.NORTH);
         peptidePanel.add(toolbar, BorderLayout.WEST);
         peptidePanel.add(internalPanel, BorderLayout.CENTER);
 
@@ -276,6 +273,10 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
         };
         toolbar.add(m_addCompareDataButton);
         
+        m_infoToggleButton = new InfoToggleButton(m_quantPeptideTable, m_quantPeptideTable);
+        toolbar.add(m_infoToggleButton);
+        
+        
         return toolbar;
     }
     
@@ -333,10 +334,9 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
         }
         m_quantChannels = quantChannels;
         m_isXICMode = isXICMode;
-        this.m_displayForProteinSet = displayForProteinSet;
+        m_displayForProteinSet = displayForProteinSet;
         ((QuantPeptideTableModel) ((CompoundTableModel) m_quantPeptideTable.getModel()).getBaseModel()).setData(taskId, m_dataBox.getProjectId(), quantChannels, peptides, m_isXICMode);
-        //m_quantPeptideTable.setColumnControlVisible(((QuantPeptideTableModel) ((CompoundTableModel) m_quantPeptideTable.getModel()).getBaseModel()).getColumnCount() < XicProteinSetPanel.NB_MAX_COLUMN_CONTROL);
-        m_titleLabel.setText(TABLE_TITLE +" ("+peptides.size()+")");
+
         if (!m_isXICMode){
             ((QuantPeptideTableModel) ((CompoundTableModel) m_quantPeptideTable.getModel()).getBaseModel()).setOverviewType(QuantPeptideTableModel.COLTYPE_RAW_ABUNDANCE);
         }
@@ -344,8 +344,12 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
         if ((peptides != null) && (peptides.size() > 0)) {
             m_quantPeptideTable.getSelectionModel().setSelectionInterval(0, 0);
             m_markerContainerPanel.setMaxLineNumber(peptides.size());
+            
+            m_infoToggleButton.updateInfo();
         }
 
+        
+        
         if (finished) {
             // allow to change column visibility
             //m_columnVisibilityButton.setEnabled(true);
@@ -446,7 +450,7 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
         return m_quantPeptideTable;
     }
     
-    private class QuantPeptideTable extends LazyTable implements ExportModelInterface  {
+    private class QuantPeptideTable extends LazyTable implements ExportModelInterface, InfoInterface  {
 
         private ObjectParameter m_overviewParameter = null;
         
@@ -720,6 +724,11 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
         @Override
         public void prepostPopupMenu() {
             m_popupMenu.prepostPopupMenu();
+        }
+
+        @Override
+        public String getInfo() {
+            return getModel().getRowCount()+" Peptides";
         }
     }
 

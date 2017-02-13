@@ -24,16 +24,15 @@ public class InfoToggleButton extends JToggleButton {
     /**
      * Constructor for search on JXTable
      * @param progressInterface
-     * @param table
      * @param infoInterface 
      */
-    public InfoToggleButton(ProgressInterface progressInterface, JXTable table, InfoInterface infoInterface) {
-        init(progressInterface, table, infoInterface);
+    public InfoToggleButton(ProgressInterface progressInterface, InfoInterface infoInterface) {
+        init(progressInterface, infoInterface);
         initGraphic();
     }
 
     
-    public final void init(ProgressInterface progressInterface, JXTable table, InfoInterface infoInterface) {
+    public final void init(ProgressInterface progressInterface, InfoInterface infoInterface) {
         m_progressInterface = progressInterface;
         m_infoInterface = infoInterface;
 
@@ -67,9 +66,7 @@ public class InfoToggleButton extends JToggleButton {
                     }
                 }
                 
-                if (isSelected()) {
-                    m_infoPanel.setInfo(m_infoInterface.getInfo());
-                }
+                updateInfo();
                 
                 m_infoPanel.setVisible(isSelected());
 
@@ -85,7 +82,11 @@ public class InfoToggleButton extends JToggleButton {
         return m_infoPanel;
     }
 
-
+    public void updateInfo() {
+        if (isSelected()) {
+            m_infoPanel.setInfo(m_infoInterface.getInfo());
+        }
+    }
     
 }
 

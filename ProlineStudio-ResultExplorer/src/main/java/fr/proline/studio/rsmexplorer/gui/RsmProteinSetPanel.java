@@ -14,6 +14,8 @@ import fr.proline.studio.filter.FilterButton;
 import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
+import fr.proline.studio.info.InfoInterface;
+import fr.proline.studio.info.InfoToggleButton;
 import fr.proline.studio.markerbar.BookmarkMarker;
 import fr.proline.studio.markerbar.MarkerContainerPanel;
 import fr.proline.studio.parameter.SettingsButton;
@@ -61,6 +63,7 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
     private JButton m_decoyButton;
 
     private SearchToggleButton m_searchToggleButton;
+    private InfoToggleButton m_infoToggleButton;
     
     private SettingsButton m_settingsButton;
     private FilterButton m_filterButton;
@@ -102,7 +105,10 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
             if (!m_firstPanel) {
                 m_markerContainerPanel.removeAllMarkers();
             }
+
         }
+        
+        m_infoToggleButton.updateInfo();
         
         if (finished) {
             m_proteinSetTable.setSortable(true);
@@ -230,7 +236,8 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
         add(layeredPane, BorderLayout.CENTER);
 
         layeredPane.add(proteinSetPanel, JLayeredPane.DEFAULT_LAYER);
-        layeredPane.add(m_searchToggleButton.getSearchPanel(), JLayeredPane.PALETTE_LAYER);
+        layeredPane.add(m_infoToggleButton.getInfoPanel(), JLayeredPane.PALETTE_LAYER);  
+        layeredPane.add(m_searchToggleButton.getSearchPanel(), new Integer(JLayeredPane.PALETTE_LAYER+1));
 
 
     }
@@ -305,6 +312,7 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
             @Override
             protected void filteringDone() {
                 m_dataBox.propagateDataChanged(CompareDataInterface.class);
+                m_infoToggleButton.updateInfo();
             }
             
         };
@@ -329,6 +337,9 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
             }
         };
         toolbar.add(m_addCompareDataButton);
+        
+        m_infoToggleButton = new InfoToggleButton(m_proteinSetTable, m_proteinSetTable);
+        toolbar.add(m_infoToggleButton);
         
         return toolbar;
     }
@@ -379,7 +390,7 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
     }
 
     
-    private class ProteinSetTable extends LazyTable implements ImportTableSelectionInterface, CrossSelectionInterface  {
+    private class ProteinSetTable extends LazyTable implements ImportTableSelectionInterface, CrossSelectionInterface, InfoInterface  {
 
         
         public ProteinSetTable() {
@@ -548,6 +559,12 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
         @Override
         public void prepostPopupMenu() {
             m_popupMenu.prepostPopupMenu();
+        }
+
+        @Override
+        public String getInfo() {
+            int count = getModel().getRowCount();
+            return count+((count>1) ? " Proteins Sets" : " Protein Set");
         }
 
         

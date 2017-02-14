@@ -14,6 +14,8 @@ import fr.proline.studio.filter.FilterButton;
 import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
+import fr.proline.studio.info.InfoInterface;
+import fr.proline.studio.info.InfoToggleButton;
 import fr.proline.studio.markerbar.MarkerContainerPanel;
 import fr.proline.studio.parameter.SettingsButton;
 import fr.proline.studio.pattern.AbstractDataBox;
@@ -28,11 +30,15 @@ import fr.proline.studio.table.DecoratedMarkerTable;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.table.TablePopupMenu;
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Image;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 import javax.swing.ImageIcon;
+import javax.swing.JLayeredPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JToolBar;
@@ -62,17 +68,56 @@ public class RsmPeptidesOfProteinPanel extends HourglassPanel implements DataBox
     
     private AddDataAnalyzerButton m_addCompareDataButton;
     
+    private InfoToggleButton m_infoToggleButton;
+    
     /**
      * Creates new form RsmPeptidesOfProteinPanel
      */
     public RsmPeptidesOfProteinPanel() {
-        setLayout(new BorderLayout());
-        
-        JPanel peptidesPanel = createPeptidesPanel();
-        
-        add(peptidesPanel, BorderLayout.CENTER);
+        initComponents();
     }
 
+    private void initComponents() {
+
+
+        setLayout(new BorderLayout());
+
+        final JPanel peptidesPanel = createPeptidesPanel();
+
+
+        final JLayeredPane layeredPane = new JLayeredPane();
+
+        layeredPane.addComponentListener(new ComponentListener() {
+
+            @Override
+            public void componentResized(ComponentEvent e) {
+                final Component c = e.getComponent();
+
+                peptidesPanel.setBounds(0, 0, c.getWidth(), c.getHeight());
+                layeredPane.revalidate();
+                layeredPane.repaint();
+
+            }
+
+            @Override
+            public void componentMoved(ComponentEvent e) {
+            }
+
+            @Override
+            public void componentShown(ComponentEvent e) {
+            }
+
+            @Override
+            public void componentHidden(ComponentEvent e) {
+            }
+        });
+        add(layeredPane, BorderLayout.CENTER);
+
+        layeredPane.add(peptidesPanel, JLayeredPane.DEFAULT_LAYER);
+        layeredPane.add(m_infoToggleButton.getInfoPanel(), JLayeredPane.PALETTE_LAYER);  
+
+    }
+    
     private JPanel createPeptidesPanel() {
         JPanel peptidesPanel = new JPanel();
         peptidesPanel.setBounds(0, 0, 500, 400);
@@ -134,6 +179,7 @@ public class RsmPeptidesOfProteinPanel extends HourglassPanel implements DataBox
             @Override
             protected void filteringDone() {
                 m_dataBox.propagateDataChanged(CompareDataInterface.class);
+                m_infoToggleButton.updateInfo();
             }
             
         };
@@ -152,12 +198,15 @@ public class RsmPeptidesOfProteinPanel extends HourglassPanel implements DataBox
             }
         };
         
+        m_infoToggleButton = new InfoToggleButton((ProgressInterface) m_peptidesTable.getModel(), m_peptidesTable);
+        
         
         
         toolbar.add(m_filterButton);
         toolbar.add(m_settingsButton);
         toolbar.add(m_exportButton);
         toolbar.add(m_addCompareDataButton);
+        toolbar.add(m_infoToggleButton);
 
         return toolbar;
     }
@@ -202,7 +251,7 @@ public class RsmPeptidesOfProteinPanel extends HourglassPanel implements DataBox
             
         }
         
-        
+        m_infoToggleButton.updateInfo();
         
         if (proteinMatch != null) {
 
@@ -280,7 +329,7 @@ public class RsmPeptidesOfProteinPanel extends HourglassPanel implements DataBox
     }
 
     
-    private class PeptideTable extends DecoratedMarkerTable  {
+    private class PeptideTable extends DecoratedMarkerTable implements InfoInterface {
         
         public PeptideTable() {
             
@@ -321,6 +370,12 @@ public class RsmPeptidesOfProteinPanel extends HourglassPanel implements DataBox
         @Override
         public void prepostPopupMenu() {
             m_popupMenu.prepostPopupMenu();
+        }
+
+        @Override
+        public String getInfo() {
+            int count = getModel().getRowCount();
+            return count+((count>1) ? " Peptides" : " Peptide");
         }
 
         

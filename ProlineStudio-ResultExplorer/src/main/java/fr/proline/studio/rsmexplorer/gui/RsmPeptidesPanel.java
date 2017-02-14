@@ -9,11 +9,11 @@ import fr.proline.studio.comparedata.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.filter.FilterButton;
-import fr.proline.studio.filter.actions.ClearRestrainAction;
-import fr.proline.studio.filter.actions.RestrainAction;
 import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
+import fr.proline.studio.info.InfoInterface;
+import fr.proline.studio.info.InfoToggleButton;
 import fr.proline.studio.markerbar.MarkerContainerPanel;
 import fr.proline.studio.parameter.SettingsButton;
 import fr.proline.studio.pattern.*;
@@ -54,6 +54,7 @@ public class RsmPeptidesPanel extends HourglassPanel implements DataBoxPanelInte
     private MarkerContainerPanel m_markerContainerPanel;
     private JButton m_decoyButton;
     private SearchToggleButton m_searchToggleButton;
+    private InfoToggleButton m_infoToggleButton;
 
     private SettingsButton m_settingsButton;
     private FilterButton m_filterButton;
@@ -102,7 +103,8 @@ public class RsmPeptidesPanel extends HourglassPanel implements DataBoxPanelInte
         add(layeredPane, BorderLayout.CENTER);
 
         layeredPane.add(peptidesPanel, JLayeredPane.DEFAULT_LAYER);
-        layeredPane.add(m_searchToggleButton.getSearchPanel(), JLayeredPane.PALETTE_LAYER);
+        layeredPane.add(m_infoToggleButton.getInfoPanel(), JLayeredPane.PALETTE_LAYER);  
+        layeredPane.add(m_searchToggleButton.getSearchPanel(), new Integer(JLayeredPane.PALETTE_LAYER+1));
 
     }
 
@@ -162,6 +164,7 @@ public class RsmPeptidesPanel extends HourglassPanel implements DataBoxPanelInte
             @Override
             protected void filteringDone() {
                 m_dataBox.propagateDataChanged(CompareDataInterface.class);
+                m_infoToggleButton.updateInfo();
             }
             
         };
@@ -195,12 +198,16 @@ public class RsmPeptidesPanel extends HourglassPanel implements DataBoxPanelInte
 
         });
 
+        m_infoToggleButton = new InfoToggleButton(m_peptideInstanceTable, m_peptideInstanceTable);
+        
+        
         toolbar.add(m_decoyButton);
         toolbar.add(m_searchToggleButton);
         toolbar.add(m_filterButton);
         toolbar.add(m_settingsButton);
         toolbar.add(m_exportButton);
         toolbar.add(m_addCompareDataButton);
+        toolbar.add(m_infoToggleButton);
         toolbar.add(m_calcButton);
         
         return toolbar;
@@ -325,6 +332,8 @@ public class RsmPeptidesPanel extends HourglassPanel implements DataBoxPanelInte
             m_markerContainerPanel.setMaxLineNumber(peptideInstances.length);
             
         }
+        
+        m_infoToggleButton.updateInfo();
 
         if (finished) {
             ((PeptideInstanceTable) m_peptideInstanceTable).setSortable(true);
@@ -362,7 +371,7 @@ public class RsmPeptidesPanel extends HourglassPanel implements DataBoxPanelInte
         return tableModel.getPeptideInstance(selectedRow);
     }
 
-    private class PeptideInstanceTable extends LazyTable {
+    private class PeptideInstanceTable extends LazyTable implements InfoInterface {
 
         /**
          * Called whenever the value of the selection changes.
@@ -512,6 +521,12 @@ public class RsmPeptidesPanel extends HourglassPanel implements DataBoxPanelInte
         @Override
         public void prepostPopupMenu() {
             m_popupMenu.prepostPopupMenu();
+        }
+
+        @Override
+        public String getInfo() {
+            int count = getModel().getRowCount();
+            return count+((count>1) ? " Peptides" : " Peptide");
         }
 
 

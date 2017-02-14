@@ -12,6 +12,8 @@ import fr.proline.studio.filter.FilterButton;
 import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
+import fr.proline.studio.info.InfoInterface;
+import fr.proline.studio.info.InfoToggleButton;
 import fr.proline.studio.markerbar.MarkerContainerPanel;
 import fr.proline.studio.parameter.SettingsButton;
 import fr.proline.studio.pattern.AbstractDataBox;
@@ -23,16 +25,18 @@ import fr.proline.studio.rsmexplorer.actions.table.DisplayTablePopupMenu;
 import fr.proline.studio.rsmexplorer.gui.model.ProteinTableModel;
 import fr.proline.studio.table.CompoundTableModel;
 import fr.proline.studio.table.DecoratedMarkerTable;
-import fr.proline.studio.table.DecoratedTable;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.table.TablePopupMenu;
 import fr.proline.studio.utils.URLCellRenderer;
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Image;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.TableModelListener;
@@ -57,6 +61,7 @@ public class RsmProteinsOfProteinSetPanel extends HourglassPanel implements Data
     private FilterButton m_filterButton;
     private ExportButton m_exportButton;
     private AddDataAnalyzerButton m_addCompareDataButton;
+    private InfoToggleButton m_infoToggleButton;
     
     private MarkerContainerPanel m_markerContainerPanel;
     
@@ -65,13 +70,51 @@ public class RsmProteinsOfProteinSetPanel extends HourglassPanel implements Data
      */
     public RsmProteinsOfProteinSetPanel() {
         
-        setLayout(new BorderLayout());
-        
-        JPanel proteinPanel = createProteinPanel();
-        
-        add(proteinPanel, BorderLayout.CENTER);
-        
+        initComponents();
     }
+    
+    private void initComponents() {
+
+
+        setLayout(new BorderLayout());
+
+        final JPanel proteinPanel = createProteinPanel();
+
+
+        final JLayeredPane layeredPane = new JLayeredPane();
+
+        layeredPane.addComponentListener(new ComponentListener() {
+
+            @Override
+            public void componentResized(ComponentEvent e) {
+                final Component c = e.getComponent();
+
+                proteinPanel.setBounds(0, 0, c.getWidth(), c.getHeight());
+                layeredPane.revalidate();
+                layeredPane.repaint();
+
+            }
+
+            @Override
+            public void componentMoved(ComponentEvent e) {
+            }
+
+            @Override
+            public void componentShown(ComponentEvent e) {
+            }
+
+            @Override
+            public void componentHidden(ComponentEvent e) {
+            }
+        });
+        add(layeredPane, BorderLayout.CENTER);
+
+        layeredPane.add(proteinPanel, JLayeredPane.DEFAULT_LAYER);
+        layeredPane.add(m_infoToggleButton.getInfoPanel(), JLayeredPane.PALETTE_LAYER);  
+
+
+    }
+    
     
     
     private JPanel createProteinPanel() {
@@ -158,6 +201,7 @@ public class RsmProteinsOfProteinSetPanel extends HourglassPanel implements Data
             @Override
             protected void filteringDone() {
                 m_dataBox.propagateDataChanged(CompareDataInterface.class);
+                m_infoToggleButton.updateInfo();
             }
             
         };
@@ -176,12 +220,14 @@ public class RsmProteinsOfProteinSetPanel extends HourglassPanel implements Data
             }
         };
         
+        m_infoToggleButton = new InfoToggleButton(m_proteinTable, m_proteinTable);
         
         
         toolbar.add(m_filterButton);
         toolbar.add(m_settingsButton);
         toolbar.add(m_exportButton);
         toolbar.add(m_addCompareDataButton);
+        toolbar.add(m_infoToggleButton);
 
         return toolbar;
     }
@@ -261,7 +307,10 @@ public class RsmProteinsOfProteinSetPanel extends HourglassPanel implements Data
         m_markerContainerPanel.setMaxLineNumber(proteinSet.getSameSetCount()+proteinSet.getSubSetCount());
         m_markerContainerPanel.removeAllMarkers();
 
+        m_infoToggleButton.updateInfo();
+        
         m_proteinTable.setSortable(true);
+        
         
     }
 
@@ -319,7 +368,7 @@ public class RsmProteinsOfProteinSetPanel extends HourglassPanel implements Data
 
 
 
-    private class ProteinTable extends DecoratedMarkerTable implements ProgressInterface {
+    private class ProteinTable extends DecoratedMarkerTable implements ProgressInterface, InfoInterface {
 
         public ProteinTable() {
 
@@ -370,5 +419,11 @@ public class RsmProteinsOfProteinSetPanel extends HourglassPanel implements Data
             m_popupMenu.prepostPopupMenu();
         }
 
+        @Override
+        public String getInfo() {
+            int count = getModel().getRowCount();
+            return count+((count>1) ? " Proteins" : " Protein");
+        }
+        
     }
 }

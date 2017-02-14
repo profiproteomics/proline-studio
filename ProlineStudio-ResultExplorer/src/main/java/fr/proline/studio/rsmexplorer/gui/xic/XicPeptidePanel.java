@@ -217,6 +217,7 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
             @Override
             protected void filteringDone() {
                 m_dataBox.propagateDataChanged(CompareDataInterface.class);
+                m_infoToggleButton.updateInfo();
             }
             
         };
@@ -344,11 +345,10 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
         if ((peptides != null) && (peptides.size() > 0)) {
             m_quantPeptideTable.getSelectionModel().setSelectionInterval(0, 0);
             m_markerContainerPanel.setMaxLineNumber(peptides.size());
-            
-            m_infoToggleButton.updateInfo();
+
         }
 
-        
+        m_infoToggleButton.updateInfo();
         
         if (finished) {
             // allow to change column visibility
@@ -728,7 +728,8 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
 
         @Override
         public String getInfo() {
-            return getModel().getRowCount()+" Peptides";
+            int count = getModel().getRowCount();
+            return count+((count>1) ? " Peptides" : " Peptide");
         }
     }
 

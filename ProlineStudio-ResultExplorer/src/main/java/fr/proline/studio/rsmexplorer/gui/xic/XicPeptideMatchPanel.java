@@ -9,8 +9,6 @@ import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.export.ExportModelInterface;
 import fr.proline.studio.filter.FilterButton;
-import fr.proline.studio.filter.actions.ClearRestrainAction;
-import fr.proline.studio.filter.actions.RestrainAction;
 import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
@@ -61,8 +59,6 @@ public class XicPeptideMatchPanel extends HourglassPanel implements DataBoxPanel
     private FilterButton m_filterButton;
     private ExportButton m_exportButton;
 
-    private JLabel m_titleLabel;
-    private static final String TABLE_TITLE = "PSM ";
 
     public XicPeptideMatchPanel() {
         initComponents();
@@ -114,8 +110,7 @@ public class XicPeptideMatchPanel extends HourglassPanel implements DataBoxPanel
         JPanel internalPanel = createInternalPanel();
 
         JToolBar toolbar = initToolbar();
-        m_titleLabel = new JLabel(TABLE_TITLE);
-        psmPanel.add(m_titleLabel, BorderLayout.NORTH);
+
         psmPanel.add(toolbar, BorderLayout.WEST);
         psmPanel.add(internalPanel, BorderLayout.CENTER);
 
@@ -188,7 +183,7 @@ public class XicPeptideMatchPanel extends HourglassPanel implements DataBoxPanel
         if (peptideMatchList != null) {
             nb = peptideMatchList.size();
         }
-        m_titleLabel.setText(TABLE_TITLE + " (" + nb + ")");
+
         // select the first row
         if ((nb > 0)) {
             m_psmTable.getSelectionModel().setSelectionInterval(0, 0);

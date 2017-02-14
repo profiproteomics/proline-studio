@@ -10,11 +10,11 @@ import fr.proline.studio.comparedata.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.filter.FilterButton;
-import fr.proline.studio.filter.actions.ClearRestrainAction;
-import fr.proline.studio.filter.actions.RestrainAction;
 import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
+import fr.proline.studio.info.InfoInterface;
+import fr.proline.studio.info.InfoToggleButton;
 import fr.proline.studio.markerbar.BookmarkMarker;
 import fr.proline.studio.markerbar.MarkerContainerPanel;
 import fr.proline.studio.parameter.SettingsButton;
@@ -78,6 +78,7 @@ public class PTMProteinSitePanel extends HourglassPanel implements DataBoxPanelI
     private MarkerContainerPanel m_markerContainerPanel;
 
     private SearchToggleButton m_searchToggleButton;
+    private InfoToggleButton m_infoToggleButton;
     
     private SettingsButton m_settingsButton;
     private FilterButton m_filterButton;
@@ -106,6 +107,7 @@ public class PTMProteinSitePanel extends HourglassPanel implements DataBoxPanelI
 
         }
         
+        m_infoToggleButton.updateInfo();
         
         m_countModificationTextField.setText(model.getModificationsInfo());
         
@@ -228,7 +230,8 @@ public class PTMProteinSitePanel extends HourglassPanel implements DataBoxPanelI
         add(layeredPane, BorderLayout.CENTER);
 
         layeredPane.add(proteinPTMSitePanel, JLayeredPane.DEFAULT_LAYER);
-        layeredPane.add(m_searchToggleButton.getSearchPanel(), JLayeredPane.PALETTE_LAYER);
+        layeredPane.add(m_infoToggleButton.getInfoPanel(), JLayeredPane.PALETTE_LAYER);  
+        layeredPane.add(m_searchToggleButton.getSearchPanel(), new Integer(JLayeredPane.PALETTE_LAYER+1));
 
 
     }
@@ -265,6 +268,7 @@ public class PTMProteinSitePanel extends HourglassPanel implements DataBoxPanelI
             @Override
             protected void filteringDone() {
                 m_dataBox.propagateDataChanged(CompareDataInterface.class);
+                m_infoToggleButton.updateInfo();
             }
             
         };
@@ -289,6 +293,10 @@ public class PTMProteinSitePanel extends HourglassPanel implements DataBoxPanelI
             }
         };
         toolbar.add(m_addCompareDataButton);
+        
+        m_infoToggleButton = new InfoToggleButton(m_ptmProteinSiteTable, m_ptmProteinSiteTable);
+        
+        toolbar.add(m_infoToggleButton);
         
         return toolbar;
     }
@@ -412,7 +420,7 @@ public class PTMProteinSitePanel extends HourglassPanel implements DataBoxPanelI
     
 
     
-    private class PTMProteinSiteTable extends LazyTable implements ImportTableSelectionInterface, CrossSelectionInterface  {
+    private class PTMProteinSiteTable extends LazyTable implements ImportTableSelectionInterface, CrossSelectionInterface, InfoInterface  {
 
         
         public PTMProteinSiteTable() {
@@ -588,6 +596,12 @@ public class PTMProteinSitePanel extends HourglassPanel implements DataBoxPanelI
         @Override
         public void prepostPopupMenu() {
             m_popupMenu.prepostPopupMenu();
+        }
+
+        @Override
+        public String getInfo() {
+            int count = getModel().getRowCount();
+            return count+((count>1) ? " PTM Proteins Sites" : " PTM Protein Site");
         }
 
         

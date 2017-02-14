@@ -7,11 +7,11 @@ import fr.proline.studio.comparedata.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.filter.FilterButton;
-import fr.proline.studio.filter.actions.ClearRestrainAction;
-import fr.proline.studio.filter.actions.RestrainAction;
 import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
+import fr.proline.studio.info.InfoInterface;
+import fr.proline.studio.info.InfoToggleButton;
 import fr.proline.studio.markerbar.MarkerContainerPanel;
 import fr.proline.studio.parameter.SettingsButton;
 import fr.proline.studio.pattern.AbstractDataBox;
@@ -65,6 +65,7 @@ public class MSQueriesPanel extends HourglassPanel implements DataBoxPanelInterf
     private FilterButton m_filterButton;
     private ExportButton m_exportButton;
     private AddDataAnalyzerButton m_addCompareDataButton;
+    private InfoToggleButton m_infoToggleButton;
     
     private JLabel m_titleLabel;
     private final String TABLE_TITLE = "MS Queries";
@@ -111,6 +112,7 @@ public class MSQueriesPanel extends HourglassPanel implements DataBoxPanelInterf
         add(layeredPane, BorderLayout.CENTER);
 
         layeredPane.add(msqueryPanel, JLayeredPane.DEFAULT_LAYER);
+        layeredPane.add(m_infoToggleButton.getInfoPanel(), JLayeredPane.PALETTE_LAYER);
     }
     
     private JPanel createMSQueryPanel() {
@@ -141,6 +143,7 @@ public class MSQueriesPanel extends HourglassPanel implements DataBoxPanelInterf
             @Override
             protected void filteringDone() {
                 m_dataBox.propagateDataChanged(CompareDataInterface.class);
+                m_infoToggleButton.updateInfo();
             }
             
         };
@@ -167,6 +170,10 @@ public class MSQueriesPanel extends HourglassPanel implements DataBoxPanelInterf
             }
         };
         toolbar.add(m_addCompareDataButton);
+        
+        m_infoToggleButton = new InfoToggleButton(m_msqueriesTable, m_msqueriesTable);
+        
+        toolbar.add(m_infoToggleButton);
         
         return toolbar;
     }
@@ -228,6 +235,9 @@ public class MSQueriesPanel extends HourglassPanel implements DataBoxPanelInterf
         if ((nbQ > 0)) {
             m_msqueriesTable.getSelectionModel().setSelectionInterval(0, 0);
         }
+        
+        m_infoToggleButton.updateInfo();
+        
         if (finished) {
             m_msqueriesTable.setSortable(true);
         }
@@ -305,7 +315,7 @@ public class MSQueriesPanel extends HourglassPanel implements DataBoxPanelInterf
     
     
     
-    private class MSQueriesTable extends LazyTable {
+    private class MSQueriesTable extends LazyTable implements InfoInterface {
         
         private boolean selectionWillBeRestored = false;
         
@@ -414,6 +424,12 @@ public class MSQueriesPanel extends HourglassPanel implements DataBoxPanelInterf
                 m_dataBox.propagateDataChanged(MsQueryInfoRset.class);
             }
 
+        }
+
+        @Override
+        public String getInfo() {
+            int count = getModel().getRowCount();
+            return count+((count>1) ? " Queries" : "Query");
         }
         
     }

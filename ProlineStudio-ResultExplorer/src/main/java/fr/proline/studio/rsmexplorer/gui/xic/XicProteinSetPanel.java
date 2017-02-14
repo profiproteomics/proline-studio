@@ -243,6 +243,7 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
             @Override
             protected void filteringDone() {
                 m_dataBox.propagateDataChanged(CompareDataInterface.class);
+                m_infoToggleButton.updateInfo();
             }
 
         };
@@ -797,7 +798,8 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
 
         @Override
         public String getInfo() {
-            return getModel().getRowCount()+" Proteins Sets";
+            int count = getModel().getRowCount();
+            return count+((count>1) ? " Proteins Sets" : " Protein Set");
         }
 
     }

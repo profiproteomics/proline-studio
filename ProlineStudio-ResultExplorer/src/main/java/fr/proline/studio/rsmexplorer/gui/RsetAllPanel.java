@@ -199,7 +199,6 @@ public class RsetAllPanel extends HourglassPanel implements DataBoxPanelInterfac
             @Override
             protected void filteringDone() {
                 m_dataBox.dataChanged();
-                //m_dataBox.propagateDataChanged(Timestamp.class);
             }
 
         };

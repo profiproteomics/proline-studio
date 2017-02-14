@@ -453,6 +453,8 @@ public class PeptideInstanceTableModel extends LazyTableModel implements GlobalT
         switch (columnIndex) {
             case COLTYPE_PEPTIDE_CALCULATED_MASS:
                 return Float.class;
+            case COLTYPE_PEPTIDE_NAME:
+                return String.class;
         }
         
         return getColumnClass(columnIndex);

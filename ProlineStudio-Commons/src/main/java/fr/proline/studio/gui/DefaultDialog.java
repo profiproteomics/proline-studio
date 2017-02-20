@@ -171,6 +171,10 @@ public class DefaultDialog extends javax.swing.JDialog {
 
     }
     
+    public void setButtonEnabled(int buttonId, boolean enabled) {
+        m_buttons[buttonId].setEnabled(enabled);
+    }
+    
     public void setButtonName(int buttonId, String name) {
         m_buttons[buttonId].setText(name);
     }

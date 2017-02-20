@@ -72,8 +72,8 @@ public class ExportDatasetJMSAction extends AbstractRSMAction {
                         if (success) {
                             if (!m_config.isEmpty()) {
                                 String conf = m_config.get(0);
-                                dialog.setDefaultExportConfig(conf);
-                                dialog.updateFileExport();
+                                boolean mustUpdateConfig = dialog.setDefaultExportConfig(conf);
+                                dialog.updateFileExport(mustUpdateConfig);
                             }
                         } else {
                             // nothing to do

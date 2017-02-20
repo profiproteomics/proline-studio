@@ -8,15 +8,12 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.prefs.Preferences;
@@ -37,6 +34,9 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import fr.proline.studio.gui.CollapsablePanel;
 import fr.proline.studio.gui.CollapseListener;
+import fr.proline.studio.gui.InfoDialog;
+import fr.proline.studio.settings.FilePreferences;
+import org.openide.windows.WindowManager;
 
 
 /**
@@ -65,6 +65,10 @@ public class CustomExportDialog extends DefaultDialog implements CollapseListene
 
     private static final FileNameExtensionFilter FILTER_EXCEL = new FileNameExtensionFilter("Excel File (.xlsx)", "xlsx");
     private static final FileNameExtensionFilter FILTER_TSV = new FileNameExtensionFilter("Tabulation Separated Values (.tsv)", "tsv");
+    
+    private static final String DEFAULT_SERVER_CONFIG_KEY = "DEFAULT_SERVER_CONFIG";
+    private static final String CURRENT_CONFIG_KEY = "CURRENT_CONFIG";
+
     
     private static CustomExportDialog m_singletonDialog = null;
 
@@ -109,7 +113,8 @@ public class CustomExportDialog extends DefaultDialog implements CollapseListene
 
     private JComboBox comboBox_exportProfile;
 
-
+    private String m_previousConfigStr = null;
+    private String m_defaultConfigStr = null;
 
 
     public static CustomExportDialog getDialog(Window parent, boolean fileExportMode) {
@@ -128,6 +133,10 @@ public class CustomExportDialog extends DefaultDialog implements CollapseListene
     private CustomExportDialog(Window parent, boolean fileExportMode) {
         super(parent, Dialog.ModalityType.APPLICATION_MODAL);
 
+        setButtonVisible(BUTTON_LOAD, true);
+        setButtonVisible(BUTTON_SAVE, true);
+        setButtonEnabled(BUTTON_SAVE, false);
+        
         setResizable(true);
         
         m_fileExportMode = fileExportMode;
@@ -140,6 +149,10 @@ public class CustomExportDialog extends DefaultDialog implements CollapseListene
 
         Preferences preferences = NbPreferences.root();
         String defaultExportPath = preferences.get("DefaultExcelExportPath", System.getProperty("user.home" ));
+        
+        //m_lastDefaultExportConfig =  preferences.get("DefaultExportConfig", null);
+        //m_lastExportConfig =  preferences.get("ExportConfig", null);
+        
         
         m_tabTitleIdHashMap = new HashMap<>(); // this is used to store tab id/tab title matching
 
@@ -179,19 +192,44 @@ public class CustomExportDialog extends DefaultDialog implements CollapseListene
         // decode json 
         m_exportConfig = new ExportConfig();
         String jsonString = "";
+        
+        String path = m_configFile.trim();
         Path filePath = Paths.get(m_configFile.trim());
-        try {
-            jsonString = new String(Files.readAllBytes(filePath));
-        } catch (IOException e) {
+        
+        FilePreferences filePreferences = new FilePreferences(new File(path), null, "");
+        String fileDefaultServerConfig = filePreferences.get(DEFAULT_SERVER_CONFIG_KEY, null);
+        
+        boolean showWarning = false;
+        
+        if (fileDefaultServerConfig == null) {
+            // old file format : json config directly saved in file
+            
+            try {
+                jsonString = new String(Files.readAllBytes(filePath));
+            } catch (IOException e) {
 
-            logger.error("Error while loading config " + e);
+                logger.error("Error while loading config " + e);
+            }
+            
+            showWarning = true;
+        } else {
+            jsonString = filePreferences.get(CURRENT_CONFIG_KEY, null);
+            
+            showWarning = (fileDefaultServerConfig.compareTo(m_defaultConfigStr) != 0);
         }
 
         if (!filePath.toString().equals("")) {
             Gson gson = new Gson();
             String messageHashMapJsonString = jsonString;
             m_exportConfig = gson.fromJson(messageHashMapJsonString, m_exportConfig.getClass());
-
+            m_previousConfigStr = jsonString;
+        }
+        
+        if (showWarning) {
+            InfoDialog errorDialog = new InfoDialog(WindowManager.getDefault().getMainWindow(), InfoDialog.InfoType.WARNING, "Warning", "The version of the Export Settings file is out of date. It could lead to an error during the export.");
+            errorDialog.setButtonVisible(InfoDialog.BUTTON_CANCEL, false);
+            errorDialog.centerToWindow(WindowManager.getDefault().getMainWindow());
+            errorDialog.setVisible(true);
         }
     }
 
@@ -767,7 +805,14 @@ public class CustomExportDialog extends DefaultDialog implements CollapseListene
 
     @Override
     protected boolean loadCalled() {
-        loadConfigFile();
+
+        boolean loaded = loadConfigFile();
+
+        // extend option panel if needed
+        if (loaded && !m_optionPanel.isVisible()) {
+            collapse(false);
+        }
+        
         return false;
     }
 
@@ -839,7 +884,7 @@ public class CustomExportDialog extends DefaultDialog implements CollapseListene
 
     }
 
-    protected void loadConfigFile() {
+    protected boolean loadConfigFile() {
 
         //-------
         String configFile = m_configFile.trim();
@@ -873,9 +918,10 @@ public class CustomExportDialog extends DefaultDialog implements CollapseListene
             } else {
 
             }
-
+            return true;
         }
 
+        return false;
     }
 
     protected void updatePresentationModeForNewlySelectedTab() {
@@ -939,27 +985,18 @@ public class CustomExportDialog extends DefaultDialog implements CollapseListene
                 f.delete();
             }
 
-            final Path path = Paths.get(absolutePath);
 
-            BufferedWriter writer = null;
             try {
-                writer = Files.newBufferedWriter(path,
-                        StandardCharsets.UTF_8, StandardOpenOption.CREATE);
 
                 Gson gson = new GsonBuilder().setPrettyPrinting().create();
                 String jsonString = gson.toJson(generateConfigFileFromGUI());
-                writer.write(jsonString);
-                writer.flush();
-            } catch (IOException e1) {
-                logger.error("Error while saving the configuration " + e1);
-            } finally {
-                try {
-                    if (writer != null) {
-                        writer.close();
-                    }
-                } catch (Exception e) {
-                    logger.error("Error while saving the configuration " + e);
-                }
+                
+                FilePreferences filePreferences = new FilePreferences(f, null, "");
+                filePreferences.put(DEFAULT_SERVER_CONFIG_KEY, m_defaultConfigStr);
+                filePreferences.put(CURRENT_CONFIG_KEY, jsonString);
+
+            } catch (Exception e) {
+                logger.error("Error while saving the configuration " + e);
             }
 
         }
@@ -1211,24 +1248,44 @@ public class CustomExportDialog extends DefaultDialog implements CollapseListene
      *
      * @param configStr the JSON string
      */
-    public void setDefaultExportConfig(String configStr) {
+    public boolean setDefaultExportConfig(String configStr) {
 
-        logger.debug("setDefaultExportConfig");
-        m_configFile = "";
-        m_exportDefaultConfig = new Gson().fromJson(configStr, ExportConfig.class);
-        // create a hashmap of tabs titles and ids in case of renaming
-        m_tabTitleIdHashMap.clear();
-        for (int i = 0; i < m_exportDefaultConfig.sheets.length; i++) {
-            m_tabTitleIdHashMap.put(m_exportDefaultConfig.sheets[i].title, m_exportDefaultConfig.sheets[i].id);
-
+        boolean mustUpdateConfig = false;
+        
+        if (m_defaultConfigStr == null) {
+            m_defaultConfigStr = configStr;
+            mustUpdateConfig = true;
         }
 
-        fillExportPossibleValues(m_exportDefaultConfig);
-        //m_exportConfig = m_exportDefaultConfig; // this in order to have the config like the default one, before one is loaded.
-        if (m_exportDefaultConfig != null) {
-            fillExportFormatTable(m_exportDefaultConfig, m_exportConfig);
+        if (m_previousConfigStr == null) {
+            mustUpdateConfig = true;
+        }
+
+        
+        if (mustUpdateConfig) {
+            
+            m_previousConfigStr = configStr;
+
+            logger.debug("setDefaultExportConfig");
+            m_configFile = "";
+            m_exportDefaultConfig = new Gson().fromJson(configStr, ExportConfig.class);
+            // create a hashmap of tabs titles and ids in case of renaming
+            m_tabTitleIdHashMap.clear();
+            for (int i = 0; i < m_exportDefaultConfig.sheets.length; i++) {
+                m_tabTitleIdHashMap.put(m_exportDefaultConfig.sheets[i].title, m_exportDefaultConfig.sheets[i].id);
+
+            }
+
+            fillExportPossibleValues(m_exportDefaultConfig);
             //m_exportConfig = m_exportDefaultConfig; // this in order to have the config like the default one, before one is loaded.
+            if (m_exportDefaultConfig != null) {
+                fillExportFormatTable(m_exportDefaultConfig, m_exportConfig);
+                //m_exportConfig = m_exportDefaultConfig; // this in order to have the config like the default one, before one is loaded.
+            }
+
         }
+        
+        return mustUpdateConfig;
     }
 
     /* return true if the configuration is ok regarding the titles (should not be empty and 1 sheet can not contain 2 same title) */
@@ -1255,7 +1312,7 @@ public class CustomExportDialog extends DefaultDialog implements CollapseListene
         return errorsOnConfig;
     }
 
-    public void updateFileExport() {
+    public void updateFileExport(boolean mustUpdateConfig) {
         String text = m_fileTextField.getText().trim();
         if (!text.isEmpty()) {
             // file or dir?
@@ -1268,8 +1325,11 @@ public class CustomExportDialog extends DefaultDialog implements CollapseListene
                 }
             }
         }
-        m_exportConfig = null; //m_exportDefaultConfig;
-        fillExportFormatTable(m_exportDefaultConfig, m_exportConfig);
+        
+        if (mustUpdateConfig) {
+            m_exportConfig = null; //m_exportDefaultConfig;
+            fillExportFormatTable(m_exportDefaultConfig, m_exportConfig);
+        }
     }
 
 
@@ -1279,8 +1339,7 @@ public class CustomExportDialog extends DefaultDialog implements CollapseListene
         boolean isExpanded = !collapse;
         m_optionPanel.setVisible(isExpanded);
 
-        setButtonVisible(BUTTON_LOAD, isExpanded);
-        setButtonVisible(BUTTON_SAVE, isExpanded);
+        setButtonEnabled(BUTTON_SAVE, isExpanded);
 
         if (!isExpanded) {
             //disable custom parameters and restore default ones

@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.prefs.AbstractPreferences;
 import java.util.prefs.BackingStoreException;
+import java.util.prefs.Preferences;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,6 +44,54 @@ public class FilePreferences extends AbstractPreferences {
     }
   }
  
+    @Override
+    public void put(String key, String value) {
+        int size = value.length();
+        if (size > Preferences.MAX_VALUE_LENGTH) {
+            int cnt = 1;
+            for (int idx = 0; idx < size; cnt++) {
+                if ((size - idx) > Preferences.MAX_VALUE_LENGTH) {
+                    super.put(key + "." + cnt, value.substring(idx, idx + Preferences.MAX_VALUE_LENGTH));
+                    idx += Preferences.MAX_VALUE_LENGTH;
+                } else {
+                    super.put(key + "." + cnt, value.substring(idx));
+                    idx = size;
+                }
+            }
+        } else {
+            super.put(key, value);
+        }
+    }
+    
+    public String get(String key, String def) {
+        String value = super.get(key, null);
+        if (value != null) {
+            return value;
+        }
+        
+        int cnt = 1;
+        StringBuilder sb = new StringBuilder();
+        while(true) {
+            String s = super.get(key+"."+cnt, null);
+            if (s == null) {
+                break;
+            }
+            
+            sb.append(s);
+            
+            cnt++;
+        }
+        
+        if (sb.length()>0) {
+            value = sb.toString();
+        } else {
+            value = def;
+        }
+        
+        return value;
+    }
+  
+  
     @Override
   protected void putSpi(String key, String value)
   {

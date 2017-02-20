@@ -21,6 +21,8 @@ public class CreateXICDesignPanel extends JPanel {
     private final AbstractNode m_rootNode;
     private final IdentificationTree m_selectionTree;
     
+    private XICDesignTree m_designTree;
+    
     public static CreateXICDesignPanel getPanel(AbstractNode rootNode, IdentificationTree selectionTree) {
         if ((m_singleton == null)
                 || (!m_singleton.m_rootNode.equals(rootNode))
@@ -45,6 +47,7 @@ public class CreateXICDesignPanel extends JPanel {
     private CreateXICDesignPanel(AbstractNode rootNode, IdentificationTree selectionTree) {
         m_rootNode = rootNode;
         m_selectionTree = selectionTree;
+        
         JPanel wizardPanel = createWizardPanel();
         JPanel mainPanel = createMainPanel(rootNode);
 
@@ -149,9 +152,9 @@ public class CreateXICDesignPanel extends JPanel {
         c.weightx = 1;
         c.weighty = 1;
 
-        XICDesignTree tree = XICDesignTree.getDesignTree(rootNode);
+        m_designTree = new XICDesignTree(rootNode, true);
         JScrollPane treeScrollPane = new JScrollPane();
-        treeScrollPane.setViewportView(tree);
+        treeScrollPane.setViewportView(m_designTree);
 
         designTreePanel.add(treeScrollPane, c);
 
@@ -188,5 +191,10 @@ public class CreateXICDesignPanel extends JPanel {
 
         return selectionTreePanel;
     }
+    
+    public XICDesignTree getDesignTree(){
+        return m_designTree;
+    }
+
 
 }

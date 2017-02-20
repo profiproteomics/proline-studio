@@ -34,9 +34,6 @@ import fr.proline.studio.rsmexplorer.tree.xic.XICBiologicalSampleNode;
 import fr.proline.studio.rsmexplorer.tree.xic.XICDesignTree;
 import fr.proline.studio.rsmexplorer.tree.xic.XICRunNode;
 import java.awt.event.MouseEvent;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.PrintWriter;
 import java.util.*;
 import javax.swing.*;
 import javax.swing.event.TreeExpansionEvent;
@@ -44,7 +41,6 @@ import javax.swing.event.TreeWillExpandListener;
 import javax.swing.tree.ExpandVetoException;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
-import org.openide.util.Exceptions;
 
 /**
  * Quantitation tree (Spectral count + XIC dataset)
@@ -53,8 +49,8 @@ import org.openide.util.Exceptions;
  */
 public class QuantitationTree extends AbstractTree implements TreeWillExpandListener {
 
-    private boolean m_isMainTree;
-    private static HashMap<ProjectQuantitationData, QuantitationTree> m_treeMap = new HashMap<>();
+    private final boolean m_isMainTree;
+    private static final HashMap<ProjectQuantitationData, QuantitationTree> m_treeMap = new HashMap<>();
     private static QuantitationTree m_currentTree = null;
     private boolean m_loadingDone = false;
     private JPopupMenu m_rootPopup;
@@ -794,7 +790,7 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
         m_model.nodeStructureChanged(parentNode);
 
         if (parentNode instanceof DataSetNode && ((DataSetNode) parentNode).isQuantXIC()) {
-            XICDesignTree.setExpDesign(((DataSetNode) parentNode).getDataset(), parentNode, this, false);
+            XICDesignTree.setExpDesign(((DataSetNode) parentNode).getDataset(), parentNode, this, false, true);
         }
 
     }

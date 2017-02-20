@@ -12,6 +12,7 @@ import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
 import fr.proline.studio.rsmexplorer.tree.xic.XICBiologicalGroupNode;
 import fr.proline.studio.rsmexplorer.tree.xic.XICBiologicalSampleAnalysisNode;
 import fr.proline.studio.rsmexplorer.tree.xic.XICBiologicalSampleNode;
+import fr.proline.studio.rsmexplorer.tree.xic.XICDesignTree;
 import fr.proline.studio.rsmexplorer.tree.xic.XICRunNode;
 import fr.proline.studio.table.DecoratedMarkerTable;
 import fr.proline.studio.table.DecoratedTableModel;
@@ -33,10 +34,8 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import javax.swing.BorderFactory;
-import javax.swing.DefaultListCellRenderer;
 import javax.swing.DropMode;
 import javax.swing.JLabel;
-import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
@@ -54,11 +53,11 @@ import javax.swing.tree.DefaultTreeModel;
  */
 public class SelectRawFilesPanel extends JPanel {
 
-    private static int INDEX_DIFFERENCE = 3;
-    private static String USER_DEFINED_ASSOCIATION = "User Defined Association";
-    private static String MISSING_ASSOCIATION = "Missing Association";
-    private static String AUTOMATIC_ASSOCIATION = "System Proposed Association";
-    private static String EXISTING_ASSOCIATION = "Existing Association in Database";
+    private static final int INDEX_DIFFERENCE = 3;
+    private static final String USER_DEFINED_ASSOCIATION = "User Defined Association";
+    private static final String MISSING_ASSOCIATION = "Missing Association";
+    private static final String AUTOMATIC_ASSOCIATION = "System Proposed Association";
+    private static final String EXISTING_ASSOCIATION = "Existing Association in Database";
 
     private static SelectRawFilesPanel m_singleton = null;
 
@@ -70,9 +69,11 @@ public class SelectRawFilesPanel extends JPanel {
     private final TreeFileChooserTransferHandler m_transferHandler;
     private AbstractNode m_rootNode;
 
-    public static SelectRawFilesPanel getPanel(AbstractNode rootNode) {
+    private final XICDesignTree m_designTree;
+
+    public static SelectRawFilesPanel getPanel(AbstractNode rootNode, XICDesignTree designTree) {
         if (m_singleton == null) {
-            m_singleton = new SelectRawFilesPanel();
+            m_singleton = new SelectRawFilesPanel(designTree);
         } else {
             m_singleton.resetDropZonePanel();
         }
@@ -86,7 +87,9 @@ public class SelectRawFilesPanel extends JPanel {
         return m_singleton;
     }
 
-    private SelectRawFilesPanel() {
+    private SelectRawFilesPanel(XICDesignTree designTree) {
+
+        m_designTree = designTree;
 
         m_transferHandler = new TreeFileChooserTransferHandler();
 
@@ -201,12 +204,10 @@ public class SelectRawFilesPanel extends JPanel {
 
     private JPanel createDesignTablePanel() {
         JPanel panel = new JPanel();
-        //panel.setLayout(new BorderLayout());
 
         panel.setLayout(new GridLayout(2, 1));
 
         JPanel designTablePanel = new JPanel();
-        //designTablePanel.setBorder(BorderFactory.createTitledBorder("Samples"));
 
         designTablePanel.setLayout(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();
@@ -224,9 +225,9 @@ public class SelectRawFilesPanel extends JPanel {
 
         try {
             m_table = new FlatDesignTable();
-            m_model = new FlatDesignTableModel();
+            m_model = new FlatDesignTableModel(m_designTree);
             m_table.setModel(m_model);
-            m_table.getColumnModel().getColumn(FlatDesignTableModel.COLTYPE_ASSOCIATION_SOURCE).setCellRenderer(new ErrorClassificationRenderer());
+            m_table.getColumnModel().getColumn(FlatDesignTableModel.COLTYPE_ASSOCIATION_SOURCE).setCellRenderer(new LinkAssociationRenderer());
 //            m_table.setRowHeight(25);
             tableScrollPane.setViewportView(m_table);
         } catch (Exception e) {
@@ -236,15 +237,15 @@ public class SelectRawFilesPanel extends JPanel {
         designTablePanel.add(tableScrollPane, c);
 
         panel.add(designTablePanel);
-        panel.add(this.createDropZonePanel());
+        panel.add(createDropZonePanel());
 
         return panel;
     }
 
     private JPanel createDropZonePanel() {
         JPanel panel = new JPanel();
-        panel.setLayout(new GridLayout(1, 2, 10, 10));
-        panel.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createTitledBorder("Automatic Raw File Association"), BorderFactory.createEmptyBorder(15, 15, 15, 15)));
+        panel.setLayout(new GridLayout(1, 2, 5, 5));
+        panel.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createTitledBorder("Automatic Raw File Association"), BorderFactory.createEmptyBorder(5, 5, 5, 5)));
 
         m_dropZoneInfo = new XICDropZoneInfo();
         m_dropZone = new XICDropZone(m_transferHandler);
@@ -345,17 +346,17 @@ public class SelectRawFilesPanel extends JPanel {
 
                 RunInfoData runInfoData = (RunInfoData) runNode.getData();
 
-                if (runInfoData.getRawFileSouce().getLinkedRawFile() != null) {
+                if (runInfoData.getLinkedRawFile() != null) {
                     return; // already a registered raw file, the user can no longer change it
                 }
 
-                ArrayList<RawFile> potentialRawFiles = runInfoData.getPotentialRawFiles();
+                HashMap<String, RawFile> potentialRawFiles = runInfoData.getPotentialRawFiles();
                 if (potentialRawFiles == null) {
                     return;
                 }
 
                 SelectRawFileDialog selectRawFileDialog = SelectRawFileDialog.getSelectRawFileDialog(CreateXICDialog.getDialog(null));
-                selectRawFileDialog.init(potentialRawFiles, runInfoData.getRawFileSouce());
+                selectRawFileDialog.init(potentialRawFiles, runInfoData);
                 //selectRawFileDialog.centerToWindow(CreateXICDialog.getDialog(null));
                 int x = (int) (CreateXICDialog.getDialog(null).getLocationOnScreen().getX() + CreateXICDialog.getDialog(null).getWidth() / 2);
                 int y = (int) (CreateXICDialog.getDialog(null).getLocationOnScreen().getY());
@@ -365,13 +366,14 @@ public class SelectRawFilesPanel extends JPanel {
 
                     RawFile rawFile = selectRawFileDialog.getSelectedRawFile();
                     if (rawFile != null) {
-                        runInfoData.getRawFileSouce().setSelectedRawFile(rawFile);
+                        runInfoData.setSelectedRawFile(rawFile);
 
                         runInfoData.setRun(rawFile.getRuns().get(0));
                         //runInfoData.setRawFilePath(rawFile.getDirectory()+File.separator+rawFile.getRawFileName());  //JPM.RUNINFODATA
                         //runInfoData.setRunInfoInDatabase(true);
                         //((DefaultTreeModel)getModel()).nodeChanged(runNode);
                         m_model.fireTableDataChanged();
+                        m_model.calculateMissingValues();
                         return;
                     }
                 }
@@ -399,7 +401,7 @@ public class SelectRawFilesPanel extends JPanel {
 
     protected static class FlatDesignTableModel extends DecoratedTableModel implements TreeFileChooserTableModelInterface {
 
-        private String[] suffix = {".raw", ".mzdb", ".wiff"};
+        private final String[] suffix = {".raw", ".mzdb", ".wiff"};
 
         public static final int COLTYPE_GROUP = 0;
         public static final int COLTYPE_SAMPLE = 1;
@@ -410,12 +412,21 @@ public class SelectRawFilesPanel extends JPanel {
 
         private static final String[] columnNames = {"Group", "Sample", "Sample Analysis", "Raw File", "Peaklist", "Association Source"};
 
-        private final ArrayList<NodeModelRow> m_dataList = new ArrayList<>();
+        private final ArrayList<NodeModelRow> m_dataList = new ArrayList<NodeModelRow>();
+
+        private HashMap<Integer, HashSet<String>> m_missingValuesMap = new HashMap<Integer, HashSet<String>>();
+
+        private XICDesignTree m_tree;
+
+        public FlatDesignTableModel(XICDesignTree tree) {
+            m_tree = tree;
+        }
 
         public void setData(AbstractNode rootNode) {
             m_dataList.clear();
             parseTree(rootNode);
             fireTableDataChanged();
+            calculateMissingValues();
         }
 
         private void parseTree(AbstractNode node) {
@@ -450,7 +461,7 @@ public class SelectRawFilesPanel extends JPanel {
                     XICBiologicalSampleAnalysisNode sampleAnalysisNode = (XICBiologicalSampleAnalysisNode) child;
 
                     //VDS : If allready existing XICRunNode!! 
-                    XICRunNode runNode = new XICRunNode(new RunInfoData());
+                    XICRunNode runNode = new XICRunNode(new RunInfoData(), m_tree);
                     //sampleAnalysisNode.add(runNode);
                     //HACK new method so that runNode is available later when we want to retrieve the potential matching raw files! calls super.add()
                     sampleAnalysisNode.addXicRunNode(runNode);
@@ -537,34 +548,17 @@ public class SelectRawFilesPanel extends JPanel {
                             return "<html><font color='#FF0000'>Unavailable Peaklist</font></html>";
                         }
                     }
-
                 }
                 case COLTYPE_ASSOCIATION_SOURCE: {
-                    String peaklistFilename = MiscellaneousUtils.getFileName(nodeModelRow.m_sampleAnalysis.getResultSet().getMsiSearch().getPeaklist().getPath(), suffix);
-                    String rawFilename = nodeModelRow.m_run.toString();
-                    String rawFilenameWithoutSuffix = MiscellaneousUtils.getFileName(rawFilename, suffix);
-                    boolean hasRawFile = rawFilename != null && rawFilename.length() > 0 && !rawFilename.equalsIgnoreCase("Loading") && !rawFilename.equalsIgnoreCase("Missing Raw File") && !rawFilename.equalsIgnoreCase("<html><font color='#FF0000'>Unavailable Peaklist</font></html>") && !rawFilename.equalsIgnoreCase("Search...");
-                    boolean hasPeaklist = peaklistFilename != null && peaklistFilename.length() > 0 && !peaklistFilename.equalsIgnoreCase("<html><font color='#FF0000'>Unavailable Peaklist</font></html>") && !peaklistFilename.contains("is null");
+                    
+                    RunInfoData info = (RunInfoData) nodeModelRow.m_run.getData();
 
-                    if (hasPeaklist) {
-                        if (hasRawFile) {
-                            if (peaklistFilename.equalsIgnoreCase(rawFilenameWithoutSuffix)) {
-                                return EXISTING_ASSOCIATION;
-                            } else if (rawFilenameWithoutSuffix.contains(peaklistFilename)) {
-                                return AUTOMATIC_ASSOCIATION;
-                            } else {
-                                return USER_DEFINED_ASSOCIATION;
-                            }
-                        } else {
-                            return MISSING_ASSOCIATION;
-                        }
+                    if (info != null) {
+                        return info.getStatus();
                     } else {
-                        if (hasRawFile) {
-                            return USER_DEFINED_ASSOCIATION;
-                        } else {
-                            return MISSING_ASSOCIATION;
-                        }
+                        return RunInfoData.Status.MISSING;
                     }
+
                 }
 
             }
@@ -617,43 +611,47 @@ public class SelectRawFilesPanel extends JPanel {
                 NodeModelRow nodeModelRow = m_dataList.get(i);
 
                 final int _curRow = i;
+                ((RunInfoData)nodeModelRow.m_run.getData()).setStatus(RunInfoData.Status.USER_DEFINED);
                 nodeModelRow.m_run.setRawFile(fileList.get(i - rowIndex), new ActionListener() {
 
                     @Override
                     public void actionPerformed(ActionEvent e) {
                         fireTableRowsUpdated(_curRow, _curRow);
+                        calculateMissingValues();
                     }
                 });
             }
-
         }
 
-        public HashMap<Integer, HashSet<String>> getModelMultiShortages() {
-            HashMap<Integer, HashSet<String>> shortagesTable = new HashMap<Integer, HashSet<String>>();
+        private void calculateMissingValues() {
+
+            m_missingValuesMap.clear();
 
             int numberOfRows = this.getRowCount();
             int numberOfColumns = this.getColumnCount();
 
             for (int i = 0; i < numberOfRows; i++) {
                 if (this.getValueAt(i, numberOfColumns - INDEX_DIFFERENCE).toString().contains("Unavailable Peaklist")) {
-                    ;
+                    //Do nothing
                 } else if (this.getValueAt(i, numberOfColumns - INDEX_DIFFERENCE).toString().contains("Multiple Raw Files")) {
 
-                    XICBiologicalSampleAnalysisNode currentAnalysisNode = this.getXICBiologicalSampleAnalysisNode(i);
-                    XICRunNode xicRunNode = currentAnalysisNode.getXicRunNode();
+                    XICRunNode xicRunNode = getXICBiologicalSampleAnalysisNode(i).getXicRunNode();
 
                     if (xicRunNode != null) {
-                        RunInfoData infoData = (RunInfoData) xicRunNode.getData();
-                        ArrayList<RawFile> rawFiles = infoData.getPotentialRawFiles();
+
+                        HashMap<String, RawFile> rawFiles = ((RunInfoData) xicRunNode.getData()).getPotentialRawFiles();
 
                         if (!rawFiles.isEmpty()) {
+
                             HashSet<String> set = new HashSet<String>();
-                            for (int k = 0; k < rawFiles.size(); k++) {
-                                set.add(MiscellaneousUtils.getFileName(rawFiles.get(k).getRawFileName().toLowerCase(), suffix));
+
+                            for (String key : rawFiles.keySet()) {
+                                set.add(MiscellaneousUtils.getFileName(key.toLowerCase(), suffix));
                             }
-                            shortagesTable.put(i, set);
+
+                            m_missingValuesMap.put(i, set);
                         } else {
-                            shortagesTable.put(i, new HashSet<String>());
+                            m_missingValuesMap.put(i, new HashSet<String>());
                         }
 
                     }
@@ -662,43 +660,15 @@ public class SelectRawFilesPanel extends JPanel {
                     XICBiologicalSampleAnalysisNode currentAnalysisNode = this.getXICBiologicalSampleAnalysisNode(i);
                     HashSet<String> set = new HashSet<String>();
                     set.add(MiscellaneousUtils.getFileName(currentAnalysisNode.getResultSet().getMsiSearch().getPeaklist().getPath().toLowerCase(), suffix));
-                    shortagesTable.put(i, set);
+                    m_missingValuesMap.put(i, set);
                 }
             }
-
-            return shortagesTable;
         }
 
-        /*
-         public HashMap<String, Integer> getModelShortages() {
-            
-         HashMap<String, Integer> shortagesTable = new HashMap<String, Integer>();
+        public HashMap<Integer, HashSet<String>> getMissingValues() {
+            return m_missingValuesMap;
+        }
 
-         int numberOfRows = this.getRowCount();
-         int numberOfColumns = this.getColumnCount();
-
-         for (int i = 0; i < numberOfRows; i++) {
-         if (this.getValueAt(i, numberOfColumns - INDEX_DIFFERENCE).toString().contains("No Raw Files found")) {
-         ;
-         } else if (this.getValueAt(i, numberOfColumns - INDEX_DIFFERENCE).toString().contains("Multiple Raw Files found")) {
-         XICBiologicalSampleAnalysisNode currentAnalysisNode = this.getXICBiologicalSampleAnalysisNode(i);
-         XICRunNode xicRunNode = currentAnalysisNode.getXicRunNode();
-         if (xicRunNode != null) {
-         RunInfoData infoData = (RunInfoData) xicRunNode.getData();
-         ArrayList<RawFile> rawFiles = infoData.getPotentialRawFiles();
-         for (int k = 0; k < rawFiles.size(); k++) {
-         shortagesTable.put(MiscellaneousUtils.getFileName(rawFiles.get(k).getRawFileName().toLowerCase(), suffix), i);
-         }
-         }
-         } else if (this.getValueAt(i, numberOfColumns - INDEX_DIFFERENCE).toString().contains("No Raw File")) {
-         XICBiologicalSampleAnalysisNode currentAnalysisNode = this.getXICBiologicalSampleAnalysisNode(i);
-         shortagesTable.put(MiscellaneousUtils.getFileName(currentAnalysisNode.getResultSet().getMsiSearch().getPeaklist().getPath().toLowerCase(), suffix), i);
-         }
-         }
-
-         return shortagesTable;
-         }
-         */
         @Override
         public boolean isCorruptionPossible(ArrayList<Integer> indices) {
             int numberOfColumns = this.getColumnCount();
@@ -712,7 +682,7 @@ public class SelectRawFilesPanel extends JPanel {
 
     }
 
-    private class ErrorClassificationRenderer extends DefaultTableCellRenderer {
+    private class LinkAssociationRenderer extends DefaultTableCellRenderer {
 
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
@@ -720,21 +690,31 @@ public class SelectRawFilesPanel extends JPanel {
             this.setHorizontalTextPosition(JLabel.CENTER);
             this.setVerticalTextPosition(JLabel.BOTTOM);
 
-            if (value instanceof String) {
+            if (value instanceof RunInfoData.Status) {
 
-                String stringValue = (String) value;
-                if (stringValue.equalsIgnoreCase(USER_DEFINED_ASSOCIATION)) {
-                    this.setIcon(IconManager.getIcon(IconManager.IconType.USER));
-                    this.setToolTipText(USER_DEFINED_ASSOCIATION);
-                } else if (stringValue.equalsIgnoreCase(MISSING_ASSOCIATION)) {
-                    this.setIcon(IconManager.getIcon(IconManager.IconType.DELETE));
-                    this.setToolTipText(MISSING_ASSOCIATION);
-                } else if (stringValue.equalsIgnoreCase(AUTOMATIC_ASSOCIATION)) {
-                    this.setIcon(IconManager.getIcon(IconManager.IconType.TARGET));
-                    this.setToolTipText(AUTOMATIC_ASSOCIATION);
-                } else if (stringValue.equalsIgnoreCase(EXISTING_ASSOCIATION)) {
-                    this.setIcon(IconManager.getIcon(IconManager.IconType.DATABASES_RELATION));
-                    this.setToolTipText(EXISTING_ASSOCIATION);
+                RunInfoData.Status status = (RunInfoData.Status) value;
+
+                switch (status) {
+                    case MISSING:
+                        this.setIcon(IconManager.getIcon(IconManager.IconType.DELETE));
+                        this.setToolTipText(MISSING_ASSOCIATION);
+                        break;
+                    case LAST_DEFINED:
+                        this.setIcon(IconManager.getIcon(IconManager.IconType.TARGET));
+                        this.setToolTipText(AUTOMATIC_ASSOCIATION);
+                        break;
+                    case SYSTEM_PROPOSED:
+                        this.setIcon(IconManager.getIcon(IconManager.IconType.TARGET));
+                        this.setToolTipText(AUTOMATIC_ASSOCIATION);
+                        break;
+                    case USER_DEFINED:
+                        this.setIcon(IconManager.getIcon(IconManager.IconType.USER));
+                        this.setToolTipText(USER_DEFINED_ASSOCIATION);
+                        break;
+                    case LINKED_IN_DATABASE:
+                        this.setIcon(IconManager.getIcon(IconManager.IconType.DATABASES_RELATION));
+                        this.setToolTipText(EXISTING_ASSOCIATION);
+                        break;
                 }
 
             }

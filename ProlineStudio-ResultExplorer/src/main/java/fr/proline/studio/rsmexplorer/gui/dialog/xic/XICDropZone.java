@@ -30,11 +30,11 @@ import javax.swing.JTable;
  */
 public class XICDropZone extends JPanel implements DropZoneInterface {
 
-    private Hashtable<String, File> m_samplesTable;
+    private final Hashtable<String, File> m_samplesTable;
     private FlatDesignTableModel m_model;
-    private String[] suffix = {".raw", ".mzdb", ".wiff"};
+    private final String[] suffix = {".raw", ".mzdb", ".wiff"};
     private XICDropZoneInfo m_info;
-    private TreeFileChooserTransferHandler m_transferHandler;
+    private final TreeFileChooserTransferHandler m_transferHandler;
 
     public XICDropZone(TreeFileChooserTransferHandler transferHandler) {
         m_transferHandler = transferHandler;
@@ -60,7 +60,7 @@ public class XICDropZone extends JPanel implements DropZoneInterface {
             return;
         }
 
-        HashMap<Integer, HashSet<String>> shortages = m_model.getModelMultiShortages();
+        HashMap<Integer, HashSet<String>> shortages = m_model.getMissingValues();
         Iterator<Integer> keyIterator = shortages.keySet().iterator();
         while (keyIterator.hasNext()) {
 
@@ -77,28 +77,16 @@ public class XICDropZone extends JPanel implements DropZoneInterface {
             }
 
         }
-
-        /*
-         HashMap<String, Integer> shortages = m_model.getModelShortages();
-         Iterator<String> keyIterator = shortages.keySet().iterator();
-         while (keyIterator.hasNext()) {
-         String key = keyIterator.next();
-         if (m_samplesTable.containsKey(key)) {
-         ArrayList<File> fileList = new ArrayList<>();
-         fileList.add(m_samplesTable.get(key));
-         int index = shortages.get(key);
-         m_model.setFiles(fileList, index);
-         }
-         }
-         */
+        
     }
 
-    private ArrayList<String> getNotAssociatedFilenames() {
-        ArrayList<String> filenames = new ArrayList<String>();
+    private ArrayList<AssociationWrapper> getAssociationWrappers() {
+        ArrayList<AssociationWrapper> filenames = new ArrayList<AssociationWrapper>();
 
         HashSet<String> totalFileNames = new HashSet<String>();
 
-        HashMap<Integer, HashSet<String>> shortages = m_model.getModelMultiShortages();
+        HashMap<Integer, HashSet<String>> shortages = m_model.getMissingValues();
+        
         Iterator<Integer> keyIterator = shortages.keySet().iterator();
         while (keyIterator.hasNext()) {
             Integer key = keyIterator.next();
@@ -112,7 +100,9 @@ public class XICDropZone extends JPanel implements DropZoneInterface {
         while (enumKey.hasMoreElements()) {
             String key = enumKey.nextElement();
             if (!totalFileNames.contains(key)) {
-                filenames.add(key);
+                filenames.add(new AssociationWrapper(key, AssociationWrapper.AssociationType.NOT_ASSOCIATED));
+            }else{
+                filenames.add(new AssociationWrapper(key, AssociationWrapper.AssociationType.ASSOCIATED));
             }
         }
         return filenames;
@@ -160,16 +150,17 @@ public class XICDropZone extends JPanel implements DropZoneInterface {
                 this.updateTable();
             }
 
+            
             if (m_info != null) {
-                m_info.updateLog(sampleList);
-                m_info.updateList(this.getNotAssociatedFilenames());
+                m_info.updateInfo(this.getAssociationWrappers());
             }
+            
         }
     }
 
     @Override
     public void clearDropZone() {
         m_samplesTable.clear();
-        m_info.clearDropInfo();
+        m_info.clearInfo();
     }
 }

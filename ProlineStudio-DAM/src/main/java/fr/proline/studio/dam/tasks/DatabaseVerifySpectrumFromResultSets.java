@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
 
 /**
@@ -17,9 +16,9 @@ import javax.persistence.TypedQuery;
  */
 public class DatabaseVerifySpectrumFromResultSets extends AbstractDatabaseTask {
 
-    private List<Long> m_resultSetIDs;
-    private List<Long> m_failedResultSetIDs;
-    private Map<Long,List<Long>> m_emptySpectraPerResultSetIDs;
+    private final List<Long> m_resultSetIDs;
+    private final List<Long> m_failedResultSetIDs;
+    private final Map<Long,List<Long>> m_emptySpectraPerResultSetIDs;
     private long m_projectID = -1;
 
 

@@ -16,8 +16,11 @@ import org.openide.util.NbBundle;
  */
 public class DeleteAction  extends AbstractRSMAction {
     
-    public DeleteAction() {
-        super(NbBundle.getMessage(DeleteAction.class, "CTL_DeleteAction"), AbstractTree.TreeType.TREE_XIC_DESIGN);
+    public XICDesignTree m_tree;
+    
+    public DeleteAction(XICDesignTree tree) {
+        super(NbBundle.getMessage(DeleteAction.class, "CTL_DeleteAction"), AbstractTree.TreeType.TREE_XIC_DESIGN, tree);
+        m_tree = tree;
     }
 
     @Override
@@ -28,8 +31,7 @@ public class DeleteAction  extends AbstractRSMAction {
             return;
         }
 
-        XICDesignTree tree = XICDesignTree.getDesignTree();
-        AbstractTree.RSMTreeModel model = (AbstractTree.RSMTreeModel) tree.getModel();
+        AbstractTree.RSMTreeModel model = (AbstractTree.RSMTreeModel) m_tree.getModel();
         
         // we must keep only parent nodes
         // if a child and its parent are selected, we keep only the parent

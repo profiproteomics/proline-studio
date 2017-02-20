@@ -5,15 +5,18 @@
  */
 package fr.proline.studio.rsmexplorer.gui.dialog.xic;
 
-import java.awt.GridLayout;
-import java.io.File;
+import fr.proline.studio.rsmexplorer.gui.dialog.xic.AssociationWrapper.AssociationType;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
 import java.util.ArrayList;
 import javax.swing.BorderFactory;
+import javax.swing.DefaultListCellRenderer;
 import javax.swing.DefaultListModel;
+import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
 
 /**
  *
@@ -21,51 +24,73 @@ import javax.swing.JTextArea;
  */
 public class XICDropZoneInfo extends JPanel {
 
-    private JList list;
-    private DefaultListModel model;
-    private JTextArea log;
+    private final JList m_list;
+    private final DefaultListModel m_model;
+    private final JLabel m_label;
+    private int m_associatedCounter, m_notAssociatedCounter;
 
     public XICDropZoneInfo() {
+
+        this.setLayout(new BorderLayout());
+
+        m_model = new DefaultListModel();
+
+        m_list = new JList(m_model);
+
+        m_list.setCellRenderer(new DefaultListCellRenderer() {
+
+            @Override
+            public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+                Component c = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+                if (value instanceof AssociationWrapper) {
+                    AssociationWrapper wrapper = (AssociationWrapper) value;
+                    setText(wrapper.getPath());
+                    if (wrapper.getAssociationType() == AssociationType.ASSOCIATED) {
+                        setForeground(Color.GREEN);
+                    } else {
+                        setForeground(Color.RED);
+                    }
+                    if (isSelected) {
+                        setBackground(getBackground().darker());
+                    }
+                }
+                return c;
+            }
+
+        });
+
+        JScrollPane listPane = new JScrollPane(m_list);
+
+        this.add(listPane, BorderLayout.CENTER);
+
+        m_label = new JLabel();
+        m_label.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 10));
+        this.add(m_label, BorderLayout.SOUTH);
         
-        this.setLayout(new GridLayout(2, 1));
-
-        log = new JTextArea();
-        log.setEditable(false);
-        JScrollPane logPane = new JScrollPane(log);
-        logPane.setBorder(BorderFactory.createTitledBorder("Log"));
-
-        model = new DefaultListModel();
-        list = new JList(model);
-        JScrollPane listPane = new JScrollPane(list);
-        listPane.setBorder(BorderFactory.createTitledBorder("Not associated dropped files"));
-
-        this.add(logPane);
-        this.add(listPane);
+        clearInfo();
 
     }
 
-    public void updateLog(ArrayList<File> samples) {     
-        log.setText(null);
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("List was updated with ").append(samples.size()).append(" new files.\n\n");
-        for (int i = 0; i < samples.size(); i++) {
-            stringBuilder.append(samples.get(i).toString());
-            stringBuilder.append("\n");
+    public void updateInfo(ArrayList<AssociationWrapper> associations) {
+        clearInfo();
+
+        for (int i = 0; i < associations.size(); i++) {
+            m_model.addElement(associations.get(i));
+            if (associations.get(i).getAssociationType() == AssociationWrapper.AssociationType.ASSOCIATED) {
+                m_associatedCounter++;
+            } else {
+                m_notAssociatedCounter++;
+            }
         }
-        log.setText(stringBuilder.toString());        
+        
+        m_label.setText(String.valueOf(m_model.size())+" files dropped. "+m_associatedCounter+" files were associated.");
     }
-    
-    public void updateList(ArrayList<String> samples){
-        model.removeAllElements();
-        for(int i=0; i<samples.size(); i++){
-            model.addElement(samples.get(i));
-        }
+
+    public void clearInfo() {
+        m_model.removeAllElements();
+        m_associatedCounter = 0;
+        m_notAssociatedCounter = 0;
+        m_label.setText("0 files dropped.");
     }
-    
-    public void clearDropInfo(){
-        model.removeAllElements();
-        log.setText(null);
-    }
-    
 
 }

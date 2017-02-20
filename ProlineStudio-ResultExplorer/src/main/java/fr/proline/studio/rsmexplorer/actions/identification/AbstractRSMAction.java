@@ -19,11 +19,17 @@ import javax.swing.tree.TreePath;
 public abstract class AbstractRSMAction extends AbstractAction {
 
     private AbstractTree.TreeType m_treeType;
- 
+    private XICDesignTree m_tree;
+    
     public AbstractRSMAction(String name, AbstractTree.TreeType treeType) {
         super(name);
-        
         m_treeType = treeType;
+    }
+    
+    public AbstractRSMAction(String name, AbstractTree.TreeType treeType, XICDesignTree tree){
+        super(name);
+        m_treeType = treeType;
+        m_tree = tree;
     }
     
     /**
@@ -50,12 +56,16 @@ public abstract class AbstractRSMAction extends AbstractAction {
                 tree = QuantitationTree.getCurrentTree(); 
                 break;
             case TREE_XIC_DESIGN:
-                tree = XICDesignTree.getDesignTree();
+                tree = m_tree;
                 break;
             default:
                 return; // should not happen
         }
     
+        if(tree==null){
+            return;
+        }
+        
         TreePath treePath = tree.getSelectionPath();
 
         Rectangle r = tree.getPathBounds(treePath);

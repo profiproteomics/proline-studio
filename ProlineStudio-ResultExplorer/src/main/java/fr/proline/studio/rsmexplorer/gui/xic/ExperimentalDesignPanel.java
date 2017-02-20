@@ -92,7 +92,7 @@ public class ExperimentalDesignPanel extends HourglassPanel implements DataBoxPa
         m_scrollPaneExpDesign = new JScrollPane();
         m_expDesignPanel = new JPanel();
         m_expDesignPanel.setLayout(new BorderLayout());
-        m_expDesignTree =  XICDesignTree.getDesignTree(QuantitationTree.getCurrentTree().copyCurrentNodeForSelection(), false);
+        m_expDesignTree =  new XICDesignTree(QuantitationTree.getCurrentTree().copyCurrentNodeForSelection(), false);
         m_expDesignPanel.add(m_expDesignTree, BorderLayout.CENTER);
         m_scrollPaneExpDesign.setViewportView(m_expDesignPanel);
         
@@ -156,7 +156,7 @@ public class ExperimentalDesignPanel extends HourglassPanel implements DataBoxPa
     }
     
     private void updateData(){
-        XICDesignTree.setExpDesign(m_dataset, (AbstractNode) m_expDesignTree.getModel().getRoot(),   m_expDesignTree, true);
+        XICDesignTree.setExpDesign(m_dataset, (AbstractNode) m_expDesignTree.getModel().getRoot(),   m_expDesignTree, true, false);
         
         // expand all
         for (int i = 0; i < m_expDesignTree.getRowCount(); i++) {

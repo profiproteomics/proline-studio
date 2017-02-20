@@ -22,25 +22,25 @@ import javax.persistence.EntityManager;
  */
 public class RegisterRawFileTask extends AbstractServiceTask {
 
-    private String m_raw_file_path;
-    private String m_raw_file_name;
-    private long m_instrumentId;
-    private long m_ownerId;
-    private RunInfoData m_runInfoData;
+    private final String m_raw_file_path;
+    private final String m_raw_file_name;
+    private final long m_instrumentId;
+    private final long m_ownerId;
+    private final RunInfoData m_runInfoData;
             
     public RegisterRawFileTask(AbstractServiceCallback callback, long instrumentId, long ownerId, RunInfoData runInfo) {
-        super(callback, true /*synchronous*/, new TaskInfo("Register raw file "+runInfo.getRawFileSouce().getRawFileOnDisk(), true, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_MEDIUM));
+        super(callback, true /*synchronous*/, new TaskInfo("Register raw file "+runInfo.getRawFileOnDisk(), true, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_MEDIUM));
         
         //Change separator to be complient with both '/' !
         String Sep = File.separator;
-        String normalizedPath = runInfo.getRawFileSouce().getRawFileOnDisk().getPath();
+        String normalizedPath = runInfo.getRawFileOnDisk().getPath();
         if(Sep.equals("\\") ){
             normalizedPath = normalizedPath.replaceAll("\\\\","/");
         }
 
         m_raw_file_path = normalizedPath;
         
-        m_raw_file_name = runInfo.getRawFileSouce().getRawFileOnDisk().getName();
+        m_raw_file_name = runInfo.getRawFileOnDisk().getName();
         m_ownerId = ownerId;
         m_instrumentId = instrumentId;
         m_runInfoData = runInfo;

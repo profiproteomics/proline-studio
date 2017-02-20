@@ -12,6 +12,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import javax.swing.Box;
 import javax.swing.DefaultListModel;
 import javax.swing.Icon;
 import javax.swing.JButton;
@@ -94,17 +95,24 @@ public class TreeFileChooserPanel extends JPanel {
 
         c.gridx = 0;
         c.gridy = 0;
-        c.gridheight = 3;
+        
+        c.gridwidth = 2;
+        
         c.weightx = 1.0;
         c.weighty = 1.0;
+        
         add(s, c);
 
-        c.gridx++;
-        c.gridheight = 1;
+        
+        
+        c.gridy++;
+        
+        c.gridwidth = 1;
+        
         c.weightx = 0;
         c.weighty = 0;
 
-        JButton updateButton = new JButton(IconManager.getIcon(IconManager.IconType.UPDATE));
+        JButton updateButton = new JButton(IconManager.getIcon(IconManager.IconType.REFRESH));
         updateButton.addActionListener(new ActionListener() {
 
             @Override
@@ -113,6 +121,12 @@ public class TreeFileChooserPanel extends JPanel {
             }
         });
         add(updateButton, c);
+        
+        c.gridx++;
+        c.weightx = 1.0;
+        c.weighty = 0;
+        
+        add(Box.createHorizontalGlue(),c);
 
     }
 

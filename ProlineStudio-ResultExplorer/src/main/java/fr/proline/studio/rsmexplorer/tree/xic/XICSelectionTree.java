@@ -19,7 +19,7 @@ public class XICSelectionTree extends AbstractTree implements TreeWillExpandList
 
         setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 
-        XICTransferHandler handler = new XICTransferHandler(true);
+        XICTransferHandler handler = new XICTransferHandler(true, this);
         setTransferHandler(handler);
 
         setDragEnabled(true);

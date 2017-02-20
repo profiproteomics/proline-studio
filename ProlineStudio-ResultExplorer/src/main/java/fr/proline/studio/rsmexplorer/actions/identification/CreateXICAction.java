@@ -24,7 +24,6 @@ import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
-import fr.proline.studio.rsmexplorer.tree.xic.XICBiologicalSampleAnalysisNode;
 import fr.proline.studio.rsmexplorer.tree.xic.XICDesignTree;
 import java.util.*;
 import javax.swing.JOptionPane;
@@ -153,7 +152,7 @@ public class CreateXICAction extends AbstractRSMAction {
 
             } else {
 
-                dialog.registerRawFiles();
+                errorMsg = dialog.registerRawFiles();
 
                 //*** Get experimental design values                
                 _quantiDS = (DataSetData) dialog.getDesignRSMNode().getData();
@@ -256,7 +255,7 @@ public class CreateXICAction extends AbstractRSMAction {
                             @Override
                             public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
                                 ((DataSetData) dsNode.getData()).setDataset(ds);
-                                XICDesignTree.setExpDesign(dsNode.getDataset(), dsNode, tree, false);
+                                XICDesignTree.setExpDesign(dsNode.getDataset(), dsNode, tree, false, false);
                                 dsNode.setIsChanging(false);
                                 treeModel.nodeChanged(dsNode);
                             }

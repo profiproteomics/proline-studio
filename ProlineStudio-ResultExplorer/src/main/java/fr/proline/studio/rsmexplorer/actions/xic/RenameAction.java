@@ -7,10 +7,10 @@ import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.gui.OptionDialog;
 import fr.proline.studio.rsmexplorer.actions.identification.AbstractRSMAction;
 import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
-import fr.proline.studio.rsmexplorer.tree.xic.XICDesignTree;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import fr.proline.studio.rsmexplorer.tree.xic.XICBiologicalSampleAnalysisNode;
+import fr.proline.studio.rsmexplorer.tree.xic.XICDesignTree;
 import javax.swing.tree.DefaultTreeModel;
 import org.openide.util.NbBundle;
 import org.openide.windows.WindowManager;
@@ -19,10 +19,13 @@ import org.openide.windows.WindowManager;
  * Rename a Node in a Xic XICDesignTree
  * @author JM235353
  */
-public class RenameAction extends AbstractRSMAction {
+public class RenameAction extends AbstractRSMAction { 
+    
+    private final XICDesignTree m_tree;
 
-    public RenameAction() {
-        super(NbBundle.getMessage(RenameAction.class, "CTL_RenameAction"), AbstractTree.TreeType.TREE_XIC_DESIGN);
+    public RenameAction(XICDesignTree tree) {
+        super(NbBundle.getMessage(RenameAction.class, "CTL_RenameAction"), AbstractTree.TreeType.TREE_XIC_DESIGN, tree);
+        m_tree = tree;
     }
 
     @Override
@@ -49,7 +52,7 @@ public class RenameAction extends AbstractRSMAction {
 
                 if (name.compareTo(newName) != 0) {
                     data.setTemporaryName(newName);
-                    ((DefaultTreeModel) XICDesignTree.getDesignTree().getModel()).nodeChanged(n);
+                    ((DefaultTreeModel) m_tree.getModel()).nodeChanged(n);
                 }
                 break;
             case BIOLOGICAL_SAMPLE_ANALYSIS :
@@ -63,7 +66,7 @@ public class RenameAction extends AbstractRSMAction {
                 
                 if (qChName.compareTo(qChNewName) != 0) {
                     bioSplAnaysisNode.setQuantChannelName(qChNewName);
-                    ((DefaultTreeModel) XICDesignTree.getDesignTree().getModel()).nodeChanged(n);
+                    ((DefaultTreeModel) m_tree.getModel()).nodeChanged(n);
                 }
             default:              
                  break;

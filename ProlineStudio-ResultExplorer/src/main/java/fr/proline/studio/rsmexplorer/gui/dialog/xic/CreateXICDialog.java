@@ -9,6 +9,7 @@ import fr.proline.core.orm.util.DataStoreConnectorFactory;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.data.DataSetData;
 import fr.proline.studio.dam.data.RunInfoData;
+import fr.proline.studio.dam.data.RunInfoData.Status;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseRunsTask;
 import fr.proline.studio.dam.tasks.DatabaseVerifySpectrumFromResultSets;
@@ -68,8 +69,9 @@ public class CreateXICDialog extends DefaultDialog {
     private DatabaseVerifySpectrumFromResultSets m_spectrumTask;
 
     private Hashtable<String, XICBiologicalSampleAnalysisNode> m_table;
-
     private Hashtable<String, XICBiologicalSampleAnalysisNode> m_duplicates;
+
+    private XICDesignTree m_designTree = null;
 
     public static CreateXICDialog getDialog(Window parent) {
         if (m_singletonDialog == null) {
@@ -115,7 +117,9 @@ public class CreateXICDialog extends DefaultDialog {
         setButtonVisible(BUTTON_BACK, false);
 
         // Update and Replace panel
-        replaceInternaleComponent(CreateXICDesignPanel.getPanel(m_finalXICDesignNode, m_selectionTree));
+        CreateXICDesignPanel createXICDesignPanel = CreateXICDesignPanel.getPanel(m_finalXICDesignNode, m_selectionTree);
+        replaceInternaleComponent(createXICDesignPanel);
+        m_designTree = createXICDesignPanel.getDesignTree();
         revalidate();
         repaint();
 
@@ -132,7 +136,7 @@ public class CreateXICDialog extends DefaultDialog {
         setButtonVisible(BUTTON_BACK, true);
 
         // Update and Replace panel
-        m_selectRawFilePanel = SelectRawFilesPanel.getPanel(m_finalXICDesignNode);
+        m_selectRawFilePanel = SelectRawFilesPanel.getPanel(m_finalXICDesignNode, m_designTree);
         replaceInternaleComponent(m_selectRawFilePanel);
         revalidate();
         repaint();
@@ -282,6 +286,9 @@ public class CreateXICDialog extends DefaultDialog {
                     Enumeration identRSMs = bioSplNode.children();
                     while (identRSMs.hasMoreElements()) {
                         AbstractNode bioSplAnalysisNode = (AbstractNode) identRSMs.nextElement();
+
+                        Long rsID = ((DataSetNode) bioSplAnalysisNode).getDataset().getResultSetId();
+
                         Enumeration runNodes = bioSplAnalysisNode.children();
                         while (runNodes.hasMoreElements()) {
                             XICRunNode runNode = (XICRunNode) runNodes.nextElement();
@@ -305,6 +312,31 @@ public class CreateXICDialog extends DefaultDialog {
                                                 public void run(boolean success) {
                                                     synchronized (mutexFileRegistered) {
                                                         mutexFileRegistered.notifyAll();
+                                                    }
+
+                                                    if (success) {
+
+                                                        if (runData.getStatus() == Status.LAST_DEFINED || runData.getStatus() == Status.USER_DEFINED) {
+
+                                                            AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
+
+                                                                @Override
+                                                                public boolean mustBeCalledInAWT() {
+                                                                    return true;
+                                                                }
+
+                                                                @Override
+                                                                public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
+                                                                    ;
+                                                                }
+                                                            };
+
+                                                            // ask asynchronous loading of data
+                                                            DatabaseRunsTask task = new DatabaseRunsTask(callback);
+                                                            task.initUpdatePeaklistIdentifier(pID, rsID, runData.getSelectedRawFile().getIdentifier());
+                                                            AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
+
+                                                        }
                                                     }
                                                 }
                                             };
@@ -330,7 +362,7 @@ public class CreateXICDialog extends DefaultDialog {
                                             RegisterRawFileTask task = new RegisterRawFileTask(callback, instrumentID, project.getOwner().getId(), runData);
                                             AccessServiceThread.getAccessServiceThread().addTask(task);
                                         }
-                                        // wait untill the files are loaded
+                                        // wait until the files are loaded
                                         mutexFileRegistered.wait();
                                     }
 
@@ -339,51 +371,10 @@ public class CreateXICDialog extends DefaultDialog {
                                 }
                             }
 
-                            /*ArrayList<RawFile> returnedRaw = new ArrayList<>();
-                             DatabaseRunsTask loadRunIdsTask = new DatabaseRunsTask(null);
-                             loadRunIdsTask.initSearchRawFile(runData.getRawFile().getRawFileName(), returnedRaw);
-                             loadRunIdsTask.fetchData();
-                             if (returnedRaw.size() == 1) {
-                             if (!project.getRawFiles().contains(runData.getRawFile())) {
-                             // TODO update Project - rawFile map
-                             } 
-                             } else if (returnedRaw.size() > 1) {
-                             errorMsg = "More than one rawFile with name " + runData.getRawFile().getRawFileName() + " found.";
-                             return errorMsg;
-                             } else {
-                             // RawFile does not exists, create it
-                             try {
-                             synchronized (mutexFileRegistered) {
-                             AbstractServiceCallback callback = new AbstractServiceCallback() {
-
-                             @Override
-                             public boolean mustBeCalledInAWT() {
-                             return false;
-                             }
-
-                             @Override
-                             public void run(boolean success) {
-                             synchronized (mutexFileRegistered) {
-                             mutexFileRegistered.notifyAll();
-                             }
-                             }
-                             };
-                             // TODO : get the right instrumentId !!! 
-                             long instrumentID = 1;
-                             RegisterRawFileTask task = new RegisterRawFileTask(callback, instrumentID, project.getOwner().getId(), runData);
-                             AccessServiceThread.getAccessServiceThread().addTask(task);
-                             // wait untill the files are loaded
-                             mutexFileRegistered.wait();
-                             }
-
-                             } catch (InterruptedException ie) {
-                             // should not happen
-                             } 
-                             }*/
                             //  then map IdentificationDataset to RawFile and Run
                             if (runData.getRun().getId() > -1) { // case runId = -1 when coming from an existing xic, no need to register again the run_identification
                                 DatabaseRunsTask registerRunIdsTask = new DatabaseRunsTask(null);
-                                registerRunIdsTask.initRegisterIdentificationDatasetRun(((DataSetData) bioSplAnalysisNode.getData()).getDataset().getId(), runData.getRawFileSouce().getSelectedRawFile(), runData.getRun());
+                                registerRunIdsTask.initRegisterIdentificationDatasetRun(((DataSetData) bioSplAnalysisNode.getData()).getDataset().getId(), runData.getSelectedRawFile(), runData.getRun());
                                 registerRunIdsTask.fetchData();
                             }
                         }
@@ -392,6 +383,7 @@ public class CreateXICDialog extends DefaultDialog {
             } //End go through group's sample
 
         } catch (Exception e) {
+            errorMsg = "Raw File(s) Registration Failed.";
             LoggerFactory.getLogger("ProlineStudio.ResultExplorer").error(getClass().getSimpleName() + " failed", e);
         } finally {
             entityManagerUDS.close();
@@ -597,8 +589,7 @@ public class CreateXICDialog extends DefaultDialog {
 
             //Will run displayDefineRawFiles if Spectrum are OK ! 
             this.checkSpectra();
-            //displayDefineRawFiles();
-            
+
             return false;
         } else if (m_step == STEP_PANEL_DEFINE_RAW_FILES) {
 
@@ -678,15 +669,6 @@ public class CreateXICDialog extends DefaultDialog {
                     FilePreferences filePreferences = new FilePreferences(settingsFile, null, "");
 
                     DefineQuantParamsPanel.getDefineQuantPanel().loadParameters(filePreferences);
-//                    Preferences preferences = NbPreferences.root();
-//                    String[] keys = filePreferences.keys();
-//                    for (String key : keys) {
-//                        String value = filePreferences.get(key, null);
-//                        preferences.put(key, value);
-//                    }
-//
-//                    DefineQuantParamsPanel.getDefineQuantPanel().getParameterList().loadParameters(filePreferences, true);
-//                    DefineQuantParamsPanel.getDefineQuantPanel().initXICMethod();
 
                 } catch (Exception e) {
                     LoggerFactory.getLogger("ProlineStudio.ResultExplorer").error("Parsing of User Settings File Failed", e);
@@ -719,15 +701,15 @@ public class CreateXICDialog extends DefaultDialog {
     }
 
     private Map<Long, DataSetNode> getSampleAnalysisNodesPerRsId(AbstractNode parentNode) {
-        Map<Long,DataSetNode> spectraNodesPerRsId = new HashMap<>();
+        Map<Long, DataSetNode> spectraNodesPerRsId = new HashMap<>();
         Enumeration children = parentNode.children();
         //Iterate over Groups
         while (children.hasMoreElements()) {
             AbstractNode currentChild = (AbstractNode) children.nextElement();
             AbstractNode.NodeTypes type = currentChild.getType();
             if (type == AbstractNode.NodeTypes.BIOLOGICAL_SAMPLE_ANALYSIS) {
-                Long rsID= ((DataSetNode)currentChild).getDataset().getResultSetId();
-                spectraNodesPerRsId.put(rsID,(DataSetNode)currentChild);
+                Long rsID = ((DataSetNode) currentChild).getDataset().getResultSetId();
+                spectraNodesPerRsId.put(rsID, (DataSetNode) currentChild);
             } else {
                 spectraNodesPerRsId.putAll(getSampleAnalysisNodesPerRsId(currentChild));
             }
@@ -736,14 +718,14 @@ public class CreateXICDialog extends DefaultDialog {
     }
 
     private void checkSpectra() {
-      
+
         Map<Long, DataSetNode> spectraNodesPerRsId = getSampleAnalysisNodesPerRsId(m_finalXICDesignNode);
         Long projectId = spectraNodesPerRsId.values().iterator().next().getDataset().getProject().getId();
         List<Long> resultSetIds = new ArrayList<>();
         resultSetIds.addAll(spectraNodesPerRsId.keySet());
         List<Long> failedRSIds = new ArrayList<>();
-        Map<Long, List<Long>> failedSpectraPerRSIds = new HashMap<>();        
-        
+        Map<Long, List<Long>> failedSpectraPerRSIds = new HashMap<>();
+
         AbstractDatabaseCallback spectraTestCallback = new AbstractDatabaseCallback() {
             @Override
             public boolean mustBeCalledInAWT() {
@@ -756,16 +738,16 @@ public class CreateXICDialog extends DefaultDialog {
                     displayDefineRawFiles();
                 } else {
                     //VDS TODO : Add popup or something to list all RS and all Spectra(if only few)  in RS that fails
-                    DataSetNode dsNode = spectraNodesPerRsId.get(failedRSIds.get(0));                    
-                    showErrorOnNode(dsNode, dsNode.getDataset().getName()+" at least one of the following attributes {First Time, First Scan, First Cycle} must be initialized. Remove the highlighted node from your design.");
+                    DataSetNode dsNode = spectraNodesPerRsId.get(failedRSIds.get(0));
+                    showErrorOnNode(dsNode, dsNode.getDataset().getName() + " at least one of the following attributes {First Time, First Scan, First Cycle} must be initialized. Remove the highlighted node from your design.");
                 }
             }
         };
 
-        m_spectrumTask = new DatabaseVerifySpectrumFromResultSets(spectraTestCallback, resultSetIds, projectId, failedRSIds,failedSpectraPerRSIds);
+        m_spectrumTask = new DatabaseVerifySpectrumFromResultSets(spectraTestCallback, resultSetIds, projectId, failedRSIds, failedSpectraPerRSIds);
         AccessDatabaseThread.getAccessDatabaseThread().addTask(m_spectrumTask);
     }
-    
+
     private boolean checkDesignStructure(AbstractNode parentNode) {
         AbstractNode.NodeTypes type = parentNode.getType();
 
@@ -798,7 +780,6 @@ public class CreateXICDialog extends DefaultDialog {
                         return true;
                     }
                 }
-
                 break;
         }
 
@@ -865,48 +846,24 @@ public class CreateXICDialog extends DefaultDialog {
         return check;
     }
 
-    /*
-     private boolean checkRawFiles(AbstractNode node) {
-     AbstractNode.NodeTypes type = node.getType();
-     if (type == AbstractNode.NodeTypes.BIOLOGICAL_SAMPLE_ANALYSIS) {
-     XICBiologicalSampleAnalysisNode sampleAnalysisNode = (XICBiologicalSampleAnalysisNode) node;
-     if (sampleAnalysisNode.getChildCount() != 1 ||  !((RunInfoData)((AbstractNode)sampleAnalysisNode.getChildAt(0)).getData()).hasRawFile()) {
-     showErrorOnNode((AbstractNode)sampleAnalysisNode.getChildAt(0), "You must specify a Raw(mzDb) File for each identification.");
-     return false;
-     }
-     }
-
-     Enumeration children = node.children();
-     //Iterate over Groups
-     while (children.hasMoreElements()) {
-     AbstractNode rsmNode = (AbstractNode) children.nextElement();
-     if (!checkRawFiles(rsmNode)) {
-     return false;
-     }
-     }
-
-     return true;
-     }
-     */
     private void showErrorOnNode(AbstractNode node, String error) {
 
         // expand parentnode if needed
         AbstractNode parentNode = (AbstractNode) node.getParent();
         if (parentNode != null) {
             TreePath pathToExpand = new TreePath(parentNode.getPath());
-            if (!XICDesignTree.getDesignTree().isExpanded(pathToExpand)) {
-
-                XICDesignTree.getDesignTree().expandPath(pathToExpand);
+            if (!m_designTree.isExpanded(pathToExpand)) {
+                m_designTree.expandPath(pathToExpand);
             }
         }
 
         // scroll to node if needed
         TreePath path = new TreePath(node.getPath());
-        XICDesignTree.getDesignTree().scrollPathToVisible(path);
+        m_designTree.scrollPathToVisible(path);
 
         // display error
         setStatus(true, error);
-        highlight(XICDesignTree.getDesignTree(), XICDesignTree.getDesignTree().getPathBounds(path));
+        highlight(m_designTree, m_designTree.getPathBounds(path));
     }
 
     @Override
@@ -915,9 +872,9 @@ public class CreateXICDialog extends DefaultDialog {
     }
 
     public void setDefaultDesignTree(DDataset dataset) {
-        XICDesignTree.setExpDesign(dataset, (AbstractNode) XICDesignTree.getDesignTree().getModel().getRoot(), XICDesignTree.getDesignTree(), false);
-        XICDesignTree.getDesignTree().renameXicTitle(dataset.getName() + "-Copy");      
-        
+        m_designTree.setExpDesign(dataset, (AbstractNode) m_designTree.getModel().getRoot(), m_designTree, false, false);
+        m_designTree.renameXicTitle(dataset.getName() + "-Copy");
+
         try {
             DefineQuantParamsPanel.getDefineQuantPanel().setQuantParams(dataset.getQuantProcessingConfigAsMap());
         } catch (Exception ex) {

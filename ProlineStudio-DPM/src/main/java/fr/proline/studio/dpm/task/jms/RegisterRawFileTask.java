@@ -34,27 +34,27 @@ public class RegisterRawFileTask extends AbstractJMSTask {
     private static final String m_serviceName = "proline/dps/uds/RegisterRawFile";
     //private static final String m_version = "2.0";
     
-    private String m_raw_file_path;
-    private String m_raw_file_name;
-    private long m_instrumentId;
-    private long m_ownerId;
-    private RunInfoData m_runInfoData;
+    private final String m_raw_file_path;
+    private final String m_raw_file_name;
+    private final long m_instrumentId;
+    private final long m_ownerId;
+    private final RunInfoData m_runInfoData;
     
     private EntityManager entityManagerUDS;
     
     public RegisterRawFileTask(AbstractJMSCallback callback, long instrumentId, long ownerId, RunInfoData runInfo) {
-        super(callback,  new TaskInfo("Register raw file "+runInfo.getRawFileSouce().getRawFileOnDisk(), true, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_MEDIUM));
+        super(callback,  new TaskInfo("Register raw file "+runInfo.getRawFileOnDisk(), true, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_MEDIUM));
         
         //Change separator to be complient with both '/' !
         String Sep = File.separator;
-        String normalizedPath = runInfo.getRawFileSouce().getRawFileOnDisk().getPath();
+        String normalizedPath = runInfo.getRawFileOnDisk().getPath();
         if(Sep.equals("\\") ){
             normalizedPath = normalizedPath.replaceAll("\\\\","/");
         }
 
         m_raw_file_path = normalizedPath;
         
-        m_raw_file_name = runInfo.getRawFileSouce().getRawFileOnDisk().getName();
+        m_raw_file_name = runInfo.getRawFileOnDisk().getName();
         m_ownerId = ownerId;
         m_instrumentId = instrumentId;
         m_runInfoData = runInfo;
@@ -76,9 +76,7 @@ public class RegisterRawFileTask extends AbstractJMSTask {
                 Run r = rawFile.getRuns().get(0);
                 m_runInfoData.setRun(r);
                 return ;
-            }
-
-            
+            }           
             
             entityManagerUDS.getTransaction().commit();
 

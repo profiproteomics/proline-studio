@@ -1,30 +1,25 @@
 package fr.proline.studio.rsmexplorer.gui.dialog.xic;
 
-
-
 import fr.proline.core.orm.uds.RawFile;
 import fr.proline.studio.dam.data.RunInfoData;
 import fr.proline.studio.gui.DefaultDialog;
 import java.awt.*;
 import java.io.File;
 
-import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.HashMap;
+import java.util.Map;
 import javax.swing.*;
-
 
 /**
  * Dialog to select a Raw File in a list
+ *
  * @author JM235353
  */
 public class SelectRawFileDialog extends DefaultDialog {
 
-    
-    
     private JLabel m_rbFileFromDatabaseLabel = null;
     private JList m_jlist;
 
-    
     private static SelectRawFileDialog m_singleton = null;
 
     private SelectRawFileDialog(Window parent) {
@@ -34,7 +29,6 @@ public class SelectRawFileDialog extends DefaultDialog {
 
         setHelpURL("http://biodev.extra.cea.fr/docs/proline/doku.php?id=how_to:studio:xic");
 
-        
         setInternalComponent(createInternalPanel());
 
         setButtonVisible(BUTTON_DEFAULT, false);
@@ -48,64 +42,63 @@ public class SelectRawFileDialog extends DefaultDialog {
         }
         return m_singleton;
     }
-    
-    public void init(ArrayList<RawFile> rawFileList, RunInfoData.RawFileSource rawFileSource) {
 
-        RawFile linkedRawFile = rawFileSource.getLinkedRawFile();
+    public void init(HashMap<String, RawFile> rawFileMap, RunInfoData runInfoData) {
+
+        RawFile linkedRawFile = runInfoData.getLinkedRawFile();
         if (linkedRawFile != null) {
-            addRawFileInList(rawFileList, linkedRawFile);
+            addRawFileInList(rawFileMap, linkedRawFile);
             return;
         }
-        
-        RawFile selectedRawFile = rawFileSource.getSelectedRawFile();
+
+        RawFile selectedRawFile = runInfoData.getSelectedRawFile();
         if (selectedRawFile != null) {
-            addRawFileInList(rawFileList, selectedRawFile);
+            addRawFileInList(rawFileMap, selectedRawFile);
             return;
         }
-        
-        File rawFileOnDisk = rawFileSource.getRawFileOnDisk();
+
+        File rawFileOnDisk = runInfoData.getRawFileOnDisk();
         if (rawFileOnDisk != null) {
-            addRawFileInList(rawFileList, null);
+            addRawFileInList(rawFileMap, null);
             return;
         }
-        
-        addRawFileInList(rawFileList, null);
 
-
-        
+        addRawFileInList(rawFileMap, null);
 
     }
-    
-    private boolean addRawFileInList(ArrayList<RawFile> rawFileList, RawFile rawFileToAdd) {
-        
+
+    private boolean addRawFileInList(HashMap<String, RawFile> rawFileMap, RawFile rawFileToAdd) {
+
         DefaultListModel model = (DefaultListModel) m_jlist.getModel();
         model.clear();
-        
+
         boolean rawFileInList = false;
-        if (rawFileList!=null && !rawFileList.isEmpty()) {
-        
-            Iterator<RawFile> it = rawFileList.iterator();
-            while (it.hasNext()) {
-                RawFile r = it.next();
-                model.addElement(r);
-                if ((rawFileToAdd!=null) && r.equals(rawFileToAdd)) {
-                   rawFileInList = true; 
+        if (rawFileMap != null && !rawFileMap.isEmpty()) {
+
+            for (Map.Entry<String, RawFile> entry : rawFileMap.entrySet()) {
+                String key = entry.getKey();
+                Object value = entry.getValue();
+                
+                model.addElement(value);
+                if ((rawFileToAdd != null) && value.equals(rawFileToAdd)) {
+                    rawFileInList = true;
                 }
             }
+
         }
-        
-        if ((!rawFileInList) && (rawFileToAdd!=null)) {
+
+        if ((!rawFileInList) && (rawFileToAdd != null)) {
             model.insertElementAt(rawFileToAdd, 0);
             rawFileInList = true;
         }
-        
+
         if (rawFileInList) {
             m_jlist.setSelectedValue(rawFileToAdd, true);
         }
-        
+
         return rawFileInList;
     }
-    
+
     private JPanel createInternalPanel() {
         JPanel internalPanel = new JPanel(new GridBagLayout());
 
@@ -114,14 +107,12 @@ public class SelectRawFileDialog extends DefaultDialog {
         c.fill = GridBagConstraints.BOTH;
         c.insets = new java.awt.Insets(5, 5, 5, 5);
 
-
         m_rbFileFromDatabaseLabel = new JLabel("Registered Raw File In Database");
 
         c.gridx = 0;
         c.gridy = 0;
         internalPanel.add(m_rbFileFromDatabaseLabel, c);
-        
-        
+
         m_jlist = new JList();
         DefaultListModel listmodel = new DefaultListModel();
         m_jlist.setModel(listmodel);
@@ -145,10 +136,6 @@ public class SelectRawFileDialog extends DefaultDialog {
         return internalPanel;
     }
 
-
-
-
-    
     @Override
     protected boolean okCalled() {
 
@@ -159,7 +146,6 @@ public class SelectRawFileDialog extends DefaultDialog {
             return false;
         }
 
-
         return true;
 
     }
@@ -169,7 +155,6 @@ public class SelectRawFileDialog extends DefaultDialog {
 
     }
 
-    
     @Override
     protected boolean cancelCalled() {
         return true;
@@ -184,5 +169,5 @@ public class SelectRawFileDialog extends DefaultDialog {
             return l;
         }
     }
-    
+
 }

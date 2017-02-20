@@ -8,6 +8,7 @@ import fr.proline.studio.dam.data.RunInfoData;
 import fr.proline.studio.parameter.BooleanParameter;
 import fr.proline.studio.parameter.ParameterList;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
+import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
@@ -39,10 +40,11 @@ public class XICTransferHandler extends TransferHandler {
     private ParameterList m_parameterList;
     private BooleanParameter m_parameter;
     private static final String GENERAL_APPLICATION_SETTINGS = "General Application Settings";
+    private AbstractTree m_tree;
 
-    public XICTransferHandler(boolean isSelectionTree) {
+    public XICTransferHandler(boolean isSelectionTree, AbstractTree tree) {
         m_isSelectionTree = isSelectionTree;
-
+        m_tree = tree;
         m_parameterList = new ParameterList(GENERAL_APPLICATION_SETTINGS);
         JCheckBox checkBox = new JCheckBox("Use dataset type to create Xic Design by DnD");
         m_parameter = new BooleanParameter("XIC_Transfer_Handler_Retains_Structure", "XIC Transfer Handler Retains Structure", checkBox, true);
@@ -251,9 +253,8 @@ public class XICTransferHandler extends TransferHandler {
         TreePath dropTreePath = location.getPath();
         int childIndex = location.getChildIndex();
         AbstractNode dropRSMNode = (AbstractNode) dropTreePath.getLastPathComponent();
-
-        XICDesignTree tree = XICDesignTree.getDesignTree();
-        DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
+        
+        DefaultTreeModel treeModel = (DefaultTreeModel) m_tree.getModel();
 
         // no insert index specified -> we insert at the end
         if (childIndex == -1) {
@@ -264,7 +265,7 @@ public class XICTransferHandler extends TransferHandler {
         ArrayList<DataSetNode> datasetList = (ArrayList<DataSetNode>) data.getDatasetList();
         if (datasetList != null) {
 
-            tree.expandNodeIfNeeded(dropRSMNode);
+            m_tree.expandNodeIfNeeded(dropRSMNode);
 
             String suffix = Integer.toString(dropRSMNode.getChildCount() + 1);
 
@@ -314,7 +315,7 @@ public class XICTransferHandler extends TransferHandler {
                 XICBiologicalGroupNode biologicalGroupNode = new XICBiologicalGroupNode(new DataSetData(groupName, Dataset.DatasetType.AGGREGATE, Aggregation.ChildNature.OTHER));
                 treeModel.insertNodeInto(biologicalGroupNode, dropRSMNode, childIndex);
                 dropRSMNode = biologicalGroupNode;
-                tree.expandNodeIfNeeded(dropRSMNode);
+                m_tree.expandNodeIfNeeded(dropRSMNode);
             }
 
             m_parameterList.loadParameters(NbPreferences.root());
@@ -365,7 +366,7 @@ public class XICTransferHandler extends TransferHandler {
                         treeModel.insertNodeInto(biologicalSampleNode, dropRSMNode, childIndex);
 
                         childIndex = 0;
-                        tree.expandNodeIfNeeded(biologicalSampleNode);
+                        m_tree.expandNodeIfNeeded(biologicalSampleNode);
 
                         for (int i = 0; i < currentSampleList.size(); i++) {
 
@@ -373,7 +374,7 @@ public class XICTransferHandler extends TransferHandler {
                             XICBiologicalSampleAnalysisNode sampleAnalysisNode = new XICBiologicalSampleAnalysisNode(currentSampleList.get(i).getData());
 
                             // put a Run node in it
-                            XICRunNode runNode = new XICRunNode(new RunInfoData());
+                            XICRunNode runNode = new XICRunNode(new RunInfoData(), m_tree);
 
                             //sampleAnalysisNode.add(runNode);
                             runNode.init(currentSampleList.get(i).getDataset(), treeModel, null);
@@ -395,7 +396,7 @@ public class XICTransferHandler extends TransferHandler {
                         XICBiologicalSampleAnalysisNode sampleAnalysisNode = new XICBiologicalSampleAnalysisNode(datasetList.get(i).getData());
 
                         // put a Run node in it
-                        XICRunNode runNode = new XICRunNode(new RunInfoData());
+                        XICRunNode runNode = new XICRunNode(new RunInfoData(), m_tree);
                         //sampleAnalysisNode.add(runNode);
                         runNode.init(datasetList.get(i).getDataset(), treeModel, null);
 
@@ -416,7 +417,7 @@ public class XICTransferHandler extends TransferHandler {
                     treeModel.insertNodeInto(biologicalSampleNode, dropRSMNode, childIndex);
                     dropRSMNode = biologicalSampleNode;
                     childIndex = 0;
-                    tree.expandNodeIfNeeded(dropRSMNode);
+                    m_tree.expandNodeIfNeeded(dropRSMNode);
                 }
 
                 if (dropRSMNode instanceof XICBiologicalSampleNode) {
@@ -428,7 +429,7 @@ public class XICTransferHandler extends TransferHandler {
                         XICBiologicalSampleAnalysisNode sampleAnalysisNode = new XICBiologicalSampleAnalysisNode(node.getData());
 
                         // put a Run node in it
-                        XICRunNode runNode = new XICRunNode(new RunInfoData());
+                        XICRunNode runNode = new XICRunNode(new RunInfoData(), m_tree);
                         //sampleAnalysisNode.add(runNode);
                         runNode.init(node.getDataset(), treeModel, null);
 

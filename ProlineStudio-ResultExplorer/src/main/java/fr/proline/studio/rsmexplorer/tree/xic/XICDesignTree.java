@@ -30,54 +30,38 @@ import javax.swing.tree.TreePath;
 
 /**
  * XICDesignTree represents a XIC design
+ *
  * @author JM235353
  */
 public class XICDesignTree extends AbstractTree {
 
-    private static XICDesignTree m_designTree = null;
-
-    public static XICDesignTree getDesignTree() {
-        return m_designTree;
-    }
-
-    public static XICDesignTree getDesignTree(AbstractNode top) {
-        m_designTree = new XICDesignTree(top, true);
-        return m_designTree;
-    }
-    
-    public static XICDesignTree getDesignTree(AbstractNode top, boolean editable) {
-        m_designTree = new XICDesignTree(top, editable);
-        return m_designTree;
-    }
-
-    private XICDesignTree(AbstractNode top, boolean editable) {
+    public XICDesignTree(AbstractNode top, boolean editable) {
 
         setEditable(editable);
-        
+
         setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 
-        XICTransferHandler handler = new XICTransferHandler(false);
+        XICTransferHandler handler = new XICTransferHandler(false, this);
         setTransferHandler(handler);
 
         setDropMode(DropMode.ON_OR_INSERT);
         setDragEnabled(true);
-        
+
         initTree(top);
     }
 
-    
     @Override
     public void rename(AbstractNode rsmNode, String newName) {
-        
+
         AbstractNode.NodeTypes nodeType = rsmNode.getType();
-         if ((nodeType == AbstractNode.NodeTypes.BIOLOGICAL_GROUP) ||
-             (nodeType == AbstractNode.NodeTypes.BIOLOGICAL_SAMPLE) ||
-             (nodeType == AbstractNode.NodeTypes.DATA_SET)) {
-            
-            ((DataSetData)rsmNode.getData()).setTemporaryName(newName);
+        if ((nodeType == AbstractNode.NodeTypes.BIOLOGICAL_GROUP)
+                || (nodeType == AbstractNode.NodeTypes.BIOLOGICAL_SAMPLE)
+                || (nodeType == AbstractNode.NodeTypes.DATA_SET)) {
+
+            ((DataSetData) rsmNode.getData()).setTemporaryName(newName);
         }
     }
-    
+
     @Override
     public boolean isPathEditable(TreePath path) {
 
@@ -86,14 +70,13 @@ public class XICDesignTree extends AbstractTree {
             return false;
         }
 
-
         if (isEditable()) {
             AbstractNode node = (AbstractNode) path.getLastPathComponent();
             AbstractNode.NodeTypes nodeType = node.getType();
-            if ((nodeType == AbstractNode.NodeTypes.BIOLOGICAL_GROUP) ||
-                (nodeType == AbstractNode.NodeTypes.BIOLOGICAL_SAMPLE) ||
-                (nodeType == AbstractNode.NodeTypes.DATA_SET)) {
-            
+            if ((nodeType == AbstractNode.NodeTypes.BIOLOGICAL_GROUP)
+                    || (nodeType == AbstractNode.NodeTypes.BIOLOGICAL_SAMPLE)
+                    || (nodeType == AbstractNode.NodeTypes.DATA_SET)) {
+
                 return true;
             }
         }
@@ -102,61 +85,6 @@ public class XICDesignTree extends AbstractTree {
 
     @Override
     public void mouseClicked(MouseEvent e) {
-        
-        /*if (SwingUtilities.isLeftMouseButton(e)) {
-            
-            TreePath path = getPathForLocation(e.getX(), e.getY());
-            if (path == null) {
-                return;
-            }
-            AbstractNode n = (AbstractNode) path.getLastPathComponent();
-
-            if (n instanceof XICRunNode) {
-                XICRunNode runNode = (XICRunNode) n;
-
-                if (runNode.isChanging()) {
-                    return;
-                }
-                
-                RunInfoData runInfoData = (RunInfoData) runNode.getData();
-
-                if (runInfoData.getRawFileSouce().getLinkedRawFile() != null) {
-                    return; // already a registered raw file, the user can no longer change it
-                }
-                
-                ArrayList<RawFile> potentialRawFiles = runInfoData.getPotentialRawFiles();
-                if (potentialRawFiles == null) {
-                    potentialRawFiles = new ArrayList<>();
-                    runInfoData.setPotentialRawFiles(potentialRawFiles);
-                }
-                
-                SelectRawFileDialog selectRawFileDialog = SelectRawFileDialog.getSelectRawFileDialog(CreateXICDialog.getDialog(null));
-                selectRawFileDialog.init(potentialRawFiles, runInfoData.getRawFileSouce());
-                //selectRawFileDialog.centerToWindow(CreateXICDialog.getDialog(null));
-                int x = (int)(CreateXICDialog.getDialog(null).getLocationOnScreen().getX() + CreateXICDialog.getDialog(null).getWidth() /2);
-                int y = (int)(CreateXICDialog.getDialog(null).getLocationOnScreen().getY());
-                selectRawFileDialog.setLocation(x, y);
-                selectRawFileDialog.setVisible(true);
-                if (selectRawFileDialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {
-                    
-                    
-    
-                    RawFile rawFile = selectRawFileDialog.getSelectedRawFile();
-                    if (rawFile != null) {
-                        runInfoData.getRawFileSouce().setSelectedRawFile(rawFile);
-                       
-                        runInfoData.setRun(rawFile.getRuns().get(0));
-                        //runInfoData.setRawFilePath(rawFile.getDirectory()+File.separator+rawFile.getRawFileName());  //JPM.RUNINFODATA
-                        //runInfoData.setRunInfoInDatabase(true);
-                        runNode.warnParent(false);
-                        ((DefaultTreeModel)getModel()).nodeChanged(runNode);
-                        return;
-                    }
-                }
-
-            }
-
-        }*/
     }
 
     @Override
@@ -177,17 +105,14 @@ public class XICDesignTree extends AbstractTree {
     @Override
     public void mouseExited(MouseEvent e) {
     }
-    
-    
+
     private void triggerPopup(MouseEvent e) {
-        
+
         // retrieve selected nodes
         AbstractNode[] selectedNodes = getSelectedNodes();
-      
+
         JPopupMenu popup;
         ArrayList<AbstractRSMAction> actions;
-        
-
 
         // creation of the popup if needed
         if (m_mainPopup == null) {
@@ -195,16 +120,13 @@ public class XICDesignTree extends AbstractTree {
             // create the actions
             m_mainActions = new ArrayList<>(3);  // <--- get in sync
 
-            RenameAction renameAction = new RenameAction();
+            RenameAction renameAction = new RenameAction(this);
             m_mainActions.add(renameAction);
-
-            
 
             m_mainActions.add(null);  // separator
 
-            DeleteAction deleteAction = new DeleteAction();
+            DeleteAction deleteAction = new DeleteAction(this);
             m_mainActions.add(deleteAction);
-
 
             // add actions to popup
             m_mainPopup = new JPopupMenu();
@@ -222,88 +144,83 @@ public class XICDesignTree extends AbstractTree {
         popup = m_mainPopup;
         actions = m_mainActions;
 
-
-        
         // update of the enable/disable state
-        for (int i=0;i<actions.size();i++) {
+        for (int i = 0; i < actions.size(); i++) {
             AbstractRSMAction action = actions.get(i);
-            
+
             if (action == null) {
                 continue;
             }
-            
+
             action.updateEnabled(selectedNodes);
         }
-        
-        popup.show( (JComponent)e.getSource(), e.getX(), e.getY() );
+
+        popup.show((JComponent) e.getSource(), e.getX(), e.getY());
     }
     private JPopupMenu m_mainPopup;
     private ArrayList<AbstractRSMAction> m_mainActions;
 
-    
-    public static void setExpDesign(DDataset dataset, AbstractNode rootNode,  AbstractTree tree, boolean expandPath){
-        if (dataset == null){
+    public static void setExpDesign(DDataset dataset, AbstractNode rootNode, AbstractTree tree, boolean expandPath, boolean includeRunNodes) {
+        if (dataset == null) {
             return;
         }
-        RSMTreeModel model = (RSMTreeModel)tree.getModel();
+        RSMTreeModel treeModel = (RSMTreeModel) tree.getModel();
         if (rootNode.getChildCount() > 0) {
             rootNode.remove(0); // remove the first child which correspond to the hour glass
-            model.nodeStructureChanged(rootNode);
+            treeModel.nodeStructureChanged(rootNode);
         }
-        
+
         rootNode.setIsChanging(false);
-        model.nodeChanged(rootNode);
+        treeModel.nodeChanged(rootNode);
         GroupSetup groupSetup = dataset.getGroupSetup();
-        if (groupSetup == null){
+        if (groupSetup == null) {
             return;
         }
         List<DQuantitationChannel> listQuantChannels = dataset.getMasterQuantitationChannels().isEmpty() ? new ArrayList() : dataset.getMasterQuantitationChannels().get(0).getQuantitationChannels();
-        
+
         List<BiologicalGroup> listBiologicalGroups = groupSetup.getBiologicalGroups();
-        int childIndex  = 0;
+        int childIndex = 0;
         for (BiologicalGroup bioGroup : listBiologicalGroups) {
             XICBiologicalGroupNode biologicalGroupNode = new XICBiologicalGroupNode(new DataSetData(bioGroup.getName(), Dataset.DatasetType.AGGREGATE, Aggregation.ChildNature.OTHER));
-            model.insertNodeInto(biologicalGroupNode, rootNode, childIndex);
+            treeModel.insertNodeInto(biologicalGroupNode, rootNode, childIndex);
             List<BiologicalSample> listSample = bioGroup.getBiologicalSamples();
             int childSampleIndex = 0;
             for (BiologicalSample sample : listSample) {
                 String sampleName = sample.getName();
                 // split the name because in Studio the sampleName is saved as groupName+sampleName see Issue#12628
-                if (sampleName.startsWith(bioGroup.getName())){
+                if (sampleName.startsWith(bioGroup.getName())) {
                     sampleName = sampleName.substring(bioGroup.getName().length());
                 }
                 XICBiologicalSampleNode biologicalSampleNode = new XICBiologicalSampleNode(new DataSetData(sampleName, Dataset.DatasetType.AGGREGATE, Aggregation.ChildNature.OTHER));
-                model.insertNodeInto(biologicalSampleNode, biologicalGroupNode, childSampleIndex);
+                treeModel.insertNodeInto(biologicalSampleNode, biologicalGroupNode, childSampleIndex);
                 List<BiologicalSplSplAnalysisMap> listSampleAnalysis = sample.getBiologicalSplSplAnalysisMap();
                 int childSampleAnalysisIndex = 0;
                 for (BiologicalSplSplAnalysisMap sampleAnalysis : listSampleAnalysis) {
                     DQuantitationChannel qCh = getQuantChannelSampleAnalysis(sampleAnalysis.getSampleAnalysis(), listQuantChannels);
-                    if (qCh != null){
+                    if (qCh != null) {
                         String name = qCh.getResultFileName();
                         // fake dataset
-                        DDataset dds = new DDataset(qCh.getIdentDatasetId(),dataset.getProject() , name, Dataset.DatasetType.IDENTIFICATION, 0, qCh.getIdentRs().getId(), qCh.getIdentResultSummaryId(), 1);
+                        DDataset dds = new DDataset(qCh.getIdentDatasetId(), dataset.getProject(), name, Dataset.DatasetType.IDENTIFICATION, 0, qCh.getIdentRs().getId(), qCh.getIdentResultSummaryId(), 1);
                         dds.setResultSet(qCh.getIdentRs());
-                        DataSetData dsData = new DataSetData(name, Dataset.DatasetType.IDENTIFICATION, Aggregation.ChildNature.SAMPLE_ANALYSIS ); 
+                        DataSetData dsData = new DataSetData(name, Dataset.DatasetType.IDENTIFICATION, Aggregation.ChildNature.SAMPLE_ANALYSIS);
                         dsData.setDataset(dds);
                         XICBiologicalSampleAnalysisNode sampleAnalysisNode = new XICBiologicalSampleAnalysisNode(dsData);
-                        if(qCh.getName() != null)
+                        if (qCh.getName() != null) {
                             sampleAnalysisNode.setQuantChannelName(qCh.getName());
-                        
-                        
+                        }
+
                         RunInfoData runInfoData = new RunInfoData();
-                        RunInfoData.RawFileSource rawFileSource = new RunInfoData.RawFileSource();
                         RawFile rawFile = new RawFile();
-                        int id= qCh.getMzdbFileName().indexOf(".");
-                        if (id == -1){
+                        int id = qCh.getMzdbFileName().indexOf(".");
+                        if (id == -1) {
                             id = qCh.getMzdbFileName().length();
                         }
                         String identifier = qCh.getMzdbFileName().substring(0, id);
                         rawFile.setRawFileName(qCh.getMzdbFileName());
                         rawFile.setIdentifier(identifier);
                         rawFile.setMzDbFileName(qCh.getMzdbFileName());
-                        rawFileSource.setLinkedRawFile(rawFile);
-                        runInfoData.setRawFileSource(rawFileSource);
-                        
+                        runInfoData.setLinkedRawFile(rawFile);
+
                         List<Run> runs = new ArrayList();
                         Run run = new Run();
                         run.setId(-1); // explicitely set the runId to -1, to avoid to register runidentification (no need)
@@ -311,41 +228,47 @@ public class XICDesignTree extends AbstractTree {
                         runInfoData.setRun(run);
                         runs.add(run);
                         rawFile.setRuns(runs);
-                        
-                        XICRunNode runNode = new XICRunNode(runInfoData);
-                        //sampleAnalysisNode.add(runNode);
-                        //runNode.init(sampleAnalysisNode.getDataset(), model);
-                        
-                        model.insertNodeInto(sampleAnalysisNode, biologicalSampleNode, childSampleAnalysisIndex);
-                        if(expandPath){
-                            tree.expandPath( new TreePath(sampleAnalysisNode.getPath()));
-                        }else{
-                            tree.expandPath( new TreePath(biologicalSampleNode.getPath()));
+
+                        XICRunNode runNode = new XICRunNode(runInfoData, tree);
+
+                        if (includeRunNodes) {
+                            sampleAnalysisNode.add(runNode);
+                            
+                            
+                            //problem here
+                            runNode.init(sampleAnalysisNode.getDataset(), treeModel, null);
+                        }
+
+                        treeModel.insertNodeInto(sampleAnalysisNode, biologicalSampleNode, childSampleAnalysisIndex);
+                        if (expandPath) {
+                            tree.expandPath(new TreePath(sampleAnalysisNode.getPath()));
+                        } else {
+                            tree.expandPath(new TreePath(biologicalSampleNode.getPath()));
                         }
                         childSampleAnalysisIndex++;
                     }
                 }
                 childSampleIndex++;
             }
-           // expandPath( new TreePath(biologicalGroupNode.getPath()));
+            // expandPath( new TreePath(biologicalGroupNode.getPath()));
             childIndex++;
         }
     }
-    
-    private static DQuantitationChannel getQuantChannelSampleAnalysis(SampleAnalysis sampleAnalysis, List<DQuantitationChannel> listQuantChannels){
+
+    private static DQuantitationChannel getQuantChannelSampleAnalysis(SampleAnalysis sampleAnalysis, List<DQuantitationChannel> listQuantChannels) {
         for (DQuantitationChannel qCh : listQuantChannels) {
             SampleAnalysis sampleReplicate = qCh.getSampleReplicate();
-            if (sampleReplicate != null && sampleReplicate.getId() == sampleAnalysis.getId()){
+            if (sampleReplicate != null && sampleReplicate.getId() == sampleAnalysis.getId()) {
                 return qCh;
             }
         }
         return null;
     }
-    
-    public void renameXicTitle(String newName){
+
+    public void renameXicTitle(String newName) {
         AbstractNode rootNode = (AbstractNode) m_model.getRoot();
         rename(rootNode, newName);
-        ((DefaultTreeModel) XICDesignTree.getDesignTree().getModel()).nodeChanged(rootNode);
+        ((DefaultTreeModel) getModel()).nodeChanged(rootNode);
     }
-    
+
 }

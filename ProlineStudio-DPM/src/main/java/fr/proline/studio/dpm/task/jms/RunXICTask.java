@@ -9,7 +9,6 @@ import fr.proline.studio.dam.taskinfo.TaskInfo;
 import fr.proline.studio.dpm.jms.AccessJMSManagerThread;
 import static fr.proline.studio.dpm.task.jms.AbstractJMSTask.m_loggerProline;
 import fr.proline.studio.dpm.task.util.JMSConnectionManager;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import javax.jms.JMSException;
@@ -24,10 +23,10 @@ public class RunXICTask extends AbstractJMSTask {
     private static final String m_existingRSM_version = "2.0";
     
     private Long[] m_xicQuantiResult = null;
-    private String m_quantiDSName;
-    private Long m_pId;
-    private Map<String,Object> m_quantParams;
-    private Map<String,Object> m_expDesignParams;
+    private final String m_quantiDSName;
+    private final Long m_pId;
+    private final Map<String,Object> m_quantParams;
+    private final Map<String,Object> m_expDesignParams;
     private boolean m_useExistingRSM =false;
     
     public RunXICTask(AbstractJMSCallback callback, boolean mergedRSMSpecified, Long projectId,  String quantDSName,  Map<String,Object> quantParams, Map<String,Object> expDesignParams, Long[] retValue) {

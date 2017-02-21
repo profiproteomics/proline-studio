@@ -9,6 +9,7 @@ import fr.proline.studio.dam.taskinfo.TaskInfo;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 
@@ -21,13 +22,14 @@ import javax.persistence.TypedQuery;
 public class DatabaseRunsTask extends AbstractDatabaseTask {
 
     private long m_projectId = -1;
-    private Long m_rsmId = null;
+    private List<Long> m_rsmIds = null;
     private Long m_rsetId = null;
     private Long m_datasetId = null;
     private RawFile m_rawfile = null;
     private Run m_run = null;
 
-    private List<Long> m_runIds = null;
+    
+    private Map<Long,Long> m_runIdsByRsmIds = null;
     private String[] m_resultPath = null;
     private String m_searchString = null;
     private HashMap<String, RawFile> m_rawfileFounds = null;
@@ -37,7 +39,7 @@ public class DatabaseRunsTask extends AbstractDatabaseTask {
 
     private int m_action;
 
-    private final static int LOAD_RUN_FOR_RSM = 0;
+    private final static int LOAD_RUNS_FOR_RSMS = 0;
     private final static int LOAD_PEAKLIST_PATH = 1;
     private final static int SEARCH_RAWFILE = 2;
     private final static int LOAD_RAWFILE = 3;
@@ -56,12 +58,12 @@ public class DatabaseRunsTask extends AbstractDatabaseTask {
      * @param rsmId
      * @param runIds
      */
-    public void initLoadRunIdForRsm(long projectId, Long rsmId, ArrayList<Long> runIds) {
-        setTaskInfo(new TaskInfo(" Load RunId for Identification Summary with id " + rsmId, false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_LOW));
+    public void initLoadRunIdsForRsms(long projectId, ArrayList<Long> rsmIds, HashMap<Long,Long> runIds) {
+        setTaskInfo(new TaskInfo(" Load RunId for Identification Summary with ids " + rsmIds, false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_LOW));
         m_projectId = projectId;
-        m_rsmId = rsmId;
-        m_runIds = runIds;
-        m_action = LOAD_RUN_FOR_RSM;
+        m_rsmIds = rsmIds;
+        m_runIdsByRsmIds = runIds;
+        m_action = LOAD_RUNS_FOR_RSMS;
     }
 
     /**
@@ -145,8 +147,8 @@ public class DatabaseRunsTask extends AbstractDatabaseTask {
     @Override
     public boolean fetchData() {
         switch (m_action) {
-            case LOAD_RUN_FOR_RSM:
-                return fetchRunForRsm();
+            case LOAD_RUNS_FOR_RSMS:
+                return fetchRunsForRsms();
             case LOAD_PEAKLIST_PATH:
                 return fetchPeaklistPath();
             case LOAD_PEAKLIST_RAWFILE_IDENTIFIER:
@@ -164,18 +166,23 @@ public class DatabaseRunsTask extends AbstractDatabaseTask {
         return false;
     }
 
-    public boolean fetchRunForRsm() {
+    public boolean fetchRunsForRsms() {
         EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().createEntityManager();
         try {
             entityManagerUDS.getTransaction().begin();
             //Get Run and Raw File
-            TypedQuery<IdentificationDataset> runIdQuery = entityManagerUDS.createQuery("SELECT idfDS FROM IdentificationDataset idfDS WHERE idfDS.project.id = :pjId and idfDS.resultSummaryId =:rsmId  ", IdentificationDataset.class);
+            TypedQuery<IdentificationDataset> runIdQuery = entityManagerUDS.createQuery("SELECT idfDS FROM IdentificationDataset idfDS WHERE idfDS.project.id = :pjId and idfDS.resultSummaryId IN (:rsmIds)  ", IdentificationDataset.class);
             runIdQuery.setParameter("pjId", m_projectId);
-            runIdQuery.setParameter("rsmId", m_rsmId);
+            runIdQuery.setParameter("rsmIds", m_rsmIds);
             List<IdentificationDataset> idfDs = runIdQuery.getResultList();
 
-            if (idfDs != null && idfDs.size() > 0 && idfDs.get(0).getRun() != null) {
-                m_runIds.add(idfDs.get(0).getRun().getId());
+            if (idfDs != null) {
+                for(IdentificationDataset identDS : idfDs) {
+                    if(identDS.getRun() != null)
+                        m_runIdsByRsmIds.put(identDS.getResultSummaryId(), identDS.getRun().getId());
+                    else
+                        m_runIdsByRsmIds.put(identDS.getResultSummaryId(), -1L);
+                }
             }
 
             entityManagerUDS.getTransaction().commit();

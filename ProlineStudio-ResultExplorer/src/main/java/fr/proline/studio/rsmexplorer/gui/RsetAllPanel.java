@@ -112,7 +112,6 @@ public class RsetAllPanel extends HourglassPanel implements DataBoxPanelInterfac
         layeredPane.add(resultSetPanel, JLayeredPane.DEFAULT_LAYER);
         layeredPane.add(m_searchToggleButton.getSearchPanel(), JLayeredPane.PALETTE_LAYER);
 
-//initComponents();
     }
     
     private JPanel createResultSetPanel(){
@@ -667,12 +666,12 @@ public class RsetAllPanel extends HourglassPanel implements DataBoxPanelInterfac
 
         @Override
         public void givePriorityTo(Long taskId, int row, int col) {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            // nothing to do
         }
 
         @Override
         public void sortingChanged(int col) {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            // nothing to do
         }
 
         @Override
@@ -687,32 +686,32 @@ public class RsetAllPanel extends HourglassPanel implements DataBoxPanelInterfac
 
         @Override
         public Class getDataColumnClass(int columnIndex) {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            return getColumnClass(columnIndex);
         }
 
         @Override
         public Object getDataValueAt(int rowIndex, int columnIndex) {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            return getValueAt(rowIndex, columnIndex);
         }
 
         @Override
         public int[] getKeysColumn() {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            return null;
         }
 
         @Override
         public int getInfoColumn() {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            return -1;
         }
 
         @Override
         public void setName(String name) {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            // nothing to do
         }
 
         @Override
         public String getName() {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            return null;
         }
 
         @Override

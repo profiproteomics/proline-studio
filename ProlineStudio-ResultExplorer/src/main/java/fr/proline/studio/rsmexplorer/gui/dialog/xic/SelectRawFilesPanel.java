@@ -452,6 +452,7 @@ public class SelectRawFilesPanel extends JPanel {
             }
         }
 
+        //VDS Create new node but get info from DBs! 
         private void parseSample(XICBiologicalGroupNode groupNode, XICBiologicalSampleNode sampleNode) {
             int nbChildren = sampleNode.getChildCount();
             for (int i = 0; i < nbChildren; i++) {
@@ -527,7 +528,7 @@ public class SelectRawFilesPanel extends JPanel {
                     return nodeModelRow.m_run.toString();
                 }
                 case COLTYPE_PEAKLIST: {
-
+                    //VDS Use cache in NodeModelRow
                     if (nodeModelRow == null) {
                         return "<html><font color='#FF0000'>NodeModelRow is null</font></html>";
                     } else if (nodeModelRow.getXICBiologicalSampleAnalysisNode() == null) {

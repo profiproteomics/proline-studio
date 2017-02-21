@@ -68,8 +68,7 @@ public class CreateXICDialog extends DefaultDialog {
     private SelectRawFilesPanel m_selectRawFilePanel;
     private DatabaseVerifySpectrumFromResultSets m_spectrumTask;
 
-    private Hashtable<String, XICBiologicalSampleAnalysisNode> m_table;
-    private Hashtable<String, XICBiologicalSampleAnalysisNode> m_duplicates;
+    private HashMap<String, XICBiologicalSampleAnalysisNode> m_duplicates;
 
     private XICDesignTree m_designTree = null;
 
@@ -86,7 +85,7 @@ public class CreateXICDialog extends DefaultDialog {
 
         setTitle("XIC Quantitation Wizard");
 
-        setHelpURL("http://biodev.extra.cea.fr/docs/proline/doku.php?id=how_to:studio:xic");
+        setHelpURL("http://biodev.extra.cea.fr/docs/proline/doku.php?id=how_to:studio:xic"); 
 
         setSize(1600, 768);
         setResizable(true);
@@ -166,45 +165,6 @@ public class CreateXICDialog extends DefaultDialog {
         // forbid pack by overloading the method
     }
 
-    public Hashtable<String, XICBiologicalSampleAnalysisNode> getAllSamples() {
-        if (m_table == null) {
-            m_table = new Hashtable<String, XICBiologicalSampleAnalysisNode>();
-        } else {
-            m_table.clear();
-        }
-
-        //populate table with XICBiologicalSampleAnalysisNodes
-        DefaultTreeModel model = (DefaultTreeModel) m_selectionTree.getModel();
-        DefaultMutableTreeNode root = (DefaultMutableTreeNode) model.getRoot();
-
-        accessNode(root);
-
-        return m_table;
-    }
-
-    private void accessNode(DefaultMutableTreeNode node) {
-
-        for (int i = 0; i < node.getChildCount(); i++) {
-
-            DefaultMutableTreeNode childNode = (DefaultMutableTreeNode) node.getChildAt(i);
-
-            if (childNode.getChildCount() > 0) {
-                accessNode(childNode);
-            } else {
-
-                if (childNode instanceof XICBiologicalSampleAnalysisNode) {
-                    m_table.put(((XICBiologicalSampleAnalysisNode) childNode).toString(), (XICBiologicalSampleAnalysisNode) childNode);
-                }
-
-            }
-
-        }
-
-        if (node instanceof XICBiologicalSampleAnalysisNode) {
-            m_table.put(((XICBiologicalSampleAnalysisNode) node).toString(), (XICBiologicalSampleAnalysisNode) node);
-        }
-
-    }
 
     public AbstractNode getDesignRSMNode() {
         return m_finalXICDesignNode;
@@ -245,21 +205,12 @@ public class CreateXICDialog extends DefaultDialog {
     private HashMap<Long, Long> getRunIdForRSMs(Collection<Long> rsmIDs) {
         //Get Run Ids for specified RSMs
         Long pID = ProjectExplorerPanel.getProjectExplorerPanel().getSelectedProject().getId();
-        HashMap<Long, Long> runIdByRsmId = new HashMap<>();
-
-        for (Long rsmId : rsmIDs) {
-            ArrayList<Long> returnedRunId = new ArrayList<>();
-            DatabaseRunsTask loadRunIdsTask = new DatabaseRunsTask(null);
-            loadRunIdsTask.initLoadRunIdForRsm(pID, rsmId, returnedRunId);
-            loadRunIdsTask.fetchData();
-            if (returnedRunId.size() > 0) {
-                runIdByRsmId.put(rsmId, returnedRunId.get(0));
-            } else {
-                runIdByRsmId.put(rsmId, -1l);
-            }
-        }
-
-        return runIdByRsmId;
+        HashMap<Long, Long> returnedRunIdsByRsmIds = new HashMap<>();
+        DatabaseRunsTask loadRunIdsTask = new DatabaseRunsTask(null);
+        loadRunIdsTask.initLoadRunIdsForRsms(pID, new ArrayList(rsmIDs), returnedRunIdsByRsmIds);
+        loadRunIdsTask.fetchData();
+        
+        return returnedRunIdsByRsmIds;
     }
 
     public String registerRawFiles() {
@@ -578,11 +529,12 @@ public class CreateXICDialog extends DefaultDialog {
         if (m_step == STEP_PANEL_CREATE_XIC_DESIGN) {
 
             if (m_duplicates == null) {
-                m_duplicates = new Hashtable<String, XICBiologicalSampleAnalysisNode>();
+                m_duplicates = new HashMap<>();
             } else {
                 m_duplicates.clear();
             }
 
+            //VDS: Can't checkDesignStructure and checkBiologicalGroupName be merged !! 
             if ((!checkDesignStructure(m_finalXICDesignNode)) || (!checkBiologicalGroupName(m_finalXICDesignNode))) {
                 return false;
             }

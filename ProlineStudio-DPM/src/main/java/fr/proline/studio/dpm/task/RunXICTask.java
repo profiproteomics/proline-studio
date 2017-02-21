@@ -72,17 +72,12 @@ public class RunXICTask extends AbstractServiceTask {
                 params.put("experimental_design", m_expDesignParams);
             }else {
                             //Get Run Ids for specified RSMs
-                Map<Long, Long> runIdByRsmId = new HashMap<>();
-                for(Long rsmId : m_rsmIdBySampleAnalysis.values()){
-                    ArrayList<Long> returnedRunId = new ArrayList<> ();
-                    DatabaseRunsTask loadRunIdsTask = new DatabaseRunsTask(null);
-                    loadRunIdsTask.initLoadRunIdForRsm(m_pId, rsmId, returnedRunId);
-                    loadRunIdsTask.fetchData();
-                    if(returnedRunId.size() >0)
-                        runIdByRsmId.put(rsmId, returnedRunId.get(0));
-                    else
-                        runIdByRsmId.put(rsmId, -1l);
-                }
+                HashMap<Long, Long> runIdByRsmId = new HashMap<>();
+                
+
+                DatabaseRunsTask loadRunIdsTask = new DatabaseRunsTask(null);
+                loadRunIdsTask.initLoadRunIdsForRsms(m_pId, new ArrayList(m_rsmIdBySampleAnalysis.values()), runIdByRsmId);
+                loadRunIdsTask.fetchData();
                 
                 //-- experimental_design Params
                 Map<String, Object> experimentalDesignParams = new HashMap<>();

@@ -35,6 +35,9 @@ import javax.swing.tree.TreePath;
  */
 public class XICDesignTree extends AbstractTree {
 
+    private JPopupMenu m_mainPopup;
+    private ArrayList<AbstractRSMAction> m_mainActions;
+
     public XICDesignTree(AbstractNode top, boolean editable) {
 
         setEditable(editable);
@@ -157,8 +160,6 @@ public class XICDesignTree extends AbstractTree {
 
         popup.show((JComponent) e.getSource(), e.getX(), e.getY());
     }
-    private JPopupMenu m_mainPopup;
-    private ArrayList<AbstractRSMAction> m_mainActions;
 
     public static void setExpDesign(DDataset dataset, AbstractNode rootNode, AbstractTree tree, boolean expandPath, boolean includeRunNodes) {
         if (dataset == null) {
@@ -209,32 +210,30 @@ public class XICDesignTree extends AbstractTree {
                             sampleAnalysisNode.setQuantChannelName(qCh.getName());
                         }
 
-                        RunInfoData runInfoData = new RunInfoData();
-                        RawFile rawFile = new RawFile();
-                        int id = qCh.getMzdbFileName().indexOf(".");
-                        if (id == -1) {
-                            id = qCh.getMzdbFileName().length();
-                        }
-                        String identifier = qCh.getMzdbFileName().substring(0, id);
-                        rawFile.setRawFileName(qCh.getMzdbFileName());
-                        rawFile.setIdentifier(identifier);
-                        rawFile.setMzDbFileName(qCh.getMzdbFileName());
-                        runInfoData.setLinkedRawFile(rawFile);
-
-                        List<Run> runs = new ArrayList();
-                        Run run = new Run();
-                        run.setId(-1); // explicitely set the runId to -1, to avoid to register runidentification (no need)
-                        run.setRawFile(rawFile);
-                        runInfoData.setRun(run);
-                        runs.add(run);
-                        rawFile.setRuns(runs);
-
-                        XICRunNode runNode = new XICRunNode(runInfoData, tree);
-
                         if (includeRunNodes) {
+                            RunInfoData runInfoData = new RunInfoData();
+                            RawFile rawFile = new RawFile();
+                            int id = qCh.getMzdbFileName().indexOf(".");
+                            if (id == -1) {
+                                id = qCh.getMzdbFileName().length();
+                            }
+                            String identifier = qCh.getMzdbFileName().substring(0, id);
+                            rawFile.setRawFileName(qCh.getMzdbFileName());
+                            rawFile.setIdentifier(identifier);
+                            rawFile.setMzDbFileName(qCh.getMzdbFileName());
+                            runInfoData.setLinkedRawFile(rawFile);
+
+                            List<Run> runs = new ArrayList();
+                            Run run = new Run();
+                            run.setId(-1); // explicitely set the runId to -1, to avoid to register runidentification (no need)
+                            run.setRawFile(rawFile);
+                            runInfoData.setRun(run);
+                            runs.add(run);
+                            rawFile.setRuns(runs);
+
+                            XICRunNode runNode = new XICRunNode(runInfoData, tree);
                             sampleAnalysisNode.add(runNode);
-                            
-                            
+
                             //problem here
                             runNode.init(sampleAnalysisNode.getDataset(), treeModel, null);
                         }

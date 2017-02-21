@@ -74,8 +74,11 @@ public class SelectRawFilesPanel extends JPanel {
     public static SelectRawFilesPanel getPanel(AbstractNode rootNode, XICDesignTree designTree) {
         if (m_singleton == null) {
             m_singleton = new SelectRawFilesPanel(designTree);
-        } else {
-            m_singleton.resetDropZonePanel();
+        }
+        
+        if (m_singleton.m_model != null && m_singleton.m_model.getRowCount() > 0) {
+            m_singleton.m_model.calculateMissingValues();
+            m_singleton.m_dropZone.updateTable();
         }
 
         m_singleton.setRootNode(rootNode);
@@ -739,8 +742,8 @@ public class SelectRawFilesPanel extends JPanel {
         public XICBiologicalSampleAnalysisNode getXICBiologicalSampleAnalysisNode() {
             return m_sampleAnalysis;
         }
-        
-        public String getName(){
+
+        public String getName() {
             return m_name;
         }
     }

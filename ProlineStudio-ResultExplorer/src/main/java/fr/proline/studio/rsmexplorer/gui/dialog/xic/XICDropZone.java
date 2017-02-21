@@ -55,7 +55,7 @@ public class XICDropZone extends JPanel implements DropZoneInterface {
         m_info = info;
     }
 
-    private void updateTable() {
+    public void updateTable() {
         if (m_model == null) {
             return;
         }
@@ -147,7 +147,7 @@ public class XICDropZone extends JPanel implements DropZoneInterface {
             }
 
             if (m_model != null) {
-                this.updateTable();
+                updateTable();
             }
 
             

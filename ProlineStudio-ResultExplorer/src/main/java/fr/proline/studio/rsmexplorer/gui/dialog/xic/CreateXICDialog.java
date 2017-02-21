@@ -642,7 +642,6 @@ public class CreateXICDialog extends DefaultDialog {
             return false;
         } else if (m_step == STEP_PANEL_DEFINE_XIC_PARAMS) {
 
-            m_selectRawFilePanel.pruneDesignTree();
             displayDefineRawFiles();
 
             return false;

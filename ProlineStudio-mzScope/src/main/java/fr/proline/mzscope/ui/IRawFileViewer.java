@@ -4,7 +4,7 @@ import fr.proline.mzscope.model.Chromatogram;
 import fr.proline.mzscope.model.IFeature;
 import fr.proline.mzscope.model.IRawFile;
 import fr.proline.mzscope.model.MsnExtractionRequest;
-import fr.proline.mzscope.model.MzScopeCallback;
+import fr.proline.mzscope.utils.MzScopeCallback;
 import fr.proline.mzscope.utils.MzScopeConstants;
 import java.awt.Color;
 

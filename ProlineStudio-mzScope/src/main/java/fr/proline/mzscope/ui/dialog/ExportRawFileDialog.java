@@ -12,7 +12,7 @@ import fr.profi.mzdb.io.writer.mgf.PrecursorMzComputationEnum;
 import fr.profi.mzdb.io.writer.mgf.IsolationWindowPrecursorExtractor;
 import fr.proline.mzscope.model.IExportParameters;
 import fr.proline.mzscope.model.IExportParameters.ExportType;
-import fr.proline.mzscope.model.MzScopePreferences;
+import fr.proline.mzscope.ui.model.MzScopePreferences;
 import fr.proline.mzscope.ui.MgfExportParameters;
 import fr.proline.mzscope.ui.ScanHeaderExportParameters;
 import fr.proline.mzscope.ui.ScanHeaderType;

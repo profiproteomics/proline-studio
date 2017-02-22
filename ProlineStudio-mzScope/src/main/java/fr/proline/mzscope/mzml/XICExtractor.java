@@ -7,10 +7,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import fr.proline.mzscope.utils.BinarySearch;
+import java.text.DecimalFormat;
 
 public class XICExtractor {
 
    static Logger logger = LoggerFactory.getLogger(XICExtractor.class);
+   final private static DecimalFormat massFormatter = new DecimalFormat("0.0000");
 
    static void search(Scan s, float v) {
       BinarySearch bs = new BinarySearch();
@@ -54,11 +56,16 @@ public class XICExtractor {
       logger.info("nb of failed prediction" + (bs.getFails()));
 
       // WARN : setting rawFilename of Chromato to null is not recommanded : becareful to set a real rawFilename
+      
       Chromatogram chromatogram = new Chromatogram(null);
       chromatogram.time = XItime;
       chromatogram.intensities = XIintensities;
       chromatogram.minMz = (double) vmin;
       chromatogram.maxMz = (double) vmax;
+      StringBuilder builder = new StringBuilder("Mass range: ");
+      builder.append(massFormatter.format(chromatogram.minMz)).append("-").append(massFormatter.format(chromatogram.maxMz));
+
+         
 
       return chromatogram;
    }

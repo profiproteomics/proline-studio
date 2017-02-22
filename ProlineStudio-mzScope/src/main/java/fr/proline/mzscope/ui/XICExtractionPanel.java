@@ -1,7 +1,7 @@
 package fr.proline.mzscope.ui;
 
 import fr.proline.mzscope.model.MsnExtractionRequest;
-import fr.proline.mzscope.model.MzScopePreferences;
+import fr.proline.mzscope.ui.model.MzScopePreferences;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;

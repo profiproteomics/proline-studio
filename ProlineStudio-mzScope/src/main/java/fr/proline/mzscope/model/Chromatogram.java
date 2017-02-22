@@ -16,4 +16,9 @@ public class Chromatogram {
    public Chromatogram(String rawFilename) {
       this.rawFilename = rawFilename;
    }
+   
+   public Chromatogram(String rawFilename, String title) {
+      this(rawFilename);
+      this.title = title;
+   }
 }

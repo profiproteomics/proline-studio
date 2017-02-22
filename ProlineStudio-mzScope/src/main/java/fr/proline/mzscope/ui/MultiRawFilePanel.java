@@ -4,10 +4,12 @@ import fr.proline.mzscope.model.Chromatogram;
 import fr.proline.mzscope.model.IFeature;
 import fr.proline.mzscope.model.IRawFile;
 import fr.proline.mzscope.model.MsnExtractionRequest;
-import fr.proline.mzscope.model.MzScopeCallback;
-import fr.proline.mzscope.model.MzScopePreferences;
+import fr.proline.mzscope.utils.MzScopeCallback;
+import fr.proline.mzscope.ui.model.MzScopePreferences;
 import fr.proline.mzscope.utils.MzScopeConstants.DisplayMode;
 import java.awt.Color;
+import java.awt.Component;
+import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
@@ -17,6 +19,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import javax.swing.AbstractButton;
 import javax.swing.ButtonGroup;
+import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JPopupMenu;
 import javax.swing.JRadioButtonMenuItem;
@@ -36,17 +39,20 @@ public class MultiRawFilePanel extends AbstractRawFilePanel {
     final private static Logger logger = LoggerFactory.getLogger(MultiRawFilePanel.class);
 
     private final List<IRawFile> rawfiles;
-    private final Map<IRawFile, Chromatogram> mapChromatogramForRawFile;
-    private final Map<String, Color> mapColorByRawFilename;
+    private final Map<IRawFile, Chromatogram> chromatogramByRawFile;
+    private final Map<String, Color> colorByRawFilename;
+
+    private IRawFile currentRawFile;
 
     public MultiRawFilePanel(List<IRawFile> rawfiles) {
         super();
         this.rawfiles = rawfiles;
-        mapChromatogramForRawFile = new HashMap();
-        mapColorByRawFilename = new HashMap();
+        chromatogramByRawFile = new HashMap();
+        colorByRawFilename = new HashMap();
+        currentRawFile = this.rawfiles.get(0);
         for (IRawFile rawFile : rawfiles) {
-            mapChromatogramForRawFile.put(rawFile, null);
-            mapColorByRawFilename.put(rawFile.getName(), null);
+            chromatogramByRawFile.put(rawFile, null);
+            colorByRawFilename.put(rawFile.getName(), null);
         }
         displayTIC();
         SwingUtilities.invokeLater(new Runnable() {
@@ -59,10 +65,7 @@ public class MultiRawFilePanel extends AbstractRawFilePanel {
 
     @Override
     public IRawFile getCurrentRawfile() {
-        if (chromatogramPanel.getCurrentChromatogram() != null){
-            return getRawFile(chromatogramPanel.getCurrentChromatogram().rawFilename);
-        }
-        return null;
+        return currentRawFile;
     }
 
     @Override
@@ -96,6 +99,7 @@ public class MultiRawFilePanel extends AbstractRawFilePanel {
             @Override
             protected void done() {
                 try {
+                    chromatogramPanel.setCurrentChromatogram(chromatogramByRawFile.get(currentRawFile));
                     logger.info("{} TIC chromatogram extracted", get());
                 } catch (InterruptedException | ExecutionException e) {
                     logger.error("Error while reading chromatogram");
@@ -105,12 +109,17 @@ public class MultiRawFilePanel extends AbstractRawFilePanel {
 
         worker.execute();
     }
+
+    @Override
+    public Chromatogram getCurrentChromatogram() {
+        return chromatogramByRawFile.get(currentRawFile);
+    }
     
     @Override
     public Color displayChromatogram(Chromatogram chromato, DisplayMode mode) {
        setMsMsEventButtonEnabled(true);
        Color plotColor = super.displayChromatogram(chromato, mode);
-       mapColorByRawFilename.put(chromato.rawFilename, plotColor);
+       colorByRawFilename.put(chromato.rawFilename, plotColor);
        return plotColor ;
     }
     
@@ -131,7 +140,7 @@ public class MultiRawFilePanel extends AbstractRawFilePanel {
 
                 for (IRawFile rawFile : rawFiles) {
                     Chromatogram c = rawFile.getTIC();
-                    mapChromatogramForRawFile.put(rawFile, c);
+                    chromatogramByRawFile.put(rawFile, c);
                     count++;
                     publish(c);
                 }
@@ -157,6 +166,7 @@ public class MultiRawFilePanel extends AbstractRawFilePanel {
             @Override
             protected void done() {
                 try {
+                    chromatogramPanel.setCurrentChromatogram(chromatogramByRawFile.get(currentRawFile));
                     logger.info("{} TIC chromatogram extracted", get());
                 } catch (InterruptedException | ExecutionException e) {
                     logger.error("Error while reading chromatogram");
@@ -218,6 +228,7 @@ public class MultiRawFilePanel extends AbstractRawFilePanel {
             @Override
             protected void done() {
                 try {
+                    chromatogramPanel.setCurrentChromatogram(chromatogramByRawFile.get(currentRawFile));
                     logger.info("{} Display Feature", get());
                 } catch (InterruptedException | ExecutionException e) {
                     logger.error("Error while displaying feature");
@@ -296,18 +307,41 @@ public class MultiRawFilePanel extends AbstractRawFilePanel {
                 // search for rawFile
                 IRawFile rawFile = getRawFile(aButton.getText());
                 if (rawFile != null) {
-                    chromatogramPanel.setCurrentChromatogram(mapChromatogramForRawFile.get(rawFile));
+                    chromatogramPanel.setCurrentChromatogram(chromatogramByRawFile.get(rawFile));
+                    currentRawFile = rawFile;
                     if(chromatogramPanel.getCurrentScanTime() != null) {
                         int scanIdx = rawFile.getSpectrumId(chromatogramPanel.getCurrentScanTime());
                         displayScan(scanIdx);
                     }
-                        hideMSMSEvents();
-                        showMSMSEvents();
+                    //update MS2 events if shown 
+                    if (getShowMS2Button().isSelected()){
+                       showMSMSEvents();
+                    }
                 }
             }
         };
         for (IRawFile rawFile : rawfiles) {
             JRadioButtonMenuItem mi = new JRadioButtonMenuItem(rawFile.getName());
+            mi.setIcon(new Icon(){
+                @Override
+                public void paintIcon(Component c, Graphics g, int x, int y) {
+                    Color previousColor = g.getColor();
+                    g.setColor(getPlotColor(rawFile.getName()));
+                    g.fillRect(x, y, 10, 10);
+                    g.setColor(previousColor);
+                }
+
+                @Override
+                public int getIconWidth() {
+                    return 10;
+                }
+
+                @Override
+                public int getIconHeight() {
+                    return 10;
+                }
+            
+            });
             mi.addActionListener(changeCurrentChromatogramAction);
             popupMenu.add(mi);
             bg.add(mi);
@@ -328,7 +362,7 @@ public class MultiRawFilePanel extends AbstractRawFilePanel {
 
     @Override
     public Color getPlotColor(String rawFilename) {
-        return mapColorByRawFilename.get(rawFilename);
+        return colorByRawFilename.get(rawFilename);
     }
 
 }

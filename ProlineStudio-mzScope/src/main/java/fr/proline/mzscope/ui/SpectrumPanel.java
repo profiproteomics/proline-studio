@@ -4,7 +4,7 @@ import fr.proline.mzscope.ui.model.ScanTableModel;
 import fr.profi.ms.model.TheoreticalIsotopePattern;
 import fr.profi.mzdb.algo.IsotopicPatternScorer;
 import fr.proline.mzscope.model.MsnExtractionRequest;
-import fr.proline.mzscope.model.MzScopePreferences;
+import fr.proline.mzscope.ui.model.MzScopePreferences;
 import fr.proline.mzscope.model.Spectrum;
 import fr.proline.mzscope.ui.event.ScanHeaderListener;
 import fr.proline.mzscope.utils.MzScopeConstants.DisplayMode;
@@ -22,6 +22,7 @@ import fr.proline.studio.graphics.marker.LineMarker;
 import fr.proline.studio.graphics.marker.PointMarker;
 import fr.proline.studio.graphics.marker.coordinates.DataCoordinates;
 import fr.proline.studio.utils.CyclicColorPalette;
+import fr.proline.studio.utils.IconManager;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
@@ -30,8 +31,10 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
+import javax.swing.AbstractSpinnerModel;
 import javax.swing.JButton;
 import javax.swing.JPanel;
+import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 import javax.swing.SwingUtilities;
 import org.slf4j.Logger;
@@ -52,20 +55,55 @@ public class SpectrumPanel extends JPanel implements ScanHeaderListener, PlotPan
    protected BasePlotPanel spectrumPlotPanel;
    protected JToolBar spectrumToolbar;
    private ScanHeaderPanel headerSpectrumPanel;
-   protected PlotAbstract scanPlot;
-   protected Spectrum currentScan;
-   protected LineMarker positionMarker;
-   private boolean keepMsLevel = true;
-   protected DisplayMode xicModeDisplay = DisplayMode.REPLACE;
    
+   protected PlotAbstract scanPlot;
+   protected LineMarker positionMarker;
+
+   protected Spectrum currentScan;
+   private boolean keepSameMsLevel = true;
+   private boolean autoZoom = false;
    private List<AbstractMarker> ipMarkers = new ArrayList();
+   private ScansSpinnerModel spinnerModel;
+
+   
+   
+class ScansSpinnerModel extends AbstractSpinnerModel {
+
+    @Override
+    public Object getValue() {
+        return (currentScan == null) ? 0 : currentScan.getIndex();
+    }
+
+    @Override
+    public void setValue(Object value) {
+        if (((Integer)value).intValue() != ((Integer)getValue()).intValue()) {
+            // the supplied index is not the index of the currentScan : force display (the modification came from the spinner itself)
+            // the display starts from the rawFilePanel to update markers in chromatogram display
+            rawFilePanel.displayScan((Integer)value);
+        }
+        // allow GUI update by firing the event.
+        fireStateChanged();
+    }
+
+    @Override
+    public Object getNextValue() {
+        return (currentScan == null) ? 0 : getNextScanIndex(currentScan.getIndex());
+    }
+
+    @Override
+    public Object getPreviousValue() {
+        return (currentScan == null) ? 0 :  getPreviousScanIndex(currentScan.getIndex());
+    }
+    
+}
+
 
    public SpectrumPanel(IRawFileViewer rawFilePanel) {
       super();
       this.rawFilePanel = rawFilePanel;
    }
 
-   public void initChart() {
+   public void initComponents() {
       // Create Scan Charts
       PlotPanel plotPanel = new PlotPanel();
       spectrumPlotPanel = plotPanel.getBasePlotPanel();
@@ -74,26 +112,23 @@ public class SpectrumPanel extends JPanel implements ScanHeaderListener, PlotPan
 
       positionMarker = new LineMarker(spectrumPlotPanel, 0.0, LineMarker.ORIENTATION_VERTICAL, Color.BLUE, false);
 
-      List<Integer> emptyListScanIndex = new ArrayList<>();
-      emptyListScanIndex.add(0);
-      boolean multiRawFile = rawFilePanel instanceof MultiRawFilePanel;
-      headerSpectrumPanel = new ScanHeaderPanel(null, emptyListScanIndex, !multiRawFile);
-      headerSpectrumPanel.addScanHeaderListener(this);
+      
       spectrumPlotPanel.repaint();
 
       this.removeAll();
-      this.add(headerSpectrumPanel, BorderLayout.NORTH);
       this.add(plotPanel, BorderLayout.CENTER);
-      this.add(getSpectrumToolbar(), BorderLayout.WEST);
+      this.add(getSpectrumToolbar(), BorderLayout.NORTH);
    }
 
    private JToolBar getSpectrumToolbar() {
-      spectrumToolbar = new JToolBar(JToolBar.VERTICAL);
+      spectrumToolbar = new JToolBar(JToolBar.HORIZONTAL);
       spectrumToolbar.setFloatable(false);
+      
       ExportButton exportImageButton = new ExportButton("Graphic", spectrumPlotPanel);
       spectrumToolbar.add(exportImageButton);
 
-      JButton displayIPBtn = new JButton("IP");
+      JButton displayIPBtn = new JButton();
+      displayIPBtn.setIcon(IconManager.getIcon(IconManager.IconType.ISOTOPES_PREDICTION));
       displayIPBtn.setToolTipText("Display Isotopic Patterns");
       displayIPBtn.addActionListener(new ActionListener() {
          @Override
@@ -101,7 +136,27 @@ public class SpectrumPanel extends JPanel implements ScanHeaderListener, PlotPan
             displayIsotopicPatterns();
          }
       });
+      
       spectrumToolbar.add(displayIPBtn);
+      
+       JToggleButton autoZoomBtn = new JToggleButton();
+       autoZoomBtn.setIcon(IconManager.getIcon(IconManager.IconType.AUTO_ZOOM));
+       autoZoomBtn.addActionListener(new ActionListener() {
+          @Override
+          public void actionPerformed(ActionEvent e) {
+              autoZoom = ((JToggleButton)e.getSource()).isSelected();
+          }
+      });
+      
+      spectrumToolbar.add(autoZoomBtn);
+      
+      spectrumToolbar.addSeparator();
+      
+      spinnerModel = new ScansSpinnerModel(); 
+      
+      headerSpectrumPanel = new ScanHeaderPanel(null, spinnerModel);
+      headerSpectrumPanel.addScanHeaderListener(this);
+      spectrumToolbar.add(headerSpectrumPanel);
 
       return spectrumToolbar;
    }
@@ -171,7 +226,7 @@ public class SpectrumPanel extends JPanel implements ScanHeaderListener, PlotPan
     @Override
     public void plotPanelMouseClicked(MouseEvent e, double xValue, double yValue) {
         if (e.getClickCount() == 2) {
-            if ((e.getModifiers() & KeyEvent.ALT_MASK) == 0 && xicModeDisplay != DisplayMode.OVERLAY) {
+            if ((e.getModifiers() & KeyEvent.ALT_MASK) == 0 && rawFilePanel.getXicModeDisplay() != DisplayMode.OVERLAY) {
                 scanPlot.clearMarkers();
                 scanPlot.addMarker(positionMarker);
             }
@@ -191,7 +246,7 @@ public class SpectrumPanel extends JPanel implements ScanHeaderListener, PlotPan
                 if ((e.getModifiers() & KeyEvent.ALT_MASK) != 0) {
                     rawFilePanel.extractAndDisplayChromatogram(builder.build(), DisplayMode.OVERLAY, null);
                 } else {
-                    rawFilePanel.extractAndDisplayChromatogram(builder.build(), xicModeDisplay, null);
+                    rawFilePanel.extractAndDisplayChromatogram(builder.build(), rawFilePanel.getXicModeDisplay(), null);
                 }
 
         } else if (SwingUtilities.isLeftMouseButton(e)) {
@@ -213,8 +268,7 @@ public class SpectrumPanel extends JPanel implements ScanHeaderListener, PlotPan
 
    @Override
    public void keepMsLevel(boolean keep) {
-      this.keepMsLevel = keep;
-      updateScanIndexList();
+      this.keepSameMsLevel = keep;
    }
 
    public void addMarkerRange(double minMz, double maxMz) {
@@ -254,51 +308,38 @@ public class SpectrumPanel extends JPanel implements ScanHeaderListener, PlotPan
          spectrumPlotPanel.lockMinYValue();
 
          if ((currentScan != null) && (currentScan.getMsLevel() == scan.getMsLevel())) {
-            spectrumPlotPanel.getXAxis().setRange(xMin, xMax);
-            spectrumPlotPanel.getYAxis().setRange(yMin, yMax);
+            if (!autoZoom) { 
+                spectrumPlotPanel.getXAxis().setRange(xMin, xMax);
+                spectrumPlotPanel.getYAxis().setRange(yMin, yMax);
+            } else {
+                spectrumPlotPanel.getXAxis().setRange(xMin, xMax);                
+            }
          }
          
          if ((currentScan != null) && (currentScan.getMsLevel() != scan.getMsLevel())) {
             positionMarker.setVisible(false);
          }
          scanPlot.addMarker(positionMarker);
+//         spectrumPlotPanel.setPlotTitle(rawFilePanel.getCurrentRawfile().getName());
          spectrumPlotPanel.repaint();
          headerSpectrumPanel.setMzdbFileName(rawFilePanel.getCurrentRawfile().getName());
          currentScan = scan;
-         updateScanIndexList();
+         spinnerModel.setValue(currentScan.getIndex());
          headerSpectrumPanel.setScan(currentScan);
       }
    }
 
    public int getNextScanIndex(Integer spectrumIndex) {
-      if (keepMsLevel) 
+      if (keepSameMsLevel) 
          return (rawFilePanel.getCurrentRawfile().getNextSpectrumId(spectrumIndex, currentScan.getMsLevel()));
       return Math.min(currentScan.getIndex() + 1, rawFilePanel.getCurrentRawfile().getSpectrumCount()-1);
    } 
 
    public int getPreviousScanIndex(Integer spectrumIndex) {
-      if (keepMsLevel) 
+      if (keepSameMsLevel) 
          return (rawFilePanel.getCurrentRawfile().getPreviousSpectrumId(spectrumIndex, currentScan.getMsLevel()));
       return Math.max(1, currentScan.getIndex() - 1);
    } 
-
-   private void updateScanIndexList() {
-      List<Integer> listScanIndex = new ArrayList(3);
-      Integer currentIndex = currentScan.getIndex();
-      listScanIndex.add(getPreviousScanIndex(currentIndex));
-      listScanIndex.add(currentIndex);
-      listScanIndex.add(getNextScanIndex(currentIndex));
-      headerSpectrumPanel.setScanIndexList(listScanIndex);
-   }
-
-   @Override
-   public void updateXicDisplayMode(DisplayMode mode) {
-      xicModeDisplay = mode;
-   }
-
-   public DisplayMode getXicModeDisplay() {
-      return this.xicModeDisplay;
-   }
 
     @Override
     public void updateAxisRange(double[] oldX, double[] newX,  double[] oldY,  double[] newY) {

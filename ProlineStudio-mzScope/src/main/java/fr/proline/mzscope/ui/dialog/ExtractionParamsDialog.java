@@ -1,7 +1,7 @@
 package fr.proline.mzscope.ui.dialog;
 
 import fr.proline.mzscope.model.FeaturesExtractionRequest;
-import fr.proline.mzscope.model.MzScopePreferences;
+import fr.proline.mzscope.ui.model.MzScopePreferences;
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Component;

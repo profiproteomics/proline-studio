@@ -2,25 +2,25 @@ package fr.proline.mzscope.ui;
 
 import fr.proline.mzscope.model.Spectrum;
 import fr.proline.mzscope.ui.event.ScanHeaderListener;
-import fr.proline.mzscope.utils.MzScopeConstants.DisplayMode;
+import fr.proline.studio.utils.IconManager;
 import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.DecimalFormat;
-import java.util.List;
-import javax.swing.JCheckBox;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
 import javax.swing.JSpinner.DefaultEditor;
 import javax.swing.JTextField;
-import javax.swing.SpinnerListModel;
+import javax.swing.JToggleButton;
 import javax.swing.SpinnerModel;
 import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import javax.swing.event.EventListenerList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,278 +39,236 @@ public class ScanHeaderPanel extends JPanel {
     private final static DecimalFormat TIME_FORMATTER = new DecimalFormat("0.00");
     private final static DecimalFormat MASS_FORMATTER = new DecimalFormat("0.####");
     
-    private final static String TXT_KEEP_MSLEVEL = "Keep same ms level";
-    private final static String TXT_XIC_OVERLAY = "XIC Overlay";
-
-    private JScrollPane scrollPane;
     private JPanel mainPanel;
-    private JPanel panelTitle;
-    private JLabel labelTitle;
-    private JPanel panelPrecursor;
-    private JLabel labelPrecursor;
-    private JPanel panelScanIndex;
-    private JLabel labelScanIndex;
-    private JSpinner spinnerScanIndex;
-    private SpinnerModel spinnerScanIndexModel;
-    private JPanel panelRetentionTime;
-    private JLabel labelRetentionTime;
-    private JTextField textFieldRetentionTime;
-    private JPanel panelMsLevel;
-    private JLabel labelMsLevel;
-    private JTextField textFieldMsLevel;
-    private JCheckBox cbKeepMsLevel;
-    private JCheckBox cbXicOverlay;
+    private JPanel titlePanel;
+    private JLabel titleLabel;
+    private JPanel precursorPanel;
+    private JLabel precursorLabel;
+    private JPanel scanIndexPanel;
+    private JLabel scanIndexLabel;
+    private JSpinner scansSpinner;
+    private SpinnerModel scansSpinnerModel;
+    private JPanel retentionTimePanel;
+    private JLabel retentionTimeLabel;
+    private JTextField retentionTimeTF;
+    private JPanel msLevelPanel;
+    private JLabel msLevelLabel;
+    private JTextField msLevelTF;
+    private JToggleButton keepSameMsLevelTB;
 
     // mzdb fileName
     private String mzdbFileName;
     // current scan information
     private Spectrum scan;
-    // list of all scanIndex
-    private List<Integer> scanIndexList;
     
-    // true by default, but mode is hidden for multi rawFile
-    private boolean displayXicModeVisible;
-
     //events
     private EventListenerList listenerList = new EventListenerList();
 
-    public ScanHeaderPanel(Spectrum scan, List<Integer> scanIndexList, boolean displayXicModeVisible) {
+    public ScanHeaderPanel(Spectrum scan, SpinnerModel model) {
         this.scan = scan;
-        this.displayXicModeVisible = displayXicModeVisible;
-        this.scanIndexList = scanIndexList;
+        this.scansSpinnerModel = model;
+        this.
         initComponents();
     }
 
     private void initComponents() {
         this.setLayout(new BorderLayout());
-        this.add(getScrollPane(), BorderLayout.CENTER);
+        this.add(getMainPanel(), BorderLayout.CENTER);
+        
         updateScan();
-    }
-    
-    private JScrollPane getScrollPane() {
-        if (scrollPane == null) {
-            scrollPane = new JScrollPane(getMainPanel());
-            scrollPane.setName("scrollPane");
-            this.add(scrollPane);
-        }
-        return scrollPane;
     }
     
     private JPanel getMainPanel() {
        if (this.mainPanel == null) {
             mainPanel = new JPanel();
             mainPanel.setName("mainPanel");
-            mainPanel.setLayout(new FlowLayout(FlowLayout.LEADING, 5, 2));
+            mainPanel.setLayout(new FlowLayout(FlowLayout.LEADING, 0, 0));
             mainPanel.add(getPanelScanIndex());
             mainPanel.add(getPanelRetentionTime());
             mainPanel.add(getPanelMsLevel());
-            mainPanel.add(getPanelTitle());
             mainPanel.add(getPanelPrecursor());
+            mainPanel.add(getPanelTitle());
         }
         return this.mainPanel; 
     }
 
     private JPanel getPanelTitle() {
-        if (this.panelTitle == null) {
-            panelTitle = new JPanel();
-            panelTitle.setName("panelTitle");
-            panelTitle.setLayout(new FlowLayout());
-            panelTitle.add(getLabelTitle());
+        if (this.titlePanel == null) {
+            titlePanel = new JPanel();
+            titlePanel.setName("panelTitle");
+            titlePanel.setLayout(new FlowLayout(FlowLayout.LEADING, 2, 0));
+            titlePanel.add(getTitleLabel());
         }
-        return this.panelTitle;
+        return this.titlePanel;
     }
     
     private JPanel getPanelPrecursor() {
-        if (this.panelPrecursor == null) {
-            panelPrecursor = new JPanel();
-            panelPrecursor.setName("panelPrecursor");
-            panelPrecursor.setLayout(new FlowLayout());
-            panelPrecursor.add(getLabelPrecursor());
+        if (this.precursorPanel == null) {
+            precursorPanel = new JPanel();
+            precursorPanel.setName("panelPrecursor");
+            precursorPanel.setLayout(new FlowLayout(FlowLayout.LEADING, 2, 0));
+            precursorPanel.add(getPrecursorLabel());
         }
-        return this.panelPrecursor;
+        return this.precursorPanel;
     }
     
     private JPanel getPanelScanIndex() {
-        if (this.panelScanIndex == null) {
-            panelScanIndex = new JPanel();
-            panelScanIndex.setName("panelScanIndex");
-            panelScanIndex.setLayout(new FlowLayout());
-            panelScanIndex.add(getLabelScanIndex());
-            panelScanIndex.add(getSpinnerScanIndex());
+        if (this.scanIndexPanel == null) {
+            scanIndexPanel = new JPanel();
+            scanIndexPanel.setName("panelScanIndex");
+            scanIndexPanel.setLayout(new FlowLayout(FlowLayout.LEADING, 2, 0));
+            scanIndexPanel.add(getScanIndexLabel());
+            scanIndexPanel.add(getScansSpinner());
         }
-        return this.panelScanIndex;
+        return this.scanIndexPanel;
     }
 
     private JPanel getPanelRetentionTime() {
-        if (this.panelRetentionTime == null) {
-            panelRetentionTime = new JPanel();
-            panelRetentionTime.setName("panelRetentionTime");
-            panelRetentionTime.setLayout(new FlowLayout());
-            panelRetentionTime.add(getLabelRetentionTime());
-            panelRetentionTime.add(getTextFieldRetentionTime());
+        if (this.retentionTimePanel == null) {
+            retentionTimePanel = new JPanel();
+            retentionTimePanel.setName("panelRetentionTime");
+            retentionTimePanel.setLayout(new FlowLayout(FlowLayout.LEADING, 2, 0));
+            retentionTimePanel.add(getRetentionTimeLabel());
+            retentionTimePanel.add(getTextFieldRetentionTime());
         }
-        return this.panelRetentionTime;
+        return this.retentionTimePanel;
     }
 
     private JPanel getPanelMsLevel() {
-        if (this.panelMsLevel == null) {
-            panelMsLevel = new JPanel();
-            panelMsLevel.setName("panelMsLevel");
-            panelMsLevel.setLayout(new FlowLayout());
-            panelMsLevel.add(getLabelMsLevel());
-            panelMsLevel.add(getTextFieldMsLevel());
-            panelMsLevel.add(getCbKeepMsLevel());
-            panelMsLevel.add(getCbXicOverlay());
+        if (this.msLevelPanel == null) {
+            msLevelPanel = new JPanel();
+            msLevelPanel.setName("panelMsLevel");
+            msLevelPanel.setLayout(new FlowLayout(FlowLayout.LEADING, 2, 0));
+            msLevelPanel.add(getLabelMsLevel());
+            msLevelPanel.add(getTextFieldMsLevel());
+            msLevelPanel.add(getKeepSameMsLevelBtn());
         }
-        return this.panelMsLevel;
+        return this.msLevelPanel;
     }
 
-    private JLabel getLabelTitle() {
-        if (this.labelTitle == null) {
-            labelTitle = new JLabel(mzdbFileName);
-            labelTitle.setName("labelTitle");
+    private JLabel getTitleLabel() {
+        if (this.titleLabel == null) {
+            titleLabel = new JLabel(mzdbFileName);
+            titleLabel.setName("labelTitle");
         }
-        return this.labelTitle;
+        return this.titleLabel;
     }
     
-    private JLabel getLabelPrecursor() {
-        if (this.labelPrecursor == null) {
-            labelPrecursor = new JLabel("");
-            labelPrecursor.setName("labelPrecursor");
+    private JLabel getPrecursorLabel() {
+        if (this.precursorLabel == null) {
+            precursorLabel = new JLabel("");
+            precursorLabel.setName("labelPrecursor");
         }
-        return this.labelPrecursor;
+        return this.precursorLabel;
     }
     
-    private JLabel getLabelScanIndex() {
-        if (this.labelScanIndex == null) {
-            labelScanIndex = new JLabel("Scan Index:");
-            labelScanIndex.setName("labelScanIndex");
+    private JLabel getScanIndexLabel() {
+        if (this.scanIndexLabel == null) {
+            scanIndexLabel = new JLabel("Scan :");
+            scanIndexLabel.setName("labelScanIndex");
         }
-        return this.labelScanIndex;
+        return this.scanIndexLabel;
     }
 
-    private JLabel getLabelRetentionTime() {
-        if (this.labelRetentionTime == null) {
-            labelRetentionTime = new JLabel("rt:");
-            labelRetentionTime.setName("labelRetentionTime");
+    private JLabel getRetentionTimeLabel() {
+        if (this.retentionTimeLabel == null) {
+            retentionTimeLabel = new JLabel("rt:");
+            retentionTimeLabel.setName("labelRetentionTime");
         }
-        return this.labelRetentionTime;
+        return this.retentionTimeLabel;
     }
 
     private JLabel getLabelMsLevel() {
-        if (this.labelMsLevel == null) {
-            labelMsLevel = new JLabel("ms:");
-            labelMsLevel.setName("labelMsLevel");
+        if (this.msLevelLabel == null) {
+            msLevelLabel = new JLabel("ms:");
+            msLevelLabel.setName("labelMsLevel");
         }
-        return this.labelMsLevel;
+        return this.msLevelLabel;
     }
 
-    private JSpinner getSpinnerScanIndex() {
-        if (this.spinnerScanIndex == null) {
-            spinnerScanIndexModel = new SpinnerListModel(scanIndexList);
-            spinnerScanIndex = new JSpinner(spinnerScanIndexModel);
-            ((DefaultEditor) spinnerScanIndex.getEditor()).getTextField().setEditable(false);
-            ((DefaultEditor) spinnerScanIndex.getEditor()).getTextField().setColumns(5);
-            spinnerScanIndex.setName("spinnerScanIndex");
-            spinnerScanIndex.addChangeListener(new ChangeListener() {
-                @Override
-                public void stateChanged(ChangeEvent e) {
-                    scanIndexChanged(e);
-                }
-            });
+    private JSpinner getScansSpinner() {
+        if (this.scansSpinner == null) {
+            scansSpinner = new JSpinner(scansSpinnerModel);
+            ((DefaultEditor) scansSpinner.getEditor()).getTextField().setEditable(true);
+            ((DefaultEditor) scansSpinner.getEditor()).getTextField().setColumns(5);
+            scansSpinner.setName("spinnerScanIndex");
         }
-        return this.spinnerScanIndex;
+        return this.scansSpinner;
     }
 
     private JTextField getTextFieldRetentionTime() {
-        if (this.textFieldRetentionTime == null) {
-            textFieldRetentionTime = new JTextField();
-            textFieldRetentionTime.setToolTipText("retention time in min");
-            textFieldRetentionTime.setColumns(6);
-            textFieldRetentionTime.setName("textFieldRetentionTime");
-            textFieldRetentionTime.addActionListener(new ActionListener() {
+        if (this.retentionTimeTF == null) {
+            retentionTimeTF = new JTextField();
+            retentionTimeTF.setToolTipText("retention time in min");
+            retentionTimeTF.setColumns(6);
+            retentionTimeTF.setName("textFieldRetentionTime");
+            retentionTimeTF.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent evt) {
                     retentionTimeActionPerformed(evt);
                 }
             });
         }
-        return this.textFieldRetentionTime;
+        return this.retentionTimeTF;
     }
 
     private JTextField getTextFieldMsLevel() {
-        if (this.textFieldMsLevel == null) {
-            textFieldMsLevel = new JTextField();
-            textFieldMsLevel.setEditable(false);
-            textFieldMsLevel.setColumns(3);
-            textFieldMsLevel.setName("textFieldMsLevel");
-            textFieldMsLevel.setToolTipText("msLevel");
+        if (this.msLevelTF == null) {
+            msLevelTF = new JTextField();
+            msLevelTF.setEditable(false);
+            msLevelTF.setColumns(3);
+            msLevelTF.setName("textFieldMsLevel");
+            msLevelTF.setToolTipText("msLevel");
         }
-        return this.textFieldMsLevel;
+        return this.msLevelTF;
     }
     
-    private JCheckBox getCbKeepMsLevel() {
-        if (this.cbKeepMsLevel == null) {
-            this.cbKeepMsLevel = new JCheckBox(TXT_KEEP_MSLEVEL);
-            this.cbKeepMsLevel.setSelected(true);
-            this.cbKeepMsLevel.setName("cbKeepMsLevel");
-            this.cbKeepMsLevel.setToolTipText("You can also use the keyboard's arrows (or Ctrl+arrows to keep the same ms level)");
-            this.cbKeepMsLevel.addActionListener(new ActionListener() {
+    private JToggleButton getKeepSameMsLevelBtn() {
+        if (this.keepSameMsLevelTB == null) {
+            this.keepSameMsLevelTB = new JToggleButton(){
+                @Override
+                public Dimension getPreferredSize() {
+                    return new Dimension(24,24); 
+                }
+                
+            };
+            this.keepSameMsLevelTB.setBorderPainted(false);
+            this.keepSameMsLevelTB.setIcon(IconManager.getIcon(IconManager.IconType.SAME_MS_LEVEL));
+            this.keepSameMsLevelTB.setSelected(true);
+            this.keepSameMsLevelTB.setName("cbKeepMsLevel");
+            this.keepSameMsLevelTB.setToolTipText("Stay on the same previous MS level while navigating. This can also be done by using the keyboard's arrows (or Ctrl+arrows to keep the same ms level)");
+            this.keepSameMsLevelTB.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     msLevelActionPerformed(e);
                 }
             });
         }
-        return cbKeepMsLevel;
+        return keepSameMsLevelTB;
     }
-    
-    private JCheckBox getCbXicOverlay() {
-        if (this.cbXicOverlay == null) {
-            this.cbXicOverlay = new JCheckBox(TXT_XIC_OVERLAY);
-            this.cbXicOverlay.setSelected(false);
-            this.cbXicOverlay.setName("cbXicOverlay");
-            this.cbXicOverlay.setToolTipText("You can also use the Alt key");
-            this.cbXicOverlay.setVisible(displayXicModeVisible);
-            this.cbXicOverlay.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    xicOverlayActionPerformed(e);
-                }
-            });
-        }
-        return cbXicOverlay;
-    }
-    
 
     private void updateScan() {
         if (scan == null) {
             clearValues();
         } else {
             if (scan.getPrecursorMz() == null) {
-                labelPrecursor.setText("");
+                precursorLabel.setText("");
             }else{
                 StringBuilder builder = new StringBuilder();
                 builder.append(MASS_FORMATTER.format(scan.getPrecursorMz())).append(" (");
                 builder.append(scan.getPrecursorCharge()).append("+)");
-                labelPrecursor.setText(builder.toString());
+                precursorLabel.setText(builder.toString());
             }
-            try{
-                spinnerScanIndex.setValue(scan.getIndex());
-            }catch(IllegalArgumentException e){
-                
-            }
-            textFieldRetentionTime.setText(TIME_FORMATTER.format(scan.getRetentionTime() / 60.0));
-            textFieldMsLevel.setText(Integer.toString(scan.getMsLevel()));
+            retentionTimeTF.setText(TIME_FORMATTER.format(scan.getRetentionTime() / 60.0));
+            msLevelTF.setText(Integer.toString(scan.getMsLevel()));
         }
     }
 
     private void clearValues() {
-        labelTitle.setText("");
-        labelPrecursor.setText("");
-        spinnerScanIndex.setValue(scanIndexList.get(0));
-        textFieldRetentionTime.setText("");
-        textFieldMsLevel.setText("");
+        titleLabel.setText("");
+        precursorLabel.setText("");
+        retentionTimeTF.setText("");
+        msLevelTF.setText("");
     }
 
     /**
@@ -324,27 +282,12 @@ public class ScanHeaderPanel extends JPanel {
     }
 
     /**
-     * set the scan index list (previous, current, next)
-     * @param scanIndexList 
-     */
-    public void setScanIndexList(List<Integer> scanIndexList) {
-        this.scanIndexList = scanIndexList;
-        this.spinnerScanIndexModel = new SpinnerListModel(scanIndexList);
-        if (scanIndexList.size() > 1){
-            spinnerScanIndexModel.setValue(scanIndexList.get(1));
-        }
-        this.spinnerScanIndex.setModel(spinnerScanIndexModel);
-        ((DefaultEditor) spinnerScanIndex.getEditor()).getTextField().setEditable(false);
-        ((DefaultEditor) spinnerScanIndex.getEditor()).getTextField().setColumns(5);
-    }
-
-    /**
      * set the mzdb fileName
      * @param fileName 
      */
     public void setMzdbFileName(String fileName) {
         this.mzdbFileName = fileName;
-        this.labelTitle.setText(fileName);
+        this.titleLabel.setText(fileName);
     }
     /**
      * event register
@@ -384,22 +327,13 @@ public class ScanHeaderPanel extends JPanel {
             }
         }
     }
-    
-    private void fireXicOverlay(DisplayMode mode) {
-        Object[] listeners = listenerList.getListenerList();
-        for (int i = 0; i < listeners.length; i = i + 2) {
-            if (listeners[i] == ScanHeaderListener.class) {
-                ((ScanHeaderListener) listeners[i + 1]).updateXicDisplayMode(mode);
-            }
-        }
-    }
 
     public void retentionTimeActionPerformed(ActionEvent evt) {
         if (scan == null) {
             return;
         }
         // check value
-        String value = this.textFieldRetentionTime.getText();
+        String value = this.retentionTimeTF.getText();
         if (value == null || value.trim().isEmpty()) {
             JOptionPane.showMessageDialog(this, "The retention time could not be empty!");
             updateScan();
@@ -422,7 +356,7 @@ public class ScanHeaderPanel extends JPanel {
         if (scan == null) {
             return;
         }
-        int scanIndex = ((Integer)spinnerScanIndex.getValue()).intValue();
+        int scanIndex = ((Integer)scansSpinner.getValue()).intValue();
         fireUpdateScanIndex(scanIndex);
     }
     
@@ -430,11 +364,7 @@ public class ScanHeaderPanel extends JPanel {
         if (scan == null) {
             return;
         }
-        fireKeepMsLevel(this.cbKeepMsLevel.isSelected());
-    }
-    
-    public void xicOverlayActionPerformed(ActionEvent evt) {
-        fireXicOverlay(this.cbXicOverlay.isSelected() ? DisplayMode.OVERLAY : DisplayMode.REPLACE);
+        fireKeepMsLevel(this.keepSameMsLevelTB.isSelected());
     }
 
 }

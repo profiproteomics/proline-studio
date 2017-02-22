@@ -6,6 +6,7 @@ import fr.proline.mzscope.model.Signal;
 import fr.proline.mzscope.utils.MzScopeConstants.DisplayMode;
 import fr.proline.mzscope.utils.SpectrumUtils;
 import fr.proline.studio.utils.CyclicColorPalette;
+import fr.proline.studio.utils.IconManager;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -48,8 +49,9 @@ public class SingleRawFilePanel extends AbstractRawFilePanel {
 
    protected JToolBar updateToolbar() {
       chromatogramToolbar.addSeparator();
-      JButton editFeatureBtn = new JButton("Sig.");
-      editFeatureBtn.setToolTipText("Edit Feature Chromatogram");
+      JButton editFeatureBtn = new JButton();
+      editFeatureBtn.setIcon(IconManager.getIcon(IconManager.IconType.SIGNAL));
+      editFeatureBtn.setToolTipText("Chromatogram signal processing dialog");
       editFeatureBtn.addActionListener(new ActionListener() {
          @Override
          public void actionPerformed(ActionEvent e) {

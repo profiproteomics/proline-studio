@@ -128,7 +128,7 @@ public class MzdbRawFile implements IRawFile {
                 yAxisData[i] = ((double) headers[i].getTIC());
             }
 
-            chromatogram = new Chromatogram(getName());
+            chromatogram = new Chromatogram(getName(), "TIC");
             chromatogram.time = xAxisData;
             chromatogram.intensities = yAxisData;
             return chromatogram;
@@ -150,12 +150,12 @@ public class MzdbRawFile implements IRawFile {
                 yAxisData[i] = ((double) headers[i].getBasePeakIntensity());
             }
 
-            chromatogram = new Chromatogram(getName());
+            chromatogram = new Chromatogram(getName(), "BPC");
             chromatogram.time = xAxisData;
             chromatogram.intensities = yAxisData;
             return chromatogram;
         } catch (SQLiteException ex) {
-            logger.error("Cannot generate BPI chromatogram", ex);
+            logger.error("Cannot generate BPC chromatogram", ex);
         }
         return chromatogram;
     }
@@ -394,7 +394,7 @@ public class MzdbRawFile implements IRawFile {
     }
 
     private List<IFeature> extractFeaturesFromMs2(float tolPPM) {
-        List<IFeature> result = null;
+        List<IFeature> result = new ArrayList<>();
         try {
             logger.info("retrieve spectrum headers...");
             SpectrumHeader[] ms2SpectrumHeaders = reader.getMs2SpectrumHeaders();
@@ -428,12 +428,9 @@ public class MzdbRawFile implements IRawFile {
             RunSliceDataProvider rsdProv = new RunSliceDataProvider(reader.getLcMsRunSliceIterator());
             FeatureExtractorConfig extractorConfig = new FeatureExtractorConfig(tolPPM, 5, 1, 3, 1200.0f, 0.05f, Option.empty(), 90, Option.empty());
             MzDbFeatureExtractor extractor = new MzDbFeatureExtractor(reader, 5, 5, extractorConfig);
-            // Extract features
-            // force the result in a java List to avoid UnsupportedOperationException on scala.collection...WrappedSequence
+            // Extract features :  force the result in a java List to avoid UnsupportedOperationException on scala.collection...WrappedSequence
             List<Feature> tmpresult = scala.collection.JavaConversions.seqAsJavaList(extractor.extractFeatures(rsdProv, scala.collection.JavaConversions.asScalaBuffer(pfs), tolPPM));
-            tmpresult.stream().forEach((f) -> {
-                result.add(f);
-            });
+            tmpresult.stream().forEach(f -> result.add(f));
         } catch (SQLiteException | StreamCorruptedException ex) {
             logger.error("error while extracting features", ex);
         }

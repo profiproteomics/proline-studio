@@ -4,7 +4,7 @@ import fr.proline.mzscope.model.Chromatogram;
 import fr.proline.mzscope.model.IFeature;
 import fr.proline.mzscope.model.IRawFile;
 import fr.proline.mzscope.model.MsnExtractionRequest;
-import fr.proline.mzscope.model.MzScopeCallback;
+import fr.proline.mzscope.utils.MzScopeCallback;
 import fr.proline.mzscope.model.Spectrum;
 import fr.proline.mzscope.ui.event.AxisRangeChromatogramListener;
 import fr.proline.mzscope.utils.ButtonTabComponent;
@@ -15,6 +15,7 @@ import fr.proline.studio.utils.CyclicColorPalette;
 import fr.proline.studio.utils.IconManager;
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -76,7 +77,7 @@ public class TabbedMultiRawFilePanel extends JPanel implements IRawFileViewer {
             mapChromatogramForRawFile.put(rawFile, null);
         }
         initComponents();
-        spectrumContainerPanel.initChart();
+        spectrumContainerPanel.initComponents();
         displayTIC();
     }
 
@@ -193,7 +194,7 @@ public class TabbedMultiRawFilePanel extends JPanel implements IRawFileViewer {
                     }
                     
                 });
-                IWrappedPanel wpanel = new ChromatoWrappedPanel(id++, rawFile.getName(), getChromatogramPanel(rawFile));
+                IWrappedPanel wpanel = new WrappedChromatogramPanel(id++, rawFile.getName(), getChromatogramPanel(rawFile));
                 wpanel.setTabHeaderComponent(buttonTabComp);
                 chromatogramContainerPanel.addTab(wpanel);
             }
@@ -508,3 +509,47 @@ public class TabbedMultiRawFilePanel extends JPanel implements IRawFileViewer {
     }
 
 }
+
+class WrappedChromatogramPanel implements IWrappedPanel{
+    
+    private ChromatogramPanel chromatogramPanel;
+    private String title;
+    private Long id;
+    private ButtonTabComponent tabHeaderComponent;
+
+    public WrappedChromatogramPanel(Long id, String title, ChromatogramPanel chromatogramPanel) {
+        this.id = id;
+        this.chromatogramPanel = chromatogramPanel;
+        this.title= title;
+    }
+    
+    
+
+    @Override
+    public String getTitle() {
+        return this.title;
+    }
+
+    @Override
+    public JPanel getComponent() {
+        return this.chromatogramPanel;
+    }
+
+    @Override
+    public Long getId() {
+        return this.id;
+    }
+    
+    @Override
+    public void setTabHeaderComponent(Component c){
+        if (c instanceof ButtonTabComponent)
+            this.tabHeaderComponent = (ButtonTabComponent)c;
+    }
+    
+    @Override
+    public Component getTabHeaderComponent(){
+        return tabHeaderComponent;
+    }
+    
+}
+

@@ -1,5 +1,6 @@
 package fr.proline.mzscope.model;
 
+import fr.proline.mzscope.ui.model.MzScopePreferences;
 import fr.profi.ms.algo.IsotopePatternEstimator;
 import fr.profi.ms.model.TheoreticalIsotopePattern;
 import fr.profi.mzdb.model.SpectrumData;

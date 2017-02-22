@@ -8,7 +8,7 @@ package fr.proline.mzscope.ui;
 import fr.proline.mzscope.model.Chromatogram;
 import fr.proline.mzscope.model.IFeature;
 import fr.proline.mzscope.model.MsnExtractionRequest;
-import fr.proline.mzscope.model.MzScopePreferences;
+import fr.proline.mzscope.ui.model.MzScopePreferences;
 import fr.proline.mzscope.ui.event.AxisRangeChromatogramListener;
 import fr.proline.mzscope.ui.model.ChromatogramTableModel;
 import fr.proline.mzscope.utils.MzScopeConstants;
@@ -38,7 +38,6 @@ import org.slf4j.LoggerFactory;
 public class ChromatogramPanel extends JPanel implements PlotPanelListener {
 
    final private static Logger logger = LoggerFactory.getLogger(ChromatogramPanel.class);
-   final private static DecimalFormat xFormatter = new DecimalFormat("0.0000");
    final public static String SCAN_TIME = "scan time";
 
    protected BasePlotPanel chromatogramPlotPanel;
@@ -104,9 +103,7 @@ public class ChromatogramPanel extends JPanel implements PlotPanelListener {
          currentChromatogram = chromato;
          listChromatogram = new ArrayList();
          listChromatogram.add(currentChromatogram);
-         StringBuilder builder = new StringBuilder("Mass range: ");
-         builder.append(xFormatter.format(chromato.minMz)).append("-").append(xFormatter.format(chromato.maxMz));
-         chromatogramPlotPanel.setPlotTitle(builder.toString());
+         chromatogramPlotPanel.setPlotTitle(chromato.title);
          chromatogramPlotPanel.clearPlots();
          PlotLinear chromatogramPlot = chromatogramPlots.isEmpty() ? null : chromatogramPlots.get(0);
          if (chromatogramPlot != null) {
@@ -202,6 +199,8 @@ public class ChromatogramPanel extends JPanel implements PlotPanelListener {
    void setCurrentChromatogram(Chromatogram chromatogram) {
       if (listChromatogram.contains(chromatogram)) {
          currentChromatogram = chromatogram;
+      } else {
+          logger.warn("current chromatogram supplied is not in the list of extracted chromatograms : "+chromatogram.toString());
       }
    }
 

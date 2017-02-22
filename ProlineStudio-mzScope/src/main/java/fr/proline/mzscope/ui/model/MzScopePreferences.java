@@ -1,4 +1,4 @@
-package fr.proline.mzscope.model;
+package fr.proline.mzscope.ui.model;
 
 /**
  *

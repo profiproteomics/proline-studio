@@ -16,6 +16,7 @@ import fr.proline.core.orm.uds.BiologicalSplSplAnalysisMap;
 import fr.proline.core.orm.uds.Run;
 import fr.proline.studio.dam.data.RunInfoData;
 import fr.proline.studio.rsmexplorer.actions.identification.AbstractRSMAction;
+import fr.proline.studio.rsmexplorer.actions.xic.CreateNodeAction;
 import fr.proline.studio.rsmexplorer.actions.xic.DeleteAction;
 import fr.proline.studio.rsmexplorer.actions.xic.RenameAction;
 import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
@@ -121,8 +122,13 @@ public class XICDesignTree extends AbstractTree {
         if (m_mainPopup == null) {
 
             // create the actions
-            m_mainActions = new ArrayList<>(3);  // <--- get in sync
+            m_mainActions = new ArrayList<AbstractRSMAction>(5);  // <--- get in sync
 
+            CreateNodeAction createAction = new CreateNodeAction(this);
+            m_mainActions.add(createAction);
+            
+            m_mainActions.add(null);
+            
             RenameAction renameAction = new RenameAction(this);
             m_mainActions.add(renameAction);
 

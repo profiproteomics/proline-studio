@@ -163,7 +163,13 @@ public class IconManager {
         PLUS_16X16,
         DATABASES_RELATION,
         TARGET,
-        CONTROL_SMALL;
+        CONTROL_SMALL,
+        SAME_MS_LEVEL,
+        SIGNAL,
+        AUTO_ZOOM,
+        OVERLAY,
+        ISOTOPES_PREDICTION;
+        
     }
     private final static HashMap<IconType, ImageIcon> m_iconMap = new HashMap<>();
     private final static HashMap<IconType, ImageIcon> m_iconHourGlassMap = new HashMap<>();
@@ -590,6 +596,16 @@ public class IconManager {
                 return "fr/proline/studio/images/target.png";
             case CONTROL_SMALL:
                 return "fr/proline/studio/images/control-000-small.png";
+            case SAME_MS_LEVEL:
+                return "fr/proline/studio/images/same_level.png";    
+            case SIGNAL:
+                return "fr/proline/studio/images/signal.png";  
+            case AUTO_ZOOM:
+                return "fr/proline/studio/images/auto_zoom.png";    
+            case OVERLAY:
+                return "fr/proline/studio/images/overlay.png";
+            case ISOTOPES_PREDICTION:
+                return "fr/proline/studio/images/isotopes_prediction.png";    
         }
 
         return null; // can not happen

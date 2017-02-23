@@ -11,15 +11,16 @@ import org.jdesktop.swingx.JXTable;
 public class TableInfo {
     
     private final int m_id;
-    //private final String m_name;
+    private String m_userName;
     private String m_dataName;
     private String m_typeName = null;
     private final JXTable m_table;
     
     private ImageIcon m_icon = null;
 
-    public TableInfo(int id, String dataName, String typeName, JXTable table) {
+    public TableInfo(int id, String userName, String dataName, String typeName, JXTable table) {
         m_id = id;
+        m_userName = userName;
         m_dataName = dataName;
         m_typeName = typeName;
         m_table = table;
@@ -35,29 +36,7 @@ public class TableInfo {
     public JXTable getTable() {
         return m_table;
     }
-    
-    /*public void setFullName(String fullName) {
-        m_fullName = fullName;
-    }*/
-    
-    /*public String getDataName() {
-        if (m_dataName!=null) {
-            return m_dataName;
-        }
-        if (m_fullName == null) {
-            return null;
-        }
-        int index = m_fullName.lastIndexOf(m_name);
-        if (index != -1) {
-            String dataName = m_fullName.substring(0, index).trim();
-            return dataName;
-        }
-        return null;
-    }
-    
-    public void setDataName(String dataName) {
-        m_dataName = dataName;
-    }*/
+
 
     public ImageIcon getIcon() {
         return m_icon;
@@ -76,14 +55,23 @@ public class TableInfo {
     }
     
     public String getDataName() {
+        if (m_userName != null) {
+            return "";
+        }
         return m_dataName;
     }
     
     public String getTypeName() {
+        if (m_userName != null) {
+            return m_userName;
+        }
         return m_typeName;
     }
     
     public String getFullName() {
+        if (m_userName != null) {
+            return m_userName;
+        }
         if (m_dataName == null) {
             return m_typeName;
         }

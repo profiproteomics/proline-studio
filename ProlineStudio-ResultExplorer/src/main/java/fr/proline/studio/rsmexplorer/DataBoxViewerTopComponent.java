@@ -1,15 +1,21 @@
 package fr.proline.studio.rsmexplorer;
 
+import fr.proline.studio.gui.DefaultDialog;
+import fr.proline.studio.gui.OptionDialog;
 import fr.proline.studio.pattern.GroupParameter;
 import fr.proline.studio.pattern.WindowBox;
 import fr.proline.studio.python.data.TableInfo;
 import java.awt.Graphics;
 import java.awt.GridLayout;
 import java.awt.Image;
+import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import javax.swing.AbstractAction;
+import javax.swing.Action;
 import org.openide.windows.TopComponent;
+import org.openide.windows.WindowManager;
 
 /**
  * TopComponent for a windox box with databoxes
@@ -39,12 +45,58 @@ public class DataBoxViewerTopComponent extends TopComponent {
     }
     
     public WindowBox getWindowBox(){
-        return this.m_windowBox;
+        return m_windowBox;
     }
 
+    
     public void retrieveTableModels(ArrayList<TableInfo> list) {
         m_windowBox.retrieveTableModels(list);
     }
+    
+    @Override
+    public Action[] getActions() {
+        Action[] actions = super.getActions();
+
+        Action renameAction = new AbstractAction("Rename...") {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                OptionDialog dialog = new OptionDialog(WindowManager.getDefault().getMainWindow(), "Rename", null, "New Name", OptionDialog.OptionDialogType.TEXTFIELD);
+                dialog.setText(getName());
+                Object o = e.getSource();
+                //dialog.setLocation(x, y);
+                dialog.setVisible(true);
+                String newName = null;
+                if (dialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {
+                    newName = dialog.getText();
+                }
+
+                if ((newName != null) && (newName.length() > 0)) {
+                    setName(newName);
+                    m_windowBox.getEntryBox().setUserName(newName);
+                }
+            }
+
+        };
+
+        List<Action> actionList;
+        if (actions == null) {
+            actionList = new ArrayList<>(2);
+            actionList.add(renameAction);
+        } else {
+            actionList = new ArrayList<>(actions.length+2);
+            actionList.add(renameAction);
+            actionList.add(null);
+            for (Action a : actions) {
+                actionList.add(a);
+            }
+        }
+
+
+        return actionList.toArray(new Action[0]);
+
+    }
+
     
     @Override
     protected void componentOpened() {

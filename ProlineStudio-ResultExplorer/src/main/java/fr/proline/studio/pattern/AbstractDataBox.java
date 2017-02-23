@@ -55,6 +55,7 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
     protected String m_dataName;
     protected String m_fullName = null;
     protected String m_description = "";
+    protected String m_userName = null;
     
     private SplittedPanelContainer.PanelLayout m_layout = SplittedPanelContainer.PanelLayout.VERTICAL;
     
@@ -267,6 +268,14 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
     
     protected DataBoxPanelInterface getDataBoxPanelInterface() {
         return m_panel;
+    }
+    
+    public void setUserName(String userName) {
+        m_userName = userName;
+    } 
+ 
+    public String getUserName() {
+        return m_userName;
     }
     
     public DataboxType getType() {
@@ -552,6 +561,9 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
     }
     
     public String getFullName() {
+        if (m_userName != null) {
+            return m_userName;
+        }
         if (m_fullName != null) {
             return m_fullName;
         }
@@ -564,11 +576,7 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
 
         return getTypeName();
     }
-    
-    /*public void setFullName(String fullName) {
-        m_fullName = fullName;
-    }*/
-    
+
     public String getDescription() {
         return m_description;
     }
@@ -662,7 +670,7 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
         if (m_panel instanceof GlobalTabelModelProviderInterface) {
             JXTable table = ((GlobalTabelModelProviderInterface) m_panel).getGlobalAssociatedTable();
             if (table != null) {
-                TableInfo info = new TableInfo(getId(), getDataName(), getTypeName(), table);
+                TableInfo info = new TableInfo(getId(), m_userName, getDataName(), getTypeName(), table);
                 list.add(info);
             }
         }

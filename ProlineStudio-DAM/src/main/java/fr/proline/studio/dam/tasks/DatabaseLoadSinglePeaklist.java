@@ -40,7 +40,8 @@ public class DatabaseLoadSinglePeaklist extends AbstractDatabaseTask {
             
             entityManagerMSI.getTransaction().begin();
 
-            TypedQuery<Peaklist> peaklistQuery = entityManagerMSI.createQuery("SELECT new fr.proline.core.orm.msi.dto.Peaklist(plist.id, plist.type, plist.path, plist.raw_file_identifier, plist.ms_level, plist.spectrum_data_compression, plist.serialized_properties, plist.peaklist_software_id) FROM Peaklist plist, MsiSearch msisearch, ResultSet rset WHERE rset.id = :rsetId AND rset.msiSearch=msisearch AND msisearch.peaklist=plist", Peaklist.class);
+            TypedQuery<Peaklist> peaklistQuery = entityManagerMSI.createQuery
+        ("SELECT plist FROM Peaklist plist, MsiSearch msisearch, ResultSet rset WHERE rset.id = :rsetId AND rset.msiSearch=msisearch AND msisearch.peaklist=plist", Peaklist.class);
             
             peaklistQuery.setMaxResults(1);
             peaklistQuery.setParameter("rsetId", m_rsetID);

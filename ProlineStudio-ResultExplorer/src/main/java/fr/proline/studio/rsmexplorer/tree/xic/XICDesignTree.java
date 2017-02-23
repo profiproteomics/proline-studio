@@ -16,7 +16,7 @@ import fr.proline.core.orm.uds.BiologicalSplSplAnalysisMap;
 import fr.proline.core.orm.uds.Run;
 import fr.proline.studio.dam.data.RunInfoData;
 import fr.proline.studio.rsmexplorer.actions.identification.AbstractRSMAction;
-import fr.proline.studio.rsmexplorer.actions.xic.CreateNodeAction;
+import fr.proline.studio.rsmexplorer.actions.xic.CreateAction;
 import fr.proline.studio.rsmexplorer.actions.xic.DeleteAction;
 import fr.proline.studio.rsmexplorer.actions.xic.RenameAction;
 import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
@@ -124,7 +124,7 @@ public class XICDesignTree extends AbstractTree {
             // create the actions
             m_mainActions = new ArrayList<AbstractRSMAction>(5);  // <--- get in sync
 
-            CreateNodeAction createAction = new CreateNodeAction(this);
+            CreateAction createAction = new CreateAction(this);
             m_mainActions.add(createAction);
             
             m_mainActions.add(null);
@@ -240,7 +240,6 @@ public class XICDesignTree extends AbstractTree {
                             XICRunNode runNode = new XICRunNode(runInfoData, tree);
                             sampleAnalysisNode.add(runNode);
 
-                            //problem here
                             runNode.init(sampleAnalysisNode.getDataset(), treeModel, null);
                         }
 

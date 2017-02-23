@@ -343,7 +343,7 @@ public class SelectRawFilesPanel extends JPanel {
 
                 XICRunNode runNode = m_model.getXICRunNode(convertRowIndexToModel(row), convertColumnIndexToModel(col));
 
-                if (runNode.isChanging()) {
+                if (runNode==null || runNode.isChanging()) {
                     return;
                 }
 
@@ -559,12 +559,8 @@ public class SelectRawFilesPanel extends JPanel {
         }
 
         public XICRunNode getXICRunNode(int row, int col) {
-            if (col == COLTYPE_RAW_FILE || col == COLTYPE_PEAKLIST) {
                 NodeModelRow nodeModelRow = m_dataList.get(row);
                 return nodeModelRow.m_run;
-            }
-            return null;
-
         }
 
         public XICBiologicalSampleAnalysisNode getXICBiologicalSampleAnalysisNode(int row) {

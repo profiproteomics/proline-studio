@@ -1,9 +1,9 @@
 package fr.proline.studio.pattern;
 
 
-import fr.proline.core.orm.msi.PeptideSet;
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.dto.DPeptideInstance;
+import fr.proline.core.orm.msi.dto.DPeptideSet;
 import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.studio.rsmexplorer.gui.RsmProteinAndPeptideSequencePanel;
 
@@ -53,13 +53,13 @@ public class DataBoxRsmProteinAndPeptideSequence extends AbstractDataBox {
             return;
         }
 
-        PeptideSet peptideSet = proteinMatch.getPeptideSet(resultSummary.getId());
+        DPeptideSet peptideSet = proteinMatch.getPeptideSet(resultSummary.getId());
         if (peptideSet == null) {
             ((RsmProteinAndPeptideSequencePanel) getDataBoxPanelInterface()).setData(null, null, null, null);
             return;
         }
         
-        DPeptideInstance[] peptideInstances = peptideSet.getTransientDPeptideInstances();
+        DPeptideInstance[] peptideInstances = peptideSet.getPeptideInstances();
         
         // check that the selectedPeptide found in previous databox is really a peptide of the proteinMatch (they
         // can come from different databoxes)

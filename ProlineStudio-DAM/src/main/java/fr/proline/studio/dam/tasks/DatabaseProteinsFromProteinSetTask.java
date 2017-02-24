@@ -2,6 +2,7 @@ package fr.proline.studio.dam.tasks;
 
 
 import fr.proline.core.orm.msi.PeptideSet;
+import fr.proline.core.orm.msi.dto.DPeptideSet;
 import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.core.orm.msi.dto.DProteinSet;
 import fr.proline.core.orm.util.DataStoreConnectorFactory;
@@ -93,7 +94,7 @@ public class DatabaseProteinsFromProteinSetTask extends AbstractDatabaseTask {
         Long rsmId = proteinSet.getResultSummaryId();
 
         // Load Proteins and their peptide count for the current result summary
-        TypedQuery<DProteinMatch> proteinMatchQuery = entityManagerMSI.createQuery("SELECT new fr.proline.core.orm.msi.dto.DProteinMatch(pm.id, pm.accession, pm.score, pm.peptideCount, pm.resultSet.id, pm.description, pepset) FROM ProteinMatch pm, ProteinSetProteinMatchItem ps_to_pm, PeptideSet pepset, PeptideSetProteinMatchMap pepset_to_pm WHERE ps_to_pm.proteinSet.id=:proteinSetId AND ps_to_pm.proteinMatch.id=pm.id AND ps_to_pm.resultSummary.id=:rsmId AND pepset_to_pm.resultSummary.id=:rsmId AND pepset_to_pm.id.peptideSetId=pepset.id AND pepset_to_pm.id.proteinMatchId=pm.id ORDER BY pepset.score DESC", DProteinMatch.class);
+        TypedQuery<DProteinMatch> proteinMatchQuery = entityManagerMSI.createQuery("SELECT new fr.proline.core.orm.msi.dto.DProteinMatch(pm.id, pm.accession, pm.score, pm.peptideCount, pm.resultSet.id, pm.description, pepset.id, pepset.score, pepset.sequenceCount, pepset.peptideCount, pepset.peptideMatchCount, pepset.resultSummaryId) FROM ProteinMatch pm, ProteinSetProteinMatchItem ps_to_pm, PeptideSet pepset, PeptideSetProteinMatchMap pepset_to_pm WHERE ps_to_pm.proteinSet.id=:proteinSetId AND ps_to_pm.proteinMatch.id=pm.id AND ps_to_pm.resultSummary.id=:rsmId AND pepset_to_pm.resultSummary.id=:rsmId AND pepset_to_pm.id.peptideSetId=pepset.id AND pepset_to_pm.id.proteinMatchId=pm.id ORDER BY pepset.score DESC", DProteinMatch.class);
         proteinMatchQuery.setParameter("proteinSetId", proteinSet.getId());
          proteinMatchQuery.setParameter("rsmId", rsmId);
         List<DProteinMatch> proteinMatchList = proteinMatchQuery.getResultList();
@@ -115,7 +116,7 @@ public class DatabaseProteinsFromProteinSetTask extends AbstractDatabaseTask {
         int peptitesCountInSameSet = 0;
         while (it.hasNext()) {
             DProteinMatch proteinMatch = it.next();
-            PeptideSet peptideSet = proteinMatch.getPeptideSet(rsmId);
+            DPeptideSet peptideSet = proteinMatch.getPeptideSet(rsmId);
             int peptideCount = peptideSet.getPeptideCount();
             if (peptideCount>peptitesCountInSameSet) {
                 peptitesCountInSameSet = peptideCount;
@@ -125,7 +126,7 @@ public class DatabaseProteinsFromProteinSetTask extends AbstractDatabaseTask {
         while (it.hasNext()) {
 
             DProteinMatch proteinMatch = it.next();
-            PeptideSet peptideSet = proteinMatch.getPeptideSet(rsmId);
+            DPeptideSet peptideSet = proteinMatch.getPeptideSet(rsmId);
 
             proteinMatch.setPeptideSet(rsmId, peptideSet);
             

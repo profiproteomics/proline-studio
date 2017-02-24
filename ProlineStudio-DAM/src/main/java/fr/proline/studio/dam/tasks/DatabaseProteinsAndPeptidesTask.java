@@ -4,6 +4,7 @@ import fr.proline.core.orm.msi.Peptide;
 import fr.proline.core.orm.msi.PeptideSet;
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
+import fr.proline.core.orm.msi.dto.DPeptideSet;
 import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.core.orm.util.DataStoreConnectorFactory;
 import fr.proline.studio.dam.taskinfo.TaskError;
@@ -111,7 +112,7 @@ public class DatabaseProteinsAndPeptidesTask extends AbstractDatabaseTask {
             }
             
             // Load PeptideSet
-            Query peptideSetQuery = entityManagerMSI.createQuery("SELECT ps_to_pm.id.proteinMatchId, ps FROM PeptideSet ps, PeptideSetProteinMatchMap ps_to_pm WHERE ps_to_pm.id.proteinMatchId IN (:listId) AND ps_to_pm.id.peptideSetId=ps.id AND ps_to_pm.resultSummary.id=:rsmId");
+            Query peptideSetQuery = entityManagerMSI.createQuery("SELECT ps_to_pm.id.proteinMatchId, ps.id, ps.score, ps.sequenceCount, ps.peptideCount, ps.peptideMatchCount, ps.resultSummaryId FROM PeptideSet ps, PeptideSetProteinMatchMap ps_to_pm WHERE ps_to_pm.id.proteinMatchId IN (:listId) AND ps_to_pm.id.peptideSetId=ps.id AND ps_to_pm.resultSummary.id=:rsmId");
             peptideSetQuery.setParameter("listId", m_proteinMatchIdArray);
             peptideSetQuery.setParameter("rsmId", m_rsm.getId());
             List<Object[]> peptideSets = peptideSetQuery.getResultList();
@@ -119,8 +120,13 @@ public class DatabaseProteinsAndPeptidesTask extends AbstractDatabaseTask {
             while (itPSet.hasNext()) {
                 Object[] res = itPSet.next();
                 Long proteinMatchId = (Long) res[0];
-                PeptideSet peptideSet = (PeptideSet) res[1];
-                m_proteinMatchMap.get(proteinMatchId).setPeptideSet(m_rsm.getId(), peptideSet);
+                Long psId = (Long) res[1];
+                Float psScore = (Float) res[2];
+                Integer psSequenceCount = (Integer) res[3];
+                Integer psPeptideCount = (Integer) res[4];
+                Integer psPeptideMatchCount = (Integer) res[5];
+                Long psResultSummaryId = (Long) res[6];
+                m_proteinMatchMap.get(proteinMatchId).setPeptideSet(m_rsm.getId(), new DPeptideSet(psId, psScore, psSequenceCount, psPeptideCount, psPeptideMatchCount, psResultSummaryId));
             }
 
             

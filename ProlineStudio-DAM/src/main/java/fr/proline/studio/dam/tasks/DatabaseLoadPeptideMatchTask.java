@@ -11,6 +11,7 @@ import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.SequenceMatch;
 import fr.proline.core.orm.msi.dto.DMsQuery;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
+import fr.proline.core.orm.msi.dto.DPeptideSet;
 import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.core.orm.msi.dto.DProteinSet;
 import fr.proline.core.orm.msi.dto.DSpectrum;
@@ -530,13 +531,13 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
             m_proteinMatch = typicalProteinMatch;
 
             // Retrieve peptideSet of a typicalProteinMatch
-            PeptideSet peptideSet = typicalProteinMatch.getPeptideSet(rsmId);
+            DPeptideSet peptideSet = typicalProteinMatch.getPeptideSet(rsmId);
             if (peptideSet == null) {
-                TypedQuery<PeptideSet> peptideSetQuery = entityManagerMSI.createQuery("SELECT ps FROM PeptideSet ps, PeptideSetProteinMatchMap ps_to_pm WHERE ps_to_pm.id.proteinMatchId=:proteinMatchId AND ps_to_pm.id.peptideSetId=ps.id AND ps_to_pm.resultSummary.id=:rsmId", PeptideSet.class);
+                TypedQuery<DPeptideSet> peptideSetQuery = entityManagerMSI.createQuery("SELECT new fr.proline.core.orm.msi.dto.DPeptideSet(ps.id, ps.score, ps.sequenceCount, ps.peptideCount, ps.peptideMatchCount, ps.resultSummaryId) FROM PeptideSet ps, PeptideSetProteinMatchMap ps_to_pm WHERE ps_to_pm.id.proteinMatchId=:proteinMatchId AND ps_to_pm.id.peptideSetId=ps.id AND ps_to_pm.resultSummary.id=:rsmId", DPeptideSet.class);
                 peptideSetQuery.setParameter("proteinMatchId", typicalProteinMatch.getId());
                 peptideSetQuery.setParameter("rsmId", rsmId);
                 peptideSet = peptideSetQuery.getSingleResult();
-                typicalProteinMatch.setPeptideSet(rsmId, peptideSet);
+                typicalProteinMatch.setPeptideSet(rsmId,peptideSet);
             }
             
 

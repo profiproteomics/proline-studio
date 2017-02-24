@@ -1,9 +1,9 @@
 package fr.proline.studio.pattern;
 
-import fr.proline.core.orm.msi.PeptideSet;
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.dto.DPeptideInstance;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
+import fr.proline.core.orm.msi.dto.DPeptideSet;
 import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseProteinsAndPeptidesTask;
@@ -135,8 +135,8 @@ public class DataBoxAdjacencyMatrix extends AbstractDataBox {
                 if ((pm != null) && (peptideMatch != null)) {
                     ResultSummary rsm = (ResultSummary) m_previousDataBox.getData(false, ResultSummary.class);
                     if (rsm != null) {
-                        PeptideSet peptideSet = pm.getPeptideSet(rsm.getId());
-                        DPeptideInstance[] peptideInstances = peptideSet.getTransientDPeptideInstances();
+                        DPeptideSet peptideSet = pm.getPeptideSet(rsm.getId());
+                        DPeptideInstance[] peptideInstances = peptideSet.getPeptideInstances();
                         if (peptideInstances != null) {
                             for (DPeptideInstance peptideInstance : peptideInstances) {
                                 if (peptideInstance.getPeptideId() == peptideMatch.getPeptide().getId()) {

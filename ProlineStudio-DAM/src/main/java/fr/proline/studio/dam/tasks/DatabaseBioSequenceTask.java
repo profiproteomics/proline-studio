@@ -1,9 +1,9 @@
 package fr.proline.studio.dam.tasks;
 
-import fr.proline.core.orm.msi.PeptideSet;
 import fr.proline.core.orm.msi.dto.DBioSequence;
 import fr.proline.core.orm.msi.dto.DPeptideInstance;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
+import fr.proline.core.orm.msi.dto.DPeptideSet;
 import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.module.seq.BioSequenceProvider;
 import fr.proline.module.seq.dto.BioSequenceWrapper;
@@ -93,13 +93,13 @@ public class DatabaseBioSequenceTask extends AbstractDatabaseTask {
             
             List<BioSequenceWrapper> bioSequenceWrapperList = relatedObjects.getBioSequenceWrappers();
 
-            PeptideSet peptideSet = null;
+            DPeptideSet peptideSet = null;
             if (rsmId != null) {
                 peptideSet = proteinMatch.getPeptideSet(rsmId);
             }
 
 
-            DPeptideInstance[] peptideInstances = (peptideSet == null) ? null : peptideSet.getTransientDPeptideInstances();
+            DPeptideInstance[] peptideInstances = (peptideSet == null) ? null : peptideSet.getPeptideInstances();
             if (peptideInstances == null) {
                 // we can not check with peptides, we return the first biosequence
                 BioSequenceWrapper biosequenceWrapperSelected = null;

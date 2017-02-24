@@ -5,6 +5,7 @@ import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.PeptideSet;
 import fr.proline.core.orm.msi.dto.DPeptideInstance;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
+import fr.proline.core.orm.msi.dto.DPeptideSet;
 import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.studio.comparedata.AddDataAnalyzerButton;
 import fr.proline.studio.comparedata.CompareDataInterface;
@@ -242,8 +243,8 @@ public class RsmPeptidesOfProteinPanel extends HourglassPanel implements DataBox
             if ((proteinMatch == null) || (rsm == null)) {
                 ((PeptideTableModel) ((CompoundTableModel) m_peptidesTable.getModel()).getBaseModel()).setData(null);
             } else {
-                PeptideSet peptideSet = proteinMatch.getPeptideSet(rsm.getId());
-                DPeptideInstance[] peptideInstances = peptideSet.getTransientDPeptideInstances();
+                DPeptideSet peptideSet = proteinMatch.getPeptideSet(rsm.getId());
+                DPeptideInstance[] peptideInstances = peptideSet.getPeptideInstances();
 
                 ((PeptideTableModel) ((CompoundTableModel) m_peptidesTable.getModel()).getBaseModel()).setData(peptideInstances);
 
@@ -258,8 +259,8 @@ public class RsmPeptidesOfProteinPanel extends HourglassPanel implements DataBox
             boolean peptideMatchChanged = (peptideMatch != m_currentPeptideMatch);
             if ((!peptideMatchChanged || (peptideMatchChanged && (m_currentPeptideMatch==null))) && proteinMatchChanged) {
                 // select first peptide
-                PeptideSet peptideSet = proteinMatch.getPeptideSet(rsm.getId());
-                DPeptideInstance[] peptideInstances = peptideSet.getTransientDPeptideInstances();
+                DPeptideSet peptideSet = proteinMatch.getPeptideSet(rsm.getId());
+                DPeptideInstance[] peptideInstances = peptideSet.getPeptideInstances();
                 if ((peptideInstances != null) && (peptideInstances.length > 0)) {
 
                     m_peptidesTable.getSelectionModel().setSelectionInterval(0, 0);

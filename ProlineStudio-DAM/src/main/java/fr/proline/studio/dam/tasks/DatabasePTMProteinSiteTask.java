@@ -72,7 +72,7 @@ public class DatabasePTMProteinSiteTask extends AbstractDatabaseTask {
             Long rsmId = m_rsm.getId();
             
             // Load Typical Protein Matches
-            TypedQuery<DProteinMatch> typicalProteinQuery = entityManagerMSI.createQuery("SELECT new fr.proline.core.orm.msi.dto.DProteinMatch(pm.id, pm.accession, pm.score, pm.peptideCount, pm.resultSet.id, pm.description, pepset) FROM PeptideSetProteinMatchMap pset_to_pm JOIN pset_to_pm.proteinMatch as pm JOIN pset_to_pm.peptideSet as pepset JOIN pepset.proteinSet as ps WHERE ps.resultSummary.id=:rsmId AND ps.isValidated=true AND ps.representativeProteinMatchId=pm.id  ORDER BY pepset.score DESC", DProteinMatch.class);
+            TypedQuery<DProteinMatch> typicalProteinQuery = entityManagerMSI.createQuery("SELECT new fr.proline.core.orm.msi.dto.DProteinMatch(pm.id, pm.accession, pm.score, pm.peptideCount, pm.resultSet.id, pm.description, pepset.id, pepset.score, pepset.sequenceCount, pepset.peptideCount, pepset.peptideMatchCount, pepset.resultSummaryId) FROM PeptideSetProteinMatchMap pset_to_pm JOIN pset_to_pm.proteinMatch as pm JOIN pset_to_pm.peptideSet as pepset JOIN pepset.proteinSet as ps WHERE ps.resultSummary.id=:rsmId AND ps.isValidated=true AND ps.representativeProteinMatchId=pm.id  ORDER BY pepset.score DESC", DProteinMatch.class);
             typicalProteinQuery.setParameter("rsmId", rsmId);
 
             List<DProteinMatch> typicalProteinMatchesArray = typicalProteinQuery.getResultList();
@@ -196,7 +196,7 @@ public class DatabasePTMProteinSiteTask extends AbstractDatabaseTask {
                     continue; // JPM.BUG ???, it is odd, it can happens, to be checked
                 }
                 DPeptideInstance[] peptideInstanceArray = peptideInstanceList.toArray(new DPeptideInstance[peptideInstanceList.size()]);
-                pm.getPeptideSet(rsmId).setTransientDPeptideInstances(peptideInstanceArray);
+                pm.getPeptideSet(rsmId).setPeptideInstances(peptideInstanceArray);
             }
             
             // fetch Generic PTM Data
@@ -223,7 +223,7 @@ public class DatabasePTMProteinSiteTask extends AbstractDatabaseTask {
             
             // create the list of DProteinPTMSite
             for (DProteinMatch proteinMatch : typicalProteinMatchesArray) {
-                DPeptideInstance[] peptideInstanceList = proteinMatch.getPeptideSet(rsmId).getTransientDPeptideInstances();
+                DPeptideInstance[] peptideInstanceList = proteinMatch.getPeptideSet(rsmId).getPeptideInstances();
                 if (peptideInstanceList != null) {
                     for (int i = 0; i < peptideInstanceList.length; i++) {
                         DPeptideInstance peptideInstance = peptideInstanceList[i];

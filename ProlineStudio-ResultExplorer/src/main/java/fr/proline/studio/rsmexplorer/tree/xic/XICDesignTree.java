@@ -167,6 +167,14 @@ public class XICDesignTree extends AbstractTree {
         popup.show((JComponent) e.getSource(), e.getX(), e.getY());
     }
 
+    /**
+     * This is called when Experimental Design already exist : Create XIC by clone, Display XIC result or Experimental Design... 
+     * @param dataset
+     * @param rootNode
+     * @param tree
+     * @param expandPath
+     * @param includeRunNodes 
+     */
     public static void setExpDesign(DDataset dataset, AbstractNode rootNode, AbstractTree tree, boolean expandPath, boolean includeRunNodes) {
         if (dataset == null) {
             return;

@@ -11,6 +11,7 @@ import fr.proline.studio.dam.data.DataSetData;
 import fr.proline.studio.dam.data.RunInfoData;
 import fr.proline.studio.dam.data.RunInfoData.Status;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
+import fr.proline.studio.dam.tasks.DatabasePeaklistTask;
 import fr.proline.studio.dam.tasks.DatabaseRunsTask;
 import fr.proline.studio.dam.tasks.DatabaseVerifySpectrumFromResultSets;
 import fr.proline.studio.dam.tasks.SubTask;
@@ -39,8 +40,6 @@ import java.io.File;
 import java.util.*;
 import javax.persistence.EntityManager;
 import javax.swing.JFileChooser;
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 import org.openide.util.NbPreferences;
 import org.slf4j.LoggerFactory;
@@ -282,7 +281,7 @@ public class CreateXICDialog extends DefaultDialog {
                                                             };
 
                                                             // ask asynchronous loading of data
-                                                            DatabaseRunsTask task = new DatabaseRunsTask(callback);
+                                                            DatabasePeaklistTask  task = new DatabasePeaklistTask(callback);
                                                             task.initUpdatePeaklistIdentifier(pID, rsID, runData.getSelectedRawFile().getIdentifier());
                                                             AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
 

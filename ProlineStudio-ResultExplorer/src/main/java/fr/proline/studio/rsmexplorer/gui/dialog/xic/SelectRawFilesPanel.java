@@ -120,7 +120,6 @@ public class SelectRawFilesPanel extends JPanel {
     private void setRootNode(AbstractNode rootNode) {
         this.m_rootNode = rootNode;
         m_model.setData(rootNode);
-
     }
 
     public boolean check(DefaultDialog dialog) {
@@ -226,17 +225,12 @@ public class SelectRawFilesPanel extends JPanel {
         JScrollPane tableScrollPane = new JScrollPane();
         tableScrollPane.getViewport().setBackground(Color.white);
 
-        try {
-            m_table = new FlatDesignTable();
-            m_model = new FlatDesignTableModel(m_designTree);
-            m_table.setModel(m_model);
-            m_table.getColumnModel().getColumn(FlatDesignTableModel.COLTYPE_ASSOCIATION_SOURCE).setCellRenderer(new LinkAssociationRenderer());
-//            m_table.setRowHeight(25);
-            tableScrollPane.setViewportView(m_table);
-        } catch (Exception e) {
-            //System.out.println(e);
-        }
-
+        m_table = new FlatDesignTable();
+        m_model = new FlatDesignTableModel(m_designTree);
+        m_table.setModel(m_model);
+        m_table.getColumnModel().getColumn(FlatDesignTableModel.COLTYPE_ASSOCIATION_SOURCE).setCellRenderer(new LinkAssociationRenderer());
+        tableScrollPane.setViewportView(m_table);
+ 
         designTablePanel.add(tableScrollPane, c);
 
         panel.add(designTablePanel);

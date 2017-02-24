@@ -9,7 +9,7 @@ import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.data.AbstractData;
 import fr.proline.studio.dam.data.RunInfoData;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
-import fr.proline.studio.dam.tasks.DatabaseLoadSinglePeaklist;
+import fr.proline.studio.dam.tasks.DatabasePeaklistTask;
 import fr.proline.studio.dam.tasks.DatabaseRunsTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
@@ -144,9 +144,9 @@ public class XICRunNode extends AbstractNode {
                                 }
                             };
 
-                            DatabaseLoadSinglePeaklist peaklistTask = new DatabaseLoadSinglePeaklist(callback, dataset.getId(), dataset.getProject().getId(), peaklist);
-                            AccessDatabaseThread.getAccessDatabaseThread().addTask(peaklistTask);
-                            
+                            DatabasePeaklistTask peaklistTask = new DatabasePeaklistTask(callback);
+                            peaklistTask.initLoadPeaklistForRS(dataset.getResultSetId(), dataset.getProject().getId(), peaklist);
+                            AccessDatabaseThread.getAccessDatabaseThread().addTask(peaklistTask);                            
                         }
                     } else {
                         // it failed !
@@ -166,56 +166,57 @@ public class XICRunNode extends AbstractNode {
             task.initLoadRawFile(dataset.getId(), rawfileFounds, runOut);
             AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
         } else {
-            if (tableModel != null) {
-                searchPeaklistPath(dataset, tableModel);
-            }
+            throw new RuntimeException("Creating XIC Run Node without an identification dataset.");
+//            if (tableModel != null) {
+//                searchPeaklistPath(dataset, tableModel);
+//            }
         }
     }
 
-    private void searchPeaklistPath(DDataset dataset, final AbstractTableModel tableModel) {
-
-        Long rsetId = dataset.getResultSetId();
-
-        final String[] path = new String[1];
-
-        final XICRunNode _this = this;
-
-        AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
-
-            @Override
-            public boolean mustBeCalledInAWT() {
-                return true;
-            }
-
-            @Override
-            public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
-                //setIsChanging(false);
-
-                String searchString = path[0];
-                ((RunInfoData) getData()).setPeakListPath(searchString);
-
-                if ((searchString == null) || (searchString.isEmpty())) {
-                    searchString = "*";
-                } else {
-                    searchString = "*" + searchString + "*";
-                }
-
-                ((RunInfoData) getData()).setMessage("Search " + searchString);
-                ((RunInfoData) getData()).setStatus(RunInfoData.Status.MISSING);
-
-                ((DefaultTreeModel) m_tree.getModel()).nodeChanged(_this);
-
-                searchPotentialRawFiles(searchString, tableModel, Search.BASED_ON_PATH);
-            }
-        };
-
-        // ask asynchronous loading of data
-        Long projectId = dataset.getProject().getId();
-        DatabaseRunsTask task = new DatabaseRunsTask(callback);
-        task.initLoadPeakListPathForRset(projectId, rsetId, path);
-        AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
-
-    }
+//    private void searchPeaklistPath(DDataset dataset, final AbstractTableModel tableModel) {
+//
+//        Long rsetId = dataset.getResultSetId();
+//
+//        final String[] path = new String[1];
+//
+//        final XICRunNode _this = this;
+//
+//        AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
+//
+//            @Override
+//            public boolean mustBeCalledInAWT() {
+//                return true;
+//            }
+//
+//            @Override
+//            public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
+//                //setIsChanging(false);
+//
+//                String searchString = path[0];
+//                ((RunInfoData) getData()).setPeakListPath(searchString);
+//
+//                if ((searchString == null) || (searchString.isEmpty())) {
+//                    searchString = "*";
+//                } else {
+//                    searchString = "*" + searchString + "*";
+//                }
+//
+//                ((RunInfoData) getData()).setMessage("Search " + searchString);
+//                ((RunInfoData) getData()).setStatus(RunInfoData.Status.MISSING);
+//
+//                ((DefaultTreeModel) m_tree.getModel()).nodeChanged(_this);
+//
+//                searchPotentialRawFiles(searchString, tableModel, Search.BASED_ON_PATH);
+//            }
+//        };
+//
+//        // ask asynchronous loading of data
+//        Long projectId = dataset.getProject().getId();
+//        DatabasePeaklistTask task = new DatabasePeaklistTask(callback);
+//        task.initLoadPeakListPathForRset(projectId, rsetId, path);
+//        AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
+//
+//    }
 
     private void searchPotentialRawFiles(String searchString, final AbstractTableModel tableModel, Search search) {
 
@@ -325,7 +326,7 @@ public class XICRunNode extends AbstractNode {
                 if (m_rawFilesMap.size() == 1) {
 
                     // we have found the raw file in the database, we use this one
-                    RawFile rawFile = m_rawFilesMap.get(0);
+                    RawFile rawFile = m_rawFilesMap.values().iterator().next();
                     runInfoData.setSelectedRawFile(rawFile);
                     runInfoData.setRun(rawFile.getRuns().get(0));
 

@@ -18,7 +18,7 @@ import org.openide.util.NbBundle;
  *
  * @author AK249877
  */
-public class CreateNodeAction extends AbstractRSMAction {
+public class CreateAction extends AbstractRSMAction {
 
     private CreateSampleNodeAction m_createSampleAction;
     private CreateGroupNodeAction m_createGroupAction;
@@ -26,10 +26,10 @@ public class CreateNodeAction extends AbstractRSMAction {
     private JMenu m_menu;
     private final XICDesignTree m_tree;
 
-    private CreateNodeAction m_createAction;
+    private CreateAction m_createAction;
 
-    public CreateNodeAction(XICDesignTree tree) {
-        super(NbBundle.getMessage(CreateNodeAction.class, "CTL_CreateAction"), AbstractTree.TreeType.TREE_XIC_DESIGN, tree);
+    public CreateAction(XICDesignTree tree) {
+        super(NbBundle.getMessage(CreateAction.class, "CTL_CreateAction"), AbstractTree.TreeType.TREE_XIC_DESIGN, tree);
         m_tree = tree;
     }
 
@@ -40,7 +40,7 @@ public class CreateNodeAction extends AbstractRSMAction {
 
             m_menu = new JMenu((String) getValue(NAME));
 
-            m_createAction = new CreateNodeAction(m_tree);
+            m_createAction = new CreateAction(m_tree);
 
             m_createSampleAction = new CreateSampleNodeAction(m_tree);
             m_createGroupAction = new CreateGroupNodeAction(m_tree);

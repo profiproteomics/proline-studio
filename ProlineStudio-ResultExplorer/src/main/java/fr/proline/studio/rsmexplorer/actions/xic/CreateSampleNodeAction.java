@@ -45,7 +45,7 @@ public class CreateSampleNodeAction extends AbstractRSMAction {
 
         if (node.getType() == AbstractNode.NodeTypes.BIOLOGICAL_GROUP) {
 
-            String sampleName = showGroupNameDialog("New Sample", x, y);
+            String sampleName = showGroupNameDialog("Sample1", x, y);
 
             if (sampleName == null) {
                 return;

@@ -44,7 +44,7 @@ public class CreateGroupNodeAction extends AbstractRSMAction {
 
         if (node.getType() == AbstractNode.NodeTypes.DATA_SET) {
 
-            String groupName = showGroupNameDialog("New Group", x, y);
+            String groupName = showGroupNameDialog("Group1", x, y);
             
             if(groupName==null){
                 return;

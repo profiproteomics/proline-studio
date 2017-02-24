@@ -602,7 +602,7 @@ public class SelectRawFilesPanel extends JPanel {
             }
         }
 
-        private void calculateMissingValues() {
+        public void calculateMissingValues() {
 
             m_missingValuesMap.clear();
 
@@ -621,18 +621,19 @@ public class SelectRawFilesPanel extends JPanel {
                     if (info.getStatus() == RunInfoData.Status.MISSING) {
                         HashMap<String, RawFile> rawFiles = info.getPotentialRawFiles();
 
+                        HashSet<String> set = new HashSet<String>();
+                        
                         if (info.hasPotentialRawFiles()) {
-
-                            HashSet<String> set = new HashSet<String>();
 
                             for (String key : rawFiles.keySet()) {
                                 set.add(MiscellaneousUtils.getFileName(key.toLowerCase(), SUFFIX));
                             }
-
-                            m_missingValuesMap.put(i, set);
-                        } else {
-                            m_missingValuesMap.put(i, new HashSet<String>());
+                            
+                        } else {                  
+                            set.add(MiscellaneousUtils.getFileName(info.getPeakListPath().toLowerCase(), SUFFIX));                     
                         }
+                        
+                        m_missingValuesMap.put(i, set);
                     }
 
                 }

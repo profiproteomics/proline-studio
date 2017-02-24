@@ -60,6 +60,8 @@ public class XICDropZone extends JPanel implements DropZoneInterface {
             return;
         }
         
+        m_model.calculateMissingValues();
+        
         HashMap<Integer, HashSet<String>> shortages = m_model.getMissingValues();
         Iterator<Integer> keyIterator = shortages.keySet().iterator();
         while (keyIterator.hasNext()) {

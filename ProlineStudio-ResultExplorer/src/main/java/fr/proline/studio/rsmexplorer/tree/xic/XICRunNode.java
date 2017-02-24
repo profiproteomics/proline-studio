@@ -39,15 +39,26 @@ public class XICRunNode extends AbstractNode {
 
     private DefaultTreeModel m_treeModel = null;
     private final AbstractTree m_tree;
+    private AbstractTableModel m_tableModel;
 
     public XICRunNode(AbstractData data, AbstractTree tree) {
         super(NodeTypes.RUN, data);
         m_tree = tree;
     }
+    
+    public AbstractTableModel getTableModel(){
+        return m_tableModel;
+    }
+    
+    public void setTableModel(AbstractTableModel tableModel){
+        m_tableModel = tableModel;
+    }
 
     public void init(final DDataset dataset, DefaultTreeModel treeModel, final AbstractTableModel tableModel) {
+        
         m_treeModel = treeModel;
-
+        m_tableModel = tableModel;
+        
         setIsChanging(true);
 
         // look if we find a Raw File
@@ -82,31 +93,36 @@ public class XICRunNode extends AbstractNode {
 
                         } else {
                             //recreate a raw file from msi
-                            if (tableModel != null) {
-                                
-                                final Peaklist peaklist = null;
 
-                                AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
+                            Peaklist[] peaklist = new Peaklist[1];
 
-                                    @Override
-                                    public boolean mustBeCalledInAWT() {
-                                        return true;
-                                    }
+                            AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
 
-                                    @Override
-                                    public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
-                                        if (success) {
-                                            if(peaklist!=null){
-                                                if(peaklist.getRawFileIdentifier()!=null && !peaklist.getRawFileIdentifier().equalsIgnoreCase("")){
+                                @Override
+                                public boolean mustBeCalledInAWT() {
+                                    return true;
+                                }
+
+                                @Override
+                                public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
+                                    if (success) {
+                                        
+                                        if (peaklist[0] != null) {
+
+                                                if (peaklist[0].getRawFileIdentifier() != null && !peaklist[0].getRawFileIdentifier().equalsIgnoreCase("")) {
+
+                                                    //Previous RawFileIdentifier exists
                                                     
-                                                    ((RunInfoData) getData()).setMessage("Search " + peaklist.getRawFileIdentifier());
+                                                    ((RunInfoData) getData()).setMessage("Search " + peaklist[0].getRawFileIdentifier());
                                                     ((DefaultTreeModel) m_tree.getModel()).nodeChanged(xicRunNode);
-                                                    searchPotentialRawFiles(peaklist.getRawFileIdentifier(), tableModel, Search.BASED_ON_IDENTIFIER);
+                                                    searchPotentialRawFiles(peaklist[0].getRawFileIdentifier(), tableModel, Search.BASED_ON_IDENTIFIER);
+
+                                                } else if (peaklist[0].getPath() != null && !peaklist[0].getPath().equalsIgnoreCase("")) {
+
+                                                    //Previous RawFileIdentifier does not exist so we will try to search for the peaklist path!
                                                     
-                                                }else if(peaklist.getPath()!=null && !peaklist.getRawFileIdentifier().equalsIgnoreCase("")){
-                                                    
-                                                    String searchString = peaklist.getPath();
-                                                    
+                                                    String searchString = peaklist[0].getPath();
+
                                                     ((RunInfoData) getData()).setPeakListPath(searchString);
 
                                                     if ((searchString == null) || (searchString.isEmpty())) {
@@ -121,19 +137,16 @@ public class XICRunNode extends AbstractNode {
                                                     ((DefaultTreeModel) m_tree.getModel()).nodeChanged(xicRunNode);
 
                                                     searchPotentialRawFiles(searchString, tableModel, Search.BASED_ON_PATH);
-                                                    
+
                                                 }
-                                            }
                                         }
                                     }
-                                };
-                                
-                                DatabaseLoadSinglePeaklist peaklistTask = new DatabaseLoadSinglePeaklist(callback, dataset.getId(), dataset.getProject().getId(), peaklist);
-                                AccessDatabaseThread.getAccessDatabaseThread().addTask(peaklistTask);
+                                }
+                            };
 
-                                //searchPeaklistRawFileIdentifier(dataset, tableModel);
-
-                            }
+                            DatabaseLoadSinglePeaklist peaklistTask = new DatabaseLoadSinglePeaklist(callback, dataset.getId(), dataset.getProject().getId(), peaklist);
+                            AccessDatabaseThread.getAccessDatabaseThread().addTask(peaklistTask);
+                            
                         }
                     } else {
                         // it failed !
@@ -158,7 +171,6 @@ public class XICRunNode extends AbstractNode {
             }
         }
     }
-
 
     private void searchPeaklistPath(DDataset dataset, final AbstractTableModel tableModel) {
 

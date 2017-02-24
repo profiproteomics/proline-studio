@@ -239,7 +239,7 @@ public class XICRunNode extends AbstractNode {
                     runInfoData.setMessage("<html><font color='#FF0000'>Missing Raw File</font></html>");
                     runInfoData.setStatus(RunInfoData.Status.MISSING);
                 } else if (m_rawFileMap.size() == 1) {
-                    RawFile rawFile = m_rawFileMap.get(0);
+                    RawFile rawFile = m_rawFileMap.entrySet().iterator().next().getValue();
                     runInfoData.setSelectedRawFile(rawFile);
                     runInfoData.setRun(rawFile.getRuns().get(0));
 

@@ -58,6 +58,7 @@ public class SelectRawFilesPanel extends JPanel {
     private static final String MISSING_ASSOCIATION = "Missing Association";
     private static final String AUTOMATIC_ASSOCIATION = "System Proposed Association";
     private static final String EXISTING_ASSOCIATION = "Existing Association in Database";
+    private static final String NOT_INITIALIZED_ASSOCIATION = "Not Initialized Association";
 
     private static SelectRawFilesPanel m_singleton = null;
 
@@ -74,8 +75,9 @@ public class SelectRawFilesPanel extends JPanel {
     public static SelectRawFilesPanel getPanel(AbstractNode rootNode, XICDesignTree designTree) {
         if (m_singleton == null) {
             m_singleton = new SelectRawFilesPanel(designTree);
+            m_singleton.m_model.calculateMissingValues();
         }
-        
+
         if (m_singleton.m_model != null && m_singleton.m_model.getRowCount() > 0) {
             m_singleton.m_model.calculateMissingValues();
             m_singleton.m_dropZone.updateTable();
@@ -337,7 +339,7 @@ public class SelectRawFilesPanel extends JPanel {
 
                 XICRunNode runNode = m_model.getXICRunNode(convertRowIndexToModel(row), convertColumnIndexToModel(col));
 
-                if (runNode==null || runNode.isChanging()) {
+                if (runNode == null || runNode.isChanging()) {
                     return;
                 }
 
@@ -553,8 +555,8 @@ public class SelectRawFilesPanel extends JPanel {
         }
 
         public XICRunNode getXICRunNode(int row, int col) {
-                NodeModelRow nodeModelRow = m_dataList.get(row);
-                return nodeModelRow.m_run;
+            NodeModelRow nodeModelRow = m_dataList.get(row);
+            return nodeModelRow.m_run;
         }
 
         public XICBiologicalSampleAnalysisNode getXICBiologicalSampleAnalysisNode(int row) {
@@ -605,20 +607,21 @@ public class SelectRawFilesPanel extends JPanel {
             m_missingValuesMap.clear();
 
             int numberOfRows = this.getRowCount();
-            int numberOfColumns = this.getColumnCount();
 
             for (int i = 0; i < numberOfRows; i++) {
-                if (this.getValueAt(i, numberOfColumns - INDEX_DIFFERENCE).toString().contains("Unavailable Peaklist")) {
-                    //Do nothing
-                } else if (this.getValueAt(i, numberOfColumns - INDEX_DIFFERENCE).toString().contains("Multiple Raw Files")) {
 
-                    XICRunNode xicRunNode = getXICBiologicalSampleAnalysisNode(i).getXicRunNode();
+                NodeModelRow nodeModelRow = m_dataList.get(i);
 
-                    if (xicRunNode != null) {
+                XICRunNode currentXicNode = nodeModelRow.m_run;
 
-                        HashMap<String, RawFile> rawFiles = ((RunInfoData) xicRunNode.getData()).getPotentialRawFiles();
+                if (currentXicNode != null) {
 
-                        if (!rawFiles.isEmpty()) {
+                    RunInfoData info = (RunInfoData) currentXicNode.getData();
+
+                    if (info.getStatus() == RunInfoData.Status.MISSING) {
+                        HashMap<String, RawFile> rawFiles = info.getPotentialRawFiles();
+
+                        if (info.hasPotentialRawFiles()) {
 
                             HashSet<String> set = new HashSet<String>();
 
@@ -630,15 +633,10 @@ public class SelectRawFilesPanel extends JPanel {
                         } else {
                             m_missingValuesMap.put(i, new HashSet<String>());
                         }
-
                     }
 
-                } else if (this.getValueAt(i, numberOfColumns - INDEX_DIFFERENCE).toString().contains("Missing Raw File")) {
-                    XICBiologicalSampleAnalysisNode currentAnalysisNode = this.getXICBiologicalSampleAnalysisNode(i);
-                    HashSet<String> set = new HashSet<String>();
-                    set.add(MiscellaneousUtils.getFileName(currentAnalysisNode.getResultSet().getMsiSearch().getPeaklist().getPath().toLowerCase(), SUFFIX));
-                    m_missingValuesMap.put(i, set);
                 }
+                
             }
         }
 
@@ -691,6 +689,10 @@ public class SelectRawFilesPanel extends JPanel {
                     case LINKED_IN_DATABASE:
                         this.setIcon(IconManager.getIcon(IconManager.IconType.DATABASES_RELATION));
                         this.setToolTipText(EXISTING_ASSOCIATION);
+                        break;
+                    case NOT_INITIALIZED:
+                        this.setIcon(IconManager.getIcon(IconManager.IconType.DELETE));
+                        this.setToolTipText(NOT_INITIALIZED_ASSOCIATION);
                         break;
                 }
 

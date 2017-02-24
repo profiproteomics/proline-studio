@@ -16,7 +16,7 @@ public class RunInfoData extends AbstractData {
 
     public enum Status {
 
-        MISSING, USER_DEFINED, SYSTEM_PROPOSED, LAST_DEFINED, LINKED_IN_DATABASE
+        MISSING, USER_DEFINED, SYSTEM_PROPOSED, LAST_DEFINED, LINKED_IN_DATABASE, NOT_INITIALIZED
     }
 
     public Status m_status;
@@ -34,7 +34,7 @@ public class RunInfoData extends AbstractData {
     private HashMap<String, RawFile> m_potentialRawFileMap = null;
 
     public RunInfoData() {
-        m_status = Status.LINKED_IN_DATABASE;
+        m_status = Status.NOT_INITIALIZED;
     }
 
     public void setStatus(Status status) {

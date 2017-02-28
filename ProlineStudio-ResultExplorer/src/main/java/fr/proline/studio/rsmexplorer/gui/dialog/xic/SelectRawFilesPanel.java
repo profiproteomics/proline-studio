@@ -75,12 +75,6 @@ public class SelectRawFilesPanel extends JPanel {
     public static SelectRawFilesPanel getPanel(AbstractNode rootNode, XICDesignTree designTree) {
         if (m_singleton == null) {
             m_singleton = new SelectRawFilesPanel(designTree);
-            m_singleton.m_model.calculateMissingValues();
-        }
-
-        if (m_singleton.m_model != null && m_singleton.m_model.getRowCount() > 0) {
-            m_singleton.m_model.calculateMissingValues();
-            m_singleton.m_dropZone.updateTable();
         }
 
         m_singleton.setRootNode(rootNode);
@@ -232,7 +226,7 @@ public class SelectRawFilesPanel extends JPanel {
         m_table.setModel(m_model);
         m_table.getColumnModel().getColumn(FlatDesignTableModel.COLTYPE_ASSOCIATION_SOURCE).setCellRenderer(new LinkAssociationRenderer());
         tableScrollPane.setViewportView(m_table);
- 
+
         designTablePanel.add(tableScrollPane, c);
 
         panel.add(designTablePanel);
@@ -255,7 +249,7 @@ public class SelectRawFilesPanel extends JPanel {
         return panel;
     }
 
-    private void resetDropZonePanel() {
+    public void resetDropZonePanel() {
         if (m_dropZone != null) {
             m_dropZone.clearDropZone();
         }
@@ -409,19 +403,24 @@ public class SelectRawFilesPanel extends JPanel {
 
         private final ArrayList<NodeModelRow> m_dataList = new ArrayList<NodeModelRow>();
 
-        private HashMap<Integer, HashSet<String>> m_missingValuesMap = new HashMap<Integer, HashSet<String>>();
+        private final HashMap<Integer, HashSet<String>> m_missingValues;
 
         private XICDesignTree m_tree;
 
         public FlatDesignTableModel(XICDesignTree tree) {
             m_tree = tree;
+            m_missingValues = new HashMap<Integer, HashSet<String>>();
         }
 
         public void setData(AbstractNode rootNode) {
             m_dataList.clear();
             parseTree(rootNode);
             fireTableDataChanged();
-            calculateMissingValues();
+            
+            if (m_singleton.m_model != null && m_singleton.m_model.getRowCount() > 0) {
+                m_singleton.m_dropZone.updateTable();
+            }
+
         }
 
         private void parseTree(AbstractNode node) {
@@ -604,7 +603,7 @@ public class SelectRawFilesPanel extends JPanel {
 
         public void calculateMissingValues() {
 
-            m_missingValuesMap.clear();
+            m_missingValues.clear();
 
             int numberOfRows = this.getRowCount();
 
@@ -622,27 +621,27 @@ public class SelectRawFilesPanel extends JPanel {
                         HashMap<String, RawFile> rawFiles = info.getPotentialRawFiles();
 
                         HashSet<String> set = new HashSet<String>();
-                        
+
                         if (info.hasPotentialRawFiles()) {
 
                             for (String key : rawFiles.keySet()) {
                                 set.add(MiscellaneousUtils.getFileName(key.toLowerCase(), SUFFIX));
                             }
-                            
-                        } else {                  
-                            set.add(MiscellaneousUtils.getFileName(info.getPeakListPath().toLowerCase(), SUFFIX));                     
+
+                        } else {
+                            set.add(MiscellaneousUtils.getFileName(info.getPeakListPath().toLowerCase(), SUFFIX));
                         }
-                        
-                        m_missingValuesMap.put(i, set);
+
+                        m_missingValues.put(i, set);
                     }
 
                 }
-                
+
             }
         }
 
         public HashMap<Integer, HashSet<String>> getMissingValues() {
-            return m_missingValuesMap;
+            return m_missingValues;
         }
 
         @Override

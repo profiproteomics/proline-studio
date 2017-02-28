@@ -9,7 +9,9 @@ import fr.proline.studio.rsmexplorer.gui.dialog.xic.AssociationWrapper.Associati
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
-import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.DefaultListModel;
@@ -66,24 +68,26 @@ public class XICDropZoneInfo extends JPanel {
         m_label = new JLabel();
         m_label.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 10));
         this.add(m_label, BorderLayout.SOUTH);
-        
-        clearInfo();
 
     }
 
-    public void updateInfo(ArrayList<AssociationWrapper> associations) {
+    public void updateInfo(HashMap<String, AssociationWrapper> associations) {
         clearInfo();
 
-        for (int i = 0; i < associations.size(); i++) {
-            m_model.addElement(associations.get(i));
-            if (associations.get(i).getAssociationType() == AssociationWrapper.AssociationType.ASSOCIATED) {
+        Iterator it = associations.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry pair = (Map.Entry) it.next();
+
+            m_model.addElement((AssociationWrapper) pair.getValue());
+
+            if (((AssociationWrapper) pair.getValue()).getAssociationType() == AssociationWrapper.AssociationType.ASSOCIATED) {
                 m_associatedCounter++;
             } else {
                 m_notAssociatedCounter++;
             }
         }
-        
-        m_label.setText(String.valueOf(m_model.size())+" files dropped. "+m_associatedCounter+" files were associated.");
+
+        m_label.setText(String.valueOf(m_model.size()) + " files dropped. " + m_associatedCounter + " files were associated.");
     }
 
     public void clearInfo() {

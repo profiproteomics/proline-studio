@@ -74,8 +74,12 @@ public class CreateXICDialog extends DefaultDialog {
     public static CreateXICDialog getDialog(Window parent) {
         if (m_singletonDialog == null) {
             m_singletonDialog = new CreateXICDialog(parent);
+        }else{
+            m_singletonDialog.m_selectRawFilePanel.resetDropZonePanel();
         }
 
+        
+        
         return m_singletonDialog;
     }
 

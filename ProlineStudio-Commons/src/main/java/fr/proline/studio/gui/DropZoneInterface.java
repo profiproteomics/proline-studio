@@ -5,7 +5,7 @@
  */
 package fr.proline.studio.gui;
 
-import java.util.Hashtable;
+import java.util.HashMap;
 
 /**
  *
@@ -21,7 +21,7 @@ public interface DropZoneInterface {
     
     public void removeAllSamples();
     
-    public Hashtable getAllSamples();
+    public HashMap getAllSamples();
     
     public void clearDropZone();
     

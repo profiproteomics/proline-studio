@@ -14,10 +14,8 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Hashtable;
 import java.util.Iterator;
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
@@ -30,19 +28,23 @@ import javax.swing.JTable;
  */
 public class XICDropZone extends JPanel implements DropZoneInterface {
 
-    private final Hashtable<String, File> m_samplesTable;
+    private final HashMap<String, File> m_droppedFiles;
     private FlatDesignTableModel m_model;
     private final String[] suffix = {".raw", ".mzdb", ".wiff"};
     private XICDropZoneInfo m_info;
     private final TreeFileChooserTransferHandler m_transferHandler;
+    private final HashMap<String, AssociationWrapper> m_associations;
 
     public XICDropZone(TreeFileChooserTransferHandler transferHandler) {
         m_transferHandler = transferHandler;
-        m_samplesTable = new Hashtable<String, File>();
-        this.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-        this.setToolTipText("Drag your .mzdb files & folders in the drop zone");
-        this.setLayout(new BorderLayout());
-        this.add(new JLabel("<html><center><font size='6' color='green'>Drop Zone</font><br><font size='4' color='black'>Drop your .mzdb files & folders here</font></center></html>", IconManager.getIcon(IconManager.IconType.DOCUMENT_LARGE), JLabel.CENTER), BorderLayout.CENTER);
+        
+        m_droppedFiles = new HashMap<String, File>();
+        m_associations = new HashMap<String, AssociationWrapper>();
+        
+        setBorder(BorderFactory.createLineBorder(Color.BLACK));
+        setToolTipText("Drag your .mzdb files & folders in the drop zone");
+        setLayout(new BorderLayout());
+        add(new JLabel("<html><center><font size='6' color='green'>Drop Zone</font><br><font size='4' color='black'>Drop your .mzdb files & folders here</font></center></html>", IconManager.getIcon(IconManager.IconType.DOCUMENT_LARGE), JLabel.CENTER), BorderLayout.CENTER);
         m_transferHandler.addComponent(this);
         this.setTransferHandler(m_transferHandler);
     }
@@ -71,54 +73,70 @@ public class XICDropZone extends JPanel implements DropZoneInterface {
             HashSet<String> currentHashSet = shortages.get(key);
 
             for (String s : currentHashSet) {
-                if (m_samplesTable.containsKey(s)) {
+                if (m_droppedFiles.containsKey(s)) {
                     ArrayList<File> fileList = new ArrayList<>();
-                    fileList.add(m_samplesTable.get(s));
+                    fileList.add(m_droppedFiles.get(s));
                     m_model.setFiles(fileList, key);
                 }
             }
 
         }
         
-    }
-
-    private ArrayList<AssociationWrapper> getAssociationWrappers() {
-        ArrayList<AssociationWrapper> filenames = new ArrayList<AssociationWrapper>();
-
-        HashSet<String> totalFileNames = new HashSet<String>();
-
-        HashMap<Integer, HashSet<String>> shortages = m_model.getMissingValues();
+        updateDropZoneInfo();
         
-        Iterator<Integer> keyIterator = shortages.keySet().iterator();
+    }
+
+    private void updateAssociations() {
+
+        HashSet<String> totalMissingValues = new HashSet<String>();
+
+        HashMap<Integer, HashSet<String>> missingValues = m_model.getMissingValues();
+        
+        Iterator<Integer> keyIterator = missingValues.keySet().iterator();
         while (keyIterator.hasNext()) {
-            Integer key = keyIterator.next();
-            HashSet<String> currentHashSet = shortages.get(key);
+            HashSet<String> currentHashSet = missingValues.get(keyIterator.next());
             for (String s : currentHashSet) {
-                totalFileNames.add(s);
+                totalMissingValues.add(s);
             }
         }
 
-        Enumeration<String> enumKey = m_samplesTable.keys();
-        while (enumKey.hasMoreElements()) {
-            String key = enumKey.nextElement();
-            if (!totalFileNames.contains(key)) {
-                filenames.add(new AssociationWrapper(key, AssociationWrapper.AssociationType.NOT_ASSOCIATED));
+        Iterator<String> it = m_droppedFiles.keySet().iterator();
+        while (it.hasNext()) {
+            String key = it.next();
+            
+            AssociationWrapper.AssociationType associationType;
+            
+            if (!totalMissingValues.contains(key)) {
+                associationType = AssociationWrapper.AssociationType.NOT_ASSOCIATED;
             }else{
-                filenames.add(new AssociationWrapper(key, AssociationWrapper.AssociationType.ASSOCIATED));
+                associationType = AssociationWrapper.AssociationType.ASSOCIATED;
+            }
+            
+            if(m_associations.containsKey(key)){
+                if(m_associations.get(key).getAssociationType()==AssociationWrapper.AssociationType.NOT_ASSOCIATED){
+                    m_associations.get(key).setAssociationType(associationType);
+                }
+            }else{
+                m_associations.put(key, new AssociationWrapper(key, associationType));
             }
         }
-        return filenames;
+    }
+    
+    public HashMap<String, AssociationWrapper> getAssociations(){
+        return m_associations;
     }
 
+    @Override
     public void removeAllSamples() {
-        if (m_samplesTable != null) {
-            m_samplesTable.clear();
+        if (m_droppedFiles != null) {
+            m_droppedFiles.clear();
         }
     }
 
-    public Hashtable<String, File> getAllSamples() {
-        if (m_samplesTable != null) {
-            return m_samplesTable;
+    @Override
+    public HashMap<String, File> getAllSamples() {
+        if (m_droppedFiles != null) {
+            return m_droppedFiles;
         } else {
             return null;
         }
@@ -127,16 +145,27 @@ public class XICDropZone extends JPanel implements DropZoneInterface {
     @Override
     public void addSample(Object sample) {
         if (sample instanceof File) {
-            if (!m_samplesTable.containsKey(MiscellaneousUtils.getFileName(((File) sample).toString().toLowerCase(), suffix))) {
-                m_samplesTable.put(MiscellaneousUtils.getFileName(((File) sample).toString().toLowerCase(), suffix), (File) sample);
+            if (!m_droppedFiles.containsKey(MiscellaneousUtils.getFileName(((File) sample).toString().toLowerCase(), suffix))) {
+                m_droppedFiles.put(MiscellaneousUtils.getFileName(((File) sample).toString().toLowerCase(), suffix), (File) sample);
             }
         }
     }
 
     @Override
     public void removeSample(Object key) {
-        if (m_samplesTable != null) {
-            m_samplesTable.remove(key);
+        if (m_droppedFiles != null) {
+            m_droppedFiles.remove(key);
+        }
+    }
+    
+    public XICDropZoneInfo getDropZoneInfo(){
+        return m_info;
+    }
+    
+    public void updateDropZoneInfo(){
+        if(m_info!=null){
+            updateAssociations();
+            m_info.updateInfo(getAssociations());
         }
     }
 
@@ -151,18 +180,14 @@ public class XICDropZone extends JPanel implements DropZoneInterface {
             if (m_model != null) {
                 updateTable();
             }
-
-            
-            if (m_info != null) {
-                m_info.updateInfo(this.getAssociationWrappers());
-            }
             
         }
     }
 
     @Override
     public void clearDropZone() {
-        m_samplesTable.clear();
+        m_droppedFiles.clear();
+        m_associations.clear();
         m_info.clearInfo();
     }
 }

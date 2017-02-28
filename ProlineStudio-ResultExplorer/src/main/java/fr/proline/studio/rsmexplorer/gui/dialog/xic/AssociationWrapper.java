@@ -5,8 +5,6 @@
  */
 package fr.proline.studio.rsmexplorer.gui.dialog.xic;
 
-import java.io.File;
-
 /**
  *
  * @author AK249877
@@ -18,7 +16,7 @@ public class AssociationWrapper {
         ASSOCIATED, NOT_ASSOCIATED
     }
     
-    private final AssociationType m_associationType;
+    private AssociationType m_associationType;
     private final String m_path;
     
     public AssociationWrapper(String path, AssociationType associationType){
@@ -32,6 +30,10 @@ public class AssociationWrapper {
     
     public AssociationType getAssociationType(){
         return m_associationType;
+    }
+    
+    public void setAssociationType(AssociationType associationType){
+        m_associationType = associationType;
     }
     
 }

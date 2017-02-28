@@ -373,12 +373,6 @@ public class XICTransferHandler extends TransferHandler {
                             // create the new node
                             XICBiologicalSampleAnalysisNode sampleAnalysisNode = new XICBiologicalSampleAnalysisNode(currentSampleList.get(i).getData());
 
-                            // put a Run node in it
-                            XICRunNode runNode = new XICRunNode(new RunInfoData(), m_tree);
-
-                            //sampleAnalysisNode.add(runNode);
-                            runNode.init(currentSampleList.get(i).getDataset(), treeModel, null);
-
                             // add to new parent
                             treeModel.insertNodeInto(sampleAnalysisNode, biologicalSampleNode, childIndex);
                             childIndex++;
@@ -394,11 +388,6 @@ public class XICTransferHandler extends TransferHandler {
 
                         // create the new node
                         XICBiologicalSampleAnalysisNode sampleAnalysisNode = new XICBiologicalSampleAnalysisNode(datasetList.get(i).getData());
-
-                        // put a Run node in it
-                        XICRunNode runNode = new XICRunNode(new RunInfoData(), m_tree);
-                        //sampleAnalysisNode.add(runNode);
-                        runNode.init(datasetList.get(i).getDataset(), treeModel, null);
 
                         // add to new parent
                         treeModel.insertNodeInto(sampleAnalysisNode, dropRSMNode, childIndex);
@@ -427,11 +416,6 @@ public class XICTransferHandler extends TransferHandler {
 
                         // create the new node
                         XICBiologicalSampleAnalysisNode sampleAnalysisNode = new XICBiologicalSampleAnalysisNode(node.getData());
-
-                        // put a Run node in it
-                        XICRunNode runNode = new XICRunNode(new RunInfoData(), m_tree);
-                        //sampleAnalysisNode.add(runNode);
-                        runNode.init(node.getDataset(), treeModel, null);
 
                         // add to new parent
                         treeModel.insertNodeInto(sampleAnalysisNode, dropRSMNode, childIndex);

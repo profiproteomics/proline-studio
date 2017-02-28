@@ -80,9 +80,6 @@ public class XICRunNode extends AbstractNode {
                     if (success) {
                         if (!rawfileFounds.isEmpty()) {
 
-                            setIsChanging(false);
-                            m_treeModel.nodeChanged(xicRunNode);
-
                             RawFile rawFile = rawfileFounds.entrySet().iterator().next().getValue();
 
                             RunInfoData runInfoData = ((RunInfoData) getData());
@@ -90,6 +87,9 @@ public class XICRunNode extends AbstractNode {
                             runInfoData.setRun(runOut[0]);
 
                             runInfoData.setStatus(RunInfoData.Status.LINKED_IN_DATABASE);
+                            
+                            setIsChanging(false);
+                            m_treeModel.nodeChanged(xicRunNode);
 
                         } else {
                             //recreate a raw file from msi
@@ -140,6 +140,10 @@ public class XICRunNode extends AbstractNode {
 
                                                 }
                                         }
+                                        
+                                        setIsChanging(false);
+                                        m_treeModel.nodeChanged(xicRunNode);
+                                        
                                     }
                                 }
                             };

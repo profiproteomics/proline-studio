@@ -64,13 +64,13 @@ public class XICDropZone extends JPanel implements DropZoneInterface {
         
         m_model.calculateMissingValues();
         
-        HashMap<Integer, HashSet<String>> shortages = m_model.getMissingValues();
-        Iterator<Integer> keyIterator = shortages.keySet().iterator();
+        HashMap<Integer, HashSet<String>> missingValues = m_model.getMissingValues();
+        Iterator<Integer> keyIterator = missingValues.keySet().iterator();
         while (keyIterator.hasNext()) {
 
             Integer key = keyIterator.next();
 
-            HashSet<String> currentHashSet = shortages.get(key);
+            HashSet<String> currentHashSet = missingValues.get(key);
 
             for (String s : currentHashSet) {
                 if (m_droppedFiles.containsKey(s)) {

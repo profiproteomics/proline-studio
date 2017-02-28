@@ -695,11 +695,13 @@ public class CreateXICDialog extends DefaultDialog {
                 @Override
                 public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
                     if (success) {
-                        displayDefineRawFiles();
+                        
 
                         for (Map.Entry<Long, DataSetNode> entry : spectraNodesPerRsId.entrySet()) {
                             ((XICBiologicalSampleAnalysisNode) entry.getValue()).setVerificationStatus(XICBiologicalSampleAnalysisNode.SpectrumVerificationStatus.SUCCESSFULLY_VERIFIED);
                         }
+                        
+                        displayDefineRawFiles();
 
                     } else {
                         for (Map.Entry<Long, DataSetNode> entry : spectraNodesPerRsId.entrySet()) {

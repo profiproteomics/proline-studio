@@ -13,6 +13,8 @@ import fr.proline.studio.rsmexplorer.TaskLogTopComponent;
 import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
 import fr.proline.studio.rsmexplorer.gui.calc.DataAnalyzerPanel;
 import java.awt.Window;
+import java.io.File;
+import java.io.IOException;
 import java.util.Iterator;
 import java.util.Set;
 import javax.swing.*;
@@ -41,7 +43,11 @@ public class ServerConnectionDialog extends ConnectionDialog {
     private ServerConnectionDialog(Window parent) {
         super(parent, "Server Connection", " Server Parameter ", "Server Host :");
 
-        setHelpURL("http://biodev.extra.cea.fr/docs/proline/doku.php?id=how_to:studio:startsession");
+        try {
+            setHelpURL(new File(".").getCanonicalPath() + File.separatorChar + "Documentation" + File.separatorChar + "Proline_UserGuide_1.4RC1.docx.html#id.1pxezwc");
+        } catch (IOException ex) {
+            ;
+        }
 
         setButtonVisible(BUTTON_DEFAULT, true);
 
@@ -79,9 +85,9 @@ public class ServerConnectionDialog extends ConnectionDialog {
                     if (topComponent instanceof DataBoxViewerTopComponent) {
                         DataBoxViewerTopComponent databoxComponent = (DataBoxViewerTopComponent) topComponent;
                         WindowBox winBox = databoxComponent.getWindowBox();
-                        if(winBox.getEntryBox() instanceof DataboxDataAnalyzer){
+                        if (winBox.getEntryBox() instanceof DataboxDataAnalyzer) {
                             DataboxDataAnalyzer analyzer = (DataboxDataAnalyzer) winBox.getEntryBox();
-                            if(analyzer.getPanel() instanceof DataAnalyzerPanel){
+                            if (analyzer.getPanel() instanceof DataAnalyzerPanel) {
                                 DataAnalyzerPanel panel = (DataAnalyzerPanel) analyzer.getPanel();
                                 panel.clearDataAnalyzerPanel();
                             }
@@ -89,7 +95,7 @@ public class ServerConnectionDialog extends ConnectionDialog {
                     }
 
                     topComponent.close();
-                    
+
                 }
             }
 

@@ -5,6 +5,7 @@ import fr.proline.studio.dam.data.RunInfoData;
 import fr.proline.studio.gui.DefaultDialog;
 import java.awt.*;
 import java.io.File;
+import java.io.IOException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -27,7 +28,11 @@ public class SelectRawFileDialog extends DefaultDialog {
 
         setTitle("Select a Raw File");
 
-        setHelpURL("http://biodev.extra.cea.fr/docs/proline/doku.php?id=how_to:studio:xic");
+        try {
+            setHelpURL(new File(".").getCanonicalPath() + File.separatorChar + "Documentation" + File.separatorChar + "Proline_UserGuide_1.4RC1.docx.html#id.3cqmetx");
+        } catch (IOException ex) {
+            ;
+        }
 
         setInternalComponent(createInternalPanel());
 
@@ -78,7 +83,7 @@ public class SelectRawFileDialog extends DefaultDialog {
             for (Map.Entry<String, RawFile> entry : rawFileMap.entrySet()) {
                 String key = entry.getKey();
                 Object value = entry.getValue();
-                
+
                 model.addElement(value);
                 if ((rawFileToAdd != null) && value.equals(rawFileToAdd)) {
                     rawFileInList = true;

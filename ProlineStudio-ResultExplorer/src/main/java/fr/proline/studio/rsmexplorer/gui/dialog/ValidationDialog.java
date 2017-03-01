@@ -32,6 +32,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -114,8 +115,11 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
 
         setTitle("Identification Validation");
 
-        setHelpURL("http://biodev.extra.cea.fr/docs/proline/doku.php?id=how_to:studio:rsvalidation");
-
+        try {
+            setHelpURL(new File(".").getCanonicalPath() + File.separatorChar + "Documentation" + File.separatorChar + "Proline_UserGuide_1.4RC1.docx.html#id.46r0co2");
+        } catch (IOException ex) {
+            ;
+        }
         setButtonVisible(BUTTON_LOAD, true);
         setButtonVisible(BUTTON_SAVE, true);
 

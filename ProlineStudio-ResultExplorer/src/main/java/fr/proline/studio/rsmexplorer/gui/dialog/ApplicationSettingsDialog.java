@@ -13,6 +13,8 @@ import fr.proline.studio.parameter.StringParameter;
 import fr.proline.studio.rsmexplorer.actions.identification.ImportManager;
 import fr.proline.studio.table.DecoratedTable;
 import java.awt.*;
+import java.io.File;
+import java.io.IOException;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.prefs.BackingStoreException;
@@ -73,7 +75,11 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
         setMinimumSize(new Dimension(1024, 360));
         setResizable(true);
 
-        setHelpURL("https://docs.google.com/document/d/13I1_sHvSoUIZAtBt_gmB7ipyUS8lhwwfG3zwv0d5c1A/edit#heading=h.eb8nfjv41vkz");
+        try {
+            setHelpURL(new File(".").getCanonicalPath() + File.separatorChar + "Documentation" + File.separatorChar + "Proline_UserGuide_1.4RC1.docx.html#h.eb8nfjv41vkz");
+        } catch (IOException ex) {
+            ;
+        }
 
         setButtonVisible(BUTTON_CANCEL, true);
         setButtonName(BUTTON_OK, "OK");

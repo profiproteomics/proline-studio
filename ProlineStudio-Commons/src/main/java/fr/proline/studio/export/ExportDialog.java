@@ -77,7 +77,7 @@ public class ExportDialog extends DefaultDialog {
         m_singletonExcelDialog.m_exportName = exportName;
 
         m_singletonExcelDialog.updateExportDecoration();
-        
+
         return m_singletonExcelDialog;
     }
 
@@ -88,7 +88,7 @@ public class ExportDialog extends DefaultDialog {
 
         m_singletonImageDialog.m_panel = panel;
         m_singletonImageDialog.m_exportName = exportName;
-        
+
         return m_singletonImageDialog;
     }
 
@@ -127,7 +127,11 @@ public class ExportDialog extends DefaultDialog {
 
         setTitle("Export");
 
-        setHelpURL("http://biodev.extra.cea.fr/docs/proline/doku.php?id=how_to:studio:exportdata");
+        try {
+            setHelpURL(new File(".").getCanonicalPath() + File.separatorChar + "Documentation" + File.separatorChar + "Proline_UserGuide_1.4RC1.docx.html#id.37m2jsg");
+        } catch (IOException ex) {
+            ;
+        }
 
         String defaultExportPath;
         Preferences preferences = NbPreferences.root();
@@ -136,12 +140,11 @@ public class ExportDialog extends DefaultDialog {
         } else { // IMAGE
             defaultExportPath = preferences.get("DefaultImageExportPath", System.getProperty("user.home"));
         }
-        
+
         setInternalComponent(createExportPanel(defaultExportPath));
 
         setButtonName(BUTTON_OK, (m_exportType == ExporterFactory.EXPORT_IMAGE) ? "Export Image" : "Export");
 
-        
         m_fchooser = new JFileChooser(new File(defaultExportPath));
         m_fchooser.setMultiSelectionEnabled(false);
 
@@ -151,9 +154,9 @@ public class ExportDialog extends DefaultDialog {
         m_decoratedPanel = new JPanel();
         m_decoratedPanel.setBorder(BorderFactory.createTitledBorder("Export Decorated"));
         m_decoratedPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
-        
+
         m_parameterList = new ParameterList(PARAMETER_LIST_NAME);
-        
+
         m_exportParameter = new BooleanParameter("Export_Decorated", "Export Decorated", JCheckBox.class, true);
         m_parameterList.add(m_exportParameter);
 
@@ -294,9 +297,9 @@ public class ExportDialog extends DefaultDialog {
     }
 
     public Boolean exportDecorated() {
-        if(m_exportType == ExporterFactory.EXPORT_TABLE){
-            return (boolean)m_exportParameter.getObjectValue();
-        }else{
+        if (m_exportType == ExporterFactory.EXPORT_TABLE) {
+            return (boolean) m_exportParameter.getObjectValue();
+        } else {
             return null;
         }
     }

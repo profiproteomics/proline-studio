@@ -9,6 +9,7 @@ import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.io.File;
 import java.net.URL;
 import java.util.prefs.Preferences;
 import javax.swing.*;
@@ -206,9 +207,8 @@ public class HelpDialog extends DefaultDialog implements MouseListener, MouseMot
             HelpInfo helpInfo = (HelpInfo) useObject;
             String url = helpInfo.getUrl();
             if (Desktop.isDesktopSupported()) { // JDK 1.6.0
-
                 try {
-                    Desktop.getDesktop().browse(new URL(MiscellaneousUtils.convertURLToCurrentHelp(url)).toURI());
+                    Desktop.getDesktop().browse(MiscellaneousUtils.createRedirectTempFile(new File(".").getCanonicalPath() + File.separatorChar + "Documentation" + File.separatorChar + "Proline_UserGuide_1.4RC1.docx.html" + url));
                 } catch (Exception ex) {
                     LoggerFactory.getLogger("ProlineStudio.ResultExplorer").error(getClass().getSimpleName() + " failed", ex);
                 }

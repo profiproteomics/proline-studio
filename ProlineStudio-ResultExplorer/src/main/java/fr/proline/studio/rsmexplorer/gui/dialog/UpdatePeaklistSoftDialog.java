@@ -44,11 +44,6 @@ public class UpdatePeaklistSoftDialog extends DefaultDialog {
         super(parent, Dialog.ModalityType.APPLICATION_MODAL);
 
         setTitle("Update Spectrum Parameters");
-       
-//        setHelpURL("http://biodev.extra.cea.fr/docs/proline/doku.php?id=how_to:studio:importmascot");
-        
-//        setButtonVisible(BUTTON_LOAD, true);
-//        setButtonVisible(BUTTON_SAVE, true);
         
         setResizable(true);
 

@@ -38,7 +38,6 @@ import fr.proline.studio.gui.InfoDialog;
 import fr.proline.studio.settings.FilePreferences;
 import org.openide.windows.WindowManager;
 
-
 /**
  *
  * @author AW
@@ -65,34 +64,27 @@ public class CustomExportDialog extends DefaultDialog implements CollapseListene
 
     private static final FileNameExtensionFilter FILTER_EXCEL = new FileNameExtensionFilter("Excel File (.xlsx)", "xlsx");
     private static final FileNameExtensionFilter FILTER_TSV = new FileNameExtensionFilter("Tabulation Separated Values (.tsv)", "tsv");
-    
+
     private static final String DEFAULT_SERVER_CONFIG_KEY = "DEFAULT_SERVER_CONFIG";
     private static final String CURRENT_CONFIG_KEY = "CURRENT_CONFIG";
 
-    
     private static CustomExportDialog m_singletonDialog = null;
 
     private JTextField m_fileTextField;
     private JComboBox m_exporTypeCombobox;
 
-
-
     // true if the user has to choose a file, false if it's a directory, in case of tsv or multi export
     private static boolean m_fileExportMode;
-
 
     private final JFileChooser m_fchooser;
     private final JFileChooser m_exportFchooser;
 
     private ProgressTask m_task = null;
 
-
     // created by AW:
     private JTabbedPane m_tabbedPane;
 
     private String m_configFile = "";
-
-
 
     //---
     private JComboBox comboBox_ProteinSets;
@@ -104,7 +96,6 @@ public class CustomExportDialog extends DefaultDialog implements CollapseListene
     public ExportConfig m_exportConfig;
     private ExportConfig m_exportDefaultConfig;
 
-
     protected boolean m_updateInProgress = true; // indicate when the table is built (to avoid calling event handler on every table update)
     public HashMap<String, String> m_tabTitleIdHashMap; // <title,id> keeps track of id/title for tabs, in case of renaming.
     public HashMap<String, String> m_presentationHashMap; // sheetId,presentation
@@ -114,12 +105,10 @@ public class CustomExportDialog extends DefaultDialog implements CollapseListene
     private JComboBox comboBox_exportProfile;
 
     /*private String m_previousConfigStr = null;
-    private String m_defaultConfigStr = null;*/
-    
+     private String m_defaultConfigStr = null;*/
     private HashMap<String, String> m_configServerKey2configMap = new HashMap<>();
     private String m_currentServerConfigStr = null;
     private String m_previousServerConfigStr = null;
-
 
     public static CustomExportDialog getDialog(Window parent, boolean fileExportMode) {
         m_fileExportMode = fileExportMode;
@@ -128,7 +117,6 @@ public class CustomExportDialog extends DefaultDialog implements CollapseListene
         }
         return m_singletonDialog;
     }
-
 
     public void setTask(DefaultDialog.ProgressTask task) {
         m_task = task;
@@ -140,43 +128,37 @@ public class CustomExportDialog extends DefaultDialog implements CollapseListene
         setButtonVisible(BUTTON_LOAD, true);
         setButtonVisible(BUTTON_SAVE, true);
         setButtonEnabled(BUTTON_SAVE, false);
-        
+
         setResizable(true);
-        
+
         m_fileExportMode = fileExportMode;
 
         setTitle("Export");
-        
-        setButtonVisible(BUTTON_HELP, true);
-        setHelpURL("http://biodev.extra.cea.fr/docs/proline/doku.php?id=how_to:studio:exportdata");
 
+        setButtonVisible(BUTTON_HELP, true);
+        try {
+            setHelpURL(new File(".").getCanonicalPath() + File.separatorChar + "Documentation" + File.separatorChar + "Proline_UserGuide_1.4RC1.docx.html#id.37m2jsg");
+        } catch (IOException ex) {
+            ;
+        }
 
         Preferences preferences = NbPreferences.root();
-        String defaultExportPath = preferences.get("DefaultExcelExportPath", System.getProperty("user.home" ));
-        
+        String defaultExportPath = preferences.get("DefaultExcelExportPath", System.getProperty("user.home"));
+
         //m_lastDefaultExportConfig =  preferences.get("DefaultExportConfig", null);
         //m_lastExportConfig =  preferences.get("ExportConfig", null);
-        
-        
         m_tabTitleIdHashMap = new HashMap<>(); // this is used to store tab id/tab title matching
 
         setInternalComponent(createCustomExportPanel(defaultExportPath));
 
         setButtonName(BUTTON_OK, "Export");
 
-        
-        
-
         m_fchooser = new JFileChooser(new File(defaultExportPath));
         m_exportFchooser = new JFileChooser(new File(defaultExportPath));
-
-
 
         m_fchooser.addChoosableFileFilter(FILTER_EXCEL);
         m_fchooser.addChoosableFileFilter(FILTER_TSV);
 
-                        
-        
         m_fchooser.setMultiSelectionEnabled(false);
         m_exportFchooser.setMultiSelectionEnabled(false);
         FileNameExtensionFilter filterJson = new FileNameExtensionFilter("Custom Export Config (." + JSON_EXTENSION + ")", JSON_EXTENSION);
@@ -196,29 +178,29 @@ public class CustomExportDialog extends DefaultDialog implements CollapseListene
         // decode json 
         m_exportConfig = new ExportConfig();
         String jsonString = "";
-        
+
         String path = m_configFile.trim();
         Path filePath = Paths.get(m_configFile.trim());
-        
+
         FilePreferences filePreferences = new FilePreferences(new File(path), null, "");
         String fileDefaultServerConfig = filePreferences.get(DEFAULT_SERVER_CONFIG_KEY, null);
-        
+
         boolean showWarning = false;
-        
+
         if (fileDefaultServerConfig == null) {
             // old file format : json config directly saved in file
-            
+
             try {
                 jsonString = new String(Files.readAllBytes(filePath));
             } catch (IOException e) {
 
                 logger.error("Error while loading config " + e);
             }
-            
+
             showWarning = true;
         } else {
             jsonString = filePreferences.get(CURRENT_CONFIG_KEY, null);
-            
+
             showWarning = (fileDefaultServerConfig.compareTo(m_currentServerConfigStr) != 0);
         }
 
@@ -227,7 +209,7 @@ public class CustomExportDialog extends DefaultDialog implements CollapseListene
             String messageHashMapJsonString = jsonString;
             m_exportConfig = gson.fromJson(messageHashMapJsonString, m_exportConfig.getClass());
         }
-        
+
         if (showWarning) {
             InfoDialog errorDialog = new InfoDialog(WindowManager.getDefault().getMainWindow(), InfoDialog.InfoType.WARNING, "Warning", "The version of the Export Settings file does not correspond. It could lead to an error during the export.");
             errorDialog.setButtonVisible(InfoDialog.BUTTON_CANCEL, false);
@@ -313,7 +295,7 @@ public class CustomExportDialog extends DefaultDialog implements CollapseListene
     }
 
     private void fillExportFormatTable(ExportConfig defaultParam, ExportConfig param) {
-		//reset panes:
+        //reset panes:
 
         m_updateInProgress = true;
         m_tabbedPane.removeAll();
@@ -335,16 +317,15 @@ public class CustomExportDialog extends DefaultDialog implements CollapseListene
                     m_tabbedPane.addTab(null, tablePanel);
                     CheckboxTabPanel closableTabPanel = new CheckboxTabPanel(m_tabbedPane, param.sheets[i].title, param.sheets[i].id);
                     closableTabPanel.setSelected(true);
-                    m_tabbedPane.setTabComponentAt(m_tabbedPane.getTabCount()-1, closableTabPanel);
-                    
-                    
+                    m_tabbedPane.setTabComponentAt(m_tabbedPane.getTabCount() - 1, closableTabPanel);
+
                     m_presentationHashMap.put(param.sheets[i].id, param.sheets[i].presentation);
-					// put id in tooltip in order to find the tab title from the tooltip even if renamed.
+                    // put id in tooltip in order to find the tab title from the tooltip even if renamed.
                     // TODO: find a better way...
                     //m_tabbedPane.setToolTipTextAt(i, param.sheets[i].id /*"Right click to Enable/Disable"*/);
                     addedTabs.add(param.sheets[i].id);
                     tablePanel.setLayout(new BorderLayout(0, 0));
-					// read fields to fill in jtable into this tabbed pane
+                    // read fields to fill in jtable into this tabbed pane
 
                     JScrollPane tableScrollPane = new JScrollPane();
                     tableScrollPane.getViewport().setBackground(Color.white);
@@ -402,7 +383,7 @@ public class CustomExportDialog extends DefaultDialog implements CollapseListene
 					// ---add ability to enable/disable individual tabs
                     //				m_tabbedPane.setEnabledAt(i, defaultParam.sheets[i].default_displayed); // true if from a saved file also
                     //m_tabbedPane.setToolTipTextAt(i, "Right click to Enable/Disable");
-					// now add the fields
+                    // now add the fields
                     // add fields contained both in param and defaultparam
                     ArrayList<String> defaultFieldsList = getFieldsFromParamSheet(defaultParam.sheets, param.sheets[i].id);
                     ArrayList<String> addedFieldsList = new ArrayList<>();// to know which fields have already been added
@@ -439,35 +420,35 @@ public class CustomExportDialog extends DefaultDialog implements CollapseListene
             }
         }
 
-	// now add the remaining default sheets that are not already added.
+        // now add the remaining default sheets that are not already added.
         for (int i = 0; i < defaultParam.sheets.length; i++) {
 
             if (!addedTabs.contains(defaultParam.sheets[i].id)) {
                 // add the missing tab
                 JPanel tablePanel = new JPanel();
                 m_tabbedPane.addTab(null, tablePanel);
-                int tabIndex = m_tabbedPane.getTabCount()-1;
-                
-                CheckboxTabPanel closableTabPanel =  new CheckboxTabPanel(m_tabbedPane, defaultParam.sheets[i].title, defaultParam.sheets[i].id);
+                int tabIndex = m_tabbedPane.getTabCount() - 1;
+
+                CheckboxTabPanel closableTabPanel = new CheckboxTabPanel(m_tabbedPane, defaultParam.sheets[i].title, defaultParam.sheets[i].id);
                 m_tabbedPane.setTabComponentAt(tabIndex, closableTabPanel);
-                
+
                 m_presentationHashMap.put(defaultParam.sheets[i].id, defaultParam.sheets[i].presentation);
-				// put id in tooltip in order to find the tab title from the tooltip even if renamed.
+                // put id in tooltip in order to find the tab title from the tooltip even if renamed.
                 // TODO: find a better way...
                 //m_tabbedPane.setToolTipTextAt(tabIndex, defaultParam.sheets[i].id /*"Right click to Enable/Disable"*/);
 
                 boolean enabled;
                 if (param != null) {
                     enabled = false; // disable default not saved tab
-                    
+
                 } else {
                     enabled = defaultParam.sheets[i].default_displayed;
                 }
-                m_tabbedPane.setEnabledAt(tabIndex, enabled); 
+                m_tabbedPane.setEnabledAt(tabIndex, enabled);
                 closableTabPanel.setSelected(enabled);
 
                 tablePanel.setLayout(new BorderLayout(0, 0));
-				// read fields to fill in jtable into this tabbed pane
+                // read fields to fill in jtable into this tabbed pane
 
                 JScrollPane tableScrollPane = new JScrollPane();
                 tableScrollPane.getViewport().setBackground(Color.white);
@@ -564,12 +545,11 @@ public class CustomExportDialog extends DefaultDialog implements CollapseListene
     public final JPanel createCustomExportPanel(String defaultExportPath) {
 
         final JPanel insidePanel = new JPanel(new GridBagLayout());
-  
+
         GridBagConstraints c = new GridBagConstraints();
         c.anchor = GridBagConstraints.NORTHWEST;
         c.fill = GridBagConstraints.BOTH;
         c.insets = new java.awt.Insets(5, 5, 5, 5);
-        
 
         c.gridx = 0;
         c.gridy = 0;
@@ -644,36 +624,34 @@ public class CustomExportDialog extends DefaultDialog implements CollapseListene
         });
         c.gridx++;
         insidePanel.add(addFileButton, c);
-        
-        
+
         JLabel lbl_exportType = new JLabel("Export Type:");
         m_exporTypeCombobox = new JComboBox();
         m_exporTypeCombobox.setModel(new DefaultComboBoxModel(new String[]{"xlsx", "xls", "csv", "tsv"}));
         c.gridx = 0;
         c.gridy++;
         insidePanel.add(lbl_exportType, c);
-        
+
         c.gridx++;
         c.weightx = 1;
         insidePanel.add(m_exporTypeCombobox, c);
         c.weightx = 0;
 
-
         m_optionPanel = createOptionPanel();
-        c.gridx=0;
+        c.gridx = 0;
         c.gridwidth = 3;
         c.gridy++;
         c.weighty = 1;
         c.weightx = 1;
         CollapsablePanel collapsablePanel = new CollapsablePanel("Custom Options", m_optionPanel, false);
         insidePanel.add(collapsablePanel, c);
-        
+
         collapsablePanel.addCollapseListener(this);
 
         return insidePanel;
 
     }
-    
+
     private JPanel createOptionPanel() {
         JPanel optionPanel = new JPanel(new GridBagLayout());
         optionPanel.setVisible(false);
@@ -683,7 +661,7 @@ public class CustomExportDialog extends DefaultDialog implements CollapseListene
         c.anchor = GridBagConstraints.NORTHWEST;
         c.fill = GridBagConstraints.BOTH;
         c.insets = new java.awt.Insets(5, 5, 5, 5);
-        
+
         JLabel lblDateFormat = new JLabel("Date format:");
         comboBox_DateFormat = new JComboBox();
         comboBox_DateFormat.setModel(new DefaultComboBoxModel(new String[]{"yyyyMMdd HH:mm:ss", "ddMMyyyy HH:mm:ss", "MMddyyyy HH:mm:ss"}));
@@ -703,26 +681,26 @@ public class CustomExportDialog extends DefaultDialog implements CollapseListene
         c.gridx = 0;
         c.gridy = 0;
         optionPanel.add(lblDateFormat, c);
-        
+
         c.gridx++;
         optionPanel.add(comboBox_DateFormat, c);
-        
+
         c.gridx++;
         optionPanel.add(lblProteinSets, c);
-        
+
         c.gridx++;
         optionPanel.add(comboBox_ProteinSets, c);
-        
+
         c.gridx = 0;
         c.gridy++;
         optionPanel.add(lblNumberSeparator, c);
-        
+
         c.gridx++;
         optionPanel.add(comboBox_NumberSeparator, c);
-        
+
         c.gridx++;
         optionPanel.add(lblExportProfile, c);
-        
+
         c.gridx++;
         optionPanel.add(comboBox_exportProfile, c);
 
@@ -732,22 +710,21 @@ public class CustomExportDialog extends DefaultDialog implements CollapseListene
         c.weightx = 1;
         c.weighty = 1;
         optionPanel.add(createTabbedOptionPanel(), c);
-        
+
         return optionPanel;
     }
-    
+
     private JPanel createTabbedOptionPanel() {
         JPanel tabbedOptionPanel = new JPanel(new GridBagLayout());
         tabbedOptionPanel.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
-        
+
         GridBagConstraints c = new GridBagConstraints();
         c.anchor = GridBagConstraints.NORTHWEST;
         c.fill = GridBagConstraints.BOTH;
         c.insets = new java.awt.Insets(5, 5, 5, 5);
 
-        
         JLabel lblOrientation = new JLabel("Orientation:");
-        
+
         comboBox_Orientation = new JComboBox();
         comboBox_Orientation.setModel(new DefaultComboBoxModel(new String[]{"rows", "columns"}));
         comboBox_Orientation.setName("");
@@ -759,15 +736,15 @@ public class CustomExportDialog extends DefaultDialog implements CollapseListene
                 }
             }
         });
-        
+
         c.gridx = 0;
         c.gridy = 0;
         tabbedOptionPanel.add(lblOrientation, c);
-        
+
         c.gridx++;
         tabbedOptionPanel.add(comboBox_Orientation, c);
-        
-        c.gridx=0;
+
+        c.gridx = 0;
         c.gridy++;
         c.gridwidth = 2;
         m_tabbedPane = createTabbedPane();
@@ -777,7 +754,7 @@ public class CustomExportDialog extends DefaultDialog implements CollapseListene
 
         return tabbedOptionPanel;
     }
-    
+
     public JTabbedPane createTabbedPane() {
 
         final DnDTabbedPane tabbedPane = new DnDTabbedPane(JTabbedPane.TOP);
@@ -790,16 +767,15 @@ public class CustomExportDialog extends DefaultDialog implements CollapseListene
             }
         });
 
-
         // add listener to allow tab rename:
         TabTitleEditListener l = new TabTitleEditListener(tabbedPane, this);
         tabbedPane.addMouseListener(l);
 
         tabbedPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
-        
+
         return tabbedPane;
     }
-    
+
     @Override
     protected boolean saveCalled() {
         saveConfigFile();
@@ -815,12 +791,12 @@ public class CustomExportDialog extends DefaultDialog implements CollapseListene
         if (loaded && !m_optionPanel.isVisible()) {
             collapse(false);
         }
-        
+
         return false;
     }
 
     protected void recalculateTabTitleIdHashMap() {
-    	//
+        //
         //because after renamed, rebuild it in order to keep tabs ids stored .
         m_tabTitleIdHashMap.clear();
         for (int i = 0; i < m_tabbedPane.getTabCount(); i++) {
@@ -829,11 +805,10 @@ public class CustomExportDialog extends DefaultDialog implements CollapseListene
             if ((comp == null) || !(comp instanceof CheckboxTabPanel)) {
                 continue; // editing mode
             }
-            
-            CheckboxTabPanel c = ((CheckboxTabPanel)m_tabbedPane.getTabComponentAt(i));
 
-            
-            m_tabTitleIdHashMap.put(c.getText(), ((CheckboxTabPanel)m_tabbedPane.getTabComponentAt(i)).getSheetId());
+            CheckboxTabPanel c = ((CheckboxTabPanel) m_tabbedPane.getTabComponentAt(i));
+
+            m_tabTitleIdHashMap.put(c.getText(), ((CheckboxTabPanel) m_tabbedPane.getTabComponentAt(i)).getSheetId());
         }
 
     }
@@ -842,7 +817,7 @@ public class CustomExportDialog extends DefaultDialog implements CollapseListene
     	//because drag n drop looses tooltiptext info, rebuild it in order to keep tabs ids stored there.
 
     	//RECALCULTAING tab ids 
-    	// 1st: get the list of ids from defaultParam
+        // 1st: get the list of ids from defaultParam
         // 2nd: find which one is missing from list
         // 3: add the missing one to tooltiptext.
         if (m_exportDefaultConfig == null) {
@@ -864,10 +839,10 @@ public class CustomExportDialog extends DefaultDialog implements CollapseListene
             if (!(comp instanceof CheckboxTabPanel)) {
                 return; // editing mode
             }
-            
+
             CheckboxTabPanel c = (CheckboxTabPanel) comp;
-            String sheetId = (c==null) ? null : c.getSheetId();
-            
+            String sheetId = (c == null) ? null : c.getSheetId();
+
             if (sheetId == null) { // if tool tip has been erased
                 removedAtIndex = i;
 
@@ -881,7 +856,9 @@ public class CustomExportDialog extends DefaultDialog implements CollapseListene
             } else if (idFullList.size() == 1) {
                 //logger.warn("Fixed the missing id: " + idFullList.get(0));
                 CheckboxTabPanel cRemoved = (CheckboxTabPanel) m_tabbedPane.getTabComponentAt(removedAtIndex);
-                if (cRemoved!=null) cRemoved.setSheetId(cRemoved.getSheetId());
+                if (cRemoved != null) {
+                    cRemoved.setSheetId(cRemoved.getSheetId());
+                }
             }
         }
 
@@ -910,7 +887,7 @@ public class CustomExportDialog extends DefaultDialog implements CollapseListene
             m_configFile = absolutePath;
             loadExportConfig();
             if (m_exportDefaultConfig != null) {
-            	// reorder param to contain all fields...
+                // reorder param to contain all fields...
 
                 fillExportFormatTable(m_exportDefaultConfig, m_exportConfig);
 
@@ -928,16 +905,15 @@ public class CustomExportDialog extends DefaultDialog implements CollapseListene
     }
 
     protected void updatePresentationModeForNewlySelectedTab() {
-		
 
         if (!m_updateInProgress) { // update only when no update in progress
             m_updateInProgress = true;
-			
+
             recalculateTabsIds();
             recalculateTabTitleIdHashMap();
-            String selectedTabId = ((CheckboxTabPanel)m_tabbedPane.getTabComponentAt(m_tabbedPane.getSelectedIndex())).getSheetId();
+            String selectedTabId = ((CheckboxTabPanel) m_tabbedPane.getTabComponentAt(m_tabbedPane.getSelectedIndex())).getSheetId();
             if (selectedTabId == null) {
-				logger.warn("ERROR: did not find tab by its id :" +selectedTabId);
+                logger.warn("ERROR: did not find tab by its id :" + selectedTabId);
             } else {
                 if (m_presentationHashMap.get(selectedTabId).equals("rows")) {
                     comboBox_Orientation.setSelectedIndex(0);
@@ -988,12 +964,11 @@ public class CustomExportDialog extends DefaultDialog implements CollapseListene
                 f.delete();
             }
 
-
             try {
 
                 Gson gson = new GsonBuilder().setPrettyPrinting().create();
                 String jsonString = gson.toJson(generateConfigFileFromGUI());
-                
+
                 FilePreferences filePreferences = new FilePreferences(f, null, "");
                 filePreferences.put(DEFAULT_SERVER_CONFIG_KEY, m_currentServerConfigStr);
                 filePreferences.put(CURRENT_CONFIG_KEY, jsonString);
@@ -1007,11 +982,11 @@ public class CustomExportDialog extends DefaultDialog implements CollapseListene
     }
 
     protected void presentationModeChanged() {
-		// update the m_presentation attribute when changed for a specific ExportConfigSheet
+        // update the m_presentation attribute when changed for a specific ExportConfigSheet
         int selectedTab = m_tabbedPane.getSelectedIndex();
         recalculateTabsIds();
         recalculateTabTitleIdHashMap();
-        String selectedTabId =  ((CheckboxTabPanel)m_tabbedPane.getTabComponentAt(selectedTab)).getSheetId();
+        String selectedTabId = ((CheckboxTabPanel) m_tabbedPane.getTabComponentAt(selectedTab)).getSheetId();
 
         if (comboBox_Orientation.getSelectedIndex() == 0) {
 
@@ -1030,10 +1005,10 @@ public class CustomExportDialog extends DefaultDialog implements CollapseListene
     }
 
     protected int tabTitleToTabPosition(String tabTitle) {
-		// returns the position in int for the specified tab title (excel sheet title)
+        // returns the position in int for the specified tab title (excel sheet title)
         // it assumes the title names are unique
         for (int i = 0; i < m_tabbedPane.getTabCount(); i++) {
-            if (((CheckboxTabPanel)m_tabbedPane.getTabComponentAt(i)).getText().equals(tabTitle)) {
+            if (((CheckboxTabPanel) m_tabbedPane.getTabComponentAt(i)).getText().equals(tabTitle)) {
                 return i;
             }
         }
@@ -1041,7 +1016,7 @@ public class CustomExportDialog extends DefaultDialog implements CollapseListene
     }
 
     protected int sheetNameToSheetIndex(String sheetTitle) {
-		// returns the position in int for the specified tab id (excel sheet title)
+        // returns the position in int for the specified tab id (excel sheet title)
         // it assumes the names are unique
         for (int i = 0; i < m_exportConfig.sheets.length; i++) {
             if (m_exportConfig.sheets[i].title.equals(sheetTitle)) {
@@ -1052,7 +1027,7 @@ public class CustomExportDialog extends DefaultDialog implements CollapseListene
     }
 
     protected int sheetIdToSheetIndex(String sheetId) {
-		// returns the position in int for the specified tab id (excel sheet title)
+        // returns the position in int for the specified tab id (excel sheet title)
         // it assumes the names are unique
         for (int i = 0; i < m_exportConfig.sheets.length; i++) {
             if (m_exportConfig.sheets[i].id.equals(sheetId)) {
@@ -1063,7 +1038,7 @@ public class CustomExportDialog extends DefaultDialog implements CollapseListene
     }
 
     protected ExportConfig generateConfigFileFromGUI() {
-		
+
         // this method creates an ExportConfig structure to export.
         ExportConfig ec = new ExportConfig();
 
@@ -1078,12 +1053,12 @@ public class CustomExportDialog extends DefaultDialog implements CollapseListene
         } else if (comboBox_NumberSeparator.getSelectedIndex() == 1) {
             ec.decimal_separator = ",";
         }
-        ec.date_format = (String)comboBox_DateFormat.getSelectedItem();
+        ec.date_format = (String) comboBox_DateFormat.getSelectedItem();
         /*if (comboBox_DateFormat.getSelectedIndex() == 0) {
-            ec.date_format = "yyyy:MM:dd HH:mm:ss";
-        } else if (comboBox_DateFormat.getSelectedIndex() == 1) {
-            ec.date_format = "yyyy:MM:dd";
-        }*/
+         ec.date_format = "yyyy:MM:dd HH:mm:ss";
+         } else if (comboBox_DateFormat.getSelectedIndex() == 1) {
+         ec.date_format = "yyyy:MM:dd";
+         }*/
         ec.data_export = new ExportDataExport();
         ec.data_export.all_protein_set = comboBox_ProteinSets.getSelectedItem().equals("All");
 
@@ -1095,13 +1070,13 @@ public class CustomExportDialog extends DefaultDialog implements CollapseListene
         ec.date_format_values = null; //": ["YYYY:MM:DD HH:mm:ss","YYYY:MM:DD"],
         ec.sheet_presentation_values = null; //": ["rows","columns"]
 
-		int nbActiveTabs = 0;
+        int nbActiveTabs = 0;
         for (int i = 0; i < m_tabbedPane.getTabCount(); i++) { // go through tab panes and jtables
             if (m_tabbedPane.isEnabledAt(i)) {
                 nbActiveTabs++;
             }
         }
-		ec.sheets = new ExportExcelSheet[nbActiveTabs];
+        ec.sheets = new ExportExcelSheet[nbActiveTabs];
 
         int usedTabNumber = 0; // the tab location for the new structure (smaller than the full table - disabled tabs)
         for (int i = 0; i < m_tabbedPane.getTabCount(); i++) { // go through tab panes and jtables
@@ -1112,7 +1087,7 @@ public class CustomExportDialog extends DefaultDialog implements CollapseListene
                 JScrollPane jsp = (JScrollPane) panelTemp.getComponent(0);
                 JTable tableRef = (JTable) jsp.getViewport().getComponents()[0];
 
-				int nbRows = tableRef.getRowCount();
+                int nbRows = tableRef.getRowCount();
                 int nbSelectedRows = 0;
                 for (int row = 0; row < nbRows; row++) { // count selected rows to be exported
                     if (tableRef.getValueAt(row, 2).equals(true)) {
@@ -1121,9 +1096,9 @@ public class CustomExportDialog extends DefaultDialog implements CollapseListene
                 }
                 ec.sheets[usedTabNumber] = new ExportExcelSheet();
 
-		ec.sheets[usedTabNumber].id = tabTitleToTabId(((CheckboxTabPanel)m_tabbedPane.getTabComponentAt(i)).getText());
-                ec.sheets[usedTabNumber].title = ((CheckboxTabPanel)m_tabbedPane.getTabComponentAt(i)).getText();
-                ec.sheets[usedTabNumber].presentation = m_presentationHashMap.get(((CheckboxTabPanel)m_tabbedPane.getTabComponentAt(i)).getSheetId()); //m_exportConfig.sheets[i].presentation;
+                ec.sheets[usedTabNumber].id = tabTitleToTabId(((CheckboxTabPanel) m_tabbedPane.getTabComponentAt(i)).getText());
+                ec.sheets[usedTabNumber].title = ((CheckboxTabPanel) m_tabbedPane.getTabComponentAt(i)).getText();
+                ec.sheets[usedTabNumber].presentation = m_presentationHashMap.get(((CheckboxTabPanel) m_tabbedPane.getTabComponentAt(i)).getSheetId()); //m_exportConfig.sheets[i].presentation;
 
                 ec.sheets[usedTabNumber].fields = new ExportExcelSheetField[nbSelectedRows];
 
@@ -1149,7 +1124,6 @@ public class CustomExportDialog extends DefaultDialog implements CollapseListene
     public String getFileName() {
         return m_fileTextField.getText().trim();
     }
-
 
     public ExporterFactory.ExporterInfo getExporterInfo() {
         return (ExporterFactory.ExporterInfo) m_exporTypeCombobox.getSelectedItem();
@@ -1216,23 +1190,18 @@ public class CustomExportDialog extends DefaultDialog implements CollapseListene
         Preferences preferences = NbPreferences.root();
         preferences.put("DefaultExcelExportPath", f.getAbsoluteFile().getParentFile().getAbsolutePath());
 
-        
         String exportConfigStr = getExportConfig();
         m_configServerKey2configMap.put(m_currentServerConfigStr, exportConfigStr);
 
-                
         return false;
 
     }
-
 
     @Override
     protected boolean cancelCalled() {
 
         return true;
     }
-
-
 
     /**
      * *
@@ -1259,21 +1228,19 @@ public class CustomExportDialog extends DefaultDialog implements CollapseListene
     public boolean setDefaultExportConfig(String serverConfigStr) {
 
         m_currentServerConfigStr = serverConfigStr;
-        
+
         boolean mustUpdateConfig = false;
 
         String configStrToApply = m_configServerKey2configMap.get(serverConfigStr);
         if (configStrToApply == null) {
             configStrToApply = serverConfigStr;
             m_configServerKey2configMap.put(serverConfigStr, serverConfigStr);
-        } 
-        
-        
+        }
+
         mustUpdateConfig = (serverConfigStr.compareTo(configStrToApply) != 0) || (m_previousServerConfigStr == null) || (m_currentServerConfigStr.compareTo(m_previousServerConfigStr) != 0);
 
         m_previousServerConfigStr = m_currentServerConfigStr;
 
-        
         if (mustUpdateConfig) {
 
             logger.debug("setDefaultExportConfig");
@@ -1294,7 +1261,6 @@ public class CustomExportDialog extends DefaultDialog implements CollapseListene
                 //m_exportConfig = m_exportDefaultConfig; // this in order to have the config like the default one, before one is loaded.
             }
 
-            
             //////////////////
             Gson gson = new Gson();
             String messageHashMapJsonString = configStrToApply;
@@ -1306,10 +1272,8 @@ public class CustomExportDialog extends DefaultDialog implements CollapseListene
             updatePresentationModeForNewlySelectedTab();
             selectLoadedExportValues(m_exportConfig);
 
-
         }
 
-        
         return mustUpdateConfig;
     }
 
@@ -1353,8 +1317,6 @@ public class CustomExportDialog extends DefaultDialog implements CollapseListene
 
     }
 
-
-
     @Override
     public void collapse(boolean collapse) {
         boolean isExpanded = !collapse;
@@ -1372,8 +1334,5 @@ public class CustomExportDialog extends DefaultDialog implements CollapseListene
         m_singletonDialog.revalidate();
         m_singletonDialog.repack();
     }
-    
-    
-    
-    
+
 }

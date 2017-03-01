@@ -9,6 +9,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import javax.swing.*;
 import java.util.prefs.Preferences;
@@ -49,7 +50,12 @@ public class MSDiagDialog extends DefaultDialog {
 
         setTitle("Define settings for Statistical Reports");
        
-        setHelpURL("http://biodev.extra.cea.fr/docs/proline/doku.php?id=how_to:studio:msdiag");    
+        try {
+            setHelpURL(new File(".").getCanonicalPath() + File.separatorChar + "Documentation" + File.separatorChar + "Proline_UserGuide_1.4RC1.docx.html#id.28h4qwu");
+        } catch (IOException ex) {
+            ;
+        }
+        
         setButtonVisible(BUTTON_LOAD, true);
         setButtonVisible(BUTTON_SAVE, true);
         

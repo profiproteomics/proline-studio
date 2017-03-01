@@ -38,7 +38,7 @@ public class DefaultDialog extends javax.swing.JDialog {
     
     private BusyGlassPane m_busyGlassPane = null;
     private HighlightGlassPane m_highlightGlassPane = null;
-    
+
     private DefaultDialog m_dialog;
     
     private boolean m_firstDisplay = true;
@@ -456,7 +456,8 @@ public class DefaultDialog extends javax.swing.JDialog {
         if (Desktop.isDesktopSupported()) { // JDK 1.6.0
 
             try {
-                Desktop.getDesktop().browse(new URL(MiscellaneousUtils.convertURLToCurrentHelp(m_helpURL)).toURI());
+                //Desktop.getDesktop().browse(new URL(MiscellaneousUtils.convertURLToCurrentHelp(m_helpURL)).toURI());
+                Desktop.getDesktop().browse(MiscellaneousUtils.createRedirectTempFile(m_helpURL));
             } catch (Exception ex) {
                 LoggerFactory.getLogger("ProlineStudio.Commons").error(getClass().getSimpleName() + " failed", ex);
             }

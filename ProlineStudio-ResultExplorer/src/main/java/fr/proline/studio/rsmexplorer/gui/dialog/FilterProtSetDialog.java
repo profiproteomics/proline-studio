@@ -17,6 +17,7 @@ import java.awt.Window;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.prefs.Preferences;
 import javax.swing.JFileChooser;
@@ -50,7 +51,11 @@ public class FilterProtSetDialog extends DefaultDialog implements ComponentListe
         super(parent, Dialog.ModalityType.APPLICATION_MODAL);
         setTitle("ProteinSet Filtering");
 
-        setHelpURL("http://biodev.extra.cea.fr/docs/proline/doku.php?id=prolineconcepts:proteinsetsfilteringandvalidation");
+        try {
+            setHelpURL(new File(".").getCanonicalPath() + File.separatorChar + "Documentation" + File.separatorChar + "Proline_UserGuide_1.4RC1.docx.html#id.26in1rg");
+        } catch (IOException ex) {
+            ;
+        }
 
         setButtonVisible(BUTTON_LOAD, true);
         setButtonVisible(BUTTON_SAVE, true);
@@ -66,17 +71,17 @@ public class FilterProtSetDialog extends DefaultDialog implements ComponentListe
     }
 
     private void createParameters() {
-        
+
         m_proteinFilterParameters = new AbstractParameter[FilterRSMProtSetsTask.FILTER_KEYS.length + 1];
         m_proteinFilterParameters[0] = null;
         for (int index = 1; index <= FilterRSMProtSetsTask.FILTER_KEYS.length; index++) {
             String filterKey = FilterRSMProtSetsTask.FILTER_KEYS[index - 1];
-            switch(filterKey){
+            switch (filterKey) {
                 case "SCORE":
                     m_proteinFilterParameters[index] = new DoubleParameter(filterKey, FilterRSMProtSetsTask.FILTER_NAME[index - 1], new JTextField(6), new Double(10), new Double(1), null);
                     m_proteinFilterParameters[index].setAssociatedData(">=");
                     break;
-                default :
+                default:
                     m_proteinFilterParameters[index] = new IntegerParameter(filterKey, FilterRSMProtSetsTask.FILTER_NAME[index - 1], new JTextField(6), new Integer(1), new Integer(1), null);
                     m_proteinFilterParameters[index].setAssociatedData(">=");
                     break;
@@ -190,7 +195,7 @@ public class FilterProtSetDialog extends DefaultDialog implements ComponentListe
                     }
 
                     m_parameterList.loadParameters(filePreferences);
-                    m_proteinPrefiltersPanel.initProteinFilterPanel();                  
+                    m_proteinPrefiltersPanel.initProteinFilterPanel();
 
                 } catch (Exception e) {
                     LoggerFactory.getLogger("ProlineStudio.ResultExplorer").error("Parsing of User Settings File Failed", e);
@@ -218,7 +223,7 @@ public class FilterProtSetDialog extends DefaultDialog implements ComponentListe
 
     @Override
     public void componentHidden(ComponentEvent e) {
-        
+
     }
 
 }

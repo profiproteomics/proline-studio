@@ -84,7 +84,6 @@ public class ImportMaxQuantResultDialog extends DefaultDialog {
 
         setTitle("Import MaxQuant Results");
 
-        // setHelpURL("http://biodev.extra.cea.fr/docs/proline/doku.php?id=how_to:studio:importmascot");
         setButtonVisible(BUTTON_LOAD, true);
         setButtonVisible(BUTTON_SAVE, true);
 

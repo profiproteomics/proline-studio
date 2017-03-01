@@ -37,6 +37,7 @@ import fr.proline.studio.utils.IconManager;
 import java.awt.Dialog;
 import java.awt.Window;
 import java.io.File;
+import java.io.IOException;
 import java.util.*;
 import javax.persistence.EntityManager;
 import javax.swing.JFileChooser;
@@ -88,7 +89,11 @@ public class CreateXICDialog extends DefaultDialog {
 
         setTitle("XIC Quantitation Wizard");
 
-        setHelpURL("http://biodev.extra.cea.fr/docs/proline/doku.php?id=how_to:studio:xic");
+        try {
+            setHelpURL(new File(".").getCanonicalPath() + File.separatorChar + "Documentation" + File.separatorChar + "Proline_UserGuide_1.4RC1.docx.html#id.2dlolyb");
+        } catch (IOException ex) {
+            ;
+        }
 
         setSize(1600, 768);
         setResizable(true);

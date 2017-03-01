@@ -85,8 +85,8 @@ public class TreeFileChooserPanel extends JPanel {
         m_tree.setShowsRootHandles(true);
         m_tree.setEditable(false);
 
-        JScrollPane s = new JScrollPane();
-        s.getViewport().add(m_tree);
+        JScrollPane scrollPane = new JScrollPane();
+        scrollPane.getViewport().add(m_tree);
 
         GridBagConstraints c = new GridBagConstraints();
         c.anchor = GridBagConstraints.NORTHWEST;
@@ -96,22 +96,11 @@ public class TreeFileChooserPanel extends JPanel {
         c.gridx = 0;
         c.gridy = 0;
         
-        c.gridwidth = 2;
+        c.gridheight = 1;
         
-        c.weightx = 1.0;
-        c.weighty = 1.0;
+        c.weightx = 0.0;
+        c.weighty = 0.0;
         
-        add(s, c);
-
-        
-        
-        c.gridy++;
-        
-        c.gridwidth = 1;
-        
-        c.weightx = 0;
-        c.weighty = 0;
-
         JButton updateButton = new JButton(IconManager.getIcon(IconManager.IconType.REFRESH));
         updateButton.addActionListener(new ActionListener() {
 
@@ -122,11 +111,23 @@ public class TreeFileChooserPanel extends JPanel {
         });
         add(updateButton, c);
         
-        c.gridx++;
-        c.weightx = 1.0;
-        c.weighty = 0;
+        c.weightx = 0.0;
+        c.weighty = 0.0;
         
-        add(Box.createHorizontalGlue(),c);
+        c.gridy++;
+        
+        add(Box.createVerticalBox(), c);
+        
+        c.gridy = 0;
+        
+        c.gridheight = 2;
+        
+        c.weightx = 1.0;
+        c.weighty = 1.0;
+        
+        c.gridx++;
+        
+        add(scrollPane, c);       
 
     }
 

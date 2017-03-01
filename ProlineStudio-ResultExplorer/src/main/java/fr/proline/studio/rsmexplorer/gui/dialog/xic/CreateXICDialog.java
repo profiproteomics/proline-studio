@@ -74,14 +74,12 @@ public class CreateXICDialog extends DefaultDialog {
     public static CreateXICDialog getDialog(Window parent) {
         if (m_singletonDialog == null) {
             m_singletonDialog = new CreateXICDialog(parent);
-        }else{
-            if(m_singletonDialog.m_selectRawFilePanel!=null){
-            m_singletonDialog.m_selectRawFilePanel.resetDropZonePanel();
+        } else {
+            if (m_singletonDialog.m_selectRawFilePanel != null) {
+                m_singletonDialog.m_selectRawFilePanel.resetDropZonePanel();
             }
         }
 
-        
-        
         return m_singletonDialog;
     }
 
@@ -287,7 +285,7 @@ public class CreateXICDialog extends DefaultDialog {
                                                             };
 
                                                             // ask asynchronous loading of data
-                                                            DatabasePeaklistTask  task = new DatabasePeaklistTask(callback);
+                                                            DatabasePeaklistTask task = new DatabasePeaklistTask(callback);
                                                             task.initUpdatePeaklistIdentifier(pID, rsID, runData.getSelectedRawFile().getIdentifier());
                                                             AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
 
@@ -697,12 +695,11 @@ public class CreateXICDialog extends DefaultDialog {
                 @Override
                 public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
                     if (success) {
-                        
 
                         for (Map.Entry<Long, DataSetNode> entry : spectraNodesPerRsId.entrySet()) {
                             ((XICBiologicalSampleAnalysisNode) entry.getValue()).setVerificationStatus(XICBiologicalSampleAnalysisNode.SpectrumVerificationStatus.SUCCESSFULLY_VERIFIED);
                         }
-                        
+
                         displayDefineRawFiles();
 
                     } else {

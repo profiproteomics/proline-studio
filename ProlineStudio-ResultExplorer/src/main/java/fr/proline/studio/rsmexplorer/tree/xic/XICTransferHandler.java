@@ -258,7 +258,6 @@ public class XICTransferHandler extends TransferHandler {
 
         // no insert index specified -> we insert at the end
         if (childIndex == -1) {
-
             childIndex = dropRSMNode.getChildCount();
         }
 
@@ -310,10 +309,13 @@ public class XICTransferHandler extends TransferHandler {
 
             if (dropRSMNode instanceof DataSetNode) {
                 // top node, we create a group now
-                childIndex = 0;
+                
                 String groupName = "Group " + suffix;
                 XICBiologicalGroupNode biologicalGroupNode = new XICBiologicalGroupNode(new DataSetData(groupName, Dataset.DatasetType.AGGREGATE, Aggregation.ChildNature.OTHER));
                 treeModel.insertNodeInto(biologicalGroupNode, dropRSMNode, childIndex);
+                
+                childIndex = 0;
+                
                 dropRSMNode = biologicalGroupNode;
                 m_tree.expandNodeIfNeeded(dropRSMNode);
             }

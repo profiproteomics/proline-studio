@@ -161,6 +161,7 @@ public class XICRunNode extends AbstractNode {
                     if (tableModel != null) {
                         // a table model display data in this Xic Run Node, so it must be updated
                         tableModel.fireTableDataChanged();
+                       
                     }
 
                 }

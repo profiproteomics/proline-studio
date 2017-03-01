@@ -223,6 +223,7 @@ public class SelectRawFilesPanel extends JPanel {
 
         m_table = new FlatDesignTable();
         m_model = new FlatDesignTableModel(m_designTree);
+        m_model.setXICDropZone(m_dropZone);
         m_table.setModel(m_model);
         m_table.getColumnModel().getColumn(FlatDesignTableModel.COLTYPE_ASSOCIATION_SOURCE).setCellRenderer(new LinkAssociationRenderer());
         tableScrollPane.setViewportView(m_table);
@@ -400,6 +401,8 @@ public class SelectRawFilesPanel extends JPanel {
         public static final int COLTYPE_ASSOCIATION_SOURCE = 5;
 
         private static final String[] columnNames = {"Group", "Sample", "Sample Analysis", "Raw File", "Peaklist", "Association Source"};
+        
+        private XICDropZone m_dropZone = null;
 
         private final ArrayList<NodeModelRow> m_dataList = new ArrayList<NodeModelRow>();
 
@@ -410,6 +413,14 @@ public class SelectRawFilesPanel extends JPanel {
         public FlatDesignTableModel(XICDesignTree tree) {
             m_tree = tree;
             m_missingValues = new HashMap<Integer, HashSet<String>>();
+        }
+        
+        public void setXICDropZone(XICDropZone dropZone){
+            m_dropZone = dropZone;
+        }
+        
+        public XICDropZone getXICDropZone(){
+            return m_dropZone;
         }
 
         public void setData(AbstractNode rootNode) {

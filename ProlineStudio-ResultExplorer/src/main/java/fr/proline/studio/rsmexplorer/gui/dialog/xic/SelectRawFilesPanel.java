@@ -438,8 +438,6 @@ public class SelectRawFilesPanel extends JPanel implements XICRunNodeInitListene
             parseTree(rootNode);
             fireTableDataChanged();
 
-            fireTableDataChanged();
-
         }
 
         private void parseTree(AbstractNode node) {

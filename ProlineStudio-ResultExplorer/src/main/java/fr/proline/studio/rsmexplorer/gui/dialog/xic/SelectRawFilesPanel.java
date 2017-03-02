@@ -14,6 +14,7 @@ import fr.proline.studio.rsmexplorer.tree.xic.XICBiologicalSampleAnalysisNode;
 import fr.proline.studio.rsmexplorer.tree.xic.XICBiologicalSampleNode;
 import fr.proline.studio.rsmexplorer.tree.xic.XICDesignTree;
 import fr.proline.studio.rsmexplorer.tree.xic.XICRunNode;
+import fr.proline.studio.rsmexplorer.tree.xic.XICRunNodeInitListener;
 import fr.proline.studio.table.DecoratedMarkerTable;
 import fr.proline.studio.table.DecoratedTableModel;
 import fr.proline.studio.table.TablePopupMenu;
@@ -36,6 +37,7 @@ import java.util.HashSet;
 import javax.swing.BorderFactory;
 import javax.swing.DropMode;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
@@ -51,7 +53,7 @@ import javax.swing.tree.DefaultTreeModel;
  *
  * @author JM235353
  */
-public class SelectRawFilesPanel extends JPanel {
+public class SelectRawFilesPanel extends JPanel implements XICRunNodeInitListener {
 
     private static final int INDEX_DIFFERENCE = 3;
     private static final String USER_DEFINED_ASSOCIATION = "User Defined Association";
@@ -290,6 +292,14 @@ public class SelectRawFilesPanel extends JPanel {
         return fileFilePathPanel;
     }
 
+    @Override
+    public void initCompleted(XICRunNode node) {
+
+        if (m_singleton.m_model != null && m_singleton.m_model.getRowCount() > 0) {
+            m_singleton.m_dropZone.updateTable();
+        }
+    }
+
     private class FlatDesignTable extends DecoratedMarkerTable implements MouseListener {
 
         //private JPopupMenu m_popup = null;
@@ -401,7 +411,7 @@ public class SelectRawFilesPanel extends JPanel {
         public static final int COLTYPE_ASSOCIATION_SOURCE = 5;
 
         private static final String[] columnNames = {"Group", "Sample", "Sample Analysis", "Raw File", "Peaklist", "Association Source"};
-        
+
         private XICDropZone m_dropZone = null;
 
         private final ArrayList<NodeModelRow> m_dataList = new ArrayList<NodeModelRow>();
@@ -414,12 +424,12 @@ public class SelectRawFilesPanel extends JPanel {
             m_tree = tree;
             m_missingValues = new HashMap<Integer, HashSet<String>>();
         }
-        
-        public void setXICDropZone(XICDropZone dropZone){
+
+        public void setXICDropZone(XICDropZone dropZone) {
             m_dropZone = dropZone;
         }
-        
-        public XICDropZone getXICDropZone(){
+
+        public XICDropZone getXICDropZone() {
             return m_dropZone;
         }
 
@@ -427,11 +437,13 @@ public class SelectRawFilesPanel extends JPanel {
             m_dataList.clear();
             parseTree(rootNode);
             fireTableDataChanged();
-            
+
+            /*
             if (m_singleton.m_model != null && m_singleton.m_model.getRowCount() > 0) {
                 m_singleton.m_dropZone.updateTable();
             }
-            
+            */
+
             fireTableDataChanged();
 
         }
@@ -473,7 +485,7 @@ public class SelectRawFilesPanel extends JPanel {
 
                         //HACK new method so that runNode is available later when we want to retrieve the potential matching raw files! calls super.add()
                         sampleAnalysisNode.addXicRunNode(runNode);
-                        runNode.init(sampleAnalysisNode.getDataset(), (DefaultTreeModel) IdentificationTree.getCurrentTree().getModel(), this);
+                        runNode.init(sampleAnalysisNode.getDataset(), (DefaultTreeModel) IdentificationTree.getCurrentTree().getModel(), this, m_singleton);
                     } else {
                         sampleAnalysisNode.add(sampleAnalysisNode.getXicRunNode());
                     }

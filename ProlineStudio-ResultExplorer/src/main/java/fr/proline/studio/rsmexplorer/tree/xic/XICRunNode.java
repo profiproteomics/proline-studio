@@ -45,20 +45,20 @@ public class XICRunNode extends AbstractNode {
         super(NodeTypes.RUN, data);
         m_tree = tree;
     }
-    
+
     public AbstractTableModel getTableModel(){
         return m_tableModel;
     }
-    
+
     public void setTableModel(AbstractTableModel tableModel){
         m_tableModel = tableModel;
     }
 
-    public void init(final DDataset dataset, DefaultTreeModel treeModel, final AbstractTableModel tableModel) {
+    public void init(final DDataset dataset, DefaultTreeModel treeModel, final AbstractTableModel tableModel, XICRunNodeInitListener initListener) {
         
         m_treeModel = treeModel;
         m_tableModel = tableModel;
-        
+
         setIsChanging(true);
 
         // look if we find a Raw File
@@ -87,9 +87,13 @@ public class XICRunNode extends AbstractNode {
                             runInfoData.setRun(runOut[0]);
 
                             runInfoData.setStatus(RunInfoData.Status.LINKED_IN_DATABASE);
-                            
+
                             setIsChanging(false);
                             m_treeModel.nodeChanged(xicRunNode);
+
+                            if (initListener != null) {
+                                initListener.initCompleted(xicRunNode);
+                            }
 
                         } else {
                             //recreate a raw file from msi
@@ -106,51 +110,49 @@ public class XICRunNode extends AbstractNode {
                                 @Override
                                 public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
                                     if (success) {
-                                        
+
                                         if (peaklist[0] != null) {
 
-                                                if (peaklist[0].getRawFileIdentifier() != null && !peaklist[0].getRawFileIdentifier().equalsIgnoreCase("")) {
+                                            if (peaklist[0].getRawFileIdentifier() != null && !peaklist[0].getRawFileIdentifier().equalsIgnoreCase("")) {
 
                                                     //Previous RawFileIdentifier exists
-                                                    
-                                                    ((RunInfoData) getData()).setMessage("Search " + peaklist[0].getRawFileIdentifier());
-                                                    ((DefaultTreeModel) m_tree.getModel()).nodeChanged(xicRunNode);
-                                                    searchPotentialRawFiles(peaklist[0].getRawFileIdentifier(), tableModel, Search.BASED_ON_IDENTIFIER);
+                                                ((RunInfoData) getData()).setMessage("Search " + peaklist[0].getRawFileIdentifier());
+                                                ((DefaultTreeModel) m_tree.getModel()).nodeChanged(xicRunNode);
+                                                searchPotentialRawFiles(peaklist[0].getRawFileIdentifier(), tableModel, Search.BASED_ON_IDENTIFIER, initListener);
 
-                                                } else if (peaklist[0].getPath() != null && !peaklist[0].getPath().equalsIgnoreCase("")) {
+                                            } else if (peaklist[0].getPath() != null && !peaklist[0].getPath().equalsIgnoreCase("")) {
 
                                                     //Previous RawFileIdentifier does not exist so we will try to search for the peaklist path!
-                                                    
-                                                    String searchString = peaklist[0].getPath();
+                                                String searchString = peaklist[0].getPath();
 
-                                                    ((RunInfoData) getData()).setPeakListPath(searchString);
+                                                ((RunInfoData) getData()).setPeakListPath(searchString);
 
-                                                    if ((searchString == null) || (searchString.isEmpty())) {
-                                                        searchString = "*";
-                                                    } else {
-                                                        searchString = "*" + searchString + "*";
-                                                    }
-
-                                                    ((RunInfoData) getData()).setMessage("Search " + searchString);
-                                                    ((RunInfoData) getData()).setStatus(RunInfoData.Status.MISSING);
-
-                                                    ((DefaultTreeModel) m_tree.getModel()).nodeChanged(xicRunNode);
-
-                                                    searchPotentialRawFiles(searchString, tableModel, Search.BASED_ON_PATH);
-
+                                                if ((searchString == null) || (searchString.isEmpty())) {
+                                                    searchString = "*";
+                                                } else {
+                                                    searchString = "*" + searchString + "*";
                                                 }
+
+                                                ((RunInfoData) getData()).setMessage("Search " + searchString);
+                                                ((RunInfoData) getData()).setStatus(RunInfoData.Status.MISSING);
+
+                                                ((DefaultTreeModel) m_tree.getModel()).nodeChanged(xicRunNode);
+
+                                                searchPotentialRawFiles(searchString, tableModel, Search.BASED_ON_PATH, initListener);
+
+                                            }
                                         }
-                                        
+
                                         setIsChanging(false);
                                         m_treeModel.nodeChanged(xicRunNode);
-                                        
+
                                     }
                                 }
                             };
 
                             DatabasePeaklistTask peaklistTask = new DatabasePeaklistTask(callback);
                             peaklistTask.initLoadPeaklistForRS(dataset.getResultSetId(), dataset.getProject().getId(), peaklist);
-                            AccessDatabaseThread.getAccessDatabaseThread().addTask(peaklistTask);                            
+                            AccessDatabaseThread.getAccessDatabaseThread().addTask(peaklistTask);
                         }
                     } else {
                         // it failed !
@@ -161,7 +163,7 @@ public class XICRunNode extends AbstractNode {
                     if (tableModel != null) {
                         // a table model display data in this Xic Run Node, so it must be updated
                         tableModel.fireTableDataChanged();
-                       
+
                     }
 
                 }
@@ -172,59 +174,13 @@ public class XICRunNode extends AbstractNode {
             AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
         } else {
             throw new RuntimeException("Creating XIC Run Node without an identification dataset.");
-//            if (tableModel != null) {
-//                searchPeaklistPath(dataset, tableModel);
-//            }
         }
     }
 
-//    private void searchPeaklistPath(DDataset dataset, final AbstractTableModel tableModel) {
-//
-//        Long rsetId = dataset.getResultSetId();
-//
-//        final String[] path = new String[1];
-//
-//        final XICRunNode _this = this;
-//
-//        AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
-//
-//            @Override
-//            public boolean mustBeCalledInAWT() {
-//                return true;
-//            }
-//
-//            @Override
-//            public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
-//                //setIsChanging(false);
-//
-//                String searchString = path[0];
-//                ((RunInfoData) getData()).setPeakListPath(searchString);
-//
-//                if ((searchString == null) || (searchString.isEmpty())) {
-//                    searchString = "*";
-//                } else {
-//                    searchString = "*" + searchString + "*";
-//                }
-//
-//                ((RunInfoData) getData()).setMessage("Search " + searchString);
-//                ((RunInfoData) getData()).setStatus(RunInfoData.Status.MISSING);
-//
-//                ((DefaultTreeModel) m_tree.getModel()).nodeChanged(_this);
-//
-//                searchPotentialRawFiles(searchString, tableModel, Search.BASED_ON_PATH);
-//            }
-//        };
-//
-//        // ask asynchronous loading of data
-//        Long projectId = dataset.getProject().getId();
-//        DatabasePeaklistTask task = new DatabasePeaklistTask(callback);
-//        task.initLoadPeakListPathForRset(projectId, rsetId, path);
-//        AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
-//
-//    }
+    private void searchPotentialRawFiles(String searchString, final AbstractTableModel tableModel, Search search, XICRunNodeInitListener initListener) {
 
-    private void searchPotentialRawFiles(String searchString, final AbstractTableModel tableModel, Search search) {
-
+        final XICRunNode xicRunNode = this;
+        
         final HashMap<String, RawFile> m_rawFileMap = new HashMap<String, RawFile>();
 
         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
@@ -263,6 +219,10 @@ public class XICRunNode extends AbstractNode {
                         runInfoData.setMessage("<html><font color='#FF0000'>Multiple Raw Files</font></html>");
                         runInfoData.setStatus(RunInfoData.Status.MISSING);
                     }
+                }
+
+                if (initListener != null) {
+                    initListener.initCompleted(xicRunNode);
                 }
 
                 if (tableModel != null) {

@@ -6,6 +6,7 @@ import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import java.util.List;
 import javax.persistence.EntityManager;
+import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 
 /**
@@ -101,10 +102,16 @@ public class DatabasePeaklistTask extends AbstractDatabaseTask {
 
             entityManagerMSI.getTransaction().begin();
 
-            TypedQuery<String> rawFileUpdateQuery = entityManagerMSI.createQuery("UPDATE Peaklist plist, MsiSearch msisearch, ResultSet rset SET plist.raw_file_identifier = :identifier WHERE rset.id = :rsetId AND rset.msiSearch=msisearch AND msisearch.peaklist=plist ", String.class);
+            //TypedQuery<String> rawFileUpdateQuery = entityManagerMSI.createQuery("UPDATE Peaklist plist, MsiSearch msisearch, ResultSet rset SET plist.raw_file_identifier = :identifier WHERE rset.id = :rsetId AND rset.msiSearch=msisearch AND msisearch.peaklist=plist ", String.class);
+            
+            Query rawFileUpdateQuery = entityManagerMSI.createQuery("UPDATE Peaklist as plist set plist.rawFileId = :identifier WHERE plist.id  IN (SELECT plist FROM Peaklist plist, MsiSearch msisearch, ResultSet rset WHERE rset.id = :rsetId AND rset.msiSearch=msisearch AND msisearch.peaklist=plist)");
+ 
+            
             rawFileUpdateQuery.setParameter("rsetId", m_rsetID);
             rawFileUpdateQuery.setParameter("identifier", m_rawFileIdentifier);
 
+            int result = rawFileUpdateQuery.executeUpdate();
+            
             entityManagerMSI.getTransaction().commit();
 
         } catch (Exception e) {

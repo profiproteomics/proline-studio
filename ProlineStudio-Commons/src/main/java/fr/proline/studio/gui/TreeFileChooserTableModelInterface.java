@@ -9,5 +9,6 @@ import java.util.ArrayList;
  */
 public interface TreeFileChooserTableModelInterface {
     public void setFiles(ArrayList<File> fileList, int rowIndex);
-    public boolean isCorruptionPossible(ArrayList<Integer> indices);
+    public boolean canCorruptFiles(ArrayList<Integer> indices);
+    public boolean canSetFiles(ArrayList<Integer> indices);
 }

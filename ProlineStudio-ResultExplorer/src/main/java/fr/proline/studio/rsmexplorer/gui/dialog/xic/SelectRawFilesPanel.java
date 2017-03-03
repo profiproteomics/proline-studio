@@ -650,7 +650,7 @@ public class SelectRawFilesPanel extends JPanel implements XICRunNodeInitListene
                         }
 
                         m_missingValues.put(i, set);
-                    }
+                    } 
 
                 }
 
@@ -662,14 +662,24 @@ public class SelectRawFilesPanel extends JPanel implements XICRunNodeInitListene
         }
 
         @Override
-        public boolean isCorruptionPossible(ArrayList<Integer> indices) {
-            int numberOfColumns = this.getColumnCount();
+        public boolean canCorruptFiles(ArrayList<Integer> indices) {
             for (int i = 0; i < indices.size(); i++) {
-                if (!this.getValueAt(indices.get(i), numberOfColumns - INDEX_DIFFERENCE).toString().contains("No Raw File")) {
+                RunInfoData.Status status = ((RunInfoData)getXICRunNode(indices.get(i)).getData()).getStatus();
+                if(status == RunInfoData.Status.LAST_DEFINED || status == RunInfoData.Status.SYSTEM_PROPOSED){
                     return true;
                 }
             }
             return false;
+        }
+        
+        @Override
+        public boolean canSetFiles(ArrayList<Integer> indices) {
+            for (int i = 0; i < indices.size(); i++) {
+                if(((RunInfoData)getXICRunNode(indices.get(i)).getData()).getStatus() == RunInfoData.Status.LINKED_IN_DATABASE){
+                    return false;
+                }
+            }
+            return true;
         }
 
     }

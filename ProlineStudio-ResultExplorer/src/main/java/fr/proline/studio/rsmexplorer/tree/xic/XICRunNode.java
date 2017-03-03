@@ -46,16 +46,16 @@ public class XICRunNode extends AbstractNode {
         m_tree = tree;
     }
 
-    public AbstractTableModel getTableModel(){
+    public AbstractTableModel getTableModel() {
         return m_tableModel;
     }
 
-    public void setTableModel(AbstractTableModel tableModel){
+    public void setTableModel(AbstractTableModel tableModel) {
         m_tableModel = tableModel;
     }
 
     public void init(final DDataset dataset, DefaultTreeModel treeModel, final AbstractTableModel tableModel, XICRunNodeInitListener initListener) {
-        
+
         m_treeModel = treeModel;
         m_tableModel = tableModel;
 
@@ -115,14 +115,14 @@ public class XICRunNode extends AbstractNode {
 
                                             if (peaklist[0].getRawFileIdentifier() != null && !peaklist[0].getRawFileIdentifier().equalsIgnoreCase("")) {
 
-                                                    //Previous RawFileIdentifier exists
+                                                //Previous RawFileIdentifier exists
                                                 ((RunInfoData) getData()).setMessage("Search " + peaklist[0].getRawFileIdentifier());
                                                 ((DefaultTreeModel) m_tree.getModel()).nodeChanged(xicRunNode);
                                                 searchPotentialRawFiles(peaklist[0].getRawFileIdentifier(), tableModel, Search.BASED_ON_IDENTIFIER, initListener);
 
                                             } else if (peaklist[0].getPath() != null && !peaklist[0].getPath().equalsIgnoreCase("")) {
 
-                                                    //Previous RawFileIdentifier does not exist so we will try to search for the peaklist path!
+                                                //Previous RawFileIdentifier does not exist so we will try to search for the peaklist path!
                                                 String searchString = peaklist[0].getPath();
 
                                                 ((RunInfoData) getData()).setPeakListPath(searchString);
@@ -180,7 +180,7 @@ public class XICRunNode extends AbstractNode {
     private void searchPotentialRawFiles(String searchString, final AbstractTableModel tableModel, Search search, XICRunNodeInitListener initListener) {
 
         final XICRunNode xicRunNode = this;
-        
+
         final HashMap<String, RawFile> m_rawFileMap = new HashMap<String, RawFile>();
 
         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {

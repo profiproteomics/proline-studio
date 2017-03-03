@@ -30,8 +30,8 @@ public class TreeFileChooserTransferHandler extends TransferHandler {
     public void addComponent(JComponent component) {
         m_components.put(component, component);
     }
-    
-    public void clearHighlights(){
+
+    public void clearHighlights() {
         Enumeration<JComponent> enumKey = m_components.keys();
         while (enumKey.hasMoreElements()) {
             JComponent key = enumKey.nextElement();
@@ -69,17 +69,17 @@ public class TreeFileChooserTransferHandler extends TransferHandler {
 
     @Override
     public boolean canImport(TransferHandler.TransferSupport support) {
-        
+
         support.setShowDropLocation(true);
 
         if (support.isDataFlavorSupported(FilesTransferable.Files_FLAVOR)) {
             DropLocation dropLocation = support.getDropLocation();
             if (dropLocation instanceof JTable.DropLocation) {
                 return true;
-            } else if (m_components.containsKey((JComponent)support.getComponent())) {
-                m_components.get((JComponent)support.getComponent()).setBackground(Color.WHITE);
+            } else if (m_components.containsKey((JComponent) support.getComponent())) {
+                m_components.get((JComponent) support.getComponent()).setBackground(Color.WHITE);
                 return true;
-            }   
+            }
         }
 
         clearHighlights();
@@ -104,18 +104,27 @@ public class TreeFileChooserTransferHandler extends TransferHandler {
 
                 FilesTransferable transferable = (FilesTransferable) support.getTransferable().getTransferData(FilesTransferable.Files_FLAVOR);
                 ArrayList<File> transferredFiles = transferable.getFiles();
-                TreeFileChooserTableModelInterface model = (TreeFileChooserTableModelInterface) table.getModel();
-                model.setFiles(transferredFiles, index);
 
                 ArrayList<Integer> indices = new ArrayList<Integer>();
-                for(int i = 0; i<transferredFiles.size(); i++){
-                    indices.add(index+i);
+                for (int i = 0; i < transferredFiles.size(); i++) {
+                    indices.add(index + i);
                 }
 
-                
-                if(model.isCorruptionPossible(indices)){
-                    JOptionPane.showMessageDialog(null, "Existing links may be corrupted by the association(s).", "Warning", JOptionPane.WARNING_MESSAGE);
+                TreeFileChooserTableModelInterface model = (TreeFileChooserTableModelInterface) table.getModel();
+
+                if (!model.canSetFiles(indices)) {
+                    JOptionPane.showMessageDialog(null, "You are trying to overwrite raw files linked in database.", "Warning", JOptionPane.WARNING_MESSAGE);
+                    return false;
                 }
+
+                if (model.canCorruptFiles(indices)) {
+                    int reply = JOptionPane.showConfirmDialog(null, "Existing links may be corrupted by the association(s).", "Warning", JOptionPane.YES_NO_OPTION);
+                    if (reply == JOptionPane.NO_OPTION) {
+                        return false;
+                    }
+                }
+
+                model.setFiles(transferredFiles, index);
 
             } catch (Exception e) {
                 //should not happen
@@ -123,7 +132,7 @@ public class TreeFileChooserTransferHandler extends TransferHandler {
             }
         } else if (support.getComponent() instanceof DropZoneInterface) {
             try {
-                
+
                 DropZoneInterface dropZone = (DropZoneInterface) support.getComponent();
 
                 FilesTransferable transferable = (FilesTransferable) support.getTransferable().getTransferData(FilesTransferable.Files_FLAVOR);
@@ -146,7 +155,7 @@ public class TreeFileChooserTransferHandler extends TransferHandler {
 
                     }
                 }
-                
+
                 dropZone.addSamples(samples);
 
             } catch (Exception e) {

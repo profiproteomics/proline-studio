@@ -37,11 +37,16 @@ import fr.proline.studio.utils.IconManager;
 import java.awt.Dialog;
 import java.awt.Window;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.*;
 import javax.persistence.EntityManager;
 import javax.swing.JFileChooser;
+import javax.swing.JList;
+import javax.swing.JOptionPane;
 import javax.swing.tree.TreePath;
+import org.openide.util.Exceptions;
 import org.openide.util.NbPreferences;
 import org.slf4j.LoggerFactory;
 
@@ -274,7 +279,7 @@ public class CreateXICDialog extends DefaultDialog {
 
                                                     if (success) {
 
-                                                        if (runData.getStatus() == Status.LAST_DEFINED || runData.getStatus() == Status.USER_DEFINED) {
+                                                        if (runData.getStatus() == Status.LAST_DEFINED || runData.getStatus() == Status.USER_DEFINED || runData.getStatus() == Status.SYSTEM_PROPOSED) {
 
                                                             AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
 
@@ -341,6 +346,16 @@ public class CreateXICDialog extends DefaultDialog {
             } //End go through group's sample
 
         } catch (Exception e) {
+
+            PrintWriter pw = null;
+            try {
+                pw = new PrintWriter(new File("D:\\shitbag.txt"));
+            } catch (FileNotFoundException ex) {
+                Exceptions.printStackTrace(ex);
+            }
+            e.printStackTrace(pw);
+            pw.close();
+
             errorMsg = "Raw File(s) Registration Failed.";
             LoggerFactory.getLogger("ProlineStudio.ResultExplorer").error(getClass().getSimpleName() + " failed", e);
         } finally {
@@ -716,8 +731,21 @@ public class CreateXICDialog extends DefaultDialog {
                             }
                         }
                         //VDS TODO : Add popup or something to list all RS and all Spectra(if only few)  in RS that fails
-                        DataSetNode dsNode = spectraNodesPerRsId.get(failedRSIds.get(0));
-                        showErrorOnNode(dsNode, dsNode.getDataset().getName() + " at least one of the following attributes {First Time, First Scan, First Cycle} must be initialized. Remove the highlighted node from your design.");
+
+                        if (failedRSIds.size() == 1) {
+                            DataSetNode dsNode = spectraNodesPerRsId.get(failedRSIds.get(0));
+                            showErrorOnNode(dsNode, dsNode.getDataset().getName() + " at least one of the following attributes {First Time, First Scan, First Cycle} must be initialized. Remove the highlighted node from your design.");
+                        } else {
+                            ArrayList<String> failedNodes = new ArrayList<String>();
+                            
+                            for(int i=0; i<failedRSIds.size(); i++){
+                                failedNodes.add(spectraNodesPerRsId.get(failedRSIds.get(i)).toString());
+                            }
+                            
+                            JList failedList = new JList(failedNodes.toArray());
+                            
+                            JOptionPane.showMessageDialog(rootPane, failedList, "The following datasets failed spectrum check.", JOptionPane.ERROR_MESSAGE);
+                        }
                     }
                 }
             };

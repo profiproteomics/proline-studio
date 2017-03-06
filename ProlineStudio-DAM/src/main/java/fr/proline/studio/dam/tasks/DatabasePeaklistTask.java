@@ -135,7 +135,8 @@ public class DatabasePeaklistTask extends AbstractDatabaseTask {
         try {
 
             entityManagerMSI.getTransaction().begin();
-
+            // SELECT plist FROM Peaklist plist, MsiSearch msisearch, ResultSet rset 
+            // WHERE rset.id = :rsetId AND rset.msiSearch=msisearch AND msisearch.peaklist=plist
             TypedQuery<Peaklist> peaklistQuery = entityManagerMSI.createQuery("SELECT plist FROM Peaklist plist, MsiSearch msisearch, ResultSet rset WHERE rset.id = :rsetId AND rset.msiSearch=msisearch AND msisearch.peaklist=plist", Peaklist.class);
 
             peaklistQuery.setMaxResults(1);

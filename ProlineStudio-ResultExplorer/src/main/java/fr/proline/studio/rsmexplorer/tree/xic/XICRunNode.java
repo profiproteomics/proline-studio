@@ -98,7 +98,7 @@ public class XICRunNode extends AbstractNode {
                         } else {
                             //recreate a raw file from msi
 
-                            Peaklist[] peaklist = new Peaklist[1];
+                            Peaklist[] peaklistResult = new Peaklist[1];
 
                             AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
 
@@ -111,19 +111,39 @@ public class XICRunNode extends AbstractNode {
                                 public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
                                     if (success) {
 
-                                        if (peaklist[0] != null) {
+                                        if (peaklistResult[0] != null) {
+                                            Peaklist peaklist = peaklistResult[0];
 
-                                            if (peaklist[0].getRawFileIdentifier() != null && !peaklist[0].getRawFileIdentifier().equalsIgnoreCase("")) {
+                                            if (peaklist.getRawFileIdentifier() != null && !peaklist.getRawFileIdentifier().equalsIgnoreCase("")) {
 
                                                 //Previous RawFileIdentifier exists
-                                                ((RunInfoData) getData()).setMessage("Search " + peaklist[0].getRawFileIdentifier());
+                                                ((RunInfoData) getData()).setMessage("Search " + peaklist.getRawFileIdentifier());
                                                 ((DefaultTreeModel) m_tree.getModel()).nodeChanged(xicRunNode);
-                                                searchPotentialRawFiles(peaklist[0].getRawFileIdentifier(), tableModel, Search.BASED_ON_IDENTIFIER, initListener);
+                                                searchPotentialRawFiles(peaklist.getRawFileIdentifier(), tableModel, Search.BASED_ON_IDENTIFIER, initListener);
 
-                                            } else if (peaklist[0].getPath() != null && !peaklist[0].getPath().equalsIgnoreCase("")) {
+                                            } else if (peaklist.getPath() != null && !peaklist.getPath().equalsIgnoreCase("")) {
 
-                                                //Previous RawFileIdentifier does not exist so we will try to search for the peaklist path!
-                                                String searchString = peaklist[0].getPath();
+                                                //Previous RawFileIdentifier does not exist so we will try to search for the peaklistResult path!
+                                                String searchString = peaklist.getPath();
+
+                                                // remove .raw , or .raw-1.mgf
+                                                int indexRaw = searchString.toLowerCase().indexOf(".raw");
+                                                if (indexRaw != -1) {
+                                                    searchString = searchString.substring(0, indexRaw);
+                                                }
+                                                // remove .mgf, ...
+                                                int indexMgf = searchString.toLowerCase().indexOf(".mgf");
+                                                if (indexMgf != -1) {
+                                                    searchString = searchString.substring(0, indexMgf);
+                                                }
+
+                                                // remove all code before \ / or ~
+                                                int index = searchString.lastIndexOf('/');
+                                                index = Math.max(index, searchString.lastIndexOf('\\'));
+                                                index = Math.max(index, searchString.lastIndexOf('~'));
+                                                if (index != -1) {
+                                                    searchString = searchString.substring(index + 1);
+                                                }
 
                                                 ((RunInfoData) getData()).setPeakListPath(searchString);
 
@@ -151,7 +171,7 @@ public class XICRunNode extends AbstractNode {
                             };
 
                             DatabasePeaklistTask peaklistTask = new DatabasePeaklistTask(callback);
-                            peaklistTask.initLoadPeaklistForRS(dataset.getResultSetId(), dataset.getProject().getId(), peaklist);
+                            peaklistTask.initLoadPeaklistForRS(dataset.getResultSetId(), dataset.getProject().getId(), peaklistResult);
                             AccessDatabaseThread.getAccessDatabaseThread().addTask(peaklistTask);
                         }
                     } else {

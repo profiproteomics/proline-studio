@@ -37,16 +37,13 @@ import fr.proline.studio.utils.IconManager;
 import java.awt.Dialog;
 import java.awt.Window;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.*;
 import javax.persistence.EntityManager;
 import javax.swing.JFileChooser;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.tree.TreePath;
-import org.openide.util.Exceptions;
 import org.openide.util.NbPreferences;
 import org.slf4j.LoggerFactory;
 
@@ -708,7 +705,9 @@ public class CreateXICDialog extends DefaultDialog {
             if (type == AbstractNode.NodeTypes.BIOLOGICAL_SAMPLE_ANALYSIS) {
                 Long rsID = ((DataSetNode) currentChild).getDataset().getResultSetId();
 
-                if (((XICBiologicalSampleAnalysisNode) currentChild).getVerificationStatus() == XICBiologicalSampleAnalysisNode.SpectrumVerificationStatus.NOT_VERIFIED) {
+                XICBiologicalSampleAnalysisNode.SpectrumVerificationStatus verificationStatus = ((XICBiologicalSampleAnalysisNode) currentChild).getVerificationStatus();
+                
+                if (verificationStatus == XICBiologicalSampleAnalysisNode.SpectrumVerificationStatus.NOT_VERIFIED || verificationStatus == XICBiologicalSampleAnalysisNode.SpectrumVerificationStatus.UNSUCCESSFULLY_VERIFIED) {
                     spectraNodesPerRsId.put(rsID, (DataSetNode) currentChild);
                 }
 

@@ -7,7 +7,6 @@ import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.net.URL;
 import javax.swing.*;
 import org.slf4j.LoggerFactory;
 

@@ -74,6 +74,11 @@ public class RunInfoData extends AbstractData {
     }
 
     public boolean isRunInfoInDatabase() {
+
+        if (m_linkedRawFile != null) {
+            return true;
+        }
+
         if (m_selectedRawFile != null && m_selectedRawFile.getOwnerId() != 0) {
             return true;
         }

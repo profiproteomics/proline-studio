@@ -238,24 +238,34 @@ public class CreateXICDialog extends DefaultDialog {
 
             final Object mutexFileRegistered = new Object();
 
-            Enumeration xicGrps = m_finalXICDesignNode.children();
-            while (xicGrps.hasMoreElements() && errorMsg == null) {
-                AbstractNode grpNode = (AbstractNode) xicGrps.nextElement();
+            Enumeration xicGroups = m_finalXICDesignNode.children();
+            
+            while (xicGroups.hasMoreElements() && errorMsg == null) {
+                AbstractNode grpNode = (AbstractNode) xicGroups.nextElement();
+                
                 //Iterate over Samples
-                Enumeration grpSpls = grpNode.children();
-                while (grpSpls.hasMoreElements() && errorMsg == null) {
-                    AbstractNode bioSplNode = (AbstractNode) grpSpls.nextElement();
+                Enumeration groupSamples = grpNode.children();
+                while (groupSamples.hasMoreElements() && errorMsg == null) {
+                    
+                    AbstractNode groupSampleNode = (AbstractNode) groupSamples.nextElement();
+                    
                     //Iterate over SampleAnalysis
-                    Enumeration identRSMs = bioSplNode.children();
-                    while (identRSMs.hasMoreElements()) {
-                        AbstractNode bioSplAnalysisNode = (AbstractNode) identRSMs.nextElement();
+                    Enumeration identiResultSummaries = groupSampleNode.children();
+                    
+                    while (identiResultSummaries.hasMoreElements()) {
+                        
+                        AbstractNode biologicalSampleAnalysisNode = (AbstractNode) identiResultSummaries.nextElement();
 
-                        Long rsID = ((DataSetNode) bioSplAnalysisNode).getDataset().getResultSetId();
+                        Long rsID = ((DataSetNode) biologicalSampleAnalysisNode).getDataset().getResultSetId();
 
-                        Enumeration runNodes = bioSplAnalysisNode.children();
+                        Enumeration runNodes = biologicalSampleAnalysisNode.children();
+                        
                         while (runNodes.hasMoreElements()) {
+                            
                             XICRunNode runNode = (XICRunNode) runNodes.nextElement();
+                            
                             RunInfoData runData = (RunInfoData) runNode.getData();
+                            
                             if (!runData.isRunInfoInDatabase()) {
                                 // RawFile does not exists, create it
                                 boolean isJMSDefined = JMSConnectionManager.getJMSConnectionManager().isJMSDefined();
@@ -264,7 +274,7 @@ public class CreateXICDialog extends DefaultDialog {
                                         // TODO : get the right instrumentId !!! 
                                         long instrumentID = 1;
                                         if (isJMSDefined) {
-                                            AbstractJMSCallback callback = new AbstractJMSCallback() {
+                                            AbstractJMSCallback registerRawFileCallback = new AbstractJMSCallback() {
 
                                                 @Override
                                                 public boolean mustBeCalledInAWT() {
@@ -281,7 +291,7 @@ public class CreateXICDialog extends DefaultDialog {
 
                                                         if (runData.getStatus() == Status.LAST_DEFINED || runData.getStatus() == Status.USER_DEFINED || runData.getStatus() == Status.SYSTEM_PROPOSED) {
 
-                                                            AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
+                                                            AbstractDatabaseCallback databasePeaklistCallback = new AbstractDatabaseCallback() {
 
                                                                 @Override
                                                                 public boolean mustBeCalledInAWT() {
@@ -295,7 +305,7 @@ public class CreateXICDialog extends DefaultDialog {
                                                             };
 
                                                             // ask asynchronous loading of data
-                                                            DatabasePeaklistTask task = new DatabasePeaklistTask(callback);
+                                                            DatabasePeaklistTask task = new DatabasePeaklistTask(databasePeaklistCallback);
                                                             task.initUpdatePeaklistIdentifier(pID, rsID, runData.getSelectedRawFile().getIdentifier());
                                                             AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
 
@@ -304,7 +314,7 @@ public class CreateXICDialog extends DefaultDialog {
                                                 }
                                             };
 
-                                            fr.proline.studio.dpm.task.jms.RegisterRawFileTask task = new fr.proline.studio.dpm.task.jms.RegisterRawFileTask(callback, instrumentID, project.getOwner().getId(), runData);
+                                            fr.proline.studio.dpm.task.jms.RegisterRawFileTask task = new fr.proline.studio.dpm.task.jms.RegisterRawFileTask(registerRawFileCallback, instrumentID, project.getOwner().getId(), runData);
                                             AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
                                         } else {
                                             AbstractServiceCallback callback = new AbstractServiceCallback() {
@@ -331,13 +341,14 @@ public class CreateXICDialog extends DefaultDialog {
 
                                 } catch (InterruptedException ie) {
                                     // should not happen
+                                    ie.printStackTrace();
                                 }
                             }
 
                             //  then map IdentificationDataset to RawFile and Run
                             if (runData.getRun().getId() > -1) { // case runId = -1 when coming from an existing xic, no need to register again the run_identification
                                 DatabaseRunsTask registerRunIdsTask = new DatabaseRunsTask(null);
-                                registerRunIdsTask.initRegisterIdentificationDatasetRun(((DataSetData) bioSplAnalysisNode.getData()).getDataset().getId(), runData.getSelectedRawFile(), runData.getRun());
+                                registerRunIdsTask.initRegisterIdentificationDatasetRun(((DataSetData) biologicalSampleAnalysisNode.getData()).getDataset().getId(), runData.getSelectedRawFile(), runData.getRun());
                                 registerRunIdsTask.fetchData();
                             }
                         }

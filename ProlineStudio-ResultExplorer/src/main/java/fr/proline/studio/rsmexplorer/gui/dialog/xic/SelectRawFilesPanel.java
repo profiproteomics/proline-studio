@@ -55,7 +55,6 @@ import javax.swing.tree.DefaultTreeModel;
  */
 public class SelectRawFilesPanel extends JPanel implements XICRunNodeInitListener {
 
-    private static final int INDEX_DIFFERENCE = 3;
     private static final String USER_DEFINED_ASSOCIATION = "User Defined Association";
     private static final String MISSING_ASSOCIATION = "Missing Association";
     private static final String AUTOMATIC_ASSOCIATION = "System Proposed Association";
@@ -241,7 +240,7 @@ public class SelectRawFilesPanel extends JPanel implements XICRunNodeInitListene
     private JPanel createDropZonePanel() {
         JPanel panel = new JPanel();
         panel.setLayout(new GridLayout(1, 2, 5, 5));
-        panel.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createTitledBorder("Automatic Raw File Association"), BorderFactory.createEmptyBorder(5, 5, 5, 5)));
+        panel.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createTitledBorder("Automatic mzDB File Association"), BorderFactory.createEmptyBorder(5, 5, 5, 5)));
 
         m_dropZoneInfo = new XICDropZoneInfo();
         m_dropZone = new XICDropZone(m_transferHandler);
@@ -410,7 +409,7 @@ public class SelectRawFilesPanel extends JPanel implements XICRunNodeInitListene
         public static final int COLTYPE_PEAKLIST = 4;
         public static final int COLTYPE_ASSOCIATION_SOURCE = 5;
 
-        private static final String[] columnNames = {"Group", "Sample", "Sample Analysis", "Raw File", "Peaklist", "Association Source"};
+        private static final String[] columnNames = {"Group", "Sample", "Sample Analysis", "mzDB File", "Peaklist", "Association Source"};
 
         private XICDropZone m_dropZone = null;
 

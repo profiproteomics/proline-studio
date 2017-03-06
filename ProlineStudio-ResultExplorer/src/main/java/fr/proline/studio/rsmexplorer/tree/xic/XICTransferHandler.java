@@ -352,7 +352,7 @@ public class XICTransferHandler extends TransferHandler {
 
                     }
                     
-                    childIndex = 0;
+                    
 
                     Iterator iter = order.iterator();
                     while (iter.hasNext()) {

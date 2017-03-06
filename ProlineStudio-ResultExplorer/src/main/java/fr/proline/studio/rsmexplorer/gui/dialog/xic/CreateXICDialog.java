@@ -239,33 +239,33 @@ public class CreateXICDialog extends DefaultDialog {
             final Object mutexFileRegistered = new Object();
 
             Enumeration xicGroups = m_finalXICDesignNode.children();
-            
+
             while (xicGroups.hasMoreElements() && errorMsg == null) {
                 AbstractNode grpNode = (AbstractNode) xicGroups.nextElement();
-                
+
                 //Iterate over Samples
                 Enumeration groupSamples = grpNode.children();
                 while (groupSamples.hasMoreElements() && errorMsg == null) {
-                    
+
                     AbstractNode groupSampleNode = (AbstractNode) groupSamples.nextElement();
-                    
+
                     //Iterate over SampleAnalysis
                     Enumeration identiResultSummaries = groupSampleNode.children();
-                    
+
                     while (identiResultSummaries.hasMoreElements()) {
-                        
+
                         AbstractNode biologicalSampleAnalysisNode = (AbstractNode) identiResultSummaries.nextElement();
 
                         Long rsID = ((DataSetNode) biologicalSampleAnalysisNode).getDataset().getResultSetId();
 
                         Enumeration runNodes = biologicalSampleAnalysisNode.children();
-                        
+
                         while (runNodes.hasMoreElements()) {
-                            
+
                             XICRunNode runNode = (XICRunNode) runNodes.nextElement();
-                            
+
                             RunInfoData runData = (RunInfoData) runNode.getData();
-                            
+
                             if (!runData.isRunInfoInDatabase()) {
                                 // RawFile does not exists, create it
                                 boolean isJMSDefined = JMSConnectionManager.getJMSConnectionManager().isJMSDefined();
@@ -289,27 +289,29 @@ public class CreateXICDialog extends DefaultDialog {
 
                                                     if (success) {
 
-                                                        if (runData.getStatus() == Status.LAST_DEFINED || runData.getStatus() == Status.USER_DEFINED || runData.getStatus() == Status.SYSTEM_PROPOSED) {
+                                                        /*
+                                                         if (runData.getStatus() == Status.LAST_DEFINED || runData.getStatus() == Status.USER_DEFINED || runData.getStatus() == Status.SYSTEM_PROPOSED) {
 
-                                                            AbstractDatabaseCallback databasePeaklistCallback = new AbstractDatabaseCallback() {
+                                                         AbstractDatabaseCallback databasePeaklistCallback = new AbstractDatabaseCallback() {
 
-                                                                @Override
-                                                                public boolean mustBeCalledInAWT() {
-                                                                    return true;
-                                                                }
+                                                         @Override
+                                                         public boolean mustBeCalledInAWT() {
+                                                         return true;
+                                                         }
 
-                                                                @Override
-                                                                public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
-                                                                    ;
-                                                                }
-                                                            };
+                                                         @Override
+                                                         public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
+                                                         ;
+                                                         }
+                                                         };
 
-                                                            // ask asynchronous loading of data
-                                                            DatabasePeaklistTask task = new DatabasePeaklistTask(databasePeaklistCallback);
-                                                            task.initUpdatePeaklistIdentifier(pID, rsID, runData.getSelectedRawFile().getIdentifier());
-                                                            AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
+                                                         // ask asynchronous loading of data
+                                                         DatabasePeaklistTask task = new DatabasePeaklistTask(databasePeaklistCallback);
+                                                         task.initUpdatePeaklistIdentifier(pID, rsID, runData.getSelectedRawFile().getIdentifier());
+                                                         AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
 
-                                                        }
+                                                         }
+                                                         */
                                                     }
                                                 }
                                             };
@@ -345,6 +347,28 @@ public class CreateXICDialog extends DefaultDialog {
                                 }
                             }
 
+                            if (runData.getStatus() == Status.LAST_DEFINED || runData.getStatus() == Status.USER_DEFINED || runData.getStatus() == Status.SYSTEM_PROPOSED) {
+
+                                AbstractDatabaseCallback databasePeaklistCallback = new AbstractDatabaseCallback() {
+
+                                    @Override
+                                    public boolean mustBeCalledInAWT() {
+                                        return true;
+                                    }
+
+                                    @Override
+                                    public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
+                                        ;
+                                    }
+                                };
+
+                                // ask asynchronous loading of data
+                                DatabasePeaklistTask task = new DatabasePeaklistTask(databasePeaklistCallback);
+                                task.initUpdatePeaklistIdentifier(pID, rsID, runData.getSelectedRawFile().getIdentifier());
+                                AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
+
+                            }
+
                             //  then map IdentificationDataset to RawFile and Run
                             if (runData.getRun().getId() > -1) { // case runId = -1 when coming from an existing xic, no need to register again the run_identification
                                 DatabaseRunsTask registerRunIdsTask = new DatabaseRunsTask(null);
@@ -357,16 +381,6 @@ public class CreateXICDialog extends DefaultDialog {
             } //End go through group's sample
 
         } catch (Exception e) {
-
-            PrintWriter pw = null;
-            try {
-                pw = new PrintWriter(new File("D:\\shitbag.txt"));
-            } catch (FileNotFoundException ex) {
-                Exceptions.printStackTrace(ex);
-            }
-            e.printStackTrace(pw);
-            pw.close();
-
             errorMsg = "Raw File(s) Registration Failed.";
             LoggerFactory.getLogger("ProlineStudio.ResultExplorer").error(getClass().getSimpleName() + " failed", e);
         } finally {
@@ -748,13 +762,13 @@ public class CreateXICDialog extends DefaultDialog {
                             showErrorOnNode(dsNode, dsNode.getDataset().getName() + " at least one of the following attributes {First Time, First Scan, First Cycle} must be initialized. Remove the highlighted node from your design.");
                         } else {
                             ArrayList<String> failedNodes = new ArrayList<String>();
-                            
-                            for(int i=0; i<failedRSIds.size(); i++){
+
+                            for (int i = 0; i < failedRSIds.size(); i++) {
                                 failedNodes.add(spectraNodesPerRsId.get(failedRSIds.get(i)).toString());
                             }
-                            
+
                             JList failedList = new JList(failedNodes.toArray());
-                            
+
                             JOptionPane.showMessageDialog(rootPane, failedList, "The following datasets failed spectrum check.", JOptionPane.ERROR_MESSAGE);
                         }
                     }

@@ -4,6 +4,7 @@ import fr.proline.studio.rsmexplorer.tree.xic.XICDesignTree;
 import fr.proline.core.orm.uds.Aggregation;
 import fr.proline.core.orm.uds.Dataset;
 import fr.proline.core.orm.uds.Project;
+import fr.proline.core.orm.uds.RawFile;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.core.orm.util.DataStoreConnectorFactory;
 import fr.proline.studio.dam.AccessDatabaseThread;
@@ -194,10 +195,16 @@ public class CreateXICDialog extends DefaultDialog {
                     ;
                 }
             };
+            
+            RawFile rawFile = (runInfoData.getSelectedRawFile()==null) ? runInfoData.getLinkedRawFile() : runInfoData.getSelectedRawFile();
+            
+            if(rawFile==null){
+                return;
+            }
 
             // ask asynchronous loading of data
             DatabasePeaklistTask task = new DatabasePeaklistTask(databasePeaklistCallback);
-            task.initUpdatePeaklistIdentifier(projectID, resultSetID, runInfoData.getSelectedRawFile().getIdentifier());
+            task.initUpdatePeaklistIdentifier(projectID, resultSetID, rawFile.getIdentifier());
             AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
         }
     }

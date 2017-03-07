@@ -179,38 +179,60 @@ public class CreateXICDialog extends DefaultDialog {
         return m_finalXICDesignNode;
     }
 
-    /*
-     * Return map reflecting JSON obhject for experimental_design :
-     "biological_samples": [{
-     "name": "ff 0",
-     "number": 0
-     }],
-     "master_quant_channels": [{
-     "quant_channels": [{
-     "ident_result_summary_id": 6,
-     "number": 0,
-     "sample_number": 0
-     }],
-     "name": "TEST 0206",
-     "number": 0
-     }],
-     "group_setups": [{
-     "biological_groups": [{
-     "name": "br 0",
-     "number": 0,
-     "sample_numbers": [0]
-     }],
-     "ratio_definitions": [{
-     "denominator_group_number": 0,
-     "numerator_group_number": 0,
-     "number": 0
-     }],
-     "name": "TEST 0206",
-     "number": 0
-     }]
+    private void updatePeaklist(RunInfoData runInfoData, long projectID, long resultSetID) {
+        if (runInfoData.getStatus() == Status.LAST_DEFINED || runInfoData.getStatus() == Status.USER_DEFINED || runInfoData.getStatus() == Status.SYSTEM_PROPOSED) {
+
+            AbstractDatabaseCallback databasePeaklistCallback = new AbstractDatabaseCallback() {
+
+                @Override
+                public boolean mustBeCalledInAWT() {
+                    return true;
+                }
+
+                @Override
+                public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
+                    ;
+                }
+            };
+
+            // ask asynchronous loading of data
+            DatabasePeaklistTask task = new DatabasePeaklistTask(databasePeaklistCallback);
+            task.initUpdatePeaklistIdentifier(projectID, resultSetID, runInfoData.getSelectedRawFile().getIdentifier());
+            AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
+        }
+    }
+        /*
+         * Return map reflecting JSON obhject for experimental_design :
+         "biological_samples": [{
+         "name": "ff 0",
+         "number": 0
+         }],
+         "master_quant_channels": [{
+         "quant_channels": [{
+         "ident_result_summary_id": 6,
+         "number": 0,
+         "sample_number": 0
+         }],
+         "name": "TEST 0206",
+         "number": 0
+         }],
+         "group_setups": [{
+         "biological_groups": [{
+         "name": "br 0",
+         "number": 0,
+         "sample_numbers": [0]
+         }],
+         "ratio_definitions": [{
+         "denominator_group_number": 0,
+         "numerator_group_number": 0,
+         "number": 0
+         }],
+         "name": "TEST 0206",
+         "number": 0
+         }]
      
-     * @throws IllegalAccessException 
-     */
+         * @throws IllegalAccessException 
+         */
     private HashMap<Long, Long> getRunIdForRSMs(Collection<Long> rsmIDs) {
         //Get Run Ids for specified RSMs
         Long pID = ProjectExplorerPanel.getProjectExplorerPanel().getSelectedProject().getId();
@@ -286,29 +308,8 @@ public class CreateXICDialog extends DefaultDialog {
 
                                                     if (success) {
 
-                                                        /*
-                                                         if (runData.getStatus() == Status.LAST_DEFINED || runData.getStatus() == Status.USER_DEFINED || runData.getStatus() == Status.SYSTEM_PROPOSED) {
+                                                        updatePeaklist(runData, pID, rsID);
 
-                                                         AbstractDatabaseCallback databasePeaklistCallback = new AbstractDatabaseCallback() {
-
-                                                         @Override
-                                                         public boolean mustBeCalledInAWT() {
-                                                         return true;
-                                                         }
-
-                                                         @Override
-                                                         public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
-                                                         ;
-                                                         }
-                                                         };
-
-                                                         // ask asynchronous loading of data
-                                                         DatabasePeaklistTask task = new DatabasePeaklistTask(databasePeaklistCallback);
-                                                         task.initUpdatePeaklistIdentifier(pID, rsID, runData.getSelectedRawFile().getIdentifier());
-                                                         AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
-
-                                                         }
-                                                         */
                                                     }
                                                 }
                                             };
@@ -342,28 +343,8 @@ public class CreateXICDialog extends DefaultDialog {
                                     // should not happen
                                     ie.printStackTrace();
                                 }
-                            }
-
-                            if (runData.getStatus() == Status.LAST_DEFINED || runData.getStatus() == Status.USER_DEFINED || runData.getStatus() == Status.SYSTEM_PROPOSED) {
-
-                                AbstractDatabaseCallback databasePeaklistCallback = new AbstractDatabaseCallback() {
-
-                                    @Override
-                                    public boolean mustBeCalledInAWT() {
-                                        return true;
-                                    }
-
-                                    @Override
-                                    public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
-                                        ;
-                                    }
-                                };
-
-                                // ask asynchronous loading of data
-                                DatabasePeaklistTask task = new DatabasePeaklistTask(databasePeaklistCallback);
-                                task.initUpdatePeaklistIdentifier(pID, rsID, runData.getSelectedRawFile().getIdentifier());
-                                AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
-
+                            } else {
+                                this.updatePeaklist(runData, pID, rsID);
                             }
 
                             //  then map IdentificationDataset to RawFile and Run
@@ -706,7 +687,7 @@ public class CreateXICDialog extends DefaultDialog {
                 Long rsID = ((DataSetNode) currentChild).getDataset().getResultSetId();
 
                 XICBiologicalSampleAnalysisNode.SpectrumVerificationStatus verificationStatus = ((XICBiologicalSampleAnalysisNode) currentChild).getVerificationStatus();
-                
+
                 if (verificationStatus == XICBiologicalSampleAnalysisNode.SpectrumVerificationStatus.NOT_VERIFIED || verificationStatus == XICBiologicalSampleAnalysisNode.SpectrumVerificationStatus.UNSUCCESSFULLY_VERIFIED) {
                     spectraNodesPerRsId.put(rsID, (DataSetNode) currentChild);
                 }

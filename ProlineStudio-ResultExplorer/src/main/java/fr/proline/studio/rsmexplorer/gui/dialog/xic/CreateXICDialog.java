@@ -195,10 +195,10 @@ public class CreateXICDialog extends DefaultDialog {
                     ;
                 }
             };
-            
-            RawFile rawFile = (runInfoData.getSelectedRawFile()==null) ? runInfoData.getLinkedRawFile() : runInfoData.getSelectedRawFile();
-            
-            if(rawFile==null){
+
+            RawFile rawFile = (runInfoData.getSelectedRawFile() == null) ? runInfoData.getLinkedRawFile() : runInfoData.getSelectedRawFile();
+
+            if (rawFile == null) {
                 return;
             }
 
@@ -208,38 +208,39 @@ public class CreateXICDialog extends DefaultDialog {
             AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
         }
     }
-        /*
-         * Return map reflecting JSON obhject for experimental_design :
-         "biological_samples": [{
-         "name": "ff 0",
-         "number": 0
-         }],
-         "master_quant_channels": [{
-         "quant_channels": [{
-         "ident_result_summary_id": 6,
-         "number": 0,
-         "sample_number": 0
-         }],
-         "name": "TEST 0206",
-         "number": 0
-         }],
-         "group_setups": [{
-         "biological_groups": [{
-         "name": "br 0",
-         "number": 0,
-         "sample_numbers": [0]
-         }],
-         "ratio_definitions": [{
-         "denominator_group_number": 0,
-         "numerator_group_number": 0,
-         "number": 0
-         }],
-         "name": "TEST 0206",
-         "number": 0
-         }]
+    /*
+     * Return map reflecting JSON obhject for experimental_design :
+     "biological_samples": [{
+     "name": "ff 0",
+     "number": 0
+     }],
+     "master_quant_channels": [{
+     "quant_channels": [{
+     "ident_result_summary_id": 6,
+     "number": 0,
+     "sample_number": 0
+     }],
+     "name": "TEST 0206",
+     "number": 0
+     }],
+     "group_setups": [{
+     "biological_groups": [{
+     "name": "br 0",
+     "number": 0,
+     "sample_numbers": [0]
+     }],
+     "ratio_definitions": [{
+     "denominator_group_number": 0,
+     "numerator_group_number": 0,
+     "number": 0
+     }],
+     "name": "TEST 0206",
+     "number": 0
+     }]
      
-         * @throws IllegalAccessException 
-         */
+     * @throws IllegalAccessException 
+     */
+
     private HashMap<Long, Long> getRunIdForRSMs(Collection<Long> rsmIDs) {
         //Get Run Ids for specified RSMs
         Long pID = ProjectExplorerPanel.getProjectExplorerPanel().getSelectedProject().getId();
@@ -729,25 +730,25 @@ public class CreateXICDialog extends DefaultDialog {
                     if (success) {
 
                         for (Map.Entry<Long, DataSetNode> entry : spectraNodesPerRsId.entrySet()) {
-                            ((XICBiologicalSampleAnalysisNode) entry.getValue()).setVerificationStatus(XICBiologicalSampleAnalysisNode.SpectrumVerificationStatus.SUCCESSFULLY_VERIFIED);
-                        }
-
-                        displayDefineRawFiles();
-
-                    } else {
-                        for (Map.Entry<Long, DataSetNode> entry : spectraNodesPerRsId.entrySet()) {
                             if (failedSpectraPerRSIds.containsKey(entry.getKey())) {
                                 ((XICBiologicalSampleAnalysisNode) entry.getValue()).setVerificationStatus(XICBiologicalSampleAnalysisNode.SpectrumVerificationStatus.SUCCESSFULLY_VERIFIED);
                             } else {
                                 ((XICBiologicalSampleAnalysisNode) entry.getValue()).setVerificationStatus(XICBiologicalSampleAnalysisNode.SpectrumVerificationStatus.UNSUCCESSFULLY_VERIFIED);
                             }
                         }
-                        //VDS TODO : Add popup or something to list all RS and all Spectra(if only few)  in RS that fails
 
-                        if (failedRSIds.size() == 1) {
+                        if (failedRSIds.size() == 0) {
+
+                            for (Map.Entry<Long, DataSetNode> entry : spectraNodesPerRsId.entrySet()) {
+                                ((XICBiologicalSampleAnalysisNode) entry.getValue()).setVerificationStatus(XICBiologicalSampleAnalysisNode.SpectrumVerificationStatus.SUCCESSFULLY_VERIFIED);
+                            }
+
+                            displayDefineRawFiles();
+
+                        } else if (failedRSIds.size() == 1) {
                             DataSetNode dsNode = spectraNodesPerRsId.get(failedRSIds.get(0));
                             showErrorOnNode(dsNode, dsNode.getDataset().getName() + " at least one of the following attributes {First Time, First Scan, First Cycle} must be initialized. Remove the highlighted node from your design.");
-                        } else {
+                        } else if (failedRSIds.size() > 1) {
                             ArrayList<String> failedNodes = new ArrayList<String>();
 
                             for (int i = 0; i < failedRSIds.size(); i++) {

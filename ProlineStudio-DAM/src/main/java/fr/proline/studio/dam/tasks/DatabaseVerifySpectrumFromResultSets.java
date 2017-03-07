@@ -39,7 +39,6 @@ public class DatabaseVerifySpectrumFromResultSets extends AbstractDatabaseTask {
     public boolean fetchData() {
 
         EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(m_projectID).createEntityManager();
-        boolean foundErrSpectra = false;
         try {
             
             entityManagerMSI.getTransaction().begin();
@@ -51,7 +50,6 @@ public class DatabaseVerifySpectrumFromResultSets extends AbstractDatabaseTask {
                 
             List<Object[]> errSpectrumIDs = spectrumQuery.getResultList();
             if(errSpectrumIDs != null && !errSpectrumIDs.isEmpty()){
-                foundErrSpectra = true;
                 for(Object[] nextErrSp : errSpectrumIDs){
                     Long spectrumID = (Long)nextErrSp[0];
                     Long rsId = (Long)nextErrSp[1];
@@ -65,8 +63,7 @@ public class DatabaseVerifySpectrumFromResultSets extends AbstractDatabaseTask {
             
             entityManagerMSI.getTransaction().commit();
 
-        } catch (Exception e) {
-            foundErrSpectra = true;            
+        } catch (Exception e) {        
             m_logger.error(getClass().getSimpleName() + " failed", e);
             m_taskError = new TaskError(e);
             try {
@@ -76,14 +73,14 @@ public class DatabaseVerifySpectrumFromResultSets extends AbstractDatabaseTask {
             }
             if(m_failedResultSetIDs.isEmpty())
                 m_failedResultSetIDs.addAll(m_resultSetIDs);
-            return !foundErrSpectra;
+            return false;
         } finally {
 
             entityManagerMSI.close();
 
         }
 
-        return !foundErrSpectra;
+        return true;
     }
 
 }

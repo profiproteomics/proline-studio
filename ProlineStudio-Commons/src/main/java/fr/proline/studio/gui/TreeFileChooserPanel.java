@@ -19,6 +19,7 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JToolBar;
 import javax.swing.JTree;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
@@ -102,6 +103,8 @@ public class TreeFileChooserPanel extends JPanel {
         c.weighty = 0.0;
         
         JButton updateButton = new JButton(IconManager.getIcon(IconManager.IconType.REFRESH));
+        updateButton.setFocusPainted(false);
+        updateButton.setOpaque(true);
         updateButton.addActionListener(new ActionListener() {
 
             @Override
@@ -109,7 +112,13 @@ public class TreeFileChooserPanel extends JPanel {
                 updateTree();
             }
         });
-        add(updateButton, c);
+        
+        JToolBar toolbar = new JToolBar();
+        toolbar.setFloatable(false);
+        
+        toolbar.add(updateButton);
+        
+        add(toolbar, c);
         
         c.weightx = 0.0;
         c.weighty = 0.0;

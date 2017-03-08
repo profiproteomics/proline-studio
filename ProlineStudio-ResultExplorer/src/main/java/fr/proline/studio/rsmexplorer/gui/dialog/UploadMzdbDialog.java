@@ -88,7 +88,7 @@ public class UploadMzdbDialog extends DefaultDialog {
         setSize(new Dimension(360, 480));
         setResizable(true);
 
-        this.setHelpURL(null);
+        this.setDocumentationSuffix(null);
 
         setButtonVisible(BUTTON_CANCEL, true);
         setButtonName(BUTTON_OK, "OK");

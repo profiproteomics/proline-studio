@@ -44,7 +44,7 @@ public class DefaultDialog extends javax.swing.JDialog {
     
     protected int m_buttonClicked = BUTTON_CANCEL;
     
-    private String m_helpURL = null;
+    private String m_documentationSuffix = null;
      
     /**
      * Creates new form AbstractDialog
@@ -99,8 +99,8 @@ public class DefaultDialog extends javax.swing.JDialog {
 
     }
 
-    public void setHelpURL(String helpURL) {
-        m_helpURL = helpURL;
+    public void setDocumentationSuffix(String documentationSuffix) {
+        m_documentationSuffix = documentationSuffix;
     }
     
     public void setImageInfo(JPanel sourcePanel, int x, int y, int width, int height) {
@@ -448,7 +448,7 @@ public class DefaultDialog extends javax.swing.JDialog {
     
     private void helpButtonActionPerformed() {
         // Show help
-        if (m_helpURL == null) {
+        if (m_documentationSuffix == null) {
             LoggerFactory.getLogger("ProlineStudio.Commons").error(getClass().getSimpleName() + " failed");
             return; // should not happen
         }
@@ -456,7 +456,7 @@ public class DefaultDialog extends javax.swing.JDialog {
 
             try {
                 //Desktop.getDesktop().browse(new URL(MiscellaneousUtils.convertURLToCurrentHelp(m_helpURL)).toURI());
-                Desktop.getDesktop().browse(MiscellaneousUtils.createRedirectTempFile(m_helpURL));
+                Desktop.getDesktop().browse(MiscellaneousUtils.createRedirectTempFile(m_documentationSuffix));
             } catch (Exception ex) {
                 LoggerFactory.getLogger("ProlineStudio.Commons").error(getClass().getSimpleName() + " failed", ex);
             }

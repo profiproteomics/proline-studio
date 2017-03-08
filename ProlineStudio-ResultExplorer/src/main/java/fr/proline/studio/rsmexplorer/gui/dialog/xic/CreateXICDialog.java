@@ -92,11 +92,7 @@ public class CreateXICDialog extends DefaultDialog {
 
         setTitle("XIC Quantitation Wizard");
 
-        try {
-            setHelpURL(new File(".").getCanonicalPath() + File.separatorChar + "Documentation" + File.separatorChar + "Proline_UserGuide_1.4RC1.docx.html#id.2dlolyb");
-        } catch (IOException ex) {
-            ;
-        }
+        setDocumentationSuffix("id.2dlolyb");
 
         setSize(1600, 768);
         setResizable(true);

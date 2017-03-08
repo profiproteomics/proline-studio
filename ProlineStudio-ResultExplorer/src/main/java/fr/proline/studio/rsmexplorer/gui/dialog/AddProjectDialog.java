@@ -79,12 +79,8 @@ public class AddProjectDialog extends DefaultDialog {
             setTitle("Add Project");
 
             setButtonVisible(BUTTON_HELP, true);
-            
-            try {
-                setHelpURL(new File(".").getCanonicalPath() + File.separatorChar + "Documentation" + File.separatorChar + "Proline_UserGuide_1.4RC1.docx.html#id.49x2ik5");
-            } catch (IOException ex) {
-                ;
-            }
+
+            setDocumentationSuffix("id.49x2ik5");
 
         } else {
             m_nameTextField.setText(p.getName());

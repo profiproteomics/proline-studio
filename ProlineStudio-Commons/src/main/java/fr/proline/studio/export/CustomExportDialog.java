@@ -136,11 +136,8 @@ public class CustomExportDialog extends DefaultDialog implements CollapseListene
         setTitle("Export");
 
         setButtonVisible(BUTTON_HELP, true);
-        try {
-            setHelpURL(new File(".").getCanonicalPath() + File.separatorChar + "Documentation" + File.separatorChar + "Proline_UserGuide_1.4RC1.docx.html#id.37m2jsg");
-        } catch (IOException ex) {
-            ;
-        }
+
+        setDocumentationSuffix("id.37m2jsg");
 
         Preferences preferences = NbPreferences.root();
         String defaultExportPath = preferences.get("DefaultExcelExportPath", System.getProperty("user.home"));
@@ -380,7 +377,7 @@ public class CustomExportDialog extends DefaultDialog implements CollapseListene
                     tableScrollPane.setViewportView(table);
 					// add the data into the model
 
-					// ---add ability to enable/disable individual tabs
+                    // ---add ability to enable/disable individual tabs
                     //				m_tabbedPane.setEnabledAt(i, defaultParam.sheets[i].default_displayed); // true if from a saved file also
                     //m_tabbedPane.setToolTipTextAt(i, "Right click to Enable/Disable");
                     // now add the fields
@@ -816,7 +813,7 @@ public class CustomExportDialog extends DefaultDialog implements CollapseListene
     protected void recalculateTabsIds() {
     	//because drag n drop looses tooltiptext info, rebuild it in order to keep tabs ids stored there.
 
-    	//RECALCULTAING tab ids 
+        //RECALCULTAING tab ids 
         // 1st: get the list of ids from defaultParam
         // 2nd: find which one is missing from list
         // 3: add the missing one to tooltiptext.

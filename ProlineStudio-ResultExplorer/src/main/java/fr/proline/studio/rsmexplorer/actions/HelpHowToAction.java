@@ -26,7 +26,7 @@ public final class HelpHowToAction implements ActionListener {
 
         if (Desktop.isDesktopSupported()) { // JDK 1.6.0
             try {
-                Desktop.getDesktop().browse(MiscellaneousUtils.createRedirectTempFile(new File(".").getCanonicalPath()+File.separatorChar+"Documentation"+File.separatorChar+"Proline_UserGuide_1.4RC1.docx.html#id.qsh70q"));
+                Desktop.getDesktop().browse(MiscellaneousUtils.createRedirectTempFile("id.qsh70q"));
             } catch (Exception ex) {
                 LoggerFactory.getLogger("ProlineStudio.ResultExplorer").error(getClass().getSimpleName() + " failed", ex);
             }

@@ -75,11 +75,7 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
         setMinimumSize(new Dimension(1024, 360));
         setResizable(true);
 
-        try {
-            setHelpURL(new File(".").getCanonicalPath() + File.separatorChar + "Documentation" + File.separatorChar + "Proline_UserGuide_1.4RC1.docx.html#h.eb8nfjv41vkz");
-        } catch (IOException ex) {
-            ;
-        }
+        setDocumentationSuffix("h.eb8nfjv41vkz");
 
         setButtonVisible(BUTTON_CANCEL, true);
         setButtonName(BUTTON_OK, "OK");

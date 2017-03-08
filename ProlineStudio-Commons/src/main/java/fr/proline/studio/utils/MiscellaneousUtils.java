@@ -64,7 +64,7 @@ public class MiscellaneousUtils {
                 +"</head></html>";
     }
 
-    public static URI createRedirectTempFile(String url) {
+    public static URI createRedirectTempFile(String documentationSuffix) {
         BufferedWriter writer = null;
         File tmpFile = null;
         try {
@@ -74,7 +74,7 @@ public class MiscellaneousUtils {
             tmpFile.deleteOnExit();
             // writes redirect page content to file 
             writer = new BufferedWriter(new FileWriter(tmpFile));
-            writer.write(createRedirectPage(url));
+            writer.write(createRedirectPage(new File(".").getCanonicalPath() + File.separatorChar + "Documentation" + File.separatorChar + "Proline_UserGuide_1.4RC1.docx.html#"+documentationSuffix));
             writer.close();
         } catch (IOException e) {
             return null;

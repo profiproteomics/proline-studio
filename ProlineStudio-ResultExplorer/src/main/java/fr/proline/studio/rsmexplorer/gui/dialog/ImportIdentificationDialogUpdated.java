@@ -36,11 +36,7 @@ public class ImportIdentificationDialogUpdated extends DefaultDialog implements 
 
         setTitle("Import Search Results");
 
-        try {
-            setHelpURL(new File(".").getCanonicalPath() + File.separatorChar + "Documentation" + File.separatorChar + "Proline_UserGuide_1.4RC1.docx.html#id.147n2zr");
-        } catch (IOException ex) {
-            ;
-        }
+        setDocumentationSuffix("id.147n2zr");
 
         setButtonVisible(BUTTON_LOAD, true);
         setButtonVisible(BUTTON_SAVE, true);

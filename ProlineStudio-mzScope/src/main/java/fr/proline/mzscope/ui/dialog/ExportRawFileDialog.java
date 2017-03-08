@@ -97,11 +97,9 @@ public class ExportRawFileDialog extends DefaultDialog {
     private ExportRawFileDialog(Window parent, String title) {
         super(parent, Dialog.ModalityType.APPLICATION_MODAL);
         setTitle("Export " + title);
-        try {
-            setHelpURL(new File(".").getCanonicalPath() + File.separatorChar + "Documentation" + File.separatorChar + "Proline_UserGuide_1.4RC1.docx.html#id.nmf14n");
-        } catch (IOException ex) {
-            ;
-        }
+
+        setDocumentationSuffix("id.nmf14n");
+
         EnumSet<PrecursorMzComputationEnum> precursorSet = EnumSet.allOf(PrecursorMzComputationEnum.class);
         precursorList = new String[precursorSet.size() + 1];
         int i = 0;

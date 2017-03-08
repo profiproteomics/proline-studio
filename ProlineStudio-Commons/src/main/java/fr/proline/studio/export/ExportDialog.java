@@ -127,11 +127,7 @@ public class ExportDialog extends DefaultDialog {
 
         setTitle("Export");
 
-        try {
-            setHelpURL(new File(".").getCanonicalPath() + File.separatorChar + "Documentation" + File.separatorChar + "Proline_UserGuide_1.4RC1.docx.html#id.37m2jsg");
-        } catch (IOException ex) {
-            ;
-        }
+        setDocumentationSuffix("id.37m2jsg");
 
         String defaultExportPath;
         Preferences preferences = NbPreferences.root();

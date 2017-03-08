@@ -32,11 +32,7 @@ public class FilterDialog extends DefaultDialog {
 
         setTitle("Filters");
 
-        try {
-            setHelpURL(new File(".").getCanonicalPath() + File.separatorChar + "Documentation" + File.separatorChar + "Proline_UserGuide_1.4RC1.docx.html#id.2u6wntf");
-        } catch (IOException ex) {
-            ;
-        }
+        setDocumentationSuffix("id.2u6wntf");
 
         setInternalComponent(createFilterPanel());
 

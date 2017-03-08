@@ -9,8 +9,6 @@ import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
-import java.io.File;
-import java.net.URL;
 import java.util.prefs.Preferences;
 import javax.swing.*;
 import javax.swing.tree.*;
@@ -34,14 +32,14 @@ public class HelpDialog extends DefaultDialog implements MouseListener, MouseMot
     private BooleanParameter m_parameter;
 
     private String[][] HELP_CONTENT = {
-        {"Create a Project", "http://biodev.extra.cea.fr/docs/proline/doku.php?id=how_to:studio:createproject"},
-        {"Create a Dataset", "http://biodev.extra.cea.fr/docs/proline/doku.php?id=how_to:studio:createaggregate"},
-        {"Import a Search Result", "http://biodev.extra.cea.fr/docs/proline/doku.php?id=how_to:studio:importmascot"},
-        {"Validate a Search Result", "http://biodev.extra.cea.fr/docs/proline/doku.php?id=how_to:studio:rsvalidation"},
-        {"Display Search Result Data", "http://biodev.extra.cea.fr/docs/proline/doku.php?id=how_to:studio:viewpsm"},
-        {"Display Identification Summary Data", "http://biodev.extra.cea.fr/docs/proline/doku.php?id=how_to:studio:viewprotset"},
-        {"Create a Spectral Count", "http://biodev.extra.cea.fr/docs/proline/doku.php?id=how_to:studio:spectralcount"},
-        {"Create a XIC", "http://biodev.extra.cea.fr/docs/proline/doku.php?id=how_to:studio:xic"}
+        {"Create a Project", "#id.2r0uhxc"},
+        {"Create a Dataset", "#id.2p2csry"},
+        {"Import a Search Result", "#id.147n2zr"},
+        {"Validate a Search Result", "#id.46r0co2"},
+        {"Display Search Result Data", "#id.ihv636"},
+        {"Display Identification Summary Data", "#id.32hioqz"},
+        {"Create a Spectral Count", "#h.3ygebqi"},
+        {"Create a XIC", "#id.2dlolyb"}
 
     };
 
@@ -136,7 +134,7 @@ public class HelpDialog extends DefaultDialog implements MouseListener, MouseMot
         DefaultMutableTreeNode top = new DefaultMutableTreeNode("Getting Started");
 
         for (int i = 0; i < HELP_CONTENT.length; i++) {
-            top.add(new DefaultMutableTreeNode(new HelpInfo(HELP_CONTENT[i][0], HELP_CONTENT[i][1])));
+            top.add(new DefaultMutableTreeNode(new DocumentationInfo(HELP_CONTENT[i][0], HELP_CONTENT[i][1])));
         }
         return top;
     }
@@ -188,7 +186,7 @@ public class HelpDialog extends DefaultDialog implements MouseListener, MouseMot
             if (useObject == null) {
                 return false;
             }
-            return (useObject instanceof HelpInfo);
+            return (useObject instanceof DocumentationInfo);
 
         }
         return false;
@@ -203,12 +201,12 @@ public class HelpDialog extends DefaultDialog implements MouseListener, MouseMot
 
         DefaultMutableTreeNode node = (DefaultMutableTreeNode) m_tree.getLastSelectedPathComponent();
         Object useObject = node.getUserObject();
-        if (useObject instanceof HelpInfo) {
-            HelpInfo helpInfo = (HelpInfo) useObject;
-            String url = helpInfo.getUrl();
+        if (useObject instanceof DocumentationInfo) {
+            DocumentationInfo helpInfo = (DocumentationInfo) useObject;
+            String suffix = helpInfo.getSuffix();
             if (Desktop.isDesktopSupported()) { // JDK 1.6.0
                 try {
-                    Desktop.getDesktop().browse(MiscellaneousUtils.createRedirectTempFile(new File(".").getCanonicalPath() + File.separatorChar + "Documentation" + File.separatorChar + "Proline_UserGuide_1.4RC1.docx.html" + url));
+                    Desktop.getDesktop().browse(MiscellaneousUtils.createRedirectTempFile(suffix));
                 } catch (Exception ex) {
                     LoggerFactory.getLogger("ProlineStudio.ResultExplorer").error(getClass().getSimpleName() + " failed", ex);
                 }
@@ -291,18 +289,18 @@ public class HelpDialog extends DefaultDialog implements MouseListener, MouseMot
         }
     }
 
-    private class HelpInfo {
+    private class DocumentationInfo {
 
         private String m_text;
-        private String m_url;
+        private String m_documentationSuffix;
 
-        public HelpInfo(String text, String url) {
+        public DocumentationInfo(String text, String url) {
             m_text = text;
-            m_url = url;
+            m_documentationSuffix = url;
         }
 
-        public String getUrl() {
-            return m_url;
+        public String getSuffix() {
+            return m_documentationSuffix;
         }
 
         @Override

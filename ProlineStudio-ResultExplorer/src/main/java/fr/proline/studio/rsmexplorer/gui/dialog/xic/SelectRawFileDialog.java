@@ -28,11 +28,7 @@ public class SelectRawFileDialog extends DefaultDialog {
 
         setTitle("Select a Raw File");
 
-        try {
-            setHelpURL(new File(".").getCanonicalPath() + File.separatorChar + "Documentation" + File.separatorChar + "Proline_UserGuide_1.4RC1.docx.html#id.3cqmetx");
-        } catch (IOException ex) {
-            ;
-        }
+        setDocumentationSuffix("id.3cqmetx");
 
         setInternalComponent(createInternalPanel());
 

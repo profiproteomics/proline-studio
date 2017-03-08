@@ -39,7 +39,7 @@ public class ManageSaveWindowsDialog extends DefaultDialog {
         
         setTitle("Manage User Windows");
        
-        setHelpURL(null); //JPM.TODO
+        setDocumentationSuffix(null); //JPM.TODO
         
         setResizable(true);
         setMinimumSize(new Dimension(200, 240));

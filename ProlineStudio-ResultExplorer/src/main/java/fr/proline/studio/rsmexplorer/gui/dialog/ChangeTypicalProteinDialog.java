@@ -32,11 +32,7 @@ public class ChangeTypicalProteinDialog extends DefaultDialog {
 
         setTitle("Change Typical Protein");
 
-        try {
-            setHelpURL(new File(".").getCanonicalPath() + File.separatorChar + "Documentation" + File.separatorChar + "Proline_UserGuide_1.4RC1.docx.html#id.111kx3o");
-        } catch (IOException ex) {
-            ;
-        }
+        setDocumentationSuffix("id.111kx3o");
 
         setStatusVisible(false);
 

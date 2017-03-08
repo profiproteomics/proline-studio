@@ -115,11 +115,8 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
 
         setTitle("Identification Validation");
 
-        try {
-            setHelpURL(new File(".").getCanonicalPath() + File.separatorChar + "Documentation" + File.separatorChar + "Proline_UserGuide_1.4RC1.docx.html#id.46r0co2");
-        } catch (IOException ex) {
-            ;
-        }
+        setDocumentationSuffix("id.46r0co2");
+
         setButtonVisible(BUTTON_LOAD, true);
         setButtonVisible(BUTTON_SAVE, true);
 

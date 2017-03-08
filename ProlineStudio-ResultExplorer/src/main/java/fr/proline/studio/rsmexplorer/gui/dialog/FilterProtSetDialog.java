@@ -51,11 +51,7 @@ public class FilterProtSetDialog extends DefaultDialog implements ComponentListe
         super(parent, Dialog.ModalityType.APPLICATION_MODAL);
         setTitle("ProteinSet Filtering");
 
-        try {
-            setHelpURL(new File(".").getCanonicalPath() + File.separatorChar + "Documentation" + File.separatorChar + "Proline_UserGuide_1.4RC1.docx.html#id.26in1rg");
-        } catch (IOException ex) {
-            ;
-        }
+        setDocumentationSuffix("id.26in1rg");
 
         setButtonVisible(BUTTON_LOAD, true);
         setButtonVisible(BUTTON_SAVE, true);

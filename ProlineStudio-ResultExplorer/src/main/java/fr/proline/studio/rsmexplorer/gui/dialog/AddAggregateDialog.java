@@ -33,11 +33,7 @@ public class AddAggregateDialog extends DefaultDialog {
 
         setTitle("Add Dataset");
 
-        try {
-            setHelpURL(new File(".").getCanonicalPath() + File.separatorChar + "Documentation" + File.separatorChar + "Proline_UserGuide_1.4RC1.docx.html#id.2p2csry");
-        } catch (IOException ex) {
-            ;
-        }
+        setDocumentationSuffix("id.2p2csry");
 
         setButtonVisible(BUTTON_DEFAULT, true);
 

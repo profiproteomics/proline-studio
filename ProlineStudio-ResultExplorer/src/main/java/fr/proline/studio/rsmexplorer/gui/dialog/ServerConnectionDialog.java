@@ -43,11 +43,7 @@ public class ServerConnectionDialog extends ConnectionDialog {
     private ServerConnectionDialog(Window parent) {
         super(parent, "Server Connection", " Server Parameter ", "Server Host :");
 
-        try {
-            setHelpURL(new File(".").getCanonicalPath() + File.separatorChar + "Documentation" + File.separatorChar + "Proline_UserGuide_1.4RC1.docx.html#id.1pxezwc");
-        } catch (IOException ex) {
-            ;
-        }
+        setDocumentationSuffix("id.1pxezwc");
 
         setButtonVisible(BUTTON_DEFAULT, true);
 

@@ -1,8 +1,5 @@
 package fr.proline.studio.parameter;
 
-import fr.proline.studio.gui.StringChooserPanel;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import javax.swing.JComponent;
 import javax.swing.JTextField;

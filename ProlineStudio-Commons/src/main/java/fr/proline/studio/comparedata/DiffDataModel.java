@@ -21,6 +21,8 @@ import javax.swing.table.TableCellRenderer;
  */
 public class DiffDataModel extends AbstractJoinDataModel {
 
+    private ArrayList<Integer> m_keysColumns1 = new ArrayList<>();
+    private ArrayList<Integer> m_keysColumns2 = new ArrayList<>();
     private final ArrayList<Integer> m_allColumns1 = new ArrayList<>();
     private final ArrayList<Integer> m_allColumns2 = new ArrayList<>();
 
@@ -32,7 +34,7 @@ public class DiffDataModel extends AbstractJoinDataModel {
         HashMap<String, Integer> mapColumn2 = new HashMap<>();
         int nbColumn = m_data2.getColumnCount();
         for (int i = 0; i < nbColumn; i++) {
-            if (i == m_selectedKey2) {
+            if ((i == m_selectedTable2Key1) || (i == m_selectedTable2Key2)) {
                 continue;
             }
             mapColumn2.put(m_data2.getDataColumnIdentifier(i), i);
@@ -41,7 +43,7 @@ public class DiffDataModel extends AbstractJoinDataModel {
         // find corresponding columns in data1 and data2
         nbColumn = m_data1.getColumnCount();
         for (int i = 0; i < nbColumn; i++) {
-            if (i == m_selectedKey1) {
+            if ((i == m_selectedTable1Key1) || (i == m_selectedTable1Key2)) {
                 continue;
             }
             String columnIdentifier = m_data1.getDataColumnIdentifier(i);
@@ -62,13 +64,39 @@ public class DiffDataModel extends AbstractJoinDataModel {
             m_allColumns2.add(col2);
         }
 
+        // First Key column(s)
+        Class c1 = m_data1.getDataColumnClass(m_selectedTable1Key1);
+        if (c1.equals(Double.class) || c1.equals(Float.class)) {
+            m_keysColumns1.add(m_selectedTable1Key1);   // For Double and Float keys, we show both values from Table 1 and Table 2
+            m_keysColumns2.add(-1);
+            m_keysColumns1.add(-1);
+            m_keysColumns2.add(m_selectedTable2Key1);
+        } else {
+            m_keysColumns1.add(m_selectedTable1Key1);  // For Other keys (String, Integer) the key is the same, or absent in one table
+            m_keysColumns2.add(m_selectedTable2Key1);
+        }
+        
+        // Second Key column(s)
+        if (m_selectedTable1Key2 != -1) {
+            Class c2 = m_data2.getDataColumnClass(m_selectedTable1Key2);
+            if (c2.equals(Double.class) || c2.equals(Float.class)) {
+                m_keysColumns1.add(m_selectedTable1Key2);   // For Double and Float keys, we show both values from Table 1 and Table 2
+                m_keysColumns2.add(-1);
+                m_keysColumns1.add(-1);
+                m_keysColumns2.add(m_selectedTable2Key2);
+            } else {
+                m_keysColumns1.add(m_selectedTable1Key2);  // For Other keys (String, Integer) the key is the same, or absent in one table
+                m_keysColumns2.add(m_selectedTable2Key2);
+            }
+        }
+        
     }
 
 
 
     @Override
     public int getColumnCount() {
-        return 1+m_allColumns1.size() + (m_showSourceColumn ? 1 : 0);
+        return m_keysColumns1.size()+m_allColumns1.size()+ (m_showSourceColumn ? 1 : 0);
     }
 
     @Override
@@ -77,25 +105,43 @@ public class DiffDataModel extends AbstractJoinDataModel {
             return null;
         }
         
-        if (columnIndex == 0) {
-            String col1 = m_data1.getDataColumnIdentifier(m_selectedKey1);
-            String col2 = m_data2.getDataColumnIdentifier(m_selectedKey2);
-            if (col1.compareTo(col2) == 0) {
+        // Columns with keys
+        if (columnIndex<m_keysColumns1.size()) {
+            int colIndexCur = m_keysColumns1.get(columnIndex);
+            String col1 = null;
+            String col2 = null;
+            if (colIndexCur != -1) {
+                col1 = m_data1.getDataColumnIdentifier(colIndexCur);
+            }
+            colIndexCur = m_keysColumns2.get(columnIndex);
+             if (colIndexCur != -1) {
+                col2 = m_data2.getDataColumnIdentifier(colIndexCur);
+            }
+            
+            if (col1 == null) {
+                return col2;
+            } else if (col2 == null) {
                 return col1;
             } else {
-                return col1+"/"+col2;
+                if (col1.compareTo(col2) == 0) {
+                    return col1;
+                } else {
+                    return col1 + "/" + col2;
+                }
             }
         }
         
+        columnIndex -= m_keysColumns1.size();
+
         if (m_showSourceColumn) {
-            if (columnIndex == 1) {
+            if (columnIndex == 0) {
                 return "Source";
-            } else {
-                columnIndex--;
             }
+            
+            columnIndex--;
         }
         
-        columnIndex--;
+ 
         return m_data1.getDataColumnIdentifier(m_allColumns1.get(columnIndex));
   
     }
@@ -105,27 +151,26 @@ public class DiffDataModel extends AbstractJoinDataModel {
         if (!joinPossible()) {
             return null;
         }
+        // Columns with keys
+        if (columnIndex<m_keysColumns1.size()) {
+            int index1 = m_keysColumns1.get(columnIndex);
+            if (index1 != -1) {
+                return m_data1.getDataColumnClass(index1);
+            }
+            return m_data1.getDataColumnClass(m_keysColumns2.get(columnIndex));
+        }
         
-        Class c = null;
-        if (columnIndex == 0) {
-            c = m_data1.getDataColumnClass(m_selectedKey1);
-        } else if (m_showSourceColumn) {
-            if (columnIndex == 1) {
-                c = String.class;
-            } else {
-                columnIndex--;
-            }
-        }
+        columnIndex -= m_keysColumns1.size();
 
-        if (c == null) {
-            columnIndex--;
-            if (columnIndex < m_allColumns1.size()) {
-                c = m_data1.getDataColumnClass(m_allColumns1.get(columnIndex));
-            } else {
-                columnIndex -= m_allColumns1.size();
-                c = m_data2.getDataColumnClass(m_allColumns2.get(columnIndex));
+        if (m_showSourceColumn) {
+            if (columnIndex == 0) {
+                return String.class;
             }
+            columnIndex--;
         }
+        
+        Class c = m_data1.getDataColumnClass(m_allColumns1.get(columnIndex));
+
         
         if ((c.equals(Double.class)) || (c.equals(Float.class)) || (c.equals(Long.class)) || (c.equals(Integer.class))) {
             return c;
@@ -134,51 +179,62 @@ public class DiffDataModel extends AbstractJoinDataModel {
         
     }
     
-        @Override
+    @Override
     public Class getColumnClass(int columnIndex) {
         return getDataColumnClass(columnIndex);
     }
     
     @Override
     public Object getDataValueAt(int rowIndex, int columnIndex) {
+        
         if (!joinPossible()) {
             return null;
         }
         
-        Object key = m_allKeys.get(rowIndex);
-        if (columnIndex == 0) {
-            return key;
+        Integer row1 = m_rowsInTable1.get(rowIndex);
+        Integer row2 = m_rowsInTable2.get(rowIndex);
+        
+        
+        // Columns with keys
+        if (columnIndex<m_keysColumns1.size()) {
+            int colIndexCur = m_keysColumns1.get(columnIndex);
+            if ((colIndexCur != -1) && (row1 != null)) {
+                return m_data1.getDataValueAt(row1, colIndexCur);
+            } else {
+                colIndexCur = m_keysColumns2.get(columnIndex);
+                if ((colIndexCur !=-1) && (row2 != null)) {
+                    return m_data2.getDataValueAt(row2, colIndexCur);
+                } else {
+                    return null;
+                }
+            }
         }
         
+        columnIndex -= m_keysColumns1.size();
+        
+        // Source Column
         if (m_showSourceColumn) {
-            if (columnIndex == 1) {
-                Integer row1 = m_keyToRow1.get(key);
-                Integer row2 = m_keyToRow2.get(key);
+            if (columnIndex == 0) {
                 if ((row1 == null) && (row2 != null)) {
                     return m_data2.getName();
                 } else if ((row1 != null) && (row2 == null)) {
                     return m_data1.getName();
                 } else {
-                    return m_data1.getName() + "," + m_data2.getName();
+                    return m_data1.getName()+","+m_data2.getName();
                 }
-
-            } else {
-                columnIndex--;
+                
             }
+            columnIndex--;
         }
-        
-        
-        columnIndex--;
         
         Object value1 = null;
-        Integer row = m_keyToRow1.get(key);
-        if (row != null) {
-            value1 = m_data1.getDataValueAt(row, m_allColumns1.get(columnIndex));
+        if (row1 != null) {
+            value1 = m_data1.getDataValueAt(row1, m_allColumns1.get(columnIndex));
         }
+
         Object value2 = null;
-        row = m_keyToRow2.get(key);
-        if (row != null) {
-            value2 = m_data2.getDataValueAt(row, m_allColumns2.get(columnIndex));
+        if (row2 != null) {
+            value2 = m_data2.getDataValueAt(row2, m_allColumns2.get(columnIndex));
         }
         
         if ((value1 == null) || (value2 == null)) {
@@ -205,7 +261,7 @@ public class DiffDataModel extends AbstractJoinDataModel {
         } else {
             return "<>";
         }
-        
+
         
     }
     

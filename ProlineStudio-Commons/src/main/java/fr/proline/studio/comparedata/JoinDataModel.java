@@ -2,14 +2,12 @@ package fr.proline.studio.comparedata;
 
 import fr.proline.studio.filter.DoubleFilter;
 import fr.proline.studio.filter.Filter;
-import fr.proline.studio.filter.IntegerFilter;
-import fr.proline.studio.filter.LongFilter;
-import fr.proline.studio.filter.StringDiffFilter;
-import fr.proline.studio.filter.StringFilter;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.table.LazyData;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -21,8 +19,10 @@ import javax.swing.table.TableCellRenderer;
  */
 public class JoinDataModel extends AbstractJoinDataModel {
 
-    private ArrayList<Integer> m_allColumns1;
-    private ArrayList<Integer> m_allColumns2;
+    private ArrayList<Integer> m_keysColumns1 = new ArrayList<>();
+    private ArrayList<Integer> m_keysColumns2 = new ArrayList<>();
+    private ArrayList<Integer> m_allColumns1 = new ArrayList<>();
+    private ArrayList<Integer> m_allColumns2 = new ArrayList<>();
 
     
     public JoinDataModel() {
@@ -30,23 +30,49 @@ public class JoinDataModel extends AbstractJoinDataModel {
     
     @Override
     protected void setColumns() {
+
         // construct column array
-        m_allColumns1 = new ArrayList<>();
         int nbColumn = m_data1.getColumnCount();
         for (int i = 0; i < nbColumn; i++) {
-            if (i == m_selectedKey1) {
+            if ((i == m_selectedTable1Key1) || (i == m_selectedTable1Key2)) {
                 continue;
             }
             m_allColumns1.add(i);
         }
-        m_allColumns2 = new ArrayList<>();
         nbColumn = m_data2.getColumnCount();
         for (int i = 0; i < nbColumn; i++) {
-            if (i == m_selectedKey2) {
+            if ((i == m_selectedTable2Key1) || (i == m_selectedTable2Key2)) {
                 continue;
             }
             m_allColumns2.add(i);
         }
+        
+        // First Key column(s)
+        Class c1 = m_data1.getDataColumnClass(m_selectedTable1Key1);
+        if (c1.equals(Double.class) || c1.equals(Float.class)) {
+            m_keysColumns1.add(m_selectedTable1Key1);   // For Double and Float keys, we show both values from Table 1 and Table 2
+            m_keysColumns2.add(-1);
+            m_keysColumns1.add(-1);
+            m_keysColumns2.add(m_selectedTable2Key1);
+        } else {
+            m_keysColumns1.add(m_selectedTable1Key1);  // For Other keys (String, Integer) the key is the same, or absent in one table
+            m_keysColumns2.add(m_selectedTable2Key1);
+        }
+        
+        // Second Key column(s)
+        if (m_selectedTable1Key2 != -1) {
+            Class c2 = m_data2.getDataColumnClass(m_selectedTable1Key2);
+            if (c2.equals(Double.class) || c2.equals(Float.class)) {
+                m_keysColumns1.add(m_selectedTable1Key2);   // For Double and Float keys, we show both values from Table 1 and Table 2
+                m_keysColumns2.add(-1);
+                m_keysColumns1.add(-1);
+                m_keysColumns2.add(m_selectedTable2Key2);
+            } else {
+                m_keysColumns1.add(m_selectedTable1Key2);  // For Other keys (String, Integer) the key is the same, or absent in one table
+                m_keysColumns2.add(m_selectedTable2Key2);
+            }
+        }
+
     }
     
 
@@ -57,7 +83,7 @@ public class JoinDataModel extends AbstractJoinDataModel {
             return 0;
         }
         
-        return m_allColumns1.size()+m_allColumns2.size()+1 + (m_showSourceColumn ? 1 : 0);
+        return m_keysColumns1.size()+m_allColumns1.size()+m_allColumns2.size() + (m_showSourceColumn ? 1 : 0);
     }
 
     @Override
@@ -65,15 +91,31 @@ public class JoinDataModel extends AbstractJoinDataModel {
         if (!joinPossible()) {
             return null;
         }
+
+        Integer row1 = m_rowsInTable1.get(rowIndex);
+        Integer row2 = m_rowsInTable2.get(rowIndex);
         
-        Object key = m_allKeys.get(rowIndex);
-        if (columnIndex == 0) {
-            return key;
+        
+        // Columns with keys
+        if (columnIndex<m_keysColumns1.size()) {
+            int colIndexCur = m_keysColumns1.get(columnIndex);
+            if ((colIndexCur != -1) && (row1 != null)) {
+                return m_data1.getDataValueAt(row1, colIndexCur);
+            } else {
+                colIndexCur = m_keysColumns2.get(columnIndex);
+                 if ((colIndexCur !=-1) && (row2 != null)) {
+                    return m_data2.getDataValueAt(row2, colIndexCur);
+                } else {
+                    return null;
+                }
+            }
         }
+        
+        columnIndex -= m_keysColumns1.size();
+        
+        // Source Column
         if (m_showSourceColumn) {
-            if (columnIndex == 1) {
-                Integer row1 = m_keyToRow1.get(key);
-                Integer row2 = m_keyToRow2.get(key);
+            if (columnIndex == 0) {
                 if ((row1 == null) && (row2 != null)) {
                     return m_data2.getName();
                 } else if ((row1 != null) && (row2 == null)) {
@@ -82,27 +124,28 @@ public class JoinDataModel extends AbstractJoinDataModel {
                     return m_data1.getName()+","+m_data2.getName();
                 }
                 
-            } else {
-                columnIndex--;
             }
+            columnIndex--;
         }
         
-        columnIndex--;
+        
+        
+        
+        // Other columns
         if (columnIndex<m_allColumns1.size()) {
-            Integer row = m_keyToRow1.get(key);
-            if (row == null) {
+            if (row1 == null) {
                 return null;
             }
-            return m_data1.getDataValueAt(row, m_allColumns1.get(columnIndex));
+            return m_data1.getDataValueAt(row1, m_allColumns1.get(columnIndex));
         }
         columnIndex-=m_allColumns1.size();
         if (columnIndex<m_allColumns2.size()) {
-            Integer row = m_keyToRow2.get(key);
-            if (row == null) {
+            if (row2 == null) {
                 return null;
             }
-            return m_data2.getDataValueAt(row, m_allColumns2.get(columnIndex));
+            return m_data2.getDataValueAt(row2, m_allColumns2.get(columnIndex));
         }
+
         return null;
     }
 
@@ -111,26 +154,45 @@ public class JoinDataModel extends AbstractJoinDataModel {
         if (!joinPossible()) {
             return null;
         }
-        
-        if (columnIndex == 0) {
-            String col1 = m_data1.getDataColumnIdentifier(m_selectedKey1);
-            String col2 = m_data2.getDataColumnIdentifier(m_selectedKey2);
-            if (col1.compareTo(col2) == 0) {
+
+        // Columns with keys
+        if (columnIndex<m_keysColumns1.size()) {
+            int colIndexCur = m_keysColumns1.get(columnIndex);
+            String col1 = null;
+            String col2 = null;
+            if (colIndexCur != -1) {
+                col1 = m_data1.getDataColumnIdentifier(colIndexCur);
+            }
+            colIndexCur = m_keysColumns2.get(columnIndex);
+             if (colIndexCur != -1) {
+                col2 = m_data2.getDataColumnIdentifier(colIndexCur);
+            }
+            
+            if (col1 == null) {
+                return col2;
+            } else if (col2 == null) {
                 return col1;
             } else {
-                return col1+"/"+col2;
+                if (col1.compareTo(col2) == 0) {
+                    return col1;
+                } else {
+                    return col1 + "/" + col2;
+                }
             }
         }
         
+        columnIndex -= m_keysColumns1.size();
+
         if (m_showSourceColumn) {
-            if (columnIndex == 1) {
+            if (columnIndex == 0) {
                 return "Source";
-            } else {
-                columnIndex--;
             }
+            
+            columnIndex--;
         }
         
-        columnIndex--;
+        
+
         if (columnIndex < m_allColumns1.size()) {
             return m_data1.getDataColumnIdentifier(m_allColumns1.get(columnIndex));
         }
@@ -138,6 +200,7 @@ public class JoinDataModel extends AbstractJoinDataModel {
         if (columnIndex < m_allColumns2.size()) {
             return m_data2.getDataColumnIdentifier(m_allColumns2.get(columnIndex));
         }
+
         return null;
     }
 
@@ -146,20 +209,27 @@ public class JoinDataModel extends AbstractJoinDataModel {
         if (!joinPossible()) {
             return null;
         }
-        
-        if (columnIndex == 0) {
-            return m_data1.getDataColumnClass(m_selectedKey1);
-        }
-        
-        if (m_showSourceColumn) {
-            if (columnIndex == 1) {
-                return String.class;
-            } else {
-                columnIndex--;
+
+        // Columns with keys
+        if (columnIndex<m_keysColumns1.size()) {
+            int index1 = m_keysColumns1.get(columnIndex);
+            if (index1 != -1) {
+                return m_data1.getDataColumnClass(index1);
             }
+            return m_data1.getDataColumnClass(m_keysColumns2.get(columnIndex));
         }
         
-        columnIndex--;
+        columnIndex -= m_keysColumns1.size();
+
+        if (m_showSourceColumn) {
+            if (columnIndex == 0) {
+                return String.class;
+            }
+            columnIndex--;
+        }
+        
+        
+
         if (columnIndex < m_allColumns1.size()) {
             return m_data1.getDataColumnClass(m_allColumns1.get(columnIndex));
         }
@@ -167,6 +237,7 @@ public class JoinDataModel extends AbstractJoinDataModel {
         if (columnIndex < m_allColumns2.size()) {
             return m_data2.getDataColumnClass(m_allColumns2.get(columnIndex));
         }
+
         return null;
     }
 
@@ -196,23 +267,26 @@ public class JoinDataModel extends AbstractJoinDataModel {
             return null;
         }
 
-        Object key = m_allKeys.get(rowIndex);
-        if (columnIndex == 0) {
-            Integer row = m_keyToRow1.get(key);
-            if (row == null) {
-                row = m_keyToRow2.get(key);
-                if (row == null) {
-                    return key;
-                }
-                return m_data2.getValueAt(row, m_selectedKey2);
+        Integer row1 = m_rowsInTable1.get(rowIndex);
+        Integer row2 = m_rowsInTable2.get(rowIndex);
+        
+        
+        // Columns with keys
+        if (columnIndex<m_keysColumns1.size()) {
+            int colIndexCur = m_keysColumns1.get(columnIndex);
+            if ((colIndexCur != -1) && (row1 != null)) {
+                return m_data1.getValueAt(row1, colIndexCur);
+            } else {
+                colIndexCur = m_keysColumns2.get(columnIndex);
+                return m_data2.getValueAt(row2, colIndexCur);
             }
-            return m_data1.getValueAt(row, m_selectedKey1);
         }
         
+        columnIndex -= m_keysColumns1.size();
+        
+        // Source Column
         if (m_showSourceColumn) {
-            if (columnIndex == 1) {
-                Integer row1 = m_keyToRow1.get(key);
-                Integer row2 = m_keyToRow2.get(key);
+            if (columnIndex == 0) {
                 if ((row1 == null) && (row2 != null)) {
                     return m_data2.getName();
                 } else if ((row1 != null) && (row2 == null)) {
@@ -221,28 +295,29 @@ public class JoinDataModel extends AbstractJoinDataModel {
                     return m_data1.getName()+","+m_data2.getName();
                 }
                 
-            } else {
-                columnIndex--;
             }
+            columnIndex--;
         }
         
         
-        columnIndex--;
-        if (columnIndex < m_allColumns1.size()) {
-            Integer row = m_keyToRow1.get(key);
-            if (row == null) {
+        
+        
+        // Other columns
+        if (columnIndex<m_allColumns1.size()) {
+            if (row1 == null) {
                 return null;
             }
-            return m_data1.getValueAt(row, m_allColumns1.get(columnIndex));
+            return m_data1.getValueAt(row1, m_allColumns1.get(columnIndex));
         }
-        columnIndex -= m_allColumns1.size();
-        if (columnIndex < m_allColumns2.size()) {
-            Integer row = m_keyToRow2.get(key);
-            if (row == null) {
+        columnIndex-=m_allColumns1.size();
+        if (columnIndex<m_allColumns2.size()) {
+            if (row2 == null) {
                 return null;
             }
-            return m_data2.getValueAt(row, m_allColumns2.get(columnIndex));
+            return m_data2.getValueAt(row2, m_allColumns2.get(columnIndex));
         }
+
+        
         return null;
     }
 
@@ -252,19 +327,27 @@ public class JoinDataModel extends AbstractJoinDataModel {
             return null;
         }
 
-        if (columnIndex == 0) { 
-            return m_data1.getColumnClass(m_selectedKey1);
-        }
-        
-        if (m_showSourceColumn) {
-            if (columnIndex == 1) {
-                return String.class;
-            } else {
-                columnIndex--;
+        // Columns with keys
+        if (columnIndex<m_keysColumns1.size()) {
+            int index1 = m_keysColumns1.get(columnIndex);
+            if (index1 != -1) {
+                return m_data1.getColumnClass(index1);
             }
+            return m_data1.getColumnClass(m_keysColumns2.get(columnIndex));
         }
         
-        columnIndex--;
+        columnIndex -= m_keysColumns1.size();
+
+        if (m_showSourceColumn) {
+            if (columnIndex == 0) {
+                return String.class;
+            }
+            
+            columnIndex--;
+        }
+        
+        
+
         if (columnIndex < m_allColumns1.size()) {
             return m_data1.getColumnClass(m_allColumns1.get(columnIndex));
         }
@@ -272,6 +355,8 @@ public class JoinDataModel extends AbstractJoinDataModel {
         if (columnIndex < m_allColumns2.size()) {
             return m_data2.getColumnClass(m_allColumns2.get(columnIndex));
         }
+
+        
         return null;
     }
     
@@ -315,46 +400,64 @@ public class JoinDataModel extends AbstractJoinDataModel {
         if (!joinPossible()) {
             return;
         }
-        
+
         LinkedHashMap<Integer, Filter> filtersMap1 = new LinkedHashMap<>();
         m_data1.addFilters(filtersMap1);
-        
+
         LinkedHashMap<Integer, Filter> filtersMap2 = new LinkedHashMap<>();
         m_data2.addFilters(filtersMap2);
-        
-        
+
         int nbColumns = getColumnCount();
-        for (int i=0;i<nbColumns;i++) {
-            if (i==0) {
-                Class c = getDataColumnClass(0);
-                if (c.equals(Double.class)) {
-                    filtersMap.put(i, new DoubleFilter(getColumnName(i), null, i));
-                } else if (c.equals(Integer.class)) {
-                    filtersMap.put(i, new IntegerFilter(getColumnName(i), null, i));
-                } else if (c.equals(String.class)) {
-                    filtersMap.put(i, new StringFilter(getColumnName(i), null, i));
-                } else if (c.equals(Long.class)) {
-                    filtersMap.put(i, new LongFilter(getColumnName(i), null, i));
-                }
-            } else if ((m_showSourceColumn) && (i == 1)) {
-                filtersMap.put(i, new StringDiffFilter(getColumnName(i), null, i));
-            }  else {
-                int colIndex = i-1 - (m_showSourceColumn ? 1 : 0);
-                if (colIndex < m_allColumns1.size()) {
-                    Filter f = filtersMap1.get(m_allColumns1.get(colIndex));
+        for (int i = 0; i < nbColumns; i++) {
+
+            int col = i;
+
+            if (i < m_keysColumns1.size()) {
+                int colIndexCur = m_keysColumns1.get(col);
+                if (colIndexCur != -1) {
+                    Filter f = filtersMap2.get(colIndexCur);
                     if (f != null) {
                         filtersMap.put(i, f);
+                        continue;
                     }
-                } else {
-                    colIndex -= m_allColumns1.size();
-                    if (colIndex < m_allColumns2.size()) {
-                        Filter f = filtersMap2.get(m_allColumns2.get(colIndex));
-                        if (f != null) {
-                            filtersMap.put(i, f);
-                        }
+                }
+                colIndexCur = m_keysColumns2.get(col);
+                if (colIndexCur != -1) {
+                    Filter f = filtersMap2.get(colIndexCur);
+                    if (f != null) {
+                        filtersMap.put(i, f);
+                        continue;
                     }
                 }
             }
+
+            col -= m_keysColumns1.size();
+
+            if (m_showSourceColumn) {
+                if (col == 0) {
+                    filtersMap.put(i, new DoubleFilter(getColumnName(i), null, i));
+                    continue;
+                }
+                col--;
+            }
+
+            if (col < m_allColumns1.size()) {
+                Filter f = filtersMap1.get(m_allColumns1.get(col));
+                if (f != null) {
+                    filtersMap.put(i, f);
+                    
+                }
+                continue;
+            }
+            col -= m_allColumns1.size();
+            if (col < m_allColumns2.size()) {
+                Filter f = filtersMap2.get(m_allColumns2.get(col));
+                if (f != null) {
+                    filtersMap.put(i, f);
+                }
+                
+            }
+
         }
     }
 
@@ -390,32 +493,40 @@ public class JoinDataModel extends AbstractJoinDataModel {
     }
 
     @Override
-    public TableCellRenderer getRenderer(int row, int col) {
-         if (!joinPossible()) {
+    public TableCellRenderer getRenderer(int rowIndex, int columnIndex) {
+        if (!joinPossible()) {
             return null;
         }
+
+        // Columns with keys
+        if (columnIndex<m_keysColumns1.size()) {
+            int index1 = m_keysColumns1.get(columnIndex);
+            if (index1 != -1) {
+                return m_data1.getRenderer(rowIndex, index1);
+            }
+            return m_data1.getRenderer(rowIndex, m_keysColumns2.get(columnIndex));
+        }
         
-         if (col == 0) {
-             return m_data1.getRenderer(row, m_selectedKey1);
-         }
-         
-         if (m_showSourceColumn) {
-             if (col == 1) {
-                 return null;
-             }
-             col--;
-         }
+        columnIndex -= m_keysColumns1.size();
 
-        col--;
-        if (col<m_allColumns1.size()) {
+        if (m_showSourceColumn) {
+            if (columnIndex == 0) {
+                return null;
+            }
+        }
+        
+        columnIndex--;
 
-            return m_data1.getRenderer(row, m_allColumns1.get(col));
+        if (columnIndex < m_allColumns1.size()) {
+            return m_data1.getRenderer(rowIndex, m_allColumns1.get(columnIndex));
         }
-        col-=m_allColumns1.size();
-        if (col<m_allColumns2.size()) {
-            return m_data2.getRenderer(row, m_allColumns2.get(col));
+        columnIndex -= m_allColumns1.size();
+        if (columnIndex < m_allColumns2.size()) {
+            return m_data2.getRenderer(rowIndex, m_allColumns2.get(columnIndex));
         }
+
         return null;
+
     }
 
     @Override

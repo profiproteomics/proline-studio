@@ -173,9 +173,9 @@ public class Table extends PyObject {
         return new Table(joinDataModel);
     }
     
-    public static Table join(Table t1, Table t2, Integer key1, Integer key2, Boolean showSourceColumn) {
+    public static Table join(Table t1, Table t2, Integer table1Key1, Integer table2Key1, Double tolerance1, Integer table1Key2, Integer table2Key2, Double tolerance2, Boolean showSourceColumn) {
         JoinDataModel joinDataModel = new JoinDataModel();
-        joinDataModel.setData(t1.getModel(), t2.getModel(), key1, key2, showSourceColumn);
+        joinDataModel.setData(t1.getModel(), t2.getModel(), table1Key1, table2Key1, tolerance1, table1Key2, table2Key2, tolerance2, showSourceColumn);
         return new Table(joinDataModel);
     }
     
@@ -185,9 +185,9 @@ public class Table extends PyObject {
         return new Table(diffDataModel);
     }
     
-    public static Table diff(Table t1, Table t2, Integer key1, Integer key2, Boolean showSourceColumn) {
+    public static Table diff(Table t1, Table t2, Integer table1Key1, Integer table2Key1, Double tolerance1, Integer table1Key2, Integer table2Key2, Double tolerance2, Boolean showSourceColumn) {
         DiffDataModel diffDataModel = new DiffDataModel();
-        diffDataModel.setData(t1.getModel(), t2.getModel(), key1, key2, showSourceColumn);
+        diffDataModel.setData(t1.getModel(), t2.getModel(), table1Key1, table2Key1, tolerance1, table1Key2, table2Key2, tolerance2, showSourceColumn);
         return new Table(diffDataModel);
     }
 }

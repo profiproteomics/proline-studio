@@ -119,9 +119,9 @@ public class DiffDataModel extends AbstractJoinDataModel {
             }
             
             if (col1 == null) {
-                return col2;
+                return col2+" "+m_data2.getName();
             } else if (col2 == null) {
-                return col1;
+                return col1+" "+m_data1.getName();
             } else {
                 if (col1.compareTo(col2) == 0) {
                     return col1;

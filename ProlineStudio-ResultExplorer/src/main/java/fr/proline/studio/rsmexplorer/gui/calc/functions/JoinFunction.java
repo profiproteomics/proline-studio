@@ -1,4 +1,4 @@
-package fr.proline.studio.rsmexplorer.gui.calc.functions;
+  package fr.proline.studio.rsmexplorer.gui.calc.functions;
 
 import fr.proline.studio.comparedata.AbstractJoinDataModel;
 import fr.proline.studio.parameter.AbstractLinkedParameters;

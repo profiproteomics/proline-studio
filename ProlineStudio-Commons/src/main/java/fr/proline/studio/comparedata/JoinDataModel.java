@@ -6,8 +6,6 @@ import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.table.LazyData;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -169,9 +167,9 @@ public class JoinDataModel extends AbstractJoinDataModel {
             }
             
             if (col1 == null) {
-                return col2;
+                return col2+" "+m_data2.getName();
             } else if (col2 == null) {
-                return col1;
+                return col1+" "+m_data1.getName();
             } else {
                 if (col1.compareTo(col2) == 0) {
                     return col1;
@@ -278,7 +276,11 @@ public class JoinDataModel extends AbstractJoinDataModel {
                 return m_data1.getValueAt(row1, colIndexCur);
             } else {
                 colIndexCur = m_keysColumns2.get(columnIndex);
-                return m_data2.getValueAt(row2, colIndexCur);
+                if ((colIndexCur !=-1) && (row2 != null)) {
+                    return m_data2.getValueAt(row2, colIndexCur);
+                } else {
+                    return null;
+                }
             }
         }
         

@@ -10,12 +10,12 @@ import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.parameter.BooleanParameter;
+import fr.proline.studio.parameter.IntegerParameter;
 import fr.proline.studio.parameter.ParameterList;
 import fr.proline.studio.parameter.SettingsButton;
 import fr.proline.studio.parameter.SettingsInterface;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
-import fr.proline.studio.progress.ProgressInterface;
 import fr.proline.studio.utils.CyclicColorPalette;
 import java.awt.BasicStroke;
 
@@ -39,6 +39,7 @@ import javax.swing.BorderFactory;
 import javax.swing.JCheckBox;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTextField;
 import javax.swing.JToolBar;
 
 public class MatrixPanel extends HourglassPanel implements DataBoxPanelInterface, SettingsInterface {
@@ -50,13 +51,17 @@ public class MatrixPanel extends HourglassPanel implements DataBoxPanelInterface
     private static final int DELTA = 3;
     private static final int TITLE_SIZE = 20;
     private static final int INFO_SIZE = 50;
-    private static final int PEPTIDE_NAME_SIZE = 120;
-    private static final int PROTEIN_NAME_SIZE = 80;
+    private static final int PEPTIDE_NAME_NB_CHARS_MAX = 45;
+    private static final int PROTEIN_NAME_NB_CHARS_MAX = 30;
     private static final int VISIBILITY_MARGE_SIZE = 20;
 
     private static final String PROTEINS = "Proteins";
     private static final String PEPTIDES = "Peptides";
 
+    private int m_peptideNameNbCharsMax = PEPTIDE_NAME_NB_CHARS_MAX;
+    private int m_proteinNameNbCharsMax = PROTEIN_NAME_NB_CHARS_MAX;
+    private int m_peptideNamePixelSize;
+    private int m_proteinNamePixelSize;
     
     
     private List<Cell> m_cells;
@@ -102,7 +107,11 @@ public class MatrixPanel extends HourglassPanel implements DataBoxPanelInterface
     private ArrayList<ParameterList> m_parameterListArray = null;
     public static final String MATRIX_PARAMETERS = "Matrix Parameters";
     public static final String HIDE_EQUIVALENT_PROTEINS_KEY = "HideEquivalentProteins";
+    public static final String PROTEIN_NAME_HEIGHT_KEY = "ProteinNameHeight";
+    public static final String PEPTIDE_NAME_WIDTH_KEY = "ProteinNameWidth";
     private BooleanParameter m_hideEquivalentPoteinsParameter = null;
+    private IntegerParameter m_proteinNameMaxCharsParameter = null;
+    private IntegerParameter m_peptideNameMaxCharsParameter = null;
     
     private boolean m_showEquivalentProteins = true;
     
@@ -265,6 +274,9 @@ public class MatrixPanel extends HourglassPanel implements DataBoxPanelInterface
         Boolean hideEquivalentProteins = (Boolean) m_hideEquivalentPoteinsParameter.getObjectValue();
         m_showEquivalentProteins = !hideEquivalentProteins;
         
+        m_peptideNameNbCharsMax = ((Integer) m_peptideNameMaxCharsParameter.getObjectValue()).intValue();
+        m_proteinNameNbCharsMax = ((Integer) m_proteinNameMaxCharsParameter.getObjectValue()).intValue();
+        
         setData(m_component, m_drawVisualization, m_proteinMap, m_peptideMap);
 
     }
@@ -275,9 +287,14 @@ public class MatrixPanel extends HourglassPanel implements DataBoxPanelInterface
         ParameterList parameterTableList = new ParameterList(MATRIX_PARAMETERS);
 
         m_hideEquivalentPoteinsParameter = new BooleanParameter(HIDE_EQUIVALENT_PROTEINS_KEY,"Hide Proteins with same peptides",JCheckBox.class, Boolean.FALSE);
+        m_proteinNameMaxCharsParameter = new IntegerParameter(PROTEIN_NAME_HEIGHT_KEY, "Maximum Protein Name Length", JTextField.class, PROTEIN_NAME_NB_CHARS_MAX, 10, PROTEIN_NAME_NB_CHARS_MAX*5);
+        m_peptideNameMaxCharsParameter = new IntegerParameter(PEPTIDE_NAME_WIDTH_KEY, "Maximum Peptide Name Length", JTextField.class, PEPTIDE_NAME_NB_CHARS_MAX, 10, PEPTIDE_NAME_NB_CHARS_MAX*5);
 
-
+        
         parameterTableList.add(m_hideEquivalentPoteinsParameter);
+        parameterTableList.add(m_proteinNameMaxCharsParameter);
+        parameterTableList.add(m_peptideNameMaxCharsParameter);
+        
 
         parameterTableList.getPanel(); // generate panel at once
 
@@ -418,7 +435,7 @@ public class MatrixPanel extends HourglassPanel implements DataBoxPanelInterface
             
             if (m_component == null) {
                 return;
-            }else if(m_component!=null && isLoading()){
+            } else if (m_component!=null && isLoading()) {
                                 
                 if (m_displayFont == null) {
                     m_displayFont = new Font("SansSerif", Font.BOLD, 12);
@@ -448,12 +465,17 @@ public class MatrixPanel extends HourglassPanel implements DataBoxPanelInterface
                 return;
             }
 
+            if (m_firstPaint) {
+                computeNecessarySize(g);
+            }
+            
+            
             int rowCount = m_component.getPeptideSize();
             int columnCount = m_component.getProteinSize(m_showEquivalentProteins);
 
             // calculate square size :
-            int squareSizeX = (int) (((width - TITLE_SIZE - PEPTIDE_NAME_SIZE - DELTA) / (columnCount + 1)));
-            int squareSizeY = (int) (((height - INFO_SIZE - TITLE_SIZE - PROTEIN_NAME_SIZE - DELTA) / (rowCount + 1)));
+            int squareSizeX = (int) (((width - TITLE_SIZE - m_peptideNamePixelSize - DELTA) / (columnCount + 1)));
+            int squareSizeY = (int) (((height - INFO_SIZE - TITLE_SIZE - m_proteinNamePixelSize - DELTA) / (rowCount + 1)));
             m_squareSize = Math.min(squareSizeX, squareSizeY);
             if (m_squareSize > MAX_CELL_SIZE) {
                 m_squareSize = MAX_CELL_SIZE;
@@ -462,16 +484,16 @@ public class MatrixPanel extends HourglassPanel implements DataBoxPanelInterface
             }
 
             int matrixWidth = (columnCount + 1) * m_squareSize + DELTA;
-            int matrixTotalWidth = matrixWidth + TITLE_SIZE + PEPTIDE_NAME_SIZE;
+            int matrixTotalWidth = matrixWidth + TITLE_SIZE + m_peptideNamePixelSize;
             int matrixHeight = (rowCount + 1) * m_squareSize + DELTA;
-            int matrixTotalHeight = matrixHeight + INFO_SIZE + TITLE_SIZE + PROTEIN_NAME_SIZE;
+            int matrixTotalHeight = matrixHeight + INFO_SIZE + TITLE_SIZE + m_proteinNamePixelSize;
 
             m_xOffset = (width - matrixTotalWidth) / 2;
             if (m_xOffset < 0) {
                 m_xOffset = 0;
             }
-            m_xOffsetMatrix = m_xOffset + TITLE_SIZE + PEPTIDE_NAME_SIZE + DELTA;
-            m_yOffsetMatrix = INFO_SIZE + TITLE_SIZE + PROTEIN_NAME_SIZE + DELTA;
+            m_xOffsetMatrix = m_xOffset + TITLE_SIZE + m_peptideNamePixelSize + DELTA;
+            m_yOffsetMatrix = INFO_SIZE + TITLE_SIZE + m_proteinNamePixelSize + DELTA;
 
             g2d.setColor(COLOR_GRAY);
             g2d.setFont(FONT_HELVETICA_12_BOLD);
@@ -480,9 +502,9 @@ public class MatrixPanel extends HourglassPanel implements DataBoxPanelInterface
             int proteinsWidth = fontMetricsBold.stringWidth(PROTEINS);
             int peptidesWidth = fontMetricsBold.stringWidth(PEPTIDES);
 
-            g2d.drawString(PROTEINS, m_xOffset + (matrixTotalWidth - proteinsWidth + PEPTIDE_NAME_SIZE)/2, INFO_SIZE + TITLE_SIZE / 2);
+            g2d.drawString(PROTEINS, m_xOffset + (matrixTotalWidth - proteinsWidth + m_peptideNamePixelSize)/2, INFO_SIZE + TITLE_SIZE / 2);
 
-            drawRotatedLine(g2d, (double) (m_xOffset + TITLE_SIZE/2), (matrixTotalHeight + peptidesWidth )/2+PROTEIN_NAME_SIZE, (double) 270 * java.lang.Math.PI / 180, PEPTIDES);
+            drawRotatedLine(g2d, (double) (m_xOffset + TITLE_SIZE/2), (matrixTotalHeight + peptidesWidth )/2+m_proteinNamePixelSize, (double) 270 * java.lang.Math.PI / 180, PEPTIDES);
 
             g2d.setFont(FONT_HELVETICA_11);
             FontMetrics fontMetricsPlain = g.getFontMetrics(FONT_HELVETICA_11);
@@ -590,7 +612,7 @@ public class MatrixPanel extends HourglassPanel implements DataBoxPanelInterface
                 int i=0;
                 for (;i<sequence.length();i++) {
                     stringWidth +=  fontMetricsPlain.charWidth(sequence.charAt(i));
-                    if (stringWidth>PEPTIDE_NAME_SIZE) {
+                    if (stringWidth>m_peptideNamePixelSize) {
                         i--;
                         break;
                     }
@@ -627,12 +649,14 @@ public class MatrixPanel extends HourglassPanel implements DataBoxPanelInterface
                 int i=0;
                 for (;i<proteinName.length();i++) {
                     stringWidth +=  fontMetricsPlain.charWidth(proteinName.charAt(i));
-                    if (stringWidth>PROTEIN_NAME_SIZE) {
+                    if (stringWidth>m_proteinNamePixelSize) {
                         i--;
                         break;
                     }
                 }
-                proteinName = proteinName.substring(0, i);
+                if ((i>0) && (i<proteinName.length()-1)) {
+                    proteinName = proteinName.substring(0, i-1)+".";
+                }
 
                 Cell cell = m_cells.get(dIndex);
                 int x = cell.getPixelX();
@@ -671,7 +695,64 @@ public class MatrixPanel extends HourglassPanel implements DataBoxPanelInterface
         private FontMetrics m_metrics = null;
 
 
+        private void computeNecessarySize(Graphics g) {
 
+            FontMetrics fontMetrics = g.getFontMetrics(FONT_HELVETICA_11);
+            
+            // Calculation for Proteins
+            int maxStringLength = 0;
+       
+            for (LightProteinMatch proteinMatch : m_component.getProteinArray(m_showEquivalentProteins)) {
+                String proteinName = proteinMatch.getAccession();
+                int nb = proteinName.length();
+                if (nb>maxStringLength) {
+                    maxStringLength = nb;
+                }
+            }
+            
+            int stringLength = Math.min(m_proteinNameNbCharsMax, maxStringLength);
+            
+            int maxPixelWidth = 0;
+            for (LightProteinMatch proteinMatch : m_component.getProteinArray(m_showEquivalentProteins)) {
+                String proteinName = proteinMatch.getAccession();
+                int nb = proteinName.length();
+                if (nb>stringLength) {
+                    proteinName = proteinName.substring(0, stringLength)+".";
+                }
+                int stringWidth = fontMetrics.stringWidth(proteinName);
+                if (stringWidth>maxPixelWidth) {
+                    maxPixelWidth = stringWidth;
+                }
+            }
+            m_proteinNamePixelSize = maxPixelWidth;
+            
+            // Calculation for Peptides
+            maxStringLength = 0;
+       
+            for (LightPeptideMatch peptideMatch : m_component.getPeptideArray()) {
+                String peptideName = peptideMatch.getSequence();
+                int nb = peptideName.length();
+                if (nb>maxStringLength) {
+                    maxStringLength = nb;
+                }
+            }
+            
+            stringLength = Math.min(m_peptideNameNbCharsMax, maxStringLength);
+            
+            maxPixelWidth = 0;
+            for (LightPeptideMatch peptideMatch : m_component.getPeptideArray()) {
+                String peptideName = peptideMatch.getSequence();
+                int nb = peptideName.length();
+                if (nb>stringLength) {
+                    peptideName = peptideName.substring(0, stringLength)+".";
+                }
+                int stringWidth = fontMetrics.stringWidth(peptideName);
+                if (stringWidth>maxPixelWidth) {
+                    maxPixelWidth = stringWidth;
+                }
+            }
+            m_peptideNamePixelSize = maxPixelWidth;
+        }
         
 
         private void drawRotatedLine(Graphics g, double x, double y, double theta, String label) {

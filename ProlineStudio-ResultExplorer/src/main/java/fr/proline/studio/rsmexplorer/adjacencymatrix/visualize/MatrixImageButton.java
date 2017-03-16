@@ -37,7 +37,7 @@ public class MatrixImageButton extends JButton {
     
     public MatrixImageButton(int index, Component componentOfImage, DrawVisualization drawVisualization) {
         int nbPeptides = componentOfImage.getPeptideSize();
-        int nbProteins = componentOfImage.getProteinSize();
+        int nbProteins = componentOfImage.getProteinSize(false);
 
         int width = (nbProteins * (SQUARE_SIZE+DELTA))+DELTA+FRAME*2;
         int height = (nbPeptides * (SQUARE_SIZE+DELTA))+DELTA+FRAME*2;
@@ -53,7 +53,7 @@ public class MatrixImageButton extends JButton {
     private void createImage(int index, Component componentOfImage, DrawVisualization drawVisualization) {
 
         int nbPeptides = componentOfImage.getPeptideSize();
-        int nbProteins = componentOfImage.getProteinSize();
+        int nbProteins = componentOfImage.getProteinSize(false);
 
         boolean[][] flagArray = new boolean[nbPeptides][nbProteins];
         for (int i=0;i<nbPeptides;i++) {
@@ -64,7 +64,7 @@ public class MatrixImageButton extends JButton {
 
         HashMap<LightPeptideMatch, ArrayList<LightProteinMatch>> m_peptideToProteinMap = drawVisualization.getPeptideToProteinMap();
 
-        ArrayList<LightPeptideMatch> peptideList = componentOfImage.m_peptideArray;
+        ArrayList<LightPeptideMatch> peptideList = componentOfImage.getPeptideArray();
         int peptIndex = -1;
 
         for (LightPeptideMatch temp2 : peptideList) {
@@ -72,7 +72,7 @@ public class MatrixImageButton extends JButton {
             ArrayList<LightProteinMatch> proteinList = m_peptideToProteinMap.get(temp2);
 
             for (LightProteinMatch temp3 : proteinList) {
-                int protIndex = componentOfImage.m_proteinMatchArray.indexOf(temp3);
+                int protIndex = componentOfImage.getProteinArray(false).indexOf(temp3);
                 flagArray[peptIndex][protIndex] = true;
             }
         }

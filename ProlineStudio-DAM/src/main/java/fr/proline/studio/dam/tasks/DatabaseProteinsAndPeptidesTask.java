@@ -2,6 +2,7 @@ package fr.proline.studio.dam.tasks;
 
 import fr.proline.core.orm.msi.Peptide;
 import fr.proline.core.orm.msi.PeptideSet;
+import fr.proline.core.orm.msi.ProteinSet;
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.msi.dto.DPeptideSet;
@@ -193,21 +194,21 @@ public class DatabaseProteinsAndPeptidesTask extends AbstractDatabaseTask {
             ArrayList<LightPeptideMatch> allPeptides = new ArrayList<>();
             
             
-            Query proteinMatchQuery = entityManagerMSI.createQuery("SELECT pm.id, pm.accession, pm.score, ps.id FROM ProteinMatch pm, ProteinSetProteinMatchItem ps_to_pm, ProteinSet ps WHERE ps_to_pm.proteinMatch.id=pm.id AND ps_to_pm.resultSummary.id=:rsmId AND ps_to_pm.id.proteinMatchId=pm.id AND ps_to_pm.id.proteinSetId=ps.id AND ps.isValidated=true");
+            Query proteinMatchQuery = entityManagerMSI.createQuery("SELECT pm.id, pm.accession, pm.score, ps.id, ps.representativeProteinMatchId FROM ProteinMatch pm, ProteinSetProteinMatchItem ps_to_pm, ProteinSet ps WHERE ps_to_pm.proteinMatch.id=pm.id AND ps_to_pm.resultSummary.id=:rsmId AND ps_to_pm.id.proteinMatchId=pm.id AND ps_to_pm.id.proteinSetId=ps.id AND ps.isValidated=true");
             proteinMatchQuery.setParameter("rsmId", m_rsm.getId());
             
             List<Object[]> proteinMatchList = proteinMatchQuery.getResultList();
-            ArrayList<Long> proteinMathIdList = new ArrayList<>(proteinMatchList.size());
-            
+            ArrayList<Long> proteinMatchIdList = new ArrayList<>(proteinMatchList.size());
             Iterator<Object[]> it = proteinMatchList.iterator();
             while (it.hasNext()) {
                 Object[] res = it.next();
                 Long proteinMatchId = (Long) res[0];
-                proteinMathIdList.add(proteinMatchId);
+                proteinMatchIdList.add(proteinMatchId);
                 String accession = (String) res[1];
                 Float score = (Float) res[2];
                 Long proteinSetId = (Long) res[3];
-                LightProteinMatch proteinMatch = new LightProteinMatch(proteinMatchId, accession, score, proteinSetId);
+                Long representativeProteinMatchId = (Long) res[4];
+                LightProteinMatch proteinMatch = new LightProteinMatch(proteinMatchId, accession, score, proteinSetId, representativeProteinMatchId);
                 proteinMatchMap.put(proteinMatchId, proteinMatch);
             }
 
@@ -217,11 +218,11 @@ public class DatabaseProteinsAndPeptidesTask extends AbstractDatabaseTask {
             
             final int SLICE_SIZE = 1000;
             SubTaskManager subTaskManager = new SubTaskManager(1);
-            SubTask subTask = subTaskManager.sliceATaskAndGetFirst(0, proteinMathIdList.size(), SLICE_SIZE);
+            SubTask subTask = subTaskManager.sliceATaskAndGetFirst(0, proteinMatchIdList.size(), SLICE_SIZE);
             while (subTask != null) {
 
-                Query proteinMatch2PepMatchQuery = entityManagerMSI.createQuery("SELECT pm.id, pepm.id FROM ProteinMatch pm, PeptideSetProteinMatchMap pepset_to_pm, PeptideMatch pepm, PeptideSetPeptideInstanceItem ps_to_pi, PeptideInstance pi WHERE pm.id IN (:pmlist) AND pepset_to_pm.resultSummary.id=:rsmId   AND pepset_to_pm.id.proteinMatchId=pm.id AND pepset_to_pm.id.peptideSetId=ps_to_pi.id.peptideSetId AND ps_to_pi.id.peptideInstanceId = pi.id AND pi.bestPeptideMatchId=pepm.id");
-                proteinMatch2PepMatchQuery.setParameter("pmlist", subTask.getSubList(proteinMathIdList));
+                Query proteinMatch2PepMatchQuery = entityManagerMSI.createQuery("SELECT pm.id, pepm.id FROM ProteinMatch pm, PeptideSetProteinMatchMap pepset_to_pm, PeptideMatch pepm, PeptideSetPeptideInstanceItem ps_to_pi, PeptideInstance pi WHERE pm.id IN (:pmlist) AND pepset_to_pm.resultSummary.id=:rsmId   AND pepset_to_pm.id.proteinMatchId=pm.id AND pepset_to_pm.id.peptideSetId=ps_to_pi.id.peptideSetId AND ps_to_pi.id.peptideInstanceId = pi.id AND pi.bestPeptideMatchId=pepm.id ORDER BY pepm.id");
+                proteinMatch2PepMatchQuery.setParameter("pmlist", subTask.getSubList(proteinMatchIdList));
                 proteinMatch2PepMatchQuery.setParameter("rsmId", m_rsm.getId());
                 List<Object[]> resList = proteinMatch2PepMatchQuery.getResultList();
                 it = resList.iterator();
@@ -265,12 +266,111 @@ public class DatabaseProteinsAndPeptidesTask extends AbstractDatabaseTask {
                 subTask = subTaskManager.getNextSubTask();
             }
             
+            
+            // Look for typical proteins of protein Set
+            HashMap<Long, LightProteinMatch> proteinSetIdToTypical = new HashMap<>();
             Iterator<Long> itProteinId = proteinToPeptideIdMap.keySet().iterator();
             while (itProteinId.hasNext()) {
                 Long proteinId = itProteinId.next();
                 LightProteinMatch protein = proteinMatchMap.get(proteinId);
-                allProteins.add(protein);
-                ArrayList<Long> peptideIdList = proteinToPeptideIdMap.get(proteinId);
+                long proteinSetId = protein.getProteinSetId();
+                long typicalProteinId = protein.getRepresentativeProteinMatchId();
+                if (typicalProteinId == proteinId) {
+                    // we have found the typical protein
+                    proteinSetIdToTypical.put(proteinSetId, protein);
+                    allProteins.add(protein);
+                }
+            }
+            
+            // equivalent proteins (proteins with the same peptides)
+            HashMap<LightProteinMatch, ArrayList<LightProteinMatch>> equivalentProteins = new HashMap<>();
+            
+            //Equivalent to Main Protein
+            HashMap<LightProteinMatch, LightProteinMatch> equivalentToMainProtein = new HashMap<>();
+            
+            // look for a protein for each samset and subset
+            HashMap<Long, ArrayList<LightProteinMatch>> proteinSetIdToSubsetsProteins = new HashMap<>();
+            itProteinId = proteinToPeptideIdMap.keySet().iterator();
+            while (itProteinId.hasNext()) {
+                Long proteinId = itProteinId.next();
+                LightProteinMatch protein = proteinMatchMap.get(proteinId);
+                long proteinSetId = protein.getProteinSetId();
+                
+                LightProteinMatch typicalProtein = proteinSetIdToTypical.get(proteinSetId);
+                ArrayList<Long> typicalPeptideIdList = proteinToPeptideIdMap.get(typicalProtein.getId());
+                int nbPeptidesTypical = typicalPeptideIdList.size();
+                
+                ArrayList<Long> peptideIdList = proteinToPeptideIdMap.get(protein.getId());
+                int nbPeptides = peptideIdList.size();
+                if (nbPeptides == nbPeptidesTypical) {
+                    // Protein of the sameset
+                    if (!typicalProtein.equals(protein)) {
+                        // we put it in the equivalent protein map if it is not itself
+                        ArrayList<LightProteinMatch> equivalentProteinsArray = equivalentProteins.get(typicalProtein);
+                        if (equivalentProteinsArray == null) {
+                            equivalentProteinsArray = new ArrayList<>();
+                            equivalentProteins.put(typicalProtein, equivalentProteinsArray);
+                        }
+                        equivalentProteinsArray.add(protein);
+                        equivalentToMainProtein.put(protein, typicalProtein);
+                    }
+                    continue;
+                }
+                
+                // we have a protein of the subset
+                 ArrayList<LightProteinMatch> subsetMainProteins = proteinSetIdToSubsetsProteins.get(proteinSetId);
+                 if (subsetMainProteins == null) {
+                     subsetMainProteins = new ArrayList<>();
+                     subsetMainProteins.add(protein);
+                     allProteins.add(protein);
+                     proteinSetIdToSubsetsProteins.put(proteinSetId, subsetMainProteins);
+                 } else {
+
+                     boolean correspondingProtein = false;
+                     Iterator<LightProteinMatch> subsetMainProteinsIt = subsetMainProteins.iterator();
+                     LightProteinMatch proteinCur =  null;
+                     while (subsetMainProteinsIt.hasNext()) {
+                         proteinCur = subsetMainProteinsIt.next();
+                         ArrayList<Long> petidesListCur = proteinToPeptideIdMap.get(proteinCur.getId());
+                         int nbPeptidesCur = petidesListCur.size();
+                         if (nbPeptides != nbPeptidesCur) {
+                             continue;
+                         }
+                         boolean peptidesCorrespond = true;
+                         for (int i=0;i<nbPeptides;i++) {
+                             long id1 =  peptideIdList.get(i);
+                             long idCur = petidesListCur.get(i);
+                             if (id1 != idCur) {
+                                 peptidesCorrespond = false;
+                                 break;
+                             }
+                         }
+                         if (peptidesCorrespond) {
+                             // there is already a corresponding protein in subset
+                             correspondingProtein = true;
+                             break;
+                         }
+                     }
+                     if (!correspondingProtein) {
+                         subsetMainProteins.add(protein);
+                         allProteins.add(protein);
+                     } else {
+                         // we put it in the equivalent protein map
+                         ArrayList<LightProteinMatch> equivalentProteinsArray = equivalentProteins.get(proteinCur);
+                         if (equivalentProteinsArray == null) {
+                             equivalentProteinsArray = new ArrayList<>();
+                             equivalentProteins.put(proteinCur, equivalentProteinsArray);
+                         }
+                         equivalentProteinsArray.add(protein);
+                         equivalentToMainProtein.put(protein, proteinCur);
+                     }
+                 }
+            }
+            
+            Iterator<LightProteinMatch> itProtein = allProteins.iterator();
+            while (itProtein.hasNext()) {
+                LightProteinMatch protein = itProtein.next();
+                ArrayList<Long> peptideIdList = proteinToPeptideIdMap.get(protein.getId());
                 
                 ArrayList<LightPeptideMatch> peptideMatchList = new ArrayList<>(peptideIdList.size());
                 for (Long peptideId : peptideIdList) {
@@ -287,8 +387,8 @@ public class DatabaseProteinsAndPeptidesTask extends AbstractDatabaseTask {
                 
                 proteinToPeptideMap.put(protein, peptideMatchList);
             }
-            
-            m_adjacencyMatrixData.setData(allProteins, allPeptides, proteinToPeptideMap, peptideToProteinMap);
+
+            m_adjacencyMatrixData.setData(allProteins, allPeptides, proteinToPeptideMap, peptideToProteinMap, equivalentProteins, equivalentToMainProtein);
             
             entityManagerMSI.getTransaction().commit();
 

@@ -31,7 +31,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import javax.swing.BorderFactory;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JToolBar;
@@ -65,7 +64,6 @@ public class MatrixPanel extends HourglassPanel implements DataBoxPanelInterface
     
     private static final Color COLOR_GRAY = new Color(95, 87, 88);
     private static final Color COLOR_PEPTIDE_RANK1 = new Color(134, 180, 96);
-    private static final Color LABEL_COLOR = COLOR_GRAY;
     private static final Color SELECTION_COLOR = new Color(51, 153, 255);
     private static final Font FONT_HELVETICA_12_BOLD = new Font("Helvetica", Font.BOLD, 12);
     private static final Font FONT_HELVETICA_11 = new Font("Helvetica", Font.PLAIN, 11);
@@ -86,7 +84,8 @@ public class MatrixPanel extends HourglassPanel implements DataBoxPanelInterface
     HashMap<Long, DPeptideMatch> m_peptideMap;
     private int[] m_flagArray;
     private DrawVisualization m_drawVisualization = null;
-    private HashMap<LightPeptideMatch, ArrayList<LightProteinMatch>> m_peptideToProteinMap = new HashMap<>();
+    private HashMap<LightProteinMatch, ArrayList<LightPeptideMatch>> m_proteinToPeptideMap = new HashMap<>();
+    HashMap<LightProteinMatch, LightProteinMatch>  m_equivalentToMainProteinMap = new HashMap<>();
 
     private final HashMap<Long, Color> m_proteinSetColorMap = new HashMap<>();
     
@@ -141,7 +140,8 @@ public class MatrixPanel extends HourglassPanel implements DataBoxPanelInterface
 
         m_drawVisualization = drawVisualization;
 
-        m_peptideToProteinMap = m_drawVisualization.getPeptideToProteinMap();
+        m_proteinToPeptideMap = m_drawVisualization.getProteinToPeptideMap();
+        m_equivalentToMainProteinMap = m_drawVisualization.getEquivalentToMainProtein();
         m_component = c;
 
         m_component.searchWeakPeptides(m_drawVisualization, 100); //JPM.TODO 100 is a threshold
@@ -150,7 +150,7 @@ public class MatrixPanel extends HourglassPanel implements DataBoxPanelInterface
         m_peptideMap = peptideMap;
 
         int rowCount = (m_component==null) ? 0 : m_component.getPeptideSize();
-        int columnCount = (m_component==null) ? 0 : m_component.getProteinSize();
+        int columnCount = (m_component==null) ? 0 : m_component.getProteinSize(true);
 
         m_cells = new ArrayList<>(columnCount * rowCount);
         m_peptideCells = new ArrayList<>(rowCount);	//pepide score
@@ -159,8 +159,8 @@ public class MatrixPanel extends HourglassPanel implements DataBoxPanelInterface
         for (int row = 0; row < rowCount; row++) {
             for (int col = 0; col < columnCount; col++) {
                 Cell cell = new Cell(row, col);
-                cell.setPeptideMatch(m_peptideMap.get(m_component.m_peptideArray.get(row).getId()));
-                LightProteinMatch lpm = m_component.m_proteinMatchArray.get(col);
+                cell.setPeptideMatch(m_peptideMap.get(m_component.getPeptideArray().get(row).getId()));
+                LightProteinMatch lpm = m_component.getProteinArray(true).get(col);
                 cell.setProteinMatch(m_proteinMap.get(lpm.getId()));
                 if (m_component.isWeakPeptide(row, lpm.getProteinSetId())) {
                     cell.setShowWeakNess();
@@ -171,13 +171,13 @@ public class MatrixPanel extends HourglassPanel implements DataBoxPanelInterface
 
         for (int row = 0; row < rowCount; row++) {
             PeptideCell cell = new PeptideCell(row);
-            cell.setPeptideMatch(m_peptideMap.get(m_component.m_peptideArray.get(row).getId()));
+            cell.setPeptideMatch(m_peptideMap.get(m_component.getPeptideArray().get(row).getId()));
             m_peptideCells.add(cell);
         }
 
         for (int col = 0; col < columnCount; col++) {
             ProteinCell cell = new ProteinCell(col);
-            cell.setProteinMatch(m_proteinMap.get(m_component.m_proteinMatchArray.get(col).getId()));
+            cell.setProteinMatch(m_proteinMap.get(m_component.getProteinArray(true).get(col).getId()));
             m_proteinCells.add(cell);
 
         }
@@ -191,7 +191,7 @@ public class MatrixPanel extends HourglassPanel implements DataBoxPanelInterface
         m_peptideScore = new Float[rowCount];
         int index = 0;
         if (m_component != null) {
-            for (LightPeptideMatch peptideMatch : m_component.m_peptideArray) {
+            for (LightPeptideMatch peptideMatch : m_component.getPeptideArray()) {
 
                 m_peptideScore[index] = peptideMatch.getScore();
                 m_peptideRank[index] = peptideMatch.getCDPrettyRank();
@@ -202,7 +202,7 @@ public class MatrixPanel extends HourglassPanel implements DataBoxPanelInterface
         m_proteinScore = new Float[columnCount];
         index = 0;
         if (m_component != null) {
-            for (LightProteinMatch proteinMatch : m_component.m_proteinMatchArray) {
+            for (LightProteinMatch proteinMatch : m_component.getProteinArray(true)) {
                 m_proteinScore[index] = proteinMatch.getScore();
                 index++;
             }
@@ -215,10 +215,16 @@ public class MatrixPanel extends HourglassPanel implements DataBoxPanelInterface
     }
 
     public DProteinMatch getSelectedProteinMatch() {
+        if (m_selectedCell == null) {
+            return null;
+        }
         return m_selectedCell.getProteinMatch();
     }
     
     public DPeptideMatch getSelectedPeptideMatch() {
+        if (m_selectedCell == null) {
+            return null;
+        }
         return m_selectedCell.getPeptideMatch();
     }
     
@@ -301,7 +307,7 @@ public class MatrixPanel extends HourglassPanel implements DataBoxPanelInterface
         
         
         private Cell findCell(int mouseX, int mouseY) {
-            int columnCount = m_component.getProteinSize();
+            int columnCount = m_component.getProteinSize(true);
 
             int matrixX1 = m_cells.get(0).getPixelX();
             int matrixX2 = m_cells.get(m_cells.size() - 1).getPixelX() + m_squareSize;
@@ -386,7 +392,7 @@ public class MatrixPanel extends HourglassPanel implements DataBoxPanelInterface
             }
 
             int rowCount = m_component.getPeptideSize();
-            int columnCount = m_component.getProteinSize();
+            int columnCount = m_component.getProteinSize(true);
 
             // calculate square size :
             int squareSizeX = (int) (((width - TITLE_SIZE - PEPTIDE_NAME_SIZE - DELTA) / (columnCount + 1)));
@@ -425,23 +431,21 @@ public class MatrixPanel extends HourglassPanel implements DataBoxPanelInterface
             FontMetrics fontMetricsPlain = g.getFontMetrics(FONT_HELVETICA_11);
 
 
-
-
-            ArrayList<LightPeptideMatch> peptideList = m_component.m_peptideArray;
-            int peptIndex = -1;
-
-            for (LightPeptideMatch peptideMatch : peptideList) {
-                peptIndex++;
-                ArrayList<LightProteinMatch> proteinList = m_peptideToProteinMap.get(peptideMatch);
-
-                for (LightProteinMatch proteinMatch : proteinList) {
-                    int protIndex = m_component.m_proteinMatchArray.indexOf(proteinMatch);
-                    int z = peptIndex * columnCount + protIndex;
-                    m_flagArray[z] = 1;
-                }
+            ArrayList<LightProteinMatch> proteinList = m_component.getProteinArray(true);
+            int proteinIndex = -1;
+            for (LightProteinMatch proteinMatch : proteinList) {
+               proteinIndex++;
+               ArrayList<LightPeptideMatch> peptideList = m_proteinToPeptideMap.get(proteinMatch);
+               if (peptideList == null) {
+                   peptideList = m_proteinToPeptideMap.get(m_equivalentToMainProteinMap.get(proteinMatch));
+               }
+               for (LightPeptideMatch peptideMatch : peptideList) {
+                   int peptIndex = m_component.getPeptideArray().indexOf(peptideMatch);
+                   int z = peptIndex * columnCount + proteinIndex;
+                   m_flagArray[z] = 1;
+               }
             }
-
-            
+ 
             // --- Unselected Cells
             
             // draw matrix
@@ -514,7 +518,7 @@ public class MatrixPanel extends HourglassPanel implements DataBoxPanelInterface
             long id1 = (m_selectedCell==null) ? -1 : m_selectedCell.getPeptideMatchId();
             long id2 = (m_overedCell==null) ? -1 : m_overedCell.getPeptideMatchId();
             int dIndex = 0;
-            for (LightPeptideMatch peptideMatch : m_component.m_peptideArray) {
+            for (LightPeptideMatch peptideMatch : m_component.getPeptideArray()) {
                 
                 long id = peptideMatch.getId();
                 boolean highlight = ((id == id1) || (id == id2));
@@ -553,7 +557,7 @@ public class MatrixPanel extends HourglassPanel implements DataBoxPanelInterface
             id1 = (m_selectedCell==null) ? -1 : m_selectedCell.getProteinMatchId();
             id2 = (m_overedCell==null) ? -1 : m_overedCell.getProteinMatchId();
             dIndex = 0;
-            for (LightProteinMatch proteinMatch : m_component.m_proteinMatchArray) {
+            for (LightProteinMatch proteinMatch : m_component.getProteinArray(true)) {
                 String proteinName = proteinMatch.getAccession();
                 long id = proteinMatch.getId();
                 boolean highlight = ((id == id1) || (id == id2));
@@ -773,7 +777,7 @@ public class MatrixPanel extends HourglassPanel implements DataBoxPanelInterface
         
         public Color getFillColor() {
 
-            int index = m_row * m_component.getProteinSize() + m_col;
+            int index = m_row * m_component.getProteinSize(true) + m_col;
             if (m_flagArray[index] == 1) {
 
                 
@@ -794,8 +798,8 @@ public class MatrixPanel extends HourglassPanel implements DataBoxPanelInterface
         }
         
         public void getInfo(String[] info) {
-            LightProteinMatch proteinMatch = (m_col>=0) ? m_component.m_proteinMatchArray.get(m_col) : null;
-            LightPeptideMatch peptideMatch = (m_row>=0) ? m_component.m_peptideArray.get(m_row) : null;
+            LightProteinMatch proteinMatch = (m_col>=0) ? m_component.getProteinArray(true).get(m_col) : null;
+            LightPeptideMatch peptideMatch = (m_row>=0) ? m_component.getPeptideArray().get(m_row) : null;
             
             if (proteinMatch == null) {
                 info[0] = "";
@@ -868,7 +872,7 @@ public class MatrixPanel extends HourglassPanel implements DataBoxPanelInterface
         @Override
         public Color getFillColor() {
 
-            Long proteinSetId = m_component.m_proteinMatchArray.get(m_col).getProteinSetId();
+            Long proteinSetId = m_component.getProteinArray(true).get(m_col).getProteinSetId();
             Color c = m_proteinSetColorMap.get(proteinSetId);
             if (c == null) {
                 c = CyclicColorPalette.getColor(m_proteinSetColorMap.size());

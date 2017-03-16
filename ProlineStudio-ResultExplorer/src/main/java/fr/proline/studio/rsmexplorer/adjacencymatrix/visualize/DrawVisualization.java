@@ -18,7 +18,7 @@ public class DrawVisualization {
     public void setData(AdjacencyMatrixData adjacencyMatrixData, boolean keepSameSet) {
         m_adjacencyMatrixData = adjacencyMatrixData;
 
-        m_cObject = new ConnectedComponents(get_ProtineList(), get_PeptideList(), getProteinToPeptideMap(), getPeptideToProteinMap());
+        m_cObject = new ConnectedComponents(getProtineList(), getPeptideList(), getProteinToPeptideMap(), getPeptideToProteinMap(), getEquivalentProteins());
         m_cList = m_cObject.getConnectedComponents(keepSameSet);
     }
 
@@ -27,24 +27,31 @@ public class DrawVisualization {
         return maxIndex;
     }
 
-    public ArrayList<Component> get_ComponentList() {
+    public ArrayList<Component> getComponentList() {
         return m_cList;
     }
 
-    public ArrayList<LightProteinMatch> get_ProtineList() {
-        return m_adjacencyMatrixData.get_ProtineList();
+    private ArrayList<LightProteinMatch> getProtineList() {
+        return m_adjacencyMatrixData.getProtineList();
     }
 
-    public ArrayList<LightPeptideMatch> get_PeptideList() {
-        return m_adjacencyMatrixData.get_PeptideList();
+    private ArrayList<LightPeptideMatch> getPeptideList() {
+        return m_adjacencyMatrixData.getPeptideList();
     }
 
     public HashMap<LightProteinMatch, ArrayList<LightPeptideMatch>> getProteinToPeptideMap() {
-        return m_adjacencyMatrixData.get_proteinToPeptideMap();
+        return m_adjacencyMatrixData.getProteinToPeptideMap();
     }
 
     public HashMap<LightPeptideMatch, ArrayList<LightProteinMatch>> getPeptideToProteinMap() {
-        return m_adjacencyMatrixData.get_peptideToProteinMap();
+        return m_adjacencyMatrixData.getPeptideToProteinMap();
+    }
+    
+    public HashMap<LightProteinMatch, ArrayList<LightProteinMatch>> getEquivalentProteins() {
+        return m_adjacencyMatrixData.getEquivalentProteins();
     }
 
+    public HashMap<LightProteinMatch, LightProteinMatch> getEquivalentToMainProtein() {
+        return m_adjacencyMatrixData.getEquivalentToMainProtein();
+    }
 }

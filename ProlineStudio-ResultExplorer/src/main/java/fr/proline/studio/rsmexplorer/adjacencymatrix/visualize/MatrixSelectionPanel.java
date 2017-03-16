@@ -201,7 +201,7 @@ public class MatrixSelectionPanel extends HourglassPanel implements DataBoxPanel
     private boolean filter(Filter filter, int index, int type) {
         if (type == PROTEIN) {
             Component c = m_componentList.get(index);
-            ArrayList<LightProteinMatch> proteinSet = c.m_proteinMatchArray;
+            ArrayList<LightProteinMatch> proteinSet = c.getProteinArray(true);
             int nbProteins = proteinSet.size();
             for (int i = 0; i < nbProteins; i++) {
                 LightProteinMatch pm = proteinSet.get(i);
@@ -211,7 +211,7 @@ public class MatrixSelectionPanel extends HourglassPanel implements DataBoxPanel
             }
         } else if (type == PEPTIDE) {
             Component c = m_componentList.get(index);
-            ArrayList<LightPeptideMatch> peptideSet = c.m_peptideArray;
+            ArrayList<LightPeptideMatch> peptideSet = c.getPeptideArray();
             int nbPeptides = peptideSet.size();
             for (int i = 0; i < nbPeptides; i++) {
                 LightPeptideMatch pm = peptideSet.get(i);
@@ -271,7 +271,7 @@ public class MatrixSelectionPanel extends HourglassPanel implements DataBoxPanel
 
             // search filter order
             m_peptideToProteinMap = m_drawVisualization.getPeptideToProteinMap();
-            m_componentList = m_drawVisualization.get_ComponentList();
+            m_componentList = m_drawVisualization.getComponentList();
 
             //Sort clist
             Collections.sort(m_componentList, new CustomComparator());
@@ -388,7 +388,7 @@ public class MatrixSelectionPanel extends HourglassPanel implements DataBoxPanel
         int nbComponents = m_componentList.size();
         for (int i = 0; i < nbComponents; i++) {
             Component c = m_componentList.get(i);
-            ArrayList<LightProteinMatch> proteinSetList = c.m_proteinMatchArray;
+            ArrayList<LightProteinMatch> proteinSetList = c.getProteinArray(true);
             int nbProteins = proteinSetList.size();
             for (int j = 0; j < nbProteins; j++) {
                 LightProteinMatch pm = proteinSetList.get(j);
@@ -426,7 +426,7 @@ public class MatrixSelectionPanel extends HourglassPanel implements DataBoxPanel
                 throw new NullPointerException();
             }
 
-            return (o2.getPeptideSize() * o2.getProteinSize()) - (o1.getPeptideSize() * o1.getProteinSize());
+            return (o2.getPeptideSize() * o2.getProteinSize(false)) - (o1.getPeptideSize() * o1.getProteinSize(false));
         }
     }
 

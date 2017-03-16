@@ -17,14 +17,17 @@ public class ConnectedComponents {
     private ArrayList<LightPeptideMatch> m_peptides = new ArrayList<>();
     private HashMap<LightProteinMatch, ArrayList<LightPeptideMatch>> m_proteinToPeptideMap = new HashMap<>();
     private HashMap<LightPeptideMatch, ArrayList<LightProteinMatch>> m_peptideToProteinMap = new HashMap<>();
-
+    private HashMap<LightProteinMatch, ArrayList<LightProteinMatch>> m_equivalentProteins = null;
+    
+    
     private int m_maxIndex = 0, m_maxSize = 0;
 
-    public ConnectedComponents(ArrayList<LightProteinMatch> proteins, ArrayList<LightPeptideMatch> peptides, HashMap<LightProteinMatch, ArrayList<LightPeptideMatch>> proteinToPeptideMap, HashMap<LightPeptideMatch, ArrayList<LightProteinMatch>> peptideToProteinMap) {
+    public ConnectedComponents(ArrayList<LightProteinMatch> proteins, ArrayList<LightPeptideMatch> peptides, HashMap<LightProteinMatch, ArrayList<LightPeptideMatch>> proteinToPeptideMap, HashMap<LightPeptideMatch, ArrayList<LightProteinMatch>> peptideToProteinMap, HashMap<LightProteinMatch, ArrayList<LightProteinMatch>> equivalentProteins) {
         m_proteins = proteins;
         m_peptides = peptides;
         m_proteinToPeptideMap = proteinToPeptideMap;
         m_peptideToProteinMap = peptideToProteinMap;
+        m_equivalentProteins = equivalentProteins;
     }
 
     public int getLargestComponent() {
@@ -61,6 +64,7 @@ public class ConnectedComponents {
         while ((proteinIndex < proteinSize) && (peptideIndex < peptideSize)) {
             componentIndex++;
             Component componentNull = new Component();
+            componentNull.m_equivalentProteins = m_equivalentProteins;
             componentSet.add(componentNull);
 
             while (!(proteinQueue.isEmpty() && peptideQueue.isEmpty())) {
@@ -77,7 +81,7 @@ public class ConnectedComponents {
                         }
                     }
 
-                    componentSet.get(componentIndex).m_proteinMatchArray.add(proteinTemp);
+                    componentSet.get(componentIndex).getProteinArray(false).add(proteinTemp);
 
                 }
 
@@ -92,13 +96,13 @@ public class ConnectedComponents {
                         }
                     }
 
-                    componentSet.get(componentIndex).m_peptideArray.add(peptideTemp);
+                    componentSet.get(componentIndex).getPeptideArray().add(peptideTemp);
 
                 }
 
             }
 
-            int tempCheckSize = componentSet.get(componentIndex).getProteinSize()+componentSet.get(componentIndex).getPeptideSize();
+            int tempCheckSize = componentSet.get(componentIndex).getProteinSize(false)+componentSet.get(componentIndex).getPeptideSize();
 
 
             if (tempCheckSize > m_maxSize) {
@@ -134,7 +138,6 @@ public class ConnectedComponents {
 
         }
 
-        
         if (keepSameSet) {
             return componentSet;
         }
@@ -146,7 +149,7 @@ public class ConnectedComponents {
     private ArrayList<Component> filterComponents(ArrayList<Component> cList) {
         ArrayList<Component> subCList = new ArrayList<>();
         for (Component temp : cList) {
-            if (temp.m_peptideArray.size() > 1 && temp.m_proteinMatchArray.size() > 1) {
+            if (temp.getPeptideArray().size() > 1 && temp.getProteinArray(false).size() > 1) {
                 if (!fullMatch(temp)) {
                     subCList.add(temp);
                 }
@@ -157,9 +160,9 @@ public class ConnectedComponents {
     }
 
     private boolean fullMatch(Component temp) {
-        for (LightPeptideMatch peptTemp : temp.m_peptideArray) {
+        for (LightPeptideMatch peptTemp : temp.getPeptideArray()) {
             ArrayList<LightProteinMatch> protList = m_peptideToProteinMap.get(peptTemp);
-            if (protList.size() != temp.m_proteinMatchArray.size()) {
+            if (protList.size() != temp.getProteinArray(false).size()) {
                 return false;
             }
         }

@@ -13,21 +13,79 @@ import java.util.Set;
 
 public class Component {
 
-    public ArrayList<LightProteinMatch> m_proteinMatchArray = new ArrayList<>();
-    public ArrayList<LightPeptideMatch> m_peptideArray = new ArrayList<>();
+    private ArrayList<LightProteinMatch> m_proteinMatchArray = new ArrayList<>();
+    private ArrayList<LightProteinMatch> m_proteinMatchWithEquivalentArray = null;
+    
+    private ArrayList<LightPeptideMatch> m_peptideArray = new ArrayList<>();
+    
+    
+    public HashMap<LightProteinMatch, ArrayList<LightProteinMatch>> m_equivalentProteins = null;
+    
+    
+
     
     private HashMap<Integer, WeakPeptideReference> m_weakPeptidesMap = null;
 
     public Component() { 
     }
 
-    public int getProteinSize() {
-        return m_proteinMatchArray.size();
+    public ArrayList<LightProteinMatch> getProteinArray(boolean withEquivalents) {
+        if (!withEquivalents) {
+            return m_proteinMatchArray;
+        }
+
+        if (m_proteinMatchWithEquivalentArray == null) {
+            prepareProteinMatchEquivalentArray();
+        }
+
+        return m_proteinMatchWithEquivalentArray;
+    }
+
+    public void setProteinArray(ArrayList<LightProteinMatch> proteinArray) {
+        m_proteinMatchArray = proteinArray;
+    }
+    
+    public ArrayList<LightPeptideMatch> getPeptideArray() {
+        return m_peptideArray;
+    }
+
+    public void setPeptideArray(ArrayList<LightPeptideMatch> peptideArray) {
+        m_peptideArray = peptideArray;
     }
 
     public int getPeptideSize() {
         return m_peptideArray.size();
     }
+    
+    public int getProteinSize(boolean withEquivalents) {
+        if (!withEquivalents) {
+            return m_proteinMatchArray.size();
+        }
+        
+        if (m_proteinMatchWithEquivalentArray == null) {
+            prepareProteinMatchEquivalentArray();
+        }
+        
+        return m_proteinMatchWithEquivalentArray.size();
+        
+    }
+    
+    private void prepareProteinMatchEquivalentArray() {
+        m_proteinMatchWithEquivalentArray = new ArrayList<>();
+        int size = m_proteinMatchArray.size();
+        for (int i=0;i<size;i++) {
+            LightProteinMatch proteinCur = m_proteinMatchArray.get(i);
+            ArrayList<LightProteinMatch> equivalentProteinsArray = m_equivalentProteins.get(proteinCur);
+            m_proteinMatchWithEquivalentArray.add(proteinCur);
+            if (equivalentProteinsArray != null) {
+                int sizeEq = equivalentProteinsArray.size();
+                for (int j=0;j<sizeEq;j++) {
+                 m_proteinMatchWithEquivalentArray.add(equivalentProteinsArray.get(j));
+                }
+            }
+        }
+    }
+    
     
     public int[][] getPeptProtMatrix(HashMap<LightPeptideMatch, ArrayList<LightProteinMatch>> peptideToProteinMap) {
 

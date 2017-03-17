@@ -5,6 +5,7 @@ import fr.proline.core.orm.msi.dto.DPeptideInstance;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.msi.dto.DPeptideSet;
 import fr.proline.core.orm.msi.dto.DProteinMatch;
+import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseProteinsAndPeptidesTask;
 import fr.proline.studio.dam.tasks.SubTask;
@@ -108,17 +109,22 @@ public class DataBoxAdjacencyMatrix extends AbstractDataBox {
 
                 ((MatrixPanel) getDataBoxPanelInterface()).setData(component, drawVisualization, proteinMap, peptideMap, _rsm.getId());
 
+                unregisterTask(taskId);
             }
         };
         
-
-        // ask asynchronous loading of data
-        registerTask(new DatabaseProteinsAndPeptidesTask(callback, getProjectId(), _rsm, proteinMatchIdArray, peptideMatchIdArray, proteinMap, peptideMap));
-
+        DatabaseProteinsAndPeptidesTask task = new DatabaseProteinsAndPeptidesTask(callback, getProjectId(), _rsm, proteinMatchIdArray, peptideMatchIdArray, proteinMap, peptideMap);
         
+        Long taskId = task.getId();
+        if (m_previousTaskId != null) {
+            // old task is suppressed if it has not been already done
+            AccessDatabaseThread.getAccessDatabaseThread().abortTask(m_previousTaskId);
+        }
+        m_previousTaskId = taskId;
+        registerTask(task);
 
     }
-    
+    private Long m_previousTaskId = null;
     
         @Override
     public Object getData(boolean getArray, Class parameterType) {

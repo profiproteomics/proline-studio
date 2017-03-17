@@ -93,6 +93,7 @@ public class MatrixPanel extends HourglassPanel implements DataBoxPanelInterface
     private Component m_component;
     HashMap<Long, DProteinMatch> m_proteinMap;
     HashMap<Long, DPeptideMatch> m_peptideMap;
+    Long m_rsmId;
     private int[] m_flagArray;
     private DrawVisualization m_drawVisualization = null;
     private HashMap<LightProteinMatch, ArrayList<LightPeptideMatch>> m_proteinToPeptideMap = new HashMap<>();
@@ -153,7 +154,7 @@ public class MatrixPanel extends HourglassPanel implements DataBoxPanelInterface
         return toolbar;
     }
     
-    public void setData(Component c, DrawVisualization drawVisualization, HashMap<Long, DProteinMatch> proteinMap, HashMap<Long, DPeptideMatch> peptideMap) {
+    public void setData(Component c, DrawVisualization drawVisualization, HashMap<Long, DProteinMatch> proteinMap, HashMap<Long, DPeptideMatch> peptideMap, Long rsmId) {
 
         setLoaded(0);
 
@@ -166,6 +167,7 @@ public class MatrixPanel extends HourglassPanel implements DataBoxPanelInterface
         }
 
         m_drawVisualization = drawVisualization;
+        m_rsmId = rsmId;
 
         m_proteinToPeptideMap = m_drawVisualization.getProteinToPeptideMap();
         m_equivalentToMainProteinMap = m_drawVisualization.getEquivalentToMainProtein();
@@ -230,7 +232,7 @@ public class MatrixPanel extends HourglassPanel implements DataBoxPanelInterface
         index = 0;
         if (m_component != null) {
             for (LightProteinMatch proteinMatch : m_component.getProteinArray(m_showEquivalentProteins)) {
-                m_proteinScore[index] = proteinMatch.getScore();
+                m_proteinScore[index] = m_proteinMap.get(proteinMatch.getId()).getPeptideSet(rsmId).getScore();
                 index++;
             }
         }
@@ -277,7 +279,7 @@ public class MatrixPanel extends HourglassPanel implements DataBoxPanelInterface
         m_peptideNameNbCharsMax = ((Integer) m_peptideNameMaxCharsParameter.getObjectValue()).intValue();
         m_proteinNameNbCharsMax = ((Integer) m_proteinNameMaxCharsParameter.getObjectValue()).intValue();
         
-        setData(m_component, m_drawVisualization, m_proteinMap, m_peptideMap);
+        setData(m_component, m_drawVisualization, m_proteinMap, m_peptideMap, m_rsmId);
 
     }
     
@@ -945,7 +947,7 @@ public class MatrixPanel extends HourglassPanel implements DataBoxPanelInterface
                 m_sb.append("Protein: ");
                 m_sb.append(proteinMatch.getAccession());
                 m_sb.append("    Score: ");
-                m_sb.append(proteinMatch.getScore());
+                m_sb.append(m_proteinMap.get(proteinMatch.getId()).getPeptideSet(m_rsmId).getScore());
                 info[0] = m_sb.toString();
                 m_sb.setLength(0);
             }

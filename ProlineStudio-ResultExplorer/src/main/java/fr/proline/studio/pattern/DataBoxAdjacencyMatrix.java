@@ -106,7 +106,7 @@ public class DataBoxAdjacencyMatrix extends AbstractDataBox {
             @Override
             public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
 
-                ((MatrixPanel) getDataBoxPanelInterface()).setData(component, drawVisualization, proteinMap, peptideMap);
+                ((MatrixPanel) getDataBoxPanelInterface()).setData(component, drawVisualization, proteinMap, peptideMap, _rsm.getId());
 
             }
         };

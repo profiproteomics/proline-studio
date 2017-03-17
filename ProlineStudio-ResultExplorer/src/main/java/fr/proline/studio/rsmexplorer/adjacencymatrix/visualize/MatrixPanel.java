@@ -83,7 +83,6 @@ public class MatrixPanel extends HourglassPanel implements DataBoxPanelInterface
 
     private Integer[] m_peptideRank;
     private Float[] m_peptideScore;
-    private Float[] m_proteinScore;
 
     private int m_squareSize;
     private int m_xOffset;
@@ -204,14 +203,37 @@ public class MatrixPanel extends HourglassPanel implements DataBoxPanelInterface
             m_peptideCells.add(cell);
         }
 
+        
         for (int col = 0; col < columnCount; col++) {
             ProteinCell cell = new ProteinCell(col);
             cell.setProteinMatch(m_proteinMap.get(m_component.getProteinArray(m_showEquivalentProteins).get(col).getId()));
             m_proteinCells.add(cell);
 
         }
+        
+        HashMap<Long, Integer> m_proteinSetPeptidesNumber = new HashMap();
+        for (int col = 0; col < columnCount; col++) {
+            LightProteinMatch lpm = m_component.getProteinArray(m_showEquivalentProteins).get(col);
+            long proteinSetId = lpm.getProteinSetId();
+            DProteinMatch pm = m_proteinMap.get(lpm.getId());
+            int nbPeptides = pm.getPeptideSet(m_rsmId).getPeptideCount();
+            Integer curNbPeptides = m_proteinSetPeptidesNumber.get(proteinSetId);
+            if ((curNbPeptides == null) || (curNbPeptides < nbPeptides)) {
+                m_proteinSetPeptidesNumber.put(proteinSetId, nbPeptides);
+            }
+        }
 
+        for (int col = 0; col < columnCount; col++) {
+            ProteinCell cell = m_proteinCells.get(col);
+            LightProteinMatch lpm = m_component.getProteinArray(m_showEquivalentProteins).get(col);
+            long proteinSetId = lpm.getProteinSetId();
+            DProteinMatch pm = m_proteinMap.get(lpm.getId());
+            int nbPeptides = pm.getPeptideSet(m_rsmId).getPeptideCount();
+            boolean sameset = nbPeptides>=m_proteinSetPeptidesNumber.get(proteinSetId);
+            cell.setProteinMatch(pm);
+            cell.setSameSet(sameset);
 
+        }
         
         m_peptideRank = new Integer[rowCount];
 
@@ -228,14 +250,6 @@ public class MatrixPanel extends HourglassPanel implements DataBoxPanelInterface
             }
         }
 
-        m_proteinScore = new Float[columnCount];
-        index = 0;
-        if (m_component != null) {
-            for (LightProteinMatch proteinMatch : m_component.getProteinArray(m_showEquivalentProteins)) {
-                m_proteinScore[index] = m_proteinMap.get(proteinMatch.getId()).getPeptideSet(rsmId).getScore();
-                index++;
-            }
-        }
 
         m_firstPaint = true;
 
@@ -818,6 +832,8 @@ public class MatrixPanel extends HourglassPanel implements DataBoxPanelInterface
         protected DPeptideMatch m_peptideMatch = null;
         protected DProteinMatch m_proteinMatch = null;
         
+        protected boolean m_showHalfFilled = false;
+        
         protected int m_row;
         protected int m_col;
         
@@ -873,7 +889,21 @@ public class MatrixPanel extends HourglassPanel implements DataBoxPanelInterface
             Graphics2D g2d = (Graphics2D) g;
             
             g.setColor(getFillColor());
-            g.fillRect(getPixelX(), getPixelY(), m_squareSize, m_squareSize);
+            if (m_showHalfFilled) {
+                if (m_xPoints == null) {
+                    m_xPoints = new int[3];
+                    m_yPoints = new int[3];
+                }
+                m_xPoints[0] = getPixelX();
+                m_xPoints[1] = getPixelX()+m_squareSize;
+                m_xPoints[2] = getPixelX();
+                m_yPoints[0] = getPixelY();
+                m_yPoints[1] = getPixelY();
+                m_yPoints[2] = getPixelY()+m_squareSize;
+                g.fillPolygon(m_xPoints, m_yPoints, 3);
+            } else {
+                g.fillRect(getPixelX(), getPixelY(), m_squareSize, m_squareSize);
+            }
 
             if (m_selected || m_flewOver) {
                 g.setColor(SELECTION_COLOR);
@@ -892,6 +922,9 @@ public class MatrixPanel extends HourglassPanel implements DataBoxPanelInterface
             g.drawRect(getPixelX(), getPixelY(), m_squareSize, m_squareSize);
             g2d.setStroke(s);
         }
+        private int m_xPoints[];
+        private int m_yPoints[];
+
         
         public void setSelected(boolean v) {
             m_selected = v;
@@ -1021,6 +1054,10 @@ public class MatrixPanel extends HourglassPanel implements DataBoxPanelInterface
             
             return c;
 
+        }
+        
+        public void setSameSet(boolean sameset) {
+            m_showHalfFilled = !sameset;
         }
         
     }

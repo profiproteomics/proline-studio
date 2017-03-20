@@ -50,7 +50,7 @@ public class RawFilesPanel extends JPanel {
       rawFilesList = new JList();
       popupMenu = new JPopupMenu();
       popupMenuDelegate.initPopupMenu(popupMenu);
-      openedRawFilesLabel.setText("Raw files");
+      openedRawFilesLabel.setText("mzDB files");
 
       rawFilesList.setModel(new RawFileListModel());
 

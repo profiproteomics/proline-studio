@@ -92,7 +92,7 @@ public class MzDBFilesPanel extends JPanel implements IPopupMenuDelegate {
             m_mzdbPathPanel = new JPanel();
             m_mzdbPathPanel.setName("m_mzdbPathPanel");
             m_mzdbPathPanel.setLayout(new GridBagLayout());
-            m_mzdbPathPanel.setBorder(BorderFactory.createTitledBorder("MzDB Files Location"));
+            m_mzdbPathPanel.setBorder(BorderFactory.createTitledBorder("Local Repository"));
             GridBagConstraints c = new GridBagConstraints();
             c.anchor = GridBagConstraints.NORTHWEST;
             c.fill = GridBagConstraints.BOTH;

@@ -1,0 +1,200 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>fr.proline</groupId>
+	<artifactId>ProlineStudio</artifactId>
+	<version>${studio.version}</version>
+	<packaging>pom</packaging>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<studio.version>1.1.0-SNAPSHOT</studio.version>
+	</properties>
+
+	<dependencies>
+
+		<dependency>
+			<groupId>fr.proline</groupId>
+			<artifactId>ProlineStudio-app</artifactId>
+			<version>${studio.version}</version>
+			<type>zip</type>
+			<exclusions>
+				<exclusion>
+					<groupId>*</groupId>
+					<artifactId>*</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+
+		<dependency>
+			<groupId>com.oracle</groupId>
+			<artifactId>jre</artifactId>
+			<version>1.8.77</version>
+			<type>zip</type>
+			<classifier>${os.classifier}</classifier>
+		</dependency>
+
+		<dependency>
+            <groupId>org.cran</groupId>
+            <artifactId>r</artifactId>
+            <version>3.3.0_1.4.3</version>
+            <type>zip</type>
+            <classifier>${os.classifier}</classifier>
+        </dependency>
+        
+	</dependencies>
+
+	<build>
+
+		<plugins>
+
+
+	<plugin>
+		<groupId>com.google.code.maven-replacer-plugin</groupId>
+		<artifactId>replacer</artifactId>
+		<version>1.5.3</version>
+		<executions>
+			<execution>
+				<phase>package</phase>
+				<goals>
+					<goal>replace</goal>
+				</goals>
+			</execution>
+		</executions>
+		<configuration>
+			<file>${project.build.directory}/${project.artifactId}-${project.version}/prolinestudio/etc/prolinestudio.conf</file>
+			<replacements>
+				<replacement>
+					<token>#jdkhome="/path/to/jdk"</token>
+					<value>jdkhome="./jre"</value>
+				</replacement>
+			</replacements>
+		</configuration>
+	</plugin> 
+
+
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<version>2.10</version>
+
+				<executions>
+					<execution>
+						<id>copy-dependencies</id>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>unpack-dependencies</goal>
+						</goals>
+						<configuration>
+							<includeTypes>zip</includeTypes>
+							<outputDirectory>${project.build.directory}/${project.artifactId}-${project.version}</outputDirectory>
+							<overWriteIfNewer>true</overWriteIfNewer>
+						</configuration>
+					</execution>
+
+				</executions>
+
+			</plugin>
+
+			<!-- Build Zip Assembly -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<version>2.5.5</version>
+				<configuration>
+					<appendAssemblyId>false</appendAssemblyId>
+					<finalName>${project.artifactId}-${project.version}</finalName>
+					<classifier>${os.classifier}</classifier>
+					<descriptors>
+						<descriptor>assembly/assembly.xml</descriptor>
+					</descriptors>
+				</configuration>
+				<executions>
+					<execution>
+						<id>make-assembly</id>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<artifactId>maven-install-plugin</artifactId>
+				<version>2.4</version>
+				<executions>
+					<execution>
+						<id>default-install</id>
+						<phase>none</phase>
+						<goals>
+							<goal>install</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>custom-install</id>
+						<phase>install</phase>
+						<goals>
+							<goal>install-file</goal>
+						</goals>
+						<configuration>
+							<file>${project.build.directory}/${project.artifactId}-${project.version}.zip</file>
+							<groupId>${project.groupId}</groupId>
+							<artifactId>${project.artifactId}</artifactId>
+							<version>${project.version}</version>
+							<type>zip</type>
+							<classifier>${os.classifier}</classifier>							
+							<packaging>zip</packaging>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>build-helper-maven-plugin</artifactId>
+				<version>1.7</version>
+				<executions>
+					<execution>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>attach-artifact</goal>
+						</goals>
+						<configuration>
+							<artifacts>
+								<artifact>
+									<file>${project.build.directory}/${project.artifactId}-${project.version}-${os.classifier}.zip</file>
+									<type>zip</type>
+									<classifier>${os.classifier}</classifier>
+								</artifact>
+							</artifacts>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<artifactId>maven-resources-plugin</artifactId>
+				<version>2.7</version>
+			</plugin>
+		</plugins>
+	</build>
+
+	<profiles>
+		<profile>
+			<id>windows-x64</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<properties>
+				<os.classifier>windows-x64</os.classifier>
+			</properties>
+		</profile>
+		<profile>
+			<id>linux-x64</id>
+			<properties>
+				<os.classifier>linux-x64</os.classifier>
+			</properties>
+		</profile>
+	</profiles>
+</project>

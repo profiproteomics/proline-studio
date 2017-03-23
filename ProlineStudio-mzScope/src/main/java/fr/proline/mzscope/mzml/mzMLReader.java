@@ -1,10 +1,8 @@
 package fr.proline.mzscope.mzml;
 
-import fr.proline.mzscope.mzml.Scan;
 import java.util.Collection;
 import java.util.List;
 
-import fr.proline.mzscope.utils.OutputUtils;
 
 import com.ximpleware.extended.AutoPilotHuge;
 import com.ximpleware.extended.VTDGenHuge;

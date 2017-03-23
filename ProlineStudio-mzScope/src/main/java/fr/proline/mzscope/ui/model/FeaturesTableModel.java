@@ -264,7 +264,7 @@ public class FeaturesTableModel extends DecoratedTableModel implements GlobalTab
         
         switch (col) {
             case COLTYPE_FEATURE_MZCOL:
-                renderer = new DefaultTableRenderer(new NumberFormatter("#.0000"), JLabel.RIGHT);
+                renderer = new DefaultTableRenderer(new NumberFormatter("#.00000"), JLabel.RIGHT);
                 break;
             case COLTYPE_FEATURE_ET_COL:
             case COLTYPE_FEATURE_DURATION_COL:

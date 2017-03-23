@@ -10,7 +10,6 @@
 
     <artifactId>ProlineStudio-app</artifactId>
     <packaging>nbm-application</packaging>
-
     <name>ProlineStudio-app</name>
 
     <properties>
@@ -22,7 +21,7 @@
         <sqlite4java.library.path>${project.build.directory}/${brandingToken}/sqlite4java</sqlite4java.library.path>
     </properties>
 
-<!--    <repositories> 
+    <!--    <repositories> 
         <repository> 
             <id>project</id> 
             <name>project repository</name> 
@@ -73,21 +72,6 @@
             <version>${netbeans.version}</version>
         </dependency>
         
-        <dependency>
-            <groupId>com.oracle</groupId>
-            <artifactId>jre</artifactId>
-            <version>1.8.77</version>
-            <type>zip</type>
-            <classifier>${os.classifier}</classifier>
-        </dependency>
-        
-        <dependency>
-            <groupId>org.cran</groupId>
-            <artifactId>r</artifactId>
-            <version>3.3.0_1.4.3</version>
-            <type>zip</type>
-            <classifier>${os.classifier}</classifier>
-        </dependency>
                 
         <!-- ProlineStudio dependencies -->
         <dependency>
@@ -186,7 +170,6 @@
        
                 </executions>
             </plugin>
-      
         </plugins>
     </build>
 
@@ -212,21 +195,5 @@
                 </plugins>
             </build>
         </profile>
-        <profile>
-            <id>windows-x64</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
-            <properties>
-                <os.classifier>windows-x64</os.classifier>
-            </properties>
-        </profile>
-                <profile>
-            <id>linux-x64</id>
-            <properties>
-                <os.classifier>linux-x64</os.classifier>
-            </properties>
-        </profile>
-
     </profiles>
 </project>

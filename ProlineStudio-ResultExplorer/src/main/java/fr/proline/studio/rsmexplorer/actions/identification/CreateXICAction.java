@@ -137,22 +137,24 @@ public class CreateXICAction extends AbstractRSMAction {
             DataSetData _quantiDS = null;
             Map<String, Object> expParams = null;
 
-            String errorMsg = null;
+            StringBuffer errorMsg = new StringBuffer("");
 
             Map<String, Object> quantParams = dialog.getQuantiParameters();
             if (quantParams == null) {
-                errorMsg = "Null Quantitation parameters !";
+                errorMsg.append("Null Quantitation parameters !  ");
             }
 
             if (dialog.getDesignRSMNode() == null) {
-                errorMsg = "No experimental design defined";
+                errorMsg.append("No experimental design defined  ");
 
             } else if (!DataSetData.class.isInstance(dialog.getDesignRSMNode().getData())) {
-                errorMsg = "Invalide Quantitation Dataset specified ";
+                errorMsg.append("Invalide Quantitation Dataset specified  ");
 
             } else {
 
-                errorMsg = dialog.registerRawFiles();
+                String registerErrMsg = dialog.registerRawFiles();
+                if(registerErrMsg != null && !registerErrMsg.isEmpty())
+                    errorMsg.append( registerErrMsg);
 
                 //*** Get experimental design values                
                 _quantiDS = (DataSetData) dialog.getDesignRSMNode().getData();
@@ -160,11 +162,11 @@ public class CreateXICAction extends AbstractRSMAction {
                 try {
                     expParams = dialog.getDesignParameters();
                 } catch (IllegalAccessException iae) {
-                    errorMsg = iae.getMessage();
+                    errorMsg.append(iae.getMessage());
                 }
             }
 
-            if (errorMsg != null) {
+            if (!errorMsg.toString().isEmpty()) {
                 JOptionPane.showMessageDialog(dialog, errorMsg, "Warning", JOptionPane.ERROR_MESSAGE);
                 return;
             }
@@ -255,7 +257,7 @@ public class CreateXICAction extends AbstractRSMAction {
                             @Override
                             public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
                                 ((DataSetData) dsNode.getData()).setDataset(ds);
-                                XICDesignTree.setExpDesign(dsNode.getDataset(), dsNode, tree, false, false);
+                                XICDesignTree.setExpDesign(dsNode.getDataset(), dsNode, tree, false, true);
                                 dsNode.setIsChanging(false);
                                 treeModel.nodeChanged(dsNode);
                             }

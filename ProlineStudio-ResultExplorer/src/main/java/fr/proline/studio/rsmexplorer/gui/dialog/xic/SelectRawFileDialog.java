@@ -75,17 +75,12 @@ public class SelectRawFileDialog extends DefaultDialog {
 
         boolean rawFileInList = false;
         if (rawFileMap != null && !rawFileMap.isEmpty()) {
-
-            for (Map.Entry<String, RawFile> entry : rawFileMap.entrySet()) {
-                String key = entry.getKey();
-                Object value = entry.getValue();
-
-                model.addElement(value);
-                if ((rawFileToAdd != null) && value.equals(rawFileToAdd)) {
+            for (RawFile nextRaw : rawFileMap.values()) {                
+                model.addElement(nextRaw);
+                if ((rawFileToAdd != null) && nextRaw.equals(rawFileToAdd)) {
                     rawFileInList = true;
                 }
             }
-
         }
 
         if ((!rawFileInList) && (rawFileToAdd != null)) {

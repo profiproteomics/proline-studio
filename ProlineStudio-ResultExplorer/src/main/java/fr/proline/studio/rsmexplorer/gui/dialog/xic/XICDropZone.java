@@ -17,6 +17,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Optional;
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -57,68 +59,71 @@ public class XICDropZone extends JPanel implements DropZoneInterface {
         m_info = info;
     }
 
+    //Ne faudrait-il pas un updateRow que updateTable => update complet a chaque ligne ? 
     public void updateTable() {
         if (m_model == null) {
             return;
         }
         
-        m_model.calculateMissingValues();
+        m_model.updatePotentialsListForMissings();
+        List<String> associatedFileList = new ArrayList<>();
         
-        HashMap<Integer, HashSet<String>> missingValues = m_model.getMissingValues();
-        Iterator<Integer> keyIterator = missingValues.keySet().iterator();
-        while (keyIterator.hasNext()) {
+        HashMap<Integer, HashSet<String>> potentialFileNamesForMissings = m_model.getPotentialFilenamesForMissings();
+        Iterator<Integer> missingIndexIterator = potentialFileNamesForMissings.keySet().iterator();
+        while (missingIndexIterator.hasNext()) {
 
-            Integer key = keyIterator.next();
+            Integer nodeIndex = missingIndexIterator.next();
 
-            HashSet<String> currentHashSet = missingValues.get(key);
+            HashSet<String> potentialFileNames = potentialFileNamesForMissings.get(nodeIndex);
 
-            for (String s : currentHashSet) {
-                if (m_droppedFiles.containsKey(s)) {
+            for (String potentialFileName : potentialFileNames) {
+                //Get the first dropped file which at least start with the same string as Potential RawFile FileName
+                Optional<String> foundedFile = m_droppedFiles.keySet().stream().filter(fileName ->fileName.toLowerCase().startsWith(potentialFileName)).findFirst();
+                if(foundedFile.isPresent()){
+                    String associedtDropFile = foundedFile.get();
+                    associatedFileList.add(associedtDropFile);
                     ArrayList<File> fileList = new ArrayList<>();
-                    fileList.add(m_droppedFiles.get(s));
-                    m_model.setFiles(fileList, key);
+                    fileList.add(m_droppedFiles.get(associedtDropFile));
+                    m_model.setFiles(fileList, nodeIndex);
                 }
             }
-
         }
         
-        updateDropZoneInfo();
-        
+        updateDropZoneInfo(associatedFileList );        
     }
 
-    private void updateAssociations() {
+    /**
+     * Update de DropZoneInfo using new associated fileList
+     * @param associatedFileList 
+     */
+    private void updateAssociations(List<String> associatedFileList) {
 
-        HashSet<String> totalMissingValues = new HashSet<String>();
+//        HashSet<String> totalMissingValues = new HashSet<>();
+//
+//        HashMap<Integer, HashSet<String>> potentialFileNamesForMissings = m_model.getPotentialFilenamesForMissings();
+//        
+//        Iterator<HashSet<String>> potentialFilenames = potentialFileNamesForMissings.values().iterator();
+//        while(potentialFilenames.hasNext()){
+//            HashSet<String> nextPotentialFilenames = potentialFilenames.next();
+//            for (String filename : nextPotentialFilenames) {
+//                totalMissingValues.add(filename);
+//            }
+//        }
 
-        HashMap<Integer, HashSet<String>> missingValues = m_model.getMissingValues();
-        
-        Iterator<Integer> keyIterator = missingValues.keySet().iterator();
-        while (keyIterator.hasNext()) {
-            HashSet<String> currentHashSet = missingValues.get(keyIterator.next());
-            for (String s : currentHashSet) {
-                totalMissingValues.add(s);
-            }
-        }
-
-        Iterator<String> it = m_droppedFiles.keySet().iterator();
-        while (it.hasNext()) {
-            String key = it.next();
+        Iterator<String> droppedFilenameIt = m_droppedFiles.keySet().iterator();
+        while (droppedFilenameIt.hasNext()) {
+            String droppedFilename = droppedFilenameIt.next();
             
             AssociationWrapper.AssociationType associationType;
-            
-            if (!totalMissingValues.contains(key)) {
-                associationType = AssociationWrapper.AssociationType.NOT_ASSOCIATED;
-            }else{
+            if(associatedFileList.contains(droppedFilename))
                 associationType = AssociationWrapper.AssociationType.ASSOCIATED;
-            }
-            
-            if(m_associations.containsKey(key)){
-                if(m_associations.get(key).getAssociationType()==AssociationWrapper.AssociationType.NOT_ASSOCIATED){
-                    m_associations.get(key).setAssociationType(associationType);
-                }
-            }else{
-                m_associations.put(key, new AssociationWrapper(key, associationType));
-            }
+            else
+                associationType = AssociationWrapper.AssociationType.NOT_ASSOCIATED;
+
+            AssociationWrapper assocWraper = m_associations.getOrDefault(droppedFilename, new AssociationWrapper(droppedFilename, associationType));
+            if(assocWraper.getAssociationType()== AssociationWrapper.AssociationType.NOT_ASSOCIATED)
+                assocWraper.setAssociationType(associationType);           
+            m_associations.put(droppedFilename, assocWraper);
         }
     }
     
@@ -162,9 +167,13 @@ public class XICDropZone extends JPanel implements DropZoneInterface {
         return m_info;
     }
     
-    public void updateDropZoneInfo(){
+    /**
+     * Update de DropZoneInfo using new associated fileList
+     * @param associatedFileList 
+     */
+    public void updateDropZoneInfo(List<String> associatedFileList ){
         if(m_info!=null){
-            updateAssociations();
+            updateAssociations(associatedFileList);
             m_info.updateInfo(getAssociations());
         }
     }

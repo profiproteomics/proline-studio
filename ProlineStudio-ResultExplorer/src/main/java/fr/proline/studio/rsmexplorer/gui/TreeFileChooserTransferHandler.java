@@ -42,10 +42,9 @@ public class TreeFileChooserTransferHandler extends TransferHandler {
     }
 
     public void clearHighlights() {
-        Iterator it = m_components.entrySet().iterator();
+        Iterator<JComponent> it = m_components.keySet().iterator();
         while (it.hasNext()) {
-            Map.Entry pair = (Map.Entry) it.next();
-            JComponent key = (JComponent) pair.getKey();
+            JComponent key = it.next();
             key.setBackground(null);
         }
     }
@@ -117,7 +116,7 @@ public class TreeFileChooserTransferHandler extends TransferHandler {
                 FilesTransferable transferable = (FilesTransferable) support.getTransferable().getTransferData(FilesTransferable.Files_FLAVOR);
                 ArrayList<File> transferredFiles = transferable.getFiles();
 
-                ArrayList<Integer> indices = new ArrayList<Integer>();
+                ArrayList<Integer> indices = new ArrayList<>();
                 for (int i = 0; i < transferredFiles.size(); i++) {
                     indices.add(index + i);
                 }
@@ -125,12 +124,12 @@ public class TreeFileChooserTransferHandler extends TransferHandler {
                 TreeFileChooserTableModelInterface model = (TreeFileChooserTableModelInterface) table.getModel();
 
                 if (!model.canSetFiles(indices)) {
-                    JOptionPane.showMessageDialog(null, "You are trying to overwrite raw files linked in database.", "Warning", JOptionPane.WARNING_MESSAGE);
+                    JOptionPane.showMessageDialog(null, "An mzDB file is already linked to this dataset. Operation is cancelled.", "Warning", JOptionPane.WARNING_MESSAGE);
                     return false;
                 }
 
-                if (model.canCorruptFiles(indices)) {
-                    int reply = JOptionPane.showConfirmDialog(null, "Existing links may be corrupted by the association(s).", "Warning", JOptionPane.YES_NO_OPTION);
+                if (model.shouldConfirmCorruptFiles(indices)) {
+                    int reply = JOptionPane.showConfirmDialog(null, "Previous quantitation has been run with existing mzDB file.\n Are you sure you want to overwrite this link.", "Warning", JOptionPane.YES_NO_OPTION);
                     if (reply == JOptionPane.NO_OPTION) {
                         return false;
                     }
@@ -177,14 +176,12 @@ public class TreeFileChooserTransferHandler extends TransferHandler {
             return false;
         } else if (support.getComponent() instanceof TreeFileChooser) {
 
-            TreeFileChooser treeFileChooser = (TreeFileChooser) support.getComponent();
-
             try {
 
                 FilesTransferable transferable = (FilesTransferable) support.getTransferable().getTransferData(FilesTransferable.Files_FLAVOR);
                 ArrayList<File> transferredFiles = transferable.getFiles();
 
-                ArrayList<File> samples = new ArrayList<File>();
+                ArrayList<File> samples = new ArrayList<>();
 
                 for (int i = 0; i < transferredFiles.size(); i++) {
 

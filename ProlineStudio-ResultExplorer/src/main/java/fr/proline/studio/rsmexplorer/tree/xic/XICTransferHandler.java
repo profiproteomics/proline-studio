@@ -4,7 +4,6 @@ import fr.proline.core.orm.uds.Aggregation;
 import fr.proline.core.orm.uds.Dataset;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dam.data.DataSetData;
-import fr.proline.studio.dam.data.RunInfoData;
 import fr.proline.studio.parameter.BooleanParameter;
 import fr.proline.studio.parameter.ParameterList;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
@@ -269,7 +268,7 @@ public class XICTransferHandler extends TransferHandler {
             String suffix = Integer.toString(dropRSMNode.getChildCount() + 1);
 
             // Issue 11312: if the dragged node is a merged node, we use its name as suffix
-            if (datasetList != null && !datasetList.isEmpty()) {
+            if (!datasetList.isEmpty()) {
                 
                 // all dataset are in the same merged dataset parent
                 DDataset parentNode = datasetList.get(0).getParentMergedDataset();
@@ -301,11 +300,9 @@ public class XICTransferHandler extends TransferHandler {
                         suffix = parentNode.getName();
                     }else if(sameAncestor){
                         suffix = ancestorNode.toString();
-                    }
-                    
-                    
+                    }                    
                 }
-            }
+            } //END datasetList NOT Empty Issue 11312:
 
             if (dropRSMNode instanceof DataSetNode) {
                 // top node, we create a group now
@@ -427,7 +424,7 @@ public class XICTransferHandler extends TransferHandler {
                 }
 
             }
-        } else {
+        } else { //datalist == null  ==> isDesignData
             ArrayList<AbstractNode> rsmList = (ArrayList<AbstractNode>) data.getDesignList();
             int nbNodes = rsmList.size();
             for (int i = 0; i < nbNodes; i++) {

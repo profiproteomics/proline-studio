@@ -17,7 +17,9 @@ import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import fr.proline.studio.utils.IconManager;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import javax.swing.ImageIcon;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.tree.DefaultTreeModel;
@@ -40,12 +42,44 @@ public class XICRunNode extends AbstractNode {
     private DefaultTreeModel m_treeModel = null;
     private final AbstractTree m_tree;
     private AbstractTableModel m_tableModel;
+    protected List<XICRunNodeInitListener> listenerList;   /** List of listeners */
 
     public XICRunNode(AbstractData data, AbstractTree tree) {
         super(NodeTypes.RUN, data);
+        listenerList = new ArrayList<>();
         m_tree = tree;
     }
 
+    
+    //
+    //  Managing Listeners
+    //
+    /**
+     * Adds a XICRunNodeInitListener that's notified when XICRunNode has been initialize 
+     *
+     * @param   l   the XICRunNodeInitListener
+     */
+    public void addXICRunNodeInitListener(XICRunNodeInitListener l) {
+        listenerList.add(l);
+    }
+
+    /**
+     * Removes a XICRunNodeInitListener from the list that's notified when 
+     * XICRunNode has been initialize 
+     *
+     * @param   l   the XICRunNodeInitListener
+     */
+    public void removeTableModelListener(XICRunNodeInitListener l) {
+        listenerList.remove( l);
+    }
+
+    private void fireXICRunNodeInitialized() {     
+        for (XICRunNodeInitListener l :  listenerList) {
+            l.initCompleted(this);
+        }
+    }
+    
+    
     public AbstractTableModel getTableModel() {
         return m_tableModel;
     }
@@ -54,7 +88,7 @@ public class XICRunNode extends AbstractNode {
         m_tableModel = tableModel;
     }
 
-    public void init(final DDataset dataset, DefaultTreeModel treeModel, final AbstractTableModel tableModel, XICRunNodeInitListener initListener) {
+    public void init(final DDataset dataset, DefaultTreeModel treeModel, final AbstractTableModel tableModel) {
 
         m_treeModel = treeModel;
         m_tableModel = tableModel;
@@ -64,11 +98,11 @@ public class XICRunNode extends AbstractNode {
         // look if we find a Raw File
         if (dataset.getType() == Dataset.DatasetType.IDENTIFICATION) {
 
-            final HashMap<String, RawFile> rawfileFounds = new HashMap<String, RawFile>(1);
+            final HashMap<String, RawFile> rawfileFounds = new HashMap<>(1);
             final Run[] runOut = new Run[1];
             final XICRunNode xicRunNode = this;
 
-            AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
+            AbstractDatabaseCallback getRawfileCallback = new AbstractDatabaseCallback() {
 
                 @Override
                 public boolean mustBeCalledInAWT() {
@@ -91,16 +125,15 @@ public class XICRunNode extends AbstractNode {
                             setIsChanging(false);
                             m_treeModel.nodeChanged(xicRunNode);
 
-                            if (initListener != null) {
-                                initListener.initCompleted(xicRunNode);
-                            }
+                            fireXICRunNodeInitialized();
 
-                        } else {
-                            //recreate a raw file from msi
 
+                        } else { //No RawFile associated to dataset 
+                            
+                            //try to get info from peaklist
                             Peaklist[] peaklistResult = new Peaklist[1];
 
-                            AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
+                            AbstractDatabaseCallback getPeakListCallback = new AbstractDatabaseCallback() {
 
                                 @Override
                                 public boolean mustBeCalledInAWT() {
@@ -109,17 +142,18 @@ public class XICRunNode extends AbstractNode {
 
                                 @Override
                                 public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
+                                    RunInfoData  runInfoData = (RunInfoData) getData();
                                     if (success) {
-
                                         if (peaklistResult[0] != null) {
                                             Peaklist peaklist = peaklistResult[0];
 
                                             if (peaklist.getRawFileIdentifier() != null && !peaklist.getRawFileIdentifier().equalsIgnoreCase("")) {
 
                                                 //Previous RawFileIdentifier exists
-                                                ((RunInfoData) getData()).setMessage("Search " + peaklist.getRawFileIdentifier());
+                                                runInfoData.setMessage("Search " + peaklist.getRawFileIdentifier());
                                                 ((DefaultTreeModel) m_tree.getModel()).nodeChanged(xicRunNode);
-                                                searchPotentialRawFiles(peaklist.getRawFileIdentifier(), tableModel, Search.BASED_ON_IDENTIFIER, initListener);
+                                                
+                                                searchPotentialRawFiles(peaklist.getRawFileIdentifier(), tableModel, Search.BASED_ON_IDENTIFIER);
 
                                             } else if (peaklist.getPath() != null && !peaklist.getPath().equalsIgnoreCase("")) {
 
@@ -145,7 +179,7 @@ public class XICRunNode extends AbstractNode {
                                                     searchString = searchString.substring(index + 1);
                                                 }
 
-                                                ((RunInfoData) getData()).setPeakListPath(searchString);
+                                                runInfoData.setPeakListPath(searchString);
 
                                                 if ((searchString == null) || (searchString.isEmpty())) {
                                                     searchString = "*";
@@ -153,24 +187,32 @@ public class XICRunNode extends AbstractNode {
                                                     searchString = "*" + searchString + "*";
                                                 }
 
-                                                ((RunInfoData) getData()).setMessage("Search " + searchString);
-                                                ((RunInfoData) getData()).setStatus(RunInfoData.Status.MISSING);
+                                                runInfoData.setMessage("Search " + searchString);
+                                                runInfoData.setStatus(RunInfoData.Status.MISSING);
 
                                                 ((DefaultTreeModel) m_tree.getModel()).nodeChanged(xicRunNode);
 
-                                                searchPotentialRawFiles(searchString, tableModel, Search.BASED_ON_PATH, initListener);
+                                                searchPotentialRawFiles(searchString, tableModel, Search.BASED_ON_PATH);
 
                                             }
+                                        } else {
+                                            // No peaklist found!
+                                            runInfoData.setMessage("<html><font color='#FF0000'>Unavailable Peaklist</font></html>");
+                                            runInfoData.setStatus(RunInfoData.Status.MISSING);
                                         }
 
                                         setIsChanging(false);
                                         m_treeModel.nodeChanged(xicRunNode);
 
+                                    } else { //failed to get Peaklist ! 
+                                        runInfoData.setStatus(RunInfoData.Status.MISSING);
+                                        runInfoData.setMessage("<html><font color='#FF0000'>Unavailable Peaklist</font></html>");
+                                        m_treeModel.nodeChanged(xicRunNode);
                                     }
                                 }
                             };
 
-                            DatabasePeaklistTask peaklistTask = new DatabasePeaklistTask(callback);
+                            DatabasePeaklistTask peaklistTask = new DatabasePeaklistTask(getPeakListCallback);
                             peaklistTask.initLoadPeaklistForRS(dataset.getResultSetId(), dataset.getProject().getId(), peaklistResult);
                             AccessDatabaseThread.getAccessDatabaseThread().addTask(peaklistTask);
                         }
@@ -189,7 +231,7 @@ public class XICRunNode extends AbstractNode {
                 }
             };
 
-            DatabaseRunsTask task = new DatabaseRunsTask(callback);
+            DatabaseRunsTask task = new DatabaseRunsTask(getRawfileCallback);
             task.initLoadRawFile(dataset.getId(), rawfileFounds, runOut);
             AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
         } else {
@@ -197,13 +239,12 @@ public class XICRunNode extends AbstractNode {
         }
     }
 
-    private void searchPotentialRawFiles(String searchString, final AbstractTableModel tableModel, Search search, XICRunNodeInitListener initListener) {
+    private void searchPotentialRawFiles(String searchString, final AbstractTableModel tableModel, Search search ) {
 
-        final XICRunNode xicRunNode = this;
 
-        final HashMap<String, RawFile> m_rawFileMap = new HashMap<String, RawFile>();
+        final HashMap<String, RawFile> m_rawFileMap = new HashMap<>();
 
-        AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
+        AbstractDatabaseCallback searchRawCallback = new AbstractDatabaseCallback() {
 
             @Override
             public boolean mustBeCalledInAWT() {
@@ -212,7 +253,7 @@ public class XICRunNode extends AbstractNode {
 
             @Override
             public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
-                setIsChanging(false);
+                    setIsChanging(false);
 
                 RunInfoData runInfoData = ((RunInfoData) getData());
 
@@ -232,18 +273,11 @@ public class XICRunNode extends AbstractNode {
 
                 } else {
                     runInfoData.setPotentialRawFiles(m_rawFileMap);
-                    if (searchString.equalsIgnoreCase("*")) {
-                        runInfoData.setMessage("<html><font color='#FF0000'>Unavailable Peaklist</font></html>");
-                        runInfoData.setStatus(RunInfoData.Status.MISSING);
-                    } else {
-                        runInfoData.setMessage("<html><font color='#FF0000'>Multiple Raw Files</font></html>");
-                        runInfoData.setStatus(RunInfoData.Status.MISSING);
-                    }
+                    runInfoData.setStatus(RunInfoData.Status.MISSING);
+                    runInfoData.setMessage("<html><font color='#FF0000'>Multiple Raw Files</font></html>");                      
                 }
 
-                if (initListener != null) {
-                    initListener.initCompleted(xicRunNode);
-                }
+                fireXICRunNodeInitialized();
 
                 if (tableModel != null) {
                     tableModel.fireTableDataChanged();
@@ -252,7 +286,7 @@ public class XICRunNode extends AbstractNode {
         };
 
         // ask asynchronous loading of data
-        DatabaseRunsTask task = new DatabaseRunsTask(callback);
+        DatabaseRunsTask task = new DatabaseRunsTask(searchRawCallback);
         task.initSearchRawFile(searchString, m_rawFileMap);
         AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
     }

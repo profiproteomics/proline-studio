@@ -177,29 +177,16 @@ public class CreateXICDialog extends DefaultDialog {
     }
 
     private void updatePeaklist(RunInfoData runInfoData, long projectID, long resultSetID) {
-        if (runInfoData.getStatus() == Status.LAST_DEFINED || runInfoData.getStatus() == Status.USER_DEFINED || runInfoData.getStatus() == Status.SYSTEM_PROPOSED) {
-
-            AbstractDatabaseCallback databasePeaklistCallback = new AbstractDatabaseCallback() {
-
-                @Override
-                public boolean mustBeCalledInAWT() {
-                    return true;
-                }
-
-                @Override
-                public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
-                    ;
-                }
-            };
+        if (runInfoData.getStatus() == Status.LINKED_IN_DATABASE || runInfoData.getStatus() == Status.USER_DEFINED || runInfoData.getStatus() == Status.SYSTEM_PROPOSED) {
 
             RawFile rawFile = (runInfoData.getSelectedRawFile() == null) ? runInfoData.getLinkedRawFile() : runInfoData.getSelectedRawFile();
 
             if (rawFile == null) {
-                return;
+                return; //should not occurs TODO error ?                
             }
 
             // ask asynchronous loading of data
-            DatabasePeaklistTask task = new DatabasePeaklistTask(databasePeaklistCallback);
+            DatabasePeaklistTask task = new DatabasePeaklistTask(null);
             task.initUpdatePeaklistIdentifier(projectID, resultSetID, rawFile.getIdentifier());
             AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
         }
@@ -306,15 +293,14 @@ public class CreateXICDialog extends DefaultDialog {
 
                                                 @Override
                                                 public void run(boolean success) {
+
+                                                    if (success) {
+                                                        updatePeaklist(runData, pID, rsID);
+                                                    }
                                                     synchronized (mutexFileRegistered) {
                                                         mutexFileRegistered.notifyAll();
                                                     }
-
-                                                    if (success) {
-
-                                                        updatePeaklist(runData, pID, rsID);
-
-                                                    }
+                                                    
                                                 }
                                             };
 

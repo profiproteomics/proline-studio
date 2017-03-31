@@ -132,20 +132,20 @@ public class RunInfoData extends AbstractData {
 
     public RawFile getSelectedRawFile() {
         //VDS : TO COMMENT Next session in order to have 2 methods : getSelectedRawFile and createRawFileFromFile...
-        if ((m_selectedRawFile == null) && (m_rawFileOnDisk != null)) {
-            RawFile rawFile = new RawFile();
-            rawFile.setRawFileDirectory(m_rawFileOnDisk.getPath());
-            rawFile.setMzDbFileDirectory(m_rawFileOnDisk.getPath());
-            int id = m_rawFileOnDisk.getName().indexOf(".");
-            if (id == -1) {
-                id = m_rawFileOnDisk.getName().length();
-            }
-            String identifier = m_rawFileOnDisk.getName().substring(0, id);
-            rawFile.setRawFileName(identifier + ".raw");
-            rawFile.setIdentifier(identifier);
-            rawFile.setMzDbFileName(m_rawFileOnDisk.getName());
-            m_selectedRawFile = rawFile;
-        }
+//        if ((m_selectedRawFile == null) && (m_rawFileOnDisk != null)) {
+//            RawFile rawFile = new RawFile();
+//            rawFile.setRawFileDirectory(m_rawFileOnDisk.getPath());
+//            rawFile.setMzDbFileDirectory(m_rawFileOnDisk.getPath());
+//            int id = m_rawFileOnDisk.getName().indexOf(".");
+//            if (id == -1) {
+//                id = m_rawFileOnDisk.getName().length();
+//            }
+//            String identifier = m_rawFileOnDisk.getName().substring(0, id);
+//            rawFile.setRawFileName(identifier + ".raw");
+//            rawFile.setIdentifier(identifier);
+//            rawFile.setMzDbFileName(m_rawFileOnDisk.getName());
+//            m_selectedRawFile = rawFile;
+//        }
         //VDS : END TO COMMENT 
         return m_selectedRawFile;
     }

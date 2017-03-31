@@ -180,7 +180,9 @@ public class RegisterRawFileTask extends AbstractJMSTask {
                     return ;
                 }
 
-                m_runInfoData.setRun(r);
+                m_runInfoData.setRun(r);                
+                m_runInfoData.setLinkedRawFile(r.getRawFile());
+                       
                 //m_runInfoData.setRunInfoInDatabase(true); //JPM.RUNINFODATA
 
                 entityManagerUDS.getTransaction().commit();

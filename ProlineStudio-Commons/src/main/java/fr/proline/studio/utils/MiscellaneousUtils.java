@@ -39,7 +39,7 @@ public class MiscellaneousUtils {
         return helpURL;
     }
 
-    public static String getFileName(String path, String[] suffix) {
+    public static String getFileName(String path, String[] suffixes) {
 
         path = path.toLowerCase();
 
@@ -49,9 +49,9 @@ public class MiscellaneousUtils {
         if (path.contains("\\")) {
             path = path.substring(path.lastIndexOf("\\") + 1);
         }
-        for (int i = 0; i < suffix.length; i++) {
-            if (path.contains(suffix[i].toLowerCase())) {
-                path = path.substring(0, path.indexOf(suffix[i].toLowerCase()));
+        for (String suffix : suffixes) {
+            if (path.contains(suffix.toLowerCase())) {
+                path = path.substring(0, path.indexOf(suffix.toLowerCase()));
             }
         }
 

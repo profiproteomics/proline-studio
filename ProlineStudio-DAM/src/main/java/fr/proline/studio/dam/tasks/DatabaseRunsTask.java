@@ -318,7 +318,7 @@ public class DatabaseRunsTask extends AbstractDatabaseTask {
             entityManagerUDS.getTransaction().begin();
 
             // Search rawFile with the searched identifier
-            TypedQuery<RawFile> searchQuery = entityManagerUDS.createQuery("SELECT rawfile FROM RawFile rawfile WHERE rawfile.identifier LIKE :search ORDER BY rawfile.identifier ASC", RawFile.class);
+            TypedQuery<RawFile> searchQuery = entityManagerUDS.createQuery("SELECT searchRawfile  FROM RawFile searchRawfile WHERE searchRawfile.identifier LIKE :search ORDER BY searchRawfile.identifier ASC", RawFile.class);
 
             String searchStringSql = m_searchString.replaceAll("\\*", "%").replaceAll("\\?", "_");
             searchQuery.setParameter("search", searchStringSql);

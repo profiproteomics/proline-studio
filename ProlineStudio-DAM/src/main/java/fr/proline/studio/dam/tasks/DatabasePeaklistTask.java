@@ -97,21 +97,17 @@ public class DatabasePeaklistTask extends AbstractDatabaseTask {
     }
 
     public boolean updatePeaklistRawFileIdentifier() {
-        EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(m_projectID).createEntityManager();
+        EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(m_projectID).createEntityManager();       
         try {
 
             entityManagerMSI.getTransaction().begin();
 
-            //TypedQuery<String> rawFileUpdateQuery = entityManagerMSI.createQuery("UPDATE Peaklist plist, MsiSearch msisearch, ResultSet rset SET plist.raw_file_identifier = :identifier WHERE rset.id = :rsetId AND rset.msiSearch=msisearch AND msisearch.peaklist=plist ", String.class);
-            
-            Query rawFileUpdateQuery = entityManagerMSI.createQuery("UPDATE Peaklist as plist set plist.rawFileId = :identifier WHERE plist.id  IN (SELECT plist FROM Peaklist plist, MsiSearch msisearch, ResultSet rset WHERE rset.id = :rsetId AND rset.msiSearch=msisearch AND msisearch.peaklist=plist)");
- 
-            
+            Query rawFileUpdateQuery = entityManagerMSI.createQuery("UPDATE Peaklist as plist set plist.rawFileId = :identifier WHERE plist.id  IN (SELECT plist FROM Peaklist plist, MsiSearch search, ResultSet rset WHERE rset.id = :rsetId AND rset.msiSearch=search AND search.peaklist=plist)");
+             
             rawFileUpdateQuery.setParameter("rsetId", m_rsetID);
             rawFileUpdateQuery.setParameter("identifier", m_rawFileIdentifier);
 
-            int result = rawFileUpdateQuery.executeUpdate();
-            
+            rawFileUpdateQuery.executeUpdate();
             entityManagerMSI.getTransaction().commit();
 
         } catch (Exception e) {
@@ -137,7 +133,7 @@ public class DatabasePeaklistTask extends AbstractDatabaseTask {
             entityManagerMSI.getTransaction().begin();
             // SELECT plist FROM Peaklist plist, MsiSearch msisearch, ResultSet rset 
             // WHERE rset.id = :rsetId AND rset.msiSearch=msisearch AND msisearch.peaklist=plist
-            TypedQuery<Peaklist> peaklistQuery = entityManagerMSI.createQuery("SELECT plist FROM Peaklist plist, MsiSearch msisearch, ResultSet rset WHERE rset.id = :rsetId AND rset.msiSearch=msisearch AND msisearch.peaklist=plist", Peaklist.class);
+            TypedQuery<Peaklist> peaklistQuery =entityManagerMSI.createQuery("SELECT plist FROM Peaklist plist, MsiSearch search, ResultSet rset WHERE rset.id = :rsetId AND rset.msiSearch=search AND search.peaklist=plist", Peaklist.class);
 
             peaklistQuery.setMaxResults(1);
             peaklistQuery.setParameter("rsetId", m_rsetID);

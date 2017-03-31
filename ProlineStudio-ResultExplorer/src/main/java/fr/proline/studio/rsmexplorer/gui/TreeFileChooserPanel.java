@@ -1,4 +1,4 @@
-package fr.proline.studio.gui;
+package fr.proline.studio.rsmexplorer.gui;
 
 import fr.proline.studio.utils.IconManager;
 import java.awt.Color;
@@ -41,18 +41,29 @@ public class TreeFileChooserPanel extends JPanel {
     protected DefaultTreeModel m_model;
     private DefaultMutableTreeNode m_top;
     private FileSystemView m_fileSystemView;
+    private TreeFileChooserTransferHandler m_transferHandler;
+    private boolean m_showUpdateButton;
 
     public TreeFileChooserPanel(FileSystemView fileSystemView, TreeFileChooserTransferHandler transferHandler) {
-
         m_fileSystemView = fileSystemView;
+        m_transferHandler = transferHandler;
+        m_showUpdateButton = true;
+    }
 
+    public TreeFileChooserPanel(FileSystemView fileSystemView, TreeFileChooserTransferHandler transferHandler, boolean showUpdateButton) {
+        this(fileSystemView, transferHandler);
+        m_showUpdateButton = showUpdateButton;
+    }
+
+    public void initTree() {
         setLayout(new GridBagLayout());
 
         m_top = new DefaultMutableTreeNode(new IconData(IconManager.getIcon(IconManager.IconType.COMPUTER_NETWORK), null, "Server"));
 
         DefaultMutableTreeNode node;
 
-        File[] roots = fileSystemView.getRoots();
+        File[] roots = m_fileSystemView.getRoots();
+
         for (int k = 0; k < roots.length; k++) {
             node = new DefaultMutableTreeNode(new IconData(IconManager.getIcon(IconManager.IconType.FOLDER), IconManager.getIcon(IconManager.IconType.FOLDER_EXPANDED), new FileNode(roots[k])));
             m_top.add(node);
@@ -62,8 +73,8 @@ public class TreeFileChooserPanel extends JPanel {
         m_model = new DefaultTreeModel(m_top);
         m_tree = new TreeFileChooser(m_model);
 
-        if (transferHandler != null) {
-            m_tree.setTransferHandler(transferHandler);
+        if (m_transferHandler != null) {
+            m_tree.setTransferHandler(m_transferHandler);
         } else {
             m_tree.setTransferHandler(new TreeFileChooserTransferHandler());
         }
@@ -89,61 +100,61 @@ public class TreeFileChooserPanel extends JPanel {
         GridBagConstraints c = new GridBagConstraints();
         c.anchor = GridBagConstraints.NORTHWEST;
         c.fill = GridBagConstraints.BOTH;
-        c.insets = new java.awt.Insets(5, 5, 5, 5);
+        //c.insets = new java.awt.Insets(5, 5, 5, 5);
+        c.insets = new java.awt.Insets(0, 0, 0, 0);
 
         c.gridx = 0;
         c.gridy = 0;
-        
+
         c.gridheight = 1;
-        
+
         c.weightx = 0.0;
         c.weighty = 0.0;
-        
-        JButton updateButton = new JButton(IconManager.getIcon(IconManager.IconType.REFRESH));
-        updateButton.setFocusPainted(false);
-        updateButton.setOpaque(true);
-        updateButton.addActionListener(new ActionListener() {
 
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                updateTree();
-            }
-        });
-        
-        JToolBar toolbar = new JToolBar();
-        toolbar.setFloatable(false);
-        
-        toolbar.add(updateButton);
-        
-        add(toolbar, c);
-        
-        c.weightx = 0.0;
-        c.weighty = 0.0;
-        
-        c.gridy++;
-        
-        add(Box.createVerticalBox(), c);
-        
-        c.gridy = 0;
-        
-        c.gridheight = 2;
-        
-        c.weightx = 1.0;
-        c.weighty = 1.0;
-        
-        c.gridx++;
-        
-        add(scrollPane, c);       
+        if (m_showUpdateButton) {
+            JButton updateButton = new JButton(IconManager.getIcon(IconManager.IconType.REFRESH));
+            updateButton.setFocusPainted(false);
+            updateButton.setOpaque(true);
+            updateButton.addActionListener(new ActionListener() {
 
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    updateTree();
+                }
+            });
+
+            JToolBar toolbar = new JToolBar();
+            toolbar.setFloatable(false);
+
+            toolbar.add(updateButton);
+
+            add(toolbar, c);
+
+            c.gridy++;
+
+            add(Box.createVerticalBox(), c);
+
+            c.gridy = 0;
+
+            c.gridheight = 2;
+
+            c.gridx++;
+        }
+
+                    c.weightx = 1.0;
+            c.weighty = 1.0;
+        
+        add(scrollPane, c);
     }
 
-    private void updateTree() {
+    public void updateTree() {
         m_top.removeAllChildren();
         m_model.reload(m_top);
 
         DefaultMutableTreeNode node;
 
         File[] roots = m_fileSystemView.getRoots();
+
         for (int k = 0; k < roots.length; k++) {
             node = new DefaultMutableTreeNode(new IconData(IconManager.getIcon(IconManager.IconType.FOLDER), IconManager.getIcon(IconManager.IconType.FOLDER_EXPANDED), new FileNode(roots[k])));
             m_top.add(node);

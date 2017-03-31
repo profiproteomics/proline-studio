@@ -5,18 +5,10 @@
  */
 package fr.proline.studio.rsmexplorer.gui.dialog;
 
-import fr.proline.studio.dpm.serverfilesystem.RootInfo;
-import fr.proline.studio.dpm.serverfilesystem.ServerFileSystemView;
 import fr.proline.studio.gui.DefaultDialog;
 import static fr.proline.studio.gui.DefaultDialog.BUTTON_CANCEL;
 import static fr.proline.studio.gui.DefaultDialog.BUTTON_OK;
-import fr.proline.studio.parameter.BooleanParameter;
-import fr.proline.studio.parameter.ObjectParameter;
-import fr.proline.studio.parameter.ParameterError;
-import fr.proline.studio.parameter.ParameterList;
 import fr.proline.studio.utils.IconManager;
-import fr.proline.studio.wizard.MzdbUploadBatch;
-import fr.proline.studio.wizard.MzdbUploadSettings;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dialog;
@@ -35,8 +27,6 @@ import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JList;
 import javax.swing.JPanel;
@@ -50,40 +40,26 @@ import org.openide.util.NbPreferences;
  *
  * @author AK249877
  */
-public class UploadMzdbDialog extends DefaultDialog implements FileDialogInterface {
+public class UploadDatDialog extends DefaultDialog {
 
-    private static UploadMzdbDialog m_singletonDialog = null;
-    private static JList m_fileList;
+    private static UploadDatDialog m_singletonDialog = null;
+    private JList m_fileList;
     private JScrollPane m_fileListScrollPane;
     private JButton m_addFileButton, m_removeFileButton;
-    private static ParameterList m_parameterList;
-    private BooleanParameter m_deleteMzdbParameter, m_createParentDirectoryParameter;
-    private static ObjectParameter m_uploadLabelParameter;
     private String m_lastParentDirectory;
 
-    public static UploadMzdbDialog getDialog(Window parent) {
+    public static UploadDatDialog getDialog(Window parent) {
         if (m_singletonDialog == null) {
-            m_singletonDialog = new UploadMzdbDialog(parent);
-        } else {
-            ArrayList<String> labels = ServerFileSystemView.getServerFileSystemView().getLabels(RootInfo.TYPE_MZDB_FILES);
-            Object[] associatedTable = labels.toArray(new String[labels.size()]);
-            Object[] objectTable = labels.toArray(new String[labels.size()]);
-            m_uploadLabelParameter.updateAssociatedObjects(associatedTable);
-            m_uploadLabelParameter.updateObjects(objectTable);
-            m_parameterList.loadParameters(NbPreferences.root());
-            if (m_fileList != null) {
-                DefaultListModel model = (DefaultListModel) m_fileList.getModel();
-                model.clear();
-            }
+            m_singletonDialog = new UploadDatDialog(parent);
         }
 
         return m_singletonDialog;
     }
 
-    public UploadMzdbDialog(Window parent) {
+    public UploadDatDialog(Window parent) {
         super(parent, Dialog.ModalityType.MODELESS);
 
-        setTitle("Upload mzDB file(s)");
+        setTitle("Upload .dat file(s)");
 
         setSize(new Dimension(360, 480));
         setResizable(true);
@@ -98,49 +74,11 @@ public class UploadMzdbDialog extends DefaultDialog implements FileDialogInterfa
 
     }
 
-    @Override
-    public void setFiles(ArrayList<File> files) {
-        ((DefaultListModel) m_fileList.getModel()).clear();
-        if (files.size() > 0) {
-            for (File f : files) {
-                ((DefaultListModel) m_fileList.getModel()).addElement(f);
-            }
-            m_lastParentDirectory = files.get(0).getParentFile().getAbsolutePath();
-        }
-    }
-
     private Component createInternalComponent() {
         JPanel internalPanel = new JPanel();
         internalPanel.setLayout(new BorderLayout());
         internalPanel.add(createFileSelectionPanel(), BorderLayout.CENTER);
-        internalPanel.add(createParameterPanel(), BorderLayout.SOUTH);
         return internalPanel;
-    }
-
-    private JPanel createParameterPanel() {
-        m_parameterList = new ParameterList("mzDB Settings");
-        JCheckBox deleteCheckbox = new JCheckBox("Delete mzdb file after a successful upload");
-        m_deleteMzdbParameter = new BooleanParameter("DELETE_MZDB", "Delete mzdb file after a successful upload", deleteCheckbox, false);
-        m_parameterList.add(m_deleteMzdbParameter);
-
-        JCheckBox parentDirectoryCheckbox = new JCheckBox("Create Parent Directory in Destination");
-        m_createParentDirectoryParameter = new BooleanParameter("CREATE_PARENT_DIRECTORY", "Create Parent Directory in Destination", parentDirectoryCheckbox, false);
-        m_parameterList.add(m_createParentDirectoryParameter);
-
-        ArrayList<String> labels = ServerFileSystemView.getServerFileSystemView().getLabels(RootInfo.TYPE_MZDB_FILES);
-
-        Object[] associatedTable = labels.toArray(new String[labels.size()]);
-        JComboBox namingComboBox = new JComboBox(associatedTable);
-        Object[] objectTable = labels.toArray(new String[labels.size()]);
-        m_uploadLabelParameter = new ObjectParameter("MZDB_MOUNT_LABEL", "Server's mounting point", namingComboBox, associatedTable, objectTable, 0, null);
-        m_parameterList.add(m_uploadLabelParameter);
-
-        m_parameterList.loadParameters(NbPreferences.root());
-
-        JPanel parameterPanel = m_parameterList.getPanel();
-        parameterPanel.setBorder(BorderFactory.createTitledBorder(" Upload Options "));
-
-        return parameterPanel;
     }
 
     private JPanel createFileSelectionPanel() {
@@ -206,18 +144,18 @@ public class UploadMzdbDialog extends DefaultDialog implements FileDialogInterfa
             public void actionPerformed(ActionEvent e) {
 
                 Preferences preferences = NbPreferences.root();
-                String initializationDirectory = preferences.get("mzDB_Settings.LAST_MZDB_PATH", System.getProperty("user.home"));
+                String initializationDirectory = preferences.get("dat_Settings.LAST_DAT_PATH", System.getProperty("user.home"));
 
                 File f = new File(initializationDirectory);
                 if (!(f.exists() && f.isDirectory())) {
                     initializationDirectory = System.getProperty("user.home");
                 }
 
-                JFileChooser fchooser = new JFileChooser(initializationDirectory);
+                JFileChooser fchooser = new JFileChooser();
 
                 fchooser.setMultiSelectionEnabled(true);
 
-                fchooser.addChoosableFileFilter(new FileNameExtensionFilter(".mzdb", "mzDB"));
+                fchooser.addChoosableFileFilter(new FileNameExtensionFilter(".dat", "DAT"));
                 fchooser.setAcceptAllFileFilterUsed(false);
 
                 //put the one and only filter here! (.mzdb)
@@ -261,13 +199,6 @@ public class UploadMzdbDialog extends DefaultDialog implements FileDialogInterfa
             highlight(m_fileList);
             return false;
         }
-        ParameterError error = m_parameterList.checkParameters();
-        if (error != null) {
-            setStatus(true, error.getErrorMessage());
-            highlight(error.getParameterComponent());
-            return false;
-        }
-        m_parameterList.saveParameters(NbPreferences.root());
 
         ArrayList<File> mzdbFiles = new ArrayList<File>();
         for (int i = 0; i < m_fileList.getModel().getSize(); i++) {
@@ -275,13 +206,11 @@ public class UploadMzdbDialog extends DefaultDialog implements FileDialogInterfa
         }
 
         Preferences preferences = NbPreferences.root();
-        preferences.put("mzDB_Settings.LAST_MZDB_PATH", m_lastParentDirectory);
+        preferences.put("dat_Settings.LAST_DAT_PATH", m_lastParentDirectory);
 
-        MzdbUploadSettings uploadSettings = new MzdbUploadSettings((boolean) m_deleteMzdbParameter.getObjectValue(), (boolean) m_createParentDirectoryParameter.getObjectValue(), m_uploadLabelParameter.getStringValue());
-
-        MzdbUploadBatch uploadBatch = new MzdbUploadBatch(mzdbFiles, uploadSettings);
-        Thread thread = new Thread(uploadBatch);
-        thread.start();
+        //MzdbUploadBatch uploadBatch = new MzdbUploadBatch(mzdbFiles, uploadSettings);
+        //Thread thread = new Thread(uploadBatch);
+        //thread.start();
 
         DefaultListModel listModel = (DefaultListModel) m_fileList.getModel();
         listModel.removeAllElements();

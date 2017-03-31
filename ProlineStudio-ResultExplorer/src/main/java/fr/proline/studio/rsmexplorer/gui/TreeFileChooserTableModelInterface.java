@@ -1,4 +1,4 @@
-package fr.proline.studio.gui;
+package fr.proline.studio.rsmexplorer.gui;
 
 import java.io.File;
 import java.util.ArrayList;

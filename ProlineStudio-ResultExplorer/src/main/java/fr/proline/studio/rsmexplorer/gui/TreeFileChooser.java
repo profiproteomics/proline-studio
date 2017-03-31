@@ -3,9 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package fr.proline.studio.gui;
+package fr.proline.studio.rsmexplorer.gui;
 
-import fr.proline.studio.gui.TreeFileChooserPanel.FileNode;
+import fr.proline.studio.rsmexplorer.gui.TreeFileChooserPanel.FileNode;
 import java.io.File;
 import java.util.ArrayList;
 import javax.swing.JTree;

@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package fr.proline.studio.gui;
+package fr.proline.studio.rsmexplorer.gui;
 
 import java.util.HashMap;
 

@@ -8,6 +8,7 @@ package fr.proline.studio.wizard;
 import fr.proline.studio.dpm.jms.AccessJMSManagerThread;
 import fr.proline.studio.dpm.task.jms.AbstractJMSCallback;
 import fr.proline.studio.dpm.task.jms.FileUploadTask;
+import fr.proline.studio.rsmexplorer.MzdbFilesTopComponent;
 import java.io.File;
 import java.util.logging.Level;
 
@@ -64,6 +65,8 @@ public class MzdbUploader implements Runnable, WorkerInterface {
                 if (success) {
                     if (m_state == WorkerInterface.ACTIVE_STATE) { 
                         m_state = WorkerInterface.FINISHED_STATE;
+                        
+                        MzdbFilesTopComponent.getTreeFileChooserPanel().updateTree();
 
                         if (m_uploadSettings.getDeleteMzdb()) {
                             while (!m_file.canWrite() && !m_file.exists()) {
@@ -90,7 +93,12 @@ public class MzdbUploader implements Runnable, WorkerInterface {
         };
 
         FileUploadTask task = new FileUploadTask(callback, m_file.getAbsolutePath(), result);
-        task.initUploadMZDB(m_uploadSettings.getMountLabel(), m_uploadSettings.getCreateParentDirectory());
+        
+        if(m_uploadSettings.getDestination()==null){
+            task.initUploadMZDB(m_uploadSettings.getMountLabel(), m_uploadSettings.getCreateParentDirectory());
+        }else{
+            task.initUploadMZDB(m_uploadSettings.getMountLabel(), m_uploadSettings.getDestination());
+        }
         AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
 
         this.m_run = false;

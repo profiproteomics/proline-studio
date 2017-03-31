@@ -54,7 +54,7 @@ import org.openide.util.NbPreferences;
  *
  * @author AK249877
  */
-public class ConvertRawDialog extends DefaultDialog {
+public class ConvertRawDialog extends DefaultDialog implements FileDialogInterface {
 
     private static ConvertRawDialog m_singletonDialog = null;
     private static JList m_fileList;
@@ -78,10 +78,10 @@ public class ConvertRawDialog extends DefaultDialog {
             m_uploadLabelParameter.updateAssociatedObjects(associatedTable);
             m_uploadLabelParameter.updateObjects(objectTable);
             m_parameterList.loadParameters(NbPreferences.root());
-            if(m_fileList!=null){
+            if (m_fileList != null) {
                 DefaultListModel model = (DefaultListModel) m_fileList.getModel();
                 model.clear();
-            }         
+            }
         }
 
         return m_singletonDialog;
@@ -105,6 +105,17 @@ public class ConvertRawDialog extends DefaultDialog {
 
     }
 
+    @Override
+    public void setFiles(ArrayList<File> files) {
+        ((DefaultListModel) m_fileList.getModel()).clear();
+        if (files.size() > 0) {
+            for (File f : files) {
+                ((DefaultListModel) m_fileList.getModel()).addElement(f);
+            }
+            m_lastParentDirectory = files.get(0).getParentFile().getAbsolutePath();
+        }
+    }
+
     private Component createInternalComponent() {
         JPanel internalPanel = new JPanel();
         internalPanel.setLayout(new BorderLayout());
@@ -125,8 +136,7 @@ public class ConvertRawDialog extends DefaultDialog {
         m_converterFilePath.setSelectionMode(JFileChooser.FILES_ONLY);
         m_converterFilePath.setDefaultDirectory(new File(preferences.get("mzDB_Settings.Converter_(.exe)", System.getProperty("user.home"))));
         m_parameterList.add(m_converterFilePath);
-        
-        
+
         m_outputFilePath = new FileParameter(null, "Output_Path", "Output Path", JTextField.class, "", null, null);
         m_outputFilePath.setAllFiles(false);
         m_outputFilePath.setSelectionMode(JFileChooser.DIRECTORIES_ONLY);
@@ -301,7 +311,7 @@ public class ConvertRawDialog extends DefaultDialog {
             return false;
         }
 
-        if (m_converterFilePath.getStringValue()==null || m_converterFilePath.getStringValue().length()==0) {
+        if (m_converterFilePath.getStringValue() == null || m_converterFilePath.getStringValue().length() == 0) {
             setStatus(true, "An appropriate executable must be selected.");
             highlight(m_converterFilePath.getComponent(m_converterFilePath.getStringValue()));
             return false;
@@ -309,7 +319,7 @@ public class ConvertRawDialog extends DefaultDialog {
             setStatus(true, "The selected executable no longer exists.");
             highlight(m_converterFilePath.getComponent(m_converterFilePath.getStringValue()));
             return false;
-        } else if (m_outputFilePath.getStringValue()==null || m_outputFilePath.getStringValue().length()==0) {
+        } else if (m_outputFilePath.getStringValue() == null || m_outputFilePath.getStringValue().length() == 0) {
             setStatus(true, "An appropriate executable must be selected.");
             highlight(m_outputFilePath.getComponent(m_outputFilePath.getStringValue()));
             return false;

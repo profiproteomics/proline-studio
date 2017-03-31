@@ -1,18 +1,28 @@
-package fr.proline.studio.gui;
+package fr.proline.studio.rsmexplorer.gui;
 
+import fr.proline.studio.dpm.serverfilesystem.RootInfo;
+import fr.proline.studio.dpm.serverfilesystem.ServerFileSystemView;
+import fr.proline.studio.export.ExporterFactory;
+import fr.proline.studio.wizard.ConversionSettings;
+import fr.proline.studio.wizard.ConvertionUploadBatch;
+import fr.proline.studio.wizard.MzdbUploadBatch;
+import fr.proline.studio.wizard.MzdbUploadSettings;
 import java.awt.Color;
-import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.File;
 import java.io.IOException;
-import java.io.Serializable;
 import java.util.*;
+import java.util.prefs.Preferences;
 import javax.swing.JComponent;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
+import javax.swing.JTree;
 
 import javax.swing.TransferHandler;
+import javax.swing.tree.TreePath;
+import org.openide.util.Exceptions;
+import org.openide.util.NbPreferences;
 
 /**
  * Class used for Drag and Drop of nodes
@@ -21,10 +31,10 @@ import javax.swing.TransferHandler;
  */
 public class TreeFileChooserTransferHandler extends TransferHandler {
 
-    private Hashtable<JComponent, JComponent> m_components;
+    private HashMap<JComponent, JComponent> m_components;
 
     public TreeFileChooserTransferHandler() {
-        m_components = new Hashtable<JComponent, JComponent>();
+        m_components = new HashMap<JComponent, JComponent>();
     }
 
     public void addComponent(JComponent component) {
@@ -32,14 +42,14 @@ public class TreeFileChooserTransferHandler extends TransferHandler {
     }
 
     public void clearHighlights() {
-        Enumeration<JComponent> enumKey = m_components.keys();
-        while (enumKey.hasMoreElements()) {
-            JComponent key = enumKey.nextElement();
+        Iterator it = m_components.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry pair = (Map.Entry) it.next();
+            JComponent key = (JComponent) pair.getKey();
             key.setBackground(null);
         }
     }
 
-    //private Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
     @Override
     public int getSourceActions(JComponent c) {
         return TransferHandler.COPY;
@@ -78,6 +88,8 @@ public class TreeFileChooserTransferHandler extends TransferHandler {
                 return true;
             } else if (m_components.containsKey((JComponent) support.getComponent())) {
                 m_components.get((JComponent) support.getComponent()).setBackground(Color.WHITE);
+                return true;
+            } else if (dropLocation instanceof JTree.DropLocation) {
                 return true;
             }
         }
@@ -141,7 +153,6 @@ public class TreeFileChooserTransferHandler extends TransferHandler {
                 ArrayList<File> samples = new ArrayList<File>();
 
                 for (int i = 0; i < transferredFiles.size(); i++) {
-                    //this.getFilesRecursive(transferredFiles.get(i), recursiveTransferredFiles);      
 
                     if (transferredFiles.get(i).isFile()) {
                         samples.add(transferredFiles.get(i));
@@ -164,57 +175,114 @@ public class TreeFileChooserTransferHandler extends TransferHandler {
             }
 
             return false;
+        } else if (support.getComponent() instanceof TreeFileChooser) {
+
+            TreeFileChooser treeFileChooser = (TreeFileChooser) support.getComponent();
+
+            try {
+
+                FilesTransferable transferable = (FilesTransferable) support.getTransferable().getTransferData(FilesTransferable.Files_FLAVOR);
+                ArrayList<File> transferredFiles = transferable.getFiles();
+
+                ArrayList<File> samples = new ArrayList<File>();
+
+                for (int i = 0; i < transferredFiles.size(); i++) {
+
+                    if (transferredFiles.get(i).isFile()) {
+                        samples.add(transferredFiles.get(i));
+                    } else {
+                        File[] listOfFiles = transferredFiles.get(i).listFiles();
+                        for (File file : listOfFiles) {
+                            if (file.isFile()) {
+                                samples.add(file);
+                            }
+                        }
+
+                    }
+                }
+
+                JTree.DropLocation treeDropLocation = (JTree.DropLocation) support.getDropLocation();
+                TreePath treePath = treeDropLocation.getPath();
+
+                String textTreePath = treePath.toString();
+                
+                textTreePath = textTreePath.replaceAll("\\[", "").replaceAll("\\]", "");
+
+                String[] pathNodes = textTreePath.split(",");
+                
+                for(int i=0; i<pathNodes.length; i++){
+                    pathNodes[i] = pathNodes[i].trim();
+                }
+
+                ArrayList<String> labels = ServerFileSystemView.getServerFileSystemView().getLabels(RootInfo.TYPE_MZDB_FILES);
+                String parentLabel = null;
+                int parentIndex = -1;
+
+                for (int i = 0; i < pathNodes.length; i++) {
+
+                    for (int j = 0; j < labels.size(); j++) {
+                        String node = pathNodes[i];
+                        String label = labels.get(j);
+                        
+                        
+                        if (node.compareToIgnoreCase(label) == 0) {
+                            parentLabel = pathNodes[i];
+                            parentIndex = i;
+                            break;
+                        }
+                    }
+
+                }
+
+                if (parentLabel == null || parentIndex==-1) {
+                    return false;
+                }
+                
+                StringBuilder destinationBuilder = new StringBuilder();
+                
+                for(int i=parentIndex+1; i<pathNodes.length; i++){
+                    destinationBuilder.append(File.separator).append(pathNodes[i]);
+                }
+                destinationBuilder.append(File.separator);
+                
+                String destination = destinationBuilder.toString();
+
+                MzdbUploadSettings uploadSettings = new MzdbUploadSettings(false, (boolean) false, parentLabel, destination);
+
+                if (samples.get(0).getAbsolutePath().endsWith(".mzdb")) {
+
+                    //Uploading Task
+                    MzdbUploadBatch uploadBatch = new MzdbUploadBatch(samples, uploadSettings);
+                    Thread thread = new Thread(uploadBatch);
+                    thread.start();
+
+                } else if (samples.get(0).getAbsolutePath().endsWith(".raw")) {
+
+                    Preferences preferences = NbPreferences.root();
+
+                    String convertersPath = preferences.get("mzDB_Settings.Converter_(.exe)", null);
+
+                    if (convertersPath == null) {
+                        return false;
+                    }
+
+                    ConversionSettings conversionSettings = new ConversionSettings(convertersPath, "/", false, true);
+
+                    conversionSettings.setUploadSettings(uploadSettings);
+
+                    ConvertionUploadBatch conversionBatch = new ConvertionUploadBatch(samples, conversionSettings);
+
+                }
+
+            } catch (UnsupportedFlavorException ex) {
+                Exceptions.printStackTrace(ex);
+            } catch (IOException ex) {
+                Exceptions.printStackTrace(ex);
+            }
+
         }
+
         return true;
-
-    }
-
-    private static void getFilesRecursive(File pFile, ArrayList<File> filesList) {
-        for (File currentFile : pFile.listFiles()) {
-            if (currentFile.isDirectory()) {
-                getFilesRecursive(currentFile, filesList);
-            } else {
-                //if(currentFile.getName().endsWith(".mzdb")){
-                filesList.add(currentFile);
-                //}
-            }
-        }
-    }
-
-    public static class FilesTransferable implements Transferable, Serializable {
-
-        public final static DataFlavor Files_FLAVOR = new DataFlavor(FilesTransferable.class, "Drag and drop Files Selection");
-
-        private static final DataFlavor[] DATA_FLAVORS = {Files_FLAVOR};
-
-        private final ArrayList<File> m_selectedFiles;
-
-        public FilesTransferable(ArrayList<File> selectedFiles) {
-            m_selectedFiles = selectedFiles;
-        }
-
-        public ArrayList<File> getFiles() {
-            return m_selectedFiles;
-        }
-
-        @Override
-        public Object getTransferData(DataFlavor flavor) throws UnsupportedFlavorException, IOException {
-            if (isDataFlavorSupported(flavor)) {
-                return this;
-            }
-
-            return null;
-        }
-
-        @Override
-        public DataFlavor[] getTransferDataFlavors() {
-            return DATA_FLAVORS;
-        }
-
-        @Override
-        public boolean isDataFlavorSupported(DataFlavor flavor) {
-            return (DATA_FLAVORS[0].equals(flavor));
-        }
 
     }
 

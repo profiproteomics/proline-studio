@@ -1,6 +1,5 @@
 package fr.proline.mzscope.model;
 
-import fr.profi.mzdb.model.Feature;
 import java.io.File;
 import java.util.List;
 

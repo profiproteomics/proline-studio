@@ -5,8 +5,8 @@
  */
 package fr.proline.studio.rsmexplorer.gui.dialog.xic;
 
-import fr.proline.studio.gui.DropZoneInterface;
-import fr.proline.studio.gui.TreeFileChooserTransferHandler;
+import fr.proline.studio.rsmexplorer.gui.DropZoneInterface;
+import fr.proline.studio.rsmexplorer.gui.TreeFileChooserTransferHandler;
 import fr.proline.studio.rsmexplorer.gui.dialog.xic.SelectRawFilesPanel.FlatDesignTableModel;
 import fr.proline.studio.utils.IconManager;
 import fr.proline.studio.utils.MiscellaneousUtils;

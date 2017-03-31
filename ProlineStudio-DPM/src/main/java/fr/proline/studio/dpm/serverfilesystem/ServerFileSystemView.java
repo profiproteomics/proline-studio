@@ -24,12 +24,16 @@ public class ServerFileSystemView extends FileSystemView {
     private static HashMap<String, ArrayList<String>> m_rootsInfo = null;
     
     private ServerFileSystemView() {
-        
+        ;
+    }
+    
+    public void setRoots(File[] roots){
+        m_roots = roots;
     }
     
     @Override
     public File[] getRoots() {
-        if (m_roots == null) {
+        if (m_roots == null || m_roots.length==0) {
             //m_roots = new File[1];
             //m_roots[0] = new ServerFile();
             

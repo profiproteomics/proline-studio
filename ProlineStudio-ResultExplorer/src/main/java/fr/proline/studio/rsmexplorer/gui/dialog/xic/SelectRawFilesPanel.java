@@ -4,9 +4,9 @@ import fr.proline.core.orm.uds.RawFile;
 import fr.proline.studio.dam.data.RunInfoData;
 import fr.proline.studio.dpm.serverfilesystem.ServerFileSystemView;
 import fr.proline.studio.gui.DefaultDialog;
-import fr.proline.studio.gui.TreeFileChooserPanel;
-import fr.proline.studio.gui.TreeFileChooserTableModelInterface;
-import fr.proline.studio.gui.TreeFileChooserTransferHandler;
+import fr.proline.studio.rsmexplorer.gui.TreeFileChooserPanel;
+import fr.proline.studio.rsmexplorer.gui.TreeFileChooserTableModelInterface;
+import fr.proline.studio.rsmexplorer.gui.TreeFileChooserTransferHandler;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
 import fr.proline.studio.rsmexplorer.tree.xic.XICBiologicalGroupNode;
@@ -283,6 +283,7 @@ public class SelectRawFilesPanel extends JPanel implements XICRunNodeInitListene
         c.weighty = 1;
 
         TreeFileChooserPanel tree = new TreeFileChooserPanel(ServerFileSystemView.getServerFileSystemView(), m_transferHandler);
+        tree.initTree();
         JScrollPane treeScrollPane = new JScrollPane();
         treeScrollPane.setViewportView(tree);
 

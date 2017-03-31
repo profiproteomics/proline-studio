@@ -47,7 +47,8 @@ public class FileUploadTask extends AbstractJMSTask {
     private String m_filePath;
     private String[] m_remoteFilePath = null;
     private boolean m_createParentDirectory;
-    
+
+    private String m_destinationPath = null;
 
     public FileUploadTask(AbstractJMSCallback callback, String filePath, String[] remoteFilePath) {
         super(callback, new TaskInfo("Upload file " + filePath, true, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_HIGH));
@@ -63,6 +64,13 @@ public class FileUploadTask extends AbstractJMSTask {
         m_action = UPLOAD_MZDB_FILE;
         m_mountLabel = mountLabel;
         m_createParentDirectory = createParentDirectory;
+    }
+
+    public void initUploadMZDB(String mountLabel, String destinationPath) {
+        m_action = UPLOAD_MZDB_FILE;
+        m_mountLabel = mountLabel;
+        m_destinationPath = destinationPath;
+        m_createParentDirectory = false;
     }
 
     @Override
@@ -87,15 +95,22 @@ public class FileUploadTask extends AbstractJMSTask {
             // Upload File on server side
             message.setJMSReplyTo(m_replyQueue);
             message.setStringProperty(JMSConnectionManager.PROLINE_SERVICE_NAME_KEY, "proline/misc/FileUpload");
-            
+
             message.setStringProperty("dest_file_name", uploadFile.getName());
-            
+
             //this needs checking!
-            if(m_action == UPLOAD_MZDB_FILE){
-                String pathExtention = (m_createParentDirectory) ? File.separator+uploadFile.getParentFile().getName() : "";
+            if (m_action == UPLOAD_MZDB_FILE) {
+
+                String pathExtention;
+                if (m_destinationPath == null) {
+                    pathExtention = (m_createParentDirectory) ? File.separator + uploadFile.getParentFile().getName() : "";
+                } else {
+                    pathExtention = m_destinationPath;
+                }
                 message.setStringProperty("dest_folder_path", m_mountLabel + pathExtention);
+
             }
-            
+
             addSourceToMessage(message);
             addDescriptionToMessage(message);
 

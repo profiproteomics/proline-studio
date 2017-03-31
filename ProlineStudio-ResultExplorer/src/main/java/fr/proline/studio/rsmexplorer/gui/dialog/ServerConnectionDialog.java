@@ -8,6 +8,7 @@ import fr.proline.studio.gui.ConnectionDialog;
 import fr.proline.studio.pattern.DataboxDataAnalyzer;
 import fr.proline.studio.pattern.WindowBox;
 import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
+import fr.proline.studio.rsmexplorer.MzdbFilesTopComponent;
 import fr.proline.studio.rsmexplorer.PropertiesTopComponent;
 import fr.proline.studio.rsmexplorer.TaskLogTopComponent;
 import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
@@ -175,6 +176,8 @@ public class ServerConnectionDialog extends ConnectionDialog {
                             }
                         });
                     }
+                    
+                    MzdbFilesTopComponent.getTreeFileChooserPanel().initTree();
 
                     if (changingUser) {
 

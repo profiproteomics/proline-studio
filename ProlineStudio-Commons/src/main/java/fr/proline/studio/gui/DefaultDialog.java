@@ -58,6 +58,17 @@ public class DefaultDialog extends javax.swing.JDialog {
     public DefaultDialog(Window parent, Dialog.ModalityType modalityType) {
         super(parent, modalityType);
         
+        init();
+    }
+
+    public DefaultDialog(Dialog owner) {
+        super(owner, true);
+        
+        init();
+    }
+    
+    private void init() {
+        
         m_buttons = new JButton[BUTTONS_NUMBER];
         
         // Action when the user press on the dialog cross
@@ -96,9 +107,8 @@ public class DefaultDialog extends javax.swing.JDialog {
         
         
         initComponents(); 
-
     }
-
+    
     public void setDocumentationSuffix(String documentationSuffix) {
         m_documentationSuffix = documentationSuffix;
     }

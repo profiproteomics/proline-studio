@@ -10,6 +10,8 @@ import fr.proline.repository.IDatabaseConnector;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import org.openide.util.Exceptions;
 
 /**
  * Static reference of the several UDS values : project, instruments ....
@@ -161,5 +163,21 @@ public class DatabaseDataManager  {
     }
     private Boolean m_checkDatabaseExists = null;
     
+    public static boolean isAdmin(UserAccount userAccount) {
+        boolean isAdmin = false;
+        try {
+            Map<String, Object> map = userAccount.getSerializedPropertiesAsMap();
+            if (map != null) {
+                String userGroup = (String) map.get("UserGroup");
+                if (userGroup != null) {
+                    isAdmin = (userGroup.compareTo("ADMIN") == 0);
+                }
+            }
+        } catch (Exception ex) {
+            Exceptions.printStackTrace(ex);
+        }
+
+        return isAdmin;
+    }
 
 }

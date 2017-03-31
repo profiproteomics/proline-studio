@@ -10,8 +10,6 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.DefaultListModel;
@@ -26,10 +24,10 @@ import javax.swing.JScrollPane;
  */
 public class XICDropZoneInfo extends JPanel {
 
-    private final JList m_list;
+    private final JList m_droppedFilesList;
     private final DefaultListModel m_model;
-    private final JLabel m_label;
-    private int m_associatedCounter, m_notAssociatedCounter;
+    private final JLabel m_statusLabel;
+    private int m_associatedCounter;
 
     public XICDropZoneInfo() {
 
@@ -37,9 +35,9 @@ public class XICDropZoneInfo extends JPanel {
 
         m_model = new DefaultListModel();
 
-        m_list = new JList(m_model);
+        m_droppedFilesList = new JList(m_model);
 
-        m_list.setCellRenderer(new DefaultListCellRenderer() {
+        m_droppedFilesList.setCellRenderer(new DefaultListCellRenderer() {
 
             @Override
             public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
@@ -61,40 +59,34 @@ public class XICDropZoneInfo extends JPanel {
 
         });
 
-        JScrollPane listPane = new JScrollPane(m_list);
+        JScrollPane listPane = new JScrollPane(m_droppedFilesList);
 
         this.add(listPane, BorderLayout.CENTER);
 
-        m_label = new JLabel();
-        m_label.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 10));
-        this.add(m_label, BorderLayout.SOUTH);
+        m_statusLabel = new JLabel();
+        m_statusLabel.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 10));
+        this.add(m_statusLabel, BorderLayout.SOUTH);
 
     }
 
     public void updateInfo(HashMap<String, AssociationWrapper> associations) {
         clearInfo();
 
-        Iterator it = associations.entrySet().iterator();
-        while (it.hasNext()) {
-            Map.Entry pair = (Map.Entry) it.next();
+        for (AssociationWrapper assocWrapper : associations.values()) {
+            m_model.addElement(assocWrapper);
 
-            m_model.addElement((AssociationWrapper) pair.getValue());
-
-            if (((AssociationWrapper) pair.getValue()).getAssociationType() == AssociationWrapper.AssociationType.ASSOCIATED) {
+            if (assocWrapper.getAssociationType() == AssociationWrapper.AssociationType.ASSOCIATED) {
                 m_associatedCounter++;
-            } else {
-                m_notAssociatedCounter++;
-            }
+            } 
         }
 
-        m_label.setText(String.valueOf(m_model.size()) + " files dropped. " + m_associatedCounter + " files were associated.");
+        m_statusLabel.setText(String.valueOf(m_model.size()) + " files dropped. " + m_associatedCounter + " files were associated.");
     }
 
     public void clearInfo() {
         m_model.removeAllElements();
-        m_associatedCounter = 0;
-        m_notAssociatedCounter = 0;
-        m_label.setText("0 files dropped.");
+        m_associatedCounter = 0;       
+        m_statusLabel.setText("0 files dropped.");
     }
 
 }

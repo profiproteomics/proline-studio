@@ -4,10 +4,12 @@ import fr.proline.core.orm.uds.Aggregation;
 import fr.proline.core.orm.uds.InstrumentConfiguration;
 import fr.proline.core.orm.uds.PeaklistSoftware;
 import fr.proline.core.orm.uds.Project;
+import fr.proline.core.orm.uds.SpectrumTitleParsingRule;
 import fr.proline.core.orm.uds.UserAccount;
 import fr.proline.module.seq.DatabaseAccess;
 import fr.proline.repository.IDatabaseConnector;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -68,6 +70,53 @@ public class DatabaseDataManager  {
     
     public PeaklistSoftware[] getPeaklistSoftwaresArray() {
         return m_peaklistSoftwares;
+    }
+    
+    public void getParsingRules(HashSet<String> rawFileIdentifierSet, HashSet<String> firstCycleSet, HashSet<String> lastCycleSet, HashSet<String> firstScanSet, HashSet<String> lastScanSet, HashSet<String> firstTimeSet, HashSet<String> lastTimeSet) {
+
+        for (PeaklistSoftware peaklistSoftware : m_peaklistSoftwares) {
+            
+            SpectrumTitleParsingRule parsingRule = peaklistSoftware.getSpecTitleParsingRule();
+            
+            String rule;
+            
+            rule = parsingRule.getRawFileIdentifier();
+            if ((rule != null) && (!rule.isEmpty())) {
+                rawFileIdentifierSet.add(rule);
+            }
+            
+            rule = parsingRule.getFirstCycle();
+            if ((rule != null) && (!rule.isEmpty())) {
+                firstCycleSet.add(rule);
+            }
+            
+            rule = parsingRule.getLastCycle();
+            if ((rule != null) && (!rule.isEmpty())) {
+                lastCycleSet.add(rule);
+            }
+            
+            rule = parsingRule.getFirstScan();
+            if ((rule != null) && (!rule.isEmpty())) {
+                firstScanSet.add(rule);
+            }
+            
+            rule = parsingRule.getLastScan();
+            if ((rule != null) && (!rule.isEmpty())) {
+                lastScanSet.add(rule);
+            }
+            
+            rule = parsingRule.getFirstTime();
+            if ((rule != null) && (!rule.isEmpty())) {
+                firstTimeSet.add(rule);
+            }
+      
+            rule = parsingRule.getLastTime();
+            if ((rule != null) && (!rule.isEmpty())) {
+                lastTimeSet.add(rule);
+            }
+
+        }
+
     }
     
     public PeaklistSoftware[] getPeaklistSoftwaresWithNullArray() {

@@ -18,7 +18,8 @@ public class InfoDialog extends DefaultDialog {
     public enum InfoType {
         WARNING,
         QUESTION,
-        INFO
+        INFO,
+        NO_ICON
     }
     
     private String m_message = null;
@@ -56,6 +57,8 @@ public class InfoDialog extends DefaultDialog {
             case INFO:
                 icon = IconManager.getIcon(IconManager.IconType.BIG_INFO);
                 break;
+            case NO_ICON:
+                icon = null;
         }
 
 

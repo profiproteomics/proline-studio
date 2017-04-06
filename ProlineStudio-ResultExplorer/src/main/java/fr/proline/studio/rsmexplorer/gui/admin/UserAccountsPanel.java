@@ -17,7 +17,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.JButton;
@@ -29,7 +28,6 @@ import javax.swing.JTable;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
-import org.openide.util.Exceptions;
 
 /**
  *
@@ -124,13 +122,14 @@ public class UserAccountsPanel extends JPanel {
         propertiesButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                UserAccountDialog userAccountDialog = UserAccountDialog.getDialog(m_dialogOwner, UserAccountDialog.DialogMode.MODIFY_USER);
-                userAccountDialog.setLocationRelativeTo(m_dialogOwner);
+                
                 int selectedRow = m_userAccountsTable.getSelectedRow();
                 if (selectedRow == -1) {
                     return;
                 }
-                ;
+                UserAccountDialog userAccountDialog = UserAccountDialog.getDialog(m_dialogOwner, UserAccountDialog.DialogMode.MODIFY_USER);
+                userAccountDialog.setLocationRelativeTo(m_dialogOwner);
+
                 UserAccountsTableModel model = (UserAccountsTableModel) m_userAccountsTable.getModel();
                 UserAccount user = model.getUserAccount(m_userAccountsTable.convertRowIndexToModel(selectedRow));
                 userAccountDialog.setUserAccountInfo(user.getLogin(), DatabaseDataManager.isAdmin(user));
@@ -143,7 +142,7 @@ public class UserAccountsPanel extends JPanel {
 
                             @Override
                             public boolean mustBeCalledInAWT() {
-                                return false;
+                                return true;
                             }
 
                             @Override
@@ -165,7 +164,7 @@ public class UserAccountsPanel extends JPanel {
 
                             @Override
                             public boolean mustBeCalledInAWT() {
-                                return false;
+                                return true;
                             }
 
                             @Override
@@ -203,12 +202,37 @@ public class UserAccountsPanel extends JPanel {
             UserAccountsTableModel tableModel = new UserAccountsTableModel(accounts);
 
             setModel(tableModel);
+            
+            setRowSelectionInterval(0, 0);
         }
         
         public void updateAccounts() {
-            UserAccount[]  accounts = DatabaseDataManager.getDatabaseDataManager().getProjectUsersArray();
+            
+            int selectedRow = getSelectedRow();
+            
             UserAccountsTableModel tableModel = (UserAccountsTableModel) getModel();
+            
+            long previouslySelectedId = -1;
+            if (selectedRow != -1) {
+                selectedRow = convertRowIndexToModel(selectedRow);
+                UserAccount userAccount = tableModel.getUserAccount(selectedRow);
+                previouslySelectedId = userAccount.getId();
+            }
+            
+            
+            UserAccount[]  accounts = DatabaseDataManager.getDatabaseDataManager().getProjectUsersArray();
             tableModel.setAccounts(accounts);
+            
+            if (previouslySelectedId != -1) {
+                int row = tableModel.findUserAccount(previouslySelectedId);
+                if (row != -1) {
+                    row = convertRowIndexToView(row);
+                    setRowSelectionInterval(row, row);
+                }
+                
+            }
+            
+            
         }
         
         @Override
@@ -243,6 +267,17 @@ public class UserAccountsPanel extends JPanel {
                 m_userAccountArray.add(user);
             }
             
+        }
+        
+        public int findUserAccount(long id) {
+
+            for (int row=0;row<m_userAccountArray.size();row++) {
+                UserAccount userAccount = m_userAccountArray.get(row);
+                if (userAccount.getId() == id) {
+                    return row;
+                }
+            }
+            return -1;
         }
         
         public void setAccounts(UserAccount[]  userAccountArray) {

@@ -56,11 +56,14 @@ public final class AdminAction extends AbstractAction implements ActionListener,
     
     @Override
      public boolean isEnabled() {
-        UserAccount user = DatabaseDataManager.getDatabaseDataManager().getLoggedUser();
+         
+         return true; //JPM.TODO
+         
+        /*UserAccount user = DatabaseDataManager.getDatabaseDataManager().getLoggedUser();
         if (user == null) {
             return false;
         }
-        return DatabaseDataManager.isAdmin(user);
+        return DatabaseDataManager.isAdmin(user);*/
     }
      
 

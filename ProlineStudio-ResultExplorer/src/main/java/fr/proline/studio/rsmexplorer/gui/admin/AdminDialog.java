@@ -55,7 +55,7 @@ public class AdminDialog extends DefaultDialog  {
         
 
         JPanel userAccountsPanel = new UserAccountsPanel(this);
-        JPanel peaklistSoftwarePanel = new PeaklistSoftwarePanel();
+        JPanel peaklistSoftwarePanel = new PeaklistSoftwarePanel(this);
         JPanel instrumentConfigPanel = new InstrumentConfigPanel();
 
         tabbedPane.add("User Accounts", userAccountsPanel);

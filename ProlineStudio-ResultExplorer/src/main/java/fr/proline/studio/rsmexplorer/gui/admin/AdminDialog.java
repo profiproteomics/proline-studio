@@ -60,7 +60,7 @@ public class AdminDialog extends DefaultDialog  {
 
         tabbedPane.add("User Accounts", userAccountsPanel);
         tabbedPane.add("Peaklist Softwares", peaklistSoftwarePanel);
-        tabbedPane.add("Instrument Config", instrumentConfigPanel);
+        // JPM.TODO : not done for the moment tabbedPane.add("Instrument Config", instrumentConfigPanel);
         
 
         GridBagConstraints c = new GridBagConstraints();

@@ -126,7 +126,10 @@ public class XICRunNode extends AbstractNode {
                             m_treeModel.nodeChanged(xicRunNode);
 
                             fireXICRunNodeInitialized();
-
+                            if (tableModel != null) {
+                                // a table model display data in this Xic Run Node, so it must be updated
+                                tableModel.fireTableDataChanged();
+                            }
 
                         } else { //No RawFile associated to dataset 
                             
@@ -194,20 +197,34 @@ public class XICRunNode extends AbstractNode {
 
                                                 searchPotentialRawFiles(searchString, tableModel, Search.BASED_ON_PATH);
 
+                                            } else {
+                                                // No Info in peaklist found!
+                                              runInfoData.setMessage("<html><font color='#FF0000'>No Info (Partial peaklist)</font></html>");
+                                              runInfoData.setStatus(RunInfoData.Status.MISSING);
+                                              fireXICRunNodeInitialized();
                                             }
                                         } else {
                                             // No peaklist found!
                                             runInfoData.setMessage("<html><font color='#FF0000'>Unavailable Peaklist</font></html>");
                                             runInfoData.setStatus(RunInfoData.Status.MISSING);
+                                            fireXICRunNodeInitialized();
                                         }
 
                                         setIsChanging(false);
                                         m_treeModel.nodeChanged(xicRunNode);
-
+                                        if (tableModel != null) {
+                                            // a table model display data in this Xic Run Node, so it must be updated
+                                            tableModel.fireTableDataChanged();
+                                        }
                                     } else { //failed to get Peaklist ! 
                                         runInfoData.setStatus(RunInfoData.Status.MISSING);
                                         runInfoData.setMessage("<html><font color='#FF0000'>Unavailable Peaklist</font></html>");
+                                        fireXICRunNodeInitialized();
                                         m_treeModel.nodeChanged(xicRunNode);
+                                        if (tableModel != null) {
+                                            // a table model display data in this Xic Run Node, so it must be updated
+                                            tableModel.fireTableDataChanged();
+                                        }
                                     }
                                 }
                             };
@@ -220,13 +237,12 @@ public class XICRunNode extends AbstractNode {
                         // it failed !
                         //popup
                         m_treeModel.removeNodeFromParent((MutableTreeNode) xicRunNode.getParent());
+                        if (tableModel != null) {
+                            // a table model display data in this Xic Run Node, so it must be updated
+                            tableModel.fireTableDataChanged();
+                        }
                     }
-
-                    if (tableModel != null) {
-                        // a table model display data in this Xic Run Node, so it must be updated
-                        tableModel.fireTableDataChanged();
-
-                    }
+                    
 
                 }
             };

@@ -203,9 +203,9 @@ public class AggregateAction extends AbstractRSMAction {
             if (node.getType() == AbstractNode.NodeTypes.DATA_SET) {
                 
                 DDataset d = ((DataSetNode) node).getDataset();
-                if (d.getType() != Dataset.DatasetType.AGGREGATE) {
+                if ((d.getType() != Dataset.DatasetType.AGGREGATE) && (d.getType() != Dataset.DatasetType.IDENTIFICATION_FOLDER)) {
                     setEnabled(false);
-                return;
+                    return;
                 }
                 // not on a merged 
                if(((DataSetNode) node).hasResultSet() || ((DataSetNode) node).hasResultSummary()){

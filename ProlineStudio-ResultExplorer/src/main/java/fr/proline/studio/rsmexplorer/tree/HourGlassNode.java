@@ -27,7 +27,7 @@ public class HourGlassNode extends AbstractNode {
     }
     
     @Override
-    public ImageIcon getIcon() {
+    public ImageIcon getIcon(boolean expanded) {
         return getIcon(IconManager.IconType.HOUR_GLASS);
     }
 
@@ -46,6 +46,10 @@ public class HourGlassNode extends AbstractNode {
     public AbstractNode copyNode() {
         AbstractNode copy = new HourGlassNode(getData());
         return copy;
+    }
+    
+    public boolean canBeDeleted() {
+        return true;
     }
     
 }

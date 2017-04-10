@@ -36,7 +36,7 @@ public class DataSetNode extends AbstractNode {
     }
 
     @Override
-    public ImageIcon getIcon() {
+    public ImageIcon getIcon(boolean expanded) {
         
         DDataset dataset = ((DataSetData) getData()).getDataset();
         Dataset.DatasetType datasetType = ((DataSetData) getData()).getDatasetType();
@@ -89,6 +89,14 @@ public class DataSetNode extends AbstractNode {
                 return getIcon(IconManager.IconType.DATASET);
             case TRASH:
                 return getIcon(IconManager.IconType.TRASH);
+            case QUANTITATION_FOLDER:
+            case IDENTIFICATION_FOLDER:
+                if (expanded) {
+                    return getIcon(IconManager.IconType.FOLDER_EXPANDED);
+                } else {
+                    return getIcon(IconManager.IconType.FOLDER);
+                }
+                
             default:
                 return getIcon(IconManager.IconType.QUANT);// sould not happen
                 
@@ -131,6 +139,18 @@ public class DataSetNode extends AbstractNode {
         }
         Dataset.DatasetType datasetType = ((DataSetData) getData()).getDatasetType();
         if (datasetType == Dataset.DatasetType.TRASH) {
+            return true;
+        }
+        return false;
+    }
+    
+    public boolean isFolder() {
+        DDataset dataset = ((DataSetData) getData()).getDataset();
+        if (dataset == null) {
+            return false;
+        }
+        Dataset.DatasetType datasetType = ((DataSetData) getData()).getDatasetType();
+        if ((datasetType == Dataset.DatasetType.QUANTITATION_FOLDER) || (datasetType == Dataset.DatasetType.IDENTIFICATION_FOLDER)) {
             return true;
         }
         return false;

@@ -85,7 +85,7 @@ public class XICBiologicalSampleAnalysisNode extends DataSetNode {
     }
 
     @Override
-    public ImageIcon getIcon() {
+    public ImageIcon getIcon(boolean expanded) {
         return getIcon(IconManager.IconType.DATASET_RSM);
     }
 

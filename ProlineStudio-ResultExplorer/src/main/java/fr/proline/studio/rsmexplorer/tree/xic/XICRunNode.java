@@ -317,7 +317,7 @@ public class XICRunNode extends AbstractNode {
     }
 
     @Override
-    public ImageIcon getIcon() {
+    public ImageIcon getIcon(boolean expanded) {
         return getIcon(IconManager.IconType.FILE); //JPM.TODO : to be changed
     }
 

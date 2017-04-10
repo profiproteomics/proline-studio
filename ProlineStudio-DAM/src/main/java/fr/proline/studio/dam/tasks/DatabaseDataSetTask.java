@@ -80,6 +80,8 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
     private final static int CLEAR_DATASET_RSM_AND_RSET = 13;
     private final static int CLEAR_DATASET_RSM = 14;
     private final static int LOAD_QUANTITATION = 15;
+    private final static int CREATE_QUANTITATION_FOLDER = 16;
+    private final static int CREATE_IDENTIFICATION_FOLDER = 17;
 
     private static final Object WRITE_DATASET_LOCK = new Object();
 
@@ -199,6 +201,16 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
         m_suffixStop = suffixStop;
         m_datasetList = datasetList;
         m_action = CREATE_AGGREGATE_DATASET;
+    }
+    
+    public void initCreateDatasetFolder(Project project, DDataset parentDataset, String folderName, boolean identification, ArrayList<DDataset> datasetList) {
+        setTaskInfo(new TaskInfo("Create "+(identification ? "Identification" : "Quantitation")+" Folder " + folderName, true, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_MEDIUM));
+        m_project = project;
+        m_parentDataset = parentDataset;
+        m_aggregateName = folderName;
+        m_datasetList = datasetList;
+        m_action = identification ? CREATE_IDENTIFICATION_FOLDER : CREATE_QUANTITATION_FOLDER;
+
     }
 
     public void initCreateDatasetForIdentification(Project project, DDataset parentDataset, Aggregation.ChildNature datasetType, String aggregateName, Long resultSetId, Long resultSummaryId, ArrayList<DDataset> datasetList, TaskInfo taskInfo) {
@@ -327,6 +339,8 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
             case CLEAR_DATASET_RSM_AND_RSET:
             case CLEAR_DATASET_RSM:
             case LOAD_QUANTITATION:
+            case CREATE_QUANTITATION_FOLDER:
+            case CREATE_IDENTIFICATION_FOLDER:
                 return true; // done one time
 
         }
@@ -381,6 +395,10 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
                 return clearDataset();
             case LOAD_QUANTITATION:
                 return fetchQuantitation();
+            case CREATE_QUANTITATION_FOLDER:
+                return createDatasetFolder(false);
+            case CREATE_IDENTIFICATION_FOLDER:
+                return createDatasetFolder(true);
         }
 
         return false; // should never happen
@@ -404,9 +422,10 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
             // So we load aggregations afterwards
             List<DDataset> datasetListSelected = new ArrayList();
             if (m_identificationDataset) {
-                TypedQuery<DDataset> dataSetQuery = entityManagerUDS.createQuery("SELECT new fr.proline.core.orm.uds.dto.DDataset(d.id, d.project, d.name, d.type, d.childrenCount, d.resultSetId, d.resultSummaryId, d.number) FROM Dataset d WHERE (d.parentDataset IS null) AND d.type<>:quantitationType AND d.project.id=:projectId  ORDER BY d.number ASC", DDataset.class);
+                TypedQuery<DDataset> dataSetQuery = entityManagerUDS.createQuery("SELECT new fr.proline.core.orm.uds.dto.DDataset(d.id, d.project, d.name, d.type, d.childrenCount, d.resultSetId, d.resultSummaryId, d.number) FROM Dataset d WHERE (d.parentDataset IS null) AND d.type<>:quantitationType AND d.type<>:quantitationType2 AND d.project.id=:projectId  ORDER BY d.number ASC", DDataset.class);
                 dataSetQuery.setParameter("projectId", projectId);
                 dataSetQuery.setParameter("quantitationType", Dataset.DatasetType.QUANTITATION);
+                dataSetQuery.setParameter("quantitationType2", Dataset.DatasetType.QUANTITATION_FOLDER);
                 datasetListSelected = dataSetQuery.getResultList();
 
             } else {
@@ -418,13 +437,33 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
                 //quant dataset with resultSummaryId from masterQuantChannel
                 String query = "SELECT new fr.proline.core.orm.uds.dto.DDataset(d.id, d.project, d.name, d.type, d.childrenCount, d.resultSetId, mqc.quantResultSummaryId, d.number) "
                         + "FROM Dataset d, MasterQuantitationChannel mqc "
-                        + "WHERE (d.parentDataset IS null) AND (d.type=:quantitationType)  AND d.project.id=:projectId "
+                        + "WHERE (d.parentDataset IS null) AND d.type=:quantitationType  AND d.project.id=:projectId "
                         + "AND mqc.dataset.id = d.id "
                         + "ORDER BY d.number ASC";
                 TypedQuery<DDataset> dataSetQuery = entityManagerUDS.createQuery(query, DDataset.class);
                 dataSetQuery.setParameter("projectId", projectId);
                 dataSetQuery.setParameter("quantitationType", Dataset.DatasetType.QUANTITATION);
                 datasetListSelected.addAll(dataSetQuery.getResultList());
+                
+                dataSetQuery = entityManagerUDS.createQuery("SELECT new fr.proline.core.orm.uds.dto.DDataset(d.id, d.project, d.name, d.type, d.childrenCount, d.resultSetId, d.resultSummaryId, d.number) FROM Dataset d WHERE (d.parentDataset IS null) AND d.type=:quantitationType AND d.project.id=:projectId  ORDER BY d.number ASC", DDataset.class);
+                dataSetQuery.setParameter("projectId", projectId);
+                dataSetQuery.setParameter("quantitationType", Dataset.DatasetType.QUANTITATION_FOLDER);
+                datasetListSelected.addAll(dataSetQuery.getResultList());
+                
+                // sort according to dataset.number
+                Collections.sort(datasetListSelected, new Comparator<DDataset>() {
+                    @Override
+                    public int compare(DDataset d2, DDataset d1) {
+
+                        if (d2.getType() == Dataset.DatasetType.TRASH) {
+                            return Integer.MAX_VALUE;
+                        } else if (d1.getType() == Dataset.DatasetType.TRASH) {
+                            return Integer.MIN_VALUE;
+                        }
+
+                        return d2.getNumber()-d1.getNumber();
+                    }
+                });
             }
 
             DDataset trash = null;
@@ -1154,7 +1193,93 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
 
         return true;
     }
+    
+    
+            
+    private boolean createDatasetFolder(boolean identification) {
 
+        synchronized (WRITE_DATASET_LOCK) {
+
+            EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().createEntityManager();
+            try {
+                entityManagerUDS.getTransaction().begin();
+
+                createFolderImpl(entityManagerUDS, m_aggregateName, identification);
+
+                entityManagerUDS.getTransaction().commit();
+
+            } catch (Exception e) {
+                m_logger.error(getClass().getSimpleName() + " failed", e);
+                m_taskError = new TaskError(e);
+                try {
+                    entityManagerUDS.getTransaction().rollback();
+                } catch (Exception rollbackException) {
+                    m_logger.error(getClass().getSimpleName() + " failed : potential network problem", rollbackException);
+                }
+                return false;
+            } finally {
+                entityManagerUDS.close();
+            }
+
+        }
+
+        return true;
+    }
+
+    private void createFolderImpl(EntityManager entityManagerUDS, String folderName, boolean identification) {
+
+
+        Project mergedProject = entityManagerUDS.find(Project.class, m_project.getId());
+
+        Dataset mergedParentDataset = (m_parentDataset == null) ? null : entityManagerUDS.find(Dataset.class, m_parentDataset.getId());
+
+        Dataset d = new Dataset(mergedProject);
+        
+        if (identification) {
+            d.setType(Dataset.DatasetType.IDENTIFICATION_FOLDER);
+        } else {
+            d.setType(Dataset.DatasetType.QUANTITATION_FOLDER);
+        }
+        
+        Aggregation aggregation = DatabaseDataManager.getDatabaseDataManager().getAggregation(Aggregation.ChildNature.OTHER);
+        Aggregation mergedAggregation = entityManagerUDS.merge(aggregation);
+         d.setAggregation(mergedAggregation);
+
+        d.setName(folderName);
+        d.setResultSetId(m_resultSetId);
+        d.setResultSummaryId(m_resultSummaryId);
+        d.setChildrenCount(0); // this aggregate has no child for the moment
+
+        // number of children of the parent
+        if (mergedParentDataset != null) {
+            mergedParentDataset.addChild(d);
+            /*try {
+             m_parentDataset[0].addChild(d);
+             } catch (org.hibernate.LazyInitializationException e) {
+             // JPM.WART
+             // if this exception happens : the children count has not been updated
+             // I update it by hand
+             m_parentDataset[0].setChildrenCount(mergedParentDataset.getChildrenCount());
+                
+             }*/
+        } else {
+            int childrenCount = m_project.getTransientData().getChildrenNumber();
+            d.setNumber(childrenCount);
+            m_project.getTransientData().setChildrenNumber(childrenCount + 1);
+        }
+
+        entityManagerUDS.persist(d);
+        if (mergedParentDataset != null) {
+            entityManagerUDS.merge(mergedParentDataset);
+        }
+
+        DDataset ddataset = new DDataset(d.getId(), d.getProject(), d.getName(), d.getType(), d.getChildrenCount(), d.getResultSetId(), d.getResultSummaryId(), d.getNumber());
+        ddataset.setAggregation(d.getAggregation());
+
+        m_datasetList.add(ddataset);
+    }
+    
+    
     private void createDataSetImpl(EntityManager entityManagerUDS, String datasetName, boolean identificationDataset) {
 
         //JPM.TODO : reuse objects for multiple queries

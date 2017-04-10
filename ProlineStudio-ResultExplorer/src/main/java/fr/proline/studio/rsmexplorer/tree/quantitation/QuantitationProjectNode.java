@@ -26,7 +26,7 @@ public class QuantitationProjectNode extends AbstractNode {
     }
     
     @Override
-    public ImageIcon getIcon() {
+    public ImageIcon getIcon(boolean expanded) {
         return getIcon(IconManager.IconType.QUANT);
     }
 

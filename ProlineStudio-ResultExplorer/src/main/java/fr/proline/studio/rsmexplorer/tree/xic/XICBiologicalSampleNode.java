@@ -17,7 +17,7 @@ public class XICBiologicalSampleNode extends AbstractNode {
     }
     
     @Override
-    public ImageIcon getIcon() {
+    public ImageIcon getIcon(boolean expanded) {
         return getIcon(IconManager.IconType.BIOLOGICAL_SAMPLE);
     }
 

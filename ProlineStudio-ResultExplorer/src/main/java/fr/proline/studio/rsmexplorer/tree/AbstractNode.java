@@ -61,7 +61,7 @@ public abstract class AbstractNode extends DefaultMutableTreeNode implements Clo
         return (AbstractData) getUserObject();
     }
 
-    public abstract ImageIcon getIcon();
+    public abstract ImageIcon getIcon(boolean expanded);
     
     public ImageIcon getIcon(IconManager.IconType iconType) {
         if (m_isChanging) {

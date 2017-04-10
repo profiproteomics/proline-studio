@@ -32,6 +32,7 @@ import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dpm.task.util.JMSConnectionManager;
 import fr.proline.studio.gui.DatasetAction;
+import fr.proline.studio.rsmexplorer.actions.identification.AddIdentificationFolderAction;
 import fr.proline.studio.rsmexplorer.actions.identification.AggregateAction;
 import fr.proline.studio.rsmexplorer.actions.identification.ClearDatasetAction;
 import fr.proline.studio.rsmexplorer.actions.identification.CreateXICAction;
@@ -45,6 +46,7 @@ import fr.proline.studio.rsmexplorer.actions.identification.ImportSearchResultAs
 import fr.proline.studio.rsmexplorer.actions.identification.ImportSearchResultAsDatasetJMSAction;
 import fr.proline.studio.rsmexplorer.actions.identification.RenameRsetAction;
 import fr.proline.studio.rsmexplorer.actions.identification.UpdatePeaklistSoftwareAction;
+import fr.proline.studio.rsmexplorer.actions.xic.AddQuantitationFolderAction;
 import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import fr.proline.studio.rsmexplorer.tree.ChildFactory;
@@ -743,6 +745,10 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
                 AggregateAction aggregateAction = new AggregateAction();
                 m_mainActions.add(aggregateAction);
 
+                AddIdentificationFolderAction addFolderAction = new AddIdentificationFolderAction();
+                m_mainActions.add(addFolderAction);
+                
+                
                 /*
                  RenameAction renameAction = new RenameAction(AbstractTree.TreeType.TREE_IDENTIFICATION);
                  m_mainActions.add(renameAction);
@@ -860,8 +866,6 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
     }
     private JPopupMenu m_mainPopup;
     private ArrayList<AbstractRSMAction> m_mainActions;
-    //private JPopupMenu m_rootPopup;
-    //private ArrayList<AbstractRSMAction> m_rootActions;
     private JPopupMenu m_trashPopup;
     private ArrayList<AbstractRSMAction> m_trashActions;
     private JPopupMenu m_allImportedPopup;
@@ -930,7 +934,7 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
                     l.setForeground(Color.BLACK);
                 }
             }
-            ImageIcon icon = ((AbstractNode) value).getIcon();
+            ImageIcon icon = ((AbstractNode) value).getIcon(expanded);
             if (icon != null) {
                 setIcon(icon);
             }

@@ -142,7 +142,7 @@ public class PropertiesAction extends AbstractRSMAction {
             }
 
             // one can be the trash
-            if (((DataSetNode) node).isTrash()) {
+            if (((DataSetNode) node).isTrash() || ((DataSetNode) node).isFolder()) {
                 setEnabled(false);
                 return;
             }

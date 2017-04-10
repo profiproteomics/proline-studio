@@ -23,6 +23,7 @@ import fr.proline.studio.rsmexplorer.actions.identification.ExportDatasetJMSActi
 import fr.proline.studio.rsmexplorer.actions.identification.GenerateSpectrumMatchesAction;
 import fr.proline.studio.rsmexplorer.actions.identification.GenerateSpectrumMatchesJMSAction;
 import fr.proline.studio.rsmexplorer.actions.identification.RetrieveBioSeqJMSAction;
+import fr.proline.studio.rsmexplorer.actions.xic.AddQuantitationFolderAction;
 import fr.proline.studio.rsmexplorer.actions.xic.ComputeQuantitationProfileAction;
 import fr.proline.studio.rsmexplorer.actions.xic.DisplayExperimentalDesignAction;
 import fr.proline.studio.rsmexplorer.actions.xic.DisplayXICAction;
@@ -206,7 +207,10 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
                     boolean isJSMDefined = JMSConnectionManager.getJMSConnectionManager().isJMSDefined();
                     CreateXICAction createXICAction = new CreateXICAction(false, isJSMDefined);
 
+                    AddQuantitationFolderAction addFolderAction = new AddQuantitationFolderAction();
+                    
                     m_rootActions.add(createXICAction);
+                    m_rootActions.add(addFolderAction);
 
                     // add actions to popup
                     m_rootPopup = new JPopupMenu();
@@ -293,6 +297,9 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
 
                     m_mainActions.add(null);  // separator
 
+                    AddQuantitationFolderAction addFolderAction = new AddQuantitationFolderAction();
+                    m_mainActions.add(addFolderAction);
+                    
                     RenameAction renameQuantitationAction = new RenameAction(AbstractTree.TreeType.TREE_QUANTITATION);
                     m_mainActions.add(renameQuantitationAction);
 

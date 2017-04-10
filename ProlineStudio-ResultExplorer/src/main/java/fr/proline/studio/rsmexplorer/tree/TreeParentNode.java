@@ -21,7 +21,7 @@ public class TreeParentNode extends AbstractNode {
     }
     
     @Override
-    public ImageIcon getIcon() {
+    public ImageIcon getIcon(boolean expanded) {
         return getIcon(IconManager.IconType.USER);
     }
     

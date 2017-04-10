@@ -19,7 +19,7 @@ public class IdAllImportedNode extends AbstractNode {
     }
     
     @Override
-    public ImageIcon getIcon() {
+    public ImageIcon getIcon(boolean expanded) {
         return getIcon(IconManager.IconType.ALL_IMPORTED);
     }
 

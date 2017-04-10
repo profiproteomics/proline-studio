@@ -4,8 +4,6 @@ import fr.proline.core.orm.uds.Aggregation;
 import fr.proline.studio.gui.DefaultDialog;
 import java.awt.Dialog;
 import java.awt.Window;
-import java.io.File;
-import java.io.IOException;
 
 /**
  * Dialog to add an aggregate

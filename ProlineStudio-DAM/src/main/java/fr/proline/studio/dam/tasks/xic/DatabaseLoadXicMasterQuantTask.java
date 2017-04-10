@@ -1425,7 +1425,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                     + "FROM PeptideSetProteinMatchMap pspmm, PeptideSet ps " +
                 "WHERE  pspmm.resultSummary.id=:rsmId  AND ps.id = pspmm.peptideSet.id ";
         Query queryPepNumberQ = entityManagerMSI.createQuery(queryPepNumber);
-        String queryStatus = "SELECT ps.id, pspmi.proteinMatch.id, pspmi.isInSubset, ps.representativeProteinMatchId "
+        String queryStatus = "SELECT ps.id, pspmi.proteinMatch.id, pspmi.isInSubset, ps.representativeProteinMatchId, ps.isValidated "
                 + "FROM ProteinSetProteinMatchItem pspmi, ProteinSet ps " +
                 " WHERE ps.id = pspmi.proteinSet.id " +
                 " AND pspmi.resultSummary.id=:rsmId ";
@@ -1448,6 +1448,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                     Long proteinMatchId = (Long)res[1];
                     Boolean isInSubset = (Boolean)res[2];
                     Long typProteinMatchId = (Long)res[3];
+                    Boolean isProtSetValidated = (Boolean)res[4];
                     String  protMatchStatus;
                     if (isInSubset) {
                         protMatchStatus = "Subset";
@@ -1455,6 +1456,9 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                         protMatchStatus = "Typical";
                     } else{
                         protMatchStatus = "Sameset";
+                    }
+                    if(!isProtSetValidated){
+                        protMatchStatus = "Invalid "+protMatchStatus;
                     }
                     statusByProtMatchId.put( proteinMatchId , protMatchStatus);
                 }

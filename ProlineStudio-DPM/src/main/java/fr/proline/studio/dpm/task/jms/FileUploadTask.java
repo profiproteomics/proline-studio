@@ -38,10 +38,10 @@ import org.openide.util.Exceptions;
  */
 public class FileUploadTask extends AbstractJMSTask {
 
-    private final static int UPLOAD_GENERIC_FILE = 0;
+    private final static int UPLOAD_MAXQUANT_FILE = 0;
     private final static int UPLOAD_MZDB_FILE = 1;
 
-    private int m_action = UPLOAD_GENERIC_FILE;
+    private int m_action = UPLOAD_MAXQUANT_FILE;
 
     private String m_mountLabel;
     private String m_filePath;
@@ -57,7 +57,7 @@ public class FileUploadTask extends AbstractJMSTask {
     }
 
     public void initUploadGenericFile() {
-        m_action = UPLOAD_GENERIC_FILE;
+        m_action = UPLOAD_MAXQUANT_FILE;
     }
 
     public void initUploadMZDB(String mountLabel, boolean createParentDirectory) {
@@ -82,7 +82,7 @@ public class FileUploadTask extends AbstractJMSTask {
 
             File uploadFile = null;
 
-            if (m_action == UPLOAD_GENERIC_FILE) {
+            if (m_action == UPLOAD_MAXQUANT_FILE) {
                 m_loggerProline.debug("Prepare MaxQuant Import First Step : Upload Files from " + m_filePath);
                 //Create ZIP file to upload
                 List<String> files2Zip = getZipFilesList(m_filePath);
@@ -175,7 +175,7 @@ public class FileUploadTask extends AbstractJMSTask {
     private static List<String> getZipFilesList(String rootFolder) {
 
         File rootFolderFile = new File(rootFolder);
-        String subFolderString = "combined" + File.separator + "txt";
+        String subFolderString = "combined/txt";
         File subTxtFolder = new File(rootFolderFile, subFolderString);
 
         if (!subTxtFolder.exists() && !subTxtFolder.isDirectory()) {
@@ -194,7 +194,7 @@ public class FileUploadTask extends AbstractJMSTask {
         for (String name : dataFilesNames) {
             if (name.equals("msms.txt") || name.equals("msmsScans.txt") || name.equals("parameters.txt") || name.equals("proteinGroups.txt")
                     || name.equals("summary.txt")) {
-                acceptedFiles.add(subFolderString + File.separator + name);
+                acceptedFiles.add(subFolderString + "/" + name);
             }
         }
         return acceptedFiles;
@@ -214,16 +214,17 @@ public class FileUploadTask extends AbstractJMSTask {
             FileInputStream in = null;
             for (String file : files2Zip) {
                 m_loggerProline.debug("-- Add file: " + file);
-                ZipEntry ze = new ZipEntry(zipSource + File.separator + file);
+                ZipEntry ze = new ZipEntry(zipSource +"/" + file);
                 zos.putNextEntry(ze);
                 try {
-                    in = new FileInputStream(sourceDir + File.separator + file);
+                    in = new FileInputStream(sourceDir + "/" + file);
                     int len;
                     while ((len = in.read(buffer)) > 0) {
                         zos.write(buffer, 0, len);
                     }
                 } finally {
-                    in.close();
+                    if(in !=null)
+                        in.close();
                 }
             }
 

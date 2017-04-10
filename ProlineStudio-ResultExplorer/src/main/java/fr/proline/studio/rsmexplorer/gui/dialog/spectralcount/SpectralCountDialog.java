@@ -7,8 +7,6 @@ import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import fr.proline.studio.utils.IconManager;
 import java.awt.Dialog;
 import java.awt.Window;
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import javax.swing.tree.TreePath;
 
@@ -79,26 +77,7 @@ public class SpectralCountDialog extends DefaultDialog {
 
             }
 
-//            String description = spectralCountNamePanel.getSpectralCountDescription();
-            /**
-             * if (description.length() == 0) {
-             *
-             * setStatus(true, "You must fill the Spectral Count Description");
-             * highlight(spectralCountNamePanel.getDescriptionTextArea());
-             * return false;
-             *
-             * }
-             */ // no check on description
-//            JScrollPane scrollPane = new JScrollPane();
-            /* help:
-             Select the Identification Summaries for which Spectral Count will be calculated.
-             The common list of protein sets and peptide specificity will be calculated at parent 
-             level, from which spectral count has been run. 
-             */
             TreeSelectionPanel treeSelectionPanel = TreeSelectionPanel.getTreeSelectionPanel(m_tree, "<html><b>Step 2:</b> Select Identification Summaries.</html>", "Select the Identification Summaries for which Spectral Count will be calculated. The common list of protein sets and peptide specificity will be calculated at parent level, from which spectral count has been run.");
-//            scrollPane.setViewportView(treeSelectionPanel);
-
-//            replaceInternaleComponent(scrollPane);
             replaceInternaleComponent(treeSelectionPanel);
 
             revalidate();
@@ -127,16 +106,10 @@ public class SpectralCountDialog extends DefaultDialog {
             //Reinit tree selection for Ref RSM weight computation    
             m_tree.revertSelectionSetDisabled(true);
             m_tree.setSelection(new ArrayList<ResultSummary>());
-//            JScrollPane scrollPane = new JScrollPane();
-            /* help:
-             Select Datasets (and associated identification summaries) in the hierarchy where shared PSM weight will be defined. 
-             The calculated weight will then be applied to Identification Summaries previously selected, the nearest parent will be used as reference for PSM weight.
-             */
+
 
             TreeSelectionPanel treeSelectionPanel = TreeSelectionPanel.getTreeSelectionPanel(m_tree, "<html><b>Step 3:</b> Select Weight Computation Identification Summaries.</html>", "Select Datasets (and associated identification summaries) in the hierarchy where shared PSM weight will be defined. The calculated weight will then be applied to Identification Summaries previously selected, the nearest parent will be used as reference for PSM weight.");
-//            scrollPane.setViewportView(treeSelectionPanel);
 
-//            replaceInternaleComponent(scrollPane);
             replaceInternaleComponent(treeSelectionPanel);
 
             revalidate();

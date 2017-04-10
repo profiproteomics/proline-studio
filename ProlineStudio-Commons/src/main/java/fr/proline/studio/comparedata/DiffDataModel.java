@@ -57,7 +57,10 @@ public class DiffDataModel extends AbstractJoinDataModel {
             Class c1 = m_data1.getDataColumnClass(i);
             Class c2 = m_data2.getDataColumnClass(col2);
             if (!c1.equals(c2)) {
-                continue;
+                if (! ((c1.equals(Long.class) && c2.equals(Integer.class)) || (c1.equals(Integer.class) && c2.equals(Long.class)) || 
+                        (c1.equals(Float.class) && c2.equals(Double.class)) || (c1.equals(Double.class) && c2.equals(Float.class))) ) {
+                    continue;
+                }
             }
             
             m_allColumns1.add(i);
@@ -242,17 +245,37 @@ public class DiffDataModel extends AbstractJoinDataModel {
         }
         
         if (value1 instanceof Double) {
-            return new Double(((Double) value1)-((Double) value2));
+            if (value2 instanceof Double) {
+               return new Double(((Double) value1)-((Double) value2)); 
+            } else if  (value2 instanceof Float) {
+               return new Double(((Double) value1)-((Float) value2)); 
+            }
         }
+        
         if (value1 instanceof Float) {
-            return new Float(((Float) value1)-((Float) value2));
+            if (value2 instanceof Double) {
+               return new Float(((Float) value1)-((Double) value2)); 
+            } else if  (value2 instanceof Float) {
+               return new Float(((Float) value1)-((Float) value2)); 
+            }
         }
+        
         if (value1 instanceof Long) {
-            return new Long(((Long) value1)-((Long) value2));
+            if (value2 instanceof Long) {
+                return new Long(((Long) value1) - ((Long) value2));
+            } else if (value2 instanceof Integer) {
+                return new Long(((Long) value1) - ((Integer) value2));
+            }
         }
+
         if (value1 instanceof Integer) {
-            return new Integer(((Integer) value1)-((Integer) value2));
+            if (value2 instanceof Long) {
+                return new Integer( (int) (((Integer) value1) - ((Long) value2)) );
+            } else if (value2 instanceof Integer) {
+                return new Integer(((Integer) value1) - ((Integer) value2));
+            }
         }
+
 
         String value1String = value1.toString();
         String value2String = value2.toString();

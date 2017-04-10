@@ -117,6 +117,7 @@ public class SpectralCountTask extends AbstractJMSTask {
             Map<String, Object> quantChannelParams = new HashMap<>();
             quantChannelParams.put("number", Integer.valueOf(number));
             quantChannelParams.put("sample_number", Integer.valueOf(number));
+            quantChannelParams.put("name", name);
             quantChannelParams.put("ident_result_summary_id", d.getResultSummaryId());
 
             quantChanneList.add(quantChannelParams);

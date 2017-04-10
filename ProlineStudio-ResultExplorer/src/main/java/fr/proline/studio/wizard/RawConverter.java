@@ -9,6 +9,10 @@ import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.SubTask;
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.DirectoryNotEmptyException;
+import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import javax.swing.SwingUtilities;
 
 /**
@@ -23,7 +27,7 @@ public class RawConverter implements Runnable, WorkerInterface {
     private final StringBuilder m_logs;
     private ConversionListener m_listener;
     private final ConversionSettings m_settings;
-    
+
     public RawConverter(File file, ConversionSettings settings) {
         m_file = file;
         m_settings = settings;
@@ -53,17 +57,30 @@ public class RawConverter implements Runnable, WorkerInterface {
                         if (success) {
                             if (m_state == WorkerInterface.ACTIVE_STATE) {
                                 m_state = WorkerInterface.FINISHED_STATE;
-                                if(m_listener!=null){
-                                    File f = new File(m_settings.getOutputPath()+File.separator+m_file.getName().substring(0, m_file.getName().lastIndexOf(".raw")) + ".mzdb");
-                                    if(f.exists()){
-                                        m_listener.ConversionPerformed(f);
+                                if (m_listener != null) {
+                                    File f = new File(m_settings.getOutputPath() + File.separator + m_file.getName().substring(0, m_file.getName().lastIndexOf(".raw")) + ".mzdb");
+                                    if (f.exists()) {
+                                        m_listener.ConversionPerformed(f, m_settings);
                                     }
                                 }
+
+                                if (m_settings.getDeleteRaw()) {
+                                    try {
+                                        Files.delete(m_file.toPath());
+                                    } catch (NoSuchFileException ex) {
+                                        ;
+                                    } catch (DirectoryNotEmptyException ex) {
+                                        ;
+                                    } catch (IOException ex) {
+                                        ;
+                                    }
+                                }
+
                             }
                         } else {
                             terminate();
                         }
-                        
+
                     }
                 });
 
@@ -76,8 +93,8 @@ public class RawConverter implements Runnable, WorkerInterface {
         m_logs.append("Converting for file: " + this.getFile().getAbsolutePath() + " has come to its end.\n\n");
         m_run = false;
     }
-    
-    public void addConversionListener(ConversionListener listener){
+
+    public void addConversionListener(ConversionListener listener) {
         m_listener = listener;
     }
 

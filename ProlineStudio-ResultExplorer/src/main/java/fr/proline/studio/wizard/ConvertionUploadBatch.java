@@ -6,7 +6,9 @@
 package fr.proline.studio.wizard;
 
 import java.io.File;
-import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -18,45 +20,45 @@ import java.util.concurrent.TimeUnit;
 public class ConvertionUploadBatch implements Runnable, ConversionListener {
 
     private ThreadPoolExecutor m_conversionExecutor, m_uploadExecutor;
-    private ArrayList<File> m_rawFiles, m_mzdbFiles;
-    private ConversionSettings m_conversionSettings;
+    private HashMap<File, ConversionSettings> m_conversions;
 
-    public ConvertionUploadBatch(ArrayList<File> rawFiles, ConversionSettings conversionSettings) {
-        m_rawFiles = rawFiles;
-        m_conversionSettings = conversionSettings;
-        
+    public ConvertionUploadBatch(HashMap<File, ConversionSettings> conversions) {
+        m_conversions = conversions;
+
         m_conversionExecutor = (ThreadPoolExecutor) Executors.newFixedThreadPool(1);
+        m_uploadExecutor = (ThreadPoolExecutor) Executors.newFixedThreadPool(5);
+        
+    }
 
-        if (m_conversionSettings.getUploadAfterConversion()) {
-            m_uploadExecutor = (ThreadPoolExecutor) Executors.newFixedThreadPool(5);
-            m_mzdbFiles = new ArrayList<File>();          
+    private void upload(File f, MzdbUploadSettings uploadSettings) {
+        if (f.getAbsolutePath().toLowerCase().endsWith(".mzdb")) {
+            if (uploadSettings.getMountLabel() == null) {
+                return;
+            }
+            MzdbUploader uploader = new MzdbUploader(f, uploadSettings);
+            m_uploadExecutor.execute(uploader);
         }
     }
 
-    private void addFile(File f) {
+    private void convert(File f, ConversionSettings conversionSettings) {
         if (f.getAbsolutePath().toLowerCase().endsWith(".raw")) {
-            RawConverter converter = new RawConverter(f, m_conversionSettings);
-            if (m_conversionSettings.getUploadAfterConversion()) {
+            RawConverter converter = new RawConverter(f, conversionSettings);
+            if (conversionSettings.getUploadAfterConversion()) {
                 converter.addConversionListener(this);
             }
             m_conversionExecutor.execute(converter);
-        } else if (f.getAbsolutePath().toLowerCase().endsWith(".mzdb")) {
-            if(m_conversionSettings.getUploadSettings().getMountLabel()==null){
-                return;
-            }
-            
-            
-            
-            MzdbUploader uploader = new MzdbUploader(f, m_conversionSettings.getUploadSettings());
-            m_uploadExecutor.execute(uploader);
         }
     }
 
     @Override
     public void run() {
-        for (int i = 0; i < m_rawFiles.size(); i++) {
-            addFile(m_rawFiles.get(i));
+
+        Iterator it = m_conversions.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry pair = (Map.Entry) it.next();
+            convert((File) pair.getKey(), (ConversionSettings) pair.getValue());
         }
+
         m_conversionExecutor.shutdown();
         try {
             m_conversionExecutor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
@@ -66,8 +68,10 @@ public class ConvertionUploadBatch implements Runnable, ConversionListener {
     }
 
     @Override
-    public void ConversionPerformed(File f) {
-        addFile(f);
+    public void ConversionPerformed(File f, ConversionSettings conversionSettings) {
+        if (conversionSettings.getUploadSettings() != null) {
+            upload(f, conversionSettings.getUploadSettings());
+        }
     }
 
 }

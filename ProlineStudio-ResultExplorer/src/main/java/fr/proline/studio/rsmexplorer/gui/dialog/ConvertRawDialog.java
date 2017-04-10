@@ -31,6 +31,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.prefs.Preferences;
@@ -337,16 +338,16 @@ public class ConvertRawDialog extends DefaultDialog implements FileDialogInterfa
         }
         m_parameterList.saveParameters(NbPreferences.root());
 
-        ArrayList<File> rawFiles = new ArrayList<File>();
-        for (int i = 0; i < m_fileList.getModel().getSize(); i++) {
-            rawFiles.add((File) m_fileList.getModel().getElementAt(i));
-        }
-
         ConversionSettings conversionSettings = new ConversionSettings(m_converterFilePath.getStringValue(), m_outputFilePath.getStringValue(), (boolean) m_deleteRaw.getObjectValue(), (boolean) m_uploadMzdb.getObjectValue());
         MzdbUploadSettings uploadSettings = new MzdbUploadSettings((boolean) m_deleteMzdb.getObjectValue(), (boolean) m_createParentDirectoryParameter.getObjectValue(), m_uploadLabelParameter.getStringValue());
         conversionSettings.setUploadSettings(uploadSettings);
 
-        ConvertionUploadBatch conversionBatch = new ConvertionUploadBatch(rawFiles, conversionSettings);
+        HashMap<File, ConversionSettings> conversions = new HashMap<File, ConversionSettings>();
+        for (int i = 0; i < m_fileList.getModel().getSize(); i++) {
+            conversions.put((File) m_fileList.getModel().getElementAt(i), conversionSettings);
+        }
+
+        ConvertionUploadBatch conversionBatch = new ConvertionUploadBatch(conversions);
 
         Preferences preferences = NbPreferences.root();
         preferences.put("mzDB_Settings.LAST_RAW_PATH", m_lastParentDirectory);

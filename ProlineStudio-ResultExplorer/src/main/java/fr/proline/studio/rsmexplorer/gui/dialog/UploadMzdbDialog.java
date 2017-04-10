@@ -28,6 +28,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.prefs.Preferences;
@@ -269,17 +270,17 @@ public class UploadMzdbDialog extends DefaultDialog implements FileDialogInterfa
         }
         m_parameterList.saveParameters(NbPreferences.root());
 
-        ArrayList<File> mzdbFiles = new ArrayList<File>();
-        for (int i = 0; i < m_fileList.getModel().getSize(); i++) {
-            mzdbFiles.add((File) m_fileList.getModel().getElementAt(i));
-        }
-
         Preferences preferences = NbPreferences.root();
         preferences.put("mzDB_Settings.LAST_MZDB_PATH", m_lastParentDirectory);
 
         MzdbUploadSettings uploadSettings = new MzdbUploadSettings((boolean) m_deleteMzdbParameter.getObjectValue(), (boolean) m_createParentDirectoryParameter.getObjectValue(), m_uploadLabelParameter.getStringValue());
 
-        MzdbUploadBatch uploadBatch = new MzdbUploadBatch(mzdbFiles, uploadSettings);
+        HashMap<File, MzdbUploadSettings> mzdbFiles = new HashMap<File, MzdbUploadSettings>();
+        for (int i = 0; i < m_fileList.getModel().getSize(); i++) {
+            mzdbFiles.put((File) m_fileList.getModel().getElementAt(i), uploadSettings);
+        }
+        
+        MzdbUploadBatch uploadBatch = new MzdbUploadBatch(mzdbFiles);
         Thread thread = new Thread(uploadBatch);
         thread.start();
 

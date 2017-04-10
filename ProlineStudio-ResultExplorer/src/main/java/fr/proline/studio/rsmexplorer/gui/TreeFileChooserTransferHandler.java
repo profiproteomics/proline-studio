@@ -181,33 +181,16 @@ public class TreeFileChooserTransferHandler extends TransferHandler {
                 FilesTransferable transferable = (FilesTransferable) support.getTransferable().getTransferData(FilesTransferable.Files_FLAVOR);
                 ArrayList<File> transferredFiles = transferable.getFiles();
 
-                ArrayList<File> samples = new ArrayList<>();
-
-                for (int i = 0; i < transferredFiles.size(); i++) {
-
-                    if (transferredFiles.get(i).isFile()) {
-                        samples.add(transferredFiles.get(i));
-                    } else {
-                        File[] listOfFiles = transferredFiles.get(i).listFiles();
-                        for (File file : listOfFiles) {
-                            if (file.isFile()) {
-                                samples.add(file);
-                            }
-                        }
-
-                    }
-                }
-
                 JTree.DropLocation treeDropLocation = (JTree.DropLocation) support.getDropLocation();
                 TreePath treePath = treeDropLocation.getPath();
 
                 String textTreePath = treePath.toString();
-                
+
                 textTreePath = textTreePath.replaceAll("\\[", "").replaceAll("\\]", "");
 
                 String[] pathNodes = textTreePath.split(",");
-                
-                for(int i=0; i<pathNodes.length; i++){
+
+                for (int i = 0; i < pathNodes.length; i++) {
                     pathNodes[i] = pathNodes[i].trim();
                 }
 
@@ -220,8 +203,7 @@ public class TreeFileChooserTransferHandler extends TransferHandler {
                     for (int j = 0; j < labels.size(); j++) {
                         String node = pathNodes[i];
                         String label = labels.get(j);
-                        
-                        
+
                         if (node.compareToIgnoreCase(label) == 0) {
                             parentLabel = pathNodes[i];
                             parentIndex = i;
@@ -231,29 +213,46 @@ public class TreeFileChooserTransferHandler extends TransferHandler {
 
                 }
 
-                if (parentLabel == null || parentIndex==-1) {
+                if (parentLabel == null || parentIndex == -1) {
                     return false;
                 }
-                
+
                 StringBuilder destinationBuilder = new StringBuilder();
-                
-                for(int i=parentIndex+1; i<pathNodes.length; i++){
+
+                for (int i = parentIndex + 1; i < pathNodes.length; i++) {
                     destinationBuilder.append(File.separator).append(pathNodes[i]);
                 }
                 destinationBuilder.append(File.separator);
-                
+
                 String destination = destinationBuilder.toString();
 
-                MzdbUploadSettings uploadSettings = new MzdbUploadSettings(false, (boolean) false, parentLabel, destination);
+                
+                //Here we must do a small modification so that mzdb is deleted if it is a result of a conversion drag!
+                MzdbUploadSettings uploadSettings = new MzdbUploadSettings(!transferredFiles.get(0).getAbsolutePath().endsWith(".mzdb"), (boolean) false, parentLabel, destination);
 
-                if (samples.get(0).getAbsolutePath().endsWith(".mzdb")) {
+                if (transferredFiles.get(0).getAbsolutePath().endsWith(".mzdb")) {
+
+                    //Here prepare mzdb samples HashMap!
+                    HashMap<File, MzdbUploadSettings> uploadSamples = new HashMap<File, MzdbUploadSettings>();
+                    for (int i = 0; i < transferredFiles.size(); i++) {
+                        if (transferredFiles.get(i).isFile()) {
+                            uploadSamples.put(transferredFiles.get(i), uploadSettings);
+                        } else {
+                            File[] listOfFiles = transferredFiles.get(i).listFiles();
+                            for (File file : listOfFiles) {
+                                if (file.isFile()) {
+                                    uploadSamples.put(file, uploadSettings);
+                                }
+                            }
+                        }
+                    }
 
                     //Uploading Task
-                    MzdbUploadBatch uploadBatch = new MzdbUploadBatch(samples, uploadSettings);
+                    MzdbUploadBatch uploadBatch = new MzdbUploadBatch(uploadSamples);
                     Thread thread = new Thread(uploadBatch);
                     thread.start();
 
-                } else if (samples.get(0).getAbsolutePath().endsWith(".raw")) {
+                } else if (transferredFiles.get(0).getAbsolutePath().endsWith(".raw")) {
 
                     Preferences preferences = NbPreferences.root();
 
@@ -263,11 +262,28 @@ public class TreeFileChooserTransferHandler extends TransferHandler {
                         return false;
                     }
 
-                    ConversionSettings conversionSettings = new ConversionSettings(convertersPath, "/", false, true);
+                    //Here prepare raw samples HashMap!
+                    HashMap<File, ConversionSettings> conversionSamples = new HashMap<File, ConversionSettings>();
+                    for (int i = 0; i < transferredFiles.size(); i++) {
 
-                    conversionSettings.setUploadSettings(uploadSettings);
+                        ConversionSettings conversionSettings = new ConversionSettings(convertersPath, transferredFiles.get(i).getParent(), false, true);
+                        conversionSettings.setUploadSettings(uploadSettings);
 
-                    ConvertionUploadBatch conversionBatch = new ConvertionUploadBatch(samples, conversionSettings);
+                        if (transferredFiles.get(i).isFile()) {
+                            conversionSamples.put(transferredFiles.get(i), conversionSettings);
+                        } else {
+                            File[] listOfFiles = transferredFiles.get(i).listFiles();
+                            for (File file : listOfFiles) {
+                                if (file.isFile()) {
+                                    conversionSamples.put(file, conversionSettings);
+                                }
+                            }
+                        }
+                    }
+
+                    ConvertionUploadBatch conversionBatch = new ConvertionUploadBatch(conversionSamples);
+                    Thread thread = new Thread(conversionBatch);
+                    thread.start();
 
                 }
 

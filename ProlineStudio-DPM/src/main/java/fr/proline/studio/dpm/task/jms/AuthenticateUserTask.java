@@ -10,6 +10,7 @@ import fr.profi.util.security.SecurityUtils;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import fr.proline.studio.dpm.jms.AccessJMSManagerThread;
 import static fr.proline.studio.dpm.task.jms.AbstractJMSTask.m_loggerProline;
+import static fr.proline.studio.dpm.task.util.JMSConnectionManager.JMS_EXPIRED_MSG_ERROR_CODE;
 import fr.proline.studio.dpm.task.util.JMSConnectionManager;
 import java.util.HashMap;
 import javax.jms.JMSException;
@@ -52,7 +53,7 @@ public class AuthenticateUserTask extends AbstractJMSTask {
         
         setTaskInfoRequest(message.getText());
         //  Send the Message
-        m_producer.send(message,Message.DEFAULT_DELIVERY_MODE,8,TASK_TIMEOUT_MS+5000);
+        m_producer.send(message);
         m_loggerProline.debug("Message AuthenticateUserTask [{}] sent", message.getJMSMessageID());
         m_taskInfo.setJmsMessageID(message.getJMSMessageID());
     }
@@ -83,9 +84,12 @@ public class AuthenticateUserTask extends AbstractJMSTask {
             final JSONRPC2Response jsonResponse = (JSONRPC2Response) jsonMessage;
 	    m_loggerProline.debug("JSON Response Id: " + jsonResponse.getID());
             
-            final JSONRPC2Error jsonError = jsonResponse.getError();
-
+            JSONRPC2Error jsonError = jsonResponse.getError();
 	    if (jsonError != null) {
+                int jsonErrCode = jsonError.getCode();
+                if(jsonErrCode == JMS_EXPIRED_MSG_ERROR_CODE && m_taskInfo.getDuration() <= TASK_TIMEOUT_MS) {
+                    jsonError = jsonError.appendMessage("\n Your clock should not be synchronized with Proline Server's one !! ");
+                }
 		m_loggerProline.error("JSON Error code {}, message : \"{}\"", jsonError.getCode(), jsonError.getMessage());
 		m_loggerProline.error("JSON Throwable", jsonError);
                 throw jsonError;

@@ -71,7 +71,7 @@ public class CreateUserAccountTask  extends AbstractJMSTask {
         //-- Global PARAMS
         params.put("login", m_userName);
         params.put("password_hash", SecurityUtils.sha256Hex(m_password));
-        params.put("group_user", Boolean.valueOf(!m_isAdmin));
+        params.put("is_user_group", Boolean.valueOf(!m_isAdmin));
         return params;
     }
     

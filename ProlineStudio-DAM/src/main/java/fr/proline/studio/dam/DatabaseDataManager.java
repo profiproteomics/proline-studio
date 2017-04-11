@@ -217,9 +217,9 @@ public class DatabaseDataManager  {
         try {
             Map<String, Object> map = userAccount.getSerializedPropertiesAsMap();
             if (map != null) {
-                String userGroup = (String) map.get("UserGroup");
+                String userGroup = (String) map.get("user_group");
                 if (userGroup != null) {
-                    isAdmin = (userGroup.compareTo("ADMIN") == 0);
+                    isAdmin = (userGroup.compareTo(UserAccount.UserGroupType.ADMIN.name()) == 0);
                 }
             }
         } catch (Exception ex) {

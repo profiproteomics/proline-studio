@@ -29,7 +29,6 @@ import javax.persistence.TypedQuery;
 public class ChangeUserGroupTask extends AbstractJMSTask {
     private static final String m_serviceName = "proline/admin/UserAccount";
     private static final String m_methodName = "modify_user_group";
-    //private static final String m_version = "2.0";
 
     private Long m_userId;
     private boolean m_isAdmin;

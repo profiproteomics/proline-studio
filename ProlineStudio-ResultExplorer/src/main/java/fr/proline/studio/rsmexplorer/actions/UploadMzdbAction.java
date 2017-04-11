@@ -19,9 +19,13 @@ import org.openide.windows.WindowManager;
 @ActionID(category = "File",
         id = "fr.proline.studio.rsmexplorer.actions.UploadMzdbAction")
 @ActionRegistration(displayName = "#CTL_UploadMzdbAction")
+
+/*
 @ActionReferences({
     @ActionReference(path = "Menu/File", position = 500)
 })
+*/
+
 @Messages("CTL_UploadMzdbAction=Upload mzDB File(s)")
 public final class UploadMzdbAction extends AbstractAction implements ActionListener, ContextAwareAction {
 

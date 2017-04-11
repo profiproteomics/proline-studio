@@ -5,6 +5,7 @@ import fr.proline.studio.gui.AbstractParameterListTree;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.parameter.AbstractLinkedParameters;
 import fr.proline.studio.parameter.BooleanParameter;
+import fr.proline.studio.parameter.FileParameter;
 import fr.proline.studio.parameter.IntegerParameter;
 import fr.proline.studio.parameter.ObjectParameter;
 import fr.proline.studio.parameter.ParameterError;
@@ -146,47 +147,17 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
 
     private ParameterList getWizardParameters() {
 
-        m_wizardParameterList = new ParameterList("mzDB Settings");
+        m_wizardParameterList = new ParameterList("Conversion/Upload Settings");
 
-        JCheckBox deleteRawCheckBox = new JCheckBox("Delete raw file after a successful conversion");
-        BooleanParameter deleteRawParameter = new BooleanParameter("Delete_raw_file_after_a_successful_conversion", "Delete raw file after a successful conversion", deleteRawCheckBox, false);
-        m_wizardParameterList.add(deleteRawParameter);
-
-        JCheckBox deleteMzdbCheckBox = new JCheckBox("Delete mzdb file after a successful upload");
-        BooleanParameter deleteMzdbParameter = new BooleanParameter("Delete_mzdb_file_after_a_successful_upload", "Delete mzdb file after a successful upload", deleteMzdbCheckBox, false);
-        m_wizardParameterList.add(deleteMzdbParameter);
-
-        StringParameter converterPath = new StringParameter("Converter_(.exe)", "Converter (.exe)", JTextField.class, "C:\\Users\\AK249877\\Documents\\NetBeansProjects\\mzDB-wizard\\target\\converter\\mzdb_x64_0.9.8d\\raw2mzDB.exe", 5, null);
-        m_wizardParameterList.add(converterPath);
+        String[] converterExtentions = {"exe"};
+        String[] converterFilterNames = {"raw2mzDB.exe"};
+        FileParameter m_converterFilePath = new FileParameter(null, "Converter_(.exe)", "Converter (.exe)", JTextField.class, "", converterFilterNames, converterExtentions);
+        m_converterFilePath.setAllFiles(false);
+        m_converterFilePath.setSelectionMode(JFileChooser.FILES_ONLY);
+        m_converterFilePath.setDefaultDirectory(new File(m_preferences.get("mzDB_Settings.Converter_(.exe)", System.getProperty("user.home"))));
+        m_wizardParameterList.add(m_converterFilePath);
 
         m_wizardParameterList.loadParameters(m_preferences);
-
-        Object[] associatedTable = {"Same as raw file", "User specified"};
-        JComboBox comboBox = new JComboBox(associatedTable);
-        Object[] objectTable = {SAME_OUTPUT_PATH, USER_SPECIFIED_OUTPUT};
-        ObjectParameter converterOutputParameter = new ObjectParameter(CONVERTER_OUTPUT_PATH_KEY, CONVERTER_OUTPUT_PATH_NAME, comboBox, associatedTable, objectTable, 0, null);
-        m_wizardParameterList.add(converterOutputParameter);
-
-        StringParameter outputPath = new StringParameter("Output_path", "Output path", JTextField.class, "C:\\Users\\AK249877\\Documents\\NetBeansProjects\\mzDB-wizard\\target\\converter\\mzdb_x64_0.9.8d\\raw2mzDB.exe", 5, null);
-        m_wizardParameterList.add(outputPath);
-
-        m_wizardParameterList.loadParameters(m_preferences);
-
-        AbstractLinkedParameters linkedParameters = new AbstractLinkedParameters(m_wizardParameterList) {
-
-            @Override
-            public void valueChanged(String value, Object associatedValue) {
-                int m_selection = Integer.parseInt(converterOutputParameter.getStringValue());
-                showParameter(outputPath, m_selection == DecoratedTable.FIXED_COLUMNS_SIZE, outputPath.getStringValue());
-                updateParameterListPanel();
-            }
-
-        };
-
-        converterOutputParameter.addLinkedParameters(linkedParameters);
-
-        int m_selection = Integer.parseInt(converterOutputParameter.getStringValue());
-        linkedParameters.valueChanged((String) associatedTable[m_selection], objectTable[m_selection]);
 
         return m_wizardParameterList;
 
@@ -239,7 +210,7 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
 
         m_parameterListTree = new AbstractParameterListTree(TREE_ROOT_NAME, this, this);
         m_parameterListTree.addNodes(getJMSParameterList());
-        //m_parameterListTree.addNodes(getWizardParameters());
+        m_parameterListTree.addNodes(getWizardParameters());
         m_parameterListTree.addNodes(getTableParameters());
         m_parameterListTree.addNodes(getGeneralParameters());
         m_parameterListTree.expandAllRows();

@@ -19,9 +19,11 @@ import org.openide.windows.WindowManager;
 @ActionID(category = "File",
         id = "fr.proline.studio.rsmexplorer.actions.ConvertRawAction")
 @ActionRegistration(displayName = "#CTL_ConvertRawAction")
+/*
 @ActionReferences({
     @ActionReference(path = "Menu/File", position = 600)
 })
+*/
 @Messages("CTL_ConvertRawAction=Convert RAW File(s)")
 public final class ConvertRawAction extends AbstractAction implements ActionListener, ContextAwareAction {
 

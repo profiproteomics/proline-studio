@@ -119,7 +119,7 @@ public class UploadMzdbDialog extends DefaultDialog implements FileDialogInterfa
     }
 
     private JPanel createParameterPanel() {
-        m_parameterList = new ParameterList("mzDB Settings");
+        m_parameterList = new ParameterList("Conversion/Upload Settings");
         JCheckBox deleteCheckbox = new JCheckBox("Delete mzdb file after a successful upload");
         m_deleteMzdbParameter = new BooleanParameter("DELETE_MZDB", "Delete mzdb file after a successful upload", deleteCheckbox, false);
         m_parameterList.add(m_deleteMzdbParameter);

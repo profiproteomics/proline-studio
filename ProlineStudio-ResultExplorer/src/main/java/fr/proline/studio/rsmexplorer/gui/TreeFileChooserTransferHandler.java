@@ -2,16 +2,24 @@ package fr.proline.studio.rsmexplorer.gui;
 
 import fr.proline.studio.dpm.serverfilesystem.RootInfo;
 import fr.proline.studio.dpm.serverfilesystem.ServerFileSystemView;
-import fr.proline.studio.export.ExporterFactory;
+import fr.proline.studio.gui.DefaultDialog;
+import fr.proline.studio.gui.DefaultDialogListener;
+import fr.proline.studio.rsmexplorer.gui.dialog.DefaultConverterDialog;
 import fr.proline.studio.wizard.ConversionSettings;
 import fr.proline.studio.wizard.ConvertionUploadBatch;
 import fr.proline.studio.wizard.MzdbUploadBatch;
 import fr.proline.studio.wizard.MzdbUploadSettings;
 import java.awt.Color;
+import java.awt.Frame;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowFocusListener;
+import java.awt.event.WindowListener;
+import java.awt.event.WindowStateListener;
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.*;
 import java.util.prefs.Preferences;
 import javax.swing.JComponent;
@@ -23,6 +31,7 @@ import javax.swing.TransferHandler;
 import javax.swing.tree.TreePath;
 import org.openide.util.Exceptions;
 import org.openide.util.NbPreferences;
+import org.openide.windows.WindowManager;
 
 /**
  * Class used for Drag and Drop of nodes
@@ -226,7 +235,6 @@ public class TreeFileChooserTransferHandler extends TransferHandler {
 
                 String destination = destinationBuilder.toString();
 
-                
                 //Here we must do a small modification so that mzdb is deleted if it is a result of a conversion drag!
                 MzdbUploadSettings uploadSettings = new MzdbUploadSettings(!transferredFiles.get(0).getAbsolutePath().endsWith(".mzdb"), (boolean) false, parentLabel, destination);
 
@@ -256,40 +264,59 @@ public class TreeFileChooserTransferHandler extends TransferHandler {
 
                     Preferences preferences = NbPreferences.root();
 
-                    String convertersPath = preferences.get("mzDB_Settings.Converter_(.exe)", null);
+                    String converterPath = preferences.get("Conversion/Upload_Settings.Converter_(.exe)", null);
 
-                    if (convertersPath == null) {
-                        return false;
-                    }
+                    if (converterPath == null) {
+                        Frame f = WindowManager.getDefault().getMainWindow();
 
-                    //Here prepare raw samples HashMap!
-                    HashMap<File, ConversionSettings> conversionSamples = new HashMap<File, ConversionSettings>();
-                    for (int i = 0; i < transferredFiles.size(); i++) {
+                        DefaultConverterDialog dialog = DefaultConverterDialog.getDialog(f);
 
-                        ConversionSettings conversionSettings = new ConversionSettings(convertersPath, transferredFiles.get(i).getParent(), false, true);
-                        conversionSettings.setUploadSettings(uploadSettings);
+                        dialog.addDefaultDialogListener(new DefaultDialogListener() {
 
-                        if (transferredFiles.get(i).isFile()) {
-                            conversionSamples.put(transferredFiles.get(i), conversionSettings);
-                        } else {
-                            File[] listOfFiles = transferredFiles.get(i).listFiles();
-                            for (File file : listOfFiles) {
-                                if (file.isFile()) {
-                                    conversionSamples.put(file, conversionSettings);
-                                }
+                            @Override
+                            public void okPerformed(DefaultDialog d) {
+                                
+                                launchConversion(transferredFiles, preferences.get("Conversion/Upload_Settings.Converter_(.exe)", null), uploadSettings);
+
                             }
-                        }
-                    }
 
-                    ConvertionUploadBatch conversionBatch = new ConvertionUploadBatch(conversionSamples);
-                    Thread thread = new Thread(conversionBatch);
-                    thread.start();
+                            @Override
+                            public void cancelPerformed(DefaultDialog d) {
+                                ;
+                            }
+
+                            @Override
+                            public void defaultPerformed(DefaultDialog d) {
+                                ;
+                            }
+
+                            @Override
+                            public void backPerformed(DefaultDialog d) {
+                                ;
+                            }
+
+                            @Override
+                            public void savePerformed(DefaultDialog d) {
+                                ;
+                            }
+
+                            @Override
+                            public void loadPerformed(DefaultDialog d) {
+                                ;
+                            }
+
+                        });
+
+                        dialog.setLocationRelativeTo(f);
+                        dialog.setVisible(true);
+
+                    } else {     
+                        launchConversion(transferredFiles, converterPath, uploadSettings);
+                    }
 
                 }
 
-            } catch (UnsupportedFlavorException ex) {
-                Exceptions.printStackTrace(ex);
-            } catch (IOException ex) {
+            } catch (UnsupportedFlavorException | IOException ex) {
                 Exceptions.printStackTrace(ex);
             }
 
@@ -297,6 +324,31 @@ public class TreeFileChooserTransferHandler extends TransferHandler {
 
         return true;
 
+    }
+
+    private void launchConversion(ArrayList<File> transferredFiles, String converterPath, MzdbUploadSettings uploadSettings) {
+        //Here prepare raw samples HashMap!
+        HashMap<File, ConversionSettings> conversionSamples = new HashMap<File, ConversionSettings>();
+        for (int i = 0; i < transferredFiles.size(); i++) {
+
+            ConversionSettings conversionSettings = new ConversionSettings(converterPath, transferredFiles.get(i).getParent(), false, true);
+            conversionSettings.setUploadSettings(uploadSettings);
+
+            if (transferredFiles.get(i).isFile()) {
+                conversionSamples.put(transferredFiles.get(i), conversionSettings);
+            } else {
+                File[] listOfFiles = transferredFiles.get(i).listFiles();
+                for (File file : listOfFiles) {
+                    if (file.isFile()) {
+                        conversionSamples.put(file, conversionSettings);
+                    }
+                }
+            }
+        }
+
+        ConvertionUploadBatch conversionBatch = new ConvertionUploadBatch(conversionSamples);
+        Thread thread = new Thread(conversionBatch);
+        thread.start();
     }
 
 }

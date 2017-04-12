@@ -128,7 +128,7 @@ public class ConvertRawDialog extends DefaultDialog implements FileDialogInterfa
     private JPanel createParameterPanel() {
         Preferences preferences = NbPreferences.root();
 
-        m_parameterList = new ParameterList("mzDB Settings");
+        m_parameterList = new ParameterList("Conversion/Upload Settings");
 
         String[] converterExtentions = {"exe"};
         String[] converterFilterNames = {"raw2mzDB.exe"};

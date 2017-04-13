@@ -6,8 +6,6 @@ import fr.proline.studio.utils.IconManager;
 import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.prefs.BackingStoreException;
@@ -27,8 +25,8 @@ public class DefineQuantParamsPanel extends JPanel{
     private static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
     
     private static DefineQuantParamsPanel m_singleton = null;
-    private boolean m_readOnly;
-    private ParameterList m_parameterList;
+    private final boolean m_readOnly;
+    private final ParameterList m_parameterList;
     
     private final static String[] CLUSTERING_TIME_COMPUTATION_VALUES = {"Most Intense", "Median"};
     private final static String[] CLUSTERING_TIME_COMPUTATION_KEYS = {"MOST_INTENSE", "MEDIAN"};
@@ -51,8 +49,6 @@ public class DefineQuantParamsPanel extends JPanel{
     private final static String[] FEATURE_NORMALIZATION_VALUES = {"No", "Intensity Sum", "Median Intensity", "Median Ratio"};
     private final static String[] FEATURE_NORMALIZATION_KEYS = {"NONE", "INTENSITY_SUM", "MEDIAN_INTENSITY", "MEDIAN_RATIO"};  
     
-    private final static String[] FEATURE_EXTRACTED_XIC_VALUES = {"Only Validated PSM", "All MSMS Events", "All detectable features"};
-    private final static String[] FEATURE_EXTRACTED_XIC_KEYS = {"ONLY_VALIDATED_PSM", "ALL_MSMS", "ALL_DETECTABLE_FEATURES"};  
     
     private ObjectParameter<String> m_clusteringTimeComputationParameter;
     private ObjectParameter<String> m_clusteringIntensityComputationParameter;
@@ -61,8 +57,6 @@ public class DefineQuantParamsPanel extends JPanel{
     private ObjectParameter<String> m_featureFilterNameParameter;
     private ObjectParameter<String> m_featureFilterOperatorParameter;
     private ObjectParameter<String> m_normalizationParameter;
-    private ObjectParameter<String> m_extractedXICFromParameter;
-    private BooleanParameter m_detectPeakelsParameter;
 
     private JTextField m_extractionMoZTolTF;
     
@@ -89,41 +83,34 @@ public class DefineQuantParamsPanel extends JPanel{
     private JTextField m_featureMappingTimeTolTF;
     
     private JComboBox m_normalizationCB;
-    //private JCheckBox m_detectFeatureChB;
-    //private JCheckBox m_validatedPSMsChB;
-    
-    private JComboBox m_extractedXICFromCB;
-    private JCheckBox m_detectPeakelChB;
+
     
     private JScrollPane m_scrollPane;
     
     private JTabbedPane m_tabbedPane;
-    
-    private boolean m_selectXICMethod;
+
     
     public DefineQuantParamsPanel(boolean readOnly) {
-       m_readOnly = readOnly;
-       Preferences preferences = NbPreferences.root();
-        this.m_selectXICMethod = preferences.getBoolean("Profi", false);
+        m_readOnly = readOnly;
+
         m_parameterList = new ParameterList("XicParameters");
         createParameters();
         m_parameterList.updateIsUsed(NbPreferences.root());
         for (AbstractParameter param : m_parameterList) {
             param.setUsed(true);
         }
-        
+
         setLayout(new BorderLayout());
-        if (!m_readOnly){
+        if (!m_readOnly) {
             add(createWizardPanel(), BorderLayout.PAGE_START);
         }
-
 
         JPanel mainPanel = createMainPanel();
         m_scrollPane = new JScrollPane();
         m_scrollPane.setViewportView(mainPanel);
         m_scrollPane.createVerticalScrollBar();
         add(m_scrollPane, BorderLayout.CENTER);
-        
+
     }
    
     public static DefineQuantParamsPanel getDefineQuantPanel() {
@@ -242,71 +229,28 @@ public class DefineQuantParamsPanel extends JPanel{
         m_normalizationParameter = new ObjectParameter<>("normalization", "Normalization", m_normalizationCB, FEATURE_NORMALIZATION_VALUES, FEATURE_NORMALIZATION_KEYS,  0, null);
         m_parameterList.add(m_normalizationParameter);
 
-//        m_detectFeatureChB = new JCheckBox("Detect all features");
-//        BooleanParameter detectFeatureParameter = new BooleanParameter("detectAllFeatures", "Detect all features", m_detectFeatureChB, false);
-//        m_parameterList.add(detectFeatureParameter);
-//        
-//        m_validatedPSMsChB = new JCheckBox("Only validated PSM");
-//        BooleanParameter validatedPSMsParameter = new BooleanParameter("onlyValidatedPSM", "Only validated PSM", m_validatedPSMsChB, true);
-//        m_parameterList.add(validatedPSMsParameter);
-        
-        m_extractedXICFromCB = new JComboBox(FEATURE_EXTRACTED_XIC_VALUES);
-        m_extractedXICFromCB.setEnabled(!m_readOnly);
-        m_extractedXICFromParameter = new ObjectParameter<>("extractedXICFrom", "ExtractedXICFrom", m_extractedXICFromCB, FEATURE_EXTRACTED_XIC_VALUES, FEATURE_EXTRACTED_XIC_KEYS,  2, null);
-        // do not allow to change the method of quanti
-        if (!m_selectXICMethod){
-            m_extractedXICFromCB.setEnabled(false);
-        }
-        m_parameterList.add(m_extractedXICFromParameter);
-        
-        m_detectPeakelChB = new JCheckBox("Deisotoping Identification Based");
-        m_detectPeakelChB.setEnabled(!m_readOnly);
-        m_detectPeakelsParameter = new BooleanParameter("detectPeakel", "Deisotoping Identification Based", m_detectPeakelChB, true);
-        // do not allow to change the method of quanti
-        if (!m_selectXICMethod){
-            m_detectPeakelChB.setEnabled(false);
-        }
-        m_parameterList.add(m_detectPeakelsParameter);
  
     }
     
-    
-    // case Profi=false: do not apply parameters for xic method
-    public void initXICMethod(){
-        if (!m_selectXICMethod){
-            m_extractedXICFromParameter.setValue(FEATURE_EXTRACTED_XIC_KEYS[2]);
-            m_detectPeakelsParameter.setValue("true");
-            m_extractedXICFromCB.setSelectedItem(2);
-            m_detectPeakelChB.setSelected(true);
-        }
-    }
+
     
     public ParameterList getParameterList() {
         return m_parameterList;
     }
     
     
-    public void loadParameters(FilePreferences filePreferences) throws BackingStoreException{
+    public void loadParameters(FilePreferences filePreferences) throws BackingStoreException {
 
         Preferences preferences = NbPreferences.root();
         String[] keys = filePreferences.keys();
-            for (String key : keys) {                
-                if(!m_selectXICMethod){
-                    String  extractedXICFromParameterKeyName = m_parameterList.getPrefixName()+m_extractedXICFromParameter.getName();
-                    String  detectPeakelsParameterKeyName = m_parameterList.getPrefixName()+m_detectPeakelsParameter.getName();
-                    if( (key.equals(extractedXICFromParameterKeyName)) || (key.equals(detectPeakelsParameterKeyName) ) )
-                        filePreferences.remove(key); // Don't load this parameter     
-                    else {
-                        String value = filePreferences.get(key, null);
-                        preferences.put(key, value);
-                    }
-                }  else {
-                    String value = filePreferences.get(key, null);
-                     preferences.put(key, value);
-                }
-            }
+        for (String key : keys) {
 
-            getParameterList().loadParameters(filePreferences); //Load params 
+            String value = filePreferences.get(key, null);
+            preferences.put(key, value);
+
+        }
+
+        getParameterList().loadParameters(filePreferences); //Load params 
     }
     
             //-- quanti Params
@@ -438,24 +382,7 @@ public class DefineQuantParamsPanel extends JPanel{
         }else{
             m_normalizationCB.setSelectedIndex(0);
         }
-//        if(!m_selectXICMethod) { //Use default value any way
-//            m_extractedXICFromCB.setSelectedIndex(2);
-//            m_detectPeakelChB.setSelected(true);
-//        } else {
-            if ((Boolean)quantParams.get("detect_features")){
-                m_extractedXICFromCB.setSelectedIndex(0);
-                m_detectPeakelChB.setSelected(false);
-            }else{
-                if ((Boolean)quantParams.get("start_from_validated_peptides")){ //VDS à vérifier !! => 0?!
-                    m_extractedXICFromCB.setSelectedIndex(2);
-                    m_detectPeakelChB.setSelected(true);
-                }else{
-                    m_extractedXICFromCB.setSelectedIndex(1);
-                    m_detectPeakelChB.setSelected(false);
-                }
-            }
-//        }
-        initXICMethod();
+
     }
     
     
@@ -507,17 +434,11 @@ public class DefineQuantParamsPanel extends JPanel{
         if (m_normalizationParameter.getStringValue() != null && !m_normalizationParameter.getStringValue().equalsIgnoreCase("NONE")) {
             params.put("normalization_method", m_normalizationParameter.getStringValue());
         }
-        //params.put("detect_features", m_detectFeatureChB.isSelected());
-        //params.put("start_from_validated_peptides", m_validatedPSMsChB.isEnabled() && m_validatedPSMsChB.isSelected());
-        boolean detectFeatures = (m_extractedXICFromParameter.getStringValue() != null && m_extractedXICFromParameter.getStringValue().equalsIgnoreCase("ONLY_VALIDATED_PSM")) ;
-        boolean start_from_validated_peptides = (m_extractedXICFromParameter.getStringValue() != null && m_extractedXICFromParameter.getStringValue().equalsIgnoreCase("ALL_DETECTABLE_FEATURES")) ;
-        params.put("detect_features", detectFeatures);
-        params.put("start_from_validated_peptides", start_from_validated_peptides);
-        if (m_selectXICMethod){
-            params.put("detect_peakels", m_detectPeakelChB.isEnabled() && m_detectPeakelChB.isSelected());
-        }else{
-            params.put("detect_peakels", true);
-        }
+
+        params.put("detect_features", false);
+        params.put("start_from_validated_peptides", true);
+        params.put("detect_peakels", true);
+
         return params;
     }
         
@@ -561,60 +482,7 @@ public class DefineQuantParamsPanel extends JPanel{
         c.gridwidth=1;
         c.weightx = 1;
         headerPanel.add(m_extractionMoZTolTF, c);
-        
-        // Extract XIC from combo box
-        JLabel extractionXICFromLabel = new JLabel("Extract XIC from:");
-        c.gridx = 0;
-        c.gridy++;
-        c.gridwidth=1;
-        c.weightx = 0;
-        headerPanel.add(extractionXICFromLabel, c);
-        c.gridx++;
-        c.weighty= 0;
-        c.weightx = 1;
-        c.gridwidth = 1;
-        c.gridheight = 1;
-        headerPanel.add(m_extractedXICFromCB, c);
-        m_extractedXICFromCB.addActionListener(new ActionListener() {
 
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                boolean start_from_validated_peptides = (m_extractedXICFromParameter.getStringValue() != null && m_extractedXICFromParameter.getStringValue().equalsIgnoreCase("ALL_DETECTABLE_FEATURES")) ;
-                if (m_selectXICMethod){
-                    m_detectPeakelChB.setEnabled(!m_readOnly && start_from_validated_peptides);
-                }else{
-                    m_detectPeakelChB.setEnabled(false);
-                }
-            }
-        });
-            
-        c.gridy++;
-        c.gridx = 0;
-        c.gridwidth = 2;
-        headerPanel.add(m_detectPeakelChB, c);
-         m_detectPeakelChB.setEnabled(false);
-         
-         m_extractedXICFromCB.setSelectedIndex(FEATURE_EXTRACTED_XIC_VALUES.length-1);
-        
-        // to be commented
-//        c.gridwidth = 2;
-//        c.gridy++;
-//        c.gridx = 0;
-//        m_detectFeatureChB.addActionListener(new ActionListener() {
-//
-//            @Override
-//            public void actionPerformed(ActionEvent e) {
-//                m_validatedPSMsChB.setEnabled(!m_detectFeatureChB.isSelected());
-//            }
-//        });
-//        headerPanel.add(m_detectFeatureChB, c);
-//        
-//        
-//        c.gridy++;
-//        c.gridx = 0;
-//        c.gridwidth = 2;
-//        headerPanel.add(m_validatedPSMsChB, c);
-        
         mainPanel.add(headerPanel, BorderLayout.PAGE_START);
         
         // tabbed pane

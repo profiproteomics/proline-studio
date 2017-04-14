@@ -144,9 +144,9 @@ public class DefineQuantParamsPanel extends JPanel {
     
     private void updateButton(boolean completePanel) {
         if (completePanel) {
-            m_toggleButton.setText("Simplified Options");
+            m_toggleButton.setText("Simplified Parameters");
         } else {
-            m_toggleButton.setText("More Options");
+            m_toggleButton.setText("Advanced Parameters");
         }
     }
     

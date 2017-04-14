@@ -186,7 +186,7 @@ public class ParameterList extends ArrayList<AbstractParameter> {
         for (int i = 0; i < nbParameters; i++) {
             AbstractParameter parameter = get(i);
 
-            String parameterValue = readParameter(preferences,parameter, prefixKey);
+            String parameterValue = readParameter(preferences, parameter, prefixKey);
             // -------------
             
             
@@ -202,6 +202,16 @@ public class ParameterList extends ArrayList<AbstractParameter> {
 
             //Used to initialize values            
             parameter.getComponent(parameterValue);
+        }
+    }
+    
+    public void setDefaultValues() {
+        int nbParameters = size();
+        for (int i = 0; i < nbParameters; i++) {
+            AbstractParameter parameter = get(i);
+
+            //Used to initialize values            
+            parameter.getComponent(null);
         }
     }
 

@@ -38,8 +38,8 @@ import fr.proline.studio.utils.IconManager;
 import java.awt.Dialog;
 import java.awt.Window;
 import java.io.File;
-import java.io.IOException;
 import java.util.*;
+import java.util.prefs.Preferences;
 import javax.persistence.EntityManager;
 import javax.swing.JFileChooser;
 import javax.swing.JList;
@@ -94,7 +94,7 @@ public class CreateXICDialog extends DefaultDialog {
 
         setDocumentationSuffix("id.2dlolyb");
 
-        setSize(1600, 768);
+        setSize(1000, 768);
         setResizable(true);
 
     }
@@ -161,7 +161,7 @@ public class CreateXICDialog extends DefaultDialog {
 
         // Update and Replace panel
         DefineQuantParamsPanel quantPanel = DefineQuantParamsPanel.getDefineQuantPanel();
-        quantPanel.resetScrollbar();
+        quantPanel.getParamsPanel().resetScrollbar();
         replaceInternaleComponent(quantPanel);
         revalidate();
         repaint();
@@ -535,7 +535,9 @@ public class CreateXICDialog extends DefaultDialog {
      "normalization_method": "MEDIAN_RATIO"
      }*/
     public Map<String, Object> getQuantiParameters() {
-        return DefineQuantParamsPanel.getDefineQuantPanel().getQuantParams();
+        
+        return DefineQuantParamsPanel.getDefineQuantPanel().getParamsPanel().getQuantParams();
+
     }
 
     @Override
@@ -574,8 +576,10 @@ public class CreateXICDialog extends DefaultDialog {
             }
 
             // Save Parameters  
-            ParameterList parameterList = DefineQuantParamsPanel.getDefineQuantPanel().getParameterList();
-            parameterList.saveParameters(NbPreferences.root());
+            ParameterList parameterList = DefineQuantParamsPanel.getDefineQuantPanel().getParamsPanel().getParameterList();
+            Preferences preferences = NbPreferences.root();
+            parameterList.saveParameters(preferences);
+            preferences.putBoolean(AbstractDefineQuantParamsPanel.XIC_SIMPLIFIED_PARAMS, DefineQuantParamsPanel.getDefineQuantPanel().getParamsPanel().isSimplifiedPanel());
 
             return true;
         }
@@ -583,7 +587,8 @@ public class CreateXICDialog extends DefaultDialog {
     }
 
     private boolean checkQuantParameters() {
-        ParameterList parameterList = DefineQuantParamsPanel.getDefineQuantPanel().getParameterList();
+
+        ParameterList parameterList = DefineQuantParamsPanel.getDefineQuantPanel().getParamsPanel().getParameterList();
 
         // check parameters
         ParameterError error = parameterList.checkParameters();
@@ -609,7 +614,7 @@ public class CreateXICDialog extends DefaultDialog {
             FilePreferences filePreferences = new FilePreferences(f, null, "");
 
             // Save Parameters  
-            ParameterList parameterList = DefineQuantParamsPanel.getDefineQuantPanel().getParameterList();
+            ParameterList parameterList = DefineQuantParamsPanel.getDefineQuantPanel().getParamsPanel().getParameterList();
             parameterList.saveParameters(filePreferences);
 
             SettingsUtils.addSettingsPath(SETTINGS_KEY, f.getAbsolutePath());
@@ -628,14 +633,14 @@ public class CreateXICDialog extends DefaultDialog {
 
         if (settingsDialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {
             if (settingsDialog.isDefaultSettingsSelected()) {
-                ParameterList parameterList = DefineQuantParamsPanel.getDefineQuantPanel().getParameterList();
+                ParameterList parameterList = DefineQuantParamsPanel.getDefineQuantPanel().getParamsPanel().getParameterList();
                 parameterList.initDefaults();
             } else {
                 try {
                     File settingsFile = settingsDialog.getSelectedFile();
                     FilePreferences filePreferences = new FilePreferences(settingsFile, null, "");
 
-                    DefineQuantParamsPanel.getDefineQuantPanel().loadParameters(filePreferences);
+                    DefineQuantParamsPanel.getDefineQuantPanel().getParamsPanel().loadParameters(filePreferences);
 
                 } catch (Exception e) {
                     LoggerFactory.getLogger("ProlineStudio.ResultExplorer").error("Parsing of User Settings File Failed", e);
@@ -881,7 +886,7 @@ public class CreateXICDialog extends DefaultDialog {
         m_designTree.renameXicTitle(dataset.getName() + "-Copy");
 
         try {
-            DefineQuantParamsPanel.getDefineQuantPanel().setQuantParams(dataset.getQuantProcessingConfigAsMap());
+            DefineQuantParamsPanel.getDefineQuantPanel().getParamsPanel().setQuantParams(dataset.getQuantProcessingConfigAsMap());
         } catch (Exception ex) {
             LoggerFactory.getLogger("ProlineStudio.ResultExplorer").error("Error while setting Quant Param ", ex);
         }

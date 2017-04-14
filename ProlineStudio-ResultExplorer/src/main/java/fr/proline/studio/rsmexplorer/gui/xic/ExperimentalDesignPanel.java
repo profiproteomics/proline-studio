@@ -7,7 +7,7 @@ import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
-import fr.proline.studio.rsmexplorer.gui.dialog.xic.DefineQuantParamsPanel;
+import fr.proline.studio.rsmexplorer.gui.dialog.xic.DefineQuantParamsCompletePanel;
 import fr.proline.studio.rsmexplorer.gui.dialog.xic.QuantProfileXICPanel;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.quantitation.QuantitationTree;
@@ -36,7 +36,7 @@ public class ExperimentalDesignPanel extends HourglassPanel implements DataBoxPa
     private JPanel m_expDesignPanel;
     private XICDesignTree m_expDesignTree;
     private ExportButton m_exportButton;
-    private DefineQuantParamsPanel m_xicParamPanel;
+    private DefineQuantParamsCompletePanel m_xicParamPanel;
     private JTabbedPane m_tabbedPane;
     private QuantProfileXICPanel m_profilizerParamPanel;
     private JPanel m_confPanel;
@@ -166,7 +166,7 @@ public class ExperimentalDesignPanel extends HourglassPanel implements DataBoxPa
         try {
             if (m_dataset.getQuantProcessingConfig() != null){
                 m_confPanel.removeAll();
-                m_xicParamPanel = new DefineQuantParamsPanel(true);
+                m_xicParamPanel = new DefineQuantParamsCompletePanel(true, false);
                 m_xicParamPanel.resetScrollbar();
                 m_confPanel.add(m_xicParamPanel, BorderLayout.CENTER);
                 m_xicParamPanel.setQuantParams(m_dataset.getQuantProcessingConfigAsMap());

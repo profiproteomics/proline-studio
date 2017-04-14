@@ -170,7 +170,9 @@ public class IconManager {
         AUTO_ZOOM,
         OVERLAY,
         ISOTOPES_PREDICTION,
-        TEST;
+        TEST,
+        OPTIONS_MORE,
+        OPTIONS_LESS;
         
     }
     private final static HashMap<IconType, ImageIcon> m_iconMap = new HashMap<>();
@@ -612,6 +614,10 @@ public class IconManager {
                 return "fr/proline/studio/images/isotopes_prediction.png";    
             case TEST:
                 return "fr/proline/studio/images/test.png";  
+            case OPTIONS_MORE:
+                return "fr/proline/studio/images/hammer--plus.png";  
+            case OPTIONS_LESS:
+                return "fr/proline/studio/images/hammer--minus.png";  
         }
 
         return null; // can not happen

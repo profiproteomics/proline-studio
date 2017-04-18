@@ -4,7 +4,9 @@ import fr.proline.studio.comparedata.ExtraDataType;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import fr.proline.studio.dam.taskinfo.TaskInfoManager;
 import fr.proline.studio.dpm.data.JMSNotificationMessage;
+import fr.proline.studio.dpm.jms.AccessJMSManagerThread;
 import fr.proline.studio.dpm.task.jms.AbstractJMSCallback;
+import fr.proline.studio.dpm.task.jms.CancelTask;
 import fr.proline.studio.dpm.task.jms.PurgeConsumer;
 import fr.proline.studio.dpm.task.util.JMSConnectionManager;
 import fr.proline.studio.filter.ConvertValueInterface;
@@ -734,7 +736,7 @@ public class TasksPanel extends AbstractTasksPanel {
     private class StopTaskAction extends AbstractTableAction {
 
         public StopTaskAction() {
-            super("Cancel pending task...");
+            super("Cancel task...");
         }
 
         @Override
@@ -745,17 +747,19 @@ public class TasksPanel extends AbstractTasksPanel {
                 return;
             }                
             TaskInfo currentTaskInfo = getSelectedTaskInfo();
-            if( currentTaskInfo.getPublicState() != TaskInfo.PUBLIC_STATE_WAITING){
-                JOptionPane.showMessageDialog(WindowManager.getDefault().getMainWindow(),"Only pending task can be aborted","Cancel Task Error",JOptionPane.ERROR_MESSAGE);
-                return;
-            }     
-            
             if(fr.profi.util.StringUtils.isEmpty(currentTaskInfo.getJmsMessageID())){
                 JOptionPane.showMessageDialog(WindowManager.getDefault().getMainWindow(),"Only server side tasks can be aborted","Cancel Task Error",JOptionPane.ERROR_MESSAGE);
                 return;
             }
             
-            PurgeConsumer.getPurgeConsumer().clearMessage(currentTaskInfo.getJmsMessageID());
+            if( currentTaskInfo.getPublicState() == TaskInfo.PUBLIC_STATE_RUNNING){
+                CancelTask task = new CancelTask(currentTaskInfo.getJmsMessageID());
+                AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
+            } else if ( currentTaskInfo.getPublicState() == TaskInfo.PUBLIC_STATE_WAITING){          
+                PurgeConsumer.getPurgeConsumer().clearMessage(currentTaskInfo.getJmsMessageID());
+            } else {
+                JOptionPane.showMessageDialog(WindowManager.getDefault().getMainWindow(),"Only pending or running task can be aborted","Cancel Task Error",JOptionPane.ERROR_MESSAGE);
+            }
         }
 
         @Override
@@ -766,7 +770,8 @@ public class TasksPanel extends AbstractTasksPanel {
                 enable = false;
             else {
                 TaskInfo currentTaskInfo = getSelectedTaskInfo();
-                if( currentTaskInfo.getPublicState() != TaskInfo.PUBLIC_STATE_WAITING){
+                int currentPublicState = currentTaskInfo.getPublicState();
+                if( currentPublicState != TaskInfo.PUBLIC_STATE_WAITING &&currentPublicState !=TaskInfo.PUBLIC_STATE_RUNNING ){
                     enable = false;
                 }
             }

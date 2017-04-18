@@ -8,6 +8,7 @@ package fr.proline.studio.wizard;
 import fr.proline.studio.dpm.jms.AccessJMSManagerThread;
 import fr.proline.studio.dpm.task.jms.AbstractJMSCallback;
 import fr.proline.studio.dpm.task.jms.FileUploadTask;
+import fr.proline.studio.rsmexplorer.MzdbFilesTopComponent;
 import java.io.File;
 import java.util.logging.Level;
 
@@ -61,15 +62,10 @@ public class MzdbUploader implements Runnable, WorkerInterface {
             @Override
             public void run(boolean success) {
 
-                String x = result[0];
-
                 if (success) {
                     if (m_state == WorkerInterface.ACTIVE_STATE) {
                         m_state = WorkerInterface.FINISHED_STATE;
-
-                        //MzdbFilesTopComponent.getTreeFileChooserPanel().updateTree();
-                        //MzdbFilesTopComponent.getTreeFileChooserPanel().insertUploadedFile(m_uploadSettings.getDestination(), m_file.getName(), m_uploadSettings.getMountLabel());
-
+                        
                         if (m_uploadSettings.getDeleteMzdb()) {
                             while (!m_file.canWrite() && !m_file.exists()) {
                                 try {

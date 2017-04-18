@@ -8,7 +8,6 @@ import fr.proline.studio.dpm.jms.AccessJMSManagerThread;
 import fr.proline.studio.dpm.task.jms.AbstractJMSCallback;
 import fr.proline.studio.dpm.task.jms.CancelTask;
 import fr.proline.studio.dpm.task.jms.PurgeConsumer;
-import fr.proline.studio.dpm.task.util.JMSConnectionManager;
 import fr.proline.studio.filter.ConvertValueInterface;
 import fr.proline.studio.filter.Filter;
 import fr.proline.studio.filter.FilterButton;

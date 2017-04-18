@@ -64,6 +64,8 @@ public class MzdbUploadBatch implements Runnable {
         
         if(m_pathToExpand!=null){
             MzdbFilesTopComponent.getTreeFileChooserPanel().expandTreePath(m_pathToExpand);
+        }else{
+            MzdbFilesTopComponent.getTreeFileChooserPanel().expandMultipleTreePath(null, m_uploads.entrySet().iterator().next().getValue().getMountLabel());
         }
     }
 

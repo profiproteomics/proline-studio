@@ -13,6 +13,6 @@ import java.io.File;
  */
 public interface ConversionListener {
     
-    public void ConversionPerformed(File f, ConversionSettings settings);
+    public void ConversionPerformed(File f, ConversionSettings settings, boolean success);
     
 }

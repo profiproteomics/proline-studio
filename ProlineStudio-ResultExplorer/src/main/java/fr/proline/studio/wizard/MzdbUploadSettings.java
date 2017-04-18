@@ -11,27 +11,18 @@ package fr.proline.studio.wizard;
  */
 public class MzdbUploadSettings {
     
-    private boolean m_deleteMzdb, m_createParentDirectory;
-    private String m_mountLabel;
-    private String m_destination;
+    private final boolean m_deleteMzdb;
+    private final String m_mountLabel;
+    private final String m_destination;
     
-    public MzdbUploadSettings(boolean deleteMzdb, boolean createParentDirectory, String mountLabel){
+    public MzdbUploadSettings(boolean deleteMzdb, String mountLabel, String destination){
         m_deleteMzdb = deleteMzdb;
-        m_createParentDirectory = createParentDirectory;
         m_mountLabel = mountLabel;
-    }
-    
-    public MzdbUploadSettings(boolean deleteMzdb, boolean createParentDirectory, String mountLabel, String destination){
-        this(deleteMzdb, createParentDirectory, mountLabel);
         m_destination = destination;
     }
     
     public boolean getDeleteMzdb(){
         return m_deleteMzdb;
-    }
-    
-    public boolean getCreateParentDirectory(){
-        return m_createParentDirectory;
     }
     
     public String getMountLabel(){

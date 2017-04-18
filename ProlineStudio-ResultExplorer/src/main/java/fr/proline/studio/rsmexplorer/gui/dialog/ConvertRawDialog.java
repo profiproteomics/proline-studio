@@ -160,7 +160,7 @@ public class ConvertRawDialog extends DefaultDialog implements FileDialogInterfa
         m_uploadLabelParameter = new ObjectParameter("MZDB_MOUNT_LABEL", "Server's mounting point", namingComboBox, associatedTable, objectTable, 0, null);
         m_parameterList.add(m_uploadLabelParameter);
 
-        JCheckBox mzdbCheckbox = new JCheckBox("Delete mzdb file after a successful upload");
+        JCheckBox mzdbCheckbox = new JCheckBox("Delete .mzdb file after a successful upload");
         m_deleteMzdb = new BooleanParameter("DELETE_MZDB", "Delete mzdb file after a successful upload", mzdbCheckbox, false);
         m_parameterList.add(m_deleteMzdb);
 
@@ -339,11 +339,15 @@ public class ConvertRawDialog extends DefaultDialog implements FileDialogInterfa
         m_parameterList.saveParameters(NbPreferences.root());
 
         ConversionSettings conversionSettings = new ConversionSettings(m_converterFilePath.getStringValue(), m_outputFilePath.getStringValue(), (boolean) m_deleteRaw.getObjectValue(), (boolean) m_uploadMzdb.getObjectValue());
-        MzdbUploadSettings uploadSettings = new MzdbUploadSettings((boolean) m_deleteMzdb.getObjectValue(), (boolean) m_createParentDirectoryParameter.getObjectValue(), m_uploadLabelParameter.getStringValue());
-        conversionSettings.setUploadSettings(uploadSettings);
 
         HashMap<File, ConversionSettings> conversions = new HashMap<File, ConversionSettings>();
         for (int i = 0; i < m_fileList.getModel().getSize(); i++) {
+            
+            File file = (File) m_fileList.getModel().getElementAt(i);
+            
+            MzdbUploadSettings uploadSettings = new MzdbUploadSettings((boolean) m_deleteMzdb.getObjectValue(), m_uploadLabelParameter.getStringValue(), (boolean) m_createParentDirectoryParameter.getObjectValue() ? File.separator + file.getParentFile().getName() : "");
+            conversionSettings.setUploadSettings(uploadSettings);
+
             conversions.put((File) m_fileList.getModel().getElementAt(i), conversionSettings);
         }
 

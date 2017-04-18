@@ -5,6 +5,7 @@
  */
 package fr.proline.studio.wizard;
 
+import fr.proline.studio.rsmexplorer.MzdbFilesTopComponent;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -12,6 +13,7 @@ import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import javax.swing.tree.TreePath;
 
 /**
  *
@@ -20,12 +22,21 @@ import java.util.concurrent.TimeUnit;
 public class MzdbUploadBatch implements Runnable {
 
     private final ThreadPoolExecutor m_executor;
-    private final HashMap<File, MzdbUploadSettings> m_uploads;
+    private final HashMap<File, MzdbUploadSettings> m_uploads;   
+    private TreePath m_pathToExpand;
 
     public MzdbUploadBatch(HashMap<File, MzdbUploadSettings> uploads) {
         m_uploads = uploads;
         m_executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(5);
-
+    }
+    
+    public MzdbUploadBatch(HashMap<File, MzdbUploadSettings> uploads, TreePath pathToExpand) {
+        this(uploads);
+        m_pathToExpand = pathToExpand;    
+    }
+    
+    public TreePath getPathToExpand(){
+        return m_pathToExpand;
     }
 
     public void upload(File f, MzdbUploadSettings uploadSettings) {
@@ -49,6 +60,10 @@ public class MzdbUploadBatch implements Runnable {
             m_executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
         } catch (InterruptedException e) {
             ;
+        }
+        
+        if(m_pathToExpand!=null){
+            MzdbFilesTopComponent.getTreeFileChooserPanel().expandTreePath(m_pathToExpand);
         }
     }
 

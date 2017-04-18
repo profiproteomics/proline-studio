@@ -10,6 +10,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import javax.swing.Box;
 import javax.swing.Icon;
 import javax.swing.JButton;
@@ -28,6 +29,7 @@ import javax.swing.filechooser.FileSystemView;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeCellRenderer;
+import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
@@ -141,9 +143,9 @@ public class TreeFileChooserPanel extends JPanel {
             c.gridx++;
         }
 
-                    c.weightx = 1.0;
-            c.weighty = 1.0;
-        
+        c.weightx = 1.0;
+        c.weighty = 1.0;
+
         add(scrollPane, c);
     }
 
@@ -162,7 +164,82 @@ public class TreeFileChooserPanel extends JPanel {
         }
 
         m_model.reload();
+    }
 
+    public static TreePath getPath(TreeNode treeNode) {
+        ArrayList<Object> nodes = new ArrayList<Object>();
+        if (treeNode != null) {
+            nodes.add(treeNode);
+            treeNode = treeNode.getParent();
+            while (treeNode != null) {
+                nodes.add(0, treeNode);
+                treeNode = treeNode.getParent();
+            }
+        }
+
+        return nodes.isEmpty() ? null : new TreePath(nodes.toArray());
+    }
+
+    public void expandTreePath(TreePath path){
+        m_tree.expandPath(path);
+    }
+    
+    public void insertUploadedFile(String destinationParentURL, String filename, String mountLabel) {
+
+        DefaultMutableTreeNode currentNode = (DefaultMutableTreeNode) m_model.getRoot();
+
+        String[] splittedDestination = destinationParentURL.split(File.separator);
+
+        ArrayList<String> destinationSteps = new ArrayList<String>();
+        destinationSteps.add(mountLabel);
+
+        for (int i = 0; i < splittedDestination.length; i++) {
+            m_tree.expandPath(getPath(currentNode));
+
+        }
+
+        /*
+         int counter = 0;
+
+         boolean firstComparison = true;
+         DefaultMutableTreeNode matchingNode = null;
+
+         DefaultMutableTreeNode root = (DefaultMutableTreeNode) m_model.getRoot();
+         Enumeration totalNodes = root.depthFirstEnumeration();
+
+         while (totalNodes.hasMoreElements()) {
+         DefaultMutableTreeNode node = (DefaultMutableTreeNode) totalNodes.nextElement();
+
+         StringBuilder treePath = new StringBuilder();
+         treePath.append(File.separator);
+
+         Enumeration ancestorNodes = node.pathFromAncestorEnumeration(root);
+         while (ancestorNodes.hasMoreElements()) {
+         DefaultMutableTreeNode ancestor = (DefaultMutableTreeNode) ancestorNodes.nextElement();
+         treePath.append(ancestor.toString()).append(File.separator);
+         }
+
+         String treePathToString = treePath.toString();
+            
+         counter++;
+
+         if (treePathToString.endsWith(destinationParentURL)) {
+
+         if (firstComparison) {
+         matchingNode = node;
+         firstComparison = false;
+         } else {
+         if (node.toString().length() < matchingNode.toString().length()) {
+         matchingNode = node;
+         }
+         }
+         }
+         }
+        
+         if(matchingNode!=null){
+         matchingNode.add(new DefaultMutableTreeNode(destinationParentURL+File.separator+filename));
+         }
+         */
     }
 
     public JTree getTree() {

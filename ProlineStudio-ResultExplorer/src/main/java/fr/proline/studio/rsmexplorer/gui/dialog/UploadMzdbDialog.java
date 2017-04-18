@@ -119,7 +119,7 @@ public class UploadMzdbDialog extends DefaultDialog implements FileDialogInterfa
     }
 
     private JPanel createParameterPanel() {
-        m_parameterList = new ParameterList("Conversion/Upload Settings");
+        m_parameterList = new ParameterList("mzDB Settings");
         JCheckBox deleteCheckbox = new JCheckBox("Delete mzdb file after a successful upload");
         m_deleteMzdbParameter = new BooleanParameter("DELETE_MZDB", "Delete mzdb file after a successful upload", deleteCheckbox, false);
         m_parameterList.add(m_deleteMzdbParameter);
@@ -273,10 +273,14 @@ public class UploadMzdbDialog extends DefaultDialog implements FileDialogInterfa
         Preferences preferences = NbPreferences.root();
         preferences.put("mzDB_Settings.LAST_MZDB_PATH", m_lastParentDirectory);
 
-        MzdbUploadSettings uploadSettings = new MzdbUploadSettings((boolean) m_deleteMzdbParameter.getObjectValue(), (boolean) m_createParentDirectoryParameter.getObjectValue(), m_uploadLabelParameter.getStringValue());
 
         HashMap<File, MzdbUploadSettings> mzdbFiles = new HashMap<File, MzdbUploadSettings>();
         for (int i = 0; i < m_fileList.getModel().getSize(); i++) {
+            
+            File file = (File) m_fileList.getModel().getElementAt(i);
+            
+            MzdbUploadSettings uploadSettings = new MzdbUploadSettings((boolean) m_deleteMzdbParameter.getObjectValue(), m_uploadLabelParameter.getStringValue(), (boolean) m_createParentDirectoryParameter.getObjectValue() ? File.separator + file.getParentFile().getName() : "");
+            
             mzdbFiles.put((File) m_fileList.getModel().getElementAt(i), uploadSettings);
         }
         

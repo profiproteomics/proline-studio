@@ -8,7 +8,6 @@ package fr.proline.studio.wizard;
 import fr.proline.studio.dpm.jms.AccessJMSManagerThread;
 import fr.proline.studio.dpm.task.jms.AbstractJMSCallback;
 import fr.proline.studio.dpm.task.jms.FileUploadTask;
-import fr.proline.studio.rsmexplorer.MzdbFilesTopComponent;
 import java.io.File;
 import java.util.logging.Level;
 
@@ -22,7 +21,7 @@ public class MzdbUploader implements Runnable, WorkerInterface {
     private final File m_file;
     private static int m_state = WorkerInterface.ACTIVE_STATE;
     private final StringBuilder m_logs;
-    
+
     private final MzdbUploadSettings m_uploadSettings;
 
     public MzdbUploader(File file, MzdbUploadSettings uploadSettings) {
@@ -49,7 +48,7 @@ public class MzdbUploader implements Runnable, WorkerInterface {
         this.m_state = WorkerInterface.ACTIVE_STATE;
 
         this.checkFileFinalization();
-        
+
         final String[] result = new String[1];
 
         AbstractJMSCallback callback = new AbstractJMSCallback() {
@@ -61,12 +60,15 @@ public class MzdbUploader implements Runnable, WorkerInterface {
 
             @Override
             public void run(boolean success) {
- 
+
+                String x = result[0];
+
                 if (success) {
-                    if (m_state == WorkerInterface.ACTIVE_STATE) { 
+                    if (m_state == WorkerInterface.ACTIVE_STATE) {
                         m_state = WorkerInterface.FINISHED_STATE;
-                        
-                        MzdbFilesTopComponent.getTreeFileChooserPanel().updateTree();
+
+                        //MzdbFilesTopComponent.getTreeFileChooserPanel().updateTree();
+                        //MzdbFilesTopComponent.getTreeFileChooserPanel().insertUploadedFile(m_uploadSettings.getDestination(), m_file.getName(), m_uploadSettings.getMountLabel());
 
                         if (m_uploadSettings.getDeleteMzdb()) {
                             while (!m_file.canWrite() && !m_file.exists()) {
@@ -86,19 +88,16 @@ public class MzdbUploader implements Runnable, WorkerInterface {
                         }
 
                     }
-                }else{
+                } else {
                     terminate();
                 }
             }
         };
 
         FileUploadTask task = new FileUploadTask(callback, m_file.getAbsolutePath(), result);
-        
-        if(m_uploadSettings.getDestination()==null){
-            task.initUploadMZDB(m_uploadSettings.getMountLabel(), m_uploadSettings.getCreateParentDirectory());
-        }else{
-            task.initUploadMZDB(m_uploadSettings.getMountLabel(), m_uploadSettings.getDestination());
-        }
+
+        task.initUploadMZDB(m_uploadSettings.getMountLabel(), m_uploadSettings.getDestination());
+
         AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
 
         this.m_run = false;

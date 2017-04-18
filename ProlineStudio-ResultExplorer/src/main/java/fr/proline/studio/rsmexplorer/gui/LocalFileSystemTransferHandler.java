@@ -83,12 +83,12 @@ public class LocalFileSystemTransferHandler extends TransferHandler {
 
         if (support.getComponent() instanceof JTree) {
 
-            JTree tree = (JTree) support.getComponent();
+            //JTree tree = (JTree) support.getComponent();
             JTree.DropLocation dropLocation = (JTree.DropLocation) support.getDropLocation();
 
             TreePath path = dropLocation.getPath();
 
-            int dropRow = tree.getRowForPath(path);
+            //int dropRow = tree.getRowForPath(path);
 
         } else if (support.getComponent() instanceof TreeFileChooserPanel) {
             return true;

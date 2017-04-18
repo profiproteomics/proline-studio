@@ -46,7 +46,6 @@ public class FileUploadTask extends AbstractJMSTask {
     private String m_mountLabel;
     private String m_filePath;
     private String[] m_remoteFilePath = null;
-    private boolean m_createParentDirectory;
 
     private String m_destinationPath = null;
 
@@ -60,17 +59,10 @@ public class FileUploadTask extends AbstractJMSTask {
         m_action = UPLOAD_MAXQUANT_FILE;
     }
 
-    public void initUploadMZDB(String mountLabel, boolean createParentDirectory) {
-        m_action = UPLOAD_MZDB_FILE;
-        m_mountLabel = mountLabel;
-        m_createParentDirectory = createParentDirectory;
-    }
-
     public void initUploadMZDB(String mountLabel, String destinationPath) {
         m_action = UPLOAD_MZDB_FILE;
         m_mountLabel = mountLabel;
         m_destinationPath = destinationPath;
-        m_createParentDirectory = false;
     }
 
     @Override
@@ -99,16 +91,8 @@ public class FileUploadTask extends AbstractJMSTask {
             message.setStringProperty("dest_file_name", uploadFile.getName());
 
             //this needs checking!
-            if (m_action == UPLOAD_MZDB_FILE) {
-
-                String pathExtention;
-                if (m_destinationPath == null) {
-                    pathExtention = (m_createParentDirectory) ? File.separator + uploadFile.getParentFile().getName() : "";
-                } else {
-                    pathExtention = m_destinationPath;
-                }
-                message.setStringProperty("dest_folder_path", m_mountLabel + pathExtention);
-
+            if (m_action == UPLOAD_MZDB_FILE) {                
+                message.setStringProperty("dest_folder_path", m_mountLabel + m_destinationPath);
             }
 
             addSourceToMessage(message);

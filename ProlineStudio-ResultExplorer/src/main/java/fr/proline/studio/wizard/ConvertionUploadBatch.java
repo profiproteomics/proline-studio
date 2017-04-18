@@ -5,6 +5,7 @@
  */
 package fr.proline.studio.wizard;
 
+import fr.proline.studio.rsmexplorer.MzdbFilesTopComponent;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -12,6 +13,7 @@ import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import javax.swing.tree.TreePath;
 
 /**
  *
@@ -21,13 +23,20 @@ public class ConvertionUploadBatch implements Runnable, ConversionListener {
 
     private ThreadPoolExecutor m_conversionExecutor, m_uploadExecutor;
     private HashMap<File, ConversionSettings> m_conversions;
+    private TreePath m_pathToExpand;
+    private int m_uploadCounter, m_failedConversions;
 
     public ConvertionUploadBatch(HashMap<File, ConversionSettings> conversions) {
         m_conversions = conversions;
-
+        m_uploadCounter = 0;
+        m_failedConversions = 0;
         m_conversionExecutor = (ThreadPoolExecutor) Executors.newFixedThreadPool(1);
         m_uploadExecutor = (ThreadPoolExecutor) Executors.newFixedThreadPool(5);
-        
+    }
+
+    public ConvertionUploadBatch(HashMap<File, ConversionSettings> conversions, TreePath pathToExpand) {
+        this(conversions);
+        m_pathToExpand = pathToExpand;
     }
 
     private void upload(File f, MzdbUploadSettings uploadSettings) {
@@ -65,12 +74,31 @@ public class ConvertionUploadBatch implements Runnable, ConversionListener {
         } catch (InterruptedException e) {
             ;
         }
+
     }
 
     @Override
-    public void ConversionPerformed(File f, ConversionSettings conversionSettings) {
-        if (conversionSettings.getUploadSettings() != null) {
-            upload(f, conversionSettings.getUploadSettings());
+    public void ConversionPerformed(File f, ConversionSettings conversionSettings, boolean success) {
+
+        if (success) {
+            if (conversionSettings.getUploadSettings() != null) {
+                upload(f, conversionSettings.getUploadSettings());
+                m_uploadCounter++;
+            }
+        } else {
+            m_failedConversions++;
+        }
+
+        if ((m_uploadCounter + m_failedConversions) == m_conversions.size()) {
+            m_uploadExecutor.shutdown();
+            try {
+                m_uploadExecutor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+            } catch (InterruptedException e) {
+                ;
+            }
+            if (m_pathToExpand != null) {
+                MzdbFilesTopComponent.getTreeFileChooserPanel().expandTreePath(m_pathToExpand);
+            }
         }
     }
 

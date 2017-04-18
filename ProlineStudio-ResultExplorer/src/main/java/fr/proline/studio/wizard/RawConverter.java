@@ -53,14 +53,17 @@ public class RawConverter implements Runnable, WorkerInterface {
 
                     @Override
                     public void run() {
+                        
+                        File f = new File(m_settings.getOutputPath() + File.separator + m_file.getName().substring(0, m_file.getName().lastIndexOf(".raw")) + ".mzdb");
 
                         if (success) {
+
                             if (m_state == WorkerInterface.ACTIVE_STATE) {
                                 m_state = WorkerInterface.FINISHED_STATE;
                                 if (m_listener != null) {
-                                    File f = new File(m_settings.getOutputPath() + File.separator + m_file.getName().substring(0, m_file.getName().lastIndexOf(".raw")) + ".mzdb");
+
                                     if (f.exists()) {
-                                        m_listener.ConversionPerformed(f, m_settings);
+                                        m_listener.ConversionPerformed(f, m_settings, true);
                                     }
                                 }
 
@@ -79,6 +82,7 @@ public class RawConverter implements Runnable, WorkerInterface {
                             }
                         } else {
                             terminate();
+                            m_listener.ConversionPerformed(f, m_settings, false);
                         }
 
                     }

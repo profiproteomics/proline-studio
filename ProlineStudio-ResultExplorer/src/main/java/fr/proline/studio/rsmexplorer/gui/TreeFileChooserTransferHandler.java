@@ -13,13 +13,8 @@ import java.awt.Color;
 import java.awt.Frame;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
-import java.awt.event.WindowEvent;
-import java.awt.event.WindowFocusListener;
-import java.awt.event.WindowListener;
-import java.awt.event.WindowStateListener;
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.*;
 import java.util.prefs.Preferences;
 import javax.swing.JComponent;
@@ -236,7 +231,7 @@ public class TreeFileChooserTransferHandler extends TransferHandler {
                 String destination = destinationBuilder.toString();
 
                 //Here we must do a small modification so that mzdb is deleted if it is a result of a conversion drag!
-                MzdbUploadSettings uploadSettings = new MzdbUploadSettings(!transferredFiles.get(0).getAbsolutePath().endsWith(".mzdb"), (boolean) false, parentLabel, destination);
+                MzdbUploadSettings uploadSettings = new MzdbUploadSettings(!transferredFiles.get(0).getAbsolutePath().endsWith(".mzdb"), parentLabel, destination);
 
                 if (transferredFiles.get(0).getAbsolutePath().endsWith(".mzdb")) {
 
@@ -256,7 +251,7 @@ public class TreeFileChooserTransferHandler extends TransferHandler {
                     }
 
                     //Uploading Task
-                    MzdbUploadBatch uploadBatch = new MzdbUploadBatch(uploadSamples);
+                    MzdbUploadBatch uploadBatch = new MzdbUploadBatch(uploadSamples, treePath);
                     Thread thread = new Thread(uploadBatch);
                     thread.start();
 
@@ -276,7 +271,7 @@ public class TreeFileChooserTransferHandler extends TransferHandler {
                             @Override
                             public void okPerformed(DefaultDialog d) {
                                 
-                                launchConversion(transferredFiles, preferences.get("Conversion/Upload_Settings.Converter_(.exe)", null), uploadSettings);
+                                launchConversion(transferredFiles, preferences.get("Conversion/Upload_Settings.Converter_(.exe)", null), uploadSettings, treePath);
 
                             }
 
@@ -311,7 +306,7 @@ public class TreeFileChooserTransferHandler extends TransferHandler {
                         dialog.setVisible(true);
 
                     } else {     
-                        launchConversion(transferredFiles, converterPath, uploadSettings);
+                        launchConversion(transferredFiles, converterPath, uploadSettings, treePath);
                     }
 
                 }
@@ -326,7 +321,7 @@ public class TreeFileChooserTransferHandler extends TransferHandler {
 
     }
 
-    private void launchConversion(ArrayList<File> transferredFiles, String converterPath, MzdbUploadSettings uploadSettings) {
+    private void launchConversion(ArrayList<File> transferredFiles, String converterPath, MzdbUploadSettings uploadSettings, TreePath pathToExpand) {
         //Here prepare raw samples HashMap!
         HashMap<File, ConversionSettings> conversionSamples = new HashMap<File, ConversionSettings>();
         for (int i = 0; i < transferredFiles.size(); i++) {
@@ -346,7 +341,7 @@ public class TreeFileChooserTransferHandler extends TransferHandler {
             }
         }
 
-        ConvertionUploadBatch conversionBatch = new ConvertionUploadBatch(conversionSamples);
+        ConvertionUploadBatch conversionBatch = new ConvertionUploadBatch(conversionSamples, pathToExpand);
         Thread thread = new Thread(conversionBatch);
         thread.start();
     }

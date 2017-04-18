@@ -1,20 +1,13 @@
 package fr.proline.studio.dpm.task.jms;
 
-import fr.proline.studio.dpm.task.*;
-import com.google.api.client.http.*;
-import com.google.api.client.json.GenericJson;
-import com.google.api.client.json.rpc2.JsonRpcRequest;
-import com.google.api.client.util.ArrayMap;
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Error;
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Message;
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Notification;
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Request;
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Response;
 
-import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
-import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import fr.proline.studio.dpm.jms.AccessJMSManagerThread;
 import fr.proline.studio.dpm.serverfilesystem.ServerFile;

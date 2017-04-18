@@ -1,6 +1,5 @@
 package fr.proline.studio.dpm.task.jms;
 
-import com.google.api.client.util.ArrayMap;
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Error;
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Message;
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Notification;
@@ -12,10 +11,8 @@ import java.util.Map;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import fr.proline.studio.dpm.jms.AccessJMSManagerThread;
 import fr.proline.studio.dpm.serverfilesystem.RootInfo;
-import fr.proline.studio.dpm.serverfilesystem.ServerFile;
 import static fr.proline.studio.dpm.task.jms.AbstractJMSTask.m_loggerProline;
 import fr.proline.studio.dpm.task.util.JMSConnectionManager;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import javax.jms.JMSException;
 import javax.jms.Message;

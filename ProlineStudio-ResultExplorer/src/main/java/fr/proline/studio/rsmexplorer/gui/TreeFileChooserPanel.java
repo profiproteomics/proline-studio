@@ -16,6 +16,7 @@ import javax.swing.Box;
 import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JToolBar;
@@ -24,11 +25,15 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.event.TreeExpansionEvent;
 import javax.swing.event.TreeExpansionListener;
+import javax.swing.event.TreeModelEvent;
+import javax.swing.event.TreeModelListener;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
+import javax.swing.event.TreeWillExpandListener;
 import javax.swing.filechooser.FileSystemView;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.ExpandVetoException;
 import javax.swing.tree.TreeCellRenderer;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
@@ -191,9 +196,48 @@ public class TreeFileChooserPanel extends JPanel {
 
         while (totalNodes.hasMoreElements()) {
             DefaultMutableTreeNode node = (DefaultMutableTreeNode) totalNodes.nextElement();
-            
-            if(node.toString().toLowerCase().equalsIgnoreCase(pathLabel)){
-                m_tree.expandPath(new TreePath(node.getPath()));
+
+            TreePath nodePath = new TreePath(node.getPath());
+
+            if (node.toString().toLowerCase().equalsIgnoreCase(pathLabel)) {
+
+                m_tree.getModel().addTreeModelListener(new TreeModelListener() {
+
+                    @Override
+                    public void treeNodesChanged(TreeModelEvent tme) {
+                        ;
+                    }
+
+                    @Override
+                    public void treeNodesInserted(TreeModelEvent tme) {
+                        ;
+                    }
+
+                    @Override
+                    public void treeNodesRemoved(TreeModelEvent tme) {
+                        ;
+                    }
+
+                    @Override
+                    public void treeStructureChanged(TreeModelEvent tme) {
+                        Enumeration mountingPointChildren = node.children();
+
+                        while (mountingPointChildren.hasMoreElements()) {
+
+                            DefaultMutableTreeNode child = (DefaultMutableTreeNode) mountingPointChildren.nextElement();
+
+                            if (directories.contains(child.toString())) {
+                                m_tree.expandPath(new TreePath(child.getPath()));
+                            }
+                        }
+
+                    }
+
+                });
+                
+                m_tree.expandPath(nodePath);
+
+                break;
             }
         }
     }

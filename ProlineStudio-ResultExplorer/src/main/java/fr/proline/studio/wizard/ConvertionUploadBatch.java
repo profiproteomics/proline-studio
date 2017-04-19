@@ -8,6 +8,7 @@ package fr.proline.studio.wizard;
 import fr.proline.studio.rsmexplorer.MzdbFilesTopComponent;
 import java.io.File;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.Executors;
@@ -25,6 +26,7 @@ public class ConvertionUploadBatch implements Runnable, ConversionListener {
     private HashMap<File, ConversionSettings> m_conversions;
     private TreePath m_pathToExpand;
     private int m_uploadCounter, m_failedConversions;
+    private HashSet<String> m_parentDirectories;
 
     public ConvertionUploadBatch(HashMap<File, ConversionSettings> conversions) {
         m_conversions = conversions;
@@ -61,11 +63,29 @@ public class ConvertionUploadBatch implements Runnable, ConversionListener {
 
     @Override
     public void run() {
+        
+        m_parentDirectories = new HashSet<String>();
 
         Iterator it = m_conversions.entrySet().iterator();
         while (it.hasNext()) {
             Map.Entry pair = (Map.Entry) it.next();
-            convert((File) pair.getKey(), (ConversionSettings) pair.getValue());
+            
+            File f = (File) pair.getKey();
+            ConversionSettings settings = (ConversionSettings) pair.getValue();
+
+            if (m_pathToExpand == null) {
+
+                if (!settings.getUploadSettings().getDestination().equalsIgnoreCase("")) {
+                    if (settings.getUploadSettings().getDestination().startsWith(File.separator)) {
+                        m_parentDirectories.add(settings.getUploadSettings().getDestination().substring(1));
+                    } else {
+                        m_parentDirectories.add(settings.getUploadSettings().getDestination());
+                    }
+                }
+
+            }
+            
+            convert(f, settings);
         }
 
         m_conversionExecutor.shutdown();
@@ -99,7 +119,7 @@ public class ConvertionUploadBatch implements Runnable, ConversionListener {
             if (m_pathToExpand != null) {
                 MzdbFilesTopComponent.getTreeFileChooserPanel().expandTreePath(m_pathToExpand);
             }else{
-                MzdbFilesTopComponent.getTreeFileChooserPanel().expandMultipleTreePath(null, conversionSettings.getUploadSettings().getMountLabel());
+                MzdbFilesTopComponent.getTreeFileChooserPanel().expandMultipleTreePath(m_parentDirectories, conversionSettings.getUploadSettings().getMountLabel());
             }
         }
     }

@@ -126,7 +126,8 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
         DataBoxDataAnalyzerResults(43),
         DataBoxImage(44),
         DataBoxSystemTasks(45),
-        DataBoxFrozenCopy(46);
+        DataBoxFrozenCopy(46),
+        DataBoxPTMProteinSite_V2(47);
         
         int m_type;
         private static HashMap<Integer, DataboxType> m_databoxTypeMap = null;
@@ -217,6 +218,8 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
                     return new DataboxRsetPSMForMsQuery();
                 case DataBoxPTMProteinSite:
                     return new DataBoxPTMProteinSite();
+                case DataBoxPTMProteinSite_V2:
+                    return new DataBoxPTMProteinSite_V2();
                 case DataBoxDataAnalyzerResults:
                     return new DataBoxDataAnalyzerResults();
                 case DataBoxImage:

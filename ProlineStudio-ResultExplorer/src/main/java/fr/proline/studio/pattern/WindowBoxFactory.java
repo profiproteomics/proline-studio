@@ -264,6 +264,16 @@ public class WindowBoxFactory {
         return new WindowBox(boxes[0].getFullName(), generatePanel(boxes), boxes[0], IconManager.getImage(iconType));
     }
 
+        public static WindowBox getPTMProteinSiteWindowBox_V2(String dataName) {
+
+        AbstractDataBox[] boxes = new AbstractDataBox[1];
+        boxes[0] = new DataBoxPTMProteinSite_V2();
+        boxes[0].setDataName(dataName);
+
+        IconManager.IconType iconType = IconManager.IconType.DATASET_RSM;
+        return new WindowBox(boxes[0].getFullName(), generatePanel(boxes), boxes[0], IconManager.getImage(iconType));
+    }
+
     public static WindowBox getRsmPSMWindowBox(String dataName, boolean isDecoy, boolean mergedData) {
         // create boxes
         // AW: All PSM of an Identification Summary or corresponding to a Peptide Instance

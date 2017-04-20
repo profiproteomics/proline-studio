@@ -156,6 +156,9 @@ public class TreeFileChooserPanel extends JPanel {
     }
 
     public void updateTree() {
+        
+        String expansionState = TreeUtil.getExpansionState(m_tree, 0);
+        
         m_top.removeAllChildren();
         m_model.reload(m_top);
 
@@ -170,6 +173,8 @@ public class TreeFileChooserPanel extends JPanel {
         }
 
         m_model.reload();
+        
+        TreeUtil.restoreExpanstionState(m_tree, 0, expansionState);
     }
 
     public static TreePath getPath(TreeNode treeNode) {
@@ -234,7 +239,7 @@ public class TreeFileChooserPanel extends JPanel {
                     }
 
                 });
-                
+
                 m_tree.expandPath(nodePath);
 
                 break;

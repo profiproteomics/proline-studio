@@ -23,9 +23,9 @@ import javax.jms.TextMessage;
  */
 public class DownloadFileTask extends AbstractJMSTask {
 
-    private String m_userFilePath;
-    private String m_serverFilePath;
-    private String m_serverNodeId;
+    private final String m_userFilePath;
+    private final String m_serverFilePath;
+    private final String m_serverNodeId;
     
     public DownloadFileTask(AbstractJMSCallback callback, String userFilePath, String serverFilePath, String serverNodeId) {
         super(callback, new TaskInfo("Download File " + userFilePath, true, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_MEDIUM));

@@ -7,7 +7,6 @@ import java.awt.event.MouseListener;
 import java.util.ArrayList;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import org.slf4j.LoggerFactory;
 import java.util.List;
 
 
@@ -31,7 +30,7 @@ public class CollapsablePanel extends JPanel {
     private HeaderLabel m_headerLabel; 
     
     /* Collapse listener list */
-    private List<CollapseListener> m_listeners = new ArrayList<>();
+    private final List<CollapseListener> m_listeners = new ArrayList<>();
 
     
         /**
@@ -51,20 +50,23 @@ public class CollapsablePanel extends JPanel {
     private void initPanel(String text, JPanel panel) {
         GridBagConstraints gbc = new GridBagConstraints();  
         gbc.insets = new Insets(1, 3, 0, 3);  
+        gbc.anchor = GridBagConstraints.NORTHWEST;
+        gbc.fill = GridBagConstraints.BOTH;
         gbc.weightx = 1.0;  
-        gbc.fill = GridBagConstraints.HORIZONTAL;  
-        gbc.gridwidth = GridBagConstraints.REMAINDER;  
   
         m_headerLabel = new HeaderLabel(text, m_expanded); 
         m_contentPanel = panel;  
   
+        gbc.gridx = 0;
+        gbc.gridy = 0;
         add(m_headerLabel, gbc);  
+        
+        gbc.gridy++;
+        gbc.weighty = 1.0;  
         add(m_contentPanel, gbc);  
         m_contentPanel.setVisible(m_expanded);  
   
-        JLabel padding = new JLabel();  
-        gbc.weighty = 1.0;  
-        add(padding, gbc); 
+
     }
   
     /**

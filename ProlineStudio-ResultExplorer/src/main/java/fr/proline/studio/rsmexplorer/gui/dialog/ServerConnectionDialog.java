@@ -178,6 +178,8 @@ public class ServerConnectionDialog extends ConnectionDialog {
                     }
                     
                     MzdbFilesTopComponent.getTreeFileChooserPanel().initTree();
+                    
+                    MzdbFilesTopComponent.getTreeFileChooserPanel().restoreTree();
 
                     if (changingUser) {
 

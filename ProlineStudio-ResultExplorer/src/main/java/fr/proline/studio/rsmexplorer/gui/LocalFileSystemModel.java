@@ -10,6 +10,7 @@ import java.util.Enumeration;
 import java.util.Vector;
 import javax.swing.event.TreeModelEvent;
 import javax.swing.event.TreeModelListener;
+import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 
@@ -21,27 +22,35 @@ public class LocalFileSystemModel implements TreeModel {
 
     private String m_rootURL;
 
+    private DefaultMutableTreeNode m_root;
+    
     private Vector listeners; // Declare the listeners vector
 
     public LocalFileSystemModel(String rootURL) {
         m_rootURL = rootURL;
+        m_root = new DefaultMutableTreeNode(new File(rootURL));
         listeners = new Vector();
     }
 
     public void setRoot(String rootURL) {
         m_rootURL = rootURL;
+        m_root = new DefaultMutableTreeNode(new File(rootURL));
     }
 
     @Override
     public Object getRoot() {
-        return new File(m_rootURL);
+        return m_root;
     }
 
     @Override
     public Object getChild(Object parent, int index) {
-        File directory = (File) parent;
+        DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode) parent;
+        
+        File directory = (File) parentNode.getUserObject();
+        
         String[] directoryMembers = directory.list();
-        return (new File(directory, directoryMembers[index]));
+        
+        return (new DefaultMutableTreeNode(new File(directory, directoryMembers[index])));
     }
 
     @Override
@@ -49,7 +58,10 @@ public class LocalFileSystemModel implements TreeModel {
         if (parent == null) {
             return 0;
         }
-        File fileSystemMember = (File) parent;
+        
+        DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode) parent;
+        
+        File fileSystemMember = (File) parentNode.getUserObject();
         if (fileSystemMember.isDirectory()) {
             File[] directoryMembers = fileSystemMember.listFiles();
             if (directoryMembers == null) {
@@ -62,8 +74,10 @@ public class LocalFileSystemModel implements TreeModel {
     }
 
     @Override
-    public boolean isLeaf(Object node) {
-        return ((File) node).isFile();
+    public boolean isLeaf(Object node) {      
+        DefaultMutableTreeNode mutableNode = (DefaultMutableTreeNode) node;       
+        File fileNode = (File)mutableNode.getUserObject();      
+        return fileNode.isFile();
     }
 
     @Override
@@ -73,8 +87,14 @@ public class LocalFileSystemModel implements TreeModel {
 
     @Override
     public int getIndexOfChild(Object parent, Object child) {
-        File directory = (File) parent;
-        File directoryMember = (File) child;
+        
+              
+        DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode) parent;
+        DefaultMutableTreeNode childNode = (DefaultMutableTreeNode) child;
+        
+        File directory = (File) parentNode.getUserObject();
+        File directoryMember = (File) childNode.getUserObject();
+
         String[] directoryMemberNames = directory.list();
         int result = -1;
 

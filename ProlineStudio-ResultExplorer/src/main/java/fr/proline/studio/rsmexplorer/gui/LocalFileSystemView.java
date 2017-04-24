@@ -19,7 +19,12 @@ import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.HashSet;
 import javax.swing.BorderFactory;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
@@ -28,7 +33,11 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTree;
+import javax.swing.event.TreeExpansionEvent;
+import javax.swing.event.TreeExpansionListener;
+import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
+import org.openide.util.Exceptions;
 import org.openide.windows.WindowManager;
 
 /**
@@ -51,11 +60,11 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
     }
 
     private void initComponents() {
-                
+
         m_selectedFiles = new ArrayList<File>();
 
         setBorder(BorderFactory.createTitledBorder("Local Site"));
-        
+
         setLayout(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();
         c.anchor = GridBagConstraints.NORTHWEST;
@@ -78,6 +87,7 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
                     m_fileSystemDataModel = new LocalFileSystemModel(rootsComboBox.getSelectedItem().toString());
                     m_tree.setModel(m_fileSystemDataModel);
                 }
+
             }
 
         });
@@ -93,7 +103,38 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
 
         m_fileSystemDataModel = new LocalFileSystemModel(roots[0].getAbsolutePath());
         m_tree = new JTree(m_fileSystemDataModel);
-        
+
+        HashSet<String> set = TreeStateUtil.retrieveExpansionState(TreeStateUtil.TreeType.LOCAL);
+
+        if (set.size() > 0) {
+            try {
+                TreeStateUtil.resetExpansionState(set, m_tree, (DefaultMutableTreeNode) m_tree.getModel().getRoot());
+            } catch (Exception ex) {
+                PrintWriter pw = null;
+                try {
+                    pw = new PrintWriter(new File("D:\\shit.txt"));
+                } catch (FileNotFoundException ex1) {
+                    Exceptions.printStackTrace(ex1);
+                }
+                ex.printStackTrace(pw);
+                pw.close();
+            }
+        }
+
+        m_tree.addTreeExpansionListener(new TreeExpansionListener() {
+
+            @Override
+            public void treeExpanded(TreeExpansionEvent tee) {
+                TreeStateUtil.saveExpansionState(m_tree, TreeStateUtil.TreeType.LOCAL);
+            }
+
+            @Override
+            public void treeCollapsed(TreeExpansionEvent tee) {
+                TreeStateUtil.saveExpansionState(m_tree, TreeStateUtil.TreeType.LOCAL);
+            }
+
+        });
+
         m_tree.setTransferHandler(m_transferHandler);
         m_tree.setDragEnabled(true);
 
@@ -110,11 +151,11 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
         add(scrollPane, c);
 
     }
-    
+
     private ArrayList<String> getSelectedURLs() {
-        
+
         m_selectedFiles.clear();
-        
+
         ArrayList<String> selectedURLs = new ArrayList<String>();
         TreePath[] paths = m_tree.getSelectionPaths();
         for (TreePath path : paths) {
@@ -186,7 +227,7 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
         m_convertRawFileItem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent ae) {
-                ConvertRawDialog dialog = ConvertRawDialog.getDialog(null);        
+                ConvertRawDialog dialog = ConvertRawDialog.getDialog(null);
                 dialog.setFiles(m_selectedFiles);
                 dialog.setVisible(true);
             }
@@ -199,7 +240,7 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
         m_uploadMzdbFileItem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent ae) {
-                UploadMzdbDialog dialog = UploadMzdbDialog.getDialog(WindowManager.getDefault().getMainWindow());        
+                UploadMzdbDialog dialog = UploadMzdbDialog.getDialog(WindowManager.getDefault().getMainWindow());
                 dialog.setFiles(m_selectedFiles);
                 dialog.setVisible(true);
             }

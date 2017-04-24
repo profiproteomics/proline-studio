@@ -16,7 +16,6 @@ import javax.swing.Box;
 import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JToolBar;
@@ -29,11 +28,9 @@ import javax.swing.event.TreeModelEvent;
 import javax.swing.event.TreeModelListener;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
-import javax.swing.event.TreeWillExpandListener;
 import javax.swing.filechooser.FileSystemView;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.ExpandVetoException;
 import javax.swing.tree.TreeCellRenderer;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
@@ -63,6 +60,13 @@ public class TreeFileChooserPanel extends JPanel {
         m_showUpdateButton = showUpdateButton;
     }
 
+    public void restoreTree() {
+        if (m_tree != null) {
+            //TreeStateUtil.setExpansionState(TreeStateUtil.retrieveExpansionState(TreeStateUtil.TreeType.SERVER), m_tree);
+            TreeStateUtil.resetExpansionState(TreeStateUtil.retrieveExpansionState(TreeStateUtil.TreeType.SERVER), m_tree, (DefaultMutableTreeNode) m_tree.getModel().getRoot());
+        }
+    }
+
     public void initTree() {
         setLayout(new GridBagLayout());
 
@@ -80,6 +84,20 @@ public class TreeFileChooserPanel extends JPanel {
 
         m_model = new DefaultTreeModel(m_top);
         m_tree = new TreeFileChooser(m_model);
+
+        m_tree.addTreeExpansionListener(new TreeExpansionListener() {
+
+            @Override
+            public void treeExpanded(TreeExpansionEvent tee) {
+                TreeStateUtil.saveExpansionState(m_tree, TreeStateUtil.TreeType.SERVER);
+            }
+
+            @Override
+            public void treeCollapsed(TreeExpansionEvent tee) {
+                TreeStateUtil.saveExpansionState(m_tree, TreeStateUtil.TreeType.SERVER);
+            }
+
+        });
 
         if (m_transferHandler != null) {
             m_tree.setTransferHandler(m_transferHandler);
@@ -156,9 +174,9 @@ public class TreeFileChooserPanel extends JPanel {
     }
 
     public void updateTree() {
-        
-        String expansionState = TreeUtil.getExpansionState(m_tree, 0);
-        
+
+        HashSet<String> expandedPaths = TreeStateUtil.getExpansionState(m_tree);
+
         m_top.removeAllChildren();
         m_model.reload(m_top);
 
@@ -173,8 +191,8 @@ public class TreeFileChooserPanel extends JPanel {
         }
 
         m_model.reload();
-        
-        TreeUtil.restoreExpanstionState(m_tree, 0, expansionState);
+
+        TreeStateUtil.setExpansionState(expandedPaths, m_tree);
     }
 
     public static TreePath getPath(TreeNode treeNode) {

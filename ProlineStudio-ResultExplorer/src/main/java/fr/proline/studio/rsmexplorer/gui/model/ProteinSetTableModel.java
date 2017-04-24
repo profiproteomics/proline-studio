@@ -45,10 +45,11 @@ public class ProteinSetTableModel extends LazyTableModel implements GlobalTableM
     public static final int COLTYPE_PROTEIN_SCORE = 3;
     public static final int COLTYPE_PROTEINS_COUNT = 4;
     public static final int COLTYPE_PEPTIDES_COUNT = 5;
-    public static final int COLTYPE_SPECTRAL_COUNT = 6;
-    public static final int COLTYPE_SPECIFIC_SPECTRAL_COUNT = 7;
-    public static final int COLTYPE_UNIQUE_SEQUENCES_COUNT = 8;
-    private static final String[] m_columnNames = {"Id", "Protein Set", "Description", "Score", "Proteins", "Peptides", "Spectral Count", "Specific Spectral Count", "Sequence Count"};
+    public static final int COLTYPE_OBSERVABLE_PEPTIDES = 6;
+    public static final int COLTYPE_SPECTRAL_COUNT = 7;
+    public static final int COLTYPE_SPECIFIC_SPECTRAL_COUNT = 8;
+    public static final int COLTYPE_UNIQUE_SEQUENCES_COUNT = 9;
+    private static final String[] m_columnNames = {"Id", "Protein Set", "Description", "Score", "Proteins", "Peptides", "Observable Peptides", "Spectral Count", "Specific Spectral Count", "Sequence Count"};
     
     private DProteinSet[] m_proteinSets = null;
 
@@ -67,10 +68,10 @@ public class ProteinSetTableModel extends LazyTableModel implements GlobalTableM
     
     private void setColUsed(boolean mergedRsm) {
         if (mergedRsm) {
-            final int[] colUsed = {COLTYPE_PROTEIN_SET_ID, COLTYPE_PROTEIN_SET_NAME, COLTYPE_PROTEIN_SET_DESCRIPTION, COLTYPE_PROTEIN_SCORE, COLTYPE_PROTEINS_COUNT, COLTYPE_PEPTIDES_COUNT, COLTYPE_SPECTRAL_COUNT, COLTYPE_SPECIFIC_SPECTRAL_COUNT, COLTYPE_UNIQUE_SEQUENCES_COUNT};
+            final int[] colUsed = {COLTYPE_PROTEIN_SET_ID, COLTYPE_PROTEIN_SET_NAME, COLTYPE_PROTEIN_SET_DESCRIPTION, COLTYPE_PROTEIN_SCORE, COLTYPE_PROTEINS_COUNT, COLTYPE_PEPTIDES_COUNT, COLTYPE_OBSERVABLE_PEPTIDES, COLTYPE_SPECTRAL_COUNT, COLTYPE_SPECIFIC_SPECTRAL_COUNT, COLTYPE_UNIQUE_SEQUENCES_COUNT};
             m_colUsed = colUsed;
         } else {
-            final int[] colUsed = {COLTYPE_PROTEIN_SET_ID, COLTYPE_PROTEIN_SET_NAME, COLTYPE_PROTEIN_SET_DESCRIPTION, COLTYPE_PROTEIN_SCORE, COLTYPE_PROTEINS_COUNT, COLTYPE_PEPTIDES_COUNT, COLTYPE_SPECTRAL_COUNT, COLTYPE_SPECIFIC_SPECTRAL_COUNT, COLTYPE_UNIQUE_SEQUENCES_COUNT};
+            final int[] colUsed = {COLTYPE_PROTEIN_SET_ID, COLTYPE_PROTEIN_SET_NAME, COLTYPE_PROTEIN_SET_DESCRIPTION, COLTYPE_PROTEIN_SCORE, COLTYPE_PROTEINS_COUNT, COLTYPE_PEPTIDES_COUNT, COLTYPE_OBSERVABLE_PEPTIDES, COLTYPE_SPECTRAL_COUNT, COLTYPE_SPECIFIC_SPECTRAL_COUNT, COLTYPE_UNIQUE_SEQUENCES_COUNT};
             m_colUsed = colUsed;
         }
     }
@@ -133,6 +134,7 @@ public class ProteinSetTableModel extends LazyTableModel implements GlobalTableM
                 return DatabaseProteinSetsTask.SUB_TASK_SAMESET_SUBSET_COUNT;
             case COLTYPE_UNIQUE_SEQUENCES_COUNT:
             case COLTYPE_PEPTIDES_COUNT:
+            case COLTYPE_OBSERVABLE_PEPTIDES:
                 return DatabaseProteinSetsTask.SUB_TASK_TYPICAL_PROTEIN;
             case COLTYPE_SPECTRAL_COUNT:
                 return DatabaseProteinSetsTask.SUB_TASK_SPECTRAL_COUNT;
@@ -248,7 +250,22 @@ public class ProteinSetTableModel extends LazyTableModel implements GlobalTableM
                 return lazyData;
    
             }
-                case COLTYPE_UNIQUE_SEQUENCES_COUNT: {
+            case COLTYPE_OBSERVABLE_PEPTIDES: {
+                LazyData lazyData = getLazyData(row,col);
+                
+                // Retrieve typical Protein Match
+                DProteinMatch proteinMatch = proteinSet.getTypicalProteinMatch();
+                
+                if (proteinMatch == null) {
+                    lazyData.setData(null);
+                    
+                    givePriorityTo(m_taskId, row, col);
+                } else {
+                    lazyData.setData( proteinMatch.getObservablePeptidesCount() );
+                }
+                return lazyData;
+            }
+            case COLTYPE_UNIQUE_SEQUENCES_COUNT: {
                 
                 LazyData lazyData = getLazyData(row,col);
                 DProteinMatch proteinMatch = proteinSet.getTypicalProteinMatch();
@@ -452,6 +469,7 @@ public class ProteinSetTableModel extends LazyTableModel implements GlobalTableM
             }
             case COLTYPE_PROTEINS_COUNT:
             case COLTYPE_PEPTIDES_COUNT:
+            case COLTYPE_OBSERVABLE_PEPTIDES:
             case COLTYPE_UNIQUE_SEQUENCES_COUNT:
             case COLTYPE_SPECTRAL_COUNT:
             case COLTYPE_SPECIFIC_SPECTRAL_COUNT: {
@@ -506,6 +524,7 @@ public class ProteinSetTableModel extends LazyTableModel implements GlobalTableM
         filtersMap.put(colIdx, new DoubleFilter(getColumnName(colIdx), null, colIdx));  colIdx++; // COLTYPE_PROTEIN_SCORE
         colIdx++; // COLTYPE_PROTEINS_COUNT
         filtersMap.put(colIdx, new IntegerFilter(getColumnName(colIdx), null, colIdx));  colIdx++; // COLTYPE_PEPTIDES_COUNT
+        filtersMap.put(colIdx, new IntegerFilter(getColumnName(colIdx), null, colIdx));  colIdx++; // COLTYPE_OBSERVABLE_PEPTIDES
         filtersMap.put(colIdx, new IntegerFilter(getColumnName(colIdx), null, colIdx));  colIdx++; // COLTYPE_SPECTRAL_COUNT
         /*if (m_mergedData) {
             filtersMap.put(colIdx, new IntegerFilter(getColumnName(colIdx), null, colIdx)); colIdx++; // COLTYPE_BASIC_SPECTRAL_COUNT
@@ -569,7 +588,8 @@ public class ProteinSetTableModel extends LazyTableModel implements GlobalTableM
                 renderer = new ProteinCountRenderer();
                 break;
             }
-            // COLTYPE_PEPTIDES_COUNT COLTYPE_SPECTRAL_COUNT COLTYPE_BASIC_SPECTRAL_COUNT COLTYPE_SPECIFIC_SPECTRAL_COUNT COLTYPE_UNIQUE_SEQUENCES_COUNT
+
+            // COLTYPE_PEPTIDES_COUNT COLTYPE_OBSERVABLE_PEPTIDES COLTYPE_SPECTRAL_COUNT COLTYPE_BASIC_SPECTRAL_COUNT COLTYPE_SPECIFIC_SPECTRAL_COUNT COLTYPE_UNIQUE_SEQUENCES_COUNT
            
         }
         m_rendererMap.put(col, renderer);

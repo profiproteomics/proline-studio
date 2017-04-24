@@ -103,7 +103,7 @@ public class DatabaseProteinsAndPeptidesTask extends AbstractDatabaseTask {
             entityManagerMSI.getTransaction().begin();
             
             // Load Protein Matches
-            TypedQuery<DProteinMatch> proteinMatchQuery = entityManagerMSI.createQuery("SELECT new fr.proline.core.orm.msi.dto.DProteinMatch(protm.id, protm.accession, protm.score, protm.peptideCount, protm.resultSet.id, protm.description)  FROM ProteinMatch protm WHERE protm.id IN (:listId) ", DProteinMatch.class);
+            TypedQuery<DProteinMatch> proteinMatchQuery = entityManagerMSI.createQuery("SELECT new fr.proline.core.orm.msi.dto.DProteinMatch(protm.id, protm.accession, protm.score, protm.peptideCount, protm.resultSet.id, protm.description, protm.serializedProperties)  FROM ProteinMatch protm WHERE protm.id IN (:listId) ", DProteinMatch.class);
             proteinMatchQuery.setParameter("listId", m_proteinMatchIdArray);
             List<DProteinMatch> proteinMatchList = proteinMatchQuery.getResultList();
             

@@ -471,7 +471,7 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseSlicerTas
 
         // Retrieve the list of Protein Sets of Peptides
         // typical ProteinMatch is loaded in the same time, to avoid lazy fetch 
-        Query proteinGroupsQuery = entityManagerMSI.createQuery("SELECT ps.id, p, pm.id, pm.accession, pm.score, pm.peptideCount, pm.description FROM fr.proline.core.orm.msi.ProteinMatch pm, fr.proline.core.orm.msi.ProteinSet ps, fr.proline.core.orm.msi.SequenceMatch sm, fr.proline.core.orm.msi.Peptide p WHERE ps.representativeProteinMatchId=pm.id AND pm.id=sm.id.proteinMatchId AND p.id=sm.id.peptideId AND p.id IN (:peptideIds) AND sm.resultSetId=:rsetId AND ps.resultSummary.id=:rsmId AND ps.isValidated=true");
+        Query proteinGroupsQuery = entityManagerMSI.createQuery("SELECT ps.id, p, pm.id, pm.accession, pm.score, pm.peptideCount, pm.description, pm.serializedProperties FROM fr.proline.core.orm.msi.ProteinMatch pm, fr.proline.core.orm.msi.ProteinSet ps, fr.proline.core.orm.msi.SequenceMatch sm, fr.proline.core.orm.msi.Peptide p WHERE ps.representativeProteinMatchId=pm.id AND pm.id=sm.id.proteinMatchId AND p.id=sm.id.peptideId AND p.id IN (:peptideIds) AND sm.resultSetId=:rsetId AND ps.resultSummary.id=:rsmId AND ps.isValidated=true");
         proteinGroupsQuery.setParameter("rsmId", rsm.getId());
         proteinGroupsQuery.setParameter("rsetId", rsm.getResultSet().getId());
         proteinGroupsQuery.setParameter("peptideIds", peptideMap.keySet());
@@ -489,8 +489,9 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseSlicerTas
             Float score = (Float) resCur[4];
             Integer peptideCount = (Integer) resCur[5];
             String description = (String) resCur[6];
+            String serializedProperties = (String) resCur[7];
 
-            DProteinMatch pm = new DProteinMatch(proteinMatchId, accession, score, peptideCount, rsm.getResultSet().getId(), description);
+            DProteinMatch pm = new DProteinMatch(proteinMatchId, accession, score, peptideCount, rsm.getResultSet().getId(), description, serializedProperties);
             
             DProteinSet proteinSet = new DProteinSet(proteinSetId, proteinMatchId, rsm.getId());
 

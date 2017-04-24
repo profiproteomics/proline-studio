@@ -40,8 +40,9 @@ public class ProteinTableModel extends DecoratedTableModel implements GlobalTabl
         SAMESET_SUBSET("Sameset / Subset", Sameset.class, 3),
         PROTEIN_SCORE("Score", Float.class, 4),
         PROTEIN_PEPTIDES_COUNT("Peptides", Integer.class, 5),
-        PROTEIN_UNIQUE_PEPTIDE_SEQUENCES_COUNT("Sequence Count", Integer.class, 6),
-        PROTEIN_MASS("Mass", Float.class, 7);
+        OBSERVABLE_PEPTIDES("Observable Peptides", Integer.class, 6),
+        PROTEIN_UNIQUE_PEPTIDE_SEQUENCES_COUNT("Sequence Count", Integer.class, 7),
+        PROTEIN_MASS("Mass", Float.class, 8);
         
         String m_name; 
         Class m_class;
@@ -149,6 +150,9 @@ public class ProteinTableModel extends DecoratedTableModel implements GlobalTabl
             case PROTEIN_SCORE:
                 Float score = Float.valueOf(proteinMatch.getPeptideSet(m_rsmId).getScore());
                 return score;
+            case OBSERVABLE_PEPTIDES:
+                Integer observablePeptideCount = proteinMatch.getObservablePeptidesCount();
+                return observablePeptideCount;
             case PROTEIN_PEPTIDES_COUNT:
                 return proteinMatch.getPeptideSet(m_rsmId).getPeptideCount();
             case PROTEIN_UNIQUE_PEPTIDE_SEQUENCES_COUNT: 
@@ -203,6 +207,7 @@ public class ProteinTableModel extends DecoratedTableModel implements GlobalTabl
         filtersMap.put(Column.PROTEIN_NAME.ordinal(), new StringDiffFilter(getColumnName(Column.PROTEIN_NAME.ordinal()), null, Column.PROTEIN_NAME.ordinal()));
         filtersMap.put(Column.PROTEIN_DESCRIPTION.ordinal(), new StringFilter(getColumnName(Column.PROTEIN_DESCRIPTION.ordinal()), null, Column.PROTEIN_DESCRIPTION.ordinal()));
         filtersMap.put(Column.PROTEIN_SCORE.ordinal(), new DoubleFilter(getColumnName(Column.PROTEIN_SCORE.ordinal()), null, Column.PROTEIN_SCORE.ordinal()));
+        filtersMap.put(Column.OBSERVABLE_PEPTIDES.ordinal(), new IntegerFilter(getColumnName(Column.OBSERVABLE_PEPTIDES.ordinal()), null, Column.OBSERVABLE_PEPTIDES.ordinal()));
         filtersMap.put(Column.PROTEIN_PEPTIDES_COUNT.ordinal(), new IntegerFilter(getColumnName(Column.PROTEIN_PEPTIDES_COUNT.ordinal()), null, Column.PROTEIN_PEPTIDES_COUNT.ordinal()));
         filtersMap.put(Column.PROTEIN_UNIQUE_PEPTIDE_SEQUENCES_COUNT.ordinal(), new IntegerFilter(getColumnName(Column.PROTEIN_UNIQUE_PEPTIDE_SEQUENCES_COUNT.ordinal()), null, Column.PROTEIN_UNIQUE_PEPTIDE_SEQUENCES_COUNT.ordinal()));
         filtersMap.put(Column.PROTEIN_MASS.ordinal(), new DoubleFilter(getColumnName(Column.PROTEIN_MASS.ordinal()), null, Column.PROTEIN_MASS.ordinal()));
@@ -395,6 +400,7 @@ public class ProteinTableModel extends DecoratedTableModel implements GlobalTabl
                 renderer = new FloatRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)));
                 break;
             }
+            case OBSERVABLE_PEPTIDES:
             case PROTEIN_PEPTIDES_COUNT:
             case PROTEIN_UNIQUE_PEPTIDE_SEQUENCES_COUNT: {
                 renderer = new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(Integer.class));

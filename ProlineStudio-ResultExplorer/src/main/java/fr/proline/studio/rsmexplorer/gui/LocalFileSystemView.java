@@ -108,7 +108,7 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
 
         if (set.size() > 0) {
             try {
-                TreeStateUtil.resetExpansionState(set, m_tree, (DefaultMutableTreeNode) m_tree.getModel().getRoot());
+                TreeStateUtil.resetExpansionState(set, m_tree, (DefaultMutableTreeNode) m_tree.getModel().getRoot(), TreeStateUtil.TreeType.LOCAL);
             } catch (Exception ex) {
                 PrintWriter pw = null;
                 try {

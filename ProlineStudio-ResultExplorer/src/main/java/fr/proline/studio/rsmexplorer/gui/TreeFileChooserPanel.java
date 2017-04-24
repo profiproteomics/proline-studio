@@ -62,8 +62,7 @@ public class TreeFileChooserPanel extends JPanel {
 
     public void restoreTree() {
         if (m_tree != null) {
-            //TreeStateUtil.setExpansionState(TreeStateUtil.retrieveExpansionState(TreeStateUtil.TreeType.SERVER), m_tree);
-            TreeStateUtil.resetExpansionState(TreeStateUtil.retrieveExpansionState(TreeStateUtil.TreeType.SERVER), m_tree, (DefaultMutableTreeNode) m_tree.getModel().getRoot());
+            TreeStateUtil.resetExpansionState(TreeStateUtil.retrieveExpansionState(TreeStateUtil.TreeType.SERVER), m_tree, (DefaultMutableTreeNode) m_tree.getModel().getRoot(), TreeStateUtil.TreeType.SERVER);
         }
     }
 

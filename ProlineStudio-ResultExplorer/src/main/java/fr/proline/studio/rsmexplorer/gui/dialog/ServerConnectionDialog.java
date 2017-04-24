@@ -14,8 +14,6 @@ import fr.proline.studio.rsmexplorer.TaskLogTopComponent;
 import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
 import fr.proline.studio.rsmexplorer.gui.calc.DataAnalyzerPanel;
 import java.awt.Window;
-import java.io.File;
-import java.io.IOException;
 import java.util.Iterator;
 import java.util.Set;
 import javax.swing.*;

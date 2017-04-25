@@ -10,6 +10,8 @@ import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.SearchSetting;
 import fr.proline.core.orm.msi.PeaklistSoftware;
 import fr.proline.core.orm.msi.PtmSpecificity;
+import fr.proline.core.orm.msi.SearchSettingsSeqDatabaseMap;
+import fr.proline.core.orm.msi.SeqDatabase;
 import fr.proline.core.orm.msi.UsedPtm;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.utils.SerializedPropertiesUtil;
@@ -109,12 +111,12 @@ public class IdentificationPropertiesTableModel extends AbstractPropertiesTableM
     public class GeneralInformationGroup extends DataGroup {
 
         private static final int ROWTYPE_RAW_FILE_NAME = 0;
-        private static final int ROWTYPE_SEARCH_RESULT_NAME = 1;
-        private static final int ROWTYPE_INSTRUMENT_NAME = 2;
-        private static final int ROWTYPE_TARGET_DECOY_MODE = 3;
-        //private static final int ROWTYPE_TARGET_DECOY_RULE = 4;
-        private static final int ROWTYPE_PEAKLIST_SOFTWARE_NAME = 4;
-        private static final int ROW_COUNT = 5; // get in sync
+        private static final int FASTA_FILE_NAME = 1;
+        private static final int ROWTYPE_SEARCH_RESULT_NAME = 2;
+        private static final int ROWTYPE_INSTRUMENT_NAME = 3;
+        private static final int ROWTYPE_TARGET_DECOY_MODE = 4;
+        private static final int ROWTYPE_PEAKLIST_SOFTWARE_NAME = 5;
+        private static final int ROW_COUNT = 6; // get in sync
         private final Color GROUP_COLOR_BACKGROUND = new Color(0, 0, 0);
 
         public GeneralInformationGroup(int rowStart) {
@@ -126,6 +128,8 @@ public class IdentificationPropertiesTableModel extends AbstractPropertiesTableM
             switch (rowIndex) {
                 case ROWTYPE_RAW_FILE_NAME:
                     return new GroupObject("Raw File Name", this);
+                case FASTA_FILE_NAME:
+                    return new GroupObject("Fasta Files", this);
                 case ROWTYPE_SEARCH_RESULT_NAME:
                     return new GroupObject("Search Result Name", this);
                 case ROWTYPE_INSTRUMENT_NAME:
@@ -154,7 +158,7 @@ public class IdentificationPropertiesTableModel extends AbstractPropertiesTableM
             PeaklistSoftware peaklistSoftware = (peaklist == null) ? null : peaklist.getPeaklistSoftware();
 
             switch (rowIndex) {
-                case ROWTYPE_RAW_FILE_NAME:
+                case ROWTYPE_RAW_FILE_NAME: {
                     if (peaklist == null) {
                         return new GroupObject("", this);
                     } else {
@@ -162,6 +166,26 @@ public class IdentificationPropertiesTableModel extends AbstractPropertiesTableM
                         File f = new File(path);
                         return new GroupObject(f.getName(), this);
                     }
+                }
+                case FASTA_FILE_NAME: {
+                    boolean first = true;
+                    Set<SearchSettingsSeqDatabaseMap> searchSettingsSeqDatabaseMapSet = searchSetting.getSearchSettingsSeqDatabaseMaps();
+                    Iterator<SearchSettingsSeqDatabaseMap> itSeqDbMap = searchSettingsSeqDatabaseMapSet.iterator();
+                    while (itSeqDbMap.hasNext()) {
+                        SearchSettingsSeqDatabaseMap seqDbMap = itSeqDbMap.next();
+
+                        SeqDatabase seqDatabase = seqDbMap.getSeqDatabase();
+                        if (!first) {
+                            m_sb.append(" ; ");
+                        }
+                        m_sb.append(seqDatabase.getFastaFilePath());
+                        first = false;
+
+                    }
+                    String paths = m_sb.toString();
+                    m_sb.setLength(0);
+                    return new GroupObject(paths, this);
+                }
                 case ROWTYPE_SEARCH_RESULT_NAME:
                     return new GroupObject((rset == null) ? "" : rset.getName(), this);
                 case ROWTYPE_INSTRUMENT_NAME:
@@ -186,9 +210,6 @@ public class IdentificationPropertiesTableModel extends AbstractPropertiesTableM
                         return new GroupObject("", this);
                     }
                 }
-                /*case ROWTYPE_TARGET_DECOY_RULE: {
-                 return "NA";
-                 }*/
                 case ROWTYPE_PEAKLIST_SOFTWARE_NAME: {
                     if (peaklistSoftware == null) {
                         return new GroupObject("", this);
@@ -205,6 +226,7 @@ public class IdentificationPropertiesTableModel extends AbstractPropertiesTableM
 
             return null;
         }
+        private StringBuilder m_sb = new StringBuilder();
 
         @Override
         public Color getGroupColor(int row) {
@@ -459,10 +481,8 @@ public class IdentificationPropertiesTableModel extends AbstractPropertiesTableM
 
         private static final int ROWTYPE_QUERIES_NUMBER = 0;
         private static final int ROWTYPE_PSM_NUMBER = 1;
-        //private static final int ROWTYPE_PEPTIDE_NUMBER = 2;
         private static final int ROWTYPE_PROTEIN_NUMBER = 2;
         private static final int ROWTYPE_DECOY_PSM_NUMBER = 3;
-        //private static final int ROWTYPE_DECOY_PEPTIDE_NUMBER = 4;
         private static final int ROWTYPE_DECOY_PROTEIN_NUMBER = 4;
 
         private static final int ROW_COUNT = 5; // get in sync
@@ -519,8 +539,6 @@ public class IdentificationPropertiesTableModel extends AbstractPropertiesTableM
                     }
                     return new GroupObject(data.toString(), this);
                 }
-                /*case ROWTYPE_PEPTIDE_NUMBER:
-                 return "NA";*/
                 case ROWTYPE_PROTEIN_NUMBER: {
                     Object data = rset.getTransientData().getProteinMatchesCount();
                     if (data == null) {
@@ -538,8 +556,6 @@ public class IdentificationPropertiesTableModel extends AbstractPropertiesTableM
                     }
                     return new GroupObject(data.toString(), this);
                 }
-                /*case ROWTYPE_DECOY_PEPTIDE_NUMBER:
-                 return "NA";*/
                 case ROWTYPE_DECOY_PROTEIN_NUMBER: {
                     if (rsetDecoy == null) {
                         return new GroupObject("", this);

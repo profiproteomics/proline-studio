@@ -53,14 +53,7 @@ public class PropertiesAction extends AbstractRSMAction {
         if (selectedNodes.length == 1) {
             AbstractNode firstNode = selectedNodes[0];
             name = firstNode.getData().getName();
-            //dialogName = "Properties : " + name;
-        } /*else {
-            dialogName = "Properties";
-        }*/
-
-        /*final PropertiesTopComponent win = new PropertiesTopComponent(dialogName);
-        win.open();
-        win.requestActive();*/
+        }
 
         // new Properties window
         AbstractPropertiesTableModel model = null;

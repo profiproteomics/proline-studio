@@ -6,8 +6,7 @@
 package fr.proline.studio.rsmexplorer.gui;
 
 import java.io.File;
-import java.util.Enumeration;
-import java.util.Vector;
+import java.util.HashSet;
 import javax.swing.event.TreeModelEvent;
 import javax.swing.event.TreeModelListener;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -21,12 +20,12 @@ import javax.swing.tree.TreePath;
 public class LocalFileSystemModel implements TreeModel {
 
     private DefaultMutableTreeNode m_root;
-    
-    private Vector listeners; // Declare the listeners vector
+
+    private HashSet<TreeModelListener> listeners; // Declare the listeners vector
 
     public LocalFileSystemModel(String rootURL) {
         m_root = new DefaultMutableTreeNode(new File(rootURL));
-        listeners = new Vector();
+        listeners = new HashSet<TreeModelListener>();
     }
 
     public void setRoot(String rootURL) {
@@ -41,12 +40,16 @@ public class LocalFileSystemModel implements TreeModel {
     @Override
     public Object getChild(Object parent, int index) {
         DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode) parent;
-        
+
         File directory = (File) parentNode.getUserObject();
-        
+
         String[] directoryMembers = directory.list();
+
+        DefaultMutableTreeNode childNode = new DefaultMutableTreeNode(new File(directory, directoryMembers[index]));
         
-        return (new DefaultMutableTreeNode(new File(directory, directoryMembers[index])));
+        parentNode.add(childNode);
+        
+        return childNode;
     }
 
     @Override
@@ -54,9 +57,9 @@ public class LocalFileSystemModel implements TreeModel {
         if (parent == null) {
             return 0;
         }
-        
+
         DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode) parent;
-        
+
         File fileSystemMember = (File) parentNode.getUserObject();
         if (fileSystemMember.isDirectory()) {
             File[] directoryMembers = fileSystemMember.listFiles();
@@ -70,9 +73,9 @@ public class LocalFileSystemModel implements TreeModel {
     }
 
     @Override
-    public boolean isLeaf(Object node) {      
-        DefaultMutableTreeNode mutableNode = (DefaultMutableTreeNode) node;       
-        File fileNode = (File)mutableNode.getUserObject();      
+    public boolean isLeaf(Object node) {
+        DefaultMutableTreeNode mutableNode = (DefaultMutableTreeNode) node;
+        File fileNode = (File) mutableNode.getUserObject();
         return fileNode.isFile();
     }
 
@@ -83,11 +86,10 @@ public class LocalFileSystemModel implements TreeModel {
 
     @Override
     public int getIndexOfChild(Object parent, Object child) {
-        
-              
+
         DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode) parent;
         DefaultMutableTreeNode childNode = (DefaultMutableTreeNode) child;
-        
+
         File directory = (File) parentNode.getUserObject();
         File directoryMember = (File) childNode.getUserObject();
 
@@ -107,52 +109,39 @@ public class LocalFileSystemModel implements TreeModel {
     @Override
     public void addTreeModelListener(TreeModelListener listener) {
         if (listener != null && !listeners.contains(listener)) {
-            listeners.addElement(listener);
+            listeners.add(listener);
         }
     }
 
     @Override
     public void removeTreeModelListener(TreeModelListener l) {
         if (l != null) {
-            listeners.removeElement(l);
+            listeners.remove(l);
         }
     }
 
     public void fireTreeNodesInserted(TreeModelEvent e) {
-        Enumeration listenerCount = listeners.elements();
-        while (listenerCount.hasMoreElements()) {
-            TreeModelListener listener = (TreeModelListener) listenerCount.nextElement();
+        for (TreeModelListener listener : listeners) {
             listener.treeNodesInserted(e);
         }
     }
 
-    //optional part
     public void fireTreeNodesRemoved(TreeModelEvent e) {
-        Enumeration listenerCount = listeners.elements();
-        while (listenerCount.hasMoreElements()) {
-            TreeModelListener listener = (TreeModelListener) listenerCount.nextElement();
+        for (TreeModelListener listener : listeners) {
             listener.treeNodesRemoved(e);
         }
-
     }
 
     public void fireTreeNodesChanged(TreeModelEvent e) {
-        Enumeration listenerCount = listeners.elements();
-        while (listenerCount.hasMoreElements()) {
-            TreeModelListener listener = (TreeModelListener) listenerCount.nextElement();
+        for (TreeModelListener listener : listeners) {
             listener.treeNodesChanged(e);
         }
-
     }
 
-    
     public void fireTreeStructureChanged(TreeModelEvent e) {
-        Enumeration listenerCount = listeners.elements();
-        while (listenerCount.hasMoreElements()) {
-            TreeModelListener listener = (TreeModelListener) listenerCount.nextElement();
+        for (TreeModelListener listener : listeners) {
             listener.treeStructureChanged(e);
         }
-
     }
 
 }

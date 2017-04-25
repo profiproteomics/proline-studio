@@ -45,9 +45,9 @@ public class TreeStateUtil {
 
         if (type == TreeType.SERVER) {
             NbPreferences.root().put("TreeStateUtil.Server_tree", builder.toString());
-        } else if(type==TreeType.LOCAL) {
+        } else if (type == TreeType.LOCAL) {
             NbPreferences.root().put("TreeStateUtil.Local_tree", builder.toString());
-        }else if(type==TreeType.XIC){
+        } else if (type == TreeType.XIC) {
             NbPreferences.root().put("TreeStateUtil.XIC_tree", builder.toString());
         }
 
@@ -60,11 +60,11 @@ public class TreeStateUtil {
 
         if (type == TreeType.SERVER) {
             s = NbPreferences.root().get("TreeStateUtil.Server_tree", null);
-        } else if(type == TreeType.LOCAL) {
+        } else if (type == TreeType.LOCAL) {
             s = NbPreferences.root().get("TreeStateUtil.Local_tree", null);
-        }else if(type == TreeType.XIC){
+        } else if (type == TreeType.XIC) {
             s = NbPreferences.root().get("TreeStateUtil.XIC_tree", null);
-        }else{
+        } else {
             s = null;
         }
 
@@ -96,67 +96,33 @@ public class TreeStateUtil {
             return;
         }
 
-        if (type == TreeType.LOCAL) {
+        tree.getModel().addTreeModelListener(new TreeModelListener() {
 
-            tree.addTreeWillExpandListener(new TreeWillExpandListener() {
+            @Override
+            public void treeNodesChanged(TreeModelEvent tme) {
+                ;
+            }
 
-                @Override
-                public void treeWillExpand(TreeExpansionEvent tee) throws ExpandVetoException {
-                    setExpansionState(previouslyExpanded, tree, root, type);
+            @Override
+            public void treeNodesInserted(TreeModelEvent tme) {
+                ;
+            }
+
+            @Override
+            public void treeNodesRemoved(TreeModelEvent tme) {
+                ;
+            }
+
+            @Override
+            public void treeStructureChanged(TreeModelEvent tme) {
+                TreePath triggerPath = new TreePath(tme.getPath());
+                if (!tree.isExpanded(triggerPath)) {
+                    tree.expandPath(triggerPath);
                 }
+                setExpansionState(previouslyExpanded, tree, root, type);
+            }
 
-                @Override
-                public void treeWillCollapse(TreeExpansionEvent tee) throws ExpandVetoException {
-                    ;
-                }
-
-            });
-
-            tree.addTreeExpansionListener(new TreeExpansionListener() {
-
-                @Override
-                public void treeExpanded(TreeExpansionEvent tee) {
-                    setExpansionState(previouslyExpanded, tree, root, type);
-                }
-
-                @Override
-                public void treeCollapsed(TreeExpansionEvent tee) {
-                    ;
-                }
-
-            });
-
-        } else {
-
-            tree.getModel().addTreeModelListener(new TreeModelListener() {
-
-                @Override
-                public void treeNodesChanged(TreeModelEvent tme) {
-                    ;
-                }
-
-                @Override
-                public void treeNodesInserted(TreeModelEvent tme) {
-                    ;
-                }
-
-                @Override
-                public void treeNodesRemoved(TreeModelEvent tme) {
-                    ;
-                }
-
-                @Override
-                public void treeStructureChanged(TreeModelEvent tme) {
-                    TreePath triggerPath = new TreePath(tme.getPath());
-                    if(!tree.isExpanded(triggerPath)){
-                        tree.expandPath(triggerPath);
-                    }
-                    setExpansionState(previouslyExpanded, tree, root, type);
-                }
-
-            });
-
-        }
+        });
 
         Enumeration totalNodes = root.preorderEnumeration();
 
@@ -164,7 +130,7 @@ public class TreeStateUtil {
 
             DefaultMutableTreeNode currentNode = (DefaultMutableTreeNode) totalNodes.nextElement();
             TreePath tp = new TreePath(currentNode.getPath());
-            
+
             if (previouslyExpanded.contains(tp.toString())) {
                 previouslyExpanded.remove(tp.toString());
                 tree.expandPath(tp);

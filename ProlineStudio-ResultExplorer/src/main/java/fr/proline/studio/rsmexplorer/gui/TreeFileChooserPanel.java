@@ -48,21 +48,24 @@ public class TreeFileChooserPanel extends JPanel {
     private FileSystemView m_fileSystemView;
     private TreeFileChooserTransferHandler m_transferHandler;
     private boolean m_showUpdateButton;
+    private TreeStateUtil.TreeType m_treeType;
 
     public TreeFileChooserPanel(FileSystemView fileSystemView, TreeFileChooserTransferHandler transferHandler) {
         m_fileSystemView = fileSystemView;
         m_transferHandler = transferHandler;
         m_showUpdateButton = true;
+        m_treeType = TreeStateUtil.TreeType.XIC;
     }
 
     public TreeFileChooserPanel(FileSystemView fileSystemView, TreeFileChooserTransferHandler transferHandler, boolean showUpdateButton) {
         this(fileSystemView, transferHandler);
         m_showUpdateButton = showUpdateButton;
+        m_treeType = TreeStateUtil.TreeType.SERVER;
     }
 
-    public void restoreTree() {
+    public void restoreTree(TreeStateUtil.TreeType type) {
         if (m_tree != null) {
-            TreeStateUtil.resetExpansionState(TreeStateUtil.retrieveExpansionState(TreeStateUtil.TreeType.SERVER), m_tree, (DefaultMutableTreeNode) m_tree.getModel().getRoot(), TreeStateUtil.TreeType.SERVER);
+            TreeStateUtil.setExpansionState(TreeStateUtil.loadExpansionState(type), m_tree, (DefaultMutableTreeNode) m_tree.getModel().getRoot(), type);
         }
     }
 
@@ -88,12 +91,12 @@ public class TreeFileChooserPanel extends JPanel {
 
             @Override
             public void treeExpanded(TreeExpansionEvent tee) {
-                TreeStateUtil.saveExpansionState(m_tree, TreeStateUtil.TreeType.SERVER);
+                TreeStateUtil.saveExpansionState(m_tree, m_treeType);
             }
 
             @Override
             public void treeCollapsed(TreeExpansionEvent tee) {
-                TreeStateUtil.saveExpansionState(m_tree, TreeStateUtil.TreeType.SERVER);
+                TreeStateUtil.saveExpansionState(m_tree, m_treeType);
             }
 
         });
@@ -191,7 +194,7 @@ public class TreeFileChooserPanel extends JPanel {
 
         m_model.reload();
 
-        TreeStateUtil.setExpansionState(expandedPaths, m_tree);
+        TreeStateUtil.setExpansionState(expandedPaths, m_tree, (DefaultMutableTreeNode) m_tree.getModel().getRoot(), TreeStateUtil.TreeType.SERVER);
     }
 
     public static TreePath getPath(TreeNode treeNode) {

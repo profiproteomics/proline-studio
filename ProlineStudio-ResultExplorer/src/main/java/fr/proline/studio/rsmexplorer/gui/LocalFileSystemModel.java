@@ -20,20 +20,16 @@ import javax.swing.tree.TreePath;
  */
 public class LocalFileSystemModel implements TreeModel {
 
-    private String m_rootURL;
-
     private DefaultMutableTreeNode m_root;
     
     private Vector listeners; // Declare the listeners vector
 
     public LocalFileSystemModel(String rootURL) {
-        m_rootURL = rootURL;
         m_root = new DefaultMutableTreeNode(new File(rootURL));
         listeners = new Vector();
     }
 
     public void setRoot(String rootURL) {
-        m_rootURL = rootURL;
         m_root = new DefaultMutableTreeNode(new File(rootURL));
     }
 

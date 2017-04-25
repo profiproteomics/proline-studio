@@ -104,22 +104,9 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
         m_fileSystemDataModel = new LocalFileSystemModel(roots[0].getAbsolutePath());
         m_tree = new JTree(m_fileSystemDataModel);
 
-        HashSet<String> set = TreeStateUtil.retrieveExpansionState(TreeStateUtil.TreeType.LOCAL);
+        HashSet<String> set = TreeStateUtil.loadExpansionState(TreeStateUtil.TreeType.LOCAL);
 
-        if (set.size() > 0) {
-            try {
-                TreeStateUtil.resetExpansionState(set, m_tree, (DefaultMutableTreeNode) m_tree.getModel().getRoot(), TreeStateUtil.TreeType.LOCAL);
-            } catch (Exception ex) {
-                PrintWriter pw = null;
-                try {
-                    pw = new PrintWriter(new File("D:\\shit.txt"));
-                } catch (FileNotFoundException ex1) {
-                    Exceptions.printStackTrace(ex1);
-                }
-                ex.printStackTrace(pw);
-                pw.close();
-            }
-        }
+        TreeStateUtil.setExpansionState(set, m_tree, (DefaultMutableTreeNode) m_tree.getModel().getRoot(), TreeStateUtil.TreeType.LOCAL);
 
         m_tree.addTreeExpansionListener(new TreeExpansionListener() {
 

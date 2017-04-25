@@ -12,6 +12,7 @@ import fr.proline.studio.rsmexplorer.MzdbFilesTopComponent;
 import fr.proline.studio.rsmexplorer.PropertiesTopComponent;
 import fr.proline.studio.rsmexplorer.TaskLogTopComponent;
 import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
+import fr.proline.studio.rsmexplorer.gui.TreeStateUtil;
 import fr.proline.studio.rsmexplorer.gui.calc.DataAnalyzerPanel;
 import java.awt.Window;
 import java.util.Iterator;
@@ -177,7 +178,7 @@ public class ServerConnectionDialog extends ConnectionDialog {
                     
                     MzdbFilesTopComponent.getTreeFileChooserPanel().initTree();
                     
-                    MzdbFilesTopComponent.getTreeFileChooserPanel().restoreTree();
+                    MzdbFilesTopComponent.getTreeFileChooserPanel().restoreTree(TreeStateUtil.TreeType.SERVER);
 
                     if (changingUser) {
 

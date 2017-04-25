@@ -28,7 +28,7 @@ public class TreeStateUtil {
 
     public enum TreeType {
 
-        SERVER, LOCAL
+        SERVER, LOCAL, XIC
     }
 
     public static void saveExpansionState(JTree tree, TreeType type) {
@@ -45,21 +45,27 @@ public class TreeStateUtil {
 
         if (type == TreeType.SERVER) {
             NbPreferences.root().put("TreeStateUtil.Server_tree", builder.toString());
-        } else {
+        } else if(type==TreeType.LOCAL) {
             NbPreferences.root().put("TreeStateUtil.Local_tree", builder.toString());
+        }else if(type==TreeType.XIC){
+            NbPreferences.root().put("TreeStateUtil.XIC_tree", builder.toString());
         }
 
     }
 
-    public static HashSet<String> retrieveExpansionState(TreeType type) {
+    public static HashSet<String> loadExpansionState(TreeType type) {
         HashSet<String> retrievedSet = new HashSet<String>();
 
         String s;
 
         if (type == TreeType.SERVER) {
             s = NbPreferences.root().get("TreeStateUtil.Server_tree", null);
-        } else {
+        } else if(type == TreeType.LOCAL) {
             s = NbPreferences.root().get("TreeStateUtil.Local_tree", null);
+        }else if(type == TreeType.XIC){
+            s = NbPreferences.root().get("TreeStateUtil.XIC_tree", null);
+        }else{
+            s = null;
         }
 
         if (s == null) {
@@ -85,7 +91,7 @@ public class TreeStateUtil {
         return expandedPaths;
     }
 
-    public static void resetExpansionState(HashSet<String> previouslyExpanded, JTree tree, DefaultMutableTreeNode root, TreeType type) {
+    public static void setExpansionState(HashSet<String> previouslyExpanded, JTree tree, DefaultMutableTreeNode root, TreeType type) {
         if (previouslyExpanded == null || previouslyExpanded.isEmpty()) {
             return;
         }
@@ -96,7 +102,7 @@ public class TreeStateUtil {
 
                 @Override
                 public void treeWillExpand(TreeExpansionEvent tee) throws ExpandVetoException {
-                    resetExpansionState(previouslyExpanded, tree, root, type);
+                    setExpansionState(previouslyExpanded, tree, root, type);
                 }
 
                 @Override
@@ -110,7 +116,7 @@ public class TreeStateUtil {
 
                 @Override
                 public void treeExpanded(TreeExpansionEvent tee) {
-                    resetExpansionState(previouslyExpanded, tree, root, type);
+                    setExpansionState(previouslyExpanded, tree, root, type);
                 }
 
                 @Override
@@ -145,7 +151,7 @@ public class TreeStateUtil {
                     if(!tree.isExpanded(triggerPath)){
                         tree.expandPath(triggerPath);
                     }
-                    resetExpansionState(previouslyExpanded, tree, root, type);
+                    setExpansionState(previouslyExpanded, tree, root, type);
                 }
 
             });
@@ -165,33 +171,6 @@ public class TreeStateUtil {
             }
         }
 
-    }
-
-    public static void setExpansionState(HashSet<String> previouslyExpanded, JTree tree) {
-
-        if (previouslyExpanded == null) {
-            return;
-        }
-
-        DefaultMutableTreeNode root = (DefaultMutableTreeNode) tree.getModel().getRoot();
-
-        while (!previouslyExpanded.isEmpty()) {
-            Enumeration totalNodes = root.preorderEnumeration();
-            while (totalNodes.hasMoreElements()) {
-                DefaultMutableTreeNode currentNode = (DefaultMutableTreeNode) totalNodes.nextElement();
-                TreePath tp = new TreePath(currentNode.getPath());
-                /*
-                 if (tree.isExpanded(tp)) {
-                 previouslyExpanded.remove(tp.toString());
-                 continue;
-                 }
-                 */
-                if (previouslyExpanded.contains(tp.toString())) {
-                    tree.expandPath(tp);
-                    previouslyExpanded.remove(tp.toString());
-                }
-            }
-        }
     }
 
 }

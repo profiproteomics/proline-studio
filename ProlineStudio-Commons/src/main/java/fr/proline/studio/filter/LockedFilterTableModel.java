@@ -34,6 +34,15 @@ public class LockedFilterTableModel extends DecoratedTableModel implements Globa
         m_tableModelSource.addTableModelListener(this);
         m_restrainIds = restrainIds;
         m_filteredIds = filteredIds;
+        
+        if (restrainIds != null) {
+            m_restrainIds = new HashSet(restrainIds);
+        }
+        if (filteredIds != null) {
+            m_filteredIds = new ArrayList<>(filteredIds);
+        }
+        
+        
     }
 
 

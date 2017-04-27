@@ -37,7 +37,6 @@ import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Image;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
@@ -46,8 +45,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import javax.swing.ImageIcon;
-import javax.swing.JCheckBox;
-import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -73,7 +70,6 @@ public class PTMProteinSitePanel_V2 extends HourglassPanel implements DataBoxPan
     private PTMProteinSiteTable m_ptmProteinSiteTable;
     
     private JTextField m_countModificationTextField;
-    private JCheckBox m_redundantCheckbox;
 
     private MarkerContainerPanel m_markerContainerPanel;
 
@@ -153,6 +149,7 @@ public class PTMProteinSitePanel_V2 extends HourglassPanel implements DataBoxPan
     public void setDataBox(AbstractDataBox dataBox) {
         m_dataBox = dataBox;
     }
+    
     @Override
     public AbstractDataBox getDataBox() {
         return m_dataBox;
@@ -232,7 +229,6 @@ public class PTMProteinSitePanel_V2 extends HourglassPanel implements DataBoxPan
         layeredPane.add(proteinPTMSitePanel, JLayeredPane.DEFAULT_LAYER);
         layeredPane.add(m_infoToggleButton.getInfoPanel(), JLayeredPane.PALETTE_LAYER);  
         layeredPane.add(m_searchToggleButton.getSearchPanel(), new Integer(JLayeredPane.PALETTE_LAYER+1));
-
 
     }
     
@@ -368,26 +364,6 @@ public class PTMProteinSitePanel_V2 extends HourglassPanel implements DataBoxPan
         m_ptmProteinSiteTable.setFillsViewportHeight(true);
         m_ptmProteinSiteTable.setViewport(m_ptmProteinSiteScrollPane.getViewport());
 
-        m_redundantCheckbox = new JCheckBox("Hide Redundant Peptides");
-        m_redundantCheckbox.setSelected(false);
-        m_redundantCheckbox.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                PtmProtenSiteTableModel_V2 submodel = ((PtmProtenSiteTableModel_V2) ((CompoundTableModel)m_ptmProteinSiteTable.getModel()).getBaseModel());
-                submodel.hideRedundantsPeptides(m_redundantCheckbox.isSelected());
-                
-                
-                // re-filter
-                CompoundTableModel model = (CompoundTableModel) m_ptmProteinSiteTable.getModel();
-                boolean filtered = model.filter();
-                if (!filtered) {
-                    submodel.fireTableDataChanged(); // filtering has not fired it, we need to do it
-                }
-                
-                m_ptmProteinSiteTable.calculateVisibleRange();
-            }
-        });
-        
         m_countModificationTextField = new JTextField();
         m_countModificationTextField.setEditable(false);
 
@@ -400,19 +376,10 @@ public class PTMProteinSitePanel_V2 extends HourglassPanel implements DataBoxPan
         
         
         c.gridy++;
-        c.weightx = 0;
+        c.weightx = 1;
         c.weighty = 0;
         c.gridwidth = 1;
-        internalPanel.add(m_redundantCheckbox, c);
-
-        c.gridx++;
-        internalPanel.add(new JLabel("Non Redundant Modifications : "), c);
-
-        c.gridx++;
-        c.weightx = 1;
         internalPanel.add(m_countModificationTextField, c);
-        
-
         
         return internalPanel;
     }                 
@@ -449,7 +416,7 @@ public class PTMProteinSitePanel_V2 extends HourglassPanel implements DataBoxPan
                         proteinPTMSiteArray.add((PTMSite) model.getValueAt(i, PtmProtenSiteTableModel_V2.COLTYPE_HIDDEN_PROTEIN_PTM));
                     }  
                     
-                    String modification = "toto processing ?"; // PtmProteinSiteTableModelProcessing.calculateData(model, new ArrayList<>(), new ArrayList<>(), new HashMap<>(), proteinPTMSiteArray, new ArrayList<>(), new HashMap<>());
+                    String modification =  PtmProteinSiteTableModelProcessing.calculateDataWORedundance(model, new ArrayList<>(), new ArrayList<>(), new HashMap<>(), proteinPTMSiteArray,  new HashMap<>());        
                     m_countModificationTextField.setText(modification); 
                 }
 
@@ -598,7 +565,9 @@ public class PTMProteinSitePanel_V2 extends HourglassPanel implements DataBoxPan
         @Override
         public String getInfo() {
             int count = getModel().getRowCount();
-            return count+((count>1) ? " PTM Proteins Sites" : " PTM Protein Site");
+            PtmProtenSiteTableModel_V2 model = (PtmProtenSiteTableModel_V2) ((CompoundTableModel) m_ptmProteinSiteTable.getModel()).getBaseModel();
+            String modifInfo = model.getModificationsInfo();
+            return count+((count>1) ? " PTM Proteins Sites" : " PTM Protein Site")+" \n "+modifInfo;
         }
 
         

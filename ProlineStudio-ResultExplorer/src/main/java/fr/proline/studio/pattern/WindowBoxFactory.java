@@ -264,12 +264,14 @@ public class WindowBoxFactory {
         return new WindowBox(boxes[0].getFullName(), generatePanel(boxes), boxes[0], IconManager.getImage(iconType));
     }
 
-        public static WindowBox getPTMProteinSiteWindowBox_V2(String dataName) {
+    public static WindowBox getPTMProteinSiteWindowBox_V2(String dataName) {
 
-        AbstractDataBox[] boxes = new AbstractDataBox[1];
+        AbstractDataBox[] boxes = new AbstractDataBox[3];
         boxes[0] = new DataBoxPTMProteinSite_V2();
         boxes[0].setDataName(dataName);
-
+        boxes[1] = new DataBoxPTMSitePeptides();
+        boxes[2] = new DataBoxPTMSitePepMatches();
+        
         IconManager.IconType iconType = IconManager.IconType.DATASET_RSM;
         return new WindowBox(boxes[0].getFullName(), generatePanel(boxes), boxes[0], IconManager.getImage(iconType));
     }

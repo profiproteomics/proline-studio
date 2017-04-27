@@ -39,7 +39,6 @@ public abstract class AbstractJMSTask  extends AbstractLongTask implements Messa
         
     protected JMSState m_currentState = null;
     
-//    protected int m_id;
     protected TaskError m_taskError = null;
     private long m_startRun = -1;
     
@@ -61,7 +60,6 @@ public abstract class AbstractJMSTask  extends AbstractLongTask implements Messa
         super(taskInfo);
         
         m_callback = callback;
-//        m_id = m_idIncrement++;
         m_synchronous = false;
     }
        
@@ -69,7 +67,6 @@ public abstract class AbstractJMSTask  extends AbstractLongTask implements Messa
         super(taskInfo);
         
         m_callback = callback;
-//        m_id = m_idIncrement++;
         m_synchronous = synchronous;
     }
     
@@ -233,7 +230,7 @@ public abstract class AbstractJMSTask  extends AbstractLongTask implements Messa
     protected void callback(final boolean success) {
         if (m_callback == null) {
             
-            getTaskInfo().setFinished(success, m_taskError, false);
+            getTaskInfo().setFinished(success, m_taskError, true);
             
             return;
         }
@@ -248,14 +245,14 @@ public abstract class AbstractJMSTask  extends AbstractLongTask implements Messa
                 @Override
                 public void run() {
                     m_callback.run(success);
-                    getTaskInfo().setFinished(success, m_taskError, false);
+                    getTaskInfo().setFinished(success, m_taskError, true);
                 }
             });
         } else {
             // Method called in the current thread
             // In this case, we assume the execution is fast.
             m_callback.run(success);
-            getTaskInfo().setFinished(success, m_taskError, false);
+            getTaskInfo().setFinished(success, m_taskError, true);
         }
     }
     

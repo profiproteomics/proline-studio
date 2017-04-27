@@ -3,7 +3,6 @@ package fr.proline.studio.pattern;
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.msi.dto.DProteinMatch;
-import fr.proline.core.orm.msi.dto.DProteinPTMSite;
 import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.comparedata.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.AccessDatabaseThread;
@@ -111,6 +110,9 @@ public class DataBoxPTMProteinSite_V2 extends AbstractDataBox {
                 setLoaded(loadingId);
                 
                 if (finished) {
+                    if(m_previousTaskId != null && m_previousTaskId.equals(taskId))
+                        m_previousTaskId = null; // Reste PreviousTask. Was finished ! 
+                    
                     unregisterTask(taskId);
                     propagateDataChanged(CompareDataInterface.class);
                 }

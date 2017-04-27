@@ -7,7 +7,6 @@ import fr.proline.core.orm.msi.dto.DProteinSet;
 import fr.proline.core.orm.msi.dto.DQuantProteinSet;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
-import fr.proline.core.orm.util.JsonSerializer;
 import fr.proline.studio.comparedata.ExtraDataType;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadXicMasterQuantTask;
 import fr.proline.studio.filter.DoubleFilter;
@@ -944,13 +943,11 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
             int nbRow = getRowCount();
             for (int i = 0; i < nbRow; i++) {
                 DMasterQuantProteinSet proteinSet = m_proteinSets.get(i);
-                String serializedProperties = proteinSet.getSerializedProperties();
-                if (serializedProperties != null) {
-                    Map<String, Object> pmqSerializedMap = JsonSerializer.getMapper().readValue(serializedProperties, Map.class);
-                    if ((pmqSerializedMap != null) && (pmqSerializedMap.containsKey(DMasterQuantProteinSet.MASTER_QUANT_PROTEINSET_WITH_PEPTIDE_MODIFIED))) {
-                        masterQuantProteinSetModified.add(proteinSet);
-                    }
+                Map<String, Object> pmqSerializedMap = proteinSet.getSerializedPropertiesAsMap();
+                if ((pmqSerializedMap != null) && (pmqSerializedMap.containsKey(DMasterQuantProteinSet.MASTER_QUANT_PROTEINSET_WITH_PEPTIDE_MODIFIED))) {
+                    masterQuantProteinSetModified.add(proteinSet);
                 }
+
             }
 
         } catch (Exception e) {
@@ -968,18 +965,16 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
         }
 
         DMasterQuantProteinSet proteinSet = m_proteinSets.get(row);
-        String serializedProperties = proteinSet.getSerializedProperties();
+        
         boolean grayed = false;
-        if (serializedProperties != null) {
-            try {
 
-                Map<String, Object> pmqSerializedMap = JsonSerializer.getMapper().readValue(serializedProperties, Map.class);
-                grayed = ((pmqSerializedMap != null) && (pmqSerializedMap.containsKey(DMasterQuantProteinSet.MASTER_QUANT_PROTEINSET_WITH_PEPTIDE_MODIFIED)));
-            } catch (Exception e) {
-
-            }
+        try {
+            Map<String, Object> pmqSerializedMap = proteinSet.getSerializedPropertiesAsMap();
+            grayed = ((pmqSerializedMap != null) && (pmqSerializedMap.containsKey(DMasterQuantProteinSet.MASTER_QUANT_PROTEINSET_WITH_PEPTIDE_MODIFIED)));
+        } catch (Exception e) {
 
         }
+
         if (grayed) {
             if (m_rendererMapGrayed.containsKey(col)) {
                 return m_rendererMapGrayed.get(col);

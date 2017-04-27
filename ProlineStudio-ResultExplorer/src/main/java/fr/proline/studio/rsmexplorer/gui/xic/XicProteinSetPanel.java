@@ -48,7 +48,6 @@ import java.util.HashSet;
 import java.util.List;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -62,7 +61,6 @@ import org.openide.windows.WindowManager;
 import fr.proline.studio.rsmexplorer.actions.xic.*;
 import fr.proline.studio.pattern.xic.*;
 import fr.proline.core.orm.uds.dto.DDataset;
-import fr.proline.core.orm.util.JsonSerializer;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.xic.DatabaseModifyPeptideTask;
@@ -361,18 +359,15 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
             try {
                 for (int i = 0; i < proteinSets.size(); i++) {
                     DMasterQuantProteinSet masterQuantProteinSet = proteinSets.get(i);
-                    String serializedProperties = masterQuantProteinSet.getSerializedProperties();
-                    if (serializedProperties != null) {
-
-                        Map<String, Object> pmqSerializedMap = JsonSerializer.getMapper().readValue(serializedProperties, Map.class);
-                        if ((pmqSerializedMap != null) && (pmqSerializedMap.containsKey(DMasterQuantProteinSet.MASTER_QUANT_PROTEINSET_WITH_PEPTIDE_MODIFIED))) {
-                            // we must show refine panel
-                            m_refineProteinsPanel.setLocation(getX() + 20, getY() + 20);
-                            m_refineProteinsPanel.setVisible(true);
-                            break;
-                        }
-
+                    Map<String, Object> pmqSerializedMap = masterQuantProteinSet.getSerializedPropertiesAsMap();
+                    if ((pmqSerializedMap != null) && (pmqSerializedMap.containsKey(DMasterQuantProteinSet.MASTER_QUANT_PROTEINSET_WITH_PEPTIDE_MODIFIED))) {
+                        // we must show refine panel
+                        m_refineProteinsPanel.setLocation(getX() + 20, getY() + 20);
+                        m_refineProteinsPanel.setVisible(true);
+                        break;
                     }
+
+
                 }
             } catch (Exception e) {
                 // should never happen

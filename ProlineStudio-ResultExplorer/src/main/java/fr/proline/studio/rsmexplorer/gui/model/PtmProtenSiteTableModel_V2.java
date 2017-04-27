@@ -1,12 +1,9 @@
 package fr.proline.studio.rsmexplorer.gui.model;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import com.google.gson.JsonPrimitive;
 import fr.proline.core.orm.msi.PeptideReadablePtmString;
 import fr.proline.core.orm.msi.dto.DInfoPTM;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
+import fr.proline.core.orm.msi.dto.DPeptidePTM;
 import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.core.orm.msi.dto.DPtmSiteProperties;
 import fr.proline.studio.comparedata.ExtraDataType;
@@ -35,8 +32,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 import javax.swing.table.TableCellRenderer;
 
 /**
@@ -61,40 +56,37 @@ public class PtmProtenSiteTableModel_V2 extends LazyTableModel implements Global
     public static final int COLTYPE_MODIFICATION_PROBA = 13;
     public static final int COLTYPE_PEPTIDE_COUNT = 14;
     public static final int COLTYPE_QUERY_TITLE = 15;
-    
+
     public static final int COLTYPE_HIDDEN_PROTEIN_PTM = 16; // hidden column, must be the last
-   
+
     private static final String[] m_columnNames = {"Id", "Protein", "Peptide", "Score", "PTM", "PTM D.Mass", "PTM Probability", "Modification", "Residue", "Modification D.Mass", "Modification Loc.", "Protein Loc.", "Protein N/C-term", "Modification Probability", "Peptide count", "Query title"};
-    private static final String[] m_columnTooltips =  {"Protein Id", "Protein", "Peptide", "Score of the peptide match", "PTM modifications associated with this peptide", "PTMs delta mass", "PTMs probability", "Modification", "Modification residue", "Modification delta mass", "Modification location", "Protein location of the modification", "Protein N/C-term", "Modification probability", "Number of peptides matching the modification site", "Peptide match query title"};
-    
+    private static final String[] m_columnTooltips = {"Protein Id", "Protein", "Peptide", "Score of the peptide match", "PTM modifications associated with this peptide", "PTMs delta mass", "PTMs probability", "Modification", "Modification residue", "Modification delta mass", "Modification location", "Protein location of the modification", "Protein N/C-term", "Modification probability", "Number of peptides matching the modification site", "Peptide match query title"};
+
     private ArrayList<PTMSite> m_arrayInUse = null;
     private ArrayList<PTMSite> m_proteinPTMSiteArray = new ArrayList<>();
     private final ArrayList<PTMSite> m_proteinPTMSiteNoRedundantArray = new ArrayList<>();
-    
+
     private final ArrayList<String> m_modificationsArray = new ArrayList<>();
     private final HashMap<String, Integer> m_modificationsMap = new HashMap<>();
-    
+
     private final ArrayList<Character> m_residuesArray = new ArrayList<>();
     private final HashMap<Character, Integer> m_residuesMap = new HashMap<>();
-    
+
     private String m_modelName;
-    
+
     private String m_modificationInfo = "";
-    
+
     private boolean m_hideRedundantPeptides = false;
-    
+
     private ScoreRenderer m_scoreRenderer = new ScoreRenderer();
-    
+
     public PtmProtenSiteTableModel_V2(LazyTable table) {
         super(table);
     }
-    
-    
-    
+
     public boolean hideRedundantsPeptides(boolean hide) {
         boolean changed = m_hideRedundantPeptides ^ hide;
-        
-        
+
         if (changed) {
             m_hideRedundantPeptides = hide;
             if (hide) {
@@ -104,11 +96,10 @@ public class PtmProtenSiteTableModel_V2 extends LazyTableModel implements Global
             }
             fireTableDataChanged();
         }
-        
+
         return changed;
     }
 
-    
     @Override
     public int getColumnCount() {
         return m_columnNames.length;
@@ -118,12 +109,12 @@ public class PtmProtenSiteTableModel_V2 extends LazyTableModel implements Global
     public String getColumnName(int col) {
         return m_columnNames[col];
     }
-    
+
     @Override
     public String getToolTipForHeader(int col) {
-            return m_columnTooltips[col];
+        return m_columnTooltips[col];
     }
-    
+
     @Override
     public String getTootlTipValue(int row, int col) {
         return null;
@@ -131,8 +122,8 @@ public class PtmProtenSiteTableModel_V2 extends LazyTableModel implements Global
 
     @Override
     public Class getColumnClass(int col) {
-        
-        switch (col){
+
+        switch (col) {
             case COLTYPE_PROTEIN_ID:
                 return Long.class;
             case COLTYPE_PEPTIDE_NAME:
@@ -158,31 +149,29 @@ public class PtmProtenSiteTableModel_V2 extends LazyTableModel implements Global
                 return Character.class;
         }
 
-        
         return null;
     }
-    
+
     @Override
     public int getSubTaskId(int col) {
         /*switch (col) {
-            case COLTYPE_PROTEIN_SET_NAME:
-            case COLTYPE_PROTEIN_SET_DESCRIPTION:
-                return DatabaseProteinSetsTask.SUB_TASK_TYPICAL_PROTEIN;
-            case COLTYPE_PROTEIN_SCORE:
-            case COLTYPE_PROTEINS_COUNT:
-                return DatabaseProteinSetsTask.SUB_TASK_SAMESET_SUBSET_COUNT;
-            case COLTYPE_UNIQUE_SEQUENCES_COUNT:
-            case COLTYPE_PEPTIDES_COUNT:
-                return DatabaseProteinSetsTask.SUB_TASK_TYPICAL_PROTEIN;
-            case COLTYPE_SPECTRAL_COUNT:
-                return DatabaseProteinSetsTask.SUB_TASK_SPECTRAL_COUNT;
-            case COLTYPE_SPECIFIC_SPECTRAL_COUNT:
-                return DatabaseProteinSetsTask.SUB_TASK_SPECIFIC_SPECTRAL_COUNT;
-        }*/ //JPM.TODO : not used for the moment
+         case COLTYPE_PROTEIN_SET_NAME:
+         case COLTYPE_PROTEIN_SET_DESCRIPTION:
+         return DatabaseProteinSetsTask.SUB_TASK_TYPICAL_PROTEIN;
+         case COLTYPE_PROTEIN_SCORE:
+         case COLTYPE_PROTEINS_COUNT:
+         return DatabaseProteinSetsTask.SUB_TASK_SAMESET_SUBSET_COUNT;
+         case COLTYPE_UNIQUE_SEQUENCES_COUNT:
+         case COLTYPE_PEPTIDES_COUNT:
+         return DatabaseProteinSetsTask.SUB_TASK_TYPICAL_PROTEIN;
+         case COLTYPE_SPECTRAL_COUNT:
+         return DatabaseProteinSetsTask.SUB_TASK_SPECTRAL_COUNT;
+         case COLTYPE_SPECIFIC_SPECTRAL_COUNT:
+         return DatabaseProteinSetsTask.SUB_TASK_SPECIFIC_SPECTRAL_COUNT;
+         }*/ //JPM.TODO : not used for the moment
         return -1;
     }
 
-    
     @Override
     public int getRowCount() {
         if (m_arrayInUse == null) {
@@ -200,7 +189,7 @@ public class PtmProtenSiteTableModel_V2 extends LazyTableModel implements Global
         DPeptideMatch peptideMatch = proteinPTMSite.getBestPeptideMatch();
         DInfoPTM infoPtm = proteinPTMSite.getPtmSpecificity();
 
-        switch (col){
+        switch (col) {
             case COLTYPE_PROTEIN_ID:
                 return proteinMatch.getId();
             case COLTYPE_PROTEIN_NAME:
@@ -215,7 +204,7 @@ public class PtmProtenSiteTableModel_V2 extends LazyTableModel implements Global
                 if (ptmString != null) {
                     ptm = ptmString.getReadablePtmString();
                 }
-            return ptm;
+                return ptm;
             case COLTYPE_MODIFICATION: {
                 return infoPtm.getPtmShortName();
             }
@@ -226,7 +215,7 @@ public class PtmProtenSiteTableModel_V2 extends LazyTableModel implements Global
                 } else if (locationSpecitifcity.contains("C-term")) {
                     return "C-term";
                 }
-                
+
                 return String.valueOf((int) proteinPTMSite.getPtmPeptidePosition(peptideMatch.getPeptide().getId()));
             }
             case COLTYPE_PROTEIN_LOC: {
@@ -242,21 +231,39 @@ public class PtmProtenSiteTableModel_V2 extends LazyTableModel implements Global
             case COLTYPE_PTM_PROBA: {
                 DPtmSiteProperties properties = peptideMatch.getPtmSiteProperties();
                 if (properties != null) {
-                    return properties.getMascotDeltaScore()*100;
+                    return properties.getMascotDeltaScore() * 100;
                 }
                 return null;
             }
             case COLTYPE_MODIFICATION_PROBA: {
-               DPtmSiteProperties properties = peptideMatch.getPtmSiteProperties();
-               if (properties != null) {
-                    return properties.getMascotProbabilityBySite().get(proteinPTMSite.toReadablePtmString(peptideMatch.getPeptide().getId()))*100;
+                DPtmSiteProperties properties = peptideMatch.getPtmSiteProperties();
+                if (properties != null) {
+                    // VDS Workaround test for issue #16643   
+                    Float proba = properties.getMascotProbabilityBySite().get(proteinPTMSite.toReadablePtmString(peptideMatch.getPeptide().getId()));
+                    if (proba == null) {
+                        proba = properties.getMascotProbabilityBySite().get(proteinPTMSite.toOtherReadablePtmString(peptideMatch.getPeptide().getId()));
+                    }
+                    //END VDS Workaround
+                    return proba * 100;
                 }
                 return null;
             }
             case COLTYPE_DELTA_MASS_PTM:
-                return 0.0;
+//                return 0.0;                
                 //return proteinPTMSite.getDeltaMassPTM();
-                
+                //Previously (Version 1) was : 
+//                double deltaMass = 0;                
+//                for (DPeptidePTM peptidePTM : peptidePTMArray) {
+//                    DInfoPTM infoPtm = DInfoPTM.getInfoPTMMap().get(peptidePTM.getIdPtmSpecificity());
+//                    deltaMass += infoPtm.getMonoMass();
+//                }
+                double deltaMass = 0;
+                for (DPeptidePTM peptidePTM : peptideMatch.getPeptidePTMArray()) {
+                    DInfoPTM pepInfoPtm = DInfoPTM.getInfoPTMMap().get(peptidePTM.getIdPtmSpecificity());
+                    deltaMass += pepInfoPtm.getMonoMass();
+                }
+                return deltaMass;
+
             case COLTYPE_DELTA_MASS_MODIFICATION: {
                 return infoPtm.getMonoMass();
             }
@@ -273,44 +280,33 @@ public class PtmProtenSiteTableModel_V2 extends LazyTableModel implements Global
             }
         }
 
-        
-        
         return null; // should never happen
     }
     private static final StringBuilder m_sb = new StringBuilder(20);
 
-
-    
-
-     
-    
     public void setData(Long taskId, ArrayList<PTMSite> proteinPTMSiteArray) {
         m_proteinPTMSiteArray = proteinPTMSiteArray;
         m_arrayInUse = m_proteinPTMSiteArray;
         m_taskId = taskId;
- 
-        m_modificationInfo = "toto processing ?";
-        //was = PtmProteinSiteTableModelProcessing.calculateData(this, m_modificationsArray, m_residuesArray, m_residuesMap, proteinPTMSiteArray, m_proteinPTMSiteNoRedundantArray, m_modificationsMap);
-        
+
+        m_modificationInfo = PtmProteinSiteTableModelProcessing.calculateDataWORedundance(this, m_modificationsArray, m_residuesArray, m_residuesMap, proteinPTMSiteArray, m_modificationsMap);
         fireTableDataChanged();
 
     }
-    
+
     public String getModificationsInfo() {
         return m_modificationInfo;
     }
-    
+
     public void dataUpdated() {
 
-            fireTableDataChanged();
+        fireTableDataChanged();
 
     }
 
     public PTMSite getProteinPTMSite(int i) {
         return m_arrayInUse.get(i);
     }
-
-
 
     @Override
     public int getLoadingPercentage() {
@@ -345,7 +341,7 @@ public class PtmProtenSiteTableModel_V2 extends LazyTableModel implements Global
 
     @Override
     public int[] getKeysColumn() {
-        int[] keys = {  COLTYPE_PROTEIN_NAME };
+        int[] keys = {COLTYPE_PROTEIN_NAME};
         return keys;
     }
 
@@ -368,7 +364,7 @@ public class PtmProtenSiteTableModel_V2 extends LazyTableModel implements Global
     public void addFilters(LinkedHashMap<Integer, Filter> filtersMap) {
 
         filtersMap.put(COLTYPE_PROTEIN_NAME, new StringFilter(getColumnName(COLTYPE_PROTEIN_NAME), null, COLTYPE_PROTEIN_NAME));
-        
+
         ConvertValueInterface peptideConverter = new ConvertValueInterface() {
             @Override
             public Object convertValue(Object o) {
@@ -377,14 +373,13 @@ public class PtmProtenSiteTableModel_V2 extends LazyTableModel implements Global
                 }
                 return ((DPeptideMatch) o).getPeptide().getSequence();
             }
-            
+
         };
         filtersMap.put(COLTYPE_PEPTIDE_NAME, new StringFilter(getColumnName(COLTYPE_PEPTIDE_NAME), peptideConverter, COLTYPE_PEPTIDE_NAME));
         filtersMap.put(COLTYPE_PEPTIDE_SCORE, new DoubleFilter(getColumnName(COLTYPE_PEPTIDE_SCORE), null, COLTYPE_PEPTIDE_SCORE));
         filtersMap.put(COLTYPE_PEPTIDE_PTM, new StringFilter(getColumnName(COLTYPE_PEPTIDE_PTM), null, COLTYPE_PEPTIDE_PTM));
         filtersMap.put(COLTYPE_DELTA_MASS_PTM, new DoubleFilter(getColumnName(COLTYPE_DELTA_MASS_PTM), null, COLTYPE_DELTA_MASS_PTM));
         filtersMap.put(COLTYPE_PTM_PROBA, new DoubleFilter(getColumnName(COLTYPE_PTM_PROBA), null, COLTYPE_PTM_PROBA));
-
 
         ConvertValueInterface modificationConverter = new ConvertValueInterface() {
             @Override
@@ -399,10 +394,8 @@ public class PtmProtenSiteTableModel_V2 extends LazyTableModel implements Global
 
         };
 
-
-
         filtersMap.put(COLTYPE_MODIFICATION, new ValueListAssociatedStringFilter(getColumnName(COLTYPE_MODIFICATION), m_modificationsArray.toArray(new String[m_modificationsArray.size()]), modificationConverter, COLTYPE_MODIFICATION, COLTYPE_RESIDUE_AA));
-        
+
         ConvertValueInterface residueConverter = new ConvertValueInterface() {
             @Override
             public Object convertValue(Object o) {
@@ -423,7 +416,6 @@ public class PtmProtenSiteTableModel_V2 extends LazyTableModel implements Global
         filtersMap.put(COLTYPE_PEPTIDE_COUNT, new IntegerFilter(getColumnName(COLTYPE_PEPTIDE_COUNT), null, COLTYPE_PEPTIDE_COUNT));
         filtersMap.put(COLTYPE_MODIFICATION_PROBA, new DoubleFilter(getColumnName(COLTYPE_MODIFICATION_PROBA), null, COLTYPE_MODIFICATION_PROBA));
         filtersMap.put(COLTYPE_QUERY_TITLE, new StringFilter(getColumnName(COLTYPE_QUERY_TITLE), null, COLTYPE_QUERY_TITLE));
-        
 
     }
 
@@ -500,7 +492,6 @@ public class PtmProtenSiteTableModel_V2 extends LazyTableModel implements Global
         m_rendererMap.put(col, renderer);
         return renderer;
 
-        
     }
     private final HashMap<Integer, TableCellRenderer> m_rendererMap = new HashMap();
 
@@ -513,21 +504,21 @@ public class PtmProtenSiteTableModel_V2 extends LazyTableModel implements Global
 
         private final int m_sameSetCount;
         private final int m_subSetCount;
-        
+
         public ProteinCount(int sameSetCount, int subSetCount) {
             m_sameSetCount = sameSetCount;
             m_subSetCount = subSetCount;
         }
-        
+
         public int getNbProteins() {
-            return m_sameSetCount+m_subSetCount;
+            return m_sameSetCount + m_subSetCount;
         }
-        
+
         public String toHtml() {
-                       
+
             String urlSameset = IconManager.getURLForIcon(IconManager.IconType.SAME_SET);
             String urlSubset = IconManager.getURLForIcon(IconManager.IconType.SUB_SET);
-            
+
             m_sb.setLength(0);
             m_sb.append("<html>");
             m_sb.append((int) (m_sameSetCount + m_subSetCount));
@@ -535,12 +526,11 @@ public class PtmProtenSiteTableModel_V2 extends LazyTableModel implements Global
             m_sb.append("&nbsp;,&nbsp;").append(m_subSetCount).append("&nbsp;<img src=\"").append(urlSubset).append("\">&nbsp;");
             m_sb.append(')');
             m_sb.append("</html>");
-            return m_sb.toString(); 
+            return m_sb.toString();
         }
-        
+
         @Override
         public String toString() {
-            
 
             m_sb.setLength(0);
             m_sb.append((int) (m_sameSetCount + m_subSetCount));
@@ -549,16 +539,16 @@ public class PtmProtenSiteTableModel_V2 extends LazyTableModel implements Global
             m_sb.append(')');
             return m_sb.toString();
         }
-        
+
         @Override
         public int compareTo(Object o) {
-            int sameSet =  m_sameSetCount-((ProteinCount) o).m_sameSetCount;
+            int sameSet = m_sameSetCount - ((ProteinCount) o).m_sameSetCount;
             if (sameSet != 0) {
                 return sameSet;
             }
-            return m_subSetCount-((ProteinCount) o).m_subSetCount;
+            return m_subSetCount - ((ProteinCount) o).m_subSetCount;
         }
-        
+
     }
 
     @Override
@@ -570,7 +560,7 @@ public class PtmProtenSiteTableModel_V2 extends LazyTableModel implements Global
     public PlotInformation getPlotInformation() {
         return null;
     }
-    
+
     @Override
     public ArrayList<ExtraDataType> getExtraDataTypes() {
         ArrayList<ExtraDataType> list = new ArrayList<>();
@@ -581,7 +571,6 @@ public class PtmProtenSiteTableModel_V2 extends LazyTableModel implements Global
         return list;
     }
 
-    
     @Override
     public Object getValue(Class c) {
         return getSingleValue(c);
@@ -600,10 +589,10 @@ public class PtmProtenSiteTableModel_V2 extends LazyTableModel implements Global
         }
         return null;
     }
-    
+
     @Override
     public Object getColValue(Class c, int col) {
         return null;
     }
-    
+
 }

@@ -139,7 +139,7 @@ public abstract class DecoratedTable extends JXTable implements CrossSelectionIn
         
         if (m_firstPaint) {
             m_firstPaint = false;
-            parametersChanged();  
+            panelResized();  
         }
         // -------------------------
 
@@ -493,10 +493,7 @@ public abstract class DecoratedTable extends JXTable implements CrossSelectionIn
         return m_parameterListArray;
     }
 
-    @Override
-    public void parametersChanged() {
-
-        
+    private void panelResized() {
         if (m_parameterListArray == null) {
             initParameters();
         }
@@ -532,6 +529,13 @@ public abstract class DecoratedTable extends JXTable implements CrossSelectionIn
                 }
 
         }
+    }
+    
+    
+    @Override
+    public void parametersChanged() {
+
+        panelResized();
 
         List selectedColumns = (List) m_columnsVisibilityParameter.getAssociatedValues(true);
         List nonSelectedColumns = (List) m_columnsVisibilityParameter.getAssociatedValues(false);

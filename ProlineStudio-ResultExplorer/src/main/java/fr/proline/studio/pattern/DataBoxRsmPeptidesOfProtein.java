@@ -117,6 +117,7 @@ public class DataBoxRsmPeptidesOfProtein extends AbstractDataBox {
         registerTask(task);
 
     }
+    
     private Long m_previousTaskId = null;
     
     @Override

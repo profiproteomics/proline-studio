@@ -1,6 +1,5 @@
 package fr.proline.studio.rsmexplorer.actions.identification;
 
-import fr.proline.core.orm.msi.ResultSet;
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dam.AccessDatabaseThread;

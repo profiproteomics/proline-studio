@@ -32,9 +32,9 @@ import org.openide.util.NbBundle.Messages;
 @TopComponent.OpenActionRegistration(displayName = "#CTL_MzdbFilesAction",
         preferredID = "MzdbFilesTopComponent")
 @Messages({
-    "CTL_MzdbFilesAction=MzDB Files",
-    "CTL_MzdbFilesTopComponent=MzDB Files",
-    "HINT_MzdbFilesTopComponent=MzDB Files"
+    "CTL_MzdbFilesAction=Ms Files",
+    "CTL_MzdbFilesTopComponent=Ms Files",
+    "HINT_MzdbFilesTopComponent=Ms Files"
 })
 public final class MzdbFilesTopComponent extends TopComponent {
 

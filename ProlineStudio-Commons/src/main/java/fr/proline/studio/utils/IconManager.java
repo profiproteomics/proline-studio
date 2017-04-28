@@ -98,6 +98,7 @@ public class IconManager {
         FOLDER,
         FOLDER_EXPANDED,
         COMPUTER_NETWORK,
+        DRIVE,
         FRAGMENTATION,
         BIOLOGICAL_GROUP,
         BIOLOGICAL_SAMPLE,
@@ -142,6 +143,7 @@ public class IconManager {
         PROGRESS,
         UPDATE,
         SPECTRUM,
+        SPECTRUM_EMISSION,
         NAVIGATE,
         SELECT,
         ZOOM_FIT,
@@ -466,6 +468,8 @@ public class IconManager {
                 return "fr/proline/studio/images/folder-horizontal.png";
             case FOLDER_EXPANDED:
                 return "fr/proline/studio/images/folder-horizontal-open.png";
+            case DRIVE:
+                return "fr/proline/studio/images/drive.png";
             case COMPUTER_NETWORK:
                 return "fr/proline/studio/images/computer-network.png";
             case FRAGMENTATION:
@@ -556,6 +560,8 @@ public class IconManager {
                 return "fr/proline/studio/images/update.png";
             case SPECTRUM:
                 return "fr/proline/studio/images/spectrum.png";
+            case SPECTRUM_EMISSION:
+                return "fr/proline/studio/images/spectrum-emission.png";
             case NAVIGATE:
                 return "fr/proline/studio/images/navigate.png";
             case SELECT:

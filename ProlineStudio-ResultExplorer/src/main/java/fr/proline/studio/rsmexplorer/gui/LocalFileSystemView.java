@@ -10,6 +10,8 @@ import fr.proline.studio.mzscope.MzdbInfo;
 import fr.proline.studio.pattern.MzScopeWindowBoxManager;
 import fr.proline.studio.rsmexplorer.gui.dialog.ConvertRawDialog;
 import fr.proline.studio.rsmexplorer.gui.dialog.UploadMzdbDialog;
+import fr.proline.studio.utils.IconManager;
+import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
@@ -22,6 +24,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.HashSet;
 import javax.swing.BorderFactory;
+import javax.swing.Icon;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JMenuItem;
@@ -29,9 +32,11 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTree;
+import javax.swing.UIManager;
 import javax.swing.event.TreeExpansionEvent;
 import javax.swing.event.TreeExpansionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreePath;
 import org.openide.windows.WindowManager;
 
@@ -98,6 +103,38 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
 
         m_fileSystemDataModel = new LocalFileSystemModel(roots[0].getAbsolutePath());
         m_tree = new JTree(m_fileSystemDataModel);
+
+        m_tree.setCellRenderer(new DefaultTreeCellRenderer() {
+
+            @Override
+            public Component getTreeCellRendererComponent(JTree tree, Object value, boolean selected, boolean expanded, boolean isLeaf, int row, boolean focused) {
+                Component c = super.getTreeCellRendererComponent(tree, value, selected, expanded, isLeaf, row, focused);
+                
+                if(((DefaultMutableTreeNode)value).isRoot()){
+                    setIcon(IconManager.getIcon(IconManager.IconType.DRIVE));
+                }else{
+                    File f = (File) ((DefaultMutableTreeNode)value).getUserObject();
+                    if(f.isDirectory()){
+                        if(expanded){
+                            setIcon(IconManager.getIcon(IconManager.IconType.FOLDER_EXPANDED));
+                        }else{
+                            setIcon(IconManager.getIcon(IconManager.IconType.FOLDER));
+                        }
+                    }else{
+                        if(f.getAbsolutePath().toLowerCase().endsWith(".raw")){
+                            setIcon(IconManager.getIcon(IconManager.IconType.SPECTRUM));
+                        }else if(f.getAbsolutePath().toLowerCase().endsWith(".mzdb")){
+                            setIcon(IconManager.getIcon(IconManager.IconType.SPECTRUM_EMISSION));
+                        }else{
+                            setIcon(IconManager.getIcon(IconManager.IconType.FILE));
+                        }
+                    }
+                }
+
+                
+                return c;
+            }
+        });
 
         HashSet<String> set = TreeStateUtil.loadExpansionState(TreeStateUtil.TreeType.LOCAL);
 

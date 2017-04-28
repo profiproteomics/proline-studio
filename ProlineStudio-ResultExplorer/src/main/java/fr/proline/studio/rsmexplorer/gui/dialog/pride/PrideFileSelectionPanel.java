@@ -36,7 +36,7 @@ public class PrideFileSelectionPanel extends  PrideWizardPanel {
     }
     
     private PrideFileSelectionPanel() {        
-        super.initWizardPanels("<html><b>Step 4:</b> Select file to export to</html>");
+        super.initWizardPanels("<html><b>Step 4:</b> Export to file:</html>");
     }
     
     //VDS TODO : Mutualise code avec ExportDialog...
@@ -112,7 +112,7 @@ public class PrideFileSelectionPanel extends  PrideWizardPanel {
     protected Component checkExportPrideParams() {
         errorMsg  = null;
         if(StringUtils.isEmpty(m_fileTextField.getText().trim())){
-            errorMsg =  "A file name to export to should be specified";
+            errorMsg =  "An export filename should be specified";
             return m_fileTextField;
         }
         return null;        

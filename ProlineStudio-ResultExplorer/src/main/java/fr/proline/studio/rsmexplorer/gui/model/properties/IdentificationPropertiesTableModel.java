@@ -20,7 +20,10 @@ import java.io.File;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
@@ -371,31 +374,59 @@ public class IdentificationPropertiesTableModel extends AbstractPropertiesTableM
                     return new GroupObject((searchSetting == null) ? "" : searchSetting.getMaxMissedCleavages().toString(), this);
                 }
                 case ROWTYPE_FIXED_MODIFICATIONS: {
+
                     if (searchSetting == null) {
                         return new GroupObject("", this);
                     }
+
                     Set<UsedPtm> usedPtmSet = searchSetting.getUsedPtms();
+
+                    HashSet<String> stringPtmSet = new HashSet<String>();
+
                     Iterator<UsedPtm> it = usedPtmSet.iterator();
+
                     while (it.hasNext()) {
+
                         UsedPtm usedPtm = it.next();
+
                         if (usedPtm.getIsFixed()) {
-                            if (m_sb.length() > 0) {
-                                m_sb.append(", ");
-                            }
+
+                            /*
+                             if (m_sb.length() > 0) {
+                             m_sb.append(", ");
+                             }
+                             */
+                            
                             String shortName = usedPtm.getShortName();
-                            m_sb.append(shortName);
+
+                            //m_sb.append(shortName);
                             if (shortName.indexOf('(') == -1) {
                                 PtmSpecificity ptmSpecificity = usedPtm.getPtmSpecificity();
                                 if (ptmSpecificity != null) {
                                     Character c = ptmSpecificity.getResidue();
                                     if (c != null) {
-                                        m_sb.append('(').append(c).append(')');
+                                        //m_sb.append('(').append(c).append(')');
+                                        shortName = shortName.concat("(").concat(c.toString()).concat(")");
                                     }
                                 }
                             }
+
+                            stringPtmSet.add(shortName);
                         }
 
                     }
+
+                    String[] array = stringPtmSet.toArray(new String[stringPtmSet.size()]);
+
+                    Arrays.sort(array);
+
+                    for (String array1 : array) {
+                        if (m_sb.length() > 0) {
+                            m_sb.append(", ");
+                        }
+                        m_sb.append(array1);
+                    }
+
                     String modifications = m_sb.toString();
                     m_sb.setLength(0);
                     return new GroupObject(modifications, this);
@@ -405,33 +436,57 @@ public class IdentificationPropertiesTableModel extends AbstractPropertiesTableM
                     if (searchSetting == null) {
                         return new GroupObject("", this);
                     }
+
                     Set<UsedPtm> usedPtmSet = searchSetting.getUsedPtms();
+
+                    HashSet<String> stringPtmSet = new HashSet<String>();
+
                     Iterator<UsedPtm> it = usedPtmSet.iterator();
                     while (it.hasNext()) {
                         UsedPtm usedPtm = it.next();
-                        if (!usedPtm.getIsFixed()) {
-                            if (m_sb.length() > 0) {
-                                m_sb.append(", ");
-                            }
 
+                        if (!usedPtm.getIsFixed()) {
+
+                            /*
+                             if (m_sb.length() > 0) {
+                             m_sb.append(", ");
+                             }
+                             */
                             String shortName = usedPtm.getShortName();
-                            m_sb.append(shortName);
+
+                            //m_sb.append(shortName);
                             if (shortName.indexOf('(') == -1) {
                                 PtmSpecificity ptmSpecificity = usedPtm.getPtmSpecificity();
                                 if (ptmSpecificity != null) {
                                     Character c = ptmSpecificity.getResidue();
                                     if (c != null) {
-                                        m_sb.append('(').append(c).append(')');
+                                        //m_sb.append('(').append(c).append(')');
+                                        shortName = shortName.concat("(").concat(c.toString()).concat(")");
                                     }
                                 }
                             }
 
+                            stringPtmSet.add(shortName);
+
                         }
 
                     }
+
+                    String[] array = stringPtmSet.toArray(new String[stringPtmSet.size()]);
+
+                    Arrays.sort(array);
+
+                    for (String array1 : array) {
+                        if (m_sb.length() > 0) {
+                            m_sb.append(", ");
+                        }
+                        m_sb.append(array1);
+                    }
+
                     String modifications = m_sb.toString();
                     m_sb.setLength(0);
                     return new GroupObject(modifications, this);
+
                 }
                 case ROWTYPE_FRAGMENT_MASS_TOLERANCE: {
                     if (msmsSearch == null) {
@@ -742,7 +797,7 @@ public class IdentificationPropertiesTableModel extends AbstractPropertiesTableM
 
         private ArrayList<String> m_valuesName = new ArrayList<String>();
         private HashMap<Integer, HashMap<String, String>> m_valuesMap = new HashMap<>();
-        
+
         private final String REQUIRED_PREFIX = "validation_properties / results /";
 
         public ValidationResultsGroup(int rowStart, ArrayList<DDataset> datasetArrayList) {
@@ -793,7 +848,7 @@ public class IdentificationPropertiesTableModel extends AbstractPropertiesTableM
 
         @Override
         public GroupObject getGroupNameAt(int rowIndex) {
-            return new GroupObject(m_valuesName.get(rowIndex).substring(m_valuesName.get(rowIndex).indexOf(REQUIRED_PREFIX) + REQUIRED_PREFIX.length()+1), this);
+            return new GroupObject(m_valuesName.get(rowIndex).substring(m_valuesName.get(rowIndex).indexOf(REQUIRED_PREFIX) + REQUIRED_PREFIX.length() + 1), this);
         }
 
         @Override
@@ -817,7 +872,7 @@ public class IdentificationPropertiesTableModel extends AbstractPropertiesTableM
 
         private ArrayList<String> m_valuesName = new ArrayList<String>();
         private HashMap<Integer, HashMap<String, String>> m_valuesMap = new HashMap<>();
-        
+
         private final String REQUIRED_PREFIX = "validation_properties / params /";
 
         public ValidationParametersGroup(int rowStart, ArrayList<DDataset> datasetArrayList) {
@@ -868,7 +923,7 @@ public class IdentificationPropertiesTableModel extends AbstractPropertiesTableM
 
         @Override
         public DataGroup.GroupObject getGroupNameAt(int rowIndex) {
-            return new GroupObject(m_valuesName.get(rowIndex).substring(m_valuesName.get(rowIndex).indexOf(REQUIRED_PREFIX) + REQUIRED_PREFIX.length()+1), this);
+            return new GroupObject(m_valuesName.get(rowIndex).substring(m_valuesName.get(rowIndex).indexOf(REQUIRED_PREFIX) + REQUIRED_PREFIX.length() + 1), this);
         }
 
         @Override

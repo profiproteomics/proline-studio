@@ -58,7 +58,7 @@ public class PropertiesAction extends AbstractRSMAction {
         // new Properties window
         AbstractPropertiesTableModel model = null;
 
-        WindowBox windowBox = WindowBoxFactory.getGenericWindowBox(name, "Properties test", IconManager.IconType.DOCUMENT_LIST, true);
+        WindowBox windowBox = WindowBoxFactory.getGenericWindowBox(name, "Properties", IconManager.IconType.DOCUMENT_LIST, true);
         model = isIdentificationTree() ? new IdentificationPropertiesTableModel() : new XICPropertiesTableModel();
         windowBox.setEntryData(-1l, model);
         DataBoxViewerTopComponent win2 = new DataBoxViewerTopComponent(windowBox);

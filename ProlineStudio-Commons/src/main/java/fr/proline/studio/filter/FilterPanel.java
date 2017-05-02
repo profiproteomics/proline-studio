@@ -6,26 +6,34 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 import javax.swing.*;
 
 /**
  * Dynamic filter panel
+ *
  * @author JM235353
  */
 public class FilterPanel extends JPanel {
-    
+
     private Filter[] m_filters;
-    
+
     private JPanel m_filterSelectedPanel;
     private JComboBox m_filterComboBox;
     private JButton m_addFilterButton;
-    
+
     private DefaultDialog m_dialog;
-    
+
+    private HashMap<Filter, Integer> m_yIndex;
+
     public FilterPanel(DefaultDialog d) {
-        
+
         m_dialog = d;
-        
+
+        m_yIndex = new HashMap<Filter, Integer>();
+
         setLayout(new GridBagLayout());
         setBorder(BorderFactory.createTitledBorder(" Filter(s) "));
 
@@ -39,9 +47,8 @@ public class FilterPanel extends JPanel {
         c.gridy = 0;
         add(m_filterSelectedPanel, c);
 
-
         m_filterComboBox = new JComboBox();
-        m_filterComboBox.setRenderer(new FilterComboboxRenderer()); 
+        m_filterComboBox.setRenderer(new FilterComboboxRenderer());
         m_addFilterButton = new JButton(IconManager.getIcon(IconManager.IconType.PLUS));
         m_addFilterButton.setMargin(new java.awt.Insets(2, 2, 2, 2));
 
@@ -58,7 +65,6 @@ public class FilterPanel extends JPanel {
         c.weightx = 1.0;
         add(Box.createHorizontalBox(), c);
 
-
         m_addFilterButton.addActionListener(new ActionListener() {
 
             @Override
@@ -70,23 +76,22 @@ public class FilterPanel extends JPanel {
                 f.setDefined(true);
                 m_filterComboBox.removeItem(f);
 
+                m_yIndex.put(f, m_yIndex.size() + 1);
+
                 initPrefilterSelectedPanel();
-                
+
                 m_dialog.repack();
             }
         });
 
     }
-    
 
-    
     public void setFilers(Filter[] filters) {
         m_filters = filters;
 
         initPrefilterSelectedPanel();
     }
-    
-    
+
     public void initPrefilterSelectedPanel() {
         m_filterSelectedPanel.removeAll();
         m_filterComboBox.removeAllItems();
@@ -95,50 +100,132 @@ public class FilterPanel extends JPanel {
         c.anchor = GridBagConstraints.NORTHWEST;
         c.fill = GridBagConstraints.BOTH;
         c.insets = new java.awt.Insets(5, 5, 5, 5);
-        c.gridy = 0;
 
-        boolean putAndInFront = false;
-        int nbParameters = m_filters.length;
-        for (int i = 0; i < nbParameters; i++) {
-            final Filter f = m_filters[i];
+        Iterator iterator = m_yIndex.entrySet().iterator();
+        while (iterator.hasNext()) {
 
-            if ((f != null) && (f.isDefined())) {
+            Map.Entry pair = (Map.Entry) iterator.next();
+            Filter currentFilter = (Filter) pair.getKey();
+            int currentVerticalPosition = (int) pair.getValue();
+
+            c.gridy = currentVerticalPosition;
+
+            if ((currentFilter != null) && (currentFilter.isDefined())) {
 
                 c.gridx = 0;
-                if (putAndInFront) {
+                if (currentVerticalPosition!=1) {
                     m_filterSelectedPanel.add(new JLabel("AND"), c);
                 } else {
-                    putAndInFront = true;
                     m_filterSelectedPanel.add(new JLabel("   "), c);
                 }
 
-                f.createComponents(m_filterSelectedPanel, c);
+                currentFilter.createComponents(m_filterSelectedPanel, c);
 
                 c.weightx = 0;
                 c.gridwidth = 1;
                 c.weighty = 0;
                 c.fill = GridBagConstraints.HORIZONTAL;
                 c.gridx++;
+
                 JButton removeButton = new JButton(IconManager.getIcon(IconManager.IconType.CROSS_SMALL7));
                 removeButton.setMargin(new java.awt.Insets(2, 2, 2, 2));
                 removeButton.addActionListener(new ActionListener() {
 
                     @Override
                     public void actionPerformed(ActionEvent e) {
-                        f.setDefined(false);
+                        currentFilter.setDefined(false);
+
+                        if (m_yIndex.get(currentFilter) != null) {
+
+                            int filterIndex = m_yIndex.get(currentFilter);
+                            m_yIndex.remove(currentFilter);
+
+                            Iterator iterator = m_yIndex.entrySet().iterator();
+                            while (iterator.hasNext()) {
+                                Map.Entry pair = (Map.Entry) iterator.next();
+                                Filter currentFilter = (Filter) pair.getKey();
+                                int currentVerticalPosition = (int) pair.getValue();
+
+                                if (currentVerticalPosition > filterIndex) {
+                                    m_yIndex.put(currentFilter, --currentVerticalPosition);
+                                }
+                            }
+
+                        }
+
                         initPrefilterSelectedPanel();
-                        
+
                         m_dialog.repack();
                     }
                 });
                 m_filterSelectedPanel.add(removeButton, c);
-
-                c.gridy++;
-            } else {
-                m_filterComboBox.addItem(f);
             }
 
         }
+
+        int nbParameters = m_filters.length;
+        for (int i = 0; i < nbParameters; i++) {
+            final Filter filter = m_filters[i];
+            if(!m_yIndex.containsKey(filter)){
+                m_filterComboBox.addItem(filter);
+            }
+        }
+
+        /*
+
+         c.gridy = 0;
+
+         boolean putAndInFront = false;
+         int nbParameters = m_filters.length;
+         for (int i = 0; i < nbParameters; i++) {
+         final Filter filter = m_filters[i];
+
+         if ((filter != null) && (filter.isDefined())) {
+
+         c.gridx = 0;
+         if (putAndInFront) {
+         m_filterSelectedPanel.add(new JLabel("AND"), c);
+         } else {
+         putAndInFront = true;
+         m_filterSelectedPanel.add(new JLabel("   "), c);
+         }
+
+         filter.createComponents(m_filterSelectedPanel, c);
+
+         c.weightx = 0;
+         c.gridwidth = 1;
+         c.weighty = 0;
+         c.fill = GridBagConstraints.HORIZONTAL;
+         c.gridx++;
+
+         JButton removeButton = new JButton(IconManager.getIcon(IconManager.IconType.CROSS_SMALL7));
+         removeButton.setMargin(new java.awt.Insets(2, 2, 2, 2));
+         removeButton.addActionListener(new ActionListener() {
+
+         @Override
+         public void actionPerformed(ActionEvent e) {
+         filter.setDefined(false);
+
+         if (m_yIndex.get(filter) != null) {
+         int filterIndex = m_yIndex.get(filter);
+         m_yIndex.remove(filter);
+
+         }
+
+         initPrefilterSelectedPanel();
+
+         m_dialog.repack();
+         }
+         });
+         m_filterSelectedPanel.add(removeButton, c);
+
+         c.gridy++;
+         } else {
+         m_filterComboBox.addItem(filter);
+         }
+
+         }
+         */
     }
-    
+
 }

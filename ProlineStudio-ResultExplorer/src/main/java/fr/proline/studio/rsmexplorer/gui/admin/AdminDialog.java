@@ -36,7 +36,7 @@ public class AdminDialog extends DefaultDialog  {
         setMinimumSize(new Dimension(400, 360));
         setResizable(true);
 
-        //setDocumentationSuffix("h.eb8nfjv41vkz"); //JPM.TODO
+        setDocumentationSuffix("h.gktawz9n942e");
 
         setButtonVisible(BUTTON_CANCEL, false);
         setButtonName(BUTTON_OK, "Close");

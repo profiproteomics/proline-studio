@@ -44,23 +44,26 @@ public class PtmProtenSiteTableModel_V2 extends LazyTableModel implements Global
     public static final int COLTYPE_PROTEIN_NAME = 1;
     public static final int COLTYPE_PEPTIDE_NAME = 2;
     public static final int COLTYPE_PEPTIDE_SCORE = 3;
-    public static final int COLTYPE_PEPTIDE_PTM = 4;
-    public static final int COLTYPE_DELTA_MASS_PTM = 5;
-    public static final int COLTYPE_PTM_PROBA = 6;
-    public static final int COLTYPE_MODIFICATION = 7;
-    public static final int COLTYPE_RESIDUE_AA = 8;
-    public static final int COLTYPE_DELTA_MASS_MODIFICATION = 9;
-    public static final int COLTYPE_MODIFICATION_LOC = 10;
-    public static final int COLTYPE_PROTEIN_LOC = 11;
-    public static final int COLTYPE_PROTEIN_NTERM_CTERM = 12;
-    public static final int COLTYPE_MODIFICATION_PROBA = 13;
-    public static final int COLTYPE_PEPTIDE_COUNT = 14;
+
+    public static final int COLTYPE_MODIFICATION = 4;
+    public static final int COLTYPE_RESIDUE_AA = 5;
+    public static final int COLTYPE_MODIFICATION_PROBA = 6;
+    public static final int COLTYPE_DELTA_MASS_MODIFICATION = 7;
+    public static final int COLTYPE_MODIFICATION_LOC = 8;
+    public static final int COLTYPE_PROTEIN_LOC = 9;
+    public static final int COLTYPE_PROTEIN_NTERM_CTERM = 10;
+    public static final int COLTYPE_PEPTIDE_COUNT = 11;
+    
+    public static final int COLTYPE_PEPTIDE_PTM = 12;
+    public static final int COLTYPE_DELTA_MASS_PTM = 13;
+    public static final int COLTYPE_PTM_PROBA = 14;
+    
     public static final int COLTYPE_QUERY_TITLE = 15;
 
     public static final int COLTYPE_HIDDEN_PROTEIN_PTM = 16; // hidden column, must be the last
 
-    private static final String[] m_columnNames = {"Id", "Protein", "Peptide", "Score", "PTM", "PTM D.Mass", "PTM Probability", "Modification", "Residue", "Modification D.Mass", "Modification Loc.", "Protein Loc.", "Protein N/C-term", "Modification Probability", "Peptide count", "Query title"};
-    private static final String[] m_columnTooltips = {"Protein Id", "Protein", "Peptide", "Score of the peptide match", "PTM modifications associated with this peptide", "PTMs delta mass", "PTMs probability", "Modification", "Modification residue", "Modification delta mass", "Modification location", "Protein location of the modification", "Protein N/C-term", "Modification probability", "Number of peptides matching the modification site", "Peptide match query title"};
+    private static final String[] m_columnNames = {"Id", "Protein", "Peptide", "Score", "Modification", "Residue", "Site Probability", "Modification D.Mass", "Modification Loc.", "Protein Loc.", "Protein N/C-term", "Peptide count", "PTM", "PTM D.Mass", "PTM Probability", "Query title"};
+    private static final String[] m_columnTooltips = {"Protein Id", "Protein", "Peptide", "Score of the peptide match", "Modification", "Modified residue","Modification probability", "Delta mass of the given modification", "Position of the modification on the peptide sequence", "Position of the modification on the protein sequence", "Protein N/C-term", "Number of peptides matching the modification site","PTM modifications associated with this peptide", "PTMs delta mass", "PTMs probability", "Peptide match query title"};
 
     private ArrayList<PTMSite> m_arrayInUse = null;
     private ArrayList<PTMSite> m_proteinPTMSiteArray = new ArrayList<>();

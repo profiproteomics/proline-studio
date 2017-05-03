@@ -45,22 +45,24 @@ public class PeptidesOfPtmSiteTableModel extends DecoratedTableModel implements 
     public static final int COLTYPE_PEPTIDE_ID = 0;
     public static final int COLTYPE_PEPTIDE_NAME = 1;
     public static final int COLTYPE_PEPTIDE_SCORE = 2;
-    public static final int COLTYPE_PEPTIDE_PTM = 3;
-    public static final int COLTYPE_DELTA_MASS_PTM = 4;
-    public static final int COLTYPE_PTM_PROBA = 5;
-    public static final int COLTYPE_MODIFICATION = 6;
-    public static final int COLTYPE_RESIDUE_AA = 7;
-    public static final int COLTYPE_DELTA_MASS_MODIFICATION = 8;
-    public static final int COLTYPE_MODIFICATION_LOC = 9;
-    public static final int COLTYPE_PROTEIN_LOC = 10;
-    public static final int COLTYPE_PROTEIN_NTERM_CTERM = 11;
-    public static final int COLTYPE_MODIFICATION_PROBA = 12;
+
+    public static final int COLTYPE_MODIFICATION = 3;
+    public static final int COLTYPE_RESIDUE_AA = 4;
+    public static final int COLTYPE_MODIFICATION_PROBA = 5;
+    public static final int COLTYPE_DELTA_MASS_MODIFICATION = 6;
+    public static final int COLTYPE_MODIFICATION_LOC = 7;
+    public static final int COLTYPE_PROTEIN_LOC = 8;
+    public static final int COLTYPE_PROTEIN_NTERM_CTERM = 9;
+
+    public static final int COLTYPE_PEPTIDE_PTM = 10;
+    public static final int COLTYPE_DELTA_MASS_PTM = 11;
+    public static final int COLTYPE_PTM_PROBA = 12;
     public static final int COLTYPE_QUERY_TITLE = 13;
     
 //    public static final int COLTYPE_HIDDEN_PROTEIN_PTM = 16; // hidden column, must be the last
    
-    private static final String[] m_columnNames = {"Id", "Peptide", "Score", "PTM", "PTM D.Mass", "PTM Probability", "Modification", "Residue", "Modification D.Mass", "Modification Loc.", "Protein Loc.", "Protein N/C-term", "Modification Probability", "Query title"};
-    private static final String[] m_columnTooltips =  {"Peptide Id (Instance Id)", "Peptide", "Score of the peptide match", "PTM modifications associated with this peptide", "PTMs delta mass", "PTMs probability", "Modification", "Modification residue", "Modification delta mass", "Modification location", "Protein location of the modification", "Protein N/C-term", "Modification probability", "Peptide match query title"};
+    private static final String[] m_columnNames = {"Id", "Peptide", "Score", "Modification", "Residue", "Site Probability", "Modification D.Mass", "Modification Loc.", "Protein Loc.", "Protein N/C-term", "PTM", "PTM D.Mass", "PTM Probability", "Query title"};
+    private static final String[] m_columnTooltips =  {"Peptide Id (Instance Id)", "Peptide", "Score of the peptide match", "Modification", "Modified residue", "Site probability", "Delta mass of the given modification", "Position of the modification on the peptide sequence", "Position of the modification on the protein sequence", "Protein N/C-term", "PTM modifications associated with this peptide", "PTMs delta mass", "PTMs probability", "Peptide match query title"};
     private final HashMap<Integer, TableCellRenderer> m_rendererMap = new HashMap();
 
     private PTMSite m_currentPtmSite;

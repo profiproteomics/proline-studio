@@ -6,7 +6,6 @@
 package fr.proline.studio.rsmexplorer.gui;
 
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
-import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.studio.comparedata.AddDataAnalyzerButton;
 import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.comparedata.GlobalTabelModelProviderInterface;
@@ -142,12 +141,7 @@ public class PeptidesPTMSitePanel extends JPanel implements DataBoxPanelInterfac
     public void setData(PTMSite peptidesPTMSite, Long pepInstID) {
 
         PeptidesOfPtmSiteTableModel model = ((PeptidesOfPtmSiteTableModel) ((CompoundTableModel) m_peptidesPtmSiteTable.getModel()).getBaseModel());
-        try {
         model.setData(peptidesPTMSite, m_displayPeptidesMatches, pepInstID);
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw e;
-        }
         // select the first row
         if (peptidesPTMSite != null) {
             m_peptidesPtmSiteTable.getSelectionModel().setSelectionInterval(0, 0);

@@ -111,10 +111,10 @@ public class PtmProteinSiteTableModelProcessing {
         TreeSet<Character> residueTreeSet = new TreeSet<>();
 
         for (int i = 0; i < nbRows; i++) {
-            String modification = (String) model.getValueAt(i, PtmProtenSiteTableModel.COLTYPE_MODIFICATION);
+            String modification = (String) model.getValueAt(i, PtmProtenSiteTableModel_V2.COLTYPE_MODIFICATION);
             modificationTreeSet.add(modification);
 
-            Character residue = (Character) model.getValueAt(i, PtmProtenSiteTableModel.COLTYPE_RESIDUE_AA);
+            Character residue = (Character) model.getValueAt(i, PtmProtenSiteTableModel_V2.COLTYPE_RESIDUE_AA);
             if (residue != null) {
                 residueTreeSet.add(residue);
             }
@@ -169,7 +169,7 @@ public class PtmProteinSiteTableModelProcessing {
         HashMap<String, Integer> globalDistinctModificationsMap = new HashMap<>();
 
         for (int i = 0; i < rowCount; i++) {
-            String modification = (String) model.getValueAt(i, PtmProtenSiteTableModel.COLTYPE_MODIFICATION);                
+            String modification = (String) model.getValueAt(i, PtmProtenSiteTableModel_V2.COLTYPE_MODIFICATION);                
             Integer nb = globalDistinctModificationsMap.get(modification);
             if (nb == null) {
                 globalDistinctModificationsMap.put(modification, 1);

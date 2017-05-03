@@ -76,9 +76,10 @@ public class DataboxRsetPSMForMsQuery extends AbstractDataBox{
     public void dataChanged() {
         long oldMsQId = m_msQuery == null? -1: m_msQuery.getId();
         final MsQueryInfoRset _msqI = (MsQueryInfoRset) m_previousDataBox.getData(false, MsQueryInfoRset.class);
-        if (_msqI != null && _msqI.getMsQuery() != null && oldMsQId == _msqI.getMsQuery().getId()){
+        if ((_msqI == null) || (_msqI != null && _msqI.getMsQuery() != null && oldMsQId == _msqI.getMsQuery().getId())){
             return ;
         }
+        
         m_msQuery = _msqI.getMsQuery();
         m_rset = _msqI.getResultSet();
 

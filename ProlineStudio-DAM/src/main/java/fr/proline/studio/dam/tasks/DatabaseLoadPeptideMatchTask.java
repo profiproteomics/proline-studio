@@ -1186,7 +1186,12 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
             
             
             m_listPeptideMatches.addAll(Arrays.asList(peptideMatchArray));
-            
+            m_listPeptideMatches.sort(new Comparator<DPeptideMatch>() {
+                @Override
+                public int compare(DPeptideMatch o1, DPeptideMatch o2) {
+                    return o1.getRank() - o2.getRank();
+                }
+            });
             
             if (nb > 0) { // check that there is at least one PSM validated
                 /**

@@ -7,6 +7,7 @@ package fr.proline.studio.pattern;
 
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.studio.comparedata.CompareDataInterface;
+import fr.proline.studio.comparedata.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabasePTMProteinSiteTask_V2;
@@ -59,7 +60,9 @@ public class DataBoxPTMSitePeptides extends AbstractDataBox {
     public void dataChanged() {
 
         final PTMSite ptmSite = (PTMSite) m_previousDataBox.getData(false, PTMSite.class); 
-       
+        final ResultSummary rsm = (ResultSummary) m_previousDataBox.getData(false, ResultSummary.class);
+        m_rsm = rsm;
+
         if (ptmSite == null) {
             ((PeptidesPTMSitePanel)getDataBoxPanelInterface()).setData(null);           
             return;
@@ -74,10 +77,7 @@ public class DataBoxPTMSitePeptides extends AbstractDataBox {
         }
         
         final int loadingId = setLoading(); 
-        
-        final ResultSummary rsm = (ResultSummary) m_previousDataBox.getData(false, ResultSummary.class);
-        m_rsm = rsm;
-        
+                
         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
 
             @Override
@@ -123,19 +123,25 @@ public class DataBoxPTMSitePeptides extends AbstractDataBox {
         if (parameterType != null) {
 
             if (parameterType.equals(ResultSummary.class)) {
-                if (m_rsm != null) {
+                if (m_rsm != null)
                     return m_rsm;
-                }
             }
 
             if (parameterType.equals(PTMSite.class)) {
-                return ((PeptidesPTMSitePanel) getDataBoxPanelInterface()).getSelectedPTMSite();
+                PTMSite ptmSite = ((PeptidesPTMSitePanel) getDataBoxPanelInterface()).getSelectedPTMSite();
+                if (ptmSite != null)
+                    return ptmSite;
             }
             
             if (parameterType.equals(Long.class)) {
-                return ((PeptidesPTMSitePanel) getDataBoxPanelInterface()).getSelectedPepInstanceId();
+                Long selectedPepInstanceId = ((PeptidesPTMSitePanel) getDataBoxPanelInterface()).getSelectedPepInstanceId();
+                if (selectedPepInstanceId != null)
+                    return selectedPepInstanceId;
             }
             
+             if (parameterType.equals(CompareDataInterface.class)) {
+                return ((GlobalTabelModelProviderInterface) getDataBoxPanelInterface()).getGlobalTableModelInterface();
+            }
         }
         
         return super.getData(getArray, parameterType);

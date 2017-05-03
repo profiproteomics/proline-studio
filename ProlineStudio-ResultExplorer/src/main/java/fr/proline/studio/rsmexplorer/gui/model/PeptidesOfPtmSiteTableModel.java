@@ -256,7 +256,7 @@ public class PeptidesOfPtmSiteTableModel extends DecoratedTableModel implements 
                 return m_currentPtmSite.getPtmSpecificity().getRresidueAASpecificity();
             }
             case COLTYPE_QUERY_TITLE: {
-                return m_currentPtmSite.getBestPeptideMatch().getMsQuery().getDSpectrum().getTitle();
+                return pepMatch.getMsQuery().getDSpectrum().getTitle();
             }
         }
 

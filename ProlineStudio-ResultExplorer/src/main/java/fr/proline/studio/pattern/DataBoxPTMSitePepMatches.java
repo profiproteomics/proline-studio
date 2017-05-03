@@ -51,6 +51,7 @@ public class DataBoxPTMSitePepMatches extends AbstractDataBox {
         outParameter.addParameter(PTMSite.class, true);
         outParameter.addParameter(ResultSummary.class, false);
         outParameter.addParameter(DPeptideMatch.class, false);
+        outParameter.addParameter(MsQueryInfoRset.class, false);
         registerOutParameter(outParameter);
     }
     
@@ -68,7 +69,10 @@ public class DataBoxPTMSitePepMatches extends AbstractDataBox {
 
         final PTMSite ptmSite = (PTMSite) m_previousDataBox.getData(false, PTMSite.class); 
         final Long pepInstanceId = (Long) m_previousDataBox.getData(false, Long.class); 
+        final ResultSummary rsm = (ResultSummary) m_previousDataBox.getData(false, ResultSummary.class);
         
+        m_rsm = rsm;
+
        
         if (ptmSite == null) {
             ((PeptidesPTMSitePanel)getDataBoxPanelInterface()).setData(null);           
@@ -85,10 +89,7 @@ public class DataBoxPTMSitePepMatches extends AbstractDataBox {
         }
         
         final int loadingId = setLoading(); 
-        
-        final ResultSummary rsm = (ResultSummary) m_previousDataBox.getData(false, ResultSummary.class);
-        m_rsm = rsm;
-        
+                
         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
 
             @Override
@@ -134,23 +135,34 @@ public class DataBoxPTMSitePepMatches extends AbstractDataBox {
         if (parameterType != null) {
 
             if (parameterType.equals(ResultSummary.class)) {
-                if (m_rsm != null) {
+                if (m_rsm != null)
                     return m_rsm;
-                }
             }
 
             if (parameterType.equals(PTMSite.class)) {
-                return ((PeptidesPTMSitePanel) getDataBoxPanelInterface()).getSelectedPTMSite();
+                PTMSite ptmSite = ((PeptidesPTMSitePanel) getDataBoxPanelInterface()).getSelectedPTMSite();
+                if (ptmSite != null)
+                    return ptmSite;
             }
             
             if (parameterType.equals(Long.class)) {
-                return ((PeptidesPTMSitePanel) getDataBoxPanelInterface()).getSelectedPTMSite();
+                Long selectedPepInstanceId = ((PeptidesPTMSitePanel) getDataBoxPanelInterface()).getSelectedPepInstanceId();
+                if (selectedPepInstanceId != null)
+                    return selectedPepInstanceId;
             }
             
             if (parameterType.equals(DPeptideMatch.class)) {
-                return ((PeptidesPTMSitePanel) getDataBoxPanelInterface()).getSelectedPeptideMatchSite();
+                DPeptideMatch selectedPeptideMatch = ((PeptidesPTMSitePanel) getDataBoxPanelInterface()).getSelectedPeptideMatchSite();
+                if (selectedPeptideMatch != null)
+                    return selectedPeptideMatch;
             }
             
+            if (parameterType.equals(MsQueryInfoRset.class)) {
+                DPeptideMatch pepMatch = ((PeptidesPTMSitePanel) getDataBoxPanelInterface()).getSelectedPeptideMatchSite();
+                if (pepMatch != null) {
+                    return new MsQueryInfoRset(pepMatch.getMsQuery(), m_rsm.getResultSet());
+                }
+            }
         }
         
         return super.getData(getArray, parameterType);

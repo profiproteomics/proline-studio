@@ -6,6 +6,7 @@
 package fr.proline.studio.rsmexplorer.gui;
 
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
+import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.studio.comparedata.AddDataAnalyzerButton;
 import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.comparedata.GlobalTabelModelProviderInterface;
@@ -21,6 +22,7 @@ import fr.proline.studio.parameter.SettingsButton;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.pattern.DataMixerWindowBoxManager;
+import fr.proline.studio.pattern.MsQueryInfoRset;
 import fr.proline.studio.progress.ProgressInterface;
 import fr.proline.studio.python.data.TableInfo;
 import fr.proline.studio.rsmexplorer.actions.table.DisplayTablePopupMenu;
@@ -140,8 +142,12 @@ public class PeptidesPTMSitePanel extends JPanel implements DataBoxPanelInterfac
     public void setData(PTMSite peptidesPTMSite, Long pepInstID) {
 
         PeptidesOfPtmSiteTableModel model = ((PeptidesOfPtmSiteTableModel) ((CompoundTableModel) m_peptidesPtmSiteTable.getModel()).getBaseModel());
+        try {
         model.setData(peptidesPTMSite, m_displayPeptidesMatches, pepInstID);
-
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
         // select the first row
         if (peptidesPTMSite != null) {
             m_peptidesPtmSiteTable.getSelectionModel().setSelectionInterval(0, 0);
@@ -408,13 +414,19 @@ public class PeptidesPTMSitePanel extends JPanel implements DataBoxPanelInterfac
             if (selectionWillBeRestored) {
                 return;
             }
-
-            m_dataBox.propagateDataChanged(PTMSite.class);
+            
+            if(m_displayPeptidesMatches) {
+                m_dataBox.propagateDataChanged(DPeptideMatch.class);
+                m_dataBox.propagateDataChanged(MsQueryInfoRset.class);
+            } else {
+                m_dataBox.propagateDataChanged(PTMSite.class);            
+            }
         }
 
         public void selectionWillBeRestored(boolean b) {
             selectionWillBeRestored = b;
         }
+        
         private boolean selectionWillBeRestored = false;
 
 

@@ -266,11 +266,12 @@ public class WindowBoxFactory {
 
     public static WindowBox getPTMProteinSiteWindowBox_V2(String dataName) {
 
-        AbstractDataBox[] boxes = new AbstractDataBox[3];
+        AbstractDataBox[] boxes = new AbstractDataBox[4];
         boxes[0] = new DataBoxPTMProteinSite_V2();
         boxes[0].setDataName(dataName);
         boxes[1] = new DataBoxPTMSitePeptides();
         boxes[2] = new DataBoxPTMSitePepMatches();
+        boxes[3] = new DataboxRsetPSMForMsQuery();
         
         IconManager.IconType iconType = IconManager.IconType.DATASET_RSM;
         return new WindowBox(boxes[0].getFullName(), generatePanel(boxes), boxes[0], IconManager.getImage(iconType));

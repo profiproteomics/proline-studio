@@ -71,7 +71,11 @@
             <artifactId>org-openide-awt</artifactId>
             <version>${netbeans.version}</version>
         </dependency>
-        
+        <dependency>
+            <groupId>org.netbeans.modules</groupId>
+            <artifactId>org-netbeans-modules-utilities-project</artifactId>
+            <version>${netbeans.version}</version>
+        </dependency>
                 
         <!-- ProlineStudio dependencies -->
         <dependency>

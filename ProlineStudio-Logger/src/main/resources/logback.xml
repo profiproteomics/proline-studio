@@ -1,6 +1,7 @@
 <configuration>
     <contextName>Proline Studio </contextName>
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        
         <!-- encoders are assigned the type
         ch.qos.logback.classic.encoder.PatternLayoutEncoder by default -->
         <encoder>
@@ -34,8 +35,7 @@
     <logger name="ProlineWebCore" level="DEBUG">
     </logger>
 
-    <logger name="fr.proline" level="DEBUG">
-    </logger>
+   <logger name="fr.proline" level="debug"/>
 
     <logger name="com.thierry" level="OFF">
     </logger>
@@ -45,7 +45,7 @@
 
 
 
-    <root level="OFF">
+    <root level="warn">
         <appender-ref ref="STDOUT" />
         <appender-ref ref="Fappender" />    
         <appender-ref ref="FappenderError" />   

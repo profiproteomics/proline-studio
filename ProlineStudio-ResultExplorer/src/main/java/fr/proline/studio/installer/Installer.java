@@ -29,7 +29,7 @@ public class Installer extends VersionInstaller {
         forceMetalUIForMac();
 
         
-        String buildnumber = "1.4  Milestone ("+moduleBuildDate+")"; //specify if Milestone, Release Candidate or release (or nothing = release)
+        String buildnumber = "1.5  Milestone ("+moduleBuildDate+")"; //specify if Milestone, Release Candidate or release (or nothing = release)
         //String buildnumber = "1.1";
         
         // set the proline version for the application title

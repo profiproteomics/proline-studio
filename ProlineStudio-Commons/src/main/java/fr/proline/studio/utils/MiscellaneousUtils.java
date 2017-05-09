@@ -74,7 +74,7 @@ public class MiscellaneousUtils {
             tmpFile.deleteOnExit();
             // writes redirect page content to file 
             writer = new BufferedWriter(new FileWriter(tmpFile));
-            writer.write(createRedirectPage(new File(".").getCanonicalPath() + File.separatorChar + "documentation" + File.separatorChar + "Proline_UserGuide_1.4RC1.docx.html#"+documentationSuffix));
+            writer.write(createRedirectPage(new File(".").getCanonicalPath() + File.separatorChar + "documentation" + File.separatorChar + "Proline_UserGuide_1.5.docx.html#"+documentationSuffix));
             writer.close();
         } catch (IOException e) {
             return null;

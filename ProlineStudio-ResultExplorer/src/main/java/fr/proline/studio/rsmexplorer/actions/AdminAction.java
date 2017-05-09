@@ -24,7 +24,7 @@ import org.openide.windows.WindowManager;
         id = "fr.proline.studio.rsmexplorer.actions.AdminAction")
 @ActionRegistration(displayName = "#CTL_AdminAction")
 @ActionReferences({
-    @ActionReference(path = "Menu/File", position = 410)
+    @ActionReference(path = "Menu/File", position = 50)
 })
 @Messages("CTL_AdminAction=Admin")
 public final class AdminAction extends AbstractAction implements ActionListener, ContextAwareAction {
@@ -57,13 +57,11 @@ public final class AdminAction extends AbstractAction implements ActionListener,
     @Override
      public boolean isEnabled() {
          
-         return true; //JPM.TODO
-         
-        /*UserAccount user = DatabaseDataManager.getDatabaseDataManager().getLoggedUser();
+         UserAccount user = DatabaseDataManager.getDatabaseDataManager().getLoggedUser();
         if (user == null) {
             return false;
         }
-        return DatabaseDataManager.isAdmin(user);*/
+        return DatabaseDataManager.isAdmin(user);
     }
      
 

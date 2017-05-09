@@ -729,7 +729,7 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
             if (m_mainPopup == null) {
                 Preferences preferences = NbPreferences.root();
                 // create the actions
-                Boolean showHiddenFunctionnality = preferences.getBoolean("Profi", false);
+                Boolean showHiddenFunctionnality = false; // JPM.TODO : completely removed for the moment preferences.getBoolean("Profi", false);
 
                 m_mainActions = new ArrayList<>(26);  // <--- get in sync
 

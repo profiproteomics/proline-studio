@@ -26,6 +26,7 @@ import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.parameter.ParameterError;
 import fr.proline.studio.parameter.ParameterList;
 import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
+import fr.proline.studio.rsmexplorer.gui.dialog.LoadWaitingDialog;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
@@ -36,6 +37,7 @@ import fr.proline.studio.settings.SettingsDialog;
 import fr.proline.studio.settings.SettingsUtils;
 import fr.proline.studio.utils.IconManager;
 import java.awt.Dialog;
+import java.awt.Point;
 import java.awt.Window;
 import java.io.File;
 import java.util.*;
@@ -46,6 +48,7 @@ import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.tree.TreePath;
 import org.openide.util.NbPreferences;
+import org.openide.windows.WindowManager;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -705,54 +708,82 @@ public class CreateXICDialog extends DefaultDialog {
             resultSetIds.addAll(spectraNodesPerRsId.keySet());
             List<Long> failedRSIds = new ArrayList<>();
             Map<Long, List<Long>> failedSpectraPerRSIds = new HashMap<>();
+            //Add waiting dialog while checking spectrum file 
+            String waitingTxt = "Please wait while checking Identification Spectra...";
+            final LoadWaitingDialog loadWaitingDialog = new LoadWaitingDialog(WindowManager.getDefault().getMainWindow(), waitingTxt);
+            DefaultDialog.ProgressTask loadConfigTasktask = new DefaultDialog.ProgressTask() {
 
-            AbstractDatabaseCallback spectraTestCallback = new AbstractDatabaseCallback() {
                 @Override
-                public boolean mustBeCalledInAWT() {
-                    return true;
+                public int getMinValue() {
+                    return 0;
                 }
 
                 @Override
-                public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
-                    if (success) {
-
-                        for (Map.Entry<Long, DataSetNode> entry : spectraNodesPerRsId.entrySet()) {
-                            if (failedSpectraPerRSIds.containsKey(entry.getKey())) {
-                                ((XICBiologicalSampleAnalysisNode) entry.getValue()).setVerificationStatus(XICBiologicalSampleAnalysisNode.SpectrumVerificationStatus.SUCCESSFULLY_VERIFIED);
-                            } else {
-                                ((XICBiologicalSampleAnalysisNode) entry.getValue()).setVerificationStatus(XICBiologicalSampleAnalysisNode.SpectrumVerificationStatus.UNSUCCESSFULLY_VERIFIED);
-                            }
-                        }
-
-                        if (failedRSIds.size() == 0) {
-
-                            for (Map.Entry<Long, DataSetNode> entry : spectraNodesPerRsId.entrySet()) {
-                                ((XICBiologicalSampleAnalysisNode) entry.getValue()).setVerificationStatus(XICBiologicalSampleAnalysisNode.SpectrumVerificationStatus.SUCCESSFULLY_VERIFIED);
-                            }
-
-                            displayDefineRawFiles();
-
-                        } else if (failedRSIds.size() == 1) {
-                            DataSetNode dsNode = spectraNodesPerRsId.get(failedRSIds.get(0));
-                            showErrorOnNode(dsNode, dsNode.getDataset().getName() + " at least one of the following attributes {First Time, First Scan, First Cycle} must be initialized. Remove the highlighted node from your design.");
-                        } else if (failedRSIds.size() > 1) {
-                            ArrayList<String> failedNodes = new ArrayList<String>();
-
-                            for (int i = 0; i < failedRSIds.size(); i++) {
-                                failedNodes.add(spectraNodesPerRsId.get(failedRSIds.get(i)).toString());
-                            }
-
-                            JList failedList = new JList(failedNodes.toArray());
-
-                            JOptionPane.showMessageDialog(rootPane, failedList, "The following datasets failed spectrum check.", JOptionPane.ERROR_MESSAGE);
-                        }
-                    }
+                public int getMaxValue() {
+                    return 100; 
                 }
+
+                @Override
+                protected Object doInBackground() throws Exception {
+                    
+                    AbstractDatabaseCallback spectraTestCallback = new AbstractDatabaseCallback() {
+                        @Override
+                        public boolean mustBeCalledInAWT() {
+                            return true;
+                        }
+
+                        @Override
+                        public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
+                            loadWaitingDialog.setVisible(false);
+                            if (success) {
+
+                                for (Map.Entry<Long, DataSetNode> entry : spectraNodesPerRsId.entrySet()) {
+                                    if (failedSpectraPerRSIds.containsKey(entry.getKey())) {
+                                        ((XICBiologicalSampleAnalysisNode) entry.getValue()).setVerificationStatus(XICBiologicalSampleAnalysisNode.SpectrumVerificationStatus.SUCCESSFULLY_VERIFIED);
+                                    } else {
+                                        ((XICBiologicalSampleAnalysisNode) entry.getValue()).setVerificationStatus(XICBiologicalSampleAnalysisNode.SpectrumVerificationStatus.UNSUCCESSFULLY_VERIFIED);
+                                    }
+                                }
+
+                                if (failedRSIds.isEmpty()) {
+
+                                    for (Map.Entry<Long, DataSetNode> entry : spectraNodesPerRsId.entrySet()) {
+                                        ((XICBiologicalSampleAnalysisNode) entry.getValue()).setVerificationStatus(XICBiologicalSampleAnalysisNode.SpectrumVerificationStatus.SUCCESSFULLY_VERIFIED);
+                                    }
+
+                                    displayDefineRawFiles();
+
+                                } else if (failedRSIds.size() == 1) {
+                                    DataSetNode dsNode = spectraNodesPerRsId.get(failedRSIds.get(0));
+                                    showErrorOnNode(dsNode, dsNode.getDataset().getName() + " at least one of the following attributes {First Time, First Scan, First Cycle} must be initialized. Remove the highlighted node from your design.");
+                                } else if (failedRSIds.size() > 1) {
+                                    ArrayList<String> failedNodes = new ArrayList<String>();
+
+                                    for (int i = 0; i < failedRSIds.size(); i++) {
+                                        failedNodes.add(spectraNodesPerRsId.get(failedRSIds.get(i)).toString());
+                                    }
+
+                                    JList failedList = new JList(failedNodes.toArray());
+
+                                    JOptionPane.showMessageDialog(rootPane, failedList, "The following datasets failed spectrum check.", JOptionPane.ERROR_MESSAGE);
+                                }
+                            }
+                        }
+                    };
+
+                    m_spectrumTask = new DatabaseVerifySpectrumFromResultSets(spectraTestCallback, resultSetIds, projectId, failedRSIds, failedSpectraPerRSIds);
+                    AccessDatabaseThread.getAccessDatabaseThread().addTask(m_spectrumTask);
+                           
+                    return null;
+                }
+
             };
 
-            m_spectrumTask = new DatabaseVerifySpectrumFromResultSets(spectraTestCallback, resultSetIds, projectId, failedRSIds, failedSpectraPerRSIds);
-            AccessDatabaseThread.getAccessDatabaseThread().addTask(m_spectrumTask);
-
+            
+            loadWaitingDialog.setTask(loadConfigTasktask);
+            Point p = this.getLocation();
+            loadWaitingDialog.setLocation(p.x,p.y);
+            loadWaitingDialog.setVisible(true);
         } else {
             displayDefineRawFiles();
         }

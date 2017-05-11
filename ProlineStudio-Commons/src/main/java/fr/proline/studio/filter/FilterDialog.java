@@ -3,8 +3,6 @@ package fr.proline.studio.filter;
 import fr.proline.studio.gui.DefaultDialog;
 import java.awt.Dialog;
 import java.awt.Window;
-import java.io.File;
-import java.io.IOException;
 import javax.swing.*;
 
 /**
@@ -64,7 +62,7 @@ public class FilterDialog extends DefaultDialog {
 
     public void initPrefilterSelectedPanel() {
 
-        m_filterPanel.setFilers(m_filters);
+        m_filterPanel.setFilters(m_filters);
 
         repack();
 

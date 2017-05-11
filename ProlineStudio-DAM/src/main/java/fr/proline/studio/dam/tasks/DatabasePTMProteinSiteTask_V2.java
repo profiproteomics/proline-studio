@@ -296,7 +296,8 @@ public class DatabasePTMProteinSiteTask_V2 extends AbstractDatabaseTask {
             List<PTMSite> values = mapper.readValue(ot.getClobData(), mapper.getTypeFactory().constructCollectionType(List.class, PTMSite.class));
 
             Long[] bestPeptideMatchIdsArray = values.stream().map(site -> site.bestPeptideMatchId).distinct().toArray(Long[]::new);
-            List<Long> peptideInstanceIds = values.stream().map(site -> site.peptideInstanceIds).flatMap(x -> Arrays.stream(x)).distinct().collect(Collectors.toList());
+            Map<Long, Long[]> peptideInstanceIdsBybestPMId = values.stream().collect(Collectors.toMap(site -> site.bestPeptideMatchId, site -> site.peptideInstanceIds, (l1, l2) -> {return Stream.concat(Arrays.stream(l1), Arrays.stream(l2)).distinct().toArray(Long[]::new);}));
+            //List<Long> peptideInstanceIds = values.stream().map(site -> site.peptideInstanceIds).flatMap(x -> Arrays.stream(x)).distinct().collect(Collectors.toList());
             
             stop = System.currentTimeMillis();
             m_logger.info("{} typical ProtMatches and {} PTMSItes loaded in {} ms", typicalProteinMatchesArray.size(), values.size(), (stop-start));
@@ -317,7 +318,9 @@ public class DatabasePTMProteinSiteTask_V2 extends AbstractDatabaseTask {
                 Query peptidesQuery = entityManagerMSI.createQuery("SELECT pm.id, pm.rank, pm.charge, pm.deltaMoz, pm.experimentalMoz, pm.missedCleavage, pm.score, pm.resultSet.id, pm.cdPrettyRank, pm.sdPrettyRank, pm.serializedProperties, sp.firstTime, sp.precursorIntensity, sp.title, p, ms.id, ms.initialId\n"
                         + "              FROM fr.proline.core.orm.msi.PeptideInstancePeptideMatchMap pipm, fr.proline.core.orm.msi.PeptideMatch pm, fr.proline.core.orm.msi.PeptideInstance pi, fr.proline.core.orm.msi.Peptide p, fr.proline.core.orm.msi.MsQuery ms, fr.proline.core.orm.msi.Spectrum sp  \n"
                         + "              WHERE pipm.id.peptideMatchId IN (:peptideMatchList) AND pi.id IN (:peptideInstanceList) AND pipm.id.peptideInstanceId=pi.id AND pipm.id.peptideMatchId=pm.id AND pm.peptideId=p.id AND pm.msQuery=ms AND ms.spectrum=sp ");
-                peptidesQuery.setParameter("peptideMatchList", subTask.getSubList(Arrays.asList(bestPeptideMatchIdsArray)));
+                List subList = subTask.getSubList(Arrays.asList(bestPeptideMatchIdsArray));
+                peptidesQuery.setParameter("peptideMatchList", subList);
+                List<Long> peptideInstanceIds = peptideInstanceIdsBybestPMId.entrySet().stream().filter(entry -> subList.contains(entry.getKey())).map(entry -> entry.getValue()).flatMap(x -> Arrays.stream(x)).distinct().collect(Collectors.toList());
                 peptidesQuery.setParameter("peptideInstanceList", peptideInstanceIds);
                 
                 List l = peptidesQuery.getResultList(); 

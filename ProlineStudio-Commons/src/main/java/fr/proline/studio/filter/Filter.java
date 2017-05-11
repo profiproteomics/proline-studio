@@ -22,6 +22,7 @@ public abstract class Filter {
     protected boolean m_used;
     protected boolean m_defined;
 
+    private int m_index = -1;
     
     protected final int m_modelColumn;
     
@@ -40,15 +41,23 @@ public abstract class Filter {
         m_extraModelColumn = extraModelColumn;
     }
     
+    public void setIndex(int index){
+        m_index = index;
+    }
+    
+    public int getIndex(){
+        return m_index;
+    }
+    
     public abstract boolean filter(Object v1, Object v2);
     
     public abstract Filter cloneFilter();
+    
     public void setValuesForClone(Filter clone) {
         clone.m_used = m_used;
         clone.m_defined = m_defined;
         clone.m_valueKeys = m_valueKeys;
     }
-    
     
     public int getModelColumn() {
         return m_modelColumn;

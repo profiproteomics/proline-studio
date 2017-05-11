@@ -20,9 +20,11 @@ import java.util.Map;
 public class PTMSite {
     
     public Long proteinMatchId;
-    public Long definitionId; //PTM Definition ID
+    public Long ptmDefinitionId; //PTM Definition ID
     public Integer seqPosition;
     public Long bestPeptideMatchId;
+    public Float localizationConfidence;
+    
     // List of peptides ID matching this PTMSite by the position of this PTM 
     // in peptide Seq
     public Map<Integer, List<Long>> peptideIdsByPtmPosition;
@@ -57,7 +59,7 @@ public class PTMSite {
             }       
             builder.append(")-");
         } else 
-            builder.append("PTM ID").append(definitionId).append("-");
+            builder.append("PTM ID").append(ptmDefinitionId).append("-");
          builder.append(seqPosition);
         return builder.toString();
     }

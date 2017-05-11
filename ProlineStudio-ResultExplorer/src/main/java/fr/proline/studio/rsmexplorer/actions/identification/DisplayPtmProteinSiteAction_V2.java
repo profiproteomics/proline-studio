@@ -115,11 +115,6 @@ public class DisplayPtmProteinSiteAction_V2  extends AbstractRSMAction {
                 setEnabled(false);
                 return;
             }
-            
-            if (dataSetNode.isMerged()) {
-                setEnabled(false);
-                return;
-            }
         }
 
         

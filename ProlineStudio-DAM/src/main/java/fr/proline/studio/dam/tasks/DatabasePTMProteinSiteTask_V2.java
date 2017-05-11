@@ -306,17 +306,16 @@ public class DatabasePTMProteinSiteTask_V2 extends AbstractDatabaseTask {
             SubTaskManager subTaskManager = new SubTaskManager(1);
             SubTask subTask = subTaskManager.sliceATaskAndGetFirst(0, bestPeptideMatchIdsArray.length, SLICE_SIZE);
             while (subTask != null) {
-                //Load Peptide Match + Spectrum / MSQuery information for all bestPeptideMatchIdsArray
-                // SELECT pm.id, pm.rank, pm.charge, pm.deltaMoz, pm.experimentalMoz, pm.missedCleavage, pm.score, pm.resultSet.id, pm.cdPrettyRank,
-                // pm.sdPrettyRank, pm.serializedProperties, sp.firstTime, sp.precursorIntensity, sp.title, p, ms.id, ms.initialId
-                // FROM PeptideInstancePeptideMatchMap pipm, PeptideMatch pm, PeptideInstance pi, Peptide p, MsQuery ms, Spectrum sp"
-                // WHERE pipm.id.peptideMatchId IN (:peptideMatchList) AND pipm.resultSummary.id = :rsmId AND pipm.id.peptideInstanceId=pi.id AND pipm.id.peptideMatchId=pm.id 
-                // AND pm.peptideId=p.id AND pm.msQuery=ms AND ms.spectrum=sp
+//                Query peptidesQuery = entityManagerMSI.createQuery("SELECT pm.id, pm.rank, pm.charge, pm.deltaMoz, pm.experimentalMoz, pm.missedCleavage, pm.score, pm.resultSet.id, pm.cdPrettyRank, pm.sdPrettyRank, pm.serializedProperties, sp.firstTime, sp.precursorIntensity, sp.title, p, ms.id, ms.initialId\n"
+//                        + "              FROM fr.proline.core.orm.msi.PeptideInstancePeptideMatchMap pipm, fr.proline.core.orm.msi.PeptideMatch pm, fr.proline.core.orm.msi.PeptideInstance pi, fr.proline.core.orm.msi.Peptide p, fr.proline.core.orm.msi.MsQuery ms, fr.proline.core.orm.msi.Spectrum sp  \n"
+//                        + "              WHERE pipm.id.peptideMatchId IN (:peptideMatchList) AND pipm.resultSummary.id = :rsmId AND pipm.id.peptideInstanceId=pi.id AND pipm.id.peptideMatchId=pm.id AND pm.peptideId=p.id AND pm.msQuery=ms AND ms.spectrum=sp ");
+//                peptidesQuery.setParameter("peptideMatchList", subTask.getSubList(Arrays.asList(bestPeptideMatchIdsArray)));
+//                peptidesQuery.setParameter("rsmId", rsmId);
+
                 Query peptidesQuery = entityManagerMSI.createQuery("SELECT pm.id, pm.rank, pm.charge, pm.deltaMoz, pm.experimentalMoz, pm.missedCleavage, pm.score, pm.resultSet.id, pm.cdPrettyRank, pm.sdPrettyRank, pm.serializedProperties, sp.firstTime, sp.precursorIntensity, sp.title, p, ms.id, ms.initialId\n"
                         + "              FROM fr.proline.core.orm.msi.PeptideInstancePeptideMatchMap pipm, fr.proline.core.orm.msi.PeptideMatch pm, fr.proline.core.orm.msi.PeptideInstance pi, fr.proline.core.orm.msi.Peptide p, fr.proline.core.orm.msi.MsQuery ms, fr.proline.core.orm.msi.Spectrum sp  \n"
-                        + "              WHERE pipm.id.peptideMatchId IN (:peptideMatchList) AND pipm.resultSummary.id = :rsmId AND pipm.id.peptideInstanceId=pi.id AND pipm.id.peptideMatchId=pm.id AND pm.peptideId=p.id AND pm.msQuery=ms AND ms.spectrum=sp ");
+                        + "              WHERE pipm.id.peptideMatchId IN (:peptideMatchList) AND pipm.id.peptideInstanceId=pi.id AND pipm.id.peptideMatchId=pm.id AND pm.peptideId=p.id AND pm.msQuery=ms AND ms.spectrum=sp ");
                 peptidesQuery.setParameter("peptideMatchList", subTask.getSubList(Arrays.asList(bestPeptideMatchIdsArray)));
-                peptidesQuery.setParameter("rsmId", rsmId);
                 
                 List l = peptidesQuery.getResultList(); 
                 Iterator<Object[]> itPeptidesQuery = l.iterator();
@@ -436,7 +435,7 @@ public class DatabasePTMProteinSiteTask_V2 extends AbstractDatabaseTask {
 
                 site.setProteinMatch(proteinMatchMap.get(site.proteinMatchId));
                 site.setBestPeptideMatch(peptideMatchMap.get(site.bestPeptideMatchId));
-                site.setPTMSpcificity(DInfoPTM.getInfoPTMMap().get(site.definitionId));
+                site.setPTMSpcificity(DInfoPTM.getInfoPTMMap().get(site.ptmDefinitionId));
                 if (site.getProteinMatch() != null) {
                     m_ptmSiteArray.add(site);
                 }

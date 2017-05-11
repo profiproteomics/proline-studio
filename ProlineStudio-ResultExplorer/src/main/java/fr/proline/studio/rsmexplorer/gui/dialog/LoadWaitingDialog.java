@@ -20,8 +20,8 @@ public class LoadWaitingDialog extends DefaultDialog{
     private DefaultDialog.ProgressTask m_task = null;
     
     
-    public LoadWaitingDialog(Window parent) {
-        super(parent, Dialog.ModalityType.MODELESS);
+    public LoadWaitingDialog(Window parent, String waitingDescription) {
+        super(parent, Dialog.ModalityType.APPLICATION_MODAL);
 
         setTitle("Load data");
 
@@ -30,7 +30,7 @@ public class LoadWaitingDialog extends DefaultDialog{
 
         JPanel internalPanel = new JPanel();
         internalPanel.setLayout(new BorderLayout());
-        internalPanel.add(new JLabel("Please wait while loading template to configure export"), BorderLayout.NORTH);
+        internalPanel.add(new JLabel(waitingDescription), BorderLayout.NORTH);
         setInternalComponent(internalPanel);
 
         // hide default  button

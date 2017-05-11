@@ -43,7 +43,8 @@ public class ExportDatasetAction extends AbstractRSMAction {
 
         final DataSetNode dataSetNode = (DataSetNode) selectedNodes[0];
         m_config = new ArrayList();
-        final LoadWaitingDialog loadWaitingDialog = new LoadWaitingDialog(WindowManager.getDefault().getMainWindow());
+        String waitingTxt = "Please wait while loading template to configure export";
+        final LoadWaitingDialog loadWaitingDialog = new LoadWaitingDialog(WindowManager.getDefault().getMainWindow(),waitingTxt );
 
         DefaultDialog.ProgressTask loadConfigTasktask = new DefaultDialog.ProgressTask() {
             @Override

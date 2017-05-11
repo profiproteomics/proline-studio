@@ -26,8 +26,6 @@ public class CreateAction extends AbstractRSMAction {
     private JMenu m_menu;
     private final XICDesignTree m_tree;
 
-    private CreateAction m_createAction;
-
     public CreateAction(XICDesignTree tree) {
         super(NbBundle.getMessage(CreateAction.class, "CTL_CreateAction"), AbstractTree.TreeType.TREE_XIC_DESIGN, tree);
         m_tree = tree;
@@ -38,9 +36,7 @@ public class CreateAction extends AbstractRSMAction {
 
         if (m_menu == null) {
 
-            m_menu = new JMenu((String) getValue(NAME));
-
-            m_createAction = new CreateAction(m_tree);
+            m_menu = new JMenu((String) getValue(NAME));           
 
             m_createSampleAction = new CreateSampleNodeAction(m_tree);
             m_createGroupAction = new CreateGroupNodeAction(m_tree);

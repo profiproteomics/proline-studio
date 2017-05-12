@@ -1,7 +1,13 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
 package fr.proline.studio.rsmexplorer.gui.model;
 
 import fr.proline.core.orm.msi.PeptideReadablePtmString;
 import fr.proline.core.orm.msi.dto.DInfoPTM;
+import fr.proline.core.orm.msi.dto.DPeptideInstance;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.msi.dto.DPeptidePTM;
 import fr.proline.core.orm.msi.dto.DProteinMatch;
@@ -56,6 +62,17 @@ public class PeptidesOfPtmSiteTableModel extends DecoratedTableModel implements 
     public static final int COLTYPE_PTM_PROBA = 12;
     public static final int COLTYPE_QUERY_TITLE = 13;
     
+    static class Row {
+        
+        DPeptideInstance peptideInstance;
+        DPeptideMatch peptideMatch;
+
+        public Row(DPeptideInstance peptideInstance, DPeptideMatch peptideMatch) {
+            this.peptideInstance = peptideInstance;
+            this.peptideMatch = peptideMatch;
+        }
+        
+    }
 //    public static final int COLTYPE_HIDDEN_PROTEIN_PTM = 16; // hidden column, must be the last
    
     private static final String[] m_columnNames = {"Id", "Peptide", "Score", "Modification", "Residue", "Site Probability", "Modification D.Mass", "Modification Loc.", "Protein Loc.", "Protein N/C-term", "PTM", "PTM D.Mass", "PTM Probability", "Query title"};
@@ -63,8 +80,7 @@ public class PeptidesOfPtmSiteTableModel extends DecoratedTableModel implements 
     private final HashMap<Integer, TableCellRenderer> m_rendererMap = new HashMap();
 
     private PTMSite m_currentPtmSite;
-    private ArrayList<DPeptideMatch> m_ptmSitePeptides = new ArrayList<>();
-    private HashMap<Long, Long> m_pepInstanceIdByPepMatchId = new HashMap<>();    
+    private ArrayList<Row> m_ptmSitePeptides = new ArrayList<>(); 
     private ScoreRenderer m_scoreRenderer = new ScoreRenderer();
         
     private String m_modelName;
@@ -79,7 +95,7 @@ public class PeptidesOfPtmSiteTableModel extends DecoratedTableModel implements 
      * @param pepInstanceId : Specify the peptide instance ID to display peptide matches for. This parameter is only
      * used if showPeptideMatches = true
      */
-    public void setData(PTMSite selectedPTMSite,boolean showPeptideMatches, Long pepInstanceId) {
+    public void setData(PTMSite selectedPTMSite,boolean showPeptideMatches, DPeptideInstance pepInstance) {
         m_currentPtmSite = selectedPTMSite;
         m_showPeptideMatches = showPeptideMatches;
         m_ptmSitePeptides = new ArrayList<>();
@@ -91,46 +107,25 @@ public class PeptidesOfPtmSiteTableModel extends DecoratedTableModel implements 
         //Get all Peptide Instances Best PSM
         if(!m_currentPtmSite.isAllPeptideMatchesLoaded()){
             m_logger.warn("Peptide Matches not loaded for PTM Site "+m_currentPtmSite.toString());
-            m_ptmSitePeptides.add(m_currentPtmSite.getBestPeptideMatch());
-
+            m_ptmSitePeptides.clear();
         } else {
 
             if (!m_showPeptideMatches) {
-                m_currentPtmSite.getPepInstancePepMatchesMap().forEach((Long pepId, List<DPeptideMatch> pepMatches) -> {
-                    final Float bestProba[] = new Float[1];
-                    bestProba[0] = 0.00f;
-                    final DPeptideMatch[] bestPM = new DPeptideMatch[1];
-                    pepMatches.sort(Comparator.comparing(DPeptideMatch::getScore).reversed());
-
-                    pepMatches.forEach((DPeptideMatch pepMatch) -> {
-                        Float proba = pepMatch.getPtmSiteProperties().getMascotProbabilityBySite().get(m_currentPtmSite.toReadablePtmString(pepMatch.getPeptide().getId()));
-                         // VDS Workaround test for issue #16643                      
-                        if (proba == null) {
-                            proba = pepMatch.getPtmSiteProperties().getMascotProbabilityBySite().get(m_currentPtmSite.toOtherReadablePtmString(pepMatch.getPeptide().getId()));
-                        }
-                        //END VDS Workaround
-                        
-                        if (proba > bestProba[0]) {
-                            bestPM[0] = pepMatch;
-                            bestProba[0] = proba;
-                        }
-                    });
-
-                    m_ptmSitePeptides.add(bestPM[0]);
-                    m_pepInstanceIdByPepMatchId.put(bestPM[0].getId(), pepId);
+                m_currentPtmSite.getParentPeptideInstances().forEach(parentPeptideInstance -> {
+                    DPeptideMatch bestPM = m_currentPtmSite.getBestPeptideMatchForPeptide(parentPeptideInstance.getPeptideId());
+                    m_ptmSitePeptides.add(new Row(parentPeptideInstance, bestPM));
                 });
             } else {
-                if(pepInstanceId == null ){
-                    m_currentPtmSite.getPepInstancePepMatchesMap().forEach((Long pepId, List<DPeptideMatch> pepMatches) -> {
-                        m_ptmSitePeptides.addAll(pepMatches);
-                        pepMatches.forEach((DPeptideMatch pepMatch) -> {
-                            m_pepInstanceIdByPepMatchId.put(pepMatch.getId(), pepId);
-                        });
-                    });
+                if(pepInstance == null ){
+                    // TODO : request all PeptideMatches ??
+                    m_logger.warn("Must shown all peptide matches but no peptide instance specified for PTM Site "+m_currentPtmSite.toString());
+                    m_ptmSitePeptides.clear();
                 } else {
-                    List<DPeptideMatch> pepMatches = m_currentPtmSite.getPepInstancePepMatchesMap().get(pepInstanceId);
-                    m_ptmSitePeptides.addAll(pepMatches);
-                    pepMatches.forEach((DPeptideMatch pepMatch) -> {m_pepInstanceIdByPepMatchId.put(pepMatch.getId(), pepInstanceId);});                    
+                    m_currentPtmSite.getPeptideMatchesForPeptide(pepInstance.getPeptideId()).forEach(entry  -> {
+                        entry.getValue().forEach( pepMatch -> {
+                            m_ptmSitePeptides.add(new Row(entry.getKey(), pepMatch));
+                        });
+                    });                
                 }
             }
         }
@@ -145,14 +140,13 @@ public class PeptidesOfPtmSiteTableModel extends DecoratedTableModel implements 
     public DPeptideMatch getSelectedPeptideMatchSite(int row){
         if(row <0 || (row >= getRowCount()) )
             return null;
-        return m_ptmSitePeptides.get(row);        
+        return m_ptmSitePeptides.get(row).peptideMatch;        
     }
     
-    public Long getPepInstanceID(int row){
+    public DPeptideInstance getSelectedPeptideInstance(int row){
         if(row <0 || (row >= getRowCount()) )
             return null;
-        Long pepMatcId = m_ptmSitePeptides.get(row).getId();
-        return m_pepInstanceIdByPepMatchId.get(pepMatcId);
+        return m_ptmSitePeptides.get(row).peptideInstance;
     }
     
     @Override
@@ -175,13 +169,13 @@ public class PeptidesOfPtmSiteTableModel extends DecoratedTableModel implements 
     @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
         
-        DPeptideMatch pepMatch = m_ptmSitePeptides.get(rowIndex);
+        DPeptideMatch pepMatch = m_ptmSitePeptides.get(rowIndex).peptideMatch;
         switch (columnIndex){
             case COLTYPE_PEPTIDE_ID:
                 if(m_showPeptideMatches)
                     return pepMatch.getId();
                 else
-                    return m_pepInstanceIdByPepMatchId.get(pepMatch.getId());
+                    return m_ptmSitePeptides.get(rowIndex).peptideInstance.getId();
             case COLTYPE_PEPTIDE_NAME:
                 return pepMatch;
             case COLTYPE_PEPTIDE_SCORE:
@@ -502,7 +496,7 @@ public class PeptidesOfPtmSiteTableModel extends DecoratedTableModel implements 
     public String getExportRowCell(int row, int col) {
          return ExportModelUtilities.getExportRowCell(this, row, col);
     }
-    
+
     @Override
     public ArrayList<ExportFontData> getExportFonts(int row, int col) {
         return null;

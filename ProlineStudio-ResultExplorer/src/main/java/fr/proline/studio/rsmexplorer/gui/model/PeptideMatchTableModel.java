@@ -10,6 +10,8 @@ import fr.proline.core.orm.msi.dto.DMsQuery;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.studio.comparedata.ExtraDataType;
 import fr.proline.studio.dam.tasks.DatabaseLoadPeptideMatchTask;
+import fr.proline.studio.export.ExportModelUtilities;
+import fr.proline.studio.export.ExportSubStringFont;
 import fr.proline.studio.filter.BooleanFilter;
 import fr.proline.studio.filter.ConvertValueInterface;
 import fr.proline.studio.filter.DoubleFilter;
@@ -881,9 +883,14 @@ public class PeptideMatchTableModel extends LazyTableModel implements GlobalTabl
 
     @Override
     public String getExportRowCell(int row, int col) {
-        return null; // no specific export
+        return ExportModelUtilities.getExportRowCell(this, row, col);
     }
 
+    @Override
+    public ArrayList<ExportSubStringFont> getSubStringFonts(int row, int col) {
+        return null;
+    }
+    
     @Override
     public String getExportColumnName(int col) {
         return getColumnName(col);

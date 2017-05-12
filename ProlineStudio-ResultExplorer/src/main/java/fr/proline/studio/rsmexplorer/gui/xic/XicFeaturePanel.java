@@ -7,6 +7,7 @@ import fr.proline.studio.comparedata.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.export.ExportModelInterface;
+import fr.proline.studio.export.ExportSubStringFont;
 import fr.proline.studio.filter.FilterButton;
 import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.gui.HourglassPanel;
@@ -38,6 +39,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
+import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -604,6 +606,11 @@ public class XicFeaturePanel  extends HourglassPanel implements DataBoxPanelInte
             return ((CompoundTableModel) m_featureTable.getModel()).getExportRowCell(convertRowIndexToModel(row), convertColumnIndexToModel(col));
         }
 
+        @Override
+        public ArrayList<ExportSubStringFont> getSubStringFonts(int row, int col) {
+            return ((CompoundTableModel) m_featureTable.getModel()).getSubStringFonts(convertRowIndexToModel(row), convertColumnIndexToModel(col));
+        }
+        
 
         @Override
         public TablePopupMenu initPopupMenu() {

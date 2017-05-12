@@ -14,7 +14,7 @@ import javax.swing.table.DefaultTableCellRenderer;
  * Renderer for sameset/subset (shown as full or half filled square)
  * @author JM235353
  */
-public class SamesetRenderer extends DefaultTableCellRenderer implements ExportTextInterface {
+public class SamesetRenderer extends DefaultTableCellRenderer /*implements ExportTextInterface*/ {
 
     private String m_basicTextForExport = "";
     private ArrayList<ExportSubStringFont> m_ExportSubStringFonts;
@@ -52,7 +52,7 @@ public class SamesetRenderer extends DefaultTableCellRenderer implements ExportT
         
     }
 
-    @Override
+    /*@Override
     public String getExportText() {
         return m_basicTextForExport;
     }
@@ -60,7 +60,7 @@ public class SamesetRenderer extends DefaultTableCellRenderer implements ExportT
     @Override
     public ArrayList<ExportSubStringFont> getSubStringFonts() {
         return this.m_ExportSubStringFonts;
-    }
+    }*/
     
     
 }

@@ -8,6 +8,7 @@ import fr.proline.core.orm.uds.dto.DQuantitationChannel;
 import fr.proline.studio.comparedata.ExtraDataType;
 import fr.proline.core.orm.msi.dto.DMasterQuantPeptideIon;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadXicMasterQuantTask;
+import fr.proline.studio.export.ExportSubStringFont;
 import fr.proline.studio.filter.ConvertValueInterface;
 import fr.proline.studio.filter.Filter;
 import fr.proline.studio.filter.DoubleFilter;
@@ -794,6 +795,11 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements GlobalT
         return ""; // should never happen
     }
 
+    @Override
+    public ArrayList<ExportSubStringFont> getSubStringFonts(int row, int col) {
+        return null;
+    }
+    
     @Override
     public String getDataColumnIdentifier(int col) {
         if (col <= LAST_STATIC_COLUMN) {

@@ -24,7 +24,7 @@ import org.apache.poi.hssf.util.HSSFColor;
  *
  * @author JM235353
  */
-public class PeptideRenderer extends DefaultTableCellRenderer implements ExportTextInterface, GrayableTableCellRenderer {
+public class PeptideRenderer extends DefaultTableCellRenderer implements /*ExportTextInterface, */ GrayableTableCellRenderer {
 
     private String m_basicTextForExport = "";
 
@@ -157,18 +157,20 @@ public class PeptideRenderer extends DefaultTableCellRenderer implements ExportT
     private final StringBuilder m_displaySB = new StringBuilder();
     private final StringBuilder m_exportSB = new StringBuilder();
 
-    @Override
-    public String getExportText() {
-        return m_basicTextForExport;
-    }
+    
 
     @Override
     public void setGrayed(boolean v) {
         m_grayed = v;
     }
 
+    /*@Override
+    public String getExportText() {
+        return m_basicTextForExport;
+    }
+    
     @Override
     public ArrayList<ExportSubStringFont> getSubStringFonts() {
         return this.m_ExportSubStringFonts;
-    }
+    }*/
 }

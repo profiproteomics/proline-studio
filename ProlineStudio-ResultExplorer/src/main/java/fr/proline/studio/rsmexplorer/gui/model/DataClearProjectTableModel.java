@@ -3,6 +3,7 @@ package fr.proline.studio.rsmexplorer.gui.model;
 
 import fr.proline.studio.comparedata.ExtraDataType;
 import fr.proline.studio.dam.data.ClearProjectData;
+import fr.proline.studio.export.ExportSubStringFont;
 import fr.proline.studio.filter.Filter;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
@@ -284,6 +285,11 @@ public class DataClearProjectTableModel extends DecoratedTableModel implements G
 
     @Override
     public String getExportRowCell(int row, int col) {
+        return null;
+    }
+    
+    @Override
+    public ArrayList<ExportSubStringFont> getSubStringFonts(int row, int col) {
         return null;
     }
 

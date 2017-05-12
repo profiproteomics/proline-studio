@@ -3,6 +3,7 @@ package fr.proline.studio.rsmexplorer.gui.xic;
 import fr.proline.core.orm.lcms.MapAlignment;
 import fr.proline.core.orm.lcms.MapTime;
 import fr.proline.studio.comparedata.ExtraDataType;
+import fr.proline.studio.export.ExportSubStringFont;
 import fr.proline.studio.filter.DoubleFilter;
 import fr.proline.studio.filter.Filter;
 import fr.proline.studio.graphics.PlotInformation;
@@ -226,6 +227,11 @@ public class MapTimeTableModel  extends LazyTableModel implements GlobalTableMod
     @Override
     public String getExportRowCell(int row, int col) {
         return null; // no specific export
+    }
+    
+    @Override
+    public ArrayList<ExportSubStringFont> getSubStringFonts(int row, int col) {
+        return null;
     }
 
     @Override

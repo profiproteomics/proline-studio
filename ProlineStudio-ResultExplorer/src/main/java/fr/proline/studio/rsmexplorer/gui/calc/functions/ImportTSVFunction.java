@@ -4,6 +4,8 @@ package fr.proline.studio.rsmexplorer.gui.calc.functions;
 
 import au.com.bytecode.opencsv.CSVReader;
 import fr.proline.studio.comparedata.ExtraDataType;
+import fr.proline.studio.export.ExportModelUtilities;
+import fr.proline.studio.export.ExportSubStringFont;
 import fr.proline.studio.filter.DoubleFilter;
 import fr.proline.studio.filter.Filter;
 import fr.proline.studio.filter.LongFilter;
@@ -615,9 +617,14 @@ public class ImportTSVFunction extends AbstractFunction {
 
         @Override
         public String getExportRowCell(int row, int col) {
-            return null;
+            return ExportModelUtilities.getExportRowCell(this, row, col);
         }
 
+        @Override
+        public ArrayList<ExportSubStringFont> getSubStringFonts(int row, int col) {
+            return null;
+        }
+        
         @Override
         public String getExportColumnName(int col) {
             return m_columnNames[col];

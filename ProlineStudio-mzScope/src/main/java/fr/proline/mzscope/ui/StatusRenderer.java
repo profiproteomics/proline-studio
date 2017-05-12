@@ -14,7 +14,7 @@ import javax.swing.table.DefaultTableCellRenderer;
  * Renderer for extraction status: show a green tick for DONE, a hour glass for REQUESTED, nothing otherwise (NONE)
  * @author MB243701
  */
-public class StatusRenderer  extends DefaultTableCellRenderer implements ExportTextInterface{
+public class StatusRenderer  extends DefaultTableCellRenderer /*implements ExportTextInterface */ {
     
     private String m_basicTextForExport = "";
     private ArrayList<ExportSubStringFont> m_ExportSubStringFonts;
@@ -54,14 +54,14 @@ public class StatusRenderer  extends DefaultTableCellRenderer implements ExportT
         
     }
 
-    @Override
+    /*@Override
     public String getExportText() {
         return m_basicTextForExport;
-    }
+    }*/
 
-    @Override
+    /*@Override
     public ArrayList<ExportSubStringFont> getSubStringFonts() {
         return this.m_ExportSubStringFonts;
-    }
+    }*/
     
 }

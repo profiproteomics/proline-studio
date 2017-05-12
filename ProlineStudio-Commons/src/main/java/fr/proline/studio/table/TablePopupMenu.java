@@ -159,9 +159,9 @@ public class TablePopupMenu extends JPopupMenu {
         }
 
         private String componentToText(Component c) {
-            if (c instanceof ExportTextInterface) {
+            /*if (c instanceof ExportTextInterface) {
                 return ((ExportTextInterface) c).getExportText();
-            } else if (c instanceof JLabel) {
+            } else*/ if (c instanceof JLabel) {
                 return ((JLabel) c).getText();
             } else if (c instanceof AbstractButton) {
                 return ((AbstractButton) c).getText();

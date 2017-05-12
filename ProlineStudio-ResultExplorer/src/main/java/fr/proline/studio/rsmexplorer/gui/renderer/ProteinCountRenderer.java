@@ -13,7 +13,7 @@ import javax.swing.table.DefaultTableCellRenderer;
  *
  * @author JM235353
  */
-public class ProteinCountRenderer extends DefaultTableCellRenderer implements ExportTextInterface {
+public class ProteinCountRenderer extends DefaultTableCellRenderer /*implements ExportTextInterface*/ {
 
     private String m_basicTextForExport = "";
     private ArrayList<ExportSubStringFont> m_ExportSubStringFonts;
@@ -44,7 +44,7 @@ public class ProteinCountRenderer extends DefaultTableCellRenderer implements Ex
         
     }
 
-    @Override
+    /*@Override
     public String getExportText() {
         return m_basicTextForExport;
     }
@@ -52,7 +52,7 @@ public class ProteinCountRenderer extends DefaultTableCellRenderer implements Ex
     @Override
     public ArrayList<ExportSubStringFont> getSubStringFonts() {
         return this.m_ExportSubStringFonts;
-    }
+    }*/
     
     
 }

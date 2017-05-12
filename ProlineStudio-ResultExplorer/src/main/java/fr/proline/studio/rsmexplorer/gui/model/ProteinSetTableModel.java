@@ -7,6 +7,8 @@ import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.core.orm.msi.dto.DProteinSet;
 import fr.proline.studio.comparedata.ExtraDataType;
 import fr.proline.studio.dam.tasks.DatabaseProteinSetsTask;
+import fr.proline.studio.export.ExportModelUtilities;
+import fr.proline.studio.export.ExportSubStringFont;
 import fr.proline.studio.filter.*;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
@@ -261,7 +263,12 @@ public class ProteinSetTableModel extends LazyTableModel implements GlobalTableM
                     
                     givePriorityTo(m_taskId, row, col);
                 } else {
-                    lazyData.setData( proteinMatch.getObservablePeptidesCount() );
+                    Integer observablePeptides = proteinMatch.getObservablePeptidesCount();
+                    if (observablePeptides == null) {
+                        return null; // will be displayed as ""
+                    } else {
+                        lazyData.setData(observablePeptides);
+                    }
                 }
                 return lazyData;
             }
@@ -556,7 +563,12 @@ public class ProteinSetTableModel extends LazyTableModel implements GlobalTableM
 
     @Override
     public String getExportRowCell(int row, int col) {
-        return null; // no specific export
+        return ExportModelUtilities.getExportRowCell(this, row, col);
+    }
+    
+    @Override
+    public ArrayList<ExportSubStringFont> getSubStringFonts(int row, int col) {
+        return null;
     }
 
     @Override

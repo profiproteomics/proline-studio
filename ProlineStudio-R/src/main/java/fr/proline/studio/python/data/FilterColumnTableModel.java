@@ -1,6 +1,7 @@
 package fr.proline.studio.python.data;
 
 import fr.proline.studio.comparedata.ExtraDataType;
+import fr.proline.studio.export.ExportSubStringFont;
 import fr.proline.studio.filter.DoubleFilter;
 import fr.proline.studio.filter.Filter;
 import fr.proline.studio.graphics.PlotInformation;
@@ -263,6 +264,11 @@ public class FilterColumnTableModel extends DecoratedTableModel implements Child
     @Override
     public String getExportRowCell(int row, int col) {
         return m_parentModel.getExportRowCell(row, m_columnsKept[col]);
+    }
+    
+    @Override
+    public ArrayList<ExportSubStringFont> getSubStringFonts(int row, int col) {
+        return m_parentModel.getSubStringFonts(row, m_columnsKept[col]);
     }
 
     @Override

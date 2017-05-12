@@ -8,8 +8,8 @@ import java.util.ArrayList;
  */
 public interface ExportTextInterface {
     
-    public String getExportText();
+    public String getExportTextOLD();
     
-    public ArrayList<ExportSubStringFont> getSubStringFonts();
+    public ArrayList<ExportSubStringFont> getSubStringFontsOLD();
     
 }

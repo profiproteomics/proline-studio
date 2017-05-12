@@ -3,6 +3,8 @@ package fr.proline.studio.rsmexplorer.gui.model;
 import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.core.orm.msi.dto.DBioSequence;
 import fr.proline.studio.comparedata.ExtraDataType;
+import fr.proline.studio.export.ExportModelUtilities;
+import fr.proline.studio.export.ExportSubStringFont;
 import fr.proline.studio.filter.*;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
@@ -322,6 +324,11 @@ public class ProteinTableModel extends DecoratedTableModel implements GlobalTabl
 
     @Override
     public String getExportRowCell(int row, int col) {
+        return ExportModelUtilities.getExportRowCell(this, row, col);
+    }
+    
+    @Override
+    public ArrayList<ExportSubStringFont> getSubStringFonts(int row, int col) {
         return null;
     }
 

@@ -4,6 +4,8 @@ import fr.profi.mzdb.model.Feature;
 import fr.proline.mzscope.model.IFeature;
 import fr.proline.mzscope.utils.NumberFormatter;
 import fr.proline.studio.comparedata.ExtraDataType;
+import fr.proline.studio.export.ExportModelUtilities;
+import fr.proline.studio.export.ExportSubStringFont;
 import fr.proline.studio.filter.DoubleFilter;
 import fr.proline.studio.filter.Filter;
 import fr.proline.studio.filter.IntegerFilter;
@@ -246,6 +248,11 @@ public class FeaturesTableModel extends DecoratedTableModel implements GlobalTab
 
     @Override
     public String getExportRowCell(int row, int col) {
+        return ExportModelUtilities.getExportRowCell(this, row, col);
+    }
+    
+    @Override
+    public ArrayList<ExportSubStringFont> getSubStringFonts(int row, int col) {
         return null;
     }
 

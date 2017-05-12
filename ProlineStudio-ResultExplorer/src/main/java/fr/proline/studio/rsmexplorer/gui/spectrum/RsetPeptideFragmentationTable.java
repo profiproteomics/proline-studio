@@ -1,6 +1,5 @@
 package fr.proline.studio.rsmexplorer.gui.spectrum;
 
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
 import java.math.BigDecimal;
@@ -8,8 +7,13 @@ import java.math.MathContext;
 import javax.swing.JTable;
 
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
+import fr.proline.studio.comparedata.CompareDataInterface;
+import fr.proline.studio.comparedata.ExtraDataType;
+import fr.proline.studio.export.ExportModelInterface;
+import fr.proline.studio.export.ExportModelUtilities;
 import fr.proline.studio.export.ExportSubStringFont;
 import fr.proline.studio.export.ExportTextInterface;
+import fr.proline.studio.graphics.PlotInformation;
 
 import fr.proline.studio.rsmexplorer.gui.spectrum.PeptideFragmentationData.FragmentMatch;
 import fr.proline.studio.rsmexplorer.gui.spectrum.PeptideFragmentationData.TheoreticalFragmentSeries;
@@ -19,13 +23,12 @@ import fr.proline.studio.table.TablePopupMenu;
 import fr.proline.studio.utils.GlobalValues;
 import java.util.ArrayList;
 import java.util.List;
-import javax.swing.JOptionPane;
+import java.util.Map;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
 
 import javax.swing.table.TableColumn;
 import org.apache.poi.hssf.util.HSSFColor;
-import org.jdesktop.swingx.renderer.DefaultTableRenderer;
 import org.jdesktop.swingx.table.TableColumnExt;
 
 public class RsetPeptideFragmentationTable extends DecoratedTable {
@@ -117,7 +120,7 @@ public class RsetPeptideFragmentationTable extends DecoratedTable {
         // nothing to do
     }
 
-    public static class FragmentationTableModel extends DecoratedTableModel {
+    public static class FragmentationTableModel extends DecoratedTableModel implements CompareDataInterface, ExportModelInterface {
 
         private TheoreticalFragmentSeries[] m_fragSer;
         private String m_peptideSequence;
@@ -346,9 +349,109 @@ public class RsetPeptideFragmentationTable extends DecoratedTable {
             return null;
         }
 
+        @Override
+        public String getExportRowCell(int row, int col) {
+            return ExportModelUtilities.getExportRowCell(this, row, col);
+        }
+
+        @Override
+        public ArrayList<ExportSubStringFont> getSubStringFonts(int row, int col) {
+
+            String exportString = getExportRowCell(row, col);
+            
+            if (m_matrix[row][col] != null) {
+
+                if (m_matrix[row][col].contains("ABC")) {
+                     ArrayList<ExportSubStringFont> exportSubStringFonts = new ArrayList<>();
+                    ExportSubStringFont newSubStringFont = new ExportSubStringFont(0, exportString.length(), HSSFColor.LIGHT_BLUE.index, Font.BOLD);
+                    exportSubStringFonts.add(newSubStringFont);   
+                    return exportSubStringFonts;
+
+                } else if (m_matrix[row][col].contains("XYZ")) {
+                    ArrayList<ExportSubStringFont> exportSubStringFonts = new ArrayList<>();
+
+                    ExportSubStringFont newSubStringFont = new ExportSubStringFont(0, exportString.length(), HSSFColor.RED.index, Font.BOLD);
+                    exportSubStringFonts.add(newSubStringFont);    
+                    return exportSubStringFonts;
+                    
+                }
+            }
+            return null;
+        }
+
+        @Override
+        public String getExportColumnName(int col) {
+            return getColumnName(col);
+        }
+
+        @Override
+        public String getDataColumnIdentifier(int columnIndex) {
+            return getColumnName(columnIndex);
+        }
+
+        @Override
+        public Class getDataColumnClass(int columnIndex) {
+            return getColumnClass(columnIndex);
+        }
+
+        @Override
+        public Object getDataValueAt(int rowIndex, int columnIndex) {
+            return getValueAt(rowIndex, columnIndex);
+        }
+
+        @Override
+        public int[] getKeysColumn() {
+            return null;
+        }
+
+        @Override
+        public int getInfoColumn() {
+            return -1;
+        }
+
+        @Override
+        public void setName(String name) {
+            
+        }
+
+        @Override
+        public String getName() {
+            return null;
+        }
+
+        @Override
+        public Map<String, Object> getExternalData() {
+            return null;
+        }
+
+        @Override
+        public PlotInformation getPlotInformation() {
+            return null;
+        }
+
+        @Override
+        public ArrayList<ExtraDataType> getExtraDataTypes() {
+            return null;
+        }
+
+        @Override
+        public Object getValue(Class c) {
+            return null;
+        }
+
+        @Override
+        public Object getRowValue(Class c, int row) {
+            return null;
+        }
+
+        @Override
+        public Object getColValue(Class c, int col) {
+            return null;
+        }
+
     }
 
-    public static class FragTableCustomRenderer extends DefaultTableCellRenderer implements ExportTextInterface {
+    public static class FragTableCustomRenderer extends DefaultTableCellRenderer /*implements ExportTextInterface*/ {
 
         private static final long serialVersionUID = 1L;
 
@@ -408,7 +511,7 @@ public class RsetPeptideFragmentationTable extends DecoratedTable {
 
         }
 
-        @Override
+        /*@Override
         public String getExportText() {
             return m_basicTextForExport;
         }
@@ -416,6 +519,6 @@ public class RsetPeptideFragmentationTable extends DecoratedTable {
         @Override
         public ArrayList<ExportSubStringFont> getSubStringFonts() {
             return m_ExportSubStringFonts;
-        }
+        }*/
     }
 }

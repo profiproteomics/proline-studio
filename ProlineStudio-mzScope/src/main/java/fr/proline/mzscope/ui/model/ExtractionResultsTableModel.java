@@ -4,6 +4,8 @@ import fr.proline.mzscope.model.ExtractionResult;
 import fr.proline.mzscope.model.ExtractionResult.Status;
 import fr.proline.mzscope.ui.StatusRenderer;
 import fr.proline.studio.comparedata.ExtraDataType;
+import fr.proline.studio.export.ExportModelUtilities;
+import fr.proline.studio.export.ExportSubStringFont;
 import fr.proline.studio.filter.Filter;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
@@ -247,9 +249,14 @@ public class ExtractionResultsTableModel extends DecoratedTableModel implements 
 
     @Override
     public String getExportRowCell(int row, int col) {
-        return null;
+        return ExportModelUtilities.getExportRowCell(this, row, col);
     }
 
+    @Override
+    public ArrayList<ExportSubStringFont> getSubStringFonts(int row, int col) {
+        return null;
+    }
+    
     @Override
     public String getExportColumnName(int col) {
         return Column.values()[col].getName();

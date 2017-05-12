@@ -8,6 +8,7 @@ import fr.proline.studio.comparedata.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.export.ExportModelInterface;
+import fr.proline.studio.export.ExportSubStringFont;
 import fr.proline.studio.filter.FilterButton;
 import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.gui.HourglassPanel;
@@ -35,6 +36,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import javax.swing.JButton;
@@ -448,6 +450,11 @@ public class XicPeakPanel  extends HourglassPanel implements DataBoxPanelInterfa
         @Override
         public String getExportRowCell(int row, int col) {
             return ((CompoundTableModel) m_peakTable.getModel()).getExportRowCell(convertRowIndexToModel(row), convertColumnIndexToModel(col));
+        }
+        
+        @Override
+        public ArrayList<ExportSubStringFont> getSubStringFonts(int row, int col) {
+            return ((CompoundTableModel) m_peakTable.getModel()).getSubStringFonts(convertRowIndexToModel(row), convertColumnIndexToModel(col));
         }
 
         @Override

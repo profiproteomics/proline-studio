@@ -1,5 +1,6 @@
 package fr.proline.studio.rsmexplorer.gui.model;
 
+import fr.proline.core.orm.msi.Peptide;
 import fr.proline.core.orm.msi.PeptideReadablePtmString;
 import fr.proline.core.orm.msi.dto.DInfoPTM;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
@@ -8,6 +9,8 @@ import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.core.orm.msi.dto.DPtmSiteProperties;
 import fr.proline.studio.comparedata.ExtraDataType;
 import fr.proline.studio.dam.tasks.data.PTMSite;
+import fr.proline.studio.export.ExportModelUtilities;
+import fr.proline.studio.export.ExportSubStringFont;
 import fr.proline.studio.filter.ConvertValueInterface;
 import fr.proline.studio.filter.DoubleFilter;
 import fr.proline.studio.filter.Filter;
@@ -33,6 +36,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import javax.swing.table.TableCellRenderer;
+import org.apache.poi.hssf.util.HSSFColor;
 
 /**
  *
@@ -439,9 +443,74 @@ public class PtmProtenSiteTableModel_V2 extends LazyTableModel implements Global
 
     @Override
     public String getExportRowCell(int row, int col) {
-        return null; // no specific export
+        return ExportModelUtilities.getExportRowCell(this, row, col);
     }
 
+    @Override
+    public ArrayList<ExportSubStringFont> getSubStringFonts(int row, int col) {
+        if (col == COLTYPE_PEPTIDE_NAME) {
+
+            PTMSite proteinPTMSite = m_arrayInUse.get(row);
+            DPeptideMatch peptideMatch = proteinPTMSite.getBestPeptideMatch();
+
+            Peptide peptide = peptideMatch.getPeptide();
+            if (peptide.getTransientData() != null) {
+
+                HashMap<Integer, DPeptidePTM> ptmMap = peptide.getTransientData().getDPeptidePtmMap();
+                if (ptmMap != null) {
+
+                    ArrayList<ExportSubStringFont> exportSubStringFonts = new ArrayList<>();
+
+                    String sequence = peptide.getSequence();
+
+                    int nb = sequence.length();
+                    for (int i = 0; i < nb; i++) {
+
+                        boolean nTerOrCterModification = false;
+                        if (i == 0) {
+                            DPeptidePTM nterPtm = ptmMap.get(0);
+                            if (nterPtm != null) {
+                                nTerOrCterModification = true;
+                            }
+                        } else if (i == nb - 1) {
+                            DPeptidePTM cterPtm = ptmMap.get(-1);
+                            if (cterPtm != null) {
+                                nTerOrCterModification = true;
+                            }
+                        }
+
+                        DPeptidePTM ptm = ptmMap.get(i + 1);
+                        boolean aminoAcidModification = (ptm != null);
+
+                        if (nTerOrCterModification || aminoAcidModification) {
+
+                            if (nTerOrCterModification && aminoAcidModification) {
+
+                                ExportSubStringFont newSubStringFont = new ExportSubStringFont(i, i + 1, HSSFColor.VIOLET.index);
+                                exportSubStringFonts.add(newSubStringFont);
+
+                            } else if (nTerOrCterModification) {
+
+                                ExportSubStringFont newSubStringFont = new ExportSubStringFont(i, i + 1, HSSFColor.GREEN.index);
+                                exportSubStringFonts.add(newSubStringFont);
+
+                            } else if (aminoAcidModification) {
+
+                                ExportSubStringFont newSubStringFont = new ExportSubStringFont(i, i + 1, HSSFColor.ORANGE.index);
+                                exportSubStringFonts.add(newSubStringFont);
+                            }
+
+                        }
+
+                    }
+                    return exportSubStringFonts;
+                }
+
+            }
+        }
+        return null;
+    }
+    
     @Override
     public String getExportColumnName(int col) {
         return getColumnName(col);

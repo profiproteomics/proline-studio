@@ -17,7 +17,7 @@ import fr.proline.studio.table.renderer.GrayableTableCellRenderer;
  *
  * @author JM235353
  */
-public class CompareValueRenderer implements GrayableTableCellRenderer, ExportTextInterface {
+public class CompareValueRenderer implements GrayableTableCellRenderer /*, ExportTextInterface*/ {
 
     private CompareValuePanel m_valuePanel = null;
     private ArrayList<ExportSubStringFont> m_ExportSubStringFonts;
@@ -49,7 +49,7 @@ public class CompareValueRenderer implements GrayableTableCellRenderer, ExportTe
         return m_valuePanel;
     }
 
-    @Override
+    /*@Override
     public String getExportText() {
         return "";
     }
@@ -57,7 +57,7 @@ public class CompareValueRenderer implements GrayableTableCellRenderer, ExportTe
     @Override
     public ArrayList<ExportSubStringFont> getSubStringFonts() {
         return this.m_ExportSubStringFonts;
-    }
+    }*/
     
     @Override
     public void setGrayed(boolean v) {

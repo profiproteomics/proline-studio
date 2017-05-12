@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package fr.proline.studio.rsmexplorer.gui.model;
 
 import fr.proline.core.orm.msi.PeptideReadablePtmString;
@@ -13,6 +8,8 @@ import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.core.orm.msi.dto.DPtmSiteProperties;
 import fr.proline.studio.comparedata.ExtraDataType;
 import fr.proline.studio.dam.tasks.data.PTMSite;
+import fr.proline.studio.export.ExportModelUtilities;
+import fr.proline.studio.export.ExportSubStringFont;
 import fr.proline.studio.filter.Filter;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
@@ -503,7 +500,12 @@ public class PeptidesOfPtmSiteTableModel extends DecoratedTableModel implements 
 
     @Override
     public String getExportRowCell(int row, int col) {
-         return null; // no specific export
+         return ExportModelUtilities.getExportRowCell(this, row, col);
+    }
+    
+    @Override
+    public ArrayList<ExportSubStringFont> getSubStringFonts(int row, int col) {
+        return null;
     }
 
     @Override

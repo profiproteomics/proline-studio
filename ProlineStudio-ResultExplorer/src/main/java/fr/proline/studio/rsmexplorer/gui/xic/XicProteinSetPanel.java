@@ -64,6 +64,7 @@ import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.xic.DatabaseModifyPeptideTask;
+import fr.proline.studio.export.ExportSubStringFont;
 import fr.proline.studio.parameter.ObjectParameter;
 import fr.proline.studio.parameter.ParameterList;
 import fr.proline.studio.rsmexplorer.DataBoxViewerManager;
@@ -791,6 +792,11 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
             return ((CompoundTableModel) m_quantProteinSetTable.getModel()).getExportRowCell(convertRowIndexToModel(row), convertColumnIndexToModel(col));
         }
 
+        @Override
+        public ArrayList<ExportSubStringFont> getSubStringFonts(int row, int col) {
+            return ((CompoundTableModel) m_quantProteinSetTable.getModel()).getSubStringFonts(convertRowIndexToModel(row), convertColumnIndexToModel(col));
+        }
+        
         @Override
         public String getInfo() {
             int count = getModel().getRowCount();

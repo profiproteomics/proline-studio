@@ -9,6 +9,8 @@ import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.comparedata.ExtraDataType;
 import fr.proline.studio.comparedata.GlobalTabelModelProviderInterface;
 import fr.proline.studio.export.ExportButton;
+import fr.proline.studio.export.ExportModelUtilities;
+import fr.proline.studio.export.ExportSubStringFont;
 import fr.proline.studio.filter.DoubleFilter;
 import fr.proline.studio.filter.Filter;
 import fr.proline.studio.filter.FilterButton;
@@ -507,6 +509,11 @@ public class RsetPeptideSpectrumValuesPanel extends HourglassPanel implements Da
 
         @Override
         public String getExportRowCell(int row, int col) {
+            return ExportModelUtilities.getExportRowCell(this, row, col);
+        }
+        
+        @Override
+        public ArrayList<ExportSubStringFont> getSubStringFonts(int row, int col) {
             return null;
         }
 

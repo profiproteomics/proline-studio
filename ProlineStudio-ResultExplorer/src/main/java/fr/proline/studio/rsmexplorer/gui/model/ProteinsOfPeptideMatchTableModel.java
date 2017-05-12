@@ -8,11 +8,12 @@ import fr.proline.studio.comparedata.ExtraDataType;
 import fr.proline.studio.table.LazyTable;
 import fr.proline.studio.table.LazyTableModel;
 import fr.proline.studio.dam.tasks.DatabaseProteinMatchesTask;
+import fr.proline.studio.export.ExportModelUtilities;
+import fr.proline.studio.export.ExportSubStringFont;
 import fr.proline.studio.filter.DoubleFilter;
 import fr.proline.studio.filter.Filter;
 import fr.proline.studio.filter.IntegerFilter;
 import fr.proline.studio.filter.StringDiffFilter;
-import fr.proline.studio.filter.StringFilter;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
 import fr.proline.studio.table.renderer.DefaultRightAlignRenderer;
@@ -22,7 +23,6 @@ import fr.proline.studio.table.CompoundTableModel;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.table.LazyData;
 import fr.proline.studio.table.TableDefaultRendererManager;
-import fr.proline.studio.utils.RelativePainterHighlighter;
 import fr.proline.studio.utils.URLCellRenderer;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -337,7 +337,12 @@ public class ProteinsOfPeptideMatchTableModel extends LazyTableModel implements 
 
     @Override
     public String getExportRowCell(int row, int col) {
-        return null; // no specific export
+        return ExportModelUtilities.getExportRowCell(this, row, col);
+    }
+    
+    @Override
+    public ArrayList<ExportSubStringFont> getSubStringFonts(int row, int col) {
+        return null;
     }
 
     @Override

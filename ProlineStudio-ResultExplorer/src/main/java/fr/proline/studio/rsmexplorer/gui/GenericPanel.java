@@ -5,6 +5,7 @@ import fr.proline.studio.comparedata.ExtraDataType;
 import fr.proline.studio.comparedata.GlobalTabelModelProviderInterface;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.export.ExportModelInterface;
+import fr.proline.studio.export.ExportSubStringFont;
 import fr.proline.studio.filter.FilterButton;
 import fr.proline.studio.filter.actions.ClearRestrainAction;
 import fr.proline.studio.filter.actions.RestrainAction;
@@ -328,6 +329,11 @@ public class GenericPanel extends JPanel implements DataBoxPanelInterface, Globa
         @Override
         public String getExportRowCell(int row, int col) {
             return ((ExportModelInterface) getModel()).getExportRowCell(convertRowIndexToModel(row), convertColumnIndexToModel(col));
+        }
+
+        @Override
+        public ArrayList<ExportSubStringFont> getSubStringFonts(int row, int col) {
+            return ((ExportModelInterface) getModel()).getSubStringFonts(convertRowIndexToModel(row), convertColumnIndexToModel(col));
         }
 
         @Override

@@ -8,8 +8,11 @@ import fr.proline.core.orm.msi.dto.DSpectrum;
 import fr.proline.core.orm.msi.dto.DMsQuery;
 import fr.proline.core.orm.msi.dto.DPeptideInstance;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
+import fr.proline.core.orm.msi.dto.DPeptidePTM;
 import fr.proline.core.orm.msi.dto.DProteinSet;
 import fr.proline.studio.comparedata.ExtraDataType;
+import fr.proline.studio.export.ExportModelUtilities;
+import fr.proline.studio.export.ExportSubStringFont;
 import fr.proline.studio.filter.*;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
@@ -24,11 +27,13 @@ import fr.proline.studio.table.DecoratedTableModel;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.table.LazyData;
 import fr.proline.studio.table.TableDefaultRendererManager;
+import fr.proline.studio.utils.GlobalValues;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import javax.swing.table.TableCellRenderer;
+import org.apache.poi.hssf.util.HSSFColor;
 
 
 /**
@@ -565,6 +570,69 @@ public class PeptideTableModel extends DecoratedTableModel implements GlobalTabl
 
     @Override
     public String getExportRowCell(int row, int col) {
+        return ExportModelUtilities.getExportRowCell(this, row, col);
+    }
+    
+    @Override
+    public ArrayList<ExportSubStringFont> getSubStringFonts(int row, int col) {
+        if (col == COLTYPE_PEPTIDE_NAME) {
+            DPeptideInstance peptideInstance = m_peptideInstances[row];
+            DPeptideMatch peptideMatch = (DPeptideMatch) peptideInstance.getBestPeptideMatch();
+            Peptide peptide = peptideMatch.getPeptide();
+            if (peptide.getTransientData() != null) {
+
+                HashMap<Integer, DPeptidePTM> ptmMap = peptide.getTransientData().getDPeptidePtmMap();
+                if (ptmMap != null) {
+
+                    ArrayList<ExportSubStringFont> exportSubStringFonts = new ArrayList<>();
+
+                    String sequence = peptide.getSequence();
+
+                    int nb = sequence.length();
+                    for (int i = 0; i < nb; i++) {
+
+                        boolean nTerOrCterModification = false;
+                        if (i == 0) {
+                            DPeptidePTM nterPtm = ptmMap.get(0);
+                            if (nterPtm != null) {
+                                nTerOrCterModification = true;
+                            }
+                        } else if (i == nb - 1) {
+                            DPeptidePTM cterPtm = ptmMap.get(-1);
+                            if (cterPtm != null) {
+                                nTerOrCterModification = true;
+                            }
+                        }
+
+                        DPeptidePTM ptm = ptmMap.get(i + 1);
+                        boolean aminoAcidModification = (ptm != null);
+
+                        if (nTerOrCterModification || aminoAcidModification) {
+
+                            if (nTerOrCterModification && aminoAcidModification) {
+
+                                ExportSubStringFont newSubStringFont = new ExportSubStringFont(i, i + 1, HSSFColor.VIOLET.index);
+                                exportSubStringFonts.add(newSubStringFont);
+
+                            } else if (nTerOrCterModification) {
+
+                                ExportSubStringFont newSubStringFont = new ExportSubStringFont(i, i + 1, HSSFColor.GREEN.index);
+                                exportSubStringFonts.add(newSubStringFont);
+
+                            } else if (aminoAcidModification) {
+
+                                ExportSubStringFont newSubStringFont = new ExportSubStringFont(i, i + 1, HSSFColor.ORANGE.index);
+                                exportSubStringFonts.add(newSubStringFont);
+                            }
+
+                        }
+
+                    }
+                    return exportSubStringFonts;
+                }
+
+            }
+        }
         return null;
     }
 

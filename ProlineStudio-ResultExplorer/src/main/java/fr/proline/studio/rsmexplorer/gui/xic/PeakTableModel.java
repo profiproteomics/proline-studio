@@ -5,6 +5,8 @@ import fr.proline.core.orm.lcms.Peakel;
 import fr.proline.core.orm.lcms.Peak;
 import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.comparedata.ExtraDataType;
+import fr.proline.studio.export.ExportModelUtilities;
+import fr.proline.studio.export.ExportSubStringFont;
 import fr.proline.studio.filter.DoubleFilter;
 import fr.proline.studio.filter.Filter;
 import fr.proline.studio.graphics.PlotInformation;
@@ -73,9 +75,14 @@ public class PeakTableModel extends LazyTableModel implements GlobalTableModelIn
     
     @Override
     public String getExportRowCell(int row, int col) {
-        return null; // no specific export
+        return ExportModelUtilities.getExportRowCell(this, row, col);
     }
 
+    @Override
+    public ArrayList<ExportSubStringFont> getSubStringFonts(int row, int col) {
+        return null;
+    }
+    
     @Override
     public String getToolTipForHeader(int col) {
         return m_toolTipColumns[col];

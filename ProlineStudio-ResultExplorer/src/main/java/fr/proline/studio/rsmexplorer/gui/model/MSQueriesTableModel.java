@@ -5,6 +5,8 @@ import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.dto.DMsQuery;
 import fr.proline.studio.comparedata.ExtraDataType;
 import fr.proline.studio.dam.tasks.DatabaseLoadMSQueriesTask;
+import fr.proline.studio.export.ExportModelUtilities;
+import fr.proline.studio.export.ExportSubStringFont;
 import fr.proline.studio.filter.DoubleFilter;
 import fr.proline.studio.filter.Filter;
 import fr.proline.studio.filter.IntegerFilter;
@@ -373,6 +375,11 @@ public class MSQueriesTableModel extends LazyTableModel implements GlobalTableMo
 
     @Override
     public String getExportRowCell(int row, int col) {
+        return ExportModelUtilities.getExportRowCell(this, row, col);
+    }
+    
+    @Override
+    public ArrayList<ExportSubStringFont> getSubStringFonts(int row, int col) {
         return null;
     }
 

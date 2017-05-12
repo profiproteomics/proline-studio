@@ -13,7 +13,7 @@ import javax.swing.table.DefaultTableCellRenderer;
  * Renderer for booleans : show a green tick for TRUE, show nothing for FALSE
  * @author JM235353
  */
-public class BooleanRenderer extends DefaultTableCellRenderer implements ExportTextInterface {
+public class BooleanRenderer extends DefaultTableCellRenderer /*implements ExportTextInterface*/ {
 
     private String m_basicTextForExport = "";
     private ArrayList<ExportSubStringFont> m_ExportSubStringFonts;
@@ -50,15 +50,15 @@ public class BooleanRenderer extends DefaultTableCellRenderer implements ExportT
         
     }
 
-    @Override
+    /*@Override
     public String getExportText() {
         return m_basicTextForExport;
     }
 
     @Override
     public ArrayList<ExportSubStringFont> getSubStringFonts() {
-        return this.m_ExportSubStringFonts;
-    }
+        return m_ExportSubStringFonts;
+    }*/
     
     
     

@@ -9,6 +9,7 @@ import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
 import fr.proline.studio.comparedata.ExtraDataType;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadXicMasterQuantTask;
+import fr.proline.studio.export.ExportSubStringFont;
 import fr.proline.studio.filter.DoubleFilter;
 import fr.proline.studio.filter.Filter;
 import fr.proline.studio.filter.IntegerFilter;
@@ -921,6 +922,11 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
         return ""; // should never happen
     }
 
+    @Override
+    public ArrayList<ExportSubStringFont> getSubStringFonts(int row, int col) {
+        return null;
+    }
+    
     @Override
     public PlotType getBestPlotType() {
         return null; //JPM.TODO

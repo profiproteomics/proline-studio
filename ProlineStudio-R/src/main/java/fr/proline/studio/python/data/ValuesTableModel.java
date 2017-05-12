@@ -1,6 +1,7 @@
 package fr.proline.studio.python.data;
 
 import fr.proline.studio.comparedata.ExtraDataType;
+import fr.proline.studio.export.ExportSubStringFont;
 import fr.proline.studio.filter.Filter;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
@@ -207,6 +208,11 @@ public class ValuesTableModel extends DecoratedTableModel implements GlobalTable
     @Override
     public String getExportRowCell(int row, int col) {
         return (String) getValueAt(row, col);
+    }
+    
+    @Override
+    public ArrayList<ExportSubStringFont> getSubStringFonts(int row, int col) {
+        return null;
     }
 
     @Override

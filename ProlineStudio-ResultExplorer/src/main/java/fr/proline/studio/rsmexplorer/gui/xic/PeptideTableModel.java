@@ -4,6 +4,8 @@ import fr.proline.core.orm.msi.dto.DMasterQuantPeptide;
 import fr.proline.core.orm.msi.dto.DQuantPeptide;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
 import fr.proline.studio.comparedata.ExtraDataType;
+import fr.proline.studio.export.ExportModelUtilities;
+import fr.proline.studio.export.ExportSubStringFont;
 import fr.proline.studio.filter.Filter;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
@@ -240,17 +242,13 @@ public class PeptideTableModel extends LazyTableModel implements GlobalTableMode
         return COLTYPE_RAW_ABUNDANCE;
     }
 
-    /*@Override
-     public void select(ArrayList<Integer> rows) {
-     throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-     }
-
-     @Override
-     public ArrayList<Integer> getSelection() {
-     throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-     }*/
     @Override
     public String getExportRowCell(int row, int col) {
+        return ExportModelUtilities.getExportRowCell(this, row, col);
+    }
+    
+    @Override
+    public ArrayList<ExportSubStringFont> getSubStringFonts(int row, int col) {
         return null;
     }
 

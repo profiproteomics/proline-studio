@@ -8,6 +8,7 @@ import fr.proline.studio.dpm.jms.AccessJMSManagerThread;
 import fr.proline.studio.dpm.task.jms.AbstractJMSCallback;
 import fr.proline.studio.dpm.task.jms.CancelTask;
 import fr.proline.studio.dpm.task.jms.PurgeConsumer;
+import fr.proline.studio.export.ExportSubStringFont;
 import fr.proline.studio.filter.ConvertValueInterface;
 import fr.proline.studio.filter.Filter;
 import fr.proline.studio.filter.FilterButton;
@@ -595,6 +596,11 @@ public class TasksPanel extends AbstractTasksPanel {
             return null; // no specific export
         }
 
+        @Override
+        public ArrayList<ExportSubStringFont> getSubStringFonts(int row, int col) {
+            return null;
+        }
+        
         @Override
         public String getExportColumnName(int col) {
             return getColumnName(col);

@@ -10,6 +10,8 @@ import fr.proline.studio.dam.tasks.AbstractDatabaseTask;
 import fr.proline.studio.dam.tasks.DatabaseRsetProperties;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.export.ExportButton;
+import fr.proline.studio.export.ExportModelUtilities;
+import fr.proline.studio.export.ExportSubStringFont;
 import fr.proline.studio.filter.ConvertValueInterface;
 import fr.proline.studio.filter.Filter;
 import fr.proline.studio.filter.FilterButton;
@@ -813,6 +815,11 @@ public class RsetAllPanel extends HourglassPanel implements DataBoxPanelInterfac
 
         @Override
         public String getExportRowCell(int row, int col) {
+            return ExportModelUtilities.getExportRowCell(this, row, col);
+        }
+        
+        @Override
+        public ArrayList<ExportSubStringFont> getSubStringFonts(int row, int col) {
             return null;
         }
 

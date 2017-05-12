@@ -55,9 +55,9 @@ public class ExportManager {
         return text;
     }
     
-    private ArrayList<ExportSubStringFont> componentToSubStringFonts(Component c){
+    private ArrayList<ExportFontData> componentToSubStringFonts(Component c){
         /*if(c instanceof ExportTextInterface){
-            return ((ExportTextInterface) c).getSubStringFonts();
+            return ((ExportTextInterface) c).getExportFonts();
         }else{*/
             return null;
         //}
@@ -138,14 +138,14 @@ public class ExportManager {
                         for (int i = 0; i < nbCol; i++) {
                             int col = colsInModel[i];
                             String text = exportInterface.getExportRowCell(row, col);
-                             ArrayList<ExportSubStringFont> stringFonts = null;
+                             ArrayList<ExportFontData> stringFonts = null;
                             if (text == null) {
                                 Object o = ((CompareDataInterface) model).getDataValueAt(row, col);
                                 if (o != null) {
                                     text = o.toString();
                                 }
                             } else {
-                                stringFonts = exportInterface.getSubStringFonts(row, col);
+                                stringFonts = exportInterface.getExportFonts(row, col);
                             }
                             m_exporter.addCell(text, stringFonts);
                         }

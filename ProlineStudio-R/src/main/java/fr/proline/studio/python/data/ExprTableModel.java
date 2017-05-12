@@ -2,7 +2,7 @@ package fr.proline.studio.python.data;
 
 import fr.proline.studio.comparedata.ExtraDataType;
 import fr.proline.studio.export.ExportModelInterface;
-import fr.proline.studio.export.ExportSubStringFont;
+import fr.proline.studio.export.ExportFontData;
 import fr.proline.studio.filter.BooleanFilter;
 import fr.proline.studio.filter.DoubleFilter;
 import fr.proline.studio.filter.Filter;
@@ -413,7 +413,7 @@ public class ExprTableModel extends DecoratedTableModel implements ChildModelInt
     }
     
     @Override
-    public ArrayList<ExportSubStringFont> getSubStringFonts(int row, int col) {
+    public ArrayList<ExportFontData> getExportFonts(int row, int col) {
         if (col >= m_parentModel.getColumnCount()) {
             return null;
         }
@@ -425,7 +425,7 @@ public class ExprTableModel extends DecoratedTableModel implements ChildModelInt
             }
         }
 
-        return m_parentModel.getSubStringFonts(row, col);
+        return m_parentModel.getExportFonts(row, col);
     }
 
     @Override

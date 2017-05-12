@@ -9,7 +9,7 @@ import fr.proline.studio.table.LazyTable;
 import fr.proline.studio.table.LazyTableModel;
 import fr.proline.studio.dam.tasks.DatabaseProteinMatchesTask;
 import fr.proline.studio.export.ExportModelUtilities;
-import fr.proline.studio.export.ExportSubStringFont;
+import fr.proline.studio.export.ExportFontData;
 import fr.proline.studio.filter.DoubleFilter;
 import fr.proline.studio.filter.Filter;
 import fr.proline.studio.filter.IntegerFilter;
@@ -341,7 +341,7 @@ public class ProteinsOfPeptideMatchTableModel extends LazyTableModel implements 
     }
     
     @Override
-    public ArrayList<ExportSubStringFont> getSubStringFonts(int row, int col) {
+    public ArrayList<ExportFontData> getExportFonts(int row, int col) {
         return null;
     }
 

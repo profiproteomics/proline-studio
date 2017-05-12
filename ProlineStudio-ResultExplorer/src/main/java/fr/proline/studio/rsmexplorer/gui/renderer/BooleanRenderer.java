@@ -1,6 +1,6 @@
 package fr.proline.studio.rsmexplorer.gui.renderer;
 
-import fr.proline.studio.export.ExportSubStringFont;
+import fr.proline.studio.export.ExportFontData;
 import fr.proline.studio.export.ExportTextInterface;
 import fr.proline.studio.utils.IconManager;
 import java.awt.Component;
@@ -15,11 +15,7 @@ import javax.swing.table.DefaultTableCellRenderer;
  */
 public class BooleanRenderer extends DefaultTableCellRenderer /*implements ExportTextInterface*/ {
 
-    private String m_basicTextForExport = "";
-    private ArrayList<ExportSubStringFont> m_ExportSubStringFonts;
-    
     public BooleanRenderer() {
-        m_ExportSubStringFonts = new ArrayList<ExportSubStringFont>();
     }
     
     @Override
@@ -31,7 +27,6 @@ public class BooleanRenderer extends DefaultTableCellRenderer /*implements Expor
         
         if ((value == null) || (! (value instanceof Boolean))) {
             label.setIcon(null);
-            m_basicTextForExport = "";
             return label;
         }
         
@@ -39,10 +34,8 @@ public class BooleanRenderer extends DefaultTableCellRenderer /*implements Expor
         Boolean b = (Boolean) value;
         
         if (b.booleanValue()) {
-            m_basicTextForExport = "true";
             label.setIcon(IconManager.getIcon(IconManager.IconType.TICK_SMALL));
         } else {
-            m_basicTextForExport = "false";
             label.setIcon(null);
         }
         
@@ -50,17 +43,5 @@ public class BooleanRenderer extends DefaultTableCellRenderer /*implements Expor
         
     }
 
-    /*@Override
-    public String getExportText() {
-        return m_basicTextForExport;
-    }
-
-    @Override
-    public ArrayList<ExportSubStringFont> getSubStringFonts() {
-        return m_ExportSubStringFonts;
-    }*/
-    
-    
-    
     
 }

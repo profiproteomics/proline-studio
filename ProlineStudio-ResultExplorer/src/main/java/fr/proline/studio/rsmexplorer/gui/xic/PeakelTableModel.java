@@ -6,7 +6,7 @@ import fr.proline.core.orm.lcms.dto.DFeature;
 import fr.proline.studio.comparedata.ExtraDataType;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadLcMSTask;
 import fr.proline.studio.export.ExportModelUtilities;
-import fr.proline.studio.export.ExportSubStringFont;
+import fr.proline.studio.export.ExportFontData;
 import fr.proline.studio.filter.DoubleFilter;
 import fr.proline.studio.filter.Filter;
 import fr.proline.studio.filter.IntegerFilter;
@@ -463,7 +463,7 @@ public class PeakelTableModel extends LazyTableModel implements GlobalTableModel
     }
 
     @Override
-    public ArrayList<ExportSubStringFont> getSubStringFonts(int row, int col) {
+    public ArrayList<ExportFontData> getExportFonts(int row, int col) {
         return null;
     }
     

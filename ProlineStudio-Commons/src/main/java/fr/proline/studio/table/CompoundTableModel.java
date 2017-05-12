@@ -1,7 +1,7 @@
 package fr.proline.studio.table;
 
 import fr.proline.studio.comparedata.ExtraDataType;
-import fr.proline.studio.export.ExportSubStringFont;
+import fr.proline.studio.export.ExportFontData;
 import fr.proline.studio.filter.Filter;
 import fr.proline.studio.filter.FilterTableModelInterface;
 import fr.proline.studio.filter.FilterTableModel;
@@ -340,8 +340,8 @@ public class CompoundTableModel extends AbstractTableModel implements GlobalTabl
     }
 
     @Override
-    public ArrayList<ExportSubStringFont> getSubStringFonts(int row, int col) {
-        return m_lastModel.getSubStringFonts(row, col);
+    public ArrayList<ExportFontData> getExportFonts(int row, int col) {
+        return m_lastModel.getExportFonts(row, col);
     }
     
     @Override

@@ -3,8 +3,7 @@ package fr.proline.studio.rsmexplorer.gui.renderer;
 import fr.proline.core.orm.msi.Peptide;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.msi.dto.DPeptidePTM;
-import fr.proline.studio.export.ExportSubStringFont;
-import fr.proline.studio.export.ExportTextInterface;
+import fr.proline.studio.export.ExportFontData;
 import fr.proline.studio.utils.GlobalValues;
 import java.awt.Color;
 import java.awt.Component;
@@ -16,7 +15,6 @@ import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
 import fr.proline.studio.table.renderer.GrayableTableCellRenderer;
-import org.apache.poi.hssf.util.HSSFColor;
 
 
 /**
@@ -24,16 +22,12 @@ import org.apache.poi.hssf.util.HSSFColor;
  *
  * @author JM235353
  */
-public class PeptideRenderer extends DefaultTableCellRenderer implements /*ExportTextInterface, */ GrayableTableCellRenderer {
-
-    private String m_basicTextForExport = "";
+public class PeptideRenderer extends DefaultTableCellRenderer implements GrayableTableCellRenderer {
 
     private boolean m_grayed = false;
-    private ArrayList<ExportSubStringFont> m_ExportSubStringFonts;
 
 
     public void PeptideRenderer() {
-        ;
     }
 
     @Override
@@ -59,9 +53,9 @@ public class PeptideRenderer extends DefaultTableCellRenderer implements /*Expor
     }
 
     private String constructPeptideDisplay(DPeptideMatch peptideMatch) {
-        
-        m_ExportSubStringFonts = new ArrayList<ExportSubStringFont>();
 
+        String textToExport;
+        
         Peptide peptide = peptideMatch.getPeptide();
         if (peptide.getTransientData() != null) {
 
@@ -72,6 +66,8 @@ public class PeptideRenderer extends DefaultTableCellRenderer implements /*Expor
 
             String sequence = peptide.getSequence();
 
+            
+            
             if (ptmMap == null) {
                 m_displaySB.append(sequence);
                 m_exportSB.append(sequence);
@@ -99,22 +95,14 @@ public class PeptideRenderer extends DefaultTableCellRenderer implements /*Expor
                     if (nTerOrCterModification || aminoAcidModification) {
 
                         if (nTerOrCterModification && aminoAcidModification) {
-                            m_displaySB.append("<span style='color:").append(GlobalValues.HTML_COLOR_VIOLET).append("'>");
-                                                     
-                            ExportSubStringFont newSubStringFont = new ExportSubStringFont(i, i + 1, HSSFColor.VIOLET.index);
-                            m_ExportSubStringFonts.add(newSubStringFont);        
+                            m_displaySB.append("<span style='color:").append(GlobalValues.HTML_COLOR_VIOLET).append("'>"); 
                             
                         } else if (nTerOrCterModification) {
                             m_displaySB.append("<span style='color:").append(GlobalValues.HTML_COLOR_GREEN).append("'>");
-                                       
-                            ExportSubStringFont newSubStringFont = new ExportSubStringFont(i, i + 1, HSSFColor.GREEN.index);
-                            m_ExportSubStringFonts.add(newSubStringFont);
-                        
+
                         } else if (aminoAcidModification) {
                             m_displaySB.append("<span style='color:").append(GlobalValues.HTML_COLOR_ORANGE).append("'>");
-                
-                            ExportSubStringFont newSubStringFont = new ExportSubStringFont(i, i + 1, HSSFColor.ORANGE.index);
-                            m_ExportSubStringFonts.add(newSubStringFont);
+
                             
                         }
                         
@@ -137,7 +125,7 @@ public class PeptideRenderer extends DefaultTableCellRenderer implements /*Expor
                 m_displaySB.append("</HTML>");
             }
 
-            m_basicTextForExport = m_exportSB.toString();
+            textToExport = m_exportSB.toString();
             m_exportSB.setLength(0);
 
             String res = m_displaySB.toString();
@@ -146,12 +134,12 @@ public class PeptideRenderer extends DefaultTableCellRenderer implements /*Expor
         }
 
         if (peptide == null) {
-            m_basicTextForExport = "";
+            textToExport = "";
         } else {
-            m_basicTextForExport = peptide.getSequence();
+            textToExport = peptide.getSequence();
         }
 
-        return m_basicTextForExport;
+        return textToExport;
 
     }
     private final StringBuilder m_displaySB = new StringBuilder();
@@ -164,13 +152,4 @@ public class PeptideRenderer extends DefaultTableCellRenderer implements /*Expor
         m_grayed = v;
     }
 
-    /*@Override
-    public String getExportText() {
-        return m_basicTextForExport;
-    }
-    
-    @Override
-    public ArrayList<ExportSubStringFont> getSubStringFonts() {
-        return this.m_ExportSubStringFonts;
-    }*/
 }

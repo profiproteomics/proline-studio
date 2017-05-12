@@ -6,7 +6,7 @@ import fr.proline.core.orm.lcms.Peak;
 import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.comparedata.ExtraDataType;
 import fr.proline.studio.export.ExportModelUtilities;
-import fr.proline.studio.export.ExportSubStringFont;
+import fr.proline.studio.export.ExportFontData;
 import fr.proline.studio.filter.DoubleFilter;
 import fr.proline.studio.filter.Filter;
 import fr.proline.studio.graphics.PlotInformation;
@@ -79,7 +79,7 @@ public class PeakTableModel extends LazyTableModel implements GlobalTableModelIn
     }
 
     @Override
-    public ArrayList<ExportSubStringFont> getSubStringFonts(int row, int col) {
+    public ArrayList<ExportFontData> getExportFonts(int row, int col) {
         return null;
     }
     

@@ -46,7 +46,7 @@ public class CSVExporter implements ExporterInterface {
     }
 
     @Override
-    public void addCell(String t, ArrayList<ExportSubStringFont> fonts) throws IOException {
+    public void addCell(String t, ArrayList<ExportFontData> fonts) throws IOException {
         
         if (m_curCell>0) {
             m_fw.write(CSV_SEPARATOR);

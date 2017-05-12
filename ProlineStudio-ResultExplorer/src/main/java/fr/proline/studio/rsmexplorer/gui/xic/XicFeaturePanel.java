@@ -7,7 +7,7 @@ import fr.proline.studio.comparedata.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.export.ExportModelInterface;
-import fr.proline.studio.export.ExportSubStringFont;
+import fr.proline.studio.export.ExportFontData;
 import fr.proline.studio.filter.FilterButton;
 import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.gui.HourglassPanel;
@@ -607,8 +607,8 @@ public class XicFeaturePanel  extends HourglassPanel implements DataBoxPanelInte
         }
 
         @Override
-        public ArrayList<ExportSubStringFont> getSubStringFonts(int row, int col) {
-            return ((CompoundTableModel) m_featureTable.getModel()).getSubStringFonts(convertRowIndexToModel(row), convertColumnIndexToModel(col));
+        public ArrayList<ExportFontData> getExportFonts(int row, int col) {
+            return ((CompoundTableModel) m_featureTable.getModel()).getExportFonts(convertRowIndexToModel(row), convertColumnIndexToModel(col));
         }
         
 

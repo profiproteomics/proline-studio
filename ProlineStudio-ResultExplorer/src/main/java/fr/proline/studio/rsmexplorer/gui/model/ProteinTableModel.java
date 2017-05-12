@@ -4,7 +4,7 @@ import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.core.orm.msi.dto.DBioSequence;
 import fr.proline.studio.comparedata.ExtraDataType;
 import fr.proline.studio.export.ExportModelUtilities;
-import fr.proline.studio.export.ExportSubStringFont;
+import fr.proline.studio.export.ExportFontData;
 import fr.proline.studio.filter.*;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
@@ -324,11 +324,24 @@ public class ProteinTableModel extends DecoratedTableModel implements GlobalTabl
 
     @Override
     public String getExportRowCell(int row, int col) {
+        switch (Column.values()[col]) {
+            case SAMESET_SUBSET: {
+                DProteinMatch proteinMatch = getProteinMatch(row);
+                if (proteinMatch.getId() == m_representativeProteinMatchId) {
+                    return Sameset.getSameset(Sameset.TYPICAL_SAMESET).toString();
+                } else if (row < m_sameSetMatches.length) {
+                    return Sameset.getSameset(Sameset.SAMESET).toString();
+                } else {
+                    return Sameset.getSameset(Sameset.SUBSET).toString();
+                }
+            }
+
+        }
         return ExportModelUtilities.getExportRowCell(this, row, col);
     }
     
     @Override
-    public ArrayList<ExportSubStringFont> getSubStringFonts(int row, int col) {
+    public ArrayList<ExportFontData> getExportFonts(int row, int col) {
         return null;
     }
 

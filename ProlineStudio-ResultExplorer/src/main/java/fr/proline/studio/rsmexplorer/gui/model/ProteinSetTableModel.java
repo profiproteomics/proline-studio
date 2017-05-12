@@ -8,7 +8,7 @@ import fr.proline.core.orm.msi.dto.DProteinSet;
 import fr.proline.studio.comparedata.ExtraDataType;
 import fr.proline.studio.dam.tasks.DatabaseProteinSetsTask;
 import fr.proline.studio.export.ExportModelUtilities;
-import fr.proline.studio.export.ExportSubStringFont;
+import fr.proline.studio.export.ExportFontData;
 import fr.proline.studio.filter.*;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
@@ -563,11 +563,19 @@ public class ProteinSetTableModel extends LazyTableModel implements GlobalTableM
 
     @Override
     public String getExportRowCell(int row, int col) {
+        if (col == COLTYPE_PROTEINS_COUNT) {
+            DProteinSet proteinSet = m_proteinSets[row];
+            Integer sameSetCount = proteinSet.getSameSetCount();
+            Integer subSetCount = proteinSet.getSubSetCount();
+            ProteinCount proteinCount = new ProteinCount(sameSetCount, subSetCount);
+        
+            return proteinCount.toString();
+        }
         return ExportModelUtilities.getExportRowCell(this, row, col);
     }
     
     @Override
-    public ArrayList<ExportSubStringFont> getSubStringFonts(int row, int col) {
+    public ArrayList<ExportFontData> getExportFonts(int row, int col) {
         return null;
     }
 

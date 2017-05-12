@@ -10,6 +10,6 @@ public interface ExportTextInterface {
     
     public String getExportTextOLD();
     
-    public ArrayList<ExportSubStringFont> getSubStringFontsOLD();
+    public ArrayList<ExportFontData> getExportFontsOLD();
     
 }

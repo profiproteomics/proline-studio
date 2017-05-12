@@ -10,7 +10,7 @@ import fr.proline.core.orm.msi.dto.DPtmSiteProperties;
 import fr.proline.studio.comparedata.ExtraDataType;
 import fr.proline.studio.dam.tasks.data.PTMSite;
 import fr.proline.studio.export.ExportModelUtilities;
-import fr.proline.studio.export.ExportSubStringFont;
+import fr.proline.studio.export.ExportFontData;
 import fr.proline.studio.filter.ConvertValueInterface;
 import fr.proline.studio.filter.DoubleFilter;
 import fr.proline.studio.filter.Filter;
@@ -447,7 +447,7 @@ public class PtmProtenSiteTableModel_V2 extends LazyTableModel implements Global
     }
 
     @Override
-    public ArrayList<ExportSubStringFont> getSubStringFonts(int row, int col) {
+    public ArrayList<ExportFontData> getExportFonts(int row, int col) {
         if (col == COLTYPE_PEPTIDE_NAME) {
 
             PTMSite proteinPTMSite = m_arrayInUse.get(row);
@@ -459,7 +459,7 @@ public class PtmProtenSiteTableModel_V2 extends LazyTableModel implements Global
                 HashMap<Integer, DPeptidePTM> ptmMap = peptide.getTransientData().getDPeptidePtmMap();
                 if (ptmMap != null) {
 
-                    ArrayList<ExportSubStringFont> exportSubStringFonts = new ArrayList<>();
+                    ArrayList<ExportFontData> ExportFontDatas = new ArrayList<>();
 
                     String sequence = peptide.getSequence();
 
@@ -486,24 +486,24 @@ public class PtmProtenSiteTableModel_V2 extends LazyTableModel implements Global
 
                             if (nTerOrCterModification && aminoAcidModification) {
 
-                                ExportSubStringFont newSubStringFont = new ExportSubStringFont(i, i + 1, HSSFColor.VIOLET.index);
-                                exportSubStringFonts.add(newSubStringFont);
+                                ExportFontData newSubStringFont = new ExportFontData(i, i + 1, HSSFColor.VIOLET.index);
+                                ExportFontDatas.add(newSubStringFont);
 
                             } else if (nTerOrCterModification) {
 
-                                ExportSubStringFont newSubStringFont = new ExportSubStringFont(i, i + 1, HSSFColor.GREEN.index);
-                                exportSubStringFonts.add(newSubStringFont);
+                                ExportFontData newSubStringFont = new ExportFontData(i, i + 1, HSSFColor.GREEN.index);
+                                ExportFontDatas.add(newSubStringFont);
 
                             } else if (aminoAcidModification) {
 
-                                ExportSubStringFont newSubStringFont = new ExportSubStringFont(i, i + 1, HSSFColor.ORANGE.index);
-                                exportSubStringFonts.add(newSubStringFont);
+                                ExportFontData newSubStringFont = new ExportFontData(i, i + 1, HSSFColor.ORANGE.index);
+                                ExportFontDatas.add(newSubStringFont);
                             }
 
                         }
 
                     }
-                    return exportSubStringFonts;
+                    return ExportFontDatas;
                 }
 
             }

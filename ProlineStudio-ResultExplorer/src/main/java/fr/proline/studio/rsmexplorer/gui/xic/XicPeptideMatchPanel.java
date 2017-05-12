@@ -8,7 +8,7 @@ import fr.proline.studio.comparedata.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.export.ExportModelInterface;
-import fr.proline.studio.export.ExportSubStringFont;
+import fr.proline.studio.export.ExportFontData;
 import fr.proline.studio.filter.FilterButton;
 import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.gui.HourglassPanel;
@@ -418,8 +418,8 @@ public class XicPeptideMatchPanel extends HourglassPanel implements DataBoxPanel
         }
         
         @Override
-        public ArrayList<ExportSubStringFont> getSubStringFonts(int row, int col) {
-            return ((CompoundTableModel) getModel()).getSubStringFonts(convertRowIndexToModel(row), convertColumnIndexToModel(col));
+        public ArrayList<ExportFontData> getExportFonts(int row, int col) {
+            return ((CompoundTableModel) getModel()).getExportFonts(convertRowIndexToModel(row), convertColumnIndexToModel(col));
         }
         
         //Implement table cell tool tips.

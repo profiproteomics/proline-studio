@@ -1,7 +1,6 @@
 package fr.proline.studio.rsmexplorer.gui.renderer;
 
-import fr.proline.studio.export.ExportSubStringFont;
-import fr.proline.studio.export.ExportTextInterface;
+import fr.proline.studio.export.ExportFontData;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -17,10 +16,10 @@ import fr.proline.studio.table.renderer.GrayableTableCellRenderer;
  *
  * @author JM235353
  */
-public class CompareValueRenderer implements GrayableTableCellRenderer /*, ExportTextInterface*/ {
+public class CompareValueRenderer implements GrayableTableCellRenderer {
 
     private CompareValuePanel m_valuePanel = null;
-    private ArrayList<ExportSubStringFont> m_ExportSubStringFonts;
+    private ArrayList<ExportFontData> m_ExportFontDatas;
 
     private boolean m_grayed = false;
     
@@ -28,7 +27,7 @@ public class CompareValueRenderer implements GrayableTableCellRenderer /*, Expor
     private static Color STRIPPED_COLOR = UIManager.getColor("UIColorHighlighter.stripingBackground"); //JPM.WART
 
     public CompareValueRenderer(){
-        m_ExportSubStringFonts = new ArrayList<ExportSubStringFont>();
+        m_ExportFontDatas = new ArrayList<ExportFontData>();
     }
     
     @Override
@@ -49,16 +48,6 @@ public class CompareValueRenderer implements GrayableTableCellRenderer /*, Expor
         return m_valuePanel;
     }
 
-    /*@Override
-    public String getExportText() {
-        return "";
-    }
-
-    @Override
-    public ArrayList<ExportSubStringFont> getSubStringFonts() {
-        return this.m_ExportSubStringFonts;
-    }*/
-    
     @Override
     public void setGrayed(boolean v) {
         m_grayed = v;

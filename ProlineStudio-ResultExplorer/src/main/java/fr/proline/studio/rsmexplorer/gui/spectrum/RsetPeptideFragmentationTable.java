@@ -11,7 +11,7 @@ import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.comparedata.ExtraDataType;
 import fr.proline.studio.export.ExportModelInterface;
 import fr.proline.studio.export.ExportModelUtilities;
-import fr.proline.studio.export.ExportSubStringFont;
+import fr.proline.studio.export.ExportFontData;
 import fr.proline.studio.export.ExportTextInterface;
 import fr.proline.studio.graphics.PlotInformation;
 
@@ -355,24 +355,24 @@ public class RsetPeptideFragmentationTable extends DecoratedTable {
         }
 
         @Override
-        public ArrayList<ExportSubStringFont> getSubStringFonts(int row, int col) {
+        public ArrayList<ExportFontData> getExportFonts(int row, int col) {
 
             String exportString = getExportRowCell(row, col);
             
             if (m_matrix[row][col] != null) {
 
                 if (m_matrix[row][col].contains("ABC")) {
-                     ArrayList<ExportSubStringFont> exportSubStringFonts = new ArrayList<>();
-                    ExportSubStringFont newSubStringFont = new ExportSubStringFont(0, exportString.length(), HSSFColor.LIGHT_BLUE.index, Font.BOLD);
-                    exportSubStringFonts.add(newSubStringFont);   
-                    return exportSubStringFonts;
+                     ArrayList<ExportFontData> ExportFontDatas = new ArrayList<>();
+                    ExportFontData newSubStringFont = new ExportFontData(0, exportString.length(), HSSFColor.LIGHT_BLUE.index, Font.BOLD);
+                    ExportFontDatas.add(newSubStringFont);   
+                    return ExportFontDatas;
 
                 } else if (m_matrix[row][col].contains("XYZ")) {
-                    ArrayList<ExportSubStringFont> exportSubStringFonts = new ArrayList<>();
+                    ArrayList<ExportFontData> ExportFontDatas = new ArrayList<>();
 
-                    ExportSubStringFont newSubStringFont = new ExportSubStringFont(0, exportString.length(), HSSFColor.RED.index, Font.BOLD);
-                    exportSubStringFonts.add(newSubStringFont);    
-                    return exportSubStringFonts;
+                    ExportFontData newSubStringFont = new ExportFontData(0, exportString.length(), HSSFColor.RED.index, Font.BOLD);
+                    ExportFontDatas.add(newSubStringFont);    
+                    return ExportFontDatas;
                     
                 }
             }
@@ -451,17 +451,14 @@ public class RsetPeptideFragmentationTable extends DecoratedTable {
 
     }
 
-    public static class FragTableCustomRenderer extends DefaultTableCellRenderer /*implements ExportTextInterface*/ {
+    public static class FragTableCustomRenderer extends DefaultTableCellRenderer {
 
         private static final long serialVersionUID = 1L;
 
         private String[][] m_selectMatrix = new String[100][100];
 
-        private String m_basicTextForExport = "";
-
-        private ArrayList<ExportSubStringFont> m_ExportSubStringFonts;
         
-        private StringBuilder stringBuilder;
+        private StringBuilder m_stringBuilder;
 
         void setSelectMatrix(String[][] matx) {
             m_selectMatrix = matx;
@@ -470,55 +467,41 @@ public class RsetPeptideFragmentationTable extends DecoratedTable {
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
 
-            if(stringBuilder==null){
-                stringBuilder = new StringBuilder();
+            if (m_stringBuilder==null) {
+                m_stringBuilder = new StringBuilder();
             }else{
-                stringBuilder.setLength(0);
+                m_stringBuilder.setLength(0);
             }
-            
-            m_ExportSubStringFonts = new ArrayList<ExportSubStringFont>();
 
+            String textToExport;
             if (value != null) {
-                m_basicTextForExport = value.toString();
+                textToExport = value.toString();
             } else {
-                m_basicTextForExport = "";
+                textToExport = "";
             }
 
             if (m_selectMatrix[row][column] != null) {
                 
-                stringBuilder.append("<HTML>");
+                m_stringBuilder.append("<HTML>");
 
-                if (m_selectMatrix[row][column].contains("ABC")) {
-                    ExportSubStringFont newSubStringFont = new ExportSubStringFont(0, m_basicTextForExport.length(), HSSFColor.LIGHT_BLUE.index, Font.BOLD);
-                    m_ExportSubStringFonts.add(newSubStringFont);                           
-                    stringBuilder.append("<span style='color:").append((isSelected) ? GlobalValues.HTML_COLOR_EXTRA_LIGHT_BLUE : GlobalValues.HTML_COLOR_LIGHT_BLUE).append("'>").append("<b>").append(m_basicTextForExport).append("</b>").append("</span>");
+                if (m_selectMatrix[row][column].contains("ABC")) {                        
+                    m_stringBuilder.append("<span style='color:").append((isSelected) ? GlobalValues.HTML_COLOR_EXTRA_LIGHT_BLUE : GlobalValues.HTML_COLOR_LIGHT_BLUE).append("'>").append("<b>").append(textToExport).append("</b>").append("</span>");
 
-                } else if (m_selectMatrix[row][column].contains("XYZ")) {
-                    ExportSubStringFont newSubStringFont = new ExportSubStringFont(0, m_basicTextForExport.length(), HSSFColor.RED.index, Font.BOLD);
-                    m_ExportSubStringFonts.add(newSubStringFont);                   
-                    stringBuilder.append("<span style='color:").append((isSelected) ? GlobalValues.HTML_COLOR_EXTRA_LIGHT_RED : GlobalValues.HTML_COLOR_LIGHT_RED).append("'>").append("<b>").append(m_basicTextForExport).append("</b>").append("</span>");                
+                } else if (m_selectMatrix[row][column].contains("XYZ")) {               
+                    m_stringBuilder.append("<span style='color:").append((isSelected) ? GlobalValues.HTML_COLOR_EXTRA_LIGHT_RED : GlobalValues.HTML_COLOR_LIGHT_RED).append("'>").append("<b>").append(textToExport).append("</b>").append("</span>");                
                 }
                 
-                stringBuilder.append("</HTML>");
+                m_stringBuilder.append("</HTML>");
 
             } else {
-                stringBuilder.append(m_basicTextForExport);
+                m_stringBuilder.append(textToExport);
             }
 
-            Component component = super.getTableCellRendererComponent(table, stringBuilder.toString(), isSelected, hasFocus, row, column);
+            Component component = super.getTableCellRendererComponent(table, m_stringBuilder.toString(), isSelected, hasFocus, row, column);
             
             return component;
 
         }
 
-        /*@Override
-        public String getExportText() {
-            return m_basicTextForExport;
-        }
-
-        @Override
-        public ArrayList<ExportSubStringFont> getSubStringFonts() {
-            return m_ExportSubStringFonts;
-        }*/
     }
 }

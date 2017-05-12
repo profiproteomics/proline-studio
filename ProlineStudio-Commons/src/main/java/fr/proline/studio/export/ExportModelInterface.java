@@ -18,13 +18,13 @@ public interface ExportModelInterface {
     public String getExportRowCell(int row, int col);
     
     /**
-     * specifies colors for the exported text
+     * specifies colors  for the exported text
      *
      * @param row
      * @param col
      * @return
      */
-    public ArrayList<ExportSubStringFont> getSubStringFonts(int row, int col);
+    public ArrayList<ExportFontData> getExportFonts(int row, int col);
         
     public String getExportColumnName(int col);
 }

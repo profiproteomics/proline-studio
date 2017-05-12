@@ -65,7 +65,7 @@ public class Excel2003Exporter implements ExporterInterface {
     }
 
     @Override
-    public void addCell(String t, ArrayList<ExportSubStringFont> fonts) {
+    public void addCell(String t, ArrayList<ExportFontData> fonts) {
 
         Cell cell = m_row.createCell(m_curCell);
 

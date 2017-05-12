@@ -1,7 +1,7 @@
 package fr.proline.studio.filter;
 
 import fr.proline.studio.comparedata.ExtraDataType;
-import fr.proline.studio.export.ExportSubStringFont;
+import fr.proline.studio.export.ExportFontData;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
 import fr.proline.studio.progress.ProgressInterface;
@@ -383,13 +383,13 @@ public class FilterTableModel extends DecoratedTableModel implements FilterTable
     }
     
     @Override
-    public ArrayList<ExportSubStringFont> getSubStringFonts(int row, int col) {
+    public ArrayList<ExportFontData> getExportFonts(int row, int col) {
                  
         int rowFiltered = row;
         if ((!m_isFiltering) && (m_filteredIds != null)) {
             rowFiltered = m_filteredIds.get(row).intValue();
         }
-        return m_tableModelSource.getSubStringFonts(rowFiltered, col);
+        return m_tableModelSource.getExportFonts(rowFiltered, col);
     }
 
     @Override

@@ -2,7 +2,7 @@ package fr.proline.studio.rsmexplorer.gui.model.properties;
 
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.comparedata.ExtraDataType;
-import fr.proline.studio.export.ExportSubStringFont;
+import fr.proline.studio.export.ExportFontData;
 import fr.proline.studio.filter.ConvertValueInterface;
 import fr.proline.studio.filter.Filter;
 import fr.proline.studio.filter.StringFilter;
@@ -287,7 +287,7 @@ public abstract class AbstractPropertiesTableModel extends DecoratedTableModel i
     }
     
     @Override
-    public ArrayList<ExportSubStringFont> getSubStringFonts(int row, int col) {
+    public ArrayList<ExportFontData> getExportFonts(int row, int col) {
         return null;
     }
 

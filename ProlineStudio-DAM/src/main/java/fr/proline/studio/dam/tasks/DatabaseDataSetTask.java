@@ -597,14 +597,20 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
             //JPM.HACK : there is a join done by Hibernate if we read the Aggregation at once,
             // But some Aggregation are null (for identifications) -> identifications are not loaded
             // So we load aggregations afterwards
-            TypedQuery<DDataset> datasetQuery = entityManagerUDS.createQuery("SELECT new fr.proline.core.orm.uds.dto.DDataset(d.id, d.project, d.name,  d.type, d.childrenCount, d.resultSetId, d.resultSummaryId, d.number)  FROM Dataset d WHERE d.parentDataset.id=:parentDatasetId ORDER BY d.number ASC", DDataset.class);
+            TypedQuery<DDataset> datasetQuery;
             if (m_parentDataset.getType() == Dataset.DatasetType.TRASH) {
                 if (m_identificationDataset) {
                     datasetQuery = entityManagerUDS.createQuery("SELECT new fr.proline.core.orm.uds.dto.DDataset(d.id, d.project, d.name,  d.type, d.childrenCount, d.resultSetId, d.resultSummaryId, d.number)  FROM Dataset d WHERE d.parentDataset.id=:parentDatasetId AND d.type<>:quantitationType ORDER BY d.number ASC", DDataset.class);
                 } else {
-                    datasetQuery = entityManagerUDS.createQuery("SELECT new fr.proline.core.orm.uds.dto.DDataset(d.id, d.project, d.name,  d.type, d.childrenCount, d.resultSetId, d.resultSummaryId, d.number)  FROM Dataset d WHERE d.parentDataset.id=:parentDatasetId AND d.type=:quantitationType ORDER BY d.number ASC", DDataset.class);
+                    datasetQuery = entityManagerUDS.createQuery("SELECT new fr.proline.core.orm.uds.dto.DDataset(d.id, d.project, d.name,  d.type, d.childrenCount, d.resultSetId, mqc.quantResultSummaryId, d.number)  FROM Dataset d, MasterQuantitationChannel mqc WHERE d.parentDataset.id=:parentDatasetId AND d.type=:quantitationType AND mqc.dataset.id = d.id ORDER BY d.number ASC", DDataset.class);
                 }
                 datasetQuery.setParameter("quantitationType", Dataset.DatasetType.QUANTITATION);
+            } else {
+                if (m_identificationDataset) {
+                    datasetQuery = entityManagerUDS.createQuery("SELECT new fr.proline.core.orm.uds.dto.DDataset(d.id, d.project, d.name,  d.type, d.childrenCount, d.resultSetId, d.resultSummaryId, d.number)  FROM Dataset d WHERE d.parentDataset.id=:parentDatasetId ORDER BY d.number ASC", DDataset.class);
+                } else {
+                    datasetQuery = entityManagerUDS.createQuery("SELECT new fr.proline.core.orm.uds.dto.DDataset(d.id, d.project, d.name,  d.type, d.childrenCount, d.resultSetId, mqc.quantResultSummaryId, d.number)  FROM Dataset d, MasterQuantitationChannel mqc WHERE d.parentDataset.id=:parentDatasetId AND mqc.dataset.id = d.id ORDER BY d.number ASC", DDataset.class);
+                }
             }
             datasetQuery.setParameter("parentDatasetId", parentDatasetId);
             List<DDataset> dataSetResultList = datasetQuery.getResultList();

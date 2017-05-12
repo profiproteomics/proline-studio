@@ -5,6 +5,7 @@
  */
 package fr.proline.studio.rsmexplorer.gui;
 
+import fr.proline.core.orm.msi.dto.DPeptideInstance;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.studio.comparedata.AddDataAnalyzerButton;
 import fr.proline.studio.comparedata.CompareDataInterface;
@@ -105,18 +106,17 @@ public class PeptidesPTMSitePanel extends JPanel implements DataBoxPanelInterfac
     }
     
     
-    public Long getSelectedPepInstanceId() {
-
+    public DPeptideInstance getSelectedPeptideInstance() {
         CompoundTableModel compoundTableModel = ((CompoundTableModel) m_peptidesPtmSiteTable.getModel());
         // Retrieve ProteinPTMSite selected
         PeptidesOfPtmSiteTableModel tableModel = (PeptidesOfPtmSiteTableModel) compoundTableModel.getBaseModel();
         
         // Retrieve Selected Row
-        int selectedRow = getSelectedTableModelRow();       
-
-        return tableModel.getPepInstanceID(selectedRow);
+        int selectedRow = getSelectedTableModelRow();    
+        
+        return tableModel.getSelectedPeptideInstance(selectedRow);
     }
-
+    
     private int getSelectedTableModelRow(){
         
         // Retrieve Selected Row
@@ -138,12 +138,12 @@ public class PeptidesPTMSitePanel extends JPanel implements DataBoxPanelInterfac
         setData(peptidesPTMSite, null);
     }
     
-    public void setData(PTMSite peptidesPTMSite, Long pepInstID) {
+    public void setData(PTMSite peptidesPTMSite, DPeptideInstance pepInst) {
 
         PeptidesOfPtmSiteTableModel model = ((PeptidesOfPtmSiteTableModel) ((CompoundTableModel) m_peptidesPtmSiteTable.getModel()).getBaseModel());
-        model.setData(peptidesPTMSite, m_displayPeptidesMatches, pepInstID);
+        model.setData(peptidesPTMSite, m_displayPeptidesMatches, pepInst);
         // select the first row
-        if (peptidesPTMSite != null) {
+        if ((peptidesPTMSite != null) && ((!m_displayPeptidesMatches) || (pepInst != null)) ) {
             m_peptidesPtmSiteTable.getSelectionModel().setSelectionInterval(0, 0);
             m_markerContainerPanel.setMaxLineNumber(m_peptidesPtmSiteTable.getModel().getRowCount());
         }

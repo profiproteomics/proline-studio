@@ -5,7 +5,9 @@
  */
 package fr.proline.studio.pattern;
 
+import fr.proline.core.orm.msi.Peptide;
 import fr.proline.core.orm.msi.ResultSummary;
+import fr.proline.core.orm.msi.dto.DPeptideInstance;
 import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.comparedata.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.AccessDatabaseThread;
@@ -43,7 +45,7 @@ public class DataBoxPTMSitePeptides extends AbstractDataBox {
         GroupParameter outParameter = new GroupParameter();
         outParameter.addParameter(PTMSite.class, true);
         outParameter.addParameter(ResultSummary.class, false);
-        outParameter.addParameter(Long.class, false);
+        outParameter.addParameter(DPeptideInstance.class, false);
         registerOutParameter(outParameter);
     }
     
@@ -133,10 +135,10 @@ public class DataBoxPTMSitePeptides extends AbstractDataBox {
                     return ptmSite;
             }
             
-            if (parameterType.equals(Long.class)) {
-                Long selectedPepInstanceId = ((PeptidesPTMSitePanel) getDataBoxPanelInterface()).getSelectedPepInstanceId();
-                if (selectedPepInstanceId != null)
-                    return selectedPepInstanceId;
+            if (parameterType.equals(DPeptideInstance.class)) {
+                DPeptideInstance selectedParentPepInstance = ((PeptidesPTMSitePanel) getDataBoxPanelInterface()).getSelectedPeptideInstance();
+                if (selectedParentPepInstance != null)
+                    return selectedParentPepInstance;
             }
             
              if (parameterType.equals(CompareDataInterface.class)) {

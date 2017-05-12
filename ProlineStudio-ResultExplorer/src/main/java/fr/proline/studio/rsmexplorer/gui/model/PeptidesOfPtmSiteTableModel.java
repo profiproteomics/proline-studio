@@ -92,10 +92,10 @@ public class PeptidesOfPtmSiteTableModel extends DecoratedTableModel implements 
      * Set data for this table Model
      * @param selectedPTMSite : PTM Site to display peptides [matches] for
      * @param showPeptideMatches : specify if all peptide matches should be displayed or only best ones
-     * @param pepInstanceId : Specify the peptide instance ID to display peptide matches for. This parameter is only
+     * @param parentPepInstance : Specify the peptide instance ID to display peptide matches for. This parameter is only
      * used if showPeptideMatches = true
      */
-    public void setData(PTMSite selectedPTMSite,boolean showPeptideMatches, DPeptideInstance pepInstance) {
+    public void setData(PTMSite selectedPTMSite,boolean showPeptideMatches, DPeptideInstance parentPepInstance) {
         m_currentPtmSite = selectedPTMSite;
         m_showPeptideMatches = showPeptideMatches;
         m_ptmSitePeptides = new ArrayList<>();
@@ -107,7 +107,6 @@ public class PeptidesOfPtmSiteTableModel extends DecoratedTableModel implements 
         //Get all Peptide Instances Best PSM
         if(!m_currentPtmSite.isAllPeptideMatchesLoaded()){
             m_logger.warn("Peptide Matches not loaded for PTM Site "+m_currentPtmSite.toString());
-            m_ptmSitePeptides.clear();
         } else {
 
             if (!m_showPeptideMatches) {
@@ -116,12 +115,11 @@ public class PeptidesOfPtmSiteTableModel extends DecoratedTableModel implements 
                     m_ptmSitePeptides.add(new Row(parentPeptideInstance, bestPM));
                 });
             } else {
-                if(pepInstance == null ){
+                if(parentPepInstance == null ){
                     // TODO : request all PeptideMatches ??
                     m_logger.warn("Must shown all peptide matches but no peptide instance specified for PTM Site "+m_currentPtmSite.toString());
-                    m_ptmSitePeptides.clear();
                 } else {
-                    m_currentPtmSite.getPeptideMatchesForPeptide(pepInstance.getPeptideId()).forEach(entry  -> {
+                    m_currentPtmSite.getPeptideMatchesForPeptide(parentPepInstance.getPeptideId()).forEach(entry  -> {
                         entry.getValue().forEach( pepMatch -> {
                             m_ptmSitePeptides.add(new Row(entry.getKey(), pepMatch));
                         });

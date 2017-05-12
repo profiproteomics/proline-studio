@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
 public class DataBoxPTMSitePepMatches extends AbstractDataBox {
 
     protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
-    private DPeptideInstance m_peptideInstance;
+    private DPeptideInstance m_parentPeptideInstance;
             
     public DataBoxPTMSitePepMatches() { 
         super(DataboxType.DataBoxPTMSitePepMatches, DataboxStyle.STYLE_RSM);
@@ -45,7 +45,6 @@ public class DataBoxPTMSitePepMatches extends AbstractDataBox {
         
         GroupParameter outParameter = new GroupParameter();
         outParameter.addParameter(PTMSite.class, true);
-        outParameter.addParameter(ResultSummary.class, false);
         outParameter.addParameter(DPeptideMatch.class, false);
         outParameter.addParameter(MsQueryInfoRset.class, false);
         registerOutParameter(outParameter);
@@ -67,7 +66,7 @@ public class DataBoxPTMSitePepMatches extends AbstractDataBox {
         final ResultSummary rsm = (ResultSummary) m_previousDataBox.getData(false, ResultSummary.class);         
         final DPeptideInstance pepInstance = (DPeptideInstance) m_previousDataBox.getData(false, DPeptideInstance.class); 
        
-        m_peptideInstance = pepInstance;
+        m_parentPeptideInstance = pepInstance;
         
         if (ptmSite == null) {
             ((PeptidesPTMSitePanel)getDataBoxPanelInterface()).setData(null);           
@@ -78,7 +77,7 @@ public class DataBoxPTMSitePepMatches extends AbstractDataBox {
         m_logger.info("DATA Changed : Update PepMatch WINDOWS. " + ptmSite.toString()+" data loaded " + ptmSite.isAllPeptideMatchesLoaded());
         if(ptmSite.isAllPeptideMatchesLoaded()){
             m_previousTaskId = null;
-            ((PeptidesPTMSitePanel) getDataBoxPanelInterface()).setData(ptmSite, m_peptideInstance);           
+            ((PeptidesPTMSitePanel) getDataBoxPanelInterface()).setData(ptmSite, m_parentPeptideInstance);           
             propagateDataChanged(CompareDataInterface.class);
             return;
         }
@@ -96,7 +95,7 @@ public class DataBoxPTMSitePepMatches extends AbstractDataBox {
             public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
                 m_logger.info(" Back from PepMatch task # "+taskId);
                 if (success) {
-                    ((PeptidesPTMSitePanel) getDataBoxPanelInterface()).setData(ptmSite,m_peptideInstance);
+                    ((PeptidesPTMSitePanel) getDataBoxPanelInterface()).setData(ptmSite,m_parentPeptideInstance);
                 } else {
                     ((PeptidesPTMSitePanel) getDataBoxPanelInterface()).setData(null);
                 }
@@ -128,11 +127,6 @@ public class DataBoxPTMSitePepMatches extends AbstractDataBox {
     @Override
     public Object getData(boolean getArray, Class parameterType) {
         if (parameterType != null) {
-
-            if (parameterType.equals(ResultSummary.class)) {
-                if (m_peptideInstance != null)
-                    return m_peptideInstance.getResultSummary();
-            }
 
             if (parameterType.equals(PTMSite.class)) {
                 PTMSite ptmSite = ((PeptidesPTMSitePanel) getDataBoxPanelInterface()).getSelectedPTMSite();

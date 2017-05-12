@@ -121,9 +121,6 @@ public class DatabasePTMProteinSiteTask_V2 extends AbstractDatabaseTask {
             
    
             //---- Load Peptide Match + Spectrum / MSQuery information for all peptideInstance of PTMSite
-            
-            
-            
             Query peptidesQuery = entityManagerMSI.createQuery("SELECT pm, pi\n"
                         + "              FROM fr.proline.core.orm.msi.PeptideInstancePeptideMatchMap pipm, fr.proline.core.orm.msi.PeptideMatch pm, fr.proline.core.orm.msi.PeptideInstance pi \n"
                         + "              WHERE pipm.id.peptideInstanceId IN ( :peptideInstanceList ) AND pipm.id.peptideInstanceId=pi.id AND pipm.id.peptideMatchId=pm.id ");
@@ -166,8 +163,6 @@ public class DatabasePTMProteinSiteTask_V2 extends AbstractDatabaseTask {
 
                 DPeptideInstance dpi = new DPeptideInstance(pi.getId(), pi.getPeptide().getId(), pi.getValidatedProteinSetCount(), pi.getElutionTime());
                 dpi.setResultSummary(pi.getResultSummary());
-                // needed only to force ResultSet loading
-                pi.getResultSummary().getResultSet();
                 dpi.setPeptide(p);
                 
                 if (!peptideMatchByPepInstance.containsKey(dpi)) {

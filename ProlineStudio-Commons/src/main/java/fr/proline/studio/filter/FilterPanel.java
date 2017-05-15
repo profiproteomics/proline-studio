@@ -23,7 +23,7 @@ public class FilterPanel extends JPanel {
 
     private DefaultDialog m_dialog;
 
-    private int m_maxIndex = 0;
+    private int m_nbFiltersSelected = 0;
 
     public FilterPanel(DefaultDialog d) {
 
@@ -71,7 +71,7 @@ public class FilterPanel extends JPanel {
                 f.setDefined(true);
                 m_filterComboBox.removeItem(f);
 
-                f.setIndex(++m_maxIndex);
+                f.setIndex(m_nbFiltersSelected);
 
                 initPrefilterSelectedPanel();
 
@@ -98,6 +98,7 @@ public class FilterPanel extends JPanel {
 
         int nbParameters = m_filters.length;
 
+        m_nbFiltersSelected = 0;
         for (int i = 0; i < nbParameters; i++) {
 
             final Filter currentFilter = m_filters[i];
@@ -106,8 +107,10 @@ public class FilterPanel extends JPanel {
 
             if (currentFilter.isDefined()) {
 
+                m_nbFiltersSelected++;
+                
                 c.gridx = 0;
-                if (currentFilter.getIndex() != 1) {
+                if (currentFilter.getIndex() != 0) {
                     m_filterSelectedPanel.add(new JLabel("AND"), c);
                 } else {
                     m_filterSelectedPanel.add(new JLabel("   "), c);
@@ -134,8 +137,6 @@ public class FilterPanel extends JPanel {
                                 m_filters[j].setIndex(m_filters[j].getIndex() - 1);
                             }
                         }
-                        
-                        m_maxIndex--;
 
                         currentFilter.setIndex(-1);
 

@@ -179,7 +179,7 @@ public class EmptyTrashAction extends AbstractRSMAction {
                             n.removeAllChildren();
                             treeModel.nodeStructureChanged(n);
                             
-                            
+                            /*
                             // check if user also wants to delete from database
                             InfoDialog exitDialog = new InfoDialog(WindowManager.getDefault().getMainWindow(), InfoDialog.InfoType.WARNING, "Do you agree with this action?", "We suggest you also clean the database");
                             exitDialog.setButtonName(OptionDialog.BUTTON_OK, "Yes");
@@ -248,7 +248,7 @@ public class EmptyTrashAction extends AbstractRSMAction {
                             };
                             clearProjectDialog.setTask(task);
                             clearProjectDialog.setVisible(true);
-
+                            */
                         } else {
                             treeModel.nodeChanged(n);
                         }

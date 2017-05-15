@@ -184,7 +184,7 @@ public class ProjectExplorerPanel extends JPanel {
 
         c.gridx++;
         // uncomment this line to give access to clear rs/rsm project
-        buttonsPanel.add(m_clearProjectButton, c);
+        //buttonsPanel.add(m_clearProjectButton, c);
 
         // Interactions
         m_addProjectButton.addActionListener(new ActionListener() {

@@ -19,7 +19,6 @@ import fr.proline.studio.table.renderer.GrayableTableCellRenderer;
 public class CompareValueRenderer implements GrayableTableCellRenderer {
 
     private CompareValuePanel m_valuePanel = null;
-    private ArrayList<ExportFontData> m_ExportFontDatas;
 
     private boolean m_grayed = false;
     
@@ -27,7 +26,6 @@ public class CompareValueRenderer implements GrayableTableCellRenderer {
     private static Color STRIPPED_COLOR = UIManager.getColor("UIColorHighlighter.stripingBackground"); //JPM.WART
 
     public CompareValueRenderer(){
-        m_ExportFontDatas = new ArrayList<ExportFontData>();
     }
     
     @Override

@@ -467,9 +467,10 @@ public class PeptideInstanceTableModel extends LazyTableModel implements GlobalT
         Object data = getValueAt(rowIndex, columnIndex);
         if (data instanceof LazyData) {
             data = ((LazyData) data).getData();
-            if (data instanceof DPeptideMatch) {
-                data = ((DPeptideMatch) data).getPeptide().getSequence();
-            }
+
+        }
+        if (data instanceof DPeptideMatch) {
+            data = ((DPeptideMatch) data).getPeptide().getSequence();
         }
         
         return data;

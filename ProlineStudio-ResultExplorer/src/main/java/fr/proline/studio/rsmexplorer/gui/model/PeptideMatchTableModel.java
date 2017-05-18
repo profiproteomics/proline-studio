@@ -813,13 +813,11 @@ public class PeptideMatchTableModel extends LazyTableModel implements GlobalTabl
         Object data = getValueAt(rowIndex, columnIndex);
         if (data instanceof LazyData) {
             data = ((LazyData) data).getData();
-            
-            if (data instanceof DPeptideMatch) {
-                data = ((DPeptideMatch)data).getPeptide().getSequence();
-            } else if (data instanceof DMsQuery) {
-                data = Integer.valueOf(((DMsQuery)data).getInitialId());
-            }
-
+        }
+        if (data instanceof DPeptideMatch) {
+            data = ((DPeptideMatch) data).getPeptide().getSequence();
+        } else if (data instanceof DMsQuery) {
+            data = Integer.valueOf(((DMsQuery) data).getInitialId());
         }
         return data;
     }

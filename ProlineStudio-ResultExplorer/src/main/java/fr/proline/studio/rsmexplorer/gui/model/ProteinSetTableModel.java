@@ -491,9 +491,10 @@ public class ProteinSetTableModel extends LazyTableModel implements GlobalTableM
         Object data = getValueAt(rowIndex, columnIndex);
         if (data instanceof LazyData) {
             data = ((LazyData) data).getData();
-            if (data instanceof ProteinCount) {
-                return ((ProteinCount) data).getNbProteins();
-            }
+
+        }
+        if (data instanceof ProteinCount) {
+            return ((ProteinCount) data).getNbProteins();
         }
         return data;
     }

@@ -109,30 +109,36 @@ public class RServerManager {
         if (isConnected()) {
             return true;
         }
+
         
-         
-        // Look for R.exe in ProlineStudio Path or inf path specified in properties file
-        File f = new File(".");
-        String pathToExe = f.getCanonicalPath()+File.separatorChar+"R"+File.separatorChar+"bin"+File.separatorChar+"R.exe";
-        f = new File(pathToExe);
-        if (!f.exists()) {
-            String defaultExePath = pathToExe;
-            // R.exe not found, try to read it from Preferences
-            Preferences preferences = NbPreferences.root();
-            pathToExe = preferences.get("RServerExePath", null);
-            if (pathToExe == null) {
-                LoggerFactory.getLogger("ProlineStudio.R").error("R.exe not found: "+defaultExePath);
-                LoggerFactory.getLogger("ProlineStudio.R").error("RServerExePath in Preferences file not found : "+pathToExe);
+        File f = null;
+        
+        // try to read R.exe path potentially defined in Properties file (saved in key "RServerExePath" )
+        Preferences preferences = NbPreferences.root();
+        String pathToExe = preferences.get("RServerExePath", null);
+        if (pathToExe != null) {
+            f = new File(pathToExe);
+            if (!f.exists()) {
+                LoggerFactory.getLogger("ProlineStudio.R").error("R.exe is defined in Preferences file but has not been found: " + pathToExe);
+                f = null;
+                // we will try to read default R.exe
+            }
+        } else {
+            // just an information in log file
+            LoggerFactory.getLogger("ProlineStudio.R").info("R.exe not defined in Preferences file. Key is : RServerExePath");
+        }
+
+        // if R.exe path is not defined in Preferences file, we read it in default application path
+        if (f == null) {
+            f = new File(".");
+            pathToExe = f.getCanonicalPath() + File.separatorChar + "R" + File.separatorChar + "bin" + File.separatorChar + "R.exe";
+            f = new File(pathToExe);
+            if (!f.exists()) {
+                LoggerFactory.getLogger("ProlineStudio.R").error("R.exe not found: " + pathToExe);
                 return false;
-            } else {
-                f = new File(pathToExe);
-                if (!f.exists()) {
-                    LoggerFactory.getLogger("ProlineStudio.R").error("R.exe not found: "+defaultExePath);
-                    LoggerFactory.getLogger("ProlineStudio.R").error("R.exe not found: "+pathToExe);
-                    return false;
-                }
             }
         }
+
 
 
         // Start R Process

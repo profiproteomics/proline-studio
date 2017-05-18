@@ -263,6 +263,7 @@ public class ExportDialog extends DefaultDialog {
                     } else {
                         m_decoratedPanel.setVisible(true);
                     }
+                    repack();
                 }
             });
         }
@@ -276,6 +277,10 @@ public class ExportDialog extends DefaultDialog {
         c.gridwidth = 2;
         exportPanel.add(m_exporTypeCombobox, c);
 
+        c.gridy++;
+        c.weighty = 1;
+        exportPanel.add(Box.createVerticalGlue());
+        
         return exportPanel;
     }
 

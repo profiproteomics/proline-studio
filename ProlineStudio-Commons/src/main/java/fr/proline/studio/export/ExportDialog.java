@@ -147,7 +147,7 @@ public class ExportDialog extends DefaultDialog {
 
     private JPanel createDecoratedRadioPanel() {
         m_decoratedPanel = new JPanel();
-        m_decoratedPanel.setBorder(BorderFactory.createTitledBorder("Export Decorated"));
+        m_decoratedPanel.setBorder(BorderFactory.createTitledBorder(" Settings "));
         m_decoratedPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
 
         m_parameterList = new ParameterList(PARAMETER_LIST_NAME);
@@ -240,13 +240,7 @@ public class ExportDialog extends DefaultDialog {
             exportPanel.add(m_exportAllPSMsChB, c);
         }
 
-        if (m_exportType == ExporterFactory.EXPORT_TABLE) {
-            //Allow specific parameter in this case
-            c.gridy++;
-            c.gridx = 0;
-            c.gridwidth = 2;
-            exportPanel.add(this.createDecoratedRadioPanel(), c);
-        }
+
 
         m_exporTypeCombobox = new JComboBox(ExporterFactory.getList(m_exportType).toArray());
         m_exporTypeCombobox.setSelectedIndex(0);
@@ -277,6 +271,15 @@ public class ExportDialog extends DefaultDialog {
         c.gridwidth = 2;
         exportPanel.add(m_exporTypeCombobox, c);
 
+        
+        if (m_exportType == ExporterFactory.EXPORT_TABLE) {
+            // Allow specific parameter in this case
+            c.gridx = 0;
+            c.gridy++;
+            c.gridwidth = 3;
+            exportPanel.add(createDecoratedRadioPanel(), c);
+        }
+        
         c.gridy++;
         c.weighty = 1;
         exportPanel.add(Box.createVerticalGlue());
@@ -319,6 +322,15 @@ public class ExportDialog extends DefaultDialog {
             return false;
         }
 
+
+        final ExporterFactory.ExporterInfo exporterInfo = getExporterInfo();
+        String extension = exporterInfo.getFileExtension();
+        if (!fileName.endsWith("."+extension)) {
+            fileName = fileName + "." + extension;
+            m_fileTextField.setText(fileName);
+        }
+
+        
         File f = new File(fileName);
 
         if (f.exists()) {
@@ -332,6 +344,8 @@ public class ExportDialog extends DefaultDialog {
             }
         }
 
+
+        
         FileWriter fw = null;
         try {
             fw = new FileWriter(f);
@@ -353,10 +367,8 @@ public class ExportDialog extends DefaultDialog {
 
         if (m_exportType == ExporterFactory.EXPORT_TABLE) {
 
-            final ExporterFactory.ExporterInfo exporterInfo = getExporterInfo();
-
             m_exportManager = new ExportManager(m_table);
-            ProgressTask exportTask = m_exportManager.getTask(exporterInfo.getExporter(), m_exportName, fileName, this.exportDecorated());
+            ProgressTask exportTask = m_exportManager.getTask(exporterInfo.getExporter(), m_exportName, fileName, exportDecorated());
 
             startTask(exportTask);
 
@@ -370,7 +382,6 @@ public class ExportDialog extends DefaultDialog {
             preferences.put("DefaultExcelExportPath", f.getAbsoluteFile().getParentFile().getAbsolutePath());
 
         } else if (m_exportType == ExporterFactory.EXPORT_IMAGE) {
-            ExporterFactory.ExporterInfo exporterInfo = (ExporterFactory.ExporterInfo) m_exporTypeCombobox.getSelectedItem();
 
             ExporterFactory.ExporterType exporterType = exporterInfo.geType();
 

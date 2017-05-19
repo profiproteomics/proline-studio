@@ -35,7 +35,7 @@
     </properties>
 
     <scm>
-        <connection>scm:svn:https://bioproj.extra.cea.fr/svn/proline/ProlineStudio/trunk</connection>
+        <connection>scm:svn:https://bioproj.extra.cea.fr/svn/proline/ProlineStudio/branches/1.1.0-RCandidates</connection>
     </scm>
  
 

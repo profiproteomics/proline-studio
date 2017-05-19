@@ -23,4 +23,5 @@ public interface ExporterInterface {
     
     public boolean getDecorated();
 
+    public String getFileExtension();
 }

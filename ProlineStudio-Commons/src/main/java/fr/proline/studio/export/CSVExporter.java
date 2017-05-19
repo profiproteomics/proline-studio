@@ -24,8 +24,8 @@ public class CSVExporter implements ExporterInterface {
     @Override
     public void start(String filePath) throws java.io.IOException {
         
-        if (!filePath.endsWith(".csv") && !filePath.endsWith(".txt")) {
-            filePath = filePath+".csv";
+        if (!filePath.endsWith(getFileExtension()) && !filePath.endsWith(".txt")) {
+            filePath = filePath+getFileExtension();
         }
         
         m_fw = new FileWriter(filePath);
@@ -73,6 +73,9 @@ public class CSVExporter implements ExporterInterface {
         return m_decorated;
     }
 
-
+    @Override
+    public String getFileExtension() {
+        return ".csv";
+    }
     
 }

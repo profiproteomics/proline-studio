@@ -30,8 +30,8 @@ public class ExcelXMLExporter implements ExporterInterface {
     @Override
     public void start(String filePath) {
 
-        if (!filePath.endsWith(".xlsx")) {
-            filePath = filePath + ".xlsx";
+        if (!filePath.endsWith(getFileExtension())) {
+            filePath = filePath + getFileExtension();
         }
 
         m_wb = new XSSFWorkbook();
@@ -109,12 +109,17 @@ public class ExcelXMLExporter implements ExporterInterface {
 
     @Override
     public void setDecorated(boolean decorated) {
-        this.m_decorated = decorated;
+        m_decorated = decorated;
     }
 
     @Override
     public boolean getDecorated() {
-        return this.m_decorated;
+        return m_decorated;
+    }
+
+    @Override
+    public String getFileExtension() {
+        return ".xlsx";
     }
 
 }

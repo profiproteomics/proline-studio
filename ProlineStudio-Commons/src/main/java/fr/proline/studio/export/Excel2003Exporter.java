@@ -33,8 +33,8 @@ public class Excel2003Exporter implements ExporterInterface {
     @Override
     public void start(String filePath) {
 
-        if (!filePath.endsWith(".xls")) {
-            filePath = filePath + ".xls";
+        if (!filePath.endsWith(getFileExtension())) {
+            filePath = filePath + getFileExtension();
         }
 
         m_wb = new HSSFWorkbook();
@@ -125,6 +125,11 @@ public class Excel2003Exporter implements ExporterInterface {
     @Override
     public boolean getDecorated() {
         return m_decorated;
+    }
+
+    @Override
+    public String getFileExtension() {
+        return ".xls";
     }
 
 }

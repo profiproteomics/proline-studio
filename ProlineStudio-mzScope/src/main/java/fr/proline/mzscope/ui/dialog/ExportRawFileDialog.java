@@ -30,7 +30,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FileWriter;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -52,15 +51,17 @@ import javax.swing.filechooser.FileNameExtensionFilter;
  * @author MB243701
  */
 public class ExportRawFileDialog extends DefaultDialog {
+    
+    private static final String ISOLATION_WINDOW_PRECURSOR = "Proline refined precursor mz";
 
     private static ExportRawFileDialog singletonExportDialog = null;
 
     private ExportType selectedExportType;
 
-    private JFileChooser fchooser;
+    private final JFileChooser fchooser;
 
     private JTextField fileTextField;
-    private List<FileNameExtensionFilter> filterList = new ArrayList<>();
+    private final List<FileNameExtensionFilter> filterList = new ArrayList<>();
     private JComboBox exportTypeCombobox;
     private JPanel panelExportParams;
     private JPanel panelMgfParam;
@@ -71,11 +72,11 @@ public class ExportRawFileDialog extends DefaultDialog {
     private JTextField intensityCutoffField;
     private JCheckBox cbExportProlineTitle;
 
-    private String[] precursorList;
+    private final String[] precursorList;
 
     private JComboBox scanHeaderCombobox;
-    private String[] scanHeaderList;
-    private Map<Integer, ScanHeaderType> mapScanHeader;
+    private final String[] scanHeaderList;
+    private final Map<Integer, ScanHeaderType> mapScanHeader;
 
     private DefaultDialog.ProgressTask m_task;
 
@@ -128,7 +129,6 @@ public class ExportRawFileDialog extends DefaultDialog {
         setExportParamsPanel();
 
     }
-    private static final String ISOLATION_WINDOW_PRECURSOR = "Proline refined precursor mz";
 
     private JPanel createExportPanel() {
         JPanel exportPanel = new JPanel();

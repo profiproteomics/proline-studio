@@ -5,6 +5,7 @@
  */
 package fr.proline.studio.rsmexplorer.gui;
 
+import fr.proline.studio.wizard.ExportMgfDialog;
 import fr.proline.mzscope.utils.IPopupMenuDelegate;
 import fr.proline.studio.mzscope.MzdbInfo;
 import fr.proline.studio.pattern.MzScopeWindowBoxManager;
@@ -24,7 +25,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.HashSet;
 import javax.swing.BorderFactory;
-import javax.swing.Icon;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JMenuItem;
@@ -32,7 +32,6 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTree;
-import javax.swing.UIManager;
 import javax.swing.event.TreeExpansionEvent;
 import javax.swing.event.TreeExpansionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -49,7 +48,7 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
     private LocalFileSystemModel m_fileSystemDataModel;
     private JTree m_tree;
     private JPopupMenu m_popupMenu;
-    private JMenuItem m_detectPeakelsItem, m_viewRawFileItem, m_convertRawFileItem, m_uploadMzdbFileItem;
+    private JMenuItem m_detectPeakelsItem, m_viewRawFileItem, m_convertRawFileItem, m_uploadMzdbFileItem, m_exportMgfItem;
     private ActionListener viewRawFileAction;
     private ArrayList<File> m_selectedFiles;
     private final LocalFileSystemTransferHandler m_transferHandler;
@@ -109,29 +108,28 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
             @Override
             public Component getTreeCellRendererComponent(JTree tree, Object value, boolean selected, boolean expanded, boolean isLeaf, int row, boolean focused) {
                 Component c = super.getTreeCellRendererComponent(tree, value, selected, expanded, isLeaf, row, focused);
-                
-                if(((DefaultMutableTreeNode)value).isRoot()){
+
+                if (((DefaultMutableTreeNode) value).isRoot()) {
                     setIcon(IconManager.getIcon(IconManager.IconType.DRIVE));
-                }else{
-                    File f = (File) ((DefaultMutableTreeNode)value).getUserObject();
-                    if(f.isDirectory()){
-                        if(expanded){
+                } else {
+                    File f = (File) ((DefaultMutableTreeNode) value).getUserObject();
+                    if (f.isDirectory()) {
+                        if (expanded) {
                             setIcon(IconManager.getIcon(IconManager.IconType.FOLDER_EXPANDED));
-                        }else{
+                        } else {
                             setIcon(IconManager.getIcon(IconManager.IconType.FOLDER));
                         }
-                    }else{
-                        if(f.getAbsolutePath().toLowerCase().endsWith(".raw")){
+                    } else {
+                        if (f.getAbsolutePath().toLowerCase().endsWith(".raw")) {
                             setIcon(IconManager.getIcon(IconManager.IconType.SPECTRUM));
-                        }else if(f.getAbsolutePath().toLowerCase().endsWith(".mzdb")){
+                        } else if (f.getAbsolutePath().toLowerCase().endsWith(".mzdb")) {
                             setIcon(IconManager.getIcon(IconManager.IconType.SPECTRUM_EMISSION));
-                        }else{
+                        } else {
                             setIcon(IconManager.getIcon(IconManager.IconType.FILE));
                         }
                     }
                 }
 
-                
                 return c;
             }
         });
@@ -224,14 +222,12 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
                 displayRaw(m_selectedFiles);
             }
         };
-        m_viewRawFileItem = new JMenuItem();
-        m_viewRawFileItem.setText("View");
+        m_viewRawFileItem = new JMenuItem("View");
         m_viewRawFileItem.addActionListener(viewRawFileAction);
         popupMenu.add(m_viewRawFileItem);
 
         // detect peakels
-        m_detectPeakelsItem = new JMenuItem();
-        m_detectPeakelsItem.setText("Detect Peakels");
+        m_detectPeakelsItem = new JMenuItem("Detect Peakels");
         m_detectPeakelsItem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent evt) {
@@ -241,8 +237,7 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
         popupMenu.add(m_detectPeakelsItem);
 
         // convert raw file
-        m_convertRawFileItem = new JMenuItem();
-        m_convertRawFileItem.setText("Convert to mzDB");
+        m_convertRawFileItem = new JMenuItem("Convert to mzDB");
         m_convertRawFileItem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent ae) {
@@ -254,8 +249,7 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
         popupMenu.add(m_convertRawFileItem);
 
         // upload mzdb file
-        m_uploadMzdbFileItem = new JMenuItem();
-        m_uploadMzdbFileItem.setText("Upload");
+        m_uploadMzdbFileItem = new JMenuItem("Upload to Server");
         m_uploadMzdbFileItem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent ae) {
@@ -265,6 +259,21 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
             }
         });
         popupMenu.add(m_uploadMzdbFileItem);
+
+        m_exportMgfItem = new JMenuItem("Export .mgf");
+        m_exportMgfItem.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+                ExportMgfDialog dialog = ExportMgfDialog.getDialog(null, "Export .mgf file(s)");
+                dialog.setLocationRelativeTo(null);
+                dialog.setFiles(m_selectedFiles);
+                dialog.setVisible(true);
+
+            }
+        ;
+        });
+        popupMenu.add(m_exportMgfItem);
 
     }
 
@@ -292,6 +301,7 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
         m_detectPeakelsItem.setEnabled(b);
         m_convertRawFileItem.setEnabled(b);
         m_uploadMzdbFileItem.setEnabled(b);
+        m_exportMgfItem.setEnabled(b);
     }
 
     @Override

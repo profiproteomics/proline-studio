@@ -95,7 +95,7 @@ public class UploadMzdbDialog extends DefaultDialog implements FileDialogInterfa
         setButtonName(BUTTON_OK, "OK");
         setStatusVisible(true);
 
-        setInternalComponent(this.createInternalComponent());
+        setInternalComponent(createInternalComponent());
 
     }
 

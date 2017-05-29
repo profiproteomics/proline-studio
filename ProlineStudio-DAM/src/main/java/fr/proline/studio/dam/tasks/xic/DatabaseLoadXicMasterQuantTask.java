@@ -42,7 +42,6 @@ import fr.proline.studio.dam.tasks.DatabaseProteinsFromProteinSetTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -98,7 +97,6 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
     private DDataset m_dataset;
     private List<DMasterQuantProteinSet> m_masterQuantProteinSetList;
     private List<DMasterQuantPeptide> m_masterQuantPeptideList;
-    private DProteinSet m_dProteinSet;
     private DMasterQuantProteinSet m_dMasterQuantProteinSet;
     private DMasterQuantPeptide m_masterQuantPeptide;
     private List<DMasterQuantPeptideIon> m_masterQuantPeptideIonList;
@@ -120,7 +118,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
     private static final int LOAD_PEPTIDE_ION_FOR_XIC = 4;
     private static final int LOAD_PEPTIDE_ION_FOR_PEPTIDE = 5;
     private static final int LOAD_PSM_FOR_PEPTIDE = 6;
-
+   
     public DatabaseLoadXicMasterQuantTask(AbstractDatabaseCallback callback) {
         super(callback);
 
@@ -151,21 +149,37 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
         action = LOAD_PEPTIDE_FOR_XIC;
     }
 
-    public void initLoadPeptides(long projectId, DDataset dataset, DProteinSet proteinSet, DMasterQuantProteinSet masterQuantProteinSet, List<DMasterQuantPeptide> masterQuantPeptideList, boolean xic) {
+    public void initLoadPeptides(long projectId, DDataset dataset, DMasterQuantProteinSet masterQuantProteinSet, List<DMasterQuantPeptide> masterQuantPeptideList, boolean xic) {
         String proteinSetName = "";
-        if (proteinSet != null) {
-            proteinSetName = DatabaseProteinsFromProteinSetTask.getProteinSetName(proteinSet);
+        if (masterQuantProteinSet != null) {
+            proteinSetName = getMasterQuantProteinSetName(masterQuantProteinSet);
         }
         init(SUB_TASK_NB, new TaskInfo("Load Peptides of proteinSet " + proteinSetName, false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_MEDIUM));
         m_projectId = projectId;
         m_dataset = dataset;
         m_masterQuantPeptideList = masterQuantPeptideList;
-        m_dProteinSet = proteinSet;
         m_dMasterQuantProteinSet = masterQuantProteinSet;
         m_xic = xic;
         action = LOAD_PEPTIDE_FOR_PROTEIN_SET;
     }
 
+//      public void initLoadPeptidesWithIds(long projectId, DDataset dataset, List<Long> listPeptideInstanceIds, DMasterQuantProteinSet masterQuantProteinSet, List<DMasterQuantPeptide> masterQuantPeptideList) {
+//          //EntityManager entityManagerMSI, List<Long> listPeptideInstanceIds, boolean xic
+//        String proteinSetName = "";
+//        if (masterQuantProteinSet != null) {
+//            proteinSetName = getMasterQuantProteinSetName(masterQuantProteinSet);
+//        }
+//        
+//        init(SUB_TASK_NB, new TaskInfo("Load Peptides of protein " + proteinSetName, false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_MEDIUM));
+//        m_projectId = projectId;
+//        m_dataset = dataset;
+//        m_masterQuantPeptideList = masterQuantPeptideList;
+//        m_peptideInstanceIds = listPeptideInstanceIds;
+//        m_dMasterQuantProteinSet = masterQuantProteinSet;
+//        m_xic = true;
+//        action = LOAD_PEPTIDE_WITH_ID;
+//    }
+      
     public void initLoadPeptideIons(long projectId, DDataset dataset, DMasterQuantPeptide masterQuantPeptide, List<DMasterQuantPeptideIon> masterQuantPeptideIonList) {
         String peptideName = "";
         if (masterQuantPeptide != null && masterQuantPeptide.getPeptideInstance() != null && masterQuantPeptide.getPeptideInstance().getBestPeptideMatch() != null && masterQuantPeptide.getPeptideInstance().getBestPeptideMatch().getPeptide() != null) {
@@ -295,7 +309,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                 return fetchDataSubTask();
             }
 
-        }
+        } 
         return true; // should not happen
     }
 
@@ -355,7 +369,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
             case LOAD_PEPTIDE_ION_FOR_PEPTIDE:
                 return (m_masterQuantPeptideIonList == null || m_masterQuantPeptideIonList.isEmpty());
             case LOAD_PSM_FOR_PEPTIDE:
-                return (m_peptideMatchList == null || m_peptideMatchList.isEmpty());
+                return (m_peptideMatchList == null || m_peptideMatchList.isEmpty());            
         }
         return false; // should not happen 
     }
@@ -884,6 +898,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                     //resultSummary
                     if (resultSummaryId != null) {
                         // load peptideInstance
+                        Long protSetId = m_dMasterQuantProteinSet.getProteinSetId();
                         String queryPep = "SELECT pi.id "
                                 + "FROM fr.proline.core.orm.msi.PeptideInstance pi, fr.proline.core.orm.msi.PeptideSetPeptideInstanceItem pspi, "
                                 + "fr.proline.core.orm.msi.PeptideSet pepSet "
@@ -892,9 +907,11 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                                 + "ORDER BY pi.id ASC";
                         Query peptidesQuery = entityManagerMSI.createQuery(queryPep);
                         peptidesQuery.setParameter("rsmId", resultSummaryId);
-                        peptidesQuery.setParameter("proteinSetId", (m_dProteinSet == null ? -1 : m_dProteinSet.getId()));
+//                            peptidesQuery.setParameter("proteinSetId", (m_dProteinSet == null ? -1 : m_dProteinSet.getId()));
+                        peptidesQuery.setParameter("proteinSetId", protSetId);
                         List<Long> listIds = (List<Long>) peptidesQuery.getResultList();
                         m_peptideInstanceIds = listIds;
+
 
                         List<DMasterQuantPeptide> listDMasterQuantPeptideFake = new ArrayList();
                         for (Long m_peptideInstanceId : m_peptideInstanceIds) {
@@ -2211,5 +2228,20 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
             }
         }
     }
+    
+    private String getMasterQuantProteinSetName(DMasterQuantProteinSet masterQuantProteinSet) {
 
+        String name = null;
+        
+        if( masterQuantProteinSet.getProteinSet() != null) {
+            DProteinMatch proteinMatch = masterQuantProteinSet.getProteinSet().getTypicalProteinMatch();
+            if (proteinMatch != null) {
+                name = proteinMatch.getAccession();
+            } 
+        }
+        
+        if(name == null)
+            name = String.valueOf(masterQuantProteinSet.getId());
+        return name;
+    }
 }

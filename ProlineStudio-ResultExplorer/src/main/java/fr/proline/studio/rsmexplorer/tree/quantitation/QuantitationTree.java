@@ -16,12 +16,14 @@ import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dpm.task.util.JMSConnectionManager;
+import fr.proline.studio.rsmexplorer.actions.identification.ChangeTypicalProteinJMSAction;
 import fr.proline.studio.rsmexplorer.actions.identification.DisplayRsetAction;
 import fr.proline.studio.rsmexplorer.actions.identification.ExportAction;
 import fr.proline.studio.rsmexplorer.actions.identification.ExportDatasetAction;
 import fr.proline.studio.rsmexplorer.actions.identification.ExportDatasetJMSAction;
 import fr.proline.studio.rsmexplorer.actions.identification.GenerateSpectrumMatchesAction;
 import fr.proline.studio.rsmexplorer.actions.identification.GenerateSpectrumMatchesJMSAction;
+import fr.proline.studio.rsmexplorer.actions.identification.IdentifyPtmSitesJMSAction;
 import fr.proline.studio.rsmexplorer.actions.identification.RetrieveBioSeqJMSAction;
 import fr.proline.studio.rsmexplorer.actions.xic.AddQuantitationFolderAction;
 import fr.proline.studio.rsmexplorer.actions.xic.ComputeQuantitationProfileAction;
@@ -283,7 +285,7 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
             } else {
                 if (m_mainPopup == null) {
                     // create the actions
-                    m_mainActions = new ArrayList<>(16);  // <--- get in sync
+                    m_mainActions = new ArrayList<>(19);  // <--- get in sync
                     boolean isJMSDefined = JMSConnectionManager.getJMSConnectionManager().isJMSDefined();
 
                     DisplayXICAction displayXICAction = new DisplayXICAction();
@@ -317,6 +319,11 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
                     m_mainActions.add(null);  // separator
 
                     if (isJMSDefined) {
+                        ChangeTypicalProteinJMSAction changeTypicalProteinJmsAction = new ChangeTypicalProteinJMSAction(AbstractTree.TreeType.TREE_QUANTITATION);
+                        m_mainActions.add(changeTypicalProteinJmsAction);
+                        IdentifyPtmSitesJMSAction identifyPtmSitesAction = new IdentifyPtmSitesJMSAction(AbstractTree.TreeType.TREE_QUANTITATION);
+                        m_mainActions.add(identifyPtmSitesAction);                   
+  
                         GenerateSpectrumMatchesJMSAction generateSpectrumMatchesAction = new GenerateSpectrumMatchesJMSAction(AbstractTree.TreeType.TREE_QUANTITATION);
                         m_mainActions.add(generateSpectrumMatchesAction);
                         RetrieveBioSeqJMSAction retrieveBioSeqAction = new RetrieveBioSeqJMSAction(AbstractTree.TreeType.TREE_QUANTITATION);

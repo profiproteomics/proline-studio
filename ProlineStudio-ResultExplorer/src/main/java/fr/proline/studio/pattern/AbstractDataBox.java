@@ -6,6 +6,7 @@ import fr.proline.studio.dam.taskinfo.TaskInfo;
 import fr.proline.studio.dam.tasks.AbstractDatabaseTask;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.id.ProjectId;
+import fr.proline.studio.pattern.xic.DataBoxXICPTMProteinSite;
 import fr.proline.studio.pattern.xic.DataboxChildFeature;
 import fr.proline.studio.pattern.xic.DataboxExperimentalDesign;
 import fr.proline.studio.pattern.xic.DataboxMapAlignment;
@@ -129,7 +130,9 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
         DataBoxFrozenCopy(46),
         DataBoxPTMProteinSite_V2(47),
         DataBoxPTMSitePeptides(48),
-        DataBoxPTMSitePepMatches(49);
+        DataBoxPTMSitePepMatches(49),
+        DataBoxXICPTMProteinSite(50),
+        DataBoxXICPTMSitePeptides(51);
         
         int m_type;
         private static HashMap<Integer, DataboxType> m_databoxTypeMap = null;
@@ -232,6 +235,10 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
                     return new DataBoxPTMSitePeptides();
                 case DataBoxPTMSitePepMatches:
                     return new DataBoxPTMSitePepMatches();
+                case DataBoxXICPTMProteinSite:
+                    return new DataBoxXICPTMProteinSite();
+                case DataBoxXICPTMSitePeptides:
+                    return new DataBoxXICPTMSitePeptides();
                 case DataBoxFrozenCopy:
                     return null; // not used for frozen copy
             }

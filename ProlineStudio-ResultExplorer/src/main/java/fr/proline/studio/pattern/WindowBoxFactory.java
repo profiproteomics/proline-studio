@@ -5,6 +5,7 @@ import fr.proline.studio.comparedata.CompareDataInterface;
 import java.util.HashMap;
 
 import fr.proline.studio.gui.SplittedPanelContainer;
+import fr.proline.studio.pattern.xic.DataBoxXICPTMProteinSite;
 import fr.proline.studio.pattern.xic.DataboxChildFeature;
 import fr.proline.studio.pattern.xic.DataboxExperimentalDesign;
 import fr.proline.studio.pattern.xic.DataboxMapAlignment;
@@ -273,6 +274,17 @@ public class WindowBoxFactory {
         boxes[3] = new DataboxRsetPSMForMsQuery();
         
         IconManager.IconType iconType = IconManager.IconType.DATASET_RSM;
+        return new WindowBox(boxes[0].getFullName(), generatePanel(boxes), boxes[0], IconManager.getImage(iconType));
+    }
+    
+     public static WindowBox getXICPTMProteinSiteWindowBox(String dataName) {
+
+        AbstractDataBox[] boxes = new AbstractDataBox[2];
+        boxes[0] = new DataBoxXICPTMProteinSite();
+        boxes[0].setDataName(dataName);
+        boxes[1] = new DataBoxXICPTMSitePeptides();
+                
+        IconManager.IconType iconType = IconManager.IconType.QUANT_XIC;
         return new WindowBox(boxes[0].getFullName(), generatePanel(boxes), boxes[0], IconManager.getImage(iconType));
     }
 

@@ -217,7 +217,7 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
         if (allPeptides) {
             task.initLoadPeptides(getProjectId(), m_dataset, m_masterQuantPeptideList, isXICMode());
         } else {
-            task.initLoadPeptides(getProjectId(), m_dataset, m_proteinSet, m_masterQuantProteinSet, m_masterQuantPeptideList, isXICMode());
+            task.initLoadPeptides(getProjectId(), m_dataset, m_masterQuantProteinSet, m_masterQuantPeptideList, isXICMode());
         }
         registerTask(task);
 

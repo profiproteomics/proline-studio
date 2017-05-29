@@ -198,7 +198,7 @@ public class DataboxXicProteinSet extends AbstractDataBox {
         //m_previousTaskId = taskId;
         registerTask(task);
 
-    }
+    } 
     //private Long m_previousTaskId = null;
 
     /**

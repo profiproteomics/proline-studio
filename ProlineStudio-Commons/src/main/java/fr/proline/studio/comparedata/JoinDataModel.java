@@ -521,9 +521,9 @@ public class JoinDataModel extends AbstractJoinDataModel {
             if (columnIndex == 0) {
                 return null;
             }
+            columnIndex--;
         }
-        
-        columnIndex--;
+                
 
         if (columnIndex < m_allColumns1.size()) {
             return m_data1.getRenderer(rowIndex, m_allColumns1.get(columnIndex));

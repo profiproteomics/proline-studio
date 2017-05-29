@@ -295,7 +295,7 @@ public class PeptidesPTMSitePanel extends JPanel implements DataBoxPanelInterfac
 
         });
 
-        m_markerContainerPanel = new MarkerContainerPanel(m_peptidesPtmSiteScrollPane, (PeptidesPTMSiteTable) m_peptidesPtmSiteTable);
+        m_markerContainerPanel = new MarkerContainerPanel(m_peptidesPtmSiteScrollPane, m_peptidesPtmSiteTable);
 
         m_peptidesPtmSiteScrollPane.setViewportView(m_peptidesPtmSiteTable);
         m_peptidesPtmSiteTable.setFillsViewportHeight(true);

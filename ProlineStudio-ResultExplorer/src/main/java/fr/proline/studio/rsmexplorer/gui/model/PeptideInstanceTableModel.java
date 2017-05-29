@@ -30,7 +30,6 @@ import fr.proline.studio.rsmexplorer.gui.renderer.ScoreRenderer;
 import fr.proline.studio.table.CompoundTableModel;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.table.TableDefaultRendererManager;
-import fr.proline.studio.utils.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;

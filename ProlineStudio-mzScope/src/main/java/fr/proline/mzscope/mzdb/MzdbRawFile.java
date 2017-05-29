@@ -179,16 +179,17 @@ public class MzdbRawFile implements IRawFile {
                 peaks = reader.getMsXicInMzRtRanges(params.getMinMz(), params.getMaxMz(), params.getElutionTimeLowerBound(), params.getElutionTimeUpperBound(), params.getMethod());
             }
             chromatogram = createChromatoFromPeaks(peaks, params.getMsLevel() );
-            chromatogram.minMz = (params.getMsLevel() == 1) ? params.getMinMz() : params.getFragmentMinMz();
-            chromatogram.maxMz = (params.getMsLevel() == 1) ? params.getMaxMz() : params.getFragmentMaxMz();
-            StringBuilder builder = new StringBuilder("Mass range: ");
-            builder.append(massFormatter.format(chromatogram.minMz)).append("-").append(massFormatter.format(chromatogram.maxMz));
-            if (params.getMsLevel() > 1) {
-                builder.append(" (").append(massFormatter.format(params.getMz()));
+            if (chromatogram != null) {
+                chromatogram.minMz = (params.getMsLevel() == 1) ? params.getMinMz() : params.getFragmentMinMz();
+                chromatogram.maxMz = (params.getMsLevel() == 1) ? params.getMaxMz() : params.getFragmentMaxMz();
+                StringBuilder builder = new StringBuilder("Mass range: ");
+                builder.append(massFormatter.format(chromatogram.minMz)).append("-").append(massFormatter.format(chromatogram.maxMz));
+                if (params.getMsLevel() > 1) {
+                    builder.append(" (").append(massFormatter.format(params.getMz()));
+                }
+                chromatogram.title = builder.toString();
             }
-            chromatogram.title = builder.toString();
             logger.info("mzdb chromatogram extracted in {} ms", (System.currentTimeMillis() - start));
-
         } catch (SQLiteException | StreamCorruptedException e) {
             logger.error("Error during chromatogram extraction", e);
         }
@@ -197,31 +198,34 @@ public class MzdbRawFile implements IRawFile {
 
     private Chromatogram createChromatoFromPeaks(Peak[] peaks, int msLevel) {
         Chromatogram chromatogram = null;
-        List<Double> xAxisData = new ArrayList<>(peaks.length);
-        List<Double> yAxisData = new ArrayList<>(peaks.length);
-        try {
-            int previousSpectrumId = (int) peaks[0].getLcContext().getSpectrumId();
-            for (Peak peak : peaks) {
-                int spectrumId = (int) peak.getLcContext().getSpectrumId();
-                if ((msLevel == 1) && (previousSpectrumId != getPreviousSpectrumId(spectrumId, msLevel))) {
-                    // there is a gap between peaks, add 0 values after the previous peak and before this one
-                    xAxisData.add(reader.getSpectrumHeaderById().get((long) getNextSpectrumId(previousSpectrumId, msLevel)).getElutionTime() / 60.0);
-                    yAxisData.add(0.0);
-                    xAxisData.add(reader.getSpectrumHeaderById().get((long) getPreviousSpectrumId(spectrumId, msLevel)).getElutionTime() / 60.0);
-                    yAxisData.add(0.0);
-                }
-                double rt = peak.getLcContext().getElutionTime() / 60.0;
-                xAxisData.add(rt);
-                yAxisData.add((double) peak.getIntensity());
-                previousSpectrumId = (int) peak.getLcContext().getSpectrumId();
-            }
-        } catch (SQLiteException sle) {
-            logger.error("Error while reading mzdb file", sle);
-        }
-        chromatogram = new Chromatogram(getName());
-        chromatogram.time = Doubles.toArray(xAxisData);
-        chromatogram.intensities = Doubles.toArray(yAxisData);
+        
+        if ((peaks != null) && (peaks.length > 0)) {
+            List<Double> xAxisData = new ArrayList<>(peaks.length);
+            List<Double> yAxisData = new ArrayList<>(peaks.length);
 
+            try {
+                int previousSpectrumId = (int) peaks[0].getLcContext().getSpectrumId();
+                for (Peak peak : peaks) {
+                    int spectrumId = (int) peak.getLcContext().getSpectrumId();
+                    if ((msLevel == 1) && (previousSpectrumId != getPreviousSpectrumId(spectrumId, msLevel))) {
+                        // there is a gap between peaks, add 0 values after the previous peak and before this one
+                        xAxisData.add(reader.getSpectrumHeaderById().get((long) getNextSpectrumId(previousSpectrumId, msLevel)).getElutionTime() / 60.0);
+                        yAxisData.add(0.0);
+                        xAxisData.add(reader.getSpectrumHeaderById().get((long) getPreviousSpectrumId(spectrumId, msLevel)).getElutionTime() / 60.0);
+                        yAxisData.add(0.0);
+                    }
+                    double rt = peak.getLcContext().getElutionTime() / 60.0;
+                    xAxisData.add(rt);
+                    yAxisData.add((double) peak.getIntensity());
+                    previousSpectrumId = (int) peak.getLcContext().getSpectrumId();
+                }
+            } catch (SQLiteException sle) {
+                logger.error("Error while reading mzdb file", sle);
+            }
+            chromatogram = new Chromatogram(getName());
+            chromatogram.time = Doubles.toArray(xAxisData);
+            chromatogram.intensities = Doubles.toArray(yAxisData);
+        }
         return chromatogram;
     }
 

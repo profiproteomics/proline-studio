@@ -285,10 +285,13 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFileVie
             @Override
             protected void done() {
                 try {
-                    displayChromatogram(get(), mode);
-                    setMsMsEventButtonEnabled(true);
-                    if (callback != null) {
-                        callback.callback(true);
+                    Chromatogram c = get();
+                    if (c != null) {
+                        displayChromatogram(c, mode);
+                        setMsMsEventButtonEnabled(true);
+                        if (callback != null) {
+                            callback.callback(true);
+                        }
                     }
                 } catch (InterruptedException | ExecutionException e) {
                     logger.error("Error while extraction chromatogram", e);

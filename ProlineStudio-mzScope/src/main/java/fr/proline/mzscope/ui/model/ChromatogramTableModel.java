@@ -32,7 +32,7 @@ public class ChromatogramTableModel  extends AbstractTableModel implements Compa
     
     @Override
     public int getRowCount() {
-        return chromato.time.length;
+        return (chromato == null) ? 0 : chromato.time.length;
     }
 
     @Override

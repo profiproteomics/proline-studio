@@ -140,7 +140,9 @@ public class ChromatogramPanel extends JPanel implements PlotPanelListener {
          chromatogramPlotPanel.lockMinXValue();
          chromatogramPlotPanel.lockMinYValue();
       }
-     chromatogramPlotPanel.repaintUpdateDoubleBuffer();
+      
+      
+      chromatogramPlotPanel.repaintUpdateDoubleBuffer();
       return plotColor;
    }
 

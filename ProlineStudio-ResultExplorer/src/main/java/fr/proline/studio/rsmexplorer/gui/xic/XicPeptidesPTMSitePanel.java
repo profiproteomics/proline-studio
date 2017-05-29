@@ -28,7 +28,6 @@ import fr.proline.studio.progress.ProgressInterface;
 import fr.proline.studio.python.data.ExprTableModel;
 import fr.proline.studio.python.data.TableInfo;
 import fr.proline.studio.rsmexplorer.actions.table.DisplayTablePopupMenu;
-import fr.proline.studio.rsmexplorer.gui.model.DPeptideInstanceTableModel;
 import fr.proline.studio.rsmexplorer.gui.model.PeptidesOfPtmSiteTableModel;
 import fr.proline.studio.rsmexplorer.gui.model.XicPeptidesOfPtmSiteTableModel;
 import fr.proline.studio.search.SearchToggleButton;

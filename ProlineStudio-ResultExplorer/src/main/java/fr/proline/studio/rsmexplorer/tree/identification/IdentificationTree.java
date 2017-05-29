@@ -778,7 +778,7 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
                     m_mainActions.add(mergeJmsAction);
                     FilterRSMProteinSetsJMSAction filterProtSetAction = new FilterRSMProteinSetsJMSAction();
                     m_mainActions.add(filterProtSetAction);
-                    ChangeTypicalProteinJMSAction changeTypicalProteinJmsAction = new ChangeTypicalProteinJMSAction();
+                    ChangeTypicalProteinJMSAction changeTypicalProteinJmsAction = new ChangeTypicalProteinJMSAction(AbstractTree.TreeType.TREE_IDENTIFICATION);
                     m_mainActions.add(changeTypicalProteinJmsAction);
                     IdentifyPtmSitesJMSAction identifyPtmSitesAction = new IdentifyPtmSitesJMSAction(AbstractTree.TreeType.TREE_IDENTIFICATION);
                     m_mainActions.add(identifyPtmSitesAction);

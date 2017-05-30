@@ -12,6 +12,7 @@ import fr.proline.studio.pattern.MzScopeWindowBoxManager;
 import fr.proline.studio.rsmexplorer.gui.dialog.ConvertRawDialog;
 import fr.proline.studio.rsmexplorer.gui.dialog.UploadMzdbDialog;
 import fr.proline.studio.utils.IconManager;
+import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -23,17 +24,23 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.HashSet;
 import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
+import javax.swing.JToolBar;
 import javax.swing.JTree;
 import javax.swing.event.TreeExpansionEvent;
 import javax.swing.event.TreeExpansionListener;
+import javax.swing.event.TreeModelEvent;
+import javax.swing.event.TreeModelListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreePath;
@@ -52,10 +59,16 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
     private ActionListener viewRawFileAction;
     private ArrayList<File> m_selectedFiles;
     private final LocalFileSystemTransferHandler m_transferHandler;
+    private boolean m_showUpdateButton;
 
     public LocalFileSystemView(LocalFileSystemTransferHandler transferHandler) {
         m_transferHandler = transferHandler;
         initComponents();
+    }
+
+    public LocalFileSystemView(LocalFileSystemTransferHandler transferHandler, boolean showUpdateButton) {
+        this(transferHandler);
+        m_showUpdateButton = showUpdateButton;
     }
 
     private void initComponents() {
@@ -68,11 +81,48 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
         GridBagConstraints c = new GridBagConstraints();
         c.anchor = GridBagConstraints.NORTHWEST;
         c.fill = GridBagConstraints.BOTH;
-        c.insets = new java.awt.Insets(5, 5, 5, 5);
+        c.insets = new java.awt.Insets(0, 0, 0, 0);
 
         c.gridy = 0;
+        c.gridx = 0;
+
+        c.gridheight = 1;
+
         c.weighty = 0;
         c.weightx = 0;
+
+        if (true) {
+            JButton updateButton = new JButton(IconManager.getIcon(IconManager.IconType.REFRESH));
+            updateButton.setFocusPainted(false);
+            updateButton.setOpaque(true);
+            updateButton.addActionListener(new ActionListener() {
+
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    updateTree();
+                }
+            });
+
+            JToolBar toolbar = new JToolBar();
+            toolbar.setFloatable(false);
+
+            toolbar.add(updateButton);
+
+            add(toolbar, c);
+
+            c.gridy++;
+
+            add(Box.createVerticalBox(), c);
+
+            c.gridy = 0;
+
+            c.gridheight = 2;
+
+            c.gridx++;
+        }
+
+        JPanel treePanel = new JPanel();
+        treePanel.setLayout(new BorderLayout(0, 5));
 
         File[] roots = File.listRoots();
         JComboBox rootsComboBox = new JComboBox(roots);
@@ -91,11 +141,7 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
 
         });
 
-        add(rootsComboBox, c);
-
-        c.weighty = 1;
-        c.weightx = 1;
-        c.gridy++;
+        treePanel.add(rootsComboBox, BorderLayout.NORTH);
 
         m_popupMenu = new JPopupMenu();
         initPopupMenu(m_popupMenu);
@@ -165,7 +211,12 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
         });
 
         JScrollPane scrollPane = new JScrollPane(m_tree);
-        add(scrollPane, c);
+        treePanel.add(scrollPane, BorderLayout.CENTER);
+
+        c.weightx = 1.0;
+        c.weighty = 1.0;
+
+        add(treePanel, c);
 
     }
 
@@ -180,6 +231,24 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
             m_selectedFiles.add(new File(path.getLastPathComponent().toString()));
         }
         return selectedURLs;
+    }
+
+    private void updateTree() {
+        TreeStateUtil.setExpansionState(TreeStateUtil.loadExpansionState(TreeStateUtil.TreeType.LOCAL), m_tree, (DefaultMutableTreeNode) m_tree.getModel().getRoot(), TreeStateUtil.TreeType.LOCAL);
+    }
+
+    public void expandMultipleTreePath(HashSet<String> directories) {
+        DefaultMutableTreeNode root = (DefaultMutableTreeNode) m_fileSystemDataModel.getRoot();
+        Enumeration totalNodes = root.depthFirstEnumeration();
+
+        while (totalNodes.hasMoreElements()) {
+            DefaultMutableTreeNode node = (DefaultMutableTreeNode) totalNodes.nextElement();
+
+            if (directories.contains(node.toString())) {
+                m_tree.expandPath(new TreePath(node.getPath()));
+            }
+
+        }
     }
 
     private boolean isSelectionHomogeneous(ArrayList<String> selectedURLs) {

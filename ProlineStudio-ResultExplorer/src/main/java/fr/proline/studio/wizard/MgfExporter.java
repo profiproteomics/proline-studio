@@ -21,6 +21,7 @@ public class MgfExporter implements Runnable, WorkerInterface {
     private final File m_file;
     private static int m_state = WorkerInterface.ACTIVE_STATE;
     private final StringBuilder m_logs;
+    private ConversionListener m_conversionListener;
     
     private final MgfExportSettings m_mgfExportSettings;
 
@@ -29,6 +30,10 @@ public class MgfExporter implements Runnable, WorkerInterface {
         m_mgfExportSettings= exportSettings;
         
         m_logs = new StringBuilder();
+    }
+    
+    public void addConversionListener(ConversionListener conversionListener) {
+        m_conversionListener = conversionListener;
     }
 
     @Override
@@ -54,6 +59,8 @@ public class MgfExporter implements Runnable, WorkerInterface {
 
                             if (m_state == WorkerInterface.ACTIVE_STATE) {
                                 m_state = WorkerInterface.FINISHED_STATE;
+                                
+                                m_conversionListener.ConversionPerformed(m_file, m_mgfExportSettings, true);
                             }
                         } else {
                             terminate();
@@ -76,6 +83,7 @@ public class MgfExporter implements Runnable, WorkerInterface {
     public void terminate() {
         m_run = false;
         m_state = WorkerInterface.KILLED_STATE;
+        m_conversionListener.ConversionPerformed(m_file, m_mgfExportSettings, false);
     }
 
     @Override

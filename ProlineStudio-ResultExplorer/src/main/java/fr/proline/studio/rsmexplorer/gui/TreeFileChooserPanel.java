@@ -128,7 +128,6 @@ public class TreeFileChooserPanel extends JPanel {
         GridBagConstraints c = new GridBagConstraints();
         c.anchor = GridBagConstraints.NORTHWEST;
         c.fill = GridBagConstraints.BOTH;
-        //c.insets = new java.awt.Insets(5, 5, 5, 5);
         c.insets = new java.awt.Insets(0, 0, 0, 0);
 
         c.gridx = 0;

@@ -25,7 +25,7 @@ public class RawConverter implements Runnable, WorkerInterface {
     private boolean m_run = false;
     private int m_state = WorkerInterface.ACTIVE_STATE;
     private final StringBuilder m_logs;
-    private ConversionListener m_listener;
+    private ConversionListener m_conversionListener;
     private final ConversionSettings m_settings;
 
     public RawConverter(File file, ConversionSettings settings) {
@@ -60,10 +60,10 @@ public class RawConverter implements Runnable, WorkerInterface {
 
                             if (m_state == WorkerInterface.ACTIVE_STATE) {
                                 m_state = WorkerInterface.FINISHED_STATE;
-                                if (m_listener != null) {
+                                if (m_conversionListener != null) {
 
                                     if (f.exists()) {
-                                        m_listener.ConversionPerformed(f, m_settings, true);
+                                        m_conversionListener.ConversionPerformed(f, m_settings, true);
                                     }
                                 }
 
@@ -82,7 +82,7 @@ public class RawConverter implements Runnable, WorkerInterface {
                             }
                         } else {
                             terminate();
-                            m_listener.ConversionPerformed(f, m_settings, false);
+                            m_conversionListener.ConversionPerformed(f, m_settings, false);
                         }
 
                     }
@@ -99,7 +99,7 @@ public class RawConverter implements Runnable, WorkerInterface {
     }
 
     public void addConversionListener(ConversionListener listener) {
-        m_listener = listener;
+        m_conversionListener = listener;
     }
 
     @Override

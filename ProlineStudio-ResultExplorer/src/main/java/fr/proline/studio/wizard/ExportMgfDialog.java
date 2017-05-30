@@ -119,11 +119,12 @@ public class ExportMgfDialog extends DefaultDialog implements FileDialogInterfac
     private ParameterList m_outputParameterList;
 
     public static final String MGF_EXPORT_NAME = "Mgf Export Parameters";
+    public static final String MGF_EXPORT_PARAM_KEY = "MGF_EXPORT_KEY";
 
     public static final String MGF_OUTPUT_NAME = "Mgf Output Parameters";
-    public static final String MGF_OUTPUT_KEY = "Mgf_Output_Parameters";
+    public static final String MGF_OUTPUT_KEY = "MGF_OUTPUT_KEY";
 
-    private Preferences m_preferences;
+    private final Preferences m_preferences;
 
     public static ExportMgfDialog getDialog(Window parent, String title) {
         if (m_singleton == null) {
@@ -188,7 +189,7 @@ public class ExportMgfDialog extends DefaultDialog implements FileDialogInterfac
 
     private JPanel createOutputParameterPanel() {
 
-        m_outputParameterList = new ParameterList(MGF_OUTPUT_NAME);
+        m_outputParameterList = new ParameterList(MGF_OUTPUT_KEY);
 
         ButtonGroup group = new ButtonGroup();
 
@@ -210,7 +211,14 @@ public class ExportMgfDialog extends DefaultDialog implements FileDialogInterfac
         m_outputParam.setAllFiles(false);
         m_outputParam.setSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 
-        m_outputParam.setDefaultDirectory(new File(NbPreferences.root().get(EXPORT_OUTPUT_KEY + "." + EXPORT_OUTPUT_KEY, System.getProperty("user.home"))));
+        String s = m_preferences.get(MGF_OUTPUT_KEY + "." + EXPORT_OUTPUT_KEY, System.getProperty("user.home"));
+
+        File defaultDirectory = new File(s);
+        if (!(defaultDirectory.exists() && defaultDirectory.isDirectory())) {
+            s = System.getProperty("user.home");
+        }
+
+        m_outputParam.setDefaultDirectory(defaultDirectory);
 
         m_outputParameterList.add(m_outputParam);
 
@@ -218,7 +226,8 @@ public class ExportMgfDialog extends DefaultDialog implements FileDialogInterfac
 
             @Override
             public void valueChanged(String value, Object associatedValue) {
-                showParameter(m_outputParam, m_exportInDirectoryButton.isSelected(), m_preferences.get("mzDB_Settings.LAST_MZDB_PATH", System.getProperty("user.home")));
+                
+                showParameter(m_outputParam, m_exportInDirectoryButton.isSelected(), m_outputParam.getObjectValue());
                 updateParameterListPanel();
             }
 
@@ -235,7 +244,7 @@ public class ExportMgfDialog extends DefaultDialog implements FileDialogInterfac
     }
 
     private JPanel createParametersPanel() {
-        m_exportParameterList = new ParameterList(MGF_EXPORT_NAME);
+        m_exportParameterList = new ParameterList(MGF_EXPORT_PARAM_KEY);
 
         m_mzToleranceParam = new FloatParameter(MZ_TOLERANCE_KEY, MZ_TOLERANCE_NAME, JTextField.class, 10.0f, 1.0f, 100.0f);
         m_exportParameterList.add(m_mzToleranceParam);
@@ -320,7 +329,7 @@ public class ExportMgfDialog extends DefaultDialog implements FileDialogInterfac
             @Override
             public void actionPerformed(ActionEvent e) {
 
-                String initializationDirectory = m_preferences.get("mzDB_Settings.LAST_MZDB_PATH", System.getProperty("user.home"));
+                String initializationDirectory = m_preferences.get(MGF_EXPORT_PARAM_KEY + "." + "LAST_MZDB_PATH", System.getProperty("user.home"));
 
                 File f = new File(initializationDirectory);
                 if (!(f.exists() && f.isDirectory())) {

@@ -39,8 +39,6 @@ import javax.swing.JToolBar;
 import javax.swing.JTree;
 import javax.swing.event.TreeExpansionEvent;
 import javax.swing.event.TreeExpansionListener;
-import javax.swing.event.TreeModelEvent;
-import javax.swing.event.TreeModelListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreePath;
@@ -55,7 +53,7 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
     private LocalFileSystemModel m_fileSystemDataModel;
     private JTree m_tree;
     private JPopupMenu m_popupMenu;
-    private JMenuItem m_detectPeakelsItem, m_viewRawFileItem, m_convertRawFileItem, m_uploadMzdbFileItem, m_exportMgfItem;
+    private JMenuItem m_detectPeakelsItem, m_viewRawFileItem, m_convertRawFileItem, m_uploadMzdbFileItem, m_exportMgfItem, m_deleteFileItem;
     private ActionListener viewRawFileAction;
     private ArrayList<File> m_selectedFiles;
     private final LocalFileSystemTransferHandler m_transferHandler;
@@ -264,12 +262,14 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
 
     }
 
+    /*
     private void displayRaw(File rawfile) {
         if (rawfile != null) {
             MzScope mzScope = new MzScope(MzdbInfo.MZSCOPE_VIEW, rawfile);
             MzScopeWindowBoxManager.addMzdbScope(mzScope);
         }
     }
+    */
 
     private void displayRaw(ArrayList<File> rawfiles) {
         MzScope mzScope = new MzScope(MzdbInfo.MZSCOPE_VIEW, rawfiles);
@@ -343,6 +343,19 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
         ;
         });
         popupMenu.add(m_exportMgfItem);
+        
+        m_deleteFileItem = new JMenuItem("Delete file(s)");
+        m_deleteFileItem.addActionListener(new ActionListener(){
+
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+                
+                //FileDeletionBatch batch;
+                
+            }
+            
+        });
+        popupMenu.add(m_deleteFileItem);
 
     }
 
@@ -357,6 +370,7 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
             } else if (firstURL.endsWith(".raw")) {
                 setPopupEnabled(false);
                 m_convertRawFileItem.setEnabled(true);
+                m_deleteFileItem.setEnabled(true);
             } else {
                 setPopupEnabled(false);
             }
@@ -371,6 +385,7 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
         m_convertRawFileItem.setEnabled(b);
         m_uploadMzdbFileItem.setEnabled(b);
         m_exportMgfItem.setEnabled(b);
+        m_deleteFileItem.setEnabled(b);
     }
 
     @Override

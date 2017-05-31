@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import javax.swing.JOptionPane;
 
 /**
  *
@@ -33,6 +34,9 @@ public class MgfExportBatch implements Runnable, ConversionListener {
 
     @Override
     public void run() {
+        
+        m_successCounter = 0;
+        m_failCounter = 0;
         
         m_parentDirectories = new HashSet<String>();
 
@@ -76,6 +80,11 @@ public class MgfExportBatch implements Runnable, ConversionListener {
         }
 
         if ((m_successCounter + m_failCounter) == m_exports.size()) {
+            
+            if(m_failCounter>0){
+                JOptionPane.showMessageDialog(null, "One or more files were found to be corrupted and were thus not converted.");
+            }
+            
             m_executor.shutdown();
             try {
                 m_executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);

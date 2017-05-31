@@ -6,7 +6,6 @@
 package fr.proline.studio.wizard;
 
 import fr.proline.mzscope.mzdb.MzdbRawFile;
-import fr.proline.mzscope.ui.MgfExportParameters;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.AbstractDatabaseTask;

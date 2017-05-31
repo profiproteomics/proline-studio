@@ -193,7 +193,8 @@
                         <publicPackage>com.google.common.*</publicPackage>
                         <publicPackage>org.apache.xerces.parsers.*</publicPackage>
                         <publicPackage>org.apache.xml.serialize.*</publicPackage> 
-                        <publicPackage>fr.profi.mzdb.io.writer.mgf.*</publicPackage>
+                        <publicPackage>fr.profi.mzdb.*</publicPackage>          
+                        <publicPackage>com.almworks.sqlite4java.*</publicPackage>
                         <!--  <publicPackage>org.joda.time.*</publicPackage>  -->
                     </publicPackages>
                 </configuration>

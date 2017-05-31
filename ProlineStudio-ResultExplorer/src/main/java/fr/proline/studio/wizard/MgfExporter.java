@@ -5,10 +5,15 @@
  */
 package fr.proline.studio.wizard;
 
+import com.almworks.sqlite4java.SQLiteException;
+import fr.profi.mzdb.MzDbReader;
+import fr.profi.mzdb.model.SpectrumHeader;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.SubTask;
 import java.io.File;
+import java.io.FileNotFoundException;
+import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
 /**
@@ -22,16 +27,16 @@ public class MgfExporter implements Runnable, WorkerInterface {
     private static int m_state = WorkerInterface.ACTIVE_STATE;
     private final StringBuilder m_logs;
     private ConversionListener m_conversionListener;
-    
+
     private final MgfExportSettings m_mgfExportSettings;
 
     public MgfExporter(File file, MgfExportSettings exportSettings) {
         m_file = file;
-        m_mgfExportSettings= exportSettings;
-        
+        m_mgfExportSettings = exportSettings;
+
         m_logs = new StringBuilder();
     }
-    
+
     public void addConversionListener(ConversionListener conversionListener) {
         m_conversionListener = conversionListener;
     }
@@ -40,43 +45,49 @@ public class MgfExporter implements Runnable, WorkerInterface {
     public void run() {
         m_run = true;
 
-        AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
+        if (canExportMgf()) {
 
-            @Override
-            public boolean mustBeCalledInAWT() {
-                return false;
-            }
+            AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
 
-            @Override
-            public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
+                @Override
+                public boolean mustBeCalledInAWT() {
+                    return false;
+                }
 
-                SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
 
-                    @Override
-                    public void run() {
+                    SwingUtilities.invokeLater(new Runnable() {
 
-                        if (success) {
+                        @Override
+                        public void run() {
 
-                            if (m_state == WorkerInterface.ACTIVE_STATE) {
-                                m_state = WorkerInterface.FINISHED_STATE;
-                                
-                                m_conversionListener.ConversionPerformed(m_file, m_mgfExportSettings, true);
+                            if (success) {
+
+                                if (m_state == WorkerInterface.ACTIVE_STATE) {
+                                    m_state = WorkerInterface.FINISHED_STATE;
+
+                                    m_conversionListener.ConversionPerformed(m_file, m_mgfExportSettings, true);
+                                }
+                            } else {
+                                terminate();
                             }
-                        } else {
-                            terminate();
+
                         }
+                    });
 
-                    }
-                });
+                }
+            };
 
-            }
-        };
+            MgfExportTask task = new MgfExportTask(callback, m_file, m_logs, m_mgfExportSettings);
+            AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
 
-        MgfExportTask task = new MgfExportTask(callback, m_file, m_logs, m_mgfExportSettings);
-        AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
+            m_logs.append("Exporting .mgf for " + m_file.getAbsolutePath() + " has come to its end.\n\n");
+            m_run = false;
 
-        m_logs.append("Exporting .mgf for " + m_file.getAbsolutePath() + " has come to its end.\n\n");
-        m_run = false;
+        } else {
+            terminate();
+        }
     }
 
     @Override
@@ -110,5 +121,29 @@ public class MgfExporter implements Runnable, WorkerInterface {
     public StringBuilder getLogs() {
         return m_logs;
     }
+
+    
+    public boolean canExportMgf() {
+        
+        MzDbReader reader = null;
+        try {
+            reader = new MzDbReader(m_file, true);
+            SpectrumHeader[] headers = reader.getMs2SpectrumHeaders();
+            reader.close();
+            if (headers == null) {
+                return false;
+            } else {
+                return true;
+            }
+        } catch (ClassNotFoundException | FileNotFoundException | SQLiteException e) {
+            return false;
+        } finally {
+            if (reader != null) {
+                reader.close();
+            }
+        }
+        
+    }
+    
 
 }

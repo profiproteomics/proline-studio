@@ -58,6 +58,9 @@ public class FileParameter extends AbstractParameter {
 
                 final JTextField textField = new JTextField(30);
                 textField.setText(startValue);
+                
+                //Check if this works-solves the problem!
+                m_parameterComponent = textField;
 
                 final JButton addFileButton = new JButton(IconManager.getIcon(IconManager.IconType.OPEN_FILE));
                 addFileButton.setMargin(new java.awt.Insets(2, 2, 2, 2));
@@ -149,7 +152,9 @@ public class FileParameter extends AbstractParameter {
     @Override
     public Object getObjectValue() {
         if (m_graphicalType.equals(JTextField.class)) {
-            return ((JTextField) m_parameterComponent).getText();
+            if(m_parameterComponent!=null){
+                return ((JTextField) m_parameterComponent).getText();
+            }
         }
         return ""; // should not happen
     }

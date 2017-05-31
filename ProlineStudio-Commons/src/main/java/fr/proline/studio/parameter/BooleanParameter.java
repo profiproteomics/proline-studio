@@ -176,6 +176,10 @@ public class BooleanParameter extends AbstractParameter {
         if (!m_valueSet) {
             initDefault();
         } else {
+            
+            String stringValue = getStringValue();
+            Object objectValue = getObjectValue();
+            
             linkedParameters.valueChanged(getStringValue(), getObjectValue());
         }
     }

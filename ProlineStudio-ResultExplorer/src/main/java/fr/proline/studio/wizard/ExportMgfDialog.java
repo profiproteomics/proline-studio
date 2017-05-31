@@ -206,17 +206,17 @@ public class ExportMgfDialog extends DefaultDialog implements FileDialogInterfac
         m_outputParameterList.add(m_exportInDirectoryParam);
         group.add(m_exportInDirectoryButton);
 
-        m_outputParam = new FileParameter(null, EXPORT_OUTPUT_KEY, EXPORT_OUTPUT_NAME, JTextField.class, "", null, null);
-        m_outputParam.forceShowLabel(AbstractParameter.LabelVisibility.NO_VISIBLE);
-        m_outputParam.setAllFiles(false);
-        m_outputParam.setSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-
         String s = m_preferences.get(MGF_OUTPUT_KEY + "." + EXPORT_OUTPUT_KEY, System.getProperty("user.home"));
 
         File defaultDirectory = new File(s);
         if (!(defaultDirectory.exists() && defaultDirectory.isDirectory())) {
             s = System.getProperty("user.home");
         }
+
+        m_outputParam = new FileParameter(null, EXPORT_OUTPUT_KEY, EXPORT_OUTPUT_NAME, JTextField.class, m_preferences.get(MGF_OUTPUT_KEY + "." + EXPORT_OUTPUT_KEY, defaultDirectory.getAbsolutePath()), null, null);
+        m_outputParam.forceShowLabel(AbstractParameter.LabelVisibility.NO_VISIBLE);
+        m_outputParam.setAllFiles(false);
+        m_outputParam.setSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 
         m_outputParam.setDefaultDirectory(defaultDirectory);
 
@@ -226,8 +226,14 @@ public class ExportMgfDialog extends DefaultDialog implements FileDialogInterfac
 
             @Override
             public void valueChanged(String value, Object associatedValue) {
-                
-                showParameter(m_outputParam, m_exportInDirectoryButton.isSelected(), m_outputParam.getObjectValue());
+
+                String stringValue = m_outputParam.getStringValue();
+
+                if (stringValue.equalsIgnoreCase("")) {
+                    stringValue = defaultDirectory.getAbsolutePath();
+                }
+
+                showParameter(m_outputParam, m_exportInDirectoryButton.isSelected(), stringValue);
                 updateParameterListPanel();
             }
 

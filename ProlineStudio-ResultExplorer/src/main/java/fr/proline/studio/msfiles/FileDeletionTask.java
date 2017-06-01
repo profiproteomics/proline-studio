@@ -5,6 +5,7 @@
  */
 package fr.proline.studio.msfiles;
 
+import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.AbstractDatabaseTask;
@@ -25,7 +26,11 @@ public class FileDeletionTask extends AbstractDatabaseTask {
 
     @Override
     public boolean fetchData() {
-        return FileUtility.deleteFile(m_file);
+        boolean b = FileUtility.deleteFile(m_file);
+        if (b) {
+            m_taskError = new TaskError("File Deletion Error", "File " + m_file.getAbsolutePath() + " could not be deleted.\n");
+        }
+        return b;
     }
 
     @Override

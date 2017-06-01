@@ -6,6 +6,7 @@
 package fr.proline.studio.rsmexplorer.gui;
 
 import fr.proline.studio.msfiles.ExportMgfDialog;
+import fr.proline.studio.msfiles.FileDeletionBatch;
 import fr.proline.mzscope.utils.IPopupMenuDelegate;
 import fr.proline.studio.mzscope.MzdbInfo;
 import fr.proline.studio.pattern.MzScopeWindowBoxManager;
@@ -263,14 +264,13 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
     }
 
     /*
-    private void displayRaw(File rawfile) {
-        if (rawfile != null) {
-            MzScope mzScope = new MzScope(MzdbInfo.MZSCOPE_VIEW, rawfile);
-            MzScopeWindowBoxManager.addMzdbScope(mzScope);
-        }
-    }
-    */
-
+     private void displayRaw(File rawfile) {
+     if (rawfile != null) {
+     MzScope mzScope = new MzScope(MzdbInfo.MZSCOPE_VIEW, rawfile);
+     MzScopeWindowBoxManager.addMzdbScope(mzScope);
+     }
+     }
+     */
     private void displayRaw(ArrayList<File> rawfiles) {
         MzScope mzScope = new MzScope(MzdbInfo.MZSCOPE_VIEW, rawfiles);
         MzScopeWindowBoxManager.addMzdbScope(mzScope);
@@ -343,18 +343,19 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
         ;
         });
         popupMenu.add(m_exportMgfItem);
-        
+
         m_deleteFileItem = new JMenuItem("Delete file(s)");
-        m_deleteFileItem.addActionListener(new ActionListener(){
+        m_deleteFileItem.addActionListener(new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent ae) {
-                
-                //FileDeletionBatch batch;
-                
+                FileDeletionBatch batch = new FileDeletionBatch(m_selectedFiles);
+                Thread thread = new Thread(batch);
+                thread.start();
             }
-            
+
         });
+        
         popupMenu.add(m_deleteFileItem);
 
     }
@@ -370,6 +371,9 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
             } else if (firstURL.endsWith(".raw")) {
                 setPopupEnabled(false);
                 m_convertRawFileItem.setEnabled(true);
+                m_deleteFileItem.setEnabled(true);
+            } else if (firstURL.endsWith(".mgf")) {
+                setPopupEnabled(false);
                 m_deleteFileItem.setEnabled(true);
             } else {
                 setPopupEnabled(false);

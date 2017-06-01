@@ -7,7 +7,6 @@ package fr.proline.studio.msfiles;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -27,7 +26,7 @@ public class FileDeletionBatch implements Runnable {
     }
 
     private void deleteFile(File f) {
-        if (f.getAbsolutePath().toLowerCase().endsWith(".mzdb") || f.getAbsolutePath().toLowerCase().endsWith(".raw") || f.getAbsolutePath().toLowerCase().endsWith(".wiff")) {
+        if (f.getAbsolutePath().toLowerCase().endsWith(".mzdb") || f.getAbsolutePath().toLowerCase().endsWith(".raw") || f.getAbsolutePath().toLowerCase().endsWith(".wiff") || f.getAbsolutePath().toLowerCase().endsWith(".mgf")) {
             FileDeleter deleter = new FileDeleter(f);
             m_executor.execute(deleter);
         }
@@ -35,8 +34,8 @@ public class FileDeletionBatch implements Runnable {
 
     @Override
     public void run() {
-        for (File f : m_files) {
-            deleteFile(f);
+        for(int i=0; i<m_files.size(); i++){
+            deleteFile(m_files.get(i));
         }
 
         m_executor.shutdown();

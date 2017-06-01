@@ -5,7 +5,7 @@
  */
 package fr.proline.studio.rsmexplorer.gui;
 
-import fr.proline.studio.wizard.ExportMgfDialog;
+import fr.proline.studio.msfiles.ExportMgfDialog;
 import fr.proline.mzscope.utils.IPopupMenuDelegate;
 import fr.proline.studio.mzscope.MzdbInfo;
 import fr.proline.studio.pattern.MzScopeWindowBoxManager;

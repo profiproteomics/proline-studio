@@ -9,6 +9,7 @@ import com.almworks.sqlite4java.SQLiteException;
 import fr.profi.mzdb.MzDbReader;
 import fr.profi.mzdb.model.SpectrumHeader;
 import fr.proline.mzscope.mzdb.MzdbRawFile;
+import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.AbstractDatabaseTask;
@@ -37,6 +38,7 @@ public class MgfExportTask extends AbstractDatabaseTask {
     public boolean fetchData() {
         
         if(!canExportMgf()){
+            m_taskError = new TaskError("Mgf Exportation Error", "MzDB file is corrupted.");
             return false;
         }
         
@@ -46,7 +48,8 @@ public class MgfExportTask extends AbstractDatabaseTask {
             mzdbFile.exportRawFile(outputFileName, m_exportSettings.getMgfExportParameters());
             return true;
         } catch (Exception ex) {
-            m_logs.append("Exporting .mgf for " + m_file.getAbsolutePath() + " failed!\n");
+            m_logs.append("Exporting .mgf for " + m_file.getAbsolutePath() + " failed.\n");
+            m_taskError = new TaskError("Mgf Exportation Error", "Exporting .mgf for " + m_file.getAbsolutePath() + " failed.\n");
             return false;
         }
     }

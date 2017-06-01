@@ -13,8 +13,6 @@ import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.SubTask;
 import java.io.File;
 import java.io.FileNotFoundException;
-import javax.swing.JOptionPane;
-import javax.swing.SwingUtilities;
 
 /**
  *
@@ -24,7 +22,7 @@ public class MgfExporter implements Runnable, WorkerInterface {
 
     private boolean m_run = false;
     private final File m_file;
-    private static int m_state = WorkerInterface.ACTIVE_STATE;
+    private int m_state = WorkerInterface.ACTIVE_STATE;
     private final StringBuilder m_logs;
     private ConversionListener m_conversionListener;
 
@@ -56,27 +54,18 @@ public class MgfExporter implements Runnable, WorkerInterface {
 
                 @Override
                 public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
+                    if (success) {
 
-                    SwingUtilities.invokeLater(new Runnable() {
+                        if (m_state == WorkerInterface.ACTIVE_STATE) {
+                            m_state = WorkerInterface.FINISHED_STATE;
 
-                        @Override
-                        public void run() {
-
-                            if (success) {
-
-                                if (m_state == WorkerInterface.ACTIVE_STATE) {
-                                    m_state = WorkerInterface.FINISHED_STATE;
-
-                                    m_conversionListener.ConversionPerformed(m_file, m_mgfExportSettings, true);
-                                }
-                            } else {
-                                terminate();
-                            }
-
+                            m_conversionListener.ConversionPerformed(m_file, m_mgfExportSettings, true);
                         }
-                    });
-
+                    } else {
+                        terminate();
+                    }
                 }
+
             };
 
             MgfExportTask task = new MgfExportTask(callback, m_file, m_logs, m_mgfExportSettings);
@@ -122,9 +111,8 @@ public class MgfExporter implements Runnable, WorkerInterface {
         return m_logs;
     }
 
-    
     public boolean canExportMgf() {
-        
+
         MzDbReader reader = null;
         try {
             reader = new MzDbReader(m_file, true);
@@ -142,8 +130,7 @@ public class MgfExporter implements Runnable, WorkerInterface {
                 reader.close();
             }
         }
-        
+
     }
-    
 
 }

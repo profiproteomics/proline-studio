@@ -43,8 +43,6 @@ public class MgfExporter implements Runnable, WorkerInterface {
     public void run() {
         m_run = true;
 
-        if (canExportMgf()) {
-
             AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
 
                 @Override
@@ -73,10 +71,6 @@ public class MgfExporter implements Runnable, WorkerInterface {
 
             m_logs.append("Exporting .mgf for " + m_file.getAbsolutePath() + " has come to its end.\n\n");
             m_run = false;
-
-        } else {
-            terminate();
-        }
     }
 
     @Override
@@ -109,28 +103,6 @@ public class MgfExporter implements Runnable, WorkerInterface {
     @Override
     public StringBuilder getLogs() {
         return m_logs;
-    }
-
-    public boolean canExportMgf() {
-
-        MzDbReader reader = null;
-        try {
-            reader = new MzDbReader(m_file, true);
-            SpectrumHeader[] headers = reader.getMs2SpectrumHeaders();
-            reader.close();
-            if (headers == null) {
-                return false;
-            } else {
-                return true;
-            }
-        } catch (ClassNotFoundException | FileNotFoundException | SQLiteException e) {
-            return false;
-        } finally {
-            if (reader != null) {
-                reader.close();
-            }
-        }
-
     }
 
 }

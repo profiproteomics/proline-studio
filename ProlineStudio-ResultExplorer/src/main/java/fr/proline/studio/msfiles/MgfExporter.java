@@ -5,14 +5,10 @@
  */
 package fr.proline.studio.msfiles;
 
-import com.almworks.sqlite4java.SQLiteException;
-import fr.profi.mzdb.MzDbReader;
-import fr.profi.mzdb.model.SpectrumHeader;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.SubTask;
 import java.io.File;
-import java.io.FileNotFoundException;
 
 /**
  *

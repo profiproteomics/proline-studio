@@ -52,13 +52,6 @@ public class MgfExportBatch implements Runnable, ConversionListener {
             export(f, settings);
         }
 
-        m_executor.shutdown();
-        try {
-            m_executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
-        } catch (InterruptedException e) {
-            ;
-        }
-
     }
 
     private void export(File f, MgfExportSettings settings) {
@@ -92,6 +85,7 @@ public class MgfExportBatch implements Runnable, ConversionListener {
                 ;
             }
             
+            MzdbFilesTopComponent.getLocalFileSystemView().reloadTree();
             MzdbFilesTopComponent.getLocalFileSystemView().expandMultipleTreePath(m_parentDirectories);
 
         }

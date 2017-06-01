@@ -10,6 +10,9 @@ import fr.proline.studio.dam.taskinfo.TaskInfo;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.AbstractDatabaseTask;
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import org.openide.util.Exceptions;
 
 /**
  *
@@ -26,11 +29,18 @@ public class FileDeletionTask extends AbstractDatabaseTask {
 
     @Override
     public boolean fetchData() {
-        boolean b = FileUtility.deleteFile(m_file);
-        if (b) {
-            m_taskError = new TaskError("File Deletion Error", "File " + m_file.getAbsolutePath() + " could not be deleted.\n");
+        boolean result = false;
+        
+        try {
+            result = Files.deleteIfExists(m_file.toPath());
+            if (!result) {
+                m_taskError = new TaskError("File Deletion Error", "File " + m_file.getAbsolutePath() + " could not be deleted.\n");
+            }
+        } catch (IOException ex) {
+            Exceptions.printStackTrace(ex);
         }
-        return b;
+
+        return result;
     }
 
     @Override

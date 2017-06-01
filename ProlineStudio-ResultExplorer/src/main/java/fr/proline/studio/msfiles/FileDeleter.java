@@ -9,7 +9,6 @@ import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.SubTask;
 import java.io.File;
-import javax.swing.SwingUtilities;
 
 /**
  *
@@ -18,6 +17,7 @@ import javax.swing.SwingUtilities;
 public class FileDeleter implements Runnable {
 
     private File m_file;
+    private ConversionListener m_conversionListener;
 
     public FileDeleter(File file) {
         m_file = file;
@@ -35,18 +35,17 @@ public class FileDeleter implements Runnable {
             @Override
             public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
 
-                SwingUtilities.invokeLater(new Runnable() {
-
-                    @Override
-                    public void run() {
-                    }
-                });
+                m_conversionListener.ConversionPerformed(m_file, null, success);
 
             }
         };
 
         FileDeletionTask task = new FileDeletionTask(callback, m_file);
         AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
+    }
+
+    public void addConversionListener(ConversionListener conversionListener) {
+        m_conversionListener = conversionListener;
     }
 
 }

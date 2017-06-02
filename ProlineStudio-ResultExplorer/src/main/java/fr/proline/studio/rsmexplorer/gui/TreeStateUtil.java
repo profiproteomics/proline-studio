@@ -10,6 +10,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.StringTokenizer;
 import javax.swing.JTree;
+import javax.swing.event.TreeExpansionEvent;
+import javax.swing.event.TreeExpansionListener;
 import javax.swing.event.TreeModelEvent;
 import javax.swing.event.TreeModelListener;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -42,7 +44,7 @@ public class TreeStateUtil {
         if (type == TreeType.SERVER) {
             NbPreferences.root().put("TreeStateUtil.Server_tree", builder.toString());
         } else if (type == TreeType.LOCAL) {
-            NbPreferences.root().put("TreeStateUtil.Local_tree"+"."+rootSuffix, builder.toString());
+            NbPreferences.root().put("TreeStateUtil.Local_tree" + "." + rootSuffix, builder.toString());
         } else if (type == TreeType.XIC) {
             NbPreferences.root().put("TreeStateUtil.XIC_tree", builder.toString());
         }
@@ -57,7 +59,7 @@ public class TreeStateUtil {
         if (type == TreeType.SERVER) {
             s = NbPreferences.root().get("TreeStateUtil.Server_tree", null);
         } else if (type == TreeType.LOCAL) {
-            s = NbPreferences.root().get("TreeStateUtil.Local_tree"+"."+rootSuffix, null);
+            s = NbPreferences.root().get("TreeStateUtil.Local_tree" + "." + rootSuffix, null);
         } else if (type == TreeType.XIC) {
             s = NbPreferences.root().get("TreeStateUtil.XIC_tree", null);
         } else {
@@ -92,16 +94,29 @@ public class TreeStateUtil {
             return;
         }
 
+        if (type == TreeType.LOCAL) {
+            tree.addTreeExpansionListener(new TreeExpansionListener() {
+
+                @Override
+                public void treeExpanded(TreeExpansionEvent tee) {
+                    setExpansionState(previouslyExpanded, tree, root, type, rootSuffix);
+                }
+
+                @Override
+                public void treeCollapsed(TreeExpansionEvent tee) {
+                }
+            }
+            );
+        }
+
         tree.getModel().addTreeModelListener(new TreeModelListener() {
 
             @Override
             public void treeNodesChanged(TreeModelEvent tme) {
-                ;
             }
 
             @Override
             public void treeNodesInserted(TreeModelEvent tme) {
-                ;
             }
 
             @Override

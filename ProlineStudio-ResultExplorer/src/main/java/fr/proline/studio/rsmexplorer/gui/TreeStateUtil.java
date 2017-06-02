@@ -27,7 +27,7 @@ public class TreeStateUtil {
         SERVER, LOCAL, XIC
     }
 
-    public static void saveExpansionState(JTree tree, TreeType type) {
+    public static void saveExpansionState(JTree tree, TreeType type, String rootSuffix) {
 
         StringBuilder builder = new StringBuilder();
 
@@ -42,14 +42,14 @@ public class TreeStateUtil {
         if (type == TreeType.SERVER) {
             NbPreferences.root().put("TreeStateUtil.Server_tree", builder.toString());
         } else if (type == TreeType.LOCAL) {
-            NbPreferences.root().put("TreeStateUtil.Local_tree", builder.toString());
+            NbPreferences.root().put("TreeStateUtil.Local_tree"+"."+rootSuffix, builder.toString());
         } else if (type == TreeType.XIC) {
             NbPreferences.root().put("TreeStateUtil.XIC_tree", builder.toString());
         }
 
     }
 
-    public static HashSet<String> loadExpansionState(TreeType type) {
+    public static HashSet<String> loadExpansionState(TreeType type, String rootSuffix) {
         HashSet<String> retrievedSet = new HashSet<String>();
 
         String s;
@@ -57,7 +57,7 @@ public class TreeStateUtil {
         if (type == TreeType.SERVER) {
             s = NbPreferences.root().get("TreeStateUtil.Server_tree", null);
         } else if (type == TreeType.LOCAL) {
-            s = NbPreferences.root().get("TreeStateUtil.Local_tree", null);
+            s = NbPreferences.root().get("TreeStateUtil.Local_tree"+"."+rootSuffix, null);
         } else if (type == TreeType.XIC) {
             s = NbPreferences.root().get("TreeStateUtil.XIC_tree", null);
         } else {
@@ -87,7 +87,7 @@ public class TreeStateUtil {
         return expandedPaths;
     }
 
-    public static void setExpansionState(HashSet<String> previouslyExpanded, JTree tree, DefaultMutableTreeNode root, TreeType type) {
+    public static void setExpansionState(HashSet<String> previouslyExpanded, JTree tree, DefaultMutableTreeNode root, TreeType type, String rootSuffix) {
         if (previouslyExpanded == null || previouslyExpanded.isEmpty()) {
             return;
         }
@@ -115,7 +115,7 @@ public class TreeStateUtil {
                 if (!tree.isExpanded(triggerPath)) {
                     tree.expandPath(triggerPath);
                 }
-                setExpansionState(previouslyExpanded, tree, root, type);
+                setExpansionState(previouslyExpanded, tree, root, type, rootSuffix);
             }
 
         });

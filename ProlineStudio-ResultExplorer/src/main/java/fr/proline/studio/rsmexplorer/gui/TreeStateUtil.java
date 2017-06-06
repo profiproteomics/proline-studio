@@ -107,33 +107,34 @@ public class TreeStateUtil {
                 }
             }
             );
-        }
+        } else {
 
-        tree.getModel().addTreeModelListener(new TreeModelListener() {
+            tree.getModel().addTreeModelListener(new TreeModelListener() {
 
-            @Override
-            public void treeNodesChanged(TreeModelEvent tme) {
-            }
-
-            @Override
-            public void treeNodesInserted(TreeModelEvent tme) {
-            }
-
-            @Override
-            public void treeNodesRemoved(TreeModelEvent tme) {
-                ;
-            }
-
-            @Override
-            public void treeStructureChanged(TreeModelEvent tme) {
-                TreePath triggerPath = new TreePath(tme.getPath());
-                if (!tree.isExpanded(triggerPath)) {
-                    tree.expandPath(triggerPath);
+                @Override
+                public void treeNodesChanged(TreeModelEvent tme) {
                 }
-                setExpansionState(previouslyExpanded, tree, root, type, rootSuffix);
-            }
 
-        });
+                @Override
+                public void treeNodesInserted(TreeModelEvent tme) {
+                }
+
+                @Override
+                public void treeNodesRemoved(TreeModelEvent tme) {
+                    ;
+                }
+
+                @Override
+                public void treeStructureChanged(TreeModelEvent tme) {
+                    TreePath triggerPath = new TreePath(tme.getPath());
+                    if (!tree.isExpanded(triggerPath)) {
+                        tree.expandPath(triggerPath);
+                    }
+                    setExpansionState(previouslyExpanded, tree, root, type, rootSuffix);
+                }
+
+            });
+        }
 
         Enumeration totalNodes = root.preorderEnumeration();
 

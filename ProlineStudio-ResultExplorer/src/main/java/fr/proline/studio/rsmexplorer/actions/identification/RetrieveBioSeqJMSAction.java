@@ -5,6 +5,7 @@
  */
 package fr.proline.studio.rsmexplorer.actions.identification;
 
+import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.uds.Project;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dam.DatabaseDataManager;
@@ -95,6 +96,8 @@ public class RetrieveBioSeqJMSAction extends AbstractRSMAction {
         List<Long> rsmIds = new ArrayList<>();
 
         int nbNodes = selectedNodes.length;
+        final List<ResultSummary> rsms2Clean = new ArrayList<>();
+
         for (int i = 0; i < nbNodes; i++) {
             final DataSetNode dataSetNode = (DataSetNode) selectedNodes[i];
             datasets.add(dataSetNode);
@@ -102,6 +105,9 @@ public class RetrieveBioSeqJMSAction extends AbstractRSMAction {
             treeModel.nodeChanged(dataSetNode);
 
             final DDataset d = dataSetNode.getDataset();
+            ResultSummary rsm = d.getResultSummary();
+            if(rsm != null)
+                rsms2Clean.add(rsm);
             rsmIds.add(d.getResultSummaryId());
         }
 
@@ -122,6 +128,10 @@ public class RetrieveBioSeqJMSAction extends AbstractRSMAction {
                     dataSetNode.setIsChanging(false);
                     treeModel.nodeChanged(dataSetNode);
                 }
+                
+                for (ResultSummary rsm : rsms2Clean)
+                    rsm.getTransientData().setProteinSetArray(null);
+
             }
         };
 

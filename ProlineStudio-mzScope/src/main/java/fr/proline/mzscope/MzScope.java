@@ -50,16 +50,16 @@ public class MzScope implements IMzScope{
 
 
     @Override
-    public void openRaw(File file) {
+    public void openRaw(File file, boolean display) {
         logger.debug("openRaw for "+file.getName());
-        mzScopePanel.openRaw(Arrays.asList(file));
+        mzScopePanel.openRaw(Arrays.asList(file), display);
     }
 
 
     @Override
-    public void openRaw(List<File> files) {
+    public void openRaw(List<File> files, boolean display) {
         logger.debug("openRaw for list");
-        mzScopePanel.openRaw(files);
+        mzScopePanel.openRaw(files, display);
     }
 
     @Override

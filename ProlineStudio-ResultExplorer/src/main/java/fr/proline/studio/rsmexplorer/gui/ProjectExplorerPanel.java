@@ -89,6 +89,7 @@ public class ProjectExplorerPanel extends JPanel {
         // ---- Create Objects
         m_projectsComboBox = new JComboBox<>();
         m_projectsComboBox.setRenderer(new ProjectComboboxRenderer());
+        m_projectsComboBox.setMaximumRowCount(16);  // default value is 8. ticket #15005
 
         JPanel buttonsPanel = createButtonPanel();
 

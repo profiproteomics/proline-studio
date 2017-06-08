@@ -85,6 +85,13 @@ public abstract class AbstractJoinDataModel extends AbstractTableModel implement
     public GlobalTableModelInterface getSecondTableModel(){
         return m_data2;
     }
+    
+    public Integer getRowInFirstModel(int row) {
+        return m_rowsInTable1.get(row);
+    }
+    public Integer getRowInSecondModel(int row) {
+        return m_rowsInTable2.get(row);
+    }
 
     protected void selectKeys() {
         int[] keys1 = m_data1.getKeysColumn();

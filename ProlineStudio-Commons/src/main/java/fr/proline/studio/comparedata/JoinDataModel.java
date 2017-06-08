@@ -18,10 +18,10 @@ import javax.swing.table.TableCellRenderer;
  */
 public class JoinDataModel extends AbstractJoinDataModel {
 
-    private ArrayList<Integer> m_keysColumns1 = new ArrayList<>();
-    private ArrayList<Integer> m_keysColumns2 = new ArrayList<>();
-    private ArrayList<Integer> m_allColumns1 = new ArrayList<>();
-    private ArrayList<Integer> m_allColumns2 = new ArrayList<>();
+    private final ArrayList<Integer> m_keysColumns1 = new ArrayList<>();
+    private final ArrayList<Integer> m_keysColumns2 = new ArrayList<>();
+    private final ArrayList<Integer> m_allColumns1 = new ArrayList<>();
+    private final ArrayList<Integer> m_allColumns2 = new ArrayList<>();
 
     
     public JoinDataModel() {
@@ -506,13 +506,19 @@ public class JoinDataModel extends AbstractJoinDataModel {
             return null;
         }
 
+        Integer row1 = m_rowsInTable1.get(rowIndex);
+        Integer row2 = m_rowsInTable2.get(rowIndex);
+        
         // Columns with keys
         if (columnIndex<m_keysColumns1.size()) {
             int index1 = m_keysColumns1.get(columnIndex);
-            if (index1 != -1) {
-                return m_data1.getRenderer(rowIndex, index1);
+            if (row1 == null) {
+                return null;
             }
-            return m_data1.getRenderer(rowIndex, m_keysColumns2.get(columnIndex));
+            if (index1 != -1) {
+                return m_data1.getRenderer(row1, index1);
+            }
+            return m_data1.getRenderer(row1, m_keysColumns2.get(columnIndex));
         }
         
         columnIndex -= m_keysColumns1.size();
@@ -526,11 +532,17 @@ public class JoinDataModel extends AbstractJoinDataModel {
                 
 
         if (columnIndex < m_allColumns1.size()) {
-            return m_data1.getRenderer(rowIndex, m_allColumns1.get(columnIndex));
+            if (row1 == null) {
+                return null;
+            }
+            return m_data1.getRenderer(row1, m_allColumns1.get(columnIndex));
         }
         columnIndex -= m_allColumns1.size();
         if (columnIndex < m_allColumns2.size()) {
-            return m_data2.getRenderer(rowIndex, m_allColumns2.get(columnIndex));
+            if (row2 == null) {
+                return null;
+            }
+            return m_data2.getRenderer(row2, m_allColumns2.get(columnIndex));
         }
 
         return null;

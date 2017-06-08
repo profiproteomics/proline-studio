@@ -172,6 +172,11 @@ public class IdentificationPropertiesTableModel extends AbstractPropertiesTableM
                 }
                 case FASTA_FILE_NAME: {
                     boolean first = true;
+                    
+                    if(searchSetting==null){
+                        return new GroupObject("AGGREGATION", this);
+                    }
+                    
                     Set<SearchSettingsSeqDatabaseMap> searchSettingsSeqDatabaseMapSet = searchSetting.getSearchSettingsSeqDatabaseMaps();
                     Iterator<SearchSettingsSeqDatabaseMap> itSeqDbMap = searchSettingsSeqDatabaseMapSet.iterator();
                     while (itSeqDbMap.hasNext()) {

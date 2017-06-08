@@ -3,7 +3,7 @@
  * To change this template file, choose CommunicationTools | Templates
  * and open the template in the editor.
  */
-package fr.proline.studio.wizard;
+package fr.proline.studio.msfiles;
 
 import fr.proline.studio.dpm.jms.AccessJMSManagerThread;
 import fr.proline.studio.dpm.task.jms.AbstractJMSCallback;
@@ -32,13 +32,13 @@ public class MzdbUploader implements Runnable, WorkerInterface {
 
     @Override
     public void terminate() {
-        this.m_run = false;
-        this.m_state = WorkerInterface.KILLED_STATE;
+        m_run = false;
+        m_state = WorkerInterface.KILLED_STATE;
     }
 
     @Override
     public boolean isAlive() {
-        return this.m_run;
+        return m_run;
     }
 
     @Override
@@ -95,17 +95,17 @@ public class MzdbUploader implements Runnable, WorkerInterface {
 
         AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
 
-        this.m_run = false;
+        m_run = false;
 
     }
 
     public File getFile() {
-        return this.m_file;
+        return m_file;
     }
 
     @Override
     public int getState() {
-        return this.m_state;
+        return m_state;
     }
 
     private void checkFileFinalization() {

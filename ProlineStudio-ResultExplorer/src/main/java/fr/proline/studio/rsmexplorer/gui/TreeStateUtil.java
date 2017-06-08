@@ -14,9 +14,7 @@ import javax.swing.event.TreeExpansionEvent;
 import javax.swing.event.TreeExpansionListener;
 import javax.swing.event.TreeModelEvent;
 import javax.swing.event.TreeModelListener;
-import javax.swing.event.TreeWillExpandListener;
 import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.ExpandVetoException;
 import javax.swing.tree.TreePath;
 import org.openide.util.NbPreferences;
 
@@ -31,7 +29,7 @@ public class TreeStateUtil {
         SERVER, LOCAL, XIC
     }
 
-    public static void saveExpansionState(JTree tree, TreeType type) {
+    public static void saveExpansionState(JTree tree, TreeType type, String rootSuffix) {
 
         StringBuilder builder = new StringBuilder();
 
@@ -46,14 +44,14 @@ public class TreeStateUtil {
         if (type == TreeType.SERVER) {
             NbPreferences.root().put("TreeStateUtil.Server_tree", builder.toString());
         } else if (type == TreeType.LOCAL) {
-            NbPreferences.root().put("TreeStateUtil.Local_tree", builder.toString());
+            NbPreferences.root().put("TreeStateUtil.Local_tree" + "." + rootSuffix, builder.toString());
         } else if (type == TreeType.XIC) {
             NbPreferences.root().put("TreeStateUtil.XIC_tree", builder.toString());
         }
 
     }
 
-    public static HashSet<String> loadExpansionState(TreeType type) {
+    public static HashSet<String> loadExpansionState(TreeType type, String rootSuffix) {
         HashSet<String> retrievedSet = new HashSet<String>();
 
         String s;
@@ -61,7 +59,7 @@ public class TreeStateUtil {
         if (type == TreeType.SERVER) {
             s = NbPreferences.root().get("TreeStateUtil.Server_tree", null);
         } else if (type == TreeType.LOCAL) {
-            s = NbPreferences.root().get("TreeStateUtil.Local_tree", null);
+            s = NbPreferences.root().get("TreeStateUtil.Local_tree" + "." + rootSuffix, null);
         } else if (type == TreeType.XIC) {
             s = NbPreferences.root().get("TreeStateUtil.XIC_tree", null);
         } else {
@@ -91,38 +89,52 @@ public class TreeStateUtil {
         return expandedPaths;
     }
 
-    public static void setExpansionState(HashSet<String> previouslyExpanded, JTree tree, DefaultMutableTreeNode root, TreeType type) {
+    public static void setExpansionState(HashSet<String> previouslyExpanded, JTree tree, DefaultMutableTreeNode root, TreeType type, String rootSuffix) {
         if (previouslyExpanded == null || previouslyExpanded.isEmpty()) {
             return;
         }
 
-        tree.getModel().addTreeModelListener(new TreeModelListener() {
+        if (type == TreeType.LOCAL) {
+            tree.addTreeExpansionListener(new TreeExpansionListener() {
 
-            @Override
-            public void treeNodesChanged(TreeModelEvent tme) {
-                ;
-            }
-
-            @Override
-            public void treeNodesInserted(TreeModelEvent tme) {
-                ;
-            }
-
-            @Override
-            public void treeNodesRemoved(TreeModelEvent tme) {
-                ;
-            }
-
-            @Override
-            public void treeStructureChanged(TreeModelEvent tme) {
-                TreePath triggerPath = new TreePath(tme.getPath());
-                if (!tree.isExpanded(triggerPath)) {
-                    tree.expandPath(triggerPath);
+                @Override
+                public void treeExpanded(TreeExpansionEvent tee) {
+                    setExpansionState(previouslyExpanded, tree, root, type, rootSuffix);
                 }
-                setExpansionState(previouslyExpanded, tree, root, type);
-            }
 
-        });
+                @Override
+                public void treeCollapsed(TreeExpansionEvent tee) {
+                }
+            }
+            );
+        } else {
+
+            tree.getModel().addTreeModelListener(new TreeModelListener() {
+
+                @Override
+                public void treeNodesChanged(TreeModelEvent tme) {
+                }
+
+                @Override
+                public void treeNodesInserted(TreeModelEvent tme) {
+                }
+
+                @Override
+                public void treeNodesRemoved(TreeModelEvent tme) {
+                    ;
+                }
+
+                @Override
+                public void treeStructureChanged(TreeModelEvent tme) {
+                    TreePath triggerPath = new TreePath(tme.getPath());
+                    if (!tree.isExpanded(triggerPath)) {
+                        tree.expandPath(triggerPath);
+                    }
+                    setExpansionState(previouslyExpanded, tree, root, type, rootSuffix);
+                }
+
+            });
+        }
 
         Enumeration totalNodes = root.preorderEnumeration();
 

@@ -1,7 +1,6 @@
 package fr.proline.studio.rsmexplorer;
 
 import fr.proline.studio.gui.HourglassPanel;
-import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.PropertiesWrapperNode;
 import fr.proline.studio.utils.PropertiesProviderInterface;
 import java.awt.BorderLayout;

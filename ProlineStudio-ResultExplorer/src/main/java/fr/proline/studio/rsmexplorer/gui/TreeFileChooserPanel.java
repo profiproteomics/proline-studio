@@ -65,7 +65,7 @@ public class TreeFileChooserPanel extends JPanel {
 
     public void restoreTree(TreeStateUtil.TreeType type) {
         if (m_tree != null) {
-            TreeStateUtil.setExpansionState(TreeStateUtil.loadExpansionState(type), m_tree, (DefaultMutableTreeNode) m_tree.getModel().getRoot(), type);
+            TreeStateUtil.setExpansionState(TreeStateUtil.loadExpansionState(type, null), m_tree, (DefaultMutableTreeNode) m_tree.getModel().getRoot(), type, null);
         }
     }
 
@@ -91,12 +91,12 @@ public class TreeFileChooserPanel extends JPanel {
 
             @Override
             public void treeExpanded(TreeExpansionEvent tee) {
-                TreeStateUtil.saveExpansionState(m_tree, m_treeType);
+                TreeStateUtil.saveExpansionState(m_tree, m_treeType, null);
             }
 
             @Override
             public void treeCollapsed(TreeExpansionEvent tee) {
-                TreeStateUtil.saveExpansionState(m_tree, m_treeType);
+                TreeStateUtil.saveExpansionState(m_tree, m_treeType, null);
             }
 
         });
@@ -128,7 +128,6 @@ public class TreeFileChooserPanel extends JPanel {
         GridBagConstraints c = new GridBagConstraints();
         c.anchor = GridBagConstraints.NORTHWEST;
         c.fill = GridBagConstraints.BOTH;
-        //c.insets = new java.awt.Insets(5, 5, 5, 5);
         c.insets = new java.awt.Insets(0, 0, 0, 0);
 
         c.gridx = 0;
@@ -194,7 +193,7 @@ public class TreeFileChooserPanel extends JPanel {
 
         m_model.reload();
 
-        TreeStateUtil.setExpansionState(expandedPaths, m_tree, (DefaultMutableTreeNode) m_tree.getModel().getRoot(), TreeStateUtil.TreeType.SERVER);
+        TreeStateUtil.setExpansionState(expandedPaths, m_tree, (DefaultMutableTreeNode) m_tree.getModel().getRoot(), TreeStateUtil.TreeType.SERVER, null);
     }
 
     public static TreePath getPath(TreeNode treeNode) {

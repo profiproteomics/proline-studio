@@ -40,7 +40,7 @@ public final class MzdbFilesTopComponent extends TopComponent {
 
     private static TreeFileChooserPanel m_tree;
     private TreeFileChooserTransferHandler m_transferHandler;
-    private LocalFileSystemView m_localFileSystemView;
+    private static LocalFileSystemView m_localFileSystemView;
     
     public MzdbFilesTopComponent() {
         initComponents();
@@ -63,7 +63,7 @@ public final class MzdbFilesTopComponent extends TopComponent {
         c.weightx = 1;
         c.weighty = 1;
 
-        m_localFileSystemView = new LocalFileSystemView(new LocalFileSystemTransferHandler());       
+        m_localFileSystemView = new LocalFileSystemView(new LocalFileSystemTransferHandler(), true);       
         add(m_localFileSystemView, c);
 
         c.gridy++;
@@ -82,7 +82,11 @@ public final class MzdbFilesTopComponent extends TopComponent {
     
     public static TreeFileChooserPanel getTreeFileChooserPanel(){
         return m_tree;
-    } 
+    }
+    
+    public static LocalFileSystemView getLocalFileSystemView(){
+        return m_localFileSystemView;
+    }
 
     @Override
     public void componentOpened() {

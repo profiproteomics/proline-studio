@@ -598,18 +598,26 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
             // But some Aggregation are null (for identifications) -> identifications are not loaded
             // So we load aggregations afterwards
             TypedQuery<DDataset> datasetQuery;
+            TypedQuery<DDataset> datasetQuery2 = null;
             if (m_parentDataset.getType() == Dataset.DatasetType.TRASH) {
                 if (m_identificationDataset) {
-                    datasetQuery = entityManagerUDS.createQuery("SELECT new fr.proline.core.orm.uds.dto.DDataset(d.id, d.project, d.name,  d.type, d.childrenCount, d.resultSetId, d.resultSummaryId, d.number)  FROM Dataset d WHERE d.parentDataset.id=:parentDatasetId AND d.type<>:quantitationType ORDER BY d.number ASC", DDataset.class);
+                    datasetQuery = entityManagerUDS.createQuery("SELECT new fr.proline.core.orm.uds.dto.DDataset(d.id, d.project, d.name,  d.type, d.childrenCount, d.resultSetId, d.resultSummaryId, d.number)  FROM Dataset d WHERE d.parentDataset.id=:parentDatasetId AND d.type<>:quantitationType AND d.type<>:quantitationType2 ORDER BY d.number ASC", DDataset.class);
+                    datasetQuery.setParameter("quantitationType", Dataset.DatasetType.QUANTITATION);
+                datasetQuery.setParameter("quantitationType2", Dataset.DatasetType.QUANTITATION_FOLDER);
                 } else {
                     datasetQuery = entityManagerUDS.createQuery("SELECT new fr.proline.core.orm.uds.dto.DDataset(d.id, d.project, d.name,  d.type, d.childrenCount, d.resultSetId, mqc.quantResultSummaryId, d.number)  FROM Dataset d, MasterQuantitationChannel mqc WHERE d.parentDataset.id=:parentDatasetId AND d.type=:quantitationType AND mqc.dataset.id = d.id ORDER BY d.number ASC", DDataset.class);
+                    datasetQuery2 = entityManagerUDS.createQuery("SELECT new fr.proline.core.orm.uds.dto.DDataset(d.id, d.project, d.name,  d.type, d.childrenCount, d.resultSetId, d.resultSummaryId, d.number)  FROM Dataset d WHERE d.parentDataset.id=:parentDatasetId AND d.type=:quantitationType2 ORDER BY d.number ASC", DDataset.class);
+                    datasetQuery.setParameter("quantitationType", Dataset.DatasetType.QUANTITATION);
+                    datasetQuery2.setParameter("quantitationType2", Dataset.DatasetType.QUANTITATION_FOLDER);
                 }
-                datasetQuery.setParameter("quantitationType", Dataset.DatasetType.QUANTITATION);
+
             } else {
                 if (m_identificationDataset) {
                     datasetQuery = entityManagerUDS.createQuery("SELECT new fr.proline.core.orm.uds.dto.DDataset(d.id, d.project, d.name,  d.type, d.childrenCount, d.resultSetId, d.resultSummaryId, d.number)  FROM Dataset d WHERE d.parentDataset.id=:parentDatasetId ORDER BY d.number ASC", DDataset.class);
                 } else {
-                    datasetQuery = entityManagerUDS.createQuery("SELECT new fr.proline.core.orm.uds.dto.DDataset(d.id, d.project, d.name,  d.type, d.childrenCount, d.resultSetId, mqc.quantResultSummaryId, d.number)  FROM Dataset d, MasterQuantitationChannel mqc WHERE d.parentDataset.id=:parentDatasetId AND mqc.dataset.id = d.id ORDER BY d.number ASC", DDataset.class);
+                    datasetQuery =  entityManagerUDS.createQuery("SELECT new fr.proline.core.orm.uds.dto.DDataset(d.id, d.project, d.name,  d.type, d.childrenCount, d.resultSetId, mqc.quantResultSummaryId, d.number)  FROM Dataset d, MasterQuantitationChannel mqc WHERE d.parentDataset.id=:parentDatasetId AND mqc.dataset.id = d.id ORDER BY d.number ASC", DDataset.class);
+                    datasetQuery2 = entityManagerUDS.createQuery("SELECT new fr.proline.core.orm.uds.dto.DDataset(d.id, d.project, d.name,  d.type, d.childrenCount, d.resultSetId, d.resultSummaryId, d.number)  FROM Dataset d WHERE d.type=:datasetType AND d.parentDataset.id=:parentDatasetId ORDER BY d.number ASC", DDataset.class);
+                    datasetQuery2.setParameter("datasetType", Dataset.DatasetType.QUANTITATION_FOLDER);
                 }
             }
             datasetQuery.setParameter("parentDatasetId", parentDatasetId);
@@ -626,6 +634,34 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
                 if (resultSetId != null) {
                     rsetIdList.add(resultSetId);
                 }
+            }
+            
+            if (datasetQuery2 != null) {
+                datasetQuery2.setParameter("parentDatasetId", parentDatasetId);
+                dataSetResultList = datasetQuery2.getResultList();
+                itDataset = dataSetResultList.iterator();
+                while (itDataset.hasNext()) {
+                    DDataset datasetCur = itDataset.next();
+                    m_list.add(new DataSetData(datasetCur));
+
+                    Long id = datasetCur.getId();
+                    idList.add(id);
+                    ddatasetMap.put(id, datasetCur);
+                    Long resultSetId = datasetCur.getResultSetId();
+                    if (resultSetId != null) {
+                        rsetIdList.add(resultSetId);
+                    }
+                }
+                
+                // sort m_list
+                m_list.sort(new Comparator<AbstractData>() {
+                    @Override
+                    public int compare(AbstractData o1, AbstractData o2) {
+                        DataSetData d1 = (DataSetData) o1;
+                        DataSetData d2 =  (DataSetData) o2;
+                        return d1.getDataset().getNumber() - d2.getDataset().getNumber() ;
+                    }
+                });
             }
 
             // Load Aggregation and QuantitationMethod separately

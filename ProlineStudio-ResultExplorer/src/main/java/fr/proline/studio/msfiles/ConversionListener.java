@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package fr.proline.studio.wizard;
+package fr.proline.studio.msfiles;
 
 import java.io.File;
 
@@ -13,6 +13,6 @@ import java.io.File;
  */
 public interface ConversionListener {
     
-    public void ConversionPerformed(File f, ConversionSettings settings, boolean success);
+    public void ConversionPerformed(File f, Object settings, boolean success);
     
 }

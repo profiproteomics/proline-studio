@@ -5,12 +5,16 @@
  */
 package fr.proline.studio.rsmexplorer.gui;
 
+
+import fr.proline.studio.msfiles.ExportMgfDialog;
+import fr.proline.studio.msfiles.FileDeletionBatch;
 import fr.proline.mzscope.utils.IPopupMenuDelegate;
 import fr.proline.studio.mzscope.MzdbInfo;
 import fr.proline.studio.pattern.MzScopeWindowBoxManager;
 import fr.proline.studio.rsmexplorer.gui.dialog.ConvertRawDialog;
 import fr.proline.studio.rsmexplorer.gui.dialog.UploadMzdbDialog;
 import fr.proline.studio.utils.IconManager;
+import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -22,19 +26,22 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.HashSet;
 import javax.swing.BorderFactory;
-import javax.swing.Icon;
+import javax.swing.Box;
+import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
+import javax.swing.JToolBar;
 import javax.swing.JTree;
-import javax.swing.UIManager;
 import javax.swing.event.TreeExpansionEvent;
 import javax.swing.event.TreeExpansionListener;
+import javax.swing.event.TreeModelEvent;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreePath;
@@ -48,15 +55,22 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
 
     private LocalFileSystemModel m_fileSystemDataModel;
     private JTree m_tree;
-    private JPopupMenu m_popupMenu;
-    private JMenuItem m_detectPeakelsItem, m_viewRawFileItem, m_convertRawFileItem, m_uploadMzdbFileItem;
+    private JPopupMenu m_popupMenu;    
+    private JMenuItem m_detectPeakelsItem, m_viewRawFileItem, m_convertRawFileItem, m_uploadMzdbFileItem, m_exportMgfItem, m_deleteFileItem;
     private ActionListener viewRawFileAction;
     private ArrayList<File> m_selectedFiles;
     private final LocalFileSystemTransferHandler m_transferHandler;
+    private boolean m_showUpdateButton;
+    private JComboBox m_rootsComboBox;
 
     public LocalFileSystemView(LocalFileSystemTransferHandler transferHandler) {
         m_transferHandler = transferHandler;
         initComponents();
+    }
+
+    public LocalFileSystemView(LocalFileSystemTransferHandler transferHandler, boolean showUpdateButton) {
+        this(transferHandler);
+        m_showUpdateButton = showUpdateButton;
     }
 
     private void initComponents() {
@@ -69,34 +83,66 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
         GridBagConstraints c = new GridBagConstraints();
         c.anchor = GridBagConstraints.NORTHWEST;
         c.fill = GridBagConstraints.BOTH;
-        c.insets = new java.awt.Insets(5, 5, 5, 5);
+        c.insets = new java.awt.Insets(0, 0, 0, 0);
 
         c.gridy = 0;
+        c.gridx = 0;
+
+        c.gridheight = 1;
+
         c.weighty = 0;
         c.weightx = 0;
 
-        File[] roots = File.listRoots();
-        JComboBox rootsComboBox = new JComboBox(roots);
+        if (true) {
+            JButton updateButton = new JButton(IconManager.getIcon(IconManager.IconType.REFRESH));
+            updateButton.setFocusPainted(false);
+            updateButton.setOpaque(true);
+            updateButton.addActionListener(new ActionListener() {
 
-        rootsComboBox.addItemListener(new ItemListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    reloadTree();
+                    updateTree();
+                }
+            });
+
+            JToolBar toolbar = new JToolBar();
+            toolbar.setFloatable(false);
+
+            toolbar.add(updateButton);
+
+            add(toolbar, c);
+
+            c.gridy++;
+
+            add(Box.createVerticalBox(), c);
+
+            c.gridy = 0;
+
+            c.gridheight = 2;
+
+            c.gridx++;
+        }
+
+        JPanel treePanel = new JPanel();
+        treePanel.setLayout(new BorderLayout(0, 5));
+
+        File[] roots = File.listRoots();
+        m_rootsComboBox = new JComboBox(roots);
+
+        m_rootsComboBox.addItemListener(new ItemListener() {
 
             @Override
             public void itemStateChanged(ItemEvent ie) {
-                if (m_fileSystemDataModel != null) {
-                    m_tree.setModel(null);
-                    m_fileSystemDataModel = new LocalFileSystemModel(rootsComboBox.getSelectedItem().toString());
-                    m_tree.setModel(m_fileSystemDataModel);
-                }
+
+                reloadTree();
+                updateTree();
 
             }
 
         });
 
-        add(rootsComboBox, c);
-
-        c.weighty = 1;
-        c.weightx = 1;
-        c.gridy++;
+        treePanel.add(m_rootsComboBox, BorderLayout.NORTH);
 
         m_popupMenu = new JPopupMenu();
         initPopupMenu(m_popupMenu);
@@ -109,47 +155,46 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
             @Override
             public Component getTreeCellRendererComponent(JTree tree, Object value, boolean selected, boolean expanded, boolean isLeaf, int row, boolean focused) {
                 Component c = super.getTreeCellRendererComponent(tree, value, selected, expanded, isLeaf, row, focused);
-                
-                if(((DefaultMutableTreeNode)value).isRoot()){
+
+                if (((DefaultMutableTreeNode) value).isRoot()) {
                     setIcon(IconManager.getIcon(IconManager.IconType.DRIVE));
-                }else{
-                    File f = (File) ((DefaultMutableTreeNode)value).getUserObject();
-                    if(f.isDirectory()){
-                        if(expanded){
+                } else {
+                    File f = (File) ((DefaultMutableTreeNode) value).getUserObject();
+                    if (f.isDirectory()) {
+                        if (expanded) {
                             setIcon(IconManager.getIcon(IconManager.IconType.FOLDER_EXPANDED));
-                        }else{
+                        } else {
                             setIcon(IconManager.getIcon(IconManager.IconType.FOLDER));
                         }
-                    }else{
-                        if(f.getAbsolutePath().toLowerCase().endsWith(".raw")){
+                    } else {
+                        if (f.getAbsolutePath().toLowerCase().endsWith(".raw")) {
                             setIcon(IconManager.getIcon(IconManager.IconType.SPECTRUM));
-                        }else if(f.getAbsolutePath().toLowerCase().endsWith(".mzdb")){
+                        } else if (f.getAbsolutePath().toLowerCase().endsWith(".mzdb")) {
                             setIcon(IconManager.getIcon(IconManager.IconType.SPECTRUM_EMISSION));
-                        }else{
+                        } else {
                             setIcon(IconManager.getIcon(IconManager.IconType.FILE));
                         }
                     }
                 }
 
-                
                 return c;
             }
         });
 
-        HashSet<String> set = TreeStateUtil.loadExpansionState(TreeStateUtil.TreeType.LOCAL);
+        HashSet<String> set = TreeStateUtil.loadExpansionState(TreeStateUtil.TreeType.LOCAL, m_rootsComboBox.getSelectedItem().toString());
 
-        TreeStateUtil.setExpansionState(set, m_tree, (DefaultMutableTreeNode) m_tree.getModel().getRoot(), TreeStateUtil.TreeType.LOCAL);
+        TreeStateUtil.setExpansionState(set, m_tree, (DefaultMutableTreeNode) m_tree.getModel().getRoot(), TreeStateUtil.TreeType.LOCAL, m_rootsComboBox.getSelectedItem().toString());
 
         m_tree.addTreeExpansionListener(new TreeExpansionListener() {
 
             @Override
             public void treeExpanded(TreeExpansionEvent tee) {
-                TreeStateUtil.saveExpansionState(m_tree, TreeStateUtil.TreeType.LOCAL);
+                TreeStateUtil.saveExpansionState(m_tree, TreeStateUtil.TreeType.LOCAL, m_rootsComboBox.getSelectedItem().toString());
             }
 
             @Override
             public void treeCollapsed(TreeExpansionEvent tee) {
-                TreeStateUtil.saveExpansionState(m_tree, TreeStateUtil.TreeType.LOCAL);
+                TreeStateUtil.saveExpansionState(m_tree, TreeStateUtil.TreeType.LOCAL, m_rootsComboBox.getSelectedItem().toString());
             }
 
         });
@@ -167,7 +212,12 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
         });
 
         JScrollPane scrollPane = new JScrollPane(m_tree);
-        add(scrollPane, c);
+        treePanel.add(scrollPane, BorderLayout.CENTER);
+
+        c.weightx = 1.0;
+        c.weighty = 1.0;
+
+        add(treePanel, c);
 
     }
 
@@ -184,6 +234,48 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
         return selectedURLs;
     }
 
+    private void updateTree() {
+        TreeStateUtil.setExpansionState(TreeStateUtil.loadExpansionState(TreeStateUtil.TreeType.LOCAL, m_rootsComboBox.getSelectedItem().toString()), m_tree, (DefaultMutableTreeNode) m_tree.getModel().getRoot(), TreeStateUtil.TreeType.LOCAL, m_rootsComboBox.getSelectedItem().toString());
+    }
+
+    public void expandMultipleTreePath(HashSet<String> directories) {
+        DefaultMutableTreeNode root = (DefaultMutableTreeNode) m_fileSystemDataModel.getRoot();
+        Enumeration totalNodes = root.depthFirstEnumeration();
+
+        while (totalNodes.hasMoreElements()) {
+            DefaultMutableTreeNode node = (DefaultMutableTreeNode) totalNodes.nextElement();
+
+            if (directories.contains(node.toString())) {
+                m_tree.expandPath(new TreePath(node.getPath()));
+            }
+
+        }
+    }
+
+    public void reloadTree() {
+        if (m_fileSystemDataModel != null) {
+            m_tree.setModel(null);
+            m_fileSystemDataModel = new LocalFileSystemModel(m_rootsComboBox.getSelectedItem().toString());
+            m_tree.setModel(m_fileSystemDataModel);
+        }
+    }
+
+    public void reloadMultipleTreePath(HashSet<String> directories) {
+        DefaultMutableTreeNode root = (DefaultMutableTreeNode) m_fileSystemDataModel.getRoot();
+        Enumeration totalNodes = root.depthFirstEnumeration();
+
+        while (totalNodes.hasMoreElements()) {
+            DefaultMutableTreeNode node = (DefaultMutableTreeNode) totalNodes.nextElement();
+
+            if (directories.contains(node.toString())) {
+                //Insted of expanding do something else!
+                m_fileSystemDataModel.fireTreeNodesChanged(new TreeModelEvent(node, node.getPath()));
+                //Remove children, reload them!
+            }
+
+        }
+    }
+
     private boolean isSelectionHomogeneous(ArrayList<String> selectedURLs) {
         if (selectedURLs.size() > 0) {
             String firstSuffix = selectedURLs.get(0).substring(selectedURLs.get(0).lastIndexOf("."));
@@ -197,13 +289,14 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
 
     }
 
-    private void displayRaw(File rawfile) {
-        if (rawfile != null) {
-            MzScope mzScope = new MzScope(MzdbInfo.MZSCOPE_VIEW, rawfile);
-            MzScopeWindowBoxManager.addMzdbScope(mzScope);
-        }
-    }
-
+    /*
+     private void displayRaw(File rawfile) {
+     if (rawfile != null) {
+     MzScope mzScope = new MzScope(MzdbInfo.MZSCOPE_VIEW, rawfile);
+     MzScopeWindowBoxManager.addMzdbScope(mzScope);
+     }
+     }
+     */
     private void displayRaw(ArrayList<File> rawfiles) {
         MzScope mzScope = new MzScope(MzdbInfo.MZSCOPE_VIEW, rawfiles);
         MzScopeWindowBoxManager.addMzdbScope(mzScope);
@@ -224,14 +317,12 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
                 displayRaw(m_selectedFiles);
             }
         };
-        m_viewRawFileItem = new JMenuItem();
-        m_viewRawFileItem.setText("View");
+        m_viewRawFileItem = new JMenuItem("View");
         m_viewRawFileItem.addActionListener(viewRawFileAction);
         popupMenu.add(m_viewRawFileItem);
 
         // detect peakels
-        m_detectPeakelsItem = new JMenuItem();
-        m_detectPeakelsItem.setText("Detect Peakels");
+        m_detectPeakelsItem = new JMenuItem("Detect Peakels");
         m_detectPeakelsItem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent evt) {
@@ -241,8 +332,7 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
         popupMenu.add(m_detectPeakelsItem);
 
         // convert raw file
-        m_convertRawFileItem = new JMenuItem();
-        m_convertRawFileItem.setText("Convert to mzDB");
+        m_convertRawFileItem = new JMenuItem("Convert to mzDB");
         m_convertRawFileItem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent ae) {
@@ -254,8 +344,7 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
         popupMenu.add(m_convertRawFileItem);
 
         // upload mzdb file
-        m_uploadMzdbFileItem = new JMenuItem();
-        m_uploadMzdbFileItem.setText("Upload");
+        m_uploadMzdbFileItem = new JMenuItem("Upload to Server");
         m_uploadMzdbFileItem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent ae) {
@@ -265,6 +354,34 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
             }
         });
         popupMenu.add(m_uploadMzdbFileItem);
+
+        m_exportMgfItem = new JMenuItem("Export .mgf");
+        m_exportMgfItem.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+                ExportMgfDialog dialog = ExportMgfDialog.getDialog(null, "Export .mgf file(s)");
+                dialog.setLocationRelativeTo(null);
+                dialog.setFiles(m_selectedFiles);
+                dialog.setVisible(true);
+            }
+        ;
+        });
+             popupMenu.add(m_exportMgfItem);
+
+        m_deleteFileItem = new JMenuItem("Delete file(s)");
+        m_deleteFileItem.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+                FileDeletionBatch batch = new FileDeletionBatch(m_selectedFiles);
+                Thread thread = new Thread(batch);
+                thread.start();
+            }
+
+        });
+
+        popupMenu.add(m_deleteFileItem);
 
     }
 
@@ -279,6 +396,10 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
             } else if (firstURL.endsWith(".raw")) {
                 setPopupEnabled(false);
                 m_convertRawFileItem.setEnabled(true);
+                m_deleteFileItem.setEnabled(true);
+            } else if (firstURL.endsWith(".mgf")) {
+                setPopupEnabled(false);
+                m_deleteFileItem.setEnabled(true);
             } else {
                 setPopupEnabled(false);
             }
@@ -292,6 +413,8 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
         m_detectPeakelsItem.setEnabled(b);
         m_convertRawFileItem.setEnabled(b);
         m_uploadMzdbFileItem.setEnabled(b);
+        m_exportMgfItem.setEnabled(b);	
+        m_deleteFileItem.setEnabled(b);
     }
 
     @Override

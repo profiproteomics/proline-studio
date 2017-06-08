@@ -21,7 +21,7 @@ import org.openide.windows.WindowManager;
         id = "fr.proline.studio.rsmexplorer.actions.UploadDatAction")
 @ActionRegistration(displayName = "#CTL_UploadDatAction")
 @ActionReferences({
-    @ActionReference(path = "Menu/File", position = 600)
+    //@ActionReference(path = "Menu/File", position = 600)
 })
 @Messages("CTL_UploadDatAction=Upload .dat File(s)")
 public final class UploadDatAction extends AbstractAction implements ActionListener, ContextAwareAction {

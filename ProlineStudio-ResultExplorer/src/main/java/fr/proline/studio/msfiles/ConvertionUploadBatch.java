@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package fr.proline.studio.wizard;
+package fr.proline.studio.msfiles;
 
 import fr.proline.studio.rsmexplorer.MzdbFilesTopComponent;
 import java.io.File;
@@ -98,10 +98,16 @@ public class ConvertionUploadBatch implements Runnable, ConversionListener {
     }
 
     @Override
-    public void ConversionPerformed(File f, ConversionSettings conversionSettings, boolean success) {
+    public void ConversionPerformed(File f, Object settings, boolean success) {
 
+        ConversionSettings conversionSettings = null;
+        
+        if(settings instanceof ConversionSettings){
+            conversionSettings = (ConversionSettings)settings;
+        }
+        
         if (success) {
-            if (conversionSettings.getUploadSettings() != null) {
+            if (conversionSettings!=null && conversionSettings.getUploadSettings() != null) {
                 upload(f, conversionSettings.getUploadSettings());
                 m_uploadCounter++;
             }

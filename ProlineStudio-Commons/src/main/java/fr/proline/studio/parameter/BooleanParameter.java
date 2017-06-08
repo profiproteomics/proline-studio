@@ -5,6 +5,7 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
+import javax.swing.JRadioButton;
 
 /**
  * Parameter of type Boolean, displayed as a Checkbox
@@ -61,6 +62,17 @@ public class BooleanParameter extends AbstractParameter {
                     }
                 }
                 return m_parameterComponent;
+            } else if (m_graphicalType.equals(JRadioButton.class)) {
+                if (startValue != null) {
+                    ((JRadioButton) m_parameterComponent).setSelected(startValue);
+                    m_valueSet = true;
+                } else {
+                    if (!m_valueSet) {
+                        ((JRadioButton) m_parameterComponent).setSelected(false);
+                        m_valueSet = true;
+                    }
+                }
+                return m_parameterComponent;
             }
         }
 
@@ -73,6 +85,14 @@ public class BooleanParameter extends AbstractParameter {
 
             m_parameterComponent = checkBox;
             return checkBox;
+        } else if (m_graphicalType.equals(JRadioButton.class)) {
+            // --- JRadioButton ---
+            JRadioButton radioButton = new JRadioButton(getName());
+            radioButton.setSelected(startValue);
+            m_valueSet = true;
+
+            m_parameterComponent = radioButton;
+            return radioButton;
         }
 
         return null;
@@ -88,8 +108,12 @@ public class BooleanParameter extends AbstractParameter {
             JCheckBox checkBox = (JCheckBox) m_parameterComponent;
             checkBox.setSelected(m_defaultValue);
             m_valueSet = true;
-
+        } else if (m_graphicalType.equals(JRadioButton.class)) {
+            JRadioButton radioButton = (JRadioButton) m_parameterComponent;
+            radioButton.setSelected(m_defaultValue);
+            m_valueSet = true;
         }
+
     }
 
     @Override
@@ -101,6 +125,9 @@ public class BooleanParameter extends AbstractParameter {
     public void setValue(String v) {
         if ((m_graphicalType.equals(JCheckBox.class)) && (m_parameterComponent != null)) {
             ((JCheckBox) m_parameterComponent).setSelected(Boolean.parseBoolean(v));
+            m_valueSet = true;
+        } else if ((m_graphicalType.equals(JRadioButton.class)) && (m_parameterComponent != null)) {
+            ((JRadioButton) m_parameterComponent).setSelected(Boolean.parseBoolean(v));
             m_valueSet = true;
         }
     }
@@ -114,6 +141,8 @@ public class BooleanParameter extends AbstractParameter {
     public Object getObjectValue() {
         if (m_graphicalType.equals(JCheckBox.class)) {
             return Boolean.valueOf(((JCheckBox) m_parameterComponent).isSelected());
+        } else if (m_graphicalType.equals(JRadioButton.class)) {
+            return Boolean.valueOf(((JRadioButton) m_parameterComponent).isSelected());
         }
         return ""; // should not happen
     }
@@ -136,11 +165,22 @@ public class BooleanParameter extends AbstractParameter {
                 }
 
             });
-            if (!m_valueSet) {
-                initDefault();
-            } else {
-                linkedParameters.valueChanged(getStringValue(), getObjectValue());
-            }
+        } else if (m_parameterComponent instanceof JRadioButton) {
+            ((JRadioButton) m_parameterComponent).addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    linkedParameters.valueChanged(getStringValue(), getObjectValue());
+                }
+            });
+        }
+        if (!m_valueSet) {
+            initDefault();
+        } else {
+            
+            String stringValue = getStringValue();
+            Object objectValue = getObjectValue();
+            
+            linkedParameters.valueChanged(getStringValue(), getObjectValue());
         }
     }
 

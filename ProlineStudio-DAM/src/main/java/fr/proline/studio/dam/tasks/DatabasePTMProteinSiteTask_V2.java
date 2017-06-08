@@ -49,7 +49,7 @@ public class DatabasePTMProteinSiteTask_V2 extends AbstractDatabaseTask {
     private ArrayList<PTMSite> m_ptmSiteArray = null;    
     final int SLICE_SIZE = 1000;
     
-    private int m_action; // Specify whch action to run
+    private final int m_action; // Specify whch action to run
     
     private final static int LOAD_ALL_PTM_SITES_FOR_RSMS = 0;
     private final static int FILL_PTM_SITE_PEPINFO= 1;

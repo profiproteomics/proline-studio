@@ -1,15 +1,9 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package fr.proline.studio.pattern.xic;
 
 import fr.proline.core.orm.lcms.MapAlignment;
 import fr.proline.core.orm.lcms.ProcessedMap;
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.dto.DMasterQuantProteinSet;
-import fr.proline.core.orm.msi.dto.DPeptideInstance;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.core.orm.uds.dto.DDataset;
@@ -28,7 +22,6 @@ import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.GroupParameter;
 import fr.proline.studio.rsmexplorer.gui.PTMProteinSitePanel_V2;
-import fr.proline.studio.rsmexplorer.gui.PeptidesPTMSitePanel;
 import fr.proline.studio.rsmexplorer.gui.xic.QuantChannelInfo;
 import fr.proline.studio.types.XicMode;
 import java.util.ArrayList;
@@ -86,6 +79,11 @@ public class DataBoxXICPTMProteinSite extends AbstractDataBox {
         outParameter = new GroupParameter();
         outParameter.addParameter(CrossSelectionInterface.class, true);
         registerOutParameter(outParameter);
+        
+        outParameter = new GroupParameter();
+        outParameter.addParameter(DQuantitationChannel.class, true);
+        registerOutParameter(outParameter);
+
     }
     
     
@@ -133,10 +131,12 @@ public class DataBoxXICPTMProteinSite extends AbstractDataBox {
                 setLoaded(loadingId);
                 
                 if (finished) {
-                    if(m_previousTaskId != null && m_previousTaskId.equals(taskId))
+                    if (m_previousTaskId != null && m_previousTaskId.equals(taskId)) {
                         m_previousTaskId = null; // Reset PreviousTask. Was finished ! 
+                    }
                     
                     unregisterTask(taskId);
+                    
                     propagateDataChanged(CompareDataInterface.class);
                 }
             }
@@ -299,6 +299,9 @@ public class DataBoxXICPTMProteinSite extends AbstractDataBox {
             }
             if (parameterType.equals(QuantChannelInfo.class)) {
                 return m_quantChannelInfo;
+            }
+            if (parameterType.equals(DQuantitationChannel.class)) {
+                return m_quantitationChannelArray;
             }
             if (parameterType.equals(CompareDataInterface.class)) {
                 return ((GlobalTabelModelProviderInterface) getDataBoxPanelInterface()).getGlobalTableModelInterface();

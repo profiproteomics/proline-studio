@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package fr.proline.studio.rsmexplorer.gui.model;
 
 import fr.proline.core.orm.msi.PeptideReadablePtmString;
@@ -32,6 +27,7 @@ import fr.proline.studio.table.renderer.DoubleRenderer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import javax.swing.table.TableCellRenderer;
 import org.slf4j.Logger;
@@ -117,11 +113,28 @@ public class PeptidesOfPtmSiteTableModel extends DecoratedTableModel implements 
                     // TODO : request all PeptideMatches ??
                     m_logger.warn("Must shown all peptide matches but no peptide instance specified for PTM Site "+m_currentPtmSite.toString());
                 } else {
-                    m_currentPtmSite.getPeptideMatchesForPeptide(parentPepInstance.getPeptideId()).forEach(entry  -> {
+                    
+                    List< Map.Entry<DPeptideInstance, List<DPeptideMatch>> > peptideMatchesForPeptide = m_currentPtmSite.getPeptideMatchesForPeptide(parentPepInstance.getPeptideId());
+                    
+                    if (peptideMatchesForPeptide == null) {
+                        // PtmSite and parentPepInstance do not correspond for the moment (asynchronous loading)
+                        m_currentPtmSite = null;
+                        fireTableDataChanged();
+                        return;
+                    }
+                    
+                    for (Map.Entry<DPeptideInstance, List<DPeptideMatch>> entry : peptideMatchesForPeptide) {
+                        List<DPeptideMatch> peptideMatchList = entry.getValue();
+                        for (DPeptideMatch pepMatch : peptideMatchList) {
+                            m_ptmSitePeptides.add(new Row(entry.getKey(), pepMatch));
+                        }
+                    }
+                    
+                    /*peptideMatchesForPeptide.forEach(entry  -> {
                         entry.getValue().forEach( pepMatch -> {
                             m_ptmSitePeptides.add(new Row(entry.getKey(), pepMatch));
                         });
-                    });                
+                    });          */      
                 }
             }
         }

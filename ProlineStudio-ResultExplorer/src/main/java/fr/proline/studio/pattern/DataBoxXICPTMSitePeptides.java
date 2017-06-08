@@ -1,19 +1,10 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package fr.proline.studio.pattern;
 
-import fr.proline.core.orm.lcms.MapAlignment;
-import fr.proline.core.orm.lcms.ProcessedMap;
+
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.dto.DMasterQuantPeptide;
-import fr.proline.core.orm.msi.dto.DMasterQuantProteinSet;
 import fr.proline.core.orm.msi.dto.DPeptideInstance;
-import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.core.orm.uds.dto.DDataset;
-import fr.proline.core.orm.uds.dto.DMasterQuantitationChannel;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
 import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.comparedata.GlobalTabelModelProviderInterface;
@@ -22,13 +13,12 @@ import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabasePTMProteinSiteTask_V2;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dam.tasks.data.PTMSite;
-import fr.proline.studio.dam.tasks.xic.DatabaseLoadLcMSTask;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadXicMasterQuantTask;
+import fr.proline.studio.graphics.CrossSelectionInterface;
 import static fr.proline.studio.pattern.DataBoxPTMSitePeptides.m_logger;
+import fr.proline.studio.rsmexplorer.gui.xic.PeptidePanel;
 import fr.proline.studio.rsmexplorer.gui.xic.QuantChannelInfo;
-import fr.proline.studio.rsmexplorer.gui.xic.XicPeptidePanel;
 import fr.proline.studio.rsmexplorer.gui.xic.XicPeptidesPTMSitePanel;
-import fr.proline.studio.types.XicMode;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,6 +31,8 @@ public class DataBoxXICPTMSitePeptides extends AbstractDataBox {
     private ResultSummary m_rsm ;
     private DDataset m_dataset;
     
+    private PTMSite m_currentPtmSite = null;
+
     public DataBoxXICPTMSitePeptides(){
         super(DataboxType.DataBoxXICPTMSitePeptides, DataboxStyle.STYLE_XIC);
 
@@ -74,22 +66,23 @@ public class DataBoxXICPTMSitePeptides extends AbstractDataBox {
     @Override
     public void dataChanged() {
         
-        final PTMSite ptmSite = (PTMSite) m_previousDataBox.getData(false, PTMSite.class); 
+        m_currentPtmSite = (PTMSite) m_previousDataBox.getData(false, PTMSite.class); 
         m_dataset  = (DDataset) m_previousDataBox.getData(false, DDataset.class);
         m_rsm = m_dataset.getResultSummary();
 
-        if (ptmSite == null) {
+        if (m_currentPtmSite == null) {
             ((XicPeptidesPTMSitePanel)getDataBoxPanelInterface()).setData(null);           
             return;
         }
-        ptmSiteChanged(ptmSite);
+        ptmSiteChanged(m_currentPtmSite);
     }
         
     private void ptmSiteChanged(PTMSite ptmSite){
-         
+
         m_logger.info("DATA Changed : Update XIC PTMSite Peptide WINDOWS. " + ptmSite.toString()+" data loaded " + ptmSite.isAllPeptideMatchesLoaded());
-        if(ptmSite.isAllPeptideMatchesLoaded()){
+        if (ptmSite.isAllPeptideMatchesLoaded()) {
             m_previousTaskId = null;
+
             xicDataChanged(ptmSite,-1);
 //            setPanelData(ptmSite);
             return;
@@ -128,11 +121,11 @@ public class DataBoxXICPTMSitePeptides extends AbstractDataBox {
     private List<DMasterQuantPeptide> m_masterQuantPeptideList;
     
     private void xicDataChanged(PTMSite ptmSite,int startedLoadingId){
-        
-        DMasterQuantProteinSet m_masterQuantProteinSet = (DMasterQuantProteinSet) m_previousDataBox.getData(false, DMasterQuantProteinSet.class);
+
         m_dataset = (DDataset) m_previousDataBox.getData(false, DDataset.class);
         m_quantChannelInfo = (QuantChannelInfo) m_previousDataBox.getData(false, QuantChannelInfo.class);       
 
+        
         
         final int loadingId = (startedLoadingId <= 0) ? setLoading() : startedLoadingId ;
 
@@ -165,7 +158,7 @@ public class DataBoxXICPTMSitePeptides extends AbstractDataBox {
         // ask asynchronous loading of data
         m_masterQuantPeptideList = new ArrayList();
         DatabaseLoadXicMasterQuantTask task = new DatabaseLoadXicMasterQuantTask(callback);
-        task.initLoadPeptides(getProjectId(), m_dataset,  m_masterQuantProteinSet, m_masterQuantPeptideList, true);
+        task.initLoadPeptides(getProjectId(), m_dataset,  ptmSite.peptideInstanceIds, m_masterQuantPeptideList, true);
         
         registerTask(task);
 
@@ -180,17 +173,15 @@ public class DataBoxXICPTMSitePeptides extends AbstractDataBox {
                     return m_rsm;
             }
 
-//            if (parameterType.equals(PTMSite.class)) {
-//                PTMSite ptmSite = ((XicPeptidesPTMSitePanel) getDataBoxPanelInterface()).getSelectedPTMSite();
-//                if (ptmSite != null)
-//                    return ptmSite;
-//            }
-            
-//            if (parameterType.equals(DPeptideInstance.class)) {
-//                DPeptideInstance selectedParentPepInstance = ((PeptidesPTMSitePanel) getDataBoxPanelInterface()).getSelectedPeptideInstance();
-//                if (selectedParentPepInstance != null)
-//                    return selectedParentPepInstance;
-//            }
+            if (parameterType.equals(PTMSite.class)) {
+                return m_currentPtmSite;
+            }
+            if (parameterType.equals(DPeptideInstance.class)) {
+
+                DPeptideInstance selectedParentPepInstance = ((XicPeptidesPTMSitePanel) getDataBoxPanelInterface()).getSelectedPeptideInstance();
+                if (selectedParentPepInstance != null)
+                    return selectedParentPepInstance;
+            }
             
              if (parameterType.equals(CompareDataInterface.class)) {
                 return ((GlobalTabelModelProviderInterface) getDataBoxPanelInterface()).getGlobalTableModelInterface();
@@ -198,5 +189,53 @@ public class DataBoxXICPTMSitePeptides extends AbstractDataBox {
         }
         
         return super.getData(getArray, parameterType);
+    }
+    
+    @Override
+    public Object getData(boolean getArray, Class parameterType, boolean isList) {
+        if (parameterType != null && isList) {
+            if (parameterType.equals(CompareDataInterface.class)) {
+                return getCompareDataInterfaceList();
+            }
+            if (parameterType.equals(CrossSelectionInterface.class)) {
+                return getCrossSelectionInterfaceList();
+            }
+        }
+        return super.getData(getArray, parameterType, isList);
+    }
+    
+    private List<CompareDataInterface> getCompareDataInterfaceList() {
+        List<CompareDataInterface> listCDI = new ArrayList();
+        List<PeptidePanel> listPeptidePanel = getPeptideTableModelList();
+        for (PeptidePanel peptidePanel : listPeptidePanel) {
+            listCDI.add(peptidePanel.getGlobalTableModelInterface());
+        }
+        return listCDI;
+    }
+
+    private List<CrossSelectionInterface> getCrossSelectionInterfaceList() {
+        List<CrossSelectionInterface> listCSI = new ArrayList();
+        List<PeptidePanel> listPeptidePanel = getPeptideTableModelList();
+        for (PeptidePanel peptidePanel : listPeptidePanel) {
+            listCSI.add(peptidePanel.getCrossSelectionInterface());
+        }
+        return listCSI;
+    }
+    
+    
+    private List<PeptidePanel> getPeptideTableModelList() {
+    
+        DQuantitationChannel[] quantitationChannelArray = (DQuantitationChannel[]) m_previousDataBox.getData(true, DQuantitationChannel.class); 
+    
+        List<PeptidePanel> list = new ArrayList();
+        if (m_masterQuantPeptideList != null) {
+            // one table model per row
+            for (DMasterQuantPeptide quantPeptide : m_masterQuantPeptideList) {
+                PeptidePanel aPepPanel = new PeptidePanel();
+                aPepPanel.setData(quantitationChannelArray, quantPeptide, true);
+                list.add(aPepPanel);
+            }
+        }
+        return list;
     }
 }

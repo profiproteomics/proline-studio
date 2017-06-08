@@ -279,11 +279,14 @@ public class WindowBoxFactory {
     
      public static WindowBox getXICPTMProteinSiteWindowBox(String dataName) {
 
-        AbstractDataBox[] boxes = new AbstractDataBox[2];
+        AbstractDataBox[] boxes = new AbstractDataBox[4];
         boxes[0] = new DataBoxXICPTMProteinSite();
         boxes[0].setDataName(dataName);
         boxes[1] = new DataBoxXICPTMSitePeptides();
-                
+        boxes[2] = new DataboxMultiGraphics(false, false);
+        boxes[2].setLayout(SplittedPanelContainer.PanelLayout.TABBED);
+        boxes[3] = new DataBoxPTMSitePepMatches();
+
         IconManager.IconType iconType = IconManager.IconType.QUANT_XIC;
         return new WindowBox(boxes[0].getFullName(), generatePanel(boxes), boxes[0], IconManager.getImage(iconType));
     }

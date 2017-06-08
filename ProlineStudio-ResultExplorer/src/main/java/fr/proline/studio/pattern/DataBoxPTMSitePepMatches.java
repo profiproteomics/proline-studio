@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package fr.proline.studio.pattern;
 
 import fr.proline.core.orm.msi.ResultSummary;
@@ -68,8 +63,12 @@ public class DataBoxPTMSitePepMatches extends AbstractDataBox {
        
         m_parentPeptideInstance = pepInstance;
         
-        if (ptmSite == null) {
-            ((PeptidesPTMSitePanel)getDataBoxPanelInterface()).setData(null);           
+        if ((ptmSite == null) || (pepInstance == null)) {
+            
+            PTMSite ptmSiteTest = (PTMSite) m_previousDataBox.getData(false, PTMSite.class); 
+            DPeptideInstance pepInstanceTest = (DPeptideInstance) m_previousDataBox.getData(false, DPeptideInstance.class); 
+            
+            ((PeptidesPTMSitePanel)getDataBoxPanelInterface()).setData(null, null);           
             return;
         }
         
@@ -95,9 +94,9 @@ public class DataBoxPTMSitePepMatches extends AbstractDataBox {
             public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
                 m_logger.info(" Back from PepMatch task # "+taskId);
                 if (success) {
-                    ((PeptidesPTMSitePanel) getDataBoxPanelInterface()).setData(ptmSite,m_parentPeptideInstance);
+                    ((PeptidesPTMSitePanel) getDataBoxPanelInterface()).setData(ptmSite, pepInstance);
                 } else {
-                    ((PeptidesPTMSitePanel) getDataBoxPanelInterface()).setData(null);
+                    ((PeptidesPTMSitePanel) getDataBoxPanelInterface()).setData(null, null);
                 }
 
                 setLoaded(loadingId);

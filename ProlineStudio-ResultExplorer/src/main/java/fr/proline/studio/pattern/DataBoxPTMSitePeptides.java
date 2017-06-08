@@ -1,11 +1,6 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package fr.proline.studio.pattern;
 
-import fr.proline.core.orm.msi.Peptide;
+
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.dto.DPeptideInstance;
 import fr.proline.studio.comparedata.CompareDataInterface;
@@ -66,14 +61,14 @@ public class DataBoxPTMSitePeptides extends AbstractDataBox {
         m_rsm = rsm;
 
         if (ptmSite == null) {
-            ((PeptidesPTMSitePanel)getDataBoxPanelInterface()).setData(null);           
+            ((PeptidesPTMSitePanel)getDataBoxPanelInterface()).setData(null, null);           
             return;
         }
          
         m_logger.info("DATA Changed : Update PTMSite Peptide WINDOWS. " + ptmSite.toString()+" data loaded " + ptmSite.isAllPeptideMatchesLoaded());
         if(ptmSite.isAllPeptideMatchesLoaded()){
             m_previousTaskId = null;
-            ((PeptidesPTMSitePanel) getDataBoxPanelInterface()).setData(ptmSite);           
+            ((PeptidesPTMSitePanel) getDataBoxPanelInterface()).setData(ptmSite, null);           
             propagateDataChanged(CompareDataInterface.class);
             return;
         }
@@ -91,9 +86,9 @@ public class DataBoxPTMSitePeptides extends AbstractDataBox {
             public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
                 m_logger.info(" Back from PTMSite Peptide task # "+taskId);
                  if (success) {
-                     ((PeptidesPTMSitePanel) getDataBoxPanelInterface()).setData(ptmSite);
+                     ((PeptidesPTMSitePanel) getDataBoxPanelInterface()).setData(ptmSite, null);
                 } else {
-                    ((PeptidesPTMSitePanel) getDataBoxPanelInterface()).setData(null);
+                    ((PeptidesPTMSitePanel) getDataBoxPanelInterface()).setData(null, null);
                 }
 
                 setLoaded(loadingId);

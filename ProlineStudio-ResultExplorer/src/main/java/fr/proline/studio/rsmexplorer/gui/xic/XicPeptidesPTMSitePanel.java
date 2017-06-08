@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package fr.proline.studio.rsmexplorer.gui.xic;
 
 import fr.proline.core.orm.msi.dto.DMasterQuantPeptide;
@@ -11,6 +6,7 @@ import fr.proline.core.orm.uds.dto.DQuantitationChannel;
 import fr.proline.studio.comparedata.AddDataAnalyzerButton;
 import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.comparedata.GlobalTabelModelProviderInterface;
+import fr.proline.studio.comparedata.JoinDataModel;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dam.tasks.data.PTMSite;
 import fr.proline.studio.export.ExportButton;
@@ -25,11 +21,9 @@ import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.pattern.DataMixerWindowBoxManager;
 import fr.proline.studio.progress.ProgressInterface;
-import fr.proline.studio.python.data.ExprTableModel;
 import fr.proline.studio.python.data.TableInfo;
 import fr.proline.studio.rsmexplorer.actions.table.DisplayTablePopupMenu;
 import fr.proline.studio.rsmexplorer.gui.model.PeptidesOfPtmSiteTableModel;
-import fr.proline.studio.rsmexplorer.gui.model.XicPeptidesOfPtmSiteTableModel;
 import fr.proline.studio.search.SearchToggleButton;
 import fr.proline.studio.table.CompoundTableModel;
 import fr.proline.studio.table.GlobalTableModelInterface;
@@ -138,7 +132,7 @@ public class XicPeptidesPTMSitePanel extends JPanel implements DataBoxPanelInter
         m_peptidesPtmSiteTable = new XicPeptidesPTMSiteTable(); 
         PeptidesOfPtmSiteTableModel model1 = new PeptidesOfPtmSiteTableModel();
         QuantPeptideInstTableModel model2 = new QuantPeptideInstTableModel(m_peptidesPtmSiteTable, true);
-        XicPeptidesOfPtmSiteTableModel joinedModel = new XicPeptidesOfPtmSiteTableModel();
+        JoinDataModel joinedModel = new JoinDataModel();
         joinedModel.setData(model1, model2, 0, 0, 0d , 0, 0, 0d, Boolean.FALSE);
         m_peptidesPtmSiteTable.setModel(new CompoundTableModel(joinedModel, true));
 
@@ -245,19 +239,38 @@ public class XicPeptidesPTMSitePanel extends JPanel implements DataBoxPanelInter
         return toolbar;
     }
     
+    public DPeptideInstance getSelectedPeptideInstance() {
+        JoinDataModel joinModel = ((JoinDataModel) ((CompoundTableModel) m_peptidesPtmSiteTable.getModel()).getBaseModel());     
+        QuantPeptideInstTableModel model2 = (QuantPeptideInstTableModel) joinModel.getSecondTableModel();
+        
+        int rowSelected = m_peptidesPtmSiteTable.getSelectionModel().getMinSelectionIndex();
+        int rowSelectedInJoinModel = (rowSelected == -1) ? -1 : m_peptidesPtmSiteTable.convertRowIndexToModel(rowSelected);
+        if (rowSelectedInJoinModel == -1) {
+            return null;
+        }    
+        Integer rowInModel2 = joinModel.getRowInSecondModel(rowSelectedInJoinModel);
+        if (rowInModel2 == null) {
+            return null;
+        }
+
+        DMasterQuantPeptide masterQuantPeptide = model2.getPeptide(rowInModel2);
+        return masterQuantPeptide.getPeptideInstance();
+
+    }
+    
     public void setData(PTMSite peptidesPTMSite) {
         setData(-1l, new DQuantitationChannel[0], null, peptidesPTMSite,  true);
     }
     
     public void setData(Long taskId,  DQuantitationChannel[] quantChannels, List<DMasterQuantPeptide> peptides,  PTMSite peptidesPTMSite, boolean finished) {
 
-        XicPeptidesOfPtmSiteTableModel model = ((XicPeptidesOfPtmSiteTableModel) ((CompoundTableModel) m_peptidesPtmSiteTable.getModel()).getBaseModel());        
-        PeptidesOfPtmSiteTableModel model1 = (PeptidesOfPtmSiteTableModel) model.getFirstTableModel();
-        QuantPeptideInstTableModel model2 = (QuantPeptideInstTableModel) model.getSecondTableModel();
+        JoinDataModel previousModel = ((JoinDataModel) ((CompoundTableModel) m_peptidesPtmSiteTable.getModel()).getBaseModel());        
+        PeptidesOfPtmSiteTableModel model1 = (PeptidesOfPtmSiteTableModel) previousModel.getFirstTableModel();
+        QuantPeptideInstTableModel model2 = (QuantPeptideInstTableModel) previousModel.getSecondTableModel();
         model1.setData(peptidesPTMSite, false, null);
         model2.setData(taskId, -1L, quantChannels, peptides, finished);
-        XicPeptidesOfPtmSiteTableModel joinedModel = new XicPeptidesOfPtmSiteTableModel();
-        joinedModel.setData(model1, model2, 0, 0, 0d , 0, 0, 0d, Boolean.FALSE);
+        JoinDataModel joinedModel = new JoinDataModel();
+        joinedModel.setData(model1, model2, PeptidesOfPtmSiteTableModel.COLTYPE_PEPTIDE_ID, QuantPeptideInstTableModel.COLTYPE_PEPTIDE_INST_ID, 0d , -1, -1, 0d, Boolean.FALSE);
         
         
         m_peptidesPtmSiteTable.setModel(new CompoundTableModel(joinedModel, true));

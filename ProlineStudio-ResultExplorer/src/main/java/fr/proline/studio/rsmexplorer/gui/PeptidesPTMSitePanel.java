@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package fr.proline.studio.rsmexplorer.gui;
 
 import fr.proline.core.orm.msi.dto.DPeptideInstance;
@@ -53,7 +48,7 @@ import javax.swing.table.TableRowSorter;
 import org.jdesktop.swingx.JXTable;
 
 /**
- *HourglassPanel
+ *
  * @author VD225637
  */
 public class PeptidesPTMSitePanel extends JPanel implements DataBoxPanelInterface, GlobalTabelModelProviderInterface {
@@ -72,7 +67,11 @@ public class PeptidesPTMSitePanel extends JPanel implements DataBoxPanelInterfac
     private ExportButton m_exportButton;
     private AddDataAnalyzerButton m_addCompareDataButton;
 
-    private boolean m_displayPeptidesMatches;
+    private PTMSite m_currentPeptidesPTMSite = null;
+    private DPeptideInstance m_currentPepInst = null;
+
+    
+    private final boolean m_displayPeptidesMatches;
     /**
      * Display Peptides Matches of a PTMSite.
      * 
@@ -133,13 +132,17 @@ public class PeptidesPTMSitePanel extends JPanel implements DataBoxPanelInterfac
         selectedRow = compoundTableModel.convertCompoundRowToBaseModelRow(selectedRow);
         return selectedRow;
     }
-    
-    public void setData(PTMSite peptidesPTMSite) {
-        setData(peptidesPTMSite, null);
-    }
-    
+
+
     public void setData(PTMSite peptidesPTMSite, DPeptideInstance pepInst) {
 
+        if ((peptidesPTMSite == m_currentPeptidesPTMSite) && (pepInst == m_currentPepInst)) {
+            return;
+        }
+        
+        m_currentPeptidesPTMSite = peptidesPTMSite;
+        m_currentPepInst = pepInst;
+        
         PeptidesOfPtmSiteTableModel model = ((PeptidesOfPtmSiteTableModel) ((CompoundTableModel) m_peptidesPtmSiteTable.getModel()).getBaseModel());
         model.setData(peptidesPTMSite, m_displayPeptidesMatches, pepInst);
         // select the first row
@@ -409,7 +412,7 @@ public class PeptidesPTMSitePanel extends JPanel implements DataBoxPanelInterfac
                 return;
             }
             
-            if(m_displayPeptidesMatches) {
+            if (m_displayPeptidesMatches) {
                 m_dataBox.propagateDataChanged(DPeptideMatch.class);
                 m_dataBox.propagateDataChanged(MsQueryInfoRset.class);
             } else {

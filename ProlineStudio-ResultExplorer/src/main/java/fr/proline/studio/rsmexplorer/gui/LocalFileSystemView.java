@@ -76,7 +76,7 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
 
         m_selectedFiles = new ArrayList<File>();
 
-        setBorder(BorderFactory.createTitledBorder("Local Site"));
+        setBorder(BorderFactory.createTitledBorder("Local File System"));
 
         setLayout(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();

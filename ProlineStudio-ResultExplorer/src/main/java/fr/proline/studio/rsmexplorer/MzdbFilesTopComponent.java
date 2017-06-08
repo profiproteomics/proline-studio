@@ -74,7 +74,7 @@ public final class MzdbFilesTopComponent extends TopComponent {
         m_tree = new TreeFileChooserPanel(ServerFileSystemView.getServerFileSystemView(), m_transferHandler, true);
         JScrollPane treeScrollPane = new JScrollPane();
         treeScrollPane.setViewportView(m_tree);
-        treeScrollPane.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createTitledBorder("Remote Site"), BorderFactory.createEmptyBorder(5, 5, 5, 5)));
+        treeScrollPane.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createTitledBorder("Proline Server File System"), BorderFactory.createEmptyBorder(5, 5, 5, 5)));
 
         add(treeScrollPane, c);
 

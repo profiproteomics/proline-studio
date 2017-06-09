@@ -5,6 +5,7 @@
  */
 package fr.proline.studio.rsmexplorer.gui;
 
+import fr.proline.studio.msfiles.LocalFileSystemFile;
 import java.io.File;
 import java.util.HashSet;
 import javax.swing.event.TreeModelEvent;
@@ -24,12 +25,12 @@ public class LocalFileSystemModel implements TreeModel {
     private HashSet<TreeModelListener> listeners; // Declare the listeners vector
 
     public LocalFileSystemModel(String rootURL) {
-        m_root = new DefaultMutableTreeNode(new File(rootURL));
+        m_root = new DefaultMutableTreeNode(new LocalFileSystemFile(rootURL));
         listeners = new HashSet<TreeModelListener>();
     }
 
     public void setRoot(String rootURL) {
-        m_root = new DefaultMutableTreeNode(new File(rootURL));
+        m_root = new DefaultMutableTreeNode(new LocalFileSystemFile(rootURL));
     }
 
     @Override
@@ -45,7 +46,7 @@ public class LocalFileSystemModel implements TreeModel {
 
         String[] directoryMembers = directory.list();
 
-        DefaultMutableTreeNode childNode = new DefaultMutableTreeNode(new File(directory, directoryMembers[index]));
+        DefaultMutableTreeNode childNode = new DefaultMutableTreeNode(new LocalFileSystemFile(directory, directoryMembers[index]));
         
         parentNode.add(childNode);
         

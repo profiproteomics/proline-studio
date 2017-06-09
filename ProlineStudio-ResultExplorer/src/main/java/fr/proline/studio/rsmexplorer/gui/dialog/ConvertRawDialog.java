@@ -113,7 +113,10 @@ public class ConvertRawDialog extends DefaultDialog implements FileDialogInterfa
             for (File f : files) {
                 ((DefaultListModel) m_fileList.getModel()).addElement(f);
             }
-            m_lastParentDirectory = files.get(0).getParentFile().getAbsolutePath();
+            
+            if(files.get(0).getParentFile()!=null){
+                m_lastParentDirectory = files.get(0).getParentFile().getAbsolutePath();
+            }
         }
     }
 

@@ -53,16 +53,21 @@ public class RawConverter implements Runnable, WorkerInterface {
 
                     @Override
                     public void run() {
-                        
-                        File f = new File(m_settings.getOutputPath() + File.separator + m_file.getName().substring(0, m_file.getName().lastIndexOf(".raw")) + ".mzdb");
 
+                        File f = null;
+
+                        if (m_file.getName().contains(".raw")) {
+                            f = new File(m_settings.getOutputPath() + File.separator + m_file.getName().substring(0, m_file.getName().lastIndexOf(".raw")) + ".mzdb");
+                        } else if (m_file.getName().contains(".wiff")) {
+                            f = new File(m_settings.getOutputPath() + File.separator + m_file.getName().substring(0, m_file.getName().lastIndexOf(".raw")) + ".mzdb");
+                        }
                         if (success) {
 
                             if (m_state == WorkerInterface.ACTIVE_STATE) {
                                 m_state = WorkerInterface.FINISHED_STATE;
                                 if (m_conversionListener != null) {
 
-                                    if (f.exists()) {
+                                    if (f!=null && f.exists()) {
                                         m_conversionListener.ConversionPerformed(f, m_settings, true);
                                     }
                                 }

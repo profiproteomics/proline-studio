@@ -390,10 +390,10 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
         ArrayList<String> selectedURLs = getSelectedURLs();
         if (isSelectionHomogeneous(selectedURLs)) {
             String firstURL = selectedURLs.get(0).toLowerCase();
-            if (firstURL.endsWith(".mzdb") || firstURL.endsWith(".wiff")) {
+            if (firstURL.endsWith(".mzdb")) {
                 setPopupEnabled(true);
                 m_convertRawFileItem.setEnabled(false);
-            } else if (firstURL.endsWith(".raw")) {
+            } else if (firstURL.endsWith(".raw") || firstURL.endsWith(".wiff")) {
                 setPopupEnabled(false);
                 m_convertRawFileItem.setEnabled(true);
                 m_deleteFileItem.setEnabled(true);

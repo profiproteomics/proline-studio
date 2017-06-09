@@ -52,7 +52,7 @@ public class ConvertionUploadBatch implements Runnable, ConversionListener {
     }
 
     private void convert(File f, ConversionSettings conversionSettings) {
-        if (f.getAbsolutePath().toLowerCase().endsWith(".raw")) {
+        if (f.getAbsolutePath().toLowerCase().endsWith(".raw") || f.getAbsolutePath().toLowerCase().endsWith(".wiff")) {
             RawConverter converter = new RawConverter(f, conversionSettings);
             if (conversionSettings.getUploadAfterConversion()) {
                 converter.addConversionListener(this);

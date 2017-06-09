@@ -7,6 +7,8 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -19,14 +21,19 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTextField;
 import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
 /**
- *
+ * Panel used for the selection/deselection of objects. There are two lists, a selected one and a deselected one
+ * with arrows to move them. There are also a search textfield and a prefix/suffix combobx for fast selection.
  * @author JM235353
  * @param <E>
  */
@@ -37,7 +44,12 @@ public class AdvancedSelectionPanel<E> extends JPanel  {
     
     private ArrayList<E> m_objects = null;
     
+    private JTextField m_selectionTextField = null;
+    private JLabel m_selectionLabel = null;
     private JComboBox m_selectionComboBox = null;
+    
+    private static final String SELECT_FROM_PREFIX_SUFFIX = "<Select from Prefix/Suffix>";
+    private static final String SEARCH_FOR_TEXT = "<Search for Text>";
     
     public AdvancedSelectionPanel(String selectedName, String unselectedName, ArrayList<E> objects, ArrayList<Boolean> selection) {
         
@@ -76,10 +88,11 @@ public class AdvancedSelectionPanel<E> extends JPanel  {
         }
         
         m_selectionComboBox.setVisible(true);
+        m_selectionLabel.setVisible(true);
         
         DefaultComboBoxModel model = (DefaultComboBoxModel) m_selectionComboBox.getModel();
         
-        model.addElement("<Select from Prefix/Suffix>");
+        model.addElement(SELECT_FROM_PREFIX_SUFFIX);
         
         int nb = columnGroupNamesArray.length;
         for (int i=0;i<nb;i++) {
@@ -95,8 +108,8 @@ public class AdvancedSelectionPanel<E> extends JPanel  {
                 }
                 
                 String value = removeHtmlColor(m_selectionComboBox.getSelectedItem().toString());
-                selectFromPrefixSuffix(value, m_selectedList);
-                selectFromPrefixSuffix(value, m_unselectedList);
+                selectFromText(value, m_selectedList);
+                selectFromText(value, m_unselectedList);
 
                 // reselect first one
                 m_selectionComboBox.setSelectedIndex(0);
@@ -106,36 +119,33 @@ public class AdvancedSelectionPanel<E> extends JPanel  {
         
     }
     
-    private void selectFromPrefixSuffix(String value, JList list) {
+  
+    private void selectFromText(String value, JList list) {
         ListSelectionModel sm = list.getSelectionModel();
         sm.clearSelection();
+        
+        if (value.isEmpty()) {
+            return;
+        }
+        
+        value = value.toLowerCase();
         
         DefaultListModel<E> listModel = (DefaultListModel) list.getModel();
 
         int lastSelectedIndex = -1;
         int nb = listModel.getSize();
         for (int i = 0; i < nb; i++) {
-            String valueCur = removeHtmlColor(listModel.getElementAt(i).toString());
+            String valueCur = removeHtmlColor(listModel.getElementAt(i).toString()).toLowerCase();
 
             if (valueCur.indexOf(value) != -1) {
                 sm.addSelectionInterval(i, i);
                 lastSelectedIndex = i;
             }
-            
-            /*int indexSpace = valueCur.lastIndexOf(' ');
-            if (indexSpace != -1) {
-                String prefix = valueCur.substring(0, indexSpace);
-                String suffix = valueCur.substring(indexSpace, valueCur.length());
-                if ((prefix.compareTo(value) == 0) || (suffix.compareTo(value) == 0)) {
-                    sm.addSelectionInterval(i, i);
-                    lastSelectedIndex = i;
-                }
-            }*/
 
         }
         list.ensureIndexIsVisible(lastSelectedIndex);
         list.ensureIndexIsVisible(list.getSelectedIndex());
-    }
+    }  
     private String removeHtmlColor(String value) {
         int colorRemoveStart = value.indexOf("</font>", 0);
         int colorRemoveStop = value.indexOf("</html>", 0);
@@ -253,8 +263,45 @@ public class AdvancedSelectionPanel<E> extends JPanel  {
         JButton arrowRight = new JButton(IconManager.getIcon(IconManager.IconType.ARROW));
         JButton arrowLeft = new JButton(IconManager.getIcon(IconManager.IconType.BACK));
         
+        m_selectionTextField = new JTextField(SEARCH_FOR_TEXT, 30);
+        m_selectionTextField.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (m_selectionTextField.getText().compareTo(SEARCH_FOR_TEXT) == 0) { 
+                    m_selectionTextField.setText("");
+                }
+            }
+        });
+
+        m_selectionTextField.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                textChanged();
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                textChanged();
+            }
+
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                textChanged();
+            }
+
+            public void textChanged() {
+                String value = m_selectionTextField.getText();
+                selectFromText(value, m_selectedList);
+                selectFromText(value, m_unselectedList);
+            }
+        });
+ 
+        
         m_selectionComboBox = new JComboBox();
         m_selectionComboBox.setVisible(false);
+        
+        m_selectionLabel = new JLabel(IconManager.getIcon(IconManager.IconType.SEARCH));
+        m_selectionLabel.setVisible(false);
         
         arrowRight.addActionListener(new ActionListener() {
             @Override
@@ -339,6 +386,7 @@ public class AdvancedSelectionPanel<E> extends JPanel  {
         c.gridy = 0;
         c.weightx = 1;
         c.weighty = 1;
+        c.gridwidth = 2;
         panel.add(Box.createVerticalBox(), c);
         
         c.gridy++;
@@ -359,6 +407,23 @@ public class AdvancedSelectionPanel<E> extends JPanel  {
         c.gridy++;
         c.weightx = 0;
         c.weighty = 0;
+        c.gridwidth = 1;
+        c.anchor = GridBagConstraints.NORTHWEST;
+        c.fill = GridBagConstraints.BOTH;
+        panel.add(new JLabel(IconManager.getIcon(IconManager.IconType.SEARCH)), c);
+        
+        c.gridx++;
+        c.weightx = 1;
+        panel.add(m_selectionTextField, c);
+        
+        c.gridx = 0;
+        c.gridy++;
+        c.weightx = 0;
+        c.weighty = 0;
+        panel.add(m_selectionLabel, c);
+        
+        c.gridx++;
+        c.weightx = 1;
         panel.add(m_selectionComboBox, c);
 
         

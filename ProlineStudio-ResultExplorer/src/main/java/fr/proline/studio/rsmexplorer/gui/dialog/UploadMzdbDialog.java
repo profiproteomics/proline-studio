@@ -235,7 +235,9 @@ public class UploadMzdbDialog extends DefaultDialog implements FileDialogInterfa
                     }
 
                     if (files.length > 0) {
-                        m_lastParentDirectory = files[0].getParentFile().getAbsolutePath();
+                        if (files[0].getParentFile() != null) {
+                            m_lastParentDirectory = files[0].getParentFile().getAbsolutePath();
+                        }
                     }
                 }
             }
@@ -273,8 +275,10 @@ public class UploadMzdbDialog extends DefaultDialog implements FileDialogInterfa
         }
         m_parameterList.saveParameters(NbPreferences.root());
 
-        Preferences preferences = NbPreferences.root();
-        preferences.put("mzDB_Settings.LAST_MZDB_PATH", m_lastParentDirectory);
+        if (m_lastParentDirectory != null) {
+            Preferences preferences = NbPreferences.root();
+            preferences.put("mzDB_Settings.LAST_MZDB_PATH", m_lastParentDirectory);
+        }
 
         HashMap<File, MzdbUploadSettings> mzdbFiles = new HashMap<File, MzdbUploadSettings>();
         for (int i = 0; i < m_fileList.getModel().getSize(); i++) {

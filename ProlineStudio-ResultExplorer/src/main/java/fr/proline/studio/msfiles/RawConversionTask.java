@@ -5,6 +5,7 @@
  */
 package fr.proline.studio.msfiles;
 
+import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.AbstractDatabaseTask;
@@ -52,6 +53,7 @@ public class RawConversionTask extends AbstractDatabaseTask {
             if (m_process != null && m_process.isAlive()) {
                 m_process.destroy();
             }
+            m_taskError = new TaskError("Raw Conversion Error", "An IOException was encountered.");
             return false;
         }
 
@@ -65,6 +67,7 @@ public class RawConversionTask extends AbstractDatabaseTask {
             if (m_process != null && m_process.isAlive()) {
                 m_process.destroy();
             }
+            m_taskError = new TaskError("Raw Conversion Error", "Process abnormal exit.");
             return false;
         }
         return true;

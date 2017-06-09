@@ -231,7 +231,7 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
             DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getLastPathComponent();
             File f = (File) node.getUserObject();
             
-            selectedURLs.add(path.getLastPathComponent().toString());
+            //selectedURLs.add(path.getLastPathComponent().toString());
             selectedURLs.add(f.getAbsolutePath());
             
             m_selectedFiles.add(f);

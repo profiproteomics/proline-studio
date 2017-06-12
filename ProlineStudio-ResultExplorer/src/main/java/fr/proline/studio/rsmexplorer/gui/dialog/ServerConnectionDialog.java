@@ -176,9 +176,9 @@ public class ServerConnectionDialog extends ConnectionDialog {
                         });
                     }
                     
-                    MzdbFilesTopComponent.getTreeFileChooserPanel().initTree();
+                    MzdbFilesTopComponent.getExplorer().getTreeFileChooserPanel().initTree();
                     
-                    MzdbFilesTopComponent.getTreeFileChooserPanel().restoreTree(TreeStateUtil.TreeType.SERVER);
+                    MzdbFilesTopComponent.getExplorer().getTreeFileChooserPanel().restoreTree(TreeStateUtil.TreeType.SERVER);
 
                     if (changingUser) {
 

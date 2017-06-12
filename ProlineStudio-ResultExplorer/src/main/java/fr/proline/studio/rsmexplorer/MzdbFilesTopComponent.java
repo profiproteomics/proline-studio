@@ -1,14 +1,18 @@
 package fr.proline.studio.rsmexplorer;
 
 import fr.proline.studio.dpm.serverfilesystem.ServerFileSystemView;
+import fr.proline.studio.msfiles.MsFilesExplorer;
 import fr.proline.studio.rsmexplorer.gui.TreeFileChooserPanel;
 import fr.proline.studio.rsmexplorer.gui.TreeFileChooserTransferHandler;
 import fr.proline.studio.rsmexplorer.gui.LocalFileSystemTransferHandler;
 import fr.proline.studio.rsmexplorer.gui.LocalFileSystemView;
+import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import javax.swing.BorderFactory;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTabbedPane;
 
 import org.netbeans.api.settings.ConvertAsProperties;
 import org.openide.awt.ActionID;
@@ -37,10 +41,9 @@ import org.openide.util.NbBundle.Messages;
     "HINT_MzdbFilesTopComponent=Ms Files"
 })
 public final class MzdbFilesTopComponent extends TopComponent {
-
-    private static TreeFileChooserPanel m_tree;
-    private TreeFileChooserTransferHandler m_transferHandler;
-    private static LocalFileSystemView m_localFileSystemView;
+    
+    private static MsFilesExplorer m_explorer;
+    private JTabbedPane m_tabbedPane;
     
     public MzdbFilesTopComponent() {
         initComponents();
@@ -51,43 +54,23 @@ public final class MzdbFilesTopComponent extends TopComponent {
 
     private void initComponents() {
 
-        // Add panel
-        setLayout(new GridBagLayout());
-        GridBagConstraints c = new GridBagConstraints();
-        c.anchor = GridBagConstraints.NORTHWEST;
-        c.fill = GridBagConstraints.BOTH;
-        c.insets = new java.awt.Insets(5, 5, 5, 5);
-
-        c.gridx = 0;
-        c.gridy = 0;
-        c.weightx = 1;
-        c.weighty = 1;
-
-        m_localFileSystemView = new LocalFileSystemView(new LocalFileSystemTransferHandler(), true);       
-        add(m_localFileSystemView, c);
-
-        c.gridy++;
-
-        m_transferHandler = new TreeFileChooserTransferHandler();
-        m_transferHandler.addComponent(m_localFileSystemView);
+        setLayout(new BorderLayout());
+        m_tabbedPane = new JTabbedPane();
         
-        m_tree = new TreeFileChooserPanel(ServerFileSystemView.getServerFileSystemView(), m_transferHandler, true);
-        JScrollPane treeScrollPane = new JScrollPane();
-        treeScrollPane.setViewportView(m_tree);
-        treeScrollPane.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createTitledBorder("Proline Server File System"), BorderFactory.createEmptyBorder(5, 5, 5, 5)));
-
-        add(treeScrollPane, c);
+        m_explorer = new MsFilesExplorer();
+        m_tabbedPane.add("Explorer", m_explorer);
+        
+        m_tabbedPane.add("Working Sets", new JPanel());
+        
+        add(m_tabbedPane, BorderLayout.CENTER);
+        
 
     }
     
-    public static TreeFileChooserPanel getTreeFileChooserPanel(){
-        return m_tree;
+    public static MsFilesExplorer getExplorer(){
+        return m_explorer;
     }
     
-    public static LocalFileSystemView getLocalFileSystemView(){
-        return m_localFileSystemView;
-    }
-
     @Override
     public void componentOpened() {
 

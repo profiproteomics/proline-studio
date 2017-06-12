@@ -123,9 +123,9 @@ public class ConvertionUploadBatch implements Runnable, ConversionListener {
                 ;
             }
             if (m_pathToExpand != null) {
-                MzdbFilesTopComponent.getTreeFileChooserPanel().expandTreePath(m_pathToExpand);
+                MzdbFilesTopComponent.getExplorer().getTreeFileChooserPanel().expandTreePath(m_pathToExpand);
             }else{
-                MzdbFilesTopComponent.getTreeFileChooserPanel().expandMultipleTreePath(m_parentDirectories, conversionSettings.getUploadSettings().getMountLabel());
+                MzdbFilesTopComponent.getExplorer().getTreeFileChooserPanel().expandMultipleTreePath(m_parentDirectories, conversionSettings.getUploadSettings().getMountLabel());
             }
         }
     }

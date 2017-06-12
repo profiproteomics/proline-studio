@@ -1,17 +1,8 @@
 package fr.proline.studio.rsmexplorer;
 
-import fr.proline.studio.dpm.serverfilesystem.ServerFileSystemView;
 import fr.proline.studio.msfiles.MsFilesExplorer;
-import fr.proline.studio.rsmexplorer.gui.TreeFileChooserPanel;
-import fr.proline.studio.rsmexplorer.gui.TreeFileChooserTransferHandler;
-import fr.proline.studio.rsmexplorer.gui.LocalFileSystemTransferHandler;
-import fr.proline.studio.rsmexplorer.gui.LocalFileSystemView;
 import java.awt.BorderLayout;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import javax.swing.BorderFactory;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 
 import org.netbeans.api.settings.ConvertAsProperties;

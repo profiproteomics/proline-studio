@@ -35,6 +35,7 @@ import fr.proline.studio.gui.DatasetAction;
 import fr.proline.studio.rsmexplorer.actions.identification.AddIdentificationFolderAction;
 import fr.proline.studio.rsmexplorer.actions.identification.AggregateAction;
 import fr.proline.studio.rsmexplorer.actions.identification.ClearDatasetAction;
+import fr.proline.studio.rsmexplorer.actions.identification.CopySearchResult;
 import fr.proline.studio.rsmexplorer.actions.identification.CreateXICAction;
 import fr.proline.studio.rsmexplorer.actions.identification.ExportAction;
 import fr.proline.studio.rsmexplorer.actions.identification.FilterRSMProteinSetsAction;
@@ -45,6 +46,7 @@ import fr.proline.studio.rsmexplorer.actions.identification.ImportManager;
 import fr.proline.studio.rsmexplorer.actions.identification.ImportMaxQuantResultJMSAction;
 import fr.proline.studio.rsmexplorer.actions.identification.ImportSearchResultAsDatasetAction;
 import fr.proline.studio.rsmexplorer.actions.identification.ImportSearchResultAsDatasetJMSAction;
+import fr.proline.studio.rsmexplorer.actions.identification.PasteSearchResult;
 import fr.proline.studio.rsmexplorer.actions.identification.RenameRsetAction;
 import fr.proline.studio.rsmexplorer.actions.identification.UpdatePeaklistSoftwareAction;
 import fr.proline.studio.rsmexplorer.actions.xic.AddQuantitationFolderAction;
@@ -749,11 +751,16 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
                 AddIdentificationFolderAction addFolderAction = new AddIdentificationFolderAction();
                 m_mainActions.add(addFolderAction);
                 
+                m_mainActions.add(null);  // separator
                 
-                /*
-                 RenameAction renameAction = new RenameAction(AbstractTree.TreeType.TREE_IDENTIFICATION);
-                 m_mainActions.add(renameAction);
-                 */
+                CopySearchResult copyAction = new CopySearchResult();
+                m_mainActions.add(copyAction);
+                
+                PasteSearchResult pasteAction = new PasteSearchResult();
+                m_mainActions.add(pasteAction);
+                
+                m_mainActions.add(null);  // separator
+
                 RenameRsetAction renameRsetAction = new RenameRsetAction(AbstractTree.TreeType.TREE_IDENTIFICATION);
                 m_mainActions.add(renameRsetAction);
 

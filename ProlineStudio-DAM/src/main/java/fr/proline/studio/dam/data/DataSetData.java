@@ -19,7 +19,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import javax.persistence.EntityManager;
-import javax.swing.JOptionPane;
 
 /**
  * Data for Dataset Node

@@ -31,6 +31,7 @@ import org.netbeans.api.db.explorer.JDBCDriver;
 import org.netbeans.api.db.explorer.JDBCDriverManager;
 
 import fr.proline.core.orm.uds.dto.DDataset;
+import fr.proline.studio.dam.data.DatasetToCopy;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadXicMasterQuantTask;
 import javax.persistence.NoResultException;
 import javax.persistence.NonUniqueResultException;
@@ -61,7 +62,8 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
     private List<Long> m_dsChildRSMIds = null;
     private List<String> m_dsNames = null;
     private boolean m_identificationDataset;
-
+    private DatasetToCopy m_datasetCopy = null;
+    
     private int m_action;
 
     private final static int LOAD_PARENT_DATASET = 0;
@@ -82,6 +84,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
     private final static int LOAD_QUANTITATION = 15;
     private final static int CREATE_QUANTITATION_FOLDER = 16;
     private final static int CREATE_IDENTIFICATION_FOLDER = 17;
+    private final static int PASTE_DATASET = 18;
 
     private static final Object WRITE_DATASET_LOCK = new Object();
 
@@ -186,6 +189,15 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
         m_action = RENAME_DATASET;
     }
 
+    public void initPasteDatasets(Project project, DDataset parentDataset, DatasetToCopy datasetCopy, ArrayList<DDataset> datasetList) {
+        setTaskInfo(new TaskInfo("Paste Dataset ", true, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_HIGH));
+        m_project = project;
+        m_parentDataset = parentDataset;
+        m_datasetCopy = datasetCopy;
+        m_action = PASTE_DATASET;
+        m_datasetList = datasetList;
+    }
+    
     public void initCreateDatasetAggregate(Project project, DDataset parentDataset, Aggregation.ChildNature datasetType, String aggregateName, ArrayList<DDataset> datasetList) {
         initCreateDatasetAggregate(project, parentDataset, datasetType, aggregateName, false, 0, 0, datasetList);
     }
@@ -328,6 +340,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
                     return needToFetchRsetAndRsm(m_dataset);
                 }
             case RENAME_DATASET:
+            case PASTE_DATASET:
             case CREATE_AGGREGATE_DATASET:
             case CREATE_IDENTIFICATION_DATASET:
             case MODIFY_VALIDATED_DATASET:
@@ -374,6 +387,8 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
                 return fetchDatasetForRsm(m_rsm);
             case RENAME_DATASET:
                 return renameDataset();
+            case PASTE_DATASET:
+                return pasteDataset();
             case CREATE_AGGREGATE_DATASET:
                 return createDataset(false);
             case CREATE_IDENTIFICATION_DATASET:
@@ -1198,6 +1213,113 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
         return true;
     }
 
+    private boolean pasteDataset() {
+        synchronized (WRITE_DATASET_LOCK) {
+
+            EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().createEntityManager();
+            try {
+                entityManagerUDS.getTransaction().begin();
+
+                long projectId = m_datasetCopy.getProjectId();
+                Long resultSetId = m_datasetCopy.getResultSetId();
+                
+                Project mergedProject = entityManagerUDS.find(Project.class, projectId);
+                Dataset mergedParentDataset = (m_parentDataset == null) ? null : entityManagerUDS.find(Dataset.class, m_parentDataset.getId());
+
+                Dataset d = null;
+                if (resultSetId != null) {
+                    d = new IdentificationDataset();
+                    d.setProject(mergedProject);
+                    d.setType(Dataset.DatasetType.IDENTIFICATION);
+                } else {
+                    d = new Dataset(mergedProject);
+                    d.setType(Dataset.DatasetType.AGGREGATE);
+
+                    Aggregation aggregation = DatabaseDataManager.getDatabaseDataManager().getAggregation(m_datasetCopy.getDatasetType());
+                    Aggregation mergedAggregation = entityManagerUDS.merge(aggregation);
+                    d.setAggregation(mergedAggregation);
+                }
+                
+                // number of children of the parent
+                if (mergedParentDataset != null) {
+                    mergedParentDataset.addChild(d);
+                } else {
+                    int childrenCount = m_project.getTransientData().getChildrenNumber();
+                    d.setNumber(childrenCount);
+                    m_project.getTransientData().setChildrenNumber(childrenCount + 1);
+                }
+
+                d.setName(m_datasetCopy.getName());
+                d.setResultSetId(m_datasetCopy.getResultSetId());
+                d.setChildrenCount(0); // this dataset has no child for the moment
+
+                pasteDatasetAddChildrenImpl(entityManagerUDS, mergedProject, d, m_datasetCopy);
+                
+               entityManagerUDS.persist(d);
+                if (mergedParentDataset != null) {
+                    entityManagerUDS.merge(mergedParentDataset);
+                }
+                
+                // we return only the top dataset created
+                DDataset ddataset = new DDataset(d.getId(), d.getProject(), d.getName(), d.getType(), d.getChildrenCount(), d.getResultSetId(), d.getResultSummaryId(), d.getNumber());
+                ddataset.setAggregation(d.getAggregation());
+
+                m_datasetList.add(ddataset);
+                
+                entityManagerUDS.getTransaction().commit();
+
+            } catch (Exception e) {
+                m_logger.error(getClass().getSimpleName() + " failed", e);
+                m_taskError = new TaskError(e);
+                try {
+                    entityManagerUDS.getTransaction().rollback();
+                } catch (Exception rollbackException) {
+                    m_logger.error(getClass().getSimpleName() + " failed : potential network problem", rollbackException);
+                }
+                return false;
+            } finally {
+                entityManagerUDS.close();
+            }
+
+        }
+
+        return true;
+    }
+    private Dataset pasteDatasetAddChildrenImpl(EntityManager entityManagerUDS, Project mergedProject, Dataset d, DatasetToCopy datasetCopy) {
+        ArrayList<DatasetToCopy> copiedChildren = datasetCopy.getChildren();
+        for (DatasetToCopy copy : copiedChildren) {
+            d.addChild(pasteDatasetImpl(entityManagerUDS, mergedProject, copy));
+        }
+        
+        return d;
+    }
+    private Dataset pasteDatasetImpl(EntityManager entityManagerUDS, Project mergedProject, DatasetToCopy datasetCopy) {
+        Long resultSetId = datasetCopy.getResultSetId();
+        Dataset d = null;
+        if (resultSetId != null) {
+            d = new IdentificationDataset();
+            d.setProject(mergedProject);
+            d.setType(Dataset.DatasetType.IDENTIFICATION);
+        } else {
+            d = new Dataset(mergedProject);
+            d.setType(Dataset.DatasetType.AGGREGATE);
+
+            Aggregation aggregation = DatabaseDataManager.getDatabaseDataManager().getAggregation(m_datasetCopy.getDatasetType());
+            Aggregation mergedAggregation = entityManagerUDS.merge(aggregation);
+            d.setAggregation(mergedAggregation);
+        }
+        
+        d.setName(datasetCopy.getName());
+        d.setResultSetId(datasetCopy.getResultSetId());
+        d.setChildrenCount(0); // this dataset has no child for the moment
+        
+        pasteDatasetAddChildrenImpl(entityManagerUDS, mergedProject, d, datasetCopy);
+        
+        entityManagerUDS.persist(d);
+                
+        return d;
+    }
+    
     private boolean createDataset(boolean identificationDataset) {
 
         synchronized (WRITE_DATASET_LOCK) {

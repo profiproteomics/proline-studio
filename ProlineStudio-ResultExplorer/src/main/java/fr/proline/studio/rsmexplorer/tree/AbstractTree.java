@@ -159,6 +159,119 @@ public abstract class AbstractTree extends JTree implements MouseListener {
 
     }
 
+    
+    ///////////////////////////////////////////////
+    
+    public void loadNodes(HashSet<AbstractNode> nodes, Runnable callback, final boolean identificationDataset) {
+        if (nodes.isEmpty()) {
+            if (callback != null) {
+                callback.run();
+                return;
+            }
+        }
+        
+        AbstractNode node = nodes.iterator().next();
+        loadNodes(nodes, node, callback, identificationDataset);
+    }
+    
+    public void loadNode(AbstractNode node, Runnable callback, final boolean identificationDataset) {
+        HashSet nodes = new HashSet<>(1);
+        nodes.add(node);
+        loadNodes(nodes, node, callback, identificationDataset);
+    }
+    
+    private void loadNodes(final HashSet<AbstractNode> nodes, AbstractNode node, Runnable callback, final boolean identificationDataset) {
+        
+        if (node.getChildCount() == 0) {
+            // node already loaded
+            nodes.remove(node);
+            loadNodes(nodes, callback, identificationDataset);
+            return;
+        }
+        
+        AbstractNode childNode = (AbstractNode) node.getChildAt(0);
+
+        if (childNode.getType() != AbstractNode.NodeTypes.HOUR_GLASS) {
+            // node already loaded, look to its children
+            int nbChildren = node.getChildCount();
+            for (int i = 0; i < nbChildren; i++) {
+                nodes.add((AbstractNode) node.getChildAt(i));
+            }
+            nodes.remove(node);
+            loadNodes(nodes, callback, identificationDataset);
+        } else {
+            // this node needs to be loaded
+
+            // register hour glass which is expanded
+            loadingMap.put(node.getData(), node);
+
+            final ArrayList<AbstractData> childrenList = new ArrayList<>();
+            final AbstractData parentData = node.getData();
+
+            if (node.getType() == AbstractNode.NodeTypes.TREE_PARENT) {
+                node.setIsChanging(true);
+                m_model.nodeChanged(node);
+            }
+
+            // Callback used only for the synchronization with the AccessDatabaseThread
+            AbstractDatabaseCallback databaseCallback = new AbstractDatabaseCallback() {
+
+                @Override
+                public boolean mustBeCalledInAWT() {
+                    return true;
+                }
+
+                @Override
+                public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
+
+                    if (node.getType() == AbstractNode.NodeTypes.TREE_PARENT) {
+                        node.setIsChanging(false);
+                        m_model.nodeChanged(node);
+                    }
+
+                    dataLoadingDone(nodes, node, callback, parentData, childrenList, identificationDataset);
+
+                }
+            };
+
+            parentData.load(databaseCallback, childrenList, Priority.TOP, identificationDataset);
+        }
+
+    }
+    
+    private void dataLoadingDone(final HashSet<AbstractNode> nodes, AbstractNode node, Runnable callback, AbstractData data, List<AbstractData> list, boolean identificationDataset) {
+
+        AbstractNode parentNode = loadingMap.remove(data);
+
+        nodes.remove(node);
+        
+        parentNode.remove(0); // remove the first child which correspond to the hour glass
+
+        int indexToInsert = 0;
+        Iterator<AbstractData> it = list.iterator();
+        while (it.hasNext()) {
+            AbstractData dataCur = it.next();
+            parentNode.insert(ChildFactory.createNode(dataCur), indexToInsert);
+            indexToInsert++;
+        }
+
+        m_model.nodeStructureChanged(parentNode);
+
+        int nbChildren = parentNode.getChildCount();
+
+        for (int i = 0; i < nbChildren; i++) {
+            AbstractNode childNode = (AbstractNode) parentNode.getChildAt(i);
+            if (childNode.getChildCount() != 0) {
+                nodes.add(childNode);
+            }
+        }
+        loadNodes(nodes, callback, identificationDataset);
+
+
+    }
+    
+    ///////////////////////////////////////
+    
     public void loadAllAtOnce(final AbstractNode nodeToLoad, final boolean identificationDataset) {
 
         if (nodeToLoad.getChildCount() == 0) {
@@ -228,7 +341,7 @@ public abstract class AbstractTree extends JTree implements MouseListener {
 
     }
 
-    protected void dataLoadedAtOnce(AbstractData data, List<AbstractData> list, boolean identificationDataset) {
+    private void dataLoadedAtOnce(AbstractData data, List<AbstractData> list, boolean identificationDataset) {
 
         AbstractNode parentNode = loadingMap.remove(data);
 
@@ -252,7 +365,7 @@ public abstract class AbstractTree extends JTree implements MouseListener {
             loadAllAtOnce((AbstractNode) parentNode.getChildAt(i), identificationDataset);
         }
 
-        if (identificationDataset && this.m_subscribedRenamer != null) {
+        if (identificationDataset &&this.m_subscribedRenamer != null) {
             if (m_expected == 0) {
                 this.m_subscribedRenamer.proceedWithRenaming();
             }

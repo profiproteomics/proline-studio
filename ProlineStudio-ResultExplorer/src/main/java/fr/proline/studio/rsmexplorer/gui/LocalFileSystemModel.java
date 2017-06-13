@@ -23,7 +23,7 @@ public class LocalFileSystemModel implements TreeModel {
 
     private DefaultMutableTreeNode m_root;
 
-    private HashSet<TreeModelListener> listeners; // Declare the listeners vector
+    private final HashSet<TreeModelListener> listeners; // Declare the listeners vector
 
     public LocalFileSystemModel(String rootURL) {
         m_root = new DefaultMutableTreeNode(new LocalFileSystemFile(rootURL));

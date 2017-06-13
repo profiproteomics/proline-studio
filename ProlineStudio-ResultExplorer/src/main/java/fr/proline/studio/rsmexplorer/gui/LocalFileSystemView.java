@@ -27,8 +27,10 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashSet;
+import java.util.prefs.Preferences;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
+import javax.swing.ComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
@@ -44,6 +46,7 @@ import javax.swing.event.TreeModelEvent;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreePath;
+import org.openide.util.NbPreferences;
 import org.openide.windows.WindowManager;
 
 /**
@@ -61,9 +64,14 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
     private final LocalFileSystemTransferHandler m_transferHandler;
     private boolean m_showUpdateButton;
     private JComboBox m_rootsComboBox;
+    private Preferences m_preferences;
+
+    private static final String LOCAL_FILE_SYSTEM_LIST_KEY = "LOCAL_FILE_SYSTEM_VIEW";
+    private static final String DRIVE_PARAM_KEY = "DRIVE_KEY";
 
     public LocalFileSystemView(LocalFileSystemTransferHandler transferHandler) {
         m_transferHandler = transferHandler;
+        m_preferences = NbPreferences.root();
         initComponents();
     }
 
@@ -136,6 +144,7 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
 
                 reloadTree();
                 updateTree();
+                m_preferences.put(LOCAL_FILE_SYSTEM_LIST_KEY + "." + DRIVE_PARAM_KEY, m_rootsComboBox.getSelectedItem().toString());
 
             }
 
@@ -146,7 +155,8 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
         m_popupMenu = new JPopupMenu();
         initPopupMenu(m_popupMenu);
 
-        m_fileSystemDataModel = new LocalFileSystemModel(roots[0].getAbsolutePath());
+        //m_fileSystemDataModel = new LocalFileSystemModel(roots[0].getAbsolutePath());
+        m_fileSystemDataModel = new LocalFileSystemModel(m_rootsComboBox.getSelectedItem().toString());
         m_tree = new JTree(m_fileSystemDataModel);
 
         m_tree.setCellRenderer(new DefaultTreeCellRenderer() {
@@ -218,6 +228,22 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
 
         add(treePanel, c);
 
+        initRoot();
+    }
+
+    private void initRoot() {
+        String previousDrive = m_preferences.get(LOCAL_FILE_SYSTEM_LIST_KEY + "." + DRIVE_PARAM_KEY, null);
+            if (previousDrive != null) {
+                ComboBoxModel model = m_rootsComboBox.getModel();
+                int size = model.getSize();
+                for (int i = 0; i < size; i++) {
+                    File f = (File) model.getElementAt(i);
+                    if (f.getAbsolutePath().equalsIgnoreCase(previousDrive)) {
+                        m_rootsComboBox.setSelectedIndex(i);
+                        break;
+                    }
+                }
+            }
     }
 
     private ArrayList<String> getSelectedURLs() {
@@ -227,13 +253,13 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
         ArrayList<String> selectedURLs = new ArrayList<String>();
         TreePath[] paths = m_tree.getSelectionPaths();
         for (TreePath path : paths) {
-            
+
             DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getLastPathComponent();
             File f = (File) node.getUserObject();
-            
+
             //selectedURLs.add(path.getLastPathComponent().toString());
             selectedURLs.add(f.getAbsolutePath());
-            
+
             m_selectedFiles.add(f);
         }
         return selectedURLs;

@@ -21,7 +21,6 @@ import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -45,6 +44,7 @@ public class IdentificationPropertiesTableModel extends AbstractPropertiesTableM
 
     }
 
+    @Override
     public void setData(ArrayList<DDataset> datasetArrayList) {
 
         m_datasetArrayList = datasetArrayList;
@@ -105,7 +105,11 @@ public class IdentificationPropertiesTableModel extends AbstractPropertiesTableM
 
         }
 
+        m_loaded = true;
+        
         fireTableStructureChanged();
+        
+        
     }
 
     /**

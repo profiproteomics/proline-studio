@@ -609,19 +609,19 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
     }
     
     
-    protected int setLoading(boolean andCalculating) {
+    public int setLoading(boolean andCalculating) {
         final int loadingId = m_loadingId++;
         getDataBoxPanelInterface().setLoading(loadingId, andCalculating);
         return loadingId;
     }
     
-    protected int setLoading() {
+    public int setLoading() {
         final int loadingId = m_loadingId++;
         getDataBoxPanelInterface().setLoading(loadingId);
         return loadingId;
     }
     
-    protected void setLoaded(int loadingId) {
+    public void setLoaded(int loadingId) {
         getDataBoxPanelInterface().setLoaded(loadingId);
     }
     

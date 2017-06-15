@@ -10,6 +10,7 @@ import fr.proline.studio.filter.FilterButton;
 import fr.proline.studio.filter.actions.ClearRestrainAction;
 import fr.proline.studio.filter.actions.RestrainAction;
 import fr.proline.studio.graphics.CrossSelectionInterface;
+import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.info.InfoInterface;
 import fr.proline.studio.info.InfoToggleButton;
@@ -43,7 +44,7 @@ import org.jdesktop.swingx.JXTable;
  *
  * @author JM235353
  */
-public class GenericPanel extends JPanel implements DataBoxPanelInterface, GlobalTabelModelProviderInterface {
+public class GenericPanel extends HourglassPanel implements DataBoxPanelInterface, GlobalTabelModelProviderInterface {
 
     private AbstractDataBox m_dataBox;
 
@@ -235,14 +236,6 @@ public class GenericPanel extends JPanel implements DataBoxPanelInterface, Globa
         return m_dataBox.getSaveAction(splittedPanel);
     }
 
-    @Override
-    public void setLoading(int id) {}
-
-    @Override
-    public void setLoading(int id, boolean calculating) {}
-
-    @Override
-    public void setLoaded(int id) {}
 
     @Override
     public void addSingleValue(Object v) {

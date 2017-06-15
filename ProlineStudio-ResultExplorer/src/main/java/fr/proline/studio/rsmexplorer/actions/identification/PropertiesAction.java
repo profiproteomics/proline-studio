@@ -72,6 +72,8 @@ public class PropertiesAction extends AbstractRSMAction {
         final AbstractPropertiesTableModel _model = model;
         final GenericPanel _genericPanel = genericPanel;
 
+        final int loadingId = databoxGeneric.setLoading();
+        
         // load data for properties
         final DataLoadedCallback dataLoadedCallback = new DataLoadedCallback(selectedNodes.length) {
 
@@ -82,6 +84,8 @@ public class PropertiesAction extends AbstractRSMAction {
 
                     //win.setProperties(selectedNodes);
 
+                    databoxGeneric.setLoaded(loadingId);
+                    
                     ArrayList<DDataset> datasetList = new ArrayList<>();
                     for (AbstractNode node : selectedNodes) {
                         if (node instanceof DataSetNode) {

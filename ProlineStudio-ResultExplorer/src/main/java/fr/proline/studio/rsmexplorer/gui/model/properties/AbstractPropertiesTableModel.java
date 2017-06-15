@@ -43,6 +43,8 @@ public abstract class AbstractPropertiesTableModel extends DecoratedTableModel i
     
     protected String m_modelName; 
     
+    protected boolean m_loaded = false;
+    
     public AbstractPropertiesTableModel() {
         m_propertiesOkRenderer = new PropertiesRenderer(false);
         m_propertiesNonOkRenderer = new PropertiesRenderer(true);
@@ -258,12 +260,16 @@ public abstract class AbstractPropertiesTableModel extends DecoratedTableModel i
 
     @Override
     public boolean isLoaded() {
-        return true;
+        return m_loaded;
     }
 
     @Override
     public int getLoadingPercentage() {
-        return 100;
+        if (m_loaded) {
+            return 100;
+        } else {
+            return 0;
+        }
     }
 
     @Override

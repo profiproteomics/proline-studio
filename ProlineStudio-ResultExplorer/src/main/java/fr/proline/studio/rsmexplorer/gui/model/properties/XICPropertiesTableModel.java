@@ -122,6 +122,8 @@ public class XICPropertiesTableModel extends AbstractPropertiesTableModel {
 
         }
         
+         m_loaded = true;
+        
         fireTableStructureChanged();
     }
 

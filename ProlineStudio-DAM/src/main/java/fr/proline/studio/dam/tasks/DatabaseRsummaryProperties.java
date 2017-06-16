@@ -17,15 +17,15 @@ public class DatabaseRsummaryProperties extends AbstractDatabaseTask {
     private long m_projectId;
     private DDataset m_dataset = null;
     private ResultSummary m_rsm = null;
-    
+
     public DatabaseRsummaryProperties(AbstractDatabaseCallback callback, long projectId, DDataset dataset) {
-        super(callback, new TaskInfo("Load Properties for Search Result "+dataset.getName(), false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_LOW));
+        super(callback, new TaskInfo("Load Properties for Identification Summary "+dataset.getName(), false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_LOW));
         m_projectId = projectId;
         m_dataset = dataset;
     }
     
     public DatabaseRsummaryProperties(AbstractDatabaseCallback callback, long projectId, ResultSummary rset, String name) {
-        super(callback, new TaskInfo("Load Properties for Search Result "+name, false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_LOW));
+        super(callback, new TaskInfo("Load Properties for Identification Summary "+name, false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_LOW));
         m_projectId = projectId;
         m_rsm = rset;
     }
@@ -85,7 +85,7 @@ public class DatabaseRsummaryProperties extends AbstractDatabaseTask {
         TypedQuery<Long> countPeptidesQuery = entityManagerMSI.createQuery("SELECT count(pi) FROM PeptideInstance pi WHERE pi.resultSummary.id=:rsmId AND pi.validatedProteinSetCount > 0", Long.class);
         countPeptidesQuery.setParameter("rsmId", rsmId);
         rsm.getTransientData().setNumberOfPeptides(countPeptidesQuery.getSingleResult().intValue());
-        
+
         // Count peptide matches 
         TypedQuery<Long> countPeptideMatchesQuery = entityManagerMSI.createQuery("SELECT  sum(pi.peptideMatchCount) FROM PeptideInstance pi WHERE pi.resultSummary.id=:rsmId AND pi.validatedProteinSetCount > 0", Long.class);
         countPeptideMatchesQuery.setParameter("rsmId", rsmId);

@@ -78,6 +78,8 @@ public class SetRsetNameAction extends AbstractRSMAction {
 
     public void proceedWithRenaming() {
 
+        m_tree.subscribeRenamer(null);
+        
         fail = false;
 
         toRename = new ArrayList<DataSetNode>();

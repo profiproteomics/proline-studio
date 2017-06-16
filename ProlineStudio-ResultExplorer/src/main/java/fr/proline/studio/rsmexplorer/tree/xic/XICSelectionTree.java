@@ -27,9 +27,9 @@ public class XICSelectionTree extends AbstractTree implements TreeWillExpandList
         initTree(top);
 
         if (loadAllAtOnce) {
-            loadAllAtOnce(top, false);
+            loadAllAtOnce(top, true);
         } else {
-            startLoading(top, false);
+            startLoading(top, true);
         }
         
 

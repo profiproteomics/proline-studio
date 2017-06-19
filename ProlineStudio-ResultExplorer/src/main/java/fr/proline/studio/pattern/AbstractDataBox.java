@@ -126,10 +126,9 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
         DataBoxDataAnalyzerResults(43),
         DataBoxImage(44),
         DataBoxSystemTasks(45),
-        DataBoxFrozenCopy(46),
-        DataBoxPTMProteinSite_V2(47),
-        DataBoxPTMSitePeptides(48),
-        DataBoxPTMSitePepMatches(49);
+        DataBoxFrozenCopy(46);
+//        DataBoxPTMSitePeptides(48),
+//        DataBoxPTMSitePepMatches(49);
         
         int m_type;
         private static HashMap<Integer, DataboxType> m_databoxTypeMap = null;
@@ -220,18 +219,16 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
                     return new DataboxRsetPSMForMsQuery();
                 case DataBoxPTMProteinSite:
                     return new DataBoxPTMProteinSite();
-                case DataBoxPTMProteinSite_V2:
-                    return new DataBoxPTMProteinSite_V2();
                 case DataBoxDataAnalyzerResults:
                     return new DataBoxDataAnalyzerResults();
                 case DataBoxImage:
                     return new DataBoxImage();
                 case DataBoxSystemTasks:
                     return new DataBoxSystemTasks();
-                case DataBoxPTMSitePeptides:
-                    return new DataBoxPTMSitePeptides();
-                case DataBoxPTMSitePepMatches:
-                    return new DataBoxPTMSitePepMatches();
+//                case DataBoxPTMSitePeptides:
+//                    return new DataBoxPTMSitePeptides();
+//                case DataBoxPTMSitePepMatches:
+//                    return new DataBoxPTMSitePepMatches();
                 case DataBoxFrozenCopy:
                     return null; // not used for frozen copy
             }

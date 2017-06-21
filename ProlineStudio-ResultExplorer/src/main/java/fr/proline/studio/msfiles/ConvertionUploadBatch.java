@@ -54,9 +54,7 @@ public class ConvertionUploadBatch implements Runnable, ConversionListener {
     private void convert(File f, ConversionSettings conversionSettings) {
         if (f.getAbsolutePath().toLowerCase().endsWith(".raw") || f.getAbsolutePath().toLowerCase().endsWith(".wiff")) {
             RawConverter converter = new RawConverter(f, conversionSettings);
-            if (conversionSettings.getUploadAfterConversion()) {
-                converter.addConversionListener(this);
-            }
+            converter.addConversionListener(this);         
             m_conversionExecutor.execute(converter);
         }
     }
@@ -75,7 +73,7 @@ public class ConvertionUploadBatch implements Runnable, ConversionListener {
 
             if (m_pathToExpand == null) {
 
-                if (!settings.getUploadSettings().getDestination().equalsIgnoreCase("")) {
+                if (settings.getUploadSettings()!=null && !settings.getUploadSettings().getDestination().equalsIgnoreCase("")) {
                     if (settings.getUploadSettings().getDestination().startsWith(File.separator)) {
                         m_parentDirectories.add(settings.getUploadSettings().getDestination().substring(1));
                     } else {
@@ -113,6 +111,12 @@ public class ConvertionUploadBatch implements Runnable, ConversionListener {
             }
         } else {
             m_failedConversions++;
+        }
+        
+        if(f.getAbsolutePath().toLowerCase().endsWith(".mzdb")){
+            HashSet<String> directoryToExpand = new HashSet<String>();
+            directoryToExpand.add(conversionSettings.getOutputPath());
+            MzdbFilesTopComponent.getExplorer().getLocalFileSystemView().expandMultipleTreePath(directoryToExpand);
         }
 
         if ((m_uploadCounter + m_failedConversions) == m_conversions.size()) {

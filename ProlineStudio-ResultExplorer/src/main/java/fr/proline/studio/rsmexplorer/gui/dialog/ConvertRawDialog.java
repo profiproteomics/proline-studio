@@ -349,8 +349,13 @@ public class ConvertRawDialog extends DefaultDialog implements FileDialogInterfa
             File file = (File) m_fileList.getModel().getElementAt(i);
 
             ConversionSettings conversionSettings = new ConversionSettings(m_converterFilePath.getStringValue(), m_outputFilePath.getStringValue(), (boolean) m_deleteRaw.getObjectValue(), (boolean) m_uploadMzdb.getObjectValue());
-            MzdbUploadSettings uploadSettings = new MzdbUploadSettings((boolean) m_deleteMzdb.getObjectValue(), m_uploadLabelParameter.getStringValue(), (boolean) m_createParentDirectoryParameter.getObjectValue() ? File.separator + file.getParentFile().getName() : "");
-            conversionSettings.setUploadSettings(uploadSettings);
+            
+            if(conversionSettings.getUploadAfterConversion()){
+                MzdbUploadSettings uploadSettings = new MzdbUploadSettings((boolean) m_deleteMzdb.getObjectValue(), m_uploadLabelParameter.getStringValue(), (boolean) m_createParentDirectoryParameter.getObjectValue() ? File.separator + file.getParentFile().getName() : "");
+                conversionSettings.setUploadSettings(uploadSettings);
+            }else{
+                conversionSettings.setUploadSettings(null);
+            }
 
             conversions.put((File) m_fileList.getModel().getElementAt(i), conversionSettings);
         }

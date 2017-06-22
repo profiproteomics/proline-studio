@@ -10,6 +10,7 @@ import fr.proline.studio.msfiles.FileDeletionBatch;
 import fr.proline.mzscope.utils.IPopupMenuDelegate;
 import fr.proline.studio.mzscope.MzdbInfo;
 import fr.proline.studio.pattern.MzScopeWindowBoxManager;
+import static fr.proline.studio.rsmexplorer.gui.TreeStateUtil.setExpansionState;
 import fr.proline.studio.rsmexplorer.gui.dialog.ConvertRawDialog;
 import fr.proline.studio.rsmexplorer.gui.dialog.UploadMzdbDialog;
 import fr.proline.studio.utils.IconManager;
@@ -233,17 +234,17 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
 
     private void initRoot() {
         String previousDrive = m_preferences.get(LOCAL_FILE_SYSTEM_LIST_KEY + "." + DRIVE_PARAM_KEY, null);
-            if (previousDrive != null) {
-                ComboBoxModel model = m_rootsComboBox.getModel();
-                int size = model.getSize();
-                for (int i = 0; i < size; i++) {
-                    File f = (File) model.getElementAt(i);
-                    if (f.getAbsolutePath().equalsIgnoreCase(previousDrive)) {
-                        m_rootsComboBox.setSelectedIndex(i);
-                        break;
-                    }
+        if (previousDrive != null) {
+            ComboBoxModel model = m_rootsComboBox.getModel();
+            int size = model.getSize();
+            for (int i = 0; i < size; i++) {
+                File f = (File) model.getElementAt(i);
+                if (f.getAbsolutePath().equalsIgnoreCase(previousDrive)) {
+                    m_rootsComboBox.setSelectedIndex(i);
+                    break;
                 }
             }
+        }
     }
 
     private ArrayList<String> getSelectedURLs() {
@@ -273,10 +274,29 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
         DefaultMutableTreeNode root = (DefaultMutableTreeNode) m_fileSystemDataModel.getRoot();
         Enumeration totalNodes = root.depthFirstEnumeration();
 
+        m_tree.addTreeExpansionListener(new TreeExpansionListener() {
+
+            @Override
+            public void treeExpanded(TreeExpansionEvent tee) {
+                expandMultipleTreePath(directories);
+            }
+
+            @Override
+            public void treeCollapsed(TreeExpansionEvent tee) {
+            }
+        }
+        );
+
         while (totalNodes.hasMoreElements()) {
             DefaultMutableTreeNode node = (DefaultMutableTreeNode) totalNodes.nextElement();
 
-            if (directories.contains(node.toString())) {
+            File f = (File) node.getUserObject();
+
+            String absolutePath = f.getAbsolutePath();
+            
+            if (directories.contains(absolutePath)) {
+                directories.remove(node.toString());
+                TreePath tp = new TreePath(node.getPath());
                 m_tree.expandPath(new TreePath(node.getPath()));
             }
 

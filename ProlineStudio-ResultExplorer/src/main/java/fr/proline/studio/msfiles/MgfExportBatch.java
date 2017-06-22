@@ -47,7 +47,12 @@ public class MgfExportBatch implements Runnable, ConversionListener {
             File f = (File) pair.getKey();
             MgfExportSettings settings = (MgfExportSettings) pair.getValue();
 
-            m_parentDirectories.add(settings.getDestinationDirectory());
+            File outputDirectory = new File(settings.getDestinationDirectory());
+            
+            while(outputDirectory.getParentFile()!=null){
+                m_parentDirectories.add(outputDirectory.getAbsolutePath());
+                outputDirectory = outputDirectory.getParentFile();
+            }
             
             export(f, settings);
         }

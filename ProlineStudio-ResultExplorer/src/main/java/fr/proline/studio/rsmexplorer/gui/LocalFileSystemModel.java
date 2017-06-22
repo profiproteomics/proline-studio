@@ -155,7 +155,7 @@ public class LocalFileSystemModel implements TreeModel {
 
             File f = new File(directory, fileName);
 
-            return f.isDirectory() || fileName.toLowerCase().endsWith(".raw") || fileName.toLowerCase().endsWith(".mzdb") || fileName.toLowerCase().endsWith(".wiff");
+            return f.isDirectory() || fileName.toLowerCase().endsWith(".raw") || fileName.toLowerCase().endsWith(".mzdb") || fileName.toLowerCase().endsWith(".wiff") || fileName.toLowerCase().endsWith(".mgf");
 
         }
 

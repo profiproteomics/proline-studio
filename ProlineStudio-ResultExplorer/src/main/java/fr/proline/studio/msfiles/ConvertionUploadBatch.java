@@ -114,9 +114,18 @@ public class ConvertionUploadBatch implements Runnable, ConversionListener {
         }
         
         if(f.getAbsolutePath().toLowerCase().endsWith(".mzdb")){
-            HashSet<String> directoryToExpand = new HashSet<String>();
-            directoryToExpand.add(conversionSettings.getOutputPath());
-            MzdbFilesTopComponent.getExplorer().getLocalFileSystemView().expandMultipleTreePath(directoryToExpand);
+            
+            HashSet<String> directories = new HashSet<String>();
+    
+            File outputDirectory = new File(conversionSettings.getOutputPath());
+            
+            while(outputDirectory.getParentFile()!=null){
+                directories.add(outputDirectory.getAbsolutePath());
+                outputDirectory = outputDirectory.getParentFile();
+            }
+                     
+            MzdbFilesTopComponent.getExplorer().getLocalFileSystemView().reloadTree();
+            MzdbFilesTopComponent.getExplorer().getLocalFileSystemView().expandMultipleTreePath(directories);
         }
 
         if ((m_uploadCounter + m_failedConversions) == m_conversions.size()) {

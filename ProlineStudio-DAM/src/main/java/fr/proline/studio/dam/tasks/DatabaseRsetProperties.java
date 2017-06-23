@@ -5,9 +5,12 @@ import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.core.orm.util.DataStoreConnectorFactory;
 import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.Iterator;
 import java.util.Set;
 import javax.persistence.EntityManager;
+import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 
 /**
@@ -111,20 +114,40 @@ public class DatabaseRsetProperties extends AbstractDatabaseTask {
         Long rsetId = rset.getId();
         
         // Count Protein Match
-        TypedQuery<Long> countProteinMatchQuery = entityManagerMSI.createQuery("SELECT count(pm) FROM fr.proline.core.orm.msi.ProteinMatch pm WHERE pm.resultSet.id=:rsetId", Long.class);
+        /*TypedQuery<Long> countProteinMatchQuery = entityManagerMSI.createQuery("SELECT count(pm) FROM fr.proline.core.orm.msi.ProteinMatch pm WHERE pm.resultSet.id=:rsetId", Long.class);
         countProteinMatchQuery.setParameter("rsetId", rsetId);
-        Long proteinMatchNumber = countProteinMatchQuery.getSingleResult();
+        Long proteinMatchNumber = countProteinMatchQuery.getSingleResult();*/
 
+        long step1 = System.currentTimeMillis();
+        
+         Query countProteinMatchQuery = entityManagerMSI.createNativeQuery(  "SELECT count(*) FROM protein_match pm WHERE pm.result_set_id=?");  
+         countProteinMatchQuery.setParameter(1, rsetId);  
+         BigInteger val = (BigInteger) countProteinMatchQuery.getSingleResult(); 
+         Long proteinMatchNumber = val.longValue();
+        
+        
         rset.getTransientData().setProteinMatchesCount(Integer.valueOf(proteinMatchNumber.intValue()));
 
-
+long step2 = System.currentTimeMillis();
+        
         // Count Peptide Match
-        TypedQuery<Long> countPeptideMatchQuery = entityManagerMSI.createQuery("SELECT count(pm) FROM fr.proline.core.orm.msi.PeptideMatch pm WHERE pm.resultSet.id=:rsetId", Long.class);
+        /*TypedQuery<Long> countPeptideMatchQuery = entityManagerMSI.createQuery("SELECT count(pm) FROM fr.proline.core.orm.msi.PeptideMatch pm WHERE pm.resultSet.id=:rsetId", Long.class);
         countPeptideMatchQuery.setParameter("rsetId", rsetId);
-        Long peptideMatchNumber = countPeptideMatchQuery.getSingleResult();
+        Long peptideMatchNumber = countPeptideMatchQuery.getSingleResult();*/
+        
+        
+         Query countPeptideMatchQuery = entityManagerMSI.createNativeQuery(  "SELECT count(*) FROM peptide_match pm WHERE pm.result_set_id=?");  
+         countPeptideMatchQuery.setParameter(1, rsetId);  
+         val = (BigInteger) countPeptideMatchQuery.getSingleResult(); 
+         Long peptideMatchNumber = val.longValue();
 
         rset.getTransientData().setPeptideMatchesCount(Integer.valueOf(peptideMatchNumber.intValue()));
 
+        long step3 = System.currentTimeMillis();
+        
+        m_logger.info("Time SQL REQUEST "+(step3-step2)+"   "+(step2-step1));
+        
+        
         // Count Ms Queries
         /*TypedQuery<Long> countMsQueriesQuery = entityManagerMSI.createQuery("SELECT count(DISTINCT msq) FROM fr.proline.core.orm.msi.MsQuery msq, fr.proline.core.orm.msi.PeptideMatch pm WHERE pm.resultSet.id=:rsetId AND msq=pm.msQuery", Long.class);
         */

@@ -1,5 +1,6 @@
 package fr.proline.studio.parameter;
 
+import fr.proline.studio.gui.DefaultDialog;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -22,7 +23,7 @@ import org.openide.util.NbPreferences;
 public class ParameterList extends ArrayList<AbstractParameter> {
 
     private String m_name;
-    private JPanel m_parametersPanel;
+    private ParametersPanel m_parametersPanel;
     private boolean m_enable = true;
 
     private final HashMap<JComponent, JLabel> m_associatedLabels = new HashMap<>();
@@ -40,7 +41,7 @@ public class ParameterList extends ArrayList<AbstractParameter> {
        return m_name.replaceAll(" ", "_") + ".";
     }
 
-    public JPanel getPanel() {
+    public ParametersPanel getPanel() {
 
         if (m_parametersPanel != null) {
             return m_parametersPanel;
@@ -49,7 +50,7 @@ public class ParameterList extends ArrayList<AbstractParameter> {
         Preferences preferences = NbPreferences.root();
         String prefixKey = getPrefixName();
 
-        m_parametersPanel = new JPanel();
+        m_parametersPanel = new ParametersPanel();
         m_parametersPanel.setLayout(new GridBagLayout());
 
         GridBagConstraints c = new GridBagConstraints();
@@ -389,6 +390,28 @@ public class ParameterList extends ArrayList<AbstractParameter> {
 
     public boolean isEnable() {
         return m_enable;
+    }
+    
+    public void displayModified() {
+        m_parametersPanel.displayModified();
+    }
+    
+    public class ParametersPanel extends JPanel {
+        
+        private DefaultDialog m_dialog = null;
+        
+        public void setParentDialog(DefaultDialog dialog) {
+            m_dialog = dialog;
+        }
+        
+        public void displayModified() {
+            if (m_dialog != null) {
+                m_dialog.repack();
+                m_dialog.revalidate();
+                m_dialog.repaint();
+            }
+        }
+        
     }
 
 }

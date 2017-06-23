@@ -181,6 +181,30 @@ public class StatsUtil {
         return cols;
     }
     
+    public static double[] colRefToDoubleArray(ColRef c) {
+        int nb = c.getRowCount();
+        double[] doubleArray = new double[nb];
+        for (int i = 0; i < nb; i++) {
+            Object o = c.getValueAt(i);
+            if (o instanceof LazyData) {
+                o = ((LazyData) o).getData();
+            }
+            double d;
+            if ((o != null) && (o instanceof Number)) {
+                d = ((Number) o).doubleValue();
+
+                if (d != d) { // NaN values
+                    d = 0;
+                }
+            } else {
+                d = 0;
+            }
+            doubleArray[i] = d;
+        }
+        
+        return doubleArray;
+    }
+    
     /*public static ColRef[] colTupleToColArray(PyTuple p1, PyTuple p2) {
         Object[] objArray1 = p1.getArray();
         int nb1 = objArray1.length;

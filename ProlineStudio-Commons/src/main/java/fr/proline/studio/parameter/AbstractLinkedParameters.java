@@ -32,6 +32,8 @@ public abstract class AbstractLinkedParameters {
         if (l != null) {
             l.setVisible(show);
         }
+        
+        m_parameterList.displayModified();
     }
 
     public void showParameter(AbstractParameter parameter, boolean show, Object value) {

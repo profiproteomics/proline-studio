@@ -71,14 +71,14 @@ public class FunctionParametersDialog extends DefaultDialog {
 
         ParameterList parameterList = m_parameterList[panelNumber];
 
-        
         c.gridx = 0;
         c.gridy = 0;
         c.weightx = 1;
         c.weighty = 1;
-        containerPanel.add(parameterList.getPanel(), c);
-        
-        
+        ParameterList.ParametersPanel panel = parameterList.getPanel();
+        panel.setParentDialog(this);
+        containerPanel.add(panel, c);
+
         return containerPanel;
     }
     
@@ -124,8 +124,6 @@ public class FunctionParametersDialog extends DefaultDialog {
         }
         
     }
-    
 
-    
     
 }

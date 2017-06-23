@@ -12,6 +12,7 @@ import org.python.core.PyObject;
 import org.python.core.PyString;
 import org.python.core.PyTuple;
 
+
 /**
  *
  * @author JM235353
@@ -135,6 +136,9 @@ public class Stats {
     
     public static Table mvimputation(PyTuple p1, PyString method) throws Exception {
         return StatsRImplementation.mvimputation(p1, method);
+    }
+    public static Table mvimputation(PyTuple p1, PyString method, PyFloat percentilePercentage, PyInteger addImputationColumns) throws Exception {
+        return StatsImplementation.mvimputationPercentile(p1, percentilePercentage, addImputationColumns);
     }
 
     

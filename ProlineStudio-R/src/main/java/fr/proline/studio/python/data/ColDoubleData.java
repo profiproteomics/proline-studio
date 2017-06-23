@@ -16,6 +16,15 @@ public class ColDoubleData extends Col {
         m_data = data;
         m_columnName = name;
     }
+    
+    public ColDoubleData(Table table, double[] data, String name) {
+        super(table);
+        m_data = new ArrayList<Double>(data.length);
+        for(double d : data) {
+            m_data.add(d);
+        }
+        m_columnName = name;
+    }
 
     private ColDoubleData() {
         super(null);

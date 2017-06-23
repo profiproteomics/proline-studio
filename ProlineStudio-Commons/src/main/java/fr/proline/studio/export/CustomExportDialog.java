@@ -142,6 +142,11 @@ public class CustomExportDialog extends DefaultDialog implements CollapseListene
         Preferences preferences = NbPreferences.root();
         String defaultExportPath = preferences.get("DefaultExcelExportPath", System.getProperty("user.home"));
 
+        String path = preferences.absolutePath();
+        
+        File f = new File(path);
+        path = f.getAbsolutePath();
+        
         //m_lastDefaultExportConfig =  preferences.get("DefaultExportConfig", null);
         //m_lastExportConfig =  preferences.get("ExportConfig", null);
         m_tabTitleIdHashMap = new HashMap<>(); // this is used to store tab id/tab title matching

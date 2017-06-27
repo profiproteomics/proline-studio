@@ -10,7 +10,6 @@ import fr.proline.studio.msfiles.FileDeletionBatch;
 import fr.proline.mzscope.utils.IPopupMenuDelegate;
 import fr.proline.studio.mzscope.MzdbInfo;
 import fr.proline.studio.pattern.MzScopeWindowBoxManager;
-import static fr.proline.studio.rsmexplorer.gui.TreeStateUtil.setExpansionState;
 import fr.proline.studio.rsmexplorer.gui.dialog.ConvertRawDialog;
 import fr.proline.studio.rsmexplorer.gui.dialog.UploadMzdbDialog;
 import fr.proline.studio.utils.IconManager;
@@ -41,6 +40,7 @@ import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JToolBar;
 import javax.swing.JTree;
+import javax.swing.SwingUtilities;
 import javax.swing.event.TreeExpansionEvent;
 import javax.swing.event.TreeExpansionListener;
 import javax.swing.event.TreeModelEvent;
@@ -49,6 +49,8 @@ import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreePath;
 import org.openide.util.NbPreferences;
 import org.openide.windows.WindowManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -67,12 +69,17 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
     private JComboBox m_rootsComboBox;
     private Preferences m_preferences;
 
+    private HashSet<String> m_paths;
+
+    protected static final Logger logger = LoggerFactory.getLogger("ProlineStudio.LocalFileSystemView");
+
     private static final String LOCAL_FILE_SYSTEM_LIST_KEY = "LOCAL_FILE_SYSTEM_VIEW";
     private static final String DRIVE_PARAM_KEY = "DRIVE_KEY";
 
     public LocalFileSystemView(LocalFileSystemTransferHandler transferHandler) {
         m_transferHandler = transferHandler;
         m_preferences = NbPreferences.root();
+        m_paths = new HashSet<String>();
         initComponents();
     }
 
@@ -109,8 +116,13 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
 
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    reloadTree();
-                    updateTree();
+                    SwingUtilities.invokeLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            reloadTree();
+                            updateTree();
+                        }
+                    });
                 }
             });
 
@@ -200,6 +212,7 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
             @Override
             public void treeExpanded(TreeExpansionEvent tee) {
                 TreeStateUtil.saveExpansionState(m_tree, TreeStateUtil.TreeType.LOCAL, m_rootsComboBox.getSelectedItem().toString());
+                traverseAndExpand();
             }
 
             @Override
@@ -266,11 +279,20 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
         return selectedURLs;
     }
 
-    private void updateTree() {
+    public void updateTree() {
         TreeStateUtil.setExpansionState(TreeStateUtil.loadExpansionState(TreeStateUtil.TreeType.LOCAL, m_rootsComboBox.getSelectedItem().toString()), m_tree, (DefaultMutableTreeNode) m_tree.getModel().getRoot(), TreeStateUtil.TreeType.LOCAL, m_rootsComboBox.getSelectedItem().toString());
+
     }
 
     public void expandMultipleTreePath(HashSet<String> directories) {
+
+        for (String s : directories) {
+            m_paths.add(s);
+        }
+        
+        traverseAndExpand();
+        
+        /*
         DefaultMutableTreeNode root = (DefaultMutableTreeNode) m_fileSystemDataModel.getRoot();
         Enumeration totalNodes = root.depthFirstEnumeration();
 
@@ -278,6 +300,10 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
 
             @Override
             public void treeExpanded(TreeExpansionEvent tee) {
+                logger.debug("Before Expansion Listener Removal");
+                m_tree.removeTreeExpansionListener(this);
+                logger.debug("After Expansion Listener Removal");
+                //TreeStateUtil.saveExpansionState(m_tree, TreeStateUtil.TreeType.LOCAL, m_rootsComboBox.getSelectedItem().toString());
                 expandMultipleTreePath(directories);
             }
 
@@ -293,11 +319,54 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
             File f = (File) node.getUserObject();
 
             String absolutePath = f.getAbsolutePath();
-            
+
             if (directories.contains(absolutePath)) {
                 directories.remove(node.toString());
                 TreePath tp = new TreePath(node.getPath());
-                m_tree.expandPath(new TreePath(node.getPath()));
+
+                if (m_tree.isExpanded(tp)) {
+                    //m_fileSystemDataModel.fireTreeNodesChanged(new TreeModelEvent(node, node.getPath()));
+                } else {
+                    m_tree.expandPath(new TreePath(node.getPath()));
+                    try {
+                        //Sleep for a sec.
+                        Thread.sleep(300);
+                    } catch (InterruptedException ex) {
+                        Exceptions.printStackTrace(ex);
+                    }
+                    expandMultipleTreePath(directories);
+                }
+
+            }
+
+        }
+        */
+    }
+
+    public void traverseAndExpand() {
+        
+        if(m_paths.size()<=0){
+            return;
+        }
+        
+        DefaultMutableTreeNode root = (DefaultMutableTreeNode) m_fileSystemDataModel.getRoot();
+        Enumeration totalNodes = root.depthFirstEnumeration();
+
+        while (totalNodes.hasMoreElements()) {
+            DefaultMutableTreeNode node = (DefaultMutableTreeNode) totalNodes.nextElement();
+
+            File f = (File) node.getUserObject();
+
+            String absolutePath = f.getAbsolutePath();
+
+            if (m_paths.contains(absolutePath)) {
+                m_paths.remove(node.toString());
+                TreePath tp = new TreePath(node.getPath());
+
+                if (!m_tree.isExpanded(tp)) {
+                    m_tree.expandPath(new TreePath(node.getPath()));
+                }
+
             }
 
         }

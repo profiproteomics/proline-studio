@@ -124,7 +124,8 @@ public class ConvertionUploadBatch implements Runnable, ConversionListener {
                 outputDirectory = outputDirectory.getParentFile();
             }
                      
-            MzdbFilesTopComponent.getExplorer().getLocalFileSystemView().reloadTree();
+            //MzdbFilesTopComponent.getExplorer().getLocalFileSystemView().reloadTree();
+            MzdbFilesTopComponent.getExplorer().getLocalFileSystemView().updateTree();
             MzdbFilesTopComponent.getExplorer().getLocalFileSystemView().expandMultipleTreePath(directories);
         }
 
@@ -140,6 +141,7 @@ public class ConvertionUploadBatch implements Runnable, ConversionListener {
             }else{
                 MzdbFilesTopComponent.getExplorer().getTreeFileChooserPanel().expandMultipleTreePath(m_parentDirectories, conversionSettings.getUploadSettings().getMountLabel());
             }
+            MzdbFilesTopComponent.getExplorer().getTreeFileChooserPanel().updateTree();
         }
     }
 

@@ -8,11 +8,13 @@ package fr.proline.studio.msfiles;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.SubTask;
+import fr.proline.studio.rsmexplorer.MzdbFilesTopComponent;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.DirectoryNotEmptyException;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
+import java.util.HashSet;
 import javax.swing.SwingUtilities;
 
 /**
@@ -58,8 +60,12 @@ public class RawConverter implements Runnable, WorkerInterface {
 
                         if (m_file.getName().contains(".raw")) {
                             f = new File(m_settings.getOutputPath() + File.separator + m_file.getName().substring(0, m_file.getName().lastIndexOf(".raw")) + ".mzdb");
-                        } else if (m_file.getName().contains(".wiff")) {
-                            f = new File(m_settings.getOutputPath() + File.separator + m_file.getName().substring(0, m_file.getName().lastIndexOf(".raw")) + ".mzdb");
+                        }else if (m_file.getName().contains(".RAW")) {
+                            f = new File(m_settings.getOutputPath() + File.separator + m_file.getName().substring(0, m_file.getName().lastIndexOf(".RAW")) + ".mzdb");
+                        }else if (m_file.getName().contains(".wiff")) {
+                            f = new File(m_settings.getOutputPath() + File.separator + m_file.getName().substring(0, m_file.getName().lastIndexOf(".wiff")) + ".mzdb");
+                        }else if (m_file.getName().contains(".WIFF")) {
+                            f = new File(m_settings.getOutputPath() + File.separator + m_file.getName().substring(0, m_file.getName().lastIndexOf(".WIFF")) + ".mzdb");
                         }
                         if (success) {
 
@@ -75,6 +81,20 @@ public class RawConverter implements Runnable, WorkerInterface {
                                 if (m_settings.getDeleteRaw()) {
                                     try {
                                         Files.delete(m_file.toPath());
+                                        
+                                        HashSet<String> directories = new HashSet<String>();
+                                        
+                                        File outputDirectory = new File(m_file.getParentFile().getAbsolutePath());
+
+                                        while (outputDirectory.getParentFile() != null) {
+                                            directories.add(outputDirectory.getAbsolutePath());
+                                            outputDirectory = outputDirectory.getParentFile();
+                                        }
+
+                                        //MzdbFilesTopComponent.getExplorer().getLocalFileSystemView().reloadTree();
+                                        MzdbFilesTopComponent.getExplorer().getLocalFileSystemView().expandMultipleTreePath(directories);
+                                        //MzdbFilesTopComponent.getExplorer().getLocalFileSystemView().updateTree();
+                                        
                                     } catch (NoSuchFileException ex) {
                                         ;
                                     } catch (DirectoryNotEmptyException ex) {

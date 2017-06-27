@@ -91,6 +91,7 @@ public class MgfExportBatch implements Runnable, ConversionListener {
             }
             
             MzdbFilesTopComponent.getExplorer().getLocalFileSystemView().reloadTree();
+            MzdbFilesTopComponent.getExplorer().getLocalFileSystemView().updateTree();
             MzdbFilesTopComponent.getExplorer().getLocalFileSystemView().expandMultipleTreePath(m_parentDirectories);
 
         }

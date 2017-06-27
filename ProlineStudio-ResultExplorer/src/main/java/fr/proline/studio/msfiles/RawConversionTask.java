@@ -39,7 +39,19 @@ public class RawConversionTask extends AbstractDatabaseTask {
     public boolean fetchData() {
         try {
   
-            m_process = new ProcessBuilder(m_settings.getConverterPath(), "-i", m_file.getAbsolutePath(), "-o", m_settings.getOutputPath()+File.separator+m_file.getName().substring(0, m_file.getName().lastIndexOf(".raw")) + ".mzdb").start();
+            String suffix = null;
+            
+            if(m_file.getAbsolutePath().endsWith(".RAW")){
+                suffix = ".RAW";
+            }else if(m_file.getAbsolutePath().endsWith(".raw")){
+                suffix = ".raw";
+            }else if(m_file.getAbsolutePath().endsWith(".WIFF")){
+                suffix = ".WIFF";
+            }else if(m_file.getAbsolutePath().endsWith(".wiff")){
+                suffix = ".wiff";
+            }
+            
+            m_process = new ProcessBuilder(m_settings.getConverterPath(), "-i", m_file.getAbsolutePath(), "-o", m_settings.getOutputPath()+File.separator+m_file.getName().substring(0, m_file.getName().lastIndexOf(suffix)) + ".mzdb").start();
 
             InputStream errorStream = m_process.getErrorStream();
             BufferedReader reader = new BufferedReader(new InputStreamReader(errorStream));

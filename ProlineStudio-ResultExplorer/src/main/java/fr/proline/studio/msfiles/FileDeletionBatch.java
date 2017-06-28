@@ -5,14 +5,12 @@
  */
 package fr.proline.studio.msfiles;
 
-import fr.proline.studio.rsmexplorer.MzdbFilesTopComponent;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import javax.swing.JOptionPane;
 
 /**
  *

@@ -71,6 +71,8 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
 
     private HashSet<String> m_paths;
 
+    private boolean m_updating;
+
     protected static final Logger logger = LoggerFactory.getLogger("ProlineStudio.LocalFileSystemView");
 
     private static final String LOCAL_FILE_SYSTEM_LIST_KEY = "LOCAL_FILE_SYSTEM_VIEW";
@@ -86,6 +88,7 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
     public LocalFileSystemView(LocalFileSystemTransferHandler transferHandler, boolean showUpdateButton) {
         this(transferHandler);
         m_showUpdateButton = showUpdateButton;
+        m_updating = false;
     }
 
     private void initComponents() {
@@ -116,13 +119,14 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
 
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    SwingUtilities.invokeLater(new Runnable() {
-                        @Override
-                        public void run() {
-                            reloadTree();
-                            updateTree();
-                        }
-                    });
+                    if (!m_updating) {
+                        SwingUtilities.invokeLater(new Runnable() {
+                            @Override
+                            public void run() {
+                                updateTree();
+                            }
+                        });
+                    }
                 }
             });
 
@@ -156,7 +160,7 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
             public void itemStateChanged(ItemEvent ie) {
 
                 reloadTree();
-                updateTree();
+                resetTreeState();
                 m_preferences.put(LOCAL_FILE_SYSTEM_LIST_KEY + "." + DRIVE_PARAM_KEY, m_rootsComboBox.getSelectedItem().toString());
 
             }
@@ -279,7 +283,7 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
         return selectedURLs;
     }
 
-    public void updateTree() {
+    public void resetTreeState() {
         TreeStateUtil.setExpansionState(TreeStateUtil.loadExpansionState(TreeStateUtil.TreeType.LOCAL, m_rootsComboBox.getSelectedItem().toString()), m_tree, (DefaultMutableTreeNode) m_tree.getModel().getRoot(), TreeStateUtil.TreeType.LOCAL, m_rootsComboBox.getSelectedItem().toString());
 
     }
@@ -289,17 +293,17 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
         for (String s : directories) {
             m_paths.add(s);
         }
-        
+
         traverseAndExpand();
-        
+
     }
 
     private void traverseAndExpand() {
-        
-        if(m_paths.size()<=0){
+
+        if (m_paths.size() <= 0) {
             return;
         }
-        
+
         DefaultMutableTreeNode root = (DefaultMutableTreeNode) m_fileSystemDataModel.getRoot();
         Enumeration totalNodes = root.depthFirstEnumeration();
 
@@ -316,13 +320,20 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
 
                 if (!m_tree.isExpanded(tp)) {
                     m_tree.expandPath(new TreePath(node.getPath()));
-                }else{
+                } else {
                     m_fileSystemDataModel.fireTreeNodesChanged(new TreeModelEvent(node, node.getPath()));
                 }
 
             }
 
         }
+    }
+
+    public void updateTree() {
+        m_updating = true;
+        reloadTree();
+        resetTreeState();
+        m_updating = false;
     }
 
     public void reloadTree() {

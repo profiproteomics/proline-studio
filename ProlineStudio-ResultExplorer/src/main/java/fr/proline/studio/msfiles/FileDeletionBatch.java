@@ -81,7 +81,7 @@ public class FileDeletionBatch implements Runnable, ConversionListener {
             }
             
             MzdbFilesTopComponent.getExplorer().getLocalFileSystemView().reloadTree();
-            MzdbFilesTopComponent.getExplorer().getLocalFileSystemView().updateTree();
+            MzdbFilesTopComponent.getExplorer().getLocalFileSystemView().resetTreeState();
 
         }
     }

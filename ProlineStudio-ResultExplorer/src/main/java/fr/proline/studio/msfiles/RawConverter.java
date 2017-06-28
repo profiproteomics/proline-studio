@@ -93,7 +93,6 @@ public class RawConverter implements Runnable, WorkerInterface {
 
                                         
                                         MzdbFilesTopComponent.getExplorer().getLocalFileSystemView().expandMultipleTreePath(directories);
-                                        MzdbFilesTopComponent.getExplorer().getLocalFileSystemView().reloadTree();
                                         MzdbFilesTopComponent.getExplorer().getLocalFileSystemView().updateTree();
                                         
                                     } catch (NoSuchFileException ex) {

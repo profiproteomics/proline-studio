@@ -125,8 +125,8 @@ public class ConvertionUploadBatch implements Runnable, ConversionListener {
             }
 
             MzdbFilesTopComponent.getExplorer().getLocalFileSystemView().expandMultipleTreePath(directories);
-            MzdbFilesTopComponent.getExplorer().getLocalFileSystemView().reloadTree();
             MzdbFilesTopComponent.getExplorer().getLocalFileSystemView().updateTree();
+            
         }
 
         if ((m_uploadCounter + m_failedConversions) == m_conversions.size()) {

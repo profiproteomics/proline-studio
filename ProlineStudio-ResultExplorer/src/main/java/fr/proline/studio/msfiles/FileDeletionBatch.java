@@ -20,7 +20,6 @@ public class FileDeletionBatch implements Runnable {
 
     private final ThreadPoolExecutor m_executor;
     private ArrayList<File> m_files;
-    private int m_successCounter, m_failCounter;
     private HashSet<String> m_parentDirectories;
 
     public FileDeletionBatch(ArrayList<File> files) {
@@ -37,9 +36,6 @@ public class FileDeletionBatch implements Runnable {
 
     @Override
     public void run() {
-
-        m_successCounter = 0;
-        m_failCounter = 0;
 
         m_parentDirectories = new HashSet<String>();
 

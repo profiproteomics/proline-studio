@@ -330,10 +330,12 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
     }
 
     public void updateTree() {
-        m_updating = true;
-        reloadTree();
-        resetTreeState();
-        m_updating = false;
+        if (!m_updating) {
+            m_updating = true;
+            reloadTree();
+            resetTreeState();
+            m_updating = false;
+        }
     }
 
     public void reloadTree() {

@@ -292,58 +292,9 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
         
         traverseAndExpand();
         
-        /*
-        DefaultMutableTreeNode root = (DefaultMutableTreeNode) m_fileSystemDataModel.getRoot();
-        Enumeration totalNodes = root.depthFirstEnumeration();
-
-        m_tree.addTreeExpansionListener(new TreeExpansionListener() {
-
-            @Override
-            public void treeExpanded(TreeExpansionEvent tee) {
-                logger.debug("Before Expansion Listener Removal");
-                m_tree.removeTreeExpansionListener(this);
-                logger.debug("After Expansion Listener Removal");
-                //TreeStateUtil.saveExpansionState(m_tree, TreeStateUtil.TreeType.LOCAL, m_rootsComboBox.getSelectedItem().toString());
-                expandMultipleTreePath(directories);
-            }
-
-            @Override
-            public void treeCollapsed(TreeExpansionEvent tee) {
-            }
-        }
-        );
-
-        while (totalNodes.hasMoreElements()) {
-            DefaultMutableTreeNode node = (DefaultMutableTreeNode) totalNodes.nextElement();
-
-            File f = (File) node.getUserObject();
-
-            String absolutePath = f.getAbsolutePath();
-
-            if (directories.contains(absolutePath)) {
-                directories.remove(node.toString());
-                TreePath tp = new TreePath(node.getPath());
-
-                if (m_tree.isExpanded(tp)) {
-                    //m_fileSystemDataModel.fireTreeNodesChanged(new TreeModelEvent(node, node.getPath()));
-                } else {
-                    m_tree.expandPath(new TreePath(node.getPath()));
-                    try {
-                        //Sleep for a sec.
-                        Thread.sleep(300);
-                    } catch (InterruptedException ex) {
-                        Exceptions.printStackTrace(ex);
-                    }
-                    expandMultipleTreePath(directories);
-                }
-
-            }
-
-        }
-        */
     }
 
-    public void traverseAndExpand() {
+    private void traverseAndExpand() {
         
         if(m_paths.size()<=0){
             return;
@@ -365,6 +316,8 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
 
                 if (!m_tree.isExpanded(tp)) {
                     m_tree.expandPath(new TreePath(node.getPath()));
+                }else{
+                    m_fileSystemDataModel.fireTreeNodesChanged(new TreeModelEvent(node, node.getPath()));
                 }
 
             }
@@ -377,22 +330,6 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
             m_tree.setModel(null);
             m_fileSystemDataModel = new LocalFileSystemModel(m_rootsComboBox.getSelectedItem().toString());
             m_tree.setModel(m_fileSystemDataModel);
-        }
-    }
-
-    public void reloadMultipleTreePath(HashSet<String> directories) {
-        DefaultMutableTreeNode root = (DefaultMutableTreeNode) m_fileSystemDataModel.getRoot();
-        Enumeration totalNodes = root.depthFirstEnumeration();
-
-        while (totalNodes.hasMoreElements()) {
-            DefaultMutableTreeNode node = (DefaultMutableTreeNode) totalNodes.nextElement();
-
-            if (directories.contains(node.toString())) {
-                //Insted of expanding do something else!
-                m_fileSystemDataModel.fireTreeNodesChanged(new TreeModelEvent(node, node.getPath()));
-                //Remove children, reload them!
-            }
-
         }
     }
 

@@ -34,10 +34,10 @@ public class MgfExportBatch implements Runnable, ConversionListener {
 
     @Override
     public void run() {
-        
+
         m_successCounter = 0;
         m_failCounter = 0;
-        
+
         m_parentDirectories = new HashSet<String>();
 
         Iterator it = m_exports.entrySet().iterator();
@@ -48,12 +48,12 @@ public class MgfExportBatch implements Runnable, ConversionListener {
             MgfExportSettings settings = (MgfExportSettings) pair.getValue();
 
             File outputDirectory = new File(settings.getDestinationDirectory());
-            
-            while(outputDirectory.getParentFile()!=null){
+
+            while (outputDirectory.getParentFile() != null) {
                 m_parentDirectories.add(outputDirectory.getAbsolutePath());
                 outputDirectory = outputDirectory.getParentFile();
             }
-            
+
             export(f, settings);
         }
 
@@ -61,8 +61,8 @@ public class MgfExportBatch implements Runnable, ConversionListener {
 
     private void export(File f, MgfExportSettings settings) {
         if (f.getAbsolutePath().toLowerCase().endsWith(".mzdb")) {
-            MgfExporter exporter = new MgfExporter(f, settings);         
-            exporter.addConversionListener(this);         
+            MgfExporter exporter = new MgfExporter(f, settings);
+            exporter.addConversionListener(this);
             m_executor.execute(exporter);
         }
     }
@@ -78,21 +78,21 @@ public class MgfExportBatch implements Runnable, ConversionListener {
         }
 
         if ((m_successCounter + m_failCounter) == m_exports.size()) {
-            
-            if(m_failCounter>0){
+
+            if (m_failCounter > 0) {
                 JOptionPane.showMessageDialog(null, "One or more files were found to be corrupted and were thus not converted.");
             }
-            
+
             m_executor.shutdown();
             try {
                 m_executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
             } catch (InterruptedException e) {
                 ;
             }
-            
+
+            MzdbFilesTopComponent.getExplorer().getLocalFileSystemView().expandMultipleTreePath(m_parentDirectories);
             MzdbFilesTopComponent.getExplorer().getLocalFileSystemView().reloadTree();
             MzdbFilesTopComponent.getExplorer().getLocalFileSystemView().updateTree();
-            MzdbFilesTopComponent.getExplorer().getLocalFileSystemView().expandMultipleTreePath(m_parentDirectories);
 
         }
     }

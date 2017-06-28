@@ -54,26 +54,26 @@ public class ConvertionUploadBatch implements Runnable, ConversionListener {
     private void convert(File f, ConversionSettings conversionSettings) {
         if (f.getAbsolutePath().toLowerCase().endsWith(".raw") || f.getAbsolutePath().toLowerCase().endsWith(".wiff")) {
             RawConverter converter = new RawConverter(f, conversionSettings);
-            converter.addConversionListener(this);         
+            converter.addConversionListener(this);
             m_conversionExecutor.execute(converter);
         }
     }
 
     @Override
     public void run() {
-        
+
         m_parentDirectories = new HashSet<String>();
 
         Iterator it = m_conversions.entrySet().iterator();
         while (it.hasNext()) {
             Map.Entry pair = (Map.Entry) it.next();
-            
+
             File f = (File) pair.getKey();
             ConversionSettings settings = (ConversionSettings) pair.getValue();
 
             if (m_pathToExpand == null) {
 
-                if (settings.getUploadSettings()!=null && !settings.getUploadSettings().getDestination().equalsIgnoreCase("")) {
+                if (settings.getUploadSettings() != null && !settings.getUploadSettings().getDestination().equalsIgnoreCase("")) {
                     if (settings.getUploadSettings().getDestination().startsWith(File.separator)) {
                         m_parentDirectories.add(settings.getUploadSettings().getDestination().substring(1));
                     } else {
@@ -82,7 +82,7 @@ public class ConvertionUploadBatch implements Runnable, ConversionListener {
                 }
 
             }
-            
+
             convert(f, settings);
         }
 
@@ -99,34 +99,34 @@ public class ConvertionUploadBatch implements Runnable, ConversionListener {
     public void ConversionPerformed(File f, Object settings, boolean success) {
 
         ConversionSettings conversionSettings = null;
-        
-        if(settings instanceof ConversionSettings){
-            conversionSettings = (ConversionSettings)settings;
+
+        if (settings instanceof ConversionSettings) {
+            conversionSettings = (ConversionSettings) settings;
         }
-        
+
         if (success) {
-            if (conversionSettings!=null && conversionSettings.getUploadSettings() != null) {
+            if (conversionSettings != null && conversionSettings.getUploadSettings() != null) {
                 upload(f, conversionSettings.getUploadSettings());
                 m_uploadCounter++;
             }
         } else {
             m_failedConversions++;
         }
-        
-        if(f.getAbsolutePath().toLowerCase().endsWith(".mzdb")){
-            
+
+        if (f.getAbsolutePath().toLowerCase().endsWith(".mzdb")) {
+
             HashSet<String> directories = new HashSet<String>();
-    
+
             File outputDirectory = new File(conversionSettings.getOutputPath());
-            
-            while(outputDirectory.getParentFile()!=null){
+
+            while (outputDirectory.getParentFile() != null) {
                 directories.add(outputDirectory.getAbsolutePath());
                 outputDirectory = outputDirectory.getParentFile();
             }
-                     
-            //MzdbFilesTopComponent.getExplorer().getLocalFileSystemView().reloadTree();
-            MzdbFilesTopComponent.getExplorer().getLocalFileSystemView().updateTree();
+
             MzdbFilesTopComponent.getExplorer().getLocalFileSystemView().expandMultipleTreePath(directories);
+            MzdbFilesTopComponent.getExplorer().getLocalFileSystemView().reloadTree();
+            MzdbFilesTopComponent.getExplorer().getLocalFileSystemView().updateTree();
         }
 
         if ((m_uploadCounter + m_failedConversions) == m_conversions.size()) {
@@ -138,7 +138,7 @@ public class ConvertionUploadBatch implements Runnable, ConversionListener {
             }
             if (m_pathToExpand != null) {
                 MzdbFilesTopComponent.getExplorer().getTreeFileChooserPanel().expandTreePath(m_pathToExpand);
-            }else{
+            } else {
                 MzdbFilesTopComponent.getExplorer().getTreeFileChooserPanel().expandMultipleTreePath(m_parentDirectories, conversionSettings.getUploadSettings().getMountLabel());
             }
             MzdbFilesTopComponent.getExplorer().getTreeFileChooserPanel().updateTree();

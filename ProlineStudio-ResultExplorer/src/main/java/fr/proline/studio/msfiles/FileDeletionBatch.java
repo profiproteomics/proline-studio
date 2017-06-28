@@ -18,7 +18,7 @@ import javax.swing.JOptionPane;
  *
  * @author AK249877
  */
-public class FileDeletionBatch implements Runnable, ConversionListener {
+public class FileDeletionBatch implements Runnable {
 
     private final ThreadPoolExecutor m_executor;
     private ArrayList<File> m_files;
@@ -55,34 +55,6 @@ public class FileDeletionBatch implements Runnable, ConversionListener {
             m_executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
         } catch (InterruptedException e) {
             ;
-        }
-    }
-
-    @Override
-    public void ConversionPerformed(File f, Object settings, boolean success) {
-        if (success) {
-            m_successCounter++;
-
-        } else {
-            m_failCounter++;
-        }
-
-        if ((m_successCounter + m_failCounter) == m_files.size()) {
-
-            if (m_failCounter > 0) {
-                JOptionPane.showMessageDialog(null, "One or more files could not be deleted.");
-            }
-
-            m_executor.shutdown();
-            try {
-                m_executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
-            } catch (InterruptedException e) {
-                ;
-            }
-            
-            MzdbFilesTopComponent.getExplorer().getLocalFileSystemView().reloadTree();
-            MzdbFilesTopComponent.getExplorer().getLocalFileSystemView().resetTreeState();
-
         }
     }
 

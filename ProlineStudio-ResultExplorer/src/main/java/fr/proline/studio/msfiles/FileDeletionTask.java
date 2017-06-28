@@ -40,6 +40,12 @@ public class FileDeletionTask extends AbstractDatabaseTask {
             Exceptions.printStackTrace(ex);
         }
 
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException ex) {
+            Exceptions.printStackTrace(ex);
+        }
+        
         return result;
     }
 

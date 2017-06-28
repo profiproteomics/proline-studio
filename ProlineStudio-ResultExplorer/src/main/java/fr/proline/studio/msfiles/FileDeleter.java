@@ -8,6 +8,7 @@ package fr.proline.studio.msfiles;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.SubTask;
+import fr.proline.studio.rsmexplorer.MzdbFilesTopComponent;
 import java.io.File;
 
 /**
@@ -17,7 +18,6 @@ import java.io.File;
 public class FileDeleter implements Runnable {
 
     private File m_file;
-    private ConversionListener m_conversionListener;
 
     public FileDeleter(File file) {
         m_file = file;
@@ -35,17 +35,13 @@ public class FileDeleter implements Runnable {
             @Override
             public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
 
-                m_conversionListener.ConversionPerformed(m_file, null, success);
+                MzdbFilesTopComponent.getExplorer().getLocalFileSystemView().updateTree();
 
             }
         };
 
         FileDeletionTask task = new FileDeletionTask(callback, m_file);
         AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
-    }
-
-    public void addConversionListener(ConversionListener conversionListener) {
-        m_conversionListener = conversionListener;
     }
 
 }

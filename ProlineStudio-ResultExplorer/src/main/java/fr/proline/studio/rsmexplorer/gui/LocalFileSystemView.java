@@ -215,8 +215,9 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
 
             @Override
             public void treeExpanded(TreeExpansionEvent tee) {
-                TreeStateUtil.saveExpansionState(m_tree, TreeStateUtil.TreeType.LOCAL, m_rootsComboBox.getSelectedItem().toString());
-                traverseAndExpand();
+                TreeStateUtil.saveExpansionState(m_tree, TreeStateUtil.TreeType.LOCAL, m_rootsComboBox.getSelectedItem().toString());              
+                DefaultMutableTreeNode expandedNode = (DefaultMutableTreeNode) tee.getPath().getLastPathComponent();          
+                traverseAndExpand(expandedNode);
             }
 
             @Override
@@ -294,17 +295,31 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
             m_paths.add(s);
         }
 
-        traverseAndExpand();
+        traverseAndExpand((DefaultMutableTreeNode) m_fileSystemDataModel.getRoot());
 
     }
 
-    private void traverseAndExpand() {
+    private void traverseAndExpand(DefaultMutableTreeNode root) {
 
         if (m_paths.size() <= 0) {
             return;
         }
+        
+        boolean found = false;
+        
+        String rootAbsolutePath = ((File) root.getUserObject()).getAbsolutePath();
+        
+        for (String s : m_paths) {
+            if(s.contains(rootAbsolutePath)){
+                found = true;
+                break;
+            }
+        }
+        
+        if(!found){
+            return;
+        }
 
-        DefaultMutableTreeNode root = (DefaultMutableTreeNode) m_fileSystemDataModel.getRoot();
         Enumeration totalNodes = root.depthFirstEnumeration();
 
         while (totalNodes.hasMoreElements()) {

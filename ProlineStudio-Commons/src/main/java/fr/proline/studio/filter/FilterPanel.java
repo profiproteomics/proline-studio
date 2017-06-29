@@ -133,7 +133,7 @@ public class FilterPanel extends JPanel {
                         currentFilter.setDefined(false);
 
                         for (int j = 0; j < nbParameters; j++) {
-                            if (m_filters[j].getIndex() < currentFilter.getIndex()) {
+                            if (m_filters[j].getIndex() > currentFilter.getIndex()) {
                                 m_filters[j].setIndex(m_filters[j].getIndex() - 1);
                             }
                         }

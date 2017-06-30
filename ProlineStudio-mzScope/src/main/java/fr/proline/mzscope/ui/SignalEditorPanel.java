@@ -76,9 +76,9 @@ public class SignalEditorPanel extends JPanel {
             int nbPoints = (input.size() <= 20) ? 5 : (input.size() < 50) ? 7 : 11;
             logger.info("display smoothed signal, SG nb smoothing points = "+nbPoints);
             PartialSavitzkyGolaySmoother psgSmoother = new PartialSavitzkyGolaySmoother(new SavitzkyGolaySmoothingConfig(5, 4, 1));
-            smooth(input, psgSmoother);
+            smooth(input, psgSmoother, "Partial SG");
             SavitzkyGolaySmoother sgSmoother = new SavitzkyGolaySmoother(new SavitzkyGolaySmoothingConfig(nbPoints, 2, 1));
-            smooth(input, sgSmoother);
+            smooth(input, sgSmoother, "SG");
          }
       });
       toolbar.add(smoothBtn);
@@ -121,11 +121,11 @@ public class SignalEditorPanel extends JPanel {
       setPreferredSize(new Dimension(300,500));
    }
    
-   private void addSmoothedSignal(Signal s) {
+   private void addSmoothedSignal(Signal s, String title) {
       
       minmaxBtn.setEnabled(true);
       BasePlotPanel basePlot = m_plotPanel.getBasePlotPanel();
-      SignalWrapper wrappedSignal = new SignalWrapper(s, "smoothed signal", CyclicColorPalette.getColor((m_smoothedSignals.size()+1)*2));
+      SignalWrapper wrappedSignal = new SignalWrapper(s, "smoothed signal : "+title, CyclicColorPalette.getColor((m_smoothedSignals.size()+1)*2));
       PlotLinear linear = new PlotLinear(basePlot, wrappedSignal, null, 0, 1);
       linear.setPlotInformation(wrappedSignal.getPlotInformation());
       linear.setStrokeFixed(true);
@@ -147,7 +147,7 @@ public class SignalEditorPanel extends JPanel {
       m_plotPanel.getBasePlotPanel().repaintUpdateDoubleBuffer();
    }
    
-   private void smooth(List<Tuple2> rtIntPairs, ISignalSmoother smoother) {
+   private void smooth(List<Tuple2> rtIntPairs, ISignalSmoother smoother, String title) {
       logger.info("signal length before smoothing = "+rtIntPairs.size());
       
       Tuple2[] result = smoother.smoothTimeIntensityPairs(rtIntPairs.toArray(new Tuple2[rtIntPairs.size()]));
@@ -159,7 +159,7 @@ public class SignalEditorPanel extends JPanel {
          y[k] = (Double)result[k]._2;
       }
       Signal s = new Signal(x,y);
-      addSmoothedSignal(s);
+      addSmoothedSignal(s, title);
    }
 
    private List<Tuple2> toScalaArrayTuple() {

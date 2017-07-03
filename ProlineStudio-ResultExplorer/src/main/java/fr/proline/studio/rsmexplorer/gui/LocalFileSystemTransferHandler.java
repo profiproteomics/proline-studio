@@ -12,6 +12,7 @@ import javax.swing.JComponent;
 import javax.swing.JTree;
 import javax.swing.TransferHandler;
 import javax.swing.tree.TreePath;
+import javax.swing.tree.DefaultMutableTreeNode;
 
 /**
  *
@@ -38,9 +39,13 @@ public class LocalFileSystemTransferHandler extends TransferHandler {
 
             TreePath[] paths = tree.getSelectionPaths();
             for (TreePath path : paths) {
-                String url = path.getLastPathComponent().toString().toLowerCase();
-                if (url.endsWith(".mzdb") || url.endsWith(".raw")) {
-                    transferableFiles.add(new File(url));
+
+                DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getLastPathComponent();
+                File file = (File) node.getUserObject();
+
+                String url = file.getAbsolutePath().toLowerCase();
+                if (url.endsWith(".mzdb") || url.endsWith(".raw") || url.endsWith(".wiff")) {
+                    transferableFiles.add(file);
                 }
             }
 

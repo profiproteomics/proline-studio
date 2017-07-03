@@ -154,10 +154,10 @@ public class MzScopePanel extends JPanel implements IFeatureViewer, IExtractionR
         }
         return this.viewersTabPane;
     }
-    
+
     private void viewersTabPaneStateChanged(ChangeEvent evt) {
         this.selectedRawFilePanel = (IRawFileViewer) viewersTabPane.getSelectedComponent();
-        if (selectedRawFilePanel != null && selectedRawFilePanel.getCurrentRawfile() != null){
+        if (selectedRawFilePanel != null && selectedRawFilePanel.getCurrentRawfile() != null) {
             getExtractionPanel().setDIAEnabled(selectedRawFilePanel.getCurrentRawfile().isDIAFile());
         }
     }
@@ -167,7 +167,7 @@ public class MzScopePanel extends JPanel implements IFeatureViewer, IExtractionR
         return selectedRawFilePanel;
     }
 
-    public void openRaw(List<File> files) {
+    public void openRaw(List<File> files, boolean display) {
         List<IRawFile> rawfiles = new ArrayList();
         for (File f : files) {
             IRawFile rawfile = RawFileManager.getInstance().getFile(f.getName());
@@ -190,7 +190,9 @@ public class MzScopePanel extends JPanel implements IFeatureViewer, IExtractionR
                 rawfiles.add(rawfile);
             }
         }
-        displayRawAction(rawfiles);
+        if (display) {
+            displayRawAction(rawfiles);
+        }
     }
 
     public void openRawAndExtract(File file, final double moz, final double elutionTime, final double firstScanTime, final double lastScanTime) {
@@ -198,7 +200,7 @@ public class MzScopePanel extends JPanel implements IFeatureViewer, IExtractionR
         if (tmpRawFile == null) {
             tmpRawFile = RawFileManager.getInstance().addRawFile(file);
         }
-        final IRawFile rawfile = tmpRawFile; 
+        final IRawFile rawfile = tmpRawFile;
         boolean fileAlreadyOpen = false;
         List<AbstractRawFilePanel> list = mapRawFilePanelRawFile.get(rawfile);
         if (list != null) {
@@ -273,7 +275,7 @@ public class MzScopePanel extends JPanel implements IFeatureViewer, IExtractionR
                 }
             }
         });
-        if (tooltip != null){
+        if (tooltip != null) {
             buttonTabComp.setToolTipText(tooltip); // set tooltip disables the tab selection!
             // so we force the selection
             buttonTabComp.addMouseListener(new MouseAdapter() {
@@ -308,9 +310,9 @@ public class MzScopePanel extends JPanel implements IFeatureViewer, IExtractionR
             }
         }
         if (!rawFilePanelExists) {
-            
+
             plotPanel = new SingleRawFilePanel(rawfile, displayDefaultChrom);
-            final ButtonTabComponent tabComp  = addRawTab(rawfile.getName(), plotPanel);
+            final ButtonTabComponent tabComp = addRawTab(rawfile.getName(), plotPanel);
             IRawFileLoading rawFileLoading = new IRawFileLoading() {
 
                 @Override
@@ -319,16 +321,16 @@ public class MzScopePanel extends JPanel implements IFeatureViewer, IExtractionR
                 }
             };
             plotPanel.setRawFileLoading(rawFileLoading);
-            if (displayDefaultChrom){
+            if (displayDefaultChrom) {
                 tabComp.setWaitingState(true);
             }
             //viewersTabPane.add(rawfile.getName(), plotPanel);
-            
+
             registerRawFilePanel(rawfile, plotPanel);
         }
     }
-    
-    private String getName(List<IRawFile> rawfiles){
+
+    private String getName(List<IRawFile> rawfiles) {
         String name = "";
         if (rawfiles.size() > 1) {
             String prefix = Strings.commonPrefix(rawfiles.get(0).getName(), rawfiles.get(1).getName());
@@ -349,11 +351,10 @@ public class MzScopePanel extends JPanel implements IFeatureViewer, IExtractionR
         }
         return name;
     }
-    
 
     public void displayRawAction(List<IRawFile> rawfiles) {
         String name = getName(rawfiles);
-        
+
         AbstractRawFilePanel plotPanel = new MultiRawFilePanel(rawfiles);
         final ButtonTabComponent tabComp = addRawTab(name, plotPanel);
         IRawFileLoading rawFileLoading = new IRawFileLoading() {
@@ -395,7 +396,7 @@ public class MzScopePanel extends JPanel implements IFeatureViewer, IExtractionR
             extractFeatures(rawfiles, params);
         }
     }
-    
+
     private void extractFeatures(List<IRawFile> rawfiles, FeaturesExtractionRequest params) {
         final FeaturesPanel featurePanel = new FeaturesPanel(this);
         final ButtonTabComponent tabComp = addFeatureTab(getName(rawfiles), featurePanel, params.getExtractionParamsString());
@@ -420,7 +421,7 @@ public class MzScopePanel extends JPanel implements IFeatureViewer, IExtractionR
             protected void process(List<List<IFeature>> list) {
                 List<IFeature> listF = list.get(list.size() - 1);
                 logger.info("{} features/peakels extracted in {}", listF.size(), (System.currentTimeMillis() - start) / 1000.0);
-                
+
                 if (count == 1) {
                     featurePanel.setFeatures(listF, rawfiles.size() > 1);
                 } else {
@@ -537,7 +538,7 @@ public class MzScopePanel extends JPanel implements IFeatureViewer, IExtractionR
     }
 
     public void closeRawFile(IRawFile rawfile) {
-       // TODO : if we still need to be able to close raw file, a list of features panel 
+        // TODO : if we still need to be able to close raw file, a list of features panel 
         // must be maintained and closed at this stage
 //        //feature panel
 //        FeaturesPanel featurePanel = mapFeaturePanelRawFile.get(rawfile);
@@ -608,35 +609,33 @@ public class MzScopePanel extends JPanel implements IFeatureViewer, IExtractionR
         }
     }
 
-
     public void displayAllRawAction() {
         final List<IRawFile> rawfiles = RawFileManager.getInstance().getAllFiles();
         TabbedMultiRawFilePanel plotPanel = new TabbedMultiRawFilePanel(rawfiles);
         addRawTab("All", plotPanel);
     }
-    
-    
-    public void displayLCMSMap(IRawFile rawFile){
+
+    public void displayLCMSMap(IRawFile rawFile) {
         JDialog mapDialog = new JDialog(this.parentFrame);
         mapDialog.setTitle("LCMS Map Viewer");
-	LcMsViewer viewer = new LcMsViewer(new LcMsMap(rawFile.getFile().getAbsolutePath()));
-	LcMsViewerUI viewerUI = new LcMsViewerUI();
-	mapDialog.add(viewerUI.getGui(), BorderLayout.CENTER);
+        LcMsViewer viewer = new LcMsViewer(new LcMsMap(rawFile.getFile().getAbsolutePath()));
+        LcMsViewerUI viewerUI = new LcMsViewerUI();
+        mapDialog.add(viewerUI.getGui(), BorderLayout.CENTER);
         mapDialog.setLocationRelativeTo(this);
-        Dimension screenSize = Toolkit.getDefaultToolkit ().getScreenSize(); 
-        mapDialog.setBounds(0, 0,  screenSize.width,  screenSize.height); 
-	mapDialog.setVisible(true);
-	viewerUI.setViewer(viewer);
-	try {
-	    Thread.sleep(1000);
-	} catch (InterruptedException e) {
-	    // TODO Auto-generated catch block
-	    e.printStackTrace();
-	}
-	viewerUI.getController().changeViewport(new LcMsViewport(390, 440, 1000, 1150));
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        mapDialog.setBounds(0, 0, screenSize.width, screenSize.height);
+        mapDialog.setVisible(true);
+        viewerUI.setViewer(viewer);
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        viewerUI.getController().changeViewport(new LcMsViewport(390, 440, 1000, 1150));
     }
-    
-    public void export(IRawFile rawFile){
+
+    public void export(IRawFile rawFile) {
         ExportRawFileDialog exportDialog = ExportRawFileDialog.getDialog(parentFrame, rawFile.getName());
         exportDialog.setLocationRelativeTo(parentFrame);
         ProgressTask task = new DefaultDialog.ProgressTask() {
@@ -653,7 +652,7 @@ public class MzScopePanel extends JPanel implements IFeatureViewer, IExtractionR
 
             @Override
             protected Object doInBackground() throws Exception {
-                exportRawFile(rawFile, exportDialog.getOutputFileName(), exportDialog.getExportParams() );
+                exportRawFile(rawFile, exportDialog.getOutputFileName(), exportDialog.getExportParams());
                 setProgress(100);
                 return null;
             }
@@ -661,8 +660,8 @@ public class MzScopePanel extends JPanel implements IFeatureViewer, IExtractionR
         exportDialog.setTask(task);
         exportDialog.setVisible(true);
     }
-    
-    private boolean exportRawFile(IRawFile rawFile, String exportFileName, IExportParameters exportParams ){
+
+    private boolean exportRawFile(IRawFile rawFile, String exportFileName, IExportParameters exportParams) {
         return rawFile.exportRawFile(exportFileName, exportParams);
     }
 
@@ -683,29 +682,29 @@ public class MzScopePanel extends JPanel implements IFeatureViewer, IExtractionR
     @Override
     public void displayChromatogramAsMultiView(Map<IRawFile, Chromatogram> chromatogramByRawFile) {
         TabbedMultiRawFilePanel panel = getTabbedMultiRawFilePanel();
-        if (panel == null){
+        if (panel == null) {
             displayAllRawAction();
             panel = getTabbedMultiRawFilePanel();
         }
         panel.displayChromatograms(chromatogramByRawFile);
     }
-    
-    private TabbedMultiRawFilePanel getTabbedMultiRawFilePanel(){
+
+    private TabbedMultiRawFilePanel getTabbedMultiRawFilePanel() {
         int nbT = viewersTabPane.getTabCount();
         TabbedMultiRawFilePanel panel = null;
-        for(int i=0; i<nbT; i++){
-            if (viewersTabPane.getComponentAt(i) instanceof TabbedMultiRawFilePanel){
-                panel = (TabbedMultiRawFilePanel)viewersTabPane.getComponentAt(i);
+        for (int i = 0; i < nbT; i++) {
+            if (viewersTabPane.getComponentAt(i) instanceof TabbedMultiRawFilePanel) {
+                panel = (TabbedMultiRawFilePanel) viewersTabPane.getComponentAt(i);
             }
         }
         return panel;
     }
-    
-    private boolean isDIAFiles(List<IRawFile> rawfiles){
+
+    private boolean isDIAFiles(List<IRawFile> rawfiles) {
         if (rawfiles.stream().anyMatch((rf) -> (rf.isDIAFile()))) {
             return true;
         }
         return false;
     }
-    
+
 }

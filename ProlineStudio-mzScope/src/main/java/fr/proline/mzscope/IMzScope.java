@@ -22,15 +22,17 @@ public interface IMzScope {
     /**
      * open the specified file
      * @param file 
+     * @param b 
      */
-    public abstract void openRaw(File file);
+    public abstract void openRaw(File file, boolean b);
     
     
     /**
      * open multi files
      * @param files 
+     * @param b 
      */
-    public abstract void openRaw(List<File> files);
+    public abstract void openRaw(List<File> files, boolean b);
     
     /**
      * launch the detectPeeakels dialog for 1 file

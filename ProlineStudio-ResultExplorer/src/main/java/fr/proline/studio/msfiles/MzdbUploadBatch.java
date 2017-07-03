@@ -82,9 +82,9 @@ public class MzdbUploadBatch implements Runnable {
         }
 
         if (m_pathToExpand != null) {
-            MzdbFilesTopComponent.getTreeFileChooserPanel().expandTreePath(m_pathToExpand);
+            MzdbFilesTopComponent.getExplorer().getTreeFileChooserPanel().expandTreePath(m_pathToExpand);
         } else {
-            MzdbFilesTopComponent.getTreeFileChooserPanel().expandMultipleTreePath(directories, m_uploads.entrySet().iterator().next().getValue().getMountLabel());
+            MzdbFilesTopComponent.getExplorer().getTreeFileChooserPanel().expandMultipleTreePath(directories, m_uploads.entrySet().iterator().next().getValue().getMountLabel());
         }
     }
 

@@ -95,7 +95,7 @@ public class UploadMzdbDialog extends DefaultDialog implements FileDialogInterfa
         setButtonName(BUTTON_OK, "OK");
         setStatusVisible(true);
 
-        setInternalComponent(this.createInternalComponent());
+        setInternalComponent(createInternalComponent());
 
     }
 
@@ -106,7 +106,10 @@ public class UploadMzdbDialog extends DefaultDialog implements FileDialogInterfa
             for (File f : files) {
                 ((DefaultListModel) m_fileList.getModel()).addElement(f);
             }
-            m_lastParentDirectory = files.get(0).getParentFile().getAbsolutePath();
+
+            if (files.get(0).getParentFile() != null) {
+                m_lastParentDirectory = files.get(0).getParentFile().getAbsolutePath();
+            }
         }
     }
 
@@ -232,7 +235,9 @@ public class UploadMzdbDialog extends DefaultDialog implements FileDialogInterfa
                     }
 
                     if (files.length > 0) {
-                        m_lastParentDirectory = files[0].getParentFile().getAbsolutePath();
+                        if (files[0].getParentFile() != null) {
+                            m_lastParentDirectory = files[0].getParentFile().getAbsolutePath();
+                        }
                     }
                 }
             }
@@ -270,20 +275,21 @@ public class UploadMzdbDialog extends DefaultDialog implements FileDialogInterfa
         }
         m_parameterList.saveParameters(NbPreferences.root());
 
-        Preferences preferences = NbPreferences.root();
-        preferences.put("mzDB_Settings.LAST_MZDB_PATH", m_lastParentDirectory);
-
+        if (m_lastParentDirectory != null) {
+            Preferences preferences = NbPreferences.root();
+            preferences.put("mzDB_Settings.LAST_MZDB_PATH", m_lastParentDirectory);
+        }
 
         HashMap<File, MzdbUploadSettings> mzdbFiles = new HashMap<File, MzdbUploadSettings>();
         for (int i = 0; i < m_fileList.getModel().getSize(); i++) {
-            
+
             File file = (File) m_fileList.getModel().getElementAt(i);
-            
+
             MzdbUploadSettings uploadSettings = new MzdbUploadSettings((boolean) m_deleteMzdbParameter.getObjectValue(), m_uploadLabelParameter.getStringValue(), (boolean) m_createParentDirectoryParameter.getObjectValue() ? File.separator + file.getParentFile().getName() : "");
-            
+
             mzdbFiles.put((File) m_fileList.getModel().getElementAt(i), uploadSettings);
         }
-        
+
         MzdbUploadBatch uploadBatch = new MzdbUploadBatch(mzdbFiles);
         Thread thread = new Thread(uploadBatch);
         thread.start();

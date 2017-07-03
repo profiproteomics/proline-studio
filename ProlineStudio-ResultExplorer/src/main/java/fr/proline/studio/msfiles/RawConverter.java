@@ -14,7 +14,8 @@ import java.nio.file.DirectoryNotEmptyException;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import javax.swing.SwingUtilities;
-
+import fr.proline.studio.rsmexplorer.MzdbFilesTopComponent;
+import java.util.HashSet;
 /**
  *
  * @author AK249877
@@ -53,16 +54,25 @@ public class RawConverter implements Runnable, WorkerInterface {
 
                     @Override
                     public void run() {
-                        
-                        File f = new File(m_settings.getOutputPath() + File.separator + m_file.getName().substring(0, m_file.getName().lastIndexOf(".raw")) + ".mzdb");
 
+                        File f = null;
+
+                         if (m_file.getName().contains(".raw")) {
+                            f = new File(m_settings.getOutputPath() + File.separator + m_file.getName().substring(0, m_file.getName().lastIndexOf(".raw")) + ".mzdb");
+                        }else if (m_file.getName().contains(".RAW")) {
+                            f = new File(m_settings.getOutputPath() + File.separator + m_file.getName().substring(0, m_file.getName().lastIndexOf(".RAW")) + ".mzdb");
+                        }else if (m_file.getName().contains(".wiff")) {
+                            f = new File(m_settings.getOutputPath() + File.separator + m_file.getName().substring(0, m_file.getName().lastIndexOf(".wiff")) + ".mzdb");
+                        }else if (m_file.getName().contains(".WIFF")) {
+                            f = new File(m_settings.getOutputPath() + File.separator + m_file.getName().substring(0, m_file.getName().lastIndexOf(".WIFF")) + ".mzdb");
+                        }
                         if (success) {
 
                             if (m_state == WorkerInterface.ACTIVE_STATE) {
                                 m_state = WorkerInterface.FINISHED_STATE;
                                 if (m_conversionListener != null) {
 
-                                    if (f.exists()) {
+                                    if (f!=null && f.exists()) {
                                         m_conversionListener.ConversionPerformed(f, m_settings, true);
                                     }
                                 }
@@ -70,6 +80,19 @@ public class RawConverter implements Runnable, WorkerInterface {
                                 if (m_settings.getDeleteRaw()) {
                                     try {
                                         Files.delete(m_file.toPath());
+                                        HashSet<String> directories = new HashSet<String>();
+                                        
+                                        File outputDirectory = new File(m_file.getParentFile().getAbsolutePath());
+
+                                        while (outputDirectory.getParentFile() != null) {
+                                            directories.add(outputDirectory.getAbsolutePath());
+                                            outputDirectory = outputDirectory.getParentFile();
+                                        }
+
+                                        
+                                        MzdbFilesTopComponent.getExplorer().getLocalFileSystemView().expandMultipleTreePath(directories);
+                                        MzdbFilesTopComponent.getExplorer().getLocalFileSystemView().updateTree();
+                                        
                                     } catch (NoSuchFileException ex) {
                                         ;
                                     } catch (DirectoryNotEmptyException ex) {

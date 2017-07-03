@@ -135,10 +135,11 @@ public class StudioMzScopePanel extends HourglassPanel implements DataBoxPanelIn
                 int action = info.getAction();
                 switch(action){
                     case MzdbInfo.MZSCOPE_VIEW :{
-                        m_mzScope.openRaw(files);
+                        m_mzScope.openRaw(files, true);
                         break;
                     }
                     case MzdbInfo.MZSCOPE_DETECT_PEAKEL:{
+                        m_mzScope.openRaw(files, false);
                         m_mzScope.detectPeakels(files);
                         break;
                     }
@@ -151,10 +152,11 @@ public class StudioMzScopePanel extends HourglassPanel implements DataBoxPanelIn
                 int action = info.getAction();
                 switch(action){
                     case MzdbInfo.MZSCOPE_VIEW :{
-                        m_mzScope.openRaw(file);
+                        m_mzScope.openRaw(file, true);
                         break;
                     }
                     case MzdbInfo.MZSCOPE_DETECT_PEAKEL:{
+                        m_mzScope.openRaw(file, false);
                         m_mzScope.detectPeakels(file);
                         break;
                     }

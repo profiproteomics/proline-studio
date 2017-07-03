@@ -9,6 +9,7 @@ import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.StringTokenizer;
+import java.util.prefs.Preferences;
 import javax.swing.JTree;
 import javax.swing.event.TreeExpansionEvent;
 import javax.swing.event.TreeExpansionListener;
@@ -28,6 +29,7 @@ public class TreeStateUtil {
 
         SERVER, LOCAL, XIC
     }
+    public static Preferences m_preferences = NbPreferences.root();
 
     public static void saveExpansionState(JTree tree, TreeType type, String rootSuffix) {
 
@@ -42,11 +44,11 @@ public class TreeStateUtil {
         }
 
         if (type == TreeType.SERVER) {
-            NbPreferences.root().put("TreeStateUtil.Server_tree", builder.toString());
+            m_preferences.put("TreeStateUtil.Server_tree", builder.toString());
         } else if (type == TreeType.LOCAL) {
-            NbPreferences.root().put("TreeStateUtil.Local_tree" + "." + rootSuffix, builder.toString());
+            m_preferences.put("TreeStateUtil.Local_tree" + "." + rootSuffix, builder.toString());
         } else if (type == TreeType.XIC) {
-            NbPreferences.root().put("TreeStateUtil.XIC_tree", builder.toString());
+            m_preferences.put("TreeStateUtil.XIC_tree", builder.toString());
         }
 
     }
@@ -57,11 +59,11 @@ public class TreeStateUtil {
         String s;
 
         if (type == TreeType.SERVER) {
-            s = NbPreferences.root().get("TreeStateUtil.Server_tree", null);
+            s = m_preferences.get("TreeStateUtil.Server_tree", null);
         } else if (type == TreeType.LOCAL) {
-            s = NbPreferences.root().get("TreeStateUtil.Local_tree" + "." + rootSuffix, null);
+            s = m_preferences.get("TreeStateUtil.Local_tree" + "." + rootSuffix, null);
         } else if (type == TreeType.XIC) {
-            s = NbPreferences.root().get("TreeStateUtil.XIC_tree", null);
+            s = m_preferences.get("TreeStateUtil.XIC_tree", null);
         } else {
             s = null;
         }
@@ -89,8 +91,8 @@ public class TreeStateUtil {
         return expandedPaths;
     }
 
-    public static void setExpansionState(HashSet<String> previouslyExpanded, JTree tree, DefaultMutableTreeNode root, TreeType type, String rootSuffix) {
-        if (previouslyExpanded == null || previouslyExpanded.isEmpty()) {
+    public static void setExpansionState(HashSet<String> previouslyExpandedPaths, JTree tree, DefaultMutableTreeNode root, TreeType type, String rootSuffix) {
+        if (previouslyExpandedPaths == null || previouslyExpandedPaths.isEmpty()) {
             return;
         }
 
@@ -99,7 +101,8 @@ public class TreeStateUtil {
 
                 @Override
                 public void treeExpanded(TreeExpansionEvent tee) {
-                    setExpansionState(previouslyExpanded, tree, root, type, rootSuffix);
+                    tree.removeTreeExpansionListener(this);
+                    setExpansionState(previouslyExpandedPaths   , tree, root, type, rootSuffix);
                 }
 
                 @Override
@@ -126,11 +129,12 @@ public class TreeStateUtil {
 
                 @Override
                 public void treeStructureChanged(TreeModelEvent tme) {
+                    tree.getModel().removeTreeModelListener(this);
                     TreePath triggerPath = new TreePath(tme.getPath());
                     if (!tree.isExpanded(triggerPath)) {
                         tree.expandPath(triggerPath);
                     }
-                    setExpansionState(previouslyExpanded, tree, root, type, rootSuffix);
+                    setExpansionState(previouslyExpandedPaths, tree, root, type, rootSuffix);
                 }
 
             });
@@ -143,8 +147,8 @@ public class TreeStateUtil {
             DefaultMutableTreeNode currentNode = (DefaultMutableTreeNode) totalNodes.nextElement();
             TreePath tp = new TreePath(currentNode.getPath());
 
-            if (previouslyExpanded.contains(tp.toString())) {
-                previouslyExpanded.remove(tp.toString());
+            if (previouslyExpandedPaths.contains(tp.toString())) {
+                previouslyExpandedPaths.remove(tp.toString());
                 tree.expandPath(tp);
             }
         }

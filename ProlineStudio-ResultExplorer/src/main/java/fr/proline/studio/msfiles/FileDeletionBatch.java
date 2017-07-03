@@ -5,24 +5,22 @@
  */
 package fr.proline.studio.msfiles;
 
-import fr.proline.studio.rsmexplorer.MzdbFilesTopComponent;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import javax.swing.JOptionPane;
+
 
 /**
  *
  * @author AK249877
  */
-public class FileDeletionBatch implements Runnable, ConversionListener {
+public class FileDeletionBatch implements Runnable {
 
     private final ThreadPoolExecutor m_executor;
     private ArrayList<File> m_files;
-    private int m_successCounter, m_failCounter;
     private HashSet<String> m_parentDirectories;
 
     public FileDeletionBatch(ArrayList<File> files) {
@@ -40,8 +38,6 @@ public class FileDeletionBatch implements Runnable, ConversionListener {
     @Override
     public void run() {
 
-        m_successCounter = 0;
-        m_failCounter = 0;
 
         m_parentDirectories = new HashSet<String>();
 
@@ -55,33 +51,6 @@ public class FileDeletionBatch implements Runnable, ConversionListener {
             m_executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
         } catch (InterruptedException e) {
             ;
-        }
-    }
-
-    @Override
-    public void ConversionPerformed(File f, Object settings, boolean success) {
-        if (success) {
-            m_successCounter++;
-
-        } else {
-            m_failCounter++;
-        }
-
-        if ((m_successCounter + m_failCounter) == m_files.size()) {
-
-            if (m_failCounter > 0) {
-                JOptionPane.showMessageDialog(null, "One or more files could not be deleted.");
-            }
-
-            m_executor.shutdown();
-            try {
-                m_executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
-            } catch (InterruptedException e) {
-                ;
-            }
-
-            MzdbFilesTopComponent.getLocalFileSystemView().reloadTree();
-
         }
     }
 

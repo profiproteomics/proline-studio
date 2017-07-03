@@ -113,7 +113,10 @@ public class ConvertRawDialog extends DefaultDialog implements FileDialogInterfa
             for (File f : files) {
                 ((DefaultListModel) m_fileList.getModel()).addElement(f);
             }
-            m_lastParentDirectory = files.get(0).getParentFile().getAbsolutePath();
+            
+            if(files.get(0).getParentFile()!=null){
+                m_lastParentDirectory = files.get(0).getParentFile().getAbsolutePath();
+            }
         }
     }
 
@@ -281,7 +284,10 @@ public class ConvertRawDialog extends DefaultDialog implements FileDialogInterfa
                     }
 
                     if (files.length > 0) {
-                        m_lastParentDirectory = files[0].getParentFile().getAbsolutePath();
+                        if (files[0].getParentFile() != null) {
+                            m_lastParentDirectory = files[0].getParentFile().getAbsolutePath();
+                
+                        }
                     }
                 }
             }
@@ -346,16 +352,21 @@ public class ConvertRawDialog extends DefaultDialog implements FileDialogInterfa
             File file = (File) m_fileList.getModel().getElementAt(i);
             
             ConversionSettings conversionSettings = new ConversionSettings(m_converterFilePath.getStringValue(), m_outputFilePath.getStringValue(), (boolean) m_deleteRaw.getObjectValue(), (boolean) m_uploadMzdb.getObjectValue());
-            MzdbUploadSettings uploadSettings = new MzdbUploadSettings((boolean) m_deleteMzdb.getObjectValue(), m_uploadLabelParameter.getStringValue(), (boolean) m_createParentDirectoryParameter.getObjectValue() ? File.separator + file.getParentFile().getName() : "");
-            conversionSettings.setUploadSettings(uploadSettings);
-
+           if(conversionSettings.getUploadAfterConversion()){
+                MzdbUploadSettings uploadSettings = new MzdbUploadSettings((boolean) m_deleteMzdb.getObjectValue(), m_uploadLabelParameter.getStringValue(), (boolean) m_createParentDirectoryParameter.getObjectValue() ? File.separator + file.getParentFile().getName() : "");
+                conversionSettings.setUploadSettings(uploadSettings);
+            }else{
+                conversionSettings.setUploadSettings(null);
+            }
             conversions.put((File) m_fileList.getModel().getElementAt(i), conversionSettings);
         }
 
         ConvertionUploadBatch conversionBatch = new ConvertionUploadBatch(conversions);
 
-        Preferences preferences = NbPreferences.root();
-        preferences.put("mzDB_Settings.LAST_RAW_PATH", m_lastParentDirectory);
+        if (m_lastParentDirectory != null) {
+            Preferences preferences = NbPreferences.root();
+            preferences.put("mzDB_Settings.LAST_RAW_PATH", m_lastParentDirectory);
+        }
 
         Thread thread = new Thread(conversionBatch);
         thread.start();

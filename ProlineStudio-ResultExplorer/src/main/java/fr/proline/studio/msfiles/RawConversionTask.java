@@ -5,6 +5,8 @@
  */
 package fr.proline.studio.msfiles;
 
+
+import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.AbstractDatabaseTask;
@@ -37,9 +39,19 @@ public class RawConversionTask extends AbstractDatabaseTask {
     @Override
     public boolean fetchData() {
         try {
-  
-            m_process = new ProcessBuilder(m_settings.getConverterPath(), "-i", m_file.getAbsolutePath(), "-o", m_settings.getOutputPath()+File.separator+m_file.getName().substring(0, m_file.getName().lastIndexOf(".raw")) + ".mzdb").start();
-
+              String suffix = null;
+            
+            if(m_file.getAbsolutePath().endsWith(".RAW")){
+                suffix = ".RAW";
+            }else if(m_file.getAbsolutePath().endsWith(".raw")){
+                suffix = ".raw";
+            }else if(m_file.getAbsolutePath().endsWith(".WIFF")){
+                suffix = ".WIFF";
+            }else if(m_file.getAbsolutePath().endsWith(".wiff")){
+                suffix = ".wiff";
+            }
+            m_process = new ProcessBuilder(m_settings.getConverterPath(), "-i", m_file.getAbsolutePath(), "-o", m_settings.getOutputPath()+File.separator+m_file.getName().substring(0, m_file.getName().lastIndexOf(suffix)) + ".mzdb").start();
+            
             InputStream errorStream = m_process.getErrorStream();
             BufferedReader reader = new BufferedReader(new InputStreamReader(errorStream));
             String line;
@@ -52,6 +64,7 @@ public class RawConversionTask extends AbstractDatabaseTask {
             if (m_process != null && m_process.isAlive()) {
                 m_process.destroy();
             }
+            m_taskError = new TaskError("Raw Conversion Error", "An IOException was encountered.");
             return false;
         }
 
@@ -65,6 +78,7 @@ public class RawConversionTask extends AbstractDatabaseTask {
             if (m_process != null && m_process.isAlive()) {
                 m_process.destroy();
             }
+             m_taskError = new TaskError("Raw Conversion Error", "Process abnormal exit.");
             return false;
         }
         return true;

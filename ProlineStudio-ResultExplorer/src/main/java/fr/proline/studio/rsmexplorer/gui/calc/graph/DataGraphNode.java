@@ -12,6 +12,7 @@ import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.utils.IconManager;
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import javax.swing.ImageIcon;
 import javax.swing.JPopupMenu;
 
@@ -33,7 +34,8 @@ public class DataGraphNode extends GraphNode {
         super(panel);
         m_tableInfo = tableInfo;
         
-        m_outConnector = new GraphConnector(this, true, panel);
+        m_outConnector = new LinkedList<>();
+        m_outConnector.add(new GraphConnector(this, true, 0, panel));
     }
 
     @Override
@@ -112,7 +114,7 @@ public class DataGraphNode extends GraphNode {
             m_graphNodeAction.setHighlighted(false);
 
             // process
-            askDisplay();
+            askDisplay(0);
         } else if (m_menuAction.isHighlighted()) {
             m_menuAction.setHighlighted(false);
 
@@ -124,7 +126,7 @@ public class DataGraphNode extends GraphNode {
     }
 
     @Override
-    public void askDisplay() {
+    public void askDisplay(int index) {
         WindowBox windowBox = WindowBoxFactory.getGenericWindowBox(m_tableInfo.getDataName(), m_tableInfo.getTypeName(), IconManager.IconType.CHALKBOARD, false);
         
         GlobalTableModelInterface model = m_tableInfo.getModel();
@@ -138,7 +140,7 @@ public class DataGraphNode extends GraphNode {
     }
 
     @Override
-    public ArrayList<WindowBox> getDisplayWindowBox() {
+    public ArrayList<WindowBox> getDisplayWindowBox(int index) {
         WindowBox windowBox = WindowBoxFactory.getGenericWindowBox(m_tableInfo.getDataName(), m_tableInfo.getTypeName(), IconManager.IconType.CHALKBOARD, false);
 
         GlobalTableModelInterface model = m_tableInfo.getModel();
@@ -166,7 +168,7 @@ public class DataGraphNode extends GraphNode {
     }
 
     @Override
-    public GlobalTableModelInterface getGlobalTableModelInterface() {
+    public GlobalTableModelInterface getGlobalTableModelInterface(int index) {
         return m_tableInfo.getModel();
     }
 
@@ -180,7 +182,14 @@ public class DataGraphNode extends GraphNode {
         return null;
     }
 
-    
+    @Override
+    public String getTooltip(int x, int y) {
+        return null;
+    }
 
+    @Override
+    public String getOutTooltip(int index) {
+        return null;
+    }
     
 }

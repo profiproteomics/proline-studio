@@ -9,7 +9,6 @@ import fr.proline.studio.graphics.cursor.CursorInfoList;
 import fr.proline.studio.graphics.cursor.HorizontalCursor;
 import fr.proline.studio.graphics.cursor.VerticalCursor;
 import fr.proline.studio.gui.SplittedPanelContainer;
-import fr.proline.studio.id.ProjectId;
 import fr.proline.studio.parameter.AbstractLinkedParameters;
 import fr.proline.studio.parameter.AbstractParameter;
 import fr.proline.studio.parameter.ComponentParameterInterface;
@@ -24,7 +23,6 @@ import fr.proline.studio.pattern.DataboxGeneric;
 import fr.proline.studio.pattern.DataboxGraphics;
 import fr.proline.studio.pattern.WindowBox;
 import fr.proline.studio.pattern.WindowBoxFactory;
-import fr.proline.studio.pattern.WindowSavedManager;
 import fr.proline.studio.python.data.ColRef;
 import fr.proline.studio.python.data.ExprTableModel;
 import fr.proline.studio.python.data.Table;
@@ -37,14 +35,13 @@ import fr.proline.studio.python.interpreter.ResultVariable;
 import fr.proline.studio.rsmexplorer.gui.GraphicsPanel;
 import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
 import fr.proline.studio.rsmexplorer.gui.calc.ProcessCallbackInterface;
-import fr.proline.studio.rsmexplorer.gui.calc.graph.AbstractConnectedGraphObject;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.FunctionGraphNode;
+import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphConnector;
 import fr.proline.studio.rsmexplorer.gui.calc.graphics.LockedDataGraphicsModel;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.types.LogInfo;
 import fr.proline.studio.types.LogRatio;
 import fr.proline.studio.types.PValue;
-import fr.proline.studio.utils.IconManager;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
@@ -52,10 +49,8 @@ import java.awt.event.ActionListener;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import javax.swing.JComponent;
-import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.JTextField;
-import javax.swing.SwingUtilities;
 import org.python.core.PyFloat;
 
 /**
@@ -93,6 +88,10 @@ public class ComputeFDRFunction extends AbstractFunction {
     private VerticalCursor m_verticalCursor = null;
     private VerticalCursor m_mirrorVerticalCursor = null;
     private HorizontalCursor m_horizontalCursor = null;
+    
+    public final static int OUT_DATA_FDR = 0;
+    public final static int OUT_DATA_DIFFERENTIAL_PROTEINS = 1;
+    public final static int OUT_VALUES_NUMBER = 2;
     
     
     public ComputeFDRFunction(GraphPanel panel) {
@@ -134,15 +133,31 @@ public class ComputeFDRFunction extends AbstractFunction {
     }
     
     @Override
-    public GlobalTableModelInterface getMainGlobalTableModelInterface() {
-        if (m_globalTableModelInterface == null) {
-            return null;
-        }
-        return m_globalTableModelInterface.get(1);
+    public int getNumberOfOutParameters() {
+        return OUT_VALUES_NUMBER;
     }
     
     @Override
-    public void process(AbstractConnectedGraphObject[] graphObjects, final FunctionGraphNode functionGraphNode, ProcessCallbackInterface callback) {
+    public String getOutTooltip(int index) {
+        switch (index) {
+            case OUT_DATA_FDR: 
+                return "FDR";
+            case OUT_DATA_DIFFERENTIAL_PROTEINS:
+                return "Differential Proteins";
+        }
+        return null;
+    }
+    
+    @Override
+    public GlobalTableModelInterface getMainGlobalTableModelInterface(int index) {
+        if (m_globalTableModelInterface == null) {
+            return null;
+        }
+        return m_globalTableModelInterface.get(index);
+    }
+    
+    @Override
+    public void process(GraphConnector[] graphObjects, final FunctionGraphNode functionGraphNode, ProcessCallbackInterface callback) {
         setInError(false, null);
         
         if (m_parameters == null) {
@@ -301,61 +316,36 @@ public class ComputeFDRFunction extends AbstractFunction {
     }
     
     @Override 
-    public void askDisplay(FunctionGraphNode functionGraphNode) {
-        display(functionGraphNode.getPreviousDataName(), getName(), 0);
-        display(functionGraphNode.getPreviousDataName(), getName(), 1);
+    public void askDisplay(FunctionGraphNode functionGraphNode, int index) {
+        display(functionGraphNode.getPreviousDataName(), getName(), index);
     }
     
     @Override
-    public ArrayList<WindowBox> getDisplayWindowBox(FunctionGraphNode functionGraphNode) {
-        return getDisplayWindowBox(functionGraphNode.getPreviousDataName(), getName());
+    public ArrayList<WindowBox> getDisplayWindowBox(FunctionGraphNode functionGraphNode, int index) {
+        return getDisplayWindowBoxList(functionGraphNode.getPreviousDataName(), getName(), index);
     }
     
-    
-    @Override
-    protected ArrayList<WindowBox> getDisplayWindowBox(String dataName, String functionName) {
-        
-        if (m_globalTableModelInterface == null) {
-            return null;
+
+    /*@Override
+    protected WindowBox getDisplayWindowBoxSingle(String dataName, String functionName, int resultIndex) {
+        if (resultIndex <= 0) {
+            return super.getDisplayWindowBoxSingle(dataName, functionName, resultIndex);
+        } else {
+            AbstractDataBox[] databoxes = new AbstractDataBox[2];
+            databoxes[0] = new DataboxGeneric(dataName, functionName, false);
+            databoxes[1] = new DataboxGraphics();
+            databoxes[1].setLayout(SplittedPanelContainer.PanelLayout.HORIZONTAL);
+
+            String windowName = (dataName == null) ? functionName : dataName + " " + functionName;
+            WindowBox wbox = WindowBoxFactory.getFromBoxesWindowBox(windowName, databoxes, false, false, ' ');
+
+            databoxes[0].setEntryData(m_globalTableModelInterface.get(1));
+            return wbox;
         }
-
-        ArrayList<WindowBox> windowBoxList = new ArrayList<>(2);
-        windowBoxList.add(getDisplayWindowBox(dataName, functionName, 0));
-     
-        AbstractDataBox[] databoxes = new AbstractDataBox[2];
-        databoxes[0] = new DataboxGeneric(dataName, functionName, false);
-        databoxes[1] = new DataboxGraphics();
-        databoxes[1].setLayout(SplittedPanelContainer.PanelLayout.HORIZONTAL);
-        
-        
-        
-        String windowName = (dataName == null) ? functionName : dataName + " " + functionName;
-        WindowBox wbox = WindowBoxFactory.getFromBoxesWindowBox(windowName, databoxes, false, false, ' ');
-        
-        databoxes[0].setEntryData(m_globalTableModelInterface.get(1));
-        
-        windowBoxList.add(wbox);
-
-
-        return windowBoxList;
-        
-        
-        /*ArrayList<WindowBox> list = super.getDisplayWindowBox(dataName, functionName);
-
-        GlobalTableModelInterface model = m_globalTableModelInterface.get(1);
-
-        int bestXColumnIndex = model.getBestXAxisColIndex(PlotType.SCATTER_PLOT);
-        int bestYColumnIndex = model.getBestYAxisColIndex(PlotType.SCATTER_PLOT);
-        
-        LockedDataGraphicsModel graphicsModel = new LockedDataGraphicsModel(model, PlotType.SCATTER_PLOT, bestXColumnIndex, bestYColumnIndex);
-        
-        list.add(WindowBoxFactory.getGraphicsWindowBox(dataName, graphicsModel, true));
-        
-        return list;*/
-    }
+    }*/
     
     @Override
-    public void generateDefaultParameters(AbstractConnectedGraphObject[] graphObjects) {
+    public void generateDefaultParameters(GraphConnector[] graphObjects) {
         
         GlobalTableModelInterface model1 = graphObjects[0].getGlobalTableModelInterface();
         int nbColumns = model1.getColumnCount();
@@ -605,85 +595,10 @@ public class ComputeFDRFunction extends AbstractFunction {
         return clone;
     }
     
-    /*
-    @Override
-    public ParameterList getExtraParameterList() {
-
-        ParameterList parameterList = new ParameterList("compute FDR options");
-
-        m_pvalueThresholdParameter = new DoubleParameter(PVALUE_THRESHOLD, "PValue Threshold", JTextField.class, 0d, 0d, null);
-        
-        m_logFCThresholdParameter = new DoubleParameter(LOGFC_THRESHOLD, "LogInfo FC Threshold", JTextField.class, 0d, 0d, null);
-
-
-
-        
-        
-        String[] pi0Values = { "Numeric Value", "abh", "jiang", "histo", "langaas", "pounds", "slim", "st.boot", "st.spline" };
-        m_pi0MethodParameter = new ObjectParameter(PI0PARAMETER, "pi0 Method", pi0Values, 0, null);
-        
-        m_numericValueParameter = new DoubleParameter(NUMERICVALUEARAMETER, "Pi0 Value", JTextField.class, 1d, 0d, 1d);
-        m_nbinsParameter = new IntegerParameter(NBBINSPARAMETER, "Number of Bins", JSpinner.class, 20, 5, 100);
-        m_pzParameter = new DoubleParameter(PZPARAMETER, "Pz", JTextField.class, 0.05, 0.01, 0.1);
-        
-        AbstractLinkedParameters linkedParameters = new AbstractLinkedParameters(parameterList) {
-            @Override
-            public void valueChanged(String value, Object associatedValue) {
-                showParameter(m_numericValueParameter, (value.compareTo("Numeric Value") == 0));
-                showParameter(m_nbinsParameter, ((value.compareTo("jiang") == 0) || (value.compareTo("histo") == 0)));
-                showParameter(m_pzParameter, (value.compareTo("slim") == 0));
-
-                updataParameterListPanel();
-            }
-            
-        };
-
-
-        parameterList.add(m_pvalueThresholdParameter);
-        parameterList.add(m_logFCThresholdParameter);
-        parameterList.add(m_pi0MethodParameter);
-        parameterList.add(m_numericValueParameter);
-        parameterList.add(m_nbinsParameter);
-        parameterList.add(m_pzParameter);
-        
-
-        
-        parameterList.getPanel(); // generate panel at once
-        m_pi0MethodParameter.addLinkedParameters(linkedParameters); // link parameter, it will modify the panel
-
-        // forbid to change values for some methods
-        m_nbinsParameter.getComponent().setEnabled(false);
-        m_pzParameter.getComponent().setEnabled(false);
-        
-        return parameterList;
-        
-    }*/
-    
-    /*@Override
-    public String getExtraValuesForFunctionCall() {
-        
-        String pvalueParameter = m_pvalueThresholdParameter.getStringValue();
-        String logFCParameter = m_logFCThresholdParameter.getStringValue();
-        
-        String pi0Method = m_pi0MethodParameter.getStringValue();
-        if (pi0Method.compareTo("Numeric Value") == 0) {
-            pi0Method = m_numericValueParameter.getStringValue();
-        }
-
-        return ","+pvalueParameter+","+logFCParameter+",\""+pi0Method+"\"";  
-
-    }
-    
-    @Override
-    public ResultVariable[] getExtraVariables(Table sourceTable) {
-        m_fdrResultVariable = new ResultVariable(sourceTable);
-        ResultVariable[] resultVariables = { m_fdrResultVariable };
-        return resultVariables;
-    }*/
     
     @Override
     public boolean calculationDone() {
-        if (m_globalTableModelInterface != null) {
+        if ((m_globalTableModelInterface != null) && (!m_globalTableModelInterface.isEmpty())) {
             return true;
         }
         return false;
@@ -715,7 +630,7 @@ public class ComputeFDRFunction extends AbstractFunction {
     }
     
     @Override
-    public ParameterError checkParameters(AbstractConnectedGraphObject[] graphObjects) {
+    public ParameterError checkParameters(GraphConnector[] graphObjects) {
         return null;
     }
 

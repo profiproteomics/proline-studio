@@ -44,6 +44,7 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
+import javax.swing.ToolTipManager;
 
 /**
  * Panel to display the Graph for the Data analyzer
@@ -92,10 +93,12 @@ public class GraphPanel extends JPanel implements MouseListener, MouseMotionList
 
         m_dataAnalyzerPanel = dataAnalyzerPanel;
 
+        ToolTipManager.sharedInstance().registerComponent( this);
+        ToolTipManager.sharedInstance().setInitialDelay(0) ;
     }
 
-    public void displayBelow(GraphNode node, boolean newTab, String name,  ArrayList<SplittedPanelContainer.PanelLayout> layout) {
-        m_dataAnalyzerPanel.displayBelow(node, newTab, name, layout);
+    public void displayBelow(GraphNode node, boolean newTab, String name,  ArrayList<SplittedPanelContainer.PanelLayout> layout, int index) {
+        m_dataAnalyzerPanel.displayBelow(node, newTab, name, layout, index);
     }
 
     @Override
@@ -770,6 +773,25 @@ public class GraphPanel extends JPanel implements MouseListener, MouseMotionList
             }
         }
 
+    }
+    
+    @Override
+    public String getToolTipText(MouseEvent e) {
+        
+        int x = e.getX();
+        int y = e.getY();
+        
+        Iterator<GraphNode> it = m_graphNodeArray.descendingIterator();
+        while (it.hasNext()) {
+            GraphNode graphNode = it.next();
+
+            AbstractGraphObject overObject = (AbstractGraphObject) graphNode.inside(x, y);
+            if (overObject != null) {
+                return overObject.getTooltip(x, y);
+            }
+        }
+        
+        return null;
     }
 
 }

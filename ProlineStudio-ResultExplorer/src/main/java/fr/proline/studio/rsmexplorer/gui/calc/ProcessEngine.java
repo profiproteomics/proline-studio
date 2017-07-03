@@ -141,7 +141,7 @@ public class ProcessEngine implements ProcessCallbackInterface {
         
          ArrayList<SplittedPanelContainer.PanelLayout> layout = node.getAutoDisplayLayoutDuringProcess();
         if (layout != null) {
-            m_panel.displayBelow(node, false, null, layout);
+            m_panel.displayBelow(node, false, null, layout, -1);
         }
         
         m_panel.repaint();

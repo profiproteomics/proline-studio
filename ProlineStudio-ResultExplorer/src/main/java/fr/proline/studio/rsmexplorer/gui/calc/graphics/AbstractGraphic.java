@@ -10,6 +10,7 @@ import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
 import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
 import fr.proline.studio.rsmexplorer.gui.calc.ProcessCallbackInterface;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.AbstractConnectedGraphObject;
+import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphConnector;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphNode;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphicGraphNode;
 import fr.proline.studio.rsmexplorer.gui.calc.parameters.CheckParameterInterface;
@@ -63,8 +64,8 @@ public abstract class AbstractGraphic implements CheckParameterInterface {
         return m_graphicsModelInterface;
     }
 
-    public abstract void process(AbstractConnectedGraphObject[] graphObjects, GraphicGraphNode graphicGraphNode, ProcessCallbackInterface callback);
-    public abstract void generateDefaultParameters(AbstractConnectedGraphObject[] graphObjects);
+    public abstract void process(GraphConnector[] graphObjects, GraphicGraphNode graphicGraphNode, ProcessCallbackInterface callback);
+    public abstract void generateDefaultParameters(GraphConnector[] graphObjects);
     public abstract void userParametersChanged();
     public abstract AbstractGraphic cloneGraphic(GraphPanel p);
     
@@ -140,7 +141,7 @@ public abstract class AbstractGraphic implements CheckParameterInterface {
         return m_errorMessage;
     }
     
-    public boolean settings(AbstractConnectedGraphObject[] graphObjects, GraphNode node) {
+    public boolean settings(GraphConnector[] graphObjects, GraphNode node) {
         
         
         boolean thereIsNoParameterAtStart = (m_parameters == null);

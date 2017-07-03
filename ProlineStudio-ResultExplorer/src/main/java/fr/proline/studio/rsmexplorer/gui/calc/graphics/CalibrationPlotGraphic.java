@@ -17,6 +17,7 @@ import fr.proline.studio.python.interpreter.ResultVariable;
 import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
 import fr.proline.studio.rsmexplorer.gui.calc.ProcessCallbackInterface;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.AbstractConnectedGraphObject;
+import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphConnector;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphicGraphNode;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.types.LogInfo;
@@ -75,7 +76,7 @@ public class CalibrationPlotGraphic extends AbstractGraphic {
     }
     
     @Override
-    public void process(final AbstractConnectedGraphObject[] graphObjects, GraphicGraphNode graphicGraphNode, final ProcessCallbackInterface callback) {
+    public void process(final GraphConnector[] graphObjects, GraphicGraphNode graphicGraphNode, final ProcessCallbackInterface callback) {
 
         // check if we have already processed
         if (m_generatedImage != null) {
@@ -166,7 +167,7 @@ public class CalibrationPlotGraphic extends AbstractGraphic {
     }
 
     @Override
-    public void generateDefaultParameters(AbstractConnectedGraphObject[] graphObjects) {
+    public void generateDefaultParameters(GraphConnector[] graphObjects) {
         GlobalTableModelInterface model1 = graphObjects[0].getGlobalTableModelInterface();
         int nbColumns = model1.getColumnCount();
         int nbColumnsKept = 0;
@@ -268,7 +269,7 @@ public class CalibrationPlotGraphic extends AbstractGraphic {
     }
 
     @Override
-    public ParameterError checkParameters(AbstractConnectedGraphObject[] graphObjects) {
+    public ParameterError checkParameters(GraphConnector[] graphObjects) {
         return null;
     }
 

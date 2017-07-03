@@ -29,13 +29,20 @@ public class FunctionGraphNode extends GraphNode {
     public FunctionGraphNode(AbstractFunction function, GraphPanel panel) {
         super(panel);
         m_function = function;
-        m_outConnector = new GraphConnector(this, true, panel);
         
-        int nbParameters = function.getNumberOfInParameters();
-        if (nbParameters > 0) {
+        int nbOutParameters = function.getNumberOfOutParameters();
+        if (nbOutParameters > 0) {
+            m_outConnector = new LinkedList<>();
+            for (int i = 0; i < nbOutParameters; i++) {
+                m_outConnector.add(new GraphConnector(this, true, i, panel));
+            }
+        }
+        
+        int nbInParameters = function.getNumberOfInParameters();
+        if (nbInParameters > 0) {
             m_inConnectors = new LinkedList<>();
-            for (int i = 0; i < nbParameters; i++) {
-                m_inConnectors.add(new GraphConnector(this, false, panel));
+            for (int i = 0; i < nbInParameters; i++) {
+                m_inConnectors.add(new GraphConnector(this, false, i, panel));
             }
         }
     }
@@ -168,8 +175,7 @@ public class FunctionGraphNode extends GraphNode {
             }
             if (m_function.calculationDone()) {
                 // display in new window
-                int nbConnections = (m_inConnectors == null) ? 0 : m_inConnectors.size();
-                new DisplayInNewWindowAction(this, nbConnections).actionPerformed(null);
+                new DisplayInNewWindowAction(this, 0, null).actionPerformed(null);
                 return;
             }
 
@@ -219,7 +225,7 @@ public class FunctionGraphNode extends GraphNode {
             for (GraphConnector connector : m_inConnectors) {
                 if (connector.isConnected(true)) {
 
-                    GraphNode graphNode = connector.getLinkedSourceGraphNode();
+                    GraphNode graphNode = connector.getLinkedSourceGraphConnector().getGraphNode();
                     if (graphNode.settingsDone() && graphNode.calculationDone()) {
                         countSettingsDone--;
                     }
@@ -271,17 +277,17 @@ public class FunctionGraphNode extends GraphNode {
             return;
         }
         
-        AbstractConnectedGraphObject[] graphObjectArray;
+        GraphConnector[] graphObjectArray;
         
         if (m_inConnectors != null) {
-            graphObjectArray = new AbstractConnectedGraphObject[m_inConnectors.size()];
+            graphObjectArray = new GraphConnector[m_inConnectors.size()];
             int i = 0;
             for (GraphConnector connector : m_inConnectors) {
-                GraphNode graphNode = connector.getLinkedSourceGraphNode();
-                graphObjectArray[i++] = graphNode;
+                GraphConnector srcConnector = connector.getLinkedSourceGraphConnector();
+                graphObjectArray[i++] = srcConnector;
             }
         } else {
-            graphObjectArray = new AbstractConnectedGraphObject[0];
+            graphObjectArray = new GraphConnector[0];
         }
         
         m_function.process(graphObjectArray, this, callback);
@@ -290,13 +296,13 @@ public class FunctionGraphNode extends GraphNode {
     }
 
     @Override
-    public void askDisplay() {
-        m_function.askDisplay(this);
+    public void askDisplay(int index) {
+        m_function.askDisplay(this, index);
     }
     
     @Override
-    public ArrayList<WindowBox> getDisplayWindowBox() {
-        return m_function.getDisplayWindowBox(this);
+    public ArrayList<WindowBox> getDisplayWindowBox(int index) {
+        return m_function.getDisplayWindowBox(this, index);
     }
     
     @Override
@@ -308,16 +314,16 @@ public class FunctionGraphNode extends GraphNode {
     @Override
     public boolean settings() {
         
-        AbstractConnectedGraphObject[] graphObjectArray;
+        GraphConnector[] graphObjectArray;
         if (m_inConnectors != null) {
-            graphObjectArray = new AbstractConnectedGraphObject[m_inConnectors.size()];
+            graphObjectArray = new GraphConnector[m_inConnectors.size()];
             int i = 0;
             for (GraphConnector connector : m_inConnectors) {
-                GraphNode graphNode = connector.getLinkedSourceGraphNode();
-                graphObjectArray[i++] = graphNode;
+                GraphConnector srcConnector = connector.getLinkedSourceGraphConnector();
+                graphObjectArray[i++] = srcConnector;
             }
         } else {
-            graphObjectArray = new AbstractConnectedGraphObject[0];
+            graphObjectArray = new GraphConnector[0];
         }
         
         
@@ -335,10 +341,17 @@ public class FunctionGraphNode extends GraphNode {
     }
 
     @Override
-    public GlobalTableModelInterface getGlobalTableModelInterface() {
-        return m_function.getMainGlobalTableModelInterface();
+    public GlobalTableModelInterface getGlobalTableModelInterface(int index) {
+        return m_function.getMainGlobalTableModelInterface(index);
     }
  
+    public String getOutTooltip(int index) {
+        return m_function.getOutTooltip(index);
+    }
 
+    @Override
+    public String getTooltip(int x, int y) {
+        return null;
+    }
     
 }

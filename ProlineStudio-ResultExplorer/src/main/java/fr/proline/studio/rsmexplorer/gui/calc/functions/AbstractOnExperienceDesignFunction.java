@@ -21,8 +21,8 @@ import fr.proline.studio.python.interpreter.CalcInterpreterTask;
 import fr.proline.studio.python.interpreter.CalcInterpreterThread;
 import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
 import fr.proline.studio.rsmexplorer.gui.calc.ProcessCallbackInterface;
-import fr.proline.studio.rsmexplorer.gui.calc.graph.AbstractConnectedGraphObject;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.FunctionGraphNode;
+import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphConnector;
 import fr.proline.studio.table.renderer.DefaultRightAlignRenderer;
 import fr.proline.studio.table.renderer.DoubleRenderer;
 import fr.proline.studio.table.GlobalTableModelInterface;
@@ -91,9 +91,14 @@ public abstract class AbstractOnExperienceDesignFunction extends AbstractFunctio
     public int getNumberOfInParameters() {
         return 1;
     }
+    
+    @Override
+    public int getNumberOfOutParameters() {
+        return 1;
+    }
 
     @Override
-    public void process(AbstractConnectedGraphObject[] graphObjects, FunctionGraphNode functionGraphNode, ProcessCallbackInterface callback) {
+    public void process(GraphConnector[] graphObjects, FunctionGraphNode functionGraphNode, ProcessCallbackInterface callback) {
 
         int nbColList;
         int nbCols;
@@ -265,13 +270,13 @@ public abstract class AbstractOnExperienceDesignFunction extends AbstractFunctio
     }
 
     @Override
-    public void askDisplay(FunctionGraphNode functionGraphNode) {
-        display(functionGraphNode.getPreviousDataName(), getName());
+    public void askDisplay(FunctionGraphNode functionGraphNode, int index) {
+        display(functionGraphNode.getPreviousDataName(), getName(), index);
     }
 
     @Override
-    public ArrayList<WindowBox> getDisplayWindowBox(FunctionGraphNode functionGraphNode) {
-        return getDisplayWindowBox(functionGraphNode.getPreviousDataName(), getName());
+    public ArrayList<WindowBox> getDisplayWindowBox(FunctionGraphNode functionGraphNode, int index) {
+        return getDisplayWindowBoxList(functionGraphNode.getPreviousDataName(), getName(), index);
     }
 
     @Override
@@ -305,7 +310,7 @@ public abstract class AbstractOnExperienceDesignFunction extends AbstractFunctio
     }
 
     @Override
-    public void generateDefaultParameters(AbstractConnectedGraphObject[] graphObjects) {
+    public void generateDefaultParameters(GraphConnector[] graphObjects) {
 
         GlobalTableModelInterface sourceModel = graphObjects[0].getGlobalTableModelInterface();
 
@@ -578,7 +583,7 @@ public abstract class AbstractOnExperienceDesignFunction extends AbstractFunctio
     }
 
     @Override
-    public ParameterError checkParameters(AbstractConnectedGraphObject[] graphObjects) {
+    public ParameterError checkParameters(GraphConnector[] graphObjects) {
         return null;
     }
 

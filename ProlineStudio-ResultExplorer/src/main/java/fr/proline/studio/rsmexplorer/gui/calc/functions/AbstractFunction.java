@@ -9,8 +9,8 @@ import fr.proline.studio.python.interpreter.CalcError;
 import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
 import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
 import fr.proline.studio.rsmexplorer.gui.calc.ProcessCallbackInterface;
-import fr.proline.studio.rsmexplorer.gui.calc.graph.AbstractConnectedGraphObject;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.FunctionGraphNode;
+import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphConnector;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphNode;
 import fr.proline.studio.rsmexplorer.gui.calc.parameters.CheckParameterInterface;
 import fr.proline.studio.rsmexplorer.gui.calc.parameters.FunctionParametersDialog;
@@ -86,17 +86,22 @@ public abstract class AbstractFunction implements CheckParameterInterface {
     
     public abstract String getName();
     public abstract int getNumberOfInParameters();
+    public abstract int getNumberOfOutParameters();
     
-    public abstract void process(AbstractConnectedGraphObject[] graphObjects, FunctionGraphNode functionGraphNode, ProcessCallbackInterface callback);
+    public String getOutTooltip(int index) {
+        return null;
+    }
     
-    public abstract void askDisplay(FunctionGraphNode functionGraphNode);
-    public abstract ArrayList<WindowBox> getDisplayWindowBox(FunctionGraphNode functionGraphNode);
+    public abstract void process(GraphConnector[] graphObjects, FunctionGraphNode functionGraphNode, ProcessCallbackInterface callback);
     
-    public GlobalTableModelInterface getMainGlobalTableModelInterface() {
+    public abstract void askDisplay(FunctionGraphNode functionGraphNode, int index);
+    public abstract ArrayList<WindowBox> getDisplayWindowBox(FunctionGraphNode functionGraphNode, int index);
+    
+    public GlobalTableModelInterface getMainGlobalTableModelInterface(int index) {
         if (m_globalTableModelInterface == null) {
             return null;
         }
-        return m_globalTableModelInterface.get(0);
+        return m_globalTableModelInterface.get(index);
     }
     
     public ArrayList<GlobalTableModelInterface> getGlobalTableModelInterfaceList() {
@@ -118,15 +123,12 @@ public abstract class AbstractFunction implements CheckParameterInterface {
         m_globalTableModelInterface.add(model);
     }
 
-    public abstract void generateDefaultParameters(AbstractConnectedGraphObject[] graphObjects);
+    public abstract void generateDefaultParameters(GraphConnector[] graphObjects);
     
     public abstract void userParametersChanged();
     public abstract AbstractFunction cloneFunction(GraphPanel p);
     
 
-    protected void display(String dataName, String functionName) {
-        display(dataName, functionName, 0);
-    }
     protected void display(String dataName, String functionName, int resultIndex) {
         WindowBox windowBox = WindowBoxFactory.getGenericWindowBox(dataName, functionName, IconManager.IconType.CHALKBOARD, false);
         ProjectId projectId = (ProjectId) m_globalTableModelInterface.get(resultIndex).getSingleValue(ProjectId.class);
@@ -137,19 +139,26 @@ public abstract class AbstractFunction implements CheckParameterInterface {
         win.requestActive();
     }
     
-    protected ArrayList<WindowBox> getDisplayWindowBox(String dataName, String functionName) {
+    protected ArrayList<WindowBox> getDisplayWindowBoxList(String dataName, String functionName, int resultIndex) {
         if (m_globalTableModelInterface == null) {
             return null;
         }
-        int size = m_globalTableModelInterface.size();
-        ArrayList<WindowBox> windowBoxList = new ArrayList<>(size);
-        for (int i=0;i<size;i++) {
-            windowBoxList.add(getDisplayWindowBox(dataName, functionName, i));
-        }
         
+        ArrayList<WindowBox> windowBoxList = null;
+        int size = m_globalTableModelInterface.size();
+        if ((resultIndex == -1) || (resultIndex >= size)) {
+
+            windowBoxList = new ArrayList<>(size);
+            for (int i = 0; i < size; i++) {
+                windowBoxList.add(getDisplayWindowBoxSingle(dataName, functionName, i));
+            }
+        } else {
+            windowBoxList = new ArrayList<>(1);
+            windowBoxList.add(getDisplayWindowBoxSingle(dataName, functionName, resultIndex));
+        }
         return windowBoxList;
     }
-    protected WindowBox getDisplayWindowBox(String dataName, String functionName, int resultIndex) {
+    protected WindowBox getDisplayWindowBoxSingle(String dataName, String functionName, int resultIndex) {
         WindowBox windowBox = WindowBoxFactory.getGenericWindowBox(dataName, functionName, IconManager.IconType.CHALKBOARD, false);
         ProjectId projectId = (ProjectId) m_globalTableModelInterface.get(resultIndex).getSingleValue(ProjectId.class);
         long id = (projectId!=null) ? projectId.getId() : -1l;
@@ -173,7 +182,7 @@ public abstract class AbstractFunction implements CheckParameterInterface {
         return m_settingsBeingDone;
     }
     
-    public boolean settings(AbstractConnectedGraphObject[] graphObjects, GraphNode node) {
+    public boolean settings(GraphConnector[] graphObjects, GraphNode node) {
         
         boolean thereIsNoParameterAtStart = (m_parameters == null);
         

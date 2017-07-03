@@ -21,9 +21,8 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
+import javax.swing.JMenu;
 import javax.swing.JPopupMenu;
-import javax.swing.event.PopupMenuEvent;
-import javax.swing.event.PopupMenuListener;
 import org.openide.windows.WindowManager;
 
 /**
@@ -38,7 +37,7 @@ public abstract class GraphNode extends AbstractConnectedGraphObject {
     private static final int MARGIN = 5;
     
     protected LinkedList<GraphConnector> m_inConnectors = null;
-    protected GraphConnector m_outConnector = null;
+    protected LinkedList<GraphConnector> m_outConnector = null;
     
     
    
@@ -85,8 +84,8 @@ public abstract class GraphNode extends AbstractConnectedGraphObject {
     
     public void connectTo(GraphNode inGraphNode) {
         GraphConnector inConnector = inGraphNode.getFirstFreeConnector();
-        m_outConnector.addConnection(inConnector);
-        inConnector.addConnection(m_outConnector);
+        m_outConnector.get(0).addConnection(inConnector);
+        inConnector.addConnection(m_outConnector.get(0));
     }
     
     public boolean hasInConnector() {
@@ -98,7 +97,9 @@ public abstract class GraphNode extends AbstractConnectedGraphObject {
     
     public void propagateSourceChanged() {
         if (m_outConnector != null) {
-            m_outConnector.propagateSourceChanged();
+            for (GraphConnector connector : m_outConnector) {
+                connector.propagateSourceChanged();
+            }
         }
     }
     
@@ -309,7 +310,9 @@ public abstract class GraphNode extends AbstractConnectedGraphObject {
             }
         }
         if (m_outConnector != null) {
-            m_outConnector.draw(g);
+            for (GraphConnector connector : m_outConnector) {
+                connector.draw(g);
+            }
         }
         
         
@@ -326,8 +329,8 @@ public abstract class GraphNode extends AbstractConnectedGraphObject {
 
     public abstract void process(ProcessCallbackInterface callback);
 
-    public abstract void askDisplay();
-    public abstract ArrayList<WindowBox> getDisplayWindowBox();
+    public abstract void askDisplay(int index);
+    public abstract ArrayList<WindowBox> getDisplayWindowBox(int index);
     public abstract ArrayList<SplittedPanelContainer.PanelLayout> getAutoDisplayLayoutDuringProcess();
     public abstract boolean settings();
 
@@ -404,9 +407,11 @@ public abstract class GraphNode extends AbstractConnectedGraphObject {
             }
         }
         if (m_outConnector != null) {
-            AbstractGraphObject object = m_outConnector.inside(x, y);
-            if (object != null) {
-                return object;
+            for (GraphConnector connector : m_outConnector) {
+                AbstractGraphObject object = connector.inside(x, y);
+                if (object != null) {
+                    return object;
+                }
             }
         }
 
@@ -474,7 +479,12 @@ public abstract class GraphNode extends AbstractConnectedGraphObject {
             }
         }
         if (m_outConnector != null) {
-            m_outConnector.setPosition(m_x + WIDTH, m_y + HEIGHT / 2);
+            int nbOutConnectors = m_outConnector.size();
+            int i = 1;
+            for (GraphConnector connector : m_outConnector) {
+                connector.setPosition(m_x + WIDTH, m_y + (i*HEIGHT) / (nbOutConnectors+1));
+                i++;
+            }
         }
     }
     
@@ -486,7 +496,10 @@ public abstract class GraphNode extends AbstractConnectedGraphObject {
             }
         }
         if (m_outConnector != null) {
-            m_outConnector.delete();
+            for (GraphConnector connector : m_outConnector) {
+                connector.delete();
+            }
+            m_outConnector.clear();
         }
         
         if (m_group != null) {
@@ -508,10 +521,40 @@ public abstract class GraphNode extends AbstractConnectedGraphObject {
         int nbConnections = (m_inConnectors == null) ? 0 : m_inConnectors.size();
         
         JPopupMenu popup = new JPopupMenu();
-        popup.add(new DisplayBelowAction(this, nbConnections));
-        popup.add(new DisplayInNewWindowAction(this, nbConnections));
+        
+        JMenu displayMenu = new JMenu("Display");
+        
+        LinkedList<AbstractAction> displayActions = new LinkedList();
+        int nbDisplay = (m_outConnector == null) ? 1 : m_outConnector.size();
+        if (nbDisplay <= 1) {
+            displayActions.add(new DisplayBelowAction(this, 0, null));
+            displayActions.add(new DisplayInNewWindowAction(this, 0, null));
+        } else {
+            for (int i=0;i<nbDisplay;i++) {
+                displayActions.add(new DisplayBelowAction(this, i, getOutTooltip(i)));
+            }
+            displayActions.add(null);
+            for (int i=0;i<nbDisplay;i++) {
+                displayActions.add(new DisplayInNewWindowAction(this, i, getOutTooltip(i)));
+            }
+        }
+        
+        boolean enabled = false;
+        for (AbstractAction action: displayActions) {
+            if (action == null) {
+                displayMenu.addSeparator();
+            } else {
+                enabled |= action.isEnabled();
+                displayMenu.add(action);
+            }
+        }
+        displayMenu.setEnabled(enabled);
+        
+       
+        
+
         popup.add(new SettingsAction(this, nbConnections));
-        //popup.add(new ProcessAction(this)); // JPM removed for the moment (auto-process set), but do not remove completely
+        popup.add(displayMenu);
         popup.add(new ErrorAction(this));
         popup.addSeparator();
         popup.add(new DeleteAction());
@@ -534,10 +577,12 @@ public abstract class GraphNode extends AbstractConnectedGraphObject {
     public class DisplayInNewWindowAction extends AbstractAction {
 
         private GraphNode m_graphNode = null;
+        private int m_connectionIndex;
 
-        public DisplayInNewWindowAction(GraphNode graphNode, int nbInConnections) {
-            super("Display in New Window");
+        public DisplayInNewWindowAction(GraphNode graphNode, int connectionIndex, String name) {
+            super( (name == null) ? "In New Window" : name+" In New Window");
             m_graphNode = graphNode;
+            m_connectionIndex = connectionIndex;
             
             setEnabled(graphNode.calculationDone());
 
@@ -545,7 +590,7 @@ public abstract class GraphNode extends AbstractConnectedGraphObject {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            m_graphNode.askDisplay();
+            m_graphNode.askDisplay(m_connectionIndex);
             m_graphPanel.repaint(); 
         }
     }
@@ -553,10 +598,12 @@ public abstract class GraphNode extends AbstractConnectedGraphObject {
     public class DisplayBelowAction extends AbstractAction {
 
         private GraphNode m_graphNode = null;
+        private int m_connectionIndex;
 
-        public DisplayBelowAction(GraphNode graphNode, int nbInConnections) {
-            super("Display");
+        public DisplayBelowAction(GraphNode graphNode, int connectionIndex, String name) {
+            super( (name == null) ? "Below" : name+" Below");
             m_graphNode = graphNode;
+            m_connectionIndex = connectionIndex;
             
             setEnabled(graphNode.calculationDone());
 
@@ -565,7 +612,7 @@ public abstract class GraphNode extends AbstractConnectedGraphObject {
         @Override
         public void actionPerformed(ActionEvent e) {
 
-             m_graphPanel.displayBelow(m_graphNode, true, m_graphNode.getFullName(), null);
+             m_graphPanel.displayBelow(m_graphNode, true, m_graphNode.getFullName(), null, m_connectionIndex);
         }
     }
     
@@ -573,7 +620,7 @@ public abstract class GraphNode extends AbstractConnectedGraphObject {
 
         private GraphNode m_graphNode = null;
 
-        public SettingsAction(GraphNode graphNode, int nbInConnections) {
+        public SettingsAction(GraphNode graphNode, int connectionIndex) {
             super("Settings");
 
             m_graphNode = graphNode;
@@ -633,10 +680,21 @@ public abstract class GraphNode extends AbstractConnectedGraphObject {
         if (!calculationDone()) {
             return null;
         }
-        return (m_outConnector == null) ? null : m_outConnector.getOutLinkedGraphNodes();
+        
+        if (m_outConnector == null) {
+            return null;
+        }
+        
+        LinkedList<GraphNode> outLinkedGraphNodes = new LinkedList<>();
+        for (GraphConnector connector : m_outConnector) {
+            connector.getOutLinkedGraphNodes(outLinkedGraphNodes);
+        }
+        
+        return outLinkedGraphNodes;
     }
     
-    
+    public abstract String getOutTooltip(int index);
+
 
     
 }

@@ -21,6 +21,7 @@ import fr.proline.studio.python.interpreter.ResultVariable;
 import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
 import fr.proline.studio.rsmexplorer.gui.calc.ProcessCallbackInterface;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.AbstractConnectedGraphObject;
+import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphConnector;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphicGraphNode;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.types.GroupSelection;
@@ -77,7 +78,7 @@ public abstract class AbstractMatrixPlotGraphic extends AbstractGraphic {
 
     
     @Override
-    public void process(final AbstractConnectedGraphObject[] graphObjects, GraphicGraphNode graphicGraphNode, final ProcessCallbackInterface callback) {
+    public void process(final GraphConnector[] graphObjects, GraphicGraphNode graphicGraphNode, final ProcessCallbackInterface callback) {
         
         
         
@@ -208,7 +209,7 @@ public abstract class AbstractMatrixPlotGraphic extends AbstractGraphic {
     }
 
     @Override
-    public void generateDefaultParameters(AbstractConnectedGraphObject[] graphObjects) {
+    public void generateDefaultParameters(GraphConnector[] graphObjects) {
 
 
         GlobalTableModelInterface sourceModel = graphObjects[0].getGlobalTableModelInterface();
@@ -500,7 +501,7 @@ public abstract class AbstractMatrixPlotGraphic extends AbstractGraphic {
     }
 
     @Override
-    public ParameterError checkParameters(AbstractConnectedGraphObject[] graphObjects) {
+    public ParameterError checkParameters(GraphConnector[] graphObjects) {
         return null;
     }
 

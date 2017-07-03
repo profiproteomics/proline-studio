@@ -81,4 +81,6 @@ public abstract class AbstractGraphObject {
     
     public abstract JPopupMenu createPopup(final GraphPanel panel);
 
+    
+    public abstract String getTooltip(int x, int y);
 }

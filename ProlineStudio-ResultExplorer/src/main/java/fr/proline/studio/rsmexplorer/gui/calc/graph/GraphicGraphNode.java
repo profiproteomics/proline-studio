@@ -32,7 +32,7 @@ public class GraphicGraphNode extends GraphNode {
         m_graphic = graphic;
         
         m_inConnectors = new LinkedList<>();
-        m_inConnectors.add(new GraphConnector(this, false, panel));
+        m_inConnectors.add(new GraphConnector(this, false, 0, panel));
     }
 
     @Override
@@ -157,8 +157,7 @@ public class GraphicGraphNode extends GraphNode {
             }
             if (m_graphic.calculationDone()) {
                 // display in new window
-                int nbConnections = (m_inConnectors == null) ? 0 : m_inConnectors.size();
-                new DisplayInNewWindowAction(this, nbConnections).actionPerformed(null);
+                new DisplayInNewWindowAction(this, 0, null).actionPerformed(null);
                 return;
             }
 
@@ -205,7 +204,7 @@ public class GraphicGraphNode extends GraphNode {
 
         if (connector.isConnected(true)) {
 
-            GraphNode graphNode = connector.getLinkedSourceGraphNode();
+            GraphNode graphNode = connector.getLinkedSourceGraphConnector().getGraphNode();
             if (graphNode.settingsDone() && graphNode.calculationDone()) {
                 return true;
             }
@@ -259,11 +258,11 @@ public class GraphicGraphNode extends GraphNode {
             return;
         }
 
-        AbstractConnectedGraphObject[] graphObjectArray = new AbstractConnectedGraphObject[m_inConnectors.size()];
+        GraphConnector[] graphObjectArray = new GraphConnector[m_inConnectors.size()];
         int i = 0;
         for (GraphConnector connector : m_inConnectors) {
-            GraphNode graphNode = connector.getLinkedSourceGraphNode();
-            graphObjectArray[i++] = graphNode;
+            GraphConnector srcConnector = connector.getLinkedSourceGraphConnector();
+            graphObjectArray[i++] = srcConnector;
         }
 
         m_graphic.process(graphObjectArray, this, callback);
@@ -271,11 +270,11 @@ public class GraphicGraphNode extends GraphNode {
     }
 
     @Override
-    public void askDisplay() {
+    public void askDisplay(int index) {
         
         String dataName = "";
         if (m_inConnectors.size()>0) {
-            GraphNode graphNode = m_inConnectors.get(0).getLinkedSourceGraphNode();
+            GraphNode graphNode = m_inConnectors.get(0).getLinkedSourceGraphConnector().getGraphNode();
             dataName = graphNode.getDataName();
         }
 
@@ -283,10 +282,10 @@ public class GraphicGraphNode extends GraphNode {
     }
     
     @Override
-    public ArrayList<WindowBox> getDisplayWindowBox() {
+    public ArrayList<WindowBox> getDisplayWindowBox(int index) {
         String dataName = "";
         if (m_inConnectors.size()>0) {
-            GraphNode graphNode = m_inConnectors.get(0).getLinkedSourceGraphNode();
+            GraphNode graphNode = m_inConnectors.get(0).getLinkedSourceGraphConnector().getGraphNode();
             dataName = graphNode.getDataName();
         }
 
@@ -305,12 +304,12 @@ public class GraphicGraphNode extends GraphNode {
     @Override
     public boolean settings() {
         
-        AbstractConnectedGraphObject[] graphObjectArray = new AbstractConnectedGraphObject[m_inConnectors.size()];
+        GraphConnector[] graphObjectArray = new GraphConnector[m_inConnectors.size()];
         int i = 0;
         for (GraphConnector connector : m_inConnectors) {
-            GraphNode graphNode = connector.getLinkedSourceGraphNode();
-            //graphNode.process(false, null);  // need to process previous nodes to be able to do settings  //JPM.TODO
-            graphObjectArray[i++] = graphNode;
+            GraphConnector srcConnector = connector.getLinkedSourceGraphConnector();
+
+            graphObjectArray[i++] = srcConnector;
         }
         
         
@@ -327,7 +326,17 @@ public class GraphicGraphNode extends GraphNode {
     }
 
     @Override
-    public GlobalTableModelInterface getGlobalTableModelInterface() {
+    public GlobalTableModelInterface getGlobalTableModelInterface(int index) {
+        return null;
+    }
+
+    @Override
+    public String getOutTooltip(int index) {
+        return null;
+    }
+
+    @Override
+    public String getTooltip(int x, int y) {
         return null;
     }
  

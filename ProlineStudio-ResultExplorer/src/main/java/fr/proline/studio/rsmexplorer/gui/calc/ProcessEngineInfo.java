@@ -14,12 +14,14 @@ public class ProcessEngineInfo {
     private Integer m_processKey = null;
     private String m_processCurrentName = null;
     private  ArrayList<SplittedPanelContainer.PanelLayout> m_layout = null;
+    private int m_index = -1;
 
-    public ProcessEngineInfo(GraphNode graphNode, boolean bumpKey, String name,  ArrayList<SplittedPanelContainer.PanelLayout> layout) {
+    public ProcessEngineInfo(GraphNode graphNode, boolean bumpKey, String name,  ArrayList<SplittedPanelContainer.PanelLayout> layout, int index) {
         m_graphNode = graphNode;
         m_processKey = ProcessEngine.getProcessEngine().getProcessEngineKey(bumpKey);
         m_processCurrentName = (name!=null) ? name : ProcessEngine.getProcessEngine().getProcessName();
         m_layout = layout;
+        m_index = index;
     }
 
     public GraphNode getGraphNode() {
@@ -36,6 +38,10 @@ public class ProcessEngineInfo {
     
     public ArrayList<SplittedPanelContainer.PanelLayout> getLayout() {
         return m_layout;
+    }
+    
+    public int getIndex() {
+        return m_index;
     }
     
 }

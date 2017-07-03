@@ -40,7 +40,7 @@ public class DataAnalyzerResultsPanel extends JPanel implements DataBoxPanelInte
     
     public void displayGraphNode(ProcessEngineInfo processEngineInfo) {
         
-        ArrayList<WindowBox> windowBoxList = processEngineInfo.getGraphNode().getDisplayWindowBox();
+        ArrayList<WindowBox> windowBoxList = processEngineInfo.getGraphNode().getDisplayWindowBox(processEngineInfo.getIndex());
         Integer processEngineKey = processEngineInfo.getProcessKey();
         
         ArrayList<SplittedPanelContainer.PanelLayout> layoutList = processEngineInfo.getLayout();

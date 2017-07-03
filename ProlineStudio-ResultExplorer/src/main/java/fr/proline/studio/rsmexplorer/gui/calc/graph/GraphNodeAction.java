@@ -70,4 +70,9 @@ public class GraphNodeAction extends AbstractGraphObject {
     public JPopupMenu createPopup(GraphPanel panel) {
         return null;
     }
+
+    @Override
+    public String getTooltip(int x, int y) {
+        return null;
+    }
 }

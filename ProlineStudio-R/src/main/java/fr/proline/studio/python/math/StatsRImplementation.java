@@ -646,7 +646,7 @@ public class StatsRImplementation {
             cmdBB = "limmaObject<-limmaObject[order(as.numeric(rownames(limmaObject))),,drop=FALSE]";
             serverR.parseAndEval(cmdBB);
             
-            Object resPValue = serverR.parseAndEval("limmaObject$P.Value");
+            Object resPValue = serverR.parseAndEval("limmaObject$P_Value");
             Object resLogFC = serverR.parseAndEval("limmaObject$logFC");
    
             double[] pvaluesArray =  ((REXPDouble) resPValue).asDoubles();
@@ -812,7 +812,7 @@ public class StatsRImplementation {
         serverR.parseAndEval("library(" + LIB_PROSTAR + ")");
 
 
-        String cmdReadCSV = "computeFDRValues<-read.delim('" + path + "',header=F, sep=';', col.names=c(\"P.Value\",\"logFC\"))";
+        String cmdReadCSV = "computeFDRValues<-read.delim('" + path + "',header=F, sep=';', col.names=c(\"P_Value\",\"logFC\"))";
         serverR.parseAndEval(cmdReadCSV);
 
         String cmdBB1 = "computedFDR<-diffAnaComputeFDR(computeFDRValues, " +pValue+","+logFCThreshold.toString()+"," + pi0Parameter  + ")";

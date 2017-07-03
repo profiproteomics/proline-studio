@@ -23,8 +23,8 @@ import fr.proline.studio.pattern.WindowBox;
 import fr.proline.studio.python.interpreter.CalcError;
 import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
 import fr.proline.studio.rsmexplorer.gui.calc.ProcessCallbackInterface;
-import fr.proline.studio.rsmexplorer.gui.calc.graph.AbstractConnectedGraphObject;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.FunctionGraphNode;
+import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphConnector;
 import fr.proline.studio.table.DecoratedTable;
 import fr.proline.studio.table.renderer.DefaultLeftAlignRenderer;
 import fr.proline.studio.table.renderer.DefaultRightAlignRenderer;
@@ -114,6 +114,11 @@ public class ImportTSVFunction extends AbstractFunction {
     public int getNumberOfInParameters() {
         return 0;
     }
+    
+    @Override
+    public int getNumberOfOutParameters() {
+        return 1;
+    }
 
     @Override
     public boolean settingsDone() {
@@ -133,7 +138,7 @@ public class ImportTSVFunction extends AbstractFunction {
     }
     
     @Override
-    public void process(AbstractConnectedGraphObject[] graphObjects, FunctionGraphNode functionGraphNode, ProcessCallbackInterface callback) {
+    public void process(GraphConnector[] graphObjects, FunctionGraphNode functionGraphNode, ProcessCallbackInterface callback) {
 
         try {
 
@@ -293,17 +298,17 @@ public class ImportTSVFunction extends AbstractFunction {
     }
     
     @Override
-    public void askDisplay(FunctionGraphNode functionGraphNode) {
-        display(m_fileParameter.getStringValue(), getName());
+    public void askDisplay(FunctionGraphNode functionGraphNode, int index) {
+        display(m_fileParameter.getStringValue(), getName(), index);
     }
     
     @Override
-    public ArrayList<WindowBox> getDisplayWindowBox(FunctionGraphNode functionGraphNode) {
-        return getDisplayWindowBox(functionGraphNode.getPreviousDataName(), getName());
+    public ArrayList<WindowBox> getDisplayWindowBox(FunctionGraphNode functionGraphNode, int index) {
+        return getDisplayWindowBoxList(functionGraphNode.getPreviousDataName(), getName(), index);
     }
     
     @Override
-    public void generateDefaultParameters(AbstractConnectedGraphObject[] graphObjects) {
+    public void generateDefaultParameters(GraphConnector[] graphObjects) {
 
         String[] separatorsCSV = {",", ";", "\\t", " " };
         m_prioritySeparatorMap.put("csv", separatorsCSV);
@@ -394,7 +399,7 @@ public class ImportTSVFunction extends AbstractFunction {
     }
     
     @Override
-    public ParameterError checkParameters(AbstractConnectedGraphObject[] graphObjects) {
+    public ParameterError checkParameters(GraphConnector[] graphObjects) {
 
         ParameterError error =  m_fileParameter.checkParameter();
 

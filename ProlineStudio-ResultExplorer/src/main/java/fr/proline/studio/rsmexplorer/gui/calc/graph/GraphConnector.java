@@ -26,6 +26,9 @@ public class GraphConnector extends AbstractConnectedGraphObject {
     
     private final boolean m_out;
     
+    // when there are several in or out connectors, the index correspond to the number of the connector.
+    private int m_index = 0;
+    
     private final GraphNode m_graphNode;
     private GraphLink m_link = null;
     
@@ -33,24 +36,27 @@ public class GraphConnector extends AbstractConnectedGraphObject {
     
     private final LinkedList<GraphConnector> m_connections = new LinkedList(); 
     
-    public GraphConnector(GraphNode graphNode, boolean out, GraphPanel panel) {
+    public GraphConnector(GraphNode graphNode, boolean out, int index, GraphPanel panel) {
         super(TypeGraphObject.CONNECTOR);
         m_out = out;
         m_graphNode = graphNode;
         m_graphPanel = panel;
+        m_index = index;
     }
     
-    public LinkedList<GraphNode> getOutLinkedGraphNodes() {
+    public int getIndex() {
+        return m_index;
+    }
+    
+    public void getOutLinkedGraphNodes(LinkedList<GraphNode> outLinkedGraphNodes) {
         if (!m_out) {
-            return null;
+            return;
         }
-        
-        LinkedList<GraphNode> outLinkedGraphNodes = new LinkedList<>();
+
         for (GraphConnector inConnector : m_connections) {
             outLinkedGraphNodes.add(inConnector.getGraphNode());
         }
-        
-        return outLinkedGraphNodes;
+
     }
     
     @Override
@@ -60,7 +66,11 @@ public class GraphConnector extends AbstractConnectedGraphObject {
 
     @Override
     public String getDataName() {
-        GraphNode node = getLinkedSourceGraphNode();
+        GraphConnector connector = getLinkedSourceGraphConnector();
+        if (connector == null) {
+            return null;
+        }
+        GraphNode node = connector.getGraphNode();
         if (node == null) {
             return null;
         }
@@ -80,7 +90,7 @@ public class GraphConnector extends AbstractConnectedGraphObject {
         } else if (!recursive) {
             return true;
         }
-        GraphNode node = getLinkedSourceGraphNode();
+        GraphNode node = getLinkedSourceGraphConnector().getGraphNode();
         return (node.isConnected(recursive));
     }
     
@@ -98,7 +108,7 @@ public class GraphConnector extends AbstractConnectedGraphObject {
         if (!isConnected(true)) {
             return false;
         }
-        GraphNode node = getLinkedSourceGraphNode();
+        GraphNode node = getLinkedSourceGraphConnector().getGraphNode();
         return (node.calculationDone());
     }
 
@@ -107,12 +117,12 @@ public class GraphConnector extends AbstractConnectedGraphObject {
         return m_graphNode;
     }
     
-    public GraphNode getLinkedSourceGraphNode() {
+    public GraphConnector getLinkedSourceGraphConnector() {
         if ((m_out) || (m_connections.isEmpty())) {
             return null;
         }
         GraphConnector connector = m_connections.getFirst();
-        return connector.getGraphNode();
+        return connector;
     }
     
     public boolean canBeLinked(GraphConnector connector) {
@@ -258,9 +268,13 @@ public class GraphConnector extends AbstractConnectedGraphObject {
         return null;
     }
 
-    @Override
     public GlobalTableModelInterface getGlobalTableModelInterface() {
-        return null;
+        return getGlobalTableModelInterface(m_index);
+    }
+    
+    @Override
+    public GlobalTableModelInterface getGlobalTableModelInterface(int index) {
+        return m_graphNode.getGlobalTableModelInterface(index);
     }
 
 
@@ -269,8 +283,19 @@ public class GraphConnector extends AbstractConnectedGraphObject {
         return null;
     }
     
+    @Override
     public void deleteAction() {
         // never deleted directly by an action
+    }
+    
+    public String getTooltip(int x, int y) {
+        if (m_graphNode == null) {
+            return null;
+        }
+        if (m_out) {
+            return m_graphNode.getOutTooltip(m_index);
+        }
+        return null;
     }
     
 }

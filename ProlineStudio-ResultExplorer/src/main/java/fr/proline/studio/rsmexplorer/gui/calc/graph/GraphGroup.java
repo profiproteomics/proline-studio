@@ -169,5 +169,11 @@ public class GraphGroup extends AbstractGraphObject {
         return null;
     }
 
+    @Override
+    public String getTooltip(int x, int y) {
+        return null;
+    }
+    
+
     
 }

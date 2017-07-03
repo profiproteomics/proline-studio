@@ -9,6 +9,7 @@ import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
 import fr.proline.studio.rsmexplorer.gui.calc.ProcessCallbackInterface;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.AbstractConnectedGraphObject;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.FunctionGraphNode;
+import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphConnector;
 import fr.proline.studio.table.GlobalTableModelInterface;
 
 /**
@@ -138,7 +139,7 @@ public class NormalizationFunction extends AbstractOnExperienceDesignFunction {
     }
     
     @Override
-    public void process(AbstractConnectedGraphObject[] graphObjects, FunctionGraphNode functionGraphNode, ProcessCallbackInterface callback) {
+    public void process(GraphConnector[] graphObjects, FunctionGraphNode functionGraphNode, ProcessCallbackInterface callback) {
         String normalizationParameter = m_normalizationParameter.getStringValue();
         if (normalizationParameter.compareTo(FAMILY_NONE) == 0) {
             GlobalTableModelInterface srcModel = graphObjects[0].getGlobalTableModelInterface();

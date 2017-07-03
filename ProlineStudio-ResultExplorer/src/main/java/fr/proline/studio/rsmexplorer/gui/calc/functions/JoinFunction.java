@@ -12,8 +12,8 @@ import fr.proline.studio.python.data.Table;
 import fr.proline.studio.python.interpreter.CalcError;
 import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
 import fr.proline.studio.rsmexplorer.gui.calc.ProcessCallbackInterface;
-import fr.proline.studio.rsmexplorer.gui.calc.graph.AbstractConnectedGraphObject;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.FunctionGraphNode;
+import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphConnector;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import java.util.ArrayList;
 import javax.swing.JCheckBox;
@@ -69,6 +69,11 @@ public class JoinFunction extends AbstractFunction {
     public int getNumberOfInParameters() {
         return 2;
     }
+    
+    @Override
+    public int getNumberOfOutParameters() {
+        return 1;
+    }
 
     
     @Override
@@ -96,7 +101,7 @@ public class JoinFunction extends AbstractFunction {
     }
 
     @Override
-    public void process(AbstractConnectedGraphObject[] graphObjects, FunctionGraphNode functionGraphNode, ProcessCallbackInterface callback) {
+    public void process(GraphConnector[] graphObjects, FunctionGraphNode functionGraphNode, ProcessCallbackInterface callback) {
         try {
             // check if we have already processed
             if (m_globalTableModelInterface != null) {
@@ -143,20 +148,20 @@ public class JoinFunction extends AbstractFunction {
     }
 
     @Override
-    public void askDisplay(FunctionGraphNode functionGraphNode) {
-        display(functionGraphNode.getPreviousDataName(), getName());
+    public void askDisplay(FunctionGraphNode functionGraphNode, int index) {
+        display(functionGraphNode.getPreviousDataName(), getName(), index);
     }
     
     @Override
-    public ArrayList<WindowBox> getDisplayWindowBox(FunctionGraphNode functionGraphNode) {
-        return getDisplayWindowBox(functionGraphNode.getPreviousDataName(), getName());
+    public ArrayList<WindowBox> getDisplayWindowBox(FunctionGraphNode functionGraphNode, int index) {
+        return getDisplayWindowBoxList(functionGraphNode.getPreviousDataName(), getName(), index);
     }
     
     @Override
-    public void generateDefaultParameters(AbstractConnectedGraphObject[] graphObjects) {
+    public void generateDefaultParameters(GraphConnector[] graphObjects) {
 
         
-        GlobalTableModelInterface modelForDefaultKey = getMainGlobalTableModelInterface();
+        GlobalTableModelInterface modelForDefaultKey = getMainGlobalTableModelInterface(0);
         
         if (modelForDefaultKey == null) {
             Table t1 = new Table(graphObjects[0].getGlobalTableModelInterface());
@@ -283,14 +288,14 @@ public class JoinFunction extends AbstractFunction {
     }
 
     @Override
-    public ParameterError checkParameters(AbstractConnectedGraphObject[] graphObjects) {
+    public ParameterError checkParameters(GraphConnector[] graphObjects) {
         Integer keyTable1Key1 = (Integer) m_paramTable1Key1.getAssociatedObjectValue();
         Integer keyTable2Key1 = (Integer) m_paramTable2Key1.getAssociatedObjectValue();
         
         Integer keyTable1Key2 = (Integer) m_paramTable1Key2.getAssociatedObjectValue();
         Integer keyTable2Key2 = (Integer) m_paramTable2Key2.getAssociatedObjectValue();
         
-        GlobalTableModelInterface modelForDefaultKey = getMainGlobalTableModelInterface();
+        GlobalTableModelInterface modelForDefaultKey = getMainGlobalTableModelInterface(0);
         
         if (modelForDefaultKey == null) {
             Table t1 = new Table(graphObjects[0].getGlobalTableModelInterface());

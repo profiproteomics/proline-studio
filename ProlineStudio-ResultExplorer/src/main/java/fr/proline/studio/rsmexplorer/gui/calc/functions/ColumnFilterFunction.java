@@ -2,7 +2,6 @@ package fr.proline.studio.rsmexplorer.gui.calc.functions;
 
 import fr.proline.studio.export.ExportModelInterface;
 import fr.proline.studio.gui.AdvancedSelectionPanel;
-import fr.proline.studio.parameter.AbstractLinkedParameters;
 import fr.proline.studio.parameter.MultiObjectParameter;
 import fr.proline.studio.parameter.ParameterError;
 import fr.proline.studio.parameter.ParameterList;
@@ -13,12 +12,9 @@ import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
 import fr.proline.studio.rsmexplorer.gui.calc.ProcessCallbackInterface;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.AbstractConnectedGraphObject;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.FunctionGraphNode;
+import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphConnector;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Set;
 
 /**
  *
@@ -54,6 +50,11 @@ public class ColumnFilterFunction extends AbstractFunction {
     public int getNumberOfInParameters() {
         return 1;
     }
+    
+    @Override
+    public int getNumberOfOutParameters() {
+        return 1;
+    }
 
     @Override
     public boolean settingsDone() {
@@ -85,7 +86,7 @@ public class ColumnFilterFunction extends AbstractFunction {
     }
 
     @Override
-    public void process(AbstractConnectedGraphObject[] graphObjects, final FunctionGraphNode functionGraphNode, ProcessCallbackInterface callback) {
+    public void process(GraphConnector[] graphObjects, final FunctionGraphNode functionGraphNode, ProcessCallbackInterface callback) {
         setInError(false, null);
         
         // check if we have already processed
@@ -132,17 +133,17 @@ public class ColumnFilterFunction extends AbstractFunction {
     }
 
     @Override
-    public void askDisplay(FunctionGraphNode functionGraphNode) {
-        display(functionGraphNode.getPreviousDataName(), getName());
+    public void askDisplay(FunctionGraphNode functionGraphNode, int index) {
+        display(functionGraphNode.getPreviousDataName(), getName(), index);
     }
     
     @Override
-    public ArrayList<WindowBox> getDisplayWindowBox(FunctionGraphNode functionGraphNode) {
-        return getDisplayWindowBox(functionGraphNode.getPreviousDataName(), getName());
+    public ArrayList<WindowBox> getDisplayWindowBox(FunctionGraphNode functionGraphNode, int index) {
+        return getDisplayWindowBoxList(functionGraphNode.getPreviousDataName(), getName(), index);
     }
 
     @Override
-    public void generateDefaultParameters(AbstractConnectedGraphObject[] graphObjects) {
+    public void generateDefaultParameters(GraphConnector[] graphObjects) {
 
         ParameterList parameterTableList = new ParameterList("Table Parameters");
 
@@ -178,18 +179,10 @@ public class ColumnFilterFunction extends AbstractFunction {
 
         parameterTableList.getPanel(); // generate panel at once
 
-        
-        
-        /*if (m_columnsGroupVisibilityParameter != null) {
-            m_columnsGroupVisibilityParameter.addLinkedParameters(linkedParameter2);
-        }*/
-        
-
-
     }
 
     @Override
-    public ParameterError checkParameters(AbstractConnectedGraphObject[] graphObjects) {
+    public ParameterError checkParameters(GraphConnector[] graphObjects) {
 
         return null;
     }

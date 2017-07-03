@@ -7,6 +7,7 @@ import fr.proline.studio.parameter.ParameterList;
 import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
 import fr.proline.studio.rsmexplorer.gui.calc.ProcessCallbackInterface;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.AbstractConnectedGraphObject;
+import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphConnector;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphicGraphNode;
 import fr.proline.studio.table.GlobalTableModelInterface;
 
@@ -40,7 +41,7 @@ public class ScatterGraphic extends AbstractGraphic {
     }
     
     @Override
-    public void process(AbstractConnectedGraphObject[] graphObjects, GraphicGraphNode graphicGraphNode, ProcessCallbackInterface callback) {
+    public void process(GraphConnector[] graphObjects, GraphicGraphNode graphicGraphNode, ProcessCallbackInterface callback) {
         
         try {
 
@@ -58,7 +59,7 @@ public class ScatterGraphic extends AbstractGraphic {
     }
 
     @Override
-    public void generateDefaultParameters(AbstractConnectedGraphObject[] graphObjects) {
+    public void generateDefaultParameters(GraphConnector[] graphObjects) {
         GlobalTableModelInterface model1 = graphObjects[0].getGlobalTableModelInterface();
         int bestXColumnIndex = model1.getBestXAxisColIndex(PlotType.SCATTER_PLOT);
         int bestYColumnIndex = model1.getBestYAxisColIndex(PlotType.SCATTER_PLOT);
@@ -103,7 +104,7 @@ public class ScatterGraphic extends AbstractGraphic {
     }
 
     @Override
-    public ParameterError checkParameters(AbstractConnectedGraphObject[] graphObjects) {
+    public ParameterError checkParameters(GraphConnector[] graphObjects) {
         return null;
     }
 

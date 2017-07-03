@@ -291,7 +291,7 @@ public class GraphLink extends AbstractConnectedGraphObject {
 
 
     @Override
-    public GlobalTableModelInterface getGlobalTableModelInterface() {
+    public GlobalTableModelInterface getGlobalTableModelInterface(int index) {
         return null;
     }
 
@@ -303,6 +303,11 @@ public class GraphLink extends AbstractConnectedGraphObject {
     public void deleteAction() {
         m_connector.deleteInLink();
         m_graphPanel.repaint();
+    }
+
+    @Override
+    public String getTooltip(int x, int y) {
+        return null;
     }
     
     public class DeleteAction  extends AbstractAction {

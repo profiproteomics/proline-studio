@@ -612,7 +612,7 @@ public abstract class GraphNode extends AbstractConnectedGraphObject {
         @Override
         public void actionPerformed(ActionEvent e) {
 
-             m_graphPanel.displayBelow(m_graphNode, true, m_graphNode.getFullName(), null, m_connectionIndex);
+             m_graphPanel.displayBelow(m_graphNode, true, m_graphNode.getFullName(m_connectionIndex), null, m_connectionIndex);
         }
     }
     

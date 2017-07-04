@@ -106,7 +106,7 @@ public class ImportTSVFunction extends AbstractFunction {
     }
     
     @Override
-    public String getName() {
+    public String getName(int index) {
         return "CSV/TSV Import";
     }
 
@@ -299,12 +299,12 @@ public class ImportTSVFunction extends AbstractFunction {
     
     @Override
     public void askDisplay(FunctionGraphNode functionGraphNode, int index) {
-        display(m_fileParameter.getStringValue(), getName(), index);
+        display(m_fileParameter.getStringValue(), getName(index), index);
     }
     
     @Override
     public ArrayList<WindowBox> getDisplayWindowBox(FunctionGraphNode functionGraphNode, int index) {
-        return getDisplayWindowBoxList(functionGraphNode.getPreviousDataName(), getName(), index);
+        return getDisplayWindowBoxList(functionGraphNode.getPreviousDataName(), getName(index), index);
     }
     
     @Override

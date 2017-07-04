@@ -8,7 +8,6 @@ import fr.proline.studio.graphics.cursor.CursorInfo;
 import fr.proline.studio.graphics.cursor.CursorInfoList;
 import fr.proline.studio.graphics.cursor.HorizontalCursor;
 import fr.proline.studio.graphics.cursor.VerticalCursor;
-import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.parameter.AbstractLinkedParameters;
 import fr.proline.studio.parameter.AbstractParameter;
 import fr.proline.studio.parameter.ComponentParameterInterface;
@@ -19,10 +18,8 @@ import fr.proline.studio.parameter.ParameterError;
 import fr.proline.studio.parameter.ParameterList;
 import fr.proline.studio.parameter.ValuesFromComponentParameter;
 import fr.proline.studio.pattern.AbstractDataBox;
-import fr.proline.studio.pattern.DataboxGeneric;
 import fr.proline.studio.pattern.DataboxGraphics;
 import fr.proline.studio.pattern.WindowBox;
-import fr.proline.studio.pattern.WindowBoxFactory;
 import fr.proline.studio.python.data.ColRef;
 import fr.proline.studio.python.data.ExprTableModel;
 import fr.proline.studio.python.data.Table;
@@ -113,7 +110,7 @@ public class ComputeFDRFunction extends AbstractFunction {
     }
 
     @Override
-    public String getName() {
+    public String getName(int index) {
         if (m_pi0MethodParameter == null) {
             return "FDR Computation";
         }
@@ -124,6 +121,12 @@ public class ComputeFDRFunction extends AbstractFunction {
         } else {
             columnNameSb.append(pi0Method);
         }
+        
+        if (index>=0) {
+            columnNameSb.append(" / ");
+            columnNameSb.append(getOutTooltip(index));
+        }
+        
         return columnNameSb.toString();
     }
     
@@ -147,14 +150,7 @@ public class ComputeFDRFunction extends AbstractFunction {
         }
         return null;
     }
-    
-    @Override
-    public GlobalTableModelInterface getMainGlobalTableModelInterface(int index) {
-        if (m_globalTableModelInterface == null) {
-            return null;
-        }
-        return m_globalTableModelInterface.get(index);
-    }
+
     
     @Override
     public void process(GraphConnector[] graphObjects, final FunctionGraphNode functionGraphNode, ProcessCallbackInterface callback) {
@@ -317,12 +313,12 @@ public class ComputeFDRFunction extends AbstractFunction {
     
     @Override 
     public void askDisplay(FunctionGraphNode functionGraphNode, int index) {
-        display(functionGraphNode.getPreviousDataName(), getName(), index);
+        display(functionGraphNode.getPreviousDataName(), getName(index), index);
     }
     
     @Override
     public ArrayList<WindowBox> getDisplayWindowBox(FunctionGraphNode functionGraphNode, int index) {
-        return getDisplayWindowBoxList(functionGraphNode.getPreviousDataName(), getName(), index);
+        return getDisplayWindowBoxList(functionGraphNode.getPreviousDataName(), getName(index), index);
     }
     
 

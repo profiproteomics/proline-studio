@@ -84,7 +84,10 @@ public abstract class AbstractFunction implements CheckParameterInterface {
         return m_errorMessage;
     }
     
-    public abstract String getName();
+    public String getName() {
+        return getName(-1);
+    }
+    public abstract String getName(int index);
     public abstract int getNumberOfInParameters();
     public abstract int getNumberOfOutParameters();
     

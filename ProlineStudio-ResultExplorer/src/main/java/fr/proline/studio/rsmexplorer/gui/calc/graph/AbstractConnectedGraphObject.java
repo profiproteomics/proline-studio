@@ -32,6 +32,9 @@ public abstract class AbstractConnectedGraphObject extends AbstractGraphObject {
     public abstract String getDataName();
     public abstract String getTypeName();
     public abstract String getFullName();
+    public String getFullName(int index) {
+        return getFullName();
+    }
   
     public abstract GlobalTableModelInterface getGlobalTableModelInterface(int index);
     

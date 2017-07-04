@@ -55,6 +55,15 @@ public class FunctionGraphNode extends GraphNode {
         }
         return dataName+' '+m_function.getName();
     }
+    
+    @Override
+    public String getFullName(int index) {
+        if (index>=0) {
+            return getFullName()+" / "+getOutTooltip(index);
+        }
+        return getFullName();
+        
+    }
 
     @Override
     public String getDataName() {

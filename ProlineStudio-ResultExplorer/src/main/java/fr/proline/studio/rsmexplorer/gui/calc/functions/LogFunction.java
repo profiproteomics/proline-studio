@@ -1,4 +1,4 @@
- package fr.proline.studio.rsmexplorer.gui.calc.functions;
+package fr.proline.studio.rsmexplorer.gui.calc.functions;
 
 
 import fr.proline.studio.parameter.MultiObjectParameter;
@@ -46,7 +46,7 @@ public class LogFunction  extends AbstractFunction {
     }
     
     @Override
-    public String getName() {
+    public String getName(int index) {
         if (m_log10) {
             return "Log10";
         } else {
@@ -182,12 +182,12 @@ public class LogFunction  extends AbstractFunction {
     
     @Override
     public void askDisplay(FunctionGraphNode functionGraphNode, int index) {
-        display(functionGraphNode.getPreviousDataName(), getName(), index);
+        display(functionGraphNode.getPreviousDataName(), getName(index), index);
     }
     
     @Override
     public ArrayList<WindowBox> getDisplayWindowBox(FunctionGraphNode functionGraphNode, int index) {
-        return getDisplayWindowBoxList(functionGraphNode.getPreviousDataName(), getName(), index);
+        return getDisplayWindowBoxList(functionGraphNode.getPreviousDataName(), getName(index), index);
     }
     
 

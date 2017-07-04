@@ -61,7 +61,7 @@ public class DiffFunction extends AbstractFunction {
     }
     
     @Override
-    public String getName() {
+    public String getName(int index) {
         return "Difference";
     }
 
@@ -148,12 +148,12 @@ public class DiffFunction extends AbstractFunction {
 
     @Override
     public void askDisplay(FunctionGraphNode functionGraphNode, int index) {
-        display(functionGraphNode.getPreviousDataName(), getName(), index);
+        display(functionGraphNode.getPreviousDataName(), getName(index), index);
     }
     
     @Override
     public ArrayList<WindowBox> getDisplayWindowBox(FunctionGraphNode functionGraphNode, int index) {
-        return getDisplayWindowBoxList(functionGraphNode.getPreviousDataName(), getName(), index);
+        return getDisplayWindowBoxList(functionGraphNode.getPreviousDataName(), getName(index), index);
     }
     
     @Override

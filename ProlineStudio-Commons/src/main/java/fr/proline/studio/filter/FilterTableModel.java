@@ -32,7 +32,7 @@ public class FilterTableModel extends DecoratedTableModel implements FilterTable
     private ArrayList<Integer> m_searchIds = null;
     private int m_searchIndex = 0;
     
-    private GlobalTableModelInterface m_tableModelSource = null;
+    protected GlobalTableModelInterface m_tableModelSource = null;
     
     private boolean m_isFiltering = false;
 
@@ -60,6 +60,10 @@ public class FilterTableModel extends DecoratedTableModel implements FilterTable
     @Override
     public LinkedHashMap<Integer, Filter> getFilters() {
         return m_filters;
+    }
+    
+    protected void setFilters(LinkedHashMap<Integer, Filter> filters) {
+        m_filters = filters;
     }
 
     @Override

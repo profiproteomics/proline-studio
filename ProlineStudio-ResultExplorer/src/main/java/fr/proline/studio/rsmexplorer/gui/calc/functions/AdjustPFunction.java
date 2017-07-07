@@ -123,14 +123,17 @@ public class AdjustPFunction extends AbstractFunction {
             ColRef col = sourceTable.getCol(colIndex);
             parameters[0] = new ResultVariable(col);
 
-
             StringBuilder codeSB = new StringBuilder();
+            StringBuilder columnNameSb = new StringBuilder();
+            createRCode(codeSB, columnNameSb, parameters, m_pi0MethodParameter, m_numericValueParameter, m_alphaParameter, m_nbinsParameter, m_pzParameter);
+            
+            /*
             codeSB.append("adjustP=Stats.adjustP(");
             for (int i = 0; i < parameters.length; i++) {
                 codeSB.append(parameters[i].getName());
             }
             
-            StringBuilder columnNameSb = new StringBuilder("adjustP ");
+            columnNameSb = new StringBuilder("adjustP ");
             String pi0Method = m_pi0MethodParameter.getStringValue();
             if (pi0Method.compareTo("Numeric Value") == 0) {
                 codeSB.append(',');
@@ -143,7 +146,7 @@ public class AdjustPFunction extends AbstractFunction {
             codeSB.append(",").append(m_alphaParameter.getStringValue());
             codeSB.append(",").append(m_nbinsParameter.getStringValue());
             codeSB.append(",").append(m_pzParameter.getStringValue());
-            codeSB.append(')');
+            codeSB.append(')');*/
             
             final String columnName = columnNameSb.toString();
             
@@ -186,6 +189,30 @@ public class AdjustPFunction extends AbstractFunction {
             setCalculating(false);
             callback.finished(functionGraphNode);
         }
+
+    }
+    
+    public static void createRCode(StringBuilder codeSB, StringBuilder columnNameSb, ResultVariable[] parameters, ObjectParameter pi0MethodParameter, DoubleParameter numericValueParameter, DoubleParameter alphaParameter, IntegerParameter nbinsParameter, DoubleParameter pzParameter) {
+
+        codeSB.append("adjustP=Stats.adjustP(");
+        for (int i = 0; i < parameters.length; i++) {
+            codeSB.append(parameters[i].getName());
+        }
+
+        columnNameSb.append("adjustP ");
+        String pi0Method = pi0MethodParameter.getStringValue();
+        if (pi0Method.compareTo("Numeric Value") == 0) {
+            codeSB.append(',');
+            codeSB.append(numericValueParameter.getStringValue());
+            columnNameSb.append(numericValueParameter.getStringValue());
+        } else {
+            codeSB.append(",\"").append(pi0Method).append("\"");
+            columnNameSb.append(pi0Method);
+        }
+        codeSB.append(",").append(alphaParameter.getStringValue());
+        codeSB.append(",").append(nbinsParameter.getStringValue());
+        codeSB.append(",").append(pzParameter.getStringValue());
+        codeSB.append(')');
 
     }
     

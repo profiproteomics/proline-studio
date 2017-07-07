@@ -20,6 +20,7 @@ import fr.proline.studio.parameter.ValuesFromComponentParameter;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataboxGraphics;
 import fr.proline.studio.pattern.WindowBox;
+import fr.proline.studio.python.data.ColDoubleData;
 import fr.proline.studio.python.data.ColRef;
 import fr.proline.studio.python.data.ExprTableModel;
 import fr.proline.studio.python.data.Table;
@@ -32,13 +33,18 @@ import fr.proline.studio.python.interpreter.ResultVariable;
 import fr.proline.studio.rsmexplorer.gui.GraphicsPanel;
 import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
 import fr.proline.studio.rsmexplorer.gui.calc.ProcessCallbackInterface;
+import static fr.proline.studio.rsmexplorer.gui.calc.functions.AdjustPFunction.createRCode;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.FunctionGraphNode;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphConnector;
 import fr.proline.studio.rsmexplorer.gui.calc.graphics.LockedDataGraphicsModel;
 import fr.proline.studio.table.GlobalTableModelInterface;
+import fr.proline.studio.table.TableDefaultRendererManager;
+import fr.proline.studio.table.renderer.DefaultRightAlignRenderer;
+import fr.proline.studio.table.renderer.DoubleRenderer;
 import fr.proline.studio.types.LogInfo;
 import fr.proline.studio.types.LogRatio;
 import fr.proline.studio.types.PValue;
+import fr.proline.studio.types.PvalueAdjusted;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
@@ -192,12 +198,19 @@ public class ComputeFDRFunction extends AbstractFunction {
             ColRef logFCCol = sourceTable.getCol(logFCColIndex);
             parameters[1] = new ResultVariable(logFCCol);
 
+            ResultVariable[] parametersForAdjustP = new ResultVariable[1];
+            parametersForAdjustP[0] = parameters[0];
 
             StringBuilder codeSB1 = new StringBuilder();
             StringBuilder codeSB2 = new StringBuilder();
             
             codeSB1.append("computedFDR=Stats.computeFDR(");
             codeSB2.append("differentialProteins=Stats.differentialProteins(");
+            
+            StringBuilder codeSB3 = new StringBuilder();
+            StringBuilder columnNameSb3 = new StringBuilder();
+            createRCode(codeSB3, columnNameSb3, parametersForAdjustP, m_pi0MethodParameter, m_numericValueParameter, m_alphaParameter, m_nbinsParameter, m_pzParameter);
+            
             
             StringBuilder codeSBFirstParameters = new StringBuilder();;
             for (int i = 0; i < parameters.length; i++) {
@@ -234,7 +247,7 @@ public class ComputeFDRFunction extends AbstractFunction {
                 @Override
                 public void run(ArrayList<ResultVariable> variables, CalcError error) {
                     
-                    boolean secondStepFinished = false;
+                    m_stepCounts++;
                     try {
                         if (variables != null) {
                             // look for res
@@ -281,8 +294,14 @@ public class ComputeFDRFunction extends AbstractFunction {
                                     model.addExtraColumnInfo(bestYColumnIndex, cursorInfoListY);
                                     
                                     addModel(model);
-                                    
-                                    secondStepFinished = true;
+
+                                } else if (var.getName().compareTo("adjustP") == 0) {
+                                    // we have found the result
+                                    ColDoubleData col = (ColDoubleData) var.getValue();
+                                    // give a specific column name
+                                    col.setColumnName(columnNameSb3.toString());
+                                    sourceTable.addColumn(col, new PvalueAdjusted(), new DoubleRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 4, true, true));
+
                                 }
                             }
                         } else if (error != null) {
@@ -290,7 +309,7 @@ public class ComputeFDRFunction extends AbstractFunction {
                         }
                         setCalculating(false);
                     } finally {
-                        if (secondStepFinished) {
+                        if (m_stepCounts == 3) {
                             callback.finished(functionGraphNode);
                         }
                     }
@@ -298,10 +317,14 @@ public class ComputeFDRFunction extends AbstractFunction {
 
             };
 
+            m_stepCounts = 0;
             CalcInterpreterTask task1 = new CalcInterpreterTask(codeSB1.toString(), parameters, calcCallback);
             CalcInterpreterThread.getCalcInterpreterThread().addTask(task1);
+            CalcInterpreterTask task3 = new CalcInterpreterTask(codeSB3.toString(), parameters, calcCallback);
+            CalcInterpreterThread.getCalcInterpreterThread().addTask(task3);
             CalcInterpreterTask task2 = new CalcInterpreterTask(codeSB2.toString(), parameters, calcCallback);
             CalcInterpreterThread.getCalcInterpreterThread().addTask(task2);
+
 
         } catch (Exception e) {
             setInError(new CalcError(e, null, -1));
@@ -310,6 +333,7 @@ public class ComputeFDRFunction extends AbstractFunction {
         }
 
     }
+    private int m_stepCounts = 0;
     
     @Override 
     public void askDisplay(FunctionGraphNode functionGraphNode, int index) {

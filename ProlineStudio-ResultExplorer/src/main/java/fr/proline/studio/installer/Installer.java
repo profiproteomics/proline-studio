@@ -29,8 +29,8 @@ public class Installer extends VersionInstaller {
         forceMetalUIForMac();
 
         
-        String buildnumber = "1.5  Release Candidate ("+moduleBuildDate+")"; //specify if Milestone, Release Candidate or release (or nothing = release)
-        //String buildnumber = "1.1";
+//        String buildnumber = "1.5  Release Candidate ("+moduleBuildDate+")"; //specify if Milestone, Release Candidate or release (or nothing = release)
+        String buildnumber = "1.5 Release";
         
         // set the proline version for the application title
         System.setProperty("netbeans.buildnumber", buildnumber);  //"1.0.1 (alpha : build date @build.date@)"

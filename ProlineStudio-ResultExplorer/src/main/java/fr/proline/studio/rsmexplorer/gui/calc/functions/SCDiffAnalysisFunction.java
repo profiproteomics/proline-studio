@@ -12,7 +12,7 @@ import fr.proline.studio.types.PValue;
 public class SCDiffAnalysisFunction extends AbstractOnExperienceDesignFunction {
 
     public SCDiffAnalysisFunction(GraphPanel panel) {
-        super(panel, "SC Differential Analysis", "sc_diffanalysis", "bbinomial", new PValue());
+        super(panel, "SC Differential Analysis", "sc_diffanalysis", "bbinomial", null, new PValue());
     }
 
     @Override

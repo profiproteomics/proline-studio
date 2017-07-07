@@ -50,7 +50,7 @@ public class NormalizationFunction extends AbstractOnExperienceDesignFunction {
     private ParameterList m_parameterList = null;
     
     public NormalizationFunction(GraphPanel panel) {
-        super(panel, "Normalization", "normalize", "normalize", null);
+        super(panel, "Normalization", "normalize", "normalize", null, null);
     }
     
     @Override

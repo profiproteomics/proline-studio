@@ -387,12 +387,12 @@ public class StatsImplementation {
  
     }
     
-    public static Table quantifilter(PyTuple p, Table t, PyInteger option, PyInteger threshold) throws MathException {
+    public static Table quantifilter(PyTuple p, Table t, PyInteger option, PyInteger threshold, boolean reversed) throws MathException {
         PyTuple[] pArray = StatsUtil.colTupleToTuplesArray(p);
-        return quantifilter(pArray, t, option, threshold);
+        return quantifilter(pArray, t, option, threshold, reversed);
     }
     
-    public static Table quantifilter(PyTuple[] pArray, Table t, PyInteger option, PyInteger threshold) throws MathException {
+    public static Table quantifilter(PyTuple[] pArray, Table t, PyInteger option, PyInteger threshold, boolean reversed) throws MathException {
 
         ColRef[] cols = StatsUtil.colTupleToColArray(pArray);
         
@@ -420,7 +420,7 @@ public class StatsImplementation {
         }
 
         
-        QuantiFilterModel quantiFilterModelModel = new QuantiFilterModel(t.getModel(), colsIndex, groupIndex, option.getValue(), threshold.getValue());
+        QuantiFilterModel quantiFilterModelModel = new QuantiFilterModel(t.getModel(), colsIndex, groupIndex, option.getValue(), threshold.getValue(), reversed);
         quantiFilterModelModel.filter();
         return new Table(quantiFilterModelModel);
     }

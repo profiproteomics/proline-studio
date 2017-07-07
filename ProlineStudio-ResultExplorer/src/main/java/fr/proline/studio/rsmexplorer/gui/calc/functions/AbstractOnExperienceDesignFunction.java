@@ -54,20 +54,32 @@ public abstract class AbstractOnExperienceDesignFunction extends AbstractFunctio
 
     private ParameterList m_extraParameterList = null;
 
-    private final String m_functionName;
-    private final String m_resultName;
-    private final String m_pythonCall;
-    private final Object m_colExtraInfo;
+    private final ArrayList<String> m_functionName;
+    private final ArrayList<String> m_resultName;
+    private final ArrayList<String> m_pythonCall;
+    private final ArrayList<Object> m_colExtraInfo;
+    private final ArrayList<String> m_outInfo;
 
     private final ArrayList<String> m_groupNames = new ArrayList<>();
 
-    public AbstractOnExperienceDesignFunction(GraphPanel panel, String functionName, String resultName, String pythonCall, Object colExtraInfo) {
+    public AbstractOnExperienceDesignFunction(GraphPanel panel, String functionName, String resultName, String pythonCall, String outInfo, Object colExtraInfo) {
         super(panel);
 
-        m_resultName = resultName;
-        m_functionName = functionName;
-        m_pythonCall = pythonCall;
-        m_colExtraInfo = colExtraInfo;
+        m_functionName = new ArrayList<>();
+        m_resultName = new ArrayList<>();
+        m_pythonCall = new ArrayList<>();
+        m_colExtraInfo = new ArrayList<>();
+        m_outInfo = new ArrayList<>();
+        
+        addCalculationTodo(functionName, resultName, pythonCall, outInfo, colExtraInfo);
+    }
+    
+    public void addCalculationTodo(String functionName, String resultName, String pythonCall, String outInfo, Object colExtraInfo) {
+        m_resultName.add(resultName);
+        m_functionName.add(functionName);
+        m_pythonCall.add(pythonCall);
+        m_outInfo.add(outInfo);
+        m_colExtraInfo.add(colExtraInfo);
     }
 
     @Override
@@ -84,7 +96,10 @@ public abstract class AbstractOnExperienceDesignFunction extends AbstractFunctio
 
     @Override
     public String getName(int index) {
-        return m_functionName;
+        if (index>0) {
+            return m_functionName.get(index);
+        }
+        return m_functionName.get(0);
     }
 
     @Override
@@ -94,7 +109,15 @@ public abstract class AbstractOnExperienceDesignFunction extends AbstractFunctio
     
     @Override
     public int getNumberOfOutParameters() {
-        return 1;
+        return m_functionName.size();
+    }
+    
+    @Override
+    public String getOutTooltip(int index) {
+        if (getNumberOfOutParameters() == 1) {
+            return null;
+        }
+        return m_outInfo.get(index);
     }
 
     @Override
@@ -157,107 +180,16 @@ public abstract class AbstractOnExperienceDesignFunction extends AbstractFunctio
                 parameters[nbSizeDone + i] = extraVariables[i];
             }
 
-            StringBuilder codeSB = new StringBuilder();
-            codeSB.append(m_resultName + "=Stats." + m_pythonCall + "((");
+            
+            int nbCalculations = m_functionName.size();
 
-            nbSizeDone = 0;
-            for (int j = 0; j < nbColList; j++) {
-                codeSB.append('(');
-                List colList = (List) m_columnsParameterArray[j].getAssociatedValues(true);
-                for (int i = 0; i < colList.size(); i++) {
-                    codeSB.append(parameters[i + nbSizeDone].getName());
-                    if (i < colList.size() - 1) {
-                        codeSB.append(',');
-                    }
-                }
-                nbSizeDone += colList.size();
-                codeSB.append(')');
-                if (j < nbColList - 1) {
-                    codeSB.append(',');
-                }
-            }
-            codeSB.append(')');
+            doCalculation(0, nbCalculations, nbSizeDone, nbColList, parameters, sourceTable, groupSelection, callback, functionGraphNode);
 
-            if (addLabelParameter()) {
+            
+            
+            
 
-                codeSB.append(",(");
-                // labels of groups 
-                boolean first = true;
-                for (int j = 0; j < nbColList; j++) {
-                    List colList = (List) m_columnsParameterArray[j].getAssociatedValues(true);
-                    for (int i = 0; i < colList.size(); i++) {
-                        if (first) {
-                            first = false;
-                        } else {
-                            codeSB.append(',');
-                        }
-                        if (m_groupNames.size() == nbColList) {
-                            codeSB.append("\"" + m_groupNames.get(j) + "\"");
-                        } else {
-                            codeSB.append("\"group" + j + "\"");
-                        }
-                    }
-                }
-                codeSB.append(")");
-            }
 
-            String extraValues = getExtraValuesForFunctionCall();
-            if (extraValues != null) {
-                codeSB.append(extraValues);
-            }
-            codeSB.append(')');
-
-            CalcCallback calcCallback = new CalcCallback() {
-
-                @Override
-                public void run(ArrayList<ResultVariable> variables, CalcError error) {
-
-                    try {
-
-                        if (variables != null) {
-                            // look for res
-                            for (ResultVariable var : variables) {
-                                if (var.getName().compareTo(m_resultName) == 0) {
-
-                                    // we have found the result
-                                    GlobalTableModelInterface model = null;
-                                    Object res = var.getValue();
-                                    if (res instanceof ColDoubleData) {
-                                        ColDoubleData col = (ColDoubleData) var.getValue();
-                                        sourceTable.addColumn(col, m_colExtraInfo, new DoubleRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 4, true, true));
-                                        model = sourceTable.getModel();
-                                    } else if (res instanceof Table) {
-                                        Table t = (Table) var.getValue();
-                                        model = t.getModel();
-                                    }
-
-                                    // save the group selection in the result
-                                    model.addSingleValue(groupSelection);
-                                    addModel(model);
-
-                                    if (m_extraParameterList != null) {
-                                        m_extraParameterList.saveParameters(NbPreferences.root());
-                                    }
-
-                                }
-                            }
-                        } else if (error != null) {
-                            if (m_extraParameterList != null) {
-                                m_extraParameterList.saveParameters(NbPreferences.root());
-                            }
-                            setInError(error);
-                        }
-                        setCalculating(false);
-                    } finally {
-                        callback.finished(functionGraphNode);
-                    }
-                }
-
-            };
-
-            CalcInterpreterTask task = new CalcInterpreterTask(codeSB.toString(), parameters, calcCallback);
-
-            CalcInterpreterThread.getCalcInterpreterThread().addTask(task);
 
         } catch (Exception e) {
 
@@ -268,7 +200,127 @@ public abstract class AbstractOnExperienceDesignFunction extends AbstractFunctio
         }
 
     }
+    
+    private void doCalculation(int calculationIndex, int nbCalculations, int nbSizeDone, int nbColList, ResultVariable[] parameters, Table sourceTable, GroupSelection groupSelection, ProcessCallbackInterface callback, FunctionGraphNode functionGraphNode) {
+        String pythonCode = createCode(calculationIndex, nbSizeDone, nbColList, parameters);
 
+        CalcCallback calcCallback = new CalcCallback() {
+
+            @Override
+            public void run(ArrayList<ResultVariable> variables, CalcError error) {
+
+                boolean problemEncountered = false;
+                try {
+
+                    if (variables != null) {
+                        // look for res
+                        for (ResultVariable var : variables) {
+                            if (var.getName().compareTo(m_resultName.get(calculationIndex)) == 0) {
+
+                                // we have found the result
+                                GlobalTableModelInterface model = null;
+                                Object res = var.getValue();
+                                if (res instanceof ColDoubleData) {
+                                    ColDoubleData col = (ColDoubleData) var.getValue();
+                                    sourceTable.addColumn(col, m_colExtraInfo, new DoubleRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 4, true, true));
+                                    model = sourceTable.getModel();
+                                } else if (res instanceof Table) {
+                                    Table t = (Table) var.getValue();
+                                    model = t.getModel();
+                                }
+
+                                // save the group selection in the result
+                                model.addSingleValue(groupSelection);
+                                addModel(model);
+
+                                if (m_extraParameterList != null) {
+                                    m_extraParameterList.saveParameters(NbPreferences.root());
+                                }
+
+                            }
+                        }
+                    } else if (error != null) {
+                        problemEncountered = true;
+                        if (m_extraParameterList != null) {
+                            m_extraParameterList.saveParameters(NbPreferences.root());
+                        }
+                        setInError(error);
+                    }
+                    
+                    
+                    if ((calculationIndex+1 == nbCalculations) || (problemEncountered)) {
+                        setCalculating(false);
+                    } else {
+                        doCalculation(calculationIndex+1, nbCalculations, nbSizeDone, nbColList, parameters, sourceTable, groupSelection, callback, functionGraphNode);
+                    }
+                } finally {
+                    if ((calculationIndex+1 == nbCalculations) || (problemEncountered)) {
+                        callback.finished(functionGraphNode);
+                    }
+                }
+            }
+
+        };
+
+        CalcInterpreterTask task = new CalcInterpreterTask(pythonCode, parameters, calcCallback);
+
+        CalcInterpreterThread.getCalcInterpreterThread().addTask(task);
+    }
+
+    private String createCode(int index, int nbSizeDone, int nbColList, ResultVariable[] parameters) {
+        StringBuilder codeSB = new StringBuilder();
+        codeSB.append(m_resultName.get(index)).append("=Stats.").append(m_pythonCall.get(index)).append("((");
+
+        nbSizeDone = 0;
+        for (int j = 0; j < nbColList; j++) {
+            codeSB.append('(');
+            List colList = (List) m_columnsParameterArray[j].getAssociatedValues(true);
+            for (int i = 0; i < colList.size(); i++) {
+                codeSB.append(parameters[i + nbSizeDone].getName());
+                if (i < colList.size() - 1) {
+                    codeSB.append(',');
+                }
+            }
+            nbSizeDone += colList.size();
+            codeSB.append(')');
+            if (j < nbColList - 1) {
+                codeSB.append(',');
+            }
+        }
+        codeSB.append(')');
+
+        if (addLabelParameter()) {
+
+            codeSB.append(",(");
+            // labels of groups 
+            boolean first = true;
+            for (int j = 0; j < nbColList; j++) {
+                List colList = (List) m_columnsParameterArray[j].getAssociatedValues(true);
+                for (int i = 0; i < colList.size(); i++) {
+                    if (first) {
+                        first = false;
+                    } else {
+                        codeSB.append(',');
+                    }
+                    if (m_groupNames.size() == nbColList) {
+                        codeSB.append("\"").append(m_groupNames.get(j)).append("\"");
+                    } else {
+                        codeSB.append("\"group").append(j).append("\"");
+                    }
+                }
+            }
+            codeSB.append(")");
+        }
+
+        String extraValues = getExtraValuesForFunctionCall();
+        if (extraValues != null) {
+            codeSB.append(extraValues);
+        }
+        codeSB.append(')');
+
+        return codeSB.toString();
+    }
+    
     @Override
     public void askDisplay(FunctionGraphNode functionGraphNode, int index) {
         display(functionGraphNode.getPreviousDataName(), getName(index), index);

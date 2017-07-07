@@ -126,9 +126,12 @@ public class Stats {
     }
 
     public static Table quantifilter(PyTuple p, Table t, PyInteger option, PyInteger threshold) throws MathException {
-        return StatsImplementation.quantifilter(p, t, option, threshold);
+        return StatsImplementation.quantifilter(p, t, option, threshold, false);
     }
 
+    public static Table quantifilterReversed(PyTuple p, Table t, PyInteger option, PyInteger threshold) throws MathException {
+        return StatsImplementation.quantifilter(p, t, option, threshold, true);
+    }
     
     public static Table normalize(PyTuple p, PyTuple labels, PyString normalizeFamily, PyString normalizeOption) throws Exception {
         return StatsRImplementation.normalize(p, labels, normalizeFamily, normalizeOption);

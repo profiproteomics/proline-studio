@@ -27,7 +27,7 @@ public class DiffAnalysisFunction extends AbstractOnExperienceDesignFunction {
     private ResultVariable m_tableResultVariable = null;
 
     public DiffAnalysisFunction(GraphPanel panel) {
-        super(panel, "XIC Differential Analysis", "xic_diffanalysis", "diffanalysis", null);
+        super(panel, "XIC Differential Analysis", "xic_diffanalysis", "diffanalysis", null, null);
     }
 
     @Override

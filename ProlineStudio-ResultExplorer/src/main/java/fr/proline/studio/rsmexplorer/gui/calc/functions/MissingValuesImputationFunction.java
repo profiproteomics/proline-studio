@@ -3,7 +3,6 @@ package fr.proline.studio.rsmexplorer.gui.calc.functions;
 import fr.proline.studio.parameter.AbstractLinkedParameters;
 import fr.proline.studio.parameter.BooleanParameter;
 import fr.proline.studio.parameter.DoubleParameter;
-import fr.proline.studio.parameter.IntegerParameter;
 import fr.proline.studio.parameter.ObjectParameter;
 import fr.proline.studio.parameter.ParameterList;
 import fr.proline.studio.python.data.Table;
@@ -46,7 +45,7 @@ public class MissingValuesImputationFunction extends AbstractOnExperienceDesignF
     
     
     public MissingValuesImputationFunction(GraphPanel panel) {
-        super(panel, "Missing Values Imputation", "mvimputation", "mvimputation", null);
+        super(panel, "Missing Values Imputation", "mvimputation", "mvimputation", null, null);
     }
     
     @Override

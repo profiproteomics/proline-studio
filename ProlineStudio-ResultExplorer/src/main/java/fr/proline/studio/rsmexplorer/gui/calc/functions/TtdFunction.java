@@ -10,7 +10,7 @@ import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
 public class TtdFunction extends AbstractOnExperienceDesignFunction {
 
     public TtdFunction(GraphPanel panel) {
-        super(panel, "ttd", "ttd", "ttd", null);
+        super(panel, "ttd", "ttd", "ttd", null, null);
     }
 
     @Override

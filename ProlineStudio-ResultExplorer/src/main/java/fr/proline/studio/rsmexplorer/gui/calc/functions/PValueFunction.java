@@ -11,7 +11,7 @@ import fr.proline.studio.types.PValue;
 public class PValueFunction extends AbstractOnExperienceDesignFunction {
 
     public PValueFunction(GraphPanel panel) {
-        super(panel, "pvalue", "pvalue", "pvalue", new PValue());
+        super(panel, "pvalue", "pvalue", "pvalue", null, new PValue());
     }
 
     @Override

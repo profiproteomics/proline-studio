@@ -17,18 +17,29 @@ public class QuantiFilterModel extends FilterTableModel   {
     private final int[] m_groupIndex;
     private final int m_option;
     private final int m_threshold;
+    private final boolean m_reversed;
     
-    public QuantiFilterModel(GlobalTableModelInterface tableModelSource, int[] colsIndex, int[] groupIndex, int option, int threshold) {
+    public QuantiFilterModel(GlobalTableModelInterface tableModelSource, int[] colsIndex, int[] groupIndex, int option, int threshold, boolean reversed) {
         super(tableModelSource);
         
         m_colsIndex = colsIndex;
         m_groupIndex = groupIndex;
         m_option = option;
         m_threshold = threshold;
+        m_reversed = reversed;
     }
 
+    
     @Override
     public boolean filter(int row) {
+        if (m_reversed) {
+            return !filterImpl(row);
+        } else {
+            return filterImpl(row);
+        }
+    }
+
+    private boolean filterImpl(int row) {
         
         if (m_option == WHOLE_GROUPS) {
             int count = 0;

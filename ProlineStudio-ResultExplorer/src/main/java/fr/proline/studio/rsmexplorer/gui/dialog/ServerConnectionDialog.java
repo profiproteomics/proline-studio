@@ -5,6 +5,7 @@ import fr.proline.studio.dam.DatabaseDataManager;
 import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dpm.ServerConnectionManager;
 import fr.proline.studio.gui.ConnectionDialog;
+import fr.proline.studio.msfiles.MsFilesExplorer;
 import fr.proline.studio.pattern.DataboxDataAnalyzer;
 import fr.proline.studio.pattern.WindowBox;
 import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
@@ -12,6 +13,7 @@ import fr.proline.studio.rsmexplorer.MzdbFilesTopComponent;
 import fr.proline.studio.rsmexplorer.PropertiesTopComponent;
 import fr.proline.studio.rsmexplorer.TaskLogTopComponent;
 import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
+import fr.proline.studio.rsmexplorer.gui.TreeFileChooserPanel;
 import fr.proline.studio.rsmexplorer.gui.TreeStateUtil;
 import fr.proline.studio.rsmexplorer.gui.calc.DataAnalyzerPanel;
 import java.awt.Window;
@@ -192,9 +194,15 @@ public class ServerConnectionDialog extends ConnectionDialog {
                         // start to load the data for the new user
                         ProjectExplorerPanel.getProjectExplorerPanel().startLoadingProjects();
 
-                    } else if(changingUser && m_serverURLTextField!=null && m_serverURLTextField.isEnabled()) {
-                        MzdbFilesTopComponent.getExplorer().getTreeFileChooserPanel().initTree();
-                        MzdbFilesTopComponent.getExplorer().getTreeFileChooserPanel().restoreTree(TreeStateUtil.TreeType.SERVER);
+                    }
+
+                    if (m_serverURLTextField != null && m_serverURLTextField.isEnabled()) {
+
+                        if (MzdbFilesTopComponent.getExplorer() != null) {
+                            MzdbFilesTopComponent.getExplorer().getTreeFileChooserPanel().initTree();
+                            MzdbFilesTopComponent.getExplorer().getTreeFileChooserPanel().restoreTree(TreeStateUtil.TreeType.SERVER);
+                        }
+                        
                     }
                 }
 

@@ -5,12 +5,12 @@
  */
 package fr.proline.studio.msfiles;
 
+import fr.proline.studio.dam.AccessDatabaseThread;
+import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
+import fr.proline.studio.dam.tasks.SubTask;
+import fr.proline.studio.rsmexplorer.MzdbFilesTopComponent;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 /**
  *
@@ -18,38 +18,43 @@ import java.util.concurrent.TimeUnit;
  */
 public class FileDeletionBatch implements Runnable {
 
-    private final ThreadPoolExecutor m_executor;
     private ArrayList<File> m_files;
-    private HashSet<String> m_parentDirectories;
 
     public FileDeletionBatch(ArrayList<File> files) {
         m_files = files;
-        m_executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(1);
     }
 
     private void deleteFile(File f) {
         if (f.getAbsolutePath().toLowerCase().endsWith(".mzdb") || f.getAbsolutePath().toLowerCase().endsWith(".raw") || f.getAbsolutePath().toLowerCase().endsWith(".wiff") || f.getAbsolutePath().toLowerCase().endsWith(".mgf")) {
-            FileDeleter deleter = new FileDeleter(f);
-            m_executor.execute(deleter);
+            
+            AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
+
+                @Override
+                public boolean mustBeCalledInAWT() {
+                    return false;
+                }
+
+                @Override
+                public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
+
+                    MzdbFilesTopComponent.getExplorer().getLocalFileSystemView().updateTree();
+
+                }
+            };
+
+            FileDeletionTask task = new FileDeletionTask(callback, f);
+            AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
+
         }
     }
 
     @Override
     public void run() {
 
-        m_parentDirectories = new HashSet<String>();
-
         for (int i = 0; i < m_files.size(); i++) {
-            m_parentDirectories.add(m_files.get(i).getParentFile().getAbsolutePath());
             deleteFile(m_files.get(i));
         }
 
-        m_executor.shutdown();
-        try {
-            m_executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
-        } catch (InterruptedException e) {
-            ;
-        }
     }
 
 }

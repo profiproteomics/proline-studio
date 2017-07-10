@@ -192,7 +192,7 @@ public class ServerConnectionDialog extends ConnectionDialog {
                         // start to load the data for the new user
                         ProjectExplorerPanel.getProjectExplorerPanel().startLoadingProjects();
 
-                    } else {
+                    } else if(changingUser && m_serverURLTextField!=null && m_serverURLTextField.isEnabled()) {
                         MzdbFilesTopComponent.getExplorer().getTreeFileChooserPanel().initTree();
                         MzdbFilesTopComponent.getExplorer().getTreeFileChooserPanel().restoreTree(TreeStateUtil.TreeType.SERVER);
                     }

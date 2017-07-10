@@ -32,14 +32,14 @@ public class HelpDialog extends DefaultDialog implements MouseListener, MouseMot
     private BooleanParameter m_parameter;
 
     private String[][] HELP_CONTENT = {
-        {"Create a Project", "#id.2r0uhxc"},
-        {"Create a Dataset", "#id.2p2csry"},
-        {"Import a Search Result", "#id.147n2zr"},
-        {"Validate a Search Result", "#id.46r0co2"},
-        {"Display Search Result Data", "#id.ihv636"},
-        {"Display Identification Summary Data", "#id.32hioqz"},
-        {"Create a Spectral Count", "#h.3ygebqi"},
-        {"Create a XIC", "#id.2dlolyb"}
+        {"Create a Project", "id.2r0uhxc"},
+        {"Create a Dataset", "id.2p2csry"},
+        {"Import a Search Result", "id.147n2zr"},
+        {"Validate a Search Result", "id.46r0co2"},
+        {"Display Search Result Data", "id.ihv636"},
+        {"Display Identification Summary Data", "id.32hioqz"},
+        {"Create a Spectral Count", "h.3ygebqi"},
+        {"Create a XIC", "id.2dlolyb"}
 
     };
 

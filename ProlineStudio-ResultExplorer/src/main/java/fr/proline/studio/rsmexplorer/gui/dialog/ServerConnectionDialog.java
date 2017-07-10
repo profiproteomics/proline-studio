@@ -175,10 +175,6 @@ public class ServerConnectionDialog extends ConnectionDialog {
                             }
                         });
                     }
-                    
-                    MzdbFilesTopComponent.getExplorer().getTreeFileChooserPanel().initTree();
-                    
-                    MzdbFilesTopComponent.getExplorer().getTreeFileChooserPanel().restoreTree(TreeStateUtil.TreeType.SERVER);
 
                     if (changingUser) {
 
@@ -196,6 +192,9 @@ public class ServerConnectionDialog extends ConnectionDialog {
                         // start to load the data for the new user
                         ProjectExplorerPanel.getProjectExplorerPanel().startLoadingProjects();
 
+                    } else {
+                        MzdbFilesTopComponent.getExplorer().getTreeFileChooserPanel().initTree();
+                        MzdbFilesTopComponent.getExplorer().getTreeFileChooserPanel().restoreTree(TreeStateUtil.TreeType.SERVER);
                     }
                 }
 

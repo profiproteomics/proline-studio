@@ -68,7 +68,7 @@ public class MgfExportBatch implements Runnable, ConversionListener {
     }
 
     @Override
-    public void ConversionPerformed(File f, Object settings, boolean success) {
+    public void conversionPerformed(File f, Object settings, boolean success) {
 
         if (success) {
             m_successCounter++;

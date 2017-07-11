@@ -2,7 +2,7 @@ package fr.proline.studio.dam.tasks;
 
 import fr.proline.core.orm.uds.PeaklistSoftware;
 import fr.proline.core.orm.uds.SpectrumTitleParsingRule;
-import fr.proline.core.orm.util.DataStoreConnectorFactory;
+import fr.proline.core.orm.util.DStoreCustomPoolConnectorFactory;
 import fr.proline.studio.dam.DatabaseDataManager;
 import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
@@ -69,7 +69,7 @@ public class DatabaseAdminTask extends AbstractDatabaseTask {
     }
 
     public boolean addPeaklistSoftware() {
-        EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().createEntityManager();
+        EntityManager entityManagerUDS = DStoreCustomPoolConnectorFactory.getInstance().getUdsDbConnector().createEntityManager();
 
         try {
 
@@ -107,7 +107,7 @@ public class DatabaseAdminTask extends AbstractDatabaseTask {
     }
 
     public boolean modifyPeaklistSoftware() {
-        EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().createEntityManager();
+        EntityManager entityManagerUDS = DStoreCustomPoolConnectorFactory.getInstance().getUdsDbConnector().createEntityManager();
 
         try {
 

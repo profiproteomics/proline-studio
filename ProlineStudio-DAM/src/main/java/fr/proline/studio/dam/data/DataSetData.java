@@ -9,7 +9,7 @@ import fr.proline.core.orm.msi.SearchSettingsSeqDatabaseMap;
 import fr.proline.core.orm.uds.Aggregation;
 import fr.proline.core.orm.uds.Dataset;
 import fr.proline.core.orm.uds.dto.DDataset;
-import fr.proline.core.orm.util.DataStoreConnectorFactory;
+import fr.proline.core.orm.util.DStoreCustomPoolConnectorFactory;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.AbstractDatabaseTask;
@@ -124,7 +124,7 @@ public class DataSetData extends AbstractData {
 
     public static void fetchRsetAndRsmForOneDataset(DDataset d) {
         
-        EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(d.getProject().getId()).createEntityManager();
+        EntityManager entityManagerMSI = DStoreCustomPoolConnectorFactory.getInstance().getMsiDbConnector(d.getProject().getId()).createEntityManager();
 
         try {
 

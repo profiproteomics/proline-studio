@@ -5,7 +5,7 @@ import fr.proline.core.orm.msi.ResultSet;
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.uds.Dataset;
 import fr.proline.core.orm.uds.Project;
-import fr.proline.core.orm.util.DataStoreConnectorFactory;
+import fr.proline.core.orm.util.DStoreCustomPoolConnectorFactory;
 import fr.proline.studio.dam.data.ClearProjectData;
 import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
@@ -107,8 +107,8 @@ public class DatabaseClearProjectTask extends AbstractDatabaseTask {
     private boolean loadDataToClear(long projectId, boolean clearTrashDataOnly, List<ClearProjectData> dataToClear, List<ClearProjectData> openedData){
         boolean result = true;
 
-        EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(projectId).createEntityManager();
-        EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().createEntityManager();
+        EntityManager entityManagerMSI = DStoreCustomPoolConnectorFactory.getInstance().getMsiDbConnector(projectId).createEntityManager();
+        EntityManager entityManagerUDS = DStoreCustomPoolConnectorFactory.getInstance().getUdsDbConnector().createEntityManager();
         try {
             
             List<Long> dsInTrash = new ArrayList<>();
@@ -409,7 +409,7 @@ public class DatabaseClearProjectTask extends AbstractDatabaseTask {
     private boolean loadDataInTrash(Long trash_Id, List<Long> trashDatasetIds) {
         m_logger.info("loadDataInTrash "+trash_Id);
         boolean result = true;
-        EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().createEntityManager();
+        EntityManager entityManagerUDS = DStoreCustomPoolConnectorFactory.getInstance().getUdsDbConnector().createEntityManager();
         try {
             Dataset ds = entityManagerUDS.find(Dataset.class, trash_Id);
             List<Dataset> children = ds.getChildren();

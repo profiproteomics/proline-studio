@@ -53,7 +53,7 @@ public class MgfExporter implements Runnable, WorkerInterface {
                         if (m_state == WorkerInterface.ACTIVE_STATE) {
                             m_state = WorkerInterface.FINISHED_STATE;
 
-                            m_conversionListener.ConversionPerformed(m_file, m_mgfExportSettings, true);
+                            m_conversionListener.conversionPerformed(m_file, m_mgfExportSettings, true);
                         }
                     } else {
                         terminate();
@@ -73,7 +73,7 @@ public class MgfExporter implements Runnable, WorkerInterface {
     public void terminate() {
         m_run = false;
         m_state = WorkerInterface.KILLED_STATE;
-        m_conversionListener.ConversionPerformed(m_file, m_mgfExportSettings, false);
+        m_conversionListener.conversionPerformed(m_file, m_mgfExportSettings, false);
     }
 
     @Override

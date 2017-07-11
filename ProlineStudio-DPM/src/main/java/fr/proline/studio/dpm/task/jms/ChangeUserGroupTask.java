@@ -6,7 +6,7 @@ import com.thetransactioncompany.jsonrpc2.JSONRPC2Notification;
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Request;
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Response;
 import fr.proline.core.orm.uds.UserAccount;
-import fr.proline.core.orm.util.DataStoreConnectorFactory;
+import fr.proline.core.orm.util.DStoreCustomPoolConnectorFactory;
 import fr.proline.studio.dam.DatabaseDataManager;
 import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
@@ -110,7 +110,7 @@ public class ChangeUserGroupTask extends AbstractJMSTask {
             
             
             // Reload users
-            EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().createEntityManager();
+            EntityManager entityManagerUDS = DStoreCustomPoolConnectorFactory.getInstance().getUdsDbConnector().createEntityManager();
 
             // Load all users
             try {
@@ -125,7 +125,7 @@ public class ChangeUserGroupTask extends AbstractJMSTask {
             } catch (Exception e) {
                 m_taskError = new TaskError("Unable to load UserAccounts from UDS");
                 entityManagerUDS.getTransaction().rollback();
-                DataStoreConnectorFactory.getInstance().closeAll();
+                DStoreCustomPoolConnectorFactory.getInstance().closeAll();
                 return;
             }
             

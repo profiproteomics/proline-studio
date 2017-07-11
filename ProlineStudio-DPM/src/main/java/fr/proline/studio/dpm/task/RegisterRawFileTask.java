@@ -9,7 +9,7 @@ import fr.proline.core.orm.uds.Run;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
-import fr.proline.core.orm.util.DataStoreConnectorFactory;
+import fr.proline.core.orm.util.DStoreCustomPoolConnectorFactory;
 import fr.proline.studio.dam.data.RunInfoData;
 import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
@@ -50,7 +50,7 @@ public class RegisterRawFileTask extends AbstractServiceTask {
     public boolean askService() {
         
         // first we check if the Raw File exists already or not 
-        EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().createEntityManager();
+        EntityManager entityManagerUDS = DStoreCustomPoolConnectorFactory.getInstance().getUdsDbConnector().createEntityManager();
         try {
             entityManagerUDS.getTransaction().begin();
         
@@ -146,7 +146,7 @@ public class RegisterRawFileTask extends AbstractServiceTask {
             return false;
         }
         
-        entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().createEntityManager();
+        entityManagerUDS = DStoreCustomPoolConnectorFactory.getInstance().getUdsDbConnector().createEntityManager();
         try {
             entityManagerUDS.getTransaction().begin();
         

@@ -18,7 +18,7 @@ import fr.proline.core.orm.msi.dto.DInfoPTM;
 import fr.proline.core.orm.msi.dto.DPeptideInstance;
 import fr.proline.core.orm.msi.dto.DPeptidePTM;
 import fr.proline.core.orm.msi.dto.DPtmSiteProperties;
-import fr.proline.core.orm.util.DataStoreConnectorFactory;
+import fr.proline.core.orm.util.DStoreCustomPoolConnectorFactory;
 import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import static fr.proline.studio.dam.tasks.AbstractDatabaseTask.m_logger;
@@ -104,7 +104,7 @@ public class DatabasePTMProteinSiteTask_V2 extends AbstractDatabaseTask {
     private boolean loadPTMSitePeptideMatches(){
         
         long start = System.currentTimeMillis();        
-        EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(m_projectId).createEntityManager();
+        EntityManager entityManagerMSI = DStoreCustomPoolConnectorFactory.getInstance().getMsiDbConnector(m_projectId).createEntityManager();
         try {
 
             entityManagerMSI.getTransaction().begin();
@@ -266,7 +266,7 @@ public class DatabasePTMProteinSiteTask_V2 extends AbstractDatabaseTask {
         
         long start = System.currentTimeMillis();
         
-        EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(m_projectId).createEntityManager();
+        EntityManager entityManagerMSI = DStoreCustomPoolConnectorFactory.getInstance().getMsiDbConnector(m_projectId).createEntityManager();
         try {
 
             entityManagerMSI.getTransaction().begin();
@@ -472,7 +472,7 @@ public class DatabasePTMProteinSiteTask_V2 extends AbstractDatabaseTask {
             return true; // already loaded
         }
         
-        EntityManager entityManagerPS = DataStoreConnectorFactory.getInstance().getPsDbConnector().createEntityManager();
+        EntityManager entityManagerPS = DStoreCustomPoolConnectorFactory.getInstance().getPsDbConnector().createEntityManager();
         try {
 
             entityManagerPS.getTransaction().begin();
@@ -510,7 +510,7 @@ public class DatabasePTMProteinSiteTask_V2 extends AbstractDatabaseTask {
     private HashMap<Long, ArrayList<DPeptidePTM>> fetchPTMDataForPeptides(ArrayList<Long> allPeptidesIds) {
 
 
-        EntityManager entityManagerPS = DataStoreConnectorFactory.getInstance().getPsDbConnector().createEntityManager();
+        EntityManager entityManagerPS = DStoreCustomPoolConnectorFactory.getInstance().getPsDbConnector().createEntityManager();
         try {
 
             entityManagerPS.getTransaction().begin();

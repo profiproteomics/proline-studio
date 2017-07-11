@@ -3,7 +3,7 @@ package fr.proline.studio.dam.tasks;
 import fr.proline.core.orm.uds.IdentificationDataset;
 import fr.proline.core.orm.uds.RawFile;
 import fr.proline.core.orm.uds.Run;
-import fr.proline.core.orm.util.DataStoreConnectorFactory;
+import fr.proline.core.orm.util.DStoreCustomPoolConnectorFactory;
 import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import java.util.ArrayList;
@@ -170,7 +170,7 @@ public class DatabaseRunsTask extends AbstractDatabaseTask {
     }
 
     public boolean fetchRunsForRsms() {
-        EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().createEntityManager();
+        EntityManager entityManagerUDS = DStoreCustomPoolConnectorFactory.getInstance().getUdsDbConnector().createEntityManager();
         try {
             entityManagerUDS.getTransaction().begin();
             //Get Run and Raw File
@@ -206,7 +206,7 @@ public class DatabaseRunsTask extends AbstractDatabaseTask {
     }
 
 //    public boolean fetchPeaklistPath() {
-//        EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(m_projectId).createEntityManager();
+//        EntityManager entityManagerMSI = DStoreCustomPoolConnectorFactory.getInstance().getMsiDbConnector(m_projectId).createEntityManager();
 //        try {
 //
 //            entityManagerMSI.getTransaction().begin();
@@ -260,7 +260,7 @@ public class DatabaseRunsTask extends AbstractDatabaseTask {
 
 
 //    public boolean fetchPeaklistRawFileIdentifier() {
-//        EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(m_projectId).createEntityManager();
+//        EntityManager entityManagerMSI = DStoreCustomPoolConnectorFactory.getInstance().getMsiDbConnector(m_projectId).createEntityManager();
 //        try {
 //
 //            entityManagerMSI.getTransaction().begin();
@@ -313,7 +313,7 @@ public class DatabaseRunsTask extends AbstractDatabaseTask {
 //    }
 
     public boolean searchRawFile() {
-        EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().createEntityManager();
+        EntityManager entityManagerUDS = DStoreCustomPoolConnectorFactory.getInstance().getUdsDbConnector().createEntityManager();
         try {
             entityManagerUDS.getTransaction().begin();
 
@@ -351,7 +351,7 @@ public class DatabaseRunsTask extends AbstractDatabaseTask {
     }
 
     private boolean loadRawFile() {
-        EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().createEntityManager();
+        EntityManager entityManagerUDS = DStoreCustomPoolConnectorFactory.getInstance().getUdsDbConnector().createEntityManager();
         try {
             entityManagerUDS.getTransaction().begin();
 
@@ -380,7 +380,7 @@ public class DatabaseRunsTask extends AbstractDatabaseTask {
     }
 
     public boolean registerIdentificationDatasetRun() {
-        EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().createEntityManager();
+        EntityManager entityManagerUDS = DStoreCustomPoolConnectorFactory.getInstance().getUdsDbConnector().createEntityManager();
         try {
             entityManagerUDS.getTransaction().begin();
             IdentificationDataset idf = entityManagerUDS.find(IdentificationDataset.class, m_datasetId);

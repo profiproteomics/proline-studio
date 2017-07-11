@@ -2,7 +2,7 @@ package fr.proline.studio.dam.tasks;
 
 import fr.proline.core.orm.msi.*;
 import fr.proline.core.orm.uds.dto.DDataset;
-import fr.proline.core.orm.util.DataStoreConnectorFactory;
+import fr.proline.core.orm.util.DStoreCustomPoolConnectorFactory;
 import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import javax.persistence.EntityManager;
@@ -19,13 +19,13 @@ public class DatabaseRsummaryProperties extends AbstractDatabaseTask {
     private ResultSummary m_rsm = null;
     
     public DatabaseRsummaryProperties(AbstractDatabaseCallback callback, long projectId, DDataset dataset) {
-        super(callback, new TaskInfo("Load Properties for Search Result "+dataset.getName(), false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_LOW));
+        super(callback, new TaskInfo("Load Properties for Identification Summary "+dataset.getName(), false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_LOW));
         m_projectId = projectId;
         m_dataset = dataset;
     }
     
     public DatabaseRsummaryProperties(AbstractDatabaseCallback callback, long projectId, ResultSummary rset, String name) {
-        super(callback, new TaskInfo("Load Properties for Search Result "+name, false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_LOW));
+        super(callback, new TaskInfo("Load Properties for Identification Summary "+name, false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_LOW));
         m_projectId = projectId;
         m_rsm = rset;
     }
@@ -41,7 +41,7 @@ public class DatabaseRsummaryProperties extends AbstractDatabaseTask {
     
     @Override
     public boolean fetchData() {
-        EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(m_projectId).createEntityManager();
+        EntityManager entityManagerMSI = DStoreCustomPoolConnectorFactory.getInstance().getMsiDbConnector(m_projectId).createEntityManager();
         try {
 
             entityManagerMSI.getTransaction().begin();

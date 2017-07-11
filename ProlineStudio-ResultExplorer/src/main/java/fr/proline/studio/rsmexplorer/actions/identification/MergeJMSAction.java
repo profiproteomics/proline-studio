@@ -54,10 +54,10 @@ public class MergeJMSAction extends AbstractRSMAction {
         m_unionMergeAction = new ConfigurableMergeAction(MergeTask.Config.UNION);
         JMenuItem mergeAggregateItem = new JMenuItem(m_aggregationMergeAction);
         m_menu.add(mergeAggregateItem);
-        if(showHiddenFunctionnality){
+//        if(showHiddenFunctionnality){
             JMenuItem mergeUnionItem = new JMenuItem(m_unionMergeAction);    
             m_menu.add(mergeUnionItem);
-        }
+//        }
 
         return m_menu;
     }

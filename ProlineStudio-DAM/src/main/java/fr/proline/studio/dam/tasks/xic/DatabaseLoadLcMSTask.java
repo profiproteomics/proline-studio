@@ -12,7 +12,7 @@ import fr.proline.core.orm.msi.dto.DMasterQuantPeptideIon;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.core.orm.uds.dto.DMasterQuantitationChannel;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
-import fr.proline.core.orm.util.DataStoreConnectorFactory;
+import fr.proline.core.orm.util.DStoreCustomPoolConnectorFactory;
 import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
@@ -278,7 +278,7 @@ public class DatabaseLoadLcMSTask extends AbstractDatabaseSlicerTask {
      * @return
      */
     private boolean fetchDataMainTaskMapForXic() {
-        EntityManager entityManagerLCMS = DataStoreConnectorFactory.getInstance().getLcMsDbConnector(m_projectId).createEntityManager();
+        EntityManager entityManagerLCMS = DStoreCustomPoolConnectorFactory.getInstance().getLcMsDbConnector(m_projectId).createEntityManager();
         try {
             entityManagerLCMS.getTransaction().begin();
             if (m_dataset != null && m_dataset.getMasterQuantitationChannels() != null) {
@@ -331,7 +331,7 @@ public class DatabaseLoadLcMSTask extends AbstractDatabaseSlicerTask {
      * @return
      */
     private boolean fetchDataMainTaskPeakelForMap() {
-        EntityManager entityManagerLCMS = DataStoreConnectorFactory.getInstance().getLcMsDbConnector(m_projectId).createEntityManager();
+        EntityManager entityManagerLCMS = DStoreCustomPoolConnectorFactory.getInstance().getLcMsDbConnector(m_projectId).createEntityManager();
         try {
             entityManagerLCMS.getTransaction().begin();
             String queryP = "SELECT p.id "
@@ -377,7 +377,7 @@ public class DatabaseLoadLcMSTask extends AbstractDatabaseSlicerTask {
      * @return
      */
     private boolean fetchDataMainTaskFeatureForMap() {
-        EntityManager entityManagerLCMS = DataStoreConnectorFactory.getInstance().getLcMsDbConnector(m_projectId).createEntityManager();
+        EntityManager entityManagerLCMS = DStoreCustomPoolConnectorFactory.getInstance().getLcMsDbConnector(m_projectId).createEntityManager();
         try {
             entityManagerLCMS.getTransaction().begin();
             String queryF = "SELECT f.id "
@@ -423,7 +423,7 @@ public class DatabaseLoadLcMSTask extends AbstractDatabaseSlicerTask {
      * @return
      */
     private boolean fetchDataMainTaskPeakelForFeature() {
-        EntityManager entityManagerLCMS = DataStoreConnectorFactory.getInstance().getLcMsDbConnector(m_projectId).createEntityManager();
+        EntityManager entityManagerLCMS = DStoreCustomPoolConnectorFactory.getInstance().getLcMsDbConnector(m_projectId).createEntityManager();
         try {
             entityManagerLCMS.getTransaction().begin();
             String queryP = "SELECT fpi.id.peakelId  "
@@ -475,7 +475,7 @@ public class DatabaseLoadLcMSTask extends AbstractDatabaseSlicerTask {
             return true; // nothing to do : should not happen
         }
 
-        EntityManager entityManagerLCMS = DataStoreConnectorFactory.getInstance().getLcMsDbConnector(m_projectId).createEntityManager();
+        EntityManager entityManagerLCMS = DStoreCustomPoolConnectorFactory.getInstance().getLcMsDbConnector(m_projectId).createEntityManager();
         try {
             entityManagerLCMS.getTransaction().begin();
             switch (slice.getSubTaskId()) {
@@ -507,7 +507,7 @@ public class DatabaseLoadLcMSTask extends AbstractDatabaseSlicerTask {
             return true; // nothing to do : should not happen
         }
 
-        EntityManager entityManagerLCMS = DataStoreConnectorFactory.getInstance().getLcMsDbConnector(m_projectId).createEntityManager();
+        EntityManager entityManagerLCMS = DStoreCustomPoolConnectorFactory.getInstance().getLcMsDbConnector(m_projectId).createEntityManager();
         try {
             entityManagerLCMS.getTransaction().begin();
             switch (slice.getSubTaskId()) {
@@ -539,7 +539,7 @@ public class DatabaseLoadLcMSTask extends AbstractDatabaseSlicerTask {
             return true; // nothing to do : should not happen
         }
 
-        EntityManager entityManagerLCMS = DataStoreConnectorFactory.getInstance().getLcMsDbConnector(m_projectId).createEntityManager();
+        EntityManager entityManagerLCMS = DStoreCustomPoolConnectorFactory.getInstance().getLcMsDbConnector(m_projectId).createEntityManager();
         try {
             entityManagerLCMS.getTransaction().begin();
             switch (slice.getSubTaskId()) {
@@ -669,8 +669,8 @@ public class DatabaseLoadLcMSTask extends AbstractDatabaseSlicerTask {
      * @return
      */
     private boolean fetchDataMainTaskMasterFeatureForPeptide() {
-        EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(m_projectId).createEntityManager();
-        EntityManager entityManagerLCMS = DataStoreConnectorFactory.getInstance().getLcMsDbConnector(m_projectId).createEntityManager();
+        EntityManager entityManagerMSI = DStoreCustomPoolConnectorFactory.getInstance().getMsiDbConnector(m_projectId).createEntityManager();
+        EntityManager entityManagerLCMS = DStoreCustomPoolConnectorFactory.getInstance().getLcMsDbConnector(m_projectId).createEntityManager();
         try {
             entityManagerMSI.getTransaction().begin();
             entityManagerLCMS.getTransaction().begin();
@@ -717,7 +717,7 @@ public class DatabaseLoadLcMSTask extends AbstractDatabaseSlicerTask {
      * @return
      */
     private boolean fetchDataMainTaskChildFeatureForMaster() {
-        EntityManager entityManagerLCMS = DataStoreConnectorFactory.getInstance().getLcMsDbConnector(m_projectId).createEntityManager();
+        EntityManager entityManagerLCMS = DStoreCustomPoolConnectorFactory.getInstance().getLcMsDbConnector(m_projectId).createEntityManager();
         try {
             entityManagerLCMS.getTransaction().begin();
             if (m_masterFeature != null) {
@@ -767,7 +767,7 @@ public class DatabaseLoadLcMSTask extends AbstractDatabaseSlicerTask {
      * @return
      */
     private boolean fetchDataMainTaskChildFeatureForPeptideIonWithPeakels() {
-        EntityManager entityManagerLCMS = DataStoreConnectorFactory.getInstance().getLcMsDbConnector(m_projectId).createEntityManager();
+        EntityManager entityManagerLCMS = DStoreCustomPoolConnectorFactory.getInstance().getLcMsDbConnector(m_projectId).createEntityManager();
         try {
             entityManagerLCMS.getTransaction().begin();
             if (m_masterQuantPeptideIon != null) {
@@ -963,7 +963,7 @@ public class DatabaseLoadLcMSTask extends AbstractDatabaseSlicerTask {
      * @return
      */
     private boolean fetchDataMainTaskAlignmentForXic() {
-        EntityManager entityManagerLCMS = DataStoreConnectorFactory.getInstance().getLcMsDbConnector(m_projectId).createEntityManager();
+        EntityManager entityManagerLCMS = DStoreCustomPoolConnectorFactory.getInstance().getLcMsDbConnector(m_projectId).createEntityManager();
         try {
             entityManagerLCMS.getTransaction().begin();
             if (m_dataset_align != null && m_dataset_align.getMasterQuantitationChannels() != null) {

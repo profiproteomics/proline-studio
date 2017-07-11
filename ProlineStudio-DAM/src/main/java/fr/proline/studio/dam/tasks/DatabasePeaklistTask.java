@@ -1,7 +1,7 @@
 package fr.proline.studio.dam.tasks;
 
 import fr.proline.core.orm.msi.Peaklist;
-import fr.proline.core.orm.util.DataStoreConnectorFactory;
+import fr.proline.core.orm.util.DStoreCustomPoolConnectorFactory;
 import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import java.util.List;
@@ -97,7 +97,7 @@ public class DatabasePeaklistTask extends AbstractDatabaseTask {
     }
 
     public boolean updatePeaklistRawFileIdentifier() {
-        EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(m_projectID).createEntityManager();       
+        EntityManager entityManagerMSI = DStoreCustomPoolConnectorFactory.getInstance().getMsiDbConnector(m_projectID).createEntityManager();       
         try {
 
             entityManagerMSI.getTransaction().begin();
@@ -126,7 +126,7 @@ public class DatabasePeaklistTask extends AbstractDatabaseTask {
     }
 
     public boolean loadPeaklistForRS() {
-        EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(m_projectID).createEntityManager();
+        EntityManager entityManagerMSI = DStoreCustomPoolConnectorFactory.getInstance().getMsiDbConnector(m_projectID).createEntityManager();
 
         try {
 
@@ -165,7 +165,7 @@ public class DatabasePeaklistTask extends AbstractDatabaseTask {
     }
 
 //    public boolean fetchPeaklistPath() {
-//        EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(m_projectID).createEntityManager();
+//        EntityManager entityManagerMSI = DStoreCustomPoolConnectorFactory.getInstance().getMsiDbConnector(m_projectID).createEntityManager();
 //        try {
 //
 //            entityManagerMSI.getTransaction().begin();

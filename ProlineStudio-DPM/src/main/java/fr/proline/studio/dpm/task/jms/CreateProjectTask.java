@@ -12,7 +12,7 @@ import com.thetransactioncompany.jsonrpc2.JSONRPC2Request;
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Response;
 import fr.proline.core.orm.uds.Project;
 import fr.proline.core.orm.uds.ProjectUserAccountMap;
-import fr.proline.core.orm.util.DataStoreConnectorFactory;
+import fr.proline.core.orm.util.DStoreCustomPoolConnectorFactory;
 import fr.proline.studio.dam.data.ProjectIdentificationData;
 import fr.proline.studio.dam.data.ProjectQuantitationData;
 import fr.proline.studio.dam.taskinfo.TaskError;
@@ -116,7 +116,7 @@ public class CreateProjectTask extends AbstractJMSTask {
                 m_loggerProline.debug("Result :\n" + result);
             }
             Long projectId = (Long) result;
-            EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().createEntityManager();
+            EntityManager entityManagerUDS = DStoreCustomPoolConnectorFactory.getInstance().getUdsDbConnector().createEntityManager();
             try {
                 entityManagerUDS.getTransaction().begin();
 

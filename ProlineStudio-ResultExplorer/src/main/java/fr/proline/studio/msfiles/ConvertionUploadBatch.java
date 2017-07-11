@@ -96,7 +96,7 @@ public class ConvertionUploadBatch implements Runnable, ConversionListener {
     }
 
     @Override
-    public void ConversionPerformed(File f, Object settings, boolean success) {
+    public void conversionPerformed(File f, Object settings, boolean success) {
 
         ConversionSettings conversionSettings = null;
 

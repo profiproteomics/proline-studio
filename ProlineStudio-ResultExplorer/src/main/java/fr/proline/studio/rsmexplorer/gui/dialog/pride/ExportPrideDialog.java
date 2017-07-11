@@ -5,8 +5,6 @@ import fr.proline.studio.utils.IconManager;
 import java.awt.Component;
 import java.awt.Dialog;
 import java.awt.Window;
-import java.io.File;
-import java.io.IOException;
 import java.util.HashMap;
 
 /**

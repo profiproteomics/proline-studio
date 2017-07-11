@@ -74,7 +74,7 @@ public class RawConverter implements Runnable, WorkerInterface {
                                 if (m_conversionListener != null) {
 
                                     if (f!=null && f.exists()) {
-                                        m_conversionListener.ConversionPerformed(f, m_settings, true);
+                                        m_conversionListener.conversionPerformed(f, m_settings, true);
                                     }
                                 }
 
@@ -107,7 +107,7 @@ public class RawConverter implements Runnable, WorkerInterface {
                             }
                         } else {
                             terminate();
-                            m_conversionListener.ConversionPerformed(f, m_settings, false);
+                            m_conversionListener.conversionPerformed(f, m_settings, false);
                         }
 
                     }

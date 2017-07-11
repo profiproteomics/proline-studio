@@ -32,6 +32,7 @@ import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dpm.task.util.JMSConnectionManager;
 import fr.proline.studio.gui.DatasetAction;
+//import fr.proline.studio.rsmexplorer.actions.WaitAction;
 import fr.proline.studio.rsmexplorer.actions.identification.AddIdentificationFolderAction;
 import fr.proline.studio.rsmexplorer.actions.identification.AggregateAction;
 import fr.proline.studio.rsmexplorer.actions.identification.ClearDatasetAction;
@@ -49,7 +50,6 @@ import fr.proline.studio.rsmexplorer.actions.identification.ImportSearchResultAs
 import fr.proline.studio.rsmexplorer.actions.identification.PasteSearchResult;
 import fr.proline.studio.rsmexplorer.actions.identification.RenameRsetAction;
 import fr.proline.studio.rsmexplorer.actions.identification.UpdatePeaklistSoftwareAction;
-import fr.proline.studio.rsmexplorer.actions.xic.AddQuantitationFolderAction;
 import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import fr.proline.studio.rsmexplorer.tree.ChildFactory;
@@ -691,7 +691,7 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
             if (m_allImportedPopup == null) {
                 boolean isJMSDefined = JMSConnectionManager.getJMSConnectionManager().isJMSDefined();
                 // create the actions
-                m_allImportedActions = new ArrayList<>(5);  // <--- get in sync
+                m_allImportedActions = new ArrayList<>(6);  // <--- get in sync
 
                 DisplayAllRsetAction allRsetAction = new DisplayAllRsetAction();
                 m_allImportedActions.add(allRsetAction);
@@ -775,10 +775,10 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
                 if (isJMSDefined) {
                     ImportSearchResultAsDatasetJMSAction identificationAction = new ImportSearchResultAsDatasetJMSAction();
                     m_mainActions.add(identificationAction);
-                    if (showHiddenFunctionnality) {
+//                    if (showHiddenFunctionnality) {
                         ImportMaxQuantResultJMSAction importMaxQuant = new ImportMaxQuantResultJMSAction();
                         m_mainActions.add(importMaxQuant);
-                    }
+//                    }
                     ValidateJMSAction validateJMSAction = new ValidateJMSAction();
                     m_mainActions.add(validateJMSAction);
                     MergeJMSAction mergeJmsAction = new MergeJMSAction();

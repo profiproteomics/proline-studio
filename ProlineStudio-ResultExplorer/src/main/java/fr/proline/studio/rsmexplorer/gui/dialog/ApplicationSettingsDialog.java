@@ -49,12 +49,6 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
     private static final String DIALOG_TITLE = "Proline Studio Settings";
     private static final String TREE_ROOT_NAME = "Settings Categories";
 
-    private static final int SAME_OUTPUT_PATH = 0;
-    private static final int USER_SPECIFIED_OUTPUT = 1;
-
-    private static final String CONVERTER_OUTPUT_PATH_NAME = "raw2mzDB output";
-    private static final String CONVERTER_OUTPUT_PATH_KEY = "raw2mzDB_output";
-
     private Preferences m_preferences;
 
     public static ApplicationSettingsDialog getDialog(Window parent) {

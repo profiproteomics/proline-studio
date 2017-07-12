@@ -15,7 +15,6 @@ import fr.proline.studio.rsmexplorer.actions.identification.ImportManager;
 import fr.proline.studio.table.DecoratedTable;
 import java.awt.*;
 import java.io.File;
-import java.io.IOException;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.prefs.BackingStoreException;
@@ -42,14 +41,16 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
     private AbstractParameterListTree m_parameterListTree;
     private ParameterList m_jmsParameterList, m_generalParameterList, m_tablePrameterList, m_wizardParameterList;
     private JPanel m_cards;
-    private Hashtable<String, JPanel> m_existingPanels;
-    private Hashtable<String, ParameterList> m_existingLists;
+    private final Hashtable<String, JPanel> m_existingPanels;
+    private final Hashtable<String, ParameterList> m_existingLists;
 
     private static final String GENERAL_APPLICATION_SETTINGS = "General Application Settings";
     private static final String DIALOG_TITLE = "Proline Studio Settings";
     private static final String TREE_ROOT_NAME = "Settings Categories";
 
-    private Preferences m_preferences;
+    private FileParameter m_converterFilePath;
+
+    private final Preferences m_preferences;
 
     public static ApplicationSettingsDialog getDialog(Window parent) {
         if (m_singletonDialog == null) {
@@ -91,22 +92,6 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
         StringParameter serviceRequestQueueName = new StringParameter(JMSConnectionManager.SERVICE_REQUEST_QUEUE_NAME_KEY, "Service Request Queue Name", JTextField.class, JMSConnectionManager.DEFAULT_SERVICE_REQUEST_QUEUE_NAME, 5, null);
         m_jmsParameterList.add(serviceRequestQueueName);
 
-        /*
-         StringParameter prolineServiceName = new StringParameter(JMSConnectionManager.PROLINE_SERVICE_NAME_KEY, "Proline Service Name", JTextField.class, JMSConnectionManager.DEFAULT_PROLINE_SERVICE_NAME_VALUE, 5, null);
-         m_jmsParameterList.add(prolineServiceName);
-
-         StringParameter prolineServiceVersion = new StringParameter(JMSConnectionManager.PROLINE_SERVICE_VERSION_KEY, "Proline Service Version", JTextField.class, JMSConnectionManager.DEFAULT_PROLINE_SERVICE_VERSION_VALUE, 5, null);
-         m_jmsParameterList.add(prolineServiceVersion);
-
-         StringParameter jmsHost = new StringParameter(JMSConnectionManager.JMS_SERVER_HOST_PARAM_KEY, "JMS Server Host", JTextField.class, JMSConnectionManager.DEFAULT_JMS_SERVER_HOST_PARAM_VALUE, 5, null);
-         m_jmsParameterList.add(jmsHost);
-
-         StringParameter serverPort = new StringParameter(JMSConnectionManager.JMS_SERVER_PORT_PARAM_KEY, "JMS Server Port", JTextField.class, JMSConnectionManager.DEFAULT_JMS_SERVER_PORT_PARAM_VALUE, 5, null);
-         m_jmsParameterList.add(serverPort);
-
-         StringParameter hornetInputStream = new StringParameter(JMSConnectionManager.HORNET_Q_INPUT_STREAM_KEY, "HornetQ Input Stream", JTextField.class, JMSConnectionManager.DEFAULT_HORNET_Q_INPUT_STREAM_VALUE, 5, null);
-         m_jmsParameterList.add(hornetInputStream);
-         */
         m_jmsParameterList.loadParameters(m_preferences);
 
         return m_jmsParameterList;
@@ -139,13 +124,13 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
         return m_generalParameterList;
     }
 
-    private ParameterList getWizardParameters() {
+    private ParameterList getMsFilesParameters() {
 
         m_wizardParameterList = new ParameterList("Conversion/Upload Settings");
 
         String[] converterExtentions = {"exe"};
         String[] converterFilterNames = {"raw2mzDB.exe"};
-        FileParameter m_converterFilePath = new FileParameter(null, "Converter_(.exe)", "Converter (.exe)", JTextField.class, "", converterFilterNames, converterExtentions);
+        m_converterFilePath = new FileParameter(null, "Converter_(.exe)", "Converter (.exe)", JTextField.class, "", converterFilterNames, converterExtentions);
         m_converterFilePath.setAllFiles(false);
         m_converterFilePath.setSelectionMode(JFileChooser.FILES_ONLY);
         m_converterFilePath.setDefaultDirectory(new File(m_preferences.get("mzDB_Settings.Converter_(.exe)", System.getProperty("user.home"))));
@@ -204,7 +189,7 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
 
         m_parameterListTree = new AbstractParameterListTree(TREE_ROOT_NAME, this, this);
         m_parameterListTree.addNodes(getJMSParameterList());
-        m_parameterListTree.addNodes(getWizardParameters());
+        m_parameterListTree.addNodes(getMsFilesParameters());
         m_parameterListTree.addNodes(getTableParameters());
         m_parameterListTree.addNodes(getGeneralParameters());
         m_parameterListTree.expandAllRows();
@@ -266,6 +251,7 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
         if (tse.getSource() == m_parameterListTree.getTree()) {
 
             DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) m_parameterListTree.getTree().getLastSelectedPathComponent();
+            
             String panelKey = selectedNode.getUserObject().toString();
 
             if (m_existingPanels.containsKey(panelKey)) {
@@ -286,14 +272,25 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
         Enumeration<String> enumKey = m_existingLists.keys();
         while (enumKey.hasMoreElements()) {
             String key = enumKey.nextElement();
-            ParameterList currentList = m_existingLists.get(key);
 
-            ParameterError currentError = currentList.checkParameters();
-            if (currentError != null) {
-                CardLayout cl = (CardLayout) (m_cards.getLayout());
-                cl.show(m_cards, key);
+            if (key.equalsIgnoreCase("Conversion/Upload Settings")) {
+                if (m_converterFilePath.getStringValue().length() > 0) {
+                    File f = new File(m_converterFilePath.getStringValue());
+                    if (!f.exists()) {
+                        ParameterError error = new ParameterError("The selected raw2mzDB.exe is not valid.", m_converterFilePath.getComponent());
+                        return error;
+                    }
+                }
+            } else {
+                ParameterList currentList = m_existingLists.get(key);
 
-                return currentError;
+                ParameterError currentError = currentList.checkParameters();
+                if (currentError != null) {
+                    CardLayout cl = (CardLayout) (m_cards.getLayout());
+                    cl.show(m_cards, key);
+
+                    return currentError;
+                }
             }
         }
         return null;

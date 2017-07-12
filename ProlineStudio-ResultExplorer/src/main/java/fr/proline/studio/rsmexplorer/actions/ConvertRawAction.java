@@ -7,8 +7,6 @@ import java.awt.event.ActionListener;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import org.openide.awt.ActionRegistration;
-import org.openide.awt.ActionReference;
-import org.openide.awt.ActionReferences;
 import org.openide.awt.ActionID;
 import org.openide.util.ContextAwareAction;
 import org.openide.util.Lookup;

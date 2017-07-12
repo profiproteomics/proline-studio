@@ -250,21 +250,26 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
     public void valueChanged(TreeSelectionEvent tse) {
         if (tse.getSource() == m_parameterListTree.getTree()) {
 
-            DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) m_parameterListTree.getTree().getLastSelectedPathComponent();
-            
-            String panelKey = selectedNode.getUserObject().toString();
+            Object lastSelectedPathComponent = m_parameterListTree.getTree().getLastSelectedPathComponent();
 
-            if (m_existingPanels.containsKey(panelKey)) {
-                CardLayout cardLayout = (CardLayout) (m_cards.getLayout());
-                cardLayout.show(m_cards, panelKey);
-            } else {
-                JPanel newPanel = m_parameterListTree.getList().get(panelKey).getPanel();
-                m_cards.add(newPanel, panelKey);
-                CardLayout cardLayout = (CardLayout) (m_cards.getLayout());
-                cardLayout.show(m_cards, panelKey);
-                m_existingPanels.put(panelKey, newPanel);
-                m_existingLists.put(panelKey, m_parameterListTree.getList().get(panelKey));
+            if (lastSelectedPathComponent instanceof DefaultMutableTreeNode) {
+                DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) lastSelectedPathComponent;
+
+                String panelKey = selectedNode.getUserObject().toString();
+
+                if (m_existingPanels.containsKey(panelKey)) {
+                    CardLayout cardLayout = (CardLayout) (m_cards.getLayout());
+                    cardLayout.show(m_cards, panelKey);
+                } else {
+                    JPanel newPanel = m_parameterListTree.getList().get(panelKey).getPanel();
+                    m_cards.add(newPanel, panelKey);
+                    CardLayout cardLayout = (CardLayout) (m_cards.getLayout());
+                    cardLayout.show(m_cards, panelKey);
+                    m_existingPanels.put(panelKey, newPanel);
+                    m_existingLists.put(panelKey, m_parameterListTree.getList().get(panelKey));
+                }
             }
+
         }
     }
 
@@ -276,7 +281,7 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
             if (key.equalsIgnoreCase("Conversion/Upload Settings")) {
                 if (m_converterFilePath.getStringValue().length() > 0) {
                     File f = new File(m_converterFilePath.getStringValue());
-                    if (!f.exists()) {
+                    if (!f.exists() || !f.getAbsolutePath().endsWith("raw2mzDB.exe")) {
                         ParameterError error = new ParameterError("The selected raw2mzDB.exe is not valid.", m_converterFilePath.getComponent());
                         return error;
                     }

@@ -52,6 +52,10 @@ public class SpectralCountDialog extends DefaultDialog {
     public String getSpectralCountDescription() {
         return SpectralCountNamePanel.getSpectralCountNamePanel().getSpectralCountDescription();
     }
+    
+//    public Boolean useSpectralCountV2_0() {
+//        return SpectralCountNamePanel.getSpectralCountNamePanel().useVersion2_0();
+//    }
 
     public ArrayList<DataSetNode> getSelectedRSMDSNodeList() {
         return m_identRSMs;

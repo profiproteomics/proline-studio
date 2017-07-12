@@ -15,6 +15,7 @@ public class SpectralCountNamePanel extends JPanel {
     private static SpectralCountNamePanel m_panel = null;
     private JTextField m_spectralCountNameTextField;
     private JTextArea m_descriptionTextArea;
+//    private JCheckBox m_useVsersion2;
 
 
     public static SpectralCountNamePanel getSpectralCountNamePanel() {
@@ -65,15 +66,21 @@ public class SpectralCountNamePanel extends JPanel {
         
 
         JLabel spectralCountNameLabel = new JLabel("Name:");
-        m_spectralCountNameTextField = new JTextField(30);
+        m_spectralCountNameTextField = new JTextField(30);                
         c.gridx = 0;
         c.gridy = 0;
-        mainPanel.add(spectralCountNameLabel, c);
+        mainPanel.add(spectralCountNameLabel, c);            
 
         c.gridx++;
         c.weightx = 1;
         mainPanel.add(m_spectralCountNameTextField, c);
 
+//        m_useVersion2 = new JCheckBox("use version 2.0");
+//        c.gridx = 0;
+//        c.gridy++;
+//        c.weighty = 1;
+//        mainPanel.add(m_useVersion2, c);  
+        
         JLabel spectralCountDescriptionLabel = new JLabel("Description:");
         m_descriptionTextArea = new JTextArea(10,30);
 
@@ -119,12 +126,15 @@ public class SpectralCountNamePanel extends JPanel {
         return m_spectralCountNameTextField;
     }
 
-        public String getSpectralCountDescription() {
+    public String getSpectralCountDescription() {
         return m_descriptionTextArea.getText();
     }
-
-    public JTextArea getDescriptionTextArea() {
-        return m_descriptionTextArea;
-    }
+//
+//    public boolean useVersion2_0(){
+//        return m_useVersion2.isSelected();
+//    }
+//    public JTextArea getDescriptionTextArea() {
+//        return m_descriptionTextArea;
+//    }
     
 }

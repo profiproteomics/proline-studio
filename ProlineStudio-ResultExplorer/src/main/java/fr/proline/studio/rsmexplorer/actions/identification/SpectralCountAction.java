@@ -10,10 +10,7 @@ import fr.proline.studio.dam.data.DataSetData;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
 import fr.proline.studio.dam.tasks.SubTask;
-import fr.proline.studio.dpm.AccessServiceThread;
 import fr.proline.studio.dpm.jms.AccessJMSManagerThread;
-import fr.proline.studio.dpm.task.AbstractServiceCallback;
-import fr.proline.studio.dpm.task.SpectralCountTask;
 import fr.proline.studio.dpm.task.jms.AbstractJMSCallback;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
@@ -96,12 +93,8 @@ public class SpectralCountAction extends AbstractRSMAction {
 
                 if (spectralCountDialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {
                     ArrayList<DataSetNode> selectedDSNodes = spectralCountDialog.getSelectedRSMDSNodeList();
-                    //A Voir :) 
-//                   if(selectedDSNodes.contains(refDatasetNode) && selectedDSNodes.size()>1) 
-//                        error = " Spectral Count is not possible on reference Node and some of its child";
 
                     for (DataSetNode dsNode : selectedDSNodes) {
-                        //TODO : Verif pas père + fils sélectionnés : Que père ou que fils ?!? 
                         if (!dsNode.hasResultSummary()) {
                             error = " Spectral Count is not possible on Search result (" + dsNode.getDataset().getName() + ").  Identification Summary should be created first";
                             break;
@@ -134,14 +127,7 @@ public class SpectralCountAction extends AbstractRSMAction {
                 }
 
                 m_logger.debug(" Will Compute SC on " + (datasetList.size()) + " RSMs : " + datasetList);
-
-                /*  WindowBox wbox = WindowBoxFactory.getRsmWSCWindowBox((String)params.get(DS_NAME_PROPERTIES), (String)params.get(DS_NAME_PROPERTIES)+" WSC", false) ;
-                 wbox.setEntryData(refDatasetNode.getDataset().getProject().getId(), params);
-
-                 // open a window to display the window box
-                 DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
-                 win.open();
-                 win.requestActive(); */
+                
                 // Used in acse of computing SC
                 final Long[] _quantiDatasetId = new Long[1];
                 QuantitationTree tree = QuantitationTree.getCurrentTree();
@@ -153,7 +139,6 @@ public class SpectralCountAction extends AbstractRSMAction {
                 }
 
                 ArrayList<DDataset> datasetArray = (ArrayList) ((Map) params).get(SpectralCountAction.DS_LIST_PROPERTIES);
-                DDataset refDataset = datasetArray.get(0);
                 int nb = datasetArray.size() - 1;
                 ArrayList<DDataset> datasetRsms = new ArrayList<>(nb);
                 for (int i = 1; i <= nb; i++) {
@@ -163,7 +148,6 @@ public class SpectralCountAction extends AbstractRSMAction {
                 String qttDSName = (String) ((Map) params).get(SpectralCountAction.DS_NAME_PROPERTIES);
                 String qttDSDescr = (String) ((Map) params).get(SpectralCountAction.DS_DESCRIPTION_PROPERTIES);
                 ArrayList<DDataset> datasetWeightRsms = (ArrayList) ((Map) params).get(SpectralCountAction.DS_WEIGHT_LIST_PROPERTIES);
-                String[] _spCountJSON = new String[1];
 
                 // add node for the quantitation dataset which will be created
                 DataSetData quantitationData = new DataSetData(qttDSName, Dataset.DatasetType.QUANTITATION, Aggregation.ChildNature.QUANTITATION_FRACTION);
@@ -192,26 +176,27 @@ public class SpectralCountAction extends AbstractRSMAction {
                             runQuantifySC(success, _quantiDatasetId[0], _quantitationNode[0], treeModel);
                         }
                     };
-                    fr.proline.studio.dpm.task.jms.SpectralCountTask task = new fr.proline.studio.dpm.task.jms.SpectralCountTask(scCallback, refDatasetNode.getDataset(), datasetRsms, datasetWeightRsms, qttDSName, qttDSDescr, _quantiDatasetId, _spCountJSON);
+                    fr.proline.studio.dpm.task.jms.SpectralCountTask task = new fr.proline.studio.dpm.task.jms.SpectralCountTask(scCallback, refDatasetNode.getDataset(), datasetRsms, datasetWeightRsms, qttDSName, qttDSDescr, _quantiDatasetId);
                     AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
-                } else {
-                    // CallBack for SC  Service
-                    AbstractServiceCallback scCallback = new AbstractServiceCallback() {
-
-                        @Override
-                        public boolean mustBeCalledInAWT() {
-                            return true;
-                        }
-
-                        @Override
-                        public void run(boolean success) {
-                            runQuantifySC(success, _quantiDatasetId[0], _quantitationNode[0], treeModel);
-                        }
-                    };
-
-                    SpectralCountTask task = new SpectralCountTask(scCallback, refDatasetNode.getDataset(), datasetRsms, datasetWeightRsms, qttDSName, qttDSDescr, _quantiDatasetId, _spCountJSON);
-                    AccessServiceThread.getAccessServiceThread().addTask(task);
-                }
+                } 
+//                else {
+//                    // CallBack for SC  Service
+//                    AbstractServiceCallback scCallback = new AbstractServiceCallback() {
+//
+//                        @Override
+//                        public boolean mustBeCalledInAWT() {
+//                            return true;
+//                        }
+//
+//                        @Override
+//                        public void run(boolean success) {
+//                            runQuantifySC(success, _quantiDatasetId[0], _quantitationNode[0], treeModel);
+//                        }
+//                    };
+//
+//                    SpectralCountTask task = new SpectralCountTask(scCallback, refDatasetNode.getDataset(), datasetRsms, datasetWeightRsms, qttDSName, qttDSDescr, _quantiDatasetId, _spCountJSON);
+//                    AccessServiceThread.getAccessServiceThread().addTask(task);
+//                }
             }
         };
 
@@ -298,6 +283,7 @@ public class SpectralCountAction extends AbstractRSMAction {
 
         DataSetNode datasetNode = (DataSetNode) node;
 
+        //VDS : Allow on Ident DS !!!??? Comment next part
         Dataset.DatasetType datasetType = ((DataSetData) datasetNode.getData()).getDatasetType();
         if (datasetType != Dataset.DatasetType.AGGREGATE) {
             setEnabled(false);
@@ -309,6 +295,7 @@ public class SpectralCountAction extends AbstractRSMAction {
             return;
         }
 
+        //VDS: ALLOW On Merge RS- Comment next part
         DDataset.MergeInformation mergeInfo = datasetNode.getDataset().getMergeInformation();
         if (mergeInfo.compareTo(DDataset.MergeInformation.MERGE_IDENTIFICATION_SUMMARY) != 0) {
             setEnabled(false);

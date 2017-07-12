@@ -1,7 +1,5 @@
 package fr.proline.studio.rsmexplorer.gui;
 
-
-
 import fr.proline.core.orm.msi.SequenceMatchPK;
 import fr.proline.core.orm.msi.dto.DPeptideInstance;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
@@ -194,19 +192,16 @@ public class RsmProteinAndPeptideSequencePanel extends HourglassPanel implements
             highlights[i] = HIGHLIGHT_NONE;
         }
         
-        if (peptideInstances != null) {
+        // highlight for non selected peptides
+        int nbPeptides = peptideInstances.length;
+        for (int i = 0; i < nbPeptides; i++) {
 
-            // highlight for non selected peptides
-            int nbPeptides = peptideInstances.length;
-            for (int i = 0; i < nbPeptides; i++) {
-
-                if (peptideInstances[i].equals(selectedPeptide)) {
-                    continue;
-                }
-
-                DPeptideMatch peptideMatch = ((DPeptideMatch)peptideInstances[i].getBestPeptideMatch());
-                hightlight(peptideMatch, false, highlights);
+            if (peptideInstances[i].equals(selectedPeptide)) {
+                continue;
             }
+
+            DPeptideMatch peptideMatch = ((DPeptideMatch)peptideInstances[i].getBestPeptideMatch());
+            hightlight(peptideMatch, false, highlights);
         }
         
         if (selectedPeptide != null) {

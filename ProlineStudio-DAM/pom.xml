@@ -68,7 +68,7 @@
             <version>1.0.1.Final</version>
         </dependency>
 
-      <dependency>
+<!--      <dependency>
         <groupId>com.fasterxml.jackson.core</groupId>
         <artifactId>jackson-core</artifactId>
       </dependency>
@@ -76,7 +76,7 @@
       <dependency>
         <groupId>com.fasterxml.jackson.core</groupId>
         <artifactId>jackson-databind</artifactId>
-      </dependency>
+      </dependency>-->
 
     </dependencies>
 
@@ -96,7 +96,6 @@
                         <publicPackage>fr.proline.studio.repositorymgr</publicPackage>
                         <publicPackage>fr.proline.studio.repositorymgr.action</publicPackage>
                         <publicPackage>org.openide.awt</publicPackage>
-                        <publicPackage>com.fasterxml.jackson.*</publicPackage>
                     </publicPackages>
                 </configuration>
             </plugin>

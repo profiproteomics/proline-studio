@@ -127,16 +127,13 @@ public class SpectralCountAction extends AbstractRSMAction {
                 }
 
                 m_logger.debug(" Will Compute SC on " + (datasetList.size()) + " RSMs : " + datasetList);
-                
-                // Used in acse of computing SC
+
+                //TODO VDS: merge de deux codes => appel inutile de param.put ci dessus/ param.get ci dessous !!!! 
+                // Used in case of computing SC
                 final Long[] _quantiDatasetId = new Long[1];
                 QuantitationTree tree = QuantitationTree.getCurrentTree();
                 final DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
                 final DataSetNode[] _quantitationNode = new DataSetNode[1];
-
-                if (!Map.class.isAssignableFrom(params.getClass())) {
-                    throw new IllegalArgumentException("Specified parameter (" + params + ") should be a Map.");
-                }
 
                 ArrayList<DDataset> datasetArray = (ArrayList) ((Map) params).get(SpectralCountAction.DS_LIST_PROPERTIES);
                 int nb = datasetArray.size() - 1;
@@ -284,11 +281,11 @@ public class SpectralCountAction extends AbstractRSMAction {
         DataSetNode datasetNode = (DataSetNode) node;
 
         //VDS : Allow on Ident DS !!!??? Comment next part
-        Dataset.DatasetType datasetType = ((DataSetData) datasetNode.getData()).getDatasetType();
-        if (datasetType != Dataset.DatasetType.AGGREGATE) {
-            setEnabled(false);
-            return;
-        }
+//        Dataset.DatasetType datasetType = ((DataSetData) datasetNode.getData()).getDatasetType();
+//        if (datasetType != Dataset.DatasetType.AGGREGATE) {
+//            setEnabled(false);
+//            return;
+//        }
 
         if (!datasetNode.hasResultSummary()) {
             setEnabled(false);
@@ -296,11 +293,11 @@ public class SpectralCountAction extends AbstractRSMAction {
         }
 
         //VDS: ALLOW On Merge RS- Comment next part
-        DDataset.MergeInformation mergeInfo = datasetNode.getDataset().getMergeInformation();
-        if (mergeInfo.compareTo(DDataset.MergeInformation.MERGE_IDENTIFICATION_SUMMARY) != 0) {
-            setEnabled(false);
-            return;
-        }
+//        DDataset.MergeInformation mergeInfo = datasetNode.getDataset().getMergeInformation();
+//        if (mergeInfo.compareTo(DDataset.MergeInformation.MERGE_IDENTIFICATION_SUMMARY) != 0) {
+//            setEnabled(false);
+//            return;
+//        }
 
         setEnabled(true);
     }

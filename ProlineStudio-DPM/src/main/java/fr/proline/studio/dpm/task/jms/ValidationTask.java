@@ -13,6 +13,7 @@ import static fr.proline.studio.dpm.task.FilterRSMProtSetsTask.FILTER_KEYS;
 import fr.proline.studio.dpm.task.util.JMSConnectionManager;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.TextMessage;
@@ -48,7 +49,9 @@ public class ValidationTask extends AbstractJMSTask  {
     private HashMap<String, String> m_argumentsMap;
     private String m_scoringType = null;
     private Integer[] m_resultSummaryId = null;    
-        
+    private Map<Long,Long> m_rsmIdsPerRsIds = null;        
+    private String m_version = null;
+    
     public ValidationTask(AbstractJMSCallback callback, DDataset dataset, String description, HashMap<String, String> argumentsMap, Integer[] resultSummaryId, String scoringType) {
         super(callback, new TaskInfo("JMS Validation of Search Result " + dataset.getName(), true, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_HIGH));
         m_dataset = dataset;
@@ -58,7 +61,16 @@ public class ValidationTask extends AbstractJMSTask  {
         m_scoringType = scoringType;
     }
     
-    
+        public ValidationTask(AbstractJMSCallback callback, DDataset dataset, String description, HashMap<String, String> argumentsMap, Integer[] resultSummaryId, HashMap<Long,Long> rsmIdsPerRsIds, String scoringType) {
+        super(callback, new TaskInfo("JMS Validation of Search Result " + dataset.getName(), true, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_HIGH));
+        m_dataset = dataset;
+        m_description = description;
+        m_argumentsMap = argumentsMap;
+        m_rsmIdsPerRsIds = rsmIdsPerRsIds;
+        m_resultSummaryId = resultSummaryId;
+        m_scoringType = scoringType;
+    }
+       
     @Override
     public void taskRun() throws JMSException {
             final JSONRPC2Request jsonRequest = new JSONRPC2Request(JMSConnectionManager.PROLINE_PROCESS_METHOD_NAME, Integer.valueOf(m_taskInfo.getId()));
@@ -69,6 +81,8 @@ public class ValidationTask extends AbstractJMSTask  {
             /* ReplyTo = Temporary Destination Queue for Server -> Client response */
             message.setJMSReplyTo(m_replyQueue);
             message.setStringProperty(JMSConnectionManager.PROLINE_SERVICE_NAME_KEY, "proline/dps/msi/ValidateResultSet");
+            if(m_version != null )
+                message.setStringProperty(JMSConnectionManager.PROLINE_SERVICE_VERSION_KEY, m_version);
             addSourceToMessage(message);  
             addDescriptionToMessage(message);
         
@@ -104,14 +118,28 @@ public class ValidationTask extends AbstractJMSTask  {
 	    }
 
 	    final Object result = jsonResponse.getResult();
-
-	    if (result == null || ! Long.class.isInstance(result) ) {
-		m_loggerProline.debug("Invalid or no result");
-                throw new Exception("null or invalid result "+result);
-	    } else {
-		m_loggerProline.debug("Result :\n" + result);
-                m_resultSummaryId[0] = ((Long) result).intValue();
-	    }
+            if(m_version != null){
+                
+                if (result == null || ! Map.class.isInstance(result) ) {
+                    m_loggerProline.debug("Invalid or no result");
+                    throw new Exception("null or invalid result "+result);
+                } else {
+                    m_loggerProline.debug("Result :\n" + result);                    
+                    Long rsmId = (Long) ((Map) result).get(m_dataset.getResultSetId().toString());
+                    m_resultSummaryId[0] = rsmId.intValue();
+                    ((Map<String,Long>) result).forEach( (String key, Long value) -> {
+                        m_rsmIdsPerRsIds.put(Long.parseLong(key), value);
+                    });                                                           
+                }
+            } else {
+                if (result == null || ! Long.class.isInstance(result) ) {
+                    m_loggerProline.debug("Invalid or no result");
+                    throw new Exception("null or invalid result "+result);
+                } else {
+                    m_loggerProline.debug("Result :\n" + result);
+                    m_resultSummaryId[0] = ((Long) result).intValue();
+                }
+            }
         }
         
         /*
@@ -235,6 +263,16 @@ public class ValidationTask extends AbstractJMSTask  {
             params.put("prot_set_validator_config", protSetValidator);
         }
 
+        if(m_argumentsMap.containsKey("propagate_prot_set_filters") ){            
+            params.put("propagate_prot_set_filters", Boolean.parseBoolean(m_argumentsMap.get("propagate_prot_set_filters")));
+            m_version = "2.0";
+        }
+        
+        if(m_argumentsMap.containsKey("propagate_pep_match_filters")) {
+            params.put("propagate_pep_match_filters",  Boolean.parseBoolean(m_argumentsMap.get("propagate_pep_match_filters")));
+            m_version = "2.0";
+        }
+        
         return params;
     }
 

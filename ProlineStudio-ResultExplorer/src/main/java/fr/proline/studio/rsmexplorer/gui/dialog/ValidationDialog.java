@@ -32,7 +32,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -72,11 +71,15 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
 
     private JPanel m_psmPrefiltersSelectedPanel = null;
     private JComboBox m_psmPrefilterJComboBox = null;
-    private JButton m_addPsmPrefilterButton = null;
-
+    private AbstractParameter m_propagatePsmFiltersParameter;
+    private JCheckBox m_propagatePsmFiltersCheckBox = null;
+    
     private AbstractParameter[] m_proteinPrefilterParameters;
     private FilterProteinSetPanel m_proteinPrefiltersPanel;
-
+    
+    private AbstractParameter m_propagateProtSetFiltersParameter;
+    private JCheckBox m_propagateProtSetFiltersCheckBox = null;
+    
     private JLabel m_fdrLabel = null;
     private JTextField m_fdrTextField = null;
     private JLabel m_fdrPercentageLabel = null;
@@ -252,7 +255,10 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
         c.insets = new java.awt.Insets(5, 5, 5, 5);
 
         c.gridx = 0;
-        c.gridy = 0;
+        c.gridy = 0;               
+        psmPanel.add(m_propagatePsmFiltersCheckBox, c);
+
+        c.gridy++;   
         c.weightx = 1.0;
         psmPanel.add(createPsmPreFilterPanel(), c);
 
@@ -280,37 +286,16 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
 
         m_psmPrefilterJComboBox = new JComboBox(m_psmPrefilterParameters);
         m_psmPrefilterJComboBox.setRenderer(new ParameterComboboxRenderer(null));
-        //m_addPsmPrefilterButton = new JButton(IconManager.getIcon(IconManager.IconType.PLUS));
-        //m_addPsmPrefilterButton.setMargin(new java.awt.Insets(2, 2, 2, 2));
 
         c.gridx = 0;
         c.gridy++;
         c.weightx = 1;
         prefilterPanel.add(m_psmPrefilterJComboBox, c);
 
-        /*
-         c.gridx++;
-         c.weightx = 0;
-         prefilterPanel.add(m_addPsmPrefilterButton, c);
-         */
         c.gridx++;
         c.weightx = 1.0;
         prefilterPanel.add(Box.createHorizontalBox(), c);
-
-        /*
-         m_addPsmPrefilterButton.addActionListener(new ActionListener() {
-
-         @Override
-         public void actionPerformed(ActionEvent e) {
-         AbstractParameter p = (AbstractParameter) m_psmPrefilterJComboBox.getSelectedItem();
-         if (p == null) {
-         return;
-         }
-         p.setUsed(true);
-         initPsmPrefilterPanel();
-         }
-         });
-         */
+        
         m_psmPrefilterJComboBox.addItemListener(new ItemListener() {
 
             @Override
@@ -397,8 +382,7 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
         }
 
         boolean hasUnusedParameters = (nbUsed != nbParameters);
-        m_psmPrefilterJComboBox.setVisible(hasUnusedParameters);
-        //m_addPsmPrefilterButton.setVisible(hasUnusedParameters);
+        m_psmPrefilterJComboBox.setVisible(hasUnusedParameters);        
 
         repack();
     }
@@ -494,6 +478,9 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
 
         c.gridx = 0;
         c.gridy = 0;
+        proteinSetFilterPanel.add(m_propagateProtSetFiltersCheckBox, c);
+        
+        c.gridy++;
         c.weightx = 1.0;
         m_proteinPrefiltersPanel = new FilterProteinSetPanel(" Filter(s) ", m_proteinPrefilterParameters);
         m_proteinPrefiltersPanel.addComponentListener((ComponentListener) this);
@@ -735,6 +722,16 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
         m_proteinFdrFilterParameter.setCompulsory(false);
         m_parameterList.add(m_proteinFdrFilterParameter);
 
+        m_propagatePsmFiltersCheckBox = new JCheckBox();
+        m_propagatePsmFiltersCheckBox.setText("Propagate PSM filtering to child Search Results");
+        m_propagatePsmFiltersParameter = new BooleanParameter("propagate_pep_match_filters", "Propagate PSM Filters", m_propagatePsmFiltersCheckBox, false);
+        m_parameterList.add(m_propagatePsmFiltersParameter);
+
+        m_propagateProtSetFiltersCheckBox = new JCheckBox();
+        m_propagateProtSetFiltersCheckBox.setText("Propagate ProteinSets filtering to child Search Results (Warning FDR Validation will not be propagated !");
+        m_propagateProtSetFiltersParameter = new BooleanParameter("propagate_prot_set_filters", "Propagate ProteinSet Filters", m_propagateProtSetFiltersCheckBox, false);
+        m_parameterList.add(m_propagateProtSetFiltersParameter);
+    
     }
 
     public HashMap<String, String> getArguments() {

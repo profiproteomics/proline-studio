@@ -24,8 +24,10 @@ import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javax.swing.tree.DefaultTreeModel;
 import org.openide.util.NbBundle;
 import org.openide.windows.WindowManager;
@@ -84,8 +86,6 @@ public class ValidateJMSAction extends AbstractRSMAction {
             if (yesNoDialog.getButtonClicked() != DefaultDialog.BUTTON_OK) {
                 return;
             }
-
-
         }
 
 
@@ -101,7 +101,12 @@ public class ValidateJMSAction extends AbstractRSMAction {
             final HashMap<String, String> parserArguments = dialog.getArguments();
             final List<ChangeTypicalRule> changeTypicalRules  = dialog.getChangeTypicalRules();
             final String scoringType = dialog.getScoringType();
-
+            //VDTEST
+            boolean getV2Service = false;
+            if(parserArguments.containsKey("propagate_prot_set_filters") || parserArguments.containsKey("propagate_pep_match_filters"))
+                getV2Service = true;
+            final boolean v2Service = getV2Service;
+            
             IdentificationTree tree = IdentificationTree.getCurrentTree();
             DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
 
@@ -128,7 +133,7 @@ public class ValidateJMSAction extends AbstractRSMAction {
                         @Override
                         public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
 
-                            askValidation(dataSetNode, parserArguments, changeTypicalRules, scoringType);
+                            askValidation(dataSetNode, parserArguments, changeTypicalRules, scoringType, v2Service);
                         }
                     };
 
@@ -137,18 +142,19 @@ public class ValidateJMSAction extends AbstractRSMAction {
                     AccessDatabaseThread.getAccessDatabaseThread().addTask(taskRemoveValidation);
                 } else {
                     // there is no result summary, we start validation at once
-                    askValidation(dataSetNode, parserArguments, changeTypicalRules, scoringType);
+                    askValidation(dataSetNode, parserArguments, changeTypicalRules, scoringType, v2Service);
                 }
             }
         }
     }
 
-    private void askValidation(final DataSetNode dataSetNode, HashMap<String, String> parserArguments, final List<ChangeTypicalRule> changeTypicalRules, final String scoringType) {
+    private void askValidation(final DataSetNode dataSetNode, HashMap<String, String> parserArguments, final List<ChangeTypicalRule> changeTypicalRules, final String scoringType,final boolean v2Service) {
 
         final DDataset d = dataSetNode.getDataset();
 
         // used as out parameter for the service
         final Integer[] _resultSummaryId = new Integer[1];
+        final HashMap<Long,Long> _rsmIdsByRsIds = new HashMap();
 
         AbstractJMSCallback callback = new AbstractJMSCallback() {
 
@@ -159,13 +165,11 @@ public class ValidateJMSAction extends AbstractRSMAction {
 
             @Override
             public void run(boolean success) {
-                if (success) {
+                    if (success) {
 
-                    updateDataset(dataSetNode, d, _resultSummaryId[0], getTaskInfo(), changeTypicalRules);
-
+                    updateDatasets(dataSetNode, d, _resultSummaryId[0],_rsmIdsByRsIds,  getTaskInfo(), changeTypicalRules);
 
                 } else {
-                    //JPM.TODO : manage error with errorMessage
                     //JPM.TODO : manage error with errorMessage
                     dataSetNode.setIsChanging(false);
                     IdentificationTree tree = IdentificationTree.getCurrentTree();
@@ -174,9 +178,10 @@ public class ValidateJMSAction extends AbstractRSMAction {
                 }
             }
         };
-
-
-        ValidationTask task = new ValidationTask(callback, dataSetNode.getDataset(), "", parserArguments, _resultSummaryId, scoringType);
+        
+        ValidationTask task = new ValidationTask(callback, d, "", parserArguments, _resultSummaryId, scoringType);
+        if(v2Service)
+            task = new ValidationTask(callback, d, "", parserArguments, _resultSummaryId,_rsmIdsByRsIds, scoringType);    
         AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
 
     }
@@ -209,8 +214,57 @@ public class ValidateJMSAction extends AbstractRSMAction {
                 AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
     }
     
-    private void updateDataset(final DataSetNode datasetNode, final DDataset d, long resultSummaryId, TaskInfo taskInfo, final List<ChangeTypicalRule> changeTypicalRules) {
+    private void updateDatasets(final DataSetNode rootDatasetNode, final DDataset rootDS, long rootRsmId, Map<Long,Long> rsmIdsByRsIds,  TaskInfo taskInfo, final List<ChangeTypicalRule> changeTypicalRules) {
+        
+        AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
 
+                @Override
+                public boolean mustBeCalledInAWT() {
+                    return true;
+                }
+
+                @Override
+                public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
+                    //Update root Dataset childs
+                    updateDatasetHierarchy(rootDatasetNode,rsmIdsByRsIds,taskInfo, changeTypicalRules);
+                }
+            };
+            
+        //load node children
+        IdentificationTree.getCurrentTree().loadInBackground(rootDatasetNode, callback);                       
+
+        //Update root node        
+        updateDataset(rootDatasetNode, rootDS, rootRsmId, taskInfo, changeTypicalRules);
+
+    }
+
+    private void updateDatasetHierarchy(final DataSetNode rootDatasetNode, Map<Long,Long> rsmIdsByRsIds,  TaskInfo taskInfo, final List<ChangeTypicalRule> changeTypicalRules) {    
+        
+        Enumeration e = rootDatasetNode.children();
+        while (e.hasMoreElements()) {
+            //Go through childs dataset
+            final DataSetNode dsChild = (DataSetNode) e.nextElement();
+            AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
+
+                @Override
+                public boolean mustBeCalledInAWT() {
+                    return true;
+                }
+
+                @Override
+                public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
+                    //Update this Dataset childs
+                    updateDatasetHierarchy(dsChild, rsmIdsByRsIds, taskInfo, changeTypicalRules);
+                }
+            };
+            updateDataset(dsChild, dsChild.getDataset(), rsmIdsByRsIds.get(dsChild.getResultSetId()), taskInfo, changeTypicalRules);
+            
+            //load node
+            IdentificationTree.getCurrentTree().loadInBackground(dsChild, callback);
+         }        
+    }
+        
+    private void updateDataset(final DataSetNode datasetNode, final DDataset d, long resultSummaryId, TaskInfo taskInfo, final List<ChangeTypicalRule> changeTypicalRules) {
         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
 
             @Override
@@ -235,8 +289,6 @@ public class ValidateJMSAction extends AbstractRSMAction {
         };
 
         // ask asynchronous loading of data
-
-
 
         DatabaseDataSetTask task = new DatabaseDataSetTask(callback);
         task.initModifyDatasetForValidation(d, resultSummaryId, taskInfo);

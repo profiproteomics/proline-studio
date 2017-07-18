@@ -70,7 +70,7 @@ public class SpectralCountTask extends AbstractJMSTask {
         message.setJMSReplyTo(m_replyQueue);
         message.setStringProperty(JMSConnectionManager.PROLINE_SERVICE_NAME_KEY, m_serviceName);
 //      TODO: UNCOMMENT FOR VERSION 2 ! 
-//        message.setStringProperty(JMSConnectionManager.PROLINE_SERVICE_VERSION_KEY, m_version_2_0);
+        message.setStringProperty(JMSConnectionManager.PROLINE_SERVICE_VERSION_KEY, m_version_2_0);
     
         addSourceToMessage(message);  
         addDescriptionToMessage(message);
@@ -89,8 +89,8 @@ public class SpectralCountTask extends AbstractJMSTask {
         params.put("description", m_dsDescr);
         params.put("project_id", m_refDataset.getProject().getId());
 //      TODO: COMMENT 2 NEXT LINES FOR VERSION 2 ! 
-        params.put("ref_rsm_id", m_refDataset.getResultSummaryId());
-        params.put("ref_ds_id", m_refDataset.getId());
+//        params.put("ref_rsm_id", m_refDataset.getResultSummaryId());
+//        params.put("ref_ds_id", m_refDataset.getId());
         
         List<Long> weightRefRSMIds = new ArrayList<>();
         for (DDataset ddset : m_rsmWeightDataset) {
@@ -142,9 +142,9 @@ public class SpectralCountTask extends AbstractJMSTask {
         Map<String, Object> masterQuantChannelParams = new HashMap<>();
         masterQuantChannelParams.put("number", 0);
         masterQuantChannelParams.put("name", m_refDataset.getName() + " Spectral Count");
-//      TODO: UNCOMMENT FOR VERSION 2 ! 
-//        masterQuantChannelParams.put("ident_result_summary_id", m_refDataset.getResultSummaryId());
-//        masterQuantChannelParams.put("ident_dataset_id", m_refDataset.getId());
+//      TODO: UNCOMMENT 2 next lines FOR VERSION 2 ! 
+        masterQuantChannelParams.put("ident_result_summary_id", m_refDataset.getResultSummaryId());
+        masterQuantChannelParams.put("ident_dataset_id", m_refDataset.getId());
         masterQuantChannelParams.put("quant_channels", quantChanneList);
         masterQuantChannelsList.add(masterQuantChannelParams);
         experimentalDesignParams.put("master_quant_channels", masterQuantChannelsList);
@@ -180,47 +180,47 @@ public class SpectralCountTask extends AbstractJMSTask {
 
             final Object result = jsonResponse.getResult();
 //      TODO:  COMMENT BELLOW FOR VERSION 2 ! 
-                if (result == null || !Map.class.isInstance(result)) {
-                    m_loggerProline.debug("Invalid result");
-                    throw new Exception("Invalid result " + result);
-                } else {
-                    m_loggerProline.debug("Result :\n" + result);
-                    Map returnedValues = (Map) result;
-                    if (returnedValues.isEmpty()) {
-                        m_loggerProline.error(getClass().getSimpleName() + " failed : No returned values");
-                        m_currentState = JMSState.STATE_FAILED;
-                        throw new Exception("No returned values " + result);
-                    }
-
-                    // retrieve Quanti Dataset ID
-                    Long quantiDatasetIdBD = (Long) returnedValues.get("quant_dataset_id");
-                    if (quantiDatasetIdBD == null) {
-                        m_loggerProline.error(getClass().getSimpleName() + " failed : No returned Quanti Dataset Id");
-                        m_currentState = JMSState.STATE_FAILED;
-                        throw new Exception("No returned Quanti Dataset Id ");
-                    }
-                    m_quantiDatasetId[0] = quantiDatasetIdBD;
-
-                    //retrieve SC Values as JSON String 
-//                    String scValues = (String) returnedValues.get("spectral_count_result");
-//                    if (scValues == null) {
-//                        m_loggerProline.error(getClass().getSimpleName() + " failed : No Spectral Count returned.");
-//                        m_currentState = JMSState.STATE_FAILED;
-//                        throw new Exception("No Spectral Count returned.");
-//                    }
-//                    m_spCountJSONResult[0] = scValues;
-                }
-//      TODO: COMMENT ABOVE FOR VERSION 2
-                
-//      TODO: UNCOMMENT BELLOW FOR VERSION 2 ! 
-//                if (result == null || !Long.class.isInstance(result)) {
+//                if (result == null || !Map.class.isInstance(result)) {
 //                    m_loggerProline.debug("Invalid result");
 //                    throw new Exception("Invalid result " + result);
 //                } else {
 //                    m_loggerProline.debug("Result :\n" + result);
-//                    // retrieve Quanti Dataset ID                   
-//                    m_quantiDatasetId[0] = (Long) result;
+//                    Map returnedValues = (Map) result;
+//                    if (returnedValues.isEmpty()) {
+//                        m_loggerProline.error(getClass().getSimpleName() + " failed : No returned values");
+//                        m_currentState = JMSState.STATE_FAILED;
+//                        throw new Exception("No returned values " + result);
+//                    }
+//
+//                    // retrieve Quanti Dataset ID
+//                    Long quantiDatasetIdBD = (Long) returnedValues.get("quant_dataset_id");
+//                    if (quantiDatasetIdBD == null) {
+//                        m_loggerProline.error(getClass().getSimpleName() + " failed : No returned Quanti Dataset Id");
+//                        m_currentState = JMSState.STATE_FAILED;
+//                        throw new Exception("No returned Quanti Dataset Id ");
+//                    }
+//                    m_quantiDatasetId[0] = quantiDatasetIdBD;
+//
+//                    //retrieve SC Values as JSON String 
+////                    String scValues = (String) returnedValues.get("spectral_count_result");
+////                    if (scValues == null) {
+////                        m_loggerProline.error(getClass().getSimpleName() + " failed : No Spectral Count returned.");
+////                        m_currentState = JMSState.STATE_FAILED;
+////                        throw new Exception("No Spectral Count returned.");
+////                    }
+////                    m_spCountJSONResult[0] = scValues;
 //                }
+//      TODO: COMMENT ABOVE FOR VERSION 2
+                
+//      TODO: UNCOMMENT BELLOW FOR VERSION 2 ! 
+                if (result == null || !Long.class.isInstance(result)) {
+                    m_loggerProline.debug("Invalid result");
+                    throw new Exception("Invalid result " + result);
+                } else {
+                    m_loggerProline.debug("Result :\n" + result);
+                    // retrieve Quanti Dataset ID                   
+                    m_quantiDatasetId[0] = (Long) result;
+                }
                 
         }
         m_currentState = JMSState.STATE_DONE;

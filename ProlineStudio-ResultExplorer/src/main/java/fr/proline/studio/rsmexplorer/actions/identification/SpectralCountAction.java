@@ -85,15 +85,16 @@ public class SpectralCountAction extends AbstractRSMAction {
             public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
                 m_logger.debug(" Choose RSM for Weighted SC");
 
+                String qttDSName = "";
+                String qttDSDescr = "";
+                ArrayList<DDataset> datasetList = new ArrayList<>();
+                ArrayList<DDataset> weightDatasetList = new ArrayList<>();
+                
                 // check if we can compute SC
                 String error = null;
-                Map<String, Object> params = new HashMap();
-                ArrayList<DDataset> datasetList = new ArrayList<>();
-                datasetList.add(refDatasetNode.getDataset()); //first entry is Reference Dataset in data box !
-
                 if (spectralCountDialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {
+                    
                     ArrayList<DataSetNode> selectedDSNodes = spectralCountDialog.getSelectedRSMDSNodeList();
-
                     for (DataSetNode dsNode : selectedDSNodes) {
                         if (!dsNode.hasResultSummary()) {
                             error = " Spectral Count is not possible on Search result (" + dsNode.getDataset().getName() + ").  Identification Summary should be created first";
@@ -105,17 +106,14 @@ public class SpectralCountAction extends AbstractRSMAction {
                         }
                         datasetList.add(dsNode.getDataset());
                     }
-                    params.put(DS_LIST_PROPERTIES, datasetList);
 
-                    ArrayList<DDataset> weightDatasetList = new ArrayList<>();
                     ArrayList<DataSetNode> selectedWeightDSNodes = spectralCountDialog.getSelectedWeightRSMDSNodeList();
                     for (DataSetNode dsNode : selectedWeightDSNodes) {
                         weightDatasetList.add(dsNode.getDataset());
                     }
-                    params.put(DS_WEIGHT_LIST_PROPERTIES, weightDatasetList);
 
-                    params.put(DS_NAME_PROPERTIES, spectralCountDialog.getSpectralCountName());
-                    params.put(DS_DESCRIPTION_PROPERTIES, spectralCountDialog.getSpectralCountDescription());
+                    qttDSName = spectralCountDialog.getSpectralCountName();
+                    qttDSDescr = spectralCountDialog.getSpectralCountDescription();
 
                 } else { //Cancel / Close was clicked
                     return;
@@ -127,28 +125,14 @@ public class SpectralCountAction extends AbstractRSMAction {
                 }
 
                 m_logger.debug(" Will Compute SC on " + (datasetList.size()) + " RSMs : " + datasetList);
-
-                //TODO VDS: merge de deux codes => appel inutile de param.put ci dessus/ param.get ci dessous !!!! 
-                // Used in case of computing SC
+                
                 final Long[] _quantiDatasetId = new Long[1];
                 QuantitationTree tree = QuantitationTree.getCurrentTree();
                 final DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
                 final DataSetNode[] _quantitationNode = new DataSetNode[1];
 
-                ArrayList<DDataset> datasetArray = (ArrayList) ((Map) params).get(SpectralCountAction.DS_LIST_PROPERTIES);
-                int nb = datasetArray.size() - 1;
-                ArrayList<DDataset> datasetRsms = new ArrayList<>(nb);
-                for (int i = 1; i <= nb; i++) {
-                    datasetRsms.add(datasetArray.get(i));
-                }
-
-                String qttDSName = (String) ((Map) params).get(SpectralCountAction.DS_NAME_PROPERTIES);
-                String qttDSDescr = (String) ((Map) params).get(SpectralCountAction.DS_DESCRIPTION_PROPERTIES);
-                ArrayList<DDataset> datasetWeightRsms = (ArrayList) ((Map) params).get(SpectralCountAction.DS_WEIGHT_LIST_PROPERTIES);
-
                 // add node for the quantitation dataset which will be created
                 DataSetData quantitationData = new DataSetData(qttDSName, Dataset.DatasetType.QUANTITATION, Aggregation.ChildNature.QUANTITATION_FRACTION);
-
                 final DataSetNode quantitationNode = new DataSetNode(quantitationData);
                 _quantitationNode[0] = quantitationNode;
                 quantitationNode.setIsChanging(true);
@@ -156,7 +140,6 @@ public class SpectralCountAction extends AbstractRSMAction {
                 AbstractNode rootNode = (AbstractNode) treeModel.getRoot();
                 // before Trash
                 treeModel.insertNodeInto(quantitationNode, rootNode, rootNode.getChildCount() - 1);
-
                 // expand the parent node to display its children
                 tree.expandNodeIfNeeded(rootNode);
 
@@ -173,34 +156,14 @@ public class SpectralCountAction extends AbstractRSMAction {
                             runQuantifySC(success, _quantiDatasetId[0], _quantitationNode[0], treeModel);
                         }
                     };
-                    fr.proline.studio.dpm.task.jms.SpectralCountTask task = new fr.proline.studio.dpm.task.jms.SpectralCountTask(scCallback, refDatasetNode.getDataset(), datasetRsms, datasetWeightRsms, qttDSName, qttDSDescr, _quantiDatasetId);
+                    fr.proline.studio.dpm.task.jms.SpectralCountTask task = new fr.proline.studio.dpm.task.jms.SpectralCountTask(scCallback, refDatasetNode.getDataset(), datasetList, weightDatasetList, qttDSName, qttDSDescr, _quantiDatasetId);
                     AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
                 } 
-//                else {
-//                    // CallBack for SC  Service
-//                    AbstractServiceCallback scCallback = new AbstractServiceCallback() {
-//
-//                        @Override
-//                        public boolean mustBeCalledInAWT() {
-//                            return true;
-//                        }
-//
-//                        @Override
-//                        public void run(boolean success) {
-//                            runQuantifySC(success, _quantiDatasetId[0], _quantitationNode[0], treeModel);
-//                        }
-//                    };
-//
-//                    SpectralCountTask task = new SpectralCountTask(scCallback, refDatasetNode.getDataset(), datasetRsms, datasetWeightRsms, qttDSName, qttDSDescr, _quantiDatasetId, _spCountJSON);
-//                    AccessServiceThread.getAccessServiceThread().addTask(task);
-//                }
             }
         };
 
         spectralCountDialog.setVisible(true);
-
         IdentificationTree.getCurrentTree().loadInBackground(refDatasetNode, callback);
-
     }
 
     private void runQuantifySC(boolean success, Long quantiDsId, final DataSetNode quantitationNode, final DefaultTreeModel treeModel) {

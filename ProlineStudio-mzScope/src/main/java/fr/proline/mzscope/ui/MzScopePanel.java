@@ -38,6 +38,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import javax.swing.JDialog;
+import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
@@ -635,9 +636,10 @@ public class MzScopePanel extends JPanel implements IFeatureViewer, IExtractionR
         viewerUI.getController().changeViewport(new LcMsViewport(390, 440, 1000, 1150));
     }
 
-    public void export(IRawFile rawFile) {
-        ExportRawFileDialog exportDialog = ExportRawFileDialog.getDialog(parentFrame, rawFile.getName());
+    public void export(List<IRawFile> rawFiles) {
+        ExportRawFileDialog exportDialog = ExportRawFileDialog.getDialog(parentFrame, rawFiles.size() == 1 ? rawFiles.get(0).getName() : "selected Files");
         exportDialog.setLocationRelativeTo(parentFrame);
+        exportDialog.setSelectionMode(rawFiles.size() == 1 ? JFileChooser.FILES_ONLY : JFileChooser.DIRECTORIES_ONLY);
         ProgressTask task = new DefaultDialog.ProgressTask() {
 
             @Override
@@ -652,8 +654,25 @@ public class MzScopePanel extends JPanel implements IFeatureViewer, IExtractionR
 
             @Override
             protected Object doInBackground() throws Exception {
-                exportRawFile(rawFile, exportDialog.getOutputFileName(), exportDialog.getExportParams());
-                setProgress(100);
+                if (rawFiles.size() == 1) {
+                    exportRawFile(rawFiles.get(0), exportDialog.getOutputFileName(), exportDialog.getExportParams());
+                    setProgress(100);
+                } else {
+                    for (int i = 0; i < rawFiles.size() ; i++) {
+                        IRawFile rawFile = rawFiles.get(i);
+                        String filename = rawFile.getName();
+                        filename = filename.substring(0, filename.lastIndexOf('.'));
+                        StringBuilder filenameBuilder = new StringBuilder(exportDialog.getOutputFileName()).append('/').append(filename);
+                        filenameBuilder.append('.').append(exportDialog.getFileExtension());
+                        setProgress(0);
+                        exportRawFile(rawFile, filenameBuilder.toString(), exportDialog.getExportParams());
+                        setProgress((int)((i+1)*(100.0/rawFiles.size())));
+                        //hack to force progress bar update
+                        firePropertyChange("progress", (int)(i*(100.0/rawFiles.size())), (int)((i+1)*(100.0/rawFiles.size())));
+                    }
+                    //just to be sure to close the progress bar
+                    setProgress(100);
+                }
                 return null;
             }
         };

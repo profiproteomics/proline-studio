@@ -21,13 +21,16 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+import javax.swing.AbstractButton;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
+import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 import javax.swing.SwingWorker;
 import javax.swing.event.ChangeEvent;
@@ -48,11 +51,15 @@ public class TabbedMultiRawFilePanel extends JPanel implements IRawFileViewer {
     private ChromatogramPanel currentChromatogramPanel;
     protected SpectrumPanel spectrumContainerPanel;
     protected Spectrum currentScan;
+    private DisplayMode xicModeDisplay = DisplayMode.REPLACE;
     
     private JToolBar m_toolbarPanel;
     private JPanel m_multiRawFilePanel;
     private JButton m_buttonLayout;
     private JButton m_buttonZoom;
+    private JToggleButton overlayBtn;
+    private JToggleButton showMS2EventsButton;
+
     private final static String tooltipForceZoom = "Synchronize zoom on all plots";
     private final static String tooltipZoom = "Remove zoom synchronization on all plots";
 
@@ -142,6 +149,8 @@ public class TabbedMultiRawFilePanel extends JPanel implements IRawFileViewer {
                 }
             });
             m_toolbarPanel.add(displayBPIbtn);
+            m_toolbarPanel.add(getOverlayBtn());
+            
         }
         return this.m_toolbarPanel;
     }
@@ -278,8 +287,9 @@ public class TabbedMultiRawFilePanel extends JPanel implements IRawFileViewer {
 
             @Override
             protected void process(List<Chromatogram> chunks) {
-                Chromatogram c = chunks.get(chunks.size() - 1);
-                displayChromatogram(c, DisplayMode.REPLACE);
+                for (int k = 0; k < chunks.size(); k++) {
+                    displayChromatogram(chunks.get(k), mode);
+                }
             }
 
             @Override
@@ -288,7 +298,7 @@ public class TabbedMultiRawFilePanel extends JPanel implements IRawFileViewer {
                     logger.info("{} TIC chromatogram extracted", get());
                 } catch (InterruptedException | ExecutionException e) {
                     logger.error("Error while reading chromatogram");
-                }finally{
+                } finally {
                     rawfiles.stream().forEach((rawFile) -> {
                         mapRawFileLoading.get(rawFile).setWaitingState(false);
                     });
@@ -358,6 +368,18 @@ public class TabbedMultiRawFilePanel extends JPanel implements IRawFileViewer {
         return (currentChromatogramPanel == null) ? null : currentChromatogramPanel.getCurrentChromatogram();
     }
 
+    @Override
+    public Iterable<Chromatogram> getAllChromatograms() {
+        int nbTab = chromatogramContainerPanel.getTabCount();
+        List<Chromatogram> list = new ArrayList<>();
+        for (int t = 0; t < nbTab; t++) {
+           ChromatogramPanel chromatoPanel = (ChromatogramPanel) chromatogramContainerPanel.getComponentAt(t);
+           chromatoPanel.getChromatograms().forEach(c -> list.add(c));
+        }
+        
+        return list;
+    }
+    
     private void displayTIC() {
 
         SwingWorker worker = new SwingWorker<Integer, Chromatogram>() {
@@ -503,9 +525,67 @@ public class TabbedMultiRawFilePanel extends JPanel implements IRawFileViewer {
         }
     }
 
+    protected JToggleButton getOverlayBtn() {
+        if (overlayBtn == null) {
+            overlayBtn = new JToggleButton();
+            overlayBtn.setIcon(IconManager.getIcon(IconManager.IconType.OVERLAY));
+            overlayBtn.setSelected(false);
+            overlayBtn.setName("cbXicOverlay");
+            overlayBtn.setToolTipText("Overlay extracted chromatograms. This can also be done by using the Alt key");
+            overlayBtn.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    xicModeDisplay = ((AbstractButton) e.getSource()).isSelected() ? DisplayMode.OVERLAY : DisplayMode.REPLACE;
+                }
+            });
+        }
+        return overlayBtn;
+    }
+    
+        protected AbstractButton getShowMS2Button() {
+        if (showMS2EventsButton == null) {
+        showMS2EventsButton = new JToggleButton("MS2", false);
+        showMS2EventsButton.setToolTipText("Show or hide MS2 Events");
+        showMS2EventsButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                displayMsMsEvents(showMS2EventsButton.isSelected());
+            }
+        });
+        }
+        return showMS2EventsButton;
+    }
+       
+     private void displayMsMsEvents(boolean showMsMsEvents) {
+        if (showMsMsEvents) {
+            
+//            final double minMz = chromatogramPanel.getCurrentChromatogram().minMz;
+//            final double maxMz = chromatogramPanel.getCurrentChromatogram().maxMz;
+//
+//            SwingWorker worker = new SwingWorker<List<Float>, Void>() {
+//                @Override
+//                protected List<Float> doInBackground() throws Exception {
+//                    return getCurrentRawfile().getMsMsEvent(minMz, maxMz);
+//                }
+//
+//                @Override
+//                protected void done() {
+//                    try {
+//                        chromatogramPanel.showMSMSEvents(get());
+//                    } catch (InterruptedException | ExecutionException e) {
+//                        logger.error("Error while reading chromatogram");
+//                    }
+//                }
+//            };
+//            worker.execute();
+//        } else {
+//            chromatogramPanel.hideMSMSEvents();
+        }
+    }
+
     @Override
     public DisplayMode getXicModeDisplay() {
-        return DisplayMode.REPLACE;
+        return xicModeDisplay;
     }
 
 }

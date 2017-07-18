@@ -1,28 +1,17 @@
 package fr.proline.mzscope.utils;
 
-import com.almworks.sqlite4java.SQLiteException;
-import fr.profi.ms.model.TheoreticalIsotopePattern;
-import fr.profi.mzdb.algo.IsotopicPatternScorer;
-import fr.profi.mzdb.model.Feature;
 import fr.profi.mzdb.model.Peakel;
-import fr.profi.mzdb.model.SpectrumData;
 import fr.profi.mzdb.model.SpectrumHeader;
-import fr.profi.mzdb.model.SpectrumSlice;
-import fr.proline.mzscope.model.IFeature;
-import fr.proline.mzscope.mzdb.MzdbFeatureWrapper;
-import java.io.StreamCorruptedException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.IntStream;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import scala.Tuple2;
-import scala.collection.JavaConverters;
 
 /**
  *
@@ -32,6 +21,8 @@ public class SpectrumUtils {
 
     private static final Logger logger = LoggerFactory.getLogger(SpectrumUtils.class);
     
+    private static final double MIN_CORRELATION_SCORE = 0.6;
+
     /**
      * sort spectrumHeader by mz
      *
@@ -143,7 +134,7 @@ public class SpectrumUtils {
                     && (peakels[k].getApexElutionTime() < referencePeakel.getLastElutionTime()) ) {
                 double corr = correlation(referencePeakel, peakels[k]);
                 //logger.debug("correlation "+referencePeakel.getMz()+ " with "+peakels[k].getMz()+" = "+corr);
-                if ( corr > 0.6 && (corr > maxCorr)) {
+                if ( corr > MIN_CORRELATION_SCORE && (corr > maxCorr)) {
                 maxCorr = corr;
                 resultIdx = k;
                 }
@@ -151,48 +142,95 @@ public class SpectrumUtils {
         }
         return resultIdx;
     }
+    
 
     /*
     * Returns the absolute value of the correlation between 2 peakels
     */
     public static double correlation(Peakel p1, Peakel p2) {
-        int p1Offset = 0;
-        int p2Offset = 0;
-
-        // not clean : some RT values can be missing in elutiontime array when intensity = 0
-        if (p1.getFirstElutionTime() < p2.getFirstElutionTime()) {
-            // search p2.firstElutionTime index in p1
-            int idx = Arrays.binarySearch(p1.getElutionTimes(), p2.getFirstElutionTime());
-            p2Offset = idx < 0 ? ~idx : idx;
-        } else {
-            // search p1.firstElutionTime in p2
-            int idx = Arrays.binarySearch(p2.getElutionTimes(), p1.getFirstElutionTime());
-            p1Offset = idx < 0 ? ~idx : idx;
-        }
-
-        float[] p1Values = p1.getIntensityValues();
-        float[] p2Values = p2.getIntensityValues();
+        return correlation(p1.getElutionTimes(), p1.getIntensityValues(), p2.getElutionTimes(), p2.getIntensityValues());        
+    }
+    
+    public static double correlation(float[] x1, float[] y1, float[] x2, float[] y2) {
+        int offset1 = 0;
+        int offset2 = 0;
         
-        int length = Math.max(p1Values.length+p1Offset, p2Values.length+p2Offset);
+        float[] c = Arrays.copyOf(x1, x1.length+x2.length);
+        System.arraycopy(x2, 0, c, x1.length, x2.length);
+        double[] time = IntStream.range(0, c.length).mapToDouble(i -> c[i]).sorted().distinct().toArray();
+                
+        double[] a1 = new double[time.length];
+        double[] a2 = new double[time.length];
         
-        double[] y = new double[length];
-        Arrays.fill(y, 0.0);
-        double[] y1 = new double[length];
-        Arrays.fill(y1, 0.0);
-        
-        for (int k = 0; k < length; k++) {
-            if (k >= p1Offset && k < p1Values.length) {
-                y[k] = p1Values[k-p1Offset];
+        for (int k = 0; k < time.length; k++) {
+            a1[k] = 0.0;
+            a2[k] = 0.0;
+            // for strange reasons, some time points are duplicated ??? TO verify in extracted chromatograms ! 
+            while ((offset1 < x1.length) && (time[k] == x1[offset1])) {
+                a1[k] = y1[offset1];
+                offset1++;
             }
-            if (k >= p2Offset && k < p2Values.length) {
-                y1[k] = p2Values[k-p2Offset];
+            while ((offset2 < x2.length) && (time[k] == x2[offset2])) {
+                a2[k] = y2[offset2];
+                offset2++;
             }
         }
+        
+//        logger.debug("starting from signal1 = "+x1.length+" and signal2 = "+x2.length+ ", total = "+time.length);
+//        logger.debug("offsets are : p1Offset = "+offset1+" and p2Offset = "+offset2);
         
         PearsonsCorrelation pearson = new PearsonsCorrelation();
-        double corr = pearson.correlation(y, y1);
-        
+        double corr = pearson.correlation(a1, a2);
         return Math.abs(corr);
+    }
+           
+       public static double correlation(double[] x1, double[] y1, double[] x2, double[] y2) {
+        int offset1 = 0;
+        int offset2 = 0;
+        
+        double[] c = Arrays.copyOf(x1, x1.length+x2.length);
+        System.arraycopy(x2, 0, c, x1.length, x2.length);
+        double[] time = Arrays.stream(c).sorted().distinct().toArray();
+                
+        double[] a1 = new double[time.length];
+        double[] a2 = new double[time.length];
+        
+        for (int k = 0; k < time.length; k++) {
+            a1[k] = 0;
+            a2[k] = 0;
+            // for strange reasons, some time points are duplicated ??? TO verify in extracted chromatograms ! 
+            while ((offset1 < x1.length) && (time[k] == x1[offset1])) {
+                a1[k] = y1[offset1];
+                offset1++;
+            }
+            while ((offset2 < x2.length) && (time[k] == x2[offset2])) {
+                a2[k] = y2[offset2];
+                offset2++;
+            }
+        }
+        
+//        logger.debug("starting from signal1 = "+x1.length+" and signal2 = "+x2.length+ ", total = "+time.length);
+//        logger.debug("offsets are : p1Offset = "+offset1+" and p2Offset = "+offset2);
+        
+        PearsonsCorrelation pearson = new PearsonsCorrelation();
+        double corr = pearson.correlation(a1, a2);
+        return Math.abs(corr);
+    }
+    
+    
+    
+    public static void main(String[] args) {
+        double[] a = { 12.01,13.0,14.0,15.0,16.0, 17.0};
+        int idx = Arrays.binarySearch(a, 12.9);
+        System.out.println("idx = "+idx);
+        if (idx < 0) {
+            System.out.println("insertion = "+~idx);            
+        }
+        double[] b = { 12.0,13.0,14.0,15.0,16.0};
+        double[] c = Arrays.copyOf(a, a.length+b.length);
+        System.arraycopy(b, 0, c, a.length, b.length);
+        double[] cc = Arrays.stream(c).sorted().distinct().toArray();
+        System.out.println(Arrays.toString(c));
     }
     
 }

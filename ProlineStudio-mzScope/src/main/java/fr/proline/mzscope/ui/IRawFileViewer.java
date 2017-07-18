@@ -73,4 +73,12 @@ public interface IRawFileViewer {
     *  @return the mode used by this component to display XIC.
     */
    public MzScopeConstants.DisplayMode getXicModeDisplay();
+   
+   /**
+    * Returns all Chromatograms displayed by this component
+    * 
+    * @return an iterator over all Chromatograms displayed by this component
+    */
+   public Iterable<Chromatogram> getAllChromatograms();
+   
 }

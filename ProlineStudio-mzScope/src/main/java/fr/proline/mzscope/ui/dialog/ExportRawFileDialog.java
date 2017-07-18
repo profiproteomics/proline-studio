@@ -189,9 +189,11 @@ public class ExportRawFileDialog extends DefaultDialog {
                     File file = fchooser.getSelectedFile();
 
                     String absolutePath = file.getAbsolutePath();
-                    String fileName = file.getName();
-                    if (fileName.indexOf('.') == -1) {
-                        absolutePath += "." + exporterInfo.getFileExtension();
+                    if (! file.isDirectory()) {
+                        String fileName = file.getName();
+                        if (fileName.lastIndexOf('.') == -1) {
+                            absolutePath += "." + exporterInfo.getFileExtension();
+                        }
                     }
                     fileTextField.setText(absolutePath);
                 }
@@ -235,6 +237,23 @@ public class ExportRawFileDialog extends DefaultDialog {
         return exportPanel;
     }
 
+    public void setSelectionMode(int mode) {
+        fchooser.setFileSelectionMode(mode);
+        if (mode == JFileChooser.DIRECTORIES_ONLY) {
+            if (!fileTextField.getText().trim().isEmpty()) {
+                File f = new File(fileTextField.getText().trim());
+                if (! f.isDirectory()) {
+                    fileTextField.setText(f.getParentFile().getAbsolutePath());
+                }
+            }
+        }
+    }
+
+    public String getFileExtension() {
+        ExporterFactory.ExporterInfo exporterInfo = (ExporterFactory.ExporterInfo) exportTypeCombobox.getSelectedItem();
+        return exporterInfo.getFileExtension();
+    }
+    
     private void setExportParamsPanel() {
         panelExportParams.removeAll();
         String extension = "";
@@ -268,8 +287,12 @@ public class ExportRawFileDialog extends DefaultDialog {
                 break;
             }
         }
-        if (!fileTextField.getText().trim().isEmpty() && !fileTextField.getText().trim().endsWith("." + extension)) {
-            fileTextField.setText(fileTextField.getText().trim() + "." + extension);
+        // If this a single file export and the file path is already specified, then update the file extension
+        if (!fileTextField.getText().trim().isEmpty() && !(fchooser.getFileSelectionMode() == JFileChooser.DIRECTORIES_ONLY)) {
+            if (!fileTextField.getText().trim().endsWith("." + extension)) {
+                String partialPath = fileTextField.getText().trim().substring(0, fileTextField.getText().trim().lastIndexOf('.'));
+                fileTextField.setText(partialPath + "." + extension);
+            }
         }
         panelExportParams.revalidate();
         panelExportParams.repaint();
@@ -365,38 +388,46 @@ public class ExportRawFileDialog extends DefaultDialog {
             return false;
         }
 
-        File mgfFile = new File(fileName);
+        if (!(fchooser.getFileSelectionMode() == JFileChooser.DIRECTORIES_ONLY)) {
+            File mgfFile = new File(fileName);
 
-        if (mgfFile.exists()) {
-            String message = "The file already exists. Do you want to overwrite it ?";
-            String title = "Overwrite ?";
-            String[] options = {"Yes", "No"};
-            int reply = JOptionPane.showOptionDialog(this, message, title, JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE, null, options, "Yes");
-            if (reply != JOptionPane.YES_OPTION) {
-                setStatus(true, "File already exists.");
+            if (mgfFile.exists()) {
+                String message = "The file already exists. Do you want to overwrite it ?";
+                String title = "Overwrite ?";
+                String[] options = {"Yes", "No"};
+                int reply = JOptionPane.showOptionDialog(this, message, title, JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE, null, options, "Yes");
+                if (reply != JOptionPane.YES_OPTION) {
+                    setStatus(true, "File already exists.");
+                    return false;
+                }
+            }
+
+            FileWriter fw = null;
+            try {
+                fw = new FileWriter(mgfFile);
+                fw.write("t");
+            } catch (Exception e) {
+                setStatus(true, fileName + " is not writable.");
+                highlight(fileTextField);
+                return false;
+            } finally {
+                try {
+                    if (fw != null) {
+                        fw.close();
+                    }
+
+                    mgfFile.delete();
+                } catch (Exception e2) {
+                }
+            }
+        } else {
+            File directory = new File(fileName);
+            if (!directory.canWrite()) {
+                setStatus(true, fileName + " is not writable.");
+                highlight(fileTextField);
                 return false;
             }
         }
-
-        FileWriter fw = null;
-        try {
-            fw = new FileWriter(mgfFile);
-            fw.write("t");
-        } catch (Exception e) {
-            setStatus(true, fileName + " is not writable.");
-            highlight(fileTextField);
-            return false;
-        } finally {
-            try {
-                if (fw != null) {
-                    fw.close();
-                }
-
-                mgfFile.delete();
-            } catch (Exception e2) {
-            }
-        }
-
         outputFileName = fileName;
         // checkParameters
         boolean isOk = true;

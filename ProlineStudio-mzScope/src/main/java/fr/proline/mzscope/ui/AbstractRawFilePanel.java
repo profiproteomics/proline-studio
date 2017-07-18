@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import javax.swing.AbstractButton;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.JToggleButton;
@@ -143,7 +142,7 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFileVie
 
     }
 
-    private JPanel getSpectrumContainerPanel() {
+    protected JPanel getSpectrumContainerPanel() {
         if (this.spectrumContainerPanel == null) {
             spectrumContainerPanel = new SpectrumPanel(this);
             spectrumContainerPanel.setName("spectrumContainerPanel");
@@ -382,6 +381,11 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFileVie
         return chromatogramPanel.getCurrentChromatogram();
     }
 
+    @Override
+    public Iterable<Chromatogram> getAllChromatograms() {
+        return chromatogramPanel.getChromatograms();
+    }
+    
     @Override
     public boolean dispatchKeyEvent(KeyEvent e) {
         if (e.isConsumed() || e.getID() != KeyEvent.KEY_PRESSED) {

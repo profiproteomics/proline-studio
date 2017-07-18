@@ -24,7 +24,6 @@ import java.awt.Color;
 import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JPanel;
@@ -102,7 +101,6 @@ public class ChromatogramPanel extends JPanel implements PlotPanelListener {
       if (mode == MzScopeConstants.DisplayMode.REPLACE) {
          currentChromatogram = chromato;
          listChromatogram = new ArrayList();
-         listChromatogram.add(currentChromatogram);
          chromatogramPlotPanel.setPlotTitle(chromato.title);
          chromatogramPlotPanel.clearPlots();
          PlotLinear chromatogramPlot = chromatogramPlots.isEmpty() ? null : chromatogramPlots.get(0);

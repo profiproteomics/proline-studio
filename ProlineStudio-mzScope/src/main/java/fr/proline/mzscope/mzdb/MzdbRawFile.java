@@ -36,6 +36,7 @@ import fr.proline.mzscope.model.MsnExtractionRequest;
 import fr.proline.mzscope.ui.MgfExportParameters;
 import fr.proline.mzscope.ui.ScanHeaderExportParameters;
 import fr.proline.mzscope.ui.ScanHeaderType;
+import fr.proline.mzscope.utils.IsotopicPatternUtils;
 import fr.proline.mzscope.utils.SpectrumUtils;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -314,7 +315,8 @@ public class MzdbRawFile implements IRawFile {
                 }
                 SpectrumData data = slices[i].getData();
 
-                Tuple2<Object, TheoreticalIsotopePattern>[] putativePatterns = IsotopicPatternScorer.calcIsotopicPatternHypotheses(data, peakels[k].getMz(), mzTolPPM);
+//                Tuple2<Object, TheoreticalIsotopePattern>[] putativePatterns = IsotopicPatternScorer.calcIsotopicPatternHypotheses(data, peakels[k].getMz(), mzTolPPM);
+                Tuple2<Object, TheoreticalIsotopePattern>[] putativePatterns = IsotopicPatternUtils.calcIsotopicPatternHypotheses(data, peakels[k].getMz(), mzTolPPM);
                 //TreeMap<Double, TheoreticalIsotopePattern> putativePatterns = IsotopePattern.getOrderedIPHypothesis(data, peakels[k].getMz());
                 TheoreticalIsotopePattern bestPattern = putativePatterns[0]._2;
                 List<Peakel> l = new ArrayList<>(bestPattern.isotopeCount() + 1);

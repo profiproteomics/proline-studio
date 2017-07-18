@@ -10,7 +10,9 @@ import fr.proline.studio.utils.IconManager;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -66,12 +68,16 @@ public class SingleRawFilePanel extends AbstractRawFilePanel {
    private void editFeature() {
       double min = chromatogramPanel.getChromatogramPlotPanel().getXAxis().getMinValue();
       double max = chromatogramPanel.getChromatogramPlotPanel().getXAxis().getMaxValue();
-      Chromatogram chrom = getCurrentChromatogram();
-      int minIdx = SpectrumUtils.getNearestPeakIndex(chrom.time, min);
-      int maxIdx = Math.min(SpectrumUtils.getNearestPeakIndex(chrom.time, max)+1, chrom.time.length);
-      Signal signal = new Signal(Arrays.copyOfRange(chrom.time, minIdx, maxIdx), Arrays.copyOfRange(chrom.intensities, minIdx, maxIdx));
+      List<Signal> signals = new ArrayList<>();
+      Iterable<Chromatogram> chromatograms = getAllChromatograms();
+      for (Chromatogram chrom : chromatograms) {
+        int minIdx = SpectrumUtils.getNearestPeakIndex(chrom.time, min);
+        int maxIdx = Math.min(SpectrumUtils.getNearestPeakIndex(chrom.time, max)+1, chrom.time.length);
+        Signal signal = new Signal(Arrays.copyOfRange(chrom.time, minIdx, maxIdx), Arrays.copyOfRange(chrom.intensities, minIdx, maxIdx));
+        signals.add(signal);
+      }
       JDialog dialog = new JDialog((JFrame)this.getTopLevelAncestor(), "Feature editor", true);
-      dialog.setContentPane(new SignalEditorPanel(signal));
+      dialog.setContentPane(SignalEditorBuilder.buildEditor(signals));
       dialog.pack();
       dialog.setVisible(true);
       logger.info("Edit feature within range "+min+", "+max);

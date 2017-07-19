@@ -107,7 +107,9 @@ public class RawConverter implements Runnable, WorkerInterface {
                             }
                         } else {
                             terminate();
-                            m_conversionListener.conversionPerformed(f, m_settings, false);
+                            if (m_conversionListener != null) {
+                                m_conversionListener.conversionPerformed(f, m_settings, false);
+                            }
                         }
 
                     }

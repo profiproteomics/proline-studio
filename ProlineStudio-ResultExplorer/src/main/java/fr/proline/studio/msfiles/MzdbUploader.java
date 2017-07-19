@@ -21,6 +21,7 @@ public class MzdbUploader implements Runnable, WorkerInterface {
     private final File m_file;
     private static int m_state = WorkerInterface.ACTIVE_STATE;
     private final StringBuilder m_logs;
+    private ConversionListener m_uploadListener;
 
     private final MzdbUploadSettings m_uploadSettings;
 
@@ -28,6 +29,10 @@ public class MzdbUploader implements Runnable, WorkerInterface {
         m_file = file;
         m_uploadSettings = uploadSettings;
         m_logs = new StringBuilder();
+    }
+
+    public void addUploadListener(ConversionListener listener) {
+        m_uploadListener = listener;
     }
 
     @Override
@@ -65,6 +70,10 @@ public class MzdbUploader implements Runnable, WorkerInterface {
                     if (m_state == WorkerInterface.ACTIVE_STATE) {
                         m_state = WorkerInterface.FINISHED_STATE;
                         
+                        if(m_uploadListener!=null && m_file.exists()){
+                            m_uploadListener.conversionPerformed(m_file, m_uploadSettings, true);
+                        }
+
                         if (m_uploadSettings.getDeleteMzdb()) {
                             while (!m_file.canWrite() && !m_file.exists()) {
                                 try {
@@ -85,6 +94,9 @@ public class MzdbUploader implements Runnable, WorkerInterface {
                     }
                 } else {
                     terminate();
+                    if (m_uploadListener != null) {
+                        m_uploadListener.conversionPerformed(m_file, m_uploadSettings, false);
+                    }
                 }
             }
         };

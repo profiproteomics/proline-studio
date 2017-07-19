@@ -20,15 +20,19 @@ import javax.swing.tree.TreePath;
  *
  * @author AK249877
  */
-public class MzdbUploadBatch implements Runnable {
+public class MzdbUploadBatch implements Runnable, ConversionListener {
 
     private final ThreadPoolExecutor m_executor;
     private final HashMap<File, MzdbUploadSettings> m_uploads;
     private TreePath m_pathToExpand;
+    private int m_successfulUploads, m_failedUploads;
+    private HashSet<String> m_directories;
 
     public MzdbUploadBatch(HashMap<File, MzdbUploadSettings> uploads) {
         m_uploads = uploads;
         m_executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(5);
+        m_successfulUploads = 0;
+        m_failedUploads = 0;
     }
 
     public MzdbUploadBatch(HashMap<File, MzdbUploadSettings> uploads, TreePath pathToExpand) {
@@ -43,6 +47,7 @@ public class MzdbUploadBatch implements Runnable {
     public void upload(File f, MzdbUploadSettings uploadSettings) {
         if (f.getAbsolutePath().toLowerCase().endsWith(".mzdb")) {
             MzdbUploader uploader = new MzdbUploader(f, uploadSettings);
+            uploader.addUploadListener(this);
             m_executor.execute(uploader);
         }
     }
@@ -50,7 +55,7 @@ public class MzdbUploadBatch implements Runnable {
     @Override
     public void run() {
 
-        HashSet<String> directories = new HashSet<String>();
+        m_directories = new HashSet<String>();
 
         Iterator it = m_uploads.entrySet().iterator();
         while (it.hasNext()) {
@@ -63,9 +68,9 @@ public class MzdbUploadBatch implements Runnable {
 
                 if (!settings.getDestination().equalsIgnoreCase("")) {
                     if (settings.getDestination().startsWith(File.separator)) {
-                        directories.add(settings.getDestination().substring(1));
+                        m_directories.add(settings.getDestination().substring(1));
                     } else {
-                        directories.add(settings.getDestination());
+                        m_directories.add(settings.getDestination());
                     }
                 }
 
@@ -74,17 +79,31 @@ public class MzdbUploadBatch implements Runnable {
             upload(f, settings);
         }
 
-        m_executor.shutdown();
-        try {
-            m_executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
-        } catch (InterruptedException e) {
-            ;
+    }
+
+    @Override
+    public void conversionPerformed(File f, Object settings, boolean success) {
+        if (success) {
+            m_successfulUploads++;
+        } else {
+            m_failedUploads++;
         }
 
-        if (m_pathToExpand != null) {
-            MzdbFilesTopComponent.getExplorer().getTreeFileChooserPanel().expandTreePath(m_pathToExpand);
-        } else {
-            MzdbFilesTopComponent.getExplorer().getTreeFileChooserPanel().expandMultipleTreePath(directories, m_uploads.entrySet().iterator().next().getValue().getMountLabel());
+        if ((m_successfulUploads + m_failedUploads) == m_uploads.size()) {
+            
+            m_executor.shutdown();
+            try {
+                m_executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+            } catch (InterruptedException e) {
+                ;
+            }
+
+            if (m_pathToExpand != null) {
+                MzdbFilesTopComponent.getExplorer().getTreeFileChooserPanel().expandTreePath(m_pathToExpand);
+            } else {
+                MzdbFilesTopComponent.getExplorer().getTreeFileChooserPanel().expandMultipleTreePath(m_directories, m_uploads.entrySet().iterator().next().getValue().getMountLabel());
+            }
+            MzdbFilesTopComponent.getExplorer().getTreeFileChooserPanel().updateTree();
         }
     }
 

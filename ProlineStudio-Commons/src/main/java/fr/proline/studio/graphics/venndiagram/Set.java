@@ -11,16 +11,22 @@ import java.util.HashMap;
 public class Set implements Comparable<Set> {
     
     private final double m_size;
+    private final String m_name;
     
     ArrayList<SetIntersection> m_intersections = new ArrayList<>(16);
     HashMap<Set, SetIntersection> m_intersectionsMap = new HashMap<>();
     
     Circle m_circle;
     
-    public Set(double size) {
+    public Set(String name, double size) {
+        m_name = name;
         m_size = size;
         
         m_circle = new Circle(size);
+    }
+    
+    public String getName() {
+        return m_name;
     }
     
     public Circle getCircle() {

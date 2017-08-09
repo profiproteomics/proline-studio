@@ -6,6 +6,12 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import javax.swing.SwingUtilities;
+import org.apache.commons.math3.analysis.MultivariateFunction;
+
+import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.*;
+import org.apache.commons.math3.optim.*;
+import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
+import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction;
 
 /**
  *
@@ -13,19 +19,25 @@ import javax.swing.SwingUtilities;
  */
 public class SetList {
     
-    private ArrayList<Set> setArrayList = new ArrayList<>(16);
-    private HashMap<Set, Integer> setMap = new HashMap<>();
+    private ArrayList<Set> m_setArrayList = new ArrayList<>(16);
+    private HashMap<Set, Integer> m_setMap = new HashMap<>();
             
+    private ArrayList<IntersectArea> m_areas = null;
+    
     public SetList() {
         
     }
     
+    public ArrayList<Set> getList() {
+        return m_setArrayList;
+    }
+    
     public static void test() {
         SetList setList = new SetList();
-        Set s1 = new Set(1000);
-        Set s2 = new Set(800);
-        Set s3 = new Set(700);
-        Set s4 = new Set(600);
+        Set s1 = new Set("S1 : 1000", 1000);
+        Set s2 = new Set("S1 : 800", 800);
+        Set s3 = new Set("S1 : 700", 700);
+        Set s4 = new Set("S1 : 600", 600);
         setList.addSet(s1);
         setList.addSet(s2);
         setList.addSet(s3);
@@ -37,15 +49,17 @@ public class SetList {
         setList.addIntersection(s2, s4, 125);
         
         setList.approximateSolution();
+        setList.optimizeSolution();
         
         setList.scale(600, 600);
+        setList.generateAreas();
         
 
         SwingUtilities.invokeLater(new Runnable() {
 
             @Override
             public void run() {
-                TmpVennDiagramFrame frame = new TmpVennDiagramFrame(setList.setArrayList);
+                TmpVennDiagramFrame frame = new TmpVennDiagramFrame(setList);
                 frame.setVisible(true);
             }
         });
@@ -54,9 +68,9 @@ public class SetList {
     }
     
     public void addSet(Set s) {
-        int index = setArrayList.size();
-        setArrayList.add(s);
-        setMap.put(s, index);
+        int index = m_setArrayList.size();
+        m_setArrayList.add(s);
+        m_setMap.put(s, index);
         
     }
     
@@ -70,8 +84,8 @@ public class SetList {
         
         int nbPositionned = 0;
         
-        int setNb = setArrayList.size();
-        Set[] setArray = setArrayList.toArray(new Set[setNb]);
+        int setNb = m_setArrayList.size();
+        Set[] setArray = m_setArrayList.toArray(new Set[setNb]);
         Arrays.sort(setArray, Collections.reverseOrder());
         
         // position of the first circle is (0,0)
@@ -182,10 +196,94 @@ public class SetList {
             intersectionPoints.clear();
             Arrays.sort(setArray, Collections.reverseOrder());
         }
+
+    }
+    public void optimizeSolution() {
+        SimplexOptimizer optimizer = new SimplexOptimizer(1e-5, 1e-10); 
+
+        EvaluateFunction evaluateFunction = new EvaluateFunction(m_setArrayList);
+        ObjectiveFunction objectiveFunction = new ObjectiveFunction(evaluateFunction);
         
-        System.out.println("toto");
+        int simplexDimension = m_setArrayList.size()*2; // for each set, there are two variables : x and y of the center
+        AbstractSimplex simplex = new NelderMeadSimplex(simplexDimension); 
+        
+        optimizer.optimize(new MaxEval(1000), objectiveFunction, simplex, GoalType.MINIMIZE, new InitialGuess(evaluateFunction.getCurrentGuess()) );
+
+        
     }
     
+    
+    
+    
+    public void generateAreas() {
+
+        
+        // Initialization
+        // first List contains one IntersectArea corresponding to first Set
+        // second List contains all other IntersectArea corresponding to all others Set
+        ArrayList<IntersectArea> resultList = new ArrayList<>();
+        ArrayList<IntersectArea> setList = new ArrayList<>();
+        
+        int nb = m_setArrayList.size();
+        
+        IntersectArea pivotArea = new IntersectArea(m_setArrayList.get(0));
+
+        for (int i=1;i<nb;i++) {
+            setList.add(new IntersectArea(m_setArrayList.get(i)));
+        }
+
+        start:
+        while (pivotArea != null) {
+
+            //boolean intersectionFound = false;
+            int nbSecond = setList.size();
+            int secondListIndex = 0;
+            while (secondListIndex<nbSecond) {
+                IntersectArea a2  = setList.get(secondListIndex);
+
+                ArrayList<IntersectArea> intersectionResultList = pivotArea.intersect(a2);
+                if (intersectionResultList != null) {
+                   //intersectionFound = true;
+                   
+                   IntersectArea test1 = intersectionResultList.get(0);
+                   IntersectArea test2 = intersectionResultList.get(1);
+                   IntersectArea test3 = intersectionResultList.get(2);
+                   if ((test1.intersect(test2) != null) || (test3.intersect(test2) != null) || (test2.intersect(test3) != null)) {
+                       System.err.println("");
+                   }
+                   
+                   setList.set(secondListIndex, intersectionResultList.get(0));
+                   for (int k=1;k<intersectionResultList.size();k++) {
+                        setList.add(secondListIndex, intersectionResultList.get(k));
+                   }
+                   pivotArea = setList.remove(0);
+
+                   // we restart the algorithm with the intersected areas
+
+                   continue start;
+                   
+                } // else no intersection, we let go the loop
+                
+                secondListIndex++;
+            }
+            
+            resultList.add(pivotArea);
+            if (setList.isEmpty()) {
+                break;
+            }
+
+            pivotArea = setList.remove(0);
+
+        }
+        
+        m_areas = resultList;
+
+    }
+    
+    public ArrayList<IntersectArea> getGeneratedAreas() {
+        return m_areas;
+    }
+        
     public void scale(/*int marginX, int marginY,*/ int width, int height) {
 
         double minX = Double.POSITIVE_INFINITY;
@@ -193,7 +291,7 @@ public class SetList {
         double minY = Double.POSITIVE_INFINITY;
         double maxY = Double.NEGATIVE_INFINITY;
         
-        for (Set set : setArrayList) {
+        for (Set set : m_setArrayList) {
             Circle c = set.getCircle();
             double x = c.getX();
             double y = c.getY();
@@ -219,7 +317,7 @@ public class SetList {
         
         double scale = scaleFactorX>scaleFactorY ? scaleFactorY : scaleFactorX;
         
-        for (Set set : setArrayList) {
+        for (Set set : m_setArrayList) {
             Circle c = set.getCircle();
             double x2 = (c.getX()-minX)*scale;
             double y2 = -(((c.getY()-minY)*scale)-height); // in the same time reverse Y axis for display
@@ -290,5 +388,37 @@ public class SetList {
         }
         
     }
+    
+    public class EvaluateFunction implements MultivariateFunction {
+
+        private final Set[] m_lossCalculationSetArray;
+
+        public EvaluateFunction(ArrayList<Set> setArrayList) {
+            m_lossCalculationSetArray = setArrayList.toArray(new Set[setArrayList.size()]);
+        }
+        
+        public double[] getCurrentGuess() {
+            int nb = m_lossCalculationSetArray.length;
+            double[] guess = new double[nb*2];
+            for (int i = 0; i < nb; i++) {
+                Set s = m_lossCalculationSetArray[i];
+                guess[i*2] = s.getCircle().getX();
+                guess[i*2+1] = s.getCircle().getY();
+            }
+            return guess;
+        }
+
+        @Override
+        public double value(double[] doubles) {
+            int nb = m_lossCalculationSetArray.length;
+            for (int i = 0; i < nb; i++) {
+                Set s = m_lossCalculationSetArray[i];
+                s.m_circle.setPosition(doubles[i * 2], doubles[i * 2 + 1]);
+            }
+
+            return lossFunction(m_lossCalculationSetArray);
+        }
+    }
+
     
 }

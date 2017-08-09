@@ -10,9 +10,9 @@ import javax.swing.JFrame;
  */
 public class TmpVennDiagramFrame extends JFrame {
     
-    public TmpVennDiagramFrame(ArrayList<Set> setArrayList) {
+    public TmpVennDiagramFrame(SetList setList) {
         
-        TmpVennDiagramPanel panel = new TmpVennDiagramPanel(setArrayList);
+        TmpVennDiagramPanel panel = new TmpVennDiagramPanel(setList);
         getContentPane().add(panel, BorderLayout.CENTER);
         
         pack();

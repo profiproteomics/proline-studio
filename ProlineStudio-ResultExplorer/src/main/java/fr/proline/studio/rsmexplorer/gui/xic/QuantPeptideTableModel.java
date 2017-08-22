@@ -1511,15 +1511,10 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
     }
 
     @Override
-    public int getBestXAxisColIndex(PlotType plotType) {
-        return -1; //JPM.TODO
+    public int[] getBestColIndex(PlotType plotType) {
+        return null;
     }
-
-    @Override
-    public int getBestYAxisColIndex(PlotType plotType) {
-        return -1; //JPM.TODO
-    }
-
+    
     @Override
     public TableCellRenderer getRenderer(int row, int col) {
 

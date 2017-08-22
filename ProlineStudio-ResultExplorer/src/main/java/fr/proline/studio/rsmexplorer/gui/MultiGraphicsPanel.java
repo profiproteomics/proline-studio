@@ -6,9 +6,11 @@ import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.graphics.BestGraphicsInterface;
 import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.graphics.BasePlotPanel;
-import fr.proline.studio.graphics.PlotAbstract;
 import fr.proline.studio.graphics.PlotLinear;
 import fr.proline.studio.graphics.BasePlotPanel.GridListener;
+import fr.proline.studio.graphics.PlotBaseAbstract;
+import static fr.proline.studio.graphics.PlotBaseAbstract.COL_X_ID;
+import static fr.proline.studio.graphics.PlotBaseAbstract.COL_Y_ID;
 import fr.proline.studio.graphics.PlotType;
 import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
@@ -56,7 +58,7 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
     private JLabel m_valueYLabel;
     private JLabel m_valueZLabel;
     
-    private List<PlotAbstract> m_plotGraphicsList = null;
+    private List<PlotBaseAbstract> m_plotGraphicsList = null;
     
     private List<CompareDataInterface> m_valuesList = null;
     private List<CrossSelectionInterface> m_crossSelectionInterfaceList = null;
@@ -338,13 +340,10 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
             int bestColY = -1;
             if (hasValues && m_valuesList.get(0) instanceof BestGraphicsInterface) {
                 BestGraphicsInterface bestGraphics = (BestGraphicsInterface) m_valuesList.get(0);
-                int col = bestGraphics.getBestXAxisColIndex(plotType);
-                if (col != -1) {
-                    bestColX = col;
-                }
-                col = bestGraphics.getBestYAxisColIndex(plotType);
-                if (col != -1) {
-                    bestColY = col;
+                int[] cols = bestGraphics.getBestColIndex(plotType);
+                if (cols != null) {
+                    bestColX = cols[0];
+                    bestColY = cols[1];
                 }
             }
 
@@ -419,7 +418,7 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
         }
         
         
-        if (m_valueXComboBox.getItemCount() == 0) {
+        if (m_valueXComboBox.getItemCount() == 0) {  
             
             fillXYCombobox();
             
@@ -433,8 +432,11 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
                     ReferenceToColumn refX = (ReferenceToColumn) m_valueXComboBox.getSelectedItem();
                     ReferenceToColumn refY = (ReferenceToColumn) m_valueYComboBox.getSelectedItem();
                     String zParameter = (String) m_valueZComboBox.getSelectedItem();
-                    for (PlotAbstract plotGraphic : m_plotGraphicsList) {
-                        plotGraphic.update(refX.getColumnIndex(), refY.getColumnIndex(), zParameter);
+                    for (PlotBaseAbstract plotGraphic : m_plotGraphicsList) {
+                        int[] cols = new int[2]; //JPM.TODO enhance
+                        cols[COL_X_ID] = refX.getColumnIndex();
+                        cols[COL_Y_ID] = refY.getColumnIndex();
+                        plotGraphic.update(cols, zParameter);
                         m_plotPanel.updateAxis(plotGraphic);
                     }
                     m_plotPanel.repaint();
@@ -452,7 +454,7 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
         
         ReferenceToColumn refX = (ReferenceToColumn) m_valueXComboBox.getSelectedItem();
         ReferenceToColumn refY = (ReferenceToColumn) m_valueYComboBox.getSelectedItem();
-        String zParameter = (String) m_valueZComboBox.getSelectedItem();
+        //String zParameter = (String) m_valueZComboBox.getSelectedItem();
         PlotType plotType = (PlotType) m_allPlotsComboBox.getSelectedItem();
         switch (plotType) {
             case LINEAR_PLOT:{

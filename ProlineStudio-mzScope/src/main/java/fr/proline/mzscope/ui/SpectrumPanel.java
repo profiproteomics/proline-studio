@@ -11,7 +11,7 @@ import fr.proline.mzscope.utils.IsotopicPatternUtils;
 import fr.proline.mzscope.utils.MzScopeConstants.DisplayMode;
 import fr.proline.mzscope.utils.SpectrumUtils;
 import fr.proline.studio.export.ExportButton;
-import fr.proline.studio.graphics.PlotAbstract;
+import fr.proline.studio.graphics.PlotXYAbstract;
 import fr.proline.studio.graphics.PlotLinear;
 import fr.proline.studio.graphics.BasePlotPanel;
 import fr.proline.studio.graphics.PlotPanel;
@@ -57,7 +57,7 @@ public class SpectrumPanel extends JPanel implements ScanHeaderListener, PlotPan
    protected JToolBar spectrumToolbar;
    private ScanHeaderPanel headerSpectrumPanel;
    
-   protected PlotAbstract scanPlot;
+   protected PlotXYAbstract scanPlot;
    protected LineMarker positionMarker;
 
    protected Spectrum currentScan;

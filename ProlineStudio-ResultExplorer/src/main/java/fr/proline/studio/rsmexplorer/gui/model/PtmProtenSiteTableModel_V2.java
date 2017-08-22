@@ -432,13 +432,8 @@ public class PtmProtenSiteTableModel_V2 extends LazyTableModel implements Global
     }
 
     @Override
-    public int getBestXAxisColIndex(PlotType plotType) {
-        return -1;
-    }
-
-    @Override
-    public int getBestYAxisColIndex(PlotType plotType) {
-        return -1;
+    public int[] getBestColIndex(PlotType plotType) {
+        return null;
     }
 
     @Override

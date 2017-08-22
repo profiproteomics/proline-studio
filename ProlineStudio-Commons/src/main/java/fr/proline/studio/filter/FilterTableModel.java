@@ -367,13 +367,8 @@ public class FilterTableModel extends DecoratedTableModel implements FilterTable
     }
 
     @Override
-    public int getBestXAxisColIndex(PlotType plotType) {
-        return m_tableModelSource.getBestXAxisColIndex(plotType);
-    }
-
-    @Override
-    public int getBestYAxisColIndex(PlotType plotType) {
-        return m_tableModelSource.getBestYAxisColIndex(plotType);
+    public int[] getBestColIndex(PlotType plotType) {
+        return m_tableModelSource.getBestColIndex(plotType);
     }
 
     @Override

@@ -263,14 +263,10 @@ public abstract class PropertiesTableModel extends DecoratedTableModel implement
     }
 
     @Override
-    public int getBestXAxisColIndex(PlotType plotType) {
-        return -1;
+    public int[] getBestColIndex(PlotType plotType) {
+        return null;
     }
 
-    @Override
-    public int getBestYAxisColIndex(PlotType plotType) {
-        return -1;
-    }
 
     @Override
     public String getExportRowCell(int row, int col) {

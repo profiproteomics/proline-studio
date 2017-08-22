@@ -1,11 +1,13 @@
 package fr.proline.studio.graphics.venndiagram;
 
+import fr.proline.studio.utils.CyclicColorPalette;
+import java.awt.Color;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import javax.swing.SwingUtilities;
+import java.util.HashSet;
 import org.apache.commons.math3.analysis.MultivariateFunction;
 
 import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.*;
@@ -19,10 +21,24 @@ import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction;
  */
 public class SetList {
     
-    private ArrayList<Set> m_setArrayList = new ArrayList<>(16);
-    private HashMap<Set, Integer> m_setMap = new HashMap<>();
+    private final ArrayList<Set> m_setArrayList = new ArrayList<>(16);
+    private final HashMap<Set, Integer> m_setMap = new HashMap<>();
             
     private ArrayList<IntersectArea> m_areas = null;
+    
+    private int m_scaleX = -1;
+    private int m_scaleY = -1;
+    
+    private HashMap<Integer, Color> m_colorMap = new HashMap<>();
+    
+        public static final Color[] DEFAULT_BASE_PALETTE = {
+        new Color(206, 90, 73),
+        new Color(255, 193, 66),
+        new Color(243, 118, 133),
+        new Color(66, 193, 255),
+        new Color(50, 192, 142),
+        new Color(255, 66, 193)
+    };
     
     public SetList() {
         
@@ -32,7 +48,23 @@ public class SetList {
         return m_setArrayList;
     }
     
-    public static void test() {
+    
+    public Color getColor(HashSet<Set> sets) {
+        int colorIndex = 0;
+        for (Set s: sets) {
+            int id = s.getId();
+            colorIndex += Math.pow(2, id);
+        }
+        Color c = m_colorMap.get(colorIndex);
+        if (c != null) {
+            return c;
+        }
+        
+        return CyclicColorPalette.getColor(colorIndex, DEFAULT_BASE_PALETTE);
+        
+    }
+    
+    /*public static void test() {
         SetList setList = new SetList();
         Set s1 = new Set("S1 : 1000", 1000);
         Set s2 = new Set("S1 : 800", 800);
@@ -65,13 +97,18 @@ public class SetList {
         });
         
         System.out.println();
-    }
+    }*/
     
     public void addSet(Set s) {
         int index = m_setArrayList.size();
+        s.setId(index);
         m_setArrayList.add(s);
         m_setMap.put(s, index);
         
+    }
+    
+    public Set getSet(int i) {
+        return m_setArrayList.get(i);
     }
     
     public void addIntersection(Set s1, Set s2, double size) {
@@ -249,7 +286,7 @@ public class SetList {
                    IntersectArea test2 = intersectionResultList.get(1);
                    IntersectArea test3 = intersectionResultList.get(2);
                    if ((test1.intersect(test2) != null) || (test3.intersect(test2) != null) || (test2.intersect(test3) != null)) {
-                       System.err.println("");
+                       System.err.println(""); //JPM.TODO remove
                    }
                    
                    setList.set(secondListIndex, intersectionResultList.get(0));
@@ -284,8 +321,18 @@ public class SetList {
         return m_areas;
     }
         
-    public void scale(/*int marginX, int marginY,*/ int width, int height) {
+    public boolean scale(int width, int height, int margin) {
 
+        width -= 2* margin;
+        height -= 2* margin;
+        
+        if ((m_scaleX == width) && (m_scaleY == height)) {
+            return false;
+        }
+    
+        m_scaleX = width;
+        m_scaleY = height;
+        
         double minX = Double.POSITIVE_INFINITY;
         double maxX = Double.NEGATIVE_INFINITY;
         double minY = Double.POSITIVE_INFINITY;
@@ -319,12 +366,13 @@ public class SetList {
         
         for (Set set : m_setArrayList) {
             Circle c = set.getCircle();
-            double x2 = (c.getX()-minX)*scale;
-            double y2 = -(((c.getY()-minY)*scale)-height); // in the same time reverse Y axis for display
+            double x2 = (c.getX()-minX)*scale + margin;
+            double y2 = -(((c.getY()-minY)*scale)-height) + margin; // in the same time reverse Y axis for display
             double r = c.getRadius()*scale;
             c.scale(x2, y2, r);
         }
         
+        return true;
     }
     
     private double lossFunction(Set[] setArray) {

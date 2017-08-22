@@ -57,7 +57,7 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
     private XAxis m_xAxis = null;
     private YAxis m_yAxis = null;
     
-    private ArrayList<PlotAbstract> m_plots = null;
+    private ArrayList<PlotBaseAbstract> m_plots = null;
     
     private final ZoomGesture m_zoomGesture = new ZoomGesture();
     private final SelectionGestureLasso m_selectionGesture = new SelectionGestureLasso();
@@ -164,7 +164,7 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
         int figuresXHeight = GAP_FIGURES_X;
         double[] tab = getMinMaxPlots();
         
-        if (m_xAxis != null) {
+        if (m_xAxis.displayAxis()) {
             
             // set default size
             m_xAxis.setSize(GAP_FIGURES_Y+GAP_AXIS_TITLE+GAP_AXIS_LINE, height-figuresXHeight -GAP_AXIS_TITLE /*-GAP_TOP_AXIS*/, width-GAP_FIGURES_Y-GAP_AXIS_TITLE-GAP_END_AXIS, figuresXHeight + GAP_AXIS_TITLE+GAP_AXIS_LINE);
@@ -187,7 +187,7 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
 
         }
         
-        if (m_yAxis != null) {
+        if (m_yAxis.displayAxis()) {
             
             m_yAxis.setSize(0, GAP_END_AXIS+titleY, GAP_FIGURES_Y+GAP_AXIS_TITLE+GAP_AXIS_LINE/*+GAP_TOP_AXIS*/, height-figuresXHeight-GAP_AXIS_TITLE-GAP_END_AXIS-titleY);
             /*if ((m_yAxis.getMinValue() == tab[2] && m_yAxis.getMaxValue() == tab[3])) {
@@ -216,15 +216,15 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
                         graphicBufferG2d.setColor(Color.white);
                         graphicBufferG2d.fillRect(0, 0, m_plotArea.width, m_plotArea.height);
                         graphicBufferG2d.translate(-m_plotArea.x, -m_plotArea.y);
-                        if ((m_plotVerticalGrid) && (m_xAxis != null)) {
+                        if ((m_plotVerticalGrid) && (m_xAxis.displayAxis())) {
                             m_xAxis.paintGrid(graphicBufferG2d, m_plotArea.x, m_plotArea.width, m_plotArea.y, m_plotArea.height);
                         }
 
-                        if ((m_plotHorizontalGrid) && (m_yAxis != null)) {
+                        if ((m_plotHorizontalGrid) && (m_yAxis.displayAxis())) {
                             m_yAxis.paintGrid(graphicBufferG2d, m_plotArea.x, m_plotArea.width, m_plotArea.y, m_plotArea.height);
                         }
 
-                        for (PlotAbstract plot : m_plots) {
+                        for (PlotBaseAbstract plot : m_plots) {
                             plot.paint(graphicBufferG2d);
                         }
                         m_updateDoubleBuffer = false;
@@ -236,15 +236,15 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
                     long startPlotTime = System.currentTimeMillis();
                     g.setColor(Color.white);
                     g.fillRect(m_plotArea.x, m_plotArea.y, m_plotArea.width, m_plotArea.height);
-                    if ((m_plotVerticalGrid) && (m_xAxis != null)) {
+                    if ((m_plotVerticalGrid) && (m_xAxis.displayAxis())) {
                         m_xAxis.paintGrid(g2d, m_plotArea.x, m_plotArea.width, m_plotArea.y, m_plotArea.height);
                     }
 
-                    if ((m_plotHorizontalGrid) && (m_yAxis != null)) {
+                    if ((m_plotHorizontalGrid) && (m_yAxis.displayAxis())) {
                         m_yAxis.paintGrid(g2d, m_plotArea.x, m_plotArea.width, m_plotArea.y, m_plotArea.height);
                     }
 
-                    for (PlotAbstract plot : m_plots) {
+                    for (PlotBaseAbstract plot : m_plots) {
                         plot.paint(g2d);
                     }
                     long stopPlotTime = System.currentTimeMillis();
@@ -254,16 +254,16 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
                     }
                 }
             }
-            for (PlotAbstract plot : m_plots) {
+            for (PlotBaseAbstract plot : m_plots) {
                 plot.paintMarkers(g2d);
             }
-            for (PlotAbstract plot : m_plots) {
+            for (PlotBaseAbstract plot : m_plots) {
                 plot.paintCursors(g2d);
             }
         }
 
         // set clipping area for zooming and selecting
-        if ((m_xAxis != null) && (m_yAxis != null)) {
+        if ((m_xAxis.displayAxis()) && (m_yAxis.displayAxis())) {
             int clipX = m_xAxis.valueToPixel(m_xAxis.getMinValue());
             int clipWidth = m_xAxis.valueToPixel(m_xAxis.getMaxValue()) - clipX;
             int clipY = m_yAxis.valueToPixel(m_yAxis.getMaxValue());
@@ -309,7 +309,7 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
             return null;
         }
         
-        for (PlotAbstract plot : m_plots) {
+        for (PlotBaseAbstract plot : m_plots) {
             return plot.getParameters();
         }
         return null;
@@ -342,17 +342,15 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
     }
     
     public void lockMinXValue() {
-       if (m_xAxis != null) {
-          double[] tab = getMinMaxPlots();
-          m_xAxis.lockMinValue(tab[0]);
-       }
+        double[] tab = getMinMaxPlots();
+        m_xAxis.lockMinValue(tab[0]);
+
     }
     
     public void lockMinYValue() {
-      if (m_yAxis != null) {
-          double[] tab = getMinMaxPlots();
-          m_yAxis.lockMinValue(tab[2]);
-       }
+        double[] tab = getMinMaxPlots();
+        m_yAxis.lockMinValue(tab[2]);
+
     }
     
     public void setDrawCursor(boolean drawCursor){
@@ -370,7 +368,7 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
         return (m_plotHorizontalGrid || m_plotVerticalGrid);
     }
     
-    public void setPlot(PlotAbstract plot) {
+    public void setPlot(PlotBaseAbstract plot) {
        m_plots = new ArrayList();
        m_plots.add(plot);
 
@@ -385,7 +383,7 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
        return m_plots.size() > 0;
     }
     
-    public void addPlot(PlotAbstract plot) {
+    public void addPlot(PlotXYAbstract plot) {
         m_plots.add(plot);
 
         updateAxis(plot);
@@ -445,25 +443,20 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
         return tab;
     }
 
-    public void updateAxis(PlotAbstract plot) {
+    public void updateAxis(PlotBaseAbstract plot) {
         double[] tab = getMinMaxPlots();
-        
-        if (plot.needsXAxis()) {
-            
-            XAxis xAxis = getXAxis();
-            //xAxis.setLog(false);  // we do no longer change the log setting
-            xAxis.setSelected(false);
-            xAxis.setRange(tab[0] ,tab[1]);
-                      
-        }
 
-        if (plot.needsYAxis()) {
-            YAxis yAxis = getYAxis();
-            //yAxis.setLog(false);  // we do no longer change the log setting
-            yAxis.setSelected(false);
-            yAxis.setRange(tab[2],tab[3]);
-        }
-        
+        XAxis xAxis = getXAxis();
+        //xAxis.setLog(false);  // we do no longer change the log setting
+        xAxis.setSelected(false);
+        xAxis.setRange(tab[0], tab[1]);
+
+        YAxis yAxis = getYAxis();
+        //yAxis.setLog(false);  // we do no longer change the log setting
+        yAxis.setSelected(false);
+        yAxis.setRange(tab[2], tab[3]);
+
+
         m_updateDoubleBuffer = true;
         m_useDoubleBuffering = plot.needsDoubleBuffering();
     }
@@ -495,15 +488,19 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
         }
         return m_yAxis;
     }
+    
+    public void resetAxis() {
+        m_xAxis = null;
+        m_yAxis = null;
+    }
 
     @Override
     public void mouseClicked(MouseEvent e) {
-        if(m_xAxis != null && m_yAxis != null){
-            double xValue = m_xAxis.pixelToValue(e.getX());
-            double yValue = m_yAxis.pixelToValue(e.getY());
+        double xValue = m_xAxis.pixelToValue(e.getX());
+        double yValue = m_yAxis.pixelToValue(e.getY());
 
-            fireMouseClicked(e, xValue, yValue);
-        }
+        fireMouseClicked(e, xValue, yValue);
+
     }
 
     @Override
@@ -531,8 +528,8 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
             if (SwingUtilities.isLeftMouseButton(e)) {
                 // check if we are over a moveable object
                 MoveableInterface movable = null;
-                PlotAbstract plotWithMovable = null;
-                for (PlotAbstract plot : m_plots) {
+                PlotBaseAbstract plotWithMovable = null;
+                for (PlotBaseAbstract plot : m_plots) {
                     movable = plot.getOverMovable(x, y);
                     if (movable != null) {
                         plotWithMovable = plot;
@@ -678,7 +675,7 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
                 // WART, in fact we are not zooming, so if it is the right mouse button,
                 // the user wants the popup menu
                 if (!m_plots.isEmpty()) {
-                    PlotAbstract plot = m_plots.get(0);
+                    PlotBaseAbstract plot = m_plots.get(0);
                     double xValue = m_xAxis.pixelToValue(e.getX());
                     double yValue = m_yAxis.pixelToValue(e.getY());
                     
@@ -754,7 +751,7 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
         if (m_drawCursor){
             setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
         }
-        
+
         if (m_moveGesture.isMoving()) {
             m_moveGesture.move(e.getX(), e.getY());
             repaint();
@@ -764,7 +761,7 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
         } else if (m_zoomGesture.isZooming()) {
             m_zoomGesture.moveZooming(e.getX(), e.getY());
             repaint();
-        } else if (m_panAxisGesture.isPanning()) {
+        } else if ((m_xAxis != null) && (m_yAxis != null) && (m_panAxisGesture.isPanning())) {
             double oldMinX = m_xAxis.getMinValue();
             double oldMaxX = m_xAxis.getMaxValue();
             double oldMinY = m_yAxis.getMinValue();
@@ -792,6 +789,10 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
             if (m_drawCursor){
                 repaint();
             }
+            return;
+        }
+        
+        if ((m_xAxis == null) || (m_yAxis == null)) {
             return;
         }
         
@@ -829,7 +830,7 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
 
         int nbPlotTooltip = 0;
         boolean repaintNeeded = false;
-        for (PlotAbstract plot : m_plots) {
+        for (PlotBaseAbstract plot : m_plots) {
 
             boolean isPlotSelected = plot.isMouseOnPlot(xValue, yValue);
             repaintNeeded |= plot.setIsPaintMarker(isPlotSelected);

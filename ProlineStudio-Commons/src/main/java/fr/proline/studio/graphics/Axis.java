@@ -67,6 +67,7 @@ public abstract class Axis {
     protected boolean m_selected = false;
     protected boolean m_isInteger = false;
     protected boolean m_isEnum = false;
+    protected boolean m_isPixel = false;
 
     protected BasePlotPanel m_plotPanel;
     protected AxisRangePanel m_rangePanel;
@@ -76,6 +77,10 @@ public abstract class Axis {
     protected int m_minimumAxisHeight = 0;
     protected int m_minimumAxisWidth = 0;
 
+    public boolean displayAxis() {
+        return !m_isPixel;
+    }
+    
     public static class AxisRangePanel extends JPanel {
 
         private JTextField m_minTextField;
@@ -183,6 +188,7 @@ public abstract class Axis {
             setVisible(false);
         }
 
+        
         private void updateRange() {
             if (m_maxTextField.getText().isEmpty() || m_minTextField.getText().isEmpty()) {
                 return;
@@ -226,9 +232,10 @@ public abstract class Axis {
         return StrictMath.max(m_minimumAxisHeight, minHeightFromParent);
     }
 
-    public void setSpecificities(boolean isInteger, boolean isEnum) {
+    public void setSpecificities(boolean isInteger, boolean isEnum, boolean isPixel) {
         m_isInteger = isInteger;
         m_isEnum = isEnum;
+        m_isPixel = isPixel;
     }
 
     public boolean isEnum() {

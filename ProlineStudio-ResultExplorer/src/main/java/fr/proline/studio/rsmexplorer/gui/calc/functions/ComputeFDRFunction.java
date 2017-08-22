@@ -1,7 +1,7 @@
 package fr.proline.studio.rsmexplorer.gui.calc.functions;
 
 import fr.proline.studio.graphics.BasePlotPanel;
-import fr.proline.studio.graphics.PlotAbstract;
+import fr.proline.studio.graphics.PlotBaseAbstract;
 import fr.proline.studio.graphics.PlotType;
 import fr.proline.studio.graphics.cursor.AbstractCursor;
 import fr.proline.studio.graphics.cursor.CursorInfo;
@@ -269,8 +269,9 @@ public class ComputeFDRFunction extends AbstractFunction {
                                     ExprTableModel model = (ExprTableModel) resTable.getModel();
                                     
                                     GlobalTableModelInterface srcModel = graphObjects[0].getGlobalTableModelInterface();
-                                    int bestXColumnIndex = srcModel.getBestXAxisColIndex(PlotType.SCATTER_PLOT);
-                                    int bestYColumnIndex = srcModel.getBestYAxisColIndex(PlotType.SCATTER_PLOT);
+                                    int[] cols = srcModel.getBestColIndex(PlotType.SCATTER_PLOT);
+                                    int bestXColumnIndex = (cols!= null) ? cols[0] : -1;
+                                    int bestYColumnIndex = (cols!= null) ? cols[1] : -1;
                                     
                                     CursorInfoList cursorInfoListX = new CursorInfoList();
                                     CursorInfo cursorInfo1 = new CursorInfo(m_verticalCursor.getValue());
@@ -494,16 +495,15 @@ public class ComputeFDRFunction extends AbstractFunction {
     }
     
     private GraphicsPanel createScatterParameter(GlobalTableModelInterface srcModel) {
-        int bestXColumnIndex = srcModel.getBestXAxisColIndex(PlotType.SCATTER_PLOT);
-        int bestYColumnIndex = srcModel.getBestYAxisColIndex(PlotType.SCATTER_PLOT);
-        
-        LockedDataGraphicsModel graphicsModelInterface = new LockedDataGraphicsModel(srcModel, PlotType.SCATTER_PLOT, (Integer) bestXColumnIndex, (Integer) bestYColumnIndex);
+        int[] cols = srcModel.getBestColIndex(PlotType.SCATTER_PLOT);
+
+        LockedDataGraphicsModel graphicsModelInterface = new LockedDataGraphicsModel(srcModel, PlotType.SCATTER_PLOT, cols);
         AbstractDataBox box = new DataboxGraphics(true);
         box.createPanel();
         box.setEntryData(graphicsModelInterface);
         GraphicsPanel graphicsPanel = (GraphicsPanel) box.getPanel();
         
-        PlotAbstract plot = graphicsPanel.getPlotGraphics();
+        PlotBaseAbstract plot = graphicsPanel.getPlotGraphics();
         final BasePlotPanel basePlotPanel = plot.getBasePlotPanel();
         basePlotPanel.setPreferredSize(new Dimension(600,400));
         

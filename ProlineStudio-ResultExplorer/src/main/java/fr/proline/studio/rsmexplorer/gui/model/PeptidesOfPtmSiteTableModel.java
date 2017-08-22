@@ -492,13 +492,8 @@ public class PeptidesOfPtmSiteTableModel extends DecoratedTableModel implements 
     }
 
     @Override
-    public int getBestXAxisColIndex(PlotType plotType) {
-        return -1;
-    }
-
-    @Override
-    public int getBestYAxisColIndex(PlotType plotType) {
-        return -1;
+    public int[] getBestColIndex(PlotType plotType) {
+        return null;
     }
 
     @Override

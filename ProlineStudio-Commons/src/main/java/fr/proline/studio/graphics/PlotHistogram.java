@@ -35,7 +35,7 @@ import org.openide.windows.WindowManager;
  * Histogram Plot
  * @author JM235353
  */
-public class PlotHistogram extends PlotAbstract {
+public class PlotHistogram extends PlotXYAbstract {
 
     private double m_xMin;
     private double m_xMax;
@@ -68,7 +68,10 @@ public class PlotHistogram extends PlotAbstract {
     
     public PlotHistogram(BasePlotPanel plotPanel, CompareDataInterface compareDataInterface, CrossSelectionInterface crossSelectionInterface, int colX, String paramZ) {
         super(plotPanel, PlotType.HISTOGRAM_PLOT, compareDataInterface, crossSelectionInterface);
-        update(colX, -1, paramZ); 
+        int[] cols = new int[2]; //JPM.TODO enhance
+        cols[COL_X_ID] = colX;
+        cols[COL_Y_ID] = -1;
+        update(cols, paramZ); 
         
         
         ParameterList parameterColorList = new ParameterList("Colors");
@@ -260,7 +263,7 @@ public class PlotHistogram extends PlotAbstract {
     @Override
     public final void update() {
          
-        m_values = new StatsModel(m_compareDataInterface, m_colX);
+        m_values = new StatsModel(m_compareDataInterface, m_cols[COL_X_ID]);
         
         m_asPercentage = (m_parameterZ.compareTo(HISTOGRAM_PERCENTAGE) == 0);
         
@@ -296,7 +299,7 @@ public class PlotHistogram extends PlotAbstract {
         m_xMax = max;
         
         
-        m_plotPanel.setXAxisTitle(m_compareDataInterface.getDataColumnIdentifier(m_colX));
+        m_plotPanel.setXAxisTitle(m_compareDataInterface.getDataColumnIdentifier(m_cols[COL_X_ID]));
         m_plotPanel.setYAxisTitle(m_asPercentage ? HISTOGRAM_PERCENTAGE : HISTOGRAM_COUNT);
         
         // bins

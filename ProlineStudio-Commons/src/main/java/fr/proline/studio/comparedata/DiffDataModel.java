@@ -376,14 +376,10 @@ public class DiffDataModel extends AbstractJoinDataModel {
     }
 
     @Override
-    public int getBestXAxisColIndex(PlotType plotType) {
-         return -1; //JPM.TODO
+    public int[] getBestColIndex(PlotType plotType) {
+         return null;
     }
 
-    @Override
-    public int getBestYAxisColIndex(PlotType plotType) {
-        return -1; //JPM.TODO
-    }
 
     @Override
     public String getExportRowCell(int row, int col) {

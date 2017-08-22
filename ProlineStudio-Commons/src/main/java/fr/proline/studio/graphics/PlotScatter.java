@@ -41,7 +41,7 @@ import org.openide.windows.WindowManager;
  * Scatter Plot
  * @author JM235353
  */
-public class PlotScatter extends PlotAbstract implements Axis.EnumXInterface, Axis.EnumYInterface {
+public class PlotScatter extends PlotXYAbstract implements Axis.EnumXInterface, Axis.EnumYInterface {
 
     private double m_xMin;
     private double m_xMax;
@@ -85,7 +85,11 @@ public class PlotScatter extends PlotAbstract implements Axis.EnumXInterface, Ax
     
     public PlotScatter(BasePlotPanel plotPanel, CompareDataInterface compareDataInterface, CrossSelectionInterface crossSelectionInterface, int colX, int colY) {
         super(plotPanel, PlotType.SCATTER_PLOT, compareDataInterface, crossSelectionInterface);
-        update(colX, colY, null); 
+        int[] cols = new int[2]; //JPM.TODO enhance
+        cols[COL_X_ID] = colX;
+        cols[COL_Y_ID] = colY;
+
+        update(cols, null); 
         
         // Color parameter
         ParameterList colorParameteList = new ParameterList("Colors");
@@ -152,14 +156,14 @@ public class PlotScatter extends PlotAbstract implements Axis.EnumXInterface, Ax
 
         String infoValue;
         int infoColumn = m_compareDataInterface.getInfoColumn();
-        if (infoColumn == m_colX) {
+        if (infoColumn == m_cols[COL_X_ID]) {
             boolean xAsEnum = m_plotPanel.getXAxis().isEnum();
             if (xAsEnum) {
                 infoValue = getEnumValueX(indexFound, true);
             } else {
                 infoValue = m_compareDataInterface.getDataValueAt(indexFound, m_compareDataInterface.getInfoColumn()).toString();
             }
-        } else if (infoColumn == m_colY) {
+        } else if (infoColumn == m_cols[COL_Y_ID]) {
             boolean yAsEnum = m_plotPanel.getYAxis().isEnum();
             if (yAsEnum) {
                 infoValue = getEnumValueY(indexFound, true);
@@ -452,7 +456,7 @@ public class PlotScatter extends PlotAbstract implements Axis.EnumXInterface, Ax
 
         int size = m_compareDataInterface.getRowCount();
         if (size == 0) {
-
+ 
             return;
         }
 
@@ -475,7 +479,7 @@ public class PlotScatter extends PlotAbstract implements Axis.EnumXInterface, Ax
             int enumIndex = 0;
             for (int i = 0; i < size; i++) {
 
-                String stringValue = m_compareDataInterface.getDataValueAt(i, m_colX).toString();
+                String stringValue = m_compareDataInterface.getDataValueAt(i, m_cols[COL_X_ID]).toString();
 
                 Integer enumIndexCur = stringToEnumMap.get(stringValue);
                 if (enumIndexCur == null) {
@@ -499,7 +503,7 @@ public class PlotScatter extends PlotAbstract implements Axis.EnumXInterface, Ax
             
         } else {
             for (int i = 0; i < size; i++) {
-                Object value = m_compareDataInterface.getDataValueAt(i, m_colX);
+                Object value = m_compareDataInterface.getDataValueAt(i, m_cols[COL_X_ID]);
                 m_dataX[i] = (value == null || !Number.class.isAssignableFrom(value.getClass())) ? Double.NaN : ((Number) value).doubleValue(); //CBy TODO : ne pas avoir a tester le type Number
                 m_selected[i] = false;
                  m_ids[i] = m_compareDataInterface.row2UniqueId(i);
@@ -514,7 +518,7 @@ public class PlotScatter extends PlotAbstract implements Axis.EnumXInterface, Ax
             int enumIndex = 0;
             for (int i = 0; i < size; i++) {
 
-                String stringValue = m_compareDataInterface.getDataValueAt(i, m_colY).toString();
+                String stringValue = m_compareDataInterface.getDataValueAt(i, m_cols[COL_Y_ID]).toString();
                 
                 Integer enumIndexCur = stringToEnumMap.get(stringValue);
                 if (enumIndexCur == null) {
@@ -534,7 +538,7 @@ public class PlotScatter extends PlotAbstract implements Axis.EnumXInterface, Ax
             }
         } else {
             for (int i = 0; i < size; i++) {
-                Object value = m_compareDataInterface.getDataValueAt(i, m_colY);
+                Object value = m_compareDataInterface.getDataValueAt(i, m_cols[COL_Y_ID]);
                 m_dataY[i] = (value == null || !Number.class.isAssignableFrom(value.getClass())) ? Double.NaN : ((Number) value).doubleValue(); //CBy TODO : ne pas avoir a tester le type Number
             }
         }
@@ -601,14 +605,14 @@ public class PlotScatter extends PlotAbstract implements Axis.EnumXInterface, Ax
         }
 
         m_plotPanel.updateAxis(this);
-        m_plotPanel.setXAxisTitle(m_compareDataInterface.getDataColumnIdentifier(m_colX));
-        m_plotPanel.setYAxisTitle(m_compareDataInterface.getDataColumnIdentifier(m_colY));
+        m_plotPanel.setXAxisTitle(m_compareDataInterface.getDataColumnIdentifier(m_cols[COL_X_ID]));
+        m_plotPanel.setYAxisTitle(m_compareDataInterface.getDataColumnIdentifier(m_cols[COL_Y_ID]));
 
 
         removeAllCursors();
         
         if (m_compareDataInterface instanceof ExtraDataInterface) {
-            CursorInfoList cursorInfoList = (CursorInfoList) ((ExtraDataInterface) m_compareDataInterface).getColValue(CursorInfoList.class, m_colX);
+            CursorInfoList cursorInfoList = (CursorInfoList) ((ExtraDataInterface) m_compareDataInterface).getColValue(CursorInfoList.class, m_cols[COL_X_ID]);
             if (cursorInfoList != null) {
                 for (CursorInfo info : cursorInfoList.getCursorInfoList()) {
                     VerticalCursor cursor = new VerticalCursor(m_plotPanel, info.getValue());
@@ -617,7 +621,7 @@ public class PlotScatter extends PlotAbstract implements Axis.EnumXInterface, Ax
                 }
             }
             
-            cursorInfoList = (CursorInfoList) ((ExtraDataInterface) m_compareDataInterface).getColValue(CursorInfoList.class, m_colY);
+            cursorInfoList = (CursorInfoList) ((ExtraDataInterface) m_compareDataInterface).getColValue(CursorInfoList.class, m_cols[COL_Y_ID]);
             if (cursorInfoList != null) {
                 for (CursorInfo info : cursorInfoList.getCursorInfoList()) {
                     HorizontalCursor cursor = new HorizontalCursor(m_plotPanel, info.getValue());

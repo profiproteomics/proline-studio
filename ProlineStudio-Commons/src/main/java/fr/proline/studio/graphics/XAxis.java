@@ -559,6 +559,9 @@ public class XAxis extends Axis {
 
     @Override
     public int valueToPixel(double v) {
+        if (m_isPixel) {
+            return (int) Math.round(v);
+        }
         if (m_log) {
             v = Math.log10(v);
             double min = Math.log10(m_minValue);
@@ -571,6 +574,9 @@ public class XAxis extends Axis {
 
     @Override
     public double pixelToValue(int pixel) {
+        if (m_isPixel) {
+            return pixel;
+        }
         if (m_log) {
             double min = Math.log10(m_minValue);
             double max = Math.log10(m_maxValue);

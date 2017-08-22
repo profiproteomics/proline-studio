@@ -9,7 +9,7 @@ import java.awt.Color;
  */
 public class CyclicColorPalette {
 
-    public static final Color[] palette = {
+    public static final Color[] DEFAULT_BASE_PALETTE = {
         new Color(231, 197, 31),
         new Color(231, 113, 58),
         new Color(169, 35, 59),
@@ -29,6 +29,9 @@ public class CyclicColorPalette {
     public static Color BLUE_SELECTION_ZONE = new Color(0.2f, 0.2f, 1f, 0.5f);
 
     public static Color getColor(int colorIndex) {
+        return getColor(colorIndex, DEFAULT_BASE_PALETTE);
+    }
+    public static Color getColor(int colorIndex, Color[] palette) {
         int paletteSize = palette.length * 3;
         colorIndex = colorIndex % paletteSize;
         if (colorIndex < palette.length) {
@@ -46,7 +49,7 @@ public class CyclicColorPalette {
     }
     
     public static Color[] getPalette() {
-        int paletteSize = palette.length * 3;
+        int paletteSize = DEFAULT_BASE_PALETTE.length * 3;
         Color[] palette = new Color[paletteSize];
         for (int i=0;i<paletteSize;i++) {
             palette[i] = getColor(i);

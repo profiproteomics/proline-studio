@@ -21,6 +21,22 @@ public class IntersectArea {
         m_intersectionArea = a;
     }
     
+    
+    public  HashSet<Set> getIntersectedMap() {
+        return m_setIntersectedMap;
+    }
+    
+    public boolean hasOneSet() {
+        return (m_setIntersectedMap.size() == 1);
+    }
+    
+    public Set getOnlySet() {
+        if (!hasOneSet()) {
+            return null;
+        }
+        return m_setIntersectedMap.iterator().next();
+    }
+    
     public IntersectArea(Set s) {
         m_setIntersectedMap.add(s);
         m_setIntersectionsOriginMap.add(s);

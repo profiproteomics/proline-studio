@@ -263,22 +263,31 @@ public class PeakTableModel extends LazyTableModel implements GlobalTableModelIn
         return PlotType.LINEAR_PLOT;
     }
 
+    
     @Override
-    public int getBestXAxisColIndex(PlotType plotType) {
+    public int[] getBestColIndex(PlotType plotType) {
+ 
         switch (plotType) {
-            case HISTOGRAM_PLOT:
-                return COLTYPE_PEAK_INTENSITY;
-            case SCATTER_PLOT:
-                return COLTYPE_PEAK_RETENTION_TIME;
-            case LINEAR_PLOT:
-                return COLTYPE_PEAK_RETENTION_TIME;
+            case HISTOGRAM_PLOT: {
+                int[] cols = new int[2];
+                cols[0] = COLTYPE_PEAK_INTENSITY;
+                cols[1] = COLTYPE_PEAK_INTENSITY;
+                return cols;
+            }
+            case SCATTER_PLOT: {
+                int[] cols = new int[2];
+                cols[0] = COLTYPE_PEAK_RETENTION_TIME;
+                cols[1] = COLTYPE_PEAK_INTENSITY;
+                return cols;
+            }
+            case LINEAR_PLOT: {
+                int[] cols = new int[2];
+                cols[0] = COLTYPE_PEAK_RETENTION_TIME;
+                cols[1] = COLTYPE_PEAK_INTENSITY;
+                return cols;
+            }
         }
-        return -1;
-    }
-
-    @Override
-    public int getBestYAxisColIndex(PlotType plotType) {
-        return COLTYPE_PEAK_INTENSITY;
+        return null;
     }
 
     @Override

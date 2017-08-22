@@ -242,24 +242,24 @@ public class FilterColumnTableModel extends DecoratedTableModel implements Child
     }
 
     @Override
-    public int getBestXAxisColIndex(PlotType plotType) {
-        int i = m_parentModel.getBestXAxisColIndex(plotType);
-        Integer index = m_reverseColumnsKept.get(i);
-        if (index == null) {
-            return -1;
+    public int[] getBestColIndex(PlotType plotType) {
+        int[] cols = m_parentModel.getBestColIndex(plotType);
+        if (cols == null) {
+            return null;
         }
-        return index;
+        int nb = cols.length;
+        int[] colsRes = new int[nb];
+        for (int i=0;i<nb;i++) {
+            Integer index = m_reverseColumnsKept.get(cols[i]);
+            if (index == null) {
+                colsRes[i] = -1;
+            } else {
+                colsRes[i] = index;
+            }
+        }
+        return colsRes;
     }
 
-    @Override
-    public int getBestYAxisColIndex(PlotType plotType) {
-        int i = m_parentModel.getBestYAxisColIndex(plotType);
-        Integer index = m_reverseColumnsKept.get(i);
-        if (index == null) {
-            return -1;
-        }
-        return index;
-    }
 
     @Override
     public String getExportRowCell(int row, int col) {

@@ -325,14 +325,10 @@ public class CompoundTableModel extends AbstractTableModel implements GlobalTabl
     }
 
     @Override
-    public int getBestXAxisColIndex(PlotType plotType) {
-        return m_lastModel.getBestXAxisColIndex(plotType);
+    public int[] getBestColIndex(PlotType plotType) {
+        return m_lastModel.getBestColIndex(plotType);
     }
 
-    @Override
-    public int getBestYAxisColIndex(PlotType plotType) {
-        return m_lastModel.getBestYAxisColIndex(plotType);
-    }
 
     @Override
     public String getExportRowCell(int row, int col) {

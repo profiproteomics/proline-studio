@@ -1,5 +1,6 @@
 package fr.proline.studio.rsmexplorer.gui.calc.macros;
 
+import fr.proline.studio.graphics.PlotType;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.rsmexplorer.gui.calc.DataTree;
 import fr.proline.studio.rsmexplorer.gui.calc.functions.ColumnFilterFunction;
@@ -11,7 +12,7 @@ import fr.proline.studio.rsmexplorer.gui.calc.functions.MissingValuesImputationF
 import fr.proline.studio.rsmexplorer.gui.calc.functions.NormalizationFunction;
 import fr.proline.studio.rsmexplorer.gui.calc.functions.QuantiFilterFunction;
 import fr.proline.studio.rsmexplorer.gui.calc.graphics.CalibrationPlotGraphic;
-import fr.proline.studio.rsmexplorer.gui.calc.graphics.ScatterGraphic;
+import fr.proline.studio.rsmexplorer.gui.calc.graphics.ScatterOrHistogramGraphic;
 import java.util.ArrayList;
 
 /**
@@ -36,7 +37,7 @@ public class ProStarMacro extends AbstractMacro {
         CalibrationPlotGraphic cpg = new CalibrationPlotGraphic(null); cpg.setAutoDisplayLayoutDuringProcess(layoutList);
         addNode(new DataTree.GraphicNode(cpg), 7, 0); addLink(6,0,7,0);
         
-        ScatterGraphic sg = new ScatterGraphic(null); //sg.setAutoDisplayLayoutDuringProcess(SplittedPanelContainer.PanelLayout.HORIZONTAL);
+        ScatterOrHistogramGraphic sg = new ScatterOrHistogramGraphic(null, PlotType.SCATTER_PLOT); //sg.setAutoDisplayLayoutDuringProcess(SplittedPanelContainer.PanelLayout.HORIZONTAL);
         addNode(new DataTree.GraphicNode(sg), 7, 1); addLink(6,0,7,1);
         
         layoutList = new ArrayList<>();

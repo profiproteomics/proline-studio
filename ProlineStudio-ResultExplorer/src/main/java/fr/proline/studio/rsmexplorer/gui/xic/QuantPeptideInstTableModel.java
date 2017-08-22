@@ -1528,13 +1528,8 @@ public class QuantPeptideInstTableModel  extends LazyTableModel implements Globa
     }
 
     @Override
-    public int getBestXAxisColIndex(PlotType plotType) {
-        return -1; //JPM.TODO
-    }
-
-    @Override
-    public int getBestYAxisColIndex(PlotType plotType) {
-        return -1; //JPM.TODO
+    public int[] getBestColIndex(PlotType plotType) {
+        return null;
     }
 
     @Override

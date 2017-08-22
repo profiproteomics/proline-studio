@@ -535,21 +535,25 @@ public class FeatureTableModel extends LazyTableModel implements GlobalTableMode
     }
 
     @Override
-    public int getBestXAxisColIndex(PlotType plotType) {
+    public int[] getBestColIndex(PlotType plotType) {
+ 
         switch (plotType) {
-            case HISTOGRAM_PLOT:
-                return COLTYPE_FEATURE_INTENSITY;
-            case SCATTER_PLOT:
-                return COLTYPE_FEATURE_RETENTION_TIME;
+            case HISTOGRAM_PLOT: {
+                int[] cols = new int[2];
+                cols[0] = COLTYPE_FEATURE_INTENSITY;
+                cols[1] = COLTYPE_FEATURE_INTENSITY;
+                return cols;
+            }
+            case SCATTER_PLOT: {
+                int[] cols = new int[2];
+                cols[0] = COLTYPE_FEATURE_RETENTION_TIME;
+                cols[1] = COLTYPE_FEATURE_INTENSITY;
+                return cols;
+            }
         }
-        return -1;
+        return null;
     }
-
-    @Override
-    public int getBestYAxisColIndex(PlotType plotType) {
-        return COLTYPE_FEATURE_INTENSITY;
-    }
-
+    
     @Override
     public int getInfoColumn() {
         return COLTYPE_FEATURE_ID;

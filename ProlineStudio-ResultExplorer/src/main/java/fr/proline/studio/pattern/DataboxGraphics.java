@@ -25,7 +25,7 @@ public class DataboxGraphics extends AbstractDataBox  {
          
         // Name of this databox
         m_typeName = "Graphic";
-        m_description = "Graphics : Histogram / Scatter Plot";
+        m_description = "Graphics : Histogram / Scatter Plot / Venn Diagram";
 
         // Register Possible in parameters
         // One ResultSummary

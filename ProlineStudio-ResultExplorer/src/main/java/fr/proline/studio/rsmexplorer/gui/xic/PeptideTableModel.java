@@ -10,6 +10,8 @@ import fr.proline.studio.filter.Filter;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
 import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
+import static fr.proline.studio.rsmexplorer.gui.xic.ProteinQuantTableModel.COLTYPE_QC_NAME;
+import static fr.proline.studio.rsmexplorer.gui.xic.ProteinQuantTableModel.COLTYPE_RAW_ABUNDANCE;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.table.LazyData;
 import fr.proline.studio.table.LazyTable;
@@ -228,18 +230,18 @@ public class PeptideTableModel extends LazyTableModel implements GlobalTableMode
         return PlotType.LINEAR_PLOT;
     }
 
-    @Override
-    public int getBestXAxisColIndex(PlotType plotType) {
+   @Override
+    public int[] getBestColIndex(PlotType plotType) {
+ 
         switch (plotType) {
-            case LINEAR_PLOT:
-                return COLTYPE_QC_NAME;
+            case LINEAR_PLOT: {
+                int[] cols = new int[2];
+                cols[0] = COLTYPE_QC_NAME;
+                cols[1] = COLTYPE_RAW_ABUNDANCE;
+                return cols;
+            }
         }
-        return -1;
-    }
-
-    @Override
-    public int getBestYAxisColIndex(PlotType plotType) {
-        return COLTYPE_RAW_ABUNDANCE;
+        return null;
     }
 
     @Override

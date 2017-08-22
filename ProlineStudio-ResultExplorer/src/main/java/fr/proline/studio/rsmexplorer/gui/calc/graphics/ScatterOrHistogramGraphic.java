@@ -6,16 +6,15 @@ import fr.proline.studio.parameter.ParameterError;
 import fr.proline.studio.parameter.ParameterList;
 import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
 import fr.proline.studio.rsmexplorer.gui.calc.ProcessCallbackInterface;
-import fr.proline.studio.rsmexplorer.gui.calc.graph.AbstractConnectedGraphObject;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphConnector;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphicGraphNode;
 import fr.proline.studio.table.GlobalTableModelInterface;
 
 /**
- * Definition of a scatter plot with its parameters for the data analyzer
+ * Definition of a scatter / histogram plot with its parameters for the data analyzer
  * @author JM235353
  */
-public class ScatterGraphic extends AbstractGraphic {
+public class ScatterOrHistogramGraphic extends AbstractGraphic {
 
     
     private static final String SEL_COLS1 = "SEL_COLS1";
@@ -24,13 +23,21 @@ public class ScatterGraphic extends AbstractGraphic {
     private ObjectParameter m_columnsParameter1 = null;
     private ObjectParameter m_columnsParameter2 = null;
     
-    public ScatterGraphic(GraphPanel panel) {
+    private PlotType m_plotType;
+    
+    public ScatterOrHistogramGraphic(GraphPanel panel, PlotType plotType) {
         super(panel);
+        
+        m_plotType = plotType;
     }
     
     @Override
     public String getName() {
-        return "Scatter Plot";
+        if (m_plotType == PlotType.SCATTER_PLOT) {
+            return "Scatter Plot";
+        } else {
+            return "Histogram Plot";
+        }
     }
 
     @Override
@@ -51,8 +58,11 @@ public class ScatterGraphic extends AbstractGraphic {
 
             Object o1 = m_columnsParameter1.getAssociatedObjectValue();
             Object o2 = m_columnsParameter2.getAssociatedObjectValue();
-
-            m_graphicsModelInterface = new LockedDataGraphicsModel(graphObjects[0].getGlobalTableModelInterface(), PlotType.SCATTER_PLOT, (Integer) o1, (Integer) o2);
+            int[] cols = new int[2];
+            cols[0] = (Integer) o1;
+            cols[1] = (Integer) o2;
+            
+            m_graphicsModelInterface = new LockedDataGraphicsModel(graphObjects[0].getGlobalTableModelInterface(), m_plotType, cols);
         } finally {
             callback.finished(graphicGraphNode);
         }
@@ -61,8 +71,11 @@ public class ScatterGraphic extends AbstractGraphic {
     @Override
     public void generateDefaultParameters(GraphConnector[] graphObjects) {
         GlobalTableModelInterface model1 = graphObjects[0].getGlobalTableModelInterface();
-        int bestXColumnIndex = model1.getBestXAxisColIndex(PlotType.SCATTER_PLOT);
-        int bestYColumnIndex = model1.getBestYAxisColIndex(PlotType.SCATTER_PLOT);
+
+        int[] cols = model1.getBestColIndex(m_plotType);
+        int bestXColumnIndex = (cols != null) ? cols[0] : -1;
+        int bestYColumnIndex = (cols != null) ? cols[1] : -1;
+        
         int selectedIndexX = -1;
         int selectedIndexY = -1;
         int nbColumns = model1.getColumnCount();
@@ -115,7 +128,7 @@ public class ScatterGraphic extends AbstractGraphic {
 
     @Override
     public AbstractGraphic cloneGraphic(GraphPanel p) {
-        AbstractGraphic clone = new ScatterGraphic(p);
+        AbstractGraphic clone = new ScatterOrHistogramGraphic(p, m_plotType);
         clone.cloneInfo(this);
         return clone;
     }

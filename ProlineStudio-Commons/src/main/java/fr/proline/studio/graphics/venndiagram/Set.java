@@ -10,19 +10,28 @@ import java.util.HashMap;
  */
 public class Set implements Comparable<Set> {
     
-    private final double m_size;
     private final String m_name;
     
-    ArrayList<SetIntersection> m_intersections = new ArrayList<>(16);
-    HashMap<Set, SetIntersection> m_intersectionsMap = new HashMap<>();
+    private ArrayList<SetIntersection> m_intersections = new ArrayList<>(16);
+    private HashMap<Set, SetIntersection> m_intersectionsMap = new HashMap<>();
     
-    Circle m_circle;
+    public Circle m_circle;
+    
+    private int m_id = -1;
+
     
     public Set(String name, double size) {
         m_name = name;
-        m_size = size;
         
         m_circle = new Circle(size);
+    }
+    
+    public void setId(int id) {
+        m_id = id;
+    }
+    
+    public int getId() {
+        return m_id;
     }
     
     public String getName() {

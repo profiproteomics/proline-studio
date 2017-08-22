@@ -501,23 +501,23 @@ public class XicPeptideMatchTableModel extends LazyTableModel implements GlobalT
     }
 
     @Override
-    public int getBestXAxisColIndex(PlotType plotType) {
+    public int[] getBestColIndex(PlotType plotType) {
+ 
         switch (plotType) {
-            case HISTOGRAM_PLOT:
-                return COLTYPE_PEPTIDE_PPM;
-            case SCATTER_PLOT:
-                return COLTYPE_PEPTIDE_CALCULATED_MASS;
+            case HISTOGRAM_PLOT: {
+                int[] cols = new int[2];
+                cols[0] = COLTYPE_PEPTIDE_PPM;
+                cols[1] = -1;
+                return cols;
+            }
+            case SCATTER_PLOT: {
+                 int[] cols = new int[2];
+                cols[0] = COLTYPE_PEPTIDE_CALCULATED_MASS;
+                cols[1] = COLTYPE_PEPTIDE_SCORE;
+                return cols;
+            }
         }
-        return -1;
-    }
-
-    @Override
-    public int getBestYAxisColIndex(PlotType plotType) {
-        switch (plotType) {
-            case SCATTER_PLOT:
-                return COLTYPE_PEPTIDE_SCORE;
-        }
-        return -1;
+        return null;
     }
 
     @Override

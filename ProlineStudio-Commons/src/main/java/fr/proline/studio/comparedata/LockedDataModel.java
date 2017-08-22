@@ -111,20 +111,13 @@ public class LockedDataModel implements CompareDataInterface, BestGraphicsInterf
     }
 
     @Override
-    public int getBestXAxisColIndex(PlotType plotType) {
+    public int[] getBestColIndex(PlotType plotType) {
         if (m_src instanceof BestGraphicsInterface) {
-            return ((BestGraphicsInterface) m_src).getBestXAxisColIndex(plotType);
+            return ((BestGraphicsInterface) m_src).getBestColIndex(plotType);
         }
-        return -1;
+        return null;
     }
 
-    @Override
-    public int getBestYAxisColIndex(PlotType plotType) {
-        if (m_src instanceof BestGraphicsInterface) {
-            return ((BestGraphicsInterface) m_src).getBestYAxisColIndex(plotType);
-        }
-        return -1;
-    }
 
     @Override
     public Map<String, Object> getExternalData() {

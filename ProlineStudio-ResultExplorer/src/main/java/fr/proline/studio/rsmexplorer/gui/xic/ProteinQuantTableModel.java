@@ -229,18 +229,19 @@ public class ProteinQuantTableModel extends LazyTableModel implements GlobalTabl
         return PlotType.LINEAR_PLOT;
     }
 
-    @Override
-    public int getBestXAxisColIndex(PlotType plotType) {
-        switch (plotType) {
-            case LINEAR_PLOT:
-                return COLTYPE_QC_NAME;
-        }
-        return -1;
-    }
 
     @Override
-    public int getBestYAxisColIndex(PlotType plotType) {
-        return COLTYPE_RAW_ABUNDANCE;
+    public int[] getBestColIndex(PlotType plotType) {
+ 
+        switch (plotType) {
+            case LINEAR_PLOT: {
+                int[] cols = new int[2];
+                cols[0] = COLTYPE_QC_NAME;
+                cols[1] = COLTYPE_RAW_ABUNDANCE;
+                return cols;
+            }
+        }
+        return null;
     }
 
     @Override

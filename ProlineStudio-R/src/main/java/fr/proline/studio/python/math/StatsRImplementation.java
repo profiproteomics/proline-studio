@@ -604,20 +604,16 @@ public class StatsRImplementation {
         final int colLogFC = colPValue + 1;
         ExprTableModel model = new ExprTableModel(t.getModel()) {
             @Override
-            public int getBestXAxisColIndex(PlotType plotType) {
+            public int[] getBestColIndex(PlotType plotType) {
                 if (plotType == SCATTER_PLOT) {
-                    return colLogFC;
+                    int[] cols = new int[2];
+                    cols[0] = colLogFC;
+                    cols[1] = colPValue;
+                    return cols;
                 }
-                return super.getBestXAxisColIndex(plotType);
+                return super.getBestColIndex(plotType);
             }
 
-            @Override
-            public int getBestYAxisColIndex(PlotType plotType) {
-                if (plotType == SCATTER_PLOT) {
-                    return colPValue;
-                }
-                return super.getBestYAxisColIndex(plotType);
-            }
             
             public PlotType getBestPlotType() {
                 return PlotType.SCATTER_PLOT;

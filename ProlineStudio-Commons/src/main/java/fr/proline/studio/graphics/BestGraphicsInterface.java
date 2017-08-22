@@ -7,6 +7,5 @@ package fr.proline.studio.graphics;
 public interface BestGraphicsInterface {
     
     public PlotType getBestPlotType();
-    public int getBestXAxisColIndex(PlotType plotType);
-    public int getBestYAxisColIndex(PlotType plotType);
+    public int[] getBestColIndex(PlotType plotType);
 }

@@ -843,26 +843,28 @@ public class PeptideMatchTableModel extends LazyTableModel implements GlobalTabl
         return PlotType.HISTOGRAM_PLOT;
     }
 
-    @Override
-    public int getBestXAxisColIndex(PlotType plotType) {
-        switch (plotType) {
-            case HISTOGRAM_PLOT:
-                return convertColToColUsed(COLTYPE_PEPTIDE_PPM);
-            case SCATTER_PLOT:
-                return convertColToColUsed(COLTYPE_PEPTIDE_CALCULATED_MASS);
-        }
-        return -1;
-    }
 
     @Override
-    public int getBestYAxisColIndex(PlotType plotType) {
+    public int[] getBestColIndex(PlotType plotType) {
+ 
         switch (plotType) {
-            case SCATTER_PLOT:
-                return convertColToColUsed(COLTYPE_PEPTIDE_SCORE);
+            case HISTOGRAM_PLOT: {
+                int[] cols = new int[2];
+                cols[0] = convertColToColUsed(COLTYPE_PEPTIDE_PPM);
+                cols[1] = convertColToColUsed(COLTYPE_PEPTIDE_SCORE);
+                return cols;
+            }
+            case SCATTER_PLOT: {
+                int[] cols = new int[2];
+                cols[0] = convertColToColUsed(COLTYPE_PEPTIDE_CALCULATED_MASS);
+                cols[1] = convertColToColUsed(COLTYPE_PEPTIDE_SCORE);
+                return cols;
+            }
         }
-        return -1;
+        return null;
     }
-
+    
+    
     @Override
     public int getInfoColumn() {
         return convertColToColUsed(COLTYPE_PEPTIDE_NAME);

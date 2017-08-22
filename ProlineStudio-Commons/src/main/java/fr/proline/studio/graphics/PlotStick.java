@@ -24,7 +24,7 @@ import java.util.Map;
  *
  * @author JM235353
  */
-public class PlotStick extends PlotAbstract {
+public class PlotStick extends PlotXYAbstract {
 
     private double m_xMin;
     private double m_xMax;
@@ -71,7 +71,10 @@ public class PlotStick extends PlotAbstract {
 
     public PlotStick(BasePlotPanel plotPanel, CompareDataInterface compareDataInterface, CrossSelectionInterface crossSelectionInterface, int colX, int colY) {
         super(plotPanel, PlotType.SCATTER_PLOT, compareDataInterface, crossSelectionInterface);
-        update(colX, colY, null);
+        int[] cols = new int[2]; //JPM.TODO enhance
+        cols[COL_X_ID] = colX;
+        cols[COL_Y_ID] = colY;
+        update(cols, null);
 
         // Color parameter
         ParameterList colorParameterList = new ParameterList("Colors");
@@ -365,14 +368,14 @@ public class PlotStick extends PlotAbstract {
             if (xAsEnum) {
                 m_dataX[i] = i;
             } else {
-                Object value = m_compareDataInterface.getDataValueAt(i, m_colX);
+                Object value = m_compareDataInterface.getDataValueAt(i, m_cols[COL_X_ID]);
                 m_dataX[i] = (value == null || !Number.class.isAssignableFrom(value.getClass())) ? Double.NaN : ((Number) value).doubleValue(); //CBy TODO : ne pas avoir a tester le type Number
             }
             
             if (yAsEnum) {
                  m_dataY[i] = i;
             } else {
-                Object value = m_compareDataInterface.getDataValueAt(i, m_colY);
+                Object value = m_compareDataInterface.getDataValueAt(i, m_cols[COL_Y_ID]);
                 m_dataY[i] = (value == null || !Number.class.isAssignableFrom(value.getClass())) ? Double.NaN : ((Number) value).doubleValue(); //CBy TODO : ne pas avoir a tester le type Number
             }
             m_selected[i] = false;
@@ -506,8 +509,8 @@ public class PlotStick extends PlotAbstract {
         }
 
         m_plotPanel.updateAxis(this);
-        m_plotPanel.setXAxisTitle(m_compareDataInterface.getDataColumnIdentifier(m_colX));
-        m_plotPanel.setYAxisTitle(m_compareDataInterface.getDataColumnIdentifier(m_colY));
+        m_plotPanel.setXAxisTitle(m_compareDataInterface.getDataColumnIdentifier(m_cols[COL_X_ID]));
+        m_plotPanel.setYAxisTitle(m_compareDataInterface.getDataColumnIdentifier(m_cols[COL_Y_ID]));
     }
 
     private void setGradientValues() {
@@ -740,7 +743,7 @@ public class PlotStick extends PlotAbstract {
             return "";
         }
 
-        return m_compareDataInterface.getDataValueAt(index, m_colX).toString();
+        return m_compareDataInterface.getDataValueAt(index, m_cols[COL_X_ID]).toString();
 
     }
 
@@ -750,7 +753,7 @@ public class PlotStick extends PlotAbstract {
             return "";
         }
 
-        return m_compareDataInterface.getDataValueAt(index, m_colY).toString();
+        return m_compareDataInterface.getDataValueAt(index, m_cols[COL_Y_ID]).toString();
     }
     
     public void setStrokeFixed(boolean b){

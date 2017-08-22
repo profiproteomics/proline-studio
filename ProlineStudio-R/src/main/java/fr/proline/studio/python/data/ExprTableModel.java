@@ -365,20 +365,16 @@ public class ExprTableModel extends DecoratedTableModel implements ChildModelInt
     }
 
     @Override
-    public int getBestXAxisColIndex(PlotType plotType) {
+    public int[] getBestColIndex(PlotType plotType) {
         if (m_bestPlotType != null) {
-            return m_bestXAxisColIndex;
+            int[] cols = new int[2];
+            cols[0] = m_bestXAxisColIndex;
+            cols[1] = m_bestYAxisColIndex;
+            return cols;
         }
-        return m_parentModel.getBestXAxisColIndex(plotType);
+        return m_parentModel.getBestColIndex(plotType);
     }
 
-    @Override
-    public int getBestYAxisColIndex(PlotType plotType) {
-        if (m_bestPlotType != null) {
-            return m_bestYAxisColIndex;
-        }
-        return m_parentModel.getBestYAxisColIndex(plotType);
-    }
 
     public void setBestPlot(int bestXAxisColIndex, int bestYAxisColIndex, PlotType bestPlotType) {
         m_bestXAxisColIndex = bestXAxisColIndex;

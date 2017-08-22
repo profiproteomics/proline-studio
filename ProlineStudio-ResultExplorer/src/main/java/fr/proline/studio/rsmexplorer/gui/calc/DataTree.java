@@ -1,5 +1,6 @@
 package fr.proline.studio.rsmexplorer.gui.calc;
 
+import fr.proline.studio.graphics.PlotType;
 import fr.proline.studio.python.data.Table;
 import fr.proline.studio.python.data.TableInfo;
 import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
@@ -24,8 +25,9 @@ import fr.proline.studio.rsmexplorer.gui.calc.graphics.AbstractGraphic;
 import fr.proline.studio.rsmexplorer.gui.calc.graphics.BoxPlotGraphic;
 import fr.proline.studio.rsmexplorer.gui.calc.graphics.CalibrationPlotGraphic;
 import fr.proline.studio.rsmexplorer.gui.calc.graphics.DensityPlotGraphic;
-import fr.proline.studio.rsmexplorer.gui.calc.graphics.ScatterGraphic;
+import fr.proline.studio.rsmexplorer.gui.calc.graphics.ScatterOrHistogramGraphic;
 import fr.proline.studio.rsmexplorer.gui.calc.graphics.VarianceDistPlotGraphic;
+import fr.proline.studio.rsmexplorer.gui.calc.graphics.VennDiagramGraphic;
 import fr.proline.studio.rsmexplorer.gui.calc.macros.AbstractMacro;
 import fr.proline.studio.rsmexplorer.gui.calc.macros.ProStarMacro;
 import fr.proline.studio.table.GlobalTableModelInterface;
@@ -248,10 +250,16 @@ public abstract class DataTree extends JTree {
         node = new GraphicNode(new DensityPlotGraphic(null));
         parentGraphicNode.add(node);
         
-        node = new GraphicNode(new ScatterGraphic(null));
+        node = new GraphicNode(new ScatterOrHistogramGraphic(null, PlotType.HISTOGRAM_PLOT));
+        parentGraphicNode.add(node);
+        
+        node = new GraphicNode(new ScatterOrHistogramGraphic(null, PlotType.SCATTER_PLOT));
         parentGraphicNode.add(node);
         
         node = new GraphicNode(new VarianceDistPlotGraphic(null));
+        parentGraphicNode.add(node);
+        
+        node = new GraphicNode(new VennDiagramGraphic(null));
         parentGraphicNode.add(node);
         
         DefaultTreeModel model = (DefaultTreeModel) getModel();

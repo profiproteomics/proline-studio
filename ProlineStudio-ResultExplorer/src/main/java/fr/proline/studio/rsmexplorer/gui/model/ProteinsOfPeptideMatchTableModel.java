@@ -326,13 +326,8 @@ public class ProteinsOfPeptideMatchTableModel extends LazyTableModel implements 
     }
 
     @Override
-    public int getBestXAxisColIndex(PlotType plotType) {
-        return -1; //JPM.TODO
-    }
-
-    @Override
-    public int getBestYAxisColIndex(PlotType plotType) {
-        return -1; //JPM.TODO
+    public int[] getBestColIndex(PlotType plotType) {
+        return null;
     }
 
     @Override

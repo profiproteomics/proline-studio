@@ -208,14 +208,10 @@ public class LockedFilterTableModel extends DecoratedTableModel implements Globa
     }
 
     @Override
-    public int getBestXAxisColIndex(PlotType plotType) {
-        return m_tableModelSource.getBestXAxisColIndex(plotType);
+    public int[] getBestColIndex(PlotType plotType) {
+        return m_tableModelSource.getBestColIndex(plotType);
     }
 
-    @Override
-    public int getBestYAxisColIndex(PlotType plotType) {
-        return m_tableModelSource.getBestYAxisColIndex(plotType);
-    }
 
     @Override
     public String getExportRowCell(int row, int col) {

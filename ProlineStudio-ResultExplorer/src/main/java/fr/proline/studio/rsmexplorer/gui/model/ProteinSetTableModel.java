@@ -546,22 +546,27 @@ public class ProteinSetTableModel extends LazyTableModel implements GlobalTableM
         return PlotType.HISTOGRAM_PLOT;
     }
 
+    
     @Override
-    public int getBestXAxisColIndex(PlotType plotType) {
-                switch (plotType) {
-            case HISTOGRAM_PLOT:
-                return COLTYPE_PEPTIDES_COUNT;
-            case SCATTER_PLOT:
-                return COLTYPE_PEPTIDES_COUNT;
+    public int[] getBestColIndex(PlotType plotType) {
+ 
+        switch (plotType) {
+            case HISTOGRAM_PLOT: {
+                int[] cols = new int[2];
+                cols[0] = COLTYPE_PEPTIDES_COUNT;
+                cols[1] = COLTYPE_PROTEIN_SCORE;
+                return cols;
+            }
+            case SCATTER_PLOT: {
+                int[] cols = new int[2];
+                cols[0] = COLTYPE_PEPTIDES_COUNT;
+                cols[1] = COLTYPE_PROTEIN_SCORE;
+                return cols;
+            }
         }
-        return -1;
+        return null;
     }
-
-    @Override
-    public int getBestYAxisColIndex(PlotType plotType) {
-        return COLTYPE_PROTEIN_SCORE;
-    }
-
+    
     @Override
     public String getExportRowCell(int row, int col) {
         if (col == COLTYPE_PROTEINS_COUNT) {

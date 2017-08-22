@@ -582,14 +582,10 @@ public class TasksPanel extends AbstractTasksPanel {
         }
 
         @Override
-        public int getBestXAxisColIndex(PlotType plotType) {
-            return -1; // not used
+        public int[] getBestColIndex(PlotType plotType) {
+            return null; // not used
         }
 
-        @Override
-        public int getBestYAxisColIndex(PlotType plotType) {
-            return -1; // not used
-        }
 
         @Override
         public String getExportRowCell(int row, int col) {

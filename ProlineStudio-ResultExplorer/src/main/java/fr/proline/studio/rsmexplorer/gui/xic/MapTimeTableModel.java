@@ -215,13 +215,17 @@ public class MapTimeTableModel  extends LazyTableModel implements GlobalTableMod
     }
 
     @Override
-    public int getBestXAxisColIndex(PlotType plotType) {
-        return COLTYPE_TIME;
-    }
-
-    @Override
-    public int getBestYAxisColIndex(PlotType plotType) {
-        return COLTYPE_DELTA_TIME;
+    public int[] getBestColIndex(PlotType plotType) {
+ 
+        switch (plotType) {
+            case LINEAR_PLOT: {
+                int[] cols = new int[2];
+                cols[0] = COLTYPE_TIME;
+                cols[1] = COLTYPE_DELTA_TIME;
+                return cols;
+            }
+        }
+        return null;
     }
 
     @Override

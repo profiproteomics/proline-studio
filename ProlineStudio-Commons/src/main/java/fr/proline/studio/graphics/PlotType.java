@@ -9,35 +9,39 @@ import java.util.HashSet;
  */
 public enum PlotType {
 
-    HISTOGRAM_PLOT("Histogram", "on", null, "as"),
-    SCATTER_PLOT("Scatter Plot", "X Axis:", "Y Axis:", null),
-    LINEAR_PLOT("Linear Plot", "X Axis:", "Y Axis:", null);
+    HISTOGRAM_PLOT("Histogram", false, "on", null, "as"),
+    SCATTER_PLOT("Scatter Plot", false, "X Axis:", "Y Axis:", null),
+    VENN_DIAGRAM_PLOT("Venn Diagram", true, "Data:", null, null),
+    LINEAR_PLOT("Linear Plot", false, "X Axis:", "Y Axis:", null);
     
-    public static PlotType[] ALL_PLOTS = { HISTOGRAM_PLOT, SCATTER_PLOT };
+    public static PlotType[] ALL_PLOTS = { HISTOGRAM_PLOT, SCATTER_PLOT, VENN_DIAGRAM_PLOT };
     public static PlotType[] LINEAR_PLOTS = {LINEAR_PLOT};
     
-    private PlotType(/*int index,*/ String name, String xLabel, String yLabel, String zLabel) {
-        //m_index = index;
+    private PlotType(String name, boolean illimitedAxis, String xLabel, String yLabel, String zLabel) {
+        m_illimitedAxis = illimitedAxis;
         m_name = name;
         m_xLabel = xLabel;
         m_yLabel = yLabel;
         m_zLabel = zLabel;
     }
     
-    //private final int m_index;
+    private final boolean m_illimitedAxis;
     private final String m_name;
     private final String m_xLabel;
     private final String m_yLabel;
     private final String m_zLabel;
     
+    public boolean needsMultiData() {
+        return m_illimitedAxis;
+    }
     public boolean needsX() {
-        return m_xLabel != null;
+        return (m_xLabel != null) && (!m_illimitedAxis);
     }
     public boolean needsY() {
-        return m_yLabel != null;
+        return (m_yLabel != null) && (!m_illimitedAxis);
     }
     public boolean needsZ() {
-        return m_zLabel != null;
+        return (m_zLabel != null) && (!m_illimitedAxis);
     }
     
     public String getXLabel() {
@@ -62,6 +66,7 @@ public enum PlotType {
         HashSet<Class> acceptedValues = new HashSet(3);
         
         switch (this) {
+            case VENN_DIAGRAM_PLOT:
             case HISTOGRAM_PLOT: 
                 acceptedValues.add(Double.class);
                 acceptedValues.add(Float.class);
@@ -73,7 +78,7 @@ public enum PlotType {
                 acceptedValues.add(Float.class);
                 acceptedValues.add(Integer.class);
                 acceptedValues.add(String.class);
-                break;
+                break;         
         }
         return acceptedValues;
     }
@@ -83,6 +88,7 @@ public enum PlotType {
         HashSet<Class> acceptedValues = new HashSet(2);
         
         switch (this) {
+            case VENN_DIAGRAM_PLOT:
             case HISTOGRAM_PLOT: 
                 break;
             case SCATTER_PLOT: 
@@ -105,6 +111,7 @@ public enum PlotType {
             }
             case SCATTER_PLOT:
             case LINEAR_PLOT:
+            case VENN_DIAGRAM_PLOT:
             default:
                 return null;
         }

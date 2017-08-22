@@ -4,7 +4,13 @@ import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.comparedata.LockedDataModel;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.graphics.BasePlotPanel.GridListener;
+import static fr.proline.studio.graphics.PlotBaseAbstract.COL_X_ID;
+import static fr.proline.studio.graphics.PlotBaseAbstract.COL_Y_ID;
+import fr.proline.studio.gui.AdvancedSelectionPanel;
 import fr.proline.studio.gui.HourglassPanel;
+import fr.proline.studio.parameter.DefaultParameterDialog;
+import fr.proline.studio.parameter.MultiObjectParameter;
+import fr.proline.studio.parameter.ParameterList;
 import fr.proline.studio.parameter.SettingsButton;
 import fr.proline.studio.utils.IconManager;
 import java.awt.BorderLayout;
@@ -13,6 +19,7 @@ import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import javax.swing.Box;
 import javax.swing.DefaultComboBoxModel;
@@ -22,6 +29,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
+import org.openide.windows.WindowManager;
 
 /**
  *
@@ -35,11 +43,14 @@ public class BaseGraphicsPanel extends HourglassPanel implements GridListener {
     private JComboBox<String> m_valueXComboBox;
     private JComboBox<String> m_valueYComboBox;
     private JComboBox<String> m_valueZComboBox;
+    private JButton m_selectDataColumnsButton;
     private JLabel m_valueXLabel;
     private JLabel m_valueYLabel;
     private JLabel m_valueZLabel;
     
-    private PlotAbstract m_plotGraphics = null;
+    private MultiObjectParameter m_columnsParameter = null;
+    
+    private PlotBaseAbstract m_plotGraphics = null;
     
     private CompareDataInterface m_values = null;
     private CrossSelectionInterface m_crossSelectionInterface = null;
@@ -64,7 +75,7 @@ public class BaseGraphicsPanel extends HourglassPanel implements GridListener {
 
     }
     
-    public PlotAbstract getPlotGraphics() {
+    public PlotBaseAbstract getPlotGraphics() {
         return m_plotGraphics;
     }
     
@@ -204,6 +215,7 @@ public class BaseGraphicsPanel extends HourglassPanel implements GridListener {
         m_valueXComboBox = new JComboBox();
         m_valueYComboBox = new JComboBox();
         m_valueZComboBox = new JComboBox();
+        m_selectDataColumnsButton = new JButton("Select Data Columns");
         m_valueXLabel = new JLabel();
         m_valueYLabel = new JLabel();
         m_valueZLabel = new JLabel();
@@ -217,8 +229,66 @@ public class BaseGraphicsPanel extends HourglassPanel implements GridListener {
                     return;
                 }
                 
+                m_plotPanel.resetAxis();
+                
                 fillXYCombobox(false);
                 updateXYCbxVisibility();
+                
+            }
+        });
+        
+        m_selectDataColumnsButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                
+                ParameterList parameterList = new ParameterList("MULTI_COLUMNS_GRAPHICS");
+                
+                if (m_columnsParameter == null) {
+
+                    ArrayList<String> columnNamesArrayList = new ArrayList<>();
+                    ArrayList<Integer> columnIdsArrayList = new ArrayList<>();
+
+                    int nbColumns = m_values.getColumnCount();
+                    for (int i = 0; i < nbColumns; i++) {
+                        Class c = m_values.getDataColumnClass(i);
+                        if ((c.equals(Double.class)) || (c.equals(Float.class)) || (c.equals(Long.class)) || (c.equals(Integer.class))) {
+                            columnNamesArrayList.add(m_values.getDataColumnIdentifier(i));
+                            columnIdsArrayList.add(i);
+                        }
+                    }
+
+                    int nb = columnNamesArrayList.size();
+
+                    boolean[] selection = new boolean[nb];
+                    for (int i = 0; i < nb; i++) {
+                        selection[i] = false;
+                    }
+
+                    Object[] columnNamesArray = columnNamesArrayList.toArray(new String[nb]);
+                    Object[] columnIdsArray = columnIdsArrayList.toArray(new Integer[nb]);
+
+                    m_columnsParameter = new MultiObjectParameter("MULTI_COLUMNS", "Columns Selection", "Selected Columns", "Unselected Columns", AdvancedSelectionPanel.class, columnNamesArray, columnIdsArray, selection, null);
+
+                }
+                parameterList.add(m_columnsParameter);
+                
+                ArrayList<ParameterList> parameterListArray = new ArrayList<>(1);
+                parameterListArray.add(parameterList);
+                
+                DefaultParameterDialog parameterDialog = new DefaultParameterDialog(WindowManager.getDefault().getMainWindow(), "Columns Parameters", parameterListArray);
+                parameterDialog.setLocationRelativeTo(m_plotPanel);
+                parameterDialog.setVisible(true);
+                
+                if (parameterDialog.getButtonClicked() == DefaultParameterDialog.BUTTON_OK) {
+                    ArrayList<Integer> selectedColumnsList = (ArrayList<Integer>) m_columnsParameter.getAssociatedValues(true);
+                    int nbSelected = selectedColumnsList.size();
+
+                    int[] cols = new int[nbSelected];
+                    for (int i = 0; i < nbSelected; i++) {
+                        cols[i] = selectedColumnsList.get(i);
+                    }
+                    m_plotGraphics.update(cols, null);
+                }
                 
             }
         });
@@ -236,6 +306,9 @@ public class BaseGraphicsPanel extends HourglassPanel implements GridListener {
         
         c.gridx++;
         selectPanel.add(m_valueXComboBox, c);
+        
+        c.gridx++;
+        selectPanel.add(m_selectDataColumnsButton, c);
         
         c.gridx++;
         selectPanel.add(m_valueYLabel, c);
@@ -260,8 +333,10 @@ public class BaseGraphicsPanel extends HourglassPanel implements GridListener {
     private void updateXYCbxVisibility() {
         PlotType plotType = (PlotType) m_allPlotsComboBox.getSelectedItem();
         
-        m_valueXLabel.setVisible(plotType.needsX());
+        m_valueXLabel.setVisible(plotType.needsX() || plotType.needsMultiData());
         m_valueXComboBox.setVisible(plotType.needsX());
+        
+        m_selectDataColumnsButton.setVisible(plotType.needsMultiData());
         
         m_valueYLabel.setVisible(plotType.needsY());
         m_valueYComboBox.setVisible(plotType.needsY());
@@ -269,7 +344,7 @@ public class BaseGraphicsPanel extends HourglassPanel implements GridListener {
         m_valueZLabel.setVisible(plotType.needsZ());
         m_valueZComboBox.setVisible(plotType.needsZ());
         
-        if (plotType.needsX()) {
+        if (plotType.needsX() || plotType.needsMultiData()) {
             m_valueXLabel.setText(plotType.getXLabel());
         }
         if (plotType.needsY()) {
@@ -319,14 +394,12 @@ public class BaseGraphicsPanel extends HourglassPanel implements GridListener {
             int bestColY = -1;
             if (m_values instanceof BestGraphicsInterface) {
                 BestGraphicsInterface bestGraphics = (BestGraphicsInterface) m_values;
-                int col = bestGraphics.getBestXAxisColIndex(plotType);
-                if (col != -1) {
-                    bestColX = col;
+                int[] cols = bestGraphics.getBestColIndex(plotType);
+                if (cols!= null) {
+                    bestColX = cols[0];
+                    bestColY = cols[1];
                 }
-                col = bestGraphics.getBestYAxisColIndex(plotType);
-                if (col != -1) {
-                    bestColY = col;
-                }
+
             }
 
             // fill the comboboxes and find the index to be selected
@@ -416,7 +489,7 @@ public class BaseGraphicsPanel extends HourglassPanel implements GridListener {
     }
     private void setDataImpl(CompareDataInterface values, CrossSelectionInterface crossSelectionInterface) {
 
-          m_values = values;
+        m_values = values;
         m_crossSelectionInterface = crossSelectionInterface;
         
         if (values == null) {
@@ -438,7 +511,11 @@ public class BaseGraphicsPanel extends HourglassPanel implements GridListener {
                     ReferenceIdName refX = (ReferenceIdName) m_valueXComboBox.getSelectedItem();
                     ReferenceIdName refY = (ReferenceIdName) m_valueYComboBox.getSelectedItem();
                     String zParameter = (String) m_valueZComboBox.getSelectedItem();
-                    m_plotGraphics.update(refX.getColumnIndex(), refY.getColumnIndex(), zParameter);
+                    
+                    int[] cols = new int[2]; //JPM.TODO enhance
+                    cols[COL_X_ID] = refX.getColumnIndex();
+                    cols[COL_Y_ID] = refY.getColumnIndex();
+                    m_plotGraphics.update(cols, zParameter);
                 }
                 
             };
@@ -450,10 +527,77 @@ public class BaseGraphicsPanel extends HourglassPanel implements GridListener {
             
         }
         
+        PlotType plotType = (PlotType) m_allPlotsComboBox.getSelectedItem();
+   
+        int[] cols = null;
+        if (m_columnsParameter == null) {
+
+            if (m_values instanceof BestGraphicsInterface) {
+                BestGraphicsInterface bestGraphics = (BestGraphicsInterface) m_values;
+                cols = bestGraphics.getBestColIndex(PlotType.VENN_DIAGRAM_PLOT);
+
+                boolean[] done = null;
+                if (cols != null) {
+                    done = new boolean[cols.length];
+                    Arrays.fill(done, Boolean.FALSE);
+                }
+                
+                ArrayList<String> columnNamesArrayList = new ArrayList<>();
+                ArrayList<Integer> columnIdsArrayList = new ArrayList<>();
+
+                int nbColumns = m_values.getColumnCount();
+                int indexCur = 0;
+                for (int i = 0; i < nbColumns; i++) {
+                    Class c = m_values.getDataColumnClass(i);
+                    if ((c.equals(Double.class)) || (c.equals(Float.class)) || (c.equals(Long.class)) || (c.equals(Integer.class))) {
+                        columnNamesArrayList.add(m_values.getDataColumnIdentifier(i));
+                        columnIdsArrayList.add(i);
+                        
+                        if (cols != null) {
+                            for (int j = 0; j < cols.length; j++) {
+                                if ((!done[j]) && (cols[j] == i)) {
+                                    cols[j] = indexCur;
+                                    done[j] = true;
+                                }
+                            }
+                        }
+                        indexCur++;
+                    }
+                }
+
+                int nb = columnNamesArrayList.size();
+
+                boolean[] selection = new boolean[nb];
+                for (int i = 0; i < nb; i++) {
+                    selection[i] = false;
+                }
+                if (cols != null) {
+                    for (int j = 0; j < cols.length; j++) {
+                        selection[cols[j]] = true;
+                    }
+                }
+
+                Object[] columnNamesArray = columnNamesArrayList.toArray(new String[nb]);
+                Object[] columnIdsArray = columnIdsArrayList.toArray(new Integer[nb]);
+
+                m_columnsParameter = new MultiObjectParameter("MULTI_COLUMNS", "Columns Selection", "Selected Columns", "Unselected Columns", AdvancedSelectionPanel.class, columnNamesArray, columnIdsArray, selection, null);
+                m_columnsParameter.getComponent(null); // finalize initialization, to be able to retrieve selected cols.
+            }
+        } else {
+            
+            ArrayList<Integer> selectedColumnsList = (ArrayList<Integer>) m_columnsParameter.getAssociatedValues(true);
+            int nbSelected = selectedColumnsList.size();
+
+            cols = new int[nbSelected];
+            for (int i = 0; i < nbSelected; i++) {
+                cols[i] = selectedColumnsList.get(i);
+            }
+        }
+        
         ReferenceIdName refX = (ReferenceIdName) m_valueXComboBox.getSelectedItem();
         ReferenceIdName refY = (ReferenceIdName) m_valueYComboBox.getSelectedItem();
         String zParameter = (String) m_valueZComboBox.getSelectedItem();
-        PlotType plotType = (PlotType) m_allPlotsComboBox.getSelectedItem();
+        
         switch (plotType) {
             case HISTOGRAM_PLOT:
                 m_plotGraphics = new PlotHistogram(m_plotPanel, m_values, m_crossSelectionInterface, refX.getColumnIndex(), zParameter);
@@ -461,6 +605,10 @@ public class BaseGraphicsPanel extends HourglassPanel implements GridListener {
                 break;
             case SCATTER_PLOT:
                 m_plotGraphics = new PlotScatter(m_plotPanel, m_values, m_crossSelectionInterface, refX.getColumnIndex(), refY.getColumnIndex());
+                m_plotPanel.setPlot(m_plotGraphics);
+                break;
+            case VENN_DIAGRAM_PLOT:
+                m_plotGraphics = new PlotVennDiagram(m_plotPanel, m_values, m_crossSelectionInterface, cols);
                 m_plotPanel.setPlot(m_plotGraphics);
                 break;
             case LINEAR_PLOT:

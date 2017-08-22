@@ -12,15 +12,13 @@ import fr.proline.studio.graphics.PlotType;
 public class LockedDataGraphicsModel extends LockedDataModel {
 
     private PlotType m_bestPlotType;
-    private int m_bestXAxisColIndex;
-    private int m_bestYAxisColIndex;
+    private int[] m_bestColsIndex;
     
-    public LockedDataGraphicsModel(CompareDataInterface srcData, PlotType bestPlotType, int bestXAxisColIndex, int bestYAxisColIndex) {
+    public LockedDataGraphicsModel(CompareDataInterface srcData, PlotType bestPlotType, int[] bestColsIndex) {
         super(srcData);
         
         m_bestPlotType = bestPlotType;
-        m_bestXAxisColIndex = bestXAxisColIndex;
-        m_bestYAxisColIndex = bestYAxisColIndex;
+        m_bestColsIndex = bestColsIndex;
     }
     
     @Override
@@ -28,17 +26,17 @@ public class LockedDataGraphicsModel extends LockedDataModel {
         return m_bestPlotType;
     }
     @Override
-    public int getBestXAxisColIndex(PlotType plotType) {
+    public int[] getBestColIndex(PlotType plotType) {
         if (plotType == m_bestPlotType) {
-            return m_bestXAxisColIndex;
+            if (m_bestColsIndex != null) {
+                int nb = m_bestColsIndex.length;
+                int[] copy = new int[nb];
+                System.arraycopy( m_bestColsIndex, 0, copy, 0, nb);
+                return copy;
+            }
+            return null;
         }
-        return super.getBestXAxisColIndex(plotType);
+        return super.getBestColIndex(plotType);
     }
-    @Override
-    public int getBestYAxisColIndex(PlotType plotType) {
-        if (plotType == m_bestPlotType) {
-            return m_bestYAxisColIndex;
-        }
-        return super.getBestYAxisColIndex(plotType);
-    }
+
 }

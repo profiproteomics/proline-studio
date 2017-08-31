@@ -6,7 +6,7 @@
     <parent>
         <artifactId>ProFI-Pom</artifactId>
         <groupId>fr.proline</groupId>
-        <version>0.3.0-SNAPSHOT</version>
+        <version>0.4.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>ProlineStudio-parent</artifactId>
@@ -72,10 +72,11 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-jar-plugin</artifactId>
                     <!-- Version inherited from ProFI-Pom -->
-                    <configuration>
-                        <!-- to have the jar plugin pickup the nbm generated manifest -->
-                        <useDefaultManifestFile>true</useDefaultManifestFile>
-                    </configuration>
+<configuration>
+    <archive>
+      <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
+    </archive>
+  </configuration>
                 </plugin>
 
                 <plugin>

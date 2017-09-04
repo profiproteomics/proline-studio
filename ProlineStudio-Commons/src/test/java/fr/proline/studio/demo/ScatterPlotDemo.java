@@ -65,6 +65,7 @@ public class ScatterPlotDemo extends JFrame {
 
           @Override
           public void prepostPopupMenu() {  }
+
        };
         table.setModel(sample.getTableModel());
         scroll.setViewportView(table);

@@ -812,7 +812,7 @@ public class PlotScatter extends PlotXYAbstract implements Axis.EnumXInterface, 
     }
     
     @Override
-    public boolean needsDoubleBuffering() {
+    public boolean getDoubleBufferingPolicy() {
         return m_dataX != null && m_dataX.length>2000;
     }
 

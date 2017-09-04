@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import org.apache.commons.math3.analysis.MultivariateFunction;
 
 import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.*;
@@ -49,12 +48,8 @@ public class SetList {
     }
     
     
-    public Color getColor(HashSet<Set> sets) {
-        int colorIndex = 0;
-        for (Set s: sets) {
-            int id = s.getId();
-            colorIndex += Math.pow(2, id);
-        }
+    public Color getColor(int colorIndex) {
+
         Color c = m_colorMap.get(colorIndex);
         if (c != null) {
             return c;
@@ -101,7 +96,7 @@ public class SetList {
     
     public void addSet(Set s) {
         int index = m_setArrayList.size();
-        s.setId(index);
+        //s.setId(index);
         m_setArrayList.add(s);
         m_setMap.put(s, index);
         
@@ -122,6 +117,11 @@ public class SetList {
         int nbPositionned = 0;
         
         int setNb = m_setArrayList.size();
+        
+        if (setNb == 0) {
+            return;
+        }
+        
         Set[] setArray = m_setArrayList.toArray(new Set[setNb]);
         Arrays.sort(setArray, Collections.reverseOrder());
         
@@ -236,6 +236,12 @@ public class SetList {
 
     }
     public void optimizeSolution() {
+        
+        int nb = m_setArrayList.size();
+        if (nb<2) {
+            return;
+        }
+        
         SimplexOptimizer optimizer = new SimplexOptimizer(1e-5, 1e-10); 
 
         EvaluateFunction evaluateFunction = new EvaluateFunction(m_setArrayList);
@@ -250,73 +256,56 @@ public class SetList {
     }
     
     
-    
-    
     public void generateAreas() {
-
         
+        int nb = m_setArrayList.size();
+        if (nb == 0) {
+            return;
+        }
+
         // Initialization
         // first List contains one IntersectArea corresponding to first Set
         // second List contains all other IntersectArea corresponding to all others Set
         ArrayList<IntersectArea> resultList = new ArrayList<>();
-        ArrayList<IntersectArea> setList = new ArrayList<>();
+        ArrayList<IntersectArea> todoList = new ArrayList<>();
         
-        int nb = m_setArrayList.size();
-        
-        IntersectArea pivotArea = new IntersectArea(m_setArrayList.get(0));
+        resultList.add(new IntersectArea(m_setArrayList.get(0)));
 
-        for (int i=1;i<nb;i++) {
-            setList.add(new IntersectArea(m_setArrayList.get(i)));
-        }
-
-        start:
-        while (pivotArea != null) {
-
-            //boolean intersectionFound = false;
-            int nbSecond = setList.size();
-            int secondListIndex = 0;
-            while (secondListIndex<nbSecond) {
-                IntersectArea a2  = setList.get(secondListIndex);
-
-                ArrayList<IntersectArea> intersectionResultList = pivotArea.intersect(a2);
-                if (intersectionResultList != null) {
-                   //intersectionFound = true;
-                   
-                   IntersectArea test1 = intersectionResultList.get(0);
-                   IntersectArea test2 = intersectionResultList.get(1);
-                   IntersectArea test3 = intersectionResultList.get(2);
-                   if ((test1.intersect(test2) != null) || (test3.intersect(test2) != null) || (test2.intersect(test3) != null)) {
-                       System.err.println(""); //JPM.TODO remove
-                   }
-                   
-                   setList.set(secondListIndex, intersectionResultList.get(0));
-                   for (int k=1;k<intersectionResultList.size();k++) {
-                        setList.add(secondListIndex, intersectionResultList.get(k));
-                   }
-                   pivotArea = setList.remove(0);
-
-                   // we restart the algorithm with the intersected areas
-
-                   continue start;
-                   
-                } // else no intersection, we let go the loop
-                
-                secondListIndex++;
-            }
-            
-            resultList.add(pivotArea);
-            if (setList.isEmpty()) {
-                break;
-            }
-
-            pivotArea = setList.remove(0);
-
+        for (int i = 1; i < nb; i++) {
+            todoList.add(new IntersectArea(m_setArrayList.get(i)));
         }
         
-        m_areas = resultList;
+        m_areas = generateAreasImpl(resultList, todoList);
 
     }
-    
+    private ArrayList<IntersectArea> generateAreasImpl(ArrayList<IntersectArea> resultList, ArrayList<IntersectArea> todoList) {
+        
+        if (todoList.isEmpty()) {
+            return resultList;
+        }
+        
+        IntersectArea pivotArea = todoList.remove(todoList.size()-1);
+        
+        boolean intersectionFound = false;
+        ArrayList<IntersectArea> resultListModified = new ArrayList<>();
+        for (IntersectArea area : resultList) {
+            ArrayList<IntersectArea> intersectionList = pivotArea.intersect(area);
+            if (intersectionList !=null) {
+                intersectionFound = true;
+                for (IntersectArea a : intersectionList) {
+                    resultListModified.add(a);
+                }
+            } else {
+                resultListModified.add(area);
+            }
+        }
+        if (!intersectionFound) {
+            resultListModified.add(pivotArea);
+        }
+        
+        return generateAreasImpl(resultListModified, todoList);
+    }
+
     public ArrayList<IntersectArea> getGeneratedAreas() {
         return m_areas;
     }

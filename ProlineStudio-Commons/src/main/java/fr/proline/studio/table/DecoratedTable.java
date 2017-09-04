@@ -563,5 +563,10 @@ public abstract class DecoratedTable extends JXTable implements CrossSelectionIn
         sorter.sort();
 
     }
+    
+    @Override
+    public boolean parametersCanceled() {
+        return false; // nothing has changed due to the parameter cancellation
+    }
 
 }

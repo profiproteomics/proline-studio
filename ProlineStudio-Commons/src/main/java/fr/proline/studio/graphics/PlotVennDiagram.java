@@ -7,14 +7,22 @@ import fr.proline.studio.graphics.venndiagram.Circle;
 import fr.proline.studio.graphics.venndiagram.IntersectArea;
 import fr.proline.studio.graphics.venndiagram.Set;
 import fr.proline.studio.graphics.venndiagram.SetList;
+import fr.proline.studio.parameter.ColorParameter;
+import fr.proline.studio.parameter.IntegerParameter;
 import fr.proline.studio.parameter.ParameterList;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.Rectangle;
 import java.awt.Stroke;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.awt.geom.Path2D;
 import java.util.ArrayList;
+import javax.swing.JSlider;
+import javax.swing.JSpinner;
 
 /**
  *
@@ -23,15 +31,69 @@ import java.util.ArrayList;
 public class PlotVennDiagram extends PlotMultiDataAbstract {
  
     private SetList m_setList = null;
-    
-    private static final BasicStroke STROKE_5 = new BasicStroke(5);
+
     
     private boolean firstPaint = true;
+    
+    private ArrayList<ParameterList> m_parameterListArray = null;
+    private final ColorParameter m_colorParameter;
+    private final IntegerParameter m_thicknessParameter;
+    private final IntegerParameter m_zoomParameter;
+    private final IntegerParameter m_rotateParameter;
+    private final IntegerParameter m_splitParameter;
+    private final IntegerParameter  m_xTranslationParameter;
+    private final IntegerParameter  m_yTranslationParameter;
+    private final ParameterList m_colorParameterList;
+    private final ArrayList<ColorParameter> m_colorAreaParameterList;
     
     public PlotVennDiagram(BasePlotPanel plotPanel, CompareDataInterface compareDataInterface, CrossSelectionInterface crossSelectionInterface, int[] cols) {
         super(plotPanel, PlotType.SCATTER_PLOT, compareDataInterface, crossSelectionInterface);
         
         update(cols, null); 
+        
+        ActionListener repaintAction = new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                m_plotPanel.forceUpdateDoubleBuffer();
+                m_plotPanel.repaint();
+            }
+
+        };
+        
+        m_colorParameterList = new ParameterList("Colors");
+        m_colorParameter = new ColorParameter("COLOR_BORDER_VENNDIAGRAM", "Border Color", Color.white);
+        m_colorParameterList.add(m_colorParameter);
+        m_thicknessParameter = new IntegerParameter("THICKNESS_BORDER_VENNDIAGRAM", "Border Thickness", JSpinner.class, 5, 1, 10);
+        m_colorParameterList.add(m_thicknessParameter);
+        
+        m_colorAreaParameterList = new ArrayList<>();
+
+        ParameterList transformationsParameterList = new ParameterList("Transformations");
+        m_rotateParameter = new IntegerParameter("ROTATE_FACTOR_VENNDIAGRAM", "Rotation", JSlider.class, 0, 0, 359);
+        m_zoomParameter = new IntegerParameter("ZOOM_FACTOR_VENNDIAGRAM", "Zooming", JSlider.class, 100, 10, 100);
+        m_splitParameter = new IntegerParameter("SPLIT_FACTOR_VENNDIAGRAM", "Splitting", JSlider.class, 0, 0, 200);
+        m_xTranslationParameter = new IntegerParameter("TRANSLATE_X_VENNDIAGRAM", "X Translation", JSlider.class, 0, -200, 200);
+        m_yTranslationParameter = new IntegerParameter("TRANSLATE_Y_VENNDIAGRAM", "Y Translation", JSlider.class, 0, -200, 200);
+        transformationsParameterList.add(m_rotateParameter);
+        transformationsParameterList.add(m_zoomParameter);
+        transformationsParameterList.add(m_splitParameter);
+        transformationsParameterList.add(m_xTranslationParameter);
+        transformationsParameterList.add(m_yTranslationParameter);
+        
+        
+        m_parameterListArray = new  ArrayList<>(2);
+        m_parameterListArray.add(transformationsParameterList);
+        m_parameterListArray.add(m_colorParameterList);
+        
+
+        
+        m_colorParameter.setExternalActionListener(repaintAction);
+        m_rotateParameter.setExternalActionListener(repaintAction);
+        m_zoomParameter.setExternalActionListener(repaintAction);
+        m_splitParameter.setExternalActionListener(repaintAction);
+        m_thicknessParameter.setExternalActionListener(repaintAction);
+        m_xTranslationParameter.setExternalActionListener(repaintAction);
+        m_yTranslationParameter.setExternalActionListener(repaintAction);
     }
 
     @Override
@@ -46,22 +108,36 @@ public class PlotVennDiagram extends PlotMultiDataAbstract {
 
     @Override
     public void parametersChanged() {
-        
+        int labelIndex = 0;
+        int areaIndex = 0;
+        for (IntersectArea intersectArea : m_setList.getGeneratedAreas()) {
+            Set s = intersectArea.getOnlySet();
+            if (s == null) {
+                areaIndex++;
+                continue;
+            }
+
+            LabelMarker marker = (LabelMarker) m_markersList.get(labelIndex);
+            marker.setReferenceColor(m_colorAreaParameterList.get(areaIndex).getColor());
+
+            labelIndex++;
+            areaIndex++;
+        }
     }
 
     @Override
-    public void paint(Graphics2D g) {
+    public void paint(Graphics2D g2d) {
 
         if (m_setList == null) {
             return;
         }
-        
-        Graphics2D g2d = (Graphics2D) g;
-        
+
         int width = m_plotPanel.getWidth();
         int height = m_plotPanel.getHeight();
-        
 
+
+        
+        
         boolean scaled = m_setList.scale(width, height, 10);
 
         if (scaled || firstPaint) {
@@ -72,65 +148,131 @@ public class PlotVennDiagram extends PlotMultiDataAbstract {
             m_plotPanel.getXAxis().setSize(0, height, width, 0);
             m_plotPanel.getYAxis().setSize(0, 0, 0, height);
         }
+
+        if (m_setList.getGeneratedAreas() == null) {
+            return;
+        }
+        
         
         if (firstPaint) {
             
             firstPaint = false;
 
-            
-            
+            prepareColorAreaParameterList();
             int labelIndex = 0;
+            int areaIndex = 0;
             for (IntersectArea intersectArea : m_setList.getGeneratedAreas()) {
                 Set s = intersectArea.getOnlySet();
                 if (s == null) {
+                    areaIndex++;
                     continue;
                 }
                 labelIndex++;
-                double percentageX = ((double) (width-100))/width;
-                double percentageY = 30d/height;
-                LabelMarker marker = new LabelMarker(m_plotPanel, new PercentageCoordinates(percentageX, percentageY*labelIndex), s.getName() , LabelMarker.ORIENTATION_XY_MIDDLE, LabelMarker.ORIENTATION_XY_MIDDLE, m_setList.getColor(intersectArea.getIntersectedMap()));
+                double percentageX = 60d/width;
+                double percentageY = 1-((30d*labelIndex)/height);
+                
+                LabelMarker marker = new LabelMarker(m_plotPanel, new PercentageCoordinates(percentageX, percentageY), s.getName() , LabelMarker.ORIENTATION_XY_MIDDLE, LabelMarker.ORIENTATION_XY_MIDDLE, m_colorAreaParameterList.get(areaIndex).getColor());
                 addMarker(marker);
+
+                areaIndex++;
+            }
+        }
+
+        AffineTransform previousTransform = g2d.getTransform();
+        
+ 
+        Integer translateX = (Integer) m_xTranslationParameter.getObjectValue();
+        double translateFactorX = (translateX!= null) ? translateX : 0;
+        Integer translateY = (Integer) m_yTranslationParameter.getObjectValue();
+        double translateFactorY = (translateY!= null) ? translateY : 0;
+        if ((translateFactorX!=0) || (translateFactorY!=0)) {
+            g2d.transform(AffineTransform.getTranslateInstance(translateFactorX, translateFactorY));
+        }
+        
+        Integer zoom = (Integer) m_zoomParameter.getObjectValue();
+        double zoomFactor = (zoom!= null) ? ((double)zoom)/100d : 1;
+        if ((zoom!= null) && (zoom < 100)) {
+            g2d.transform(AffineTransform.getScaleInstance(zoomFactor, zoomFactor));
+        }
+        
+        Integer rotation = (Integer) m_rotateParameter.getObjectValue();
+        if ((rotation!= null) && (rotation > 0)) {
+            
+            double angle = ((double) rotation.intValue())*Math.PI/180;
+            double centerX = (width/2) ; //* zoomFactor;
+            double centerY = (height/2) ; //* zoomFactor;
+            g2d.transform(AffineTransform.getRotateInstance( angle , centerX, centerY));
+
+        }
+        
+        Integer split = (Integer) m_splitParameter.getObjectValue();
+        double splitFactor = (split != null) ? split : 0;
+
+        int centerSplitX = width/2;
+        int centerSplitY = height/2;
+
+        // fill areas
+        ArrayList<Area> areaListForSplitFactor = null;
+        int index = 0;
+        for (IntersectArea intersectArea : m_setList.getGeneratedAreas()) {
+            g2d.setColor(m_colorAreaParameterList.get(index).getColor());
+            index++;
+
+            Area a = intersectArea.getArea();
+
+            if (splitFactor > 0) {
+                
+                Rectangle r = a.getBounds();
+                int centerX = r.x + r.width / 2;
+                int centerY = r.y + r.height / 2;
+                double trX = splitFactor*((double)(centerX-centerSplitX))/((double)(width-centerSplitX));
+                double trY = splitFactor*((double)(centerY-centerSplitY))/((double)(height-centerSplitY));
+                
+                Area splittedArea = a.createTransformedArea(AffineTransform.getTranslateInstance(trX, trY));
+                if (areaListForSplitFactor == null) {
+                    areaListForSplitFactor = new ArrayList();
+                }
+                areaListForSplitFactor.add(splittedArea);
+                g2d.fill(splittedArea);
+            } else {
+                
+                g2d.fill(a);
+            }
+
+        }
+
+       
+        
+        Color color = m_colorParameter.getColor();
+        g2d.setColor(color);
+        Stroke previousStroke = g2d.getStroke();
+        
+        Integer thickness = (Integer) m_thicknessParameter.getObjectValue();
+        if (thickness == null) {
+            thickness = 5;
+        }
+        g2d.setStroke( new BasicStroke(thickness));
+        
+        
+        if (splitFactor > 0) {
+            for (Area a : areaListForSplitFactor) {
+                g2d.draw(a);
+            }
+        } else {
+            for (Set set : m_setList.getList()) {
+                Circle c = set.getCircle();
+
+                int x = (int) Math.round(c.getX() - c.getRadius());
+                int y = (int) Math.round(c.getY() - c.getRadius());
+                int size = (int) Math.round(c.getRadius() * 2);
+                g2d.drawOval(x, y, size, size);
 
             }
         }
 
-        for (IntersectArea intersectArea : m_setList.getGeneratedAreas()) {
-            
-            //if (colorIndex == areaToPaint) {
-                g.setColor(m_setList.getColor(intersectArea.getIntersectedMap()));
-                Area a = intersectArea.getArea();
-                g2d.fill(a);
-                
-                /*g.setColor(Color.black);
-                g.drawString(String.valueOf(areaToPaint), 10, 10);*/
-            //}
-        }
-        /*areaToPaint++;
-        if (areaToPaint == m_setList.getGeneratedAreas().size()) {
-            areaToPaint = 0;
-        }*/
-        
-        g.setColor(Color.white);
-        Stroke previousStroke = g2d.getStroke();
-        g2d.setStroke(STROKE_5);
-        /*for (IntersectArea intersectArea : m_setList.getGeneratedAreas()) {
-
-            Area a = intersectArea.getArea();
-            g2d.draw(a);
-        }*/
-        
-        for (Set set : m_setList.getList()) {
-            Circle c = set.getCircle();
-
-            int x = (int) Math.round(c.getX() - c.getRadius());
-            int y = (int) Math.round(c.getY() - c.getRadius());
-            int size = (int) Math.round(c.getRadius() * 2);
-            g.drawOval(x, y, size, size);
-
-            //g.drawString(set.getName(), x+size/2, y+size/2);
-        }
-     
         g2d.setStroke(previousStroke);
+        
+        g2d.setTransform(previousTransform);
     }
 
     @Override
@@ -220,9 +362,78 @@ public class PlotVennDiagram extends PlotMultiDataAbstract {
 
     @Override
     public ArrayList<ParameterList> getParameters() {
-        return null;
+        
+        m_currentColor = (Color) m_colorParameter.getObjectValue();
+        m_currentThickness = m_thicknessParameter.getStringValue();
+        m_currentZoom = m_zoomParameter.getStringValue();
+        m_currentRotate = m_rotateParameter.getStringValue();
+        m_currentSplit = m_splitParameter.getStringValue();
+        m_currentXTranslation = m_xTranslationParameter.getStringValue();
+        m_currentYTranslation = m_yTranslationParameter.getStringValue();
+        
+        prepareColorAreaParameterList();
+        
+        
+        return m_parameterListArray;
     }
 
+    private void prepareColorAreaParameterList() {
+        int size = m_setList.getGeneratedAreas().size();
+        int sizeColor = m_colorAreaParameterList.size();
+        if (size != sizeColor) {
+            m_colorAreaParameterList.clear();
+
+            ActionListener repaintAction = new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    m_plotPanel.forceUpdateDoubleBuffer();
+                    m_plotPanel.repaint();
+                }
+
+            };
+
+            int index = 1;
+            for (IntersectArea intersectArea : m_setList.getGeneratedAreas()) {
+                ColorParameter param = new ColorParameter("COLOR_AREA_VENNDIAGRAM" + index, "Color " + index, m_setList.getColor((index-1)));
+                param.setExternalActionListener(repaintAction);
+                m_colorAreaParameterList.add(param);
+                m_colorParameterList.add(param);
+                index++;
+            }
+        }
+        
+        m_currentAreaColorList.clear();
+        for (ColorParameter parameter : m_colorAreaParameterList) {
+            m_currentAreaColorList.add(parameter.getColor());
+        }
+    }
+    
+    @Override
+    public boolean parametersCanceled() {
+        m_colorParameter.setColor(m_currentColor);
+        m_thicknessParameter.setValue(m_currentThickness);
+        m_zoomParameter.setValue(m_currentZoom);
+        m_rotateParameter.setValue(m_currentRotate);
+        m_splitParameter.setValue(m_currentSplit);
+        m_xTranslationParameter.setValue(m_currentXTranslation);
+        m_yTranslationParameter.setValue(m_currentYTranslation);
+        int index = 0;
+        for (ColorParameter parameter : m_colorAreaParameterList) {
+            parameter.setColor(m_currentAreaColorList.get(index));
+            index++;
+        }
+        
+        return true;
+    }
+    private Color m_currentColor;
+    private String m_currentThickness;
+    private String m_currentZoom;
+    private String m_currentRotate;
+    private String m_currentSplit;
+    private String m_currentXTranslation;
+    private String m_currentYTranslation;
+    private ArrayList<Color> m_currentAreaColorList = new ArrayList<>();
+    
     @Override
     public boolean isMouseOnPlot(double x, double y) {
         return false;

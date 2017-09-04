@@ -6,7 +6,9 @@ import fr.proline.studio.graphics.ColorOrGradient;
 import fr.proline.studio.graphics.colorpicker.ColorPickerPanel;
 import fr.proline.studio.utils.CyclicColorPalette;
 import fr.proline.studio.graphics.ColorButtonAndPalettePanel;
+import fr.proline.studio.graphics.colorpicker.ColorDataInterface;
 import java.awt.Color;
+import java.awt.event.ActionEvent;
 import javax.swing.JComponent;
 
 /**
@@ -56,6 +58,26 @@ public class ColorParameter extends AbstractParameter {
             colorButton.initActionListener();
             colorButton.setColor(startValue);
 
+            colorButton.addListener(new ColorDataInterface() {
+
+                @Override
+                public void propagateColorChanged(int r, int g, int b) {
+                    if (m_externalActionListener != null) {
+                        ActionEvent e = new ActionEvent(colorButton, -1, null);
+                        m_externalActionListener.actionPerformed(e);
+                    }
+                }
+                @Override
+                public int getRed() { return -1; }
+                @Override
+                public int getGreen() { return -1; }
+                @Override
+                public int getBlue() { return -1; }
+                @Override
+                public void addListener(ColorDataInterface colorDataInterface) {}
+            });
+            
+            
             m_parameterComponent = colorButton;
             return colorButton;
         } else if (m_graphicalType.equals(ColorPickerPanel.class)) {
@@ -101,7 +123,8 @@ public class ColorParameter extends AbstractParameter {
 
     @Override
     public String getStringValue() {
-        return ((ColorOrGradient) getObjectValue()).toString();
+        Object v = getObjectValue();
+        return (v != null) ? v.toString() : null;
     }
 
     @Override
@@ -124,6 +147,18 @@ public class ColorParameter extends AbstractParameter {
         return c;
     }
 
+    public void setColor(Color c) {
+        if (c == null) {
+            c = m_defaultColor;
+        }
+        if (m_graphicalType.equals(ColorButton.class) && (m_parameterComponent != null)) {
+           ((ColorButton) m_parameterComponent).setColor(c);
+        } else if (m_graphicalType.equals(ColorPickerPanel.class) && (m_parameterComponent != null)) {
+           ((ColorPickerPanel) m_parameterComponent).setColor(c);
+        } else if (m_graphicalType.equals(ColorButtonAndPalettePanel.class) && (m_parameterComponent != null)) {
+            ((ColorButtonAndPalettePanel) m_parameterComponent).setColor(c);
+        }
+    }
     
     @Override
     public void setValue(String v) {

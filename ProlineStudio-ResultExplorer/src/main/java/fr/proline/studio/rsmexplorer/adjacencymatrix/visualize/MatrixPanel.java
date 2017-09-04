@@ -317,6 +317,11 @@ public class MatrixPanel extends HourglassPanel implements DataBoxPanelInterface
         m_parameterListArray = new ArrayList<>();
         m_parameterListArray.add(parameterTableList);
     }
+
+    @Override
+    public boolean parametersCanceled() {
+        return false;
+    }
     
     public class InternalPanel extends JPanel {
 

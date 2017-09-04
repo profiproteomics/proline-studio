@@ -655,7 +655,7 @@ public class PlotStick extends PlotXYAbstract {
 
 
     @Override
-    public boolean needsDoubleBuffering() {
+    public boolean getDoubleBufferingPolicy() {
         return (m_dataX != null && m_dataX.length > 2000);
     }
 

@@ -9,4 +9,5 @@ import java.util.ArrayList;
 public interface SettingsInterface {
     public ArrayList<ParameterList> getParameters();
     public void parametersChanged();
+    public boolean parametersCanceled();
 }

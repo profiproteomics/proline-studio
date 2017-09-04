@@ -19,4 +19,9 @@ public abstract class PlotMultiDataAbstract extends PlotBaseAbstract {
         return true;
     }
     
+    @Override
+    public boolean isMouseWheelSupported() {
+        return false;
+    }
+    
 }

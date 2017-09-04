@@ -164,7 +164,7 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
         int figuresXHeight = GAP_FIGURES_X;
         double[] tab = getMinMaxPlots();
         
-        if (m_xAxis.displayAxis()) {
+        if ((m_xAxis!=null) && (m_xAxis.displayAxis())) {
             
             // set default size
             m_xAxis.setSize(GAP_FIGURES_Y+GAP_AXIS_TITLE+GAP_AXIS_LINE, height-figuresXHeight -GAP_AXIS_TITLE /*-GAP_TOP_AXIS*/, width-GAP_FIGURES_Y-GAP_AXIS_TITLE-GAP_END_AXIS, figuresXHeight + GAP_AXIS_TITLE+GAP_AXIS_LINE);
@@ -187,7 +187,7 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
 
         }
         
-        if (m_yAxis.displayAxis()) {
+        if ((m_yAxis!=null) && (m_yAxis.displayAxis())) {
             
             m_yAxis.setSize(0, GAP_END_AXIS+titleY, GAP_FIGURES_Y+GAP_AXIS_TITLE+GAP_AXIS_LINE/*+GAP_TOP_AXIS*/, height-figuresXHeight-GAP_AXIS_TITLE-GAP_END_AXIS-titleY);
             /*if ((m_yAxis.getMinValue() == tab[2] && m_yAxis.getMaxValue() == tab[3])) {
@@ -236,11 +236,11 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
                     long startPlotTime = System.currentTimeMillis();
                     g.setColor(Color.white);
                     g.fillRect(m_plotArea.x, m_plotArea.y, m_plotArea.width, m_plotArea.height);
-                    if ((m_plotVerticalGrid) && (m_xAxis.displayAxis())) {
+                    if ((m_plotVerticalGrid) && (m_xAxis!= null) && (m_xAxis.displayAxis())) {
                         m_xAxis.paintGrid(g2d, m_plotArea.x, m_plotArea.width, m_plotArea.y, m_plotArea.height);
                     }
 
-                    if ((m_plotHorizontalGrid) && (m_yAxis.displayAxis())) {
+                    if ((m_plotHorizontalGrid) && (m_yAxis!= null)  && (m_yAxis.displayAxis())) {
                         m_yAxis.paintGrid(g2d, m_plotArea.x, m_plotArea.width, m_plotArea.y, m_plotArea.height);
                     }
 
@@ -263,7 +263,7 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
         }
 
         // set clipping area for zooming and selecting
-        if ((m_xAxis.displayAxis()) && (m_yAxis.displayAxis())) {
+        if ((m_xAxis!=null) && (m_yAxis!=null) && (m_xAxis.displayAxis()) && (m_yAxis.displayAxis())) {
             int clipX = m_xAxis.valueToPixel(m_xAxis.getMinValue());
             int clipWidth = m_xAxis.valueToPixel(m_xAxis.getMaxValue()) - clipX;
             int clipY = m_yAxis.valueToPixel(m_yAxis.getMaxValue());
@@ -325,6 +325,28 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
         m_updateDoubleBuffer = true;
         repaint();
     }
+    
+    @Override
+    public boolean parametersCanceled() {
+        
+        boolean repaintNeeded = false;
+         if (m_plots!= null) {
+            for (int i=0;i<m_plots.size();i++) {
+                repaintNeeded |= m_plots.get(i).parametersCanceled();
+            }
+        }
+         if (repaintNeeded) {
+            m_updateDoubleBuffer = true;
+            repaint();
+         }
+         
+         return repaintNeeded;
+    }
+    
+    public void forceUpdateDoubleBuffer() {
+        m_updateDoubleBuffer = true;
+    }
+    
     
     public void lockData(boolean lock) {
         if (lock == m_dataLocked) {
@@ -458,7 +480,7 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
 
 
         m_updateDoubleBuffer = true;
-        m_useDoubleBuffering = plot.needsDoubleBuffering();
+        m_useDoubleBuffering = plot.getDoubleBufferingPolicy();
     }
     
     public void setXAxisTitle(String title) {
@@ -938,8 +960,13 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
    @Override
    public void mouseWheelMoved(MouseWheelEvent e) {
        if (m_plots == null || m_plots.isEmpty() || e == null) {
-            return;
-        }
+           return;
+       }
+       if (!m_plots.get(0).isMouseWheelSupported()) {
+           return;
+       }
+       
+       
        double oldMinX = m_xAxis.getMinValue();
        double oldMaxX = m_xAxis.getMaxValue();
        double oldMinY = m_yAxis.getMinValue();

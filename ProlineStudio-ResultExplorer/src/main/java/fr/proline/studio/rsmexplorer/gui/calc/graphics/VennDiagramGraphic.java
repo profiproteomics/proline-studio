@@ -113,6 +113,7 @@ public class VennDiagramGraphic extends AbstractGraphic {
         // nothing to do
     }
 
+
     @Override
     public AbstractGraphic cloneGraphic(GraphPanel p) {
         AbstractGraphic clone = new VennDiagramGraphic(p);

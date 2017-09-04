@@ -1,5 +1,7 @@
 package fr.proline.studio.parameter;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import javax.swing.*;
 
 /**
@@ -17,7 +19,10 @@ public abstract class AbstractParameter {
     protected boolean m_compulsory = true;
     protected Object m_associatedData = null;
     protected LabelVisibility m_labelVisibility = LabelVisibility.VISIBLE;
+    protected ActionListener m_externalActionListener = null;
+    
 
+   
     //JP.WART : use for backward compatibility to change the name of a parameter
     protected String m_backwardCompatibleKey = null;
     
@@ -125,6 +130,10 @@ public abstract class AbstractParameter {
     
     public Object getAssociatedData() {
         return m_associatedData;
+    }
+    
+    public void setExternalActionListener(ActionListener a) {
+        m_externalActionListener = a;
     }
     
 }

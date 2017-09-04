@@ -62,6 +62,8 @@ public class SettingsButton extends JButton implements ActionListener {
 
         if (parameterDialog.getButtonClicked() == DefaultParameterDialog.BUTTON_OK) {
             m_settingsInterface.parametersChanged();
+        } else {
+            m_settingsInterface.parametersCanceled();
         }
 
     }

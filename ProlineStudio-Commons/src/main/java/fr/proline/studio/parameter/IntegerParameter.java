@@ -2,6 +2,7 @@ package fr.proline.studio.parameter;
 
 
 import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -94,6 +95,10 @@ public class IntegerParameter extends AbstractParameter {
                 public void stateChanged(javax.swing.event.ChangeEvent evt) {
                     int v = (int) slider.getValue();
                     textField.setText(String.valueOf(v));
+                    if (m_externalActionListener != null) {
+                        ActionEvent e = new ActionEvent(slider, -1, null);
+                        m_externalActionListener.actionPerformed(e);
+                    }
                 }
             });
 
@@ -146,6 +151,16 @@ public class IntegerParameter extends AbstractParameter {
             JSpinner spinner = new JSpinner();
             SpinnerNumberModel model = new SpinnerNumberModel(startValue, m_minValue, m_maxValue, new Integer(1));
             spinner.setModel(model);
+            spinner.addChangeListener(new javax.swing.event.ChangeListener() {
+
+                @Override
+                public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                    if (m_externalActionListener != null) {
+                        ActionEvent e = new ActionEvent(spinner, -1, null);
+                        m_externalActionListener.actionPerformed(e);
+                    }
+                }
+            });
 
             m_parameterComponent = spinner;
 
@@ -224,6 +239,11 @@ public class IntegerParameter extends AbstractParameter {
         if (m_parameterComponent == null) {
             return; // should not happen
         }
+        
+        if (v == null) {
+            v = m_defaultValue.toString();
+        }
+        
         if (m_graphicalType.equals(JTextField.class)) {
             ((JTextField) m_parameterComponent).setText(v);
         } else if (m_graphicalType.equals(JSlider.class)) {
@@ -235,7 +255,8 @@ public class IntegerParameter extends AbstractParameter {
     
     @Override
     public String getStringValue() {
-        return getObjectValue().toString();
+        Object v = getObjectValue();
+        return (v!=null) ? v.toString() : null;
     }
 
     @Override

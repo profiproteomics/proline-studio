@@ -28,7 +28,7 @@ public abstract class PlotBaseAbstract implements Axis.EnumXInterface, Axis.Enum
         
     protected BasePlotPanel m_plotPanel;
     
-    private ArrayList<AbstractMarker> m_markersList = null;
+    protected ArrayList<AbstractMarker> m_markersList = null;
     
     protected ArrayList<AbstractCursor> m_cursorList = null;
     protected AbstractCursor m_selectedCursor = null;
@@ -52,8 +52,16 @@ public abstract class PlotBaseAbstract implements Axis.EnumXInterface, Axis.Enum
     
     public abstract void parametersChanged();
     
+    public boolean parametersCanceled() {
+        return false;
+    }
+    
     public abstract void paint(Graphics2D g);
 
+    public enum DoubleBufferingPolicyEnum {
+        DOUBLE_BUFFERING
+    }
+    
     public PlotBaseAbstract(BasePlotPanel plotPanel, PlotType plotType, CompareDataInterface compareDataInterface, CrossSelectionInterface crossSelectionInterface) {
         m_plotPanel = plotPanel;
         m_plotType = plotType;
@@ -240,7 +248,7 @@ public abstract class PlotBaseAbstract implements Axis.EnumXInterface, Axis.Enum
 
     }
     
-    public boolean needsDoubleBuffering() {
+    public boolean getDoubleBufferingPolicy() {
         return false;
     }
     
@@ -257,6 +265,10 @@ public abstract class PlotBaseAbstract implements Axis.EnumXInterface, Axis.Enum
     public abstract boolean isMouseOnPlot(double x, double y);
     public abstract boolean isMouseOnSelectedPlot(double x, double y);
 
+    public boolean isMouseWheelSupported() {
+       return true;
+    }
+    
     public JPopupMenu getPopupMenu(double x, double y) {
         return null;
     }

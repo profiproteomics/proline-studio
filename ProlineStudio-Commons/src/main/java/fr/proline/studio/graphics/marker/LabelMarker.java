@@ -51,6 +51,8 @@ public class LabelMarker extends AbstractMarker implements MoveableInterface {
     // draw frame around the text
     private boolean m_drawFrame  = true;
 
+    private double m_zoomFactor = 1.0d;
+    
     /**
      * Constructor to have a label without anchor
      * @param plotPanel
@@ -105,6 +107,10 @@ public class LabelMarker extends AbstractMarker implements MoveableInterface {
         m_drawLineToAnchor = (m_orientationX != ORIENTATION_XY_MIDDLE);
     }
 
+    public void setZoomFactor(double zoomFactor) {
+        m_zoomFactor = zoomFactor;
+    }
+    
     public void setFont(Font f) {
         m_font = f;
     }
@@ -116,7 +122,11 @@ public class LabelMarker extends AbstractMarker implements MoveableInterface {
     private boolean hasReferenceColor() {
         return m_referenceColor != null;
     }
-
+    
+    public void setReferenceColor(Color referenceColor) {
+        m_referenceColor = referenceColor;
+    }
+    
     private void prepareCoordinates() {
 
         int deltaX;
@@ -155,8 +165,10 @@ public class LabelMarker extends AbstractMarker implements MoveableInterface {
     public void paint(Graphics2D g) {
 
         AbstractCoordinates anchorCoordinates = m_anchorMarker.getCoordinates();
-        int pixelX = anchorCoordinates.getPixelX(m_plotPanel);
-        int pixelY = anchorCoordinates.getPixelY(m_plotPanel);
+        int pixelX = (int) Math.round(anchorCoordinates.getPixelX(m_plotPanel) * m_zoomFactor);
+        int pixelY = (int) Math.round(anchorCoordinates.getPixelY(m_plotPanel) * m_zoomFactor);
+        
+        
         
         // set font
         g.setFont(m_font);

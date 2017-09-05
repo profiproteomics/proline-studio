@@ -229,8 +229,7 @@ public class BaseGraphicsPanel extends HourglassPanel implements GridListener {
                     return;
                 }
                 
-                m_plotPanel.resetAxis();
-                
+
                 fillXYCombobox(false);
                 updateXYCbxVisibility();
                 

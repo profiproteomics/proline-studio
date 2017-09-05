@@ -510,11 +510,7 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
         }
         return m_yAxis;
     }
-    
-    public void resetAxis() {
-        m_xAxis = null;
-        m_yAxis = null;
-    }
+
 
     @Override
     public void mouseClicked(MouseEvent e) {

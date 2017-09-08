@@ -17,25 +17,28 @@ public class Set implements Comparable<Set> {
     
     public Circle m_circle;
     
-    //private int m_id = -1;
+    private int m_id = -1;
 
+    private double m_size;
     
-    public Set(String name, double size) {
+    public Set(String name, double size, int id) {
         m_name = name;
-        
-        m_circle = new Circle(size);
-    }
-    
-    /*public void setId(int id) {
         m_id = id;
+        m_circle = new Circle(size);
+        m_size = size;
     }
+
     
     public int getId() {
         return m_id;
-    }*/
+    }
     
     public String getName() {
         return m_name;
+    }
+    
+    public String getDisplayName() {
+        return "Set"+m_id+": "+m_name+" : "+m_size;
     }
     
     public Circle getCircle() {
@@ -117,4 +120,6 @@ public class Set implements Comparable<Set> {
         }
         return 0;
     }
+    
+
 }

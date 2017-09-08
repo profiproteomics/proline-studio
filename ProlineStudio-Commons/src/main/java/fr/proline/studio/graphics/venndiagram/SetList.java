@@ -2,6 +2,7 @@ package fr.proline.studio.graphics.venndiagram;
 
 import fr.proline.studio.utils.CyclicColorPalette;
 import java.awt.Color;
+import java.awt.Rectangle;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -129,6 +130,10 @@ public class SetList {
         Set firstSet = setArray[0];
         firstSet.getCircle().setPosition(0, 0);
         nbPositionned++;
+        
+        if (setNb == 1) {
+            return;
+        }
         
         // position of the second circle
         // we look for a circle which intersects in the order
@@ -276,6 +281,8 @@ public class SetList {
         }
         
         m_areas = generateAreasImpl(resultList, todoList);
+        
+        Collections.sort(m_areas);
 
     }
     private ArrayList<IntersectArea> generateAreasImpl(ArrayList<IntersectArea> resultList, ArrayList<IntersectArea> todoList) {
@@ -289,10 +296,17 @@ public class SetList {
         boolean intersectionFound = false;
         ArrayList<IntersectArea> resultListModified = new ArrayList<>();
         for (IntersectArea area : resultList) {
-            ArrayList<IntersectArea> intersectionList = pivotArea.intersect(area);
+            
+            ArrayList<IntersectArea> intersectionList = null;
+            if (pivotArea.isPotentialIntersect(area)) {
+                intersectionList = pivotArea.intersect(area);
+            }
+
             if (intersectionList !=null) {
                 intersectionFound = true;
                 for (IntersectArea a : intersectionList) {
+                    Rectangle r = a.getArea().getBounds();
+                    double surface = r.width*r.height;
                     resultListModified.add(a);
                 }
             } else {

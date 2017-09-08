@@ -47,7 +47,7 @@ public class PlotVennDiagram extends PlotMultiDataAbstract {
     private final ArrayList<ColorParameter> m_colorAreaParameterList;
     
     public PlotVennDiagram(BasePlotPanel plotPanel, CompareDataInterface compareDataInterface, CrossSelectionInterface crossSelectionInterface, int[] cols) {
-        super(plotPanel, PlotType.SCATTER_PLOT, compareDataInterface, crossSelectionInterface);
+        super(plotPanel, PlotType.VENN_DIAGRAM_PLOT, compareDataInterface, crossSelectionInterface);
         
         update(cols, null); 
         
@@ -111,11 +111,11 @@ public class PlotVennDiagram extends PlotMultiDataAbstract {
         int labelIndex = 0;
         int areaIndex = 0;
         for (IntersectArea intersectArea : m_setList.getGeneratedAreas()) {
-            Set s = intersectArea.getOnlySet();
+            /*Set s = intersectArea.getOnlySet();
             if (s == null) {
                 areaIndex++;
                 continue;
-            }
+            }*/
 
             LabelMarker marker = (LabelMarker) m_markersList.get(labelIndex);
             marker.setReferenceColor(m_colorAreaParameterList.get(areaIndex).getColor());
@@ -162,16 +162,16 @@ public class PlotVennDiagram extends PlotMultiDataAbstract {
             int labelIndex = 0;
             int areaIndex = 0;
             for (IntersectArea intersectArea : m_setList.getGeneratedAreas()) {
-                Set s = intersectArea.getOnlySet();
+                /*Set s = intersectArea.getOnlySet();
                 if (s == null) {
                     areaIndex++;
                     continue;
-                }
+                }*/
                 labelIndex++;
                 double percentageX = 60d/width;
                 double percentageY = 1-((30d*labelIndex)/height);
                 
-                LabelMarker marker = new LabelMarker(m_plotPanel, new PercentageCoordinates(percentageX, percentageY), s.getName() , LabelMarker.ORIENTATION_XY_MIDDLE, LabelMarker.ORIENTATION_XY_MIDDLE, m_colorAreaParameterList.get(areaIndex).getColor());
+                LabelMarker marker = new LabelMarker(m_plotPanel, new PercentageCoordinates(percentageX, percentageY), intersectArea.getDisplayName() , LabelMarker.ORIENTATION_XY_MIDDLE, LabelMarker.ORIENTATION_XY_MIDDLE, m_colorAreaParameterList.get(areaIndex).getColor());
                 addMarker(marker);
 
                 areaIndex++;
@@ -305,14 +305,14 @@ public class PlotVennDiagram extends PlotMultiDataAbstract {
                 }
                 
             }
-            Set s = new Set(m_compareDataInterface.getDataColumnIdentifier(colId), nbValues);
+            Set s = new Set(m_compareDataInterface.getDataColumnIdentifier(colId), nbValues, (i+1));
             m_setList.addSet(s);
             
         }
         
         for (int i=0;i<nbCols;i++) {
             int colId1 = m_cols[i];
-            for (int j=0;j<nbCols;j++) {
+            for (int j=i+1;j<nbCols;j++) {
                 int colId2 = m_cols[j];
                 int nbValues = 0;
                 for (int k = 0; k < nbRows; k++) {
@@ -333,9 +333,9 @@ public class PlotVennDiagram extends PlotMultiDataAbstract {
 
                         }
                     }
-                    if (nbValues>0) {
-                        m_setList.addIntersection(m_setList.getSet(i), m_setList.getSet(j), nbValues);
-                    }
+                }
+                if (nbValues > 0) {
+                    m_setList.addIntersection(m_setList.getSet(i), m_setList.getSet(j), nbValues);
                 }
             }
         }
@@ -344,6 +344,10 @@ public class PlotVennDiagram extends PlotMultiDataAbstract {
         m_setList.approximateSolution();
         m_setList.optimizeSolution();
 
+        if (m_markersList != null) {
+            m_markersList.clear();
+        }
+        
         firstPaint = true;
         
         m_plotPanel.repaint();

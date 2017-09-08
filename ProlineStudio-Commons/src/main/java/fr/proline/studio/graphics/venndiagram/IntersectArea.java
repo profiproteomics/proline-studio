@@ -3,24 +3,68 @@ package fr.proline.studio.graphics.venndiagram;
 import java.awt.geom.Area;
 import java.awt.geom.Ellipse2D;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashSet;
 
 /**
  *
  * @author JM235353
  */
-public class IntersectArea {
-    private HashSet<Set> m_setIntersectedMap = new HashSet<>();
+public class IntersectArea implements Comparable<IntersectArea> {
+    private final HashSet<Set> m_setIntersectedMap = new HashSet<>();
     
-    private HashSet<Set> m_setIntersectionsOriginMap = new HashSet<>();
+    private final HashSet<Set> m_setIntersectionsOriginMap = new HashSet<>();
     
     private Area m_intersectionArea = null;
     
+    private String m_displayName = null;
     
     public IntersectArea(Area a) {
         m_intersectionArea = a;
     }
     
+    public boolean isPotentialIntersect(IntersectArea intersectArea) {
+
+        for (Set set1 : m_setIntersectedMap) {
+
+            for (Set set2 : intersectArea.m_setIntersectedMap) {
+                if (!set1.intersect(set2)) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+    
+    
+    public String getDisplayName() {
+        if (m_displayName != null) {
+            return m_displayName;
+        }
+        if (hasOneSet()) {
+            m_displayName = getOnlySet().getDisplayName();
+        } else {
+            
+            StringBuilder sb = new StringBuilder();
+            
+            Set setArray[] = new Set[m_setIntersectedMap.size()];
+            setArray = m_setIntersectedMap.toArray(setArray);
+            Arrays.sort(setArray, getSpectificSetComparator());
+            for (int i = 0; i < setArray.length; i++) {
+                sb.append("Set").append(setArray[i].getId());
+                if (i < setArray.length-1) {
+                    sb.append(String.valueOf("\u2229")); // intersection character
+                }
+                //sb.append(": ");
+            }
+            
+            m_displayName = sb.toString();
+        }
+        
+        return m_displayName;
+        
+    }
     
     public  HashSet<Set> getIntersectedMap() {
         return m_setIntersectedMap;
@@ -146,4 +190,44 @@ public class IntersectArea {
         }
         return true;
     }
+
+    @Override
+    public int compareTo(IntersectArea o) {
+        int sizeA = m_setIntersectedMap.size();
+        int sizeB = o.m_setIntersectedMap.size();
+        if (sizeA != sizeB) {
+            return sizeA-sizeB;
+        }
+
+        
+        Object[] arrayA = m_setIntersectedMap.toArray();
+        Arrays.sort(arrayA, getSpectificSetComparator());
+        Object[] arrayB = o.m_setIntersectedMap.toArray();
+        Arrays.sort(arrayB, getSpectificSetComparator());
+        for (int i=0;i<sizeA;i++) {
+            Set setA = (Set) arrayA[i];
+            Set setB = (Set) arrayB[i];
+            int delta = setA.getId()-setB.getId();
+            if (delta != 0) {
+                return delta;
+            }
+        }
+        return 0;
+        
+        
+    }
+    private static Comparator getSpectificSetComparator() {
+        if (m_specificSetComparator  == null) {
+            m_specificSetComparator = new Comparator<Set>() {
+                @Override
+                public int compare(Set setA, Set setB) {
+
+                    return setA.getId()-setB.getId();
+                }
+            };
+        }
+        return m_specificSetComparator;
+    }
+    
+    private static Comparator m_specificSetComparator = null;
 }

@@ -267,7 +267,7 @@ class ChiSquareScorer implements Scorer {
 
 }
 
-class ProlineScorer implements Scorer {
+class ProlineLikeScorer implements Scorer {
     
       public  Tuple2<Double, TheoreticalIsotopePattern> score(SpectrumData currentSpectrum, double intialMz, int shift,  int charge, double ppmTol) {
       double score = 0.0;

@@ -5,6 +5,7 @@ package fr.proline.mzscope.model;
  * @author MB243701
  */
 public interface IExportParameters {
+    
     enum ExportType {MGF, SCAN_HEADER} ;  
     
     public ExportType getExportType();

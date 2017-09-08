@@ -6,9 +6,11 @@ import fr.proline.mzscope.model.IExportParameters;
 import fr.proline.mzscope.model.IFeature;
 import fr.proline.mzscope.model.IRawFile;
 import fr.proline.mzscope.model.MsnExtractionRequest;
+import fr.proline.mzscope.model.QCMetrics;
 import fr.proline.mzscope.model.Spectrum;
 import java.io.File;
 import java.util.List;
+import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -122,4 +124,17 @@ public class MzMLRawFile implements IRawFile {
         return false;
     }
 
+    @Override
+    public Map<String, Object> getFileProperties() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public QCMetrics getFileMetrics() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    
+    
+    
 }

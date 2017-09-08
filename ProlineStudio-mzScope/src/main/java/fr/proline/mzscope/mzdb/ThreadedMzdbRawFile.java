@@ -6,9 +6,11 @@ import fr.proline.mzscope.model.IExportParameters;
 import fr.proline.mzscope.model.IFeature;
 import fr.proline.mzscope.model.IRawFile;
 import fr.proline.mzscope.model.MsnExtractionRequest;
+import fr.proline.mzscope.model.QCMetrics;
 import fr.proline.mzscope.model.Spectrum;
 import java.io.File;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -228,4 +230,35 @@ public class ThreadedMzdbRawFile implements IRawFile {
         return mzdbRawFile.isDIAFile();
     }
 
+    @Override
+    public Map<String, Object> getFileProperties() {
+              try {
+         return service.submit(new Callable<Map<String, Object>>() {
+            @Override
+            public Map<String, Object> call() {
+               Map<String, Object> data =  mzdbRawFile.getFileProperties();
+               return data;
+            }
+         }).get();
+      } catch (InterruptedException | ExecutionException ex ) {
+         logger.error("getFileMetaData call fail", ex);
+      } 
+      return null;
+    }
+
+    @Override
+    public QCMetrics getFileMetrics() {
+      try {
+         return service.submit(new Callable<QCMetrics>() {
+            @Override
+            public QCMetrics call() {
+               return mzdbRawFile.getFileMetrics();
+            }
+         }).get();
+      } catch (InterruptedException | ExecutionException ex ) {
+         logger.error("getFileMetaData call fail", ex);
+      } 
+      return null;
+    }
+    
 }

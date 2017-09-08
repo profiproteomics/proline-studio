@@ -9,7 +9,6 @@ import fr.profi.mzdb.MzDbFeatureDetector;
 import fr.profi.mzdb.MzDbFeatureExtractor;
 import fr.profi.mzdb.MzDbReader;
 import fr.profi.mzdb.SmartPeakelFinderConfig;
-import fr.profi.mzdb.algo.IsotopicPatternScorer;
 import fr.profi.mzdb.algo.feature.extraction.FeatureExtractorConfig;
 import fr.profi.mzdb.io.reader.provider.RunSliceDataProvider;
 import fr.profi.mzdb.io.writer.MsSpectrumTSVWriter;
@@ -33,6 +32,7 @@ import fr.proline.mzscope.model.IFeature;
 import fr.proline.mzscope.model.Spectrum;
 import fr.proline.mzscope.model.IRawFile;
 import fr.proline.mzscope.model.MsnExtractionRequest;
+import fr.proline.mzscope.model.QCMetrics;
 import fr.proline.mzscope.ui.MgfExportParameters;
 import fr.proline.mzscope.ui.ScanHeaderExportParameters;
 import fr.proline.mzscope.ui.ScanHeaderType;
@@ -56,6 +56,7 @@ import org.slf4j.LoggerFactory;
 import scala.Option;
 import scala.Tuple2;
 import scala.collection.JavaConverters;
+
 
 /**
  *
@@ -86,6 +87,8 @@ public class MzdbRawFile implements IRawFile {
     private void init() {
         try {
             reader = new MzDbReader(mzDbFile, true);
+            //reader.enableScanListLoading();
+            //reader.enableParamTreeLoading();
             long start = System.currentTimeMillis();
             isDIAFile= checkDIAFile();
             logger.debug("MzdbRawFile "+getName()+(isDIAFile?" is ": " is not ")+" a DIA File in "+(System.currentTimeMillis() - start)+" ms");
@@ -710,4 +713,32 @@ public class MzdbRawFile implements IRawFile {
         return this.isDIAFile;
     }
 
+    @Override
+    public Map<String, Object> getFileProperties() {
+        try {
+            return MzdbMetricsCollector.getFileFormaData(getMzDbReader());
+        } catch (SQLiteException ex) {
+            logger.error("Enable to extract information from mzdb file", ex);
+        }
+        return null;
+    }
+   
+    @Override
+    public QCMetrics getFileMetrics() {
+        try {
+            QCMetrics metrics = MetricsCache.getInstance().loadQC(this);
+            if (metrics == null) {
+                logger.info("QC metrics not found for file {}, they will be computed now", this.getName());
+                metrics = MzdbMetricsCollector2.getMSMetrics(this);
+                MetricsCache.getInstance().writeQC(this, metrics);
+            } else {
+                metrics.setRawFile(this);
+            }
+            return metrics;
+        } catch (SQLiteException ex) {
+            logger.error("Enable to extract information from mzdb file", ex);
+        }
+        return null;
+    }
+    
 }

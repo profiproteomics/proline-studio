@@ -157,9 +157,12 @@ public class MzScopePanel extends JPanel implements IFeatureViewer, IExtractionR
     }
 
     private void viewersTabPaneStateChanged(ChangeEvent evt) {
-        this.selectedRawFilePanel = (IRawFileViewer) viewersTabPane.getSelectedComponent();
-        if (selectedRawFilePanel != null && selectedRawFilePanel.getCurrentRawfile() != null) {
-            getExtractionPanel().setDIAEnabled(selectedRawFilePanel.getCurrentRawfile().isDIAFile());
+        Component c = viewersTabPane.getSelectedComponent();
+        if ( (c != null) &&  IRawFileViewer.class.isAssignableFrom(c.getClass())) {
+            this.selectedRawFilePanel = (IRawFileViewer) c;
+            if (selectedRawFilePanel != null && selectedRawFilePanel.getCurrentRawfile() != null) {
+                getExtractionPanel().setDIAEnabled(selectedRawFilePanel.getCurrentRawfile().isDIAFile());
+            }
         }
     }
 
@@ -616,6 +619,21 @@ public class MzScopePanel extends JPanel implements IFeatureViewer, IExtractionR
         addRawTab("All", plotPanel);
     }
 
+    public void displayProperties(List<IRawFile> rawFiles) {
+        if ((rawFiles != null) && rawFiles.size() > 0) {
+            PropertiesPanel propertiesPanel = new PropertiesPanel(rawFiles);
+            String title = rawFiles.size() == 1 ? "Properties" : new StringBuilder().append("Properties ").append(rawFiles.get(0).getName()).toString();
+            addTab(viewersTabPane, title, propertiesPanel, "Raw file properties panel");
+        }
+    }
+    
+    public void displayMetricsComparison(List<IRawFile> rawFiles) {
+        if ((rawFiles != null) && rawFiles.size() > 0) {
+            QCMetricsPanel comparisonPanel = new QCMetricsPanel(rawFiles);
+            addTab(viewersTabPane, "QC Metrics", comparisonPanel, "QC metrics panel");
+        }
+    }
+    
     public void displayLCMSMap(IRawFile rawFile) {
         JDialog mapDialog = new JDialog(this.parentFrame);
         mapDialog.setTitle("LCMS Map Viewer");

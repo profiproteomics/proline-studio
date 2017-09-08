@@ -73,7 +73,6 @@ public class IdentificationPropertiesTableModel extends AbstractPropertiesTableM
 
         if (m_dataGroupList == null) {
             m_dataGroupList = new ArrayList<>();
-            m_dataGroupMap = new HashMap<>();
 
             int startRow = 0;
             DataGroup group = new GeneralInformationGroup(startRow);

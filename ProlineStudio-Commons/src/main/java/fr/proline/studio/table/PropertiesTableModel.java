@@ -26,7 +26,7 @@ public abstract class PropertiesTableModel extends DecoratedTableModel implement
     protected PropertiesRenderer m_propertiesNonOkRenderer;    
     protected ArrayList<String> m_datasetNameArray = null;
     protected ArrayList<DataGroup> m_dataGroupList = null;
-    protected HashMap<Integer, DataGroup> m_dataGroupMap = null;
+    private HashMap<Integer, DataGroup> m_dataGroupMap = null;
     protected int m_rowCount = -1;
     
     protected String m_modelName; 
@@ -70,7 +70,7 @@ public abstract class PropertiesTableModel extends DecoratedTableModel implement
 
         // calculate row count
         m_rowCount = 0;
-
+        m_dataGroupMap = new HashMap<>();
         for (DataGroup dataGroup : m_dataGroupList) {
             int start = m_rowCount;
             m_rowCount += dataGroup.getRowCount();

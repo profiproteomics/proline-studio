@@ -18,7 +18,6 @@ import java.awt.event.MouseListener;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import javax.swing.ButtonGroup;
-import javax.swing.JColorChooser;
 import javax.swing.JComboBox;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
@@ -53,7 +52,7 @@ public class ColorOrGradientChooserPanel extends JPanel {
         group.add(m_colorRadioButton);
         group.add(m_gradientRadioButton);
         
-        m_gradientParamComboBox = new JComboBox(gradientParam.toArray());
+        m_gradientParamComboBox = (gradientParam == null) ? null : new JComboBox(gradientParam.toArray());
         
         if (color.isColorSelected()) {
             m_colorRadioButton.setSelected(true);
@@ -92,8 +91,10 @@ public class ColorOrGradientChooserPanel extends JPanel {
         c.weightx = 1.0;
         add(m_gradientSelector, c);
         
-        c.gridy++;
-        add(m_gradientParamComboBox, c);
+        if (m_gradientParamComboBox != null) {
+            c.gridy++;
+            add(m_gradientParamComboBox, c);
+        }
 
     }
 
@@ -170,24 +171,22 @@ public class ColorOrGradientChooserPanel extends JPanel {
         private static final int DELTA_X = 10;
         private static final int DELTA_Y_TOP = 5;
         private static final int DELTA_Y_BOTTOM = 10;
-        
-        private LinearGradientPaint m_linearGradientPaint;
-        private Color[] m_gradientColors;
-        private float[] m_gradientFractions;
+
+        private Color[] m_gradientColors = null;
+        private float[] m_gradientFractions = null;
         
         private final ArrayList<ColorSelector> m_colorSelectors = new ArrayList<>();
         
         public GradientSelectorPanel() {
-            m_linearGradientPaint = null;
-            
+
             addMouseListener(this);
         }
     
         public void setLinearGradient(LinearGradientPaint linearGradientPaint) {
-            m_linearGradientPaint = linearGradientPaint;
+            //m_linearGradientPaint = linearGradientPaint;
             
-            m_gradientColors = m_linearGradientPaint.getColors();
-            m_gradientFractions = m_linearGradientPaint.getFractions();
+            m_gradientColors = linearGradientPaint.getColors();
+            m_gradientFractions = linearGradientPaint.getFractions();
 
             m_colorSelectors.clear();
             for (int i=0;i<m_gradientColors.length;i++) {
@@ -199,7 +198,7 @@ public class ColorOrGradientChooserPanel extends JPanel {
         }
         
         public LinearGradientPaint getGradient() {
-            return m_linearGradientPaint;
+            return getGradientForPanel(m_gradientColors, m_gradientFractions);
         }
         
         @Override
@@ -227,9 +226,10 @@ public class ColorOrGradientChooserPanel extends JPanel {
             g.setColor(Color.darkGray);
             g.drawRect(0, 0, width-1, height-1);
             
-            if (m_linearGradientPaint != null) {
-                g2D.setPaint(m_linearGradientPaint);
+            if (m_gradientColors != null) {
+                
                 Rectangle2D r2d = new Rectangle2D.Double(DELTA_X, DELTA_Y_TOP, width-2*DELTA_X, height-DELTA_Y_TOP-DELTA_Y_BOTTOM);
+                g2D.setPaint( getGradientForPanel(m_gradientColors, m_gradientFractions, (int) r2d.getX(), (int) r2d.getY(), (int) r2d.getWidth(), (int) r2d.getHeight()));
                 g2D.fill(r2d);
             }
             
@@ -256,9 +256,7 @@ public class ColorOrGradientChooserPanel extends JPanel {
                     
                     // use new color
                     m_gradientColors[i] = m_colorSelectors.get(i).getColor();
-                    
-                    m_linearGradientPaint = getGradientForPanel(m_gradientColors, m_gradientFractions);
-                    
+
                     repaint();
                     return;
                 }
@@ -374,9 +372,11 @@ public class ColorOrGradientChooserPanel extends JPanel {
     }
     
     public static LinearGradientPaint getGradientForPanel(Color[] colors, float[] fractions) {
-        return new LinearGradientPaint(GradientSelectorPanel.DELTA_X, GradientSelectorPanel.DELTA_Y_TOP, GradientSelectorPanel.WIDTH - 2 * GradientSelectorPanel.DELTA_X, GradientSelectorPanel.HEIGHT - GradientSelectorPanel.DELTA_Y_TOP - GradientSelectorPanel.DELTA_Y_BOTTOM, fractions, colors);
+        return new LinearGradientPaint(0, 0, 100, 100, fractions, colors);
     }
     
-    
+    public static LinearGradientPaint getGradientForPanel(Color[] colors, float[] fractions, int x, int y, int width, int height) {
+        return new LinearGradientPaint(x, y, width, height, fractions, colors);
+    }
 
 }

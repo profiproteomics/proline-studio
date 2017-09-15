@@ -230,9 +230,10 @@ public class ValidateJMSAction extends AbstractRSMAction {
                 }
             };
             
-        //load node children
-        IdentificationTree.getCurrentTree().loadInBackground(rootDatasetNode, callback);                       
-
+        if (!rsmIdsByRsIds.isEmpty() && rsmIdsByRsIds.size() > 1) {
+            //load node children and update them
+            IdentificationTree.getCurrentTree().loadInBackground(rootDatasetNode, callback);                       
+        }
         //Update root node        
         updateDataset(rootDatasetNode, rootDS, rootRsmId, taskInfo, changeTypicalRules);
 

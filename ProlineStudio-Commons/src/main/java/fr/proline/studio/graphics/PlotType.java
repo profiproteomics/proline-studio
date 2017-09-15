@@ -12,9 +12,10 @@ public enum PlotType {
     HISTOGRAM_PLOT("Histogram", false, "on", null, "as"),
     SCATTER_PLOT("Scatter Plot", false, "X Axis:", "Y Axis:", null),
     VENN_DIAGRAM_PLOT("Venn Diagram", true, "Data:", null, null),
+    PARALLEL_COORDINATES_PLOT("Parallel Coordinates", true, "Data:", null, null),
     LINEAR_PLOT("Linear Plot", false, "X Axis:", "Y Axis:", null);
     
-    public static PlotType[] ALL_PLOTS = { HISTOGRAM_PLOT, SCATTER_PLOT, VENN_DIAGRAM_PLOT };
+    public static PlotType[] ALL_PLOTS = { HISTOGRAM_PLOT, SCATTER_PLOT, VENN_DIAGRAM_PLOT, PARALLEL_COORDINATES_PLOT };
     public static PlotType[] LINEAR_PLOTS = {LINEAR_PLOT};
     
     private PlotType(String name, boolean illimitedAxis, String xLabel, String yLabel, String zLabel) {
@@ -74,6 +75,7 @@ public enum PlotType {
                 break;
             case SCATTER_PLOT: 
             case LINEAR_PLOT: 
+            case PARALLEL_COORDINATES_PLOT:
                 acceptedValues.add(Double.class);
                 acceptedValues.add(Float.class);
                 acceptedValues.add(Integer.class);
@@ -90,6 +92,7 @@ public enum PlotType {
         switch (this) {
             case VENN_DIAGRAM_PLOT:
             case HISTOGRAM_PLOT: 
+            case PARALLEL_COORDINATES_PLOT:
                 break;
             case SCATTER_PLOT: 
             case LINEAR_PLOT: 
@@ -112,6 +115,7 @@ public enum PlotType {
             case SCATTER_PLOT:
             case LINEAR_PLOT:
             case VENN_DIAGRAM_PLOT:
+            case PARALLEL_COORDINATES_PLOT:
             default:
                 return null;
         }

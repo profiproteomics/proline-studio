@@ -250,7 +250,7 @@ public class BaseGraphicsPanel extends HourglassPanel implements GridListener {
                     int nbColumns = m_values.getColumnCount();
                     for (int i = 0; i < nbColumns; i++) {
                         Class c = m_values.getDataColumnClass(i);
-                        if ((c.equals(Double.class)) || (c.equals(Float.class)) || (c.equals(Long.class)) || (c.equals(Integer.class))) {
+                        if ((c.equals(Double.class)) || (c.equals(Float.class)) || (c.equals(Long.class)) || (c.equals(Integer.class)) || (c.equals(String.class))) {
                             columnNamesArrayList.add(m_values.getDataColumnIdentifier(i));
                             columnIdsArrayList.add(i);
                         }
@@ -548,7 +548,7 @@ public class BaseGraphicsPanel extends HourglassPanel implements GridListener {
                 int indexCur = 0;
                 for (int i = 0; i < nbColumns; i++) {
                     Class c = m_values.getDataColumnClass(i);
-                    if ((c.equals(Double.class)) || (c.equals(Float.class)) || (c.equals(Long.class)) || (c.equals(Integer.class))) {
+                    if ((c.equals(Double.class)) || (c.equals(Float.class)) || (c.equals(Long.class)) || (c.equals(Integer.class)) || (c.equals(String.class))) {
                         columnNamesArrayList.add(m_values.getDataColumnIdentifier(i));
                         columnIdsArrayList.add(i);
                         
@@ -608,6 +608,10 @@ public class BaseGraphicsPanel extends HourglassPanel implements GridListener {
                 break;
             case VENN_DIAGRAM_PLOT:
                 m_plotGraphics = new PlotVennDiagram(m_plotPanel, m_values, m_crossSelectionInterface, cols);
+                m_plotPanel.setPlot(m_plotGraphics);
+                break;
+            case PARALLEL_COORDINATES_PLOT:
+                m_plotGraphics = new PlotParallelCoordinates(m_plotPanel, m_values, m_crossSelectionInterface, cols);
                 m_plotPanel.setPlot(m_plotGraphics);
                 break;
             case LINEAR_PLOT:

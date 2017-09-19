@@ -3,6 +3,7 @@ package fr.proline.studio.graphics;
 import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.graphics.parallelcoordinates.ParallelCoordinatesAxis;
 import fr.proline.studio.parameter.ColorOrGradientParameter;
+import fr.proline.studio.parameter.ColorParameter;
 import fr.proline.studio.parameter.ParameterList;
 import fr.proline.studio.utils.CyclicColorPalette;
 import java.awt.Color;
@@ -18,11 +19,16 @@ import java.util.Arrays;
  */
 public class PlotParallelCoordinates extends PlotMultiDataAbstract {
     
+    
+    private static final Color COLOR_VALUES_NOT_SELECTED = new Color(230,230,230);
+    private static final Color[] GRADIENT_COLORS_VALUES_SELECTED = { new Color(132,90,133) /* purple*/, new Color(255,200,255) /* pink */ };
+    
     private ArrayList<ParallelCoordinatesAxis> m_axisList = new ArrayList<>();
     
     
     private ArrayList<ParameterList> m_parameterListArray = null;
-    private final ColorOrGradientParameter m_colorParameter;
+    private final ColorOrGradientParameter m_colorSelectedParameter;
+    private final ColorParameter m_colorParameter;
     
     private Color[] m_gradientColors;
     private float[] m_gradientFractions;
@@ -42,13 +48,17 @@ public class PlotParallelCoordinates extends PlotMultiDataAbstract {
         ColorOrGradient colorOrGradient = new ColorOrGradient();
         colorOrGradient.setColor(CyclicColorPalette.getColor(21, 128));
         float[] fractions = {0.0f, 1.0f};
-        Color[] colors = {Color.white, Color.red};
-        LinearGradientPaint gradient = ColorOrGradientChooserPanel.getGradientForPanel(colors, fractions);
+        
+        LinearGradientPaint gradient = ColorOrGradientChooserPanel.getGradientForPanel(GRADIENT_COLORS_VALUES_SELECTED, fractions);
         colorOrGradient.setGradient(gradient);
+        colorOrGradient.setGradientSelected();
 
-        m_colorParameter = new ColorOrGradientParameter("PLOT_COORD_PARALLEL_COLOR_KEY", "Color", colorOrGradient, null);
+        m_colorSelectedParameter = new ColorOrGradientParameter("PLOT_COORD_PARALLEL_COLOR_KEY", "Color for selected values", colorOrGradient, null);
+        colorParameteList.add(m_colorSelectedParameter);
+
+        m_colorParameter = new ColorParameter("UNSELECTED_COLOR_KEY", "Color for unselected values", COLOR_VALUES_NOT_SELECTED);
         colorParameteList.add(m_colorParameter);
-
+        
         
         m_parameterListArray = new  ArrayList<>(1);
         m_parameterListArray.add(colorParameteList);
@@ -128,7 +138,7 @@ public class PlotParallelCoordinates extends PlotMultiDataAbstract {
             i++;
         }
 
-        ColorOrGradient colorOrGradient = m_colorParameter.getColor();
+        ColorOrGradient colorOrGradient = m_colorSelectedParameter.getColor();
         boolean useGradient = !colorOrGradient.isColorSelected();
 
         Color plotColor = Color.black; // default init
@@ -140,31 +150,6 @@ public class PlotParallelCoordinates extends PlotMultiDataAbstract {
         }
 
         
-        /*ParallelCoordinatesAxis selectedAxis = m_axisList.get(m_selectedAxisIndex);
-        
-        ParallelCoordinatesAxis firstAxis = m_axisList.get(0);
-        int nbRows = m_compareDataInterface.getRowCount();
-        for (int index=0;index<nbRows;index++) {
-            
-            boolean selected = m_selectionArray[index];
-            
-            int rowIndex = selectedAxis.getRowIndexFromIndex(index);
-            
-            int y1 = firstAxis.getPositionByRowIndex(rowIndex);
-            int x1 = firstAxis.getX();
-            Color c = (selected) ? selectColor(plotColor, useGradient, rowIndex) : Color.lightGray;
-            g.setColor(c);
-            for (int j = 0;j< m_axisList.size();j++) {
-                ParallelCoordinatesAxis secondAxis = m_axisList.get(j);
-                int y2 = secondAxis.getPositionByRowIndex(rowIndex);
-                int x2 = secondAxis.getX();
-                
-                g.drawLine(x1, y1, x2, y2);
-                x1 = x2;
-                y1 = y2;
-            }   
-        }*/
-        
         // paint non selected lines
         drawLines(g, plotColor, useGradient, false);
         
@@ -172,7 +157,7 @@ public class PlotParallelCoordinates extends PlotMultiDataAbstract {
         drawLines(g, plotColor, useGradient, true);
         
         for (ParallelCoordinatesAxis axis : m_axisList) {
-            axis.paintForeground(g, m_selectedAxisIndex == axis.getId());
+            axis.paintForeground(g, width, m_selectedAxisIndex == axis.getId());
         }
         
     }
@@ -193,7 +178,7 @@ public class PlotParallelCoordinates extends PlotMultiDataAbstract {
             
             int y1 = firstAxis.getPositionByRowIndex(rowIndex);
             int x1 = firstAxis.getX();
-            Color c = (paintSelection) ? selectColor(plotColor, useGradient, rowIndex) : Color.lightGray;
+            Color c = (paintSelection) ? selectColor(plotColor, useGradient, rowIndex) : m_colorParameter.getColor();
             g.setColor(c);
             for (int j = 0; j < m_axisList.size(); j++) {
                 ParallelCoordinatesAxis secondAxis = m_axisList.get(j);
@@ -234,7 +219,7 @@ public class PlotParallelCoordinates extends PlotMultiDataAbstract {
     
     private void setGradientValues() {
             
-        ColorOrGradient colorOrGradient = m_colorParameter.getColor();
+        ColorOrGradient colorOrGradient = m_colorSelectedParameter.getColor();
         boolean useGradient = !colorOrGradient.isColorSelected();
         if (!useGradient) {
             return;
@@ -345,6 +330,7 @@ public class PlotParallelCoordinates extends PlotMultiDataAbstract {
         //JPM.TODO : remove it !!!!!!!!!!!!!!!!!!!!!!
         prepareSelectionHashSet();
         
+        m_plotPanel.forceUpdateDoubleBuffer();
         m_plotPanel.repaint();
         
         
@@ -410,6 +396,17 @@ public class PlotParallelCoordinates extends PlotMultiDataAbstract {
             }
         }
         return null;
+    }
+    
+    @Override
+    public void doubleClicked(int x, int y) {
+        for (ParallelCoordinatesAxis axis : m_axisList) {
+             MoveableInterface movable = axis.getOverMovable(x, y);
+            if (movable != null) {
+                // we are over the axis
+                axis.doubleClicked();
+            }
+        }
     }
     
     public void selectAxis(ParallelCoordinatesAxis axis) {

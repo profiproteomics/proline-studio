@@ -2,7 +2,6 @@ package fr.proline.studio.parameter;
 
 
 import fr.proline.studio.graphics.ColorButton;
-import fr.proline.studio.graphics.ColorOrGradient;
 import fr.proline.studio.graphics.colorpicker.ColorPickerPanel;
 import fr.proline.studio.utils.CyclicColorPalette;
 import fr.proline.studio.graphics.ColorButtonAndPalettePanel;

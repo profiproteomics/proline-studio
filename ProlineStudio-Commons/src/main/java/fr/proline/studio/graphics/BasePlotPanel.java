@@ -514,9 +514,17 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
 
     @Override
     public void mouseClicked(MouseEvent e) {
+
+        if (e.getClickCount() == 2) {
+            for (PlotBaseAbstract plot : m_plots) {
+                plot.doubleClicked(e.getX(), e.getY());
+            }
+        }
+        
         double xValue = m_xAxis.pixelToValue(e.getX());
         double yValue = m_yAxis.pixelToValue(e.getY());
 
+        
         fireMouseClicked(e, xValue, yValue);
 
     }

@@ -111,11 +111,6 @@ public class PlotVennDiagram extends PlotMultiDataAbstract {
         int labelIndex = 0;
         int areaIndex = 0;
         for (IntersectArea intersectArea : m_setList.getGeneratedAreas()) {
-            /*Set s = intersectArea.getOnlySet();
-            if (s == null) {
-                areaIndex++;
-                continue;
-            }*/
 
             LabelMarker marker = (LabelMarker) m_markersList.get(labelIndex);
             marker.setReferenceColor(m_colorAreaParameterList.get(areaIndex).getColor());

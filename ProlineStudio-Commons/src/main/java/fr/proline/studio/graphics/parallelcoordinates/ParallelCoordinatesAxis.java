@@ -7,6 +7,7 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
+import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;   
@@ -25,7 +26,8 @@ public class ParallelCoordinatesAxis implements MoveableInterface {
     public static final int PAD_HANDLE = 2;
     
     private static final Color COLOR_TRANSPARENT_GRAY = new Color(164,164,164,128);
-    private static final Color COLOR_SELECTION = new Color(164,80,40,128);
+    private static final Color COLOR_SELECTED = new Color(164,80,40,128);
+    
 
     protected Font m_valuesFont = null;
     protected FontMetrics m_valuesFontMetrics = null;
@@ -39,6 +41,7 @@ public class ParallelCoordinatesAxis implements MoveableInterface {
     private int m_height;
     
     private boolean m_numericAxis;
+    private boolean m_discreteAxis;
     
     private final int m_id;
     private final PlotParallelCoordinates m_plot;
@@ -63,22 +66,26 @@ public class ParallelCoordinatesAxis implements MoveableInterface {
         m_plot = plot;
 
         
-        m_values = new ArrayList<>(compareDataInterface.getColumnCount());
+        m_values = new ArrayList<>(compareDataInterface.getRowCount());
         m_rowIndexToValueMap = new HashMap<>();
         
         if (dataClass.equals(String.class)) {
             prepareStringData(compareDataInterface, colId);
             m_numericAxis = false;
-        } else /*if (dataClass.equals(Number.class))*/ {
+            m_discreteAxis = true;
+        } else if ((dataClass.equals(Long.class)) || (dataClass.equals(Integer.class))) {
             prepareNumberData(compareDataInterface, colId);
             m_numericAxis = true;
+            m_discreteAxis = true;
+        } else { // Float or Double
+            prepareNumberData(compareDataInterface, colId);
+            m_numericAxis = true;
+            m_discreteAxis = false;
         }
         
         Collections.sort(m_values);
         
         m_columnName = compareDataInterface.getDataColumnIdentifier(colId);
-        
-        
 
     }
     
@@ -99,13 +106,13 @@ public class ParallelCoordinatesAxis implements MoveableInterface {
         g.drawLine(x, m_y, x, m_y+m_height);
     }
     
-    public void paintForeground(Graphics2D g, boolean selected) {
+    public void paintForeground(Graphics2D g, int plotWidth, boolean selected) {
         
         int y1 = (int) Math.round(m_y+m_height*m_selectionMinPercentage);
         int y2 =(int) Math.round(m_y+m_height*m_selectionMaxPercentage);
         int height = (int) Math.round(m_height*(m_selectionMaxPercentage-m_selectionMinPercentage));
         
-        g.setColor(selected ? COLOR_SELECTION : COLOR_TRANSPARENT_GRAY);
+        g.setColor(selected ? COLOR_SELECTED : COLOR_TRANSPARENT_GRAY);
         g.fillRect(m_x, y1, AXIS_WIDTH, height);
         
         g.setColor(Color.white);
@@ -117,45 +124,106 @@ public class ParallelCoordinatesAxis implements MoveableInterface {
         // Display Column Name
         g.setColor(Color.black);
         g.setFont(m_valuesFont);
-        int stringWidth = m_valuesFontMetrics.stringWidth(m_columnName);
         int fontHeight = m_valuesFontMetrics.getHeight();
-        g.drawString(m_columnName, getX()-stringWidth/2, fontHeight+4);
+        g.drawString(m_columnName, xForLabel(m_columnName, plotWidth), fontHeight+4);
         
-        // Display Column Min
+        
+        // Display Min Value
+        String valueMin = m_values.get(0).toString();
+        g.drawString(valueMin, xForLabel(valueMin, plotWidth), PAD_Y_UP/2+fontHeight+4);
+        
+        // Display Max Value
+        String valueMax = m_values.get(m_values.size() - 1).toString();
+        g.drawString(valueMax, xForLabel(valueMax, plotWidth), m_y+m_height+fontHeight+4);
+        
+        
+        // Display Selected values
         if (m_numericAxis) {
-            
-            
-            // Min Value
-            NumberValue vMin = (NumberValue) m_values.get(0);
-            String valueMin = vMin.toString();
-            stringWidth = m_valuesFontMetrics.stringWidth(valueMin);
-            g.drawString(valueMin, getX()-stringWidth/2, PAD_Y_UP/2+fontHeight+4);
-            
-            
-            // Max Value
-            NumberValue vMax = (NumberValue) m_values.get(m_values.size()-1);
-            String valueMax = vMax.toString();
-            stringWidth = m_valuesFontMetrics.stringWidth(valueMax);
-            g.drawString(valueMax, getX()-stringWidth/2, m_y+m_height+fontHeight+4);
-            
+            double vMin = ((NumberValue) m_values.get(0)).doubleValue();
+            double vMax = ((NumberValue) m_values.get(m_values.size()-1)).doubleValue();
+
             // Min Value Selected
             if (y1>m_y) {
-                double v = (vMax.doubleValue()-vMin.doubleValue())*m_selectionMinPercentage+vMin.doubleValue();
-                String minValueSelected = String.valueOf(v);
-                stringWidth = m_valuesFontMetrics.stringWidth(minValueSelected);
-                g.drawString(minValueSelected, getX()-stringWidth/2, y1-fontHeight);
+                double v = (vMax-vMin)*m_selectionMinPercentage+vMin;
+                
+                String minValueSelected = (m_discreteAxis) ? Integer.toString((int) Math.round(Math.floor(v))) :  String.format("%6.5e", v);
+                
+                Rectangle2D r = m_valuesFontMetrics.getStringBounds(minValueSelected, g);
+                int textX = xForLabel(minValueSelected, plotWidth);
+                int textY = y1-fontHeight;
+                g.setColor(Color.white);
+                g.fillRect(((int) Math.round(r.getX()))+textX-2, ((int) Math.round(r.getY()))+textY, ((int) Math.round(r.getWidth()))+4, ((int) Math.round(r.getHeight())));
+                
+                g.setColor(Color.black);
+                g.drawString(minValueSelected, textX, textY);
             }
             
             // Max Value Selected
              if (y2 < m_y+m_height) {
-                double v = (vMax.doubleValue() - vMin.doubleValue()) * m_selectionMaxPercentage + vMin.doubleValue();
-                String maxValueSelected = String.valueOf(v);
-                stringWidth = m_valuesFontMetrics.stringWidth(maxValueSelected);
-                g.drawString(maxValueSelected, getX() - stringWidth / 2, y2 + fontHeight + 4);
+                double v = (vMax-vMin)*m_selectionMaxPercentage+vMin;
+                String maxValueSelected = (m_discreteAxis) ? Integer.toString((int) Math.round(Math.floor(v))) :  String.format("%6.5e", v);
+                
+                Rectangle2D r = m_valuesFontMetrics.getStringBounds(maxValueSelected, g);
+                int textX = xForLabel(maxValueSelected, plotWidth);
+                int textY = y2 + fontHeight + 4;
+                g.setColor(Color.white);
+                g.fillRect(((int) Math.round(r.getX()))+textX-2, ((int) Math.round(r.getY()))+textY, ((int) Math.round(r.getWidth()))+4, ((int) Math.round(r.getHeight())));
+                
+                g.setColor(Color.black);
+                g.drawString(maxValueSelected, textX, textY);
             }
             
+        } else {
+
+            // Min Value Selected
+            if (y1>m_y) {
+                int index = (int) Math.round((m_values.size()-1)*m_selectionMinPercentage+0.5);
+                if (index>m_values.size()-1) {
+                    index = m_values.size()-1;
+                } else if (index<0){
+                    index = 0;
+                }
+                valueMin = m_values.get(index).toString();
+                
+                Rectangle2D r = m_valuesFontMetrics.getStringBounds(valueMin, g);
+                int textX = xForLabel(valueMin, plotWidth);
+                int textY =  y1-fontHeight;
+                g.setColor(Color.white);
+                g.fillRect(((int) Math.round(r.getX()))+textX-2, ((int) Math.round(r.getY()))+textY, ((int) Math.round(r.getWidth()))+4, ((int) Math.round(r.getHeight())));
+                
+                g.setColor(Color.black);
+                g.drawString(valueMin, textX, textY);
+
+                index = (int) Math.round((m_values.size()-1)*m_selectionMaxPercentage+0.5);
+                if (index>m_values.size()-1) {
+                    index = m_values.size()-1;
+                } else if (index<0){
+                    index = 0;
+                }
+                valueMax = m_values.get(index).toString();
+                
+                r = m_valuesFontMetrics.getStringBounds(valueMax, g);
+                textX =  xForLabel(valueMax, plotWidth);
+                textY =  y2 + fontHeight + 4;
+                g.setColor(Color.white);
+                g.fillRect(((int) Math.round(r.getX()))+textX-2, ((int) Math.round(r.getY()))+textY, ((int) Math.round(r.getWidth()))+4, ((int) Math.round(r.getHeight())));
+                
+                g.setColor(Color.black);
+                g.drawString(valueMax, textX, textY);
+            }
         }
         
+    }
+    
+    private int xForLabel(String label, int plotWidth) {
+        int stringWidth = m_valuesFontMetrics.stringWidth(label);
+        int x = getX()-stringWidth/2;
+        if (x<0) {
+            x = 0;
+        } else if (x+stringWidth>=plotWidth) {
+            x = plotWidth-stringWidth-1;
+        }
+        return x;
     }
     
     public void setPosition(int x, int height) {
@@ -183,28 +251,14 @@ public class ParallelCoordinatesAxis implements MoveableInterface {
                 return false;
             }
             
+        } else { // String
+            int indexMin = (int) Math.round((m_values.size()-1)*m_selectionMinPercentage);
+            int indexMax = (int) Math.round((m_values.size()-1)*m_selectionMaxPercentage);
+            return ((indexMax>=rowIndex) && (indexMin<=rowIndex));
         }
         
         return true;
     }
-    
-    /*public int getPositionByIndex(int index) {
-        return getRelativePositionByIndex(index)+m_y;
-    }
-    
-    public int getRelativePositionByIndex(int index) {
-        AbstractValue v = m_values.get(index);
-
-        if (m_numericAxis) {
-            double min = ((NumberValue) m_values.get(0)).doubleValue();
-            double max = ((NumberValue) m_values.get(m_values.size() - 1)).doubleValue();
-            double value = ((NumberValue) v).doubleValue();
-
-            return (int) (((value - min) / (max - min)) * m_height);
-        }
-
-        return 0; //JPM.TODO
-    }*/
 
     
     public int getPositionByRowIndex(int rowIndex) {
@@ -220,9 +274,11 @@ public class ParallelCoordinatesAxis implements MoveableInterface {
             double value = ((NumberValue) v).doubleValue();
 
             return (int) (((value - min) / (max - min)) * m_height);
+        } else {
+           return (int) Math.round(   ((double)rowIndex)/((double)(m_values.size()-1)) *m_height);
         }
 
-        return 0; //JPM.TODO
+        //return 0; //JPM.TODO
     }
     
     public int getX() {
@@ -261,6 +317,15 @@ public class ParallelCoordinatesAxis implements MoveableInterface {
             m_rowIndexToValueMap.put(i, nValue);
         }
 
+    }
+    
+    public void doubleClicked() {
+        if ((m_selectionMinPercentage>0) || (m_selectionMaxPercentage<1)) {
+            m_selectionMinPercentage = 0;
+            m_selectionMaxPercentage = 1;
+            setSelected(true);
+            m_plot.axisChanged();
+        }
     }
 
     public MoveableInterface getOverMovable(int x, int y) {
@@ -319,8 +384,12 @@ public class ParallelCoordinatesAxis implements MoveableInterface {
                 m_plot.axisChanged();
                 break;
             case SCROLL:
-                if ((m_selectionMinPercentage+percentageMove<0) || (m_selectionMaxPercentage+percentageMove>1)) {
-                    // we do nothing, scroll impossible
+                if (m_selectionMinPercentage+percentageMove<0)  {
+                    m_selectionMaxPercentage -= m_selectionMinPercentage;
+                    m_selectionMinPercentage = 0;
+                } else if (m_selectionMaxPercentage+percentageMove>1) {
+                    m_selectionMinPercentage += m_selectionMaxPercentage;
+                    m_selectionMaxPercentage = 1;
                 } else {
                     m_selectionMinPercentage += percentageMove;
                     m_selectionMaxPercentage += percentageMove;

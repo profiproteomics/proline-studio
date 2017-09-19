@@ -272,4 +272,8 @@ public abstract class PlotBaseAbstract implements Axis.EnumXInterface, Axis.Enum
     public JPopupMenu getPopupMenu(double x, double y) {
         return null;
     }
+    
+    public void doubleClicked(int x, int y) {
+        
+    }
 }

@@ -25,6 +25,7 @@ import fr.proline.studio.rsmexplorer.gui.calc.graphics.AbstractGraphic;
 import fr.proline.studio.rsmexplorer.gui.calc.graphics.BoxPlotGraphic;
 import fr.proline.studio.rsmexplorer.gui.calc.graphics.CalibrationPlotGraphic;
 import fr.proline.studio.rsmexplorer.gui.calc.graphics.DensityPlotGraphic;
+import fr.proline.studio.rsmexplorer.gui.calc.graphics.ParallelCoordinatesGraphic;
 import fr.proline.studio.rsmexplorer.gui.calc.graphics.ScatterOrHistogramGraphic;
 import fr.proline.studio.rsmexplorer.gui.calc.graphics.VarianceDistPlotGraphic;
 import fr.proline.studio.rsmexplorer.gui.calc.graphics.VennDiagramGraphic;
@@ -248,6 +249,9 @@ public abstract class DataTree extends JTree {
         parentGraphicNode.add(node);
         
         node = new GraphicNode(new DensityPlotGraphic(null));
+        parentGraphicNode.add(node);
+        
+        node = new GraphicNode(new ParallelCoordinatesGraphic(null));
         parentGraphicNode.add(node);
         
         node = new GraphicNode(new ScatterOrHistogramGraphic(null, PlotType.HISTOGRAM_PLOT));

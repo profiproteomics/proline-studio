@@ -14,6 +14,10 @@ public class NumberValue extends AbstractValue {
         m_n = n;
     }
     
+    public void setValue(Number n) {
+        m_n = n;
+    }
+    
     @Override
     public String toString() {
         return m_n.toString();
@@ -25,7 +29,20 @@ public class NumberValue extends AbstractValue {
     
     @Override
     public int compareTo(AbstractValue o) {
-        double delta =  m_n.doubleValue() - ((NumberValue) o).m_n.doubleValue();
+        
+        double v1 = m_n.doubleValue();
+        double v2 = ((NumberValue) o).m_n.doubleValue();
+        if (Double.isNaN(v1)) {
+            if (Double.isNaN(v2)) {
+                return 0;
+            } else {
+                return -1;
+            }
+        } else if (Double.isNaN(v2)) {
+            return 1;
+        }
+        
+        double delta =  v1 - v2;
         if (delta >0) {
             return 1;
         } else if (delta < 0) {
@@ -33,4 +50,10 @@ public class NumberValue extends AbstractValue {
         }
         return 0;
     }
+    
+    @Override
+    public boolean isNan() {
+        return Double.isNaN(doubleValue());
+    }
+    
 }

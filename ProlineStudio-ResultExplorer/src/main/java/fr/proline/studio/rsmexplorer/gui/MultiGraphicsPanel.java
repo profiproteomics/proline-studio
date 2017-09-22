@@ -7,7 +7,6 @@ import fr.proline.studio.graphics.BestGraphicsInterface;
 import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.graphics.BasePlotPanel;
 import fr.proline.studio.graphics.PlotLinear;
-import fr.proline.studio.graphics.BasePlotPanel.GridListener;
 import fr.proline.studio.graphics.PlotBaseAbstract;
 import static fr.proline.studio.graphics.PlotBaseAbstract.COL_X_ID;
 import static fr.proline.studio.graphics.PlotBaseAbstract.COL_Y_ID;
@@ -36,12 +35,13 @@ import javax.swing.JPanel;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 import org.openide.windows.WindowManager;
+import fr.proline.studio.graphics.BasePlotPanel.PlotToolbarListener;
 
 /**
  *
  * @author JM235353
  */
-public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelInterface, GridListener {
+public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelInterface, PlotToolbarListener {
 
     
     private AbstractDataBox m_dataBox;
@@ -68,6 +68,8 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
     private boolean m_dataLocked = false;
     
     private JToggleButton m_gridButton = null;
+    private JButton m_importSelectionButton = null;
+    private JButton m_exportSelectionButton = null;
     
     public MultiGraphicsPanel(boolean dataLocked, boolean canChooseColor) {
         setLayout(new BorderLayout());
@@ -95,7 +97,7 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
         c.insets = new java.awt.Insets(0, 5, 0, 5);
 
         m_plotPanel = new BasePlotPanel();
-        m_plotPanel.setGridListener(this);
+        m_plotPanel.setPlotToolbarListener(this);
         JPanel selectPanel = createSelectPanel();
         
         c.gridx = 0;
@@ -125,11 +127,11 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
             }
         });
         
-        final JButton importSelectionButton  = new JButton(IconManager.getIcon(IconManager.IconType.IMPORT_TABLE_SELECTION));
-        importSelectionButton.setToolTipText( "Import Selection from Previous View");
-        importSelectionButton.setFocusPainted(false);
-        importSelectionButton.setEnabled(!m_dataLocked);
-        importSelectionButton.addActionListener(new ActionListener() {
+        m_importSelectionButton  = new JButton(IconManager.getIcon(IconManager.IconType.IMPORT_TABLE_SELECTION));
+        m_importSelectionButton.setToolTipText( "Import Selection from Previous View");
+        m_importSelectionButton.setFocusPainted(false);
+        m_importSelectionButton.setEnabled(!m_dataLocked);
+        m_importSelectionButton.addActionListener(new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -139,11 +141,11 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
                 }*/
             }
         });
-        final JButton exportSelectionButton  = new JButton(IconManager.getIcon(IconManager.IconType.EXPORT_TABLE_SELECTION));
-        exportSelectionButton.setToolTipText("Export Selection to Previous View");
-        exportSelectionButton.setFocusPainted(false);
-        exportSelectionButton.setEnabled(!m_dataLocked);
-        exportSelectionButton.addActionListener(new ActionListener() {
+        m_exportSelectionButton  = new JButton(IconManager.getIcon(IconManager.IconType.EXPORT_TABLE_SELECTION));
+        m_exportSelectionButton.setToolTipText("Export Selection to Previous View");
+        m_exportSelectionButton.setFocusPainted(false);
+        m_exportSelectionButton.setEnabled(!m_dataLocked);
+        m_exportSelectionButton.addActionListener(new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -508,12 +510,30 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
     }
 
     @Override
-    public void gridChanged() {
-        if (!m_plotPanel.displayGrid()) {
-            m_gridButton.setSelected(false);
+    public void stateModified(BUTTONS b) {
+        switch (b) {
+            case GRID:
+                if (!m_plotPanel.displayGrid()) {
+                    m_gridButton.setSelected(false);
+                }
+                break;
         }
-            
-            
+        
+    }
+
+    @Override
+    public void enable(BUTTONS b, boolean v) {
+        switch (b) {
+            case GRID:
+                m_gridButton.setEnabled(v);
+                break;
+            case IMPORT_SELECTION:
+                m_importSelectionButton.setEnabled(v);
+                break;
+            case EXPORT_SELECTION:
+                m_exportSelectionButton.setEnabled(v);
+                break;
+        }
     }
 
     private static class ReferenceToColumn {

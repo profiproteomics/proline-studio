@@ -94,6 +94,11 @@ public class PlotVennDiagram extends PlotMultiDataAbstract {
         m_thicknessParameter.setExternalActionListener(repaintAction);
         m_xTranslationParameter.setExternalActionListener(repaintAction);
         m_yTranslationParameter.setExternalActionListener(repaintAction);
+        
+        // disable selection buttons
+        m_plotPanel.enableButton(BasePlotPanel.PlotToolbarListener.BUTTONS.GRID, false);
+        m_plotPanel.enableButton(BasePlotPanel.PlotToolbarListener.BUTTONS.EXPORT_SELECTION, false);
+        m_plotPanel.enableButton(BasePlotPanel.PlotToolbarListener.BUTTONS.IMPORT_SELECTION, false);
     }
 
     @Override

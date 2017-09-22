@@ -79,7 +79,7 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
     private boolean m_dataLocked = false;
     private boolean m_drawCursor = false;
 
-    private GridListener m_gridListener = null;
+    private PlotToolbarListener m_plotToolbarListener = null;
     private List<PlotPanelListener> m_listeners = new ArrayList<>();
     
     private final Rectangle m_plotArea = new Rectangle();
@@ -118,10 +118,15 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
         m_plots = new ArrayList();
     }
     
-    public void setPlotTitle(String title){
-        this.m_plotTitle= title;
+    public void setPlotTitle(String title) {
+        m_plotTitle = title;
     }
 
+    public void enableButton(PlotToolbarListener.BUTTONS button, boolean v) {
+        if (m_plotToolbarListener != null) {
+            m_plotToolbarListener.enable(button, v);
+        }
+    }
     
     @Override
     public void paint(Graphics g) {
@@ -923,8 +928,8 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
         return popup;
     }
     
-    public void setGridListener(GridListener gridListener) {
-        m_gridListener = gridListener;
+    public void setPlotToolbarListener(PlotToolbarListener plotToolbarListener) {
+        m_plotToolbarListener = plotToolbarListener;
     }
 
     @Override
@@ -1037,14 +1042,16 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
             } else { // y Axis
                 m_plotHorizontalGrid = !m_plotHorizontalGrid;
             }
-            if (m_gridListener != null) {
-                m_gridListener.gridChanged();
+            if (m_plotToolbarListener != null) {
+                m_plotToolbarListener.stateModified(PlotToolbarListener.BUTTONS.GRID);
             }
             m_updateDoubleBuffer = true;
             repaint();
         }
 
     }
+    
+
     
     public class RangeAction extends AbstractAction {
 
@@ -1079,8 +1086,18 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
 
     }
 
-    public interface GridListener {
-        public void gridChanged();
+    public interface PlotToolbarListener {
+        
+        public enum BUTTONS {
+            GRID,
+            EXPORT_SELECTION,
+            IMPORT_SELECTION
+        }
+
+        
+        public void stateModified(BUTTONS b);
+        
+        public void enable(BUTTONS b, boolean v);
     }
 
    public class FPSUtility {

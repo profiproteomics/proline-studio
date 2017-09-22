@@ -23,5 +23,8 @@ public abstract class AbstractValue implements Comparable<AbstractValue> {
         return m_rowIndex;
     }
 
+    public boolean isNan() {
+        return false;
+    }
     
 }

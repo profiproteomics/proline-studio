@@ -3,7 +3,6 @@ package fr.proline.studio.graphics;
 import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.comparedata.LockedDataModel;
 import fr.proline.studio.export.ExportButton;
-import fr.proline.studio.graphics.BasePlotPanel.GridListener;
 import static fr.proline.studio.graphics.PlotBaseAbstract.COL_X_ID;
 import static fr.proline.studio.graphics.PlotBaseAbstract.COL_Y_ID;
 import fr.proline.studio.gui.AdvancedSelectionPanel;
@@ -30,12 +29,13 @@ import javax.swing.JPanel;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 import org.openide.windows.WindowManager;
+import fr.proline.studio.graphics.BasePlotPanel.PlotToolbarListener;
 
 /**
  *
  * @author JM235353
  */
-public class BaseGraphicsPanel extends HourglassPanel implements GridListener {
+public class BaseGraphicsPanel extends HourglassPanel implements PlotToolbarListener {
 
     private BasePlotPanel m_plotPanel;
     
@@ -60,6 +60,8 @@ public class BaseGraphicsPanel extends HourglassPanel implements GridListener {
     private boolean m_dataLocked = false;
     
     private JToggleButton m_gridButton = null;
+    private JButton m_importSelectionButton = null;
+    private JButton m_exportSelectionButton = null;
     
     
     public BaseGraphicsPanel(boolean dataLocked) {
@@ -95,7 +97,7 @@ public class BaseGraphicsPanel extends HourglassPanel implements GridListener {
 
         PlotPanel panel = new PlotPanel();
         m_plotPanel = panel.getBasePlotPanel();
-        m_plotPanel.setGridListener(this);
+        m_plotPanel.setPlotToolbarListener(this);
         JPanel selectPanel = createSelectPanel();
         
         c.gridx = 0;
@@ -128,10 +130,10 @@ public class BaseGraphicsPanel extends HourglassPanel implements GridListener {
         SettingsButton settingsButton = new SettingsButton(null, m_plotPanel);
 
         
-        final JButton importSelectionButton  = new JButton(IconManager.getIcon(IconManager.IconType.IMPORT_TABLE_SELECTION));
-        importSelectionButton.setToolTipText( "Import Selection from Previous View");
-        importSelectionButton.setFocusPainted(false);
-        importSelectionButton.addActionListener(new ActionListener() {
+        m_importSelectionButton  = new JButton(IconManager.getIcon(IconManager.IconType.IMPORT_TABLE_SELECTION));
+        m_importSelectionButton.setToolTipText( "Import Selection from Previous View");
+        m_importSelectionButton.setFocusPainted(false);
+        m_importSelectionButton.addActionListener(new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -141,10 +143,10 @@ public class BaseGraphicsPanel extends HourglassPanel implements GridListener {
                 }
             }
         });
-        final JButton exportSelectionButton  = new JButton(IconManager.getIcon(IconManager.IconType.EXPORT_TABLE_SELECTION));
-        exportSelectionButton.setToolTipText("Export Selection to Previous View");
-        exportSelectionButton.setFocusPainted(false);
-        exportSelectionButton.addActionListener(new ActionListener() {
+        m_exportSelectionButton  = new JButton(IconManager.getIcon(IconManager.IconType.EXPORT_TABLE_SELECTION));
+        m_exportSelectionButton.setToolTipText("Export Selection to Previous View");
+        m_exportSelectionButton.setFocusPainted(false);
+        m_exportSelectionButton.addActionListener(new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -190,8 +192,8 @@ public class BaseGraphicsPanel extends HourglassPanel implements GridListener {
         toolbar.add(settingsButton);
         toolbar.addSeparator(); // ----
         toolbar.add(lockButton);
-        toolbar.add(importSelectionButton);
-        toolbar.add(exportSelectionButton);
+        toolbar.add(m_importSelectionButton);
+        toolbar.add(m_exportSelectionButton);
         toolbar.addSeparator(); // ----
         toolbar.add(exportImageButton);
 
@@ -533,8 +535,14 @@ public class BaseGraphicsPanel extends HourglassPanel implements GridListener {
 
             if (m_values instanceof BestGraphicsInterface) {
                 BestGraphicsInterface bestGraphics = (BestGraphicsInterface) m_values;
+                
+                
+                //JPM.TODO : this is a wart (JPM.WART): should be done in another way
                 cols = bestGraphics.getBestColIndex(PlotType.VENN_DIAGRAM_PLOT);
-
+                if (cols == null) {
+                    cols = bestGraphics.getBestColIndex(PlotType.PARALLEL_COORDINATES_PLOT);
+                }
+                
                 boolean[] done = null;
                 if (cols != null) {
                     done = new boolean[cols.length];
@@ -597,6 +605,12 @@ public class BaseGraphicsPanel extends HourglassPanel implements GridListener {
         ReferenceIdName refY = (ReferenceIdName) m_valueYComboBox.getSelectedItem();
         String zParameter = (String) m_valueZComboBox.getSelectedItem();
         
+                
+        // enable buttons before to reinit them
+        m_gridButton.setEnabled(true);
+        m_importSelectionButton.setEnabled(true);
+        m_exportSelectionButton.setEnabled(true);
+        
         switch (plotType) {
             case HISTOGRAM_PLOT:
                 m_plotGraphics = new PlotHistogram(m_plotPanel, m_values, m_crossSelectionInterface, refX.getColumnIndex(), zParameter);
@@ -619,21 +633,38 @@ public class BaseGraphicsPanel extends HourglassPanel implements GridListener {
                 m_plotPanel.setPlot(m_plotGraphics);
                 break;
         }
-        
-        
+
         
         
         
     }
-    
+
 
     @Override
-    public void gridChanged() {
-        if (!m_plotPanel.displayGrid()) {
-            m_gridButton.setSelected(false);
+    public void stateModified(BUTTONS b) {
+        switch (b) {
+            case GRID:
+                if (!m_plotPanel.displayGrid()) {
+                    m_gridButton.setSelected(false);
+                }
+                break;
         }
-            
-            
+        
+    }
+
+    @Override
+    public void enable(BUTTONS b, boolean v) {
+        switch (b) {
+            case GRID:
+                m_gridButton.setEnabled(v);
+                break;
+            case IMPORT_SELECTION:
+                m_importSelectionButton.setEnabled(v);
+                break;
+            case EXPORT_SELECTION:
+                m_exportSelectionButton.setEnabled(v);
+                break;
+        }
     }
 
 

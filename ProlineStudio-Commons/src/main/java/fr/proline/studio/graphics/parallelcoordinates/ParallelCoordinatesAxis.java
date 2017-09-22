@@ -77,11 +77,13 @@ public class ParallelCoordinatesAxis implements MoveableInterface {
         m_values = new ArrayList<>(compareDataInterface.getRowCount());
         m_rowIndexToValueMap = new HashMap<>();
         
+        
         if (dataClass.equals(String.class)) {
             prepareStringData(compareDataInterface, colId);
             m_numericAxis = false;
             m_discreteAxis = true;
             Collections.sort(m_values);
+            m_firstNonNanValueIndex = m_values.size()-1;
         } else if ((dataClass.equals(Long.class)) || (dataClass.equals(Integer.class))) {
             prepareNumberData(compareDataInterface, colId);
             m_numericAxis = true;
@@ -94,6 +96,7 @@ public class ParallelCoordinatesAxis implements MoveableInterface {
             m_discreteAxis = false;            
             Collections.sort(m_values, Collections.reverseOrder());
             
+            m_firstNonNanValueIndex = m_values.size()-1;
             if (m_values.get(m_values.size()-1).isNan()) {
                 m_hasNan = true;
                 m_firstNonNanValueIndex = -1;

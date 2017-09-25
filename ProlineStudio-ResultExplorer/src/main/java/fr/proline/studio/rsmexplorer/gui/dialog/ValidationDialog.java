@@ -50,6 +50,8 @@ import org.slf4j.LoggerFactory;
 public class ValidationDialog extends DefaultDialog implements ComponentListener {
 
     private static ValidationDialog m_singletonDialog = null;
+    
+    private boolean m_allowPropagateFilters = true;
 
 //    private final static String[] FDR_ESTIMATOR_VALUES = {null, "Default", "Competition Based"};
 //    private final static String[] FDR_ESTIMATOR_VALUES_ASSOCIATED_KEYS = {null, "false", "true"};
@@ -126,7 +128,7 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
         m_parameterList = new ParameterList("Validation");
         createParameters();
         m_parameterList.updateIsUsed(NbPreferences.root());
-
+        
         setInternalComponent(createInternalPanel());
 
         initPsmPrefilterPanel();
@@ -146,6 +148,28 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
         return m_hasDecoy;
     }
 
+    public void setAllowPropagateFilters(boolean allowPropagateFilters){
+        if(m_allowPropagateFilters != allowPropagateFilters){
+            if(!allowPropagateFilters){
+                m_propagatePsmFiltersCheckBox.setSelected(false);
+                m_propagateProtSetFiltersCheckBox.setSelected(false);
+                m_propagateProtSetFiltersParameter.setUsed(false);
+                m_propagatePsmFiltersParameter.setUsed(false);
+            }
+            
+            m_propagateProtSetFiltersCheckBox.setEnabled(allowPropagateFilters);
+            m_propagatePsmFiltersCheckBox.setEnabled(allowPropagateFilters);            
+        }
+        m_allowPropagateFilters=allowPropagateFilters;
+        revalidate();
+        repack();
+    }
+    
+    public boolean isPropagateFiltersSelected(){
+        return ((m_propagatePsmFiltersCheckBox.isEnabled() && m_propagatePsmFiltersCheckBox.isSelected()) 
+                || (m_propagateProtSetFiltersCheckBox.isEnabled() && m_propagateProtSetFiltersCheckBox.isSelected()));
+    }
+            
     public void setDatasetList(final ArrayList<DDataset> datasetList) {
 
         setHasDecoy(DecoyStatus.WAITING);
@@ -182,7 +206,7 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
         AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
 
     }
-
+    
     private JPanel createInternalPanel() {
 
         JPanel internalPanel = new JPanel(new GridBagLayout());
@@ -223,7 +247,7 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
 
         return psmTabPanel;
     }
-
+    
     private JPanel createTypicalProteinTabPanel() {
 
         JPanel tabPanel = new JPanel(new GridBagLayout());
@@ -255,9 +279,19 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
         c.insets = new java.awt.Insets(5, 5, 5, 5);
 
         c.gridx = 0;
-        c.gridy = 0;               
+        c.gridy = 0;           
+        if(!m_allowPropagateFilters)
+           m_propagatePsmFiltersCheckBox.setSelected(false);
+        m_propagatePsmFiltersCheckBox.setEnabled(m_allowPropagateFilters);
         psmPanel.add(m_propagatePsmFiltersCheckBox, c);
-
+        m_propagatePsmFiltersCheckBox.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                boolean enabled = (m_propagatePsmFiltersCheckBox.isSelected());
+                m_propagatePsmFiltersParameter.setUsed(enabled);
+            }
+        });
+        
         c.gridy++;   
         c.weightx = 1.0;
         psmPanel.add(createPsmPreFilterPanel(), c);
@@ -478,7 +512,18 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
 
         c.gridx = 0;
         c.gridy = 0;
+        if(!m_allowPropagateFilters)
+            m_propagateProtSetFiltersCheckBox.setSelected(false);
+        m_propagateProtSetFiltersCheckBox.setEnabled(m_allowPropagateFilters);
         proteinSetFilterPanel.add(m_propagateProtSetFiltersCheckBox, c);
+        
+        m_propagateProtSetFiltersCheckBox.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                boolean enabled = (m_propagateProtSetFiltersCheckBox.isSelected());
+                m_propagateProtSetFiltersParameter.setUsed(enabled);
+            }
+        });
         
         c.gridy++;
         c.weightx = 1.0;
@@ -725,13 +770,16 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
         m_propagatePsmFiltersCheckBox = new JCheckBox();
         m_propagatePsmFiltersCheckBox.setText("Propagate PSM filtering to child Search Results");
         m_propagatePsmFiltersParameter = new BooleanParameter("propagate_pep_match_filters", "Propagate PSM Filters", m_propagatePsmFiltersCheckBox, false);
+        m_propagatePsmFiltersParameter.setUsed(false);
+        m_propagatePsmFiltersParameter.setCompulsory(false);
         m_parameterList.add(m_propagatePsmFiltersParameter);
 
         m_propagateProtSetFiltersCheckBox = new JCheckBox();
         m_propagateProtSetFiltersCheckBox.setText("Propagate ProteinSets filtering to child Search Results (Warning FDR Validation will not be propagated !");
         m_propagateProtSetFiltersParameter = new BooleanParameter("propagate_prot_set_filters", "Propagate ProteinSet Filters", m_propagateProtSetFiltersCheckBox, false);
-        m_parameterList.add(m_propagateProtSetFiltersParameter);
-    
+        m_propagateProtSetFiltersParameter.setUsed(false);
+        m_propagateProtSetFiltersParameter.setCompulsory(false);        
+        m_parameterList.add(m_propagateProtSetFiltersParameter);    
     }
 
     public HashMap<String, String> getArguments() {
@@ -883,9 +931,17 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
                     restoreTypicalProteinParameters(filePreferences);
                     updateFdrObjects(m_fdrFilterParameter.isUsed());
                     updateproteinFdrObjects(m_proteinFdrFilterParameter.isUsed());
+                    //
+                    //Initi PSM/Prot filters Propagation if possible
+                    if(m_allowPropagateFilters){
+                        m_propagatePsmFiltersCheckBox.setSelected(m_propagatePsmFiltersParameter.isUsed());
+                        m_propagateProtSetFiltersCheckBox.setSelected(m_propagateProtSetFiltersParameter.isUsed());
+                    }        
                     initPsmPrefilterPanel();
                     m_proteinPrefiltersPanel.initProteinFilterPanel();
 
+                    
+                    
                 } catch (Exception e) {
                     LoggerFactory.getLogger("ProlineStudio.ResultExplorer").error("Parsing of User Settings File Failed", e);
                     setStatus(true, "Parsing of your Settings File failed");

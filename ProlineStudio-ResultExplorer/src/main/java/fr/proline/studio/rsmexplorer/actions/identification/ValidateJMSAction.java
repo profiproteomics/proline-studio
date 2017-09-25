@@ -50,6 +50,7 @@ public class ValidateJMSAction extends AbstractRSMAction {
     public void actionPerformed(AbstractNode[] selectedNodes, int x, int y) {
 
         int nbAlreadyValidated = 0;
+        boolean mergedDatasetSelected =false;
 
         int nbNodes = selectedNodes.length;
         ArrayList<DDataset> datasetList = new ArrayList<>(nbNodes);
@@ -60,6 +61,9 @@ public class ValidateJMSAction extends AbstractRSMAction {
             rsm=d.getResultSummaryId(); 
             if (dataSetNode.hasResultSummary()) {
                 nbAlreadyValidated++;
+            }
+            if(((DataSetData) dataSetNode.getData()).getDatasetType().equals(Dataset.DatasetType.AGGREGATE)){
+                mergedDatasetSelected = true;
             }
         }
 
@@ -92,6 +96,7 @@ public class ValidateJMSAction extends AbstractRSMAction {
         ValidationDialog dialog = ValidationDialog.getDialog(WindowManager.getDefault().getMainWindow());
         dialog.setLocation(x, y);
         dialog.setDatasetList(datasetList);
+        dialog.setAllowPropagateFilters(mergedDatasetSelected);
         dialog.setVisible(true);
 
 
@@ -102,10 +107,7 @@ public class ValidateJMSAction extends AbstractRSMAction {
             final List<ChangeTypicalRule> changeTypicalRules  = dialog.getChangeTypicalRules();
             final String scoringType = dialog.getScoringType();
             //VDTEST
-            boolean getV2Service = false;
-            if(parserArguments.containsKey("propagate_prot_set_filters") || parserArguments.containsKey("propagate_pep_match_filters"))
-                getV2Service = true;
-            final boolean v2Service = getV2Service;
+            final boolean v2Service = dialog.isPropagateFiltersSelected();
             
             IdentificationTree tree = IdentificationTree.getCurrentTree();
             DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();

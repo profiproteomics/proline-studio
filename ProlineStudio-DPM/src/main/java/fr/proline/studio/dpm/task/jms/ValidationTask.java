@@ -214,7 +214,7 @@ public class ValidationTask extends AbstractJMSTask  {
             HashMap filterCfg = new HashMap();
             filterCfg.put("parameter", SINGLE_PSM_RANK_FILTER_KEY);
             filterCfg.put("threshold", 1);
-//                filterCfg.put("post_validation", Boolean.valueOf(m_argumentsMap.get(SINGLE_PSM_RANK_FILTER_KEY)));
+            filterCfg.put("post_validation", Boolean.valueOf(m_argumentsMap.get("PSM_"+SINGLE_PSM_RANK_FILTER_KEY)));
             pepFilters.add(filterCfg);
         }
         params.put("pep_match_filters", pepFilters);

@@ -507,11 +507,13 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                         }else{
                             dqc.setIdentRs(null);
                         }
-                        // search if a dataset with rsmId, rsId exists
-                        String queryIdentDsS = "SELECT ds.id FROM Dataset ds WHERE ds.resultSetId=:rsId AND ds.resultSummaryId=:rsmId ";
+                        // search if a dataset with rsmId, rsId exists 
+                        String queryIdentDsS = "SELECT ds.id FROM Dataset ds WHERE ds.resultSetId=:rsId AND ds.resultSummaryId=:rsmId AND ds.project.id=:projectId ";
                         TypedQuery<Long> queryIdentDs = entityManagerUDS.createQuery(queryIdentDsS, Long.class);
                         queryIdentDs.setParameter("rsId",rsId );
                         queryIdentDs.setParameter("rsmId", qc.getIdentResultSummaryId());
+                        queryIdentDs.setParameter("projectId", projectId);
+                        
                         try {
                             Long identDsId  = queryIdentDs.getSingleResult();
                             dqc.setIdentDatasetId(identDsId);

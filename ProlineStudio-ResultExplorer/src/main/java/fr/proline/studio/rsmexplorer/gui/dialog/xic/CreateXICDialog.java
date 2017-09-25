@@ -380,8 +380,8 @@ public class CreateXICDialog extends DefaultDialog {
         List _biologicalGroupList = new ArrayList();
         HashMap<String, Long> _rsmIdBySampleAnalysis = new HashMap<>();
         HashMap<Long, Long> _runIdByRSMId;
-        HashMap<String, ArrayList<String>> _samplesAnalysisBySample = new HashMap<>();
-        Map<String, Integer> splNbrByName = new HashMap<>();
+        HashMap<String, ArrayList<String>> _samplesAnalysisBySample = new HashMap<>();       
+        Map<Integer, String> splNameByNbr = new HashMap<>();
 
         Enumeration xicGrps = m_finalXICDesignNode.children();
         while (xicGrps.hasMoreElements() && errorMsg == null) {
@@ -395,7 +395,7 @@ public class CreateXICDialog extends DefaultDialog {
             while (grpSpls.hasMoreElements() && errorMsg == null) {
                 AbstractNode splNode = (AbstractNode) grpSpls.nextElement();
                 String sampleName = grpName + splNode.getData().getName();
-                splNbrByName.put(sampleName, splNumber);
+                splNameByNbr.put(splNumber, sampleName);                        
                 splNumbers.add(splNumber++);
 
                 //Iterate over SampleAnalysis
@@ -456,22 +456,24 @@ public class CreateXICDialog extends DefaultDialog {
         List biologicalSampleList = new ArrayList();
         List quantChanneList = new ArrayList();
 
-        Iterator<String> samplesIt = splNbrByName.keySet().iterator();
-        while (samplesIt.hasNext()) {
-            String nextSpl = samplesIt.next();
-            Integer splNbr = splNbrByName.get(nextSpl);
+        List<Integer> samplesNbrList = new ArrayList(splNameByNbr.keySet());      
+        Collections.sort(samplesNbrList);
+        Iterator<Integer> samplesNbrIt = samplesNbrList.iterator();
+        while (samplesNbrIt.hasNext()) {
+            Integer nextSplNbr = samplesNbrIt.next();
+            String nextSpl = splNameByNbr.get(nextSplNbr);
 
             Map<String, Object> biologicalSampleParams = new HashMap<>();
-            biologicalSampleParams.put("number", splNbr);
+            biologicalSampleParams.put("number", nextSplNbr);
             biologicalSampleParams.put("name", nextSpl);
 
             biologicalSampleList.add(biologicalSampleParams);
-
+            
             List<String> splAnalysis = _samplesAnalysisBySample.get(nextSpl);
             for (String nextSplAnalysis : splAnalysis) {
                 Map<String, Object> quantChannelParams = new HashMap<>();
                 quantChannelParams.put("number", splAnalysisNumber++);
-                quantChannelParams.put("sample_number", splNbr);
+                quantChannelParams.put("sample_number", nextSplNbr);
                 quantChannelParams.put("name", nextSplAnalysis);
                 quantChannelParams.put("ident_result_summary_id", _rsmIdBySampleAnalysis.get(nextSplAnalysis));
                 quantChannelParams.put("run_id", _runIdByRSMId.get(_rsmIdBySampleAnalysis.get(nextSplAnalysis)));
@@ -757,7 +759,7 @@ public class CreateXICDialog extends DefaultDialog {
                                     DataSetNode dsNode = spectraNodesPerRsId.get(failedRSIds.get(0));
                                     showErrorOnNode(dsNode, dsNode.getDataset().getName() + " at least one of the following attributes {First Time, First Scan, First Cycle} must be initialized. Remove the highlighted node from your design.");
                                 } else if (failedRSIds.size() > 1) {
-                                    ArrayList<String> failedNodes = new ArrayList<String>();
+                                    ArrayList<String> failedNodes = new ArrayList<>();
 
                                     for (int i = 0; i < failedRSIds.size(); i++) {
                                         failedNodes.add(spectraNodesPerRsId.get(failedRSIds.get(i)).toString());

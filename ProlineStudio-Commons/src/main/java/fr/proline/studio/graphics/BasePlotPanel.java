@@ -628,7 +628,11 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
         }
         
         if (m_moveGesture.isMoving()) {
-            m_moveGesture.stopMoving(x, y);
+            
+            int modifier = e.getModifiers();
+            boolean isCtrlOrShiftDown = ((modifier & (InputEvent.SHIFT_MASK | InputEvent.CTRL_MASK)) != 0);
+            
+            m_moveGesture.stopMoving(x, y, isCtrlOrShiftDown);
             setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
             m_updateDoubleBuffer = true;
             mustRepaint = true;
@@ -1009,7 +1013,7 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
         private final Axis m_axis;
 
         public LogAction(Axis axis) {
-            super(axis.isLog() ? "Linear Axis" : "Log Axis");
+            super(axis.isLog() ? "Linear Axis" : "Log10 Axis");
             m_axis = axis;
         }
 

@@ -7,7 +7,6 @@ import java.awt.Graphics2D;
 import java.awt.Stroke;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import static fr.proline.studio.graphics.cursor.AbstractCursor.DEFAULT_CURSOR_COLOR;
 
 /**
  *
@@ -106,7 +105,7 @@ public class HorizontalCursor extends AbstractCursor {
     }
 
     @Override
-    public void snapToData() {
+    public void snapToData(boolean isCtrlOrShiftDown) {
         if (!m_snapToData) {
             return;
         }

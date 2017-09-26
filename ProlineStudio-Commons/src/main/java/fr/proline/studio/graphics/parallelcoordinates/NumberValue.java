@@ -56,4 +56,8 @@ public class NumberValue extends AbstractValue {
         return Double.isNaN(doubleValue());
     }
     
+    public void log() {
+        m_n = Math.log10(m_n.doubleValue());
+    }
+    
 }

@@ -30,9 +30,9 @@ public class MoveGesture {
         m_y = y;
     }
     
-    public void stopMoving(int x, int y) {
+    public void stopMoving(int x, int y, boolean isCtrlOrShiftDown) {
         move(x, y);
-        m_moveableObject.snapToData();
+        m_moveableObject.snapToData(isCtrlOrShiftDown);
         m_moveableObject = null;
     }
 }

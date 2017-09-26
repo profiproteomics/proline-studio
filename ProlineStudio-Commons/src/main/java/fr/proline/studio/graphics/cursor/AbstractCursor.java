@@ -123,16 +123,15 @@ public abstract class AbstractCursor implements MoveableInterface {
         return m_snapToData = !m_snapToData;
     }
     
-    public void setSelected(boolean s) {
+    @Override
+    public void setSelected(boolean s, boolean isCtrlOrShiftDown) {
         m_selected = s;
     }
     
     public boolean isSelected() {
         return m_selected;
     }
-    
-    public abstract void snapToData();
-    
+ 
     
     public abstract void paint(Graphics2D g);
 }

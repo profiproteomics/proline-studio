@@ -9,7 +9,7 @@ public interface MoveableInterface {
     public boolean inside(int x, int y);
     public void move(int deltaX, int deltaY);
     public boolean isMoveable();
-    public void snapToData();
-    public void setSelected(boolean s);
+    public void snapToData(boolean isCtrlOrShiftDown);
+    public void setSelected(boolean s, boolean isCtrlOrShiftDown);
     
 }

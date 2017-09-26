@@ -12,9 +12,13 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.LinearGradientPaint;
 import java.awt.Stroke;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.geom.Path2D;
 import java.util.ArrayList;
 import java.util.Arrays;
+import javax.swing.JMenuItem;
+import javax.swing.JPopupMenu;
 import javax.swing.JSpinner;
 
 /**
@@ -39,7 +43,7 @@ public class PlotParallelCoordinates extends PlotMultiDataAbstract {
     
     private Color[] m_gradientColors;
     private float[] m_gradientFractions;
-    private int m_selectedAxisIndex = 0;
+    private int m_mainSelectedAxisIndex = 0;
     
     private boolean[] m_selectionArray = null;
     private boolean[] m_selectionArrayForExport = null;
@@ -178,7 +182,7 @@ public class PlotParallelCoordinates extends PlotMultiDataAbstract {
         g.setStroke(previousStroke);
         
         for (ParallelCoordinatesAxis axis : m_axisList) {
-            axis.paint(g, width, m_selectedAxisIndex == axis.getId());
+            axis.paint(g, width);
         }
         
     }
@@ -189,7 +193,7 @@ public class PlotParallelCoordinates extends PlotMultiDataAbstract {
     
     private void drawLines(Graphics2D g, Color plotColor, boolean useGradient, boolean paintSelection) {
         
-        ParallelCoordinatesAxis selectedAxis = m_axisList.get(m_selectedAxisIndex);
+        ParallelCoordinatesAxis selectedAxis = m_axisList.get(m_mainSelectedAxisIndex);
         ParallelCoordinatesAxis firstAxis = m_axisList.get(0);
         
         int nbRows = m_compareDataInterface.getRowCount();
@@ -225,7 +229,7 @@ public class PlotParallelCoordinates extends PlotMultiDataAbstract {
         int nbRows = m_compareDataInterface.getRowCount();
         
         
-        ParallelCoordinatesAxis selectedAxis = m_axisList.get(m_selectedAxisIndex);
+        ParallelCoordinatesAxis selectedAxis = m_axisList.get(m_mainSelectedAxisIndex);
         
         for (int index = 0; index < nbRows; index++) {
             boolean selected = true;
@@ -307,7 +311,7 @@ public class PlotParallelCoordinates extends PlotMultiDataAbstract {
                 c = plotColor;
             }
         } else*/ if (useGradient) {
-            ParallelCoordinatesAxis selectedAxis = m_axisList.get(m_selectedAxisIndex);
+            ParallelCoordinatesAxis selectedAxis = m_axisList.get(m_mainSelectedAxisIndex);
 
             int height = selectedAxis.getHeight();
             int heightInAxis = selectedAxis.getRelativePositionByRowIndex(rowIndex);
@@ -363,15 +367,19 @@ public class PlotParallelCoordinates extends PlotMultiDataAbstract {
         }
         
         
-        
+        m_mainSelectedAxisIndex = 0;
         int nbCols = m_cols.length;
         for (int i=0;i<nbCols;i++) {
             int colId = m_cols[i];
             
             ParallelCoordinatesAxis axis = new ParallelCoordinatesAxis(i, m_compareDataInterface, colId, this);
+            if (i == 0) {
+                axis.displaySelected(true);
+            }
             m_axisList.add(axis);
             
         }
+        
         
         //JPM.TODO : remove it ?
         prepareSelectionHashSet();
@@ -395,7 +403,7 @@ public class PlotParallelCoordinates extends PlotMultiDataAbstract {
     @Override
     public ArrayList<Long> getSelectedIds() {
         
-        ParallelCoordinatesAxis selectedAxis = m_axisList.get(m_selectedAxisIndex);
+        ParallelCoordinatesAxis selectedAxis = m_axisList.get(m_mainSelectedAxisIndex);
         int nbRows = m_compareDataInterface.getRowCount();
 
         ArrayList<Long> selection = new ArrayList();
@@ -456,6 +464,70 @@ public class PlotParallelCoordinates extends PlotMultiDataAbstract {
         return null;
     }
     
+    
+    @Override
+    public JPopupMenu getPopupMenu(double x, double y) {
+        
+        MoveableInterface over = getOverMovable((int) Math.round(x), (int) Math.round(y));
+        if ( (over == null) || (!(over instanceof ParallelCoordinatesAxis)) || (! ((ParallelCoordinatesAxis) over).isSelected())) {
+            return null;
+        }
+ 
+        
+        int nbNumberAxisSelected = 0;
+        boolean stringAxisSelected = false;
+        boolean canLog = true;
+        for (ParallelCoordinatesAxis axis : m_axisList) {
+            if (axis.isSelected() ) {
+                if (axis.isNumeric()) {
+                    nbNumberAxisSelected++;
+                    if (!axis.canLog()) {
+                        canLog = false;
+                    }
+                } else {
+                    stringAxisSelected = true;
+                }
+            }
+        }
+        
+        JMenuItem logAction = new JMenuItem("Log10");
+        logAction.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                for (ParallelCoordinatesAxis axis : m_axisList) {
+                    if (axis.isSelected() && axis.isNumeric()) {
+                        axis.log();
+                    }
+                }
+                
+                // only main axis is selected after a log
+                ParallelCoordinatesAxis mainAxis = m_axisList.get(m_mainSelectedAxisIndex);
+                m_mainSelectedAxisIndex = -1;
+                selectAxis(mainAxis, false);
+                
+                m_plotPanel.repaintUpdateDoubleBuffer();
+                
+                
+            }
+        });
+        logAction.setEnabled((nbNumberAxisSelected>=1) && (!stringAxisSelected) && canLog);
+        
+        JMenuItem normalizeAction = new JMenuItem("Normalize");
+        normalizeAction.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                
+            }
+        });
+        normalizeAction.setEnabled((nbNumberAxisSelected>1) && (!stringAxisSelected));
+
+        JPopupMenu menu = new JPopupMenu();
+        menu.add(logAction);
+        menu.add(normalizeAction);
+
+        return menu;
+    }
+        
     @Override
     public void doubleClicked(int x, int y) {
         for (ParallelCoordinatesAxis axis : m_axisList) {
@@ -467,13 +539,24 @@ public class PlotParallelCoordinates extends PlotMultiDataAbstract {
         }
     }
     
-    public void selectAxis(ParallelCoordinatesAxis axis) {
+    public void selectAxis(ParallelCoordinatesAxis axis, boolean isCtrlOrShiftDown) {
         int id = axis.getId();
-        if (m_selectedAxisIndex != id) {
-            m_selectedAxisIndex = id;
+        if (m_mainSelectedAxisIndex != id) {
+            m_mainSelectedAxisIndex = id;
+            
+            if (!isCtrlOrShiftDown) {
+
+                for (ParallelCoordinatesAxis axisCur : m_axisList) {
+                    axisCur.displaySelected(false);
+                }
+                
+            }
+            axis.displaySelected(true);
+            
             m_plotPanel.repaint();
         }
     }
+
     
     public void axisMoved(ParallelCoordinatesAxis axis, int deltaX) {
         

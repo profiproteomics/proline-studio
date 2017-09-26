@@ -230,7 +230,7 @@ public class LabelMarker extends AbstractMarker implements MoveableInterface {
 
 
         // draw label
-        int delta = 0;
+        int delta;
         g.setColor(new Color(255, 255, 255, 196));
         g.fillRect(xBox, yBox, m_widthBox, m_heightBox);
         g.setColor(Color.black);
@@ -290,11 +290,12 @@ public class LabelMarker extends AbstractMarker implements MoveableInterface {
     }
 
     @Override
-    public void snapToData() {
-        return; // no snap to data for markers
+    public void snapToData(boolean isCtrlOrShiftDown) {
+        // no snap to data for markers
     }
     
-    public void setSelected(boolean s) {
+    @Override
+    public void setSelected(boolean s, boolean isCtrlOrShiftDown) {
         // no selection for markers
     }
 

@@ -132,10 +132,10 @@ public abstract class PlotBaseAbstract implements Axis.EnumXInterface, Axis.Enum
 
     public void selectCursor(AbstractCursor c) {
         if (m_selectedCursor != null) {
-            m_selectedCursor.setSelected(false);
+            m_selectedCursor.setSelected(false, false);
         }
         m_selectedCursor = c;
-        c.setSelected(true);
+        c.setSelected(true, false);
     }
     public void addCursor(AbstractCursor c) {
         if (m_cursorList == null) {

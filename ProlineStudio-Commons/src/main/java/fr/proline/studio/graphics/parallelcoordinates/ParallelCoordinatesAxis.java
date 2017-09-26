@@ -36,6 +36,7 @@ public class ParallelCoordinatesAxis implements MoveableInterface {
     private ArrayList<AbstractValue> m_values = null;
     private HashMap<Integer, AbstractValue> m_rowIndexToValueMap = null;
     private boolean m_hasNan = false;
+    private boolean m_log = false;
     private int m_firstNonNanValueIndex = -1;
     
     private String m_columnName = null;
@@ -55,6 +56,7 @@ public class ParallelCoordinatesAxis implements MoveableInterface {
     
     private int m_movingX = 0;
     
+    private boolean m_displaySelected = false;
     
     
     private enum OverSubObject {
@@ -96,23 +98,11 @@ public class ParallelCoordinatesAxis implements MoveableInterface {
             m_discreteAxis = false;            
             Collections.sort(m_values, Collections.reverseOrder());
             
-            m_firstNonNanValueIndex = m_values.size()-1;
-            if (m_values.get(m_values.size()-1).isNan()) {
-                m_hasNan = true;
-                m_firstNonNanValueIndex = -1;
-                for (int i=m_values.size()-1;i>=0;i--) {
-                    if (!m_values.get(i).isNan()) {
-                        m_firstNonNanValueIndex = i;
-                        break;
-                    }
-                }
-
-            }
+            searchFirstNonNaNValue();
         }
 
         
         m_columnName = compareDataInterface.getDataColumnIdentifier(colId);
-        
         
 
     }
@@ -123,7 +113,7 @@ public class ParallelCoordinatesAxis implements MoveableInterface {
     
 
     
-    public void paint(Graphics2D g, int plotWidth, boolean selected) {
+    public void paint(Graphics2D g, int plotWidth) {
         
         if (m_valuesFont == null) {
             m_valuesFont = g.getFont().deriveFont(Font.PLAIN, 10);
@@ -139,7 +129,7 @@ public class ParallelCoordinatesAxis implements MoveableInterface {
         int y2 =(int) Math.round(m_y+m_heightTotal*m_selectionMaxPercentage);
         int height = (int) Math.round(m_heightTotal*(m_selectionMaxPercentage-m_selectionMinPercentage));
         
-        g.setColor(selected ? COLOR_SELECTED : COLOR_TRANSPARENT_GRAY);
+        g.setColor(m_displaySelected ? COLOR_SELECTED : COLOR_TRANSPARENT_GRAY);
         g.fillRect(m_x, y1, AXIS_WIDTH, height);
         
         g.setColor(Color.white);
@@ -169,12 +159,12 @@ public class ParallelCoordinatesAxis implements MoveableInterface {
         
         
         // Display Min Value
-        String valueMin = (0>m_firstNonNanValueIndex) ? "NaN" : m_values.get(0).toString();
-        g.drawString(valueMin, xForLabel(valueMin, plotWidth), PAD_Y_UP/2+fontHeight+4);
+        //String valueMin = (0>m_firstNonNanValueIndex) ? "NaN" : m_values.get(0).toString();
+        //g.drawString(valueMin, xForLabel(valueMin, plotWidth), PAD_Y_UP/2+fontHeight+4);
         
         // Display Max Value
-        String valueMax = (m_values.size() - 1>m_firstNonNanValueIndex) ? "NaN" : m_values.get(m_values.size() - 1).toString();
-        g.drawString(valueMax, xForLabel(valueMax, plotWidth), m_y+m_heightTotal+fontHeight+4);
+        //String valueMax = (m_values.size() - 1>m_firstNonNanValueIndex) ? "NaN" : m_values.get(m_values.size() - 1).toString();
+        //g.drawString(valueMax, xForLabel(valueMax, plotWidth), m_y+m_heightTotal+fontHeight+4);
         
         
         // Display Selected values
@@ -182,6 +172,24 @@ public class ParallelCoordinatesAxis implements MoveableInterface {
             double vMin = ((NumberValue) m_values.get(m_values.size()-1)).doubleValue();
             double vMax = ((NumberValue) m_values.get(0)).doubleValue();
 
+            // min
+            String min;
+            if (m_discreteAxis) {
+                min = Integer.toString((int) Math.round(Math.floor(vMin)));
+            } else {
+                min = (m_firstNonNanValueIndex == -1) || (vMin < ((NumberValue) m_values.get(m_firstNonNanValueIndex)).doubleValue()) ? "NaN" : String.format("%6.5e", vMin);
+            }
+            g.drawString(min, xForLabel(min, plotWidth), m_y+m_heightTotal+fontHeight+4);
+            
+            // max
+            String max;
+            if (m_discreteAxis) {
+                max = Integer.toString((int) Math.round(Math.floor(vMax)));
+            } else {
+                max = (m_firstNonNanValueIndex == -1) || (vMax < ((NumberValue) m_values.get(m_firstNonNanValueIndex)).doubleValue()) ? "NaN" : String.format("%6.5e", vMax);
+            }
+            g.drawString(max, xForLabel(max, plotWidth), PAD_Y_UP/2+fontHeight+4);
+            
             // Min Value Selected
             if (y1>m_y) {
                 double v = (vMax-vMin)*(1-m_selectionMinPercentage)+vMin;
@@ -226,6 +234,16 @@ public class ParallelCoordinatesAxis implements MoveableInterface {
             }
             
         } else {
+
+            
+            // Display Min Value
+            String valueMin = m_values.get(0).toString();
+            g.drawString(valueMin, xForLabel(valueMin, plotWidth), PAD_Y_UP / 2 + fontHeight + 4);
+
+            // Display Max Value
+            String valueMax = m_values.get(m_values.size() - 1).toString();
+            g.drawString(valueMax, xForLabel(valueMax, plotWidth), m_y + m_heightTotal + fontHeight + 4);
+
 
             // Min Value Selected
             if (y1>m_y) {
@@ -284,6 +302,10 @@ public class ParallelCoordinatesAxis implements MoveableInterface {
         m_x = x;
         m_heightTotal = height-PAD_Y_UP-PAD_Y_DOWN;
         
+        manageNaN();
+
+    }
+    private void manageNaN() {
         if (m_hasNan) {
 
             // replace NaN Values by a small value which will be put at PAD_NAN
@@ -300,7 +322,29 @@ public class ParallelCoordinatesAxis implements MoveableInterface {
                 ((NumberValue) m_values.get(i)).setValue(valueForNan);
             }
         }
+    }
+    private void putBackNaN() {
+        // put back NaN value
+        for (int i = m_values.size() - 1; i > m_firstNonNanValueIndex; i--) {
+            NumberValue v = (NumberValue) m_values.get(i);
+            v.setValue(Double.NaN);
+        }
 
+    }
+    
+    private void searchFirstNonNaNValue() {
+        m_firstNonNanValueIndex = m_values.size() - 1;
+        if (m_values.get(m_values.size() - 1).isNan()) {
+            m_hasNan = true;
+            m_firstNonNanValueIndex = -1;
+            for (int i = m_values.size() - 1; i >= 0; i--) {
+                if (!m_values.get(i).isNan()) {
+                    m_firstNonNanValueIndex = i;
+                    break;
+                }
+            }
+
+        }
     }
     
     public boolean isRowIndexSelected(int rowIndex, int srcIndex, boolean exportOrder) {
@@ -405,11 +449,46 @@ public class ParallelCoordinatesAxis implements MoveableInterface {
 
     }
     
+    public boolean canLog() {
+        
+      
+        if (!m_numericAxis || m_log) {
+            return false;
+        };
+        
+        
+        double min = ((NumberValue)m_values.get(m_firstNonNanValueIndex)).doubleValue();
+        
+        return min>10e-9;
+    }
+    
+    public void log() {
+
+        m_log = true;
+        
+        // put back NaN value
+       putBackNaN();
+        
+        // log other values
+        for (int i = m_firstNonNanValueIndex; i >= 0; i--) {
+            NumberValue v = (NumberValue) m_values.get(i);
+            ((NumberValue) v).log();
+        }
+
+        // search the limit between real values and NaN values
+        searchFirstNonNaNValue();
+        
+        // replace NaN values for display
+        manageNaN();
+        
+        m_columnName = "log10("+m_columnName+")";
+    }
+    
     public void doubleClicked() {
         if ((m_selectionMinPercentage>0) || (m_selectionMaxPercentage<1)) {
             m_selectionMinPercentage = 0;
             m_selectionMaxPercentage = 1;
-            setSelected(true);
+            setSelected(true, false);
             m_plot.axisChanged();
         }
     }
@@ -505,8 +584,8 @@ public class ParallelCoordinatesAxis implements MoveableInterface {
     }
 
     @Override
-    public void snapToData() {
-        m_plot.selectAxis(this);
+    public void snapToData(boolean isCtrlOrShiftDown) {
+        m_plot.selectAxis(this, isCtrlOrShiftDown);
         if (Math.abs(m_movingX) > 5) {
             m_plot.axisMoved(this, m_movingX);
         }
@@ -514,8 +593,20 @@ public class ParallelCoordinatesAxis implements MoveableInterface {
     }
 
     @Override
-    public void setSelected(boolean s) {
-        m_plot.selectAxis(this);
+    public void setSelected(boolean s, boolean isCtrlOrShiftDown) {
+        m_plot.selectAxis(this, isCtrlOrShiftDown);
     }
     
+    public void displaySelected(boolean selected) {
+        m_displaySelected = selected;
+    }
+    
+    public boolean isSelected() {
+        return m_displaySelected;
+    }
+    
+    public boolean isNumeric() {
+        return m_numericAxis;
+    }
+
 }

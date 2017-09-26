@@ -106,7 +106,7 @@ public class VerticalCursor extends AbstractCursor {
     }
 
     @Override
-    public void snapToData() {
+    public void snapToData(boolean isCtrlOrShiftDown) {
         if (!m_snapToData) {
             return;
         }

@@ -712,8 +712,9 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
         JCheckBox singlePerQueryCB = new JCheckBox("post FDR");
         m_psmPrefilterParameters[8] = new BooleanParameter("PSM_" + ValidationTask.SINGLE_PSM_QUERY_FILTER_KEY, ValidationTask.SINGLE_PSM_QUERY_FILTER_NAME, singlePerQueryCB, false);
         m_psmPrefilterParameters[8].setAssociatedData(":");
-        m_psmPrefilterParameters[9] = new NoneParameter("PSM_" + ValidationTask.SINGLE_PSM_RANK_FILTER_KEY, ValidationTask.SINGLE_PSM_RANK_FILTER_NAME);
-//        m_psmPrefilterParameters[8].setAssociatedData("=");
+        JCheckBox singlePerRankCB = new JCheckBox("post FDR");
+        m_psmPrefilterParameters[9] = new BooleanParameter("PSM_" + ValidationTask.SINGLE_PSM_RANK_FILTER_KEY, ValidationTask.SINGLE_PSM_RANK_FILTER_NAME, singlePerRankCB, false);
+        m_psmPrefilterParameters[9].setAssociatedData(":");
         for (AbstractParameter p : m_psmPrefilterParameters) {
             if (p == null) {
                 continue;

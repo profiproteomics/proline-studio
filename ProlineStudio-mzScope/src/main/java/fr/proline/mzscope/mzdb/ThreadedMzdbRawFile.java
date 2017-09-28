@@ -252,7 +252,9 @@ public class ThreadedMzdbRawFile implements IRawFile {
          return service.submit(new Callable<QCMetrics>() {
             @Override
             public QCMetrics call() {
-               return mzdbRawFile.getFileMetrics();
+               QCMetrics metrics = mzdbRawFile.getFileMetrics();
+               metrics.setRawFile(ThreadedMzdbRawFile.this);
+               return metrics;
             }
          }).get();
       } catch (InterruptedException | ExecutionException ex ) {

@@ -20,15 +20,16 @@ public class QCMetrics {
     
     public static String MAX_MS_LEVEL = "Max MS level";
     
-    
     // WARNING : insert a null value at the head as a marker telling that 
     // the following values are values for each msLevel
     private Map<String, List<Object>> scalarMSLevelMetrics;
     private Map<String, List<DescriptiveStatistics>> populationMSLevelMetrics;
+    private String name;
     transient private IRawFile rawFile;
 
     public QCMetrics(IRawFile rawFile) {
         this.rawFile = rawFile;
+        this.name = rawFile.getName();
         scalarMSLevelMetrics = new LinkedHashMap<>();
         populationMSLevelMetrics = new LinkedHashMap<>();
     }
@@ -40,6 +41,10 @@ public class QCMetrics {
 
     public IRawFile getRawFile() {
         return rawFile;
+    }
+
+    public String getName() {
+        return name;
     }
 
     public void setRawFile(IRawFile rawFile) {
@@ -83,7 +88,14 @@ public class QCMetrics {
     }
 
     public DescriptiveStatistics[] getMetricStatistics(String name) {
-        return populationMSLevelMetrics.get(name).toArray(new DescriptiveStatistics[0]);
+        List<DescriptiveStatistics> stats = populationMSLevelMetrics.get(name);
+        if (stats == null) 
+            return null;
+        return stats.toArray(new DescriptiveStatistics[0]);
+    }
+    
+    public List<String> getPopulationMetricNames() {
+        return new ArrayList<String>(populationMSLevelMetrics.keySet());
     }
     
     public Object[] getMetricValue(String name) {
@@ -117,6 +129,9 @@ public class QCMetrics {
                         metrics.put(key+" Q2", stats.getPercentile(50.0));
                         metrics.put(key+" Q3", stats.getPercentile(75.0));
                         metrics.put(key+" Q4", stats.getPercentile(100.0));
+                        metrics.put(key+" mean", stats.getMean());
+                        metrics.put(key+" stdev", stats.getStandardDeviation());
+                        
                     }
                 }
             } else {

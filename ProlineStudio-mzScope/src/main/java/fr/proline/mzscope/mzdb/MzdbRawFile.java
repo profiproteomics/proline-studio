@@ -716,7 +716,7 @@ public class MzdbRawFile implements IRawFile {
     @Override
     public Map<String, Object> getFileProperties() {
         try {
-            return MzdbMetricsCollector.getFileFormaData(getMzDbReader());
+            return MzdbMetricsCollector.getFileFormatData(getMzDbReader());
         } catch (SQLiteException ex) {
             logger.error("Enable to extract information from mzdb file", ex);
         }
@@ -726,14 +726,7 @@ public class MzdbRawFile implements IRawFile {
     @Override
     public QCMetrics getFileMetrics() {
         try {
-            QCMetrics metrics = MetricsCache.getInstance().loadQC(this);
-            if (metrics == null) {
-                logger.info("QC metrics not found for file {}, they will be computed now", this.getName());
-                metrics = MzdbMetricsCollector2.getMSMetrics(this);
-                MetricsCache.getInstance().writeQC(this, metrics);
-            } else {
-                metrics.setRawFile(this);
-            }
+            QCMetrics metrics = MzdbMetricsCollector.getMSMetrics(this);
             return metrics;
         } catch (SQLiteException ex) {
             logger.error("Enable to extract information from mzdb file", ex);

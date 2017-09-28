@@ -13,12 +13,10 @@ import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JToolBar;
-import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -68,11 +68,6 @@
             <artifactId>org-openide-util</artifactId>
             <version>${netbeans.version}</version>
         </dependency> 
-        <dependency>
-            <groupId>com.esotericsoftware</groupId>
-            <artifactId>kryo</artifactId>
-            <version>4.0.0</version>
-        </dependency>
     
         <!--  -->
         <dependency>
@@ -203,15 +198,9 @@
                 <extensions>true</extensions>
                 <configuration>
                     <publicPackages>
+                        <!--  <publicPackage>org.joda.time.*</publicPackage>  -->
                         <publicPackage>fr.proline.mzscope.*</publicPackage>
                         <publicPackage>fr.proline.studio.mzscope</publicPackage>
-                        <publicPackage>org.xmlpull.v1.*</publicPackage>
-                        <publicPackage>com.google.common.*</publicPackage>
-                        <publicPackage>org.apache.xerces.parsers.*</publicPackage>
-                        <publicPackage>org.apache.xml.serialize.*</publicPackage> 
-                        <publicPackage>fr.profi.mzdb.*</publicPackage>          
-                        <publicPackage>com.almworks.sqlite4java.*</publicPackage>
-                        <!--  <publicPackage>org.joda.time.*</publicPackage>  -->
                     </publicPackages>
                 </configuration>
             </plugin>

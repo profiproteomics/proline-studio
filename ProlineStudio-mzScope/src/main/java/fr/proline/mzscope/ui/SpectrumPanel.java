@@ -19,6 +19,9 @@ import fr.proline.studio.graphics.PlotPanelListener;
 import fr.proline.studio.graphics.PlotStick;
 import fr.proline.studio.graphics.marker.AbstractMarker;
 import fr.proline.studio.graphics.marker.IntervalMarker;
+import fr.proline.studio.graphics.marker.LabelMarker;
+import static fr.proline.studio.graphics.marker.LabelMarker.ORIENTATION_XY_MIDDLE;
+import static fr.proline.studio.graphics.marker.LabelMarker.ORIENTATION_XY_MIDDLE;
 import fr.proline.studio.graphics.marker.LineMarker;
 import fr.proline.studio.graphics.marker.PointMarker;
 import fr.proline.studio.graphics.marker.coordinates.DataCoordinates;
@@ -66,8 +69,6 @@ public class SpectrumPanel extends JPanel implements ScanHeaderListener, PlotPan
    private List<AbstractMarker> ipMarkers = new ArrayList();
    private ScansSpinnerModel spinnerModel;
 
-   
-   
 class ScansSpinnerModel extends AbstractSpinnerModel {
 
     @Override
@@ -200,6 +201,12 @@ class ScansSpinnerModel extends AbstractSpinnerModel {
                     scanPlot.addMarker(pm);
                 }
             }
+            Double mz = 0.1+((Double)pattern.mzAbundancePairs()[0]._1 + (Double)pattern.mzAbundancePairs()[1]._1)/2.0;
+            Float ab = (Float)pattern.mzAbundancePairs()[0]._2 * 0.75f;
+            LabelMarker label = new LabelMarker(spectrumPlotPanel, new DataCoordinates(mz, ab * abundance / normAbundance), "charge "+pattern.charge()+"+", ORIENTATION_XY_MIDDLE,ORIENTATION_XY_MIDDLE, CyclicColorPalette.getColor(0));
+            ipMarkers.add(label);
+            scanPlot.addMarker(label);
+
         }
         spectrumPlotPanel.repaintUpdateDoubleBuffer();
     }

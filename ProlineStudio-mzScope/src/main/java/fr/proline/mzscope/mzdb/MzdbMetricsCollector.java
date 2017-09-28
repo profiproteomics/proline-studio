@@ -9,12 +9,12 @@ import com.almworks.sqlite4java.SQLiteException;
 import fr.profi.mzdb.MzDbReader;
 import fr.profi.mzdb.db.model.Run;
 import fr.profi.mzdb.db.model.Sample;
-import fr.profi.mzdb.db.model.params.ParamTree;
 import fr.profi.mzdb.db.model.params.ScanList;
 import fr.profi.mzdb.db.model.params.ScanParamTree;
 import fr.profi.mzdb.db.model.params.param.CVParam;
 import fr.profi.mzdb.model.DataEncoding;
 import fr.profi.mzdb.model.SpectrumHeader;
+import fr.proline.mzscope.model.QCMetrics;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,7 +32,7 @@ public class MzdbMetricsCollector {
 
     private static final Logger logger = LoggerFactory.getLogger(MzdbMetricsCollector.class);
 
-    public static Map<String, Object> getFileFormaData(MzDbReader reader) throws SQLiteException {
+    public static Map<String, Object> getFileFormatData(MzDbReader reader) throws SQLiteException {
         // Respect insertion order of keys : LinkedHashMap used
         Map<String, Object> metrics = new LinkedHashMap<>();
         metrics.put("Filename", reader.getFirstSourceFileName());
@@ -64,72 +64,77 @@ public class MzdbMetricsCollector {
         return metrics;
     }
 
-    public static Map<String, Object> getMSMetrics(MzDbReader reader) throws SQLiteException {
+    public static QCMetrics getMSMetrics(MzdbRawFile rawFile) throws SQLiteException {
         // Respect insertion order of keys : LinkedHashMap used
-        Map<String, Object> metrics = new LinkedHashMap<>();
-
-        metrics.put("Cycles count", reader.getCyclesCount());
+        QCMetrics metrics = new QCMetrics(rawFile);
+        MzDbReader reader = rawFile.getMzDbReader();
+        
+        metrics.addMetric("Cycles count", reader.getCyclesCount());
 
         int maxMsLevel = reader.getMaxMsLevel();
-        DescriptiveStatistics[] TICStatistices = new DescriptiveStatistics[maxMsLevel];
-        DescriptiveStatistics[] SumTICStatistices = new DescriptiveStatistics[maxMsLevel];
-        DescriptiveStatistics[] RTStatistices = new DescriptiveStatistics[maxMsLevel];
-        DescriptiveStatistics[] PeaksCountStatistices = new DescriptiveStatistics[maxMsLevel];
-        DescriptiveStatistics[] InjectionTimeStatistices = new DescriptiveStatistics[maxMsLevel];
+        DescriptiveStatistics[] TICStatistics = new DescriptiveStatistics[maxMsLevel];
+        DescriptiveStatistics[] SumTICStatistics = new DescriptiveStatistics[maxMsLevel];
+        DescriptiveStatistics[] RTStatistics = new DescriptiveStatistics[maxMsLevel];
+        DescriptiveStatistics[] PeaksCountStatistics = new DescriptiveStatistics[maxMsLevel];
+        DescriptiveStatistics[] InjectionTimeStatistics = new DescriptiveStatistics[maxMsLevel];
 
-        metrics.put("Max MS level", maxMsLevel);
+        metrics.addMetric("Max MS level", maxMsLevel);
+        
         for (int msLevel = 1; msLevel <= maxMsLevel; msLevel++) {
             StringBuilder labelBuilder = new StringBuilder();
             labelBuilder.append("MS").append(msLevel).append(" Spectra count");
-            metrics.put(labelBuilder.toString(), reader.getSpectraCount(msLevel));
+            metrics.addMetric(labelBuilder.toString(), reader.getSpectraCount(msLevel));
             int[] range = reader.getMzRange(msLevel);
             labelBuilder = new StringBuilder();
             labelBuilder.append("MS").append(msLevel).append(" min m/z");
-            metrics.put(labelBuilder.toString(), range[0]);
+            metrics.addMetric(labelBuilder.toString(), range[0]);
             labelBuilder = new StringBuilder();
             labelBuilder.append("MS").append(msLevel).append(" max m/z");
-            metrics.put(labelBuilder.toString(), range[1]);
+            metrics.addMetric(labelBuilder.toString(), range[1]);
             // prepare statistics collector for next step
-            SumTICStatistices[msLevel - 1] = new DescriptiveStatistics();
-            TICStatistices[msLevel - 1] = new DescriptiveStatistics();
-            RTStatistices[msLevel - 1] = new DescriptiveStatistics();
-            PeaksCountStatistices[msLevel - 1] = new DescriptiveStatistics();
-            InjectionTimeStatistices[msLevel - 1] = new DescriptiveStatistics();
+            SumTICStatistics[msLevel - 1] = new DescriptiveStatistics();
+            TICStatistics[msLevel - 1] = new DescriptiveStatistics();
+            RTStatistics[msLevel - 1] = new DescriptiveStatistics();
+            PeaksCountStatistics[msLevel - 1] = new DescriptiveStatistics();
+            InjectionTimeStatistics[msLevel - 1] = new DescriptiveStatistics();
         }
 
         SpectrumHeader[] headers = reader.getSpectrumHeaders();
         SpectrumHeader.loadScanLists(headers, reader.getConnection());
-        
-        metrics.put("RT start", (int) Math.round(headers[0].getTime() / 60.0));
-        metrics.put("RT end", (int) Math.round(headers[headers.length - 1].getTime() / 60.0));
+
+        metrics.addMetric("RT start", (int) Math.round(headers[0].getTime() / 60.0));
+        metrics.addMetric("RT end", (int) Math.round(headers[headers.length - 1].getTime() / 60.0));
         float duration = (headers[headers.length - 1].getTime() - headers[0].getTime()) / 60.0f;
         double ticSum = 0.0d;
-        metrics.put("RT duration", (int) Math.round(duration));
+        metrics.addMetric("RT duration", (int) Math.round(duration));
         // charge states will be sorted by their natural order : TreeMap used
         Map<Integer, Integer> chargeStates = new TreeMap<>();
 
         for (SpectrumHeader header : headers) {
 
             ScanList sl = header.getScanList();
+            if (sl == null) {
+                header.loadScanList(reader.getConnection());
+            }
             if (sl != null) {
                 List<ScanParamTree> scans = sl.getScans();
                 if (scans != null && !scans.isEmpty()) {
                     ScanParamTree spt = scans.get(0);
                     for (CVParam cvParam : spt.getCVParams()) {
                         if (cvParam.getAccession().equals("MS:1000927")) {
-                            InjectionTimeStatistices[header.getMsLevel() - 1].addValue(Double.valueOf(cvParam.getValue()));
+                            InjectionTimeStatistics[header.getMsLevel() - 1].addValue(Double.valueOf(cvParam.getValue()));
                             break;
                         }
                     }
                 }
             } 
-            ParamTree pt = header.getParamTree(reader.getConnection());
 
             ticSum += header.getTIC();
-            SumTICStatistices[header.getMsLevel() - 1].addValue(ticSum);
-            TICStatistices[header.getMsLevel() - 1].addValue(header.getTIC());
-            RTStatistices[header.getMsLevel() - 1].addValue(header.getTime() / 60.0);
-            PeaksCountStatistices[header.getMsLevel() - 1].addValue(header.getPeaksCount());
+            SumTICStatistics[header.getMsLevel() - 1].addValue(ticSum);
+            TICStatistics[header.getMsLevel() - 1].addValue(header.getTIC());
+            RTStatistics[header.getMsLevel() - 1].addValue(header.getTime() / 60.0);
+            RTStatistics[0].addValue(header.getTime() / 60.0);
+            PeaksCountStatistics[header.getMsLevel() - 1].addValue(header.getPeaksCount());
             if ((header.getMsLevel() == 2) && (header.getPrecursorCharge() > 0)) {
                 if (!chargeStates.containsKey(header.getPrecursorCharge())) {
                     chargeStates.put(header.getPrecursorCharge(), 1);
@@ -139,43 +144,17 @@ public class MzdbMetricsCollector {
             }
         }
 
-        for (int msLevel = 1; msLevel <= maxMsLevel; msLevel++) {
-            if (msLevel == 1) {
-                // doeant make sens for msLevel > 1
-                String label = new StringBuilder().append("MS").append(msLevel).append(" Sum TIC ").toString();
-                metrics.put(label + "Q1", SumTICStatistices[msLevel - 1].getPercentile(25));
-                metrics.put(label + "Q2", SumTICStatistices[msLevel - 1].getPercentile(50));
-                metrics.put(label + "Q3", SumTICStatistices[msLevel - 1].getPercentile(75));
-                metrics.put(label + "Q4", SumTICStatistices[msLevel - 1].getPercentile(100));
+        metrics.addMetric("MS  Sum TIC ", SumTICStatistics);
+        metrics.addMetric("MS TIC", TICStatistics);
+        metrics.addMetric("RT events ", RTStatistics[0]);
+        metrics.addMetric("RT MS events ", RTStatistics);
+        metrics.addMetric("MS peaks count", PeaksCountStatistics);
+        metrics.addMetric("MS injection time", InjectionTimeStatistics);
 
-                label = new StringBuilder().append("MS").append(msLevel).append(" TIC ").toString();
-                metrics.put(label + "log10(Q2/Q1)", Math.log10(TICStatistices[msLevel - 1].getPercentile(50) / TICStatistices[msLevel - 1].getPercentile(25)));
-                metrics.put(label + "log10(Q3/Q2)", Math.log10(TICStatistices[msLevel - 1].getPercentile(75) / TICStatistices[msLevel - 1].getPercentile(50)));
-                metrics.put(label + "log10(Q4/Q3)", Math.log10(TICStatistices[msLevel - 1].getPercentile(100) / TICStatistices[msLevel - 1].getPercentile(75)));
-            }
-
-            String label = new StringBuilder().append("RTnorm MS").append(msLevel).append(" events ").toString();
-            metrics.put(label + "Q1", RTStatistices[msLevel - 1].getPercentile(25) / duration);
-            metrics.put(label + "Q2", RTStatistices[msLevel - 1].getPercentile(50) / duration);
-            metrics.put(label + "Q3", RTStatistices[msLevel - 1].getPercentile(75) / duration);
-            metrics.put(label + "Q4", RTStatistices[msLevel - 1].getPercentile(100) / duration);
-
-            label = new StringBuilder().append("MS").append(msLevel).append(" peaks density ").toString();
-            metrics.put(label + "Q1", PeaksCountStatistices[msLevel - 1].getPercentile(25));
-            metrics.put(label + "Q2", PeaksCountStatistices[msLevel - 1].getPercentile(50));
-            metrics.put(label + "Q3", PeaksCountStatistices[msLevel - 1].getPercentile(75));
-            metrics.put(label + "Q4", PeaksCountStatistices[msLevel - 1].getPercentile(100));
-            
-            label = new StringBuilder().append("MS").append(msLevel).append(" injection time ").toString();
-            metrics.put(label + "Q1", InjectionTimeStatistices[msLevel - 1].getPercentile(25));
-            metrics.put(label + "Q2", InjectionTimeStatistices[msLevel - 1].getPercentile(50));
-            metrics.put(label + "Q3", InjectionTimeStatistices[msLevel - 1].getPercentile(75));
-            metrics.put(label + "Q4", InjectionTimeStatistices[msLevel - 1].getPercentile(100));
-        }
 
         for (Map.Entry<Integer, Integer> e : chargeStates.entrySet()) {
             String label = new StringBuilder().append("MS2 precursor ").append(e.getKey()).append("+").toString();
-            metrics.put(label, e.getValue());
+            metrics.addMetric(label, e.getValue());
         }
         return metrics;
     }

@@ -379,10 +379,12 @@ public class CreateXICDialog extends DefaultDialog {
 
         List _biologicalGroupList = new ArrayList();
         HashMap<String, Long> _rsmIdBySampleAnalysis = new HashMap<>();
-        HashMap<Long, Long> _runIdByRSMId;
+        HashMap<Long, Long> _runIdByRSMId = new HashMap<>();
         HashMap<String, ArrayList<String>> _samplesAnalysisBySample = new HashMap<>();       
         Map<Integer, String> splNameByNbr = new HashMap<>();
 
+        List<Long> rsmIdsToGetRunIdsFor  = new ArrayList();
+        
         Enumeration xicGrps = m_finalXICDesignNode.children();
         while (xicGrps.hasMoreElements() && errorMsg == null) {
             AbstractNode grpNode = (AbstractNode) xicGrps.nextElement();
@@ -404,6 +406,7 @@ public class CreateXICDialog extends DefaultDialog {
                 while (identRSMs.hasMoreElements()) {
                     //VD TODO TEST child type
                     XICBiologicalSampleAnalysisNode qChannelNode = (XICBiologicalSampleAnalysisNode) identRSMs.nextElement();
+                    XICRunNode associatedRunNode = qChannelNode.getXicRunNode();
                     String quantChName = qChannelNode.getQuantChannelName();
                     if ((quantChName == null) || (quantChName.isEmpty())) {
                         quantChName = qChannelNode.getData().getName();
@@ -413,7 +416,14 @@ public class CreateXICDialog extends DefaultDialog {
                         errorMsg = "Invalide Sample Analysis specified ";
                         break;
                     }
-                    _rsmIdBySampleAnalysis.put(quantChName, ((DataSetData) qChannelNode.getData()).getDataset().getResultSummaryId());
+                    
+                    Long rsmId = ((DataSetData) qChannelNode.getData()).getDataset().getResultSummaryId();
+                    _rsmIdBySampleAnalysis.put(quantChName, rsmId);
+                    if(associatedRunNode!=null && ((RunInfoData)associatedRunNode.getData()).getRun() != null) {
+                        _runIdByRSMId.put(rsmId,  ((RunInfoData)associatedRunNode.getData()).getRun().getId());
+                    } else {
+                        rsmIdsToGetRunIdsFor.add(rsmId);
+                    }
                 }
                 _samplesAnalysisBySample.put(sampleName, splAnalysisNames);
             } //End go through group's sample
@@ -426,8 +436,9 @@ public class CreateXICDialog extends DefaultDialog {
 
         }// End go through groups
 
-        //Read Run IDs
-        _runIdByRSMId = getRunIdForRSMs(_rsmIdBySampleAnalysis.values());
+        //Read Run IDs for not found run Ids
+        if(!rsmIdsToGetRunIdsFor.isEmpty())
+            _runIdByRSMId.putAll(getRunIdForRSMs(rsmIdsToGetRunIdsFor));
 
         if (errorMsg != null) {
             throw new IllegalAccessException(errorMsg);
@@ -761,8 +772,8 @@ public class CreateXICDialog extends DefaultDialog {
                                 } else if (failedRSIds.size() > 1) {
                                     ArrayList<String> failedNodes = new ArrayList<>();
 
-                                    for (int i = 0; i < failedRSIds.size(); i++) {
-                                        failedNodes.add(spectraNodesPerRsId.get(failedRSIds.get(i)).toString());
+                                    for (Long failedRSId : failedRSIds) {
+                                        failedNodes.add(spectraNodesPerRsId.get(failedRSId).toString());
                                     }
 
                                     JList failedList = new JList(failedNodes.toArray());
@@ -914,8 +925,8 @@ public class CreateXICDialog extends DefaultDialog {
         return true;
     }
 
-    public void setDefaultDesignTree(DDataset dataset) {
-        m_designTree.setExpDesign(dataset, (AbstractNode) m_designTree.getModel().getRoot(), m_designTree, false, false);
+    public void copyClonedDesignTree(DDataset dataset) {
+        XICDesignTree.setExpDesign(dataset, (AbstractNode) m_designTree.getModel().getRoot(), m_designTree, false, false);
         m_designTree.renameXicTitle(dataset.getName() + "-Copy");
 
         try {

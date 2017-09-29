@@ -124,7 +124,7 @@ public class CreateXICAction extends AbstractRSMAction {
         }
         dialog.displayDesignTree();
         if (m_fromExistingXIC) {
-            dialog.setDefaultDesignTree(dataset);
+            dialog.copyClonedDesignTree(dataset);
         }
 
         dialog.setLocation(x, y);

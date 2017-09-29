@@ -168,12 +168,13 @@ public class XICDesignTree extends AbstractTree {
     }
 
     /**
-     * This is called when Experimental Design already exist : Create XIC by clone, Display XIC result or Experimental Design... 
-     * @param dataset
-     * @param rootNode
-     * @param tree
-     * @param expandPath
-     * @param includeRunNodes 
+     * Replace current Experimental Design with an existing one. This is called when Design Tree is used with an existing experimental Design :
+     * to create XIC by clone, display XIC result (in quanti tree for instanceà) or display experimental design already run ... 
+     * @param dataset quantitiation DS to extract experimental design from
+     * @param rootNode : root node for Experimental Design nodes
+     * @param tree : tree to insert Experimental Design nodes
+     * @param expandPath :specify if tree should be expanded or not
+     * @param includeRunNodes : Add runNode to Experimental Design Tree. If not, root Node are created but only added to XICBiologicalSampleAnalysisNode ( addXicRunNode method)
      */
     public static void setExpDesign(DDataset dataset, AbstractNode rootNode, AbstractTree tree, boolean expandPath, boolean includeRunNodes) {
         if (dataset == null) {
@@ -223,34 +224,21 @@ public class XICDesignTree extends AbstractTree {
                         if (qCh.getName() != null) {
                             sampleAnalysisNode.setQuantChannelName(qCh.getName());
                         }
-
+                              
+                        Run run = qCh.getRun();
+                        RawFile rawFile = run.getRawFile();
+                        RunInfoData runInfoData = new RunInfoData();
+                        runInfoData.setLinkedRawFile(rawFile);
+                        runInfoData.setRun(run);
+                        runInfoData.setStatus(RunInfoData.Status.LINKED_IN_DATABASE);
+                        
+                        XICRunNode runNode = new XICRunNode(runInfoData, treeModel);
                         if (includeRunNodes) {
-                            RunInfoData runInfoData = new RunInfoData();
-                            RawFile rawFile = new RawFile();
-                            int id = qCh.getMzdbFileName().indexOf(".");
-                            if (id == -1) {
-                                id = qCh.getMzdbFileName().length();
-                            }
-                            String identifier = qCh.getMzdbFileName().substring(0, id);
-                            rawFile.setRawFileName(qCh.getMzdbFileName());
-                            rawFile.setIdentifier(identifier);
-                            rawFile.setMzDbFileName(qCh.getMzdbFileName());
-                            runInfoData.setLinkedRawFile(rawFile);
-
-                            List<Run> runs = new ArrayList();
-                            Run run = new Run();
-                            run.setId(-1); // explicitely set the runId to -1, to avoid to register runidentification (no need)
-                            run.setRawFile(rawFile);
-                            runInfoData.setRun(run);
-                            runs.add(run);
-                            rawFile.setRuns(runs);
-
-                            XICRunNode runNode = new XICRunNode(runInfoData, tree);
                             sampleAnalysisNode.add(runNode);
-
-                            runNode.init(sampleAnalysisNode.getDataset(), treeModel, null);
+                        } else {
+                            sampleAnalysisNode.addXicRunNode(runNode,false);
                         }
-
+                        
                         treeModel.insertNodeInto(sampleAnalysisNode, biologicalSampleNode, childSampleAnalysisIndex);
                         if (expandPath) {
                             tree.expandPath(new TreePath(sampleAnalysisNode.getPath()));

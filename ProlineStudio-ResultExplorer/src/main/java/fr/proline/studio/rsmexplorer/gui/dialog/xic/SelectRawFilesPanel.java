@@ -472,11 +472,11 @@ public class SelectRawFilesPanel extends JPanel implements XICRunNodeInitListene
                     XICBiologicalSampleAnalysisNode sampleAnalysisNode = (XICBiologicalSampleAnalysisNode) child;
 
                     if (sampleAnalysisNode.getXicRunNode() == null) {
-                        XICRunNode runNode = new XICRunNode(new RunInfoData(), m_tree);
+                        XICRunNode runNode = new XICRunNode(new RunInfoData(),(DefaultTreeModel)  IdentificationTree.getCurrentTree().getModel());
                         runNode.addXICRunNodeInitListener(m_singleton);
                         //HACK new method so that runNode is available later when we want to retrieve the potential matching raw files! calls super.add()
-                        sampleAnalysisNode.addXicRunNode(runNode);
-                        runNode.init(sampleAnalysisNode.getDataset(), (DefaultTreeModel) IdentificationTree.getCurrentTree().getModel(), this);
+                        sampleAnalysisNode.addXicRunNode(runNode,true);
+                        runNode.init(sampleAnalysisNode.getDataset(), this);
                     } else {
                         sampleAnalysisNode.add(sampleAnalysisNode.getXicRunNode());
                     }

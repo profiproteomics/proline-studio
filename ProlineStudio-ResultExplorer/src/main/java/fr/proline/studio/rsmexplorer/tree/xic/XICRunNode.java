@@ -40,14 +40,15 @@ public class XICRunNode extends AbstractNode {
     }
 
     private DefaultTreeModel m_treeModel = null;
-    private final AbstractTree m_tree;
+//    private final AbstractTree m_tree;
     private AbstractTableModel m_tableModel;
     protected List<XICRunNodeInitListener> listenerList;   /** List of listeners */
 
-    public XICRunNode(AbstractData data, AbstractTree tree) {
+    public XICRunNode(AbstractData data, DefaultTreeModel treeModel) {
         super(NodeTypes.RUN, data);
         listenerList = new ArrayList<>();
-        m_tree = tree;
+
+        m_treeModel = treeModel;
     }
 
     
@@ -88,9 +89,9 @@ public class XICRunNode extends AbstractNode {
         m_tableModel = tableModel;
     }
 
-    public void init(final DDataset dataset, DefaultTreeModel treeModel, final AbstractTableModel tableModel) {
-
-        m_treeModel = treeModel;
+    
+    public void init(final DDataset dataset, final AbstractTableModel tableModel) {
+       
         m_tableModel = tableModel;
 
         setIsChanging(true);
@@ -102,6 +103,7 @@ public class XICRunNode extends AbstractNode {
             final Run[] runOut = new Run[1];
             final XICRunNode xicRunNode = this;
 
+//            if(dataset.)
             AbstractDatabaseCallback getRawfileCallback = new AbstractDatabaseCallback() {
 
                 @Override
@@ -154,7 +156,7 @@ public class XICRunNode extends AbstractNode {
 
                                                 //Previous RawFileIdentifier exists
                                                 runInfoData.setMessage("Search " + peaklist.getRawFileIdentifier());
-                                                ((DefaultTreeModel) m_tree.getModel()).nodeChanged(xicRunNode);
+                                                m_treeModel.nodeChanged(xicRunNode);
                                                 
                                                 searchPotentialRawFiles(peaklist.getRawFileIdentifier(), tableModel, Search.BASED_ON_IDENTIFIER);
 
@@ -193,7 +195,7 @@ public class XICRunNode extends AbstractNode {
                                                 runInfoData.setMessage("Search " + searchString);
                                                 runInfoData.setStatus(RunInfoData.Status.MISSING);
 
-                                                ((DefaultTreeModel) m_tree.getModel()).nodeChanged(xicRunNode);
+                                                m_treeModel.nodeChanged(xicRunNode);
 
                                                 searchPotentialRawFiles(searchString, tableModel, Search.BASED_ON_PATH);
 

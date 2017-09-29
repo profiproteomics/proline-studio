@@ -461,7 +461,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                         } catch (NoResultException | NonUniqueResultException e) {
                             
                         }
-                        // take the dataset name as qch name
+                        // take the dataset name as qch name TODO IF NOT DEFINE ABOVE
                         String queryQCName = "SELECT ds.name "
                                     + "FROM fr.proline.core.orm.uds.Dataset ds, fr.proline.core.orm.uds.QuantitationChannel qc "
                                     + "WHERE ds.resultSummaryId = qc.identResultSummaryId AND "
@@ -530,7 +530,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                     Map<String, Object> propertiesMap = dMaster.getSerializedPropertiesAsMap();
                     DDataset identDataset = null;
                     if (propertiesMap != null) {
-                        Object o = propertiesMap.get("ident_dataset_id");
+                        Object o = propertiesMap.get("ident_dataset_id"); 
                         if (o != null) {
                             Long identDatasetId = Long.parseLong(o.toString());
                             Dataset identDatasetDB = entityManagerUDS.find(Dataset.class, identDatasetId);
@@ -542,6 +542,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                     }
                     dMaster.setIdentDataset(identDataset);
                     // load the list of quantitation channel linked to this masterQuantitationChannel
+                    //VDS POURQUOI pas lors de la creation des DQC 
                     if (listQuantitationChannels != null && !listQuantitationChannels.isEmpty()) {
                         int id2 = 0;
                         for (QuantitationChannel quantitationChannel : listQuantitationChannels) {

@@ -7,6 +7,7 @@ import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import fr.proline.studio.utils.IconManager;
 import javax.swing.ImageIcon;
+import javax.swing.tree.MutableTreeNode;
 import org.openide.nodes.Sheet;
 
 /**
@@ -40,11 +41,20 @@ public class XICBiologicalSampleAnalysisNode extends DataSetNode {
     }
 
     //HACK so that we can access potential raw files when needed.
-    public void addXicRunNode(XICRunNode xicRunNode) {
+    public void addXicRunNode(XICRunNode xicRunNode, boolean addToChild) {
         m_xicRunNode = xicRunNode;
-        super.add(m_xicRunNode);
+        if(addToChild)
+            super.add(m_xicRunNode);
     }
-
+   
+    @Override
+    public void add(MutableTreeNode newChild) {
+        if(!XICRunNode.class.isInstance(newChild))
+            throw new IllegalArgumentException("BiologicalSampleAnalysisNode only accept RunNode as child. (invalid "+newChild+" node )");
+        m_xicRunNode = (XICRunNode) newChild;
+        super.add(m_xicRunNode);    
+    }
+   
     public XICRunNode getXicRunNode() {
         return m_xicRunNode;
     }

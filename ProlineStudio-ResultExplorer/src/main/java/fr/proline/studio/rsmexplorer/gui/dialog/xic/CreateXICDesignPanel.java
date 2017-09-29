@@ -175,7 +175,7 @@ public class CreateXICDesignPanel extends JPanel {
         c.weightx = 1;
         c.weighty = 1;
 
-        AbstractNode rootSelectionNode = null;
+        AbstractNode rootSelectionNode;
         if (m_selectionTree == null) {
             rootSelectionNode = IdentificationTree.getCurrentTree().copyRootNodeForSelection();
         } else {

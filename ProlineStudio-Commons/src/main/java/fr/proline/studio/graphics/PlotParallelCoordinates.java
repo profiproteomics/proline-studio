@@ -516,7 +516,36 @@ public class PlotParallelCoordinates extends PlotMultiDataAbstract {
         normalizeAction.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                double rangeMin = Double.POSITIVE_INFINITY;
+                double rangeMax= -Double.POSITIVE_INFINITY;
+                boolean hasNaN = false;
+                for (ParallelCoordinatesAxis axis : m_axisList) {
+                    if (!axis.isSelected()) {
+                        continue;
+                    }
+                    hasNaN |= axis.hasNaN();
+                    double min = axis.getRealMinValue();
+                    if (min<rangeMin) {
+                        rangeMin = min;
+                    }
+                    double max = axis.getRealMaxValue();
+                    if (max>rangeMax) {
+                        rangeMax = max;
+                    }
+                }
+                for (ParallelCoordinatesAxis axis : m_axisList) {
+                    if (!axis.isSelected()) {
+                        continue;
+                    }
+                    axis.setRange(rangeMin, rangeMax, hasNaN);
+                }
                 
+                // only main axis is selected after a normalize
+                ParallelCoordinatesAxis mainAxis = m_axisList.get(m_mainSelectedAxisIndex);
+                m_mainSelectedAxisIndex = -1;
+                selectAxis(mainAxis, false);
+                
+                m_plotPanel.repaintUpdateDoubleBuffer();
             }
         });
         normalizeAction.setEnabled((nbNumberAxisSelected>1) && (!stringAxisSelected));

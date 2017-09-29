@@ -57,6 +57,10 @@ public class ParallelCoordinatesAxis implements MoveableInterface {
     private int m_movingX = 0;
     
     private boolean m_displaySelected = false;
+    private Double m_rangeMin = null;
+    private Double m_rangeMax = null;
+    private Double m_rangeMinWithNaN = null;
+    private boolean m_forceNaN = false;
     
     
     private enum OverSubObject {
@@ -92,6 +96,8 @@ public class ParallelCoordinatesAxis implements MoveableInterface {
             m_discreteAxis = true;
             Collections.sort(m_values, Collections.reverseOrder());
             m_firstNonNanValueIndex = m_values.size()-1;
+            m_rangeMin = ((NumberValue)m_values.get(m_firstNonNanValueIndex)).doubleValue();
+            m_rangeMax = ((NumberValue)m_values.get(0)).doubleValue();
         } else { // Float or Double
             prepareNumberData(compareDataInterface, colId);
             m_numericAxis = true;
@@ -99,7 +105,10 @@ public class ParallelCoordinatesAxis implements MoveableInterface {
             Collections.sort(m_values, Collections.reverseOrder());
             
             searchFirstNonNaNValue();
+            m_rangeMin = ((NumberValue)m_values.get(m_firstNonNanValueIndex)).doubleValue();
+            m_rangeMax = ((NumberValue)m_values.get(0)).doubleValue();
         }
+        m_rangeMinWithNaN = m_rangeMin;
 
         
         m_columnName = compareDataInterface.getDataColumnIdentifier(colId);
@@ -111,7 +120,20 @@ public class ParallelCoordinatesAxis implements MoveableInterface {
         return m_id;
     }
     
+    public double getRealMaxValue() {
+        return ((NumberValue) m_values.get(0)).doubleValue();
+    }
 
+    public double getRealMinValue() {
+        return ((NumberValue) m_values.get(m_firstNonNanValueIndex)).doubleValue();
+    }
+    
+    public void setRange(Double rangeMin, Double rangeMax, boolean forceNaN) {
+        m_rangeMin = rangeMin;
+        m_rangeMinWithNaN = rangeMin;
+        m_rangeMax = rangeMax;
+        m_forceNaN = forceNaN;
+    }
     
     public void paint(Graphics2D g, int plotWidth) {
         
@@ -157,48 +179,39 @@ public class ParallelCoordinatesAxis implements MoveableInterface {
         int fontHeight = m_valuesFontMetrics.getHeight();
         g.drawString(m_columnName, xForLabel(m_columnName, plotWidth), fontHeight+4);
         
-        
-        // Display Min Value
-        //String valueMin = (0>m_firstNonNanValueIndex) ? "NaN" : m_values.get(0).toString();
-        //g.drawString(valueMin, xForLabel(valueMin, plotWidth), PAD_Y_UP/2+fontHeight+4);
-        
-        // Display Max Value
-        //String valueMax = (m_values.size() - 1>m_firstNonNanValueIndex) ? "NaN" : m_values.get(m_values.size() - 1).toString();
-        //g.drawString(valueMax, xForLabel(valueMax, plotWidth), m_y+m_heightTotal+fontHeight+4);
-        
-        
+ 
         // Display Selected values
         if (m_numericAxis) {
-            double vMin = ((NumberValue) m_values.get(m_values.size()-1)).doubleValue();
+            double vMin = m_rangeMinWithNaN;
             double vMax = ((NumberValue) m_values.get(0)).doubleValue();
 
             // min
             String min;
             if (m_discreteAxis) {
-                min = Integer.toString((int) Math.round(Math.floor(vMin)));
+                min = (m_firstNonNanValueIndex == -1) || (vMin < m_rangeMin) ? "NaN" : Integer.toString((int) Math.round(Math.floor(m_rangeMin)));
             } else {
-                min = (m_firstNonNanValueIndex == -1) || (vMin < ((NumberValue) m_values.get(m_firstNonNanValueIndex)).doubleValue()) ? "NaN" : String.format("%6.5e", vMin);
+                min = (m_firstNonNanValueIndex == -1) || (vMin < m_rangeMin) ? "NaN" : String.format("%6.5e", m_rangeMin);
             }
-            g.drawString(min, xForLabel(min, plotWidth), m_y+m_heightTotal+fontHeight+4);
+               g.drawString(min, xForLabel(min, plotWidth), m_y+m_heightTotal+fontHeight+4);
             
             // max
             String max;
             if (m_discreteAxis) {
-                max = Integer.toString((int) Math.round(Math.floor(vMax)));
+                max = (m_firstNonNanValueIndex == -1) || (vMax < m_rangeMin) ? "NaN" : Integer.toString((int) Math.round(Math.floor(m_rangeMax)));
             } else {
-                max = (m_firstNonNanValueIndex == -1) || (vMax < ((NumberValue) m_values.get(m_firstNonNanValueIndex)).doubleValue()) ? "NaN" : String.format("%6.5e", vMax);
+                max = (m_firstNonNanValueIndex == -1) || (vMax < m_rangeMin) ? "NaN" : String.format("%6.5e", m_rangeMax);
             }
             g.drawString(max, xForLabel(max, plotWidth), PAD_Y_UP/2+fontHeight+4);
             
             // Min Value Selected
             if (y1>m_y) {
-                double v = (vMax-vMin)*(1-m_selectionMinPercentage)+vMin;
+                double v = (m_rangeMax-m_rangeMinWithNaN)*(1-m_selectionMinPercentage)+m_rangeMinWithNaN;
 
                 String minValueSelected;
                 if (m_discreteAxis) {
-                    minValueSelected = Integer.toString((int) Math.round(Math.floor(v)));
+                    minValueSelected = (m_firstNonNanValueIndex == -1) || (v < m_rangeMin) ? "NaN" : Integer.toString((int) Math.round(Math.floor(v)));
                 } else {
-                    minValueSelected = (m_firstNonNanValueIndex==-1) || ( v < ((NumberValue)m_values.get(m_firstNonNanValueIndex)).doubleValue() )  ? "NaN" : String.format("%6.5e", v);
+                    minValueSelected = (m_firstNonNanValueIndex==-1) || ( v < m_rangeMin )  ? "NaN" : String.format("%6.5e", v);
                 }
                 
                 Rectangle2D r = m_valuesFontMetrics.getStringBounds(minValueSelected, g);
@@ -213,13 +226,13 @@ public class ParallelCoordinatesAxis implements MoveableInterface {
             
             // Max Value Selected
              if (y2 < m_y+m_heightTotal) {
-                double v = (vMax-vMin)*(1-m_selectionMaxPercentage)+vMin;
+                double v = (m_rangeMax-m_rangeMinWithNaN)*(1-m_selectionMaxPercentage)+m_rangeMinWithNaN;
                 
                 String maxValueSelected;
                 if (m_discreteAxis) {
-                    maxValueSelected = Integer.toString((int) Math.round(Math.floor(v)));
+                    maxValueSelected = (m_firstNonNanValueIndex == -1) || (v < m_rangeMin) ? "NaN" : Integer.toString((int) Math.round(Math.floor(v)));
                 } else {
-                    maxValueSelected = (m_firstNonNanValueIndex==-1) || ( v < ((NumberValue)m_values.get(m_firstNonNanValueIndex)).doubleValue() )  ? "NaN" : String.format("%6.5e", v);
+                    maxValueSelected = (m_firstNonNanValueIndex==-1) || ( v < m_rangeMin )  ? "NaN" : String.format("%6.5e", v);
                 }
                 
                 
@@ -305,21 +318,28 @@ public class ParallelCoordinatesAxis implements MoveableInterface {
         manageNaN();
 
     }
+    
+    public boolean hasNaN() {
+        return m_hasNan;
+    }
+    
     private void manageNaN() {
-        if (m_hasNan) {
+        if (m_hasNan || m_forceNaN) {
 
             // replace NaN Values by a small value which will be put at PAD_NAN
-            Double valueForNan;
+            double naNValue;
             if (m_firstNonNanValueIndex == -1) {
                 // only  NaN values
-                valueForNan = 0d;
+                naNValue = 0d;
             } else {
                 double min = ((NumberValue) m_values.get(m_firstNonNanValueIndex)).doubleValue();
                 double max = ((NumberValue) m_values.get(0)).doubleValue();
-                valueForNan = (max == min) ? min - 1 : max - ((double) m_heightTotal) * ((max - min) / ((double) (m_heightTotal - PAD_NAN)));
+                naNValue = (max == min) ? min - 1 : max - ((double) m_heightTotal) * ((max - min) / ((double) (m_heightTotal - PAD_NAN)));
+                m_rangeMinWithNaN = naNValue;
+                
             }
             for (int i = m_values.size() - 1; i > m_firstNonNanValueIndex; i--) {
-                ((NumberValue) m_values.get(i)).setValue(valueForNan);
+                ((NumberValue) m_values.get(i)).setValue(naNValue);
             }
         }
     }
@@ -356,8 +376,8 @@ public class ParallelCoordinatesAxis implements MoveableInterface {
         AbstractValue v = m_rowIndexToValueMap.get(rowIndex);
         if (m_numericAxis) {
             double value = ((NumberValue) v).doubleValue();
-            double vMin = ((NumberValue) m_values.get(m_values.size()-1)).doubleValue();
-            double vMax = ((NumberValue) m_values.get(0)).doubleValue();
+            double vMin = m_rangeMinWithNaN;
+            double vMax = m_rangeMax;
             double maxSelected = (vMax-vMin)*(1-m_selectionMinPercentage)+vMin;
             if (value>maxSelected) {
                 return false;
@@ -392,18 +412,18 @@ public class ParallelCoordinatesAxis implements MoveableInterface {
         AbstractValue v = m_rowIndexToValueMap.get(rowIndex);
 
         if (m_numericAxis) {
-            if (!m_hasNan) {
-                double min = ((NumberValue) m_values.get(m_values.size() - 1)).doubleValue();
-                double max = ((NumberValue) m_values.get(0)).doubleValue();
+            if (!m_hasNan && !m_forceNaN) {
+                double min = m_rangeMin;
+                double max = m_rangeMax;
                 double value = ((NumberValue) v).doubleValue();
 
                 return (int) ((1d - ((value - min) / (max - min))) * m_heightTotal);
             } else {
-                    double min = ((NumberValue) m_values.get(m_values.size() - 1)).doubleValue();
-                    double max = ((NumberValue) m_values.get(0)).doubleValue();
-                    double value = ((NumberValue) v).doubleValue();
+                double min = m_rangeMinWithNaN;
+                double max = m_rangeMax;
+                double value = ((NumberValue) v).doubleValue();
 
-                    return (int) ((1d - ((value - min) / (max - min))) * m_heightTotal);
+                return (int) ((1d - ((value - min) / (max - min))) * m_heightTotal);
             }
         } else {
            return (int) Math.round(   ((double)rowIndex)/((double)(m_values.size()-1)) *m_heightTotal);
@@ -428,6 +448,9 @@ public class ParallelCoordinatesAxis implements MoveableInterface {
         int nbRows = compareDataInterface.getRowCount();
         for (int i = 0; i < nbRows; i++) {
             String value = (String) compareDataInterface.getDataValueAt(i, colId);
+            if (value == null) {
+                value = ""; // null values are considerez as empty string
+            }
             StringValue nValue = new StringValue(value, i);
             m_values.add(nValue);
             m_rowIndexToValueMap.put(i, nValue);
@@ -442,7 +465,12 @@ public class ParallelCoordinatesAxis implements MoveableInterface {
         int nbRows = compareDataInterface.getRowCount();
         for (int i = 0; i < nbRows; i++) {
             Number v = (Number) compareDataInterface.getDataValueAt(i, colId);
-            NumberValue nValue = new NumberValue(v, i);
+            NumberValue nValue;
+            if (v != null) {
+                nValue = new NumberValue(v, i);
+            } else {
+                nValue = new NumberValue(Double.NaN, i); // Null values as considered as NaN
+            }
             m_values.add(nValue);
             m_rowIndexToValueMap.put(i, nValue);
         }
@@ -455,11 +483,8 @@ public class ParallelCoordinatesAxis implements MoveableInterface {
         if (!m_numericAxis || m_log) {
             return false;
         };
-        
-        
-        double min = ((NumberValue)m_values.get(m_firstNonNanValueIndex)).doubleValue();
-        
-        return min>10e-9;
+
+        return m_rangeMin>10e-9;
     }
     
     public void log() {

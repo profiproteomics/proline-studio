@@ -259,6 +259,11 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
                     }
                 }
             }
+            
+            
+            for (PlotBaseAbstract plot : m_plots) {
+                plot.paintOver(g2d);
+            }
             for (PlotBaseAbstract plot : m_plots) {
                 plot.paintMarkers(g2d);
             }

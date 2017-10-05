@@ -181,10 +181,16 @@ public class PlotParallelCoordinates extends PlotMultiDataAbstract {
         
         g.setStroke(previousStroke);
         
+
+        
+    }
+    
+    @Override
+    public void paintOver(Graphics2D g) {
+        int width = m_plotPanel.getWidth();
         for (ParallelCoordinatesAxis axis : m_axisList) {
             axis.paint(g, width);
         }
-        
     }
     
     private int getAxisDelta(int width, int nbAxis) {
@@ -237,7 +243,7 @@ public class PlotParallelCoordinates extends PlotMultiDataAbstract {
             for (ParallelCoordinatesAxis axis : m_axisList) {
 
                 
-                if (!axis.isRowIndexSelected(rowIndex, index, false)) {
+                if (!axis.isRowIndexSelected(rowIndex, false)) {
                     selected = false;
                     break;
                 }
@@ -250,7 +256,7 @@ public class PlotParallelCoordinates extends PlotMultiDataAbstract {
             int rowIndex = selectedAxis.getRowIndexFromIndex(index);
             for (ParallelCoordinatesAxis axis : m_axisList) {
 
-                if (!axis.isRowIndexSelected(rowIndex, index, true)) {
+                if (!axis.isRowIndexSelected(rowIndex, true)) {
                     selected = false;
                     break;
                 }
@@ -392,6 +398,9 @@ public class PlotParallelCoordinates extends PlotMultiDataAbstract {
 
     @Override
     public boolean select(double x, double y, boolean append) {
+        ParallelCoordinatesAxis selectedAxis = m_axisList.get(m_mainSelectedAxisIndex);
+        m_mainSelectedAxisIndex = -1;
+        selectAxis(selectedAxis, false);
         return false;
     }
 
@@ -588,6 +597,9 @@ public class PlotParallelCoordinates extends PlotMultiDataAbstract {
 
     
     public void axisMoved(ParallelCoordinatesAxis axis, int deltaX) {
+
+        ParallelCoordinatesAxis mainAxis = m_axisList.get(m_mainSelectedAxisIndex);
+
         
         int nbAxis = m_axisList.size();
         int width = m_plotPanel.getWidth();
@@ -629,6 +641,18 @@ public class PlotParallelCoordinates extends PlotMultiDataAbstract {
         
         m_axisList = m_axisListNew;
 
+        // set the index of the main axis which can have been changed
+        m_mainSelectedAxisIndex = 0;
+        for (ParallelCoordinatesAxis axisCur : m_axisList) {
+            axisCur.setId(m_mainSelectedAxisIndex);
+            if (axisCur.equals(mainAxis)) {
+                break;
+            }
+            m_mainSelectedAxisIndex++;
+        }
+
+
+        
         m_plotPanel.repaintUpdateDoubleBuffer();
 
     }

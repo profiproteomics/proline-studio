@@ -48,7 +48,7 @@ public class ParallelCoordinatesAxis implements MoveableInterface {
     private boolean m_numericAxis;
     private boolean m_discreteAxis;
     
-    private final int m_id;
+    private int m_id;
     private final PlotParallelCoordinates m_plot;
     
     private double m_selectionMinPercentage = 0;
@@ -112,12 +112,18 @@ public class ParallelCoordinatesAxis implements MoveableInterface {
 
         
         m_columnName = compareDataInterface.getDataColumnIdentifier(colId);
-        
+
+        for (int i=0;i<m_values.size();i++) {
+            m_values.get(i).setIndex(i);
+        }
 
     }
     
     public int getId() {
         return m_id;
+    }
+    public void setId(int id) {
+        m_id = id;
     }
     
     public double getRealMaxValue() {
@@ -260,7 +266,7 @@ public class ParallelCoordinatesAxis implements MoveableInterface {
 
             // Min Value Selected
             if (y1>m_y) {
-                int index = (int) Math.round((m_values.size()-1)*m_selectionMinPercentage+0.5);
+                int index = (int) Math.round((m_values.size()-1)*m_selectionMinPercentage+0.5d);
                 if (index>m_values.size()-1) {
                     index = m_values.size()-1;
                 } else if (index<0){
@@ -279,7 +285,7 @@ public class ParallelCoordinatesAxis implements MoveableInterface {
             }
             // Max Value Selected
              if (y2 < m_y+m_heightTotal) {
-                int index = (int) Math.round((m_values.size()-1)*m_selectionMaxPercentage+0.5);
+                int index = (int) Math.round((m_values.size()-1)*m_selectionMaxPercentage-0.5d);
                 if (index>m_values.size()-1) {
                     index = m_values.size()-1;
                 } else if (index<0){
@@ -367,7 +373,7 @@ public class ParallelCoordinatesAxis implements MoveableInterface {
         }
     }
     
-    public boolean isRowIndexSelected(int rowIndex, int srcIndex, boolean exportOrder) {
+    public boolean isRowIndexSelected(int rowIndex, boolean exportOrder) {
         
         if ((m_selectionMinPercentage<=1e-10) && (m_selectionMaxPercentage-1>=-1e-10)) {
             return true;
@@ -389,14 +395,13 @@ public class ParallelCoordinatesAxis implements MoveableInterface {
             
         } else { // String
             
-            int indexMin = (int) Math.round((m_values.size()-1)*m_selectionMinPercentage);
-            int indexMax = (int) Math.round((m_values.size()-1)*m_selectionMaxPercentage);
+            int srcIndex = v.getIndex();
             
-            if (exportOrder) {
-                return ((indexMax>=srcIndex) && (indexMin<=srcIndex));
-            } else {
-                return ((indexMax>=rowIndex) && (indexMin<=rowIndex));
-            }
+            int indexMin = (int) Math.round((m_values.size()-1)*m_selectionMinPercentage+0.5d-1e-10);
+            int indexMax = (int) Math.round((m_values.size()-1)*m_selectionMaxPercentage-0.5d+1e-10);
+
+            return ((indexMax>=srcIndex) && (indexMin<=srcIndex));
+
 
         }
         
@@ -426,7 +431,7 @@ public class ParallelCoordinatesAxis implements MoveableInterface {
                 return (int) ((1d - ((value - min) / (max - min))) * m_heightTotal);
             }
         } else {
-           return (int) Math.round(   ((double)rowIndex)/((double)(m_values.size()-1)) *m_heightTotal);
+           return (int) Math.round(   ((double)v.getIndex())/((double)(m_values.size()-1)) *m_heightTotal);
         }
 
     }

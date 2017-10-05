@@ -46,8 +46,9 @@ public class PlotParallelCoordinates extends PlotMultiDataAbstract {
     private int m_mainSelectedAxisIndex = 0;
     
     private boolean[] m_selectionArray = null;
-    private boolean[] m_selectionArrayForExport = null;
     private long[] m_ids;
+    
+    private boolean[] m_SpecificSelection = null;
     
     public PlotParallelCoordinates(BasePlotPanel plotPanel, CompareDataInterface compareDataInterface, CrossSelectionInterface crossSelectionInterface, int[] cols) {
         super(plotPanel, PlotType.PARALLEL_COORDINATES_PLOT, compareDataInterface, crossSelectionInterface);
@@ -80,7 +81,7 @@ public class PlotParallelCoordinates extends PlotMultiDataAbstract {
         
          // disable selection buttons
         m_plotPanel.enableButton(BasePlotPanel.PlotToolbarListener.BUTTONS.GRID, false);
-        m_plotPanel.enableButton(BasePlotPanel.PlotToolbarListener.BUTTONS.IMPORT_SELECTION, false);
+        //m_plotPanel.enableButton(BasePlotPanel.PlotToolbarListener.BUTTONS.IMPORT_SELECTION, false);
     }
 
 
@@ -207,7 +208,11 @@ public class PlotParallelCoordinates extends PlotMultiDataAbstract {
 
             int rowIndex = selectedAxis.getRowIndexFromIndex(index);
 
-            if (m_selectionArray[rowIndex] ^ paintSelection) {
+            if (m_SpecificSelection != null) {
+                if (m_SpecificSelection[rowIndex] ^ paintSelection) {
+                    continue;
+                }
+            } else if (m_selectionArray[rowIndex] ^ paintSelection) {
                 continue;
             }
             
@@ -232,6 +237,8 @@ public class PlotParallelCoordinates extends PlotMultiDataAbstract {
             return;
         }
         
+        m_SpecificSelection = null;
+        
         int nbRows = m_compareDataInterface.getRowCount();
         
         
@@ -243,26 +250,14 @@ public class PlotParallelCoordinates extends PlotMultiDataAbstract {
             for (ParallelCoordinatesAxis axis : m_axisList) {
 
                 
-                if (!axis.isRowIndexSelected(rowIndex, false)) {
+                if (!axis.isRowIndexSelected(rowIndex)) {
                     selected = false;
                     break;
                 }
             }
             m_selectionArray[rowIndex] = selected;
         }
-        
-        for (int index = 0; index < nbRows; index++) {
-            boolean selected = true;
-            int rowIndex = selectedAxis.getRowIndexFromIndex(index);
-            for (ParallelCoordinatesAxis axis : m_axisList) {
 
-                if (!axis.isRowIndexSelected(rowIndex, true)) {
-                    selected = false;
-                    break;
-                }
-            }
-            m_selectionArrayForExport[rowIndex] = selected;
-        }
         
     }
     
@@ -277,46 +272,12 @@ public class PlotParallelCoordinates extends PlotMultiDataAbstract {
         m_gradientColors = colorOrGradient.getGradient().getColors();
         m_gradientFractions = colorOrGradient.getGradient().getFractions();
 
-        /*ParallelCoordinatesAxis firstAxis = m_axisList.get(0);
-        
-        
-        int height = firstAxis.getHeight();
-        if ((m_gradientParamValues == null) || (m_gradientParamValues.length != height)) {
-            m_gradientParamValues = new double[height];
-        }
-
-        Object value = m_compareDataInterface.getDataValueAt(0, m_gradientParamCol);
-        double d = (value == null || ! Number.class.isAssignableFrom(value.getClass())) ? Double.NaN : ((Number)value).doubleValue();
-        m_gradientParamValues[0] = d;
-
-        m_gradientParamValuesMin = d;
-        m_gradientParamValuesMax = d;
-
-        for (int i = 1; i < size; i++) {
-            value = m_compareDataInterface.getDataValueAt(i, m_gradientParamCol);
-            d = (value == null || ! Number.class.isAssignableFrom(value.getClass())) ? Double.NaN : ((Number)value).doubleValue();
-            m_gradientParamValues[i] = d;
-            if (d<m_gradientParamValuesMin) {
-                m_gradientParamValuesMin = d;
-            } else if (d>m_gradientParamValuesMax) {
-                m_gradientParamValuesMax = d;
-            }
-        }*/
 
     }
     
       private Color selectColor(Color plotColor, boolean useGradient, int rowIndex) {
-        Color c = null;
-        /*if (!m_idsToGraphicDataGroup.isEmpty()) {
-            GraphicDataGroup dataGroup = m_idsToGraphicDataGroup.get(m_ids[i]);
-            if (dataGroup != null) {
-                c = dataGroup.getColor();
-            } else if (useGradient) {
-                c = getColorInGradient(m_gradientParamValues[i]);
-            } else {
-                c = plotColor;
-            }
-        } else*/ if (useGradient) {
+        Color c;
+        if (useGradient) {
             ParallelCoordinatesAxis selectedAxis = m_axisList.get(m_mainSelectedAxisIndex);
 
             int height = selectedAxis.getHeight();
@@ -361,10 +322,9 @@ public class PlotParallelCoordinates extends PlotMultiDataAbstract {
 
         int nbRows = m_compareDataInterface.getRowCount();
         m_selectionArray = new boolean[nbRows];
-        m_selectionArrayForExport = new boolean[nbRows];
+        m_SpecificSelection = null;
         m_ids = new long[nbRows];
         Arrays.fill(m_selectionArray, Boolean.TRUE);
-        Arrays.fill(m_selectionArrayForExport, Boolean.TRUE);
         
         m_axisList.clear();
         
@@ -419,16 +379,28 @@ public class PlotParallelCoordinates extends PlotMultiDataAbstract {
         for (int index = 0; index < nbRows; index++) {
             int rowIndex = selectedAxis.getRowIndexFromIndex(index);
 
-            if (m_selectionArrayForExport[rowIndex]) {
+            
+            if (m_SpecificSelection != null) {
+                if (m_SpecificSelection[rowIndex]) {
+                    selection.add(m_ids[rowIndex]);
+                }
+            } else if (m_selectionArray[rowIndex]) {
                 selection.add(m_ids[rowIndex]);
             }
+
         }
         return selection;
     }
 
     @Override
     public void setSelectedIds(ArrayList<Long> selection) {
-        
+
+        int nbRows = m_compareDataInterface.getRowCount();
+        m_SpecificSelection = new boolean[nbRows];
+        Arrays.fill(m_SpecificSelection, Boolean.FALSE);
+        for (Long l : selection) {
+            m_SpecificSelection[l.intValue()] = true;
+        }
     }
 
     @Override
@@ -581,6 +553,8 @@ public class PlotParallelCoordinates extends PlotMultiDataAbstract {
         int id = axis.getId();
         if (m_mainSelectedAxisIndex != id) {
             m_mainSelectedAxisIndex = id;
+            
+            m_SpecificSelection = null;
             
             if (!isCtrlOrShiftDown) {
 

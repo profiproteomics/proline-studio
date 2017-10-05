@@ -373,7 +373,7 @@ public class ParallelCoordinatesAxis implements MoveableInterface {
         }
     }
     
-    public boolean isRowIndexSelected(int rowIndex, boolean exportOrder) {
+    public boolean isRowIndexSelected(int rowIndex) {
         
         if ((m_selectionMinPercentage<=1e-10) && (m_selectionMaxPercentage-1>=-1e-10)) {
             return true;

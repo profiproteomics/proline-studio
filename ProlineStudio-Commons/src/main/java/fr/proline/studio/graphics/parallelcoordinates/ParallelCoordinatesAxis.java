@@ -236,7 +236,7 @@ public class ParallelCoordinatesAxis implements MoveableInterface {
                 
                 String maxValueSelected;
                 if (m_discreteAxis) {
-                    maxValueSelected = (m_firstNonNanValueIndex == -1) || (v < m_rangeMin) ? "NaN" : Integer.toString((int) Math.round(Math.floor(v)));
+                    maxValueSelected = (m_firstNonNanValueIndex == -1) || (v < m_rangeMin) ? "NaN" : Integer.toString((int) Math.round(Math.ceil(v)));
                 } else {
                     maxValueSelected = (m_firstNonNanValueIndex==-1) || ( v < m_rangeMin )  ? "NaN" : String.format("%6.5e", v);
                 }

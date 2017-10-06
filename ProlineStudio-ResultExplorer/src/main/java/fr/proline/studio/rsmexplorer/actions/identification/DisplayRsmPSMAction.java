@@ -131,10 +131,10 @@ public class DisplayRsmPSMAction extends AbstractRSMAction {
                 setEnabled(false);
                 return;
             }
-            if (dataSetNode.isMerged()) {
+            /*if (dataSetNode.isMerged()) {
                 setEnabled(false);
                 return;
-            }
+            }*/
         }
 
         

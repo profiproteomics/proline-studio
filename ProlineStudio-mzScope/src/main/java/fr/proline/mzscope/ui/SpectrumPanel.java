@@ -2,7 +2,6 @@
 
 import fr.proline.mzscope.ui.model.ScanTableModel;
 import fr.profi.ms.model.TheoreticalIsotopePattern;
-import fr.profi.mzdb.algo.IsotopicPatternScorer;
 import fr.proline.mzscope.model.MsnExtractionRequest;
 import fr.proline.mzscope.ui.model.MzScopePreferences;
 import fr.proline.mzscope.model.Spectrum;
@@ -20,7 +19,6 @@ import fr.proline.studio.graphics.PlotStick;
 import fr.proline.studio.graphics.marker.AbstractMarker;
 import fr.proline.studio.graphics.marker.IntervalMarker;
 import fr.proline.studio.graphics.marker.LabelMarker;
-import static fr.proline.studio.graphics.marker.LabelMarker.ORIENTATION_XY_MIDDLE;
 import static fr.proline.studio.graphics.marker.LabelMarker.ORIENTATION_XY_MIDDLE;
 import fr.proline.studio.graphics.marker.LineMarker;
 import fr.proline.studio.graphics.marker.PointMarker;

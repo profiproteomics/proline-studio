@@ -215,6 +215,7 @@ public class TreeFileChooserPanel extends JPanel {
     }
 
     public void expandMultipleTreePath(HashSet<String> directories, String pathLabel) {
+        
         DefaultMutableTreeNode root = (DefaultMutableTreeNode) m_model.getRoot();
         Enumeration totalNodes = root.depthFirstEnumeration();
 

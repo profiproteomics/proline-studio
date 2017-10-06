@@ -20,7 +20,7 @@ import javax.swing.JOptionPane;
  *
  * @author AK249877
  */
-public class MgfExportBatch implements Runnable, ConversionListener {
+public class MgfExportBatch implements Runnable, MsListener {
 
     private final ThreadPoolExecutor m_executor;
     private final HashMap<File, MgfExportSettings> m_exports;
@@ -62,14 +62,28 @@ public class MgfExportBatch implements Runnable, ConversionListener {
     private void export(File f, MgfExportSettings settings) {
         if (f.getAbsolutePath().toLowerCase().endsWith(".mzdb")) {
             MgfExporter exporter = new MgfExporter(f, settings);
-            exporter.addConversionListener(this);
+            exporter.addMsListener(this);
             m_executor.execute(exporter);
         }
     }
 
     @Override
-    public void conversionPerformed(File f, Object settings, boolean success) {
+    public void conversionPerformed(File f, ConversionSettings settings, boolean success) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
 
+    @Override
+    public void uploadPerformed(File f, boolean success) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void downloadPerformed(boolean success) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void exportPerformed(File f, boolean success) {
         if (success) {
             m_successCounter++;
 

@@ -5,14 +5,19 @@
  */
 package fr.proline.studio.rsmexplorer.gui;
 
+import fr.proline.studio.msfiles.MzdbDownloadBatch;
+import fr.proline.studio.rsmexplorer.MzdbFilesTopComponent;
 import java.awt.datatransfer.Transferable;
+import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import javax.swing.JComponent;
 import javax.swing.JTree;
 import javax.swing.TransferHandler;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
+import org.openide.util.Exceptions;
 
 /**
  *
@@ -86,21 +91,33 @@ public class LocalFileSystemTransferHandler extends TransferHandler {
 
     @Override
     public boolean importData(TransferHandler.TransferSupport support) {
-
-        if (support.getComponent() instanceof JTree) {
-
-            //JTree tree = (JTree) support.getComponent();
-            JTree.DropLocation dropLocation = (JTree.DropLocation) support.getDropLocation();
-
-            TreePath path = dropLocation.getPath();
-
-            //int dropRow = tree.getRowForPath(path);
-
-        } else if (support.getComponent() instanceof TreeFileChooserPanel) {
+        
+        try {
+            
+            FilesTransferable transferable = (FilesTransferable) support.getTransferable().getTransferData(FilesTransferable.Files_FLAVOR);
+            ArrayList<File> files = transferable.getFiles();
+            
+            if (support.getComponent() instanceof JTree) {
+                
+                JTree.DropLocation dropLocation = (JTree.DropLocation) support.getDropLocation();
+                
+                TreePath dropPath = dropLocation.getPath();
+                
+                MzdbDownloadBatch downloadBatch = new MzdbDownloadBatch(files, dropPath, MzdbFilesTopComponent.getExplorer().getLocalFileSystemView().getSelectedRoot());
+                Thread downloadThread = new Thread(downloadBatch);
+                downloadThread.start();
+                
+                return true;
+                
+            } else if (support.getComponent() instanceof TreeFileChooserPanel) {
+                return true;
+            }
+            
             return true;
+        } catch (UnsupportedFlavorException | IOException ex) {
+            Exceptions.printStackTrace(ex);
         }
-
-        return true;
+        return false;
 
     }
 

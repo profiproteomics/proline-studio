@@ -25,13 +25,11 @@ public class RawConversionTask extends AbstractDatabaseTask {
 
     private final File m_file;
     private Process m_process = null;
-    private final StringBuilder m_logs;
     private ConversionSettings m_settings;
 
-    public RawConversionTask(AbstractDatabaseCallback callback, File file, StringBuilder logs, ConversionSettings settings) {
+    public RawConversionTask(AbstractDatabaseCallback callback, File file, ConversionSettings settings) {
         super(callback, new TaskInfo("Convert .raw file " + file.getAbsolutePath(), false, "Generic Task", TaskInfo.INFO_IMPORTANCE_MEDIUM));
         m_file = file;
-        m_logs = logs;
         m_settings = settings;
     }
 
@@ -53,15 +51,7 @@ public class RawConversionTask extends AbstractDatabaseTask {
             
             m_process = new ProcessBuilder(m_settings.getConverterPath(), "-i", m_file.getAbsolutePath(), "-o", m_settings.getOutputPath()+File.separator+m_file.getName().substring(0, m_file.getName().lastIndexOf(suffix)) + ".mzdb").start();
 
-            InputStream errorStream = m_process.getErrorStream();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(errorStream));
-            String line;
-            while ((line = reader.readLine()) != null) {
-                m_logs.append(line + "\n");
-            }
-
         } catch (IOException ex) {
-            Logger.getLogger(RawConversionTask.class.getName()).log(Level.SEVERE, null, ex);
             if (m_process != null && m_process.isAlive()) {
                 m_process.destroy();
             }

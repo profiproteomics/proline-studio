@@ -20,7 +20,7 @@ import javax.swing.tree.TreePath;
  *
  * @author AK249877
  */
-public class ConvertionUploadBatch implements Runnable, ConversionListener {
+public class ConvertionUploadBatch implements Runnable, MsListener {
 
     private ThreadPoolExecutor m_conversionExecutor, m_uploadExecutor;
     private HashMap<File, ConversionSettings> m_conversions;
@@ -54,7 +54,7 @@ public class ConvertionUploadBatch implements Runnable, ConversionListener {
     private void convert(File f, ConversionSettings conversionSettings) {
         if (f.getAbsolutePath().toLowerCase().endsWith(".raw") || f.getAbsolutePath().toLowerCase().endsWith(".wiff")) {
             RawConverter converter = new RawConverter(f, conversionSettings);
-            converter.addConversionListener(this);
+            converter.addMsListener(this);
             m_conversionExecutor.execute(converter);
         }
     }
@@ -96,14 +96,7 @@ public class ConvertionUploadBatch implements Runnable, ConversionListener {
     }
 
     @Override
-    public void conversionPerformed(File f, Object settings, boolean success) {
-
-        ConversionSettings conversionSettings = null;
-
-        if (settings instanceof ConversionSettings) {
-            conversionSettings = (ConversionSettings) settings;
-        }
-
+    public void conversionPerformed(File f, ConversionSettings conversionSettings, boolean success) {
         if (success) {
             if (conversionSettings != null && conversionSettings.getUploadSettings() != null) {
                 upload(f, conversionSettings.getUploadSettings());
@@ -126,7 +119,7 @@ public class ConvertionUploadBatch implements Runnable, ConversionListener {
 
             MzdbFilesTopComponent.getExplorer().getLocalFileSystemView().expandMultipleTreePath(directories);
             MzdbFilesTopComponent.getExplorer().getLocalFileSystemView().updateTree();
-            
+
         }
 
         if ((m_uploadCounter + m_failedConversions) == m_conversions.size()) {
@@ -143,6 +136,21 @@ public class ConvertionUploadBatch implements Runnable, ConversionListener {
             }
             MzdbFilesTopComponent.getExplorer().getTreeFileChooserPanel().updateTree();
         }
+    }
+
+    @Override
+    public void uploadPerformed(File f, boolean success) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void downloadPerformed(boolean success) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void exportPerformed(File f, boolean success) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
 }

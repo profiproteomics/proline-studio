@@ -21,25 +21,19 @@ import javax.swing.SwingUtilities;
  *
  * @author AK249877
  */
-public class RawConverter implements Runnable, WorkerInterface {
+public class RawConverter implements Runnable {
 
     private final File m_file;
-    private boolean m_run = false;
-    private int m_state = WorkerInterface.ACTIVE_STATE;
-    private final StringBuilder m_logs;
-    private ConversionListener m_conversionListener;
+    private MsListener m_msListener;
     private final ConversionSettings m_settings;
 
     public RawConverter(File file, ConversionSettings settings) {
         m_file = file;
         m_settings = settings;
-        m_logs = new StringBuilder();
     }
 
     @Override
     public void run() {
-
-        m_run = true;
 
         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
 
@@ -56,7 +50,7 @@ public class RawConverter implements Runnable, WorkerInterface {
                     @Override
                     public void run() {
 
-                        File f = null;
+                        File f = null; 
 
                         if (m_file.getName().contains(".raw")) {
                             f = new File(m_settings.getOutputPath() + File.separator + m_file.getName().substring(0, m_file.getName().lastIndexOf(".raw")) + ".mzdb");
@@ -69,12 +63,10 @@ public class RawConverter implements Runnable, WorkerInterface {
                         }
                         if (success) {
 
-                            if (m_state == WorkerInterface.ACTIVE_STATE) {
-                                m_state = WorkerInterface.FINISHED_STATE;
-                                if (m_conversionListener != null) {
+                                if (m_msListener != null) {
 
                                     if (f!=null && f.exists()) {
-                                        m_conversionListener.conversionPerformed(f, m_settings, true);
+                                        m_msListener.conversionPerformed(f, m_settings, true);
                                     }
                                 }
 
@@ -90,8 +82,7 @@ public class RawConverter implements Runnable, WorkerInterface {
                                             directories.add(outputDirectory.getAbsolutePath());
                                             outputDirectory = outputDirectory.getParentFile();
                                         }
-
-                                        
+                                       
                                         MzdbFilesTopComponent.getExplorer().getLocalFileSystemView().expandMultipleTreePath(directories);
                                         MzdbFilesTopComponent.getExplorer().getLocalFileSystemView().updateTree();
                                         
@@ -104,11 +95,10 @@ public class RawConverter implements Runnable, WorkerInterface {
                                     }
                                 }
 
-                            }
+                            
                         } else {
-                            terminate();
-                            if (m_conversionListener != null) {
-                                m_conversionListener.conversionPerformed(f, m_settings, false);
+                            if (m_msListener != null) {
+                                m_msListener.conversionPerformed(f, m_settings, false);
                             }
                         }
 
@@ -118,44 +108,12 @@ public class RawConverter implements Runnable, WorkerInterface {
             }
         };
 
-        RawConversionTask task = new RawConversionTask(callback, m_file, m_logs, m_settings);
+        RawConversionTask task = new RawConversionTask(callback, m_file, m_settings);
         AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
-
-        m_logs.append("Converting for file: " + this.getFile().getAbsolutePath() + " has come to its end.\n\n");
-        m_run = false;
     }
 
-    public void addConversionListener(ConversionListener listener) {
-        m_conversionListener = listener;
+    public void addMsListener(MsListener listener) {
+        m_msListener = listener;
     }
-
-    @Override
-    public void terminate() {
-        m_state = WorkerInterface.KILLED_STATE;
-        m_run = false;
-    }
-
-    @Override
-    public boolean isAlive() {
-        return m_run;
-    }
-
-    public File getFile() {
-        return m_file;
-    }
-
-    @Override
-    public int getState() {
-        return m_state;
-    }
-
-    @Override
-    public int getWorkerType() {
-        return WorkerInterface.CONVERTER_TYPE;
-    }
-
-    @Override
-    public StringBuilder getLogs() {
-        return m_logs;
-    }
+    
 }

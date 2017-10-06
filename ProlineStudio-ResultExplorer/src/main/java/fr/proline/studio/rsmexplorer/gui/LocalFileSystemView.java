@@ -499,5 +499,13 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
     public ActionListener getDefaultAction() {
         return null;
     }
+    
+    public String getSelectedRoot(){
+        if(m_rootsComboBox!=null){
+            return m_rootsComboBox.getSelectedItem().toString();
+        }else{
+            return "";
+        }
+    }
 
 }

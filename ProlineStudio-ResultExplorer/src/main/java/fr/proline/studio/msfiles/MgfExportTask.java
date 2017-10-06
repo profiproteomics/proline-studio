@@ -25,12 +25,9 @@ public class MgfExportTask extends AbstractDatabaseTask {
     private final File m_file;
     private final MgfExportSettings m_exportSettings;
 
-    private final StringBuilder m_logs;
-
-    public MgfExportTask(AbstractDatabaseCallback callback, File file, StringBuilder logs, MgfExportSettings exportSettings) {
+    public MgfExportTask(AbstractDatabaseCallback callback, File file, MgfExportSettings exportSettings) {
         super(callback, new TaskInfo("Export .mgf file for " + file.getAbsolutePath(), false, "Generic Task", TaskInfo.INFO_IMPORTANCE_MEDIUM));
         m_file = file;
-        m_logs = logs;
         m_exportSettings = exportSettings;
     }
 
@@ -48,7 +45,6 @@ public class MgfExportTask extends AbstractDatabaseTask {
             mzdbFile.exportRawFile(outputFileName, m_exportSettings.getMgfExportParameters());
             return true;
         } catch (Exception ex) {
-            m_logs.append("Exporting .mgf for " + m_file.getAbsolutePath() + " failed.\n");
             m_taskError = new TaskError("Mgf Exportation Error", "Exporting .mgf for " + m_file.getAbsolutePath() + " failed.\n");
             return false;
         }

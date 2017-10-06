@@ -78,7 +78,7 @@ public class ExportSpectraListJMSAction extends AbstractRSMAction {
                 };
 
                 // used as out parameter for the service
-                final List<String>  _filePath = new ArrayList();;
+                final List<String>  _filePath = new ArrayList();
                 final List<String> _jmsNodeId = new ArrayList();
 
                 AbstractJMSCallback exportCallback = new AbstractJMSCallback() {

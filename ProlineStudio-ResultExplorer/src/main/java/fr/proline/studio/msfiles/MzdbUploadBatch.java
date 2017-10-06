@@ -20,7 +20,7 @@ import javax.swing.tree.TreePath;
  *
  * @author AK249877
  */
-public class MzdbUploadBatch implements Runnable, ConversionListener {
+public class MzdbUploadBatch implements Runnable, MsListener {
 
     private final ThreadPoolExecutor m_executor;
     private final HashMap<File, MzdbUploadSettings> m_uploads;
@@ -40,14 +40,10 @@ public class MzdbUploadBatch implements Runnable, ConversionListener {
         m_pathToExpand = pathToExpand;
     }
 
-    public TreePath getPathToExpand() {
-        return m_pathToExpand;
-    }
-
     public void upload(File f, MzdbUploadSettings uploadSettings) {
         if (f.getAbsolutePath().toLowerCase().endsWith(".mzdb")) {
             MzdbUploader uploader = new MzdbUploader(f, uploadSettings);
-            uploader.addUploadListener(this);
+            uploader.addMsListener(this);
             m_executor.execute(uploader);
         }
     }
@@ -82,7 +78,12 @@ public class MzdbUploadBatch implements Runnable, ConversionListener {
     }
 
     @Override
-    public void conversionPerformed(File f, Object settings, boolean success) {
+    public void conversionPerformed(File f, ConversionSettings settings, boolean success) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void uploadPerformed(File f, boolean success) {
         if (success) {
             m_successfulUploads++;
         } else {
@@ -90,7 +91,7 @@ public class MzdbUploadBatch implements Runnable, ConversionListener {
         }
 
         if ((m_successfulUploads + m_failedUploads) == m_uploads.size()) {
-            
+
             m_executor.shutdown();
             try {
                 m_executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
@@ -105,6 +106,16 @@ public class MzdbUploadBatch implements Runnable, ConversionListener {
             }
             MzdbFilesTopComponent.getExplorer().getTreeFileChooserPanel().updateTree();
         }
+    }
+
+    @Override
+    public void downloadPerformed(boolean success) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void exportPerformed(File f, boolean success) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
 }

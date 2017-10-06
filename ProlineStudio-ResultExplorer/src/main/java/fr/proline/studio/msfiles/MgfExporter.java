@@ -14,30 +14,24 @@ import java.io.File;
  *
  * @author AK249877
  */
-public class MgfExporter implements Runnable, WorkerInterface {
+public class MgfExporter implements Runnable {
 
-    private boolean m_run = false;
     private final File m_file;
-    private int m_state = WorkerInterface.ACTIVE_STATE;
-    private final StringBuilder m_logs;
-    private ConversionListener m_conversionListener;
+    private MsListener m_msListener;
 
     private final MgfExportSettings m_mgfExportSettings;
 
     public MgfExporter(File file, MgfExportSettings exportSettings) {
         m_file = file;
         m_mgfExportSettings = exportSettings;
-
-        m_logs = new StringBuilder();
     }
 
-    public void addConversionListener(ConversionListener conversionListener) {
-        m_conversionListener = conversionListener;
+    public void addMsListener(MsListener listener) {
+        m_msListener = listener;
     }
 
     @Override
     public void run() {
-        m_run = true;
 
             AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
 
@@ -49,56 +43,16 @@ public class MgfExporter implements Runnable, WorkerInterface {
                 @Override
                 public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
                     if (success) {
-
-                        if (m_state == WorkerInterface.ACTIVE_STATE) {
-                            m_state = WorkerInterface.FINISHED_STATE;
-
-                            m_conversionListener.conversionPerformed(m_file, m_mgfExportSettings, true);
-                        }
+                            m_msListener.exportPerformed(m_file, true);       
                     } else {
-                        terminate();
+                        m_msListener.exportPerformed(m_file, false);
                     }
                 }
 
             };
 
-            MgfExportTask task = new MgfExportTask(callback, m_file, m_logs, m_mgfExportSettings);
+            MgfExportTask task = new MgfExportTask(callback, m_file, m_mgfExportSettings);
             AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
-
-            m_logs.append("Exporting .mgf for " + m_file.getAbsolutePath() + " has come to its end.\n\n");
-            m_run = false;
-    }
-
-    @Override
-    public void terminate() {
-        m_run = false;
-        m_state = WorkerInterface.KILLED_STATE;
-        m_conversionListener.conversionPerformed(m_file, m_mgfExportSettings, false);
-    }
-
-    @Override
-    public boolean isAlive() {
-        return m_run;
-    }
-
-    @Override
-    public int getState() {
-        return m_state;
-    }
-
-    @Override
-    public File getFile() {
-        return m_file;
-    }
-
-    @Override
-    public int getWorkerType() {
-        return WorkerInterface.CONVERTER_TYPE;
-    }
-
-    @Override
-    public StringBuilder getLogs() {
-        return m_logs;
     }
 
 }

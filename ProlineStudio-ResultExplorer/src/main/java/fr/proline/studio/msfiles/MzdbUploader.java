@@ -15,42 +15,24 @@ import java.util.logging.Level;
  *
  * @author AK249877
  */
-public class MzdbUploader implements Runnable, WorkerInterface {
+public class MzdbUploader implements Runnable {
 
-    private boolean m_run = false;
     private final File m_file;
-    private static int m_state = WorkerInterface.ACTIVE_STATE;
-    private final StringBuilder m_logs;
-    private ConversionListener m_uploadListener;
+    private MsListener m_msListener;
 
     private final MzdbUploadSettings m_uploadSettings;
 
     public MzdbUploader(File file, MzdbUploadSettings uploadSettings) {
         m_file = file;
         m_uploadSettings = uploadSettings;
-        m_logs = new StringBuilder();
     }
 
-    public void addUploadListener(ConversionListener listener) {
-        m_uploadListener = listener;
-    }
-
-    @Override
-    public void terminate() {
-        m_run = false;
-        m_state = WorkerInterface.KILLED_STATE;
-    }
-
-    @Override
-    public boolean isAlive() {
-        return m_run;
+    public void addMsListener(MsListener listener) {
+        m_msListener = listener;
     }
 
     @Override
     public void run() {
-        this.m_run = true;
-
-        this.m_state = WorkerInterface.ACTIVE_STATE;
 
         this.checkFileFinalization();
 
@@ -67,11 +49,9 @@ public class MzdbUploader implements Runnable, WorkerInterface {
             public void run(boolean success) {
 
                 if (success) {
-                    if (m_state == WorkerInterface.ACTIVE_STATE) {
-                        m_state = WorkerInterface.FINISHED_STATE;
                         
-                        if(m_uploadListener!=null && m_file.exists()){
-                            m_uploadListener.conversionPerformed(m_file, m_uploadSettings, true);
+                        if(m_msListener!=null && m_file.exists()){
+                            m_msListener.uploadPerformed(m_file, true);
                         }
 
                         if (m_uploadSettings.getDeleteMzdb()) {
@@ -91,11 +71,10 @@ public class MzdbUploader implements Runnable, WorkerInterface {
                             FileUtility.deleteFile(m_file);
                         }
 
-                    }
+                    
                 } else {
-                    terminate();
-                    if (m_uploadListener != null) {
-                        m_uploadListener.conversionPerformed(m_file, m_uploadSettings, false);
+                    if (m_msListener != null) {
+                        m_msListener.uploadPerformed(m_file, false);
                     }
                 }
             }
@@ -107,17 +86,10 @@ public class MzdbUploader implements Runnable, WorkerInterface {
 
         AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
 
-        m_run = false;
-
     }
 
     public File getFile() {
         return m_file;
-    }
-
-    @Override
-    public int getState() {
-        return m_state;
     }
 
     private void checkFileFinalization() {
@@ -129,15 +101,5 @@ public class MzdbUploader implements Runnable, WorkerInterface {
             java.util.logging.Logger.getLogger(MzdbUploader.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-
-    @Override
-    public int getWorkerType() {
-        return WorkerInterface.UPLOADER_TYPE;
-    }
-
-    @Override
-    public StringBuilder getLogs() {
-        return m_logs;
-    }
-
+    
 }

@@ -57,7 +57,7 @@ public class PeptideRenderer extends DefaultTableCellRenderer implements Grayabl
         String textToExport;
         
         Peptide peptide = peptideMatch.getPeptide();
-        if (peptide.getTransientData() != null) {
+        if ((peptide!=null) && (peptide.getTransientData() != null)) {
 
             HashMap<Integer, DPeptidePTM> ptmMap = peptide.getTransientData().getDPeptidePtmMap();
             if (ptmMap != null) {

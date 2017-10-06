@@ -241,7 +241,6 @@ class ConfigurableMergeAction extends AbstractRSMAction {
     public void updateEnabled(AbstractNode[] selectedNodes) {
 
         Preferences preferences = NbPreferences.root();
-        Boolean showHiddenFunctionnality =  preferences.getBoolean("Profi", false);
         
         // to execute this action, the user must be the owner of the project
         Project selectedProject = ProjectExplorerPanel.getProjectExplorerPanel().getSelectedProject();
@@ -310,7 +309,7 @@ class ConfigurableMergeAction extends AbstractRSMAction {
             }
         }
 
-        setEnabled(m_configuration.equals(MergeTask.Config.AGGREGATION) || showHiddenFunctionnality );
+        setEnabled(true );
     }
     
 }

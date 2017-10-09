@@ -31,12 +31,12 @@ public class SetList {
     private HashMap<Integer, Color> m_colorMap = new HashMap<>();
     
         public static final Color[] DEFAULT_BASE_PALETTE = {
-        new Color(206, 90, 73),
-        new Color(255, 193, 66),
-        new Color(243, 118, 133),
-        new Color(66, 193, 255),
-        new Color(50, 192, 142),
-        new Color(255, 66, 193)
+        new Color(252, 180, 46),
+        new Color(105, 203, 212),
+        new Color(236, 33, 123),
+        new Color(18, 168, 157),
+        new Color(158, 31, 98),
+        new Color(91, 131, 192)
     };
     
     public SetList() {

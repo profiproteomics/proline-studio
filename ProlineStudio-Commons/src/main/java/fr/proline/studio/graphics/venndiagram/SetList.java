@@ -2,7 +2,6 @@ package fr.proline.studio.graphics.venndiagram;
 
 import fr.proline.studio.utils.CyclicColorPalette;
 import java.awt.Color;
-import java.awt.Rectangle;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -305,8 +304,6 @@ public class SetList {
             if (intersectionList !=null) {
                 intersectionFound = true;
                 for (IntersectArea a : intersectionList) {
-                    Rectangle r = a.getArea().getBounds();
-                    double surface = r.width*r.height;
                     resultListModified.add(a);
                 }
             } else {

@@ -38,7 +38,7 @@ public class Set implements Comparable<Set> {
     }
     
     public String getDisplayName() {
-        return "Set"+m_id+": "+m_name+" : "+m_size;
+        return "Set"+(m_id+1)+": "+m_name+" : "+m_size;
     }
     
     public Circle getCircle() {

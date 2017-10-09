@@ -21,6 +21,7 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.awt.geom.Path2D;
 import java.util.ArrayList;
+import java.util.HashMap;
 import javax.swing.JSlider;
 import javax.swing.JSpinner;
 
@@ -171,7 +172,7 @@ public class PlotVennDiagram extends PlotMultiDataAbstract {
                 double percentageX = 60d/width;
                 double percentageY = 1-((30d*labelIndex)/height);
                 
-                LabelMarker marker = new LabelMarker(m_plotPanel, new PercentageCoordinates(percentageX, percentageY), intersectArea.getDisplayName() , LabelMarker.ORIENTATION_XY_MIDDLE, LabelMarker.ORIENTATION_XY_MIDDLE, m_colorAreaParameterList.get(areaIndex).getColor());
+                LabelMarker marker = new LabelMarker(m_plotPanel, new PercentageCoordinates(percentageX, percentageY), intersectArea.getDisplayName(this) , LabelMarker.ORIENTATION_XY_MIDDLE, LabelMarker.ORIENTATION_XY_MIDDLE, m_colorAreaParameterList.get(areaIndex).getColor());
                 addMarker(marker);
 
                 areaIndex++;
@@ -305,7 +306,7 @@ public class PlotVennDiagram extends PlotMultiDataAbstract {
                 }
                 
             }
-            Set s = new Set(m_compareDataInterface.getDataColumnIdentifier(colId), nbValues, (i+1));
+            Set s = new Set(m_compareDataInterface.getDataColumnIdentifier(colId), nbValues, i);
             m_setList.addSet(s);
             
         }
@@ -340,6 +341,7 @@ public class PlotVennDiagram extends PlotMultiDataAbstract {
             }
         }
 
+        allIntersections();
         
         m_setList.approximateSolution();
         m_setList.optimizeSolution();
@@ -354,6 +356,60 @@ public class PlotVennDiagram extends PlotMultiDataAbstract {
         
     }
 
+    
+    public int getIntersectionSize(Set[] setArray) {
+        int intersectionOfSetsId = 0;
+        for (Set s : setArray) {
+            intersectionOfSetsId += (int) Math.round(Math.pow(2,s.getId()));
+        }
+        
+        return m_allIntersections.get(intersectionOfSetsId);
+    }
+    public void allIntersections() {
+        
+        final double EPSILON = 1e-15;
+        
+        int nbRows = m_compareDataInterface.getRowCount();
+        
+        m_allIntersections.clear();
+        
+        ArrayList<Set> setList = m_setList.getList();
+        int nb = setList.size();
+        int powNb = (int) Math.round(Math.pow(2, nb));
+        
+        for (int intersectionOfSetsId = 1; intersectionOfSetsId < powNb; intersectionOfSetsId++) {
+            
+            int nbValues = 0;
+            for (int i = 0; i < nbRows; i++) {
+                
+                boolean valuesFound = true;
+                for (int setId = 0; setId < nb; setId++) {
+                    int pow = (int) Math.round(Math.pow(2, setId));
+                    if ((pow & intersectionOfSetsId) > 0) {
+                        int colId = m_cols[setId];
+                        Number value = (Number) m_compareDataInterface.getDataValueAt(i, colId);
+                        if (value != null) {
+                            double d2 = value.doubleValue();
+                            if ((Double.isNaN(d2)) || (Math.abs(d2) <= EPSILON)) {
+                                valuesFound = false;
+                                break;
+                            }
+                        } else {
+                            valuesFound = false;
+                            break;
+                        }
+                    }
+                }
+                if (valuesFound) {
+                    nbValues++;
+                }
+            }
+            m_allIntersections.put(intersectionOfSetsId, nbValues);
+            
+        }
+    }
+    private HashMap<Integer, Integer> m_allIntersections = new HashMap();
+    
     @Override
     public boolean select(double x, double y, boolean append) {
         return false;

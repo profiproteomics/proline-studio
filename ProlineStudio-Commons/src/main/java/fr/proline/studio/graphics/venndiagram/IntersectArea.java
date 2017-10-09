@@ -1,5 +1,6 @@
 package fr.proline.studio.graphics.venndiagram;
 
+import fr.proline.studio.graphics.PlotVennDiagram;
 import java.awt.geom.Area;
 import java.awt.geom.Ellipse2D;
 import java.util.ArrayList;
@@ -38,7 +39,7 @@ public class IntersectArea implements Comparable<IntersectArea> {
     }
     
     
-    public String getDisplayName() {
+    public String getDisplayName(PlotVennDiagram vennDiagram) {
         if (m_displayName != null) {
             return m_displayName;
         }
@@ -48,16 +49,17 @@ public class IntersectArea implements Comparable<IntersectArea> {
             
             StringBuilder sb = new StringBuilder();
             
-            Set setArray[] = new Set[m_setIntersectedMap.size()];
+            Set[] setArray = new Set[m_setIntersectedMap.size()];
             setArray = m_setIntersectedMap.toArray(setArray);
             Arrays.sort(setArray, getSpectificSetComparator());
             for (int i = 0; i < setArray.length; i++) {
-                sb.append("Set").append(setArray[i].getId());
+                sb.append("Set").append((setArray[i].getId()+1));
                 if (i < setArray.length-1) {
                     sb.append(String.valueOf("\u2229")); // intersection character
                 }
-                //sb.append(": ");
             }
+            sb.append(": ");
+            sb.append(vennDiagram.getIntersectionSize(setArray));
             
             m_displayName = sb.toString();
         }

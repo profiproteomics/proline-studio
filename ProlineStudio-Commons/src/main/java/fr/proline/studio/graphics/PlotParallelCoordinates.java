@@ -358,6 +358,9 @@ public class PlotParallelCoordinates extends PlotMultiDataAbstract {
 
     @Override
     public boolean select(double x, double y, boolean append) {
+        if (m_mainSelectedAxisIndex == -1) {
+            return false;
+        }
         ParallelCoordinatesAxis selectedAxis = m_axisList.get(m_mainSelectedAxisIndex);
         m_mainSelectedAxisIndex = -1;
         selectAxis(selectedAxis, false);

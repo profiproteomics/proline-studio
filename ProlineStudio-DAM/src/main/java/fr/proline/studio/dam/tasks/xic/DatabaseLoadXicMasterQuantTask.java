@@ -1465,39 +1465,46 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                 + "WHERE pm.id=:pmId";
         TypedQuery<DProteinMatch> proteinMatchQuery = entityManagerMSI.createQuery(queryProteinMatch, DProteinMatch.class);
 
-        String queryCountNbPep = "SELECT count(pi.id) , pepSet.peptideCount "
-                + "FROM fr.proline.core.orm.msi.PeptideSet pepSet JOIN pepSet.peptideSetPeptideInstanceItems pspi JOIN pspi.peptideInstance pi "
+        // Get nbr Peptide quantified and nbr total peptide (identified)
+        String queryStrCountNbPepAndQuantPep = "SELECT count(pi.id) , pepSet.peptideCount "
+                + "FROM fr.proline.core.orm.msi.PeptideSet pepSet JOIN pepSet.peptideSetPeptideInstanceItems pspi JOIN pspi.peptideInstance pi, fr.proline.core.orm.msi.MasterQuantComponent mqc "
                 + "WHERE pepSet.resultSummaryId=:rsmId AND pepSet.proteinSet.id=:proteinSetId AND "
-                + "pi.masterQuantComponentId IS NOT NULL "
+                + "pi.masterQuantComponentId IS NOT NULL AND "
+                + "mqc.id = pi.masterQuantComponentId AND "
+                + "mqc.selectionLevel > 1"
                 + "GROUP BY pepSet.peptideCount ";
-        String queryCountNbPepCount = "SELECT  pepSet.peptideCount "
+        Query queryCountPepAndQuantPep = entityManagerMSI.createQuery(queryStrCountNbPepAndQuantPep);
+        
+        // Get nbr total peptide (identified). Use when no peptide quantified -> NO pi.masterQuantComponentId
+        String queryStrCountNbPep = "SELECT  pepSet.peptideCount "
                 + "FROM fr.proline.core.orm.msi.PeptideSet pepSet "
                 + "WHERE pepSet.resultSummaryId=:rsmId AND pepSet.proteinSet.id=:proteinSetId  ";
-        Query queryCountPep = entityManagerMSI.createQuery(queryCountNbPep);
-        Query queryCountPepCount = entityManagerMSI.createQuery(queryCountNbPepCount);
+        Query queryCountPep = entityManagerMSI.createQuery(queryStrCountNbPep);
         
-        String queryPepNumber = "SELECT ps.peptideCount, pspmm.proteinMatch.id "
+        String queryStrPepCountByProtMatch = "SELECT ps.peptideCount, pspmm.proteinMatch.id "
                     + "FROM PeptideSetProteinMatchMap pspmm, PeptideSet ps " +
                 "WHERE  pspmm.resultSummary.id=:rsmId  AND ps.id = pspmm.peptideSet.id ";
-        Query queryPepNumberQ = entityManagerMSI.createQuery(queryPepNumber);
-        String queryStatus = "SELECT ps.id, pspmi.proteinMatch.id, pspmi.isInSubset, ps.representativeProteinMatchId, ps.isValidated "
+        Query queryPepCountByProtMatch = entityManagerMSI.createQuery(queryStrPepCountByProtMatch);
+        String queryStrProtSetStatus = "SELECT ps.id, pspmi.proteinMatch.id, pspmi.isInSubset, ps.representativeProteinMatchId, ps.isValidated "
                 + "FROM ProteinSetProteinMatchItem pspmi, ProteinSet ps " +
                 " WHERE ps.id = pspmi.proteinSet.id " +
                 " AND pspmi.resultSummary.id=:rsmId ";
-        Query queryStatusQ = entityManagerMSI.createQuery(queryStatus);
+        Query queryProtSetStatus = entityManagerMSI.createQuery(queryStrProtSetStatus);
         List<DQuantitationChannel> listQC = new ArrayList();
         Map<Long, Map<Long, String>> protMatchStatusByIdByQcId = new HashMap();
         Map<Long, Map<Long, Integer>> protMatchPepNumberByIdByQcId = new HashMap();
+        
+        //Get ProtMatches PepCount and Status in all Quant Channels RSMs
         if (m_dataset != null && m_dataset.getMasterQuantitationChannels() != null && !m_dataset.getMasterQuantitationChannels().isEmpty()){
             listQC = m_dataset.getMasterQuantitationChannels().get(0).getQuantitationChannels();
             for (DQuantitationChannel qch : listQC) {
                 Long identQCRsmId = qch.getIdentResultSummaryId();
                 Map<Long, String> statusByProtMatchId = new HashMap();
                 Map<Long, Integer> pepNumberByProtMatchId = new HashMap();
-                queryStatusQ.setParameter("rsmId", identQCRsmId);
-                queryPepNumberQ.setParameter("rsmId", identQCRsmId);
-                List rStatus = queryStatusQ.getResultList();
-                List rPepNumber = queryPepNumberQ.getResultList();
+                queryProtSetStatus.setParameter("rsmId", identQCRsmId);
+                queryPepCountByProtMatch.setParameter("rsmId", identQCRsmId);
+                List rStatus = queryProtSetStatus.getResultList();
+                List rPepNumber = queryPepCountByProtMatch.getResultList();
                 for (Object resSt : rStatus) {
                     Object[] res = (Object[]) resSt;
                     Long proteinMatchId = (Long)res[1];
@@ -1528,6 +1535,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
             }
         }
        
+        //Get DMasterQuantProteinSet info and associated DQuantProteinSet for each Quant Channel
         for (DMasterQuantProteinSet masterQuantProteinSet : listResult) {
             proteinSetQuery.setParameter("psId", masterQuantProteinSet.getProteinSetId());
             DProteinSet dProteinSet = proteinSetQuery.getSingleResult();
@@ -1552,22 +1560,23 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
             masterQuantProteinSet.setQuantProteinSetByQchIds(quantProteinSetByQchIds);
             masterQuantProteinSet.setProteinSet(dProteinSet);
             // nb PeptideInstance and nbPeptide quantified
-            // nb PeptideInstance and nbPeptide quantified
 
-            queryCountPep.setParameter("rsmId", masterQuantProteinSet.getQuantResultSummaryId());
-            queryCountPep.setParameter("proteinSetId", masterQuantProteinSet.getProteinSetId());
+            queryCountPepAndQuantPep.setParameter("rsmId", masterQuantProteinSet.getQuantResultSummaryId());
+            queryCountPepAndQuantPep.setParameter("proteinSetId", masterQuantProteinSet.getProteinSetId());
             int nbPep = 0;
             int nbPepQuant = 0;
-            List resultList = queryCountPep.getResultList();
+            List resultList = queryCountPepAndQuantPep.getResultList();
             if (!resultList.isEmpty()) {
                 Object[] nb = (Object[]) resultList.get(0);
-                nbPep = ((Integer) nb[1]).intValue();
+                nbPep = (Integer) nb[1];
                 nbPepQuant = ((Long) nb[0]).intValue();
-            }
-            if (nbPepQuant == 0) {
-                queryCountPepCount.setParameter("rsmId", masterQuantProteinSet.getQuantResultSummaryId());
-                queryCountPepCount.setParameter("proteinSetId", masterQuantProteinSet.getProteinSetId());
-                List rl = queryCountPepCount.getResultList();
+            } 
+                        
+            //If queryCountPepAndQuantPep return an empty result (or empty nbPep ?! not sure it's possible)
+            if (nbPep == 0) {
+                queryCountPep.setParameter("rsmId", masterQuantProteinSet.getQuantResultSummaryId());
+                queryCountPep.setParameter("proteinSetId", masterQuantProteinSet.getProteinSetId());
+                List rl = queryCountPep.getResultList();
                 if (!rl.isEmpty()) {
                     nbPep = (Integer) rl.get(0);
                 }
@@ -1575,8 +1584,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
             masterQuantProteinSet.setNbPeptides(nbPep);
             masterQuantProteinSet.setNbQuantifiedPeptides(nbPepQuant);
             
-            // load status and peptideNumber by QcId
-            
+            // load status and peptideNumber by QcId            
             Map<Long, String> quantStatusByQchIds = new HashMap();
             Map<Long, Integer> quantPeptideNumberByQchIds = new HashMap();
             for (DQuantitationChannel qch : listQC) {
@@ -1616,7 +1624,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
             }
             m_masterQuantProteinSetList.set(index, masterQuantProteinSet);
         }
-        return true;
+            return true;
     }
 
     /**

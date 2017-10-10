@@ -146,6 +146,10 @@ public class ParameterList extends ArrayList<AbstractParameter> {
         return m_parametersPanel;
     }
 
+    public void resetPanel() {
+        m_parametersPanel = null;
+    }
+    
     public JLabel getAssociatedLabel(JComponent c) {
         return m_associatedLabels.get(c);
     }

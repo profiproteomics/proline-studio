@@ -27,17 +27,17 @@ public class SetList {
     
     private int m_scaleX = -1;
     private int m_scaleY = -1;
-    
-    private HashMap<Integer, Color> m_colorMap = new HashMap<>();
-    
-        public static final Color[] DEFAULT_BASE_PALETTE = {
+
+        /*public static final Color[] DEFAULT_BASE_PALETTE = {
         new Color(252, 180, 46),
         new Color(105, 203, 212),
         new Color(236, 33, 123),
         new Color(18, 168, 157),
         new Color(158, 31, 98),
         new Color(91, 131, 192)
-    };
+    };*/
+        
+
     
     public SetList() {
         
@@ -46,18 +46,9 @@ public class SetList {
     public ArrayList<Set> getList() {
         return m_setArrayList;
     }
-    
-    
-    public Color getColor(int colorIndex) {
 
-        Color c = m_colorMap.get(colorIndex);
-        if (c != null) {
-            return c;
-        }
-        
-        return CyclicColorPalette.getColor(colorIndex, DEFAULT_BASE_PALETTE);
-        
-    }
+    
+
     
     /*public static void test() {
         SetList setList = new SetList();

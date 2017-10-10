@@ -1,6 +1,8 @@
 package fr.proline.studio.graphics.venndiagram;
 
 import fr.proline.studio.graphics.PlotVennDiagram;
+import fr.proline.studio.utils.CyclicColorPalette;
+import java.awt.Color;
 import java.awt.geom.Area;
 import java.awt.geom.Ellipse2D;
 import java.util.ArrayList;
@@ -21,8 +23,62 @@ public class IntersectArea implements Comparable<IntersectArea> {
     
     private String m_displayName = null;
     
+    private static final Color[] DEFAULT_BASE_PALETTE = {
+        new Color(252, 180, 46), // orange
+        new Color(0, 147, 221), // cyan
+        new Color(221, 18, 123), // magenta
+         new Color(10, 255, 43), // green
+        new Color(42, 23, 234), // blue
+        new Color(225, 43, 10) // red
+    };
+    
     public IntersectArea(Area a) {
         m_intersectionArea = a;
+    }
+    
+    public Color getColor() {
+        if (hasOneSet()) {
+            return CyclicColorPalette.getColor(getOnlySet().getId(), DEFAULT_BASE_PALETTE);
+        }
+        
+        int nb = m_setIntersectedMap.size();
+        Color[] colors = new Color[nb];
+        int index = 0;
+        for (Set s : m_setIntersectedMap) {
+            colors[index] = CyclicColorPalette.getColor(s.getId(), DEFAULT_BASE_PALETTE);
+            index++;
+        }
+        
+        Color c =  blend(colors);
+        
+        for (int i=0;i<nb;i++) {
+            c = c.darker();
+        }
+        
+        return c;
+    }
+    
+    private Color blend(Color[] colors) {
+
+        int nb = colors.length;
+        float[] hsv = new float[3];
+        for (int i = 0; i < 3; i++) {
+            hsv[i] = 0;
+        }
+
+        float[] hsvTemp = new float[3];
+        for (Color c : colors) {
+            Color.RGBtoHSB(c.getRed(), c.getGreen(), c.getBlue(), hsvTemp);
+            for (int i = 0; i < 3; i++) {
+                hsv[i] += hsvTemp[i];
+            }
+        }
+
+        for (int i = 0; i < 3; i++) {
+            hsv[i] /= nb;
+        }
+
+        return new Color(Color.HSBtoRGB(hsv[0], hsv[1], hsv[2]));
     }
     
     public boolean isPotentialIntersect(IntersectArea intersectArea) {

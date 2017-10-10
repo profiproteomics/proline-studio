@@ -137,7 +137,15 @@ public class PlotVennDiagram extends PlotMultiDataAbstract {
         int height = m_plotPanel.getHeight();
 
 
+        /*g2d.setColor(new Color(0,0,255));
+        g2d.fillRect(0,0,width, height);
         
+        g2d.setColor(new Color(255,255,0,128));
+        g2d.fillRect(0,0,width/2, height);
+        
+        
+        g2d.setColor(blend(new Color(0,0,255), new Color(255,255,0)));
+        g2d.fillRect(width/2,0,width/2, height);*/
         
         boolean scaled = m_setList.scale(width, height, 10);
 
@@ -455,12 +463,14 @@ public class PlotVennDiagram extends PlotMultiDataAbstract {
 
             int index = 1;
             for (IntersectArea intersectArea : m_setList.getGeneratedAreas()) {
-                ColorParameter param = new ColorParameter("COLOR_AREA_VENNDIAGRAM" + index, "Color " + index, m_setList.getColor((index-1)));
+                ColorParameter param = new ColorParameter("COLOR_AREA_VENNDIAGRAM" + index, "Color " + index, intersectArea.getColor());
                 param.setExternalActionListener(repaintAction);
                 m_colorAreaParameterList.add(param);
                 m_colorParameterList.add(param);
                 index++;
             }
+            
+            m_colorParameterList.resetPanel();
         }
         
         m_currentAreaColorList.clear();
@@ -562,5 +572,5 @@ public class PlotVennDiagram extends PlotMultiDataAbstract {
     }
 
 
-    
+
 }

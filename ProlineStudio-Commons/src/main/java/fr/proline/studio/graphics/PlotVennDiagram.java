@@ -352,6 +352,7 @@ public class PlotVennDiagram extends PlotMultiDataAbstract {
         
         firstPaint = true;
         
+        m_plotPanel.forceUpdateDoubleBuffer();
         m_plotPanel.repaint();
         
     }

@@ -143,7 +143,7 @@ public class TreeStateUtil {
 
         Enumeration totalNodes = root.preorderEnumeration();
 
-        while (totalNodes.hasMoreElements()) {
+        while (totalNodes.hasMoreElements() && !previouslyExpandedPaths.isEmpty()) {
 
             DefaultMutableTreeNode currentNode = (DefaultMutableTreeNode) totalNodes.nextElement();
             TreePath tp = new TreePath(currentNode.getPath());

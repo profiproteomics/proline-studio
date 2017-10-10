@@ -288,6 +288,10 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
         TreeStateUtil.setExpansionState(TreeStateUtil.loadExpansionState(TreeStateUtil.TreeType.LOCAL, m_rootsComboBox.getSelectedItem().toString()), m_tree, (DefaultMutableTreeNode) m_tree.getModel().getRoot(), TreeStateUtil.TreeType.LOCAL, m_rootsComboBox.getSelectedItem().toString());
 
     }
+    
+    public void expandTreePath(TreePath path) {
+        m_tree.expandPath(path);
+    }
 
     public void expandMultipleTreePath(HashSet<String> directories) {
 

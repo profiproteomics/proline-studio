@@ -13,7 +13,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 import javax.swing.tree.TreePath;
 
 /**
@@ -25,14 +24,10 @@ public class MzdbUploadBatch implements Runnable, MsListener {
     private final ThreadPoolExecutor m_executor;
     private final HashMap<File, MzdbUploadSettings> m_uploads;
     private TreePath m_pathToExpand;
-    private int m_successfulUploads, m_failedUploads;
-    private HashSet<String> m_directories;
 
     public MzdbUploadBatch(HashMap<File, MzdbUploadSettings> uploads) {
         m_uploads = uploads;
         m_executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(5);
-        m_successfulUploads = 0;
-        m_failedUploads = 0;
     }
 
     public MzdbUploadBatch(HashMap<File, MzdbUploadSettings> uploads, TreePath pathToExpand) {
@@ -51,16 +46,12 @@ public class MzdbUploadBatch implements Runnable, MsListener {
     @Override
     public void run() {
 
-        m_directories = new HashSet<String>();
-
-        Iterator it = m_uploads.entrySet().iterator();
-        while (it.hasNext()) {
-            Map.Entry pair = (Map.Entry) it.next();
-
-            File f = (File) pair.getKey();
-            MzdbUploadSettings settings = (MzdbUploadSettings) pair.getValue();
-
-            if (m_pathToExpand == null) {
+        if (m_pathToExpand == null) {
+            HashSet<String> m_directories = new HashSet<String>();
+            Iterator it = m_uploads.entrySet().iterator();
+            while (it.hasNext()) {
+                Map.Entry pair = (Map.Entry) it.next();
+                MzdbUploadSettings settings = (MzdbUploadSettings) pair.getValue();
 
                 if (!settings.getDestination().equalsIgnoreCase("")) {
                     if (settings.getDestination().startsWith(File.separator)) {
@@ -69,10 +60,16 @@ public class MzdbUploadBatch implements Runnable, MsListener {
                         m_directories.add(settings.getDestination());
                     }
                 }
-
             }
+            MzdbFilesTopComponent.getExplorer().getTreeFileChooserPanel().expandMultipleTreePath(m_directories, m_uploads.entrySet().iterator().next().getValue().getMountingPointPath());
+        } else {
+            MzdbFilesTopComponent.getExplorer().getTreeFileChooserPanel().expandTreePath(m_pathToExpand);
+        }
 
-            upload(f, settings);
+        Iterator it = m_uploads.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry pair = (Map.Entry) it.next();
+            upload((File) pair.getKey(), (MzdbUploadSettings) pair.getValue());
         }
 
     }
@@ -85,25 +82,6 @@ public class MzdbUploadBatch implements Runnable, MsListener {
     @Override
     public void uploadPerformed(File f, boolean success) {
         if (success) {
-            m_successfulUploads++;
-        } else {
-            m_failedUploads++;
-        }
-
-        if ((m_successfulUploads + m_failedUploads) == m_uploads.size()) {
-
-            m_executor.shutdown();
-            try {
-                m_executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
-            } catch (InterruptedException e) {
-                ;
-            }
-
-            if (m_pathToExpand != null) {
-                MzdbFilesTopComponent.getExplorer().getTreeFileChooserPanel().expandTreePath(m_pathToExpand);
-            } else {
-                MzdbFilesTopComponent.getExplorer().getTreeFileChooserPanel().expandMultipleTreePath(m_directories, m_uploads.entrySet().iterator().next().getValue().getMountLabel());
-            }
             MzdbFilesTopComponent.getExplorer().getTreeFileChooserPanel().updateTree();
         }
     }

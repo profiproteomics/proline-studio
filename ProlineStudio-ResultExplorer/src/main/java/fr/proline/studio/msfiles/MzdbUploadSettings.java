@@ -25,7 +25,7 @@ public class MzdbUploadSettings {
         return m_deleteMzdb;
     }
     
-    public String getMountLabel(){
+    public String getMountingPointPath(){
         return m_mountLabel;
     }
     

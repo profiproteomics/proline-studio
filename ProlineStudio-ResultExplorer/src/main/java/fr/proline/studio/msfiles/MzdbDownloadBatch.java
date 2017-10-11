@@ -55,7 +55,6 @@ public class MzdbDownloadBatch implements Runnable {
                 public void run(boolean success) {
 
                     if (success) {
-                        MzdbFilesTopComponent.getExplorer().getLocalFileSystemView().expandTreePath(m_pathToExpand);
                         MzdbFilesTopComponent.getExplorer().getLocalFileSystemView().updateTree();
                     }
                 }
@@ -70,6 +69,7 @@ public class MzdbDownloadBatch implements Runnable {
 
     @Override
     public void run() {
+        MzdbFilesTopComponent.getExplorer().getLocalFileSystemView().expandTreePath(m_pathToExpand);
         for (int i = 0; i < m_files.size(); i++) {
             download(m_files.get(i));
         }

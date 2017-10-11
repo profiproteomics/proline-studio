@@ -25,13 +25,9 @@ public class ConvertionUploadBatch implements Runnable, MsListener {
     private ThreadPoolExecutor m_conversionExecutor, m_uploadExecutor;
     private HashMap<File, ConversionSettings> m_conversions;
     private TreePath m_pathToExpand;
-    private int m_uploadCounter, m_failedConversions;
-    private HashSet<String> m_parentDirectories;
 
     public ConvertionUploadBatch(HashMap<File, ConversionSettings> conversions) {
         m_conversions = conversions;
-        m_uploadCounter = 0;
-        m_failedConversions = 0;
         m_conversionExecutor = (ThreadPoolExecutor) Executors.newFixedThreadPool(1);
         m_uploadExecutor = (ThreadPoolExecutor) Executors.newFixedThreadPool(5);
     }
@@ -43,10 +39,11 @@ public class ConvertionUploadBatch implements Runnable, MsListener {
 
     private void upload(File f, MzdbUploadSettings uploadSettings) {
         if (f.getAbsolutePath().toLowerCase().endsWith(".mzdb")) {
-            if (uploadSettings.getMountLabel() == null) {
+            if (uploadSettings.getMountingPointPath() == null) {
                 return;
             }
             MzdbUploader uploader = new MzdbUploader(f, uploadSettings);
+            uploader.addMsListener(this);
             m_uploadExecutor.execute(uploader);
         }
     }
@@ -62,16 +59,13 @@ public class ConvertionUploadBatch implements Runnable, MsListener {
     @Override
     public void run() {
 
-        m_parentDirectories = new HashSet<String>();
+        HashSet<String> m_parentDirectories = new HashSet<String>();
 
-        Iterator it = m_conversions.entrySet().iterator();
-        while (it.hasNext()) {
-            Map.Entry pair = (Map.Entry) it.next();
-
-            File f = (File) pair.getKey();
-            ConversionSettings settings = (ConversionSettings) pair.getValue();
-
-            if (m_pathToExpand == null) {
+        if (m_pathToExpand == null) {
+            Iterator it = m_conversions.entrySet().iterator();
+            while (it.hasNext()) {
+                Map.Entry pair = (Map.Entry) it.next();
+                ConversionSettings settings = (ConversionSettings) pair.getValue();
 
                 if (settings.getUploadSettings() != null && !settings.getUploadSettings().getDestination().equalsIgnoreCase("")) {
                     if (settings.getUploadSettings().getDestination().startsWith(File.separator)) {
@@ -80,17 +74,18 @@ public class ConvertionUploadBatch implements Runnable, MsListener {
                         m_parentDirectories.add(settings.getUploadSettings().getDestination());
                     }
                 }
-
             }
-
-            convert(f, settings);
+            MzdbFilesTopComponent.getExplorer().getTreeFileChooserPanel().expandMultipleTreePath(m_parentDirectories, m_conversions.values().iterator().next().getUploadSettings().getMountingPointPath());
+        } else {
+            MzdbFilesTopComponent.getExplorer().getTreeFileChooserPanel().expandTreePath(m_pathToExpand);
         }
 
-        m_conversionExecutor.shutdown();
-        try {
-            m_conversionExecutor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
-        } catch (InterruptedException e) {
-            ;
+        MzdbFilesTopComponent.getExplorer().getTreeFileChooserPanel().updateTree();
+
+        Iterator it = m_conversions.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry pair = (Map.Entry) it.next();
+            convert((File) pair.getKey(), (ConversionSettings) pair.getValue());
         }
 
     }
@@ -99,48 +94,35 @@ public class ConvertionUploadBatch implements Runnable, MsListener {
     public void conversionPerformed(File f, ConversionSettings conversionSettings, boolean success) {
         if (success) {
             if (conversionSettings != null && conversionSettings.getUploadSettings() != null) {
+                MzdbFilesTopComponent.getExplorer().getLocalFileSystemView().updateTree();
                 upload(f, conversionSettings.getUploadSettings());
-                m_uploadCounter++;
             }
-        } else {
-            m_failedConversions++;
         }
 
-        if (f.getAbsolutePath().toLowerCase().endsWith(".mzdb")) {
+        /*
+         if (f.getAbsolutePath().toLowerCase().endsWith(".mzdb")) {
 
-            HashSet<String> directories = new HashSet<String>();
+         HashSet<String> directories = new HashSet<String>();
 
-            File outputDirectory = new File(conversionSettings.getOutputPath());
+         File outputDirectory = new File(conversionSettings.getOutputPath());
 
-            while (outputDirectory.getParentFile() != null) {
-                directories.add(outputDirectory.getAbsolutePath());
-                outputDirectory = outputDirectory.getParentFile();
-            }
+         while (outputDirectory.getParentFile() != null) {
+         directories.add(outputDirectory.getAbsolutePath());
+         outputDirectory = outputDirectory.getParentFile();
+         }
 
-            MzdbFilesTopComponent.getExplorer().getLocalFileSystemView().expandMultipleTreePath(directories);
-            MzdbFilesTopComponent.getExplorer().getLocalFileSystemView().updateTree();
+         MzdbFilesTopComponent.getExplorer().getLocalFileSystemView().expandMultipleTreePath(directories);
+         MzdbFilesTopComponent.getExplorer().getLocalFileSystemView().updateTree();
 
-        }
-
-        if ((m_uploadCounter + m_failedConversions) == m_conversions.size()) {
-            m_uploadExecutor.shutdown();
-            try {
-                m_uploadExecutor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
-            } catch (InterruptedException e) {
-                ;
-            }
-            if (m_pathToExpand != null) {
-                MzdbFilesTopComponent.getExplorer().getTreeFileChooserPanel().expandTreePath(m_pathToExpand);
-            } else {
-                MzdbFilesTopComponent.getExplorer().getTreeFileChooserPanel().expandMultipleTreePath(m_parentDirectories, conversionSettings.getUploadSettings().getMountLabel());
-            }
-            MzdbFilesTopComponent.getExplorer().getTreeFileChooserPanel().updateTree();
-        }
+         }
+         */
     }
 
     @Override
     public void uploadPerformed(File f, boolean success) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        if (success) {
+            MzdbFilesTopComponent.getExplorer().getTreeFileChooserPanel().updateTree();
+        }
     }
 
     @Override

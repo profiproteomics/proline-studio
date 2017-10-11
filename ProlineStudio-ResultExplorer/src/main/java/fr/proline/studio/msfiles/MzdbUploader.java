@@ -82,7 +82,7 @@ public class MzdbUploader implements Runnable {
 
         FileUploadTask task = new FileUploadTask(callback, m_file.getAbsolutePath(), result);
 
-        task.initUploadMZDB(m_uploadSettings.getMountLabel(), m_uploadSettings.getDestination());
+        task.initUploadMZDB(m_uploadSettings.getMountingPointPath(), m_uploadSettings.getDestination());
 
         AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
 

@@ -672,11 +672,13 @@ public class ProteinSetTableModel extends LazyTableModel implements GlobalTableM
         
         @Override
         public int compareTo(Object o) {
-            int sameSet =  m_sameSetCount-((ProteinCount) o).m_sameSetCount;
-            if (sameSet != 0) {
-                return sameSet;
+            
+            int diffProteins = m_sameSetCount+m_subSetCount-((ProteinCount) o).m_sameSetCount-((ProteinCount) o).m_subSetCount;
+            if (diffProteins != 0) {
+                return diffProteins;
             }
-            return m_subSetCount-((ProteinCount) o).m_subSetCount;
+
+            return m_sameSetCount-((ProteinCount) o).m_sameSetCount;
         }
         
     }

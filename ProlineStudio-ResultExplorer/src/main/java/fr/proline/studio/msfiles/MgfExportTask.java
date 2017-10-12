@@ -5,16 +5,13 @@
  */
 package fr.proline.studio.msfiles;
 
-import com.almworks.sqlite4java.SQLiteException;
-import fr.profi.mzdb.MzDbReader;
-import fr.profi.mzdb.model.SpectrumHeader;
+import fr.profi.mzdb.MzDbReaderHelper;
 import fr.proline.mzscope.mzdb.MzdbRawFile;
 import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.AbstractDatabaseTask;
 import java.io.File;
-import java.io.FileNotFoundException;
 
 /**
  *
@@ -34,7 +31,7 @@ public class MgfExportTask extends AbstractDatabaseTask {
     @Override
     public boolean fetchData() {
         
-        if(!canExportMgf()){
+        if(!MzDbReaderHelper.isValid(m_file)){
             m_taskError = new TaskError("Mgf Exportation Error", "MzDB file is corrupted.");
             return false;
         }
@@ -53,28 +50,6 @@ public class MgfExportTask extends AbstractDatabaseTask {
     @Override
     public boolean needToFetch() {
         return true;
-    }
-
-    public boolean canExportMgf() {
-
-        MzDbReader reader = null;
-        try {
-            reader = new MzDbReader(m_file, true);
-            SpectrumHeader[] headers = reader.getMs2SpectrumHeaders();
-            reader.close();
-            if (headers == null) {
-                return false;
-            } else {
-                return true;
-            }
-        } catch (ClassNotFoundException | FileNotFoundException | SQLiteException e) {
-            return false;
-        } finally {
-            if (reader != null) {
-                reader.close();
-            }
-        }
-
     }
 
 }

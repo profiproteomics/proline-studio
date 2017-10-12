@@ -251,7 +251,18 @@ public class SplittedPanelContainer extends JPanel {
             JSplitPane splitPane = (JSplitPane) c;
             splittedPanel.replaceEmbededPanel((JComponent)splitPane.getLeftComponent() );
         } else {
+            
+             // prepare the heights of remaining components
+             int[] heights = getHeights();
+             int incPanel = heights[heights.length - 1] / (heights.length - 1);
+             int[] newHeights = new int[heights.length - 1];
+             for (int i = 0; i < newHeights.length; i++) {
+                 newHeights[i] = heights[i] + incPanel;
+             }
+
             removePanel(m_panelArray.size()-1);
+            
+            dispatchHeight(newHeights);
         }
         
         revalidate();

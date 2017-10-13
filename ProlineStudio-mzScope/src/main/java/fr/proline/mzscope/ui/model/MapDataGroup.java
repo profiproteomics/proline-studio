@@ -5,7 +5,7 @@
  */
 package fr.proline.mzscope.ui.model;
 
-import fr.proline.studio.rsmexplorer.gui.model.properties.DataGroup;
+import fr.proline.studio.table.DataGroup;
 import java.awt.Color;
 import java.text.DateFormat;
 import java.text.DecimalFormat;

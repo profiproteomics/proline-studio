@@ -6,6 +6,7 @@ import fr.proline.core.orm.uds.QuantitationMethod;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.core.orm.uds.dto.DMasterQuantitationChannel;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
+import fr.proline.studio.table.DataGroup;
 import fr.proline.studio.utils.SerializedPropertiesUtil;
 import java.awt.Color;
 import java.sql.Timestamp;
@@ -29,6 +30,7 @@ public class XICPropertiesTableModel extends AbstractPropertiesTableModel {
 
     }
 
+    @Override
     public void setData(ArrayList<DDataset> datasetArrayList) {
 
         m_datasetArrayList = datasetArrayList;

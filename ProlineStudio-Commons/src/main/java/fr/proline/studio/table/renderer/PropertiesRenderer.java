@@ -1,7 +1,7 @@
-package fr.proline.studio.rsmexplorer.gui.model.properties;
+package fr.proline.studio.table.renderer;
 
-import fr.proline.studio.rsmexplorer.gui.model.properties.DataGroup.GroupObject;
-import fr.proline.studio.table.CompoundTableModel;
+import fr.proline.studio.table.DataGroup;
+import fr.proline.studio.table.DataGroup.GroupObject;
 import java.awt.Color;
 import java.awt.Component;
 import javax.swing.JLabel;

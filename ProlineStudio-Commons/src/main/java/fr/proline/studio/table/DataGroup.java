@@ -1,5 +1,6 @@
-package fr.proline.studio.rsmexplorer.gui.model.properties;
+package fr.proline.studio.table;
 
+import fr.proline.studio.table.renderer.PropertiesRenderer;
 import java.awt.Color;
 import javax.swing.JTable;
 import javax.swing.table.TableCellRenderer;
@@ -116,6 +117,11 @@ public abstract class DataGroup {
             return m_valueFiltering;
         }
         public String stringForRendering() {
+            return m_valueRendering;
+        }
+        
+        @Override
+        public String toString() {
             return m_valueRendering;
         }
     }

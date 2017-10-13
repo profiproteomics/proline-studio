@@ -14,6 +14,7 @@ import fr.proline.core.orm.msi.SearchSettingsSeqDatabaseMap;
 import fr.proline.core.orm.msi.SeqDatabase;
 import fr.proline.core.orm.msi.UsedPtm;
 import fr.proline.core.orm.uds.dto.DDataset;
+import fr.proline.studio.table.DataGroup;
 import fr.proline.studio.utils.SerializedPropertiesUtil;
 import java.awt.Color;
 import java.io.File;

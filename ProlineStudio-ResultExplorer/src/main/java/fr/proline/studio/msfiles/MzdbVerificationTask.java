@@ -15,6 +15,7 @@ import java.io.FileNotFoundException;
 import java.io.StreamCorruptedException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.slf4j.LoggerFactory;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -50,20 +51,22 @@ public class MzdbVerificationTask extends AbstractDatabaseTask {
 
     public static boolean isValid(File file) {
 
-        boolean pass = true;
-
-        MzDbReader reader = null;
-
         try {
-            reader = new MzDbReader(file, true);
 
-            SpectrumHeader[] ms2Headers = reader.getMs2SpectrumHeaders();
+            boolean pass = true;
 
-            SpectrumHeader[] ms1Headers = reader.getMs1SpectrumHeaders();
+            MzDbReader reader = null;
 
-            if (ms1Headers == null || ms1Headers.length < 1) {
-                return false;
-            } else {
+            try {
+                reader = new MzDbReader(file, true);
+
+                SpectrumHeader[] ms2Headers = reader.getMs2SpectrumHeaders();
+
+                SpectrumHeader[] ms1Headers = reader.getMs1SpectrumHeaders();
+
+                if (ms1Headers == null || ms1Headers.length < 1) {
+                    return false;
+                } else {
                     long ms1SpectrumId = ms1Headers[0].getSpectrumId();
                     if (ms1SpectrumId != 0) {
                         Spectrum ms1RawSpectrum = reader.getSpectrum(ms1SpectrumId);
@@ -81,25 +84,30 @@ public class MzdbVerificationTask extends AbstractDatabaseTask {
                             pass = false;
                         }
                     }
-            }
+                }
 
-            if (ms2Headers != null && ms2Headers.length > 0) {
-
-                long ms2SpectrumId = ms2Headers[0].getSpectrumId();
                 
-                if (ms2SpectrumId != 0) {
-                    
-                    Spectrum ms2RawSpectrum = reader.getSpectrum(ms2SpectrumId);
+                if (ms2Headers != null && ms2Headers.length > 0) {
 
-                    if (ms2RawSpectrum != null) {
+                    long ms2SpectrumId = ms2Headers[0].getSpectrumId();
 
-                        SpectrumData ms2SpectrumData = ms2RawSpectrum.getData();
+                    if (ms2SpectrumId != 0) {
 
-                        if (ms2SpectrumData != null) {
+                        Spectrum ms2RawSpectrum = reader.getSpectrum(ms2SpectrumId);
 
-                            final double[] mzList = ms2SpectrumData.getMzList();
+                        if (ms2RawSpectrum != null) {
 
-                            if (mzList == null || mzList.length < 1) {
+                            SpectrumData ms2SpectrumData = ms2RawSpectrum.getData();
+
+                            if (ms2SpectrumData != null) {
+
+                                final double[] mzList = ms2SpectrumData.getMzList();
+
+                                if (mzList == null || mzList.length < 1) {
+                                    pass = false;
+                                }
+
+                            } else {
                                 pass = false;
                             }
 
@@ -107,25 +115,26 @@ public class MzdbVerificationTask extends AbstractDatabaseTask {
                             pass = false;
                         }
 
-                    } else {
-                        pass = false;
                     }
 
                 }
+                
 
+            } catch (ClassNotFoundException | FileNotFoundException | SQLiteException e) {
+                return false;
+            } catch (StreamCorruptedException ex) {
+                Logger.getLogger(MzDbReaderHelper.class.getName()).log(Level.SEVERE, null, ex);
+            } finally {
+                if (reader != null) {
+                    reader.close();
+                }
             }
 
-        } catch (ClassNotFoundException | FileNotFoundException | SQLiteException e) {
+            return pass;
+        } catch (Throwable t) {
+            LoggerFactory.getLogger("ProlineStudio.DAM").debug("Unexpected exception in mzdb verification task", t);
             return false;
-        } catch (StreamCorruptedException ex) {
-            Logger.getLogger(MzDbReaderHelper.class.getName()).log(Level.SEVERE, null, ex);
-        } finally {
-            if (reader != null) {
-                reader.close();
-            }
         }
-
-        return pass;
 
     }
 

@@ -239,7 +239,7 @@ public abstract class DecoratedTable extends JXTable implements CrossSelectionIn
 
     private void calculateMeanWidth() {
         int totalWidth = m_totalWidth;
-        m_meanWidth = totalWidth / m_nbVisible;
+        m_meanWidth = (m_nbVisible != 0) ? totalWidth / m_nbVisible : 30;
         if (m_meanWidth < 30) {
             m_meanWidth = 30;
         } else if (m_meanWidth > COLUMN_MAX_WIDTH) {

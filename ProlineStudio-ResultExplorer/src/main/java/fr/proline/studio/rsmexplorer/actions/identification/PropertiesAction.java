@@ -50,16 +50,37 @@ public class PropertiesAction extends AbstractRSMAction {
 
         //String dialogName;
         String name = "";
-        if (selectedNodes.length == 1) {
+        int nbSelectedNodes = selectedNodes.length;
+        if (nbSelectedNodes == 1) {
             AbstractNode firstNode = selectedNodes[0];
             name = firstNode.getData().getName();
+        }
+
+        
+        boolean identificationProperties = false;
+        boolean isIdentificationTree = isIdentificationTree();
+        
+        for (int i = 0; i < nbSelectedNodes; i++) {
+            AbstractNode node = selectedNodes[i];
+
+            AbstractNode.NodeTypes type = node.getType();
+
+            if ((type == AbstractNode.NodeTypes.PROJECT_IDENTIFICATION) || ((type == AbstractNode.NodeTypes.DATA_SET) && (isIdentificationTree)) || (type == AbstractNode.NodeTypes.BIOLOGICAL_SAMPLE_ANALYSIS)) {
+                identificationProperties = true;
+ 
+            }
+
+            /*if ((type == AbstractNode.NodeTypes.PROJECT_QUANTITATION) ) {
+                quantitationProperties = true;
+
+            }*/
         }
 
         // new Properties window
         AbstractPropertiesTableModel model = null;
 
         WindowBox windowBox = WindowBoxFactory.getGenericWindowBox(name, "Properties", IconManager.IconType.DOCUMENT_LIST, true);
-        model = isIdentificationTree() ? new IdentificationPropertiesTableModel() : new XICPropertiesTableModel();
+        model = identificationProperties ? new IdentificationPropertiesTableModel() : new XICPropertiesTableModel();
         windowBox.setEntryData(-1l, model);
         DataBoxViewerTopComponent win2 = new DataBoxViewerTopComponent(windowBox);
         win2.open();
@@ -119,6 +140,8 @@ public class PropertiesAction extends AbstractRSMAction {
         // properties action is enabled only if selected nodes
         // are of the same type and are of type PROJECT or DATA_SET
         AbstractNode.NodeTypes currentType = null;
+        boolean identificationProperties = false;
+        boolean quantitationProperties = false;
         for (int i = 0; i < nbSelectedNodes; i++) {
             AbstractNode node = selectedNodes[i];
 
@@ -144,16 +167,18 @@ public class PropertiesAction extends AbstractRSMAction {
                 return;
             }
 
-            if ((type == AbstractNode.NodeTypes.PROJECT_IDENTIFICATION) && (type == AbstractNode.NodeTypes.DATA_SET)) {
+            if ((type == AbstractNode.NodeTypes.PROJECT_IDENTIFICATION) || (type == AbstractNode.NodeTypes.DATA_SET)) {
                 DataSetNode datasetNode = (DataSetNode) node;
+                identificationProperties = true;
                 if (!datasetNode.hasResultSet() && !datasetNode.hasResultSummary()) {
                     setEnabled(false);
                     return;
                 }
             }
 
-            if ((type == AbstractNode.NodeTypes.PROJECT_QUANTITATION) && (type == AbstractNode.NodeTypes.BIOLOGICAL_SAMPLE_ANALYSIS)) {
+            if ((type == AbstractNode.NodeTypes.PROJECT_QUANTITATION) || (type == AbstractNode.NodeTypes.BIOLOGICAL_SAMPLE_ANALYSIS)) {
                 DataSetNode datasetNode = (DataSetNode) node;
+                quantitationProperties = true;
                 if (!datasetNode.hasResultSet() && !datasetNode.hasResultSummary()) {
                     setEnabled(false);
                     return;
@@ -161,6 +186,12 @@ public class PropertiesAction extends AbstractRSMAction {
             }
 
             currentType = type;
+        }
+        
+        if (identificationProperties && quantitationProperties) {
+            // can not display combined property for identification and quantitation
+            setEnabled(false);
+            return;
         }
 
         setEnabled(true);

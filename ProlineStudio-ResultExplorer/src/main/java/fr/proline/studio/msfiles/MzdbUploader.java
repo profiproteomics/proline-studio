@@ -5,6 +5,9 @@
  */
 package fr.proline.studio.msfiles;
 
+import fr.proline.studio.dam.AccessDatabaseThread;
+import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
+import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dpm.jms.AccessJMSManagerThread;
 import fr.proline.studio.dpm.task.jms.AbstractJMSCallback;
 import fr.proline.studio.dpm.task.jms.FileUploadTask;
@@ -34,57 +37,73 @@ public class MzdbUploader implements Runnable {
     @Override
     public void run() {
 
-        this.checkFileFinalization();
+        checkFileFinalization();
 
-        final String[] result = new String[1];
-
-        AbstractJMSCallback callback = new AbstractJMSCallback() {
+        AbstractDatabaseCallback verificationCallback = new AbstractDatabaseCallback() {
 
             @Override
             public boolean mustBeCalledInAWT() {
-                return true;
+                return false;
             }
 
             @Override
-            public void run(boolean success) {
-
+            public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
                 if (success) {
-                        
-                        if(m_msListener!=null && m_file.exists()){
-                            m_msListener.uploadPerformed(m_file, true);
+                    final String[] result = new String[1];
+
+                    AbstractJMSCallback callback = new AbstractJMSCallback() {
+
+                        @Override
+                        public boolean mustBeCalledInAWT() {
+                            return true;
                         }
 
-                        if (m_uploadSettings.getDeleteMzdb()) {
-                            while (!m_file.canWrite() && !m_file.exists()) {
-                                try {
-                                    Thread.sleep(1000);
-                                } catch (InterruptedException ex) {
-                                    java.util.logging.Logger.getLogger(MzdbUploader.class.getName()).log(Level.SEVERE, null, ex);
+                        @Override
+                        public void run(boolean success) {
+
+                            if (success) {
+
+                                if (m_msListener != null && m_file.exists()) {
+                                    m_msListener.uploadPerformed(m_file, true);
+                                }
+
+                                if (m_uploadSettings.getDeleteMzdb()) {
+                                    while (!m_file.canWrite() && !m_file.exists()) {
+                                        try {
+                                            Thread.sleep(1000);
+                                        } catch (InterruptedException ex) {
+                                            java.util.logging.Logger.getLogger(MzdbUploader.class.getName()).log(Level.SEVERE, null, ex);
+                                        }
+                                    }
+                                    m_file.setWritable(true);
+                                    try {
+                                        Thread.sleep(5000);
+                                    } catch (InterruptedException ex) {
+                                        java.util.logging.Logger.getLogger(MzdbUploader.class.getName()).log(Level.SEVERE, null, ex);
+                                    }
+                                    FileUtility.deleteFile(m_file);
+                                }
+
+                            } else {
+                                if (m_msListener != null) {
+                                    m_msListener.uploadPerformed(m_file, false);
                                 }
                             }
-                            m_file.setWritable(true);
-                            try {
-                                Thread.sleep(5000);
-                            } catch (InterruptedException ex) {
-                                java.util.logging.Logger.getLogger(MzdbUploader.class.getName()).log(Level.SEVERE, null, ex);
-                            }
-                            FileUtility.deleteFile(m_file);
                         }
+                    };
 
-                    
-                } else {
-                    if (m_msListener != null) {
-                        m_msListener.uploadPerformed(m_file, false);
-                    }
+                    FileUploadTask task = new FileUploadTask(callback, m_file.getAbsolutePath(), result);
+
+                    task.initUploadMZDB(m_uploadSettings.getMountingPointPath(), m_uploadSettings.getDestination());
+
+                    AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
                 }
             }
+
         };
 
-        FileUploadTask task = new FileUploadTask(callback, m_file.getAbsolutePath(), result);
-
-        task.initUploadMZDB(m_uploadSettings.getMountingPointPath(), m_uploadSettings.getDestination());
-
-        AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
+        MzdbVerificationTask verificationTask = new MzdbVerificationTask(verificationCallback, m_file);
+        AccessDatabaseThread.getAccessDatabaseThread().addTask(verificationTask);
 
     }
 
@@ -101,5 +120,5 @@ public class MzdbUploader implements Runnable {
             java.util.logging.Logger.getLogger(MzdbUploader.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    
+
 }

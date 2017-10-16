@@ -33,26 +33,44 @@ public class MgfExporter implements Runnable {
     @Override
     public void run() {
 
-            AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
+        AbstractDatabaseCallback verificationCallback = new AbstractDatabaseCallback() {
 
-                @Override
-                public boolean mustBeCalledInAWT() {
-                    return false;
+            @Override
+            public boolean mustBeCalledInAWT() {
+                return false;
+            }
+
+            @Override
+            public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
+                if (success) {
+                    AbstractDatabaseCallback exportMgfCallback = new AbstractDatabaseCallback() {
+
+                        @Override
+                        public boolean mustBeCalledInAWT() {
+                            return false;
+                        }
+
+                        @Override
+                        public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
+                            if (success) {
+                                m_msListener.exportPerformed(m_file, true);
+                            } else {
+                                m_msListener.exportPerformed(m_file, false);
+                            }
+                        }
+
+                    };
+
+                    MgfExportTask exportMgfTask = new MgfExportTask(exportMgfCallback, m_file, m_mgfExportSettings);
+                    AccessDatabaseThread.getAccessDatabaseThread().addTask(exportMgfTask);
                 }
+            }
 
-                @Override
-                public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
-                    if (success) {
-                            m_msListener.exportPerformed(m_file, true);       
-                    } else {
-                        m_msListener.exportPerformed(m_file, false);
-                    }
-                }
+        };
 
-            };
+        MzdbVerificationTask verificationTask = new MzdbVerificationTask(verificationCallback, m_file);
+        AccessDatabaseThread.getAccessDatabaseThread().addTask(verificationTask);
 
-            MgfExportTask task = new MgfExportTask(callback, m_file, m_mgfExportSettings);
-            AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
     }
 
 }

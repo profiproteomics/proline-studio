@@ -31,11 +31,6 @@ public class MgfExportTask extends AbstractDatabaseTask {
     @Override
     public boolean fetchData() {
         
-        if(!MzDbReaderHelper.isValid(m_file)){
-            m_taskError = new TaskError("Mgf Exportation Error", "MzDB file is corrupted.");
-            return false;
-        }
-        
         try {
             MzdbRawFile mzdbFile = new MzdbRawFile(m_file);
             String outputFileName = m_exportSettings.getDestinationDirectory() + File.separator + m_file.getName().substring(0, m_file.getName().lastIndexOf(".mzdb")) + ".mgf";

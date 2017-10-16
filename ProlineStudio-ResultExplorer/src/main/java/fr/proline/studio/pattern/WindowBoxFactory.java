@@ -110,7 +110,7 @@ public class WindowBoxFactory {
             boxes[6].setLayout(SplittedPanelContainer.PanelLayout.TABBED);
 
         } else if (databox instanceof DataBoxRsmProteinSetOfPeptides) {
-            boxes = new AbstractDataBox[2];
+            boxes = new AbstractDataBox[3];
             boxes[1] = new DataBoxRsmProteinsOfProteinSet();
             boxes[2] = new DataBoxRsmPeptidesOfProtein();
         } else if (databox instanceof DataBoxRsmProteinsOfProteinSet) {

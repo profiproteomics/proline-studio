@@ -58,8 +58,8 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
     private final static String[] FDR_ON_VALUES = {null, "Score", "e-Value", "Adjusted e-Value", "Identity p-Value", "Homology p-Value"};
     private final static String[] FDR_ON_VALUES_ASSOCIATED_KEYS = {null, "SCORE", "MASCOT_EVALUE", "MASCOT_ADJUSTED_EVALUE", "SCORE_IT_P-VALUE", "SCORE_HT_P-VALUE"};
 
-    private final static String[] SCORING_TYPE_OPTIONS = {"Standard", "Mascot Modified Mudpit"};
-    private final static String[] SCORING_TYPE_VALUES = {"mascot:standard score", "mascot:modified mudpit score"};
+    private final static String[] SCORING_TYPE_OPTIONS = {"Standard","Mascot Mudpit", "Mascot Modified Mudpit"};
+    private final static String[] SCORING_TYPE_VALUES = {"mascot:standard score", "mascot:mudpit score", "mascot:modified mudpit score"};
 
     private final static String SETTINGS_KEY = "Validation";
 

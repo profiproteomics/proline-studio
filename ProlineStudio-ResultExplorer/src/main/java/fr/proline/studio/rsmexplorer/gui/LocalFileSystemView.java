@@ -272,15 +272,17 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
 
         ArrayList<String> selectedURLs = new ArrayList<String>();
         TreePath[] paths = m_tree.getSelectionPaths();
-        for (TreePath path : paths) {
+        if (paths != null) {
+            for (TreePath path : paths) {
 
-            DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getLastPathComponent();
-            File f = (File) node.getUserObject();
+                DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getLastPathComponent();
+                File f = (File) node.getUserObject();
 
-            //selectedURLs.add(path.getLastPathComponent().toString());
-            selectedURLs.add(f.getAbsolutePath());
+                //selectedURLs.add(path.getLastPathComponent().toString());
+                selectedURLs.add(f.getAbsolutePath());
 
-            m_selectedFiles.add(f);
+                m_selectedFiles.add(f);
+            }
         }
         return selectedURLs;
     }
@@ -485,22 +487,26 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
     @Override
     public void updatePopupMenu() {
         ArrayList<String> selectedURLs = getSelectedURLs();
-        if (isSelectionHomogeneous(selectedURLs)) {
-            String firstURL = selectedURLs.get(0).toLowerCase();
-            if (firstURL.endsWith(".mzdb")) {
-                setPopupEnabled(true);
-                m_convertRawFileItem.setEnabled(false);
-            } else if (firstURL.endsWith(".raw") || firstURL.endsWith(".wiff")) {
-                setPopupEnabled(false);
-                m_convertRawFileItem.setEnabled(true);
-                m_deleteFileItem.setEnabled(true);
-            } else if (firstURL.endsWith(".mgf")) {
-                setPopupEnabled(false);
-                m_deleteFileItem.setEnabled(true);
+        if (!selectedURLs.isEmpty()) {
+            if (isSelectionHomogeneous(selectedURLs)) {
+                String firstURL = selectedURLs.get(0).toLowerCase();
+                if (firstURL.endsWith(".mzdb")) {
+                    setPopupEnabled(true);
+                    m_convertRawFileItem.setEnabled(false);
+                } else if (firstURL.endsWith(".raw") || firstURL.endsWith(".wiff")) {
+                    setPopupEnabled(false);
+                    m_convertRawFileItem.setEnabled(true);
+                    m_deleteFileItem.setEnabled(true);
+                } else if (firstURL.endsWith(".mgf")) {
+                    setPopupEnabled(false);
+                    m_deleteFileItem.setEnabled(true);
+                } else {
+                    setPopupEnabled(false);
+                }
             } else {
                 setPopupEnabled(false);
             }
-        } else {
+        }else{
             setPopupEnabled(false);
         }
     }

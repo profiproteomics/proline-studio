@@ -37,8 +37,17 @@ public class MzdbUploader implements Runnable {
     @Override
     public void run() {
 
-        checkFileFinalization();
+        verifyFinalization();
 
+        verifyEncoding();
+
+    }
+
+    public File getFile() {
+        return m_file;
+    }
+
+    private void verifyIntegrityAndUpload() {
         AbstractDatabaseCallback verificationCallback = new AbstractDatabaseCallback() {
 
             @Override
@@ -102,16 +111,11 @@ public class MzdbUploader implements Runnable {
 
         };
 
-        MzdbVerificationTask verificationTask = new MzdbVerificationTask(verificationCallback, m_file);
+        MzdbIntegrityVerificationTask verificationTask = new MzdbIntegrityVerificationTask(verificationCallback, m_file);
         AccessDatabaseThread.getAccessDatabaseThread().addTask(verificationTask);
-
     }
 
-    public File getFile() {
-        return m_file;
-    }
-
-    private void checkFileFinalization() {
+    private void verifyFinalization() {
         try {
             while (!FileUtility.isCompletelyWritten(m_file)) {
                 Thread.sleep(10000);
@@ -119,6 +123,26 @@ public class MzdbUploader implements Runnable {
         } catch (InterruptedException ex) {
             java.util.logging.Logger.getLogger(MzdbUploader.class.getName()).log(Level.SEVERE, null, ex);
         }
+    }
+
+    private void verifyEncoding() {
+        AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
+
+            @Override
+            public boolean mustBeCalledInAWT() {
+                return true;
+            }
+
+            @Override
+            public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
+                if(success){
+                    verifyIntegrityAndUpload();
+                }
+            }
+            
+        };
+        MzdbEncodingVerificationTask encodingVerificationTask = new MzdbEncodingVerificationTask(callback, m_file);
+        AccessDatabaseThread.getAccessDatabaseThread().addTask(encodingVerificationTask);
     }
 
 }

@@ -5,7 +5,6 @@
  */
 package fr.proline.studio.msfiles;
 
-import fr.profi.mzdb.MzDbReaderHelper;
 import fr.proline.mzscope.mzdb.MzdbRawFile;
 import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;

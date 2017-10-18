@@ -65,24 +65,58 @@ public class MgfExportBatch implements Runnable {
     private void export(File f, MgfExportSettings settings) {
         if (f.getAbsolutePath().toLowerCase().endsWith(".mzdb")) {
 
-            AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
+            AbstractDatabaseCallback encodingCallback = new AbstractDatabaseCallback() {
 
                 @Override
                 public boolean mustBeCalledInAWT() {
-                    return false;
+                    return true;
                 }
 
                 @Override
                 public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
                     if (success) {
-                        MzdbFilesTopComponent.getExplorer().getLocalFileSystemView().updateTree();
+                        AbstractDatabaseCallback integrityCallback = new AbstractDatabaseCallback() {
+
+                            @Override
+                            public boolean mustBeCalledInAWT() {
+                                return false;
+                            }
+
+                            @Override
+                            public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
+                                if (success) {
+                                    AbstractDatabaseCallback exportMgfCallback = new AbstractDatabaseCallback() {
+
+                                        @Override
+                                        public boolean mustBeCalledInAWT() {
+                                            return false;
+                                        }
+
+                                        @Override
+                                        public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
+                                            if (success) {
+                                                MzdbFilesTopComponent.getExplorer().getLocalFileSystemView().updateTree();
+                                            }
+                                        }
+
+                                    };
+
+                                    MgfExportTask exportMgfTask = new MgfExportTask(exportMgfCallback, f, settings);
+                                    AccessDatabaseThread.getAccessDatabaseThread().addTask(exportMgfTask);
+                                }
+                            }
+
+                        };
+
+                        MzdbIntegrityVerificationTask verificationTask = new MzdbIntegrityVerificationTask(integrityCallback, f);
+                        AccessDatabaseThread.getAccessDatabaseThread().addTask(verificationTask);
                     }
                 }
 
             };
+            MzdbEncodingVerificationTask encodingVerificationTask = new MzdbEncodingVerificationTask(encodingCallback, f);
+            AccessDatabaseThread.getAccessDatabaseThread().addTask(encodingVerificationTask);
 
-            MgfExportTask task = new MgfExportTask(callback, f, settings);
-            AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
         }
     }
 

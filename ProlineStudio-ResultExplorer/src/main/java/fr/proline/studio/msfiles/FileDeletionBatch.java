@@ -18,7 +18,7 @@ import java.util.ArrayList;
  */
 public class FileDeletionBatch implements Runnable {
 
-    private ArrayList<File> m_files;
+    private final ArrayList<File> m_files;
 
     public FileDeletionBatch(ArrayList<File> files) {
         m_files = files;
@@ -44,7 +44,6 @@ public class FileDeletionBatch implements Runnable {
 
             FileDeletionTask task = new FileDeletionTask(callback, f);
             AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
-
         }
     }
 

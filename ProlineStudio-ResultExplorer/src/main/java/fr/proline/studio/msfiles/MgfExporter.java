@@ -32,7 +32,10 @@ public class MgfExporter implements Runnable {
 
     @Override
     public void run() {
+        verifyEncoding();
+    }
 
+    private void verifyIntegrityAndExport() {
         AbstractDatabaseCallback verificationCallback = new AbstractDatabaseCallback() {
 
             @Override
@@ -68,9 +71,28 @@ public class MgfExporter implements Runnable {
 
         };
 
-        MzdbVerificationTask verificationTask = new MzdbVerificationTask(verificationCallback, m_file);
+        MzdbIntegrityVerificationTask verificationTask = new MzdbIntegrityVerificationTask(verificationCallback, m_file);
         AccessDatabaseThread.getAccessDatabaseThread().addTask(verificationTask);
+    }
 
+    private void verifyEncoding() {
+        AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
+
+            @Override
+            public boolean mustBeCalledInAWT() {
+                return true;
+            }
+
+            @Override
+            public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
+                if (success) {
+                    verifyIntegrityAndExport();
+                }
+            }
+
+        };
+        MzdbEncodingVerificationTask encodingVerificationTask = new MzdbEncodingVerificationTask(callback, m_file);
+        AccessDatabaseThread.getAccessDatabaseThread().addTask(encodingVerificationTask);
     }
 
 }

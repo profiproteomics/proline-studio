@@ -8,6 +8,7 @@ package fr.proline.studio.rsmexplorer.gui;
 import fr.proline.studio.msfiles.ExportMgfDialog;
 import fr.proline.studio.msfiles.FileDeletionBatch;
 import fr.proline.mzscope.utils.IPopupMenuDelegate;
+import fr.proline.studio.msfiles.MzdbEncodingVerificationBatch;
 import fr.proline.studio.mzscope.MzdbInfo;
 import fr.proline.studio.pattern.MzScopeWindowBoxManager;
 import fr.proline.studio.rsmexplorer.gui.dialog.ConvertRawDialog;
@@ -61,7 +62,7 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
     private LocalFileSystemModel m_fileSystemDataModel;
     private JTree m_tree;
     private JPopupMenu m_popupMenu;
-    private JMenuItem m_detectPeakelsItem, m_viewRawFileItem, m_convertRawFileItem, m_uploadMzdbFileItem, m_exportMgfItem, m_deleteFileItem;
+    private JMenuItem m_detectPeakelsItem, m_viewRawFileItem, m_convertRawFileItem, m_uploadMzdbFileItem, m_exportMgfItem, m_deleteFileItem, m_verifyEncodingItem;
     private ActionListener viewRawFileAction;
     private ArrayList<File> m_selectedFiles;
     private final LocalFileSystemTransferHandler m_transferHandler;
@@ -215,8 +216,8 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
 
             @Override
             public void treeExpanded(TreeExpansionEvent tee) {
-                TreeStateUtil.saveExpansionState(m_tree, TreeStateUtil.TreeType.LOCAL, m_rootsComboBox.getSelectedItem().toString());              
-                DefaultMutableTreeNode expandedNode = (DefaultMutableTreeNode) tee.getPath().getLastPathComponent();          
+                TreeStateUtil.saveExpansionState(m_tree, TreeStateUtil.TreeType.LOCAL, m_rootsComboBox.getSelectedItem().toString());
+                DefaultMutableTreeNode expandedNode = (DefaultMutableTreeNode) tee.getPath().getLastPathComponent();
                 traverseAndExpand(expandedNode);
             }
 
@@ -288,7 +289,7 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
         TreeStateUtil.setExpansionState(TreeStateUtil.loadExpansionState(TreeStateUtil.TreeType.LOCAL, m_rootsComboBox.getSelectedItem().toString()), m_tree, (DefaultMutableTreeNode) m_tree.getModel().getRoot(), TreeStateUtil.TreeType.LOCAL, m_rootsComboBox.getSelectedItem().toString());
 
     }
-    
+
     public void expandTreePath(TreePath path) {
         m_tree.expandPath(path);
     }
@@ -308,19 +309,19 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
         if (m_paths.size() <= 0) {
             return;
         }
-        
+
         boolean found = false;
-        
+
         String rootAbsolutePath = ((File) root.getUserObject()).getAbsolutePath();
-        
+
         for (String s : m_paths) {
-            if(s.contains(rootAbsolutePath)){
+            if (s.contains(rootAbsolutePath)) {
                 found = true;
                 break;
             }
         }
-        
-        if(!found){
+
+        if (!found) {
             return;
         }
 
@@ -424,6 +425,20 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
         });
         popupMenu.add(m_convertRawFileItem);
 
+        // verify and repair encoding
+        m_verifyEncodingItem = new JMenuItem("Verify Encoding");
+        m_verifyEncodingItem.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+                MzdbEncodingVerificationBatch batch = new MzdbEncodingVerificationBatch(m_selectedFiles);
+                Thread thread = new Thread(batch);
+                thread.start();
+            }
+
+        });
+        popupMenu.add(m_verifyEncodingItem);
+
         // upload mzdb file
         m_uploadMzdbFileItem = new JMenuItem("Upload to Server");
         m_uploadMzdbFileItem.addActionListener(new ActionListener() {
@@ -494,6 +509,7 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
         m_viewRawFileItem.setEnabled(b);
         m_detectPeakelsItem.setEnabled(b);
         m_convertRawFileItem.setEnabled(b);
+        m_verifyEncodingItem.setEnabled(b);
         m_uploadMzdbFileItem.setEnabled(b);
         m_exportMgfItem.setEnabled(b);
         m_deleteFileItem.setEnabled(b);
@@ -503,11 +519,11 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
     public ActionListener getDefaultAction() {
         return null;
     }
-    
-    public String getSelectedRoot(){
-        if(m_rootsComboBox!=null){
+
+    public String getSelectedRoot() {
+        if (m_rootsComboBox != null) {
             return m_rootsComboBox.getSelectedItem().toString();
-        }else{
+        } else {
             return "";
         }
     }

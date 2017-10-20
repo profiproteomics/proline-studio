@@ -1,6 +1,5 @@
 package fr.proline.studio.graphics;
 
-import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.graphics.parallelcoordinates.ParallelCoordinatesAxis;
 import fr.proline.studio.parameter.ColorOrGradientParameter;
 import fr.proline.studio.parameter.ColorParameter;
@@ -20,6 +19,7 @@ import java.util.Arrays;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.JSpinner;
+import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 
 /**
  *
@@ -50,7 +50,7 @@ public class PlotParallelCoordinates extends PlotMultiDataAbstract {
     
     private boolean[] m_SpecificSelection = null;
     
-    public PlotParallelCoordinates(BasePlotPanel plotPanel, CompareDataInterface compareDataInterface, CrossSelectionInterface crossSelectionInterface, int[] cols) {
+    public PlotParallelCoordinates(BasePlotPanel plotPanel, ExtendedTableModelInterface compareDataInterface, CrossSelectionInterface crossSelectionInterface, int[] cols) {
         super(plotPanel, PlotType.PARALLEL_COORDINATES_PLOT, compareDataInterface, crossSelectionInterface);
 
         update(cols, null);

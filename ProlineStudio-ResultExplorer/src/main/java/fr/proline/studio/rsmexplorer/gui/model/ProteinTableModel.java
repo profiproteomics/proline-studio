@@ -2,7 +2,7 @@ package fr.proline.studio.rsmexplorer.gui.model;
 
 import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.core.orm.msi.dto.DBioSequence;
-import fr.proline.studio.comparedata.ExtraDataType;
+import fr.proline.studio.extendedtablemodel.ExtraDataType;
 import fr.proline.studio.export.ExportModelUtilities;
 import fr.proline.studio.export.ExportFontData;
 import fr.proline.studio.filter.*;
@@ -15,7 +15,7 @@ import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.SamesetRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.ScoreRenderer;
 import fr.proline.studio.table.DecoratedTableModel;
-import fr.proline.studio.table.GlobalTableModelInterface;
+import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
 import fr.proline.studio.table.LazyData;
 import fr.proline.studio.table.TableDefaultRendererManager;
 import fr.proline.studio.utils.IconManager;

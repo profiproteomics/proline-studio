@@ -1,12 +1,12 @@
 package fr.proline.studio.pattern;
 
-import fr.proline.studio.comparedata.CompareDataInterface;
-import fr.proline.studio.comparedata.ExtraDataType;
-import fr.proline.studio.comparedata.GlobalTabelModelProviderInterface;
+import fr.proline.studio.extendedtablemodel.ExtraDataType;
+import fr.proline.studio.extendedtablemodel.GlobalTabelModelProviderInterface;
 import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.rsmexplorer.gui.GenericPanel;
-import fr.proline.studio.table.GlobalTableModelInterface;
+import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
 import java.util.ArrayList;
+import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 
 /**
  *
@@ -30,13 +30,13 @@ public class DataboxGeneric extends AbstractDataBox {
         // Register Possible in parameters
         // One ResultSummary
         GroupParameter inParameter = new GroupParameter();
-        inParameter.addParameter(CompareDataInterface.class, false);
+        inParameter.addParameter(ExtendedTableModelInterface.class, false);
         registerInParameter(inParameter);
         
         
         // Register possible out parameters
         GroupParameter outParameter = new GroupParameter();
-        outParameter.addParameter(CompareDataInterface.class, false);
+        outParameter.addParameter(ExtendedTableModelInterface.class, false);
         registerOutParameter(outParameter);
 
         
@@ -86,7 +86,7 @@ public class DataboxGeneric extends AbstractDataBox {
         @Override
     public Object getData(boolean getArray, Class parameterType) {
         if (parameterType != null) {
-            if (parameterType.equals(CompareDataInterface.class)) {
+            if (parameterType.equals(ExtendedTableModelInterface.class)) {
                 return ((GlobalTabelModelProviderInterface) getDataBoxPanelInterface()).getGlobalTableModelInterface();
             }
             if (parameterType.equals(CrossSelectionInterface.class)) {

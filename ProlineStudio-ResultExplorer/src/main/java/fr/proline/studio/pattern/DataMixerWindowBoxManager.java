@@ -4,7 +4,7 @@ import fr.proline.studio.id.ProjectId;
 import fr.proline.studio.python.data.TableInfo;
 import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
 import fr.proline.studio.rsmexplorer.gui.calc.DataAnalyzerPanel;
-import fr.proline.studio.table.GlobalTableModelInterface;
+import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
 
 /**
  *

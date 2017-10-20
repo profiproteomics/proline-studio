@@ -13,8 +13,7 @@ import fr.proline.core.orm.msi.dto.DProteinSet;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.core.orm.uds.dto.DMasterQuantitationChannel;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
-import fr.proline.studio.comparedata.CompareDataInterface;
-import fr.proline.studio.comparedata.GlobalTabelModelProviderInterface;
+import fr.proline.studio.extendedtablemodel.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadLcMSTask;
@@ -28,6 +27,7 @@ import fr.proline.studio.rsmexplorer.gui.xic.XicPeptidePanel;
 import fr.proline.studio.types.XicMode;
 import java.util.ArrayList;
 import java.util.List;
+import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 
 /**
  *
@@ -77,7 +77,7 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
         registerOutParameter(outParameter);
 
         outParameter = new GroupParameter();
-        outParameter.addParameter(CompareDataInterface.class, true);
+        outParameter.addParameter(ExtendedTableModelInterface.class, true);
         registerOutParameter(outParameter);
 
         outParameter = new GroupParameter();
@@ -206,7 +206,7 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
 
                 if (finished) {
                     unregisterTask(taskId);
-                    propagateDataChanged(CompareDataInterface.class);
+                    propagateDataChanged(ExtendedTableModelInterface.class);
                 }
             }
         };
@@ -256,7 +256,7 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
             if (parameterType.equals(QuantChannelInfo.class)) {
                 return m_quantChannelInfo;
             }
-            if (parameterType.equals(CompareDataInterface.class)) {
+            if (parameterType.equals(ExtendedTableModelInterface.class)) {
                 return ((GlobalTabelModelProviderInterface) getDataBoxPanelInterface()).getGlobalTableModelInterface();
             }
             if (parameterType.equals(CrossSelectionInterface.class)) {
@@ -272,7 +272,7 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
     @Override
     public Object getData(boolean getArray, Class parameterType, boolean isList) {
         if (parameterType != null && isList) {
-            if (parameterType.equals(CompareDataInterface.class)) {
+            if (parameterType.equals(ExtendedTableModelInterface.class)) {
                 return getCompareDataInterfaceList();
             }
             if (parameterType.equals(CrossSelectionInterface.class)) {
@@ -287,8 +287,8 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
         return m_dataset.getName() + " " + getTypeName();
     }
 
-    private List<CompareDataInterface> getCompareDataInterfaceList() {
-        List<CompareDataInterface> listCDI = new ArrayList();
+    private List<ExtendedTableModelInterface> getCompareDataInterfaceList() {
+        List<ExtendedTableModelInterface> listCDI = new ArrayList();
         List<PeptidePanel> listPeptidePanel = getPeptideTableModelList();
         for (PeptidePanel peptidePanel : listPeptidePanel) {
             listCDI.add(peptidePanel.getGlobalTableModelInterface());

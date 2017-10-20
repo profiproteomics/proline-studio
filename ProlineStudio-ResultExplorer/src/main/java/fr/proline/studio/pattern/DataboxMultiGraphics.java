@@ -1,9 +1,9 @@
 package fr.proline.studio.pattern;
 
-import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.rsmexplorer.gui.MultiGraphicsPanel;
 import java.util.List;
+import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 
 /**
  *
@@ -11,7 +11,7 @@ import java.util.List;
  */
 public class DataboxMultiGraphics extends AbstractDataBox  {
 
-    private List<CompareDataInterface> m_valuesList = null;
+    private List<ExtendedTableModelInterface> m_valuesList = null;
 
     private boolean m_defaultLocked = false;
     private boolean m_canChooseColor = false;
@@ -32,7 +32,7 @@ public class DataboxMultiGraphics extends AbstractDataBox  {
 
         // Register Possible in parameters
         GroupParameter inParameter = new GroupParameter();
-        inParameter.addParameter(CompareDataInterface.class, true);
+        inParameter.addParameter(ExtendedTableModelInterface.class, true);
         registerInParameter(inParameter);
         
         inParameter.addParameter(CrossSelectionInterface.class, true);
@@ -50,14 +50,14 @@ public class DataboxMultiGraphics extends AbstractDataBox  {
 
     @Override
     public void dataChanged() {
-        final List<CompareDataInterface> valuesL = (List<CompareDataInterface>) m_previousDataBox.getData(false, CompareDataInterface.class, true);
+        final List<ExtendedTableModelInterface> valuesL = (List<ExtendedTableModelInterface>) m_previousDataBox.getData(false, ExtendedTableModelInterface.class, true);
         final List<CrossSelectionInterface> crossSelectionInterfaceL =  (List<CrossSelectionInterface>) m_previousDataBox.getData(false, CrossSelectionInterface.class, true);
         ((MultiGraphicsPanel)getDataBoxPanelInterface()).setData(valuesL, crossSelectionInterfaceL);
     }
     
     @Override
     public void setEntryData(Object data) {
-        m_valuesList = (List<CompareDataInterface>) data;
+        m_valuesList = (List<ExtendedTableModelInterface>) data;
         dataChanged();
     }
     

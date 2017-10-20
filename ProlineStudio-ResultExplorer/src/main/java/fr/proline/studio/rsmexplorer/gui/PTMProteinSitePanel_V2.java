@@ -3,9 +3,8 @@ package fr.proline.studio.rsmexplorer.gui;
 
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.msi.dto.DProteinMatch;
-import fr.proline.studio.comparedata.AddDataAnalyzerButton;
-import fr.proline.studio.comparedata.CompareDataInterface;
-import fr.proline.studio.comparedata.GlobalTabelModelProviderInterface;
+import fr.proline.studio.extendedtablemodel.AddDataAnalyzerButton;
+import fr.proline.studio.extendedtablemodel.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dam.tasks.data.PTMSite;
 import fr.proline.studio.export.ExportButton;
@@ -27,8 +26,8 @@ import fr.proline.studio.rsmexplorer.actions.table.DisplayTablePopupMenu;
 import fr.proline.studio.rsmexplorer.gui.model.PtmProteinSiteTableModelProcessing;
 import fr.proline.studio.rsmexplorer.gui.model.PtmProtenSiteTableModel_V2;
 import fr.proline.studio.search.SearchToggleButton;
-import fr.proline.studio.table.CompoundTableModel;
-import fr.proline.studio.table.GlobalTableModelInterface;
+import fr.proline.studio.extendedtablemodel.CompoundTableModel;
+import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
 import fr.proline.studio.table.ImportTableSelectionInterface;
 import fr.proline.studio.table.LazyTable;
 import fr.proline.studio.table.TablePopupMenu;
@@ -57,6 +56,7 @@ import javax.swing.event.TableModelListener;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import org.jdesktop.swingx.JXTable;
+import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 
 /**
  *
@@ -263,7 +263,7 @@ public class PTMProteinSitePanel_V2 extends HourglassPanel implements DataBoxPan
 
             @Override
             protected void filteringDone() {
-                m_dataBox.propagateDataChanged(CompareDataInterface.class);
+                m_dataBox.propagateDataChanged(ExtendedTableModelInterface.class);
                 m_infoToggleButton.updateInfo();
             }
             

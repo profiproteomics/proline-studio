@@ -1,5 +1,6 @@
 package fr.proline.studio.table;
 
+import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.progress.ProgressBarDialog;
 import fr.proline.studio.progress.ProgressInterface;

@@ -3,8 +3,7 @@ package fr.proline.studio.rsmexplorer.gui.xic;
 import fr.proline.core.orm.lcms.Feature;
 import fr.proline.core.orm.lcms.Peakel;
 import fr.proline.core.orm.lcms.Peak;
-import fr.proline.studio.comparedata.CompareDataInterface;
-import fr.proline.studio.comparedata.ExtraDataType;
+import fr.proline.studio.extendedtablemodel.ExtraDataType;
 import fr.proline.studio.export.ExportModelUtilities;
 import fr.proline.studio.export.ExportFontData;
 import fr.proline.studio.filter.DoubleFilter;
@@ -14,7 +13,7 @@ import fr.proline.studio.graphics.PlotType;
 import fr.proline.studio.table.renderer.DefaultRightAlignRenderer;
 import fr.proline.studio.table.renderer.DoubleRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
-import fr.proline.studio.table.GlobalTableModelInterface;
+import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
 import fr.proline.studio.table.LazyData;
 import fr.proline.studio.table.LazyTable;
 import fr.proline.studio.table.LazyTableModel;
@@ -27,6 +26,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import javax.swing.table.TableCellRenderer;
+import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 
 /**
  *
@@ -324,9 +324,9 @@ public class PeakTableModel extends LazyTableModel implements GlobalTableModelIn
                 scanColor.add(m_color);
             }
         }
-        externalData.put(CompareDataInterface.EXTERNAL_DATA_VERTICAL_MARKER_VALUE, scanValues);
-        externalData.put(CompareDataInterface.EXTERNAL_DATA_VERTICAL_MARKER_TEXT, scanText);
-        externalData.put(CompareDataInterface.EXTERNAL_DATA_VERTICAL_MARKER_COLOR, scanColor);
+        externalData.put(ExtendedTableModelInterface.EXTERNAL_DATA_VERTICAL_MARKER_VALUE, scanValues);
+        externalData.put(ExtendedTableModelInterface.EXTERNAL_DATA_VERTICAL_MARKER_TEXT, scanText);
+        externalData.put(ExtendedTableModelInterface.EXTERNAL_DATA_VERTICAL_MARKER_COLOR, scanColor);
         return externalData;
     }
     

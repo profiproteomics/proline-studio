@@ -1,6 +1,5 @@
 package fr.proline.studio.graphics;
 
-import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.graphics.marker.coordinates.DataCoordinates;
 import fr.proline.studio.graphics.marker.LabelMarker;
 import fr.proline.studio.graphics.marker.LineMarker;
@@ -18,6 +17,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 
 /**
  * Stick plot
@@ -69,7 +69,7 @@ public class PlotStick extends PlotXYAbstract {
     private ArrayList<ParameterList> m_parameterListArray = null;
     
 
-    public PlotStick(BasePlotPanel plotPanel, CompareDataInterface compareDataInterface, CrossSelectionInterface crossSelectionInterface, int colX, int colY) {
+    public PlotStick(BasePlotPanel plotPanel, ExtendedTableModelInterface compareDataInterface, CrossSelectionInterface crossSelectionInterface, int colX, int colY) {
         super(plotPanel, PlotType.SCATTER_PLOT, compareDataInterface, crossSelectionInterface);
         int[] cols = new int[2]; //JPM.TODO enhance
         cols[COL_X_ID] = colX;
@@ -462,12 +462,12 @@ public class PlotStick extends PlotXYAbstract {
 
         // add marker if needed
         if (m_compareDataInterface.getExternalData() != null) {
-            if (m_compareDataInterface.getExternalData().containsKey(CompareDataInterface.EXTERNAL_DATA_VERTICAL_MARKER_VALUE)) {
-                Object o = m_compareDataInterface.getExternalData().get(CompareDataInterface.EXTERNAL_DATA_VERTICAL_MARKER_VALUE);
-                Object o2 = m_compareDataInterface.getExternalData().get(CompareDataInterface.EXTERNAL_DATA_VERTICAL_MARKER_TEXT);
+            if (m_compareDataInterface.getExternalData().containsKey(ExtendedTableModelInterface.EXTERNAL_DATA_VERTICAL_MARKER_VALUE)) {
+                Object o = m_compareDataInterface.getExternalData().get(ExtendedTableModelInterface.EXTERNAL_DATA_VERTICAL_MARKER_VALUE);
+                Object o2 = m_compareDataInterface.getExternalData().get(ExtendedTableModelInterface.EXTERNAL_DATA_VERTICAL_MARKER_TEXT);
                 List<Color> colors = null;
-                if (m_compareDataInterface.getExternalData().containsKey(CompareDataInterface.EXTERNAL_DATA_VERTICAL_MARKER_COLOR)) {
-                    colors = (List<Color>) m_compareDataInterface.getExternalData().get(CompareDataInterface.EXTERNAL_DATA_VERTICAL_MARKER_COLOR);
+                if (m_compareDataInterface.getExternalData().containsKey(ExtendedTableModelInterface.EXTERNAL_DATA_VERTICAL_MARKER_COLOR)) {
+                    colors = (List<Color>) m_compareDataInterface.getExternalData().get(ExtendedTableModelInterface.EXTERNAL_DATA_VERTICAL_MARKER_COLOR);
                 }
                 try {
                     List<Double> values = (List<Double>) o;

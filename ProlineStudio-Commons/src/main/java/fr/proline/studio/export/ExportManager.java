@@ -1,10 +1,10 @@
 package fr.proline.studio.export;
 
-import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.gui.DefaultDialog;
 import java.util.ArrayList;
 import javax.swing.JTable;
 import javax.swing.table.TableModel;
+import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 
 /**
  * Class used to do a local export of a table
@@ -123,7 +123,7 @@ public class ExportManager {
                             String text = exportInterface.getExportRowCell(row, col);
                              ArrayList<ExportFontData> stringFonts = null;
                             if (text == null) {
-                                Object o = ((CompareDataInterface) m_model).getDataValueAt(row, col);
+                                Object o = ((ExtendedTableModelInterface) m_model).getDataValueAt(row, col);
                                 if (o != null) {
                                     text = o.toString();
                                 }
@@ -132,12 +132,12 @@ public class ExportManager {
                             }
                             m_exporter.addCell(text, stringFonts);
                         }
-                    } else if (m_model instanceof CompareDataInterface) {
+                    } else if (m_model instanceof ExtendedTableModelInterface) {
                         m_exporter.startRow();
                         for (int i = 0; i < nbCol; i++) {
                             int col = m_colsInModel[i];
                             String text = null;
-                            Object o = ((CompareDataInterface) m_model).getDataValueAt(row, col);
+                            Object o = ((ExtendedTableModelInterface) m_model).getDataValueAt(row, col);
                             if (o != null) {
                                 text = o.toString();
                             }

@@ -6,14 +6,14 @@
 package fr.proline.mzscope.ui;
 
 import fr.proline.mzscope.model.Signal;
-import fr.proline.studio.comparedata.CompareDataInterface;
-import fr.proline.studio.comparedata.ExtraDataType;
+import fr.proline.studio.extendedtablemodel.ExtraDataType;
 import fr.proline.studio.graphics.PlotInformation;
 import java.awt.Color;
 import java.awt.Container;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 
 /**
  *
@@ -30,7 +30,7 @@ public class SignalEditorBuilder {
     }
 }
 
-class SignalWrapper implements CompareDataInterface {
+class SignalWrapper implements ExtendedTableModelInterface {
 
    private Signal m_signal;
    private String m_title;

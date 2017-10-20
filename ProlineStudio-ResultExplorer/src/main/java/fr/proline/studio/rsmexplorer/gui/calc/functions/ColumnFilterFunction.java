@@ -11,7 +11,7 @@ import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
 import fr.proline.studio.rsmexplorer.gui.calc.ProcessCallbackInterface;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.FunctionGraphNode;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphConnector;
-import fr.proline.studio.table.GlobalTableModelInterface;
+import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
 import java.util.ArrayList;
 
 /**

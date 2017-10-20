@@ -1,8 +1,8 @@
 package fr.proline.studio.python.data;
 
 import fr.proline.studio.python.util.Conversion;
-import fr.proline.studio.table.CompoundTableModel;
-import fr.proline.studio.table.GlobalTableModelInterface;
+import fr.proline.studio.extendedtablemodel.CompoundTableModel;
+import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
 import fr.proline.studio.table.LazyData;
 import java.util.ArrayList;
 import org.python.core.Py;

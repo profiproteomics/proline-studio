@@ -1,14 +1,14 @@
 package fr.proline.studio.filter;
 
-import fr.proline.studio.comparedata.ExtraDataType;
+import fr.proline.studio.extendedtablemodel.ExtraDataType;
 import fr.proline.studio.export.ExportFontData;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
 import fr.proline.studio.progress.ProgressInterface;
-import fr.proline.studio.table.ChildModelInterface;
+import fr.proline.studio.extendedtablemodel.ChildModelInterface;
 import fr.proline.studio.table.DecoratedTableModel;
 import fr.proline.studio.table.DecoratedTableModelInterface;
-import fr.proline.studio.table.GlobalTableModelInterface;
+import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
 import fr.proline.studio.table.LazyData;
 import java.util.ArrayList;
 import java.util.HashSet;

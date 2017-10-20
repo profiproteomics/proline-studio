@@ -1,7 +1,7 @@
 package fr.proline.studio.python.model;
 
 import fr.proline.studio.filter.FilterTableModel;
-import fr.proline.studio.table.GlobalTableModelInterface;
+import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
 
 /**
  * Abstract Model to do a join/diff between two tables by joining two columns which correspond to a key.

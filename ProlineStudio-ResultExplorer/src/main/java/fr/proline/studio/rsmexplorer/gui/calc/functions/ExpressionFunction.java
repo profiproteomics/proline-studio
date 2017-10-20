@@ -19,7 +19,7 @@ import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
 import fr.proline.studio.rsmexplorer.gui.calc.ProcessCallbackInterface;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.FunctionGraphNode;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphConnector;
-import fr.proline.studio.table.GlobalTableModelInterface;
+import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
 import fr.proline.studio.table.TableDefaultRendererManager;
 import fr.proline.studio.table.renderer.DefaultRightAlignRenderer;
 import fr.proline.studio.table.renderer.DoubleRenderer;

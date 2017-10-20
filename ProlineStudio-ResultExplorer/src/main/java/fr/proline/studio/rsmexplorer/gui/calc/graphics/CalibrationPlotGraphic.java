@@ -19,7 +19,7 @@ import fr.proline.studio.rsmexplorer.gui.calc.ProcessCallbackInterface;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.AbstractConnectedGraphObject;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphConnector;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphicGraphNode;
-import fr.proline.studio.table.GlobalTableModelInterface;
+import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
 import fr.proline.studio.types.LogInfo;
 import fr.proline.studio.types.PValue;
 import java.util.ArrayList;

@@ -1,6 +1,6 @@
 package fr.proline.studio.pattern;
 
-import fr.proline.studio.comparedata.GlobalTabelModelProviderInterface;
+import fr.proline.studio.extendedtablemodel.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import fr.proline.studio.dam.tasks.AbstractDatabaseTask;

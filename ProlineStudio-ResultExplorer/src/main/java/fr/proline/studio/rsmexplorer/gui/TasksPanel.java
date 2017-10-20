@@ -1,6 +1,6 @@
 package fr.proline.studio.rsmexplorer.gui;
 
-import fr.proline.studio.comparedata.ExtraDataType;
+import fr.proline.studio.extendedtablemodel.ExtraDataType;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import fr.proline.studio.dam.taskinfo.TaskInfoManager;
 import fr.proline.studio.dpm.data.JMSNotificationMessage;
@@ -21,10 +21,10 @@ import fr.proline.studio.rsmexplorer.gui.dialog.GetSystemInfoButtonAction;
 import fr.proline.studio.rsmexplorer.gui.renderer.PercentageRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.ScoreRenderer;
 import fr.proline.studio.table.AbstractTableAction;
-import fr.proline.studio.table.CompoundTableModel;
+import fr.proline.studio.extendedtablemodel.CompoundTableModel;
 import fr.proline.studio.table.DecoratedMarkerTable;
 import fr.proline.studio.table.DecoratedTableModel;
-import fr.proline.studio.table.GlobalTableModelInterface;
+import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
 import fr.proline.studio.table.LazyData;
 import fr.proline.studio.table.TablePopupMenu;
 import fr.proline.studio.utils.IconManager;

@@ -9,8 +9,7 @@ import fr.proline.core.orm.msi.dto.DMasterQuantPeptide;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.core.orm.uds.dto.DMasterQuantitationChannel;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
-import fr.proline.studio.comparedata.CompareDataInterface;
-import fr.proline.studio.comparedata.GlobalTabelModelProviderInterface;
+import fr.proline.studio.extendedtablemodel.GlobalTabelModelProviderInterface;
 import fr.proline.core.orm.msi.dto.DMasterQuantPeptideIon;
 import fr.proline.core.orm.msi.dto.DPeptideInstance;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
@@ -26,6 +25,7 @@ import fr.proline.studio.rsmexplorer.gui.xic.XicPeptideIonPanel;
 import fr.proline.studio.types.XicMode;
 import java.util.ArrayList;
 import java.util.List;
+import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 
 /**
  *
@@ -83,7 +83,7 @@ public class DataboxXicPeptideIon extends AbstractDataBox {
         registerOutParameter(outParameter);
 
         outParameter = new GroupParameter();
-        outParameter.addParameter(CompareDataInterface.class, true);
+        outParameter.addParameter(ExtendedTableModelInterface.class, true);
         registerOutParameter(outParameter);
 
         
@@ -178,7 +178,7 @@ public class DataboxXicPeptideIon extends AbstractDataBox {
 
                 if (finished) {
                     unregisterTask(taskId);
-                    propagateDataChanged(CompareDataInterface.class);
+                    propagateDataChanged(ExtendedTableModelInterface.class);
                 }
             }
         };
@@ -242,7 +242,7 @@ public class DataboxXicPeptideIon extends AbstractDataBox {
             if (parameterType.equals(DDataset.class)) {
                 return m_dataset;
             }
-            if (parameterType.equals(CompareDataInterface.class)) {
+            if (parameterType.equals(ExtendedTableModelInterface.class)) {
                 return ((GlobalTabelModelProviderInterface) getDataBoxPanelInterface()).getGlobalTableModelInterface();
             }
             if (parameterType.equals(CrossSelectionInterface.class)) {

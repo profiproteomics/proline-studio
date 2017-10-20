@@ -1,7 +1,6 @@
 package fr.proline.studio.graphics;
 
-import fr.proline.studio.comparedata.CompareDataInterface;
-import fr.proline.studio.comparedata.StatsModel;
+import fr.proline.studio.extendedtablemodel.StatsModel;
 import fr.proline.studio.graphics.marker.AbstractMarker;
 import fr.proline.studio.graphics.marker.coordinates.DataCoordinates;
 import fr.proline.studio.graphics.marker.LabelMarker;
@@ -30,6 +29,7 @@ import javax.swing.AbstractAction;
 import javax.swing.JPopupMenu;
 import javax.swing.JTextField;
 import org.openide.windows.WindowManager;
+import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 
 /**
  * Histogram Plot
@@ -66,7 +66,7 @@ public class PlotHistogram extends PlotXYAbstract {
     
     private boolean m_asPercentage = false;
     
-    public PlotHistogram(BasePlotPanel plotPanel, CompareDataInterface compareDataInterface, CrossSelectionInterface crossSelectionInterface, int colX, String paramZ) {
+    public PlotHistogram(BasePlotPanel plotPanel, ExtendedTableModelInterface compareDataInterface, CrossSelectionInterface crossSelectionInterface, int colX, String paramZ) {
         super(plotPanel, PlotType.HISTOGRAM_PLOT, compareDataInterface, crossSelectionInterface);
         int[] cols = new int[2]; //JPM.TODO enhance
         cols[COL_X_ID] = colX;

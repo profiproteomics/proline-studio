@@ -23,7 +23,7 @@ import fr.proline.studio.rsmexplorer.gui.calc.ProcessCallbackInterface;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.AbstractConnectedGraphObject;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphConnector;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphicGraphNode;
-import fr.proline.studio.table.GlobalTableModelInterface;
+import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
 import fr.proline.studio.types.GroupSelection;
 import fr.proline.studio.types.QuantitationType;
 import fr.proline.studio.types.XicGroup;

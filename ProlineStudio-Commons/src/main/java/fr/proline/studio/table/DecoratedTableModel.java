@@ -1,6 +1,6 @@
 package fr.proline.studio.table;
 
-import fr.proline.studio.comparedata.ExtraDataType;
+import fr.proline.studio.extendedtablemodel.ExtraDataType;
 import java.util.ArrayList;
 import javax.swing.table.AbstractTableModel;
 import java.util.HashMap;

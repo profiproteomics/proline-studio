@@ -3,9 +3,8 @@ package fr.proline.studio.rsmexplorer.gui.xic;
 
 import fr.proline.core.orm.msi.dto.DMasterQuantPeptide;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
-import fr.proline.studio.comparedata.AddDataAnalyzerButton;
-import fr.proline.studio.comparedata.CompareDataInterface;
-import fr.proline.studio.comparedata.GlobalTabelModelProviderInterface;
+import fr.proline.studio.extendedtablemodel.AddDataAnalyzerButton;
+import fr.proline.studio.extendedtablemodel.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.export.ExportModelInterface;
@@ -32,9 +31,9 @@ import fr.proline.studio.python.data.TableInfo;
 import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
 import fr.proline.studio.rsmexplorer.actions.table.DisplayTablePopupMenu;
 import fr.proline.studio.search.SearchToggleButton;
-import fr.proline.studio.table.CompoundTableModel;
+import fr.proline.studio.extendedtablemodel.CompoundTableModel;
 import fr.proline.studio.table.CustomColumnControlButton;
-import fr.proline.studio.table.GlobalTableModelInterface;
+import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
 import fr.proline.studio.utils.IconManager;
 import fr.proline.studio.table.LazyTable;
 import fr.proline.studio.table.TablePopupMenu;
@@ -65,6 +64,7 @@ import javax.swing.table.TableColumn;
 import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.table.TableColumnExt;
 import org.openide.windows.WindowManager;
+import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 
 /**
  *
@@ -216,7 +216,7 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
 
             @Override
             protected void filteringDone() {
-                m_dataBox.propagateDataChanged(CompareDataInterface.class);
+                m_dataBox.propagateDataChanged(ExtendedTableModelInterface.class);
                 m_infoToggleButton.updateInfo();
             }
             

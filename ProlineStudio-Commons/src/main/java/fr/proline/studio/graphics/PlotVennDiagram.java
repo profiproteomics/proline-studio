@@ -1,6 +1,5 @@
 package fr.proline.studio.graphics;
 
-import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.graphics.marker.LabelMarker;
 import fr.proline.studio.graphics.marker.coordinates.PercentageCoordinates;
 import fr.proline.studio.graphics.venndiagram.Circle;
@@ -24,6 +23,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import javax.swing.JSlider;
 import javax.swing.JSpinner;
+import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 
 /**
  *
@@ -47,7 +47,7 @@ public class PlotVennDiagram extends PlotMultiDataAbstract {
     private final ParameterList m_colorParameterList;
     private final ArrayList<ColorParameter> m_colorAreaParameterList;
     
-    public PlotVennDiagram(BasePlotPanel plotPanel, CompareDataInterface compareDataInterface, CrossSelectionInterface crossSelectionInterface, int[] cols) {
+    public PlotVennDiagram(BasePlotPanel plotPanel, ExtendedTableModelInterface compareDataInterface, CrossSelectionInterface crossSelectionInterface, int[] cols) {
         super(plotPanel, PlotType.VENN_DIAGRAM_PLOT, compareDataInterface, crossSelectionInterface);
         
         update(cols, null); 

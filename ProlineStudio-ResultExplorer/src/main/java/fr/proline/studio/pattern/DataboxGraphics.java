@@ -1,8 +1,8 @@
 package fr.proline.studio.pattern;
 
-import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.rsmexplorer.gui.GraphicsPanel;
+import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 
 /**
  *
@@ -10,7 +10,7 @@ import fr.proline.studio.rsmexplorer.gui.GraphicsPanel;
  */
 public class DataboxGraphics extends AbstractDataBox  {
 
-    private CompareDataInterface m_values = null;
+    private ExtendedTableModelInterface m_values = null;
 
     private boolean m_defaultLocked = false;
     
@@ -30,7 +30,7 @@ public class DataboxGraphics extends AbstractDataBox  {
         // Register Possible in parameters
         // One ResultSummary
         GroupParameter inParameter = new GroupParameter();
-        inParameter.addParameter(CompareDataInterface.class, false);
+        inParameter.addParameter(ExtendedTableModelInterface.class, false);
         registerInParameter(inParameter);
         
     }
@@ -45,14 +45,14 @@ public class DataboxGraphics extends AbstractDataBox  {
 
     @Override
     public void dataChanged() {
-        final CompareDataInterface values = (m_values!=null) ? m_values : (CompareDataInterface) m_previousDataBox.getData(false, CompareDataInterface.class);
+        final ExtendedTableModelInterface values = (m_values!=null) ? m_values : (ExtendedTableModelInterface) m_previousDataBox.getData(false, ExtendedTableModelInterface.class);
         final CrossSelectionInterface crossSelectionInterface = (m_values!=null) ? null : (CrossSelectionInterface) m_previousDataBox.getData(false, CrossSelectionInterface.class);
         ((GraphicsPanel)getDataBoxPanelInterface()).setData(values, crossSelectionInterface);
     }
     
     @Override
     public void setEntryData(Object data) {
-        m_values = (CompareDataInterface) data;
+        m_values = (ExtendedTableModelInterface) data;
         dataChanged();
     }
     

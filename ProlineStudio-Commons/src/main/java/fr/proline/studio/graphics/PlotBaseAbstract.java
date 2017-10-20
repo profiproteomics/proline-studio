@@ -1,7 +1,6 @@
 package fr.proline.studio.graphics;
 
-import fr.proline.studio.comparedata.CompareDataInterface;
-import fr.proline.studio.comparedata.LockedDataModel;
+import fr.proline.studio.extendedtablemodel.LockedDataModel;
 import fr.proline.studio.graphics.cursor.AbstractCursor;
 import fr.proline.studio.graphics.marker.AbstractMarker;
 import fr.proline.studio.parameter.ParameterList;
@@ -9,6 +8,7 @@ import java.awt.Graphics2D;
 import java.awt.geom.Path2D;
 import java.util.ArrayList;
 import javax.swing.JPopupMenu;
+import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 
 /**
  *
@@ -21,7 +21,7 @@ public abstract class PlotBaseAbstract implements Axis.EnumXInterface, Axis.Enum
     
     protected PlotType m_plotType;
     
-    protected CompareDataInterface m_compareDataInterface = null;
+    protected ExtendedTableModelInterface m_compareDataInterface = null;
     protected CrossSelectionInterface m_crossSelectionInterface = null;
     protected int[] m_cols;
     protected String m_parameterZ;
@@ -65,7 +65,7 @@ public abstract class PlotBaseAbstract implements Axis.EnumXInterface, Axis.Enum
         DOUBLE_BUFFERING
     }
     
-    public PlotBaseAbstract(BasePlotPanel plotPanel, PlotType plotType, CompareDataInterface compareDataInterface, CrossSelectionInterface crossSelectionInterface) {
+    public PlotBaseAbstract(BasePlotPanel plotPanel, PlotType plotType, ExtendedTableModelInterface compareDataInterface, CrossSelectionInterface crossSelectionInterface) {
         m_plotPanel = plotPanel;
         m_plotType = plotType;
         m_compareDataInterface = (m_locked) ? new LockedDataModel(compareDataInterface) : compareDataInterface;

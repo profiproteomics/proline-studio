@@ -4,8 +4,7 @@ import fr.proline.core.orm.msi.Peptide;
 import fr.proline.core.orm.msi.dto.DMsQuery;
 import fr.proline.core.orm.msi.ResultSet;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
-import fr.proline.studio.comparedata.CompareDataInterface;
-import fr.proline.studio.comparedata.GlobalTabelModelProviderInterface;
+import fr.proline.studio.extendedtablemodel.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseLoadPeptideMatchTask;
 import fr.proline.studio.dam.tasks.SubTask;
@@ -13,6 +12,7 @@ import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.rsmexplorer.gui.PeptideMatchPanel;
 import java.util.ArrayList;
 import java.util.List;
+import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 
 /**
  * display Peptide Matches for a given MsQuey
@@ -55,7 +55,7 @@ public class DataboxRsetPSMForMsQuery extends AbstractDataBox{
         registerOutParameter(outParameter);
         
         outParameter = new GroupParameter();
-        outParameter.addParameter(CompareDataInterface.class, false);
+        outParameter.addParameter(ExtendedTableModelInterface.class, false);
         registerOutParameter(outParameter);
         
         outParameter = new GroupParameter();
@@ -109,7 +109,7 @@ public class DataboxRsetPSMForMsQuery extends AbstractDataBox{
                
                 if (finished) {
                     unregisterTask(taskId);
-                    propagateDataChanged(CompareDataInterface.class);
+                    propagateDataChanged(ExtendedTableModelInterface.class);
                 }
             }
         };
@@ -129,7 +129,7 @@ public class DataboxRsetPSMForMsQuery extends AbstractDataBox{
             if (parameterType.equals(DPeptideMatch.class)) {
                 return ((PeptideMatchPanel)getDataBoxPanelInterface()).getSelectedPeptideMatch();
             }
-            if (parameterType.equals(CompareDataInterface.class)) {
+            if (parameterType.equals(ExtendedTableModelInterface.class)) {
                 return ((GlobalTabelModelProviderInterface) getDataBoxPanelInterface()).getGlobalTableModelInterface();
             }
             if (parameterType.equals(CrossSelectionInterface.class)) {

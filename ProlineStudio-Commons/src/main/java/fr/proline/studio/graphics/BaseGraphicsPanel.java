@@ -1,7 +1,6 @@
 package fr.proline.studio.graphics;
 
-import fr.proline.studio.comparedata.CompareDataInterface;
-import fr.proline.studio.comparedata.LockedDataModel;
+import fr.proline.studio.extendedtablemodel.LockedDataModel;
 import fr.proline.studio.export.ExportButton;
 import static fr.proline.studio.graphics.PlotBaseAbstract.COL_X_ID;
 import static fr.proline.studio.graphics.PlotBaseAbstract.COL_Y_ID;
@@ -30,6 +29,7 @@ import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 import org.openide.windows.WindowManager;
 import fr.proline.studio.graphics.BasePlotPanel.PlotToolbarListener;
+import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 
 /**
  *
@@ -52,7 +52,7 @@ public class BaseGraphicsPanel extends HourglassPanel implements PlotToolbarList
     
     private PlotBaseAbstract m_plotGraphics = null;
     
-    private CompareDataInterface m_values = null;
+    private ExtendedTableModelInterface m_values = null;
     private CrossSelectionInterface m_crossSelectionInterface = null;
     
     private boolean m_isUpdatingCbx = false;
@@ -474,7 +474,7 @@ public class BaseGraphicsPanel extends HourglassPanel implements PlotToolbarList
          
     }
     
-    public void setData(CompareDataInterface values, CrossSelectionInterface crossSelectionInterface) {
+    public void setData(ExtendedTableModelInterface values, CrossSelectionInterface crossSelectionInterface) {
         if (m_plotPanel.isLocked()) {
             return;
         }
@@ -488,7 +488,7 @@ public class BaseGraphicsPanel extends HourglassPanel implements PlotToolbarList
             m_plotPanel.lockData(m_dataLocked);
         }
     }
-    private void setDataImpl(CompareDataInterface values, CrossSelectionInterface crossSelectionInterface) {
+    private void setDataImpl(ExtendedTableModelInterface values, CrossSelectionInterface crossSelectionInterface) {
 
         m_values = values;
         m_crossSelectionInterface = crossSelectionInterface;

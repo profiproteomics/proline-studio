@@ -1,11 +1,11 @@
 package fr.proline.studio.rsmexplorer.actions.table;
 
-import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.filter.actions.ClearRestrainAction;
 import fr.proline.studio.filter.actions.RestrainAction;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.table.TablePopupMenu;
+import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 
 /**
  *
@@ -29,13 +29,13 @@ public class DisplayTablePopupMenu extends TablePopupMenu {
         addAction(new RestrainAction() {
             @Override
             public void filteringDone() {
-                m_databoxProvider.getDataBox().propagateDataChanged(CompareDataInterface.class);
+                m_databoxProvider.getDataBox().propagateDataChanged(ExtendedTableModelInterface.class);
             }
         });
         addAction(new ClearRestrainAction() {
             @Override
             public void filteringDone() {
-                m_databoxProvider.getDataBox().propagateDataChanged(CompareDataInterface.class);
+                m_databoxProvider.getDataBox().propagateDataChanged(ExtendedTableModelInterface.class);
             }
         });
     }

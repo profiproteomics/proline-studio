@@ -1,6 +1,7 @@
 package fr.proline.studio.table;
 
-import fr.proline.studio.comparedata.ExtraDataType;
+import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
+import fr.proline.studio.extendedtablemodel.ExtraDataType;
 import fr.proline.studio.export.ExportFontData;
 import fr.proline.studio.filter.ConvertValueInterface;
 import fr.proline.studio.filter.Filter;

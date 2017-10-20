@@ -6,7 +6,7 @@
 
 package fr.proline.mzscope.ui.model;
 
-import fr.proline.studio.comparedata.ExtraDataType;
+import fr.proline.studio.extendedtablemodel.ExtraDataType;
 import fr.proline.studio.export.ExportFontData;
 import fr.proline.studio.filter.DoubleFilter;
 import fr.proline.studio.filter.Filter;
@@ -14,7 +14,7 @@ import fr.proline.studio.filter.IntegerFilter;
 import fr.proline.studio.filter.StringFilter;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
-import fr.proline.studio.table.GlobalTableModelInterface;
+import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
 import fr.proline.studio.table.LazyData;
 import java.util.ArrayList;
 import java.util.HashSet;

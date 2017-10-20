@@ -2,8 +2,7 @@ package fr.proline.studio.rsmexplorer.gui.xic;
 
 import fr.proline.core.orm.lcms.Feature;
 import fr.proline.core.orm.lcms.dto.DFeature;
-import fr.proline.studio.comparedata.CompareDataInterface;
-import fr.proline.studio.comparedata.GlobalTabelModelProviderInterface;
+import fr.proline.studio.extendedtablemodel.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.export.ExportModelInterface;
@@ -25,8 +24,8 @@ import fr.proline.studio.progress.ProgressBarDialog;
 import fr.proline.studio.progress.ProgressInterface;
 import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
 import fr.proline.studio.rsmexplorer.actions.table.DisplayTablePopupMenu;
-import fr.proline.studio.table.CompoundTableModel;
-import fr.proline.studio.table.GlobalTableModelInterface;
+import fr.proline.studio.extendedtablemodel.CompoundTableModel;
+import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
 import fr.proline.studio.table.LazyTable;
 import fr.proline.studio.table.TablePopupMenu;
 import fr.proline.studio.utils.IconManager;
@@ -51,6 +50,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.TableModelListener;
 import org.jdesktop.swingx.JXTable;
 import org.openide.windows.WindowManager;
+import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 
 /**
  *
@@ -153,7 +153,7 @@ public class XicFeaturePanel  extends HourglassPanel implements DataBoxPanelInte
 
             @Override
             protected void filteringDone() {
-                 m_dataBox.propagateDataChanged(CompareDataInterface.class);
+                 m_dataBox.propagateDataChanged(ExtendedTableModelInterface.class);
             }
         };
 
@@ -207,7 +207,7 @@ public class XicFeaturePanel  extends HourglassPanel implements DataBoxPanelInte
                     }
                 }
                 setGraphicTypeToolTip();
-                m_dataBox.propagateDataChanged(CompareDataInterface.class);
+                m_dataBox.propagateDataChanged(ExtendedTableModelInterface.class);
             }
         });
         if(m_canGraph) {
@@ -413,7 +413,7 @@ public class XicFeaturePanel  extends HourglassPanel implements DataBoxPanelInte
             }
  
             m_dataBox.propagateDataChanged(Feature.class);
-            m_dataBox.propagateDataChanged(CompareDataInterface.class);
+            m_dataBox.propagateDataChanged(ExtendedTableModelInterface.class);
 
         }
         

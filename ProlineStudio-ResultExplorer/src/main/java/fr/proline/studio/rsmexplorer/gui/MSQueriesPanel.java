@@ -1,9 +1,8 @@
 package fr.proline.studio.rsmexplorer.gui;
 
 import fr.proline.core.orm.msi.dto.DMsQuery;
-import fr.proline.studio.comparedata.AddDataAnalyzerButton;
-import fr.proline.studio.comparedata.CompareDataInterface;
-import fr.proline.studio.comparedata.GlobalTabelModelProviderInterface;
+import fr.proline.studio.extendedtablemodel.AddDataAnalyzerButton;
+import fr.proline.studio.extendedtablemodel.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.filter.FilterButton;
@@ -23,9 +22,9 @@ import fr.proline.studio.progress.ProgressInterface;
 import fr.proline.studio.python.data.TableInfo;
 import fr.proline.studio.rsmexplorer.actions.table.DisplayTablePopupMenu;
 import fr.proline.studio.rsmexplorer.gui.model.MSQueriesTableModel;
-import fr.proline.studio.table.CompoundTableModel;
+import fr.proline.studio.extendedtablemodel.CompoundTableModel;
 import fr.proline.studio.table.CustomColumnControlButton;
-import fr.proline.studio.table.GlobalTableModelInterface;
+import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
 import fr.proline.studio.table.LazyTable;
 import fr.proline.studio.table.TablePopupMenu;
 import java.awt.BorderLayout;
@@ -47,6 +46,7 @@ import javax.swing.JToolBar;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.TableModelListener;
 import org.jdesktop.swingx.JXTable;
+import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 
 /**
  * panel to display MSQueries 
@@ -142,7 +142,7 @@ public class MSQueriesPanel extends HourglassPanel implements DataBoxPanelInterf
 
             @Override
             protected void filteringDone() {
-                m_dataBox.propagateDataChanged(CompareDataInterface.class);
+                m_dataBox.propagateDataChanged(ExtendedTableModelInterface.class);
                 m_infoToggleButton.updateInfo();
             }
             

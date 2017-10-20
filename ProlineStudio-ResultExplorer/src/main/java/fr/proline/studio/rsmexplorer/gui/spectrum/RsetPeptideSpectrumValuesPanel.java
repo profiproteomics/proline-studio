@@ -4,10 +4,9 @@ import fr.proline.core.orm.msi.Peptide;
 import fr.proline.core.orm.msi.dto.DSpectrum;
 import fr.proline.core.orm.msi.dto.DMsQuery;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
-import fr.proline.studio.comparedata.AddDataAnalyzerButton;
-import fr.proline.studio.comparedata.CompareDataInterface;
-import fr.proline.studio.comparedata.ExtraDataType;
-import fr.proline.studio.comparedata.GlobalTabelModelProviderInterface;
+import fr.proline.studio.extendedtablemodel.AddDataAnalyzerButton;
+import fr.proline.studio.extendedtablemodel.ExtraDataType;
+import fr.proline.studio.extendedtablemodel.GlobalTabelModelProviderInterface;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.export.ExportModelUtilities;
 import fr.proline.studio.export.ExportFontData;
@@ -30,10 +29,10 @@ import fr.proline.studio.progress.ProgressInterface;
 import fr.proline.studio.python.data.TableInfo;
 import fr.proline.studio.table.renderer.DefaultRightAlignRenderer;
 import fr.proline.studio.table.renderer.DoubleRenderer;
-import fr.proline.studio.table.CompoundTableModel;
+import fr.proline.studio.extendedtablemodel.CompoundTableModel;
 import fr.proline.studio.table.DecoratedTable;
 import fr.proline.studio.table.DecoratedTableModel;
-import fr.proline.studio.table.GlobalTableModelInterface;
+import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
 import fr.proline.studio.table.LazyData;
 import fr.proline.studio.table.TableDefaultRendererManager;
 import fr.proline.studio.table.TablePopupMenu;
@@ -60,6 +59,7 @@ import org.jdesktop.swingx.JXTable;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 
 /**
  *
@@ -146,7 +146,7 @@ public class RsetPeptideSpectrumValuesPanel extends HourglassPanel implements Da
 
             @Override
             protected void filteringDone() {
-                m_dataBox.propagateDataChanged(CompareDataInterface.class);
+                m_dataBox.propagateDataChanged(ExtendedTableModelInterface.class);
             }
 
         };
@@ -301,13 +301,13 @@ public class RsetPeptideSpectrumValuesPanel extends HourglassPanel implements Da
             popupMenu.addAction(new RestrainAction() {
                 @Override
                 public void filteringDone() {
-                    m_dataBox.propagateDataChanged(CompareDataInterface.class);
+                    m_dataBox.propagateDataChanged(ExtendedTableModelInterface.class);
                 }
             });
             popupMenu.addAction(new ClearRestrainAction() {
                 @Override
                 public void filteringDone() {
-                    m_dataBox.propagateDataChanged(CompareDataInterface.class);
+                    m_dataBox.propagateDataChanged(ExtendedTableModelInterface.class);
                 }
             });
 

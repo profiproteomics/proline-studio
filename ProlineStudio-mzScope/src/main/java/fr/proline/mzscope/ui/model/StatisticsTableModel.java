@@ -6,20 +6,20 @@
 package fr.proline.mzscope.ui.model;
 
 
-import fr.proline.studio.comparedata.CompareDataInterface;
-import fr.proline.studio.comparedata.ExtraDataType;
+import fr.proline.studio.extendedtablemodel.ExtraDataType;
 import fr.proline.studio.graphics.PlotInformation;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Map;
 import javax.swing.table.AbstractTableModel;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 
 /**
  *
  * @author CB205360
  */
-public class StatisticsTableModel extends AbstractTableModel implements CompareDataInterface {
+public class StatisticsTableModel extends AbstractTableModel implements ExtendedTableModelInterface {
 
     public static final int COLTYPE_TIME = 0;
     public static final int COLTYPE_METRIC = 1;

@@ -1,7 +1,7 @@
 
 package fr.proline.studio.rsmexplorer.gui.model;
 
-import fr.proline.studio.comparedata.ExtraDataType;
+import fr.proline.studio.extendedtablemodel.ExtraDataType;
 import fr.proline.studio.dam.data.ClearProjectData;
 import fr.proline.studio.export.ExportFontData;
 import fr.proline.studio.filter.Filter;
@@ -9,7 +9,7 @@ import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
 import fr.proline.studio.rsmexplorer.gui.renderer.TimestampRenderer;
 import fr.proline.studio.table.DecoratedTableModel;
-import fr.proline.studio.table.GlobalTableModelInterface;
+import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
 import fr.proline.studio.table.LazyData;
 import fr.proline.studio.table.TableDefaultRendererManager;
 import fr.proline.studio.table.renderer.DefaultLeftAlignRenderer;

@@ -1,19 +1,19 @@
 package fr.proline.mzscope.ui.model;
 
 import fr.proline.mzscope.model.Spectrum;
-import fr.proline.studio.comparedata.CompareDataInterface;
-import fr.proline.studio.comparedata.ExtraDataType;
+import fr.proline.studio.extendedtablemodel.ExtraDataType;
 import fr.proline.studio.graphics.PlotInformation;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Map;
 import javax.swing.table.AbstractTableModel;
+import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 
 /**
  * data for scan
  * @author MB243701
  */
-public class ScanTableModel extends AbstractTableModel implements CompareDataInterface{
+public class ScanTableModel extends AbstractTableModel implements ExtendedTableModelInterface{
     private static final String[] m_columnNames = {"Masses", "Intensities", "Retention Time", "MS Level"};
     
     public static final int COLTYPE_SCAN_MASS = 0;

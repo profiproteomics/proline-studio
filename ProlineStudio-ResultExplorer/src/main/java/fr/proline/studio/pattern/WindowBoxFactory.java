@@ -1,7 +1,6 @@
 package fr.proline.studio.pattern;
 
 import fr.proline.core.orm.msi.ResultSet;
-import fr.proline.studio.comparedata.CompareDataInterface;
 import java.util.HashMap;
 
 import fr.proline.studio.gui.SplittedPanelContainer;
@@ -20,6 +19,7 @@ import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.border.EmptyBorder;
+import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 
 /**
  *
@@ -209,7 +209,7 @@ public class WindowBoxFactory {
         return winBox;
     }
 
-    public static WindowBox getGraphicsWindowBox(String fullName, CompareDataInterface srcDataInterface, boolean locked) {
+    public static WindowBox getGraphicsWindowBox(String fullName, ExtendedTableModelInterface srcDataInterface, boolean locked) {
         AbstractDataBox[] boxes = new AbstractDataBox[1];
         boxes[0] = new DataboxGraphics(locked);
         IconManager.IconType iconType = IconManager.IconType.CHART;

@@ -1,12 +1,14 @@
-package fr.proline.studio.table;
+package fr.proline.studio.extendedtablemodel;
 
-import fr.proline.studio.comparedata.ExtraDataType;
+import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
+import fr.proline.studio.extendedtablemodel.ExtraDataType;
 import fr.proline.studio.export.ExportFontData;
 import fr.proline.studio.filter.Filter;
 import fr.proline.studio.filter.FilterTableModelInterface;
 import fr.proline.studio.filter.FilterTableModel;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
+import fr.proline.studio.table.LazyData;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;

@@ -3,8 +3,7 @@ package fr.proline.studio.pattern;
 
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.dto.DPeptideInstance;
-import fr.proline.studio.comparedata.CompareDataInterface;
-import fr.proline.studio.comparedata.GlobalTabelModelProviderInterface;
+import fr.proline.studio.extendedtablemodel.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabasePTMProteinSiteTask_V2;
@@ -13,6 +12,7 @@ import fr.proline.studio.dam.tasks.data.PTMSite;
 import fr.proline.studio.rsmexplorer.gui.PeptidesPTMSitePanel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 
 /**
  *
@@ -69,7 +69,7 @@ public class DataBoxPTMSitePeptides extends AbstractDataBox {
         if(ptmSite.isAllPeptideMatchesLoaded()){
             m_previousTaskId = null;
             ((PeptidesPTMSitePanel) getDataBoxPanelInterface()).setData(ptmSite, null);           
-            propagateDataChanged(CompareDataInterface.class);
+            propagateDataChanged(ExtendedTableModelInterface.class);
             return;
         }
         
@@ -96,7 +96,7 @@ public class DataBoxPTMSitePeptides extends AbstractDataBox {
                 if (finished) {
                     m_previousTaskId = null;
                     unregisterTask(taskId);
-                    propagateDataChanged(CompareDataInterface.class);
+                    propagateDataChanged(ExtendedTableModelInterface.class);
                 }
             }
         };
@@ -136,7 +136,7 @@ public class DataBoxPTMSitePeptides extends AbstractDataBox {
                     return selectedParentPepInstance;
             }
             
-             if (parameterType.equals(CompareDataInterface.class)) {
+             if (parameterType.equals(ExtendedTableModelInterface.class)) {
                 return ((GlobalTabelModelProviderInterface) getDataBoxPanelInterface()).getGlobalTableModelInterface();
             }
         }

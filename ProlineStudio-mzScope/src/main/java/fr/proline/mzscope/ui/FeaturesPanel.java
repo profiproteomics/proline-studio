@@ -3,8 +3,7 @@ package fr.proline.mzscope.ui;
 import fr.profi.mzdb.model.Peakel;
 import fr.proline.mzscope.ui.model.FeaturesTableModel;
 import fr.proline.mzscope.model.IFeature;
-import fr.proline.studio.comparedata.CompareDataInterface;
-import fr.proline.studio.comparedata.ExtraDataType;
+import fr.proline.studio.extendedtablemodel.ExtraDataType;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.filter.FilterButton;
 import fr.proline.studio.filter.actions.ClearRestrainAction;
@@ -14,7 +13,7 @@ import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotLinear;
 import fr.proline.studio.markerbar.MarkerContainerPanel;
 import fr.proline.studio.table.AbstractTableAction;
-import fr.proline.studio.table.CompoundTableModel;
+import fr.proline.studio.extendedtablemodel.CompoundTableModel;
 import fr.proline.studio.table.DecoratedMarkerTable;
 import fr.proline.studio.table.TablePopupMenu;
 import fr.proline.studio.utils.CyclicColorPalette;
@@ -39,6 +38,7 @@ import javax.swing.event.RowSorterListener;
 import javax.swing.event.TableModelListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 
 /**
  * panel that contains the features/peaks table
@@ -324,7 +324,7 @@ public class FeaturesPanel extends JPanel implements RowSorterListener, MouseLis
     }
 }
 
-class PeakelWrapper implements CompareDataInterface {
+class PeakelWrapper implements ExtendedTableModelInterface {
 
     Peakel peakel;
     int isotopeIndex;

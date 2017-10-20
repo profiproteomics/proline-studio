@@ -1,6 +1,6 @@
 package fr.proline.studio.rsmexplorer.gui.calc.functions;
 
-import fr.proline.studio.comparedata.AbstractJoinDataModel;
+import fr.proline.studio.extendedtablemodel.AbstractJoinDataModel;
 import fr.proline.studio.parameter.AbstractLinkedParameters;
 import fr.proline.studio.parameter.BooleanParameter;
 import fr.proline.studio.parameter.DoubleParameter;
@@ -14,7 +14,7 @@ import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
 import fr.proline.studio.rsmexplorer.gui.calc.ProcessCallbackInterface;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.FunctionGraphNode;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphConnector;
-import fr.proline.studio.table.GlobalTableModelInterface;
+import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
 import java.util.ArrayList;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;

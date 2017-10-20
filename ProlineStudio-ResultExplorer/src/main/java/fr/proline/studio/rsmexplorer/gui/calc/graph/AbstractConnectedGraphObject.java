@@ -1,6 +1,6 @@
 package fr.proline.studio.rsmexplorer.gui.calc.graph;
 
-import fr.proline.studio.table.GlobalTableModelInterface;
+import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
 
 
 /**

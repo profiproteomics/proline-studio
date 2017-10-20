@@ -7,7 +7,7 @@ import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
 import fr.proline.studio.rsmexplorer.gui.calc.ProcessCallbackInterface;
 import fr.proline.studio.rsmexplorer.gui.calc.ProcessEngine;
 import fr.proline.studio.rsmexplorer.gui.calc.functions.AbstractFunction;
-import fr.proline.studio.table.GlobalTableModelInterface;
+import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
 import fr.proline.studio.utils.IconManager;
 import java.awt.Color;
 import java.util.ArrayList;

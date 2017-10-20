@@ -2,7 +2,7 @@ package fr.proline.studio.rsmexplorer.gui.calc.graph;
 
 import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
 import static fr.proline.studio.rsmexplorer.gui.calc.graph.AbstractConnectedGraphObject.STROKE_SELECTED;
-import fr.proline.studio.table.GlobalTableModelInterface;
+import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics;

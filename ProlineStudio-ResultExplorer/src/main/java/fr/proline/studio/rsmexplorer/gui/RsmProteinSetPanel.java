@@ -5,9 +5,8 @@ package fr.proline.studio.rsmexplorer.gui;
 import fr.proline.core.orm.msi.ResultSet;
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.dto.DProteinSet;
-import fr.proline.studio.comparedata.AddDataAnalyzerButton;
-import fr.proline.studio.comparedata.CompareDataInterface;
-import fr.proline.studio.comparedata.GlobalTabelModelProviderInterface;
+import fr.proline.studio.extendedtablemodel.AddDataAnalyzerButton;
+import fr.proline.studio.extendedtablemodel.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.tasks.*;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.filter.FilterButton;
@@ -26,8 +25,8 @@ import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
 import fr.proline.studio.rsmexplorer.actions.table.DisplayTablePopupMenu;
 import fr.proline.studio.rsmexplorer.gui.model.ProteinSetTableModel;
 import fr.proline.studio.search.SearchToggleButton;
-import fr.proline.studio.table.CompoundTableModel;
-import fr.proline.studio.table.GlobalTableModelInterface;
+import fr.proline.studio.extendedtablemodel.CompoundTableModel;
+import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
 import fr.proline.studio.table.ImportTableSelectionInterface;
 import fr.proline.studio.table.LazyTable;
 import fr.proline.studio.table.TablePopupMenu;
@@ -43,6 +42,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.TableModelListener;
 import org.jdesktop.swingx.JXTable;
 import org.openide.windows.TopComponent;
+import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 
 /**
  * In : Window which display Protein Sets of a Result Summary
@@ -311,7 +311,7 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
 
             @Override
             protected void filteringDone() {
-                m_dataBox.propagateDataChanged(CompareDataInterface.class);
+                m_dataBox.propagateDataChanged(ExtendedTableModelInterface.class);
                 m_infoToggleButton.updateInfo();
             }
             

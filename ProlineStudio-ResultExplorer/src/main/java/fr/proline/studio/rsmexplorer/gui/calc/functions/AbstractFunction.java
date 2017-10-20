@@ -14,7 +14,7 @@ import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphConnector;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphNode;
 import fr.proline.studio.rsmexplorer.gui.calc.parameters.CheckParameterInterface;
 import fr.proline.studio.rsmexplorer.gui.calc.parameters.FunctionParametersDialog;
-import fr.proline.studio.table.GlobalTableModelInterface;
+import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
 import fr.proline.studio.utils.IconManager;
 import java.awt.Color;
 import java.util.ArrayList;

@@ -1,7 +1,7 @@
 package fr.proline.studio.table;
 
+import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
 import com.thierry.filtering.TableSelection;
-import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.gui.AdvancedSelectionPanel;
 import fr.proline.studio.parameter.AbstractLinkedParameters;
@@ -41,6 +41,7 @@ import org.jdesktop.swingx.table.TableColumnExt;
 import org.openide.util.NbPreferences;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 
 /**
  * Table which has a bi-color striping, an ability to select columns viewed and
@@ -374,8 +375,8 @@ public abstract class DecoratedTable extends JXTable implements CrossSelectionIn
 
         TableModel model = getModel();
 
-        if (model instanceof CompareDataInterface) {
-            CompareDataInterface compareDataInterface = (CompareDataInterface) model;
+        if (model instanceof ExtendedTableModelInterface) {
+            ExtendedTableModelInterface compareDataInterface = (ExtendedTableModelInterface) model;
             for (Long id : uniqueIds) {
                 int row = compareDataInterface.uniqueId2Row(id);
                 if (row == -1) {
@@ -406,8 +407,8 @@ public abstract class DecoratedTable extends JXTable implements CrossSelectionIn
         ListSelectionModel selModel = getSelectionModel();
         AbstractTableModel model = (AbstractTableModel) getModel();
 
-        if (model instanceof CompareDataInterface) {
-            CompareDataInterface compareDataInterface = (CompareDataInterface) model;
+        if (model instanceof ExtendedTableModelInterface) {
+            ExtendedTableModelInterface compareDataInterface = (ExtendedTableModelInterface) model;
             for (int i = 0; i < model.getRowCount(); i++) {
                 int row = convertRowIndexToView(i);
                 if (selModel.isSelectedIndex(row)) {

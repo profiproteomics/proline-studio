@@ -1,7 +1,7 @@
 package fr.proline.studio.rsmexplorer.gui.renderer;
 
 import fr.proline.studio.rsmexplorer.gui.xic.FeatureTableModel;
-import fr.proline.studio.table.CompoundTableModel;
+import fr.proline.studio.extendedtablemodel.CompoundTableModel;
 import java.awt.Component;
 import java.awt.Font;
 import javax.swing.JTable;

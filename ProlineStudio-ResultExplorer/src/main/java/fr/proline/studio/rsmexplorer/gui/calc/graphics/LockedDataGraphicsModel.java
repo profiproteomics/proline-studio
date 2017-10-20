@@ -1,8 +1,8 @@
 package fr.proline.studio.rsmexplorer.gui.calc.graphics;
 
-import fr.proline.studio.comparedata.CompareDataInterface;
-import fr.proline.studio.comparedata.LockedDataModel;
+import fr.proline.studio.extendedtablemodel.LockedDataModel;
 import fr.proline.studio.graphics.PlotType;
+import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 
 /**
  * Locked Model for graphics (if src data is modified, the modification is not propagated),
@@ -14,7 +14,7 @@ public class LockedDataGraphicsModel extends LockedDataModel {
     private PlotType m_bestPlotType;
     private int[] m_bestColsIndex;
     
-    public LockedDataGraphicsModel(CompareDataInterface srcData, PlotType bestPlotType, int[] bestColsIndex) {
+    public LockedDataGraphicsModel(ExtendedTableModelInterface srcData, PlotType bestPlotType, int[] bestColsIndex) {
         super(srcData);
         
         m_bestPlotType = bestPlotType;

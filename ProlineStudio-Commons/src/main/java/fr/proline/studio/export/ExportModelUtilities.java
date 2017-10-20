@@ -1,6 +1,6 @@
 package fr.proline.studio.export;
 
-import fr.proline.studio.comparedata.CompareDataInterface;
+import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 
 /**
  *
@@ -8,7 +8,7 @@ import fr.proline.studio.comparedata.CompareDataInterface;
  */
 public class ExportModelUtilities {
     
-    public static String getExportRowCell(CompareDataInterface dataInterface, int row, int col) {
+    public static String getExportRowCell(ExtendedTableModelInterface dataInterface, int row, int col) {
         Object o = dataInterface.getDataValueAt(row, col);
         if (o != null) {
             if ((o instanceof Double) && (((Double) o).isNaN())) {

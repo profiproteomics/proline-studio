@@ -1,6 +1,6 @@
 package fr.proline.studio.graphics;
 
-import fr.proline.studio.comparedata.CompareDataInterface;
+import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 
 
 /**
@@ -9,7 +9,7 @@ import fr.proline.studio.comparedata.CompareDataInterface;
  */
 public abstract class PlotMultiDataAbstract extends PlotBaseAbstract {
 
-    public PlotMultiDataAbstract(BasePlotPanel plotPanel, PlotType plotType, CompareDataInterface compareDataInterface, CrossSelectionInterface crossSelectionInterface) {
+    public PlotMultiDataAbstract(BasePlotPanel plotPanel, PlotType plotType, ExtendedTableModelInterface compareDataInterface, CrossSelectionInterface crossSelectionInterface) {
         super(plotPanel, plotType, compareDataInterface, crossSelectionInterface);
     }
 

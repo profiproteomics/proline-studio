@@ -1,6 +1,5 @@
 package fr.proline.studio.pattern;
 
-import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.mzscope.MzScopeInterface;
@@ -15,6 +14,7 @@ import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import org.openide.util.NbPreferences;
 import org.openide.windows.WindowManager;
+import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 
 /**
  * databox which contains mzscope
@@ -126,7 +126,7 @@ public class DataBoxMzScope extends AbstractDataBox{
                 
                 if (finished) {
                     unregisterTask(taskId);
-                    propagateDataChanged(CompareDataInterface.class); 
+                    propagateDataChanged(ExtendedTableModelInterface.class); 
                 }
             }
         };

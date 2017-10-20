@@ -1,14 +1,14 @@
 package fr.proline.studio.rsmexplorer.gui.xic;
 
 import fr.proline.core.orm.lcms.Map;
-import fr.proline.studio.comparedata.ExtraDataType;
+import fr.proline.studio.extendedtablemodel.ExtraDataType;
 import fr.proline.studio.export.ExportFontData;
 import fr.proline.studio.filter.Filter;
 import fr.proline.studio.filter.StringFilter;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
-import fr.proline.studio.table.CompoundTableModel;
-import fr.proline.studio.table.GlobalTableModelInterface;
+import fr.proline.studio.extendedtablemodel.CompoundTableModel;
+import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
 import fr.proline.studio.table.LazyData;
 import fr.proline.studio.table.LazyTable;
 import fr.proline.studio.table.LazyTableModel;

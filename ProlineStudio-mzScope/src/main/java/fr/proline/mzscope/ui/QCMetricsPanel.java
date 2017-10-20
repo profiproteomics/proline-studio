@@ -17,7 +17,7 @@ import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.graphics.PlotLinear;
 import fr.proline.studio.graphics.PlotPanel;
 import fr.proline.studio.markerbar.MarkerContainerPanel;
-import fr.proline.studio.table.CompoundTableModel;
+import fr.proline.studio.extendedtablemodel.CompoundTableModel;
 import fr.proline.studio.table.DecoratedMarkerTable;
 import fr.proline.studio.table.TablePopupMenu;
 import java.awt.BorderLayout;

@@ -7,7 +7,6 @@ package fr.proline.studio.rsmexplorer.gui.xic;
 
 import fr.proline.core.orm.lcms.MapAlignment;
 import fr.proline.core.orm.lcms.ProcessedMap;
-import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
@@ -34,6 +33,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 
 /**
  * map alignment panel for 1 dataset
@@ -152,7 +152,7 @@ public class MapAlignmentPanel extends HourglassPanel implements DataBoxPanelInt
     
 
     public void setData(QuantChannelInfo quantChannelInfo, List<MapAlignment> mapAlignments, List<ProcessedMap> allMap, List<MapAlignment> allMapAlignments, 
-            List<CompareDataInterface> compareDataInterfaceList, List<CrossSelectionInterface> crossSelectionInterfaceList){
+            List<ExtendedTableModelInterface> compareDataInterfaceList, List<CrossSelectionInterface> crossSelectionInterfaceList){
         this.m_listMapAlignment = mapAlignments;
         this.m_allMap = allMap;
         this.m_allMapAlignments = allMapAlignments;

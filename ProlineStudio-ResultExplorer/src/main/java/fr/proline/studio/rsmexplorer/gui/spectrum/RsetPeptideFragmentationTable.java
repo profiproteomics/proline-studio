@@ -7,8 +7,7 @@ import java.math.MathContext;
 import javax.swing.JTable;
 
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
-import fr.proline.studio.comparedata.CompareDataInterface;
-import fr.proline.studio.comparedata.ExtraDataType;
+import fr.proline.studio.extendedtablemodel.ExtraDataType;
 import fr.proline.studio.export.ExportModelInterface;
 import fr.proline.studio.export.ExportModelUtilities;
 import fr.proline.studio.export.ExportFontData;
@@ -30,6 +29,7 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import org.apache.poi.hssf.util.HSSFColor;
 import org.jdesktop.swingx.table.TableColumnExt;
+import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 
 public class RsetPeptideFragmentationTable extends DecoratedTable {
 
@@ -120,7 +120,7 @@ public class RsetPeptideFragmentationTable extends DecoratedTable {
         // nothing to do
     }
 
-    public static class FragmentationTableModel extends DecoratedTableModel implements CompareDataInterface, ExportModelInterface {
+    public static class FragmentationTableModel extends DecoratedTableModel implements ExtendedTableModelInterface, ExportModelInterface {
 
         private TheoreticalFragmentSeries[] m_fragSer;
         private String m_peptideSequence;

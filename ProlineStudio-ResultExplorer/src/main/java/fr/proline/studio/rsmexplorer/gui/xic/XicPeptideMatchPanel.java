@@ -3,8 +3,7 @@ package fr.proline.studio.rsmexplorer.gui.xic;
 
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
-import fr.proline.studio.comparedata.CompareDataInterface;
-import fr.proline.studio.comparedata.GlobalTabelModelProviderInterface;
+import fr.proline.studio.extendedtablemodel.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.export.ExportModelInterface;
@@ -19,8 +18,8 @@ import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.progress.ProgressInterface;
 import fr.proline.studio.rsmexplorer.actions.table.DisplayTablePopupMenu;
-import fr.proline.studio.table.CompoundTableModel;
-import fr.proline.studio.table.GlobalTableModelInterface;
+import fr.proline.studio.extendedtablemodel.CompoundTableModel;
+import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
 import fr.proline.studio.table.LazyTable;
 import fr.proline.studio.table.TablePopupMenu;
 import java.awt.BorderLayout;
@@ -43,6 +42,7 @@ import javax.swing.JToolBar;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.TableModelListener;
 import org.jdesktop.swingx.JXTable;
+import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 
 /**
  *
@@ -129,7 +129,7 @@ public class XicPeptideMatchPanel extends HourglassPanel implements DataBoxPanel
 
             @Override
             protected void filteringDone() {
-                m_dataBox.propagateDataChanged(CompareDataInterface.class);
+                m_dataBox.propagateDataChanged(ExtendedTableModelInterface.class);
             }
         };
 
@@ -280,7 +280,7 @@ public class XicPeptideMatchPanel extends HourglassPanel implements DataBoxPanel
             }
 
             m_dataBox.propagateDataChanged(DPeptideMatch.class);
-            m_dataBox.propagateDataChanged(CompareDataInterface.class);
+            m_dataBox.propagateDataChanged(ExtendedTableModelInterface.class);
 
         }
 

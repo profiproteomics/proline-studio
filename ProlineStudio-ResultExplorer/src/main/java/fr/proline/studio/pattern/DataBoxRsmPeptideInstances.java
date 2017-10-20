@@ -6,14 +6,14 @@ import fr.proline.core.orm.msi.Peptide;
 import fr.proline.core.orm.msi.PeptideInstance;
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
-import fr.proline.studio.comparedata.CompareDataInterface;
-import fr.proline.studio.comparedata.GlobalTabelModelProviderInterface;
+import fr.proline.studio.extendedtablemodel.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseLoadPeptidesInstancesTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.rsmexplorer.gui.RsmPeptidesPanel;
+import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 
 
 
@@ -50,7 +50,7 @@ public class DataBoxRsmPeptideInstances extends AbstractDataBox {
         registerOutParameter(outParameter);
        
         outParameter = new GroupParameter();
-        outParameter.addParameter(CompareDataInterface.class, false);
+        outParameter.addParameter(ExtendedTableModelInterface.class, false);
         registerOutParameter(outParameter);
 
         
@@ -94,7 +94,7 @@ public class DataBoxRsmPeptideInstances extends AbstractDataBox {
                
                 if (finished) {
                     unregisterTask(taskId);
-                    propagateDataChanged(CompareDataInterface.class);
+                    propagateDataChanged(ExtendedTableModelInterface.class);
                 }
             }
         };
@@ -133,7 +133,7 @@ public class DataBoxRsmPeptideInstances extends AbstractDataBox {
                     return m_rsm;
                 }
             }
-            if (parameterType.equals(CompareDataInterface.class)) {
+            if (parameterType.equals(ExtendedTableModelInterface.class)) {
                 return ((GlobalTabelModelProviderInterface) getDataBoxPanelInterface()).getGlobalTableModelInterface();
             }
             if (parameterType.equals(CrossSelectionInterface.class)) {

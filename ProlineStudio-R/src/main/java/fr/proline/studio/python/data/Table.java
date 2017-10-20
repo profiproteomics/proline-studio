@@ -1,10 +1,10 @@
 package fr.proline.studio.python.data;
 
 
-import fr.proline.studio.comparedata.DiffDataModel;
-import fr.proline.studio.comparedata.JoinDataModel;
-import fr.proline.studio.table.CompoundTableModel;
-import fr.proline.studio.table.GlobalTableModelInterface;
+import fr.proline.studio.extendedtablemodel.DiffDataModel;
+import fr.proline.studio.extendedtablemodel.JoinDataModel;
+import fr.proline.studio.extendedtablemodel.CompoundTableModel;
+import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
 
 import java.util.HashMap;
 import java.util.List;

@@ -1,6 +1,6 @@
 package fr.proline.studio.python.data;
 
-import fr.proline.studio.table.GlobalTableModelInterface;
+import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
 import javax.swing.ImageIcon;
 import org.jdesktop.swingx.JXTable;
 

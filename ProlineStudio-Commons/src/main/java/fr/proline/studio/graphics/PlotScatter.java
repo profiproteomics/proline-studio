@@ -1,7 +1,5 @@
 package fr.proline.studio.graphics;
 
-import fr.proline.studio.comparedata.CompareDataInterface;
-import fr.proline.studio.comparedata.ExtraDataInterface;
 import fr.proline.studio.graphics.cursor.AbstractCursor;
 import fr.proline.studio.graphics.cursor.CursorInfo;
 import fr.proline.studio.graphics.cursor.CursorInfoList;
@@ -36,6 +34,8 @@ import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.JTextField;
 import org.openide.windows.WindowManager;
+import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
+import fr.proline.studio.extendedtablemodel.ExtraDataForTableModelInterface;
 
 /**
  * Scatter Plot
@@ -83,7 +83,7 @@ public class PlotScatter extends PlotXYAbstract implements Axis.EnumXInterface, 
     private final HashMap<Long, GraphicDataGroup> m_idsToGraphicDataGroup = new HashMap<>();
     private final HashMap<GraphicDataGroup, LinkedHashSet<Long>> m_graphicDataGroupToId = new HashMap<>();
     
-    public PlotScatter(BasePlotPanel plotPanel, CompareDataInterface compareDataInterface, CrossSelectionInterface crossSelectionInterface, int colX, int colY) {
+    public PlotScatter(BasePlotPanel plotPanel, ExtendedTableModelInterface compareDataInterface, CrossSelectionInterface crossSelectionInterface, int colX, int colY) {
         super(plotPanel, PlotType.SCATTER_PLOT, compareDataInterface, crossSelectionInterface);
         int[] cols = new int[2]; //JPM.TODO enhance
         cols[COL_X_ID] = colX;
@@ -611,8 +611,8 @@ public class PlotScatter extends PlotXYAbstract implements Axis.EnumXInterface, 
 
         removeAllCursors();
         
-        if (m_compareDataInterface instanceof ExtraDataInterface) {
-            CursorInfoList cursorInfoList = (CursorInfoList) ((ExtraDataInterface) m_compareDataInterface).getColValue(CursorInfoList.class, m_cols[COL_X_ID]);
+        if (m_compareDataInterface instanceof ExtraDataForTableModelInterface) {
+            CursorInfoList cursorInfoList = (CursorInfoList) ((ExtraDataForTableModelInterface) m_compareDataInterface).getColValue(CursorInfoList.class, m_cols[COL_X_ID]);
             if (cursorInfoList != null) {
                 for (CursorInfo info : cursorInfoList.getCursorInfoList()) {
                     VerticalCursor cursor = new VerticalCursor(m_plotPanel, info.getValue());
@@ -621,7 +621,7 @@ public class PlotScatter extends PlotXYAbstract implements Axis.EnumXInterface, 
                 }
             }
             
-            cursorInfoList = (CursorInfoList) ((ExtraDataInterface) m_compareDataInterface).getColValue(CursorInfoList.class, m_cols[COL_Y_ID]);
+            cursorInfoList = (CursorInfoList) ((ExtraDataForTableModelInterface) m_compareDataInterface).getColValue(CursorInfoList.class, m_cols[COL_Y_ID]);
             if (cursorInfoList != null) {
                 for (CursorInfo info : cursorInfoList.getCursorInfoList()) {
                     HorizontalCursor cursor = new HorizontalCursor(m_plotPanel, info.getValue());

@@ -6,8 +6,7 @@ import fr.proline.core.orm.msi.dto.DMasterQuantPeptide;
 import fr.proline.core.orm.msi.dto.DPeptideInstance;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
-import fr.proline.studio.comparedata.CompareDataInterface;
-import fr.proline.studio.comparedata.GlobalTabelModelProviderInterface;
+import fr.proline.studio.extendedtablemodel.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabasePTMProteinSiteTask_V2;
@@ -21,6 +20,7 @@ import fr.proline.studio.rsmexplorer.gui.xic.QuantChannelInfo;
 import fr.proline.studio.rsmexplorer.gui.xic.XicPeptidesPTMSitePanel;
 import java.util.ArrayList;
 import java.util.List;
+import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 
 /**
  *
@@ -150,7 +150,7 @@ public class DataBoxXICPTMSitePeptides extends AbstractDataBox {
                 if (finished) {
                     m_previousTaskId = null;
                     unregisterTask(taskId);
-                    propagateDataChanged(CompareDataInterface.class);
+                    propagateDataChanged(ExtendedTableModelInterface.class);
                 }
             }
         };
@@ -183,7 +183,7 @@ public class DataBoxXICPTMSitePeptides extends AbstractDataBox {
                     return selectedParentPepInstance;
             }
             
-             if (parameterType.equals(CompareDataInterface.class)) {
+             if (parameterType.equals(ExtendedTableModelInterface.class)) {
                 return ((GlobalTabelModelProviderInterface) getDataBoxPanelInterface()).getGlobalTableModelInterface();
             }
         }
@@ -194,7 +194,7 @@ public class DataBoxXICPTMSitePeptides extends AbstractDataBox {
     @Override
     public Object getData(boolean getArray, Class parameterType, boolean isList) {
         if (parameterType != null && isList) {
-            if (parameterType.equals(CompareDataInterface.class)) {
+            if (parameterType.equals(ExtendedTableModelInterface.class)) {
                 return getCompareDataInterfaceList();
             }
             if (parameterType.equals(CrossSelectionInterface.class)) {
@@ -204,8 +204,8 @@ public class DataBoxXICPTMSitePeptides extends AbstractDataBox {
         return super.getData(getArray, parameterType, isList);
     }
     
-    private List<CompareDataInterface> getCompareDataInterfaceList() {
-        List<CompareDataInterface> listCDI = new ArrayList();
+    private List<ExtendedTableModelInterface> getCompareDataInterfaceList() {
+        List<ExtendedTableModelInterface> listCDI = new ArrayList();
         List<PeptidePanel> listPeptidePanel = getPeptideTableModelList();
         for (PeptidePanel peptidePanel : listPeptidePanel) {
             listCDI.add(peptidePanel.getGlobalTableModelInterface());

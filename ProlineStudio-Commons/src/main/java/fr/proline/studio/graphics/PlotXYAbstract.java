@@ -1,7 +1,7 @@
 package fr.proline.studio.graphics;
 
-import fr.proline.studio.comparedata.CompareDataInterface;
 import java.util.ArrayList;
+import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 
 /**
  * Base class for all types of plot
@@ -17,7 +17,7 @@ public abstract class PlotXYAbstract extends PlotBaseAbstract {
 
 
 
-    public PlotXYAbstract(BasePlotPanel plotPanel, PlotType plotType, CompareDataInterface compareDataInterface, CrossSelectionInterface crossSelectionInterface) {
+    public PlotXYAbstract(BasePlotPanel plotPanel, PlotType plotType, ExtendedTableModelInterface compareDataInterface, CrossSelectionInterface crossSelectionInterface) {
         super(plotPanel, plotType, compareDataInterface, crossSelectionInterface);
     }
 

@@ -12,7 +12,7 @@ import fr.proline.mzscope.model.IRawFile;
 import fr.proline.mzscope.model.MsnExtractionRequest;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.markerbar.MarkerContainerPanel;
-import fr.proline.studio.table.CompoundTableModel;
+import fr.proline.studio.extendedtablemodel.CompoundTableModel;
 import fr.proline.studio.table.DecoratedMarkerTable;
 import fr.proline.studio.table.TablePopupMenu;
 import fr.proline.studio.utils.IconManager;

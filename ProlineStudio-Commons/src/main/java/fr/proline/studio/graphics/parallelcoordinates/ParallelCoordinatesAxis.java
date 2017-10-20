@@ -1,6 +1,5 @@
 package fr.proline.studio.graphics.parallelcoordinates;
 
-import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.graphics.MoveableInterface;
 import fr.proline.studio.graphics.PlotParallelCoordinates;
 import java.awt.Color;
@@ -11,6 +10,7 @@ import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;   
+import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 
 
 
@@ -73,7 +73,7 @@ public class ParallelCoordinatesAxis implements MoveableInterface {
     private OverSubObject m_overSubObject = OverSubObject.NONE;
     
     
-    public ParallelCoordinatesAxis(int id, CompareDataInterface compareDataInterface, int colId, PlotParallelCoordinates plot) {
+    public ParallelCoordinatesAxis(int id, ExtendedTableModelInterface compareDataInterface, int colId, PlotParallelCoordinates plot) {
         Class dataClass = compareDataInterface.getDataColumnClass(colId);
 
         m_id = id;
@@ -448,7 +448,7 @@ public class ParallelCoordinatesAxis implements MoveableInterface {
         return m_values.get(index).getRowIndex();
     }
     
-    private void prepareStringData(CompareDataInterface compareDataInterface, int colId) {
+    private void prepareStringData(ExtendedTableModelInterface compareDataInterface, int colId) {
 
         int nbRows = compareDataInterface.getRowCount();
         for (int i = 0; i < nbRows; i++) {
@@ -465,7 +465,7 @@ public class ParallelCoordinatesAxis implements MoveableInterface {
 
     }
     
-    private void prepareNumberData(CompareDataInterface compareDataInterface, int colId) {
+    private void prepareNumberData(ExtendedTableModelInterface compareDataInterface, int colId) {
 
         int nbRows = compareDataInterface.getRowCount();
         for (int i = 0; i < nbRows; i++) {

@@ -1,5 +1,6 @@
 package fr.proline.studio.table;
 
+import fr.proline.studio.extendedtablemodel.CompoundTableModel;
 import fr.proline.studio.markerbar.MarkerComponentInterface;
 import fr.proline.studio.markerbar.ViewChangeListener;
 import java.awt.Point;

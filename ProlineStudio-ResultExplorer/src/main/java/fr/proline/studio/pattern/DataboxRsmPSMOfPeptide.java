@@ -3,13 +3,13 @@ package fr.proline.studio.pattern;
 import fr.proline.core.orm.msi.Peptide;
 import fr.proline.core.orm.msi.PeptideInstance;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
-import fr.proline.studio.comparedata.CompareDataInterface;
-import fr.proline.studio.comparedata.GlobalTabelModelProviderInterface;
+import fr.proline.studio.extendedtablemodel.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseLoadPeptideMatchTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.rsmexplorer.gui.PeptideMatchPanel;
+import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 
 /**
  * Load the PSM of a Peptide
@@ -46,7 +46,7 @@ public class DataboxRsmPSMOfPeptide extends AbstractDataBox {
         registerOutParameter(outParameter);
 
         outParameter = new GroupParameter();
-        outParameter.addParameter(CompareDataInterface.class, true);
+        outParameter.addParameter(ExtendedTableModelInterface.class, true);
         registerOutParameter(outParameter);
        
     }
@@ -93,7 +93,7 @@ public class DataboxRsmPSMOfPeptide extends AbstractDataBox {
                 if (finished) {
                     unregisterTask(taskId);
                     //propagateDataChanged(ValuesForStatsAbstract.class);
-                    propagateDataChanged(CompareDataInterface.class);
+                    propagateDataChanged(ExtendedTableModelInterface.class);
                 }
             }
         };
@@ -112,7 +112,7 @@ public class DataboxRsmPSMOfPeptide extends AbstractDataBox {
             if (parameterType.equals(DPeptideMatch.class)) {
                 return ((PeptideMatchPanel)getDataBoxPanelInterface()).getSelectedPeptideMatch();
             }
-            if (parameterType.equals(CompareDataInterface.class)) {
+            if (parameterType.equals(ExtendedTableModelInterface.class)) {
                 return ((GlobalTabelModelProviderInterface) getDataBoxPanelInterface()).getGlobalTableModelInterface();
             }
             if (parameterType.equals(CrossSelectionInterface.class)) {

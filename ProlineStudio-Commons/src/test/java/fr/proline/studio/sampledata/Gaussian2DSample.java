@@ -1,18 +1,18 @@
 package fr.proline.studio.sampledata;
 
-import fr.proline.studio.comparedata.CompareDataInterface;
-import fr.proline.studio.comparedata.ExtraDataType;
+import fr.proline.studio.extendedtablemodel.ExtraDataType;
 import fr.proline.studio.graphics.PlotInformation;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import javax.swing.table.TableModel;
+import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 
 /**
  *
  * @author CB205360
  */
-public class Gaussian2DSample implements CompareDataInterface {
+public class Gaussian2DSample implements ExtendedTableModelInterface {
 
    private TableModel model; 
    

@@ -8,7 +8,7 @@ package fr.proline.studio.rsmexplorer.gui.dialog;
 import fr.proline.studio.dam.data.ClearProjectData;
 import fr.proline.studio.rsmexplorer.gui.DataClearProjectTable;
 import fr.proline.studio.rsmexplorer.gui.model.DataClearProjectTableModel;
-import fr.proline.studio.table.CompoundTableModel;
+import fr.proline.studio.extendedtablemodel.CompoundTableModel;
 import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;

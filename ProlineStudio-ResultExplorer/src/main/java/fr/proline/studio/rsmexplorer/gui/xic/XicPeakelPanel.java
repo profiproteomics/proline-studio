@@ -2,8 +2,7 @@ package fr.proline.studio.rsmexplorer.gui.xic;
 
 import fr.proline.core.orm.lcms.Feature;
 import fr.proline.core.orm.lcms.Peakel;
-import fr.proline.studio.comparedata.CompareDataInterface;
-import fr.proline.studio.comparedata.GlobalTabelModelProviderInterface;
+import fr.proline.studio.extendedtablemodel.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.export.ExportModelInterface;
@@ -22,8 +21,8 @@ import fr.proline.studio.progress.ProgressBarDialog;
 import fr.proline.studio.progress.ProgressInterface;
 import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
 import fr.proline.studio.rsmexplorer.actions.table.DisplayTablePopupMenu;
-import fr.proline.studio.table.CompoundTableModel;
-import fr.proline.studio.table.GlobalTableModelInterface;
+import fr.proline.studio.extendedtablemodel.CompoundTableModel;
+import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
 import fr.proline.studio.table.LazyTable;
 import fr.proline.studio.table.TablePopupMenu;
 import fr.proline.studio.utils.IconManager;
@@ -47,6 +46,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.TableModelListener;
 import org.jdesktop.swingx.JXTable;
 import org.openide.windows.WindowManager;
+import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 
 /**
  *
@@ -135,7 +135,7 @@ public class XicPeakelPanel  extends HourglassPanel implements DataBoxPanelInter
 
             @Override
             protected void filteringDone() {
-                 m_dataBox.propagateDataChanged(CompareDataInterface.class);
+                 m_dataBox.propagateDataChanged(ExtendedTableModelInterface.class);
             }
         };
 
@@ -164,7 +164,7 @@ public class XicPeakelPanel  extends HourglassPanel implements DataBoxPanelInter
                 // prepare window box
                 WindowBox wbox = WindowBoxFactory.getGraphicsWindowBox("Peakel Graphic", m_dataBox, true);
 
-                wbox.setEntryData(m_dataBox.getProjectId(), m_dataBox.getData(false, CompareDataInterface.class));
+                wbox.setEntryData(m_dataBox.getProjectId(), m_dataBox.getData(false, ExtendedTableModelInterface.class));
 
                 // open a window to display the window box
                 DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);

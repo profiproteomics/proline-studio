@@ -1,6 +1,6 @@
 package fr.proline.studio.filter;
 
-import fr.proline.studio.table.GlobalTableModelInterface;
+import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
 import java.util.HashSet;
 import org.jdesktop.swingx.JXTable;
 

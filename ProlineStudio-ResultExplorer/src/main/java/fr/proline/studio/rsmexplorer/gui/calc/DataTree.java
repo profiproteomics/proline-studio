@@ -31,7 +31,7 @@ import fr.proline.studio.rsmexplorer.gui.calc.graphics.VarianceDistPlotGraphic;
 import fr.proline.studio.rsmexplorer.gui.calc.graphics.VennDiagramGraphic;
 import fr.proline.studio.rsmexplorer.gui.calc.macros.AbstractMacro;
 import fr.proline.studio.rsmexplorer.gui.calc.macros.ProStarMacro;
-import fr.proline.studio.table.GlobalTableModelInterface;
+import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
 import fr.proline.studio.utils.IconManager;
 import java.awt.Color;
 import java.awt.Component;

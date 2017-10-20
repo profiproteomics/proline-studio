@@ -3,7 +3,7 @@ package fr.proline.studio.rsmexplorer.gui.calc.functions;
 
 
 import au.com.bytecode.opencsv.CSVReader;
-import fr.proline.studio.comparedata.ExtraDataType;
+import fr.proline.studio.extendedtablemodel.ExtraDataType;
 import fr.proline.studio.export.ExportModelUtilities;
 import fr.proline.studio.export.ExportFontData;
 import fr.proline.studio.filter.DoubleFilter;
@@ -30,7 +30,7 @@ import fr.proline.studio.table.renderer.DefaultLeftAlignRenderer;
 import fr.proline.studio.table.renderer.DefaultRightAlignRenderer;
 import fr.proline.studio.table.renderer.DoubleRenderer;
 import fr.proline.studio.table.DecoratedTableModel;
-import fr.proline.studio.table.GlobalTableModelInterface;
+import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
 import fr.proline.studio.table.LazyData;
 import fr.proline.studio.table.TableDefaultRendererManager;
 import fr.proline.studio.table.TablePopupMenu;

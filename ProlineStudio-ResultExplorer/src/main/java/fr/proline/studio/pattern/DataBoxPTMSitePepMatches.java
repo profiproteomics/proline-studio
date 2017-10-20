@@ -3,7 +3,6 @@ package fr.proline.studio.pattern;
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.dto.DPeptideInstance;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
-import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabasePTMProteinSiteTask_V2;
@@ -12,6 +11,7 @@ import fr.proline.studio.dam.tasks.data.PTMSite;
 import fr.proline.studio.rsmexplorer.gui.PeptidesPTMSitePanel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 
 /**
  *
@@ -77,7 +77,7 @@ public class DataBoxPTMSitePepMatches extends AbstractDataBox {
         if(ptmSite.isAllPeptideMatchesLoaded()){
             m_previousTaskId = null;
             ((PeptidesPTMSitePanel) getDataBoxPanelInterface()).setData(ptmSite, m_parentPeptideInstance);           
-            propagateDataChanged(CompareDataInterface.class);
+            propagateDataChanged(ExtendedTableModelInterface.class);
             return;
         }
         
@@ -103,7 +103,7 @@ public class DataBoxPTMSitePepMatches extends AbstractDataBox {
                 
                 if (finished) {
                     unregisterTask(taskId);
-                    propagateDataChanged(CompareDataInterface.class);
+                    propagateDataChanged(ExtendedTableModelInterface.class);
                 }
             }
         };

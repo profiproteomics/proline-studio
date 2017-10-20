@@ -1,7 +1,6 @@
 package fr.proline.studio.rsmexplorer.gui;
 
-import fr.proline.studio.comparedata.CompareDataInterface;
-import fr.proline.studio.comparedata.LockedDataModel;
+import fr.proline.studio.extendedtablemodel.LockedDataModel;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.graphics.BestGraphicsInterface;
 import fr.proline.studio.graphics.CrossSelectionInterface;
@@ -36,6 +35,7 @@ import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 import org.openide.windows.WindowManager;
 import fr.proline.studio.graphics.BasePlotPanel.PlotToolbarListener;
+import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 
 /**
  *
@@ -60,7 +60,7 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
     
     private List<PlotBaseAbstract> m_plotGraphicsList = null;
     
-    private List<CompareDataInterface> m_valuesList = null;
+    private List<ExtendedTableModelInterface> m_valuesList = null;
     private List<CrossSelectionInterface> m_crossSelectionInterfaceList = null;
     
     private boolean m_isUpdatingCbx = false;
@@ -390,12 +390,12 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
         }
     }
     
-    public void setData(List<CompareDataInterface> valuesList, List<CrossSelectionInterface> crossSelectionInterfaceList) {
+    public void setData(List<ExtendedTableModelInterface> valuesList, List<CrossSelectionInterface> crossSelectionInterfaceList) {
         if (m_plotPanel.isLocked()) {
             return;
         }
         for (int i=0; i<valuesList.size(); i++) {
-            CompareDataInterface values = valuesList.get(i);
+            ExtendedTableModelInterface values = valuesList.get(i);
             if ((m_dataLocked) && !(values instanceof LockedDataModel)) {
                 // wart for first call when directly locked
                 values = new LockedDataModel(values);
@@ -409,7 +409,7 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
             m_plotPanel.lockData(m_dataLocked);
         }
     }
-    private void setDataImpl(List<CompareDataInterface> valuesList, List<CrossSelectionInterface> crossSelectionInterfaceList) {
+    private void setDataImpl(List<ExtendedTableModelInterface> valuesList, List<CrossSelectionInterface> crossSelectionInterfaceList) {
 
         m_valuesList = valuesList;
         m_crossSelectionInterfaceList = crossSelectionInterfaceList;

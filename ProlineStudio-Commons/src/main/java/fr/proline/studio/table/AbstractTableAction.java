@@ -8,7 +8,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JTable;
 
 /**
- *
+ * Base class for all actions on JTable
  * @author JM235353
  */
 public abstract class AbstractTableAction extends AbstractAction {

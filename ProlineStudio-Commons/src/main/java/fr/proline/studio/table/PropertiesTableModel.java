@@ -17,7 +17,8 @@ import java.util.Map;
 import javax.swing.table.TableCellRenderer;
 
 /**
- *
+ * Model to display properties. This model is a hack: it allows to not follow the general policy
+ * of renderers (one renderer for each data type or for each column)
  * @author JM235353
  */
 public abstract class PropertiesTableModel extends DecoratedTableModel implements GlobalTableModelInterface {

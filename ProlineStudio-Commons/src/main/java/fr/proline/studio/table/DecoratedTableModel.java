@@ -6,7 +6,8 @@ import javax.swing.table.AbstractTableModel;
 import java.util.HashMap;
 
 /**
- * 
+ * Table model with extra decoration info (tooltip and renderer row/col).
+ * It contains extra data added to the model
  * @author JM235353
  */
 public abstract class DecoratedTableModel extends AbstractTableModel implements DecoratedTableModelInterface {

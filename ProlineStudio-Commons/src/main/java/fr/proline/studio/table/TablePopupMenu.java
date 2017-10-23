@@ -1,6 +1,5 @@
 package fr.proline.studio.table;
 
-import fr.proline.studio.export.ExportTextInterface;
 import java.awt.Component;
 import java.awt.Point;
 import java.awt.Toolkit;
@@ -8,16 +7,13 @@ import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.util.ArrayList;
 import javax.swing.AbstractButton;
-import javax.swing.JComponent;
 import javax.swing.JLabel;
-import javax.swing.JMenu;
 import javax.swing.JPopupMenu;
-import javax.swing.JSeparator;
 import javax.swing.JTable;
 import javax.swing.table.TableCellRenderer;
 
 /**
- *
+ * Default popup menu for tables with copy cell action and select all action
  * @author JM235353
  */
 public class TablePopupMenu extends JPopupMenu {
@@ -67,54 +63,20 @@ public class TablePopupMenu extends JPopupMenu {
     public void preparePopup() {
 
         removeAll();
-        
-        //boolean previousIsSeparator = false; // to hide potential consecutive separators is an action is not visible in the middel
+
         int nbActions = m_actions.size();
         for (int i = 0; i < nbActions; i++) {
             AbstractTableAction action = m_actions.get(i);
-            /*if ((action!=null) && (!action.isVisible())) {
-                
-                continue;
-            }*/
+
             if (action == null) {
-                /*if (previousIsSeparator) {
-                    continue;
-                }
-                previousIsSeparator = true;*/
                 addSeparator();
             } else {
-                //previousIsSeparator = false;
                 add(action.getPopupPresenter());
             }
         }
 
     }
-    
-    /*public void cleanupPopup() {
-        
-        boolean menuRemoved = false;
-        int nb = getComponentCount();
-        for (int i=0;i<nb;i++) {
-            Component c = getComponent(i);
-            if (c instanceof JMenu) {
-                JMenu menu = (JMenu) c;
-                menu.getPopupMenu();
-                if (menu.getPopupMenu().getComponentCount()==0) {
-                    // remove the menu
-                    remove(menu);
-                    nb--;
-                    menuRemoved = true;
-                }
-            } else if ((menuRemoved) && (c instanceof JPopupMenu.Separator)) {
-                remove(c);
-                menuRemoved = false;
-            } else {
-                menuRemoved = false;
-            }
-        }
 
-
-    }*/
 
     public void show(int mouseX, int mouseY, JTable table) {
 
@@ -159,9 +121,7 @@ public class TablePopupMenu extends JPopupMenu {
         }
 
         private String componentToText(Component c) {
-            /*if (c instanceof ExportTextInterface) {
-                return ((ExportTextInterface) c).getExportText();
-            } else*/ if (c instanceof JLabel) {
+            if (c instanceof JLabel) {
                 return ((JLabel) c).getText();
             } else if (c instanceof AbstractButton) {
                 return ((AbstractButton) c).getText();

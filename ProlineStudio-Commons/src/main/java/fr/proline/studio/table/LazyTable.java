@@ -15,7 +15,6 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableModel;
 import org.openide.windows.WindowManager;
-import fr.proline.studio.table.renderer.GrayableTableCellRenderer;
 import fr.proline.studio.table.renderer.GrayedRenderer;
 
 /**

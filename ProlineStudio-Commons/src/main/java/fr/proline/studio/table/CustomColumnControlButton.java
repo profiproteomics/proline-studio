@@ -1,13 +1,7 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package fr.proline.studio.table;
 
 import fr.proline.studio.utils.IconManager;
 import java.awt.ComponentOrientation;
-import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -31,7 +25,7 @@ import org.jdesktop.swingx.table.ColumnControlButton.DefaultColumnControlPopup;
 import org.jdesktop.swingx.table.ColumnControlPopup;
 
 /**
- * column control button: take care of long list of columns
+ * Column control button: take care of long list of columns
  * http://marxenter-labs.googlecode.com/svn/trunk/java.labs/jdnc-trunk/src/paultaylor/java/org/jdesktop/swingx/table/ScrollableColumnControlWithActionsAtTop.java
  * @author MB243701
  */

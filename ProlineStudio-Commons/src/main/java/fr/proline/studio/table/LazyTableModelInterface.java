@@ -1,7 +1,7 @@
 package fr.proline.studio.table;
 
 /**
- *
+ * Interface used to display not loaded values in a table
  * @author JM235353
  */
 public interface LazyTableModelInterface {

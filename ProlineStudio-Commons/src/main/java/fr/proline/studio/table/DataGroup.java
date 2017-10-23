@@ -6,7 +6,8 @@ import javax.swing.JTable;
 import javax.swing.table.TableCellRenderer;
 
 /**
- *
+ * Used by Properties Table Model. It breaks general table rendering convention.
+ * Rendering does no longer depends of a type or of a column
  * @author JM235353
  */
 public abstract class DataGroup {

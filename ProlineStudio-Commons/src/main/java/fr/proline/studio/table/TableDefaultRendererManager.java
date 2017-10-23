@@ -4,7 +4,7 @@ import javax.swing.JTable;
 import javax.swing.table.TableCellRenderer;
 
 /**
- *
+ * Front End to have access to the default renderers embeded in JTable
  * @author JM235353
  */
 public class TableDefaultRendererManager {

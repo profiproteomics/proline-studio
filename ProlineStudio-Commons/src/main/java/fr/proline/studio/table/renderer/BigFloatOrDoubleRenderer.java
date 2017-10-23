@@ -28,12 +28,14 @@ public class BigFloatOrDoubleRenderer implements TableCellRenderer {
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
 
         String formatedValue;
-        if (value instanceof Float) {
+        if (value == null) {
+            formatedValue = "";
+        } else if (value instanceof Float) {
             Float f = (Float) value;
-            formatedValue = ((f == null) || (f.isNaN())) ? "" : DataFormat.formatWithGroupingSep(f, m_digits);
+            formatedValue = (f.isNaN()) ? "" : DataFormat.formatWithGroupingSep(f, m_digits);
         } else { // Double
             Double d = (Double) value;
-            formatedValue = ((d == null) || (d.isNaN())) ? "" : DataFormat.formatWithGroupingSep(d, m_digits);
+            formatedValue = (d.isNaN()) ? "" : DataFormat.formatWithGroupingSep(d, m_digits);
         }
         
 

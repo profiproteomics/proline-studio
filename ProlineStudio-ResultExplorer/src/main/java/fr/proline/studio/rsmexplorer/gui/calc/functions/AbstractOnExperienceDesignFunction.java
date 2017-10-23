@@ -389,7 +389,7 @@ public abstract class AbstractOnExperienceDesignFunction extends AbstractFunctio
                 for (int j = 0; j < selection.length; j++) {
                     selection[j] = true;
                 }
-                m_columnsParameterArray[i] = new MultiObjectParameter(SEL_COLS_PREFIX + i, "group " + i, null, selectedColsObject, selectedColsObject, selection, null, true);
+                m_columnsParameterArray[i] = new MultiObjectParameter(SEL_COLS_PREFIX + i, "group " + i, null, selectedColsObject, selectedColsObject, selection, true);
                 m_columnsParameterArray[i].setCompulsory(2); // at least two values in a group
             }
 
@@ -523,7 +523,7 @@ public abstract class AbstractOnExperienceDesignFunction extends AbstractFunctio
 
             m_columnsParameterArray = new MultiObjectParameter[getMaxGroups()];
             for (int i = 0; i < getMaxGroups(); i++) {
-                m_columnsParameterArray[i] = new MultiObjectParameter(SEL_COLS_PREFIX + i, groupNameList[i], null, objectArray1, associatedObjectArray1, selection[i], null, true);
+                m_columnsParameterArray[i] = new MultiObjectParameter(SEL_COLS_PREFIX + i, groupNameList[i], null, objectArray1, associatedObjectArray1, selection[i], true);
                 m_columnsParameterArray[i].setCompulsory(2); // at least two values in a group
             }
 

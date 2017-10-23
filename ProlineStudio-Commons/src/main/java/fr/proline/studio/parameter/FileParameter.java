@@ -123,8 +123,6 @@ public class FileParameter extends AbstractParameter {
     @Override
     public ParameterError checkParameter() {
 
-        Integer value = null;
-
         if (m_graphicalType.equals(JTextField.class)) {
             JTextField textField = (JTextField) m_parameterComponent;
             String path = textField.getText();
@@ -193,14 +191,17 @@ public class FileParameter extends AbstractParameter {
             
             
             ((JTextField) m_parameterComponent).getDocument().addDocumentListener(new DocumentListener() {
+                @Override
                 public void changedUpdate(DocumentEvent e) {
                     textChanged();
                 }
 
+                @Override
                 public void removeUpdate(DocumentEvent e) {
                     textChanged();
                 }
 
+                @Override
                 public void insertUpdate(DocumentEvent e) {
                     textChanged();
                 }
@@ -210,11 +211,6 @@ public class FileParameter extends AbstractParameter {
                 }
             });
 
-            /*if (!m_valueSet) {
-                initDefault();
-            } else {
-                linkedParameters.valueChanged(getStringValue(), getObjectValue());
-            }*/
         }
     }
 }

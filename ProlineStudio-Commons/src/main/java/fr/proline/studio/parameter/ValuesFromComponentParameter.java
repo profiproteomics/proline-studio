@@ -4,14 +4,12 @@ import java.util.ArrayList;
 import javax.swing.JComponent;
 
 /**
- *
+ * Generic Parameter which can be used by any object which implements ComponentParameterInterface
+ * which embeds a graphical component to return values as parameter.
+ * Example : a scatter plot with cursors to choose values.
  * @author JM235353
  */
 public class ValuesFromComponentParameter extends AbstractParameter {
-
-    /*private Double m_minValue;
-    private Double m_maxValue;
-    private Double m_defaultValue;*/
 
     private ArrayList<AbstractLinkedParameters> m_linkedParametersList = null;
     
@@ -76,7 +74,6 @@ public class ValuesFromComponentParameter extends AbstractParameter {
             m_linkedParametersList = new ArrayList<>(1);
         }
         m_linkedParametersList.add(linkedParameters);
-//linkedParameters.valueChanged(getStringValue(), getAssociatedObjectValue());
     }
     
     public void valueChanged(Object o) {

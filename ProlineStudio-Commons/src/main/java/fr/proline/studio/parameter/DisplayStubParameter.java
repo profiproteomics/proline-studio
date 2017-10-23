@@ -49,6 +49,7 @@ public class DisplayStubParameter extends AbstractParameter {
         // nothing to do
     }
     
+    @Override
     public LabelVisibility showLabel() {
         return LabelVisibility.AS_BORDER_TITLE;
     }

@@ -16,7 +16,8 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
 /**
- *
+ * Panel to choose a string among a list presented with radio buttons
+ * or let the user type a cursom one in a textfield.
  * @author JM235353
  */
 public class StringChooserPanel extends JPanel {

@@ -10,7 +10,7 @@ import javax.swing.JButton;
 import org.openide.windows.WindowManager;
 
 /**
- *
+ * Generic Settings Button
  * @author JM235353
  */
 public class SettingsButton extends JButton implements ActionListener {

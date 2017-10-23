@@ -6,7 +6,6 @@ import fr.proline.studio.gui.JCheckBoxListPanel;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import javax.swing.*;
 
@@ -23,7 +22,6 @@ public class MultiObjectParameter<E> extends AbstractParameter {
     private final E[] m_objects;
     private Object[] m_associatedObjects = null;
     private boolean[] m_defaultSelection = null;
-    private AbstractParameterToString<E> m_paramToString = null;
 
     private ArrayList<AbstractLinkedParameters> m_linkedParametersList = null;
     
@@ -32,15 +30,13 @@ public class MultiObjectParameter<E> extends AbstractParameter {
     
     private String m_selectedName;
     private String m_unselectedName;
-    
-    private String[] m_columnGroupNamesArray = null;
+
     
     public MultiObjectParameter(String key, String name, String selectedName, String unselectedName, Class graphicalType, E[] objects, Object[] associatedObjects, boolean[] selection, AbstractParameterToString<E> paramToString) {
         super(key, name, Integer.class, graphicalType);
         m_objects = objects;
         m_associatedObjects = associatedObjects;
         m_defaultSelection = selection;
-        m_paramToString = paramToString;
         
         m_selectedName = selectedName;
         m_unselectedName = unselectedName;
@@ -50,11 +46,10 @@ public class MultiObjectParameter<E> extends AbstractParameter {
     
     
     
-    public MultiObjectParameter(String key, String name, JCheckBoxList checkBoxList, E[] objects, Object[] associatedObjects, boolean[] selection, AbstractParameterToString<E> paramToString, boolean allowSelectAll) {
+    public MultiObjectParameter(String key, String name, JCheckBoxList checkBoxList, E[] objects, Object[] associatedObjects, boolean[] selection, boolean allowSelectAll) {
         super(key, name, Integer.class, JCheckBoxList.class);
         m_objects = objects;
         m_defaultSelection = selection;
-        m_paramToString = paramToString;
         m_allowSelectAll = allowSelectAll;
         if (checkBoxList == null) {
             m_parameterComponent = (JCheckBoxListPanel) getComponent(null);
@@ -67,12 +62,7 @@ public class MultiObjectParameter<E> extends AbstractParameter {
         m_labelVisibility = LabelVisibility.AS_BORDER_TITLE;
 
     }
-    
-    /*public void setFastSelectionValues(String[] columnGroupNamesArray) {
-        m_columnGroupNamesArray = columnGroupNamesArray;
-    }*/
 
-    
     public void setCompulsory(int nbCompulsorySelection) {
         m_compulsory = (nbCompulsorySelection>0);
         m_nbCompulsorySelection = nbCompulsorySelection;
@@ -147,7 +137,6 @@ public class MultiObjectParameter<E> extends AbstractParameter {
     @Override
     public void initDefault() {
         // not used for this component for the moment
-        //((JComboBox) m_parameterComponent).setSelectedIndex(m_defaultIndex);
     }
 
     @Override
@@ -157,10 +146,10 @@ public class MultiObjectParameter<E> extends AbstractParameter {
             return null;
         }
         
-        List selectedList = null;
+        List selectedList;
          if (m_graphicalType.equals(JCheckBoxList.class)) {
             selectedList = ((JCheckBoxListPanel) m_parameterComponent).getCheckBoxList().getSelectedItems();
-         } else if (m_graphicalType.equals(AdvancedSelectionPanel.class)) {
+         } else /*if (m_graphicalType.equals(AdvancedSelectionPanel.class)) */ {
              selectedList = ((AdvancedSelectionPanel) m_parameterComponent).getSelectedItems();
          }
         
@@ -213,12 +202,12 @@ public class MultiObjectParameter<E> extends AbstractParameter {
             return getObjectValue();
         }
         
-        int[] indices = null;
+        int[] indices;
         if (m_graphicalType.equals(JCheckBoxList.class)) {
             
             JCheckBoxList checkBoxList = ((JCheckBoxListPanel) m_parameterComponent).getCheckBoxList();
             indices = selected ? checkBoxList.getSelectedIndices() : checkBoxList.getNonSelectedIndices();
-        } else if (m_graphicalType.equals(AdvancedSelectionPanel.class)) {
+        } else /*if (m_graphicalType.equals(AdvancedSelectionPanel.class))*/ {
             AdvancedSelectionPanel selectionPanel = ((AdvancedSelectionPanel) m_parameterComponent);
             indices = selected ? selectionPanel.getSelectedIndices() : selectionPanel.getNonSelectedIndices();
         }

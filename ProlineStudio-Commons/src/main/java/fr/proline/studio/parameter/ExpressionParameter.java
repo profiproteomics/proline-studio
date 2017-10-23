@@ -1,13 +1,12 @@
 package fr.proline.studio.parameter;
 
-import fr.proline.studio.graphics.ColorOrGradient;
 import fr.proline.studio.gui.expressionbuilder.ExpressionBuilderPanel;
 import fr.proline.studio.gui.expressionbuilder.ExpressionEntity;
 import java.util.ArrayList;
 import javax.swing.JComponent;
 
 /**
- *
+ * Parameter to select an expression (with functions, variables)
  * @author JM235353
  */
 public class ExpressionParameter extends AbstractParameter {

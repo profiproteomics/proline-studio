@@ -29,7 +29,7 @@ import javax.swing.JTextField;
 import javax.swing.JToggleButton;
 
 /**
- *
+ * Panel which can be put over another panel and can do a search
  * @author JM235353
  */
 public class AdvancedSearchFloatingPanel extends JPanel {

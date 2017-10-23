@@ -82,7 +82,7 @@ public class ParameterList extends ArrayList<AbstractParameter> {
 
             if (parameter.hasComponent()) {
 
-                JComponent comp = null;
+                JComponent comp;
                 if (parameter.showLabel() == AbstractParameter.LabelVisibility.AS_BORDER_TITLE) {
                     c.gridx = 0;
                     c.gridwidth = 2;

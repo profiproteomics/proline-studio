@@ -7,7 +7,9 @@ import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 
 /**
- *
+ * Dialog to display parameter from a list of ParameterList.
+ * A ParameterList generates a panel
+ * A list of ParameterList generates a TabbedPane with panels
  * @author JM235353
  */
 public class DefaultParameterDialog extends DefaultDialog {

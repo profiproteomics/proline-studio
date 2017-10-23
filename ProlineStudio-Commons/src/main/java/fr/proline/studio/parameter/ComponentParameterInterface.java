@@ -4,7 +4,8 @@ import java.awt.event.ActionListener;
 import javax.swing.JComponent;
 
 /**
- *
+ * Interface to be used in coordination with ValuesFromComponentParameter
+ * 
  * @author JM235353
  */
 public interface ComponentParameterInterface extends ActionListener {

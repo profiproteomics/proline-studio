@@ -148,14 +148,17 @@ public class DoubleParameter extends AbstractParameter {
         if (m_graphicalType.equals(JTextField.class)) {
 
             ((JTextField) m_parameterComponent).getDocument().addDocumentListener(new DocumentListener() {
+                @Override
                 public void changedUpdate(DocumentEvent e) {
                     textChanged();
                 }
 
+                @Override
                 public void removeUpdate(DocumentEvent e) {
                     textChanged();
                 }
 
+                @Override
                 public void insertUpdate(DocumentEvent e) {
                     textChanged();
                 }

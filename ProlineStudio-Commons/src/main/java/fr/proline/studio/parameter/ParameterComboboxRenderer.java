@@ -6,9 +6,10 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 
 /**
- * Renderer for Paramters
+ * Renderer for Paramters displayed in a combobox
  *
  * @author JM235353
+ * @param <E>
  */
 public class ParameterComboboxRenderer<E> extends DefaultListCellRenderer {
 

@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import javax.swing.JComponent;
 
 /**
- *
+ * Parameter to select a color or a gradient of colors
  * @author JM235353
  */
 public class ColorOrGradientParameter extends AbstractParameter {

@@ -11,7 +11,7 @@ import java.awt.event.ActionEvent;
 import javax.swing.JComponent;
 
 /**
- *
+ * Parameter to select a Color
  * @author JM235353
  */
 public class ColorParameter extends AbstractParameter {
@@ -161,6 +161,8 @@ public class ColorParameter extends AbstractParameter {
     
     @Override
     public void setValue(String v) {
+        
+        // method never used for the moment
         
         if (m_parameterComponent == null) {
             return; // should not happen

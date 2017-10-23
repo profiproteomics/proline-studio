@@ -11,7 +11,8 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
 /**
- *
+ * Parameter for Strings. Can be displayed JTextField or StringChooserPanel (preselected strings + custom textfield)
+ * 
  * @author jm235353
  */
 public class StringParameter extends AbstractParameter {
@@ -193,14 +194,17 @@ public class StringParameter extends AbstractParameter {
         if (m_graphicalType.equals(JTextField.class)) {
 
             ((JTextField) m_parameterComponent).getDocument().addDocumentListener(new DocumentListener() {
+                @Override
                 public void changedUpdate(DocumentEvent e) {
                     textChanged();
                 }
 
+                @Override
                 public void removeUpdate(DocumentEvent e) {
                     textChanged();
                 }
 
+                @Override
                 public void insertUpdate(DocumentEvent e) {
                     textChanged();
                 }

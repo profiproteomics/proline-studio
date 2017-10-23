@@ -3,7 +3,7 @@ package fr.proline.studio.parameter;
 import javax.swing.JComponent;
 
 /**
- * Error on a parameter
+ * Class used to repert an Error on a parameter
  * @author JM235353
  */
 public class ParameterError {

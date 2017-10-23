@@ -8,7 +8,8 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 /**
- *
+ * Used to link parameters between them.
+ * For instance to display a parameter when another parameter is selected
  * @author jm235353
  */
 public abstract class AbstractLinkedParameters {

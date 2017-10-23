@@ -9,7 +9,7 @@ import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
 
 /**
- *
+ * Renderer used for the Properties Table with GroupObject and DataGroup
  * @author JM235353
  */
 public class PropertiesRenderer extends DefaultTableCellRenderer {

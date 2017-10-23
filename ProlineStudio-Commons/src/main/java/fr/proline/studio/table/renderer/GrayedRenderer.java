@@ -1,6 +1,5 @@
 package fr.proline.studio.table.renderer;
 
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
 import java.io.Serializable;
@@ -8,7 +7,9 @@ import javax.swing.JTable;
 import javax.swing.table.TableCellRenderer;
 
 /**
- *
+ * This renderer encapsulates another renderer so it can be grayed.
+ * In fact to gray it is not possible due to optimizations in JTable. So the text
+ * font is modified to italic
  * @author JM235353
  */
 public class GrayedRenderer implements TableCellRenderer, Serializable {

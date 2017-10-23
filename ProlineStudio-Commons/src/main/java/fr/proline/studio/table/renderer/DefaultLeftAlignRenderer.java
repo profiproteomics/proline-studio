@@ -7,7 +7,7 @@ import javax.swing.JTable;
 import javax.swing.table.TableCellRenderer;
 
 /**
- * This renderer encapsulates another renderer and force to display the text to the right
+ * This renderer encapsulates another renderer and force to display the text to the left
  * @author JM235353
  */
 public class DefaultLeftAlignRenderer implements TableCellRenderer, Serializable {

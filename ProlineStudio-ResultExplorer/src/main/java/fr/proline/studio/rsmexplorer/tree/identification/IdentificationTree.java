@@ -1,7 +1,6 @@
 package fr.proline.studio.rsmexplorer.tree.identification;
 
 import fr.proline.studio.rsmexplorer.actions.identification.MergeAction;
-import fr.proline.studio.rsmexplorer.actions.identification.DatasetWrapperAction;
 import fr.proline.studio.rsmexplorer.actions.identification.DisplayRsmAction;
 import fr.proline.studio.rsmexplorer.actions.identification.DeleteAction;
 import fr.proline.studio.rsmexplorer.actions.identification.ValidateAction;
@@ -56,7 +55,6 @@ import fr.proline.studio.rsmexplorer.tree.ChildFactory;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import fr.proline.studio.rsmexplorer.tree.HourGlassNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
-import fr.proline.studio.utils.ActionRegistry;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.event.MouseEvent;
@@ -840,13 +838,7 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
                         m_mainPopup.add(action.getPopupPresenter());
                     }
                 }
-                //mainPopup.add(new DoItAction());
-                List<Action> additionalActions = ActionRegistry.getInstance().getActions(DDataset.class);
-                if (additionalActions != null) {
-                    for (Action action : additionalActions) {
-                        m_mainPopup.add(new DatasetWrapperAction(((DatasetAction) action)));
-                    }
-                }
+
 
             }
 

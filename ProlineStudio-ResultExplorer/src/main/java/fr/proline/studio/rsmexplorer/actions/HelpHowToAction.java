@@ -1,6 +1,6 @@
 package fr.proline.studio.rsmexplorer.actions;
 
-import fr.proline.studio.utils.MiscellaneousUtils;
+import fr.proline.studio.utils.HelpUtils;
 import java.awt.Desktop;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -26,7 +26,7 @@ public final class HelpHowToAction implements ActionListener {
 
         if (Desktop.isDesktopSupported()) { // JDK 1.6.0
             try {
-                Desktop.getDesktop().browse(MiscellaneousUtils.createRedirectTempFile("id.qsh70q"));
+                Desktop.getDesktop().browse(HelpUtils.createRedirectTempFile("id.qsh70q"));
             } catch (Exception ex) {
                 LoggerFactory.getLogger("ProlineStudio.ResultExplorer").error(getClass().getSimpleName() + " failed", ex);
             }

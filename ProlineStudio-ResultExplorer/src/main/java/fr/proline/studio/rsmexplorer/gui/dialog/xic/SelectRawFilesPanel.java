@@ -20,7 +20,7 @@ import fr.proline.studio.table.DecoratedMarkerTable;
 import fr.proline.studio.table.DecoratedTableModel;
 import fr.proline.studio.table.TablePopupMenu;
 import fr.proline.studio.utils.IconManager;
-import fr.proline.studio.utils.MiscellaneousUtils;
+import fr.proline.studio.utils.HelpUtils;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.GridBagConstraints;
@@ -641,11 +641,11 @@ public class SelectRawFilesPanel extends JPanel implements XICRunNodeInitListene
                         if (info.hasPotentialRawFiles()) {
 
                             for (String key : rawFiles.keySet()) {
-                                set.add(MiscellaneousUtils.getFileName(key.toLowerCase(), SUFFIX));
+                                set.add(HelpUtils.getFileName(key.toLowerCase(), SUFFIX));
                             }
 
                         } else if(info.getPeakListPath()!=null){
-                            set.add(MiscellaneousUtils.getFileName(info.getPeakListPath().toLowerCase(), SUFFIX));
+                            set.add(HelpUtils.getFileName(info.getPeakListPath().toLowerCase(), SUFFIX));
                         }
                         
                         m_potentialFileNameForMissings.put(i, set);
@@ -754,7 +754,7 @@ public class SelectRawFilesPanel extends JPanel implements XICRunNodeInitListene
             m_sample = sample;
             m_sampleAnalysis = sampleAnalysis;
             m_run = run;
-            m_name = MiscellaneousUtils.getFileName(this.m_sampleAnalysis.getResultSet().getMsiSearch().getPeaklist().getPath(), SUFFIX);
+            m_name = HelpUtils.getFileName(this.m_sampleAnalysis.getResultSet().getMsiSearch().getPeaklist().getPath(), SUFFIX);
         }
 
         public XICBiologicalSampleAnalysisNode getXICBiologicalSampleAnalysisNode() {

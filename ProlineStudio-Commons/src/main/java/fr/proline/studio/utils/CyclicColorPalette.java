@@ -3,7 +3,7 @@ package fr.proline.studio.utils;
 import java.awt.Color;
 
 /**
- * To create and combine icons from a color palette
+ * Management of a default color palette for the application
  *
  * @author JM235353
  */
@@ -20,17 +20,34 @@ public class CyclicColorPalette {
         new Color(63, 121, 58),
         new Color(109, 153, 5)
     };
-    public static Color GRAY_BACKGROUND = new Color(239, 236, 234);
-    public static Color GRAY_BACKGROUND_DARKER = new Color(229, 226, 224);
-    public static Color GRAY_TEXT_LIGHT = new Color(142, 136, 131);
-    public static Color GRAY_TEXT_DARK = new Color(99, 95, 93);
-    public static Color GRAY_GRID = new Color(229, 226, 224);
-    public static Color GRAY_GRID_LOG = new Color(244, 240, 238);
-    public static Color BLUE_SELECTION_ZONE = new Color(0.2f, 0.2f, 1f, 0.5f);
+    public static final Color GRAY_BACKGROUND = new Color(239, 236, 234);
+    public static final Color GRAY_BACKGROUND_DARKER = new Color(229, 226, 224);
+    public static final Color GRAY_TEXT_LIGHT = new Color(142, 136, 131);
+    public static final Color GRAY_TEXT_DARK = new Color(99, 95, 93);
+    public static final Color GRAY_GRID = new Color(229, 226, 224);
+    public static final Color GRAY_GRID_LOG = new Color(244, 240, 238);
+    public static final Color BLUE_SELECTION_ZONE = new Color(0.2f, 0.2f, 1f, 0.5f);
 
+    /**
+     * get color from the default color palette
+     * if the colorIndex is too high, the color returned will be of a different brightness
+     * than those in the palette
+     * @param colorIndex
+     * @return 
+     */
     public static Color getColor(int colorIndex) {
         return getColor(colorIndex, DEFAULT_BASE_PALETTE);
     }
+    
+    
+    /**
+     * get color from the specified color palette
+     * if the colorIndex is too high, the color returned will be of a different brightness
+     * than those in the palette
+     * @param colorIndex
+     * @param palette
+     * @return 
+     */
     public static Color getColor(int colorIndex, Color[] palette) {
         int paletteSize = palette.length * 3;
         colorIndex = colorIndex % paletteSize;
@@ -48,6 +65,11 @@ public class CyclicColorPalette {
         return new Color(Color.HSBtoRGB(hsb[0], hsb[1], brightness));
     }
     
+    /**
+     * Return a palette created from the default palette with additional colors
+     * with a modification of the brightness
+     * @return 
+     */
     public static Color[] getPalette() {
         int paletteSize = DEFAULT_BASE_PALETTE.length * 3;
         Color[] palette = new Color[paletteSize];
@@ -57,72 +79,34 @@ public class CyclicColorPalette {
         return palette;
     }
     
+    /**
+     * get color from the default palette with the specified transparency (alpha value)
+     * @param colorIndex
+     * @param alpha
+     * @return 
+     */
     public static Color getColor(int colorIndex, int alpha) {
         Color c = getColor(colorIndex);
         return new Color(c.getRed(), c.getGreen(), c.getBlue(), alpha);
     }
 
+    /**
+     * get HTML color from the defautl palette
+     * @param colorIndex
+     * @return 
+     */
     public static String getHTMLColor(int colorIndex) {
         Color c = getColor(colorIndex);
         return getHTMLColor(c);
     }
-    
+ 
+    /**
+     * returns HTML color corresponding to the specified color
+     * @param color
+     * @return 
+     */
     public static String getHTMLColor(Color color) {
         return String.format("%02x%02x%02x", color.getRed(), color.getGreen(), color.getBlue());
     }
-    
-    /*
-     * no longer used for the moment
-     *
-     *
-     * public static ImageIcon getColoredImageIcon(int width, int height, int colorIndex, boolean registerImage) {
-     *
-     * String registerKey = null; if (registerImage) { if (m_sb == null) { m_sb = new StringBuilder(); }
-     * m_sb.append(width).append('x').append(height).append('x').append(colorIndex); registerKey = m_sb.toString(); m_sb.setLength(0);
-     *
-     * ImageIcon imageIcon = getRegisteredIcon(registerKey); if (imageIcon != null) { return imageIcon; } }
-     *
-     * Color c = getColor(colorIndex);      *
-     * BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB); Graphics2D g = image.createGraphics(); g.setColor(c);
-     * g.fillRect(1, 1, width-2, height-2); g.setColor(Color.black); g.drawRect(0, 0, width-1, height-1);
-     *
-     * ImageIcon imageIcon = new ImageIcon(image);
-     *
-     * if (registerImage) { registerIcon(registerKey, imageIcon); }
-     *
-     * return imageIcon; } private static StringBuilder m_sb = null;
-     *
-     * public static ImageIcon getCombinedImageIcon(Icon leftIcon, Icon rightIcon, int hGap, String registerKey) {
-     *
-     * if (registerKey != null) { ImageIcon imageIcon = getRegisteredIcon(registerKey); if (imageIcon != null) { return imageIcon; } }
-     *
-     * int width = leftIcon.getIconWidth() + rightIcon.getIconWidth() + hGap; int height = Math.max(leftIcon.getIconHeight(),
-     * rightIcon.getIconHeight());
-     *
-     * BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB); Graphics2D g = image.createGraphics(); g.setColor(new
-     * Color(0, 0, 0, 0)); g.fillRect(0, 0, width - 1, height - 1);
-     *
-     *
-     * leftIcon.paintIcon(null, g, 0, 0); rightIcon.paintIcon(null, g, leftIcon.getIconWidth() + hGap, 0);
-     *
-     * ImageIcon imageIcon = new ImageIcon(image);
-     *
-     * if (registerKey != null) { registerIcon(registerKey, imageIcon); }
-     *
-     * return imageIcon;
-     *
-     * }
-     *
-     * private static ImageIcon getRegisteredIcon(String registerKey) {
-     *
-     * if (m_imageIconMap != null) { return m_imageIconMap.get(registerKey);
-     *
-     * }
-     * return null; }
-     *
-     * private static void registerIcon(String registerKey, ImageIcon i) { if (m_imageIconMap == null) { m_imageIconMap = new HashMap<>(); }
-     * m_imageIconMap.put(registerKey, i); }
-     *
-     *
-     */
+
 }

@@ -18,6 +18,8 @@ import org.openide.nodes.Sheet;
  */
 public class SerializedPropertiesUtil {
 
+    private static final StringBuilder m_sb = new StringBuilder();
+    
     public static void getProperties(HashMap<String, String> propertiesList, String name, Map<String, Object> serializedPropertiesMap) {
         
         getPropertiesImpl(propertiesList, name, serializedPropertiesMap);
@@ -68,7 +70,7 @@ public class SerializedPropertiesUtil {
         m_sb.setLength(0);
         
     }
-    private static final StringBuilder m_sb = new StringBuilder();
+    
 
     /**
      * If the First Map contains only maps, we remove the first map and use the
@@ -203,7 +205,7 @@ public class SerializedPropertiesUtil {
         }
 
         if (listOfMaps != null) {
-            Map<Object, Integer> propIndex = new HashMap<Object, Integer>();
+            Map<Object, Integer> propIndex = new HashMap<>();
             int nbMap = listOfMaps.size();
             for (int i = 0; i < nbMap; i++) {
                 Object key = listOfKeyMap.get(i);
@@ -313,7 +315,7 @@ public class SerializedPropertiesUtil {
         }
 
         if (listOfMaps != null) {
-            Map<Object, Integer> propIndex = new HashMap<Object, Integer>();
+            Map<Object, Integer> propIndex = new HashMap<>();
             int nbMap = listOfMaps.size();
             for (int i = 0; i < nbMap; i++) {
                 Object key = listOfKeyMap.get(i);

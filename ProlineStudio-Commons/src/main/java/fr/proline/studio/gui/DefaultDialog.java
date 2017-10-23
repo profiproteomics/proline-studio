@@ -1,7 +1,7 @@
 package fr.proline.studio.gui;
 
 import fr.proline.studio.utils.IconManager;
-import fr.proline.studio.utils.MiscellaneousUtils;
+import fr.proline.studio.utils.HelpUtils;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
@@ -481,7 +481,7 @@ public class DefaultDialog extends javax.swing.JDialog {
 
             try {
                 //Desktop.getDesktop().browse(new URL(MiscellaneousUtils.convertURLToCurrentHelp(m_helpURL)).toURI());
-                Desktop.getDesktop().browse(MiscellaneousUtils.createRedirectTempFile(m_documentationSuffix));
+                Desktop.getDesktop().browse(HelpUtils.createRedirectTempFile(m_documentationSuffix));
             } catch (Exception ex) {
                 LoggerFactory.getLogger("ProlineStudio.Commons").error(getClass().getSimpleName() + " failed", ex);
             }

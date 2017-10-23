@@ -8,10 +8,10 @@ import java.io.IOException;
 import java.net.URI;
 
 /**
- *
+ * Static Util methods used for the help functionnality
  * @author JM235353
  */
-public class MiscellaneousUtils {
+public class HelpUtils {
     
     /**
      * Transform URL of type

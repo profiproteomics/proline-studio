@@ -11,17 +11,17 @@ import java.text.DecimalFormatSymbols;
  */
 public class DataFormat {
     
-    private final static DecimalFormat m_decimalFormat = new DecimalFormat("###.##");
-    private final static DecimalFormat m_scientificFormat = new DecimalFormat("#.##E0");
+    private final static DecimalFormat DECIMAL_FORMAT = new DecimalFormat("###.##");
+    private final static DecimalFormat SCIENTIFIC_FORMAT = new DecimalFormat("#.##E0");
     
     static {
-        DecimalFormatSymbols dfs = m_decimalFormat.getDecimalFormatSymbols();
+        DecimalFormatSymbols dfs = DECIMAL_FORMAT.getDecimalFormatSymbols();
         dfs.setDecimalSeparator('.');
-        m_decimalFormat.setDecimalFormatSymbols(dfs);
+        DECIMAL_FORMAT.setDecimalFormatSymbols(dfs);
         
-        dfs = m_scientificFormat.getDecimalFormatSymbols();
+        dfs = SCIENTIFIC_FORMAT.getDecimalFormatSymbols();
         dfs.setDecimalSeparator('.');
-        m_scientificFormat.setDecimalFormatSymbols(dfs);
+        SCIENTIFIC_FORMAT.setDecimalFormatSymbols(dfs);
     }
     
     
@@ -35,10 +35,10 @@ public class DataFormat {
     
     public static String format(float f, int nbFractionDigits) {
         
-        m_decimalFormat.setMaximumFractionDigits(nbFractionDigits);
-        m_decimalFormat.setMinimumFractionDigits(nbFractionDigits);
+        DECIMAL_FORMAT.setMaximumFractionDigits(nbFractionDigits);
+        DECIMAL_FORMAT.setMinimumFractionDigits(nbFractionDigits);
         
-        return m_decimalFormat.format((double) f);
+        return DECIMAL_FORMAT.format((double) f);
     }
     
     public static String format(Double d, int nbFractionDigits) {
@@ -50,10 +50,10 @@ public class DataFormat {
     
     public static String format(double d, int nbFractionDigits) {
 
-        m_decimalFormat.setMaximumFractionDigits(nbFractionDigits);
-        m_decimalFormat.setMinimumFractionDigits(nbFractionDigits);
+        DECIMAL_FORMAT.setMaximumFractionDigits(nbFractionDigits);
+        DECIMAL_FORMAT.setMinimumFractionDigits(nbFractionDigits);
         
-        return m_decimalFormat.format((double) d);
+        return DECIMAL_FORMAT.format((double) d);
     }
     
     public static String formatScientific(Float f, int nbFractionDigits) {
@@ -65,10 +65,10 @@ public class DataFormat {
     
     public static String formatScientific(float f, int nbFractionDigits) {
         
-        m_scientificFormat.setMaximumFractionDigits(nbFractionDigits);
-        m_scientificFormat.setMinimumFractionDigits(nbFractionDigits);
+        SCIENTIFIC_FORMAT.setMaximumFractionDigits(nbFractionDigits);
+        SCIENTIFIC_FORMAT.setMinimumFractionDigits(nbFractionDigits);
         
-        return m_scientificFormat.format((double) f);
+        return SCIENTIFIC_FORMAT.format((double) f);
     }
     
     public static String formatScientific(Double d, int nbFractionDigits) {
@@ -80,10 +80,10 @@ public class DataFormat {
     
     public static String formatScientific(double d, int nbFractionDigits) {
 
-        m_scientificFormat.setMaximumFractionDigits(nbFractionDigits);
-        m_scientificFormat.setMinimumFractionDigits(nbFractionDigits);
+        SCIENTIFIC_FORMAT.setMaximumFractionDigits(nbFractionDigits);
+        SCIENTIFIC_FORMAT.setMinimumFractionDigits(nbFractionDigits);
         
-        return m_scientificFormat.format((double) d);
+        return SCIENTIFIC_FORMAT.format((double) d);
     }
     
     public static String format(Integer i) {

@@ -1,6 +1,5 @@
 package fr.proline.studio.utils;
 
-import java.lang.Class;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -13,17 +12,17 @@ import javax.swing.Action;
  */
 public class ActionRegistry {
 
-    private static ActionRegistry instance = new ActionRegistry();
+    private static ActionRegistry m_instance = new ActionRegistry();
 
     public static ActionRegistry getInstance() {
-        return instance;
+        return m_instance;
     }
     
-    private Map<Class, List<Action>> actionRegistry = new HashMap<Class, List<Action>>();
+    private Map<Class, List<Action>> actionRegistry = new HashMap<>();
     
     public void registerAction(Class nodeClass, Action action) {
         if (!actionRegistry.containsKey(nodeClass)) 
-            actionRegistry.put(nodeClass, new ArrayList<Action>());
+            actionRegistry.put(nodeClass, new ArrayList<>());
         actionRegistry.get(nodeClass).add(action);
     }
     

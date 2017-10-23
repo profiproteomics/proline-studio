@@ -9,7 +9,7 @@ import fr.proline.studio.rsmexplorer.gui.DropZoneInterface;
 import fr.proline.studio.rsmexplorer.gui.TreeFileChooserTransferHandler;
 import fr.proline.studio.rsmexplorer.gui.dialog.xic.SelectRawFilesPanel.FlatDesignTableModel;
 import fr.proline.studio.utils.IconManager;
-import fr.proline.studio.utils.MiscellaneousUtils;
+import fr.proline.studio.utils.HelpUtils;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.io.File;
@@ -150,8 +150,8 @@ public class XICDropZone extends JPanel implements DropZoneInterface {
     @Override
     public void addSample(Object sample) {
         if (sample instanceof File) {
-            if (!m_droppedFiles.containsKey(MiscellaneousUtils.getFileName(((File) sample).toString().toLowerCase(), suffix))) {
-                m_droppedFiles.put(MiscellaneousUtils.getFileName(((File) sample).toString().toLowerCase(), suffix), (File) sample);
+            if (!m_droppedFiles.containsKey(HelpUtils.getFileName(((File) sample).toString().toLowerCase(), suffix))) {
+                m_droppedFiles.put(HelpUtils.getFileName(((File) sample).toString().toLowerCase(), suffix), (File) sample);
             }
         }
     }

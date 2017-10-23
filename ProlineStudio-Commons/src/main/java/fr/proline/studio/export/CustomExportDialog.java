@@ -226,9 +226,7 @@ public class CustomExportDialog extends DefaultDialog implements CollapseListene
             if (param.sheet_presentation_values != null) {
                 comboBox_Orientation.setModel(new DefaultComboBoxModel(param.sheet_presentation_values));
             }
-//			if(param.format_values!=null) {
-//				m_exporTypeCombobox.setModel(new DefaultComboBoxModel(param.format_values));
-//			}
+
             if (param.format_values != null) {
                 String[] reformatedParamValues = new String[param.format_values.length];
                 for (int i = 0; i < param.format_values.length; i++) {
@@ -380,11 +378,7 @@ public class CustomExportDialog extends DefaultDialog implements CollapseListene
                     };
 
                     tableScrollPane.setViewportView(table);
-					// add the data into the model
 
-                    // ---add ability to enable/disable individual tabs
-                    //				m_tabbedPane.setEnabledAt(i, defaultParam.sheets[i].default_displayed); // true if from a saved file also
-                    //m_tabbedPane.setToolTipTextAt(i, "Right click to Enable/Disable");
                     // now add the fields
                     // add fields contained both in param and defaultparam
                     ArrayList<String> defaultFieldsList = getFieldsFromParamSheet(defaultParam.sheets, param.sheets[i].id);
@@ -520,7 +514,7 @@ public class CustomExportDialog extends DefaultDialog implements CollapseListene
     }
 
     private int getIndexOfSheet(ExportConfig config, String sheetId) {
-        int index = -1; //config.sheets.length; // if not found, then value is size of table
+        int index = -1;
         for (int i = 0; i < config.sheets.length; i++) {
             if (config.sheets[i].id.equals(sheetId)) {
                 index = i;
@@ -1056,11 +1050,7 @@ public class CustomExportDialog extends DefaultDialog implements CollapseListene
             ec.decimal_separator = ",";
         }
         ec.date_format = (String) comboBox_DateFormat.getSelectedItem();
-        /*if (comboBox_DateFormat.getSelectedIndex() == 0) {
-         ec.date_format = "yyyy:MM:dd HH:mm:ss";
-         } else if (comboBox_DateFormat.getSelectedIndex() == 1) {
-         ec.date_format = "yyyy:MM:dd";
-         }*/
+
         ec.data_export = new ExportDataExport();
         ec.data_export.all_protein_set = comboBox_ProteinSets.getSelectedItem().equals("All");
 

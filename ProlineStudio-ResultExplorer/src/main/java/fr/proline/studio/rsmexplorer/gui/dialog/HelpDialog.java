@@ -4,7 +4,7 @@ import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.parameter.BooleanParameter;
 import fr.proline.studio.parameter.ParameterList;
 import fr.proline.studio.utils.IconManager;
-import fr.proline.studio.utils.MiscellaneousUtils;
+import fr.proline.studio.utils.HelpUtils;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -206,7 +206,7 @@ public class HelpDialog extends DefaultDialog implements MouseListener, MouseMot
             String suffix = helpInfo.getSuffix();
             if (Desktop.isDesktopSupported()) { // JDK 1.6.0
                 try {
-                    Desktop.getDesktop().browse(MiscellaneousUtils.createRedirectTempFile(suffix));
+                    Desktop.getDesktop().browse(HelpUtils.createRedirectTempFile(suffix));
                 } catch (Exception ex) {
                     LoggerFactory.getLogger("ProlineStudio.ResultExplorer").error(getClass().getSimpleName() + " failed", ex);
                 }

@@ -70,7 +70,6 @@ public class TableRowTransferHandler extends TransferHandler {
                     sels.add(index);
                     TableUtil.addRowAt(table, obj, index++);
                 }
-                TableUtil.selectMultipleRow(table, sels);
 
 
                 return true;

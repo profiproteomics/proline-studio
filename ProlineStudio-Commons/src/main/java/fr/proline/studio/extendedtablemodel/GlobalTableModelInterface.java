@@ -5,8 +5,6 @@ import fr.proline.studio.filter.FilterProviderInterface;
 import fr.proline.studio.graphics.BestGraphicsInterface;
 import fr.proline.studio.progress.ProgressInterface;
 import javax.swing.table.TableModel;
-import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
-import fr.proline.studio.extendedtablemodel.ExtraDataForTableModelInterface;
 import fr.proline.studio.table.DecoratedTableModelInterface;
 import fr.proline.studio.table.LazyTableModelInterface;
 

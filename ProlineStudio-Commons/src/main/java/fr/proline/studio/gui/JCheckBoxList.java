@@ -25,7 +25,7 @@ import javax.swing.ListSelectionModel;
  */
 public class JCheckBoxList<E> extends JList {
 
-    private DefaultListModel<CheckListItem<E>> model;
+    private DefaultListModel<CheckListItem<E>> m_model;
       
     /** A list of event listeners for this component. */
     private ArrayList<ActionListener> m_listenerList = new ArrayList(1);
@@ -35,12 +35,12 @@ public class JCheckBoxList<E> extends JList {
         int size = list.size();
         CheckListItem<E>[] items = new CheckListItem[size];
         
-        model = new DefaultListModel<>();        
+        m_model = new DefaultListModel<>();        
         for (int i=0;i<list.size();i++) {
             items[i] = new CheckListItem<>(list.get(i), visibilityList.get(i));
-            model.addElement(items[i]);
+            m_model.addElement(items[i]);
         }
-        super.setModel(model);
+        super.setModel(m_model);
         
         setCellRenderer(new CheckBoxListRenderer());
         setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -69,7 +69,7 @@ public class JCheckBoxList<E> extends JList {
     
     public void addItem(int index, E item, Boolean isVisible){
         CheckListItem<E> cItem = new CheckListItem<>(item, isVisible);
-        model.add(index, cItem);
+        m_model.add(index, cItem);
     }
     
     public E getElementAt(int index){

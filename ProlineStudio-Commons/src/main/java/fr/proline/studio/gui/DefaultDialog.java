@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * All Dialogs of this application must extend this class which offers a common
- * behaviour
+ * behaviour.
  *
  * @author JM235353
  */

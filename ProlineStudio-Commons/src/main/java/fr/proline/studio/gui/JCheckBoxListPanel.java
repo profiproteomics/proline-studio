@@ -11,7 +11,9 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
 /**
- *
+ * Panel with a list of checkbox to select/unselect multiple objet.
+ * There is a button to select/unselect all.
+ * 
  * @author JM235353
  */
 public class JCheckBoxListPanel extends JPanel {

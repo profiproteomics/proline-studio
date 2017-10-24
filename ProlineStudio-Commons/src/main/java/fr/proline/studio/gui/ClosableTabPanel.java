@@ -12,6 +12,8 @@ import javax.swing.JTabbedPane;
 
 /**
  *
+ * Tab for a JTabbedPane that the user can close through a button
+ * 
  * @author JM235353
  */
 public class ClosableTabPanel extends JPanel {

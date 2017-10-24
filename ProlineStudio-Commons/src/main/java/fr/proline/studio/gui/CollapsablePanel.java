@@ -15,6 +15,7 @@ import java.util.List;
  * The header panel contains the arrow (down/right) and the title
  * if the component containing the CollapsablePanel needs to know the current status (expand/collapse) for example fo rresizing, 
  * it must implement the @see CollapseListener interface
+ * 
  * @author MB243701
  */
 

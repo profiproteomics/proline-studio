@@ -20,6 +20,9 @@ import org.openide.windows.WindowManager;
 
 /**
  *
+ * Panel with a generic behaviour to work as a floatting panel.
+ * -> possibility to drag it and to close it.
+ * 
  * @author JM235353
  */
 public class DefaultFloatingPanel extends HourglassPanel {

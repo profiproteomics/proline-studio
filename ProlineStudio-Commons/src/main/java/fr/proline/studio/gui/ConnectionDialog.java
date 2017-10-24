@@ -9,6 +9,7 @@ import javax.swing.*;
 
 /**
  * Dialog to Connect to the server
+ * 
  * @author jm235353
  */
 public abstract class ConnectionDialog extends DefaultDialog {

@@ -5,6 +5,7 @@ import javax.swing.*;
 
 /**
  * Dialog for a question yes/no or to get a text input
+ * 
  * @author jm235353
  */
 public class OptionDialog extends DefaultDialog {

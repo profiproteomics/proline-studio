@@ -1,6 +1,5 @@
 package fr.proline.studio.gui;
 
-import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.utils.IconManager;
 import java.awt.*;
 import java.util.prefs.Preferences;

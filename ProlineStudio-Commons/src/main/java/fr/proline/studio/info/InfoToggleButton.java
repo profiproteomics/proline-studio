@@ -6,11 +6,11 @@ import fr.proline.studio.utils.IconManager;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.JToggleButton;
-import org.jdesktop.swingx.JXTable;
 import org.openide.windows.WindowManager;
 
 /**
- *
+ * Button to access to an info floating panel
+ * 
  * @author JM235353
  */
 public class InfoToggleButton extends JToggleButton {
@@ -44,7 +44,7 @@ public class InfoToggleButton extends JToggleButton {
         m_infoPanel.setToggleButton(this);
         
         setIcon(IconManager.getIcon(IconManager.IconType.INFORMATION));
-        //setToolTipText("Search");
+
         setFocusPainted(false);
 
         addActionListener(new ActionListener() {

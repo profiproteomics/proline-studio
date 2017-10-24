@@ -18,6 +18,8 @@ import javax.swing.JToggleButton;
 
 /**
  *
+ * Floating Panel to display an info as text
+ * 
  * @author JM235353
  */
 public class InfoFloatingPanel extends JPanel {

@@ -15,7 +15,8 @@ import org.jdesktop.swingx.JXTable;
 import org.openide.windows.WindowManager;
 
 /**
- *
+ * Button to add to start a search.
+ * This button use 
  * @author JM235353
  */
 public class SearchToggleButton extends JToggleButton {

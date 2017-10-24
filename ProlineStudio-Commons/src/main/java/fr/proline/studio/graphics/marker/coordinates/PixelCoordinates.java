@@ -4,6 +4,7 @@ import fr.proline.studio.graphics.BasePlotPanel;
 
 /**
  * Coordinates expressed in pixel
+ * 
  * @author JM235353
  */
 public class PixelCoordinates extends AbstractCoordinates {

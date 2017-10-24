@@ -6,6 +6,7 @@ import fr.proline.studio.graphics.YAxis;
 
 /**
  * Coordinates expressed in percentage of the visible area
+ * 
  * @author JM235353
  */
 public class PercentageCoordinates extends AbstractCoordinates {

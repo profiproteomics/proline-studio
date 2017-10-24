@@ -6,6 +6,7 @@ import fr.proline.studio.graphics.YAxis;
 
 /**
  * Coordinates expressed in data according to X and Y axis
+ * 
  * @author JM235353
  */
 public class DataCoordinates extends AbstractCoordinates {

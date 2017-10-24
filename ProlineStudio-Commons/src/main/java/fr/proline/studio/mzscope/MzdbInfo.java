@@ -5,6 +5,7 @@ import java.util.List;
 
 /**
  * represents the info to  pass to mzscope
+ * 
  * @author MB243701
  */
 public class MzdbInfo {

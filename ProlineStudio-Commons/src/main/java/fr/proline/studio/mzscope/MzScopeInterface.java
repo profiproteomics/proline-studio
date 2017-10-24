@@ -5,6 +5,7 @@ import java.util.List;
 
 /**
  * gives information needed to display mzscope
+ * 
  * @author MB243701
  */
 public interface MzScopeInterface {

@@ -9,8 +9,9 @@ import javax.swing.JButton;
 import org.openide.windows.WindowManager;
 
 /**
- *
- * @author JM235353
+ * Button to access to mzScope
+ * 
+ * @author MB243701
  */
 public abstract class AddMzScopeButton extends JButton implements ActionListener {
 

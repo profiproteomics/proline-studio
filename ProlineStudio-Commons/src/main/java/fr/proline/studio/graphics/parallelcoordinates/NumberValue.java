@@ -1,7 +1,8 @@
 package fr.proline.studio.graphics.parallelcoordinates;
 
 /**
- *
+ * Encapsulation of values of type Number to be displayed in ParallelCoordinates
+ * 
  * @author JM235353
  */
 public class NumberValue extends AbstractValue {

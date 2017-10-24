@@ -14,8 +14,13 @@ import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 
 
 
-/**
- *
+/**  
+ * Axis used for parallel coordinates.
+ * An Axis can be moved to modify the order of the axis. It has a scrollbar with two handles to select min and max.
+ * It is possible to move this scrollbar to change accordingly min and max.
+ * This axis support String and Number (integer or double).
+ * It handles NaN values by putting them separately at the bottom.
+ * 
  * @author JM235353
  */
 public class ParallelCoordinatesAxis implements MoveableInterface {
@@ -66,7 +71,7 @@ public class ParallelCoordinatesAxis implements MoveableInterface {
     private enum OverSubObject {
       HANDLE_UP,
       HANDLE_BOTTOM,
-      SCROLL,
+      SCROLLBAR,
       NONE
     };
     
@@ -535,7 +540,7 @@ public class ParallelCoordinatesAxis implements MoveableInterface {
             } else if ((y <= y2) && (y >= y2 - AXIS_WIDTH)) {
                 m_overSubObject = OverSubObject.HANDLE_BOTTOM;
             } else if ((y>=y1) && (y<=y2)) {
-                m_overSubObject = OverSubObject.SCROLL;
+                m_overSubObject = OverSubObject.SCROLLBAR;
             } else {
                 m_overSubObject = OverSubObject.NONE; // should not happen !
             }
@@ -578,7 +583,7 @@ public class ParallelCoordinatesAxis implements MoveableInterface {
                     }
                     m_plot.axisChanged();
                     break;
-                case SCROLL:
+                case SCROLLBAR:
                     if (m_selectionMinPercentage + percentageMove < 0) {
                        percentageMove = -m_selectionMinPercentage;
                     } else if (m_selectionMaxPercentage + percentageMove > 1) {

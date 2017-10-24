@@ -1,7 +1,8 @@
 package fr.proline.studio.graphics.parallelcoordinates;
 
 /**
- *
+ * Encapsulation of values to be displayed in ParallelCoordinates
+ * 
  * @author JM235353
  */
 public abstract class AbstractValue implements Comparable<AbstractValue> {

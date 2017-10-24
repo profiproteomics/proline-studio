@@ -5,23 +5,22 @@ import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
-
-import fr.proline.studio.utils.IconManager;
+import javax.swing.tree.TreePath;
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Dimension;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import javax.swing.tree.TreePath;
+import fr.proline.studio.utils.IconManager;
 
 /**
- *
+ * Tree containing functions or variables. This tree is used in the ExpressionBuilderPanel
+ * to let the user select functions and variables
+ * 
  * @author JM235353
  */
 public class ExpressionEntityTree  extends JTree {
 
     private ExpressionBuilderPanel m_builderPanel;
-    private TreeType m_type;
     
     public enum TreeType {
         FUNCTIONS,
@@ -31,10 +30,6 @@ public class ExpressionEntityTree  extends JTree {
     protected ExpressionEntityTree(ExpressionBuilderPanel builderPanel, TreeType type) {
         super(new RootFunctionNode(type));
 
-        m_type = type;
-
-        
-        
         m_builderPanel = builderPanel;
         
         setToggleClickCount(0); // avoid expanding when double clicking
@@ -56,15 +51,7 @@ public class ExpressionEntityTree  extends JTree {
 
             }
         });
-        
-        // expand first level of the tree
-        /*DefaultMutableTreeNode currentNode = root.getNextNode();
-        do {
-            if (currentNode.getLevel() == 1) {
-                expandPath(new TreePath(currentNode.getPath()));
-            }
-            currentNode = currentNode.getNextNode();
-        } while (currentNode != null);*/
+
     }
 
     

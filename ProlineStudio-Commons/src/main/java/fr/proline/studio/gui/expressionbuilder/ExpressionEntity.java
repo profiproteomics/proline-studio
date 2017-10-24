@@ -2,6 +2,9 @@ package fr.proline.studio.gui.expressionbuilder;
 
 /**
  *
+ * ExpressionEntity links what is displayed to the user, to the code
+ * generated to be executed
+ * 
  * @author JM235353
  */
 public class ExpressionEntity {

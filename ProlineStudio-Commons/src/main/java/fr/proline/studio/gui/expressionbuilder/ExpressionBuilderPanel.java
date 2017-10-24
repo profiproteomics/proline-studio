@@ -27,6 +27,11 @@ import org.jdesktop.swingx.JXTextField;
 
 /**
  *
+ * Panel of the expression builder with:
+ * - a tree with functions
+ * - a tree with variables
+ * - buttons like a calculator with figures and symbols like * / ( )...
+ * 
  * @author JM235353
  */
 public class ExpressionBuilderPanel extends JPanel {

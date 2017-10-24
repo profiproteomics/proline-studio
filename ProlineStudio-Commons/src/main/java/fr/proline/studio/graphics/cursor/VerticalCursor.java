@@ -3,14 +3,13 @@ package fr.proline.studio.graphics.cursor;
 import fr.proline.studio.graphics.BasePlotPanel;
 import fr.proline.studio.graphics.XAxis;
 import fr.proline.studio.graphics.YAxis;
-import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Stroke;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 /**
- *
+ * Horizontal cursor : it displays the X axis value
  * @author JM235353
  */
 public class VerticalCursor extends AbstractCursor {

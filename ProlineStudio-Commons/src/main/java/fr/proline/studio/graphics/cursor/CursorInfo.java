@@ -5,6 +5,8 @@ import java.awt.Color;
 
 /**
  *
+ * Information on a cursor : value, strokke, color, selectables...
+ * 
  * @author JM235353
  */
 public class CursorInfo {

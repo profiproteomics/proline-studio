@@ -10,7 +10,9 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 
 /**
- *
+ * Base class for cursors.
+ * A cursor is a movable graphical object displayed over a graphic.
+ * It displays the X or Y axis value.
  * @author JM235353
  */
 public abstract class AbstractCursor implements MoveableInterface {

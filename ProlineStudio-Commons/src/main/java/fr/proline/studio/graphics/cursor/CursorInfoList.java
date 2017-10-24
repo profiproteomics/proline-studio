@@ -3,7 +3,7 @@ package fr.proline.studio.graphics.cursor;
 import java.util.ArrayList;
 
 /**
- *
+ * List of all the cursors infos
  * @author JM235353
  */
 public class CursorInfoList {

@@ -9,7 +9,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 /**
- *
+ * Horizontal cursor : it displays the Y axis value
+ * 
  * @author JM235353
  */
 public class HorizontalCursor extends AbstractCursor {

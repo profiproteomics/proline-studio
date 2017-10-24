@@ -10,7 +10,8 @@ import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 
 /**
- *
+ * Dialog to select a color
+ * 
  * @author jm235353
  */
 public class ColorPickerDialog extends DefaultDialog {

@@ -1,11 +1,11 @@
 package fr.proline.studio.graphics.venndiagram;
 
-import java.awt.Point;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 
 /**
- *
+ * Circle(x,y,radius) and useful methods for intersections between circles
+ * 
  * @author JM235353
  */
 public class Circle {
@@ -55,6 +55,13 @@ public class Circle {
         m_radius = r;
     }
     
+    /**
+     * 
+     * Intersection area with another circle
+     * 
+     * @param c
+     * @return 
+     */
     public double intersectionArea(Circle c) {
         
         double r1 = m_radius;
@@ -74,6 +81,14 @@ public class Circle {
         return intersectionArea(distance, r1, r2);
     }
     
+    /**
+     * Intersection area for two circles (radius1 and radius2) separated by a specified distance
+     * 
+     * @param distance
+     * @param radius1
+     * @param radius2
+     * @return 
+     */
     public static double intersectionArea(double distance, double radius1, double radius2) {
 
         if (distance >= (radius1 + radius2)) {
@@ -92,6 +107,14 @@ public class Circle {
         return part1 + part2 - part3;
     }
     
+    /**
+     * 
+     * Find intersection points for two circles
+     * 
+     * @param c1
+     * @param c2
+     * @param result 
+     */
     public static void intersection(Circle c1, Circle c2, ArrayList<Point2D.Double> result) {
         
         double x1 = c1.getX();
@@ -124,6 +147,16 @@ public class Circle {
 
     }
     
+    /**
+     * 
+     * Distance between two points
+     * 
+     * @param x1
+     * @param y1
+     * @param x2
+     * @param y2
+     * @return 
+     */
     public static double distance(double x1, double y1, double x2, double y2) {
         return Math.sqrt((x1-x2)*(x1-x2)+(y1-y2)*(y1-y2));
     }

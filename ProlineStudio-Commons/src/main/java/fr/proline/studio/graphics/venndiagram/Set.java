@@ -6,16 +6,21 @@ import java.util.HashMap;
 
 /**
  *
+ * Set correspond to a Group(size) like a group of proteins of an analysis.
+ * 
  * @author JM235353
  */
 public class Set implements Comparable<Set> {
     
     private final String m_name;
     
+    // list of intersection with other sets
     private ArrayList<SetIntersection> m_intersections = new ArrayList<>(16);
+    
+    // map of intersections with other set (Other Set, SetIntersection)
     private HashMap<Set, SetIntersection> m_intersectionsMap = new HashMap<>();
     
-    public Circle m_circle;
+    private Circle m_circle;
     
     private int m_id = -1;
 
@@ -28,7 +33,6 @@ public class Set implements Comparable<Set> {
         m_size = size;
     }
 
-    
     public int getId() {
         return m_id;
     }

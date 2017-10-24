@@ -12,6 +12,10 @@ import java.util.HashSet;
 
 /**
  *
+ * Intersection Area of one or multiple circles.
+ * It can be for instance (Circle1 inter Circle2 inter Circle3)
+ * or ((Circle1 inter Circle2) / Circle3)
+ * 
  * @author JM235353
  */
 public class IntersectArea implements Comparable<IntersectArea> {
@@ -19,15 +23,17 @@ public class IntersectArea implements Comparable<IntersectArea> {
     
     private final HashSet<Set> m_setIntersectionsOriginMap = new HashSet<>();
     
+    // real intersection area used for display
     private Area m_intersectionArea = null;
     
     private String m_displayName = null;
     
+    // base palette for circles when there is no intersection
     private static final Color[] DEFAULT_BASE_PALETTE = {
         new Color(252, 180, 46), // orange
         new Color(0, 147, 221), // cyan
         new Color(221, 18, 123), // magenta
-         new Color(10, 255, 43), // green
+        new Color(10, 255, 43), // green
         new Color(42, 23, 234), // blue
         new Color(225, 43, 10) // red
     };
@@ -36,6 +42,11 @@ public class IntersectArea implements Comparable<IntersectArea> {
         m_intersectionArea = a;
     }
     
+    /**
+     * For intersections, we create colors mixed from colors of intersected circles
+     * 
+     * @return 
+     */
     public Color getColor() {
         if (hasOneSet()) {
             return CyclicColorPalette.getColor(getOnlySet().getId(), DEFAULT_BASE_PALETTE);
@@ -81,6 +92,14 @@ public class IntersectArea implements Comparable<IntersectArea> {
         return new Color(Color.HSBtoRGB(hsv[0], hsv[1], hsv[2]));
     }
     
+    /**
+     * Check if two areas can logically intersect
+     * It is needed because java class Area does not provide a correct
+     * intersection algorithm at the limit.
+     * 
+     * @param intersectArea
+     * @return 
+     */
     public boolean isPotentialIntersect(IntersectArea intersectArea) {
 
         for (Set set1 : m_setIntersectedMap) {

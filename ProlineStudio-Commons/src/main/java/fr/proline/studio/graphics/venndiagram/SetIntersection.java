@@ -2,6 +2,10 @@ package fr.proline.studio.graphics.venndiagram;
 
 /**
  *
+ * Intersection between two Sets (m_s1 and m_s2)
+ * For the calculations we only take in account intersection between two sets,
+ * not intersection between multiple sets
+ * 
  * @author JM235353
  */
 public class SetIntersection {

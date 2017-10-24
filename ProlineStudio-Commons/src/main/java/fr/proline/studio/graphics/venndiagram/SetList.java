@@ -1,21 +1,22 @@
 package fr.proline.studio.graphics.venndiagram;
 
-import fr.proline.studio.utils.CyclicColorPalette;
-import java.awt.Color;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import org.apache.commons.math3.analysis.MultivariateFunction;
-
 import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.*;
 import org.apache.commons.math3.optim.*;
 import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
 import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction;
 
 /**
- *
+ * This class manage the list of sets and their placement.
+ * - first the sets are approximatively placed
+ * - then the placement of the sets is optimized thanks to 
+ * a NelderMeadSimplex and a evaluation function.
+ * 
  * @author JM235353
  */
 public class SetList {
@@ -28,16 +29,6 @@ public class SetList {
     private int m_scaleX = -1;
     private int m_scaleY = -1;
 
-        /*public static final Color[] DEFAULT_BASE_PALETTE = {
-        new Color(252, 180, 46),
-        new Color(105, 203, 212),
-        new Color(236, 33, 123),
-        new Color(18, 168, 157),
-        new Color(158, 31, 98),
-        new Color(91, 131, 192)
-    };*/
-        
-
     
     public SetList() {
         
@@ -47,47 +38,9 @@ public class SetList {
         return m_setArrayList;
     }
 
-    
 
-    
-    /*public static void test() {
-        SetList setList = new SetList();
-        Set s1 = new Set("S1 : 1000", 1000);
-        Set s2 = new Set("S1 : 800", 800);
-        Set s3 = new Set("S1 : 700", 700);
-        Set s4 = new Set("S1 : 600", 600);
-        setList.addSet(s1);
-        setList.addSet(s2);
-        setList.addSet(s3);
-        setList.addSet(s4);
-        setList.addIntersection(s1, s2, 500);
-        setList.addIntersection(s2, s3, 150);
-        setList.addIntersection(s1, s3, 100);
-        setList.addIntersection(s1, s4, 125);
-        setList.addIntersection(s2, s4, 125);
-        
-        setList.approximateSolution();
-        setList.optimizeSolution();
-        
-        setList.scale(600, 600);
-        setList.generateAreas();
-        
-
-        SwingUtilities.invokeLater(new Runnable() {
-
-            @Override
-            public void run() {
-                TmpVennDiagramFrame frame = new TmpVennDiagramFrame(setList);
-                frame.setVisible(true);
-            }
-        });
-        
-        System.out.println();
-    }*/
-    
     public void addSet(Set s) {
         int index = m_setArrayList.size();
-        //s.setId(index);
         m_setArrayList.add(s);
         m_setMap.put(s, index);
         
@@ -230,6 +183,8 @@ public class SetList {
         }
 
     }
+    
+    
     public void optimizeSolution() {
         
         int nb = m_setArrayList.size();
@@ -311,7 +266,17 @@ public class SetList {
     public ArrayList<IntersectArea> getGeneratedAreas() {
         return m_areas;
     }
-        
+     
+    
+    /**
+     * Scale the circles of the sets, so they can be displayed
+     * according to the display area
+     * 
+     * @param width
+     * @param height
+     * @param margin
+     * @return 
+     */
     public boolean scale(int width, int height, int margin) {
 
         width -= 2* margin;
@@ -387,7 +352,14 @@ public class SetList {
         return loss;
     }
     
-    
+    /**
+     * Generate barycenters of the given points.
+     * These barycenter are potential good approximative solutions for
+     * the center of a newly added circle
+     * 
+     * 
+     * @param srcPoints 
+     */
     private void generateBarycenterPoints(ArrayList<Point2D.Double> srcPoints) {
         int n = srcPoints.size();
         if (n<=2) {
@@ -428,6 +400,9 @@ public class SetList {
         
     }
     
+    /**
+     * Evaluate function used for the optimization with NelderMeadSimplex
+     */
     public class EvaluateFunction implements MultivariateFunction {
 
         private final Set[] m_lossCalculationSetArray;
@@ -452,7 +427,7 @@ public class SetList {
             int nb = m_lossCalculationSetArray.length;
             for (int i = 0; i < nb; i++) {
                 Set s = m_lossCalculationSetArray[i];
-                s.m_circle.setPosition(doubles[i * 2], doubles[i * 2 + 1]);
+                s.getCircle().setPosition(doubles[i * 2], doubles[i * 2 + 1]);
             }
 
             return lossFunction(m_lossCalculationSetArray);

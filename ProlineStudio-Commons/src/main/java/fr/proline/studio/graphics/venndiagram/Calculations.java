@@ -1,12 +1,15 @@
 package fr.proline.studio.graphics.venndiagram;
 
 /**
- *
+ * Useful methods for Venn Diagram
  * @author JM235353
  */
 public class Calculations {
     
     /**
+     * 
+     * Calculate relative position of two circles, so the intersection area is of a specified value
+     * with a precision
      * 
      * @param precision   : value >0 and <1  0.01 correspond to 1%
      * @param areaSearched : intersection area searched

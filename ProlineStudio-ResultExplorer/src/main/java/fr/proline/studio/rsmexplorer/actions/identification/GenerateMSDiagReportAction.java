@@ -31,7 +31,7 @@ import org.openide.windows.WindowManager;
  */
 public class GenerateMSDiagReportAction extends AbstractRSMAction {
 
-    public GenerateMSDiagReportAction(TreeType treeType, boolean isJMSDefined) {
+    public GenerateMSDiagReportAction(TreeType treeType) {
         super(NbBundle.getMessage(GenerateMSDiagReportAction.class, "CTL_GenerateMSDiagReportAction"), treeType);
     }
 
@@ -39,29 +39,12 @@ public class GenerateMSDiagReportAction extends AbstractRSMAction {
     public void actionPerformed(AbstractNode[] selectedNodes, int x, int y) {
 
     	IdentificationTree tree = IdentificationTree.getCurrentTree();
-        final DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
-        
-    	
+
 
         
         int nbNodes = selectedNodes.length;
         for (int i = 0; i < nbNodes; i++) {
             final DataSetNode dataSetNode = (DataSetNode) selectedNodes[i];
-
-           // actionImpl(dataSetNode);
-         //   AbstractServiceCallback callback = new AbstractServiceCallback() {
-
-//                @Override
-//                public boolean mustBeCalledInAWT() {
-//                    return true;
-//                }
-//
-//                @Override
-//                public void run(boolean success) {
-//                	dataSetNode.setIsChanging(false);
-//                    treeModel.nodeChanged(dataSetNode);
-//                }
-//            };
 
             MSDiagDialog dialog = MSDiagDialog.getDialog(WindowManager.getDefault().getMainWindow());
             dialog.setLocation(x, y);

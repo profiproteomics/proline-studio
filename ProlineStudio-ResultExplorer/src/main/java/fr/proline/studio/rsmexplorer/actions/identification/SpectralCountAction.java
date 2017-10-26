@@ -21,8 +21,6 @@ import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import fr.proline.studio.rsmexplorer.tree.quantitation.QuantitationTree;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 import javax.swing.JOptionPane;
 import javax.swing.tree.DefaultTreeModel;
 import org.openide.util.NbBundle;
@@ -43,11 +41,10 @@ public class SpectralCountAction extends AbstractRSMAction {
     final static public String DS_LIST_PROPERTIES = "dsList";
     final static public String DS_WEIGHT_LIST_PROPERTIES = "dsWeightList";
 
-    private boolean m_isJMSDefined;
 
-    public SpectralCountAction(boolean isJMSDefined) {
+    public SpectralCountAction() {
         super(NbBundle.getMessage(SpectralCountAction.class, "CTL_CompareWithSCAction"), AbstractTree.TreeType.TREE_IDENTIFICATION);
-        this.m_isJMSDefined = isJMSDefined;
+
     }
 
     @Override
@@ -143,22 +140,21 @@ public class SpectralCountAction extends AbstractRSMAction {
                 // expand the parent node to display its children
                 tree.expandNodeIfNeeded(rootNode);
 
-                if (m_isJMSDefined) {
-                    // CallBack for SC  Service
-                    AbstractJMSCallback scCallback = new AbstractJMSCallback() {
-                        @Override
-                        public boolean mustBeCalledInAWT() {
-                            return true;
-                        }
+                // CallBack for SC  Service
+                AbstractJMSCallback scCallback = new AbstractJMSCallback() {
+                    @Override
+                    public boolean mustBeCalledInAWT() {
+                        return true;
+                    }
 
-                        @Override
-                        public void run(boolean success) {
-                            runQuantifySC(success, _quantiDatasetId[0], _quantitationNode[0], treeModel);
-                        }
-                    };
-                    fr.proline.studio.dpm.task.jms.SpectralCountTask task = new fr.proline.studio.dpm.task.jms.SpectralCountTask(scCallback, refDatasetNode.getDataset(), datasetList, weightDatasetList, qttDSName, qttDSDescr, _quantiDatasetId);
-                    AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
-                } 
+                    @Override
+                    public void run(boolean success) {
+                        runQuantifySC(success, _quantiDatasetId[0], _quantitationNode[0], treeModel);
+                    }
+                };
+                fr.proline.studio.dpm.task.jms.SpectralCountTask task = new fr.proline.studio.dpm.task.jms.SpectralCountTask(scCallback, refDatasetNode.getDataset(), datasetList, weightDatasetList, qttDSName, qttDSDescr, _quantiDatasetId);
+                AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
+
             }
         };
 

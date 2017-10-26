@@ -8,7 +8,6 @@ import com.thetransactioncompany.jsonrpc2.JSONRPC2Response;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import fr.proline.studio.dpm.jms.AccessJMSManagerThread;
-import static fr.proline.studio.dpm.task.FilterRSMProtSetsTask.FILTER_KEYS;
 import static fr.proline.studio.dpm.task.jms.AbstractJMSTask.m_loggerProline;
 import fr.proline.studio.dpm.task.util.JMSConnectionManager;
 import java.util.ArrayList;
@@ -27,6 +26,10 @@ public class FilterRSMProtSetsTask extends AbstractJMSTask {
     
     private DDataset m_dataset = null;
     private HashMap<String, String> m_argumentsMap;
+    
+    //Protein PreFilter
+    public static String[] FILTER_KEYS = {"SPECIFIC_PEP","PEP_COUNT", "PEP_SEQ_COUNT", "SCORE"};//TODO USE ENUM
+    public static String[] FILTER_NAME = {"Specific Peptides","Peptides count", "Peptide sequence count","Protein Set Score"};
     
     public FilterRSMProtSetsTask(AbstractJMSCallback callback,  DDataset dataset,HashMap<String, String> argumentsMap) {
         super(callback, new TaskInfo( "Filter Protein Sets of Identifcation Summary "+dataset.getName(), true, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_HIGH));

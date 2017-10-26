@@ -7,9 +7,6 @@ import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseConnectionTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dpm.jms.AccessJMSManagerThread;
-import fr.proline.studio.dpm.task.AbstractServiceCallback;
-import fr.proline.studio.dpm.task.ServerConnectionTask;
-import fr.proline.studio.dpm.task.UserAccountTask;
 import fr.proline.studio.dpm.task.jms.AbstractJMSCallback;
 import fr.proline.studio.dpm.task.jms.AuthenticateUserTask;
 import fr.proline.studio.dpm.task.jms.GetDBConnectionTemplateTask;
@@ -98,57 +95,45 @@ public class ServerConnectionManager {
 
     public void tryServerConnection(final Runnable connectionCallback, final String serverURL, final String projectUser, String userPassword, final boolean changingUser) {
 
-        boolean isJMSServer = ! serverURL.startsWith("http");
-        
         m_passwordNeeded = !userPassword.isEmpty();
 
-        if (isJMSServer) {
+        // pre-check to avoid to try a connection when the parameters are not set
+        if (serverURL.isEmpty()) {
+            setConnectionState(CONNECTION_FAILED);
+            m_connectionError = new TaskError("JMS Server Connection", "Empty Server Host");
+            return;
+        }
 
-            // pre-check to avoid to try a connection when the parameters are not set
-            if (serverURL.isEmpty()) {
-                setConnectionState(CONNECTION_FAILED);
-                m_connectionError = new TaskError("JMS Server Connection", "Empty Server Host");
-                return;
+        // reconnect even if changing user
+        JMSConnectionManager.getJMSConnectionManager().closeConnection();
+
+        setConnectionState(CONNECTION_ASKED);
+
+        //Configure JMSConnectionManager and try to connect to server
+        try {
+            String[] jmsHostAndPort = parseJMSServerURL(serverURL);
+            JMSConnectionManager.getJMSConnectionManager().setJMSServerHost(jmsHostAndPort[0]);
+            if (jmsHostAndPort[1] != null) {
+                JMSConnectionManager.getJMSConnectionManager().setJMSServerPort(Integer.parseInt(jmsHostAndPort[1]));
             }
-
-            // reconnect even if changing user
+            //Try to connect to server
+            JMSConnectionManager.getJMSConnectionManager().getJMSConnection();
+        } catch (Exception e) {
+            setConnectionState(CONNECTION_FAILED);
             JMSConnectionManager.getJMSConnectionManager().closeConnection();
-            
-            setConnectionState(CONNECTION_ASKED);
+            m_connectionError = new TaskError(e.getMessage());
 
-            //Configure JMSConnectionManager and try to connect to server
-            try {
-                String[] jmsHostAndPort = parseJMSServerURL(serverURL);
-                JMSConnectionManager.getJMSConnectionManager().setJMSServerHost(jmsHostAndPort[0]);
-                if (jmsHostAndPort[1] != null) {
-                    JMSConnectionManager.getJMSConnectionManager().setJMSServerPort(Integer.parseInt(jmsHostAndPort[1]));
-                }
-                //Try to connect to server
-                JMSConnectionManager.getJMSConnectionManager().getJMSConnection();
-            } catch (Exception e) {
-                setConnectionState(CONNECTION_FAILED);
-                JMSConnectionManager.getJMSConnectionManager().closeConnection();
-                m_connectionError = new TaskError(e.getMessage());
-
-                if (connectionCallback != null) {
-                    connectionCallback.run();
-                }
-
-                return;
-                //throw new RuntimeException("Error creating connection to JMS Server "+e.getMessage());
+            if (connectionCallback != null) {
+                connectionCallback.run();
             }
+
+            return;
+            //throw new RuntimeException("Error creating connection to JMS Server "+e.getMessage());
+        }
 
 
             userAuthenticateJMS(connectionCallback, serverURL, projectUser, userPassword, changingUser);
 
-        } else {  //WebCore Connection
-
-            setConnectionState(CONNECTION_ASKED);
-
-            // First, we check the user password      
-            userAuthenticateWC(connectionCallback, serverURL, projectUser, userPassword, changingUser);
-
-        }  //End WebCore
     }
 
     private String[] parseJMSServerURL(String serverURL) {
@@ -211,107 +196,6 @@ public class ServerConnectionManager {
 
     }
 
-    private void userAuthenticateWC(final Runnable connectionCallback, final String serverURL, final String projectUser, final String userPassword, final boolean changingUser) {
-        final String[] databasePassword = new String[1];
-        AbstractServiceCallback callback = new AbstractServiceCallback() {
-
-            @Override
-            public boolean mustBeCalledInAWT() {
-                return true;
-            }
-
-            @Override
-            public void run(boolean success) {
-              if (success) {
-                    m_serverURL = serverURL;
-                    if (changingUser) { // No need to get DBConnection (use previous one). skip further steps
-                        // save connection parameters
-                        saveParameters();
-                        setConnectionState(CONNECTION_DONE);
-
-                        if (connectionCallback != null) {
-                            connectionCallback.run();
-                        }
-                    } else {
-
-                        // we now try to connect to the server
-                        m_databasePassword = databasePassword[0];
-                        tryConnectToWCServer(connectionCallback, projectUser, serverURL, m_databasePassword);
-                    }
-
-                } else {
-
-                    setConnectionState(CONNECTION_FAILED);
-                    m_connectionError = getTaskError();
-                    
-                    
-                    // try JMS Connection instead
-                    boolean jmsTry = false;
-                    if (!changingUser) {
-                        int indexStart = serverURL.indexOf(HTTP_URL_PREFFIX);
-                        if (indexStart != -1) {
-                            indexStart += HTTP_URL_PREFFIX.length();
-                            int indexStop = serverURL.lastIndexOf(":");
-                            if (indexStop > indexStart) {
-                                String jmsServer = serverURL.substring(indexStart, indexStop);
-                                tryServerConnection(connectionCallback, jmsServer, projectUser, userPassword, changingUser);
-                                jmsTry = true;
-                            } else { //assume no port specified
-                                indexStop = serverURL.lastIndexOf("/");
-                                if (indexStop > indexStart) {
-                                    String jmsServer = serverURL.substring(indexStart, indexStop);
-                                    tryServerConnection(connectionCallback, jmsServer, projectUser, userPassword, changingUser);
-                                    jmsTry = true;
-                                }
-                            }
-                        }
-                    }
-                    
-                    if ((!jmsTry) && (connectionCallback != null)) {
-                        connectionCallback.run();
-                    }
-                    
-                    
-
-                }
-            }
-        };
-
-        UserAccountTask task = new UserAccountTask(callback, serverURL, projectUser, userPassword, databasePassword);
-        AccessServiceThread.getAccessServiceThread().addTask(task);
-    }
-
-    private void tryConnectToWCServer(final Runnable connectionCallback, final String projectUser, final String serverURL, final String databasePassword) {
-
-        final HashMap<Object, Object> databaseProperties = new HashMap<>();
-
-        //  we try to connect to the service 
-        AbstractServiceCallback callback = new AbstractServiceCallback() {
-
-            @Override
-            public boolean mustBeCalledInAWT() {
-                return true;
-            }
-
-            @Override
-            public void run(boolean success) {
-                if (success) {
-             
-                    // we now ask for the database connection
-                    tryDatabaseConnection(connectionCallback, databaseProperties, projectUser);
-                } else {
-                    setConnectionState(CONNECTION_FAILED);
-                    m_connectionError = getTaskError();
-                    if (connectionCallback != null) {
-                        connectionCallback.run();
-                    }
-                }
-            }
-        };
-
-        ServerConnectionTask task = new ServerConnectionTask(callback, serverURL, databasePassword, databaseProperties);
-        AccessServiceThread.getAccessServiceThread().addTask(task);
-    }
 
     private void getDBConnectionTemplate(final Runnable connectionCallback, final String projectUser, final String databasePassword) {
 

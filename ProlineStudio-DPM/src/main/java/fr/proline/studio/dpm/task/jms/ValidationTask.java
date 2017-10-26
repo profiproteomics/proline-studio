@@ -9,7 +9,7 @@ import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import fr.proline.studio.dpm.jms.AccessJMSManagerThread;
 import static fr.proline.studio.dpm.task.jms.AbstractJMSTask.m_loggerProline;
-import static fr.proline.studio.dpm.task.FilterRSMProtSetsTask.FILTER_KEYS;
+import static fr.proline.studio.dpm.task.jms.FilterRSMProtSetsTask.FILTER_KEYS;
 import fr.proline.studio.dpm.task.util.JMSConnectionManager;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -27,14 +27,15 @@ public class ValidationTask extends AbstractJMSTask  {
 
     //PSM PreFilter
     public static String RANK_FILTER_KEY = "RANK";
-    public static String RANK_FILTER_NAME = "Rank";
+    public static String RANK_FILTER_NAME = "Pretty Rank";
     public static String SCORE_FILTER_KEY = "SCORE";
     public static String SCORE_FILTER_NAME = "Score";
     public static String PEP_LENGTH_FILTER_KEY = "PEP_SEQ_LENGTH";
     public static String PEP_LENGTH_FILTER_NAME = "Length";
     public static String MASCOT_EVAL_FILTER_KEY = "MASCOT_EVALUE";
-    public static String MASCOT_ADJUSTED_EVAL_FILTER_KEY = "MASCOT_ADJUSTED_EVALUE";
     public static String MASCOT_EVAL_FILTER_NAME = "e-Value";
+    public static String MASCOT_ADJUSTED_EVAL_FILTER_KEY = "MASCOT_ADJUSTED_EVALUE";
+    public static String MASCOT_ADJUSTED_EVAL_FILTER_NAME = "Adjusted e-Value";
     public static String MASCOT_IT_SCORE_FILTER_KEY = "SCORE_IT_P-VALUE";
     public static String MASCOT_IT_SCORE_FILTER_NAME = "Identity p-Value";
     public static String MASCOT_HT_SCORE_FILTER_KEY = "SCORE_HT_P-VALUE";
@@ -43,6 +44,7 @@ public class ValidationTask extends AbstractJMSTask  {
     public static String SINGLE_PSM_QUERY_FILTER_NAME = "Single PSM per MS Query";               
     public static String SINGLE_PSM_RANK_FILTER_KEY = "SINGLE_PSM_PER_RANK";
     public static String SINGLE_PSM_RANK_FILTER_NAME = "Single PSM per Rank";               
+                  
 
     private DDataset m_dataset = null;
     private String m_description;  //Not used on server side

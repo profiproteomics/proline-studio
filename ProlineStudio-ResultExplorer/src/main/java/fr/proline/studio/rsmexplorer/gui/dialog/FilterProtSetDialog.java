@@ -1,6 +1,6 @@
 package fr.proline.studio.rsmexplorer.gui.dialog;
 
-import fr.proline.studio.dpm.task.FilterRSMProtSetsTask;
+import fr.proline.studio.dpm.task.jms.FilterRSMProtSetsTask;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.parameter.AbstractParameter;
 import fr.proline.studio.parameter.DoubleParameter;

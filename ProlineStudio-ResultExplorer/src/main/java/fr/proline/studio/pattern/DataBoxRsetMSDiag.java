@@ -2,13 +2,8 @@ package fr.proline.studio.pattern;
 
 import fr.proline.core.orm.msi.ResultSet;
 import fr.proline.core.orm.msi.ResultSummary;
-import fr.proline.studio.dpm.AccessServiceThread;
 import fr.proline.studio.dpm.jms.AccessJMSManagerThread;
-import fr.proline.studio.dpm.task.AbstractServiceCallback;
-import fr.proline.studio.dpm.task.AbstractServiceTask;
-import fr.proline.studio.dpm.task.GenerateMSDiagReportTask;
 import fr.proline.studio.dpm.task.jms.AbstractJMSCallback;
-import fr.proline.studio.dpm.task.util.JMSConnectionManager;
 import fr.proline.studio.rsmexplorer.gui.RsetMSDiagPanel;
 
 import java.util.ArrayList;
@@ -84,60 +79,29 @@ public class DataBoxRsetMSDiag extends AbstractDataBox {
         parameters.put("Scan groups size", scanGroupSize);
 
     	//--
-        if (JMSConnectionManager.getJMSConnectionManager().isJMSDefined()) {
-            AbstractJMSCallback callback = new AbstractJMSCallback() {
-                @Override
-                public boolean mustBeCalledInAWT() {
-                    return true;
+        AbstractJMSCallback callback = new AbstractJMSCallback() {
+            @Override
+            public boolean mustBeCalledInAWT() {
+                return true;
+            }
+
+            @Override
+            public void run(boolean success) {
+                m_logger.debug("  get MSDiag data");
+                if (success) {
+                    ((RsetMSDiagPanel) getDataBoxPanelInterface()).setData((String) m_messages_back.get(1)); // send last element containing JSON information (data to be represented)
+                } else {
+                    ((RsetMSDiagPanel) getDataBoxPanelInterface()).setData(null);
                 }
 
-                @Override
-                public void run(boolean success) {
-                    m_logger.debug("  get MSDiag data");
-                    if (success) {
-                        ((RsetMSDiagPanel) getDataBoxPanelInterface()).setData((String) m_messages_back.get(1)); // send last element containing JSON information (data to be represented)
-                    } else {
-                        ((RsetMSDiagPanel) getDataBoxPanelInterface()).setData(null);
-                    }
+                setLoaded(loadingId);
+            }
+        };
 
-                    setLoaded(loadingId);
-                }
-            };
+        fr.proline.studio.dpm.task.jms.GenerateMSDiagReportTask task = new fr.proline.studio.dpm.task.jms.GenerateMSDiagReportTask(callback, getProjectId(), rSetId, parameters, m_messages_back);
+        ((RsetMSDiagPanel) getDataBoxPanelInterface()).setData("task running...please wait.(or come back later)");
+        AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
 
-            fr.proline.studio.dpm.task.jms.GenerateMSDiagReportTask task = new fr.proline.studio.dpm.task.jms.GenerateMSDiagReportTask(callback, getProjectId(), rSetId, parameters, m_messages_back);
-            ((RsetMSDiagPanel) getDataBoxPanelInterface()).setData("task running...please wait.(or come back later)");
-            AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
-        } else {
-
-            AbstractServiceCallback callback = new AbstractServiceCallback() {
-
-                @Override
-                public boolean mustBeCalledInAWT() {
-                    return true;
-                }
-
-                @Override
-                public void run(boolean success) {
-                    m_logger.debug("  get MSDiag data");
-                    if (success) {
-
-                        ((RsetMSDiagPanel) getDataBoxPanelInterface()).setData((String) m_messages_back.get(1)); // send last element containing JSON information (data to be represented)
-
-                    } else {
-                        ((RsetMSDiagPanel) getDataBoxPanelInterface()).setData(null);
-
-                    }
-
-                    setLoaded(loadingId);
-                }
-            };
-
-            AbstractServiceTask task = new GenerateMSDiagReportTask(callback, getProjectId(), rSetId, parameters, m_messages_back);
-
-            ((RsetMSDiagPanel) getDataBoxPanelInterface()).setData("task running...please wait.(or come back later)");
-
-            AccessServiceThread.getAccessServiceThread().addTask(task);
-        }
     }
 
     @Override

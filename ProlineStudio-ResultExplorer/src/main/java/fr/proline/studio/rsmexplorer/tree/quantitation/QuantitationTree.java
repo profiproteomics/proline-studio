@@ -15,13 +15,10 @@ import fr.proline.studio.dam.data.ProjectQuantitationData;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
 import fr.proline.studio.dam.tasks.SubTask;
-import fr.proline.studio.dpm.task.util.JMSConnectionManager;
 import fr.proline.studio.rsmexplorer.actions.identification.ChangeTypicalProteinJMSAction;
 import fr.proline.studio.rsmexplorer.actions.identification.DisplayRsetAction;
 import fr.proline.studio.rsmexplorer.actions.identification.ExportAction;
-import fr.proline.studio.rsmexplorer.actions.identification.ExportDatasetAction;
 import fr.proline.studio.rsmexplorer.actions.identification.ExportDatasetJMSAction;
-import fr.proline.studio.rsmexplorer.actions.identification.GenerateSpectrumMatchesAction;
 import fr.proline.studio.rsmexplorer.actions.identification.GenerateSpectrumMatchesJMSAction;
 import fr.proline.studio.rsmexplorer.actions.identification.IdentifyPtmSitesJMSAction;
 import fr.proline.studio.rsmexplorer.actions.identification.RetrieveBioSeqJMSAction;
@@ -168,19 +165,15 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
 
         if ((nbNodes > 1) && !xicSampleAnalysisNodeSelected) {
             if (m_multiPopup == null) {
-                boolean isJSMDefined = JMSConnectionManager.getJMSConnectionManager().isJMSDefined();
+
                 // create the actions
                 m_multiActions = new ArrayList<>(4);  // <--- get in sync
 
-                if (isJSMDefined) {
-                    ExportDatasetJMSAction exportDatasetAction = new ExportDatasetJMSAction(AbstractTree.TreeType.TREE_QUANTITATION, true);
-                    m_multiActions.add(exportDatasetAction);
-                    RetrieveBioSeqJMSAction retrieveBioSeqAction = new RetrieveBioSeqJMSAction(AbstractTree.TreeType.TREE_QUANTITATION);
-                    m_multiActions.add(retrieveBioSeqAction);
-                } else {
-                    ExportDatasetAction exportDatasetAction = new ExportDatasetAction(AbstractTree.TreeType.TREE_QUANTITATION, true);
-                    m_multiActions.add(exportDatasetAction);
-                }
+                ExportDatasetJMSAction exportDatasetAction = new ExportDatasetJMSAction(AbstractTree.TreeType.TREE_QUANTITATION, true);
+                m_multiActions.add(exportDatasetAction);
+                RetrieveBioSeqJMSAction retrieveBioSeqAction = new RetrieveBioSeqJMSAction(AbstractTree.TreeType.TREE_QUANTITATION);
+                m_multiActions.add(retrieveBioSeqAction);
+
 
                 m_multiActions.add(null);  // separator
 
@@ -206,8 +199,8 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
                 if (m_rootPopup == null) {
                     // create the actions
                     m_rootActions = new ArrayList<>(1);  // <--- get in sync
-                    boolean isJSMDefined = JMSConnectionManager.getJMSConnectionManager().isJMSDefined();
-                    CreateXICAction createXICAction = new CreateXICAction(false, isJSMDefined);
+                    
+                    CreateXICAction createXICAction = new CreateXICAction(false);
 
                     AddQuantitationFolderAction addFolderAction = new AddQuantitationFolderAction();
                     
@@ -251,9 +244,8 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
 
                     m_identActions = new ArrayList<>(6);  // <--- get in sync
 
-                    boolean isJMSDefined = JMSConnectionManager.getJMSConnectionManager().isJMSDefined();
 
-                    DisplayRsetAction displayRsetAction = new DisplayRsetAction(AbstractTree.TreeType.TREE_QUANTITATION, isJMSDefined);
+                    DisplayRsetAction displayRsetAction = new DisplayRsetAction(AbstractTree.TreeType.TREE_QUANTITATION);
                     m_identActions.add(displayRsetAction);
 
                     DisplayRsmAction displayRsmAction = new DisplayRsmAction(AbstractTree.TreeType.TREE_QUANTITATION);
@@ -261,7 +253,7 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
 
                     m_identActions.add(null);  // separator
 
-                    ExportAction exportAction = new ExportAction(AbstractTree.TreeType.TREE_QUANTITATION, isJMSDefined);
+                    ExportAction exportAction = new ExportAction(AbstractTree.TreeType.TREE_QUANTITATION);
                     m_identActions.add(exportAction);
 
                     m_identActions.add(null);  // separator
@@ -286,7 +278,6 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
                 if (m_mainPopup == null) {
                     // create the actions
                     m_mainActions = new ArrayList<>(19);  // <--- get in sync
-                    boolean isJMSDefined = JMSConnectionManager.getJMSConnectionManager().isJMSDefined();
 
                     DisplayXICAction displayXICAction = new DisplayXICAction();
                     m_mainActions.add(displayXICAction);
@@ -310,32 +301,28 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
 
                     m_mainActions.add(null);  // separator
 
-                    ComputeQuantitationProfileAction computeQuantProfileAction = new ComputeQuantitationProfileAction(isJMSDefined);
+                    ComputeQuantitationProfileAction computeQuantProfileAction = new ComputeQuantitationProfileAction();
                     m_mainActions.add(computeQuantProfileAction);
 
-                    CreateXICAction createXICAction = new CreateXICAction(true, isJMSDefined);
+                    CreateXICAction createXICAction = new CreateXICAction(true);
                     m_mainActions.add(createXICAction);
 
                     m_mainActions.add(null);  // separator
 
-                    if (isJMSDefined) {
-                        ChangeTypicalProteinJMSAction changeTypicalProteinJmsAction = new ChangeTypicalProteinJMSAction(AbstractTree.TreeType.TREE_QUANTITATION);
-                        m_mainActions.add(changeTypicalProteinJmsAction);
-                        IdentifyPtmSitesJMSAction identifyPtmSitesAction = new IdentifyPtmSitesJMSAction(AbstractTree.TreeType.TREE_QUANTITATION);
-                        m_mainActions.add(identifyPtmSitesAction);                   
-  
-                        GenerateSpectrumMatchesJMSAction generateSpectrumMatchesAction = new GenerateSpectrumMatchesJMSAction(AbstractTree.TreeType.TREE_QUANTITATION);
-                        m_mainActions.add(generateSpectrumMatchesAction);
-                        RetrieveBioSeqJMSAction retrieveBioSeqAction = new RetrieveBioSeqJMSAction(AbstractTree.TreeType.TREE_QUANTITATION);
-                        m_mainActions.add(retrieveBioSeqAction);
-                    } else {
-                        GenerateSpectrumMatchesAction generateSpectrumMatchesAction = new GenerateSpectrumMatchesAction(AbstractTree.TreeType.TREE_QUANTITATION);
-                        m_mainActions.add(generateSpectrumMatchesAction);
-                    }
+                    ChangeTypicalProteinJMSAction changeTypicalProteinJmsAction = new ChangeTypicalProteinJMSAction(AbstractTree.TreeType.TREE_QUANTITATION);
+                    m_mainActions.add(changeTypicalProteinJmsAction);
+                    IdentifyPtmSitesJMSAction identifyPtmSitesAction = new IdentifyPtmSitesJMSAction(AbstractTree.TreeType.TREE_QUANTITATION);
+                    m_mainActions.add(identifyPtmSitesAction);
+
+                    GenerateSpectrumMatchesJMSAction generateSpectrumMatchesAction = new GenerateSpectrumMatchesJMSAction(AbstractTree.TreeType.TREE_QUANTITATION);
+                    m_mainActions.add(generateSpectrumMatchesAction);
+                    RetrieveBioSeqJMSAction retrieveBioSeqAction = new RetrieveBioSeqJMSAction(AbstractTree.TreeType.TREE_QUANTITATION);
+                    m_mainActions.add(retrieveBioSeqAction);
+
 
                     m_mainActions.add(null);  // separator
 
-                    ExportAction exportAction = new ExportAction(AbstractTree.TreeType.TREE_QUANTITATION, isJMSDefined);
+                    ExportAction exportAction = new ExportAction(AbstractTree.TreeType.TREE_QUANTITATION);
                     m_mainActions.add(exportAction);
 
                     m_mainActions.add(null);  // separator

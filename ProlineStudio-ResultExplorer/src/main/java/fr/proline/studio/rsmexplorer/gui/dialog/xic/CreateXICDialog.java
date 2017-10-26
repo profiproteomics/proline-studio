@@ -16,12 +16,8 @@ import fr.proline.studio.dam.tasks.DatabasePeaklistTask;
 import fr.proline.studio.dam.tasks.DatabaseRunsTask;
 import fr.proline.studio.dam.tasks.DatabaseVerifySpectrumFromResultSets;
 import fr.proline.studio.dam.tasks.SubTask;
-import fr.proline.studio.dpm.AccessServiceThread;
 import fr.proline.studio.dpm.jms.AccessJMSManagerThread;
-import fr.proline.studio.dpm.task.AbstractServiceCallback;
-import fr.proline.studio.dpm.task.RegisterRawFileTask;
 import fr.proline.studio.dpm.task.jms.AbstractJMSCallback;
-import fr.proline.studio.dpm.task.util.JMSConnectionManager;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.parameter.ParameterError;
 import fr.proline.studio.parameter.ParameterList;
@@ -281,53 +277,35 @@ public class CreateXICDialog extends DefaultDialog {
 
                             if (!runData.isRunInfoInDatabase()) {
                                 // RawFile does not exists, create it
-                                boolean isJMSDefined = JMSConnectionManager.getJMSConnectionManager().isJMSDefined();
+
                                 try {
                                     synchronized (mutexFileRegistered) {
                                         // TODO : get the right instrumentId !!! 
                                         long instrumentID = 1;
-                                        if (isJMSDefined) {
-                                            AbstractJMSCallback registerRawFileCallback = new AbstractJMSCallback() {
 
-                                                @Override
-                                                public boolean mustBeCalledInAWT() {
-                                                    return false;
+                                        AbstractJMSCallback registerRawFileCallback = new AbstractJMSCallback() {
+
+                                            @Override
+                                            public boolean mustBeCalledInAWT() {
+                                                return false;
+                                            }
+
+                                            @Override
+                                            public void run(boolean success) {
+
+                                                if (success) {
+                                                    updatePeaklist(runData, pID, rsID);
+                                                }
+                                                synchronized (mutexFileRegistered) {
+                                                    mutexFileRegistered.notifyAll();
                                                 }
 
-                                                @Override
-                                                public void run(boolean success) {
+                                            }
+                                        };
 
-                                                    if (success) {
-                                                        updatePeaklist(runData, pID, rsID);
-                                                    }
-                                                    synchronized (mutexFileRegistered) {
-                                                        mutexFileRegistered.notifyAll();
-                                                    }
-                                                    
-                                                }
-                                            };
+                                        fr.proline.studio.dpm.task.jms.RegisterRawFileTask task = new fr.proline.studio.dpm.task.jms.RegisterRawFileTask(registerRawFileCallback, instrumentID, project.getOwner().getId(), runData);
+                                        AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
 
-                                            fr.proline.studio.dpm.task.jms.RegisterRawFileTask task = new fr.proline.studio.dpm.task.jms.RegisterRawFileTask(registerRawFileCallback, instrumentID, project.getOwner().getId(), runData);
-                                            AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
-                                        } else {
-                                            AbstractServiceCallback callback = new AbstractServiceCallback() {
-
-                                                @Override
-                                                public boolean mustBeCalledInAWT() {
-                                                    return false;
-                                                }
-
-                                                @Override
-                                                public void run(boolean success) {
-                                                    synchronized (mutexFileRegistered) {
-                                                        mutexFileRegistered.notifyAll();
-                                                    }
-                                                }
-                                            };
-
-                                            RegisterRawFileTask task = new RegisterRawFileTask(callback, instrumentID, project.getOwner().getId(), runData);
-                                            AccessServiceThread.getAccessServiceThread().addTask(task);
-                                        }
                                         // wait until the files are loaded
                                         mutexFileRegistered.wait();
                                     }

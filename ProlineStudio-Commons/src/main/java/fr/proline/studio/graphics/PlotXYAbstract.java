@@ -1,28 +1,19 @@
 package fr.proline.studio.graphics;
 
-import java.util.ArrayList;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 
 /**
- * Base class for all types of plot
+ * Base class for plots with 
+ * 
  * @author JM235353
  */
 public abstract class PlotXYAbstract extends PlotBaseAbstract {
-
-
-
-
-
-    
-
 
 
     public PlotXYAbstract(BasePlotPanel plotPanel, PlotType plotType, ExtendedTableModelInterface compareDataInterface, CrossSelectionInterface crossSelectionInterface) {
         super(plotPanel, plotType, compareDataInterface, crossSelectionInterface);
     }
 
-    
-    
     
     @Override
     public boolean inside(int x, int y) {

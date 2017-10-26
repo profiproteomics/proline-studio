@@ -14,13 +14,9 @@ import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseClearProjectTask;
 import fr.proline.studio.dam.tasks.DatabaseProjectTask;
 import fr.proline.studio.dam.tasks.SubTask;
-import fr.proline.studio.dpm.AccessServiceThread;
 import fr.proline.studio.dpm.jms.AccessJMSManagerThread;
-import fr.proline.studio.dpm.task.AbstractServiceCallback;
-import fr.proline.studio.dpm.task.CreateProjectTask;
 import fr.proline.studio.dpm.task.jms.AbstractJMSCallback;
 import fr.proline.studio.dpm.task.jms.ClearProjectTask;
-import fr.proline.studio.dpm.task.util.JMSConnectionManager;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.pattern.DataParameter;
 import fr.proline.studio.pattern.GroupParameter;
@@ -43,7 +39,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 import java.util.prefs.Preferences;
 import javax.swing.*;
 import javax.swing.plaf.basic.BasicComboBoxRenderer;
@@ -265,76 +260,40 @@ public class ProjectExplorerPanel extends JPanel {
             m_projectsComboBox.insertItemAt(projectItem, insertionIndex);
             m_projectsComboBox.setSelectedItem(projectItem);
 
-            boolean isJMSDefined = JMSConnectionManager.getJMSConnectionManager().isJMSDefined();
-            if (isJMSDefined) {
-                AbstractJMSCallback callback = new AbstractJMSCallback() {
+            AbstractJMSCallback callback = new AbstractJMSCallback() {
 
-                    @Override
-                    public boolean mustBeCalledInAWT() {
-                        return true;
-                    }
+                @Override
+                public boolean mustBeCalledInAWT() {
+                    return true;
+                }
 
-                    @Override
-                    public void run(boolean success) {
-                        if (success) {
-                            projectItem.setIsChanging(false);
-                            getProjectExplorerPanel().selectProject(projectItem);
-                            m_projectsComboBox.repaint();
-                            m_projectsComboBox.setSelectedIndex(m_projectsComboBox.getSelectedIndex());
+                @Override
+                public void run(boolean success) {
+                    if (success) {
+                        projectItem.setIsChanging(false);
+                        getProjectExplorerPanel().selectProject(projectItem);
+                        m_projectsComboBox.repaint();
+                        m_projectsComboBox.setSelectedIndex(m_projectsComboBox.getSelectedIndex());
 
-                            if (!userAccountList.isEmpty()) {
-                                // we must add the user account list
-                                DatabaseProjectTask task = new DatabaseProjectTask(null);
-                                Project p = projectItem.getProjectIdentificationData().getProject();
-                                task.initChangeSettingsOfProject(p, p.getName(), p.getDescription(), userAccountList);
-                                AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
+                        if (!userAccountList.isEmpty()) {
+                            // we must add the user account list
+                            DatabaseProjectTask task = new DatabaseProjectTask(null);
+                            Project p = projectItem.getProjectIdentificationData().getProject();
+                            task.initChangeSettingsOfProject(p, p.getName(), p.getDescription(), userAccountList);
+                            AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
 
-                            }
-
-                        } else {
-                            //JPM.TODO : manage error with errorMessage
-                            m_projectsComboBox.removeItem(projectItem);
                         }
+
+                    } else {
+                        //JPM.TODO : manage error with errorMessage
+                        m_projectsComboBox.removeItem(projectItem);
                     }
-                };
+                }
+            };
 
-                fr.proline.studio.dpm.task.jms.CreateProjectTask task = new fr.proline.studio.dpm.task.jms.CreateProjectTask(callback, projectName, projectDescription, owner.getId(), projectIdentificationData, projectQuantitationData);
-                AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
-            } else {
-                AbstractServiceCallback callback = new AbstractServiceCallback() {
+            fr.proline.studio.dpm.task.jms.CreateProjectTask task = new fr.proline.studio.dpm.task.jms.CreateProjectTask(callback, projectName, projectDescription, owner.getId(), projectIdentificationData, projectQuantitationData);
+            AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
 
-                    @Override
-                    public boolean mustBeCalledInAWT() {
-                        return true;
-                    }
-
-                    @Override
-                    public void run(boolean success) {
-                        if (success) {
-                            projectItem.setIsChanging(false);
-                            getProjectExplorerPanel().selectProject(projectItem);
-                            m_projectsComboBox.repaint();
-                            m_projectsComboBox.setSelectedIndex(m_projectsComboBox.getSelectedIndex());
-
-                            if (!userAccountList.isEmpty()) {
-                                // we must add the user account list
-                                DatabaseProjectTask task = new DatabaseProjectTask(null);
-                                Project p = projectItem.getProjectIdentificationData().getProject();
-                                task.initChangeSettingsOfProject(p, p.getName(), p.getDescription(), userAccountList);
-                                AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
-
-                            }
-
-                        } else {
-                            //JPM.TODO : manage error with errorMessage
-                            m_projectsComboBox.removeItem(projectItem);
-                        }
-                    }
-                };
-
-                CreateProjectTask task = new CreateProjectTask(callback, projectName, projectDescription, owner.getId(), projectIdentificationData, projectQuantitationData);
-                AccessServiceThread.getAccessServiceThread().addTask(task);
-            }
         }
     }
     
@@ -516,26 +475,22 @@ public class ProjectExplorerPanel extends JPanel {
                         }
                     });
 
-                    boolean isJMSDefined = JMSConnectionManager.getJMSConnectionManager().isJMSDefined();
-                    if (isJMSDefined) {
-                        AbstractJMSCallback clearCallBack = new AbstractJMSCallback() {
+                    AbstractJMSCallback clearCallBack = new AbstractJMSCallback() {
 
-                            @Override
-                            public boolean mustBeCalledInAWT() {
-                                return true;
-                            }
+                        @Override
+                        public boolean mustBeCalledInAWT() {
+                            return true;
+                        }
 
-                            @Override
-                            public void run(boolean success) {
-                                setProgress(100);
-                            }
+                        @Override
+                        public void run(boolean success) {
+                            setProgress(100);
+                        }
 
-                        };
-                        ClearProjectTask clearTaskDb = new ClearProjectTask(clearCallBack, project.getId(), rsmIds, rsIds);
-                        AccessJMSManagerThread.getAccessJMSManagerThread().addTask(clearTaskDb);
-                    }else{
-                        setProgress(100);
-                    }
+                    };
+                    ClearProjectTask clearTaskDb = new ClearProjectTask(clearCallBack, project.getId(), rsmIds, rsIds);
+                    AccessJMSManagerThread.getAccessJMSManagerThread().addTask(clearTaskDb);
+
                 }
                 return null;
             }

@@ -33,7 +33,7 @@ public class UpdatePeaklistSoftwareAction extends AbstractRSMAction {
     protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
  
     public UpdatePeaklistSoftwareAction(){        
-        super(NbBundle.getMessage(GenerateSpectrumMatchesAction.class, "CTL_UpdatePeaklistSoft"), AbstractTree.TreeType.TREE_IDENTIFICATION);
+        super(NbBundle.getMessage(UpdatePeaklistSoftwareAction.class, "CTL_UpdatePeaklistSoft"), AbstractTree.TreeType.TREE_IDENTIFICATION);
     }
     
     @Override

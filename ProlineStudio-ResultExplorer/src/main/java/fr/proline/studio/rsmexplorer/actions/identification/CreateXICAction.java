@@ -11,10 +11,7 @@ import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadXicMasterQuantTask;
-import fr.proline.studio.dpm.AccessServiceThread;
 import fr.proline.studio.dpm.jms.AccessJMSManagerThread;
-import fr.proline.studio.dpm.task.AbstractServiceCallback;
-import fr.proline.studio.dpm.task.RunXICTask;
 import fr.proline.studio.dpm.task.jms.AbstractJMSCallback;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
@@ -43,7 +40,6 @@ public class CreateXICAction extends AbstractRSMAction {
 
     private boolean m_fromExistingXIC = false;
     private boolean m_mergedDSDefined = false;
-    private boolean m_isJMSDefined;
 
     static String getMessage(boolean fromExistingXIC, AbstractTree.TreeType sourceTree) {
         if (fromExistingXIC) {
@@ -55,16 +51,14 @@ public class CreateXICAction extends AbstractRSMAction {
         }
     }
 
-    public CreateXICAction(boolean fromExistingXIC, boolean isJMSDefined) {
+    public CreateXICAction(boolean fromExistingXIC) {
         super(CreateXICAction.getMessage(fromExistingXIC, AbstractTree.TreeType.TREE_QUANTITATION), AbstractTree.TreeType.TREE_QUANTITATION);
         m_fromExistingXIC = fromExistingXIC;
-        m_isJMSDefined = isJMSDefined;
     }
 
-    public CreateXICAction(boolean fromExistingXIC, boolean isJMSDefined, AbstractTree.TreeType sourceTree) {
+    public CreateXICAction(boolean fromExistingXIC, AbstractTree.TreeType sourceTree) {
         super(CreateXICAction.getMessage(fromExistingXIC, sourceTree), sourceTree);
         m_fromExistingXIC = fromExistingXIC;
-        m_isJMSDefined = isJMSDefined;
     }
 
     @Override
@@ -192,42 +186,23 @@ public class CreateXICAction extends AbstractRSMAction {
             tree.expandNodeIfNeeded(rootNode);
 
             // CallBack for Xic Quantitation Service
-            if (m_isJMSDefined) {
-                AbstractJMSCallback xicCallback = new AbstractJMSCallback() {
+            AbstractJMSCallback xicCallback = new AbstractJMSCallback() {
 
-                    @Override
-                    public boolean mustBeCalledInAWT() {
-                        return true;
-                    }
+                @Override
+                public boolean mustBeCalledInAWT() {
+                    return true;
+                }
 
-                    @Override
-                    public void run(boolean success) {
-                        runXic(success, _xicQuantiDataSetId[0], _quantitationNode[0], tree, treeModel);
+                @Override
+                public void run(boolean success) {
+                    runXic(success, _xicQuantiDataSetId[0], _quantitationNode[0], tree, treeModel);
 
-                    }
-                };
+                }
+            };
 
-                fr.proline.studio.dpm.task.jms.RunXICTask task = new fr.proline.studio.dpm.task.jms.RunXICTask(xicCallback, m_mergedDSDefined, pID, _quantiDS.getName(), quantParams, expParams, _xicQuantiDataSetId);
-                AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
-            } else {
+            fr.proline.studio.dpm.task.jms.RunXICTask task = new fr.proline.studio.dpm.task.jms.RunXICTask(xicCallback, m_mergedDSDefined, pID, _quantiDS.getName(), quantParams, expParams, _xicQuantiDataSetId);
+            AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
 
-                AbstractServiceCallback xicCallback = new AbstractServiceCallback() {
-
-                    @Override
-                    public boolean mustBeCalledInAWT() {
-                        return true;
-                    }
-
-                    @Override
-                    public void run(boolean success) {
-                        runXic(success, _xicQuantiDataSetId[0], _quantitationNode[0], tree, treeModel);
-
-                    }
-                };
-
-                RunXICTask task = new RunXICTask(xicCallback, pID, _quantiDS.getName(), quantParams, expParams, _xicQuantiDataSetId);
-                AccessServiceThread.getAccessServiceThread().addTask(task);
-            }
 
         } //End OK entered      
     }

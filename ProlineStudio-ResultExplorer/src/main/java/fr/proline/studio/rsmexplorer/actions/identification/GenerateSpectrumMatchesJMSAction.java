@@ -35,7 +35,7 @@ public class GenerateSpectrumMatchesJMSAction extends AbstractRSMAction {
     protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
 
     public GenerateSpectrumMatchesJMSAction(AbstractTree.TreeType selectedTree) {
-        super(NbBundle.getMessage(GenerateSpectrumMatchesAction.class, "CTL_GenerateSpectrumMatchesAction"), selectedTree);
+        super(NbBundle.getMessage(GenerateSpectrumMatchesJMSAction.class, "CTL_GenerateSpectrumMatchesAction"), selectedTree);
     }
     
     @Override

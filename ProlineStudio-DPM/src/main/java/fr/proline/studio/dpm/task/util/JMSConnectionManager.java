@@ -106,14 +106,6 @@ public class JMSConnectionManager {
         }
     }
 
-    public boolean isJMSDefined() {
-        try {
-            return (getJMSConnection() != null);
-
-        } catch (Exception e) {
-            return false;
-        }
-    }
 
     public int getConnectionState() {
         return m_connectionState;

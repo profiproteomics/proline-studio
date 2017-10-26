@@ -159,7 +159,7 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
                 long projectId = m_dataBox.getProjectId();
                 DDataset dataset = (DDataset) databox.getData(false, DDataset.class);
                 
-                boolean okCalled = ComputeQuantitationProfileAction.quantificationProfile(resultCallback, getX()+20, getY()+20, projectId, dataset, null, true);
+                boolean okCalled = ComputeQuantitationProfileAction.quantificationProfile(resultCallback, getX()+20, getY()+20, projectId, dataset, null);
                 if (okCalled) {
                     m_refineProteinsPanel.actionStarted();
                 }

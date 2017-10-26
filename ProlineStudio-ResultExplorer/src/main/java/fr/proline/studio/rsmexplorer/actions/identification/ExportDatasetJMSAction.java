@@ -35,7 +35,7 @@ public class ExportDatasetJMSAction extends AbstractRSMAction {
     }
 
     public ExportDatasetJMSAction(AbstractTree.TreeType treeType, boolean exportTitle) {
-        super(NbBundle.getMessage(ExportDatasetJMSAction.class, "CTL_ExportAction") + " " + NbBundle.getMessage(ExportDatasetAction.class, "CTL_ExportDatasetAction"), treeType);
+        super(NbBundle.getMessage(ExportDatasetJMSAction.class, "CTL_ExportAction") + " " + NbBundle.getMessage(ExportDatasetJMSAction.class, "CTL_ExportDatasetAction"), treeType);
     }
 
     @Override

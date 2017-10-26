@@ -7,21 +7,20 @@ import java.awt.Polygon;
 import java.awt.geom.Path2D;
 
 /**
- * Used to manage selection gesture
+ * Used to manage mouse selection gesture as a polygon
+ * 
  * @author JM235353
  */
 public class SelectionGestureLasso extends AbstractSelectionGesture {
 
     private final Polygon m_selectionPolygon = new Polygon();
 
-
-
     
     public SelectionGestureLasso() {
     }
 
-
     
+    @Override
     public void startSelection(int x, int y) {
         m_selectionPolygon.reset();
         m_selectionPolygon.addPoint(x, y);
@@ -30,6 +29,7 @@ public class SelectionGestureLasso extends AbstractSelectionGesture {
         m_action = ACTION_NONE;
     }
     
+    @Override
     public void continueSelection(int x, int y) {
 
         int lastIndex = m_selectionPolygon.npoints - 1;
@@ -39,6 +39,7 @@ public class SelectionGestureLasso extends AbstractSelectionGesture {
 
     }
     
+    @Override
     public void stopSelection(int x, int y) {
         
         continueSelection(x, y);
@@ -75,10 +76,12 @@ public class SelectionGestureLasso extends AbstractSelectionGesture {
     }
 
     
+    @Override
     public Point getClickPoint() {
         return new Point(m_selectionPolygon.xpoints[m_selectionPolygon.npoints-1], m_selectionPolygon.ypoints[m_selectionPolygon.npoints-1]);
     }
     
+    @Override
     public Path2D.Double getSelectionPath() {
 
         Path2D.Double path = new Path2D.Double();
@@ -94,6 +97,7 @@ public class SelectionGestureLasso extends AbstractSelectionGesture {
         return m_selectionPolygon;
     }
     
+    @Override
     public void paint(Graphics g) {
         if (!m_isSelecting) {
             return;
@@ -109,6 +113,7 @@ public class SelectionGestureLasso extends AbstractSelectionGesture {
         g.fillPolygon(m_selectionPolygon);
     }
     
+    @Override
     public int getAction() {
         return m_action;
     }

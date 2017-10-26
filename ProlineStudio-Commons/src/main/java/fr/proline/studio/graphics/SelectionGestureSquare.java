@@ -13,13 +13,14 @@ import java.awt.Stroke;
 import java.awt.geom.Path2D;
 
 /**
- *
+ * Rectangle Selection zone
+ * 
  * @author JM235353
  */
 public class SelectionGestureSquare extends AbstractSelectionGesture {
 
-    private static final float dash1[] = {10.0f};
-    private static final BasicStroke DASHED_STROKE = new BasicStroke(1.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, dash1, 0.0f);
+    private static final float DASH1[] = {10.0f};
+    private static final BasicStroke DASHED_STROKE = new BasicStroke(1.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, DASH1, 0.0f);
     
     private final Rectangle m_selectionRectangle = new Rectangle();
     

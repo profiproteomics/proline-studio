@@ -10,7 +10,7 @@ import java.util.List;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
-import fr.proline.studio.dpm.jms.AccessJMSManagerThread;
+import fr.proline.studio.dpm.AccessJMSManagerThread;
 import static fr.proline.studio.dpm.task.jms.AbstractJMSTask.m_loggerProline;
 import fr.proline.studio.dpm.task.util.JMSConnectionManager;
 import java.util.HashMap;

@@ -8,7 +8,7 @@ package fr.proline.studio.dpm.task.jms;
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Error;
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Response;
 import fr.proline.studio.dpm.data.JMSNotificationMessage;
-import fr.proline.studio.dpm.jms.AccessJMSManagerThread;
+import fr.proline.studio.dpm.AccessJMSManagerThread;
 import fr.proline.studio.dpm.task.util.JMSConnectionManager;
 import fr.proline.studio.dpm.task.util.JMSMessageUtil;
 import java.util.ArrayList;

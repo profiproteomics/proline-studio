@@ -2,7 +2,7 @@ package fr.proline.studio.rsmexplorer.gui.admin;
 
 import fr.proline.core.orm.uds.UserAccount;
 import fr.proline.studio.dam.DatabaseDataManager;
-import fr.proline.studio.dpm.jms.AccessJMSManagerThread;
+import fr.proline.studio.dpm.AccessJMSManagerThread;
 import fr.proline.studio.dpm.task.jms.AbstractJMSCallback;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.table.DecoratedTable;

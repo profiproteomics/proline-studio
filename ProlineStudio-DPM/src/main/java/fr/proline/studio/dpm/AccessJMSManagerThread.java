@@ -1,4 +1,4 @@
-package fr.proline.studio.dpm.jms;
+package fr.proline.studio.dpm;
 
 import fr.proline.studio.dam.taskinfo.TaskInfoManager;
 import fr.proline.studio.dpm.task.jms.AbstractJMSTask;

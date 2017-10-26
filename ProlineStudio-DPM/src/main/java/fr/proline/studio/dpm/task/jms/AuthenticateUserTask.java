@@ -8,7 +8,7 @@ import com.thetransactioncompany.jsonrpc2.JSONRPC2Response;
 import fr.profi.util.security.EncryptionManager;
 import fr.profi.util.security.SecurityUtils;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
-import fr.proline.studio.dpm.jms.AccessJMSManagerThread;
+import fr.proline.studio.dpm.AccessJMSManagerThread;
 import static fr.proline.studio.dpm.task.jms.AbstractJMSTask.m_loggerProline;
 import static fr.proline.studio.dpm.task.util.JMSConnectionManager.JMS_EXPIRED_MSG_ERROR_CODE;
 import fr.proline.studio.dpm.task.util.JMSConnectionManager;

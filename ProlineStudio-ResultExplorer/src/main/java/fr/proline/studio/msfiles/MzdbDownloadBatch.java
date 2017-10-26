@@ -5,7 +5,7 @@
  */
 package fr.proline.studio.msfiles;
 
-import fr.proline.studio.dpm.jms.AccessJMSManagerThread;
+import fr.proline.studio.dpm.AccessJMSManagerThread;
 import fr.proline.studio.dpm.task.jms.AbstractJMSCallback;
 import fr.proline.studio.dpm.task.jms.DownloadMzdbTask;
 import fr.proline.studio.rsmexplorer.MzdbFilesTopComponent;

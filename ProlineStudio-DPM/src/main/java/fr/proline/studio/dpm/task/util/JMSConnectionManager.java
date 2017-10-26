@@ -1,6 +1,6 @@
 package fr.proline.studio.dpm.task.util;
 
-import fr.proline.studio.dpm.jms.AccessJMSManagerThread;
+import fr.proline.studio.dpm.AccessJMSManagerThread;
 import fr.proline.studio.parameter.ParameterList;
 import fr.proline.studio.parameter.StringParameter;
 import java.util.HashMap;

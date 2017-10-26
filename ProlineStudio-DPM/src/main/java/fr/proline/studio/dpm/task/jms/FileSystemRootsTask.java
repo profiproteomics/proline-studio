@@ -9,7 +9,7 @@ import com.thetransactioncompany.jsonrpc2.JSONRPC2Response;
 import java.util.HashMap;
 import java.util.Map;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
-import fr.proline.studio.dpm.jms.AccessJMSManagerThread;
+import fr.proline.studio.dpm.AccessJMSManagerThread;
 import fr.proline.studio.dpm.serverfilesystem.RootInfo;
 import static fr.proline.studio.dpm.task.jms.AbstractJMSTask.m_loggerProline;
 import fr.proline.studio.dpm.task.util.JMSConnectionManager;

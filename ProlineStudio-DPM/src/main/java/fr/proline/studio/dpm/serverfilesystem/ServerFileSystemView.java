@@ -1,6 +1,6 @@
 package fr.proline.studio.dpm.serverfilesystem;
 
-import fr.proline.studio.dpm.jms.AccessJMSManagerThread;
+import fr.proline.studio.dpm.AccessJMSManagerThread;
 import fr.proline.studio.dpm.task.jms.AbstractJMSCallback;
 import java.io.File;
 import java.io.IOException;

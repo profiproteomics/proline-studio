@@ -3,7 +3,7 @@ package fr.proline.studio.rsmexplorer.gui.calc;
 import fr.proline.studio.graphics.SelectionGestureLasso;
 import fr.proline.studio.graphics.SelectionGestureSquare;
 import fr.proline.studio.gui.SplittedPanelContainer;
-import fr.proline.studio.python.data.TableInfo;
+import fr.proline.studio.table.TableInfo;
 import fr.proline.studio.rsmexplorer.gui.calc.functions.AbstractFunction;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.AbstractConnectedGraphObject;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.AbstractGraphObject;

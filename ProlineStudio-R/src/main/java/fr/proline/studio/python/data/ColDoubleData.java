@@ -4,7 +4,8 @@ import fr.proline.studio.python.util.Conversion;
 import java.util.ArrayList;
 
 /**
- *
+ * Python object corresponding to the column of type Double/Float of a Table Model
+ * 
  * @author JM235353
  */
 public class ColDoubleData extends Col {
@@ -19,7 +20,7 @@ public class ColDoubleData extends Col {
     
     public ColDoubleData(Table table, double[] data, String name) {
         super(table);
-        m_data = new ArrayList<Double>(data.length);
+        m_data = new ArrayList<>(data.length);
         for(double d : data) {
             m_data.add(d);
         }

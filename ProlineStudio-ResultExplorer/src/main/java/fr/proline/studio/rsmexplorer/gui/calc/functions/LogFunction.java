@@ -6,7 +6,7 @@ import fr.proline.studio.parameter.ParameterError;
 import fr.proline.studio.parameter.ParameterList;
 import fr.proline.studio.pattern.WindowBox;
 import fr.proline.studio.python.data.ColRef;
-import fr.proline.studio.python.data.ExprTableModel;
+import fr.proline.studio.python.model.ExprTableModel;
 import fr.proline.studio.python.data.Table;
 import fr.proline.studio.python.interpreter.CalcCallback;
 import fr.proline.studio.python.interpreter.CalcError;

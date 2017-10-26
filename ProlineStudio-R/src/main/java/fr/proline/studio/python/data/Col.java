@@ -6,10 +6,11 @@ import org.python.core.Py;
 import org.python.core.PyFloat;
 import org.python.core.PyInteger;
 import org.python.core.PyObject;
-import org.python.core.PyType;
 
 /**
- *
+ * Python object corresponding to the column of a Table Model
+ * It is the base class of ColDoubleData, ColBooleanData and ColRef
+ * 
  * @author JM235353
  */
 public abstract class Col extends PyObject {
@@ -486,6 +487,7 @@ public abstract class Col extends PyObject {
         throw Py.TypeError("Type Mismatch for + " + left.getClass().getName());
     }
     
+    @Override
     public PyObject __gt__(PyObject right) {
         if (right instanceof Col) {
 
@@ -550,6 +552,7 @@ public abstract class Col extends PyObject {
         throw Py.TypeError("Type Mismatch for + " + right.getClass().getName());
     }
      
+    @Override
      public PyObject __ge__(PyObject right) {
         if (right instanceof Col) {
 
@@ -614,6 +617,7 @@ public abstract class Col extends PyObject {
         throw Py.TypeError("Type Mismatch for + " + right.getClass().getName());
     }
      
+    @Override
     public PyObject __lt__(PyObject right) {
         if (right instanceof Col) {
 
@@ -678,6 +682,7 @@ public abstract class Col extends PyObject {
         throw Py.TypeError("Type Mismatch for + " + right.getClass().getName());
     }
 
+    @Override
     public PyObject __le__(PyObject right) {
         if (right instanceof Col) {
 

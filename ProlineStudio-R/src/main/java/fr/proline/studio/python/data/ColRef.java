@@ -8,7 +8,8 @@ import java.util.ArrayList;
 import org.python.core.Py;
 
 /**
- *
+ * Python object corresponding to the reference to a column of a Table Model
+ * 
  * @author JM235353
  */
 public class ColRef extends Col {

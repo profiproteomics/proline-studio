@@ -1,11 +1,12 @@
-package fr.proline.studio.python.data;
+package fr.proline.studio.table;
 
 import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
 import javax.swing.ImageIcon;
 import org.jdesktop.swingx.JXTable;
 
 /**
- *
+ * Information attached to a Table
+ * 
  * @author JM235353
  */
 public class TableInfo {
@@ -44,12 +45,7 @@ public class TableInfo {
     public void setIcon(ImageIcon icon) {
         m_icon = icon;
     }
-    
-    /*public String getFullName() {
-        return m_fullName;
-    }*/
-    
-   
+
     public String getNameWithId() {
         return m_id+": "+getFullName();
     }

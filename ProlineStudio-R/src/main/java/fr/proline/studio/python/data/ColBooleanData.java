@@ -1,11 +1,10 @@
 package fr.proline.studio.python.data;
 
 import java.util.ArrayList;
-import org.python.core.Py;
-import org.python.core.PyObject;
 
 /**
- *
+ * Python object corresponding to the column of type Boolean of a Table Model
+ * 
  * @author JM235353
  */
 public class ColBooleanData extends Col {

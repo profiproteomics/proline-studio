@@ -1,6 +1,7 @@
 package fr.proline.studio.python.data;
 
 
+import fr.proline.studio.python.model.ExprTableModel;
 import fr.proline.studio.extendedtablemodel.DiffDataModel;
 import fr.proline.studio.extendedtablemodel.JoinDataModel;
 import fr.proline.studio.extendedtablemodel.CompoundTableModel;
@@ -18,7 +19,8 @@ import org.python.core.PyInteger;
 import org.python.core.PyObject;
 
 /**
- *
+ * Python object corresponding to a Table
+ * 
  * @author JM235353
  */
 public class Table extends PyObject {

@@ -4,7 +4,7 @@ import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.gui.OptionDialog;
 import fr.proline.studio.pattern.GroupParameter;
 import fr.proline.studio.pattern.WindowBox;
-import fr.proline.studio.python.data.TableInfo;
+import fr.proline.studio.table.TableInfo;
 import java.awt.Graphics;
 import java.awt.GridLayout;
 import java.awt.Image;

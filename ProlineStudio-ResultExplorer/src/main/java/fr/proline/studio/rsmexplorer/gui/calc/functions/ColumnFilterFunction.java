@@ -5,7 +5,7 @@ import fr.proline.studio.parameter.MultiObjectParameter;
 import fr.proline.studio.parameter.ParameterError;
 import fr.proline.studio.parameter.ParameterList;
 import fr.proline.studio.pattern.WindowBox;
-import fr.proline.studio.python.data.FilterColumnTableModel;
+import fr.proline.studio.python.model.FilterColumnTableModel;
 import fr.proline.studio.python.interpreter.CalcError;
 import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
 import fr.proline.studio.rsmexplorer.gui.calc.ProcessCallbackInterface;

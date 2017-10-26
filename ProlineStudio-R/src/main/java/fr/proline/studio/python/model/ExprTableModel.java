@@ -1,7 +1,6 @@
-package fr.proline.studio.python.data;
+package fr.proline.studio.python.model;
 
 import fr.proline.studio.extendedtablemodel.ExtraDataType;
-import fr.proline.studio.export.ExportModelInterface;
 import fr.proline.studio.export.ExportFontData;
 import fr.proline.studio.filter.BooleanFilter;
 import fr.proline.studio.filter.DoubleFilter;
@@ -11,6 +10,7 @@ import fr.proline.studio.graphics.PlotType;
 import fr.proline.studio.extendedtablemodel.ChildModelInterface;
 import fr.proline.studio.table.DecoratedTableModel;
 import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
+import fr.proline.studio.python.data.Col;
 import fr.proline.studio.table.LazyData;
 import fr.proline.studio.table.TableDefaultRendererManager;
 import fr.proline.studio.table.renderer.DefaultRightAlignRenderer;
@@ -26,6 +26,8 @@ import javax.swing.table.TableCellRenderer;
 
 /**
  *
+ * Table Model which is a result of an expressions (with modified columns or new columns added)
+ * 
  * @author JM235353
  */
 public class ExprTableModel extends DecoratedTableModel implements ChildModelInterface {

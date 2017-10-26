@@ -6,7 +6,7 @@ import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 import javax.swing.JPanel;
-import fr.proline.studio.python.data.TableInfo;
+import fr.proline.studio.table.TableInfo;
 import fr.proline.studio.rsmexplorer.gui.calc.functions.AbstractFunction;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.DataGraphNode;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.FunctionGraphNode;

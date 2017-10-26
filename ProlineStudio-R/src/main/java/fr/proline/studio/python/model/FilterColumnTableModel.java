@@ -1,8 +1,7 @@
-package fr.proline.studio.python.data;
+package fr.proline.studio.python.model;
 
 import fr.proline.studio.extendedtablemodel.ExtraDataType;
 import fr.proline.studio.export.ExportFontData;
-import fr.proline.studio.filter.DoubleFilter;
 import fr.proline.studio.filter.Filter;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
@@ -10,9 +9,6 @@ import fr.proline.studio.extendedtablemodel.ChildModelInterface;
 import fr.proline.studio.table.DecoratedTableModel;
 import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
 import fr.proline.studio.table.LazyData;
-import fr.proline.studio.table.TableDefaultRendererManager;
-import fr.proline.studio.table.renderer.DefaultRightAlignRenderer;
-import fr.proline.studio.table.renderer.DoubleRenderer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -23,6 +19,8 @@ import javax.swing.table.TableCellRenderer;
 
 /**
  *
+ * Model to remove columns of a parent model
+ * 
  * @author JM235353
  */
 public class FilterColumnTableModel extends DecoratedTableModel implements ChildModelInterface {
@@ -33,16 +31,7 @@ public class FilterColumnTableModel extends DecoratedTableModel implements Child
     private HashMap<Integer, Integer> m_reverseColumnsKept = new HashMap<>();
     
     public String m_name = null;
-    
-    
-    private static DoubleRenderer DOUBLE_RENDERER = new DoubleRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 4, true, true);
-    
-    private HashMap<Integer, Col> m_modifiedColumns = null;
-    private HashMap<Integer, Object> m_modifiedColumnsExtraInfo = null;
-    
-    private final ArrayList<Col> m_extraColumns = new ArrayList();
-    private final ArrayList<HashMap<Class, Object>> m_extraColumnInfos = new ArrayList();
-    private final ArrayList<TableCellRenderer> m_extraColumnRenderers = new ArrayList();
+
     
 
     public FilterColumnTableModel(GlobalTableModelInterface parentModel, int[] columnsKept) {

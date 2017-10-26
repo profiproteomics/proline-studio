@@ -9,7 +9,7 @@ import fr.proline.studio.pattern.WindowBox;
 import fr.proline.studio.python.data.ColBooleanData;
 import fr.proline.studio.python.data.ColDoubleData;
 import fr.proline.studio.python.data.Table;
-import fr.proline.studio.python.data.ValuesTableModel;
+import fr.proline.studio.python.model.ValuesTableModel;
 import fr.proline.studio.python.interpreter.CalcCallback;
 import fr.proline.studio.python.interpreter.CalcError;
 import fr.proline.studio.python.interpreter.CalcInterpreterTask;

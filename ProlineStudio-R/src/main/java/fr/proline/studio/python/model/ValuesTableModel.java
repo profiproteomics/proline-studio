@@ -1,4 +1,4 @@
-package fr.proline.studio.python.data;
+package fr.proline.studio.python.model;
 
 import fr.proline.studio.extendedtablemodel.ExtraDataType;
 import fr.proline.studio.export.ExportFontData;
@@ -14,7 +14,8 @@ import java.util.Map;
 import javax.swing.table.TableCellRenderer;
 
 /**
- *
+ * Model showing a list of name/value
+ * 
  * @author JM235353
  */
 public class ValuesTableModel extends DecoratedTableModel implements GlobalTableModelInterface {
@@ -22,7 +23,7 @@ public class ValuesTableModel extends DecoratedTableModel implements GlobalTable
     public static final int COLTYPE_NAME = 0;
     public static final int COLTYPE_VALUE = 1;
     
-    private static final String[] m_columnNames =  {"Name", "Value"};
+    private static final String[] COLUMN_NAMES =  {"Name", "Value"};
     
     private String m_name = "";
     
@@ -41,7 +42,7 @@ public class ValuesTableModel extends DecoratedTableModel implements GlobalTable
     
     @Override
     public String getColumnName(int columnIndex) {
-        return m_columnNames[columnIndex];
+        return COLUMN_NAMES[columnIndex];
     }
     
     @Override
@@ -51,7 +52,7 @@ public class ValuesTableModel extends DecoratedTableModel implements GlobalTable
 
     @Override
     public int getColumnCount() {
-        return m_columnNames.length;
+        return COLUMN_NAMES.length;
     }
 
     @Override

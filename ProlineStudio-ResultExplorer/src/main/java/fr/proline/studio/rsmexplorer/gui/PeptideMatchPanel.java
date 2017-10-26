@@ -19,7 +19,7 @@ import fr.proline.studio.parameter.SettingsButton;
 import fr.proline.studio.pattern.*;
 import fr.proline.studio.progress.ProgressBarDialog;
 import fr.proline.studio.progress.ProgressInterface;
-import fr.proline.studio.python.data.TableInfo;
+import fr.proline.studio.table.TableInfo;
 import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
 import fr.proline.studio.rsmexplorer.actions.table.DisplayTablePopupMenu;
 import fr.proline.studio.rsmexplorer.gui.model.PeptideMatchTableModel;

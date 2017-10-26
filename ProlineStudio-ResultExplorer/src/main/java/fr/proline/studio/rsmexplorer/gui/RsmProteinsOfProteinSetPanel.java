@@ -19,7 +19,7 @@ import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.pattern.DataMixerWindowBoxManager;
 import fr.proline.studio.progress.ProgressInterface;
-import fr.proline.studio.python.data.TableInfo;
+import fr.proline.studio.table.TableInfo;
 import fr.proline.studio.rsmexplorer.actions.table.DisplayTablePopupMenu;
 import fr.proline.studio.rsmexplorer.gui.model.ProteinTableModel;
 import fr.proline.studio.extendedtablemodel.CompoundTableModel;

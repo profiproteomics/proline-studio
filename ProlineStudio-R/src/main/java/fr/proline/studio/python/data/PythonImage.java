@@ -7,7 +7,8 @@ import javax.imageio.ImageIO;
 import org.python.core.PyObject;
 
 /**
- *
+ * Python Encapsulation of an image 
+ * 
  * @author jm235353
  */
 public class PythonImage extends PyObject {

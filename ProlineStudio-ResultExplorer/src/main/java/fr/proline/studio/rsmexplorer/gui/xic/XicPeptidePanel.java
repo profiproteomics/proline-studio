@@ -27,7 +27,7 @@ import fr.proline.studio.pattern.WindowBox;
 import fr.proline.studio.pattern.WindowBoxFactory;
 import fr.proline.studio.progress.ProgressBarDialog;
 import fr.proline.studio.progress.ProgressInterface;
-import fr.proline.studio.python.data.TableInfo;
+import fr.proline.studio.table.TableInfo;
 import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
 import fr.proline.studio.rsmexplorer.actions.table.DisplayTablePopupMenu;
 import fr.proline.studio.search.SearchToggleButton;

@@ -26,7 +26,7 @@ import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.pattern.DataMixerWindowBoxManager;
 import fr.proline.studio.progress.ProgressInterface;
-import fr.proline.studio.python.data.TableInfo;
+import fr.proline.studio.table.TableInfo;
 import fr.proline.studio.table.renderer.DefaultRightAlignRenderer;
 import fr.proline.studio.table.renderer.DoubleRenderer;
 import fr.proline.studio.extendedtablemodel.CompoundTableModel;

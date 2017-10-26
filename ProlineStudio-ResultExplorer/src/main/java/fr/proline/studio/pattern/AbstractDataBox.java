@@ -15,7 +15,7 @@ import fr.proline.studio.pattern.xic.DataboxXicPeptideIon;
 import fr.proline.studio.pattern.xic.DataboxXicPeptideSet;
 import fr.proline.studio.pattern.xic.DataboxXicProteinSet;
 import fr.proline.studio.progress.ProgressInterface;
-import fr.proline.studio.python.data.TableInfo;
+import fr.proline.studio.table.TableInfo;
 import fr.proline.studio.utils.IconManager;
 import java.awt.Image;
 import java.awt.event.ActionListener;

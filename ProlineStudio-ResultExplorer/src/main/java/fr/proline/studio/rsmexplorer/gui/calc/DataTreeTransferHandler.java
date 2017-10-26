@@ -1,6 +1,6 @@
 package fr.proline.studio.rsmexplorer.gui.calc;
 
-import fr.proline.studio.python.data.TableInfo;
+import fr.proline.studio.table.TableInfo;
 import fr.proline.studio.rsmexplorer.gui.calc.DataTree.DataNode;
 import fr.proline.studio.rsmexplorer.gui.calc.functions.AbstractFunction;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.DataGraphNode;

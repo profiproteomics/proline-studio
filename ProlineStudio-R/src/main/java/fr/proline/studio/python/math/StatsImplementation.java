@@ -5,7 +5,7 @@ import fr.proline.studio.python.data.Col;
 import fr.proline.studio.python.data.ColBooleanData;
 import fr.proline.studio.python.data.ColDoubleData;
 import fr.proline.studio.python.data.ColRef;
-import fr.proline.studio.python.data.ExprTableModel;
+import fr.proline.studio.python.model.ExprTableModel;
 import fr.proline.studio.python.data.Table;
 import fr.proline.studio.python.model.QuantiFilterModel;
 

@@ -18,7 +18,7 @@ import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.pattern.DataMixerWindowBoxManager;
 import fr.proline.studio.pattern.MsQueryInfoRset;
 import fr.proline.studio.progress.ProgressInterface;
-import fr.proline.studio.python.data.TableInfo;
+import fr.proline.studio.table.TableInfo;
 import fr.proline.studio.rsmexplorer.actions.table.DisplayTablePopupMenu;
 import fr.proline.studio.rsmexplorer.gui.model.PeptidesOfPtmSiteTableModel;
 import fr.proline.studio.search.SearchToggleButton;

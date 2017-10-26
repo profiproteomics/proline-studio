@@ -2,7 +2,7 @@ package fr.proline.studio.rsmexplorer;
 
 import fr.proline.studio.pattern.GroupParameter;
 import fr.proline.studio.pattern.WindowBox;
-import fr.proline.studio.python.data.TableInfo;
+import fr.proline.studio.table.TableInfo;
 import java.awt.GridLayout;
 import java.util.ArrayList;
 import java.util.HashSet;

@@ -4,7 +4,7 @@ import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.id.ProjectId;
 import fr.proline.studio.pattern.WindowBox;
 import fr.proline.studio.pattern.WindowBoxFactory;
-import fr.proline.studio.python.data.TableInfo;
+import fr.proline.studio.table.TableInfo;
 import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
 import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
 import fr.proline.studio.rsmexplorer.gui.calc.ProcessCallbackInterface;

@@ -17,6 +17,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  *
+ * Thread in charge to interpret python expressions
+ * 
  * @author JM235353
  */
 public class CalcInterpreterThread extends Thread {

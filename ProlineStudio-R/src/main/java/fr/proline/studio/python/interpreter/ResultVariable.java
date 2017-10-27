@@ -8,6 +8,12 @@ import org.python.core.PyFloat;
 import org.python.core.PyInteger;
 import org.python.core.PyObject;
 
+/**
+ * 
+ * Encapsulation of a python result and the name of this result
+ * 
+ * @author JM235353
+ */
 public class ResultVariable {
 
     private final String m_name;

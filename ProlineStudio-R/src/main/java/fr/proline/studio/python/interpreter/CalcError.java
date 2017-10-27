@@ -5,6 +5,8 @@ import java.io.StringWriter;
 
 /**
  *
+ * Reports an error during a calculation for the calculator
+ * 
  * @author jm235353
  */
 public class CalcError {

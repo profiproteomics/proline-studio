@@ -14,6 +14,11 @@ import javax.swing.JTabbedPane;
 
 /**
  *
+ * Panel used to display results of the Data Analyzer bellow the graph zone.
+ * 
+ * It contains a JTabbedPane. Each Tab correspond to an execution of the graph.
+ * 
+ * 
  * @author JM235353
  */
 public class DataAnalyzerResultsPanel extends JPanel implements DataBoxPanelInterface {
@@ -78,7 +83,7 @@ public class DataAnalyzerResultsPanel extends JPanel implements DataBoxPanelInte
     
     @Override
     public void addSingleValue(Object v) {
-        // not used for the moment JPM.TODO ?
+        // not used 
     }
 
     @Override

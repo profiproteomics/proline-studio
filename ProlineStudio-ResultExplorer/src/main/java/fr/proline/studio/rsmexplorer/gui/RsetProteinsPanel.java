@@ -194,7 +194,7 @@ public class RsetProteinsPanel extends HourglassPanel implements DataBoxPanelInt
                 if (i!=null) {
                     tableInfo.setIcon(new ImageIcon(i));
                 }
-                DataMixerWindowBoxManager.addTableInfo(tableInfo);
+                DataAnalyzerWindowBoxManager.addTableInfo(tableInfo);
             }
         };
         

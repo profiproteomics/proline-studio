@@ -333,7 +333,7 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
                 if (i!=null) {
                     tableInfo.setIcon(new ImageIcon(i));
                 }
-                DataMixerWindowBoxManager.addTableInfo(tableInfo);
+                DataAnalyzerWindowBoxManager.addTableInfo(tableInfo);
             }
         };
         toolbar.add(m_addCompareDataButton);

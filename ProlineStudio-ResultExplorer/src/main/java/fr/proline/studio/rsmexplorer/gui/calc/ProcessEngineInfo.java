@@ -5,7 +5,7 @@ import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphNode;
 import java.util.ArrayList;
 
 /**
- *
+ * Class used as information to display results of a process in Data Analyzer
  * @author JM235353
  */
 public class ProcessEngineInfo {
@@ -13,7 +13,7 @@ public class ProcessEngineInfo {
     private GraphNode m_graphNode = null;
     private Integer m_processKey = null;
     private String m_processCurrentName = null;
-    private  ArrayList<SplittedPanelContainer.PanelLayout> m_layout = null;
+    private ArrayList<SplittedPanelContainer.PanelLayout> m_layout = null;
     private int m_index = -1;
 
     public ProcessEngineInfo(GraphNode graphNode, boolean bumpKey, String name,  ArrayList<SplittedPanelContainer.PanelLayout> layout, int index) {

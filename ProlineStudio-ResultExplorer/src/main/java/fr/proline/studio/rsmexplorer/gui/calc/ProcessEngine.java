@@ -6,11 +6,12 @@ import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphNode;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import javax.swing.JButton;
-import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
 /**
  *
+ * Manage the processing of the graph of the DataAnalyzer
+ * 
  * @author JM235353
  */
 public class ProcessEngine implements ProcessCallbackInterface {

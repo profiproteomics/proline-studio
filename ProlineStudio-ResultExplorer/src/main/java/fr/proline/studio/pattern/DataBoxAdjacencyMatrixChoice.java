@@ -12,13 +12,13 @@ import fr.proline.studio.rsmexplorer.adjacencymatrix.visualize.DrawVisualization
 import fr.proline.studio.rsmexplorer.adjacencymatrix.visualize.MatrixSelectionPanel;
 
 /**
- *
+ * Databox to select one of the available adjacency matrices
+ * 
  * @author JM235353
  */
 public class DataBoxAdjacencyMatrixChoice extends AbstractDataBox {
     
     private ResultSummary m_rsm = null;
-    private boolean dataLoadedForRSM = false;
     
     private boolean m_keepSameSet = false;
     private boolean m_doNotTakeFirstSelection = false;  //JPM.WART : when we select later the matrix to be showed.

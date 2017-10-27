@@ -1,4 +1,4 @@
-package fr.proline.studio.pattern;
+  package fr.proline.studio.pattern;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -6,7 +6,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 
 /**
- *  
+ *  Container for available parameters of a DataBox
+ * 
  * @author JM235353
  */
 public class AvailableParameters {

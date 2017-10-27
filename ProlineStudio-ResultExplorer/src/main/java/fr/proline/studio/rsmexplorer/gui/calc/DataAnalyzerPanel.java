@@ -40,6 +40,7 @@ import javax.swing.KeyStroke;
 
 /**
  * Panel for the DataAnalyzer (combine tree + graph panel)
+ * 
  * @author JM235353
  */
 public class DataAnalyzerPanel extends JPanel implements DataBoxPanelInterface {
@@ -273,7 +274,7 @@ public class DataAnalyzerPanel extends JPanel implements DataBoxPanelInterface {
     public class DataMixerTree extends DataTree {
 
         public DataMixerTree() {
-            super(new RootDataMixerNode(), false, m_graphPanel);
+            super(new RootDataAnalyzerNode(), false, m_graphPanel);
         }
 
         @Override

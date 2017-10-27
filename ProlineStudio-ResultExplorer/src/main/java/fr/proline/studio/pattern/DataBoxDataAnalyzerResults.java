@@ -5,6 +5,8 @@ import fr.proline.studio.rsmexplorer.gui.calc.ProcessEngineInfo;
 
 /**
  *
+ * Databox corresponding to zone to display results of the Data Analyzer
+ * 
  * @author JM235353
  */
 public class DataBoxDataAnalyzerResults extends AbstractDataBox {

@@ -58,10 +58,7 @@ public class DataboxManager {
         
         return compatibilityList;
     }
-    
-   /* public TreeMap<ParameterDistance, AbstractDataBox> findCompatibleDataboxList(AbstractDataBox previousDatabox) {
-        return findCompatibleDataboxList(previousDatabox, null);
-    }*/
+
     public TreeMap<ParameterDistance, AbstractDataBox> findCompatibleDataboxList(AbstractDataBox previousDatabox, Class[] importantInParameter) {
         
         AvailableParameters avalaibleParameters = new AvailableParameters(previousDatabox);

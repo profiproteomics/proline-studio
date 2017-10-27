@@ -24,7 +24,7 @@ import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.parameter.SettingsButton;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
-import fr.proline.studio.pattern.DataMixerWindowBoxManager;
+import fr.proline.studio.pattern.DataAnalyzerWindowBoxManager;
 import fr.proline.studio.progress.ProgressInterface;
 import fr.proline.studio.table.TableInfo;
 import fr.proline.studio.table.renderer.DefaultRightAlignRenderer;
@@ -161,7 +161,7 @@ public class RsetPeptideSpectrumValuesPanel extends HourglassPanel implements Da
                 if (i != null) {
                     tableInfo.setIcon(new ImageIcon(i));
                 }
-                DataMixerWindowBoxManager.addTableInfo(tableInfo);
+                DataAnalyzerWindowBoxManager.addTableInfo(tableInfo);
             }
         };
 

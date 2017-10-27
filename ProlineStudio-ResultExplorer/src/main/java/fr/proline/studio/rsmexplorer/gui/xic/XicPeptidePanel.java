@@ -22,7 +22,7 @@ import fr.proline.studio.parameter.ParameterList;
 import fr.proline.studio.parameter.SettingsButton;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
-import fr.proline.studio.pattern.DataMixerWindowBoxManager;
+import fr.proline.studio.pattern.DataAnalyzerWindowBoxManager;
 import fr.proline.studio.pattern.WindowBox;
 import fr.proline.studio.pattern.WindowBoxFactory;
 import fr.proline.studio.progress.ProgressBarDialog;
@@ -269,7 +269,7 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
                 if (i!=null) {
                     tableInfo.setIcon(new ImageIcon(i));
                 }
-                DataMixerWindowBoxManager.addTableInfo(tableInfo);
+                DataAnalyzerWindowBoxManager.addTableInfo(tableInfo);
             }
         };
         toolbar.add(m_addCompareDataButton);

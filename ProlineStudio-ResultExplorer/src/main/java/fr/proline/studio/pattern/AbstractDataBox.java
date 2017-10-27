@@ -248,8 +248,7 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
         private static HashMap<Integer, DataboxType> generateDataboxTypeMap() {
             HashMap<Integer, DataboxType> map = new HashMap<>();
             DataboxType[] databoxTypeArray = DataboxType.values();
-            for (int i=0;i<databoxTypeArray.length;i++) {
-                DataboxType type = databoxTypeArray[i];
+            for (DataboxType type : databoxTypeArray) {
                 map.put(type.m_type, type);
             }
             return map;

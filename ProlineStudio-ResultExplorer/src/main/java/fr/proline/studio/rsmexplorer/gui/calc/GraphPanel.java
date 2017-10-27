@@ -367,10 +367,7 @@ public class GraphPanel extends JPanel implements MouseListener, MouseMotionList
                             m_deselectionIfNoMoveNoPopup = true;
                             m_hasMovedOrPopup = false;
                         }
-                        
-                        
-                        
-                        
+
                         if (!m_selectedObjectsArray.contains(overObject)) {
                             m_selectedObjectsArray.add((AbstractConnectedGraphObject) overObject);
                             overObject.setSelected(true);
@@ -485,12 +482,12 @@ public class GraphPanel extends JPanel implements MouseListener, MouseMotionList
             if (m_selectedConnector != null) {
                 int x = e.getX();
                 int y = e.getY();
-                AbstractGraphObject overObject = null;
+
                 Iterator<GraphNode> it = m_graphNodeArray.descendingIterator();
                 while (it.hasNext()) {
                     AbstractConnectedGraphObject graphNode = it.next();
 
-                    overObject = graphNode.inside(x, y);
+                    AbstractGraphObject overObject =  graphNode.inside(x, y);
                     if (overObject != null) {
                         if (overObject.getType() == AbstractConnectedGraphObject.TypeGraphObject.CONNECTOR) {
                             GraphConnector connector = (GraphConnector) overObject;

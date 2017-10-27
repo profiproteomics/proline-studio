@@ -19,7 +19,7 @@ import fr.proline.studio.markerbar.MarkerContainerPanel;
 import fr.proline.studio.parameter.SettingsButton;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
-import fr.proline.studio.pattern.DataMixerWindowBoxManager;
+import fr.proline.studio.pattern.DataAnalyzerWindowBoxManager;
 import fr.proline.studio.progress.ProgressInterface;
 import fr.proline.studio.table.TableInfo;
 import fr.proline.studio.rsmexplorer.actions.table.DisplayTablePopupMenu;
@@ -289,7 +289,7 @@ public class PTMProteinSitePanel extends HourglassPanel implements DataBoxPanelI
                 if (i!=null) {
                     tableInfo.setIcon(new ImageIcon(i));
                 }
-                DataMixerWindowBoxManager.addTableInfo(tableInfo);
+                DataAnalyzerWindowBoxManager.addTableInfo(tableInfo);
             }
         };
         toolbar.add(m_addCompareDataButton);

@@ -8,9 +8,14 @@ import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
 
 /**
  *
+ * Static Access to the Window of the DataAnalyzer.
+ * 
+ * When adding Data info (by sending data view to the data analyzer), the
+ * data analyzer is automatically created / activated if needed.
+ * 
  * @author JM235353
  */
-public class DataMixerWindowBoxManager {
+public class DataAnalyzerWindowBoxManager {
 
     private static WindowBox m_windowBox = null;
     private static DataBoxViewerTopComponent m_win = null;
@@ -59,7 +64,7 @@ public class DataMixerWindowBoxManager {
         }
     }
 
-    public static void openDataMixer() {
+    public static void openDataAnalyzer() {
         addTableInfo(null);
     }
 

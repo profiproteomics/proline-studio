@@ -6,7 +6,8 @@ import fr.proline.studio.rsmexplorer.gui.calc.DataAnalyzerPanel;
 import fr.proline.studio.rsmexplorer.gui.calc.ProcessEngineInfo;
 
 /**
- *
+ * Databox corresponding to the Data Analyzer ( Tree of functions and data + graph zone)
+ * 
  * @author JM235353
  */
 public class DataboxDataAnalyzer extends AbstractDataBox {

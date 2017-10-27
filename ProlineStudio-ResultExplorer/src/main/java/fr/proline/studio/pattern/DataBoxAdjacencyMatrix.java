@@ -21,6 +21,8 @@ import java.util.HashMap;
 
 /**
  *
+ * Databox to display an adjacency Matrix
+ * 
  * @author JM235353
  */
 public class DataBoxAdjacencyMatrix extends AbstractDataBox {

@@ -181,7 +181,7 @@ public class RsmPeptidesPanel extends HourglassPanel implements DataBoxPanelInte
                 if (i!=null) {
                     tableInfo.setIcon(new ImageIcon(i));
                 }
-                DataMixerWindowBoxManager.addTableInfo(tableInfo);
+                DataAnalyzerWindowBoxManager.addTableInfo(tableInfo);
             }
         };
         

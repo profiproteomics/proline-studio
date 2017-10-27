@@ -18,9 +18,7 @@ import fr.proline.studio.rsmexplorer.gui.calc.functions.JoinFunction;
 import fr.proline.studio.rsmexplorer.gui.calc.functions.LogFunction;
 import fr.proline.studio.rsmexplorer.gui.calc.functions.MissingValuesImputationFunction;
 import fr.proline.studio.rsmexplorer.gui.calc.functions.NormalizationFunction;
-import fr.proline.studio.rsmexplorer.gui.calc.functions.PValueFunction;
 import fr.proline.studio.rsmexplorer.gui.calc.functions.QuantiFilterFunction;
-import fr.proline.studio.rsmexplorer.gui.calc.functions.TtdFunction;
 import fr.proline.studio.rsmexplorer.gui.calc.graphics.AbstractGraphic;
 import fr.proline.studio.rsmexplorer.gui.calc.graphics.BoxPlotGraphic;
 import fr.proline.studio.rsmexplorer.gui.calc.graphics.CalibrationPlotGraphic;
@@ -55,6 +53,7 @@ import org.openide.windows.TopComponent;
 
 /**
  * Tree Panel for the DataAnalyzer with data and functions
+ * 
  * @author JM235353
  */
 public abstract class DataTree extends JTree {
@@ -96,7 +95,7 @@ public abstract class DataTree extends JTree {
         }
         
         setToggleClickCount(0); // avoid expanding when double clicking
-        setCellRenderer(new DataMixerTreeRenderer()); 
+        setCellRenderer(new DataAnalyzerTreeRenderer()); 
         addMouseListener(new MouseAdapter() {
             @Override
             public void mouseReleased(MouseEvent e) {
@@ -284,10 +283,13 @@ public abstract class DataTree extends JTree {
         return nodes;
     }
     
+    /**
+     * Base class for all node of the Tree
+     */
     public static abstract class DataNode extends DefaultMutableTreeNode {
 
         public enum DataNodeType {
-            ROOT_DATA_MIXER,
+            ROOT_DATA_ANALYZER,
             PARENT_DATA,
             PARENT_MACROS,
             PARENT_FUNCTION,
@@ -327,10 +329,13 @@ public abstract class DataTree extends JTree {
         public abstract ImageIcon getIcon();
     }
 
-    public static class RootDataMixerNode extends DataNode {
+    /**
+     * Parent Node with name "Data Analyzer"
+     */
+    public static class RootDataAnalyzerNode extends DataNode {
 
-        public RootDataMixerNode() {
-            super(DataNodeType.ROOT_DATA_MIXER);
+        public RootDataAnalyzerNode() {
+            super(DataNodeType.ROOT_DATA_ANALYZER);
         }
 
         @Override
@@ -585,9 +590,14 @@ public abstract class DataTree extends JTree {
         }
     }
     
-    private class DataMixerTreeRenderer extends DefaultTreeCellRenderer {
+    /**
+     * Renderer for the tree of the Data Analyzer.
+     * 
+     * It manages icons and grayed nodes
+     */
+    private class DataAnalyzerTreeRenderer extends DefaultTreeCellRenderer {
 
-        public DataMixerTreeRenderer() {
+        public DataAnalyzerTreeRenderer() {
         }
 
         @Override

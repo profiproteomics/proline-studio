@@ -24,10 +24,14 @@ import org.python.core.PyTuple;
 
 /**
  *
+ * Implementation in java of some statistics calculations
+ * 
  * @author JM235353
  */
 public class StatsImplementation {
 
+    private static final double LOG2 = StrictMath.log(2);
+    
     public static ColDoubleData neg(Col values) {
 
         int nbRow = values.getRowCount();
@@ -168,7 +172,7 @@ public class StatsImplementation {
         String logfunction = (log10) ? "log10(" : "log2(";
         return new ColDoubleData(values.getTable(), resultArray, logfunction+values.getExportColumnName()+")");
     }
-    private static final double LOG2 = StrictMath.log(2);
+    
     
     public static Table log10(Table sourceTable, PyTuple pcols) {
         return log(sourceTable, pcols, true);
@@ -270,9 +274,7 @@ public class StatsImplementation {
                     // avoid -0.0
                     pvalue += 0.0;
                 }
-            } catch (IllegalArgumentException ex) {
-                pvalue = Double.NaN;
-            } catch (MathException ex) {
+            } catch (IllegalArgumentException | MathException ex) {
                 pvalue = Double.NaN;
             }
 
@@ -426,7 +428,6 @@ public class StatsImplementation {
     }
     
     private static DescriptiveStatistics _toDescriptiveStatistics(PyTuple p, int row) {
-        final double LOG2 = Math.log(2.0d);
 
         DescriptiveStatistics m = new DescriptiveStatistics();
 

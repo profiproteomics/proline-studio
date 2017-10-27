@@ -15,6 +15,8 @@ import org.python.core.PyTuple;
 
 /**
  *
+ * Python statistics calculations
+ * 
  * @author JM235353
  */
 public class Stats {
@@ -183,10 +185,6 @@ public class Stats {
 
         return StatsImplementation.differentialProteins(pvalues, logFC, pvalueThreshold, logFCThreshold);
     }
-    
-    /*public void Testdapar() throws Exception {
-        RServerManager serverR = RServerManager.getRServerManager();
-        serverR.parseAndEval("library(DAPAR)");
-    }*/
+
 
 }

@@ -31,6 +31,8 @@ import org.rosuda.REngine.RList;
 
 /**
  *
+ * Implementation with a call to R Server of some statistics calculations
+ * 
  * @author JM235353
  */
 public class StatsRImplementation {
@@ -615,6 +617,7 @@ public class StatsRImplementation {
             }
 
             
+            @Override
             public PlotType getBestPlotType() {
                 return PlotType.SCATTER_PLOT;
             }
@@ -699,9 +702,9 @@ public class StatsRImplementation {
                 }
 
                 for (int j = 0; j < nbCols; j++) {
-                    String colName = null;
+
                     if (j == 0) {
-                        colName = diffAnalysisTypeString + " PValue";
+                        String colName = diffAnalysisTypeString + " PValue";
                         ColDoubleData pvalueCol = new ColDoubleData(resTable, valuesForCol.get(j), colName);
                         ColDoubleData log10PvalueCol = StatsImplementation.log10(pvalueCol);
                         ColDoubleData minusLog10PvalueCol = StatsImplementation.neg(log10PvalueCol);
@@ -711,7 +714,7 @@ public class StatsRImplementation {
                         model.addExtraColumnInfo(model.getColumnCount()-1, new PValue());
                         model.addExtraColumnInfo(model.getColumnCount()-1, new LogInfo(LogInfo.LogState.LOG10));
                     } else if (j == 1) {
-                        colName = diffAnalysisTypeString + " log Ratio";
+                        String colName = diffAnalysisTypeString + " log Ratio";
                         model.addExtraColumn(new ColDoubleData(resTable, valuesForCol.get(j), colName), ExprTableModel.DOUBLE_RENDERER);
                         model.addExtraColumnInfo(model.getColumnCount()-1, new LogRatio());
                     }
@@ -729,11 +732,10 @@ public class StatsRImplementation {
                     for (int j = 0; j < d.length; j++) {
                         values.add(d[j]);
                     }
-                    String colName = null;
-                    Object colExtraInfo = null;
+
                     if (i == 0) {
-                        colName = diffAnalysisTypeString + " PValue";
-                        colExtraInfo = new PValue();
+                        String colName = diffAnalysisTypeString + " PValue";
+                        Object colExtraInfo = new PValue();
                         ColDoubleData pvalueCol = new ColDoubleData(resTable, values, colName);
                         ColDoubleData log10PvalueCol = StatsImplementation.log10(pvalueCol);
                         ColDoubleData minusLog10PvalueCol = StatsImplementation.neg(log10PvalueCol);
@@ -743,8 +745,8 @@ public class StatsRImplementation {
                         model.addExtraColumnInfo(model.getColumnCount()-1, colExtraInfo);
                         model.addExtraColumnInfo(model.getColumnCount()-1, new LogInfo(LogInfo.LogState.LOG10));
                     } else if (i == 1) {
-                        colName = diffAnalysisTypeString + " log Ratio";
-                        colExtraInfo = new LogRatio();
+                        String colName = diffAnalysisTypeString + " log Ratio";
+                        Object colExtraInfo = new LogRatio();
                         model.addExtraColumn(new ColDoubleData(resTable, values, colName), ExprTableModel.DOUBLE_RENDERER);
                         model.addExtraColumnInfo(model.getColumnCount()-1, colExtraInfo);
                     }

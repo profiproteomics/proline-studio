@@ -1,7 +1,9 @@
 package fr.proline.studio.types;
 
 /**
- *
+ * Class used to add information to a Table Model in the Data Analyzer
+ * This class corresponds to a reference to the Xic Group of a column
+ * 
  * @author JM235353
  */
 public class XicGroup {

@@ -11,6 +11,8 @@ import org.openide.windows.TopComponent;
 
 /**
  *
+ * Top Component to view an image which is a result comming from R Server
+ * 
  * @author JM235353
  */
 public class ImageViewerTopComponent extends TopComponent {

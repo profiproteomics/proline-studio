@@ -228,11 +228,6 @@ public class RServerManager {
             if (user != null) {
                 m_connection.login(user, password);
             }
-            
-            // for the moment, we need to load the library roline //JPM.TODO
-            //m_connection.eval("library(Roline)");
-            //m_connection.eval("library(Cairo)");
-            //m_connection.eval("library(png)");
 
             return m_connection;
 
@@ -381,18 +376,7 @@ public class RServerManager {
             throw new RServerException(e.getMessage());
         }
     }
-    
-    /*public void eval(String code) throws RServerException {
-        
-        try {
-            m_connection.eval("try(" + code + ",silent=TRUE)");
 
-        } catch (Exception e) {
-            LoggerFactory.getLogger("ProlineStudio.Commons").error(getClass().getSimpleName() + " failed", e);
-            throw new RServerException(e.getMessage());
-        }
-    }*/
-    
     
     public class RServerException extends Exception {
         
@@ -435,7 +419,6 @@ public class RServerManager {
                     pw.flush();
                 }
             } catch (IOException ioe) {
-                //ioe.printStackTrace();
             }
         }
     }

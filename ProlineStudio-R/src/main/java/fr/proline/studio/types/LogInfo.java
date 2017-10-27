@@ -2,6 +2,9 @@ package fr.proline.studio.types;
 
 /**
  *
+ * Class used to add information to a Table Model in the Data Analyzer
+ * This class is used to know if a columns has been logged.
+ * 
  * @author JM235353
  */
 public class LogInfo {

@@ -9,6 +9,8 @@ import org.python.core.PyObject;
 
 /**
  *
+ * Converstion from java classes to Python classes, or from Python classes to java classes
+ * 
  * @author JM235353
  */
 public class Conversion {

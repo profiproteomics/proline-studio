@@ -4,6 +4,10 @@ import java.util.ArrayList;
 
 /**
  *
+ * Class used to add information to a Table Model in the Data Analyzer
+ * This class correspond to a list of groups of columns used for calculations
+ * on SC or XIC.
+ * 
  * @author JM235353
  */
 public class GroupSelection {

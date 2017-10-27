@@ -1,9 +1,10 @@
 package fr.proline.studio.types;
 
-import java.util.HashSet;
 
 /**
- *
+ * Class used to add information to a Table Model in the Data Analyzer
+ * This class corresponds to the type of quantitation of a column
+ * 
  * @author JM235353
  */
 public class QuantitationType {
@@ -48,14 +49,7 @@ public class QuantitationType {
     public String getName() {
         return m_names[m_type];
     }
-    
-    /*public static void addAllQuantitations(HashSet<QuantitationType> quantitationsSet) {
-        initArray();
-        for (int i=0;i<SIZE;i++) {
-            quantitationsSet.add(m_array[i]);
-        }
-    }*/
-    
+
     @Override
     public String toString() {
         return getName();

@@ -2,6 +2,7 @@ package fr.proline.studio.rsmexplorer;
 
 import fr.proline.studio.dpm.ServerConnectionManager;
 import fr.proline.studio.msfiles.MsFilesExplorer;
+import fr.proline.studio.msfiles.WorkingSetView;
 import fr.proline.studio.rsmexplorer.gui.TreeStateUtil;
 import java.awt.BorderLayout;
 import javax.swing.JTabbedPane;
@@ -52,7 +53,7 @@ public final class MzdbFilesTopComponent extends TopComponent {
         m_explorer = new MsFilesExplorer();
         m_tabbedPane.add("Explorer", m_explorer);
 
-        //m_tabbedPane.add("Working Sets", new JPanel());
+        m_tabbedPane.add("Working Sets", new WorkingSetView());
         add(m_tabbedPane, BorderLayout.CENTER);
 
         if (!ServerConnectionManager.getServerConnectionManager().isNotConnected()) {

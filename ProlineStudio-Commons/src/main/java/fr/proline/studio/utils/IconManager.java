@@ -99,6 +99,7 @@ public class IconManager {
         FOLDER_EXPANDED,
         COMPUTER_NETWORK,
         DRIVE,
+        DRIVE_GLOBE,
         FRAGMENTATION,
         BIOLOGICAL_GROUP,
         BIOLOGICAL_SAMPLE,
@@ -470,6 +471,8 @@ public class IconManager {
                 return "fr/proline/studio/images/folder-horizontal-open.png";
             case DRIVE:
                 return "fr/proline/studio/images/drive.png";
+            case DRIVE_GLOBE:
+                return "fr/proline/studio/images/drive-globe.png";
             case COMPUTER_NETWORK:
                 return "fr/proline/studio/images/computer-network.png";
             case FRAGMENTATION:

@@ -27,7 +27,7 @@ public class TreeStateUtil {
 
     public enum TreeType {
 
-        SERVER, LOCAL, XIC
+        SERVER, LOCAL, XIC, WORKING_SET
     }
     
     public static Preferences m_preferences = NbPreferences.root();
@@ -50,6 +50,8 @@ public class TreeStateUtil {
             m_preferences.put("TreeStateUtil.Local_tree" + "." + rootSuffix, builder.toString());
         } else if (type == TreeType.XIC) {
             m_preferences.put("TreeStateUtil.XIC_tree", builder.toString());
+        } else if(type == TreeType.WORKING_SET) {
+            m_preferences.put("TreeStateUtil.Working_Set_tree", builder.toString());
         }
 
     }
@@ -65,6 +67,8 @@ public class TreeStateUtil {
             s = m_preferences.get("TreeStateUtil.Local_tree" + "." + rootSuffix, null);
         } else if (type == TreeType.XIC) {
             s = m_preferences.get("TreeStateUtil.XIC_tree", null);
+        }else if(type == TreeType.WORKING_SET) {
+            s = m_preferences.get("TreeStateUtil.Working_Set_tree", null);
         } else {
             s = null;
         }
@@ -97,7 +101,7 @@ public class TreeStateUtil {
             return;
         }
 
-        if (type == TreeType.LOCAL) {
+        if (type == TreeType.LOCAL || type == TreeType.WORKING_SET) {
             tree.addTreeExpansionListener(new TreeExpansionListener() {
 
                 @Override

@@ -280,9 +280,9 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
 
                 if (f.isFile()) {
                     selectedURLs.add(f.getAbsolutePath());
+                    m_selectedFiles.add(f);
                 }
 
-                m_selectedFiles.add(f);
             }
         }
         return selectedURLs;
@@ -290,7 +290,6 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
 
     public void resetTreeState() {
         TreeStateUtil.setExpansionState(TreeStateUtil.loadExpansionState(TreeStateUtil.TreeType.LOCAL, m_rootsComboBox.getSelectedItem().toString()), m_tree, (DefaultMutableTreeNode) m_tree.getModel().getRoot(), TreeStateUtil.TreeType.LOCAL, m_rootsComboBox.getSelectedItem().toString());
-
     }
 
     public void expandTreePath(TreePath path) {

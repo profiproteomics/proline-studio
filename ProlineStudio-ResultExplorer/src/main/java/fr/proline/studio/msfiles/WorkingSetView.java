@@ -44,6 +44,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.openide.util.Exceptions;
+import org.openide.util.NbPreferences;
 
 /**
  *
@@ -57,7 +58,7 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
     private JPopupMenu m_popupMenu;
     private ActionListener m_viewMzdbAction;
     private WorkingSetRoot m_root;
-    
+
     private ArrayList<WorkingSet> m_selectedWorkingSets;
     private ArrayList<WorkingSetEntry> m_selectedWorkingSetEntries;
     private ArrayList<WorkingSetEntry> m_existingSelectedWorkingSetEntries;
@@ -87,30 +88,8 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
         c.weightx = 1;
         c.weighty = 1;
 
-        JSONObject jsonObject = null;
+        m_root = new WorkingSetRoot((JSONArray) readJSON().get("working_sets"));
 
-        FileReader reader = null;
-        try {
-            reader = new FileReader("D:\\json_example.json");
-            JSONParser jsonParser = new JSONParser();
-            jsonObject = (JSONObject) jsonParser.parse(reader);
-
-        } catch (FileNotFoundException ex) {
-            Exceptions.printStackTrace(ex);
-        } catch (IOException ex) {
-            Exceptions.printStackTrace(ex);
-        } catch (ParseException ex) {
-            Exceptions.printStackTrace(ex);
-        } finally {
-            try {
-                reader.close();
-            } catch (IOException ex) {
-                Exceptions.printStackTrace(ex);
-            }
-        }
-
-        m_root = new WorkingSetRoot((JSONArray) jsonObject.get("working_sets"));
-        
         m_workingSetModel = new WorkingSetModel(m_root);
         m_tree = new JTree(m_workingSetModel);
 
@@ -155,7 +134,7 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
                 }
             }
         });
-        
+
         m_tree.addTreeExpansionListener(new TreeExpansionListener() {
 
             @Override
@@ -177,6 +156,47 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
 
         add(scrollPane, c);
 
+    }
+
+    private JSONObject readJSON() {
+        File baseLocationFile = new File(".");
+
+        String canonicalPath = null;
+        try {
+            canonicalPath = baseLocationFile.getCanonicalPath();
+        } catch (IOException ex) {
+            Exceptions.printStackTrace(ex);
+        }
+
+        File jsonFile = new File(canonicalPath + File.separator + "working_sets.json");
+
+        if (jsonFile.exists()) {
+
+            JSONObject jsonObject = null;
+
+            FileReader reader = null;
+            try {
+                reader = new FileReader(canonicalPath + File.separator + "working_sets.json");
+                JSONParser jsonParser = new JSONParser();
+                jsonObject = (JSONObject) jsonParser.parse(reader);
+            } catch (FileNotFoundException ex) {
+                return saveJSON(null);
+            } catch (IOException | ParseException ex) {
+                Exceptions.printStackTrace(ex);
+                return saveJSON(null);
+            } finally {
+                try {
+                    reader.close();
+                } catch (IOException ex) {
+                    Exceptions.printStackTrace(ex);
+                }
+            }
+
+            return jsonObject;
+
+        } else {
+            return saveJSON(null);
+        }
     }
 
     @Override
@@ -211,7 +231,7 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
                 dialog.setLocationRelativeTo(null);
                 dialog.setVisible(true);
                 DefaultMutableTreeNode root = (DefaultMutableTreeNode) m_workingSetModel.getRoot();
-                m_workingSetModel.fireTreeStructureChanged(new TreeModelEvent(root, root.getPath())); 
+                m_workingSetModel.fireTreeStructureChanged(new TreeModelEvent(root, root.getPath()));
                 resetTreeState();
             }
 
@@ -236,9 +256,9 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
                 }
 
                 if (success) {
-                    m_workingSetModel.fireTreeStructureChanged(new TreeModelEvent(root, root.getPath())); 
+                    m_workingSetModel.fireTreeStructureChanged(new TreeModelEvent(root, root.getPath()));
                     resetTreeState();
-                    saveJSON(workingSetRoot.getWorkingSets());              
+                    saveJSON(workingSetRoot.getWorkingSets());
                 }
 
             }
@@ -250,12 +270,12 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
         m_addWorkingSetEntry.addActionListener(new ActionListener() {
 
             @Override
-            public void actionPerformed(ActionEvent ae) {  
+            public void actionPerformed(ActionEvent ae) {
                 AddWorkingSetEntryDialog dialog = AddWorkingSetEntryDialog.getDialog(null, m_selectedWorkingSets.get(0));
                 dialog.setLocationRelativeTo(null);
                 dialog.setVisible(true);
                 DefaultMutableTreeNode root = (DefaultMutableTreeNode) m_workingSetModel.getRoot();
-                m_workingSetModel.fireTreeStructureChanged(new TreeModelEvent(root, root.getPath())); 
+                m_workingSetModel.fireTreeStructureChanged(new TreeModelEvent(root, root.getPath()));
                 resetTreeState();
                 WorkingSetRoot workingSetRoot = (WorkingSetRoot) root.getUserObject();
                 saveJSON(workingSetRoot.getWorkingSets());
@@ -299,7 +319,7 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
         });
         popupMenu.add(m_removeWorkingSetEntry);
     }
-    
+
     public void resetTreeState() {
         TreeStateUtil.setExpansionState(TreeStateUtil.loadExpansionState(TreeStateUtil.TreeType.WORKING_SET, null), m_tree, (DefaultMutableTreeNode) m_tree.getModel().getRoot(), TreeStateUtil.TreeType.WORKING_SET, null);
     }
@@ -398,13 +418,27 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
 
         return files;
     }
-    
-    private void saveJSON(JSONArray array){
-        
+
+    private JSONObject saveJSON(JSONArray array) {
+
+        File baseLocationFile = new File(".");
+
+        String canonicalPath = null;
+        try {
+            canonicalPath = baseLocationFile.getCanonicalPath();
+        } catch (IOException ex) {
+            Exceptions.printStackTrace(ex);
+        }
+
         JSONObject obj = new JSONObject();
-        obj.put("working_sets", array);
-        
-        try (FileWriter file = new FileWriter("D:\\json_example.json")) {
+
+        if (array != null) {
+            obj.put("working_sets", array);
+        } else {
+            obj.put("working_sets", new JSONArray());
+        }
+
+        try (FileWriter file = new FileWriter(canonicalPath + File.separator + File.separator + "working_sets.json")) {
 
             file.write(obj.toJSONString());
             file.flush();
@@ -412,6 +446,8 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        return obj;
     }
 
 }

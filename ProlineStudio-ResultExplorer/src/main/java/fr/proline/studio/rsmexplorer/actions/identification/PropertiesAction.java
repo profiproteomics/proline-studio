@@ -70,10 +70,6 @@ public class PropertiesAction extends AbstractRSMAction {
  
             }
 
-            /*if ((type == AbstractNode.NodeTypes.PROJECT_QUANTITATION) ) {
-                quantitationProperties = true;
-
-            }*/
         }
 
         // new Properties window
@@ -102,8 +98,6 @@ public class PropertiesAction extends AbstractRSMAction {
             public void run() {
                 m_nbDataToLoad--;
                 if (m_nbDataToLoad == 0) {
-
-                    //win.setProperties(selectedNodes);
 
                     databoxGeneric.setLoaded(loadingId);
                     

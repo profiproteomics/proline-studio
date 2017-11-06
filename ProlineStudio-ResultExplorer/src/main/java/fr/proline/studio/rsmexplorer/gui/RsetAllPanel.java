@@ -3,6 +3,7 @@ package fr.proline.studio.rsmexplorer.gui;
 import fr.proline.core.orm.msi.MsiSearch;
 import fr.proline.core.orm.msi.Peaklist;
 import fr.proline.core.orm.msi.ResultSet;
+import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.extendedtablemodel.ExtraDataType;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
@@ -25,7 +26,6 @@ import fr.proline.studio.markerbar.MarkerContainerPanel;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.progress.ProgressInterface;
-import fr.proline.studio.rsmexplorer.PropertiesTopComponent;
 import fr.proline.studio.rsmexplorer.actions.identification.PropertiesAction;
 import fr.proline.studio.rsmexplorer.gui.renderer.TimestampRenderer;
 import fr.proline.studio.rsmexplorer.tree.identification.IdTransferable;
@@ -34,6 +34,11 @@ import fr.proline.studio.table.AbstractTableAction;
 import fr.proline.studio.extendedtablemodel.CompoundTableModel;
 import fr.proline.studio.table.DecoratedTableModel;
 import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
+import fr.proline.studio.pattern.DataboxGeneric;
+import fr.proline.studio.pattern.WindowBox;
+import fr.proline.studio.pattern.WindowBoxFactory;
+import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
+import fr.proline.studio.rsmexplorer.gui.model.properties.IdentificationPropertiesTableModel;
 import fr.proline.studio.table.LazyData;
 import fr.proline.studio.table.LazyTable;
 import fr.proline.studio.table.TablePopupMenu;
@@ -266,7 +271,6 @@ public class RsetAllPanel extends HourglassPanel implements DataBoxPanelInterfac
 
     private class ResultSetTable extends LazyTable implements ProgressInterface {
 
-        //private JPopupMenu m_popup = null;
         public ResultSetTable() {
             super(m_scrollPane.getVerticalScrollBar());
 
@@ -416,21 +420,22 @@ public class RsetAllPanel extends HourglassPanel implements DataBoxPanelInterfac
         @Override
         public void actionPerformed(int col, int row, int[] selectedRows, JTable table) {
 
-            ResultSetTableModel model = (ResultSetTableModel) m_resultSetTable.getModel();
+            int nbResultSet = selectedRows.length;
 
-            long projectId = m_dataBox.getProjectId();
+            ResultSetTableModel rsetModel = (ResultSetTableModel) ((CompoundTableModel) m_resultSetTable.getModel()).getBaseModel();
 
-            //int[] selectedRows = m_resultSetTable.getSelectedRows();
-            int nbSelectedRset = selectedRows.length;
-            final ResultsetPropertiesProvider[] resultPropertiesProviderArray = new ResultsetPropertiesProvider[nbSelectedRset];
-            for (int i = 0; i < nbSelectedRset; i++) {
+            final long projectId = m_dataBox.getProjectId();
+
+            ArrayList<ResultSet> resultSetList = new ArrayList<>(nbResultSet);
+
+            for (int i = 0; i < nbResultSet; i++) {
                 int rowInModel = m_resultSetTable.convertRowIndexToModel(selectedRows[i]);
 
-                ResultSet rset = model.getResultSet(rowInModel);
-                resultPropertiesProviderArray[i] = new ResultsetPropertiesProvider(rset, projectId, rset.getName());
+                ResultSet rset = rsetModel.getResultSet(rowInModel);
+                resultSetList.add(rset);
             }
 
-            String rsetFileName = resultPropertiesProviderArray[0].getResultset().getMsiSearch().getResultFileName();
+            String rsetFileName = resultSetList.get(0).getMsiSearch().getResultFileName();
             if (rsetFileName != null) {
                 int index = rsetFileName.lastIndexOf('.');
                 if (index != -1) {
@@ -442,28 +447,58 @@ public class RsetAllPanel extends HourglassPanel implements DataBoxPanelInterfac
 
             String dialogName = "Properties " + rsetFileName;
 
-            final PropertiesTopComponent win = new PropertiesTopComponent(dialogName);
-            win.open();
-            win.requestActive();
+            // new Properties window
+            WindowBox windowBox = WindowBoxFactory.getGenericWindowBox(dialogName, "Properties", IconManager.IconType.DOCUMENT_LIST, true);
+            final IdentificationPropertiesTableModel _model = new IdentificationPropertiesTableModel();
+            windowBox.setEntryData(-1l, _model);
+            DataBoxViewerTopComponent win2 = new DataBoxViewerTopComponent(windowBox);
+            win2.open();
+            win2.requestActive();
+
+            //JPM.HACK ! Impossible to set the max number of lines differently in this case
+            DataboxGeneric databoxGeneric = ((DataboxGeneric) windowBox.getEntryBox());
+            GenericPanel genericPanel = (GenericPanel) databoxGeneric.getPanel();
+
+            final GenericPanel _genericPanel = genericPanel;
+
+            final int loadingId = databoxGeneric.setLoading();
 
             // load data for properties
-            DataLoadedCallback dataLoadedCallback = new DataLoadedCallback(nbSelectedRset) {
+            final RsetCallback dataLoadedCallback2 = new RsetCallback(nbResultSet) {
 
                 @Override
-                public void run() {
+                public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
                     m_nbDataToLoad--;
                     if (m_nbDataToLoad == 0) {
 
-                        win.setProperties(resultPropertiesProviderArray);
+                        databoxGeneric.setLoaded(loadingId);
+
+                        if (_model != null) {
+                            _model.setData(projectId, resultSetList);
+                            _genericPanel.setMaxLineNumber(_model.getRowCount());
+                        }
 
                     }
                 }
+
+                @Override
+                public boolean mustBeCalledInAWT() {
+                    return true;
+                }
+
+
+
             };
 
-            int nbDataToLoad = resultPropertiesProviderArray.length;
-            for (int i = 0; i < nbDataToLoad; i++) {
-                resultPropertiesProviderArray[i].loadDataForProperties(dataLoadedCallback);
+            for (int i = 0; i < nbResultSet; i++) {
+
+                ResultSet rset = resultSetList.get(i);
+                DatabaseRsetProperties task = new DatabaseRsetProperties(dataLoadedCallback2, projectId, rset, rset.getName());
+                task.setPriority(AbstractDatabaseTask.Priority.HIGH_3); // highest priority
+
+                AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
             }
+
         }
 
         @Override
@@ -472,19 +507,22 @@ public class RsetAllPanel extends HourglassPanel implements DataBoxPanelInterfac
         }
 
     }
+  
 
-    public abstract class DataLoadedCallback implements Runnable {
 
-        protected int m_nbDataToLoad = 0;
 
-        public DataLoadedCallback(int nb) {
-            m_nbDataToLoad = nb;
+    public abstract class RsetCallback extends AbstractDatabaseCallback {
+
+        protected int m_nbDataToLoad;
+        
+        public RsetCallback(int nbDataToLoad) {
+            m_nbDataToLoad = nbDataToLoad;
         }
 
-        @Override
-        public abstract void run();
-    }
 
+
+    };
+    
     public class ResultsetPropertiesProvider implements PropertiesProviderInterface {
 
         private ResultSet m_rset = null;

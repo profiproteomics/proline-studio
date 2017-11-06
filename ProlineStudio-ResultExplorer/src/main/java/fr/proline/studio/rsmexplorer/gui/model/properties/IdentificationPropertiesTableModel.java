@@ -31,7 +31,8 @@ import java.util.Set;
 import java.util.TreeSet;
 
 /**
- *
+ * Table Model for Properties on a Dataset with Rset or (Rset and Rsm)
+ * 
  * @author JM235353
  */
 public class IdentificationPropertiesTableModel extends AbstractPropertiesTableModel {
@@ -39,23 +40,20 @@ public class IdentificationPropertiesTableModel extends AbstractPropertiesTableM
     private ArrayList<ResultSet> m_rsetArray = null;
     private ArrayList<ResultSummary> m_rsmArray = null;
 
+    
     private final StringBuilder m_sb = new StringBuilder();
 
     public IdentificationPropertiesTableModel() {
 
     }
 
+    
     @Override
     public void setData(ArrayList<DDataset> datasetArrayList) {
 
-        m_datasetArrayList = datasetArrayList;
-
         int nbDataset = datasetArrayList.size();
-        m_datasetNameArray = new ArrayList<>(nbDataset);
-        m_rsetArray = new ArrayList<>(nbDataset);
-        m_rsmArray = new ArrayList<>(nbDataset);
-        m_projectIdArray = new ArrayList<>(nbDataset);
-        m_datasetIdArray = new ArrayList<>(nbDataset);
+        initArrays(nbDataset);
+        
         boolean hasRsm = false;
         for (int i = 0; i < nbDataset; i++) {
             DDataset dataset = datasetArrayList.get(i);
@@ -70,6 +68,36 @@ public class IdentificationPropertiesTableModel extends AbstractPropertiesTableM
             }
         }
 
+        initGroups(hasRsm, datasetArrayList);
+        
+    }
+    
+    public void setData(long projectId, ArrayList<ResultSet> rsetArray) {
+        int nb = rsetArray.size();
+        initArrays(nb);
+        
+        m_rsetArray = rsetArray;
+        for (int i = 0; i < nb; i++) {
+            ResultSet rset = rsetArray.get(i);
+            m_datasetNameArray.add(rset.getName());
+            m_projectIdArray.add(projectId);
+            m_datasetIdArray.add(-1l);
+            m_rsmArray.add(null);
+        }
+
+        initGroups(false, null);
+    }
+    
+    private void initArrays(int nb) {
+        m_datasetNameArray = new ArrayList<>(nb);
+        m_rsetArray = new ArrayList<>(nb);
+        m_rsmArray = new ArrayList<>(nb);
+        m_projectIdArray = new ArrayList<>(nb);
+        m_datasetIdArray = new ArrayList<>(nb);
+    }
+
+    private void initGroups(boolean hasRsm, ArrayList<DDataset> datasetArrayList) {
+        
         m_rowCount = -1; // will be recalculated later
 
         if (m_dataGroupList == null) {
@@ -109,9 +137,8 @@ public class IdentificationPropertiesTableModel extends AbstractPropertiesTableM
         
         fireTableStructureChanged();
         
-        
     }
-
+    
     /**
      * GeneralInformationGroup
      */
@@ -261,7 +288,6 @@ public class IdentificationPropertiesTableModel extends AbstractPropertiesTableM
         private static final int ROWTYPE_SEARCH_DATE = 1;
         private static final int ROWTYPE_SOFTWARE_NAME = 2;
         private static final int ROWTYPE_SOFTWARE_VERSION = 3;
-        //private static final int ROWTYPE_DATABASE_NAME = 4;
         private static final int ROWTYPE_TAXONOMY = 4;
         private static final int ROWTYPE_ENZYME = 5;
         private static final int ROWTYPE_MAX_MISSED_CLIVAGE = 6;
@@ -270,10 +296,8 @@ public class IdentificationPropertiesTableModel extends AbstractPropertiesTableM
         private static final int ROWTYPE_FRAGMENT_MASS_TOLERANCE = 9;
         private static final int ROWTYPE_PEPTIDE_CHARGE_STATES = 10;
         private static final int ROWTYPE_PEPTIDE_MASS_ERROR_TOLERANCE = 11;
-        //private static final int ROWTYPE_PEPTIDE_MASS_ERROR_TOLERANCE_UNIT = 12;
         private static final int ROWTYPE_FRAGMENT_CHARGE_STATES = 12;
         private static final int ROWTYPE_FRAGMENT_MASS_ERROR_TOLERANCE = 13;
-        //private static final int ROWTYPE_FRAGMENT_MASS_ERROR_TOLERANCE_UNIT = 15;
 
         private static final int ROW_COUNT = 14; // get in sync
         private final Color GROUP_COLOR_BACKGROUND = new Color(254, 163, 71);
@@ -311,14 +335,10 @@ public class IdentificationPropertiesTableModel extends AbstractPropertiesTableM
                     return new GroupObject("Peptide Charge States", this);
                 case ROWTYPE_PEPTIDE_MASS_ERROR_TOLERANCE:
                     return new GroupObject("Peptide Mass Error Tolerance", this);
-                /*case ROWTYPE_PEPTIDE_MASS_ERROR_TOLERANCE_UNIT:
-                 return "Peptide Mass Error Tolerance Unit";*/
                 case ROWTYPE_FRAGMENT_CHARGE_STATES:
                     return new GroupObject("Fragment Charge States", this);
                 case ROWTYPE_FRAGMENT_MASS_ERROR_TOLERANCE:
                     return new GroupObject("Fragment Mass Error Tolerance", this);
-                /*case ROWTYPE_FRAGMENT_MASS_ERROR_TOLERANCE_UNIT:
-                 return "Fragment Mass Error Tolerance Unit";*/
             }
 
             return null;
@@ -359,9 +379,6 @@ public class IdentificationPropertiesTableModel extends AbstractPropertiesTableM
                 case ROWTYPE_SOFTWARE_VERSION: {
                     return new GroupObject((searchSetting == null) ? "" : searchSetting.getSoftwareVersion(), this);
                 }
-                /*case ROWTYPE_DATABASE_NAME: {
-                 return "NA";
-                 }*/
                 case ROWTYPE_TAXONOMY: {
                     return new GroupObject((searchSetting == null) ? "" : searchSetting.getTaxonomy(), this);
                 }
@@ -400,12 +417,6 @@ public class IdentificationPropertiesTableModel extends AbstractPropertiesTableM
 
                         if (usedPtm.getIsFixed()) {
 
-                            /*
-                             if (m_sb.length() > 0) {
-                             m_sb.append(", ");
-                             }
-                             */
-                            
                             String shortName = usedPtm.getShortName();
 
                             //m_sb.append(shortName);
@@ -414,7 +425,7 @@ public class IdentificationPropertiesTableModel extends AbstractPropertiesTableM
                                 if (ptmSpecificity != null) {
                                     Character c = ptmSpecificity.getResidue();
                                     if (c != null) {
-                                        //m_sb.append('(').append(c).append(')');
+
                                         shortName = shortName.concat("(").concat(c.toString()).concat(")");
                                     }
                                 }
@@ -456,20 +467,14 @@ public class IdentificationPropertiesTableModel extends AbstractPropertiesTableM
 
                         if (!usedPtm.getIsFixed()) {
 
-                            /*
-                             if (m_sb.length() > 0) {
-                             m_sb.append(", ");
-                             }
-                             */
                             String shortName = usedPtm.getShortName();
 
-                            //m_sb.append(shortName);
                             if (shortName.indexOf('(') == -1) {
                                 PtmSpecificity ptmSpecificity = usedPtm.getPtmSpecificity();
                                 if (ptmSpecificity != null) {
                                     Character c = ptmSpecificity.getResidue();
                                     if (c != null) {
-                                        //m_sb.append('(').append(c).append(')');
+
                                         shortName = shortName.concat("(").concat(c.toString()).concat(")");
                                     }
                                 }
@@ -509,18 +514,13 @@ public class IdentificationPropertiesTableModel extends AbstractPropertiesTableM
                 case ROWTYPE_PEPTIDE_MASS_ERROR_TOLERANCE: {
                     return new GroupObject((searchSetting == null) ? "" : searchSetting.getPeptideMassErrorTolerance().toString() + " " + searchSetting.getPeptideMassErrorToleranceUnit(), this);
                 }
-                /*case ROWTYPE_PEPTIDE_MASS_ERROR_TOLERANCE_UNIT: {
-                 return (searchSetting == null) ? "" : searchSetting.getPeptideMassErrorToleranceUnit();
-                 }*/
                 case ROWTYPE_FRAGMENT_CHARGE_STATES: {
                     return new GroupObject((msmsSearch == null) ? "" : msmsSearch.getFragmentChargeStates(), this);
                 }
                 case ROWTYPE_FRAGMENT_MASS_ERROR_TOLERANCE: {
                     return new GroupObject((msmsSearch == null) ? "" : String.valueOf(msmsSearch.getFragmentMassErrorTolerance()) + " " + msmsSearch.getFragmentMassErrorToleranceUnit(), this);
                 }
-                /*case ROWTYPE_FRAGMENT_MASS_ERROR_TOLERANCE_UNIT: {
-                 return (msmsSearch == null) ? "" : msmsSearch.getFragmentMassErrorToleranceUnit();
-                 }*/
+
             }
 
             return null;
@@ -563,14 +563,10 @@ public class IdentificationPropertiesTableModel extends AbstractPropertiesTableM
                     return new GroupObject("Queries Number", this);
                 case ROWTYPE_PSM_NUMBER:
                     return new GroupObject("PSM Number", this);
-                /*case ROWTYPE_PEPTIDE_NUMBER:
-                 return "Peptide Number";*/
                 case ROWTYPE_PROTEIN_NUMBER:
                     return new GroupObject("Protein Number", this);
                 case ROWTYPE_DECOY_PSM_NUMBER:
                     return new GroupObject("PSM Decoy Number", this);
-                /*case ROWTYPE_DECOY_PEPTIDE_NUMBER:
-                 return "Peptide Decoy Number";*/
                 case ROWTYPE_DECOY_PROTEIN_NUMBER:
                     return new GroupObject("Protein Decoy Number", this);
 
@@ -745,8 +741,6 @@ public class IdentificationPropertiesTableModel extends AbstractPropertiesTableM
                     return new GroupObject(String.valueOf(rsm.getTransientData().getNumberOfPeptideMatches()), this);
                 case ROWTYPE_PEPTIDE_NUMBER:
                     return new GroupObject(String.valueOf(rsm.getTransientData().getNumberOfPeptides()), this);
-                /*case ROWTYPE_PROTEIN_NUMBER:
-                 return "NA";*/
                 case ROWTYPE_PROTEINSET_DECOY_NUMBER:
                     if (rsmDecoy == null) {
                         return new GroupObject("", this);
@@ -770,8 +764,6 @@ public class IdentificationPropertiesTableModel extends AbstractPropertiesTableM
                         return new GroupObject("", this);
                     }
                     return new GroupObject(String.valueOf(rsmDecoy.getTransientData().getNumberOfPeptides()), this);
-                /*case ROWTYPE_PROTEIN_DECOY_NUMBER:
-                 return "NA";*/
                 default: {
                     String key = m_valuesName.get(rowIndex - ROW_COUNT);
                     String value = m_valuesMap.get(columnIndex).get(key);

@@ -10,7 +10,6 @@ import java.util.ArrayList;
  */
 public abstract class AbstractPropertiesTableModel extends PropertiesTableModel {
     
-    protected ArrayList<DDataset> m_datasetArrayList = null;
     protected ArrayList<Long> m_datasetIdArray = null;
     protected ArrayList<Long> m_projectIdArray = null;
     

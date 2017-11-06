@@ -303,7 +303,6 @@ public class SelectRawFilesPanel extends JPanel implements XICRunNodeInitListene
 
     private class FlatDesignTable extends DecoratedMarkerTable implements MouseListener {
 
-        //private JPopupMenu m_popup = null;
         public FlatDesignTable() {
             setDragEnabled(true);
             setDropMode(DropMode.ON);
@@ -318,11 +317,6 @@ public class SelectRawFilesPanel extends JPanel implements XICRunNodeInitListene
 
         @Override
         public TablePopupMenu initPopupMenu() {
-
-            /*TablePopupMenu popupMenu = new TablePopupMenu();
-             popupMenu.addAction(new RsetAllPanel.PropertiesFromTableAction());
-            
-             return popupMenu;*/
             return null;
         }
 

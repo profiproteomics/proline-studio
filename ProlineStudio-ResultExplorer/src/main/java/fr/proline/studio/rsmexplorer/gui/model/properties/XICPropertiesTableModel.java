@@ -26,6 +26,8 @@ import java.util.TreeSet;
  */
 public class XICPropertiesTableModel extends AbstractPropertiesTableModel {
     
+    private ArrayList<DDataset> m_datasetArrayList = null;
+
     public XICPropertiesTableModel() {
 
     }

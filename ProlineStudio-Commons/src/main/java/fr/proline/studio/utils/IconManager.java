@@ -35,6 +35,7 @@ public class IconManager {
         GEL,
         PROJECT,
         PROJECT_READ_ONLY,
+        PROJECT_DELETED,
         USER,
         USERS,
         USER_ADMIN,
@@ -345,6 +346,8 @@ public class IconManager {
                 return "fr/proline/studio/images/project.png";
             case PROJECT_READ_ONLY:
                 return "fr/proline/studio/images/projectReadOnly.png";
+            case PROJECT_DELETED:
+                return "fr/proline/studio/images/projectDeleted.png";
             case USER:
                 return "fr/proline/studio/images/user.png";
             case USERS:

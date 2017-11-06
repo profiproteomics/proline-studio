@@ -1,5 +1,6 @@
 package fr.proline.studio.dam.tasks;
 
+
 import fr.proline.studio.dam.data.ProjectIdentificationData;
 import fr.proline.studio.dam.data.AbstractData;
 import fr.proline.core.orm.uds.Project;
@@ -15,6 +16,7 @@ import java.util.List;
 import java.util.Set;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
+
 
 /**
  * Load a Project from the UDS DB
@@ -100,10 +102,11 @@ public class DatabaseProjectTask extends AbstractDatabaseTask {
             List<Project> projectList = projectQuery.getResultList();
 
 
-            //HashMap<Integer, ProjectData> projectMap = new HashMap<>();
+
             Iterator<Project> it = projectList.iterator();
             while (it.hasNext()) {
                 Project projectCur = it.next();
+
 
                 // avoid lazy initialization problem
                 Set<ProjectUserAccountMap> members = projectCur.getProjectUserAccountMap();
@@ -113,7 +116,7 @@ public class DatabaseProjectTask extends AbstractDatabaseTask {
                 
                 ProjectIdentificationData projectDataCur = new ProjectIdentificationData(projectCur);
                 projectDataCur.setHasChildren(true); // always has a Trash
-                //projectMap.put(projectIdCur, projectDataCur);
+
                 m_list.add(projectDataCur);
             }
 

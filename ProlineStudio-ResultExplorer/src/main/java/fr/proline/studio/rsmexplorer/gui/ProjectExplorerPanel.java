@@ -1,5 +1,8 @@
 package fr.proline.studio.rsmexplorer.gui;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonPrimitive;
 import fr.proline.core.orm.msi.ResultSet;
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.uds.Project;
@@ -18,6 +21,7 @@ import fr.proline.studio.dpm.AccessJMSManagerThread;
 import fr.proline.studio.dpm.task.jms.AbstractJMSCallback;
 import fr.proline.studio.dpm.task.jms.ClearProjectTask;
 import fr.proline.studio.gui.DefaultDialog;
+import fr.proline.studio.gui.InfoDialog;
 import fr.proline.studio.pattern.DataParameter;
 import fr.proline.studio.pattern.GroupParameter;
 import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
@@ -590,9 +594,23 @@ public class ProjectExplorerPanel extends JPanel {
 
     public void selectProject(ProjectItem projectItem) {
 
-        if (projectItem == null) {
+        if ((projectItem == null) || (!projectItem.isActive())) {
             m_identificationTreeScrollPane.setViewportView(null);
             m_quantitationTreeScrollPane.setViewportView(null);
+            
+            if ((projectItem != null) && (!projectItem.isActive())) {
+                SwingUtilities.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        InfoDialog infoDialog = new InfoDialog(WindowManager.getDefault().getMainWindow(), InfoDialog.InfoType.WARNING, "Project Deleted", "Databases corresponding to this project have been deleted.\nAsk to your Administrator to restore them.");
+                        infoDialog.setButtonVisible(InfoDialog.BUTTON_CANCEL, false);
+                        infoDialog.centerToWindow(WindowManager.getDefault().getMainWindow());
+                        infoDialog.setVisible(true);
+                    }
+                });
+
+            }
+            
             return;
         }
 
@@ -637,11 +655,29 @@ public class ProjectExplorerPanel extends JPanel {
                     if (projectItem.isChanging()) {
                         l.setIcon(IconManager.getIconWithHourGlass(IconManager.IconType.PROJECT));
                     } else {
-                        if (DatabaseDataManager.getDatabaseDataManager().ownProject(projectItem.getProjectIdentificationData().getProject())) {
+                        Project project = projectItem.getProjectIdentificationData().getProject();
+                        
+                        JsonParser parser = new JsonParser();
+                        
+                        String serializedProperties = project.getSerializedProperties();
+                        boolean isActive = true;
+                        if (serializedProperties != null) {
+                            JsonObject jsonObject = parser.parse(serializedProperties).getAsJsonObject();
+                            JsonPrimitive isActiveObject = jsonObject.getAsJsonPrimitive("is_active");
+                            isActive = isActiveObject.getAsBoolean();
+                        }
+                        projectItem.setIsActive(isActive);
+                        
+                        if (! isActive) {
+                            l.setIcon(IconManager.getIcon(IconManager.IconType.PROJECT_DELETED));
+                        } else if (DatabaseDataManager.getDatabaseDataManager().ownProject(project)) {
                             l.setIcon(IconManager.getIcon(IconManager.IconType.PROJECT));
                         } else {
                             l.setIcon(IconManager.getIcon(IconManager.IconType.PROJECT_READ_ONLY));
                         }
+                        
+                       
+
                     }
                 }
             }
@@ -654,6 +690,7 @@ public class ProjectExplorerPanel extends JPanel {
         private ProjectIdentificationData m_projectIdentificationData;
         private ProjectQuantitationData m_projectQuantitationData;
         private boolean m_isChanging = false;
+        private boolean m_active = true;
 
         public ProjectItem(ProjectIdentificationData projectIdentificationData, ProjectQuantitationData projectQuantitationData) {
             m_projectIdentificationData = projectIdentificationData;
@@ -684,6 +721,15 @@ public class ProjectExplorerPanel extends JPanel {
             return m_projectIdentificationData.getName();
         }
 
+        public void setIsActive(boolean v) {
+            m_active = v;
+        }
+
+        public boolean isActive() {
+            return m_active;
+        }
+        
+        
         @Override
         public Sheet createSheet() {
             Project p = m_projectIdentificationData.getProject();

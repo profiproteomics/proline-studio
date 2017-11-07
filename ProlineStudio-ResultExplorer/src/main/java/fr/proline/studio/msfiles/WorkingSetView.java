@@ -54,7 +54,7 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
 
     private WorkingSetModel m_workingSetModel;
     private JTree m_tree;
-    private JMenuItem m_addWorkingSet, m_removeWorkingSet, m_addWorkingSetEntry, m_removeWorkingSetEntry, m_viewMzdb, m_detectPeakels;
+    private JMenuItem m_addWorkingSet, m_removeWorkingSet, m_addWorkingSetLocalEntry, m_removeWorkingSetEntry, m_viewMzdb, m_detectPeakels;
     private JPopupMenu m_popupMenu;
     private ActionListener m_viewMzdbAction;
     private WorkingSetRoot m_root;
@@ -88,7 +88,7 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
         c.weightx = 1;
         c.weighty = 1;
 
-        m_root = new WorkingSetRoot((JSONArray) readJSON().get("working_sets"));
+        m_root = new WorkingSetRoot((JSONArray) WorkingSetUtil.readJSON().get("working_sets"));
 
         m_workingSetModel = new WorkingSetModel(m_root);
         m_tree = new JTree(m_workingSetModel);
@@ -158,47 +158,6 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
 
     }
 
-    private JSONObject readJSON() {
-        File baseLocationFile = new File(".");
-
-        String canonicalPath = null;
-        try {
-            canonicalPath = baseLocationFile.getCanonicalPath();
-        } catch (IOException ex) {
-            Exceptions.printStackTrace(ex);
-        }
-
-        File jsonFile = new File(canonicalPath + File.separator + "working_sets.json");
-
-        if (jsonFile.exists()) {
-
-            JSONObject jsonObject = null;
-
-            FileReader reader = null;
-            try {
-                reader = new FileReader(canonicalPath + File.separator + "working_sets.json");
-                JSONParser jsonParser = new JSONParser();
-                jsonObject = (JSONObject) jsonParser.parse(reader);
-            } catch (FileNotFoundException ex) {
-                return saveJSON(null);
-            } catch (IOException | ParseException ex) {
-                Exceptions.printStackTrace(ex);
-                return saveJSON(null);
-            } finally {
-                try {
-                    reader.close();
-                } catch (IOException ex) {
-                    Exceptions.printStackTrace(ex);
-                }
-            }
-
-            return jsonObject;
-
-        } else {
-            return saveJSON(null);
-        }
-    }
-
     @Override
     public void initPopupMenu(JPopupMenu popupMenu) {
         // view data
@@ -258,7 +217,7 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
                 if (success) {
                     m_workingSetModel.fireTreeStructureChanged(new TreeModelEvent(root, root.getPath()));
                     resetTreeState();
-                    saveJSON(workingSetRoot.getWorkingSets());
+                    WorkingSetUtil.saveJSON(workingSetRoot.getWorkingSets());
                 }
 
             }
@@ -266,8 +225,8 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
         });
         popupMenu.add(m_removeWorkingSet);
 
-        m_addWorkingSetEntry = new JMenuItem("Add Entry");
-        m_addWorkingSetEntry.addActionListener(new ActionListener() {
+        m_addWorkingSetLocalEntry = new JMenuItem("Add local entry");
+        m_addWorkingSetLocalEntry.addActionListener(new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent ae) {
@@ -278,11 +237,11 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
                 m_workingSetModel.fireTreeStructureChanged(new TreeModelEvent(root, root.getPath()));
                 resetTreeState();
                 WorkingSetRoot workingSetRoot = (WorkingSetRoot) root.getUserObject();
-                saveJSON(workingSetRoot.getWorkingSets());
+                WorkingSetUtil.saveJSON(workingSetRoot.getWorkingSets());
             }
 
         });
-        popupMenu.add(m_addWorkingSetEntry);
+        popupMenu.add(m_addWorkingSetLocalEntry);
 
         m_removeWorkingSetEntry = new JMenuItem("Remove Entry");
         m_removeWorkingSetEntry.addActionListener(new ActionListener() {
@@ -310,7 +269,7 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
                         WorkingSetRoot workingSetRoot = (WorkingSetRoot) root.getUserObject();
                         m_workingSetModel.fireTreeStructureChanged(new TreeModelEvent(root, root.getPath()));
                         resetTreeState();
-                        saveJSON(workingSetRoot.getWorkingSets());
+                        WorkingSetUtil.saveJSON(workingSetRoot.getWorkingSets());
                     }
 
                 }
@@ -335,7 +294,7 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
         }
 
         if (m_selectedRoot == null && m_selectedWorkingSets.size() == 1 && m_selectedWorkingSetEntries.isEmpty()) {
-            m_addWorkingSetEntry.setEnabled(true);
+            m_addWorkingSetLocalEntry.setEnabled(true);
         }
 
         if (m_selectedRoot == null && m_selectedWorkingSets.isEmpty() && !m_selectedWorkingSetEntries.isEmpty()) {
@@ -356,7 +315,7 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
     private void setPopupEnabled(boolean b) {
         m_addWorkingSet.setEnabled(b);
         m_removeWorkingSet.setEnabled(b);
-        m_addWorkingSetEntry.setEnabled(b);
+        m_addWorkingSetLocalEntry.setEnabled(b);
         m_removeWorkingSetEntry.setEnabled(b);
         m_viewMzdb.setEnabled(b);
         m_detectPeakels.setEnabled(b);
@@ -419,35 +378,5 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
         return files;
     }
 
-    private JSONObject saveJSON(JSONArray array) {
-
-        File baseLocationFile = new File(".");
-
-        String canonicalPath = null;
-        try {
-            canonicalPath = baseLocationFile.getCanonicalPath();
-        } catch (IOException ex) {
-            Exceptions.printStackTrace(ex);
-        }
-
-        JSONObject obj = new JSONObject();
-
-        if (array != null) {
-            obj.put("working_sets", array);
-        } else {
-            obj.put("working_sets", new JSONArray());
-        }
-
-        try (FileWriter file = new FileWriter(canonicalPath + File.separator + File.separator + "working_sets.json")) {
-
-            file.write(obj.toJSONString());
-            file.flush();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return obj;
-    }
 
 }

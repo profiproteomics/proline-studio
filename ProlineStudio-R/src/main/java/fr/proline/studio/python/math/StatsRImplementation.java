@@ -154,39 +154,40 @@ public class StatsRImplementation {
         int nb1 = pArray[0].size();
         int nb2 = pArray[1].size();
         int nb3 = (pArray.length<=2) ? 0 : pArray[2].size();
-        ExprTableModel model = new ExprTableModel(t.getModel());
-        Table resTable = _bbinomialR(t, matrixTempFile, nb1, nb2, nb3, model);
+        
+        Table resTable = _bbinomialR(t, matrixTempFile, nb1, nb2, nb3, pArray, cols);
         
         // delete temp files
         matrixTempFile.delete();
         
-        // if bbinomial is calculated for 2 groups, automatically compute a log Ratio column.  
-        if (pArray.length<=2) {
-            int nbRows = t.getModel().getRowCount(); 
-            
-            ArrayList<Double> valuesForCol = new ArrayList<>(nbRows);
-            for (int row = 0; row < nbRows; row++) {
-                double n = 0.0;
-                int c = 0;
-                for (; c < nb1; c++) {
-                    n += asDoubleValue(cols[c], row) +1;
-                }
-                double d = 0.0;
-                for (; c < (nb1+nb2); c++) {
-                    d += asDoubleValue(cols[c], row) +1;
-                }
-                valuesForCol.add(StrictMath.log((n/nb1)/(d/nb2))/LOG2); 
-            }
 
-            String colName = "log Ratio";
-            model.addExtraColumn(new ColDoubleData(resTable, valuesForCol, colName), ExprTableModel.DOUBLE_RENDERER);
-            model.addExtraColumnInfo(model.getColumnCount()-1, new LogRatio());
-        
-        }
         return resTable;
     }
 
-    private static Table _bbinomialR(Table t, File matrixTempFile, int nbCols1, int nbCols2, int nbCols3, ExprTableModel model) throws Exception {
+    private static Table _bbinomialR(Table t, File matrixTempFile, int nbCols1, int nbCols2, int nbCols3, PyTuple[] pArray, ColRef[] cols) throws Exception {
+        
+        final boolean hasBest = (pArray.length<=2); // bbinomial on two groups
+        final int colPValue = t.getModel().getColumnCount() + 1;
+        final int colLogFC = colPValue + 1;
+        ExprTableModel model = new ExprTableModel(t.getModel()) {
+            @Override
+            public int[] getBestColIndex(PlotType plotType) {
+                if ((plotType == SCATTER_PLOT) && (hasBest)) {
+
+                    int[] cols = new int[2];
+                    cols[0] = colLogFC;
+                    cols[1] = colPValue;
+                    return cols;
+                }
+                return super.getBestColIndex(plotType);
+            }
+
+            
+            @Override
+            public PlotType getBestPlotType() {
+                return PlotType.SCATTER_PLOT;
+            }
+        };
         
         Table resTable = new Table(model);
         
@@ -210,34 +211,49 @@ public class StatsRImplementation {
         HashMap map = (HashMap) o;
         double[] values = (double[]) map.keySet().toArray()[0];
 
-        
-        // previous code : 
-        
-//        ArrayList<Double> resArray = new ArrayList<>(values.length);
-//        for (int i = 0; i < values.length; i++) {
-//            resArray.add(values[i]);
-//        }
-
-        
-        
         int nbRows = values.length;
 
-            ArrayList<Double> valuesForCol = new ArrayList<>(nbRows);
+        ArrayList<Double> valuesForCol = new ArrayList<>(nbRows);
 
-            for (int i = 0; i < nbRows; i++) {
-                valuesForCol.add(values[i]);
+        for (int i = 0; i < nbRows; i++) {
+            valuesForCol.add(values[i]);
+        }
+
+        String colName = "bbinomial PValue";
+        ColDoubleData pvalueCol = new ColDoubleData(resTable, valuesForCol, colName);
+        ColDoubleData log10PvalueCol = StatsImplementation.log10(pvalueCol);
+        ColDoubleData minusLog10PvalueCol = StatsImplementation.neg(log10PvalueCol);
+
+        model.addExtraColumn(pvalueCol, ExprTableModel.DOUBLE_RENDERER);
+        model.addExtraColumnInfo(model.getColumnCount() - 1, new PValue());
+        model.addExtraColumn(minusLog10PvalueCol, ExprTableModel.DOUBLE_RENDERER);
+        model.addExtraColumnInfo(model.getColumnCount() - 1, new PValue());
+        model.addExtraColumnInfo(model.getColumnCount() - 1, new LogInfo(LogInfo.LogState.LOG10));
+
+        // if bbinomial is calculated for 2 groups, automatically compute a log Ratio column.  
+        if (pArray.length<=2) {
+            nbRows = t.getModel().getRowCount(); 
+            
+            ArrayList<Double> valuesForCol2 = new ArrayList<>(nbRows);
+            for (int row = 0; row < nbRows; row++) {
+                double n = 0.0;
+                int c = 0;
+                for (; c < nbCols1; c++) {
+                    n += asDoubleValue(cols[c], row) +1;
+                }
+                double d = 0.0;
+                for (; c < (nbCols1+nbCols2); c++) {
+                    d += asDoubleValue(cols[c], row) +1;
+                }
+                valuesForCol2.add(StrictMath.log((n/nbCols1)/(d/nbCols2))/LOG2); 
             }
 
-            String colName = "bbinomial PValue";
-            ColDoubleData pvalueCol = new ColDoubleData(resTable, valuesForCol, colName);
-            ColDoubleData log10PvalueCol = StatsImplementation.log10(pvalueCol);
-            ColDoubleData minusLog10PvalueCol = StatsImplementation.neg(log10PvalueCol);
-            
-            model.addExtraColumn(pvalueCol, ExprTableModel.DOUBLE_RENDERER);
-            model.addExtraColumnInfo(model.getColumnCount()-1, new PValue());
-            model.addExtraColumn(minusLog10PvalueCol, ExprTableModel.DOUBLE_RENDERER);
-            model.addExtraColumnInfo(model.getColumnCount()-1, new PValue());
-            model.addExtraColumnInfo(model.getColumnCount()-1, new LogInfo(LogInfo.LogState.LOG10));
+            colName = "log Ratio";
+            model.addExtraColumn(new ColDoubleData(resTable, valuesForCol2, colName), ExprTableModel.DOUBLE_RENDERER);
+            model.addExtraColumnInfo(model.getColumnCount()-1, new LogRatio());
+        
+        }
+        
         
         return resTable;
 

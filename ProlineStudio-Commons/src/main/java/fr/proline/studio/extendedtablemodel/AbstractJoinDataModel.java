@@ -9,9 +9,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import javax.swing.table.AbstractTableModel;
 
+
 /**
  * Abstract Model to do a join/diff between two tables by joining two columns which correspond to a key.
- * Possibility to join on numeric values with a tolerance
  * @author JM235353
  */
 public abstract class AbstractJoinDataModel extends AbstractTableModel implements GlobalTableModelInterface  {
@@ -36,7 +36,8 @@ public abstract class AbstractJoinDataModel extends AbstractTableModel implement
     
     protected ArrayList<Integer> m_rowsInTable1 = new ArrayList<>();
     protected ArrayList<Integer> m_rowsInTable2 = new ArrayList<>();
-
+    protected ArrayList<Integer> m_sourceColumn1 = new ArrayList<>();
+    protected ArrayList<Integer> m_sourceColumn2 = new ArrayList<>();
     
     protected abstract void setColumns();
     
@@ -136,7 +137,7 @@ public abstract class AbstractJoinDataModel extends AbstractTableModel implement
             return;
         }
 
-        // Prepare join structures for One Key
+        // Prepare join structures for the first key
         int nb = m_data1.getRowCount();
         ArrayList<Object> table1Key1 = new ArrayList<>(nb);
         ArrayList<Integer> rowsInTable1Key1 = new ArrayList<>(nb);
@@ -156,7 +157,10 @@ public abstract class AbstractJoinDataModel extends AbstractTableModel implement
         JoinKeyStructure joinKeyStructure = (m_key1FloatOrDouble) ? joinKeysDouble(table1Key1, rowsInTable1Key1, table2Key1, rowsInTable2Key1, m_tolerance1) : joinKeysNew(table1Key1, rowsInTable1Key1, table2Key1, rowsInTable2Key1);
         
         if (m_selectedTable1Key2 != -1) {
-            // second key
+            // A second key is used for joining tables
+            HashSet<Integer> orphanKeys1 = new HashSet<>();
+            HashSet<Integer> orphanKeys2 = new HashSet<>();
+            
             ArrayList allKeys = joinKeyStructure.m_allKeys;
             nb = allKeys.size();
             for (int i=0;i<nb;i++) {
@@ -181,7 +185,6 @@ public abstract class AbstractJoinDataModel extends AbstractTableModel implement
                     table2Key2.add(m_data2.getDataValueAt(rowCur, m_selectedTable2Key2));
                 }
                 
-                
                 JoinKeyStructure joinKeyStructureSub = (m_key2FloatOrDouble) ? joinKeysDouble(table1Key2, rowsInTable1Key2, table2Key2, rowsInTable2Key2, m_tolerance2) : joinKeysNew(table1Key2, rowsInTable1Key2, table2Key2, rowsInTable2Key2);
 
                 // create combined key !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -194,24 +197,42 @@ public abstract class AbstractJoinDataModel extends AbstractTableModel implement
                     int size2 = correspondingKeysValuesSub.m_correspondingKeys2.size();
                     if (size1 == 0) {
                         for (int k=0;k<size2;k++) {
-                                m_rowsInTable1.add(null);
-                                m_rowsInTable2.add(correspondingKeysValuesSub.m_correspondingKeys2.get(k));
+                            orphanKeys2.add(correspondingKeysValuesSub.m_correspondingKeys2.get(k));
                         }
                     } else if (size2 == 0) {
                         for (int k = 0; k < size1; k++) {
-                            m_rowsInTable1.add(correspondingKeysValuesSub.m_correspondingKeys1.get(k));
-                            m_rowsInTable2.add(null);
+                            orphanKeys1.add(correspondingKeysValuesSub.m_correspondingKeys1.get(k));
                         }
                     } else {
                         for (int k = 0; k < size1; k++) {
                             for (int m = 0; m < size2; m++) {
                                 m_rowsInTable1.add(correspondingKeysValuesSub.m_correspondingKeys1.get(k));
                                 m_rowsInTable2.add(correspondingKeysValuesSub.m_correspondingKeys2.get(m));
+                                m_sourceColumn1.add(size1);
+                                m_sourceColumn2.add(size2);
                             }
                         }
                     }
-                }
+                }   
             }
+            
+            orphanKeys1.removeAll(m_rowsInTable1);
+            orphanKeys2.removeAll(m_rowsInTable2);
+            
+            for (Integer i : orphanKeys1) {
+                 m_rowsInTable1.add(i);
+                 m_rowsInTable2.add(null);
+                 m_sourceColumn1.add(1);
+                 m_sourceColumn2.add(null);
+            }
+            
+            for (Integer i : orphanKeys2) {
+                 m_rowsInTable1.add(null);
+                 m_rowsInTable2.add(i);
+                 m_sourceColumn1.add(null);
+                 m_sourceColumn2.add(1);
+            }
+            
         } else {
             ArrayList allKeys = joinKeyStructure.m_allKeys;
             int nbSub = allKeys.size();
@@ -224,17 +245,23 @@ public abstract class AbstractJoinDataModel extends AbstractTableModel implement
                     for (int k = 0; k < size2; k++) {
                         m_rowsInTable1.add(null);
                         m_rowsInTable2.add(correspondingKeyValues.m_correspondingKeys2.get(k));
+                        m_sourceColumn1.add(null);
+                        m_sourceColumn2.add(1);
                     }
                 } else if (size2 == 0) {
                     for (int k = 0; k < size1; k++) {
                         m_rowsInTable1.add(correspondingKeyValues.m_correspondingKeys1.get(k));
                         m_rowsInTable2.add(null);
+                        m_sourceColumn1.add(1);
+                        m_sourceColumn2.add(null);
                     }
                 } else {
                     for (int k = 0; k < size1; k++) {
                         for (int m = 0; m < size2; m++) {
                             m_rowsInTable1.add(correspondingKeyValues.m_correspondingKeys1.get(k));
                             m_rowsInTable2.add(correspondingKeyValues.m_correspondingKeys2.get(m));
+                            m_sourceColumn1.add(size1);
+                            m_sourceColumn2.add(size2);
                         }
                     }
                 }
@@ -314,34 +341,61 @@ public abstract class AbstractJoinDataModel extends AbstractTableModel implement
 
             int size2 = tableKey2.size();
             for (int i = 0; i < size2; i++) {
+                try {
+                    Number key = (Number) tableKey2.get(i);
+                    double value = key.doubleValue();
+                    Integer nearestIndex = searchNearestValueIndex(value, indexes, values1);
+                    boolean correspondanceFound = false;
 
-                Number key = (Number) tableKey2.get(i);
-                double value = key.doubleValue();
-                Integer nearestValueIndex = searchNearestValueIndex(value, indexes, values1);
-                double nearestValue = values1[nearestValueIndex];
-                double delta = nearestValue - value;
-                if (delta < 0) {
-                    delta = -delta;
-                }
+                    double delta = 0.0;
+                    int index = nearestIndex;
+                    int increment = -1;
+                    
+                    do {
+                        double nearestValue = values1[indexes[index]];
+                        delta = nearestValue - value;
 
-                if (delta < tolerance) {
-                    Number keyAssorted = (Number) tableKey1.get(nearestValueIndex);
+                        if (delta < 0) {
+                            delta = -delta;
+                        }
 
-                    CorrespondingKeyValues values = correspondingKeys.get(keyAssorted);
-                    values.m_correspondingKeys2.add(rowsInTableKey2.get(i));
-
-                } else {
-                    // no correspondance even with tolerance
-                    CorrespondingKeyValues values = correspondingKeys.get(key);
-                    if (values == null) {
-                        values = new CorrespondingKeyValues();
-                        correspondingKeys.put(key, values);
-                        keysFound.add(key);
-                        allKeys.add(key);
+                        Number keyAssorted = key;
+                        if (delta <= tolerance) {
+                            keyAssorted = (Number) tableKey1.get(indexes[index]);
+                            CorrespondingKeyValues values = correspondingKeys.get(keyAssorted);
+                            values.m_correspondingKeys2.add(rowsInTableKey2.get(i));
+                            correspondanceFound = true;
+                            index += increment;
+                            // if array bounds are reached : reverse iteration or stop loop
+                            if ((index < 0) || (index >= values1.length)) {
+                                increment = increment + 2;
+                                index = nearestIndex+1;
+                            }
+                        } else {
+                            // reverse iteration or stop loop by setting increment 
+                            increment = increment + 2;  
+                            index = nearestIndex+1;
+                        }
+                    } while ((increment <= 1) && (index >= 0) && (index < values1.length));
+                            
+                    if (!correspondanceFound) {
+                        // no correspondance even with tolerance
+                        CorrespondingKeyValues values = correspondingKeys.get(key);
+                        if (values == null) {
+                            values = new CorrespondingKeyValues();
+                            correspondingKeys.put(key, values);
+                            keysFound.add(key);
+                            allKeys.add(key);
+                        }
+                        values.m_correspondingKeys2.add(rowsInTableKey2.get(i));
                     }
-                    values.m_correspondingKeys2.add(rowsInTableKey2.get(i));
+                } catch (Exception e) {
+                    StringWriter sw = new StringWriter();
+                    PrintWriter pw = new PrintWriter(sw);
+                    e.printStackTrace(pw);
+                    String s = sw.toString();
+                    System.out.println(s);
                 }
-
             }
         } else {
             int size2 = tableKey2.size();
@@ -378,19 +432,28 @@ public abstract class AbstractJoinDataModel extends AbstractTableModel implement
         int hi = indexes.length - 1;
 
         Integer lastValueIndex = null;
-
+        int mid = (lo + hi) / 2;
+        
         while (lo <= hi) {
-            int mid = (lo + hi) / 2;
+            mid = (lo + hi) / 2;
             lastValueIndex = indexes[mid];
             if (value < values[lastValueIndex]) {
                 hi = mid - 1;
             } else if (value > values[lastValueIndex]) {
                 lo = mid + 1;
             } else {
-                return lastValueIndex;
+                return mid;
             }
         }
-        return lastValueIndex;
+        // then return the nearest value index
+        double min = Double.MAX_VALUE;
+        for (int k = Math.max(0, mid - 1); k <= Math.min(indexes.length - 1, mid + 1); k++) {
+         if (Math.abs(values[indexes[k]] - value) < min) {
+            min = Math.abs(values[indexes[k]] - value);
+            mid = k;
+         }
+        }
+        return mid;
     }
     
     
@@ -571,7 +634,7 @@ public abstract class AbstractJoinDataModel extends AbstractTableModel implement
             // Autounbox from Integer to int to use as array indexes
             if (m_doubleArray[index1]< m_doubleArray[index2]) {
                 return -1;
-            } else if (m_doubleArray[index1]< m_doubleArray[index2]) {
+            } else if (m_doubleArray[index1]> m_doubleArray[index2]) {
                 return 1;
             }
             return 0;

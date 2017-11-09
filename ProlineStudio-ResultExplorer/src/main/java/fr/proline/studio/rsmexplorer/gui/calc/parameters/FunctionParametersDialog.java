@@ -3,7 +3,6 @@ package fr.proline.studio.rsmexplorer.gui.calc.parameters;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.parameter.ParameterError;
 import fr.proline.studio.parameter.ParameterList;
-import fr.proline.studio.rsmexplorer.gui.calc.graph.AbstractConnectedGraphObject;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphConnector;
 import fr.proline.studio.utils.IconManager;
 import java.awt.Dialog;
@@ -39,12 +38,12 @@ public class FunctionParametersDialog extends DefaultDialog {
 
         setInternalComponent(createInternalPanel(m_currentPanelNumber));
 
-        initOkButton(m_currentPanelNumber, m_parameterList.length);
+        setButtonsState(m_currentPanelNumber, m_parameterList.length);
     }
     
 
     
-    private void initOkButton(int panelNumber, int nbPanels) {
+    private void setButtonsState(int panelNumber, int nbPanels) {
         if (nbPanels == 1) {
             // nothing to do
             return;
@@ -58,6 +57,10 @@ public class FunctionParametersDialog extends DefaultDialog {
             setButtonName(DefaultDialog.BUTTON_OK, "OK");
             setButtonIcon(DefaultDialog.BUTTON_OK, IconManager.getIcon(IconManager.IconType.OK));
         }
+        
+        // init Back Button
+        setButtonVisible(DefaultDialog.BUTTON_BACK, (panelNumber > 0));
+
         
     }
     
@@ -115,7 +118,7 @@ public class FunctionParametersDialog extends DefaultDialog {
                 }
                 
                 replaceInternaleComponent(createInternalPanel(m_currentPanelNumber));
-                initOkButton(m_currentPanelNumber, m_parameterList.length);
+                setButtonsState(m_currentPanelNumber, m_parameterList.length);
                 repack();
                 revalidate();
                 repaint();
@@ -124,6 +127,32 @@ public class FunctionParametersDialog extends DefaultDialog {
             }
         }
         
+    }
+    
+    @Override
+    protected boolean backCalled() {
+        while (true) {
+            if (m_currentPanelNumber == 0) {
+                // we were on the first panel : it should not happen
+                return false;
+            } else {
+
+                m_currentPanelNumber--;
+
+                // An entire panel with parameters can have been desabled
+                if (!m_parameterList[m_currentPanelNumber].isEnable()) {
+                    continue;
+                }
+
+                replaceInternaleComponent(createInternalPanel(m_currentPanelNumber));
+                setButtonsState(m_currentPanelNumber, m_parameterList.length);
+                repack();
+                revalidate();
+                repaint();
+
+                return false;
+            }
+        }
     }
 
     

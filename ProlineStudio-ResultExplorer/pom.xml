@@ -402,33 +402,28 @@
          <dependency>
             <groupId>uk.ac.ebi.pride.toolsuite</groupId>
             <artifactId>ols-dialog</artifactId>
-            <version>3.4.6</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>jfree</groupId>
-                    <artifactId>jfreechart</artifactId>
-                </exclusion>            
-            </exclusions>
+            <version>3.4.14-EDyP_SNAPSHOT</version>
+            
         </dependency>
 <!--        <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>2.7.3</version>
+            <version>2.7.3</version> 
 
-        </dependency>
+        </dependency>-->
         
                        <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty-all</artifactId>
             <version>4.0.13.Final</version>    
-        </dependency>
+        </dependency><!--
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-annotations</artifactId>
             <version>2.7.3</version>
 
         </dependency>
-                <dependency>
+        <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-core</artifactId>
             <version>2.7.3</version>
@@ -495,7 +490,7 @@
                 <configuration>
                     <publicPackages>
                         <publicPackage>fr.proline.studio.rsmexplorer</publicPackage>
-                    </publicPackages>
+                   </publicPackages>
                 </configuration>
             </plugin>   
             

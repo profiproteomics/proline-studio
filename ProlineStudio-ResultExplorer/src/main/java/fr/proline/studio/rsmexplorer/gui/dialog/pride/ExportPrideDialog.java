@@ -34,7 +34,12 @@ public class ExportPrideDialog extends DefaultDialog {
         setButtonName(DefaultDialog.BUTTON_OK, "Next");
         setButtonIcon(DefaultDialog.BUTTON_OK, IconManager.getIcon(IconManager.IconType.ARROW));
 
-        //CREATE FIRST PANEL     
+        //CREATE FIRST PANEL    
+        //Reinitialize panels if previoiusly sets
+        PrideExpDescPanel.getPrideExpDescPanel().resetPanel();
+        PrideProtocolDescPanel.getPrideProtocolDescPanel().resetPanel();
+        PrideSampleDescPanel.getPrideSampleDescPanel().resetPanel();
+        
         setInternalComponent(PrideExpDescPanel.getPrideExpDescPanel());
     }
 

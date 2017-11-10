@@ -11,7 +11,6 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.JButton;
@@ -23,15 +22,14 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.table.AbstractTableModel;
-//import no.uib.olsdialog.OLSDialog;
-//import no.uib.olsdialog.OLSInputable;
-import uk.ac.ebi.pride.toolsuite.ols.dialog.OLSDialog;
 import uk.ac.ebi.pride.toolsuite.ols.dialog.OLSInputable;
+import uk.ac.ebi.pride.utilities.ols.web.service.model.Term;
+import uk.ac.ebi.pride.toolsuite.ols.dialog.OLSDialog;
 
 import org.apache.commons.lang3.StringUtils;
 import org.openide.windows.WindowManager;
 import org.slf4j.LoggerFactory;
-import uk.ac.ebi.pride.utilities.ols.web.service.model.Term;
+
 
 /**
  *
@@ -57,6 +55,11 @@ public class PrideProtocolDescPanel extends PrideWizardPanel implements OLSInput
             m_panel = new PrideProtocolDescPanel();
         }
         return m_panel;
+    }
+    
+    protected void resetPanel(){
+        m_protocolNameTextField.setText(null);
+        ((StepDescriptionTableModel)m_stepsDescriptionTable.getModel()).clearCVParams();
     }
 
     @Override
@@ -163,13 +166,26 @@ public class PrideProtocolDescPanel extends PrideWizardPanel implements OLSInput
         JButton m_addStepDescButton = new JButton("Add Step", IconManager.getIcon(IconManager.IconType.PLUS));
         m_addStepDescButton.setMargin(new java.awt.Insets(2, 2, 2, 2));
         stepPanel.add(m_addStepDescButton, c);
-  
         m_addStepDescButton.addActionListener(new ActionListener() {
 
-            @Override
+            @Override   
             public void actionPerformed(ActionEvent e) {
                 new OLSDialog((JDialog) SwingUtilities.getAncestorOfClass(JDialog.class, PrideProtocolDescPanel.getPrideProtocolDescPanel()),
-                        PrideProtocolDescPanel.getPrideProtocolDescPanel(), true, STEPS_FIELD, "", null);
+                        PrideProtocolDescPanel.getPrideProtocolDescPanel(), true, STEPS_FIELD, "", null, false);
+                
+            }
+        });
+        
+        c.gridx++;
+        c.anchor = GridBagConstraints.NORTHEAST;
+        c.fill = GridBagConstraints.NONE;
+        JButton m_clearStepDescButton = new JButton("Clear Steps", IconManager.getIcon(IconManager.IconType.CLEAR_ALL));
+        m_clearStepDescButton.setMargin(new java.awt.Insets(2, 2, 2, 2));
+        stepPanel.add(m_clearStepDescButton, c);        
+        m_clearStepDescButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                ((StepDescriptionTableModel)m_stepsDescriptionTable.getModel()).clearCVParams();                
             }
         });
 
@@ -194,8 +210,6 @@ public class PrideProtocolDescPanel extends PrideWizardPanel implements OLSInput
     }
 
     @Override
-//    public void insertOLSResult(String field, String selectedValue, String accession, String ontologyShort, String ontologyLong, int modifiedRow, String mappedTerm, Map<String, String> metadata) {
-    
     public void insertOLSResult(String field, Term selectedValue, Term accession, String ontologyShort, String ontologyLong, int modifiedRow, String mappedTerm, List<String> metadata) {
         LoggerFactory.getLogger("ProlineStudio.ResultExplorer").debug("field : {}, selectedValue : {}  , accession : {} , ontologyShort : {} ontologyLong: {},  modifiedRow : {} mappedTerm: {} , nbr other : {}", field, selectedValue, accession, ontologyShort, ontologyLong, modifiedRow, mappedTerm, metadata);
 
@@ -244,10 +258,16 @@ public class PrideProtocolDescPanel extends PrideWizardPanel implements OLSInput
             } else{
                 cvParams.add(newParam);
                 fireTableRowsInserted(getRowCount()-1, getRowCount()-1);
-            }
-            
+            }           
         }
 
+        public void clearCVParams(){
+            int end=getRowCount()-1;
+            cvParams.clear();
+            cvParams.add(EMPTY_PARAM);
+            fireTableRowsDeleted(0, end);
+        }
+        
         public void replaceCVParam(CVParam newParam, int index) {
             cvParams.set(index, newParam);
             fireTableRowsUpdated(index,index);

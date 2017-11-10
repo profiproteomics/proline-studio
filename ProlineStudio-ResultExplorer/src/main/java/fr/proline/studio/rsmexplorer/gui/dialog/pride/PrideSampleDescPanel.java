@@ -68,6 +68,15 @@ public class PrideSampleDescPanel extends PrideWizardPanel implements OLSInputab
     private PrideSampleDescPanel() {
         super.initWizardPanels("<html><b>Step 3:</b> Sample Definition</html>");
     }
+    
+    protected void resetPanel(){
+        m_sampleNameTextField.setText(null);
+        m_sampleDescTextField.setText(null);
+        m_sampleSpeciesCB.setSelectedIndex(-1);
+        m_sampleTissueCBList.unselectAll();
+        m_sampleCellCBList.unselectAll();
+
+    }
         
     @Override
     public HashMap<String, Object> getExportPrideParams(){
@@ -178,7 +187,7 @@ public class PrideSampleDescPanel extends PrideWizardPanel implements OLSInputab
             @Override
             public void actionPerformed(ActionEvent e) {
                 new OLSDialog((JDialog) SwingUtilities.getAncestorOfClass(JDialog.class, PrideSampleDescPanel.getPrideSampleDescPanel()),
-                        PrideSampleDescPanel.getPrideSampleDescPanel() , true, SPECIES_FIELD, "NEWT",null);
+                        PrideSampleDescPanel.getPrideSampleDescPanel() , true, SPECIES_FIELD, "NEWT",null, false);
             }
         });        
         c.gridx++;
@@ -212,7 +221,7 @@ public class PrideSampleDescPanel extends PrideWizardPanel implements OLSInputab
             @Override
             public void actionPerformed(ActionEvent e) {
                 new OLSDialog((JDialog) SwingUtilities.getAncestorOfClass(JDialog.class, PrideSampleDescPanel.getPrideSampleDescPanel()),
-                        PrideSampleDescPanel.getPrideSampleDescPanel() , true, TISSUE_FIELD, "BTO",null);
+                        PrideSampleDescPanel.getPrideSampleDescPanel() , true, TISSUE_FIELD, "BTO",null, false);
             }
         });
         
@@ -248,7 +257,7 @@ public class PrideSampleDescPanel extends PrideWizardPanel implements OLSInputab
             @Override
             public void actionPerformed(ActionEvent e) {
                 new OLSDialog((JDialog) SwingUtilities.getAncestorOfClass(JDialog.class, PrideSampleDescPanel.getPrideSampleDescPanel()),
-                        PrideSampleDescPanel.getPrideSampleDescPanel() , true,CELLTYPE_FIELD, "NEWT",null);
+                        PrideSampleDescPanel.getPrideSampleDescPanel() , true,CELLTYPE_FIELD, "NEWT",null, false);
             }
         });
         

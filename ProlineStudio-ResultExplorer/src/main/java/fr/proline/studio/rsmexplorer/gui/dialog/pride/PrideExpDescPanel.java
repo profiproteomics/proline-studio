@@ -35,6 +35,14 @@ public class PrideExpDescPanel extends PrideWizardPanel {
         return m_panel;
     }
 
+    protected void resetPanel(){
+        m_contactInstitutionTextField.setText(null);
+        m_contactNameTextField.setText(null);
+        m_projectNameTextField.setText(null);
+        m_expNameTextField.setText(null);
+        m_expShortLabelTextField.setText(null);
+    }
+    
     private PrideExpDescPanel() {        
         super.initWizardPanels("<html><b>Step 1:</b> Experimental Detail</html>");
     }

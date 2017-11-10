@@ -221,6 +221,11 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
                 AddlWorkingSetEntryDialog dialog = AddlWorkingSetEntryDialog.getDialog(null, m_selectedWorkingSets.get(0));
                 dialog.setLocationRelativeTo(null);
                 dialog.setVisible(true);
+                
+                TreePath pathToExpand = m_tree.getSelectionPaths()[0];
+                
+                m_tree.expandPath(pathToExpand);
+                
                 DefaultMutableTreeNode root = (DefaultMutableTreeNode) m_workingSetModel.getRoot();
                 m_workingSetModel.fireTreeStructureChanged(new TreeModelEvent(root, root.getPath()));
                 resetTreeState();

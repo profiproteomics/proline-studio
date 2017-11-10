@@ -21,10 +21,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.ArrayList;
 import javax.swing.BorderFactory;
 import javax.swing.JComponent;
@@ -40,11 +36,6 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreePath;
 import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
-import org.openide.util.Exceptions;
-import org.openide.util.NbPreferences;
 
 /**
  *
@@ -54,7 +45,7 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
 
     private WorkingSetModel m_workingSetModel;
     private JTree m_tree;
-    private JMenuItem m_addWorkingSet, m_removeWorkingSet, m_addWorkingSetLocalEntry, m_removeWorkingSetEntry, m_viewMzdb, m_detectPeakels;
+    private JMenuItem m_addWorkingSet, m_removeWorkingSet, m_addWorkingSetEntry, m_removeWorkingSetEntry, m_viewMzdb, m_detectPeakels;
     private JPopupMenu m_popupMenu;
     private ActionListener m_viewMzdbAction;
     private WorkingSetRoot m_root;
@@ -114,11 +105,8 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
                         if (!entry.exists()) {
                             setForeground(Color.LIGHT_GRAY);
                         }
-                        if (entry.getLocation() == Location.LOCAL) {
-                            setIcon(IconManager.getIcon(IconManager.IconType.DRIVE));
-                        } else if (entry.getLocation() == Location.REMOTE) {
-                            setIcon(IconManager.getIcon(IconManager.IconType.DRIVE_GLOBE));
-                        }
+                        setIcon(IconManager.getIcon(IconManager.IconType.SPECTRUM_EMISSION));
+                        
                     }
                 }
 
@@ -172,7 +160,7 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
         popupMenu.add(m_viewMzdb);
 
         // detect peakels
-        m_detectPeakels = new JMenuItem("Detect Peakels");
+        m_detectPeakels = new JMenuItem("Detect peakels");
         m_detectPeakels.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent evt) {
@@ -181,7 +169,7 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
         });
         popupMenu.add(m_detectPeakels);
 
-        m_addWorkingSet = new JMenuItem("Add Working Set");
+        m_addWorkingSet = new JMenuItem("Add a working set");
         m_addWorkingSet.addActionListener(new ActionListener() {
 
             @Override
@@ -197,7 +185,7 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
         });
         popupMenu.add(m_addWorkingSet);
 
-        m_removeWorkingSet = new JMenuItem("Remove Working Set");
+        m_removeWorkingSet = new JMenuItem("Remove a working set");
         m_removeWorkingSet.addActionListener(new ActionListener() {
 
             @Override
@@ -225,12 +213,12 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
         });
         popupMenu.add(m_removeWorkingSet);
 
-        m_addWorkingSetLocalEntry = new JMenuItem("Add local entry");
-        m_addWorkingSetLocalEntry.addActionListener(new ActionListener() {
+        m_addWorkingSetEntry = new JMenuItem("Add an entry");
+        m_addWorkingSetEntry.addActionListener(new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent ae) {
-                AddWorkingSetEntryDialog dialog = AddWorkingSetEntryDialog.getDialog(null, m_selectedWorkingSets.get(0));
+                AddlWorkingSetEntryDialog dialog = AddlWorkingSetEntryDialog.getDialog(null, m_selectedWorkingSets.get(0));
                 dialog.setLocationRelativeTo(null);
                 dialog.setVisible(true);
                 DefaultMutableTreeNode root = (DefaultMutableTreeNode) m_workingSetModel.getRoot();
@@ -241,9 +229,9 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
             }
 
         });
-        popupMenu.add(m_addWorkingSetLocalEntry);
+        popupMenu.add(m_addWorkingSetEntry);
 
-        m_removeWorkingSetEntry = new JMenuItem("Remove Entry");
+        m_removeWorkingSetEntry = new JMenuItem("Remove an entry");
         m_removeWorkingSetEntry.addActionListener(new ActionListener() {
 
             @Override
@@ -294,7 +282,7 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
         }
 
         if (m_selectedRoot == null && m_selectedWorkingSets.size() == 1 && m_selectedWorkingSetEntries.isEmpty()) {
-            m_addWorkingSetLocalEntry.setEnabled(true);
+            m_addWorkingSetEntry.setEnabled(true);
         }
 
         if (m_selectedRoot == null && m_selectedWorkingSets.isEmpty() && !m_selectedWorkingSetEntries.isEmpty()) {
@@ -315,7 +303,7 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
     private void setPopupEnabled(boolean b) {
         m_addWorkingSet.setEnabled(b);
         m_removeWorkingSet.setEnabled(b);
-        m_addWorkingSetLocalEntry.setEnabled(b);
+        m_addWorkingSetEntry.setEnabled(b);
         m_removeWorkingSetEntry.setEnabled(b);
         m_viewMzdb.setEnabled(b);
         m_detectPeakels.setEnabled(b);

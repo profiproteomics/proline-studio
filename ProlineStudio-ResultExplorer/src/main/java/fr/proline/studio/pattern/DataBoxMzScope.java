@@ -46,8 +46,7 @@ public class DataBoxMzScope extends AbstractDataBox{
         //outParameter.addParameter(?.class, false);
         registerOutParameter(outParameter);
         
-         // mzdb directory
-        /*
+         // mzdb directory       
         Preferences preferences = NbPreferences.root();
         m_mzdbDir = preferences.get(MZDB_DIRECTORY_KEY, null);
         if (m_mzdbDir == null) {
@@ -67,7 +66,7 @@ public class DataBoxMzScope extends AbstractDataBox{
                m_mzdbDir = ".";
             }
         }
-        */
+        
 
     }
      

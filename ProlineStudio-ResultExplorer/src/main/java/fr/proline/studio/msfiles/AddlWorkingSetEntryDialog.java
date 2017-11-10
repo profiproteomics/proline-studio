@@ -5,7 +5,9 @@
  */
 package fr.proline.studio.msfiles;
 
+import fr.proline.studio.dpm.serverfilesystem.ServerFileSystemView;
 import fr.proline.studio.gui.DefaultDialog;
+import fr.proline.studio.msfiles.WorkingSetEntry.Location;
 import fr.proline.studio.utils.IconManager;
 import java.awt.Dialog;
 import java.awt.Dimension;
@@ -35,27 +37,27 @@ import org.openide.util.NbPreferences;
  *
  * @author AK249877
  */
-public class AddWorkingSetEntryDialog extends DefaultDialog {
+public class AddlWorkingSetEntryDialog extends DefaultDialog {
 
-    private static AddWorkingSetEntryDialog m_singleton = null;
+    private static AddlWorkingSetEntryDialog m_singleton = null;
     private static WorkingSet m_workingSet;
-    private JButton m_addFileButton, m_removeFileButton;
+    private JButton m_addLocalFileButton, m_addRemoteFileButton, m_removeFileButton;
     private JScrollPane m_fileListScrollPane;
     private static JList m_fileList;
     private String m_lastParentDirectory;
     private Preferences m_preferences;
 
-    public static AddWorkingSetEntryDialog getDialog(Window parent, WorkingSet workingSet) {
+    public static AddlWorkingSetEntryDialog getDialog(Window parent, WorkingSet workingSet) {
         m_workingSet = workingSet;
         if (m_singleton == null) {
-            m_singleton = new AddWorkingSetEntryDialog(parent);
+            m_singleton = new AddlWorkingSetEntryDialog(parent);
         }
         return m_singleton;
     }
 
-    private AddWorkingSetEntryDialog(Window parent) {
+    private AddlWorkingSetEntryDialog(Window parent) {
         super(parent, Dialog.ModalityType.APPLICATION_MODAL);
-        setTitle("Add Working Set");
+        setTitle("Add an entry");
         setSize(new Dimension(480, 320));
         m_preferences = NbPreferences.root();
         setInternalComponent(createFileSelectionPanel());
@@ -78,8 +80,12 @@ public class AddWorkingSetEntryDialog extends DefaultDialog {
             }
         };
 
-        m_addFileButton = new JButton(IconManager.getIcon(IconManager.IconType.OPEN_FILE));
-        m_addFileButton.setMargin(new java.awt.Insets(2, 2, 2, 2));
+        m_addLocalFileButton = new JButton(IconManager.getIcon(IconManager.IconType.OPEN_FILE));
+        m_addLocalFileButton.setMargin(new java.awt.Insets(2, 2, 2, 2));
+        
+        m_addRemoteFileButton = new JButton(IconManager.getIcon(IconManager.IconType.SERVER_ON));
+        m_addRemoteFileButton.setMargin(new java.awt.Insets(2, 2, 2, 2));
+        
         m_removeFileButton = new JButton(IconManager.getIcon(IconManager.IconType.ERASER));
         m_removeFileButton.setMargin(new java.awt.Insets(2, 2, 2, 2));
 
@@ -91,7 +97,7 @@ public class AddWorkingSetEntryDialog extends DefaultDialog {
 
         c.gridx = 0;
         c.gridy = 0;
-        c.gridheight = 3;
+        c.gridheight = 4;
         c.weightx = 1.0;
         c.weighty = 1.0;
         fileSelectionPanel.add(m_fileListScrollPane, c);
@@ -100,7 +106,10 @@ public class AddWorkingSetEntryDialog extends DefaultDialog {
         c.gridheight = 1;
         c.weightx = 0;
         c.weighty = 0;
-        fileSelectionPanel.add(m_addFileButton, c);
+        fileSelectionPanel.add(m_addLocalFileButton, c);
+        
+        c.gridy++;
+        fileSelectionPanel.add(m_addRemoteFileButton, c);
 
         c.gridy++;
         fileSelectionPanel.add(m_removeFileButton, c);
@@ -118,7 +127,7 @@ public class AddWorkingSetEntryDialog extends DefaultDialog {
             }
         });
 
-        m_addFileButton.addActionListener(new ActionListener() {
+        m_addLocalFileButton.addActionListener(new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -132,6 +141,38 @@ public class AddWorkingSetEntryDialog extends DefaultDialog {
 
                 JFileChooser fchooser = new JFileChooser(initializationDirectory);
 
+                fchooser.setMultiSelectionEnabled(true);
+
+                fchooser.addChoosableFileFilter(new FileNameExtensionFilter(".mzdb", "mzDB"));
+                fchooser.setAcceptAllFileFilterUsed(false);
+
+                //put the one and only filter here! (.mzdb)
+                int result = fchooser.showOpenDialog(m_singleton);
+                if (result == JFileChooser.APPROVE_OPTION) {
+
+                    File[] files = fchooser.getSelectedFiles();
+                    int nbFiles = files.length;
+                    for (int i = 0; i < nbFiles; i++) {
+                        ((DefaultListModel) m_fileList.getModel()).addElement(files[i]);
+                    }
+
+                    if (files.length > 0) {
+                        m_lastParentDirectory = files[0].getParentFile().getAbsolutePath();
+                    }
+
+                }
+            }
+        });
+        
+        m_addRemoteFileButton.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+
+                File[] f = ServerFileSystemView.getFileSystemView().getRoots();
+                
+                JFileChooser fchooser = new JFileChooser(ServerFileSystemView.getServerFileSystemView());
+                
                 fchooser.setMultiSelectionEnabled(true);
 
                 fchooser.addChoosableFileFilter(new FileNameExtensionFilter(".mzdb", "mzDB"));
@@ -181,8 +222,10 @@ public class AddWorkingSetEntryDialog extends DefaultDialog {
             m_preferences.put("New_Entry_Dialog.LAST_MZDB_PATH", m_lastParentDirectory);
 
             for (int i = 0; i < m_fileList.getModel().getSize(); i++) {
-                File f = (File) m_fileList.getModel().getElementAt(i);              
-                m_workingSet.addEntry(f.getAbsolutePath(), WorkingSetEntry.Location.LOCAL);
+                File f = (File) m_fileList.getModel().getElementAt(i);          
+                Location location = f.exists() ? WorkingSetEntry.Location.LOCAL : WorkingSetEntry.Location.REMOTE;
+                boolean b = f.exists();
+                m_workingSet.addEntry(f.getAbsolutePath(), location);
             }
 
             DefaultListModel listModel = (DefaultListModel) m_fileList.getModel();

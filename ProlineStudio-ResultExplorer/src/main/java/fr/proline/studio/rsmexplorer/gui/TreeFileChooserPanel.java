@@ -117,7 +117,7 @@ public class TreeFileChooserPanel extends JPanel {
         m_tree.addTreeExpansionListener(new DirExpansionListener());
 
         m_tree.addTreeSelectionListener(new DirSelectionListener());
-
+        
         m_tree.getSelectionModel().setSelectionMode(TreeSelectionModel.DISCONTIGUOUS_TREE_SELECTION);
         m_tree.setShowsRootHandles(true);
         m_tree.setEditable(false);

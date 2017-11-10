@@ -8,6 +8,7 @@ package fr.proline.studio.rsmexplorer.gui;
 import fr.proline.studio.msfiles.ExportMgfDialog;
 import fr.proline.studio.msfiles.FileDeletionBatch;
 import fr.proline.mzscope.utils.IPopupMenuDelegate;
+import fr.proline.studio.dam.DatabaseDataManager;
 import fr.proline.studio.msfiles.MzdbEncodingVerificationBatch;
 import fr.proline.studio.mzscope.MzdbInfo;
 import fr.proline.studio.pattern.MzScopeWindowBoxManager;
@@ -493,6 +494,7 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
                 if (firstURL.endsWith(".mzdb")) {
                     setPopupEnabled(true);
                     m_convertRawFileItem.setEnabled(false);
+                    m_uploadMzdbFileItem.setEnabled(DatabaseDataManager.getDatabaseDataManager().getLoggedUser()!=null);
                 } else if (firstURL.endsWith(".raw") || firstURL.endsWith(".wiff")) {
                     setPopupEnabled(false);
                     m_convertRawFileItem.setEnabled(true);

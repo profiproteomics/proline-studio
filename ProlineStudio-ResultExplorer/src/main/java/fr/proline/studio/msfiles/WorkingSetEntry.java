@@ -33,7 +33,7 @@ public class WorkingSetEntry {
         m_parent = parent;
         
         m_file = new File(m_path);
-        m_existing = m_file.exists();
+        m_existing = (location == Location.REMOTE || m_file.exists());
     }
     
     public String getFilename(){
@@ -58,7 +58,7 @@ public class WorkingSetEntry {
     
     public void resetExist(){
         m_file = new File(m_path);
-        m_existing = m_file.exists();
+        m_existing = (m_location == Location.REMOTE || m_file.exists());
     }
     
     public File getFile(){

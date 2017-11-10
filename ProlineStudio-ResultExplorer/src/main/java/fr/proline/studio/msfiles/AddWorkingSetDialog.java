@@ -38,7 +38,7 @@ public class AddWorkingSetDialog extends DefaultDialog {
 
     private AddWorkingSetDialog(Window parent) {
         super(parent, Dialog.ModalityType.APPLICATION_MODAL);
-        setTitle("Add Working Set");
+        setTitle("Add a working set");
         setSize(new Dimension(480, 320));
         setInternalComponent(initParamPanel());
     }
@@ -84,7 +84,7 @@ public class AddWorkingSetDialog extends DefaultDialog {
         return m_paramPanel;
     }
     
-     @Override
+    @Override
     protected boolean okCalled() {
 
         if (!validateParameters()) {

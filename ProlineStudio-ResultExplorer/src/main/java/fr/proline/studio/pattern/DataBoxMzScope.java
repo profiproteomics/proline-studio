@@ -4,16 +4,10 @@ import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.mzscope.MzScopeInterface;
 import fr.proline.studio.mzscope.MzdbInfo;
-import fr.proline.studio.rsmexplorer.gui.MzDBFilesPanel;
 import fr.proline.studio.rsmexplorer.gui.StudioMzScopePanel;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.prefs.Preferences;
-import javax.swing.JFileChooser;
-import javax.swing.JOptionPane;
-import org.openide.util.NbPreferences;
-import org.openide.windows.WindowManager;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 
 /**

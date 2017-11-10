@@ -402,7 +402,7 @@
          <dependency>
             <groupId>uk.ac.ebi.pride.toolsuite</groupId>
             <artifactId>ols-dialog</artifactId>
-            <version>3.4.14-EDyP_SNAPSHOT</version>
+            <version>3.4.13-EDyP</version>
             
         </dependency>
 <!--        <dependency>

@@ -114,10 +114,9 @@ public class JoinFunction extends AbstractFunction {
 
             try {
                 Table t1 = new Table(graphObjects[0].getGlobalTableModelInterface());
-                graphObjects[0].getGlobalTableModelInterface().setName(graphObjects[0].getFullName());
+                graphObjects[0].getGlobalTableModelInterface().setName(graphObjects[0].getGraphNode().getDataName());
                 Table t2 = new Table(graphObjects[1].getGlobalTableModelInterface());
-                graphObjects[1].getGlobalTableModelInterface().setName(graphObjects[1].getFullName());
-
+                graphObjects[1].getGlobalTableModelInterface().setName(graphObjects[1].getGraphNode().getDataName());
                 Table joinedTable;
                 if ((m_paramTable1Key1 != null) && (m_paramTable2Key1 != null)) {
                     Integer table1Key1 = (Integer) m_paramTable1Key1.getAssociatedObjectValue();

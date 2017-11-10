@@ -177,6 +177,7 @@
                         <publicPackage>javax.jms.*</publicPackage>  
                         <publicPackage>org.jboss.logging.*</publicPackage>  
                         <publicPackage>javax.annotation.*</publicPackage>  
+                        <publicPackage>io.netty.*</publicPackage>  
                     </publicPackages>
                 </configuration>
             </plugin>

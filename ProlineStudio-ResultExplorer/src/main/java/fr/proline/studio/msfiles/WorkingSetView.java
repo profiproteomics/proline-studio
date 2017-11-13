@@ -179,6 +179,8 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
                 dialog.setVisible(true);
                 DefaultMutableTreeNode root = (DefaultMutableTreeNode) m_workingSetModel.getRoot();
                 m_workingSetModel.fireTreeStructureChanged(new TreeModelEvent(root, root.getPath()));
+                WorkingSetRoot workingSetRoot = (WorkingSetRoot) root.getUserObject();
+                WorkingSetUtil.saveJSON(workingSetRoot.getWorkingSets());
                 resetTreeState();
             }
 

@@ -5,6 +5,7 @@
  */
 package fr.proline.studio.msfiles;
 
+import fr.proline.studio.dam.DatabaseDataManager;
 import fr.proline.studio.dpm.serverfilesystem.ServerFileSystemView;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.msfiles.WorkingSetEntry.Location;
@@ -52,6 +53,7 @@ public class AddlWorkingSetEntryDialog extends DefaultDialog {
         if (m_singleton == null) {
             m_singleton = new AddlWorkingSetEntryDialog(parent);
         }
+        m_singleton.updateRemoteButton();
         return m_singleton;
     }
 
@@ -233,6 +235,10 @@ public class AddlWorkingSetEntryDialog extends DefaultDialog {
 
             return true;
         }
+    }
+    
+    private void updateRemoteButton(){
+        m_addRemoteFileButton.setEnabled(DatabaseDataManager.getDatabaseDataManager().getLoggedUser()!=null);
     }
 
     private boolean validateParameters() {

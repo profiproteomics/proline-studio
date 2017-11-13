@@ -117,12 +117,12 @@ public class GraphPanel extends JPanel implements MouseListener, MouseMotionList
 
             GraphNode lastGraphNode = m_graphNodeArray.getLast();
             posX = lastGraphNode.getCenterX();
-            posY = lastGraphNode.getCenterY() + GraphNode.HEIGHT * 2;
+            posY = lastGraphNode.getCenterY() + GraphNode.HEIGHT_MIN * 2;
             int height = getHeight();
             if (height > 60) {
                 // could be ==0 when the panel has just been created
-                if (posY > height - GraphNode.HEIGHT) {
-                    posY = height - GraphNode.HEIGHT;
+                if (posY > height - GraphNode.HEIGHT_MIN) {
+                    posY = height - GraphNode.HEIGHT_MIN;
                 }
             }
 
@@ -212,12 +212,12 @@ public class GraphPanel extends JPanel implements MouseListener, MouseMotionList
                 if (position.x < GraphNode.WIDTH * 1.4) {
                     position.x = (int) (GraphNode.WIDTH * 1.4);
                 }
-                if (position.y < GraphNode.HEIGHT * 1.4) {
-                    position.y = (int) (GraphNode.HEIGHT * 1.4);
+                if (position.y < GraphNode.HEIGHT_MIN * 1.4) {
+                    position.y = (int) (GraphNode.HEIGHT_MIN * 1.4);
                 }
             }
             graphNodeMap.put(node, graphNode);
-            addGraphNode(graphNode, position.x + (int) (levelX * GraphNode.WIDTH * 2.2), position.y + levelY * GraphNode.HEIGHT * 2);
+            addGraphNode(graphNode, position.x + (int) (levelX * GraphNode.WIDTH * 2.2), position.y + levelY * GraphNode.HEIGHT_MIN * 2);
 
             group.addObject(graphNode);
         }
@@ -485,7 +485,7 @@ public class GraphPanel extends JPanel implements MouseListener, MouseMotionList
 
                 Iterator<GraphNode> it = m_graphNodeArray.descendingIterator();
                 while (it.hasNext()) {
-                    AbstractConnectedGraphObject graphNode = it.next();
+                    GraphNode graphNode = it.next();
 
                     AbstractGraphObject overObject =  graphNode.inside(x, y);
                     if (overObject != null) {
@@ -494,7 +494,17 @@ public class GraphPanel extends JPanel implements MouseListener, MouseMotionList
                             if (m_selectedConnector.canBeLinked(connector)) {
                                 m_selectedConnector.addConnection(connector);
                                 connector.addConnection(m_selectedConnector);
+                                
+                                // find the in Graph Node from both connectors being connected
+                                GraphNode inGraphNode = (connector.isOutConnector()) ? m_selectedConnector.getGraphNode() : connector.getGraphNode();
+                                if ((inGraphNode.getFirstFreeConnector() == null) && (inGraphNode.canAddConnector())) {
+                                    // all connectors are connected, but we can add a new connector
+                                    inGraphNode.addFreeConnector();
+                                }
                             }
+                            
+                            
+                            
                         }
                         break;
                     }

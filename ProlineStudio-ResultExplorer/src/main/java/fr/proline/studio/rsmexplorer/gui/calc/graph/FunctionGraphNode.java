@@ -221,7 +221,43 @@ public class FunctionGraphNode extends GraphNode {
                 }
             }
         }
-        return (countUnlinkedConnectors == 0);
+        return (countUnlinkedConnectors <= 0); // can be negative if there are optional in parameters
+    }
+    
+    @Override
+    public boolean canAddConnector() {
+        if (m_inConnectors == null) {
+            return true;
+        }
+        
+        return (m_function.getMaximumNumberOfInParameters()-m_inConnectors.size())>0;
+    }
+    
+    @Override
+    public void addFreeConnector() {
+        m_inConnectors.add(new GraphConnector(this, false, m_inConnectors.size(), m_graphPanel));
+        setConnectorsPosition();
+    }
+    
+    @Override
+    public void updateNumberOfInConnections() {
+
+        int nbConnections = m_inConnectors.size();
+        int nbInParameters = m_function.getNumberOfInParameters();
+        boolean modification = false;
+        while ((nbConnections>2) && (nbConnections>nbInParameters)) {
+            if ((!m_inConnectors.get(nbConnections-1).isConnected(false) ) && (!m_inConnectors.get(m_inConnectors.size()-2).isConnected(false) ) ) {
+                // last two extra connections are not used : remove the last one
+                m_inConnectors.removeLast();
+                modification = true;
+                nbConnections--;
+            } else {
+                break;
+            }
+        }
+        if (modification) {
+            setConnectorsPosition();
+        }
     }
     
     @Override
@@ -241,7 +277,7 @@ public class FunctionGraphNode extends GraphNode {
                 }
             }
         }
-        return (countSettingsDone == 0); 
+        return (countSettingsDone <= 0); // can be negative if there are optional in parameters
     }
     
     @Override

@@ -33,7 +33,7 @@ public abstract class GraphNode extends AbstractConnectedGraphObject {
 
     
     public static final int WIDTH = 60;
-    public static final int HEIGHT = 60;
+    public static final int HEIGHT_MIN = 60;
     private static final int MARGIN = 5;
     
     protected LinkedList<GraphConnector> m_inConnectors = null;
@@ -43,6 +43,7 @@ public abstract class GraphNode extends AbstractConnectedGraphObject {
    
     protected int m_x = 0;
     protected int m_y = 0;
+    protected int m_extraHeight = 0;
 
     protected GraphNodeAction m_graphNodeAction = new GraphNodeAction();
     protected GraphNodeAction m_menuAction = new GraphNodeAction();
@@ -68,7 +69,7 @@ public abstract class GraphNode extends AbstractConnectedGraphObject {
         m_menuAction.setAction(true);
     }
 
-    private GraphConnector getFirstFreeConnector() {
+    public GraphConnector getFirstFreeConnector() {
         if (m_inConnectors == null) {
             return null;
         }
@@ -80,6 +81,17 @@ public abstract class GraphNode extends AbstractConnectedGraphObject {
             return inConnector;
         }
         return null;
+    }
+    
+    public boolean canAddConnector() {
+        return false;
+    }
+    public void addFreeConnector() {
+        // nothing to do
+    }
+    
+    public void updateNumberOfInConnections() {
+        // nothing to do
     }
     
     public void connectTo(GraphNode inGraphNode) {
@@ -105,7 +117,7 @@ public abstract class GraphNode extends AbstractConnectedGraphObject {
     
     public void setCenter(int x, int y) {
         m_x = x-WIDTH/2;
-        m_y = y-HEIGHT/2;
+        m_y = y-(HEIGHT_MIN+m_extraHeight)/2;
         if (m_x<40) {
             m_x = 40;
         }
@@ -124,7 +136,7 @@ public abstract class GraphNode extends AbstractConnectedGraphObject {
     }
     
     public int getCenterY() {
-        return m_y+HEIGHT/2;
+        return m_y+(HEIGHT_MIN+m_extraHeight)/2;
     }
 
     public int getX() {
@@ -140,7 +152,7 @@ public abstract class GraphNode extends AbstractConnectedGraphObject {
     }
     
     public int getYEnd() {
-        return m_y+HEIGHT;
+        return m_y+(HEIGHT_MIN+m_extraHeight);
     }
     
     public abstract String getErrorMessage();
@@ -158,20 +170,20 @@ public abstract class GraphNode extends AbstractConnectedGraphObject {
 
         if (m_hightlighted) {
             g2.setColor(getFrameColor().brighter());
-            g.fillRoundRect(m_x-5, m_y-5, WIDTH+10, HEIGHT+10, 8, 8);
+            g.fillRoundRect(m_x-5, m_y-5, WIDTH+10, (HEIGHT_MIN+m_extraHeight)+10, 8, 8);
         }
         
         
         LinearGradientPaint gradient = getBackgroundGradient();
         g2.setPaint(gradient);
-        g.fillRoundRect(m_x, m_y, WIDTH, HEIGHT, 8, 8);
+        g.fillRoundRect(m_x, m_y, WIDTH, HEIGHT_MIN+m_extraHeight, 8, 8);
         
         g.setColor(getFrameColor());
         
         Stroke previousStroke = g2.getStroke();
         BasicStroke stroke = (m_selected || m_hightlighted) ? STROKE_SELECTED : STROKE_NOT_SELECTED;
         g2.setStroke(stroke);
-        g.drawRoundRect(m_x, m_y, WIDTH, HEIGHT, 8, 8);
+        g.drawRoundRect(m_x, m_y, WIDTH, (HEIGHT_MIN+m_extraHeight), 8, 8);
         g2.setStroke(previousStroke);
         
         FontMetrics metricsBold = g.getFontMetrics(m_fontBold);
@@ -206,7 +218,7 @@ public abstract class GraphNode extends AbstractConnectedGraphObject {
             wIcon = statusIcon.getIconWidth();
             hIcon = statusIcon.getIconHeight();
             xIcon = m_x+MARGIN;
-            yIcon = m_y+HEIGHT-MARGIN-statusIcon.getIconHeight();
+            yIcon = m_y+(HEIGHT_MIN+m_extraHeight)-MARGIN-statusIcon.getIconHeight();
             
             
              if ((possibleAction == NodeAction.STEP_ACTION) || (possibleAction == NodeAction.ERROR_ACTION)) {
@@ -251,7 +263,7 @@ public abstract class GraphNode extends AbstractConnectedGraphObject {
             wIcon = displayIcon.getIconWidth();
             hIcon = displayIcon.getIconHeight();
             xIcon = m_x+WIDTH-MARGIN-displayIcon.getIconWidth();
-            yIcon = m_y+HEIGHT-MARGIN-displayIcon.getIconHeight();
+            yIcon = m_y+(HEIGHT_MIN+m_extraHeight)-MARGIN-displayIcon.getIconHeight();
             
             
             if (possibleAction == NodeAction.RESULT_ACTION) {
@@ -364,7 +376,7 @@ public abstract class GraphNode extends AbstractConnectedGraphObject {
             Color frameColor = getFrameColor();
 
             Point2D start = new Point2D.Float(m_x, m_y);
-            Point2D end = new Point2D.Float(m_x, m_y + HEIGHT);
+            Point2D end = new Point2D.Float(m_x, m_y + (HEIGHT_MIN+m_extraHeight));
             float[] dist = {0.0f, 0.5f, 0.501f, 1.0f};
             Color[] colors = {Color.white, frameColor.brighter(), frameColor, frameColor.brighter()};
             m_gradient =  new LinearGradientPaint(start, end, dist, colors);
@@ -431,7 +443,7 @@ public abstract class GraphNode extends AbstractConnectedGraphObject {
         
        
        
-        if ((x>=m_x) && (y>=m_y) && (x<=m_x+WIDTH) && (y<=m_y+HEIGHT)) {
+        if ((x>=m_x) && (y>=m_y) && (x<=m_x+WIDTH) && (y<=m_y+(HEIGHT_MIN+m_extraHeight))) {
             return this;
         }
         
@@ -468,12 +480,17 @@ public abstract class GraphNode extends AbstractConnectedGraphObject {
         return m_graphNodeAction.setHighlighted(false) | m_menuAction.setHighlighted(false);
     }
     
-    private void setConnectorsPosition() {
+    protected void setConnectorsPosition() {
         if (m_inConnectors != null) {
             int nb = m_inConnectors.size();
+            if (nb>3) {
+                m_extraHeight = (nb-3) * (GraphConnector.HEIGHT+4);
+            } else {
+                m_extraHeight = 0;
+            }
             int i = 0;
             for (GraphConnector connector : m_inConnectors) {
-                int y = m_y + (int) Math.round((((double) HEIGHT)/(nb+1))*(i+1));
+                int y = m_y + (int) Math.round((((double) (HEIGHT_MIN+m_extraHeight))/(nb+1))*(i+1));
                 connector.setRightPosition(m_x, y);
                 i++;
             }
@@ -482,7 +499,7 @@ public abstract class GraphNode extends AbstractConnectedGraphObject {
             int nbOutConnectors = m_outConnector.size();
             int i = 1;
             for (GraphConnector connector : m_outConnector) {
-                connector.setPosition(m_x + WIDTH, m_y + (i*HEIGHT) / (nbOutConnectors+1));
+                connector.setPosition(m_x + WIDTH, m_y + (i*(HEIGHT_MIN+m_extraHeight)) / (nbOutConnectors+1));
                 i++;
             }
         }

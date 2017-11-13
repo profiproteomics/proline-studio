@@ -71,6 +71,11 @@ public class JoinFunction extends AbstractFunction {
     }
     
     @Override
+    public int getMaximumNumberOfInParameters() {
+        return 10; //JPM.TODO 
+    }
+    
+    @Override
     public int getNumberOfOutParameters() {
         return 1;
     }

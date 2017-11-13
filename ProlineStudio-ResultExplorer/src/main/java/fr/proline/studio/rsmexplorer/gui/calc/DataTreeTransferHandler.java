@@ -134,7 +134,7 @@ public class DataTreeTransferHandler extends TransferHandler {
 
                     }
                     x += DataGraphNode.WIDTH/2;
-                    y += DataGraphNode.HEIGHT/2; 
+                    y += DataGraphNode.HEIGHT_MIN/2; 
                     
                 }
 

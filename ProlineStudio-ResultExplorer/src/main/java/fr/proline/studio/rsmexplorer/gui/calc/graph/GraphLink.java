@@ -300,6 +300,7 @@ public class GraphLink extends AbstractConnectedGraphObject {
         return null;
     }
  
+    @Override
     public void deleteAction() {
         m_connector.deleteInLink();
         m_graphPanel.repaint();

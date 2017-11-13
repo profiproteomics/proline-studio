@@ -91,6 +91,11 @@ public abstract class AbstractFunction implements CheckParameterInterface {
     public abstract int getNumberOfInParameters();
     public abstract int getNumberOfOutParameters();
     
+    public int getMaximumNumberOfInParameters() {
+        return getNumberOfInParameters();
+    }
+    
+    
     public String getOutTooltip(int index) {
         return null;
     }

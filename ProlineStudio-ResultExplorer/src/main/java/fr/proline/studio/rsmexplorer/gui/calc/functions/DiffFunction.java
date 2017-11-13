@@ -12,7 +12,6 @@ import fr.proline.studio.python.data.Table;
 import fr.proline.studio.python.interpreter.CalcError;
 import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
 import fr.proline.studio.rsmexplorer.gui.calc.ProcessCallbackInterface;
-import fr.proline.studio.rsmexplorer.gui.calc.graph.AbstractConnectedGraphObject;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.FunctionGraphNode;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphConnector;
 import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
@@ -113,9 +112,9 @@ public class DiffFunction extends AbstractFunction {
 
             try {
                 Table t1 = new Table(graphObjects[0].getGlobalTableModelInterface());
-                graphObjects[0].getGlobalTableModelInterface().setName(graphObjects[0].getFullName());
+                graphObjects[0].getGlobalTableModelInterface().setName(graphObjects[0].getGraphNode().getDataName());
                 Table t2 = new Table(graphObjects[1].getGlobalTableModelInterface());
-                graphObjects[1].getGlobalTableModelInterface().setName(graphObjects[1].getFullName());
+                graphObjects[1].getGlobalTableModelInterface().setName(graphObjects[1].getGraphNode().getDataName());
 
                 Table diffTable;
                 if ((m_paramTable1Key1 != null) && (m_paramTable2Key1 != null)) {

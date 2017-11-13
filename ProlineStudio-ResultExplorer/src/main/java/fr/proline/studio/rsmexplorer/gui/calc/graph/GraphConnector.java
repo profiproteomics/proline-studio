@@ -18,7 +18,7 @@ import javax.swing.JPopupMenu;
 public class GraphConnector extends AbstractConnectedGraphObject {
 
     private static final int WIDTH = 10;
-    private static final int HEIGHT = 10;
+    public static final int HEIGHT = 10;
     private static final int LINE_LENGTH = 3;
     
     private int m_x = 0;
@@ -44,6 +44,10 @@ public class GraphConnector extends AbstractConnectedGraphObject {
         m_index = index;
     }
     
+    public boolean isOutConnector() {
+        return m_out;
+    }
+    
     public int getIndex() {
         return m_index;
     }
@@ -61,7 +65,7 @@ public class GraphConnector extends AbstractConnectedGraphObject {
     
     @Override
     public String getFullName() {
-        return null;
+        return m_graphNode.getFullName(m_index);
     }
 
     @Override
@@ -249,6 +253,8 @@ public class GraphConnector extends AbstractConnectedGraphObject {
         m_link = null;
 
         if (!m_out) {
+            
+            m_graphNode.updateNumberOfInConnections();
             m_graphNode.propagateSourceChanged();
         }
     }

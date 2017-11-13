@@ -33,6 +33,9 @@ public class AddWorkingSetDialog extends DefaultDialog {
         if (m_singleton == null) {
             m_singleton = new AddWorkingSetDialog(parent);
         }
+        m_singleton.m_name.setText(null);
+        m_singleton.m_description.setText(null);
+        
         return m_singleton;
     }
 

@@ -6,7 +6,6 @@
 package fr.proline.studio.msfiles;
 
 import fr.proline.mzscope.utils.IPopupMenuDelegate;
-import fr.proline.studio.msfiles.WorkingSetEntry.Location;
 import fr.proline.studio.mzscope.MzdbInfo;
 import fr.proline.studio.pattern.MzScopeWindowBoxManager;
 import fr.proline.studio.rsmexplorer.gui.MzScope;
@@ -31,7 +30,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JTree;
 import javax.swing.event.TreeExpansionEvent;
 import javax.swing.event.TreeExpansionListener;
-import javax.swing.event.TreeModelEvent;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreePath;
@@ -178,7 +176,7 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
                 dialog.setLocationRelativeTo(null);
                 dialog.setVisible(true);
                 DefaultMutableTreeNode root = (DefaultMutableTreeNode) m_workingSetModel.getRoot();
-                m_workingSetModel.fireTreeStructureChanged(new TreeModelEvent(root, root.getPath()));
+                reloadTree();
                 WorkingSetRoot workingSetRoot = (WorkingSetRoot) root.getUserObject();
                 WorkingSetUtil.saveJSON(workingSetRoot.getWorkingSets());
                 resetTreeState();
@@ -205,7 +203,7 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
                 }
 
                 if (success) {
-                    m_workingSetModel.fireTreeStructureChanged(new TreeModelEvent(root, root.getPath()));
+                    reloadTree();
                     resetTreeState();
                     WorkingSetUtil.saveJSON(workingSetRoot.getWorkingSets());
                 }
@@ -228,9 +226,9 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
                 
                 m_tree.expandPath(pathToExpand);
                 
-                DefaultMutableTreeNode root = (DefaultMutableTreeNode) m_workingSetModel.getRoot();
-                m_workingSetModel.fireTreeStructureChanged(new TreeModelEvent(root, root.getPath()));
+                reloadTree();
                 resetTreeState();
+                DefaultMutableTreeNode root = (DefaultMutableTreeNode) m_workingSetModel.getRoot();
                 WorkingSetRoot workingSetRoot = (WorkingSetRoot) root.getUserObject();
                 WorkingSetUtil.saveJSON(workingSetRoot.getWorkingSets());
             }
@@ -262,7 +260,7 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
                     if (success) {
                         DefaultMutableTreeNode root = (DefaultMutableTreeNode) m_workingSetModel.getRoot();
                         WorkingSetRoot workingSetRoot = (WorkingSetRoot) root.getUserObject();
-                        m_workingSetModel.fireTreeStructureChanged(new TreeModelEvent(root, root.getPath()));
+                        reloadTree();
                         resetTreeState();
                         WorkingSetUtil.saveJSON(workingSetRoot.getWorkingSets());
                     }
@@ -371,6 +369,14 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
         }
 
         return files;
+    }
+    
+    private void reloadTree() {
+        if (m_workingSetModel != null) {
+            m_tree.setModel(null);
+            m_workingSetModel = new WorkingSetModel(m_root);
+            m_tree.setModel(m_workingSetModel);
+        }
     }
 
 

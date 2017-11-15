@@ -23,11 +23,11 @@ public class WorkingSetModel implements TreeModel {
 
     private DefaultMutableTreeNode m_root;
 
-    private final HashSet<TreeModelListener> listeners; // Declare the listeners vector
+    private final HashSet<TreeModelListener> m_listeners; // Declare the listeners vector
 
     public WorkingSetModel(WorkingSetRoot root) {
         m_root = new DefaultMutableTreeNode(root);
-        listeners = new HashSet<TreeModelListener>();
+        m_listeners = new HashSet<TreeModelListener>();
     }
 
     @Override
@@ -162,38 +162,38 @@ public class WorkingSetModel implements TreeModel {
 
     @Override
     public void addTreeModelListener(TreeModelListener listener) {
-        if (listener != null && !listeners.contains(listener)) {
-            listeners.add(listener);
+        if (listener != null && !m_listeners.contains(listener)) {
+            m_listeners.add(listener);
         }
     }
 
     @Override
     public void removeTreeModelListener(TreeModelListener l) {
         if (l != null) {
-            listeners.remove(l);
+            m_listeners.remove(l);
         }
     }
 
     public void fireTreeNodesInserted(TreeModelEvent e) {
-        for (TreeModelListener listener : listeners) {
+        for (TreeModelListener listener : m_listeners) {
             listener.treeNodesInserted(e);
         }
     }
 
     public void fireTreeNodesRemoved(TreeModelEvent e) {
-        for (TreeModelListener listener : listeners) {
+        for (TreeModelListener listener : m_listeners) {
             listener.treeNodesRemoved(e);
         }
     }
 
     public void fireTreeNodesChanged(TreeModelEvent e) {
-        for (TreeModelListener listener : listeners) {
+        for (TreeModelListener listener : m_listeners) {
             listener.treeNodesChanged(e);
         }
     }
 
     public void fireTreeStructureChanged(TreeModelEvent e) {
-        for (TreeModelListener listener : listeners) {
+        for (TreeModelListener listener : m_listeners) {
             listener.treeStructureChanged(e);
         }
     }

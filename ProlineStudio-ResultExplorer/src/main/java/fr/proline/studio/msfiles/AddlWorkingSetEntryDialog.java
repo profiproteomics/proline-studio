@@ -45,7 +45,7 @@ public class AddlWorkingSetEntryDialog extends DefaultDialog {
     private JButton m_addLocalFileButton, m_addRemoteFileButton, m_removeFileButton;
     private JScrollPane m_fileListScrollPane;
     private static JList m_fileList;
-    private String m_lastParentDirectory;
+    private String m_lastLocalParentDirectory, m_lastLabelUsed;
     private Preferences m_preferences;
 
     public static AddlWorkingSetEntryDialog getDialog(Window parent, WorkingSet workingSet) {
@@ -84,10 +84,10 @@ public class AddlWorkingSetEntryDialog extends DefaultDialog {
 
         m_addLocalFileButton = new JButton(IconManager.getIcon(IconManager.IconType.OPEN_FILE));
         m_addLocalFileButton.setMargin(new java.awt.Insets(2, 2, 2, 2));
-        
+
         m_addRemoteFileButton = new JButton(IconManager.getIcon(IconManager.IconType.SERVER_ON));
         m_addRemoteFileButton.setMargin(new java.awt.Insets(2, 2, 2, 2));
-        
+
         m_removeFileButton = new JButton(IconManager.getIcon(IconManager.IconType.ERASER));
         m_removeFileButton.setMargin(new java.awt.Insets(2, 2, 2, 2));
 
@@ -109,7 +109,7 @@ public class AddlWorkingSetEntryDialog extends DefaultDialog {
         c.weightx = 0;
         c.weighty = 0;
         fileSelectionPanel.add(m_addLocalFileButton, c);
-        
+
         c.gridy++;
         fileSelectionPanel.add(m_addRemoteFileButton, c);
 
@@ -134,14 +134,14 @@ public class AddlWorkingSetEntryDialog extends DefaultDialog {
             @Override
             public void actionPerformed(ActionEvent e) {
 
-                String initializationDirectory = m_preferences.get("New_Entry_Dialog.LAST_MZDB_PATH", System.getProperty("user.home"));
+                String localInitDirectory = m_preferences.get("New_Entry_Dialog.LAST_LOCAL_MZDB_PATH", System.getProperty("user.home"));
 
-                File f = new File(initializationDirectory);
+                File f = new File(localInitDirectory);
                 if (!(f.exists() && f.isDirectory())) {
-                    initializationDirectory = System.getProperty("user.home");
+                    localInitDirectory = System.getProperty("user.home");
                 }
 
-                JFileChooser fchooser = new JFileChooser(initializationDirectory);
+                JFileChooser fchooser = new JFileChooser(localInitDirectory);
 
                 fchooser.setMultiSelectionEnabled(true);
 
@@ -159,22 +159,32 @@ public class AddlWorkingSetEntryDialog extends DefaultDialog {
                     }
 
                     if (files.length > 0) {
-                        m_lastParentDirectory = files[0].getParentFile().getAbsolutePath();
+                        m_lastLocalParentDirectory = files[0].getParentFile().getAbsolutePath();
                     }
 
                 }
             }
         });
-        
+
         m_addRemoteFileButton.addActionListener(new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent e) {
 
-                File[] f = ServerFileSystemView.getFileSystemView().getRoots();
-                
-                JFileChooser fchooser = new JFileChooser(ServerFileSystemView.getServerFileSystemView());
-                
+                File[] roots = ServerFileSystemView.getServerFileSystemView().getRoots();
+
+                String remoteInitDirectory = m_preferences.get("New_Entry_Dialog.LAST_REMOTE_MZDB_PATH", roots[0].getAbsolutePath());
+
+                int index;
+
+                for (index = 0; index < roots.length-1; index++) {
+                    if (remoteInitDirectory.startsWith(roots[index].getAbsolutePath())) {
+                        break;
+                    }
+                }
+
+                JFileChooser fchooser = new JFileChooser(roots[index], ServerFileSystemView.getServerFileSystemView());
+
                 fchooser.setMultiSelectionEnabled(true);
 
                 fchooser.addChoosableFileFilter(new FileNameExtensionFilter(".mzdb", "mzDB"));
@@ -191,7 +201,7 @@ public class AddlWorkingSetEntryDialog extends DefaultDialog {
                     }
 
                     if (files.length > 0) {
-                        m_lastParentDirectory = files[0].getParentFile().getAbsolutePath();
+                        m_lastLabelUsed = files[0].getParentFile().getAbsolutePath();
                     }
 
                 }
@@ -221,10 +231,17 @@ public class AddlWorkingSetEntryDialog extends DefaultDialog {
         if (!validateParameters()) {
             return false;
         } else {
-            m_preferences.put("New_Entry_Dialog.LAST_MZDB_PATH", m_lastParentDirectory);
+
+            if (m_lastLocalParentDirectory != null) {
+                m_preferences.put("New_Entry_Dialog.LAST_LOCAL_MZDB_PATH", m_lastLocalParentDirectory);
+            }
+
+            if (m_lastLabelUsed != null) {
+                m_preferences.put("New_Entry_Dialog.LAST_REMOTE_MZDB_PATH", m_lastLabelUsed);
+            }
 
             for (int i = 0; i < m_fileList.getModel().getSize(); i++) {
-                File f = (File) m_fileList.getModel().getElementAt(i);          
+                File f = (File) m_fileList.getModel().getElementAt(i);
                 Location location = f.exists() ? WorkingSetEntry.Location.LOCAL : WorkingSetEntry.Location.REMOTE;
                 boolean b = f.exists();
                 m_workingSet.addEntry(f.getAbsolutePath(), location);
@@ -236,9 +253,9 @@ public class AddlWorkingSetEntryDialog extends DefaultDialog {
             return true;
         }
     }
-    
-    private void updateRemoteButton(){
-        m_addRemoteFileButton.setEnabled(DatabaseDataManager.getDatabaseDataManager().getLoggedUser()!=null);
+
+    private void updateRemoteButton() {
+        m_addRemoteFileButton.setEnabled(DatabaseDataManager.getDatabaseDataManager().getLoggedUser() != null);
     }
 
     private boolean validateParameters() {

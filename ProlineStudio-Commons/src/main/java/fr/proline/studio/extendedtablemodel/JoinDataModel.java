@@ -490,14 +490,20 @@ public class JoinDataModel extends AbstractJoinDataModel {
         
         // Columns with keys
         if (columnIndex<m_keysColumns1.size()) {
-            int index1 = m_keysColumns1.get(columnIndex);
-            if (row1 == null) {
-                return null;
+            
+            if (row1 != null) {
+                int index1 = m_keysColumns1.get(columnIndex);
+                if (index1 != -1) {
+                    return m_data1.getRenderer(row1, index1);
+                }
             }
-            if (index1 != -1) {
-                return m_data1.getRenderer(row1, index1);
+            if (row2 != null) {
+                int index2 = m_keysColumns2.get(columnIndex);
+                if (index2 != -1) {
+                    return m_data2.getRenderer(row2, index2);
+                }
             }
-            return m_data2.getRenderer(row1, m_keysColumns2.get(columnIndex));
+            return null;
         }
         
         columnIndex -= m_keysColumns1.size();

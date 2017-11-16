@@ -23,12 +23,17 @@ public class MzdbDownloadBatch implements Runnable {
     private final String m_localURL;
     private final ArrayList<File> m_files;
     private final String m_root;
+    private MsListener m_listener;
+    private int m_successful, m_failed;
 
     public MzdbDownloadBatch(ArrayList<File> files, TreePath pathToExpand, String root) {
 
         m_files = files;
         m_pathToExpand = pathToExpand;
         m_root = root;
+
+        m_successful = 0;
+        m_failed = 0;
 
         StringBuilder temp = new StringBuilder();
 
@@ -39,6 +44,10 @@ public class MzdbDownloadBatch implements Runnable {
 
         m_localURL = temp.toString();
 
+    }
+
+    public void addMsListener(MsListener listener) {
+        m_listener = listener;
     }
 
     private void download(File remoteFile) {
@@ -55,12 +64,23 @@ public class MzdbDownloadBatch implements Runnable {
                 public void run(boolean success) {
 
                     if (success) {
-                        MzdbFilesTopComponent.getExplorer().getLocalFileSystemView().updateTree();
+                        if (m_pathToExpand != null) {
+                            MzdbFilesTopComponent.getExplorer().getLocalFileSystemView().updateTree();
+                        }
+                        m_successful++;
+                    } else {
+                        m_failed++;
+                    }
+
+                    if (m_successful + m_failed == m_files.size()) {
+                        m_listener.downloadPerformed(m_successful > 0);
                     }
                 }
             };
+            
+            String title = (m_pathToExpand!=null) ? m_root + m_localURL : " in a temp destination.";
 
-            DownloadMzdbTask task = new DownloadMzdbTask(callback, m_root + m_localURL, remoteFile.getAbsolutePath());
+            DownloadMzdbTask task = new DownloadMzdbTask(callback, title, remoteFile.getAbsolutePath());
 
             AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
 
@@ -69,7 +89,9 @@ public class MzdbDownloadBatch implements Runnable {
 
     @Override
     public void run() {
-        MzdbFilesTopComponent.getExplorer().getLocalFileSystemView().expandTreePath(m_pathToExpand);
+        if (m_pathToExpand != null) {
+            MzdbFilesTopComponent.getExplorer().getLocalFileSystemView().expandTreePath(m_pathToExpand);
+        }
         for (int i = 0; i < m_files.size(); i++) {
             download(m_files.get(i));
         }

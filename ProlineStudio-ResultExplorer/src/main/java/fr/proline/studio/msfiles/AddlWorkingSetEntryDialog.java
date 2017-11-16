@@ -6,6 +6,7 @@
 package fr.proline.studio.msfiles;
 
 import fr.proline.studio.dam.DatabaseDataManager;
+import fr.proline.studio.dpm.serverfilesystem.ServerFile;
 import fr.proline.studio.dpm.serverfilesystem.ServerFileSystemView;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.msfiles.WorkingSetEntry.Location;
@@ -197,7 +198,7 @@ public class AddlWorkingSetEntryDialog extends DefaultDialog {
                     File[] files = fchooser.getSelectedFiles();
                     int nbFiles = files.length;
                     for (int i = 0; i < nbFiles; i++) {
-                        ((DefaultListModel) m_fileList.getModel()).addElement(files[i]);
+                        ((DefaultListModel) m_fileList.getModel()).addElement(new ServerFile(files[i].getPath(), files[i].getPath(), true, 0, 0));
                     }
 
                     if (files.length > 0) {
@@ -242,8 +243,7 @@ public class AddlWorkingSetEntryDialog extends DefaultDialog {
 
             for (int i = 0; i < m_fileList.getModel().getSize(); i++) {
                 File f = (File) m_fileList.getModel().getElementAt(i);
-                Location location = f.exists() ? WorkingSetEntry.Location.LOCAL : WorkingSetEntry.Location.REMOTE;
-                boolean b = f.exists();
+                Location location = (f instanceof ServerFile) ? WorkingSetEntry.Location.REMOTE : WorkingSetEntry.Location.LOCAL;
                 m_workingSet.addEntry(f.getAbsolutePath(), location);
             }
 

@@ -93,5 +93,24 @@ public class WorkingSetUtil {
 
         return obj;
     }
+    
+    public static File getTempDirectory(){
+        File baseLocationFile = new File(".");
+
+        String canonicalPath = null;
+        try {
+            canonicalPath = baseLocationFile.getCanonicalPath();
+        } catch (IOException ex) {
+            Exceptions.printStackTrace(ex);
+        }
+
+        File tempDir = new File(canonicalPath + File.separator + "mzdb_temp");
+        
+        if(!tempDir.exists()){
+            tempDir.mkdir();
+        }
+        
+        return tempDir;
+    }
 
 }

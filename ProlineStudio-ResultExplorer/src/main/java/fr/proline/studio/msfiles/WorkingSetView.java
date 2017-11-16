@@ -8,6 +8,7 @@ package fr.proline.studio.msfiles;
 import fr.proline.mzscope.utils.IPopupMenuDelegate;
 import fr.proline.studio.mzscope.MzdbInfo;
 import fr.proline.studio.pattern.MzScopeWindowBoxManager;
+import fr.proline.studio.rsmexplorer.MzdbFilesTopComponent;
 import fr.proline.studio.rsmexplorer.gui.MzScope;
 import fr.proline.studio.rsmexplorer.gui.TreeStateUtil;
 import fr.proline.studio.utils.IconManager;
@@ -104,7 +105,7 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
                             setForeground(Color.LIGHT_GRAY);
                         }
                         setIcon(IconManager.getIcon(IconManager.IconType.SPECTRUM_EMISSION));
-                        
+
                     }
                 }
 
@@ -150,7 +151,40 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
         m_viewMzdbAction = new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent evt) {
-                displayRaw(extractSelectedRawFiles());
+                
+                       ArrayList<File> localFiles = extractSelectedRawFiles(WorkingSetEntry.Location.LOCAL);
+                ArrayList<File> remoteFiles = extractSelectedRawFiles(WorkingSetEntry.Location.REMOTE);
+
+                if (!remoteFiles.isEmpty()) {
+                    MsListener msListener = new MsListener() {
+
+                        @Override
+                        public void conversionPerformed(File f, ConversionSettings settings, boolean success) {
+                            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+                        }
+
+                        @Override
+                        public void uploadPerformed(File f, boolean success) {
+                            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+                        }
+
+                        @Override
+                        public void downloadPerformed(boolean success) {
+                            //all the action will be here.
+                            displayRaw(remoteFiles);
+                        }
+
+                        @Override
+                        public void exportPerformed(File f, boolean success) {
+                            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+                        }
+                    };
+
+                    
+                } else {
+                    displayRaw(localFiles);
+                }
+
             }
         };
         m_viewMzdb = new JMenuItem("View");
@@ -162,7 +196,59 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
         m_detectPeakels.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent evt) {
-                detectPeakels(extractSelectedRawFiles());
+
+                ArrayList<File> localFiles = extractSelectedRawFiles(WorkingSetEntry.Location.LOCAL);
+                ArrayList<File> remoteFiles = extractSelectedRawFiles(WorkingSetEntry.Location.REMOTE);
+
+                if (!remoteFiles.isEmpty()) {
+                    MsListener msListener = new MsListener() {
+
+                        @Override
+                        public void conversionPerformed(File f, ConversionSettings settings, boolean success) {
+                            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+                        }
+
+                        @Override
+                        public void uploadPerformed(File f, boolean success) {
+                            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+                        }
+
+                        @Override
+                        public void downloadPerformed(boolean success) {
+                            //all the action will be here.
+                            ArrayList<File> totalFiles = new ArrayList<File>();
+                            totalFiles.addAll(localFiles);
+                            
+                            File tempDir = WorkingSetUtil.getTempDirectory();
+                                                        
+                            for(int i=0; i<remoteFiles.size(); i++){
+                                String url = tempDir+File.separator+remoteFiles.get(i).getName();
+                                File f = new File(url);
+                                if(f.exists()){
+                                    totalFiles.add(f);
+                                }
+                            }
+                            
+                            detectPeakels(remoteFiles);
+                        }
+
+                        @Override
+                        public void exportPerformed(File f, boolean success) {
+                            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+                        }
+                    };
+                    
+                    String localDirPath = WorkingSetUtil.getTempDirectory().getAbsolutePath();
+                    
+                    MzdbDownloadBatch downloadBatch = new MzdbDownloadBatch(remoteFiles, localDirPath, "");
+                    downloadBatch.addMsListener(msListener);
+                    Thread downloadThread = new Thread(downloadBatch);
+                    downloadThread.start();
+
+                    
+                } else {
+                    detectPeakels(localFiles);
+                }
             }
         });
         popupMenu.add(m_detectPeakels);
@@ -221,11 +307,11 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
                 AddlWorkingSetEntryDialog dialog = AddlWorkingSetEntryDialog.getDialog(null, m_selectedWorkingSets.get(0));
                 dialog.setLocationRelativeTo(null);
                 dialog.setVisible(true);
-                
+
                 TreePath pathToExpand = m_tree.getSelectionPaths()[0];
-                
+
                 m_tree.expandPath(pathToExpand);
-                
+
                 reloadTree();
                 resetTreeState();
                 DefaultMutableTreeNode root = (DefaultMutableTreeNode) m_workingSetModel.getRoot();
@@ -360,17 +446,19 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
 
     }
 
-    private ArrayList<File> extractSelectedRawFiles() {
+    private ArrayList<File> extractSelectedRawFiles(WorkingSetEntry.Location location) {
         ArrayList<File> files = new ArrayList<File>();
 
         for (int i = 0; i < m_selectedWorkingSetEntries.size(); i++) {
             WorkingSetEntry entry = m_selectedWorkingSetEntries.get(i);
-            files.add(entry.getFile());
+            if (entry.getLocation() == location) {
+                files.add(entry.getFile());
+            }
         }
 
         return files;
     }
-    
+
     private void reloadTree() {
         if (m_workingSetModel != null) {
             m_tree.setModel(null);
@@ -378,6 +466,5 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
             m_tree.setModel(m_workingSetModel);
         }
     }
-
 
 }

@@ -5,6 +5,7 @@
  */
 package fr.proline.studio.msfiles;
 
+import fr.proline.studio.dpm.serverfilesystem.ServerFile;
 import java.io.File;
 
 /**
@@ -12,62 +13,65 @@ import java.io.File;
  * @author AK249877
  */
 public class WorkingSetEntry {
-    
+
     public enum Location {
 
         LOCAL, REMOTE
     }
-    
-    
+
     private final String m_filename;
     private final String m_path;
     private final Location m_location;
     private boolean m_existing;
     private File m_file;
     private WorkingSet m_parent;
-    
-    public WorkingSetEntry(String filename, String path, Location location, WorkingSet parent){
+
+    public WorkingSetEntry(String filename, String path, Location location, WorkingSet parent) {
         m_filename = filename;
         m_path = path;
         m_location = location;
         m_parent = parent;
-        
-        m_file = new File(m_path);
+
+        if (location == Location.LOCAL) {
+            m_file = new File(m_path);
+        } else {
+            m_file = new ServerFile(path, path, true, 0, 0);
+        }
         m_existing = (location == Location.REMOTE || m_file.exists());
     }
-    
-    public String getFilename(){
+
+    public String getFilename() {
         return m_filename;
     }
-    
-    public String getPath(){
+
+    public String getPath() {
         return m_path;
     }
-    
-    public Location getLocation(){
+
+    public Location getLocation() {
         return m_location;
     }
-    
-    public boolean exists(){
+
+    public boolean exists() {
         return m_existing;
     }
-    
-    public WorkingSet getParent(){
+
+    public WorkingSet getParent() {
         return m_parent;
     }
-    
-    public void resetExist(){
+
+    public void resetExist() {
         m_file = new File(m_path);
         m_existing = (m_location == Location.REMOTE || m_file.exists());
     }
-    
-    public File getFile(){
+
+    public File getFile() {
         return m_file;
     }
-    
+
     @Override
-    public String toString(){
+    public String toString() {
         return m_filename;
     }
-    
+
 }

@@ -173,7 +173,7 @@ public class AddlWorkingSetEntryDialog extends DefaultDialog {
 
                 File[] roots = ServerFileSystemView.getServerFileSystemView().getRoots();
 
-                String remoteInitDirectory = m_preferences.get("New_Entry_Dialog.LAST_REMOTE_MZDB_PATH", roots[0].getAbsolutePath());
+                String remoteInitDirectory = m_preferences.get("New_Entry_Dialog.LAST_REMOTE_MZDB_PATH_LABEL", roots[0].getAbsolutePath());
 
                 int index;
 
@@ -237,7 +237,7 @@ public class AddlWorkingSetEntryDialog extends DefaultDialog {
             }
 
             if (m_lastLabelUsed != null) {
-                m_preferences.put("New_Entry_Dialog.LAST_REMOTE_MZDB_PATH", m_lastLabelUsed);
+                m_preferences.put("New_Entry_Dialog.LAST_REMOTE_MZDB_PATH_LABEL", m_lastLabelUsed);
             }
 
             for (int i = 0; i < m_fileList.getModel().getSize(); i++) {

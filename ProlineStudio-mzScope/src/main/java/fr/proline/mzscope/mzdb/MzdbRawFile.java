@@ -250,7 +250,7 @@ public class MzdbRawFile implements IRawFile {
 
     private List<IFeature> detectFeatures(float mzTolPPM, double minMz, double maxMz) {
         List<IFeature> result = new ArrayList<>();
-        FeatureDetectorConfig detectorConfig = new FeatureDetectorConfig(1, mzTolPPM, 5, new SmartPeakelFinderConfig(5, 3, 0.75f, false, 10, false, true));
+        FeatureDetectorConfig detectorConfig = new FeatureDetectorConfig(1, mzTolPPM, 5, new SmartPeakelFinderConfig(5, 3, 0.75f, false, 10, false, true, true));   
         MzDbFeatureDetector detector = new MzDbFeatureDetector(reader, detectorConfig);
         try {
             Iterator<RunSlice> runSlices;
@@ -375,9 +375,9 @@ public class MzdbRawFile implements IRawFile {
             
             FeatureDetectorConfig detectorConfig = null;
             if (params.isMsnExtraction()) {
-                detectorConfig = new FeatureDetectorConfig(2, params.getFragmentMzTolPPM(), 5, new SmartPeakelFinderConfig(5, 3, 0.75f, false, 10, true, params.isRemoveBaseline()));
+                detectorConfig = new FeatureDetectorConfig(2, params.getFragmentMzTolPPM(), 5, new SmartPeakelFinderConfig(5, 3, 0.75f, false, 10, true, params.isRemoveBaseline(), true));
             } else {
-                detectorConfig = new FeatureDetectorConfig(1, params.getMzTolPPM(), 5, new SmartPeakelFinderConfig(5, 3, 0.75f, false, 10, false, params.isRemoveBaseline()));                
+                detectorConfig = new FeatureDetectorConfig(1, params.getMzTolPPM(), 5, new SmartPeakelFinderConfig(5, 3, 0.75f, false, 10, false, params.isRemoveBaseline(), true));                
             }
             
             MzDbFeatureDetector detector = new MzDbFeatureDetector(reader, detectorConfig);

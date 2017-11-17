@@ -183,7 +183,7 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
                                 }
                             }
 
-                            displayRaw(remoteFiles);
+                            displayRaw(totalFiles);
                         }
 
                         @Override
@@ -241,14 +241,18 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
                             File tempDir = WorkingSetUtil.getTempDirectory();
 
                             for (int i = 0; i < remoteFiles.size(); i++) {
+                                
                                 String url = tempDir + File.separator + remoteFiles.get(i).getName();
+                                
                                 File f = new File(url);
+                                
                                 if (f.exists()) {
                                     totalFiles.add(f);
                                 }
+                                
                             }
 
-                            detectPeakels(remoteFiles);
+                            detectPeakels(totalFiles);
                         }
 
                         @Override

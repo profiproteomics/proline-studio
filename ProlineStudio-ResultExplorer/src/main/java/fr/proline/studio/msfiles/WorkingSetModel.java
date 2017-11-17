@@ -26,11 +26,14 @@ public class WorkingSetModel implements TreeModel {
     private final HashSet<TreeModelListener> m_listeners; // Declare the listeners vector
     
     private HashSet<WorkingSet> m_workingSetIndex;
+    
+    private HashSet<WorkingSetEntry> m_workingSetEntryIndex;
 
     public WorkingSetModel(WorkingSetRoot root) {
         m_root = new DefaultMutableTreeNode(root);
         m_listeners = new HashSet<TreeModelListener>();
         m_workingSetIndex = new HashSet<WorkingSet>();
+        m_workingSetEntryIndex = new HashSet<WorkingSetEntry>();
     }
 
     @Override
@@ -83,6 +86,8 @@ public class WorkingSetModel implements TreeModel {
             String path = (String) entry.get("path");
 
             WorkingSetEntry newEntry = new WorkingSetEntry(filename, path, location, workingSet);
+            
+            m_workingSetEntryIndex.add(newEntry);
 
             DefaultMutableTreeNode childNode = new DefaultMutableTreeNode(newEntry);
 
@@ -205,6 +210,10 @@ public class WorkingSetModel implements TreeModel {
     
     public HashSet<WorkingSet> getAllWorkingSets(){
         return m_workingSetIndex;
+    }
+    
+    public HashSet<WorkingSetEntry> getAllWorkingSetEntries(){
+        return m_workingSetEntryIndex;
     }
 
 }

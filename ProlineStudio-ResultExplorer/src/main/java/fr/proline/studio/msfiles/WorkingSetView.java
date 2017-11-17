@@ -151,8 +151,8 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
         m_viewMzdbAction = new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent evt) {
-                
-                       ArrayList<File> localFiles = extractSelectedRawFiles(WorkingSetEntry.Location.LOCAL);
+
+                ArrayList<File> localFiles = extractSelectedRawFiles(WorkingSetEntry.Location.LOCAL);
                 ArrayList<File> remoteFiles = extractSelectedRawFiles(WorkingSetEntry.Location.REMOTE);
 
                 if (!remoteFiles.isEmpty()) {
@@ -171,6 +171,19 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
                         @Override
                         public void downloadPerformed(boolean success) {
                             //all the action will be here.
+                            ArrayList<File> totalFiles = new ArrayList<File>();
+                            totalFiles.addAll(localFiles);
+
+                            File tempDir = WorkingSetUtil.getTempDirectory();
+
+                            for (int i = 0; i < remoteFiles.size(); i++) {
+                                String url = tempDir + File.separator + remoteFiles.get(i).getName();
+                                File f = new File(url);
+                                if (f.exists()) {
+                                    totalFiles.add(f);
+                                }
+                            }
+
                             displayRaw(remoteFiles);
                         }
 
@@ -180,7 +193,13 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
                         }
                     };
 
-                    
+                    String localDirPath = WorkingSetUtil.getTempDirectory().getAbsolutePath();
+
+                    MzdbDownloadBatch downloadBatch = new MzdbDownloadBatch(remoteFiles, localDirPath, "");
+                    downloadBatch.addMsListener(msListener);
+                    Thread downloadThread = new Thread(downloadBatch);
+                    downloadThread.start();
+
                 } else {
                     displayRaw(localFiles);
                 }
@@ -218,17 +237,17 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
                             //all the action will be here.
                             ArrayList<File> totalFiles = new ArrayList<File>();
                             totalFiles.addAll(localFiles);
-                            
+
                             File tempDir = WorkingSetUtil.getTempDirectory();
-                                                        
-                            for(int i=0; i<remoteFiles.size(); i++){
-                                String url = tempDir+File.separator+remoteFiles.get(i).getName();
+
+                            for (int i = 0; i < remoteFiles.size(); i++) {
+                                String url = tempDir + File.separator + remoteFiles.get(i).getName();
                                 File f = new File(url);
-                                if(f.exists()){
+                                if (f.exists()) {
                                     totalFiles.add(f);
                                 }
                             }
-                            
+
                             detectPeakels(remoteFiles);
                         }
 
@@ -237,15 +256,14 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
                             throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
                         }
                     };
-                    
+
                     String localDirPath = WorkingSetUtil.getTempDirectory().getAbsolutePath();
-                    
+
                     MzdbDownloadBatch downloadBatch = new MzdbDownloadBatch(remoteFiles, localDirPath, "");
                     downloadBatch.addMsListener(msListener);
                     Thread downloadThread = new Thread(downloadBatch);
                     downloadThread.start();
 
-                    
                 } else {
                     detectPeakels(localFiles);
                 }

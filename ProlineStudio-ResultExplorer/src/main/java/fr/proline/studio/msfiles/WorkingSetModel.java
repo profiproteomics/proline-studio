@@ -24,10 +24,13 @@ public class WorkingSetModel implements TreeModel {
     private DefaultMutableTreeNode m_root;
 
     private final HashSet<TreeModelListener> m_listeners; // Declare the listeners vector
+    
+    private HashSet<WorkingSet> m_workingSetIndex;
 
     public WorkingSetModel(WorkingSetRoot root) {
         m_root = new DefaultMutableTreeNode(root);
         m_listeners = new HashSet<TreeModelListener>();
+        m_workingSetIndex = new HashSet<WorkingSet>();
     }
 
     @Override
@@ -52,6 +55,8 @@ public class WorkingSetModel implements TreeModel {
             JSONArray entries = (JSONArray) workingSetEntry.get("entries");
 
             WorkingSet newWorkingSet = new WorkingSet(name, description, entries);
+            
+            m_workingSetIndex.add(newWorkingSet);
 
             DefaultMutableTreeNode childNode = new DefaultMutableTreeNode(newWorkingSet);
 
@@ -196,6 +201,10 @@ public class WorkingSetModel implements TreeModel {
         for (TreeModelListener listener : m_listeners) {
             listener.treeStructureChanged(e);
         }
+    }
+    
+    public HashSet<WorkingSet> getAllWorkingSets(){
+        return m_workingSetIndex;
     }
 
 }

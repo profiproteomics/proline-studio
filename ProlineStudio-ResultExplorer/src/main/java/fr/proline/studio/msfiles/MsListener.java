@@ -5,7 +5,7 @@
  */
 package fr.proline.studio.msfiles;
 
-import java.io.File;
+import java.util.ArrayList;
 
 /**
  *
@@ -13,12 +13,12 @@ import java.io.File;
  */
 public interface MsListener {  
     
-    public void conversionPerformed(File f, ConversionSettings settings, boolean success);
+    public void conversionPerformed(ArrayList<MsListenerConverterParameter> list);
     
-    public void uploadPerformed(File f, boolean success);
+    public void uploadPerformed(ArrayList<MsListenerParameter> list);
     
-    public void downloadPerformed(boolean success);
+    public void downloadPerformed(ArrayList<MsListenerParameter> list);
     
-    public void exportPerformed(File f, boolean success);
+    public void exportPerformed(ArrayList<MsListenerParameter> list);
     
 }

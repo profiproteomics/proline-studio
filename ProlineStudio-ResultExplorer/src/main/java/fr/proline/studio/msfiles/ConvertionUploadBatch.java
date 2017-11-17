@@ -7,13 +7,13 @@ package fr.proline.studio.msfiles;
 
 import fr.proline.studio.rsmexplorer.MzdbFilesTopComponent;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 import javax.swing.tree.TreePath;
 
 /**
@@ -91,47 +91,52 @@ public class ConvertionUploadBatch implements Runnable, MsListener {
     }
 
     @Override
-    public void conversionPerformed(File f, ConversionSettings conversionSettings, boolean success) {
-        if (success) {
-            if (conversionSettings != null && conversionSettings.getUploadSettings() != null) {
-                MzdbFilesTopComponent.getExplorer().getLocalFileSystemView().updateTree();
-                upload(f, conversionSettings.getUploadSettings());
+    public void conversionPerformed(ArrayList<MsListenerConverterParameter> list) {
+
+        if (list != null && !list.isEmpty()) {
+
+            for (int i = 0; i < list.size(); i++) {
+
+                MsListenerConverterParameter p = list.get(i);
+
+                if (p.wasSuccessful()) {
+                    if (p.getConversionSettings() != null && p.getConversionSettings().getUploadSettings() != null) {
+                        MzdbFilesTopComponent.getExplorer().getLocalFileSystemView().updateTree();
+                        upload(p.getFile(), p.getConversionSettings().getUploadSettings());
+                    }
+                }
+
             }
         }
-
-        /*
-         if (f.getAbsolutePath().toLowerCase().endsWith(".mzdb")) {
-
-         HashSet<String> directories = new HashSet<String>();
-
-         File outputDirectory = new File(conversionSettings.getOutputPath());
-
-         while (outputDirectory.getParentFile() != null) {
-         directories.add(outputDirectory.getAbsolutePath());
-         outputDirectory = outputDirectory.getParentFile();
-         }
-
-         MzdbFilesTopComponent.getExplorer().getLocalFileSystemView().expandMultipleTreePath(directories);
-         MzdbFilesTopComponent.getExplorer().getLocalFileSystemView().updateTree();
-
-         }
-         */
     }
 
     @Override
-    public void uploadPerformed(File f, boolean success) {
-        if (success) {
-            MzdbFilesTopComponent.getExplorer().getTreeFileChooserPanel().updateTree();
+    public void uploadPerformed(ArrayList<MsListenerParameter> list) {
+
+        if (list != null && !list.isEmpty()) {
+
+            boolean success = false;
+
+            for (MsListenerParameter parameter : list) {
+                if (parameter.wasSuccessful()) {
+                    success = true;
+                    break;
+                }
+            }
+
+            if (success) {
+                MzdbFilesTopComponent.getExplorer().getTreeFileChooserPanel().updateTree();
+            }
         }
     }
 
     @Override
-    public void downloadPerformed(boolean success) {
+    public void downloadPerformed(ArrayList<MsListenerParameter> list) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public void exportPerformed(File f, boolean success) {
+    public void exportPerformed(ArrayList<MsListenerParameter> list) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 

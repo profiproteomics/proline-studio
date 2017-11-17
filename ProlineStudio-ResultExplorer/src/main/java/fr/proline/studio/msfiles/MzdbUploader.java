@@ -12,6 +12,7 @@ import fr.proline.studio.dpm.AccessJMSManagerThread;
 import fr.proline.studio.dpm.task.jms.AbstractJMSCallback;
 import fr.proline.studio.dpm.task.jms.FileUploadTask;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.logging.Level;
 
 /**
@@ -73,7 +74,9 @@ public class MzdbUploader implements Runnable {
                             if (success) {
 
                                 if (m_msListener != null && m_file.exists()) {
-                                    m_msListener.uploadPerformed(m_file, true);
+                                    ArrayList<MsListenerParameter> list = new ArrayList<MsListenerParameter>();
+                                    list.add(new MsListenerParameter(m_file, true));
+                                    m_msListener.uploadPerformed(list);
                                 }
 
                                 if (m_uploadSettings.getDeleteMzdb()) {
@@ -95,7 +98,9 @@ public class MzdbUploader implements Runnable {
 
                             } else {
                                 if (m_msListener != null) {
-                                    m_msListener.uploadPerformed(m_file, false);
+                                    ArrayList<MsListenerParameter> list = new ArrayList<MsListenerParameter>();
+                                    list.add(new MsListenerParameter(m_file, false));
+                                    m_msListener.uploadPerformed(list);
                                 }
                             }
                         }
@@ -135,11 +140,11 @@ public class MzdbUploader implements Runnable {
 
             @Override
             public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
-                if(success){
+                if (success) {
                     verifyIntegrityAndUpload();
                 }
             }
-            
+
         };
         MzdbEncodingVerificationTask encodingVerificationTask = new MzdbEncodingVerificationTask(callback, m_file);
         AccessDatabaseThread.getAccessDatabaseThread().addTask(encodingVerificationTask);

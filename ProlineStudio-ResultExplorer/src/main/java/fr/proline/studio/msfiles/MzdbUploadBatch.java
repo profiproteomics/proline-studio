@@ -7,6 +7,7 @@ package fr.proline.studio.msfiles;
 
 import fr.proline.studio.rsmexplorer.MzdbFilesTopComponent;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -75,24 +76,36 @@ public class MzdbUploadBatch implements Runnable, MsListener {
     }
 
     @Override
-    public void conversionPerformed(File f, ConversionSettings settings, boolean success) {
+    public void conversionPerformed(ArrayList<MsListenerConverterParameter> list) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public void uploadPerformed(File f, boolean success) {
-        if (success) {
-            MzdbFilesTopComponent.getExplorer().getTreeFileChooserPanel().updateTree();
+    public void uploadPerformed(ArrayList<MsListenerParameter> list) {
+        if (list!=null && !list.isEmpty()) {
+            
+            boolean success = false;
+            
+            for(int i=0; i<list.size(); i++){
+                if(list.get(i).wasSuccessful()){
+                    success = true;
+                    break;
+                }
+            }
+            
+            if (success) {
+                MzdbFilesTopComponent.getExplorer().getTreeFileChooserPanel().updateTree();
+            }
         }
     }
 
     @Override
-    public void downloadPerformed(boolean success) {
+    public void downloadPerformed(ArrayList<MsListenerParameter> list) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public void exportPerformed(File f, boolean success) {
+    public void exportPerformed(ArrayList<MsListenerParameter> list) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 

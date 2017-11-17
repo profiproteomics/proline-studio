@@ -8,7 +8,6 @@ package fr.proline.studio.msfiles;
 import fr.proline.mzscope.utils.IPopupMenuDelegate;
 import fr.proline.studio.mzscope.MzdbInfo;
 import fr.proline.studio.pattern.MzScopeWindowBoxManager;
-import fr.proline.studio.rsmexplorer.MzdbFilesTopComponent;
 import fr.proline.studio.rsmexplorer.gui.MzScope;
 import fr.proline.studio.rsmexplorer.gui.TreeStateUtil;
 import fr.proline.studio.utils.IconManager;
@@ -159,17 +158,17 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
                     MsListener msListener = new MsListener() {
 
                         @Override
-                        public void conversionPerformed(File f, ConversionSettings settings, boolean success) {
+                        public void conversionPerformed(ArrayList<MsListenerConverterParameter> list) {
                             throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
                         }
 
                         @Override
-                        public void uploadPerformed(File f, boolean success) {
+                        public void uploadPerformed(ArrayList<MsListenerParameter> list) {
                             throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
                         }
 
                         @Override
-                        public void downloadPerformed(boolean success) {
+                        public void downloadPerformed(ArrayList<MsListenerParameter> list) {
                             //all the action will be here.
                             ArrayList<File> totalFiles = new ArrayList<File>();
                             totalFiles.addAll(localFiles);
@@ -188,9 +187,10 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
                         }
 
                         @Override
-                        public void exportPerformed(File f, boolean success) {
+                        public void exportPerformed(ArrayList<MsListenerParameter> list) {
                             throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
                         }
+
                     };
 
                     String localDirPath = WorkingSetUtil.getTempDirectory().getAbsolutePath();
@@ -223,17 +223,17 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
                     MsListener msListener = new MsListener() {
 
                         @Override
-                        public void conversionPerformed(File f, ConversionSettings settings, boolean success) {
+                        public void conversionPerformed(ArrayList<MsListenerConverterParameter> list) {
                             throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
                         }
 
                         @Override
-                        public void uploadPerformed(File f, boolean success) {
+                        public void uploadPerformed(ArrayList<MsListenerParameter> list) {
                             throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
                         }
 
                         @Override
-                        public void downloadPerformed(boolean success) {
+                        public void downloadPerformed(ArrayList<MsListenerParameter> list) {
                             //all the action will be here.
                             ArrayList<File> totalFiles = new ArrayList<File>();
                             totalFiles.addAll(localFiles);
@@ -252,9 +252,10 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
                         }
 
                         @Override
-                        public void exportPerformed(File f, boolean success) {
+                        public void exportPerformed(ArrayList<MsListenerParameter> list) {
                             throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
                         }
+
                     };
 
                     String localDirPath = WorkingSetUtil.getTempDirectory().getAbsolutePath();

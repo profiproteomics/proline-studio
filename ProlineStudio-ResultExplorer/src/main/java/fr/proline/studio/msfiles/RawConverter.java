@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.nio.file.DirectoryNotEmptyException;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
+import java.util.ArrayList;
 import java.util.HashSet;
 import javax.swing.SwingUtilities;
 
@@ -66,7 +67,11 @@ public class RawConverter implements Runnable {
                                 if (m_msListener != null) {
 
                                     if (f!=null && f.exists()) {
-                                        m_msListener.conversionPerformed(f, m_settings, true);
+                                        
+                                        ArrayList<MsListenerConverterParameter> list = new ArrayList<MsListenerConverterParameter>();
+                                        list.add(new MsListenerConverterParameter(f, true, m_settings));
+                                        
+                                        m_msListener.conversionPerformed(list);
                                     }
                                 }
 
@@ -98,7 +103,11 @@ public class RawConverter implements Runnable {
                             
                         } else {
                             if (m_msListener != null) {
-                                m_msListener.conversionPerformed(f, m_settings, false);
+                                
+                                ArrayList<MsListenerConverterParameter> list = new ArrayList<MsListenerConverterParameter>();
+                                list.add(new MsListenerConverterParameter(f, false, m_settings));
+                                
+                                m_msListener.conversionPerformed(list);
                             }
                         }
 

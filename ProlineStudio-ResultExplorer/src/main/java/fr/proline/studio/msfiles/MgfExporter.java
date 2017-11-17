@@ -9,6 +9,7 @@ import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.SubTask;
 import java.io.File;
+import java.util.ArrayList;
 
 /**
  *
@@ -55,11 +56,9 @@ public class MgfExporter implements Runnable {
 
                         @Override
                         public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
-                            if (success) {
-                                m_msListener.exportPerformed(m_file, true);
-                            } else {
-                                m_msListener.exportPerformed(m_file, false);
-                            }
+                            ArrayList<MsListenerParameter> list = new ArrayList<MsListenerParameter>();
+                            list.add(new MsListenerParameter(m_file, success));
+                            m_msListener.exportPerformed(list);
                         }
 
                     };

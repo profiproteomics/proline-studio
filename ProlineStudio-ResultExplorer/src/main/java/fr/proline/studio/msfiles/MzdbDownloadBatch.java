@@ -6,7 +6,6 @@
 package fr.proline.studio.msfiles;
 
 import fr.proline.studio.dpm.AccessJMSManagerThread;
-import fr.proline.studio.dpm.serverfilesystem.ServerFile;
 import fr.proline.studio.dpm.task.jms.AbstractJMSCallback;
 import fr.proline.studio.dpm.task.jms.DownloadMzdbTask;
 import fr.proline.studio.rsmexplorer.MzdbFilesTopComponent;
@@ -25,15 +24,14 @@ public class MzdbDownloadBatch implements Runnable {
     private final ArrayList<File> m_files;
     private final String m_root;
     private MsListener m_listener;
-    private int m_successful, m_failed;
-
+    private ArrayList<MsListenerParameter> m_list;
+    
     public MzdbDownloadBatch(ArrayList<File> files, TreePath pathToExpand, String root) {
         m_files = files;
         m_pathToExpand = pathToExpand;
         m_root = root;
 
-        m_successful = 0;
-        m_failed = 0;
+        m_list = new ArrayList<MsListenerParameter>();
 
         StringBuilder temp = new StringBuilder();
 
@@ -48,8 +46,7 @@ public class MzdbDownloadBatch implements Runnable {
     public MzdbDownloadBatch(ArrayList<File> files, String localURL, String root) {
         m_files = files;
         m_root = root;
-        m_successful = 0;
-        m_failed = 0;
+
         m_localURL = localURL;
     }
 
@@ -58,12 +55,6 @@ public class MzdbDownloadBatch implements Runnable {
     }
 
     private void download(File remoteFile) {
-        
-        if(remoteFile instanceof ServerFile){
-            System.out.println("yiupi!");
-        }else{
-            System.out.println("not!");
-        }
         
         if (remoteFile.getAbsolutePath().toLowerCase().endsWith(".mzdb")) {
 
@@ -81,14 +72,14 @@ public class MzdbDownloadBatch implements Runnable {
                         if (m_pathToExpand != null) {
                             MzdbFilesTopComponent.getExplorer().getLocalFileSystemView().updateTree();
                         }
-                        m_successful++;
+                        m_list.add(new MsListenerParameter(remoteFile, true));
                     } else {
-                        m_failed++;
+                        m_list.add(new MsListenerParameter(remoteFile, false));
                     }
 
                     if (m_listener != null) {
-                        if (m_successful + m_failed == m_files.size()) {
-                            m_listener.downloadPerformed(m_successful > 0);
+                        if (m_list.size() == m_files.size()) { 
+                            m_listener.downloadPerformed(m_list);
                         }
                     }
                 }

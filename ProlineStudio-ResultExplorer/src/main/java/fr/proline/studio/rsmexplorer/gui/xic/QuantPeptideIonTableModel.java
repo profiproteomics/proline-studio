@@ -268,16 +268,14 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements GlobalT
             case COLTYPE_PEPTIDE_SCORE: {
                 // Retrieve typical Peptide Match
                 LazyData lazyData = getLazyData(row, col);
-                DPeptideInstance peptideInstance = peptideIon.getPeptideInstance();
-                if (peptideInstance == null) {
+                DPeptideMatch peptideMatch = peptideIon.getBestPeptideMatch();
+                if (peptideMatch == null) {
                     lazyData.setData(null);
                     givePriorityTo(m_taskId, row, col);
-                } else if (peptideInstance.getBestPeptideMatch() != null) {
-                    Float score = Float.valueOf((float) peptideInstance.getBestPeptideMatch().getScore());
-                    lazyData.setData(score);
                 } else {
-                    lazyData.setData(null);
-                }
+                    Float score = Float.valueOf((float) peptideMatch.getScore());
+                    lazyData.setData(score);
+                } 
                 return lazyData;
 
             }
@@ -646,13 +644,13 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements GlobalT
                 DPeptideInstance peptideInstance = peptideIon.getPeptideInstance();
                 if (peptideInstance == null) {
                     return "";
-                } else if (peptideInstance.getBestPeptideMatch() != null) {
-                    boolean ptmStringLoadeed = peptideInstance.getBestPeptideMatch().getPeptide().getTransientData().isPeptideReadablePtmStringLoaded();
+                } else if (peptideInstance.getPeptide() != null) {
+                    boolean ptmStringLoadeed = peptideInstance.getPeptide().getTransientData().isPeptideReadablePtmStringLoaded();
                     if (!ptmStringLoadeed) {
                         return null;
                     }
                     String ptm = "";
-                    PeptideReadablePtmString ptmString = peptideInstance.getBestPeptideMatch().getPeptide().getTransientData().getPeptideReadablePtmString();
+                    PeptideReadablePtmString ptmString = peptideInstance.getPeptide().getTransientData().getPeptideReadablePtmString();
                     if (ptmString != null) {
                         ptm = ptmString.getReadablePtmString();
                     }
@@ -663,16 +661,15 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements GlobalT
                 }
             }
             case COLTYPE_PEPTIDE_SCORE: {
-                DPeptideInstance peptideInstance = peptideIon.getPeptideInstance();
-                if (peptideInstance == null) {
+                DPeptideMatch peptideMatch = peptideIon.getBestPeptideMatch();
+                if (peptideMatch == null) {
                     return "";
 
-                } else if (peptideInstance.getBestPeptideMatch() != null) {
-                    float score = (float) peptideInstance.getBestPeptideMatch().getScore();
+                } else {
+                    float score = (float) peptideMatch.getScore();
                     return String.valueOf(score);
                 }
-                return "";
-
+                
             }
             case COLTYPE_PEPTIDE_PROTEIN_SET_COUNT: {
 

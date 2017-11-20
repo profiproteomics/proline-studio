@@ -30,6 +30,11 @@ public class FontRenderer implements TableCellRenderer  {
                 Font font = c.getFont();
                 c.setFont(font.deriveFont(Font.ITALIC));
             }
+            if (tableModel.isReliable(table.convertRowIndexToModel(row), table.convertColumnIndexToModel(column))) {
+                Font font = c.getFont();
+                int style = font.getStyle() + Font.BOLD;
+                c.setFont(font.deriveFont(style));
+            }
         }
         return c;
 

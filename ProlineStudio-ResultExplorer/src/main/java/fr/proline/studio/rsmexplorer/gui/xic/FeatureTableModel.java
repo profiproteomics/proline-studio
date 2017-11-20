@@ -5,6 +5,8 @@ import fr.proline.core.orm.uds.dto.DQuantitationChannel;
 import fr.proline.studio.extendedtablemodel.ExtraDataType;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadLcMSTask;
 import fr.proline.studio.export.ExportFontData;
+import fr.proline.studio.extendedtablemodel.CompoundTableModel;
+import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
 import fr.proline.studio.filter.ConvertValueInterface;
 import fr.proline.studio.filter.DoubleFilter;
 import fr.proline.studio.filter.Filter;
@@ -57,6 +59,8 @@ public class FeatureTableModel extends LazyTableModel implements GlobalTableMode
     
     public final static String SERIALIZED_PROP_PREDICTED_ELUTION_TIME = "predicted_elution_time";
     public final static String SERIALIZED_PROP_PEAKELS_COUNT = "peakels_count";
+    public final static String SERIALIZED_PROP_IS_RELIABLE = "is_reliable";
+    
     
     
     private static final String[] m_columnNames = {"Id", "Map", "Quant. Channel", "m/z", "Charge", "RT", "Apex Intensity", "Intensity", "Duration (sec)", "Quality Score", "Is Overlapping", "Predicted RT", "#Peakels"};
@@ -268,22 +272,11 @@ public class FeatureTableModel extends LazyTableModel implements GlobalTableMode
             }
             case COLTYPE_FEATURE_PEAKELS_COUNT:{
                 LazyData lazyData = getLazyData(row, col);
-                Map<String, Object> prop = null;
-                try {
-                    prop = feature.getSerializedPropertiesAsMap();
-                } catch (Exception ex) {
-                    
-                }
-                if (prop != null) {
-                    Object o = prop.get(SERIALIZED_PROP_PEAKELS_COUNT);
-                    if (o != null && o instanceof Integer) {
-                        Integer peakelsCount = (Integer)o;
-                        lazyData.setData(peakelsCount);
-                    }else{
-                        lazyData.setData(0);
-                    }
-                }else{
-                    lazyData.setData(0);
+                if (feature.getCharge() == null) {
+                    lazyData.setData(null);
+                    givePriorityTo(m_taskId, row, col);
+                }else {
+                    lazyData.setData(feature.getPeakelCount());
                 }
                 return lazyData;
             }
@@ -495,19 +488,7 @@ public class FeatureTableModel extends LazyTableModel implements GlobalTableMode
                 return new Float(feature.getPredictedElutionTime());
             }
             case COLTYPE_FEATURE_PEAKELS_COUNT: {
-                Map<String, Object> prop = null;
-                try {
-                    prop = feature.getSerializedPropertiesAsMap();
-                } catch (Exception ex) {
-                    
-                }
-                if (prop != null) {
-                    Object o = prop.get(SERIALIZED_PROP_PEAKELS_COUNT);
-                    if (o != null && o instanceof Integer) {
-                        return (Integer)o;
-                    }
-                }
-                return null;
+                return feature.getPeakelCount();
             }
         }
         return null; // should never happen
@@ -694,19 +675,11 @@ public class FeatureTableModel extends LazyTableModel implements GlobalTableMode
                 return String.valueOf(feature.getPredictedElutionTime());
             }
             case COLTYPE_FEATURE_PEAKELS_COUNT: {
-                Map<String, Object> prop = null;
-                try {
-                    prop = feature.getSerializedPropertiesAsMap();
-                } catch (Exception ex) {
-                    
-                }
-                if (prop != null) {
-                    Object o = prop.get(SERIALIZED_PROP_PEAKELS_COUNT);
-                    if (o != null && o instanceof Integer) {
-                        return ((Integer)o).toString();
-                    }
-                }
-                return String.valueOf(feature.getPredictedElutionTime());
+               if (feature.getCharge() == null) {
+                    return "";
+                } else {
+                   return ""+feature.getPeakelCount();
+               }
             }
         }
         return ""; // should never happen
@@ -726,6 +699,32 @@ public class FeatureTableModel extends LazyTableModel implements GlobalTableMode
     }
     
 
+    public Boolean isReliable(int row, int col) {
+        //return !hasFeaturePeaks(row);
+        // Retrieve Feature
+        DFeature feature = m_features.get(row);
+        if (feature.getId() == -1){
+            // fake feature
+            return false;
+        } else {
+                Map<String, Object> prop = null;
+                try {
+                    prop = feature.getSerializedPropertiesAsMap();
+                } catch (Exception ex) {
+                prop = null;     
+                }
+                if (prop != null) {
+                    Object o = prop.get(SERIALIZED_PROP_IS_RELIABLE);
+                    if (o != null && o instanceof Boolean) {
+                        return (Boolean)o;
+                    } else {
+                        return true;
+                    }
+                } else {
+                    return true;
+                }
+        }
+    }
     
     public Boolean isInItalic(int row, int col) {
         //return !hasFeaturePeaks(row);

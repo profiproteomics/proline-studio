@@ -142,7 +142,7 @@ public class ExportDatasetJMSAction extends AbstractRSMAction {
                                                 AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
                                             } else {
                                                 int nb = 1;
-                                                //WARNING : This code parse the returned filename from Prolibe Server ExportRSM Service : It assume
+                                                //WARNING : This code parse the returned filename from Proline Server ExportRSM Service : It assume
                                                 // the returned name is formated as : <prefix>-<DS_ID>_random.<ext> and for multi export, will be modified as 
                                                 // Before <prefix>-<DS_ID>_<DS_name>_index.<ext> 
                                                 // After <DS_name>_<DS__ID>_index.<ext> : with <DS_name> limited to 20 characters.

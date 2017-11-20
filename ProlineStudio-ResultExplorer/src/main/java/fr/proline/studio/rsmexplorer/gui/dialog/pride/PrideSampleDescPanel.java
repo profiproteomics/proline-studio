@@ -88,7 +88,7 @@ public class PrideSampleDescPanel extends PrideWizardPanel implements OLSInputab
         
         List<CVParam> additinalDescription = new ArrayList<>();
         //Add Species
-        if(!m_sampleSpeciesCB.getSelectedItem().equals(EMPTY_PARAM))
+        if(m_sampleSpeciesCB.getSelectedItem()!= null && !m_sampleSpeciesCB.getSelectedItem().equals(EMPTY_PARAM))
             additinalDescription.add(m_sampleSpeciesCB.getItemAt(m_sampleSpeciesCB.getSelectedIndex()));            
         
         //Add all selected Tissue

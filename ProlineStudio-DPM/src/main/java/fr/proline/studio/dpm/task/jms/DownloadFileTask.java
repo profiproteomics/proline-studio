@@ -60,7 +60,7 @@ public class DownloadFileTask extends AbstractJMSTask {
     }
     
     private HashMap<String, Object> createParams() {
-        HashMap<String, Object> namedParams = new HashMap<String, Object>();
+        HashMap<String, Object> namedParams = new HashMap<>();
         namedParams.put("file_path", m_serverFilePath);
                     
         return namedParams;

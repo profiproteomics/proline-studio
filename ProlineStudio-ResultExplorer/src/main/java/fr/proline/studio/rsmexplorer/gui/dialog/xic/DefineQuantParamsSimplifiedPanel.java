@@ -101,6 +101,10 @@ public class DefineQuantParamsSimplifiedPanel extends AbstractDefineQuantParamsP
         IntegerParameter alignmentSmoothingMinWinlandmarksParameter = new IntegerParameter("smoothingMinimumNumberOfLandmarks", "Smoothing minimum number of landmarks", m_alignmentSmoothingMinWinlandmarksTF, new Integer(50), new Integer(1), null);
         m_parameterList.add(alignmentSmoothingMinWinlandmarksParameter);
 
+        m_featureMappingMethodCB = new JComboBox(FEATURE_MAPPING_METHOD_VALUES);
+        m_featureMappingMethodCB.setEnabled(!m_readOnly);
+        m_featureMappingMethodParameter = new ObjectParameter("featureMappingMethod", "Feature Mapping Method", m_featureMappingMethodCB, FEATURE_MAPPING_METHOD_VALUES, FEATURE_MAPPING_METHOD_KEYS,  0, null);
+        m_parameterList.add(m_featureMappingMethodParameter);
         
         m_alignmentFeatureMappingTimeToleranceTF = new JTextField();
         m_alignmentFeatureMappingTimeToleranceTF.setEnabled(!m_readOnly);
@@ -154,7 +158,12 @@ public class DefineQuantParamsSimplifiedPanel extends AbstractDefineQuantParamsP
         Map<String,Object> alnFtParams = (Map<String,Object>) alnParams.get("ft_mapping_params");
         m_alignmentFeatureMappingTimeToleranceTF.setText(""+Double.parseDouble(alnFtParams.get("time_tol").toString()));
         
-
+        for(int i=0; i<FEATURE_MAPPING_METHOD_KEYS.length; i++){
+            if (FEATURE_MAPPING_METHOD_KEYS[i].equals((String) quantParams.get("ft_mapping_method_name"))) { 
+                m_featureMappingMethodCB.setSelectedIndex(i);
+                break;
+            }
+        }
 
 
         
@@ -351,7 +360,15 @@ public class DefineQuantParamsSimplifiedPanel extends AbstractDefineQuantParamsP
         c1.insets = new java.awt.Insets(5, 5, 5, 5);
 
         c1.gridx = 0;
-        c1.gridy = 0;                
+        c1.gridy = 0;    
+        ftParamsPanel.add(new JLabel("method:"), c1);        
+        c1.gridx++;     
+        c1.weightx = 1;
+        ftParamsPanel.add(m_featureMappingMethodCB, c1);
+        c1.weightx = 0;
+        
+        c1.gridy++;
+        c1.gridx = 0;              
              
         ftParamsPanel.add(new JLabel("time tolerance (s):"), c1);        
         c1.gridx++;   

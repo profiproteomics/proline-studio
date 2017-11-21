@@ -59,10 +59,7 @@ public abstract class AbstractDefineQuantParamsPanel extends JPanel {
     protected final static String[] FEATURE_MAPPING_METHOD_VALUES = {"Feature Coordinates", "Peptide Identity"};
     protected final static String[] FEATURE_MAPPING_METHOD_KEYS = {"FEATURE_COORDINATES", "PEPTIDE_IDENTITY"};
     
-    protected ObjectParameter<String> m_featureMappingMethodParameter;
-    
-    
-    protected JComboBox  m_featureMappingMethodCB;
+
     protected JTextField m_featureMappingTimeTolTF;
     
 

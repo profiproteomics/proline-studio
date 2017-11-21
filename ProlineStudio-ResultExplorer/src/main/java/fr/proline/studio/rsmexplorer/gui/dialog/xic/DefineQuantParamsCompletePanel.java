@@ -40,6 +40,8 @@ public class DefineQuantParamsCompletePanel extends AbstractDefineQuantParamsPan
     private ObjectParameter<String> m_featureFilterOperatorParameter;
     private ObjectParameter<String> m_normalizationParameter;
 
+    protected ObjectParameter<String> m_featureMappingMethodParameter;
+    
     private JTextField m_clusteringMoZTolTF;
     private JTextField m_clusteringTimeTolTF;
     private JComboBox  m_clusteringTimeComputationCB;
@@ -55,6 +57,8 @@ public class DefineQuantParamsCompletePanel extends AbstractDefineQuantParamsPan
     private JComboBox m_featureFilterOperatorCB;
     private JTextField m_featureFilterValueTF;
     
+    
+    protected JComboBox  m_featureMappingMethodCB;
     private JTextField m_featureMappingMoZTolTF;
     
     private JComboBox m_normalizationCB;
@@ -353,6 +357,9 @@ public class DefineQuantParamsCompletePanel extends AbstractDefineQuantParamsPan
         smootingParams.put("window_overlap", m_alignmentSmoothingWinOverlapTF.getText());
         smootingParams.put("min_window_landmarks", m_alignmentSmoothingMinWinlandmarksTF.getText());
         alnParams.put("smoothing_params", smootingParams);     
+        
+        
+        params.put("ft_mapping_method_name", m_featureMappingMethodParameter.getStringValue());
         Map<String,Object> alnFtParams = new HashMap<>();
         alnFtParams.put("moz_tol", m_alignmentFeatureMappingMoZTolTF.getText());
         alnFtParams.put("moz_tol_unit", "PPM");

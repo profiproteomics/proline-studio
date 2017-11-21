@@ -101,10 +101,6 @@ public class DefineQuantParamsSimplifiedPanel extends AbstractDefineQuantParamsP
         IntegerParameter alignmentSmoothingMinWinlandmarksParameter = new IntegerParameter("smoothingMinimumNumberOfLandmarks", "Smoothing minimum number of landmarks", m_alignmentSmoothingMinWinlandmarksTF, new Integer(50), new Integer(1), null);
         m_parameterList.add(alignmentSmoothingMinWinlandmarksParameter);
 
-        m_featureMappingMethodCB = new JComboBox(FEATURE_MAPPING_METHOD_VALUES);
-        m_featureMappingMethodCB.setEnabled(!m_readOnly);
-        m_featureMappingMethodParameter = new ObjectParameter("featureMappingMethod", "Feature Mapping Method", m_featureMappingMethodCB, FEATURE_MAPPING_METHOD_VALUES, FEATURE_MAPPING_METHOD_KEYS,  0, null);
-        m_parameterList.add(m_featureMappingMethodParameter);
         
         m_alignmentFeatureMappingTimeToleranceTF = new JTextField();
         m_alignmentFeatureMappingTimeToleranceTF.setEnabled(!m_readOnly);
@@ -157,14 +153,6 @@ public class DefineQuantParamsSimplifiedPanel extends AbstractDefineQuantParamsP
         m_alignmentSmoothingMinWinlandmarksTF.setText(""+Integer.parseInt(smootingParams.get("min_window_landmarks").toString()));
         Map<String,Object> alnFtParams = (Map<String,Object>) alnParams.get("ft_mapping_params");
         m_alignmentFeatureMappingTimeToleranceTF.setText(""+Double.parseDouble(alnFtParams.get("time_tol").toString()));
-        
-        for(int i=0; i<FEATURE_MAPPING_METHOD_KEYS.length; i++){
-            if (FEATURE_MAPPING_METHOD_KEYS[i].equals((String) quantParams.get("ft_mapping_method_name"))) { 
-                m_featureMappingMethodCB.setSelectedIndex(i);
-                break;
-            }
-        }
-
 
         
         Map<String,Object> ftMappingParams =(Map<String,Object>) quantParams.get("ft_mapping_params");
@@ -219,6 +207,7 @@ public class DefineQuantParamsSimplifiedPanel extends AbstractDefineQuantParamsP
         ftParams.put("value", "0.0");
         params.put("ft_filter", ftParams); 
          
+        params.put("ft_mapping_method_name", FEATURE_MAPPING_METHOD_KEYS[0]);
         Map<String,Object> ftMappingParams = new HashMap<>();
         ftMappingParams.put("moz_tol", m_extractionMoZTolTF.getText());
         ftMappingParams.put("moz_tol_unit", "PPM");
@@ -361,14 +350,7 @@ public class DefineQuantParamsSimplifiedPanel extends AbstractDefineQuantParamsP
 
         c1.gridx = 0;
         c1.gridy = 0;    
-        ftParamsPanel.add(new JLabel("method:"), c1);        
-        c1.gridx++;     
-        c1.weightx = 1;
-        ftParamsPanel.add(m_featureMappingMethodCB, c1);
-        c1.weightx = 0;
-        
-        c1.gridy++;
-        c1.gridx = 0;              
+             
              
         ftParamsPanel.add(new JLabel("time tolerance (s):"), c1);        
         c1.gridx++;   

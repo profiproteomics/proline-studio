@@ -1,7 +1,6 @@
 package fr.proline.studio.rsmexplorer.gui.dialog.xic;
 
 import fr.proline.studio.parameter.AbstractParameter;
-import fr.proline.studio.parameter.BooleanParameter;
 import fr.proline.studio.parameter.DoubleParameter;
 import fr.proline.studio.parameter.IntegerParameter;
 import fr.proline.studio.parameter.ObjectParameter;
@@ -12,7 +11,6 @@ import java.awt.GridBagLayout;
 import java.util.HashMap;
 import java.util.Map;
 import javax.swing.Box;
-import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;

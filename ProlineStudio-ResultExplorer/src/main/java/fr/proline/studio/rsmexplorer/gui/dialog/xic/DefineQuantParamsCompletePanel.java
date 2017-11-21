@@ -6,6 +6,7 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.prefs.Preferences;
 import javax.swing.*;
 import org.openide.util.NbPreferences;
 
@@ -44,6 +45,7 @@ public class DefineQuantParamsCompletePanel extends AbstractDefineQuantParamsPan
     private JComboBox  m_clusteringTimeComputationCB;
     private JComboBox  m_clusteringIntensityComputationCB;
      
+    private JCheckBox m_useLastPeakelDetectionCB;
 
     private JTextField m_alignmentMassIntervalTF;
     private JTextField m_alignmentSmoothingWinOverlapTF;
@@ -104,6 +106,13 @@ public class DefineQuantParamsCompletePanel extends AbstractDefineQuantParamsPan
         m_extractionMoZTolTF.setEnabled(!m_readOnly);
         DoubleParameter extractionMoZTolParameter = new DoubleParameter("extractionMoZTol", "Extraction moz tolerance", m_extractionMoZTolTF, new Double(5), new Double(0), null);
         m_parameterList.add(extractionMoZTolParameter);
+        
+        m_useLastPeakelDetectionCB = new JCheckBox("Use last peakel detection");
+        Preferences preferences = NbPreferences.root();
+        m_useLastPeakelDetectionCB.setEnabled(!m_readOnly && preferences.getBoolean("Profi", false));
+        BooleanParameter useLastPeakelDetectionParameter = new BooleanParameter("useLastPeakelDetection", "Use last peakel detection", m_useLastPeakelDetectionCB, Boolean.FALSE);
+        m_parameterList.add(useLastPeakelDetectionParameter);
+
         
         m_clusteringMoZTolTF = new JTextField();
         m_clusteringMoZTolTF.setEnabled(!m_readOnly);
@@ -216,6 +225,8 @@ public class DefineQuantParamsCompletePanel extends AbstractDefineQuantParamsPan
         Map<String,Object> extRactParams = (Map<String,Object>) quantParams.get("extraction_params");
         m_extractionMoZTolTF.setText(""+Double.parseDouble(extRactParams.get("moz_tol").toString()));
         
+        m_useLastPeakelDetectionCB.setSelected(Boolean.parseBoolean(quantParams.get("use_last_peakel_detection").toString()));
+        
         Map<String,Object> clusterParams = (Map<String,Object>) quantParams.get("clustering_params");
         m_clusteringMoZTolTF.setText(""+Double.parseDouble(clusterParams.get("moz_tol").toString()));
         m_clusteringTimeTolTF.setText(""+Double.parseDouble(clusterParams.get("time_tol").toString()));
@@ -304,7 +315,11 @@ public class DefineQuantParamsCompletePanel extends AbstractDefineQuantParamsPan
         Map<String,Object> params = new HashMap<>();
         
         Map<String,Object> extRactParams = new HashMap<>();
-        extRactParams.put("moz_tol", m_extractionMoZTolTF.getText());
+        String extractionTolStr = m_extractionMoZTolTF.getText();
+        
+        params.put("use_last_peakel_detection", m_useLastPeakelDetectionCB.isSelected());
+        
+        extRactParams.put("moz_tol", extractionTolStr);
         extRactParams.put("moz_tol_unit", "PPM");
         params.put("extraction_params", extRactParams);
         
@@ -377,6 +392,12 @@ public class DefineQuantParamsCompletePanel extends AbstractDefineQuantParamsPan
         c.weightx = 1;
         headerPanel.add(m_extractionMoZTolTF, c);
 
+        c.gridx++;
+        c.gridwidth=1;
+        c.weightx = 0.4;
+        headerPanel.add(m_useLastPeakelDetectionCB, c);
+
+        
         mainPanel.add(headerPanel, BorderLayout.PAGE_START);
         
         // tabbed pane

@@ -207,7 +207,7 @@ public class DefineQuantParamsSimplifiedPanel extends AbstractDefineQuantParamsP
         ftParams.put("value", "0.0");
         params.put("ft_filter", ftParams); 
          
-        params.put("ft_mapping_method_name", FEATURE_MAPPING_METHOD_KEYS[0]);
+        alnParams.put("ft_mapping_method_name", FEATURE_MAPPING_METHOD_KEYS[0]);
         Map<String,Object> ftMappingParams = new HashMap<>();
         ftMappingParams.put("moz_tol", m_extractionMoZTolTF.getText());
         ftMappingParams.put("moz_tol_unit", "PPM");

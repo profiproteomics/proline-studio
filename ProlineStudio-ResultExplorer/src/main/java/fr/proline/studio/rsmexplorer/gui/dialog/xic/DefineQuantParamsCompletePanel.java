@@ -276,7 +276,7 @@ public class DefineQuantParamsCompletePanel extends AbstractDefineQuantParamsPan
         m_alignmentFeatureMappingTimeToleranceTF.setText(""+Double.parseDouble(alnFtParams.get("time_tol").toString()));
         
         for (int i = 0; i < FEATURE_MAPPING_METHOD_KEYS.length; i++) {
-            if (FEATURE_MAPPING_METHOD_KEYS[i].equals((String) quantParams.get("ft_mapping_method_name"))) {
+            if (FEATURE_MAPPING_METHOD_KEYS[i].equals((String) alnParams.get("ft_mapping_method_name"))) {
                 m_featureMappingMethodCB.setSelectedIndex(i);
                 break;
             }
@@ -356,10 +356,8 @@ public class DefineQuantParamsCompletePanel extends AbstractDefineQuantParamsPan
         smootingParams.put("window_size", m_alignmentSmoothingWinSizeTF.getText());
         smootingParams.put("window_overlap", m_alignmentSmoothingWinOverlapTF.getText());
         smootingParams.put("min_window_landmarks", m_alignmentSmoothingMinWinlandmarksTF.getText());
-        alnParams.put("smoothing_params", smootingParams);     
-        
-        
-        params.put("ft_mapping_method_name", m_featureMappingMethodParameter.getStringValue());
+        alnParams.put("smoothing_params", smootingParams);
+        alnParams.put("ft_mapping_method_name", m_featureMappingMethodParameter.getStringValue());
         Map<String,Object> alnFtParams = new HashMap<>();
         alnFtParams.put("moz_tol", m_alignmentFeatureMappingMoZTolTF.getText());
         alnFtParams.put("moz_tol_unit", "PPM");

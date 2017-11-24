@@ -18,9 +18,16 @@ import java.util.ArrayList;
 public class MzdbEncodingVerificationBatch implements Runnable {
 
     private final ArrayList<File> m_files;
+    private ArrayList<MsListenerParameter> m_list;
+    private MsListener m_listener;
 
     public MzdbEncodingVerificationBatch(ArrayList<File> files) {
         m_files = files;
+        m_list = new ArrayList<MsListenerParameter>();
+    }
+
+    public void addMsListener(MsListener listener) {
+        m_listener = listener;
     }
 
     @Override
@@ -40,12 +47,24 @@ public class MzdbEncodingVerificationBatch implements Runnable {
 
             @Override
             public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
-                ;
+                if (finished) {
+                    if (m_listener != null) {
+                        
+                        m_list.add(new MsListenerParameter(f, success));
+                        
+                        if (m_list.size() == m_files.size()) {
+                            m_listener.verificationPerformed(m_list);
+                        }
+                        
+                    }
+                }
             }
 
         };
+
         MzdbEncodingVerificationTask encodingVerificationTask = new MzdbEncodingVerificationTask(callback, f);
         AccessDatabaseThread.getAccessDatabaseThread().addTask(encodingVerificationTask);
+
     }
 
 }

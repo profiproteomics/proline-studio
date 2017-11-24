@@ -19,9 +19,9 @@ public class WorkingSetEntry {
         LOCAL, REMOTE
     }
 
-    private final String m_filename;
-    private final String m_path;
-    private final Location m_location;
+    private String m_filename;
+    private String m_path;
+    private Location m_location;
     private boolean m_existing;
     private File m_file;
     private WorkingSet m_parent;
@@ -43,13 +43,25 @@ public class WorkingSetEntry {
     public String getFilename() {
         return m_filename;
     }
+    
+    public void setFilename(String filename){
+        m_filename = filename;
+    }
 
     public String getPath() {
         return m_path;
     }
+    
+    public void setPath(String path){
+        m_path = path;
+    }
 
     public Location getLocation() {
         return m_location;
+    }
+    
+    public void setLocation(Location location){
+        m_location = location;
     }
 
     public boolean exists() {

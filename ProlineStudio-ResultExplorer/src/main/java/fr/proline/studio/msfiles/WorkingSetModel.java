@@ -6,6 +6,8 @@
 package fr.proline.studio.msfiles;
 
 import fr.proline.studio.msfiles.WorkingSetEntry.Location;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import javax.swing.event.TreeModelEvent;
 import javax.swing.event.TreeModelListener;
@@ -21,19 +23,17 @@ import org.json.simple.JSONObject;
  */
 public class WorkingSetModel implements TreeModel {
 
-    private DefaultMutableTreeNode m_root;
+    private final DefaultMutableTreeNode m_root;
 
     private final HashSet<TreeModelListener> m_listeners; // Declare the listeners vector
     
-    private HashSet<WorkingSet> m_workingSetIndex;
-    
-    private HashSet<WorkingSetEntry> m_workingSetEntryIndex;
+    private final HashMap<String, ArrayList<WorkingSet>> m_workingSetEntryIndex;
 
     public WorkingSetModel(WorkingSetRoot root) {
         m_root = new DefaultMutableTreeNode(root);
         m_listeners = new HashSet<TreeModelListener>();
-        m_workingSetIndex = new HashSet<WorkingSet>();
-        m_workingSetEntryIndex = new HashSet<WorkingSetEntry>();
+        
+        m_workingSetEntryIndex = new HashMap<String, ArrayList<WorkingSet>>();
     }
 
     @Override
@@ -58,8 +58,6 @@ public class WorkingSetModel implements TreeModel {
             JSONArray entries = (JSONArray) workingSetEntry.get("entries");
 
             WorkingSet newWorkingSet = new WorkingSet(name, description, entries);
-            
-            m_workingSetIndex.add(newWorkingSet);
 
             DefaultMutableTreeNode childNode = new DefaultMutableTreeNode(newWorkingSet);
 
@@ -87,7 +85,13 @@ public class WorkingSetModel implements TreeModel {
 
             WorkingSetEntry newEntry = new WorkingSetEntry(filename, path, location, workingSet);
             
-            m_workingSetEntryIndex.add(newEntry);
+            if(m_workingSetEntryIndex.containsKey(path)){
+                m_workingSetEntryIndex.get(path).add(workingSet);       
+            }else{
+                ArrayList<WorkingSet> list = new ArrayList<WorkingSet>();
+                list.add(workingSet);
+                m_workingSetEntryIndex.put(path, list);
+            }
 
             DefaultMutableTreeNode childNode = new DefaultMutableTreeNode(newEntry);
 
@@ -208,11 +212,8 @@ public class WorkingSetModel implements TreeModel {
         }
     }
     
-    public HashSet<WorkingSet> getAllWorkingSets(){
-        return m_workingSetIndex;
-    }
     
-    public HashSet<WorkingSetEntry> getAllWorkingSetEntries(){
+    public HashMap<String, ArrayList<WorkingSet>> getEntriesIndex(){
         return m_workingSetEntryIndex;
     }
 

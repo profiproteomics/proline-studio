@@ -48,6 +48,8 @@ public class MzdbDownloadBatch implements Runnable {
         m_root = root;
 
         m_localURL = localURL;
+        
+        m_list = new ArrayList<MsListenerParameter>();
     }
 
     public void addMsListener(MsListener listener) {

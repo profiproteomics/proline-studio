@@ -21,4 +21,6 @@ public interface MsListener {
     
     public void exportPerformed(ArrayList<MsListenerParameter> list);
     
+    public void verificationPerformed(ArrayList<MsListenerParameter> list);
+    
 }

@@ -6,6 +6,9 @@
 package fr.proline.studio.msfiles;
 
 import fr.proline.mzscope.utils.IPopupMenuDelegate;
+import fr.proline.studio.dam.AccessDatabaseThread;
+import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
+import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.mzscope.MzdbInfo;
 import fr.proline.studio.pattern.MzScopeWindowBoxManager;
 import fr.proline.studio.rsmexplorer.gui.MzScope;
@@ -21,6 +24,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import javax.swing.BorderFactory;
 import javax.swing.JComponent;
 import javax.swing.JMenuItem;
@@ -40,6 +44,11 @@ import org.json.simple.JSONArray;
  * @author AK249877
  */
 public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
+
+    public enum ActionType {
+
+        VIEW, DETECT_PEAKELS
+    }
 
     private WorkingSetModel m_workingSetModel;
     private JTree m_tree;
@@ -154,6 +163,8 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
                 ArrayList<File> localFiles = extractSelectedRawFiles(WorkingSetEntry.Location.LOCAL);
                 ArrayList<File> remoteFiles = extractSelectedRawFiles(WorkingSetEntry.Location.REMOTE);
 
+                ArrayList<File> totalFiles = new ArrayList<File>();
+
                 if (!remoteFiles.isEmpty()) {
                     MsListener msListener = new MsListener() {
 
@@ -170,25 +181,44 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
                         @Override
                         public void downloadPerformed(ArrayList<MsListenerParameter> list) {
                             //all the action will be here.
-                            ArrayList<File> totalFiles = new ArrayList<File>();
+
                             totalFiles.addAll(localFiles);
 
                             File tempDir = WorkingSetUtil.getTempDirectory();
 
-                            for (int i = 0; i < remoteFiles.size(); i++) {
-                                String url = tempDir + File.separator + remoteFiles.get(i).getName();
-                                File f = new File(url);
-                                if (f.exists()) {
-                                    totalFiles.add(f);
+                            for (int i = 0; i < list.size(); i++) {
+                                MsListenerParameter p = list.get(i);
+
+                                if (p.wasSuccessful()) {
+                                    
+                                    String delimiter = (p.getFile().getAbsolutePath().contains(File.separator) ? File.separator : "/");
+                                    
+                                    String url = tempDir + File.separator + p.getFile().getAbsolutePath().substring(p.getFile().getAbsolutePath().lastIndexOf(delimiter)+1);
+
+                                    File f = new File(url);
+
+                                    if (f.exists()) {
+
+                                        replaceEntry(p.getFile(), f);
+
+                                        totalFiles.add(f);
+                                    }
+
                                 }
+
                             }
 
-                            displayRaw(totalFiles);
+                            verifyEncodingAndProcess(totalFiles, ActionType.VIEW);
                         }
 
                         @Override
                         public void exportPerformed(ArrayList<MsListenerParameter> list) {
                             throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+                        }
+
+                        @Override
+                        public void verificationPerformed(ArrayList<MsListenerParameter> list) {
+                            ;
                         }
 
                     };
@@ -201,7 +231,7 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
                     downloadThread.start();
 
                 } else {
-                    displayRaw(localFiles);
+                    verifyEncodingAndProcess(localFiles, ActionType.VIEW);
                 }
 
             }
@@ -219,6 +249,8 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
                 ArrayList<File> localFiles = extractSelectedRawFiles(WorkingSetEntry.Location.LOCAL);
                 ArrayList<File> remoteFiles = extractSelectedRawFiles(WorkingSetEntry.Location.REMOTE);
 
+                ArrayList<File> totalFiles = new ArrayList<File>();
+
                 if (!remoteFiles.isEmpty()) {
                     MsListener msListener = new MsListener() {
 
@@ -234,29 +266,40 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
 
                         @Override
                         public void downloadPerformed(ArrayList<MsListenerParameter> list) {
-                            //all the action will be here.
-                            ArrayList<File> totalFiles = new ArrayList<File>();
-                            totalFiles.addAll(localFiles);
 
+                            totalFiles.addAll(localFiles);
                             File tempDir = WorkingSetUtil.getTempDirectory();
 
-                            for (int i = 0; i < remoteFiles.size(); i++) {
-                                
-                                String url = tempDir + File.separator + remoteFiles.get(i).getName();
-                                
-                                File f = new File(url);
-                                
-                                if (f.exists()) {
-                                    totalFiles.add(f);
+                            for (int i = 0; i < list.size(); i++) {
+                                MsListenerParameter p = list.get(i);
+
+                                if (p.wasSuccessful()) {
+
+                                    String delimiter = (p.getFile().getAbsolutePath().contains(File.separator) ? File.separator : "/");
+                                    
+                                    String url = tempDir + File.separator + p.getFile().getAbsolutePath().substring(p.getFile().getAbsolutePath().lastIndexOf(delimiter)+1);
+
+                                    File f = new File(url);
+
+                                    if (f.exists()) {
+                                        replaceEntry(p.getFile(), f);
+                                        totalFiles.add(f);
+                                    }
+
                                 }
-                                
+
                             }
 
-                            detectPeakels(totalFiles);
+                            verifyEncodingAndProcess(totalFiles, ActionType.DETECT_PEAKELS);
                         }
 
                         @Override
                         public void exportPerformed(ArrayList<MsListenerParameter> list) {
+                            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+                        }
+
+                        @Override
+                        public void verificationPerformed(ArrayList<MsListenerParameter> list) {
                             throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
                         }
 
@@ -270,7 +313,7 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
                     downloadThread.start();
 
                 } else {
-                    detectPeakels(localFiles);
+                    verifyEncodingAndProcess(localFiles, ActionType.DETECT_PEAKELS);
                 }
             }
         });
@@ -488,6 +531,77 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
             m_workingSetModel = new WorkingSetModel(m_root);
             m_tree.setModel(m_workingSetModel);
         }
+    }
+
+    private void replaceEntry(File oldFile, File newFile) {
+        HashMap<String, ArrayList<WorkingSet>> index = m_workingSetModel.getEntriesIndex();
+        if (index.containsKey(oldFile.getAbsolutePath())) {
+            ArrayList<WorkingSet> list = index.get(oldFile.getAbsolutePath());
+            for (int i = 0; i < list.size(); i++) {
+                WorkingSet set = list.get(i);
+                set.removeEntry(oldFile.getAbsolutePath());
+                set.addEntry(newFile.getAbsolutePath(), WorkingSetEntry.Location.LOCAL);
+            }
+        }
+    }
+
+    private void verifyEncodingAndProcess(ArrayList<File> totalFiles, ActionType actionType) {
+        MsListener listener = new MsListener() {
+
+            @Override
+            public void conversionPerformed(ArrayList<MsListenerConverterParameter> list) {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
+
+            @Override
+            public void uploadPerformed(ArrayList<MsListenerParameter> list) {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
+
+            @Override
+            public void downloadPerformed(ArrayList<MsListenerParameter> list) {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
+
+            @Override
+            public void exportPerformed(ArrayList<MsListenerParameter> list) {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
+
+            @Override
+            public void verificationPerformed(ArrayList<MsListenerParameter> list) {
+
+                reloadTree();
+                resetTreeState();
+                DefaultMutableTreeNode root = (DefaultMutableTreeNode) m_workingSetModel.getRoot();
+                WorkingSetRoot workingSetRoot = (WorkingSetRoot) root.getUserObject();
+                WorkingSetUtil.saveJSON(workingSetRoot.getWorkingSets());
+
+                ArrayList<File> verifiedFiles = new ArrayList<File>();
+
+                for (int i = 0; i < list.size(); i++) {
+                    MsListenerParameter p = list.get(i);
+                    if (p.wasSuccessful()) {
+                        verifiedFiles.add(p.getFile());
+                    }
+                }
+
+                if (verifiedFiles.size() > 0) {
+
+                    if (actionType == ActionType.DETECT_PEAKELS) {
+                        detectPeakels(verifiedFiles);
+                    } else if (actionType == ActionType.VIEW) {
+                        displayRaw(verifiedFiles);
+                    }
+                }
+
+            }
+        };
+
+        MzdbEncodingVerificationBatch batch = new MzdbEncodingVerificationBatch(totalFiles);
+        batch.addMsListener(listener);
+        Thread thread = new Thread(batch);
+        thread.start();
     }
 
 }

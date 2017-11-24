@@ -118,7 +118,7 @@ public class DownloadMzdbTask extends AbstractJMSTask {
             throw new Exception(" Invalide message type to download file ! ");
         }
 
-        m_currentState = JMSState.STATE_DONE;
+         m_currentState = JMSState.STATE_DONE;
     }
 
 }

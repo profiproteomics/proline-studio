@@ -59,7 +59,7 @@ public class JoinDataModel extends AbstractJoinDataModel {
         
         // Second Key column(s)
         if (m_selectedTable1Key2 != -1) {
-            Class c2 = m_data2.getDataColumnClass(m_selectedTable1Key2);
+            Class c2 = m_data1.getDataColumnClass(m_selectedTable1Key2);
             if (c2.equals(Double.class) || c2.equals(Float.class)) {
                 m_keysColumns1.add(m_selectedTable1Key2);   // For Double and Float keys, we show both values from Table 1 and Table 2
                 m_keysColumns2.add(-1);
@@ -139,6 +139,10 @@ public class JoinDataModel extends AbstractJoinDataModel {
         return null;
     }
 
+    public int getNumberOfKeysColumn() {
+        return m_keysColumns1.size();
+    }
+    
     @Override
     public String getDataColumnIdentifier(int columnIndex) {
         if (!joinPossible()) {
@@ -540,9 +544,116 @@ public class JoinDataModel extends AbstractJoinDataModel {
     }
     
     @Override
-    public Object getColValue(Class c, int col) {
-        return null; // could be enhanced
+    public Object getColValue(Class c, int columnIndex) {
+        return null;
     }
     
+
+    /**
+     * Method used to recursively find informations on each source and keys columns
+     * 
+     * @param columnIndex
+     * @param depth
+     * @return 
+     */
+    public JoinTAG getKeyIndex(int columnIndex, int depth) {
+
+        
+        if (!joinPossible()) {
+            return null;
+        }
+
+        // Columns with keys
+        if (columnIndex < m_keysColumns1.size()) {
+            int index1 = m_keysColumns1.get(columnIndex);
+            if (index1 != -1) {
+                
+                if (m_data1 instanceof JoinDataModel) {
+                    return ((JoinDataModel) m_data1).getKeyIndex(index1, depth + 1);
+                }
+                return new JoinTAG(true, 0, depth);
+
+            }
+            if (m_data2 instanceof JoinDataModel) {
+                return ((JoinDataModel) m_data2).getKeyIndex(m_keysColumns2.get(columnIndex), depth + 1);
+            }
+            return new JoinTAG(true, 1, depth);
+        }
+        
+        columnIndex -= m_keysColumns1.size();
+
+        if (m_showSourceColumn) {
+            if ((columnIndex == 0) || (columnIndex == 1)) {
+                if ((m_data1 instanceof JoinDataModel) && (columnIndex == 0)) {
+                    // remove this source which is a join and not a real data source
+                    return null;
+                }
+                return new JoinTAG(false, columnIndex, depth);
+            }
+            columnIndex-=2;
+        }
+        
+        
+
+        if (columnIndex < m_allColumns1.size()) {
+            if (m_data1 instanceof JoinDataModel) {
+                return ((JoinDataModel)m_data1).getKeyIndex(m_allColumns1.get(columnIndex), depth + 1);
+            }
+            return null;
+        }
+        columnIndex -= m_allColumns1.size();
+        if (columnIndex < m_allColumns2.size()) {
+            if (m_data2 instanceof JoinDataModel) {
+                return ((JoinDataModel)m_data2).getKeyIndex(m_allColumns2.get(columnIndex), depth + 1);
+            }
+        }
+        
+        return null;
+        
+        
+    }
     
+    /**
+     * Class used to control keys and source column for the MultiJoinDataModel
+     */
+    public class JoinTAG implements Comparable<JoinTAG> {
+        private boolean m_isKey;  // key or source column
+        private int m_index; // index of the column to order key/source column among them
+        private int m_depth; // depth of the JoinDataModel in the JoinDataModel tree created by MultiJoinDataModel
+        private int m_columnIndex; // index in the MultiJoinDataModel
+        
+        public JoinTAG(boolean isKey, int index, int depth) {
+            m_isKey = isKey;
+            m_index = index;
+            m_depth = depth;
+        }
+        
+        public int getColumnIndex() {
+            return m_columnIndex;
+        }
+        
+        public void setColumnIndex(int columnIndex) {
+            m_columnIndex = columnIndex;
+        }
+
+        @Override
+        public int compareTo(JoinTAG o) {
+            
+            // used to sort a list of JoinTAG.
+            
+            // sort on m_isKey is used to separate keys and source columns            
+            if (m_isKey != o.m_isKey) {
+                return (m_isKey) ? -1 : 1;
+            }
+            
+            // sort on m_depth is used to display first columns from the first (and then deepest) JoinDataModel
+            // in the JoinDataModel tree created for MultiJoinDataModel
+            if (m_depth != o.m_depth) {
+                return o.m_depth - m_depth;
+            }
+            
+            // final order to respect the oder of the original columns in each JoinDataModel
+            return (m_index-o.m_index);
+        }
+    }
 }

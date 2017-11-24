@@ -6,6 +6,8 @@ import fr.proline.studio.extendedtablemodel.DiffDataModel;
 import fr.proline.studio.extendedtablemodel.JoinDataModel;
 import fr.proline.studio.extendedtablemodel.CompoundTableModel;
 import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
+import fr.proline.studio.extendedtablemodel.MultiJoinDataModel;
+import java.util.ArrayList;
 
 import java.util.HashMap;
 import java.util.List;
@@ -180,6 +182,33 @@ public class Table extends PyObject {
         joinDataModel.setData(t1.getModel(), t2.getModel(), table1Key1, table2Key1, tolerance1, table1Key2, table2Key2, tolerance2, showSourceColumn);
         return new Table(joinDataModel);
     }
+    
+    public static Table join(ArrayList<Table> tables) {
+        
+        int nbTables = tables.size();
+        ArrayList<GlobalTableModelInterface> models = new ArrayList<>(nbTables);
+        for (int i=0;i<nbTables;i++) {
+            models.add(tables.get(i).getModel());
+        }
+        
+        MultiJoinDataModel joinDataModel = new MultiJoinDataModel();
+        joinDataModel.setData(models, null, null, null, null, false);
+        return new Table(joinDataModel);
+    }
+
+    public static Table join(ArrayList<Table> tables, ArrayList<Integer> tableKey1,  Double tolerance1,  ArrayList<Integer> tableKey2, Double tolerance2, Boolean showSourceColumn) {
+        int nbTables = tables.size();
+        ArrayList<GlobalTableModelInterface> models = new ArrayList<>(nbTables);
+        for (int i = 0; i < nbTables; i++) {
+            models.add(tables.get(i).getModel());
+        }
+
+        MultiJoinDataModel joinDataModel = new MultiJoinDataModel();
+        joinDataModel.setData(models, tableKey1, tolerance1, tableKey2, tolerance2, showSourceColumn);
+        return new Table(joinDataModel);
+    }
+    
+    
     
     public static Table diff(Table t1, Table t2) {
         DiffDataModel diffDataModel = new DiffDataModel();

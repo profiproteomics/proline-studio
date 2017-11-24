@@ -325,16 +325,28 @@ public class FunctionGraphNode extends GraphNode {
         GraphConnector[] graphObjectArray;
         
         if (m_inConnectors != null) {
-            graphObjectArray = new GraphConnector[m_inConnectors.size()];
+
+            int nbLinkedConnectors = 0;
+            for (GraphConnector connector : m_inConnectors) {
+                GraphConnector srcConnector = connector.getLinkedSourceGraphConnector();
+                if (srcConnector != null) {
+                    nbLinkedConnectors++;
+                }
+            }
+
+            graphObjectArray = new GraphConnector[nbLinkedConnectors];
             int i = 0;
             for (GraphConnector connector : m_inConnectors) {
                 GraphConnector srcConnector = connector.getLinkedSourceGraphConnector();
-                graphObjectArray[i++] = srcConnector;
+                if (srcConnector != null) {
+                    graphObjectArray[i++] = srcConnector;
+                }
             }
         } else {
             graphObjectArray = new GraphConnector[0];
         }
-        
+
+
         m_function.process(graphObjectArray, this, callback);
 
         
@@ -361,11 +373,22 @@ public class FunctionGraphNode extends GraphNode {
         
         GraphConnector[] graphObjectArray;
         if (m_inConnectors != null) {
-            graphObjectArray = new GraphConnector[m_inConnectors.size()];
+            
+            int nbLinkedConnectors = 0;
+            for (GraphConnector connector : m_inConnectors) {
+                GraphConnector srcConnector = connector.getLinkedSourceGraphConnector();
+                if (srcConnector != null) {
+                    nbLinkedConnectors++;
+                }
+            }
+            
+            graphObjectArray = new GraphConnector[nbLinkedConnectors];
             int i = 0;
             for (GraphConnector connector : m_inConnectors) {
                 GraphConnector srcConnector = connector.getLinkedSourceGraphConnector();
-                graphObjectArray[i++] = srcConnector;
+                if (srcConnector != null) {
+                    graphObjectArray[i++] = srcConnector;
+                }
             }
         } else {
             graphObjectArray = new GraphConnector[0];

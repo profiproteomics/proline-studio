@@ -322,6 +322,9 @@ public abstract class AbstractJoinDataModel extends AbstractTableModel implement
             double[] values1 = new double[size1];
             for (int i = 0; i < size1; i++) {
                 Number key = (Number) tableKey1.get(i);
+                if (key == null) {
+                    key = Double.NaN;
+                }
                 CorrespondingKeyValues values = correspondingKeys.get(key);
                 if (values == null) {
                     values = new CorrespondingKeyValues();
@@ -343,6 +346,9 @@ public abstract class AbstractJoinDataModel extends AbstractTableModel implement
             for (int i = 0; i < size2; i++) {
                 try {
                     Number key = (Number) tableKey2.get(i);
+                    if (key == null) {
+                        key = Double.NaN;
+                    }
                     double value = key.doubleValue();
                     Integer nearestIndex = searchNearestValueIndex(value, indexes, values1);
                     boolean correspondanceFound = false;
@@ -402,6 +408,9 @@ public abstract class AbstractJoinDataModel extends AbstractTableModel implement
             for (int i = 0; i < size2; i++) {
                 try {
                     Number key = (Number) tableKey2.get(i);
+                    if (key == null) {
+                        key = Double.NaN;
+                    }
 
                     // no correspondance even with tolerance
                     CorrespondingKeyValues values = correspondingKeys.get(key);

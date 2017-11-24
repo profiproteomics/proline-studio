@@ -81,7 +81,7 @@ public class DiffDataModel extends AbstractJoinDataModel {
         
         // Second Key column(s)
         if (m_selectedTable1Key2 != -1) {
-            Class c2 = m_data2.getDataColumnClass(m_selectedTable1Key2);
+            Class c2 = m_data1.getDataColumnClass(m_selectedTable1Key2);
             if (c2.equals(Double.class) || c2.equals(Float.class)) {
                 m_keysColumns1.add(m_selectedTable1Key2);   // For Double and Float keys, we show both values from Table 1 and Table 2
                 m_keysColumns2.add(-1);

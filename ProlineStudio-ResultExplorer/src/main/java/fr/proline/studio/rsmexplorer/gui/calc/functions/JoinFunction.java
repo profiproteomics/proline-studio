@@ -1,6 +1,5 @@
 package fr.proline.studio.rsmexplorer.gui.calc.functions;
 
-import fr.proline.studio.extendedtablemodel.AbstractJoinDataModel;
 import fr.proline.studio.parameter.AbstractLinkedParameters;
 import fr.proline.studio.parameter.BooleanParameter;
 import fr.proline.studio.parameter.DoubleParameter;
@@ -15,6 +14,7 @@ import fr.proline.studio.rsmexplorer.gui.calc.ProcessCallbackInterface;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.FunctionGraphNode;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphConnector;
 import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
+import fr.proline.studio.extendedtablemodel.MultiJoinDataModel;
 import java.util.ArrayList;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -36,11 +36,9 @@ public class JoinFunction extends AbstractFunction {
   
     
     private ParameterList m_parameterList;
-    private ObjectParameter m_paramTable1Key1;
-    private ObjectParameter m_paramTable2Key1;
+    private ArrayList<ObjectParameter> m_paramTableKey1;
+    private ArrayList<ObjectParameter> m_paramTableKey2;
     private DoubleParameter m_tolerance1;
-    private ObjectParameter m_paramTable1Key2;
-    private ObjectParameter m_paramTable2Key2;
     private DoubleParameter m_tolerance2;
     private BooleanParameter m_addSourceCol;
     
@@ -51,11 +49,9 @@ public class JoinFunction extends AbstractFunction {
     @Override
     public void inLinkDeleted() {
         super.inLinkDeleted();
-        m_paramTable1Key1 = null;
-        m_paramTable2Key1 = null;
+        m_paramTableKey1 = null;
+        m_paramTableKey2 = null;
         m_tolerance1 = null;
-        m_paramTable1Key2 = null;
-        m_paramTable2Key2 = null;
         m_tolerance2 = null;
         m_addSourceCol = null;
     }
@@ -72,7 +68,7 @@ public class JoinFunction extends AbstractFunction {
     
     @Override
     public int getMaximumNumberOfInParameters() {
-        return 10; //JPM.TODO 
+        return 16; //JPM.TODO 
     }
     
     @Override
@@ -86,7 +82,7 @@ public class JoinFunction extends AbstractFunction {
         if (m_parameterList == null) {
             return false;
         }
-        return ((m_paramTable1Key1 != null) && (m_paramTable2Key1 != null));
+        return ((m_paramTableKey1 != null) && (m_paramTableKey2 != null));
     }
     
     @Override
@@ -118,23 +114,34 @@ public class JoinFunction extends AbstractFunction {
             setInError(false, null);
 
             try {
-                Table t1 = new Table(graphObjects[0].getGlobalTableModelInterface());
-                graphObjects[0].getGlobalTableModelInterface().setName(graphObjects[0].getGraphNode().getDataName());
-                Table t2 = new Table(graphObjects[1].getGlobalTableModelInterface());
-                graphObjects[1].getGlobalTableModelInterface().setName(graphObjects[1].getGraphNode().getDataName());
+                int nbTables = graphObjects.length;
+                ArrayList<Table> tables = new ArrayList<>(nbTables);
+                for (int i=0;i<nbTables;i++) {
+                    Table t = new Table(graphObjects[i].getGlobalTableModelInterface());
+                    graphObjects[i].getGlobalTableModelInterface().setName(graphObjects[i].getGraphNode().getDataName());
+                    tables.add(t);
+                }
+                
+
                 Table joinedTable;
-                if ((m_paramTable1Key1 != null) && (m_paramTable2Key1 != null)) {
-                    Integer table1Key1 = (Integer) m_paramTable1Key1.getAssociatedObjectValue();
-                    Integer table2Key1 = (Integer) m_paramTable2Key1.getAssociatedObjectValue();
+                
+                if ((m_paramTableKey1 != null) && (m_paramTableKey1 != null)) {
+                    
+                    ArrayList tableKey1List = new ArrayList<>(nbTables);
+                    ArrayList tableKey2List = new ArrayList<>(nbTables);
+                    for (int i=0;i<nbTables;i++) {
+                        Integer tableKey1 = (Integer) m_paramTableKey1.get(i).getAssociatedObjectValue();
+                        tableKey1List.add(tableKey1);
+                        Integer tableKey2 = (Integer) m_paramTableKey2.get(i).getAssociatedObjectValue();
+                        tableKey2List.add(tableKey2);
+                    }
                     Double tolerance1 = Double.valueOf(m_tolerance1.getStringValue());
-                    Integer table1Key2 = (Integer) m_paramTable1Key2.getAssociatedObjectValue();
-                    Integer table2Key2 = (Integer) m_paramTable2Key2.getAssociatedObjectValue();
                     Double tolerance2 = Double.valueOf(m_tolerance2.getStringValue());
                     Boolean showSourceColumn = (Boolean) m_addSourceCol.getObjectValue();
                     
-                    joinedTable = Table.join(t1, t2, table1Key1, table2Key1, tolerance1, table1Key2, table2Key2, tolerance2, showSourceColumn);
+                    joinedTable = Table.join(tables, tableKey1List, tolerance1, tableKey2List, tolerance2 , showSourceColumn);
                 } else {
-                    joinedTable = Table.join(t1, t2);
+                    joinedTable = Table.join(tables);
                 }
 
                 addModel(joinedTable.getModel());
@@ -167,82 +174,75 @@ public class JoinFunction extends AbstractFunction {
         
         GlobalTableModelInterface modelForDefaultKey = getMainGlobalTableModelInterface(0);
         
+        int nbTables = graphObjects.length;
+        
+        int[] keys = null;
+
         if (modelForDefaultKey == null) {
-            Table t1 = new Table(graphObjects[0].getGlobalTableModelInterface());
-            Table t2 = new Table(graphObjects[1].getGlobalTableModelInterface());
-            Table joinedTable = Table.join(t1, t2);
-            modelForDefaultKey = joinedTable.getModel();
+            
+            /*ArrayList<Table> tables = new ArrayList<>(nbTables);
+            for (int i=0;i<nbTables;i++) {
+                tables.add(new Table(graphObjects[i].getGlobalTableModelInterface()));
+            }
+
+            Table joinedTable = Table.join(tables);
+            modelForDefaultKey = joinedTable.getModel();*/
+            
+            ArrayList<GlobalTableModelInterface> data = new ArrayList<>(graphObjects.length);
+            for (GraphConnector connector : graphObjects) {
+                data.add(connector.getGlobalTableModelInterface());
+            }
+            
+            keys = MultiJoinDataModel.selectKeys(data);
         }
 
-        GlobalTableModelInterface model1 = graphObjects[0].getGlobalTableModelInterface();
-        int nbColumns = model1.getColumnCount();
-        int nbColumnsKept = 0;
-        for (int i = 0; i < nbColumns; i++) {
-            Class c = model1.getDataColumnClass(i);
-            if (c.equals(String.class) || c.equals(Integer.class) || c.equals(Long.class) || c.equals(Float.class) || c.equals(Double.class)) {
-                nbColumnsKept++;
+        m_paramTableKey1 = new ArrayList<>();
+        m_paramTableKey2 = new ArrayList<>();
+        for (int i=0;i<nbTables;i++) {
+            GlobalTableModelInterface model = graphObjects[i].getGlobalTableModelInterface();
+            
+            int nbColumns = model.getColumnCount();
+            int nbColumnsKept = 0;
+            for (int j = 0; j < nbColumns; j++) {
+                Class c = model.getDataColumnClass(j);
+                if (c.equals(String.class) || c.equals(Integer.class) || c.equals(Long.class) || c.equals(Float.class) || c.equals(Double.class)) {
+                    nbColumnsKept++;
+                }
             }
-        }
-        Object[] objectArrayTable1Key1 = new Object[nbColumnsKept];
-        Object[] associatedObjectArrayTable1Key1 = new Object[nbColumnsKept];
-        int iKept = 0;
-        for (int i = 0; i < nbColumns; i++) {
-            Class c = model1.getDataColumnClass(i);
-            if (c.equals(String.class) || c.equals(Integer.class) || c.equals(Long.class) || c.equals(Float.class) || c.equals(Double.class)) {
-                objectArrayTable1Key1[iKept] = model1.getColumnName(i);
-                associatedObjectArrayTable1Key1[iKept] = i;  // no +1 because it is not used in python calc expression
-                iKept++;
+            
+            Object[] objectArrayTableKey1 = new Object[nbColumnsKept];
+            Object[] associatedObjectArrayTableKey1 = new Object[nbColumnsKept];
+            int iKept = 0;
+            for (int j = 0; j < nbColumns; j++) {
+                Class c = model.getDataColumnClass(j);
+                if (c.equals(String.class) || c.equals(Integer.class) || c.equals(Long.class) || c.equals(Float.class) || c.equals(Double.class)) {
+                    objectArrayTableKey1[iKept] = model.getColumnName(j);
+                    associatedObjectArrayTableKey1[iKept] = j;  // no +1 because it is not used in python calc expression
+                    iKept++;
+                }
             }
+            
+            int nb = objectArrayTableKey1.length;
+            Object[] objectArrayTableKey2 = new Object[nb + 1];
+            Object[] associatedObjectArrayTableKey2 = new Object[nb + 1];
+            objectArrayTableKey2[0] = "<No Second Key>";
+            associatedObjectArrayTableKey2[0] = new Integer(-1);
+            for (int j = 0; j < nb; j++) {
+                objectArrayTableKey2[j + 1] = objectArrayTableKey1[j];
+                associatedObjectArrayTableKey2[j + 1] = associatedObjectArrayTableKey1[j];
+            }
+            
+            ObjectParameter paramTableKey1 = new ObjectParameter(JOIN_TABLE1_KEY1, graphObjects[0].getFullName() + " Join Column Key 1", new JComboBox(objectArrayTableKey1), objectArrayTableKey1, associatedObjectArrayTableKey1, keys[i], null);
+            m_paramTableKey1.add(paramTableKey1);
+            
+            ObjectParameter paramTableKey2 = new ObjectParameter(JOIN_TABLE1_KEY2, graphObjects[0].getFullName() + " Join Column Key 2", new JComboBox(objectArrayTableKey2), objectArrayTableKey2, associatedObjectArrayTableKey2, 0, null);
+            m_paramTableKey2.add(paramTableKey2);
+
         }
 
-        GlobalTableModelInterface model2 = graphObjects[1].getGlobalTableModelInterface();
-        nbColumns = model2.getColumnCount();
-        nbColumnsKept = 0;
-        for (int i = 0; i < nbColumns; i++) {
-            Class c = model2.getDataColumnClass(i);
-            if (c.equals(String.class) || c.equals(Integer.class) || c.equals(Long.class) || c.equals(Float.class) || c.equals(Double.class)) {
-                nbColumnsKept++;
-            }
-        }
-        Object[] objectArrayTable2Key1 = new Object[nbColumnsKept];
-        Object[] associatedObjectArrayTable2Key1 = new Object[nbColumnsKept];
-        iKept = 0;
-        for (int i = 0; i < nbColumns; i++) {
-            Class c = model2.getDataColumnClass(i);
-            if (c.equals(String.class) || c.equals(Integer.class) || c.equals(Long.class) || c.equals(Float.class) || c.equals(Double.class)) {
-                objectArrayTable2Key1[iKept] = model2.getColumnName(i);
-                associatedObjectArrayTable2Key1[iKept] = i;
-                iKept++;
-            }
-        }
-
-        int nb = objectArrayTable1Key1.length;
-        Object[] objectArrayTable1Key2 = new Object[nb+1];
-        Object[] associatedObjectArrayTable1Key2 = new Object[nb+1];
-        objectArrayTable1Key2[0] = "<No Second Key>";
-        associatedObjectArrayTable1Key2[0] = new Integer(-1);
-        for (int i=0;i<nb;i++) {
-            objectArrayTable1Key2[i+1] = objectArrayTable1Key1[i];
-            associatedObjectArrayTable1Key2[i+1] = associatedObjectArrayTable1Key1[i];
-        }
-
-        nb = objectArrayTable2Key1.length;
-        Object[] objectArrayTable2Key2 = new Object[nb+1];
-        Object[] associatedObjectArrayTable2Key2 = new Object[nb+1];
-        objectArrayTable2Key2[0] = "<No Second Key>";
-        associatedObjectArrayTable2Key2[0] = new Integer(-1);
-        for (int i=0;i<nb;i++) {
-            objectArrayTable2Key2[i+1] = objectArrayTable2Key1[i];
-            associatedObjectArrayTable2Key2[i+1] = associatedObjectArrayTable2Key1[i];
-        }
-        
-        m_paramTable1Key1 = new ObjectParameter(JOIN_TABLE1_KEY1, graphObjects[0].getFullName() + " Join Column Key 1", new JComboBox(objectArrayTable1Key1), objectArrayTable1Key1, associatedObjectArrayTable1Key1, ((AbstractJoinDataModel) modelForDefaultKey).getSelectedKey1(), null);
-        m_paramTable2Key1 = new ObjectParameter(JOIN_TABLE2_KEY1, graphObjects[1].getFullName() + " Join Column Key 1", new JComboBox(objectArrayTable2Key1), objectArrayTable2Key1, associatedObjectArrayTable2Key1, ((AbstractJoinDataModel) modelForDefaultKey).getSelectedKey2(), null);
         m_tolerance1 = new DoubleParameter(TOLERANCE_KEY1, "Tolerance", JTextField.class, 0.0, 0.0, null);
-        m_paramTable1Key2 = new ObjectParameter(JOIN_TABLE1_KEY2, graphObjects[0].getFullName() + " Join Column Key 2", new JComboBox(objectArrayTable1Key2), objectArrayTable1Key2, associatedObjectArrayTable1Key2, 0, null);
-        m_paramTable2Key2 = new ObjectParameter(JOIN_TABLE2_KEY2, graphObjects[1].getFullName() + " Join Column Key 2", new JComboBox(objectArrayTable2Key2), objectArrayTable2Key2, associatedObjectArrayTable2Key2, 0, null);
         m_tolerance2 = new DoubleParameter(TOLERANCE_KEY2, "Tolerance 2", JTextField.class, 0.0, 0.0, null);
-        
+
         m_addSourceCol = new BooleanParameter(SOURCE_COL, "Add Source Info", JCheckBox.class, true);
         
         m_parameterList = new ParameterList("Join");
@@ -251,7 +251,8 @@ public class JoinFunction extends AbstractFunction {
             @Override
             public void valueChanged(String value, Object associatedValue) {
                 int index = ((Integer)associatedValue).intValue();
-                Class c = model1.getDataColumnClass(index);
+                GlobalTableModelInterface model = graphObjects[0].getGlobalTableModelInterface();
+                Class c = model.getDataColumnClass(index);
                 showParameter(m_tolerance1, (c.equals(Double.class) || c.equals(Float.class)));
                 updateParameterListPanel();
             }
@@ -265,7 +266,8 @@ public class JoinFunction extends AbstractFunction {
                 if (index == -1) {
                     showParameter(m_tolerance2, false);
                 } else {
-                    Class c = model1.getDataColumnClass(index);
+                    GlobalTableModelInterface model = graphObjects[0].getGlobalTableModelInterface();
+                    Class c = model.getDataColumnClass(index);
                     showParameter(m_tolerance2, (c.equals(Double.class) || c.equals(Float.class)));
                 }
                 updateParameterListPanel();
@@ -278,22 +280,29 @@ public class JoinFunction extends AbstractFunction {
         m_parameters = new ParameterList[1];
         m_parameters[0] = m_parameterList;
 
-        m_parameterList.add(m_paramTable1Key1);
-        m_parameterList.add(m_paramTable2Key1);
+        for (int i=0;i<nbTables;i++) {
+            m_parameterList.add(m_paramTableKey1.get(i));
+        }
         m_parameterList.add(m_tolerance1);
-        m_parameterList.add(m_paramTable1Key2);
-        m_parameterList.add(m_paramTable2Key2);
+        
+        for (int i=0;i<nbTables;i++) {
+            m_parameterList.add(m_paramTableKey2.get(i));
+        }
         m_parameterList.add(m_tolerance2);
+        
+
         m_parameterList.add(m_addSourceCol);
         
         m_parameterList.getPanel(); // generate panel at once
-        m_paramTable1Key1.addLinkedParameters(linkedParameters1); // link parameter, it will modify the panel
-        m_paramTable1Key2.addLinkedParameters(linkedParameters2); // link parameter, it will modify the panel
+        for (int i=0;i<nbTables;i++) {
+            m_paramTableKey1.get(i).addLinkedParameters(linkedParameters1); // link parameter, it will modify the panel
+            m_paramTableKey2.get(i).addLinkedParameters(linkedParameters2); // link parameter, it will modify the panel
+        }
     }
 
     @Override
     public ParameterError checkParameters(GraphConnector[] graphObjects) {
-        Integer keyTable1Key1 = (Integer) m_paramTable1Key1.getAssociatedObjectValue();
+        /*Integer keyTable1Key1 = (Integer) m_paramTable1Key1.getAssociatedObjectValue();
         Integer keyTable2Key1 = (Integer) m_paramTable2Key1.getAssociatedObjectValue();
         
         Integer keyTable1Key2 = (Integer) m_paramTable1Key2.getAssociatedObjectValue();
@@ -305,15 +314,15 @@ public class JoinFunction extends AbstractFunction {
             Table t1 = new Table(graphObjects[0].getGlobalTableModelInterface());
             Table t2 = new Table(graphObjects[1].getGlobalTableModelInterface());
             Table joinedTable = Table.join(t1, t2);
-            modelForDefaultKey = joinedTable.getModel();
+            modelForDefaultKey = joinedTable.getModel(); //JPM.TODO
         }
         
         boolean checkKeys = ((AbstractJoinDataModel) modelForDefaultKey).checkKeys(keyTable1Key1, keyTable2Key1) && ((AbstractJoinDataModel) modelForDefaultKey).checkKeys(keyTable1Key2, keyTable2Key2);
-
+*/
         ParameterError error = null;
-        if (!checkKeys) {
+        /*if (!checkKeys) {
             error = new ParameterError("Selected Keys are not compatible", m_parameterList.getPanel());
-        }
+        }*/
         return error;
     }
 

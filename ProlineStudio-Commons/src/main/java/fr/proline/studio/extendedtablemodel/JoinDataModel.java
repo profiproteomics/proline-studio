@@ -614,7 +614,7 @@ public class JoinDataModel extends AbstractJoinDataModel {
     }
     
     /**
-     * Class used to control keys and source column for the MultiJoinDataModel
+     * Class used to control keys and source columns for the MultiJoinDataModel
      */
     public class JoinTAG implements Comparable<JoinTAG> {
         private boolean m_isKey;  // key or source column

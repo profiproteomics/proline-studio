@@ -152,7 +152,53 @@ public class GraphConnector extends AbstractConnectedGraphObject {
         if (m_connections.isEmpty()) {
             m_link = null; 
         }
+        
+        if (!m_out) {
+            m_graphNode.updateNumberOfInConnections();
+            m_graphNode.propagateSourceChanged();
+        }
     }
+    
+        @Override
+    public void delete() {
+
+        // copy list to avoid commodification problem
+        GraphConnector[] connectorsArray = m_connections.toArray(new GraphConnector[m_connections.size()]);
+        for (GraphConnector connector : connectorsArray) {
+            connector.removeConnection(this);
+            //connector.deleteInLink();
+        }
+        m_connections.clear();
+        m_link = null;
+
+    }
+    
+    public void deleteInLink() {
+        // when called, we have an in-connecter
+        for (GraphConnector connector : m_connections) {
+            connector.removeConnection(this);
+
+        }
+        m_connections.clear();
+        m_link = null;
+
+        if (!m_out) {
+
+            m_graphNode.updateNumberOfInConnections();
+            m_graphNode.propagateSourceChanged();
+        }
+    }
+
+    public void propagateSourceChanged() {
+        if (m_out) {
+            for (GraphConnector connector : m_connections) {
+                connector.propagateSourceChanged();
+            }
+        } else {
+            m_graphNode.propagateSourceChanged();
+        }
+    }
+    
     
     public int getXConnection() {
         if (m_out) {
@@ -238,45 +284,7 @@ public class GraphConnector extends AbstractConnectedGraphObject {
         m_y += dy;
     }
     
-    @Override
-    public void delete() {
 
-        // copy list to avoid commodification problem
-        GraphConnector[] connectorsArray = m_connections.toArray(new GraphConnector[m_connections.size()]);
-        for (GraphConnector connector : connectorsArray) {
-            //connector.removeConnection(this);
-            connector.deleteInLink();
-        }
-        m_connections.clear();
-        m_link = null;
-    }
-    
-    public void deleteInLink() {
-        // when called, we have an in-connecter
-        for (GraphConnector connector : m_connections) {
-            connector.removeConnection(this);
-            
-        }
-        m_connections.clear();
-        m_link = null;
-
-        if (!m_out) {
-            
-            m_graphNode.updateNumberOfInConnections();
-            m_graphNode.propagateSourceChanged();
-        }
-    }
-    
-    public void propagateSourceChanged() {
-        if (m_out) {
-            for (GraphConnector connector : m_connections) {
-                connector.propagateSourceChanged();
-            }
-        } else {
-            m_graphNode.propagateSourceChanged();
-        }
-    }
-    
     @Override
     public JPopupMenu createPopup(final GraphPanel panel) {
         return null;

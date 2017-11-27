@@ -237,8 +237,11 @@ public class GraphConnector extends AbstractConnectedGraphObject {
     @Override
     public void delete() {
 
-        for (GraphConnector connector : m_connections) {
-            connector.removeConnection(this);
+        // copy list to avoid commodification problem
+        GraphConnector[] connectorsArray = m_connections.toArray(new GraphConnector[m_connections.size()]);
+        for (GraphConnector connector : connectorsArray) {
+            //connector.removeConnection(this);
+            connector.deleteInLink();
         }
         m_connections.clear();
         m_link = null;
@@ -248,6 +251,7 @@ public class GraphConnector extends AbstractConnectedGraphObject {
         // when called, we have an in-connecter
         for (GraphConnector connector : m_connections) {
             connector.removeConnection(this);
+            
         }
         m_connections.clear();
         m_link = null;

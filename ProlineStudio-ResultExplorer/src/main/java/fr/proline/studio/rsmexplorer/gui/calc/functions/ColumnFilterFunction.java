@@ -30,8 +30,8 @@ public class ColumnFilterFunction extends AbstractFunction {
     }
 
     @Override
-    public void inLinkDeleted() {
-        super.inLinkDeleted();
+    public void inLinkModified() {
+        super.inLinkModified();
 
         m_columnsVisibilityParameter = null;
     }

@@ -141,6 +141,10 @@ public class GraphConnector extends AbstractConnectedGraphObject {
             deleteInLink();
         }
         m_connections.add(connector);
+        
+        if (!m_out) {
+            m_graphNode.propagateSourceChanged();
+        }
     }
     
     public void removeConnection(GraphConnector connector) {

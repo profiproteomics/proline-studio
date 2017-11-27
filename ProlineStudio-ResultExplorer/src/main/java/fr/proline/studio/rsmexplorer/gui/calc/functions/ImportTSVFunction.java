@@ -99,8 +99,8 @@ public class ImportTSVFunction extends AbstractFunction {
     }
     
     @Override
-    public void inLinkDeleted() {
-        super.inLinkDeleted();
+    public void inLinkModified() {
+        super.inLinkModified();
         m_parameterList= null;
         m_fileParameter = null;
     }

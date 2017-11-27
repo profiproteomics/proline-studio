@@ -207,7 +207,7 @@ public class FunctionGraphNode extends GraphNode {
     
     @Override
     public void propagateSourceChanged() {
-        m_function.inLinkDeleted();
+        m_function.inLinkModified();
         super.propagateSourceChanged();
     }
 

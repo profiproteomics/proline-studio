@@ -48,8 +48,8 @@ public class DiffFunction extends AbstractFunction {
     }
     
     @Override
-    public void inLinkDeleted() {
-        super.inLinkDeleted();
+    public void inLinkModified() {
+        super.inLinkModified();
         m_paramTable1Key1 = null;
         m_paramTable2Key1 = null;
         m_tolerance1 = null;

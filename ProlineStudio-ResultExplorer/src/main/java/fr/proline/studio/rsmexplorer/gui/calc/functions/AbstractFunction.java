@@ -44,7 +44,7 @@ public abstract class AbstractFunction implements CheckParameterInterface {
         m_panel = panel;
     }
 
-    public void inLinkDeleted() {
+    public void inLinkModified() {
         m_parameters = null;
         m_globalTableModelInterface = null;
 

@@ -56,8 +56,8 @@ public class AdjustPFunction extends AbstractFunction {
     }
     
     @Override
-    public void inLinkDeleted() {
-        super.inLinkDeleted();
+    public void inLinkModified() {
+        super.inLinkModified();
         m_columnsParameter1 = null;
         m_pi0MethodParameter = null;
         m_numericValueParameter = null;

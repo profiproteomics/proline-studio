@@ -40,8 +40,8 @@ public class LogFunction  extends AbstractFunction {
     }
     
     @Override
-    public void inLinkDeleted() {
-        super.inLinkDeleted();
+    public void inLinkModified() {
+        super.inLinkModified();
         m_columnsParameter = null;
     }
     

@@ -83,8 +83,8 @@ public abstract class AbstractOnExperienceDesignFunction extends AbstractFunctio
     }
 
     @Override
-    public void inLinkDeleted() {
-        super.inLinkDeleted();
+    public void inLinkModified() {
+        super.inLinkModified();
         m_nbGroupsParameter = null;
         m_quantitationTypeParameter = null;
         m_columnsParameterArray = null;

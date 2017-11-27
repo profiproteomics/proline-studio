@@ -102,8 +102,8 @@ public class ComputeFDRFunction extends AbstractFunction {
     }
 
         @Override
-    public void inLinkDeleted() {
-        super.inLinkDeleted();
+    public void inLinkModified() {
+        super.inLinkModified();
         m_pValueColumnParameter = null;
         m_logFCColumnParameter = null;
         m_pvalueThresholdParameter = null;

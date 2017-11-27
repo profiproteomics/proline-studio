@@ -39,8 +39,8 @@ public class FilterFunction extends AbstractFunction {
     }
 
     @Override
-    public void inLinkDeleted() {
-        super.inLinkDeleted();
+    public void inLinkModified() {
+        super.inLinkModified();
 
         m_filters = null;
         m_settingsDone = false;

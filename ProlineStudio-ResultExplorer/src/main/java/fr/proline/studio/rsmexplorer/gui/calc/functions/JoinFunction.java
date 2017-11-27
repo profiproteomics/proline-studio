@@ -36,8 +36,8 @@ public class JoinFunction extends AbstractFunction {
   
     
     private ParameterList m_parameterList;
-    private ArrayList<ObjectParameter> m_paramTableKey1;
-    private ArrayList<ObjectParameter> m_paramTableKey2;
+    private ArrayList<ObjectParameter> m_paramTableKey1 = null;
+    private ArrayList<ObjectParameter> m_paramTableKey2 = null;
     private DoubleParameter m_tolerance1;
     private DoubleParameter m_tolerance2;
     private BooleanParameter m_addSourceCol;
@@ -302,28 +302,51 @@ public class JoinFunction extends AbstractFunction {
 
     @Override
     public ParameterError checkParameters(GraphConnector[] graphObjects) {
-        /*Integer keyTable1Key1 = (Integer) m_paramTable1Key1.getAssociatedObjectValue();
-        Integer keyTable2Key1 = (Integer) m_paramTable2Key1.getAssociatedObjectValue();
         
-        Integer keyTable1Key2 = (Integer) m_paramTable1Key2.getAssociatedObjectValue();
-        Integer keyTable2Key2 = (Integer) m_paramTable2Key2.getAssociatedObjectValue();
         
-        GlobalTableModelInterface modelForDefaultKey = getMainGlobalTableModelInterface(0);
         
-        if (modelForDefaultKey == null) {
-            Table t1 = new Table(graphObjects[0].getGlobalTableModelInterface());
-            Table t2 = new Table(graphObjects[1].getGlobalTableModelInterface());
-            Table joinedTable = Table.join(t1, t2);
-            modelForDefaultKey = joinedTable.getModel(); //JPM.TODO
+        int size = (m_paramTableKey1!=null) ? m_paramTableKey1.size() : 0;
+        
+        if (size>0) {
+            Integer key = (Integer) m_paramTableKey1.get(0).getAssociatedObjectValue();
+            if (key != -1) {
+                Class c = graphObjects[0].getGlobalTableModelInterface().getDataColumnClass(key);
+                for (int i = 1; i < size; i++) {
+                    Integer keyCur = (Integer) m_paramTableKey1.get(i).getAssociatedObjectValue();
+                    if (keyCur == -1) {
+                        return new ParameterError("Selected Keys are not compatible", m_parameterList.getPanel());
+                    }
+                    Class cCur = graphObjects[i].getGlobalTableModelInterface().getDataColumnClass(keyCur);
+
+                    if (!cCur.equals(c)) {
+                        return new ParameterError("Selected Keys are not compatible", m_parameterList.getPanel());
+                    }
+                }
+            } else {
+                return new ParameterError("First Key is not Selected", m_parameterList.getPanel());
+            }
         }
         
-        boolean checkKeys = ((AbstractJoinDataModel) modelForDefaultKey).checkKeys(keyTable1Key1, keyTable2Key1) && ((AbstractJoinDataModel) modelForDefaultKey).checkKeys(keyTable1Key2, keyTable2Key2);
-*/
-        ParameterError error = null;
-        /*if (!checkKeys) {
-            error = new ParameterError("Selected Keys are not compatible", m_parameterList.getPanel());
-        }*/
-        return error;
+        size = (m_paramTableKey2 != null) ? m_paramTableKey2.size() : 0;
+        if (size > 0) {
+            Integer key = (Integer) m_paramTableKey2.get(0).getAssociatedObjectValue();
+            if (key != -1) {
+                Class c = graphObjects[0].getGlobalTableModelInterface().getDataColumnClass(key);
+                for (int i = 1; i < size; i++) {
+                    Integer keyCur = (Integer) m_paramTableKey2.get(i).getAssociatedObjectValue();
+                    if (keyCur == -1) {
+                        return new ParameterError("Selected Keys are not compatible", m_parameterList.getPanel());
+                    }
+                    Class cCur = graphObjects[i].getGlobalTableModelInterface().getDataColumnClass(keyCur);
+
+                    if (!cCur.equals(c)) {
+                        return new ParameterError("Selected Keys are not compatible", m_parameterList.getPanel());
+                    }
+                }
+            }
+        }
+        
+        return null;
     }
 
     @Override

@@ -6,6 +6,7 @@
 package fr.proline.studio.msfiles;
 
 import fr.proline.studio.msfiles.WorkingSetEntry.Location;
+import java.io.File;
 import java.util.HashSet;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -61,7 +62,12 @@ public class WorkingSet {
     public boolean addEntry(String path, Location location) {
         if(!m_index.contains(path)){ 
             JSONObject newEntry = new JSONObject();
-            newEntry.put("filename", path);
+            
+            //extract filename!
+            String delimiter = (path.contains(File.separator) ? File.separator : "/");
+            String filename = path.substring(path.lastIndexOf(delimiter)+1);
+            
+            newEntry.put("filename", filename);
             newEntry.put("location", location.toString().toLowerCase());
             newEntry.put("path", path);
             m_index.add(path);

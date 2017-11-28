@@ -85,7 +85,7 @@ public abstract class DecoratedTable extends JXTable implements CrossSelectionIn
     public static final int AUTOMATIC_COLUMNS_SIZE = 0;
     public static final int FIXED_COLUMNS_SIZE = 1;
     public static final int SMART_COLUMNS_SIZE = 2;
-    public static final String TABLE_PARAMETERS = "Table Parameters";
+    public static final String TABLE_PARAMETER_LIST_KEY = "Tables";
 
 
     private boolean m_firstPaint = true;
@@ -165,7 +165,7 @@ public abstract class DecoratedTable extends JXTable implements CrossSelectionIn
         m_width = -1;
         m_selection = -1;
 
-        ParameterList parameterTableList = new ParameterList(TABLE_PARAMETERS);
+        ParameterList parameterTableList = new ParameterList(TABLE_PARAMETER_LIST_KEY);
         Object[] associatedTable = {"Automatic Column Size", "Fixed Column Size", "Smart Column Size"};
         m_arrangementComboBox = new JComboBox(associatedTable);
         Object[] objectTable = {DecoratedTable.AUTOMATIC_COLUMNS_SIZE, DecoratedTable.FIXED_COLUMNS_SIZE, DecoratedTable.SMART_COLUMNS_SIZE};

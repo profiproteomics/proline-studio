@@ -37,7 +37,7 @@ public class JMSConnectionManager {
     
     // paramaters management
     private ParameterList m_jmsSettingsPList;
-    public static final String JMS_SETTINGS_PARAMLIST_KEY = "JMS Settings";
+    public static final String JMS_SETTINGS_PARAMETER_LIST_KEY = "JMS";
 
     protected static final Logger m_loggerProline = LoggerFactory.getLogger("ProlineStudio.DPM.Task");
 
@@ -185,7 +185,7 @@ public class JMSConnectionManager {
             // Step 1. Directly instantiate the JMS Queue object.
             //Get JMS Queue Name from preference 
             
-            m_jmsSettingsPList = new ParameterList(JMS_SETTINGS_PARAMLIST_KEY);
+            m_jmsSettingsPList = new ParameterList(JMS_SETTINGS_PARAMETER_LIST_KEY);
             StringParameter m_parameter = new StringParameter(JMSConnectionManager.SERVICE_REQUEST_QUEUE_NAME_KEY, "JMSProlineQueueName", JTextField.class, DEFAULT_SERVICE_REQUEST_QUEUE_NAME, 5, null);
             m_jmsSettingsPList.add(m_parameter);
             m_jmsSettingsPList.loadParameters(NbPreferences.root());

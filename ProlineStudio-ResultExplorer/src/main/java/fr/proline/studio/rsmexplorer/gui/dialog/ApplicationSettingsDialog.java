@@ -39,14 +39,21 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
 
     private static ApplicationSettingsDialog m_singletonDialog = null;
     private AbstractParameterListTree m_parameterListTree;
-    private ParameterList m_jmsParameterList, m_generalParameterList, m_tablePrameterList, m_wizardParameterList;
+    private ParameterList m_jmsParameterList, m_generalParameterList, m_tablePrameterList, m_msParameterList;
     private JPanel m_cards;
     private final Hashtable<String, JPanel> m_existingPanels;
     private final Hashtable<String, ParameterList> m_existingLists;
 
-    private static final String GENERAL_APPLICATION_SETTINGS = "General Application Settings";
-    private static final String DIALOG_TITLE = "Proline Studio Settings";
-    private static final String TREE_ROOT_NAME = "Settings Categories";
+    private static final String GENERAL_APPLICATION_SETTINGS = "General";
+    
+    private static final String MS_FILES_SETTINGS = "Ms Files";
+    public static final String FULLNAME = "Absolute Path";
+    public static final String ABSOLUTE_PATH = "Filename";
+    public static final String WORKING_SET_ENTRY_NAMING_KEY = "WsEntryLabel";
+    public static final String WORKING_SET_ENTRY_NAMING_NAME = "Working Set Entry Label";
+    
+    private static final String DIALOG_TITLE = "General Settings";
+    private static final String TREE_ROOT_NAME = "Settings";
 
     private FileParameter m_converterFilePath;
 
@@ -67,8 +74,8 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
 
         setTitle(DIALOG_TITLE);
 
-        setSize(new Dimension(1024, 480));
-        setMinimumSize(new Dimension(1024, 360));
+        setSize(new Dimension(720, 480));
+        setMinimumSize(new Dimension(720, 480));
         setResizable(true);
 
         setDocumentationSuffix("h.eb8nfjv41vkz");
@@ -87,7 +94,7 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
     }
 
     private ParameterList getJMSParameterList() {
-        m_jmsParameterList = new ParameterList(JMSConnectionManager.JMS_SETTINGS_PARAMLIST_KEY);
+        m_jmsParameterList = new ParameterList(JMSConnectionManager.JMS_SETTINGS_PARAMETER_LIST_KEY);
 
         StringParameter serviceRequestQueueName = new StringParameter(JMSConnectionManager.SERVICE_REQUEST_QUEUE_NAME_KEY, "Service Request Queue Name", JTextField.class, JMSConnectionManager.DEFAULT_SERVICE_REQUEST_QUEUE_NAME, 5, null);
         m_jmsParameterList.add(serviceRequestQueueName);
@@ -123,10 +130,11 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
 
         return m_generalParameterList;
     }
+   
 
     private ParameterList getMsFilesParameters() {
 
-        m_wizardParameterList = new ParameterList("Conversion/Upload Settings");
+        m_msParameterList = new ParameterList(MS_FILES_SETTINGS);
 
         String[] converterExtentions = {"exe"};
         String[] converterFilterNames = {"raw2mzDB.exe"};
@@ -134,16 +142,22 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
         m_converterFilePath.setAllFiles(false);
         m_converterFilePath.setSelectionMode(JFileChooser.FILES_ONLY);
         m_converterFilePath.setDefaultDirectory(new File(m_preferences.get("mzDB_Settings.Converter_(.exe)", System.getProperty("user.home"))));
-        m_wizardParameterList.add(m_converterFilePath);
+        m_msParameterList.add(m_converterFilePath);
+        
+        Object[] namingAssosiatedTable = {"Filename", "Absolute Path"};
+        JComboBox namingComboBox = new JComboBox(namingAssosiatedTable);
+        Object[] namingObjectTable = {FULLNAME, ABSOLUTE_PATH};
+        ObjectParameter entryLabel = new ObjectParameter(WORKING_SET_ENTRY_NAMING_KEY, WORKING_SET_ENTRY_NAMING_NAME, namingComboBox, namingAssosiatedTable, namingObjectTable, 1, null);
+        m_msParameterList.add(entryLabel);
 
-        m_wizardParameterList.loadParameters(m_preferences);
+        m_msParameterList.loadParameters(m_preferences);
 
-        return m_wizardParameterList;
+        return m_msParameterList;
 
     }
 
     private ParameterList getTableParameters() {
-        m_tablePrameterList = new ParameterList(DecoratedTable.TABLE_PARAMETERS);
+        m_tablePrameterList = new ParameterList(DecoratedTable.TABLE_PARAMETER_LIST_KEY);
 
         Object[] associatedTable = {"Automatic Column Size", "Fixed Column Size", "Smart Column Size"};
         JComboBox comboBox = new JComboBox(associatedTable);
@@ -185,7 +199,7 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
         JPanel panel = new JPanel();
         panel.setLayout(new GridLayout(1, 1));
 
-        panel.setBorder(BorderFactory.createTitledBorder(DIALOG_TITLE));
+        panel.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createEtchedBorder(), BorderFactory.createEmptyBorder(10, 10, 10, 10)));
 
         m_parameterListTree = new AbstractParameterListTree(TREE_ROOT_NAME, this, this);
         m_parameterListTree.addNodes(getJMSParameterList());

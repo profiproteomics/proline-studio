@@ -39,8 +39,8 @@ public class AbstractParameterListTree extends JPanel {
         m_root = new DefaultMutableTreeNode(rootName);
 
         DefaultTreeCellRenderer renderer = new DefaultTreeCellRenderer();
-        renderer.setLeafIcon(IconManager.getIcon(IconManager.IconType.SETTINGS));
-        renderer.setIcon(IconManager.getIcon(IconManager.IconType.SETTINGS));
+        renderer.setLeafIcon(IconManager.getIcon(IconManager.IconType.FILE));
+        renderer.setIcon(IconManager.getIcon(IconManager.IconType.FILE));
         renderer.setClosedIcon(IconManager.getIcon(IconManager.IconType.TOOLBOX_PLUS));
         renderer.setOpenIcon(IconManager.getIcon(IconManager.IconType.TOOLBOX_MINUS));
 

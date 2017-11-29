@@ -18,6 +18,10 @@ public class WorkingSetEntry {
 
         LOCAL, REMOTE
     }
+    
+    public enum Labeling {
+        DISPLAY_FILENAME, DISPLAY_PATH
+    }
 
     private String m_filename;
     private String m_path;
@@ -25,12 +29,14 @@ public class WorkingSetEntry {
     private boolean m_existing;
     private File m_file;
     private WorkingSet m_parent;
+    private Labeling m_labeling;
 
-    public WorkingSetEntry(String filename, String path, Location location, WorkingSet parent) {
+    public WorkingSetEntry(String filename, String path, Location location, WorkingSet parent, Labeling labeling) {
         m_filename = filename;
         m_path = path;
         m_location = location;
         m_parent = parent;
+        m_labeling = labeling;
 
         if (location == Location.LOCAL) {
             m_file = new File(m_path);
@@ -83,7 +89,11 @@ public class WorkingSetEntry {
 
     @Override
     public String toString() {
-        return m_filename;
+        if(m_labeling == WorkingSetEntry.Labeling.DISPLAY_FILENAME){
+            return m_filename;
+        }else{
+            return m_path;
+        }
     }
 
 }

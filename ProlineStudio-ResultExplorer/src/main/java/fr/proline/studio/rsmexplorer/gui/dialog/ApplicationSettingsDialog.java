@@ -46,9 +46,9 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
 
     private static final String GENERAL_APPLICATION_SETTINGS = "General";
     
-    private static final String MS_FILES_SETTINGS = "Ms Files";
-    public static final String FULLNAME = "Absolute Path";
-    public static final String ABSOLUTE_PATH = "Filename";
+    public static final String MS_FILES_SETTINGS = "MsFiles";
+    public static final String FILENAME = "Filename";
+    public static final String ABSOLUTE_PATH = "Absolute Path";
     public static final String WORKING_SET_ENTRY_NAMING_KEY = "WsEntryLabel";
     public static final String WORKING_SET_ENTRY_NAMING_NAME = "Working Set Entry Label";
     
@@ -146,7 +146,7 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
         
         Object[] namingAssosiatedTable = {"Filename", "Absolute Path"};
         JComboBox namingComboBox = new JComboBox(namingAssosiatedTable);
-        Object[] namingObjectTable = {FULLNAME, ABSOLUTE_PATH};
+        Object[] namingObjectTable = {FILENAME, ABSOLUTE_PATH};
         ObjectParameter entryLabel = new ObjectParameter(WORKING_SET_ENTRY_NAMING_KEY, WORKING_SET_ENTRY_NAMING_NAME, namingComboBox, namingAssosiatedTable, namingObjectTable, 1, null);
         m_msParameterList.add(entryLabel);
 

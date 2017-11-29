@@ -6,6 +6,7 @@
 package fr.proline.studio.msfiles;
 
 import fr.proline.studio.msfiles.WorkingSetEntry.Location;
+import fr.proline.studio.rsmexplorer.gui.dialog.ApplicationSettingsDialog;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -16,6 +17,7 @@ import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.openide.util.NbPreferences;
 
 /**
  *
@@ -28,10 +30,14 @@ public class WorkingSetModel implements TreeModel {
     private final HashSet<TreeModelListener> m_listeners; // Declare the listeners vector
     
     private final HashMap<String, ArrayList<WorkingSet>> m_workingSetEntryIndex;
+    
+    private boolean m_displayFilename;
 
     public WorkingSetModel(WorkingSetRoot root) {
         m_root = new DefaultMutableTreeNode(root);
         m_listeners = new HashSet<TreeModelListener>();
+        
+        m_displayFilename = NbPreferences.root().get(ApplicationSettingsDialog.MS_FILES_SETTINGS+"."+ApplicationSettingsDialog.WORKING_SET_ENTRY_NAMING_KEY, ApplicationSettingsDialog.FILENAME).equalsIgnoreCase(ApplicationSettingsDialog.FILENAME);
         
         m_workingSetEntryIndex = new HashMap<String, ArrayList<WorkingSet>>();
     }
@@ -83,7 +89,7 @@ public class WorkingSetModel implements TreeModel {
 
             String path = (String) entry.get("path");
 
-            WorkingSetEntry newEntry = new WorkingSetEntry(filename, path, location, workingSet);
+            WorkingSetEntry newEntry = new WorkingSetEntry(filename, path, location, workingSet, (m_displayFilename) ? WorkingSetEntry.Labeling.DISPLAY_FILENAME : WorkingSetEntry.Labeling.DISPLAY_PATH);
             
             if(m_workingSetEntryIndex.containsKey(path)){
                 m_workingSetEntryIndex.get(path).add(workingSet);       

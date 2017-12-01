@@ -292,8 +292,8 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
         while (enumKey.hasMoreElements()) {
             String key = enumKey.nextElement();
 
-            if (key.equalsIgnoreCase("Conversion/Upload Settings")) {
-                if (m_converterFilePath.getStringValue().length() > 0) {
+            if (key.equalsIgnoreCase(MS_FILES_SETTINGS)) {
+                if (m_converterFilePath.isEdited() || (m_converterFilePath.getStringValue()!=null && m_converterFilePath.getStringValue().length()>0)) {
                     File f = new File(m_converterFilePath.getStringValue());
                     if (!f.exists() || !f.getAbsolutePath().endsWith("raw2mzDB.exe")) {
                         ParameterError error = new ParameterError("The selected raw2mzDB.exe is not valid.", m_converterFilePath.getComponent());

@@ -4,6 +4,8 @@ import fr.proline.studio.utils.IconManager;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.io.File;
 import java.util.ArrayList;
 import javax.swing.*;
@@ -21,11 +23,12 @@ import javax.swing.filechooser.FileSystemView;
 public class FileParameter extends AbstractParameter {
 
     private ArrayList<AbstractLinkedParameters> m_linkedParametersList = null;
-    
+
     private final FileSystemView m_fsv;
-    private String m_defaultValue;
+    private String m_defaultValue, m_startValue;
     private final String[] m_fileFilterName;
     private final String[] m_fileFilterExtension;
+    private boolean m_edited;
 
     private int m_selectionMode = JFileChooser.FILES_AND_DIRECTORIES;
     private boolean m_allFiles = true;
@@ -37,17 +40,18 @@ public class FileParameter extends AbstractParameter {
         m_defaultValue = defaultValue;
         m_fileFilterName = fileFilterName;
         m_fileFilterExtension = fileFilterExtension;
+        m_edited = false;
     }
 
     @Override
     public JComponent getComponent(Object value) {
 
-        String startValue = null;
-        if (value != null)  {
-            startValue = value.toString();
+        m_startValue = null;
+        if (value != null) {
+            m_startValue = value.toString();
         }
-        if (startValue == null) {
-            startValue = (m_defaultValue!= null) ? m_defaultValue : "";
+        if (m_startValue == null) {
+            m_startValue = (m_defaultValue != null) ? m_defaultValue : "";
         }
 
         if (m_parameterComponent == null) {
@@ -57,8 +61,29 @@ public class FileParameter extends AbstractParameter {
                 m_panel = new JPanel(new FlowLayout());
 
                 final JTextField textField = new JTextField(30);
-                textField.setText(startValue);
-                
+                textField.setText(m_startValue);
+                textField.addKeyListener(new KeyListener() {
+
+                    @Override
+                    public void keyTyped(KeyEvent ke) {
+                        if(!textField.getText().equalsIgnoreCase(m_startValue)){
+                            m_edited = true;
+                        }else{
+                            m_edited = false;
+                        }        
+                    }
+
+                    @Override
+                    public void keyPressed(KeyEvent ke) {
+                        ;
+                    }
+
+                    @Override
+                    public void keyReleased(KeyEvent ke) {
+                        ;
+                    }
+                });
+
                 //Check if this works-solves the problem!
                 m_parameterComponent = textField;
 
@@ -88,9 +113,9 @@ public class FileParameter extends AbstractParameter {
 
                         int result = fchooser.showOpenDialog(addFileButton);
                         if (result == JFileChooser.APPROVE_OPTION) {
-
                             File file = fchooser.getSelectedFile();
                             textField.setText(file.getPath());
+                            m_edited = true;
                         }
                     }
                 });
@@ -150,7 +175,7 @@ public class FileParameter extends AbstractParameter {
     @Override
     public Object getObjectValue() {
         if (m_graphicalType.equals(JTextField.class)) {
-            if(m_parameterComponent!=null){
+            if (m_parameterComponent != null) {
                 return ((JTextField) m_parameterComponent).getText();
             }
         }
@@ -176,7 +201,7 @@ public class FileParameter extends AbstractParameter {
     public void setDefaultDirectory(File defaultDirectory) {
         m_defaultDirectory = defaultDirectory;
     }
-    
+
     public void addLinkedParameters(final AbstractLinkedParameters linkedParameters) {
 
         // create parameterComponent if needed
@@ -188,8 +213,7 @@ public class FileParameter extends AbstractParameter {
         m_linkedParametersList.add(linkedParameters);
 
         if (m_parameterComponent instanceof JTextField) {
-            
-            
+
             ((JTextField) m_parameterComponent).getDocument().addDocumentListener(new DocumentListener() {
                 @Override
                 public void changedUpdate(DocumentEvent e) {
@@ -212,5 +236,9 @@ public class FileParameter extends AbstractParameter {
             });
 
         }
+    }
+
+    public boolean isEdited() {
+        return m_edited;
     }
 }

@@ -134,8 +134,8 @@ public class DatabaseConnectionTask extends AbstractDatabaseTask {
                 // UDS Connection
                 try {
                     
-                    IDatabaseConnector udsConn = DatabaseConnectorFactory.createDatabaseConnectorInstance(ProlineDatabaseType.UDS, m_databaseProperties,IDatabaseConnector.ConnectionPoolType.SIMPLE_POOL_MANAGEMENT);
-                    DStoreCustomPoolConnectorFactory.getInstance().initialize(udsConn, "Proline STUDIO",IDatabaseConnector.ConnectionPoolType.SIMPLE_POOL_MANAGEMENT);
+                    IDatabaseConnector udsConn = DatabaseConnectorFactory.createDatabaseConnectorInstance(ProlineDatabaseType.UDS, m_databaseProperties); //VD #16961,IDatabaseConnector.ConnectionPoolType.SIMPLE_POOL_MANAGEMENT);
+                    DStoreCustomPoolConnectorFactory.getInstance().initialize(udsConn, "Proline STUDIO"); //VD #16961,IDatabaseConnector.ConnectionPoolType.SIMPLE_POOL_MANAGEMENT);
                 } catch (Exception e) {
                     m_logger.error(getClass().getSimpleName() + " failed", e);
                     m_taskError = new TaskError(e.getMessage());

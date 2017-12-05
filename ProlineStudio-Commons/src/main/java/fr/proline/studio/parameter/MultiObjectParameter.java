@@ -8,6 +8,7 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.*;
+import jonelo.jacksum.adapt.org.bouncycastle.util.Arrays;
 
 
 /**
@@ -83,7 +84,7 @@ public class MultiObjectParameter<E> extends AbstractParameter {
             JCheckBoxList checkBoxList = ((JCheckBoxListPanel) m_parameterComponent).getCheckBoxList();
             checkBoxList.selectItem(i, v);
         } else if (m_graphicalType.equals(AdvancedSelectionPanel.class)) {
-            
+            ;
         }
         
     }
@@ -249,6 +250,11 @@ public class MultiObjectParameter<E> extends AbstractParameter {
         } else if (m_parameterComponent instanceof AdvancedSelectionPanel) {
             // JPM.TODO : not done for the moment, not used
         }
+    }
+
+    @Override
+    public boolean isEdited() {
+        return true;
     }
     
 }

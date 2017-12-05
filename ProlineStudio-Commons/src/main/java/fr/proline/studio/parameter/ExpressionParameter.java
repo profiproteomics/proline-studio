@@ -87,5 +87,10 @@ public class ExpressionParameter extends AbstractParameter {
     public void setValue(String v) {
         // nothing to do
     }
+
+    @Override
+    public boolean isEdited() {
+        return true;
+    }
     
 }

@@ -53,4 +53,9 @@ public class DisplayStubParameter extends AbstractParameter {
     public LabelVisibility showLabel() {
         return LabelVisibility.AS_BORDER_TITLE;
     }
+
+    @Override
+    public boolean isEdited() {
+        return true;
+    }
 }

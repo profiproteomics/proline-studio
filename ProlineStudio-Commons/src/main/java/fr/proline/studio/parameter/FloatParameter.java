@@ -8,6 +8,7 @@ import javax.swing.event.DocumentListener;
 
 /**
  * Parameter of type Double, displayed as a Textfield
+ *
  * @author jm235353
  */
 public class FloatParameter extends AbstractParameter {
@@ -15,9 +16,11 @@ public class FloatParameter extends AbstractParameter {
     private Float m_minValue;
     private Float m_maxValue;
     private Float m_defaultValue;
+    private Float m_startValue;
+    private boolean m_edited = false;
 
     private ArrayList<AbstractLinkedParameters> m_linkedParametersList = null;
-    
+
     public FloatParameter(String key, String name, Class graphicalType, Float defaultValue, Float minValue, Float maxValue) {
         super(key, name, Float.class, graphicalType);
         m_defaultValue = defaultValue;
@@ -25,7 +28,7 @@ public class FloatParameter extends AbstractParameter {
         m_maxValue = maxValue;
 
     }
-    
+
     public FloatParameter(String key, String name, JComponent component, Float defaultValue, Float minValue, Float maxValue) {
         super(key, name, Float.class, component.getClass());
         m_defaultValue = defaultValue;
@@ -36,6 +39,18 @@ public class FloatParameter extends AbstractParameter {
 
     @Override
     public JComponent getComponent(Object value) {
+
+        m_startValue = null;
+        if (value != null) {
+            try {
+                float valueParsed = Float.parseFloat(value.toString());
+                m_startValue = new Float(valueParsed);
+            } catch (NumberFormatException nfe) {
+            }
+        }
+        if (m_startValue == null) {
+            m_startValue = m_defaultValue;
+        }
 
         if (m_parameterComponent != null) {
             if (m_graphicalType.equals(JTextField.class)) {
@@ -48,8 +63,7 @@ public class FloatParameter extends AbstractParameter {
                 return m_parameterComponent;
             }
         }
-        
-        
+
         if (m_graphicalType.equals(JTextField.class)) {
             JTextField textField = new JTextField(3);
             if (value != null) {
@@ -63,13 +77,13 @@ public class FloatParameter extends AbstractParameter {
 
         return null;
     }
-    
+
     @Override
     public void initDefault() {
         if (m_defaultValue == null) {
             return; // should not happen
         }
-        
+
         if (m_graphicalType.equals(JTextField.class)) {
             JTextField textField = (JTextField) m_parameterComponent;
             textField.setText(m_defaultValue.toString());
@@ -78,50 +92,52 @@ public class FloatParameter extends AbstractParameter {
 
     @Override
     public ParameterError checkParameter() {
-        
+
         if (!m_used && !m_compulsory) {
             return null;
         }
-        
+
         Float value = null;
-        
+
         if (m_graphicalType.equals(JTextField.class)) {
             JTextField textField = (JTextField) m_parameterComponent;
             try {
                 value = Float.parseFloat(textField.getText());
             } catch (NumberFormatException nfe) {
-                return new ParameterError(m_name+" is  not a Number", m_parameterComponent);
+                return new ParameterError(m_name + " is  not a Number", m_parameterComponent);
             }
         }
-        
+
         if (m_minValue != null) {
             if (value < m_minValue) {
-                return new ParameterError(m_name+" must be greater than "+m_minValue.toString(), m_parameterComponent);
+                return new ParameterError(m_name + " must be greater than " + m_minValue.toString(), m_parameterComponent);
             }
         }
-        
+
         if (m_maxValue != null) {
             if (value > m_maxValue) {
-                return new ParameterError(m_name+" must be lesser than "+m_maxValue.toString(), m_parameterComponent);
+                return new ParameterError(m_name + " must be lesser than " + m_maxValue.toString(), m_parameterComponent);
             }
         }
-        
+
         return null;
     }
-    
+
     @Override
     public void setValue(String v) {
-        if ((m_graphicalType.equals(JTextField.class)) && (m_parameterComponent!=null)) {
-            ((JTextField)m_parameterComponent).setText(v);
+        if ((m_graphicalType.equals(JTextField.class)) && (m_parameterComponent != null)) {
+            ((JTextField) m_parameterComponent).setText(v);
+        }
+        if (v != null && m_startValue != null) {
+            m_edited = !(Float.parseFloat(v) == m_startValue);
         }
     }
-    
 
     @Override
     public String getStringValue() {
         String v = getObjectValue().toString();
         if (!v.contains(".")) {
-            v = v+".0";  // JPM.WART : force to have a float (needed for python usage)
+            v = v + ".0";  // JPM.WART : force to have a float (needed for python usage)
         }
         return v;
     }
@@ -129,12 +145,11 @@ public class FloatParameter extends AbstractParameter {
     @Override
     public Object getObjectValue() {
         if (m_graphicalType.equals(JTextField.class)) {
-           return ((JTextField) m_parameterComponent).getText();
+            return ((JTextField) m_parameterComponent).getText();
         }
         return ""; // should not happen
     }
-    
-    
+
     public void addLinkedParameters(final AbstractLinkedParameters linkedParameters) {
 
         // create parameterComponent if needed
@@ -167,10 +182,15 @@ public class FloatParameter extends AbstractParameter {
                         linkedParameters.valueChanged(valueString, d);
                     } catch (Exception e) {
                     }
-                    
+
                 }
             });
 
         }
+    }
+
+    @Override
+    public boolean isEdited() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

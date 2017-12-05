@@ -16,6 +16,10 @@ public class ColorOrGradientParameter extends AbstractParameter {
     private ColorOrGradient m_defaultColor = null;
     private ArrayList<ReferenceIdName> m_gradientParam = null;
     
+    private ColorOrGradient m_startValue;
+    
+    private boolean m_edited = false;
+    
     public ColorOrGradientParameter(String key, String name, ColorOrGradient defaultColor, ArrayList<ReferenceIdName> gradientParam) {
         super(key, name, Color.class, ColorOrGradientChooserPanel.class);
         m_defaultColor = defaultColor;
@@ -29,22 +33,22 @@ public class ColorOrGradientParameter extends AbstractParameter {
     @Override
     public JComponent getComponent(Object value) {
 
-        ColorOrGradient startValue = (ColorOrGradient) value;
+        m_startValue = (ColorOrGradient) value;
 
-        if (startValue == null) {
-            startValue = m_defaultColor;
+        if (m_startValue == null) {
+            m_startValue = m_defaultColor;
         }
 
         if (m_parameterComponent !=null) {
             if (m_graphicalType.equals(ColorOrGradientChooserPanel.class)) {
-                ((ColorOrGradientChooserPanel) m_parameterComponent).setColor(startValue);
+                ((ColorOrGradientChooserPanel) m_parameterComponent).setColor(m_startValue);
                 return m_parameterComponent;
             }
         }
 
         if (m_graphicalType.equals(ColorOrGradientChooserPanel.class)) {
 
-            ColorOrGradientChooserPanel colorGradientChooser = new ColorOrGradientChooserPanel(startValue, m_gradientParam);
+            ColorOrGradientChooserPanel colorGradientChooser = new ColorOrGradientChooserPanel(m_startValue, m_gradientParam);
 
             m_parameterComponent = colorGradientChooser;
             return colorGradientChooser;
@@ -109,7 +113,15 @@ public class ColorOrGradientParameter extends AbstractParameter {
             ((ColorOrGradientChooserPanel) m_parameterComponent).setColor(ColorOrGradient.read(v));
         }
         
+        if(v!=null && ColorOrGradient.read(v)!=null && m_startValue!=null){
+            m_edited = ColorOrGradient.read(v) != m_startValue;
+        }
         
+    }
+
+    @Override
+    public boolean isEdited() {
+        return m_edited;
     }
 
     

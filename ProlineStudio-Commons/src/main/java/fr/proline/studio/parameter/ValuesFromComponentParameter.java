@@ -15,6 +15,8 @@ public class ValuesFromComponentParameter extends AbstractParameter {
     
     private ComponentParameterInterface m_componentParameterInterface;
     
+    private boolean m_edited = false;
+    
     public ValuesFromComponentParameter(String key, String name, ComponentParameterInterface componentParameterInterface) {
         super(key, name, Object.class, ComponentParameterInterface.class);
 
@@ -83,6 +85,11 @@ public class ValuesFromComponentParameter extends AbstractParameter {
         for (AbstractLinkedParameters linkedParameter : m_linkedParametersList) {
             linkedParameter.valueChanged(getStringValue(), getObjectValue());
         }
+    }
+
+    @Override
+    public boolean isEdited() {
+        return true;
     }
     
 }

@@ -71,6 +71,7 @@ public abstract class AbstractParameter {
     
     public abstract ParameterError checkParameter();
     
+    public abstract boolean isEdited();
     
     public abstract String getStringValue();
     public abstract Object getObjectValue();

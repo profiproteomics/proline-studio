@@ -28,7 +28,7 @@ public class FileParameter extends AbstractParameter {
     private String m_defaultValue, m_startValue;
     private final String[] m_fileFilterName;
     private final String[] m_fileFilterExtension;
-    private boolean m_edited;
+    private boolean m_edited = false;
 
     private int m_selectionMode = JFileChooser.FILES_AND_DIRECTORIES;
     private boolean m_allFiles = true;
@@ -40,7 +40,6 @@ public class FileParameter extends AbstractParameter {
         m_defaultValue = defaultValue;
         m_fileFilterName = fileFilterName;
         m_fileFilterExtension = fileFilterExtension;
-        m_edited = false;
     }
 
     @Override
@@ -66,11 +65,11 @@ public class FileParameter extends AbstractParameter {
 
                     @Override
                     public void keyTyped(KeyEvent ke) {
-                        if(!textField.getText().equalsIgnoreCase(m_startValue)){
+                        if (!textField.getText().equalsIgnoreCase(m_startValue)) {
                             m_edited = true;
-                        }else{
+                        } else {
                             m_edited = false;
-                        }        
+                        }
                     }
 
                     @Override
@@ -115,7 +114,11 @@ public class FileParameter extends AbstractParameter {
                         if (result == JFileChooser.APPROVE_OPTION) {
                             File file = fchooser.getSelectedFile();
                             textField.setText(file.getPath());
-                            m_edited = true;
+                            if (!textField.getText().equalsIgnoreCase(m_startValue)) {
+                                m_edited = true;
+                            } else {
+                                m_edited = false;
+                            }
                         }
                     }
                 });
@@ -238,6 +241,7 @@ public class FileParameter extends AbstractParameter {
         }
     }
 
+    @Override
     public boolean isEdited() {
         return m_edited;
     }

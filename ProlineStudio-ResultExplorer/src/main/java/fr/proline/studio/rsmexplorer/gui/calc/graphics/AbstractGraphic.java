@@ -9,7 +9,6 @@ import fr.proline.studio.rserver.dialog.ImageViewerTopComponent;
 import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
 import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
 import fr.proline.studio.rsmexplorer.gui.calc.ProcessCallbackInterface;
-import fr.proline.studio.rsmexplorer.gui.calc.graph.AbstractConnectedGraphObject;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphConnector;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphNode;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphicGraphNode;
@@ -42,10 +41,40 @@ public abstract class AbstractGraphic implements CheckParameterInterface {
     
     protected GraphPanel m_panel;
 
-    
-    public AbstractGraphic(GraphPanel panel) {
-        m_panel = panel;
+    public enum GRAPHIC_TYPE {
+        CalibrationPlotGraphic(0),
+        ParallelCoordinatesGraphic(1),
+        ScatterGraphic(2),
+        HistogramGraphic(3),
+        VennDiagramGraphic(4),
+        BoxPlotGraphic(5),
+        DensityPlotGraphic(6),
+        VarianceDistPlotGraphic(7);
+        
+        
+        private int m_id;
+
+        GRAPHIC_TYPE(int id) {
+            m_id = id;
+        }
+        
+        public int getId() {
+            return m_id;
+        }
+
     }
+    
+    private GRAPHIC_TYPE m_type;
+    
+    public AbstractGraphic(GraphPanel panel, GRAPHIC_TYPE graphicType) {
+        m_panel = panel;
+        m_type = graphicType;
+    }
+    
+    public int getTypeId() {
+        return m_type.getId();
+    }
+    
     
     public void cloneInfo(AbstractGraphic src) {
         m_autoDisplayLayoutDuringProcess = src.m_autoDisplayLayoutDuringProcess;

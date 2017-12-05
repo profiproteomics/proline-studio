@@ -43,7 +43,7 @@ public class JoinFunction extends AbstractFunction {
     private BooleanParameter m_addSourceCol;
     
     public JoinFunction(GraphPanel panel) {
-        super(panel);
+        super(panel, FUNCTION_TYPE.JoinFunction);
     }
     
     @Override

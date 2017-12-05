@@ -35,7 +35,7 @@ public class FilterFunction extends AbstractFunction {
     
     
     public FilterFunction(GraphPanel panel) {
-        super(panel);
+        super(panel, FUNCTION_TYPE.FilterFunction);
     }
 
     @Override

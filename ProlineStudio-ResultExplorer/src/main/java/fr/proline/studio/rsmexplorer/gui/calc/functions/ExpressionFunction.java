@@ -38,7 +38,7 @@ public class ExpressionFunction extends AbstractFunction {
     private ExpressionParameter m_expressionParameter = null;
     
     public ExpressionFunction(GraphPanel panel) {
-        super(panel);
+        super(panel, FUNCTION_TYPE.ExpressionFunction);
     }
     
     @Override

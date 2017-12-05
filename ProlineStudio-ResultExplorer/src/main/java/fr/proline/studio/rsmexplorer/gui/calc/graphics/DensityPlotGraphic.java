@@ -12,7 +12,7 @@ public class DensityPlotGraphic extends AbstractMatrixPlotGraphic {
     
     
     public DensityPlotGraphic(GraphPanel panel) {
-        super(panel, "densityPlot", "densityPlot");
+        super(panel, "densityPlot", "densityPlot", GRAPHIC_TYPE.DensityPlotGraphic);
     }
    
     @Override

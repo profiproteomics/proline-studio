@@ -36,7 +36,7 @@ public class QuantiFilterFunction extends AbstractOnExperienceDesignFunction {
     
     
     public QuantiFilterFunction(GraphPanel panel) {
-        super(panel, "Missing Values Filter", "quantifilter", "quantifilter", "Rows Kept", null);
+        super(panel, FUNCTION_TYPE.QuantiFilterFunction, "Missing Values Filter", "quantifilter", "quantifilter", "Rows Kept", null);
         addCalculationTodo("Missing Values Filter", "quantifilterReversed", "quantifilterReversed", "Rows Filtered", null);
     }
     

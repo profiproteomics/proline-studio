@@ -21,7 +21,7 @@ public class ParallelCoordinatesGraphic extends AbstractGraphic {
     private MultiObjectParameter m_columnsParameter = null;
     
     public ParallelCoordinatesGraphic(GraphPanel panel) {
-        super(panel);
+        super(panel, GRAPHIC_TYPE.ParallelCoordinatesGraphic);
     }
     
     @Override

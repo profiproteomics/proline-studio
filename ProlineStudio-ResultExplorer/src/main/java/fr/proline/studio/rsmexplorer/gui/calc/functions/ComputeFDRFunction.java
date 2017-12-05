@@ -98,7 +98,7 @@ public class ComputeFDRFunction extends AbstractFunction {
     
     
     public ComputeFDRFunction(GraphPanel panel) {
-        super(panel);
+        super(panel, FUNCTION_TYPE.ComputeFDRFunction);
     }
 
         @Override

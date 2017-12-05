@@ -320,4 +320,18 @@ public class GraphConnector extends AbstractConnectedGraphObject {
         return null;
     }
     
+    public void saveGraph(StringBuilder sb) {
+        for (GraphConnector connector : m_connections) {
+            sb.append("<connector id1=\"");
+            sb.append(m_graphNode.getId());
+            sb.append("\" id2=\"");
+            sb.append(connector.m_graphNode.getId());
+
+            sb.append("\" index=\"");
+            sb.append(m_index);  // connector out index
+            sb.append("\"></connector>");
+        }
+        
+        
+    }
 }

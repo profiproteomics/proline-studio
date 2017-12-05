@@ -53,6 +53,9 @@ public abstract class GraphNode extends AbstractConnectedGraphObject {
 
     private long m_startTime = System.currentTimeMillis();
     
+    protected int m_id;
+    
+    public static int INCREMANTAL_ID = 0;
     
     public enum NodeAction {
         NO_ACTION,
@@ -67,8 +70,15 @@ public abstract class GraphNode extends AbstractConnectedGraphObject {
         
         // menu always available 
         m_menuAction.setAction(true);
+        
+        m_id = INCREMANTAL_ID;
+        INCREMANTAL_ID++;
     }
 
+    public int getId() {
+        return m_id;
+    }
+    
     public GraphConnector getFirstFreeConnector() {
         if (m_inConnectors == null) {
             return null;
@@ -94,9 +104,9 @@ public abstract class GraphNode extends AbstractConnectedGraphObject {
         // nothing to do
     }
     
-    public void connectTo(GraphNode inGraphNode) {
+    public void connectTo(GraphNode inGraphNode, int outConnectorIndex) {
         GraphConnector inConnector = inGraphNode.getFirstFreeConnector();
-        m_outConnector.get(0).addConnection(inConnector);
+        m_outConnector.get(outConnectorIndex).addConnection(inConnector);
         inConnector.addConnection(m_outConnector.get(0));
     }
     
@@ -709,6 +719,9 @@ public abstract class GraphNode extends AbstractConnectedGraphObject {
         
         return outLinkedGraphNodes;
     }
+    
+    public abstract void saveGraph(StringBuilder sb);
+
     
     public abstract String getOutTooltip(int index);
 

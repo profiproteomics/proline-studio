@@ -26,7 +26,7 @@ public class ScatterOrHistogramGraphic extends AbstractGraphic {
     private PlotType m_plotType;
     
     public ScatterOrHistogramGraphic(GraphPanel panel, PlotType plotType) {
-        super(panel);
+        super(panel, (plotType == PlotType.HISTOGRAM_PLOT) ? GRAPHIC_TYPE.HistogramGraphic : GRAPHIC_TYPE.ScatterGraphic);
         
         m_plotType = plotType;
     }

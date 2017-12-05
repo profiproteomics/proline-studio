@@ -34,7 +34,7 @@ public class LogFunction  extends AbstractFunction {
     private final boolean m_log10;
     
     public LogFunction(GraphPanel panel, boolean log10) {
-        super(panel);
+        super(panel, log10 ? FUNCTION_TYPE.Log10Function : FUNCTION_TYPE.Log2Function);
         
         m_log10 = log10;
     }

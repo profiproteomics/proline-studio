@@ -26,7 +26,7 @@ public class ColumnFilterFunction extends AbstractFunction {
     private MultiObjectParameter<ColumnIdentifier> m_columnsVisibilityParameter = null;
     
     public ColumnFilterFunction(GraphPanel panel) {
-        super(panel);
+        super(panel, FUNCTION_TYPE.ColumnFilterFunction);
     }
 
     @Override

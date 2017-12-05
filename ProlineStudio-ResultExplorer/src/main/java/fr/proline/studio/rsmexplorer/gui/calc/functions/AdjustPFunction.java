@@ -52,7 +52,7 @@ public class AdjustPFunction extends AbstractFunction {
     
     
     public AdjustPFunction(GraphPanel panel) {
-        super(panel);
+        super(panel, FUNCTION_TYPE.AdjustPFunction);
     }
     
     @Override

@@ -192,4 +192,9 @@ public class DataGraphNode extends GraphNode {
         return null;
     }
     
+    @Override
+    public void saveGraph(StringBuilder sb) {
+        // we don't save graph node
+    }
+    
 }

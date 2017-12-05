@@ -23,7 +23,7 @@ public class VennDiagramGraphic extends AbstractGraphic {
     private MultiObjectParameter m_columnsParameter = null;
     
     public VennDiagramGraphic(GraphPanel panel) {
-        super(panel);
+        super(panel, GRAPHIC_TYPE.VennDiagramGraphic);
     }
     
     @Override

@@ -45,7 +45,7 @@ public class MissingValuesImputationFunction extends AbstractOnExperienceDesignF
     
     
     public MissingValuesImputationFunction(GraphPanel panel) {
-        super(panel, "Missing Values Imputation", "mvimputation", "mvimputation", null, null);
+        super(panel, FUNCTION_TYPE.MissingValuesImputationFunction, "Missing Values Imputation", "mvimputation", "mvimputation", null, null);
     }
     
     @Override

@@ -62,8 +62,8 @@ public abstract class AbstractOnExperienceDesignFunction extends AbstractFunctio
 
     private final ArrayList<String> m_groupNames = new ArrayList<>();
 
-    public AbstractOnExperienceDesignFunction(GraphPanel panel, String functionName, String resultName, String pythonCall, String outInfo, Object colExtraInfo) {
-        super(panel);
+    public AbstractOnExperienceDesignFunction(GraphPanel panel, FUNCTION_TYPE type, String functionName, String resultName, String pythonCall, String outInfo, Object colExtraInfo) {
+        super(panel, type);
 
         m_functionName = new ArrayList<>();
         m_resultName = new ArrayList<>();

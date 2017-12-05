@@ -40,10 +40,49 @@ public abstract class AbstractFunction implements CheckParameterInterface {
     
     protected GraphPanel m_panel;
     
-    public AbstractFunction(GraphPanel panel) {
+    public enum FUNCTION_TYPE {
+
+        AdjustPFunction(0),
+        ColumnFilterFunction(1),
+        ComputeFDRFunction(2),
+        DiffAnalysisFunction(3),
+        DiffFunction(4),
+        ExpressionFunction(5),
+        FilterFunction(6),
+        ImportTSVFunction(7),
+        JoinFunction(8),
+        Log2Function(9),
+        Log10Function(10),
+        MissingValuesImputationFunction(11),
+        NormalizationFunction(12),
+        PValueFunction(13),
+        QuantiFilterFunction(14),
+        SCDiffAnalysisFunction(15),
+        TtdFunction(16);
+
+        private int m_id;
+
+        private FUNCTION_TYPE(int id) {
+            m_id = id;
+        }
+        
+        public int getId() {
+            return m_id;
+        }
+
+    }
+    
+    private FUNCTION_TYPE m_type;
+    
+    public AbstractFunction(GraphPanel panel, FUNCTION_TYPE type) {
         m_panel = panel;
+        m_type = type;
     }
 
+    public int getTypeId() {
+        return m_type.getId();
+    }
+    
     public void inLinkModified() {
         m_parameters = null;
         m_globalTableModelInterface = null;

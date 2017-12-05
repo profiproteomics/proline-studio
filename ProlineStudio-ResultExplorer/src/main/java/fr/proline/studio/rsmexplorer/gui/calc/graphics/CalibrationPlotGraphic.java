@@ -45,7 +45,7 @@ public class CalibrationPlotGraphic extends AbstractGraphic {
     private DoubleParameter m_pzParameter = null;
     
     public CalibrationPlotGraphic(GraphPanel panel) {
-        super(panel);
+        super(panel, GRAPHIC_TYPE.CalibrationPlotGraphic);
     }
     
     @Override

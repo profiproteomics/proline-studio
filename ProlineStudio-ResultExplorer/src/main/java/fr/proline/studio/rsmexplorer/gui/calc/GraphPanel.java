@@ -32,19 +32,25 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.geom.Path2D;
+import java.io.File;
+import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.prefs.Preferences;
 import javax.swing.AbstractAction;
 import javax.swing.JComponent;
+import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 import javax.swing.ToolTipManager;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import org.openide.util.NbPreferences;
 
 /**
  * Panel to display the Graph for the Data analyzer
@@ -229,7 +235,7 @@ public class GraphPanel extends JPanel implements MouseListener, MouseMotionList
             if (links != null) {
                 for (DataTree.DataNode linkedNode : links) {
                     GraphNode nodeIn = graphNodeMap.get(linkedNode);
-                    nodeOut.connectTo(nodeIn);
+                    nodeOut.connectTo(nodeIn, 0);
                 }
             }
         }
@@ -725,7 +731,10 @@ public class GraphPanel extends JPanel implements MouseListener, MouseMotionList
         JPopupMenu popup = new JPopupMenu();
         popup.add(new SelectAllAction());
         popup.add(new ClearAllAction());
-
+        popup.addSeparator();
+        popup.add(new OpenGraphAction());
+        popup.add(new SaveAsAction());
+        
         return popup;
     }
 
@@ -754,6 +763,7 @@ public class GraphPanel extends JPanel implements MouseListener, MouseMotionList
 
         @Override
         public void actionPerformed(ActionEvent ae) {
+            
             int reply = JOptionPane.showConfirmDialog(null, "Are you sure you want to clear the graph?", "Warning", JOptionPane.YES_NO_OPTION);
             if (reply == JOptionPane.YES_OPTION) {
                 while (m_graphNodeArray.size() > 0) {
@@ -782,6 +792,114 @@ public class GraphPanel extends JPanel implements MouseListener, MouseMotionList
 
     }
     
+    public class OpenGraphAction extends AbstractAction {
+        public OpenGraphAction() {
+            super("Open", IconManager.getIcon(IconManager.IconType.OPEN_FILE));
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent ae) {
+            
+            if (!m_graphNodeArray.isEmpty()) {
+                int reply = JOptionPane.showConfirmDialog(null, "Load a graph and get rid of the current graph ? ", "Warning", JOptionPane.YES_NO_OPTION);
+                if (reply != JOptionPane.YES_OPTION) {
+                    return;
+                }
+                
+                while (m_graphNodeArray.size() > 0) {
+                    m_graphNodeArray.get(m_graphNodeArray.size() - 1).deleteAction();
+                }
+            }
+            
+            
+            FileNameExtensionFilter FILTER = new FileNameExtensionFilter("Data Analyzer (.gda)", "gda");
+            
+                        
+            Preferences preferences = NbPreferences.root();
+            String defaultGraphPath = preferences.get("DefaultGraphPath", System.getProperty("user.home"));
+
+            
+            JFileChooser fileChooser = new JFileChooser(new File(defaultGraphPath));
+            fileChooser.addChoosableFileFilter(FILTER);
+            fileChooser.setFileFilter(FILTER);
+            fileChooser.setMultiSelectionEnabled(false);
+            int result = fileChooser.showOpenDialog(m_dataAnalyzerPanel);
+            if (result == JFileChooser.APPROVE_OPTION) {
+                File file = fileChooser.getSelectedFile();
+                
+                try {
+                    GraphFileManager.getGraphFileManager().parseFile(file, getGraph());
+                } catch (Exception e) {
+                    JOptionPane.showMessageDialog(null, "Failed to load the graph", "Error", JOptionPane.ERROR_MESSAGE);
+                }
+
+                preferences.put("DefaultGraphPath", file.getAbsoluteFile().getParentFile().getAbsolutePath());
+            }
+        }
+    }
+    
+    public class SaveAsAction extends AbstractAction {
+
+        public SaveAsAction() {
+            super("Save As", IconManager.getIcon(IconManager.IconType.SAVE_SETTINGS));
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent ae) {
+            
+            FileNameExtensionFilter FILTER = new FileNameExtensionFilter("Data Analyzer (.gda)", "gda");
+            
+            
+            Preferences preferences = NbPreferences.root();
+            String defaultGraphPath = preferences.get("DefaultGraphPath", System.getProperty("user.home"));
+
+            
+            JFileChooser fileChooser = new JFileChooser(new File(defaultGraphPath));
+            fileChooser.addChoosableFileFilter(FILTER);
+            fileChooser.setFileFilter(FILTER);
+            fileChooser.setMultiSelectionEnabled(false);
+            int result = fileChooser.showSaveDialog(m_dataAnalyzerPanel);
+            if (result == JFileChooser.APPROVE_OPTION) {
+                File file = fileChooser.getSelectedFile();
+                
+                if (file.exists()) {
+                    String message = "The file already exists. Do you want to overwrite it ?";
+                    String title = "Overwrite ?";
+                    String[] options = {"Yes", "No"};
+                    int reply = JOptionPane.showOptionDialog(m_dataAnalyzerPanel, message, title, JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE, null, options, "Yes");
+                    if (reply != JOptionPane.YES_OPTION) {
+                        return;
+                    }
+                }
+
+                FileWriter fw = null;
+                try {
+                    fw = new FileWriter(file);
+                    
+                    String graphToSave = saveGraph();
+                    fw.write(graphToSave);
+
+                    
+                } catch (Exception e) {
+                    JOptionPane.showMessageDialog(m_dataAnalyzerPanel, file.getName() + " is not writable.");
+                    return;
+                } finally {
+                    try {
+                        if (fw != null) {
+                            fw.close();
+                        }
+
+                    } catch (Exception e2) {
+                    }
+                }
+                
+                 preferences.put("DefaultGraphPath", file.getAbsoluteFile().getParentFile().getAbsolutePath());
+            }
+
+        }
+
+    }
+    
     @Override
     public String getToolTipText(MouseEvent e) {
         
@@ -799,6 +917,22 @@ public class GraphPanel extends JPanel implements MouseListener, MouseMotionList
         }
         
         return null;
+    }
+    
+    public String saveGraph() {
+        
+        StringBuilder sb = new StringBuilder();
+        sb.append("<dataanalyzer>");
+        for (GraphNode node : m_graphNodeArray) {
+            node.saveGraph(sb);
+        }
+        sb.append("</dataanalyzer>");
+        
+        return sb.toString();
+    }
+
+    public GraphPanel getGraph() {
+        return this;
     }
 
 }

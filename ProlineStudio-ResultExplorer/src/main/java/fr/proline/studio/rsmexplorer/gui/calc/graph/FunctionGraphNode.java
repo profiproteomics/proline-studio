@@ -242,7 +242,7 @@ public class FunctionGraphNode extends GraphNode {
     @Override
     public void updateNumberOfInConnections() {
 
-        int nbConnections = m_inConnectors.size();
+          int nbConnections = m_inConnectors.size();
         int nbInParameters = m_function.getNumberOfInParameters();
         boolean modification = false;
         while ((nbConnections>2) && (nbConnections>nbInParameters)) {
@@ -420,6 +420,18 @@ public class FunctionGraphNode extends GraphNode {
     @Override
     public String getTooltip(int x, int y) {
         return null;
+    }
+    
+    @Override
+    public void saveGraph(StringBuilder sb) {
+        sb.append("<graphnode id=\"").append(m_id).append("\" x=\"").append(getCenterX()).append("\" y=\"").append(getCenterY()).append("\" type=\"Function\"").append(" subtype=\"").append(m_function.getTypeId()).append('\"').append(">"); 
+        sb.append("</graphnode>");
+
+        if (m_outConnector != null) {
+            for (GraphConnector connector : m_outConnector) {
+                connector.saveGraph(sb);
+            }
+        }
     }
     
 }

@@ -7,7 +7,6 @@ import fr.proline.studio.python.data.Table;
 import fr.proline.studio.python.interpreter.ResultVariable;
 import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
 import fr.proline.studio.rsmexplorer.gui.calc.ProcessCallbackInterface;
-import fr.proline.studio.rsmexplorer.gui.calc.graph.AbstractConnectedGraphObject;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.FunctionGraphNode;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphConnector;
 import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
@@ -50,7 +49,7 @@ public class NormalizationFunction extends AbstractOnExperienceDesignFunction {
     private ParameterList m_parameterList = null;
     
     public NormalizationFunction(GraphPanel panel) {
-        super(panel, "Normalization", "normalize", "normalize", null, null);
+        super(panel, FUNCTION_TYPE.NormalizationFunction, "Normalization", "normalize", "normalize", null, null);
     }
     
     @Override

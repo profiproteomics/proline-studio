@@ -75,7 +75,7 @@ public class ImportTSVFunction extends AbstractFunction {
     
     
     public ImportTSVFunction(GraphPanel panel) {
-        super(panel);
+        super(panel, FUNCTION_TYPE.ImportTSVFunction);
     }
     
     @Override

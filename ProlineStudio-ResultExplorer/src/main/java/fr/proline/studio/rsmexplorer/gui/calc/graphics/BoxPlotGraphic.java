@@ -11,7 +11,7 @@ import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
 public class BoxPlotGraphic extends AbstractMatrixPlotGraphic {
 
     public BoxPlotGraphic(GraphPanel panel) {
-        super(panel, "boxPlot", "boxPlot");
+        super(panel, "boxPlot", "boxPlot", GRAPHIC_TYPE.BoxPlotGraphic);
     }
     
         @Override

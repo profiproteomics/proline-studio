@@ -9,7 +9,7 @@ import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
 public class VarianceDistPlotGraphic extends AbstractMatrixPlotGraphic {
 
     public VarianceDistPlotGraphic(GraphPanel panel) {
-        super(panel, "varianceDistPlot", "varianceDistPlot");
+        super(panel, "varianceDistPlot", "varianceDistPlot", GRAPHIC_TYPE.VarianceDistPlotGraphic);
     }
 
     @Override

@@ -339,6 +339,17 @@ public class GraphicGraphNode extends GraphNode {
     public String getTooltip(int x, int y) {
         return null;
     }
+    
+    @Override
+    public void saveGraph(StringBuilder sb) {
+        sb.append("<graphnode id=\"").append(m_id).append("\" x=\"").append(getCenterX()).append("\" y=\"").append(getCenterY()).append("\" type=\"Graphic\"").append(" subtype=\"").append(m_graphic.getTypeId()).append('\"').append(">"); 
+        sb.append("</graphnode>");
+        if (m_outConnector != null) {
+            for (GraphConnector connector : m_outConnector) {
+                connector.saveGraph(sb);
+            }
+        }
+    }
  
 }
 

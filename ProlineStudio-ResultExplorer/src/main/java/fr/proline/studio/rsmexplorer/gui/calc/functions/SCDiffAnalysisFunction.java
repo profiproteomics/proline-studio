@@ -4,7 +4,6 @@ import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
 import fr.proline.studio.types.PValue;
 
 
-
 /**
  * Beta Binomial Function for the data analyzer
  * @author JM235353
@@ -12,7 +11,7 @@ import fr.proline.studio.types.PValue;
 public class SCDiffAnalysisFunction extends AbstractOnExperienceDesignFunction {
 
     public SCDiffAnalysisFunction(GraphPanel panel) {
-        super(panel, "SC Differential Analysis", "sc_diffanalysis", "bbinomial", null, new PValue());
+        super(panel, FUNCTION_TYPE.SCDiffAnalysisFunction, "SC Differential Analysis", "sc_diffanalysis", "bbinomial", null, new PValue());
     }
 
     @Override

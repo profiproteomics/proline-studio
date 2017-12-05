@@ -20,7 +20,6 @@ import fr.proline.studio.python.interpreter.CalcInterpreterThread;
 import fr.proline.studio.python.interpreter.ResultVariable;
 import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
 import fr.proline.studio.rsmexplorer.gui.calc.ProcessCallbackInterface;
-import fr.proline.studio.rsmexplorer.gui.calc.graph.AbstractConnectedGraphObject;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphConnector;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphicGraphNode;
 import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
@@ -52,8 +51,8 @@ public abstract class AbstractMatrixPlotGraphic extends AbstractGraphic {
     
     private final ArrayList<String> m_groupNames = new ArrayList<>();
 
-    public AbstractMatrixPlotGraphic(GraphPanel panel, String functionName, String pythonCall) {
-        super(panel);
+    public AbstractMatrixPlotGraphic(GraphPanel panel, String functionName, String pythonCall, GRAPHIC_TYPE graphicType) {
+        super(panel, graphicType);
 
         m_functionName = functionName;
         m_pythonCall = pythonCall;

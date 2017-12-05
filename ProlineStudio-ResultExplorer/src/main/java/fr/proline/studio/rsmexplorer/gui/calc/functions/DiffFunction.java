@@ -44,7 +44,7 @@ public class DiffFunction extends AbstractFunction {
     private BooleanParameter m_addSourceCol;
     
     public DiffFunction(GraphPanel panel) {
-        super(panel);
+        super(panel, FUNCTION_TYPE.DiffFunction);
     }
     
     @Override

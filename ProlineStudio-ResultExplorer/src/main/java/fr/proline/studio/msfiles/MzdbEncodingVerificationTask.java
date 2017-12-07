@@ -27,6 +27,8 @@ public class MzdbEncodingVerificationTask extends AbstractDatabaseTask {
     private boolean m_result;
     private final File m_file;
     private Connection m_connection;
+    
+    private boolean m_corrupted = false;
 
     public MzdbEncodingVerificationTask(AbstractDatabaseCallback callback, File file) {
         super(callback, new TaskInfo("Verify encoding of " + file.getAbsolutePath(), false, "Mzdb Verification", TaskInfo.INFO_IMPORTANCE_MEDIUM));
@@ -39,17 +41,17 @@ public class MzdbEncodingVerificationTask extends AbstractDatabaseTask {
         m_result = true;
 
         if (connect()) {
-            if (needFix()) {
+            if (needFix() && !m_corrupted) {
                 fix();
             }
             closeConnection();
         }
 
-        if(!m_result){
+        if(!m_result || m_corrupted){
             m_taskError = new TaskError("Encoding verification & repair failed.", "File is corrupted.");
         }
         
-        return m_result;
+        return m_taskError==null;
     }
 
     @Override
@@ -92,7 +94,9 @@ public class MzdbEncodingVerificationTask extends AbstractDatabaseTask {
             }
 
         } catch (SQLException ex) {
-            Exceptions.printStackTrace(ex);
+            //Exceptions.printStackTrace(ex);
+            m_corrupted = true;
+            return false;
         }
 
         //get encoding count
@@ -107,7 +111,9 @@ public class MzdbEncodingVerificationTask extends AbstractDatabaseTask {
             }
 
         } catch (SQLException ex) {
-            Exceptions.printStackTrace(ex);
+            //Exceptions.printStackTrace(ex);
+            m_corrupted = true;
+            return false;
         }
 
         if (hcdSpectraCount != -1 && dataEncodingCount != -1) {

@@ -6,9 +6,6 @@
 package fr.proline.studio.msfiles;
 
 import fr.proline.mzscope.utils.IPopupMenuDelegate;
-import fr.proline.studio.dam.AccessDatabaseThread;
-import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
-import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.mzscope.MzdbInfo;
 import fr.proline.studio.pattern.MzScopeWindowBoxManager;
 import fr.proline.studio.rsmexplorer.gui.MzScope;
@@ -111,6 +108,10 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
                         WorkingSetEntry entry = (WorkingSetEntry) userObject;
                         if (!entry.exists()) {
                             setForeground(Color.LIGHT_GRAY);
+                        }else{
+                            if(entry.isDownloading()){
+                                setIcon(IconManager.getIcon(IconManager.IconType.ARROW_DOWN));
+                            }
                         }
                         setIcon(IconManager.getIcon(IconManager.IconType.SPECTRUM_EMISSION));
 
@@ -161,11 +162,12 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
             public void actionPerformed(ActionEvent evt) {
 
                 ArrayList<File> localFiles = extractSelectedRawFiles(WorkingSetEntry.Location.LOCAL);
-                ArrayList<File> remoteFiles = extractSelectedRawFiles(WorkingSetEntry.Location.REMOTE);
-
+                
+                ArrayList<WorkingSetEntry> remoteEntries = extractSelectedWorkingSetEntries(WorkingSetEntry.Location.REMOTE);
+                
                 ArrayList<File> totalFiles = new ArrayList<File>();
 
-                if (!remoteFiles.isEmpty()) {
+                if (!remoteEntries.isEmpty()) {
                     MsListener msListener = new MsListener() {
 
                         @Override
@@ -221,11 +223,17 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
                             ;
                         }
 
+                        @Override
+                        public void msStateChanged() {
+                            m_tree.revalidate();
+                            m_tree.repaint();
+                        }
+
                     };
 
                     String localDirPath = WorkingSetUtil.getTempDirectory().getAbsolutePath();
 
-                    MzdbDownloadBatch downloadBatch = new MzdbDownloadBatch(remoteFiles, localDirPath, "");
+                    MzdbDownloadBatch downloadBatch = new MzdbDownloadBatch(localDirPath, "", remoteEntries);
                     downloadBatch.addMsListener(msListener);
                     Thread downloadThread = new Thread(downloadBatch);
                     downloadThread.start();
@@ -247,11 +255,12 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
             public void actionPerformed(ActionEvent evt) {
 
                 ArrayList<File> localFiles = extractSelectedRawFiles(WorkingSetEntry.Location.LOCAL);
-                ArrayList<File> remoteFiles = extractSelectedRawFiles(WorkingSetEntry.Location.REMOTE);
+                
+                ArrayList<WorkingSetEntry> remoteEntries = extractSelectedWorkingSetEntries(WorkingSetEntry.Location.REMOTE);
 
                 ArrayList<File> totalFiles = new ArrayList<File>();
 
-                if (!remoteFiles.isEmpty()) {
+                if (!remoteEntries.isEmpty()) {
                     MsListener msListener = new MsListener() {
 
                         @Override
@@ -303,11 +312,17 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
                             throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
                         }
 
+                        @Override
+                        public void msStateChanged() {
+                            m_tree.revalidate();
+                            m_tree.repaint();
+                        }
+
                     };
 
                     String localDirPath = WorkingSetUtil.getTempDirectory().getAbsolutePath();
 
-                    MzdbDownloadBatch downloadBatch = new MzdbDownloadBatch(remoteFiles, localDirPath, "");
+                    MzdbDownloadBatch downloadBatch = new MzdbDownloadBatch(localDirPath, "", remoteEntries);
                     downloadBatch.addMsListener(msListener);
                     Thread downloadThread = new Thread(downloadBatch);
                     downloadThread.start();
@@ -524,6 +539,19 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
 
         return files;
     }
+    
+    private ArrayList<WorkingSetEntry> extractSelectedWorkingSetEntries(WorkingSetEntry.Location location){
+        ArrayList<WorkingSetEntry> entries = new ArrayList<WorkingSetEntry>();
+
+        for (int i = 0; i < m_selectedWorkingSetEntries.size(); i++) {
+            WorkingSetEntry entry = m_selectedWorkingSetEntries.get(i);
+            if (entry.getLocation() == location) {
+                entries.add(entry);
+            }
+        }
+
+        return entries;
+    }
 
     private void reloadTree() {
         if (m_workingSetModel != null) {
@@ -595,6 +623,11 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
                     }
                 }
 
+            }
+
+            @Override
+            public void msStateChanged() {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
             }
         };
 

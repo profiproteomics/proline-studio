@@ -58,8 +58,11 @@ public class DefineQuantParamsCompletePanel extends AbstractDefineQuantParamsPan
     private JTextField m_featureFilterValueTF;
     
     
-    protected JComboBox  m_featureMappingMethodCB;
+    private JComboBox  m_featureMappingMethodCB;
     private JTextField m_featureMappingMoZTolTF;
+    private JCheckBox m_crossAssignWithinGroupOnly;
+    private JCheckBox m_retainOnlyReliableFeatures;
+    
     
     private JComboBox m_normalizationCB;
 
@@ -133,13 +136,10 @@ public class DefineQuantParamsCompletePanel extends AbstractDefineQuantParamsPan
         m_clusteringTimeComputationParameter = new ObjectParameter<>("clusteringTimeComputation", "Clustering time computation", m_clusteringTimeComputationCB, CLUSTERING_TIME_COMPUTATION_VALUES, CLUSTERING_TIME_COMPUTATION_KEYS,  0, null);
         m_parameterList.add(m_clusteringTimeComputationParameter);
         
-
-        
         m_clusteringIntensityComputationCB = new JComboBox(CLUSTERING_INTENSITY_COMPUTATION_VALUES);
         m_clusteringIntensityComputationCB.setEnabled(!m_readOnly);
         m_clusteringIntensityComputationParameter = new ObjectParameter<>("clusteringIntensityComputation", "Clustering intensity computation", m_clusteringIntensityComputationCB, CLUSTERING_INTENSITY_COMPUTATION_VALUES, CLUSTERING_INTENSITY_COMPUTATION_KEYS, 0, null);
         m_parameterList.add(m_clusteringIntensityComputationParameter);
-
         
         m_alignmentMethodCB = new JComboBox(ALIGNMENT_METHOD_VALUES);
         m_alignmentMethodCB.setEnabled(!m_readOnly);
@@ -155,7 +155,6 @@ public class DefineQuantParamsCompletePanel extends AbstractDefineQuantParamsPan
         m_alignmentSmoothingMethodCB.setEnabled(!m_readOnly);
         m_alignmentSmoothingMethodParameter = new ObjectParameter("alignmentSmoothingMethod", "Alignment Smoothing Method", m_alignmentSmoothingMethodCB, ALIGNMENT_SMOOTHING_METHOD_VALUES, ALIGNMENT_SMOOTHING_METHOD_KEYS,  0, null);
         m_parameterList.add(m_alignmentSmoothingMethodParameter);
-
         
         m_alignmentSmoothingWinSizeTF = new JTextField();
         m_alignmentSmoothingWinSizeTF.setEnabled(!m_readOnly);
@@ -219,6 +218,18 @@ public class DefineQuantParamsCompletePanel extends AbstractDefineQuantParamsPan
         m_normalizationCB.setEnabled(!m_readOnly);
         m_normalizationParameter = new ObjectParameter<>("normalization", "Normalization", m_normalizationCB, FEATURE_NORMALIZATION_VALUES, FEATURE_NORMALIZATION_KEYS,  0, null);
         m_parameterList.add(m_normalizationParameter);
+        
+        
+        m_crossAssignWithinGroupOnly = new JCheckBox("Cross assign feature within group only");
+        m_crossAssignWithinGroupOnly.setEnabled(!m_readOnly);
+        BooleanParameter crossAssignWithinGroupParameter = new BooleanParameter("performCrossAssignmentInsideGroupsOnly", "Cross assign feature within group only", m_crossAssignWithinGroupOnly, Boolean.FALSE);
+        m_parameterList.add(crossAssignWithinGroupParameter);
+
+        m_retainOnlyReliableFeatures = new JCheckBox("Retain only reliable cross assigned features");
+        m_retainOnlyReliableFeatures.setEnabled(!m_readOnly);
+        BooleanParameter retainOnlyReliableFeaturesParameter = new BooleanParameter("restrainCrossAssignmentToReliableFeatures", "Retain only reliable cross assigned features", m_retainOnlyReliableFeatures, Boolean.FALSE);
+        m_parameterList.add(retainOnlyReliableFeaturesParameter);
+
 
     }
     
@@ -235,6 +246,8 @@ public class DefineQuantParamsCompletePanel extends AbstractDefineQuantParamsPan
         m_extractionMoZTolTF.setText(""+Double.parseDouble(extRactParams.get("moz_tol").toString()));
         
         m_useLastPeakelDetectionCB.setSelected(Boolean.parseBoolean(quantParams.get("use_last_peakel_detection").toString()));
+        m_retainOnlyReliableFeatures.setSelected(Boolean.parseBoolean(quantParams.get("restrain_cross_assignment_to_reliable_features").toString()));
+        m_crossAssignWithinGroupOnly.setSelected(Boolean.parseBoolean(quantParams.get("perform_cross_assignment_inside_groups_only").toString()));
         
         Map<String,Object> clusterParams = (Map<String,Object>) quantParams.get("clustering_params");
         m_clusteringMoZTolTF.setText(""+Double.parseDouble(clusterParams.get("moz_tol").toString()));
@@ -335,6 +348,9 @@ public class DefineQuantParamsCompletePanel extends AbstractDefineQuantParamsPan
         
         params.put("use_last_peakel_detection", m_useLastPeakelDetectionCB.isSelected());
         
+        params.put("restrain_cross_assignment_to_reliable_features", m_retainOnlyReliableFeatures.isSelected());
+        params.put("perform_cross_assignment_inside_groups_only", m_crossAssignWithinGroupOnly.isSelected());
+        
         extRactParams.put("moz_tol", extractionTolStr);
         extRactParams.put("moz_tol_unit", "PPM");
         params.put("extraction_params", extRactParams);
@@ -376,6 +392,8 @@ public class DefineQuantParamsCompletePanel extends AbstractDefineQuantParamsPan
         ftMappingParams.put("moz_tol_unit", "PPM");
         ftMappingParams.put("time_tol", m_featureMappingTimeTolTF.getText());        
         params.put("ft_mapping_params", ftMappingParams); 
+        
+        
         // normalization parameter is an option
         if (m_normalizationParameter.getStringValue() != null && !m_normalizationParameter.getStringValue().equalsIgnoreCase("NONE")) {
             params.put("normalization_method", m_normalizationParameter.getStringValue());
@@ -422,7 +440,7 @@ public class DefineQuantParamsCompletePanel extends AbstractDefineQuantParamsPan
         m_tabbedPane.addTab("Clustering", null, createClusteringPanel(), "Feature Clustering");
         m_tabbedPane.addTab("Alignment", null, createAlignmentPanel(), "Map Alignment");
         m_tabbedPane.addTab("Normalization", null, createNormalizationPanel(), "Map Normalization");
-        m_tabbedPane.addTab("Master Map", null, createFTPanel(), "Master Map");
+        m_tabbedPane.addTab("Master Map", null, createCrossAssignmentPanel(), "Master Map");
         
         mainPanel.add(m_tabbedPane, BorderLayout.CENTER);
         
@@ -637,7 +655,7 @@ public class DefineQuantParamsCompletePanel extends AbstractDefineQuantParamsPan
         return panelA ;                 
     }           
     
-    private JPanel createFTPanel(){
+    private JPanel createCrossAssignmentPanel(){
         JPanel panelF = new JPanel(new BorderLayout());
         
         JPanel masterMapPanel = new JPanel(new GridBagLayout());
@@ -645,6 +663,29 @@ public class DefineQuantParamsCompletePanel extends AbstractDefineQuantParamsPan
         cm.anchor = GridBagConstraints.FIRST_LINE_START ;
         cm.fill = GridBagConstraints.BOTH;
         cm.insets = new java.awt.Insets(5, 5, 5, 5);
+        
+        JPanel caPanel = new JPanel(new GridBagLayout());
+        caPanel.setBorder(createTitledBorder(" Cross Assignment ", 1));
+        GridBagConstraints c0 = new GridBagConstraints();
+        c0.anchor = GridBagConstraints.NORTHWEST ;
+        c0.fill = GridBagConstraints.BOTH;
+        c0.insets = new java.awt.Insets(5, 5, 5, 5);
+        
+        c0.gridx = 0;
+        c0.gridy = 0;
+        c0.gridwidth = 1;
+        c0.weightx = 1;
+        
+        caPanel.add(m_crossAssignWithinGroupOnly, c0);
+        c0.gridy++;
+        caPanel.add(m_retainOnlyReliableFeatures, c0);   
+        
+        cm.gridy = 0;
+        cm.gridx = 0;
+        cm.weightx = 1.0;
+        cm.gridwidth = 2;
+        masterMapPanel.add(caPanel, cm);   
+        
         
         JPanel ftPanel = new JPanel(new GridBagLayout());
         ftPanel.setBorder(createTitledBorder(" Feature Filter ", 1));
@@ -678,7 +719,7 @@ public class DefineQuantParamsCompletePanel extends AbstractDefineQuantParamsPan
         c.weightx = 1;
         ftPanel.add(m_featureFilterValueTF, c);
         
-        cm.gridy = 0;
+        cm.gridy++;
         cm.gridx = 0;
         cm.weightx = 1.0;
         cm.gridwidth = 2;

@@ -30,6 +30,7 @@ import fr.proline.studio.rsmexplorer.gui.calc.graphics.VennDiagramGraphic;
 import fr.proline.studio.rsmexplorer.gui.calc.macros.AbstractMacro;
 import fr.proline.studio.rsmexplorer.gui.calc.macros.ProStarMacro;
 import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
+import fr.proline.studio.rsmexplorer.gui.calc.macros.MacroSavedManager;
 import fr.proline.studio.utils.IconManager;
 import java.awt.Color;
 import java.awt.Component;
@@ -128,6 +129,14 @@ public abstract class DataTree extends JTree {
         fillDataNodes(m_parentDataNode);
     }
     
+    public void addUserMacro(String xmlMacro) {
+        UserMacroNode node = new UserMacroNode(xmlMacro);
+        m_parentMacrosNode.add(node);
+        
+        DefaultTreeModel model = (DefaultTreeModel) getModel();
+        model.nodeStructureChanged(m_parentMacrosNode);
+    }
+    
     public abstract void action(DataNode node);
 
     
@@ -172,6 +181,16 @@ public abstract class DataTree extends JTree {
     private void fillMacrosNodes(ParentMacrosNode parentMacrosNode) {
         ProStarMacro proStar = new ProStarMacro();
         parentMacrosNode.add( new MacroNode(proStar));
+        
+        ArrayList<String> macros = MacroSavedManager.readSavedMacros();
+        if (macros != null) {
+            for (String xmlMacro : macros) {
+                UserMacroNode node = new UserMacroNode(xmlMacro);
+                parentMacrosNode.add(node);
+            }
+        }
+        
+        
     }
     
     private void fillFunctionNodes(ParentFunctionNode parentFunctionNode) {
@@ -295,6 +314,7 @@ public abstract class DataTree extends JTree {
             PARENT_FUNCTION,
             FUNCTION,
             MACRO,
+            USERMACRO,
             PARENT_GRAPHIC,
             GRAPHIC,
             WINDOW_DATA,
@@ -446,6 +466,40 @@ public abstract class DataTree extends JTree {
         @Override
         public String toString() {
             return m_macro.getName();
+        }
+    }
+    
+    public static class UserMacroNode extends DataNode {
+
+        private String m_xmlMacro = null;
+        private String m_name = "";
+
+        public UserMacroNode(String xmlMacro) {
+            super(DataNode.DataNodeType.USERMACRO);
+            m_xmlMacro = xmlMacro;
+            final String ID_DATAANALYZER_XML = "<dataanalyzer name=\"";
+            int indexStartName = xmlMacro.indexOf(ID_DATAANALYZER_XML);
+            if (indexStartName != -1) {
+                indexStartName += ID_DATAANALYZER_XML.length();
+                int indexEndName = xmlMacro.indexOf("\"",indexStartName+1);
+                if (indexEndName != -1) {
+                    m_name = m_xmlMacro.substring(indexStartName, indexEndName);
+                }
+            }
+        }
+
+        public String getXMLMacro() {
+            return m_xmlMacro;
+        }
+
+        @Override
+        public ImageIcon getIcon() {
+            return IconManager.getIcon(IconManager.IconType.GEAR);
+        }
+
+        @Override
+        public String toString() {
+            return m_name;
         }
     }
     

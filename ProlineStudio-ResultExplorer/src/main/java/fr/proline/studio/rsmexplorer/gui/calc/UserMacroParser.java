@@ -29,7 +29,8 @@ import fr.proline.studio.rsmexplorer.gui.calc.graphics.ParallelCoordinatesGraphi
 import fr.proline.studio.rsmexplorer.gui.calc.graphics.ScatterOrHistogramGraphic;
 import fr.proline.studio.rsmexplorer.gui.calc.graphics.VarianceDistPlotGraphic;
 import fr.proline.studio.rsmexplorer.gui.calc.graphics.VennDiagramGraphic;
-import java.io.File;
+import java.awt.Point;
+import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import org.xml.sax.helpers.DefaultHandler;
@@ -37,29 +38,30 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
+import org.xml.sax.InputSource;
 
 /**
  *
- * Parse an XML file to construct a Graph in the Data Analyzer
+ * Parse an XML string to construct a Graph in the Data Analyzer
  * 
  * @author JM235353
  */
-public class GraphFileManager {
+public class UserMacroParser {
     
-    private static GraphFileManager m_singleton = null;
+    private static UserMacroParser m_singleton = null;
     
     public GraphPanel m_graphPanel = null;
     
-    public static GraphFileManager getGraphFileManager() {
+    public static UserMacroParser getGraphFileManager() {
         if (m_singleton == null) {
-            m_singleton = new GraphFileManager();
+            m_singleton = new UserMacroParser();
         }
 
         
         return m_singleton;
     }
     
-    private GraphFileManager() {
+    private UserMacroParser() {
         
     }
     
@@ -187,14 +189,27 @@ public class GraphFileManager {
         return new GraphicGraphNode(m_graphPanel, graphic);
     }
     
-    public void parseFile(File f, GraphPanel graphPanel) throws Exception {
+    public void parseFile(String xml, GraphPanel graphPanel) throws Exception {
+        Point position = graphPanel.getNextGraphNodePosition(null);
+        parseFile(xml, graphPanel, position.x, position.y);
+        
+    }
+    public void parseFile(String xml, GraphPanel graphPanel, int x, int y) throws Exception {
+        
+        if (x < GraphNode.WIDTH * 1.4) {
+            x = (int) (GraphNode.WIDTH * 1.4);
+        }
+        if (y < GraphNode.HEIGHT_MIN * 1.4) {
+            y = (int) (GraphNode.HEIGHT_MIN * 1.4);
+        }
         
         m_graphPanel = graphPanel;
         
         SAXParserFactory factory = SAXParserFactory.newInstance();
         SAXParser parser = factory.newSAXParser();
-        GraphXMLHandler handler = new GraphXMLHandler(m_graphPanel);
-        parser.parse(f.getAbsolutePath(), handler);
+        GraphXMLHandler handler = new GraphXMLHandler(m_graphPanel, x, y);
+
+        parser.parse(new InputSource(new ByteArrayInputStream(xml.getBytes("utf-8"))), handler);
         handler.doConnections();
         
         m_graphPanel.repaint();
@@ -209,9 +224,15 @@ public class GraphFileManager {
         private HashMap<Integer, GraphNode> m_graphNodeMap = new HashMap<>();
         private ArrayList<int[]> m_connections = new ArrayList<>();
         
-        public GraphXMLHandler(GraphPanel p) {
+        private Point m_firstPosition = null;
+        private Point m_deltaPosition = null;
+        
+        public GraphXMLHandler(GraphPanel p, int x, int y) {
             m_graphPanel = p;
+
+            m_firstPosition = new Point(x, y);
         }
+
         
         @Override
         public void startElement(String namespaceURI, String lname, String qname, Attributes attrs) throws SAXException {
@@ -239,6 +260,16 @@ public class GraphFileManager {
                     } else if (attributeName.compareTo("subtype") == 0) {
                         subtype = Integer.parseInt(attributevalue);
                     }
+                }
+                
+                if (m_firstPosition != null) {
+                    m_deltaPosition = new Point(x-m_firstPosition.x, y-m_firstPosition.y);
+                    x = m_firstPosition.x;
+                    y = m_firstPosition.y;
+                    m_firstPosition = null;
+                } else {
+                    x-= m_deltaPosition.x;
+                    y -= m_deltaPosition.y;
                 }
                 
                 if (type.compareTo("Function") == 0) {

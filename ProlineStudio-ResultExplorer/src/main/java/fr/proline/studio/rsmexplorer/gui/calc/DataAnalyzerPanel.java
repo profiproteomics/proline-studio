@@ -51,6 +51,7 @@ public class DataAnalyzerPanel extends JPanel implements DataBoxPanelInterface {
     
     private GraphPanel m_graphPanel;
 
+    private DataAnalyzerTree m_dataAnalyzerTree;
     
     public DataAnalyzerPanel() {
         setLayout(new BorderLayout());
@@ -104,8 +105,8 @@ public class DataAnalyzerPanel extends JPanel implements DataBoxPanelInterface {
         
         
         JScrollPane treeScrollPane = new JScrollPane();
-        final DataMixerTree dataMixerTree = new DataMixerTree();
-        treeScrollPane.setViewportView(dataMixerTree);
+        m_dataAnalyzerTree = new DataAnalyzerTree();
+        treeScrollPane.setViewportView(m_dataAnalyzerTree);
         treeScrollPane.setMinimumSize(new Dimension(180,50));
         
         JButton refreshButton = new JButton("Refresh Data", IconManager.getIcon(IconManager.IconType.REFRESH));
@@ -113,7 +114,7 @@ public class DataAnalyzerPanel extends JPanel implements DataBoxPanelInterface {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                dataMixerTree.updataDataNodes();
+                m_dataAnalyzerTree.updataDataNodes();
             }
         });
         
@@ -199,6 +200,9 @@ public class DataAnalyzerPanel extends JPanel implements DataBoxPanelInterface {
         return graphZonePanel;
     }
 
+    public DataAnalyzerTree getDataAnalyzerTree() {
+        return m_dataAnalyzerTree;
+    }
     
     public void clearDataAnalyzerPanel(){
         m_graphPanel.removeAllGraphNodes();
@@ -271,9 +275,9 @@ public class DataAnalyzerPanel extends JPanel implements DataBoxPanelInterface {
     
 
     
-    public class DataMixerTree extends DataTree {
+    public class DataAnalyzerTree extends DataTree {
 
-        public DataMixerTree() {
+        public DataAnalyzerTree() {
             super(new RootDataAnalyzerNode(), false, m_graphPanel);
         }
 
@@ -299,6 +303,15 @@ public class DataAnalyzerPanel extends JPanel implements DataBoxPanelInterface {
                 case MACRO: {
                     AbstractMacro macro = ((MacroNode) node).getMacro();
                     addMacroToGraph(macro);
+                    break;
+                }
+                case USERMACRO: {
+                    String macroXML = ((UserMacroNode) node).getXMLMacro();
+                    try {
+                        UserMacroParser.getGraphFileManager().parseFile(macroXML, m_graphPanel);
+                    } catch (Exception e) {
+                        //JPM.TODO
+                    }
                     break;
                 }
 

@@ -18,7 +18,7 @@ import org.openide.util.NbPreferences;
  */
 public class WindowSavedManager {
     
-    private static boolean m_newWindowAdded = true;
+    //private static boolean m_newWindowAdded = true;
     
     public final static char SAVE_WINDOW_FOR_RSET = '1';
     public final static char SAVE_WINDOW_FOR_RSM = '2';
@@ -149,7 +149,7 @@ public class WindowSavedManager {
     
     public static  void setSavedWindows(ArrayList<String> windowSavedList) {
         m_windowSavedList = windowSavedList;
-        m_newWindowAdded = true;
+        //m_newWindowAdded = true;
         writeSavedWindows();
         
         IdentificationTree.reinitMainPopup();
@@ -157,7 +157,7 @@ public class WindowSavedManager {
     
     public static void addSavedWindow(String savedWindow) {
         
-        m_newWindowAdded = true;
+        //m_newWindowAdded = true;
         
         readSavedWindows();
         
@@ -169,13 +169,13 @@ public class WindowSavedManager {
         QuantitationTree.reinitMainPopup();
     }
     
-    public static void setNoWindowAdded() {
+    /*public static void setNoWindowAdded() {
         m_newWindowAdded = false;
     }
     
     public static boolean isWindowAdded() {
         return m_newWindowAdded;
-    }
+    }*/
     
     public static void writeSavedWindows() {
 

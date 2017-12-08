@@ -242,7 +242,7 @@ public class FunctionGraphNode extends GraphNode {
     @Override
     public void updateNumberOfInConnections() {
 
-          int nbConnections = m_inConnectors.size();
+        int nbConnections = m_inConnectors.size();
         int nbInParameters = m_function.getNumberOfInParameters();
         boolean modification = false;
         while ((nbConnections>2) && (nbConnections>nbInParameters)) {

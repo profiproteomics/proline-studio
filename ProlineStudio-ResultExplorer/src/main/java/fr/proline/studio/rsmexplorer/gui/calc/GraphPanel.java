@@ -2,6 +2,8 @@ package fr.proline.studio.rsmexplorer.gui.calc;
 
 import fr.proline.studio.graphics.SelectionGestureLasso;
 import fr.proline.studio.graphics.SelectionGestureSquare;
+import fr.proline.studio.gui.DefaultDialog;
+import fr.proline.studio.gui.OptionDialog;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.table.TableInfo;
 import fr.proline.studio.rsmexplorer.gui.calc.functions.AbstractFunction;
@@ -16,6 +18,7 @@ import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphNode;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphicGraphNode;
 import fr.proline.studio.rsmexplorer.gui.calc.graphics.AbstractGraphic;
 import fr.proline.studio.rsmexplorer.gui.calc.macros.AbstractMacro;
+import fr.proline.studio.rsmexplorer.gui.calc.macros.MacroSavedManager;
 import fr.proline.studio.utils.IconManager;
 import java.awt.Color;
 import java.awt.Cursor;
@@ -32,25 +35,20 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.geom.Path2D;
-import java.io.File;
-import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.prefs.Preferences;
 import javax.swing.AbstractAction;
 import javax.swing.JComponent;
-import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 import javax.swing.ToolTipManager;
-import javax.swing.filechooser.FileNameExtensionFilter;
-import org.openide.util.NbPreferences;
+import org.openide.windows.WindowManager;
 
 /**
  * Panel to display the Graph for the Data analyzer
@@ -132,7 +130,7 @@ public class GraphPanel extends JPanel implements MouseListener, MouseMotionList
                 }
             }
 
-            if ((lastGraphNode instanceof DataGraphNode) && (graphNode instanceof FunctionGraphNode)) {
+            if ((lastGraphNode instanceof DataGraphNode) && (graphNode!=null) && (graphNode instanceof FunctionGraphNode)) {
                 posX += GraphNode.WIDTH * 2.2;
                 posY = lastGraphNode.getCenterY();
 
@@ -732,7 +730,7 @@ public class GraphPanel extends JPanel implements MouseListener, MouseMotionList
         popup.add(new SelectAllAction());
         popup.add(new ClearAllAction());
         popup.addSeparator();
-        popup.add(new OpenGraphAction());
+        //popup.add(new OpenGraphAction());
         popup.add(new SaveAsAction());
         
         return popup;
@@ -792,7 +790,7 @@ public class GraphPanel extends JPanel implements MouseListener, MouseMotionList
 
     }
     
-    public class OpenGraphAction extends AbstractAction {
+    /*public class OpenGraphAction extends AbstractAction {
         public OpenGraphAction() {
             super("Open", IconManager.getIcon(IconManager.IconType.OPEN_FILE));
         }
@@ -836,18 +834,33 @@ public class GraphPanel extends JPanel implements MouseListener, MouseMotionList
                 preferences.put("DefaultGraphPath", file.getAbsoluteFile().getParentFile().getAbsolutePath());
             }
         }
-    }
+    }*/
     
     public class SaveAsAction extends AbstractAction {
 
         public SaveAsAction() {
-            super("Save As", IconManager.getIcon(IconManager.IconType.SAVE_SETTINGS));
+            super("Save As Macro", IconManager.getIcon(IconManager.IconType.SAVE_SETTINGS));
         }
 
         @Override
         public void actionPerformed(ActionEvent ae) {
             
-            FileNameExtensionFilter FILTER = new FileNameExtensionFilter("Data Analyzer (.gda)", "gda");
+            OptionDialog dialog = new OptionDialog(WindowManager.getDefault().getMainWindow(), "Select Macro Name", null, "Macro Name", OptionDialog.OptionDialogType.TEXTFIELD);
+            dialog.centerToWindow(WindowManager.getDefault().getMainWindow());
+            dialog.setVisible(true);
+            String macroName = null;
+            if (dialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {
+                macroName = dialog.getText().trim();
+            }
+
+            if ((macroName != null) && (macroName.length() > 0)) {
+                // save as macro
+                String macro = saveGraph(macroName);
+                MacroSavedManager.addSavedMacro(macro);
+                m_dataAnalyzerPanel.getDataAnalyzerTree().addUserMacro(macro);
+            }
+            
+            /*FileNameExtensionFilter FILTER = new FileNameExtensionFilter("Data Analyzer (.gda)", "gda");
             
             
             Preferences preferences = NbPreferences.root();
@@ -894,7 +907,7 @@ public class GraphPanel extends JPanel implements MouseListener, MouseMotionList
                 }
                 
                  preferences.put("DefaultGraphPath", file.getAbsoluteFile().getParentFile().getAbsolutePath());
-            }
+            }*/
 
         }
 
@@ -919,10 +932,12 @@ public class GraphPanel extends JPanel implements MouseListener, MouseMotionList
         return null;
     }
     
-    public String saveGraph() {
+    public String saveGraph(String macroName) {
         
         StringBuilder sb = new StringBuilder();
-        sb.append("<dataanalyzer>");
+        sb.append("<dataanalyzer name=\"");
+        sb.append(macroName);
+        sb.append("\">");
         for (GraphNode node : m_graphNodeArray) {
             node.saveGraph(sb);
         }

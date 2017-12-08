@@ -46,7 +46,7 @@ public class DataTreeTransferHandler extends TransferHandler {
             for (int i=0;i<nbSelectedNode;i++) {
                 DataNode node = selectedNodes[i];
                 DataNode.DataNodeType nodeType = node.getType();
-                if ((nodeType != DataNode.DataNodeType.VIEW_DATA) && (nodeType != DataNode.DataNodeType.FUNCTION) && (nodeType != DataNode.DataNodeType.GRAPHIC) && (nodeType != DataNode.DataNodeType.MACRO)) {
+                if ((nodeType != DataNode.DataNodeType.VIEW_DATA) && (nodeType != DataNode.DataNodeType.FUNCTION) && (nodeType != DataNode.DataNodeType.GRAPHIC) && (nodeType != DataNode.DataNodeType.MACRO) && (nodeType != DataNode.DataNodeType.USERMACRO)) {
                     return null;
                 }
             } 
@@ -129,6 +129,15 @@ public class DataTreeTransferHandler extends TransferHandler {
                         case MACRO: {
                             AbstractMacro macro = ((DataTree.MacroNode) node).getMacro();
                             graphPanel.addMacroToGraph(macro, x, y);
+                            break;
+                        }
+                        case USERMACRO: {
+                            String macroXML = ((DataTree.UserMacroNode) node).getXMLMacro();
+                            try {
+                                UserMacroParser.getGraphFileManager().parseFile(macroXML, graphPanel, x, y);
+                            } catch (Exception e) {
+                                System.out.println(e);
+                            }
                             break;
                         }
 

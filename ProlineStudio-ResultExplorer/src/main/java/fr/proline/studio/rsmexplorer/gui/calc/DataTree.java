@@ -34,6 +34,7 @@ import fr.proline.studio.rsmexplorer.gui.calc.macros.MacroSavedManager;
 import fr.proline.studio.utils.IconManager;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
@@ -41,8 +42,12 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
+import javax.swing.JComponent;
+import javax.swing.JPopupMenu;
 import javax.swing.JTree;
+import javax.swing.SwingUtilities;
 import javax.swing.table.TableColumn;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
@@ -64,6 +69,7 @@ public abstract class DataTree extends JTree {
     private ParentFunctionNode m_parentFunctionNode = null;
     private ParentGraphicNode m_parentGraphicNode = null;
 
+   
     
     protected DataTree(DataNode root, boolean tableOnly, GraphPanel graphPanel) {
         super(root);
@@ -100,7 +106,9 @@ public abstract class DataTree extends JTree {
         addMouseListener(new MouseAdapter() {
             @Override
             public void mouseReleased(MouseEvent e) {
-                if (e.getClickCount() == 2) {
+                if (SwingUtilities.isRightMouseButton(e)) {
+                    triggerPopup(e);
+                }else if (e.getClickCount() == 2) {
 
                      TreePath path = getSelectionPath();
                      if (path == null) {
@@ -123,6 +131,47 @@ public abstract class DataTree extends JTree {
             }
             currentNode = currentNode.getNextNode();
         } while (currentNode != null);
+    }
+    
+    private void triggerPopup(MouseEvent e) {
+        // retrieve selected nodes
+        DataNode[] selectedNodes = getSelectedNodes();
+        
+        int nbNodes = selectedNodes.length;
+
+        if (nbNodes == 0) {
+            // nothing selected
+            return;
+        }
+        
+        for (int i = 0; i < nbNodes; i++) {
+            DataNode n = selectedNodes[i];
+            if (n.getType() != DataNode.DataNodeType.USERMACRO) {
+                return; // popup only on user macro
+            }
+        }
+        
+        
+        JPopupMenu userMacroPopup = new JPopupMenu();
+        
+        final DataTree _tree = this;
+        userMacroPopup.add(new AbstractAction("Delete") {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                DefaultTreeModel model = (DefaultTreeModel) (_tree.getModel());
+                TreePath[] paths = _tree.getSelectionPaths();
+                for (int i = 0; i < paths.length; i++) {
+                    UserMacroNode node = (UserMacroNode) (paths[i].getLastPathComponent());
+                    String macroName = node.toString();
+                    model.removeNodeFromParent(node);
+                    
+                    MacroSavedManager.removeSavedMacro(macroName);
+                }
+            }
+            
+        });
+        
+        userMacroPopup.show((JComponent) e.getSource(), e.getX(), e.getY());
     }
     
     public void updataDataNodes() {

@@ -48,6 +48,16 @@ public class MacroSavedManager {
         writeSavedMacros();
 
     }
+    
+    public static void removeSavedMacro(String name) {
+        for (String macro : m_macroSavedList) {
+            if (macro.indexOf("\""+name+"\"") != -1) {
+                m_macroSavedList.remove(macro);
+                break;
+            }
+        }
+        writeSavedMacros();
+    }
 
     
     public static void writeSavedMacros() {

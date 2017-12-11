@@ -225,6 +225,7 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
 
                         @Override
                         public void msStateChanged() {
+                            m_tree.updateUI();
                             m_tree.revalidate();
                             m_tree.repaint();
                         }
@@ -314,6 +315,7 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
 
                         @Override
                         public void msStateChanged() {
+                            m_tree.updateUI();
                             m_tree.revalidate();
                             m_tree.repaint();
                         }

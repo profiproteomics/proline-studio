@@ -116,8 +116,7 @@ public class MzdbDownloadBatch implements Runnable {
 
                     entry.setDownloading(false);
 
-                    if (m_listener != null) {
-                        m_listener.msStateChanged();
+                    if (m_listener != null) {                        m_listener.msStateChanged();
                         if (m_list.size() == m_entries.size()) {
                             m_listener.downloadPerformed(m_list);
                         }

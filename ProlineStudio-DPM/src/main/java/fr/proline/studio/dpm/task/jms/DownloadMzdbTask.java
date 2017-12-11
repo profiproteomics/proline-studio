@@ -73,13 +73,22 @@ public class DownloadMzdbTask extends AbstractJMSTask {
             
             Path path = Paths.get(m_remoteFileURL);
             String filename = path.getFileName().toString();
+            
+            String tempUrl = m_destinationDirectory+File.separatorChar+filename;
+            
+            File f = new File(tempUrl);
+            
+            while(f.exists()){
+                tempUrl = tempUrl.substring(0, tempUrl.lastIndexOf("."))+" - Copie.mzdb";
+                f = new File(tempUrl);
+            }
 
             boolean success = false;
             BufferedOutputStream bos = null;
             String errorMsg = "";
             try {
-                bos = new BufferedOutputStream(new FileOutputStream(m_destinationDirectory+File.separatorChar+filename));
-                m_loggerProline.debug("Saving stream to File [" + m_destinationDirectory+File.separatorChar+filename + ']');
+                bos = new BufferedOutputStream(new FileOutputStream(tempUrl));
+                m_loggerProline.debug("Saving stream to File [" + tempUrl + ']');
 
                 /* Block until all BytesMessage content is streamed into File OutputStream */
                 jmsMessage.setObjectProperty(JMSConnectionManager.HORNET_Q_SAVE_STREAM_KEY, bos);

@@ -617,6 +617,11 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
         AbstractNode[] selectedNodes = getSelectedNodes();
 
         int nbNodes = selectedNodes.length;
+        
+        if (nbNodes == 0) {
+            // nothing selected
+            return;
+        }
 
         // check if the Root node or Trash or a Node in Trash is selected
         //boolean rootNodeSelected = false;

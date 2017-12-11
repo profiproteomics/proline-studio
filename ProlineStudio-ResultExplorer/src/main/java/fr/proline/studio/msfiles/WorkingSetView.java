@@ -186,8 +186,6 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
 
                             totalFiles.addAll(localFiles);
 
-                            File tempDir = WorkingSetUtil.getTempDirectory();
-
                             for (int i = 0; i < list.size(); i++) {
                                 MsListenerDownloadParameter p = list.get(i);
 
@@ -221,9 +219,7 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
 
                         @Override
                         public void msStateChanged() {
-                            m_tree.updateUI();
-                            m_tree.revalidate();
-                            m_tree.repaint();
+                            ;
                         }
 
                     };
@@ -274,7 +270,6 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
                         public void downloadPerformed(ArrayList<MsListenerDownloadParameter> list) {
 
                             totalFiles.addAll(localFiles);
-                            File tempDir = WorkingSetUtil.getTempDirectory();
 
                             for (int i = 0; i < list.size(); i++) {
                                 MsListenerDownloadParameter p = list.get(i);
@@ -307,9 +302,7 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
 
                         @Override
                         public void msStateChanged() {
-                            m_tree.updateUI();
-                            m_tree.revalidate();
-                            m_tree.repaint();
+                            ;
                         }
 
                     };

@@ -17,7 +17,7 @@ public interface MsListener {
     
     public void uploadPerformed(ArrayList<MsListenerParameter> list);
     
-    public void downloadPerformed(ArrayList<MsListenerParameter> list);
+    public void downloadPerformed(ArrayList<MsListenerDownloadParameter> list);
     
     public void exportPerformed(ArrayList<MsListenerParameter> list);
     

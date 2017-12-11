@@ -100,7 +100,7 @@ public class MzdbUploadBatch implements Runnable, MsListener {
     }
 
     @Override
-    public void downloadPerformed(ArrayList<MsListenerParameter> list) {
+    public void downloadPerformed(ArrayList<MsListenerDownloadParameter> list) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 

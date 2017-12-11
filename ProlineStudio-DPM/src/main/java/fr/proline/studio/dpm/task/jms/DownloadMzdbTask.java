@@ -16,8 +16,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import javax.jms.BytesMessage;
 import javax.jms.JMSException;
@@ -30,13 +28,13 @@ import javax.jms.TextMessage;
  */
 public class DownloadMzdbTask extends AbstractJMSTask {
 
-    private final String m_destinationDirectory;
     private final String m_remoteFileURL;
+    private final File m_localFile;
 
-    public DownloadMzdbTask(AbstractJMSCallback callback, String destinationDirectory, String remoteFileURL) {
+    public DownloadMzdbTask(AbstractJMSCallback callback, String remoteFileURL, File localFile) {
         super(callback, new TaskInfo("Download mzDB file " + remoteFileURL, true, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_MEDIUM));
-        m_destinationDirectory = destinationDirectory;
         m_remoteFileURL = remoteFileURL;
+        m_localFile = localFile;
     }
 
     @Override
@@ -71,31 +69,20 @@ public class DownloadMzdbTask extends AbstractJMSTask {
         if (jmsMessage instanceof BytesMessage) {
             /* It is a Large Message Stream */
             
-            Path path = Paths.get(m_remoteFileURL);
-            String filename = path.getFileName().toString();
-            
-            String tempUrl = m_destinationDirectory+File.separatorChar+filename;
-            
-            File f = new File(tempUrl);
-            
-            while(f.exists()){
-                tempUrl = tempUrl.substring(0, tempUrl.lastIndexOf("."))+" - Copie.mzdb";
-                f = new File(tempUrl);
-            }
 
             boolean success = false;
             BufferedOutputStream bos = null;
             String errorMsg = "";
             try {
-                bos = new BufferedOutputStream(new FileOutputStream(tempUrl));
-                m_loggerProline.debug("Saving stream to File [" + tempUrl + ']');
+                bos = new BufferedOutputStream(new FileOutputStream(m_localFile.getAbsolutePath()));
+                m_loggerProline.debug("Saving stream to File [" + m_localFile.getAbsolutePath() + ']');
 
                 /* Block until all BytesMessage content is streamed into File OutputStream */
                 jmsMessage.setObjectProperty(JMSConnectionManager.HORNET_Q_SAVE_STREAM_KEY, bos);
                 success = true;
             } catch (FileNotFoundException | JMSException ex) {
-                m_loggerProline.error("Error handling JMS_HQ_SaveStream OutputStream [" + m_destinationDirectory + ']', ex);
-                errorMsg = "Error handling JMS_HQ_SaveStream OutputStream [" + m_destinationDirectory + "] (" + ex.getMessage() + ")";
+                m_loggerProline.error("Error handling JMS_HQ_SaveStream OutputStream [" + m_localFile.getAbsolutePath() + ']', ex);
+                errorMsg = "Error handling JMS_HQ_SaveStream OutputStream [" + m_localFile.getAbsolutePath() + "] (" + ex.getMessage() + ")";
             } finally {
 
                 if (bos != null) {
@@ -103,12 +90,12 @@ public class DownloadMzdbTask extends AbstractJMSTask {
                         bos.close();
 
                         if (success) {
-                            m_loggerProline.info("File [" + m_destinationDirectory + "] Saved");
+                            m_loggerProline.info("File [" + m_localFile.getAbsolutePath() + "] Saved");
                         }
 
                     } catch (IOException ioEx) {
-                        m_loggerProline.error("Error closing OutputStream [" + m_destinationDirectory + ']', ioEx);
-                        errorMsg = "Error closing OutputStream [" + m_destinationDirectory + "] (" + ioEx.getMessage() + ")";
+                        m_loggerProline.error("Error closing OutputStream [" + m_localFile.getAbsolutePath() + ']', ioEx);
+                        errorMsg = "Error closing OutputStream [" + m_localFile.getAbsolutePath() + "] (" + ioEx.getMessage() + ")";
                     }
                 }
 

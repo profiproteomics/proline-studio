@@ -10,6 +10,8 @@ import fr.proline.studio.dpm.task.jms.AbstractJMSCallback;
 import fr.proline.studio.dpm.task.jms.DownloadMzdbTask;
 import fr.proline.studio.rsmexplorer.MzdbFilesTopComponent;
 import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import javax.swing.tree.TreePath;
 
@@ -25,14 +27,15 @@ public class MzdbDownloadBatch implements Runnable {
     private ArrayList<WorkingSetEntry> m_entries;
     private final String m_root;
     private MsListener m_listener;
-    private ArrayList<MsListenerParameter> m_list;
+    private ArrayList<MsListenerDownloadParameter> m_list;
+    private File m_localFile;
 
     public MzdbDownloadBatch(ArrayList<File> files, TreePath pathToExpand, String root) {
         m_files = files;
         m_pathToExpand = pathToExpand;
         m_root = root;
 
-        m_list = new ArrayList<MsListenerParameter>();
+        m_list = new ArrayList<MsListenerDownloadParameter>();
 
         StringBuilder temp = new StringBuilder();
 
@@ -48,14 +51,14 @@ public class MzdbDownloadBatch implements Runnable {
         m_files = files;
         m_root = root;
         m_localURL = localURL;
-        m_list = new ArrayList<MsListenerParameter>();
+        m_list = new ArrayList<MsListenerDownloadParameter>();
     }
 
     public MzdbDownloadBatch(String localURL, String root, ArrayList<WorkingSetEntry> entries) {
         m_entries = entries;
         m_root = root;
         m_localURL = localURL;
-        m_list = new ArrayList<MsListenerParameter>();
+        m_list = new ArrayList<MsListenerDownloadParameter>();
     }
 
     public void addMsListener(MsListener listener) {
@@ -77,9 +80,9 @@ public class MzdbDownloadBatch implements Runnable {
                         if (m_pathToExpand != null) {
                             MzdbFilesTopComponent.getExplorer().getLocalFileSystemView().updateTree();
                         }
-                        m_list.add(new MsListenerParameter(remoteFile, true));
+                        m_list.add(new MsListenerDownloadParameter(m_localFile, remoteFile,true));
                     } else {
-                        m_list.add(new MsListenerParameter(remoteFile, false));
+                        m_list.add(new MsListenerDownloadParameter(m_localFile, remoteFile, false));
                     }
 
                     if (m_listener != null) {
@@ -89,7 +92,20 @@ public class MzdbDownloadBatch implements Runnable {
                     }
                 }
             };
-            DownloadMzdbTask task = new DownloadMzdbTask(callback, m_root + m_localURL, remoteFile.getAbsolutePath());
+            
+            String destinationDirectory = m_root + m_localURL;
+            
+            Path path = Paths.get(m_localURL);       
+            String filename = path.getFileName().toString();                  
+            String url = destinationDirectory+File.separatorChar+filename;
+            
+            m_localFile = new File(url);            
+            while(m_localFile.exists()){
+                url = url.substring(0, url.lastIndexOf("."))+" - Copie.mzdb";
+                m_localFile = new File(url);
+            }
+            
+            DownloadMzdbTask task = new DownloadMzdbTask(callback, remoteFile.getAbsolutePath(), m_localFile);
             AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
         }
     }
@@ -109,21 +125,34 @@ public class MzdbDownloadBatch implements Runnable {
                         if (m_pathToExpand != null) {
                             MzdbFilesTopComponent.getExplorer().getLocalFileSystemView().updateTree();
                         }
-                        m_list.add(new MsListenerParameter(entry.getFile(), true));
+                        m_list.add(new MsListenerDownloadParameter(m_localFile, entry.getFile(), true));
                     } else {
-                        m_list.add(new MsListenerParameter(entry.getFile(), false));
+                        m_list.add(new MsListenerDownloadParameter(m_localFile, entry.getFile(), false));
                     }
 
                     entry.setDownloading(false);
 
-                    if (m_listener != null) {                        m_listener.msStateChanged();
+                    if (m_listener != null) {                        
+                        m_listener.msStateChanged();
                         if (m_list.size() == m_entries.size()) {
                             m_listener.downloadPerformed(m_list);
                         }
                     }
                 }
             };
-            DownloadMzdbTask task = new DownloadMzdbTask(callback, m_root + m_localURL, entry.getFile().getAbsolutePath());
+            
+            String destinationDirectory = m_root + m_localURL;
+                
+            String filename = entry.getFilename();                  
+            String url = destinationDirectory+File.separatorChar+filename;
+            
+            m_localFile = new File(url);            
+            while(m_localFile.exists()){
+                url = url.substring(0, url.lastIndexOf("."))+" - Copie.mzdb";
+                m_localFile = new File(url);
+            }
+            
+            DownloadMzdbTask task = new DownloadMzdbTask(callback, entry.getFile().getAbsolutePath(), m_localFile);
 
             entry.setDownloading(true);
 

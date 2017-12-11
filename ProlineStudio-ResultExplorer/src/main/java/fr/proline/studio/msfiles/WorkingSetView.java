@@ -181,7 +181,7 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
                         }
 
                         @Override
-                        public void downloadPerformed(ArrayList<MsListenerParameter> list) {
+                        public void downloadPerformed(ArrayList<MsListenerDownloadParameter> list) {
                             //all the action will be here.
 
                             totalFiles.addAll(localFiles);
@@ -189,21 +189,17 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
                             File tempDir = WorkingSetUtil.getTempDirectory();
 
                             for (int i = 0; i < list.size(); i++) {
-                                MsListenerParameter p = list.get(i);
+                                MsListenerDownloadParameter p = list.get(i);
 
                                 if (p.wasSuccessful()) {
                                     
-                                    String delimiter = (p.getFile().getAbsolutePath().contains(File.separator) ? File.separator : "/");
-                                    
-                                    String url = tempDir + File.separator + p.getFile().getAbsolutePath().substring(p.getFile().getAbsolutePath().lastIndexOf(delimiter)+1);
+                                    File newFile = p.getDestinationFile();
 
-                                    File f = new File(url);
+                                    if (newFile.exists()) {
 
-                                    if (f.exists()) {
+                                        replaceEntry(p.getRemoteFile(), newFile);
 
-                                        replaceEntry(p.getFile(), f);
-
-                                        totalFiles.add(f);
+                                        totalFiles.add(newFile);
                                     }
 
                                 }
@@ -275,25 +271,21 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
                         }
 
                         @Override
-                        public void downloadPerformed(ArrayList<MsListenerParameter> list) {
+                        public void downloadPerformed(ArrayList<MsListenerDownloadParameter> list) {
 
                             totalFiles.addAll(localFiles);
                             File tempDir = WorkingSetUtil.getTempDirectory();
 
                             for (int i = 0; i < list.size(); i++) {
-                                MsListenerParameter p = list.get(i);
+                                MsListenerDownloadParameter p = list.get(i);
 
                                 if (p.wasSuccessful()) {
 
-                                    String delimiter = (p.getFile().getAbsolutePath().contains(File.separator) ? File.separator : "/");
+                                    File newFile = p.getDestinationFile();
                                     
-                                    String url = tempDir + File.separator + p.getFile().getAbsolutePath().substring(p.getFile().getAbsolutePath().lastIndexOf(delimiter)+1);
-
-                                    File f = new File(url);
-
-                                    if (f.exists()) {
-                                        replaceEntry(p.getFile(), f);
-                                        totalFiles.add(f);
+                                    if (newFile.exists()) {
+                                        replaceEntry(p.getRemoteFile(), newFile);
+                                        totalFiles.add(newFile);
                                     }
 
                                 }
@@ -589,7 +581,7 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
             }
 
             @Override
-            public void downloadPerformed(ArrayList<MsListenerParameter> list) {
+            public void downloadPerformed(ArrayList<MsListenerDownloadParameter> list) {
                 throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
             }
 

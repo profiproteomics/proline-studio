@@ -36,14 +36,7 @@ public class MacroSavedManager {
 
         return m_macroSavedList;
     }
-    
-    /*public static  void setSavedWindows(ArrayList<String> macroSavedList) {
-        m_macroSavedList = windowSavedList;
 
-        writeSavedWindows();
-        
-        IdentificationTree.reinitMainPopup();
-    }*/
     
     public static void addSavedMacro(String savedMacro) {
 
@@ -53,9 +46,7 @@ public class MacroSavedManager {
         m_macroSavedList.add(savedMacro);
         
         writeSavedMacros();
-        
-        /*IdentificationTree.reinitMainPopup();
-        QuantitationTree.reinitMainPopup();*/
+
     }
 
     

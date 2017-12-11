@@ -19,6 +19,7 @@ import fr.proline.studio.rsmexplorer.gui.calc.functions.QuantiFilterFunction;
 import fr.proline.studio.rsmexplorer.gui.calc.functions.SCDiffAnalysisFunction;
 import fr.proline.studio.rsmexplorer.gui.calc.functions.TtdFunction;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.FunctionGraphNode;
+import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphGroup;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphNode;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphicGraphNode;
 import fr.proline.studio.rsmexplorer.gui.calc.graphics.AbstractGraphic;
@@ -227,19 +228,32 @@ public class UserMacroParser {
         private Point m_firstPosition = null;
         private Point m_deltaPosition = null;
         
+        private GraphGroup m_group = null;
+        
         public GraphXMLHandler(GraphPanel p, int x, int y) {
             m_graphPanel = p;
 
             m_firstPosition = new Point(x, y);
+
         }
 
         
         @Override
         public void startElement(String namespaceURI, String lname, String qname, Attributes attrs) throws SAXException {
 
+                //
+            
             int nbAttributes = attrs.getLength();
             
-            if (qname.compareTo("graphnode") == 0) {
+            if (qname.compareTo("dataanalyzer") == 0) {
+                for (int i = 0; i < nbAttributes; i++) {
+                    String attributeName = attrs.getQName(i);
+                    String attributevalue = attrs.getValue(i);
+                    if (attributeName.compareTo("name") == 0) {
+                        m_group = new GraphGroup(attributevalue);
+                    }
+                }
+            } else if (qname.compareTo("graphnode") == 0) {
                 int id = -1;
                 int x = 0;
                 int y = 0;
@@ -275,12 +289,18 @@ public class UserMacroParser {
                 if (type.compareTo("Function") == 0) {
                     FunctionGraphNode graphNode = createFunctionGraphNode(subtype);
                     m_graphPanel.addGraphNode(graphNode, x, y);
+                    if (m_group != null) {
+                        m_group.addObject(graphNode);
+                    }
                     
                     m_graphNodeMap.put(id, graphNode);
                 } else if (type.compareTo("Graphic") == 0) {
                     GraphicGraphNode graphNode = createGraphicGraphNode(subtype);
                     m_graphPanel.addGraphNode(graphNode, x, y);
-                    
+                    if (m_group != null) {
+                        m_group.addObject(graphNode);
+                    }
+
                     m_graphNodeMap.put(id, graphNode);
                 }
 
@@ -310,9 +330,7 @@ public class UserMacroParser {
                     m_connections.add(connection);
                 }
                 
-                
-                
-                
+
             }
 
         }

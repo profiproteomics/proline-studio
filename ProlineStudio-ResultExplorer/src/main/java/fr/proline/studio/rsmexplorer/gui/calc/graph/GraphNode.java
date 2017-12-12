@@ -589,6 +589,9 @@ public abstract class GraphNode extends AbstractConnectedGraphObject {
         return popup;
     }
  
+    
+
+    
     public class DeleteAction  extends AbstractAction {
 
         public DeleteAction() {

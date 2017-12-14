@@ -146,7 +146,7 @@ public class ConvertionUploadBatch implements Runnable, MsListener {
     }
 
     @Override
-    public void msStateChanged() {
+    public void entryStateUpdated(ArrayList<MsListenerEntryUpdateParameter> list) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 

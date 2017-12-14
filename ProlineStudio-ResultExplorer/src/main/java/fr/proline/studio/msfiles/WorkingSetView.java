@@ -22,6 +22,7 @@ import java.awt.event.MouseEvent;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import javax.swing.BorderFactory;
 import javax.swing.JComponent;
 import javax.swing.JMenuItem;
@@ -59,6 +60,8 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
     private ArrayList<WorkingSetEntry> m_existingSelectedWorkingSetEntries;
     private WorkingSetRoot m_selectedRoot;
 
+    private HashSet<String> m_downloadIndex;
+
     public WorkingSetView() {
         initComponents();
         resetTreeState();
@@ -70,6 +73,8 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
         m_selectedWorkingSetEntries = new ArrayList<WorkingSetEntry>();
         m_existingSelectedWorkingSetEntries = new ArrayList<WorkingSetEntry>();
         m_selectedRoot = null;
+
+        m_downloadIndex = new HashSet<String>();
 
         setBorder(BorderFactory.createCompoundBorder(BorderFactory.createTitledBorder("Working Sets"), BorderFactory.createEmptyBorder(5, 5, 5, 5)));
 
@@ -108,12 +113,15 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
                         WorkingSetEntry entry = (WorkingSetEntry) userObject;
                         if (!entry.exists()) {
                             setForeground(Color.LIGHT_GRAY);
-                        }else{
-                            if(entry.isDownloading()){
+                            setIcon(IconManager.getIcon(IconManager.IconType.SPECTRUM_EMISSION));
+                        } else {
+                            if (m_downloadIndex.contains(entry.getFile().getAbsolutePath())) {
                                 setIcon(IconManager.getIcon(IconManager.IconType.ARROW_DOWN));
+                            }else{
+                                setIcon(IconManager.getIcon(IconManager.IconType.SPECTRUM_EMISSION));
                             }
                         }
-                        setIcon(IconManager.getIcon(IconManager.IconType.SPECTRUM_EMISSION));
+                        
 
                     }
                 }
@@ -162,9 +170,9 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
             public void actionPerformed(ActionEvent evt) {
 
                 ArrayList<File> localFiles = extractSelectedRawFiles(WorkingSetEntry.Location.LOCAL);
-                
+
                 ArrayList<WorkingSetEntry> remoteEntries = extractSelectedWorkingSetEntries(WorkingSetEntry.Location.REMOTE);
-                
+
                 ArrayList<File> totalFiles = new ArrayList<File>();
 
                 if (!remoteEntries.isEmpty()) {
@@ -190,7 +198,7 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
                                 MsListenerDownloadParameter p = list.get(i);
 
                                 if (p.wasSuccessful()) {
-                                    
+
                                     File newFile = p.getDestinationFile();
 
                                     if (newFile.exists()) {
@@ -218,8 +226,8 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
                         }
 
                         @Override
-                        public void msStateChanged() {
-                            ;
+                        public void entryStateUpdated(ArrayList<MsListenerEntryUpdateParameter> list) {
+                            updateDownloadIndex(list);
                         }
 
                     };
@@ -248,7 +256,7 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
             public void actionPerformed(ActionEvent evt) {
 
                 ArrayList<File> localFiles = extractSelectedRawFiles(WorkingSetEntry.Location.LOCAL);
-                
+
                 ArrayList<WorkingSetEntry> remoteEntries = extractSelectedWorkingSetEntries(WorkingSetEntry.Location.REMOTE);
 
                 ArrayList<File> totalFiles = new ArrayList<File>();
@@ -277,7 +285,7 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
                                 if (p.wasSuccessful()) {
 
                                     File newFile = p.getDestinationFile();
-                                    
+
                                     if (newFile.exists()) {
                                         replaceEntry(p.getRemoteFile(), newFile);
                                         totalFiles.add(newFile);
@@ -301,8 +309,8 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
                         }
 
                         @Override
-                        public void msStateChanged() {
-                            ;
+                        public void entryStateUpdated(ArrayList<MsListenerEntryUpdateParameter> list) {
+                            updateDownloadIndex(list);
                         }
 
                     };
@@ -459,6 +467,17 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
 
     }
 
+    private void updateDownloadIndex(ArrayList<MsListenerEntryUpdateParameter> list) {
+        for (int i = 0; i < list.size(); i++) {
+            MsListenerEntryUpdateParameter parameter = list.get(i);
+            if (parameter.getState() == MsListenerEntryUpdateParameter.State.DOWNLOAD_COMPLETE) {
+                m_downloadIndex.remove(parameter.getFile().getAbsolutePath());
+            } else {
+                m_downloadIndex.add(parameter.getFile().getAbsolutePath());
+            }
+        }
+    }
+
     private void setPopupEnabled(boolean b) {
         m_addWorkingSet.setEnabled(b);
         m_removeWorkingSet.setEnabled(b);
@@ -526,8 +545,8 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
 
         return files;
     }
-    
-    private ArrayList<WorkingSetEntry> extractSelectedWorkingSetEntries(WorkingSetEntry.Location location){
+
+    private ArrayList<WorkingSetEntry> extractSelectedWorkingSetEntries(WorkingSetEntry.Location location) {
         ArrayList<WorkingSetEntry> entries = new ArrayList<WorkingSetEntry>();
 
         for (int i = 0; i < m_selectedWorkingSetEntries.size(); i++) {
@@ -613,7 +632,7 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
             }
 
             @Override
-            public void msStateChanged() {
+            public void entryStateUpdated(ArrayList<MsListenerEntryUpdateParameter> list) {
                 throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
             }
         };

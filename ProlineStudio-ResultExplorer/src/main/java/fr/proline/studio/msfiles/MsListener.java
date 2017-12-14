@@ -23,6 +23,6 @@ public interface MsListener {
     
     public void verificationPerformed(ArrayList<MsListenerParameter> list);
     
-    public void msStateChanged();
+    public void entryStateUpdated(ArrayList<MsListenerEntryUpdateParameter> list);
     
 }

@@ -30,8 +30,6 @@ public class WorkingSetEntry {
     private File m_file;
     private WorkingSet m_parent;
     private Labeling m_labeling;
-    
-    private boolean m_downloading;
 
     public WorkingSetEntry(String filename, String path, Location location, WorkingSet parent, Labeling labeling) {
         m_filename = filename;
@@ -39,8 +37,6 @@ public class WorkingSetEntry {
         m_location = location;
         m_parent = parent;
         m_labeling = labeling;
-        
-        m_downloading = false;
 
         if (location == Location.LOCAL) {
             m_file = new File(m_path);
@@ -100,12 +96,5 @@ public class WorkingSetEntry {
         }
     }
     
-    public void setDownloading(boolean downloading){
-        m_downloading = downloading;
-    }
-    
-    public boolean isDownloading(){
-        return m_downloading;
-    }
 
 }

@@ -36,21 +36,14 @@ import fr.proline.studio.utils.StudioExceptions;
 import java.awt.Dialog;
 import java.awt.Point;
 import java.awt.Window;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.*;
-import java.util.logging.Level;
 import java.util.prefs.Preferences;
 import javax.persistence.EntityManager;
-import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.tree.TreePath;
-import org.openide.awt.NotificationDisplayer;
-import org.openide.util.Exceptions;
-import org.openide.util.ImageUtilities;
 import org.openide.util.NbPreferences;
 import org.openide.windows.WindowManager;
 import org.slf4j.LoggerFactory;
@@ -919,7 +912,7 @@ public class CreateXICDialog extends DefaultDialog {
             DefineQuantParamsPanel.getDefineQuantPanel().getParamsPanel().setQuantParams(dataset.getQuantProcessingConfigAsMap());
         } catch (Exception ex) {
             LoggerFactory.getLogger("ProlineStudio.ResultExplorer").error("Error while setting Quant Param ", ex);
-            StudioExceptions.getInstance().notify("An error occured while cloning XIC parameters", ex);
+            StudioExceptions.notify("An error occured while cloning XIC parameters", ex);
         }
     }
 

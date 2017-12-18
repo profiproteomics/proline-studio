@@ -12,6 +12,7 @@ import javax.swing.ImageIcon;
 import org.openide.awt.NotificationDisplayer;
 import org.openide.util.Exceptions;
 import org.openide.util.ImageUtilities;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -19,20 +20,9 @@ import org.openide.util.ImageUtilities;
  */
 public class StudioExceptions {
     
-    ImageIcon exceptionIcon = ImageUtilities.loadImageIcon("org/netbeans/core/resources/exception.gif", false);
-    
-    private StudioExceptions() {
-    }
-    
-    public static StudioExceptions getInstance() {
-        return StudioExceptionsHolder.INSTANCE;
-    }
-    
-    private static class StudioExceptionsHolder {
-        private static final StudioExceptions INSTANCE = new StudioExceptions();
-    }
-    
-    public void notify(String message, Throwable throwable) {
+    private static ImageIcon exceptionIcon = ImageUtilities.loadImageIcon("org/netbeans/core/resources/exception.gif", false);
+        
+    public static void notify(String message, Throwable throwable) {
         NotificationDisplayer.getDefault().notify("Proline Studio Error", exceptionIcon, message, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -41,4 +31,8 @@ public class StudioExceptions {
         });
     }
 
+    public static void logAndNotify(String loggerName, String message, Throwable throwable) {
+        LoggerFactory.getLogger(loggerName).error(message, throwable);
+        notify(message, throwable);
+    }
 }

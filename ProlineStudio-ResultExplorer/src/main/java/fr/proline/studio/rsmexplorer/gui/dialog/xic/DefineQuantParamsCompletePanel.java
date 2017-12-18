@@ -245,9 +245,21 @@ public class DefineQuantParamsCompletePanel extends AbstractDefineQuantParamsPan
         Map<String,Object> extRactParams = (Map<String,Object>) quantParams.get("extraction_params");
         m_extractionMoZTolTF.setText(""+Double.parseDouble(extRactParams.get("moz_tol").toString()));
         
-        m_useLastPeakelDetectionCB.setSelected(Boolean.parseBoolean(quantParams.get("use_last_peakel_detection").toString()));
-        m_retainOnlyReliableFeatures.setSelected(Boolean.parseBoolean(quantParams.get("restrain_cross_assignment_to_reliable_features").toString()));
-        m_crossAssignWithinGroupOnly.setSelected(Boolean.parseBoolean(quantParams.get("perform_cross_assignment_inside_groups_only").toString()));
+        if (quantParams.containsKey("use_last_peakel_detection")) {
+            m_useLastPeakelDetectionCB.setSelected(Boolean.parseBoolean(quantParams.get("use_last_peakel_detection").toString()));
+        } else {
+            m_useLastPeakelDetectionCB.setSelected(false);
+        }
+        if (quantParams.containsKey("restrain_cross_assignment_to_reliable_features")) {        
+            m_retainOnlyReliableFeatures.setSelected(Boolean.parseBoolean(quantParams.get("restrain_cross_assignment_to_reliable_features").toString()));
+        } else {
+            m_retainOnlyReliableFeatures.setSelected(false);
+        }
+        if (quantParams.containsKey("perform_cross_assignment_inside_groups_only")) {
+            m_crossAssignWithinGroupOnly.setSelected(Boolean.parseBoolean(quantParams.get("perform_cross_assignment_inside_groups_only").toString()));
+        } else {
+            m_crossAssignWithinGroupOnly.setSelected(false);
+        }
         
         Map<String,Object> clusterParams = (Map<String,Object>) quantParams.get("clustering_params");
         m_clusteringMoZTolTF.setText(""+Double.parseDouble(clusterParams.get("moz_tol").toString()));

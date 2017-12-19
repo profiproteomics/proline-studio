@@ -86,6 +86,8 @@ public class YAxis extends Axis {
     @Override
     public void paintCursor(Graphics2D g, AbstractCursor cursor, boolean selected) {
 
+        g.setFont(m_valuesFont);
+        
         final int DELTA = 3;
         
         double y = cursor.getValue();

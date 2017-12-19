@@ -9,6 +9,7 @@ import java.awt.geom.Path2D;
 import java.util.ArrayList;
 import javax.swing.JPopupMenu;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
+import fr.proline.studio.graphics.measurement.AbstractMeasurement;
 
 /**
  *
@@ -34,6 +35,8 @@ public abstract class PlotBaseAbstract implements Axis.EnumXInterface, Axis.Enum
     protected AbstractCursor m_selectedCursor = null;
     
     protected boolean m_isPaintMarker = true;
+    
+    protected ArrayList<AbstractMeasurement> m_measurements = null;
 
     protected boolean m_locked = false;
 
@@ -220,6 +223,27 @@ public abstract class PlotBaseAbstract implements Axis.EnumXInterface, Axis.Enum
             return;
         }
         m_markersList.clear();
+    }
+    
+    public final void addMeasurement(AbstractMeasurement measurement) {
+        if (m_measurements == null) {
+            m_measurements = new ArrayList<>();
+        }
+        m_measurements.add(measurement);
+    }
+    
+    public ArrayList<AbstractMeasurement> getMeasurements(ArrayList<AbstractMeasurement> measurements, AbstractMeasurement.MeasurementType type) {
+
+        if (m_measurements == null) {
+            return measurements;
+        }
+        for (AbstractMeasurement measurement : m_measurements) {
+            if (measurement.getMeasurementType() == type)  {
+                measurements.add(measurement);
+                
+            }
+        }
+        return measurements;
     }
     
     public void paintMarkers(Graphics2D g) {

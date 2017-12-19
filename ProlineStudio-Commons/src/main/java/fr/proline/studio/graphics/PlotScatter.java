@@ -36,6 +36,7 @@ import javax.swing.JTextField;
 import org.openide.windows.WindowManager;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 import fr.proline.studio.extendedtablemodel.ExtraDataForTableModelInterface;
+import fr.proline.studio.graphics.measurement.WidthMeasurement;
 
 /**
  * Scatter Plot
@@ -116,9 +117,9 @@ public class PlotScatter extends PlotXYAbstract implements Axis.EnumXInterface, 
         m_parameterListArray = new  ArrayList<>(2);
         m_parameterListArray.add(colorParameteList);
         m_parameterListArray.add(settingsParameterList);
-        
 
         
+        addMeasurement(new WidthMeasurement(this));
     }
 
     

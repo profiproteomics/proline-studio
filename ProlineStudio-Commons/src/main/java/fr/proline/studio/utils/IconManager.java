@@ -176,7 +176,8 @@ public class IconManager {
         ISOTOPES_PREDICTION,
         TEST,
         OPTIONS_MORE,
-        OPTIONS_LESS;
+        OPTIONS_LESS, 
+        PIN;
         
     }
     private final static HashMap<IconType, ImageIcon> m_iconMap = new HashMap<>();
@@ -630,6 +631,8 @@ public class IconManager {
                 return "fr/proline/studio/images/hammer--plus.png";  
             case OPTIONS_LESS:
                 return "fr/proline/studio/images/hammer--minus.png";  
+            case PIN:
+                return "fr/proline/studio/images/pin.png";  
         }
 
         return null; // can not happen

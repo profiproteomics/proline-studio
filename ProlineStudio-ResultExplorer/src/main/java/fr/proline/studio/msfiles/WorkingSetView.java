@@ -93,6 +93,9 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
 
         m_workingSetModel = new WorkingSetModel(m_root);
         m_tree = new JTree(m_workingSetModel);
+        
+        m_tree.setTransferHandler(new WorkingSetEntriesTransferHandler());
+        m_tree.setDragEnabled(true);
 
         m_tree.setCellRenderer(new DefaultTreeCellRenderer() {
 
@@ -498,6 +501,10 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
         if (m_selectedRoot == null && m_selectedWorkingSetEntries.isEmpty() && m_selectedWorkingSets.size() == 1) {
             m_renameWorkingSet.setEnabled(true);
         }
+        
+        if (m_selectedRoot == null && m_selectedWorkingSetEntries.isEmpty() && m_selectedWorkingSets.size() == 1) {
+            m_changeDescriptionAtWorkingSet.setEnabled(true);
+        }
 
         if (m_selectedRoot == null && m_selectedWorkingSets.size() == 1 && m_selectedWorkingSetEntries.isEmpty()) {
             m_addWorkingSetEntry.setEnabled(true);
@@ -532,6 +539,7 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
     private void setPopupEnabled(boolean b) {
         m_addWorkingSet.setEnabled(b);
         m_renameWorkingSet.setEnabled(b);
+        m_changeDescriptionAtWorkingSet.setEnabled(b);
         m_removeWorkingSet.setEnabled(b);
         m_addWorkingSetEntry.setEnabled(b);
         m_removeWorkingSetEntry.setEnabled(b);

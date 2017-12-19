@@ -23,6 +23,7 @@ import static fr.proline.studio.graphics.marker.LabelMarker.ORIENTATION_XY_MIDDL
 import fr.proline.studio.graphics.marker.LineMarker;
 import fr.proline.studio.graphics.marker.PointMarker;
 import fr.proline.studio.graphics.marker.coordinates.DataCoordinates;
+import fr.proline.studio.graphics.measurement.IntegralMeasurement;
 import fr.proline.studio.utils.CyclicColorPalette;
 import fr.proline.studio.utils.IconManager;
 import java.awt.BorderLayout;
@@ -285,6 +286,7 @@ class ScansSpinnerModel extends AbstractSpinnerModel {
             ((PlotStick) scanPlot).setIsPaintMarker(true);
          } else {
             scanPlot = new PlotLinear(spectrumPlotPanel, scanModel, null, ScanTableModel.COLTYPE_SCAN_MASS, ScanTableModel.COLTYPE_SCAN_INTENSITIES);
+            ((PlotLinear) scanPlot).addMeasurement(new IntegralMeasurement(scanPlot));
             ((PlotLinear) scanPlot).setStrokeFixed(true);
             ((PlotLinear) scanPlot).setPlotInformation(scanModel.getPlotInformation());
             ((PlotLinear) scanPlot).setIsPaintMarker(true);

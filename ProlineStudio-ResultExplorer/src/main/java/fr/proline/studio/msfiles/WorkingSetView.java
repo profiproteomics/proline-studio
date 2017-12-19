@@ -51,7 +51,7 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
 
     private WorkingSetModel m_workingSetModel;
     private JTree m_tree;
-    private JMenuItem m_addWorkingSet, m_renameWorkingSet, m_removeWorkingSet, m_addWorkingSetEntry, m_removeWorkingSetEntry, m_viewMzdb, m_detectPeakels;
+    private JMenuItem m_addWorkingSet, m_renameWorkingSet, m_changeDescriptionAtWorkingSet, m_removeWorkingSet, m_addWorkingSetEntry, m_removeWorkingSetEntry, m_viewMzdb, m_detectPeakels;
     private JPopupMenu m_popupMenu;
     private ActionListener m_viewMzdbAction;
     private WorkingSetRoot m_root;
@@ -369,6 +369,29 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
 
         });
         popupMenu.add(m_renameWorkingSet);
+        
+        m_changeDescriptionAtWorkingSet = new JMenuItem("Change description");
+        m_changeDescriptionAtWorkingSet.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+                String message = "Change description";
+                String text = JOptionPane.showInputDialog(null, message);
+                if (text != null) {
+                    if (m_selectedWorkingSets.size() == 1) {
+                        m_workingSetModel.updateJSONObject(WorkingSetModel.JSONObjectType.WORKING_SET, m_selectedWorkingSets.get(0).getName(), "description", text);
+                        m_selectedWorkingSets.get(0).setDescription(text);                       
+                        DefaultMutableTreeNode root = (DefaultMutableTreeNode) m_workingSetModel.getRoot();
+                        WorkingSetRoot workingSetRoot = (WorkingSetRoot) root.getUserObject();
+                        WorkingSetUtil.saveJSON(workingSetRoot.getWorkingSets());
+                        reloadTree();
+                        resetTreeState();
+                    }
+                }
+            }
+        });
+        popupMenu.add(m_changeDescriptionAtWorkingSet);
+        
 
         m_removeWorkingSet = new JMenuItem("Remove a working set");
         m_removeWorkingSet.addActionListener(new ActionListener() {

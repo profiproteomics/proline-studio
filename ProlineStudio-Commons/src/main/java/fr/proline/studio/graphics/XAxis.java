@@ -76,6 +76,8 @@ public class XAxis extends Axis {
     @Override
     public void paintCursor(Graphics2D g, AbstractCursor cursor, boolean selected) {
 
+        g.setFont(m_valuesFont);
+        
         final int DELTA = 3;
         
         double x = cursor.getValue();
@@ -153,6 +155,39 @@ public class XAxis extends Axis {
 
         // restore stroke
         g.setStroke(prevStroke);
+
+    }
+    
+    public String defaultFormat(double x) {
+
+        int integerDigits = m_ticks.getIntegerDigits();
+        int fractionalDigits = m_ticks.getFractionalDigits()+2;
+
+        double multForRounding = Math.pow(10, fractionalDigits);
+  
+        String label;
+        if (m_isEnum) {
+            label = m_plotPanel.getEnumValueX((int) Math.round(x), false); //JPM.WART
+            if (label == null) {
+                label = " ";
+            }
+        } else {
+            // round x
+            double xDisplay = (m_log) ? StrictMath.log10(x) : x;
+            if (fractionalDigits > 0) {
+                xDisplay = StrictMath.round(xDisplay * multForRounding) / multForRounding;
+            }
+
+            DecimalFormat df = selectDecimalFormat(fractionalDigits + 2, integerDigits);
+            
+            
+            
+            
+            label = df.format(xDisplay);
+
+        }
+        
+        return label;
 
     }
 

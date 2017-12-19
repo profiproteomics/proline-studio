@@ -27,6 +27,10 @@ public class PointMarker extends AbstractMarker{
         m_markerColor = color;
     }
     
+    public void setCoordinates(AbstractCoordinates coordinates) {
+        m_coordinates = coordinates;
+    }
+    
     public AbstractCoordinates getCoordinates() {
         return m_coordinates;
     }

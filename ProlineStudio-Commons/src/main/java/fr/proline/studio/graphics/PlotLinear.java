@@ -98,6 +98,8 @@ public class PlotLinear extends PlotXYAbstract {
         
         m_parameterListArray = new  ArrayList<>(1);
         m_parameterListArray.add(colorParameterList);
+        
+        
     }
 
     @Override
@@ -263,6 +265,13 @@ public class PlotLinear extends PlotXYAbstract {
         return d2;
     }
 
+    public double[] getDataX() {
+        return m_dataX;
+    }
+    public double[] getDataY() {
+        return m_dataY;
+    }
+    
     /**
      * Return the  distance from a point to a segment
      *     
@@ -693,9 +702,9 @@ public class PlotLinear extends PlotXYAbstract {
 
     }
 
-    private boolean isPaintMarker() {
-        return m_isPaintMarker;
-    }
+    
+
+    
 
     @Override
     public boolean getDoubleBufferingPolicy() {

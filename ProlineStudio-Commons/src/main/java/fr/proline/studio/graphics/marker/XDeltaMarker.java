@@ -3,6 +3,7 @@ package fr.proline.studio.graphics.marker;
 import fr.proline.studio.graphics.BasePlotPanel;
 import fr.proline.studio.graphics.XAxis;
 import fr.proline.studio.graphics.YAxis;
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
 
@@ -26,6 +27,11 @@ public class XDeltaMarker extends AbstractMarker {
         m_y = y;
     }
     
+    public void set(double x1, double x2) {
+        m_x1 = x1;
+        m_x2 = x2;
+    }
+    
     @Override
     public void paint(Graphics2D g) {
 
@@ -43,6 +49,7 @@ public class XDeltaMarker extends AbstractMarker {
             
 
         g.setColor(Color.black);
+        g.setStroke(new BasicStroke(1));
         g.drawLine(x1, y, x2, y);
 
         final int ARROW_SIZE = 3;

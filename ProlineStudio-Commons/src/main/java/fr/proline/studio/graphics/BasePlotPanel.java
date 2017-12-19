@@ -3,6 +3,7 @@ package fr.proline.studio.graphics;
 import fr.proline.studio.graphics.Axis.EnumXInterface;
 import fr.proline.studio.graphics.Axis.EnumYInterface;
 import fr.proline.studio.graphics.cursor.AbstractCursor;
+import fr.proline.studio.graphics.measurement.AbstractMeasurement;
 import fr.proline.studio.parameter.ParameterList;
 import fr.proline.studio.parameter.SettingsInterface;
 import fr.proline.studio.utils.StringUtils;
@@ -16,6 +17,7 @@ import java.awt.Point;
 import java.awt.Polygon;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
+import java.awt.Shape;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
@@ -273,6 +275,7 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
         }
 
         // set clipping area for zooming and selecting
+         Shape previousClipping = g2d.getClip();
         if ((m_xAxis!=null) && (m_yAxis!=null) && (m_xAxis.displayAxis()) && (m_yAxis.displayAxis())) {
             int clipX = m_xAxis.valueToPixel(m_xAxis.getMinValue());
             int clipWidth = m_xAxis.valueToPixel(m_xAxis.getMaxValue()) - clipX;
@@ -288,6 +291,8 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
             // show coord
             paintCoord(g2d);
         }
+        
+        g2d.setClip(previousClipping);
         
 //        fps.stopFrame();
     }
@@ -608,13 +613,13 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
             if (m_xAxis != null && m_yAxis != null && m_xAxis.inside(x, y)) {
                 m_xAxis.setSelected(true);
                 m_yAxis.setSelected(false);
-                JPopupMenu popup = createAxisPopup(m_xAxis);
+                JPopupMenu popup = createAxisPopup(m_xAxis, x, y);
                 popup.show((JComponent) e.getSource(), x, y);
                 mustRepaint = true;
             } else if (m_xAxis != null && m_yAxis != null && m_yAxis.inside(x, y)) {
                 m_xAxis.setSelected(false);
                 m_yAxis.setSelected(true);
-                JPopupMenu popup = createAxisPopup(m_yAxis);
+                JPopupMenu popup = createAxisPopup(m_yAxis, x ,y);
                 popup.show((JComponent) e.getSource(), x, y);
                 mustRepaint = true;
             }
@@ -913,11 +918,25 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
     private final StringBuilder m_sbTooltip = new StringBuilder();
 
     
-    private JPopupMenu createAxisPopup(final Axis axis) {
+    private JPopupMenu createAxisPopup(final Axis axis, int x, int y) {
+        
+        boolean isXAxis = axis.equals(m_xAxis);
+        
         JPopupMenu popup = new JPopupMenu();
         popup.add(new LogAction(axis));
         popup.add(new GridAction(axis.equals(m_xAxis)));
         popup.add(new RangeAction(axis, axis.equals(m_xAxis)));
+        
+        ArrayList<AbstractMeasurement> measurements = new ArrayList<>();
+        for (PlotBaseAbstract plot : m_plots) {
+            plot.getMeasurements(measurements, isXAxis ? AbstractMeasurement.MeasurementType.X_AXIS_POPUP : AbstractMeasurement.MeasurementType.Y_AXIS_POPUP);
+        }
+        if (measurements.size()>0) {
+            popup.addSeparator();
+            for (AbstractMeasurement measurement : measurements) {
+                popup.add(new MeasurementAction(measurement, x, y));
+            }
+        }
         
         popup.addPopupMenuListener(new PopupMenuListener() {
 
@@ -1012,6 +1031,29 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
         fireUpdateAxisRange(oldMinX, oldMaxX, m_xAxis.getMinValue(), m_xAxis.getMaxValue(), oldMinY,oldMaxY, m_yAxis.getMinValue(), m_yAxis.getMaxValue() );
    }
    
+    public class MeasurementAction extends AbstractAction {
+
+        private final AbstractMeasurement m_measurement;
+        private int m_x;
+        private int m_y;
+
+        public MeasurementAction(AbstractMeasurement measurement, int x, int y) {
+            super(measurement.getName());
+            m_measurement = measurement;
+            m_x = x;
+            m_y = y;
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            m_measurement.applyMeasurement(m_x, m_y);
+        }
+        
+        @Override
+        public boolean isEnabled() {
+            return m_measurement.canApply();
+        }
+    }
    
     public class LogAction extends AbstractAction {
 
@@ -1059,9 +1101,7 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
         }
 
     }
-    
 
-    
     public class RangeAction extends AbstractAction {
 
          private final Axis m_axis;

@@ -24,12 +24,18 @@ import org.openide.util.NbPreferences;
  * @author AK249877
  */
 public class WorkingSetModel implements TreeModel {
+    
+    public enum JSONObjectType {
+        WORKING_SET, ENTRY
+    }
 
     private final DefaultMutableTreeNode m_root;
 
     private final HashSet<TreeModelListener> m_listeners; // Declare the listeners vector
     
-    private final HashMap<String, ArrayList<WorkingSet>> m_workingSetEntryIndex;
+    private final HashMap<String, ArrayList<WorkingSet>> m_index;
+    
+    private final HashMap<String, JSONObject> m_workingSets, m_workingSetEntries;
     
     private boolean m_displayFilename;
 
@@ -39,7 +45,10 @@ public class WorkingSetModel implements TreeModel {
         
         m_displayFilename = NbPreferences.root().get(ApplicationSettingsDialog.MS_FILES_SETTINGS+"."+ApplicationSettingsDialog.WORKING_SET_ENTRY_NAMING_KEY, ApplicationSettingsDialog.FILENAME).equalsIgnoreCase(ApplicationSettingsDialog.FILENAME);
         
-        m_workingSetEntryIndex = new HashMap<String, ArrayList<WorkingSet>>();
+        m_index = new HashMap<String, ArrayList<WorkingSet>>();
+        
+        m_workingSets = new HashMap<String, JSONObject>();
+        m_workingSetEntries = new HashMap<String, JSONObject>();
     }
 
     @Override
@@ -64,6 +73,8 @@ public class WorkingSetModel implements TreeModel {
             JSONArray entries = (JSONArray) workingSetEntry.get("entries");
 
             WorkingSet newWorkingSet = new WorkingSet(name, description, entries);
+            
+            m_workingSets.put(name, workingSetEntry);
 
             DefaultMutableTreeNode childNode = new DefaultMutableTreeNode(newWorkingSet);
 
@@ -78,7 +89,7 @@ public class WorkingSetModel implements TreeModel {
             JSONObject entry = (JSONObject) workingSet.getEntries().get(index);
 
             String filename = (String) entry.get("filename");
-
+            
             String stringLocation = (String) entry.get("location");
             Location location = null;
             if (stringLocation.equalsIgnoreCase("LOCAL")) {
@@ -91,12 +102,14 @@ public class WorkingSetModel implements TreeModel {
 
             WorkingSetEntry newEntry = new WorkingSetEntry(filename, path, location, workingSet, (m_displayFilename) ? WorkingSetEntry.Labeling.DISPLAY_FILENAME : WorkingSetEntry.Labeling.DISPLAY_PATH);
             
-            if(m_workingSetEntryIndex.containsKey(path)){
-                m_workingSetEntryIndex.get(path).add(workingSet);       
+            m_workingSetEntries.put(path, entry);
+            
+            if(m_index.containsKey(path)){
+                m_index.get(path).add(workingSet);       
             }else{
                 ArrayList<WorkingSet> list = new ArrayList<WorkingSet>();
                 list.add(workingSet);
-                m_workingSetEntryIndex.put(path, list);
+                m_index.put(path, list);
             }
 
             DefaultMutableTreeNode childNode = new DefaultMutableTreeNode(newEntry);
@@ -220,7 +233,21 @@ public class WorkingSetModel implements TreeModel {
     
     
     public HashMap<String, ArrayList<WorkingSet>> getEntriesIndex(){
-        return m_workingSetEntryIndex;
+        return m_index;
+    }
+    
+    public void updateJSONObject(JSONObjectType type, String key, String objectKey, String objectNewValue){
+        if(type == JSONObjectType.WORKING_SET){
+            JSONObject workingSet = m_workingSets.get(key);
+            if(workingSet!=null){
+                workingSet.put(objectKey, objectNewValue);
+            }
+        }else if(type == JSONObjectType.ENTRY){
+            JSONObject entry = m_workingSetEntries.get(key);
+            if(entry!=null){
+                entry.put(objectKey, objectNewValue);
+            }
+        }
     }
 
 }

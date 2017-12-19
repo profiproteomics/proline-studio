@@ -47,13 +47,6 @@ public class MzdbDownloadBatch implements Runnable {
         m_localURL = temp.toString();
     }
 
-    public MzdbDownloadBatch(ArrayList<File> files, String localURL, String root) {
-        m_files = files;
-        m_root = root;
-        m_localURL = localURL;
-        m_downloadList = new ArrayList<MsListenerDownloadParameter>();
-    }
-
     public MzdbDownloadBatch(String localURL, String root, ArrayList<WorkingSetEntry> entries) {
         m_entries = entries;
         m_root = root;

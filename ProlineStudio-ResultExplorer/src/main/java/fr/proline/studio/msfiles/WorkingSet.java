@@ -17,8 +17,8 @@ import org.json.simple.JSONObject;
  */
 public class WorkingSet {
 
-    private final String m_name;
-    private final String m_description;
+    private String m_name;
+    private String m_description;
     private final JSONArray m_entries;
     private HashSet<String> m_index;
 
@@ -30,8 +30,16 @@ public class WorkingSet {
         updateIndex();
     }
 
+    public void setName(String name){
+        m_name = name;
+    }
+    
     public String getName() {
         return m_name;
+    }
+    
+    public void setDescription(String description){
+        m_description = description;
     }
 
     public String getDescription() {

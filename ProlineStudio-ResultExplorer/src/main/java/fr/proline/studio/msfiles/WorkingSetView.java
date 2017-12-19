@@ -26,6 +26,7 @@ import java.util.HashSet;
 import javax.swing.BorderFactory;
 import javax.swing.JComponent;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
@@ -50,7 +51,7 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
 
     private WorkingSetModel m_workingSetModel;
     private JTree m_tree;
-    private JMenuItem m_addWorkingSet, m_removeWorkingSet, m_addWorkingSetEntry, m_removeWorkingSetEntry, m_viewMzdb, m_detectPeakels;
+    private JMenuItem m_addWorkingSet, m_renameWorkingSet, m_removeWorkingSet, m_addWorkingSetEntry, m_removeWorkingSetEntry, m_viewMzdb, m_detectPeakels;
     private JPopupMenu m_popupMenu;
     private ActionListener m_viewMzdbAction;
     private WorkingSetRoot m_root;
@@ -117,11 +118,10 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
                         } else {
                             if (m_downloadIndex.contains(entry.getFile().getAbsolutePath())) {
                                 setIcon(IconManager.getIcon(IconManager.IconType.ARROW_DOWN));
-                            }else{
+                            } else {
                                 setIcon(IconManager.getIcon(IconManager.IconType.SPECTRUM_EMISSION));
                             }
                         }
-                        
 
                     }
                 }
@@ -347,6 +347,29 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
         });
         popupMenu.add(m_addWorkingSet);
 
+        m_renameWorkingSet = new JMenuItem("Rename working set");
+        m_renameWorkingSet.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+                String message = "Rename working set";
+                String text = JOptionPane.showInputDialog(null, message);
+                if (text != null) {
+                    if (m_selectedWorkingSets.size() == 1) {
+                        m_workingSetModel.updateJSONObject(WorkingSetModel.JSONObjectType.WORKING_SET, m_selectedWorkingSets.get(0).getName(), "name", text);
+                        m_selectedWorkingSets.get(0).setName(text);                       
+                        DefaultMutableTreeNode root = (DefaultMutableTreeNode) m_workingSetModel.getRoot();
+                        WorkingSetRoot workingSetRoot = (WorkingSetRoot) root.getUserObject();
+                        WorkingSetUtil.saveJSON(workingSetRoot.getWorkingSets());
+                        reloadTree();
+                        resetTreeState();
+                    }
+                }
+            }
+
+        });
+        popupMenu.add(m_renameWorkingSet);
+
         m_removeWorkingSet = new JMenuItem("Remove a working set");
         m_removeWorkingSet.addActionListener(new ActionListener() {
 
@@ -361,6 +384,7 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
                 for (int i = 0; i < m_selectedWorkingSets.size(); i++) {
                     if (workingSetRoot.removeWorkingSet(m_selectedWorkingSets.get(i).getName())) {
                         success = true;
+                        break;
                     }
                 }
 
@@ -448,6 +472,10 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
             m_addWorkingSet.setEnabled(true);
         }
 
+        if (m_selectedRoot == null && m_selectedWorkingSetEntries.isEmpty() && m_selectedWorkingSets.size() == 1) {
+            m_renameWorkingSet.setEnabled(true);
+        }
+
         if (m_selectedRoot == null && m_selectedWorkingSets.size() == 1 && m_selectedWorkingSetEntries.isEmpty()) {
             m_addWorkingSetEntry.setEnabled(true);
         }
@@ -480,6 +508,7 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
 
     private void setPopupEnabled(boolean b) {
         m_addWorkingSet.setEnabled(b);
+        m_renameWorkingSet.setEnabled(b);
         m_removeWorkingSet.setEnabled(b);
         m_addWorkingSetEntry.setEnabled(b);
         m_removeWorkingSetEntry.setEnabled(b);

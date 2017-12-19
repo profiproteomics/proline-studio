@@ -14,6 +14,10 @@ public class DataCoordinates extends AbstractCoordinates {
     private double m_dataY;
     
     public DataCoordinates(double dataX, double dataY) {
+        setDataCoordinates(dataX, dataY);
+    }
+    
+    public final void setDataCoordinates(double dataX, double dataY) {
         m_dataX = dataX;
         m_dataY = dataY;
     }

@@ -107,6 +107,20 @@ public class LabelMarker extends AbstractMarker implements MoveableInterface {
         m_drawLineToAnchor = (m_orientationX != ORIENTATION_XY_MIDDLE);
     }
 
+    public void setCoordinates(AbstractCoordinates coordinates) {
+        m_anchorMarker.setCoordinates(coordinates);
+        m_firstPaint = true;
+    }
+    
+    public AbstractCoordinates getCoordinates() {
+        return m_anchorMarker.getCoordinates();
+    }
+    
+    public void setLabel(String valueLabel) {
+        m_valueLabel = valueLabel;
+        m_firstPaint = true;
+    }
+    
     public void setZoomFactor(double zoomFactor) {
         m_zoomFactor = zoomFactor;
     }
@@ -199,8 +213,11 @@ public class LabelMarker extends AbstractMarker implements MoveableInterface {
             if (m_orientationX == ORIENTATION_X_RIGHT) {
                 xBox = pixelX + deltaX;
                 yBox = pixelY + deltaY - stringHeight / 2 - DELTA;
-            } else if ((m_orientationX == ORIENTATION_X_LEFT) || (m_orientationX == ORIENTATION_XY_MIDDLE)) {
+            } else if (m_orientationX == ORIENTATION_X_LEFT) {
                 xBox = pixelX + deltaX - stringWidth ;
+                yBox = pixelY + deltaY - stringHeight / 2 - DELTA;
+            } else if (m_orientationX == ORIENTATION_XY_MIDDLE) {
+                xBox = pixelX + deltaX - stringWidth / 2 ;
                 yBox = pixelY + deltaY - stringHeight / 2 - DELTA;
             }
             

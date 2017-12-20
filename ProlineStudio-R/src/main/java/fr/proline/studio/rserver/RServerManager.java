@@ -1,8 +1,10 @@
 package fr.proline.studio.rserver;
 
+import fr.proline.studio.utils.StudioExceptions;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -135,6 +137,7 @@ public class RServerManager {
             f = new File(pathToExe);
             if (!f.exists()) {
                 LoggerFactory.getLogger("ProlineStudio.R").error("R.exe not found: " + pathToExe);
+                StudioExceptions.notify("R.exe not found", new FileNotFoundException(pathToExe));
                 return false;
             }
         }
@@ -163,6 +166,7 @@ public class RServerManager {
             // linux and MacIntosh ?
 
             LoggerFactory.getLogger("ProlineStudio.R").error("R Server not available for Linux or MacIntosh");
+            StudioExceptions.notify("R Server not available for Linux or MacIntosh", new FileNotFoundException());
             return false;
             // linux
             //command = "echo \"" + todo + "\"|" + cmd + " " + rargs;
@@ -234,6 +238,7 @@ public class RServerManager {
         } catch (RserveException e) {
             if (log) {
                 LoggerFactory.getLogger("ProlineStudio.Commons").error(getClass().getSimpleName() + " failed", e);
+                StudioExceptions.notify(e.getMessage(), e);
             }
             m_connection = null;
             throw new RServerException(e.getMessage());

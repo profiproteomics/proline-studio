@@ -76,13 +76,13 @@ public class QuantiFilterModel extends FilterTableModel   {
         if (m_option == AT_LEAST_ONE_GROUP) {
             int prevGroup = -1;
             int count = 0;
-            boolean trueForOneGroup = false;
             for (int i=0;i<m_groupIndex.length;i++) {
                 int groupCur = m_groupIndex[i];
                 if ((prevGroup!=-1) && (groupCur!=prevGroup)) {
                     if (count>=m_threshold) {
-                        trueForOneGroup = true;
                         break;
+                    } else {
+                        count = 0;
                     }
                 }
                 prevGroup = groupCur;
@@ -92,7 +92,7 @@ public class QuantiFilterModel extends FilterTableModel   {
                     count++;
                 }
             }
-            return trueForOneGroup;
+            return (count>=m_threshold);
         }
         
         return true; // should never happen

@@ -36,7 +36,7 @@
 		<dependency>
             <groupId>org.cran</groupId>
             <artifactId>r</artifactId>
-            <version>3.3.0_1.4.3</version>
+            <version>3.4.3_1.10.1</version>
             <type>zip</type>
             <classifier>${os.classifier}</classifier>
         </dependency>

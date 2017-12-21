@@ -148,7 +148,7 @@ public class RServerManager {
         String operatingSystem = System.getProperty("os.name");
         if (operatingSystem != null && operatingSystem.startsWith("Windows")) {
 
-            String[] cmds = {pathToExe, "-e", "\"library(Rserve);Rserve(TRUE,args='--no-save --slave')\"", "--no-save", "--slave"};
+            String[] cmds = {pathToExe, "-e", "\"library(Rserve);Rserve(TRUE,args='--no-save')\"", "--no-save"};
             m_RProcess = Runtime.getRuntime().exec(cmds);
 
             // error stream

@@ -1047,6 +1047,7 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
         @Override
         public void actionPerformed(ActionEvent e) {
             m_measurement.applyMeasurement(m_x, m_y);
+            repaint();
         }
         
         @Override

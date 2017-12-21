@@ -13,7 +13,9 @@ public class IntegralMeasurement extends DeltaXMeasurement {
     public IntegralMeasurement(PlotBaseAbstract plot) {
         super(plot);
 
-        DeltaXMeasurement.AlgorithmMeasurement widthAlgorithm = new DeltaXMeasurement.AlgorithmMeasurement() {
+        
+        
+        DeltaXMeasurement.AlgorithmMeasurement integralAlgorithm = new DeltaXMeasurement.AlgorithmMeasurement() {
             @Override
             public String getName() {
                 return "Measurement Integral";
@@ -31,7 +33,13 @@ public class IntegralMeasurement extends DeltaXMeasurement {
 
         };
 
-        setAlgorithm(widthAlgorithm);
+        setAlgorithm(integralAlgorithm);
+    }
+    
+    @Override
+    public void applyMeasurement(int x, int y) {
+        super.applyMeasurement(x, y);
+
     }
 
     private double calculateIntegral(double[] dataX, double[] dataY, double xStartD, double xEndD) {

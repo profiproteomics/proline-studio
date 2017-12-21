@@ -2,12 +2,15 @@ package fr.proline.studio.graphics.measurement;
 
 import fr.proline.studio.graphics.BasePlotPanel;
 import fr.proline.studio.graphics.PlotBaseAbstract;
+import fr.proline.studio.graphics.PlotLinear;
 import fr.proline.studio.graphics.XAxis;
 import fr.proline.studio.graphics.YAxis;
 import fr.proline.studio.graphics.cursor.VerticalCursor;
 import fr.proline.studio.graphics.marker.LabelMarker;
+import fr.proline.studio.graphics.marker.WaveformAreaMarker;
 import fr.proline.studio.graphics.marker.XDeltaMarker;
 import fr.proline.studio.graphics.marker.coordinates.DataCoordinates;
+import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -21,8 +24,9 @@ public class DeltaXMeasurement extends AbstractMeasurement {
     private VerticalCursor m_verticalCursor2;
     private XDeltaMarker m_horizontalDeltaMarker;
     private LabelMarker m_resultLabelMarker;
+    protected WaveformAreaMarker m_waveformAreaMarker = null;
     
-    private PlotBaseAbstract m_plot;
+    protected PlotBaseAbstract m_plot;
     private AlgorithmMeasurement m_algorithm;
     
     
@@ -33,7 +37,7 @@ public class DeltaXMeasurement extends AbstractMeasurement {
     public final void setAlgorithm(AlgorithmMeasurement algorithm) {
         m_algorithm = algorithm;
     }
-
+    
     @Override
     public void applyMeasurement(int x, int y) {
         BasePlotPanel basePlotPanel = m_plot.getBasePlotPanel();
@@ -65,10 +69,17 @@ public class DeltaXMeasurement extends AbstractMeasurement {
         m_verticalCursor2 = new VerticalCursor(basePlotPanel, x2);
 
         m_horizontalDeltaMarker = new XDeltaMarker(basePlotPanel, x1, x2, (maxY - minY) / 2);
+        
+        if (m_plot instanceof PlotLinear) {
+            m_waveformAreaMarker = new WaveformAreaMarker(basePlotPanel, ((PlotLinear) m_plot), new Color(196,196,196,128),  x1, x2);
+        }
         m_resultLabelMarker = new LabelMarker(basePlotPanel, new DataCoordinates((x1 + x2) / 2, (maxY - minY) / 2), res, LabelMarker.ORIENTATION_XY_MIDDLE, LabelMarker.ORIENTATION_Y_TOP);
 
         m_plot.addCursor(m_verticalCursor1);
         m_plot.addCursor(m_verticalCursor2);
+        if (m_waveformAreaMarker != null) {
+            m_plot.addMarker(m_waveformAreaMarker);
+        }
         m_plot.addMarker(m_horizontalDeltaMarker);
         m_plot.addMarker(m_resultLabelMarker);
 
@@ -88,6 +99,9 @@ public class DeltaXMeasurement extends AbstractMeasurement {
                 coordinates.setDataCoordinates((x1 + x2) / 2, (maxY - minY) / 2);
 
                 m_horizontalDeltaMarker.set(x1, x2);
+                if (m_waveformAreaMarker != null) {
+                    m_waveformAreaMarker.set(x1, x2);
+                }
             }
 
         };

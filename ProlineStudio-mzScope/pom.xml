@@ -14,7 +14,7 @@
     <name>ProlineStudio-mzScope</name>
     <description>Proline module to display mzdb files</description>
     
-    <properties>
+    <properties> 
         <maven.compiler.source>1.7</maven.compiler.source>
         <maven.compiler.target>1.7</maven.compiler.target> 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -37,7 +37,7 @@
         <dependency>
             <groupId>fr.profi</groupId>
             <artifactId>mzdb-processing</artifactId>
-            <version>1.1.0-SNAPSHOT</version>
+            <version>0.9.0-SNAPSHOT</version>
             <exclusions>
                 <exclusion>
                     <groupId>joda-time</groupId>

@@ -24,11 +24,11 @@ public class WorkingSetEntriesTransferable implements Transferable, Serializable
 
     private final ArrayList<WorkingSetEntry> m_selectedEntries;
 
-    public WorkingSetEntriesTransferable(ArrayList<WorkingSetEntry> selectedFiles) {
-        m_selectedEntries = selectedFiles;
+    public WorkingSetEntriesTransferable(ArrayList<WorkingSetEntry> selectedEntries) {
+        m_selectedEntries = selectedEntries;
     }
 
-    public ArrayList<WorkingSetEntry> getFiles() {
+    public ArrayList<WorkingSetEntry> getEntries() {
         return m_selectedEntries;
     }
 

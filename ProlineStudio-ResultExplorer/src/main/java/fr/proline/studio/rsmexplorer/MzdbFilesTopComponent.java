@@ -53,7 +53,7 @@ public final class MzdbFilesTopComponent extends TopComponent {
         m_explorer = new MsFilesExplorer();
         m_tabbedPane.add("Explorer", m_explorer);
 
-        m_tabbedPane.add("Working Sets", new WorkingSetView());
+        m_tabbedPane.add("Working Sets", WorkingSetView.getWorkingSetView());
         add(m_tabbedPane, BorderLayout.CENTER);
 
         if (!ServerConnectionManager.getServerConnectionManager().isNotConnected()) {

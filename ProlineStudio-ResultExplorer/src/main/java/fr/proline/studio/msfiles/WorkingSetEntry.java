@@ -7,12 +7,13 @@ package fr.proline.studio.msfiles;
 
 import fr.proline.studio.dpm.serverfilesystem.ServerFile;
 import java.io.File;
+import java.io.Serializable;
 
 /**
  *
  * @author AK249877
  */
-public class WorkingSetEntry {
+public class WorkingSetEntry implements Serializable {
 
     public enum Location {
 

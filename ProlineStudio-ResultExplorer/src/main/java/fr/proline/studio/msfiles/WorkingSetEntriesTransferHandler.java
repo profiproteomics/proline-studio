@@ -6,12 +6,15 @@
 package fr.proline.studio.msfiles;
 
 import java.awt.datatransfer.Transferable;
+import java.awt.datatransfer.UnsupportedFlavorException;
+import java.io.IOException;
 import java.util.ArrayList;
 import javax.swing.JComponent;
 import javax.swing.JTree;
 import javax.swing.TransferHandler;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
+import org.openide.util.Exceptions;
 
 /**
  *
@@ -19,8 +22,18 @@ import javax.swing.tree.TreePath;
  */
 public class WorkingSetEntriesTransferHandler extends TransferHandler {
 
+    private WorkingSetModel m_model;
+
     public WorkingSetEntriesTransferHandler() {
-        System.out.println("test");
+        ;
+    }
+
+    public WorkingSetEntriesTransferHandler(WorkingSetModel model) {
+        m_model = model;
+    }
+
+    public void setWorkingSetModel(WorkingSetModel model) {
+        m_model = model;
     }
 
     @Override
@@ -70,9 +83,14 @@ public class WorkingSetEntriesTransferHandler extends TransferHandler {
         support.setShowDropLocation(true);
 
         if (support.isDataFlavorSupported(WorkingSetEntriesTransferable.WorkingSetEntries_FLAVOR)) {
-            DropLocation dropLocation = support.getDropLocation();
-            if (dropLocation instanceof JTree.DropLocation) {
-                return true;
+            if (support.getDropLocation() instanceof JTree.DropLocation) {
+
+                JTree.DropLocation location = (JTree.DropLocation) support.getDropLocation();
+                TreePath path = location.getPath();
+                DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getLastPathComponent();
+                if (node.getUserObject() instanceof WorkingSet) {
+                    return true;
+                }
             }
         }
 
@@ -82,31 +100,42 @@ public class WorkingSetEntriesTransferHandler extends TransferHandler {
     @Override
     public boolean importData(TransferHandler.TransferSupport support) {
 
-        System.out.println("test");
-        /*
-         try {
+        try {
 
-         FilesTransferable transferable = (FilesTransferable) support.getTransferable().getTransferData(FilesTransferable.Files_FLAVOR);
-         ArrayList<File> files = transferable.getFiles();
+            WorkingSetEntriesTransferable transferable = (WorkingSetEntriesTransferable) support.getTransferable().getTransferData(WorkingSetEntriesTransferable.WorkingSetEntries_FLAVOR);
 
-         if (support.getComponent() instanceof JTree) {
+            if (support.getComponent() instanceof JTree) {
 
-         JTree.DropLocation dropLocation = (JTree.DropLocation) support.getDropLocation();
+                ArrayList<WorkingSetEntry> entries = transferable.getEntries();
 
-         TreePath dropPath = dropLocation.getPath();
+                JTree.DropLocation dropLocation = (JTree.DropLocation) support.getDropLocation();
 
-         MzdbDownloadBatch downloadBatch = new MzdbDownloadBatch(files, dropPath, MzdbFilesTopComponent.getExplorer().getLocalFileSystemView().getSelectedRoot());
-         Thread downloadThread = new Thread(downloadBatch);
-         downloadThread.start();
+                TreePath dropPath = dropLocation.getPath();
 
-         return true;
+                DefaultMutableTreeNode node = (DefaultMutableTreeNode) dropPath.getLastPathComponent();
 
-         }
+                if (node.getUserObject() instanceof WorkingSet) {
+                    WorkingSet set = (WorkingSet) node.getUserObject();
 
-         } catch (UnsupportedFlavorException | IOException ex) {
-         Exceptions.printStackTrace(ex);
-         }
-         */
+                    if (m_model != null) {
+                        for (int i = 0; i < entries.size(); i++) {
+                            set.addEntry(m_model.getEntiesObjects().get(entries.get(i).getPath()));
+                        }
+                    } else {
+                        for(int i=0; i<entries.size(); i++){
+                            set.addEntry(entries.get(i).getPath(), entries.get(i).getLocation());
+                        }
+                    }
+                }
+
+                return true;
+
+            }
+
+        } catch (UnsupportedFlavorException | IOException ex) {
+            Exceptions.printStackTrace(ex);
+        }
+
         return false;
 
     }

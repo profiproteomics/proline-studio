@@ -15,6 +15,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -49,6 +50,8 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
         VIEW, DETECT_PEAKELS
     }
 
+    private static WorkingSetView m_singleton = null;
+
     private WorkingSetModel m_workingSetModel;
     private JTree m_tree;
     private JMenuItem m_addWorkingSet, m_renameWorkingSet, m_changeDescriptionAtWorkingSet, m_removeWorkingSet, m_addWorkingSetEntry, m_removeWorkingSetEntry, m_viewMzdb, m_detectPeakels;
@@ -63,12 +66,18 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
 
     private HashSet<String> m_downloadIndex;
 
-    public WorkingSetView() {
-        initComponents();
-        resetTreeState();
+    public static WorkingSetView getWorkingSetView() {
+        if (m_singleton == null) {
+            m_singleton = new WorkingSetView();
+        }
+        return m_singleton;
     }
 
-    public void initComponents() {
+    private WorkingSetView() {
+        initComponents();
+    }
+
+    private void initComponents() {
 
         m_selectedWorkingSets = new ArrayList<WorkingSet>();
         m_selectedWorkingSetEntries = new ArrayList<WorkingSetEntry>();
@@ -93,7 +102,7 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
 
         m_workingSetModel = new WorkingSetModel(m_root);
         m_tree = new JTree(m_workingSetModel);
-        
+
         m_tree.setTransferHandler(new WorkingSetEntriesTransferHandler());
         m_tree.setDragEnabled(true);
 
@@ -163,6 +172,8 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
 
         add(scrollPane, c);
 
+        resetTreeState();
+        
     }
 
     @Override
@@ -340,11 +351,8 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
                 AddWorkingSetDialog dialog = AddWorkingSetDialog.getDialog(null, m_root);
                 dialog.setLocationRelativeTo(null);
                 dialog.setVisible(true);
-                DefaultMutableTreeNode root = (DefaultMutableTreeNode) m_workingSetModel.getRoot();
-                reloadTree();
-                WorkingSetRoot workingSetRoot = (WorkingSetRoot) root.getUserObject();
-                WorkingSetUtil.saveJSON(workingSetRoot.getWorkingSets());
-                resetTreeState();
+
+                reloadAndSave();
             }
 
         });
@@ -360,19 +368,17 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
                 if (text != null) {
                     if (m_selectedWorkingSets.size() == 1) {
                         m_workingSetModel.updateJSONObject(WorkingSetModel.JSONObjectType.WORKING_SET, m_selectedWorkingSets.get(0).getName(), "name", text);
-                        m_selectedWorkingSets.get(0).setName(text);                       
-                        DefaultMutableTreeNode root = (DefaultMutableTreeNode) m_workingSetModel.getRoot();
-                        WorkingSetRoot workingSetRoot = (WorkingSetRoot) root.getUserObject();
-                        WorkingSetUtil.saveJSON(workingSetRoot.getWorkingSets());
-                        reloadTree();
-                        resetTreeState();
+                        m_selectedWorkingSets.get(0).setName(text);
+
+                        reloadAndSave();
+
                     }
                 }
             }
 
         });
         popupMenu.add(m_renameWorkingSet);
-        
+
         m_changeDescriptionAtWorkingSet = new JMenuItem("Change description");
         m_changeDescriptionAtWorkingSet.addActionListener(new ActionListener() {
 
@@ -383,18 +389,15 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
                 if (text != null) {
                     if (m_selectedWorkingSets.size() == 1) {
                         m_workingSetModel.updateJSONObject(WorkingSetModel.JSONObjectType.WORKING_SET, m_selectedWorkingSets.get(0).getName(), "description", text);
-                        m_selectedWorkingSets.get(0).setDescription(text);                       
-                        DefaultMutableTreeNode root = (DefaultMutableTreeNode) m_workingSetModel.getRoot();
-                        WorkingSetRoot workingSetRoot = (WorkingSetRoot) root.getUserObject();
-                        WorkingSetUtil.saveJSON(workingSetRoot.getWorkingSets());
-                        reloadTree();
-                        resetTreeState();
+                        m_selectedWorkingSets.get(0).setDescription(text);
+
+                        reloadAndSave();
+
                     }
                 }
             }
         });
         popupMenu.add(m_changeDescriptionAtWorkingSet);
-        
 
         m_removeWorkingSet = new JMenuItem("Remove a working set");
         m_removeWorkingSet.addActionListener(new ActionListener() {
@@ -415,7 +418,7 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
                 }
 
                 if (success) {
-                    reloadTree();
+                    reloadModel();
                     resetTreeState();
                     WorkingSetUtil.saveJSON(workingSetRoot.getWorkingSets());
                 }
@@ -438,11 +441,7 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
 
                 m_tree.expandPath(pathToExpand);
 
-                reloadTree();
-                resetTreeState();
-                DefaultMutableTreeNode root = (DefaultMutableTreeNode) m_workingSetModel.getRoot();
-                WorkingSetRoot workingSetRoot = (WorkingSetRoot) root.getUserObject();
-                WorkingSetUtil.saveJSON(workingSetRoot.getWorkingSets());
+                reloadAndSave();
             }
 
         });
@@ -470,11 +469,7 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
                     }
 
                     if (success) {
-                        DefaultMutableTreeNode root = (DefaultMutableTreeNode) m_workingSetModel.getRoot();
-                        WorkingSetRoot workingSetRoot = (WorkingSetRoot) root.getUserObject();
-                        reloadTree();
-                        resetTreeState();
-                        WorkingSetUtil.saveJSON(workingSetRoot.getWorkingSets());
+                        reloadAndSave();
                     }
 
                 }
@@ -501,7 +496,7 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
         if (m_selectedRoot == null && m_selectedWorkingSetEntries.isEmpty() && m_selectedWorkingSets.size() == 1) {
             m_renameWorkingSet.setEnabled(true);
         }
-        
+
         if (m_selectedRoot == null && m_selectedWorkingSetEntries.isEmpty() && m_selectedWorkingSets.size() == 1) {
             m_changeDescriptionAtWorkingSet.setEnabled(true);
         }
@@ -619,7 +614,7 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
         return entries;
     }
 
-    private void reloadTree() {
+    private void reloadModel() {
         if (m_workingSetModel != null) {
             m_tree.setModel(null);
             m_workingSetModel = new WorkingSetModel(m_root);
@@ -628,7 +623,7 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
     }
 
     private void replaceEntry(File oldFile, File newFile) {
-        HashMap<String, ArrayList<WorkingSet>> index = m_workingSetModel.getEntriesIndex();
+        HashMap<String, ArrayList<WorkingSet>> index = m_workingSetModel.getAssociationsIndex();
         if (index.containsKey(oldFile.getAbsolutePath())) {
             ArrayList<WorkingSet> list = index.get(oldFile.getAbsolutePath());
             for (int i = 0; i < list.size(); i++) {
@@ -665,11 +660,7 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
             @Override
             public void verificationPerformed(ArrayList<MsListenerParameter> list) {
 
-                reloadTree();
-                resetTreeState();
-                DefaultMutableTreeNode root = (DefaultMutableTreeNode) m_workingSetModel.getRoot();
-                WorkingSetRoot workingSetRoot = (WorkingSetRoot) root.getUserObject();
-                WorkingSetUtil.saveJSON(workingSetRoot.getWorkingSets());
+                reloadAndSave();
 
                 ArrayList<File> verifiedFiles = new ArrayList<File>();
 
@@ -701,6 +692,14 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
         batch.addMsListener(listener);
         Thread thread = new Thread(batch);
         thread.start();
+    }
+
+    public void reloadAndSave() {
+        reloadModel();
+        resetTreeState();
+        DefaultMutableTreeNode root = (DefaultMutableTreeNode) m_workingSetModel.getRoot();
+        WorkingSetRoot workingSetRoot = (WorkingSetRoot) root.getUserObject();
+        WorkingSetUtil.saveJSON(workingSetRoot.getWorkingSets());
     }
 
 }

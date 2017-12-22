@@ -35,7 +35,7 @@ public class WorkingSetModel implements TreeModel {
     
     private final HashMap<String, ArrayList<WorkingSet>> m_index;
     
-    private final HashMap<String, JSONObject> m_workingSets, m_workingSetEntries;
+    private final HashMap<String, JSONObject> m_setsObjects, m_entriesObjects;
     
     private boolean m_displayFilename;
 
@@ -47,8 +47,8 @@ public class WorkingSetModel implements TreeModel {
         
         m_index = new HashMap<String, ArrayList<WorkingSet>>();
         
-        m_workingSets = new HashMap<String, JSONObject>();
-        m_workingSetEntries = new HashMap<String, JSONObject>();
+        m_setsObjects = new HashMap<String, JSONObject>();
+        m_entriesObjects = new HashMap<String, JSONObject>();
     }
 
     @Override
@@ -74,7 +74,7 @@ public class WorkingSetModel implements TreeModel {
 
             WorkingSet newWorkingSet = new WorkingSet(name, description, entries);
             
-            m_workingSets.put(name, workingSetEntry);
+            m_setsObjects.put(name, workingSetEntry);
 
             DefaultMutableTreeNode childNode = new DefaultMutableTreeNode(newWorkingSet);
 
@@ -86,11 +86,11 @@ public class WorkingSetModel implements TreeModel {
 
             WorkingSet workingSet = (WorkingSet) userObject;
 
-            JSONObject entry = (JSONObject) workingSet.getEntries().get(index);
+            JSONObject entryObject = (JSONObject) workingSet.getEntries().get(index);
 
-            String filename = (String) entry.get("filename");
+            String filename = (String) entryObject.get("filename");
             
-            String stringLocation = (String) entry.get("location");
+            String stringLocation = (String) entryObject.get("location");
             Location location = null;
             if (stringLocation.equalsIgnoreCase("LOCAL")) {
                 location = Location.LOCAL;
@@ -98,11 +98,11 @@ public class WorkingSetModel implements TreeModel {
                 location = Location.REMOTE;
             }
 
-            String path = (String) entry.get("path");
+            String path = (String) entryObject.get("path");
 
             WorkingSetEntry newEntry = new WorkingSetEntry(filename, path, location, workingSet, (m_displayFilename) ? WorkingSetEntry.Labeling.DISPLAY_FILENAME : WorkingSetEntry.Labeling.DISPLAY_PATH);
             
-            m_workingSetEntries.put(path, entry);
+            m_entriesObjects.put(path, entryObject);
             
             if(m_index.containsKey(path)){
                 m_index.get(path).add(workingSet);       
@@ -232,22 +232,30 @@ public class WorkingSetModel implements TreeModel {
     }
     
     
-    public HashMap<String, ArrayList<WorkingSet>> getEntriesIndex(){
+    public HashMap<String, ArrayList<WorkingSet>> getAssociationsIndex(){
         return m_index;
     }
     
     public void updateJSONObject(JSONObjectType type, String key, String objectKey, String objectNewValue){
         if(type == JSONObjectType.WORKING_SET){
-            JSONObject workingSet = m_workingSets.get(key);
+            JSONObject workingSet = m_setsObjects.get(key);
             if(workingSet!=null){
                 workingSet.put(objectKey, objectNewValue);
             }
         }else if(type == JSONObjectType.ENTRY){
-            JSONObject entry = m_workingSetEntries.get(key);
+            JSONObject entry = m_entriesObjects.get(key);
             if(entry!=null){
                 entry.put(objectKey, objectNewValue);
             }
         }
+    }
+    
+    public HashMap<String, JSONObject> getEntiesObjects(){
+        return m_entriesObjects;
+    }
+    
+    public HashMap<String, JSONObject> getSetsObjects(){
+        return m_setsObjects;
     }
 
 }

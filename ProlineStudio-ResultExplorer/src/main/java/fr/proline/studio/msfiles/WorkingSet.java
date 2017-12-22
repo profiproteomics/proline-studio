@@ -7,6 +7,7 @@ package fr.proline.studio.msfiles;
 
 import fr.proline.studio.msfiles.WorkingSetEntry.Location;
 import java.io.File;
+import java.io.Serializable;
 import java.util.HashSet;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -15,7 +16,7 @@ import org.json.simple.JSONObject;
  *
  * @author AK249877
  */
-public class WorkingSet {
+public class WorkingSet implements Serializable {
 
     private String m_name;
     private String m_description;
@@ -30,15 +31,15 @@ public class WorkingSet {
         updateIndex();
     }
 
-    public void setName(String name){
+    public void setName(String name) {
         m_name = name;
     }
-    
+
     public String getName() {
         return m_name;
     }
-    
-    public void setDescription(String description){
+
+    public void setDescription(String description) {
         m_description = description;
     }
 
@@ -68,22 +69,33 @@ public class WorkingSet {
     }
 
     public boolean addEntry(String path, Location location) {
-        if(!m_index.contains(path)){ 
-            JSONObject newEntry = new JSONObject();
-            
+        if (!m_index.contains(path)) {
+            JSONObject newJSONObject = new JSONObject();
+
             //extract filename!
             String delimiter = (path.contains(File.separator) ? File.separator : "/");
-            String filename = path.substring(path.lastIndexOf(delimiter)+1);
-            
-            newEntry.put("filename", filename);
-            newEntry.put("location", location.toString().toLowerCase());
-            newEntry.put("path", path);
+            String filename = path.substring(path.lastIndexOf(delimiter) + 1);
+
+            newJSONObject.put("filename", filename);
+            newJSONObject.put("location", location.toString().toLowerCase());
+            newJSONObject.put("path", path);
             m_index.add(path);
-            
-            m_entries.add(newEntry);
-            
+
+            m_entries.add(newJSONObject);
+
             return true;
-        }else{
+        } else {
+            return false;
+        }
+    }
+
+    public boolean addEntry(JSONObject object) {
+        String path = (String) object.get("path");
+        if (!m_index.contains(path)) {
+            m_index.add(path);
+            m_entries.add(object);
+            return true;
+        } else {
             return false;
         }
     }

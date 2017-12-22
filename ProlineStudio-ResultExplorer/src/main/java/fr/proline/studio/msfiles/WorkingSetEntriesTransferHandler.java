@@ -34,7 +34,7 @@ public class WorkingSetEntriesTransferHandler extends TransferHandler {
     @Override
     protected Transferable createTransferable(JComponent c) {
 
-        ArrayList<WorkingSetEntry> transferable = new ArrayList<WorkingSetEntry>();
+        ArrayList<TransferableEntryWrapper> transferable = new ArrayList<TransferableEntryWrapper>();
 
         if (c instanceof JTree) {
             JTree tree = (JTree) c;
@@ -47,7 +47,7 @@ public class WorkingSetEntriesTransferHandler extends TransferHandler {
                 Object userObject = node.getUserObject();
 
                 if (userObject instanceof WorkingSetEntry) {
-                    transferable.add((WorkingSetEntry) userObject);
+                    transferable.add(new TransferableEntryWrapper((WorkingSetEntry) userObject, path.getParentPath()));
                 }
 
             }
@@ -96,7 +96,7 @@ public class WorkingSetEntriesTransferHandler extends TransferHandler {
 
             if (support.getComponent() instanceof JTree) {
 
-                ArrayList<WorkingSetEntry> entries = transferable.getEntries();
+                ArrayList<TransferableEntryWrapper> entriesWrappers = transferable.getEntries();
 
                 JTree.DropLocation dropLocation = (JTree.DropLocation) support.getDropLocation();
 
@@ -107,8 +107,8 @@ public class WorkingSetEntriesTransferHandler extends TransferHandler {
                 if (node.getUserObject() instanceof WorkingSet) {
                     WorkingSet set = (WorkingSet) node.getUserObject();
 
-                        for (int i = 0; i < entries.size(); i++) {
-                            if(set.addEntry(WorkingSetView.getWorkingSetView().getModel().getEntiesObjects().get(entries.get(i).getPath()))){
+                        for (int i = 0; i < entriesWrappers.size(); i++) {
+                            if(set.addEntry(WorkingSetView.getWorkingSetView().getModel().getEntiesObjects().get(entriesWrappers.get(i).getEntry().getPath()))){
                                 WorkingSetView.getWorkingSetView().reloadAndSave();
                                 WorkingSetView.getWorkingSetView().expand(dropPath);
                             }

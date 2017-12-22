@@ -22,13 +22,13 @@ public class WorkingSetEntriesTransferable implements Transferable, Serializable
 
     private static final DataFlavor[] DATA_FLAVORS = {WorkingSetEntries_FLAVOR};
 
-    private final ArrayList<WorkingSetEntry> m_selectedEntries;
+    private final ArrayList<TransferableEntryWrapper> m_selectedEntries;
 
-    public WorkingSetEntriesTransferable(ArrayList<WorkingSetEntry> selectedEntries) {
+    public WorkingSetEntriesTransferable(ArrayList<TransferableEntryWrapper> selectedEntries) {
         m_selectedEntries = selectedEntries;
     }
 
-    public ArrayList<WorkingSetEntry> getEntries() {
+    public ArrayList<TransferableEntryWrapper> getEntries() {
         return m_selectedEntries;
     }
 

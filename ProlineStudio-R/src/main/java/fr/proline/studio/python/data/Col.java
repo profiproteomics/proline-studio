@@ -520,7 +520,8 @@ public abstract class Col extends PyObject {
                 Object o1 = getValueAt(i);
                 Object o2 = rightCol.getValueAt(i);
                 if ((o1 == null) || (o2 == null)) {
-                    throw Py.TypeError("Col with null values");
+                    resultArray.add(Boolean.FALSE);
+                    continue;
                 }
                 if (!(o1 instanceof Number) || !(o2 instanceof Number)) {
                     throw Py.TypeError("Col with non numeric values");
@@ -539,7 +540,8 @@ public abstract class Col extends PyObject {
             for (int i = 0; i < nb; i++) {
                 Object o1 = getValueAt(i);
                 if (o1 == null) {
-                    throw Py.TypeError("Col with null values");
+                    resultArray.add(Boolean.FALSE);
+                    continue;
                 }
                 if (!(o1 instanceof Number)) {
                     throw Py.TypeError("Col with non numeric values");
@@ -557,7 +559,8 @@ public abstract class Col extends PyObject {
             for (int i = 0; i < nb; i++) {
                 Object o1 = getValueAt(i);
                 if (o1 == null) {
-                    throw Py.TypeError("Col with null values");
+                    resultArray.add(Boolean.FALSE);
+                    continue;
                 }
                 if (!(o1 instanceof Number)) {
                     throw Py.TypeError("Col with non numeric values");
@@ -585,7 +588,8 @@ public abstract class Col extends PyObject {
                 Object o1 = getValueAt(i);
                 Object o2 = rightCol.getValueAt(i);
                 if ((o1 == null) || (o2 == null)) {
-                    throw Py.TypeError("Col with null values");
+                    resultArray.add(Boolean.FALSE);
+                    continue;
                 }
                 if (!(o1 instanceof Number) || !(o2 instanceof Number)) {
                     throw Py.TypeError("Col with non numeric values");
@@ -604,7 +608,8 @@ public abstract class Col extends PyObject {
             for (int i = 0; i < nb; i++) {
                 Object o1 = getValueAt(i);
                 if (o1 == null) {
-                    throw Py.TypeError("Col with null values");
+                    resultArray.add(Boolean.FALSE);
+                    continue;
                 }
                 if (!(o1 instanceof Number)) {
                     throw Py.TypeError("Col with non numeric values");
@@ -622,7 +627,8 @@ public abstract class Col extends PyObject {
             for (int i = 0; i < nb; i++) {
                 Object o1 = getValueAt(i);
                 if (o1 == null) {
-                    throw Py.TypeError("Col with null values");
+                    resultArray.add(Boolean.FALSE);
+                    continue;
                 }
                 if (!(o1 instanceof Number)) {
                     throw Py.TypeError("Col with non numeric values");
@@ -650,7 +656,8 @@ public abstract class Col extends PyObject {
                 Object o1 = getValueAt(i);
                 Object o2 = rightCol.getValueAt(i);
                 if ((o1 == null) || (o2 == null)) {
-                    throw Py.TypeError("Col with null values");
+                    resultArray.add(Boolean.FALSE);
+                    continue;
                 }
                 if (!(o1 instanceof Number) || !(o2 instanceof Number)) {
                     throw Py.TypeError("Col with non numeric values");
@@ -669,7 +676,8 @@ public abstract class Col extends PyObject {
             for (int i = 0; i < nb; i++) {
                 Object o1 = getValueAt(i);
                 if (o1 == null) {
-                    throw Py.TypeError("Col with null values");
+                    resultArray.add(Boolean.FALSE);
+                    continue;
                 }
                 if (!(o1 instanceof Number)) {
                     throw Py.TypeError("Col with non numeric values");
@@ -687,7 +695,8 @@ public abstract class Col extends PyObject {
             for (int i = 0; i < nb; i++) {
                 Object o1 = getValueAt(i);
                 if (o1 == null) {
-                    throw Py.TypeError("Col with null values");
+                    resultArray.add(Boolean.FALSE);
+                    continue;
                 }
                 if (!(o1 instanceof Number)) {
                     throw Py.TypeError("Col with non numeric values");
@@ -715,7 +724,8 @@ public abstract class Col extends PyObject {
                 Object o1 = getValueAt(i);
                 Object o2 = rightCol.getValueAt(i);
                 if ((o1 == null) || (o2 == null)) {
-                    throw Py.TypeError("Col with null values");
+                    resultArray.add(Boolean.FALSE);
+                    continue;
                 }
                 if (!(o1 instanceof Number) || !(o2 instanceof Number)) {
                     throw Py.TypeError("Col with non numeric values");
@@ -734,7 +744,8 @@ public abstract class Col extends PyObject {
             for (int i = 0; i < nb; i++) {
                 Object o1 = getValueAt(i);
                 if (o1 == null) {
-                    throw Py.TypeError("Col with null values");
+                    resultArray.add(Boolean.FALSE);
+                    continue;
                 }
                 if (!(o1 instanceof Number)) {
                     throw Py.TypeError("Col with non numeric values");
@@ -752,7 +763,8 @@ public abstract class Col extends PyObject {
             for (int i = 0; i < nb; i++) {
                 Object o1 = getValueAt(i);
                 if (o1 == null) {
-                    throw Py.TypeError("Col with null values");
+                    resultArray.add(Boolean.FALSE);
+                    continue;
                 }
                 if (!(o1 instanceof Number)) {
                     throw Py.TypeError("Col with non numeric values");
@@ -801,7 +813,8 @@ public abstract class Col extends PyObject {
             for (int i = 0; i < nb; i++) {
                 Object o1 = getValueAt(i);
                 if (o1 == null) {
-                    throw Py.TypeError("Col with null values");
+                    resultArray.add(Boolean.FALSE);
+                    continue;
                 }
                 if (!(o1 instanceof Number)) {
                     throw Py.TypeError("Col with non numeric values");
@@ -819,7 +832,8 @@ public abstract class Col extends PyObject {
             for (int i = 0; i < nb; i++) {
                 Object o1 = getValueAt(i);
                 if (o1 == null) {
-                    throw Py.TypeError("Col with null values");
+                    resultArray.add(Boolean.FALSE);
+                    continue;
                 }
                 if (!(o1 instanceof Number)) {
                     throw Py.TypeError("Col with non numeric values");
@@ -868,7 +882,8 @@ public abstract class Col extends PyObject {
             for (int i = 0; i < nb; i++) {
                 Object o1 = getValueAt(i);
                 if (o1 == null) {
-                    throw Py.TypeError("Col with null values");
+                    resultArray.add(Boolean.FALSE);
+                    continue;
                 }
                 if (!(o1 instanceof Number)) {
                     throw Py.TypeError("Col with non numeric values");
@@ -886,7 +901,8 @@ public abstract class Col extends PyObject {
             for (int i = 0; i < nb; i++) {
                 Object o1 = getValueAt(i);
                 if (o1 == null) {
-                    throw Py.TypeError("Col with null values");
+                    resultArray.add(Boolean.FALSE);
+                    continue;
                 }
                 if (!(o1 instanceof Number)) {
                     throw Py.TypeError("Col with non numeric values");
@@ -934,7 +950,8 @@ public abstract class Col extends PyObject {
                 Object o1 = getValueAt(i);
                 Object o2 = rightCol.getValueAt(i);
                 if ((o1 == null) || (o2 == null)) {
-                    throw Py.TypeError("Col with null values");
+                    resultArray.add(Boolean.FALSE);
+                    continue;
                 }
                 if (!(o1 instanceof Boolean) || !(o2 instanceof Boolean)) {
                     throw Py.TypeError("Col with non boolean values");
@@ -964,7 +981,16 @@ public abstract class Col extends PyObject {
                 Object o1 = getValueAt(i);
                 Object o2 = rightCol.getValueAt(i);
                 if ((o1 == null) || (o2 == null)) {
-                    throw Py.TypeError("Col with null values");
+                    if ((o1 != null) && (o1 instanceof Boolean)) {
+                        resultArray.add(((Boolean) o1));
+                        continue;
+                    }
+                    if ((o2 != null) && (o2 instanceof Boolean)) {
+                        resultArray.add(((Boolean) o2));
+                        continue;
+                    }
+                    resultArray.add(Boolean.FALSE);
+                    continue;
                 }
                 if (!(o1 instanceof Boolean) || !(o2 instanceof Boolean)) {
                     throw Py.TypeError("Col with non boolean values");

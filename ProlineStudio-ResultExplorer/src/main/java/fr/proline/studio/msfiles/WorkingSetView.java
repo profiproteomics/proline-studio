@@ -173,7 +173,7 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
         add(scrollPane, c);
 
         resetTreeState();
-        
+
     }
 
     @Override
@@ -433,6 +433,7 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
 
             @Override
             public void actionPerformed(ActionEvent ae) {
+
                 AddlWorkingSetEntryDialog dialog = AddlWorkingSetEntryDialog.getDialog(null, m_selectedWorkingSets.get(0));
                 dialog.setLocationRelativeTo(null);
                 dialog.setVisible(true);
@@ -701,9 +702,13 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
         WorkingSetRoot workingSetRoot = (WorkingSetRoot) root.getUserObject();
         WorkingSetUtil.saveJSON(workingSetRoot.getWorkingSets());
     }
-    
-    public WorkingSetModel getModel(){
+
+    public WorkingSetModel getModel() {
         return m_workingSetModel;
+    }
+
+    public void expand(TreePath path) {
+        m_tree.expandPath(path);
     }
 
 }

@@ -110,6 +110,7 @@ public class WorkingSetEntriesTransferHandler extends TransferHandler {
                         for (int i = 0; i < entries.size(); i++) {
                             if(set.addEntry(WorkingSetView.getWorkingSetView().getModel().getEntiesObjects().get(entries.get(i).getPath()))){
                                 WorkingSetView.getWorkingSetView().reloadAndSave();
+                                WorkingSetView.getWorkingSetView().expand(dropPath);
                             }
                         }
                     

@@ -407,17 +407,17 @@ public class JoinDataModel extends AbstractJoinDataModel {
                 if (colIndexCur != -1) {
                     Filter f = filtersMap2.get(colIndexCur);
                     if (f != null) {
-                        filtersMap.put(i, f);
-                        continue;
+                        filtersMap.put(i, f); 
                     }
+                    continue;
                 }
                 colIndexCur = m_keysColumns2.get(col);
                 if (colIndexCur != -1) {
                     Filter f = filtersMap2.get(colIndexCur);
                     if (f != null) {
                         filtersMap.put(i, f);
-                        continue;
                     }
+                    continue;
                 }
             }
 

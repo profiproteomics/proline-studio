@@ -701,5 +701,9 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
         WorkingSetRoot workingSetRoot = (WorkingSetRoot) root.getUserObject();
         WorkingSetUtil.saveJSON(workingSetRoot.getWorkingSets());
     }
+    
+    public WorkingSetModel getModel(){
+        return m_workingSetModel;
+    }
 
 }

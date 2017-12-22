@@ -22,18 +22,8 @@ import org.openide.util.Exceptions;
  */
 public class WorkingSetEntriesTransferHandler extends TransferHandler {
 
-    private WorkingSetModel m_model;
-
     public WorkingSetEntriesTransferHandler() {
         ;
-    }
-
-    public WorkingSetEntriesTransferHandler(WorkingSetModel model) {
-        m_model = model;
-    }
-
-    public void setWorkingSetModel(WorkingSetModel model) {
-        m_model = model;
     }
 
     @Override
@@ -117,15 +107,12 @@ public class WorkingSetEntriesTransferHandler extends TransferHandler {
                 if (node.getUserObject() instanceof WorkingSet) {
                     WorkingSet set = (WorkingSet) node.getUserObject();
 
-                    if (m_model != null) {
                         for (int i = 0; i < entries.size(); i++) {
-                            set.addEntry(m_model.getEntiesObjects().get(entries.get(i).getPath()));
+                            if(set.addEntry(WorkingSetView.getWorkingSetView().getModel().getEntiesObjects().get(entries.get(i).getPath()))){
+                                WorkingSetView.getWorkingSetView().reloadAndSave();
+                            }
                         }
-                    } else {
-                        for(int i=0; i<entries.size(); i++){
-                            set.addEntry(entries.get(i).getPath(), entries.get(i).getLocation());
-                        }
-                    }
+                    
                 }
 
                 return true;

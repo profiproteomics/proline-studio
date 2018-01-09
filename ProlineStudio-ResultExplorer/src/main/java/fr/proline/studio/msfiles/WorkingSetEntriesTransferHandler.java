@@ -109,8 +109,16 @@ public class WorkingSetEntriesTransferHandler extends TransferHandler {
 
                         for (int i = 0; i < entriesWrappers.size(); i++) {
                             if(set.addEntry(WorkingSetView.getWorkingSetView().getModel().getEntiesObjects().get(entriesWrappers.get(i).getEntry().getPath()))){
-                                WorkingSetView.getWorkingSetView().reloadAndSave();
+                                
+                                DefaultMutableTreeNode sourceNode = (DefaultMutableTreeNode) entriesWrappers.get(i).getSource().getLastPathComponent();
+                                if(sourceNode.getUserObject() instanceof WorkingSet){
+                                    WorkingSet sourceSet = (WorkingSet) sourceNode.getUserObject();
+                                    sourceSet.removeEntry(entriesWrappers.get(i).getEntry().getPath());
+                                }
+                                
                                 WorkingSetView.getWorkingSetView().expand(dropPath);
+                                WorkingSetView.getWorkingSetView().reloadAndSave();
+
                             }
                         }
                     

@@ -53,7 +53,7 @@ public class WorkingSet implements Serializable {
 
     @Override
     public String toString() {
-        return m_name;
+        return m_name + " (" + m_description + ")";
     }
 
     public boolean removeEntry(String path) {

@@ -40,7 +40,6 @@ import org.openide.windows.WindowManager;
  */
 public class ValidateJMSAction extends AbstractRSMAction {
 
-    Long rsm=null;
     
     public ValidateJMSAction() {
         super(NbBundle.getMessage(ValidateJMSAction.class, "CTL_ValidateAction"), AbstractTree.TreeType.TREE_IDENTIFICATION);
@@ -58,7 +57,6 @@ public class ValidateJMSAction extends AbstractRSMAction {
             DataSetNode dataSetNode = (DataSetNode) selectedNodes[i];
             DDataset d = dataSetNode.getDataset();
             datasetList.add(d);
-            rsm=d.getResultSummaryId(); 
             if (dataSetNode.hasResultSummary()) {
                 nbAlreadyValidated++;
             }
@@ -107,7 +105,7 @@ public class ValidateJMSAction extends AbstractRSMAction {
             final List<ChangeTypicalRule> changeTypicalRules  = dialog.getChangeTypicalRules();
             final String scoringType = dialog.getScoringType();
             //VDTEST
-            final boolean v2Service = dialog.isPropagateFiltersSelected();
+            final boolean propagateValidation = dialog.isPropagateFiltersSelected();
             
             IdentificationTree tree = IdentificationTree.getCurrentTree();
             DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
@@ -122,34 +120,28 @@ public class ValidateJMSAction extends AbstractRSMAction {
                 final DDataset d = dataSetNode.getDataset();
 
                 if (dataSetNode.hasResultSummary()) {
-                    rsm=dataSetNode.getResultSummaryId();
-                    // we remove the result Summary and we start validation
-                    
-                    AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
-
-                        @Override
-                        public boolean mustBeCalledInAWT() {
-                            return true;
-                        }
-
-                        @Override
-                        public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
-
-                            askValidation(dataSetNode, parserArguments, changeTypicalRules, scoringType, v2Service);
-                        }
-                    };
-
-                    DatabaseDataSetTask taskRemoveValidation = new DatabaseDataSetTask(callback);
-                    taskRemoveValidation.initModifyDatasetToRemoveValidation(d);
-                    AccessDatabaseThread.getAccessDatabaseThread().addTask(taskRemoveValidation);
-                } else {
-                    // there is no result summary, we start validation at once
-                    askValidation(dataSetNode, parserArguments, changeTypicalRules, scoringType, v2Service);
+                    removePreviousValidation(dataSetNode, propagateValidation);
                 }
+                
+                askValidation(dataSetNode, parserArguments, changeTypicalRules, scoringType, propagateValidation);
+  
             }
         }
     }
 
+    private void removePreviousValidation(DataSetNode dataSetNode, boolean removeInHierarchy){
+        if(removeInHierarchy){
+            Enumeration e = dataSetNode.children();
+            while(e.hasMoreElements()){
+                removePreviousValidation((DataSetNode) e.nextElement(),removeInHierarchy);
+            }
+        }
+        
+        DatabaseDataSetTask taskRemoveValidation = new DatabaseDataSetTask(null);
+        taskRemoveValidation.initModifyDatasetToRemoveValidation(dataSetNode.getDataset());
+        taskRemoveValidation.fetchData();        
+    }
+        
     private void askValidation(final DataSetNode dataSetNode, HashMap<String, String> parserArguments, final List<ChangeTypicalRule> changeTypicalRules, final String scoringType,final boolean v2Service) {
 
         final DDataset d = dataSetNode.getDataset();

@@ -20,7 +20,7 @@ public class WorkingSet implements Serializable {
 
     private String m_name;
     private String m_description;
-    private final JSONArray m_entries;
+    private JSONArray m_entries;
     private HashSet<String> m_index;
 
     public WorkingSet(String name, String description, JSONArray entries) {
@@ -62,6 +62,7 @@ public class WorkingSet implements Serializable {
             String currentPath = (String) innerObj.get("path");
             if (path.equalsIgnoreCase(currentPath)) {
                 m_entries.remove(i);
+                m_index.remove(path);
                 return true;
             }
         }

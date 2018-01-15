@@ -695,11 +695,11 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
     }
 
     public void reloadAndSave() {
-        reloadModel();
-        resetTreeState();
         DefaultMutableTreeNode root = (DefaultMutableTreeNode) m_workingSetModel.getRoot();
         WorkingSetRoot workingSetRoot = (WorkingSetRoot) root.getUserObject();
         WorkingSetUtil.saveJSON(workingSetRoot.getWorkingSets());
+        reloadModel();
+        resetTreeState();
     }
 
     public WorkingSetModel getModel() {

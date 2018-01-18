@@ -153,7 +153,7 @@ public class ProjectsPanel extends JPanel {
         m_genericBeanModel.addProperties("name", 1, "Project");
         m_genericBeanModel.addProperties("description", 2);
         m_genericBeanModel.addProperties("size", 3, "Size (MB)", new DoubleRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 0, true, true), null);
-        m_genericBeanModel.addProperties("user", 4);
+        m_genericBeanModel.addProperties("user", 4, "Owner");
         m_genericBeanModel.addProperties("DBName", 5, "Databases");
         
         // must be called only one time

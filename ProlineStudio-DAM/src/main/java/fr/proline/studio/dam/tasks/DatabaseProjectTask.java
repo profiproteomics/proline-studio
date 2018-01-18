@@ -1,6 +1,7 @@
 package fr.proline.studio.dam.tasks;
 
 
+import fr.proline.core.orm.uds.ExternalDb;
 import fr.proline.studio.dam.data.ProjectIdentificationData;
 import fr.proline.studio.dam.data.AbstractData;
 import fr.proline.core.orm.uds.Project;
@@ -9,12 +10,16 @@ import fr.proline.core.orm.uds.ProjectUserAccountMap;
 import fr.proline.core.orm.util.DStoreCustomPoolConnectorFactory;
 import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
+import fr.proline.studio.dam.tasks.data.ProjectToDBs;
+import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import javax.persistence.EntityManager;
+import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 
 
@@ -31,11 +36,13 @@ public class DatabaseProjectTask extends AbstractDatabaseTask {
     private String m_name = null;
     private String m_description = null;
     private ArrayList<UserAccount> m_userAccountList = null;
-
+    private ArrayList<ProjectToDBs> m_resultProjectsList = null;
+    
     private int m_action;
     
     private final static int LOAD_PROJECT   = 0;
     private final static int CHANGE_SETTINGS_PROJECT = 1;
+    private final static int LOAD_PROJECTS_LIST = 2;
     
     public DatabaseProjectTask(AbstractDatabaseCallback callback) {
         super(callback, null);
@@ -72,6 +79,16 @@ public class DatabaseProjectTask extends AbstractDatabaseTask {
         m_action = CHANGE_SETTINGS_PROJECT;
     }
 
+    /**
+     * Load the Projects List
+     * @param resultProjectsList
+     */
+    public void initLoadProjectsList(ArrayList<ProjectToDBs> resultProjectsList) {
+        setTaskInfo(new TaskInfo("Load Projects List", true, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_HIGH));
+        m_resultProjectsList = resultProjectsList;
+        
+        m_action = LOAD_PROJECTS_LIST;
+    }
     
     @Override
     public boolean needToFetch() {
@@ -86,6 +103,8 @@ public class DatabaseProjectTask extends AbstractDatabaseTask {
                 return loadProject();
             case CHANGE_SETTINGS_PROJECT:
                 return changeProjectSettings();
+            case LOAD_PROJECTS_LIST:
+                return loadProjectsList();
         }
         return false; // should not happen
     }
@@ -141,6 +160,82 @@ public class DatabaseProjectTask extends AbstractDatabaseTask {
         return result;
     }
 
+    private boolean loadProjectsList() {
+
+                    
+
+        m_resultProjectsList.clear();
+        
+        EntityManager entityManagerUDS = DStoreCustomPoolConnectorFactory.getInstance().getUdsDbConnector().createEntityManager();
+        boolean result = true;
+        try {
+            entityManagerUDS.getTransaction().begin();
+
+            Query querySize =  entityManagerUDS.createNativeQuery(" SELECT p.id, p.name, p.description, p.owner, d.size, p.db_name\n" +
+"FROM  (SELECT \n" +
+"  project.id as id, \n" +
+"  project.name as name, \n" +
+"  project.description as description, \n" +
+"  user_account.login as owner, \n" +
+"  external_db.name as db_name\n" +
+"FROM \n" +
+"  public.project, \n" +
+"  public.project_db_map, \n" +
+"  public.external_db, \n" +
+"  public.user_account\n" +
+"WHERE \n" +
+"  project.owner_id = user_account.id AND\n" +
+"  project_db_map.project_id = project.id AND\n" +
+"  project_db_map.external_db_id = external_db.id) p\n" +
+"INNER JOIN (SELECT \n" +
+"  pg_database.datname as db_name,\n" +
+"  pg_database_size(pg_database.datname) AS size,\n" + // pg_size_pretty( ...  )
+"  pg_database_size(pg_database.datname) as raw_size\n" +
+"FROM pg_database) d\n" +
+"ON p.db_name = d.db_name\n" +
+"ORDER BY d.raw_size DESC");
+            List<Object[]> results = querySize.getResultList();
+
+            
+            HashMap<Long, ProjectToDBs> projectMap = new HashMap<>();
+            Iterator<Object[]> it = results.iterator();
+            while (it.hasNext()) {
+                Object[] resCur = it.next();
+                long id = ((BigInteger) resCur[0]).longValue();
+                BigInteger sizeInBits = (BigInteger) resCur[4];
+                double sizeInMB = sizeInBits.doubleValue()/(1024*1024);
+                
+                ProjectToDBs projectToDB = projectMap.get(id);
+                if (projectToDB == null) {
+                    projectToDB = new ProjectToDBs(id, (String) resCur[1],(String) resCur[2],(String) resCur[3],sizeInMB,(String) resCur[5]);
+                    projectMap.put(id, projectToDB);
+                    m_resultProjectsList.add(projectToDB);
+                } else {
+                    projectToDB.addDb((String) resCur[5], sizeInMB);
+                }
+                
+            }
+
+            entityManagerUDS.getTransaction().commit();
+
+        } catch (Exception e) {
+            m_logger.error(getClass().getSimpleName() + " failed", e);
+            m_taskError = new TaskError(e);
+            try {
+                entityManagerUDS.getTransaction().rollback();
+            } catch (Exception rollbackException) {
+                m_logger.error(getClass().getSimpleName() + " failed : potential network problem", rollbackException);
+            }
+            result = false;
+        } finally {
+            entityManagerUDS.close();
+        }
+
+
+
+        return result;
+    }
+    
     private boolean changeProjectSettings() {
 
         EntityManager entityManagerUDS = DStoreCustomPoolConnectorFactory.getInstance().getUdsDbConnector().createEntityManager();

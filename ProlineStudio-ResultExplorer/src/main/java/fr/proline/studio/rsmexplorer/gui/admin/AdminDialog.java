@@ -56,10 +56,13 @@ public class AdminDialog extends DefaultDialog  {
 
         JPanel userAccountsPanel = new UserAccountsPanel(this);
         JPanel peaklistSoftwarePanel = new PeaklistSoftwarePanel(this);
+        ProjectsPanel projectsPanel = new ProjectsPanel(this);
         JPanel instrumentConfigPanel = new InstrumentConfigPanel();
 
         tabbedPane.add("User Accounts", userAccountsPanel);
         tabbedPane.add("Peaklist Softwares", peaklistSoftwarePanel);
+        tabbedPane.add("Projects and Databases", projectsPanel);
+
         // JPM.TODO : not done for the moment tabbedPane.add("Instrument Config", instrumentConfigPanel);
         
 

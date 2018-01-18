@@ -1,9 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package fr.proline.studio.table;
 
 import fr.proline.studio.export.ExportFontData;
@@ -20,6 +14,7 @@ import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,252 +29,377 @@ import org.slf4j.LoggerFactory;
  */
 public class BeanTableModel<T> extends AbstractTableModel implements GlobalTableModelInterface {
 
-   final private static Logger logger = LoggerFactory.getLogger(BeanTableModel.class);
-   
-   private String name;
-   private Class<T> typeParameterClass;
-   private PropertyDescriptor[] descriptors;
-   private List<T> entities = new ArrayList<>();
-   
-   public BeanTableModel(Class<T> type) {
-      try {
-         typeParameterClass = type;
-         name = type.getName()+" table";
-         descriptors = Introspector.getBeanInfo(type, Object.class).getPropertyDescriptors();
-      } catch (IntrospectionException ex) {
-         logger.info("cannot infer getters from "+type, ex);
-      }  
+    final private static Logger logger = LoggerFactory.getLogger(BeanTableModel.class);
+
+    private String m_name;
+    private PropertyDescriptor[] m_descriptors;
+    private List<T> m_entities = new ArrayList<>();
+    private int[] m_columnIndexConverter = null;
+
+    private HashMap<String, Integer> m_columnIndexMap = new HashMap<>();
+    private HashMap<String, String> m_columnNameMap = new HashMap<>();
+    private HashMap<String, TableCellRenderer> m_columnRendererMap = new HashMap<>();
+    private HashMap<Integer, Filter> m_columnFilterMap = new HashMap<>();
+
+    public BeanTableModel(Class<T> type) {
+        try {
+            //typeParameterClass = type;
+            m_name = type.getName() + " table";
+            m_descriptors = Introspector.getBeanInfo(type, Object.class).getPropertyDescriptors();
+        } catch (IntrospectionException ex) {
+            logger.info("cannot infer getters from " + type, ex);
+        }
     }
 
-   public void setData(List<T> data) {
-      entities = data;
-      fireTableDataChanged();
-   }
-   
-   public List<T> getData() {
-      return entities;
-   }
-   
-   @Override
-   public int getRowCount() {
-      return entities.size();
-   }
+    public void addProperties(String columnKey, Integer columnIndex) {
+        addProperties(columnKey, columnIndex, null, null, null);
+    }
 
-   @Override
-   public int getColumnCount() {
-      return descriptors.length;
-   }
+    public void addProperties(String columnKey, Integer columnIndex, String columnName) {
+        addProperties(columnKey, columnIndex, columnName, null, null);
+    }
 
-   @Override
-   public Object getValueAt(int rowIndex, int columnIndex) {
-      try {
-         Object obj = descriptors[columnIndex].getReadMethod().invoke(entities.get(rowIndex));
-         if (obj.getClass().isArray()) {
-             int arrayLength = Array.getLength(obj);
-             int length = Math.min(arrayLength, 10);
-             StringBuffer buffer = new StringBuffer("[");
-             int k = 0;
-             for (; k < length; k++) {
-                 buffer.append(Array.get(obj, k).toString()).append(",");
-             }
-             if (k < arrayLength) {
-                 buffer.append("...");
-             } else {
-                buffer.deleteCharAt(buffer.length()-1);
-             }
-             buffer.append("]");
-             obj = buffer.toString();
-         }
-         return obj;
-      } catch (Exception ex) {
-         logger.info("cannot get read method for property "+descriptors[columnIndex].getName(), ex);
-      } 
-      return null;
-   }
+    public void addProperties(String columnKey, Integer columnIndex, String columnName, TableCellRenderer renderer, Filter f) {
+        if (columnIndex != null) {
+            m_columnIndexMap.put(columnKey, columnIndex);
+        }
+        if (columnName != null) {
+            m_columnNameMap.put(columnKey, columnName);
+        }
+        if (renderer != null) {
+            m_columnRendererMap.put(columnKey, renderer);
+        }
+        if (f != null) {
+            m_columnFilterMap.put(columnIndex, f);
+        }
+    }
 
-   
-   @Override
-   public String getColumnName(int column) {
-      return descriptors[column].getDisplayName();
-   }
+    public void firePropertiesChanged() {
 
-   @Override
-   public Class<?> getColumnClass(int columnIndex) {
-      Class<?> cl = descriptors[columnIndex].getPropertyType(); 
-      if (cl.isPrimitive()) {
-          switch(cl.getSimpleName()) {
-            case "double" : cl = Double.class;
-            break;
-            case "int" : cl = Integer.class;
-            break;
-            case "float" : cl = Float.class;
-            break;
-            case "boolean": cl = Boolean.class;
-         }
-      } else if (cl.isArray()) {
-          cl = String.class;
-      }
-      return cl;
-   }
+        // Prepare the index of columns as specified 
+        int nbColumns = getColumnCount();
+        if (m_columnIndexConverter == null) {
+            m_columnIndexConverter = new int[nbColumns];
+        }
+        for (int i = 0; i < nbColumns; i++) {
+            m_columnIndexConverter[i] = -1;
+        }
+
+        for (int i = 0; i < nbColumns; i++) {
+            String columnKey = getColumnKey(i);
+            Integer indexForUser = m_columnIndexMap.get(columnKey);
+            if (indexForUser != null) {
+                m_columnIndexConverter[indexForUser] = i;
+            }
+        }
+
+        int firstFreePotentialIndex = 0;
+        for (int i = 0; i < nbColumns; i++) {
+            String columnKey = getColumnKey(i);
+            Integer indexForUser = m_columnIndexMap.get(columnKey);
+            if (indexForUser == null) {
+                for (int j = firstFreePotentialIndex; j < nbColumns; j++) {
+                    if (m_columnIndexConverter[j] == -1) {
+                        m_columnIndexConverter[j] = i;
+                        firstFreePotentialIndex = j;
+                        break;
+                    }
+                }
+            }
+        }
+
+        fireTableDataChanged();
+    }
+
+    public void setData(List<T> data) {
+        m_entities = data;
+
+        fireTableDataChanged();
+    }
+
+    public List<T> getData() {
+        return m_entities;
+    }
+
+    @Override
+    public int getRowCount() {
+        return m_entities.size();
+    }
+
+    @Override
+    public int getColumnCount() {
+        return m_descriptors.length;
+    }
+
+    @Override
+    public Object getValueAt(int rowIndex, int columnIndex) {
+
+        if (m_columnIndexConverter != null) {
+            columnIndex = m_columnIndexConverter[columnIndex];
+        }
+
+        try {
+            Object obj = m_descriptors[columnIndex].getReadMethod().invoke(m_entities.get(rowIndex));
+            if (obj.getClass().isArray()) {
+                int arrayLength = Array.getLength(obj);
+                int length = Math.min(arrayLength, 10);
+                StringBuilder buffer = new StringBuilder("[");
+                int k = 0;
+                for (; k < length; k++) {
+                    buffer.append(Array.get(obj, k).toString()).append(",");
+                }
+                if (k < arrayLength) {
+                    buffer.append("...");
+                } else {
+                    buffer.deleteCharAt(buffer.length() - 1);
+                }
+                buffer.append("]");
+                obj = buffer.toString();
+            }
+            return obj;
+        } catch (Exception ex) {
+            logger.info("cannot get read method for property " + m_descriptors[columnIndex].getName(), ex);
+        }
+        return null;
+    }
+
+    public String getColumnKey(int column) {
+        return m_descriptors[column].getDisplayName();
+    }
+
+    @Override
+    public String getColumnName(int columnIndex) {
+
+        if (m_columnIndexConverter != null) {
+            columnIndex = m_columnIndexConverter[columnIndex];
+        }
+
+        String columnKey = getColumnKey(columnIndex);
+        String columnName = m_columnNameMap.get(columnKey);
+        if (columnName != null) {
+            return columnName;
+        } else {
+            return columnKey;
+        }
+    }
+
+    @Override
+    public Class<?> getColumnClass(int columnIndex) {
+
+        if (m_columnIndexConverter != null) {
+            columnIndex = m_columnIndexConverter[columnIndex];
+        }
+
+        Class<?> cl = m_descriptors[columnIndex].getPropertyType();
+        if (cl.isPrimitive()) {
+            switch (cl.getSimpleName()) {
+                case "double":
+                    cl = Double.class;
+                    break;
+                case "int":
+                    cl = Integer.class;
+                    break;
+                case "long":
+                    cl = Long.class;
+                    break;
+                case "float":
+                    cl = Float.class;
+                    break;
+                case "boolean":
+                    cl = Boolean.class;
+            }
+        } else if (cl.isArray()) {
+            cl = String.class;
+        }
+        return cl;
+    }
+
+    @Override
+    public String getToolTipForHeader(int columnIndex) {
+        if (m_columnIndexConverter != null) {
+            columnIndex = m_columnIndexConverter[columnIndex];
+        }
+
+        return m_descriptors[columnIndex].getShortDescription();
+    }
+
+    @Override
+    public String getTootlTipValue(int row, int col) {
+        return null;
+    }
+
+    @Override
+    public TableCellRenderer getRenderer(int rowIndex, int columnIndex) {
+        
+        if (m_columnIndexConverter != null) {
+            columnIndex = m_columnIndexConverter[columnIndex];
+        }
+        
+        String columnKey = getColumnKey(columnIndex);
+        return m_columnRendererMap.get(columnKey);
+    }
+
+    @Override
+    public Long getTaskId() {
+        return -1l;
+    }
+
+    @Override
+    public LazyData getLazyData(int row, int col) {
+        return null;
+    }
+
+    @Override
+    public void givePriorityTo(Long taskId, int row, int col) {
+    }
+
+    @Override
+    public void sortingChanged(int col) {
+    }
+
+    @Override
+    public int getSubTaskId(int col) {
+        return -1;
+    }
+
+    @Override
+    public String getDataColumnIdentifier(int columnIndex) {
+        return getColumnName(columnIndex);
+    }
+
+    @Override
+    public Class getDataColumnClass(int columnIndex) {
+        return getColumnClass(columnIndex);
+    }
+
+    @Override
+    public Object getDataValueAt(int rowIndex, int columnIndex) {
+        return getValueAt(rowIndex, columnIndex);
+    }
+
+    @Override
+    public int[] getKeysColumn() {
+        return null;
+    }
+
+    @Override
+    public int getInfoColumn() {
+        return 0;
+    }
+
+    @Override
+    public void setName(String name) {
+        this.m_name = name;
+    }
+
+    @Override
+    public String getName() {
+        return m_name;
+    }
+
+    @Override
+    public Map<String, Object> getExternalData() {
+        return null;
+    }
+
+    @Override
+    public PlotInformation getPlotInformation() {
+        return null;
+    }
+
+    @Override
+    public long row2UniqueId(int rowIndex) {
+        return rowIndex;
+    }
+
+    @Override
+    public int uniqueId2Row(long id) {
+        return (int) id;
+    }
+
+    @Override
+    public void addFilters(LinkedHashMap<Integer, Filter> filtersMap) {
+        for (int columnIndex = 0; columnIndex< m_descriptors.length; columnIndex++) {
 
 
-   @Override
-   public String getToolTipForHeader(int column) {
-      return descriptors[column].getShortDescription();
-   }
+            Filter f = m_columnFilterMap.get(columnIndex);
+            if (f != null) {
+                filtersMap.put(columnIndex, f);
+                return;
+            }
 
-   @Override
-   public String getTootlTipValue(int row, int col) {
-      return null;
-   }
+            int descriptorIndex = columnIndex;
+            if (m_columnIndexConverter != null) {
+                descriptorIndex = m_columnIndexConverter[columnIndex];
+            }
+            
+            switch (m_descriptors[descriptorIndex].getPropertyType().getSimpleName()) {
+                case "String":
+                    filtersMap.put(columnIndex, new StringFilter(getColumnName(columnIndex), null, columnIndex));
+                    break;
+                case "Double":
+                case "double":
+                    filtersMap.put(columnIndex, new DoubleFilter(getColumnName(columnIndex), null, columnIndex));
+                    break;
+                case "Integer":
+                case "int":
+                    filtersMap.put(columnIndex, new IntegerFilter(getColumnName(columnIndex), null, columnIndex));
+                    break;
+                default:
+                    System.out.println("no filter for type : " + m_descriptors[descriptorIndex].getPropertyType().getSimpleName());
+            }
+        }
+    }
 
-   @Override
-   public TableCellRenderer getRenderer(int row, int col) {
-      return null;
-   }
+    @Override
+    public boolean isLoaded() {
+        return true;
+    }
 
-   @Override
-   public Long getTaskId() {
-      return -1l;
-   }
+    @Override
+    public int getLoadingPercentage() {
+        return 100;
+    }
 
-   @Override
-   public LazyData getLazyData(int row, int col) {
-      return null;
-   }
-
-   @Override
-   public void givePriorityTo(Long taskId, int row, int col) {   }
-
-   @Override
-   public void sortingChanged(int col) {   }
-
-   @Override
-   public int getSubTaskId(int col) {
-      return -1;
-   }
-
-   @Override
-   public String getDataColumnIdentifier(int columnIndex) {
-      return getColumnName(columnIndex);
-   }
-
-   @Override
-   public Class getDataColumnClass(int columnIndex) {
-      return getColumnClass(columnIndex);
-   }
-
-   @Override
-   public Object getDataValueAt(int rowIndex, int columnIndex) {
-      return getValueAt(rowIndex, columnIndex);
-   }
-
-   @Override
-   public int[] getKeysColumn() {
-      return null;
-   }
-
-   @Override
-   public int getInfoColumn() {
-      return 0;
-   }
-
-   @Override
-   public void setName(String name) {
-      this.name = name;
-   }
-
-   @Override
-   public String getName() {
-      return name;
-   }
-
-   @Override
-   public Map<String, Object> getExternalData() {
-      return null;
-   }
-
-   @Override
-   public PlotInformation getPlotInformation() {
-       return null;
-   }
-
-   @Override
-   public long row2UniqueId(int rowIndex) {
-      return rowIndex;
-   }
-
-   @Override
-   public int uniqueId2Row(long id) {
-      return (int)id;
-   }
-
-   @Override
-   public void addFilters(LinkedHashMap<Integer, Filter> filtersMap) {
-      for(int k = 0; k < descriptors.length; k++) {
-         switch(descriptors[k].getPropertyType().getSimpleName()) {
-            case "String" : filtersMap.put(k, new StringFilter(getColumnName(k), null, k));
-               break;
-            case "Double" : 
-            case "double" : filtersMap.put(k, new DoubleFilter(getColumnName(k), null, k));
-               break;
-            case "Integer" :
-            case "int" : filtersMap.put(k, new IntegerFilter(getColumnName(k), null, k));
-               break;
-            default: System.out.println("no filter for type : "+descriptors[k].getPropertyType().getSimpleName());
-         }
-      }
-   }
-
-   @Override
-   public boolean isLoaded() {
-      return true;
-   }
-
-   @Override
-   public int getLoadingPercentage() {
-      return 100;
-   }
-
-   @Override
-   public PlotType getBestPlotType() {
-      return PlotType.SCATTER_PLOT;
-   }
+    @Override
+    public PlotType getBestPlotType() {
+        return PlotType.SCATTER_PLOT;
+    }
 
     @Override
     public int[] getBestColIndex(PlotType plotType) {
         return null;
     }
 
-   @Override
-   public String getExportRowCell(int row, int col) {
-      return null;
-   }
+    @Override
+    public String getExportRowCell(int row, int col) {
+        return null;
+    }
 
-   @Override
-   public String getExportColumnName(int col) {
-      return getColumnName(col);
-   }
+    @Override
+    public String getExportColumnName(int col) {
+        return getColumnName(col);
+    }
 
-   @Override
-   public GlobalTableModelInterface getFrozzenModel() {
-      return this;
-   }
+    @Override
+    public GlobalTableModelInterface getFrozzenModel() {
+        return this;
+    }
 
-   @Override
-   public Object getValue(Class c) {
-      return null;
-   }
+    @Override
+    public Object getValue(Class c) {
+        return null;
+    }
 
-   @Override
-   public void addSingleValue(Object v) {
-       
-   }
+    @Override
+    public void addSingleValue(Object v) {
 
-   @Override
-   public Object getSingleValue(Class c) {
-      return null;
-   }
+    }
+
+    @Override
+    public Object getSingleValue(Class c) {
+        return null;
+    }
 
     @Override
     public Object getRowValue(Class c, int row) {

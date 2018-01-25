@@ -16,7 +16,7 @@ import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import org.openide.util.NbBundle;
 
 /**
- *
+ * TODO VDS: TO remove. V2 used instead
  * @author JM235353
  */
 public class DisplayPtmProteinSite  extends AbstractRSMAction {

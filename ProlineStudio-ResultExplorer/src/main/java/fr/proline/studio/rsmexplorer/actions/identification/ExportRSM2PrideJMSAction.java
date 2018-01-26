@@ -1,14 +1,17 @@
 package fr.proline.studio.rsmexplorer.actions.identification;
 
+import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dpm.AccessJMSManagerThread;
 import fr.proline.studio.dpm.task.jms.AbstractJMSCallback;
 import fr.proline.studio.dpm.task.jms.DownloadFileTask;
-import fr.proline.studio.dpm.task.jms.ExportRSMTask;
+import fr.proline.studio.dpm.task.jms.ExportDatasetTask;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.rsmexplorer.gui.dialog.pride.ExportPrideDialog;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree.TreeType;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
+import java.util.ArrayList;
+import java.util.List;
 import org.openide.util.NbBundle;
 import org.openide.windows.WindowManager;
 import org.slf4j.Logger;
@@ -70,8 +73,8 @@ public class ExportRSM2PrideJMSAction extends AbstractRSMAction {
                 };
 
                 // used as out parameter for the service
-                final String[] _filePath = new String[1];
-                final String[] _JMSNodeId = new String[1];
+                final List<String>_filePath = new ArrayList();             
+                final List<String> _JMSNodeId = new ArrayList();
 
                 AbstractJMSCallback exportCallback = new AbstractJMSCallback() {
 
@@ -88,7 +91,7 @@ public class ExportRSM2PrideJMSAction extends AbstractRSMAction {
                             if (!fileName.endsWith(".xml") && !fileName.endsWith(".XML")) {
                                 fileName += ".xml";
                             }
-                            DownloadFileTask task = new DownloadFileTask(downloadCallback, fileName, _filePath[0], _JMSNodeId[0]);
+                            DownloadFileTask task = new DownloadFileTask(downloadCallback, fileName, _filePath.get(0), _JMSNodeId.get(0));
                             AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
 
                         } else {
@@ -98,8 +101,10 @@ public class ExportRSM2PrideJMSAction extends AbstractRSMAction {
                         }
                     }
                 };
-
-                ExportRSMTask exportTask = new ExportRSMTask(exportCallback, dataSetNode.getDataset(), false, _filePath, _JMSNodeId, ExportRSMTask.ExporterFormat.PRIDE, dialog.getExportParams());
+                
+                List<DDataset> dsets = new ArrayList<>();
+                dsets.add(dataSetNode.getDataset());
+                ExportDatasetTask exportTask = new ExportDatasetTask(exportCallback, dsets, null, _filePath, _JMSNodeId, ExportDatasetTask.ExporterFormat.PRIDE, dialog.getExportParams());
                 AccessJMSManagerThread.getAccessJMSManagerThread().addTask(exportTask);
 
                 return null;

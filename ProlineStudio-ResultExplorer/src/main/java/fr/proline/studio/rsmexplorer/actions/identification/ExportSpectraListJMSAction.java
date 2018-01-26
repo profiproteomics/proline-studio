@@ -31,9 +31,9 @@ public class ExportSpectraListJMSAction extends AbstractRSMAction {
         super(NbBundle.getMessage(ExportSpectraListJMSAction.class, "CTL_ExportSpectraListAction"), treeType);
     }
     
-    public ExportSpectraListJMSAction(AbstractTree.TreeType treeType, boolean exportTitle) {
-        super(NbBundle.getMessage(ExportSpectraListJMSAction.class, "CTL_ExportAction")+" "+NbBundle.getMessage(ExportSpectraListJMSAction.class, "CTL_ExportSpectraListAction") , treeType);
-    }
+//    public ExportSpectraListJMSAction(AbstractTree.TreeType treeType, boolean exportTitle) {
+//        super(NbBundle.getMessage(ExportSpectraListJMSAction.class, "CTL_ExportAction")+" "+NbBundle.getMessage(ExportSpectraListJMSAction.class, "CTL_ExportSpectraListAction") , treeType);
+//    }
 
     @Override
     public void actionPerformed(final AbstractNode[] selectedNodes, final int x, final int y) {
@@ -112,7 +112,7 @@ public class ExportSpectraListJMSAction extends AbstractRSMAction {
                 
                 List<DDataset> dsets = new ArrayList<>();
                 dsets.add(dataSetNode.getDataset());
-                ExportDatasetTask task = new ExportDatasetTask(exportCallback, dsets, null, _filePath, _jmsNodeId, ExportDatasetTask.ExporterFormat.SPECTRA_LIST, null);
+            ExportDatasetTask task = new ExportDatasetTask(exportCallback, dsets, null, _filePath, _jmsNodeId, ExportDatasetTask.ExporterFormat.SPECTRA_LIST, null);
                 AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
 
                 return null;

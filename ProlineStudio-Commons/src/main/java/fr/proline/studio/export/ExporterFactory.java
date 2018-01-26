@@ -13,8 +13,9 @@ public class ExporterFactory {
     public static final int EXPORT_FROM_SERVER = 3;
     public static final int EXPORT_XIC = 4;
     public static final int EXPORT_MGF = 5;
-    public static final int EXPORT_TSV = 6; //VDS : NOT USED !!!! 
-    public static final int EXPORT_SPECTRA = 7;
+    //public static final int EXPORT_TSV = 6; //VDS : NOT USED !!!! 
+    public static final int EXPORT_SPECTRA = 6;
+    public static final int EXPORT_MZIDENTML = 7;
 
     private static ArrayList<ExporterInfo> m_listTable = null;
     private static ArrayList<ExporterInfo> m_listImage = null;
@@ -22,6 +23,7 @@ public class ExporterFactory {
     private static ArrayList<ExporterInfo> m_listXic = null;
     private static ArrayList<ExporterInfo> m_listMGF = null;
     private static ArrayList<ExporterInfo> m_listSpectra = null;
+    private static ArrayList<ExporterInfo> m_listMzIdent = null;
     
     public static final ExporterInfo EXPORTER_INFO_PNG = new ExporterInfo(ExporterType.PNG, "PNG (.png)", "png");
     public static final ExporterInfo EXPORTER_INFO_SVG = new ExporterInfo(ExporterType.SVG, "SVG (.svg)", "svg");
@@ -33,9 +35,10 @@ public class ExporterFactory {
         PNG,
         SVG, 
         MGF, 
-        TSV
+        TSV,
+        MZID
     };
-    
+       
     public static  ArrayList<ExporterInfo> getList(int exportType) {
         
         if (exportType == EXPORT_TABLE) {
@@ -109,6 +112,13 @@ public class ExporterFactory {
             m_listMGF.add(new ExporterInfo(ExporterType.TSV, "TSV (.tsv)", "tsv"));
 
             return m_listMGF; 
+        } else if (exportType == EXPORT_MZIDENTML) {
+            if(m_listMzIdent != null)
+                return m_listMzIdent;
+            
+            m_listMzIdent = new ArrayList<>(1);
+            m_listMzIdent.add(new ExporterInfo(ExporterType.MZID, "MzIdentML (.mzid)","mzid"));
+            return m_listMzIdent; 
         }
         return new ArrayList(); // should not happen
     }

@@ -39,9 +39,9 @@ import org.openide.windows.WindowManager;
  */
 public class ExportDialog extends DefaultDialog {
 
-    private static ExportDialog m_singletonImageDialog = null;
-    private static ExportDialog m_singletonExcelDialog = null;
-    private static ExportDialog m_singletonServerDialog = null;
+    private static ExportDialog m_singletonImageDialog = null; //Exort directly an image dfrom Studio 
+    private static ExportDialog m_singletonExcelDialog = null; //Export directly from Studio table
+    private static ExportDialog m_singletonServerDialog = null; //Run Server side export
 
     private int m_exportType;
 
@@ -67,11 +67,13 @@ public class ExportDialog extends DefaultDialog {
 
     private ExportManager m_exportManager = null;
 
+    //This metghod is called when exportind directly a table from Studio GUI
     public static ExportDialog getDialog(Window parent, JXTable table, String exportName) {
         if (m_singletonExcelDialog == null) {
             m_singletonExcelDialog = new ExportDialog(parent, ExporterFactory.EXPORT_TABLE);
         }
 
+        //Update data to export
         m_singletonExcelDialog.m_table = table;
         m_singletonExcelDialog.m_exportName = exportName;
 
@@ -80,31 +82,36 @@ public class ExportDialog extends DefaultDialog {
         return m_singletonExcelDialog;
     }
 
+    //This method is called when exportind directly an image from Studio GUI
     public static ExportDialog getDialog(Window parent, JPanel panel, String exportName) {
         if (m_singletonImageDialog == null) {
             m_singletonImageDialog = new ExportDialog(parent, ExporterFactory.EXPORT_IMAGE);
         }
-
+        
+        //Update data to export
         m_singletonImageDialog.m_panel = panel;
         m_singletonImageDialog.m_exportName = exportName;
 
         return m_singletonImageDialog;
     }
 
+    //This method is called when exportind an Identification RSM on server side
     public static ExportDialog getDialog(Window parent, Boolean showExportAllPSMsOption) {
         if (m_singletonServerDialog == null) {
             m_singletonServerDialog = new ExportDialog(parent, ExporterFactory.EXPORT_FROM_SERVER, showExportAllPSMsOption);
-        } else if (!m_singletonServerDialog.m_showExportAllPSMsChB.equals(showExportAllPSMsOption)) {
+        } else if (!m_singletonServerDialog.m_showExportAllPSMsChB.equals(showExportAllPSMsOption)) { //option has changed, create nex dialog
             m_singletonServerDialog = new ExportDialog(parent, ExporterFactory.EXPORT_FROM_SERVER, showExportAllPSMsOption);
         }
 
         return m_singletonServerDialog;
     }
 
+    //This method is called when exportind from server side. Data to export is specified throhg export type
     public static ExportDialog getDialog(Window parent, Boolean showExportAllPSMsOption, int exportType) {
         if (m_singletonServerDialog == null) {
             m_singletonServerDialog = new ExportDialog(parent, exportType, showExportAllPSMsOption);
-        } else if (!m_singletonServerDialog.m_showExportAllPSMsChB.equals(showExportAllPSMsOption)) {
+        } else if((m_singletonServerDialog.m_exportType != exportType)
+                || (!m_singletonServerDialog.m_showExportAllPSMsChB.equals(showExportAllPSMsOption))) {
             m_singletonServerDialog = new ExportDialog(parent, exportType, showExportAllPSMsOption);
         }
 
@@ -125,15 +132,21 @@ public class ExportDialog extends DefaultDialog {
         m_exportType = type;
 
         setTitle("Export");
-
         setDocumentationSuffix("id.37m2jsg");
 
         String defaultExportPath;
         Preferences preferences = NbPreferences.root();
-        if ((m_exportType == ExporterFactory.EXPORT_TABLE) || (m_exportType == ExporterFactory.EXPORT_FROM_SERVER) || (m_exportType == ExporterFactory.EXPORT_XIC) || (m_exportType == ExporterFactory.EXPORT_SPECTRA)) {
+        if ((m_exportType == ExporterFactory.EXPORT_TABLE) 
+                || (m_exportType == ExporterFactory.EXPORT_FROM_SERVER) 
+                || (m_exportType == ExporterFactory.EXPORT_XIC) 
+                || (m_exportType == ExporterFactory.EXPORT_SPECTRA)
+                || (m_exportType == ExporterFactory.EXPORT_MZIDENTML)
+                ) {
             defaultExportPath = preferences.get("DefaultExcelExportPath", System.getProperty("user.home"));
-        } else { // IMAGE
+        } else if(m_exportType == ExporterFactory.EXPORT_IMAGE) {
             defaultExportPath = preferences.get("DefaultImageExportPath", System.getProperty("user.home"));
+        } else {
+            throw new IllegalArgumentException("Unknow export type specified "+m_exportType);
         }
 
         setInternalComponent(createExportPanel(defaultExportPath));
@@ -219,7 +232,7 @@ public class ExportDialog extends DefaultDialog {
 
                     String absolutePath = file.getAbsolutePath();
                     String fileName = file.getName();
-                    if (fileName.indexOf('.') == -1) {
+                    if (fileName.indexOf('.') == -1 && exporterInfo!=null ) {
                         absolutePath += "." + exporterInfo.getFileExtension();
                     }
                     m_fileTextField.setText(absolutePath);
@@ -231,7 +244,8 @@ public class ExportDialog extends DefaultDialog {
         c.gridwidth = 1;
         exportPanel.add(addFileButton, c);
 
-        if ((m_exportType == ExporterFactory.EXPORT_FROM_SERVER || m_exportType == ExporterFactory.EXPORT_XIC) && m_showExportAllPSMsChB) {
+        if ((m_exportType == ExporterFactory.EXPORT_FROM_SERVER 
+                || m_exportType == ExporterFactory.EXPORT_XIC) && m_showExportAllPSMsChB) {
             //Allow specific parameter in this case
             c.gridy++;
             c.gridx = 0;
@@ -239,7 +253,6 @@ public class ExportDialog extends DefaultDialog {
             m_exportAllPSMsChB = new JCheckBox("Export all PSMs");
             exportPanel.add(m_exportAllPSMsChB, c);
         }
-
 
 
         m_exporTypeCombobox = new JComboBox(ExporterFactory.getList(m_exportType).toArray());
@@ -292,7 +305,7 @@ public class ExportDialog extends DefaultDialog {
     }
 
     public Boolean exportAllPSMs() {
-        if (m_exportType == ExporterFactory.EXPORT_FROM_SERVER) {
+        if (m_exportType == ExporterFactory.EXPORT_FROM_SERVER || m_exportType == ExporterFactory.EXPORT_XIC) {
             return m_exportAllPSMsChB.isSelected();
         } else {
             return null;
@@ -369,12 +382,15 @@ public class ExportDialog extends DefaultDialog {
 
             m_exportManager = new ExportManager(m_table);
             ProgressTask exportTask = m_exportManager.getTask(exporterInfo.getExporter(), m_exportName, fileName, exportDecorated());
-
             startTask(exportTask);
-
+            
             Preferences preferences = NbPreferences.root();
             preferences.put("DefaultExcelExportPath", f.getAbsoluteFile().getParentFile().getAbsolutePath());
-        } else if (m_exportType == ExporterFactory.EXPORT_FROM_SERVER || m_exportType == ExporterFactory.EXPORT_XIC || m_exportType == ExporterFactory.EXPORT_SPECTRA) {
+            
+        } else if (m_exportType == ExporterFactory.EXPORT_FROM_SERVER 
+                || m_exportType == ExporterFactory.EXPORT_XIC 
+                || m_exportType == ExporterFactory.EXPORT_SPECTRA
+                || m_exportType == ExporterFactory.EXPORT_MZIDENTML) {
 
             startTask(m_singletonServerDialog.m_task);
 

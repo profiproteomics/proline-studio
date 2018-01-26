@@ -17,7 +17,7 @@ public class ExportAction extends AbstractRSMAction {
     private AbstractRSMAction m_exportDatasetAction; 
     private AbstractRSMAction m_exportPrideAction;
     private AbstractRSMAction m_exportSpectraAction;
-    
+    private AbstractRSMAction m_exportMzIdentMLAction;
     
     private JMenu m_menu;
     
@@ -37,19 +37,24 @@ public class ExportAction extends AbstractRSMAction {
 
         if (AbstractTree.TreeType.TREE_IDENTIFICATION.equals(m_treeType)) {
             m_exportPrideAction = new ExportRSM2PrideJMSAction(m_treeType);
-
+            m_exportMzIdentMLAction = new ExportMzIdentMLAction(m_treeType);
         } else {
             m_exportPrideAction = null;
+            m_exportMzIdentMLAction = null;
         }
         
         m_exportSpectraAction = new ExportSpectraListJMSAction(m_treeType);
-
 
         JMenuItem exportDatasetItem = new JMenuItem(m_exportDatasetAction);
         m_menu.add(exportDatasetItem);
         if(m_exportPrideAction!=null){
             JMenuItem exportPrideItem = new JMenuItem(m_exportPrideAction);
             m_menu.add(exportPrideItem);
+        }
+        
+        if(m_exportMzIdentMLAction!=null){
+            JMenuItem exportMzIdentMLItem = new JMenuItem(m_exportMzIdentMLAction);
+            m_menu.add(exportMzIdentMLItem);
         }
 
         if(m_exportSpectraAction!=null){
@@ -67,11 +72,14 @@ public class ExportAction extends AbstractRSMAction {
         if(m_exportPrideAction!=null){
             m_exportPrideAction.updateEnabled(selectedNodes);
         }
+        if(m_exportMzIdentMLAction!=null){
+            m_exportMzIdentMLAction.updateEnabled(selectedNodes);
+        }        
         if(m_exportSpectraAction!=null){
             m_exportSpectraAction.updateEnabled(selectedNodes);
         }       
         
-        boolean isEnabled = m_exportDatasetAction.isEnabled() || (m_exportPrideAction != null && m_exportPrideAction.isEnabled()) ||  (m_exportSpectraAction != null && m_exportSpectraAction.isEnabled());
+        boolean isEnabled = m_exportDatasetAction.isEnabled() || (m_exportPrideAction != null && m_exportPrideAction.isEnabled()) ||  (m_exportSpectraAction != null && m_exportSpectraAction.isEnabled()) ||  (m_exportMzIdentMLAction  != null && m_exportMzIdentMLAction.isEnabled());
         setEnabled(isEnabled);
         m_menu.setEnabled(isEnabled);
     }

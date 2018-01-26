@@ -30,7 +30,8 @@ public class ExportDatasetTask extends AbstractJMSTask {
     public enum ExporterFormat {
         PRIDE,
         TEMPLATED,
-        SPECTRA_LIST
+        SPECTRA_LIST,
+        MZIDENTML
     };
     private static String m_serviceName = "proline/dps/msi/ExportResultSummary";
     private static final String m_version = "2.0";

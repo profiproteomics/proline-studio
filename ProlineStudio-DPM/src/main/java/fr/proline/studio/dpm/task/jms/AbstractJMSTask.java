@@ -1,7 +1,6 @@
 package fr.proline.studio.dpm.task.jms;
 
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Error;
-import com.thetransactioncompany.jsonrpc2.JSONRPC2Response;
 import fr.proline.core.orm.uds.UserAccount;
 import fr.proline.studio.dam.DatabaseDataManager;
 import fr.proline.studio.dam.taskinfo.AbstractLongTask;
@@ -40,7 +39,6 @@ public abstract class AbstractJMSTask  extends AbstractLongTask implements Messa
     protected JMSState m_currentState = null;
     
     protected TaskError m_taskError = null;
-    private long m_startRun = -1;
     
     protected boolean m_synchronous;
     private int responseTimeout = 10000;
@@ -84,7 +82,6 @@ public abstract class AbstractJMSTask  extends AbstractLongTask implements Messa
      * @throws javax.jms.JMSException
      */
     public void askJMS() throws JMSException {
-        m_startRun = System.currentTimeMillis();
         try {
 
             /*
@@ -173,7 +170,8 @@ public abstract class AbstractJMSTask  extends AbstractLongTask implements Messa
     public final void onMessage(final Message jmsMessage) {       
         
         long endRun = System.currentTimeMillis();
-        this.m_taskInfo.setDuration(endRun-m_startRun);
+//        this.m_taskInfo.setDuration(endRun-m_startRun);
+        this.m_taskInfo.setDuration(endRun-m_taskInfo.getStartTimestamp());
         
         if(jmsMessage != null) {
             m_loggerProline.info("Receiving message n° " + MESSAGE_COUNT_SEQUENCE.incrementAndGet() + " : " + JMSMessageUtil.formatMessage(jmsMessage));

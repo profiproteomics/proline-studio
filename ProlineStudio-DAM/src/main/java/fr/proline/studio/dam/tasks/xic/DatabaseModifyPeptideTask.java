@@ -265,7 +265,7 @@ public class DatabaseModifyPeptideTask extends AbstractDatabaseTask {
                     HashMap<Long, Peptide> peptideMap = new HashMap<>();
 
                     List<DPeptideInstance> peptideInstanceList = new ArrayList();
-                    String querySelect = "SELECT  pi, pm.id, pm.rank, pm.charge, pm.deltaMoz, pm.experimentalMoz, pm.missedCleavage, pm.score, pm.resultSet.id, pm.cdPrettyRank, pm.sdPrettyRank, p "
+                    String querySelect = "SELECT  pi, pm.id, pm.rank, pm.charge, pm.deltaMoz, pm.experimentalMoz, pm.missedCleavage, pm.score, pm.resultSet.id, pm.cdPrettyRank, pm.sdPrettyRank, pm.serializedProperties, p "
                             + "FROM fr.proline.core.orm.msi.PeptideInstance pi,  "
                             + "fr.proline.core.orm.msi.PeptideMatch pm, fr.proline.core.orm.msi.Peptide p  "
                             + "WHERE pi.id IN (:listId) AND  "
@@ -292,9 +292,10 @@ public class DatabaseModifyPeptideTask extends AbstractDatabaseTask {
                         Long pmResultSetId = (Long) resCur[8];
                         Integer pmCdPrettyRank = (Integer) resCur[9];
                         Integer pmSdPrettyRank = (Integer) resCur[10];
-                        DPeptideMatch pm = new DPeptideMatch(pmId, pmRank, pmCharge, pmDeltaMoz, pmExperimentalMoz, pmMissedCleavage, pmScore, pmResultSetId, pmCdPrettyRank, pmSdPrettyRank);
+                        String pmSerializedProp = (String) resCur[11];
+                        DPeptideMatch pm = new DPeptideMatch(pmId, pmRank, pmCharge, pmDeltaMoz, pmExperimentalMoz, pmMissedCleavage, pmScore, pmResultSetId, pmCdPrettyRank, pmSdPrettyRank, pmSerializedProp );
 
-                        Peptide p = (Peptide) resCur[11];
+                        Peptide p = (Peptide) resCur[12];
                         p.getTransientData().setPeptideReadablePtmStringLoaded();
                         peptideMap.put(p.getId(), p);
 

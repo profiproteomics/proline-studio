@@ -128,7 +128,7 @@ public class DatabaseRsetProperties extends AbstractDatabaseTask {
         
         rset.getTransientData().setProteinMatchesCount(Integer.valueOf(proteinMatchNumber.intValue()));
 
-long step2 = System.currentTimeMillis();
+        long step2 = System.currentTimeMillis();
         
         // Count Peptide Match
         /*TypedQuery<Long> countPeptideMatchQuery = entityManagerMSI.createQuery("SELECT count(pm) FROM fr.proline.core.orm.msi.PeptideMatch pm WHERE pm.resultSet.id=:rsetId", Long.class);

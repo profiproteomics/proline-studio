@@ -1015,7 +1015,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
         List<DPeptideInstance> peptideInstanceList = new ArrayList();
         String querySelect;
         if (xic) {
-            querySelect = "SELECT  pi, pm.id, pm.rank, pm.charge, pm.deltaMoz, pm.experimentalMoz, pm.missedCleavage, pm.score, pm.resultSet.id, pm.cdPrettyRank, pm.sdPrettyRank, p, mqpi.elutionTime "
+            querySelect = "SELECT  pi, pm.id, pm.rank, pm.charge, pm.deltaMoz, pm.experimentalMoz, pm.missedCleavage, pm.score, pm.resultSet.id, pm.cdPrettyRank, pm.sdPrettyRank, p, pm.serializedProperties, mqpi.elutionTime "
                 + "FROM fr.proline.core.orm.msi.PeptideInstance pi,  "
                 + "fr.proline.core.orm.msi.PeptideMatch pm, fr.proline.core.orm.msi.Peptide p, fr.proline.core.orm.msi.MasterQuantPeptideIon mqpi "
                 + "WHERE pi.id IN (:listId) AND "
@@ -1023,7 +1023,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                 + "pm.peptideId=p.id  AND  pi.id = mqpi.peptideInstance.id "
                 + "ORDER BY pm.score DESC";
         } else { // Spectral Count
-            querySelect = "SELECT  pi, pm.id, pm.rank, pm.charge, pm.deltaMoz, pm.experimentalMoz, pm.missedCleavage, pm.score, pm.resultSet.id, pm.cdPrettyRank, pm.sdPrettyRank, p "
+            querySelect = "SELECT  pi, pm.id, pm.rank, pm.charge, pm.deltaMoz, pm.experimentalMoz, pm.missedCleavage, pm.score, pm.resultSet.id, pm.cdPrettyRank, pm.sdPrettyRank, p, pm.serializedProperties "
                 + "FROM fr.proline.core.orm.msi.PeptideInstance pi,  "
                 + "fr.proline.core.orm.msi.PeptideMatch pm, fr.proline.core.orm.msi.Peptide p "
                 + "WHERE pi.id IN (:listId) AND "
@@ -1041,7 +1041,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
         while (itPeptidesQuery.hasNext()) {
             Object[] resCur = itPeptidesQuery.next();
             PeptideInstance pi = (PeptideInstance) resCur[0];
-            Float elutionTime = (xic) ? (Float) resCur[12] : pi.getElutionTime();
+            Float elutionTime = (xic) ? (Float) resCur[13] : pi.getElutionTime();
             DPeptideInstance dpi = new DPeptideInstance(pi.getId(), pi.getPeptide().getId(), pi.getValidatedProteinSetCount(), elutionTime);
             dpi.setResultSummary(pi.getResultSummary());
             Long pmId = (Long) resCur[1];
@@ -1058,7 +1058,8 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                 Long pmResultSetId = (Long) resCur[8];
                 Integer pmCdPrettyRank = (Integer) resCur[9];
                 Integer pmSdPrettyRank = (Integer) resCur[10];
-                pm = new DPeptideMatch(pmId, pmRank, pmCharge, pmDeltaMoz, pmExperimentalMoz, pmMissedCleavage, pmScore, pmResultSetId, pmCdPrettyRank, pmSdPrettyRank);
+                String pmSerializedProp = (String) resCur[12];
+                pm = new DPeptideMatch(pmId, pmRank, pmCharge, pmDeltaMoz, pmExperimentalMoz, pmMissedCleavage, pmScore, pmResultSetId, pmCdPrettyRank, pmSdPrettyRank,pmSerializedProp);
                 pm.setRetentionTime(elutionTime);
                 peptideMatchMap.put(pmId, pm);
             }
@@ -1208,7 +1209,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                 if (extendedPeptideInstanceList == null) {
                     extendedPeptideInstanceList = new ArrayList();
                     
-                    String querySelect2 = "SELECT  pi, pm.id, pm.rank, pm.charge, pm.deltaMoz, pm.experimentalMoz, pm.missedCleavage, pm.score, pm.resultSet.id, pm.cdPrettyRank, pm.sdPrettyRank, p "
+                    String querySelect2 = "SELECT  pi, pm.id, pm.rank, pm.charge, pm.deltaMoz, pm.experimentalMoz, pm.missedCleavage, pm.score, pm.resultSet.id, pm.cdPrettyRank, pm.sdPrettyRank, pm.serializedProperties, p "
                             + "FROM fr.proline.core.orm.msi.PeptideInstance pi,  "
                             + "fr.proline.core.orm.msi.PeptideMatch pm, fr.proline.core.orm.msi.Peptide p  "
                             + "WHERE pi.id IN (:listId) AND  "
@@ -1216,7 +1217,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                             + "pm.peptideId=p.id  "
                             + "ORDER BY pm.score DESC";
 
-                          Query query2 = entityManagerMSI.createQuery(querySelect2);
+                    Query query2 = entityManagerMSI.createQuery(querySelect2);
                     query2.setParameter("listId", listPeptideInstanceIds);
                     List resultList2 = query2.getResultList();
 
@@ -1240,7 +1241,8 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                             Long pmResultSetId = (Long) resCur[8];
                             Integer pmCdPrettyRank = (Integer) resCur[9];
                             Integer pmSdPrettyRank = (Integer) resCur[10];
-                            pm = new DPeptideMatch(pmId, pmRank, pmCharge, pmDeltaMoz, pmExperimentalMoz, pmMissedCleavage, pmScore, pmResultSetId, pmCdPrettyRank, pmSdPrettyRank);
+                            String pmSerializedProp = (String) resCur[11];
+                            pm = new DPeptideMatch(pmId, pmRank, pmCharge, pmDeltaMoz, pmExperimentalMoz, pmMissedCleavage, pmScore, pmResultSetId, pmCdPrettyRank, pmSdPrettyRank, pmSerializedProp);
                             
                             if (!xic) {
                                 pm.setRetentionTime(pi.getElutionTime());
@@ -1248,7 +1250,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                             peptideMatchMap.put(pmId, pm);
                         }
 
-                        Peptide p = (Peptide) resCur[11];
+                        Peptide p = (Peptide) resCur[12];
                         p.getTransientData().setPeptideReadablePtmStringLoaded();
                         peptideMap.put(p.getId(), p);
 
@@ -1850,7 +1852,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
 
         // load dPeptideInstance and PeptideMatch
         List<DPeptideInstance> peptideInstanceList = new ArrayList();
-        String querySelect = "SELECT  pi.id, pm.id, pm.rank, pm.charge, pm.deltaMoz, pm.experimentalMoz, pm.missedCleavage, pm.score, pm.resultSet.id, pm.cdPrettyRank, pm.sdPrettyRank "
+        String querySelect = "SELECT  pi.id, pm.id, pm.rank, pm.charge, pm.deltaMoz, pm.experimentalMoz, pm.missedCleavage, pm.score, pm.resultSet.id, pm.cdPrettyRank, pm.sdPrettyRank, pm.serializedProperties "
                 + "FROM fr.proline.core.orm.msi.PeptideInstance pi,  "
                 + "fr.proline.core.orm.msi.PeptideMatch pm "
                 + "WHERE pi.id IN (:listId) AND  "
@@ -1885,7 +1887,8 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                 Long pmResultSetId = (Long) resCur[8];
                 Integer pmCdPrettyRank = (Integer) resCur[9];
                 Integer pmSdPrettyRank = (Integer) resCur[10];
-                pm = new DPeptideMatch(pmId, pmRank, pmCharge, pmDeltaMoz, pmExperimentalMoz, pmMissedCleavage, pmScore, pmResultSetId, pmCdPrettyRank, pmSdPrettyRank);
+                String pmSerializedProp  = (String) resCur[11];
+                pm = new DPeptideMatch(pmId, pmRank, pmCharge, pmDeltaMoz, pmExperimentalMoz, pmMissedCleavage, pmScore, pmResultSetId, pmCdPrettyRank, pmSdPrettyRank, pmSerializedProp);
                 peptideMatchMap.put(pmId, pm);
             }
             
@@ -2012,7 +2015,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                             peptideInstanceIdRSM = (Long) o;
                         }
 
-                        String query = "SELECT  new fr.proline.core.orm.msi.dto.DPeptideMatch(pm.id, pm.rank, pm.charge, pm.deltaMoz, pm.experimentalMoz, pm.missedCleavage, pm.score, pm.resultSet.id, pm.cdPrettyRank, pm.sdPrettyRank) "
+                        String query = "SELECT  new fr.proline.core.orm.msi.dto.DPeptideMatch(pm.id, pm.rank, pm.charge, pm.deltaMoz, pm.experimentalMoz, pm.missedCleavage, pm.score, pm.resultSet.id, pm.cdPrettyRank, pm.sdPrettyRank, pm.serializedProperties) "
                                 + "FROM  fr.proline.core.orm.msi.PeptideMatch pm, fr.proline.core.orm.msi.PeptideInstancePeptideMatchMap pipm , fr.proline.core.orm.msi.Peptide p "
                                 + "WHERE pipm.resultSummary.id=:rsmId AND "
                                 + "pipm.id.peptideMatchId=pm.id AND "

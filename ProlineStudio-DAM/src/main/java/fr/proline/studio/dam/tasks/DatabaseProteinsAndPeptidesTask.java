@@ -132,7 +132,7 @@ public class DatabaseProteinsAndPeptidesTask extends AbstractDatabaseTask {
 
             
             // Load Peptide Matches
-            TypedQuery peptideMatchQuery = entityManagerMSI.createQuery("SELECT new fr.proline.core.orm.msi.dto.DPeptideMatch(pm.id, pm.rank, pm.charge, pm.deltaMoz, pm.experimentalMoz, pm.missedCleavage, pm.score, pm.resultSet.id, pm.cdPrettyRank, pm.sdPrettyRank, pm.isDecoy) FROM fr.proline.core.orm.msi.PeptideMatch pm WHERE pm.id IN (:listId) ", DPeptideMatch.class);
+            TypedQuery peptideMatchQuery = entityManagerMSI.createQuery("SELECT new fr.proline.core.orm.msi.dto.DPeptideMatch(pm.id, pm.rank, pm.charge, pm.deltaMoz, pm.experimentalMoz, pm.missedCleavage, pm.score, pm.resultSet.id, pm.cdPrettyRank, pm.sdPrettyRank, pm.isDecoy, pm.serializedProperties) FROM fr.proline.core.orm.msi.PeptideMatch pm WHERE pm.id IN (:listId) ", DPeptideMatch.class);
             peptideMatchQuery.setParameter("listId", m_peptideMatchIdArray);
             List<DPeptideMatch> peptideMatchList = peptideMatchQuery.getResultList();
             

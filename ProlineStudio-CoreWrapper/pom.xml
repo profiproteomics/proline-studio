@@ -161,6 +161,7 @@
                         <publicPackage>fr.proline.security</publicPackage>
                         <publicPackage>fr.proline.util</publicPackage>
                         <publicPackage>fr.proline.util.version</publicPackage>
+                        <publicPackage>fr.proline.studio.corewrapper.util</publicPackage>
                         <publicPackage>javassist</publicPackage>
                         <publicPackage>javax.annotation</publicPackage>
                         <publicPackage>javax.annotation.concurrent</publicPackage>

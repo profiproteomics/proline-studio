@@ -7,18 +7,13 @@ import javax.swing.JTable;
 
 
 
-import fr.proline.core.orm.msi.dto.DPeptideMatch;
 
-import fr.proline.studio.rsmexplorer.gui.spectrum.PeptideFragmentationData.FragmentMatch;
 import fr.proline.studio.rsmexplorer.gui.spectrum.PeptideFragmentationData.TheoreticalFragmentSeries;
 import fr.proline.studio.table.DecoratedTable;
 import fr.proline.studio.table.DecoratedTableModel;
 import fr.proline.studio.table.TablePopupMenu;
-import java.util.List;
 import javax.swing.table.TableCellRenderer;
 
-import javax.swing.table.TableColumn;
-import org.jdesktop.swingx.table.TableColumnExt;
 
 	/**
 	* Created by AW

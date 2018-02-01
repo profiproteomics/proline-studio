@@ -27,7 +27,7 @@ public class HelpUtils {
         }
         final String START_URL = "http://biodev.extra.cea.fr/docs/proline/doku.php";
         final String START_URL_WITH_PARAMETER = "http://biodev.extra.cea.fr/docs/proline/doku.php?id=";
-        final String NEW_URL = "http://proline.profiproteomics.fr/doc/1.3/";
+        final String NEW_URL = "http://proline.profiproteomics.fr/doc/1.6/";
         if (PUBLIC_RELEASE_VERSION && helpURL.startsWith(START_URL)) {
             if (helpURL.startsWith(START_URL_WITH_PARAMETER)) {
                 helpURL = NEW_URL + helpURL.substring(START_URL_WITH_PARAMETER.length()).replaceAll(" ", "_").replaceAll(":", "/") + ".html";
@@ -74,7 +74,7 @@ public class HelpUtils {
             tmpFile.deleteOnExit();
             // writes redirect page content to file 
             writer = new BufferedWriter(new FileWriter(tmpFile));
-            writer.write(createRedirectPage(new File(".").getCanonicalPath() + File.separatorChar + "documentation" + File.separatorChar + "Proline_UserGuide_1.5.docx.html#"+documentationSuffix));
+            writer.write(createRedirectPage(new File(".").getCanonicalPath() + File.separatorChar + "documentation" + File.separatorChar + "Proline_UserGuide_1.6.docx.html#"+documentationSuffix));
             writer.close();
         } catch (IOException e) {
             return null;

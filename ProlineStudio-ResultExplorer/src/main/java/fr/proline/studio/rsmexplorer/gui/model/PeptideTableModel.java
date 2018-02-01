@@ -10,6 +10,7 @@ import fr.proline.core.orm.msi.dto.DPeptideInstance;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.msi.dto.DPeptidePTM;
 import fr.proline.core.orm.msi.dto.DProteinSet;
+import fr.proline.studio.corewrapper.util.PeptideClassesUtils;
 import fr.proline.studio.extendedtablemodel.ExtraDataType;
 import fr.proline.studio.export.ExportModelUtilities;
 import fr.proline.studio.export.ExportFontData;
@@ -280,19 +281,14 @@ public class PeptideTableModel extends DecoratedTableModel implements GlobalTabl
                     return null; // should never happen   
                 }
                 return Float.valueOf(peptideMatch.getDeltaMoz());
-            }*/
+            }*/           
             case COLTYPE_PEPTIDE_PPM: {
                 DPeptideMatch peptideMatch = (DPeptideMatch) peptideInstance.getBestPeptideMatch();
                 if (peptideMatch == null) {
                     return null; // should never happen   
                 }
                 
-                double deltaMoz = (double) peptideMatch.getDeltaMoz();
-                double calculatedMass = peptideMatch.getPeptide().getCalculatedMass();
-                double charge = (double) peptideMatch.getCharge();
-                final double CSTE = 1.007825;
-                final double EXP_CSTE = StrictMath.pow(10, 6);
-                float ppm = (float) ((deltaMoz * EXP_CSTE) / ((calculatedMass + (charge * CSTE)) / charge));
+                float ppm = PeptideClassesUtils.getPPMFor(peptideMatch, peptideMatch.getPeptide());  
 
                 return Float.valueOf(ppm);
 

@@ -8,6 +8,7 @@ import fr.proline.core.orm.msi.PeptideReadablePtmString;
 import fr.proline.core.orm.msi.SequenceMatch;
 import fr.proline.core.orm.msi.dto.DMsQuery;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
+import fr.proline.studio.corewrapper.util.PeptideClassesUtils;
 import fr.proline.studio.extendedtablemodel.ExtraDataType;
 import fr.proline.studio.dam.tasks.DatabaseLoadPeptideMatchTask;
 import fr.proline.studio.export.ExportModelUtilities;
@@ -404,19 +405,7 @@ public class PeptideMatchTableModel extends LazyTableModel implements GlobalTabl
                     return lazyData;
                 }
                 
-                
-                double deltaMoz = (double) peptideMatch.getDeltaMoz();
-                double calculatedMass = peptide.getCalculatedMass() ;
-                double charge = (double) peptideMatch.getCharge(); 
-                final double CSTE = 1.007825;
-                final double EXP_CSTE = StrictMath.pow(10, 6);
-                float ppm = (float) ((deltaMoz*EXP_CSTE) / ((calculatedMass + (charge*CSTE))/charge));
-                
-                if ((calculatedMass >= -1e-10) && (calculatedMass <= 1e-10)) {
-                    //calculatedMass == 0; // it was a bug, does no longer exist, but 0 values can exist in database.
-                    ppm = 0;
-                }
-
+                float ppm = PeptideClassesUtils.getPPMFor(peptideMatch, peptide);   
                 lazyData.setData(Float.valueOf(ppm));
                 return  lazyData;
             }

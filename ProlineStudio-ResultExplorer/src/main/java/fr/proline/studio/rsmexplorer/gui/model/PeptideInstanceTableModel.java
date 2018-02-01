@@ -10,6 +10,7 @@ import fr.proline.core.orm.msi.PeptideReadablePtmString;
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.msi.dto.DMsQuery;
+import fr.proline.studio.corewrapper.util.PeptideClassesUtils;
 import fr.proline.studio.extendedtablemodel.ExtraDataType;
 import fr.proline.studio.dam.tasks.DatabaseLoadPeptidesInstancesTask;
 import fr.proline.studio.export.ExportModelUtilities;
@@ -199,14 +200,7 @@ public class PeptideInstanceTableModel extends LazyTableModel implements GlobalT
                 return Float.valueOf((float) peptideMatch.getExperimentalMoz());
             }
             case COLTYPE_PEPTIDE_PPM: {
-
-                double deltaMoz = (double) peptideMatch.getDeltaMoz();
-                double calculatedMass = peptideMatch.getPeptide().getCalculatedMass() ;
-                double charge = (double) peptideMatch.getCharge(); 
-                final double CSTE = 1.007825;
-                final double EXP_CSTE = StrictMath.pow(10, 6);
-                float ppm = (float) ((deltaMoz*EXP_CSTE) / ((calculatedMass + (charge*CSTE))/charge));
-                
+                float ppm = PeptideClassesUtils.getPPMFor(peptideMatch, peptideMatch.getPeptide());               
                 return Float.valueOf(ppm);
             }
             case COLTYPE_PEPTIDE_CALCULATED_MASS: {

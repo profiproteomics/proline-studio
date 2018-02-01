@@ -43,8 +43,9 @@ public class ValidationTask extends AbstractJMSTask  {
     public static String SINGLE_PSM_QUERY_FILTER_KEY = "SINGLE_PSM_PER_QUERY";
     public static String SINGLE_PSM_QUERY_FILTER_NAME = "Single PSM per MS Query";               
     public static String SINGLE_PSM_RANK_FILTER_KEY = "SINGLE_PSM_PER_RANK";
-    public static String SINGLE_PSM_RANK_FILTER_NAME = "Single PSM per Rank";               
-                  
+    public static String SINGLE_PSM_RANK_FILTER_NAME = "Single PSM per Rank";                                 
+    public static String ISOTOPE_OFFSET_FILTER_KEY = "ISOTOPE_OFFSET";
+    public static String ISOTOPE_OFFSET_FILTER_NAME = "Isotope Offset";               
 
     private DDataset m_dataset = null;
     private String m_description;  //Not used on server side
@@ -217,6 +218,12 @@ public class ValidationTask extends AbstractJMSTask  {
             filterCfg.put("parameter", SINGLE_PSM_RANK_FILTER_KEY);
             filterCfg.put("threshold", 1);
             filterCfg.put("post_validation", Boolean.valueOf(m_argumentsMap.get("PSM_"+SINGLE_PSM_RANK_FILTER_KEY)));
+            pepFilters.add(filterCfg);
+        }
+        if (m_argumentsMap.containsKey("PSM_"+ISOTOPE_OFFSET_FILTER_KEY)) {
+            HashMap filterCfg = new HashMap();
+            filterCfg.put("parameter", ISOTOPE_OFFSET_FILTER_KEY);
+            filterCfg.put("threshold", Integer.valueOf(m_argumentsMap.get("PSM_"+ISOTOPE_OFFSET_FILTER_KEY)));
             pepFilters.add(filterCfg);
         }
         params.put("pep_match_filters", pepFilters);

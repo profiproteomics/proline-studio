@@ -692,7 +692,7 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
     }
 
     private void createParameters() {
-        m_psmPrefilterParameters = new AbstractParameter[10];
+        m_psmPrefilterParameters = new AbstractParameter[11]; //<< get sync
         m_psmPrefilterParameters[0] = null;
         m_psmPrefilterParameters[1] = new IntegerParameter("PSM_" + ValidationTask.RANK_FILTER_KEY, ValidationTask.RANK_FILTER_NAME, new JTextField(6), new Integer(5), new Integer(0), new Integer(10));
         m_psmPrefilterParameters[1].setAssociatedData("<=");
@@ -715,6 +715,9 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
         JCheckBox singlePerRankCB = new JCheckBox("post FDR");
         m_psmPrefilterParameters[9] = new BooleanParameter("PSM_" + ValidationTask.SINGLE_PSM_RANK_FILTER_KEY, ValidationTask.SINGLE_PSM_RANK_FILTER_NAME, singlePerRankCB, false);
         m_psmPrefilterParameters[9].setAssociatedData(":");
+        m_psmPrefilterParameters[10] = new IntegerParameter("PSM_" + ValidationTask.ISOTOPE_OFFSET_FILTER_KEY, ValidationTask.ISOTOPE_OFFSET_FILTER_NAME, new JTextField(6), new Integer(1), new Integer(0), null);
+        m_psmPrefilterParameters[10].setAssociatedData("<=");
+        
         for (AbstractParameter p : m_psmPrefilterParameters) {
             if (p == null) {
                 continue;

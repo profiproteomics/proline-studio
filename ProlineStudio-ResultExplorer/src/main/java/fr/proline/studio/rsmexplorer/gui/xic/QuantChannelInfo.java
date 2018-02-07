@@ -1,9 +1,8 @@
 package fr.proline.studio.rsmexplorer.gui.xic;
 
-import fr.proline.core.orm.lcms.MapAlignment;
-import fr.proline.core.orm.lcms.ProcessedMap;
+import fr.proline.core.orm.uds.dto.DDataset;
+import fr.proline.core.orm.uds.dto.DMasterQuantitationChannel;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
-import fr.proline.studio.dam.tasks.xic.MapAlignmentConverter;
 import fr.proline.studio.utils.CyclicColorPalette;
 import java.awt.Color;
 import java.util.ArrayList;
@@ -16,15 +15,18 @@ import java.util.List;
 public class QuantChannelInfo {
     
     private DQuantitationChannel[] m_quantChannels = null;
+    private DDataset m_dataset = null;
     
-    private List<MapAlignment> m_mapAlignments;
-    private List<MapAlignment> m_allMapAlignments;
-    List<MapAlignment> m_allMapAlignmentsRev;
-    private List<ProcessedMap> m_allMaps;
-
-    
-    public QuantChannelInfo(DQuantitationChannel[] quantChannels) {
-        this.m_quantChannels = quantChannels;
+    public QuantChannelInfo(DDataset dataset) {
+        this.m_dataset = dataset;
+        List<DQuantitationChannel> listQuantChannel = new ArrayList();
+        if (m_dataset.getMasterQuantitationChannels() != null && !m_dataset.getMasterQuantitationChannels().isEmpty()) {
+            DMasterQuantitationChannel masterChannel = m_dataset.getMasterQuantitationChannels().get(0);
+            listQuantChannel = masterChannel.getQuantitationChannels();
+        }
+        this.m_quantChannels = new DQuantitationChannel[listQuantChannel.size()];
+        listQuantChannel.toArray(m_quantChannels);
+        
     }
 
     public DQuantitationChannel[] getQuantChannels() {
@@ -77,6 +79,10 @@ public class QuantChannelInfo {
         }
         return null;
     }
+
+    public DDataset getDataset() {
+        return m_dataset;
+    }
     
     
     private boolean compareMap(DQuantitationChannel m_quantChannel, Long mapId) {
@@ -90,47 +96,5 @@ public class QuantChannelInfo {
         }
         return false;
     }
-
-    public List<MapAlignment> getMapAlignments() {
-        return m_mapAlignments;
-    }
-
-    public void setMapAlignments(List<MapAlignment> mapAlignments) {
-        this.m_mapAlignments = mapAlignments;
-    }
-
-    public List<MapAlignment> getAllMapAlignments() {
-        return m_allMapAlignments;
-    }
-
-    public void setAllMapAlignments(List<MapAlignment> allMapAlignments) {
-        this.m_allMapAlignments = allMapAlignments;
-        addReversedAlignment();
-    }
-
-    public List<ProcessedMap> getAllMaps() {
-        return m_allMaps;
-    }
-
-    public void setAllMaps(List<ProcessedMap> allMaps) {
-        this.m_allMaps = allMaps;
-    }
     
-    public void addReversedAlignment(){
-        // add the reversed alignments
-        m_allMapAlignmentsRev = new ArrayList();
-        m_allMapAlignmentsRev.addAll(m_allMapAlignments);
-        for (MapAlignment ma : m_allMapAlignments) {
-            MapAlignment reversedMap = MapAlignmentConverter.getRevertedMapAlignment(ma);
-            m_allMapAlignmentsRev.add(reversedMap);
-        }
-    }
-
-    public List<MapAlignment> getAllMapAlignmentsRev() {
-        return m_allMapAlignmentsRev;
-    }
-    
-     
-    
-        
 }

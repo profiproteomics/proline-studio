@@ -12,9 +12,11 @@ import fr.proline.studio.gui.DefaultDialog;
 import static fr.proline.studio.gui.DefaultDialog.BUTTON_LOAD;
 import static fr.proline.studio.gui.DefaultDialog.BUTTON_SAVE;
 import fr.proline.studio.parameter.AbstractParameterToString;
+import fr.proline.studio.parameter.BooleanParameter;
 import fr.proline.studio.parameter.ObjectParameter;
 import fr.proline.studio.parameter.ParameterError;
 import fr.proline.studio.parameter.ParameterList;
+import fr.proline.studio.parameter.StringParameter;
 import fr.proline.studio.settings.FilePreferences;
 import fr.proline.studio.settings.SettingsDialog;
 import fr.proline.studio.settings.SettingsUtils;
@@ -34,12 +36,14 @@ import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -57,8 +61,9 @@ public class ImportMaxQuantResultDialog extends DefaultDialog {
     //Import parameters
     private ParameterList m_sourceParameterList;
     private JComboBox m_instrumentsComboBox = null;
-    private JComboBox m_peaklistSoftwaresComboBox = null;
-
+    private JTextField m_accessionRegexpTF = null;
+    private JCheckBox m_importQuantitationCB = null;
+    
     //To select folder containing result
     private JList<File> m_fileList;
     private JScrollPane m_fileListScrollPane;
@@ -266,20 +271,30 @@ public class ImportMaxQuantResultDialog extends DefaultDialog {
         c.gridwidth = 1;
         c.weightx = 0;
         c.gridy++;
-        JLabel peaklistSoftwareLabel = new JLabel("Peaklist Software :");
+        JLabel peaklistSoftwareLabel = new JLabel("Accession regexp :");
         peaklistSoftwareLabel.setHorizontalAlignment(SwingConstants.RIGHT);
         allParametersPanel.add(peaklistSoftwareLabel, c);
 
         c.gridx++;
         c.gridwidth = 2;
         c.weightx = 1;
-        allParametersPanel.add(m_peaklistSoftwaresComboBox, c);
+        allParametersPanel.add(m_accessionRegexpTF, c);
+
+        c.gridx = 0;
+        c.gridwidth = 1;
+        c.weightx = 0;
+        c.gridy++;
+        allParametersPanel.add(new JPanel(), c);
+
+        c.gridx++;
+        c.gridwidth = 2;
+        c.weightx = 1;
+        allParametersPanel.add(m_importQuantitationCB, c);
 
         return allParametersPanel;
     }
 
     private void reinitialize() {
-
         // reinit of files selection
         ((DefaultListModel) m_fileList.getModel()).removeAllElements();
         m_removeFileButton.setEnabled(false);
@@ -287,14 +302,16 @@ public class ImportMaxQuantResultDialog extends DefaultDialog {
     }
 
     public long getInstrumentId() {
-
         InstrumentConfiguration instrument = (InstrumentConfiguration) m_sourceParameterList.getParameter("instrument").getObjectValue();
         return instrument.getId();
     }
+    
+    public String getAccessionRegexp() {
+        return m_sourceParameterList.getParameter("accession_regexp").getStringValue();
+    }
 
-    public long getPeaklistSoftwareId() {
-        PeaklistSoftware peaklistSoftware = (PeaklistSoftware) m_sourceParameterList.getParameter("peaklist_software").getObjectValue();
-        return peaklistSoftware.getId();
+    public Boolean getImportQuantitation() {
+        return (Boolean)m_sourceParameterList.getParameter("import_quant_result").getObjectValue();
     }
     
     public File[] getFilePaths() {
@@ -463,17 +480,16 @@ public class ImportMaxQuantResultDialog extends DefaultDialog {
             }
         });
 
-        m_peaklistSoftwaresComboBox = new JComboBox(DatabaseDataManager.getDatabaseDataManager().getPeaklistSoftwaresWithNullArray());
-        final ObjectParameter<PeaklistSoftware> peaklistParameter = new ObjectParameter("peaklist_software", "Peaklist Software", m_peaklistSoftwaresComboBox, DatabaseDataManager.getDatabaseDataManager().getPeaklistSoftwaresWithNullArray(), null, -1, softwareToString);
-        parameterList.add(peaklistParameter);
-        m_peaklistSoftwaresComboBox.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                peaklistParameter.setUsed(true);   //JPM.WART : found a better fix (parameters not saved if it has never been set)
-            }
-        });
-
+        m_accessionRegexpTF = new JTextField(20);
+        StringParameter accessionParameter = new StringParameter("accession_regexp", "Accession regular expression", m_accessionRegexpTF, "", new Integer(2), null);
+        accessionParameter.setUsed(true);
+        parameterList.add(accessionParameter);
+        
+        m_importQuantitationCB = new JCheckBox("Import quantitation values");
+        BooleanParameter importParameter = new BooleanParameter("import_quant_result", "Import quantitation results", m_importQuantitationCB, false);
+        importParameter.setUsed(true);
+        parameterList.add(importParameter);
+        
         return parameterList;
 
     }

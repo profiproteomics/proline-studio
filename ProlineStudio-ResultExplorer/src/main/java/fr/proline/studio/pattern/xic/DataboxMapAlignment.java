@@ -7,10 +7,7 @@ package fr.proline.studio.pattern.xic;
 
 import fr.proline.core.orm.lcms.MapAlignment;
 import fr.proline.core.orm.lcms.MapTime;
-import fr.proline.core.orm.lcms.ProcessedMap;
 import fr.proline.core.orm.uds.dto.DDataset;
-import fr.proline.core.orm.uds.dto.DMasterQuantitationChannel;
-import fr.proline.core.orm.uds.dto.DQuantitationChannel;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadLcMSTask;
@@ -32,13 +29,8 @@ import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 public class DataboxMapAlignment extends AbstractDataBox {
     
     private DDataset m_dataset;
-    private  DQuantitationChannel[] m_quantitationChannelArray = null;
     private QuantChannelInfo  m_quantChannelInfo;
-    
-    private List<MapAlignment> m_mapAlignments;
-    private List<MapAlignment> m_allMapAlignments;
-    private List<ProcessedMap> m_allMaps;
-    
+        
     public DataboxMapAlignment() {
         super(DataboxType.DataBoxMapAlignment, DataboxStyle.STYLE_XIC);
 
@@ -96,7 +88,7 @@ public class DataboxMapAlignment extends AbstractDataBox {
     
     private List<MapTimePanel> getMapTimeTableModelList() {
         List<MapTimePanel> list = new ArrayList();
-        for (MapAlignment mapAlignment : m_mapAlignments) {
+        for (MapAlignment mapAlignment : m_dataset.getMapAlignmentsFromMap(m_dataset.getAlnReferenceMapId())) {
             List<MapTime> listMapTime = mapAlignment.getMapTimeList();
             MapTimePanel mapTimePanel = new MapTimePanel();
             String fromMap = m_quantChannelInfo.getMapTitle(mapAlignment.getSourceMap().getId());
@@ -140,19 +132,8 @@ public class DataboxMapAlignment extends AbstractDataBox {
 
             @Override
             public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
-                // list quant Channels
-                List<DQuantitationChannel> listQuantChannel = new ArrayList();
-                if (m_dataset.getMasterQuantitationChannels() != null && !m_dataset.getMasterQuantitationChannels().isEmpty()) {
-                    DMasterQuantitationChannel masterChannel = m_dataset.getMasterQuantitationChannels().get(0);
-                    listQuantChannel = masterChannel.getQuantitationChannels();
-                }
-                m_quantitationChannelArray = new DQuantitationChannel[listQuantChannel.size()];
-                listQuantChannel.toArray(m_quantitationChannelArray);
-                m_quantChannelInfo = new QuantChannelInfo(m_quantitationChannelArray);
-                m_quantChannelInfo.setAllMapAlignments(m_allMapAlignments);
-                m_quantChannelInfo.setMapAlignments(m_mapAlignments);
-                m_quantChannelInfo.setAllMaps(m_allMaps);
-                ((MapAlignmentPanel) getDataBoxPanelInterface()).setData(m_quantChannelInfo, m_mapAlignments, m_allMaps, m_allMapAlignments, getCompareDataInterfaceList(), getCrossSelectionInterfaceList());
+                m_quantChannelInfo = new QuantChannelInfo(m_dataset);
+                ((MapAlignmentPanel) getDataBoxPanelInterface()).setData(m_quantChannelInfo, getCompareDataInterfaceList(), getCrossSelectionInterfaceList());
                 
                 setLoaded(loadingId);
                 if (finished) {
@@ -164,11 +145,8 @@ public class DataboxMapAlignment extends AbstractDataBox {
 
 
         // ask asynchronous loading of data
-        m_mapAlignments = new ArrayList();
-        m_allMapAlignments = new ArrayList();
-        m_allMaps = new ArrayList();
         DatabaseLoadLcMSTask task = new DatabaseLoadLcMSTask(callback);
-        task.initLoadAlignmentForXic(getProjectId(), m_dataset, m_mapAlignments, m_allMapAlignments, m_allMaps);
+        task.initLoadAlignmentForXic(getProjectId(), m_dataset);
         registerTask(task);
     }
     

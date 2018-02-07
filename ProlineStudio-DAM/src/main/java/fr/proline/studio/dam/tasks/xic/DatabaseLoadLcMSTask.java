@@ -69,10 +69,6 @@ public class DatabaseLoadLcMSTask extends AbstractDatabaseSlicerTask {
     private Feature m_childFeature;
     private List<Peakel> m_peakelForChildFeatureList;
     private List<List<Peakel>> m_peakelListPerFeature;
-    private DDataset m_dataset_align;
-    private List<MapAlignment> m_mapAlignmentList;
-    private List<MapAlignment> m_allMapAlignmentList;
-    private List<ProcessedMap> m_allMaps;
 
     // data kept for sub tasks
     private List<Long> m_peakelIds = null;
@@ -157,13 +153,10 @@ public class DatabaseLoadLcMSTask extends AbstractDatabaseSlicerTask {
         action = LOAD_PEAKELS_FOR_FEATURE;
     }
     
-    public void initLoadAlignmentForXic(long projectId, DDataset dataset, List<MapAlignment> mapAlignmentList, List<MapAlignment> allMapAlignmentList, List<ProcessedMap> allMapList) {
+    public void initLoadAlignmentForXic(long projectId, DDataset dataset) {
         init(SUB_TASK_COUNT_MAP, new TaskInfo("Load Map Alignment of XIC " + dataset.getName(), false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_MEDIUM));
         m_projectId = projectId;
-        m_dataset_align = dataset;
-        m_mapAlignmentList = mapAlignmentList;
-        m_allMapAlignmentList = allMapAlignmentList;
-        m_allMaps = allMapList;
+        m_dataset = dataset;
         action = LOAD_ALIGNMENT_FOR_XIC;
     }
 
@@ -195,7 +188,7 @@ public class DatabaseLoadLcMSTask extends AbstractDatabaseSlicerTask {
                 m_peakelListPerFeature = null;
                 break;
             case LOAD_ALIGNMENT_FOR_XIC:
-                m_mapAlignmentList = null;
+                m_dataset.clearMapAlignments();
                 break;
         }
     }
@@ -242,7 +235,7 @@ public class DatabaseLoadLcMSTask extends AbstractDatabaseSlicerTask {
             }
         }else if (action == LOAD_ALIGNMENT_FOR_XIC) {
             if (needToFetch()) {
-                DatabaseLoadXicMasterQuantTask.fetchDataQuantChannels(m_projectId, m_dataset_align, m_taskError);
+                DatabaseLoadXicMasterQuantTask.fetchDataQuantChannels(m_projectId, m_dataset, m_taskError);
                 return fetchDataMainTaskAlignmentForXic();
             }
         } 
@@ -267,7 +260,7 @@ public class DatabaseLoadLcMSTask extends AbstractDatabaseSlicerTask {
             case LOAD_FEATURE_FOR_PEPTIDE_ION_WITH_PEAKELS:
                 return (m_childFeatureList == null || m_childFeatureList.isEmpty());
             case LOAD_ALIGNMENT_FOR_XIC:
-                return (m_mapAlignmentList == null || m_mapAlignmentList.isEmpty());
+                return (m_dataset.getMapAlignments() == null || m_dataset.getMapAlignments().isEmpty());
         }
         return false; // should not happen 
     }
@@ -966,11 +959,15 @@ public class DatabaseLoadLcMSTask extends AbstractDatabaseSlicerTask {
         EntityManager entityManagerLCMS = DStoreCustomPoolConnectorFactory.getInstance().getLcMsDbConnector(m_projectId).createEntityManager();
         try {
             entityManagerLCMS.getTransaction().begin();
-            if (m_dataset_align != null && m_dataset_align.getMasterQuantitationChannels() != null) {
-                List<DMasterQuantitationChannel> listMasterQuantitationChannels = m_dataset_align.getMasterQuantitationChannels();
+            if (m_dataset != null && m_dataset.getMasterQuantitationChannels() != null) {
+                List<DMasterQuantitationChannel> listMasterQuantitationChannels = m_dataset.getMasterQuantitationChannels();
                 for (DMasterQuantitationChannel masterQuantitationChannel : listMasterQuantitationChannels) {
                     List<DQuantitationChannel> listQuantChannels = masterQuantitationChannel.getQuantitationChannels();
                     if (listQuantChannels != null && !listQuantChannels.isEmpty()) {
+                        
+                        List<MapAlignment> allMapAlignmentList = new ArrayList<>();
+                        List<ProcessedMap> allMaps = new ArrayList<>();
+
                         List<Long> listMapIds = new ArrayList();
                         for (DQuantitationChannel quantitationChannel : listQuantChannels) {
                             if (quantitationChannel.getLcmsMapId() != null){
@@ -985,7 +982,6 @@ public class DatabaseLoadLcMSTask extends AbstractDatabaseSlicerTask {
                         Query queryMasterMapQ = entityManagerLCMS.createQuery(queryMasterMap);
                         queryMasterMapQ.setParameter("listId", listMapIds);
                         List<Object[]> rl = new ArrayList();
-                        Long algRefMapId = (long) -1;
                         Long mapSetId  = (long)-1;
                         if (!listMapIds.isEmpty()) {
                             rl = queryMasterMapQ.getResultList();
@@ -993,24 +989,8 @@ public class DatabaseLoadLcMSTask extends AbstractDatabaseSlicerTask {
                         Iterator<Object[]> it2 = rl.iterator();
                         while (it2.hasNext()) { // should be one
                             Object[] res = it2.next();
-                            algRefMapId = (Long) res[0];
+                            m_dataset.setAlnReferenceMapId((Long) res[0]);
                             mapSetId = (Long) res[1];
-                        }
-                        
-                        String queryMapAlignS = "SELECT ma "
-                                + "FROM fr.proline.core.orm.lcms.MapAlignment ma  "
-                                + "WHERE ma.mapSet.id=:mapSetId "
-                                + "AND  ma.sourceMap.id=:algRefMapId ";
-                        Query queryMapAlign = entityManagerLCMS.createQuery(queryMapAlignS);
-                        queryMapAlign.setParameter("mapSetId", mapSetId);
-                        queryMapAlign.setParameter("algRefMapId", algRefMapId);
-                        List<Object> resultList = new ArrayList();
-                        if (!listMapIds.isEmpty()) {
-                            resultList = queryMapAlign.getResultList();
-                        }
-                        for (Object resCur : resultList) {
-                            MapAlignment ma = (MapAlignment) resCur;
-                            m_mapAlignmentList.add(ma);
                         }
                         
                         // all alignments
@@ -1021,8 +1001,9 @@ public class DatabaseLoadLcMSTask extends AbstractDatabaseSlicerTask {
                         queryAllAlign.setParameter("mapSetId", mapSetId);
                         List<MapAlignment> rs2 = queryAllAlign.getResultList();
                         for (MapAlignment ma : rs2) {
-                            m_allMapAlignmentList.add(ma);
+                            allMapAlignmentList.add(ma);
                         }
+                        m_dataset.setMapAlignments(allMapAlignmentList);
                         // all processed map -- order by quant channel
                         String orderBy = " case pm.id ";
                         int index = 1;
@@ -1040,8 +1021,9 @@ public class DatabaseLoadLcMSTask extends AbstractDatabaseSlicerTask {
                             queryAllProcessedMap.setParameter("listId", listMapIds);
                             List<ProcessedMap> rs3 = queryAllProcessedMap.getResultList();
                             for (ProcessedMap pm : rs3) {
-                                m_allMaps.add(pm);
+                                 allMaps.add(pm);
                             }
+                            m_dataset.setMaps(allMaps);
                         }
                     }
                 }

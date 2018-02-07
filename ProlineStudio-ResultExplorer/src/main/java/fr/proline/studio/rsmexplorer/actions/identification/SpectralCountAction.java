@@ -149,7 +149,14 @@ public class SpectralCountAction extends AbstractRSMAction {
 
                     @Override
                     public void run(boolean success) {
-                        runQuantifySC(success, _quantiDatasetId[0], _quantitationNode[0], treeModel);
+                        if (success) {
+                            m_logger.debug(" SC SUCCESS : " + _quantiDatasetId[0]);
+                            QuantitationTree.getCurrentTree().loadDataSet(_quantiDatasetId[0], _quantitationNode[0]);
+
+                        } else {
+                            m_logger.debug(" SC ERROR ");
+                            treeModel.removeNodeFromParent(_quantitationNode[0]);
+                        }
                     }
                 };
                 fr.proline.studio.dpm.task.jms.SpectralCountTask task = new fr.proline.studio.dpm.task.jms.SpectralCountTask(scCallback, refDatasetNode.getDataset(), datasetList, weightDatasetList, qttDSName, qttDSDescr, _quantiDatasetId);
@@ -160,54 +167,6 @@ public class SpectralCountAction extends AbstractRSMAction {
 
         spectralCountDialog.setVisible(true);
         IdentificationTree.getCurrentTree().loadInBackground(refDatasetNode, callback);
-    }
-
-    private void runQuantifySC(boolean success, Long quantiDsId, final DataSetNode quantitationNode, final DefaultTreeModel treeModel) {
-        if (success) {
-            m_logger.debug(" SC SUCCESS : " +quantiDsId );
-            final ArrayList<DDataset> readDatasetList = new ArrayList<>(1);
-
-            AbstractDatabaseCallback readDatasetCallback = new AbstractDatabaseCallback() {
-
-                @Override
-                public boolean mustBeCalledInAWT() {
-                    return true;
-                }
-
-                @Override
-                public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
-                    if (success) {
-                        final DDataset ds = readDatasetList.get(0);
-                        AbstractDatabaseCallback loadQCallback = new AbstractDatabaseCallback() {
-                            @Override
-                            public boolean mustBeCalledInAWT() {
-                                return true;
-                            }
-
-                            @Override
-                            public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
-                                ((DataSetData) quantitationNode.getData()).setDataset(ds);
-                                quantitationNode.setIsChanging(false);
-                                treeModel.nodeChanged(quantitationNode);
-                            }
-                        };
-                        DatabaseDataSetTask loadQTask = new DatabaseDataSetTask(loadQCallback);
-                        loadQTask.initLoadQuantitation(ProjectExplorerPanel.getProjectExplorerPanel().getSelectedProject(), ds);
-                        AccessDatabaseThread.getAccessDatabaseThread().addTask(loadQTask);
-                    } else {
-                        treeModel.removeNodeFromParent(quantitationNode);
-                    }
-                }
-            };
-
-            DatabaseDataSetTask task = new DatabaseDataSetTask(readDatasetCallback);
-            task.initLoadDataset(quantiDsId, readDatasetList);
-            AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
-
-        } else {
-            m_logger.debug(" SC ERROR ");
-            treeModel.removeNodeFromParent(quantitationNode);
-        }
     }
 
     @Override

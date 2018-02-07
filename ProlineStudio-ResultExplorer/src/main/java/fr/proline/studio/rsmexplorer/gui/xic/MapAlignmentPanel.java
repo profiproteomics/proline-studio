@@ -46,15 +46,9 @@ public class MapAlignmentPanel extends HourglassPanel implements DataBoxPanelInt
     private final static NumberFormat format2 = new DecimalFormat("#0.0000");     
     
     private QuantChannelInfo m_quantChannelInfo;
-    // map alignments / refmap
-    private List<MapAlignment> m_listMapAlignment;
     // all map alignments
     private List<MapAlignment> m_allMapAlignments;
-    // all ProcessedMap 
-    private List<ProcessedMap> m_allMap;
-    // reference alignment map 
-    private String m_refAlgMap = "";
-    private Long alnRefMapId = (long)-1;
+    
     private final static String panelTitle = " LC-MS Map Alignments";
     
     private JLabel m_labelTitle;
@@ -151,42 +145,35 @@ public class MapAlignmentPanel extends HourglassPanel implements DataBoxPanelInt
     }
     
 
-    public void setData(QuantChannelInfo quantChannelInfo, List<MapAlignment> mapAlignments, List<ProcessedMap> allMap, List<MapAlignment> allMapAlignments, 
-            List<ExtendedTableModelInterface> compareDataInterfaceList, List<CrossSelectionInterface> crossSelectionInterfaceList){
-        this.m_listMapAlignment = mapAlignments;
-        this.m_allMap = allMap;
-        this.m_allMapAlignments = allMapAlignments;
-        // add the reversed alignments
-        List<MapAlignment> listRev = new ArrayList();
-        for(MapAlignment ma: m_allMapAlignments){
-            MapAlignment reversedMap = MapAlignmentConverter.getRevertedMapAlignment(ma);
-            listRev.add(reversedMap);
-        }
-        m_allMapAlignments.addAll(listRev);
+    public void setData(QuantChannelInfo quantChannelInfo, List<ExtendedTableModelInterface> compareDataInterfaceList, List<CrossSelectionInterface> crossSelectionInterfaceList){
+        
         this.m_quantChannelInfo = quantChannelInfo;
+        
+        m_allMapAlignments = new ArrayList();
+        m_allMapAlignments.addAll(m_quantChannelInfo.getDataset().getMapAlignments());
+        m_allMapAlignments.addAll(m_quantChannelInfo.getDataset().getMapReversedAlignments());
+        
+        
         // reference alignment map
-        if (!m_listMapAlignment.isEmpty()){
-            MapAlignment ma = m_listMapAlignment.get(0);
-            m_refAlgMap = m_quantChannelInfo.getMapTitle(ma.getSourceMap().getId());
-            StringBuilder sb = new StringBuilder();
-            String htmlColor = m_quantChannelInfo.getMapHtmlColor(ma.getSourceMap().getId());
-            sb.append("<html><font color='").append(htmlColor).append("'>&#x25A0;&nbsp;</font>");
-            sb.append(panelTitle);
-            sb.append(" to ");
-            sb.append(m_refAlgMap);
-            sb.append("<br/>");
-            sb.append("</html>");
-            m_labelTitle.setText(sb.toString());
-            alnRefMapId = ma.getSourceMap().getId();
-        }
+        String referenceMapTitle = m_quantChannelInfo.getMapTitle(m_quantChannelInfo.getDataset().getAlnReferenceMapId());
+        StringBuilder sb = new StringBuilder();
+        String htmlColor = m_quantChannelInfo.getMapHtmlColor(m_quantChannelInfo.getDataset().getAlnReferenceMapId());
+        sb.append("<html><font color='").append(htmlColor).append("'>&#x25A0;&nbsp;</font>");
+        sb.append(panelTitle);
+        sb.append(" to ");
+        sb.append(referenceMapTitle);
+        sb.append("<br/>");
+        sb.append("</html>");
+        m_labelTitle.setText(sb.toString());
+        
         //model cb
         m_mapName = new HashMap<>();
-        String[] mapItems = new String[m_allMap.size()];
+        String[] mapItems = new String[m_quantChannelInfo.getDataset().getMaps().size()];
         int i=0;
-        for(ProcessedMap map: m_allMap){
+        for(ProcessedMap map: m_quantChannelInfo.getDataset().getMaps()){
             String mapTitle =  m_quantChannelInfo.getMapTitle(map.getId());
-            StringBuilder sb = new StringBuilder();
-            String htmlColor = m_quantChannelInfo.getMapHtmlColor(map.getId());
+            sb = new StringBuilder();
+            htmlColor = m_quantChannelInfo.getMapHtmlColor(map.getId());
             sb.append("<html><font color='").append(htmlColor).append("'>&#x25A0;&nbsp;</font>");
             sb.append(mapTitle);
             sb.append("</html>");
@@ -269,7 +256,7 @@ public class MapAlignmentPanel extends HourglassPanel implements DataBoxPanelInt
         m_logger.debug("calculate time for "+time+" from source mapId="+sourceMapId +" to target MapId="+targetMapId );
         Double calcTime = Double.NaN;
         try{
-            calcTime = MapAlignmentConverter.convertElutionTime(time*60, sourceMapId, targetMapId, m_allMapAlignments, alnRefMapId);
+            calcTime = MapAlignmentConverter.convertElutionTime(time*60, sourceMapId, targetMapId, m_allMapAlignments, m_quantChannelInfo.getDataset().getAlnReferenceMapId());
             m_logger.debug("...result= "+calcTime);
         }catch(Exception e){
             m_logger.error("Error while retrieving time in map alignment: "+e);

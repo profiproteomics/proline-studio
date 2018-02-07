@@ -28,9 +28,11 @@ import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import fr.proline.studio.rsmexplorer.tree.identification.IdProjectIdentificationNode;
 import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
+import fr.proline.studio.rsmexplorer.tree.quantitation.QuantitationTree;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import javax.swing.JOptionPane;
 import javax.swing.tree.DefaultTreeModel;
 import org.openide.util.NbBundle;
@@ -61,7 +63,8 @@ public class ImportMaxQuantResultJMSAction extends AbstractRSMAction {
             // retrieve parameters
             File[] filePaths = dialog.getFilePaths();
             final long instrumentId = dialog.getInstrumentId();
-            final long peaklistSoftwareId = dialog.getPeaklistSoftwareId();
+            final String accessionRegexp = dialog.getAccessionRegexp();
+            final Boolean importQuantitation = dialog.getImportQuantitation();
 
             Project project = null;
             DDataset parentDataset = null;
@@ -107,12 +110,12 @@ public class ImportMaxQuantResultJMSAction extends AbstractRSMAction {
             // Import MaxQuant files             
             for (int i = 0; i < nbFiles; i++) {
                 File f = filePaths[i]; 
-                uploadAndImport(f.getPath(), project, allIdentificationNodes.get(i),parentDataset,allDatasetNames.get(i),treeModel,instrumentId,peaklistSoftwareId);
+                uploadAndImport(f.getPath(), project, allIdentificationNodes.get(i),parentDataset,allDatasetNames.get(i),treeModel,instrumentId,accessionRegexp, importQuantitation);
             }
         }
     }
 
-    private void uploadAndImport(final String filePath, final Project project, final DataSetNode identificationNode, final DDataset parentDataset, final String datasetName, final DefaultTreeModel treeModel,final long instrumentId,final long peaklistSoftwareId){
+    private void uploadAndImport(final String filePath, final Project project, final DataSetNode identificationNode, final DDataset parentDataset, final String datasetName, final DefaultTreeModel treeModel,final long instrumentId,final String accessionRegexp, final Boolean importQuantitation){
          
         final String[] result = new String[1];
         
@@ -128,7 +131,7 @@ public class ImportMaxQuantResultJMSAction extends AbstractRSMAction {
 
                 if (success) {
                     // start  imports
-                    startImport(project, identificationNode, parentDataset, datasetName, result[0], treeModel, instrumentId, peaklistSoftwareId);
+                    startImport(project, identificationNode, parentDataset, datasetName, result[0], treeModel, instrumentId, accessionRegexp, importQuantitation);
                 } else {
                     // delete all nodes
                     treeModel.removeNodeFromParent(identificationNode);
@@ -141,10 +144,10 @@ public class ImportMaxQuantResultJMSAction extends AbstractRSMAction {
 
     }
     
-    private void startImport(final Project project, final DataSetNode identificationNode, final DDataset parentDataset, final String datasetName, String canonicalPath, final DefaultTreeModel treeModel,final long instrumentId,final long peaklistSoftwareId) {
+    private void startImport(final Project project, final DataSetNode identificationNode, final DDataset parentDataset, final String datasetName, String canonicalPath, final DefaultTreeModel treeModel,final long instrumentId,final String accessionRegexp, final Boolean importQuantitation) {
 
         // used as out parameter for the service
-        final Object[] _results = new Object[2];
+        final Object[] _results = new Object[ImportMaxQuantTask.RESULTS_SIZE];
 
         AbstractJMSCallback callback = new AbstractJMSCallback() {
 
@@ -156,9 +159,14 @@ public class ImportMaxQuantResultJMSAction extends AbstractRSMAction {
             @Override
             public void run(boolean success) {
                 if (success) {
-                   createDataset(identificationNode, project, parentDataset, datasetName,treeModel, (List) _results[0], getTaskInfo());
-                   if(_results[1] != null && !_results[1].toString().isEmpty()){
-                         JOptionPane.showMessageDialog(IdentificationTree.getCurrentTree(), _results[1].toString(), "Warning", JOptionPane.ERROR_MESSAGE);
+                   Map<String, Long> rsmIdByRsId = _results[ImportMaxQuantTask.RESULT_SUMMARY_IDS_MAP] == null ? null : (Map<String, Long>)_results[ImportMaxQuantTask.RESULT_SUMMARY_IDS_MAP];
+                   createDataset(identificationNode, project, parentDataset, datasetName,treeModel, (List) _results[ImportMaxQuantTask.RESULT_SET_IDS_LIST], rsmIdByRsId, getTaskInfo());
+                   Long quantDatasetId = (Long)_results[ImportMaxQuantTask.QUANTITATION_DATASET_ID];
+                   if (quantDatasetId != null) {
+                       createQuantDataset(quantDatasetId);
+                   }
+                   if(_results[ImportMaxQuantTask.WARNING_MESSAGES] != null && !_results[ImportMaxQuantTask.WARNING_MESSAGES].toString().isEmpty()){
+                         JOptionPane.showMessageDialog(IdentificationTree.getCurrentTree(), _results[ImportMaxQuantTask.WARNING_MESSAGES].toString(), "Warning", JOptionPane.ERROR_MESSAGE);
                     }
                 } else {
                     //JPM.TODO : manage error with errorMessage
@@ -168,7 +176,7 @@ public class ImportMaxQuantResultJMSAction extends AbstractRSMAction {
         };
 
         // use canonicalPath when it is possible to be sure to have an unique path
-        ImportMaxQuantTask  task = new ImportMaxQuantTask(callback, canonicalPath, instrumentId, peaklistSoftwareId, project.getId(), _results);
+        ImportMaxQuantTask  task = new ImportMaxQuantTask(callback, canonicalPath, instrumentId, accessionRegexp, importQuantitation, project.getId(), _results);
         AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
     }
 
@@ -215,8 +223,24 @@ public class ImportMaxQuantResultJMSAction extends AbstractRSMAction {
         setEnabled(false);
     }
 
-    
-    private void createDataset(final DataSetNode identificationNode, Project project, DDataset parentDataset, String name,final DefaultTreeModel treeModel, List resultSetIds, TaskInfo taskInfo) {
+    private void createQuantDataset(Long quantDatasetId) {
+
+        QuantitationTree tree = QuantitationTree.getCurrentTree();
+        final DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
+                
+        DataSetData quantitationData = new DataSetData("running import ...", Dataset.DatasetType.QUANTITATION, Aggregation.ChildNature.QUANTITATION_FRACTION);
+        final DataSetNode quantitationNode = new DataSetNode(quantitationData);
+        quantitationNode.setIsChanging(true);
+
+        AbstractNode rootNode = (AbstractNode) treeModel.getRoot();
+        // insert before Trash
+        treeModel.insertNodeInto(quantitationNode, rootNode, rootNode.getChildCount() - 1);
+        // expand the parent node to display its children
+        tree.expandNodeIfNeeded(rootNode);
+        QuantitationTree.getCurrentTree().loadDataSet(quantDatasetId, quantitationNode);
+    }
+
+    private void createDataset(final DataSetNode identificationNode, Project project, DDataset parentDataset, String name,final DefaultTreeModel treeModel, List resultSetIds, Map<String, Long> rsmIdByRsId, TaskInfo taskInfo) {
                                     
 
         identificationNode.setIsChanging(false);        
@@ -235,11 +259,10 @@ public class ImportMaxQuantResultJMSAction extends AbstractRSMAction {
             public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
 
                 if (success) {
-
                     DDataset dataset = createdDatasetList.get(0);
                     identificationNode.setIsChanging(false);
                     ((DataSetData) identificationNode.getData()).setDataset(dataset);
-                    createSubDataset(identificationNode, project, dataset, treeModel, resultSetIds, taskInfo);
+                    createSubDataset(identificationNode, project, dataset, treeModel, resultSetIds, rsmIdByRsId, taskInfo);
                     treeModel.nodeChanged(identificationNode);
                 } else {
                     // should not happen
@@ -257,10 +280,10 @@ public class ImportMaxQuantResultJMSAction extends AbstractRSMAction {
     }
     
         
-    private void createSubDataset(final DataSetNode parentNode, Project project, DDataset parentDataset, final DefaultTreeModel treeModel, List resultSetIds, TaskInfo taskInfo) {
+    private void createSubDataset(final DataSetNode parentNode, Project project, DDataset parentDataset, final DefaultTreeModel treeModel, List resultSetIds, Map<String, Long> rsmIdByRsId, TaskInfo taskInfo) {
            
         for(int i=0; i<resultSetIds.size();i++){
-            String dsName = parentDataset.getName()+resultSetIds.get(i).toString();
+            String dsName = new StringBuilder(parentDataset.getName()).append(".").append(resultSetIds.get(i).toString()).toString();
             DataSetData identificationData = new DataSetData(dsName, Dataset.DatasetType.IDENTIFICATION, Aggregation.ChildNature.SAMPLE_ANALYSIS);  //JPM.TODO                
             final DataSetNode identificationNode = new DataSetNode(identificationData);
             identificationNode.setIsChanging(true);
@@ -294,8 +317,9 @@ public class ImportMaxQuantResultJMSAction extends AbstractRSMAction {
 
             // ask asynchronous loading of data
             DatabaseDataSetTask task = new DatabaseDataSetTask(callback);
-
-            task.initCreateDatasetForIdentification(project, parentDataset, Aggregation.ChildNature.SAMPLE_ANALYSIS, dsName, (Long)resultSetIds.get(i), null, createdDatasetList, taskInfo);
+            Long rsId = (Long)resultSetIds.get(i);
+            Long rmsId = (rsmIdByRsId != null) && (rsmIdByRsId.containsKey(rsId.toString())) ?  rsmIdByRsId.get(rsId.toString()) : null;
+            task.initCreateDatasetForIdentification(project, parentDataset, Aggregation.ChildNature.SAMPLE_ANALYSIS, dsName, (Long)resultSetIds.get(i), rmsId, createdDatasetList, taskInfo);
             AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
         }
     }

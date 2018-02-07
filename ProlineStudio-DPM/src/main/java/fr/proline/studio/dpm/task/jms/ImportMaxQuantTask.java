@@ -26,13 +26,21 @@ import javax.jms.TextMessage;
  * @author VD225637
  */
 public class ImportMaxQuantTask extends AbstractJMSTask {
+
+    public static int RESULT_SET_IDS_LIST = 0;
+    public static int WARNING_MESSAGES = 1;
+    public static int RESULT_SUMMARY_IDS_MAP = 2;
+    public static int QUANTITATION_DATASET_ID = 3;
     
-//    private String m_parserId;
-//    private HashMap<String, String> m_parserArguments;
+    public static int RESULTS_SIZE = 4;
+    
     private String m_filePath;
     private long m_instrumentId;
     private long m_peaklistSoftwareId;
     private long m_projectId;
+    private String m_accessionRegexp;
+    private Boolean m_importQuantResult;
+    
     private Object[] m_taskResult = null;
  
 
@@ -42,9 +50,21 @@ public class ImportMaxQuantTask extends AbstractJMSTask {
         m_instrumentId = instrumentId;
         m_peaklistSoftwareId = peaklistSoftwareId;
         m_projectId = projectId;
+        m_importQuantResult = false; 
+        m_accessionRegexp = "*";
         m_taskResult = resultsFromTask;
     }
-    
+
+    public ImportMaxQuantTask(AbstractJMSCallback callback, String filePath, long instrumentId, String accessionRegexp, Boolean importQuantitation, long projectId, Object[] resultsFromTask) {
+        super(callback, new TaskInfo("Import MaxQuant file " + filePath, true, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_HIGH));
+        m_filePath = filePath;
+        m_instrumentId = instrumentId;
+        m_accessionRegexp = accessionRegexp;
+        m_importQuantResult = importQuantitation;
+        m_projectId = projectId;
+        m_taskResult = resultsFromTask;
+    }
+
     
     @Override
     public void taskRun() throws JMSException {
@@ -56,6 +76,8 @@ public class ImportMaxQuantTask extends AbstractJMSTask {
         /* ReplyTo = Temporary Destination Queue for Server -> Client response */
         message.setJMSReplyTo(m_replyQueue);
         message.setStringProperty(JMSConnectionManager.PROLINE_SERVICE_NAME_KEY, "proline/dps/msi/ImportMaxQuantResults");
+        message.setStringProperty(JMSConnectionManager.PROLINE_SERVICE_VERSION_KEY, "2.0");
+        
         addSourceToMessage(message);  
         addDescriptionToMessage(message);
         
@@ -102,9 +124,21 @@ public class ImportMaxQuantTask extends AbstractJMSTask {
                 m_loggerProline.error(getClass().getSimpleName() + " failed : No returned ResultSet Ids");
                 throw new Exception("Import result error : No returned ResultSet Ids");
             }
-                    
-            m_taskResult[0] = returnedRsIds;
-            m_taskResult[1] = (String) returnedValues.get("warning_msg");
+                  
+            
+            Map resultSummaries = (Map) returnedValues.get("result_summary_ids_by_result_set_id");
+            if (resultSummaries != null && !resultSummaries.isEmpty()) {
+                m_taskResult[RESULT_SUMMARY_IDS_MAP] = resultSummaries;
+            }
+            
+            Long datasetId = (Long)returnedValues.get("quantitation_dataset_id");
+            if (datasetId != null) {
+                m_taskResult[QUANTITATION_DATASET_ID] = datasetId;
+            }
+            
+            m_taskResult[RESULT_SET_IDS_LIST] = returnedRsIds;
+            m_taskResult[WARNING_MESSAGES] = (String) returnedValues.get("warning_msg");
+            
         }
                
         m_currentState = JMSState.STATE_DONE;
@@ -116,8 +150,9 @@ public class ImportMaxQuantTask extends AbstractJMSTask {
         params.put("project_id", m_projectId);
         params.put("result_files_dir",m_filePath );
         params.put("instrument_config_id", m_instrumentId);
-        params.put("peaklist_software_id", m_peaklistSoftwareId);               
-         
+        if ((m_accessionRegexp != null) && !m_accessionRegexp.isEmpty())
+            params.put("accession_regexp", m_accessionRegexp);
+        params.put("import_quant_result", m_importQuantResult);
         return params;
     }
     

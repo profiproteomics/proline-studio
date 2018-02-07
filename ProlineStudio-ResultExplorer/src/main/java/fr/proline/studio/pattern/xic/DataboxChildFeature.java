@@ -1,13 +1,12 @@
 package fr.proline.studio.pattern.xic;
 
 import fr.proline.core.orm.lcms.Feature;
+import fr.proline.core.orm.lcms.MapAlignment;
 import fr.proline.core.orm.lcms.Peakel;
 import fr.proline.core.orm.lcms.Peak;
-import fr.proline.core.orm.lcms.ProcessedMap;
 import fr.proline.core.orm.lcms.dto.DFeature;
 import fr.proline.core.orm.msi.dto.DMasterQuantPeptideIon;
 
-import fr.proline.core.orm.uds.dto.DDataset;
 
 import fr.proline.studio.extendedtablemodel.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
@@ -135,12 +134,7 @@ public class DataboxChildFeature extends AbstractDataBox {
 
             }
         };
-        Long alnRefMapId = (long) -1;
-        for (ProcessedMap pmap : m_quantChannelInfo.getAllMaps()) {
-            if (pmap.getIsAlnReference()) {
-                alnRefMapId = pmap.getId();
-            }
-        }
+        Long alnRefMapId = m_quantChannelInfo.getDataset().getAlnReferenceMapId();
         
         // ask asynchronous loading of data
         m_childFeatureList = new ArrayList();
@@ -148,7 +142,12 @@ public class DataboxChildFeature extends AbstractDataBox {
         m_peakelList = new ArrayList();
         m_peakList = new ArrayList();
         DatabaseLoadLcMSTask task = new DatabaseLoadLcMSTask(callback);
-        task.initLoadChildFeatureForPeptideIonWithPeakel(getProjectId(), m_masterQuantPeptideIon, m_childFeatureList, m_peakelList, m_quantChannelInfo.getAllMapAlignmentsRev(), alnRefMapId, m_quantChannelInfo.getAllMaps());
+        
+        List<MapAlignment> allMapAlignments = new ArrayList();
+        allMapAlignments.addAll(m_quantChannelInfo.getDataset().getMapAlignments());
+        allMapAlignments.addAll(m_quantChannelInfo.getDataset().getMapReversedAlignments());
+        
+        task.initLoadChildFeatureForPeptideIonWithPeakel(getProjectId(), m_masterQuantPeptideIon, m_childFeatureList, m_peakelList, allMapAlignments, alnRefMapId, m_quantChannelInfo.getDataset().getMaps());
         registerTask(task);
 
     }

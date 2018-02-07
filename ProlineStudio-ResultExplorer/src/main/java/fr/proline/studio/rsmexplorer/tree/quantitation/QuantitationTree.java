@@ -2,8 +2,10 @@ package fr.proline.studio.rsmexplorer.tree.quantitation;
 
 import fr.proline.core.orm.uds.Project;
 import fr.proline.core.orm.uds.dto.DDataset;
+import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.DatabaseDataManager;
 import fr.proline.studio.dam.data.AbstractData;
+import fr.proline.studio.dam.data.DataSetData;
 import fr.proline.studio.rsmexplorer.actions.identification.CreateXICAction;
 import fr.proline.studio.rsmexplorer.actions.identification.AbstractRSMAction;
 import fr.proline.studio.rsmexplorer.actions.identification.DeleteAction;
@@ -38,6 +40,7 @@ import java.util.*;
 import javax.swing.*;
 import javax.swing.event.TreeExpansionEvent;
 import javax.swing.event.TreeWillExpandListener;
+import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.ExpandVetoException;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
@@ -796,4 +799,51 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
 
     }
 
+     public void loadDataSet(Long quantiDatasetId, final DataSetNode datasetNode) {
+
+        final ArrayList<DDataset> readDatasetList = new ArrayList<>(1);
+        final QuantitationTree tree = QuantitationTree.getCurrentTree();
+        final DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
+        
+        AbstractDatabaseCallback readDatasetCallback = new AbstractDatabaseCallback() {
+
+            @Override
+            public boolean mustBeCalledInAWT() {
+                return true;
+            }
+
+            @Override
+            public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
+                if (success) {
+                    final DDataset ds = readDatasetList.get(0);
+                    AbstractDatabaseCallback loadQCallback = new AbstractDatabaseCallback() {
+                        @Override
+                        public boolean mustBeCalledInAWT() {
+                            return true;
+                        }
+
+                        @Override
+                        public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
+                            ((DataSetData) datasetNode.getData()).setDataset(ds);
+                            if (datasetNode instanceof DataSetNode && datasetNode.isQuantXIC()) {
+                                XICDesignTree.setExpDesign(datasetNode.getDataset(), datasetNode, tree, false, true);
+                            }
+                            datasetNode.setIsChanging(false);
+                            treeModel.nodeChanged(datasetNode);
+                        }
+                    };
+                    DatabaseDataSetTask loadQTask = new DatabaseDataSetTask(loadQCallback);
+                    loadQTask.initLoadQuantitation(ProjectExplorerPanel.getProjectExplorerPanel().getSelectedProject(), ds);
+                    AccessDatabaseThread.getAccessDatabaseThread().addTask(loadQTask);
+                } else {
+                    treeModel.removeNodeFromParent(datasetNode);
+                }
+            }
+        };
+
+        DatabaseDataSetTask task = new DatabaseDataSetTask(readDatasetCallback);
+        task.initLoadDataset(quantiDatasetId, readDatasetList);
+        AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
+
+    }
 }

@@ -195,8 +195,13 @@ public class CreateXICAction extends AbstractRSMAction {
 
                 @Override
                 public void run(boolean success) {
-                    runXic(success, _xicQuantiDataSetId[0], _quantitationNode[0], tree, treeModel);
-
+                    if (success) {
+                        m_logger.debug(" XIC SUCCESS : " + _xicQuantiDataSetId[0]);
+                        QuantitationTree.getCurrentTree().loadDataSet(_xicQuantiDataSetId[0], _quantitationNode[0]);
+                    } else {
+                        m_logger.debug(" XIC ERROR ");
+                        treeModel.removeNodeFromParent(_quantitationNode[0]);
+                    }
                 }
             };
 
@@ -205,55 +210,6 @@ public class CreateXICAction extends AbstractRSMAction {
 
 
         } //End OK entered      
-    }
-
-    private void runXic(boolean success, Long xicQuantiDsId, final DataSetNode dsNode, final QuantitationTree tree, final DefaultTreeModel treeModel) {
-        if (success) {
-            m_logger.debug(" XIC SUCCESS : " + xicQuantiDsId);
-            final ArrayList<DDataset> readDatasetList = new ArrayList<>(1);
-
-            AbstractDatabaseCallback readDatasetCallback = new AbstractDatabaseCallback() {
-
-                @Override
-                public boolean mustBeCalledInAWT() {
-                    return true;
-                }
-
-                @Override
-                public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
-                    if (success) {
-                        final DDataset ds = readDatasetList.get(0);
-                        AbstractDatabaseCallback loadQCallback = new AbstractDatabaseCallback() {
-                            @Override
-                            public boolean mustBeCalledInAWT() {
-                                return true;
-                            }
-
-                            @Override
-                            public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
-                                ((DataSetData) dsNode.getData()).setDataset(ds);
-                                XICDesignTree.setExpDesign(dsNode.getDataset(), dsNode, tree, false, true);
-                                dsNode.setIsChanging(false);
-                                treeModel.nodeChanged(dsNode);
-                            }
-                        };
-                        DatabaseDataSetTask loadQTask = new DatabaseDataSetTask(loadQCallback);
-                        loadQTask.initLoadQuantitation(ProjectExplorerPanel.getProjectExplorerPanel().getSelectedProject(), ds);
-                        AccessDatabaseThread.getAccessDatabaseThread().addTask(loadQTask);
-                    } else {
-                        treeModel.removeNodeFromParent(dsNode);
-                    }
-                }
-            };
-
-            DatabaseDataSetTask task = new DatabaseDataSetTask(readDatasetCallback);
-            task.initLoadDataset(xicQuantiDsId, readDatasetList);
-            AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
-
-        } else {
-            m_logger.debug(" XIC ERROR ");
-            treeModel.removeNodeFromParent(dsNode);
-        }
     }
 
     @Override

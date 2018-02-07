@@ -1,7 +1,5 @@
 package fr.proline.studio.pattern.xic;
 
-import fr.proline.core.orm.lcms.MapAlignment;
-import fr.proline.core.orm.lcms.ProcessedMap;
 import fr.proline.core.orm.msi.Peptide;
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.dto.DMasterQuantPeptide;
@@ -11,8 +9,6 @@ import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.msi.dto.DProteinSet;
 
 import fr.proline.core.orm.uds.dto.DDataset;
-import fr.proline.core.orm.uds.dto.DMasterQuantitationChannel;
-import fr.proline.core.orm.uds.dto.DQuantitationChannel;
 import fr.proline.studio.extendedtablemodel.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.SubTask;
@@ -40,11 +36,6 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
     private DMasterQuantProteinSet m_masterQuantProteinSet;
     private List<DMasterQuantPeptide> m_masterQuantPeptideList;
     private QuantChannelInfo m_quantChannelInfo;
-    private DQuantitationChannel[] quantitationChannelArray = null;
-
-    private List<MapAlignment> m_mapAlignments;
-    private List<MapAlignment> m_allMapAlignments;
-    private List<ProcessedMap> m_allMaps;
 
     private boolean m_isXICMode = true;
 
@@ -155,10 +146,8 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
                 if (subTask == null) {
 
                     if (!allPeptides) {
-                        quantitationChannelArray = m_quantChannelInfo.getQuantChannels();
-                        ((XicPeptidePanel) getDataBoxPanelInterface()).setData(taskId, m_proteinSet != null, quantitationChannelArray, m_masterQuantPeptideList, m_isXICMode, finished);
-                         
-                    
+                        ((XicPeptidePanel) getDataBoxPanelInterface()).setData(taskId, m_proteinSet != null, m_quantChannelInfo.getQuantChannels(), m_masterQuantPeptideList, m_isXICMode, finished);
+                                             
                     } else {
                         AbstractDatabaseCallback mapCallback = new AbstractDatabaseCallback() {
 
@@ -169,21 +158,11 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
 
                             @Override
                             public void run(boolean success, long task2Id, SubTask subTask, boolean finished) {
-                                // list quant Channels
-                                List<DQuantitationChannel> listQuantChannel = new ArrayList();
-                                if (m_dataset.getMasterQuantitationChannels() != null && !m_dataset.getMasterQuantitationChannels().isEmpty()) {
-                                    DMasterQuantitationChannel masterChannel = m_dataset.getMasterQuantitationChannels().get(0);
-                                    listQuantChannel = masterChannel.getQuantitationChannels();
-                                }
-                                quantitationChannelArray = new DQuantitationChannel[listQuantChannel.size()];
-                                listQuantChannel.toArray(quantitationChannelArray);
-                                m_quantChannelInfo = new QuantChannelInfo(quantitationChannelArray);
-                                m_quantChannelInfo.setAllMapAlignments(m_allMapAlignments);
-                                m_quantChannelInfo.setMapAlignments(m_mapAlignments);
-                                m_quantChannelInfo.setAllMaps(m_allMaps);
+                                
+                                m_quantChannelInfo = new QuantChannelInfo(m_dataset);
                                 getDataBoxPanelInterface().addSingleValue(m_quantChannelInfo);
 
-                                ((XicPeptidePanel) getDataBoxPanelInterface()).setData(taskId, m_proteinSet != null, quantitationChannelArray, m_masterQuantPeptideList, m_isXICMode, finished);
+                                ((XicPeptidePanel) getDataBoxPanelInterface()).setData(taskId, m_proteinSet != null, m_quantChannelInfo.getQuantChannels(), m_masterQuantPeptideList, m_isXICMode, finished);
                                 
                                 if (finished) {
                                     unregisterTask(task2Id);
@@ -191,11 +170,8 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
                             }
                         };
                         // ask asynchronous loading of data
-                        m_mapAlignments = new ArrayList();
-                        m_allMapAlignments = new ArrayList();
-                        m_allMaps = new ArrayList();
                         DatabaseLoadLcMSTask maptask = new DatabaseLoadLcMSTask(mapCallback);
-                        maptask.initLoadAlignmentForXic(getProjectId(), m_dataset, m_mapAlignments, m_allMapAlignments, m_allMaps);
+                        maptask.initLoadAlignmentForXic(getProjectId(), m_dataset);
                         registerTask(maptask);
                     }
 
@@ -311,7 +287,7 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
             // one table model per row
             for (DMasterQuantPeptide quantPeptide : m_masterQuantPeptideList) {
                 PeptidePanel aPepPanel = new PeptidePanel();
-                aPepPanel.setData(quantitationChannelArray, quantPeptide, m_isXICMode);
+                aPepPanel.setData(m_quantChannelInfo.getQuantChannels(), quantPeptide, m_isXICMode);
                 list.add(aPepPanel);
             }
         }

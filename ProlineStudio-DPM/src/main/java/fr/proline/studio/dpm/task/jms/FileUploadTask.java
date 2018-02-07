@@ -177,7 +177,7 @@ public class FileUploadTask extends AbstractJMSTask {
         String[] dataFilesNames = subTxtFolder.list();
         for (String name : dataFilesNames) {
             if (name.equals("msms.txt") || name.equals("msmsScans.txt") || name.equals("parameters.txt") || name.equals("proteinGroups.txt")
-                    || name.equals("summary.txt")) {
+                    || name.equals("summary.txt") || name.equals("allPeptides.txt") || name.equals("evidence.txt")) {
                 acceptedFiles.add(subFolderString + "/" + name);
             }
         }

@@ -36,13 +36,7 @@ public class DataboxXicPeptideIon extends AbstractDataBox {
     private DDataset m_dataset;
     private DMasterQuantPeptide m_masterQuantPeptide;
     private List<DMasterQuantPeptideIon> m_masterQuantPeptideIonList;
-    private DQuantitationChannel[] quantitationChannelArray = null;
-
     private QuantChannelInfo m_quantChannelInfo;
-
-    private List<MapAlignment> m_mapAlignments;
-    private List<MapAlignment> m_allMapAlignments;
-    private List<ProcessedMap> m_allMaps;
 
     private boolean m_isXICMode = true;
 
@@ -85,9 +79,6 @@ public class DataboxXicPeptideIon extends AbstractDataBox {
         outParameter = new GroupParameter();
         outParameter.addParameter(ExtendedTableModelInterface.class, true);
         registerOutParameter(outParameter);
-
-        
-        
         
     }
 
@@ -129,8 +120,7 @@ public class DataboxXicPeptideIon extends AbstractDataBox {
 
                 if (subTask == null) {
                     if (!allPeptides) {
-                        quantitationChannelArray = m_quantChannelInfo.getQuantChannels();
-                        ((XicPeptideIonPanel) getDataBoxPanelInterface()).setData(taskId, quantitationChannelArray, m_masterQuantPeptideIonList, m_isXICMode, finished);
+                        ((XicPeptideIonPanel) getDataBoxPanelInterface()).setData(taskId, m_quantChannelInfo.getQuantChannels(), m_masterQuantPeptideIonList, m_isXICMode, finished);
                     } else {
                         AbstractDatabaseCallback mapCallback = new AbstractDatabaseCallback() {
 
@@ -141,20 +131,8 @@ public class DataboxXicPeptideIon extends AbstractDataBox {
 
                             @Override
                             public void run(boolean success, long task2Id, SubTask subTask, boolean finished) {
-                                // list quant Channels
-                                List<DQuantitationChannel> listQuantChannel = new ArrayList();
-                                if (m_dataset.getMasterQuantitationChannels() != null && !m_dataset.getMasterQuantitationChannels().isEmpty()) {
-                                    DMasterQuantitationChannel masterChannel = m_dataset.getMasterQuantitationChannels().get(0);
-                                    listQuantChannel = masterChannel.getQuantitationChannels();
-                                }
-                                quantitationChannelArray = new DQuantitationChannel[listQuantChannel.size()];
-                                listQuantChannel.toArray(quantitationChannelArray);
-                                m_quantChannelInfo = new QuantChannelInfo(quantitationChannelArray);
-                                m_quantChannelInfo.setAllMapAlignments(m_allMapAlignments);
-                                m_quantChannelInfo.setMapAlignments(m_mapAlignments);
-                                m_quantChannelInfo.setAllMaps(m_allMaps);
-
-                                ((XicPeptideIonPanel) getDataBoxPanelInterface()).setData(taskId, quantitationChannelArray, m_masterQuantPeptideIonList, m_isXICMode, finished);
+                                m_quantChannelInfo = new QuantChannelInfo(m_dataset);
+                                ((XicPeptideIonPanel) getDataBoxPanelInterface()).setData(taskId, m_quantChannelInfo.getQuantChannels(), m_masterQuantPeptideIonList, m_isXICMode, finished);
 
                                 if (finished) {
                                     unregisterTask(task2Id);
@@ -162,11 +140,8 @@ public class DataboxXicPeptideIon extends AbstractDataBox {
                             }
                         };
                         // ask asynchronous loading of data
-                        m_mapAlignments = new ArrayList();
-                        m_allMapAlignments = new ArrayList();
-                        m_allMaps = new ArrayList();
                         DatabaseLoadLcMSTask taskMap = new DatabaseLoadLcMSTask(mapCallback);
-                        taskMap.initLoadAlignmentForXic(getProjectId(), m_dataset, m_mapAlignments, m_allMapAlignments, m_allMaps);
+                        taskMap.initLoadAlignmentForXic(getProjectId(), m_dataset);
                         registerTask(taskMap);
                     }
 

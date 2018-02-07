@@ -1,13 +1,10 @@
 package fr.proline.studio.pattern.xic;
 
-import fr.proline.core.orm.lcms.MapAlignment;
-import fr.proline.core.orm.lcms.ProcessedMap;
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.dto.DMasterQuantProteinSet;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.core.orm.uds.dto.DDataset;
-import fr.proline.core.orm.uds.dto.DMasterQuantitationChannel;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
 import fr.proline.studio.extendedtablemodel.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.AccessDatabaseThread;
@@ -161,9 +158,6 @@ public class DataBoxXICPTMProteinSite extends AbstractDataBox {
     //Load XIC Information    
     private List<DMasterQuantProteinSet> m_masterQuantProteinSetList;
     private DQuantitationChannel[] m_quantitationChannelArray = null;
-    private List<MapAlignment> m_mapAlignments;
-    private List<MapAlignment> m_allMapAlignments;
-    private List<ProcessedMap> m_allMaps;
     private QuantChannelInfo m_quantChannelInfo;
 
     public void loadXicData(long taskId, ArrayList<PTMSite> proteinPTMSiteArray, boolean finished) {
@@ -188,18 +182,8 @@ public class DataBoxXICPTMProteinSite extends AbstractDataBox {
 
                         @Override
                         public void run(boolean success, long task2Id, SubTask subTask, boolean finished) {
-                            // list quant Channels
-                            List<DQuantitationChannel> listQuantChannel = new ArrayList();
-                            if (m_dataset.getMasterQuantitationChannels() != null && !m_dataset.getMasterQuantitationChannels().isEmpty()) {
-                                DMasterQuantitationChannel masterChannel = m_dataset.getMasterQuantitationChannels().get(0);
-                                listQuantChannel = masterChannel.getQuantitationChannels();
-                            }
-                            m_quantitationChannelArray = new DQuantitationChannel[listQuantChannel.size()];
-                            listQuantChannel.toArray(m_quantitationChannelArray);
-                            m_quantChannelInfo = new QuantChannelInfo(m_quantitationChannelArray);
-                            m_quantChannelInfo.setAllMapAlignments(m_allMapAlignments);
-                            m_quantChannelInfo.setMapAlignments(m_mapAlignments);
-                            m_quantChannelInfo.setAllMaps(m_allMaps);
+                            
+                            m_quantChannelInfo = new QuantChannelInfo(m_dataset);
                             getDataBoxPanelInterface().addSingleValue(m_quantChannelInfo);
 
                             // proteins set 
@@ -214,11 +198,8 @@ public class DataBoxXICPTMProteinSite extends AbstractDataBox {
                         }
                     };
                     // ask asynchronous loading of data
-                    m_mapAlignments = new ArrayList();
-                    m_allMapAlignments = new ArrayList();
-                    m_allMaps = new ArrayList();
                     DatabaseLoadLcMSTask taskMap = new DatabaseLoadLcMSTask(mapCallback);
-                    taskMap.initLoadAlignmentForXic(getProjectId(), m_dataset, m_mapAlignments, m_allMapAlignments, m_allMaps);
+                    taskMap.initLoadAlignmentForXic(getProjectId(), m_dataset);
                     registerTask(taskMap);
 
                 } else {

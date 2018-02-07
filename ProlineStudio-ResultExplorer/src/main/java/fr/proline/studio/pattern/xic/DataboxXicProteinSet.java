@@ -34,12 +34,7 @@ public class DataboxXicProteinSet extends AbstractDataBox {
     private DDataset m_dataset;
     private QuantChannelInfo m_quantChannelInfo;
     private List<DMasterQuantProteinSet> m_masterQuantProteinSetList;
-    private DQuantitationChannel[] m_quantitationChannelArray = null;
     private boolean m_isXICMode = true;
-
-    private List<MapAlignment> m_mapAlignments;
-    private List<MapAlignment> m_allMapAlignments;
-    private List<ProcessedMap> m_allMaps;
 
     public DataboxXicProteinSet() {
         super(DataboxType.DataboxXicProteinSet, DataboxStyle.STYLE_XIC);
@@ -143,35 +138,21 @@ public class DataboxXicProteinSet extends AbstractDataBox {
 
                         @Override
                         public void run(boolean success, long task2Id, SubTask subTask, boolean finished) {
-                            // list quant Channels
-                            List<DQuantitationChannel> listQuantChannel = new ArrayList();
-                            if (m_dataset.getMasterQuantitationChannels() != null && !m_dataset.getMasterQuantitationChannels().isEmpty()) {
-                                DMasterQuantitationChannel masterChannel = m_dataset.getMasterQuantitationChannels().get(0);
-                                listQuantChannel = masterChannel.getQuantitationChannels();
-                            }
-                            m_quantitationChannelArray = new DQuantitationChannel[listQuantChannel.size()];
-                            listQuantChannel.toArray(m_quantitationChannelArray);
-                            m_quantChannelInfo = new QuantChannelInfo(m_quantitationChannelArray);
-                            m_quantChannelInfo.setAllMapAlignments(m_allMapAlignments);
-                            m_quantChannelInfo.setMapAlignments(m_mapAlignments);
-                            m_quantChannelInfo.setAllMaps(m_allMaps);
+                            m_quantChannelInfo = new QuantChannelInfo(m_dataset);
                             getDataBoxPanelInterface().addSingleValue(m_quantChannelInfo);
 
                             // proteins set 
                             //DMasterQuantProteinSet[] masterQuantProteinSetArray = new DMasterQuantProteinSet[m_masterQuantProteinSetList.size()];
                             //m_masterQuantProteinSetList.toArray(masterQuantProteinSetArray);
-                            ((XicProteinSetPanel) getDataBoxPanelInterface()).setData(taskId, m_quantitationChannelArray, m_masterQuantProteinSetList, m_isXICMode, finished);
+                            ((XicProteinSetPanel) getDataBoxPanelInterface()).setData(taskId, m_quantChannelInfo.getQuantChannels(), m_masterQuantProteinSetList, m_isXICMode, finished);
                             if (finished) {
                                 unregisterTask(task2Id);
                             }
                         }
                     };
                     // ask asynchronous loading of data
-                    m_mapAlignments = new ArrayList();
-                    m_allMapAlignments = new ArrayList();
-                    m_allMaps = new ArrayList();
                     DatabaseLoadLcMSTask taskMap = new DatabaseLoadLcMSTask(mapCallback);
-                    taskMap.initLoadAlignmentForXic(getProjectId(), m_dataset, m_mapAlignments, m_allMapAlignments, m_allMaps);
+                    taskMap.initLoadAlignmentForXic(getProjectId(), m_dataset);
                     registerTask(taskMap);
 
                 } else {
@@ -295,7 +276,7 @@ public class DataboxXicProteinSet extends AbstractDataBox {
 
     private ProteinQuantPanel getProteinQuantTableModelList() {
         ProteinQuantPanel aProtPanel = new ProteinQuantPanel();
-        aProtPanel.setData(m_quantitationChannelArray, ((XicProteinSetPanel) getDataBoxPanelInterface()).getSelectedMasterQuantProteinSet(), m_isXICMode);
+        aProtPanel.setData(m_quantChannelInfo.getQuantChannels(), ((XicProteinSetPanel) getDataBoxPanelInterface()).getSelectedMasterQuantProteinSet(), m_isXICMode);
         return aProtPanel;
     }
 

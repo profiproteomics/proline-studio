@@ -6,9 +6,7 @@
 package fr.proline.studio.dam.tasks.xic;
 
 import fr.proline.core.orm.lcms.MapAlignment;
-import fr.proline.core.orm.lcms.MapAlignmentPK;
 import fr.proline.core.orm.lcms.MapTime;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -54,7 +52,7 @@ public class MapAlignmentConverter {
         MapAlignment mapAln = getMapAlgn(sourceMapId, targetMapId, listMapAlignment);
         if(mapAln != null) {
             return calcTargetMapElutionTime(mapAln, elutionTime);
-        }else{// Else we need to make to consecutive time conversions
+        } else {// Else we need to make to consecutive time conversions
             // Convert time into the reference map scale
             MapAlignment refMapAln = getMapAlgn(sourceMapId, alnRefMapId, listMapAlignment);
             Double refTime = calcTargetMapElutionTime(refMapAln, elutionTime);
@@ -164,41 +162,6 @@ public class MapAlignmentConverter {
         lineP[0] = slope;
         lineP[1] = intercept;
         return lineP;
-    }
-    
-    public static MapAlignment getRevertedMapAlignment(MapAlignment map){
-        MapAlignment revertedMap = new MapAlignment();
-        MapAlignmentPK mapKey = new MapAlignmentPK();
-        mapKey.setFromMapId(map.getDestinationMap().getId());
-        mapKey.setToMapId(map.getSourceMap().getId());
-        mapKey.setMassStart(map.getId().getMassStart());
-        mapKey.setMassEnd(map.getId().getMassEnd());
-        revertedMap.setId(mapKey);
-        revertedMap.setDestinationMap(map.getSourceMap());
-        revertedMap.setSourceMap(map.getDestinationMap());
-        revertedMap.setMapSet(map.getMapSet());
-        
-        int  nbLandmarks = map.getMapTimeList().size();
-        Double[] revTimeList = new Double[nbLandmarks];
-        Double[] revDeltaTimeList = new Double[nbLandmarks];
-        List<MapTime> revMapTimeList = new ArrayList();
-        for (int i=0; i<nbLandmarks; i++){
-            MapTime mapTime = map.getMapTimeList().get(i);
-            Double deltaTime = mapTime.getDeltaTime();
-            Double targetMapTime = mapTime.getTime() + deltaTime ;
-            revTimeList[i] = targetMapTime;
-            revDeltaTimeList[i] = -deltaTime;
-            MapTime rmp = new MapTime(revTimeList[i], revDeltaTimeList[i]);
-            revMapTimeList.add(rmp);
-        }
-        String deltaS = org.apache.commons.lang3.StringUtils.join(revDeltaTimeList, " ");
-        String timeS = org.apache.commons.lang3.StringUtils.join(revTimeList, " ");
-        
-        revertedMap.setMapTimeList(revMapTimeList);
-        revertedMap.setDeltaTimeList(deltaS);
-        revertedMap.setTimeList(timeS);
-        
-        return revertedMap;
     }
     
 }

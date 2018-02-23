@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package fr.proline.mzscope.utils;
+package fr.proline.mzscope.processing;
 
 import fr.profi.ms.model.TheoreticalIsotopePattern;
 import fr.profi.mzdb.model.SpectrumData;

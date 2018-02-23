@@ -3,7 +3,6 @@ package fr.proline.mzscope.mzdb;
 import com.almworks.sqlite4java.SQLiteException;
 import com.google.common.primitives.Doubles;
 import com.google.common.primitives.Floats;
-import fr.profi.ms.model.TheoreticalIsotopePattern;
 import fr.profi.mzdb.FeatureDetectorConfig;
 import fr.profi.mzdb.MzDbFeatureDetector;
 import fr.profi.mzdb.MzDbFeatureExtractor;
@@ -23,7 +22,6 @@ import fr.profi.mzdb.model.PutativeFeature;
 import fr.profi.mzdb.model.RunSlice;
 import fr.profi.mzdb.model.SpectrumData;
 import fr.profi.mzdb.model.SpectrumHeader;
-import fr.profi.mzdb.model.SpectrumSlice;
 import fr.proline.mzscope.model.Chromatogram;
 import fr.proline.mzscope.model.FeaturesExtractionRequest;
 import fr.proline.mzscope.model.IExportParameters;
@@ -33,11 +31,11 @@ import fr.proline.mzscope.model.Spectrum;
 import fr.proline.mzscope.model.IRawFile;
 import fr.proline.mzscope.model.MsnExtractionRequest;
 import fr.proline.mzscope.model.QCMetrics;
+import fr.proline.mzscope.processing.PeakelsHelper;
 import fr.proline.mzscope.ui.MgfExportParameters;
 import fr.proline.mzscope.ui.ScanHeaderExportParameters;
 import fr.proline.mzscope.ui.ScanHeaderType;
-import fr.proline.mzscope.utils.IsotopicPatternUtils;
-import fr.proline.mzscope.utils.SpectrumUtils;
+import fr.proline.mzscope.processing.SpectrumUtils;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -49,13 +47,9 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.Option;
-import scala.Tuple2;
-import scala.collection.JavaConverters;
 
 
 /**
@@ -271,7 +265,14 @@ public class MzdbRawFile implements IRawFile {
                 }
             });
             logger.info("Peakels detected : " + peakels.length);
-            result = deisotopePeakels(peakels, mzTolPPM);
+
+            PeakelsHelper helper = new PeakelsHelper(peakels);
+            //List<Feature> features2 = helper.deisotopePeakels(reader, mzTolPPM);            
+            List<Feature> features = helper.deisotopePeakelsFromMzdb(reader, mzTolPPM);
+            
+            //List<Feature> features = PeakelsHelper.deisotopePeakelsFromMzdb(reader, peakels, mzTolPPM);
+            features.forEach(f -> result.add(new MzdbFeatureWrapper(f, this, 1)));            
+            
         } catch (SQLiteException | StreamCorruptedException ex) {
             logger.error("Error while getting LcMs RunSlice Iterator: " + ex);
         }
@@ -289,63 +290,6 @@ public class MzdbRawFile implements IRawFile {
       }
       logger.info("Real bounds : " + min + " - " + max);
    }
-    
-    private List<IFeature> deisotopePeakels(Peakel[] peakels, float mzTolPPM) throws StreamCorruptedException, SQLiteException {
-        List<IFeature> result = new ArrayList<>();
-        boolean[] assigned = new boolean[peakels.length];
-        Arrays.fill(assigned, false);
-        Pair<Double, Integer> peakelIndexesByMz[] = new Pair[peakels.length];
-        for (int k = 0; k < peakels.length; k++) {
-            peakelIndexesByMz[k] = new ImmutablePair<>(peakels[k].getMz(), k);
-        }
-
-        Arrays.sort(peakelIndexesByMz, new Comparator<Pair<Double, Integer>>() {
-            @Override
-            public int compare(Pair<Double, Integer> p1, Pair<Double, Integer> p2) {
-                return Double.compare(p1.getLeft(), p2.getLeft());
-            }
-        });
-
-        for (int k = 0; k < peakels.length; k++) {
-            if ((k % 10000) == 0) {
-                logger.info("processing peakel " + k);
-            }
-            if (!assigned[k]) {
-                SpectrumSlice[] slices = reader.getMsSpectrumSlices(peakels[k].getApexMz() - 5.0, peakels[k].getApexMz() + 5.0, peakels[k].getApexElutionTime() - 0.1f, peakels[k].getApexElutionTime() + 0.1f);
-                int i = 0;
-                while ((i < slices.length) && (slices[i].getHeader().getSpectrumId() != peakels[k].getApexSpectrumId())) {
-                    i++;
-                }
-                SpectrumData data = slices[i].getData();
-
-//                Tuple2<Object, TheoreticalIsotopePattern>[] putativePatterns = IsotopicPatternScorer.calcIsotopicPatternHypotheses(data, peakels[k].getMz(), mzTolPPM);
-                Tuple2<Object, TheoreticalIsotopePattern>[] putativePatterns = IsotopicPatternUtils.calcIsotopicPatternHypotheses(data, peakels[k].getMz(), mzTolPPM);
-                //TreeMap<Double, TheoreticalIsotopePattern> putativePatterns = IsotopePattern.getOrderedIPHypothesis(data, peakels[k].getMz());
-                TheoreticalIsotopePattern bestPattern = putativePatterns[0]._2;
-                List<Peakel> l = new ArrayList<>(bestPattern.isotopeCount() + 1);
-                
-                for (Tuple2 t : bestPattern.mzAbundancePairs()) {
-                    int idx = SpectrumUtils.findCorrelatingPeakelIndex(peakels, peakelIndexesByMz, (double) t._1, peakels[k], mzTolPPM);
-                    if (idx != -1) {
-                        assigned[idx] = true;
-                        l.add(peakels[idx]);
-                    } //else if ( ((double)t._1 > min) && ((double)t._1 < max)) {
-//                     logger.info("Isotope at "+(double)t._1+" not found");
-//                  }
-                }
-                if (l.isEmpty()) {
-                    logger.warn("Strange situation : peakel not found within isotopic pattern .... " + peakels[k].getMz());
-                    l.add(peakels[k]);
-                }
-               logger.info("Creates feature with "+l.size()+" peakels at mz="+l.get(0).getMz()+ " from peakel "+peakels[k].getMz()+ " at "+peakels[k].getApexElutionTime()/60.0);                
-                Feature feature = new Feature(l.get(0).getMz(), bestPattern.charge(), JavaConverters.asScalaBufferConverter(l).asScala(), true);
-                result.add(new MzdbFeatureWrapper(feature, this, 1));
-            }
-        }
-
-        logger.info("Features detected : " + result.size());
-        return result;
-    }
 
     private List<IFeature> detectPeakels(FeaturesExtractionRequest params) {
 
@@ -386,6 +330,8 @@ public class MzdbRawFile implements IRawFile {
             double min = (params.getMsLevel() == 1) ? params.getMinMz() : params.getFragmentMinMz();
             double max = (params.getMsLevel() == 1) ? params.getMaxMz() : params.getFragmentMaxMz();
             
+            logger.info("{} peakels found",peakels.length);
+            
             for (Peakel peakel : peakels) {
                 //creates a fake Feature associated to this peakel in order to always display Features
                 IFeature feature = (params.getMsLevel() == 1) ? new MzdbPeakelWrapper(peakel, this) : new MzdbPeakelWrapper(peakel, this, getMzDbReader().getSpectrumHeader(peakel.getApexSpectrumId()).getPrecursorMz());
@@ -400,6 +346,8 @@ public class MzdbRawFile implements IRawFile {
             }
         } catch (SQLiteException | StreamCorruptedException ex) {
             logger.error("Error while getting LcMs RunSlice Iterator: " + ex);
+        } catch (Exception e) {
+            logger.error("unexpected error ",e);
         }
         return result;
     }

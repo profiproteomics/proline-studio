@@ -311,6 +311,7 @@ public class MultiRawFilePanel extends AbstractRawFilePanel {
                     currentRawFile = rawFile;
                     if(chromatogramPanel.getCurrentScanTime() != null) {
                         int scanIdx = rawFile.getSpectrumId(chromatogramPanel.getCurrentScanTime());
+                        currentScan = null;
                         displayScan(scanIdx);
                     }
                     //update MS2 events if shown 

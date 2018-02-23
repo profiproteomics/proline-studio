@@ -25,6 +25,7 @@ import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
 import fr.proline.studio.rsmexplorer.gui.calc.ProcessCallbackInterface;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.FunctionGraphNode;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphConnector;
+import fr.proline.studio.rsmexplorer.gui.model.ImportedDataTableModel;
 import fr.proline.studio.table.DecoratedTable;
 import fr.proline.studio.table.renderer.DefaultLeftAlignRenderer;
 import fr.proline.studio.table.renderer.DefaultRightAlignRenderer;
@@ -64,7 +65,7 @@ public class ImportTSVFunction extends AbstractFunction {
     private StringParameter m_separatorParameter;
     private DisplayStubParameter m_displayTableParameter;
     
-    private LoadedDataModel m_displayModel = new LoadedDataModel();
+    private ImportedDataTableModel m_displayModel = new ImportedDataTableModel();
     
     private String m_modelName = null;
     
@@ -155,7 +156,7 @@ public class ImportTSVFunction extends AbstractFunction {
 
             char separator = getSeparator();
 
-            LoadedDataModel loadedModel = new LoadedDataModel();
+            ImportedDataTableModel loadedModel = new ImportedDataTableModel();
 
             Exception e = loadFile(loadedModel, filePath, separator, true, false);
             if (e != null) {
@@ -173,7 +174,7 @@ public class ImportTSVFunction extends AbstractFunction {
 
     }
     
-    private Exception loadFile(LoadedDataModel model, String filePath, char separator, boolean header, boolean testFile) {
+    public static Exception loadFile(ImportedDataTableModel model, String filePath, char separator, boolean header, boolean testFile) {
         
         File f = new File(filePath);
         if (!f.exists()) {
@@ -288,6 +289,7 @@ public class ImportTSVFunction extends AbstractFunction {
 
         
         model.setData(headerLine, columTypes, data);
+        model.setName(f.getName().substring(0, f.getName().lastIndexOf('.')));
 
         } catch (Exception e) {
             model.setData(null, null, null);

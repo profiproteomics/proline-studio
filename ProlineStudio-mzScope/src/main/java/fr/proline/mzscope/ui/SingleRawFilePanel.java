@@ -4,7 +4,7 @@ import fr.proline.mzscope.model.Chromatogram;
 import fr.proline.mzscope.model.IRawFile;
 import fr.proline.mzscope.model.Signal;
 import fr.proline.mzscope.utils.MzScopeConstants.DisplayMode;
-import fr.proline.mzscope.utils.SpectrumUtils;
+import fr.proline.mzscope.processing.SpectrumUtils;
 import fr.proline.studio.utils.CyclicColorPalette;
 import fr.proline.studio.utils.IconManager;
 import java.awt.Color;

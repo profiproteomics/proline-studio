@@ -70,10 +70,12 @@ public class SignalEditorPanel extends JPanel {
          public void actionPerformed(ActionEvent e) {
             
             List<Tuple2> input = toScalaArrayTuple();
-            int nbPoints = (input.size() <= 20) ? 5 : (input.size() < 50) ? 7 : 11;
-            logger.info("display smoothed signal, SG nb smoothing points = "+nbPoints);
+ 
             PartialSavitzkyGolaySmoother psgSmoother = new PartialSavitzkyGolaySmoother(new SavitzkyGolaySmoothingConfig(5, 4, 1));
             smooth(input, psgSmoother, "Partial SG");
+            //int nbPoints = (input.size() <= 20) ? 5 : (input.size() < 50) ? 7 : 11;
+            int nbPoints = Math.min(input.size()/4, 9);
+            logger.info("display smoothed signal, SG nb smoothing points = "+nbPoints);
             SavitzkyGolaySmoother sgSmoother = new SavitzkyGolaySmoother(new SavitzkyGolaySmoothingConfig(nbPoints, 2, 1));
             smooth(input, sgSmoother, "SG");
          }

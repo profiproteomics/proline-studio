@@ -1,7 +1,11 @@
 package fr.proline.mzscope.ui;
 
+import com.almworks.sqlite4java.SQLiteConnection;
+import com.almworks.sqlite4java.SQLiteException;
 import fr.proline.mzscope.utils.ButtonTabComponent;
 import com.google.common.base.Strings;
+import fr.profi.mzdb.peakeldb.io.PeakelDbReader;
+import fr.profi.mzdb.model.Peakel;
 import fr.proline.mzscope.map.LcMsMap;
 import fr.proline.mzscope.map.LcMsViewer;
 import fr.proline.mzscope.map.LcMsViewport;
@@ -14,6 +18,7 @@ import fr.proline.mzscope.model.IFeature;
 import fr.proline.mzscope.model.IRawFile;
 import fr.proline.mzscope.model.MsnExtractionRequest;
 import fr.proline.mzscope.model.QCMetrics;
+import fr.proline.mzscope.mzdb.MzdbPeakelWrapper;
 import fr.proline.mzscope.utils.MzScopeCallback;
 import fr.proline.mzscope.ui.model.MzScopePreferences;
 import fr.proline.mzscope.ui.dialog.ExportRawFileDialog;
@@ -35,6 +40,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -48,8 +54,10 @@ import javax.swing.SwingWorker;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.EventListenerList;
+import org.openide.util.Exceptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import static scala.collection.JavaConversions.asJavaIterable;
 
 /**
  * main panel for mzscope
@@ -483,6 +491,27 @@ public class MzScopePanel extends JPanel implements IFeatureViewer, IExtractionR
         }
     }
 
+    public void loadPeakels(IRawFile rawfile, File file) {
+        try {
+            List<IFeature> features = new ArrayList<>();
+            SQLiteConnection connection = new SQLiteConnection(file);
+            connection.openReadonly();
+            Iterator<Peakel> peakelsIt = asJavaIterable(PeakelDbReader.loadAllPeakels(connection, 400000)).iterator();
+            while(peakelsIt.hasNext()) {
+                features.add(new MzdbPeakelWrapper(peakelsIt.next(), rawfile));
+            }
+            logger.info("loaded peakels : "+features.size());
+            connection.dispose();
+            final FeaturesPanel featurePanel = new FeaturesPanel(this);
+            addFeatureTab(rawfile.getName(), featurePanel, "loaded from "+file.getAbsolutePath());
+            featurePanel.setFeatures(features, true);
+            
+        } catch (SQLiteException ex) {
+            logger.error("error while reading peakeldb file", ex);
+            Exceptions.printStackTrace(ex);
+        }
+    }
+        
     public void detectPeakels(List<IRawFile> rawfiles) {
         boolean isDIA = isDIAFiles(rawfiles);
         ExtractionParamsDialog dialog = new ExtractionParamsDialog(this.parentFrame, true, isDIA);
@@ -498,7 +527,12 @@ public class MzScopePanel extends JPanel implements IFeatureViewer, IExtractionR
     }
 
     public void detectFeatures() {
-        detectFeatures(Arrays.asList(selectedRawFilePanel.getCurrentRawfile()));
+        IRawFile rawFile = selectedRawFilePanel.getCurrentRawfile();
+        if (rawFile != null) {
+            detectFeatures(Arrays.asList(selectedRawFilePanel.getCurrentRawfile()));
+        } else {
+            logger.error("Feature detection is available as soon as a raw file is currently dispayed");
+        }
     }
 
     public void detectFeatures(List<IRawFile> rawfiles) {

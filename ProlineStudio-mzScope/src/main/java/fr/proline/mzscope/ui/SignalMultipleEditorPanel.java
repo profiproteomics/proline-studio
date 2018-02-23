@@ -1,7 +1,8 @@
 package fr.proline.mzscope.ui;
 
 import fr.proline.mzscope.model.Signal;
-import fr.proline.mzscope.utils.SpectrumUtils;
+import fr.proline.mzscope.processing.DotProductScorer;
+import fr.proline.mzscope.processing.SpectrumUtils;
 import fr.proline.studio.graphics.BasePlotPanel;
 import fr.proline.studio.graphics.PlotLinear;
 import fr.proline.studio.graphics.PlotPanel;
@@ -17,6 +18,7 @@ import java.util.List;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JToolBar;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -68,7 +70,13 @@ public class SignalMultipleEditorPanel extends JPanel {
          public void actionPerformed(ActionEvent e) {
             double value = SpectrumUtils.correlation(m_signals.get(0).getXSeries(), m_signals.get(0).getYSeries(), m_signals.get(1).getXSeries(),  m_signals.get(1).getYSeries());
             m_plots.get(0).addMarker(new LabelMarker(m_plotPanel.getBasePlotPanel(), new PixelCoordinates(10, 10), "Pearson Corr = "+value));
+            
+            Pair<double[], double[]> values = SpectrumUtils.zipValues(m_signals.get(0).getXSeries(), m_signals.get(0).getYSeries(), m_signals.get(1).getXSeries(),  m_signals.get(1).getYSeries());
+            double cosineCorr = DotProductScorer.dotProduct(values.getLeft(), values.getRight());
+            m_plots.get(0).addMarker(new LabelMarker(m_plotPanel.getBasePlotPanel(), new PixelCoordinates(10, 60), "Cosine Corr = "+cosineCorr));
+            
             m_plotPanel.getBasePlotPanel().repaintUpdateDoubleBuffer();
+            
          }
       });
       toolbar.add(button);

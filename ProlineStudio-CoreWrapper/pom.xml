@@ -109,6 +109,7 @@
                         <publicPackage>fr.profi.jdbc</publicPackage>
                         <publicPackage>fr.profi.jdbc.easy</publicPackage>
                         <publicPackage>fr.profi.util</publicPackage>
+                        <publicPackage>fr.profi.util.math</publicPackage>
                         <publicPackage>fr.profi.util.security</publicPackage>
                         <publicPackage>fr.proline.api.service</publicPackage>
                         <publicPackage>fr.proline.context</publicPackage>

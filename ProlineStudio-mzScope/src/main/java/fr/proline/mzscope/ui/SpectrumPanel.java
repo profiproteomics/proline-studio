@@ -6,9 +6,9 @@ import fr.proline.mzscope.model.MsnExtractionRequest;
 import fr.proline.mzscope.ui.model.MzScopePreferences;
 import fr.proline.mzscope.model.Spectrum;
 import fr.proline.mzscope.ui.event.ScanHeaderListener;
-import fr.proline.mzscope.utils.IsotopicPatternUtils;
+import fr.proline.mzscope.processing.IsotopicPatternUtils;
 import fr.proline.mzscope.utils.MzScopeConstants.DisplayMode;
-import fr.proline.mzscope.utils.SpectrumUtils;
+import fr.proline.mzscope.processing.SpectrumUtils;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.graphics.PlotXYAbstract;
 import fr.proline.studio.graphics.PlotLinear;
@@ -52,17 +52,19 @@ import scala.Tuple2;
 public class SpectrumPanel extends JPanel implements ScanHeaderListener, PlotPanelListener {
 
    private static final Logger logger = LoggerFactory.getLogger(SpectrumPanel.class);
+   private static final int OVERLAY_KEY = KeyEvent.CTRL_MASK;
    
    private final IRawFileViewer rawFilePanel;
-
+   private ScanHeaderPanel headerSpectrumPanel;
    protected BasePlotPanel spectrumPlotPanel;
    protected JToolBar spectrumToolbar;
-   private ScanHeaderPanel headerSpectrumPanel;
    
    protected PlotXYAbstract scanPlot;
    protected LineMarker positionMarker;
 
    protected Spectrum currentScan;
+   protected Spectrum referenceSpectrum;
+   
    private boolean keepSameMsLevel = true;
    private boolean autoZoom = false;
    private List<AbstractMarker> ipMarkers = new ArrayList();
@@ -112,7 +114,6 @@ class ScansSpinnerModel extends AbstractSpinnerModel {
       spectrumPlotPanel.setDrawCursor(true);
 
       positionMarker = new LineMarker(spectrumPlotPanel, 0.0, LineMarker.ORIENTATION_VERTICAL, Color.BLUE, false);
-
       
       spectrumPlotPanel.repaint();
 
@@ -139,6 +140,22 @@ class ScansSpinnerModel extends AbstractSpinnerModel {
       });
       
       spectrumToolbar.add(displayIPBtn);
+      
+      JToggleButton freezeSpectrumBtn = new JToggleButton(IconManager.getIcon(IconManager.IconType.PIN));
+      
+      freezeSpectrumBtn.addActionListener(new ActionListener() {
+          @Override
+          public void actionPerformed(ActionEvent e) {
+              JToggleButton tBtn = (JToggleButton)e.getSource();
+            if (tBtn.isSelected()) {
+               displayReferenceSpectrum(currentScan);
+            } else {
+               clearReferenceSpectrumData();
+            }
+          }
+      });
+      
+      spectrumToolbar.add(freezeSpectrumBtn);
       
        JToggleButton autoZoomBtn = new JToggleButton();
        autoZoomBtn.setIcon(IconManager.getIcon(IconManager.IconType.AUTO_ZOOM));
@@ -169,9 +186,9 @@ class ScansSpinnerModel extends AbstractSpinnerModel {
         ipMarkers = new ArrayList();
         float ppmTol = MzScopePreferences.getInstance().getMzPPMTolerance();
 
-        TheoreticalIsotopePattern pattern = IsotopicPatternUtils.predictIsotopicPattern(currentScan.getSpectrumData(), positionMarker.getValue(), ppmTol);
+        //IsotopicPatternUtils.compareIsotopicPatternPredictions(currentScan.getSpectrumData(), positionMarker.getValue(), ppmTol);
 
-        IsotopicPatternUtils.compareIsotopicPatternPredictions(currentScan.getSpectrumData(), positionMarker.getValue(), ppmTol);
+        TheoreticalIsotopePattern pattern = IsotopicPatternUtils.predictIsotopicPattern(currentScan.getSpectrumData(), positionMarker.getValue(), ppmTol);
         
         // search for the index of the user selected mz value
         int referenceMzIdx = 0;
@@ -214,7 +231,7 @@ class ScansSpinnerModel extends AbstractSpinnerModel {
     @Override
     public void plotPanelMouseClicked(MouseEvent e, double xValue, double yValue) {
         if (e.getClickCount() == 2) {
-            if ((e.getModifiers() & KeyEvent.ALT_MASK) == 0 && rawFilePanel.getXicModeDisplay() != DisplayMode.OVERLAY) {
+            if ((e.getModifiers() & OVERLAY_KEY) == 0 && rawFilePanel.getXicModeDisplay() != DisplayMode.OVERLAY) {
                 scanPlot.clearMarkers();
                 scanPlot.addMarker(positionMarker);
             }
@@ -231,7 +248,7 @@ class ScansSpinnerModel extends AbstractSpinnerModel {
                 } else {
                     builder.setMz(currentScan.getPrecursorMz()).setFragmentMz(mz).setFragmentMzTolPPM(ppmTol);
                 }
-                if ((e.getModifiers() & KeyEvent.ALT_MASK) != 0) {
+                if ((e.getModifiers() & OVERLAY_KEY) != 0) {
                     rawFilePanel.extractAndDisplayChromatogram(builder.build(), DisplayMode.OVERLAY, null);
                 } else {
                     rawFilePanel.extractAndDisplayChromatogram(builder.build(), rawFilePanel.getXicModeDisplay(), null);
@@ -292,6 +309,7 @@ class ScansSpinnerModel extends AbstractSpinnerModel {
             ((PlotLinear) scanPlot).setIsPaintMarker(true);
          }
 
+         scanPlot = buildPlot(scan, rawFilePanel.getPlotColor(rawFilePanel.getCurrentRawfile().getName()));
          spectrumPlotPanel.setPlot(scanPlot);
          spectrumPlotPanel.lockMinXValue();
          spectrumPlotPanel.lockMinYValue();
@@ -308,8 +326,9 @@ class ScansSpinnerModel extends AbstractSpinnerModel {
          if ((currentScan != null) && (currentScan.getMsLevel() != scan.getMsLevel())) {
             positionMarker.setVisible(false);
          }
+         
          scanPlot.addMarker(positionMarker);
-//         spectrumPlotPanel.setPlotTitle(rawFilePanel.getCurrentRawfile().getName());
+         displayReferenceSpectrum(referenceSpectrum);
          spectrumPlotPanel.repaint();
          headerSpectrumPanel.setMzdbFileName(rawFilePanel.getCurrentRawfile().getName());
          currentScan = scan;
@@ -318,6 +337,58 @@ class ScansSpinnerModel extends AbstractSpinnerModel {
       }
    }
 
+    public void displayReferenceSpectrum(Spectrum spectrum) {
+        if (spectrum != null) {
+            
+            double xMin = 0.0, xMax = 0.0, yMin = 0.0, yMax = 0.0;
+            
+            if (currentScan != null) {
+               xMin = spectrumPlotPanel.getXAxis().getMinValue();
+               xMax = spectrumPlotPanel.getXAxis().getMaxValue();
+               yMin = spectrumPlotPanel.getYAxis().getMinValue();
+               yMax = spectrumPlotPanel.getYAxis().getMaxValue();
+            }
+
+            PlotXYAbstract plot = buildPlot(spectrum, CyclicColorPalette.getColor(5));                        
+            spectrumPlotPanel.addPlot(plot);
+            
+            if (currentScan != null) {
+                spectrumPlotPanel.getXAxis().setRange(xMin, xMax);
+                spectrumPlotPanel.getYAxis().setRange(yMin, yMax);
+            } 
+            
+            referenceSpectrum = spectrum;
+            spectrumPlotPanel.repaint();
+        }
+    }
+
+    
+    private PlotXYAbstract buildPlot(Spectrum scan, Color plotColor) {
+        ScanTableModel scanModel = new ScanTableModel(scan);
+        PlotXYAbstract plot = null;
+        scanModel.setColor(plotColor);
+        if (scan.getDataType() == Spectrum.ScanType.CENTROID) {
+            //stick plot
+            plot = new PlotStick(spectrumPlotPanel, scanModel, null, ScanTableModel.COLTYPE_SCAN_MASS, ScanTableModel.COLTYPE_SCAN_INTENSITIES);
+            ((PlotStick) plot).setStrokeFixed(true);
+            ((PlotStick) plot).setPlotInformation(scanModel.getPlotInformation());
+            ((PlotStick) plot).setIsPaintMarker(true);
+        } else {
+            plot = new PlotLinear(spectrumPlotPanel, scanModel, null, ScanTableModel.COLTYPE_SCAN_MASS, ScanTableModel.COLTYPE_SCAN_INTENSITIES);
+            ((PlotLinear) plot).setStrokeFixed(true);
+            ((PlotLinear) plot).setPlotInformation(scanModel.getPlotInformation());
+            ((PlotLinear) plot).setIsPaintMarker(true);
+        }
+        return plot;
+    }
+   
+    public void clearReferenceSpectrumData() {
+        if (referenceSpectrum != null) {
+            referenceSpectrum = null;
+            displayScan(currentScan);
+        }
+    }
+    
    public int getNextScanIndex(Integer spectrumIndex) {
       if (keepSameMsLevel) 
          return (rawFilePanel.getCurrentRawfile().getNextSpectrumId(spectrumIndex, currentScan.getMsLevel()));

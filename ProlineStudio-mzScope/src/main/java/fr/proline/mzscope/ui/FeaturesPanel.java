@@ -3,8 +3,10 @@ package fr.proline.mzscope.ui;
 import fr.profi.mzdb.model.Peakel;
 import fr.proline.mzscope.ui.model.FeaturesTableModel;
 import fr.proline.mzscope.model.IFeature;
-import fr.proline.studio.extendedtablemodel.ExtraDataType;
 import fr.proline.studio.export.ExportButton;
+import fr.proline.studio.extendedtablemodel.CompoundTableModel;
+import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
+import fr.proline.studio.extendedtablemodel.ExtraDataType;
 import fr.proline.studio.filter.FilterButton;
 import fr.proline.studio.filter.actions.ClearRestrainAction;
 import fr.proline.studio.filter.actions.RestrainAction;
@@ -13,7 +15,6 @@ import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotLinear;
 import fr.proline.studio.markerbar.MarkerContainerPanel;
 import fr.proline.studio.table.AbstractTableAction;
-import fr.proline.studio.extendedtablemodel.CompoundTableModel;
 import fr.proline.studio.table.DecoratedMarkerTable;
 import fr.proline.studio.table.TablePopupMenu;
 import fr.proline.studio.utils.CyclicColorPalette;
@@ -33,12 +34,13 @@ import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTable;
 import javax.swing.JToolBar;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.event.RowSorterEvent;
 import javax.swing.event.RowSorterListener;
 import javax.swing.event.TableModelListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 
 /**
  * panel that contains the features/peaks table
@@ -88,6 +90,14 @@ public class FeaturesPanel extends JPanel implements RowSorterListener, MouseLis
                 featureTableMouseClicked(evt);
             }
         });
+        
+        featureTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+            @Override
+            public void valueChanged(ListSelectionEvent e) {
+                updateFeatureViewer();
+            }
+        });
+                
         featureTable.getRowSorter().addRowSorterListener(this);
 
         jScrollPane.setViewportView(featureTable);
@@ -122,7 +132,6 @@ public class FeaturesPanel extends JPanel implements RowSorterListener, MouseLis
         };
 
         m_exportButton = new ExportButton(((CompoundTableModel) featureTable.getModel()), "Features-Peakels", featureTable);
-
         toolbar.add(m_filterButton);
         toolbar.add(m_exportButton);
 
@@ -146,10 +155,19 @@ public class FeaturesPanel extends JPanel implements RowSorterListener, MouseLis
     }
 
     private void featureTableMouseClicked(MouseEvent evt) {
+        IFeature f = updateFeatureViewer();
+        if (evt.getClickCount() == 2 ) {
+                featureViewer.displayFeatureInRawFile(f);
+        } 
+
+    }
+    
+    private IFeature updateFeatureViewer() {
+        IFeature f = null;
         if ((features != null) && (!features.isEmpty()) && (featureTable.getSelectedRow() != -1)) {
             // Retrieve Selected Row
             int selectedRow = featureTable.getSelectedRow();
-            IFeature f = features.get(getModelRowId(selectedRow));
+            f = features.get(getModelRowId(selectedRow));
             graphPlot.clearPlots();
             int index = 0;
             for (Peakel p : f.getPeakels()) {
@@ -157,10 +175,8 @@ public class FeaturesPanel extends JPanel implements RowSorterListener, MouseLis
                 graphPlot.addPlot(plot);
             }
              graphPlot.repaint();
-            if (evt.getClickCount() == 2 ) {
-                featureViewer.displayFeatureInRawFile(f);
-            } 
         }
+        return f;
     }
     
     private int getModelRowId(int rowId){

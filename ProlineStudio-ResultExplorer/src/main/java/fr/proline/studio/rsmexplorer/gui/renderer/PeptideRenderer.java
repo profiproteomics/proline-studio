@@ -3,7 +3,6 @@ package fr.proline.studio.rsmexplorer.gui.renderer;
 import fr.proline.core.orm.msi.Peptide;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.msi.dto.DPeptidePTM;
-import fr.proline.studio.export.ExportFontData;
 import fr.proline.studio.utils.GlobalValues;
 import java.awt.Color;
 import java.awt.Component;
@@ -35,11 +34,10 @@ public class PeptideRenderer extends DefaultTableCellRenderer implements Grayabl
 
         String displayString;
 
-        if (value == null) {
+        if ((value == null) || (!DPeptideMatch.class.isAssignableFrom(value.getClass()))){
             displayString = "";
         } else {
             DPeptideMatch pm = (DPeptideMatch) value;
-
             displayString = constructPeptideDisplay(pm);
         }
 

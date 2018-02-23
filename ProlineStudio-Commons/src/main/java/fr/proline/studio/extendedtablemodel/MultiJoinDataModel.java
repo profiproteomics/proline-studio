@@ -124,7 +124,7 @@ public class MultiJoinDataModel extends AbstractTableModel implements GlobalTabl
             Class c0 = data.get(0).getDataColumnClass(col0);
             String id0 = data.get(0).getDataColumnIdentifier(col0);
             for (int j = 0; j < keys2.length; j++) {
-                int col1 = keys2[i];
+                int col1 = keys2[j];
                 Class c1 = data.get(1).getDataColumnClass(col1);
                 String id1 = data.get(1).getDataColumnIdentifier(col1);
                 if (!c0.equals(c1)) {

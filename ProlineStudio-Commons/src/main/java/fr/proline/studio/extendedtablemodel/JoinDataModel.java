@@ -451,8 +451,6 @@ public class JoinDataModel extends AbstractJoinDataModel {
         }
     }
 
-
-
     @Override
     public PlotType getBestPlotType() {
          return null; //JPM.TODO
@@ -462,7 +460,6 @@ public class JoinDataModel extends AbstractJoinDataModel {
     public int[] getBestColIndex(PlotType plotType) {
          return null;
     }
-
 
     @Override
     public String getExportRowCell(int row, int col) {

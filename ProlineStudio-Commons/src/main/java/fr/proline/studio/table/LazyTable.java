@@ -184,13 +184,16 @@ public abstract class LazyTable extends DecoratedMarkerTable implements Adjustme
             
             TableCellRenderer renderer = ((GlobalTableModelInterface) model).getRenderer(rowInModel, columnInModel);
             if (renderer != null) {
-                Class columnClass = model.getColumnClass(columnInModel);
-                if (columnClass.equals(LazyData.class)) {
+                //Class columnClass = model.getColumnClass(columnInModel);
+                Object value = model.getValueAt(rowInModel, columnInModel);
+                Class valueClass = value.getClass();
+                if (valueClass.equals(LazyData.class)) {
                     
                     m_sb.append(columnInModel);
                     if (renderer instanceof GrayedRenderer) {
                         m_sb.append("grayed" );
                     }
+                    m_sb.append(((LazyData)value).getData().getClass().getName());
                     String key = m_sb.toString();
                     m_sb.setLength(0);
                     

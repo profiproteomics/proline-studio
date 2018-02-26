@@ -1,6 +1,7 @@
 package fr.proline.studio.extendedtablemodel;
 
 import fr.proline.studio.export.ExportFontData;
+import fr.proline.studio.export.ExportModelUtilities;
 import fr.proline.studio.filter.DoubleFilter;
 import fr.proline.studio.filter.Filter;
 import fr.proline.studio.graphics.PlotInformation;
@@ -462,16 +463,112 @@ public class JoinDataModel extends AbstractJoinDataModel {
     }
 
     @Override
-    public String getExportRowCell(int row, int col) {
-        Object o = getValueAt(row, col);
-        if (o == null) {
-            return "";
+    public String getExportRowCell(int rowIndex, int columnIndex) {
+        if (!joinPossible()) {
+            return null;
         }
-        return o.toString();
+
+        Integer row1 = m_rowsInTable1.get(rowIndex);
+        Integer row2 = m_rowsInTable2.get(rowIndex);
+        
+        
+        // Columns with keys
+        if (columnIndex<m_keysColumns1.size()) {
+            int colIndexCur = m_keysColumns1.get(columnIndex);
+            if ((colIndexCur != -1) && (row1 != null)) {
+                return m_data1.getExportRowCell(row1, colIndexCur);
+            } else {
+                colIndexCur = m_keysColumns2.get(columnIndex);
+                if ((colIndexCur !=-1) && (row2 != null)) {
+                    return m_data2.getExportRowCell(row2, colIndexCur);
+                } else {
+                    return null;
+                }
+            }
+        }
+        
+        columnIndex -= m_keysColumns1.size();
+        
+        // Source Column
+        if (m_showSourceColumn) {
+            if (columnIndex == 0) {
+               return (m_sourceColumn1.get(rowIndex)) == null ? "" : (m_sourceColumn1.get(rowIndex)).toString();  
+            } else if (columnIndex == 1) {
+                return m_sourceColumn2.get(rowIndex) == null ? "" : (m_sourceColumn2.get(rowIndex)).toString(); 
+            }
+            columnIndex-=2;
+        }
+        
+        // Other columns
+        if (columnIndex<m_allColumns1.size()) {
+            if (row1 == null) {
+                return null;
+            }
+            return m_data1.getExportRowCell(row1, m_allColumns1.get(columnIndex));
+        }
+        columnIndex-=m_allColumns1.size();
+        if (columnIndex<m_allColumns2.size()) {
+            if (row2 == null) {
+                return null;
+            }
+            return m_data2.getExportRowCell(row2, m_allColumns2.get(columnIndex));
+        }
+        
+        return null;
     }
     
     @Override
-    public ArrayList<ExportFontData> getExportFonts(int row, int col) {
+    public ArrayList<ExportFontData> getExportFonts(int rowIndex, int columnIndex) {
+        if (!joinPossible()) {
+            return null;
+        }
+
+        Integer row1 = m_rowsInTable1.get(rowIndex);
+        Integer row2 = m_rowsInTable2.get(rowIndex);
+        
+        
+        // Columns with keys
+        if (columnIndex<m_keysColumns1.size()) {
+            int colIndexCur = m_keysColumns1.get(columnIndex);
+            if ((colIndexCur != -1) && (row1 != null)) {
+                return m_data1.getExportFonts(row1, colIndexCur);
+            } else {
+                colIndexCur = m_keysColumns2.get(columnIndex);
+                if ((colIndexCur !=-1) && (row2 != null)) {
+                    return m_data2.getExportFonts(row2, colIndexCur);
+                } else {
+                    return null;
+                }
+            }
+        }
+        
+        columnIndex -= m_keysColumns1.size();
+        
+        // Source Column
+        if (m_showSourceColumn) {
+            if (columnIndex == 0) {
+               return null;  
+            } else if (columnIndex == 1) {
+                return null; 
+            }
+            columnIndex-=2;
+        }
+        
+        // Other columns
+        if (columnIndex<m_allColumns1.size()) {
+            if (row1 == null) {
+                return null;
+            }
+            return m_data1.getExportFonts(row1, m_allColumns1.get(columnIndex));
+        }
+        columnIndex-=m_allColumns1.size();
+        if (columnIndex<m_allColumns2.size()) {
+            if (row2 == null) {
+                return null;
+            }
+            return m_data2.getExportFonts(row2, m_allColumns2.get(columnIndex));
+        }
+        
         return null;
     }
 

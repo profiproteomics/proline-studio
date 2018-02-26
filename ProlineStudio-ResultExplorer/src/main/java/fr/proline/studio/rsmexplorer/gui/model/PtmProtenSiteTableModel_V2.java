@@ -444,64 +444,9 @@ public class PtmProtenSiteTableModel_V2 extends LazyTableModel implements Global
     @Override
     public ArrayList<ExportFontData> getExportFonts(int row, int col) {
         if (col == COLTYPE_PEPTIDE_NAME) {
-
             PTMSite proteinPTMSite = m_arrayInUse.get(row);
             DPeptideMatch peptideMatch = proteinPTMSite.getBestPeptideMatch();
-
-            Peptide peptide = peptideMatch.getPeptide();
-            if (peptide.getTransientData() != null) {
-
-                HashMap<Integer, DPeptidePTM> ptmMap = peptide.getTransientData().getDPeptidePtmMap();
-                if (ptmMap != null) {
-
-                    ArrayList<ExportFontData> ExportFontDatas = new ArrayList<>();
-
-                    String sequence = peptide.getSequence();
-
-                    int nb = sequence.length();
-                    for (int i = 0; i < nb; i++) {
-
-                        boolean nTerOrCterModification = false;
-                        if (i == 0) {
-                            DPeptidePTM nterPtm = ptmMap.get(0);
-                            if (nterPtm != null) {
-                                nTerOrCterModification = true;
-                            }
-                        } else if (i == nb - 1) {
-                            DPeptidePTM cterPtm = ptmMap.get(-1);
-                            if (cterPtm != null) {
-                                nTerOrCterModification = true;
-                            }
-                        }
-
-                        DPeptidePTM ptm = ptmMap.get(i + 1);
-                        boolean aminoAcidModification = (ptm != null);
-
-                        if (nTerOrCterModification || aminoAcidModification) {
-
-                            if (nTerOrCterModification && aminoAcidModification) {
-
-                                ExportFontData newSubStringFont = new ExportFontData(i, i + 1, HSSFColor.VIOLET.index);
-                                ExportFontDatas.add(newSubStringFont);
-
-                            } else if (nTerOrCterModification) {
-
-                                ExportFontData newSubStringFont = new ExportFontData(i, i + 1, HSSFColor.GREEN.index);
-                                ExportFontDatas.add(newSubStringFont);
-
-                            } else if (aminoAcidModification) {
-
-                                ExportFontData newSubStringFont = new ExportFontData(i, i + 1, HSSFColor.ORANGE.index);
-                                ExportFontDatas.add(newSubStringFont);
-                            }
-
-                        }
-
-                    }
-                    return ExportFontDatas;
-                }
-
-            }
+            return ExportModelUtilities.getExportFonts(peptideMatch);
         }
         return null;
     }

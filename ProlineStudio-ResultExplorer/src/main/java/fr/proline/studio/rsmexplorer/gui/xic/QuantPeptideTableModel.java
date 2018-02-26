@@ -1,6 +1,5 @@
 package fr.proline.studio.rsmexplorer.gui.xic;
 
-import fr.proline.core.orm.msi.Peptide;
 import fr.proline.core.orm.msi.PeptideReadablePtmString;
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.dto.DCluster;
@@ -8,7 +7,6 @@ import fr.proline.core.orm.msi.dto.DMasterQuantPeptide;
 import fr.proline.core.orm.msi.dto.DMasterQuantProteinSet;
 import fr.proline.core.orm.msi.dto.DPeptideInstance;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
-import fr.proline.core.orm.msi.dto.DPeptidePTM;
 import fr.proline.core.orm.msi.dto.DQuantPeptide;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
@@ -19,6 +17,7 @@ import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadXicMasterQuantTask;
 import fr.proline.studio.dam.tasks.xic.DatabaseModifyPeptideTask;
 import fr.proline.studio.export.ExportFontData;
+import fr.proline.studio.export.ExportModelUtilities;
 import fr.proline.studio.filter.ConvertValueInterface;
 import fr.proline.studio.filter.DoubleFilter;
 import fr.proline.studio.filter.Filter;
@@ -60,7 +59,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import javax.swing.table.TableCellRenderer;
-import org.apache.poi.hssf.util.HSSFColor;
 
 /**
  *
@@ -422,65 +420,8 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
     @Override
     public ArrayList<ExportFontData> getExportFonts(int row, int col) {
         if (col == COLTYPE_PEPTIDE_NAME) {
-
             DMasterQuantPeptide quantPeptide = m_quantPeptides.get(row);
-            DPeptideInstance peptideInstance = quantPeptide.getPeptideInstance();
-
-            if ((peptideInstance != null) && (peptideInstance.getBestPeptideMatch() != null)) {
-
-                Peptide peptide = peptideInstance.getBestPeptideMatch().getPeptide();
-                
-                HashMap<Integer, DPeptidePTM> ptmMap = peptide.getTransientData().getDPeptidePtmMap();
-                if (ptmMap != null) {
-
-                    ArrayList<ExportFontData> ExportFontDatas = new ArrayList<>();
-
-                    String sequence = peptide.getSequence();
-
-                    int nb = sequence.length();
-                    for (int i = 0; i < nb; i++) {
-
-                        boolean nTerOrCterModification = false;
-                        if (i == 0) {
-                            DPeptidePTM nterPtm = ptmMap.get(0);
-                            if (nterPtm != null) {
-                                nTerOrCterModification = true;
-                            }
-                        } else if (i == nb - 1) {
-                            DPeptidePTM cterPtm = ptmMap.get(-1);
-                            if (cterPtm != null) {
-                                nTerOrCterModification = true;
-                            }
-                        }
-
-                        DPeptidePTM ptm = ptmMap.get(i + 1);
-                        boolean aminoAcidModification = (ptm != null);
-
-                        if (nTerOrCterModification || aminoAcidModification) {
-
-                            if (nTerOrCterModification && aminoAcidModification) {
-
-                                ExportFontData newSubStringFont = new ExportFontData(i, i + 1, HSSFColor.VIOLET.index);
-                                ExportFontDatas.add(newSubStringFont);
-
-                            } else if (nTerOrCterModification) {
-
-                                ExportFontData newSubStringFont = new ExportFontData(i, i + 1, HSSFColor.GREEN.index);
-                                ExportFontDatas.add(newSubStringFont);
-
-                            } else if (aminoAcidModification) {
-
-                                ExportFontData newSubStringFont = new ExportFontData(i, i + 1, HSSFColor.ORANGE.index);
-                                ExportFontDatas.add(newSubStringFont);
-                            }
-
-                        }
-
-                    }
-                    return ExportFontDatas;
-                }
-
-            }
+            return ExportModelUtilities.getExportFonts(quantPeptide.getPeptideInstance());
         }
         return null;
     }

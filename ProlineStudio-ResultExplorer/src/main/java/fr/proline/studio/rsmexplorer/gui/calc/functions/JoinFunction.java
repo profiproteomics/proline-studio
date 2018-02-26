@@ -27,10 +27,8 @@ import javax.swing.JTextField;
 public class JoinFunction extends AbstractFunction {
 
     private static final String JOIN_TABLE1_KEY1 = "JOIN_TABLE1_KEY1";
-    private static final String JOIN_TABLE2_KEY1 = "JOIN_TABLE2_KEY1";
     private static final String TOLERANCE_KEY1 = "TOLERANCE_KEY1";
     private static final String JOIN_TABLE1_KEY2 = "JOIN_TABLE1_KEY2";
-    private static final String JOIN_TABLE2_KEY2 = "JOIN_TABLE2_KEY2";
     private static final String TOLERANCE_KEY2 = "TOLERANCE_KEY2";
     private static final String SOURCE_COL = "SOURCE_COL";
   
@@ -200,6 +198,7 @@ public class JoinFunction extends AbstractFunction {
         m_paramTableKey2 = new ArrayList<>();
         for (int i=0;i<nbTables;i++) {
             GlobalTableModelInterface model = graphObjects[i].getGlobalTableModelInterface();
+            int keyColumn = 0;
             
             int nbColumns = model.getColumnCount();
             int nbColumnsKept = 0;
@@ -212,12 +211,16 @@ public class JoinFunction extends AbstractFunction {
             
             Object[] objectArrayTableKey1 = new Object[nbColumnsKept];
             Object[] associatedObjectArrayTableKey1 = new Object[nbColumnsKept];
+            
             int iKept = 0;
             for (int j = 0; j < nbColumns; j++) {
                 Class c = model.getDataColumnClass(j);
                 if (c.equals(String.class) || c.equals(Integer.class) || c.equals(Long.class) || c.equals(Float.class) || c.equals(Double.class)) {
                     objectArrayTableKey1[iKept] = model.getColumnName(j);
                     associatedObjectArrayTableKey1[iKept] = j;  // no +1 because it is not used in python calc expression
+                    if (j == keys[i]) {
+                        keyColumn = iKept;
+                    }
                     iKept++;
                 }
             }
@@ -232,17 +235,16 @@ public class JoinFunction extends AbstractFunction {
                 associatedObjectArrayTableKey2[j + 1] = associatedObjectArrayTableKey1[j];
             }
             
-            ObjectParameter paramTableKey1 = new ObjectParameter(JOIN_TABLE1_KEY1, graphObjects[0].getFullName() + " Join Column Key 1", new JComboBox(objectArrayTableKey1), objectArrayTableKey1, associatedObjectArrayTableKey1, keys[i], null);
+            ObjectParameter paramTableKey1 = new ObjectParameter(JOIN_TABLE1_KEY1, graphObjects[i].getFullName() + " Join Column Key 1", new JComboBox(objectArrayTableKey1), objectArrayTableKey1, associatedObjectArrayTableKey1, keyColumn, null);
             m_paramTableKey1.add(paramTableKey1);
             
-            ObjectParameter paramTableKey2 = new ObjectParameter(JOIN_TABLE1_KEY2, graphObjects[0].getFullName() + " Join Column Key 2", new JComboBox(objectArrayTableKey2), objectArrayTableKey2, associatedObjectArrayTableKey2, 0, null);
+            ObjectParameter paramTableKey2 = new ObjectParameter(JOIN_TABLE1_KEY2, graphObjects[i].getFullName() + " Join Column Key 2", new JComboBox(objectArrayTableKey2), objectArrayTableKey2, associatedObjectArrayTableKey2, 0, null);
             m_paramTableKey2.add(paramTableKey2);
 
         }
 
         m_tolerance1 = new DoubleParameter(TOLERANCE_KEY1, "Tolerance", JTextField.class, 0.0, 0.0, null);
         m_tolerance2 = new DoubleParameter(TOLERANCE_KEY2, "Tolerance 2", JTextField.class, 0.0, 0.0, null);
-
         m_addSourceCol = new BooleanParameter(SOURCE_COL, "Add Source Info", JCheckBox.class, true);
         
         m_parameterList = new ParameterList("Join");
@@ -289,15 +291,12 @@ public class JoinFunction extends AbstractFunction {
             m_parameterList.add(m_paramTableKey2.get(i));
         }
         m_parameterList.add(m_tolerance2);
-        
-
-        m_parameterList.add(m_addSourceCol);
-        
+        m_parameterList.add(m_addSourceCol);        
         m_parameterList.getPanel(); // generate panel at once
-        for (int i=0;i<nbTables;i++) {
-            m_paramTableKey1.get(i).addLinkedParameters(linkedParameters1); // link parameter, it will modify the panel
-            m_paramTableKey2.get(i).addLinkedParameters(linkedParameters2); // link parameter, it will modify the panel
-        }
+
+        // Update tolerance field visibility by checking only the key column from the first tableModel
+        m_paramTableKey1.get(0).addLinkedParameters(linkedParameters1); // link parameter, it will modify the panel
+        m_paramTableKey2.get(0).addLinkedParameters(linkedParameters2); // link parameter, it will modify the panel
     }
 
     @Override

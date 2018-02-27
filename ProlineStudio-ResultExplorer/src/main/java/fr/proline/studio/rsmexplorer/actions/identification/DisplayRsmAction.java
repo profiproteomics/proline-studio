@@ -17,7 +17,6 @@ public class DisplayRsmAction extends AbstractRSMAction {
     private DisplayRsmPSMAction m_displayRsmPSMAction;
     private DisplayRsmPeptidesAction m_displayRsmPeptidesAction;
     private DisplayRsmProteinSetsAction m_displayRsmProteinSetsAction;
-    private DisplayPtmProteinSite m_displayPtmProteinSite;
     private DisplayPtmProteinSiteAction_V2 m_displayPtmProteinSite_V2;
     
     private DisplayAdjacencyMatrixAction m_displayAdjacencyMatrixAction;
@@ -43,7 +42,6 @@ public class DisplayRsmAction extends AbstractRSMAction {
         m_displayRsmPSMAction = new DisplayRsmPSMAction(m_treeType);
         m_displayRsmPeptidesAction = new DisplayRsmPeptidesAction(m_treeType);
         m_displayRsmProteinSetsAction = new DisplayRsmProteinSetsAction(m_treeType);       
-        m_displayPtmProteinSite = new DisplayPtmProteinSite(m_treeType);
         m_displayPtmProteinSite_V2 = new DisplayPtmProteinSiteAction_V2(m_treeType);
         
         m_displayAdjacencyMatrixAction = new DisplayAdjacencyMatrixAction(m_treeType);
@@ -69,7 +67,6 @@ public class DisplayRsmAction extends AbstractRSMAction {
         JMenuItem displayRsmPSMItem = new JMenuItem(m_displayRsmPSMAction);
         JMenuItem displayRsmPeptidesItem = new JMenuItem(m_displayRsmPeptidesAction);
         JMenuItem displayRsmProteinSetsItem = new JMenuItem(m_displayRsmProteinSetsAction);
-        JMenuItem displayPtmProteinSiteItem = new JMenuItem(m_displayPtmProteinSite);
         JMenuItem displayPtmProteinSiteItem_V2 = new JMenuItem(m_displayPtmProteinSite_V2);
         JMenuItem displayAdjacencyMatrixItem = new JMenuItem(m_displayAdjacencyMatrixAction);
         JMenuItem displayUserWindowItem = new JMenuItem(m_displayUserWindowAction);
@@ -79,7 +76,6 @@ public class DisplayRsmAction extends AbstractRSMAction {
         m_menu.add(displayRsmPSMItem);
         m_menu.add(displayRsmPeptidesItem);
         m_menu.add(displayRsmProteinSetsItem);
-        m_menu.add(displayPtmProteinSiteItem);
         m_menu.add(displayPtmProteinSiteItem_V2);        
         m_menu.add(displayAdjacencyMatrixItem);
         m_menu.addSeparator();
@@ -102,7 +98,6 @@ public class DisplayRsmAction extends AbstractRSMAction {
         m_displayRsmPSMAction.updateEnabled(selectedNodes);
         m_displayRsmPeptidesAction.updateEnabled(selectedNodes);
         m_displayRsmProteinSetsAction.updateEnabled(selectedNodes);
-        m_displayPtmProteinSite.updateEnabled(selectedNodes);
         m_displayPtmProteinSite_V2.updateEnabled(selectedNodes);
         
         m_displayAdjacencyMatrixAction.updateEnabled(selectedNodes);
@@ -116,7 +111,7 @@ public class DisplayRsmAction extends AbstractRSMAction {
             listEnabled |= m_displaySavedWindowActionList.get(i).isEnabled();
         }
 
-        boolean isEnabled = m_displayRsmPSMAction.isEnabled() || m_displayRsmPeptidesAction.isEnabled() || m_displayRsmProteinSetsAction.isEnabled()|| m_displayPtmProteinSite_V2.isEnabled() || m_displayPtmProteinSite.isEnabled() || m_displayMSQueryAction.isEnabled() || m_displayUserWindowAction.isEnabled()|| m_manageUserWindowsAction.isEnabled() || listEnabled;
+        boolean isEnabled = m_displayRsmPSMAction.isEnabled() || m_displayRsmPeptidesAction.isEnabled() || m_displayRsmProteinSetsAction.isEnabled()|| m_displayPtmProteinSite_V2.isEnabled() || m_displayMSQueryAction.isEnabled() || m_displayUserWindowAction.isEnabled()|| m_manageUserWindowsAction.isEnabled() || listEnabled;
         setEnabled(isEnabled);
         m_menu.setEnabled(isEnabled);
 

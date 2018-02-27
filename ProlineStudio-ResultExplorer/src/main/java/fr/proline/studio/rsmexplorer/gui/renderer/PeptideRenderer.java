@@ -34,11 +34,12 @@ public class PeptideRenderer extends DefaultTableCellRenderer implements Grayabl
 
         String displayString;
 
-        if ((value == null) || (!DPeptideMatch.class.isAssignableFrom(value.getClass()))){
+        if ((value == null) || !( DPeptideMatch.class.isAssignableFrom(value.getClass()) || Peptide.class.isAssignableFrom(value.getClass()) )){
             displayString = "";
+        } else if (DPeptideMatch.class.isAssignableFrom(value.getClass())) {
+            displayString = constructPeptideDisplay(((DPeptideMatch)value).getPeptide());
         } else {
-            DPeptideMatch pm = (DPeptideMatch) value;
-            displayString = constructPeptideDisplay(pm);
+            displayString = constructPeptideDisplay((Peptide)value);            
         }
 
         JLabel l = (JLabel) super.getTableCellRendererComponent(table, displayString, isSelected, hasFocus, row, column);
@@ -50,11 +51,11 @@ public class PeptideRenderer extends DefaultTableCellRenderer implements Grayabl
         return l;
     }
 
-    private String constructPeptideDisplay(DPeptideMatch peptideMatch) {
+    private String constructPeptideDisplay(Peptide peptide) {
 
         String textToExport;
         
-        Peptide peptide = peptideMatch.getPeptide();
+        
         if ((peptide!=null) && (peptide.getTransientData() != null)) {
 
             HashMap<Integer, DPeptidePTM> ptmMap = peptide.getTransientData().getDPeptidePtmMap();

@@ -1076,21 +1076,6 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
             peptideInstanceList.add(dpi);
         }
         
-        DatabaseLoadPeptidesInstancesTask.fetchReadablePtmData(entityManagerMSI, m_dataset.getResultSetId(), peptideMap);
-        
-        try {
-            DatabaseLoadPeptidesInstancesTask.fetchPtmDataFromPSdb(peptideMap);
-        } catch (Exception e) {
-            m_logger.error(getClass().getSimpleName() + " failed", e);
-            m_taskError = new TaskError(e);
-            return false;
-        }
-
-        
-
-
-
-        
         int nbMP = m_masterQuantPeptideList.size();
         int nbPI = peptideInstanceList.size();
         //  load MasterQuantPeptide and list of QuantPeptide
@@ -1201,6 +1186,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
             m_masterQuantPeptideList.set(index, masterQuantPeptide);
         }
 
+        // non quantified peptides instances : 
         // no master quantPeptide: build a fake masterQuantPeptide to display the peptideInstance
         List<DPeptideInstance> extendedPeptideInstanceList = null;
         for (int i = 0; i < nbMP; i++) {
@@ -1300,6 +1286,15 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                     m_masterQuantPeptideList.set(i, o);
                 }
             }
+        }
+
+        DatabaseLoadPeptidesInstancesTask.fetchReadablePtmData(entityManagerMSI, m_dataset.getResultSetId(), peptideMap);
+        try {
+            DatabaseLoadPeptidesInstancesTask.fetchPtmDataFromPSdb(peptideMap);
+        } catch (Exception e) {
+            m_logger.error(getClass().getSimpleName() + " failed", e);
+            m_taskError = new TaskError(e);
+            return false;
         }
 
         // load masterQuantPeptide not linked to a peptideInstance
@@ -1902,6 +1897,13 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
         }
         
         DatabaseLoadPeptidesInstancesTask.fetchReadablePtmData(entityManagerMSI, m_dataset.getResultSetId(), peptideMap);
+        try {
+            DatabaseLoadPeptidesInstancesTask.fetchPtmDataFromPSdb(peptideMap);
+        } catch (Exception e) {
+            m_logger.error(getClass().getSimpleName() + " failed", e);
+            m_taskError = new TaskError(e);
+            return false;
+        }
         
         ArrayList<Long> peptideMatchIds = new ArrayList<>(peptideMatchMap.size());
         peptideMatchIds.addAll(peptideMatchMap.keySet());

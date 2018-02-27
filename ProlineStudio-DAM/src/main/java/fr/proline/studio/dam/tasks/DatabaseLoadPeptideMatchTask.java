@@ -927,8 +927,6 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
             Query peptideQuery = entityManagerMSI.createQuery("SELECT pm.id, p FROM PeptideMatch pm, fr.proline.core.orm.msi.Peptide p WHERE pm.id IN (:listId) AND pm.peptideId=p.id");
             peptideQuery.setParameter("listId", sliceOfPeptideMatchIds);
 
-            
-
             List<Object[]> peptides = peptideQuery.getResultList();
             Iterator<Object[]> it = peptides.iterator();
             while (it.hasNext()) {
@@ -959,6 +957,14 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
             Peptide peptide = peptideMap.get(peptideId);
             peptide.getTransientData().setPeptideReadablePtmString(ptmString);
         }
+        
+         try {
+                DatabaseLoadPeptidesInstancesTask.fetchPtmDataFromPSdb(peptideMap);
+            } catch (Exception e) {
+                m_logger.error(getClass().getSimpleName() + " failed", e);
+                m_taskError = new TaskError(e);
+            }
+       
  
     }
     

@@ -126,7 +126,7 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseSlicerTas
         if (needToFetch()) {
             switch (m_action) {
                 case LOAD_PEPTIDE_INSTANCE_FOR_PROTEIN_MATCH: {
-                    return fetchDataForPeptideMatch();
+                    return fetchDataForProteinMatch();
                 }
                 case LOAD_PEPTIDE_INSTANCES_FOR_RSM: {
                     return fetchDataForRsm();
@@ -245,7 +245,8 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseSlicerTas
             m_rsm.getTransientData().setPeptideInstanceArray(peptideInstances);
             
             fetchReadablePtmData(entityManagerMSI, m_rsm.getResultSet().getId(), peptideMap);
-
+            fetchPtmDataFromPSdb(peptideMap);
+             
             // slice the task and get the first one
             SubTask subTask = m_subTaskManager.sliceATaskAndGetFirst( SUB_TASK_PROTEINSET_NAME_LIST, nbPeptides, SLICE_SIZE );
 
@@ -339,7 +340,7 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseSlicerTas
         }
     }
     
-    public boolean fetchDataForPeptideMatch() {
+    public boolean fetchDataForProteinMatch() {
 
         HashMap<Long, Peptide> peptideMap = new HashMap<>();
         EntityManager entityManagerMSI = DStoreCustomPoolConnectorFactory.getInstance().getMsiDbConnector(m_projectId).createEntityManager();
@@ -383,6 +384,7 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseSlicerTas
         
         return true;
     }
+    
     
     public static void fetchPeptideData(EntityManager entityManagerMSI, ResultSummary rsm, DProteinMatch proteinMatch, HashMap<Long, Peptide> peptideMap) {
 

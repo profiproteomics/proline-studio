@@ -1,5 +1,6 @@
 package fr.proline.studio.rsmexplorer.gui.xic;
 
+import fr.proline.core.orm.msi.Peptide;
 import fr.proline.core.orm.msi.PeptideReadablePtmString;
 import fr.proline.core.orm.msi.dto.DPeptideInstance;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
@@ -26,6 +27,7 @@ import fr.proline.studio.table.renderer.DoubleRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.TimeRenderer;
 import fr.proline.studio.extendedtablemodel.CompoundTableModel;
 import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
+import fr.proline.studio.rsmexplorer.gui.renderer.PeptideRenderer;
 import fr.proline.studio.utils.CyclicColorPalette;
 import fr.proline.studio.table.LazyData;
 import fr.proline.studio.table.LazyTable;
@@ -230,9 +232,9 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements GlobalT
                     givePriorityTo(m_taskId, row, col);
                 } else {
                     if (peptideIon.getPeptideInstance() == null) {
-                        lazyData.setData("");
+                        lazyData.setData(null);
                     } else {
-                        lazyData.setData(peptideIon.getPeptideInstance().getPeptide().getSequence());
+                        lazyData.setData(peptideIon.getPeptideInstance().getPeptide());
                     }
                 }
                 return lazyData;
@@ -494,7 +496,17 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements GlobalT
 
     @Override
     public void addFilters(LinkedHashMap<Integer, Filter> filtersMap) {
-        filtersMap.put(COLTYPE_PEPTIDE_ION_NAME, new StringDiffFilter(getColumnNameForFilter(COLTYPE_PEPTIDE_ION_NAME), null, COLTYPE_PEPTIDE_ION_NAME));
+        ConvertValueInterface peptideConverter = new ConvertValueInterface() {
+            @Override
+            public Object convertValue(Object o) {
+                if (o == null) {
+                    return null;
+                }
+                return ((Peptide)o).getSequence();
+            }
+
+        };
+        filtersMap.put(COLTYPE_PEPTIDE_ION_NAME, new StringDiffFilter(getColumnNameForFilter(COLTYPE_PEPTIDE_ION_NAME), peptideConverter, COLTYPE_PEPTIDE_ION_NAME));
         filtersMap.put(COLTYPE_PEPTIDE_PTM, new StringFilter(getColumnName(COLTYPE_PEPTIDE_PTM), null, COLTYPE_PEPTIDE_PTM));
         filtersMap.put(COLTYPE_PEPTIDE_SCORE, new DoubleFilter(getColumnName(COLTYPE_PEPTIDE_SCORE), null, COLTYPE_PEPTIDE_SCORE));
         filtersMap.put(COLTYPE_PEPTIDE_ION_CHARGE, new IntegerFilter(getColumnNameForFilter(COLTYPE_PEPTIDE_ION_CHARGE), null, COLTYPE_PEPTIDE_ION_CHARGE));
@@ -925,7 +937,10 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements GlobalT
 
         switch (col) {
 
-            case COLTYPE_PEPTIDE_ION_NAME:
+            case COLTYPE_PEPTIDE_ION_NAME: {
+                renderer = new PeptideRenderer();
+                break;
+            }
             case COLTYPE_PEPTIDE_PTM: {
                 renderer = new DefaultLeftAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class));
                 break;

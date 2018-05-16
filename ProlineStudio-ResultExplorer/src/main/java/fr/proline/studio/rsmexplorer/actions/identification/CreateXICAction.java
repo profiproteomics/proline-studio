@@ -96,10 +96,11 @@ public class CreateXICAction extends AbstractRSMAction {
                 DataSetNode node = (DataSetNode) n;
                 DataSetData dataset = (DataSetData) node.getData();
                 Dataset.DatasetType dsType = dataset.getDatasetType();
-                if (node.hasResultSummary()
-                        && (dsType.equals(Dataset.DatasetType.IDENTIFICATION) || dsType.equals(Dataset.DatasetType.AGGREGATE))) {
+                if (node.hasResultSummary() && (dsType.equals(Dataset.DatasetType.IDENTIFICATION) || dsType.equals(Dataset.DatasetType.AGGREGATE))) {
                     m_mergedDSDefined = true;
                     refDataset = dataset.getDataset();
+                } else {
+                    m_mergedDSDefined = false;
                 }
             }
             createXICDialog(refDataset, x, y);
@@ -115,6 +116,7 @@ public class CreateXICAction extends AbstractRSMAction {
             dialog.setParentDataset(dataset);
         } else {
             dialog.setSelectableIdentTree(null);
+            dialog.setParentDataset(null);
         }
         dialog.displayDesignTree();
         if (m_fromExistingXIC) {

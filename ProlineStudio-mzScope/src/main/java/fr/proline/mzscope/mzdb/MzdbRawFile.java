@@ -401,6 +401,8 @@ public class MzdbRawFile implements IRawFile {
         Spectrum spectrum = null;
         try {
             fr.profi.mzdb.model.Spectrum rawSpectrum = reader.getSpectrum((long) spectrumIndex);
+            logger.info("Spectrum id {}, cycle = {}", rawSpectrum.getHeader().getInitialId(), rawSpectrum.getHeader().getCycle());
+            
             SpectrumData data = rawSpectrum.getData();
             Map<Integer, DataEncoding> map = reader.getDataEncodingReader().getDataEncodingById();
             DataEncoding encoding = reader.getSpectrumDataEncoding((long) spectrumIndex);

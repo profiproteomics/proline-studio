@@ -1027,9 +1027,9 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
 
         List sliceOfPeptideMatchIds = subTask.getSubList(m_peptideMatchIds);
         
-        Query query = entityManagerMSI.createQuery("SELECT pm.id, msi.resultFileName "
-                + "FROM PeptideMatch pm, PeptideMatch pm2, ResultSet rset, MsiSearch msi "
-                + "WHERE pm.id IN (:listId) AND pm.bestPeptideMatch = pm2 AND pm2.resultSet = rset AND rset.msiSearch=msi");
+       Query query = entityManagerMSI.createQuery("SELECT pm.id, msiSearch.resultFileName "
+                + "FROM PeptideMatch pm, MsQuery msq, MsiSearch msiSearch "
+                + "WHERE pm.id IN (:listId) AND pm.msQuery=msq AND msq.msiSearch = msiSearch");
         query.setParameter("listId", sliceOfPeptideMatchIds);
         
         List<Object[]> resultList = query.getResultList();

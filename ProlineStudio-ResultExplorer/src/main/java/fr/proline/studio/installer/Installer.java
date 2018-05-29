@@ -30,7 +30,7 @@ public class Installer extends VersionInstaller {
 
         
 //        String buildnumber = "1.6  Milestone ("+moduleBuildDate+")"; //specify if Milestone, Release Candidate or release (or nothing = release)
-        String buildnumber = "1.6";
+        String buildnumber = "1.6.1";
         
         // set the proline version for the application title
         System.setProperty("netbeans.buildnumber", buildnumber);  //"1.0.1 (alpha : build date @build.date@)"

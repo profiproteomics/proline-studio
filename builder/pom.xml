@@ -7,7 +7,7 @@
 	<packaging>pom</packaging>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<studio.version>1.2.0</studio.version>
+		<studio.version>1.2.1</studio.version>
 	</properties>
 
 	<dependencies>
@@ -28,7 +28,7 @@
 		<dependency>
 			<groupId>com.oracle</groupId>
 			<artifactId>jre</artifactId>
-			<version>1.8.77</version>
+			<version>1.8.77-EDyP</version>
 			<type>zip</type>
 			<classifier>${os.classifier}</classifier>
 		</dependency>

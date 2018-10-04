@@ -1,7 +1,6 @@
 package fr.proline.studio.dam.tasks;
 
 
-import fr.proline.core.orm.msi.PeptideSet;
 import fr.proline.core.orm.msi.dto.DPeptideSet;
 import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.core.orm.msi.dto.DProteinSet;

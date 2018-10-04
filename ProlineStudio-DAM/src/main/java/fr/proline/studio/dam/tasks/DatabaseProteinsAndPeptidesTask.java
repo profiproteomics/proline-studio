@@ -1,8 +1,6 @@
 package fr.proline.studio.dam.tasks;
 
 import fr.proline.core.orm.msi.Peptide;
-import fr.proline.core.orm.msi.PeptideSet;
-import fr.proline.core.orm.msi.ProteinSet;
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.msi.dto.DPeptideSet;
@@ -35,7 +33,6 @@ public class DatabaseProteinsAndPeptidesTask extends AbstractDatabaseTask {
     
     private long m_projectId = -1;
     private ResultSummary m_rsm = null;
-    
     private AdjacencyMatrixData m_adjacencyMatrixData = null;
     
     ArrayList<Long> m_proteinMatchIdArray;
@@ -43,11 +40,7 @@ public class DatabaseProteinsAndPeptidesTask extends AbstractDatabaseTask {
     HashMap<Long, DProteinMatch> m_proteinMatchMap;
     HashMap<Long, DPeptideMatch> m_peptideMatchMap;
     
-    private final int m_action;
-    
-   
-    
-    
+    private final int m_action; 
     
     public DatabaseProteinsAndPeptidesTask(AbstractDatabaseCallback callback, long projectId, ResultSummary rsm, AdjacencyMatrixData adjacencyMatrixData ) {
         super(callback, new TaskInfo("Load All Proteins and Peptides for "+rsm.getId(), false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_MEDIUM));
@@ -107,8 +100,7 @@ public class DatabaseProteinsAndPeptidesTask extends AbstractDatabaseTask {
             proteinMatchQuery.setParameter("listId", m_proteinMatchIdArray);
             List<DProteinMatch> proteinMatchList = proteinMatchQuery.getResultList();
             
-            for (int i=0;i<proteinMatchList.size();i++) {
-                DProteinMatch pm = proteinMatchList.get(i);
+            for (DProteinMatch pm : proteinMatchList) {
                 m_proteinMatchMap.put(pm.getId(), pm);
             }
             
@@ -158,7 +150,7 @@ public class DatabaseProteinsAndPeptidesTask extends AbstractDatabaseTask {
             HashMap<Long, Peptide> tmpMap = new HashMap<>();
             Iterator<DProteinMatch> itProt = proteinMatchList.iterator();
             while (itProt.hasNext()) {
-                DatabaseLoadPeptidesInstancesTask.fetchPeptideData(entityManagerMSI, m_rsm, itProt.next(), tmpMap);
+                DatabaseLoadPeptidesInstancesTask.fetchPeptideDataForProteinMatch(entityManagerMSI, m_rsm, itProt.next(), tmpMap);
                 tmpMap.clear();
             }
             
@@ -246,7 +238,7 @@ public class DatabaseProteinsAndPeptidesTask extends AbstractDatabaseTask {
             subTaskManager = new SubTaskManager(1);
             subTask = subTaskManager.sliceATaskAndGetFirst(0, peptides.size(), SLICE_SIZE);
             while (subTask != null) {
-                Query peptideMatchQuery = entityManagerMSI.createQuery("SELECT pepm.id, pepm.score, pepm.cdPrettyRank, pep.sequence FROM PeptideMatch pepm, Peptide pep WHERE pepm.id IN (:pepList) AND pepm.peptideId=pep.id");
+                Query peptideMatchQuery = entityManagerMSI.createQuery("SELECT pepm.id, pepm.score, pepm.cdPrettyRank, pep.sequence FROM PeptideMatch pepm, fr.proline.core.orm.msi.Peptide pep WHERE pepm.id IN (:pepList) AND pepm.peptideId=pep.id");
                 peptideMatchQuery.setParameter("pepList", subTask.getSubList(peptides));
                 List<Object[]> resList = peptideMatchQuery.getResultList();
                 it = resList.iterator();

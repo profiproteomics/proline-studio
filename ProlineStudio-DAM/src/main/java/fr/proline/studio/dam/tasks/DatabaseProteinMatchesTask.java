@@ -1,7 +1,6 @@
 package fr.proline.studio.dam.tasks;
 
 
-import fr.proline.core.orm.msi.BioSequence;
 import fr.proline.core.orm.msi.Peptide;
 import fr.proline.core.orm.msi.ResultSet;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;

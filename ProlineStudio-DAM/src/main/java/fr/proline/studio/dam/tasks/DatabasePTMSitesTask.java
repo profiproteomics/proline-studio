@@ -21,7 +21,6 @@ import fr.proline.core.orm.msi.dto.DPtmSiteProperties;
 import fr.proline.core.orm.util.DStoreCustomPoolConnectorFactory;
 import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
-import static fr.proline.studio.dam.tasks.AbstractDatabaseTask.m_logger;
 import fr.proline.studio.dam.tasks.data.PTMSite;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -40,7 +39,7 @@ import javax.persistence.TypedQuery;
  *
  * @author JM235353
  */
-public class DatabasePTMProteinSiteTask_V2 extends AbstractDatabaseTask {
+public class DatabasePTMSitesTask extends AbstractDatabaseTask {
 
     private long m_projectId = -1;
     private ResultSummary m_rsm = null;
@@ -54,7 +53,7 @@ public class DatabasePTMProteinSiteTask_V2 extends AbstractDatabaseTask {
     private final static int LOAD_ALL_PTM_SITES_FOR_RSMS = 0;
     private final static int FILL_PTM_SITE_PEPINFO= 1;
     
-    public DatabasePTMProteinSiteTask_V2(AbstractDatabaseCallback callback, long projectId, ResultSummary rsm, ArrayList<PTMSite> ptmSiteArray) {
+    public DatabasePTMSitesTask(AbstractDatabaseCallback callback, long projectId, ResultSummary rsm, ArrayList<PTMSite> ptmSiteArray) {
         super(callback, new TaskInfo("Load All PTM Sites for " + rsm.getId(), false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_MEDIUM));
         m_projectId = projectId;
         m_rsm = rsm;
@@ -62,7 +61,7 @@ public class DatabasePTMProteinSiteTask_V2 extends AbstractDatabaseTask {
         m_action = LOAD_ALL_PTM_SITES_FOR_RSMS;
     }
 
-    public DatabasePTMProteinSiteTask_V2(AbstractDatabaseCallback callback, long projectId, ResultSummary rsm, PTMSite ptmSiteToFill) {
+    public DatabasePTMSitesTask(AbstractDatabaseCallback callback, long projectId, ResultSummary rsm, PTMSite ptmSiteToFill) {
         super(callback, new TaskInfo("Load peptides for PTM Sites " + ptmSiteToFill, false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_MEDIUM));
         m_projectId = projectId;
         m_ptmSiteToFill = ptmSiteToFill;
@@ -77,7 +76,7 @@ public class DatabasePTMProteinSiteTask_V2 extends AbstractDatabaseTask {
                 return true;
             }  
             case FILL_PTM_SITE_PEPINFO: {
-                return !m_ptmSiteToFill.isAllPeptideMatchesLoaded();
+                return !m_ptmSiteToFill.isLoaded();
             }              
         }
         return false; // should not be called 
@@ -88,10 +87,10 @@ public class DatabasePTMProteinSiteTask_V2 extends AbstractDatabaseTask {
         if (needToFetch()) {
             switch (m_action) {
                 case LOAD_ALL_PTM_SITES_FOR_RSMS: {
-                    return fetchAllProteinSets();
+                    return fetchAllPtmSites();
                 }
                 case FILL_PTM_SITE_PEPINFO: {
-                    return loadPTMSitePeptideMatches();
+                    return fetchPTMSitePeptideMatches();
                 }
                 
             }
@@ -101,7 +100,7 @@ public class DatabasePTMProteinSiteTask_V2 extends AbstractDatabaseTask {
         return true; // should not happen
     }
 
-    private boolean loadPTMSitePeptideMatches(){
+    private boolean fetchPTMSitePeptideMatches(){
         
         long start = System.currentTimeMillis();        
         EntityManager entityManagerMSI = DStoreCustomPoolConnectorFactory.getInstance().getMsiDbConnector(m_projectId).createEntityManager();
@@ -110,14 +109,14 @@ public class DatabasePTMProteinSiteTask_V2 extends AbstractDatabaseTask {
             entityManagerMSI.getTransaction().begin();
 
             long stop = System.currentTimeMillis();
-            m_logger.info("MSI EMF create and transaction started in {} ms", (stop-start));
+            m_logger.debug("MSI EMF create and transaction started in {} ms", (stop-start));
             start = stop;
             
             ObjectMapper mapper = new ObjectMapper();
             mapper.setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE);
             
             HashMap<Long, Peptide> allPeptidesMap = new HashMap();
-            HashMap<DPeptideInstance, List<DPeptideMatch>> peptideMatchByPepInstance = new HashMap<>();
+            HashMap<Long, DPeptideInstance> peptideInstancesById = new HashMap<>();
             
    
             //---- Load Peptide Match + Spectrum / MSQuery information for all peptideInstance of PTMSite
@@ -161,18 +160,19 @@ public class DatabasePTMProteinSiteTask_V2 extends AbstractDatabaseTask {
                 dpm.setPeptide(p);
                 dpm.setMsQuery(msq);
 
-                DPeptideInstance dpi = new DPeptideInstance(pi.getId(), pi.getPeptide().getId(), pi.getValidatedProteinSetCount(), pi.getElutionTime());
-                dpi.setResultSummary(pi.getResultSummary());
-                dpi.setPeptide(p);
-                
-                if (!peptideMatchByPepInstance.containsKey(dpi)) {
-                    peptideMatchByPepInstance.put(dpi, new ArrayList<>());
+                if (!peptideInstancesById.containsKey(pi.getId())) {
+                    DPeptideInstance dpi = new DPeptideInstance(pi.getId(), pi.getPeptide().getId(), pi.getValidatedProteinSetCount(), pi.getElutionTime());
+                    dpi.setResultSummary(pi.getResultSummary());
+                    dpi.setPeptide(p);
+                    dpi.setPeptideMatches(new ArrayList<>());
+                    peptideInstancesById.put(dpi.getId(), dpi);
                 }
-                peptideMatchByPepInstance.get(dpi).add(dpm);
+                
+                peptideInstancesById.get(pi.getId()).getPeptideMatches().add(dpm);
             }
                                
             stop = System.currentTimeMillis();
-            m_logger.info("PSMs for PTM Site created in {} ms", (stop-start));
+            m_logger.debug("PSMs for PTM Site created in {} ms", (stop-start));
             start = stop;
             
             //--- Retrieve Parent peptideInstances
@@ -205,19 +205,19 @@ public class DatabasePTMProteinSiteTask_V2 extends AbstractDatabaseTask {
             }           
             
             stop = System.currentTimeMillis();
-            m_logger.info("PeptideReadablePtmString loaded in {} ms", (stop-start));
+            m_logger.debug("PeptideReadablePtmString loaded in {} ms", (stop-start));
             start = stop;
             
             // fetch Generic PTM Data
-            fetchGenericPTMData();
+            fetchGenericPTMData(entityManagerMSI);
             
             stop = System.currentTimeMillis();
-            m_logger.info("Generic PTM data loaded in {} ms", (stop-start));
+            m_logger.debug("Generic PTM data loaded in {} ms", (stop-start));
             start = stop;
             
             //--- fetch Specific Data for the Peptides Found
-            HashMap<Long, ArrayList<DPeptidePTM>> ptmMap = fetchPTMDataForPeptides(new ArrayList(allPeptidesMap.keySet()));
-            List<DPeptideMatch> allpeptideMatches = peptideMatchByPepInstance.values().stream().flatMap(listPepM -> listPepM.stream()).collect(Collectors.toList());
+            HashMap<Long, ArrayList<DPeptidePTM>> ptmMap = fetchPTMDataForPeptides(entityManagerMSI, new ArrayList(allPeptidesMap.keySet()));
+            List<DPeptideMatch> allpeptideMatches = peptideInstancesById.values().stream().flatMap(pi -> pi.getPeptideMatches().stream()).collect(Collectors.toList());
             
             for (DPeptideMatch pm : allpeptideMatches) {
                 Peptide p = pm.getPeptide();
@@ -235,15 +235,15 @@ public class DatabasePTMProteinSiteTask_V2 extends AbstractDatabaseTask {
             }
             
             stop = System.currentTimeMillis();
-            m_logger.info("PTM data for peptides loaded in {} ms", (stop-start));
+            m_logger.debug("PTM data for peptides loaded in {} ms", (stop-start));
             start = stop;
             
             // create the list of PTMSites            
-            m_ptmSiteToFill.setPepInstancePepMatchesMap(peptideMatchByPepInstance);
+            m_ptmSiteToFill.seLeafPeptideInstances(peptideInstancesById.values().stream().collect(Collectors.toList()));
             m_ptmSiteToFill.setParentPeptideInstances(parentPeptideInstances);
                         
             stop = System.currentTimeMillis();
-            m_logger.info("PTM Sites filled in {} ms", (stop-start));
+            m_logger.debug("PTM Sites filled in {} ms", (stop-start));
 
             entityManagerMSI.getTransaction().commit();
         } catch (Exception e) {
@@ -262,7 +262,7 @@ public class DatabasePTMProteinSiteTask_V2 extends AbstractDatabaseTask {
         return true;
     }
     
-    private boolean fetchAllProteinSets() {
+    private boolean fetchAllPtmSites() {
         
         long start = System.currentTimeMillis();
         
@@ -272,7 +272,7 @@ public class DatabasePTMProteinSiteTask_V2 extends AbstractDatabaseTask {
             entityManagerMSI.getTransaction().begin();
 
             long stop = System.currentTimeMillis();
-            m_logger.info("MSI EMF create and transaction started in {} ms", (stop-start));
+            m_logger.debug("MSI EMF create and transaction started in {} ms", (stop-start));
             start = stop;
             
             Long rsmId = m_rsm.getId();
@@ -288,6 +288,8 @@ public class DatabasePTMProteinSiteTask_V2 extends AbstractDatabaseTask {
             List<DProteinMatch> typicalProteinMatchesArray = typicalProteinQuery.getResultList();
             
             ResultSummary rsm = entityManagerMSI.find(ResultSummary.class, rsmId);
+            // TODO : fllowing line code will fail is ptm sites were not previously identified. Check this first and returns properly 
+            // 
             ObjectTree ot = entityManagerMSI.find(ObjectTree.class, rsm.getObjectTreeIdByName().get(ObjectTreeSchema.SchemaName.PTM_SITES.toString()));
             ObjectMapper mapper = new ObjectMapper();
             mapper.setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE);
@@ -297,7 +299,7 @@ public class DatabasePTMProteinSiteTask_V2 extends AbstractDatabaseTask {
             Map<Long, Long[]> peptideInstanceIdsBybestPMId = values.stream().collect(Collectors.toMap(site -> site.bestPeptideMatchId, site -> site.peptideInstanceIds, (l1, l2) -> {return Stream.concat(Arrays.stream(l1), Arrays.stream(l2)).distinct().toArray(Long[]::new);}));
             
             stop = System.currentTimeMillis();
-            m_logger.info("{} typical ProtMatches and {} PTMSItes loaded in {} ms", typicalProteinMatchesArray.size(), values.size(), (stop-start));
+            m_logger.debug("{} typical ProtMatches and {} PTMSItes loaded in {} ms", typicalProteinMatchesArray.size(), values.size(), (stop-start));
             start = stop;
             
             HashMap<Long, Peptide> allPeptidesMap = new HashMap();
@@ -306,12 +308,6 @@ public class DatabasePTMProteinSiteTask_V2 extends AbstractDatabaseTask {
             SubTaskManager subTaskManager = new SubTaskManager(1);
             SubTask subTask = subTaskManager.sliceATaskAndGetFirst(0, bestPeptideMatchIdsArray.length, SLICE_SIZE);
             while (subTask != null) {
-//                Query peptidesQuery = entityManagerMSI.createQuery("SELECT pm.id, pm.rank, pm.charge, pm.deltaMoz, pm.experimentalMoz, pm.missedCleavage, pm.score, pm.resultSet.id, pm.cdPrettyRank, pm.sdPrettyRank, pm.serializedProperties, sp.firstTime, sp.precursorIntensity, sp.title, p, ms.id, ms.initialId\n"
-//                        + "              FROM fr.proline.core.orm.msi.PeptideInstancePeptideMatchMap pipm, fr.proline.core.orm.msi.PeptideMatch pm, fr.proline.core.orm.msi.PeptideInstance pi, fr.proline.core.orm.msi.Peptide p, fr.proline.core.orm.msi.MsQuery ms, fr.proline.core.orm.msi.Spectrum sp  \n"
-//                        + "              WHERE pipm.id.peptideMatchId IN (:peptideMatchList) AND pipm.resultSummary.id = :rsmId AND pipm.id.peptideInstanceId=pi.id AND pipm.id.peptideMatchId=pm.id AND pm.peptideId=p.id AND pm.msQuery=ms AND ms.spectrum=sp ");
-//                peptidesQuery.setParameter("peptideMatchList", subTask.getSubList(Arrays.asList(bestPeptideMatchIdsArray)));
-//                peptidesQuery.setParameter("rsmId", rsmId);
-
                 Query peptidesQuery = entityManagerMSI.createQuery("SELECT pm.id, pm.rank, pm.charge, pm.deltaMoz, pm.experimentalMoz, pm.missedCleavage, pm.score, pm.resultSet.id, pm.cdPrettyRank, pm.sdPrettyRank, pm.serializedProperties, sp.firstTime, sp.precursorIntensity, sp.title, p, ms.id, ms.initialId\n"
                         + "              FROM fr.proline.core.orm.msi.PeptideInstancePeptideMatchMap pipm, fr.proline.core.orm.msi.PeptideMatch pm, fr.proline.core.orm.msi.PeptideInstance pi, fr.proline.core.orm.msi.Peptide p, fr.proline.core.orm.msi.MsQuery ms, fr.proline.core.orm.msi.Spectrum sp  \n"
                         + "              WHERE pipm.id.peptideMatchId IN (:peptideMatchList) AND pi.id IN (:peptideInstanceList) AND pipm.id.peptideInstanceId=pi.id AND pipm.id.peptideMatchId=pm.id AND pm.peptideId=p.id AND pm.msQuery=ms AND ms.spectrum=sp ");
@@ -378,7 +374,7 @@ public class DatabasePTMProteinSiteTask_V2 extends AbstractDatabaseTask {
             }
             
             stop = System.currentTimeMillis();
-            m_logger.info("PSM from PM created in {} ms", (stop-start));
+            m_logger.debug("PSM from PM created in {} ms", (stop-start));
             start = stop;
             
             // Retrieve PeptideReadablePtmString
@@ -398,18 +394,18 @@ public class DatabasePTMProteinSiteTask_V2 extends AbstractDatabaseTask {
             }           
             
             stop = System.currentTimeMillis();
-            m_logger.info("PeptideReadablePtmString loaded in {} ms", (stop-start));
+            m_logger.debug("PeptideReadablePtmString loaded in {} ms", (stop-start));
             start = stop;
             
             // fetch Generic PTM Data
-            fetchGenericPTMData();
+            fetchGenericPTMData(entityManagerMSI);
             
             stop = System.currentTimeMillis();
-            m_logger.info("Generic PTM data loaded in {} ms", (stop-start));
+            m_logger.debug("Generic PTM data loaded in {} ms", (stop-start));
             start = stop;
             
             // fetch Specific Data for the Peptides Found
-            HashMap<Long, ArrayList<DPeptidePTM>> ptmMap = fetchPTMDataForPeptides(new ArrayList(allPeptidesMap.keySet()));
+            HashMap<Long, ArrayList<DPeptidePTM>> ptmMap = fetchPTMDataForPeptides(entityManagerMSI, new ArrayList(allPeptidesMap.keySet()));
         
             for (DPeptideMatch pm : peptideMatchArray) {
                 Peptide p = pm.getPeptide();
@@ -427,7 +423,7 @@ public class DatabasePTMProteinSiteTask_V2 extends AbstractDatabaseTask {
             }
             
             stop = System.currentTimeMillis();
-            m_logger.info("PTM data for peptides loaded in {} ms", (stop-start));
+            m_logger.debug("PTM data for peptides loaded in {} ms", (stop-start));
             start = stop;
             
             // create the list of PTMSites            
@@ -445,8 +441,7 @@ public class DatabasePTMProteinSiteTask_V2 extends AbstractDatabaseTask {
             }
             
             stop = System.currentTimeMillis();
-            m_logger.info("PTM Sites built in {} ms", (stop-start));
-            start = stop;
+            m_logger.debug("PTM Sites built in {} ms", (stop-start));
 
             entityManagerMSI.getTransaction().commit();
         } catch (Exception e) {
@@ -465,103 +460,60 @@ public class DatabasePTMProteinSiteTask_V2 extends AbstractDatabaseTask {
         return true;
     }
 
-    private boolean fetchGenericPTMData() {
+    private boolean fetchGenericPTMData(EntityManager entityManagerMSI) {
 
         HashMap<Long, DInfoPTM> infoPTMMAp = DInfoPTM.getInfoPTMMap();
         if (!infoPTMMAp.isEmpty()) {
             return true; // already loaded
         }
-        
-        EntityManager entityManagerPS = DStoreCustomPoolConnectorFactory.getInstance().getPsDbConnector().createEntityManager();
-        try {
-
-            entityManagerPS.getTransaction().begin();
-
-            TypedQuery<DInfoPTM> ptmInfoQuery = entityManagerPS.createQuery("SELECT new fr.proline.core.orm.msi.dto.DInfoPTM(spec.id, spec.residue, spec.location, ptm.shortName, evidence.composition, evidence.monoMass) \n"
-                    + "FROM fr.proline.core.orm.ps.PtmSpecificity as spec, fr.proline.core.orm.ps.Ptm as ptm, fr.proline.core.orm.ps.PtmEvidence as evidence \n"
-                    + "WHERE spec.ptm=ptm AND ptm=evidence.ptm AND evidence.type='Precursor' ", DInfoPTM.class);
-
-            List<DInfoPTM> ptmInfoList = ptmInfoQuery.getResultList();
-
-            Iterator<DInfoPTM> it = ptmInfoList.iterator();
-            while (it.hasNext()) {
-                DInfoPTM infoPTM = it.next();
-                DInfoPTM.addInfoPTM(infoPTM);
-            }
-
-            entityManagerPS.getTransaction().commit();
-
-            return true;
-        } catch (Exception e) {
-            m_logger.error(getClass().getSimpleName() + " failed", e);
-            m_taskError = new TaskError(e);
-            try {
-                entityManagerPS.getTransaction().rollback();
-            } catch (Exception rollbackException) {
-                m_logger.error(getClass().getSimpleName() + " failed : potential network problem", rollbackException);
-            }
-            return false;
-        } finally {
-            entityManagerPS.close();
-        }
-
-    }
-    
-    private HashMap<Long, ArrayList<DPeptidePTM>> fetchPTMDataForPeptides(ArrayList<Long> allPeptidesIds) {
-
-
-        EntityManager entityManagerPS = DStoreCustomPoolConnectorFactory.getInstance().getPsDbConnector().createEntityManager();
-        try {
-
-            entityManagerPS.getTransaction().begin();
-
-            HashMap<Long, ArrayList<DPeptidePTM>> ptmMap = new HashMap<>();
-            
-            SubTaskManager subTaskManager = new SubTaskManager(1);
-            SubTask subTask = subTaskManager.sliceATaskAndGetFirst(0, allPeptidesIds.size(), SLICE_SIZE);
-            while (subTask != null) {
-  
-                TypedQuery<DPeptidePTM> ptmQuery = entityManagerPS.createQuery("SELECT new fr.proline.core.orm.msi.dto.DPeptidePTM(pptm.peptide.id, pptm.specificity.id, pptm.seqPosition) \n"
-                    + "FROM PeptidePtm as pptm  \n"
-                    + "WHERE pptm.peptide.id IN (:peptideList) ", DPeptidePTM.class);
-                ptmQuery.setParameter("peptideList", subTask.getSubList(allPeptidesIds));
-
-                List<DPeptidePTM> ptmList = ptmQuery.getResultList();
-
-                Iterator<DPeptidePTM> it = ptmList.iterator();
-                while (it.hasNext()) {
-                    DPeptidePTM ptm = it.next();
-                    Long peptideId = ptm.getIdPeptide();
-                    ArrayList<DPeptidePTM> list = ptmMap.get(peptideId);
-                    if (list == null) {
-                        list =new ArrayList<>();
-                        ptmMap.put(peptideId, list);
-                    }
-                    list.add(ptm);
-                    
-                    //Peptide
-                    
-                }
- 
                 
-                subTask = subTaskManager.getNextSubTask();
-            }
+        TypedQuery<DInfoPTM> ptmInfoQuery = entityManagerMSI.createQuery("SELECT new fr.proline.core.orm.msi.dto.DInfoPTM(spec.id, spec.residue, spec.location, ptm.shortName, evidence.composition, evidence.monoMass) \n"
+            + "FROM fr.proline.core.orm.msi.PtmSpecificity as spec, fr.proline.core.orm.msi.Ptm as ptm, fr.proline.core.orm.msi.PtmEvidence as evidence \n"
+            + "WHERE spec.ptm=ptm AND ptm=evidence.ptm AND evidence.type='Precursor' ", DInfoPTM.class);
+        List<DInfoPTM> ptmInfoList = ptmInfoQuery.getResultList();
 
-            entityManagerPS.getTransaction().commit();
-
-            return ptmMap;
-        } catch (Exception e) {
-            m_logger.error(getClass().getSimpleName() + " failed", e);
-            m_taskError = new TaskError(e);
-            try {
-                entityManagerPS.getTransaction().rollback();
-            } catch (Exception rollbackException) {
-                m_logger.error(getClass().getSimpleName() + " failed : potential network problem", rollbackException);
-            }
-            return null;
-        } finally {
-            entityManagerPS.close();
+        Iterator<DInfoPTM> it = ptmInfoList.iterator();
+        while (it.hasNext()) {
+            DInfoPTM infoPTM = it.next();
+            DInfoPTM.addInfoPTM(infoPTM);
         }
+
+        return true;
+    }
+
+    
+    private HashMap<Long, ArrayList<DPeptidePTM>> fetchPTMDataForPeptides(EntityManager entityManagerMSI, ArrayList<Long> allPeptidesIds) {
+
+        HashMap<Long, ArrayList<DPeptidePTM>> ptmMap = new HashMap<>();
+            
+        SubTaskManager subTaskManager = new SubTaskManager(1);
+        SubTask subTask = subTaskManager.sliceATaskAndGetFirst(0, allPeptidesIds.size(), SLICE_SIZE);
+        while (subTask != null) {
+  
+            TypedQuery<DPeptidePTM> ptmQuery = entityManagerMSI.createQuery("SELECT new fr.proline.core.orm.msi.dto.DPeptidePTM(pptm.peptide.id, pptm.specificity.id, pptm.seqPosition) \n"
+                + "FROM PeptidePtm as pptm  \n"
+                + "WHERE pptm.peptide.id IN (:peptideList) ", DPeptidePTM.class);
+            ptmQuery.setParameter("peptideList", subTask.getSubList(allPeptidesIds));
+
+            List<DPeptidePTM> ptmList = ptmQuery.getResultList();
+
+            Iterator<DPeptidePTM> it = ptmList.iterator();
+            while (it.hasNext()) {
+                DPeptidePTM ptm = it.next();
+                Long peptideId = ptm.getIdPeptide();
+                ArrayList<DPeptidePTM> list = ptmMap.get(peptideId);
+                if (list == null) {
+                    list =new ArrayList<>();
+                    ptmMap.put(peptideId, list);
+                }
+                list.add(ptm);
+                    
+            }
+                
+            subTask = subTaskManager.getNextSubTask();
+        }
+
+        return ptmMap;
 
     }
     

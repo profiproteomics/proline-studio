@@ -41,15 +41,7 @@ public class DatabaseRunsTask extends AbstractDatabaseTask {
     private final static int LOAD_RAWFILE = 2;
     private final static int REGISTER_IDENTIFICATION_DATASET_RUN = 3;
 
-    //Data migrated to DatabasePeaklistTask. TO REM    
-    //    private final static int LOAD_PEAKLIST_PATH = 1;
-    //    private final static int LOAD_PEAKLIST_RAWFILE_IDENTIFIER = 5;
-//    private final static int UPDATE_PEAKLIST = 6;
-
-    //    private Long m_rsetId = null;
-    //    private String[] m_resultPath = null;
-    //    private String m_rawFileIdentifier = null;
-    
+   
     public DatabaseRunsTask(AbstractDatabaseCallback callback) {
         super(callback, null);
     }
@@ -90,44 +82,6 @@ public class DatabaseRunsTask extends AbstractDatabaseTask {
         m_action = LOAD_RAWFILE;
     }
 
-//    /**
-//     * Load PeakList Path for Rset
-//     *
-//     * @param projectId
-//     * @param rsetId
-//     * @param resultPath
-//     */
-//    public void initLoadPeakListPathForRset(long projectId, Long rsetId, String[] resultPath) {
-//        setTaskInfo(new TaskInfo(" Load PeakList Path for Search Result with id " + rsetId, false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_LOW, true /* hide this task to user */));
-//        m_projectId = projectId;
-//        m_rsetId = rsetId;
-//        m_resultPath = resultPath;
-//        m_action = LOAD_PEAKLIST_PATH;
-//    }
-//
-//    /**
-//     * Load PeakList Identifier for Rset
-//     *
-//     * @param projectId
-//     * @param rsetId
-//     * @param resultIdentifiers
-//     */
-//    public void initLoadPeakListRawFileIdentifierForRset(long projectId, Long rsetId, String[] resultIdentifiers) {
-//        setTaskInfo(new TaskInfo(" Load PeakList RawFile Identifier for Search Result with id " + rsetId, false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_LOW, true /* hide this task to user */));
-//        m_projectId = projectId;
-//        m_rsetId = rsetId;
-//        m_resultPath = resultIdentifiers;
-//        m_action = LOAD_PEAKLIST_RAWFILE_IDENTIFIER;
-//    }
-//
-//    public void initUpdatePeaklistIdentifier(long projectId, Long rsetId, String peaklistIdentifier) {
-//        setTaskInfo(new TaskInfo(" Updating Raw File Identifier ", false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_LOW, true /* hide this task to user */));
-//        m_projectId = projectId;
-//        m_rsetId = rsetId;
-//        m_rawFileIdentifier = peaklistIdentifier;
-//        m_action = UPDATE_PEAKLIST;
-//    }
-
     /**
      * Register map between IdentificationDataset & Run
      *
@@ -152,12 +106,6 @@ public class DatabaseRunsTask extends AbstractDatabaseTask {
         switch (m_action) {
             case LOAD_RUNS_FOR_RSMS:
                 return fetchRunsForRsms();
-//            case LOAD_PEAKLIST_PATH:
-//                return fetchPeaklistPath();
-//            case LOAD_PEAKLIST_RAWFILE_IDENTIFIER:
-//                return fetchPeaklistRawFileIdentifier();
-//            case UPDATE_PEAKLIST:
-//                return updatePeaklistRawFileIdentifier();
             case SEARCH_RAWFILE:
                 return searchRawFile();
             case LOAD_RAWFILE:
@@ -204,113 +152,6 @@ public class DatabaseRunsTask extends AbstractDatabaseTask {
 
         return true;
     }
-
-//    public boolean fetchPeaklistPath() {
-//        EntityManager entityManagerMSI = DStoreCustomPoolConnectorFactory.getInstance().getMsiDbConnector(m_projectId).createEntityManager();
-//        try {
-//
-//            entityManagerMSI.getTransaction().begin();
-//
-//            TypedQuery<String> peakListPathQuery = entityManagerMSI.createQuery("SELECT plist.path FROM Peaklist plist, MsiSearch msisearch, ResultSet rset WHERE rset.id = :rsetId AND rset.msiSearch=msisearch AND msisearch.peaklist=plist ", String.class);
-//            peakListPathQuery.setParameter("rsetId", m_rsetId);
-//            List<String> paths = peakListPathQuery.getResultList();
-//
-//            if (paths != null && paths.size() > 0) {
-//
-//                String path = paths.get(0);
-//
-//                // remove .raw , or .raw-1.mgf
-//                int indexRaw = path.toLowerCase().indexOf(".raw");
-//                if (indexRaw != -1) {
-//                    path = path.substring(0, indexRaw);
-//                }
-//                // remove .mgf, ...
-//                int indexMgf = path.toLowerCase().indexOf(".mgf");
-//                if (indexMgf != -1) {
-//                    path = path.substring(0, indexMgf);
-//                }
-//
-//                // remove all code before \ / or ~
-//                int index = path.lastIndexOf('/');
-//                index = Math.max(index, path.lastIndexOf('\\'));
-//                index = Math.max(index, path.lastIndexOf('~'));
-//                if (index != -1) {
-//                    path = path.substring(index + 1);
-//                }
-//
-//                m_resultPath[0] = path;
-//            }
-//
-//            entityManagerMSI.getTransaction().commit();
-//        } catch (Exception e) {
-//            m_logger.error(getClass().getSimpleName() + " failed", e);
-//            m_taskError = new TaskError(e);
-//            try {
-//                entityManagerMSI.getTransaction().rollback();
-//            } catch (Exception rollbackException) {
-//                m_logger.error(getClass().getSimpleName() + " failed : potential network problem", rollbackException);
-//            }
-//            return false;
-//        } finally {
-//            entityManagerMSI.close();
-//        }
-//
-//        return true;
-//    }
-
-
-//    public boolean fetchPeaklistRawFileIdentifier() {
-//        EntityManager entityManagerMSI = DStoreCustomPoolConnectorFactory.getInstance().getMsiDbConnector(m_projectId).createEntityManager();
-//        try {
-//
-//            entityManagerMSI.getTransaction().begin();
-//
-//            TypedQuery<String> peaklistIdentifierQuery = entityManagerMSI.createQuery("SELECT plist.raw_file_identifier FROM Peaklist plist, MsiSearch msisearch, ResultSet rset WHERE rset.id = :rsetId AND rset.msiSearch=msisearch AND msisearch.peaklist=plist ", String.class);
-//            peaklistIdentifierQuery.setParameter("rsetId", m_rsetId);
-//            List<String> paths = peaklistIdentifierQuery.getResultList();
-//
-//            if (paths != null && paths.size() > 0) {
-//
-//                String path = paths.get(0);
-//
-//                // remove .raw , or .raw-1.mgf
-//                int indexRaw = path.toLowerCase().indexOf(".raw");
-//                if (indexRaw != -1) {
-//                    path = path.substring(0, indexRaw);
-//                }
-//                // remove .mgf, ...
-//                int indexMgf = path.toLowerCase().indexOf(".mgf");
-//                if (indexMgf != -1) {
-//                    path = path.substring(0, indexMgf);
-//                }
-//
-//                // remove all code before \ / or ~
-//                int index = path.lastIndexOf('/');
-//                index = Math.max(index, path.lastIndexOf('\\'));
-//                index = Math.max(index, path.lastIndexOf('~'));
-//                if (index != -1) {
-//                    path = path.substring(index + 1);
-//                }
-//
-//                m_resultPath[0] = path;
-//            }
-//
-//            entityManagerMSI.getTransaction().commit();
-//        } catch (Exception e) {
-//            m_logger.error(getClass().getSimpleName() + " failed", e);
-//            m_taskError = new TaskError(e);
-//            try {
-//                entityManagerMSI.getTransaction().rollback();
-//            } catch (Exception rollbackException) {
-//                m_logger.error(getClass().getSimpleName() + " failed : potential network problem", rollbackException);
-//            }
-//            return false;
-//        } finally {
-//            entityManagerMSI.close();
-//        }
-//
-//        return true;
-//    }
 
     public boolean searchRawFile() {
         EntityManager entityManagerUDS = DStoreCustomPoolConnectorFactory.getInstance().getUdsDbConnector().createEntityManager();

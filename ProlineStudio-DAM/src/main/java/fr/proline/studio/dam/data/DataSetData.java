@@ -39,11 +39,9 @@ public class DataSetData extends AbstractData {
 
     public DataSetData(String temporaryName, Dataset.DatasetType temporaryDatasetType, Aggregation.ChildNature temporaryAggregateType) {
         m_dataType = DataTypes.DATA_SET;
-
         m_temporaryName = temporaryName;
         m_temporaryAggregateType = temporaryAggregateType;
         m_temporaryDatasetType = temporaryDatasetType;
-
     }
 
     public DDataset getDataset() {

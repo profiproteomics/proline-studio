@@ -117,7 +117,7 @@ public class FunctionParametersDialog extends DefaultDialog {
                     continue;
                 }
                 
-                replaceInternaleComponent(createInternalPanel(m_currentPanelNumber));
+                replaceInternalComponent(createInternalPanel(m_currentPanelNumber));
                 setButtonsState(m_currentPanelNumber, m_parameterList.length);
                 repack();
                 revalidate();
@@ -144,7 +144,7 @@ public class FunctionParametersDialog extends DefaultDialog {
                     continue;
                 }
 
-                replaceInternaleComponent(createInternalPanel(m_currentPanelNumber));
+                replaceInternalComponent(createInternalPanel(m_currentPanelNumber));
                 setButtonsState(m_currentPanelNumber, m_parameterList.length);
                 repack();
                 revalidate();

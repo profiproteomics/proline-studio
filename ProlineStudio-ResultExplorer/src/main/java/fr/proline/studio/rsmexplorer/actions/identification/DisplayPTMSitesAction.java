@@ -1,9 +1,4 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-package fr.proline.studio.rsmexplorer.actions.xic;
+package fr.proline.studio.rsmexplorer.actions.identification;
 
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.uds.dto.DDataset;
@@ -12,10 +7,10 @@ import fr.proline.studio.dam.data.DataSetData;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
 import fr.proline.studio.dam.tasks.SubTask;
+import fr.proline.studio.dam.tasks.data.PTMDataset;
 import fr.proline.studio.pattern.WindowBox;
 import fr.proline.studio.pattern.WindowBoxFactory;
 import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
-import fr.proline.studio.rsmexplorer.actions.identification.AbstractRSMAction;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
@@ -23,12 +18,12 @@ import org.openide.util.NbBundle;
 
 /**
  *
- * @author VD225637
+ * @author JM235353
  */
-public class DisplayXICPtmProteinSiteAction extends AbstractRSMAction {
+public class DisplayPTMSitesAction  extends AbstractRSMAction {
 
-    public DisplayXICPtmProteinSiteAction() {
-       super(NbBundle.getMessage(DisplayXICPtmProteinSiteAction.class, "CTL_DisplayPtmProteinSite"), AbstractTree.TreeType.TREE_QUANTITATION);
+    public DisplayPTMSitesAction(AbstractTree.TreeType treeType) {
+       super(NbBundle.getMessage(DisplayPTMSitesAction.class, "CTL_PtmProteinSite"), treeType);
     }
     
     @Override
@@ -55,14 +50,13 @@ public class DisplayXICPtmProteinSiteAction extends AbstractRSMAction {
         if (rsm != null) {
 
             // prepare window box
-            WindowBox wbox = WindowBoxFactory.getXICPTMProteinSiteWindowBox(dataSet.getName());
-            wbox.setEntryData(dataSet.getProject().getId(), dataSet);
+            WindowBox wbox = WindowBoxFactory.getPTMSitesWindowBox(dataSet.getName());
+            wbox.setEntryData(dataSet.getProject().getId(), new PTMDataset(dataSet));
             
             // open a window to display the window box
             DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
             win.open();
             win.requestActive();
-            
         } else {
 
             
@@ -76,15 +70,15 @@ public class DisplayXICPtmProteinSiteAction extends AbstractRSMAction {
 
                 @Override
                 public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
-
-                    WindowBox wbox = WindowBoxFactory.getXICPTMProteinSiteWindowBox(dataSet.getName());
+                    
+                    WindowBox wbox = WindowBoxFactory.getPTMSitesWindowBox(dataSet.getName());
                     // open a window to display the window box
                     DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
                     win.open();
                     win.requestActive();
                     
                     // prepare window box
-                    wbox.setEntryData(dataSet.getProject().getId(), dataSet);
+                    wbox.setEntryData(dataSet.getProject().getId(), new PTMDataset(dataSet));
                 }
             };
 
@@ -124,6 +118,5 @@ public class DisplayXICPtmProteinSiteAction extends AbstractRSMAction {
         
         setEnabled(true);
     }
-    
     
 }

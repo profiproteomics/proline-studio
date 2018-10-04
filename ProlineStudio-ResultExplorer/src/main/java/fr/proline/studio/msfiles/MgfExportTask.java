@@ -30,6 +30,7 @@ public class MgfExportTask extends AbstractDatabaseTask {
     @Override
     public boolean fetchData() {
         
+
         try {
             MzdbRawFile mzdbFile = new MzdbRawFile(m_file);
             String outputFileName = m_exportSettings.getDestinationDirectory() + File.separator + m_file.getName().substring(0, m_file.getName().lastIndexOf(".mzdb")) + ".mgf";

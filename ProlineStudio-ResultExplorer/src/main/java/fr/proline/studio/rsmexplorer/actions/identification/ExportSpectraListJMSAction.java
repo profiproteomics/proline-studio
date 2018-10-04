@@ -12,7 +12,9 @@ import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import javax.swing.JOptionPane;
 import org.openide.util.NbBundle;
 import org.openide.windows.WindowManager;
 import org.slf4j.Logger;
@@ -23,25 +25,23 @@ import org.slf4j.LoggerFactory;
  * @author VD225637
  */
 public class ExportSpectraListJMSAction extends AbstractRSMAction {
- 
+
+    public enum FormatCompatibility { PeakView, Spectronaut }
+    
     protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
 
-
-    public ExportSpectraListJMSAction(AbstractTree.TreeType treeType) {
-        super(NbBundle.getMessage(ExportSpectraListJMSAction.class, "CTL_ExportSpectraListAction"), treeType);
-    }
+    FormatCompatibility m_compatibility;
     
-//    public ExportSpectraListJMSAction(AbstractTree.TreeType treeType, boolean exportTitle) {
-//        super(NbBundle.getMessage(ExportSpectraListJMSAction.class, "CTL_ExportAction")+" "+NbBundle.getMessage(ExportSpectraListJMSAction.class, "CTL_ExportSpectraListAction") , treeType);
-//    }
+    public ExportSpectraListJMSAction(AbstractTree.TreeType treeType, FormatCompatibility compatibility) {
+        super(NbBundle.getMessage(ExportSpectraListJMSAction.class, "CTL_"+compatibility.toString()+"SpectraListAction"), treeType);
+        m_compatibility = compatibility;
+    }
 
     @Override
     public void actionPerformed(final AbstractNode[] selectedNodes, final int x, final int y) {
 
         final DataSetNode dataSetNode = (DataSetNode) selectedNodes[0];
         final ExportDialog  dialog = ExportDialog.getDialog(WindowManager.getDefault().getMainWindow(), false, ExporterFactory.EXPORT_SPECTRA);
-
-//        final LoadWaitingDialog loadWaitingDialog = new LoadWaitingDialog(WindowManager.getDefault().getMainWindow());
 
         DefaultDialog.ProgressTask task = new DefaultDialog.ProgressTask() {
             @Override
@@ -66,12 +66,8 @@ public class ExportSpectraListJMSAction extends AbstractRSMAction {
                     @Override
                     public void run(boolean success) {
                         if (success) {
-
                             setProgress(100);
-
                         } else {
-                                    // nothing to do
-                            // failed
                             setProgress(100);
                         }
                     }
@@ -102,18 +98,18 @@ public class ExportSpectraListJMSAction extends AbstractRSMAction {
                             }                            
 
                         } else {
-                            // nothing to do
-                            // failed
+                            JOptionPane.showMessageDialog(WindowManager.getDefault().getMainWindow(), this.getTaskError().getErrorText(), "Warning", JOptionPane.ERROR_MESSAGE);
                             setProgress(100);
                         }
                     }
                 };
-
                 
                 List<DDataset> dsets = new ArrayList<>();
                 dsets.add(dataSetNode.getDataset());
-            ExportDatasetTask task = new ExportDatasetTask(exportCallback, dsets, null, _filePath, _jmsNodeId, ExportDatasetTask.ExporterFormat.SPECTRA_LIST, null);
-                AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
+                HashMap exportParams = new HashMap<String, Object>();
+                exportParams.put("format_compatibility", m_compatibility.toString().toLowerCase());
+                ExportDatasetTask exportTask = new ExportDatasetTask(exportCallback, dsets, null, _filePath, _jmsNodeId, ExportDatasetTask.ExporterFormat.SPECTRA_LIST, exportParams);
+                AccessJMSManagerThread.getAccessJMSManagerThread().addTask(exportTask);
 
                 return null;
             }
@@ -124,26 +120,6 @@ public class ExportSpectraListJMSAction extends AbstractRSMAction {
         dialog.setVisible(true);        
     }
     
-//    public String getDatasetName(String fileName, AbstractNode[] selectedNodes){
-//        int id0 = fileName.indexOf("-");
-//        int id1 = fileName.lastIndexOf("_");
-//        if (id0 > -1 && id1 > -1&& id0<id1){
-//            String dsIdStr = fileName.substring(id0+1, id1);
-//            try{
-//                Long dsId  = Long.parseLong(dsIdStr);
-//                for (AbstractNode node : selectedNodes) {
-//                    if (((DataSetNode)node).getDataset().getId() == dsId){
-//                        return "_"+((DataSetNode)node).getDataset().getName()+"_";
-//                    }
-//                }
-//            }catch(NumberFormatException e){
-//                
-//            }
-//            
-//        }
-//        return "";
-//    }
-
     @Override
     public void updateEnabled(AbstractNode[] selectedNodes) {
 

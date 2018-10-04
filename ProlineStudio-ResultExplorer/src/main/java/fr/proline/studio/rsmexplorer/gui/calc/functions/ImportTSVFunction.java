@@ -2,7 +2,6 @@ package fr.proline.studio.rsmexplorer.gui.calc.functions;
 
 
 
-import au.com.bytecode.opencsv.CSVReader;
 import fr.proline.studio.extendedtablemodel.ExtraDataType;
 import fr.proline.studio.export.ExportModelUtilities;
 import fr.proline.studio.export.ExportFontData;
@@ -25,7 +24,7 @@ import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
 import fr.proline.studio.rsmexplorer.gui.calc.ProcessCallbackInterface;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.FunctionGraphNode;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphConnector;
-import fr.proline.studio.rsmexplorer.gui.model.ImportedDataTableModel;
+import fr.proline.studio.extendedtablemodel.ImportedDataTableModel;
 import fr.proline.studio.table.DecoratedTable;
 import fr.proline.studio.table.renderer.DefaultLeftAlignRenderer;
 import fr.proline.studio.table.renderer.DefaultRightAlignRenderer;
@@ -158,7 +157,7 @@ public class ImportTSVFunction extends AbstractFunction {
 
             ImportedDataTableModel loadedModel = new ImportedDataTableModel();
 
-            Exception e = loadFile(loadedModel, filePath, separator, true, false);
+            Exception e = ImportedDataTableModel.loadFile(loadedModel, filePath, separator, true, false);
             if (e != null) {
                 setInError(new CalcError(e, null, -1));
             } else {
@@ -174,130 +173,6 @@ public class ImportTSVFunction extends AbstractFunction {
 
     }
     
-    public static Exception loadFile(ImportedDataTableModel model, String filePath, char separator, boolean header, boolean testFile) {
-        
-        File f = new File(filePath);
-        if (!f.exists()) {
-            model.setData(null, null, null);
-        }
-        
-        try {
-            CSVReader reader = new CSVReader(new FileReader(filePath), separator);
-
-            
-            
-        // read column headers
-        String[] headerLine = null;
-        int nbColumns = 0;
-        int line = 1;
-        if (header) {
-            headerLine = reader.readNext();
-            if (headerLine == null) {
-                model.setData(null, null, null);
-                throw new IOException("No Data found in File");
-            }
-            nbColumns = headerLine.length;
-            line = 2;
-        }
-        
-        if (headerLine == null) {
-            headerLine = new String[nbColumns];
-            for (int i = 0; i < nbColumns; i++) {
-                headerLine[i] = new String(String.valueOf(i + 1));
-            }
-        }
-
-        // read lines, skip empty ones and check the number of columns
-        ArrayList<String[]> allDataLines = new ArrayList<>();
-        String[] dataLine;
-        while ((dataLine = reader.readNext()) != null) {
-
-            int nbColumsCur = dataLine.length;
-            if (nbColumsCur == 0) {
-                // continue : empty line
-            } else if (nbColumns == 0) {
-                nbColumns = nbColumsCur;
-            }
-
-            if (nbColumns != nbColumsCur) {
-                model.setData(null, null, null);
-                return new IOException("Number of columns differ in file at line " + line);
-            }
-
-            allDataLines.add(dataLine);
-
-            line++;
-
-            if ((testFile) && (line >= 7)) {
-                // we read only the first lines of the file
-                break;
-                
-            }
-        }
-
-
-
-        // check the type of columns
-        int nbRows = allDataLines.size();
-        Class[] columTypes = new Class[nbColumns];
-        for (int col = 0; col < nbColumns; col++) {
-
-            boolean canBeLong = true;
-            boolean canBeDouble = true;
-            for (int row = 0; row < nbRows; row++) {
-                String data = allDataLines.get(row)[col];
-                if (canBeLong) {
-                    try {
-                        Long.parseLong(data);
-                    } catch (NumberFormatException nfe) {
-                        canBeLong = false;
-                    }
-                }
-                if ((!canBeLong) && (canBeDouble)) {
-                    try {
-                        Double.parseDouble(data);
-                    } catch (NumberFormatException nfe) {
-                        canBeDouble = false;
-                        break;
-                    }
-                }
-            }
-            if (canBeLong) {
-                columTypes[col] = Long.class;
-            } else if (canBeDouble) {
-                columTypes[col] = Double.class;
-            } else {
-                columTypes[col] = String.class;
-            }
-        }
-
-        // create the model
-        Object[][] data = new Object[nbRows][nbColumns];
-        for (int row = 0; row < nbRows; row++) {
-            for (int col = 0; col < nbColumns; col++) {
-                String value = allDataLines.get(row)[col];
-                if (columTypes[col].equals(Long.class)) {
-                    data[row][col] = Long.parseLong(value);
-                } else if (columTypes[col].equals(Double.class)) {
-                    data[row][col] = Double.parseDouble(value);
-                } else {
-                    data[row][col] = value;
-                }
-
-            }
-        }
-
-        
-        model.setData(headerLine, columTypes, data);
-        model.setName(f.getName().substring(0, f.getName().lastIndexOf('.')));
-
-        } catch (Exception e) {
-            model.setData(null, null, null);
-            return e;
-        }
-        
-        return null;
-    }
     
     @Override
     public void askDisplay(FunctionGraphNode functionGraphNode, int index) {
@@ -366,7 +241,7 @@ public class ImportTSVFunction extends AbstractFunction {
 
                 boolean found = false;
                 for (int i=0;i<separators.length;i++) {
-                    Exception e = loadFile(m_displayModel, m_fileParameter.getStringValue(), separatorToChar(separators[i]), true, true);
+                    Exception e = ImportedDataTableModel.loadFile(m_displayModel, m_fileParameter.getStringValue(), separatorToChar(separators[i]), true, true);
                     if (e == null) {
                         if (m_displayModel.getColumnCount() > 1) {
                             m_separatorParameter.setValue(separators[i]);
@@ -377,7 +252,7 @@ public class ImportTSVFunction extends AbstractFunction {
                     
                 }
                 if (!found) {
-                    loadFile(m_displayModel, m_fileParameter.getStringValue(), separatorToChar(separators[0]), true, true);
+                    ImportedDataTableModel.loadFile(m_displayModel, m_fileParameter.getStringValue(), separatorToChar(separators[0]), true, true);
                     m_separatorParameter.setValue(separators[0]);
                 }
                 
@@ -388,7 +263,7 @@ public class ImportTSVFunction extends AbstractFunction {
         AbstractLinkedParameters separatorLinkedParameter = new AbstractLinkedParameters(m_parameterList) {
             @Override
             public void valueChanged(String value, Object associatedValue) {
-                loadFile(m_displayModel, m_fileParameter.getStringValue(), getSeparator(), true, true);
+                ImportedDataTableModel.loadFile(m_displayModel, m_fileParameter.getStringValue(), getSeparator(), true, true);
             }
             
         };

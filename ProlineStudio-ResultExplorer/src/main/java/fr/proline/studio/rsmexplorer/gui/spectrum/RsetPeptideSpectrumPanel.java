@@ -43,13 +43,16 @@ import fr.proline.core.orm.uds.Project;
 import fr.proline.studio.dam.DatabaseDataManager;
 import fr.proline.studio.dpm.AccessJMSManagerThread;
 import fr.proline.studio.dpm.task.jms.AbstractJMSCallback;
+import fr.proline.studio.dpm.task.jms.GenerateSpectrumMatchTask;
 import fr.proline.studio.export.ExportButton;
+import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.pattern.DataBoxRsetPeptideSpectrum;
 import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
+import fr.proline.studio.rsmexplorer.gui.dialog.GenerateSpectrumMarchesDialog;
 import fr.proline.studio.utils.IconManager;
 import java.awt.Cursor;
 
@@ -190,9 +193,15 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                m_generateMatchButton.setEnabled(false);
-                generateSpectrumMatch();
-            }            
+                GenerateSpectrumMarchesDialog dialog = new GenerateSpectrumMarchesDialog(WindowManager.getDefault().getMainWindow());
+                dialog.setVisible(true);
+                if (dialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {
+                    Long frsId = dialog.getFragmentationRuleSetId();
+                    Boolean forceGenerate = dialog.getDoForceGenerate();
+                    m_generateMatchButton.setEnabled(false);
+                    generateSpectrumMatch(frsId, forceGenerate);
+                }          
+            }
         });
         m_generateMatchButton.setEnabled(false);
         toolbar.add(m_generateMatchButton);
@@ -203,7 +212,7 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
     
     public void setData(DPeptideMatch peptideMatch, PeptideFragmentationData peptideFragmentationData) {
         
-        if ( (peptideMatch == m_previousPeptideMatch) && ((peptideFragmentationData== null) || ((peptideFragmentationData!= null) && (m_previousFragmentationSet))) ) {
+        if ( (peptideMatch == m_previousPeptideMatch) && ((peptideFragmentationData== null) ||  m_previousFragmentationSet) ) {
             return;
         }
         m_previousPeptideMatch = peptideMatch;
@@ -236,7 +245,7 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
 
 
     
-    private void generateSpectrumMatch() {
+    private void generateSpectrumMatch(Long frsId, Boolean forceGenerateSM) {
 
         AbstractJMSCallback spectrumMatchCallback = new AbstractJMSCallback() {
             
@@ -257,7 +266,7 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
         };
         
         setCursor(new Cursor(Cursor.WAIT_CURSOR));
-        fr.proline.studio.dpm.task.jms.GenerateSpectrumMatchTask task = new fr.proline.studio.dpm.task.jms.GenerateSpectrumMatchTask(spectrumMatchCallback, null, m_dataBox.getProjectId(), m_previousPeptideMatch.getResultSetId(), null, m_previousPeptideMatch.getId());
+        GenerateSpectrumMatchTask task = new GenerateSpectrumMatchTask(spectrumMatchCallback, null, m_dataBox.getProjectId(), m_previousPeptideMatch.getResultSetId(), null, m_previousPeptideMatch.getId(), frsId, forceGenerateSM);
         AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
         
     }

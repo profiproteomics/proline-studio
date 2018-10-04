@@ -36,11 +36,12 @@ import javax.swing.table.TableCellRenderer;
 public class UserAccountsPanel extends JPanel {
     
     private JDialog m_dialogOwner = null;
+    private Boolean m_isEditable = true;
     
     private UserAccountsTable m_userAccountsTable;
     
-    public UserAccountsPanel(JDialog dialog) {
-        
+    public UserAccountsPanel(JDialog dialog, Boolean editable) {
+        m_isEditable = editable;
         m_dialogOwner = dialog;
         
         setBorder(BorderFactory.createTitledBorder("User Accounts"));
@@ -55,8 +56,10 @@ public class UserAccountsPanel extends JPanel {
         
         JButton addUserButton = new JButton("Add User Account");
         addUserButton.setIcon(IconManager.getIcon(IconManager.IconType.PLUS_16X16));
+        addUserButton.setEnabled(m_isEditable);
         JButton propertiesButton = new JButton("Modify User Account");
         propertiesButton.setIcon(IconManager.getIcon(IconManager.IconType.PROPERTIES));
+        propertiesButton.setEnabled(m_isEditable);
 
         GridBagConstraints c = new GridBagConstraints();
         c.anchor = GridBagConstraints.NORTHWEST;

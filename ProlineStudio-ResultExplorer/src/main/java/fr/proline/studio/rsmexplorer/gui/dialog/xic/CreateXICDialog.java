@@ -27,6 +27,7 @@ import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
 import fr.proline.studio.rsmexplorer.tree.xic.XICBiologicalSampleAnalysisNode;
+import fr.proline.studio.rsmexplorer.tree.xic.XICReferenceRSMNode;
 import fr.proline.studio.rsmexplorer.tree.xic.XICRunNode;
 import fr.proline.studio.settings.FilePreferences;
 import fr.proline.studio.settings.SettingsDialog;
@@ -34,10 +35,12 @@ import fr.proline.studio.settings.SettingsUtils;
 import fr.proline.studio.utils.IconManager;
 import fr.proline.studio.utils.StudioExceptions;
 import java.awt.Dialog;
+import java.awt.HeadlessException;
 import java.awt.Point;
 import java.awt.Window;
 import java.io.File;
 import java.util.*;
+import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 import javax.persistence.EntityManager;
 import javax.swing.JFileChooser;
@@ -46,6 +49,7 @@ import javax.swing.JOptionPane;
 import javax.swing.tree.TreePath;
 import org.openide.util.NbPreferences;
 import org.openide.windows.WindowManager;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -54,26 +58,25 @@ import org.slf4j.LoggerFactory;
  * @author JM235353
  */
 public class CreateXICDialog extends DefaultDialog {
+    
+    protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
 
     private static final int STEP_PANEL_CREATE_XIC_DESIGN = 0;
     private static final int STEP_PANEL_DEFINE_RAW_FILES = 1;
     private static final int STEP_PANEL_DEFINE_XIC_PARAMS = 2;
     private int m_step = STEP_PANEL_CREATE_XIC_DESIGN;
-    private DDataset m_refDataset = null;
-
+    
     private static final String SETTINGS_KEY = "XIC";
-
     private static CreateXICDialog m_singletonDialog = null;
-
-    private AbstractNode m_finalXICDesignNode = null;
+    
+    private XICDesignTree m_designTree = null;
     private IdentificationTree m_selectionTree = null;
+    private AbstractNode m_finalXICDesignNode = null;
 
+    private DDataset m_refDataset = null;
+    private Long m_refResultSummaryId = null;
     private SelectRawFilesPanel m_selectRawFilePanel;
     private DatabaseVerifySpectrumFromResultSets m_spectrumTask;
-
-    private HashMap<String, XICBiologicalSampleAnalysisNode> m_duplicates;
-
-    private XICDesignTree m_designTree = null;
 
     public static CreateXICDialog getDialog(Window parent) {
         if (m_singletonDialog == null) {
@@ -103,15 +106,27 @@ public class CreateXICDialog extends DefaultDialog {
         m_selectionTree = selectionTree;
     }
 
-    public void setParentDataset(DDataset parentDS) {
+    public void setReferenceIdentDataset(DDataset parentDS) {
         m_refDataset = parentDS;
     }
 
-    public void displayDesignTree() {
-        displayDesignTree(new DataSetNode(new DataSetData("XIC", Dataset.DatasetType.QUANTITATION, Aggregation.ChildNature.QUANTITATION_FRACTION)));
+    /**
+     * 
+     * XIC Dialog params should be set before :
+     * - selectionTree using setSelectableIdentTree
+     * - parentDS : reference DS used for XIC using setReferenceIdentDataset
+     * 
+     */
+    public void displayExperimentalDesignTree() {
+        DataSetNode rootNode = new DataSetNode(new DataSetData("XIC", Dataset.DatasetType.QUANTITATION, Aggregation.ChildNature.QUANTITATION_FRACTION));
+        if (m_refDataset != null) {
+            XICReferenceRSMNode refDatasetNode = new XICReferenceRSMNode(new DataSetData(m_refDataset.getName(), Dataset.DatasetType.AGGREGATE, Aggregation.ChildNature.OTHER));
+            rootNode.add(refDatasetNode);
+        }
+        displayExperimentalDesignTree(rootNode);
     }
 
-    private void displayDesignTree(AbstractNode finalXICDesignNode) {
+    private void displayExperimentalDesignTree(AbstractNode finalXICDesignNode) {
 
         m_finalXICDesignNode = finalXICDesignNode;
         m_step = STEP_PANEL_CREATE_XIC_DESIGN;
@@ -124,14 +139,14 @@ public class CreateXICDialog extends DefaultDialog {
 
         // Update and Replace panel
         CreateXICDesignPanel createXICDesignPanel = CreateXICDesignPanel.getPanel(m_finalXICDesignNode, m_selectionTree);
-        replaceInternaleComponent(createXICDesignPanel);
+        replaceInternalComponent(createXICDesignPanel);
         m_designTree = createXICDesignPanel.getDesignTree();
         revalidate();
         repaint();
 
     }
 
-    public void displayDefineRawFiles() {
+    protected void displayDefineRawFiles() {
 
         m_step = STEP_PANEL_DEFINE_RAW_FILES;
 
@@ -143,15 +158,15 @@ public class CreateXICDialog extends DefaultDialog {
 
         // Update and Replace panel
         m_selectRawFilePanel = SelectRawFilesPanel.getPanel(m_finalXICDesignNode, m_designTree);
-        replaceInternaleComponent(m_selectRawFilePanel);
+        replaceInternalComponent(m_selectRawFilePanel);
         revalidate();
         repaint();
 
     }
 
-    public void displayDefineXICParams() {
+    protected void displayDefineXICParams() {
         m_step = STEP_PANEL_DEFINE_XIC_PARAMS;
-
+ 
         setButtonName(DefaultDialog.BUTTON_OK, org.openide.util.NbBundle.getMessage(DefaultDialog.class, "DefaultDialog.okButton.text"));
         setButtonIcon(DefaultDialog.BUTTON_OK, IconManager.getIcon(IconManager.IconType.OK));
 
@@ -160,19 +175,25 @@ public class CreateXICDialog extends DefaultDialog {
         setButtonVisible(BUTTON_SAVE, true);
 
         // Update and Replace panel
+        //QUANTV2 : comment to use V1
+        DefineQuantParamsPanel.setUsePanelV2(true);
         DefineQuantParamsPanel quantPanel = DefineQuantParamsPanel.getDefineQuantPanel();
         quantPanel.getParamsPanel().resetScrollbar();
-        replaceInternaleComponent(quantPanel);
+        replaceInternalComponent(quantPanel);
         revalidate();
         repaint();
     }
-
+    
+    public String getParamVersion(){
+        return DefineQuantParamsPanel.getDefineQuantPanel().getParamsVersion();
+    }
+    
     @Override
     public void pack() {
         // forbid pack by overloading the method
     }
 
-    public AbstractNode getDesignRSMNode() {
+    public AbstractNode getExperimentalDesignNode() {
         return m_finalXICDesignNode;
     }
 
@@ -190,49 +211,6 @@ public class CreateXICDialog extends DefaultDialog {
             task.initUpdatePeaklistIdentifier(projectID, resultSetID, rawFile.getIdentifier());
             AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
         }
-    }
-    /*
-     * Return map reflecting JSON obhject for experimental_design :
-     "biological_samples": [{
-     "name": "ff 0",
-     "number": 0
-     }],
-     "master_quant_channels": [{
-     "quant_channels": [{
-     "ident_result_summary_id": 6,
-     "number": 0,
-     "sample_number": 0
-     }],
-     "name": "TEST 0206",
-     "number": 0
-     }],
-     "group_setups": [{
-     "biological_groups": [{
-     "name": "br 0",
-     "number": 0,
-     "sample_numbers": [0]
-     }],
-     "ratio_definitions": [{
-     "denominator_group_number": 0,
-     "numerator_group_number": 0,
-     "number": 0
-     }],
-     "name": "TEST 0206",
-     "number": 0
-     }]
-     
-     * @throws IllegalAccessException 
-     */
-
-    private HashMap<Long, Long> getRunIdForRSMs(Collection<Long> rsmIDs) {
-        //Get Run Ids for specified RSMs
-        Long pID = ProjectExplorerPanel.getProjectExplorerPanel().getSelectedProject().getId();
-        HashMap<Long, Long> returnedRunIdsByRsmIds = new HashMap<>();
-        DatabaseRunsTask loadRunIdsTask = new DatabaseRunsTask(null);
-        loadRunIdsTask.initLoadRunIdsForRsms(pID, new ArrayList(rsmIDs), returnedRunIdsByRsmIds);
-        loadRunIdsTask.fetchData();
-
-        return returnedRunIdsByRsmIds;
     }
 
     public String registerRawFiles() {
@@ -265,20 +243,15 @@ public class CreateXICDialog extends DefaultDialog {
                     while (identiResultSummaries.hasMoreElements()) {
 
                         AbstractNode biologicalSampleAnalysisNode = (AbstractNode) identiResultSummaries.nextElement();
-
                         Long rsID = ((DataSetNode) biologicalSampleAnalysisNode).getDataset().getResultSetId();
-
                         Enumeration runNodes = biologicalSampleAnalysisNode.children();
 
                         while (runNodes.hasMoreElements()) {
 
                             XICRunNode runNode = (XICRunNode) runNodes.nextElement();
-
                             RunInfoData runData = (RunInfoData) runNode.getData();
-
                             if (!runData.isRunInfoInDatabase()) {
                                 // RawFile does not exists, create it
-
                                 try {
                                     synchronized (mutexFileRegistered) {
                                         // TODO : get the right instrumentId !!! 
@@ -293,14 +266,12 @@ public class CreateXICDialog extends DefaultDialog {
 
                                             @Override
                                             public void run(boolean success) {
-
                                                 if (success) {
                                                     updatePeaklist(runData, pID, rsID);
                                                 }
                                                 synchronized (mutexFileRegistered) {
                                                     mutexFileRegistered.notifyAll();
                                                 }
-
                                             }
                                         };
 
@@ -313,7 +284,7 @@ public class CreateXICDialog extends DefaultDialog {
 
                                 } catch (InterruptedException ie) {
                                     // should not happen
-                                    ie.printStackTrace();
+                                    m_logger.error("", ie); 
                                 }
                             } else {
                                 this.updatePeaklist(runData, pID, rsID);
@@ -340,199 +311,16 @@ public class CreateXICDialog extends DefaultDialog {
         return errorMsg;
     }
 
-    public Map<String, Object> getDesignParameters() throws IllegalAccessException {
+    public Map<String, Object> getExperimentalDesignParameters() throws IllegalAccessException {
         if (m_finalXICDesignNode == null) {
             throw new IllegalAccessException("Design parameters have not been set.");
         }
-
-        Map<String, Object> experimentalDesignParams = new HashMap<>();
-
-        String errorMsg = null;
-
-        //Number used for Experimental Design data 
-        int ratioNumeratorGrp = 1;
-        int ratioDenominatorGrp = 1;
-        int grpNumber = 1;
-        int splNumber = 1;
-        int splAnalysisNumber = 1;
-
-        List _biologicalGroupList = new ArrayList();
-        HashMap<String, Long> _rsmIdBySampleAnalysis = new HashMap<>();
-        HashMap<Long, Long> _runIdByRSMId = new HashMap<>();
-        HashMap<String, ArrayList<String>> _samplesAnalysisBySample = new HashMap<>();       
-        Map<Integer, String> splNameByNbr = new HashMap<>();
-
-        List<Long> rsmIdsToGetRunIdsFor  = new ArrayList();
-        
-        Enumeration xicGrps = m_finalXICDesignNode.children();
-        while (xicGrps.hasMoreElements() && errorMsg == null) {
-            AbstractNode grpNode = (AbstractNode) xicGrps.nextElement();
-            String grpName = grpNode.getData().getName();
-
-            //Iterate over Samples
-            Enumeration grpSpls = grpNode.children();
-            List<Integer> splNumbers = new ArrayList();
-
-            while (grpSpls.hasMoreElements() && errorMsg == null) {
-                AbstractNode splNode = (AbstractNode) grpSpls.nextElement();
-                String sampleName = grpName + splNode.getData().getName();
-                splNameByNbr.put(splNumber, sampleName);                        
-                splNumbers.add(splNumber++);
-
-                //Iterate over SampleAnalysis
-                Enumeration identRSMs = splNode.children();
-                ArrayList<String> splAnalysisNames = new ArrayList<>();
-                while (identRSMs.hasMoreElements()) {
-                    //VD TODO TEST child type
-                    XICBiologicalSampleAnalysisNode qChannelNode = (XICBiologicalSampleAnalysisNode) identRSMs.nextElement();
-                    XICRunNode associatedRunNode = qChannelNode.getXicRunNode();
-                    String quantChName = qChannelNode.getQuantChannelName();
-                    if ((quantChName == null) || (quantChName.isEmpty())) {
-                        quantChName = qChannelNode.getData().getName();
-                    }
-                    splAnalysisNames.add(quantChName);
-                    if (!DataSetData.class.isInstance(qChannelNode.getData())) {
-                        errorMsg = "Invalide Sample Analysis specified ";
-                        break;
-                    }
-                    
-                    Long rsmId = ((DataSetData) qChannelNode.getData()).getDataset().getResultSummaryId();
-                    _rsmIdBySampleAnalysis.put(quantChName, rsmId);
-                    if(associatedRunNode!=null && ((RunInfoData)associatedRunNode.getData()).getRun() != null) {
-                        _runIdByRSMId.put(rsmId,  ((RunInfoData)associatedRunNode.getData()).getRun().getId());
-                    } else {
-                        rsmIdsToGetRunIdsFor.add(rsmId);
-                    }
-                }
-                _samplesAnalysisBySample.put(sampleName, splAnalysisNames);
-            } //End go through group's sample
-
-            Map<String, Object> biologicalGroupParams = new HashMap<>();
-            biologicalGroupParams.put("number", grpNumber++);
-            biologicalGroupParams.put("name", grpName);
-            biologicalGroupParams.put("sample_numbers", splNumbers);
-            _biologicalGroupList.add(biologicalGroupParams);
-
-        }// End go through groups
-
-        //Read Run IDs for not found run Ids
-        if(!rsmIdsToGetRunIdsFor.isEmpty())
-            _runIdByRSMId.putAll(getRunIdForRSMs(rsmIdsToGetRunIdsFor));
-
-        if (errorMsg != null) {
-            throw new IllegalAccessException(errorMsg);
-        }
-
-        if (grpNumber > 2) {
-            ratioDenominatorGrp = 2; //VD TODO :  Comment gerer les ratois ?
-        }
-        Map<String, Object> ratioParams = new HashMap<>();
-        ratioParams.put("number", 1);
-        ratioParams.put("numerator_group_number", ratioNumeratorGrp);
-        ratioParams.put("denominator_group_number", ratioDenominatorGrp);
-        List ratioParamsList = new ArrayList();
-        ratioParamsList.add(ratioParams);
-
-        Map<String, Object> groupSetupParams = new HashMap<>();
-        groupSetupParams.put("number", 1);
-        groupSetupParams.put("name", m_finalXICDesignNode.getData().getName());
-        groupSetupParams.put("biological_groups", _biologicalGroupList);
-        groupSetupParams.put("ratio_definitions", ratioParamsList);
-
-        ArrayList groupSetupParamsList = new ArrayList();
-        groupSetupParamsList.add(groupSetupParams);
-        experimentalDesignParams.put("group_setups", groupSetupParamsList);
-
-        List biologicalSampleList = new ArrayList();
-        List quantChanneList = new ArrayList();
-
-        List<Integer> samplesNbrList = new ArrayList(splNameByNbr.keySet());      
-        Collections.sort(samplesNbrList);
-        Iterator<Integer> samplesNbrIt = samplesNbrList.iterator();
-        while (samplesNbrIt.hasNext()) {
-            Integer nextSplNbr = samplesNbrIt.next();
-            String nextSpl = splNameByNbr.get(nextSplNbr);
-
-            Map<String, Object> biologicalSampleParams = new HashMap<>();
-            biologicalSampleParams.put("number", nextSplNbr);
-            biologicalSampleParams.put("name", nextSpl);
-
-            biologicalSampleList.add(biologicalSampleParams);
-            
-            List<String> splAnalysis = _samplesAnalysisBySample.get(nextSpl);
-            for (String nextSplAnalysis : splAnalysis) {
-                Map<String, Object> quantChannelParams = new HashMap<>();
-                quantChannelParams.put("number", splAnalysisNumber++);
-                quantChannelParams.put("sample_number", nextSplNbr);
-                quantChannelParams.put("name", nextSplAnalysis);
-                quantChannelParams.put("ident_result_summary_id", _rsmIdBySampleAnalysis.get(nextSplAnalysis));
-                quantChannelParams.put("run_id", _runIdByRSMId.get(_rsmIdBySampleAnalysis.get(nextSplAnalysis)));
-                quantChanneList.add(quantChannelParams);
-            }
-
-        } // End go through samples
-        experimentalDesignParams.put("biological_samples", biologicalSampleList);
-
-        List masterQuantChannelsList = new ArrayList();
-        Map<String, Object> masterQuantChannelParams = new HashMap<>();
-        masterQuantChannelParams.put("number", 1);
-        masterQuantChannelParams.put("name", m_finalXICDesignNode.getData().getName());
-        masterQuantChannelParams.put("quant_channels", quantChanneList);
-        if (m_refDataset != null) {
-            masterQuantChannelParams.put("ident_dataset_id", m_refDataset.getId());
-            masterQuantChannelParams.put("ident_result_summary_id", m_refDataset.getResultSummaryId());
-        }
-        masterQuantChannelsList.add(masterQuantChannelParams);
-
-        experimentalDesignParams.put("master_quant_channels", masterQuantChannelsList);
-
+        Map<String, Object> experimentalDesignParams = XICDesignTree.toExperimentalDesignParameters(m_finalXICDesignNode, m_refDataset, m_refResultSummaryId);
         return experimentalDesignParams;
     }
-
-    /*"quantitation_config": {
-     "extraction_params": {
-     "moz_tol": "5",
-     "moz_tol_unit": "PPM"
-     },
-     "clustering_params": {
-     "moz_tol": "5",
-     "moz_tol_unit": "PPM",
-     "time_tol": "15",
-     "time_computation": "MOST_INTENSE",
-     "intensity_computation": "MOST_INTENSE"
-     },
-     "aln_method_name": "ITERATIVE",
-     "aln_params": {
-     "mass_interval": "20000",
-     "max_iterations": "3",
-     "smoothing_method_name": "TIME_WINDOW",
-     "smoothing_params": {
-     "window_size": "200",
-     "window_overlap": "20",
-     "min_window_landmarks": "50"
-     },
-     "ft_mapping_params": {
-     "moz_tol": "5",
-     "moz_tol_unit": "PPM",
-     "time_tol": "600"
-     }
-     },
-     "ft_filter": {
-     "name": "INTENSITY",
-     "operator": "GT",
-     "value": "0"
-     },
-     "ft_mapping_params": {
-     "moz_tol": "10",
-     "moz_tol_unit": "PPM",
-     "time_tol": "120"
-     },
-     "normalization_method": "MEDIAN_RATIO"
-     }*/
+    
     public Map<String, Object> getQuantiParameters() {
-        
         return DefineQuantParamsPanel.getDefineQuantPanel().getParamsPanel().getQuantParams();
-
     }
 
     @Override
@@ -540,14 +328,8 @@ public class CreateXICDialog extends DefaultDialog {
 
         if (m_step == STEP_PANEL_CREATE_XIC_DESIGN) {
 
-            if (m_duplicates == null) {
-                m_duplicates = new HashMap<>();
-            } else {
-                m_duplicates.clear();
-            }
-
             //VDS: Can't checkDesignStructure and checkBiologicalGroupName be merged !! 
-            if ((!checkDesignStructure(m_finalXICDesignNode)) || (!checkBiologicalGroupName(m_finalXICDesignNode))) {
+            if ((!checkDesignStructure(m_finalXICDesignNode, new HashSet<>())) || (!checkBiologicalGroupName(m_finalXICDesignNode))) {
                 return false;
             }
 
@@ -611,7 +393,8 @@ public class CreateXICDialog extends DefaultDialog {
             // Save Parameters  
             ParameterList parameterList = DefineQuantParamsPanel.getDefineQuantPanel().getParamsPanel().getParameterList();
             parameterList.saveParameters(filePreferences);
-
+            filePreferences.putBoolean(AbstractGenericQuantParamsPanel.XIC_SIMPLIFIED_PARAMS, DefineQuantParamsPanel.getDefineQuantPanel().getParamsPanel().isSimplifiedPanel());
+            filePreferences.put(AbstractGenericQuantParamsPanel.XIC_PARAMS_VERSION_KEY, DefineQuantParamsPanel.getDefineQuantPanel().getParamsVersion());
             SettingsUtils.addSettingsPath(SETTINGS_KEY, f.getAbsolutePath());
             SettingsUtils.writeDefaultDirectory(SETTINGS_KEY, f.getParent());
         }
@@ -634,10 +417,19 @@ public class CreateXICDialog extends DefaultDialog {
                 try {
                     File settingsFile = settingsDialog.getSelectedFile();
                     FilePreferences filePreferences = new FilePreferences(settingsFile, null, "");
-
+                    if(Arrays.asList(filePreferences.keys()).contains(AbstractDefineQuantParamsPanel.XIC_SIMPLIFIED_PARAMS)){
+                        boolean isSimplified = filePreferences.getBoolean(AbstractDefineQuantParamsPanel.XIC_SIMPLIFIED_PARAMS, true);
+                        DefineQuantParamsPanel.getDefineQuantPanel().setIsSimplifiedPanel(isSimplified);                        
+                    }
+                    String version = filePreferences.get(AbstractGenericQuantParamsPanel.XIC_PARAMS_VERSION_KEY, "1.0");
+                    String panelVersion = DefineQuantParamsPanel.getDefineQuantPanel().getParamsVersion();
+                    if(!version.equals(panelVersion)){
+                        String msg = "Can't load "+version+" quantitation parameters to "+panelVersion+" one. All parameters may not have been taken into account !";
+                        JOptionPane.showMessageDialog(this, msg, "Load XIC parameters error",JOptionPane.ERROR_MESSAGE);
+                    }
                     DefineQuantParamsPanel.getDefineQuantPanel().getParamsPanel().loadParameters(filePreferences);
 
-                } catch (Exception e) {
+                } catch (HeadlessException | BackingStoreException e) {
                     LoggerFactory.getLogger("ProlineStudio.ResultExplorer").error("Parsing of User Settings File Failed", e);
                     setStatus(true, "Parsing of your Settings File failed");
                 }
@@ -652,7 +444,7 @@ public class CreateXICDialog extends DefaultDialog {
         if (m_step == STEP_PANEL_DEFINE_RAW_FILES) {
 
             m_selectRawFilePanel.pruneDesignTree();
-            displayDesignTree(m_finalXICDesignNode);
+            displayExperimentalDesignTree(m_finalXICDesignNode);
 
             return false;
         } else if (m_step == STEP_PANEL_DEFINE_XIC_PARAMS) {
@@ -781,7 +573,7 @@ public class CreateXICDialog extends DefaultDialog {
         }
     }
 
-    private boolean checkDesignStructure(AbstractNode parentNode) {
+    private boolean checkDesignStructure(AbstractNode parentNode, Set<String> duplicates) {
         AbstractNode.NodeTypes type = parentNode.getType();
 
         switch (type) {
@@ -805,11 +597,11 @@ public class CreateXICDialog extends DefaultDialog {
                 break;
             case BIOLOGICAL_SAMPLE_ANALYSIS:
                 if (parentNode.isLeaf()) {
-                    if (m_duplicates.containsKey(parentNode.toString())) {
+                    if (duplicates.contains(parentNode.toString())) {
                         showErrorOnNode(parentNode, "Biological Sample Analysis is a duplicate. Please rename using right click!");
                         return false;
                     } else {
-                        m_duplicates.put(parentNode.toString(), (XICBiologicalSampleAnalysisNode) parentNode);
+                        duplicates.add(parentNode.toString());
                         return true;
                     }
                 }
@@ -820,7 +612,7 @@ public class CreateXICDialog extends DefaultDialog {
         //Iterate over Groups
         while (children.hasMoreElements()) {
             AbstractNode rsmNode = (AbstractNode) children.nextElement();
-            if (!checkDesignStructure(rsmNode)) {
+            if (!checkDesignStructure(rsmNode, duplicates)) {
                 return false;
             }
         }
@@ -904,12 +696,57 @@ public class CreateXICDialog extends DefaultDialog {
         return true;
     }
 
-    public void copyClonedDesignTree(DDataset dataset) {
-        XICDesignTree.setExpDesign(dataset, (AbstractNode) m_designTree.getModel().getRoot(), m_designTree, false, false);
-        m_designTree.renameXicTitle(dataset.getName() + "-Copy");
-
-        try {
-            DefineQuantParamsPanel.getDefineQuantPanel().getParamsPanel().setQuantParams(dataset.getQuantProcessingConfigAsMap());
+    /**
+     * 
+     * XIC Dialog params should be set before :
+     * - selectionTree using setSelectableIdentTree
+     * - parentDS : reference DS used for XIC using setReferenceIdentDataset
+     * 
+     */
+    public void copyClonedDesignTree(DDataset xicDataset2Clone) {
+        AbstractNode rootNode = (AbstractNode) m_designTree.getModel().getRoot();
+        XICDesignTree.displayExperimentalDesign(xicDataset2Clone, rootNode, m_designTree, false, false, false);
+        m_designTree.renameXicTitle(xicDataset2Clone.getName() + "-Copy");
+        if(rootNode.getChildCount()>0){
+            AbstractNode firstChildNode = (AbstractNode) rootNode.getChildAt(0);
+            if(XICReferenceRSMNode.class.isInstance(firstChildNode)){
+                if(((XICReferenceRSMNode)firstChildNode).isRefDatasetIncorrect()){
+                    //Save previous RSM associated to reference dataset to use the same one !
+                    m_refResultSummaryId = xicDataset2Clone.getMasterQuantitationChannels().get(0).getIdentResultSummaryId();
+                    CreateXICDesignPanel.getPanel().updatePanel();
+                }
+            }
+        }
+        
+        try {            
+            //QUANTV2: uncomment until END V2 to use V2
+            DefineQuantParamsPanel.setUsePanelV2(true);
+            Map<String, Object> quantConfig = xicDataset2Clone.getQuantProcessingConfigAsMap();
+            if(quantConfig.containsKey("config_version") && quantConfig.get("config_version").equals("2.0")) { //TODO to create V2 panel even if clone from V1
+                DefineQuantParamsPanel.getDefineQuantPanel().setIsSimplifiedPanel(false); //to view all config 
+                DefineQuantParamsPanel.getDefineQuantPanel().getParamsPanel().setQuantParams(quantConfig);
+            } else {
+                String msg = "Can't clone old quantitation parameters to new one. Default parameters will be used !!";
+                JOptionPane.showMessageDialog(this, msg, "Clone Error",JOptionPane.ERROR_MESSAGE);
+                ParameterList parameterList = DefineQuantParamsPanel.getDefineQuantPanel().getParamsPanel().getParameterList();
+                parameterList.initDefaults();
+                DefineQuantParamsPanel.getDefineQuantPanel().setIsSimplifiedPanel(true);
+            }
+            //END V2
+            //QUANTV2 : uncomment until END V1 to use V1
+//            DefineQuantParamsPanel.setUsePanelV2(false);
+//            Map<String, Object> quantConfig = xicDataset2Clone.getQuantProcessingConfigAsMap();
+//            if(quantConfig.containsKey("config_version")) { 
+//                String msg = "Can't clone new quantitation parameters to old one. Default parameters will be used !!";
+//                JOptionPane.showMessageDialog(this, msg, "Clone Error",JOptionPane.ERROR_MESSAGE);   
+//                DefineQuantParamsPanel.getDefineQuantPanel().setIsSimplifiedPanel(true);
+//                ParameterList parameterList = DefineQuantParamsPanel.getDefineQuantPanel().getParamsPanel().getParameterList();
+//                parameterList.initDefaults();                
+//            } else {
+//                DefineQuantParamsPanel.getDefineQuantPanel().setIsSimplifiedPanel(false); //to view all config 
+//                DefineQuantParamsPanel.getDefineQuantPanel().getParamsPanel().setQuantParams(quantConfig);
+//            }
+//            //END V1
         } catch (Exception ex) {
             LoggerFactory.getLogger("ProlineStudio.ResultExplorer").error("Error while setting Quant Param ", ex);
             StudioExceptions.notify("An error occured while cloning XIC parameters", ex);

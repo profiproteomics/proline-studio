@@ -348,7 +348,6 @@ public class PeptideInstanceTableModel extends LazyTableModel implements GlobalT
     
     public int findRow(long peptideInstanceId) {
 
-        
         int nb = m_peptideInstances.length;
         for (int i = 0; i < nb; i++) {
             if (peptideInstanceId == m_peptideInstances[i].getId()) {
@@ -381,7 +380,6 @@ public class PeptideInstanceTableModel extends LazyTableModel implements GlobalT
                 peptideMatchIds.set(iCur++, ps.getId());
             }
         }
-
 
     }
     
@@ -500,8 +498,6 @@ public class PeptideInstanceTableModel extends LazyTableModel implements GlobalT
     public PlotInformation getPlotInformation() {
         return null;
     }
-
-
 
     @Override
     public PlotType getBestPlotType() {

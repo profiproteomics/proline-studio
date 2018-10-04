@@ -123,12 +123,12 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
         DataBoxRsetPeptideSpectrumValues(39),
         DataBoxMSQueriesForRset(40), 
         DataBoxRsetPSMForMsQuery(41),
-        DataBoxPTMProteinSite(42),
+        
         DataBoxDataAnalyzerResults(43),
         DataBoxImage(44),
         DataBoxSystemTasks(45),
         DataBoxFrozenCopy(46),
-        DataBoxPTMProteinSite_V2(47),
+        DataBoxPTMProteinSite(47),
         DataBoxPTMSitePeptides(48),
         DataBoxPTMSitePepMatches(49),
         DataBoxXICPTMProteinSite(50),
@@ -223,8 +223,6 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
                     return new DataboxRsetPSMForMsQuery();
                 case DataBoxPTMProteinSite:
                     return new DataBoxPTMProteinSite();
-                case DataBoxPTMProteinSite_V2:
-                    return new DataBoxPTMProteinSite_V2();
                 case DataBoxDataAnalyzerResults:
                     return new DataBoxDataAnalyzerResults();
                 case DataBoxImage:

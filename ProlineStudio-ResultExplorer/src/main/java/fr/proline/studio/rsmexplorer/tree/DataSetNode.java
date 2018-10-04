@@ -11,7 +11,6 @@ import fr.proline.studio.dam.data.AbstractData;
 import fr.proline.studio.dam.data.DataSetData;
 import fr.proline.studio.dam.tasks.AbstractDatabaseTask.Priority;
 import fr.proline.studio.dam.tasks.*;
-import fr.proline.studio.rsmexplorer.actions.identification.PropertiesAction;
 import fr.proline.studio.utils.IconManager;
 import java.util.Enumeration;
 import javax.swing.ImageIcon;
@@ -73,18 +72,28 @@ public class DataSetNode extends AbstractNode {
                 //JPM.TODO : according to aggregateType type :icon must be different
                 
                 if (dataset != null) {
-                    if (dataset.getResultSummaryId() != null) {
+//                    if (dataset.getResultSummaryId() != null) {
+                    boolean rsmDefined = dataset.getResultSummaryId() != null;
                         MergeInformation mergeInfo = ((DataSetData) getData()).getDataset().getMergeInformation();
-                        if (mergeInfo.compareTo(MergeInformation.MERGE_IDENTIFICATION_SUMMARY) == 0) {
-                            return getIcon(IconManager.IconType.DATASET_RSM_MERGED);
-                        } else {
-                            return getIcon(IconManager.IconType.DATASET_RSM_RSET_MERGED);
+                    switch(mergeInfo){
+                        case MERGE_IDENTIFICATION_SUMMARY_AGG: 
+                            return getIcon(IconManager.IconType.DATASET_RSM_MERGED_AGG);
+                        case MERGE_IDENTIFICATION_SUMMARY_UNION:
+                            return getIcon(IconManager.IconType.DATASET_RSM_MERGED_UNION);
+                        case MERGE_SEARCH_RESULT_AGG:
+                            if(rsmDefined)
+                                return getIcon(IconManager.IconType.DATASET_RSM_RSET_MERGED_AGG);
+                            else
+                                return getIcon(IconManager.IconType.DATASET_RSET_MERGED_AGG);
+                        case MERGE_SEARCH_RESULT_UNION:
+                            if(rsmDefined)
+                                return getIcon(IconManager.IconType.DATASET_RSM_RSET_MERGED_UNION);
+                            else
+                                return getIcon(IconManager.IconType.DATASET_RSET_MERGED_UNION);
+                        case MERGE_UNKNOW:
+                            return getIcon(IconManager.IconType.DATASET);                                                           
                         }
                     }
-                    if (dataset.getResultSetId() != null) {
-                        return getIcon(IconManager.IconType.DATASET_RSET_MERGED);
-                    }
-                }
                 
                 return getIcon(IconManager.IconType.DATASET);
             case TRASH:
@@ -175,7 +184,7 @@ public class DataSetNode extends AbstractNode {
     
     public boolean hasResultSet() {
         DDataset dataSet = ((DataSetData) getData()).getDataset();
-        return (dataSet.getResultSetId() != null) || (dataSet.isQuantiXIC());
+        return (dataSet != null) && ((dataSet.getResultSetId() != null) || (dataSet.isQuantiXIC()));
     }
     
     public Long getResultSetId() {
@@ -341,14 +350,6 @@ public class DataSetNode extends AbstractNode {
     
     
     @Override
-    public Sheet createSheet() {
-        
-        DDataset dataset = getDataset();
-        return PropertiesAction.createSheet(dataset);
-        
-    }
-    
-    @Override
     public AbstractNode copyNode() {
         if (isTrash()) {
             return null;
@@ -415,5 +416,10 @@ public class DataSetNode extends AbstractNode {
         }else {
             return null;
         }
+    }
+
+    @Override
+    public Sheet createSheet() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

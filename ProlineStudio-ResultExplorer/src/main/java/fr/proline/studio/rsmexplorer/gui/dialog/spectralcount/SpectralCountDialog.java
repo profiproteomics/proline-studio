@@ -82,7 +82,7 @@ public class SpectralCountDialog extends DefaultDialog {
             }
 
             TreeSelectionPanel treeSelectionPanel = TreeSelectionPanel.getTreeSelectionPanel(m_tree, "<html><b>Step 2:</b> Select Identification Summaries.</html>", "Select the Identification Summaries for which Spectral Count will be calculated. The common list of protein sets and peptide specificity will be calculated at parent level, from which spectral count has been run.");
-            replaceInternaleComponent(treeSelectionPanel);
+            replaceInternalComponent(treeSelectionPanel);
 
             revalidate();
             repaint();
@@ -114,7 +114,7 @@ public class SpectralCountDialog extends DefaultDialog {
 
             TreeSelectionPanel treeSelectionPanel = TreeSelectionPanel.getTreeSelectionPanel(m_tree, "<html><b>Step 3:</b> Select Weight Computation Identification Summaries.</html>", "Select Datasets (and associated identification summaries) in the hierarchy where shared PSM weight will be defined. The calculated weight will then be applied to Identification Summaries previously selected, the nearest parent will be used as reference for PSM weight.");
 
-            replaceInternaleComponent(treeSelectionPanel);
+            replaceInternalComponent(treeSelectionPanel);
 
             revalidate();
             repaint();

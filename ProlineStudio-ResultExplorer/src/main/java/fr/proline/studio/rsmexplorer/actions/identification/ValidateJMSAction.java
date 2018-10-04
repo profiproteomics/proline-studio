@@ -331,7 +331,7 @@ public class ValidateJMSAction extends AbstractRSMAction {
             Dataset.DatasetType datasetType = datasetData.getDatasetType();
             if ( Dataset.DatasetType.AGGREGATE.equals(datasetType) && dataSetNode.hasResultSummary()) {
                 DDataset.MergeInformation mergeInfo = datasetData.getDataset().getMergeInformation();
-                if (mergeInfo.compareTo(DDataset.MergeInformation.MERGE_IDENTIFICATION_SUMMARY) == 0) {
+                if( (mergeInfo.compareTo(DDataset.MergeInformation.MERGE_IDENTIFICATION_SUMMARY_AGG) == 0) || (mergeInfo.compareTo(DDataset.MergeInformation.MERGE_IDENTIFICATION_SUMMARY_UNION) == 0)) {
                     setEnabled(false);
                     return;
                 }

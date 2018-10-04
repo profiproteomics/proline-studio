@@ -15,7 +15,9 @@ import fr.proline.studio.dam.tasks.xic.DatabaseLoadXicMasterQuantTask;
 import fr.proline.studio.dpm.AccessJMSManagerThread;
 import fr.proline.studio.dpm.task.jms.AbstractJMSCallback;
 import fr.proline.studio.dpm.task.jms.GenerateSpectrumMatchTask;
+import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
+import fr.proline.studio.rsmexplorer.gui.dialog.GenerateSpectrumMarchesDialog;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
@@ -23,6 +25,7 @@ import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
 import fr.proline.studio.rsmexplorer.tree.quantitation.QuantitationTree;
 import javax.swing.tree.DefaultTreeModel;
 import org.openide.util.NbBundle;
+import org.openide.windows.WindowManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,34 +61,22 @@ public class GenerateSpectrumMatchesJMSAction extends AbstractRSMAction {
         final DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
         
         int nbNodes = selectedNodes.length;
-        for (int i = 0; i < nbNodes; i++) {
-            final DataSetNode node = (DataSetNode) selectedNodes[i];
-            node.setIsChanging(true);
-            treeModel.nodeChanged(node);
-            
-            AbstractJMSCallback callback = new AbstractJMSCallback() {
+//        FragmentationRuleSet currentFRS = null;
+//        if(nbNodes ==1){
+//            DataSetNode node = (DataSetNode) selectedNodes[i];
+//        }
+        GenerateSpectrumMarchesDialog dialog = new GenerateSpectrumMarchesDialog(WindowManager.getDefault().getMainWindow());
+        dialog.setLocation(x, y);
+        dialog.setVisible(true);
+        if (dialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {
+            Long frsId = dialog.getFragmentationRuleSetId();
+            Boolean forceGenerate = dialog.getDoForceGenerate();
+            for (int i = 0; i < nbNodes; i++) {
+                final DataSetNode node = (DataSetNode) selectedNodes[i];
+                node.setIsChanging(true);
+                treeModel.nodeChanged(node);
 
-                @Override
-                public boolean mustBeCalledInAWT() {
-                    return true;
-                }
-
-                @Override
-                public void run(boolean success) {
-                    node.setIsChanging(false);
-                    treeModel.nodeChanged(node);
-                }
-            };
-            
-            final DDataset dataset = node.getDataset();
-            Long projectId = dataset.getProject().getId();
-             Long resultSummaryId = dataset.getResultSummaryId();
-            // TODO : if resultSummaryId != null open a dialog to choose between generate spectrum matches for the whole resultSet or only RSM
-            Long resultSetId = dataset.getResultSetId();
-            if ((resultSetId == null) && (dataset.isQuantiXIC())) { // can happen for XIC
-                // we read more info with resultSetId
-
-                AbstractDatabaseCallback rsetIdCallback = new AbstractDatabaseCallback() {
+                AbstractJMSCallback callback = new AbstractJMSCallback() {
 
                     @Override
                     public boolean mustBeCalledInAWT() {
@@ -93,25 +84,46 @@ public class GenerateSpectrumMatchesJMSAction extends AbstractRSMAction {
                     }
 
                     @Override
-                    public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
-                        if (success) {
-                            GenerateSpectrumMatchTask task = new GenerateSpectrumMatchTask(callback, dataset.getName(), projectId, dataset.getResultSetId(), resultSummaryId, null);
-                            AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
-                        }
+                    public void run(boolean success) {
+                        node.setIsChanging(false);
+                        treeModel.nodeChanged(node);
                     }
                 };
 
-                DatabaseLoadXicMasterQuantTask task = new DatabaseLoadXicMasterQuantTask(rsetIdCallback);
-                task.initLoadQuantChannels(dataset.getProject().getId(), dataset);
-                AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
+                final DDataset dataset = node.getDataset();
+                Long projectId = dataset.getProject().getId();
+                 Long resultSummaryId = dataset.getResultSummaryId();
+                // TODO : if resultSummaryId != null open a dialog to choose between generate spectrum matches for the whole resultSet or only RSM
+                Long resultSetId = dataset.getResultSetId();
+                if ((resultSetId == null) && (dataset.isQuantiXIC())) { // can happen for XIC
+                    // we read more info with resultSetId
 
-            } else {
-                GenerateSpectrumMatchTask task = new GenerateSpectrumMatchTask(callback, dataset.getName(), projectId, resultSetId, resultSummaryId, null);
-                AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
+                    AbstractDatabaseCallback rsetIdCallback = new AbstractDatabaseCallback() {
+
+                        @Override
+                        public boolean mustBeCalledInAWT() {
+                            return true;
+                        }
+
+                        @Override
+                        public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
+                            if (success) {
+                                GenerateSpectrumMatchTask task = new GenerateSpectrumMatchTask(callback, dataset.getName(), projectId, dataset.getResultSetId(), resultSummaryId, null, frsId, forceGenerate);
+                                AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
+                            }
+                        }
+                    };
+
+                    DatabaseLoadXicMasterQuantTask task = new DatabaseLoadXicMasterQuantTask(rsetIdCallback);
+                    task.initLoadQuantChannels(dataset.getProject().getId(), dataset);
+                    AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
+
+                } else {
+                    GenerateSpectrumMatchTask task = new GenerateSpectrumMatchTask(callback, dataset.getName(), projectId, resultSetId, resultSummaryId, null, frsId, forceGenerate);
+                    AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
+                }
             }
         }
-        
-        
     }
 
 

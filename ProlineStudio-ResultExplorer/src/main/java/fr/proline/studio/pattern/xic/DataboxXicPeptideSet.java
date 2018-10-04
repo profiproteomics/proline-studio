@@ -17,13 +17,13 @@ import fr.proline.studio.dam.tasks.xic.DatabaseLoadXicMasterQuantTask;
 import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.GroupParameter;
-import fr.proline.studio.rsmexplorer.gui.xic.PeptidePanel;
 import fr.proline.studio.rsmexplorer.gui.xic.QuantChannelInfo;
 import fr.proline.studio.rsmexplorer.gui.xic.XicPeptidePanel;
 import fr.proline.studio.types.XicMode;
 import java.util.ArrayList;
 import java.util.List;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
+import fr.proline.studio.rsmexplorer.gui.xic.PeptideTableModel;
 
 /**
  *
@@ -249,10 +249,7 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
     public Object getData(boolean getArray, Class parameterType, boolean isList) {
         if (parameterType != null && isList) {
             if (parameterType.equals(ExtendedTableModelInterface.class)) {
-                return getCompareDataInterfaceList();
-            }
-            if (parameterType.equals(CrossSelectionInterface.class)) {
-                return getCrossSelectionInterfaceList();
+                return getTableModelInterfaceList();
             }
         }
         return super.getData(getArray, parameterType, isList);
@@ -263,36 +260,18 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
         return m_dataset.getName() + " " + getTypeName();
     }
 
-    private List<ExtendedTableModelInterface> getCompareDataInterfaceList() {
-        List<ExtendedTableModelInterface> listCDI = new ArrayList();
-        List<PeptidePanel> listPeptidePanel = getPeptideTableModelList();
-        for (PeptidePanel peptidePanel : listPeptidePanel) {
-            listCDI.add(peptidePanel.getGlobalTableModelInterface());
-        }
-        return listCDI;
-    }
-
-    private List<CrossSelectionInterface> getCrossSelectionInterfaceList() {
-        List<CrossSelectionInterface> listCSI = new ArrayList();
-        List<PeptidePanel> listPeptidePanel = getPeptideTableModelList();
-        for (PeptidePanel peptidePanel : listPeptidePanel) {
-            listCSI.add(peptidePanel.getCrossSelectionInterface());
-        }
-        return listCSI;
-    }
-
-    private List<PeptidePanel> getPeptideTableModelList() {
-        List<PeptidePanel> list = new ArrayList();
+    private List<ExtendedTableModelInterface> getTableModelInterfaceList() {
+        List<ExtendedTableModelInterface> list = new ArrayList();
         if (m_masterQuantPeptideList != null){
-            // one table model per row
             for (DMasterQuantPeptide quantPeptide : m_masterQuantPeptideList) {
-                PeptidePanel aPepPanel = new PeptidePanel();
-                aPepPanel.setData(m_quantChannelInfo.getQuantChannels(), quantPeptide, m_isXICMode);
-                list.add(aPepPanel);
+                PeptideTableModel peptideTableModel  = new PeptideTableModel(null);
+                peptideTableModel.setData( m_quantChannelInfo.getQuantChannels(), quantPeptide, m_isXICMode);
+                list.add(peptideTableModel);
             }
         }
         return list;
     }
+
     
     @Override
     public Class[] getImportantInParameterClass() {
@@ -319,3 +298,5 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
         return null;
     }
 }
+
+

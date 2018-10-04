@@ -53,8 +53,8 @@ public class RsmPeptidesPanel extends HourglassPanel implements DataBoxPanelInte
     private JScrollPane m_scrollPane;
     private MarkerContainerPanel m_markerContainerPanel;
     private JButton m_decoyButton;
-    private SearchToggleButton m_searchToggleButton;
     private InfoToggleButton m_infoToggleButton;
+    private SearchToggleButton m_searchToggleButton;
 
     private SettingsButton m_settingsButton;
     private FilterButton m_filterButton;
@@ -64,7 +64,6 @@ public class RsmPeptidesPanel extends HourglassPanel implements DataBoxPanelInte
     
     public RsmPeptidesPanel() {
         initComponents();
-
     }
 
     private void initComponents() {
@@ -126,8 +125,6 @@ public class RsmPeptidesPanel extends HourglassPanel implements DataBoxPanelInte
         m_decoyButton = new JButton(IconManager.getIcon(IconManager.IconType.DATASET_RSM_DECOY));
         m_decoyButton.setToolTipText("Display Decoy Data");
         m_decoyButton.setEnabled(false);
-
-
 
         m_decoyButton.addActionListener(new ActionListener() {
 
@@ -225,7 +222,6 @@ public class RsmPeptidesPanel extends HourglassPanel implements DataBoxPanelInte
         JToolBar toolbar = initToolbar();
         peptidesPanel.add(toolbar, BorderLayout.WEST);
 
-
         return peptidesPanel;
 
     }
@@ -233,7 +229,6 @@ public class RsmPeptidesPanel extends HourglassPanel implements DataBoxPanelInte
     private JPanel createInternalPanel() {
 
         JPanel internalPanel = new JPanel();
-
         internalPanel.setLayout(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();
         c.anchor = GridBagConstraints.NORTHWEST;
@@ -266,8 +261,6 @@ public class RsmPeptidesPanel extends HourglassPanel implements DataBoxPanelInte
         c.weighty = 1;
         c.gridwidth = 3;
         internalPanel.add(m_markerContainerPanel, c);
-
-
 
         return internalPanel;
     }
@@ -336,23 +329,18 @@ public class RsmPeptidesPanel extends HourglassPanel implements DataBoxPanelInte
         m_infoToggleButton.updateInfo();
 
         if (finished) {
-            ((PeptideInstanceTable) m_peptideInstanceTable).setSortable(true);
+            m_peptideInstanceTable.setSortable(true);
         }
     }
 
     public void dataUpdated(SubTask subTask, boolean finished) {
-
-        ((PeptideInstanceTable) m_peptideInstanceTable).dataUpdated(subTask, finished);
-
-
+        m_peptideInstanceTable.dataUpdated(subTask, finished);
     }
 
     public PeptideInstance getSelectedPeptideInstance() {
 
-        PeptideInstanceTable table = ((PeptideInstanceTable) m_peptideInstanceTable);
-
         // Retrieve Selected Row
-        int selectedRow = table.getSelectedRow();
+        int selectedRow = m_peptideInstanceTable.getSelectedRow();
 
         // nothing selected
         if (selectedRow == -1) {
@@ -361,9 +349,9 @@ public class RsmPeptidesPanel extends HourglassPanel implements DataBoxPanelInte
         }
 
         // convert according to the sorting
-        selectedRow = table.convertRowIndexToModel(selectedRow);
+        selectedRow = m_peptideInstanceTable.convertRowIndexToModel(selectedRow);
 
-        CompoundTableModel compoundTableModel = ((CompoundTableModel)table.getModel());
+        CompoundTableModel compoundTableModel = ((CompoundTableModel)m_peptideInstanceTable.getModel());
         selectedRow = compoundTableModel.convertCompoundRowToBaseModelRow(selectedRow);
 
         // Retrieve ProteinSet selected
@@ -373,15 +361,9 @@ public class RsmPeptidesPanel extends HourglassPanel implements DataBoxPanelInte
 
     private class PeptideInstanceTable extends LazyTable implements InfoInterface {
 
-        /**
-         * Called whenever the value of the selection changes.
-         *
-         * @param e the event that characterizes the change.
-         */
         public PeptideInstanceTable() {
             super(m_scrollPane.getVerticalScrollBar());
             //displayColumnAsPercentage(PeptideInstanceTableModel.COLTYPE_PEPTIDE_SCORE);
-
         }
 
 
@@ -390,22 +372,13 @@ public class RsmPeptidesPanel extends HourglassPanel implements DataBoxPanelInte
             getModel().addTableModelListener(l);
         }
         
-        /**
-         * Called whenever the value of the selection changes.
-         *
-         * @param e the event that characterizes the change.
-         */
         @Override
         public void valueChanged(ListSelectionEvent e) {
 
             super.valueChanged(e);
-
             if (selectionWillBeRestored) {
                 return;
             }
-
-
-
             m_dataBox.propagateDataChanged(PeptideInstance.class);
             m_dataBox.propagateDataChanged(DPeptideMatch.class);
 

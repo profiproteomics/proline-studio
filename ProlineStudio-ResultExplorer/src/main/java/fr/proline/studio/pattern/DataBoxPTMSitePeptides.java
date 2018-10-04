@@ -6,7 +6,7 @@ import fr.proline.core.orm.msi.dto.DPeptideInstance;
 import fr.proline.studio.extendedtablemodel.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
-import fr.proline.studio.dam.tasks.DatabasePTMProteinSiteTask_V2;
+import fr.proline.studio.dam.tasks.DatabasePTMSitesTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dam.tasks.data.PTMSite;
 import fr.proline.studio.rsmexplorer.gui.PeptidesPTMSitePanel;
@@ -65,8 +65,8 @@ public class DataBoxPTMSitePeptides extends AbstractDataBox {
             return;
         }
          
-        m_logger.info("DATA Changed : Update PTMSite Peptide WINDOWS. " + ptmSite.toString()+" data loaded " + ptmSite.isAllPeptideMatchesLoaded());
-        if(ptmSite.isAllPeptideMatchesLoaded()){
+        m_logger.info("DATA Changed : Update PTMSite Peptide WINDOWS. " + ptmSite.toString()+" data loaded " + ptmSite.isLoaded());
+        if(ptmSite.isLoaded()){
             m_previousTaskId = null;
             ((PeptidesPTMSitePanel) getDataBoxPanelInterface()).setData(ptmSite, null);           
             propagateDataChanged(ExtendedTableModelInterface.class);
@@ -101,7 +101,7 @@ public class DataBoxPTMSitePeptides extends AbstractDataBox {
             }
         };
         
-        DatabasePTMProteinSiteTask_V2 task = new DatabasePTMProteinSiteTask_V2(callback, getProjectId(), rsm, ptmSite);
+        DatabasePTMSitesTask task = new DatabasePTMSitesTask(callback, getProjectId(), rsm, ptmSite);
         Long taskId = task.getId();
         m_logger.info(" Call PTMSite Peptide DatabasePTMProteinSiteTask_V2 task # "+taskId);
         if (m_previousTaskId != null) {

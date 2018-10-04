@@ -18,18 +18,18 @@ import javax.swing.JTabbedPane;
 public class AdminDialog extends DefaultDialog  {
 
     private static AdminDialog m_singletonDialog = null;
+    private Boolean m_viewAsUser = true;
 
-
-    public static AdminDialog getDialog(Window parent) {
-        if (m_singletonDialog == null) {
-            m_singletonDialog = new AdminDialog(parent);
-        }
+    public static AdminDialog getDialog(Window parent, boolean asUser) {
+        if (m_singletonDialog == null || asUser!=m_singletonDialog.m_viewAsUser) {
+            m_singletonDialog = new AdminDialog(parent, asUser);
+        } 
         return m_singletonDialog;
     }
 
-    public AdminDialog(Window parent) {
+    private AdminDialog(Window parent, boolean asUSer) {
         super(parent, Dialog.ModalityType.MODELESS);
-
+        m_viewAsUser = asUSer;
         setTitle("Admin Dialog");
 
         setSize(new Dimension(640, 480));
@@ -54,14 +54,15 @@ public class AdminDialog extends DefaultDialog  {
         JTabbedPane tabbedPane = new JTabbedPane(); 
         
 
-        JPanel userAccountsPanel = new UserAccountsPanel(this);
-        JPanel peaklistSoftwarePanel = new PeaklistSoftwarePanel(this);
-        ProjectsPanel projectsPanel = new ProjectsPanel(this);
-        JPanel instrumentConfigPanel = new InstrumentConfigPanel();
+        JPanel userAccountsPanel = new UserAccountsPanel(this, !m_viewAsUser);
+        JPanel peaklistSoftwarePanel = new PeaklistSoftwarePanel(this, !m_viewAsUser);
+        ProjectsPanel projectsPanel = new ProjectsPanel(this, !m_viewAsUser);
+        JPanel fragmentationRuleSetPanel = new FragmentationRuleSetPanel(this, !m_viewAsUser);
 
         tabbedPane.add("User Accounts", userAccountsPanel);
         tabbedPane.add("Peaklist Softwares", peaklistSoftwarePanel);
         tabbedPane.add("Projects and Databases", projectsPanel);
+        tabbedPane.add("Fragmentation Rule Sets", fragmentationRuleSetPanel);
 
         // JPM.TODO : not done for the moment tabbedPane.add("Instrument Config", instrumentConfigPanel);
         

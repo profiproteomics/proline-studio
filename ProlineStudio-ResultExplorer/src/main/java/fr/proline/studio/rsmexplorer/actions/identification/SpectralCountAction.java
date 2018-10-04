@@ -4,14 +4,13 @@ import fr.proline.core.orm.uds.Aggregation;
 import fr.proline.core.orm.uds.Dataset;
 import fr.proline.core.orm.uds.Project;
 import fr.proline.core.orm.uds.dto.DDataset;
-import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.DatabaseDataManager;
 import fr.proline.studio.dam.data.DataSetData;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
-import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dpm.AccessJMSManagerThread;
 import fr.proline.studio.dpm.task.jms.AbstractJMSCallback;
+import fr.proline.studio.dpm.task.jms.SpectralCountTask;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
 import fr.proline.studio.rsmexplorer.gui.dialog.spectralcount.SpectralCountDialog;
@@ -159,7 +158,7 @@ public class SpectralCountAction extends AbstractRSMAction {
                         }
                     }
                 };
-                fr.proline.studio.dpm.task.jms.SpectralCountTask task = new fr.proline.studio.dpm.task.jms.SpectralCountTask(scCallback, refDatasetNode.getDataset(), datasetList, weightDatasetList, qttDSName, qttDSDescr, _quantiDatasetId);
+                SpectralCountTask task = new SpectralCountTask(scCallback, refDatasetNode.getDataset(), datasetList, weightDatasetList, qttDSName, qttDSDescr, _quantiDatasetId);
                 AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
 
             }

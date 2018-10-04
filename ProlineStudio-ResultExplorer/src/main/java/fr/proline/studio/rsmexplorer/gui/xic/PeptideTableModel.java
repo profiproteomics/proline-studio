@@ -1,5 +1,6 @@
 package fr.proline.studio.rsmexplorer.gui.xic;
 
+import fr.proline.core.orm.msi.Peptide;
 import fr.proline.core.orm.msi.dto.DMasterQuantPeptide;
 import fr.proline.core.orm.msi.dto.DQuantPeptide;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
@@ -10,8 +11,6 @@ import fr.proline.studio.filter.Filter;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
 import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
-import static fr.proline.studio.rsmexplorer.gui.xic.ProteinQuantTableModel.COLTYPE_QC_NAME;
-import static fr.proline.studio.rsmexplorer.gui.xic.ProteinQuantTableModel.COLTYPE_RAW_ABUNDANCE;
 import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
 import fr.proline.studio.table.LazyData;
 import fr.proline.studio.table.LazyTable;
@@ -19,6 +18,7 @@ import fr.proline.studio.table.LazyTableModel;
 import fr.proline.studio.table.TableDefaultRendererManager;
 import fr.proline.studio.table.renderer.BigFloatOrDoubleRenderer;
 import fr.proline.studio.table.renderer.DefaultRightAlignRenderer;
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -218,7 +218,16 @@ public class PeptideTableModel extends LazyTableModel implements GlobalTableMode
     public PlotInformation getPlotInformation() {
         PlotInformation plotInformation = new PlotInformation();
         if (m_quantPeptide.getPeptideInstance() != null && m_quantPeptide.getPeptideInstance().getBestPeptideMatch() != null) {
-            plotInformation.setPlotTitle(m_quantPeptide.getPeptideInstance().getBestPeptideMatch().getPeptide().getSequence());
+            Peptide peptide = m_quantPeptide.getPeptideInstance().getBestPeptideMatch().getPeptide();
+            StringBuilder sb = new StringBuilder(peptide.getSequence());
+            if (peptide.getTransientData().isPeptideReadablePtmStringLoaded() && peptide.getTransientData().getPeptideReadablePtmString() != null) {
+                sb.append(" - ").append(peptide.getTransientData().getPeptideReadablePtmString().getReadablePtmString());
+            }
+            plotInformation.setPlotTitle(sb.toString());
+        }
+        
+        if (m_quantPeptide.getSelectionLevel() < 2) {
+            plotInformation.setPlotColor(Color.LIGHT_GRAY);
         }
         plotInformation.setDrawPoints(true);
         plotInformation.setDrawGap(true);

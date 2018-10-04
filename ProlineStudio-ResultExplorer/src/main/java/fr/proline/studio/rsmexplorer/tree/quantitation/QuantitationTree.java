@@ -1,5 +1,7 @@
 package fr.proline.studio.rsmexplorer.tree.quantitation;
 
+import fr.proline.core.orm.uds.Aggregation;
+import fr.proline.core.orm.uds.Dataset;
 import fr.proline.core.orm.uds.Project;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dam.AccessDatabaseThread;
@@ -25,6 +27,7 @@ import fr.proline.studio.rsmexplorer.actions.identification.GenerateSpectrumMatc
 import fr.proline.studio.rsmexplorer.actions.identification.IdentifyPtmSitesJMSAction;
 import fr.proline.studio.rsmexplorer.actions.identification.RetrieveBioSeqJMSAction;
 import fr.proline.studio.rsmexplorer.actions.xic.AddQuantitationFolderAction;
+import fr.proline.studio.rsmexplorer.actions.xic.AggregateQuantitationsAction;
 import fr.proline.studio.rsmexplorer.actions.xic.ComputeQuantitationProfileAction;
 import fr.proline.studio.rsmexplorer.actions.xic.DisplayExperimentalDesignAction;
 import fr.proline.studio.rsmexplorer.actions.xic.DisplayXICAction;
@@ -172,6 +175,11 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
                 // create the actions
                 m_multiActions = new ArrayList<>(4);  // <--- get in sync
 
+//                AggregateQuantitationsAction aggregateAction = new AggregateQuantitationsAction();
+//                m_multiActions.add(aggregateAction);
+//                
+//                m_multiActions.add(null);  // separator
+                
                 ExportDatasetJMSAction exportDatasetAction = new ExportDatasetJMSAction(AbstractTree.TreeType.TREE_QUANTITATION, true);
                 m_multiActions.add(exportDatasetAction);
                 RetrieveBioSeqJMSAction retrieveBioSeqAction = new RetrieveBioSeqJMSAction(AbstractTree.TreeType.TREE_QUANTITATION);
@@ -794,9 +802,24 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
         m_model.nodeStructureChanged(parentNode);
 
         if (parentNode instanceof DataSetNode && ((DataSetNode) parentNode).isQuantXIC()) {
-            XICDesignTree.setExpDesign(((DataSetNode) parentNode).getDataset(), parentNode, this, false, true);
+            XICDesignTree.displayExperimentalDesign(((DataSetNode) parentNode).getDataset(), parentNode, this, false, true, false);
         }
 
+    }
+
+    public DataSetNode createQuantitationNode(String name) {
+        final DefaultTreeModel treeModel = (DefaultTreeModel) getModel();
+
+        // add node for the quantitation dataset which will be created
+        DataSetData quantitationData = new DataSetData(name, Dataset.DatasetType.QUANTITATION, Aggregation.ChildNature.QUANTITATION_FRACTION);
+        final DataSetNode quantitationNode = new DataSetNode(quantitationData);
+        quantitationNode.setIsChanging(true);
+        AbstractNode rootNode = (AbstractNode) treeModel.getRoot();
+        // before trash
+        treeModel.insertNodeInto(quantitationNode, rootNode, rootNode.getChildCount() - 1);
+        // expand the parent node to display its children
+        expandNodeIfNeeded(rootNode);
+        return quantitationNode;
     }
 
      public void loadDataSet(Long quantiDatasetId, final DataSetNode datasetNode) {
@@ -826,7 +849,7 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
                         public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
                             ((DataSetData) datasetNode.getData()).setDataset(ds);
                             if (datasetNode instanceof DataSetNode && datasetNode.isQuantXIC()) {
-                                XICDesignTree.setExpDesign(datasetNode.getDataset(), datasetNode, tree, false, true);
+                                XICDesignTree.displayExperimentalDesign(datasetNode.getDataset(), datasetNode, tree, false, true, false);
                             }
                             datasetNode.setIsChanging(false);
                             treeModel.nodeChanged(datasetNode);

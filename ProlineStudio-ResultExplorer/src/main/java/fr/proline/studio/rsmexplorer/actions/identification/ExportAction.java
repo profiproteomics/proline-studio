@@ -16,7 +16,8 @@ public class ExportAction extends AbstractRSMAction {
      // Could be ExportXXXAction or ExportXXXJMSAction
     private AbstractRSMAction m_exportDatasetAction; 
     private AbstractRSMAction m_exportPrideAction;
-    private AbstractRSMAction m_exportSpectraAction;
+    private AbstractRSMAction m_exportPeakViewSpectraAction;
+    private AbstractRSMAction m_exportSpectronautSpectraAction;
     private AbstractRSMAction m_exportMzIdentMLAction;
     
     private JMenu m_menu;
@@ -43,8 +44,7 @@ public class ExportAction extends AbstractRSMAction {
             m_exportMzIdentMLAction = null;
         }
         
-        m_exportSpectraAction = new ExportSpectraListJMSAction(m_treeType);
-
+        
         JMenuItem exportDatasetItem = new JMenuItem(m_exportDatasetAction);
         m_menu.add(exportDatasetItem);
         if(m_exportPrideAction!=null){
@@ -57,10 +57,16 @@ public class ExportAction extends AbstractRSMAction {
             m_menu.add(exportMzIdentMLItem);
         }
 
-        if(m_exportSpectraAction!=null){
-            JMenuItem exportSpectraItem = new JMenuItem(m_exportSpectraAction);
-            m_menu.add(exportSpectraItem);
-        }
+        JMenu exportMenu = new JMenu(NbBundle.getMessage(ExportAction.class, "CTL_ExportSpectraListAction"));
+        m_exportPeakViewSpectraAction = new ExportSpectraListJMSAction(m_treeType, ExportSpectraListJMSAction.FormatCompatibility.PeakView);
+        m_exportSpectronautSpectraAction = new ExportSpectraListJMSAction(m_treeType, ExportSpectraListJMSAction.FormatCompatibility.Spectronaut);
+        
+        JMenuItem exportSpectraItem = new JMenuItem(m_exportPeakViewSpectraAction);        
+        exportMenu.add(exportSpectraItem);
+        exportSpectraItem = new JMenuItem(m_exportSpectronautSpectraAction);        
+        exportMenu.add(exportSpectraItem);
+        
+        m_menu.add(exportMenu);        
 
         return m_menu;
     }
@@ -75,11 +81,15 @@ public class ExportAction extends AbstractRSMAction {
         if(m_exportMzIdentMLAction!=null){
             m_exportMzIdentMLAction.updateEnabled(selectedNodes);
         }        
-        if(m_exportSpectraAction!=null){
-            m_exportSpectraAction.updateEnabled(selectedNodes);
-        }       
         
-        boolean isEnabled = m_exportDatasetAction.isEnabled() || (m_exportPrideAction != null && m_exportPrideAction.isEnabled()) ||  (m_exportSpectraAction != null && m_exportSpectraAction.isEnabled()) ||  (m_exportMzIdentMLAction  != null && m_exportMzIdentMLAction.isEnabled());
+        m_exportSpectronautSpectraAction.updateEnabled(selectedNodes);
+        m_exportPeakViewSpectraAction.updateEnabled(selectedNodes);
+        
+        boolean isEnabled = m_exportDatasetAction.isEnabled() || 
+                (m_exportPrideAction != null && m_exportPrideAction.isEnabled()) || 
+                m_exportSpectronautSpectraAction.isEnabled() || 
+                m_exportPeakViewSpectraAction.isEnabled() || 
+                (m_exportMzIdentMLAction != null && m_exportMzIdentMLAction.isEnabled() );
         setEnabled(isEnabled);
         m_menu.setEnabled(isEnabled);
     }

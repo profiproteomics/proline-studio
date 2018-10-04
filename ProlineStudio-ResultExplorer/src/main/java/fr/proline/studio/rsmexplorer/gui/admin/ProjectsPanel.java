@@ -33,6 +33,7 @@ import javax.swing.event.TableModelListener;
 public class ProjectsPanel extends JPanel {
     
     private JDialog m_dialogOwner = null;
+    private Boolean m_isEditable = true;
     
     private final BeanTableModel m_genericBeanModel = new BeanTableModel<ProjectToDBs>(ProjectToDBs.class);
     private final CompoundTableModel m_projectsModel = new CompoundTableModel(m_genericBeanModel, true);
@@ -40,8 +41,8 @@ public class ProjectsPanel extends JPanel {
     
     private ArrayList<ProjectToDBs> m_resultProjectsList = new ArrayList<>();
 
-    public ProjectsPanel(JDialog dialog) {
-        
+    public ProjectsPanel(JDialog dialog, Boolean editable) {
+        m_isEditable = editable;
         m_dialogOwner = dialog;
 
         setLayout(new BorderLayout());

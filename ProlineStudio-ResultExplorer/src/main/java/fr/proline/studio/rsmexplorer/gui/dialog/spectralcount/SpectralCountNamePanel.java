@@ -1,7 +1,6 @@
 package fr.proline.studio.rsmexplorer.gui.dialog.spectralcount;
 
 import fr.proline.studio.utils.IconManager;
-import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import javax.swing.*;
@@ -15,7 +14,6 @@ public class SpectralCountNamePanel extends JPanel {
     private static SpectralCountNamePanel m_panel = null;
     private JTextField m_spectralCountNameTextField;
     private JTextArea m_descriptionTextArea;
-//    private JCheckBox m_useVsersion2;
 
 
     public static SpectralCountNamePanel getSpectralCountNamePanel() {
@@ -75,12 +73,6 @@ public class SpectralCountNamePanel extends JPanel {
         c.weightx = 1;
         mainPanel.add(m_spectralCountNameTextField, c);
 
-//        m_useVersion2 = new JCheckBox("use version 2.0");
-//        c.gridx = 0;
-//        c.gridy++;
-//        c.weighty = 1;
-//        mainPanel.add(m_useVersion2, c);  
-        
         JLabel spectralCountDescriptionLabel = new JLabel("Description:");
         m_descriptionTextArea = new JTextArea(10,30);
 
@@ -129,12 +121,6 @@ public class SpectralCountNamePanel extends JPanel {
     public String getSpectralCountDescription() {
         return m_descriptionTextArea.getText();
     }
-//
-//    public boolean useVersion2_0(){
-//        return m_useVersion2.isSelected();
-//    }
-//    public JTextArea getDescriptionTextArea() {
-//        return m_descriptionTextArea;
-//    }
+
     
 }

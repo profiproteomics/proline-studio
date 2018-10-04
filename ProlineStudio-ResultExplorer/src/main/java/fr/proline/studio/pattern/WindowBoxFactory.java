@@ -244,30 +244,10 @@ public class WindowBoxFactory {
 
     }
 
-    public static WindowBox getPTMProteinSiteWindowBox(String dataName) {
-
-        AbstractDataBox[] boxes = new AbstractDataBox[7];
-        boxes[0] = new DataBoxPTMProteinSite();
-        boxes[0].setDataName(dataName);
-        boxes[1] = new DataBoxRsmPeptidesOfProtein();
-        boxes[2] = new DataBoxRsmProteinAndPeptideSequence();
-        boxes[3] = new DataBoxRsetPeptideSpectrum();
-        boxes[3].setLayout(SplittedPanelContainer.PanelLayout.TABBED);
-        boxes[4] = new DataBoxRsetPeptideSpectrumError();
-        boxes[4].setLayout(SplittedPanelContainer.PanelLayout.TABBED);
-        boxes[5] = new DataBoxRsetPeptideFragmentation();
-        boxes[5].setLayout(SplittedPanelContainer.PanelLayout.TABBED);
-        boxes[6] = new DataBoxRsetPeptideSpectrumValues();
-        boxes[6].setLayout(SplittedPanelContainer.PanelLayout.TABBED);
-
-        IconManager.IconType iconType = IconManager.IconType.DATASET_RSM;
-        return new WindowBox(boxes[0].getFullName(), generatePanel(boxes), boxes[0], IconManager.getImage(iconType));
-    }
-
-    public static WindowBox getPTMProteinSiteWindowBox_V2(String dataName) {
+    public static WindowBox getPTMSitesWindowBox(String dataName) {
 
         AbstractDataBox[] boxes = new AbstractDataBox[4];
-        boxes[0] = new DataBoxPTMProteinSite_V2();
+        boxes[0] = new DataBoxPTMProteinSite();
         boxes[0].setDataName(dataName);
         boxes[1] = new DataBoxPTMSitePeptides();
         boxes[2] = new DataBoxPTMSitePepMatches();
@@ -277,7 +257,7 @@ public class WindowBoxFactory {
         return new WindowBox(boxes[0].getFullName(), generatePanel(boxes), boxes[0], IconManager.getImage(iconType));
     }
     
-     public static WindowBox getXICPTMProteinSiteWindowBox(String dataName) {
+     public static WindowBox getXICPTMSitesWindowBox(String dataName) {
 
         AbstractDataBox[] boxes = new AbstractDataBox[4];
         boxes[0] = new DataBoxXICPTMProteinSite();

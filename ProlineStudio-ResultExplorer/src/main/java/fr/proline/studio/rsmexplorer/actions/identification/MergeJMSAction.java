@@ -54,10 +54,8 @@ public class MergeJMSAction extends AbstractRSMAction {
         m_unionMergeAction = new ConfigurableMergeAction(MergeTask.Config.UNION);
         JMenuItem mergeAggregateItem = new JMenuItem(m_aggregationMergeAction);
         m_menu.add(mergeAggregateItem);
-//        if(showHiddenFunctionnality){
-            JMenuItem mergeUnionItem = new JMenuItem(m_unionMergeAction);    
-            m_menu.add(mergeUnionItem);
-//        }
+        JMenuItem mergeUnionItem = new JMenuItem(m_unionMergeAction);    
+        m_menu.add(mergeUnionItem);
 
         return m_menu;
     }
@@ -218,8 +216,17 @@ class ConfigurableMergeAction extends AbstractRSMAction {
                 datasetNode.setIsChanging(false);
 
                 if (datasetNode.hasResultSummary()) {
-                    datasetNode.getDataset().setMergeInformation(DDataset.MergeInformation.MERGE_IDENTIFICATION_SUMMARY);
+                    if(MergeTask.Config.AGGREGATION.equals(m_configuration))
+                        datasetNode.getDataset().setMergeInformation(DDataset.MergeInformation.MERGE_IDENTIFICATION_SUMMARY_AGG);
+                    else
+                        datasetNode.getDataset().setMergeInformation(DDataset.MergeInformation.MERGE_IDENTIFICATION_SUMMARY_UNION);
+                } else {
+                    if(MergeTask.Config.AGGREGATION.equals(m_configuration))
+                        datasetNode.getDataset().setMergeInformation(DDataset.MergeInformation.MERGE_SEARCH_RESULT_AGG);
+                    else
+                        datasetNode.getDataset().setMergeInformation(DDataset.MergeInformation.MERGE_SEARCH_RESULT_UNION);
                 }
+             
                 
                 IdentificationTree tree = IdentificationTree.getCurrentTree();
                 DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
@@ -239,8 +246,6 @@ class ConfigurableMergeAction extends AbstractRSMAction {
 
     @Override
     public void updateEnabled(AbstractNode[] selectedNodes) {
-
-        Preferences preferences = NbPreferences.root();
         
         // to execute this action, the user must be the owner of the project
         Project selectedProject = ProjectExplorerPanel.getProjectExplorerPanel().getSelectedProject();

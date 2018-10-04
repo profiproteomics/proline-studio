@@ -4,9 +4,13 @@ import fr.proline.studio.rsmexplorer.tree.xic.XICDesignTree;
 import fr.proline.studio.rsmexplorer.tree.xic.XICSelectionTree;
 import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
+import fr.proline.studio.rsmexplorer.tree.xic.XICReferenceRSMNode;
 import fr.proline.studio.utils.IconManager;
+import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.util.Enumeration;
 import javax.swing.*;
 
 /**
@@ -47,37 +51,26 @@ public class CreateXICDesignPanel extends JPanel {
     private CreateXICDesignPanel(AbstractNode rootNode, IdentificationTree selectionTree) {
         m_rootNode = rootNode;
         m_selectionTree = selectionTree;
+        m_designTree = new XICDesignTree(m_rootNode, true);
         
         JPanel wizardPanel = createWizardPanel();
-        JPanel mainPanel = createMainPanel(rootNode);
+        JPanel mainPanel = createMainPanel();
 
-        setLayout(new GridBagLayout());
-        GridBagConstraints c = new GridBagConstraints();
-        c.anchor = GridBagConstraints.NORTHWEST;
-        c.fill = GridBagConstraints.BOTH;
-        c.insets = new java.awt.Insets(5, 5, 5, 5);
-
-        c.gridx = 0;
-        c.gridy = 0;
-        c.weightx = 1;
-        add(wizardPanel, c);
-
-        c.gridy++;
-        c.weighty = 1;
-
-        add(mainPanel, c);
+        setLayout(new BorderLayout());
+        add(wizardPanel, BorderLayout.NORTH);
+        add(mainPanel, BorderLayout.CENTER);
 
     }
 
-    public final JPanel createMainPanel(AbstractNode rootNode) {
+    public final JPanel createMainPanel() {
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new GridBagLayout());
         final GridBagConstraints c = new GridBagConstraints();
         c.anchor = GridBagConstraints.NORTHWEST;
         c.fill = GridBagConstraints.BOTH;
         c.insets = new java.awt.Insets(5, 5, 5, 5);
-
-        JPanel designTreePanel = createDesignTreePanel(rootNode);
+        
+        JPanel designTreePanel = createDesignTreePanel();
         JPanel selectionTreePanel = createSelectionTreePanel();
 
         JPanel framePanel = new JPanel(new GridBagLayout());
@@ -138,7 +131,7 @@ public class CreateXICDesignPanel extends JPanel {
         return wizardPanel;
     }
 
-    private JPanel createDesignTreePanel(AbstractNode rootNode) {
+    private JPanel createDesignTreePanel() {
         JPanel designTreePanel = new JPanel();
 
         designTreePanel.setLayout(new GridBagLayout());
@@ -151,8 +144,7 @@ public class CreateXICDesignPanel extends JPanel {
         c.gridy = 0;
         c.weightx = 1;
         c.weighty = 1;
-
-        m_designTree = new XICDesignTree(rootNode, true);
+        
         JScrollPane treeScrollPane = new JScrollPane();
         treeScrollPane.setViewportView(m_designTree);
 
@@ -163,7 +155,15 @@ public class CreateXICDesignPanel extends JPanel {
 
     private JPanel createSelectionTreePanel() {
         JPanel selectionTreePanel = new JPanel();
-
+        boolean isCorrect = true;
+        Enumeration childEnum = m_rootNode.children();
+        while(childEnum.hasMoreElements()){
+            AbstractNode childNode = (AbstractNode) childEnum.nextElement();
+            if(XICReferenceRSMNode.class.isInstance(childNode)){
+                isCorrect = !((XICReferenceRSMNode)childNode).isRefDatasetIncorrect();
+            }
+        }
+        
         selectionTreePanel.setLayout(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();
         c.anchor = GridBagConstraints.NORTHWEST;
@@ -174,20 +174,26 @@ public class CreateXICDesignPanel extends JPanel {
         c.gridy = 0;
         c.weightx = 1;
         c.weighty = 1;
+        if(isCorrect){
+            AbstractNode rootSelectionNode;
+            if (m_selectionTree == null) {
+                rootSelectionNode = IdentificationTree.getCurrentTree().copyRootNodeForSelection();
+            } else {
+                rootSelectionNode = m_selectionTree.copyRootNodeForSelection();
+            }
 
-        AbstractNode rootSelectionNode;
-        if (m_selectionTree == null) {
-            rootSelectionNode = IdentificationTree.getCurrentTree().copyRootNodeForSelection();
+            XICSelectionTree tree = new XICSelectionTree(rootSelectionNode, true);
+            JScrollPane treeScrollPane = new JScrollPane();
+            treeScrollPane.setViewportView(tree);
+
+            c.gridy++;
+            selectionTreePanel.add(treeScrollPane, c);
         } else {
-            rootSelectionNode = m_selectionTree.copyRootNodeForSelection();
+            selectionTreePanel = new JPanel(new BorderLayout());
+            JLabel errMsgLabel = new JLabel("<html>Invalid Reference Dataset Specified in XIC (may have been revalidated).<br> Same data will be used, no change in experimental design is allowed.</html>", IconManager.getIcon(IconManager.IconType.EXCLAMATION), JLabel.CENTER);
+            errMsgLabel.setForeground(Color.red);
+            selectionTreePanel.add(errMsgLabel, BorderLayout.CENTER);
         }
-
-        XICSelectionTree tree = new XICSelectionTree(rootSelectionNode, true);
-        JScrollPane treeScrollPane = new JScrollPane();
-        treeScrollPane.setViewportView(tree);
-
-        c.gridy++;
-        selectionTreePanel.add(treeScrollPane, c);
 
         return selectionTreePanel;
     }
@@ -196,5 +202,12 @@ public class CreateXICDesignPanel extends JPanel {
         return m_designTree;
     }
 
+    public void updatePanel(){
+        //Component c = this.getComponent(1);
+        this.remove(1); //Remove component at 1 => Main Panel        
+        add(createMainPanel(), BorderLayout.CENTER);
+        revalidate();
+        repaint();
+    }
 
 }

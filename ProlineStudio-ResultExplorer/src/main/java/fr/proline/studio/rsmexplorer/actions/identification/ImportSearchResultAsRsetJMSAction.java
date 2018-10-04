@@ -28,6 +28,8 @@ import org.openide.windows.WindowManager;
  */
 public class ImportSearchResultAsRsetJMSAction extends AbstractRSMAction {
 
+    //VDS TODO : To merge with ImportSearchResultAsDatasetJMSAction
+    
     private static int m_beingImportedNumber = 0;
     
     private static HashMap<Long, ArrayList<ChangeListener>> m_listenerMap = new HashMap<>();
@@ -61,7 +63,7 @@ public class ImportSearchResultAsRsetJMSAction extends AbstractRSMAction {
             final String decoyRegex = dialog.getDecoyRegex();
             final long instrumentId = dialog.getInstrumentId();
             final long peaklistSoftwareId = dialog.getPeaklistSoftwareId();
-            final boolean saveSpectrumMatches = false; // ABU old import parameter
+            final long fragRuleSetId = dialog.getFragmentationRuleSetId();            
             
             IdentificationTree tree = IdentificationTree.getCurrentTree();
             final DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
@@ -97,7 +99,7 @@ public class ImportSearchResultAsRsetJMSAction extends AbstractRSMAction {
 
                     if (success) {
                         // start imports
-                        startImport(projectId, allImportedNode, filePaths, treeModel, parserId, parserArguments, decoyRegex, instrumentId, peaklistSoftwareId, saveSpectrumMatches  );
+                        startImport(projectId, allImportedNode, filePaths, treeModel, parserId, parserArguments, decoyRegex, instrumentId, peaklistSoftwareId, fragRuleSetId  );
                     } else {
                         allImportedNode.setIsChanging(false);
                         treeModel.nodeChanged(allImportedNode);
@@ -111,7 +113,7 @@ public class ImportSearchResultAsRsetJMSAction extends AbstractRSMAction {
         }
     }
     
-    private void startImport(final Long projectId, final IdAllImportedNode allImportedNode, File[] filePaths, final DefaultTreeModel treeModel, String parserId, HashMap<String, String> parserArguments, String decoyRegex, long instrumentId, long peaklistSoftwareId,  boolean saveSpectrumMatches ) {
+    private void startImport(final Long projectId, final IdAllImportedNode allImportedNode, File[] filePaths, final DefaultTreeModel treeModel, String parserId, HashMap<String, String> parserArguments, String decoyRegex, long instrumentId, long peaklistSoftwareId,  long fragmentationRuleSetId ) {
         
         AbstractJMSCallback callback = new AbstractJMSCallback() {
             @Override
@@ -142,7 +144,7 @@ public class ImportSearchResultAsRsetJMSAction extends AbstractRSMAction {
             String path = f.getPath();
             Long[] resultSetId = new Long[1];
 
-            ImportIdentificationTask task = new ImportIdentificationTask(callback, parserId, parserArguments, path, decoyRegex, instrumentId, peaklistSoftwareId, saveSpectrumMatches, projectId, resultSetId);
+            ImportIdentificationTask task = new ImportIdentificationTask(callback, parserId, parserArguments, path, decoyRegex, instrumentId, peaklistSoftwareId, false /*don't save spectrum match any more*/, fragmentationRuleSetId, projectId, resultSetId);
             AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
         }
     }

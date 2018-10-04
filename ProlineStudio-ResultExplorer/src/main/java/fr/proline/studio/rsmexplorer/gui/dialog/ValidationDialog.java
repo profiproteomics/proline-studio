@@ -696,7 +696,8 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
         m_psmPrefilterParameters[0] = null;
         m_psmPrefilterParameters[1] = new IntegerParameter("PSM_" + ValidationTask.RANK_FILTER_KEY, ValidationTask.RANK_FILTER_NAME, new JTextField(6), new Integer(5), new Integer(0), new Integer(10));
         m_psmPrefilterParameters[1].setAssociatedData("<=");
-        m_psmPrefilterParameters[1].setBackwardCompatibleKey("Rank");
+        m_psmPrefilterParameters[1].addBackwardCompatibleKey("Rank");
+        m_psmPrefilterParameters[1].addBackwardCompatibleKey("PSM_RANK");
         m_psmPrefilterParameters[2] = new IntegerParameter("PSM_" + ValidationTask.PEP_LENGTH_FILTER_KEY, ValidationTask.PEP_LENGTH_FILTER_NAME, new JTextField(6), new Integer(4), new Integer(4), null);
         m_psmPrefilterParameters[2].setAssociatedData(">=");
         m_psmPrefilterParameters[3] = new DoubleParameter("PSM_" + ValidationTask.SCORE_FILTER_KEY, ValidationTask.SCORE_FILTER_NAME, new JTextField(6), new Double(0), new Double(0), null);

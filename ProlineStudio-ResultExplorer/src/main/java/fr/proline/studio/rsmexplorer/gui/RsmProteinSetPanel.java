@@ -128,7 +128,6 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
         // nothing selected
         if (selectedRow == -1) {
             return null;
-
         }
 
         // convert according to the sorting
@@ -255,7 +254,6 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
         proteinSetPanel.add(toolbar, BorderLayout.WEST);
         proteinSetPanel.add(internalPanel, BorderLayout.CENTER);
 
-
         return proteinSetPanel;
     }
     
@@ -361,7 +359,6 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
         m_proteinSetTable.setModel(new CompoundTableModel(new ProteinSetTableModel((LazyTable)m_proteinSetTable), true));
         // hide the id column
         m_proteinSetTable.getColumnExt(m_proteinSetTable.convertColumnIndexToView(ProteinSetTableModel.COLTYPE_PROTEIN_SET_ID)).setVisible(false);
-        
 
         m_markerContainerPanel = new MarkerContainerPanel(m_proteinSetScrollPane, (ProteinSetTable) m_proteinSetTable);
         
@@ -371,16 +368,12 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
         
         //m_proteinSetTable.displayColumnAsPercentage(ProteinSetTableModel.COLTYPE_PROTEIN_SCORE);
 
-
-
         c.gridx = 0;
         c.gridy = 0;
         c.weightx = 1;
         c.weighty = 1;
         c.gridwidth = 3;
         internalPanel.add(m_markerContainerPanel, c);
-        
-
         
         return internalPanel;
     }                 

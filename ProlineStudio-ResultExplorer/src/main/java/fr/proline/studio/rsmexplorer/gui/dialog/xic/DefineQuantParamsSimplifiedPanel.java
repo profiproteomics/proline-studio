@@ -29,8 +29,7 @@ public class DefineQuantParamsSimplifiedPanel extends AbstractDefineQuantParamsP
 
     public DefineQuantParamsSimplifiedPanel(boolean readOnly, boolean readValues) {
         super(readOnly);
-
-        m_parameterList = new ParameterList("XicParameters");
+       
         createParameters();
         
         if (readValues) {

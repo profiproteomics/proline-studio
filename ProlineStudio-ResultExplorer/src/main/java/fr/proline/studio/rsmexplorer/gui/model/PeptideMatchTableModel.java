@@ -42,8 +42,6 @@ import javax.swing.table.TableCellRenderer;
  * @author JM235353
  */
 public class PeptideMatchTableModel extends LazyTableModel implements GlobalTableModelInterface  {
-
-    
     
     public static final int COLTYPE_PEPTIDE_ID = 0;
     public static final int COLTYPE_PEPTIDE_PREVIOUS_AA = 1;
@@ -73,8 +71,6 @@ public class PeptideMatchTableModel extends LazyTableModel implements GlobalTabl
     private static final String[] m_columnTooltips = {"PeptideMatch Id", "Previous Amino Acid","Peptide", "Next Amino Acid", "Post Translational Modifications", "Score", "Start", "Stop", "Calculated Mass", "Experimental Mass to Charge Ratio", "parts-per-million" , "Charge", "Missed Clivage", "Pretty Rank", "Retention Time (min)", "Potein Set Count", "Protein Sets", "Ion Parent Intensity", "Is Decoy", "Is Validated", "MsQuery", ".dat file of best PSM", "Spectrum Title"};
     
     private final ArrayList<Integer> m_colUsed = new ArrayList<>();
-
-    
     
     private DPeptideMatch[] m_peptideMatches = null; // some of the DPeptideMatch can be null : they are loaded in sub task
     private long[] m_peptideMatchesId = null;
@@ -240,9 +236,7 @@ public class PeptideMatchTableModel extends LazyTableModel implements GlobalTabl
         col =  m_colUsed.get(col);
 
         // Retrieve Protein Set
-        DPeptideMatch peptideMatch = m_peptideMatches[row];
-
-        
+        DPeptideMatch peptideMatch = m_peptideMatches[row]; 
         
         if (peptideMatch == null) {
             givePriorityTo(m_taskId, row, COLTYPE_PEPTIDE_MISSED_CLIVAGE); // no data att all : need to read PeptideMatch like for the COLTYPE_PEPTIDE_MISSED_CLIVAGE column

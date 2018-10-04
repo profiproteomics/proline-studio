@@ -20,6 +20,7 @@ import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import javax.swing.JComponent;
 import javax.swing.JTree;
 import javax.swing.TransferHandler;
@@ -249,7 +250,7 @@ public class IdTransferHandler extends TransferHandler {
         JTree.DropLocation location = ((JTree.DropLocation) support.getDropLocation());
         TreePath dropTreePath = location.getPath();
         int childIndex = location.getChildIndex();
-        AbstractNode dropRSMNode = (AbstractNode) dropTreePath.getLastPathComponent();
+        final AbstractNode dropRSMNode = (AbstractNode) dropTreePath.getLastPathComponent();
 
         IdentificationTree tree = IdentificationTree.getCurrentTree();
         final DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
@@ -284,6 +285,8 @@ public class IdTransferHandler extends TransferHandler {
         // start imports
         ArrayList<ResultSet> rsetList = (ArrayList<ResultSet>) data.getDataList();
         int nbRset = rsetList.size();
+        final AtomicInteger counter = new AtomicInteger(0); 
+        
         for (int i = 0; i < nbRset; i++) {
             ResultSet rset = rsetList.get(i);
             String datasetName = rset.getMsiSearch().getResultFileName();
@@ -313,7 +316,8 @@ public class IdTransferHandler extends TransferHandler {
                 public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
 
                     identificationNode.setIsChanging(false);
-
+                    counter.getAndIncrement();
+                    
                     if (success) {
 
                         DDataset dataset = createdDatasetList.get(0);
@@ -326,6 +330,21 @@ public class IdTransferHandler extends TransferHandler {
                     } else {
                         // should not happen
                         treeModel.removeNodeFromParent(identificationNode);
+                    }
+                    
+                    if (counter.get() == nbRset) {
+                        LinkedHashMap<Object, ArrayList<DDataset>> databaseObjectsToModify = new LinkedHashMap<>();
+                        int nbChildren = dropRSMNode.getChildCount();
+                        ArrayList<DDataset> datasetList = new ArrayList<>(nbChildren);
+                        for (int i = 0; i < nbChildren; i++) {
+                            AbstractNode childNode = ((AbstractNode) dropRSMNode.getChildAt(i));
+                            DataSetNode childDatasetNode = (DataSetNode) childNode;
+                            DDataset dataset = childDatasetNode.getDataset();
+                            datasetList.add(dataset);
+                        }
+                        Object databaseParentObject = (dropRSMNode.getType() == AbstractNode.NodeTypes.PROJECT_IDENTIFICATION) ? ((IdProjectIdentificationNode)dropRSMNode).getProject() : ((DataSetNode)dropRSMNode).getDataset();
+                        databaseObjectsToModify.put(databaseParentObject, datasetList);
+                        DatabaseDataSetTask.updateDatasetAndProjectsTree(databaseObjectsToModify, true);
                     }
                 }
             };

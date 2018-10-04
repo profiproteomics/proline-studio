@@ -19,7 +19,6 @@ public abstract class AbstractNode extends DefaultMutableTreeNode implements Clo
    
     
     public enum NodeTypes {
-
         TREE_PARENT,
         PROJECT_IDENTIFICATION,
         PROJECT_QUANTITATION,
@@ -29,7 +28,8 @@ public abstract class AbstractNode extends DefaultMutableTreeNode implements Clo
         BIOLOGICAL_SAMPLE,
         BIOLOGICAL_GROUP,
         BIOLOGICAL_SAMPLE_ANALYSIS,
-        RUN
+        RUN,
+        REFERENCE_RSM
     }
     private static Action[] m_actionInstance = null;
     protected NodeTypes m_type;

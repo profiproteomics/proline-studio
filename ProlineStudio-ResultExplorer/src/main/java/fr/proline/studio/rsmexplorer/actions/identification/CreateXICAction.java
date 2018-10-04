@@ -1,6 +1,5 @@
 package fr.proline.studio.rsmexplorer.actions.identification;
 
-import fr.proline.core.orm.uds.Aggregation;
 import fr.proline.core.orm.uds.Dataset;
 import fr.proline.core.orm.uds.Project;
 import fr.proline.core.orm.uds.dto.DDataset;
@@ -8,11 +7,11 @@ import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.DatabaseDataManager;
 import fr.proline.studio.dam.data.DataSetData;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
-import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadXicMasterQuantTask;
 import fr.proline.studio.dpm.AccessJMSManagerThread;
 import fr.proline.studio.dpm.task.jms.AbstractJMSCallback;
+import fr.proline.studio.dpm.task.jms.RunXICTask;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
 import fr.proline.studio.rsmexplorer.gui.dialog.xic.CreateXICDialog;
@@ -20,8 +19,8 @@ import fr.proline.studio.rsmexplorer.tree.quantitation.QuantitationTree;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
+import fr.proline.studio.rsmexplorer.tree.ChildFactory;
 import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
-import fr.proline.studio.rsmexplorer.tree.xic.XICDesignTree;
 import java.util.*;
 import javax.swing.JOptionPane;
 import javax.swing.tree.DefaultTreeModel;
@@ -38,8 +37,8 @@ public class CreateXICAction extends AbstractRSMAction {
 
     protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
 
-    private boolean m_fromExistingXIC = false;
-    private boolean m_mergedDSDefined = false;
+    private boolean m_isXiCClone = false;
+    private boolean m_referenceDataSetDefined = false;
 
     static String getMessage(boolean fromExistingXIC, AbstractTree.TreeType sourceTree) {
         if (fromExistingXIC) {
@@ -53,12 +52,12 @@ public class CreateXICAction extends AbstractRSMAction {
 
     public CreateXICAction(boolean fromExistingXIC) {
         super(CreateXICAction.getMessage(fromExistingXIC, AbstractTree.TreeType.TREE_QUANTITATION), AbstractTree.TreeType.TREE_QUANTITATION);
-        m_fromExistingXIC = fromExistingXIC;
+        m_isXiCClone = fromExistingXIC;
     }
 
-    public CreateXICAction(boolean fromExistingXIC, AbstractTree.TreeType sourceTree) {
-        super(CreateXICAction.getMessage(fromExistingXIC, sourceTree), sourceTree);
-        m_fromExistingXIC = fromExistingXIC;
+    public CreateXICAction(AbstractTree.TreeType sourceTree) {
+        super(CreateXICAction.getMessage(false, sourceTree), sourceTree);
+        m_isXiCClone = false;
     }
 
     @Override
@@ -69,10 +68,11 @@ public class CreateXICAction extends AbstractRSMAction {
             return;
         }
 
-        if (m_fromExistingXIC) {
+        if (m_isXiCClone) {
             final DDataset currentDataset = ((DataSetData) ((DataSetNode) selectedNodes[0]).getData()).getDataset();
             final int posx = x;
             final int posy = y;
+            
             AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
 
                 @Override
@@ -97,10 +97,10 @@ public class CreateXICAction extends AbstractRSMAction {
                 DataSetData dataset = (DataSetData) node.getData();
                 Dataset.DatasetType dsType = dataset.getDatasetType();
                 if (node.hasResultSummary() && (dsType.equals(Dataset.DatasetType.IDENTIFICATION) || dsType.equals(Dataset.DatasetType.AGGREGATE))) {
-                    m_mergedDSDefined = true;
+                    m_referenceDataSetDefined = true;
                     refDataset = dataset.getDataset();
                 } else {
-                    m_mergedDSDefined = false;
+                    m_referenceDataSetDefined = false;
                 }
             }
             createXICDialog(refDataset, x, y);
@@ -110,16 +110,26 @@ public class CreateXICAction extends AbstractRSMAction {
     private void createXICDialog(DDataset dataset, int x, int y) {
         Long pID = ProjectExplorerPanel.getProjectExplorerPanel().getSelectedProject().getId();
         CreateXICDialog dialog = CreateXICDialog.getDialog(WindowManager.getDefault().getMainWindow());
-        if (m_mergedDSDefined) {
+        if (m_referenceDataSetDefined) {
             IdentificationTree childTree = IdentificationTree.getCurrentTree().copyDataSetRootSubTree(dataset, dataset.getProject().getId());
             dialog.setSelectableIdentTree(childTree);
-            dialog.setParentDataset(dataset);
+            dialog.setReferenceIdentDataset(dataset);
+        } else if (m_isXiCClone && dataset.getMasterQuantitationChannels().get(0).getIdentDataset() != null) {
+            DDataset refDataset = dataset.getMasterQuantitationChannels().get(0).getIdentDataset();         
+            dialog.setReferenceIdentDataset(refDataset);
+            IdentificationTree childTree = IdentificationTree.getCurrentTree().copyDataSetRootSubTree(refDataset, refDataset.getProject().getId());
+            if (childTree == null) {
+                m_logger.debug("Reference dataset not already loaded: creates a new node to dispay in a new IdentificationTree");
+                childTree = new IdentificationTree(ChildFactory.createNode(new DataSetData(refDataset)));
+            }
+            dialog.setSelectableIdentTree(childTree);
         } else {
             dialog.setSelectableIdentTree(null);
-            dialog.setParentDataset(null);
+            dialog.setReferenceIdentDataset(null);
         }
-        dialog.displayDesignTree();
-        if (m_fromExistingXIC) {
+
+        dialog.displayExperimentalDesignTree();
+        if (m_isXiCClone) {
             dialog.copyClonedDesignTree(dataset);
         }
 
@@ -140,10 +150,10 @@ public class CreateXICAction extends AbstractRSMAction {
                 errorMsg.append("Null Quantitation parameters !  ");
             }
 
-            if (dialog.getDesignRSMNode() == null) {
+            if (dialog.getExperimentalDesignNode() == null) {
                 errorMsg.append("No experimental design defined  ");
 
-            } else if (!DataSetData.class.isInstance(dialog.getDesignRSMNode().getData())) {
+            } else if (!DataSetData.class.isInstance(dialog.getExperimentalDesignNode().getData())) {
                 errorMsg.append("Invalide Quantitation Dataset specified  ");
 
             } else {
@@ -153,10 +163,10 @@ public class CreateXICAction extends AbstractRSMAction {
                     errorMsg.append( registerErrMsg);
 
                 //*** Get experimental design values                
-                _quantiDS = (DataSetData) dialog.getDesignRSMNode().getData();
+                _quantiDS = (DataSetData) dialog.getExperimentalDesignNode().getData();
 
                 try {
-                    expParams = dialog.getDesignParameters();
+                    expParams = dialog.getExperimentalDesignParameters();
                 } catch (IllegalAccessException iae) {
                     errorMsg.append(iae.getMessage());
                 }
@@ -171,22 +181,8 @@ public class CreateXICAction extends AbstractRSMAction {
 
             final QuantitationTree tree = QuantitationTree.getCurrentTree();
             final DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
-            final DataSetNode[] _quantitationNode = new DataSetNode[1];
-
-            // add node for the quantitation dataset which will be created
-            DataSetData quantitationData = new DataSetData(_quantiDS.getName(), Dataset.DatasetType.QUANTITATION, Aggregation.ChildNature.QUANTITATION_FRACTION);
-
-            final DataSetNode quantitationNode = new DataSetNode(quantitationData);
-            _quantitationNode[0] = quantitationNode;
-            quantitationNode.setIsChanging(true);
-
-            AbstractNode rootNode = (AbstractNode) treeModel.getRoot();
-            // before trash
-            treeModel.insertNodeInto(quantitationNode, rootNode, rootNode.getChildCount() - 1);
-
-            // expand the parent node to display its children
-            tree.expandNodeIfNeeded(rootNode);
-
+            final DataSetNode[] _quantitationNode = { QuantitationTree.getCurrentTree().createQuantitationNode(_quantiDS.getName()) };
+            
             // CallBack for Xic Quantitation Service
             AbstractJMSCallback xicCallback = new AbstractJMSCallback() {
 
@@ -206,11 +202,10 @@ public class CreateXICAction extends AbstractRSMAction {
                     }
                 }
             };
-
-            fr.proline.studio.dpm.task.jms.RunXICTask task = new fr.proline.studio.dpm.task.jms.RunXICTask(xicCallback, m_mergedDSDefined, pID, _quantiDS.getName(), quantParams, expParams, _xicQuantiDataSetId);
+           
+            RunXICTask task = new RunXICTask(xicCallback, pID, _quantiDS.getName(), quantParams, expParams, dialog.getParamVersion(), _xicQuantiDataSetId);
             AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
-
-
+           
         } //End OK entered      
     }
 
@@ -224,7 +219,7 @@ public class CreateXICAction extends AbstractRSMAction {
             return;
         }
 
-        if (m_fromExistingXIC) {
+        if (m_isXiCClone) {
             // only one node selected
             if (selectedNodes.length != 1) {
                 setEnabled(false);

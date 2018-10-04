@@ -12,8 +12,10 @@ import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
+import javax.swing.JOptionPane;
 import javax.swing.tree.DefaultTreeModel;
 import org.openide.util.NbBundle;
+import org.openide.windows.WindowManager;
 
 /**
  * Remove Identification Summary and potentially Search Result from a dataset
@@ -28,7 +30,11 @@ public class ClearDatasetAction extends AbstractRSMAction {
 
      @Override
     public void actionPerformed(final AbstractNode[] selectedNodes, int x, int y) {
-        
+        String msg = NbBundle.getMessage(ClearDatasetAction.class,"ClearDatasetAction.help.text");
+        String title = "Clear Dataset";
+        int n = JOptionPane.showConfirmDialog(WindowManager.getDefault().getMainWindow(),
+                msg, title, JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+        if (n == JOptionPane.YES_OPTION) {
         IdentificationTree tree = IdentificationTree.getCurrentTree();
         final DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
         
@@ -69,7 +75,7 @@ public class ClearDatasetAction extends AbstractRSMAction {
             
             AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
         }
-        
+        }
         
     }
     

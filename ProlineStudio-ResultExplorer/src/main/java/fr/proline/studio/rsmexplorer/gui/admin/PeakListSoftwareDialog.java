@@ -30,7 +30,8 @@ public class PeakListSoftwareDialog extends DefaultDialog  {
 
     public enum DialogMode {
         CREATE_USER,
-        MODIFY_USER
+        MODIFY_USER,
+        VIEW_USER
     }
 
     private static final String COMBOBOX_SELECTION_STRING = "< Select Predefined >";
@@ -88,6 +89,7 @@ public class PeakListSoftwareDialog extends DefaultDialog  {
     private void initMode(DialogMode mode) {
 
         boolean enableParsingFields = true;
+        boolean enableModifications = true;
         switch(mode) {
             case CREATE_USER:
                 setTitle("Add Peaklist Software");
@@ -95,6 +97,11 @@ public class PeakListSoftwareDialog extends DefaultDialog  {
             case MODIFY_USER:
                 setTitle("Modify Peaklist Software");
                 enableParsingFields = false;
+                break;
+            case VIEW_USER:
+                setTitle("View Peaklist Software");
+                enableParsingFields = false;
+                enableModifications = false;
                 break;
         }
         m_nameTextField.setText("");
@@ -106,7 +113,8 @@ public class PeakListSoftwareDialog extends DefaultDialog  {
         m_lastScanTextField.setText("");
         m_firstTimeTextField.setText("");
         m_lastTimeTextField.setText("");
-        
+        m_nameTextField.setEnabled(enableModifications);
+        m_versionTextField.setEnabled(enableModifications);
         m_rawFileIdentifierTextField.setEnabled(enableParsingFields);
         m_rawFileIdentifierComboBox.setEnabled(enableParsingFields);
         m_firstCycleTextField.setEnabled(enableParsingFields);
@@ -228,10 +236,6 @@ public class PeakListSoftwareDialog extends DefaultDialog  {
         c.weightx = 0;
         c.weighty = 0;
         
-        c.gridx = 0;
-        c.gridy = 0;
-        c.weightx = 0;
-        c.weighty = 0;
         peaklistPanel.add(nameLabel, c);
         
         c.gridx++;

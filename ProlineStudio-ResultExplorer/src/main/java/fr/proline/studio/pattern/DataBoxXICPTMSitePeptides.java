@@ -9,18 +9,17 @@ import fr.proline.core.orm.uds.dto.DQuantitationChannel;
 import fr.proline.studio.extendedtablemodel.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
-import fr.proline.studio.dam.tasks.DatabasePTMProteinSiteTask_V2;
+import fr.proline.studio.dam.tasks.DatabasePTMSitesTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dam.tasks.data.PTMSite;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadXicMasterQuantTask;
-import fr.proline.studio.graphics.CrossSelectionInterface;
 import static fr.proline.studio.pattern.DataBoxPTMSitePeptides.m_logger;
-import fr.proline.studio.rsmexplorer.gui.xic.PeptidePanel;
 import fr.proline.studio.rsmexplorer.gui.xic.QuantChannelInfo;
 import fr.proline.studio.rsmexplorer.gui.xic.XicPeptidesPTMSitePanel;
 import java.util.ArrayList;
 import java.util.List;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
+import fr.proline.studio.rsmexplorer.gui.xic.PeptideTableModel;
 
 /**
  *
@@ -79,8 +78,8 @@ public class DataBoxXICPTMSitePeptides extends AbstractDataBox {
         
     private void ptmSiteChanged(PTMSite ptmSite){
 
-        m_logger.info("DATA Changed : Update XIC PTMSite Peptide WINDOWS. " + ptmSite.toString()+" data loaded " + ptmSite.isAllPeptideMatchesLoaded());
-        if (ptmSite.isAllPeptideMatchesLoaded()) {
+        m_logger.info("DATA Changed : Update XIC PTMSite Peptide WINDOWS. " + ptmSite.toString()+" data loaded " + ptmSite.isLoaded());
+        if (ptmSite.isLoaded()) {
             m_previousTaskId = null;
 
             xicDataChanged(ptmSite,-1);
@@ -104,7 +103,7 @@ public class DataBoxXICPTMSitePeptides extends AbstractDataBox {
              }
         };
         
-        DatabasePTMProteinSiteTask_V2 task = new DatabasePTMProteinSiteTask_V2(callback, getProjectId(), m_rsm, ptmSite);
+        DatabasePTMSitesTask task = new DatabasePTMSitesTask(callback, getProjectId(), m_rsm, ptmSite);
         Long taskId = task.getId();
         m_logger.info(" Call PTMSite Peptide DatabasePTMProteinSiteTask_V2 task # "+taskId);
         if (m_previousTaskId != null) {
@@ -195,47 +194,22 @@ public class DataBoxXICPTMSitePeptides extends AbstractDataBox {
     public Object getData(boolean getArray, Class parameterType, boolean isList) {
         if (parameterType != null && isList) {
             if (parameterType.equals(ExtendedTableModelInterface.class)) {
-                return getCompareDataInterfaceList();
-            }
-            if (parameterType.equals(CrossSelectionInterface.class)) {
-                return getCrossSelectionInterfaceList();
+                return getTableModelInterfaceList();
             }
         }
         return super.getData(getArray, parameterType, isList);
     }
     
-    private List<ExtendedTableModelInterface> getCompareDataInterfaceList() {
-        List<ExtendedTableModelInterface> listCDI = new ArrayList();
-        List<PeptidePanel> listPeptidePanel = getPeptideTableModelList();
-        for (PeptidePanel peptidePanel : listPeptidePanel) {
-            listCDI.add(peptidePanel.getGlobalTableModelInterface());
-        }
-        return listCDI;
-    }
-
-    private List<CrossSelectionInterface> getCrossSelectionInterfaceList() {
-        List<CrossSelectionInterface> listCSI = new ArrayList();
-        List<PeptidePanel> listPeptidePanel = getPeptideTableModelList();
-        for (PeptidePanel peptidePanel : listPeptidePanel) {
-            listCSI.add(peptidePanel.getCrossSelectionInterface());
-        }
-        return listCSI;
-    }
-    
-    
-    private List<PeptidePanel> getPeptideTableModelList() {
-    
-        DQuantitationChannel[] quantitationChannelArray = (DQuantitationChannel[]) m_previousDataBox.getData(true, DQuantitationChannel.class); 
-    
-        List<PeptidePanel> list = new ArrayList();
-        if (m_masterQuantPeptideList != null) {
-            // one table model per row
+     private List<ExtendedTableModelInterface> getTableModelInterfaceList() {
+        List<ExtendedTableModelInterface> list = new ArrayList();
+        if (m_masterQuantPeptideList != null){
             for (DMasterQuantPeptide quantPeptide : m_masterQuantPeptideList) {
-                PeptidePanel aPepPanel = new PeptidePanel();
-                aPepPanel.setData(quantitationChannelArray, quantPeptide, true);
-                list.add(aPepPanel);
+                PeptideTableModel peptideTableModel  = new PeptideTableModel(null);
+                peptideTableModel.setData( m_quantChannelInfo.getQuantChannels(), quantPeptide, true);
+                list.add(peptideTableModel);
             }
         }
         return list;
     }
+
 }

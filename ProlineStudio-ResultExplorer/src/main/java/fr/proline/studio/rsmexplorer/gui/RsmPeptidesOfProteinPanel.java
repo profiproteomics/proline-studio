@@ -2,7 +2,6 @@ package fr.proline.studio.rsmexplorer.gui;
 
 
 import fr.proline.core.orm.msi.ResultSummary;
-import fr.proline.core.orm.msi.PeptideSet;
 import fr.proline.core.orm.msi.dto.DPeptideInstance;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.msi.dto.DPeptideSet;
@@ -48,29 +47,27 @@ import org.jdesktop.swingx.JXTable;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 
 /**
- * Panel for Peptides of a Protein 
+ * Panel for Peptides of a Protein
+ *
  * @author JM235353
  */
 public class RsmPeptidesOfProteinPanel extends HourglassPanel implements DataBoxPanelInterface, GlobalTabelModelProviderInterface {
 
     private AbstractDataBox m_dataBox;
-    
     private PeptideTable m_peptidesTable;
     private JScrollPane m_scrollPane;
-    
     private MarkerContainerPanel m_markerContainerPanel;
+    private InfoToggleButton m_infoToggleButton;
 
     private SettingsButton m_settingsButton;
     private FilterButton m_filterButton;
     private ExportButton m_exportButton;
-    
+    private AddDataAnalyzerButton m_addCompareDataButton;
+
     private DProteinMatch m_currentProteinMatch = null;
     private DPeptideMatch m_currentPeptideMatch = null;
-    
-    private AddDataAnalyzerButton m_addCompareDataButton;
-    
-    private InfoToggleButton m_infoToggleButton;
-    
+
+
     /**
      * Creates new form RsmPeptidesOfProteinPanel
      */
@@ -118,7 +115,48 @@ public class RsmPeptidesOfProteinPanel extends HourglassPanel implements DataBox
         layeredPane.add(m_infoToggleButton.getInfoPanel(), JLayeredPane.PALETTE_LAYER);  
 
     }
-    
+
+    private JToolBar initToolbar() {
+        JToolBar toolbar = new JToolBar(JToolBar.VERTICAL);
+        toolbar.setFloatable(false);
+
+        m_settingsButton = new SettingsButton(((ProgressInterface) m_peptidesTable.getModel()), m_peptidesTable);
+
+        m_filterButton = new FilterButton(((CompoundTableModel) m_peptidesTable.getModel())) {
+
+            @Override
+            protected void filteringDone() {
+                m_dataBox.propagateDataChanged(ExtendedTableModelInterface.class);
+                m_infoToggleButton.updateInfo();
+            }
+
+        };
+        m_exportButton = new ExportButton(((ProgressInterface) m_peptidesTable.getModel()), "Peptides", m_peptidesTable);
+        m_addCompareDataButton = new AddDataAnalyzerButton(((CompoundTableModel) m_peptidesTable.getModel())) {
+
+            @Override
+            public void actionPerformed() {
+                JXTable table = getGlobalAssociatedTable();
+                TableInfo tableInfo = new TableInfo(m_dataBox.getId(), m_dataBox.getUserName(), m_dataBox.getDataName(), m_dataBox.getTypeName(), table);
+                Image i = m_dataBox.getIcon();
+                if (i!=null) {
+                    tableInfo.setIcon(new ImageIcon(i));
+                }
+                DataAnalyzerWindowBoxManager.addTableInfo(tableInfo);
+            }
+        };
+
+        m_infoToggleButton = new InfoToggleButton((ProgressInterface) m_peptidesTable.getModel(), m_peptidesTable);
+
+        toolbar.add(m_filterButton);
+        toolbar.add(m_settingsButton);
+        toolbar.add(m_exportButton);
+        toolbar.add(m_addCompareDataButton);
+        toolbar.add(m_infoToggleButton);
+
+        return toolbar;
+    }
+
     private JPanel createPeptidesPanel() {
         JPanel peptidesPanel = new JPanel();
         peptidesPanel.setBounds(0, 0, 500, 400);
@@ -131,11 +169,9 @@ public class RsmPeptidesOfProteinPanel extends HourglassPanel implements DataBox
         JToolBar toolbar = initToolbar();
         peptidesPanel.add(toolbar, BorderLayout.WEST);
 
-
         return peptidesPanel;
 
     }
-    
 
     private JPanel createInternalPanel() {
 
@@ -146,11 +182,9 @@ public class RsmPeptidesOfProteinPanel extends HourglassPanel implements DataBox
         c.fill = GridBagConstraints.BOTH;
         c.insets = new java.awt.Insets(5, 5, 5, 5);
 
-
         m_peptidesTable = new PeptideTable();
         m_peptidesTable.setModel(new CompoundTableModel(new PeptideTableModel(), true));
         m_peptidesTable.getColumnExt(m_peptidesTable.convertColumnIndexToView(PeptideTableModel.COLTYPE_PEPTIDE_ID)).setVisible(false);
-
 
         m_scrollPane = new JScrollPane();
         
@@ -169,49 +203,6 @@ public class RsmPeptidesOfProteinPanel extends HourglassPanel implements DataBox
         return internalPanel;
     }
 
-    private JToolBar initToolbar() {
-        JToolBar toolbar = new JToolBar(JToolBar.VERTICAL);
-        toolbar.setFloatable(false);
-
-        m_settingsButton = new SettingsButton(((ProgressInterface) m_peptidesTable.getModel()), m_peptidesTable);
-        
-        m_filterButton = new FilterButton(((CompoundTableModel) m_peptidesTable.getModel())) {
-
-            @Override
-            protected void filteringDone() {
-                m_dataBox.propagateDataChanged(ExtendedTableModelInterface.class);
-                m_infoToggleButton.updateInfo();
-            }
-            
-        };
-        m_exportButton = new ExportButton(((ProgressInterface) m_peptidesTable.getModel()), "Peptides", m_peptidesTable);
-        m_addCompareDataButton = new AddDataAnalyzerButton(((CompoundTableModel) m_peptidesTable.getModel())) {
-           
-            @Override
-            public void actionPerformed() {
-                JXTable table = getGlobalAssociatedTable();
-                TableInfo tableInfo = new TableInfo(m_dataBox.getId(), m_dataBox.getUserName(), m_dataBox.getDataName(), m_dataBox.getTypeName(), table);
-                Image i = m_dataBox.getIcon();
-                if (i!=null) {
-                    tableInfo.setIcon(new ImageIcon(i));
-                }
-                DataAnalyzerWindowBoxManager.addTableInfo(tableInfo);
-            }
-        };
-        
-        m_infoToggleButton = new InfoToggleButton((ProgressInterface) m_peptidesTable.getModel(), m_peptidesTable);
-        
-        
-        
-        toolbar.add(m_filterButton);
-        toolbar.add(m_settingsButton);
-        toolbar.add(m_exportButton);
-        toolbar.add(m_addCompareDataButton);
-        toolbar.add(m_infoToggleButton);
-
-        return toolbar;
-    }
-
     
     public DPeptideInstance getSelectedPeptide() {
         int selectedIndex = m_peptidesTable.getSelectionModel().getMinSelectionIndex();
@@ -223,7 +214,6 @@ public class RsmPeptidesOfProteinPanel extends HourglassPanel implements DataBox
         int indexInModelSelected = m_peptidesTable.convertRowIndexToModel(selectedIndex);
         CompoundTableModel compoundTableModel = ((CompoundTableModel)m_peptidesTable.getModel());
         indexInModelSelected = compoundTableModel.convertCompoundRowToBaseModelRow(indexInModelSelected);
-        
         
         return ((PeptideTableModel) compoundTableModel.getBaseModel()).getPeptide(indexInModelSelected);
         
@@ -288,6 +278,7 @@ public class RsmPeptidesOfProteinPanel extends HourglassPanel implements DataBox
     public void setDataBox(AbstractDataBox dataBox) {
         m_dataBox = dataBox;
     }
+
     @Override
     public AbstractDataBox getDataBox() {
         return m_dataBox;
@@ -340,8 +331,7 @@ public class RsmPeptidesOfProteinPanel extends HourglassPanel implements DataBox
         public void addTableModelListener(TableModelListener l) {
             getModel().addTableModelListener(l);
         }
-
-        
+       
         /** 
          * Called whenever the value of the selection changes.
          * @param e the event that characterizes the change.
@@ -350,8 +340,6 @@ public class RsmPeptidesOfProteinPanel extends HourglassPanel implements DataBox
         public void valueChanged(ListSelectionEvent e) {
             
             super.valueChanged(e);
-            
-
             
             m_dataBox.propagateDataChanged(DPeptideInstance.class);
             m_dataBox.propagateDataChanged(DPeptideMatch.class);
@@ -378,8 +366,6 @@ public class RsmPeptidesOfProteinPanel extends HourglassPanel implements DataBox
             int count = getModel().getRowCount();
             return count+((count>1) ? " Peptides" : " Peptide");
         }
-
-        
        
     }
     

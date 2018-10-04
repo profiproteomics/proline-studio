@@ -237,7 +237,7 @@ public class IdentificationPropertiesTableModel extends AbstractPropertiesTableM
                         Map<String, Object> map = rsetDecoy.getSerializedPropertiesAsMap();
                         Object o = map.get("target_decoy_mode");
                         if (o == null) {
-                            //JPM.WART: bug in server/database :information sometimes saved in rset, not in decoy rset
+                            //JPM.WART: #15631 bug in server/database :information sometimes saved in rset, not in decoy rset. For old data
                             map = rset.getSerializedPropertiesAsMap();
                             o = map.get("target_decoy_mode");
                         }

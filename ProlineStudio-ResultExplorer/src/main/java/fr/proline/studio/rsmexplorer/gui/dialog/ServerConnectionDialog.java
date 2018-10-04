@@ -121,7 +121,7 @@ public class ServerConnectionDialog extends ConnectionDialog {
 
         setBusy(true);
 
-        String serverURL = m_serverURLTextField.getText();
+        String serverURL = m_serverURLTextField.getText().trim();
         if (serverURL.startsWith("http") && !serverURL.endsWith("/")) {
             //JPM.WART : server URL must ends with a "/"
             // if the user forgets it, the error is really strange (exception with no message reported)

@@ -86,8 +86,8 @@ public class TreeSelectionPanel extends JPanel {
         
         if(m_wizardHelp != null && !m_wizardHelp.isEmpty()){
             JTextArea helpArea = new JTextArea(m_wizardHelp);        
-            helpArea.setBackground(Color.LIGHT_GRAY);
-            helpArea.setForeground(Color.WHITE);
+            helpArea.setForeground(Color.LIGHT_GRAY);
+            helpArea.setBackground(Color.WHITE);
             helpArea.setLineWrap(true);
             helpArea.setWrapStyleWord(true);
             c.gridy++;

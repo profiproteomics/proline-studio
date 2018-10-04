@@ -6,7 +6,6 @@ import fr.proline.studio.dam.DatabaseDataManager;
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.Map;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import org.openide.awt.ActionRegistration;
@@ -14,7 +13,6 @@ import org.openide.awt.ActionReference;
 import org.openide.awt.ActionReferences;
 import org.openide.awt.ActionID;
 import org.openide.util.ContextAwareAction;
-import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
 import org.openide.util.NbBundle;
 import org.openide.util.NbBundle.Messages;
@@ -38,8 +36,12 @@ public final class AdminAction extends AbstractAction implements ActionListener,
     public void actionPerformed(ActionEvent e) {
 
         Frame f = WindowManager.getDefault().getMainWindow();
-
-        AdminDialog dialog = AdminDialog.getDialog(f);
+        Boolean  isUser = true;
+        UserAccount user = DatabaseDataManager.getDatabaseDataManager().getLoggedUser();
+        if (user != null) {
+           isUser = !DatabaseDataManager.isAdmin(user);
+        }
+        AdminDialog dialog = AdminDialog.getDialog(f, isUser);
         if (dialog.isVisible()) {
             return;
         }
@@ -57,11 +59,11 @@ public final class AdminAction extends AbstractAction implements ActionListener,
     @Override
      public boolean isEnabled() {
          
-         UserAccount user = DatabaseDataManager.getDatabaseDataManager().getLoggedUser();
+        UserAccount user = DatabaseDataManager.getDatabaseDataManager().getLoggedUser();
         if (user == null) {
             return false;
         }
-        return DatabaseDataManager.isAdmin(user);
+        return true;
     }
      
 

@@ -6,7 +6,7 @@ import fr.proline.studio.dpm.task.jms.AbstractJMSCallback;
 import fr.proline.studio.dpm.task.jms.DownloadFileTask;
 import fr.proline.studio.dpm.task.jms.ExportDatasetTask;
 import fr.proline.studio.gui.DefaultDialog;
-import fr.proline.studio.rsmexplorer.gui.dialog.pride.ExportPrideDialog;
+import fr.proline.studio.rsmexplorer.gui.dialog.exporter.ExportPrideDialog;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree.TreeType;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;

@@ -22,26 +22,24 @@ import fr.proline.studio.dpm.AccessJMSManagerThread;
 import fr.proline.studio.dpm.task.jms.AbstractJMSCallback;
 import fr.proline.studio.dpm.task.jms.CertifyIdentificationTask;
 import fr.proline.studio.dpm.task.jms.ImportIdentificationTask;
-import fr.proline.studio.parameter.ObjectParameter;
-import fr.proline.studio.parameter.ParameterList;
 import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import javax.swing.tree.DefaultTreeModel;
 import org.openide.util.NbBundle;
-import org.openide.util.NbPreferences;
 import org.openide.windows.WindowManager;
 
 /**
  *
  * Action to import one or multiple identification, imported Rset are refered by
  * a Dataset
- *
+ * 
  * @author JM235353
  */
 public class ImportSearchResultAsDatasetJMSAction extends AbstractRSMAction {
 
+    //VDS TODO : To merge with ImportSearchResultAsRsetJMSAction
     private static final String GENERAL_APPLICATION_SETTINGS = "General Application Settings";
 
     public ImportSearchResultAsDatasetJMSAction() {
@@ -78,7 +76,6 @@ public class ImportSearchResultAsDatasetJMSAction extends AbstractRSMAction {
             Project project = null;
             DDataset parentDataset = null;
             boolean isParentAProject = false;
-            DataSetNode parentDatasetNode = null;
             if (n.getType() == AbstractNode.NodeTypes.PROJECT_IDENTIFICATION) {
                 IdProjectIdentificationNode projectNode = (IdProjectIdentificationNode) n;
                 project = projectNode.getProject();
@@ -87,7 +84,6 @@ public class ImportSearchResultAsDatasetJMSAction extends AbstractRSMAction {
                 DataSetNode dataSetNode = (DataSetNode) n;
                 project = dataSetNode.getDataset().getProject();
                 parentDataset = dataSetNode.getDataset();
-                parentDatasetNode = dataSetNode;
             }
             final Project _project = project;
             final DDataset _parentDataset = parentDataset;
@@ -95,9 +91,8 @@ public class ImportSearchResultAsDatasetJMSAction extends AbstractRSMAction {
             final String parserId = dialog.getParserId();
             final String decoyRegex = dialog.getDecoyRegex();
             final long instrumentId = dialog.getInstrumentId();
-            final long peaklistSoftwareId = dialog.getPeaklistSoftwareId();
-            final boolean saveSpectrumMatches = false; // ABU old import parameter
-
+            final long peaklistSoftwareId = dialog.getPeaklistSoftwareId();           
+            final long fragRuleSetId = dialog.getFragmentationRuleSetId();
             IdentificationTree tree = IdentificationTree.getCurrentTree();
 
             final ArrayList<DataSetNode> allIdentificationNodes = new ArrayList<>();
@@ -116,7 +111,7 @@ public class ImportSearchResultAsDatasetJMSAction extends AbstractRSMAction {
                 if (indexOfDot != -1) {
                     datasetName = datasetName.substring(0, indexOfDot);
                 }
-                final String _datasetName = datasetName;
+//                final String _datasetName = datasetName;
                 allDatasetNames.add(datasetName);
 
                 DataSetData identificationData = new DataSetData(datasetName, Dataset.DatasetType.IDENTIFICATION, Aggregation.ChildNature.SAMPLE_ANALYSIS);  //JPM.TODO
@@ -161,7 +156,7 @@ public class ImportSearchResultAsDatasetJMSAction extends AbstractRSMAction {
                     if (success) {
                         // start all imports
                         for (int i = 0; i < nbFiles; i++) {
-                            startImport(_project, allIdentificationNodes.get(i), _parentDataset, allDatasetNames.get(i), pathArray[i], treeModel, parserId, parserArguments, decoyRegex, instrumentId, peaklistSoftwareId, saveSpectrumMatches);
+                            startImport(_project, allIdentificationNodes.get(i), _parentDataset, allDatasetNames.get(i), pathArray[i], treeModel, parserId, parserArguments, decoyRegex, instrumentId, peaklistSoftwareId, fragRuleSetId);
                         }
                     } else {
                         // delete all nodes
@@ -178,7 +173,7 @@ public class ImportSearchResultAsDatasetJMSAction extends AbstractRSMAction {
         }
     }
 
-    private void startImport(final Project project, final DataSetNode identificationNode, final DDataset parentDataset, final String datasetName, String canonicalPath, final DefaultTreeModel treeModel, String parserId, HashMap<String, String> parserArguments, String decoyRegex, long instrumentId, long peaklistSoftwareId, boolean saveSpectrumMatches) {
+    private void startImport(final Project project, final DataSetNode identificationNode, final DDataset parentDataset, final String datasetName, String canonicalPath, final DefaultTreeModel treeModel, String parserId, HashMap<String, String> parserArguments, String decoyRegex, long instrumentId, long peaklistSoftwareId, long fragmentationRuleSetId) {
         // used as out parameter for the service
         final Long[] _resultSetId = new Long[1];
 
@@ -206,7 +201,7 @@ public class ImportSearchResultAsDatasetJMSAction extends AbstractRSMAction {
         };
 
         // use canonicalPath when it is possible to be sure to have an unique path
-        ImportIdentificationTask task = new ImportIdentificationTask(callback, parserId, parserArguments, canonicalPath, decoyRegex, instrumentId, peaklistSoftwareId, saveSpectrumMatches, project.getId(), _resultSetId);
+        ImportIdentificationTask task = new ImportIdentificationTask(callback, parserId, parserArguments, canonicalPath, decoyRegex, instrumentId, peaklistSoftwareId, false /*don't save spectrum match any more*/, fragmentationRuleSetId, project.getId(), _resultSetId);
         AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
     }
 

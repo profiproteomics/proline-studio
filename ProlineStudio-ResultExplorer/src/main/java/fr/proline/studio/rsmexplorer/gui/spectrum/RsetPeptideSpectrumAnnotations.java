@@ -7,12 +7,10 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.DoubleBuffer;
 import java.nio.FloatBuffer;
-import java.util.List;
 
 
 
 import org.jfree.chart.JFreeChart;
-import org.jfree.chart.annotations.XYAnnotation;
 import org.jfree.chart.annotations.XYLineAnnotation;
 import org.jfree.chart.annotations.XYPointerAnnotation;
 import org.jfree.chart.annotations.XYTextAnnotation;
@@ -27,7 +25,6 @@ import org.jfree.ui.TextAnchor;
 import org.slf4j.LoggerFactory;
 
 import fr.proline.core.orm.msi.dto.DSpectrum;
-import fr.proline.core.orm.msi.dto.DMsQuery;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.studio.pattern.AbstractDataBox;
 
@@ -58,14 +55,7 @@ public class RsetPeptideSpectrumAnnotations {
 
     private void removeAnnotations() {
         XYPlot p = (XYPlot) m_chart.getPlot();
-
-        //@SuppressWarnings("unchecked")
-        List<XYAnnotation> annotationsList = p.getAnnotations();
-        int lsize = annotationsList.size();
-        for (int i = 0; i < lsize; i++) {
-            p.removeAnnotation(annotationsList.get(i));
-        }
-
+        p.clearAnnotations();
         p.clearRangeMarkers();
     }
 
@@ -79,9 +69,10 @@ public class RsetPeptideSpectrumAnnotations {
     	if(m_peptideFragmentationData.isEmpty) {
         	return;
         }
+        if(!m_peptideMatch.isMsQuerySet() || !m_peptideMatch.getMsQuery().isSpectrumFullySet())
+            return;
 
-        DMsQuery msQuery = m_peptideMatch.isMsQuerySet() ? m_peptideMatch.getMsQuery() : null;
-        DSpectrum spectrum = msQuery.isSpectrumFullySet() ? msQuery.getDSpectrum() : null;
+        DSpectrum spectrum = m_peptideMatch.getMsQuery().getDSpectrum();
 
         PeptideFragmentationData.TheoreticalFragmentSeries[] fragSer = m_peptideFragmentationData.getFragmentSeries();
         PeptideFragmentationData.FragmentMatch[] fragMa = m_peptideFragmentationData.getFragmentMatch();
@@ -91,7 +82,6 @@ public class RsetPeptideSpectrumAnnotations {
         ByteBuffer intensityByteBuffer = ByteBuffer.wrap(intensityByteArray).order(ByteOrder.LITTLE_ENDIAN);
         FloatBuffer intensityFloatBuffer = intensityByteBuffer.asFloatBuffer();
         double[] intensityDoubleArray = new double[intensityFloatBuffer.remaining()];
-
         for (int i = 0; i < intensityDoubleArray.length; i++) {
             intensityDoubleArray[i] = (double) intensityFloatBuffer.get();
         }
@@ -99,7 +89,6 @@ public class RsetPeptideSpectrumAnnotations {
         ByteBuffer massByteBuffer = ByteBuffer.wrap(massByteArray).order(ByteOrder.LITTLE_ENDIAN);
         DoubleBuffer massDoubleBuffer = massByteBuffer.asDoubleBuffer();
         double[] massDoubleArray = new double[massDoubleBuffer.remaining()];
-
         for (int i = 0; i < massDoubleArray.length; i++) {
             massDoubleArray[i] = massDoubleBuffer.get();
         }
@@ -120,7 +109,7 @@ public class RsetPeptideSpectrumAnnotations {
 
         // **-*-*-* HERE READING Data from Objects *-*-*-*-**-
 
-        removeAnnotations();
+        removeAnnotations(); //VDS Done at start of method !
         XYTextAnnotation xyta;
         XYPlot plot = (XYPlot) m_chart.getPlot();
 

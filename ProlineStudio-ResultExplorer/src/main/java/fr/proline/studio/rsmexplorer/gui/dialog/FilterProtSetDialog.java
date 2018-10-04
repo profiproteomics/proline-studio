@@ -17,7 +17,6 @@ import java.awt.Window;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.io.File;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.prefs.Preferences;
 import javax.swing.JFileChooser;

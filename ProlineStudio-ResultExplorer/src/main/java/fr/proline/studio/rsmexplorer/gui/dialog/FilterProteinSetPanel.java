@@ -28,7 +28,6 @@ public class FilterProteinSetPanel extends JPanel {
 
     private JPanel m_proteinPrefiltersSelectedPanel = null;
     private JComboBox m_proteinPrefilterJComboBox = null;
-    private JButton m_addProteinPrefilterButton = null;
     private AbstractParameter[] m_proteinFilterParameters;
 
     public FilterProteinSetPanel(String title, AbstractParameter[] proteinFilterParameters) {

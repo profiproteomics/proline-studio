@@ -1,14 +1,10 @@
 package fr.proline.studio.pattern.xic;
 
-import fr.proline.core.orm.lcms.MapAlignment;
-import fr.proline.core.orm.lcms.ProcessedMap;
 import fr.proline.core.orm.msi.Peptide;
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.dto.DMasterQuantPeptide;
 
 import fr.proline.core.orm.uds.dto.DDataset;
-import fr.proline.core.orm.uds.dto.DMasterQuantitationChannel;
-import fr.proline.core.orm.uds.dto.DQuantitationChannel;
 import fr.proline.studio.extendedtablemodel.GlobalTabelModelProviderInterface;
 import fr.proline.core.orm.msi.dto.DMasterQuantPeptideIon;
 import fr.proline.core.orm.msi.dto.DPeptideInstance;

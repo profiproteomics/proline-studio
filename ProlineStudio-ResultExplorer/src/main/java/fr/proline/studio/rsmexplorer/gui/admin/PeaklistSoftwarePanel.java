@@ -6,6 +6,8 @@ import fr.proline.studio.dam.DatabaseDataManager;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.gui.DefaultDialog;
+import static fr.proline.studio.gui.DefaultDialog.BUTTON_CANCEL;
+import fr.proline.studio.gui.InfoDialog;
 import fr.proline.studio.table.DecoratedTable;
 import fr.proline.studio.table.DecoratedTableModel;
 import fr.proline.studio.table.TableDefaultRendererManager;
@@ -16,15 +18,21 @@ import java.awt.GridBagConstraints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JDialog;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTextField;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.table.TableCellRenderer;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  *
@@ -33,17 +41,22 @@ import javax.swing.table.TableCellRenderer;
 public class PeaklistSoftwarePanel extends JPanel {
     
     private JDialog m_dialogOwner = null;
+    private Boolean m_isEditable = true;
     
     private PeaklistSoftwareTable m_peaklistSoftwareTable;
     
 
-    public PeaklistSoftwarePanel(JDialog dialog) {
-        
+    public PeaklistSoftwarePanel(JDialog dialog, Boolean editable) {
+        m_isEditable = editable;
         m_dialogOwner = dialog;
         
         setBorder(BorderFactory.createTitledBorder("Peaklist Softwares"));
         
         setLayout(new java.awt.GridBagLayout());
+        initInternalPanel();
+    }
+    
+    private void initInternalPanel(){
 
         JScrollPane tableScrollPane = new JScrollPane();
         m_peaklistSoftwareTable = new PeaklistSoftwareTable(); 
@@ -51,10 +64,17 @@ public class PeaklistSoftwarePanel extends JPanel {
         m_peaklistSoftwareTable.setFillsViewportHeight(true);
         
         
-        JButton addUserButton = new JButton("Add Peaklist Software");
-        addUserButton.setIcon(IconManager.getIcon(IconManager.IconType.PLUS_16X16));
-        JButton propertiesButton = new JButton("Modify Peaklist Software");
-        propertiesButton.setIcon(IconManager.getIcon(IconManager.IconType.PROPERTIES));
+        JButton addPeaklistButton = new JButton("Add Peaklist Software");
+        addPeaklistButton.setIcon(IconManager.getIcon(IconManager.IconType.PLUS_16X16));
+        addPeaklistButton.setEnabled(m_isEditable);
+        String buttonTitle = "View Peaklist Software";
+        if(m_isEditable)
+            buttonTitle = "Modify Peaklist Software";
+            
+        JButton modifyPeaklistButton = new JButton(buttonTitle);
+        modifyPeaklistButton.setIcon(IconManager.getIcon(IconManager.IconType.PROPERTIES));
+//        modifyPeaklistButton.setEnabled(m_isEditable);
+        JPanel testPanel = createTestPanel();
 
         GridBagConstraints c = new GridBagConstraints();
         c.anchor = GridBagConstraints.NORTHWEST;
@@ -68,6 +88,9 @@ public class PeaklistSoftwarePanel extends JPanel {
         c.weighty = 1.0;
         add(tableScrollPane, c);
         
+        c.gridy++;
+        c.weighty = 0;
+        add(testPanel, c);
         
         c.gridy++;
         c.gridwidth = 1;
@@ -76,13 +99,14 @@ public class PeaklistSoftwarePanel extends JPanel {
         
         c.gridx++;
         c.weightx = 0;
-        add(addUserButton, c);
+//        c.fill = GridBagConstraints.HORIZONTAL;
+        add(addPeaklistButton, c);
         
-        c.gridx++;
-        add(propertiesButton, c);
+        c.gridx++;        
+        add(modifyPeaklistButton, c);
         
         
-        addUserButton.addActionListener(new ActionListener() {
+        addPeaklistButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 PeakListSoftwareDialog peaklistSoftwareDialog = PeakListSoftwareDialog.getDialog(m_dialogOwner, PeakListSoftwareDialog.DialogMode.CREATE_USER);
@@ -115,14 +139,15 @@ public class PeaklistSoftwarePanel extends JPanel {
             
         });
         
-        propertiesButton.addActionListener(new ActionListener() {
+        modifyPeaklistButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 int selectedRow = m_peaklistSoftwareTable.getSelectedRow();
                 if (selectedRow == -1) {
                     return;
                 }
-                PeakListSoftwareDialog peaklistSoftwareDialog = PeakListSoftwareDialog.getDialog(m_dialogOwner, PeakListSoftwareDialog.DialogMode.MODIFY_USER);
+                
+                PeakListSoftwareDialog peaklistSoftwareDialog = m_isEditable ? (PeakListSoftwareDialog.getDialog(m_dialogOwner, PeakListSoftwareDialog.DialogMode.MODIFY_USER)) : (PeakListSoftwareDialog.getDialog(m_dialogOwner, PeakListSoftwareDialog.DialogMode.VIEW_USER));
                 peaklistSoftwareDialog.setLocationRelativeTo(m_dialogOwner);
                 
                 PeaklistSoftwareTableModel model = (PeaklistSoftwareTableModel) m_peaklistSoftwareTable.getModel();
@@ -172,14 +197,89 @@ public class PeaklistSoftwarePanel extends JPanel {
         
     }
     
+    private JPanel createTestPanel() {
+        JPanel testPanel = new JPanel(new java.awt.GridBagLayout());
+        testPanel.setLayout(new java.awt.GridBagLayout());
+        testPanel.setBorder(BorderFactory.createTitledBorder("Spectrum Title Parsing Test"));
+        
+        JLabel spectrumTitleLabel = new JLabel("Spectrum Title:");
+        JTextField spectrumTitleTextField = new JTextField(30);
+        JButton testButton = new JButton("Test", IconManager.getIcon(IconManager.IconType.TEST));
+
+        testButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                
+                StringBuilder sb = new StringBuilder();
+                
+                String spectrumTitle = spectrumTitleTextField.getText().trim();
+                int rowSelected = m_peaklistSoftwareTable.getSelectedRow();
+                PeaklistSoftware selectedPS = (( PeaklistSoftwareTableModel) m_peaklistSoftwareTable.getModel()).getPeaklistSoftware(rowSelected);
+                                                
+                parse(sb, StringUtils.defaultIfEmpty(selectedPS.getSpecTitleParsingRule().getRawFileIdentifier(),""), "Raw File Identifier :",spectrumTitle);
+                parse(sb, StringUtils.defaultIfEmpty(selectedPS.getSpecTitleParsingRule().getFirstCycle(),""), "First Cycle :",spectrumTitle);
+                parse(sb, StringUtils.defaultIfEmpty(selectedPS.getSpecTitleParsingRule().getLastCycle(),""), "Last Cycle :",spectrumTitle);
+                parse(sb, StringUtils.defaultIfEmpty(selectedPS.getSpecTitleParsingRule().getFirstScan(),""), "First Scan :",spectrumTitle);
+                parse(sb, StringUtils.defaultIfEmpty(selectedPS.getSpecTitleParsingRule().getLastScan(),""), "Last Scan :",spectrumTitle);
+                parse(sb, StringUtils.defaultIfEmpty(selectedPS.getSpecTitleParsingRule().getFirstTime(),""), "First Time :",spectrumTitle);
+                parse(sb, StringUtils.defaultIfEmpty(selectedPS.getSpecTitleParsingRule().getLastTime(),""), "Last Time :",spectrumTitle);
+
+                InfoDialog parseResultDialog = new InfoDialog(m_dialogOwner, InfoDialog.InfoType.NO_ICON, "Spectrum Title Parsing Result", sb.toString());
+                parseResultDialog.setButtonVisible(InfoDialog.BUTTON_OK, false);
+                parseResultDialog.setButtonName(BUTTON_CANCEL, "Close");
+                parseResultDialog.centerToWindow(m_dialogOwner);
+                parseResultDialog.setVisible(true);
+            }
+            
+        });
+        
+        GridBagConstraints c = new GridBagConstraints();
+        c.anchor = GridBagConstraints.NORTHWEST;
+        c.fill = GridBagConstraints.BOTH;
+        c.insets = new java.awt.Insets(5, 5, 5, 5);
+
+        c.gridx = 0;
+        c.gridy = 0;
+        c.weightx = 0;
+        c.weighty = 0;
+        testPanel.add(spectrumTitleLabel, c);
+        
+        c.gridx++;
+        c.weightx = 1;
+        testPanel.add(spectrumTitleTextField, c);
+        
+        c.gridx++;
+        c.weightx = 0;
+        testPanel.add(testButton, c);
+        
+        
+        return testPanel;
+    }
+    
+    
+    private void parse(StringBuilder sb, String rule, String fieldName, String stringToParse) {
+        sb.append(fieldName);
+        if (!rule.isEmpty()) {
+            Pattern pattern = Pattern.compile(rule);
+            Matcher match = pattern.matcher(stringToParse);
+            boolean findAMatch = match.find();
+            if (findAMatch) {
+                String firstMatch = match.group(1);
+                sb.append(firstMatch);
+            }
+            
+        }
+        sb.append('\n');
+    }
+        
     public class PeaklistSoftwareTable extends DecoratedTable {
 
         public PeaklistSoftwareTable() {
             
-            initAccounts();
+            initData();
         }
         
-        private void initAccounts() {
+        private void initData() {
             PeaklistSoftware[]  peaklistSoftwares = DatabaseDataManager.getDatabaseDataManager().getPeaklistSoftwaresArray();
             PeaklistSoftwareTableModel tableModel = new PeaklistSoftwareTableModel(peaklistSoftwares);
 
@@ -245,9 +345,7 @@ public class PeaklistSoftwarePanel extends JPanel {
 
         public PeaklistSoftwareTableModel(PeaklistSoftware[]  peaklistSoftwareArray) {
             m_peaklistSoftwareArray = new ArrayList<>(peaklistSoftwareArray.length);
-            for (PeaklistSoftware peaklistSoftware : peaklistSoftwareArray) {
-                m_peaklistSoftwareArray.add(peaklistSoftware);
-            }
+            m_peaklistSoftwareArray.addAll(Arrays.asList(peaklistSoftwareArray));
             
         }
         
@@ -265,9 +363,7 @@ public class PeaklistSoftwarePanel extends JPanel {
         
         public void setPeaklistSoftwares(PeaklistSoftware[]  peaklistSoftwareArray) {
             m_peaklistSoftwareArray.clear();
-            for (PeaklistSoftware peaklistSoftware : peaklistSoftwareArray) {
-                m_peaklistSoftwareArray.add(peaklistSoftware);
-            }
+            m_peaklistSoftwareArray.addAll(Arrays.asList(peaklistSoftwareArray));
             fireTableDataChanged();
         }
         
@@ -358,9 +454,6 @@ public class PeaklistSoftwarePanel extends JPanel {
     private final HashMap<Integer, TableCellRenderer> m_rendererMap = new HashMap();
         
     }
-    
-    
 
-    
 
 }

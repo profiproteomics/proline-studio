@@ -401,7 +401,8 @@ public class XICPropertiesTableModel extends AbstractPropertiesTableModel {
 
         private static final int ROWTYPE_MASTER_QUANTICHANNEL_ID = 0;
         private static final int ROWTYPE_MASTER_QUANTICHANNEL_NAME = 1;
-        private static final int ROWTYPE_MASTER_QUANTICHANNEL_NAME_SERIALIZEDPROPERTIES = 2;
+        private static final int ROWTYPE_MASTER_QUANTICHANNEL_IDENT_DATASET_NAME = 2;        
+        private static final int ROWTYPE_MASTER_QUANTICHANNEL_NAME_SERIALIZEDPROPERTIES = 3;
         
         private static final int ROW_COUNT = 3; // get in sync
         private final Color GROUP_COLOR_BACKGROUND = new Color(254,71,163);
@@ -420,6 +421,8 @@ public class XICPropertiesTableModel extends AbstractPropertiesTableModel {
                     return new GroupObject("Master Quantitation id", this);
                 case ROWTYPE_MASTER_QUANTICHANNEL_NAME:
                     return new GroupObject("Name", this);
+                case ROWTYPE_MASTER_QUANTICHANNEL_IDENT_DATASET_NAME:
+                    return new GroupObject("Identification Dataset Name", this);
                 case ROWTYPE_MASTER_QUANTICHANNEL_NAME_SERIALIZEDPROPERTIES:
                     return new GroupObject("Serialized Properties", this);
             }
@@ -449,6 +452,12 @@ public class XICPropertiesTableModel extends AbstractPropertiesTableModel {
                         return new GroupObject("", this);
                     }
                     return new GroupObject(masterQuantitationChannel.getName(), this);
+                case ROWTYPE_MASTER_QUANTICHANNEL_IDENT_DATASET_NAME:
+                    if ((masterQuantitationChannel == null) || (masterQuantitationChannel.getIdentDataset() == null)) {
+                        return new GroupObject("", this);
+                    }
+                    return new GroupObject(masterQuantitationChannel.getIdentDataset().getName(), this);
+
                 case ROWTYPE_MASTER_QUANTICHANNEL_NAME_SERIALIZEDPROPERTIES:
                     if (masterQuantitationChannel == null) {
                         return new GroupObject("", this);

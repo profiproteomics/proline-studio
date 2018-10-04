@@ -71,8 +71,7 @@ public class DefineQuantParamsCompletePanel extends AbstractDefineQuantParamsPan
     
     public DefineQuantParamsCompletePanel(boolean readOnly, boolean readValues) {
         super(readOnly);
-
-        m_parameterList = new ParameterList("XicParameters");
+        
         createParameters();
         if (readValues) {
             m_parameterList.updateIsUsed(NbPreferences.root());

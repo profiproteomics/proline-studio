@@ -218,7 +218,7 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
 
     }
 
-    private IdentificationTree(AbstractNode top) {
+    public IdentificationTree(AbstractNode top) {
 
         m_isMainTree = false;
 
@@ -782,7 +782,7 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
                 SpectralCountAction spectralCountAction = new SpectralCountAction();
                 m_mainActions.add(spectralCountAction);
 
-                CreateXICAction createXICAction = new CreateXICAction(false, AbstractTree.TreeType.TREE_IDENTIFICATION);
+                CreateXICAction createXICAction = new CreateXICAction(AbstractTree.TreeType.TREE_IDENTIFICATION);
                 m_mainActions.add(createXICAction);
 
                 m_mainActions.add(null);  // separator

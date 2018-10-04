@@ -1,14 +1,10 @@
 package fr.proline.studio.pattern.xic;
 
-import fr.proline.core.orm.lcms.MapAlignment;
-import fr.proline.core.orm.lcms.ProcessedMap;
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.dto.DMasterQuantProteinSet;
 import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.core.orm.msi.dto.DProteinSet;
 import fr.proline.core.orm.uds.dto.DDataset;
-import fr.proline.core.orm.uds.dto.DMasterQuantitationChannel;
-import fr.proline.core.orm.uds.dto.DQuantitationChannel;
 import fr.proline.studio.extendedtablemodel.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.SubTask;
@@ -147,6 +143,7 @@ public class DataboxXicProteinSet extends AbstractDataBox {
                             ((XicProteinSetPanel) getDataBoxPanelInterface()).setData(taskId, m_quantChannelInfo.getQuantChannels(), m_masterQuantProteinSetList, m_isXICMode, finished);
                             if (finished) {
                                 unregisterTask(task2Id);
+                                propagateDataChanged(ExtendedTableModelInterface.class);
                             }
                         }
                     };
@@ -162,7 +159,6 @@ public class DataboxXicProteinSet extends AbstractDataBox {
 
                 if (finished) {
                     unregisterTask(taskId);
-                    propagateDataChanged(ExtendedTableModelInterface.class);
                 }
             }
         };

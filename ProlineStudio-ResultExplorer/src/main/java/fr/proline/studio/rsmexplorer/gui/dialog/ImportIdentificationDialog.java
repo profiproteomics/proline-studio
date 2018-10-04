@@ -1,6 +1,7 @@
 package fr.proline.studio.rsmexplorer.gui.dialog;
 
 import fr.proline.core.orm.uds.InstrumentConfiguration;
+import fr.proline.core.orm.uds.FragmentationRuleSet;
 import fr.proline.core.orm.uds.PeaklistSoftware;
 import fr.proline.studio.dam.DatabaseDataManager;
 import fr.proline.studio.dpm.serverfilesystem.RootInfo;
@@ -21,7 +22,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
@@ -86,6 +86,7 @@ public class ImportIdentificationDialog extends DefaultDialog {
     private StringParameter m_decoyRegexParameter;
 
     private JComboBox m_instrumentsComboBox = null;
+    private JComboBox m_fragmentationRuleSetsComboBox = null;
     private JComboBox m_peaklistSoftwaresComboBox = null;
     //private JCheckBox m_saveSpectrumCheckBox ;
     private JComboBox m_decoyComboBox = null;
@@ -398,6 +399,35 @@ public class ImportIdentificationDialog extends DefaultDialog {
         c.weightx = 1;
         parserPanel.add(m_instrumentsComboBox, c);
 
+        
+        c.gridx = 0;
+        c.gridwidth = 1;
+        c.weightx = 0;
+        c.gridy++;
+        JLabel fragRuleSetLabel = new JLabel("Fragmentation Rule Set :");
+        fragRuleSetLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+        parserPanel.add(fragRuleSetLabel, c);
+        
+        c.gridx++;
+        c.gridwidth = 1;
+        c.weightx = 1;
+        parserPanel.add(m_fragmentationRuleSetsComboBox, c);  
+         
+        c.gridx++;
+        c.weightx = 0;
+        JButton viewFragmentationRuleSet = new JButton(IconManager.getIcon(IconManager.IconType.DOCUMENT_LIST));    
+        viewFragmentationRuleSet.setMargin(new java.awt.Insets(2, 2, 2, 2));
+        viewFragmentationRuleSet.setToolTipText("View Fragmentation Rule Sets");
+        viewFragmentationRuleSet.addActionListener( new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                FragmentationRuleSetViewer viewer  = FragmentationRuleSetViewer.getDialog(m_singletonDialog);
+                viewer.setVisible(true);
+                        
+            }
+        });
+        parserPanel.add(viewFragmentationRuleSet, c);  
+                
         c.gridx = 0;
         c.gridwidth = 1;
         c.weightx = 0;
@@ -674,7 +704,27 @@ public class ImportIdentificationDialog extends DefaultDialog {
         // reinit of some parameters
         ParameterList parameterList = (ParameterList) m_parserComboBox.getSelectedItem();
         parameterList.clean();
-
+        
+        //reinit FragmentationRuleSets
+        FragmentationRuleSet[] allFRS = DatabaseDataManager.getDatabaseDataManager().getFragmentationRuleSetsWithNullArray();
+        String selectedFragmRuleSet = ((ObjectParameter)m_sourceParameterList.getParameter("fragmentation_rule_set")).getStringValue();
+        m_fragmentationRuleSetsComboBox.removeAllItems();
+        for(int i=0; i<allFRS.length; i++){
+            m_fragmentationRuleSetsComboBox.addItem(allFRS[i]);
+        }        
+        ((ObjectParameter)m_sourceParameterList.getParameter("fragmentation_rule_set")).updateObjects(allFRS);
+        ((ObjectParameter)m_sourceParameterList.getParameter("fragmentation_rule_set")).setValue(selectedFragmRuleSet);
+        
+        //reinit FragmentationRuleSets
+        PeaklistSoftware[] allPS = DatabaseDataManager.getDatabaseDataManager().getPeaklistSoftwaresWithNullArray();
+        String selectedPeaklistSoft = ((ObjectParameter)m_sourceParameterList.getParameter("peaklist_software")).getStringValue();
+        m_peaklistSoftwaresComboBox.removeAllItems();
+        for(int i=0; i<allPS.length; i++){
+            m_peaklistSoftwaresComboBox.addItem(allPS[i]);
+        }        
+        ((ObjectParameter)m_sourceParameterList.getParameter("peaklist_software")).updateObjects(allPS);
+        ((ObjectParameter)m_sourceParameterList.getParameter("peaklist_software")).setValue(selectedPeaklistSoft);
+        
         updateDecoyRegexEnabled();
     }
 
@@ -892,6 +942,14 @@ public class ImportIdentificationDialog extends DefaultDialog {
         PeaklistSoftware peaklistSoftware = (PeaklistSoftware) m_sourceParameterList.getParameter("peaklist_software").getObjectValue();
         return peaklistSoftware.getId();
     }
+    
+    
+    public long getFragmentationRuleSetId() {
+        FragmentationRuleSet fragmentationRuleSet = (FragmentationRuleSet) m_sourceParameterList.getParameter("fragmentation_rule_set").getObjectValue();
+        if(fragmentationRuleSet == null)
+            return -1l;
+        return fragmentationRuleSet.getId();
+    }
 
 //    public boolean getSaveSpectrumMatches() {
 ////        return m_saveSpectrumCheckBox.isEnabled() && m_saveSpectrumCheckBox.isSelected();
@@ -984,7 +1042,14 @@ public class ImportIdentificationDialog extends DefaultDialog {
                 return o.getName() + " " + version;
             }
         };
-
+               
+        AbstractParameterToString<FragmentationRuleSet> fragmentationRuleSetToString = new AbstractParameterToString<FragmentationRuleSet>() {
+            @Override
+            public String toString(FragmentationRuleSet o) {
+                return o.getName();
+            }
+        };
+        
         m_instrumentsComboBox = new JComboBox(DatabaseDataManager.getDatabaseDataManager().getInstrumentsWithNullArray());
         final ObjectParameter<InstrumentConfiguration> instrumentParameter = new ObjectParameter<>("instrument", "Instrument", m_instrumentsComboBox, DatabaseDataManager.getDatabaseDataManager().getInstrumentsWithNullArray(), null, -1, instrumentToString);
         parameterList.add(instrumentParameter);
@@ -996,6 +1061,18 @@ public class ImportIdentificationDialog extends DefaultDialog {
             }
         });
 
+        
+        m_fragmentationRuleSetsComboBox = new JComboBox(DatabaseDataManager.getDatabaseDataManager().getFragmentationRuleSetsWithNullArray());
+        final ObjectParameter<FragmentationRuleSet> fragmentationRuleSetParameter = new ObjectParameter<>("fragmentation_rule_set", "FragmentationRuleSet", m_fragmentationRuleSetsComboBox, DatabaseDataManager.getDatabaseDataManager().getFragmentationRuleSetsWithNullArray(), null, -1, fragmentationRuleSetToString);
+        parameterList.add(fragmentationRuleSetParameter);
+        m_fragmentationRuleSetsComboBox.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                fragmentationRuleSetParameter.setUsed(true);  //JPM.WART : found a better fix (parameters not saved if it has never been set)
+            }
+        });
+        
         m_peaklistSoftwaresComboBox = new JComboBox(DatabaseDataManager.getDatabaseDataManager().getPeaklistSoftwaresWithNullArray());
         final ObjectParameter<PeaklistSoftware> peaklistParameter = new ObjectParameter("peaklist_software", "Peaklist Software", m_peaklistSoftwaresComboBox, DatabaseDataManager.getDatabaseDataManager().getPeaklistSoftwaresWithNullArray(), null, -1, softwareToString);
         parameterList.add(peaklistParameter);
@@ -1028,9 +1105,8 @@ public class ImportIdentificationDialog extends DefaultDialog {
 //        m_saveSpectrumCheckBox = (JCheckBox) saveSpectrumParameter.getComponent(null);
 //        parameterList.add(saveSpectrumParameter);
         return parameterList;
-
     }
-
+    
     /**
      * Class used to select Regex previously used
      */

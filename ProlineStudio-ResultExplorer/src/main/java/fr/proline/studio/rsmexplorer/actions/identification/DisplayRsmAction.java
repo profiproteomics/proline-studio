@@ -17,7 +17,7 @@ public class DisplayRsmAction extends AbstractRSMAction {
     private DisplayRsmPSMAction m_displayRsmPSMAction;
     private DisplayRsmPeptidesAction m_displayRsmPeptidesAction;
     private DisplayRsmProteinSetsAction m_displayRsmProteinSetsAction;
-    private DisplayPtmProteinSiteAction_V2 m_displayPtmProteinSite_V2;
+    private DisplayPTMSitesAction m_displayPtmProteinSite_V2;
     
     private DisplayAdjacencyMatrixAction m_displayAdjacencyMatrixAction;
     private DisplayMSQueryAction m_displayMSQueryAction;
@@ -42,7 +42,7 @@ public class DisplayRsmAction extends AbstractRSMAction {
         m_displayRsmPSMAction = new DisplayRsmPSMAction(m_treeType);
         m_displayRsmPeptidesAction = new DisplayRsmPeptidesAction(m_treeType);
         m_displayRsmProteinSetsAction = new DisplayRsmProteinSetsAction(m_treeType);       
-        m_displayPtmProteinSite_V2 = new DisplayPtmProteinSiteAction_V2(m_treeType);
+        m_displayPtmProteinSite_V2 = new DisplayPTMSitesAction(m_treeType);
         
         m_displayAdjacencyMatrixAction = new DisplayAdjacencyMatrixAction(m_treeType);
         

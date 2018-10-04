@@ -22,7 +22,7 @@ import fr.proline.studio.pattern.DataAnalyzerWindowBoxManager;
 import fr.proline.studio.progress.ProgressInterface;
 import fr.proline.studio.table.TableInfo;
 import fr.proline.studio.rsmexplorer.actions.table.DisplayTablePopupMenu;
-import fr.proline.studio.rsmexplorer.gui.model.PeptidesOfPtmSiteTableModel;
+import fr.proline.studio.rsmexplorer.gui.model.PeptidesOfPTMSiteTableModel;
 import fr.proline.studio.search.SearchToggleButton;
 import fr.proline.studio.extendedtablemodel.CompoundTableModel;
 import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
@@ -130,18 +130,18 @@ public class XicPeptidesPTMSitePanel extends JPanel implements DataBoxPanelInter
         m_peptidesPtmSiteScrollPane = new JScrollPane();
 
         m_peptidesPtmSiteTable = new XicPeptidesPTMSiteTable(); 
-        PeptidesOfPtmSiteTableModel model1 = new PeptidesOfPtmSiteTableModel();
+        PeptidesOfPTMSiteTableModel model1 = new PeptidesOfPTMSiteTableModel();
         QuantPeptideInstTableModel model2 = new QuantPeptideInstTableModel(m_peptidesPtmSiteTable, true);
         JoinDataModel joinedModel = new JoinDataModel();
         joinedModel.setData(model1, model2, 0, 0, 0d , 0, 0, 0d, Boolean.FALSE);
         m_peptidesPtmSiteTable.setModel(new CompoundTableModel(joinedModel, true));
 
         // hide the id column
-        m_peptidesPtmSiteTable.getColumnExt(m_peptidesPtmSiteTable.convertColumnIndexToView(PeptidesOfPtmSiteTableModel.COLTYPE_PEPTIDE_ID)).setVisible(false);
+        m_peptidesPtmSiteTable.getColumnExt(m_peptidesPtmSiteTable.convertColumnIndexToView(PeptidesOfPTMSiteTableModel.COLTYPE_PEPTIDE_ID)).setVisible(false);
         TableRowSorter<TableModel> sorter = new TableRowSorter<>(m_peptidesPtmSiteTable.getModel());
         m_peptidesPtmSiteTable.setRowSorter(sorter);
 
-        sorter.setComparator(PeptidesOfPtmSiteTableModel.COLTYPE_MODIFICATION_LOC, new Comparator<String>() {
+        sorter.setComparator(PeptidesOfPTMSiteTableModel.COLTYPE_MODIFICATION_LOC, new Comparator<String>() {
 
             @Override
             public int compare(String s1, String s2) {
@@ -167,7 +167,7 @@ public class XicPeptidesPTMSitePanel extends JPanel implements DataBoxPanelInter
 
         });
 
-        sorter.setComparator(PeptidesOfPtmSiteTableModel.COLTYPE_PROTEIN_LOC, new Comparator<Integer>() {
+        sorter.setComparator(PeptidesOfPTMSiteTableModel.COLTYPE_PROTEIN_LOC, new Comparator<Integer>() {
 
             @Override
             public int compare(Integer s1, Integer s2) {
@@ -265,12 +265,12 @@ public class XicPeptidesPTMSitePanel extends JPanel implements DataBoxPanelInter
     public void setData(Long taskId,  DQuantitationChannel[] quantChannels, List<DMasterQuantPeptide> peptides,  PTMSite peptidesPTMSite, boolean finished) {
 
         JoinDataModel previousModel = ((JoinDataModel) ((CompoundTableModel) m_peptidesPtmSiteTable.getModel()).getBaseModel());        
-        PeptidesOfPtmSiteTableModel model1 = (PeptidesOfPtmSiteTableModel) previousModel.getFirstTableModel();
+        PeptidesOfPTMSiteTableModel model1 = (PeptidesOfPTMSiteTableModel) previousModel.getFirstTableModel();
         QuantPeptideInstTableModel model2 = (QuantPeptideInstTableModel) previousModel.getSecondTableModel();
         model1.setData(peptidesPTMSite, false, null);
         model2.setData(taskId, -1L, quantChannels, peptides, finished);
         JoinDataModel joinedModel = new JoinDataModel();
-        joinedModel.setData(model1, model2, PeptidesOfPtmSiteTableModel.COLTYPE_PEPTIDE_ID, QuantPeptideInstTableModel.COLTYPE_PEPTIDE_INST_ID, 0d , -1, -1, 0d, Boolean.FALSE);
+        joinedModel.setData(model1, model2, PeptidesOfPTMSiteTableModel.COLTYPE_PEPTIDE_ID, QuantPeptideInstTableModel.COLTYPE_PEPTIDE_INST_ID, 0d , -1, -1, 0d, Boolean.FALSE);
         
         
         m_peptidesPtmSiteTable.setModel(new CompoundTableModel(joinedModel, true));

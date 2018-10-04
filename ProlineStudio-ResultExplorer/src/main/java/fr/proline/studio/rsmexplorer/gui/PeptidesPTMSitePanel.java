@@ -20,7 +20,7 @@ import fr.proline.studio.pattern.MsQueryInfoRset;
 import fr.proline.studio.progress.ProgressInterface;
 import fr.proline.studio.table.TableInfo;
 import fr.proline.studio.rsmexplorer.actions.table.DisplayTablePopupMenu;
-import fr.proline.studio.rsmexplorer.gui.model.PeptidesOfPtmSiteTableModel;
+import fr.proline.studio.rsmexplorer.gui.model.PeptidesOfPTMSiteTableModel;
 import fr.proline.studio.search.SearchToggleButton;
 import fr.proline.studio.extendedtablemodel.CompoundTableModel;
 import fr.proline.studio.table.DecoratedMarkerTable;
@@ -88,7 +88,7 @@ public class PeptidesPTMSitePanel extends JPanel implements DataBoxPanelInterfac
 
         CompoundTableModel compoundTableModel = ((CompoundTableModel) m_peptidesPtmSiteTable.getModel());
         // Retrieve ProteinPTMSite selected
-        PeptidesOfPtmSiteTableModel tableModel = (PeptidesOfPtmSiteTableModel) compoundTableModel.getBaseModel();
+        PeptidesOfPTMSiteTableModel tableModel = (PeptidesOfPTMSiteTableModel) compoundTableModel.getBaseModel();
         return tableModel.getCurrentPTMSite();
     }
     
@@ -96,7 +96,7 @@ public class PeptidesPTMSitePanel extends JPanel implements DataBoxPanelInterfac
 
         CompoundTableModel compoundTableModel = ((CompoundTableModel) m_peptidesPtmSiteTable.getModel());
         // Retrieve ProteinPTMSite selected
-        PeptidesOfPtmSiteTableModel tableModel = (PeptidesOfPtmSiteTableModel) compoundTableModel.getBaseModel();
+        PeptidesOfPTMSiteTableModel tableModel = (PeptidesOfPTMSiteTableModel) compoundTableModel.getBaseModel();
         
         // Retrieve Selected Row
         int selectedRow = getSelectedTableModelRow();    
@@ -108,7 +108,7 @@ public class PeptidesPTMSitePanel extends JPanel implements DataBoxPanelInterfac
     public DPeptideInstance getSelectedPeptideInstance() {
         CompoundTableModel compoundTableModel = ((CompoundTableModel) m_peptidesPtmSiteTable.getModel());
         // Retrieve ProteinPTMSite selected
-        PeptidesOfPtmSiteTableModel tableModel = (PeptidesOfPtmSiteTableModel) compoundTableModel.getBaseModel();
+        PeptidesOfPTMSiteTableModel tableModel = (PeptidesOfPTMSiteTableModel) compoundTableModel.getBaseModel();
         
         // Retrieve Selected Row
         int selectedRow = getSelectedTableModelRow();    
@@ -143,7 +143,7 @@ public class PeptidesPTMSitePanel extends JPanel implements DataBoxPanelInterfac
         m_currentPeptidesPTMSite = peptidesPTMSite;
         m_currentPepInst = pepInst;
         
-        PeptidesOfPtmSiteTableModel model = ((PeptidesOfPtmSiteTableModel) ((CompoundTableModel) m_peptidesPtmSiteTable.getModel()).getBaseModel());
+        PeptidesOfPTMSiteTableModel model = ((PeptidesOfPTMSiteTableModel) ((CompoundTableModel) m_peptidesPtmSiteTable.getModel()).getBaseModel());
         model.setData(peptidesPTMSite, m_displayPeptidesMatches, pepInst);
         // select the first row
         if ((peptidesPTMSite != null) && ((!m_displayPeptidesMatches) || (pepInst != null)) ) {
@@ -254,16 +254,16 @@ public class PeptidesPTMSitePanel extends JPanel implements DataBoxPanelInterfac
         m_peptidesPtmSiteScrollPane = new JScrollPane();
 
         m_peptidesPtmSiteTable = new PeptidesPTMSiteTable();
-        PeptidesOfPtmSiteTableModel model = new PeptidesOfPtmSiteTableModel();
+        PeptidesOfPTMSiteTableModel model = new PeptidesOfPTMSiteTableModel();
         m_peptidesPtmSiteTable.setModel(new CompoundTableModel(model, true));
 
         // hide the id column
-        m_peptidesPtmSiteTable.getColumnExt(m_peptidesPtmSiteTable.convertColumnIndexToView(PeptidesOfPtmSiteTableModel.COLTYPE_PEPTIDE_ID)).setVisible(false);
+        m_peptidesPtmSiteTable.getColumnExt(m_peptidesPtmSiteTable.convertColumnIndexToView(PeptidesOfPTMSiteTableModel.COLTYPE_PEPTIDE_ID)).setVisible(false);
         //m_ptmProteinSiteTable.displayColumnAsPercentage(PtmProtenSiteTableModel_V2.COLTYPE_PEPTIDE_SCORE);
         TableRowSorter<TableModel> sorter = new TableRowSorter<>(m_peptidesPtmSiteTable.getModel());
         m_peptidesPtmSiteTable.setRowSorter(sorter);
 
-        sorter.setComparator(PeptidesOfPtmSiteTableModel.COLTYPE_MODIFICATION_LOC, new Comparator<String>() {
+        sorter.setComparator(PeptidesOfPTMSiteTableModel.COLTYPE_MODIFICATION_LOC, new Comparator<String>() {
 
             @Override
             public int compare(String s1, String s2) {
@@ -289,7 +289,7 @@ public class PeptidesPTMSitePanel extends JPanel implements DataBoxPanelInterfac
 
         });
 
-        sorter.setComparator(PeptidesOfPtmSiteTableModel.COLTYPE_PROTEIN_LOC, new Comparator<Integer>() {
+        sorter.setComparator(PeptidesOfPTMSiteTableModel.COLTYPE_PROTEIN_LOC, new Comparator<Integer>() {
 
             @Override
             public int compare(Integer s1, Integer s2) {

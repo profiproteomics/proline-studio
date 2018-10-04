@@ -25,25 +25,40 @@ public class DefineQuantParamsPanel extends JPanel {
     
     private static DefineQuantParamsPanel m_singleton = null;
     
-    private AbstractDefineQuantParamsPanel m_internalPanel = null;
+    private static boolean m_usePanelV2 = false;
+    private AbstractGenericQuantParamsPanel m_internalQuantPanel = null;
     
     private  JButton m_toggleButton = null;
+    private JPanel m_mainPanel ;
     
-    private boolean m_completePanel;
+    private boolean m_completePanel; //todo: change to m_simplifiedPanel to simplify ...
+    
+    private GridBagConstraints m_internalPanelGBC = null;
     
     private DefineQuantParamsPanel() {
         setLayout(new BorderLayout());
  
         
         JPanel wizardPanel = createWizardPanel();
-        JPanel mainPanel = createMainPanel();
+        m_mainPanel = createMainPanel();
 
         add(wizardPanel, BorderLayout.PAGE_START);
-        add(mainPanel, BorderLayout.CENTER);
+        add(m_mainPanel, BorderLayout.CENTER);
     }
     
-    public AbstractDefineQuantParamsPanel getParamsPanel() {
-        return m_internalPanel;
+    public String getParamsVersion(){
+        if(m_usePanelV2)
+            return "2.0";
+        else 
+            return "1.0";
+    }
+    
+    public AbstractGenericQuantParamsPanel getParamsPanel() {
+        return m_internalQuantPanel;     
+    }
+    
+    protected static void setUsePanelV2(boolean useV2){
+        m_usePanelV2 = useV2;
     }
     
     public static DefineQuantParamsPanel getDefineQuantPanel() {
@@ -74,17 +89,9 @@ public class DefineQuantParamsPanel extends JPanel {
                 exitDialog.setVisible(true);
 
                 if (exitDialog.getButtonClicked() == OptionDialog.BUTTON_OK) {
-                    m_completePanel = !m_completePanel;
-                    m_toggleButton.setIcon(m_completePanel ? IconManager.getIcon(IconManager.IconType.OPTIONS_LESS) : IconManager.getIcon(IconManager.IconType.OPTIONS_MORE));
-                    mainPanel.remove(m_internalPanel);
-                    m_internalPanel = getParamsPanel(m_completePanel, false);
-                    mainPanel.add(m_internalPanel, c);
-                    mainPanel.revalidate();
-                    mainPanel.repaint();
+                   setIsSimplifiedPanel(m_completePanel); //if current is complete, switch to simplified panel.
                 }
-                }
-                
-                
+            }
 
         });
         
@@ -103,14 +110,26 @@ public class DefineQuantParamsPanel extends JPanel {
         c.weighty = 1;
         Preferences preferences = NbPreferences.root();
         boolean completePanel = ! preferences.getBoolean(XIC_SIMPLIFIED_PARAMS, true);
-        m_internalPanel = getParamsPanel(completePanel, true);
-        mainPanel.add(m_internalPanel, c);
 
+        m_internalQuantPanel = getParamsPanel(completePanel, true);
+        mainPanel.add(m_internalQuantPanel, c);  
+        m_internalPanelGBC = c;
         
         return mainPanel;
     }
     
-            
+    protected void setIsSimplifiedPanel(boolean isSimplified){
+        if(m_completePanel == isSimplified) { //have to change Panel 
+            m_completePanel = !m_completePanel;
+            m_toggleButton.setIcon(m_completePanel ? IconManager.getIcon(IconManager.IconType.OPTIONS_LESS) : IconManager.getIcon(IconManager.IconType.OPTIONS_MORE));
+            m_mainPanel.remove(m_internalQuantPanel);
+            m_internalQuantPanel = getParamsPanel(m_completePanel, true);
+            m_mainPanel.add(m_internalQuantPanel, m_internalPanelGBC);
+            m_mainPanel.revalidate();
+            m_mainPanel.repaint();
+        }        
+    }
+               
     private JPanel createWizardPanel() {
         JPanel wizardPanel = new JPanel();
         wizardPanel.setLayout(new GridBagLayout());
@@ -132,13 +151,19 @@ public class DefineQuantParamsPanel extends JPanel {
     }
     
     
-    private AbstractDefineQuantParamsPanel getParamsPanel(boolean completePanel, boolean readValues) {
+    private AbstractGenericQuantParamsPanel getParamsPanel(boolean completePanel, boolean readValues) {
         m_completePanel = completePanel;
         updateButton(m_completePanel);
         if (m_completePanel) {
-            return new DefineQuantParamsCompletePanel(false, readValues);
+            if(m_usePanelV2)
+                return new DefineQuantParamsCompletePanelV2(false, readValues);
+            else
+                return new DefineQuantParamsCompletePanel(false, readValues);
         } else {
-            return new DefineQuantParamsSimplifiedPanel(false, readValues);
+            if(m_usePanelV2)            
+                return new DefineQuantParamsSimplifiedPanelV2(false, readValues);
+            else
+                return new DefineQuantParamsSimplifiedPanel(false, readValues);
         }
     }
     

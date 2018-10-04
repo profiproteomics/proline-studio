@@ -3,7 +3,6 @@ package fr.proline.studio.rsmexplorer.gui;
 import fr.proline.core.orm.msi.MsiSearch;
 import fr.proline.core.orm.msi.Peaklist;
 import fr.proline.core.orm.msi.ResultSet;
-import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.extendedtablemodel.ExtraDataType;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
@@ -134,18 +133,6 @@ public class RsetAllPanel extends HourglassPanel implements DataBoxPanelInterfac
         panel.add(toolbar, BorderLayout.WEST);
         
         return panel;
-    }
-
-    private void initComponents() {   
-        
-        setLayout(new BorderLayout());
-
-        JPanel internalPanel = initInternalPanel();
-        add(internalPanel, BorderLayout.CENTER);
-
-        JToolBar toolbar = initToolbar();
-        add(toolbar, BorderLayout.WEST);
-
     }
 
     private JPanel initInternalPanel() {
@@ -536,11 +523,6 @@ public class RsetAllPanel extends HourglassPanel implements DataBoxPanelInterfac
         }
 
         @Override
-        public Sheet createSheet() {
-            return PropertiesAction.createSheet(null, m_rset, null);
-        }
-
-        @Override
         public void loadDataForProperties(final Runnable callback) {
 
             AbstractDatabaseCallback taskCallback = new AbstractDatabaseCallback() {
@@ -567,6 +549,11 @@ public class RsetAllPanel extends HourglassPanel implements DataBoxPanelInterfac
 
         public ResultSet getResultset() {
             return m_rset;
+        }
+
+        @Override
+        public Sheet createSheet() {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
         }
     }
 
@@ -894,7 +881,8 @@ public class RsetAllPanel extends HourglassPanel implements DataBoxPanelInterfac
             ArrayList<ResultSet> resultSetList = new ArrayList<>(nbRows);
 
             for (int i = 0; i < nbRows; i++) {
-                int row = table.convertRowIndexToModel(rows[i]);
+//                int row = table.convertRowIndexToModel(rows[i]);
+                int row = table.convertRowIndexToNonFilteredModel(rows[i]);
                 ResultSet rset = model.getResultSet(row);
                 resultSetList.add(rset);
 

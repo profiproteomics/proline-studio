@@ -3,12 +3,13 @@ package fr.proline.studio.pattern;
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.msi.dto.DProteinMatch;
-import fr.proline.core.orm.msi.dto.DProteinPTMSite;
 import fr.proline.studio.extendedtablemodel.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
-import fr.proline.studio.dam.tasks.DatabasePTMProteinSiteTask;
+import fr.proline.studio.dam.tasks.DatabasePTMSitesTask;
 import fr.proline.studio.dam.tasks.SubTask;
+import fr.proline.studio.dam.tasks.data.PTMDataset;
+import fr.proline.studio.dam.tasks.data.PTMSite;
 import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.rsmexplorer.gui.PTMProteinSitePanel;
 import java.util.ArrayList;
@@ -20,7 +21,7 @@ import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
  */
 public class DataBoxPTMProteinSite extends AbstractDataBox {
     
-    private ResultSummary m_rsm = null;
+    private PTMDataset m_dataset = null;
 
     
     public DataBoxPTMProteinSite() { 
@@ -36,12 +37,11 @@ public class DataBoxPTMProteinSite extends AbstractDataBox {
         inParameter.addParameter(ResultSummary.class, false);
         registerInParameter(inParameter);
 
-
         // Register possible out parameters
         // One or Multiple ProteinSet
 
         GroupParameter outParameter = new GroupParameter();
-        outParameter.addParameter(DProteinPTMSite.class, true);
+        outParameter.addParameter(PTMSite.class, true);
         outParameter.addParameter(ResultSummary.class, false);
         registerOutParameter(outParameter);
         
@@ -76,7 +76,7 @@ public class DataBoxPTMProteinSite extends AbstractDataBox {
 
         final int loadingId = setLoading();
 
-        final ArrayList<DProteinPTMSite> proteinPTMSiteArray = new ArrayList<>();
+        final ArrayList<PTMSite> proteinPTMSiteArray = new ArrayList<>();
         
         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
 
@@ -90,7 +90,7 @@ public class DataBoxPTMProteinSite extends AbstractDataBox {
 
                 ((PTMProteinSitePanel) getDataBoxPanelInterface()).setData(taskId, proteinPTMSiteArray, finished);
                 
-                //PTMProteinSitePanel //JPM.TODO
+                //PTMProteinSitePanel_V2 //JPM.TODO
                 
                 /*if (subTask == null) {
                     DProteinSet[] proteinSetArray = m_rsm.getTransientData().getProteinSetArray();
@@ -104,12 +104,15 @@ public class DataBoxPTMProteinSite extends AbstractDataBox {
                     ((RsmProteinSetPanel) getDataBoxPanelInterface()).dataUpdated(subTask, finished);
                     
                 }*/
-                
-                
+                                
 
                 setLoaded(loadingId);
                 
                 if (finished) {
+                    if(m_previousTaskId != null && m_previousTaskId.equals(taskId)) {
+                        m_previousTaskId = null; // Reste PreviousTask. Was finished ! 
+                    }
+                    m_dataset.setPTMSites(proteinPTMSiteArray);
                     unregisterTask(taskId);
                     propagateDataChanged(ExtendedTableModelInterface.class);
                 }
@@ -119,7 +122,7 @@ public class DataBoxPTMProteinSite extends AbstractDataBox {
 
         // ask asynchronous loading of data
 
-        DatabasePTMProteinSiteTask task = new DatabasePTMProteinSiteTask(callback, getProjectId(), m_rsm, proteinPTMSiteArray);
+        DatabasePTMSitesTask task = new DatabasePTMSitesTask(callback, getProjectId(), m_dataset.getDataset().getResultSummary(), proteinPTMSiteArray);
         Long taskId = task.getId();
         if (m_previousTaskId != null) {
             // old task is suppressed if it has not been already done
@@ -139,25 +142,24 @@ public class DataBoxPTMProteinSite extends AbstractDataBox {
                 return ((RsmProteinSetPanel)getDataBoxPanelInterface()).getSelectedProteinSet();
             }*/ //JPM.TODO
             if (parameterType.equals(ResultSummary.class)) {
-                if (m_rsm != null) {
-                    return m_rsm;
+                if (m_dataset.getDataset().getResultSummary() != null) {
+                    return m_dataset.getDataset().getResultSummary();
                 }
             }
             
-            
             if (parameterType.equals(DProteinMatch.class)) {
-                DProteinPTMSite proteinPtmSite = ((PTMProteinSitePanel)getDataBoxPanelInterface()).getSelectedProteinPTMSite();
+                PTMSite proteinPtmSite = ((PTMProteinSitePanel)getDataBoxPanelInterface()).getSelectedProteinPTMSite();
                 if (proteinPtmSite != null) {
-                    return proteinPtmSite.getPoteinMatch();
+                    return proteinPtmSite.getProteinMatch();
                 }
             }
             if (parameterType.equals(DPeptideMatch.class)) {
-                DProteinPTMSite proteinPtmSite = ((PTMProteinSitePanel) getDataBoxPanelInterface()).getSelectedProteinPTMSite();
+                PTMSite proteinPtmSite = ((PTMProteinSitePanel) getDataBoxPanelInterface()).getSelectedProteinPTMSite();
                 if (proteinPtmSite != null) {
-                    return proteinPtmSite.getPeptideMatch();
+                    return proteinPtmSite.getBestPeptideMatch();
                 }
             }
-            if (parameterType.equals(DProteinPTMSite.class)) {
+            if (parameterType.equals(PTMSite.class)) {
                 return ((PTMProteinSitePanel) getDataBoxPanelInterface()).getSelectedProteinPTMSite();
             }
  
@@ -173,10 +175,8 @@ public class DataBoxPTMProteinSite extends AbstractDataBox {
  
     @Override
     public void setEntryData(Object data) {
-        
         getDataBoxPanelInterface().addSingleValue(data);
-        
-        m_rsm = (ResultSummary) data;
+        m_dataset = (PTMDataset) data;
         dataChanged();
     }
 

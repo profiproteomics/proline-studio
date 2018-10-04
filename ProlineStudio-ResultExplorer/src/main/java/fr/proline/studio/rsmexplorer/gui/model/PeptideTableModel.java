@@ -8,7 +8,6 @@ import fr.proline.core.orm.msi.dto.DSpectrum;
 import fr.proline.core.orm.msi.dto.DMsQuery;
 import fr.proline.core.orm.msi.dto.DPeptideInstance;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
-import fr.proline.core.orm.msi.dto.DPeptidePTM;
 import fr.proline.core.orm.msi.dto.DProteinSet;
 import fr.proline.studio.corewrapper.util.PeptideClassesUtils;
 import fr.proline.studio.extendedtablemodel.ExtraDataType;
@@ -28,13 +27,11 @@ import fr.proline.studio.table.DecoratedTableModel;
 import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
 import fr.proline.studio.table.LazyData;
 import fr.proline.studio.table.TableDefaultRendererManager;
-import fr.proline.studio.utils.GlobalValues;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import javax.swing.table.TableCellRenderer;
-import org.apache.poi.hssf.util.HSSFColor;
 
 
 /**
@@ -400,10 +397,8 @@ public class PeptideTableModel extends DecoratedTableModel implements GlobalTabl
     }
 
     public void setData(DPeptideInstance[] peptideInstances) {
-        m_peptideInstances = peptideInstances;
-        
+        m_peptideInstances = peptideInstances;        
         fireTableDataChanged();
-
     }
 
     public DPeptideInstance[] getPeptideInstances() {

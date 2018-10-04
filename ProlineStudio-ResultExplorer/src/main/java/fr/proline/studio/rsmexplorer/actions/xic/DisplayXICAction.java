@@ -23,7 +23,7 @@ public class DisplayXICAction extends AbstractRSMAction {
     private DisplayXICProteinSetAction m_displayXICProteinSetAction;
     private DisplayXICPeptideSetAction m_displayXICPeptideSetAction;
     private DisplayXICPeptideIonAction m_displayXICPeptideIonAction;
-    private DisplayXICPtmProteinSiteAction m_displayXICPtmProteinSiteAction;
+    private DisplayXICPTMSitesAction m_displayXICPtmProteinSiteAction;
     private DisplayUserWindowAction m_displayUserWindowAction;
     private ManageUserWindowsAction m_manageUserWindowsAction;
     private ArrayList<DisplaySavedWindowAction> m_displaySavedWindowActionList;
@@ -42,7 +42,7 @@ public class DisplayXICAction extends AbstractRSMAction {
         m_displayXICProteinSetAction = new DisplayXICProteinSetAction();
         m_displayXICPeptideSetAction = new DisplayXICPeptideSetAction();
         m_displayXICPeptideIonAction = new DisplayXICPeptideIonAction();
-        m_displayXICPtmProteinSiteAction = new DisplayXICPtmProteinSiteAction();
+        m_displayXICPtmProteinSiteAction = new DisplayXICPTMSitesAction();
         m_manageUserWindowsAction = new ManageUserWindowsAction(WindowSavedManager.SAVE_WINDOW_FOR_QUANTI, m_treeType);
         m_displayUserWindowAction = new DisplayUserWindowAction(WindowSavedManager.SAVE_WINDOW_FOR_QUANTI, m_treeType);
        

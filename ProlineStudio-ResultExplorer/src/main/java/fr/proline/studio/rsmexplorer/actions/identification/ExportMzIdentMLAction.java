@@ -13,6 +13,7 @@ import fr.proline.studio.dpm.task.jms.ExportDatasetTask;
 import fr.proline.studio.export.ExportDialog;
 import fr.proline.studio.export.ExporterFactory;
 import fr.proline.studio.gui.DefaultDialog;
+import fr.proline.studio.rsmexplorer.gui.dialog.exporter.Export2MzIdentMLDialog;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
@@ -37,95 +38,93 @@ public class ExportMzIdentMLAction extends AbstractRSMAction {
     
         @Override
     public void actionPerformed(final AbstractNode[] selectedNodes, final int x, final int y) {
-
         final DataSetNode dataSetNode = (DataSetNode) selectedNodes[0];
-        final ExportDialog  dialog = ExportDialog.getDialog(WindowManager.getDefault().getMainWindow(), false, ExporterFactory.EXPORT_MZIDENTML);
 
-//        final LoadWaitingDialog loadWaitingDialog = new LoadWaitingDialog(WindowManager.getDefault().getMainWindow());
-
+        //Once export to file is choosen, open MzIdentMLSpecific dialog
+        Export2MzIdentMLDialog mzIdentDialog = new Export2MzIdentMLDialog(WindowManager.getDefault().getMainWindow());
+        
         DefaultDialog.ProgressTask task = new DefaultDialog.ProgressTask() {
-            @Override
-            public int getMinValue() {
-                return 0;
-            }
+                @Override
+                public int getMinValue() {
+                    return 0;
+                }
 
-            @Override 
-            public int getMaxValue() {
-                return 100;
-            }
+                @Override
+                public int getMaxValue() {
+                    return 100;
+                }
 
-            @Override
-            protected Object doInBackground() throws Exception {
-                final AbstractJMSCallback downloadCallback = new AbstractJMSCallback() {
+                @Override
+                protected Object doInBackground() throws Exception {
+                    final AbstractJMSCallback downloadCallback = new AbstractJMSCallback() {
 
-                    @Override
-                    public boolean mustBeCalledInAWT() {
-                        return true;
-                    }
-
-                    @Override
-                    public void run(boolean success) {
-                        if (success) {
-
-                            setProgress(100);
-
-                        } else {
-                                    // nothing to do
-                            // failed
-                            setProgress(100);
+                        @Override
+                        public boolean mustBeCalledInAWT() {
+                            return true;
                         }
-                    }
-                };
 
-                // used as out parameter for the service
-                final List<String>  _filePath = new ArrayList();
-                final List<String> _jmsNodeId = new ArrayList();
+                        @Override
+                        public void run(boolean success) {
+                            if (success) {
 
-                AbstractJMSCallback exportCallback = new AbstractJMSCallback() {
+                                setProgress(100);
 
-                    @Override
-                    public boolean mustBeCalledInAWT() {
-                        return true;
-                    }
-
-                    @Override
-                    public void run(boolean success) {
-                        if (success) {
-
-                            String fileName = dialog.getFileName();
-                            //TODO use ExportFactory getList ... 
-                            if (!fileName.toLowerCase().endsWith(".mzid")) {
-                                fileName += ".mzid";
+                            } else {
+                                // nothing to do
+                                // failed
+                                setProgress(100);
                             }
-                            if (_filePath.size() == 1) {
-                                DownloadFileTask task = new DownloadFileTask(downloadCallback, fileName, _filePath.get(0), _jmsNodeId.get(0));
-                                AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
-                            }                            
-
-                        } else {
-                            // nothing to do
-                            // failed
-                            setProgress(100);
                         }
-                    }
-                };
+                    };
+                    // used as out parameter for the service
+                    final List<String> _filePath = new ArrayList();
+                    final List<String> _jmsNodeId = new ArrayList();
 
-                
-                List<DDataset> dsets = new ArrayList<>();
-                dsets.add(dataSetNode.getDataset());
-                ExportDatasetTask task = new ExportDatasetTask(exportCallback, dsets, null, _filePath, _jmsNodeId, ExportDatasetTask.ExporterFormat.MZIDENTML, null);
-                AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
+                    AbstractJMSCallback exportCallback = new AbstractJMSCallback() {
 
-                return null;
-            }
-        };
+                        @Override
+                        public boolean mustBeCalledInAWT() {
+                            return true;
+                        }
 
-        dialog.setTask(task);
-        dialog.setLocation(x, y);
-        dialog.setVisible(true);        
+                        @Override
+                        public void run(boolean success) {
+                            if (success) {
+
+                                String fileName = mzIdentDialog.getFileName();
+                                //TODO use ExportFactory getList ... 
+                                if (!fileName.toLowerCase().endsWith(".mzid")) {
+                                    fileName += ".mzid";
+                                }
+                                if (_filePath.size() == 1) {
+                                    DownloadFileTask task = new DownloadFileTask(downloadCallback, fileName, _filePath.get(0), _jmsNodeId.get(0));
+                                    AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
+                                }
+
+                            } else {
+                                // nothing to do
+                                // failed
+                                setProgress(100);
+                            }
+                        }
+                    };
+
+                    List<DDataset> dsets = new ArrayList<>();
+                    dsets.add(dataSetNode.getDataset());
+                    ExportDatasetTask task = new ExportDatasetTask(exportCallback, dsets, null, _filePath, _jmsNodeId, ExportDatasetTask.ExporterFormat.MZIDENTML, mzIdentDialog.getExportParams());
+                    AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
+
+                    return null;
+                }
+            };
+
+        mzIdentDialog.setTask(task);
+        mzIdentDialog.setLocation(x, y);
+        mzIdentDialog.setVisible(true);
+        
     }
     
-        @Override
+    @Override
     public void updateEnabled(AbstractNode[] selectedNodes) {
 
         int nbSelectedNodes = selectedNodes.length;

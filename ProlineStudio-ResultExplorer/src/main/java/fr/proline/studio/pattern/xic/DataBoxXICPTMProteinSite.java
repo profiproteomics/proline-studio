@@ -1,30 +1,38 @@
 package fr.proline.studio.pattern.xic;
 
+import fr.proline.core.orm.msi.ProteinSetProteinMatchItem;
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.dto.DMasterQuantProteinSet;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
-import fr.proline.studio.extendedtablemodel.GlobalTabelModelProviderInterface;
+import fr.proline.core.orm.util.DStoreCustomPoolConnectorFactory;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
-import fr.proline.studio.dam.tasks.DatabasePTMProteinSiteTask_V2;
+import fr.proline.studio.dam.tasks.DatabasePTMSitesTask;
 import fr.proline.studio.dam.tasks.SubTask;
+import fr.proline.studio.dam.tasks.data.PTMDataset;
 import fr.proline.studio.dam.tasks.data.PTMSite;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadLcMSTask;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadXicMasterQuantTask;
 import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.GroupParameter;
-import fr.proline.studio.rsmexplorer.gui.PTMProteinSitePanel_V2;
+import fr.proline.studio.rsmexplorer.gui.PTMProteinSitePanel;
 import fr.proline.studio.rsmexplorer.gui.xic.QuantChannelInfo;
-import fr.proline.studio.types.XicMode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
+import fr.proline.studio.extendedtablemodel.GlobalTabelModelProviderInterface;
+import fr.proline.studio.types.XicMode;
+import java.util.HashMap;
+import java.util.Iterator;
+import javax.persistence.EntityManager;
+import javax.persistence.Query;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -32,9 +40,15 @@ import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
  */
 public class DataBoxXICPTMProteinSite extends AbstractDataBox {
 
-    private DDataset m_dataset;
+    private static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
+    
+    private PTMDataset m_dataset;
     private ResultSummary m_rsm;
-    private Map<Long,DMasterQuantProteinSet> m_masterQuantProtMatchByIdProtMatchId;
+    private Long m_previousTaskId = null;
+    private List<DMasterQuantProteinSet> m_masterQuantProteinSetList;
+    private DQuantitationChannel[] m_quantitationChannelArray = null;
+    private QuantChannelInfo m_quantChannelInfo;
+
      
     public DataBoxXICPTMProteinSite(){
         super(DataboxType.DataBoxXICPTMProteinSite, DataboxStyle.STYLE_XIC);
@@ -89,7 +103,7 @@ public class DataBoxXICPTMProteinSite extends AbstractDataBox {
         if (m_dataset == null) {
             return null;
         }
-        return m_dataset.getResultSetId();
+        return m_dataset.getDataset().getResultSetId();
     }
 
     @Override
@@ -97,12 +111,12 @@ public class DataBoxXICPTMProteinSite extends AbstractDataBox {
         if (m_dataset == null) {
             return null;
         }
-        return m_dataset.getResultSummaryId();
+        return m_dataset.getDataset().getResultSummaryId();
     }
     
     @Override
     public void createPanel() {       
-        PTMProteinSitePanel_V2 p = new PTMProteinSitePanel_V2();
+        PTMProteinSitePanel p = new PTMProteinSitePanel();
         p.setName(m_typeName);
         p.setDataBox(this);
         setDataBoxPanelInterface(p);        
@@ -131,9 +145,8 @@ public class DataBoxXICPTMProteinSite extends AbstractDataBox {
                     if (m_previousTaskId != null && m_previousTaskId.equals(taskId)) {
                         m_previousTaskId = null; // Reset PreviousTask. Was finished ! 
                     }
-                    
+                    m_dataset.setPTMSites(proteinPTMSiteArray);
                     unregisterTask(taskId);
-                    
                     propagateDataChanged(ExtendedTableModelInterface.class);
                 }
             }
@@ -142,7 +155,7 @@ public class DataBoxXICPTMProteinSite extends AbstractDataBox {
 
         // ask asynchronous loading of data
 
-        DatabasePTMProteinSiteTask_V2 task = new DatabasePTMProteinSiteTask_V2(callback, getProjectId(), m_rsm, proteinPTMSiteArray);
+        DatabasePTMSitesTask task = new DatabasePTMSitesTask(callback, getProjectId(), m_rsm, proteinPTMSiteArray);
         Long taskId = task.getId();
         if (m_previousTaskId != null) {
             // old task is suppressed if it has not been already done
@@ -152,14 +165,7 @@ public class DataBoxXICPTMProteinSite extends AbstractDataBox {
         registerTask(task);
 
     }
-    private Long m_previousTaskId = null;
-
-  
-    //Load XIC Information    
-    private List<DMasterQuantProteinSet> m_masterQuantProteinSetList;
-    private DQuantitationChannel[] m_quantitationChannelArray = null;
-    private QuantChannelInfo m_quantChannelInfo;
-
+    
     public void loadXicData(long taskId, ArrayList<PTMSite> proteinPTMSiteArray, boolean finished) {
 
         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
@@ -183,23 +189,21 @@ public class DataBoxXICPTMProteinSite extends AbstractDataBox {
                         @Override
                         public void run(boolean success, long task2Id, SubTask subTask, boolean finished) {
                             
-                            m_quantChannelInfo = new QuantChannelInfo(m_dataset);
+                            m_quantChannelInfo = new QuantChannelInfo(m_dataset.getDataset());
                             getDataBoxPanelInterface().addSingleValue(m_quantChannelInfo);
 
-                            // proteins set 
-//                            ((XicProteinSetPanel) getDataBoxPanelInterface()).setData(taskId, m_quantitationChannelArray, m_masterQuantProteinSetList, true, finished);
-                            
                             if (finished) {
-                                m_masterQuantProtMatchByIdProtMatchId = m_masterQuantProteinSetList.stream().collect(Collectors.toMap(mqPS -> mqPS.getProteinSetId(), mqPS->mqPS));
-                                                                                
-                                ((PTMProteinSitePanel_V2) getDataBoxPanelInterface()).setData(taskId, proteinPTMSiteArray, finished);         
+                                Map<Long, Long> typicalProteinMatchIdByProteinMatchId = loadProteinMatchMapping();
+                                m_dataset.setQuantProteinSets(m_masterQuantProteinSetList, typicalProteinMatchIdByProteinMatchId);
+                                ((PTMProteinSitePanel) getDataBoxPanelInterface()).setData(taskId, proteinPTMSiteArray, finished);         
                                 unregisterTask(task2Id);
                             }
                         }
+
                     };
                     // ask asynchronous loading of data
                     DatabaseLoadLcMSTask taskMap = new DatabaseLoadLcMSTask(mapCallback);
-                    taskMap.initLoadAlignmentForXic(getProjectId(), m_dataset);
+                    taskMap.initLoadAlignmentForXic(getProjectId(), m_dataset.getDataset());
                     registerTask(taskMap);
 
                 } else {
@@ -216,18 +220,55 @@ public class DataBoxXICPTMProteinSite extends AbstractDataBox {
         // ask asynchronous loading of data
         m_masterQuantProteinSetList = new ArrayList();
         DatabaseLoadXicMasterQuantTask task = new DatabaseLoadXicMasterQuantTask(callback);
-        task.initLoadProteinSets(getProjectId(), m_dataset, m_masterQuantProteinSetList);
+        task.initLoadProteinSets(getProjectId(), m_dataset.getDataset(), m_masterQuantProteinSetList);
         registerTask(task);
 
     }
     
-    
-    
+      private Map<Long, Long> loadProteinMatchMapping() {
+        Map<Long, Long> typicalProteinMatchIdByProteinMatchId = new HashMap<>();
+        EntityManager entityManagerMSI = DStoreCustomPoolConnectorFactory.getInstance().getMsiDbConnector(getProjectId()).createEntityManager();
+        try {
+
+            entityManagerMSI.getTransaction().begin();
+
+            long start = System.currentTimeMillis();
+            // Load Proteins for PeptideMatch
+            Query proteinMatchQuery = entityManagerMSI.createQuery("SELECT pspmi.proteinMatch.id, pspmi.proteinSet.representativeProteinMatchId FROM ProteinSetProteinMatchItem pspmi WHERE pspmi.resultSummary.id=:rsmId");
+            proteinMatchQuery.setParameter("rsmId", m_dataset.getDataset().getResultSummaryId());
+            List<Object[]> resultList = proteinMatchQuery.getResultList();
+            Iterator<Object[]> iterator = resultList.iterator();
+            
+            while (iterator.hasNext()) {
+                Object[] cur = iterator.next();
+                Long proteinMatchId = (Long) cur[0];
+                Long typicalProteinMatchId = (Long) cur[1];
+                typicalProteinMatchIdByProteinMatchId.put(proteinMatchId, typicalProteinMatchId);
+            }
+            
+            m_logger.info("Protein match ids map retrieve {} entries in {} ms", typicalProteinMatchIdByProteinMatchId.size(), (System.currentTimeMillis() - start));
+            
+            entityManagerMSI.getTransaction().commit();
+        } catch (RuntimeException e) {
+            try {
+                entityManagerMSI.getTransaction().rollback();
+            } catch (Exception rollbackException) {
+                m_logger.error(getClass().getSimpleName() + " failed : potential network problem", rollbackException);
+            }
+            m_logger.error(getClass().getSimpleName() + " failed : ", e);
+            return null;
+        } finally {
+            entityManagerMSI.close();
+        }
+        return typicalProteinMatchIdByProteinMatchId;
+    }
+
+                            
     @Override
     public void setEntryData(Object data) {
         getDataBoxPanelInterface().addSingleValue(data);
-        m_dataset = (DDataset) data;
-        m_rsm = m_dataset.getResultSummary();
+        m_dataset = (PTMDataset) data;
+        m_rsm = m_dataset.getDataset().getResultSummary();
         dataChanged();
     }
     
@@ -239,44 +280,30 @@ public class DataBoxXICPTMProteinSite extends AbstractDataBox {
             }
             
             if (parameterType.equals(DProteinMatch.class)) {
-                PTMSite proteinPtmSite = ((PTMProteinSitePanel_V2)getDataBoxPanelInterface()).getSelectedProteinPTMSite();
+                PTMSite proteinPtmSite = ((PTMProteinSitePanel)getDataBoxPanelInterface()).getSelectedProteinPTMSite();
                 if (proteinPtmSite != null) {
                     return proteinPtmSite.getProteinMatch();
                 }
             }
             if (parameterType.equals(DPeptideMatch.class)) {
-                PTMSite proteinPtmSite = ((PTMProteinSitePanel_V2) getDataBoxPanelInterface()).getSelectedProteinPTMSite();
+                PTMSite proteinPtmSite = ((PTMProteinSitePanel) getDataBoxPanelInterface()).getSelectedProteinPTMSite();
                 if (proteinPtmSite != null) {
                     return proteinPtmSite.getBestPeptideMatch();
                 }
             }
             if (parameterType.equals(PTMSite.class)) {
-                return ((PTMProteinSitePanel_V2) getDataBoxPanelInterface()).getSelectedProteinPTMSite();
+                return ((PTMProteinSitePanel) getDataBoxPanelInterface()).getSelectedProteinPTMSite();
             }            
             
             if(parameterType.equals(DMasterQuantProteinSet.class)) {
-                PTMSite proteinPtmSite = ((PTMProteinSitePanel_V2)getDataBoxPanelInterface()).getSelectedProteinPTMSite();
+                PTMSite proteinPtmSite = ((PTMProteinSitePanel)getDataBoxPanelInterface()).getSelectedProteinPTMSite();
                 if (proteinPtmSite != null) {
-                    return m_masterQuantProtMatchByIdProtMatchId.get(proteinPtmSite.getProteinMatch().getId());
+                    return proteinPtmSite.getMasterQuantProteinSet();
                 }
             }
                         
-//            if (parameterType.equals(DMasterQuantPeptide.class)) {
-//                return ((XicPeptidePanel) getDataBoxPanelInterface()).getSelectedMasterQuantPeptide();
-//            }
-//            if (parameterType.equals(DPeptideMatch.class)) {
-//                DMasterQuantPeptide mqp = ((XicPeptidePanel) getDataBoxPanelInterface()).getSelectedMasterQuantPeptide();
-//                if (mqp == null) {
-//                    return null;
-//                }
-//                DPeptideInstance pi = mqp.getPeptideInstance();
-//                if (pi == null) {
-//                    return null;
-//                }
-//                return pi.getBestPeptideMatch();
-//            }
             if (parameterType.equals(DDataset.class)) {
-                return m_dataset;
+                return m_dataset.getDataset();
             }
             if (parameterType.equals(QuantChannelInfo.class)) {
                 return m_quantChannelInfo;

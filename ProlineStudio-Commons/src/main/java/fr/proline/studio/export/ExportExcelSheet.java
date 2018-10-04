@@ -9,8 +9,11 @@ package fr.proline.studio.export;
  */
 public class ExportExcelSheet {
     public String id;
-    public String title;
-    public String presentation;
+   /**
+    * title for the tabbed Panel in custom options, CustomExportDialog
+    */
+    public String title; 
+    private String presentation; // column or row
     public ExportExcelSheetField[] fields;
     public boolean default_displayed;
 
@@ -32,7 +35,10 @@ public class ExportExcelSheet {
     public void setTitle(String title) {
         this.title = title;
     }
-
+    /**
+     * 
+     * @return String represente column or row
+     */
     public String getPresentation() {
         return presentation;
     }

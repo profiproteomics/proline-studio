@@ -45,5 +45,14 @@ public class IntervalMarker extends AbstractMarker{
         m_lineMarkerStart.paint(g);
         m_lineMarkerEnd.paint(g);
     }
+
+    @Override
+    public AbstractMarker clone(BasePlotPanel plotPanel) throws CloneNotSupportedException {
+        IntervalMarker clone =  (IntervalMarker)super.clone(plotPanel); 
+        clone.m_lineMarkerEnd = (LineMarker)m_lineMarkerEnd.clone(plotPanel);
+        clone.m_lineMarkerStart = (LineMarker)m_lineMarkerStart.clone(plotPanel);
+        return clone;
+    }
+    
     
 }

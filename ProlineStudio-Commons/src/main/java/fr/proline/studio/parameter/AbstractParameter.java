@@ -1,6 +1,8 @@
 package fr.proline.studio.parameter;
 
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.List;
 import javax.swing.*;
 
 /**
@@ -19,11 +21,9 @@ public abstract class AbstractParameter {
     protected Object m_associatedData = null;
     protected LabelVisibility m_labelVisibility = LabelVisibility.VISIBLE;
     protected ActionListener m_externalActionListener = null;
-    
-
    
     //JP.WART : use for backward compatibility to change the name of a parameter
-    protected String m_backwardCompatibleKey = null;
+    protected List<String> m_backwardCompatibleKeys = new ArrayList<>(1);
     
     public enum LabelVisibility {
         NO_VISIBLE,
@@ -52,12 +52,12 @@ public abstract class AbstractParameter {
         return m_key;
     }
 
-    public void setBackwardCompatibleKey(String backwardCompatibleKey) {
-        m_backwardCompatibleKey = backwardCompatibleKey;
+    public void addBackwardCompatibleKey(String backwardCompatibleKey) {
+        m_backwardCompatibleKeys.add(backwardCompatibleKey);
     }
     
-    public String getBackwardCompatibleKey() {
-        return m_backwardCompatibleKey;
+    public List<String> getBackwardCompatibleKeys() {
+        return m_backwardCompatibleKeys;
     }
     
     public JComponent getComponent() {

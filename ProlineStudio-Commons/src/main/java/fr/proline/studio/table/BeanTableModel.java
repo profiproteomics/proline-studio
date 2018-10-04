@@ -14,6 +14,7 @@ import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -42,10 +43,22 @@ public class BeanTableModel<T> extends AbstractTableModel implements GlobalTable
     private HashMap<Integer, Filter> m_columnFilterMap = new HashMap<>();
 
     public BeanTableModel(Class<T> type) {
+        this(type, Arrays.asList("class"));
+    }
+        
+    public BeanTableModel(Class<T> type, List<String> exclusionList) {
         try {
             //typeParameterClass = type;
             m_name = type.getName() + " table";
-            m_descriptors = Introspector.getBeanInfo(type, Object.class).getPropertyDescriptors();
+            PropertyDescriptor[] propertyDescriptors = Introspector.getBeanInfo(type, Introspector.USE_ALL_BEANINFO).getPropertyDescriptors();
+            //avoid 'class' property 
+            List<PropertyDescriptor> descriptors = new ArrayList<>();
+            for (PropertyDescriptor property : propertyDescriptors) {
+                if (!exclusionList.contains(property.getName())) {
+                    descriptors.add(property);
+                }
+            }
+            m_descriptors = descriptors.toArray(new PropertyDescriptor[0]);
         } catch (IntrospectionException ex) {
             logger.info("cannot infer getters from " + type, ex);
         }
@@ -140,7 +153,7 @@ public class BeanTableModel<T> extends AbstractTableModel implements GlobalTable
 
         try {
             Object obj = m_descriptors[columnIndex].getReadMethod().invoke(m_entities.get(rowIndex));
-            if (obj.getClass().isArray()) {
+            if ((obj != null) && obj.getClass().isArray()) {
                 int arrayLength = Array.getLength(obj);
                 int length = Math.min(arrayLength, 10);
                 StringBuilder buffer = new StringBuilder("[");

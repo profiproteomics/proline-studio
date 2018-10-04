@@ -104,12 +104,20 @@ public class IconManager {
         FRAGMENTATION,
         BIOLOGICAL_GROUP,
         BIOLOGICAL_SAMPLE,
+        REFERENCE_RSM,
+        REFERENCE_RSM_ERR,
         DATASET,
         DATASET_RSET,
         DATASET_RSM,
         DATASET_RSET_MERGED,
+        DATASET_RSET_MERGED_AGG,
+        DATASET_RSET_MERGED_UNION,
         DATASET_RSM_RSET_MERGED,
+        DATASET_RSM_RSET_MERGED_AGG,
+        DATASET_RSM_RSET_MERGED_UNION,
         DATASET_RSM_MERGED,
+        DATASET_RSM_MERGED_AGG,
+        DATASET_RSM_MERGED_UNION,
         DATASET_RSET_DECOY,
         DATASET_RSM_DECOY,
         DATASET_RSM_ERROR,
@@ -489,14 +497,30 @@ public class IconManager {
                 return "fr/proline/studio/images/dataset.png";
             case DATASET_RSET:
                 return "fr/proline/studio/images/dataset_rset.png";
+            case REFERENCE_RSM:
+                return "fr/proline/studio/images/reference_dataset.png";                
+            case REFERENCE_RSM_ERR:
+                return "fr/proline/studio/images/reference_dataset_err.png";
             case DATASET_RSM:
                 return "fr/proline/studio/images/dataset_rsm.png";
             case DATASET_RSET_MERGED:
                 return "fr/proline/studio/images/dataset_rset_merged.png";
+            case DATASET_RSET_MERGED_AGG:
+                return "fr/proline/studio/images/dataset_rset_mergedA.png";
+            case DATASET_RSET_MERGED_UNION:
+                return "fr/proline/studio/images/dataset_rset_mergedU.png";
             case DATASET_RSM_RSET_MERGED:
                 return "fr/proline/studio/images/dataset_rsm_rset_merged.png";
+            case DATASET_RSM_RSET_MERGED_AGG:
+                return "fr/proline/studio/images/dataset_rsm_rset_mergedA.png";
+            case DATASET_RSM_RSET_MERGED_UNION:
+                return "fr/proline/studio/images/dataset_rsm_rset_mergedU.png";
             case DATASET_RSM_MERGED:
                 return "fr/proline/studio/images/dataset_rsm_merged.png";
+            case DATASET_RSM_MERGED_AGG:
+                return "fr/proline/studio/images/dataset_rsm_mergedA.png";
+            case DATASET_RSM_MERGED_UNION:
+                return "fr/proline/studio/images/dataset_rsm_mergedU.png";
             case DATASET_RSET_DECOY:
                 return "fr/proline/studio/images/dataset_rset_decoy.png";
             case DATASET_RSM_DECOY:

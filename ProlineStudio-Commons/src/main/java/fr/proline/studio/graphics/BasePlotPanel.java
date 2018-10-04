@@ -45,6 +45,7 @@ import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import scala.Array;
 
 /**
  * Panel to display data with an X and Y Axis
@@ -58,6 +59,8 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
     
     private XAxis m_xAxis = null;
     private YAxis m_yAxis = null;
+    private double[] m_xAxisBounds = {Double.NaN, Double.NaN};
+    private double[] m_yAxisBounds = {Double.NaN, Double.NaN};
     
     private ArrayList<PlotBaseAbstract> m_plots = null;
     
@@ -169,7 +172,7 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
         g.setColor(Color.darkGray);
 
         int figuresXHeight = GAP_FIGURES_X;
-        double[] tab = getMinMaxPlots();
+        //double[] tab = getMinMaxPlots();
         
         if ((m_xAxis!=null) && (m_xAxis.displayAxis())) {
             
@@ -486,12 +489,12 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
         XAxis xAxis = getXAxis();
         //xAxis.setLog(false);  // we do no longer change the log setting
         xAxis.setSelected(false);
-        xAxis.setRange(tab[0], tab[1]);
+        xAxis.setRange((Double.isNaN(m_xAxisBounds[0])) ? tab[0] : m_xAxisBounds[0], (Double.isNaN(m_xAxisBounds[1])) ? tab[1] : m_xAxisBounds[1]);
 
         YAxis yAxis = getYAxis();
         //yAxis.setLog(false);  // we do no longer change the log setting
         yAxis.setSelected(false);
-        yAxis.setRange(tab[2], tab[3]);
+        yAxis.setRange((Double.isNaN(m_yAxisBounds[0])) ? tab[2] : m_yAxisBounds[0], (Double.isNaN(m_yAxisBounds[1])) ? tab[3] : m_yAxisBounds[1]);
 
 
         m_updateDoubleBuffer = true;
@@ -503,6 +506,28 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
             return;
         }
         m_xAxis.setTitle(title);
+    }
+    
+    public void setXAxisBounds(double min, double max) {
+        m_xAxisBounds = new double[]{min, max};
+        if (m_plots != null && !m_plots.isEmpty()) {
+            updateAxis(m_plots.get(0));
+        }
+    }
+    
+    public double[] getXAxisBounds() {
+        return new double[]{m_xAxisBounds[0], m_xAxisBounds[1]};
+    }
+
+    public double[] getYAxisBounds() {
+        return new double[]{m_yAxisBounds[0], m_yAxisBounds[1]};
+    }
+    
+    public void setYAxisBounds(double min, double max) {
+        m_yAxisBounds = new double[]{min, max};
+        if (m_plots != null && !m_plots.isEmpty()) {
+            updateAxis(m_plots.get(0));
+        }
     }
     
     public void setYAxisTitle(String title) {

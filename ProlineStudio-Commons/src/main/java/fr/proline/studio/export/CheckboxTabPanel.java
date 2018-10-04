@@ -11,33 +11,38 @@ import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 
 /**
- *
+ * @kx, tabbedPanel in CustomOptions Panel, one title with it's checkBox 
  * @author JM235353
  */
 public class CheckboxTabPanel extends JPanel {
-
+   
     private String m_sheetId = null;
 
     private JCheckBox m_checkBox;
     private JLabel m_label;
-    private JTabbedPane m_tabbedPane;
-
+    private JTabbedPane ctrlPane;
+    /**
+     * 
+     * @param tabbedPane, the control super panel
+     * @param title
+     * @param sheetId 
+     */
     public CheckboxTabPanel(JTabbedPane tabbedPane, String title, String sheetId) {
         setLayout(new FlowLayout());
-
+          
         setOpaque(false);
 
-        m_tabbedPane = tabbedPane;
+        ctrlPane = tabbedPane;
 
         m_sheetId = sheetId;
-
+        
         m_checkBox = new JCheckBox();
         m_checkBox.setOpaque(false);
         m_label = new JLabel(title);
-
+        
         add(m_checkBox);
         add(m_label);
-
+        
         final CheckboxTabPanel _this = this;
         m_checkBox.addActionListener(new ActionListener() {
 
@@ -47,9 +52,9 @@ public class CheckboxTabPanel extends JPanel {
 
                 //JPM.WART : big wart due to the fact that dnd changes the index of tabs
                 int indexCur = -1;
-                int nbTabs = m_tabbedPane.getTabCount();
+                int nbTabs = ctrlPane.getTabCount();
                 for (int i = 0; i < nbTabs; i++) {
-                    Component tabComponent = m_tabbedPane.getTabComponentAt(i);
+                    Component tabComponent = ctrlPane.getTabComponentAt(i);
                     if (tabComponent == _this) {
                         indexCur = i;
                         break;
@@ -57,7 +62,7 @@ public class CheckboxTabPanel extends JPanel {
                 }
 
                 if (indexCur != -1) {
-                    m_tabbedPane.setEnabledAt(indexCur, isSelected);
+                    ctrlPane.setEnabledAt(indexCur, isSelected);
                 }
 
                 if (isSelected) {
@@ -70,7 +75,10 @@ public class CheckboxTabPanel extends JPanel {
         });
 
     }
-
+    /**
+     * set the CheckBox
+     * @param isSelected 
+     */
     public void setSelected(boolean isSelected) {
         m_checkBox.setSelected(isSelected);
         if (isSelected) {
@@ -83,11 +91,19 @@ public class CheckboxTabPanel extends JPanel {
     public boolean isSelected() {
         return m_checkBox.isSelected();
     }
-
+    
+    /**
+     * get Tab title name
+     * @return 
+     */
     public String getText() {
         return m_label.getText();
     }
 
+    /**
+     * set Tab title name
+     * @param text 
+     */
     public void setText(String text) {
         m_label.setText(text);
     }

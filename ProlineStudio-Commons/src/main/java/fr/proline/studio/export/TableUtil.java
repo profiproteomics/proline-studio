@@ -1,5 +1,6 @@
 package fr.proline.studio.export;
 
+import fr.proline.studio.export.model.CustomExportTableModel;
 import java.util.ArrayList;
 import java.util.Vector;
 
@@ -37,36 +38,23 @@ public class TableUtil {
         table.clearSelection();
 
     }
-
+    
+    /**
+     * insert in the given table, a new row
+     * @param table, the object table
+     * @param obj, the new row to add
+     * @param i , the position where the new row to add
+     */
     public static void addRowAt(JTable table, Vector obj, int i) {
+        //copie le column name in colNames
         Object[] colNames = new Object[table.getColumnCount()];
         for (int col = 0; col < table.getColumnCount(); col++) {
             colNames[col] = table.getColumnName(col);
         }
-        DefaultTableModel model = new javax.swing.table.DefaultTableModel(
-                new Object[][]{},
-                new String[]{
-                    "Internal field name", "Displayed field name", "Exported"
-                }
-        ) {
-            Class[] types = new Class[]{
-                java.lang.String.class, java.lang.String.class, java.lang.Boolean.class
-            };
-            boolean[] canEdit = new boolean[]{
-                false, true, true
-            };
-
-            @Override
-            public Class getColumnClass(int columnIndex) {
-                return types[columnIndex];
-            }
-
-            @Override
-            public boolean isCellEditable(int rowIndex, int columnIndex) {
-                return canEdit[columnIndex];
-            }
-        };
-
+        //creat a new empty table model
+        //0String, not editable, 1 String editable, 2 boolean editable
+        CustomExportTableModel model = new CustomExportTableModel();
+        //add in the new table, one row is a new Vector
         int nbRows = table.getModel().getRowCount();
         for (int row = 0; row < nbRows; row++) {
             Vector v = new Vector();

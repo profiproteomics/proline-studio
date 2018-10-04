@@ -237,31 +237,23 @@ public class ParameterList extends ArrayList<AbstractParameter> {
             // no value found, for backward compatibility, load the parameter from the name as a key (there was a bug, name was used as the key)
             parameterKey = parameter.getName();
             suffixKey = parameterKey.replaceAll(" ", "_");
-
             key = prefixKey + suffixKey;
-
             parameterValue = preferences.get(key, null);
         }
         if (parameterValue == null) {
             // no value found, for backward compatibility, load the parameter from the backward compatible key 
-            parameterKey = parameter.getBackwardCompatibleKey();
-            if (parameterKey != null) {
-                suffixKey = parameterKey.replaceAll(" ", "_");
-
+            for (String alternativeKey : parameter.getBackwardCompatibleKeys()) {
+                suffixKey = alternativeKey.replaceAll(" ", "_");
                 key = prefixKey + suffixKey;
-
                 parameterValue = preferences.get(key, null);
+                if (parameterValue != null) break;
             }
         }
         // -------------
 
         return parameterValue;
     }
-    private String readParameter(Preferences preferences, AbstractParameter parameter) {
-        String prefixKey = getPrefixName();
-        return readParameter(preferences, parameter, prefixKey);
-    }
-    
+        
     public void initDefaults() {
 
         int nbParameters = size();
@@ -280,29 +272,21 @@ public class ParameterList extends ArrayList<AbstractParameter> {
         for (int i = 0; i < nbParameters; i++) {
             AbstractParameter parameter = get(i);
 
-            
             // JPM.WART remove any old parameter in the file (constructed with the name of the parameter instead of the key ----------
             String parameterKey = parameter.getName();
             String suffixKey = parameterKey.replaceAll(" ", "_");
             String key = prefixKey + suffixKey;
             preferences.remove(key);
 
-            parameterKey = parameter.getBackwardCompatibleKey();
-            if (parameterKey != null) {
-                suffixKey = parameterKey.replaceAll(" ", "_");
-
+            for(String alternativeKey : parameter.getBackwardCompatibleKeys()) {
+                suffixKey = alternativeKey.replaceAll(" ", "_");
                 key = prefixKey + suffixKey;
-
                 preferences.remove(key);
-            }
-            // --------------
-            
+            }                        
             
             parameterKey = parameter.getKey();
             suffixKey = parameterKey.replaceAll(" ", "_");
-
             key = prefixKey + suffixKey;
-
             if (parameter.isUsed()|| parameter.isCompulsory()) {
                 String value = parameter.getStringValue();
                 preferences.put(key, value);
@@ -310,8 +294,6 @@ public class ParameterList extends ArrayList<AbstractParameter> {
                 preferences.remove(key);
             }
             
-            
-
         }
     }
 
@@ -323,17 +305,12 @@ public class ParameterList extends ArrayList<AbstractParameter> {
         int nbParameters = size();
         for (int i = 0; i < nbParameters; i++) {
             AbstractParameter parameter = get(i);
-
             String value = readParameter(preferences,parameter, prefixKey);
-
             if (value == null) {
                  continue;
             }
-
             parameter.setValue(value);
-
         }
-
         updateIsUsed(preferences);
     }
 
@@ -343,11 +320,9 @@ public class ParameterList extends ArrayList<AbstractParameter> {
         int nbParameters = size();
         for (int i = 0; i < nbParameters; i++) {
             AbstractParameter parameter = get(i);
-
             if (!parameter.isUsed()) {
                 continue;
             }
-
             String key = parameter.getKey();
             String value = parameter.getStringValue();
             valuesMap.put(key, value);
@@ -356,7 +331,7 @@ public class ParameterList extends ArrayList<AbstractParameter> {
         return valuesMap;
 
     }
-
+    
     public AbstractParameter getParameter(String key) {
         int nbParameters = size();
         for (int i = 0; i < nbParameters; i++) {

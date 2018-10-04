@@ -58,7 +58,6 @@ public class PlotLinear extends PlotXYAbstract {
     
     private boolean strokeFixed = false;
     
-    private ParameterList m_parameterList;
     private ColorOrGradientParameter m_colorParameter;
 
 
@@ -140,6 +139,8 @@ public class PlotLinear extends PlotXYAbstract {
         if (m_plotInformation != null && m_plotInformation.getPlotTitle() != null && !m_plotInformation.getPlotTitle().isEmpty()) {
             m_sb.append(m_plotInformation.getPlotTitle());
             m_sb.append("<BR>");
+        } else {
+            m_sb.append(m_compareDataInterface.getDataValueAt(indexFound, m_compareDataInterface.getInfoColumn()).toString());
         }
         if (m_plotInformation != null && m_plotInformation.getPlotInfo() != null) {
             for (Map.Entry<String, String> entrySet : m_plotInformation.getPlotInfo().entrySet()) {
@@ -165,7 +166,6 @@ public class PlotLinear extends PlotXYAbstract {
             labelY = DataFormat.format(m_dataY[indexFound],4);
         }
         
-        m_sb.append(m_compareDataInterface.getDataValueAt(indexFound, m_compareDataInterface.getInfoColumn()).toString());
         m_sb.append("<BR>");
         m_sb.append(m_plotPanel.getXAxis().getTitle());
         m_sb.append(" : ");

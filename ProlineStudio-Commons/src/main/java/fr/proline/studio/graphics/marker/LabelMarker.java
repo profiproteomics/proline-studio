@@ -316,4 +316,12 @@ public class LabelMarker extends AbstractMarker implements MoveableInterface {
         // no selection for markers
     }
 
+    @Override
+    public AbstractMarker clone(BasePlotPanel plotPanel) throws CloneNotSupportedException {
+        LabelMarker clone = (LabelMarker)super.clone(plotPanel); 
+        clone.m_anchorMarker = (PointMarker)m_anchorMarker.clone(plotPanel);
+        return clone;
+    }
+
+    
 }

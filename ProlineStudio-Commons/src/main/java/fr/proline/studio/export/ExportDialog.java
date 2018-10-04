@@ -67,7 +67,7 @@ public class ExportDialog extends DefaultDialog {
 
     private ExportManager m_exportManager = null;
 
-    //This metghod is called when exportind directly a table from Studio GUI
+    //This method is called when exportind directly a table from Studio GUI
     public static ExportDialog getDialog(Window parent, JXTable table, String exportName) {
         if (m_singletonExcelDialog == null) {
             m_singletonExcelDialog = new ExportDialog(parent, ExporterFactory.EXPORT_TABLE);
@@ -151,7 +151,7 @@ public class ExportDialog extends DefaultDialog {
 
         setInternalComponent(createExportPanel(defaultExportPath));
 
-        setButtonName(BUTTON_OK, (m_exportType == ExporterFactory.EXPORT_IMAGE) ? "Export Image" : "Export");
+            setButtonName(BUTTON_OK, (m_exportType == ExporterFactory.EXPORT_IMAGE) ? "Export Image" : "Export");
 
         m_fchooser = new JFileChooser(new File(defaultExportPath));
         m_fchooser.setMultiSelectionEnabled(false);

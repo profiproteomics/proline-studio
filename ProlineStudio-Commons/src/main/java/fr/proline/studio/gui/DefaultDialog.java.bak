@@ -179,7 +179,7 @@ public class DefaultDialog extends javax.swing.JDialog {
 
     }
 
-    protected void replaceInternalComponent(Component component) {
+    protected void replaceInternaleComponent(Component component) {
         m_internalPanel.removeAll();
         setInternalComponent(component);
     }

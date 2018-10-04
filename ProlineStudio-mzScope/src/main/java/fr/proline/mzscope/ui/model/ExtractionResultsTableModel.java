@@ -1,7 +1,9 @@
 package fr.proline.mzscope.ui.model;
 
+import fr.proline.mzscope.model.Chromatogram;
 import fr.proline.mzscope.model.ExtractionResult;
 import fr.proline.mzscope.model.ExtractionResult.Status;
+import fr.proline.mzscope.model.IRawFile;
 import fr.proline.mzscope.ui.StatusRenderer;
 import fr.proline.studio.extendedtablemodel.ExtraDataType;
 import fr.proline.studio.export.ExportModelUtilities;
@@ -18,6 +20,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import javax.swing.table.TableCellRenderer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -26,10 +30,11 @@ import javax.swing.table.TableCellRenderer;
  */
 public class ExtractionResultsTableModel extends DecoratedTableModel implements GlobalTableModelInterface {
 
+    final private static Logger logger = LoggerFactory.getLogger(ExtractionResultsTableModel.class);
+    
     private final HashMap<Integer, TableCellRenderer> m_rendererMap = new HashMap();
-
-
-
+    private List<IRawFile> m_rawFiles = new ArrayList<>();
+    
     public enum Column {
 
         MZ(0, "m/z", "m/z extration value"),
@@ -60,6 +65,11 @@ public class ExtractionResultsTableModel extends DecoratedTableModel implements 
     }
 
     private List<ExtractionResult> m_extractionResults = new ArrayList<>(0);
+
+    public void setRawFiles(List<IRawFile> rawFiles) {
+        this.m_rawFiles = rawFiles;
+    }
+    
     
     public ExtractionResult getExtractionResultAt(int rowId){
         if (rowId > -1 && rowId < m_extractionResults.size()){
@@ -81,12 +91,13 @@ public class ExtractionResultsTableModel extends DecoratedTableModel implements 
 
     @Override
     public int getColumnCount() {
-        return Column.values().length;
-    }
+        return Column.values().length + m_rawFiles.size();
+    } 
 
     @Override
     public String getColumnName(int column) {
-        return Column.values()[column].getName();
+        int valuesCount = Column.values().length;
+        return (column < valuesCount) ? Column.values()[column].getName() : m_rawFiles.get(column - valuesCount).getName();
     }
 
     @Override
@@ -96,23 +107,31 @@ public class ExtractionResultsTableModel extends DecoratedTableModel implements 
         } else if (col == Column.STATUS.id) {
             return Status.class;
         }
-        return LazyData.class;
+        return Double.class;
     }
 
     @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
+        int valuesCount = Column.values().length;
+        if (columnIndex < valuesCount) {
         switch (Column.values()[columnIndex]) {
             case MZ:
                 return m_extractionResults.get(rowIndex).getMz();
             case STATUS:
                 return m_extractionResults.get(rowIndex).getStatus();
         }
+        } else {
+            IRawFile rawFile = m_rawFiles.get(columnIndex - valuesCount);
+            Map<IRawFile, Chromatogram> map = m_extractionResults.get(rowIndex).getChromatograms();
+            return ((map != null) && (map.containsKey(rawFile))) ? map.get(rawFile).getMaxIntensity() : null;
+        }
         return null;
     }
 
     @Override
     public String getToolTipForHeader(int columnIndex) {
-        return Column.values()[columnIndex].getTooltip();
+        int valuesCount = Column.values().length;
+        return (columnIndex < valuesCount) ? Column.values()[columnIndex].getTooltip() : "Intensity";
     }
 
     @Override
@@ -132,7 +151,8 @@ public class ExtractionResultsTableModel extends DecoratedTableModel implements 
             renderer = new StatusRenderer();
         }
         
-        m_rendererMap.put(col, renderer);
+        if (renderer != null) m_rendererMap.put(col, renderer);
+        
         return renderer;
     }
 
@@ -168,7 +188,7 @@ public class ExtractionResultsTableModel extends DecoratedTableModel implements 
 
     @Override
     public String getDataColumnIdentifier(int columnIndex) {
-        return Column.values()[columnIndex].getName();
+        return getColumnName(columnIndex);
     }
 
     @Override
@@ -178,7 +198,7 @@ public class ExtractionResultsTableModel extends DecoratedTableModel implements 
         } else if (columnIndex == Column.STATUS.id) {
             return Status.class;
         }
-        return null; // should never happen
+        return Double.class;
     }
 
     @Override
@@ -265,7 +285,7 @@ public class ExtractionResultsTableModel extends DecoratedTableModel implements 
     
     @Override
     public String getExportColumnName(int col) {
-        return Column.values()[col].getName();
+        return getColumnName(col);
     }
     
     @Override

@@ -2,6 +2,7 @@ package fr.proline.mzscope.ui;
 
 import fr.proline.mzscope.model.MsnExtractionRequest;
 import fr.proline.mzscope.ui.model.MzScopePreferences;
+import fr.proline.mzscope.utils.Display;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
@@ -86,7 +87,7 @@ public class XICExtractionPanel extends JPanel{
             massRangePanel = new JPanel();
             massRangePanel.setLayout(new FlowLayout(FlowLayout.LEADING));
             JLabel massRangeLabel = new JLabel();
-            massRangeLabel.setText("Mass :");
+            massRangeLabel.setText("Precursor Mass :");
             massRangePanel.add(massRangeLabel);
             massRangePanel.add(getMassRangeTF());
         }
@@ -97,7 +98,7 @@ public class XICExtractionPanel extends JPanel{
     private JTextField getMassRangeTF() {
         if (massRangeTF == null) {
             massRangeTF = new JTextField();
-            massRangeTF.setToolTipText("mass range to extract with the specified tolerance");
+            massRangeTF.setToolTipText("<html><p width=\"500\">Precursor mass range to extract. A single value can be entered (the following tolerance value will be used) or a range of values using '-' delimiter</p></html>");
             massRangeTF.setColumns(10);
             massRangeTF.setPreferredSize(new Dimension(massRangeTF.getPreferredSize().width, 16));
             massRangeTF.addActionListener(new ActionListener() {
@@ -131,11 +132,15 @@ public class XICExtractionPanel extends JPanel{
             toleranceTF = new JTextField();
             toleranceTF.setColumns(3);
             toleranceTF.setPreferredSize(new Dimension(toleranceTF.getPreferredSize().width, 16));
-            toleranceTF.setToolTipText("Tolerance in ppm");
+            toleranceTF.setToolTipText("Precursor mass tolerance in ppm");
             toleranceTF.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent evt) {
-                    startExtraction();
+                    float ppm = Float.parseFloat(toleranceTF.getText().trim());
+                    MzScopePreferences.getInstance().setMzPPMTolerance(ppm);
+                    if (!getMassRangeTF().getText().isEmpty()) {
+                        startExtraction();
+                    }
                 }
             });
         }
@@ -147,7 +152,7 @@ public class XICExtractionPanel extends JPanel{
             fragmentMassRangePanel = new JPanel();
             fragmentMassRangePanel.setLayout(new FlowLayout(FlowLayout.LEADING));
             JLabel fragmentMassLabel = new JLabel();
-            fragmentMassLabel.setText("Parent Mass:");
+            fragmentMassLabel.setText("Fragment mass:");
             fragmentMassRangePanel.add(fragmentMassLabel);
             fragmentMassRangePanel.add(getFragmentMassRangeTF());
         }
@@ -158,7 +163,7 @@ public class XICExtractionPanel extends JPanel{
     private JTextField getFragmentMassRangeTF() {
         if (fragmentMassRangeTF == null) {
             fragmentMassRangeTF = new JTextField();
-            fragmentMassRangeTF.setToolTipText("parent mass range to extract");
+            fragmentMassRangeTF.setToolTipText("<html><p width=\"500\">Fragment mass range to extract. A single value can be entered (the following tolerance value will be used) or a range of values using '-' delimiter</p></html>");
             fragmentMassRangeTF.setColumns(10);
             fragmentMassRangeTF.setPreferredSize(new Dimension(fragmentMassRangeTF.getPreferredSize().width, 16));
             fragmentMassRangeTF.addActionListener(new ActionListener() {
@@ -192,11 +197,15 @@ public class XICExtractionPanel extends JPanel{
             fragmentToleranceTF = new JTextField();
             fragmentToleranceTF.setColumns(3);
             fragmentToleranceTF.setPreferredSize(new Dimension(fragmentToleranceTF.getPreferredSize().width, 16));
-            fragmentToleranceTF.setToolTipText("Tolerance in ppm");
+            fragmentToleranceTF.setToolTipText("Fragment mass tolerance in ppm");
             fragmentToleranceTF.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent evt) {
-                    startExtraction();
+                                        float ppm = Float.parseFloat(fragmentToleranceTF.getText().trim());
+                    MzScopePreferences.getInstance().setFragmentMzPPMTolerance(ppm);
+                    if (!getFragmentMassRangeTF().getText().isEmpty()) {
+                        startExtraction();
+                    }
                 }
             });
         }
@@ -217,14 +226,14 @@ public class XICExtractionPanel extends JPanel{
         try{
             firstMzValue = Double.parseDouble(masses[0]); // will be updated later in this method
         }catch(NumberFormatException e){
-            JOptionPane.showMessageDialog(this, "The mass is incorrect: "+masses[0]);
+            JOptionPane.showMessageDialog(this, "The mass value is incorrect: "+masses[0]);
             return;
         }
         try{
             ppm = Float.parseFloat(toleranceTF.getText().trim());
             MzScopePreferences.getInstance().setMzPPMTolerance(ppm);
         }catch(NumberFormatException e){
-            JOptionPane.showMessageDialog(this, "The tolerance is incorrect: "+toleranceTF.getText().trim());
+            JOptionPane.showMessageDialog(this, "The tolerance value is incorrect: "+toleranceTF.getText().trim());
             return;
         }
         if (masses.length == 1) {
@@ -236,7 +245,7 @@ public class XICExtractionPanel extends JPanel{
                 builder.setMinMz(firstMzValue);
                 builder.setMaxMz(secondMzValue);
             }catch(NumberFormatException e){
-                JOptionPane.showMessageDialog(this, "The max mass is incorrect: "+masses[1]);
+                JOptionPane.showMessageDialog(this, "The max mass value is incorrect: "+masses[1]);
                 return;
             }
         }
@@ -247,13 +256,14 @@ public class XICExtractionPanel extends JPanel{
         try{
             firstMzValue = Double.parseDouble(masses[0]); // will be updated later in this method
         }catch(NumberFormatException e){
-            JOptionPane.showMessageDialog(this, "The mass is incorrect: "+masses[0]);
+            JOptionPane.showMessageDialog(this, "The mass value is incorrect: "+masses[0]);
             return;
         }
         try{
             ppm = Float.parseFloat(fragmentToleranceTF.getText().trim());
+            MzScopePreferences.getInstance().setFragmentMzPPMTolerance(ppm);
         }catch(NumberFormatException e){
-            JOptionPane.showMessageDialog(this, "The tolerance is incorrect: "+fragmentToleranceTF.getText().trim());
+            JOptionPane.showMessageDialog(this, "The tolerance value is incorrect: "+fragmentToleranceTF.getText().trim());
             return;
         }
         if (masses.length == 1) {
@@ -265,7 +275,7 @@ public class XICExtractionPanel extends JPanel{
                 builder.setFragmentMinMz(firstMzValue);
                 builder.setFragmentMaxMz(secondMzValue);
             }catch(NumberFormatException e){
-                JOptionPane.showMessageDialog(this, "The max mass is incorrect: "+masses[1]);
+                JOptionPane.showMessageDialog(this, "The max mass value is incorrect: "+masses[1]);
                 return;
             }
         }
@@ -275,7 +285,7 @@ public class XICExtractionPanel extends JPanel{
         
         IRawFileViewer currentViewer = appController.getCurrentRawFileViewer();
         if (currentViewer != null) {
-            currentViewer.extractAndDisplayChromatogram(builder.build(), currentViewer.getXicModeDisplay(), null);
+            currentViewer.extractAndDisplayChromatogram(builder.build(), new Display(currentViewer.getXicDisplayMode()), null);
         }
     }
 

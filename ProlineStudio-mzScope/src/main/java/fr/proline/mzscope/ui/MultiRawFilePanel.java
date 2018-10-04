@@ -6,13 +6,15 @@ import fr.proline.mzscope.model.IRawFile;
 import fr.proline.mzscope.model.MsnExtractionRequest;
 import fr.proline.mzscope.utils.MzScopeCallback;
 import fr.proline.mzscope.ui.model.MzScopePreferences;
-import fr.proline.mzscope.utils.MzScopeConstants.DisplayMode;
+import fr.proline.mzscope.utils.Display;
+import fr.proline.studio.graphics.marker.IntervalMarker;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -69,13 +71,13 @@ public class MultiRawFilePanel extends AbstractRawFilePanel {
     }
 
     @Override
-    public void extractAndDisplayChromatogram(final MsnExtractionRequest params, DisplayMode mode, MzScopeCallback callback) {
-       // in this implementation displayMode is ignored : always REPLACE since we will extract one Chromatogram per RawFile
+    public void extractAndDisplayChromatogram(final MsnExtractionRequest params, Display display, MzScopeCallback callback) {
+       // in this implementation display is ignored : always REPLACE since we will extract one Chromatogram per RawFile
         SwingWorker worker = new SwingWorker<Integer, Chromatogram>() {
-            int count = 0;
+            Display display = new Display(Display.Mode.SERIES);
             @Override
             protected Integer doInBackground() throws Exception {
-
+                int count = 0;
                 for (IRawFile rawFile : rawfiles) {
                     Chromatogram c = rawFile.getXIC(params);
                     count++;
@@ -86,13 +88,9 @@ public class MultiRawFilePanel extends AbstractRawFilePanel {
 
             @Override
             protected void process(List<Chromatogram> chunks) {
-                Chromatogram c = chunks.get(chunks.size() - 1);
-                if (count == 1) {
-                    logger.info("display first chromato");
-                    displayChromatogram(c, DisplayMode.REPLACE);
-                } else {
-                    logger.info("add additionnal chromato");
-                    displayChromatogram(c, DisplayMode.OVERLAY);
+                for (int k = 0; k < chunks.size(); k++) {
+                    logger.info("display chromato number {}",k);
+                    displayChromatogram(chunks.get(k), display);
                 }
             }
 
@@ -116,9 +114,9 @@ public class MultiRawFilePanel extends AbstractRawFilePanel {
     }
     
     @Override
-    public Color displayChromatogram(Chromatogram chromato, DisplayMode mode) {
+    public Color displayChromatogram(Chromatogram chromato, Display display) {
        setMsMsEventButtonEnabled(true);
-       Color plotColor = super.displayChromatogram(chromato, mode);
+       Color plotColor = super.displayChromatogram(chromato, display);
        colorByRawFilename.put(chromato.rawFilename, plotColor);
        return plotColor ;
     }
@@ -132,16 +130,14 @@ public class MultiRawFilePanel extends AbstractRawFilePanel {
         logger.info("Display {} TIC chromatograms", rawFiles.size());
         SwingWorker worker = new SwingWorker<Integer, Chromatogram>() {
 
-            int count = 0;
-            boolean isFirstProcessCall = true;
-
+            Display display = new Display(Display.Mode.SERIES);
+            
             @Override
             protected Integer doInBackground() throws Exception {
-
+                int count = 0;    
                 for (IRawFile rawFile : rawFiles) {
                     Chromatogram c = rawFile.getTIC();
                     chromatogramByRawFile.put(rawFile, c);
-                    count++;
                     publish(c);
                 }
                 return count;
@@ -149,16 +145,9 @@ public class MultiRawFilePanel extends AbstractRawFilePanel {
 
             @Override
             protected void process(List<Chromatogram> chunks) {
-                int k = 0;
-                if (isFirstProcessCall) {
-                    logger.info("display first chromato");
-                    isFirstProcessCall = false;
-                    displayChromatogram(chunks.get(0), DisplayMode.REPLACE);
-                    k = 1;
-                }
-                for (; k < chunks.size(); k++) {
-                    logger.info("add additionnal chromato");
-                    displayChromatogram(chunks.get(k), DisplayMode.OVERLAY);
+                for (int k = 0; k < chunks.size(); k++) {
+                    logger.info("diplay TIC number {}",k);
+                    displayChromatogram(chunks.get(k), display);
                 }
                 setMsMsEventButtonEnabled(false);
             }
@@ -192,7 +181,6 @@ public class MultiRawFilePanel extends AbstractRawFilePanel {
         SwingWorker worker = new SwingWorker<Integer, Chromatogram>() {
             int count = 0;
             boolean isFirstProcessCall = true;
-
                 
             @Override
             protected Integer doInBackground() throws Exception {
@@ -209,19 +197,20 @@ public class MultiRawFilePanel extends AbstractRawFilePanel {
             @Override
             protected void process(List<Chromatogram> chunks) {
                 int k = 0;
+                Display display = new Display(Arrays.asList(new IntervalMarker(null, Color.ORANGE, Color.RED, f.getFirstElutionTime() / 60.0, f.getLastElutionTime() / 60.0)));
                 if (isFirstProcessCall) {
                     logger.info("display first chromato");
                     isFirstProcessCall = false;
-                    displayChromatogram(chunks.get(0), DisplayMode.REPLACE);
+                    displayChromatogram(chunks.get(0), new Display(Display.Mode.REPLACE));
                     k = 1;
                     displayScan(getCurrentRawfile().getSpectrumId(f.getElutionTime()));
-                    chromatogramPanel.displayFeature(f);
+                    chromatogramPanel.displayFeature(f, display);
                 }
                 for (; k < chunks.size(); k++) {
                     logger.info("add additionnal chromato");
-                    displayChromatogram(chunks.get(k), DisplayMode.OVERLAY);
+                    displayChromatogram(chunks.get(k), new Display(Display.Mode.OVERLAY));
                     displayScan(getCurrentRawfile().getSpectrumId(f.getElutionTime()));
-                    chromatogramPanel.displayFeature(f);
+                    chromatogramPanel.displayFeature(f, display);
                 }
             }
 
@@ -244,12 +233,12 @@ public class MultiRawFilePanel extends AbstractRawFilePanel {
         final List<IRawFile> rawFiles = new ArrayList<>(rawfiles);
         logger.info("Display {} BPI chromatogram", rawFiles.size());
         SwingWorker worker = new SwingWorker<Integer, Chromatogram>() {
-            int count = 0;
-            boolean isFirstProcessCall = true;
-
+            
+            Display display = new Display(Display.Mode.SERIES);
+            
             @Override
             protected Integer doInBackground() throws Exception {
-
+                int count = 0;
                 for (IRawFile rawFile : rawFiles) {
                     Chromatogram c = rawFile.getBPI();
                     count++;
@@ -260,16 +249,9 @@ public class MultiRawFilePanel extends AbstractRawFilePanel {
 
             @Override
             protected void process(List<Chromatogram> chunks) {
-                int k = 0;
-                if (isFirstProcessCall) {
-                    logger.info("display first chromato");
-                    isFirstProcessCall = false;
-                    displayChromatogram(chunks.get(0), DisplayMode.REPLACE);
-                    k = 1;
-                }
-                for (; k < chunks.size(); k++) {
-                    logger.info("add additionnal chromato");
-                    displayChromatogram(chunks.get(k), DisplayMode.OVERLAY);
+                for (int k = 0; k < chunks.size(); k++) {
+                    logger.info("display BPI chromato number {}", k);
+                    displayChromatogram(chunks.get(k), display);
                 }
                 setMsMsEventButtonEnabled(false);
             }

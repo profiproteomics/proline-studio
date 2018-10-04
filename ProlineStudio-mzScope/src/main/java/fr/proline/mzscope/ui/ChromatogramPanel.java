@@ -7,16 +7,15 @@ package fr.proline.mzscope.ui;
 
 import fr.proline.mzscope.model.Chromatogram;
 import fr.proline.mzscope.model.IFeature;
-import fr.proline.mzscope.model.MsnExtractionRequest;
-import fr.proline.mzscope.ui.model.MzScopePreferences;
 import fr.proline.mzscope.ui.event.AxisRangeChromatogramListener;
 import fr.proline.mzscope.ui.model.ChromatogramTableModel;
-import fr.proline.mzscope.utils.MzScopeConstants;
+import fr.proline.mzscope.utils.Display;
 import fr.proline.studio.graphics.BasePlotPanel;
+import fr.proline.studio.graphics.PlotBaseAbstract;
 import fr.proline.studio.graphics.PlotLinear;
 import fr.proline.studio.graphics.PlotPanel;
 import fr.proline.studio.graphics.PlotPanelListener;
-import fr.proline.studio.graphics.marker.IntervalMarker;
+import fr.proline.studio.graphics.marker.AbstractMarker;
 import fr.proline.studio.graphics.marker.LineMarker;
 import fr.proline.studio.utils.CyclicColorPalette;
 import java.awt.BorderLayout;
@@ -27,6 +26,7 @@ import java.beans.PropertyChangeSupport;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JPanel;
+import org.openide.util.Exceptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,6 +46,8 @@ public class ChromatogramPanel extends JPanel implements PlotPanelListener {
    protected List<LineMarker> listMsMsMarkers;
    protected LineMarker currentScanMarker;
    protected Float currentScanTime = null;
+   protected String lastDisplayIdentifier;
+   
    private PropertyChangeSupport changeSupport;
    
    private List<AxisRangeChromatogramListener> m_listeners = new ArrayList<>();
@@ -97,8 +99,8 @@ public class ChromatogramPanel extends JPanel implements PlotPanelListener {
       listMsMsMarkers = new ArrayList();
    }
 
-   public Color displayChromatogram(Chromatogram chromato, MzScopeConstants.DisplayMode mode) {
-      if (mode == MzScopeConstants.DisplayMode.REPLACE) {
+   public Color displayChromatogram(Chromatogram chromato, Display display) {
+      if (display.getMode() == Display.Mode.REPLACE || ((display.getMode() == Display.Mode.SERIES) && !display.getIdentifier().equals(lastDisplayIdentifier))) {
          currentChromatogram = chromato;
          listChromatogram = new ArrayList();
          chromatogramPlotPanel.setPlotTitle(chromato.title);
@@ -108,14 +110,28 @@ public class ChromatogramPanel extends JPanel implements PlotPanelListener {
             chromatogramPlot.clearMarkers();
          }
          chromatogramPlots = new ArrayList();
+      } else if (!listChromatogram.isEmpty()) {
+         StringBuilder stb = new StringBuilder("<");
+         stb.append(listChromatogram.size()+1).append(" chromatograms>");
+         chromatogramPlotPanel.setPlotTitle(stb.toString());
       }
 
       listChromatogram.add(chromato);
       double xMin = Double.NaN, xMax = Double.NaN;
       if (chromatogramPlotPanel.hasPlots()) {
-         xMin = chromatogramPlotPanel.getXAxis().getMinValue();
-         xMax = chromatogramPlotPanel.getXAxis().getMaxValue();
+          double[] bounds = chromatogramPlotPanel.getXAxisBounds();
+          if (Double.isNaN(bounds[0]) || bounds[0] < chromatogramPlotPanel.getXAxis().getMinValue()) xMin = chromatogramPlotPanel.getXAxis().getMinValue();
+          if (Double.isNaN(bounds[1]) || bounds[1] > chromatogramPlotPanel.getXAxis().getMaxValue()) xMax = chromatogramPlotPanel.getXAxis().getMaxValue();
       }
+      
+      // if a previous chromatogram was plotted, compute new bounds, otherwise set bounds to chromato start / end time
+      if (chromatogramPlotPanel.hasPlots()) {
+        double[] bounds = chromatogramPlotPanel.getXAxisBounds();
+        chromatogramPlotPanel.setXAxisBounds(Math.min(chromato.elutionStartTime, bounds[0]) , Math.max(chromato.elutionEndTime, bounds[1]));
+      } else {
+        chromatogramPlotPanel.setXAxisBounds(chromato.elutionStartTime, chromato.elutionEndTime);
+      }
+
       Color plotColor = CyclicColorPalette.getColor(chromatogramPlots.size() + 1);
       ChromatogramTableModel chromatoModel = new ChromatogramTableModel(chromato);
       chromatoModel.setColor(plotColor);
@@ -125,11 +141,13 @@ public class ChromatogramPanel extends JPanel implements PlotPanelListener {
       chromatogramPlot.setStrokeFixed(true);
       chromatogramPlotPanel.addPlot(chromatogramPlot);
       chromatogramPlots.add(chromatogramPlot);
+      
+      // if a a zoom range was set, restore it
       if (!Double.isNaN(xMax) && !Double.isNaN(xMin)) {
          chromatogramPlotPanel.getXAxis().setRange(xMin, xMax);
       }
 
-      if (mode == MzScopeConstants.DisplayMode.REPLACE) {
+      if ((display.getMode() == Display.Mode.REPLACE) || ((display.getMode() == Display.Mode.SERIES) && !display.getIdentifier().equals(lastDisplayIdentifier))) {
          chromatogramPlots.get(0).addMarker(currentScanMarker);
          if (currentScanTime != null) {
             currentScanMarker.setValue(currentScanTime / 60.0);
@@ -139,19 +157,30 @@ public class ChromatogramPanel extends JPanel implements PlotPanelListener {
          chromatogramPlotPanel.lockMinYValue();
       }
       
-      
+      displayMarkers(chromatogramPlot, chromatogramPlotPanel, display);
       chromatogramPlotPanel.repaintUpdateDoubleBuffer();
+      lastDisplayIdentifier = display.getIdentifier();
       return plotColor;
    }
 
-   public void displayFeature(final IFeature f) {
-      double ppm = MzScopePreferences.getInstance().getMzPPMTolerance();
-      final MsnExtractionRequest.Builder builder = MsnExtractionRequest.builder().setMzTolPPM((float) ppm);
-      builder.setMaxMz(f.getMz() + f.getMz() * ppm / 1e6).setMinMz(f.getMz() - f.getMz() * ppm / 1e6);
+    private void displayMarkers(PlotBaseAbstract plot, BasePlotPanel plotPanel, Display display) {
+        if (display.getMarkers() != null) {
+            for (AbstractMarker marker : display.getMarkers()) {
+                try {
+                    AbstractMarker clone = marker.clone(plotPanel);
+                    plot.addMarker(clone);
+                } catch (CloneNotSupportedException ex) {
+                    Exceptions.printStackTrace(ex);
+                }
+            }
+        }
+    }
+
+   public void displayFeature(final IFeature f, Display display) {
       PlotLinear chromatogramPlot = chromatogramPlots.isEmpty() ? null : chromatogramPlots.get(0);
       if (chromatogramPlot != null) {
          chromatogramPlot.clearMarkers();
-         chromatogramPlot.addMarker(new IntervalMarker(chromatogramPlotPanel, Color.ORANGE, Color.RED, f.getFirstElutionTime() / 60.0, f.getLastElutionTime() / 60.0));
+         displayMarkers(chromatogramPlot, chromatogramPlotPanel, display);
          currentScanMarker.setValue(f.getElutionTime() / 60.0);
          chromatogramPlot.addMarker(currentScanMarker);
       }
@@ -233,17 +262,48 @@ public class ChromatogramPanel extends JPanel implements PlotPanelListener {
         double oldYMin = chromatogramPlotPanel.getYAxis().getMinValue();
         double oldYMax = chromatogramPlotPanel.getYAxis().getMaxValue();
         
-        double newRangeX = (double)(zoomXLevel * (oldXMax - oldXMin) / 100);
-        double x =   (double)(oldXMin + (relativeXValue * (oldXMax - oldXMin) / 100));
-        double newRangeY = (double)(zoomYLevel * (oldYMax - oldYMin) / 100);
-        double y =   (double)(oldYMin + (relativeYValue * (oldYMax - oldYMin) / 100));
-        double newXMin = x - (double)(newRangeX / 2);
-        double newXMax = x + (double)(newRangeX / 2);
-        double newYMin = y - (double)(newRangeY / 2);
-        double newYMax = y + (double)(newRangeY / 2);
+        double newRangeX = (double)(zoomXLevel * (oldXMax - oldXMin) / 100.0);
+        double x =   (double)(oldXMin + (relativeXValue * (oldXMax - oldXMin) / 100.0));
+        double newRangeY = (double)(zoomYLevel * (oldYMax - oldYMin) / 100.0);
+        double y =   (double)(oldYMin + (relativeYValue * (oldYMax - oldYMin) / 100.0));
+        double newXMin = x - (double)(newRangeX / 2.0);
+        double newXMax = x + (double)(newRangeX / 2.0);
+        double newYMin = y - (double)(newRangeY / 2.0);
+        double newYMax = y + (double)(newRangeY / 2.0);
+        logger.debug("{} move from min={}, max={} to min={}, max={}", currentChromatogram.rawFilename, oldXMin, oldXMax, newXMin, newXMax);
         chromatogramPlotPanel.getXAxis().setRange(newXMin, newXMax);
         chromatogramPlotPanel.getYAxis().setRange(newYMin, newYMax);
         chromatogramPlotPanel.repaintUpdateDoubleBuffer();
     }
-  
+
+    
+    public void updateAxisRange2(double zoomXRange, double relativeXPosition, double zoomYLevel, double relativeYValue){
+
+        double oldYMin = chromatogramPlotPanel.getYAxis().getMinValue();
+        double oldYMax = chromatogramPlotPanel.getYAxis().getMaxValue();
+        
+        double newRangeY = (double)(zoomYLevel * (oldYMax - oldYMin) / 100.0);
+        double y =   (double)(oldYMin + (relativeYValue * (oldYMax - oldYMin) / 100.0));
+
+        double newXMin = (double)((relativeXPosition * (currentChromatogram.elutionEndTime - currentChromatogram.elutionStartTime)));
+        double newXMax = newXMin + zoomXRange;
+        double newYMin = y - (double)(newRangeY / 2.0);
+        double newYMax = y + (double)(newRangeY / 2.0);
+        //logger.debug("{} move to min={}, max={}", currentChromatogram.rawFilename, newXMin, newXMax);
+        chromatogramPlotPanel.getXAxis().setRange(newXMin, newXMax);
+        chromatogramPlotPanel.getYAxis().setRange(newYMin, newYMax);
+        chromatogramPlotPanel.repaintUpdateDoubleBuffer();
+    }
+        
+        
+//        public void computeAxisRange(double zoomXLevel, double relativeXValue, double oldXMin, double oldXMax){
+//        
+//        double newRangeX = (double)(zoomXLevel * (oldXMax - oldXMin) / 100.0);
+//        double x =   (double)(oldXMin + (relativeXValue * (oldXMax - oldXMin) / 100.0));
+//        double newXMin = x - (double)(newRangeX / 2.0);
+//        double newXMax = x + (double)(newRangeX / 2.0);
+//
+//        logger.debug("{} move from min={}, max={} to min={}, max={}", currentChromatogram.rawFilename, oldXMin, oldXMax, newXMin, newXMax);
+//    }
+
 }

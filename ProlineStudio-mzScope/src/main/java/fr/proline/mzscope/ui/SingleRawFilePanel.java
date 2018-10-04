@@ -3,8 +3,8 @@ package fr.proline.mzscope.ui;
 import fr.proline.mzscope.model.Chromatogram;
 import fr.proline.mzscope.model.IRawFile;
 import fr.proline.mzscope.model.Signal;
-import fr.proline.mzscope.utils.MzScopeConstants.DisplayMode;
 import fr.proline.mzscope.processing.SpectrumUtils;
+import fr.proline.mzscope.utils.Display;
 import fr.proline.studio.utils.CyclicColorPalette;
 import fr.proline.studio.utils.IconManager;
 import java.awt.Color;
@@ -99,7 +99,7 @@ public class SingleRawFilePanel extends AbstractRawFilePanel {
          @Override
          protected void done() {
             try {
-               displayChromatogram(get(), DisplayMode.REPLACE);
+               displayChromatogram(get(), new Display(Display.Mode.REPLACE));
                setMsMsEventButtonEnabled(false);
             } catch (InterruptedException | ExecutionException e) {
                logger.error("Error while reading chromatogram");
@@ -129,7 +129,7 @@ public class SingleRawFilePanel extends AbstractRawFilePanel {
          @Override
          protected void done() {
             try {
-               displayChromatogram(get(), DisplayMode.REPLACE);
+               displayChromatogram(get(), new Display(Display.Mode.REPLACE));
                setMsMsEventButtonEnabled(false);
             } catch (InterruptedException | ExecutionException e) {
                logger.error("Error while reading chromatogram");

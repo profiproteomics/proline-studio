@@ -4,8 +4,8 @@ import fr.proline.mzscope.model.Chromatogram;
 import fr.proline.mzscope.model.IFeature;
 import fr.proline.mzscope.model.IRawFile;
 import fr.proline.mzscope.model.MsnExtractionRequest;
+import fr.proline.mzscope.utils.Display;
 import fr.proline.mzscope.utils.MzScopeCallback;
-import fr.proline.mzscope.utils.MzScopeConstants;
 import java.awt.Color;
 
 /**
@@ -22,14 +22,15 @@ public interface IRawFileViewer {
     * @param mode the display mode to use
     * @param callback that must be called back after XIC extraction.
     */
-   public void extractAndDisplayChromatogram(MsnExtractionRequest params, MzScopeConstants.DisplayMode mode, MzScopeCallback callback);
+   public void extractAndDisplayChromatogram(MsnExtractionRequest params, Display display, MzScopeCallback callback);
    /**
     * Display the chromatogram and return the plot color
     * 
-    * @param chromato
+    * @param chromato the chromatogram to display 
+    * @param display parameters used to display the specified chromatogram
     * @return the color used to display the sepecified c
     */ 
-   public Color displayChromatogram(Chromatogram chromato, MzScopeConstants.DisplayMode mode);
+   public Color displayChromatogram(Chromatogram chromato, Display display);
    
    /**
     * Display the specified Feature in this component.
@@ -72,7 +73,7 @@ public interface IRawFileViewer {
     * 
     *  @return the mode used by this component to display XIC.
     */
-   public MzScopeConstants.DisplayMode getXicModeDisplay();
+   public Display.Mode getXicDisplayMode();
    
    /**
     * Returns all Chromatograms displayed by this component

@@ -10,9 +10,13 @@ import fr.proline.mzscope.ui.model.ExtractionResultsTableModel;
 import fr.proline.mzscope.model.ExtractionResult;
 import fr.proline.mzscope.model.IRawFile;
 import fr.proline.mzscope.model.MsnExtractionRequest;
+import fr.proline.mzscope.ui.model.MzScopePreferences;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.markerbar.MarkerContainerPanel;
 import fr.proline.studio.extendedtablemodel.CompoundTableModel;
+import fr.proline.studio.extendedtablemodel.ExpansionTableModel;
+import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
+import fr.proline.studio.extendedtablemodel.ImportedDataTableModel;
 import fr.proline.studio.table.DecoratedMarkerTable;
 import fr.proline.studio.table.TablePopupMenu;
 import fr.proline.studio.utils.IconManager;
@@ -21,13 +25,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -41,12 +40,14 @@ import javax.swing.JToolBar;
 import javax.swing.SwingWorker;
 import javax.swing.event.TableModelListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.table.TableModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author CB205360
+ * 
  */
 public class ExtractionResultsPanel extends JPanel {
 
@@ -54,11 +55,11 @@ public class ExtractionResultsPanel extends JPanel {
 
     private List<ExtractionResult> extractions;
     private ExtractionResultsTableModel extractionResultsTableModel;
+    private ImportedDataTableModel importedTableModel;
     private ExtractionResultsTable extractionResultsTable;
     private SwingWorker extractionWorker;
     
     private IExtractionResultsViewer extractionResultsViewer;
-    private Map<ExtractionResult, Map<IRawFile, Chromatogram>> mapChromatogramByExtraction;
 
     private JFileChooser m_fchooser;
     private MarkerContainerPanel m_markerContainerPanel;
@@ -121,6 +122,7 @@ public class ExtractionResultsPanel extends JPanel {
 
             @Override
             public void actionPerformed(ActionEvent e) {
+                importedTableModel = null;
                 setExtractions(buildIRTRequest());
             }
 
@@ -150,59 +152,41 @@ public class ExtractionResultsPanel extends JPanel {
      * clear all extraction values
      */
     private void clearAllValues(){
+        importedTableModel = null;
         setExtractionsValues(new ArrayList());
     }
 
     private void importCSVExtractions() {
         int result = m_fchooser.showOpenDialog(this);
         if (result == JFileChooser.APPROVE_OPTION) {
-            List<Double> mzValues = new ArrayList();
             File csvFile = m_fchooser.getSelectedFile();
             String fileName = csvFile.getName();
             if (!fileName.endsWith(".csv")){
                 JOptionPane.showMessageDialog(this, "The file must be a csv file", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
-            BufferedReader br = null;
-            String line = "";
-            String cvsSplitBy = ",";
-            try {
-                br = new BufferedReader(new FileReader(csvFile));
-                while ((line = br.readLine()) != null) {
-                    // use comma as separator
-                    String[] values = line.split(cvsSplitBy);
-                    if (values.length >0){
-                        try {
-                            Double v = Double.parseDouble(values[0]);
-                            mzValues.add(v);
-                        } catch (NumberFormatException e) {
-                            logger.error("Error while reading the csv file, values are not Number " + values[0]); // first line could be a title
-                        }
-                    }
+            importedTableModel = new ImportedDataTableModel();
+            ImportedDataTableModel.loadFile(importedTableModel, csvFile.getAbsolutePath(), ',', true, false);
+            int mzColumnIdx = importedTableModel.findColumn("moz");
+            if (mzColumnIdx == -1) {
+                mzColumnIdx = importedTableModel.findColumn("m/z");
+                if (mzColumnIdx == -1) {
+                    mzColumnIdx = importedTableModel.findColumn("mz");
                 }
-            } catch (FileNotFoundException e) {
-                logger.error("Error while importing csv file, File not found: " + e);
-                JOptionPane.showMessageDialog(this, "File not found", "Error", JOptionPane.ERROR_MESSAGE);
-            } catch (IOException e) {
-                logger.error("Error while reading csv file " + e);
-                JOptionPane.showMessageDialog(this, "Error while reading csv file", "Error", JOptionPane.ERROR_MESSAGE);
-            } finally {
-                if (br != null) {
-                    try {
-                        br.close();
-                    } catch (IOException e) {
-                        logger.error("Error while closing csv file " + e);
-                    }
-                }
+            }
+            List<Double> mzValues= new ArrayList<>();
+            for (int k = 0; k < importedTableModel.getRowCount(); k++) {
+                mzValues.add((Double)importedTableModel.getValueAt(k, mzColumnIdx));
             }
             setExtractionsValues(mzValues);
         }
     }
 
     private void setExtractionsValues(List<Double> values) {
+        float moztol = (float)MzScopePreferences.getInstance().getMzPPMTolerance();
         List<MsnExtractionRequest> list = new ArrayList<>();
         for (Double v : values) {
-            list.add(MsnExtractionRequest.builder().setMzTolPPM(10.0f).setMz(v).build());
+            list.add(MsnExtractionRequest.builder().setMzTolPPM(moztol).setMz(v).build());
         }
         setExtractions(list);
     }
@@ -211,13 +195,15 @@ public class ExtractionResultsPanel extends JPanel {
         return extractions;
     }
 
-    public void setExtractions(List<MsnExtractionRequest> extractionRequests) {
+    private void setExtractions(List<MsnExtractionRequest> extractionRequests) {
         List<ExtractionResult> results = new ArrayList<>();
         for (MsnExtractionRequest request : extractionRequests) {
             ExtractionResult extractionResult = new ExtractionResult(request);
             results.add(extractionResult);
         }
         extractionResultsTableModel.setExtractions(results);
+        GlobalTableModelInterface model =  (importedTableModel == null) ? new CompoundTableModel(extractionResultsTableModel, true) : new ExpansionTableModel(importedTableModel, extractionResultsTableModel);
+        extractionResultsTable.setModel(model);
         m_markerContainerPanel.setMaxLineNumber(extractionRequests.size());
         extractions = results;
     }
@@ -229,23 +215,21 @@ public class ExtractionResultsPanel extends JPanel {
             return;
         }
         final List<IRawFile> rawfiles = RawFileManager.getInstance().getAllFiles();
+        extractionResultsTableModel.setRawFiles(rawfiles);
+        
         if ((extractionWorker == null) || extractionWorker.isDone()) {
-            mapChromatogramByExtraction = new HashMap();
             for (ExtractionResult extraction : extractions) {
                 extraction.setStatus(ExtractionResult.Status.REQUESTED);
-                mapChromatogramByExtraction.put(extraction, new HashMap());
             }
-            extractionResultsTableModel.fireTableDataChanged();
+            extractionResultsTableModel.fireTableStructureChanged();
             extractionWorker = new SwingWorker<Integer, List<Object>>() {
-                int count = 0;
-
                 @Override
                 protected Integer doInBackground() throws Exception {
+                    int count = 0;
                     for (ExtractionResult extraction : extractions) {
                         for (IRawFile rawFile : rawfiles) {
                             long start = System.currentTimeMillis();
                             Chromatogram c = rawFile.getXIC(extraction.getRequest());
-                            extraction.addChromatogram(c);
                             count++;
                             List<Object> o = new ArrayList();
                             o.add(c);
@@ -261,12 +245,13 @@ public class ExtractionResultsPanel extends JPanel {
 
                 @Override
                 protected void process(List<List<Object>> chunks) {
+                    for (List<Object> o : chunks) {
+                        Chromatogram c = (Chromatogram)o.get(0);
+                        IRawFile rf = (IRawFile)o.get(1);
+                        ExtractionResult extraction = (ExtractionResult)o.get(2);
+                        extraction.addChromatogram(rf, c);
+                    }
                     extractionResultsTableModel.fireTableDataChanged();
-                    List<Object> o = chunks.get(chunks.size() - 1);
-                    Chromatogram c = (Chromatogram)o.get(0);
-                    IRawFile rf = (IRawFile)o.get(1);
-                    ExtractionResult extraction = (ExtractionResult)o.get(2);
-                    mapChromatogramByExtraction.get(extraction).put(rf, c);
                 }
 
                 @Override
@@ -288,16 +273,17 @@ public class ExtractionResultsPanel extends JPanel {
         extractionResultsTableModel = new ExtractionResultsTableModel();
         JScrollPane jScrollPane = new JScrollPane();
         extractionResultsTable = new ExtractionResultsTable();
-        extractionResultsTable.setModel(new CompoundTableModel(extractionResultsTableModel, true));
+        TableModel model =  (importedTableModel == null) ? new CompoundTableModel(extractionResultsTableModel, true) : new ExpansionTableModel(importedTableModel, extractionResultsTableModel);
+        extractionResultsTable.setModel(model);
         extractionResultsTable.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent evt) {
-                logger.debug("Extraction Result table mouse clicked");
                 int selRow = extractionResultsTable.rowAtPoint(evt.getPoint());
                 if (selRow != -1){
                     ExtractionResult extraction = extractionResultsTableModel.getExtractionResultAt(extractionResultsTable.convertRowIndexToModel(selRow));
-                    if (extraction != null && mapChromatogramByExtraction.containsKey(extraction)){
-                        Map<IRawFile, Chromatogram> mapChr = mapChromatogramByExtraction.get(extraction);
+                    //logger.debug("mouse clicked on Extraction Result "+extraction);
+                    if (extraction != null){
+                        Map<IRawFile, Chromatogram> mapChr = extraction.getChromatograms();
                         final List<IRawFile> rawfiles = RawFileManager.getInstance().getAllFiles();
                         int nbFiles = rawfiles.size();
                         if (nbFiles == 1){
@@ -345,18 +331,19 @@ public class ExtractionResultsPanel extends JPanel {
     }
 
     private static List<MsnExtractionRequest> buildIRTRequest() {
+        float moztol = (float)MzScopePreferences.getInstance().getMzPPMTolerance();
         List<MsnExtractionRequest> list = new ArrayList<>();
-        list.add(MsnExtractionRequest.builder().setMzTolPPM(10.0f).setMz(487.257).build());
-        list.add(MsnExtractionRequest.builder().setMzTolPPM(10.0f).setMz(547.297).build());
-        list.add(MsnExtractionRequest.builder().setMzTolPPM(10.0f).setMz(622.853).build());
-        list.add(MsnExtractionRequest.builder().setMzTolPPM(10.0f).setMz(636.869).build());
-        list.add(MsnExtractionRequest.builder().setMzTolPPM(10.0f).setMz(644.822).build());
-        list.add(MsnExtractionRequest.builder().setMzTolPPM(10.0f).setMz(669.838).build());
-        list.add(MsnExtractionRequest.builder().setMzTolPPM(10.0f).setMz(683.827).build());
-        list.add(MsnExtractionRequest.builder().setMzTolPPM(10.0f).setMz(683.853).build());
-        list.add(MsnExtractionRequest.builder().setMzTolPPM(10.0f).setMz(699.338).build());
-        list.add(MsnExtractionRequest.builder().setMzTolPPM(10.0f).setMz(726.835).build());
-        list.add(MsnExtractionRequest.builder().setMzTolPPM(10.0f).setMz(776.929).build());
+        list.add(MsnExtractionRequest.builder().setMzTolPPM(moztol).setMz(487.257).build());
+        list.add(MsnExtractionRequest.builder().setMzTolPPM(moztol).setMz(547.297).build());
+        list.add(MsnExtractionRequest.builder().setMzTolPPM(moztol).setMz(622.853).build());
+        list.add(MsnExtractionRequest.builder().setMzTolPPM(moztol).setMz(636.869).build());
+        list.add(MsnExtractionRequest.builder().setMzTolPPM(moztol).setMz(644.822).build());
+        list.add(MsnExtractionRequest.builder().setMzTolPPM(moztol).setMz(669.838).build());
+        list.add(MsnExtractionRequest.builder().setMzTolPPM(moztol).setMz(683.827).build());
+        list.add(MsnExtractionRequest.builder().setMzTolPPM(moztol).setMz(683.853).build());
+        list.add(MsnExtractionRequest.builder().setMzTolPPM(moztol).setMz(699.338).build());
+        list.add(MsnExtractionRequest.builder().setMzTolPPM(moztol).setMz(726.835).build());
+        list.add(MsnExtractionRequest.builder().setMzTolPPM(moztol).setMz(776.929).build());
         return list;
     }
 }

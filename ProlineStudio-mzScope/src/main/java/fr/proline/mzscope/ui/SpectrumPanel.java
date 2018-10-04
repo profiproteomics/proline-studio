@@ -7,8 +7,8 @@ import fr.proline.mzscope.ui.model.MzScopePreferences;
 import fr.proline.mzscope.model.Spectrum;
 import fr.proline.mzscope.ui.event.ScanHeaderListener;
 import fr.proline.mzscope.processing.IsotopicPatternUtils;
-import fr.proline.mzscope.utils.MzScopeConstants.DisplayMode;
 import fr.proline.mzscope.processing.SpectrumUtils;
+import fr.proline.mzscope.utils.Display;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.graphics.PlotXYAbstract;
 import fr.proline.studio.graphics.PlotLinear;
@@ -231,7 +231,7 @@ class ScansSpinnerModel extends AbstractSpinnerModel {
     @Override
     public void plotPanelMouseClicked(MouseEvent e, double xValue, double yValue) {
         if (e.getClickCount() == 2) {
-            if ((e.getModifiers() & OVERLAY_KEY) == 0 && rawFilePanel.getXicModeDisplay() != DisplayMode.OVERLAY) {
+            if ((e.getModifiers() & OVERLAY_KEY) == 0 && rawFilePanel.getXicDisplayMode() != Display.Mode.OVERLAY) {
                 scanPlot.clearMarkers();
                 scanPlot.addMarker(positionMarker);
             }
@@ -249,9 +249,9 @@ class ScansSpinnerModel extends AbstractSpinnerModel {
                     builder.setMz(currentScan.getPrecursorMz()).setFragmentMz(mz).setFragmentMzTolPPM(ppmTol);
                 }
                 if ((e.getModifiers() & OVERLAY_KEY) != 0) {
-                    rawFilePanel.extractAndDisplayChromatogram(builder.build(), DisplayMode.OVERLAY, null);
+                    rawFilePanel.extractAndDisplayChromatogram(builder.build(), new Display(Display.Mode.OVERLAY), null);
                 } else {
-                    rawFilePanel.extractAndDisplayChromatogram(builder.build(), rawFilePanel.getXicModeDisplay(), null);
+                    rawFilePanel.extractAndDisplayChromatogram(builder.build(), new Display(rawFilePanel.getXicDisplayMode()), null);
                 }
 
         } else if (SwingUtilities.isLeftMouseButton(e)) {

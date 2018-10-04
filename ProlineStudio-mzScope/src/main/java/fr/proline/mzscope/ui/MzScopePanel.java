@@ -25,8 +25,7 @@ import fr.proline.mzscope.ui.dialog.ExportRawFileDialog;
 import fr.proline.mzscope.ui.dialog.ExtractionParamsDialog;
 import fr.proline.mzscope.ui.event.ExtractionEvent;
 import fr.proline.mzscope.ui.event.ExtractionStateListener;
-import fr.proline.mzscope.utils.MzScopeConstants;
-import fr.proline.mzscope.utils.MzScopeConstants.DisplayMode;
+import fr.proline.mzscope.utils.Display;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.gui.DefaultDialog.ProgressTask;
 import java.awt.BorderLayout;
@@ -44,6 +43,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
@@ -232,7 +232,7 @@ public class MzScopePanel extends JPanel implements IFeatureViewer, IExtractionR
         list = mapRawFilePanelRawFile.get(rawfile);
         for (final AbstractRawFilePanel p : list) {
             if (p instanceof SingleRawFilePanel) {
-                p.extractAndDisplayChromatogram(params, MzScopeConstants.DisplayMode.REPLACE, new MzScopeCallback() {
+                p.extractAndDisplayChromatogram(params, new Display(Display.Mode.REPLACE), new MzScopeCallback() {
                     @Override
                     public void callback(boolean success) {
                         p.displayFeature(new BaseFeature(moz, (float) elutionTime, (float) firstScanTime, (float) lastScanTime, rawfile, 1));
@@ -435,7 +435,7 @@ public class MzScopePanel extends JPanel implements IFeatureViewer, IExtractionR
 
             @Override
             protected void process(List<List<IFeature>> list) {
-                List<IFeature> listF = list.get(list.size() - 1);
+                List<IFeature> listF = list.stream().flatMap(l -> l.stream()).collect(Collectors.toList());
                 logger.info("{} features/peakels extracted in {}", listF.size(), (System.currentTimeMillis() - start) / 1000.0);
 
                 if (count == 1) {
@@ -574,6 +574,7 @@ public class MzScopePanel extends JPanel implements IFeatureViewer, IExtractionR
             viewersTabPane.removeAll();
             featuresTabPane.removeAll();
             mapRawFilePanelRawFile = new HashMap<>();
+            RawFileManager.getInstance().removeAllFiles();
             return true;
         }
         return false;
@@ -754,7 +755,7 @@ public class MzScopePanel extends JPanel implements IFeatureViewer, IExtractionR
         if (list != null) {
             for (AbstractRawFilePanel panel : list) {
                 if (panel instanceof SingleRawFilePanel) {
-                    panel.displayChromatogram(c, DisplayMode.REPLACE);
+                    panel.displayChromatogram(c, new Display(Display.Mode.REPLACE));
                     viewersTabPane.setSelectedComponent(panel);
                 }
             }

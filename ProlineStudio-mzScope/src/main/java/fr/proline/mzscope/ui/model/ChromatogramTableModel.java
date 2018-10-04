@@ -28,6 +28,9 @@ public class ChromatogramTableModel  extends AbstractTableModel implements Exten
 
     public ChromatogramTableModel(Chromatogram chromato) {
         this.chromato = chromato;
+        plotInformation = new PlotInformation();
+        plotInformation.setPlotColor(chromatoColor);
+        plotInformation.setPlotTitle(chromato.title);
     }
     
     @Override
@@ -103,13 +106,13 @@ public class ChromatogramTableModel  extends AbstractTableModel implements Exten
 
     @Override
     public PlotInformation getPlotInformation() {
-       PlotInformation plotInformation = new PlotInformation();
-       plotInformation.setPlotColor(chromatoColor);
        return plotInformation;
     }
+    private PlotInformation plotInformation;
     
     public void setColor(Color c){
         this.chromatoColor = c;
+        plotInformation.setPlotColor(chromatoColor);
     }
 
     @Override

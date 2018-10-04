@@ -191,6 +191,8 @@ class MetricsDetailsPanel extends JPanel {
     private final static Logger logger = LoggerFactory.getLogger(MetricsDetailsPanel.class);
     
     private JComboBox<String> m_metricsCbx;
+    private JComboBox<Integer> m_msLevelCbx;
+    
     private QCMetrics m_metrics;
     private BasePlotPanel m_plotPanel;
     
@@ -203,15 +205,24 @@ class MetricsDetailsPanel extends JPanel {
         m_metricsCbx.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String metric = (String)m_metricsCbx.getSelectedItem();
-                // can be null when metricCbs is reset.
-                if (metric != null) {
-                    setCurrentMetric(metric);
-                }
+                updateCurrentMetric();
             }
         }) ;
         toolbar.setLayout(new FlowLayout(FlowLayout.LEADING,5,5));
         toolbar.add(m_metricsCbx);
+
+        m_msLevelCbx = new JComboBox<>();
+        m_msLevelCbx.addItem(1);
+        m_msLevelCbx.addItem(2);
+        
+        m_msLevelCbx.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                updateCurrentMetric();
+            }
+        }) ;
+        toolbar.add(m_msLevelCbx);        
+        
         toolbar.add(Box.createHorizontalGlue());
         this.add(toolbar, BorderLayout.NORTH);
         PlotPanel panel = new PlotPanel();
@@ -219,12 +230,20 @@ class MetricsDetailsPanel extends JPanel {
         this.add(panel, BorderLayout.CENTER);
     }
     
-    public void setCurrentMetric(String metricName) {
+    public void updateCurrentMetric() {
+     String metricName = (String)m_metricsCbx.getSelectedItem();
+     Integer msLevel = (Integer)m_msLevelCbx.getSelectedItem();
+     if (metricName == null) {
+         m_plotPanel.clearPlots();
+         m_plotPanel.repaintUpdateDoubleBuffer();
+         return;
+     } 
       DescriptiveStatistics[] stats = m_metrics.getMetricStatistics(metricName);
       if (stats == null) {
           logger.error("no stats found for metric "+metricName);
           m_plotPanel.clearPlots();
           m_plotPanel.repaintUpdateDoubleBuffer();
+          return;
       }
       logger.info("set visible metric to "+metricName);
       double[] time;
@@ -232,10 +251,13 @@ class MetricsDetailsPanel extends JPanel {
       if (stats[0] != null) {
           time = m_metrics.getMetricStatistics("RT events ")[0].getValues();
           statistics = stats[0];
+          m_msLevelCbx.setEnabled(false);
       }  else {
-          time = m_metrics.getMetricStatistics("RT MS events ")[1].getValues();
-          statistics = stats[1];          
+          time = m_metrics.getMetricStatistics("RT MS events ")[msLevel].getValues();
+          statistics = stats[msLevel];  
+          m_msLevelCbx.setEnabled(true);
       }
+      logger.info("Statistics size = "+statistics.getN());
       if (statistics.getN() == time.length) {
         StatisticsTableModel model = new StatisticsTableModel(metricName, time, statistics);
         PlotLinear plot = new PlotLinear(m_plotPanel, model, null, ChromatogramTableModel.COLTYPE_CHROMATOGRAM_XIC_TIME, ChromatogramTableModel.COLTYPE_CHROMATOGRAM_XIC_INTENSITIES);
@@ -246,7 +268,7 @@ class MetricsDetailsPanel extends JPanel {
         m_plotPanel.addPlot(plot);
         m_plotPanel.repaintUpdateDoubleBuffer();
       } else {
-          logger.warn("Should not appen : time range and values size are not equal !");
+          logger.warn("Should not append : time range and values size are not equal !");
       }
     }
 

@@ -77,7 +77,8 @@ public class MzdbMetricsCollector {
         DescriptiveStatistics[] RTStatistics = new DescriptiveStatistics[maxMsLevel];
         DescriptiveStatistics[] PeaksCountStatistics = new DescriptiveStatistics[maxMsLevel];
         DescriptiveStatistics[] InjectionTimeStatistics = new DescriptiveStatistics[maxMsLevel];
-
+        DescriptiveStatistics AllRTStatistics = new DescriptiveStatistics();
+        
         metrics.addMetric("Max MS level", maxMsLevel);
         
         for (int msLevel = 1; msLevel <= maxMsLevel; msLevel++) {
@@ -133,7 +134,7 @@ public class MzdbMetricsCollector {
             SumTICStatistics[header.getMsLevel() - 1].addValue(ticSum);
             TICStatistics[header.getMsLevel() - 1].addValue(header.getTIC());
             RTStatistics[header.getMsLevel() - 1].addValue(header.getTime() / 60.0);
-            RTStatistics[0].addValue(header.getTime() / 60.0);
+            AllRTStatistics.addValue(header.getTime() / 60.0);
             PeaksCountStatistics[header.getMsLevel() - 1].addValue(header.getPeaksCount());
             if ((header.getMsLevel() == 2) && (header.getPrecursorCharge() > 0)) {
                 if (!chargeStates.containsKey(header.getPrecursorCharge())) {
@@ -146,7 +147,7 @@ public class MzdbMetricsCollector {
 
         metrics.addMetric("MS  Sum TIC ", SumTICStatistics);
         metrics.addMetric("MS TIC", TICStatistics);
-        metrics.addMetric("RT events ", RTStatistics[0]);
+        metrics.addMetric("RT events ", AllRTStatistics);
         metrics.addMetric("RT MS events ", RTStatistics);
         metrics.addMetric("MS peaks count", PeaksCountStatistics);
         metrics.addMetric("MS injection time", InjectionTimeStatistics);

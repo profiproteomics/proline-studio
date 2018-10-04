@@ -66,7 +66,8 @@ public class MzdbRawFile implements IRawFile {
     private MzDbReader reader;
     private SpectrumHeader[] ms2SpectrumHeaders = null;
     private double[] ms2SpectrumHeaderByMz = null;
-    
+    private double elutionStartTime = Double.NaN;
+    private double elutionEndTime = Double.NaN;
     private boolean isDIAFile;
 
     public MzdbRawFile(File file) {
@@ -101,6 +102,26 @@ public class MzdbRawFile implements IRawFile {
         }
     }
 
+    private double getElutionStartTime() {
+        if (Double.isNaN(elutionStartTime)) updateElutionTimes();
+        return elutionStartTime;
+    }
+    
+    private double getElutionEndTime() {
+        if (Double.isNaN(elutionEndTime)) updateElutionTimes();
+        return elutionEndTime;
+    }
+    
+    private void updateElutionTimes() {
+         try {
+            SpectrumHeader[] headers = reader.getSpectrumHeaders();
+            elutionStartTime = Math.floor(headers[0].getElutionTime()/60.0);
+            elutionEndTime = Math.ceil(headers[headers.length - 1].getElutionTime()/60.0);
+         } catch (SQLiteException ex) {
+            logger.error("Cannot generate TIC chromatogram", ex);
+        }
+    }
+    
     @Override
     public String getName() {
         return mzDbFile.getName();
@@ -128,9 +149,13 @@ public class MzdbRawFile implements IRawFile {
                 yAxisData[i] = ((double) headers[i].getTIC());
             }
 
-            chromatogram = new Chromatogram(getName(), "TIC");
+            chromatogram = new Chromatogram(getName(), getName()+" TIC");
             chromatogram.time = xAxisData;
             chromatogram.intensities = yAxisData;
+            if (Double.isNaN(elutionEndTime)) elutionEndTime = Math.ceil(xAxisData[headers.length -1]);
+            if (Double.isNaN(elutionStartTime))elutionStartTime = Math.floor(xAxisData[0]);
+            chromatogram.elutionStartTime = getElutionStartTime();
+            chromatogram.elutionEndTime = getElutionEndTime();
             return chromatogram;
         } catch (SQLiteException ex) {
             logger.error("Cannot generate TIC chromatogram", ex);
@@ -150,9 +175,11 @@ public class MzdbRawFile implements IRawFile {
                 yAxisData[i] = ((double) headers[i].getBasePeakIntensity());
             }
 
-            chromatogram = new Chromatogram(getName(), "BPC");
+            chromatogram = new Chromatogram(getName(), getName()+" BPC");
             chromatogram.time = xAxisData;
             chromatogram.intensities = yAxisData;
+            chromatogram.elutionStartTime = getElutionStartTime();
+            chromatogram.elutionEndTime = getElutionEndTime();
             return chromatogram;
         } catch (SQLiteException ex) {
             logger.error("Cannot generate BPC chromatogram", ex);
@@ -182,12 +209,15 @@ public class MzdbRawFile implements IRawFile {
             if (chromatogram != null) {
                 chromatogram.minMz = (params.getMsLevel() == 1) ? params.getMinMz() : params.getFragmentMinMz();
                 chromatogram.maxMz = (params.getMsLevel() == 1) ? params.getMaxMz() : params.getFragmentMaxMz();
-                StringBuilder builder = new StringBuilder("Mass range: ");
+                StringBuilder builder = new StringBuilder();
+                builder.append("MS").append(params.getMsLevel()).append(" m/z: ");
                 builder.append(massFormatter.format(chromatogram.minMz)).append("-").append(massFormatter.format(chromatogram.maxMz));
                 if (params.getMsLevel() > 1) {
-                    builder.append(" (").append(massFormatter.format(params.getMz()));
+                    builder.append(" (prec m/z: ").append(massFormatter.format(params.getMz())).append(')');
                 }
                 chromatogram.title = builder.toString();
+            } else {
+                logger.info("mzdb extracted chromatogram is empty");
             }
             logger.info("mzdb chromatogram extracted in {} ms", (System.currentTimeMillis() - start));
         } catch (SQLiteException | StreamCorruptedException e) {
@@ -225,6 +255,8 @@ public class MzdbRawFile implements IRawFile {
             chromatogram = new Chromatogram(getName());
             chromatogram.time = Doubles.toArray(xAxisData);
             chromatogram.intensities = Doubles.toArray(yAxisData);
+            chromatogram.elutionStartTime = getElutionStartTime();
+            chromatogram.elutionEndTime = getElutionEndTime();
         }
         return chromatogram;
     }
@@ -264,8 +296,7 @@ public class MzdbRawFile implements IRawFile {
                     return Double.compare(p2.getApexIntensity(), p1.getApexIntensity());
                 }
             });
-            logger.info("Peakels detected : " + peakels.length);
-
+            
             PeakelsHelper helper = new PeakelsHelper(peakels);
             //List<Feature> features2 = helper.deisotopePeakels(reader, mzTolPPM);            
             List<Feature> features = helper.deisotopePeakelsFromMzdb(reader, mzTolPPM);
@@ -319,7 +350,7 @@ public class MzdbRawFile implements IRawFile {
             
             FeatureDetectorConfig detectorConfig = null;
             if (params.isMsnExtraction()) {
-                detectorConfig = new FeatureDetectorConfig(2, params.getFragmentMzTolPPM(), 5, new SmartPeakelFinderConfig(5, 3, 0.75f, false, 10, true, params.isRemoveBaseline(), true));
+                detectorConfig = new FeatureDetectorConfig(2, params.getFragmentMzTolPPM(), 5, new SmartPeakelFinderConfig(5, 3, 0.75f, false, 10, false, params.isRemoveBaseline(), true));
             } else {
                 detectorConfig = new FeatureDetectorConfig(1, params.getMzTolPPM(), 5, new SmartPeakelFinderConfig(5, 3, 0.75f, false, 10, false, params.isRemoveBaseline(), true));                
             }
@@ -401,8 +432,6 @@ public class MzdbRawFile implements IRawFile {
         Spectrum spectrum = null;
         try {
             fr.profi.mzdb.model.Spectrum rawSpectrum = reader.getSpectrum((long) spectrumIndex);
-            logger.info("Spectrum id {}, cycle = {}", rawSpectrum.getHeader().getInitialId(), rawSpectrum.getHeader().getCycle());
-            
             SpectrumData data = rawSpectrum.getData();
             Map<Integer, DataEncoding> map = reader.getDataEncodingReader().getDataEncodingById();
             DataEncoding encoding = reader.getSpectrumDataEncoding((long) spectrumIndex);
@@ -414,7 +443,7 @@ public class MzdbRawFile implements IRawFile {
             List<Float> xAxisData = new ArrayList<Float>(mzList.length);
             List<Float> yAxisData = new ArrayList<Float>(mzList.length);
             for (int count = 0; count < mzList.length; count++) {
-                if ((data.getLeftHwhmList() != null) && data.getLeftHwhmList()[count] > 0) {
+                if ((data.getLeftHwhmList() != null) && data.getLeftHwhmList()[count] > 0 && !encoding.getMode().equals(DataMode.PROFILE)) {
                     leftSigma[count] = 2.0 * data.getLeftHwhmList()[count] / 2.35482;
                     double x = mzList[count] - 4.0 * leftSigma[count];
                     //search for the first left value less than x
@@ -438,7 +467,7 @@ public class MzdbRawFile implements IRawFile {
                 }
                 xAxisData.add((float) mzList[count]);
                 yAxisData.add(intensityList[count]);
-                if (data.getRightHwhmList() != null && data.getRightHwhmList()[count] > 0) {
+                if (data.getRightHwhmList() != null && data.getRightHwhmList()[count] > 0 && !encoding.getMode().equals(DataMode.PROFILE)) {
                     rightSigma[count] = 2.0 * data.getRightHwhmList()[count] / 2.35482;
                     double x = mzList[count] + rightSigma[count] / 2.0;
                     if (!xAxisData.isEmpty()) {

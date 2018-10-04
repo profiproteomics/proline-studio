@@ -5,10 +5,8 @@
  */
 package fr.proline.mzscope.model;
 
-import java.util.ArrayList;
-import java.util.List;
-import org.apache.commons.lang3.tuple.MutablePair;
-import org.apache.commons.lang3.tuple.Pair;
+import java.util.HashMap;
+import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,12 +19,11 @@ public class ExtractionResult {
    final private static Logger logger = LoggerFactory.getLogger(ExtractionResult.class);
 
    public enum Status {
-
       NONE, REQUESTED, DONE
    };
 
    private MsnExtractionRequest request;
-   private List<Pair<Chromatogram, Object>> chromatograms;
+   private Map<IRawFile, Chromatogram> chromatograms;
    private Status status = Status.NONE;
 
    public ExtractionResult(MsnExtractionRequest request) {
@@ -69,19 +66,16 @@ public class ExtractionResult {
       this.status = status;
    }
    
-   public boolean addChromatogram(Chromatogram chromato) {
+   public boolean addChromatogram(IRawFile rawFile, Chromatogram chromato) {
       if (chromatograms == null) {
-         chromatograms = new ArrayList<>();
+         chromatograms = new HashMap<>();
       }
-      return chromatograms.add(new MutablePair<>(chromato, null));
+      chromatograms.put(rawFile, chromato);
+      return true;
    }
 
-   public List<Chromatogram> getChromatograms() {
-      List<Chromatogram> result = new ArrayList<>(chromatograms.size());
-      for( Pair<Chromatogram, Object>  p : chromatograms) {
-         result.add(p.getKey());
-      }
-      return result;
+   public Map<IRawFile, Chromatogram> getChromatograms() {
+      return chromatograms;
    }
    
    public MsnExtractionRequest getRequest() {

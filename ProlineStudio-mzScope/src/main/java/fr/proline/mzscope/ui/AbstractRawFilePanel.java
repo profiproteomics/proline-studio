@@ -6,10 +6,12 @@ import fr.proline.mzscope.model.MsnExtractionRequest;
 import fr.proline.mzscope.utils.MzScopeCallback;
 import fr.proline.mzscope.ui.model.MzScopePreferences;
 import fr.proline.mzscope.model.Spectrum;
+import fr.proline.mzscope.utils.Display;
 import fr.proline.mzscope.utils.KeyEventDispatcherDecorator;
-import fr.proline.mzscope.utils.MzScopeConstants.DisplayMode;
 import fr.proline.studio.export.ExportButton;
+import fr.proline.studio.graphics.marker.IntervalMarker;
 import fr.proline.studio.utils.IconManager;
+import fr.proline.studio.utils.StringUtils;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Cursor;
@@ -19,10 +21,12 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import javax.swing.AbstractButton;
 import javax.swing.JButton;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.JToggleButton;
@@ -42,7 +46,7 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFileVie
     final private static Logger logger = LoggerFactory.getLogger("ProlineStudio.mzScope.AbstractRawFilePanel");
 
     private boolean displayScan = true;
-    private DisplayMode xicModeDisplay = DisplayMode.REPLACE;
+    private Display.Mode xicDisplayMode = Display.Mode.REPLACE;
 
     private JSplitPane splitPane;
     private JPanel mainPanel;
@@ -210,7 +214,7 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFileVie
             overlayBtn.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    xicModeDisplay = ((AbstractButton) e.getSource()).isSelected() ? DisplayMode.OVERLAY : DisplayMode.REPLACE;
+                    xicDisplayMode = ((AbstractButton) e.getSource()).isSelected() ? Display.Mode.OVERLAY : Display.Mode.REPLACE;
                 }
             });
         }
@@ -224,8 +228,8 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFileVie
         }
     }
 
-    public DisplayMode getXicModeDisplay() {
-        return xicModeDisplay;
+    public Display.Mode getXicDisplayMode() {
+        return xicDisplayMode;
     }
 
     private void displayMsMsEvents(boolean showMsMsEvents) {
@@ -266,17 +270,15 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFileVie
     }
 
     @Override
-    public Color displayChromatogram(Chromatogram chromato, DisplayMode mode) {
-        if (mode == DisplayMode.REPLACE) {
-            setMsMsEventButtonEnabled(true);
-        }
-        Color plotColor = chromatogramPanel.displayChromatogram(chromato, mode);
+    public Color displayChromatogram(Chromatogram chromato, Display display) {
+        setMsMsEventButtonEnabled(display.getMode() == Display.Mode.REPLACE);
+        Color plotColor = chromatogramPanel.displayChromatogram(chromato, display);
         displayMsMsEvents(showMS2EventsButton.isSelected());
         return plotColor;
     }
 
     @Override
-    public void extractAndDisplayChromatogram(MsnExtractionRequest params, final DisplayMode mode, final MzScopeCallback callback) {
+    public void extractAndDisplayChromatogram(MsnExtractionRequest params, final Display display, final MzScopeCallback callback) {
         if (rawFileLoading != null) {
             rawFileLoading.setWaitingState(true);
         }
@@ -286,11 +288,14 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFileVie
                 try {
                     Chromatogram c = get();
                     if (c != null) {
-                        displayChromatogram(c, mode);
+                        displayChromatogram(c, display);
                         setMsMsEventButtonEnabled(true);
                         if (callback != null) {
                             callback.callback(true);
                         }
+                    } else {
+                        String msg = StringUtils.formatString(params.toString(), 60);
+                        JOptionPane.showMessageDialog(null, "The following extraction request did not produce any data: \n"+msg, "Chromatogram Extraction failure", JOptionPane.ERROR_MESSAGE);
                     }
                 } catch (InterruptedException | ExecutionException e) {
                     logger.error("Error while extraction chromatogram", e);
@@ -335,8 +340,8 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFileVie
             @Override
             protected void done() {
                 try {
-                    displayChromatogram(get(), getXicModeDisplay());
-                    chromatogramPanel.displayFeature(f);
+                    displayChromatogram(get(), new Display(getXicDisplayMode()));
+                    chromatogramPanel.displayFeature(f, new Display(Arrays.asList(new IntervalMarker(null, Color.ORANGE, Color.RED, f.getFirstElutionTime() / 60.0, f.getLastElutionTime() / 60.0))));
                     displayScan(getCurrentRawfile().getSpectrumId(f.getElutionTime()));
                     if (rawFileLoading != null) {
                         rawFileLoading.setWaitingState(false);

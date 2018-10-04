@@ -8,7 +8,7 @@ import fr.proline.mzscope.utils.MzScopeCallback;
 import fr.proline.mzscope.model.Spectrum;
 import fr.proline.mzscope.ui.event.AxisRangeChromatogramListener;
 import fr.proline.mzscope.utils.ButtonTabComponent;
-import fr.proline.mzscope.utils.MzScopeConstants.DisplayMode;
+import fr.proline.mzscope.utils.Display;
 import fr.proline.studio.tabs.IWrappedPanel;
 import fr.proline.studio.tabs.TabsPanel;
 import fr.proline.studio.utils.CyclicColorPalette;
@@ -51,7 +51,7 @@ public class TabbedMultiRawFilePanel extends JPanel implements IRawFileViewer {
     private ChromatogramPanel currentChromatogramPanel;
     protected SpectrumPanel spectrumContainerPanel;
     protected Spectrum currentScan;
-    private DisplayMode xicModeDisplay = DisplayMode.REPLACE;
+    private Display.Mode xicDisplayMode = Display.Mode.REPLACE;
     
     private JToolBar m_toolbarPanel;
     private JPanel m_multiRawFilePanel;
@@ -235,8 +235,6 @@ public class TabbedMultiRawFilePanel extends JPanel implements IRawFileViewer {
             }
         });
         chromatogramPanel.addListener(new AxisRangeChromatogramListener() {
-
-            
             @Override
             public void updateAxisRange(double[] oldX, double[] newX,  double[] oldY,  double[] newY) {
                 synchronizeAxisRange(rawFile, oldX, newX, oldY, newY);
@@ -268,7 +266,7 @@ public class TabbedMultiRawFilePanel extends JPanel implements IRawFileViewer {
     }
 
     @Override
-    public void extractAndDisplayChromatogram(final MsnExtractionRequest params, DisplayMode mode, MzScopeCallback callback) {
+    public void extractAndDisplayChromatogram(final MsnExtractionRequest params, Display display, MzScopeCallback callback) {
         // in this implementation displayMode is ignored : always REPLACE since we will extract one Chromatogram per RawFile
         SwingWorker worker = new SwingWorker<Integer, Chromatogram>() {
             int count = 0;
@@ -288,7 +286,7 @@ public class TabbedMultiRawFilePanel extends JPanel implements IRawFileViewer {
             @Override
             protected void process(List<Chromatogram> chunks) {
                 for (int k = 0; k < chunks.size(); k++) {
-                    displayChromatogram(chunks.get(k), mode);
+                    displayChromatogram(chunks.get(k), display);
                 }
             }
 
@@ -310,7 +308,7 @@ public class TabbedMultiRawFilePanel extends JPanel implements IRawFileViewer {
     }
 
     @Override
-    public Color displayChromatogram(Chromatogram chromato, DisplayMode mode) {
+    public Color displayChromatogram(Chromatogram chromato, Display display) {
         String rawFileName = chromato.rawFilename;
         int nbTab = chromatogramContainerPanel.getTabCount();
         Color c = null;
@@ -318,7 +316,7 @@ public class TabbedMultiRawFilePanel extends JPanel implements IRawFileViewer {
             String tabTitle = chromatogramContainerPanel.getTitleAt(t);
             if (tabTitle.equals(rawFileName)) {  // see how to better get the tabComponent linked to a rawFile
                 ChromatogramPanel chromatoPanel = (ChromatogramPanel) chromatogramContainerPanel.getComponentAt(t);
-                c = chromatoPanel.displayChromatogram(chromato, mode);
+                c = chromatoPanel.displayChromatogram(chromato, display);
                 mapChromatogramForRawFile.put(getRawFile(rawFileName), chromato);
                 if (isZoomSynchronized && (!zoomXLevel.isNaN() && !zoomYLevel.isNaN())) {
                     chromatoPanel.updateAxisRange(zoomXLevel, relativeXValue, zoomYLevel, relativeYValue);
@@ -331,7 +329,7 @@ public class TabbedMultiRawFilePanel extends JPanel implements IRawFileViewer {
     // override display feature to display all xic
     @Override
     public void displayFeature(final IFeature f) {
-        // TODO : how to handle this simple display of a unique feature ? In this case multiple Features must be displayed, on by RawFile
+        // TODO : how to handle this simple display of a unique feature ? In this case multiple Features must be displayed, one by RawFile
     }
 
     @Override
@@ -401,7 +399,7 @@ public class TabbedMultiRawFilePanel extends JPanel implements IRawFileViewer {
             protected void process(List<Chromatogram> chunks) {
                 for (int k = 0; k < chunks.size(); k++) {
                     logger.info("display  chromato");
-                    displayChromatogram(chunks.get(k), DisplayMode.REPLACE);
+                    displayChromatogram(chunks.get(k), new Display(Display.Mode.REPLACE));
                 }
             }
 
@@ -443,7 +441,7 @@ public class TabbedMultiRawFilePanel extends JPanel implements IRawFileViewer {
             protected void process(List<Chromatogram> chunks) {
                 for (int k = 0; k < chunks.size(); k++) {
                     logger.info("display  chromato");
-                    displayChromatogram(chunks.get(k), DisplayMode.REPLACE);
+                    displayChromatogram(chunks.get(k), new Display(Display.Mode.REPLACE));
                 }
             }
 
@@ -473,11 +471,8 @@ public class TabbedMultiRawFilePanel extends JPanel implements IRawFileViewer {
                 String tabTitle = chromatogramContainerPanel.getTitleAt(t);
                 if (tabTitle.equals(rawFile.getName())) {  // see how to better get the tabComponent linked to a rawFile
                     ChromatogramPanel chromatoPanel = (ChromatogramPanel) chromatogramContainerPanel.getComponentAt(t);
-                    chromatoPanel.displayChromatogram(chromato, DisplayMode.REPLACE);
+                    chromatoPanel.displayChromatogram(chromato, new Display(Display.Mode.REPLACE));
                     mapChromatogramForRawFile.put(rawFile, chromato);
-                    if (isZoomSynchronized && (!zoomXLevel.isNaN() && !zoomYLevel.isNaN())) {
-                        chromatoPanel.updateAxisRange(zoomXLevel, relativeXValue, zoomYLevel, relativeYValue);
-                    }
                 }
             }
         }
@@ -499,28 +494,75 @@ public class TabbedMultiRawFilePanel extends JPanel implements IRawFileViewer {
     }
     
     
-    private  void synchronizeAxisRange(IRawFile rawFile, double[] oldX, double[] newX,  double[] oldY,  double[] newY){
+//    private  void synchronizeAxisRange(IRawFile rawFile, double[] oldX, double[] newX,  double[] oldY,  double[] newY){
+//        if (isZoomSynchronized){
+//            double oldMinX = oldX[0];
+//            double oldMaxX = oldX[1];
+//            double newMinX = newX[0];
+//            double newMaxX = newX[1];
+//            double oldMinY = oldY[0];
+//            double oldMaxY = oldY[1];
+//            double newMinY = newY[0];
+//            double newMaxY = newY[1];
+//            
+//            logger.debug("moving from min={}, max={} to min={}, max={} ", oldMinX, oldMaxX, newMinX, newMaxX);
+//            zoomXLevel = (double)((newMaxX - newMinX)*100.0/(oldMaxX - oldMinX));
+//            relativeXValue = (double)(100.0 * ((newMinX+((newMaxX-newMinX) /2.0)) - oldMinX)/(oldMaxX - oldMinX));
+//            zoomYLevel = (double)((newMaxY - newMinY)*100.0/(oldMaxY - oldMinY));
+//            relativeYValue = (double)(100.0 * ((newMinY+((newMaxY-newMinY) /2.0)) - oldMinY)/(oldMaxY - oldMinY));
+//            
+//            logger.debug("leads to zoomLevel={}, relativeX={}", zoomXLevel, relativeXValue);
+//
+//            int nbTab = chromatogramContainerPanel.getTabCount();
+//            for (int t = 0; t < nbTab; t++) {
+//                String tabTitle = chromatogramContainerPanel.getTitleAt(t);
+//                if (!tabTitle.equals(rawFile.getName())) {  // see how to better get the tabComponent linked to a rawFile
+//                 ChromatogramPanel chromatoPanel = (ChromatogramPanel) chromatogramContainerPanel.getComponentAt(t);
+//                 chromatoPanel.updateAxisRange(zoomXLevel, relativeXValue, zoomYLevel, relativeYValue);
+//                } else {
+//                    logger.debug("in source rawfile {} ", rawFile.getName());
+//                    ChromatogramPanel chromatoPanel = (ChromatogramPanel) chromatogramContainerPanel.getComponentAt(t);
+//                    chromatoPanel.computeAxisRange(zoomXLevel, relativeXValue, oldMinX, oldMaxX);
+//                }
+//            }
+//        }
+//    }
+    
+        private  void synchronizeAxisRange(IRawFile rawFile, double[] oldX, double[] newX,  double[] oldY,  double[] newY){
         if (isZoomSynchronized){
-            double oldMinX = oldX[0];
-            double oldMaxX = oldX[1];
             double newMinX = newX[0];
             double newMaxX = newX[1];
+
             double oldMinY = oldY[0];
             double oldMaxY = oldY[1];
             double newMinY = newY[0];
             double newMaxY = newY[1];
             
-            zoomXLevel = (double)((newMaxX - newMinX)*100/(oldMaxX - oldMinX));
-            relativeXValue = (double)(100* ((newMinX+((newMaxX-newMinX) /2)) - oldMinX)/(oldMaxX - oldMinX));
-            zoomYLevel = (double)((newMaxY - newMinY)*100/(oldMaxY - oldMinY));
-            relativeYValue = (double)(100* ((newMinY+((newMaxY-newMinY) /2)) - oldMinY)/(oldMaxY - oldMinY));
             int nbTab = chromatogramContainerPanel.getTabCount();
+            Chromatogram referenceChromato = null;
+            for (int t = 0; t < nbTab; t++) {
+                String tabTitle = chromatogramContainerPanel.getTitleAt(t);
+                if (tabTitle.equals(rawFile.getName())) {  // see how to better get the tabComponent linked to a rawFile
+                 ChromatogramPanel chromatoPanel = (ChromatogramPanel) chromatogramContainerPanel.getComponentAt(t);
+                 referenceChromato = chromatoPanel.getCurrentChromatogram();
+                } 
+            }
+            
+//            logger.debug("moving to min={}, max={} ", newMinX, newMaxX);
+            double zoomXRange = (double)(newMaxX - newMinX);
+            double relativeXMinPosition = (double)(newMinX/(referenceChromato.elutionEndTime - referenceChromato.elutionStartTime));
+
+            zoomYLevel = (double)((newMaxY - newMinY)*100.0/(oldMaxY - oldMinY));
+            relativeYValue = (double)(100.0 * ((newMinY+((newMaxY-newMinY) /2.0)) - oldMinY)/(oldMaxY - oldMinY));
+            
+//            logger.debug("leads to zoomRange={}, relativeX={}", zoomXRange, relativeXMinPosition);
+
             for (int t = 0; t < nbTab; t++) {
                 String tabTitle = chromatogramContainerPanel.getTitleAt(t);
                 if (!tabTitle.equals(rawFile.getName())) {  // see how to better get the tabComponent linked to a rawFile
                  ChromatogramPanel chromatoPanel = (ChromatogramPanel) chromatogramContainerPanel.getComponentAt(t);
-                 chromatoPanel.updateAxisRange(zoomXLevel, relativeXValue, zoomYLevel, relativeYValue);
-                }
+                 chromatoPanel.updateAxisRange2(zoomXRange, relativeXMinPosition, zoomYLevel, relativeYValue);
+                } 
             }
         }
     }
@@ -535,7 +577,7 @@ public class TabbedMultiRawFilePanel extends JPanel implements IRawFileViewer {
             overlayBtn.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    xicModeDisplay = ((AbstractButton) e.getSource()).isSelected() ? DisplayMode.OVERLAY : DisplayMode.REPLACE;
+                    xicDisplayMode = ((AbstractButton) e.getSource()).isSelected() ? Display.Mode.OVERLAY : Display.Mode.REPLACE;
                 }
             });
         }
@@ -584,8 +626,8 @@ public class TabbedMultiRawFilePanel extends JPanel implements IRawFileViewer {
     }
 
     @Override
-    public DisplayMode getXicModeDisplay() {
-        return xicModeDisplay;
+    public Display.Mode getXicDisplayMode() {
+        return xicDisplayMode;
     }
 
 }

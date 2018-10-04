@@ -11,8 +11,8 @@ import fr.proline.core.orm.msi.dto.DInfoPTM;
 import fr.proline.core.orm.msi.dto.DPeptideInstance;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.msi.dto.DProteinMatch;
-import fr.proline.core.orm.ps.PtmSpecificity.PtmLocation;
-import java.util.ArrayList;
+import fr.proline.core.orm.msi.PtmSpecificity.PtmLocation;
+import fr.proline.core.orm.msi.dto.DMasterQuantProteinSet;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -44,28 +44,28 @@ public class PTMSite {
     //
     // Additional information build by DAM task
     //
-    @JsonIgnore private DProteinMatch proteinMatch;
-    @JsonIgnore private DPeptideMatch bestPeptideMatch;
-    @JsonIgnore private DInfoPTM ptmSpecificity;
-    @JsonIgnore private Map<Long, Integer> reversePtmPositionByPeptideId;
-    @JsonIgnore private Map<DPeptideInstance, List<DPeptideMatch>> m_peptideMatchesByPepInstance;
-    @JsonIgnore private Map<Long, List<Map.Entry<DPeptideInstance, List<DPeptideMatch>>>> m_peptideMatchesByPeptideId;
+    @JsonIgnore private DProteinMatch m_proteinMatch;
+    @JsonIgnore private DPeptideMatch m_bestPeptideMatch;
+    @JsonIgnore private DInfoPTM m_ptmSpecificity;
+    @JsonIgnore private Map<Long, Integer> m_ptmPositionByPeptideId;
+    @JsonIgnore private Map<Long, List<DPeptideInstance>> m_leafPeptideInstancesByPeptideId;
     @JsonIgnore private List<DPeptideInstance> m_parentPeptideInstances;
-
+    @JsonIgnore private DMasterQuantProteinSet m_masterQuantProteinSet;
+    
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        if (proteinMatch != null) {
-            builder.append(proteinMatch.getAccession()).append("-");
+        if (m_proteinMatch != null) {
+            builder.append(m_proteinMatch.getAccession()).append("-");
         } else {
             builder.append("Protein Match ID").append(proteinMatchId).append("-");
         }
-        if (ptmSpecificity != null) {
-            builder.append(ptmSpecificity.getPtmShortName()).append("(");
-            if (ptmSpecificity.getLocationSpecificity().equals("Anywhere")) {
-                builder.append(ptmSpecificity.getRresidueAASpecificity());
+        if (m_ptmSpecificity != null) {
+            builder.append(m_ptmSpecificity.getPtmShortName()).append("(");
+            if (m_ptmSpecificity.getLocationSpecificity().equals("Anywhere")) {
+                builder.append(m_ptmSpecificity.getRresidueAASpecificity());
             } else {
-                builder.append(ptmSpecificity.getLocationSpecificity());
+                builder.append(m_ptmSpecificity.getLocationSpecificity());
             }
             builder.append(")-");
         } else {
@@ -76,39 +76,32 @@ public class PTMSite {
     }
 
     public void setProteinMatch(DProteinMatch proteinMatch) {
-        this.proteinMatch = proteinMatch;
+        this.m_proteinMatch = proteinMatch;
     }
 
     public void setBestPeptideMatch(DPeptideMatch peptideMatch) {
-        bestPeptideMatch = peptideMatch;
+        m_bestPeptideMatch = peptideMatch;
     }
 
     public void setPTMSpcificity(DInfoPTM specificity) {
-        ptmSpecificity = specificity;
+        m_ptmSpecificity = specificity;
     }
 
     @JsonIgnore
-    public void setPepInstancePepMatchesMap(Map<DPeptideInstance, List<DPeptideMatch>> pepMatchesByPepInstance) {
-        m_peptideMatchesByPepInstance = pepMatchesByPepInstance;
-        m_peptideMatchesByPeptideId = new HashMap<>();
-        for (Map.Entry<DPeptideInstance, List<DPeptideMatch>> entry : m_peptideMatchesByPepInstance.entrySet()) {
-            if (!m_peptideMatchesByPeptideId.containsKey(entry.getKey().getPeptideId())) {
-               m_peptideMatchesByPeptideId.put(entry.getKey().getPeptideId(), new ArrayList<>());
-            }
-            m_peptideMatchesByPeptideId.get(entry.getKey().getPeptideId()).add(entry);
-        }
+    public void seLeafPeptideInstances(List<DPeptideInstance> peptideInstances) {
+         m_leafPeptideInstancesByPeptideId = peptideInstances.stream().collect(Collectors.groupingBy(pi -> pi.getPeptideId()));
     }
 
-    public List<Map.Entry<DPeptideInstance, List<DPeptideMatch>>> getPeptideMatchesForPeptide(Long peptideId) {
-        return m_peptideMatchesByPeptideId.get(peptideId);
+    public List<DPeptideInstance> getLeafPeptideInstances(Long peptideId) {
+        return m_leafPeptideInstancesByPeptideId.get(peptideId);
     }
-    
+        
     public DProteinMatch getProteinMatch() {
-        return proteinMatch;
+        return m_proteinMatch;
     }
 
     public DPeptideMatch getBestPeptideMatch() {
-        return bestPeptideMatch;
+        return m_bestPeptideMatch;
     }
     
     @JsonIgnore
@@ -121,20 +114,20 @@ public class PTMSite {
     }
     
     public DInfoPTM getPtmSpecificity() {
-        return ptmSpecificity;
+        return m_ptmSpecificity;
     }
 
     public Integer getPeptideCount() {
-        return getReversePtmPositionByPeptideId().keySet().size();
+        return getPtmPositionByPeptideId().keySet().size();
     }
 
-    public boolean isAllPeptideMatchesLoaded() {
-        return (m_peptideMatchesByPepInstance != null);
+    public boolean isLoaded() {
+        return (m_leafPeptideInstancesByPeptideId != null);
     }
 
     public DPeptideMatch getBestPeptideMatchForPeptide(Long peptideId) {
         
-        List<DPeptideMatch> pepMatches = m_peptideMatchesByPeptideId.get(peptideId).stream().map( entry -> entry.getValue()).flatMap(list -> list.stream()).collect(Collectors.toList());
+        List<DPeptideMatch> pepMatches = m_leafPeptideInstancesByPeptideId.get(peptideId).stream().flatMap( pi -> pi.getPeptideMatches().stream()).collect(Collectors.toList());
         
         final Float bestProba[] = new Float[1];
         bestProba[0] = 0.00f;
@@ -158,36 +151,36 @@ public class PTMSite {
         return bestPM[0];
     }
 
-    public Map<Long, Integer> getReversePtmPositionByPeptideId() {
-        if (reversePtmPositionByPeptideId == null) {
-            reversePtmPositionByPeptideId = new HashMap<>();
+    private Map<Long, Integer> getPtmPositionByPeptideId() {
+        if (m_ptmPositionByPeptideId == null) {
+            m_ptmPositionByPeptideId = new HashMap<>();
             for (Map.Entry<Integer, List<Long>> entry : peptideIdsByPtmPosition.entrySet()) {
                 for (Long pepId : entry.getValue()) {
-                    reversePtmPositionByPeptideId.put(pepId, entry.getKey());
+                    m_ptmPositionByPeptideId.put(pepId, entry.getKey());
                 }
             }
         }
-        return reversePtmPositionByPeptideId;
+        return m_ptmPositionByPeptideId;
     }
 
     public String toReadablePtmString(Long peptideId) {
-        StringBuilder builder = new StringBuilder(ptmSpecificity.getPtmShortName());
+        StringBuilder builder = new StringBuilder(m_ptmSpecificity.getPtmShortName());
         builder.append(" (");
-        if (ptmSpecificity.getLocationSpecificity().equals("Anywhere")) {
-            builder.append(ptmSpecificity.getRresidueAASpecificity()).append(getPtmPeptidePosition(peptideId)).append(')');
+        if (m_ptmSpecificity.getLocationSpecificity().equals("Anywhere")) {
+            builder.append(m_ptmSpecificity.getRresidueAASpecificity()).append(getPtmPositionOnPeptide(peptideId)).append(')');
         } else {
-            builder.append(ptmSpecificity.getLocationSpecificity()).append(')');
+            builder.append(m_ptmSpecificity.getLocationSpecificity()).append(')');
         }
         return builder.toString();
     }
 
     // VDS Workaround test for issue #16643   
     public String toOtherReadablePtmString(Long peptideId) {
-        StringBuilder builder = new StringBuilder(ptmSpecificity.getPtmShortName());
+        StringBuilder builder = new StringBuilder(m_ptmSpecificity.getPtmShortName());
         builder.append(" (");
-        PtmLocation ptmLoc = PtmLocation.withName(ptmSpecificity.getLocationSpecificity());
+        PtmLocation ptmLoc = PtmLocation.withName(m_ptmSpecificity.getLocationSpecificity());
         if (ptmLoc.equals(PtmLocation.ANYWHERE)) {
-            builder.append(ptmSpecificity.getRresidueAASpecificity()).append(getPtmPeptidePosition(peptideId)).append(')');
+            builder.append(m_ptmSpecificity.getRresidueAASpecificity()).append(getPtmPositionOnPeptide(peptideId)).append(')');
         } else {
             switch (ptmLoc) {
                 case ANY_C_TERM:
@@ -207,8 +200,16 @@ public class PTMSite {
         return builder.toString();
     }
 
-    public Integer getPtmPeptidePosition(Long peptideId) {
-        return getReversePtmPositionByPeptideId().get(peptideId);
+    public Integer getPtmPositionOnPeptide(Long peptideId) {
+        return getPtmPositionByPeptideId().get(peptideId);
     }
 
+    void setQuantProteinSet(DMasterQuantProteinSet mqps) {
+        m_masterQuantProteinSet = mqps;
+    }
+
+    public DMasterQuantProteinSet getMasterQuantProteinSet() {
+        return m_masterQuantProteinSet;
+    }
+    
 }

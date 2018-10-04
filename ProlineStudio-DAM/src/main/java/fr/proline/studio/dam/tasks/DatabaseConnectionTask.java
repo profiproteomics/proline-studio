@@ -20,7 +20,7 @@ import org.netbeans.api.db.explorer.JDBCDriverManager;
 
 
 /**
- * Used to connect to a UDS DB, MSI DB or PDI DB
+ * Used to connect to a UDS DB, MSI DB
  *
  * @author JM235353
  */
@@ -113,17 +113,12 @@ public class DatabaseConnectionTask extends AbstractDatabaseTask {
         action = UDS_USER_TEST;
     }
     
-
-
-
-
     
     @Override
     public boolean needToFetch() {
         return true; // anyway this task is used only one time for each node
 
     }
-
 
     
     @Override
@@ -224,9 +219,6 @@ public class DatabaseConnectionTask extends AbstractDatabaseTask {
                     entityManagerMSI.close();
 
                     
-                    // PS Connection
-                    EntityManager entityManagerPS = DStoreCustomPoolConnectorFactory.getInstance().getPsDbConnector().createEntityManager();
-                    entityManagerPS.close();
                 } catch (Exception e) {
                     m_logger.error(getClass().getSimpleName() + " failed", e);
                     m_taskError = new TaskError(e);
@@ -287,6 +279,45 @@ public class DatabaseConnectionTask extends AbstractDatabaseTask {
 
         } catch (Exception e) {
             m_taskError = new TaskError("Unable to load Instrument Configurations from UDS");
+            m_logger.error(getClass().getSimpleName() + " failed", e);
+            entityManagerUDS.getTransaction().rollback();
+            DStoreCustomPoolConnectorFactory.getInstance().closeAll();
+            return false;
+        }
+                
+        // Load All fragmentation rules
+        try {
+            entityManagerUDS.getTransaction().begin();
+
+            TypedQuery<FragmentationRule> fragRulesQuery = entityManagerUDS.createQuery("SELECT fr FROM fr.proline.core.orm.uds.FragmentationRule fr ORDER BY fr.id ASC", FragmentationRule.class);
+            List<FragmentationRule> frList = fragRulesQuery.getResultList();
+            DatabaseDataManager.getDatabaseDataManager().setFragmentationRules(frList);
+
+            entityManagerUDS.getTransaction().commit();
+
+        } catch (Exception e) {
+            m_taskError = new TaskError("Unable to load FragmentationRule Configurations from UDS");
+            m_logger.error(getClass().getSimpleName() + " failed", e);
+            entityManagerUDS.getTransaction().rollback();
+            DStoreCustomPoolConnectorFactory.getInstance().closeAll();
+            return false;
+        }
+        
+        // Load All fragmentation rule sets
+        try {
+            entityManagerUDS.getTransaction().begin();
+
+            TypedQuery<FragmentationRuleSet> fragRuleSetsQuery = entityManagerUDS.createQuery("SELECT frs FROM fr.proline.core.orm.uds.FragmentationRuleSet frs ORDER BY frs.name ASC", FragmentationRuleSet.class);
+            List<FragmentationRuleSet> frsList = fragRuleSetsQuery.getResultList();
+            frsList.stream().forEach(frs -> { 
+                frs.getFragmentationRules().stream().forEach(fr -> fr.getDescription());
+            });
+            DatabaseDataManager.getDatabaseDataManager().setFragmentationRuleSets(frsList);
+
+            entityManagerUDS.getTransaction().commit();
+
+        } catch (Exception e) {
+            m_taskError = new TaskError("Unable to load FragmentationRuleSet Configurations from UDS");
             m_logger.error(getClass().getSimpleName() + " failed", e);
             entityManagerUDS.getTransaction().rollback();
             DStoreCustomPoolConnectorFactory.getInstance().closeAll();

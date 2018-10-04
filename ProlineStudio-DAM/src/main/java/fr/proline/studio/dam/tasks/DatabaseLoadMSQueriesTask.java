@@ -110,7 +110,7 @@ public class DatabaseLoadMSQueriesTask extends AbstractDatabaseSlicerTask {
                         + "s.id = msq.spectrum.id AND "
                         + "msq.msiSearch.id =:msiSearchId ";
                 Query msQueryQ = entityManagerMSI.createQuery(query);
-                msQueryQ.setParameter("msiSearchId", msiSearchId);
+                msQueryQ.setParameter("msiSearchId", msiSearchId); 
                 List<Object[]> resultList = msQueryQ.getResultList();
                 m_msQueriesIds = new ArrayList<>(resultList.size());
                 m_msqQueryMap = new HashMap();
@@ -128,7 +128,6 @@ public class DatabaseLoadMSQueriesTask extends AbstractDatabaseSlicerTask {
                     m_msQueriesIds.add(msqId);
                     m_msqQueryMap.put(msqId, msQuery);
                     m_nbPeptideMatchesByMsQueryIdMap.put(msqId, 0);
-
                 }
                 
                 m_msiSearch = entityManagerMSI.find(MsiSearch.class, msiSearchId);

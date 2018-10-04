@@ -1,6 +1,8 @@
 package fr.proline.studio.dam;
 
 import fr.proline.core.orm.uds.Aggregation;
+import fr.proline.core.orm.uds.FragmentationRule;
+import fr.proline.core.orm.uds.FragmentationRuleSet;
 import fr.proline.core.orm.uds.InstrumentConfiguration;
 import fr.proline.core.orm.uds.PeaklistSoftware;
 import fr.proline.core.orm.uds.Project;
@@ -24,6 +26,8 @@ public class DatabaseDataManager  {
     private static DatabaseDataManager m_singleton = null;
     
     private InstrumentConfiguration[] m_instruments;
+    private FragmentationRuleSet[] m_fragmentationRuleSets;
+    private FragmentationRule[] m_fragmentationRules;
     private PeaklistSoftware[] m_peaklistSoftwares;
     private UserAccount[] m_projectUsers;
     private UserAccount m_loggedUser;
@@ -128,6 +132,30 @@ public class DatabaseDataManager  {
         return peaklistSoftwaresWithNull;
     }
     
+    public void setFragmentationRules(List<FragmentationRule> l) {
+        m_fragmentationRules = l.toArray(new FragmentationRule[l.size()]);
+    }
+    
+    public FragmentationRule[] getFragmentationRulesArray() {
+        return m_fragmentationRules;
+    }
+      
+    public void setFragmentationRuleSets(List<FragmentationRuleSet> l) {
+        m_fragmentationRuleSets = l.toArray(new FragmentationRuleSet[l.size()]);
+    }
+    
+    public FragmentationRuleSet[] getFragmentationRuleSetsArray() {
+        return m_fragmentationRuleSets;
+    }
+    
+    public FragmentationRuleSet[] getFragmentationRuleSetsWithNullArray() {        
+        int length = m_fragmentationRuleSets.length;
+        FragmentationRuleSet[] fragRuleSetsWithNull = new FragmentationRuleSet[length+1];
+        fragRuleSetsWithNull[0] = null;
+        System.arraycopy(m_fragmentationRuleSets, 0, fragRuleSetsWithNull, 1, length);
+        return fragRuleSetsWithNull;
+    }
+    
     public void setAggregationList(List<Aggregation> l) {
         
         m_aggregationMap = new HashMap<>();
@@ -192,9 +220,9 @@ public class DatabaseDataManager  {
         if (m_checkDatabaseExists == null) {
         
             try {
-                IDatabaseConnector seqDatabaseConnector = null;
+                IDatabaseConnector seqDatabaseConnector;
                 if(m_serverConnectionProperties != null && !m_serverConnectionProperties.isEmpty())
-                  seqDatabaseConnector = DatabaseAccess.getSEQDatabaseConnector(false,m_serverConnectionProperties);
+                    seqDatabaseConnector = DatabaseAccess.getSEQDatabaseConnector(false,m_serverConnectionProperties);
                 else
                     seqDatabaseConnector =DatabaseAccess.getSEQDatabaseConnector(false);
                 

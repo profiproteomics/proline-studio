@@ -5,6 +5,7 @@ package fr.proline.studio.dam.tasks;
 import fr.proline.core.orm.msi.Peptide;
 import fr.proline.core.orm.msi.PeptideInstance;
 import fr.proline.core.orm.msi.PeptideReadablePtmString;
+import fr.proline.core.orm.msi.ResultSet;
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.SequenceMatch;
 import fr.proline.core.orm.msi.dto.DMsQuery;
@@ -18,6 +19,7 @@ import fr.proline.core.orm.msi.dto.DSpectrum;
 import fr.proline.core.orm.util.DStoreCustomPoolConnectorFactory;
 import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
+import static fr.proline.studio.dam.tasks.DatabaseLoadPeptideMatchTask.SUB_TASK_SRC_DAT_FILE;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -46,7 +48,7 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseSlicerTas
     public static final int SUB_TASK_COUNT = 2; // <<----- get in sync
     
     
-    private long m_projectId = -1;
+    private long m_projectId;
     private DProteinMatch m_proteinMatch = null;
     private ArrayList<DProteinMatch> m_proteinMatchArray = null;
     private ArrayList<ResultSummary> m_rsmList = null;
@@ -143,7 +145,7 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseSlicerTas
         /**
      * Fetch data of a Subtask
      *
-     * @return
+     * @return true on task execution success
      */
     private boolean fetchDataSubTask() {
         SubTask subTask = m_subTaskManager.getNextSubTask();
@@ -183,14 +185,12 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseSlicerTas
         return true;
     }
 
-    public boolean fetchDataForRsm() {
+    private boolean fetchDataForRsm() {
         
-         HashMap<Long, Peptide> peptideMap = new HashMap<>();
-        
+        HashMap<Long, Peptide> peptideMap = new HashMap<>();
         EntityManager entityManagerMSI = DStoreCustomPoolConnectorFactory.getInstance().getMsiDbConnector(m_projectId).createEntityManager();
 
         try {
-
             
             entityManagerMSI.getTransaction().begin();
 
@@ -201,8 +201,6 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseSlicerTas
             // WHERE pi.resultSummary.id=:rsmId AND pi.bestPeptideMatchId=pm.id AND pm.peptideId=p.id AND pm.msQuery=ms AND ms.spectrum=sp ORDER BY pm.score DESC
             Query peptideInstancesQuery = entityManagerMSI.createQuery("SELECT pi, pm.id, pm.rank, pm.charge, pm.deltaMoz, pm.experimentalMoz, pm.missedCleavage, pm.score, pm.resultSet.id, p, pm.cdPrettyRank, pm.sdPrettyRank, sp.firstTime, pm.serializedProperties FROM fr.proline.core.orm.msi.PeptideInstance pi, fr.proline.core.orm.msi.PeptideMatch pm, fr.proline.core.orm.msi.Peptide p, fr.proline.core.orm.msi.MsQuery ms, fr.proline.core.orm.msi.Spectrum sp  WHERE pi.resultSummary.id=:rsmId AND pi.bestPeptideMatchId=pm.id AND pm.peptideId=p.id AND pm.msQuery=ms AND ms.spectrum=sp ORDER BY pm.score DESC");
             peptideInstancesQuery.setParameter("rsmId", m_rsm.getId());
-
-            
             
             List l = peptideInstancesQuery.getResultList();
             m_peptideMatchIds = new ArrayList<>(l.size());
@@ -234,7 +232,6 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseSlicerTas
                 peptideMap.put(p.getId(), p);
 
                 pi.getTransientData().setBestPeptideMatch(pm);
-
                 pm.setPeptide(p);
 
                 peptideInstanceList.add(pi);
@@ -245,21 +242,24 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseSlicerTas
             m_rsm.getTransientData().setPeptideInstanceArray(peptideInstances);
             
             fetchReadablePtmData(entityManagerMSI, m_rsm.getResultSet().getId(), peptideMap);
-            fetchPtmDataFromPSdb(peptideMap);
+            fetchPtmDataForPeptides(entityManagerMSI, peptideMap);
              
-            // slice the task and get the first one
+            // slice the task and get the first one and execute the first slice now
             SubTask subTask = m_subTaskManager.sliceATaskAndGetFirst( SUB_TASK_PROTEINSET_NAME_LIST, nbPeptides, SLICE_SIZE );
-
-            // execute the first slice now
             fetchProteinSetName(entityManagerMSI, subTask);
             
-            // slice the task and get the first one
+            // slice the task and get the first one and execute the first slice
             subTask = m_subTaskManager.sliceATaskAndGetFirst( SUB_TASK_MSQUERY, nbPeptides, SLICE_SIZE );
+            DatabaseLoadPeptideMatchTask.fetchMsQuery(entityManagerMSI, subTask, m_peptideMatchIds, m_peptideMatchMap); 
+            
+            ResultSet.Type rsType = m_rsm.getResultSet().getType();
+            boolean mergedData = (rsType == ResultSet.Type.USER) || (rsType == ResultSet.Type.DECOY_USER); // Merge or Decoy Merge
+            if (mergedData) {
+                // slice the task and get the first one and execute the first slice now
+                subTask = m_subTaskManager.sliceATaskAndGetFirst(SUB_TASK_SRC_DAT_FILE, m_peptideMatchMap.size(), SLICE_SIZE);
+                DatabaseLoadPeptideMatchTask.fetchSrcDatFile(entityManagerMSI, subTask, m_peptideMatchIds, null, null, m_peptideMatchMap);
+            }
 
-            // execute the first slice now
-            DatabaseLoadPeptideMatchTask.fetchMsQuery(entityManagerMSI, subTask, m_peptideMatchIds, m_peptideMatchMap);
-            
-            
             entityManagerMSI.getTransaction().commit();
         } catch (Exception e) {
             m_logger.error(getClass().getSimpleName() + " failed", e);
@@ -273,11 +273,7 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseSlicerTas
         } finally {
             entityManagerMSI.close();
         }
-        
-        
 
-        
-        
         return true;
     }
     
@@ -285,8 +281,8 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseSlicerTas
     /**
      * Retrieve MsQuery for a Sub Task
      *
-     * @param entityManagerMSI
-     * @param slice
+     * @param entityManagerMSI : the entity manager to use for database queries
+     * @param subTask : the subtask that must be completed
      */
     private void fetchProteinSetName(EntityManager entityManagerMSI, SubTask subTask) {
 
@@ -297,7 +293,7 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseSlicerTas
         proteinSetQuery.setParameter("listId", sliceOfPeptideMatchIds);
         proteinSetQuery.setParameter("rsmId", m_rsm == null ? -1 : m_rsm.getId());
 
-        ArrayList<String> proteinSetNameArray = new ArrayList();
+        ArrayList<String> proteinSetNameArray = new ArrayList<>();
         long prevPeptideMatchId = -1;
 
         List<Object[]> resultList = proteinSetQuery.getResultList();
@@ -340,7 +336,7 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseSlicerTas
         }
     }
     
-    public boolean fetchDataForProteinMatch() {
+    private boolean fetchDataForProteinMatch() {
 
         HashMap<Long, Peptide> peptideMap = new HashMap<>();
         EntityManager entityManagerMSI = DStoreCustomPoolConnectorFactory.getInstance().getMsiDbConnector(m_projectId).createEntityManager();
@@ -357,8 +353,10 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseSlicerTas
                     continue;
                 }
 
-                fetchPeptideData(entityManagerMSI, rsm, pm, peptideMap);
+                fetchPeptideDataForProteinMatch(entityManagerMSI, rsm, pm, peptideMap);
             }
+            
+            fetchPtmDataForPeptides(entityManagerMSI, peptideMap); 
             
             entityManagerMSI.getTransaction().commit();
         } catch (Exception e) {
@@ -372,21 +370,13 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseSlicerTas
             return false;
         } finally {
             entityManagerMSI.close();
-        }
-        
-        try {
-            fetchPtmDataFromPSdb(peptideMap);
-        } catch (Exception e) {
-            m_logger.error(getClass().getSimpleName() + " failed", e);
-            m_taskError = new TaskError(e);
-            return false;
-        }
+        }       
         
         return true;
     }
     
     
-    public static void fetchPeptideData(EntityManager entityManagerMSI, ResultSummary rsm, DProteinMatch proteinMatch, HashMap<Long, Peptide> peptideMap) {
+    public static void fetchPeptideDataForProteinMatch(EntityManager entityManagerMSI, ResultSummary rsm, DProteinMatch proteinMatch, HashMap<Long, Peptide> peptideMap) {
 
         // Retrieve peptideSet of a proteinMatch
         DPeptideSet peptideSet = proteinMatch.getPeptideSet(rsm.getId());
@@ -447,12 +437,10 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseSlicerTas
             Long msqId = (Long) resCur[11];
             Integer msqInitialId = (Integer) resCur[12];
 
-            
             DMsQuery msq = new DMsQuery(pmId, msqId, msqInitialId, precursorIntensity);
             msq.setDSpectrum(spectrum);
 
             dpi.setBestPeptideMatch(pm);
-
 
             pm.setSequenceMatch(sm);
             p.getTransientData().setPeptideReadablePtmStringLoaded();
@@ -465,16 +453,13 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseSlicerTas
 
         fetchReadablePtmData(entityManagerMSI, rsm.getResultSet().getId(), peptideMapForPtm);
 
-        
         int nbPeptides = peptideInstanceList.size();
         DPeptideInstance[] peptideInstances = peptideInstanceList.toArray(new DPeptideInstance[nbPeptides]);
         peptideSet.setPeptideInstances(peptideInstances);
-
         
         for (int i = 0; i < nbPeptides; i++) {
-            peptideMap.put(peptideInstances[i].getPeptideId(), ((DPeptideMatch)peptideInstances[i].getBestPeptideMatch()).getPeptide());
+            peptideMap.put(peptideInstances[i].getPeptideId(), (peptideInstances[i].getBestPeptideMatch()).getPeptide());
         }
-
 
         // Retrieve the list of Protein Sets of Peptides
         // typical ProteinMatch is loaded in the same time, to avoid lazy fetch 
@@ -489,8 +474,6 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseSlicerTas
             Long proteinSetId = (Long) resCur[0];
             Peptide p = (Peptide) resCur[1];
             
-            
-            
             Long proteinMatchId = (Long) resCur[2];
             String accession = (String) resCur[3];
             Float score = (Float) resCur[4];
@@ -499,9 +482,7 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseSlicerTas
             String serializedProperties = (String) resCur[7];
 
             DProteinMatch pm = new DProteinMatch(proteinMatchId, accession, score, peptideCount, rsm.getResultSet().getId(), description, serializedProperties);
-            
             DProteinSet proteinSet = new DProteinSet(proteinSetId, proteinMatchId, rsm.getId());
-
             proteinSet.setTypicalProteinMatch(pm);
 
             ArrayList<DProteinSet> proteinSetArray = p.getTransientData().getProteinSetArray();
@@ -511,7 +492,6 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseSlicerTas
             }
             proteinSetArray.add(proteinSet);
         }
-
     }
 
     public static void fetchReadablePtmData(EntityManager entityManagerMSI, Long rsetId, HashMap<Long, Peptide> peptideMap) {
@@ -531,36 +511,27 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseSlicerTas
         }
     }
     
-    public static void fetchPtmDataFromPSdb(HashMap<Long, Peptide> peptideMap) {
+
+    public static void fetchPtmDataForPeptides(EntityManager entityManagerMSI, HashMap<Long, Peptide> peptideMap) {
 
         if (!peptideMap.isEmpty()) {
-            EntityManager entityManagerPS = DStoreCustomPoolConnectorFactory.getInstance().getPsDbConnector().createEntityManager();
-            try {
-                entityManagerPS.getTransaction().begin();
-                TypedQuery<DPeptidePTM> ptmQuery = entityManagerPS.createQuery("SELECT new fr.proline.core.orm.msi.dto.DPeptidePTM(pptm.peptide.id, pptm.specificity.id, pptm.seqPosition) FROM fr.proline.core.orm.ps.PeptidePtm pptm WHERE pptm.peptide.id IN (:peptideIds)", DPeptidePTM.class);
-                ptmQuery.setParameter("peptideIds", peptideMap.keySet());
-                List<DPeptidePTM> ptmList = ptmQuery.getResultList();
+            TypedQuery<DPeptidePTM> ptmQuery = entityManagerMSI.createQuery("SELECT new fr.proline.core.orm.msi.dto.DPeptidePTM(pptm.peptide.id, pptm.specificity.id, pptm.seqPosition) FROM fr.proline.core.orm.msi.PeptidePtm pptm WHERE pptm.peptide.id IN (:peptideIds)", DPeptidePTM.class);
+            ptmQuery.setParameter("peptideIds", peptideMap.keySet());
+            List<DPeptidePTM> ptmList = ptmQuery.getResultList();
 
-                Iterator<DPeptidePTM> it = ptmList.iterator();
-                while (it.hasNext()) {
-                    DPeptidePTM ptm = it.next();
+            Iterator<DPeptidePTM> it = ptmList.iterator();
+            while (it.hasNext()) {
+                DPeptidePTM ptm = it.next();
 
-                    Peptide p = peptideMap.get(ptm.getIdPeptide());
-                    HashMap<Integer, DPeptidePTM> map = p.getTransientData().getDPeptidePtmMap();
-                    if (map == null) {
-                        map = new HashMap<>();
-                        p.getTransientData().setDPeptidePtmMap(map);
-                    }
-
-                    map.put((int) ptm.getSeqPosition(), ptm);
-
+                Peptide p = peptideMap.get(ptm.getIdPeptide());
+                HashMap<Integer, DPeptidePTM> map = p.getTransientData().getDPeptidePtmMap();
+                if (map == null) {
+                    map = new HashMap<>();
+                    p.getTransientData().setDPeptidePtmMap(map);
                 }
-                entityManagerPS.getTransaction().commit();
-            } catch (Exception e) {
-                entityManagerPS.getTransaction().rollback();
-                throw (e);
-            } finally {
-                entityManagerPS.close();
+
+                map.put((int) ptm.getSeqPosition(), ptm);
+
             }
         }
     }

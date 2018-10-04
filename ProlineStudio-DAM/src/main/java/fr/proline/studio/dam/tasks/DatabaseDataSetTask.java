@@ -1,5 +1,6 @@
 package fr.proline.studio.dam.tasks;
 
+import fr.proline.core.orm.MergeMode;
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.ResultSet;
 import fr.proline.core.orm.msi.MsiSearch;
@@ -15,6 +16,7 @@ import fr.proline.core.orm.uds.*;
 
 import fr.proline.core.orm.uds.repository.ExternalDbRepository;
 import fr.proline.core.orm.util.DStoreCustomPoolConnectorFactory;
+import fr.proline.repository.AbstractDatabaseConnector;
 import fr.proline.repository.ProlineDatabaseType;
 import fr.proline.studio.dam.DatabaseDataManager;
 import fr.proline.studio.dam.data.AbstractData;
@@ -31,6 +33,7 @@ import org.netbeans.api.db.explorer.JDBCDriver;
 import org.netbeans.api.db.explorer.JDBCDriverManager;
 
 import fr.proline.core.orm.uds.dto.DDataset;
+import fr.proline.core.orm.util.JsonSerializer;
 import fr.proline.studio.dam.data.DatasetToCopy;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadXicMasterQuantTask;
 import javax.persistence.NoResultException;
@@ -423,8 +426,8 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
 
         long projectId = m_project.getId();
 
-        ArrayList<Long> idList = new ArrayList<>();
-        HashMap<Long, DDataset> ddatasetMap = new HashMap<>();
+        ArrayList<Long> dsIdsList = new ArrayList<>();
+        HashMap<Long, DDataset> ddatasetById = new HashMap<>();
         ArrayList<Long> rsetIdList = new ArrayList<>();
 
         EntityManager entityManagerUDS = DStoreCustomPoolConnectorFactory.getInstance().getUdsDbConnector().createEntityManager();
@@ -435,32 +438,30 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
             //JPM.HACK : there is a join done by Hibernate if we read the Aggregation at once,
             // But some Aggregation are null (for identifications) -> identifications are not loaded
             // So we load aggregations afterwards
-            List<DDataset> datasetListSelected = new ArrayList();
+            List<DDataset> datasetListSelected = new ArrayList(); //Query result
             if (m_identificationDataset) {
-                TypedQuery<DDataset> dataSetQuery = entityManagerUDS.createQuery("SELECT new fr.proline.core.orm.uds.dto.DDataset(d.id, d.project, d.name, d.type, d.childrenCount, d.resultSetId, d.resultSummaryId, d.number) FROM Dataset d WHERE (d.parentDataset IS null) AND d.type<>:quantitationType AND d.type<>:quantitationType2 AND d.project.id=:projectId  ORDER BY d.number ASC", DDataset.class);
+                //Get Root DATASETs which isn't quanti (=> ident & trash & ident folder...)
+                TypedQuery<DDataset> dataSetQuery = entityManagerUDS.createQuery("SELECT new fr.proline.core.orm.uds.dto.DDataset(d.id, d.project, d.name, d.type, d.childCount, d.resultSetId, d.resultSummaryId, d.number) FROM Dataset d WHERE (d.parentDataset IS null) AND d.type<>:quantitationType AND d.type<>:quantitationType2 AND d.project.id=:projectId  ORDER BY d.number ASC", DDataset.class);
                 dataSetQuery.setParameter("projectId", projectId);
                 dataSetQuery.setParameter("quantitationType", Dataset.DatasetType.QUANTITATION);
                 dataSetQuery.setParameter("quantitationType2", Dataset.DatasetType.QUANTITATION_FOLDER);
                 datasetListSelected = dataSetQuery.getResultList();
 
             } else {
-                TypedQuery<DDataset> dataSetQueryTrash = entityManagerUDS.createQuery("SELECT new fr.proline.core.orm.uds.dto.DDataset(d.id, d.project, d.name, d.type, d.childrenCount, d.resultSetId, d.resultSummaryId, d.number) FROM Dataset d WHERE (d.parentDataset IS null) AND (  d.type=:trashType)  AND d.project.id=:projectId  ORDER BY d.number ASC", DDataset.class);
-                dataSetQueryTrash.setParameter("projectId", projectId);
-                //dataSetQuery.setParameter("quantitationType", Dataset.DatasetType.QUANTITATION);
-                dataSetQueryTrash.setParameter("trashType", Dataset.DatasetType.TRASH);
-                datasetListSelected.addAll(dataSetQueryTrash.getResultList());
-                //quant dataset with resultSummaryId from masterQuantChannel
-                String query = "SELECT new fr.proline.core.orm.uds.dto.DDataset(d.id, d.project, d.name, d.type, d.childrenCount, d.resultSetId, mqc.quantResultSummaryId, d.number) "
-                        + "FROM Dataset d, MasterQuantitationChannel mqc "
-                        + "WHERE (d.parentDataset IS null) AND d.type=:quantitationType  AND d.project.id=:projectId "
-                        + "AND mqc.dataset.id = d.id "
-                        + "ORDER BY d.number ASC";
-                TypedQuery<DDataset> dataSetQuery = entityManagerUDS.createQuery(query, DDataset.class);
+                //Get Trash for current project
+                TypedQuery<DDataset> dataSetQuery = entityManagerUDS.createQuery("SELECT new fr.proline.core.orm.uds.dto.DDataset(d.id, d.project, d.name, d.type, d.childCount, d.resultSetId, d.resultSummaryId, d.number) FROM Dataset d WHERE (d.parentDataset IS null) AND (  d.type=:trashType)  AND d.project.id=:projectId  ORDER BY d.number ASC", DDataset.class);
+                dataSetQuery.setParameter("projectId", projectId);
+                dataSetQuery.setParameter("trashType", Dataset.DatasetType.TRASH);
+                datasetListSelected.addAll(dataSetQuery.getResultList());
+                
+                //Get Quant dataset (with resultSummaryId from masterQuantChannel)
+                dataSetQuery = entityManagerUDS.createQuery("SELECT new fr.proline.core.orm.uds.dto.DDataset(d.id, d.project, d.name, d.type, d.childCount, d.resultSetId, mqc.quantResultSummaryId, d.number) FROM Dataset d, MasterQuantitationChannel mqc WHERE (d.parentDataset IS null) AND d.type=:quantitationType  AND d.project.id=:projectId AND mqc.quantDataset.id = d.id ORDER BY d.number ASC", DDataset.class);
                 dataSetQuery.setParameter("projectId", projectId);
                 dataSetQuery.setParameter("quantitationType", Dataset.DatasetType.QUANTITATION);
                 datasetListSelected.addAll(dataSetQuery.getResultList());
                 
-                dataSetQuery = entityManagerUDS.createQuery("SELECT new fr.proline.core.orm.uds.dto.DDataset(d.id, d.project, d.name, d.type, d.childrenCount, d.resultSetId, d.resultSummaryId, d.number) FROM Dataset d WHERE (d.parentDataset IS null) AND d.type=:quantitationType AND d.project.id=:projectId  ORDER BY d.number ASC", DDataset.class);
+                //Get Quant Folder dataset 
+                dataSetQuery = entityManagerUDS.createQuery("SELECT new fr.proline.core.orm.uds.dto.DDataset(d.id, d.project, d.name, d.type, d.childCount, d.resultSetId, d.resultSummaryId, d.number) FROM Dataset d WHERE (d.parentDataset IS null) AND d.type=:quantitationType AND d.project.id=:projectId  ORDER BY d.number ASC", DDataset.class);
                 dataSetQuery.setParameter("projectId", projectId);
                 dataSetQuery.setParameter("quantitationType", Dataset.DatasetType.QUANTITATION_FOLDER);
                 datasetListSelected.addAll(dataSetQuery.getResultList());
@@ -505,44 +506,13 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
                 }
 
                 Long id = datasetCur.getId();
-                idList.add(id);
-                ddatasetMap.put(id, datasetCur);
+                dsIdsList.add(id);
+                ddatasetById.put(id, datasetCur);
             }
 
             // Load Aggregation and QuantitationMethod separately
             if (!m_list.isEmpty()) {
-
-                // Load Aggregation
-                Query aggregationQuery = entityManagerUDS.createQuery("SELECT d.id, d.aggregation FROM Dataset d WHERE d.id IN (:listId)");
-                aggregationQuery.setParameter("listId", idList);
-                List<Object[]> results = aggregationQuery.getResultList();
-                Iterator<Object[]> itAgg = results.iterator();
-                while (itAgg.hasNext()) {
-                    Object[] resCur = itAgg.next();
-                    Long id = (Long) resCur[0];
-                    Aggregation aggregation = (Aggregation) resCur[1];
-                    ddatasetMap.get(id).setAggregation(aggregation);
-                }
-
-                // Load QuantitationMethod
-                Query quantitationQuery = entityManagerUDS.createQuery("SELECT d.id, d.method FROM Dataset d WHERE d.id IN (:listId)");
-                quantitationQuery.setParameter("listId", idList);
-                results = quantitationQuery.getResultList();
-                itAgg = results.iterator();
-                while (itAgg.hasNext()) {
-                    Object[] resCur = itAgg.next();
-                    Long id = (Long) resCur[0];
-                    QuantitationMethod quantitationMethod = (QuantitationMethod) resCur[1];
-                    ddatasetMap.get(id).setQuantitationMethod(quantitationMethod);
-                }
-                // force XIC dataset to have a children to display the exp. design
-                for (Map.Entry<Long, DDataset> entrySet : ddatasetMap.entrySet()) {
-                    DDataset ds = entrySet.getValue();
-                    if (ds.isQuantiXIC()) {
-                        ds.setChildrenCount(1);
-                    }
-                }
-
+                loadDataSetSuppData(entityManagerUDS, dsIdsList, ddatasetById);
             }
 
             if (trash != null) {
@@ -553,25 +523,25 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
                 m_project.getTransientData().setChildrenNumber(m_list.size());
             }
 
-            // add the UDS connection to the Netbeans Service
+            // add the MSIdb connection to the Netbeans Service
             ExternalDb msiDb = ExternalDbRepository.findExternalByTypeAndProject(entityManagerUDS, ProlineDatabaseType.MSI, entityManagerUDS.merge(m_project));
 
             try {
                 ConnectionManager cm = ConnectionManager.getDefault();
-
                 JDBCDriver driver = JDBCDriverManager.getDefault().getDrivers(DatabaseDataManager.getDatabaseDataManager().getUdsJdbcDriver())[0]; //JPM.WART : same driver for uds and msi
-
                 String udsJdbcUrl = DatabaseDataManager.getDatabaseDataManager().getUdsJdbcURL();
-
                 String msiJdbcUrl = udsJdbcUrl.substring(0, udsJdbcUrl.lastIndexOf('/') + 1) + msiDb.getDbName();
 
-                DatabaseConnection dbconn = DatabaseConnection.create(driver, msiJdbcUrl, msiDb.getDbUser(), "public", msiDb.getDbPassword(), true);
+                String dbUser = (String)DStoreCustomPoolConnectorFactory.getInstance().getMsiDbConnector(projectId).getProperty(AbstractDatabaseConnector.PERSISTENCE_JDBC_USER_KEY);
+                String dbPassword = (String)DStoreCustomPoolConnectorFactory.getInstance().getMsiDbConnector(projectId).getProperty(AbstractDatabaseConnector.PERSISTENCE_JDBC_PASSWORD_KEY);
+
+                DatabaseConnection dbconn = DatabaseConnection.create(driver, msiJdbcUrl, dbUser, "public", dbPassword, true);
 
                 cm.addConnection(dbconn);
             } catch (Exception e) {
 
                 String message = e.getMessage();
-                if ((message == null) || (message.indexOf("connection already exists") == -1)) { //JPM.WART : avoid error because the connection already exist
+                if ((message == null) || (!message.contains("connection already exists"))) { //JPM.WART : avoid error because the connection already exist
                     m_logger.error(getClass().getSimpleName() + " failed to add UDS connection to Services ", e);
                 }
             }
@@ -600,120 +570,94 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
 
         long parentDatasetId = m_parentDataset.getId();
 
+        ArrayList<Long> dsIdsList = new ArrayList<>();
+        HashMap<Long, DDataset> ddatasetById = new HashMap<>();
         ArrayList<Long> rsetIdList = new ArrayList<>();
 
         EntityManager entityManagerUDS = DStoreCustomPoolConnectorFactory.getInstance().getUdsDbConnector().createEntityManager();
         try {
             entityManagerUDS.getTransaction().begin();
 
-            ArrayList<Long> idList = new ArrayList<>();
-            HashMap<Long, DDataset> ddatasetMap = new HashMap<>();
-
             //JPM.HACK : there is a join done by Hibernate if we read the Aggregation at once,
             // But some Aggregation are null (for identifications) -> identifications are not loaded
             // So we load aggregations afterwards
-            TypedQuery<DDataset> datasetQuery;
-            TypedQuery<DDataset> datasetQuery2 = null;
+             List<DDataset> datasetListSelected = new ArrayList(); //Query result
             if (m_parentDataset.getType() == Dataset.DatasetType.TRASH) {
+               // TypedQuery<DDataset> datasetQuery2 = null;
                 if (m_identificationDataset) {
-                    datasetQuery = entityManagerUDS.createQuery("SELECT new fr.proline.core.orm.uds.dto.DDataset(d.id, d.project, d.name,  d.type, d.childrenCount, d.resultSetId, d.resultSummaryId, d.number)  FROM Dataset d WHERE d.parentDataset.id=:parentDatasetId AND d.type<>:quantitationType AND d.type<>:quantitationType2 ORDER BY d.number ASC", DDataset.class);
+                     //Get child DATASETs which isn't quanti (=> ident & trash & ident folder...)
+                    TypedQuery<DDataset> datasetQuery = entityManagerUDS.createQuery("SELECT new fr.proline.core.orm.uds.dto.DDataset(d.id, d.project, d.name,  d.type, d.childCount, d.resultSetId, d.resultSummaryId, d.number)  FROM Dataset d WHERE d.parentDataset.id=:parentDatasetId AND d.type<>:quantitationType AND d.type<>:quantitationType2 ORDER BY d.number ASC", DDataset.class);
                     datasetQuery.setParameter("quantitationType", Dataset.DatasetType.QUANTITATION);
-                datasetQuery.setParameter("quantitationType2", Dataset.DatasetType.QUANTITATION_FOLDER);
+                    datasetQuery.setParameter("quantitationType2", Dataset.DatasetType.QUANTITATION_FOLDER);
+                    datasetQuery.setParameter("parentDatasetId", parentDatasetId);                    
+                    datasetListSelected = datasetQuery.getResultList();
                 } else {
-                    datasetQuery = entityManagerUDS.createQuery("SELECT new fr.proline.core.orm.uds.dto.DDataset(d.id, d.project, d.name,  d.type, d.childrenCount, d.resultSetId, mqc.quantResultSummaryId, d.number)  FROM Dataset d, MasterQuantitationChannel mqc WHERE d.parentDataset.id=:parentDatasetId AND d.type=:quantitationType AND mqc.dataset.id = d.id ORDER BY d.number ASC", DDataset.class);
-                    datasetQuery2 = entityManagerUDS.createQuery("SELECT new fr.proline.core.orm.uds.dto.DDataset(d.id, d.project, d.name,  d.type, d.childrenCount, d.resultSetId, d.resultSummaryId, d.number)  FROM Dataset d WHERE d.parentDataset.id=:parentDatasetId AND d.type=:quantitationType2 ORDER BY d.number ASC", DDataset.class);
+                    //Get Quant dataset (with resultSummaryId from masterQuantChannel)
+                    TypedQuery<DDataset> datasetQuery  = entityManagerUDS.createQuery("SELECT new fr.proline.core.orm.uds.dto.DDataset(d.id, d.project, d.name,  d.type, d.childCount, d.resultSetId, mqc.quantResultSummaryId, d.number)  FROM Dataset d, MasterQuantitationChannel mqc WHERE d.parentDataset.id=:parentDatasetId AND d.type=:quantitationType AND mqc.quantDataset.id = d.id ORDER BY d.number ASC", DDataset.class);
                     datasetQuery.setParameter("quantitationType", Dataset.DatasetType.QUANTITATION);
-                    datasetQuery2.setParameter("quantitationType2", Dataset.DatasetType.QUANTITATION_FOLDER);
+                    datasetQuery.setParameter("parentDatasetId", parentDatasetId);
+                    datasetListSelected.addAll(datasetQuery.getResultList());
+                    
+                    //Get Quant Folder dataset 
+                    datasetQuery = entityManagerUDS.createQuery("SELECT new fr.proline.core.orm.uds.dto.DDataset(d.id, d.project, d.name,  d.type, d.childCount, d.resultSetId, d.resultSummaryId, d.number)  FROM Dataset d WHERE d.parentDataset.id=:parentDatasetId AND d.type=:quantitationType2 ORDER BY d.number ASC", DDataset.class);                    
+                    datasetQuery.setParameter("quantitationType2", Dataset.DatasetType.QUANTITATION_FOLDER);
+                    datasetQuery.setParameter("parentDatasetId", parentDatasetId);
+                    datasetListSelected.addAll(datasetQuery.getResultList());
                 }
 
             } else {
                 if (m_identificationDataset) {
-                    datasetQuery = entityManagerUDS.createQuery("SELECT new fr.proline.core.orm.uds.dto.DDataset(d.id, d.project, d.name,  d.type, d.childrenCount, d.resultSetId, d.resultSummaryId, d.number)  FROM Dataset d WHERE d.parentDataset.id=:parentDatasetId ORDER BY d.number ASC", DDataset.class);
+                    //Get child DATASETs
+                   TypedQuery<DDataset> datasetQuery = entityManagerUDS.createQuery("SELECT new fr.proline.core.orm.uds.dto.DDataset(d.id, d.project, d.name,  d.type, d.childCount, d.resultSetId, d.resultSummaryId, d.number)  FROM Dataset d WHERE d.parentDataset.id=:parentDatasetId ORDER BY d.number ASC", DDataset.class);
+                   datasetQuery.setParameter("parentDatasetId", parentDatasetId);
+                   datasetListSelected.addAll(datasetQuery.getResultList());
                 } else {
-                    datasetQuery =  entityManagerUDS.createQuery("SELECT new fr.proline.core.orm.uds.dto.DDataset(d.id, d.project, d.name,  d.type, d.childrenCount, d.resultSetId, mqc.quantResultSummaryId, d.number)  FROM Dataset d, MasterQuantitationChannel mqc WHERE d.parentDataset.id=:parentDatasetId AND mqc.dataset.id = d.id ORDER BY d.number ASC", DDataset.class);
-                    datasetQuery2 = entityManagerUDS.createQuery("SELECT new fr.proline.core.orm.uds.dto.DDataset(d.id, d.project, d.name,  d.type, d.childrenCount, d.resultSetId, d.resultSummaryId, d.number)  FROM Dataset d WHERE d.type=:datasetType AND d.parentDataset.id=:parentDatasetId ORDER BY d.number ASC", DDataset.class);
-                    datasetQuery2.setParameter("datasetType", Dataset.DatasetType.QUANTITATION_FOLDER);
+                    //Get child DATASETs (with resultSummaryId from masterQuantChannel)
+                    TypedQuery<DDataset> datasetQuery =  entityManagerUDS.createQuery("SELECT new fr.proline.core.orm.uds.dto.DDataset(d.id, d.project, d.name,  d.type, d.childCount, d.resultSetId, mqc.quantResultSummaryId, d.number)  FROM Dataset d, MasterQuantitationChannel mqc WHERE d.parentDataset.id=:parentDatasetId AND mqc.quantDataset.id = d.id ORDER BY d.number ASC", DDataset.class);
+                    datasetQuery.setParameter("parentDatasetId", parentDatasetId);
+                    datasetListSelected.addAll(datasetQuery.getResultList());
+                    
+                    //Get QuantFolder DATASETs
+                    datasetQuery = entityManagerUDS.createQuery("SELECT new fr.proline.core.orm.uds.dto.DDataset(d.id, d.project, d.name,  d.type, d.childCount, d.resultSetId, d.resultSummaryId, d.number)  FROM Dataset d WHERE d.type=:datasetType AND d.parentDataset.id=:parentDatasetId ORDER BY d.number ASC", DDataset.class);
+                    datasetQuery.setParameter("datasetType", Dataset.DatasetType.QUANTITATION_FOLDER);
+                    datasetQuery.setParameter("parentDatasetId", parentDatasetId);
+                    datasetListSelected.addAll(datasetQuery.getResultList());
                 }
             }
-            datasetQuery.setParameter("parentDatasetId", parentDatasetId);
-            List<DDataset> dataSetResultList = datasetQuery.getResultList();
-            Iterator<DDataset> itDataset = dataSetResultList.iterator();
+            
+            // sort according to dataset.number
+            Collections.sort(datasetListSelected, new Comparator<DDataset>() {
+                @Override
+                public int compare(DDataset d2, DDataset d1) {
+
+                    if (d2.getType() == Dataset.DatasetType.TRASH) {
+                        return Integer.MAX_VALUE;
+                    } else if (d1.getType() == Dataset.DatasetType.TRASH) {
+                        return Integer.MIN_VALUE;
+                    }
+
+                    return d2.getNumber()-d1.getNumber();
+                }
+            });
+            
+            Iterator<DDataset> itDataset = datasetListSelected.iterator();
             while (itDataset.hasNext()) {
                 DDataset datasetCur = itDataset.next();
                 m_list.add(new DataSetData(datasetCur));
 
                 Long id = datasetCur.getId();
-                idList.add(id);
-                ddatasetMap.put(id, datasetCur);
+                dsIdsList.add(id);
+                ddatasetById.put(id, datasetCur);
                 Long resultSetId = datasetCur.getResultSetId();
                 if (resultSetId != null) {
                     rsetIdList.add(resultSetId);
                 }
             }
             
-            if (datasetQuery2 != null) {
-                datasetQuery2.setParameter("parentDatasetId", parentDatasetId);
-                dataSetResultList = datasetQuery2.getResultList();
-                itDataset = dataSetResultList.iterator();
-                while (itDataset.hasNext()) {
-                    DDataset datasetCur = itDataset.next();
-                    m_list.add(new DataSetData(datasetCur));
-
-                    Long id = datasetCur.getId();
-                    idList.add(id);
-                    ddatasetMap.put(id, datasetCur);
-                    Long resultSetId = datasetCur.getResultSetId();
-                    if (resultSetId != null) {
-                        rsetIdList.add(resultSetId);
-                    }
-                }
-                
-                // sort m_list
-                m_list.sort(new Comparator<AbstractData>() {
-                    @Override
-                    public int compare(AbstractData o1, AbstractData o2) {
-                        DataSetData d1 = (DataSetData) o1;
-                        DataSetData d2 =  (DataSetData) o2;
-                        return d1.getDataset().getNumber() - d2.getDataset().getNumber() ;
-                    }
-                });
-            }
-
             // Load Aggregation and QuantitationMethod separately
-            if (!m_list.isEmpty()) {
-
-                // Load Aggregation
-                Query aggregationQuery = entityManagerUDS.createQuery("SELECT d.id, d.aggregation FROM Dataset d WHERE d.id IN (:listId)");
-                aggregationQuery.setParameter("listId", idList);
-                List<Object[]> results = aggregationQuery.getResultList();
-                Iterator<Object[]> it = results.iterator();
-                while (it.hasNext()) {
-                    Object[] resCur = it.next();
-                    Long id = (Long) resCur[0];
-                    Aggregation aggregation = (Aggregation) resCur[1];
-                    ddatasetMap.get(id).setAggregation(aggregation);
-                }
-
-                // Load QuantitationMethod
-                Query quantitationQuery = entityManagerUDS.createQuery("SELECT d.id, d.method FROM Dataset d WHERE d.id IN (:listId)");
-                quantitationQuery.setParameter("listId", idList);
-                results = quantitationQuery.getResultList();
-                it = results.iterator();
-                while (it.hasNext()) {
-                    Object[] resCur = it.next();
-                    Long id = (Long) resCur[0];
-                    QuantitationMethod quantitationMethod = (QuantitationMethod) resCur[1];
-                    ddatasetMap.get(id).setQuantitationMethod(quantitationMethod);
-                }
-
-                for (Map.Entry<Long, DDataset> entrySet : ddatasetMap.entrySet()) {
-                    DDataset ds = entrySet.getValue();
-                    if (ds.isQuantiXIC()) {
-                        ds.setChildrenCount(1);
-                    }
-                }
-
-            }
+            if (!m_list.isEmpty()) 
+                loadDataSetSuppData(entityManagerUDS, dsIdsList, ddatasetById);
+            
 
             entityManagerUDS.getTransaction().commit();
 
@@ -735,6 +679,45 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
         return true;
     }
 
+    /**
+     *  Load Aggregation and QuantitationMethod for specied datasats and force XIC dataset to have a children to display the exp. design
+     *  dsIdsList = List of Dataset to get information for    
+     *  ddatasetById 
+     */
+    private void loadDataSetSuppData(EntityManager entityManagerUDS, List<Long> dsIdsList, Map<Long,DDataset> ddatasetById ) {
+
+        // Load Aggregation
+        Query aggregationQuery = entityManagerUDS.createQuery("SELECT d.id, d.aggregation FROM Dataset d WHERE d.id IN (:listId)");
+        aggregationQuery.setParameter("listId", dsIdsList);
+        List<Object[]> results = aggregationQuery.getResultList();
+        Iterator<Object[]> it = results.iterator();
+        while (it.hasNext()) {
+            Object[] resCur = it.next();
+            Long id = (Long) resCur[0];
+            Aggregation aggregation = (Aggregation) resCur[1];
+            ddatasetById.get(id).setAggregation(aggregation);
+        }
+
+        // Load QuantitationMethod
+        Query quantitationQuery = entityManagerUDS.createQuery("SELECT d.id, d.method FROM Dataset d WHERE d.id IN (:listId)");
+        quantitationQuery.setParameter("listId", dsIdsList);
+        results = quantitationQuery.getResultList();
+        it = results.iterator();
+        while (it.hasNext()) {
+            Object[] resCur = it.next();
+            Long id = (Long) resCur[0];
+            QuantitationMethod quantitationMethod = (QuantitationMethod) resCur[1];
+            ddatasetById.get(id).setQuantitationMethod(quantitationMethod);
+        }
+
+        for (Map.Entry<Long, DDataset> entrySet : ddatasetById.entrySet()) {
+            DDataset ds = entrySet.getValue();
+            if (ds.isQuantiXIC()) {
+                ds.setChildrenCount(1);
+            }
+        }        
+    }
+
     private boolean completeMergeInfo(Long projectId, ArrayList<Long> rsetIdList) {
         if (!m_list.isEmpty() && !rsetIdList.isEmpty()) {
             // fetch if there is a merged rsm
@@ -743,21 +726,58 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
 
                 entityManagerMSI.getTransaction().begin();
 
-                HashSet<Long> m_rsetFromMergedRsm = new HashSet<>();
-
-                Query mergeInfoQuery = entityManagerMSI.createQuery("SELECT r.id, r.mergedRsmId FROM ResultSet r WHERE r.id IN (:listId)");
+                HashSet<Long> rsetFromMergedRsm = new HashSet<>();
+                HashSet<Long> mergedRsmIds = new HashSet<>();
+                HashMap<Long,MergeMode> mergeModeByRSId = new HashMap<>();
+                HashMap<Long,MergeMode> mergeModeByRSMId = new HashMap<>();
+                 
+                //Get ResultSet merge info & mode
+                Query mergeInfoQuery = entityManagerMSI.createQuery("SELECT r.id, r.mergedRsmId, r.serializedProperties FROM ResultSet r WHERE r.id IN (:listId)"); //Add type != search ? 
                 mergeInfoQuery.setParameter("listId", rsetIdList);
                 List<Object[]> results = mergeInfoQuery.getResultList();
-                Iterator<Object[]> itMergedInfo = results.iterator();
+                Iterator<Object[]> itMergedInfo = results.iterator();               
                 while (itMergedInfo.hasNext()) {
                     Object[] resCur = itMergedInfo.next();
                     Long rsetId = (Long) resCur[0];
                     Long mergedRsmId = (Long) resCur[1];
                     if (mergedRsmId != null) {
-                        m_rsetFromMergedRsm.add(rsetId);
+                        rsetFromMergedRsm.add(rsetId);
+                        mergedRsmIds.add(mergedRsmId);
+                    } else {
+                        //result set from import or merge rs
+                        String serializedProperties = (String)resCur[2];
+                        Map<String, Object> serializedPropertiesMap = JsonSerializer.getMapper().readValue(serializedProperties,Map.class);
+                        if(serializedPropertiesMap.containsKey("merge_mode")){
+                            String mergeType = serializedPropertiesMap.get("merge_mode").toString().toUpperCase();
+                            if(mergeType.equals(MergeMode.UNION.name()))
+                                mergeModeByRSId.put(rsetId,MergeMode.UNION);
+                            else
+                                mergeModeByRSId.put(rsetId,MergeMode.AGGREGATION);
+                        }
                     }
                 }
-
+                
+                if(!mergedRsmIds.isEmpty()){
+                    //Get ResultSummary merge mode
+                    mergeInfoQuery = entityManagerMSI.createQuery("SELECT rsm.id, rsm.serializedProperties FROM ResultSummary rsm WHERE rsm.id IN (:listId)"); 
+                    mergeInfoQuery.setParameter("listId", mergedRsmIds);
+                    results = mergeInfoQuery.getResultList();
+                    itMergedInfo = results.iterator();               
+                    while (itMergedInfo.hasNext()) {
+                        Object[] resCur = itMergedInfo.next();
+                        Long rsmId = (Long) resCur[0];
+                        String serializedProperties = (String)resCur[1];
+                        Map<String, Object> serializedPropertiesMap = JsonSerializer.getMapper().readValue(serializedProperties,Map.class);
+                        if(serializedPropertiesMap.containsKey("merge_mode")){
+                            String mergeType = serializedPropertiesMap.get("merge_mode").toString().toUpperCase();
+                            if(mergeType.equals(MergeMode.UNION.name()))
+                                mergeModeByRSMId.put(rsmId,MergeMode.UNION);
+                            else
+                                mergeModeByRSMId.put(rsmId,MergeMode.AGGREGATION);
+                        }                    
+                    }
+                }
+                
                 Iterator<AbstractData> it = m_list.iterator();
                 while (it.hasNext()) {
                     AbstractData data = (AbstractData) it.next();
@@ -765,13 +785,27 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
                     if (data.getDataType() != AbstractData.DataTypes.DATA_SET) {
                         continue;
                     }
-                    DataSetData datasetData = (DataSetData) data;
-                    DDataset dataset = datasetData.getDataset();
+                    
+                    DDataset dataset = ((DataSetData) data).getDataset();
                     Long rsetId = dataset.getResultSetId();
-                    if (m_rsetFromMergedRsm.contains(rsetId)) {
-                        dataset.setMergeInformation(DDataset.MergeInformation.MERGE_IDENTIFICATION_SUMMARY);
+                    Long rsmId = dataset.getResultSummaryId();
+                    dataset.setMergeInformation(DDataset.MergeInformation.MERGE_UNKNOW);
+                    if (rsetFromMergedRsm.contains(rsetId)) {
+                        //Merge RSM
+                        if(mergeModeByRSMId.containsKey(rsmId)){
+                            if(mergeModeByRSMId.get(rsmId).equals(MergeMode.AGGREGATION))
+                                dataset.setMergeInformation(DDataset.MergeInformation.MERGE_IDENTIFICATION_SUMMARY_AGG);
+                            else
+                                dataset.setMergeInformation(DDataset.MergeInformation.MERGE_IDENTIFICATION_SUMMARY_UNION);
+                        } 
                     } else {
-                        dataset.setMergeInformation(DDataset.MergeInformation.MERGE_UNKNOW);
+                        //Merge RS
+                         if(mergeModeByRSId.containsKey(rsetId)){
+                            if(mergeModeByRSId.get(rsetId).equals(MergeMode.AGGREGATION))
+                                dataset.setMergeInformation(DDataset.MergeInformation.MERGE_SEARCH_RESULT_AGG);
+                            else
+                                dataset.setMergeInformation(DDataset.MergeInformation.MERGE_SEARCH_RESULT_UNION);
+                        }                        
                     }
                 }
 
@@ -848,7 +882,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
             Dataset datasetDB = entityManagerUDS.find(Dataset.class, m_dataset.getId());
             QuantitationMethod quantMethodDB = datasetDB.getMethod();
             List<MasterQuantitationChannel> listMasterQuantitationChannels = datasetDB.getMasterQuantitationChannels();
-            Set<QuantitationLabel> labels = quantMethodDB.getLabels();
+            List<QuantitationLabel> labels = quantMethodDB.getLabels();
             Map<String, Long> objectTreeIdByName = datasetDB.getObjectTreeIdByName();
 
             // fill the current object with the db object
@@ -991,7 +1025,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
             entityManagerUDS.getTransaction().begin();
 
             // *** load dataset for specified id
-            TypedQuery<DDataset> dataSetQuery = entityManagerUDS.createQuery("SELECT new fr.proline.core.orm.uds.dto.DDataset(d.id, d.project, d.name, d.type, d.childrenCount, d.resultSetId, d.resultSummaryId, d.number)  FROM Dataset d WHERE d.id=:dsId", DDataset.class);
+            TypedQuery<DDataset> dataSetQuery = entityManagerUDS.createQuery("SELECT new fr.proline.core.orm.uds.dto.DDataset(d.id, d.project, d.name, d.type, d.childCount, d.resultSetId, d.resultSummaryId, d.number)  FROM Dataset d WHERE d.id=:dsId", DDataset.class);
             dataSetQuery.setParameter("dsId", m_datasetId);
             DDataset ddataSet = dataSetQuery.getSingleResult();
             m_datasetList.add(ddataSet);
@@ -1038,7 +1072,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
             entityManagerUDS.getTransaction().begin();
 
             // *** load dataset for specified id
-            TypedQuery<DDataset> dataSetQuery = entityManagerUDS.createQuery("SELECT new fr.proline.core.orm.uds.dto.DDataset(d.id, d.project, d.name,  d.type, d.childrenCount, d.resultSetId, d.resultSummaryId, d.number)  FROM Dataset d WHERE d.id=:dsId", DDataset.class);
+            TypedQuery<DDataset> dataSetQuery = entityManagerUDS.createQuery("SELECT new fr.proline.core.orm.uds.dto.DDataset(d.id, d.project, d.name,  d.type, d.childCount, d.resultSetId, d.resultSummaryId, d.number)  FROM Dataset d WHERE d.id=:dsId", DDataset.class);
             dataSetQuery.setParameter("dsId", m_datasetId);
             DDataset ddataSet = null;
             try {
@@ -1196,7 +1230,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
             updateQuery.executeUpdate();
 
             entityManagerUDS.getTransaction().commit();
-
+            m_dataset.setMergeInformation(DDataset.MergeInformation.MERGE_UNKNOW);
         } catch (Exception e) {
             m_logger.error(getClass().getSimpleName() + " failed", e);
             m_taskError = new TaskError(e);
@@ -1226,7 +1260,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
                 Project mergedProject = entityManagerUDS.find(Project.class, projectId);
                 Dataset mergedParentDataset = (m_parentDataset == null) ? null : entityManagerUDS.find(Dataset.class, m_parentDataset.getId());
 
-                Dataset d = null;
+                Dataset d;
                 if (resultSetId != null) {
                     d = new IdentificationDataset();
                     d.setProject(mergedProject);
@@ -1285,6 +1319,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
 
         return true;
     }
+    
     private Dataset pasteDatasetAddChildrenImpl(EntityManager entityManagerUDS, Project mergedProject, Dataset d, DatasetToCopy datasetCopy) {
         ArrayList<DatasetToCopy> copiedChildren = datasetCopy.getChildren();
         for (DatasetToCopy copy : copiedChildren) {
@@ -1293,9 +1328,10 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
         
         return d;
     }
+    
     private Dataset pasteDatasetImpl(EntityManager entityManagerUDS, Project mergedProject, DatasetToCopy datasetCopy) {
         Long resultSetId = datasetCopy.getResultSetId();
-        Dataset d = null;
+        Dataset d;
         if (resultSetId != null) {
             d = new IdentificationDataset();
             d.setProject(mergedProject);
@@ -1625,8 +1661,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
                 mergedTrash.setChildrenCount(children == null ? 0 : children.size());
                 if (children != null) {
                     int pos = 0;
-                    for (Iterator<Dataset> it = children.iterator(); it.hasNext();) {
-                        Dataset child = it.next();
+                    for (Dataset child : children) {
                         child.setNumber(pos);
                         entityManagerUDS.persist(child);
                     }
@@ -1716,7 +1751,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
                     if (mergedParentDataset.getType() == Dataset.DatasetType.TRASH) {
                         if (identificationTree) {
                             // load quanti trash
-                            TypedQuery<DDataset> datasetQuery = entityManagerUDS.createQuery("SELECT new fr.proline.core.orm.uds.dto.DDataset(d.id, d.project, d.name,  d.type, d.childrenCount, d.resultSetId, d.resultSummaryId, d.number)  FROM Dataset d WHERE d.parentDataset.id=:parentDatasetId AND d.type=:quantitationType ORDER BY d.number ASC", DDataset.class);
+                            TypedQuery<DDataset> datasetQuery = entityManagerUDS.createQuery("SELECT new fr.proline.core.orm.uds.dto.DDataset(d.id, d.project, d.name,  d.type, d.childCount, d.resultSetId, d.resultSummaryId, d.number)  FROM Dataset d WHERE d.parentDataset.id=:parentDatasetId AND d.type=:quantitationType ORDER BY d.number ASC", DDataset.class);
                             datasetQuery.setParameter("parentDatasetId", mergedParentDataset.getId());
                             datasetQuery.setParameter("quantitationType", Dataset.DatasetType.QUANTITATION);
                             List<DDataset> quantiInTrash = datasetQuery.getResultList();
@@ -1730,7 +1765,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
 
                         } else {
                             // load identification trash
-                            TypedQuery<DDataset> datasetQuery = entityManagerUDS.createQuery("SELECT new fr.proline.core.orm.uds.dto.DDataset(d.id, d.project, d.name,  d.type, d.childrenCount, d.resultSetId, d.resultSummaryId, d.number)  FROM Dataset d WHERE d.parentDataset.id=:parentDatasetId AND d.type<>:quantitationType ORDER BY d.number ASC", DDataset.class);
+                            TypedQuery<DDataset> datasetQuery = entityManagerUDS.createQuery("SELECT new fr.proline.core.orm.uds.dto.DDataset(d.id, d.project, d.name,  d.type, d.childCount, d.resultSetId, d.resultSummaryId, d.number)  FROM Dataset d WHERE d.parentDataset.id=:parentDatasetId AND d.type<>:quantitationType ORDER BY d.number ASC", DDataset.class);
 
                             datasetQuery.setParameter("parentDatasetId", mergedParentDataset.getId());
                             datasetQuery.setParameter("quantitationType", Dataset.DatasetType.QUANTITATION);

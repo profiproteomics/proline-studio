@@ -426,7 +426,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
             // fill the current object with the db object
             dataset.setQuantitationMethod(quantMethodDB);
             // load labels lazydata
-            Set<QuantitationLabel> labels = quantMethodDB.getLabels();
+            List<QuantitationLabel> labels = quantMethodDB.getLabels();
             labels.size();
             dataset.setDescription(datasetDB.getDescription());
             List<DMasterQuantitationChannel> masterQuantitationChannels = null;
@@ -435,126 +435,30 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                 masterQuantitationChannels = new ArrayList<>();
                 for (MasterQuantitationChannel masterQuantitationChannel : listMasterQuantitationChannels) {
                     Long resultSummaryId = masterQuantitationChannel.getQuantResultSummaryId();
+                    
                     // load the list of quantitation channel linked to this masterQuantitationChannel
-                    List<QuantitationChannel> listQuantitationChannels = masterQuantitationChannel.getQuantitationChannels();
-                    List<DQuantitationChannel> listDQuantChannels = new ArrayList();
-                    for (QuantitationChannel qc : listQuantitationChannels) {
-                        DQuantitationChannel dqc = new DQuantitationChannel(qc);
-                        // search resultFileName and raw path
-                        String resultFileName = "";
-                        String rawPath = "";
-                        Long rsId = null;
-                        String queryMsi = "SELECT msi.resultFileName, pl.path, rsm.resultSet.id  "
-                                + "FROM MsiSearch msi, Peaklist pl, ResultSet rs, ResultSummary rsm "
-                                + " WHERE rsm.id=:rsmId AND rsm.resultSet.id = rs.id AND rs.msiSearch.id = msi.id "
-                                + "AND msi.peaklist.id = pl.id ";
-                        Query qMsi = entityManagerMSI.createQuery(queryMsi);
-                        qMsi.setParameter("rsmId", qc.getIdentResultSummaryId());
-                        try {
-                            Object[] res = (Object[]) qMsi.getSingleResult();
-                            resultFileName = (String) res[0];
-                            rawPath = (String) res[1];
-                            if (resultFileName != null && resultFileName.contains(".")) {
-                                resultFileName = resultFileName.substring(0, resultFileName.indexOf('.'));
-                            }
-                            rsId = (Long)res[2];
-                        } catch (NoResultException | NonUniqueResultException e) {
-                            
-                        }
-                        // take the dataset name as qch name TODO IF NOT DEFINE ABOVE
-                        String queryQCName = "SELECT ds.name "
-                                    + "FROM fr.proline.core.orm.uds.Dataset ds, fr.proline.core.orm.uds.QuantitationChannel qc "
-                                    + "WHERE ds.resultSummaryId = qc.identResultSummaryId AND "
-                                    + "qc.id=:qChId AND ds.project.id=:projectId ";
-                        TypedQuery<String> queryQCNameQ = entityManagerUDS.createQuery(queryQCName, String.class);
-                        queryQCNameQ.setParameter("qChId", qc.getId());
-                        queryQCNameQ.setParameter("projectId", projectId);
-                        try {
-                            String name = queryQCNameQ.getSingleResult();
-                            resultFileName = name;
-                        } catch (NoResultException | NonUniqueResultException e2) {
-
-                        }
-                        dqc.setResultFileName(resultFileName);
-                        dqc.setRawFilePath(rawPath);
-                        // search for run_identification rawFileName (mzdb fileName) in UDS
-
-                        String mzdbFile = "";
-                        try{
-                            //mzdbFile = (String) queryMzdb.getSingleResult();
-                             mzdbFile = qc.getRun().getRawFile().getMzDbFileName();
-                        }catch( Exception e) {
-                            m_logger.error("Error while retrieving mzdb file "+e);
-                        }
-                        dqc.setMzdbFileName(mzdbFile);
-                        // search for raw map in LCMS database
-                        String queryLcms = "SELECT pmrm.rawMap.id "
-                                + "FROM fr.proline.core.orm.lcms.Map  m, ProcessedMap pm, ProcessedMapRawMapMapping pmrm  "
-                                + "WHERE m.id =:processedMapId "
-                                + "AND m.id = pm.id "
-                                + "AND pm.id = pmrm.id.processedMapId ";
-                        TypedQuery<Long> queryRawMapLcms = entityManagerLCMS.createQuery(queryLcms, Long.class);
-                        queryRawMapLcms.setParameter("processedMapId", qc.getLcmsMapId());
-                        try {
-                            Long rawMapId = queryRawMapLcms.getSingleResult();
-                            dqc.setLcmsRawMapId(rawMapId);
-                        } catch (NoResultException | NonUniqueResultException e) {
-
-                        }
-                        if (rsId != null){
-                            ResultSet rsetFound = entityManagerMSI.find(ResultSet.class, rsId);
-                            dqc.setIdentRs(rsetFound);
-                        }else{
-                            dqc.setIdentRs(null);
-                        }
-                        // search if a dataset with rsmId, rsId exists 
-                        String queryIdentDsS = "SELECT ds.id FROM Dataset ds WHERE ds.resultSetId=:rsId AND ds.resultSummaryId=:rsmId AND ds.project.id=:projectId ";
-                        TypedQuery<Long> queryIdentDs = entityManagerUDS.createQuery(queryIdentDsS, Long.class);
-                        queryIdentDs.setParameter("rsId",rsId );
-                        queryIdentDs.setParameter("rsmId", qc.getIdentResultSummaryId());
-                        queryIdentDs.setParameter("projectId", projectId);
-                        
-                        try {
-                            Long identDsId  = queryIdentDs.getSingleResult();
-                            dqc.setIdentDatasetId(identDsId);
-                        } catch (NoResultException | NonUniqueResultException e) {
-                            dqc.setIdentDatasetId((long)-1);
-                        }
-                        
-                        listDQuantChannels.add(dqc);
-                    }
+                    List<DQuantitationChannel> listDQuantChannels = createDQuantChannelsForMQC(projectId, masterQuantitationChannel, entityManagerMSI, entityManagerUDS, entityManagerLCMS);
+                    
                     DMasterQuantitationChannel dMaster = new DMasterQuantitationChannel(masterQuantitationChannel.getId(), masterQuantitationChannel.getName(),
-                            resultSummaryId, listDQuantChannels,
-                            masterQuantitationChannel.getDataset(), masterQuantitationChannel.getSerializedProperties());
+                            resultSummaryId, listDQuantChannels, masterQuantitationChannel.getDataset(), masterQuantitationChannel.getSerializedProperties());
+                    
                     // load the dataset for which the id is stored in the serialized properties
-                    Map<String, Object> propertiesMap = dMaster.getSerializedPropertiesAsMap();
+                    //Since V2 : ref dataset and resultSummary identification are stored in masterQuantChannel
                     DDataset identDataset = null;
-                    if (propertiesMap != null) {
-                        Object o = propertiesMap.get("ident_dataset_id"); 
-                        if (o != null) {
-                            Long identDatasetId = Long.parseLong(o.toString());
-                            Dataset identDatasetDB = entityManagerUDS.find(Dataset.class, identDatasetId);
-                            if (identDatasetDB != null) {
-                                identDataset = new DDataset(identDatasetDB.getId(), identDatasetDB.getProject(), identDatasetDB.getName(), identDatasetDB.getType(),
-                                        identDatasetDB.getChildrenCount(), identDatasetDB.getResultSetId(), identDatasetDB.getResultSummaryId(), identDatasetDB.getNumber());
-                            }
-                        }
+                    Long identResultSummaryId = null;
+                    Dataset identDatasetDB = masterQuantitationChannel.getIdentDataset();
+                    if (identDatasetDB != null) {
+                        identDataset = new DDataset(identDatasetDB.getId(), identDatasetDB.getProject(), identDatasetDB.getName(), identDatasetDB.getType(),
+                                identDatasetDB.getChildrenCount(), identDatasetDB.getResultSetId(), identDatasetDB.getResultSummaryId(), identDatasetDB.getNumber());
                     }
+                    identResultSummaryId = masterQuantitationChannel.getIdentResultSummaryId();
+                    
                     dMaster.setIdentDataset(identDataset);
-                    // load the list of quantitation channel linked to this masterQuantitationChannel
-                    //VDS POURQUOI pas lors de la creation des DQC 
-                    if (listQuantitationChannels != null && !listQuantitationChannels.isEmpty()) {
-                        int id2 = 0;
-                        for (QuantitationChannel quantitationChannel : listQuantitationChannels) {
-                            // load biologicalSample
-                            BiologicalSample biologicalSample = quantitationChannel.getBiologicalSample();
-                            dMaster.getQuantitationChannels().get(id2).setBiologicalSample(biologicalSample);
-                            id2++;
-                        }
-                    }
+                    dMaster.setIdentResultSummaryId(identResultSummaryId);                   
+                   
                     // add into the list
                     masterQuantitationChannels.add(dMaster);
-                } // end of the for
+                } // end of the for all MasterQuantChannel
 
                 // Set the ResultSummary of the Dataset as the ResultSummary of the first MasterQuantitationChannel
                 MasterQuantitationChannel masterQuantitationChannel = listMasterQuantitationChannels.get(0);
@@ -564,8 +468,8 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                 dataset.setResultSummary(rsm);
                 dataset.setResultSet(rsm.getResultSet());
                 dataset.setResultSetId(rsm.getResultSet().getId());
-
-            }
+            } //End if at least 1 MQC exits
+            
             dataset.setMasterQuantitationChannels(masterQuantitationChannels);
             // load groupSetup
             Set<GroupSetup> groupSetupSet = datasetDB.getGroupSetups();
@@ -583,6 +487,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                 }
                 dataset.setGroupSetup(groupSetup);
             }
+            
             // sort qCh by BiologicalGroup/BiologicalSample
             if (!dataset.getMasterQuantitationChannels().isEmpty()){
                 List<DQuantitationChannel> listQch = dataset.getMasterQuantitationChannels().get(0).getQuantitationChannels();
@@ -665,6 +570,103 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
         return true;
     }
 
+    
+    static private List<DQuantitationChannel> createDQuantChannelsForMQC(Long projectId, MasterQuantitationChannel masterQuantitationChannel, EntityManager entityManagerMSI, EntityManager entityManagerUDS, EntityManager entityManagerLCMS) {
+
+        List<QuantitationChannel> listQuantitationChannels = masterQuantitationChannel.getQuantitationChannels();
+        List<DQuantitationChannel> listDQuantChannels = new ArrayList();
+        for (QuantitationChannel qc : listQuantitationChannels) {
+            DQuantitationChannel dqc = new DQuantitationChannel(qc);
+            // search resultFileName and raw path
+            String resultFileName = "";
+            String rawPath = "";
+            Long rsId = null;
+            String queryMsi = "SELECT msi.resultFileName, pl.path, rsm.resultSet.id  "
+                    + "FROM MsiSearch msi, Peaklist pl, ResultSet rs, ResultSummary rsm "
+                    + " WHERE rsm.id=:rsmId AND rsm.resultSet.id = rs.id AND rs.msiSearch.id = msi.id "
+                    + "AND msi.peaklist.id = pl.id ";
+            Query qMsi = entityManagerMSI.createQuery(queryMsi);
+            qMsi.setParameter("rsmId", qc.getIdentResultSummaryId());
+            try {
+                Object[] res = (Object[]) qMsi.getSingleResult();
+                resultFileName = (String) res[0];
+                rawPath = (String) res[1];
+                if (resultFileName != null && resultFileName.contains(".")) {
+                    resultFileName = resultFileName.substring(0, resultFileName.indexOf('.'));
+                }
+                rsId = (Long) res[2];
+            } catch (NoResultException | NonUniqueResultException e) {
+
+            }
+            // take the dataset name as qch name TODO IF NOT DEFINE ABOVE
+            String queryQCName = "SELECT ds.name "
+                    + "FROM fr.proline.core.orm.uds.Dataset ds, fr.proline.core.orm.uds.QuantitationChannel qc "
+                    + "WHERE ds.resultSummaryId = qc.identResultSummaryId AND "
+                    + "qc.id=:qChId AND ds.project.id=:projectId ";
+            TypedQuery<String> queryQCNameQ = entityManagerUDS.createQuery(queryQCName, String.class);
+            queryQCNameQ.setParameter("qChId", qc.getId());
+            queryQCNameQ.setParameter("projectId", projectId);
+            try {
+                String name = queryQCNameQ.getSingleResult();
+                resultFileName = name;
+            } catch (NoResultException | NonUniqueResultException e2) {
+
+            }
+            dqc.setResultFileName(resultFileName);
+            dqc.setRawFilePath(rawPath);
+            // search for run_identification rawFileName (mzdb fileName) in UDS
+
+            String mzdbFile = "";
+            try {
+                //mzdbFile = (String) queryMzdb.getSingleResult();
+                mzdbFile = qc.getRun().getRawFile().getMzDbFileName();
+            } catch (Exception e) {
+                m_logger.error("Error while retrieving mzdb file " + e);
+            }
+            dqc.setMzdbFileName(mzdbFile);
+            // search for raw map in LCMS database
+            String queryLcms = "SELECT pmrm.rawMap.id "
+                    + "FROM fr.proline.core.orm.lcms.Map  m, ProcessedMap pm, ProcessedMapRawMapMapping pmrm  "
+                    + "WHERE m.id =:processedMapId "
+                    + "AND m.id = pm.id "
+                    + "AND pm.id = pmrm.id.processedMapId ";
+            TypedQuery<Long> queryRawMapLcms = entityManagerLCMS.createQuery(queryLcms, Long.class);
+            queryRawMapLcms.setParameter("processedMapId", qc.getLcmsMapId());
+            try {
+                Long rawMapId = queryRawMapLcms.getSingleResult();
+                dqc.setLcmsRawMapId(rawMapId);
+            } catch (NoResultException | NonUniqueResultException e) {
+
+            }
+            if (rsId != null) {
+                ResultSet rsetFound = entityManagerMSI.find(ResultSet.class, rsId);
+                dqc.setIdentRs(rsetFound);
+            } else {
+                dqc.setIdentRs(null);
+            }
+            // search if a dataset with rsmId, rsId exists 
+            String queryIdentDsS = "SELECT ds.id FROM Dataset ds WHERE ds.resultSetId=:rsId AND ds.resultSummaryId=:rsmId AND ds.project.id=:projectId ";
+            TypedQuery<Long> queryIdentDs = entityManagerUDS.createQuery(queryIdentDsS, Long.class);
+            queryIdentDs.setParameter("rsId", rsId);
+            queryIdentDs.setParameter("rsmId", qc.getIdentResultSummaryId());
+            queryIdentDs.setParameter("projectId", projectId);
+
+            try {
+                Long identDsId = queryIdentDs.getSingleResult();
+                dqc.setIdentDatasetId(identDsId);
+            } catch (NoResultException | NonUniqueResultException e) {
+                dqc.setIdentDatasetId((long) -1);
+            }
+            // load biologicalSample
+            dqc.setBiologicalSample(qc.getBiologicalSample());
+
+                    
+            listDQuantChannels.add(dqc);
+        } //End go through QuantChannel
+        return listDQuantChannels;
+    }
+            
+            
     /**
      * Fetch first data to display proteinSet (all Master Protein Sets,
      * quantProteinSet
@@ -763,6 +765,10 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
 
                     //resultSummary
                     if (resultSummaryId != null) {
+                        
+                        // CBy : Je ne comprend pas ce que fait ce code si peptideInstanceIdArray est non null ??? Il selection les id des objets 
+                        // dont on a deja les Id ???? Au mieux il filtre ceux qui n'ont pas été trouvés ?? 
+                        
                         // load peptideInstance
                         String queryPep = "SELECT pi.id "
                                 + "FROM fr.proline.core.orm.msi.PeptideInstance pi "
@@ -1076,6 +1082,10 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
             peptideInstanceList.add(dpi);
         }
         
+        DatabaseLoadPeptidesInstancesTask.fetchReadablePtmData(entityManagerMSI, m_dataset.getResultSetId(), peptideMap);
+        DatabaseLoadPeptidesInstancesTask.fetchPtmDataForPeptides(entityManagerMSI, peptideMap);
+
+        
         int nbMP = m_masterQuantPeptideList.size();
         int nbPI = peptideInstanceList.size();
         //  load MasterQuantPeptide and list of QuantPeptide
@@ -1186,7 +1196,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
             m_masterQuantPeptideList.set(index, masterQuantPeptide);
         }
 
-        // non quantified peptides instances : 
+        // non quantified peptides instances :
         // no master quantPeptide: build a fake masterQuantPeptide to display the peptideInstance
         List<DPeptideInstance> extendedPeptideInstanceList = null;
         for (int i = 0; i < nbMP; i++) {
@@ -1289,13 +1299,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
         }
 
         DatabaseLoadPeptidesInstancesTask.fetchReadablePtmData(entityManagerMSI, m_dataset.getResultSetId(), peptideMap);
-        try {
-            DatabaseLoadPeptidesInstancesTask.fetchPtmDataFromPSdb(peptideMap);
-        } catch (Exception e) {
-            m_logger.error(getClass().getSimpleName() + " failed", e);
-            m_taskError = new TaskError(e);
-            return false;
-        }
+        DatabaseLoadPeptidesInstancesTask.fetchPtmDataForPeptides(entityManagerMSI, peptideMap);
 
         // load masterQuantPeptide not linked to a peptideInstance
         queryDMasterQuantPeptide = "SELECT  new fr.proline.core.orm.msi.dto.DMasterQuantPeptide"
@@ -1897,14 +1901,8 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
         }
         
         DatabaseLoadPeptidesInstancesTask.fetchReadablePtmData(entityManagerMSI, m_dataset.getResultSetId(), peptideMap);
-        try {
-            DatabaseLoadPeptidesInstancesTask.fetchPtmDataFromPSdb(peptideMap);
-        } catch (Exception e) {
-            m_logger.error(getClass().getSimpleName() + " failed", e);
-            m_taskError = new TaskError(e);
-            return false;
-        }
-        
+        DatabaseLoadPeptidesInstancesTask.fetchPtmDataForPeptides(entityManagerMSI, peptideMap);
+
         ArrayList<Long> peptideMatchIds = new ArrayList<>(peptideMatchMap.size());
         peptideMatchIds.addAll(peptideMatchMap.keySet());
         

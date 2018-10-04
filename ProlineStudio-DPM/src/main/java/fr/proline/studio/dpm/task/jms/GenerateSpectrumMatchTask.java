@@ -28,13 +28,18 @@ public class GenerateSpectrumMatchTask extends AbstractJMSTask {
     private Long m_resultSetId;
     private Long m_resultSummaryId;
     private Long m_peptideMatchId = null;
+    private Boolean m_forceGenerate = false;
+    private Long m_fragmentRuleSetId= null;
     
-    public GenerateSpectrumMatchTask(AbstractJMSCallback callback, String datasetName, Long projectId, Long resultSetId, Long resultSummaryId, Long peptideMatchId) {
+    
+    public GenerateSpectrumMatchTask(AbstractJMSCallback callback, String datasetName, Long projectId, Long resultSetId, Long resultSummaryId, Long peptideMatchId,  long fragmRuleSetId, Boolean forceGenerate) {
         super(callback, new TaskInfo( ((datasetName != null) ? "Generate Spectrum Matches for "+datasetName : "Generate Spectrum Match(es)"), true, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_HIGH));
         m_projectId = projectId;
         m_resultSetId = resultSetId;
         m_resultSummaryId = resultSummaryId;
         m_peptideMatchId = peptideMatchId;
+        m_fragmentRuleSetId = fragmRuleSetId;
+        m_forceGenerate = forceGenerate;
     }
     
     
@@ -71,7 +76,9 @@ public class GenerateSpectrumMatchTask extends AbstractJMSTask {
         } else if (m_resultSummaryId != null){
             params.put("result_summary_id", m_resultSummaryId);
         }
-
+        if(m_fragmentRuleSetId != null && m_fragmentRuleSetId >0)
+            params.put("fragmentation_rule_set_id",m_fragmentRuleSetId);        
+        params.put("force_insert",m_forceGenerate);
         return params;
     }
 

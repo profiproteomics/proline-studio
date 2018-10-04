@@ -32,10 +32,11 @@ public class ImportIdentificationTask extends AbstractJMSTask {
     private long m_instrumentId;
     private long m_peaklistSoftwareId;
     private long m_projectId;
+    private long m_fragmentRuleSetId;
     private boolean m_saveSpectrumMatches;
     private Long[] m_resultSetId = null;
 
-    public ImportIdentificationTask(AbstractJMSCallback callback, String parserId, HashMap<String, String> parserArguments, String filePath, String decoyRegex, long instrumentId, long peaklistSoftwareId, boolean saveSpectrumMatches, long projectId, Long[] resultSetId) {
+    public ImportIdentificationTask(AbstractJMSCallback callback, String parserId, HashMap<String, String> parserArguments, String filePath, String decoyRegex, long instrumentId, long peaklistSoftwareId, boolean saveSpectrumMatches, long fragmRuleSetId, long projectId, Long[] resultSetId) {
         super(callback, new TaskInfo("Import Identification " + filePath, true, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_HIGH));
 
         m_parserId = parserId;
@@ -47,6 +48,7 @@ public class ImportIdentificationTask extends AbstractJMSTask {
         m_saveSpectrumMatches = saveSpectrumMatches;
         m_projectId = projectId;
         m_resultSetId = resultSetId;
+        m_fragmentRuleSetId = fragmRuleSetId;
     }
 
     @Override
@@ -61,7 +63,7 @@ public class ImportIdentificationTask extends AbstractJMSTask {
         message.setJMSReplyTo(m_replyQueue);
         //SERVICE - ImportValidateGenerateSpectrumMatches service TEST
 //        message.setStringProperty(JMSConnectionManager.PROLINE_SERVICE_NAME_KEY, "proline/dps/msi/ImportValidateGenerateSM");
-	  message.setStringProperty(JMSConnectionManager.PROLINE_SERVICE_NAME_KEY, "proline/dps/msi/ImportResultFiles");
+        message.setStringProperty(JMSConnectionManager.PROLINE_SERVICE_NAME_KEY, "proline/dps/msi/ImportResultFiles");
         addSourceToMessage(message);
         addDescriptionToMessage(message);
 
@@ -98,7 +100,7 @@ public class ImportIdentificationTask extends AbstractJMSTask {
     private HashMap<String, Object> createParams() {
         HashMap<String, Object> params = new HashMap<>();
         params.put("project_id", m_projectId);
-        params.put("use_decoy_regexp", true); //For ImportValidateGenerateSpectrumMatches test
+//        params.put("use_decoy_regexp", true); //For ImportValidateGenerateSpectrumMatches test
         List args = new ArrayList();
 
         // add the file to parse
@@ -113,7 +115,8 @@ public class ImportIdentificationTask extends AbstractJMSTask {
 
         params.put("instrument_config_id", m_instrumentId);
         params.put("peaklist_software_id", m_peaklistSoftwareId);
-
+        if(m_fragmentRuleSetId >0)
+            params.put("fragmentation_rule_set_id",m_fragmentRuleSetId);
         params.put("save_spectrum_matches", m_saveSpectrumMatches);
 
         // parser arguments

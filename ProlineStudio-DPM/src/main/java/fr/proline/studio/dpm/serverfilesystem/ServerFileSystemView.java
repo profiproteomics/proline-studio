@@ -21,7 +21,6 @@ public class ServerFileSystemView extends FileSystemView {
     private static HashMap<String, ArrayList<String>> m_rootsInfo = null;
     
     private ServerFileSystemView() {
-        ;
     }
     
     public void setRoots(File[] roots){
@@ -41,26 +40,28 @@ public class ServerFileSystemView extends FileSystemView {
             try {
                 synchronized (mutexRootsLoaded) {
 
-
+//                    boolean[] fileLoaded = new boolean[1];
+//                    fileLoaded[0] = false;
+//                    
                     AbstractJMSCallback callback = new AbstractJMSCallback() {
 
-                        @Override
-                        public boolean mustBeCalledInAWT() {
-                            return false;
-                        }
+                       @Override
+                       public boolean mustBeCalledInAWT() {
+                           return false;
+                       }
 
-                        @Override
-                        public void run(boolean success) {
+                       @Override
+                       public void run(boolean success) {
 
-                            synchronized (mutexRootsLoaded) {
-                                mutexRootsLoaded.notifyAll();
-                            }
-                        }
-                    };
+                           synchronized (mutexRootsLoaded) {
+                               mutexRootsLoaded.notifyAll();
+                           }
+                       }
+                   };
 
-                    fr.proline.studio.dpm.task.jms.FileSystemRootsTask task = new fr.proline.studio.dpm.task.jms.FileSystemRootsTask(callback, rootInfoArray);
-                    AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
-
+                   fr.proline.studio.dpm.task.jms.FileSystemRootsTask task = new fr.proline.studio.dpm.task.jms.FileSystemRootsTask(callback, rootInfoArray);
+                   AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
+                        
                     // wait untill the files are loaded
                     mutexRootsLoaded.wait();
                 }
@@ -147,26 +148,28 @@ public class ServerFileSystemView extends FileSystemView {
         try {
             synchronized (mutexFileLoaded) {
 
+//                boolean[] fileLoaded = new boolean[1];
+//                fileLoaded[0] = false;
 
                 AbstractJMSCallback callback = new AbstractJMSCallback() {
 
-                    @Override
-                    public boolean mustBeCalledInAWT() {
-                        return false;
-                    }
+                       @Override
+                       public boolean mustBeCalledInAWT() {
+                           return false;
+                       }
 
-                    @Override
-                    public void run(boolean success) {
+                       @Override
+                       public void run(boolean success) {
 
-                        synchronized (mutexFileLoaded) {
-                            mutexFileLoaded.notifyAll();
-                        }
-                    }
+                           synchronized (mutexFileLoaded) {
+                               mutexFileLoaded.notifyAll();
+                           }
+                       }
                 };
 
                 fr.proline.studio.dpm.task.jms.FileSystemBrowseTask task = new fr.proline.studio.dpm.task.jms.FileSystemBrowseTask(callback, dir.getPath(), files);
                 AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
-                // wait untill the files are loaded
+                
                 mutexFileLoaded.wait();
             }
         

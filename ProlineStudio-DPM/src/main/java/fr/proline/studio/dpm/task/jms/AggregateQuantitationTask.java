@@ -18,25 +18,24 @@ import javax.jms.TextMessage;
 /**
  * XIC Quantitation Task JMS
  */
-public class RunXICTask extends AbstractJMSTask {
-    private static final String m_serviceName = "proline/dps/msq/Quantify";
+public class AggregateQuantitationTask extends AbstractJMSTask {
+    
+    private static final String m_serviceName = "proline/dps/msq/AggregateQuantitation";
     private String m_version = "1.0";
     
-    private Long[] m_xicQuantiResult = null;
+    private Long[] m_quantiResult = null;
     private final String m_quantiDSName;
     private final Long m_pId;
     private final Map<String,Object> m_quantParams;
     private final Map<String,Object> m_expDesignParams;
     
-    public RunXICTask(AbstractJMSCallback callback, Long projectId,  String quantDSName,  Map<String,Object> quantParams, Map<String,Object> expDesignParams, String quantParamVersion, Long[] retValue) {
-        super(callback, new TaskInfo("Run XIC Quantitation for "+quantDSName, true, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_HIGH));
-        m_xicQuantiResult = retValue;     
+    public AggregateQuantitationTask(AbstractJMSCallback callback, Long projectId,  String quantDSName,  Map<String,Object> quantParams, Map<String,Object> expDesignParams, Long[] retValue) {
+        super(callback, new TaskInfo("Run Aggregate Quantitation for "+quantDSName, true, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_HIGH));
+        m_quantiResult = retValue;     
         m_expDesignParams = expDesignParams;
         m_quantiDSName = quantDSName;
         m_pId= projectId;
         m_quantParams = quantParams;
-        if(quantParamVersion !=null && quantParamVersion.equals("2.0"))
-            m_version = "3.0";  
     }
     
     
@@ -105,7 +104,7 @@ public class RunXICTask extends AbstractJMSTask {
 	    } else {
 		m_loggerProline.debug("Result :\n" + result); 
                 // retrieve resultSummary id
-                 m_xicQuantiResult[0] = (Long) result;
+                    m_quantiResult[0] = (Long) result;
 	    }
         }
           m_currentState = JMSState.STATE_DONE;

@@ -70,7 +70,7 @@ public class CreateUserAccountTask  extends AbstractJMSTask {
         HashMap<String, Object> params = new HashMap<>();
         //-- Global PARAMS
         params.put("login", m_userName);
-        params.put("password_hash", /*SecurityUtils.sha256Hex(*/m_password/*)*/); // crypting password is done at server level for the moment
+        params.put("password_hash", SecurityUtils.sha256Hex(m_password)); // crypting password is done at server level for the moment
         params.put("is_user_group", Boolean.valueOf(!m_isAdmin));
         return params;
     }

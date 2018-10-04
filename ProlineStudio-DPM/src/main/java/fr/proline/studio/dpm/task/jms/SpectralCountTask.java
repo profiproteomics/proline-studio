@@ -69,7 +69,6 @@ public class SpectralCountTask extends AbstractJMSTask {
         /* ReplyTo = Temporary Destination Queue for Server -> Client response */
         message.setJMSReplyTo(m_replyQueue);
         message.setStringProperty(JMSConnectionManager.PROLINE_SERVICE_NAME_KEY, m_serviceName);
-//      TODO: UNCOMMENT FOR VERSION 2 ! 
         message.setStringProperty(JMSConnectionManager.PROLINE_SERVICE_VERSION_KEY, m_version_2_0);
     
         addSourceToMessage(message);  
@@ -88,10 +87,7 @@ public class SpectralCountTask extends AbstractJMSTask {
         params.put("name", m_dsName);
         params.put("description", m_dsDescr);
         params.put("project_id", m_refDataset.getProject().getId());
-//      TODO: COMMENT 2 NEXT LINES FOR VERSION 2 ! 
-//        params.put("ref_rsm_id", m_refDataset.getResultSummaryId());
-//        params.put("ref_ds_id", m_refDataset.getId());
-        
+
         List<Long> weightRefRSMIds = new ArrayList<>();
         for (DDataset ddset : m_rsmWeightDataset) {
             weightRefRSMIds.add(ddset.getResultSummaryId());
@@ -142,7 +138,6 @@ public class SpectralCountTask extends AbstractJMSTask {
         Map<String, Object> masterQuantChannelParams = new HashMap<>();
         masterQuantChannelParams.put("number", 0);
         masterQuantChannelParams.put("name", m_refDataset.getName() + " Spectral Count");
-//      TODO: UNCOMMENT 2 next lines FOR VERSION 2 ! 
         masterQuantChannelParams.put("ident_result_summary_id", m_refDataset.getResultSummaryId());
         masterQuantChannelParams.put("ident_dataset_id", m_refDataset.getId());
         masterQuantChannelParams.put("quant_channels", quantChanneList);

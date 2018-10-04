@@ -34,8 +34,6 @@ public class ServerConnectionManager {
     public static final int CONNECTION_FAILED = 2;
     public static final int CONNECTION_DONE = 3;
 
-    //VDS TO BE REMOVED => Full JMS
-    private static final String HTTP_URL_PREFFIX = "http://";
     protected static final Logger m_loggerProline = LoggerFactory.getLogger("ProlineStudio.DPM.Task");
     
     private int m_connectionState = NOT_CONNECTED;
@@ -94,6 +92,7 @@ public class ServerConnectionManager {
 
     public void tryServerConnection(final Runnable connectionCallback, final String serverURL, final String projectUser, String userPassword, final boolean changingUser) {
 
+        
         m_passwordNeeded = !userPassword.isEmpty();
 
         // pre-check to avoid to try a connection when the parameters are not set
@@ -131,15 +130,13 @@ public class ServerConnectionManager {
         }
 
 
-            userAuthenticateJMS(connectionCallback, serverURL, projectUser, userPassword, changingUser);
-
+        userAuthenticateJMS(connectionCallback, serverURL, projectUser, userPassword, changingUser);
     }
 
     private String[] parseJMSServerURL(String serverURL) {
         String[] hostAndPort = new String[2];
 
-        String parsedURL = (serverURL.startsWith(HTTP_URL_PREFFIX)) ? serverURL.substring(HTTP_URL_PREFFIX.length()) : serverURL;
-
+        String parsedURL = serverURL;
         int portSep = parsedURL.indexOf(":");
         if (portSep > 0) {
             hostAndPort[0] = parsedURL.substring(0, portSep);

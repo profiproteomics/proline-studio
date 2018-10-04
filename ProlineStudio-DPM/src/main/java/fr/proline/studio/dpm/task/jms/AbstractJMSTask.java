@@ -133,7 +133,7 @@ public abstract class AbstractJMSTask  extends AbstractLongTask implements Messa
             userLoginSB.append(user.getLogin());
         else
             userLoginSB.append("Unknonw user");
-        String hostIP = "Unknown";
+        String hostIP;
         try { 
             hostIP = InetAddress.getLocalHost().getHostAddress();
         } catch(UnknownHostException uhe){

@@ -38,9 +38,9 @@ public class ServerFile extends File {
         
         // check the separator
         if (m_serverFilePath.length()>m_serverFileName.length()) {
-            char separator = m_serverFilePath.charAt(m_serverFilePath.length()-m_serverFileName.length()-1);
-            if ((separator== '/') || (separator== '\\')) {
-                SEPARATOR = separator;
+            char serverSeparator = m_serverFilePath.charAt(m_serverFilePath.length()-m_serverFileName.length()-1);
+            if ((serverSeparator== '/') || (serverSeparator== '\\')) {
+                SEPARATOR = serverSeparator;
             }
         }
         

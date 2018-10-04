@@ -171,6 +171,7 @@ public class ExportDatasetTask extends AbstractJMSTask {
                  break;
             }
             
+            case MZIDENTML:
             case SPECTRA_LIST:{
                 if(m_exportParams != null)
                     extraParams.putAll(m_exportParams);

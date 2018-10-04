@@ -141,7 +141,7 @@ public class DatabaseLoadLcMSTask extends AbstractDatabaseSlicerTask {
         m_peakelListPerFeature = peakelListPerFeature;
         m_allMapAlignments = allMapAlignments;
         m_alnRefMapId = alnRefMapId;
-        m_allProcessedMaps = allProcessedMaps;
+        m_allProcessedMaps = (allProcessedMaps == null) ? new ArrayList<>() : allProcessedMaps;
         action = LOAD_FEATURE_FOR_PEPTIDE_ION_WITH_PEAKELS;
     }
 
@@ -805,33 +805,12 @@ public class DatabaseLoadLcMSTask extends AbstractDatabaseSlicerTask {
                         bestChildElutionTime = new Double(bestChild.getElutionTime());
                         sourceMapId = bestChild.getMap().getId();
                     }
-                    // if child feature is in processed map => search into cluster feature
-                    if (!mapRawToProcessedId.containsKey(mfi.getChildFeature().getMap().getId()) ){
+                    // if child feature is in a processed map => search into cluster feature
+                    if (mfi.getChildFeature().getMap().getType() != 0) {
                         childFeatureIdsForCluster.add(mfi.getChildFeature().getId());
                     }
                 }
-                // isBestChild is always set to false! cf Issue #13116
-                if (bestChild == null){
-                    // then we determine the best child as the child with the max apex intensity , among the childs that do not have predicted elution time
-                    for (MasterFeatureItem mfi : resultMFIList) {
-                        boolean hasPredElTime = false;
-                        java.util.Map<String,Object>  prop = mfi.getChildFeature().getSerializedPropertiesAsMap();
-                        if (prop != null){
-                            Object o = prop.get("predicted_elution_time");
-                            hasPredElTime = (o != null && o instanceof Double);
-                        }
-                        if (!hasPredElTime && (maxIntensity.isNaN() || mfi.getChildFeature().getApexIntensity() > maxIntensity)){
-                            maxIntensity = mfi.getChildFeature().getApexIntensity();
-                            bestChild = mfi.getChildFeature();
-                            bestChildElutionTime = new Double(bestChild.getElutionTime());
-                            sourceMapId = bestChild.getMap().getId();
-                        }
-                    }
-                }
-                Long processedSourceMapId = sourceMapId;
-                if (mapRawToProcessedId.containsKey(sourceMapId)){
-                    processedSourceMapId = mapRawToProcessedId.get(sourceMapId);
-                }
+
 
                 /*
                 String query = "SELECT f "
@@ -878,6 +857,32 @@ public class DatabaseLoadLcMSTask extends AbstractDatabaseSlicerTask {
                     
                 }
                 
+                // isBestChild is always set to false! cf Issue #13116
+                if (bestChild == null){
+                    // then we determine the best child as the child with the max apex intensity , among the childs that do not have predicted elution time
+                    for (Feature feature : allFeature) {
+                        if (!feature.getIsCluster() && feature.getId() != -1L) {
+                            boolean hasPredElTime = false;
+                            java.util.Map<String, Object> prop = feature.getSerializedPropertiesAsMap();
+                            if (prop != null) {
+                                Object o = prop.get("predicted_elution_time");
+                                hasPredElTime = (o != null && o instanceof Double);
+                            }
+                            if (!hasPredElTime && (maxIntensity.isNaN() || feature.getApexIntensity() > maxIntensity)) {
+                                maxIntensity = feature.getApexIntensity();
+                                bestChild = feature;
+                                bestChildElutionTime = new Double(bestChild.getElutionTime());
+                                sourceMapId = bestChild.getMap().getId();
+                            }
+                        }
+                    }
+                }
+                
+                Long processedSourceMapId = sourceMapId;
+                if (mapRawToProcessedId.containsKey(sourceMapId)){
+                    processedSourceMapId = mapRawToProcessedId.get(sourceMapId);
+                }
+                
                 //load peakel
                 String queryP = "SELECT fpi.id.peakelId  "
                             + "FROM fr.proline.core.orm.lcms.FeaturePeakelItem fpi "
@@ -890,13 +895,13 @@ public class DatabaseLoadLcMSTask extends AbstractDatabaseSlicerTask {
                     DFeature dFeature = new DFeature(feature);
                     dFeature.setBestChild(false);
                     java.util.Map<String,Object>  prop = dFeature.getSerializedPropertiesAsMap(); //init the serializedProp.
-                    if (bestChild != null && processedSourceMapId !=null){
+                    if (bestChild != null){
                         Long featureMapId = feature.getMap().getId();
                         if (mapRawToProcessedId.containsKey(feature.getMap().getId())){
                             featureMapId = mapRawToProcessedId.get(feature.getMap().getId());
                         }
                         try{
-                            double predictedElutionTime = MapAlignmentConverter.convertElutionTime(bestChildElutionTime, processedSourceMapId,featureMapId , m_allMapAlignments, m_alnRefMapId);
+                            double predictedElutionTime = MapAlignmentConverter.convertElutionTime(bestChildElutionTime, processedSourceMapId, featureMapId , m_allMapAlignments, m_alnRefMapId);
                             dFeature.setPredictedElutionTime(predictedElutionTime);
                         }catch(Exception e){
                             

@@ -7,7 +7,7 @@
 	<packaging>pom</packaging>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<studio.version>2.1.0-SNAPSHOT</studio.version>
+		<studio.version>2.0.0-SNAPSHOT</studio.version>
 	</properties>
 
 	<dependencies>

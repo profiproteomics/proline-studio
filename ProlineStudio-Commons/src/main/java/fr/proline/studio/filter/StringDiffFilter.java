@@ -1,8 +1,8 @@
 package fr.proline.studio.filter;
 
+import fr.proline.studio.utils.StringUtils;
 import java.awt.GridBagConstraints;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -13,11 +13,9 @@ import javax.swing.JTextField;
  * The operator could be = or !=, and allows the user to search on an empty string
  * @author JM235353
  */
-public class StringDiffFilter extends Filter {
+public class StringDiffFilter extends StringFilter {
 
-    private static final Integer SEARCH_TEXT = 0;
-    private String m_filterText = null;
-    private Pattern m_searchPattern = null;
+
     private JComboBox m_cbOp = null;
     private int m_selIndex = 0;
     
@@ -26,16 +24,6 @@ public class StringDiffFilter extends Filter {
         super(variableName, convertValueInterface, modelColumn);
     }
 
-    @Override
-    public Filter cloneFilter() {
-        StringDiffFilter clone = new StringDiffFilter(m_variableName, m_convertValueInterface, m_modelColumn);
-        clone.m_filterText = m_filterText;
-        clone.m_searchPattern = m_searchPattern;
-        clone.m_selIndex = m_selIndex;
-        setValuesForClone(clone);
-        return clone;
-    }
-    
     @Override
     public boolean filter(Object v1, Object v2) {
         if (m_filterText == null) {
@@ -48,22 +36,7 @@ public class StringDiffFilter extends Filter {
         boolean found = matcher.matches();
         return m_cbOp.getSelectedIndex() == 0?found:!found;
     }
-
-    @Override
-    public FilterStatus checkValues() {
-        if (m_filterText == null) {
-            return null;
-        }
-
-        try {
-            compileRegex(m_filterText);
-        } catch (Exception e) {
-            return new FilterStatus("Regex Pattern Error", getComponent(SEARCH_TEXT));
-        }
-
-        return null;
-    }
-
+    
     @Override
     public boolean registerValues() {
 
@@ -75,7 +48,7 @@ public class StringDiffFilter extends Filter {
             int lastSelIndex = m_selIndex;
             
             m_filterText = ((JTextField) getComponent(SEARCH_TEXT)).getText().trim();
-            m_searchPattern = compileRegex(m_filterText);
+            m_searchPattern = StringUtils.compileRegex(m_filterText);
             m_selIndex = m_cbOp.getSelectedIndex();
             
             hasChanged = (lastValue == null) || (m_filterText==null) || (lastValue.compareTo(m_filterText)!=0) || (lastSelIndex != m_selIndex);
@@ -84,32 +57,6 @@ public class StringDiffFilter extends Filter {
         registerDefinedAsUsed();
         
         return hasChanged;
-    }
-
-    private static Pattern compileRegex(String text) {
-        String escapedText = "^" + escapeRegex(text) + "$";
-        String wildcardsFilter = escapedText.replaceAll("\\*", ".*").replaceAll("\\?", ".");
-        return Pattern.compile(wildcardsFilter, Pattern.CASE_INSENSITIVE);
-    }
-
-    private static String escapeRegex(String s) {
-        if (s == null) {
-            return "";
-        }
-        int len = s.length();
-        if (len == 0) {
-            return "";
-        }
-
-        StringBuilder sb = new StringBuilder(len * 2);
-        for (int i = 0; i < len; i++) {
-            char c = s.charAt(i);
-            if ("[](){}.+$^|#\\".indexOf(c) != -1) {
-                sb.append("\\");
-            }
-            sb.append(c);
-        }
-        return sb.toString();
     }
 
     @Override
@@ -134,16 +81,7 @@ public class StringDiffFilter extends Filter {
         c.gridx++;
         c.gridwidth = 3;
         c.weightx = 1;
-        JTextField vTextField = ((JTextField) getComponent(SEARCH_TEXT));
-        if (vTextField == null) {
-            vTextField = new JTextField(8);
-            vTextField.setToolTipText("<html>Search is based on wildcards:<br>  '*' : can replace all characters<br>  '?' : can replace one character<br><br>Use 'FOO*' to search a string starting with FOO. </html>");
-            if (m_filterText != null) {
-                vTextField.setText(m_filterText.toString());
-            }
-            registerComponent(SEARCH_TEXT, vTextField);
-        }
-        p.add(vTextField, c);
+        p.add(createTextField(), c);
 
         c.gridx += 2;
 

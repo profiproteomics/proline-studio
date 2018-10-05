@@ -46,7 +46,7 @@ import java.util.Map;
 import javax.swing.table.TableCellRenderer;
 
 /**
- *
+ * @kx Table Model for XIC-displayAbundances-Proteins sets
  * @author JM235353
  */
 public class QuantProteinSetTableModel extends LazyTableModel implements ExportTableSelectionInterface, GlobalTableModelInterface {
@@ -54,13 +54,14 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
     public static final int COLTYPE_PROTEIN_SET_ID = 0;
     public static final int COLTYPE_PROTEIN_SET_NAME = 1;
     public static final int COLTYPE_OVERVIEW = 2;
-    public static final int COLTYPE_NB_PEPTIDE = 3;
-    public static final int COLTYPE_NB_QUANT_PEPTIDE = 4;
+    public static final int COLTYPE_DESCRIPTION = 3; //add a column type: description
+    public static final int COLTYPE_NB_PEPTIDE = 4;
+    public static final int COLTYPE_NB_QUANT_PEPTIDE = 5;
     public static final int LAST_STATIC_COLUMN = COLTYPE_NB_QUANT_PEPTIDE;
 
-    private static final String[] m_columnNames = {"Id", "Protein Set", "Overview", "#Peptide", "<html>#Quant.<br/>Peptide</html>"};
-    private static final String[] m_columnNamesForFilter = {"Id", "Protein Set", "Overview", "#Peptide", "#Quant.Peptide"};
-    private static final String[] m_toolTipColumns = {"MasterQuantProteinSet Id", "Identified Protein label", "Overview", "Number of Identified Peptides", "Number of Quantified Peptides"};
+    private static final String[] m_columnNames = {"Id", "Protein Set", "Overview","Description", "#Peptide", "<html>#Quant.<br/>Peptide</html>"};
+    private static final String[] m_columnNamesForFilter = {"Id", "Protein Set", "Overview", "Description", "#Peptide", "#Quant.Peptide"};
+    private static final String[] m_toolTipColumns = {"MasterQuantProteinSet Id", "Identified Protein label", "Overview","Description", "Number of Identified Peptides", "Number of Quantified Peptides"};
 
     public static final int COLTYPE_STATUS = 0;
     public static final int COLTYPE_PEP_NUMBER = 1;
@@ -334,7 +335,25 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
                         return Double.compare(calculateComparableValue(), o.calculateComparableValue());
                     }
                 };
+                
+            case COLTYPE_DESCRIPTION:{//Retrieve the description of the typical protein
+                  LazyData lazyData = getLazyData(row, col);
 
+                // Retrieve typical Protein Match
+                DProteinMatch proteinMatch = null;
+                if (proteinSet.getProteinSet() != null) {
+                    proteinMatch = proteinSet.getProteinSet().getTypicalProteinMatch();
+                    if (proteinMatch == null) {
+                        lazyData.setData("");
+                    } else {
+                        lazyData.setData(proteinMatch.getDescription());
+                    }
+                } else {
+                    lazyData.setData(null);
+                    givePriorityTo(m_taskId, row, col);
+                }
+                return lazyData;
+            }
             case COLTYPE_NB_PEPTIDE: {
                 LazyData lazyData = getLazyData(row, col);
 

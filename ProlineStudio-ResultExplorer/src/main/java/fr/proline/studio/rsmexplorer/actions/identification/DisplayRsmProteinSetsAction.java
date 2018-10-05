@@ -29,6 +29,7 @@ public class DisplayRsmProteinSetsAction extends AbstractRSMAction {
     public void actionPerformed(AbstractNode[] selectedNodes, int x, int y) {
 
         int nbNodes = selectedNodes.length;
+        //leaf dataSet multi choice is enable
         for (int i = 0; i < nbNodes; i++) {
             DataSetNode dataSetNode = (DataSetNode) selectedNodes[i];
 

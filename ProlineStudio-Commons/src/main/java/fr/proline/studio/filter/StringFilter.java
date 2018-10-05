@@ -1,11 +1,25 @@
 package fr.proline.studio.filter;
 
+import fr.proline.studio.utils.StringUtils;
 import java.awt.GridBagConstraints;
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.Transferable;
+import java.awt.datatransfer.UnsupportedFlavorException;
+import java.awt.event.ActionEvent;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
+import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.swing.AbstractAction;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.KeyStroke;
+import javax.swing.text.JTextComponent;
+import org.openide.util.Exceptions;
 
 /**
  * Filter on String values with wildcards : * and ?
@@ -14,9 +28,9 @@ import javax.swing.JTextField;
  */
 public class StringFilter extends Filter {
 
-    private static final Integer SEARCH_TEXT = 0;
-    private String m_filterText = null;
-    private Pattern m_searchPattern;
+    protected static final Integer SEARCH_TEXT = 0;
+    protected String m_filterText = null;
+    protected Pattern m_searchPattern;
 
     public StringFilter(String variableName, ConvertValueInterface convertValueInterface, int modelColumn) {
         super(variableName, convertValueInterface, modelColumn);
@@ -30,7 +44,7 @@ public class StringFilter extends Filter {
         setValuesForClone(clone);
         return clone;
     }
-    
+
     @Override
     public boolean filter(Object v1, Object v2) {
         if (m_filterText == null) {
@@ -38,7 +52,7 @@ public class StringFilter extends Filter {
         }
 
         String value = (String) v1;
-        
+
         Matcher matcher = m_searchPattern.matcher(value);
 
         return matcher.matches();
@@ -51,7 +65,7 @@ public class StringFilter extends Filter {
         }
 
         try {
-            compileRegex(m_filterText);
+            StringUtils.compileRegex(m_filterText);
         } catch (Exception e) {
             return new FilterStatus("Regex Pattern Error", getComponent(SEARCH_TEXT));
         }
@@ -63,50 +77,24 @@ public class StringFilter extends Filter {
     public boolean registerValues() {
 
         boolean hasChanged = false;
-        
+
         if (isDefined()) {
-            
+
             String lastValue = m_filterText;
-            
+
             m_filterText = ((JTextField) getComponent(SEARCH_TEXT)).getText().trim();
             if (m_filterText.isEmpty()) {
                 m_filterText = null;
             }
 
-            m_searchPattern = compileRegex(m_filterText);
-            
-            hasChanged = (lastValue == null) || (m_filterText==null) || (lastValue.compareTo(m_filterText)!=0);
+            m_searchPattern = StringUtils.compileRegex(m_filterText);
+
+            hasChanged = (lastValue == null) || (m_filterText == null) || (lastValue.compareTo(m_filterText) != 0);
         }
 
         registerDefinedAsUsed();
-        
+
         return hasChanged;
-    }
-
-    private static Pattern compileRegex(String text) {
-        String escapedText = "^" + escapeRegex(text) + "$";
-        String wildcardsFilter = escapedText.replaceAll("\\*", ".*").replaceAll("\\?", ".");
-        return Pattern.compile(wildcardsFilter, Pattern.CASE_INSENSITIVE);
-    }
-
-    private static String escapeRegex(String s) {
-        if (s == null) {
-            return "";
-        }
-        int len = s.length();
-        if (len == 0) {
-            return "";
-        }
-
-        StringBuilder sb = new StringBuilder(len * 2);
-        for (int i = 0; i < len; i++) {
-            char c = s.charAt(i);
-            if ("[](){}.+$^|#\\".indexOf(c) != -1) {
-                sb.append("\\");
-            }
-            sb.append(c);
-        }
-        return sb.toString();
     }
 
     @Override
@@ -125,23 +113,86 @@ public class StringFilter extends Filter {
         c.gridx++;
         c.gridwidth = 3;
         c.weightx = 1;
-        JTextField vTextField = ((JTextField) getComponent(SEARCH_TEXT));
-        if (vTextField == null) {
-            vTextField = new JTextField(8);
-            vTextField.setToolTipText("<html>Search is based on wildcards:<br>  '*' : can replace all characters<br>  '?' : can replace one character<br><br>Use 'FOO*' to search a string starting with FOO. </html>");
-            if (m_filterText != null) {
-                vTextField.setText(m_filterText);
-            }
-            registerComponent(SEARCH_TEXT, vTextField);
-        }
-        p.add(vTextField, c);
+        p.add(createTextField(), c);
 
         c.gridx += 2;
 
+    }
+
+    protected JTextField createTextField() {
+        JTextField vTextField = ((JTextField) getComponent(SEARCH_TEXT));
+        if (vTextField == null) {
+            vTextField = createPasteTextField(vTextField, m_filterText);
+            registerComponent(SEARCH_TEXT, vTextField);
+        }
+        return vTextField;
     }
 
     @Override
     public void reset() {
         m_filterText = null;
     }
+
+    /**
+     * create a JTextField, which listen ctrl+V action, convert any html text to
+     * plain text
+     *
+     * @param vTextField
+     * @param filterText
+     * @return
+     */
+    protected JTextField createPasteTextField(JTextField vTextField, String filterText) {
+        //System.out.println("debug################### createPasteTextField in" );
+        vTextField = new JTextField(8);
+        vTextField.setToolTipText("<html>Search is based on wildcards:<br>  '*' : can replace all characters<br>  '?' : can replace one character<br><br>Use 'FOO*' to search a string starting with FOO. </html>");
+        if (filterText != null) {
+            vTextField.setText(filterText);
+        }
+
+        KeyStroke pasteKeyStrock = KeyStroke.getKeyStroke(KeyEvent.VK_V, InputEvent.CTRL_MASK, false);
+
+        vTextField.getInputMap().put(pasteKeyStrock, "paste");
+
+        PasteAction pasteAction = new PasteAction(vTextField);
+        vTextField.getActionMap().put("paste", pasteAction);
+        //System.out.println("debug################### createPasteTextField out" );
+        return vTextField;
+    }
+
+    protected class PasteAction extends AbstractAction {
+
+        JTextComponent textComponent;
+
+        public PasteAction(JTextComponent textComponent) {
+            super();
+            this.textComponent = textComponent;
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            //System.out.println("debug################### createPasteTextField action in" );
+            String msg = "";
+            try {
+                Clipboard c = Toolkit.getDefaultToolkit().getSystemClipboard();
+                boolean b = c.isDataFlavorAvailable(DataFlavor.stringFlavor);
+                if (b) {
+                    msg = StringUtils.extractTextFromHtml(c.getData(DataFlavor.stringFlavor).toString());
+                } else {
+                    Transferable t = c.getContents(null);
+                    msg = t.getTransferData(t.getTransferDataFlavors()[0]).toString();
+                }
+
+            } catch (UnsupportedFlavorException ex) {
+                msg = "UnsupportedFlavorException";
+                Exceptions.printStackTrace(ex);
+            } catch (IOException ex) {
+                msg = "IOException";
+                Exceptions.printStackTrace(ex);
+            }
+
+            this.textComponent.setText(msg);
+        }
+
+    }
+
 }

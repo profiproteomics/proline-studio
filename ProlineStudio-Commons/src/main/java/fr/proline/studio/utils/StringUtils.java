@@ -1,63 +1,131 @@
 package fr.proline.studio.utils;
 
 import java.awt.FontMetrics;
+import java.io.IOException;
+import java.io.Reader;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.swing.text.html.HTML;
+import javax.swing.text.html.HTMLEditorKit;
+import javax.swing.text.html.parser.ParserDelegator;
 
 /**
  * utils for String
+ *
  * @author MB243701
  */
 public class StringUtils {
-    
+
     /**
      * truncates the given text with nbCharac, starting from end
+     *
      * @param text
-     * @param nbCharac 
-     * @return  
+     * @param nbCharac
+     * @return
      */
-    public final static String truncate (String text, int nbCharac) {
+    public final static String truncate(String text, int nbCharac) {
         if (text == null) {
             return null;
         }
-        int textSize = text.length() ;
+        int textSize = text.length();
         if (nbCharac > textSize) {
             return text;
         }
-        return text.substring(textSize-nbCharac);
+        return text.substring(textSize - nbCharac);
     }
-    
+
     /* returns the pixel-lenght of a string */
     public static int lenghtOfString(String s, FontMetrics fm) {
-       if (fm == null || s == null)
+        if (fm == null || s == null) {
             return 0;
-       else 
-           return fm.stringWidth(s);
+        } else {
+            return fm.stringWidth(s);
+        }
     }
-    
+
     public static List<String> splitString(String msg, int lineSize) {
         List<String> res = new ArrayList<>();
-        Pattern p = Pattern.compile("\\b.{1," + (lineSize-1) + "}\\b\\W?");
+        Pattern p = Pattern.compile("\\b.{1," + (lineSize - 1) + "}\\b\\W?");
         Matcher m = p.matcher(msg);
-	while(m.find()) {
-                System.out.println(m.group().trim());   // Debug
-                res.add(m.group());
+        while (m.find()) {
+            System.out.println(m.group().trim());   // Debug
+            res.add(m.group());
         }
         return res;
     }
 
     public static String formatString(String msg, int lineSize) {
-        Pattern p = Pattern.compile(".{1," + (lineSize-1) + "}\\b\\W?");
+        Pattern p = Pattern.compile(".{1," + (lineSize - 1) + "}\\b\\W?");
         Matcher m = p.matcher(msg);
         StringBuilder builder = new StringBuilder();
-        while(m.find()) {
-            if (builder.length() != 0) builder.append("\n");
+        while (m.find()) {
+            if (builder.length() != 0) {
+                builder.append("\n");
+            }
             builder.append(m.group());
         }
         return builder.toString();
     }
-        
+
+    public static Pattern compileRegex(String text) {
+        String escapedText = "^" + escapeRegex(text) + "$";
+        String wildcardsFilter = escapedText.replaceAll("\\*", ".*").replaceAll("\\?", ".");
+        return Pattern.compile(wildcardsFilter, Pattern.CASE_INSENSITIVE);
+    }
+
+    private static String escapeRegex(String s) {
+        if (s == null) {
+            return "";
+        }
+        int len = s.length();
+        if (len == 0) {
+            return "";
+        }
+
+        StringBuilder sb = new StringBuilder(len * 2);
+        for (int i = 0; i < len; i++) {
+            char c = s.charAt(i);
+            if ("[](){}.+$^|#\\".indexOf(c) != -1) {
+                sb.append("\\");
+            }
+            sb.append(c);
+        }
+        return sb.toString();
+    }
+
+    /**
+     * parse a String which has html tag, return a plain test String. <br>
+     * if IOException, return the input string
+     *
+     * @param html
+     * @return
+     */
+    public static String extractTextFromHtml(String html) {
+        try {
+            Reader reader = new StringReader(html);
+            StringBuilder resultText = new StringBuilder();
+
+            ParserDelegator parserDelegator = new ParserDelegator();
+            HTMLEditorKit.ParserCallback parserCallback = new HTMLEditorKit.ParserCallback() {
+                @Override
+                public void handleText(final char[] data, final int pos) {
+                    resultText.append(data);
+                }
+
+                public void handleEndTag(HTML.Tag t, int pos) {
+                    if (t.equals(HTML.Tag.HTML)) {
+                        resultText.append("\n");
+                    }
+                }
+            };
+            parserDelegator.parse(reader, parserCallback, true);
+            return resultText.toString().trim();
+        } catch (IOException ex) {
+            return html;
+        }
+    }
 
 }

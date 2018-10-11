@@ -792,7 +792,10 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
     }
 
     public List<ChangeTypicalRule> getChangeTypicalRules() {
-        return m_changeTypicalPanel.getChangeTypicalRules();
+		if(m_typicalProteinMatchCheckBox.isSelected())
+			return m_changeTypicalPanel.getChangeTypicalRules();
+		 else 
+            return new ArrayList<>();
     }
 
     public String getScoringType() {

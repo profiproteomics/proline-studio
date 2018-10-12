@@ -164,7 +164,7 @@ public class FilterFunction extends AbstractFunction {
         FilterDialog dialog = FilterDialog.getDialog(WindowManager.getDefault().getMainWindow());
         dialog.setImageInfo(m_panel, node.getX()-90, node.getY()-50, node.getXEnd()-node.getX()+180, node.getYEnd()-node.getY()+100);
         dialog.centerToWindow(WindowManager.getDefault().getMainWindow());
-        dialog.setFilers(m_filters);
+        dialog.setFilters(m_filters);
 
 
         m_settingsBeingDone = true;

@@ -70,6 +70,12 @@ public class StringUtils {
         return builder.toString();
     }
 
+    /**
+     * compile a Pattern with regex
+     *
+     * @param text
+     * @return
+     */
     public static Pattern compileRegex(String text) {
         String escapedText = "^" + escapeRegex(text) + "$";
         String wildcardsFilter = escapedText.replaceAll("\\*", ".*").replaceAll("\\?", ".");
@@ -109,12 +115,14 @@ public class StringUtils {
             StringBuilder resultText = new StringBuilder();
 
             ParserDelegator parserDelegator = new ParserDelegator();
-            HTMLEditorKit.ParserCallback parserCallback = new HTMLEditorKit.ParserCallback() {
+            HTMLEditorKit.ParserCallback parserCallback;
+            parserCallback = new HTMLEditorKit.ParserCallback() {
                 @Override
                 public void handleText(final char[] data, final int pos) {
                     resultText.append(data);
                 }
 
+                @Override
                 public void handleEndTag(HTML.Tag t, int pos) {
                     if (t.equals(HTML.Tag.HTML)) {
                         resultText.append("\n");

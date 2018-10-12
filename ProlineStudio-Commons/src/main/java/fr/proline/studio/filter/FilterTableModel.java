@@ -514,4 +514,8 @@ public class FilterTableModel extends DecoratedTableModel implements FilterTable
     public Object getSingleValue(Class c) {
         return m_tableModelSource.getSingleValue(c);
     }
+    
+    public String toString(){
+        return this.getClass().getName() + m_tableModelSource.toString() ;
+    }
 }

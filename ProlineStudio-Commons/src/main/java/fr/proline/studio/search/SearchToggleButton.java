@@ -22,30 +22,31 @@ import org.openide.windows.WindowManager;
 public class SearchToggleButton extends JToggleButton {
 
     private ProgressInterface m_progressInterface = null;
-    
+
     // for search on table
     private JXTable m_table = null;
     private FilterTableModelInterface m_tableModelFilterInterface = null;
-    
+
     // for generic search
     SearchInterface m_searchInterface = null;
     FilterMapInterface m_filterMapInterface = null;
-    
+
     private AdvancedSearchFloatingPanel m_searchPanel = null;
-    
+
     /**
      * Constructor for search on JXTable
      * @param progressInterface
      * @param table
-     * @param tableModelFilterInterface 
+     * @param tableModelFilterInterface
      */
     public SearchToggleButton(ProgressInterface progressInterface, JXTable table, FilterTableModelInterface tableModelFilterInterface) {
         init(progressInterface, table, tableModelFilterInterface);
         initGraphic(new Search());
     }
-    
+
     /**
      * Constructor for generic search
+     *
      * @param applySearchInterface
      * @param progressInterface
      * @param searchInterface
@@ -58,21 +59,21 @@ public class SearchToggleButton extends JToggleButton {
         m_filterMapInterface = filterMapInterface;
 
         initGraphic(applySearchInterface);
-        
+
     }
-    
+
     public final void init(ProgressInterface progressInterface, JXTable table, FilterTableModelInterface tableModelFilterInterface) {
         m_progressInterface = progressInterface;
         m_table = table;
         m_tableModelFilterInterface = tableModelFilterInterface;
 
     }
-    
+
     private void initGraphic(ApplySearchInterface search) {
         
         m_searchPanel = new AdvancedSearchFloatingPanel(search);
         m_searchPanel.setToggleButton(this);
-        
+
         setIcon(IconManager.getIcon(IconManager.IconType.SEARCH));
         setToolTipText("Search");
         setFocusPainted(false);
@@ -95,17 +96,17 @@ public class SearchToggleButton extends JToggleButton {
                         return;
                     }
                 }
-                
+
                 if (isSelected() && (!m_searchPanel.hasFilters())) {
-                    
+
                     // we must clone filters because we can not use the same that can be used for filtering
                     LinkedHashMap<Integer, Filter> filtersMap = (m_filterMapInterface!=null) ? m_filterMapInterface.getFilters() : m_tableModelFilterInterface.getFilters();
                     Filter[] filters = new Filter[filtersMap.size()];
                     int index = 0;
                     for (Map.Entry<Integer, Filter> entry : filtersMap.entrySet()) {
-                        filters[index++] = entry.getValue().cloneFilter();
+                        filters[index++] = entry.getValue().cloneFilter4Search();
                     }
-
+                
                     m_searchPanel.setFilers(filters);
                 }
                 
@@ -118,14 +119,14 @@ public class SearchToggleButton extends JToggleButton {
             }
         });
     }
-    
+
     public AdvancedSearchFloatingPanel getSearchPanel() {
         return m_searchPanel;
     }
-    
+
     
     private class Search implements ApplySearchInterface {
-        
+
 
         @Override
         public void doSearch(Filter f, boolean firstSearch) {

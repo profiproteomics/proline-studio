@@ -25,18 +25,18 @@ public class FilterDialog extends DefaultDialog {
         return m_singletonDialog;
     }
 
-    public FilterDialog(Window parent) {
+    private FilterDialog(Window parent) {
         super(parent, Dialog.ModalityType.APPLICATION_MODAL);
 
         setTitle("Filters");
 
         setDocumentationSuffix("id.2u6wntf");
-
-        setInternalComponent(createFilterPanel());
+        m_filterPanel = new FilterPanel(this);
+        setInternalComponent(m_filterPanel);
 
     }
 
-    public void setFilers(Filter[] filters) {
+    public void setFilters(Filter[] filters) {
         m_filters = filters;
 
         int nb = m_filters.length;
@@ -45,28 +45,13 @@ public class FilterDialog extends DefaultDialog {
             f.setDefined(f.isUsed());
         }
 
-        initPrefilterSelectedPanel();
+        m_filterPanel.setFilters(m_filters);
     }
 
     public Filter[] getFilters() {
         return m_filters;
     }
 
-    private JPanel createFilterPanel() {
-
-        m_filterPanel = new FilterPanel(this);
-
-        return m_filterPanel;
-
-    }
-
-    public void initPrefilterSelectedPanel() {
-
-        m_filterPanel.setFilters(m_filters);
-
-        repack();
-
-    }
 
     @Override
     protected boolean okCalled() {
@@ -75,7 +60,7 @@ public class FilterDialog extends DefaultDialog {
             if (!f.isDefined()) {
                 continue;
             }
-            FilterStatus status = f.checkValues();
+            FilterStatus status = f.checkValues();//check user input valor before register
             if (status != null) {
                 setStatus(true, status.getError());
                 highlight(status.getComponent());
@@ -102,4 +87,5 @@ public class FilterDialog extends DefaultDialog {
 
         return true;
     }
+
 }

@@ -85,7 +85,9 @@ public class FilterPanel extends JPanel {
         m_filters = filters;
 
         initPrefilterSelectedPanel();
+         m_dialog.repack();
     }
+    
 
     public void initPrefilterSelectedPanel() {
         m_filterSelectedPanel.removeAll();
@@ -151,7 +153,6 @@ public class FilterPanel extends JPanel {
             }
 
         }
-        
     }
 
 }

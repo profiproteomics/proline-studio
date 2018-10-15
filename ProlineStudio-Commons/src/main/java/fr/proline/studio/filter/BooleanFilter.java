@@ -25,7 +25,7 @@ public class BooleanFilter extends Filter{
     }
     
     @Override
-    public Filter cloneFilter() {
+    public Filter cloneFilter4Search() {
         BooleanFilter clone = new BooleanFilter(m_variableName, m_convertValueInterface, m_modelColumn);
         clone.m_bValue = m_bValue;
         setValuesForClone(clone);
@@ -81,7 +81,7 @@ public class BooleanFilter extends Filter{
             registerComponent(BOOLEAN_CB, cb);
         }
         p.add(cb, c);
-        c.gridx += 2;
+        c.gridx += 3;
     }
 
     @Override
@@ -99,5 +99,5 @@ public class BooleanFilter extends Filter{
         }
         return true;
     }
-    
+
 }

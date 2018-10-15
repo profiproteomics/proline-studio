@@ -27,7 +27,7 @@ public class DoubleFilter extends Filter {
     }
     
     @Override
-    public Filter cloneFilter() {
+    public Filter cloneFilter4Search() {
         DoubleFilter clone = new DoubleFilter(m_variableName, m_convertValueInterface, m_modelColumn);
         clone.m_min = m_min;
         clone.m_max = m_max;
@@ -187,7 +187,7 @@ public class DoubleFilter extends Filter {
             registerComponent(VALUE_MAX, maxTextField);
         }
         p.add(maxTextField, c);
-
+        c.gridx++;
     }
 
     @Override

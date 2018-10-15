@@ -39,7 +39,7 @@ public class ValueFilter extends Filter {
     }
     
     @Override
-    public Filter cloneFilter() {
+    public Filter cloneFilter4Search() {
         ValueFilter clone = new ValueFilter(m_variableName, m_values, m_displayIcons, m_type, m_convertValueInterface, m_modelColumn);
         clone.m_index = m_index;
         setValuesForClone(clone);
@@ -117,7 +117,7 @@ public class ValueFilter extends Filter {
         }
         p.add(vCombobox, c);
 
-        c.gridx += 2;
+        c.gridx += 3;
 
     }
 

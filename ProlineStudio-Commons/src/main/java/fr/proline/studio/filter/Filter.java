@@ -54,7 +54,7 @@ public abstract class Filter {
      * A copy of the Filter used for search : SearchToggleButton
      * @return 
      */
-    public abstract Filter cloneFilter();
+    public abstract Filter cloneFilter4Search();
 
     public void setValuesForClone(Filter clone) {
         clone.m_used = m_used;
@@ -120,10 +120,17 @@ public abstract class Filter {
         m_used = used;
     }
 
-    
+    /**
+     * will be used by ComboBox in AdvancedSearchFloatingPanel
+     * @return the name of the colomn
+     */
     @Override
     public String toString() {
         return m_variableName;
+    }
+    
+    public String toStringFull() {
+        return "["+this.getClass().getName()+"] "+m_variableName+ " (isDefined: " + m_defined + ") (isUsed: " + m_used + ")";
     }
 
     /**
@@ -154,9 +161,14 @@ public abstract class Filter {
     }
 
     /**
+     * @kx
      * each filtre mananger its self panel component, and put it's panel
      * according to GridBagConstraints c at the control panel p.
-     *
+     * Will be called by FilterPanel and AdvancedSearchFloatingPanel
+     * inside of a Filter, GridBagConstraints c take 7 column, 
+     * the c.wightx = 1 for JLabel and TextField, 
+     * the c.wightx = 0 for operator (JComboBox, "=" ">" etc),
+     * try to respect it.
      * @param p JPanel, contrl mother panel
      * @param c GridBagConstraints, it's layout
      */

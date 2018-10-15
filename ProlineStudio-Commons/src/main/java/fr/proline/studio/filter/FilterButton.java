@@ -9,17 +9,18 @@ import java.util.Map;
 import javax.swing.Icon;
 import javax.swing.JButton;
 import org.openide.windows.WindowManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Button to access to filter dialog from a toolbar
  * @author JM235353
  */
 public abstract class FilterButton extends JButton implements ActionListener {
-    
+     protected static final Logger logger = LoggerFactory.getLogger("ProlineStudio.Commons");
     private FilterTableModelInterface m_tableModelFilterInterface;
     
     public FilterButton(FilterTableModelInterface tableModelFilterInterface) {
-
         setModelFilterInterface(tableModelFilterInterface);
         
         setIcon(IconManager.getIcon(IconManager.IconType.FUNNEL ));
@@ -53,11 +54,11 @@ public abstract class FilterButton extends JButton implements ActionListener {
         Filter[] filters = new Filter[filtersMap.size()];
         int index = 0;
         for (Map.Entry<Integer, Filter> entry : filtersMap.entrySet()) {
-            filters[index++] = entry.getValue();
+           filters[index++] = entry.getValue();
         }
         
         
-        dialog.setFilers(filters);
+        dialog.setFilters(filters);
         dialog.setVisible(true);
 
         if (dialog.getButtonClicked() == FilterDialog.BUTTON_OK) {

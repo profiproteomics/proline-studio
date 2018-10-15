@@ -33,12 +33,12 @@ import javax.swing.JToggleButton;
  * @author JM235353
  */
 public class AdvancedSearchFloatingPanel extends JPanel {
-    
+
     private Filter[] m_filters = null;
-    
+
     private JToggleButton m_srcButton = null;
     private ApplySearchInterface m_search = null;
-    
+
     private JButton m_searchButton;
 
     private JComboBox m_columnComboBox;
@@ -51,16 +51,16 @@ public class AdvancedSearchFloatingPanel extends JPanel {
     public AdvancedSearchFloatingPanel(ApplySearchInterface search, String defaultSearchValue, String defaultTooltip) {
 
         m_search = search;
-        
+
         setBorder(BorderFactory.createLineBorder(Color.darkGray, 1, true));
         setOpaque(true);
         setLayout(new FlowLayout());
-        
+
         JButton closeButton = new JButton(IconManager.getIcon(IconManager.IconType.CROSS_SMALL7));
         closeButton.setMargin(new java.awt.Insets(0, 0, 0, 0));
         closeButton.setFocusPainted(false);
         closeButton.setContentAreaFilled(false);
-        
+
 
         closeButton.addActionListener(new ActionListener() {
 
@@ -75,25 +75,25 @@ public class AdvancedSearchFloatingPanel extends JPanel {
 
         
         m_columnComboBox = new JComboBox();
-        
+
         m_searchButton = new JButton(IconManager.getIcon(IconManager.IconType.SEARCH_ARROW));
         m_searchButton.setMargin(new Insets(1, 1, 1, 1));
         m_searchButton.setFocusPainted(false);
-        
+
         m_searchButton.addActionListener(new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                
+
                 Filter f = (Filter)m_columnComboBox.getSelectedItem();
                 f.setDefined(true);
                 boolean hasChanged = f.registerValues();
                 m_search.doSearch(f, hasChanged);
-                
+
 
             }
         });
-        
+
         add(closeButton);
         add(m_columnComboBox);
         add(m_searchOptionPanel);
@@ -101,44 +101,44 @@ public class AdvancedSearchFloatingPanel extends JPanel {
 
         
         Dimension d = getPreferredSize();
-        setBounds(0,0,(int)d.getWidth(),(int)d.getHeight());
-        
+        setBounds(0, 0, (int) d.getWidth(), (int) d.getHeight());
+
         
         MouseAdapter dragGestureAdapter = new MouseAdapter() {
             int dX, dY;
-            
+
             @Override
             public void mouseDragged(MouseEvent e) {
                 Component panel = e.getComponent();
-                
+
                 int newX = e.getLocationOnScreen().x - dX;
                 int newY = e.getLocationOnScreen().y - dY;
-                
+
                 Component parentComponent = panel.getParent();
-                int  parentX = parentComponent.getX();
-                if (newX<parentX) {
+                int parentX = parentComponent.getX();
+                if (newX < parentX) {
                     newX = parentX;
                 }
                 int parentY = parentComponent.getY();
-                if (newY<parentY) {
+                if (newY < parentY) {
                     newY = parentY;
                 }
                 int parentWidth = parentComponent.getWidth();
-                if (newX+panel.getWidth()>parentWidth-parentX) {
-                    newX = parentWidth-parentX-panel.getWidth();
+                if (newX + panel.getWidth() > parentWidth - parentX) {
+                    newX = parentWidth - parentX - panel.getWidth();
                 }
                 int parentHeight = parentComponent.getHeight();
-                if (newY+panel.getHeight()>parentHeight-parentY) {
-                    newY = parentHeight-parentY-panel.getHeight();
+                if (newY + panel.getHeight() > parentHeight - parentY) {
+                    newY = parentHeight - parentY - panel.getHeight();
                 }
-                
+
                 
                 panel.setLocation(newX, newY);
-                
+
                 dX = e.getLocationOnScreen().x - panel.getX();
                 dY = e.getLocationOnScreen().y - panel.getY();
             }
-            
+
             @Override
             public void mousePressed(MouseEvent e) {
                 JPanel panel = (JPanel) e.getComponent();
@@ -146,27 +146,27 @@ public class AdvancedSearchFloatingPanel extends JPanel {
                 dX = e.getLocationOnScreen().x - panel.getX();
                 dY = e.getLocationOnScreen().y - panel.getY();
             }
-            
+
             @Override
             public void mouseReleased(MouseEvent e) {
                 JPanel panel = (JPanel) e.getComponent();
                 panel.setCursor(null);
             }
         };
-        
+
         
         addMouseMotionListener(dragGestureAdapter);
         addMouseListener(dragGestureAdapter);
-        
+
         addComponentListener(new ComponentAdapter() {
             @Override
             public void componentShown(ComponentEvent e) {
                 List<JTextField> list = new ArrayList<>();
                 getJTextFields(m_searchOptionPanel, list);
-                list.get(0).requestFocusInWindow();
+                list.get(0).requestFocusInWindow();//JTextfield
             }
-            
-        }) ;
+
+        });
         setVisible(false);
 
     }
@@ -176,11 +176,11 @@ public class AdvancedSearchFloatingPanel extends JPanel {
 
         initPrefilterSelectedPanel();
     }
-    
+
     public boolean hasFilters() {
         return (m_filters!=null);
     }
-    
+
     
     public void initPrefilterSelectedPanel() {
         m_searchOptionPanel.removeAll();
@@ -191,9 +191,9 @@ public class AdvancedSearchFloatingPanel extends JPanel {
             final Filter f = m_filters[i];
             m_columnComboBox.addItem(f);
         }
-        
+
         Filter f =(Filter) m_columnComboBox.getSelectedItem();
-        
+
         modifySearchOptionPanel(f, true);
 
         
@@ -203,14 +203,14 @@ public class AdvancedSearchFloatingPanel extends JPanel {
                 Filter f = (Filter) m_columnComboBox.getSelectedItem();
                 f.setDefined(true);
                 modifySearchOptionPanel(f, false);
-                
+
             }
         });
-        
+
     }
-    
+
     private void modifySearchOptionPanel(Filter f, boolean firstTime) {
-        
+
         GridBagConstraints c = new GridBagConstraints();
         c.anchor = GridBagConstraints.NORTHWEST;
         c.fill = GridBagConstraints.BOTH;
@@ -220,10 +220,10 @@ public class AdvancedSearchFloatingPanel extends JPanel {
         m_searchOptionPanel.removeAll();
         c.gridx = 0;
         f.createComponents(m_searchOptionPanel, c);
-        
+
         // add listeners to text field for return key
         addListener(m_searchOptionPanel);
-        
+
         revalidate();
         Dimension d = getPreferredSize();
         if (firstTime) {
@@ -265,7 +265,7 @@ public class AdvancedSearchFloatingPanel extends JPanel {
             });
         }
     }
-    
+
     private void getJTextFields(Container container, List<JTextField> list) {
         for (Component c : container.getComponents()) {
             if (c instanceof JTextField) {
@@ -275,11 +275,11 @@ public class AdvancedSearchFloatingPanel extends JPanel {
             }
         }
     }
-    
+
     public void setToggleButton(JToggleButton srcButton) {
         m_srcButton = srcButton;
     }
-    
+
     public void enableSearch(boolean enable) {
         if (m_srcButton != null) {
             m_searchButton.setEnabled(enable);

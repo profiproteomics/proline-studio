@@ -43,7 +43,7 @@ public class ValueListAssociatedStringFilter extends Filter {
     }
     
     @Override
-    public Filter cloneFilter() {
+    public Filter cloneFilter4Search() {
        ValueListAssociatedStringFilter clone = new ValueListAssociatedStringFilter(m_variableName, m_values, m_convertValueInterface, m_modelColumn, m_extraModelColumn);
        if (m_selected != null) {
            int nb = m_selected.length;
@@ -130,7 +130,7 @@ public class ValueListAssociatedStringFilter extends Filter {
         c.weightx = 1;
         p.add(createInternalPanel(), c);
 
-        c.gridx += 3;
+        c.gridx += 4;
 
 
     }

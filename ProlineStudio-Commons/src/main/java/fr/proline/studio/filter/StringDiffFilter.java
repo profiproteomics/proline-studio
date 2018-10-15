@@ -31,15 +31,9 @@ public class StringDiffFilter extends StringFilter {
         clone.m_optionList[1] = OPTION_NOT;
         //clone.m_optionList[2] = OPTION_IN; search has not multi chose
         //next attributs  have not been created
-        clone.m_searchPattern = null;
-        clone.m_searchPatternList = null;
-        clone.m_filterText = null;
-        clone.m_filterAreaText = null;
-        clone.m_selectItem = OPTION_EQUAL; //return to 0
-        clone.m_cbOp = null;
-        clone.m_field = null;
-        clone.m_area = null;
+        clone.reset();
         setValuesForClone(clone);
+        clone.m_filterText = m_filterText;
         return clone;
     }
 
@@ -52,21 +46,27 @@ public class StringDiffFilter extends StringFilter {
      */
     @Override
     public boolean filter(Object v1, Object v2) {
-        if (m_filterText == null & m_filterAreaText == null) {
-            return true;
-        }
         String value = (String) v1;
         boolean found = false;
         switch (m_selectItem) {
             case OPTION_EQUAL:
+                if (m_filterText.length() == 0) {
+                    return true;
+                }
                 Matcher matcher = m_searchPattern.matcher(value);
                 found = matcher.matches();
                 return found;
             case OPTION_NOT:
+                if (m_filterText.length() == 0) {
+                    return true;
+                }
                 matcher = m_searchPattern.matcher(value);
                 found = matcher.matches();
                 return !found;
             case OPTION_IN:
+                if (m_filterAreaText.length() == 0) {
+                    return true;
+                }
                 found = false;
                 for (Pattern rx : m_searchPatternList) {
                     if (rx.matcher(value).matches()) {

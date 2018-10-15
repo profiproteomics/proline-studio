@@ -26,6 +26,8 @@ import javax.swing.KeyStroke;
 import javax.swing.text.JTextComponent;
 import org.openide.util.Exceptions;
 import org.openide.windows.WindowManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Filter on String values with wildcards : * and ?
@@ -34,6 +36,7 @@ import org.openide.windows.WindowManager;
  */
 public class StringFilter extends Filter {
 
+    protected static final Logger logger = LoggerFactory.getLogger("ProlineStudio.Commons");
     protected static final Integer SEARCH_TEXT = 0;
     protected static final Integer SEARCH_TEXT_AREA = 1;
     protected static final String OPTION_EQUAL = "=";
@@ -58,8 +61,8 @@ public class StringFilter extends Filter {
         m_cbOp = null;
         m_field = null;
         m_area = null;
-        m_filterText = null;
-        m_filterAreaText = null;
+        m_filterText = "";
+        m_filterAreaText = "";
         m_searchPattern = null;
         m_searchPatternList = null;
     }
@@ -76,33 +79,29 @@ public class StringFilter extends Filter {
         clone.m_optionList[0] = OPTION_EQUAL;
         //clone.m_optionList[1] = OPTION_IN; search has not multi chose
         //next attributs  have not been created
-        clone.m_filterText = m_filterText;
-        clone.m_filterAreaText = null;//nothing
-        clone.m_selectItem = OPTION_EQUAL; //return to 0
-        clone.m_cbOp = null;
-        clone.m_field = null;
-        clone.m_area = null;//nothing 
-        clone.m_searchPattern = null;
-        clone.m_searchPatternList = null;//nothing
+        clone.reset();
         setValuesForClone(clone);
-
+        clone.m_filterText = m_filterText;
         return clone;
     }
 
     @Override
     public boolean filter(Object v1, Object v2) {
-        if (m_filterText == null & m_filterAreaText == null) {
-            return true;
-        }
         String value = (String) v1;
         boolean found = false;
         switch (m_selectItem) {
             case OPTION_EQUAL:
+                if (m_filterText.length() == 0) {
+                    return true;
+                }
                 Matcher matcher = m_searchPattern.matcher(value);
                 found = matcher.matches();
                 return found;
 
             case OPTION_IN:
+                if (m_filterAreaText.length() == 0) {
+                    return true;
+                }
                 found = false;
                 for (Pattern rx : m_searchPatternList) {
                     if (rx.matcher(value).matches()) {
@@ -116,11 +115,25 @@ public class StringFilter extends Filter {
 
     @Override
     public FilterStatus checkValues() {
-        if (m_filterText == null) {
-            return null;
-        }
+        String selectItem = m_cbOp.getSelectedItem().toString();
+        String stringF = m_field.getText().trim();
+        String stringA = ((JTextArea) this.m_area.getViewport().getView()).getText();
         try {
-            StringUtils.compileRegex(m_filterText);
+            if (!selectItem.equals(OPTION_IN)) {
+                if (stringF.length() == 0) {
+                    return null;
+                }
+                m_searchPattern = StringUtils.compileRegex(stringF);
+            } else {
+                if (stringA.length() == 0) {
+                    return null;
+                }
+                String delims = "[\n]+";//each line separator 
+                String[] filterAList = stringA.split(delims);
+                for (String s : filterAList) {
+                    StringUtils.compileRegex(s);
+                }
+            }
         } catch (Exception e) {
             return new FilterStatus("Regex Pattern Error", getComponent(SEARCH_TEXT));
         }
@@ -145,17 +158,17 @@ public class StringFilter extends Filter {
                 lastValue = m_filterText;
                 m_filterText = m_field.getText().trim();
                 m_searchPattern = StringUtils.compileRegex(m_filterText);
-                hasChanged = (lastValue == null) || (m_filterText == null) || (lastValue.compareTo(m_filterText) != 0) || (lastSelItem != m_selectItem);
+                hasChanged = (lastValue.compareTo(m_filterText) != 0) || (lastSelItem != m_selectItem);
             } else {
                 lastValue = m_filterAreaText;
-                m_filterAreaText = ((JTextArea) this.m_area.getViewport().getView()).getText();
+                m_filterAreaText = ((JTextArea) this.m_area.getViewport().getView()).getText().trim();
                 String delims = "[\n]+";//each line separator 
                 String[] m_filterStringList = m_filterAreaText.split(delims);
                 m_searchPatternList = new ArrayList<Pattern>();
                 for (String m_filterStringList1 : m_filterStringList) {
                     m_searchPatternList.add(StringUtils.compileRegex(m_filterStringList1));
                 }
-                hasChanged = (lastValue == null) || (m_filterAreaText == null) || (lastValue.compareTo(m_filterAreaText) != 0) || (lastSelItem != m_selectItem);
+                hasChanged = (lastValue.compareTo(m_filterAreaText) != 0) || (lastSelItem != m_selectItem);
             }
         }
 
@@ -245,21 +258,19 @@ public class StringFilter extends Filter {
         }
 
     }
-
-
-
+    
     @Override
     public void reset() {
-        m_filterText = null;
         m_selectItem = OPTION_EQUAL;
-        m_cbOp.setSelectedIndex(0);
-        m_searchPatternList = null;
+        m_cbOp = null;
+        m_filterText = "";
+        m_filterAreaText = "";
         m_field = null;
         m_area = null;
-        m_filterAreaText = null;
+        m_searchPattern = null;
         m_searchPatternList = null;
     }
-    
+
     @Override
     public void clearComponents() {
         if (m_components == null) {
@@ -267,6 +278,7 @@ public class StringFilter extends Filter {
         }
         m_components.clear();
     }
+
     /**
      * create a JTextField, which listen ctrl+V action, convert any html text to
      * plain text
@@ -276,7 +288,6 @@ public class StringFilter extends Filter {
      * @return
      */
     protected JTextField createPasteTextField(String filterText) {
-        //System.out.println("debug################### createPasteTextField in" );
         JTextField vTextField = new JTextField(12);
         vTextField.setToolTipText("<html>Search is based on wildcards:<br>  '*' : can replace all characters<br>  '?' : can replace one character<br><br>Use 'FOO*' to search a string starting with FOO. </html>");
         if (filterText != null) {
@@ -291,7 +302,7 @@ public class StringFilter extends Filter {
         vTextField.getActionMap().put("paste", pasteAction);
         //System.out.println("debug################### createPasteTextField out" );
         return vTextField;
-       
+
     }
 
     protected JTextArea createPasteArea(String filterAreaText) {
@@ -306,7 +317,7 @@ public class StringFilter extends Filter {
         vArea.getActionMap().put("paste", pasteAction);
         return vArea;
     }
-    
+
     protected class PasteAction extends AbstractAction {
 
         JTextComponent textComponent;
@@ -318,7 +329,6 @@ public class StringFilter extends Filter {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            //System.out.println("debug################### createPasteTextField action in" );
             String msg = "";
             try {
                 Clipboard c = Toolkit.getDefaultToolkit().getSystemClipboard();

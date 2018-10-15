@@ -60,7 +60,7 @@ public class FilterDialog extends DefaultDialog {
             if (!f.isDefined()) {
                 continue;
             }
-            FilterStatus status = f.checkValues();
+            FilterStatus status = f.checkValues();//check user input valor before register
             if (status != null) {
                 setStatus(true, status.getError());
                 highlight(status.getComponent());

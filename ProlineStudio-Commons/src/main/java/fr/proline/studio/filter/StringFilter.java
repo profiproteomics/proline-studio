@@ -25,6 +25,7 @@ import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.text.JTextComponent;
 import org.openide.util.Exceptions;
+import org.openide.util.NbBundle;
 import org.openide.windows.WindowManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -289,7 +290,8 @@ public class StringFilter extends Filter {
      */
     protected JTextField createPasteTextField(String filterText) {
         JTextField vTextField = new JTextField(12);
-        vTextField.setToolTipText("<html>Search is based on wildcards:<br>  '*' : can replace all characters<br>  '?' : can replace one character<br><br>Use 'FOO*' to search a string starting with FOO. </html>");
+        String msg = NbBundle.getMessage(this.getClass(),"Filter_String_RegularExpression.tooltip.text");
+        vTextField.setToolTipText(msg);
         if (filterText != null) {
             vTextField.setText(filterText);
         }
@@ -307,7 +309,8 @@ public class StringFilter extends Filter {
 
     protected JTextArea createPasteArea(String filterAreaText) {
         JTextArea vArea = new JTextArea(5, 20);
-        vArea.setToolTipText("<html>Search is based on wildcards:<br>  '*' : can replace all characters<br>  '?' : can replace one character<br><br>Use 'FOO*' to search a string starting with FOO. </html>");
+        String msg = NbBundle.getMessage(this.getClass(),"Filter_String_RegularExpression.tooltip.text");
+        vArea.setToolTipText(msg);
         if (filterAreaText != null) {
             vArea.setText(filterAreaText);
         }

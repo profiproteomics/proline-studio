@@ -128,9 +128,10 @@ public class IntersectArea implements Comparable<IntersectArea> {
             setArray = m_setIntersectedMap.toArray(setArray);
             Arrays.sort(setArray, getSpectificSetComparator());
             for (int i = 0; i < setArray.length; i++) {
-                sb.append("Set").append((setArray[i].getId()+1));
+                //sb.append("Set").append((setArray[i].getId()+1));
+                sb.append(setArray[i].getName());
                 if (i < setArray.length-1) {
-                    sb.append(String.valueOf("\u2229")); // intersection character
+                    sb.append(' ').append(String.valueOf("\u2229")).append(' '); // intersection character
                 }
             }
             sb.append(": ");
@@ -186,7 +187,8 @@ public class IntersectArea implements Comparable<IntersectArea> {
         return m_intersectionArea;
     }
     
-    public ArrayList<IntersectArea> intersect(IntersectArea otherArea) {
+    
+        public ArrayList<IntersectArea> intersect(IntersectArea otherArea) {
         
         int size1 = m_setIntersectionsOriginMap.size();
         int size2 = otherArea.m_setIntersectionsOriginMap.size();
@@ -207,14 +209,14 @@ public class IntersectArea implements Comparable<IntersectArea> {
         
         ArrayList<IntersectArea> resultList = new ArrayList<>();
         
-        // a2: otherArea MINUS this
-        Area a2 = new Area(otherArea.getArea());
-        a2.subtract(m_intersectionArea);
-        
-        // a3: this area MINUS otherArea
-        Area a3 = new Area(m_intersectionArea);
-        a3.subtract(otherArea.getArea());
-        
+//        // a2: otherArea MINUS this
+//        Area a2 = new Area(otherArea.getArea());
+//        a2.subtract(m_intersectionArea);
+//        
+//        // a3: this area MINUS otherArea
+//        Area a3 = new Area(m_intersectionArea);
+//        a3.subtract(otherArea.getArea());
+//        
         
         IntersectArea ia1 = new IntersectArea(a1);
         for (Set s : m_setIntersectedMap) {
@@ -231,32 +233,104 @@ public class IntersectArea implements Comparable<IntersectArea> {
         }
         resultList.add(ia1);
            
-        IntersectArea ia2 = new IntersectArea(a2);
-        for (Set s : otherArea.m_setIntersectedMap) {
-            ia2.addSet(s);
-        }
-        for (Set s : m_setIntersectedMap) {
-            ia2.addOriginSet(s);
-        }
-        for (Set s : otherArea.m_setIntersectedMap) {
-            ia2.addOriginSet(s);
-        }
-        resultList.add(ia2);
-        
-        IntersectArea ia3 = new IntersectArea(a3);
-        for (Set s : m_setIntersectedMap) {
-            ia3.addSet(s);
-        }
-        for (Set s : m_setIntersectedMap) {
-            ia3.addOriginSet(s);
-        }
-        for (Set s : otherArea.m_setIntersectedMap) {
-            ia3.addOriginSet(s);
-        }
-        resultList.add(ia3);
+//        IntersectArea ia2 = new IntersectArea(a2);
+//        for (Set s : otherArea.m_setIntersectedMap) {
+//            ia2.addSet(s);
+//        }
+//        for (Set s : m_setIntersectedMap) {
+//            ia2.addOriginSet(s);
+//        }
+//        for (Set s : otherArea.m_setIntersectedMap) {
+//            ia2.addOriginSet(s);
+//        }
+//        resultList.add(ia2);
+//        
+//        IntersectArea ia3 = new IntersectArea(a3);
+//        for (Set s : m_setIntersectedMap) {
+//            ia3.addSet(s);
+//        }
+//        for (Set s : m_setIntersectedMap) {
+//            ia3.addOriginSet(s);
+//        }
+//        for (Set s : otherArea.m_setIntersectedMap) {
+//            ia3.addOriginSet(s);
+//        }
+//        resultList.add(ia3);
         
         return resultList;
     }
+    
+//    public ArrayList<IntersectArea> intersect(IntersectArea otherArea) {
+//        
+//        int size1 = m_setIntersectionsOriginMap.size();
+//        int size2 = otherArea.m_setIntersectionsOriginMap.size();
+//        if (size1 <= size2) {
+//            if (testIntersectionDone(m_setIntersectionsOriginMap, otherArea.m_setIntersectionsOriginMap)) {
+//                return null;
+//            }
+//        } else if (testIntersectionDone(otherArea.m_setIntersectionsOriginMap, m_setIntersectionsOriginMap)) {
+//            return null;
+//        }
+//
+//        // a1: intersection area : this INTER otherArea
+//        Area a1 = new Area(m_intersectionArea);
+//        a1.intersect(otherArea.getArea());
+//        if (a1.isEmpty()) {
+//            return null;
+//        }
+//        
+//        ArrayList<IntersectArea> resultList = new ArrayList<>();
+//        
+//        // a2: otherArea MINUS this
+//        Area a2 = new Area(otherArea.getArea());
+//        a2.subtract(m_intersectionArea);
+//        
+//        // a3: this area MINUS otherArea
+//        Area a3 = new Area(m_intersectionArea);
+//        a3.subtract(otherArea.getArea());
+//        
+//        
+//        IntersectArea ia1 = new IntersectArea(a1);
+//        for (Set s : m_setIntersectedMap) {
+//            ia1.addSet(s);
+//        }
+//        for (Set s : otherArea.m_setIntersectedMap) {
+//            ia1.addSet(s);
+//        }
+//        for (Set s : m_setIntersectionsOriginMap) {
+//            ia1.addOriginSet(s);
+//        }
+//        for (Set s : otherArea.m_setIntersectionsOriginMap) {
+//            ia1.addOriginSet(s);
+//        }
+//        resultList.add(ia1);
+//           
+//        IntersectArea ia2 = new IntersectArea(a2);
+//        for (Set s : otherArea.m_setIntersectedMap) {
+//            ia2.addSet(s);
+//        }
+//        for (Set s : m_setIntersectedMap) {
+//            ia2.addOriginSet(s);
+//        }
+//        for (Set s : otherArea.m_setIntersectedMap) {
+//            ia2.addOriginSet(s);
+//        }
+//        resultList.add(ia2);
+//        
+//        IntersectArea ia3 = new IntersectArea(a3);
+//        for (Set s : m_setIntersectedMap) {
+//            ia3.addSet(s);
+//        }
+//        for (Set s : m_setIntersectedMap) {
+//            ia3.addOriginSet(s);
+//        }
+//        for (Set s : otherArea.m_setIntersectedMap) {
+//            ia3.addOriginSet(s);
+//        }
+//        resultList.add(ia3);
+//        
+//        return resultList;
+//    }
     
     
     private boolean testIntersectionDone(HashSet<Set>  hashSet1, HashSet<Set>  hashSet2) {

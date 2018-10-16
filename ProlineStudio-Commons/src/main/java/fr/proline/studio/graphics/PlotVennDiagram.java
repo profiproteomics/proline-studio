@@ -31,8 +31,9 @@ import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
  */
 public class PlotVennDiagram extends PlotMultiDataAbstract {
  
+    final double EPSILON = 1e-15;
+    
     private SetList m_setList = null;
-
     
     private boolean firstPaint = true;
     
@@ -291,9 +292,7 @@ public class PlotVennDiagram extends PlotMultiDataAbstract {
 
     @Override
     public void update() {
-        
-        final double EPSILON = 1e-15;
-        
+                
         // Sets Creation
         m_setList = new SetList();
         
@@ -301,20 +300,23 @@ public class PlotVennDiagram extends PlotMultiDataAbstract {
         int nbRows = m_compareDataInterface.getRowCount();
         for (int i=0;i<nbCols;i++) {
             int colId = m_cols[i];
-            
             int nbValues = 0;
+            int nbNonSpecificValues = 0;
+            
             for (int j=0;j<nbRows;j++) {
-                Number value = (Number) m_compareDataInterface.getDataValueAt(j, colId);
-
-                if (value != null) {
-                    double d = value.doubleValue();
-                    if ((! Double.isNaN(d)) && (Math.abs(d)>EPSILON)) {
-                        nbValues++;
-                    }    
+                if (isValue(m_compareDataInterface.getDataValueAt(j, colId)) == 1) {
+                for (int k=0;k<nbCols;k++) {
+                    if ((k!= i) && (isValue(m_compareDataInterface.getDataValueAt(j, m_cols[k])) == 1)) {
+                        nbNonSpecificValues++;
+                        break;
+                    }
                 }
-                
+                nbValues++;
+                }
             }
+            
             Set s = new Set(m_compareDataInterface.getDataColumnIdentifier(colId), nbValues, i);
+            s.setSpecificSize(nbValues - nbNonSpecificValues);
             m_setList.addSet(s);
             
         }
@@ -325,23 +327,7 @@ public class PlotVennDiagram extends PlotMultiDataAbstract {
                 int colId2 = m_cols[j];
                 int nbValues = 0;
                 for (int k = 0; k < nbRows; k++) {
-                    Number value1 = (Number) m_compareDataInterface.getDataValueAt(k, colId1);
-
-                    if (value1 != null) {
-                        double d1 = value1.doubleValue();
-                        if ((!Double.isNaN(d1)) && (Math.abs(d1) > EPSILON)) {
-                            
-                            Number value2 = (Number) m_compareDataInterface.getDataValueAt(k, colId2);
-
-                            if (value2 != null) {
-                                double d2 = value2.doubleValue();
-                                if ((!Double.isNaN(d2)) && (Math.abs(d2) > EPSILON)) {
-                                    nbValues++;
-                                }
-                            }
-
-                        }
-                    }
+                    nbValues +=  isValue(m_compareDataInterface.getDataValueAt(k, colId1)) * isValue(m_compareDataInterface.getDataValueAt(k, colId2));
                 }
                 if (nbValues > 0) {
                     m_setList.addIntersection(m_setList.getSet(i), m_setList.getSet(j), nbValues);
@@ -374,9 +360,8 @@ public class PlotVennDiagram extends PlotMultiDataAbstract {
         
         return m_allIntersections.get(intersectionOfSetsId);
     }
+    
     public void allIntersections() {
-        
-        final double EPSILON = 1e-15;
         
         int nbRows = m_compareDataInterface.getRowCount();
         
@@ -394,19 +379,13 @@ public class PlotVennDiagram extends PlotMultiDataAbstract {
                 boolean valuesFound = true;
                 for (int setId = 0; setId < nb; setId++) {
                     int pow = (int) Math.round(Math.pow(2, setId));
+                    int colId = m_cols[setId];
                     if ((pow & intersectionOfSetsId) > 0) {
-                        int colId = m_cols[setId];
-                        Number value = (Number) m_compareDataInterface.getDataValueAt(i, colId);
-                        if (value != null) {
-                            double d2 = value.doubleValue();
-                            if ((Double.isNaN(d2)) || (Math.abs(d2) <= EPSILON)) {
-                                valuesFound = false;
-                                break;
-                            }
-                        } else {
-                            valuesFound = false;
-                            break;
-                        }
+                        // verify that each columns of this set are containing values
+                        valuesFound = valuesFound && (isValue(m_compareDataInterface.getDataValueAt(i, colId)) == 1);                        
+                    } else {
+                        // verify that other columns are not containing values  
+                        valuesFound = valuesFound && (isValue(m_compareDataInterface.getDataValueAt(i, colId)) == 0);
                     }
                 }
                 if (valuesFound) {
@@ -417,6 +396,32 @@ public class PlotVennDiagram extends PlotMultiDataAbstract {
             
         }
     }
+    
+    private int isValue(Object o) {
+        if (o == null) return 0;
+        
+        if (Number.class.isAssignableFrom(o.getClass())) {
+        Number value = (Number) o;
+        if (value != null) {
+            double d2 = value.doubleValue();
+            if ((Double.isNaN(d2)) || (Math.abs(d2) <= EPSILON)) {
+                return 0;
+            }
+        } else {
+            return 0;
+        }
+        return 1;
+        } else if (String.class.isAssignableFrom(o.getClass())) {
+            String s = (String)o;
+            if ((s == null) || s.isEmpty() || s.trim().isEmpty()) {
+                return 0;
+            } else {
+                return 1;
+            }
+        }
+        return 1;
+    }
+    
     private HashMap<Integer, Integer> m_allIntersections = new HashMap();
     
     @Override

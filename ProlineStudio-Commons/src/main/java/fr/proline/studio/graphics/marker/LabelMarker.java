@@ -23,7 +23,7 @@ public class LabelMarker extends AbstractMarker implements MoveableInterface {
     public static final Font TITLE_FONT = new Font("Arial", Font.BOLD, 16);
     
     private Font m_font = TEXT_FONT;
-    private int m_fontAscent;
+    private FontMetrics m_metrics;
     
     private PointMarker m_anchorMarker;
     private AbstractCoordinates m_labelCoordinates = null;
@@ -34,7 +34,7 @@ public class LabelMarker extends AbstractMarker implements MoveableInterface {
     private final int m_orientationY;
     
     private static final int LINE_DELTA = 18;
-    private final static int COLOR_WIDTH = 5;
+    private final static int COLOR_WIDTH = 15;
     private final static int DELTA_COLOR = 4;
     private final static int DELTA = 3;
 
@@ -196,10 +196,9 @@ public class LabelMarker extends AbstractMarker implements MoveableInterface {
             int deltaX = m_labelCoordinates.getPixelX(m_plotPanel);
             int deltaY = m_labelCoordinates.getPixelY(m_plotPanel);
             
-            FontMetrics metrics = g.getFontMetrics();
-            m_fontAscent = metrics.getAscent();
-            int stringWidth = metrics.stringWidth(m_valueLabel);
-            int stringHeight = metrics.getHeight();
+            m_metrics = g.getFontMetrics();
+            int stringWidth = m_metrics.stringWidth(m_valueLabel);
+            int stringHeight = m_metrics.getHeight();
             stringWidth += DELTA * 2;
             if (hasReferenceColor()) {
                 stringWidth += 2 * DELTA_COLOR + COLOR_WIDTH;
@@ -262,7 +261,8 @@ public class LabelMarker extends AbstractMarker implements MoveableInterface {
         } else {
             delta = DELTA;
         }
-        g.drawString(m_valueLabel, xBox + delta, yBox + m_fontAscent);
+        int spacer = (m_heightBox - (m_metrics.getAscent() + m_metrics.getDescent()))/2;
+        g.drawString(m_valueLabel, xBox + delta, yBox + m_metrics.getAscent() + spacer);
         
         // draw line from anchor to label
         if (m_drawLineToAnchor) {

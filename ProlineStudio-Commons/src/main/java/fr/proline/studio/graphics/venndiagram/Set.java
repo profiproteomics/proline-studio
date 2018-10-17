@@ -25,6 +25,7 @@ public class Set implements Comparable<Set> {
     private int m_id = -1;
 
     private double m_size;
+    private double m_specificSize;
     
     public Set(String name, double size, int id) {
         m_name = name;
@@ -33,6 +34,14 @@ public class Set implements Comparable<Set> {
         m_size = size;
     }
 
+    public void setSpecificSize(double specificSize) {
+        m_specificSize = specificSize;
+    }
+
+    public double getSpecificSize() {
+        return m_specificSize;
+    }
+    
     public int getId() {
         return m_id;
     }
@@ -42,7 +51,7 @@ public class Set implements Comparable<Set> {
     }
     
     public String getDisplayName() {
-        return "Set"+(m_id+1)+": "+m_name+" : "+m_size;
+        return m_name+" : "+m_specificSize + "/"+m_size;
     }
     
     public Circle getCircle() {

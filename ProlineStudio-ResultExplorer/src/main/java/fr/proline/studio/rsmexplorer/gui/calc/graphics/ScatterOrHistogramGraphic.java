@@ -123,7 +123,7 @@ public class ScatterOrHistogramGraphic extends AbstractGraphic {
 
     @Override
     public void userParametersChanged() {
-        // nothing to do
+        m_graphicsModelInterface = null;
     }
 
     @Override

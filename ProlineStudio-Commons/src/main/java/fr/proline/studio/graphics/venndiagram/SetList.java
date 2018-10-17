@@ -230,6 +230,7 @@ public class SetList {
         Collections.sort(m_areas);
 
     }
+    
     private ArrayList<IntersectArea> generateAreasImpl(ArrayList<IntersectArea> resultList, ArrayList<IntersectArea> todoList) {
         
         if (todoList.isEmpty()) {
@@ -238,8 +239,7 @@ public class SetList {
         
         IntersectArea pivotArea = todoList.remove(todoList.size()-1);
         
-        boolean intersectionFound = false;
-        ArrayList<IntersectArea> resultListModified = new ArrayList<>();
+        ArrayList<IntersectArea> resultListModified = new ArrayList<>(resultList);
         for (IntersectArea area : resultList) {
             
             ArrayList<IntersectArea> intersectionList = null;
@@ -247,21 +247,50 @@ public class SetList {
                 intersectionList = pivotArea.intersect(area);
             }
 
-            if (intersectionList !=null) {
-                intersectionFound = true;
+            if (intersectionList != null) {
                 for (IntersectArea a : intersectionList) {
                     resultListModified.add(a);
                 }
-            } else {
-                resultListModified.add(area);
             }
         }
-        if (!intersectionFound) {
-            resultListModified.add(pivotArea);
-        }
+       
+        resultListModified.add(pivotArea);
         
         return generateAreasImpl(resultListModified, todoList);
     }
+    
+//    private ArrayList<IntersectArea> generateAreasImpl(ArrayList<IntersectArea> resultList, ArrayList<IntersectArea> todoList) {
+//        
+//        if (todoList.isEmpty()) {
+//            return resultList;
+//        }
+//        
+//        IntersectArea pivotArea = todoList.remove(todoList.size()-1);
+//        
+//        boolean intersectionFound = false;
+//        ArrayList<IntersectArea> resultListModified = new ArrayList<>();
+//        for (IntersectArea area : resultList) {
+//            
+//            ArrayList<IntersectArea> intersectionList = null;
+//            if (pivotArea.isPotentialIntersect(area)) {
+//                intersectionList = pivotArea.intersect(area);
+//            }
+//
+//            if (intersectionList != null) {
+//                intersectionFound = true;
+//                for (IntersectArea a : intersectionList) {
+//                    resultListModified.add(a);
+//                }
+//            } else {
+//                resultListModified.add(area);
+//            }
+//        }
+//        if (!intersectionFound) {
+//            resultListModified.add(pivotArea);
+//        }
+//        
+//        return generateAreasImpl(resultListModified, todoList);
+//    }
 
     public ArrayList<IntersectArea> getGeneratedAreas() {
         return m_areas;

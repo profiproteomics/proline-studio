@@ -22,6 +22,10 @@ public class Sample implements ExtendedTableModelInterface {
       model = new SampleTableModel(sample, col);
    }
 
+   public Sample(TableModel model) {
+       this.model = model;
+   }
+   
    public TableModel getTableModel() {
       return model;
    }
@@ -109,7 +113,7 @@ public class Sample implements ExtendedTableModelInterface {
 
     @Override
     public Object getColValue(Class c, int col) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+       return null;
     }
 
     @Override

@@ -9,7 +9,7 @@ import javax.swing.table.TableCellRenderer;
  *
  * @author CB205360
  */
-class SampleTableModel extends AbstractTableModel implements DecoratedTableModelInterface {
+public class SampleTableModel extends AbstractTableModel implements DecoratedTableModelInterface {
 
    private List<Object[]> sample;
    private Class[] classes;
@@ -37,6 +37,11 @@ class SampleTableModel extends AbstractTableModel implements DecoratedTableModel
       return sample.get(rowIndex)[columnIndex];
    }
 
+   public void setDataValueAt(Object value, int rowIndex, int columnIndex) {
+       sample.get(rowIndex)[columnIndex] = value;
+   }
+   
+     
    @Override
    public String getColumnName(int column) {
       return columns[column];

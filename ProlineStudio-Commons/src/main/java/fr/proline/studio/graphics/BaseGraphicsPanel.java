@@ -556,7 +556,8 @@ public class BaseGraphicsPanel extends HourglassPanel implements PlotToolbarList
                 int indexCur = 0;
                 for (int i = 0; i < nbColumns; i++) {
                     Class c = m_values.getDataColumnClass(i);
-                    if ((c.equals(Double.class)) || (c.equals(Float.class)) || (c.equals(Long.class)) || (c.equals(Integer.class)) || (c.equals(String.class))) {
+                    
+                    if ((c!= null) && ((c.equals(Double.class)) || (c.equals(Float.class)) || (c.equals(Long.class)) || (c.equals(Integer.class)) || (c.equals(String.class)))) {
                         columnNamesArrayList.add(m_values.getDataColumnIdentifier(i));
                         columnIdsArrayList.add(i);
                         

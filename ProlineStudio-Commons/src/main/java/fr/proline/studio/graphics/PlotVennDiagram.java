@@ -456,7 +456,8 @@ public class PlotVennDiagram extends PlotMultiDataAbstract {
         int sizeColor = m_colorAreaParameterList.size();
         if (size != sizeColor) {
             m_colorAreaParameterList.clear();
-
+            m_colorParameterList.clear();
+            
             ActionListener repaintAction = new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {

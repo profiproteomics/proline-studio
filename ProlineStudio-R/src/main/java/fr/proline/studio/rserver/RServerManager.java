@@ -91,7 +91,7 @@ public class RServerManager {
      * Démarrage de R
      * @throws Exception 
      */
-    public boolean startRProcess() throws Exception {
+    private boolean startRProcess() throws Exception {
 
         if (m_RProcess != null) {
             return true;
@@ -372,7 +372,7 @@ public class RServerManager {
             REXP result = m_connection.parseAndEval("try(" + code + ",silent=TRUE)");
             if (result.inherits("try-error")) {
                 RServerException e = new RServerException(result.asString());
-                LoggerFactory.getLogger("ProlineStudio.Commons").error(getClass().getSimpleName() + " failed", e);
+//                LoggerFactory.getLogger("ProlineStudio.Commons").error(getClass().getSimpleName() + " failed", e);
                 throw e;
             }
         

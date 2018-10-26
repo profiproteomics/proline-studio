@@ -9,14 +9,15 @@ import fr.proline.studio.table.DecoratedTableModel;
 import fr.proline.studio.table.DecoratedTableModelInterface;
 import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
 import fr.proline.studio.table.LazyData;
+import fr.proline.studio.utils.StudioExceptions;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
-import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableModel;
 import org.jdesktop.swingx.JXTable;
 
 /**
@@ -204,7 +205,7 @@ public class FilterTableModel extends DecoratedTableModel implements FilterTable
         m_searchIds = null;
         
         try {
-            int nbData = ((AbstractTableModel) m_tableModelSource).getRowCount();
+            int nbData = ((TableModel) m_tableModelSource).getRowCount();
 
             m_isFiltering = true;
             try {
@@ -234,7 +235,7 @@ public class FilterTableModel extends DecoratedTableModel implements FilterTable
             }
             fireTableDataChanged();
         } catch (Exception e) {
-            //e.printStackTrace();
+            StudioExceptions.logAndNotify("ProlineStudio.Commons", "Error during table filtering", e);
         }
         
         return true;

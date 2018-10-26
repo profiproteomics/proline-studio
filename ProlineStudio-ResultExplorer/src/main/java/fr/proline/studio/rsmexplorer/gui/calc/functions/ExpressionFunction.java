@@ -176,7 +176,7 @@ public class ExpressionFunction extends AbstractFunction {
         m_functions.add(new ExpressionEntity("log2", "log2(", "Stats.log2("));
         m_functions.add(new ExpressionEntity("log10", "log10(", "Stats.log10("));
         m_functions.add(new ExpressionEntity("std", "std(", "Stats.std("));
-        
+
         ArrayList<ExpressionEntity> m_variables = new ArrayList<>(colCount);
         
         for (int i = 0; i < colCount; i++) {
@@ -226,7 +226,8 @@ public class ExpressionFunction extends AbstractFunction {
         m_calcFunctions.add(new ExpressionEntity(">", " > ", ">"));
         m_calcFunctions.add(new ExpressionEntity(">=", " >= ", ">="));
         m_calcFunctions.add(new ExpressionEntity("<=", " <= ", "<="));
-        
+        m_calcFunctions.add(new ExpressionEntity("^", "^", " ** "));
+
         
         m_expressionParameter = new ExpressionParameter(EXPRESSION_KEY, "Expression", m_functions, m_variables, m_calcFunctions, 4);
         m_expressionParameter.forceShowLabel(AbstractParameter.LabelVisibility.NO_VISIBLE);

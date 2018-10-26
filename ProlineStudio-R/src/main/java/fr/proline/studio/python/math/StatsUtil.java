@@ -22,7 +22,7 @@ public class StatsUtil {
     
     public static final String MATRIX_VARIABLE = "matrixProlineValues";
     
-    public static RServerManager startRSever() throws Exception {
+    public static RServerManager startRServer() throws Exception {
         RServerManager serverR = RServerManager.getRServerManager();
         boolean RStarted = serverR.startRProcessWithRetry();
         if (!RStarted) {
@@ -129,7 +129,7 @@ public class StatsUtil {
     }
     
     public static File createImageTempFile() throws Exception {
-        File imageFile = File.createTempFile("graphics", "jpg");
+        File imageFile = File.createTempFile("graphics", ".png");
         imageFile.deleteOnExit();
         return imageFile;
     }

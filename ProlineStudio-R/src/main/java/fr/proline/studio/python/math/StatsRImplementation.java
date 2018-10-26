@@ -140,7 +140,7 @@ public class StatsRImplementation {
     public static Table bbinomial(PyTuple p) throws Exception {
 
         // needs R for this calculation
-        StatsUtil.startRSever();
+        StatsUtil.startRServer();
 
         // PyTuple to Col Array
         PyTuple[] pArray = StatsUtil.colTupleToTuplesArray(p);
@@ -262,7 +262,7 @@ public class StatsRImplementation {
     public static PythonImage boxPlot(PyTuple p, PyTuple labels) throws Exception {
 
         // needs R for this calculation
-        StatsUtil.startRSever();
+        StatsUtil.startRServer();
 
         // PyTuple to Col Array
         PyTuple[] pArray = StatsUtil.colTupleToTuplesArray(p);
@@ -302,7 +302,7 @@ public class StatsRImplementation {
     public static PyObject calibrationPlot(Col pvaluesCol, PyString pi0Method, PyInteger nbins, PyFloat pz) throws Exception {
 
         // needs R for this calculation
-        StatsUtil.startRSever();
+        StatsUtil.startRServer();
 
         // Create a temp file with a matrix containing cols data
         File matrixTempFile = StatsUtil.columnToMatrixTempFile(pvaluesCol);
@@ -348,7 +348,7 @@ public class StatsRImplementation {
     public static PythonImage densityPlot(PyTuple p, PyTuple labels) throws Exception {
 
         // needs R for this calculation
-        StatsUtil.startRSever();
+        StatsUtil.startRServer();
 
         // PyTuple to Col Array
         PyTuple[] pArray = StatsUtil.colTupleToTuplesArray(p);
@@ -388,7 +388,7 @@ public class StatsRImplementation {
     public static PythonImage varianceDistPlot(PyTuple p, PyTuple labels) throws Exception {
 
         // needs R for this calculation
-        StatsUtil.startRSever();
+        StatsUtil.startRServer();
 
         // PyTuple to Col Array
         PyTuple[] pArray = StatsUtil.colTupleToTuplesArray(p);
@@ -428,7 +428,7 @@ public class StatsRImplementation {
     public static Table normalize(PyTuple p, PyTuple labels, PyString normalizeFamily, PyString normalizeOption) throws Exception {
 
         // needs R for this calculation
-        StatsUtil.startRSever();
+        StatsUtil.startRServer();
 
         // PyTuple to Col Array
         PyTuple[] pArray = StatsUtil.colTupleToTuplesArray(p);
@@ -512,7 +512,7 @@ public class StatsRImplementation {
     public static Table mvimputation(PyTuple p, PyString method) throws Exception {
 
         // needs R for this calculation
-        StatsUtil.startRSever();
+        StatsUtil.startRServer();
 
         // PyTuple to Col Array
         PyTuple[] pArray = StatsUtil.colTupleToTuplesArray(p);
@@ -596,7 +596,7 @@ public class StatsRImplementation {
     public static Table diffanalysis(PyTuple p, PyTuple labels, PyString diffAnalysisType) throws Exception {
 
         // needs R for this calculation
-        StatsUtil.startRSever();
+        StatsUtil.startRServer();
 
         // PyTuple to Col Array
         PyTuple[] pArray = StatsUtil.colTupleToTuplesArray(p);

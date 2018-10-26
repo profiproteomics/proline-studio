@@ -175,10 +175,10 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
                 // create the actions
                 m_multiActions = new ArrayList<>(4);  // <--- get in sync
 
-//                AggregateQuantitationsAction aggregateAction = new AggregateQuantitationsAction();
-//                m_multiActions.add(aggregateAction);
-//                
-//                m_multiActions.add(null);  // separator
+                AggregateQuantitationsAction aggregateAction = new AggregateQuantitationsAction();
+                m_multiActions.add(aggregateAction);
+                
+                m_multiActions.add(null);  // separator
                 
                 ExportDatasetJMSAction exportDatasetAction = new ExportDatasetJMSAction(AbstractTree.TreeType.TREE_QUANTITATION, true);
                 m_multiActions.add(exportDatasetAction);
@@ -802,7 +802,7 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
         m_model.nodeStructureChanged(parentNode);
 
         if (parentNode instanceof DataSetNode && ((DataSetNode) parentNode).isQuantXIC()) {
-            XICDesignTree.displayExperimentalDesign(((DataSetNode) parentNode).getDataset(), parentNode, this, false, true, false);
+            XICDesignTree.displayExperimentalDesign(((DataSetNode) parentNode).getDataset(), parentNode, this, false, true);
         }
 
     }
@@ -849,7 +849,7 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
                         public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
                             ((DataSetData) datasetNode.getData()).setDataset(ds);
                             if (datasetNode instanceof DataSetNode && datasetNode.isQuantXIC()) {
-                                XICDesignTree.displayExperimentalDesign(datasetNode.getDataset(), datasetNode, tree, false, true, false);
+                                XICDesignTree.displayExperimentalDesign(datasetNode.getDataset(), datasetNode, tree, false, true);
                             }
                             datasetNode.setIsChanging(false);
                             treeModel.nodeChanged(datasetNode);

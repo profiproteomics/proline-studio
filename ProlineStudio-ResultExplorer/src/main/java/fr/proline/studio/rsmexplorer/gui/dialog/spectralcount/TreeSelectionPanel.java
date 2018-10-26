@@ -3,11 +3,10 @@ package fr.proline.studio.rsmexplorer.gui.dialog.spectralcount;
 
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.uds.dto.DDataset;
+import fr.proline.studio.gui.WizardPanel;
 import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
-import fr.proline.studio.utils.IconManager;
-import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.util.ArrayList;
@@ -22,11 +21,6 @@ public class TreeSelectionPanel extends JPanel {
     
    
     private IdentificationTree m_tree = null;
-    private String m_wizardLabel = "";
-    private String m_wizardHelp = null;
-    /*private ArrayList<DDataset> m_selectedDatasetList = null;
-    private ArrayList<RSMDataSetNode> m_selectedRSMDSNodeList = null;*/
-
     private static TreeSelectionPanel m_treeSelectionPanel = null;
     
     public static TreeSelectionPanel getTreeSelectionPanel() {
@@ -39,8 +33,6 @@ public class TreeSelectionPanel extends JPanel {
     }
     
     private TreeSelectionPanel(IdentificationTree tree, String wizardLabel, String wizardHelp) {
-        m_wizardLabel = wizardLabel;
-        m_wizardHelp = wizardHelp;
         m_tree = tree;
 
         setLayout(new GridBagLayout());
@@ -52,7 +44,7 @@ public class TreeSelectionPanel extends JPanel {
         c.gridx = 0;
         c.gridy = 0;
         c.weightx = 1;
-        add(createWizardPanel(), c);
+        add(new WizardPanel(wizardLabel, wizardHelp), c);
         
         c.gridy++;
         c.weighty = 1;
@@ -67,35 +59,6 @@ public class TreeSelectionPanel extends JPanel {
         return scrollPane;
     }
     
-    private JPanel createWizardPanel() {
-        JPanel wizardPanel = new JPanel();
-        wizardPanel.setLayout(new GridBagLayout());
-        GridBagConstraints c = new GridBagConstraints();
-        c.anchor = GridBagConstraints.NORTHWEST;
-        c.fill = GridBagConstraints.BOTH;
-        c.insets = new java.awt.Insets(5, 5, 5, 5);
-
-        JLabel wizardLabel = new JLabel(m_wizardLabel);
-        wizardLabel.setIcon(IconManager.getIcon(IconManager.IconType.WAND_HAT));
-        
-        c.gridx = 0;
-        c.gridy = 0;
-        c.weightx = 1;
-        c.weighty = 1;
-        wizardPanel.add(wizardLabel, c);
-        
-        if(m_wizardHelp != null && !m_wizardHelp.isEmpty()){
-            JTextArea helpArea = new JTextArea(m_wizardHelp);        
-            helpArea.setForeground(Color.LIGHT_GRAY);
-            helpArea.setBackground(Color.WHITE);
-            helpArea.setLineWrap(true);
-            helpArea.setWrapStyleWord(true);
-            c.gridy++;
-            wizardPanel.add(helpArea, c);
-        }
-        
-        return wizardPanel;
-    }
     
     public void setSelection(ArrayList<ResultSummary> rsmArray) {
         m_tree.setSelection(rsmArray);

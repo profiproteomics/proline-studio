@@ -17,7 +17,7 @@ import java.util.HashMap;
  */
 public class XICSelectionTransferable implements Transferable, Serializable {
     
-    public final static DataFlavor RSMNodeList_FLAVOR = new DataFlavor(XICSelectionTree.class, "Drag and drop Identification Summary");
+    public final static DataFlavor RSMNodeList_FLAVOR = new DataFlavor(IdentificationSelectionTree.class, "Drag and drop Identification Summary");
 
     
     private Integer m_transferKey = null;
@@ -37,16 +37,9 @@ public class XICSelectionTransferable implements Transferable, Serializable {
         
         Integer transferKey = Integer.valueOf(m_transferIndex);
         m_transferIndex++;
-        
         transferMap.put(transferKey, data);
-        
-        
         return transferKey;
-    
     }
-
- 
-    
     
     public static TransferData getData(Integer transferKey) {
         return transferMap.get(transferKey);
@@ -77,9 +70,7 @@ public class XICSelectionTransferable implements Transferable, Serializable {
     
     public Integer getTransferKey() {
         return m_transferKey;
-    }
-
-     
+    }     
     
     public static class TransferData {
 

@@ -9,7 +9,7 @@ import fr.proline.mzscope.utils.IPopupMenuDelegate;
 import fr.proline.studio.mzscope.MzdbInfo;
 import fr.proline.studio.pattern.MzScopeWindowBoxManager;
 import fr.proline.studio.rsmexplorer.gui.MzScope;
-import fr.proline.studio.rsmexplorer.gui.TreeStateUtil;
+import fr.proline.studio.rsmexplorer.gui.TreeUtils;
 import fr.proline.studio.utils.IconManager;
 import java.awt.Color;
 import java.awt.Component;
@@ -154,12 +154,12 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
 
             @Override
             public void treeExpanded(TreeExpansionEvent tee) {
-                TreeStateUtil.saveExpansionState(m_tree, TreeStateUtil.TreeType.WORKING_SET, null);
+                TreeUtils.saveExpansionState(m_tree, TreeUtils.TreeType.WORKING_SET, null);
             }
 
             @Override
             public void treeCollapsed(TreeExpansionEvent tee) {
-                TreeStateUtil.saveExpansionState(m_tree, TreeStateUtil.TreeType.WORKING_SET, null);
+                TreeUtils.saveExpansionState(m_tree, TreeUtils.TreeType.WORKING_SET, null);
             }
 
         });
@@ -480,7 +480,7 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
     }
 
     public void resetTreeState() {
-        TreeStateUtil.setExpansionState(TreeStateUtil.loadExpansionState(TreeStateUtil.TreeType.WORKING_SET, null), m_tree, (DefaultMutableTreeNode) m_tree.getModel().getRoot(), TreeStateUtil.TreeType.WORKING_SET, null);
+        TreeUtils.setExpansionState(TreeUtils.loadExpansionState(TreeUtils.TreeType.WORKING_SET, null), m_tree, (DefaultMutableTreeNode) m_tree.getModel().getRoot(), TreeUtils.TreeType.WORKING_SET, null);
     }
 
     @Override

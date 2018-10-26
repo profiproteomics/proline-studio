@@ -158,7 +158,7 @@ public class ExperimentalDesignPanel extends HourglassPanel implements DataBoxPa
     }
     
     private void updateData(){
-        XICDesignTree.displayExperimentalDesign(m_dataset, (AbstractNode) m_expDesignTree.getModel().getRoot(), m_expDesignTree, true, true, false);
+        XICDesignTree.displayExperimentalDesign(m_dataset, (AbstractNode) m_expDesignTree.getModel().getRoot(), m_expDesignTree, true, true);
         
         // expand all
         for (int i = 0; i < m_expDesignTree.getRowCount(); i++) {

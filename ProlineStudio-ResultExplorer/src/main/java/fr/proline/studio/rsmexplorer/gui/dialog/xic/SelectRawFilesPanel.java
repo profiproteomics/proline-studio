@@ -4,10 +4,11 @@ import fr.proline.core.orm.uds.RawFile;
 import fr.proline.studio.dam.data.RunInfoData;
 import fr.proline.studio.dpm.serverfilesystem.ServerFileSystemView;
 import fr.proline.studio.gui.DefaultDialog;
+import fr.proline.studio.gui.WizardPanel;
 import fr.proline.studio.rsmexplorer.gui.TreeFileChooserPanel;
 import fr.proline.studio.rsmexplorer.gui.TreeFileChooserTableModelInterface;
 import fr.proline.studio.rsmexplorer.gui.TreeFileChooserTransferHandler;
-import fr.proline.studio.rsmexplorer.gui.TreeStateUtil;
+import fr.proline.studio.rsmexplorer.gui.TreeUtils;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
 import fr.proline.studio.rsmexplorer.tree.xic.XICBiologicalGroupNode;
@@ -94,7 +95,7 @@ public class SelectRawFilesPanel extends JPanel implements XICRunNodeInitListene
 
         m_transferHandler = new TreeFileChooserTransferHandler();
 
-        JPanel wizardPanel = createWizardPanel();
+        JPanel wizardPanel = new WizardPanel("<html><b>Step 2:</b> Drag and Drop File Path.</html>");
         JPanel mainPanel = createMainPanel();
 
         setLayout(new GridBagLayout());
@@ -182,25 +183,6 @@ public class SelectRawFilesPanel extends JPanel implements XICRunNodeInitListene
         return mainPanel;
     }
 
-    private JPanel createWizardPanel() {
-        JPanel wizardPanel = new JPanel();
-        wizardPanel.setLayout(new GridBagLayout());
-        GridBagConstraints c = new GridBagConstraints();
-        c.anchor = GridBagConstraints.NORTHWEST;
-        c.fill = GridBagConstraints.BOTH;
-        c.insets = new java.awt.Insets(5, 5, 5, 5);
-
-        JLabel wizardLabel = new JLabel("<html><b>Step 2:</b> Drag and Drop File Path.</html>");
-        wizardLabel.setIcon(IconManager.getIcon(IconManager.IconType.WAND_HAT));
-
-        c.gridx = 0;
-        c.gridy = 0;
-        c.weightx = 1;
-        c.weighty = 1;
-        wizardPanel.add(wizardLabel, c);
-
-        return wizardPanel;
-    }
 
     private JPanel createDesignTablePanel() {
         JPanel panel = new JPanel();
@@ -224,7 +206,7 @@ public class SelectRawFilesPanel extends JPanel implements XICRunNodeInitListene
         tableScrollPane.getViewport().setBackground(Color.white);
 
         m_table = new FlatDesignTable();
-        m_model = new FlatDesignTableModel(m_designTree);
+        m_model = new FlatDesignTableModel();
         m_model.setXICDropZone(m_dropZone);
         m_table.setModel(m_model);
         m_table.getColumnModel().getColumn(FlatDesignTableModel.COLTYPE_ASSOCIATION_SOURCE).setCellRenderer(new LinkAssociationRenderer());
@@ -285,7 +267,7 @@ public class SelectRawFilesPanel extends JPanel implements XICRunNodeInitListene
 
         TreeFileChooserPanel tree = new TreeFileChooserPanel(ServerFileSystemView.getServerFileSystemView(), m_transferHandler);
         tree.initTree();
-        tree.restoreTree(TreeStateUtil.TreeType.XIC);
+        tree.restoreTree(TreeUtils.TreeType.XIC);
         JScrollPane treeScrollPane = new JScrollPane();
         treeScrollPane.setViewportView(tree);
 
@@ -412,10 +394,7 @@ public class SelectRawFilesPanel extends JPanel implements XICRunNodeInitListene
 
         private final HashMap<Integer, HashSet<String>> m_potentialFileNameForMissings;
 
-        private XICDesignTree m_tree;
-
-        public FlatDesignTableModel(XICDesignTree tree) {
-            m_tree = tree;
+        public FlatDesignTableModel() {
             m_potentialFileNameForMissings = new HashMap<>();
         }
 
@@ -620,28 +599,22 @@ public class SelectRawFilesPanel extends JPanel implements XICRunNodeInitListene
             for (int i = 0; i < numberOfRows; i++) {
 
                 NodeModelRow nodeModelRow = m_dataList.get(i);
-
                 XICRunNode currentXicNode = nodeModelRow.m_run;
-
                 if (currentXicNode != null) {
 
                     RunInfoData info = (RunInfoData) currentXicNode.getData();
 
                     if (info.getStatus() == RunInfoData.Status.MISSING) {
                         HashMap<String, RawFile> rawFiles = info.getPotentialRawFiles();
-
                         HashSet<String> set = new HashSet<>();
 
                         if (info.hasPotentialRawFiles()) {
-
                             for (String key : rawFiles.keySet()) {
                                 set.add(HelpUtils.getFileName(key.toLowerCase(), SUFFIX));
                             }
-
                         } else if(info.getPeakListPath()!=null){
                             set.add(HelpUtils.getFileName(info.getPeakListPath().toLowerCase(), SUFFIX));
-                        }
-                        
+                        }  
                         m_potentialFileNameForMissings.put(i, set);
                     } 
 

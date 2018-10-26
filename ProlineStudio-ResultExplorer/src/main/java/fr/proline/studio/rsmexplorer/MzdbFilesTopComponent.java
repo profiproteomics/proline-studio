@@ -3,7 +3,7 @@ package fr.proline.studio.rsmexplorer;
 import fr.proline.studio.dpm.ServerConnectionManager;
 import fr.proline.studio.msfiles.MsFilesExplorer;
 import fr.proline.studio.msfiles.WorkingSetView;
-import fr.proline.studio.rsmexplorer.gui.TreeStateUtil;
+import fr.proline.studio.rsmexplorer.gui.TreeUtils;
 import java.awt.BorderLayout;
 import javax.swing.JTabbedPane;
 
@@ -58,7 +58,7 @@ public final class MzdbFilesTopComponent extends TopComponent {
 
         if (!ServerConnectionManager.getServerConnectionManager().isNotConnected()) {
                 m_explorer.getTreeFileChooserPanel().initTree();
-                m_explorer.getTreeFileChooserPanel().restoreTree(TreeStateUtil.TreeType.SERVER);
+                m_explorer.getTreeFileChooserPanel().restoreTree(TreeUtils.TreeType.SERVER);
         }
 
     }

@@ -16,6 +16,7 @@ import javax.swing.event.TreeExpansionListener;
 import javax.swing.event.TreeModelEvent;
 import javax.swing.event.TreeModelListener;
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import org.openide.util.NbPreferences;
 
@@ -23,20 +24,20 @@ import org.openide.util.NbPreferences;
  *
  * @author AK249877
  */
-public class TreeStateUtil {
+public class TreeUtils {
 
     public enum TreeType {
 
         SERVER, LOCAL, XIC, WORKING_SET
     }
-    
+
     public static Preferences m_preferences = NbPreferences.root();
 
     public static void saveExpansionState(JTree tree, TreeType type, String rootSuffix) {
 
         StringBuilder builder = new StringBuilder();
 
-        HashSet<String> set = TreeStateUtil.getExpansionState(tree);
+        HashSet<String> set = TreeUtils.getExpansionState(tree);
 
         Iterator iter = set.iterator();
         while (iter.hasNext()) {
@@ -50,7 +51,7 @@ public class TreeStateUtil {
             m_preferences.put("TreeStateUtil.Local_tree" + "." + rootSuffix, builder.toString());
         } else if (type == TreeType.XIC) {
             m_preferences.put("TreeStateUtil.XIC_tree", builder.toString());
-        } else if(type == TreeType.WORKING_SET) {
+        } else if (type == TreeType.WORKING_SET) {
             m_preferences.put("TreeStateUtil.Working_Set_tree", builder.toString());
         }
 
@@ -67,7 +68,7 @@ public class TreeStateUtil {
             s = m_preferences.get("TreeStateUtil.Local_tree" + "." + rootSuffix, null);
         } else if (type == TreeType.XIC) {
             s = m_preferences.get("TreeStateUtil.XIC_tree", null);
-        }else if(type == TreeType.WORKING_SET) {
+        } else if (type == TreeType.WORKING_SET) {
             s = m_preferences.get("TreeStateUtil.Working_Set_tree", null);
         } else {
             s = null;
@@ -160,4 +161,28 @@ public class TreeStateUtil {
 
     }
 
+    public static void expandTree(JTree tree, boolean expand) {
+        TreeNode root = (TreeNode) tree.getModel().getRoot();
+        expandAll(tree, new TreePath(root), expand);
+    }
+
+    public static void expandAll(JTree tree, TreePath path, boolean expand) {
+        TreeNode node = (TreeNode) path.getLastPathComponent();
+
+        if (node.getChildCount() >= 0) {
+            Enumeration enumeration = node.children();
+            while (enumeration.hasMoreElements()) {
+                TreeNode n = (TreeNode) enumeration.nextElement();
+                TreePath p = path.pathByAddingChild(n);
+
+                expandAll(tree, p, expand);
+            }
+        }
+
+        if (expand) {
+            tree.expandPath(path);
+        } else {
+            tree.collapsePath(path);
+        }
+    }
 }

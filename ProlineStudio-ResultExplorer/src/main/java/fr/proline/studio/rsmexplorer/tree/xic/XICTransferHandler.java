@@ -9,7 +9,6 @@ import fr.proline.studio.parameter.ParameterList;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
-import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -17,7 +16,6 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import javax.swing.JCheckBox;
-import javax.swing.JComponent;
 import javax.swing.JTree;
 import javax.swing.TransferHandler;
 import javax.swing.tree.DefaultTreeModel;
@@ -27,22 +25,21 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Management of the drag and drop from the XICSelectionTree to the XIC
- * XICDesignTree
+ * Management of the drag and drop from the IdentificationSelectionTree to the XIC
+ XICDesignTree
  *
  * @author JM235353
  */
-public class XICTransferHandler extends TransferHandler {
+public class XICTransferHandler extends AbstractTreeTransferHandler {
 
     private Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
-    private boolean m_isSelectionTree;
     private ParameterList m_parameterList;
     private BooleanParameter m_parameter;
     private static final String GENERAL_APPLICATION_SETTINGS = "General Application Settings";
     private AbstractTree m_tree;
 
     public XICTransferHandler(boolean isSelectionTree, AbstractTree tree) {
-        m_isSelectionTree = isSelectionTree;
+        super(isSelectionTree);
         m_tree = tree;
         m_parameterList = new ParameterList(GENERAL_APPLICATION_SETTINGS);
         JCheckBox checkBox = new JCheckBox("Use dataset type to create Xic Design by DnD");
@@ -52,117 +49,9 @@ public class XICTransferHandler extends TransferHandler {
     }
 
     @Override
-    public int getSourceActions(JComponent c) {
-        return TransferHandler.MOVE;
-    }
-
-    @Override
-    protected Transferable createTransferable(JComponent c) {
-
-        if (m_isSelectionTree) {
-
-            XICSelectionTree tree = (XICSelectionTree) c;
-
-            AbstractNode[] selectedNodes = tree.getSelectedNodes();
-            ArrayList<DataSetNode> keptNodes = new ArrayList<>();
-
-            retrieveLeaves(keptNodes, selectedNodes);
-
-            if (keptNodes.isEmpty()) {
-                return null;
-            }
-
-            XICSelectionTransferable.TransferData data = new XICSelectionTransferable.TransferData();
-            data.setDatasetList(keptNodes);
-            Integer transferKey = XICSelectionTransferable.register(data);
-
-            return new XICSelectionTransferable(transferKey);
-
-        } else {
-
-            XICDesignTree tree = (XICDesignTree) c;
-
-            AbstractNode[] selectedNodes = tree.getSelectedNodes();
-
-            ArrayList<AbstractNode> keptNodes = new ArrayList<>();
-
-            // only the nodes of the same type can be transferred
-            AbstractNode.NodeTypes commonType = null;
-            int nbSelectedNode = selectedNodes.length;
-            for (int i = 0; i < nbSelectedNode; i++) {
-                AbstractNode node = selectedNodes[i];
-
-                AbstractNode.NodeTypes type = node.getType();
-
-                if ((type != AbstractNode.NodeTypes.BIOLOGICAL_GROUP) && (type != AbstractNode.NodeTypes.BIOLOGICAL_SAMPLE_ANALYSIS) && (type != AbstractNode.NodeTypes.BIOLOGICAL_SAMPLE)) {
-                    return null;
-                }
-                if (commonType != null) {
-                    if (commonType != type) {
-                        return null;
-                    }
-                } else {
-                    commonType = type;
-                }
-
-                keptNodes.add(node);
-            }
-
-            XICSelectionTransferable.TransferData data = new XICSelectionTransferable.TransferData();
-            data.setDesignList(keptNodes);
-            Integer transferKey = XICSelectionTransferable.register(data);
-
-            return new XICSelectionTransferable(transferKey);
-
-        }
-
-    }
-
-    private void retrieveLeaves(ArrayList<DataSetNode> keptNodes, AbstractNode[] selectedNodes) {
-        int nbSelectedNode = selectedNodes.length;
-        for (int i = 0; i < nbSelectedNode; i++) {
-            AbstractNode node = selectedNodes[i];
-            retrieveLeaves(keptNodes, node);
-        }
-    }
-
-    private void retrieveLeaves(ArrayList<DataSetNode> keptNodes, AbstractNode node) {
-        if (node.isChanging()) {
-            return;
-        }
-        AbstractNode.NodeTypes type = node.getType();
-        if (type != AbstractNode.NodeTypes.DATA_SET) {
-            return;
-        }
-
-        DataSetNode datasetNode = (DataSetNode) node;
-
-        if (node.isLeaf()) {
-            if (!datasetNode.hasResultSummary()) {
-                return;
-            }
-            keptNodes.add(datasetNode);
-        } else {
-            int nbChildren = node.getChildCount();
-            for (int i = 0; i < nbChildren; i++) {
-                retrieveLeaves(keptNodes, (AbstractNode) node.getChildAt(i));
-            }
-        }
-    }
-
-    @Override
-    protected void exportDone(JComponent source, Transferable data, int action) {
-
-        // clean all transferred data
-        if (m_isSelectionTree) {
-            XICSelectionTransferable.clearRegisteredData();
-        }
-    }
-
-    @Override
     public boolean canImport(TransferHandler.TransferSupport support) {
 
-        if (!m_isSelectionTree) {
+        if (!m_isIdentificationSelectionTree) {
 
             support.setShowDropLocation(true);
 

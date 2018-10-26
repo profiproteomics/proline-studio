@@ -189,13 +189,13 @@ public class XICDesignTree extends AbstractTree {
      * @param expandPath :specify if tree should be expanded or not
      * @param includeRunNodes : Add runNode to Experimental Design Tree. If not, root Node are created but only added to XICBiologicalSampleAnalysisNode ( addXicRunNode method)
      */
-    public static void displayExperimentalDesign(DDataset dataset, AbstractNode rootNode, AbstractTree tree, boolean expandPath, boolean includeRunNodes, boolean anonymizeSplAnalysis) {
+    public static void displayExperimentalDesign(DDataset dataset, AbstractNode rootNode, AbstractTree tree, boolean expandPath, boolean includeRunNodes) {
         if (dataset == null) {
             return;
         }
         RSMTreeModel treeModel = (RSMTreeModel) tree.getModel();
         if (rootNode.getChildCount() > 0) {
-            rootNode.remove(0); // remove the first child which correspond to the hour glass
+            rootNode.removeAllChildren(); // remove the first child which correspond to the hour glass
             treeModel.nodeStructureChanged(rootNode);
         }
 
@@ -238,9 +238,9 @@ public class XICDesignTree extends AbstractTree {
                     if (qCh != null) {
                         String name = qCh.getResultFileName();
                         DataSetData dsData = new DataSetData(name, Dataset.DatasetType.IDENTIFICATION, Aggregation.ChildNature.SAMPLE_ANALYSIS);
-                        if (!anonymizeSplAnalysis && qCh.getIdentRs() != null) {
+                        if (qCh.getIdentRs() != null) {
                             // fake dataset
-                            DDataset dds = new DDataset(qCh.getIdentDatasetId(), dataset.getProject(), name, Dataset.DatasetType.IDENTIFICATION, 0, qCh.getIdentRs().getId(), qCh.getIdentResultSummaryId(), 1);
+                            DDataset dds = new DDataset(qCh.getIdentDatasetId(), dataset.getProject(), name, Dataset.DatasetType.IDENTIFICATION, 0, qCh.getIdentRs().getId(), qCh.getIdentResultSummaryId(), qCh.getNumber());
                             dds.setResultSet(qCh.getIdentRs());
                             dsData.setDataset(dds);
                         }
@@ -249,7 +249,7 @@ public class XICDesignTree extends AbstractTree {
                             sampleAnalysisNode.setQuantChannelName(qCh.getName());
                         }
                               
-                        if (!anonymizeSplAnalysis && qCh.getRun() != null) {
+                        if (qCh.getRun() != null) {
                             Run run = qCh.getRun();
                             RawFile rawFile = run.getRawFile();
                             RunInfoData runInfoData = new RunInfoData();

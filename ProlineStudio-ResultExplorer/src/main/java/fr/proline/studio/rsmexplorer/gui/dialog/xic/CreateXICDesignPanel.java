@@ -1,7 +1,8 @@
 package fr.proline.studio.rsmexplorer.gui.dialog.xic;
 
+import fr.proline.studio.gui.WizardPanel;
 import fr.proline.studio.rsmexplorer.tree.xic.XICDesignTree;
-import fr.proline.studio.rsmexplorer.tree.xic.XICSelectionTree;
+import fr.proline.studio.rsmexplorer.tree.xic.IdentificationSelectionTree;
 import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.xic.XICReferenceRSMNode;
@@ -53,7 +54,7 @@ public class CreateXICDesignPanel extends JPanel {
         m_selectionTree = selectionTree;
         m_designTree = new XICDesignTree(m_rootNode, true);
         
-        JPanel wizardPanel = createWizardPanel();
+        JPanel wizardPanel = new WizardPanel("<html><b>Step 1:</b> Drag and Drop Identification Summaries to create your XIC Design.</html>");
         JPanel mainPanel = createMainPanel();
 
         setLayout(new BorderLayout());
@@ -111,26 +112,6 @@ public class CreateXICDesignPanel extends JPanel {
         return mainPanel;
     }
 
-    private JPanel createWizardPanel() {
-        JPanel wizardPanel = new JPanel();
-        wizardPanel.setLayout(new GridBagLayout());
-        GridBagConstraints c = new GridBagConstraints();
-        c.anchor = GridBagConstraints.NORTHWEST;
-        c.fill = GridBagConstraints.BOTH;
-        c.insets = new java.awt.Insets(5, 5, 5, 5);
-
-        JLabel wizardLabel = new JLabel("<html><b>Step 1:</b> Drag and Drop Identification Summaries to create your XIC Design.</html>");
-        wizardLabel.setIcon(IconManager.getIcon(IconManager.IconType.WAND_HAT));
-
-        c.gridx = 0;
-        c.gridy = 0;
-        c.weightx = 1;
-        c.weighty = 1;
-        wizardPanel.add(wizardLabel, c);
-
-        return wizardPanel;
-    }
-
     private JPanel createDesignTreePanel() {
         JPanel designTreePanel = new JPanel();
 
@@ -182,7 +163,7 @@ public class CreateXICDesignPanel extends JPanel {
                 rootSelectionNode = m_selectionTree.copyRootNodeForSelection();
             }
 
-            XICSelectionTree tree = new XICSelectionTree(rootSelectionNode, true);
+            IdentificationSelectionTree tree = new IdentificationSelectionTree(rootSelectionNode, true);
             JScrollPane treeScrollPane = new JScrollPane();
             treeScrollPane.setViewportView(tree);
 

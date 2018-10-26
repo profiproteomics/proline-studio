@@ -78,6 +78,10 @@ public class DataSetData extends AbstractData {
         m_temporaryName = name;
     }
 
+    public String getTemporaryName() {
+        return m_temporaryName;
+    }
+
     @Override
     public String toString() {
         return getName();

@@ -705,7 +705,7 @@ public class CreateXICDialog extends DefaultDialog {
      */
     public void copyClonedDesignTree(DDataset xicDataset2Clone) {
         AbstractNode rootNode = (AbstractNode) m_designTree.getModel().getRoot();
-        XICDesignTree.displayExperimentalDesign(xicDataset2Clone, rootNode, m_designTree, false, false, false);
+        XICDesignTree.displayExperimentalDesign(xicDataset2Clone, rootNode, m_designTree, false, false);
         m_designTree.renameXicTitle(xicDataset2Clone.getName() + "-Copy");
         if(rootNode.getChildCount()>0){
             AbstractNode firstChildNode = (AbstractNode) rootNode.getChildAt(0);

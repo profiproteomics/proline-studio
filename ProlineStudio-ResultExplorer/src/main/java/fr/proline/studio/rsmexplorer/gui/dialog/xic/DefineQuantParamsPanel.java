@@ -2,6 +2,7 @@ package fr.proline.studio.rsmexplorer.gui.dialog.xic;
 
 import fr.proline.studio.gui.InfoDialog;
 import fr.proline.studio.gui.OptionDialog;
+import fr.proline.studio.gui.WizardPanel;
 import static fr.proline.studio.rsmexplorer.gui.dialog.xic.AbstractDefineQuantParamsPanel.XIC_SIMPLIFIED_PARAMS;
 import fr.proline.studio.utils.IconManager;
 import java.awt.BorderLayout;
@@ -12,7 +13,6 @@ import java.awt.event.ActionListener;
 import java.util.prefs.Preferences;
 import javax.swing.Box;
 import javax.swing.JButton;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import org.openide.util.NbPreferences;
 import org.openide.windows.WindowManager;
@@ -39,7 +39,7 @@ public class DefineQuantParamsPanel extends JPanel {
         setLayout(new BorderLayout());
  
         
-        JPanel wizardPanel = createWizardPanel();
+        JPanel wizardPanel = new WizardPanel("<html><b>Step 3:</b> Specify quantitation parameters.</html>");
         m_mainPanel = createMainPanel();
 
         add(wizardPanel, BorderLayout.PAGE_START);
@@ -129,27 +129,6 @@ public class DefineQuantParamsPanel extends JPanel {
             m_mainPanel.repaint();
         }        
     }
-               
-    private JPanel createWizardPanel() {
-        JPanel wizardPanel = new JPanel();
-        wizardPanel.setLayout(new GridBagLayout());
-        GridBagConstraints c = new GridBagConstraints();
-        c.anchor = GridBagConstraints.NORTHWEST;
-        c.fill = GridBagConstraints.BOTH;
-        c.insets = new java.awt.Insets(5, 5, 5, 5);
-
-        JLabel wizardLabel = new JLabel("<html><b>Step 3:</b> Specify quantitation parameters.</html>");
-        wizardLabel.setIcon(IconManager.getIcon(IconManager.IconType.WAND_HAT));
-        
-        c.gridx = 0;
-        c.gridy = 0;
-        c.weightx = 1;
-        c.weighty = 1;
-        wizardPanel.add(wizardLabel, c);
-        
-        return wizardPanel;
-    }
-    
     
     private AbstractGenericQuantParamsPanel getParamsPanel(boolean completePanel, boolean readValues) {
         m_completePanel = completePanel;

@@ -1,6 +1,6 @@
 package fr.proline.studio.rsmexplorer.gui.dialog.spectralcount;
 
-import fr.proline.studio.utils.IconManager;
+import fr.proline.studio.gui.WizardPanel;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import javax.swing.*;
@@ -41,8 +41,7 @@ public class SpectralCountNamePanel extends JPanel {
         c.gridx = 0;
         c.gridy = 0;
         c.weightx = 1;
-        add(createWizardPanel(), c);
-
+        add(new WizardPanel("<html><b>Step 1:</b> Define spectral count name and description.</html>"), c);
 
         c.gridy++;
         c.weighty = 1;
@@ -87,28 +86,6 @@ public class SpectralCountNamePanel extends JPanel {
         
         return mainPanel;
     } 
-    
-    private JPanel createWizardPanel() {
-        JPanel wizardPanel = new JPanel();
-        wizardPanel.setLayout(new GridBagLayout());
-        GridBagConstraints c = new GridBagConstraints();
-        c.anchor = GridBagConstraints.NORTHWEST;
-        c.fill = GridBagConstraints.BOTH;
-        c.insets = new java.awt.Insets(5, 5, 5, 5);
-
-        JLabel wizardLabel = new JLabel("<html><b>Step 1:</b> Define spectral count name and description.</html>");
-        wizardLabel.setIcon(IconManager.getIcon(IconManager.IconType.WAND_HAT));
-        
-        c.gridx = 0;
-        c.gridy = 0;
-        c.weightx = 1;
-        c.weighty = 1;
-        wizardPanel.add(wizardLabel, c);
-        
-        return wizardPanel;
-    }
-    
-
 
     public String getSpectralCountName() {
         return m_spectralCountNameTextField.getText().trim();

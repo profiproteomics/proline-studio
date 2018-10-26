@@ -48,24 +48,24 @@ public class TreeFileChooserPanel extends JPanel {
     private FileSystemView m_fileSystemView;
     private TreeFileChooserTransferHandler m_transferHandler;
     private boolean m_showUpdateButton;
-    private TreeStateUtil.TreeType m_treeType;
+    private TreeUtils.TreeType m_treeType;
 
     public TreeFileChooserPanel(FileSystemView fileSystemView, TreeFileChooserTransferHandler transferHandler) {
         m_fileSystemView = fileSystemView;
         m_transferHandler = transferHandler;
         m_showUpdateButton = true;
-        m_treeType = TreeStateUtil.TreeType.XIC;
+        m_treeType = TreeUtils.TreeType.XIC;
     }
 
     public TreeFileChooserPanel(FileSystemView fileSystemView, TreeFileChooserTransferHandler transferHandler, boolean showUpdateButton) {
         this(fileSystemView, transferHandler);
         m_showUpdateButton = showUpdateButton;
-        m_treeType = TreeStateUtil.TreeType.SERVER;
+        m_treeType = TreeUtils.TreeType.SERVER;
     }
 
-    public void restoreTree(TreeStateUtil.TreeType type) {
+    public void restoreTree(TreeUtils.TreeType type) {
         if (m_tree != null) {
-            TreeStateUtil.setExpansionState(TreeStateUtil.loadExpansionState(type, null), m_tree, (DefaultMutableTreeNode) m_tree.getModel().getRoot(), type, null);
+            TreeUtils.setExpansionState(TreeUtils.loadExpansionState(type, null), m_tree, (DefaultMutableTreeNode) m_tree.getModel().getRoot(), type, null);
         }
     }
 
@@ -91,12 +91,12 @@ public class TreeFileChooserPanel extends JPanel {
 
             @Override
             public void treeExpanded(TreeExpansionEvent tee) {
-                TreeStateUtil.saveExpansionState(m_tree, m_treeType, null);
+                TreeUtils.saveExpansionState(m_tree, m_treeType, null);
             }
 
             @Override
             public void treeCollapsed(TreeExpansionEvent tee) {
-                TreeStateUtil.saveExpansionState(m_tree, m_treeType, null);
+                TreeUtils.saveExpansionState(m_tree, m_treeType, null);
             }
 
         });
@@ -176,7 +176,7 @@ public class TreeFileChooserPanel extends JPanel {
 
     public void updateTree() {
 
-        HashSet<String> expandedPaths = TreeStateUtil.getExpansionState(m_tree);
+        HashSet<String> expandedPaths = TreeUtils.getExpansionState(m_tree);
 
         m_top.removeAllChildren();
         m_model.reload(m_top);
@@ -193,7 +193,7 @@ public class TreeFileChooserPanel extends JPanel {
 
         m_model.reload();
 
-        TreeStateUtil.setExpansionState(expandedPaths, m_tree, (DefaultMutableTreeNode) m_tree.getModel().getRoot(), TreeStateUtil.TreeType.SERVER, null);
+        TreeUtils.setExpansionState(expandedPaths, m_tree, (DefaultMutableTreeNode) m_tree.getModel().getRoot(), TreeUtils.TreeType.SERVER, null);
     }
 
     public static TreePath getPath(TreeNode treeNode) {

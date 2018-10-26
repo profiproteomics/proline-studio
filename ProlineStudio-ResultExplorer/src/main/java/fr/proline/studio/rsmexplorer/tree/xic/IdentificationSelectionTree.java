@@ -13,9 +13,9 @@ import javax.swing.tree.TreePath;
  * Tree to select the identifications to drag and drop to the XIC design tree
  * @author JM235353
  */
-public class XICSelectionTree extends AbstractTree implements TreeWillExpandListener {
+public class IdentificationSelectionTree extends AbstractTree implements TreeWillExpandListener {
 
-    public XICSelectionTree(AbstractNode top, boolean loadAllAtOnce) {
+    public IdentificationSelectionTree(AbstractNode top, boolean loadAllAtOnce) {
 
         setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 

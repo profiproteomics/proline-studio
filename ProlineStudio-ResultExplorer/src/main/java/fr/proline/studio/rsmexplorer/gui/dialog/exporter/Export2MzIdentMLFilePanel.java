@@ -6,20 +6,17 @@
 package fr.proline.studio.rsmexplorer.gui.dialog.exporter;
 
 import fr.proline.studio.gui.DefaultDialog;
+import fr.proline.studio.gui.WizardPanel;
 import fr.proline.studio.utils.IconManager;
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.prefs.Preferences;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import org.apache.commons.lang3.StringUtils;
@@ -41,38 +38,9 @@ public class Export2MzIdentMLFilePanel extends JPanel {
     public Export2MzIdentMLFilePanel(DefaultDialog parent) {
         m_parent = parent;
         setLayout(new BorderLayout());
-        add(createWizardPanel(), BorderLayout.PAGE_START);
+        add(new WizardPanel("MzIdentML output file", NbBundle.getMessage(Export2MzIdentMLDialog.class, "Export2MzIdentMLDialog.help.text")), BorderLayout.PAGE_START);
         add(createMainPanel(), BorderLayout.CENTER);
 
-    }
-
-    private JPanel createWizardPanel() {
-        JPanel helpPanel = new JPanel();
-        helpPanel.setLayout(new GridBagLayout());
-        GridBagConstraints c = new GridBagConstraints();
-        c.anchor = GridBagConstraints.NORTHWEST;
-        c.fill = GridBagConstraints.BOTH;
-        c.insets = new java.awt.Insets(5, 15, 5, 15);
-
-        JLabel titleLabel = new JLabel("MzIdentML output file");
-        titleLabel.setIcon(IconManager.getIcon(IconManager.IconType.WAND_HAT));
-
-        c.gridx = 0;
-        c.gridy = 0;
-        c.weightx = 1;
-        c.weighty = 1;
-        helpPanel.add(titleLabel, c);
-
-        String helpText = NbBundle.getMessage(Export2MzIdentMLDialog.class, "Export2MzIdentMLDialog.help.text");
-        JTextArea helpArea = new JTextArea(helpText);
-        helpArea.setForeground(Color.LIGHT_GRAY);
-        helpArea.setBackground(Color.WHITE);
-        helpArea.setLineWrap(true);
-        helpArea.setWrapStyleWord(true);
-        c.gridy++;
-        helpPanel.add(helpArea, c);
-
-        return helpPanel;
     }
 
     private JPanel createMainPanel() {

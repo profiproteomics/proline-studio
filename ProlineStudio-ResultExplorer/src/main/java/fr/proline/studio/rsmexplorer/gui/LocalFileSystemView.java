@@ -209,22 +209,22 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
             }
         });
 
-        HashSet<String> set = TreeStateUtil.loadExpansionState(TreeStateUtil.TreeType.LOCAL, m_rootsComboBox.getSelectedItem().toString());
+        HashSet<String> set = TreeUtils.loadExpansionState(TreeUtils.TreeType.LOCAL, m_rootsComboBox.getSelectedItem().toString());
 
-        TreeStateUtil.setExpansionState(set, m_tree, (DefaultMutableTreeNode) m_tree.getModel().getRoot(), TreeStateUtil.TreeType.LOCAL, m_rootsComboBox.getSelectedItem().toString());
+        TreeUtils.setExpansionState(set, m_tree, (DefaultMutableTreeNode) m_tree.getModel().getRoot(), TreeUtils.TreeType.LOCAL, m_rootsComboBox.getSelectedItem().toString());
 
         m_tree.addTreeExpansionListener(new TreeExpansionListener() {
 
             @Override
             public void treeExpanded(TreeExpansionEvent tee) {
-                TreeStateUtil.saveExpansionState(m_tree, TreeStateUtil.TreeType.LOCAL, m_rootsComboBox.getSelectedItem().toString());
+                TreeUtils.saveExpansionState(m_tree, TreeUtils.TreeType.LOCAL, m_rootsComboBox.getSelectedItem().toString());
                 DefaultMutableTreeNode expandedNode = (DefaultMutableTreeNode) tee.getPath().getLastPathComponent();
                 traverseAndExpand(expandedNode);
             }
 
             @Override
             public void treeCollapsed(TreeExpansionEvent tee) {
-                TreeStateUtil.saveExpansionState(m_tree, TreeStateUtil.TreeType.LOCAL, m_rootsComboBox.getSelectedItem().toString());
+                TreeUtils.saveExpansionState(m_tree, TreeUtils.TreeType.LOCAL, m_rootsComboBox.getSelectedItem().toString());
             }
 
         });
@@ -290,7 +290,7 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
     }
 
     public void resetTreeState() {
-        TreeStateUtil.setExpansionState(TreeStateUtil.loadExpansionState(TreeStateUtil.TreeType.LOCAL, m_rootsComboBox.getSelectedItem().toString()), m_tree, (DefaultMutableTreeNode) m_tree.getModel().getRoot(), TreeStateUtil.TreeType.LOCAL, m_rootsComboBox.getSelectedItem().toString());
+        TreeUtils.setExpansionState(TreeUtils.loadExpansionState(TreeUtils.TreeType.LOCAL, m_rootsComboBox.getSelectedItem().toString()), m_tree, (DefaultMutableTreeNode) m_tree.getModel().getRoot(), TreeUtils.TreeType.LOCAL, m_rootsComboBox.getSelectedItem().toString());
     }
 
     public void expandTreePath(TreePath path) {

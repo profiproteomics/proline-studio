@@ -25,7 +25,7 @@
         <module>ProlineStudio-ResultExplorer</module>
         <module>ProlineStudio-DPM</module>
         <module>ProlineStudio-R</module>
-        <module>ProlineStudio-mzScope</module>        
+        <module>ProlineStudio-mzScope</module>
     </modules>
 
     <properties>
@@ -36,26 +36,18 @@
     <scm>
         <connection>scm:svn:https://bioproj.extra.cea.fr/svn/proline/ProlineStudio/trunk</connection>
     </scm>
- 
-
 
     <dependencies>
-
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <scope>test</scope>
         </dependency>
-        
-
-        
     </dependencies>
 
     <build>
-
         <pluginManagement>
             <plugins>
-
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>nbm-maven-plugin</artifactId>
@@ -71,11 +63,11 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-jar-plugin</artifactId>
                     <!-- Version inherited from ProFI-Pom -->
-<configuration>
-    <archive>
-      <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
-    </archive>
-  </configuration>
+                    <configuration>
+                        <archive>
+                            <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
+                        </archive>
+                    </configuration>
                 </plugin>
 
                 <plugin>
@@ -91,8 +83,6 @@
                 </plugin>
         
                 <!--  Maven Release for branches and tags -->
-
- 
 
                 <plugin>
                     <artifactId>maven-release-plugin</artifactId>
@@ -111,10 +101,6 @@
                         </dependency>
                     </dependencies>
                 </plugin>
-
- 
-
-
             </plugins>
         </pluginManagement>
 

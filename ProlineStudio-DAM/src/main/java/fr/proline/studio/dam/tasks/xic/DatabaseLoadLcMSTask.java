@@ -134,7 +134,7 @@ public class DatabaseLoadLcMSTask extends AbstractDatabaseSlicerTask {
     }
 
     public void initLoadChildFeatureForPeptideIonWithPeakel(long projectId, DMasterQuantPeptideIon masterQuantPeptideIon, List<DFeature> childFeatureList, List<List<Peakel>> peakelListPerFeature, List<MapAlignment> allMapAlignments, Long alnRefMapId, List<ProcessedMap> allProcessedMaps) {
-        init(SUB_TASK_COUNT_CHILD_FEATURE, new TaskInfo("Load Child Features + peakels for PeptideIon "+ (masterQuantPeptideIon == null ? "" : (masterQuantPeptideIon.getId())) , false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_MEDIUM));
+        init(SUB_TASK_COUNT_CHILD_FEATURE, new TaskInfo("Load Child Features + peakels for PeptideIon " + (masterQuantPeptideIon == null ? "" : (masterQuantPeptideIon.getId())), false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_MEDIUM));
         m_projectId = projectId;
         m_masterQuantPeptideIon = masterQuantPeptideIon;
         m_childFeatureList = childFeatureList;
@@ -152,7 +152,7 @@ public class DatabaseLoadLcMSTask extends AbstractDatabaseSlicerTask {
         m_peakelForChildFeatureList = peakelList;
         action = LOAD_PEAKELS_FOR_FEATURE;
     }
-    
+
     public void initLoadAlignmentForXic(long projectId, DDataset dataset) {
         init(SUB_TASK_COUNT_MAP, new TaskInfo("Load Map Alignment of XIC " + dataset.getName(), false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_MEDIUM));
         m_projectId = projectId;
@@ -233,12 +233,12 @@ public class DatabaseLoadLcMSTask extends AbstractDatabaseSlicerTask {
             if (needToFetch()) {
                 return fetchDataMainTaskChildFeatureForPeptideIonWithPeakels();
             }
-        }else if (action == LOAD_ALIGNMENT_FOR_XIC) {
+        } else if (action == LOAD_ALIGNMENT_FOR_XIC) {
             if (needToFetch()) {
                 DatabaseLoadXicMasterQuantTask.fetchDataQuantChannels(m_projectId, m_dataset, m_taskError);
                 return fetchDataMainTaskAlignmentForXic();
             }
-        } 
+        }
         return true; // should not happen
     }
 
@@ -675,11 +675,11 @@ public class DatabaseLoadLcMSTask extends AbstractDatabaseSlicerTask {
                 TypedQuery<Long> peptidesIonQuery = entityManagerMSI.createQuery(queryPepIon, Long.class);
                 peptidesIonQuery.setParameter("masterQuantPeptideId", m_masterQuantPeptide.getId());
                 List<Long> listLcmsIds = (List<Long>) peptidesIonQuery.getResultList();
-                if(listLcmsIds != null && !listLcmsIds.isEmpty()) {
+                if (listLcmsIds != null && !listLcmsIds.isEmpty()) {
                     String queryMaster = "SELECT f "
-                        + "FROM fr.proline.core.orm.lcms.Feature f "
-                        + "WHERE f.id IN (:listId) "
-                        + "ORDER BY f.elutionTime ASC ";
+                            + "FROM fr.proline.core.orm.lcms.Feature f "
+                            + "WHERE f.id IN (:listId) "
+                            + "ORDER BY f.elutionTime ASC ";
                     TypedQuery<Feature> masterQuery = entityManagerLCMS.createQuery(queryMaster, Feature.class);
                     masterQuery.setParameter("listId", listLcmsIds);
                     m_masterFeatureList.addAll(masterQuery.getResultList());
@@ -755,7 +755,8 @@ public class DatabaseLoadLcMSTask extends AbstractDatabaseSlicerTask {
     }
 
     /**
-     * main task to load all child features for a masterQuantPeptideIon with peakels
+     * main task to load all child features for a masterQuantPeptideIon with
+     * peakels
      *
      * @return
      */
@@ -791,16 +792,16 @@ public class DatabaseLoadLcMSTask extends AbstractDatabaseSlicerTask {
                 List<Feature> allFeature = new ArrayList();
                 Feature bestChild = null;
                 Double bestChildElutionTime = Double.NaN;
-                Long sourceMapId = (long)-1;
+                Long sourceMapId = (long) -1;
                 Float maxIntensity = Float.NaN;
                 List<Long> childFeatureIdsForCluster = new ArrayList();
                 for (MasterFeatureItem mfi : resultMFIList) {
                     allFeature.add(mfi.getChildFeature());
-                    if (!listOfRawMapsId.contains(mfi.getChildFeature().getMap().getId())){
+                    if (!listOfRawMapsId.contains(mfi.getChildFeature().getMap().getId())) {
                         listOfRawMapsId.add(mfi.getChildFeature().getMap().getId());
                     }
-                    
-                    if (mfi.getIsBestChild()){
+
+                    if (mfi.getIsBestChild()) {
                         bestChild = mfi.getChildFeature();
                         bestChildElutionTime = new Double(bestChild.getElutionTime());
                         sourceMapId = bestChild.getMap().getId();
@@ -822,14 +823,14 @@ public class DatabaseLoadLcMSTask extends AbstractDatabaseSlicerTask {
                 List<Feature> resultList = queryChild.getResultList();
                 List<Feature> allFeature = new ArrayList();
                 allFeature.addAll(resultList);
-                */
+                 */
                 String queryF = "SELECT f "
-                            + "FROM fr.proline.core.orm.lcms.Feature f, fr.proline.core.orm.lcms.FeatureClusterItem fci  "
-                            + "WHERE f.id = fci.subFeature.id AND "
-                            + "fci.clusterFeature.id in (:listClusterFeatureId) ";
+                        + "FROM fr.proline.core.orm.lcms.Feature f, fr.proline.core.orm.lcms.FeatureClusterItem fci  "
+                        + "WHERE f.id = fci.subFeature.id AND "
+                        + "fci.clusterFeature.id in (:listClusterFeatureId) ";
                 TypedQuery<Feature> queryChildF = entityManagerLCMS.createQuery(queryF, Feature.class);
                 queryChildF.setParameter("listClusterFeatureId", childFeatureIdsForCluster);
-                if(!childFeatureIdsForCluster.isEmpty()){
+                if (!childFeatureIdsForCluster.isEmpty()) {
                     List<Feature> resultList = queryChildF.getResultList();
                     allFeature.addAll(resultList);
                     for (Feature f : resultList) {
@@ -838,27 +839,27 @@ public class DatabaseLoadLcMSTask extends AbstractDatabaseSlicerTask {
                         }
                     }
                 }
-                
+
                 // build fake feature if some rawMap are not reprensented
                 for (java.util.Map.Entry<Long, Long> entrySet : mapRawToProcessedId.entrySet()) {
                     Long rawMapId = entrySet.getKey();
                     Long processedMapId = entrySet.getValue();
-                    if (!listOfRawMapsId.contains(rawMapId) && !listOfRawMapsId.contains(processedMapId)){
+                    if (!listOfRawMapsId.contains(rawMapId) && !listOfRawMapsId.contains(processedMapId)) {
                         Map fakeMap = entityManagerLCMS.find(Map.class, processedMapId);
-                        Feature fakeFeature= new Feature();
-                        fakeFeature.setId((long)-1);
+                        Feature fakeFeature = new Feature();
+                        fakeFeature.setId((long) -1);
                         fakeFeature.setMap(fakeMap);
                         fakeFeature.setCharge(0);
                         fakeFeature.setIsOverlapping(false);
                         fakeFeature.setIsCluster(false);
-                        
+
                         allFeature.add(fakeFeature);
                     }
-                    
+
                 }
-                
+
                 // isBestChild is always set to false! cf Issue #13116
-                if (bestChild == null){
+                if (bestChild == null) {
                     // then we determine the best child as the child with the max apex intensity , among the childs that do not have predicted elution time
                     for (Feature feature : allFeature) {
                         if (!feature.getIsCluster() && feature.getId() != -1L) {
@@ -877,36 +878,35 @@ public class DatabaseLoadLcMSTask extends AbstractDatabaseSlicerTask {
                         }
                     }
                 }
-                
+
                 Long processedSourceMapId = sourceMapId;
-                if (mapRawToProcessedId.containsKey(sourceMapId)){
+                if (mapRawToProcessedId.containsKey(sourceMapId)) {
                     processedSourceMapId = mapRawToProcessedId.get(sourceMapId);
                 }
-                
+
                 //load peakel
                 String queryP = "SELECT fpi.id.peakelId  "
-                            + "FROM fr.proline.core.orm.lcms.FeaturePeakelItem fpi "
-                            + "WHERE fpi.id.featureId =:featureId "
-                            + "ORDER BY fpi.isotopeIndex ASC ";
+                        + "FROM fr.proline.core.orm.lcms.FeaturePeakelItem fpi "
+                        + "WHERE fpi.id.featureId =:featureId "
+                        + "ORDER BY fpi.isotopeIndex ASC ";
                 TypedQuery<Long> queryPeakel = entityManagerLCMS.createQuery(queryP, Long.class);
-                
-                
+
                 for (Feature feature : allFeature) {
                     DFeature dFeature = new DFeature(feature);
                     dFeature.setBestChild(false);
-                    java.util.Map<String,Object>  prop = dFeature.getSerializedPropertiesAsMap(); //init the serializedProp.
-                    if (bestChild != null){
+                    java.util.Map<String, Object> prop = dFeature.getSerializedPropertiesAsMap(); //init the serializedProp.
+                    if (bestChild != null) {
                         Long featureMapId = feature.getMap().getId();
-                        if (mapRawToProcessedId.containsKey(feature.getMap().getId())){
+                        if (mapRawToProcessedId.containsKey(feature.getMap().getId())) {
                             featureMapId = mapRawToProcessedId.get(feature.getMap().getId());
                         }
-                        try{
-                            double predictedElutionTime = MapAlignmentConverter.convertElutionTime(bestChildElutionTime, processedSourceMapId, featureMapId , m_allMapAlignments, m_alnRefMapId);
+                        try {
+                            double predictedElutionTime = MapAlignmentConverter.convertElutionTime(bestChildElutionTime, processedSourceMapId, featureMapId, m_allMapAlignments, m_alnRefMapId);
                             dFeature.setPredictedElutionTime(predictedElutionTime);
-                        }catch(Exception e){
-                            
+                        } catch (Exception e) {
+
                         }
-                        if (bestChild.getId().equals(dFeature.getId())){
+                        if (bestChild.getId().equals(dFeature.getId())) {
                             dFeature.setBestChild(true);
                         }
                     }
@@ -914,7 +914,7 @@ public class DatabaseLoadLcMSTask extends AbstractDatabaseSlicerTask {
                     //
                     queryPeakel.setParameter("featureId", feature.getId());
                     List<Long> listIds = new ArrayList();
-                    if (feature.getId() > -1){
+                    if (feature.getId() > -1) {
                         listIds = queryPeakel.getResultList();
                     }
                     if (listIds != null && !listIds.isEmpty()) {
@@ -928,7 +928,7 @@ public class DatabaseLoadLcMSTask extends AbstractDatabaseSlicerTask {
                         List<Peakel> peakelResultList = new ArrayList();
                         for (Object[] resCur : resultPeakelList) {
                             Peakel peakel = (Peakel) resCur[0];
-                            peakel.setIsotopeIndex((Integer)resCur[1]);
+                            peakel.setIsotopeIndex((Integer) resCur[1]);
                             peakelResultList.add(peakel);
                         }
                         m_peakelListPerFeature.add(peakelResultList);
@@ -938,7 +938,7 @@ public class DatabaseLoadLcMSTask extends AbstractDatabaseSlicerTask {
                 }
             }
             entityManagerLCMS.getTransaction().commit();
-            
+
         } catch (Exception e) {
             m_logger.error(getClass().getSimpleName() + " failed", e);
             m_taskError = new TaskError(e);
@@ -953,8 +953,7 @@ public class DatabaseLoadLcMSTask extends AbstractDatabaseSlicerTask {
         m_currentPriority = Priority.LOW;
         return true;
     }
-    
-    
+
     /**
      * main task to load all map alignment for a xic
      *
@@ -969,13 +968,13 @@ public class DatabaseLoadLcMSTask extends AbstractDatabaseSlicerTask {
                 for (DMasterQuantitationChannel masterQuantitationChannel : listMasterQuantitationChannels) {
                     List<DQuantitationChannel> listQuantChannels = masterQuantitationChannel.getQuantitationChannels();
                     if (listQuantChannels != null && !listQuantChannels.isEmpty()) {
-                        
+
                         List<MapAlignment> allMapAlignmentList = new ArrayList<>();
                         List<ProcessedMap> allMaps = new ArrayList<>();
 
                         List<Long> listMapIds = new ArrayList();
                         for (DQuantitationChannel quantitationChannel : listQuantChannels) {
-                            if (quantitationChannel.getLcmsMapId() != null){
+                            if (quantitationChannel.getLcmsMapId() != null) {
                                 listMapIds.add(quantitationChannel.getLcmsMapId());
                             }
                         }
@@ -987,7 +986,7 @@ public class DatabaseLoadLcMSTask extends AbstractDatabaseSlicerTask {
                         Query queryMasterMapQ = entityManagerLCMS.createQuery(queryMasterMap);
                         queryMasterMapQ.setParameter("listId", listMapIds);
                         List<Object[]> rl = new ArrayList();
-                        Long mapSetId  = (long)-1;
+                        Long mapSetId = (long) -1;
                         if (!listMapIds.isEmpty()) {
                             rl = queryMasterMapQ.getResultList();
                         }
@@ -997,7 +996,7 @@ public class DatabaseLoadLcMSTask extends AbstractDatabaseSlicerTask {
                             m_dataset.setAlnReferenceMapId((Long) res[0]);
                             mapSetId = (Long) res[1];
                         }
-                        
+
                         // all alignments
                         String queryAllAlignS = "SELECT ma "
                                 + "FROM fr.proline.core.orm.lcms.MapAlignment ma "
@@ -1012,21 +1011,21 @@ public class DatabaseLoadLcMSTask extends AbstractDatabaseSlicerTask {
                         // all processed map -- order by quant channel
                         String orderBy = " case pm.id ";
                         int index = 1;
-                        for (Long id: listMapIds){
-                            orderBy+=" when "+id+" then "+index;
+                        for (Long id : listMapIds) {
+                            orderBy += " when " + id + " then " + index;
                             index++;
                         }
-                        orderBy += " else "+index+ " end "  ;
+                        orderBy += " else " + index + " end ";
                         String queryAllProcessedMapS = "SELECT pm "
                                 + "FROM fr.proline.core.orm.lcms.ProcessedMap pm "
                                 + "WHERE pm.id IN (:listId) "
-                                + "ORDER BY "+orderBy;
-                        if (listMapIds.size() > 0){
+                                + "ORDER BY " + orderBy;
+                        if (listMapIds.size() > 0) {
                             TypedQuery<ProcessedMap> queryAllProcessedMap = entityManagerLCMS.createQuery(queryAllProcessedMapS, ProcessedMap.class);
                             queryAllProcessedMap.setParameter("listId", listMapIds);
                             List<ProcessedMap> rs3 = queryAllProcessedMap.getResultList();
                             for (ProcessedMap pm : rs3) {
-                                 allMaps.add(pm);
+                                allMaps.add(pm);
                             }
                             m_dataset.setMaps(allMaps);
                         }
@@ -1034,6 +1033,13 @@ public class DatabaseLoadLcMSTask extends AbstractDatabaseSlicerTask {
                 }
             }
             entityManagerLCMS.getTransaction().commit();
+//            m_logger.debug("----->DatabaseLoadLcMSTask fetchDataMainTaskAlignmentForXic " + m_dataset.getName() + " " + m_dataset.getMapAlignments());
+//            for (MapAlignment m : m_dataset.getMapAlignments()) {
+//                m_logger.debug("-----> src: " + m.getSourceMap().getId() + " dest : " + m.getDestinationMap().getId());
+//            }
+//
+//            m_logger.debug("<----->DatabaseLoadLcMSTask fetchDataMainTaskAlignmentForXic done");
+
         } catch (Exception e) {
             m_logger.error(getClass().getSimpleName() + " failed", e);
             m_taskError = new TaskError(e);

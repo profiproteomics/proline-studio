@@ -21,11 +21,11 @@ import org.openide.util.NbBundle;
  * @author MB243701
  */
 public class DisplayMapAlignmentAction extends AbstractRSMAction {
-    
+
     public DisplayMapAlignmentAction() {
        super(NbBundle.getMessage(DisplayMapAlignmentAction.class,"CTL_DisplayMapAlignmentAction"), AbstractTree.TreeType.TREE_QUANTITATION);
     }
-    
+
     @Override
     public void actionPerformed(AbstractNode[] selectedNodes, int x, int y) {
 
@@ -37,7 +37,7 @@ public class DisplayMapAlignmentAction extends AbstractRSMAction {
         }
 
     }
-    
+
     private void actionImpl(DataSetNode dataSetNode) {
 
         final DDataset dataset = ((DataSetData) dataSetNode.getData()).getDataset();
@@ -50,7 +50,7 @@ public class DisplayMapAlignmentAction extends AbstractRSMAction {
         win.open();
         win.requestActive();
     }
-    
+
     @Override
     public void updateEnabled(AbstractNode[] selectedNodes) {
         // only one node selected

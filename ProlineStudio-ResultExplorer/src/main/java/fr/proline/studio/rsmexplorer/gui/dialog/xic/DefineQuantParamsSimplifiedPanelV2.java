@@ -209,14 +209,14 @@ public class DefineQuantParamsSimplifiedPanelV2 extends AbstractDefineQuantParam
             
             if(m_alignRTCB.isSelected()){
                 Map<String,Object> alignmentConfig = new HashMap<>();
-                alignmentConfig.put("method_name", ALIGNMENT_METHOD_KEYS[0]);
+                alignmentConfig.put(AbstractDefineQuantParamsPanelV2.ALIGNMENT_METHOD_NAME, ALIGNMENT_METHOD_KEYS[0]);
                 alignmentConfig.put("smoothing_method_name", ALIGNMENT_SMOOTHING_METHOD_KEYS[0]);   
                 alignmentConfig.put("ft_mapping_method_name", FEATURE_MAPPING_METHOD_KEYS[0]);
                 Map<String,Object> alnFtParams = new HashMap<>();
                 alnFtParams.put("time_tol",  m_alignmentFeatureMappTimeToleranceTF.getText());
                 alignmentConfig.put("ft_mapping_method_params", alnFtParams);                
                 alignmentConfig.put("ignore_errors", false);
-                params.put("alignment_config", alignmentConfig);
+                params.put(AbstractDefineQuantParamsPanelV2.ALIGNMENT_CONFIG, alignmentConfig);
             }
             
         }

@@ -32,7 +32,7 @@ public class MapTimeTableModel  extends LazyTableModel implements GlobalTableMod
     public static final int COLTYPE_TIME = 0;
     public static final int COLTYPE_DELTA_TIME = 1;
     
-    private static final String[] m_columnNames = {"Time in Reference Map (min)", "Delta time vs. Reference Map (s)"};
+    private String[] m_columnNames;
     private static final String[] m_toolTipColumns = {"Time (min)", "Delta time (s)"};
     
     private MapAlignment m_mapAlignment;
@@ -45,6 +45,7 @@ public class MapTimeTableModel  extends LazyTableModel implements GlobalTableMod
 
     public MapTimeTableModel(LazyTable table) {
         super(table);
+         m_columnNames = new String[]{"Time in Reference Map (min)", "Delta time (s)"};
     }
     
     
@@ -254,6 +255,17 @@ public class MapTimeTableModel  extends LazyTableModel implements GlobalTableMod
         fireTableDataChanged();
     }
 
+    public void setData(Long taskId, MapAlignment mapAlignment,  List<MapTime> mapTimes, Color color, String title, String fromMapName) {
+        m_mapAlignment = mapAlignment;
+        m_mapTimes = mapTimes;
+        m_color = color;
+        m_title = title;
+
+        m_taskId = taskId;
+
+        fireTableDataChanged();
+        m_columnNames[0] = "Time in Map "+ fromMapName + " (min)";
+    }
     public void dataUpdated() {
         // no need to do an updateMinMax : scores are known at once
         fireTableDataChanged();

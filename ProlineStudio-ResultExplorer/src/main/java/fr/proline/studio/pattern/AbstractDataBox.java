@@ -38,7 +38,7 @@ import org.jdesktop.swingx.JXTable;
  */
 public abstract class AbstractDataBox implements ChangeListener, ProgressInterface, SplittedPanelContainer.UserActions {
    
-
+    
     
     // Panel corresponding to this box
     private DataBoxPanelInterface m_panel;

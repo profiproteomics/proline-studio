@@ -21,16 +21,20 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * databox for mapAlignment data
+ *
  * @author MB243701
  */
 public class DataboxMapAlignment extends AbstractDataBox {
-    
+
+    protected static final Logger logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
     private DDataset m_dataset;
-    private QuantChannelInfo  m_quantChannelInfo;
-        
+    private QuantChannelInfo m_quantChannelInfo;
+
     public DataboxMapAlignment() {
         super(DataboxType.DataBoxMapAlignment, DataboxStyle.STYLE_XIC);
 
@@ -54,8 +58,20 @@ public class DataboxMapAlignment extends AbstractDataBox {
         registerOutParameter(outParameter);
     }
 
+    /**
+     * this.dataChanged() callback in run() propagateDataChanged will propagate
+     * to DataboxMultiGraphics.dataChanged(), the DataboxMultiGraphics will call
+     * m_previousDataBox.getData, his m_previousDataBox is this
+     * DataboxMapAlignment used by DataboxMultiGraphics.dataChanged
+     *
+     * @param getArray
+     * @param parameterType
+     * @param isList
+     * @return
+     */
     @Override
     public Object getData(boolean getArray, Class parameterType, boolean isList) {
+        //logger.debug("get Data");
         if (parameterType != null && isList) {
             if (parameterType.equals(ExtendedTableModelInterface.class)) {
                 return getCompareDataInterfaceList();
@@ -66,8 +82,7 @@ public class DataboxMapAlignment extends AbstractDataBox {
         }
         return super.getData(getArray, parameterType, isList);
     }
-    
-    
+
     private List<ExtendedTableModelInterface> getCompareDataInterfaceList() {
         List<ExtendedTableModelInterface> listCDI = new ArrayList();
         List<MapTimePanel> listMapTimePanel = getMapTimeTableModelList();
@@ -86,22 +101,27 @@ public class DataboxMapAlignment extends AbstractDataBox {
         return listCSI;
     }
     
+    /**
+     * get new MapAligments and create MapTimePanel for each MapAlignement
+     * @return 
+     */
     private List<MapTimePanel> getMapTimeTableModelList() {
+        //logger.debug(" getMapTimeTableModelList");
         List<MapTimePanel> list = new ArrayList();
-        for (MapAlignment mapAlignment : m_dataset.getMapAlignmentsFromMap(m_dataset.getAlnReferenceMapId())) {
+        for (MapAlignment mapAlignment : m_dataset.getMapAlignmentsFromMap(m_dataset.getAlnReferenceMapId())) {//only these from reference map
+            //for (MapAlignment mapAlignment : m_dataset.getMapAlignments()) {//all maps
             List<MapTime> listMapTime = mapAlignment.getMapTimeList();
             MapTimePanel mapTimePanel = new MapTimePanel();
             String fromMap = m_quantChannelInfo.getMapTitle(mapAlignment.getSourceMap().getId());
             String toMap = m_quantChannelInfo.getMapTitle(mapAlignment.getDestinationMap().getId());
-            String title = "Map Alignment from "+ toMap +" (ref. "+fromMap+")";
+            String title = "Map Alignment from " + fromMap + " (to " + toMap + ")";
             Color color = m_quantChannelInfo.getMapColor(mapAlignment.getDestinationMap().getId());
-            mapTimePanel.setData((long) -1, mapAlignment, listMapTime, color, title, true);
+            mapTimePanel.setData((long) -1, mapAlignment, listMapTime, color, title, true, fromMap);
             list.add(mapTimePanel);
         }
         return list;
     }
-    
-    
+
     @Override
     public void createPanel() {
         MapAlignmentPanel p = new MapAlignmentPanel();
@@ -109,7 +129,7 @@ public class DataboxMapAlignment extends AbstractDataBox {
         p.setDataBox(this);
         setDataBoxPanelInterface(p);
     }
-    
+
     @Override
     public void setEntryData(Object data) {
         getDataBoxPanelInterface().addSingleValue(data);
@@ -120,7 +140,7 @@ public class DataboxMapAlignment extends AbstractDataBox {
     @Override
     public void dataChanged() {
         final int loadingId = setLoading();
-        if (m_dataset == null){
+        if (m_dataset == null) {
             m_dataset = (DDataset) m_previousDataBox.getData(false, DDataset.class);
         }
         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
@@ -134,20 +154,21 @@ public class DataboxMapAlignment extends AbstractDataBox {
             public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
                 m_quantChannelInfo = new QuantChannelInfo(m_dataset);
                 ((MapAlignmentPanel) getDataBoxPanelInterface()).setData(m_quantChannelInfo, getCompareDataInterfaceList(), getCrossSelectionInterfaceList());
-                
+
                 setLoaded(loadingId);
                 if (finished) {
                     unregisterTask(taskId);
-                    propagateDataChanged(ExtendedTableModelInterface.class); 
+                   // logger.debug("-->DataboxMapAlignment dataChanged call back run propagateDataChanged");
+                    propagateDataChanged(ExtendedTableModelInterface.class);
+                   // logger.debug("<-->DataboxMapAlignment dataChanged call back run propagateDataChanged ");
                 }
             }
         };
-
 
         // ask asynchronous loading of data
         DatabaseLoadLcMSTask task = new DatabaseLoadLcMSTask(callback);
         task.initLoadAlignmentForXic(getProjectId(), m_dataset);
         registerTask(task);
     }
-    
+
 }

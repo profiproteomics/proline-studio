@@ -326,7 +326,7 @@ public class CreateXICDialog extends DefaultDialog {
     @Override
     protected boolean okCalled() {
 
-        if (m_step == STEP_PANEL_CREATE_XIC_DESIGN) {
+        if (m_step == STEP_PANEL_CREATE_XIC_DESIGN) {//CreateXICDesignPanel-NEXT button
 
             //VDS: Can't checkDesignStructure and checkBiologicalGroupName be merged !! 
             if ((!checkDesignStructure(m_finalXICDesignNode, new HashSet<>())) || (!checkBiologicalGroupName(m_finalXICDesignNode))) {
@@ -337,7 +337,7 @@ public class CreateXICDialog extends DefaultDialog {
             this.checkSpectrum();
 
             return false;
-        } else if (m_step == STEP_PANEL_DEFINE_RAW_FILES) {
+        } else if (m_step == STEP_PANEL_DEFINE_RAW_FILES) {//SelectRawFilesPanel-NEXT button
 
             if (!checkRawFiles()) {
                 return false;
@@ -346,7 +346,7 @@ public class CreateXICDialog extends DefaultDialog {
             displayDefineXICParams();
 
             return false;
-        } else { //STEP_PANEL_DEFINE_XIC_PARAMS
+        } else { //STEP_PANEL_DEFINE_XIC_PARAMS , DefineQuantParamsPanel-OK button
 
             if (!checkQuantParameters()) {
                 return false;

@@ -42,7 +42,7 @@ import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
  * @author JM235353
  */
 public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelInterface, PlotToolbarListener {
-
+   
     
     private AbstractDataBox m_dataBox;
 
@@ -409,6 +409,15 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
             m_plotPanel.lockData(m_dataLocked);
         }
     }
+    /**
+     * @KX call by MapAlignementPanel, to clear plot when source, destination map are the same
+     */
+    public void clearPlots(){
+        this.m_plotPanel.lockData(true); //if not true, repaint don't work
+        this.m_plotPanel.clearPlots();
+        this.m_plotPanel.repaint();
+        this.m_plotPanel.lockData(m_dataLocked);//back to previous state, if not, the next setData will not repaint
+    }
     private void setDataImpl(List<ExtendedTableModelInterface> valuesList, List<CrossSelectionInterface> crossSelectionInterfaceList) {
 
         m_valuesList = valuesList;
@@ -537,7 +546,7 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
         }
     }
 
-    private static class ReferenceToColumn {
+    protected static class ReferenceToColumn {
         private final String m_name;
         private final int m_columnIndex;
         public ReferenceToColumn(String name, int columnIndex) {

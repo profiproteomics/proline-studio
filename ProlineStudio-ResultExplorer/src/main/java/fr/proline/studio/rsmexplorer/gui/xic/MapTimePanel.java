@@ -134,8 +134,8 @@ public class MapTimePanel extends HourglassPanel implements DataBoxPanelInterfac
         return m_dataBox.getSaveAction(splittedPanel);
     }
     
-    public void setData(Long taskId,  MapAlignment mapAlignment,  List<MapTime> mapTimes, Color color, String title, boolean finished) {
-        ((MapTimeTableModel)((CompoundTableModel) m_timeTable.getModel()).getBaseModel()).setData(taskId, mapAlignment, mapTimes, color, title);
+    public void setData(Long taskId,  MapAlignment mapAlignment,  List<MapTime> mapTimes, Color color, String title, boolean finished, String fromMapName) {
+        ((MapTimeTableModel)((CompoundTableModel) m_timeTable.getModel()).getBaseModel()).setData(taskId, mapAlignment, mapTimes, color, title,fromMapName );
 
         // select the first row
         if ((mapTimes != null) && (mapTimes.size() > 0)) {

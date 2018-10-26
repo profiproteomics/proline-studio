@@ -10,7 +10,7 @@ import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
  * @author JM235353
  */
 public class DataboxMultiGraphics extends AbstractDataBox  {
-
+ 
     private List<ExtendedTableModelInterface> m_valuesList = null;
 
     private boolean m_defaultLocked = false;
@@ -47,7 +47,9 @@ public class DataboxMultiGraphics extends AbstractDataBox  {
         p.setDataBox(this);
         setDataBoxPanelInterface(p);
     }
-
+    /**
+     * m_previousDataBox is DataboxMapAlignment
+     */
     @Override
     public void dataChanged() {
         final List<ExtendedTableModelInterface> valuesL = (List<ExtendedTableModelInterface>) m_previousDataBox.getData(false, ExtendedTableModelInterface.class, true);

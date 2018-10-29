@@ -302,9 +302,13 @@ public class MapAlignmentPanel extends HourglassPanel implements DataBoxPanelInt
         long mapIdSrc = getSelectedMapId(m_cbSourceMaps);
         long mapIdDst = getSelectedMapId(m_cbDestMaps);
         if (mapIdSrc == mapIdDst) {
+            this.m_alignmentGraphicPanel.ClearAxisTitle(m_quantChannelInfo.getMapTitle(mapIdSrc));
             this.m_alignmentGraphicPanel.clearPlots();
-            if ( this.m_alignmentGraphicPanel_2.isVisible())
+            if (this.m_alignmentGraphicPanel_2.isVisible()) {//iterative mode, and nobody of source, destination map is reference map
+                this.m_alignmentGraphicPanel_2.ClearAxisTitle(m_quantChannelInfo.getMapTitle(mapIdSrc));
                 this.m_alignmentGraphicPanel_2.clearPlots();
+                this.m_alignmentGraphicPanel_2.setVisible(false);
+            }
         } else {
             List<MapAlignment> mapAList;
             MapAlignment map = MapAlignmentConverter.getMapAlgn(mapIdSrc, mapIdDst, m_allMapAlignments);

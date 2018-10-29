@@ -42,14 +42,13 @@ import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
  * @author JM235353
  */
 public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelInterface, PlotToolbarListener {
-   
-    
+
     private AbstractDataBox m_dataBox;
 
     private BasePlotPanel m_plotPanel;
-    
+
     private boolean m_canChooseColor = false;
-    
+
     private JComboBox<PlotType> m_allPlotsComboBox;
     private JComboBox<String> m_valueXComboBox;
     private JComboBox<String> m_valueYComboBox;
@@ -57,40 +56,42 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
     private JLabel m_valueXLabel;
     private JLabel m_valueYLabel;
     private JLabel m_valueZLabel;
-    
+
     private List<PlotBaseAbstract> m_plotGraphicsList = null;
-    
+
     private List<ExtendedTableModelInterface> m_valuesList = null;
     private List<CrossSelectionInterface> m_crossSelectionInterfaceList = null;
-    
+
     private boolean m_isUpdatingCbx = false;
-    
+
     private boolean m_dataLocked = false;
-    
+
     private JToggleButton m_gridButton = null;
     private JButton m_importSelectionButton = null;
     private JButton m_exportSelectionButton = null;
-    
+
     public MultiGraphicsPanel(boolean dataLocked, boolean canChooseColor) {
-        setLayout(new BorderLayout());
-        
         m_dataLocked = dataLocked;
-        m_canChooseColor = canChooseColor ;
+        m_canChooseColor = canChooseColor;
         m_plotGraphicsList = new ArrayList();
         
+        initComponent();
+    }
+
+    private void initComponent() {
         JPanel internalPanel = createInternalPanel();
-        add(internalPanel, BorderLayout.CENTER);
-
         JToolBar toolbar = initToolbar();
-        add(toolbar, BorderLayout.WEST);
 
+        this.setLayout(new BorderLayout());
+        add(internalPanel, BorderLayout.CENTER);
+        add(toolbar, BorderLayout.WEST);
     }
     
     public final JPanel createInternalPanel() {
-        
+
         JPanel internalPanel = new JPanel();
         internalPanel.setLayout(new GridBagLayout());
-        
+
         GridBagConstraints c = new GridBagConstraints();
         c.anchor = GridBagConstraints.NORTHWEST;
         c.fill = GridBagConstraints.BOTH;
@@ -99,7 +100,7 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
         m_plotPanel = new BasePlotPanel();
         m_plotPanel.setPlotToolbarListener(this);
         JPanel selectPanel = createSelectPanel();
-        
+
         c.gridx = 0;
         c.gridy = 0;
         internalPanel.add(selectPanel, c);
@@ -111,9 +112,9 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
 
         return internalPanel;
     }
- 
+
     public final JToolBar initToolbar() {
-            
+
         JToolBar toolbar = new JToolBar(JToolBar.VERTICAL);
         toolbar.setFloatable(false);
 
@@ -126,9 +127,9 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
                 m_plotPanel.displayGrid(m_gridButton.isSelected());
             }
         });
-        
-        m_importSelectionButton  = new JButton(IconManager.getIcon(IconManager.IconType.IMPORT_TABLE_SELECTION));
-        m_importSelectionButton.setToolTipText( "Import Selection from Previous View");
+
+        m_importSelectionButton = new JButton(IconManager.getIcon(IconManager.IconType.IMPORT_TABLE_SELECTION));
+        m_importSelectionButton.setToolTipText("Import Selection from Previous View");
         m_importSelectionButton.setFocusPainted(false);
         m_importSelectionButton.setEnabled(!m_dataLocked);
         m_importSelectionButton.addActionListener(new ActionListener() {
@@ -141,7 +142,7 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
                 }*/
             }
         });
-        m_exportSelectionButton  = new JButton(IconManager.getIcon(IconManager.IconType.EXPORT_TABLE_SELECTION));
+        m_exportSelectionButton = new JButton(IconManager.getIcon(IconManager.IconType.EXPORT_TABLE_SELECTION));
         m_exportSelectionButton.setToolTipText("Export Selection to Previous View");
         m_exportSelectionButton.setFocusPainted(false);
         m_exportSelectionButton.setEnabled(!m_dataLocked);
@@ -154,10 +155,9 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
                 }*/
             }
         });
-        
-        
+
         final JButton lockButton = new JButton(m_dataLocked ? IconManager.getIcon(IconManager.IconType.LOCK) : IconManager.getIcon(IconManager.IconType.UNLOCK));
-        lockButton.setToolTipText( "Lock/Unlock Input Data");
+        lockButton.setToolTipText("Lock/Unlock Input Data");
         lockButton.setFocusPainted(false);
         lockButton.addActionListener(new ActionListener() {
             @Override
@@ -180,14 +180,12 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
                 }
                 importSelectionButton.setEnabled(!m_dataLocked);
                 exportSelectionButton.setEnabled(!m_dataLocked);
-                        */
+                 */
             }
         });
-        
 
-        
         ExportButton exportImageButton = new ExportButton("Graphic", m_plotPanel);
-        
+
         JButton colorPicker = new JButton(IconManager.getIcon(IconManager.IconType.SETTINGS));
         colorPicker.setFocusPainted(false);
         colorPicker.addActionListener(new ActionListener() {
@@ -201,18 +199,14 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
                 DefaultParameterDialog parameterDialog = new DefaultParameterDialog(WindowManager.getDefault().getMainWindow(), "Plot Parameters", parameterListArray);
                 parameterDialog.setLocationRelativeTo(m_plotPanel);
                 parameterDialog.setVisible(true);
-                
+
                 if (parameterDialog.getButtonClicked() == DefaultParameterDialog.BUTTON_OK) {
                     m_plotPanel.parametersChanged();
                 }
-                
-                
-                
-                
+
             }
         });
-        
-        
+
         // add buttons to toolbar
         toolbar.add(m_gridButton);
         if (m_canChooseColor) {
@@ -223,15 +217,13 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
         toolbar.add(importSelectionButton);
         toolbar.add(exportSelectionButton);
         toolbar.addSeparator(); // ----
-                */
+         */
         toolbar.add(exportImageButton);
 
         return toolbar;
 
     }
-    
 
-    
     private JPanel createSelectPanel() {
         JPanel selectPanel = new JPanel();
         selectPanel.setLayout(new GridBagLayout());
@@ -240,17 +232,17 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
         c.anchor = GridBagConstraints.NORTHWEST;
         c.fill = GridBagConstraints.BOTH;
         c.insets = new java.awt.Insets(5, 5, 5, 5);
-        
+
         JLabel selectLabel = new JLabel("Graphic :");
         m_allPlotsComboBox = new JComboBox(PlotType.LINEAR_PLOTS);
-         m_valueXComboBox = new JComboBox();
+        m_valueXComboBox = new JComboBox();
         m_valueYComboBox = new JComboBox();
         m_valueZComboBox = new JComboBox();
         m_valueXLabel = new JLabel();
         m_valueYLabel = new JLabel();
         m_valueZLabel = new JLabel();
         updateXYCbxVisibility();
-        
+
         m_allPlotsComboBox.addActionListener(new ActionListener() {
 
             @Override
@@ -258,11 +250,10 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
                 fillXYCombobox();
                 setDataImpl(m_valuesList, m_crossSelectionInterfaceList);
                 updateXYCbxVisibility();
-                
+
             }
         });
-        
-        
+
         c.gridx = 0;
         c.gridy = 0;
         selectPanel.add(selectLabel, c);
@@ -272,51 +263,51 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
 
         c.gridx++;
         selectPanel.add(m_valueXLabel, c);
-        
+
         c.gridx++;
         selectPanel.add(m_valueXComboBox, c);
-        
+
         c.gridx++;
         selectPanel.add(m_valueYLabel, c);
-        
+
         c.gridx++;
         selectPanel.add(m_valueYComboBox, c);
-        
+
         c.gridx++;
         selectPanel.add(m_valueZLabel, c);
-        
+
         c.gridx++;
         selectPanel.add(m_valueZComboBox, c);
-        
+
         c.gridx++;
         c.weightx = 1;
         selectPanel.add(Box.createHorizontalGlue(), c);
-        
+
         return selectPanel;
-        
+
     }
-    
+
     private void updateXYCbxVisibility() {
         PlotType plotType = (PlotType) m_allPlotsComboBox.getSelectedItem();
-        
+
         m_valueXLabel.setVisible(plotType.needsX());
         m_valueXComboBox.setVisible(plotType.needsX());
-        
+
         m_valueYLabel.setVisible(plotType.needsY());
         m_valueYComboBox.setVisible(plotType.needsY());
-        
+
         m_valueZLabel.setVisible(plotType.needsZ());
         m_valueZComboBox.setVisible(plotType.needsZ());
-        
+
         if (plotType.needsX()) {
             m_valueXLabel.setText(plotType.getXLabel());
         }
         if (plotType.needsY()) {
             m_valueYLabel.setText(plotType.getYLabel());
         }
-        
+
     }
-    
+
     private void fillXYCombobox() {
 
         m_isUpdatingCbx = true;
@@ -332,11 +323,11 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
 
             int nbValuesType = 0;
             boolean hasValues = m_valuesList != null && !m_valuesList.isEmpty();
-            
+
             if (hasValues) {
                 nbValuesType = m_valuesList.get(0).getColumnCount();
             }
-            
+
             // find the best column for the current plot
             int bestColX = -1;
             int bestColY = -1;
@@ -366,7 +357,7 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
                         bestColIndexYCbx = nbValuesInCbx;
                     }
                     nbValuesInCbx++;
-                    
+
                 }
             }
             if (nbValuesType > 0) {
@@ -377,24 +368,21 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
             }
             if (plotType.needsZ()) {
                 ArrayList<String> zValues = plotType.getZValues();
-                for (int i=0;i<zValues.size();i++) {
+                for (int i = 0; i < zValues.size(); i++) {
                     ((DefaultComboBoxModel) m_valueZComboBox.getModel()).addElement(zValues.get(i));
                 }
             }
-            
-            
-
 
         } finally {
             m_isUpdatingCbx = false;
         }
     }
-    
+
     public void setData(List<ExtendedTableModelInterface> valuesList, List<CrossSelectionInterface> crossSelectionInterfaceList) {
         if (m_plotPanel.isLocked()) {
             return;
         }
-        for (int i=0; i<valuesList.size(); i++) {
+        for (int i = 0; i < valuesList.size(); i++) {
             ExtendedTableModelInterface values = valuesList.get(i);
             if ((m_dataLocked) && !(values instanceof LockedDataModel)) {
                 // wart for first call when directly locked
@@ -402,37 +390,44 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
                 valuesList.set(i, values);
             }
         }
-        
+
         setDataImpl(valuesList, crossSelectionInterfaceList);
         if (m_dataLocked) {
             // check that plotPanel corresponds, it can not correspond at the first call
             m_plotPanel.lockData(m_dataLocked);
         }
     }
+
     /**
-     * @KX call by MapAlignementPanel, to clear plot when source, destination map are the same
+     * @KX call by MapAlignementPanel, to clear plot when source, destination
+     * map are the same
      */
-    public void clearPlots(){
+    public void clearPlots() {
         this.m_plotPanel.lockData(true); //if not true, repaint don't work
         this.m_plotPanel.clearPlots();
         this.m_plotPanel.repaint();
         this.m_plotPanel.lockData(m_dataLocked);//back to previous state, if not, the next setData will not repaint
     }
+
+    public void ClearAxisTitle(String xTitle) {
+        m_plotPanel.setXAxisTitle("Time in Map " + xTitle + " (min)");
+        m_plotPanel.setYAxisTitle("Delta time in Map (s)");
+    }
+
     private void setDataImpl(List<ExtendedTableModelInterface> valuesList, List<CrossSelectionInterface> crossSelectionInterfaceList) {
 
         m_valuesList = valuesList;
         m_crossSelectionInterfaceList = crossSelectionInterfaceList;
         m_plotGraphicsList.clear();
-        
+
         if (valuesList == null) {
             return;
         }
-        
-        
-        if (m_valueXComboBox.getItemCount() == 0) {  
-            
+
+        if (m_valueXComboBox.getItemCount() == 0) {
+
             fillXYCombobox();
-            
+
             ActionListener actionForXYCbx = new ActionListener() {
 
                 @Override
@@ -451,27 +446,26 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
                         m_plotPanel.updateAxis(plotGraphic);
                     }
                     m_plotPanel.repaint();
-                    
+
                 }
-                
+
             };
-            
-            
+
             m_valueXComboBox.addActionListener(actionForXYCbx);
             m_valueYComboBox.addActionListener(actionForXYCbx);
             m_valueZComboBox.addActionListener(actionForXYCbx);
-            
+
         }
-        
+
         ReferenceToColumn refX = (ReferenceToColumn) m_valueXComboBox.getSelectedItem();
         ReferenceToColumn refY = (ReferenceToColumn) m_valueYComboBox.getSelectedItem();
         //String zParameter = (String) m_valueZComboBox.getSelectedItem();
         PlotType plotType = (PlotType) m_allPlotsComboBox.getSelectedItem();
         switch (plotType) {
-            case LINEAR_PLOT:{
+            case LINEAR_PLOT: {
                 m_plotPanel.clearPlots();
-                for(int i=0; i<m_valuesList.size(); i++){
-                    CrossSelectionInterface crossSelectionInterface = (m_crossSelectionInterfaceList == null) || (m_crossSelectionInterfaceList.size() <= i) ? null : m_crossSelectionInterfaceList.get(i) ;
+                for (int i = 0; i < m_valuesList.size(); i++) {
+                    CrossSelectionInterface crossSelectionInterface = (m_crossSelectionInterfaceList == null) || (m_crossSelectionInterfaceList.size() <= i) ? null : m_crossSelectionInterfaceList.get(i);
                     //create plotGraphics for each table
                     PlotLinear plotGraphics = new PlotLinear(m_plotPanel, m_valuesList.get(i), crossSelectionInterface, refX.getColumnIndex(), refY.getColumnIndex());
                     plotGraphics.setPlotInformation(m_valuesList.get(i).getPlotInformation());
@@ -480,26 +474,22 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
                     m_plotGraphicsList.add(plotGraphics);
                 }
                 m_plotPanel.repaint();
-            break;
+                break;
             }
         }
-        
-        
-        
-        
-        
+
     }
-    
-        
+
     @Override
     public void addSingleValue(Object v) {
         // should not be called
     }
-    
+
     @Override
     public void setDataBox(AbstractDataBox dataBox) {
         m_dataBox = dataBox;
     }
+
     @Override
     public AbstractDataBox getDataBox() {
         return m_dataBox;
@@ -529,7 +519,7 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
                 }
                 break;
         }
-        
+
     }
 
     @Override
@@ -547,22 +537,25 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
         }
     }
 
+
     protected static class ReferenceToColumn {
+
         private final String m_name;
         private final int m_columnIndex;
+
         public ReferenceToColumn(String name, int columnIndex) {
             m_name = name;
             m_columnIndex = columnIndex;
         }
-        
+
         public int getColumnIndex() {
             return m_columnIndex;
         }
-        
+
         @Override
         public String toString() {
             return m_name;
         }
     }
-    
+
 }

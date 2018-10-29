@@ -199,9 +199,9 @@ public class MapAlignmentPanel extends HourglassPanel implements DataBoxPanelInt
         sb.append("<html>");
 
         sb.append("Reference Map: ");
-        sb.append("<font color='").append(htmlColor).append("'>&#x25A0;&nbsp;</font><b>");
+        sb.append("<font color='").append(htmlColor).append("'>&#x25A0;&nbsp;</font>");
         sb.append(referenceMapTitle);
-        sb.append("</b>, Alignment Mode : ");
+        sb.append(", Alignment Mode : ");
         sb.append(m_alnMode);
         sb.append("</html>");
         m_labelTitle.setText(sb.toString());
@@ -303,6 +303,8 @@ public class MapAlignmentPanel extends HourglassPanel implements DataBoxPanelInt
         long mapIdDst = getSelectedMapId(m_cbDestMaps);
         if (mapIdSrc == mapIdDst) {
             this.m_alignmentGraphicPanel.clearPlots();
+            if ( this.m_alignmentGraphicPanel_2.isVisible())
+                this.m_alignmentGraphicPanel_2.clearPlots();
         } else {
             List<MapAlignment> mapAList;
             MapAlignment map = MapAlignmentConverter.getMapAlgn(mapIdSrc, mapIdDst, m_allMapAlignments);
@@ -340,7 +342,7 @@ public class MapAlignmentPanel extends HourglassPanel implements DataBoxPanelInt
             String toMap = m_quantChannelInfo.getMapTitle(m.getDestinationMap().getId());
             String title = "Map Alignment from " + fromMap + " (to. " + toMap + ")";
             Color color = m_quantChannelInfo.getMapColor(m.getDestinationMap().getId());
-            mapTimePanel.setData((long) -1, m, listMapTime, color, title, true, fromMap);
+            mapTimePanel.setData((long) -1, m, listMapTime, color, title, true, fromMap, toMap);//set graphic content
             mapTimePanelist.add(mapTimePanel);
         }
         for (MapTimePanel mPanel : mapTimePanelist) {

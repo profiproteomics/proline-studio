@@ -26,29 +26,30 @@ import javax.swing.table.TableCellRenderer;
 
 /**
  * map alignment table model (table not displayed, only used for graphic)
+ *
  * @author MB243701
  */
-public class MapTimeTableModel  extends LazyTableModel implements GlobalTableModelInterface {
+public class MapTimeTableModel extends LazyTableModel implements GlobalTableModelInterface {
+
     public static final int COLTYPE_TIME = 0;
     public static final int COLTYPE_DELTA_TIME = 1;
-    
+
     private String[] m_columnNames;
     private static final String[] m_toolTipColumns = {"Time (min)", "Delta time (s)"};
-    
+
     private MapAlignment m_mapAlignment;
     private List<MapTime> m_mapTimes = null;
     private Color m_color = null;
     private String m_title = null;
-    
+
     private final HashMap<Integer, TableCellRenderer> m_rendererMap = new HashMap();
     private String m_modelName;
 
     public MapTimeTableModel(LazyTable table) {
         super(table);
-         m_columnNames = new String[]{"Time in Reference Map (min)", "Delta time (s)"};
+        m_columnNames = new String[]{"Time in Reference Map (min)", "Delta time (s)"};
     }
-    
-    
+
     @Override
     public int getSubTaskId(int col) {
         return -1;
@@ -63,12 +64,11 @@ public class MapTimeTableModel  extends LazyTableModel implements GlobalTableMod
     public int getColumnCount() {
         return m_columnNames.length;
     }
-    
+
     @Override
     public String getColumnName(int col) {
-        return  m_columnNames[col];
+        return m_columnNames[col];
     }
-
 
     @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
@@ -76,7 +76,7 @@ public class MapTimeTableModel  extends LazyTableModel implements GlobalTableMod
         MapTime mapTime = m_mapTimes.get(rowIndex);
 
         switch (columnIndex) {
-           case COLTYPE_TIME: {
+            case COLTYPE_TIME: {
                 LazyData lazyData = getLazyData(rowIndex, columnIndex);
                 lazyData.setData(mapTime.getTime());
                 return lazyData;
@@ -111,16 +111,16 @@ public class MapTimeTableModel  extends LazyTableModel implements GlobalTableMod
         TableCellRenderer renderer = null;
 
         switch (col) {
-            case COLTYPE_TIME:{
+            case COLTYPE_TIME: {
                 renderer = new TimeRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)));
                 break;
             }
-            case COLTYPE_DELTA_TIME :{
-                renderer = new DoubleRenderer( new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)) );
+            case COLTYPE_DELTA_TIME: {
+                renderer = new DoubleRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)));
                 break;
             }
         }
-        
+
         m_rendererMap.put(col, renderer);
         return renderer;
     }
@@ -132,7 +132,7 @@ public class MapTimeTableModel  extends LazyTableModel implements GlobalTableMod
 
     @Override
     public Class getDataColumnClass(int columnIndex) {
-        switch (columnIndex){
+        switch (columnIndex) {
             case COLTYPE_TIME:
             case COLTYPE_DELTA_TIME:
                 return Double.class;
@@ -160,7 +160,7 @@ public class MapTimeTableModel  extends LazyTableModel implements GlobalTableMod
 
     @Override
     public int[] getKeysColumn() {
-        int[] keys = { COLTYPE_TIME };
+        int[] keys = {COLTYPE_TIME};
         return keys;
     }
 
@@ -217,7 +217,7 @@ public class MapTimeTableModel  extends LazyTableModel implements GlobalTableMod
 
     @Override
     public int[] getBestColIndex(PlotType plotType) {
- 
+
         switch (plotType) {
             case LINEAR_PLOT: {
                 int[] cols = new int[2];
@@ -233,7 +233,7 @@ public class MapTimeTableModel  extends LazyTableModel implements GlobalTableMod
     public String getExportRowCell(int row, int col) {
         return null; // no specific export
     }
-    
+
     @Override
     public ArrayList<ExportFontData> getExportFonts(int row, int col) {
         return null;
@@ -243,29 +243,26 @@ public class MapTimeTableModel  extends LazyTableModel implements GlobalTableMod
     public String getExportColumnName(int col) {
         return m_columnNames[col];
     }
-    
-    public void setData(Long taskId, MapAlignment mapAlignment,  List<MapTime> mapTimes, Color color, String title) {
+
+    public void setData(Long taskId, MapAlignment mapAlignment, List<MapTime> mapTimes, Color color, String title) {
+        this.setData(taskId, mapAlignment, mapTimes, color, title, "(Reference map)", "");
+    }
+
+    public void setData(Long taskId, MapAlignment mapAlignment, List<MapTime> mapTimes, Color color, String title, String fromMapName) {
+        this.setData(taskId, mapAlignment, mapTimes, color, title, fromMapName, "");
+    }
+
+    public void setData(Long taskId, MapAlignment mapAlignment, List<MapTime> mapTimes, Color color, String title, String fromMapName, String toMapName) {
         m_mapAlignment = mapAlignment;
         m_mapTimes = mapTimes;
         m_color = color;
         m_title = title;
-
         m_taskId = taskId;
-
+        m_columnNames[0] = "Time in Map " + fromMapName + " (min)";
+        m_columnNames[1] = "Delta time in Map " + toMapName + " (s)";
         fireTableDataChanged();
     }
 
-    public void setData(Long taskId, MapAlignment mapAlignment,  List<MapTime> mapTimes, Color color, String title, String fromMapName) {
-        m_mapAlignment = mapAlignment;
-        m_mapTimes = mapTimes;
-        m_color = color;
-        m_title = title;
-
-        m_taskId = taskId;
-
-        fireTableDataChanged();
-        m_columnNames[0] = "Time in Map "+ fromMapName + " (min)";
-    }
     public void dataUpdated() {
         // no need to do an updateMinMax : scores are known at once
         fireTableDataChanged();
@@ -276,8 +273,7 @@ public class MapTimeTableModel  extends LazyTableModel implements GlobalTableMod
     public GlobalTableModelInterface getFrozzenModel() {
         return this;
     }
-    
- 
+
     @Override
     public ArrayList<ExtraDataType> getExtraDataTypes() {
         ArrayList<ExtraDataType> list = new ArrayList<>();
@@ -298,11 +294,10 @@ public class MapTimeTableModel  extends LazyTableModel implements GlobalTableMod
         }
         return null;
     }
-    
+
     @Override
     public Object getColValue(Class c, int col) {
         return null;
     }
-    
 
 }

@@ -36,29 +36,30 @@ import org.slf4j.LoggerFactory;
 
 /**
  * map alignement data
+ *
  * @author MB243701
  */
-public class MapTimePanel extends HourglassPanel implements DataBoxPanelInterface , GlobalTabelModelProviderInterface {
+public class MapTimePanel extends HourglassPanel implements DataBoxPanelInterface, GlobalTabelModelProviderInterface {
+
     private static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
     private AbstractDataBox m_dataBox;
-    
+
     private JScrollPane m_timeScrollPane;
     private MapAlignmentTable m_timeTable;
     private MarkerContainerPanel m_markerContainerPanel;
-    
-    
+
     public MapTimePanel() {
         super();
         initComponents();
     }
-    
-    private void initComponents(){
+
+    private void initComponents() {
         setLayout(new BorderLayout());
         JPanel expDesignPanel = createMapAlignmentPanel();
         this.add(expDesignPanel, BorderLayout.CENTER);
     }
-    
-    private JPanel createMapAlignmentPanel(){
+
+    private JPanel createMapAlignmentPanel() {
         JPanel mapAlignmentPanel = new JPanel();
         mapAlignmentPanel.setBounds(0, 0, 500, 400);
         mapAlignmentPanel.setLayout(new BorderLayout());
@@ -70,16 +71,16 @@ public class MapTimePanel extends HourglassPanel implements DataBoxPanelInterfac
         mapAlignmentPanel.add(internalPanel, BorderLayout.CENTER);
         return mapAlignmentPanel;
     }
-    
+
     private JToolBar initToolbar() {
         JToolBar toolbar = new JToolBar(JToolBar.VERTICAL);
         toolbar.setFloatable(false);
         return toolbar;
     }
-    
-    private JPanel createInternalPanel(){
+
+    private JPanel createInternalPanel() {
         JPanel internalPanel = new JPanel();
-        
+
         internalPanel.setLayout(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();
         c.anchor = GridBagConstraints.NORTHWEST;
@@ -87,15 +88,14 @@ public class MapTimePanel extends HourglassPanel implements DataBoxPanelInterfac
         c.insets = new java.awt.Insets(5, 5, 5, 5);
         // create objects
         m_timeScrollPane = new JScrollPane();
-        
+
         m_timeTable = new MapAlignmentTable();
-        m_timeTable.setModel(new CompoundTableModel(new MapTimeTableModel((LazyTable)m_timeTable), true));
-        
-        
+        m_timeTable.setModel(new CompoundTableModel(new MapTimeTableModel((LazyTable) m_timeTable), true));
+
         m_timeTable.setSortable(false);
 
         m_markerContainerPanel = new MarkerContainerPanel(m_timeScrollPane, m_timeTable);
-        
+
         m_timeScrollPane.setViewportView(m_timeTable);
         m_timeTable.setFillsViewportHeight(true);
         m_timeTable.setViewport(m_timeScrollPane.getViewport());
@@ -133,9 +133,25 @@ public class MapTimePanel extends HourglassPanel implements DataBoxPanelInterfac
     public ActionListener getSaveAction(SplittedPanelContainer splittedPanel) {
         return m_dataBox.getSaveAction(splittedPanel);
     }
+
+  
+    public void setData(Long taskId, MapAlignment mapAlignment, List<MapTime> mapTimes, Color color, String title, boolean finished, String fromMapName) {
+        this.setData(taskId, mapAlignment, mapTimes, color, title, finished, fromMapName, "");
+      }
     
-    public void setData(Long taskId,  MapAlignment mapAlignment,  List<MapTime> mapTimes, Color color, String title, boolean finished, String fromMapName) {
-        ((MapTimeTableModel)((CompoundTableModel) m_timeTable.getModel()).getBaseModel()).setData(taskId, mapAlignment, mapTimes, color, title,fromMapName );
+    /**
+     * 
+     * @param taskId
+     * @param mapAlignment
+     * @param mapTimes
+     * @param color
+     * @param title
+     * @param finished
+     * @param fromMapNamethe map Name will be shown in the AxisX of the curve
+     * @param toMapName map Name will be shown in the AxisY of the curve
+     */
+    public void setData(Long taskId, MapAlignment mapAlignment, List<MapTime> mapTimes, Color color, String title, boolean finished, String fromMapName, String toMapName) {
+        ((MapTimeTableModel) ((CompoundTableModel) m_timeTable.getModel()).getBaseModel()).setData(taskId, mapAlignment, mapTimes, color, title, fromMapName, toMapName);
 
         // select the first row
         if ((mapTimes != null) && (mapTimes.size() > 0)) {
@@ -147,57 +163,56 @@ public class MapTimePanel extends HourglassPanel implements DataBoxPanelInterfac
         }
 
     }
-    
+
     public void dataUpdated(SubTask subTask, boolean finished) {
         updateData();
     }
-    
-    private void updateData(){
-        
+
+    private void updateData() {
+
     }
-    
+
     @Override
     public CrossSelectionInterface getCrossSelectionInterface() {
         return m_timeTable;
     }
-    
+
     @Override
     public void addSingleValue(Object v) {
         getGlobalTableModelInterface().addSingleValue(v);
     }
-    
+
     @Override
     public GlobalTableModelInterface getGlobalTableModelInterface() {
         return (GlobalTableModelInterface) m_timeTable.getModel();
     }
+
     @Override
     public JXTable getGlobalAssociatedTable() {
         return m_timeTable;
     }
-    
-    
 
-private class MapAlignmentTable extends LazyTable  {
+    private class MapAlignmentTable extends LazyTable {
 
         public MapAlignmentTable() {
             super(m_timeScrollPane.getVerticalScrollBar());
         }
-        
-        
+
         @Override
         public void addTableModelListener(TableModelListener l) {
             getModel().addTableModelListener(l);
         }
-        
-        /** 
+
+        /**
          * Called whenever the value of the selection changes.
+         *
          * @param e the event that characterizes the change.
          */
         @Override
         public void valueChanged(ListSelectionEvent e) {
-            
+
             super.valueChanged(e);
-            
+
             if (selectionWillBeRestored) {
                 return;
             }
@@ -208,54 +223,50 @@ private class MapAlignmentTable extends LazyTable  {
         }
 
         public void dataUpdated(SubTask subTask, boolean finished) {
-            
+
             LazyTable.LastAction keepLastAction = m_lastAction;
             try {
-            // retrieve selected row
-            int rowSelected = getSelectionModel().getMinSelectionIndex();
-            int rowSelectedInModel = (rowSelected == -1) ? -1 : convertRowIndexToModel(rowSelected);
+                // retrieve selected row
+                int rowSelected = getSelectionModel().getMinSelectionIndex();
+                int rowSelectedInModel = (rowSelected == -1) ? -1 : convertRowIndexToModel(rowSelected);
 
-            // Update Model (but protein set table must not react to the model update)
-            
-            selectionWillBeRestored(true);
-            try {
-                ((MapTimeTableModel) (((CompoundTableModel) getModel()).getBaseModel())).dataUpdated();
-            } finally {
-                selectionWillBeRestored(false);
-            }
-
-            
-            
-            // restore selected row
-            if (rowSelectedInModel != -1) {
-                int rowSelectedInView = convertRowIndexToView(rowSelectedInModel);
-                //getSelectionModel().setSelectionInterval(rowSelectedInView, rowSelectedInView);
-                setSelection(rowSelectedInView);
-
-                
-                // if the subtask correspond to the loading of the data of the sorted column,
-                // we keep the row selected visible
-                if (((keepLastAction == LazyTable.LastAction.ACTION_SELECTING ) || (keepLastAction == LazyTable.LastAction.ACTION_SORTING)) && (subTask.getSubTaskId() == ((CompoundTableModel) getModel()).getSubTaskId( getSortedColumnIndex() )) ) {
-                    scrollRowToVisible(rowSelectedInView);
+                // Update Model (but protein set table must not react to the model update)
+                selectionWillBeRestored(true);
+                try {
+                    ((MapTimeTableModel) (((CompoundTableModel) getModel()).getBaseModel())).dataUpdated();
+                } finally {
+                    selectionWillBeRestored(false);
                 }
-                    
-            }
+
+                // restore selected row
+                if (rowSelectedInModel != -1) {
+                    int rowSelectedInView = convertRowIndexToView(rowSelectedInModel);
+                    //getSelectionModel().setSelectionInterval(rowSelectedInView, rowSelectedInView);
+                    setSelection(rowSelectedInView);
+
+                    // if the subtask correspond to the loading of the data of the sorted column,
+                    // we keep the row selected visible
+                    if (((keepLastAction == LazyTable.LastAction.ACTION_SELECTING) || (keepLastAction == LazyTable.LastAction.ACTION_SORTING)) && (subTask.getSubTaskId() == ((CompoundTableModel) getModel()).getSubTaskId(getSortedColumnIndex()))) {
+                        scrollRowToVisible(rowSelectedInView);
+                    }
+
+                }
 
             } finally {
 
                 m_lastAction = keepLastAction;
- 
+
             }
-            
+
             if (finished) {
                 setSortable(true);
             }
         }
-        
+
         @Override
         public void sortingChanged(int col) {
         }
-    
+
         public void selectionWillBeRestored(boolean b) {
             selectionWillBeRestored = b;
         }
@@ -270,7 +281,7 @@ private class MapAlignmentTable extends LazyTable  {
         public boolean isLoaded() {
             return m_dataBox.isLoaded();
         }
-        
+
         @Override
         public TablePopupMenu initPopupMenu() {
             return null;
@@ -282,9 +293,5 @@ private class MapAlignmentTable extends LazyTable  {
             // nothing to do
         }
 
-
-
-        
     }
 }
-

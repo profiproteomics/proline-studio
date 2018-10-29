@@ -116,7 +116,7 @@ public class DataboxMapAlignment extends AbstractDataBox {
             String toMap = m_quantChannelInfo.getMapTitle(mapAlignment.getDestinationMap().getId());
             String title = "Map Alignment from " + fromMap + " (to " + toMap + ")";
             Color color = m_quantChannelInfo.getMapColor(mapAlignment.getDestinationMap().getId());
-            mapTimePanel.setData((long) -1, mapAlignment, listMapTime, color, title, true, fromMap);
+            mapTimePanel.setData((long) -1, mapAlignment, listMapTime, color, title, true, fromMap);  //set mapAlignemnt curve data with its AxisX
             list.add(mapTimePanel);
         }
         return list;

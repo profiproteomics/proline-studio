@@ -472,6 +472,7 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
                 m_plotPanel.clearPlots();
                 for(int i=0; i<m_valuesList.size(); i++){
                     CrossSelectionInterface crossSelectionInterface = (m_crossSelectionInterfaceList == null) || (m_crossSelectionInterfaceList.size() <= i) ? null : m_crossSelectionInterfaceList.get(i) ;
+                    //create plotGraphics for each table
                     PlotLinear plotGraphics = new PlotLinear(m_plotPanel, m_valuesList.get(i), crossSelectionInterface, refX.getColumnIndex(), refY.getColumnIndex());
                     plotGraphics.setPlotInformation(m_valuesList.get(i).getPlotInformation());
                     plotGraphics.setIsPaintMarker(false);

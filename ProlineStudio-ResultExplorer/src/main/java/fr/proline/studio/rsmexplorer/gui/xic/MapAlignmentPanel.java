@@ -319,14 +319,16 @@ public class MapAlignmentPanel extends HourglassPanel implements DataBoxPanelInt
                 this.m_alignmentGraphicPanel_2.setVisible(false);
                 setDataGraphicTableModel(map, this.m_alignmentGraphicPanel);
             } else {
-                this.m_alignmentGraphicPanel_2.setVisible(true);
-                this.m_splitPane.resetToPreferredSizes();
                 //from source to reference
                 map = MapAlignmentConverter.getMapAlgn(mapIdSrc, m_referenceMapId, m_allMapAlignments);
-                setDataGraphicTableModel(map, m_alignmentGraphicPanel);
-                //from reference to source
-                map = MapAlignmentConverter.getMapAlgn(m_referenceMapId, mapIdDst, m_allMapAlignments);
-                setDataGraphicTableModel(map, m_alignmentGraphicPanel_2);
+                if (map != null) { // in simple parameters extraction abundance, there is not any map Alignment
+                    setDataGraphicTableModel(map, m_alignmentGraphicPanel);
+                    //from reference to source
+                    map = MapAlignmentConverter.getMapAlgn(m_referenceMapId, mapIdDst, m_allMapAlignments);
+                    setDataGraphicTableModel(map, m_alignmentGraphicPanel_2);
+                    this.m_alignmentGraphicPanel_2.setVisible(true);
+                    this.m_splitPane.resetToPreferredSizes();
+                }
             }
 
         }

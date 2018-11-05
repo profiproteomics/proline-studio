@@ -74,7 +74,7 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
         m_dataLocked = dataLocked;
         m_canChooseColor = canChooseColor;
         m_plotGraphicsList = new ArrayList();
-        
+
         initComponent();
     }
 
@@ -86,7 +86,7 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
         add(internalPanel, BorderLayout.CENTER);
         add(toolbar, BorderLayout.WEST);
     }
-    
+
     public final JPanel createInternalPanel() {
 
         JPanel internalPanel = new JPanel();
@@ -248,7 +248,7 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
             @Override
             public void actionPerformed(ActionEvent e) {
                 fillXYCombobox();
-                setDataImpl(m_valuesList, m_crossSelectionInterfaceList);
+                setDataImpl(m_valuesList, m_crossSelectionInterfaceList, false);
                 updateXYCbxVisibility();
 
             }
@@ -379,6 +379,10 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
     }
 
     public void setData(List<ExtendedTableModelInterface> valuesList, List<CrossSelectionInterface> crossSelectionInterfaceList) {
+        this.setData(valuesList, crossSelectionInterfaceList, false);
+    }
+
+    public void setData(List<ExtendedTableModelInterface> valuesList, List<CrossSelectionInterface> crossSelectionInterfaceList, boolean isSingle) {
         if (m_plotPanel.isLocked()) {
             return;
         }
@@ -391,7 +395,7 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
             }
         }
 
-        setDataImpl(valuesList, crossSelectionInterfaceList);
+        setDataImpl(valuesList, crossSelectionInterfaceList, isSingle);
         if (m_dataLocked) {
             // check that plotPanel corresponds, it can not correspond at the first call
             m_plotPanel.lockData(m_dataLocked);
@@ -412,9 +416,11 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
     public void ClearAxisTitle(String xTitle) {
         m_plotPanel.setXAxisTitle("Time in Map " + xTitle + " (min)");
         m_plotPanel.setYAxisTitle("Delta time in Map (s)");
+//        ((DefaultComboBoxModel) m_valueXComboBox.getModel()).removeAllElements();
+//        ((DefaultComboBoxModel) m_valueYComboBox.getModel()).removeAllElements();
     }
 
-    private void setDataImpl(List<ExtendedTableModelInterface> valuesList, List<CrossSelectionInterface> crossSelectionInterfaceList) {
+    private void setDataImpl(List<ExtendedTableModelInterface> valuesList, List<CrossSelectionInterface> crossSelectionInterfaceList, boolean isSingle) {
 
         m_valuesList = valuesList;
         m_crossSelectionInterfaceList = crossSelectionInterfaceList;
@@ -424,9 +430,9 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
             return;
         }
 
-        if (m_valueXComboBox.getItemCount() == 0) {
-
-            fillXYCombobox();
+        //if (m_valueXComboBox.getItemCount() == 0) {
+        if (isSingle == true ||(isSingle == false && m_valueXComboBox.getItemCount() == 0 )) {
+            fillXYCombobox();//update select panel combo box
 
             ActionListener actionForXYCbx = new ActionListener() {
 
@@ -536,7 +542,6 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
                 break;
         }
     }
-
 
     protected static class ReferenceToColumn {
 

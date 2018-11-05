@@ -355,7 +355,7 @@ public class MapAlignmentPanel extends HourglassPanel implements DataBoxPanelInt
             listCSI.add(mPanel.getCrossSelectionInterface());
             listETI.add(mPanel.getGlobalTableModelInterface());
         }
-        graphicPanel.setData(listETI, listCSI);
+        graphicPanel.setData(listETI, listCSI, true);
     }
 
     private Long getSelectedMapId(JComboBox cb) {

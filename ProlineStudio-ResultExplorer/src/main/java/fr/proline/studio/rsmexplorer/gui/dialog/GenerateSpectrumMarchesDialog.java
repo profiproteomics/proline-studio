@@ -157,7 +157,9 @@ public class GenerateSpectrumMarchesDialog extends DefaultDialog {
         boolean oneNull = false;
         boolean oneNotNull = false;
         boolean oneMerged = false;
-        for (DDataset ds : m_datasets){            
+        if (m_datasets == null || m_datasets.isEmpty()) //from specific pepMatch. TODO Get DS informatoin ?
+            return "unknown - see dataset properties";
+        for (DDataset ds : m_datasets){
             if(! DDataset.MergeInformation.NO_MERGE.equals(ds.getMergeInformation()))
                 oneMerged = true;
             else {
@@ -170,7 +172,8 @@ public class GenerateSpectrumMarchesDialog extends DefaultDialog {
                         oneNull = true;
                     else {
                         if(oneNotNull)
-                            sb.append(", ").append(fragSet.getName());
+                            sb.append(", ");
+                        sb.append(fragSet.getName());
                         oneNotNull = true;
                     }
                 }

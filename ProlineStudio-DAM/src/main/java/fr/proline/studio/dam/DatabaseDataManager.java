@@ -156,6 +156,14 @@ public class DatabaseDataManager  {
         return fragRuleSetsWithNull;
     }
     
+    public FragmentationRuleSet getFragmentationRuleSet(Long frsId){
+        for(FragmentationRuleSet frs : m_fragmentationRuleSets){
+            if(frs.getId() == frsId)
+                return frs;
+        }
+        return null;
+    }
+    
     public void setAggregationList(List<Aggregation> l) {
         
         m_aggregationMap = new HashMap<>();

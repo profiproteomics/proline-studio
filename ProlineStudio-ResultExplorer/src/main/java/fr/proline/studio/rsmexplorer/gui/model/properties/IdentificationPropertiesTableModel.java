@@ -13,7 +13,9 @@ import fr.proline.core.orm.msi.PtmSpecificity;
 import fr.proline.core.orm.msi.SearchSettingsSeqDatabaseMap;
 import fr.proline.core.orm.msi.SeqDatabase;
 import fr.proline.core.orm.msi.UsedPtm;
+import fr.proline.core.orm.uds.FragmentationRuleSet;
 import fr.proline.core.orm.uds.dto.DDataset;
+import fr.proline.studio.dam.DatabaseDataManager;
 import fr.proline.studio.table.DataGroup;
 import fr.proline.studio.utils.SerializedPropertiesUtil;
 import java.awt.Color;
@@ -148,9 +150,10 @@ public class IdentificationPropertiesTableModel extends AbstractPropertiesTableM
         private static final int FASTA_FILE_NAME = 1;
         private static final int ROWTYPE_SEARCH_RESULT_NAME = 2;
         private static final int ROWTYPE_INSTRUMENT_NAME = 3;
-        private static final int ROWTYPE_TARGET_DECOY_MODE = 4;
-        private static final int ROWTYPE_PEAKLIST_SOFTWARE_NAME = 5;
-        private static final int ROW_COUNT = 6; // get in sync
+        private static final int ROWTYPE_FRAGMENTATION_RULESET_NAME = 4;
+        private static final int ROWTYPE_TARGET_DECOY_MODE = 5;
+        private static final int ROWTYPE_PEAKLIST_SOFTWARE_NAME = 6;
+        private static final int ROW_COUNT = 7; // get in sync
         private final Color GROUP_COLOR_BACKGROUND = new Color(0, 0, 0);
 
         public GeneralInformationGroup(int rowStart) {
@@ -168,6 +171,8 @@ public class IdentificationPropertiesTableModel extends AbstractPropertiesTableM
                     return new GroupObject("Search Result Name", this);
                 case ROWTYPE_INSTRUMENT_NAME:
                     return new GroupObject("Instrument Name", this);
+                case ROWTYPE_FRAGMENTATION_RULESET_NAME:
+                    return new GroupObject("Fragmentation Rule Set", this);
                 case ROWTYPE_TARGET_DECOY_MODE:
                     return new GroupObject("Target Decoy Mode", this);
                 /*case ROWTYPE_TARGET_DECOY_RULE:
@@ -188,6 +193,7 @@ public class IdentificationPropertiesTableModel extends AbstractPropertiesTableM
             MsiSearch msiSearch = (rset == null) ? null : rset.getMsiSearch();
             SearchSetting searchSetting = (msiSearch == null) ? null : msiSearch.getSearchSetting();
             InstrumentConfig instrumentConfig = (searchSetting == null) ? null : searchSetting.getInstrumentConfig();
+            FragmentationRuleSet frs = (searchSetting == null) ? null : DatabaseDataManager.getDatabaseDataManager().getFragmentationRuleSet(searchSetting.getFragmentationRuleSetId());
             Peaklist peaklist = (msiSearch == null) ? null : msiSearch.getPeaklist();
             PeaklistSoftware peaklistSoftware = (peaklist == null) ? null : peaklist.getPeaklistSoftware();
 
@@ -229,6 +235,9 @@ public class IdentificationPropertiesTableModel extends AbstractPropertiesTableM
                     return new GroupObject((rset == null) ? "" : rset.getName(), this);
                 case ROWTYPE_INSTRUMENT_NAME:
                     return new GroupObject((instrumentConfig == null) ? "" : instrumentConfig.getName(), this);
+                case ROWTYPE_FRAGMENTATION_RULESET_NAME:
+                    return new GroupObject((frs == null) ? "" : frs.getName(), this);                    
+                    
                 case ROWTYPE_TARGET_DECOY_MODE: {
                     if (rsetDecoy == null) {
                         return new GroupObject("", this);

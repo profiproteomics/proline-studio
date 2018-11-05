@@ -5,7 +5,10 @@
  */
 package fr.proline.studio.rsmexplorer.gui.dialog;
 
+import fr.proline.core.orm.msi.MsiSearch;
+import fr.proline.core.orm.msi.SearchSetting;
 import fr.proline.core.orm.uds.FragmentationRuleSet;
+import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dam.DatabaseDataManager;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.utils.IconManager;
@@ -15,6 +18,7 @@ import java.awt.GridBagConstraints;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.List;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -36,15 +40,20 @@ public class GenerateSpectrumMarchesDialog extends DefaultDialog {
     private JCheckBox m_forceGenerateChB = null;
     private JCheckBox m_useDefinedFRSChB = null;
     
-//    public static GenerateSpectrumMarchesDialog getDialog(Window parent){
-//        if(m_singletonDialog == null)
-//            m_singletonDialog = new GenerateSpectrumMarchesDialog(parent);
-//        return m_singletonDialog;
-//    }
-    
+    private List<DDataset> m_datasets = null;
+       
     public GenerateSpectrumMarchesDialog(Window parent){
         super(parent, Dialog.ModalityType.APPLICATION_MODAL);
          
+        setTitle("Generate Spectrum Matches");
+        setDocumentationSuffix("id.1mrcu09");
+        initInternalPanel();
+        pack();
+    }
+    
+    public GenerateSpectrumMarchesDialog(Window parent,  List<DDataset> allDSs){
+        super(parent, Dialog.ModalityType.APPLICATION_MODAL);
+        m_datasets = allDSs;
         setTitle("Generate Spectrum Matches");
         setDocumentationSuffix("id.1mrcu09");
         initInternalPanel();
@@ -99,7 +108,9 @@ public class GenerateSpectrumMarchesDialog extends DefaultDialog {
         c.gridwidth = 2;
         c.weightx = 1.0;
         c.weighty = 1.0;
-        m_useDefinedFRSChB = new JCheckBox("Use fragmentation rule set defined at import", false);
+        
+        String dsFrs = getFragmentationRuleSetsLabel();
+        m_useDefinedFRSChB = new JCheckBox("Use fragmentation rule set defined at import ("+dsFrs+")", false);               
         m_useDefinedFRSChB.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -140,6 +151,47 @@ public class GenerateSpectrumMarchesDialog extends DefaultDialog {
         panel.add(viewFragmentationRuleSet, c);  
         return panel;
     }
+    
+     private String getFragmentationRuleSetsLabel(){
+        StringBuilder sb = new StringBuilder();
+        boolean oneNull = false;
+        boolean oneNotNull = false;
+        boolean oneMerged = false;
+        if (m_datasets == null || m_datasets.isEmpty()) //from specific pepMatch. TODO Get DS informatoin ?
+            return "unknown - see dataset properties";
+        for (DDataset ds : m_datasets){
+            if(! DDataset.MergeInformation.NO_MERGE.equals(ds.getMergeInformation()))
+                oneMerged = true;
+            else {
+                MsiSearch msiSearch = ds.getResultSet().getMsiSearch();
+                if(msiSearch == null)
+                    oneNull = true;
+                else {
+                    FragmentationRuleSet fragSet = DatabaseDataManager.getDatabaseDataManager().getFragmentationRuleSet(msiSearch.getSearchSetting().getFragmentationRuleSetId());
+                    if(fragSet == null)
+                        oneNull = true;
+                    else {
+                        if(oneNotNull)
+                            sb.append(", ");
+                        sb.append(fragSet.getName());
+                        oneNotNull = true;
+                    }
+                }
+            }
+        }
+        if(oneMerged){
+            if(oneNotNull)
+                sb.append("; ");
+            sb.append("merged dataset...");
+        }
+        if(oneNull){
+            if(oneNotNull)
+                sb.append("; ");
+            sb.append("unknown");
+        }
+        
+        return sb.toString();
+     }
      
     @Override
     protected boolean okCalled() {

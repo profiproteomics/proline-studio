@@ -730,7 +730,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
                 HashSet<Long> mergedRsmIds = new HashSet<>();
                 HashMap<Long,MergeMode> mergeModeByRSId = new HashMap<>();
                 HashMap<Long,MergeMode> mergeModeByRSMId = new HashMap<>();
-                 
+                                 
                 //Get ResultSet merge info & mode
                 Query mergeInfoQuery = entityManagerMSI.createQuery("SELECT r.id, r.mergedRsmId, r.serializedProperties FROM ResultSet r WHERE r.id IN (:listId)"); //Add type != search ? 
                 mergeInfoQuery.setParameter("listId", rsetIdList);
@@ -798,14 +798,13 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
                             else
                                 dataset.setMergeInformation(DDataset.MergeInformation.MERGE_IDENTIFICATION_SUMMARY_UNION);
                         } 
+                    } else if(mergeModeByRSId.containsKey(rsetId)){ //Merge RS
+                        if(mergeModeByRSId.get(rsetId).equals(MergeMode.AGGREGATION))
+                            dataset.setMergeInformation(DDataset.MergeInformation.MERGE_SEARCH_RESULT_AGG);
+                        else
+                            dataset.setMergeInformation(DDataset.MergeInformation.MERGE_SEARCH_RESULT_UNION);
                     } else {
-                        //Merge RS
-                         if(mergeModeByRSId.containsKey(rsetId)){
-                            if(mergeModeByRSId.get(rsetId).equals(MergeMode.AGGREGATION))
-                                dataset.setMergeInformation(DDataset.MergeInformation.MERGE_SEARCH_RESULT_AGG);
-                            else
-                                dataset.setMergeInformation(DDataset.MergeInformation.MERGE_SEARCH_RESULT_UNION);
-                        }                        
+                        
                     }
                 }
 

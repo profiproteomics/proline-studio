@@ -36,7 +36,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 import fr.proline.studio.rsmexplorer.gui.MultiGraphicsPanel;
-import fr.proline.studio.rsmexplorer.gui.dialog.xic.AbstractDefineQuantParamsPanelV2;
+import fr.proline.studio.rsmexplorer.gui.dialog.xic.AbstractGenericQuantParamsPanel;
 import java.awt.Color;
 import javax.swing.JSplitPane;
 import javax.swing.border.TitledBorder;
@@ -240,9 +240,9 @@ public class MapAlignmentPanel extends HourglassPanel implements DataBoxPanelInt
         Map<String, Object> quantParams;
         try {
             quantParams = m_quantChannelInfo.getDataset().getQuantProcessingConfigAsMap();
-            if (quantParams.containsKey(AbstractDefineQuantParamsPanelV2.ALIGNMENT_CONFIG)) {
-                Map<String, Object> alignmentConfig = (Map<String, Object>) quantParams.get(AbstractDefineQuantParamsPanelV2.ALIGNMENT_CONFIG);
-                method = (String) alignmentConfig.getOrDefault(AbstractDefineQuantParamsPanelV2.ALIGNMENT_METHOD_NAME, "unknown");
+            if (quantParams.containsKey(AbstractGenericQuantParamsPanel.ALIGNMENT_CONFIG)) {
+                Map<String, Object> alignmentConfig = (Map<String, Object>) quantParams.get(AbstractGenericQuantParamsPanel.ALIGNMENT_CONFIG);
+                method = (String) alignmentConfig.getOrDefault(AbstractGenericQuantParamsPanel.ALIGNMENT_METHOD_NAME, "unknown");
             }
             return method;
         } catch (Exception e) {

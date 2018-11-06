@@ -20,7 +20,7 @@ import javax.jms.TextMessage;
  */
 public class RunXICTask extends AbstractJMSTask {
     private static final String m_serviceName = "proline/dps/msq/Quantify";
-    private String m_version = "1.0";
+    private String m_version = "3.0";
     
     private Long[] m_xicQuantiResult = null;
     private final String m_quantiDSName;
@@ -28,15 +28,13 @@ public class RunXICTask extends AbstractJMSTask {
     private final Map<String,Object> m_quantParams;
     private final Map<String,Object> m_expDesignParams;
     
-    public RunXICTask(AbstractJMSCallback callback, Long projectId,  String quantDSName,  Map<String,Object> quantParams, Map<String,Object> expDesignParams, String quantParamVersion, Long[] retValue) {
+    public RunXICTask(AbstractJMSCallback callback, Long projectId,  String quantDSName,  Map<String,Object> quantParams, Map<String,Object> expDesignParams, Long[] retValue) {
         super(callback, new TaskInfo("Run XIC Quantitation for "+quantDSName, true, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_HIGH));
         m_xicQuantiResult = retValue;     
         m_expDesignParams = expDesignParams;
         m_quantiDSName = quantDSName;
         m_pId= projectId;
-        m_quantParams = quantParams;
-        if(quantParamVersion !=null && quantParamVersion.equals("2.0"))
-            m_version = "3.0";  
+        m_quantParams = quantParams;        
     }
     
     

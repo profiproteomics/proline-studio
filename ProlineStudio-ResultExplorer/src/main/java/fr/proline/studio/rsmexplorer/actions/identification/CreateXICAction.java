@@ -203,7 +203,7 @@ public class CreateXICAction extends AbstractRSMAction {
                 }
             };
            
-            RunXICTask task = new RunXICTask(xicCallback, pID, _quantiDS.getName(), quantParams, expParams, dialog.getParamVersion(), _xicQuantiDataSetId);
+            RunXICTask task = new RunXICTask(xicCallback, pID, _quantiDS.getName(), quantParams, expParams, _xicQuantiDataSetId);
             AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
            
         } //End OK entered      

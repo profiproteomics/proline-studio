@@ -3,7 +3,6 @@ package fr.proline.studio.rsmexplorer.gui.dialog.xic;
 import fr.proline.studio.gui.InfoDialog;
 import fr.proline.studio.gui.OptionDialog;
 import fr.proline.studio.gui.WizardPanel;
-import static fr.proline.studio.rsmexplorer.gui.dialog.xic.AbstractDefineQuantParamsPanel.XIC_SIMPLIFIED_PARAMS;
 import fr.proline.studio.utils.IconManager;
 import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
@@ -25,7 +24,6 @@ public class DefineQuantParamsPanel extends JPanel {
     
     private static DefineQuantParamsPanel m_singleton = null;
     
-    private static boolean m_usePanelV2 = false;
     private AbstractGenericQuantParamsPanel m_internalQuantPanel = null;
     
     private  JButton m_toggleButton = null;
@@ -45,22 +43,16 @@ public class DefineQuantParamsPanel extends JPanel {
         add(wizardPanel, BorderLayout.PAGE_START);
         add(m_mainPanel, BorderLayout.CENTER);
     }
-    
+           
     public String getParamsVersion(){
-        if(m_usePanelV2)
-            return "2.0";
-        else 
-            return "1.0";
+        return "2.0";
     }
     
     public AbstractGenericQuantParamsPanel getParamsPanel() {
         return m_internalQuantPanel;     
     }
     
-    protected static void setUsePanelV2(boolean useV2){
-        m_usePanelV2 = useV2;
-    }
-    
+
     public static DefineQuantParamsPanel getDefineQuantPanel() {
         if (m_singleton == null) {
             m_singleton = new DefineQuantParamsPanel();
@@ -109,7 +101,7 @@ public class DefineQuantParamsPanel extends JPanel {
         c.gridwidth = 2;
         c.weighty = 1;
         Preferences preferences = NbPreferences.root();
-        boolean completePanel = ! preferences.getBoolean(XIC_SIMPLIFIED_PARAMS, true);
+        boolean completePanel = ! preferences.getBoolean(AbstractGenericQuantParamsPanel.XIC_SIMPLIFIED_PARAMS, true);
 
         m_internalQuantPanel = getParamsPanel(completePanel, true);
         mainPanel.add(m_internalQuantPanel, c);  
@@ -134,15 +126,9 @@ public class DefineQuantParamsPanel extends JPanel {
         m_completePanel = completePanel;
         updateButton(m_completePanel);
         if (m_completePanel) {
-            if(m_usePanelV2)
-                return new DefineQuantParamsCompletePanelV2(false, readValues);
-            else
-                return new DefineQuantParamsCompletePanel(false, readValues);
+            return new DefineQuantParamsCompletePanel(false, readValues);
         } else {
-            if(m_usePanelV2)            
-                return new DefineQuantParamsSimplifiedPanelV2(false, readValues);
-            else
-                return new DefineQuantParamsSimplifiedPanel(false, readValues);
+            return new DefineQuantParamsSimplifiedPanel(false, readValues);
         }
     }
     

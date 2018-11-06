@@ -175,17 +175,11 @@ public class CreateXICDialog extends DefaultDialog {
         setButtonVisible(BUTTON_SAVE, true);
 
         // Update and Replace panel
-        //QUANTV2 : comment to use V1
-        DefineQuantParamsPanel.setUsePanelV2(true);
         DefineQuantParamsPanel quantPanel = DefineQuantParamsPanel.getDefineQuantPanel();
         quantPanel.getParamsPanel().resetScrollbar();
         replaceInternalComponent(quantPanel);
         revalidate();
         repaint();
-    }
-    
-    public String getParamVersion(){
-        return DefineQuantParamsPanel.getDefineQuantPanel().getParamsVersion();
     }
     
     @Override
@@ -356,7 +350,7 @@ public class CreateXICDialog extends DefaultDialog {
             ParameterList parameterList = DefineQuantParamsPanel.getDefineQuantPanel().getParamsPanel().getParameterList();
             Preferences preferences = NbPreferences.root();
             parameterList.saveParameters(preferences);
-            preferences.putBoolean(AbstractDefineQuantParamsPanel.XIC_SIMPLIFIED_PARAMS, DefineQuantParamsPanel.getDefineQuantPanel().getParamsPanel().isSimplifiedPanel());
+            preferences.putBoolean(AbstractGenericQuantParamsPanel.XIC_SIMPLIFIED_PARAMS, DefineQuantParamsPanel.getDefineQuantPanel().getParamsPanel().isSimplifiedPanel());
 
             return true;
         }
@@ -417,8 +411,8 @@ public class CreateXICDialog extends DefaultDialog {
                 try {
                     File settingsFile = settingsDialog.getSelectedFile();
                     FilePreferences filePreferences = new FilePreferences(settingsFile, null, "");
-                    if(Arrays.asList(filePreferences.keys()).contains(AbstractDefineQuantParamsPanel.XIC_SIMPLIFIED_PARAMS)){
-                        boolean isSimplified = filePreferences.getBoolean(AbstractDefineQuantParamsPanel.XIC_SIMPLIFIED_PARAMS, true);
+                    if(Arrays.asList(filePreferences.keys()).contains(AbstractGenericQuantParamsPanel.XIC_SIMPLIFIED_PARAMS)){
+                        boolean isSimplified = filePreferences.getBoolean(AbstractGenericQuantParamsPanel.XIC_SIMPLIFIED_PARAMS, true);
                         DefineQuantParamsPanel.getDefineQuantPanel().setIsSimplifiedPanel(isSimplified);                        
                     }
                     String version = filePreferences.get(AbstractGenericQuantParamsPanel.XIC_PARAMS_VERSION_KEY, "1.0");
@@ -720,9 +714,8 @@ public class CreateXICDialog extends DefaultDialog {
         
         try {            
             //QUANTV2: uncomment until END V2 to use V2
-            DefineQuantParamsPanel.setUsePanelV2(true);
             Map<String, Object> quantConfig = xicDataset2Clone.getQuantProcessingConfigAsMap();
-            if(quantConfig.containsKey("config_version") && quantConfig.get("config_version").equals("2.0")) { //TODO to create V2 panel even if clone from V1
+            if(quantConfig.containsKey("config_version") && quantConfig.get("config_version").equals("2.0")) { 
                 DefineQuantParamsPanel.getDefineQuantPanel().setIsSimplifiedPanel(false); //to view all config 
                 DefineQuantParamsPanel.getDefineQuantPanel().getParamsPanel().setQuantParams(quantConfig);
             } else {
@@ -732,21 +725,6 @@ public class CreateXICDialog extends DefaultDialog {
                 parameterList.initDefaults();
                 DefineQuantParamsPanel.getDefineQuantPanel().setIsSimplifiedPanel(true);
             }
-            //END V2
-            //QUANTV2 : uncomment until END V1 to use V1
-//            DefineQuantParamsPanel.setUsePanelV2(false);
-//            Map<String, Object> quantConfig = xicDataset2Clone.getQuantProcessingConfigAsMap();
-//            if(quantConfig.containsKey("config_version")) { 
-//                String msg = "Can't clone new quantitation parameters to old one. Default parameters will be used !!";
-//                JOptionPane.showMessageDialog(this, msg, "Clone Error",JOptionPane.ERROR_MESSAGE);   
-//                DefineQuantParamsPanel.getDefineQuantPanel().setIsSimplifiedPanel(true);
-//                ParameterList parameterList = DefineQuantParamsPanel.getDefineQuantPanel().getParamsPanel().getParameterList();
-//                parameterList.initDefaults();                
-//            } else {
-//                DefineQuantParamsPanel.getDefineQuantPanel().setIsSimplifiedPanel(false); //to view all config 
-//                DefineQuantParamsPanel.getDefineQuantPanel().getParamsPanel().setQuantParams(quantConfig);
-//            }
-//            //END V1
         } catch (Exception ex) {
             LoggerFactory.getLogger("ProlineStudio.ResultExplorer").error("Error while setting Quant Param ", ex);
             StudioExceptions.notify("An error occured while cloning XIC parameters", ex);

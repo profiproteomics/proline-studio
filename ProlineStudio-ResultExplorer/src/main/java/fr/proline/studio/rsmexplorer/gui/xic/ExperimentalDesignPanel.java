@@ -7,9 +7,7 @@ import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
-import fr.proline.studio.rsmexplorer.gui.dialog.xic.AbstractGenericQuantParamsPanel;
 import fr.proline.studio.rsmexplorer.gui.dialog.xic.DefineQuantParamsCompletePanel;
-import fr.proline.studio.rsmexplorer.gui.dialog.xic.DefineQuantParamsCompletePanelV2;
 import fr.proline.studio.rsmexplorer.gui.dialog.xic.QuantProfileXICPanel;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.quantitation.QuantitationTree;
@@ -18,7 +16,6 @@ import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionListener;
-import java.util.Map;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -167,19 +164,12 @@ public class ExperimentalDesignPanel extends HourglassPanel implements DataBoxPa
         
         try {
             if (m_dataset.getQuantProcessingConfig() != null){
-                Map<String,Object> quantConfig = m_dataset.getQuantProcessingConfigAsMap();
-                AbstractGenericQuantParamsPanel xicParamPanel = null;
-                if(quantConfig.containsKey("config_version") && quantConfig.get("config_version").equals("2.0")) {
-                    xicParamPanel =  new DefineQuantParamsCompletePanelV2(true, false);
-                } else {
-                    xicParamPanel = new DefineQuantParamsCompletePanel(true, false);
-                }
-                    
+                DefineQuantParamsCompletePanel xicParamPanel =  new DefineQuantParamsCompletePanel(true, false);                    
                 m_confPanel.removeAll();
                 xicParamPanel.resetScrollbar();
                 m_confPanel.add(xicParamPanel, BorderLayout.CENTER);
                 xicParamPanel.setQuantParams(m_dataset.getQuantProcessingConfigAsMap());
-            }else{
+            } else{
                 m_confPanel.removeAll();
                 m_confPanel.add(new JLabel("no configuration available"), BorderLayout.CENTER);
             }

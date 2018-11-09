@@ -193,7 +193,9 @@ public abstract class LazyTable extends DecoratedMarkerTable implements Adjustme
                     if (renderer instanceof GrayedRenderer) {
                         m_sb.append("grayed" );
                     }
-                    m_sb.append(((LazyData)value).getData().getClass().getName());
+                    if (((LazyData)value).getData() != null) {
+                        m_sb.append(((LazyData)value).getData().getClass().getName());
+                    }
                     String key = m_sb.toString();
                     m_sb.setLength(0);
                     

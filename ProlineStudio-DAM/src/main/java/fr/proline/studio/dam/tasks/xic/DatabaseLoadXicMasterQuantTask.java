@@ -21,7 +21,6 @@ import fr.proline.core.orm.msi.dto.MasterQuantProteinSetProperties;
 import fr.proline.core.orm.msi.dto.MasterQuantProteinSetProperties.MasterQuantProteinSetProfile;
 import fr.proline.core.orm.uds.BiologicalGroup;
 import fr.proline.core.orm.uds.BiologicalSample;
-import fr.proline.core.orm.uds.BiologicalSplSplAnalysisMap;
 import fr.proline.core.orm.uds.Dataset;
 import fr.proline.core.orm.uds.GroupSetup;
 import fr.proline.core.orm.uds.MasterQuantitationChannel;
@@ -33,6 +32,7 @@ import fr.proline.core.orm.uds.dto.DMasterQuantitationChannel;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
 import fr.proline.core.orm.util.DStoreCustomPoolConnectorFactory;
 import fr.proline.core.orm.msi.dto.DMasterQuantPeptideIon;
+import fr.proline.core.orm.uds.SampleAnalysis;
 import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
@@ -410,6 +410,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
      * @return
      */
     public static boolean fetchDataQuantChannels(Long projectId, DDataset dataset, TaskError taskError) {
+        long start = System.currentTimeMillis();
         EntityManager entityManagerUDS = DStoreCustomPoolConnectorFactory.getInstance().getUdsDbConnector().createEntityManager();
         EntityManager entityManagerMSI = DStoreCustomPoolConnectorFactory.getInstance().getMsiDbConnector(projectId).createEntityManager();
         EntityManager entityManagerLCMS = DStoreCustomPoolConnectorFactory.getInstance().getLcMsDbConnector(projectId).createEntityManager();
@@ -418,8 +419,8 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
             entityManagerMSI.getTransaction().begin();
             entityManagerLCMS.getTransaction().begin();
             // load DDataset
-            // force initialization of lazy data (data will be needed for the display of properties)
             Dataset datasetDB = entityManagerUDS.find(Dataset.class, dataset.getId());
+            // force initialization of lazy data (data will be needed for the display of properties)
             QuantitationMethod quantMethodDB = datasetDB.getMethod();
             List<MasterQuantitationChannel> listMasterQuantitationChannels = datasetDB.getMasterQuantitationChannels();
 
@@ -478,10 +479,9 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                 List<BiologicalGroup> listBiolGroup = groupSetup.getBiologicalGroups();
                 for (BiologicalGroup biolGroup : listBiolGroup) {
                     List<BiologicalSample> listBiologicalSamples = biolGroup.getBiologicalSamples();
-                    for (BiologicalSample sample : listBiologicalSamples) {
-                        List<BiologicalSplSplAnalysisMap> splAnalysisMap = sample.getBiologicalSplSplAnalysisMap();
-                        for(BiologicalSplSplAnalysisMap splAnalysis:splAnalysisMap){
-                            splAnalysis.getSampleAnalysis().getDataset();
+                    for (BiologicalSample bioSample : listBiologicalSamples) {
+                        for(SampleAnalysis splAnalysis : bioSample.getSampleAnalyses()){
+                            splAnalysis.getDataset();
                         }
                     }
                 }
@@ -502,7 +502,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                                 for(DQuantitationChannel dqch :listQch ){
                                     if (dqch.getId() == qchS.getId()){
                                         dqch.setBiologicalGroupId(biolGroup.getId());
-                                        //dqch.setBiologicalGroupName(biolGroup.getName());  //JPM.TODO
+                                        dqch.setBiologicalGroupName(biolGroup.getName());
                                         sortedQch.add(dqch);
                                         break;
                                     }
@@ -551,6 +551,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
             entityManagerMSI.getTransaction().commit();
             entityManagerUDS.getTransaction().commit();
             entityManagerLCMS.getTransaction().commit();
+//            m_logger.info("fetchQuantChannels took "+(System.currentTimeMillis() - start)+" ms");
         } catch (Exception e) {
             //logger.error(getClass().getSimpleName() + " failed", e);
             taskError = new TaskError(e);
@@ -626,7 +627,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
             dqc.setMzdbFileName(mzdbFile);
             // search for raw map in LCMS database
             String queryLcms = "SELECT pmrm.rawMap.id "
-                    + "FROM fr.proline.core.orm.lcms.Map  m, ProcessedMap pm, ProcessedMapRawMapMapping pmrm  "
+                    + "FROM fr.proline.core.orm.lcms.Map  m, ProcessedMap pm, ProcessedMapRawMapMapping pmrm "
                     + "WHERE m.id =:processedMapId "
                     + "AND m.id = pm.id "
                     + "AND pm.id = pmrm.id.processedMapId ";
@@ -660,7 +661,6 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
             // load biologicalSample
             dqc.setBiologicalSample(qc.getBiologicalSample());
 
-                    
             listDQuantChannels.add(dqc);
         } //End go through QuantChannel
         return listDQuantChannels;

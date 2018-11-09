@@ -495,8 +495,11 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseSlicerTas
     }
 
     public static void fetchReadablePtmData(EntityManager entityManagerMSI, Long rsetId, HashMap<Long, Peptide> peptideMap) {
+        if ((peptideMap == null) || peptideMap.isEmpty()) return;
         // Retrieve PeptideReadablePtmString
-        Query ptmStingQuery = entityManagerMSI.createQuery("SELECT p.id, ptmString FROM fr.proline.core.orm.msi.Peptide p, fr.proline.core.orm.msi.PeptideReadablePtmString ptmString WHERE p.id IN (:listId) AND ptmString.peptide=p AND ptmString.resultSet.id=:rsetId");
+        Query ptmStingQuery = entityManagerMSI.createQuery("SELECT p.id, ptmString "
+            + "FROM fr.proline.core.orm.msi.Peptide p, fr.proline.core.orm.msi.PeptideReadablePtmString ptmString "
+            + "WHERE p.id IN (:listId) AND ptmString.peptide=p AND ptmString.resultSet.id=:rsetId");
         ptmStingQuery.setParameter("listId", peptideMap.keySet());
         ptmStingQuery.setParameter("rsetId", rsetId);
         

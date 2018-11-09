@@ -113,9 +113,7 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements GlobalT
                 sb.append(m_columnNamesQC_SC[id]);
             }
             sb.append("<br/>");
-            sb.append(m_quantChannels[nbQc].getResultFileName());
-            /*sb.append("<br/>");
-             sb.append(m_quantChannels[nbQc].getRawFileName());*/
+            sb.append(m_quantChannels[nbQc].getName());
 
             sb.append("</html>");
             return sb.toString();
@@ -139,7 +137,7 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements GlobalT
                 sb.append(m_columnNamesQC_SC[id]);
             }
             sb.append(" ");
-            sb.append(m_quantChannels[nbQc].getResultFileName());
+            sb.append(m_quantChannels[nbQc].getName());
 
             return sb.toString();
         } else {
@@ -178,7 +176,7 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements GlobalT
                 sb.append(m_toolTipQC_SC[id]);
             }
             sb.append("<br/>");
-            sb.append(m_quantChannels[nbQc].getResultFileName());
+            sb.append(m_quantChannels[nbQc].getFullName());
             sb.append("<br/>");
             sb.append(rawFilePath);
             sb.append("</html>");
@@ -560,47 +558,6 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements GlobalT
         return m_table.isLoaded();
     }
 
-    public int getByQCCount() {
-        return m_columnNamesQC.length;
-    }
-
-    public int getQCCount() {
-        return m_quantChannels.length;
-    }
-
-    public int getColumStart(int index) {
-        return m_columnNames.length + index * m_columnNamesQC.length;
-    }
-
-    public int getColumStop(int index) {
-        return m_columnNames.length + (1 + index) * m_columnNamesQC.length - 1;
-    }
-
-    public String getQCName(int i) {
-
-        StringBuilder sb = new StringBuilder();
-
-        String rsmHtmlColor = CyclicColorPalette.getHTMLColor(i);
-        sb.append("<html><font color='").append(rsmHtmlColor).append("'>&#x25A0;&nbsp;</font>");
-        sb.append(m_quantChannels[i].getResultFileName());
-        /*sb.append("<br/>");
-         sb.append(m_quantChannels[i].getRawFileName());*/
-        sb.append("</html>");
-
-        return sb.toString();
-    }
-
-    public String getByQCMColumnName(int index) {
-        return m_isXICMode ? m_columnNamesQC[index] : m_columnNamesQC_SC[index];
-    }
-
-    public int getQCNumber(int col) {
-        return (col - m_columnNames.length) / m_columnNamesQC.length;
-    }
-
-    public int getTypeNumber(int col) {
-        return (col - m_columnNames.length) % m_columnNamesQC.length;
-    }
 
     public Long getResultSummaryId() {
         if ((m_quantPeptideIons == null) || (m_quantPeptideIons.size() == 0)) {
@@ -824,7 +781,7 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements GlobalT
                 sb.append(m_columnNamesQC_SC[id]);
             }
             sb.append(' ');
-            sb.append(m_quantChannels[nbQc].getResultFileName());
+            sb.append(m_quantChannels[nbQc].getName());
 
             return sb.toString();
         }

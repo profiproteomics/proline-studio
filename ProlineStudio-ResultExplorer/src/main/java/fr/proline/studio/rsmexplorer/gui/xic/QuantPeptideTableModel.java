@@ -164,7 +164,7 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
                 sb.append(m_columnNamesQC_SC[id]);
             }
             sb.append("<br/>");
-            sb.append(m_quantChannels[nbQc].getResultFileName());
+            sb.append(m_quantChannels[nbQc].getName());
             /*sb.append("<br/>");
              sb.append(m_quantChannels[nbQc].getRawFileName());*/
 
@@ -198,7 +198,7 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
                 sb.append(m_columnNamesQC_SC[id]);
             }
             sb.append(" ");
-            sb.append(m_quantChannels[nbQc].getResultFileName());
+            sb.append(m_quantChannels[nbQc].getName());
 
             return sb.toString();
         } else {
@@ -463,7 +463,7 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
                 sb.append(m_toolTipQC_SC[id]);
             }
             sb.append("<br/>");
-            sb.append(m_quantChannels[nbQc].getResultFileName());
+            sb.append(m_quantChannels[nbQc].getFullName());
             sb.append("<br/>");
             sb.append(rawFilePath);
 
@@ -535,7 +535,7 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
                     sb.append("<html><font color='").append(rsmHtmlColor).append("'>&#x25A0;&nbsp;</font>");
                     sb.append("Abundance");
                     sb.append("<br/>");
-                    sb.append(m_quantChannels[a].getResultFileName());
+                    sb.append(m_quantChannels[a].getFullName());
                     sb.append("</td>");
                 }
                 sb.append("</tr><tr> ");
@@ -565,7 +565,7 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
                     sb.append("<html><font color='").append(rsmHtmlColor).append("'>&#x25A0;&nbsp;</font>");
                     sb.append("Abundance");
                     sb.append("<br/>");
-                    sb.append(m_quantChannels[a].getResultFileName());
+                    sb.append(m_quantChannels[a].getFullName());
                     sb.append("</td>");
                     sb.append("</tr><tr> ");
                     // we suppose that the abundances are in the "good" order
@@ -1241,9 +1241,7 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
 
         String rsmHtmlColor = CyclicColorPalette.getHTMLColor(i);
         sb.append("<html><font color='").append(rsmHtmlColor).append("'>&#x25A0;&nbsp;</font>");
-        sb.append(m_quantChannels[i].getResultFileName());
-        /* sb.append("<br/>");
-         sb.append(m_quantChannels[i].getRawFileName());*/
+        sb.append(m_quantChannels[i].getFullName());
         sb.append("</html>");
 
         return sb.toString();
@@ -1341,7 +1339,7 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
                 sb.append(m_columnNamesQC_SC[id]);
             }
             sb.append(' ');
-            sb.append(m_quantChannels[nbQc].getResultFileName());
+            sb.append(m_quantChannels[nbQc].getName());
 
             return sb.toString();
         }

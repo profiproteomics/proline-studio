@@ -124,10 +124,7 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
                 sb.append(m_columnNamesQC_SC[id]);
             }
             sb.append("<br/>");
-            sb.append(m_quantChannels[nbQc].getResultFileName());
-            /*sb.append("<br/>");
-             sb.append(m_quantChannels[nbQc].getRawFileName());*/
-
+            sb.append(m_quantChannels[nbQc].getName());
             sb.append("</html>");
             return sb.toString();
         }
@@ -160,7 +157,7 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
                 sb.append(m_columnNamesQC_SC[id]);
             }
             sb.append(" ");
-            sb.append(m_quantChannels[nbQc].getResultFileName());
+            sb.append(m_quantChannels[nbQc].getName());
 
             return sb.toString();
         } else {
@@ -190,7 +187,7 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
                 sb.append(m_toolTipQC_SC[id]);
             }
             sb.append("<br/>");
-            sb.append(m_quantChannels[nbQc].getResultFileName());
+            sb.append(m_quantChannels[nbQc].getFullName());
             sb.append("<br/>");
             sb.append(rawFilePath);
 
@@ -635,7 +632,7 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
 
         String rsmHtmlColor = CyclicColorPalette.getHTMLColor(i);
         sb.append("<html><font color='").append(rsmHtmlColor).append("'>&#x25A0;&nbsp;</font>");
-        sb.append(m_quantChannels[i].getResultFileName());
+        sb.append(m_quantChannels[i].getFullName());
         /* sb.append("<br/>");
          sb.append(m_quantChannels[i].getRawFileName());*/
         sb.append("</html>");
@@ -727,7 +724,7 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
                 sb.append(m_columnNamesQC_SC[id]);
             }
             sb.append(' ');
-            sb.append(m_quantChannels[nbQc].getResultFileName());
+            sb.append(m_quantChannels[nbQc].getName());
 
             return sb.toString();
         }

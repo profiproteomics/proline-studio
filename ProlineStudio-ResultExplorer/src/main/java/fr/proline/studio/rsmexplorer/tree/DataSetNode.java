@@ -167,7 +167,7 @@ public class DataSetNode extends AbstractNode {
     
     public boolean hasResultSummary() {
         DDataset dataSet = ((DataSetData) getData()).getDataset();
-        return (dataSet.getResultSummaryId() != null);
+        return (dataSet != null) && (dataSet.getResultSummaryId() != null);
     }
     
 

@@ -15,16 +15,19 @@ import java.util.List;
  * @author MB243701
  */
 public class MapAlignmentConverter {
+
+
     /**
      * convert the elutionTime in the sourceMapId into the targetMapId, with the given list of mapAlignments
      * The alignmentReferenceMapId must be given
+     *
      * @param elutionTime
      * @param sourceMapId
      * @param targetMapId
      * @param listMapAlignment
      * @param alnRefMapId
-     * @return 
-     * @throws java.lang.Exception 
+     * @return
+     * @throws java.lang.Exception
      */
     public static Double convertElutionTime(Double elutionTime, Long sourceMapId, Long targetMapId, List<MapAlignment> listMapAlignment, Long alnRefMapId) throws Exception{
         if (listMapAlignment == null || listMapAlignment.isEmpty() ){

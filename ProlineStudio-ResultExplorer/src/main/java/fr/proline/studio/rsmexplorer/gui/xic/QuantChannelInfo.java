@@ -64,7 +64,7 @@ public class QuantChannelInfo {
     public String getMapTitle (Long mapId) {
         for (DQuantitationChannel m_quantChannel : m_quantChannels) {
             if (compareMap( m_quantChannel, mapId)) {
-                return m_quantChannel.getResultFileName();
+                return m_quantChannel.getName();
             }
         }
         return null;

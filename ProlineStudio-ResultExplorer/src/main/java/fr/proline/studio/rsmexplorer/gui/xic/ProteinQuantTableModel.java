@@ -96,7 +96,7 @@ public class ProteinQuantTableModel extends LazyTableModel implements GlobalTabl
                 return qc.getId();
             }
             case COLTYPE_QC_NAME: {
-                return qc.getResultFileName();
+                return qc.getName();
             }
             case COLTYPE_ABUNDANCE: {
                 if (quantProteinSet == null || quantProteinSet.getAbundance() == null) {

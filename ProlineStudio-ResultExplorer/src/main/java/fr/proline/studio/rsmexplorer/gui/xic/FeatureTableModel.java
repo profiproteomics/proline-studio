@@ -149,6 +149,7 @@ public class FeatureTableModel extends LazyTableModel implements GlobalTableMode
                     givePriorityTo(m_taskId, row, col);
                 }else {
                     String mapTitle = m_quantChannelInfo.getMapTitle(feature.getMap().getId());
+                    if (mapTitle == null) mapTitle = feature.getMap().getName();
                     Color mapColor = m_quantChannelInfo.getMapColor(feature.getMap().getId());
                     String rsmHtmlColor = CyclicColorPalette.getHTMLColor(mapColor);
         

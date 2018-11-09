@@ -144,7 +144,7 @@ public class XicPeptideMatchTableModel extends LazyTableModel implements GlobalT
                     StringBuilder sb = new StringBuilder();
                     String rsmHtmlColor =  m_quantChannelInfo.getRsmHtmlColor(idQc);
                     sb.append("<html><font color='").append(rsmHtmlColor).append("'>&#x25A0;&nbsp;</font>");
-                    sb.append(m_quantitationChannelArray[idQc].getResultFileName());
+                    sb.append(m_quantitationChannelArray[idQc].getName());
                     sb.append("</html>");
                     lazyData.setData(sb.toString());
                     return lazyData;
@@ -563,7 +563,7 @@ public class XicPeptideMatchTableModel extends LazyTableModel implements GlobalT
             case COLTYPE_PEPTIDE_QC_NAME: {
                 int idQc = getPeptideMatchQuantChannel(Long.valueOf(peptideMatch.getId())) ;
                 if (idQc != -1) {
-                    return m_quantitationChannelArray[idQc].getResultFileName();
+                    return m_quantitationChannelArray[idQc].getName();
                 } else {
                     return "";
                 }

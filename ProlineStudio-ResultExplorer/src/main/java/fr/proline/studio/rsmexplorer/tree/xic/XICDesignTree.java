@@ -223,20 +223,19 @@ public class XICDesignTree extends AbstractTree {
             treeModel.insertNodeInto(biologicalGroupNode, rootNode, childIndex);
             List<BiologicalSample> listSample = bioGroup.getBiologicalSamples();
             int childSampleIndex = 0;
-            for (BiologicalSample sample : listSample) {
-                String sampleName = sample.getName();
+            for (BiologicalSample biologicalSample : listSample) {
+                String sampleName = biologicalSample.getName();
                 // split the name because in Studio the sampleName is saved as groupName+sampleName see Issue#12628
                 if (sampleName.startsWith(bioGroup.getName())) {
                     sampleName = sampleName.substring(bioGroup.getName().length());
                 }
                 XICBiologicalSampleNode biologicalSampleNode = new XICBiologicalSampleNode(new DataSetData(sampleName, Dataset.DatasetType.AGGREGATE, Aggregation.ChildNature.OTHER));
                 treeModel.insertNodeInto(biologicalSampleNode, biologicalGroupNode, childSampleIndex);
-                List<BiologicalSplSplAnalysisMap> listSampleAnalysis = sample.getBiologicalSplSplAnalysisMap();
                 int childSampleAnalysisIndex = 0;
-                for (BiologicalSplSplAnalysisMap sampleAnalysis : listSampleAnalysis) {
-                    DQuantitationChannel qCh = getQuantChannelSampleAnalysis(sampleAnalysis.getSampleAnalysis(), listQuantChannels);
+                for (SampleAnalysis sampleAnalysis : biologicalSample.getSampleAnalyses()) {
+                    DQuantitationChannel qCh = getQuantChannelSampleAnalysis(sampleAnalysis, listQuantChannels);
                     if (qCh != null) {
-                        String name = qCh.getResultFileName();
+                        String name = qCh.getName();
                         DataSetData dsData = new DataSetData(name, Dataset.DatasetType.IDENTIFICATION, Aggregation.ChildNature.SAMPLE_ANALYSIS);
                         if (qCh.getIdentRs() != null) {
                             // fake dataset

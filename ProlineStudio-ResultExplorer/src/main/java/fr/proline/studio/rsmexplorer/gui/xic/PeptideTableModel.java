@@ -98,7 +98,7 @@ public class PeptideTableModel extends LazyTableModel implements GlobalTableMode
                 return qc.getId();
             }
             case COLTYPE_QC_NAME: {
-                return qc.getResultFileName();
+                return qc.getName();
             }
             case COLTYPE_ABUNDANCE: {
                 if (quantPeptide == null || quantPeptide.getAbundance() == null) {

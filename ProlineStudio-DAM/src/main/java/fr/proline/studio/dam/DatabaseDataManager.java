@@ -157,6 +157,8 @@ public class DatabaseDataManager  {
     }
     
     public FragmentationRuleSet getFragmentationRuleSet(Long frsId){
+        if(frsId == null)
+            return null;
         for(FragmentationRuleSet frs : m_fragmentationRuleSets){
             if(frs.getId() == frsId)
                 return frs;

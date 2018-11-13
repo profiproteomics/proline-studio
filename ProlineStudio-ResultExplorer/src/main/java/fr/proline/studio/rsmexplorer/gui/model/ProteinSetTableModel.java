@@ -293,31 +293,30 @@ public class ProteinSetTableModel extends LazyTableModel implements GlobalTableM
             }
             case COLTYPE_SPECTRAL_COUNT: {
                 LazyData lazyData = getLazyData(row,col);
-
                 Integer spectralCount = proteinSet.getSpectralCount();
-                
-                if ((m_mergedData) && (spectralCount < 0)) {
-                    lazyData.setData("Not Available");
-                    return lazyData;
-                }
                 
                 lazyData.setData(spectralCount);
                 if (spectralCount == null) {
                     givePriorityTo(m_taskId, row, col);
+                } else {
+                    if ((m_mergedData) && (spectralCount < 0)) {
+                        lazyData.setData("Not Available");
+                    }                               
                 }
+                 
                 return lazyData;
             }
             case COLTYPE_SPECIFIC_SPECTRAL_COUNT: {
-                LazyData lazyData = getLazyData(row,col);
-                
+                LazyData lazyData = getLazyData(row,col);                
                 Integer specificSpectralCount = proteinSet.getSpecificSpectralCount();
-                if ((m_mergedData) && (specificSpectralCount < 0)) {
-                    lazyData.setData("Not Available");
-                    return lazyData;
-                }
+                
                 lazyData.setData(specificSpectralCount);
                 if (specificSpectralCount == null) {
                     givePriorityTo(m_taskId, row, col);
+                } else {
+                    if ((m_mergedData) && (specificSpectralCount < 0)) {
+                        lazyData.setData("Not Available");
+                    }
                 }
                 return lazyData;
             }

@@ -84,7 +84,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
     public static final int SUB_TASK_PTM_PEPTIDE_INSTANCE = 11;
     
     public static final int SUB_TASK_NB = 12; // <<----- get in sync
-    
+ 
     // data kept for sub tasks
     private List<Long> m_proteinSetIds = null;
     private List<Long> m_resultSetIds = null;
@@ -864,10 +864,10 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
             List<DMasterQuantitationChannel> listMasterQuantitationChannels = m_dataset.getMasterQuantitationChannels();
 
             if (listMasterQuantitationChannels != null && !listMasterQuantitationChannels.isEmpty()) {
-                for (DMasterQuantitationChannel masterQuantitationChannel : listMasterQuantitationChannels) {
+                for (DMasterQuantitationChannel masterQuantitationChannel : listMasterQuantitationChannels) {//for each channel
                     Long resultSummaryId = masterQuantitationChannel.getQuantResultSummaryId();
 
-                    //resultSummary
+                    //resultSummary all peptide id for this channel
                     if (resultSummaryId != null) {
                         // load masterQuantPeptideIon
                         String queryPepIon = "SELECT mqpi.id "
@@ -880,7 +880,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
 
                         m_masterQuantPeptideIonIds = listIds;
                         
-                        for (Long m_masterQuantPeptideIonId : m_masterQuantPeptideIonIds) {
+                        for (Long m_masterQuantPeptideIonId : m_masterQuantPeptideIonIds) {//for each id, create a DMasterQuantPeptideIon
                             DMasterQuantPeptideIon mqpi = new DMasterQuantPeptideIon();
                             mqpi.setId(m_masterQuantPeptideIonId);
                             m_masterQuantPeptideIonList.add(mqpi);

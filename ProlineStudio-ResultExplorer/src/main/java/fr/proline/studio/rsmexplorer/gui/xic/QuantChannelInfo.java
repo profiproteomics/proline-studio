@@ -60,7 +60,11 @@ public class QuantChannelInfo {
         }
         return CyclicColorPalette.getHTMLColor(m_quantChannels.length);
     }
-    
+    /**
+     * 
+     * @param mapId, the XIC map id
+     * @return 
+     */
     public String getMapTitle (Long mapId) {
         for (DQuantitationChannel m_quantChannel : m_quantChannels) {
             if (compareMap( m_quantChannel, mapId)) {

@@ -48,7 +48,7 @@ public class DataboxMultiGraphics extends AbstractDataBox  {
         setDataBoxPanelInterface(p);
     }
     /**
-     * m_previousDataBox is DataboxMapAlignment
+     * in the case of DisplayMapAlignement action, m_previousDataBox is DataboxMapAlignment
      */
     @Override
     public void dataChanged() {

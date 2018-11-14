@@ -37,25 +37,28 @@ import org.openide.windows.WindowManager;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 import fr.proline.studio.extendedtablemodel.ExtraDataForTableModelInterface;
 import fr.proline.studio.graphics.measurement.WidthMeasurement;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Scatter Plot
  * @author JM235353
  */
 public class PlotScatter extends PlotXYAbstract implements Axis.EnumXInterface, Axis.EnumYInterface {
-
-    private double m_xMin;
-    private double m_xMax;
-    private double m_yMin;
-    private double m_yMax;
+    protected static final Logger logger = LoggerFactory.getLogger("ProlineStudio.Common");
+    protected double m_xMin;
+    protected double m_xMax;
+    protected double m_yMin;
+    protected double m_yMax;
     
-    private double[] m_dataX;
-    private double[] m_dataY;
-    private int[] m_jitterX;
-    private int[] m_jitterY;
+    protected double[] m_dataX;
+    protected double[] m_dataY;
+    protected int[] m_jitterX;
+    protected int[] m_jitterY;
     private String[] m_enumX;
     private String[] m_enumY;
     
+    // next 6 variable are for color
     private double m_gradientParamValuesMin;
     private double m_gradientParamValuesMax;
     private double[] m_gradientParamValues;
@@ -64,7 +67,7 @@ public class PlotScatter extends PlotXYAbstract implements Axis.EnumXInterface, 
     private float[] m_gradientFractions;
     
     
-    private boolean[] m_selected;
+    protected boolean[] m_selected;
     private long[] m_ids;
     private HashMap<Long, Integer> m_idToIndex;
 
@@ -83,14 +86,15 @@ public class PlotScatter extends PlotXYAbstract implements Axis.EnumXInterface, 
     private final LinkedList<GraphicDataGroup> m_dataGroup = new LinkedList<>();
     private final HashMap<Long, GraphicDataGroup> m_idsToGraphicDataGroup = new HashMap<>();
     private final HashMap<GraphicDataGroup, LinkedHashSet<Long>> m_graphicDataGroupToId = new HashMap<>();
+    private StringBuilder m_sb = null;
     
     public PlotScatter(BasePlotPanel plotPanel, ExtendedTableModelInterface compareDataInterface, CrossSelectionInterface crossSelectionInterface, int colX, int colY) {
         super(plotPanel, PlotType.SCATTER_PLOT, compareDataInterface, crossSelectionInterface);
         int[] cols = new int[2]; //JPM.TODO enhance
         cols[COL_X_ID] = colX;
         cols[COL_Y_ID] = colY;
-
-        update(cols, null); 
+        
+        update(cols, null); //by call this methode, min max X, min max Y are calculated
         
         // Color parameter
         ParameterList colorParameteList = new ParameterList("Colors");
@@ -173,6 +177,7 @@ public class PlotScatter extends PlotXYAbstract implements Axis.EnumXInterface, 
             }
         } else {
             infoValue = m_compareDataInterface.getDataValueAt(indexFound, m_compareDataInterface.getInfoColumn()).toString();
+            
         }
 
         
@@ -201,7 +206,7 @@ public class PlotScatter extends PlotXYAbstract implements Axis.EnumXInterface, 
         return tooltip;
  
     }
-    private StringBuilder m_sb = null;
+
     
     @Override
     public boolean select(double x, double y, boolean append) {
@@ -276,8 +281,13 @@ public class PlotScatter extends PlotXYAbstract implements Axis.EnumXInterface, 
         }
     }
     
-
-    private int findPoint(double x, double y) {
+    /**
+     * return nearestDataIndex
+     * @param x, pixel x
+     * @param y, pixel y
+     * @return 
+     */
+    protected int findPoint(double x, double y) {
 
         double rangeX = m_xMax - m_xMin;
         double rangeY = m_yMax - m_yMin;
@@ -452,6 +462,9 @@ public class PlotScatter extends PlotXYAbstract implements Axis.EnumXInterface, 
         }
     }
     
+    /**
+     * here we get min max X,min max Y
+     */
     @Override
     public final void update() {
 

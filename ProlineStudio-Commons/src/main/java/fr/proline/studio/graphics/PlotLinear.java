@@ -20,6 +20,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Scatter Plot or linear
@@ -28,6 +30,7 @@ import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
  */
 public class PlotLinear extends PlotXYAbstract {
 
+    protected static final Logger logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
     private double m_xMin;
     private double m_xMax;
     private double m_yMin;
@@ -55,25 +58,22 @@ public class PlotLinear extends PlotXYAbstract {
 
     private static final BasicStroke STROKE_1 = new BasicStroke(1.2f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER);
     private static final BasicStroke STROKE_2 = new BasicStroke(2f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER);
-    
     private boolean strokeFixed = false;
-    
-    private ColorOrGradientParameter m_colorParameter;
 
+    private ColorOrGradientParameter m_colorParameter;
 
     // for linear plots, draw (or not) the points
     private boolean m_isDrawPoints = false;
-    
+
     // draw a line between points, even if there is a missing value
     private boolean m_isDrawGap = true;
 
     private BasicStroke m_strokeLine = STROKE_1;
-    
+    private BasicStroke m_userStock = null;
     private ArrayList<ParameterList> m_parameterListArray = null;
-    
+
     private boolean displayAntiAliasing = true;
 
-    
     public PlotLinear(BasePlotPanel plotPanel, ExtendedTableModelInterface compareDataInterface, CrossSelectionInterface crossSelectionInterface, int colX, int colY) {
         super(plotPanel, PlotType.SCATTER_PLOT, compareDataInterface, crossSelectionInterface);
         int[] cols = new int[2]; //JPM.TODO enhance
@@ -83,9 +83,9 @@ public class PlotLinear extends PlotXYAbstract {
 
         // Color parameter
         ParameterList colorParameterList = new ParameterList("Colors");
-       
+
         ColorOrGradient colorOrGradient = new ColorOrGradient();
-        colorOrGradient.setColor(CyclicColorPalette.getColor(21, 128));
+        colorOrGradient.setColor(CyclicColorPalette.getColor(21, 128));//purple bordeaux brightness modified
         float[] fractions = {0.0f, 1.0f};
         Color[] colors = {Color.white, Color.red};
         LinearGradientPaint gradient = ColorOrGradientChooserPanel.getGradientForPanel(colors, fractions);
@@ -93,12 +93,10 @@ public class PlotLinear extends PlotXYAbstract {
 
         m_colorParameter = new ColorOrGradientParameter(PLOT_SCATTER_COLOR_KEY, "Scatter Plot Color", colorOrGradient, null);
         colorParameterList.add(m_colorParameter);
-        
-        
-        m_parameterListArray = new  ArrayList<>(1);
+
+        m_parameterListArray = new ArrayList<>(1);
         m_parameterListArray.add(colorParameterList);
-        
-        
+
     }
 
     @Override
@@ -118,8 +116,6 @@ public class PlotLinear extends PlotXYAbstract {
 
         m_colorParameter.setGradientParam(m_potentialGradientParamArray);
 
-
-        
         return m_parameterListArray;
     }
 
@@ -153,19 +149,19 @@ public class PlotLinear extends PlotXYAbstract {
             }
             m_sb.append("<BR>");
         }
-        String labelX; 
+        String labelX;
         if (m_plotPanel.getXAxis().isEnum()) {
             labelX = m_plotPanel.getEnumValueX(indexFound, true);
         } else {
-            labelX = DataFormat.format(m_dataX[indexFound],4);
+            labelX = DataFormat.format(m_dataX[indexFound], 4);
         }
         String labelY;
         if (m_plotPanel.getYAxis().isEnum()) {
             labelY = m_plotPanel.getEnumValueY(indexFound, true);
         } else {
-            labelY = DataFormat.format(m_dataY[indexFound],4);
+            labelY = DataFormat.format(m_dataY[indexFound], 4);
         }
-        
+
         m_sb.append("<BR>");
         m_sb.append(m_plotPanel.getXAxis().getTitle());
         m_sb.append(" : ");
@@ -186,7 +182,7 @@ public class PlotLinear extends PlotXYAbstract {
 
         int indexFound = findPoint(x, y);
 
-        int size = m_dataX == null?0:m_dataX.length;
+        int size = m_dataX == null ? 0 : m_dataX.length;
         if (!append) {
             for (int i = 0; i < size; i++) {
                 m_selected[i] = false;
@@ -207,7 +203,7 @@ public class PlotLinear extends PlotXYAbstract {
     public boolean select(Path2D.Double path, double minX, double maxX, double minY, double maxY, boolean append) {
 
         boolean aSelection = false;
-        int size = m_dataX == null? 0:m_dataX.length;
+        int size = m_dataX == null ? 0 : m_dataX.length;
         for (int i = 0; i < size; i++) {
 
             double dataX = m_dataX[i];
@@ -219,10 +215,8 @@ public class PlotLinear extends PlotXYAbstract {
             } else if (path.contains(dataX, dataY)) {
                 m_selected[i] = true;
                 aSelection = true;
-            } else {
-                if (!append) {
-                    m_selected[i] = false;
-                }
+            } else if (!append) {
+                m_selected[i] = false;
             }
 
         }
@@ -254,8 +248,8 @@ public class PlotLinear extends PlotXYAbstract {
     }
 
     /**
-     * return the  distance between two points
-     *     
+     * return the distance between two points
+     *
      * @param p1,p2 the two points
      * @return dist the distance
      */
@@ -268,13 +262,14 @@ public class PlotLinear extends PlotXYAbstract {
     public double[] getDataX() {
         return m_dataX;
     }
+
     public double[] getDataY() {
         return m_dataY;
     }
-    
+
     /**
-     * Return the  distance from a point to a segment
-     *     
+     * Return the distance from a point to a segment
+     *
      * @param ps,pe the start/end of the segment
      * @param p the given point
      * @return the distance from the given point to the segment
@@ -307,12 +302,13 @@ public class PlotLinear extends PlotXYAbstract {
         return un2 - ah2;
     }
 
-
     /**
-     * return the nearest point index for a given point (x,y), depending of the distance to the segments
+     * return the nearest point index for a given point (x,y), depending of the
+     * distance to the segments
+     *
      * @param x
      * @param y
-     * @return 
+     * @return
      */
     private int findPoint(double x, double y) {
 
@@ -321,7 +317,7 @@ public class PlotLinear extends PlotXYAbstract {
 
         double distanceMin = Double.MAX_VALUE;
         int nearestDataIndex = -1;
-        int size = m_dataX== null?0: m_dataX.length;
+        int size = m_dataX == null ? 0 : m_dataX.length;
         for (int i = size - 1; i >= 0; i--) { // reverse loop to select first the data in foreground
             double dataX = m_dataX[i];
             double dataY = m_dataY[i];
@@ -346,17 +342,17 @@ public class PlotLinear extends PlotXYAbstract {
 
         XAxis xAxis = m_plotPanel.getXAxis();
         YAxis yAxis = m_plotPanel.getYAxis();
-        
+
         if (nearestDataIndex != -1) {
             Point p = new Point(xAxis.valueToPixel(x), m_plotPanel.getYAxis().valueToPixel(y));
             Point ps = null;
             Point pe = null;
-            Point pnd = new Point(xAxis.valueToPixel(m_dataX[nearestDataIndex]),  yAxis.valueToPixel(m_dataY[nearestDataIndex]));
+            Point pnd = new Point(xAxis.valueToPixel(m_dataX[nearestDataIndex]), yAxis.valueToPixel(m_dataY[nearestDataIndex]));
             if (nearestDataIndex > 0) {
-                ps = new Point(xAxis.valueToPixel(m_dataX[nearestDataIndex-1]),  yAxis.valueToPixel(m_dataY[nearestDataIndex-1]));
+                ps = new Point(xAxis.valueToPixel(m_dataX[nearestDataIndex - 1]), yAxis.valueToPixel(m_dataY[nearestDataIndex - 1]));
             }
-            if (nearestDataIndex < size-1) {
-                pe = new Point(xAxis.valueToPixel(m_dataX[nearestDataIndex+1]), yAxis.valueToPixel(m_dataY[nearestDataIndex+1]));
+            if (nearestDataIndex < size - 1) {
+                pe = new Point(xAxis.valueToPixel(m_dataX[nearestDataIndex + 1]), yAxis.valueToPixel(m_dataY[nearestDataIndex + 1]));
             }
             if (ps != null) {
                 double d0 = distanceToSegment(ps, pnd, p);
@@ -374,12 +370,12 @@ public class PlotLinear extends PlotXYAbstract {
 
         return -1;
     }
-    
+
     @Override
     public double getNearestXData(double x) {
         return x; //JPM.TODO
     }
-    
+
     @Override
     public double getNearestYData(double y) {
         return y; //JPM.TODO
@@ -400,7 +396,7 @@ public class PlotLinear extends PlotXYAbstract {
 
         boolean xAsEnum = m_plotPanel.getXAxis().isEnum();
         boolean yAsEnum = m_plotPanel.getYAxis().isEnum();
-        
+
         for (int i = 0; i < size; i++) {
             if (xAsEnum) {
                 m_dataX[i] = i;
@@ -408,9 +404,9 @@ public class PlotLinear extends PlotXYAbstract {
                 Object value = m_compareDataInterface.getDataValueAt(i, m_cols[COL_X_ID]);
                 m_dataX[i] = (value == null || !Number.class.isAssignableFrom(value.getClass())) ? Double.NaN : ((Number) value).doubleValue(); //CBy TODO : ne pas avoir a tester le type Number
             }
-            
+
             if (yAsEnum) {
-                 m_dataY[i] = i;
+                m_dataY[i] = i;
             } else {
                 Object value = m_compareDataInterface.getDataValueAt(i, m_cols[COL_Y_ID]);
                 m_dataY[i] = (value == null || !Number.class.isAssignableFrom(value.getClass())) ? Double.NaN : ((Number) value).doubleValue(); //CBy TODO : ne pas avoir a tester le type Number
@@ -423,8 +419,8 @@ public class PlotLinear extends PlotXYAbstract {
         double maxX = minX;
         double minY = m_dataY[0];
         double maxY = minY;
-        
-        for(int i=0; i<size; i++) {
+
+        for (int i = 0; i < size; i++) {
             double x = m_dataX[i];
             double y = m_dataY[i];
             if (!Double.valueOf(x).isNaN()) {
@@ -448,34 +444,33 @@ public class PlotLinear extends PlotXYAbstract {
                 maxY = Math.max(maxY, y);
             }
         }
-        
-        if (Double.valueOf(minX).isNaN() ||Double.valueOf(minY).isNaN()) {
+
+        if (Double.valueOf(minX).isNaN() || Double.valueOf(minY).isNaN()) {
             m_dataX = new double[0];
             m_dataY = new double[0];
             m_selected = new boolean[0];
             return;
         }
-        
+
         m_xMin = minX;
         m_xMax = maxX;
         m_yMin = minY;
         m_yMax = maxY;
-        
 
         // we let margins
-        if (!xAsEnum || (xAsEnum && m_xMin == m_xMax)) { 
+        if (!xAsEnum || (xAsEnum && m_xMin == m_xMax)) {
             double deltaX = (m_xMax - m_xMin);
             if (deltaX <= 10e-10) {
                 // no real delta
                 m_xMin = m_xMin - 1;  //JPM.TODO : enhance this
                 m_xMax = m_xMax + 1;
             } else {
-               // m_xMin = m_xMin - deltaX * 0.01; // no need to have a margin on xMin
+                // m_xMin = m_xMin - deltaX * 0.01; // no need to have a margin on xMin
                 m_xMax = m_xMax + deltaX * 0.01;
             }
         }
 
-        if (!yAsEnum || (yAsEnum && m_yMin == m_yMax)) { 
+        if (!yAsEnum || (yAsEnum && m_yMin == m_yMax)) {
             double deltaY = (m_yMax - m_yMin);
             if (deltaY <= 10e-10) {
                 // no real delta
@@ -495,7 +490,6 @@ public class PlotLinear extends PlotXYAbstract {
             m_yMax *= 1.2; // we let place at the top to be able to put information
         }
         DecimalFormat df = new DecimalFormat("#.00");
-
 
         // add marker if needed
         if (m_compareDataInterface.getExternalData() != null) {
@@ -647,7 +641,7 @@ public class PlotLinear extends PlotXYAbstract {
         int clipX = xAxis.valueToPixel(xAxis.getMinValue());
         int clipWidth = xAxis.valueToPixel(xAxis.getMaxValue()) - clipX;
         int clipY = yAxis.valueToPixel(yAxis.getMaxValue());
-        int clipHeight = yAxis.valueToPixel(yAxis.getMinValue()) - clipY +1;
+        int clipHeight = yAxis.valueToPixel(yAxis.getMinValue()) - clipY + 1;
         g.setClip(clipX, clipY, clipWidth, clipHeight);
 
         ColorOrGradient colorOrGradient = m_colorParameter.getColor();
@@ -666,11 +660,11 @@ public class PlotLinear extends PlotXYAbstract {
         if (this.m_plotInformation != null && m_plotInformation.getPlotColor() != null) {
             plotColor = this.m_plotInformation.getPlotColor();
         }
-        if (displayAntiAliasing){
+        if (displayAntiAliasing) {
             g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         }
-        
-        int size = m_dataX == null? 0:m_dataX.length;
+
+        int size = m_dataX == null ? 0 : m_dataX.length;
         if (size > 0) {
             int x0 = xAxis.valueToPixel(m_dataX[0]);
             int y0 = yAxis.valueToPixel(m_dataY[0]);
@@ -684,7 +678,12 @@ public class PlotLinear extends PlotXYAbstract {
                 int y = yAxis.valueToPixel(m_dataY[i]);
                 boolean isDef = !Double.valueOf(m_dataX[i]).isNaN() && !Double.valueOf(m_dataY[i]).isNaN();
                 g.setColor(plotColor);
-                g.setStroke(m_strokeLine);
+                logger.debug("YYYYYYYYYYYYYYYYY" + plotColor.toString());
+                if (m_userStock != null) {
+                    g.setStroke(m_userStock);
+                } else {
+                    g.setStroke(m_strokeLine);
+                }
                 if (m_isDrawPoints && isDef) {
                     g.fillOval(x - 3, y - 3, 6, 6);
                 }
@@ -694,17 +693,9 @@ public class PlotLinear extends PlotXYAbstract {
                 x0 = x;
                 y0 = y;
                 isDef0 = isDef;
-
             }
         }
-
-
-
     }
-
-    
-
-    
 
     @Override
     public boolean getDoubleBufferingPolicy() {
@@ -722,7 +713,7 @@ public class PlotLinear extends PlotXYAbstract {
     }
 
     private void sortData() {
-        int dataSize = m_dataX == null?0:m_dataX.length;
+        int dataSize = m_dataX == null ? 0 : m_dataX.length;
         int j;
         if (dataSize > 1) {
             for (int i = 1; i < dataSize; i++) {
@@ -746,28 +737,30 @@ public class PlotLinear extends PlotXYAbstract {
             setDrawGap(plotInformation.isDrawGap());
         }
     }
-    
+
     public PlotInformation getPlotInformation() {
         return this.m_plotInformation;
     }
 
     @Override
     public boolean setIsPaintMarker(boolean isPaintMarker) {
-        if (strokeFixed){
+        if (strokeFixed) {
             m_isPaintMarker = true;
             return false;
         }
         boolean modified = isPaintMarker ^ m_isPaintMarker;
-        
+
         if (modified) {
             m_isPaintMarker = isPaintMarker;
             if (isPaintMarker) {
                 m_strokeLine = STROKE_2;
+            } else if (m_userStock != null) {
+                m_strokeLine = m_userStock;
             } else {
                 m_strokeLine = STROKE_1;
             }
         }
-        
+
         return modified;
     }
 
@@ -775,7 +768,7 @@ public class PlotLinear extends PlotXYAbstract {
     public boolean isMouseOnPlot(double x, double y) {
         return findPoint(x, y) != -1;
     }
-    
+
     @Override
     public boolean isMouseOnSelectedPlot(double x, double y) {
         return false; // JPM : not supported for the moment
@@ -784,7 +777,7 @@ public class PlotLinear extends PlotXYAbstract {
     public void setDrawPoints(boolean drawPoints) {
         this.m_isDrawPoints = drawPoints;
     }
-    
+
     public void setDrawGap(boolean drawGap) {
         this.m_isDrawGap = drawGap;
     }
@@ -793,7 +786,7 @@ public class PlotLinear extends PlotXYAbstract {
     public void parametersChanged() {
         // nothing to do
     }
-    
+
     @Override
     public String getEnumValueX(int index, boolean fromData) {
         if ((index < 0) || (index >= m_dataX.length)) {
@@ -812,14 +805,17 @@ public class PlotLinear extends PlotXYAbstract {
 
         return m_compareDataInterface.getDataValueAt(index, m_cols[COL_Y_ID]).toString();
     }
-    
-    public void setStrokeFixed(boolean b){
+
+    public void setStrokeFixed(boolean b) {
         this.strokeFixed = b;
         m_strokeLine = STROKE_1;
     }
-    
-    public void setAntiAliasing(boolean displayAntiAliasing){
+
+    public void setStroke(float witdh) {
+        m_userStock = new BasicStroke(witdh, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER);
+    }
+
+    public void setAntiAliasing(boolean displayAntiAliasing) {
         this.displayAntiAliasing = displayAntiAliasing;
     }
 }
-

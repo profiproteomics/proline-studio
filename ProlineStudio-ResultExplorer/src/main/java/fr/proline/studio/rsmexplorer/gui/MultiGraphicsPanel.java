@@ -47,12 +47,18 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
 
     private BasePlotPanel m_plotPanel;
 
-    private boolean m_canChooseColor = false;
+    public BasePlotPanel getM_plotPanel() {
+        return m_plotPanel;
+    }
 
+    private boolean m_canChooseColor = false;
+    //plot type combo box
     private JComboBox<PlotType> m_allPlotsComboBox;
+    //Axis combo box
     private JComboBox<String> m_valueXComboBox;
     private JComboBox<String> m_valueYComboBox;
     private JComboBox<String> m_valueZComboBox;
+    //Axis label
     private JLabel m_valueXLabel;
     private JLabel m_valueYLabel;
     private JLabel m_valueZLabel;
@@ -287,6 +293,10 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
 
     }
 
+    /**
+     * for the current Plot, needsX(), needsY() will affect m_valueX-Y-ZLabel
+     * and m_valueX-Y-Z ComboBox
+     */
     private void updateXYCbxVisibility() {
         PlotType plotType = (PlotType) m_allPlotsComboBox.getSelectedItem();
 
@@ -308,18 +318,19 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
 
     }
 
+    /**
+     * set data in Combo Box X, Y
+     */
     private void fillXYCombobox() {
-
         m_isUpdatingCbx = true;
         try {
-
             // clear combobox
             ((DefaultComboBoxModel) m_valueXComboBox.getModel()).removeAllElements();
             ((DefaultComboBoxModel) m_valueYComboBox.getModel()).removeAllElements();
             ((DefaultComboBoxModel) m_valueZComboBox.getModel()).removeAllElements();
 
             PlotType plotType = (PlotType) m_allPlotsComboBox.getSelectedItem();
-            HashSet<Class> acceptedValues = plotType.getAcceptedXValues();
+            HashSet<Class> acceptedValues = plotType.getAcceptedXValues(); //Double,Float,Integer,String...
 
             int nbValuesType = 0;
             boolean hasValues = m_valuesList != null && !m_valuesList.isEmpty();
@@ -403,23 +414,11 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
     }
 
     /**
-     * @KX call by MapAlignementPanel, to clear plot when source, destination
-     * map are the same
+     *
+     * @param valuesList
+     * @param crossSelectionInterfaceList
+     * @param isSingle to display one plot
      */
-    public void clearPlots() {
-        this.m_plotPanel.lockData(true); //if not true, repaint don't work
-        this.m_plotPanel.clearPlots();
-        this.m_plotPanel.repaint();
-        this.m_plotPanel.lockData(m_dataLocked);//back to previous state, if not, the next setData will not repaint
-    }
-
-    public void ClearAxisTitle(String xTitle) {
-        m_plotPanel.setXAxisTitle("Time in Map " + xTitle + " (min)");
-        m_plotPanel.setYAxisTitle("Delta time in Map (s)");
-//        ((DefaultComboBoxModel) m_valueXComboBox.getModel()).removeAllElements();
-//        ((DefaultComboBoxModel) m_valueYComboBox.getModel()).removeAllElements();
-    }
-
     private void setDataImpl(List<ExtendedTableModelInterface> valuesList, List<CrossSelectionInterface> crossSelectionInterfaceList, boolean isSingle) {
 
         m_valuesList = valuesList;
@@ -431,11 +430,12 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
         }
 
         //if (m_valueXComboBox.getItemCount() == 0) {
+        //if isSingle == true, each time we update comob box //@KX @todo delete isSingle, because MapAlignemntPanel dont use MultiGraphicsPanel now
+        //if getItemCount() == 0, it is the first time we set data to combo box
         if (isSingle == true ||(isSingle == false && m_valueXComboBox.getItemCount() == 0 )) {
-            fillXYCombobox();//update select panel combo box
+                fillXYCombobox();//update select panel combo box
 
             ActionListener actionForXYCbx = new ActionListener() {
-
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     if (m_isUpdatingCbx) {
@@ -452,11 +452,10 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
                         m_plotPanel.updateAxis(plotGraphic);
                     }
                     m_plotPanel.repaint();
-
                 }
-
             };
 
+            //@Karine XUE: if Axis change, Combo Box Change
             m_valueXComboBox.addActionListener(actionForXYCbx);
             m_valueYComboBox.addActionListener(actionForXYCbx);
             m_valueZComboBox.addActionListener(actionForXYCbx);

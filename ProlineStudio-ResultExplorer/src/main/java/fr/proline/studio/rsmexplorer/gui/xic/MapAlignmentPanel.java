@@ -35,11 +35,20 @@ import javax.swing.JTextField;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
-import fr.proline.studio.rsmexplorer.gui.MultiGraphicsPanel;
+import fr.proline.studio.graphics.BasePlotPanel;
+import fr.proline.studio.graphics.PlotBaseAbstract;
+import fr.proline.studio.graphics.PlotLinear;
+import fr.proline.studio.pattern.xic.DataboxMapAlignment;
 import fr.proline.studio.rsmexplorer.gui.dialog.xic.AbstractGenericQuantParamsPanel;
+import fr.proline.studio.rsmexplorer.gui.xic.alignment.RTCompareTableModel;
+import fr.proline.studio.rsmexplorer.gui.xic.alignment.PlotScatterXicCloud;
 import java.awt.Color;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import javax.swing.JSplitPane;
 import javax.swing.border.TitledBorder;
+import org.openide.util.Exceptions;
 
 /**
  * map alignment panel for 1 dataset
@@ -74,26 +83,29 @@ public class MapAlignmentPanel extends HourglassPanel implements DataBoxPanelInt
     private List<ExtendedTableModelInterface> m_valuesList = null;
     private List<CrossSelectionInterface> m_crossSelectionInterfaceList = null;
     private JSplitPane m_splitPane;
-    private MultiGraphicsPanel m_alignmentGraphicPanel;  //who has plotPanel
+    private BasePlotPanel m_alignmentGraphicPanel;  //who has BasePlotPanel
+    private boolean m_isSourceDestComboBoxSeted = false;
     /**
      * for alignement iterative mode, sometimes, we should show 2 graphic
      */
-    private MultiGraphicsPanel m_alignmentGraphicPanel_2;
+    private BasePlotPanel m_alignmentGraphicPanel_2;
 
-    public MapAlignmentPanel() {
+    public MapAlignmentPanel(DataboxMapAlignment dataBox) {
         super();
         m_referenceMapId = 0;
         m_alnMode = "unknown";
+        m_dataBox = dataBox;
         initComponents();
-
     }
 
     private void initComponents() {
         JPanel pane;
         pane = new JPanel();
         JPanel mapAlignmentPanel = initMapAlignmentPanel();
-        m_alignmentGraphicPanel = new MultiGraphicsPanel(false, false);
-        m_alignmentGraphicPanel_2 = new MultiGraphicsPanel(false, false);
+        //m_alignmentGraphicPanel = new MultiGraphicsPanel(false, false);
+        m_alignmentGraphicPanel = new BasePlotPanel();
+        //m_alignmentGraphicPanel_2 = new MultiGraphicsPanel(false, false);
+        m_alignmentGraphicPanel_2 = new BasePlotPanel();
         // the second graphic panel has not data in exhaustive mode and in iterative mode, when one selected map is reference map
         m_alignmentGraphicPanel_2.setVisible(false);
         pane.setLayout(new BorderLayout());
@@ -138,9 +150,11 @@ public class MapAlignmentPanel extends HourglassPanel implements DataBoxPanelInt
         m_cbSourceMaps.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                //((DataboxMapAlignment)m_dataBox).setMapFrom(m_cbSourceMaps.getSelectedItem());
                 convertTime();
                 setDataGraphic();
             }
+
         });
 
         m_cbDestMaps = new JComboBox();
@@ -180,59 +194,73 @@ public class MapAlignmentPanel extends HourglassPanel implements DataBoxPanelInt
         return pane;
     }
 
+    /**
+     * show in plotScatter, the cloud, usulay be called when user change combo
+     * box selection <br>
+     * can be called by DataBoxMapAlignment
+     */
+    public void setAlignmentCloud() {
+        this.setDataGraphic();
+    }
+
     public void setData(QuantChannelInfo quantChannelInfo, List<ExtendedTableModelInterface> compareDataInterfaceList, List<CrossSelectionInterface> crossSelectionInterfaceList) {
+        //@Karine XUE,when a databaseLoadTask or it's subTask is finished, the callback will be called in DataBox, 
+        //so this setData method can be called sevral time. m_isSourceDestComboBoxSeted is used to limite the repeatition
+        if (!this.m_isSourceDestComboBoxSeted) {
+            this.m_quantChannelInfo = quantChannelInfo;
+            this.m_valuesList = compareDataInterfaceList;
+            this.m_crossSelectionInterfaceList = crossSelectionInterfaceList;
 
-        this.m_quantChannelInfo = quantChannelInfo;
-        this.m_valuesList = compareDataInterfaceList;
-        this.m_crossSelectionInterfaceList = crossSelectionInterfaceList;
+            m_allMapAlignments = new ArrayList();
+            m_allMapAlignments.addAll(m_quantChannelInfo.getDataset().getMapAlignments());
+            m_allMapAlignments.addAll(m_quantChannelInfo.getDataset().getMapReversedAlignments());
+            // reference alignment map
+            m_referenceMapId = m_quantChannelInfo.getDataset().getAlnReferenceMapId();
+            String referenceMapTitle = m_quantChannelInfo.getMapTitle(m_referenceMapId);
+            String htmlColor = m_quantChannelInfo.getMapHtmlColor(m_quantChannelInfo.getDataset().getAlnReferenceMapId());
+            m_alnMode = this.getAlignmentMethod();
 
-        m_allMapAlignments = new ArrayList();
-        m_allMapAlignments.addAll(m_quantChannelInfo.getDataset().getMapAlignments());
-        m_allMapAlignments.addAll(m_quantChannelInfo.getDataset().getMapReversedAlignments());
-        // reference alignment map
-        m_referenceMapId = m_quantChannelInfo.getDataset().getAlnReferenceMapId();
-        String referenceMapTitle = m_quantChannelInfo.getMapTitle(m_referenceMapId);
-        String htmlColor = m_quantChannelInfo.getMapHtmlColor(m_quantChannelInfo.getDataset().getAlnReferenceMapId());
-        m_alnMode = this.getAlignmentMethod();
+            StringBuilder sb = new StringBuilder();
+            sb.append("<html>");
 
-        StringBuilder sb = new StringBuilder();
-        sb.append("<html>");
-
-        sb.append("Reference Map: ");
-        sb.append("<font color='").append(htmlColor).append("'>&#x25A0;&nbsp;</font>");
-        sb.append(referenceMapTitle);
-        sb.append(", Alignment Mode : ");
-        sb.append(m_alnMode);
-        sb.append("</html>");
-        m_labelTitle.setText(sb.toString());
-
-        //model cb
-        m_mapName = new HashMap<>();
-        String[] mapItems = new String[m_quantChannelInfo.getDataset().getMaps().size()];
-        int i = 0;
-        for (ProcessedMap map : m_quantChannelInfo.getDataset().getMaps()) {
-            String mapTitle = m_quantChannelInfo.getMapTitle(map.getId());
-            sb = new StringBuilder();
-            htmlColor = m_quantChannelInfo.getMapHtmlColor(map.getId());
-            sb.append("<html><font color='").append(htmlColor).append("'>&#x25A0;&nbsp;</font>");
-            sb.append(mapTitle);
+            sb.append("Reference Map: ");
+            sb.append("<font color='").append(htmlColor).append("'>&#x25A0;&nbsp;</font>");
+            sb.append(referenceMapTitle);
+            sb.append(", Alignment Mode : ");
+            sb.append(m_alnMode);
             sb.append("</html>");
-            mapItems[i] = sb.toString();
-            m_mapName.put(i, map);
-            i++;
+            m_labelTitle.setText(sb.toString());
+
+            //model cb
+            m_mapName = new HashMap<>();
+            String[] mapItems = new String[m_quantChannelInfo.getDataset().getMaps().size()];
+            int i = 0;
+            for (ProcessedMap map : m_quantChannelInfo.getDataset().getMaps()) {
+                String mapTitle = m_quantChannelInfo.getMapTitle(map.getId());
+                sb = new StringBuilder();
+                htmlColor = m_quantChannelInfo.getMapHtmlColor(map.getId());
+                sb.append("<html><font color='").append(htmlColor).append("'>&#x25A0;&nbsp;</font>");
+                sb.append(mapTitle);
+                sb.append("</html>");
+                mapItems[i] = sb.toString();
+                m_mapName.put(i, map);
+                i++;
+            }
+            m_cbSourceModel = new DefaultComboBoxModel(mapItems);
+            m_cbDestModel = new DefaultComboBoxModel(mapItems);
+            m_cbSourceMaps.setModel(m_cbSourceModel);
+            m_cbDestMaps.setModel(m_cbDestModel);
+            if (mapItems.length > 0) {
+                m_cbSourceModel.setSelectedItem(mapItems[0]);
+            }
+            if (mapItems.length > 1) {
+                m_cbDestModel.setSelectedItem(mapItems[1]);
+            }
+            setDataGraphic();
+            this.m_isSourceDestComboBoxSeted = true;
+            repaint();
+
         }
-        m_cbSourceModel = new DefaultComboBoxModel(mapItems);
-        m_cbDestModel = new DefaultComboBoxModel(mapItems);
-        m_cbSourceMaps.setModel(m_cbSourceModel);
-        m_cbDestMaps.setModel(m_cbDestModel);
-        if (mapItems.length > 0) {
-            m_cbSourceModel.setSelectedItem(mapItems[0]);
-        }
-        if (mapItems.length > 1) {
-            m_cbDestModel.setSelectedItem(mapItems[1]);
-        }
-        setDataGraphic();
-        repaint();
     }
 
     private String getAlignmentMethod() {
@@ -302,13 +330,14 @@ public class MapAlignmentPanel extends HourglassPanel implements DataBoxPanelInt
         long mapIdSrc = getSelectedMapId(m_cbSourceMaps);
         long mapIdDst = getSelectedMapId(m_cbDestMaps);
         if (mapIdSrc == mapIdDst) {
-            this.m_alignmentGraphicPanel.ClearAxisTitle(m_quantChannelInfo.getMapTitle(mapIdSrc));
-            this.m_alignmentGraphicPanel.clearPlots();
+            //this.m_alignmentGraphicPanel.ClearAxisTitle(m_quantChannelInfo.getMapTitle(mapIdSrc));
+            this.m_alignmentGraphicPanel.clearPlotsWithRepaint();
             if (this.m_alignmentGraphicPanel_2.isVisible()) {//iterative mode, and nobody of source, destination map is reference map
-                this.m_alignmentGraphicPanel_2.ClearAxisTitle(m_quantChannelInfo.getMapTitle(mapIdSrc));
-                this.m_alignmentGraphicPanel_2.clearPlots();
+                //this.m_alignmentGraphicPanel_2.ClearAxisTitle(m_quantChannelInfo.getMapTitle(mapIdSrc));
                 this.m_alignmentGraphicPanel_2.setVisible(false);
+                this.m_alignmentGraphicPanel_2.clearPlotsWithRepaint();
             }
+            repaint();
         } else {
             List<MapAlignment> mapAList;
             MapAlignment map = MapAlignmentConverter.getMapAlgn(mapIdSrc, mapIdDst, m_allMapAlignments);
@@ -318,6 +347,7 @@ public class MapAlignmentPanel extends HourglassPanel implements DataBoxPanelInt
             {
                 this.m_alignmentGraphicPanel_2.setVisible(false);
                 setDataGraphicTableModel(map, this.m_alignmentGraphicPanel);
+
             } else {
                 //from source to reference
                 map = MapAlignmentConverter.getMapAlgn(mapIdSrc, m_referenceMapId, m_allMapAlignments);
@@ -334,28 +364,54 @@ public class MapAlignmentPanel extends HourglassPanel implements DataBoxPanelInt
         }
     }
 
-    private void setDataGraphicTableModel(MapAlignment map, MultiGraphicsPanel graphicPanel) {
-        List<MapAlignment> mapAList = new ArrayList();
-        mapAList.add(map);
-        List<CrossSelectionInterface> listCSI = new ArrayList();
-        List<ExtendedTableModelInterface> listETI = new ArrayList();
-        List<MapTimePanel> mapTimePanelist = new ArrayList();
+    private void setDataGraphicTableModel(MapAlignment map, BasePlotPanel graphicPanel) {
+        CrossSelectionInterface crossSelectionTableModel;
+        ExtendedTableModelInterface extendedTableModel;
+        PlotScatterXicCloud plotCloud;
+        Long mapIdSrc = map.getSourceMap().getId();
+        Long mapIdDst = map.getDestinationMap().getId();
+
         MapTimePanel mapTimePanel;
-        for (MapAlignment m : mapAList) {
-            List<MapTime> listMapTime = m.getMapTimeList();
-            mapTimePanel = new MapTimePanel();
-            String fromMap = m_quantChannelInfo.getMapTitle(m.getSourceMap().getId());
-            String toMap = m_quantChannelInfo.getMapTitle(m.getDestinationMap().getId());
-            String title = "Map Alignment from " + fromMap + " (to. " + toMap + ")";
-            Color color = m_quantChannelInfo.getMapColor(m.getDestinationMap().getId());
-            mapTimePanel.setData((long) -1, m, listMapTime, color, title, true, fromMap, toMap);//set graphic content
-            mapTimePanelist.add(mapTimePanel);
+        List<MapTime> listMapTime = map.getMapTimeList();
+        mapTimePanel = new MapTimePanel();
+        String mapTitleFrom = m_quantChannelInfo.getMapTitle(mapIdSrc);
+        String mapTitleTo = m_quantChannelInfo.getMapTitle(mapIdDst);
+        String title = "Map Alignment from " + mapIdSrc + " (to. " + mapIdDst + ")";
+        Color color = m_quantChannelInfo.getMapColor(mapIdSrc);
+        logger.debug("XXXXXXXXX color=" + color.toString()) ;
+        mapTimePanel.setData((long) -1, map, listMapTime, color, title, true, mapTitleFrom, mapTitleTo);//set graphic content
+
+        crossSelectionTableModel = mapTimePanel.getCrossSelectionInterface();
+        extendedTableModel = mapTimePanel.getGlobalTableModelInterface();
+        PlotLinear alignmentLiner = new PlotLinear(graphicPanel, extendedTableModel, crossSelectionTableModel, PlotBaseAbstract.COL_X_ID, PlotBaseAbstract.COL_Y_ID);
+        alignmentLiner.setStroke(3f);
+       
+        graphicPanel.setPlot(alignmentLiner);
+        RTCompareTableModel cloudData = getCloudData(mapIdSrc);
+        if (cloudData != null) {
+            int axisX = cloudData.getColumnIndex(mapIdSrc);
+            int axisY = cloudData.getColumnIndex(mapIdDst);
+            plotCloud = new PlotScatterXicCloud(graphicPanel, cloudData, null, axisX, axisY);
+            //write2File(cloudData);
+            plotCloud.setColor(m_quantChannelInfo.getMapColor(mapIdDst));
+            double yMax = alignmentLiner.getYMax();
+            double yMin = alignmentLiner.getYMin();
+            double distance = ((DataboxMapAlignment)this.m_dataBox).getRT_Tolerance();
+            plotCloud.setYMax(yMax+2*distance);
+            plotCloud.setYMin(yMin-2*distance);
+            graphicPanel.setPlot(plotCloud);
+            graphicPanel.addPlot(alignmentLiner);
         }
-        for (MapTimePanel mPanel : mapTimePanelist) {
-            listCSI.add(mPanel.getCrossSelectionInterface());
-            listETI.add(mPanel.getGlobalTableModelInterface());
+        graphicPanel.repaint();
+
+    }
+
+    private RTCompareTableModel getCloudData(long mapIdSrc) {
+        if (this.m_dataBox.isLoaded()) {
+            return ((DataboxMapAlignment) this.m_dataBox).getPeptideCloud(mapIdSrc);
+        } else {
+            return null;
         }
-        graphicPanel.setData(listETI, listCSI, true);
     }
 
     private Long getSelectedMapId(JComboBox cb) {
@@ -382,5 +438,26 @@ public class MapAlignmentPanel extends HourglassPanel implements DataBoxPanelInt
         }
         return calcTime;
     }
+
+//    private void write2File(ElutionTimeCompareTableModel cloudData) {
+//        PrintWriter writer = null;
+//        try {
+//            String fileName = cloudData.getName()+".txt";
+//            writer = new PrintWriter(fileName, "UTF-8");
+//            
+//            for (int i = 0; i < cloudData.getRowCount(); i++){
+//                
+//                writer.println(cloudData.getInfo(i));
+//            }
+//            
+//            writer.close();
+//        } catch (FileNotFoundException ex) {
+//            Exceptions.printStackTrace(ex);
+//        } catch (UnsupportedEncodingException ex) {
+//            Exceptions.printStackTrace(ex);
+//        } finally {
+//            writer.close();
+//        }
+//    }
 
 }

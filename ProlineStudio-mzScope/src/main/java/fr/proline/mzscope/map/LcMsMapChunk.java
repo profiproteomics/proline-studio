@@ -49,7 +49,7 @@ public class LcMsMapChunk {
     /**
      * Constructor
      *
-     * @param reader
+     * @param map
      *            map parent LC/MS map
      * @param viewport
      *            chunk viewport
@@ -217,8 +217,7 @@ public class LcMsMapChunk {
      *
      * @param mz
      * @param rt
-     * @param slice
-     * @param intensity
+     * @param sliceIndex
      */
     private void addIntensity(double mz, double rt, int sliceIndex, int dataIndex, int imageWidth,
 	    int imageHeight) {

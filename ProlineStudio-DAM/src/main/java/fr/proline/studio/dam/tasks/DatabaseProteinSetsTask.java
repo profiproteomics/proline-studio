@@ -131,10 +131,7 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
             Long rsmId = m_rsm.getId();
             // SELECT ps FROM PeptideSet pepset JOIN pepset.proteinSet as ps WHERE ps.resultSummary.id=:rsmId AND ps.isValidated=true ORDER BY pepset.score DESC
             
-            // SELECT new fr.proline.core.orm.msi.dto.DProteinSet(ps.id, ps.representativeProteinMatchId ,ps.resultSummary.id) 
-            // FROM PeptideSet pepset JOIN pepset.proteinSet as ps
-            // WHERE ps.resultSummary.id=:rsmId AND ps.isValidated=true ORDER BY pepset.score DESC
-            TypedQuery<DProteinSet> proteinSetsQuery = entityManagerMSI.createQuery("SELECT new fr.proline.core.orm.msi.dto.DProteinSet(ps.id, ps.representativeProteinMatchId ,ps.resultSummary.id) FROM PeptideSet pepset JOIN pepset.proteinSet as ps WHERE ps.resultSummary.id=:rsmId AND ps.isValidated=true ORDER BY pepset.score DESC", DProteinSet.class);            
+            TypedQuery<DProteinSet> proteinSetsQuery = entityManagerMSI.createQuery("SELECT new fr.proline.core.orm.msi.dto.DProteinSet(ps.id, ps.representativeProteinMatchId ,ps.resultSummary.id) FROM PeptideSet pepset JOIN pepset.proteinSet as ps WHERE ps.resultSummary.id=:rsmId AND ps.isValidated=true ORDER BY pepset.score DESC", DProteinSet.class);
             proteinSetsQuery.setParameter("rsmId", rsmId);
             List<DProteinSet> proteinSets = proteinSetsQuery.getResultList();
 
@@ -245,9 +242,6 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
             Long pepInstanceId = m_peptideInstance.getId();
             // SELECT prots FROM fr.proline.core.orm.msi.ProteinSet prots, fr.proline.core.orm.msi.PeptideSet peps, fr.proline.core.orm.msi.PeptideSetPeptideInstanceItem peps_to_pepi WHERE peps.proteinSet=prots AND peps.id=peps_to_pepi.id.peptideSetId AND peps_to_pepi.id.peptideInstanceId=:peptideInstanceId AND prots.isValidated=true ORDER BY prots.score DESC
             
-            //"SELECT new fr.proline.core.orm.msi.dto.DProteinSet(prots.id, prots.representativeProteinMatchId ,prots.resultSummary.id) 
-            // FROM fr.proline.core.orm.msi.ProteinSet prots, fr.proline.core.orm.msi.PeptideSet peps, fr.proline.core.orm.msi.PeptideSetPeptideInstanceItem peps_to_pepi 
-            // WHERE peps.proteinSet=prots AND peps.id=peps_to_pepi.id.peptideSetId AND peps_to_pepi.id.peptideInstanceId=:peptideInstanceId AND prots.isValidated=true ORDER BY peps.score DESC"
             TypedQuery proteinSetsQuery = entityManagerMSI.createQuery("SELECT new fr.proline.core.orm.msi.dto.DProteinSet(prots.id, prots.representativeProteinMatchId ,prots.resultSummary.id) FROM fr.proline.core.orm.msi.ProteinSet prots, fr.proline.core.orm.msi.PeptideSet peps, fr.proline.core.orm.msi.PeptideSetPeptideInstanceItem peps_to_pepi WHERE peps.proteinSet=prots AND peps.id=peps_to_pepi.id.peptideSetId AND peps_to_pepi.id.peptideInstanceId=:peptideInstanceId AND prots.isValidated=true ORDER BY peps.score DESC", DProteinSet.class);
             proteinSetsQuery.setParameter("peptideInstanceId", pepInstanceId);
             List<DProteinSet> proteinSets = proteinSetsQuery.getResultList();
@@ -327,7 +321,6 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
      * Retrieve Typical Protein Match for a Sub Task
      *
      * @param entityManagerMSI
-     * @param slice
      */
     private void typicalProteinMatch(EntityManager entityManagerMSI, SubTask subTask) {
 
@@ -386,16 +379,6 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
 
         HashMap<Long, Integer> spectralCountMap = new HashMap<>();
 
-        // VDS: Change query to go through ProtSet -> PepSet -> PepInst : BCP BCP plus rapide! 
-                //select ps.id, ps.representative_protein_match_id, sum(pepI.total_leaves_match_count), sum(pepI.peptide_match_count)
-                //from protein_set ps, peptide_set peps, peptide_set_peptide_instance_item pspii, peptide_instance pepI
-                //where pspii.peptide_set_id = peps.id
-                //and pspii.peptide_instance_id = pepI.id
-                //and peps.protein_set_id = ps.id
-                //and ps.result_summary_id = 24
-                //and pepI.result_summary_id = 24
-                //GROUP BY ps.id, ps.representative_protein_match_id
-        
         String spectralCountQueryString = "SELECT ps.representativeProteinMatchId, sum(pi.totalLeavesMatchCount), sum(pi.peptideMatchCount) "
                 + "FROM ProteinSet ps, PeptideSet pepS, PeptideInstance pi, PeptideSetPeptideInstanceItem ps_to_pi "
                 + "WHERE ps.id IN (:proteinSetIds) AND ps_to_pi.id.peptideSetId = pepS.id AND  ps_to_pi.id.peptideInstanceId=pi.id AND pepS.proteinSet.id = ps.id "                
@@ -457,18 +440,7 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
         HashMap<Long, Integer> spectralCountMap = new HashMap<>();
 
         // Prepare Specific Spectral count query
-        
-        // VDS: Change query to go through ProtSet -> PepSet -> PepInst : BCP BCP plus rapide! 
-                //select ps.id, ps.representative_protein_match_id, sum(pepI.total_leaves_match_count), sum(pepI.peptide_match_count)
-                //from protein_set ps, peptide_set peps, peptide_set_peptide_instance_item pspii, peptide_instance pepI
-                //where pspii.peptide_set_id = peps.id
-                //and pspii.peptide_instance_id = pepI.id
-                //and peps.protein_set_id = ps.id
-                //and ps.result_summary_id = 24
-                //and pepI.result_summary_id = 24 
-                //AND pi.validatedProteinSetCount=1  << NOT TESTED IN Specific case
-                //GROUP BY ps.id, ps.representative_protein_match_id
-        
+
        String specificSpectralCountQueryString = "SELECT ps.representativeProteinMatchId, sum(pi.totalLeavesMatchCount), sum(pi.peptideMatchCount) "
                 + "FROM ProteinSet ps, PeptideSet pepS, PeptideInstance pi, PeptideSetPeptideInstanceItem ps_to_pi "
                 + "WHERE ps.id IN (:proteinSetIds) AND ps_to_pi.id.peptideSetId = pepS.id AND  ps_to_pi.id.peptideInstanceId=pi.id AND pepS.proteinSet.id = ps.id "                
@@ -541,13 +513,6 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
 
 
         // SameSet count query
-        /**
-         * SELECT ps.id, count(pm) 
-         * FROM ProteinSet ps, PeptideSet pepset, ProteinMatch pm, PeptideSetProteinMatchMap pepset_to_pm 
-         * WHERE ps.id IN (:proteinSetIds) AND pepset.proteinSet=ps AND 
-         * pepset_to_pm.id.peptideSetId=pepset.id AND pepset_to_pm.id.proteinMatchId=pm.id 
-         * GROUP BY ps
-         */
         String sameSetCountQueryString = "SELECT ps.id, count(pm) FROM ProteinSet ps, PeptideSet pepset, ProteinMatch pm, PeptideSetProteinMatchMap pepset_to_pm WHERE ps.id IN (:proteinSetIds) AND pepset.proteinSet=ps AND pepset_to_pm.id.peptideSetId=pepset.id AND pepset_to_pm.id.proteinMatchId=pm.id GROUP BY ps";
         Query sameSetCountQuery = entityManagerMSI.createQuery(sameSetCountQueryString);
 
@@ -565,13 +530,7 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
 
         // All proteins in Protein Set count query
         // -> used to know number of proteins in Sub set
-        /**
-         * SELECT ps, count(pm) FROM ProteinMatch pm, ProteinSetProteinMatchItem
-         * ps_to_pm, ProteinSet ps WHERE ps_to_pm.proteinSet.id IN
-         * (:proteinSetIds) AND ps_to_pm.proteinSet.id = ps.id AND
-         * ps_to_pm.proteinMatch.id=pm.id AND ps_to_pm.resultSummary.id=:rsmId
-         * GROUP BY ps
-         */
+
         String allCountQueryString = "SELECT ps.id, count(pm) FROM ProteinMatch pm, ProteinSetProteinMatchItem ps_to_pm, ProteinSet ps WHERE  ps_to_pm.proteinSet.id IN (:proteinSetIds) AND ps_to_pm.proteinSet.id = ps.id AND ps_to_pm.proteinMatch.id=pm.id AND ps_to_pm.resultSummary.id=:rsmId GROUP BY ps";
         Query allCountQuery = entityManagerMSI.createQuery(allCountQueryString);
         allCountQuery.setParameter("proteinSetIds", sliceOfProteinSetIds);

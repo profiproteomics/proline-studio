@@ -77,7 +77,8 @@ public class ServiceNotificationListener implements MessageListener {
                     Map<String,Object> params = jsonNotif.getNamedParams();                
                     final JMSNotificationMessage resultMsg = new JMSNotificationMessage(params.getOrDefault(NOTIFICATION_SERVICE_NAME_KEY, "Undefined").toString(),params.getOrDefault(NOTIFICATION_SERVICE_VERSION_KEY, "default").toString(),
                             params.getOrDefault(NOTIFICATION_SERVICE_SOURCE_KEY, "Unknown").toString(), params.getOrDefault(NOTIFICATION_SERVICE_DESCR_KEY, "").toString(),
-                            params.getOrDefault(NOTIFICATION_SERVICE_MORE_INFO_KEY, "Unknown").toString(), (Long) params.getOrDefault(NOTIFICATION_TIMESTAMP_KEY,0l),
+                            params.getOrDefault(NOTIFICATION_SERVICE_MORE_INFO_KEY, "Unknown").toString(), (Long) params.getOrDefault(NOTIFICATION_TIMESTAMP_KEY,
+                        0L),
                             params.getOrDefault(NOTIFICATION_JMS_ID_KEY, "Unknown").toString(), params.getOrDefault(NOTIFICATION_JSON_REQ_ID_KEY,"Unknown").toString(), 
                             JMSNotificationMessage.MessageStatus.parseString(params.get(NOTIFICATION_SERVICE_STATUS_KEY).toString()) );
 

@@ -54,7 +54,7 @@ public class AddIdentificationFolderAction extends AbstractRSMAction {
             final IdentificationTree tree = IdentificationTree.getCurrentTree();
             final DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
 
-            DataSetNode datasetNode = new DataSetNode(new DataSetData(name, Dataset.DatasetType.IDENTIFICATION_FOLDER, Aggregation.ChildNature.OTHER));
+            DataSetNode datasetNode = new DataSetNode(DataSetData.createTemporaryFolder(name));//new DataSetData(name, Dataset.DatasetType.IDENTIFICATION_FOLDER, Aggregation.ChildNature.OTHER));
             nodesCreated.add(datasetNode);
             datasetNode.setIsChanging(true);
 
@@ -152,7 +152,7 @@ public class AddIdentificationFolderAction extends AbstractRSMAction {
         } else if (node.getType() == AbstractNode.NodeTypes.DATA_SET) {
 
             DDataset d = ((DataSetNode) node).getDataset();
-            if (d.getType() == Dataset.DatasetType.IDENTIFICATION_FOLDER) {
+            if (d.isIdentification() && d.isFolder()) {
                 enabled = true;
             }
 

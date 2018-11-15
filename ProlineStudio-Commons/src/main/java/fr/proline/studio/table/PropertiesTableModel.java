@@ -141,7 +141,7 @@ public abstract class PropertiesTableModel extends DecoratedTableModel implement
 
     @Override
     public Long getTaskId() {
-        return -1l;
+        return -1L;
     }
 
     @Override

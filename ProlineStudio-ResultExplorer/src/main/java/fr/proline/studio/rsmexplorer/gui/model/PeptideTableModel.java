@@ -521,7 +521,7 @@ public class PeptideTableModel extends DecoratedTableModel implements GlobalTabl
 
     @Override
     public Long getTaskId() {
-        return -1l; // not used
+        return -1L; // not used
     }
 
     @Override

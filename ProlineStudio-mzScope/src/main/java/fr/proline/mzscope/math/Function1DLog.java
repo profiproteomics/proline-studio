@@ -13,12 +13,11 @@ public class Function1DLog implements Function1D {
     private double base;
 
     /**
-     * @param a
-     * @param b
+     * @param base
      */
     public Function1DLog(double base) {
-	super();
-	this.base = base;
+	    super();
+	    this.base = base;
     }
 
     /*

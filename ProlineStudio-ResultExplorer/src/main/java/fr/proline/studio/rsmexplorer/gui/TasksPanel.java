@@ -507,7 +507,7 @@ public class TasksPanel extends AbstractTasksPanel {
 
         @Override
         public Long getTaskId() {
-            return -1l; // not used
+            return -1L; // not used
         }
 
         @Override

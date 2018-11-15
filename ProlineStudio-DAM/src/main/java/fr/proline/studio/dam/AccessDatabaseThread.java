@@ -178,12 +178,9 @@ public class AccessDatabaseThread extends Thread {
     /**
      * Add a task to be done later according to its priority
      *
-     * @param action
      */
     public final void addTask(AbstractDatabaseTask task) {
 
-        
-        
         // check if we need to fetch data for this action
         if (!task.needToFetch()) {
             // fetch already done : return immediately

@@ -469,7 +469,7 @@ public class RsetPeptideSpectrumValuesPanel extends HourglassPanel implements Da
 
         @Override
         public Long getTaskId() {
-            return -1l; // not used
+            return -1L; // not used
         }
 
         @Override

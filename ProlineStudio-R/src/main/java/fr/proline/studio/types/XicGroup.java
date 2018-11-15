@@ -13,7 +13,7 @@ public class XicGroup {
     
     public XicGroup(Long id, String name) {
         if (id == null) {
-            m_id = -1l; // JPM.WART temporary wart for Spectral Count
+            m_id = -1L; // JPM.WART temporary wart for Spectral Count
         } else {
             m_id = id;
         }

@@ -66,11 +66,6 @@ public class LcMsMapMzSpectrum extends AbstractLcMsMapSpectrum {
 	return this.maxIntensity;
     }
 
-    /**
-     * @param rt
-     *            elution time
-     * @return
-     */
     private int getMzIndex(double mz) {
 	return (int) ((mz - this.getMinX()) / this.getSliceSize());
     }

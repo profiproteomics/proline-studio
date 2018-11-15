@@ -49,8 +49,6 @@ public class DatabaseConnectionTask extends AbstractDatabaseTask {
      * Constructor 
      *
      * @param callback
-     * @param databaseProperties
-     * @param projectId
      */
     public DatabaseConnectionTask(AbstractDatabaseCallback callback) {
         super(callback, null);
@@ -101,8 +99,7 @@ public class DatabaseConnectionTask extends AbstractDatabaseTask {
     
     /**
      * to check if the project user is known in the database
-     * @param databaseProperties
-     * @param projectUser 
+     * @param projectUser
      */
     public void initCheckProjectUser(String projectUser) {
         setTaskInfo(new TaskInfo("Check Project User", false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_MEDIUM));

@@ -284,7 +284,6 @@ public class StringFilter extends Filter {
      * create a JTextField, which listen ctrl+V action, convert any html text to
      * plain text
      *
-     * @param vTextField
      * @param filterText
      * @return
      */

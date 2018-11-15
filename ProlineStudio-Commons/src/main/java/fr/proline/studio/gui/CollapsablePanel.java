@@ -111,7 +111,6 @@ public class CollapsablePanel extends JPanel {
         /**
          * HeaderPanel contructor with a title and a font
          * @param text
-         * @param font 
          */
         public HeaderLabel(String text, boolean defaultExpand) { 
             super(text, defaultExpand ? IconManager.getIcon(IconManager.IconType.ARROW_DOWN) : IconManager.getIcon(IconManager.IconType.ARROW_RIGHT) , JLabel.LEFT);

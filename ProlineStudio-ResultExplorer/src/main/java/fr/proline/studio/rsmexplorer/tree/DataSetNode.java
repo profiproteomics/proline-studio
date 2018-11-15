@@ -2,15 +2,24 @@ package fr.proline.studio.rsmexplorer.tree;
 
 import fr.proline.core.orm.msi.ResultSet;
 import fr.proline.core.orm.msi.ResultSummary;
-import fr.proline.core.orm.uds.Dataset;
-import fr.proline.core.orm.uds.QuantitationMethod;
 import fr.proline.core.orm.uds.dto.DDataset;
-import fr.proline.core.orm.uds.dto.DDataset.MergeInformation;
+import fr.proline.core.orm.uds.dto.DDatasetType;
+import fr.proline.core.orm.uds.dto.DDatasetType.AggregationInformation;
+import static fr.proline.core.orm.uds.dto.DDatasetType.AggregationInformation.IDENTIFICATION_SUMMARY_AGG;
+import static fr.proline.core.orm.uds.dto.DDatasetType.AggregationInformation.IDENTIFICATION_SUMMARY_UNION;
+import static fr.proline.core.orm.uds.dto.DDatasetType.AggregationInformation.SEARCH_RESULT_AGG;
+import static fr.proline.core.orm.uds.dto.DDatasetType.AggregationInformation.SEARCH_RESULT_UNION;
+import static fr.proline.core.orm.uds.dto.DDatasetType.AggregationInformation.UNKNOWN;
+import fr.proline.core.orm.uds.dto.DDatasetType.QuantitationMethodInfo;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.data.AbstractData;
 import fr.proline.studio.dam.data.DataSetData;
+import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.AbstractDatabaseTask.Priority;
-import fr.proline.studio.dam.tasks.*;
+import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
+import fr.proline.studio.dam.tasks.DatabaseRsetProperties;
+import fr.proline.studio.dam.tasks.DatabaseRsummaryProperties;
+import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.utils.IconManager;
 import java.util.Enumeration;
 import javax.swing.ImageIcon;
@@ -36,96 +45,93 @@ public class DataSetNode extends AbstractNode {
 
     @Override
     public ImageIcon getIcon(boolean expanded) {
-        
-        DDataset dataset = ((DataSetData) getData()).getDataset();
-        Dataset.DatasetType datasetType = ((DataSetData) getData()).getDatasetType();
-        switch(datasetType) {
-            case IDENTIFICATION:
-                
-                if (dataset != null) {
-                    if (dataset.getResultSummaryId() == null) {
-                        if (isChanging()) {
-                            // will become a RSM
-                            return getIcon(IconManager.IconType.DATASET_RSM); 
-                        } else {
-                            return getIcon(IconManager.IconType.DATASET_RSET);
-                         }
-                    } else {
-                        return getIcon(IconManager.IconType.DATASET_RSM);
-                    }
-                } else {
-                    return getIcon(IconManager.IconType.DATASET_RSET);
-                }
-            case QUANTITATION: {
-                if (dataset == null || dataset.getQuantitationMethod() == null)
-                    return getIcon(IconManager.IconType.QUANT_XIC);
-                if (dataset.isQuantiXIC()) { // XIC
-                    return getIcon(IconManager.IconType.QUANT_XIC);            
-                } else if(dataset.isQuantiSC()) { // Spectral count
-                    return getIcon(IconManager.IconType.QUANT_SC);
-                } else 
-                    return getIcon(IconManager.IconType.QUANT);
-            }
-            case AGGREGATE:
 
-                //Aggregation.ChildNature aggregateType = ((DataSetData) getData()).getAggregateType();
-                //JPM.TODO : according to aggregateType type :icon must be different
-                
-                if (dataset != null) {
-//                    if (dataset.getResultSummaryId() != null) {
-                    boolean rsmDefined = dataset.getResultSummaryId() != null;
-                        MergeInformation mergeInfo = ((DataSetData) getData()).getDataset().getMergeInformation();
-                    switch(mergeInfo){
-                        case MERGE_IDENTIFICATION_SUMMARY_AGG: 
-                            return getIcon(IconManager.IconType.DATASET_RSM_MERGED_AGG);
-                        case MERGE_IDENTIFICATION_SUMMARY_UNION:
-                            return getIcon(IconManager.IconType.DATASET_RSM_MERGED_UNION);
-                        case MERGE_SEARCH_RESULT_AGG:
-                            if(rsmDefined)
-                                return getIcon(IconManager.IconType.DATASET_RSM_RSET_MERGED_AGG);
-                            else
-                                return getIcon(IconManager.IconType.DATASET_RSET_MERGED_AGG);
-                        case MERGE_SEARCH_RESULT_UNION:
-                            if(rsmDefined)
-                                return getIcon(IconManager.IconType.DATASET_RSM_RSET_MERGED_UNION);
-                            else
-                                return getIcon(IconManager.IconType.DATASET_RSET_MERGED_UNION);
-                        case MERGE_UNKNOW:
-                            return getIcon(IconManager.IconType.DATASET);                                                           
-                        }
-                    }
-                
-                return getIcon(IconManager.IconType.DATASET);
-            case TRASH:
-                return getIcon(IconManager.IconType.TRASH);
-            case QUANTITATION_FOLDER:
-            case IDENTIFICATION_FOLDER:
-                if (expanded) {
-                    return getIcon(IconManager.IconType.FOLDER_EXPANDED);
-                } else {
-                    return getIcon(IconManager.IconType.FOLDER);
-                }
-                
-            default:
-                return getIcon(IconManager.IconType.QUANT);// sould not happen
-                
-        }
+        DDataset dataset = ((DataSetData) getData()).getDataset();
+        DDatasetType datasetType = ((DataSetData) getData()).getDatasetType();
         
-        //return null;
+        
+        if (datasetType.isTrash()) {
+            return getIcon(IconManager.IconType.TRASH);
+        }
+        // Test Folders first since for identification folders, isQuantitation() is true (same for identification folders
+        if (datasetType.isFolder()) {
+            if (expanded) {
+                return getIcon(IconManager.IconType.FOLDER_EXPANDED);
+            } else {
+                return getIcon(IconManager.IconType.FOLDER);
+            }
+        }
+
+        if (datasetType.isIdentification()) {
+            if (datasetType.isAggregation()) {
+                if (dataset != null) {
+                    boolean rsmDefined = dataset.getResultSummaryId() != null;
+                    AggregationInformation mergeInfo = ((DataSetData) getData()).getDataset().getAggregationInformation();
+                    switch (mergeInfo) {
+                        case IDENTIFICATION_SUMMARY_AGG:
+                            return getIcon(IconManager.IconType.DATASET_RSM_MERGED_AGG);
+                        case IDENTIFICATION_SUMMARY_UNION:
+                            return getIcon(IconManager.IconType.DATASET_RSM_MERGED_UNION);
+                        case SEARCH_RESULT_AGG:
+                            if (rsmDefined) {
+                                return getIcon(IconManager.IconType.DATASET_RSM_RSET_MERGED_AGG);
+                            } else {
+                                return getIcon(IconManager.IconType.DATASET_RSET_MERGED_AGG);
+                            }
+                        case SEARCH_RESULT_UNION:
+                            if (rsmDefined) {
+                                return getIcon(IconManager.IconType.DATASET_RSM_RSET_MERGED_UNION);
+                            } else {
+                                return getIcon(IconManager.IconType.DATASET_RSET_MERGED_UNION);
+                            }
+                        case UNKNOWN:
+                            return getIcon(IconManager.IconType.DATASET);
+                    }
+                }
+                return getIcon(IconManager.IconType.DATASET);
+            } else if (dataset != null) {
+                if (dataset.getResultSummaryId() == null) {
+                    if (isChanging()) {
+                        // will become a RSM
+                        return getIcon(IconManager.IconType.DATASET_RSM);
+                    } else {
+                        return getIcon(IconManager.IconType.DATASET_RSET);
+                    }
+                } else {
+                    return getIcon(IconManager.IconType.DATASET_RSM);
+                }
+            } else {
+                return getIcon(IconManager.IconType.DATASET_RSET);
+            }
+        }
+        if (datasetType.isQuantitation()) {
+            if (dataset == null || datasetType.getQuantMethodInfo() == QuantitationMethodInfo.NONE) {
+                return getIcon(IconManager.IconType.QUANT_XIC);
+            }
+            if (dataset.getQuantMethodInfo() == QuantitationMethodInfo.FEATURES_EXTRACTION) { // XIC
+                return getIcon(IconManager.IconType.QUANT_XIC);
+            } else if (dataset.getQuantMethodInfo() == QuantitationMethodInfo.SPECTRAL_COUNTING) { // Spectral count
+                return getIcon(IconManager.IconType.QUANT_SC);
+            } else {
+                return getIcon(IconManager.IconType.QUANT);
+            }
+        }
+
+        return getIcon(IconManager.IconType.QUANT);// sould not happen
 
     }
     
     public boolean isMerged() {
 
-        Dataset.DatasetType datasetType = ((DataSetData) getData()).getDatasetType();
-        if (datasetType == Dataset.DatasetType.AGGREGATE) {
+        DDatasetType datasetType = ((DataSetData) getData()).getDatasetType();
+        if (datasetType.isIdentification() && datasetType.isAggregation()) {
             DDataset dataset = ((DataSetData) getData()).getDataset();
             if (dataset != null) {
                 if ((dataset.getResultSummaryId() != null) || (dataset.getResultSetId() != null)) {
                     return true;
                 }
             }
-        }else if (datasetType == Dataset.DatasetType.QUANTITATION){
+        } else if (datasetType.isQuantitation()){
             return true; //rsType is Quantitation but, a SC or a XIC is necessarily a merge
         }
         return false;
@@ -146,8 +152,8 @@ public class DataSetNode extends AbstractNode {
         if (dataset == null) {
             return false;
         }
-        Dataset.DatasetType datasetType = ((DataSetData) getData()).getDatasetType();
-        if (datasetType == Dataset.DatasetType.TRASH) {
+        DDatasetType datasetType = ((DataSetData) getData()).getDatasetType();
+        if (datasetType.isTrash()) {
             return true;
         }
         return false;
@@ -158,8 +164,8 @@ public class DataSetNode extends AbstractNode {
         if (dataset == null) {
             return false;
         }
-        Dataset.DatasetType datasetType = ((DataSetData) getData()).getDatasetType();
-        if ((datasetType == Dataset.DatasetType.QUANTITATION_FOLDER) || (datasetType == Dataset.DatasetType.IDENTIFICATION_FOLDER)) {
+        DDatasetType datasetType = ((DataSetData) getData()).getDatasetType();
+        if (datasetType.isFolder()) {
             return true;
         }
         return false;
@@ -184,7 +190,7 @@ public class DataSetNode extends AbstractNode {
     
     public boolean hasResultSet() {
         DDataset dataSet = ((DataSetData) getData()).getDataset();
-        return (dataSet != null) && ((dataSet.getResultSetId() != null) || (dataSet.isQuantiXIC()));
+        return (dataSet != null) && ((dataSet.getResultSetId() != null) || (dataSet.isQuantitation()));
     }
     
     public Long getResultSetId() {
@@ -312,8 +318,7 @@ public class DataSetNode extends AbstractNode {
 
         // ask asynchronous loading of data
         // depending of the type
-        Dataset.DatasetType type = dataSet.getType();
-        if (type != null && type.equals(Dataset.DatasetType.QUANTITATION)) { 
+        if (dataSet.isQuantitation()) {
             // Task 1 : Load Quantitation, MasterQuantitationChannels 
             DatabaseDataSetTask task1 = new DatabaseDataSetTask(dbCallback);
             task1.setPriority(Priority.HIGH_3); // highest priority
@@ -364,8 +369,8 @@ public class DataSetNode extends AbstractNode {
      * @return 
      */
     public boolean isQuantitation(){
-       Dataset.DatasetType datasetType = ((DataSetData) getData()).getDatasetType();
-       return  (datasetType == Dataset.DatasetType.QUANTITATION) ;
+       DDatasetType datasetType = ((DataSetData) getData()).getDatasetType();
+       return  (datasetType.isQuantitation()) ;
     }
     
     /**
@@ -375,15 +380,8 @@ public class DataSetNode extends AbstractNode {
     public boolean isQuantSC() {
         if (isQuantitation()) {
             DDataset d =  ((DataSetData) getData()).getDataset();
-            QuantitationMethod quantitationMethod = d.getQuantitationMethod();
-            if (quantitationMethod == null) {
-                return false;
-            }else if (quantitationMethod.getAbundanceUnit().compareTo("spectral_counts") == 0) { // Spectral count
-                return true;
-            } else {
-                return false;
-            }
-        }else {
+            return d.getQuantMethodInfo() == DDatasetType.QuantitationMethodInfo.SPECTRAL_COUNTING;
+        } else {
             return false;
         }
     }
@@ -395,7 +393,7 @@ public class DataSetNode extends AbstractNode {
     public boolean isQuantXIC() {
         if (isQuantitation()) {
             DDataset d =  ((DataSetData) getData()).getDataset();
-            return d.isQuantiXIC();
+            return d.getQuantMethodInfo() == DDatasetType.QuantitationMethodInfo.FEATURES_EXTRACTION;
         }else {
             return false;
         }
@@ -408,7 +406,7 @@ public class DataSetNode extends AbstractNode {
     public DDataset getParentMergedDataset ()  {
         if (this.getParent() instanceof DataSetNode) {
             DataSetNode parentNode = (DataSetNode)this.getParent();
-            if (parentNode.getDataset().getMergeInformation() != null) {
+            if (parentNode.getDataset().getAggregationInformation() != null) {
                 return parentNode.getDataset();
             }else {
                 return null;

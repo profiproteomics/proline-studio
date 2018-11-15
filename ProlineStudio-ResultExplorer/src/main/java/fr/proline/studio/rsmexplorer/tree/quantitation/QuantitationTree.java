@@ -811,7 +811,7 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
         final DefaultTreeModel treeModel = (DefaultTreeModel) getModel();
 
         // add node for the quantitation dataset which will be created
-        DataSetData quantitationData = new DataSetData(name, Dataset.DatasetType.QUANTITATION, Aggregation.ChildNature.QUANTITATION_FRACTION);
+        DataSetData quantitationData = DataSetData.createTemporaryQuantitation(name); //new DataSetData(name, Dataset.DatasetType.QUANTITATION, Aggregation.ChildNature.QUANTITATION_FRACTION);
         final DataSetNode quantitationNode = new DataSetNode(quantitationData);
         quantitationNode.setIsChanging(true);
         AbstractNode rootNode = (AbstractNode) treeModel.getRoot();

@@ -102,7 +102,7 @@ public class GenerateSpectrumMatchesJMSAction extends AbstractRSMAction {
                 Long resultSummaryId = dataset.getResultSummaryId();
                 // TODO : if resultSummaryId != null open a dialog to choose between generate spectrum matches for the whole resultSet or only RSM
                 Long resultSetId = dataset.getResultSetId();
-                if ((resultSetId == null) && (dataset.isQuantiXIC())) { // can happen for XIC
+                if ((resultSetId == null) && dataset.isQuantitation()) { // can happen for XIC
                     // we read more info with resultSetId
 
                     AbstractDatabaseCallback rsetIdCallback = new AbstractDatabaseCallback() {

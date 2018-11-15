@@ -335,7 +335,7 @@ public class ExportRawFileDialog extends DefaultDialog {
         c.gridx++;
         c.gridwidth = 2;
         intensityCutoffField = new JTextField();
-        intensityCutoffField.setText(new Float(0.0).toString());
+        intensityCutoffField.setText("0.0");
         panelMgf.add(intensityCutoffField, c);
 
         c.gridy++;

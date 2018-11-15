@@ -284,7 +284,7 @@ public class ProteinTableModel extends DecoratedTableModel implements GlobalTabl
     
     @Override
     public Long getTaskId() {
-        return -1l; // not needed
+        return -1L; // not needed
     }
 
     @Override

@@ -19,7 +19,7 @@ public interface IRawFileViewer {
     * callback is called in the AWT event dispatch thread when the display finished.
     * 
     * @param params the XIC extraction parameters 
-    * @param mode the display mode to use
+    * @param display the display mode to use
     * @param callback that must be called back after XIC extraction.
     */
    public void extractAndDisplayChromatogram(MsnExtractionRequest params, Display display, MzScopeCallback callback);

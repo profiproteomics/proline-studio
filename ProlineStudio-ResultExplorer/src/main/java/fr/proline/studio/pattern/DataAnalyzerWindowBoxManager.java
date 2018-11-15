@@ -28,7 +28,7 @@ public class DataAnalyzerWindowBoxManager {
 
                 GlobalTableModelInterface model = tableInfo.getModel();
                 ProjectId projectId = (ProjectId) model.getSingleValue(ProjectId.class);
-                long id = (projectId != null) ? projectId.getId() : -1l;
+                long id = (projectId != null) ? projectId.getId() : -1L;
 
                 m_windowBox.setEntryData(id, tableInfo);
             }
@@ -50,7 +50,7 @@ public class DataAnalyzerWindowBoxManager {
 
                 GlobalTableModelInterface model = tableInfo.getModel();
                 ProjectId projectId = (ProjectId) model.getSingleValue(ProjectId.class);
-                long id = (projectId != null) ? projectId.getId() : -1l;
+                long id = (projectId != null) ? projectId.getId() : -1L;
 
                 m_windowBox.setEntryData(id, tableInfo);
             }

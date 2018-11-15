@@ -826,7 +826,7 @@ public class SplittedPanelContainer extends JPanel {
     
     /**
      * Reduce the maximized panel to its original place
-     * @param panel 
+     * @param panelToReduce
      */
     private void reduce(SplittedPanel panelToReduce) {
         

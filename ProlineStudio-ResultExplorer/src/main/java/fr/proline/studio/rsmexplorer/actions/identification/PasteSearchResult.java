@@ -70,9 +70,10 @@ public class PasteSearchResult extends AbstractRSMAction {
                 if (success) {
 
                     DDataset d = datasetList.get(0);
-                    Aggregation aggregation = d.getAggregation(); 
-                    DataSetData data = new DataSetData(d.getName(), d.getType(), (aggregation!=null) ? d.getAggregation().getChildNature() : Aggregation.ChildNature.SAMPLE_ANALYSIS);
-                    data.setDataset(d);
+//                    Aggregation aggregation = d.getAggregation();
+//                    DataSetData data = new DataSetData(d.getName(), d.getType(), (aggregation!=null) ? d.getAggregation().getChildNature() : Aggregation.ChildNature.SAMPLE_ANALYSIS);
+//                    data.setDataset(d);
+                    DataSetData data = new DataSetData(d);
                     DataSetNode datasetNode = new DataSetNode(data);
                     if (d.getChildrenCount()>0) {
                         datasetNode.add(new HourGlassNode(null));
@@ -143,10 +144,10 @@ public class PasteSearchResult extends AbstractRSMAction {
             return;
         } else if (data.getDataType() == AbstractData.DataTypes.DATA_SET) {
             DataSetData datasetData = (DataSetData) data;
-            if (datasetData.getDatasetType() == Dataset.DatasetType.IDENTIFICATION_FOLDER) {
+            if (datasetData.getDatasetType().isIdentification() && datasetData.getDatasetType().isFolder()) {
                 setEnabled(true);
                 return;
-            } else if (datasetData.getDatasetType() == Dataset.DatasetType.AGGREGATE) {
+            } else if (datasetData.getDatasetType().isIdentification() && datasetData.getDatasetType().isAggregation()) {
                 DDataset dataset =  datasetData.getDataset();
                 if (dataset.getResultSetId() == null) {
                     setEnabled(true);

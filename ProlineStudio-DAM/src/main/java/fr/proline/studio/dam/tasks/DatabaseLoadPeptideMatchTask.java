@@ -1,7 +1,5 @@
 package fr.proline.studio.dam.tasks;
 
-
-
 import fr.proline.core.orm.msi.Peptide;
 import fr.proline.core.orm.msi.PeptideInstance;
 import fr.proline.core.orm.msi.PeptideReadablePtmString;
@@ -839,7 +837,6 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
      * Retrieve Peptide Match for a Sub Task
      *
      * @param entityManagerMSI
-     * @param slice
      */
     private void fetchPeptideMatch(EntityManager entityManagerMSI, SubTask subTask) {
 
@@ -874,7 +871,6 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
      * Retrieve Peptide for a Sub Task
      *
      * @param entityManagerMSI
-     * @param slice
      */
     private void fetchPeptide(EntityManager entityManagerMSI, SubTask subTask) {
 
@@ -962,7 +958,6 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
      * Retrieve MsQuery for a Sub Task
      *
      * @param entityManagerMSI
-     * @param slice
      */
     public static void fetchMsQuery(EntityManager entityManagerMSI, SubTask subTask, ArrayList<Long> peptideMatchIds, HashMap<Long, DPeptideMatch> peptideMatchMap) {
         fetchMsQuery(entityManagerMSI, subTask, peptideMatchIds, null, null, peptideMatchMap);
@@ -1046,7 +1041,6 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
      * Retrieve MsQuery for a Sub Task
      *
      * @param entityManagerMSI
-     * @param slice
      */
     private void fetchProteinSetName(EntityManager entityManagerMSI, SubTask subTask) {
 

@@ -24,7 +24,6 @@ public abstract class AbstractDatabaseCallback {
      * 
      * @param success   indicates if the loading of data has been a success or not
      * @param taskId    id of the task which has been executed
-     * @param slice     if subTask is not null : only a subpart of the task has been done
      */
     public abstract void run(boolean success, long taskId, SubTask subTask, boolean finished);
     

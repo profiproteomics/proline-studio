@@ -131,7 +131,7 @@ public class DataGraphNode extends GraphNode {
         
         GlobalTableModelInterface model = m_tableInfo.getModel();
         ProjectId projectId = (ProjectId) model.getSingleValue(ProjectId.class);
-        long id = (projectId!=null) ? projectId.getId() : -1l;
+        long id = (projectId!=null) ? projectId.getId() : -1L;
         
         windowBox.setEntryData(id, model);
         DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(windowBox);
@@ -145,7 +145,7 @@ public class DataGraphNode extends GraphNode {
 
         GlobalTableModelInterface model = m_tableInfo.getModel();
         ProjectId projectId = (ProjectId) model.getSingleValue(ProjectId.class);
-        long id = (projectId != null) ? projectId.getId() : -1l;
+        long id = (projectId != null) ? projectId.getId() : -1L;
 
         windowBox.setEntryData(id, model);
         

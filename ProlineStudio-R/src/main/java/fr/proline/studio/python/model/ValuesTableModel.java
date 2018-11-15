@@ -88,7 +88,7 @@ public class ValuesTableModel extends DecoratedTableModel implements GlobalTable
 
     @Override
     public Long getTaskId() {
-        return -1l;
+        return -1L;
     }
 
     @Override

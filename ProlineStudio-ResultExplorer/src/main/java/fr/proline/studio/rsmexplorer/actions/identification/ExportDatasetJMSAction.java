@@ -245,7 +245,7 @@ public class ExportDatasetJMSAction extends AbstractRSMAction {
      * @return 
      */
     private Long getDatasetId(String fileName) {        
-        Long dsId = -1l;
+        Long dsId = -1L;
         int id0 = fileName.indexOf("-");
         int id1 = fileName.lastIndexOf("_");
         if (id0 > -1 && id1 > -1 && id0 < id1) {
@@ -253,7 +253,7 @@ public class ExportDatasetJMSAction extends AbstractRSMAction {
             try {
                 dsId = Long.parseLong(dsIdStr);
             } catch (NumberFormatException e) {
-                dsId = -1l;
+                dsId = -1L;
             }
         }
         return dsId;

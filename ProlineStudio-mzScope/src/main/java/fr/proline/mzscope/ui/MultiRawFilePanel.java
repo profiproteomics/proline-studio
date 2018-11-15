@@ -13,11 +13,7 @@ import java.awt.Component;
 import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import javax.swing.AbstractButton;
 import javax.swing.ButtonGroup;
@@ -197,7 +193,8 @@ public class MultiRawFilePanel extends AbstractRawFilePanel {
             @Override
             protected void process(List<Chromatogram> chunks) {
                 int k = 0;
-                Display display = new Display(Arrays.asList(new IntervalMarker(null, Color.ORANGE, Color.RED, f.getFirstElutionTime() / 60.0, f.getLastElutionTime() / 60.0)));
+                Display display = new Display(Collections
+                    .singletonList(new IntervalMarker(null, Color.ORANGE, Color.RED, f.getFirstElutionTime() / 60.0, f.getLastElutionTime() / 60.0)));
                 if (isFirstProcessCall) {
                     logger.info("display first chromato");
                     isFirstProcessCall = false;

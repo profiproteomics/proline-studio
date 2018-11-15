@@ -22,7 +22,6 @@ public class ExportConfig {
     /**
      * get the index of sheet, a sheet means the title of the tab
      *
-     * @param config
      * @param sheetId
      * @return
      */

@@ -118,9 +118,9 @@ public class CreateXICDialog extends DefaultDialog {
      * 
      */
     public void displayExperimentalDesignTree() {
-        DataSetNode rootNode = new DataSetNode(new DataSetData("XIC", Dataset.DatasetType.QUANTITATION, Aggregation.ChildNature.QUANTITATION_FRACTION));
+        DataSetNode rootNode = new DataSetNode(DataSetData.createTemporaryQuantitation("XIC")); //new DataSetData("XIC", Dataset.DatasetType.QUANTITATION, Aggregation.ChildNature.QUANTITATION_FRACTION));
         if (m_refDataset != null) {
-            XICReferenceRSMNode refDatasetNode = new XICReferenceRSMNode(new DataSetData(m_refDataset.getName(), Dataset.DatasetType.AGGREGATE, Aggregation.ChildNature.OTHER));
+            XICReferenceRSMNode refDatasetNode = new XICReferenceRSMNode(DataSetData.createTemporaryAggregate(m_refDataset.getName())); //new DataSetData(m_refDataset.getName(), Dataset.DatasetType.AGGREGATE, Aggregation.ChildNature.OTHER));
             rootNode.add(refDatasetNode);
         }
         displayExperimentalDesignTree(rootNode);
@@ -482,8 +482,7 @@ public class CreateXICDialog extends DefaultDialog {
         if (spectraNodesPerRsId.size() > 0) {
 
             Long projectId = spectraNodesPerRsId.values().iterator().next().getDataset().getProject().getId();
-            List<Long> resultSetIds = new ArrayList<>();
-            resultSetIds.addAll(spectraNodesPerRsId.keySet());
+            List<Long> resultSetIds = new ArrayList<>(spectraNodesPerRsId.keySet());
             List<Long> failedRSIds = new ArrayList<>();
             Map<Long, List<Long>> failedSpectraPerRSIds = new HashMap<>();
             //Add waiting dialog while checking spectrum file 

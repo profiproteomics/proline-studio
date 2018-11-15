@@ -26,7 +26,8 @@ public class PeptideRenderer extends DefaultTableCellRenderer implements Grayabl
     private boolean m_grayed = false;
 
 
-    public void PeptideRenderer() {
+    public PeptideRenderer() {
+
     }
 
     @Override

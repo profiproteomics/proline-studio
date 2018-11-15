@@ -1,8 +1,8 @@
 package fr.proline.studio.rsmexplorer.actions.identification;
 
-import fr.proline.core.orm.uds.Dataset;
 import fr.proline.core.orm.uds.Project;
 import fr.proline.core.orm.uds.dto.DDataset;
+import fr.proline.core.orm.uds.dto.DDatasetType;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.DatabaseDataManager;
 import fr.proline.studio.dam.data.DataSetData;
@@ -95,8 +95,8 @@ public class CreateXICAction extends AbstractRSMAction {
             if (!n.isRoot() && DataSetNode.class.isInstance(n)) {
                 DataSetNode node = (DataSetNode) n;
                 DataSetData dataset = (DataSetData) node.getData();
-                Dataset.DatasetType dsType = dataset.getDatasetType();
-                if (node.hasResultSummary() && (dsType.equals(Dataset.DatasetType.IDENTIFICATION) || dsType.equals(Dataset.DatasetType.AGGREGATE))) {
+                DDatasetType dsType = dataset.getDatasetType();
+                if (node.hasResultSummary() && (dsType.isAggregation())) {
                     m_referenceDataSetDefined = true;
                     refDataset = dataset.getDataset();
                 } else {

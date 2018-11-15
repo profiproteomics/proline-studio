@@ -12,7 +12,6 @@ import java.util.List;
 public abstract class AbstractData {
 
     public enum DataTypes {
-
         MAIN,
         PROJECT_IDENTIFICATION,
         PROJECT_QUANTITATION,

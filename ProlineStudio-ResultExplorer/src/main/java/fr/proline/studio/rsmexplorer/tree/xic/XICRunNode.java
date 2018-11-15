@@ -97,13 +97,12 @@ public class XICRunNode extends AbstractNode {
         setIsChanging(true);
 
         // look if we find a Raw File
-        if (dataset.getType() == Dataset.DatasetType.IDENTIFICATION) {
+        if (dataset.isIdentification()) {
 
             final HashMap<String, RawFile> rawfileFounds = new HashMap<>(1);
             final Run[] runOut = new Run[1];
             final XICRunNode xicRunNode = this;
 
-//            if(dataset.)
             AbstractDatabaseCallback getRawfileCallback = new AbstractDatabaseCallback() {
 
                 @Override

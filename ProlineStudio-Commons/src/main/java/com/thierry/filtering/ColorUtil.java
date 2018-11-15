@@ -41,8 +41,8 @@ public class ColorUtil
   /**
    * Make an even blend between two colors.
    * 
-   * @param c1     First color to blend.
-   * @param c2     Second color to blend.
+   * @param color1     First color to blend.
+   * @param color2     Second color to blend.
    * @return       Blended color.
    */
   public static Color blend (Color color1, Color color2)

@@ -259,7 +259,7 @@ public class XicPeptidesPTMSitePanel extends JPanel implements DataBoxPanelInter
     }
     
     public void setData(PTMSite peptidesPTMSite) {
-        setData(-1l, new DQuantitationChannel[0], null, peptidesPTMSite,  true);
+        setData(-1L, new DQuantitationChannel[0], null, peptidesPTMSite,  true);
     }
     
     public void setData(Long taskId,  DQuantitationChannel[] quantChannels, List<DMasterQuantPeptide> peptides,  PTMSite peptidesPTMSite, boolean finished) {

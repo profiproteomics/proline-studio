@@ -878,14 +878,14 @@ public class MatrixPanel extends HourglassPanel implements DataBoxPanelInterface
         
         public long getPeptideMatchId() {
             if (m_peptideMatch == null) {
-                return -1l;
+                return -1L;
             }
             return m_peptideMatch.getId();
         }
 
         public long getProteinMatchId() {
             if (m_proteinMatch == null) {
-                return -1l;
+                return -1L;
             }
             return m_proteinMatch.getId();
         }

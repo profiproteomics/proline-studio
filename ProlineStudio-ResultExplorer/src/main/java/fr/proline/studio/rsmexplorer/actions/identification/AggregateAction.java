@@ -96,7 +96,7 @@ public class AggregateAction extends AbstractRSMAction {
                         aggregateName += suffixNumber;
                         suffixNumber++;
                     }
-                    DataSetNode datasetNode = new DataSetNode(new DataSetData(aggregateName, Dataset.DatasetType.AGGREGATE, aggregateType));
+                    DataSetNode datasetNode = new DataSetNode(DataSetData.createTemporaryAggregate(aggregateName));//new DataSetData(aggregateName, Dataset.DatasetType.AGGREGATE, aggregateType));
                     nodesCreated.add(datasetNode);
                     datasetNode.setIsChanging(true);
                     
@@ -203,7 +203,7 @@ public class AggregateAction extends AbstractRSMAction {
             if (node.getType() == AbstractNode.NodeTypes.DATA_SET) {
                 
                 DDataset d = ((DataSetNode) node).getDataset();
-                if ((d.getType() != Dataset.DatasetType.AGGREGATE) && (d.getType() != Dataset.DatasetType.IDENTIFICATION_FOLDER)) {
+                if ((!d.isAggregation()) && (!d.isFolder())) {
                     setEnabled(false);
                     return;
                 }

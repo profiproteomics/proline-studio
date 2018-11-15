@@ -28,6 +28,7 @@ import fr.proline.core.orm.uds.QuantitationChannel;
 import fr.proline.core.orm.uds.QuantitationLabel;
 import fr.proline.core.orm.uds.QuantitationMethod;
 import fr.proline.core.orm.uds.dto.DDataset;
+import fr.proline.core.orm.uds.dto.DDatasetType.QuantitationMethodInfo;
 import fr.proline.core.orm.uds.dto.DMasterQuantitationChannel;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
 import fr.proline.core.orm.util.DStoreCustomPoolConnectorFactory;
@@ -514,37 +515,17 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                     dataset.getMasterQuantitationChannels().get(0).setQuantitationChannels(sortedQch);
                 }
             }
-            // load ObjectTree corresponding to the QUANT_PROCESSING_CONFIG
+
+            // load ObjectTree corresponding to the QUANTITATION.*_CONFIG
             Map<String, Long> objectTreeIdByName = datasetDB.getObjectTreeIdByName();
-            if (objectTreeIdByName != null && objectTreeIdByName.get("quantitation.label_free_config") != null){
-                Long objectId = objectTreeIdByName.get("quantitation.label_free_config");
-                String queryObject = "SELECT clobData FROM fr.proline.core.orm.uds.ObjectTree WHERE id=:objectId ";
-                Query qObject = entityManagerUDS.createQuery(queryObject);
-                qObject.setParameter("objectId", objectId);
-                try{
-                    String clobData = (String)qObject.getSingleResult();
-                    fr.proline.core.orm.uds.ObjectTree objectTree = new fr.proline.core.orm.uds.ObjectTree();
-                    objectTree.setId(objectId);
-                    objectTree.setClobData(clobData);
-                    dataset.setQuantProcessingConfig(objectTree);
-                }catch(NoResultException | NonUniqueResultException e){
-                            
-                }
-            }
-            // load ObjectTree corresponding to the POST_QUANT_PROCESSING_CONFIG
-            if (objectTreeIdByName != null && objectTreeIdByName.get("quantitation.post_quant_processing_config") != null){
-                Long objectId = objectTreeIdByName.get("quantitation.post_quant_processing_config");
-                String queryObject = "SELECT clobData FROM fr.proline.core.orm.uds.ObjectTree WHERE id=:objectId ";
-                Query qObject = entityManagerUDS.createQuery(queryObject);
-                qObject.setParameter("objectId", objectId);
-                try{
-                    String clobData = (String)qObject.getSingleResult();
-                    fr.proline.core.orm.uds.ObjectTree objectTree = new fr.proline.core.orm.uds.ObjectTree();
-                    objectTree.setId(objectId);
-                    objectTree.setClobData(clobData);
-                    dataset.setPostQuantProcessingConfig(objectTree);
-                }catch(NoResultException | NonUniqueResultException e){
-                            
+            // load ObjectTree linked to the dataset
+            if ((objectTreeIdByName != null) && (dataset.getQuantProcessingConfig() == null)){
+                for (Map.Entry<String, Long> entry: objectTreeIdByName.entrySet()) {
+                    if (entry.getKey().startsWith("quantitation")) {
+                        Long objectId = entry.getValue();
+                        fr.proline.core.orm.uds.ObjectTree objectTree = entityManagerUDS.find(fr.proline.core.orm.uds.ObjectTree.class, objectId);
+                        dataset.setObjectTree(objectTree);
+                    }
                 }
             }
 
@@ -686,11 +667,9 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                     //resultSummary
                     if (resultSummaryId != null) {
                         // retrieve the proteinSet list with isValidated = true
-                        QuantitationMethod quantitationMethod = m_dataset.getQuantitationMethod();
-                        boolean isSC = quantitationMethod != null && (quantitationMethod.getAbundanceUnit().compareTo("spectral_counts") == 0);
                         Query proteinSetsQuery = entityManagerMSI.createQuery("SELECT ps.id  FROM PeptideSet pepset JOIN pepset.proteinSet as ps "
                                                 + " WHERE ps.resultSummary.id=:rsmId AND ps.isValidated=true ORDER BY pepset.score DESC");
-                        if (isSC){
+                        if (m_dataset.getQuantMethodInfo() == QuantitationMethodInfo.SPECTRAL_COUNTING){
                            proteinSetsQuery = entityManagerMSI.createQuery("SELECT ps.id  FROM PeptideSet pepset JOIN pepset.proteinSet as ps "
                                                 + " WHERE ps.resultSummary.id=:rsmId AND ps.isValidated=true AND ps.masterQuantComponentId is not null ORDER BY pepset.score DESC");
                         }
@@ -702,7 +681,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                             m_proteinSetIds = new ArrayList<>(nbProteinSet);
                             m_resultSetIds = new ArrayList<>(nbProteinSet);
                             for (int i = 0; i < nbProteinSet; i++) {
-                                Long id = Long.valueOf(proteinSets.get(i));
+                                Long id = proteinSets.get(i);
                                 m_proteinSetIds.add(id);
                                 m_resultSetIds.add(resultSummaryId);
                                 DMasterQuantProteinSet dMasterQuantProteinSet = new DMasterQuantProteinSet();

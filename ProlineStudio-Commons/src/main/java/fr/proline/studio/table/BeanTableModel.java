@@ -13,12 +13,7 @@ import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
 import org.slf4j.Logger;
@@ -43,7 +38,7 @@ public class BeanTableModel<T> extends AbstractTableModel implements GlobalTable
     private HashMap<Integer, Filter> m_columnFilterMap = new HashMap<>();
 
     public BeanTableModel(Class<T> type) {
-        this(type, Arrays.asList("class"));
+        this(type, Collections.singletonList("class"));
     }
         
     public BeanTableModel(Class<T> type, List<String> exclusionList) {
@@ -254,7 +249,7 @@ public class BeanTableModel<T> extends AbstractTableModel implements GlobalTable
 
     @Override
     public Long getTaskId() {
-        return -1l;
+        return -1L;
     }
 
     @Override

@@ -237,7 +237,7 @@ public class MultiJoinDataModel extends AbstractTableModel implements GlobalTabl
 
     @Override
     public Long getTaskId() {
-        return -1l;
+        return -1L;
     }
 
     @Override

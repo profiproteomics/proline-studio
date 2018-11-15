@@ -359,7 +359,6 @@ public class XICPropertiesTableModel extends AbstractPropertiesTableModel {
             DDataset dataset = m_datasetArrayList.get(columnIndex);
             QuantitationMethod quantMethod = dataset.getQuantitationMethod();
 
-
             switch (rowIndex) {
                 case ROWTYPE_QUANTI_METHOD_NAME:
                     if (quantMethod == null) {

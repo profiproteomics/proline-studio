@@ -51,7 +51,7 @@ public class CreateSampleNodeAction extends AbstractRSMAction {
                 return;
             }
 
-            XICBiologicalSampleNode biologicalSampleNode = new XICBiologicalSampleNode(new DataSetData(sampleName, Dataset.DatasetType.AGGREGATE, Aggregation.ChildNature.OTHER));
+            XICBiologicalSampleNode biologicalSampleNode = new XICBiologicalSampleNode(DataSetData.createTemporaryAggregate(sampleName)); //new DataSetData(sampleName, Dataset.DatasetType.AGGREGATE, Aggregation.ChildNature.OTHER));
             DefaultTreeModel treeModel = (DefaultTreeModel) m_tree.getModel();
             treeModel.insertNodeInto(biologicalSampleNode, node, 0);
             m_tree.expandNodeIfNeeded(node);
@@ -62,8 +62,8 @@ public class CreateSampleNodeAction extends AbstractRSMAction {
                 return;
             }
             
-            XICBiologicalGroupNode biologicalGroupNode = new XICBiologicalGroupNode(new DataSetData("New Group", Dataset.DatasetType.AGGREGATE, Aggregation.ChildNature.OTHER));
-            XICBiologicalSampleNode biologicalSampleNode = new XICBiologicalSampleNode(new DataSetData(sampleName, Dataset.DatasetType.AGGREGATE, Aggregation.ChildNature.OTHER));
+            XICBiologicalGroupNode biologicalGroupNode = new XICBiologicalGroupNode(DataSetData.createTemporaryAggregate("New Group")); //new DataSetData("New Group", Dataset.DatasetType.AGGREGATE, Aggregation.ChildNature.OTHER));
+            XICBiologicalSampleNode biologicalSampleNode = new XICBiologicalSampleNode(DataSetData.createTemporaryAggregate(sampleName)); //new DataSetData(sampleName, Dataset.DatasetType.AGGREGATE, Aggregation.ChildNature.OTHER));
             
             DefaultTreeModel treeModel = (DefaultTreeModel) m_tree.getModel();
             

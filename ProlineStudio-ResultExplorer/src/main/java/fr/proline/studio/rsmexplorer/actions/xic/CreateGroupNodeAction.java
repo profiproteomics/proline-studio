@@ -50,7 +50,7 @@ public class CreateGroupNodeAction extends AbstractRSMAction {
                 return;
             }
             
-            XICBiologicalGroupNode biologicalGroupNode = new XICBiologicalGroupNode(new DataSetData(groupName, Dataset.DatasetType.AGGREGATE, Aggregation.ChildNature.OTHER));
+            XICBiologicalGroupNode biologicalGroupNode = new XICBiologicalGroupNode(DataSetData.createTemporaryAggregate(groupName)); //new DataSetData(groupName, Dataset.DatasetType.AGGREGATE, Aggregation.ChildNature.OTHER));
             DefaultTreeModel treeModel = (DefaultTreeModel) m_tree.getModel();
             treeModel.insertNodeInto(biologicalGroupNode, node, 0);
             m_tree.expandNodeIfNeeded(node);

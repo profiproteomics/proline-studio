@@ -22,6 +22,7 @@ import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import javax.swing.AbstractButton;
@@ -341,7 +342,8 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFileVie
             protected void done() {
                 try {
                     displayChromatogram(get(), new Display(getXicDisplayMode()));
-                    chromatogramPanel.displayFeature(f, new Display(Arrays.asList(new IntervalMarker(null, Color.ORANGE, Color.RED, f.getFirstElutionTime() / 60.0, f.getLastElutionTime() / 60.0))));
+                    chromatogramPanel.displayFeature(f, new Display(Collections.singletonList(
+                        new IntervalMarker(null, Color.ORANGE, Color.RED, f.getFirstElutionTime() / 60.0, f.getLastElutionTime() / 60.0))));
                     displayScan(getCurrentRawfile().getSpectrumId(f.getElutionTime()));
                     if (rawFileLoading != null) {
                         rawFileLoading.setWaitingState(false);

@@ -95,7 +95,7 @@ public class ImportMaxQuantResultJMSAction extends AbstractRSMAction {
                 }
                 allDatasetNames.add(datasetName);
 
-                DataSetData identificationData = new DataSetData(datasetName, Dataset.DatasetType.AGGREGATE, Aggregation.ChildNature.BIOLOGICAL_GROUP);  //JPM.TODO                
+                DataSetData identificationData = DataSetData.createTemporaryAggregate(datasetName); // new DatasetData(datasetName, Dataset.DatasetType.AGGREGATE, Aggregation.ChildNature.BIOLOGICAL_GROUP);  //JPM.TODO
                 final DataSetNode identificationNode = new DataSetNode(identificationData);
                 identificationNode.setIsChanging(true);
                 allIdentificationNodes.add(identificationNode);
@@ -228,7 +228,7 @@ public class ImportMaxQuantResultJMSAction extends AbstractRSMAction {
         QuantitationTree tree = QuantitationTree.getCurrentTree();
         final DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
                 
-        DataSetData quantitationData = new DataSetData("running import ...", Dataset.DatasetType.QUANTITATION, Aggregation.ChildNature.QUANTITATION_FRACTION);
+        DataSetData quantitationData = DataSetData.createTemporaryQuantitation("running import ...");//new DataSetData("running import ...", Dataset.DatasetType.QUANTITATION, Aggregation.ChildNature.QUANTITATION_FRACTION);
         final DataSetNode quantitationNode = new DataSetNode(quantitationData);
         quantitationNode.setIsChanging(true);
 
@@ -284,7 +284,7 @@ public class ImportMaxQuantResultJMSAction extends AbstractRSMAction {
            
         for(int i=0; i<resultSetIds.size();i++){
             String dsName = new StringBuilder(parentDataset.getName()).append(".").append(resultSetIds.get(i).toString()).toString();
-            DataSetData identificationData = new DataSetData(dsName, Dataset.DatasetType.IDENTIFICATION, Aggregation.ChildNature.SAMPLE_ANALYSIS);  //JPM.TODO                
+            DataSetData identificationData = DataSetData.createTemporaryIdentification(dsName); //new DataSetData(dsName, Dataset.DatasetType.IDENTIFICATION, Aggregation.ChildNature.SAMPLE_ANALYSIS);  //JPM.TODO
             final DataSetNode identificationNode = new DataSetNode(identificationData);
             identificationNode.setIsChanging(true);
             treeModel.insertNodeInto(identificationNode, parentNode, parentNode.getChildCount());

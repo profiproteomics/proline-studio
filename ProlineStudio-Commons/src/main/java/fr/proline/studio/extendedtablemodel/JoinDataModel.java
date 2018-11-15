@@ -353,7 +353,7 @@ public class JoinDataModel extends AbstractJoinDataModel {
     
     @Override
     public Long getTaskId() {
-        return -1l; // not used
+        return -1L; // not used
     }
 
     @Override

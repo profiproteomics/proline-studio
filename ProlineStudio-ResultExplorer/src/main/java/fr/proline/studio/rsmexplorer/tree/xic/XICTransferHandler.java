@@ -197,7 +197,7 @@ public class XICTransferHandler extends AbstractTreeTransferHandler {
                 // top node, we create a group now
                 
                 String groupName = "Group " + suffix;
-                XICBiologicalGroupNode biologicalGroupNode = new XICBiologicalGroupNode(new DataSetData(groupName, Dataset.DatasetType.AGGREGATE, Aggregation.ChildNature.OTHER));
+                XICBiologicalGroupNode biologicalGroupNode = new XICBiologicalGroupNode(DataSetData.createTemporaryAggregate(groupName)); //new DataSetData(groupName, Dataset.DatasetType.AGGREGATE, Aggregation.ChildNature.OTHER));
                 treeModel.insertNodeInto(biologicalGroupNode, dropRSMNode, childIndex);
                 
                 childIndex = 0;
@@ -250,7 +250,7 @@ public class XICTransferHandler extends AbstractTreeTransferHandler {
 
                         String sampleName = "Sample " + suffix;
 
-                        XICBiologicalSampleNode biologicalSampleNode = new XICBiologicalSampleNode(new DataSetData(sampleName, Dataset.DatasetType.AGGREGATE, Aggregation.ChildNature.OTHER));
+                        XICBiologicalSampleNode biologicalSampleNode = new XICBiologicalSampleNode(DataSetData.createTemporaryAggregate(sampleName)); //new DataSetData(sampleName, Dataset.DatasetType.AGGREGATE, Aggregation.ChildNature.OTHER));
                         treeModel.insertNodeInto(biologicalSampleNode, dropRSMNode, childIndex);
 
                         childIndex = 0;
@@ -290,7 +290,7 @@ public class XICTransferHandler extends AbstractTreeTransferHandler {
                 if (dropRSMNode instanceof XICBiologicalGroupNode) {
                     // Group Node, we create a sample node
                     String sampleName = "Sample " + suffix;
-                    XICBiologicalSampleNode biologicalSampleNode = new XICBiologicalSampleNode(new DataSetData(sampleName, Dataset.DatasetType.AGGREGATE, Aggregation.ChildNature.OTHER));
+                    XICBiologicalSampleNode biologicalSampleNode = new XICBiologicalSampleNode(DataSetData.createTemporaryAggregate(sampleName)); //new DataSetData(sampleName, Dataset.DatasetType.AGGREGATE, Aggregation.ChildNature.OTHER));
                     treeModel.insertNodeInto(biologicalSampleNode, dropRSMNode, childIndex);
                     dropRSMNode = biologicalSampleNode;
                     childIndex = 0;

@@ -147,7 +147,8 @@ public class QuantiTransferHandler extends TransferHandler {
             AbstractNode.NodeTypes nodeType = dropRSMNode.getType();
             if ( nodeType == AbstractNode.NodeTypes.DATA_SET) {
                 DataSetNode dropDatasetNode = (DataSetNode) dropRSMNode;
-                if (dropDatasetNode.isQuantitation()) {
+                // cannot drop into another quantitation dataset except if this quantitation is a folder
+                if (dropDatasetNode.isQuantitation() && !dropDatasetNode.isFolder()) {
                     return false;
                 }
                 dropProjectId = dropDatasetNode.getDataset().getProject().getId();

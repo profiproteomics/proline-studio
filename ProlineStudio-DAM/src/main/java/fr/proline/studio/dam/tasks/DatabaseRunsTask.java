@@ -50,7 +50,7 @@ public class DatabaseRunsTask extends AbstractDatabaseTask {
      * Load Run Id for specified RSMs
      *
      * @param projectId
-     * @param rsmId
+     * @param rsmIds
      * @param runIds
      */
     public void initLoadRunIdsForRsms(long projectId, ArrayList<Long> rsmIds, HashMap<Long,Long> runIds) {

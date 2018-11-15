@@ -116,7 +116,7 @@ import au.com.bytecode.opencsv.CSVReader;
 
         @Override
         public Long getTaskId() {
-            return -1l;
+            return -1L;
         }
 
         @Override
@@ -283,7 +283,7 @@ import au.com.bytecode.opencsv.CSVReader;
         if (headerLine == null) {
             headerLine = new String[nbColumns];
             for (int i = 0; i < nbColumns; i++) {
-                headerLine[i] = new String(String.valueOf(i + 1));
+                headerLine[i] = String.valueOf(i + 1);
             }
         }
 

@@ -114,7 +114,7 @@ public class ImportSearchResultAsDatasetJMSAction extends AbstractRSMAction {
 //                final String _datasetName = datasetName;
                 allDatasetNames.add(datasetName);
 
-                DataSetData identificationData = new DataSetData(datasetName, Dataset.DatasetType.IDENTIFICATION, Aggregation.ChildNature.SAMPLE_ANALYSIS);  //JPM.TODO
+                DataSetData identificationData = DataSetData.createTemporaryIdentification(datasetName); //new DataSetData(datasetName, Dataset.DatasetType.IDENTIFICATION, Aggregation.ChildNature.SAMPLE_ANALYSIS);  //JPM.TODO
 
                 final DataSetNode identificationNode = new DataSetNode(identificationData);
                 identificationNode.setIsChanging(true);

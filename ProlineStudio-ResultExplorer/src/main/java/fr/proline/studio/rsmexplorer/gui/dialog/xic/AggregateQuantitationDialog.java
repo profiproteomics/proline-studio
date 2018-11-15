@@ -181,9 +181,9 @@ public class AggregateQuantitationDialog extends DefaultDialog {
     private DataSetNode inferExperimentalDesign() {
         int childIndex = 0;
         
-        DataSetNode rootNode = new DataSetNode(new DataSetData("XIC Aggregation", Dataset.DatasetType.QUANTITATION, Aggregation.ChildNature.QUANTITATION_FRACTION));
+        DataSetNode rootNode = new DataSetNode(DataSetData.createTemporaryQuantitation("XIC Aggregation")); //new DataSetData("XIC Aggregation", Dataset.DatasetType.QUANTITATION, Aggregation.ChildNature.QUANTITATION_FRACTION));
         
-        XICReferenceRSMNode refDatasetNode = new XICReferenceRSMNode(new DataSetData(m_refDataset == null ? "auto" : m_refDataset.getName(), Dataset.DatasetType.AGGREGATE, Aggregation.ChildNature.OTHER));
+        XICReferenceRSMNode refDatasetNode = new XICReferenceRSMNode(DataSetData.createTemporaryAggregate(m_refDataset == null ? "auto" : m_refDataset.getName()));//new DataSetData(m_refDataset == null ? "auto" : m_refDataset.getName(), Dataset.DatasetType.AGGREGATE, Aggregation.ChildNature.OTHER));
         if(m_refDataset != null){
             Long refResultSummaryId = m_quantitations.get(0).getMasterQuantitationChannels().get(0).getIdentResultSummaryId();
             if(refResultSummaryId == null || !refResultSummaryId.equals(m_refDataset.getResultSummaryId()) )
@@ -194,7 +194,7 @@ public class AggregateQuantitationDialog extends DefaultDialog {
         Map<String, List<BiologicalGroup>> groups = m_quantitations.stream().map(ds -> ds.getGroupSetup().getBiologicalGroups()).flatMap(Collection::stream).collect(Collectors.groupingBy(bg -> bg.getName(), Collectors.toList()));
         int qcIndex = 1; 
         for (String groupName : groups.keySet()) {
-            XICBiologicalGroupNode biologicalGroupNode = new XICBiologicalGroupNode(new DataSetData(groupName, Dataset.DatasetType.AGGREGATE, Aggregation.ChildNature.OTHER));
+            XICBiologicalGroupNode biologicalGroupNode = new XICBiologicalGroupNode(DataSetData.createTemporaryAggregate(groupName)); //new DataSetData(groupName, Dataset.DatasetType.AGGREGATE, Aggregation.ChildNature.OTHER));
             rootNode.insert(biologicalGroupNode, childIndex++);
             
             Map<String, List<BiologicalSample>> samples = groups.get(groupName).stream().map( bg -> bg.getBiologicalSamples()).flatMap(Collection::stream).collect(Collectors.groupingBy(s -> s.getName(), Collectors.toList() ));
@@ -204,11 +204,11 @@ public class AggregateQuantitationDialog extends DefaultDialog {
                   int replicates = bg.getBiologicalSamples().stream().map(bs -> bs.getQuantitationChannels().size()).max(Comparator.comparing(Integer::valueOf)).get();
                   maxReplicates = Math.max(replicates, maxReplicates);
             }
-            XICBiologicalSampleNode biologicalSampleNode = new XICBiologicalSampleNode(new DataSetData(sampleName, Dataset.DatasetType.AGGREGATE, Aggregation.ChildNature.OTHER));
+            XICBiologicalSampleNode biologicalSampleNode = new XICBiologicalSampleNode(DataSetData.createTemporaryAggregate(sampleName)); //new DataSetData(sampleName, Dataset.DatasetType.AGGREGATE, Aggregation.ChildNature.OTHER));
             biologicalGroupNode.insert(biologicalSampleNode, 0);
             for (int i = 0; i < maxReplicates; i++) {
                 String name = "Channel " + Integer.toString(qcIndex++);
-                DataSetData dsData = new DataSetData(name, Dataset.DatasetType.IDENTIFICATION, Aggregation.ChildNature.SAMPLE_ANALYSIS);
+                DataSetData dsData = DataSetData.createTemporaryIdentification(name); //new DataSetData(name, Dataset.DatasetType.IDENTIFICATION, Aggregation.ChildNature.SAMPLE_ANALYSIS);
                 XICBiologicalSampleAnalysisNode sampleAnalysisNode = new XICBiologicalSampleAnalysisNode(dsData);
                 sampleAnalysisNode.setQuantChannelName(name);
                 biologicalSampleNode.insert(sampleAnalysisNode, biologicalSampleNode.getChildCount());

@@ -139,7 +139,7 @@ public class FeaturesTableModel extends DecoratedTableModel implements GlobalTab
 
     @Override
     public Long getTaskId() {
-        return -1l; // not used
+        return -1L; // not used
     }
 
     @Override

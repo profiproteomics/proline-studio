@@ -395,7 +395,7 @@ public class ImportTSVFunction extends AbstractFunction {
 
         @Override
         public Long getTaskId() {
-            return -1l;
+            return -1L;
         }
 
         @Override

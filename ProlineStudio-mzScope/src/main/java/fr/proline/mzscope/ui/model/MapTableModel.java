@@ -142,7 +142,7 @@ public class MapTableModel extends AbstractTableModel implements GlobalTableMode
 
    @Override
    public Long getTaskId() {
-      return -1l;
+      return -1L;
    }
 
    @Override

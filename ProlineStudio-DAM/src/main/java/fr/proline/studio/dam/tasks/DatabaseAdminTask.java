@@ -41,10 +41,6 @@ public class DatabaseAdminTask extends AbstractDatabaseTask {
 
     /**
      * Load PeakList Path for Rset
-     *
-     * @param projectId
-     * @param rsetId
-     * @param resultPath
      */
     public void initAddPeakListSoftware(String name, String version, SpectrumTitleParsingRule spectrumTitleParsingRule) {
         setTaskInfo(new TaskInfo(" Add PeakList Software " + name, false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_HIGH));

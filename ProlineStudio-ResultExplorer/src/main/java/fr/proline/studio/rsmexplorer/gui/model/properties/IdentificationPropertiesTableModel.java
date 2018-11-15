@@ -83,7 +83,7 @@ public class IdentificationPropertiesTableModel extends AbstractPropertiesTableM
             ResultSet rset = rsetArray.get(i);
             m_datasetNameArray.add(rset.getName());
             m_projectIdArray.add(projectId);
-            m_datasetIdArray.add(-1l);
+            m_datasetIdArray.add(-1L);
             m_rsmArray.add(null);
         }
 

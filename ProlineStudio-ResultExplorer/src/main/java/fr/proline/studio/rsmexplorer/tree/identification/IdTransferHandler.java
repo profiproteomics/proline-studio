@@ -295,7 +295,7 @@ public class IdTransferHandler extends TransferHandler {
                 datasetName = datasetName.substring(0, indexOfDot);
             }
 
-            DataSetData identificationData = new DataSetData(datasetName, Dataset.DatasetType.IDENTIFICATION, Aggregation.ChildNature.SAMPLE_ANALYSIS);  //JPM.TODO
+            DataSetData identificationData = DataSetData.createTemporaryIdentification(datasetName); //new DataSetData(datasetName, Dataset.DatasetType.IDENTIFICATION, Aggregation.ChildNature.SAMPLE_ANALYSIS);  //JPM.TODO
 
             final DataSetNode identificationNode = new DataSetNode(identificationData);
             identificationNode.setIsChanging(true);
@@ -338,9 +338,11 @@ public class IdTransferHandler extends TransferHandler {
                         ArrayList<DDataset> datasetList = new ArrayList<>(nbChildren);
                         for (int i = 0; i < nbChildren; i++) {
                             AbstractNode childNode = ((AbstractNode) dropRSMNode.getChildAt(i));
-                            DataSetNode childDatasetNode = (DataSetNode) childNode;
-                            DDataset dataset = childDatasetNode.getDataset();
-                            datasetList.add(dataset);
+                            if (childNode.getType() == AbstractNode.NodeTypes.DATA_SET) {
+                                DataSetNode childDatasetNode = (DataSetNode) childNode;
+                                DDataset dataset = childDatasetNode.getDataset();
+                                datasetList.add(dataset);
+                            }
                         }
                         Object databaseParentObject = (dropRSMNode.getType() == AbstractNode.NodeTypes.PROJECT_IDENTIFICATION) ? ((IdProjectIdentificationNode)dropRSMNode).getProject() : ((DataSetNode)dropRSMNode).getDataset();
                         databaseObjectsToModify.put(databaseParentObject, datasetList);

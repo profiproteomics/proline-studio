@@ -156,9 +156,10 @@ public class TaskInfoManager {
             }
             index++;
         }
-        for (int i=destinationList.size()-1;i>=index;i--) {
-            destinationList.remove(i); // can happen when table has been cleared
-        }
+      // can happen when table has been cleared
+      if (destinationList.size() > index) {
+        destinationList.subList(index, destinationList.size()).clear();
+      }
         
         return true;
     }

@@ -141,8 +141,7 @@ public class AggregationQuantChannelsPanel extends JPanel {
         m_tabbedPane.removeAll();
         
         for (DDataset ds : datasets) {
-            
-            DataSetData datasetData = new DataSetData(ds.getName(), Dataset.DatasetType.QUANTITATION, Aggregation.ChildNature.QUANTITATION_FRACTION);
+            DataSetData datasetData = DataSetData.createTemporaryQuantitation(ds.getName()); //new DataSetData(ds.getName(), Dataset.DatasetType.QUANTITATION, Aggregation.ChildNature.QUANTITATION_FRACTION);
             datasetData.setDataset(ds);
             DataSetNode dsNode = new DataSetNode(datasetData);
             XICDesignTree dsDesignTree = new XICDesignTree(dsNode, true);

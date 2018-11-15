@@ -437,7 +437,7 @@ public class RsetAllPanel extends HourglassPanel implements DataBoxPanelInterfac
             // new Properties window
             WindowBox windowBox = WindowBoxFactory.getGenericWindowBox(dialogName, "Properties", IconManager.IconType.DOCUMENT_LIST, true);
             final IdentificationPropertiesTableModel _model = new IdentificationPropertiesTableModel();
-            windowBox.setEntryData(-1l, _model);
+            windowBox.setEntryData(-1L, _model);
             DataBoxViewerTopComponent win2 = new DataBoxViewerTopComponent(windowBox);
             win2.open();
             win2.requestActive();
@@ -683,7 +683,7 @@ public class RsetAllPanel extends HourglassPanel implements DataBoxPanelInterfac
 
         @Override
         public Long getTaskId() {
-            return -1l; // not needed
+            return -1L; // not needed
         }
 
         @Override

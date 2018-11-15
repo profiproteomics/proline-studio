@@ -401,7 +401,7 @@ public class TreeFileChooserPanel extends JPanel {
                 parent.add(node);
 
                 if (nd.hasSubDirs()) {
-                    node.add(new DefaultMutableTreeNode(new Boolean(true)));
+                    node.add(new DefaultMutableTreeNode(Boolean.TRUE));
                 }
             }
 

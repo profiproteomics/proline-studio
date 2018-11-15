@@ -6,9 +6,9 @@
 package fr.proline.studio.rsmexplorer.gui.dialog;
 
 import fr.proline.core.orm.msi.MsiSearch;
-import fr.proline.core.orm.msi.SearchSetting;
 import fr.proline.core.orm.uds.FragmentationRuleSet;
 import fr.proline.core.orm.uds.dto.DDataset;
+import fr.proline.core.orm.uds.dto.DDatasetType;
 import fr.proline.studio.dam.DatabaseDataManager;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.utils.IconManager;
@@ -160,7 +160,7 @@ public class GenerateSpectrumMarchesDialog extends DefaultDialog {
         if (m_datasets == null || m_datasets.isEmpty()) //from specific pepMatch. TODO Get DS informatoin ?
             return "unknown - see dataset properties";
         for (DDataset ds : m_datasets){
-            if(! DDataset.MergeInformation.NO_MERGE.equals(ds.getMergeInformation()))
+            if(!DDatasetType.AggregationInformation.NONE.equals(ds.getAggregationInformation()))
                 oneMerged = true;
             else {
                 MsiSearch msiSearch = ds.getResultSet().getMsiSearch();
@@ -210,10 +210,10 @@ public class GenerateSpectrumMarchesDialog extends DefaultDialog {
     
     public long getFragmentationRuleSetId() {
         if(m_useDefinedFRSChB.isSelected())
-            return -1l;
+            return -1L;
         FragmentationRuleSet fragmentationRuleSet = (FragmentationRuleSet) m_fragmentationRuleSetsComboBox.getSelectedItem();
         if(fragmentationRuleSet == null)
-            return -1l;
+            return -1L;
         return fragmentationRuleSet.getId();
     }
 }

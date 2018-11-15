@@ -179,7 +179,7 @@ public abstract class AbstractFunction implements CheckParameterInterface {
     protected void display(String dataName, String functionName, int resultIndex) {
         WindowBox windowBox = WindowBoxFactory.getGenericWindowBox(dataName, functionName, IconManager.IconType.CHALKBOARD, false);
         ProjectId projectId = (ProjectId) m_globalTableModelInterface.get(resultIndex).getSingleValue(ProjectId.class);
-        long id = (projectId!=null) ? projectId.getId() : -1l;
+        long id = (projectId!=null) ? projectId.getId() : -1L;
         windowBox.setEntryData(id, m_globalTableModelInterface.get(resultIndex));
         DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(windowBox);
         win.open();
@@ -208,7 +208,7 @@ public abstract class AbstractFunction implements CheckParameterInterface {
     protected WindowBox getDisplayWindowBoxSingle(String dataName, String functionName, int resultIndex) {
         WindowBox windowBox = WindowBoxFactory.getGenericWindowBox(dataName, functionName, IconManager.IconType.CHALKBOARD, false);
         ProjectId projectId = (ProjectId) m_globalTableModelInterface.get(resultIndex).getSingleValue(ProjectId.class);
-        long id = (projectId!=null) ? projectId.getId() : -1l;
+        long id = (projectId!=null) ? projectId.getId() : -1L;
         windowBox.setEntryData(id, m_globalTableModelInterface.get(resultIndex));
         return windowBox;
     }

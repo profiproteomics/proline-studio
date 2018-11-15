@@ -3,6 +3,7 @@ package fr.proline.studio.rsmexplorer.actions.identification;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.core.orm.uds.Dataset;
 import fr.proline.core.orm.uds.Project;
+import fr.proline.core.orm.uds.dto.DDatasetType.AggregationInformation;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.DatabaseDataManager;
 import fr.proline.studio.dam.data.DataSetData;
@@ -22,7 +23,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.prefs.Preferences;
-import static javax.swing.Action.NAME;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
@@ -217,14 +217,18 @@ class ConfigurableMergeAction extends AbstractRSMAction {
 
                 if (datasetNode.hasResultSummary()) {
                     if(MergeTask.Config.AGGREGATION.equals(m_configuration))
-                        datasetNode.getDataset().setMergeInformation(DDataset.MergeInformation.MERGE_IDENTIFICATION_SUMMARY_AGG);
+                        datasetNode.getDataset().setAggregationInformation(
+                            AggregationInformation.IDENTIFICATION_SUMMARY_AGG);
                     else
-                        datasetNode.getDataset().setMergeInformation(DDataset.MergeInformation.MERGE_IDENTIFICATION_SUMMARY_UNION);
+                        datasetNode.getDataset().setAggregationInformation(
+                            AggregationInformation.IDENTIFICATION_SUMMARY_UNION);
                 } else {
                     if(MergeTask.Config.AGGREGATION.equals(m_configuration))
-                        datasetNode.getDataset().setMergeInformation(DDataset.MergeInformation.MERGE_SEARCH_RESULT_AGG);
+                        datasetNode.getDataset().setAggregationInformation(
+                            AggregationInformation.SEARCH_RESULT_AGG);
                     else
-                        datasetNode.getDataset().setMergeInformation(DDataset.MergeInformation.MERGE_SEARCH_RESULT_UNION);
+                        datasetNode.getDataset().setAggregationInformation(
+                            AggregationInformation.SEARCH_RESULT_UNION);
                 }
              
                 
@@ -302,8 +306,7 @@ class ConfigurableMergeAction extends AbstractRSMAction {
                 return;
             }
 
-            Dataset.DatasetType datasetType = ((DataSetData) datasetNode.getData()).getDatasetType();
-            if (datasetType != Dataset.DatasetType.AGGREGATE) {
+            if (!((DataSetData) datasetNode.getData()).getDatasetType().isAggregation()) {
                 setEnabled(false);
                 return;
             }

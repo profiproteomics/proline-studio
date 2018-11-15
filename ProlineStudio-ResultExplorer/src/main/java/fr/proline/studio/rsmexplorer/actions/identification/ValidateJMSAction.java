@@ -3,6 +3,8 @@ package fr.proline.studio.rsmexplorer.actions.identification;
 import fr.proline.core.orm.uds.Dataset;
 import fr.proline.core.orm.uds.Project;
 import fr.proline.core.orm.uds.dto.DDataset;
+import fr.proline.core.orm.uds.dto.DDatasetType;
+import fr.proline.core.orm.uds.dto.DDatasetType.AggregationInformation;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.DatabaseDataManager;
 import fr.proline.studio.dam.data.DataSetData;
@@ -31,7 +33,6 @@ import java.util.Map;
 import javax.swing.tree.DefaultTreeModel;
 import org.openide.util.NbBundle;
 import org.openide.windows.WindowManager;
-import org.slf4j.LoggerFactory;
 
 /**
  * Action to validate or re-validate a Search Result
@@ -328,10 +329,11 @@ public class ValidateJMSAction extends AbstractRSMAction {
             
             // if merge DS : forbidden (re)validation on RSM merge
             DataSetData datasetData = (DataSetData) dataSetNode.getData();
-            Dataset.DatasetType datasetType = datasetData.getDatasetType();
-            if ( Dataset.DatasetType.AGGREGATE.equals(datasetType) && dataSetNode.hasResultSummary()) {
-                DDataset.MergeInformation mergeInfo = datasetData.getDataset().getMergeInformation();
-                if( (mergeInfo.compareTo(DDataset.MergeInformation.MERGE_IDENTIFICATION_SUMMARY_AGG) == 0) || (mergeInfo.compareTo(DDataset.MergeInformation.MERGE_IDENTIFICATION_SUMMARY_UNION) == 0)) {
+            DDatasetType datasetType = datasetData.getDatasetType();
+            if ( datasetType.isAggregation() && dataSetNode.hasResultSummary()) {
+                AggregationInformation mergeInfo = datasetData.getDataset().getAggregationInformation();
+                if( (mergeInfo.compareTo(AggregationInformation.IDENTIFICATION_SUMMARY_AGG) == 0) 
+                        || (mergeInfo.compareTo(AggregationInformation.IDENTIFICATION_SUMMARY_UNION) == 0)) {
                     setEnabled(false);
                     return;
                 }

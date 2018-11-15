@@ -57,7 +57,7 @@ public class AddQuantitationFolderAction extends AbstractRSMAction {
             final QuantitationTree tree = QuantitationTree.getCurrentTree();
             final DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
 
-            DataSetNode datasetNode = new DataSetNode(new DataSetData(name, Dataset.DatasetType.QUANTITATION_FOLDER, Aggregation.ChildNature.OTHER));
+            DataSetNode datasetNode = new DataSetNode(DataSetData.createTemporaryFolder(name)); //new DataSetData(name, Dataset.DatasetType.QUANTITATION_FOLDER, Aggregation.ChildNature.OTHER));
             nodesCreated.add(datasetNode);
             datasetNode.setIsChanging(true);
 
@@ -155,7 +155,7 @@ public class AddQuantitationFolderAction extends AbstractRSMAction {
         } else if (node.getType() == AbstractNode.NodeTypes.DATA_SET) {
 
             DDataset d = ((DataSetNode) node).getDataset();
-            if (d.getType() == Dataset.DatasetType.QUANTITATION_FOLDER) {
+            if (d.isQuantitation() && d.isFolder()) {
                 enabled = true;
             }
 

@@ -690,7 +690,6 @@ public class PlotLinear extends PlotXYAbstract {
                 int y = yAxis.valueToPixel(m_dataY[i]);
                 boolean isDef = !Double.valueOf(m_dataX[i]).isNaN() && !Double.valueOf(m_dataY[i]).isNaN();
                 g.setColor(plotColor);
-                logger.debug("YYYYYYYYYYYYYYYYY" + plotColor.toString());
                 if (m_userStrock != null) {
                     g.setStroke(m_userStrock);
                 } else {

@@ -246,7 +246,7 @@ public class CalcDialog extends JDialog {
                         
                         GlobalTableModelInterface model = ((Table)o).getModel();
                         ProjectId projectId = (ProjectId) model.getSingleValue(ProjectId.class);
-                        long id = (projectId!=null) ? projectId.getId() : -1l;
+                        long id = (projectId!=null) ? projectId.getId() : -1L;
                         
                         windowBox.setEntryData(id, model );
                         DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(windowBox);

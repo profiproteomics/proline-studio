@@ -947,7 +947,7 @@ public class ImportIdentificationDialog extends DefaultDialog {
     public long getFragmentationRuleSetId() {
         FragmentationRuleSet fragmentationRuleSet = (FragmentationRuleSet) m_sourceParameterList.getParameter("fragmentation_rule_set").getObjectValue();
         if(fragmentationRuleSet == null)
-            return -1l;
+            return -1L;
         return fragmentationRuleSet.getId();
     }
 

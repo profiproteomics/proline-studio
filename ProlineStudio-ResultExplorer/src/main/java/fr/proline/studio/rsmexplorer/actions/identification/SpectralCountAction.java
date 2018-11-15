@@ -51,8 +51,8 @@ public class SpectralCountAction extends AbstractRSMAction {
 
         final DataSetNode refDatasetNode = (DataSetNode) selectedNodes[0];
 
-        /*DDataset.MergeInformation mergeInfo = refDatasetNode.getDataset().getMergeInformation();
-         if (mergeInfo.compareTo(DDataset.MergeInformation.MERGE_IDENTIFICATION_SUMMARY) != 0) {
+        /*DDataset.AggregationInformation mergeInfo = refDatasetNode.getDataset().getAggregationInformation();
+         if (mergeInfo.compareTo(DDataset.AggregationInformation.MERGE_IDENTIFICATION_SUMMARY) != 0) {
          InfoDialog exitDialog = new InfoDialog(WindowManager.getDefault().getMainWindow(), InfoDialog.InfoType.WARNING, "Warning", "Spectral Count on a Merge of Search Results has not been tested.\nDo you want to proceed ?");
          exitDialog.setButtonName(OptionDialog.BUTTON_OK, "Yes");
          exitDialog.setButtonName(OptionDialog.BUTTON_CANCEL, "No");
@@ -128,7 +128,7 @@ public class SpectralCountAction extends AbstractRSMAction {
                 final DataSetNode[] _quantitationNode = new DataSetNode[1];
 
                 // add node for the quantitation dataset which will be created
-                DataSetData quantitationData = new DataSetData(qttDSName, Dataset.DatasetType.QUANTITATION, Aggregation.ChildNature.QUANTITATION_FRACTION);
+                DataSetData quantitationData = DataSetData.createTemporaryQuantitation(qttDSName); //new DataSetData(qttDSName, Dataset.DatasetType.QUANTITATION, Aggregation.ChildNature.QUANTITATION_FRACTION);
                 final DataSetNode quantitationNode = new DataSetNode(quantitationData);
                 _quantitationNode[0] = quantitationNode;
                 quantitationNode.setIsChanging(true);
@@ -210,8 +210,8 @@ public class SpectralCountAction extends AbstractRSMAction {
         }
 
         //VDS: ALLOW On Merge RS- Comment next part
-//        DDataset.MergeInformation mergeInfo = datasetNode.getDataset().getMergeInformation();
-//        if (mergeInfo.compareTo(DDataset.MergeInformation.MERGE_IDENTIFICATION_SUMMARY) != 0) {
+//        DDataset.AggregationInformation mergeInfo = datasetNode.getDataset().getAggregationInformation();
+//        if (mergeInfo.compareTo(DDataset.AggregationInformation.MERGE_IDENTIFICATION_SUMMARY) != 0) {
 //            setEnabled(false);
 //            return;
 //        }

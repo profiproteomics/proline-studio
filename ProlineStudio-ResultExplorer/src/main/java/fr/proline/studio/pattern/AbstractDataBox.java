@@ -468,7 +468,7 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
     public Object getData(boolean getArray, Class parameterType) {
         
         if ((parameterType!= null ) && (parameterType.equals(ProjectId.class))) {
-            if ((m_projectId==null) || (m_projectId.getId() == -1l)) {
+            if ((m_projectId==null) || (m_projectId.getId() == -1L)) {
                 if (m_previousDataBox != null) {
                     return m_previousDataBox.getData(getArray, parameterType);
                 }

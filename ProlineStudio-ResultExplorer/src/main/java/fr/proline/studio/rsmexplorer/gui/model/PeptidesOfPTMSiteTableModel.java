@@ -332,7 +332,7 @@ public class PeptidesOfPTMSiteTableModel extends DecoratedTableModel implements 
 
     @Override
     public Long getTaskId() {
-        return -1l; // not used
+        return -1L; // not used
     }
 
     @Override

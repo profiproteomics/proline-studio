@@ -211,7 +211,7 @@ public class XICDesignTree extends AbstractTree {
         
         DDataset refDataset = dataset.getMasterQuantitationChannels().get(0).getIdentDataset();
         Long refResultSummaryId = dataset.getMasterQuantitationChannels().get(0).getIdentResultSummaryId();
-        XICReferenceRSMNode refDatasetNode = new XICReferenceRSMNode(new DataSetData(refDataset == null ? "auto" : refDataset.getName(), Dataset.DatasetType.AGGREGATE, Aggregation.ChildNature.OTHER));
+        XICReferenceRSMNode refDatasetNode = new XICReferenceRSMNode(DataSetData.createTemporaryAggregate(refDataset == null ? "auto" : refDataset.getName())); //new DataSetData(refDataset == null ? "auto" : refDataset.getName(), Dataset.DatasetType.AGGREGATE, Aggregation.ChildNature.OTHER));
         if(refDataset != null){
             if(refResultSummaryId ==null || !refResultSummaryId.equals(refDataset.getResultSummaryId()) )
                 refDatasetNode.setRefDatasetIncorrect(true);
@@ -219,7 +219,7 @@ public class XICDesignTree extends AbstractTree {
         treeModel.insertNodeInto(refDatasetNode, rootNode, childIndex++);
         
         for (BiologicalGroup bioGroup : listBiologicalGroups) {
-            XICBiologicalGroupNode biologicalGroupNode = new XICBiologicalGroupNode(new DataSetData(bioGroup.getName(), Dataset.DatasetType.AGGREGATE, Aggregation.ChildNature.OTHER));
+            XICBiologicalGroupNode biologicalGroupNode = new XICBiologicalGroupNode(DataSetData.createTemporaryAggregate(bioGroup.getName())); //new DataSetData(bioGroup.getName(), Dataset.DatasetType.AGGREGATE, Aggregation.ChildNature.OTHER));
             treeModel.insertNodeInto(biologicalGroupNode, rootNode, childIndex);
             List<BiologicalSample> listSample = bioGroup.getBiologicalSamples();
             int childSampleIndex = 0;
@@ -229,14 +229,14 @@ public class XICDesignTree extends AbstractTree {
                 if (sampleName.startsWith(bioGroup.getName())) {
                     sampleName = sampleName.substring(bioGroup.getName().length());
                 }
-                XICBiologicalSampleNode biologicalSampleNode = new XICBiologicalSampleNode(new DataSetData(sampleName, Dataset.DatasetType.AGGREGATE, Aggregation.ChildNature.OTHER));
+                XICBiologicalSampleNode biologicalSampleNode = new XICBiologicalSampleNode(DataSetData.createTemporaryAggregate(sampleName)); //new DataSetData(sampleName, Dataset.DatasetType.AGGREGATE, Aggregation.ChildNature.OTHER));
                 treeModel.insertNodeInto(biologicalSampleNode, biologicalGroupNode, childSampleIndex);
                 int childSampleAnalysisIndex = 0;
                 for (SampleAnalysis sampleAnalysis : biologicalSample.getSampleAnalyses()) {
                     DQuantitationChannel qCh = getQuantChannelSampleAnalysis(sampleAnalysis, listQuantChannels);
                     if (qCh != null) {
                         String name = qCh.getName();
-                        DataSetData dsData = new DataSetData(name, Dataset.DatasetType.IDENTIFICATION, Aggregation.ChildNature.SAMPLE_ANALYSIS);
+                        DataSetData dsData = DataSetData.createTemporaryIdentification(name); //new DataSetData(name, Dataset.DatasetType.IDENTIFICATION, Aggregation.ChildNature.SAMPLE_ANALYSIS);
                         if (qCh.getIdentRs() != null) {
                             // fake dataset
                             DDataset dds = new DDataset(qCh.getIdentDatasetId(), dataset.getProject(), name, Dataset.DatasetType.IDENTIFICATION, 0, qCh.getIdentRs().getId(), qCh.getIdentResultSummaryId(), qCh.getNumber());

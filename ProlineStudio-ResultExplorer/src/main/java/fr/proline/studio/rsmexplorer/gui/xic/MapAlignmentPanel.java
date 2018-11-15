@@ -201,7 +201,7 @@ public class MapAlignmentPanel extends HourglassPanel implements DataBoxPanelInt
 
     public void setData(QuantChannelInfo quantChannelInfo, List<ExtendedTableModelInterface> compareDataInterfaceList, List<CrossSelectionInterface> crossSelectionInterfaceList) {
         //@Karine XUE,when a databaseLoadTask or it's subTask is finished, the callback will be called in DataBox, 
-        //so this setData method can be called sevral time. m_isSourceDestComboBoxSeted is used to limite the repeatition
+        //so this setData method can be called several time. m_isSourceDestComboBoxSeted is used to limite the repetition
         if (!this.m_isSourceDestComboBoxSeted) {
             this.m_quantChannelInfo = quantChannelInfo;
             this.m_valuesList = compareDataInterfaceList;

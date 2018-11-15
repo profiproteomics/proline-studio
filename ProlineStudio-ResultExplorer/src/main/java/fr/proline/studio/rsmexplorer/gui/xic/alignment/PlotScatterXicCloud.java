@@ -109,7 +109,7 @@ public class PlotScatterXicCloud extends PlotScatter {
             if (m_selected[i]) {
                 continue;
             }
-            if (m_dataY[i] == Float.NaN || m_dataY[i] == Double.NaN) {
+            if (Double.isNaN(m_dataY[i])) {
                 continue;
             }
             int x = xAxis.valueToPixel(m_dataX[i]) + ((m_jitterX != null) ? m_jitterX[i] : 0);
@@ -126,7 +126,7 @@ public class PlotScatterXicCloud extends PlotScatter {
             if (!m_selected[i]) {
                 continue;
             }
-            if (m_dataY[i] == Float.NaN || m_dataY[i] == Double.NaN) {
+            if (Double.isNaN(m_dataY[i])) {
                 continue;
             }
             int x = xAxis.valueToPixel(m_dataX[i]) + ((m_jitterX != null) ? m_jitterX[i] : 0);

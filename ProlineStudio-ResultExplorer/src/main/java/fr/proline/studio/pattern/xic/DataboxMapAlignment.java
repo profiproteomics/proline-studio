@@ -252,8 +252,8 @@ public class DataboxMapAlignment extends AbstractDataBox {
     }
 
     private RTCompareTableModel createMapRTCompareTableModel(long mapIdFrom) {
-        Map<Long, String> idNameMap = new HashMap<Long, String>(); //Map<rsmId,MapTitleName>
-        Map<Long, Long> idMap = new HashMap<Long, Long>();//Map<MapId,resultSummaryId>
+        Map<Long, String> idNameMap = new HashMap<>(); // Map<rsmId,MapTitleName>
+        Map<Long, Long> idMap = new HashMap<>();       // Map<MapId,resultSummaryId>
         List<ProcessedMap> processMapList = m_quantChannelInfo.getDataset().getMaps();
         long[] rsmIdArray = new long[processMapList.size()];
         int index = 1;

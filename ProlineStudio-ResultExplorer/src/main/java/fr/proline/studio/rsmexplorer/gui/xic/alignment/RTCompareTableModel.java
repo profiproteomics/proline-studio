@@ -56,7 +56,7 @@ public class RTCompareTableModel implements ExtendedTableModelInterface {
         m_idNameMap = idNameMap;
         m_idMap = idMap;
         m_rsmIdArray = rsmIdArray;
-        m_data = new ArrayList<RTCompareRow>();
+        m_data = new ArrayList<>();
         m_columnName = new String[rsmIdArray.length + 3];
         m_columnName[PEPTEDE_ID] = "Peptide Id";//[0]
         m_columnName[PEPTEDE_SEQUENCE] = "Peptide Seqence";//[1]

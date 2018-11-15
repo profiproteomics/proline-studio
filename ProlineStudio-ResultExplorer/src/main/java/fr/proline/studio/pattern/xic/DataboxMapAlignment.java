@@ -188,7 +188,7 @@ public class DataboxMapAlignment extends AbstractDataBox {
                         propagateDataChanged(ExtendedTableModelInterface.class);
                         //if all task loaded, then execute the first Alignement Cloud
                         if (DataboxMapAlignment.this.isLoaded()) {
-                            m_RT_Tolerance = getRTTolerance();
+                            m_RT_Tolerance = getTimeTol();
                             ((MapAlignmentPanel) DataboxMapAlignment.this.getPanel()).setAlignmentCloud();
                         }
                     }
@@ -214,7 +214,7 @@ public class DataboxMapAlignment extends AbstractDataBox {
         registerTask(taskPeptideCloud);
     }
 
-    private double getRTTolerance() {
+    private double getTimeTol() {
         Double time = AbstractGenericQuantParamsPanel.DEFAULT_CA_FEATMAP_RTTOL_VALUE;
         try {
             Map<String, Object> quantParams = this.m_dataset.getQuantProcessingConfigAsMap();

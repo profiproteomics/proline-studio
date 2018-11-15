@@ -69,10 +69,12 @@ public class PlotLinear extends PlotXYAbstract {
     private boolean m_isDrawGap = true;
 
     private BasicStroke m_strokeLine = STROKE_1;
-    private BasicStroke m_userStock = null;
+    private BasicStroke m_userStrock = null;
+    private BasicStroke m_edgeStrock =  STROKE_1;
     private ArrayList<ParameterList> m_parameterListArray = null;
 
     private boolean displayAntiAliasing = true;
+    private double m_tolerance;
 
     public PlotLinear(BasePlotPanel plotPanel, ExtendedTableModelInterface compareDataInterface, CrossSelectionInterface crossSelectionInterface, int colX, int colY) {
         super(plotPanel, PlotType.SCATTER_PLOT, compareDataInterface, crossSelectionInterface);
@@ -96,7 +98,17 @@ public class PlotLinear extends PlotXYAbstract {
 
         m_parameterListArray = new ArrayList<>(1);
         m_parameterListArray.add(colorParameterList);
+        this.m_tolerance = 0;
+    }
 
+    /**
+     * if the tolerance is not 0, there will be a tolerance edge abover and
+     * under the main curve.
+     *
+     * @param tolerance
+     */
+    public void setTolerance(double tolerance) {
+        this.m_tolerance = tolerance;
     }
 
     @Override
@@ -679,8 +691,8 @@ public class PlotLinear extends PlotXYAbstract {
                 boolean isDef = !Double.valueOf(m_dataX[i]).isNaN() && !Double.valueOf(m_dataY[i]).isNaN();
                 g.setColor(plotColor);
                 logger.debug("YYYYYYYYYYYYYYYYY" + plotColor.toString());
-                if (m_userStock != null) {
-                    g.setStroke(m_userStock);
+                if (m_userStrock != null) {
+                    g.setStroke(m_userStrock);
                 } else {
                     g.setStroke(m_strokeLine);
                 }
@@ -694,6 +706,42 @@ public class PlotLinear extends PlotXYAbstract {
                 y0 = y;
                 isDef0 = isDef;
             }
+            if (m_tolerance != 0) {
+                paintEdge(g, plotColor, m_tolerance / 2);
+                paintEdge(g, plotColor, -m_tolerance / 2);
+            }
+
+        }
+    }
+
+    private void paintEdge(Graphics2D g, Color color, double halfTolerance) {
+        int x0, y0;
+        int x, y;
+        XAxis xAxis = m_plotPanel.getXAxis();
+        YAxis yAxis = m_plotPanel.getYAxis();
+        int size = m_dataX == null ? 0 : m_dataX.length;
+        x0 = xAxis.valueToPixel(m_dataX[0]);
+        y0 = yAxis.valueToPixel(m_dataY[0] + halfTolerance);
+        boolean isDef0 = !Double.valueOf(m_dataX[0]).isNaN() && !Double.valueOf(m_dataY[0]).isNaN();
+
+        for (int i = 0; i < size; i++) {
+            boolean isDef = !Double.valueOf(m_dataX[i]).isNaN() && !Double.valueOf(m_dataY[i]).isNaN();
+            x = xAxis.valueToPixel(m_dataX[i]);
+            y = yAxis.valueToPixel(m_dataY[i] + halfTolerance);
+
+            g.setStroke(m_edgeStrock);
+            g.setColor(color);
+
+            if (m_isDrawPoints && isDef) {
+                g.fillOval(x - 3, y - 3, 6, 6);
+            }
+            if (m_isDrawGap || (!m_isDrawGap && isDef && isDef0)) {
+                g.drawLine(x0, y0, x, y);
+            }
+
+            x0 = x;
+            y0 = y;
+            isDef0 = isDef;
         }
     }
 
@@ -754,8 +802,8 @@ public class PlotLinear extends PlotXYAbstract {
             m_isPaintMarker = isPaintMarker;
             if (isPaintMarker) {
                 m_strokeLine = STROKE_2;
-            } else if (m_userStock != null) {
-                m_strokeLine = m_userStock;
+            } else if (m_userStrock != null) {
+                m_strokeLine = m_userStrock;
             } else {
                 m_strokeLine = STROKE_1;
             }
@@ -812,10 +860,11 @@ public class PlotLinear extends PlotXYAbstract {
     }
 
     public void setStroke(float witdh) {
-        m_userStock = new BasicStroke(witdh, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER);
+        m_userStrock = new BasicStroke(witdh, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER);
     }
 
     public void setAntiAliasing(boolean displayAntiAliasing) {
         this.displayAntiAliasing = displayAntiAliasing;
     }
+
 }

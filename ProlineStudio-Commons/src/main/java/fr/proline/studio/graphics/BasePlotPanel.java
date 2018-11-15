@@ -402,8 +402,9 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
     }
 
     /**
-     * set the first plot with Axis 
-     * @param plot 
+     * set the first plot with Axis
+     *
+     * @param plot
      */
     public void setPlot(PlotBaseAbstract plot) {
         m_plots = new ArrayList();
@@ -415,8 +416,8 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
     public void clearPlots() {
         m_plots = new ArrayList();
     }
-    
-    public void clearPlotsWithRepaint(){
+
+    public void clearPlotsWithRepaint() {
         boolean actualLock = m_dataLocked;
         this.lockData(true); //if not true, repaint don't work
         m_plots = new ArrayList();
@@ -427,10 +428,9 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
     public boolean hasPlots() {
         return m_plots.size() > 0;
     }
-    
+
     public void addPlot(PlotXYAbstract plot) {
         m_plots.add(plot);
-
         updateAxis(plot);
     }
 
@@ -449,9 +449,10 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
             repaint();
         }
     }
-    
+
     /**
-     * browse each plot to find the Min Max X, Y 
+     * browse each plot to find the Min Max X, Y
+     *
      * @return doube[4]= [minX, maxX, minY, maxY]
      */
     private double[] getMinMaxPlots() {

@@ -43,12 +43,8 @@ import fr.proline.studio.rsmexplorer.gui.dialog.xic.AbstractGenericQuantParamsPa
 import fr.proline.studio.rsmexplorer.gui.xic.alignment.RTCompareTableModel;
 import fr.proline.studio.rsmexplorer.gui.xic.alignment.PlotScatterXicCloud;
 import java.awt.Color;
-import java.io.FileNotFoundException;
-import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
 import javax.swing.JSplitPane;
 import javax.swing.border.TitledBorder;
-import org.openide.util.Exceptions;
 
 /**
  * map alignment panel for 1 dataset
@@ -378,14 +374,17 @@ public class MapAlignmentPanel extends HourglassPanel implements DataBoxPanelInt
         String mapTitleTo = m_quantChannelInfo.getMapTitle(mapIdDst);
         String title = "Map Alignment from " + mapIdSrc + " (to. " + mapIdDst + ")";
         Color color = m_quantChannelInfo.getMapColor(mapIdSrc);
-        logger.debug("XXXXXXXXX color=" + color.toString()) ;
+        logger.debug("XXXXXXXXX color=" + color.toString());
         mapTimePanel.setData((long) -1, map, listMapTime, color, title, true, mapTitleFrom, mapTitleTo);//set graphic content
 
         crossSelectionTableModel = mapTimePanel.getCrossSelectionInterface();
         extendedTableModel = mapTimePanel.getGlobalTableModelInterface();
-        PlotLinear alignmentLiner = new PlotLinear(graphicPanel, extendedTableModel, crossSelectionTableModel, PlotBaseAbstract.COL_X_ID, PlotBaseAbstract.COL_Y_ID);
+        double tolerance = ((DataboxMapAlignment) this.m_dataBox).getRT_Tolerance();
+        PlotLinear alignmentLiner = new PlotLinear(graphicPanel, extendedTableModel, crossSelectionTableModel, 
+                PlotBaseAbstract.COL_X_ID, PlotBaseAbstract.COL_Y_ID);
+        alignmentLiner.setTolerance(tolerance);
         alignmentLiner.setStroke(3f);
-       
+
         graphicPanel.setPlot(alignmentLiner);
         RTCompareTableModel cloudData = getCloudData(mapIdSrc);
         if (cloudData != null) {
@@ -394,11 +393,12 @@ public class MapAlignmentPanel extends HourglassPanel implements DataBoxPanelInt
             plotCloud = new PlotScatterXicCloud(graphicPanel, cloudData, null, axisX, axisY);
             //write2File(cloudData);
             plotCloud.setColor(m_quantChannelInfo.getMapColor(mapIdDst));
+            //set visible Min Max, the real Min Max are too large to show the alignment PlotLinear
             double yMax = alignmentLiner.getYMax();
             double yMin = alignmentLiner.getYMin();
-            double distance = ((DataboxMapAlignment)this.m_dataBox).getRT_Tolerance();
-            plotCloud.setYMax(yMax+2*distance);
-            plotCloud.setYMin(yMin-2*distance);
+            
+            plotCloud.setYMax(yMax + tolerance);
+            plotCloud.setYMin(yMin - tolerance);
             graphicPanel.setPlot(plotCloud);
             graphicPanel.addPlot(alignmentLiner);
         }
@@ -459,5 +459,4 @@ public class MapAlignmentPanel extends HourglassPanel implements DataBoxPanelInt
 //            writer.close();
 //        }
 //    }
-
 }

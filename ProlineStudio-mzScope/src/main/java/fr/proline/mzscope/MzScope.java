@@ -7,6 +7,7 @@ import java.awt.Frame;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import javax.swing.JPanel;
 import org.slf4j.Logger;
@@ -30,7 +31,7 @@ public class MzScope implements IMzScope{
      * @return 
      */
     public JPanel createMzScopePanel(Frame frame){
-        mzScopePanel = new MzScopePanel(frame, true);
+        mzScopePanel = new MzScopePanel(frame);
         return mzScopePanel;
         
     }
@@ -52,7 +53,7 @@ public class MzScope implements IMzScope{
     @Override
     public void openRaw(File file, boolean display) {
         logger.debug("openRaw for "+file.getName());
-        mzScopePanel.openRaw(Arrays.asList(file), display);
+        mzScopePanel.openRaw(Collections.singletonList(file), display);
     }
 
 
@@ -65,7 +66,7 @@ public class MzScope implements IMzScope{
     @Override
     public void detectPeakels(File file) {
         logger.debug("detectPeakel on "+file.getName());
-        mzScopePanel.detectPeakels(Arrays.asList(RawFileManager.getInstance().getFile(file.getName())));
+        mzScopePanel.detectPeakels(Collections.singletonList(RawFileManager.getInstance().getFile(file.getName())));
     }
 
     @Override

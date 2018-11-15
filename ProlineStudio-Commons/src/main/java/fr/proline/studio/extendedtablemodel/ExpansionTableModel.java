@@ -258,7 +258,27 @@ public class ExpansionTableModel implements GlobalTableModelInterface {
 
     @Override
     public void addFilters(LinkedHashMap<Integer, Filter> filtersMap) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        LinkedHashMap<Integer, Filter> filtersMap1 = new LinkedHashMap<>();
+        m_masterModel.addFilters(filtersMap1);
+
+        LinkedHashMap<Integer, Filter> filtersMap2 = new LinkedHashMap<>();
+        m_slaveModel.addFilters(filtersMap2);
+        
+        int nbColumns = getColumnCount();
+        for (int col = 0; col < nbColumns; col++) {
+            if (col < m_masterModel.getColumnCount()) {
+                 Filter f = filtersMap1.get(col);
+                 if (f != null) {
+                        filtersMap.put(col, f); 
+                 }
+                 continue;
+            } else {
+                Filter f = filtersMap2.get(col - m_masterModel.getColumnCount());
+                    if (f != null) {
+                        filtersMap.put(col, f); 
+                }
+            }
+        }
     }
 
     @Override

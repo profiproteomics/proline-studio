@@ -36,12 +36,7 @@ import java.awt.Toolkit;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import javax.swing.JDialog;
@@ -69,59 +64,25 @@ public class MzScopePanel extends JPanel implements IFeatureViewer, IExtractionR
     private final static Logger logger = LoggerFactory.getLogger("ProlineStudio.mzScope.MzScopePanel");
 
     private Frame parentFrame = null;
-    private JSplitPane mainRightSplitPane = null;
-    private JSplitPane mainLeftSplitPane = null;
+    private JSplitPane mainSplitPane = null;
     private JTabbedPane viewersTabPane = null;
     private JTabbedPane featuresTabPane = null;
-    private boolean m_extractResultPanel;
-    private JSplitPane generalSplitPane = null;
 
     private IRawFileViewer selectedRawFilePanel;
     private XICExtractionPanel extractionPanel = null;
     private EventListenerList listenerList = new EventListenerList();
     private Map<IRawFile, List<AbstractRawFilePanel>> mapRawFilePanelRawFile;
 
-    public MzScopePanel(Frame parentFrame, boolean extractResultPanel) {
+    public MzScopePanel(Frame parentFrame) {
         this.parentFrame = parentFrame;
-        this.m_extractResultPanel = extractResultPanel;
         initComponents();
     }
 
     private void initComponents() {
         mapRawFilePanelRawFile = new HashMap<>();
         setLayout(new BorderLayout());
-        if (m_extractResultPanel) {
-            this.add(getGeneralSplitPane(), BorderLayout.CENTER);
-        } else {
-            this.add(getExtractionPanel(), BorderLayout.NORTH);
-            this.add(getMainRightComponent(), BorderLayout.CENTER);
-        }
-    }
-
-    private JSplitPane getGeneralSplitPane() {
-        if (this.generalSplitPane == null) {
-            this.generalSplitPane = new JSplitPane();
-            this.generalSplitPane.setDividerLocation(120);
-            this.generalSplitPane.setOrientation(JSplitPane.VERTICAL_SPLIT);
-            this.generalSplitPane.setOneTouchExpandable(true);
-            this.generalSplitPane.setRightComponent(getMainRightComponent());
-            this.generalSplitPane.setLeftComponent(getMainLeftComponent());
-        }
-
-        return this.generalSplitPane;
-    }
-
-    private JSplitPane getMainLeftComponent() {
-        if (this.mainLeftSplitPane == null) {
-            this.mainLeftSplitPane = new JSplitPane();
-            this.mainLeftSplitPane.setDividerLocation(250);
-            this.mainLeftSplitPane.setOrientation(JSplitPane.HORIZONTAL_SPLIT);
-            this.mainLeftSplitPane.setOneTouchExpandable(true);
-            this.mainLeftSplitPane.setRightComponent(new ExtractionResultsPanel(this, ExtractionResultsPanel.TOOLBAR_ALIGN_VERTICAL));
-            this.mainLeftSplitPane.setLeftComponent(getExtractionPanel());
-        }
-
-        return this.mainLeftSplitPane;
+        this.add(getExtractionPanel(), BorderLayout.NORTH);
+        this.add(getMainComponent(), BorderLayout.CENTER);
     }
 
     private XICExtractionPanel getExtractionPanel() {
@@ -131,17 +92,17 @@ public class MzScopePanel extends JPanel implements IFeatureViewer, IExtractionR
         return extractionPanel;
     }
 
-    private JSplitPane getMainRightComponent() {
-        if (this.mainRightSplitPane == null) {
-            this.mainRightSplitPane = new JSplitPane();
-            this.mainRightSplitPane.setDividerLocation(320);
-            this.mainRightSplitPane.setOrientation(JSplitPane.VERTICAL_SPLIT);
-            this.mainRightSplitPane.setOneTouchExpandable(true);
-            this.mainRightSplitPane.setRightComponent(getFeaturesTabPane());
-            this.mainRightSplitPane.setLeftComponent(getViewersTabPane());
+    private JSplitPane getMainComponent() {
+        if (this.mainSplitPane == null) {
+            this.mainSplitPane = new JSplitPane();
+            this.mainSplitPane.setDividerLocation(320);
+            this.mainSplitPane.setOrientation(JSplitPane.VERTICAL_SPLIT);
+            this.mainSplitPane.setOneTouchExpandable(true);
+            this.mainSplitPane.setRightComponent(getFeaturesTabPane());
+            this.mainSplitPane.setLeftComponent(getViewersTabPane());
         }
 
-        return this.mainRightSplitPane;
+        return this.mainSplitPane;
     }
 
     public JTabbedPane getFeaturesTabPane() {
@@ -529,7 +490,7 @@ public class MzScopePanel extends JPanel implements IFeatureViewer, IExtractionR
     public void detectFeatures() {
         IRawFile rawFile = selectedRawFilePanel.getCurrentRawfile();
         if (rawFile != null) {
-            detectFeatures(Arrays.asList(selectedRawFilePanel.getCurrentRawfile()));
+            detectFeatures(Collections.singletonList(selectedRawFilePanel.getCurrentRawfile()));
         } else {
             logger.error("Feature detection is available as soon as a raw file is currently dispayed");
         }

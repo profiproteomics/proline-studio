@@ -15,8 +15,8 @@ import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.markerbar.MarkerContainerPanel;
 import fr.proline.studio.extendedtablemodel.CompoundTableModel;
 import fr.proline.studio.extendedtablemodel.ExpansionTableModel;
-import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
 import fr.proline.studio.extendedtablemodel.ImportedDataTableModel;
+import fr.proline.studio.filter.FilterButton;
 import fr.proline.studio.table.DecoratedMarkerTable;
 import fr.proline.studio.table.TablePopupMenu;
 import fr.proline.studio.utils.IconManager;
@@ -40,7 +40,6 @@ import javax.swing.JToolBar;
 import javax.swing.SwingWorker;
 import javax.swing.event.TableModelListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
-import javax.swing.table.TableModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,24 +52,26 @@ public class ExtractionResultsPanel extends JPanel {
 
     final private static Logger logger = LoggerFactory.getLogger(ExtractionResultsPanel.class);
 
-    private List<ExtractionResult> extractions;
-    private ExtractionResultsTableModel extractionResultsTableModel;
-    private ImportedDataTableModel importedTableModel;
-    private ExtractionResultsTable extractionResultsTable;
-    private SwingWorker extractionWorker;
+    private List<ExtractionResult> m_extractions;
+    private ExtractionResultsTableModel m_extractionResultsTableModel;
+    private CompoundTableModel m_globalTableModel;
+    private ImportedDataTableModel m_importedTableModel;
+    private ExtractionResultsTable m_extractionResultsTable;
+    private SwingWorker m_extractionWorker;
     
-    private IExtractionResultsViewer extractionResultsViewer;
-
+    private IExtractionResultsViewer m_extractionResultsViewer;
     private JFileChooser m_fchooser;
     private MarkerContainerPanel m_markerContainerPanel;
     private ExportButton m_exportButton;
+    private FilterButton m_filterButton;
+    
     
     public final static int TOOLBAR_ALIGN_VERTICAL = 0;
     public final static int TOOLBAR_ALIGN_HORIZONTAL = 1;
     private int m_toolbarAlign = TOOLBAR_ALIGN_HORIZONTAL;
 
     public ExtractionResultsPanel(IExtractionResultsViewer extractionResults, int align) {
-        this.extractionResultsViewer = extractionResults;
+        this.m_extractionResultsViewer = extractionResults;
         m_toolbarAlign = align;
         initComponents();
 
@@ -122,7 +123,7 @@ public class ExtractionResultsPanel extends JPanel {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                importedTableModel = null;
+                m_importedTableModel = null;
                 setExtractions(buildIRTRequest());
             }
 
@@ -142,9 +143,16 @@ public class ExtractionResultsPanel extends JPanel {
         toolbar.add(extractBtn);
         
         toolbar.addSeparator();
-        m_exportButton = new ExportButton(((CompoundTableModel) extractionResultsTable.getModel()), "Extraction Values", extractionResultsTable);
+        m_exportButton = new ExportButton(((CompoundTableModel) m_extractionResultsTable.getModel()), "Extraction Values", m_extractionResultsTable);
         toolbar.add(m_exportButton);
-        
+        m_filterButton = new FilterButton(((CompoundTableModel) m_extractionResultsTable.getModel())) {
+            @Override
+            protected void filteringDone() { 
+                logger.info("Filtering done ! ");
+            }
+        };
+        // TODO : button removed cause Expansion model filtering is not yet working ?  
+        toolbar.add(m_filterButton);
         return toolbar;
     }
     
@@ -152,7 +160,7 @@ public class ExtractionResultsPanel extends JPanel {
      * clear all extraction values
      */
     private void clearAllValues(){
-        importedTableModel = null;
+        m_importedTableModel = null;
         setExtractionsValues(new ArrayList());
     }
 
@@ -165,18 +173,18 @@ public class ExtractionResultsPanel extends JPanel {
                 JOptionPane.showMessageDialog(this, "The file must be a csv file", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
-            importedTableModel = new ImportedDataTableModel();
-            ImportedDataTableModel.loadFile(importedTableModel, csvFile.getAbsolutePath(), ',', true, false);
-            int mzColumnIdx = importedTableModel.findColumn("moz");
+            m_importedTableModel = new ImportedDataTableModel();
+            ImportedDataTableModel.loadFile(m_importedTableModel, csvFile.getAbsolutePath(), ',', true, false);
+            int mzColumnIdx = m_importedTableModel.findColumn("moz");
             if (mzColumnIdx == -1) {
-                mzColumnIdx = importedTableModel.findColumn("m/z");
+                mzColumnIdx = m_importedTableModel.findColumn("m/z");
                 if (mzColumnIdx == -1) {
-                    mzColumnIdx = importedTableModel.findColumn("mz");
+                    mzColumnIdx = m_importedTableModel.findColumn("mz");
                 }
             }
             List<Double> mzValues= new ArrayList<>();
-            for (int k = 0; k < importedTableModel.getRowCount(); k++) {
-                mzValues.add((Double)importedTableModel.getValueAt(k, mzColumnIdx));
+            for (int k = 0; k < m_importedTableModel.getRowCount(); k++) {
+                mzValues.add((Double)m_importedTableModel.getValueAt(k, mzColumnIdx));
             }
             setExtractionsValues(mzValues);
         }
@@ -192,7 +200,7 @@ public class ExtractionResultsPanel extends JPanel {
     }
 
     public List<ExtractionResult> getExtractions() {
-        return extractions;
+        return m_extractions;
     }
 
     private void setExtractions(List<MsnExtractionRequest> extractionRequests) {
@@ -201,32 +209,34 @@ public class ExtractionResultsPanel extends JPanel {
             ExtractionResult extractionResult = new ExtractionResult(request);
             results.add(extractionResult);
         }
-        extractionResultsTableModel.setExtractions(results);
-        GlobalTableModelInterface model =  (importedTableModel == null) ? new CompoundTableModel(extractionResultsTableModel, true) : new ExpansionTableModel(importedTableModel, extractionResultsTableModel);
-        extractionResultsTable.setModel(model);
+        m_extractionResultsTableModel.setExtractions(results);
+        if (m_importedTableModel != null) {
+            m_globalTableModel.setBaseModel(new ExpansionTableModel(m_importedTableModel, m_extractionResultsTableModel));
+            m_globalTableModel.fireTableStructureChanged();
+        }
         m_markerContainerPanel.setMaxLineNumber(extractionRequests.size());
-        extractions = results;
+        m_extractions = results;
     }
 
     private void startExtractions() {
         logger.info("startExtractions...");
-        if (extractions == null){
+        if (m_extractions == null){
             logger.info("no extractions!");
             return;
         }
         final List<IRawFile> rawfiles = RawFileManager.getInstance().getAllFiles();
-        extractionResultsTableModel.setRawFiles(rawfiles);
+        m_extractionResultsTableModel.setRawFiles(rawfiles);
         
-        if ((extractionWorker == null) || extractionWorker.isDone()) {
-            for (ExtractionResult extraction : extractions) {
+        if ((m_extractionWorker == null) || m_extractionWorker.isDone()) {
+            for (ExtractionResult extraction : m_extractions) {
                 extraction.setStatus(ExtractionResult.Status.REQUESTED);
             }
-            extractionResultsTableModel.fireTableStructureChanged();
-            extractionWorker = new SwingWorker<Integer, List<Object>>() {
+            m_extractionResultsTableModel.fireTableStructureChanged();
+            m_extractionWorker = new SwingWorker<Integer, List<Object>>() {
                 @Override
                 protected Integer doInBackground() throws Exception {
                     int count = 0;
-                    for (ExtractionResult extraction : extractions) {
+                    for (ExtractionResult extraction : m_extractions) {
                         for (IRawFile rawFile : rawfiles) {
                             long start = System.currentTimeMillis();
                             Chromatogram c = rawFile.getXIC(extraction.getRequest());
@@ -251,7 +261,7 @@ public class ExtractionResultsPanel extends JPanel {
                         ExtractionResult extraction = (ExtractionResult)o.get(2);
                         extraction.addChromatogram(rf, c);
                     }
-                    extractionResultsTableModel.fireTableDataChanged();
+                    m_extractionResultsTableModel.fireTableDataChanged();
                 }
 
                 @Override
@@ -264,23 +274,25 @@ public class ExtractionResultsPanel extends JPanel {
                 }
             };
 
-            extractionWorker.execute();
+            m_extractionWorker.execute();
         }
     }
 
     private JComponent getExtractionResultsTable() {
 
-        extractionResultsTableModel = new ExtractionResultsTableModel();
+        m_extractionResultsTableModel = new ExtractionResultsTableModel();
         JScrollPane jScrollPane = new JScrollPane();
-        extractionResultsTable = new ExtractionResultsTable();
-        TableModel model =  (importedTableModel == null) ? new CompoundTableModel(extractionResultsTableModel, true) : new ExpansionTableModel(importedTableModel, extractionResultsTableModel);
-        extractionResultsTable.setModel(model);
-        extractionResultsTable.addMouseListener(new MouseAdapter() {
+        m_extractionResultsTable = new ExtractionResultsTable();
+        m_globalTableModel = (m_importedTableModel == null) ? new CompoundTableModel(m_extractionResultsTableModel, true) : new CompoundTableModel(new ExpansionTableModel(m_importedTableModel, m_extractionResultsTableModel), true);
+        m_extractionResultsTable.setModel(m_globalTableModel);
+        m_extractionResultsTable.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent evt) {
-                int selRow = extractionResultsTable.rowAtPoint(evt.getPoint());
+                if (evt.getClickCount() == 2) {
+                int selRow = m_extractionResultsTable.getSelectedRow();
                 if (selRow != -1){
-                    ExtractionResult extraction = extractionResultsTableModel.getExtractionResultAt(extractionResultsTable.convertRowIndexToModel(selRow));
+                    
+                    ExtractionResult extraction = m_extractionResultsTableModel.getExtractionResultAt(getModelRowId(selRow));
                     //logger.debug("mouse clicked on Extraction Result "+extraction);
                     if (extraction != null){
                         Map<IRawFile, Chromatogram> mapChr = extraction.getChromatograms();
@@ -289,25 +301,35 @@ public class ExtractionResultsPanel extends JPanel {
                         if (nbFiles == 1){
                             // view singleRawFile
                             if (mapChr.containsKey(rawfiles.get(0))){
-                                extractionResultsViewer.displayChromatogramAsSingleView(rawfiles.get(0), mapChr.get(rawfiles.get(0)));
+                                m_extractionResultsViewer.displayChromatogramAsSingleView(rawfiles.get(0), mapChr.get(rawfiles.get(0)));
                             }
                         }else{
                             // view all file
-                            extractionResultsViewer.displayChromatogramAsMultiView(mapChr);
+                            m_extractionResultsViewer.displayChromatogramAsMultiView(mapChr);
                         }
                     }
+                }
                 }
             }
         });
 
       //extractionResultsTable.getRowSorter().addRowSorterListener(this);
-        jScrollPane.setViewportView(extractionResultsTable);
-        extractionResultsTable.setFillsViewportHeight(true);
-        extractionResultsTable.setViewport(jScrollPane.getViewport());
+        jScrollPane.setViewportView(m_extractionResultsTable);
+        m_extractionResultsTable.setFillsViewportHeight(true);
+        m_extractionResultsTable.setViewport(jScrollPane.getViewport());
 
-        m_markerContainerPanel = new MarkerContainerPanel(jScrollPane, extractionResultsTable);
+        m_markerContainerPanel = new MarkerContainerPanel(jScrollPane, m_extractionResultsTable);
         return m_markerContainerPanel;
 
+    }
+
+    private int getModelRowId(int rowId){
+        if (m_globalTableModel.getRowCount() != 0) {
+            // convert according to the sorting
+            rowId = m_extractionResultsTable.convertRowIndexToModel(rowId);
+            rowId = m_globalTableModel.convertCompoundRowToBaseModelRow(rowId);
+        }
+        return rowId;
     }
 
     class ExtractionResultsTable extends DecoratedMarkerTable {

@@ -103,7 +103,7 @@ public class StringUtils {
     }
 
     /**
-     * parse a String which has html tag, return a plain test String. <br>
+     * parse a String which has html tag, return a plain text String. <br>
      * if IOException, return the input string
      *
      * @param html
@@ -111,7 +111,16 @@ public class StringUtils {
      */
     public static String extractTextFromHtml(String html) {
         try {
-            Reader reader = new StringReader(html);
+            //first, treat plain Text to html, in order to reserve the end of line
+            String htmlTag = "<html>";
+            String htmlEndTag = "</html>";
+            String[] lines = html.split("\n");
+            StringBuffer sb = new StringBuffer();
+            for (String s : lines) {
+                sb.append(htmlTag).append(s).append(htmlEndTag);
+            }
+            //then parse
+            Reader reader = new StringReader(sb.toString());
             StringBuilder resultText = new StringBuilder();
 
             ParserDelegator parserDelegator = new ParserDelegator();

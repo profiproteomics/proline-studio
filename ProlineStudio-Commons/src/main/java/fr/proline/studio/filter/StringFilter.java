@@ -259,7 +259,7 @@ public class StringFilter extends Filter {
         }
 
     }
-    
+
     @Override
     public void reset() {
         m_selectItem = OPTION_EQUAL;
@@ -289,7 +289,7 @@ public class StringFilter extends Filter {
      */
     protected JTextField createPasteTextField(String filterText) {
         JTextField vTextField = new JTextField(12);
-        String msg = NbBundle.getMessage(this.getClass(),"Filter_String_RegularExpression.tooltip.text");
+        String msg = NbBundle.getMessage(this.getClass(), "Filter_String_RegularExpression.tooltip.text");
         vTextField.setToolTipText(msg);
         if (filterText != null) {
             vTextField.setText(filterText);
@@ -308,7 +308,7 @@ public class StringFilter extends Filter {
 
     protected JTextArea createPasteArea(String filterAreaText) {
         JTextArea vArea = new JTextArea(5, 20);
-        String msg = NbBundle.getMessage(this.getClass(),"Filter_String_RegularExpression.tooltip.text");
+        String msg = NbBundle.getMessage(this.getClass(), "Filter_String_RegularExpression.tooltip.text");
         vArea.setToolTipText(msg);
         if (filterAreaText != null) {
             vArea.setText(filterAreaText);
@@ -340,13 +340,7 @@ public class StringFilter extends Filter {
                     String text = c.getData(DataFlavor.stringFlavor).toString().trim();
                     //remove html tags
                     String content = StringUtils.extractTextFromHtml(text).trim();
-                    //one line string to multi line string, used for TextArea if necessary
-                    //msg = content.replaceAll("[\n]+", "\r\n");
-                    if (content.length() == text.length()) {
-                        msg = text;
-                    } else {
-                        msg = content;
-                    }
+                    msg = content;
                 } else {
                     Transferable t = c.getContents(null);
                     msg = t.getTransferData(t.getTransferDataFlavors()[0]).toString();

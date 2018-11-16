@@ -21,6 +21,7 @@ import java.util.Map;
  * @author Karine XUE
  */
 public class RTCompareTableModel implements ExtendedTableModelInterface {
+    // |PEPTEDE_ID|PEPTEDE_SEQUENCE|CHARGE|ELUTION_TIME_FROM|_eTimeTo[0]|_eTimeTo[1]|....|_eTimeTo[n]|
 
     private String m_modelName;
 
@@ -43,6 +44,7 @@ public class RTCompareTableModel implements ExtendedTableModelInterface {
     private static int PEPTEDE_SEQUENCE = 1;
     private static int CHARGE = 2;
     private static int ELUTION_TIME_FROM = 3;
+    private int m_mapCount;
 
     /**
      *
@@ -53,6 +55,7 @@ public class RTCompareTableModel implements ExtendedTableModelInterface {
      */
     public RTCompareTableModel(List<DMasterQuantPeptideIon> m_masterQuantPeptideIonList,
             Map<Long, Long> idMap, Map<Long, String> idNameMap, long[] rsmIdArray) {
+        m_mapCount = rsmIdArray.length;
         m_idNameMap = idNameMap;
         m_idMap = idMap;
         m_rsmIdArray = rsmIdArray;
@@ -61,20 +64,23 @@ public class RTCompareTableModel implements ExtendedTableModelInterface {
         m_columnName[PEPTEDE_ID] = "Peptide Id";//[0]
         m_columnName[PEPTEDE_SEQUENCE] = "Peptide Seqence";//[1]
         m_columnName[CHARGE] = "Charge";//[2]
-        m_columnName[ELUTION_TIME_FROM] = "Time in Map "+m_idNameMap.get(rsmIdArray[0])+" (min)";
+        m_columnName[ELUTION_TIME_FROM] = "Time in Map " + m_idNameMap.get(rsmIdArray[0]) + " (min)";
         for (int i = 4; i < rsmIdArray.length + 3; i++) {
-            m_columnName[i] ="Delta time in Map "+ m_idNameMap.get(rsmIdArray[i - 3])+ " (s)";
+            m_columnName[i] = "Delta time in Map " + m_idNameMap.get(rsmIdArray[i - 3]) + " (s)";
         }
-      
+
         long peptideId;
         String peptideSequence;
         int charge;
         float rTimeFrom;
         float[] rTimeTo;
+        int matchCountFrom;
+        int[] matchCountTo;
         DPeptideInstance pi;
         Map<Long, DQuantPeptideIon> nbPepInMap; //Map<key=rsmId<>mapId, DQuantPeptideIon>
         for (DMasterQuantPeptideIon masterPep : m_masterQuantPeptideIonList) {
-            rTimeTo = new float[rsmIdArray.length - 1];
+            rTimeTo = new float[m_mapCount - 1];
+            matchCountTo = new int[rTimeTo.length];
             pi = masterPep.getPeptideInstance();
             peptideId = pi.getPeptideId();
             peptideSequence = pi.getPeptide().getSequence();
@@ -90,6 +96,7 @@ public class RTCompareTableModel implements ExtendedTableModelInterface {
                     continue;
                 }
                 rTimeFrom = element.getElutionTime();
+                matchCountFrom = element.getPeptideMatchesCount();
                 DQuantPeptideIon quantPeptideIon;
                 for (int i = 1; i < rsmIdArray.length; i++) {//0 is from
                     quantPeptideIon = nbPepInMap.get(rsmIdArray[i]);
@@ -97,19 +104,14 @@ public class RTCompareTableModel implements ExtendedTableModelInterface {
                         rTimeTo[i - 1] = Float.NaN; //not a number, then show nothing in the PlotLiner
                     } else {
                         float deltaTime = quantPeptideIon.getElutionTime() - rTimeFrom;
-                         rTimeTo[i - 1] = deltaTime;
-//                        if (Math.abs(deltaTime) > 120) { //@todo debug use
-//                            eTimeTo[i - 1] = Float.NaN;
-//                        } else {
-//                            eTimeTo[i - 1] = deltaTime;
-//                        }
+                        rTimeTo[i - 1] = deltaTime;
+                        matchCountTo[i - 1] = quantPeptideIon.getPeptideMatchesCount();
                     }
                 }
             }
-            this.m_data.add(new RTCompareRow(peptideId, peptideSequence, charge, rTimeFrom, rTimeTo));
+            this.m_data.add(new RTCompareRow(peptideId, peptideSequence, charge, rTimeFrom, rTimeTo, matchCountFrom, matchCountTo));
         }
     }
-
 
     public String getInfo(int rowIndex) {
         return this.m_data.get(rowIndex).toString();
@@ -123,13 +125,18 @@ public class RTCompareTableModel implements ExtendedTableModelInterface {
         int _charge;
         float _eTimeFrom;
         float[] _eTimeTo;
+        int _MatchCountFrom;
+        int[] _MatchCountTo;
 
-        public RTCompareRow(long peptideId, String peptideSequence, int charge, float eTimeFrom, float[] eTimeTo) {
+        public RTCompareRow(long peptideId, String peptideSequence, int charge, float eTimeFrom, float[] eTimeTo, int matchCountFrom, int[] matchCountTo) {
             this._peptideId = peptideId;
             this._peptideSequence = peptideSequence;
             this._charge = charge;
             this._eTimeFrom = eTimeFrom;
             this._eTimeTo = eTimeTo;
+
+            this._MatchCountFrom = matchCountFrom;
+            this._MatchCountTo = matchCountTo;
         }
 
         public String toString() {
@@ -181,8 +188,23 @@ public class RTCompareTableModel implements ExtendedTableModelInterface {
             return row._charge;
         } else if (columnIndex == RTCompareTableModel.ELUTION_TIME_FROM) {
             return row._eTimeFrom / 60d; //in minute
-        } else {
+        } else if (columnIndex > 3 && columnIndex < this.m_mapCount + 3) {
             return row._eTimeTo[columnIndex - 4]; //in seconde
+        } else if (columnIndex == 3 + this.m_mapCount) {
+            return row._MatchCountTo;
+        } else {
+            return row._MatchCountTo[columnIndex - 4 - this.m_mapCount];
+        }
+    }
+
+    public boolean isMatchCountDiff(int rowIndex, int colY) {
+        RTCompareRow row = this.m_data.get(rowIndex);
+        int countFrom = row._MatchCountFrom;
+        int countTo = row._MatchCountTo[colY - 4];
+        if (countFrom > 0 && countTo > 0 && countFrom != countTo) {
+            return true;
+        } else {
+            return false;
         }
     }
 

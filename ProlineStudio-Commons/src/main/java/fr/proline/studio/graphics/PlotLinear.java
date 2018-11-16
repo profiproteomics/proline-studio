@@ -70,7 +70,7 @@ public class PlotLinear extends PlotXYAbstract {
 
     private BasicStroke m_strokeLine = STROKE_1;
     private BasicStroke m_userStrock = null;
-    private BasicStroke m_edgeStrock =  STROKE_1;
+    private BasicStroke m_edgeStrock =  new BasicStroke(1f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER);;
     private ArrayList<ParameterList> m_parameterListArray = null;
 
     private boolean displayAntiAliasing = true;
@@ -421,7 +421,7 @@ public class PlotLinear extends PlotXYAbstract {
                 m_dataY[i] = i;
             } else {
                 Object value = m_compareDataInterface.getDataValueAt(i, m_cols[COL_Y_ID]);
-                m_dataY[i] = (value == null || !Number.class.isAssignableFrom(value.getClass())) ? Double.NaN : ((Number) value).doubleValue(); //CBy TODO : ne pas avoir a tester le type Number
+                m_dataY[i] = (value == null || value.equals(Float.NaN) || !Number.class.isAssignableFrom(value.getClass())) ? Double.NaN : ((Number) value).doubleValue(); //CBy TODO : ne pas avoir a tester le type Number
             }
             m_selected[i] = false;
         }
@@ -706,27 +706,27 @@ public class PlotLinear extends PlotXYAbstract {
                 isDef0 = isDef;
             }
             if (m_tolerance != 0) {
-                paintEdge(g, plotColor, m_tolerance / 2);
-                paintEdge(g, plotColor, -m_tolerance / 2);
+                paintEdge(g, plotColor, m_tolerance);
+                paintEdge(g, plotColor, -m_tolerance);
             }
 
         }
     }
 
-    private void paintEdge(Graphics2D g, Color color, double halfTolerance) {
+    private void paintEdge(Graphics2D g, Color color, double tolerance) {
         int x0, y0;
         int x, y;
         XAxis xAxis = m_plotPanel.getXAxis();
         YAxis yAxis = m_plotPanel.getYAxis();
         int size = m_dataX == null ? 0 : m_dataX.length;
         x0 = xAxis.valueToPixel(m_dataX[0]);
-        y0 = yAxis.valueToPixel(m_dataY[0] + halfTolerance);
+        y0 = yAxis.valueToPixel(m_dataY[0] + tolerance);
         boolean isDef0 = !Double.valueOf(m_dataX[0]).isNaN() && !Double.valueOf(m_dataY[0]).isNaN();
 
         for (int i = 0; i < size; i++) {
             boolean isDef = !Double.valueOf(m_dataX[i]).isNaN() && !Double.valueOf(m_dataY[i]).isNaN();
             x = xAxis.valueToPixel(m_dataX[i]);
-            y = yAxis.valueToPixel(m_dataY[i] + halfTolerance);
+            y = yAxis.valueToPixel(m_dataY[i] + tolerance);
 
             g.setStroke(m_edgeStrock);
             g.setColor(color);

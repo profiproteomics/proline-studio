@@ -380,7 +380,7 @@ public class MapAlignmentPanel extends HourglassPanel implements DataBoxPanelInt
         crossSelectionTableModel = mapTimePanel.getCrossSelectionInterface();
         extendedTableModel = mapTimePanel.getGlobalTableModelInterface();
         double tolerance = ((DataboxMapAlignment) this.m_dataBox).getRT_Tolerance();
-        PlotLinear alignmentLiner = new PlotLinear(graphicPanel, extendedTableModel, crossSelectionTableModel, 
+        PlotLinear alignmentLiner = new PlotLinear(graphicPanel, extendedTableModel, crossSelectionTableModel,
                 PlotBaseAbstract.COL_X_ID, PlotBaseAbstract.COL_Y_ID);
         alignmentLiner.setTolerance(tolerance);
         alignmentLiner.setStroke(3f);
@@ -391,14 +391,14 @@ public class MapAlignmentPanel extends HourglassPanel implements DataBoxPanelInt
             int axisX = cloudData.getColumnIndex(mapIdSrc);
             int axisY = cloudData.getColumnIndex(mapIdDst);
             plotCloud = new PlotScatterXicCloud(graphicPanel, cloudData, null, axisX, axisY);
-            //write2File(cloudData);
+
             plotCloud.setColor(m_quantChannelInfo.getMapColor(mapIdDst));
             //set visible Min Max, the real Min Max are too large to show the alignment PlotLinear
             double yMax = alignmentLiner.getYMax();
             double yMin = alignmentLiner.getYMin();
-            
-            plotCloud.setYMax(yMax + tolerance);
-            plotCloud.setYMin(yMin - tolerance);
+            plotCloud.setYMax(yMax + 2 * tolerance);
+            plotCloud.setYMin(yMin - 2 * tolerance);
+
             graphicPanel.setPlot(plotCloud);
             graphicPanel.addPlot(alignmentLiner);
         }
@@ -439,24 +439,4 @@ public class MapAlignmentPanel extends HourglassPanel implements DataBoxPanelInt
         return calcTime;
     }
 
-//    private void write2File(ElutionTimeCompareTableModel cloudData) {
-//        PrintWriter writer = null;
-//        try {
-//            String fileName = cloudData.getName()+".txt";
-//            writer = new PrintWriter(fileName, "UTF-8");
-//            
-//            for (int i = 0; i < cloudData.getRowCount(); i++){
-//                
-//                writer.println(cloudData.getInfo(i));
-//            }
-//            
-//            writer.close();
-//        } catch (FileNotFoundException ex) {
-//            Exceptions.printStackTrace(ex);
-//        } catch (UnsupportedEncodingException ex) {
-//            Exceptions.printStackTrace(ex);
-//        } finally {
-//            writer.close();
-//        }
-//    }
 }

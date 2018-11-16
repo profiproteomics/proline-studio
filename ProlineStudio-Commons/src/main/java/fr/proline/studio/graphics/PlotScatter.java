@@ -774,6 +774,7 @@ public class PlotScatter extends PlotXYAbstract implements Axis.EnumXInterface, 
             if (m_selected[i]) {
                 continue;
             }
+            
             int x = xAxis.valueToPixel(m_dataX[i]) + ((m_jitterX != null) ? m_jitterX[i] : 0);
             int y = yAxis.valueToPixel(m_dataY[i]) + ((m_jitterY != null) ? m_jitterY[i] : 0);
 

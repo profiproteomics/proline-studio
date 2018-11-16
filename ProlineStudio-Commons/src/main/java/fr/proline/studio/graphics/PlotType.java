@@ -11,7 +11,6 @@ public enum PlotType {
 
     HISTOGRAM_PLOT("Histogram", false, "on", null, "as"),
     SCATTER_PLOT("Scatter Plot", false, "X Axis:", "Y Axis:", null),
-    SCATTER_PLOT_XIC_CLOUD("Scatter Plot Xic Cloud", false, "X Axis:", "Y Axis:", null),
     VENN_DIAGRAM_PLOT("Venn Diagram", true, "Data:", null, null),
     PARALLEL_COORDINATES_PLOT("Parallel Coordinates", true, "Data:", null, null),
     LINEAR_PLOT("Linear Plot", false, "X Axis:", "Y Axis:", null);
@@ -78,7 +77,6 @@ public enum PlotType {
                 acceptedValues.add(Integer.class);
                 break;
             case SCATTER_PLOT:
-            case SCATTER_PLOT_XIC_CLOUD:
             case LINEAR_PLOT:
             case PARALLEL_COORDINATES_PLOT:
                 acceptedValues.add(Double.class);
@@ -100,7 +98,6 @@ public enum PlotType {
             case PARALLEL_COORDINATES_PLOT:
                 break;
             case SCATTER_PLOT:
-            case SCATTER_PLOT_XIC_CLOUD:
             case LINEAR_PLOT:
                 acceptedValues.add(Double.class);
                 acceptedValues.add(Float.class);
@@ -119,7 +116,6 @@ public enum PlotType {
                 return zParams;
             }
             case SCATTER_PLOT:
-            case SCATTER_PLOT_XIC_CLOUD:
             case LINEAR_PLOT:
             case VENN_DIAGRAM_PLOT:
             case PARALLEL_COORDINATES_PLOT:

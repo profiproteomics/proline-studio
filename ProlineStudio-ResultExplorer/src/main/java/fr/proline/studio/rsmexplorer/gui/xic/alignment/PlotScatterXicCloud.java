@@ -24,13 +24,16 @@ public class PlotScatterXicCloud extends PlotScatter {
     private int transparence = 64;
 
     private Color m_color;
-    private StringBuilder m_sBuffer;
+    private StringBuilder m_sBuilder;
+    private static Color m_diffColor = Color.green;
+    
+    private int m_colY; //index of column Y
 
     public PlotScatterXicCloud(BasePlotPanel plotPanel, ExtendedTableModelInterface compareDataInterface, CrossSelectionInterface crossSelectionInterface, int colX, int colY) {
         super(plotPanel, compareDataInterface, crossSelectionInterface, colX, colY);
-        m_sBuffer = null;
+        m_sBuilder = null;
         m_color = Color.ORANGE;
-        m_plotType = PlotType.SCATTER_PLOT_XIC_CLOUD;
+        m_colY = colY;
     }
 
     public void setColor(Color c) {
@@ -63,29 +66,29 @@ public class PlotScatterXicCloud extends PlotScatter {
             return null;
         }
 
-        if (m_sBuffer == null) {
-            m_sBuffer = new StringBuilder();
+        if (m_sBuilder == null) {
+            m_sBuilder = new StringBuilder();
         }
 
         String infoValue = ((RTCompareTableModel) m_compareDataInterface).getToolTipInfo(indexFound);
 
-        m_sBuffer.append(infoValue);
-        m_sBuffer.append("<BR>");
-        m_sBuffer.append(m_plotPanel.getXAxis().getTitle());
-        m_sBuffer.append(" : ");
+        m_sBuilder.append(infoValue);
+        m_sBuilder.append("<BR>");
+        m_sBuilder.append(m_plotPanel.getXAxis().getTitle());
+        m_sBuilder.append(" : ");
 
-        m_sBuffer.append(m_plotPanel.getXAxis().getExternalDecimalFormat().format(m_dataX[indexFound]));
+        m_sBuilder.append(m_plotPanel.getXAxis().getExternalDecimalFormat().format(m_dataX[indexFound]));
 
-        m_sBuffer.append(" <BR>");
-        m_sBuffer.append(m_plotPanel.getYAxis().getTitle());
+        m_sBuilder.append(" <BR>");
+        m_sBuilder.append(m_plotPanel.getYAxis().getTitle());
 
         if (m_dataY[indexFound] > 0) {
-            m_sBuffer.append("+");
+            m_sBuilder.append("+");
         }
-        m_sBuffer.append(m_plotPanel.getYAxis().getExternalDecimalFormat().format(m_dataY[indexFound]));
+        m_sBuilder.append(m_plotPanel.getYAxis().getExternalDecimalFormat().format(m_dataY[indexFound]));
 
-        String tooltip = m_sBuffer.toString();
-        m_sBuffer.setLength(0);
+        String tooltip = m_sBuilder.toString();
+        m_sBuilder.setLength(0);
         return tooltip;
 
     }
@@ -115,10 +118,13 @@ public class PlotScatterXicCloud extends PlotScatter {
             int x = xAxis.valueToPixel(m_dataX[i]) + ((m_jitterX != null) ? m_jitterX[i] : 0);
             int y = yAxis.valueToPixel(m_dataY[i]) + ((m_jitterY != null) ? m_jitterY[i] : 0);
 
-            g.setColor(m_color);
+            if (((RTCompareTableModel) this.m_compareDataInterface).isMatchCountDiff(i, m_colY)) {
+                g.setColor(m_diffColor);
+            } else {
+                g.setColor(m_color);
+            }
 
             g.fillOval(x - 3, y - 3, 6, 6);
-
         }
 
         // plot selected

@@ -338,9 +338,11 @@ public class IdTransferHandler extends TransferHandler {
                         ArrayList<DDataset> datasetList = new ArrayList<>(nbChildren);
                         for (int i = 0; i < nbChildren; i++) {
                             AbstractNode childNode = ((AbstractNode) dropRSMNode.getChildAt(i));
-                            DataSetNode childDatasetNode = (DataSetNode) childNode;
-                            DDataset dataset = childDatasetNode.getDataset();
-                            datasetList.add(dataset);
+                            if(childNode.getType() == AbstractNode.NodeTypes.DATA_SET){
+                                DataSetNode childDatasetNode = (DataSetNode) childNode;
+                                DDataset dataset = childDatasetNode.getDataset();
+                                datasetList.add(dataset);
+                            }
                         }
                         Object databaseParentObject = (dropRSMNode.getType() == AbstractNode.NodeTypes.PROJECT_IDENTIFICATION) ? ((IdProjectIdentificationNode)dropRSMNode).getProject() : ((DataSetNode)dropRSMNode).getDataset();
                         databaseObjectsToModify.put(databaseParentObject, datasetList);

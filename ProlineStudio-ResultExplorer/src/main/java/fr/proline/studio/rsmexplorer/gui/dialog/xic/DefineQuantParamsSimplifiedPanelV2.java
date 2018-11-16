@@ -46,6 +46,7 @@ public class DefineQuantParamsSimplifiedPanelV2 extends AbstractDefineQuantParam
 
         createParameters();
         
+        //VDS: FIXME  m_parameterList.updateIsUsed(NbPreferences.root()); AND param.setUsed(true); ?????
         if (readValues) {
             m_parameterList.updateIsUsed(NbPreferences.root());
         } else {
@@ -97,7 +98,7 @@ public class DefineQuantParamsSimplifiedPanelV2 extends AbstractDefineQuantParam
         DoubleParameter featureMappingTimeTolParameter = new DoubleParameter("featureTimeTol", "RT tolerance", m_crossAssignFeatureMappRTTolTF, DEFAULT_CA_FEATMAP_RTTOL_VALUE, new Double(0), null);
         m_parameterList.add(featureMappingTimeTolParameter);
 
-        m_alignRTCB = new JCheckBox("Align RT");
+        m_alignRTCB = new JCheckBox("Align RT", true);
         m_alignRTCB.addActionListener(new ActionListener() {
 
             @Override
@@ -278,8 +279,8 @@ public class DefineQuantParamsSimplifiedPanelV2 extends AbstractDefineQuantParam
         m_crossAssRTToleranceLabel.setEnabled(isEnabled);
         m_crossAssignFeatureMappRTTolTF.setEnabled(isEnabled);
         m_alignRTCB.setEnabled(isEnabled);
-        m_alignmentFeatureTimeTolLabel.setEnabled(isEnabled);
-        m_alignmentFeatureMappTimeToleranceTF.setEnabled(isEnabled);
+        enableAlignment(m_alignRTCB.isSelected()&& isEnabled);
+
     }
     
 
@@ -332,9 +333,11 @@ public class DefineQuantParamsSimplifiedPanelV2 extends AbstractDefineQuantParam
         c.weightx = 0;
         c.gridwidth=1;
         m_alignmentFeatureTimeTolLabel = new JLabel("time tolerance (s):");
+        m_alignmentFeatureTimeTolLabel.setEnabled(m_alignRTCB.isSelected()&&m_alignRTCB.isEnabled());
         m_crossAssignSettingsPanel.add(m_alignmentFeatureTimeTolLabel, c);
         c.gridx++;   
         c.weightx = 1;
+        m_alignmentFeatureMappTimeToleranceTF.setEnabled(m_alignRTCB.isSelected()&&m_alignRTCB.isEnabled());
         m_crossAssignSettingsPanel.add(m_alignmentFeatureMappTimeToleranceTF,c);
         panelA.add(m_crossAssignSettingsPanel, BorderLayout.NORTH);
         return panelA ;                 

@@ -671,7 +671,7 @@ public class PlotLinear extends PlotXYAbstract {
 
         if (this.m_plotInformation != null && m_plotInformation.getPlotColor() != null) {
             plotColor = this.m_plotInformation.getPlotColor();
-        }
+            }
         if (displayAntiAliasing) {
             g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         }

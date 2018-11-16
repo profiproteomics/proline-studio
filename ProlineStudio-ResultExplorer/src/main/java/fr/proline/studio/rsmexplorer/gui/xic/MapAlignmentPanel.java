@@ -373,17 +373,18 @@ public class MapAlignmentPanel extends HourglassPanel implements DataBoxPanelInt
         String mapTitleFrom = m_quantChannelInfo.getMapTitle(mapIdSrc);
         String mapTitleTo = m_quantChannelInfo.getMapTitle(mapIdDst);
         String title = "Map Alignment from " + mapIdSrc + " (to. " + mapIdDst + ")";
-        Color color = m_quantChannelInfo.getMapColor(mapIdSrc);
-        logger.debug("XXXXXXXXX color=" + color.toString());
-        mapTimePanel.setData((long) -1, map, listMapTime, color, title, true, mapTitleFrom, mapTitleTo);//set graphic content
+        Color color = m_quantChannelInfo.getMapColor(mapIdDst);
+        mapTimePanel.setData((long) -1, map, listMapTime, color.darker(), title, true, mapTitleFrom, mapTitleTo);//set graphic content
 
         crossSelectionTableModel = mapTimePanel.getCrossSelectionInterface();
         extendedTableModel = mapTimePanel.getGlobalTableModelInterface();
         double tolerance = ((DataboxMapAlignment) this.m_dataBox).getRT_Tolerance();
         PlotLinear alignmentLiner = new PlotLinear(graphicPanel, extendedTableModel, crossSelectionTableModel,
                 PlotBaseAbstract.COL_X_ID, PlotBaseAbstract.COL_Y_ID);
+
+        alignmentLiner.setPlotInformation(extendedTableModel.getPlotInformation());//set Color
+        alignmentLiner.setStroke(3f);  //set Stroke
         alignmentLiner.setTolerance(tolerance);
-        alignmentLiner.setStroke(3f);
 
         graphicPanel.setPlot(alignmentLiner);
         RTCompareTableModel cloudData = getCloudData(mapIdSrc);
@@ -392,7 +393,7 @@ public class MapAlignmentPanel extends HourglassPanel implements DataBoxPanelInt
             int axisY = cloudData.getColumnIndex(mapIdDst);
             plotCloud = new PlotScatterXicCloud(graphicPanel, cloudData, null, axisX, axisY);
 
-            plotCloud.setColor(m_quantChannelInfo.getMapColor(mapIdDst));
+            plotCloud.setColor(color);
             //set visible Min Max, the real Min Max are too large to show the alignment PlotLinear
             double yMax = alignmentLiner.getYMax();
             double yMin = alignmentLiner.getYMin();

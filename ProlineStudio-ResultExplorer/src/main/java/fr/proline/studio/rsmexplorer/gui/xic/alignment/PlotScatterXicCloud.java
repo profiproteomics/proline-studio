@@ -9,7 +9,6 @@ import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 import fr.proline.studio.graphics.BasePlotPanel;
 import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.graphics.PlotScatter;
-import fr.proline.studio.graphics.PlotType;
 import fr.proline.studio.graphics.XAxis;
 import fr.proline.studio.graphics.YAxis;
 import java.awt.Color;

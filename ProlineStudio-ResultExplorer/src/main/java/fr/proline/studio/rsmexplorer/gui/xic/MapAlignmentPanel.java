@@ -372,7 +372,7 @@ public class MapAlignmentPanel extends HourglassPanel implements DataBoxPanelInt
         mapTimePanel = new MapTimePanel();
         String mapTitleFrom = m_quantChannelInfo.getMapTitle(mapIdSrc);
         String mapTitleTo = m_quantChannelInfo.getMapTitle(mapIdDst);
-        String title = "Map Alignment from " + mapIdSrc + " (to. " + mapIdDst + ")";
+        String title = "Map Alignment from " + mapTitleFrom + " (to. " + mapTitleTo + ")";
         Color color = m_quantChannelInfo.getMapColor(mapIdDst);
         mapTimePanel.setData((long) -1, map, listMapTime, color.darker(), title, true, mapTitleFrom, mapTitleTo);//set graphic content
 

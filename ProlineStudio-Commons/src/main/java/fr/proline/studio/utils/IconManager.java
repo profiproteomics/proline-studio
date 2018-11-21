@@ -122,6 +122,8 @@ public class IconManager {
         DATASET_RSM_DECOY,
         DATASET_RSM_ERROR,
         LOAD_SETTINGS,
+        LOAD_ALIGNMENT_CLOUD,
+        REMOVE_ALIGNMENT_CLOUD,
         SAVE_SETTINGS,
         SAVE_WND,
         ARROW_DOWN,
@@ -157,6 +159,7 @@ public class IconManager {
         NAVIGATE,
         SELECT,
         ZOOM_FIT,
+        ZOOM_ALL,
         CONTROL_PLAY,
         CONTROL_STOP,
         CONTROL_PAUSE,
@@ -184,9 +187,9 @@ public class IconManager {
         ISOTOPES_PREDICTION,
         TEST,
         OPTIONS_MORE,
-        OPTIONS_LESS, 
+        OPTIONS_LESS,
         PIN;
-        
+
     }
     private final static HashMap<IconType, ImageIcon> m_iconMap = new HashMap<>();
     private final static HashMap<IconType, ImageIcon> m_iconHourGlassMap = new HashMap<>();
@@ -498,7 +501,7 @@ public class IconManager {
             case DATASET_RSET:
                 return "fr/proline/studio/images/dataset_rset.png";
             case REFERENCE_RSM:
-                return "fr/proline/studio/images/reference_dataset.png";                
+                return "fr/proline/studio/images/reference_dataset.png";
             case REFERENCE_RSM_ERR:
                 return "fr/proline/studio/images/reference_dataset_err.png";
             case DATASET_RSM:
@@ -529,6 +532,10 @@ public class IconManager {
                 return "fr/proline/studio/images/dataset_rsm_error.png";
             case LOAD_SETTINGS:
                 return "fr/proline/studio/images/load-settings.png";
+            case LOAD_ALIGNMENT_CLOUD:
+                return "fr/proline/studio/images/cloud.png";
+            case REMOVE_ALIGNMENT_CLOUD:
+                return "fr/proline/studio/images/cloud_remove.png";
             case SAVE_SETTINGS:
                 return "fr/proline/studio/images/save-settings.png";
             case SAVE_WND:
@@ -599,6 +606,8 @@ public class IconManager {
                 return "fr/proline/studio/images/select.png";
             case ZOOM_FIT:
                 return "fr/proline/studio/images/magnifier-zoom-fit.png";
+            case ZOOM_ALL:
+                return "fr/proline/studio/images/magnifier-zoom-all.png";
             case CONTROL_PLAY:
                 return "fr/proline/studio/images/control.png";
             case CONTROL_STOP:
@@ -612,9 +621,9 @@ public class IconManager {
             case TOOLBOX_PLUS:
                 return "fr/proline/studio/images/toolbox--plus.png";
             case TOOLBOX_MINUS:
-                return "fr/proline/studio/images/toolbox--minus.png";     
+                return "fr/proline/studio/images/toolbox--minus.png";
             case SCREWDRIVER:
-                return "fr/proline/studio/images/screwdriver.png";    
+                return "fr/proline/studio/images/screwdriver.png";
             case REFINE:
                 return "fr/proline/studio/images/refine.png";
             case SELECTED_CHECKBOXES:
@@ -640,23 +649,23 @@ public class IconManager {
             case CONTROL_SMALL:
                 return "fr/proline/studio/images/control-000-small.png";
             case SAME_MS_LEVEL:
-                return "fr/proline/studio/images/same_level.png";    
+                return "fr/proline/studio/images/same_level.png";
             case SIGNAL:
-                return "fr/proline/studio/images/signal.png";  
+                return "fr/proline/studio/images/signal.png";
             case AUTO_ZOOM:
-                return "fr/proline/studio/images/auto_zoom.png";    
+                return "fr/proline/studio/images/auto_zoom.png";
             case OVERLAY:
                 return "fr/proline/studio/images/overlay.png";
             case ISOTOPES_PREDICTION:
-                return "fr/proline/studio/images/isotopes_prediction.png";    
+                return "fr/proline/studio/images/isotopes_prediction.png";
             case TEST:
-                return "fr/proline/studio/images/test.png";  
+                return "fr/proline/studio/images/test.png";
             case OPTIONS_MORE:
-                return "fr/proline/studio/images/hammer--plus.png";  
+                return "fr/proline/studio/images/hammer--plus.png";
             case OPTIONS_LESS:
-                return "fr/proline/studio/images/hammer--minus.png";  
+                return "fr/proline/studio/images/hammer--minus.png";
             case PIN:
-                return "fr/proline/studio/images/pin.png";  
+                return "fr/proline/studio/images/pin.png";
         }
 
         return null; // can not happen

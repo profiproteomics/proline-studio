@@ -72,7 +72,7 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
     
     protected DataboxStyle m_style;
     protected DataboxType m_type;
-    
+
     public enum DataboxStyle {
         STYLE_XIC,
         STYLE_SC,
@@ -430,6 +430,10 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
 
     }
     
+    /**
+     * set m_nextDataBoxArray and m_previousDataBox 
+     * @param nextDataBox 
+     */
     public void addNextDataBox(AbstractDataBox nextDataBox) {
         if (m_nextDataBoxArray == null) {
             m_nextDataBoxArray = new ArrayList<>(1);

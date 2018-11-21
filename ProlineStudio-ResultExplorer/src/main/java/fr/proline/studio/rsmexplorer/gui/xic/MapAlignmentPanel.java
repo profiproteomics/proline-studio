@@ -35,15 +35,21 @@ import javax.swing.JTextField;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
-import fr.proline.studio.graphics.BasePlotPanel;
 import fr.proline.studio.graphics.PlotBaseAbstract;
 import fr.proline.studio.graphics.PlotLinear;
 import fr.proline.studio.pattern.xic.DataboxMapAlignment;
 import fr.proline.studio.rsmexplorer.gui.dialog.xic.AbstractGenericQuantParamsPanel;
+import fr.proline.studio.rsmexplorer.gui.xic.alignment.AlignmentPlotPanel;
 import fr.proline.studio.rsmexplorer.gui.xic.alignment.RTCompareTableModel;
 import fr.proline.studio.rsmexplorer.gui.xic.alignment.PlotScatterXicCloud;
+import fr.proline.studio.utils.IconManager;
 import java.awt.Color;
+import java.awt.Dimension;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.JSeparator;
 import javax.swing.JSplitPane;
+import javax.swing.JToggleButton;
 import javax.swing.border.TitledBorder;
 
 /**
@@ -71,6 +77,21 @@ public class MapAlignmentPanel extends HourglassPanel implements DataBoxPanelInt
     private JComboBox m_cbDestMaps;
     private DefaultComboBoxModel m_cbSourceModel;
     private DefaultComboBoxModel m_cbDestModel;
+
+    private static final String CLOUD_VIEW_BEST_FIT_TEXT = "Show Best Fit Zone";
+    private static final String CLOUD_VIEW_All_TEXT = "Show All Peptide Ion";
+    private static final String CLOUD_VIEW_NOT_ENABLED_TEXT = "Zoom Not Enabled";
+    private static final int CLOUD_VIEW_ALL = 1;
+    private static final int CLOUD_VIEW_BEST_FIT = 0;//default show mode
+    private JToggleButton m_btCloudViewMode;
+    private int m_cloudViewMode;
+
+    private static final String CLOUD_LOAD_TEXT = "Load the peptide compare points";
+    private static final String CLOUD_REMOVE_TEXT = "Remove the peptide compare points";
+    private static final String CLOUD_IS_LOADING = "In loading...peptide compare points";
+    private JToggleButton m_btLoadCloud;
+    private boolean m_isLoadCloudAsked;
+
     private Map<Integer, ProcessedMap> m_mapName;
     private long m_referenceMapId;
 
@@ -79,18 +100,19 @@ public class MapAlignmentPanel extends HourglassPanel implements DataBoxPanelInt
     private List<ExtendedTableModelInterface> m_valuesList = null;
     private List<CrossSelectionInterface> m_crossSelectionInterfaceList = null;
     private JSplitPane m_splitPane;
-    private BasePlotPanel m_alignmentGraphicPanel;  //who has BasePlotPanel
+    private AlignmentPlotPanel m_alignmentGraphicPanel;  //who has BasePlotPanel
     private boolean m_isSourceDestComboBoxSeted = false;
     /**
      * for alignement iterative mode, sometimes, we should show 2 graphic
      */
-    private BasePlotPanel m_alignmentGraphicPanel_2;
+    private AlignmentPlotPanel m_alignmentGraphicPanel_2;
 
     public MapAlignmentPanel(DataboxMapAlignment dataBox) {
         super();
         m_referenceMapId = 0;
         m_alnMode = "unknown";
         m_dataBox = dataBox;
+        m_isLoadCloudAsked = false;
         initComponents();
     }
 
@@ -99,9 +121,9 @@ public class MapAlignmentPanel extends HourglassPanel implements DataBoxPanelInt
         pane = new JPanel();
         JPanel mapAlignmentPanel = initMapAlignmentPanel();
         //m_alignmentGraphicPanel = new MultiGraphicsPanel(false, false);
-        m_alignmentGraphicPanel = new BasePlotPanel();
+        m_alignmentGraphicPanel = new AlignmentPlotPanel(this);
         //m_alignmentGraphicPanel_2 = new MultiGraphicsPanel(false, false);
-        m_alignmentGraphicPanel_2 = new BasePlotPanel();
+        m_alignmentGraphicPanel_2 = new AlignmentPlotPanel(this);
         // the second graphic panel has not data in exhaustive mode and in iterative mode, when one selected map is reference map
         m_alignmentGraphicPanel_2.setVisible(false);
         pane.setLayout(new BorderLayout());
@@ -118,6 +140,8 @@ public class MapAlignmentPanel extends HourglassPanel implements DataBoxPanelInt
     }
 
     private JPanel initMapAlignmentPanel() {
+        createButtonLoadCloud();//m_loadCloudBt is created
+        createButtonZoom();
 
         m_labelTitle = new JLabel("<html>Reference Map: <font color='RED'>&#x25A0;&nbsp;</font>"
                 + "   map   &nbsp;, Alignment Mode : I/H) </html>");
@@ -163,11 +187,19 @@ public class MapAlignmentPanel extends HourglassPanel implements DataBoxPanelInt
         });
         m_cbDestMaps.setName("cbDestMaps");
 
-        JPanel pane = new JPanel();
+        JPanel cloudOptionPane = new JPanel();
+        {
+            JSeparator separator = new JSeparator(JSeparator.VERTICAL);
+            cloudOptionPane.setLayout(new BoxLayout(cloudOptionPane, BoxLayout.LINE_AXIS));
+            cloudOptionPane.add(m_btCloudViewMode);
+            cloudOptionPane.add(m_btLoadCloud);
+            cloudOptionPane.add(Box.createRigidArea(new Dimension(10, 0)));
+            cloudOptionPane.add(separator);
+        }
         JPanel timePanel = new JPanel();
-        pane.setLayout(new BorderLayout());
         {
             timePanel.setLayout(new FlowLayout(FlowLayout.LEFT));
+
             timePanel.add(m_tfSouceTime);
             JLabel label0 = new JLabel("(min) in ");
             timePanel.add(label0);
@@ -184,10 +216,42 @@ public class MapAlignmentPanel extends HourglassPanel implements DataBoxPanelInt
             timePanel.add(m_cbDestMaps);
         }
 
-        pane.add(timePanel, BorderLayout.LINE_START);
+        JPanel beginPane = new JPanel(new FlowLayout());
+        beginPane.add(cloudOptionPane);
+        beginPane.add(timePanel);
+
+        JPanel pane = new JPanel();
+        pane.setLayout(new BorderLayout());
+        pane.add(beginPane, BorderLayout.LINE_START);
         pane.add(m_labelTitle, BorderLayout.LINE_END);
-        pane.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10));
+        pane.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 10));
         return pane;
+    }
+
+    private void createButtonLoadCloud() {
+        m_btLoadCloud = new JToggleButton(IconManager.getIcon(IconManager.IconType.LOAD_ALIGNMENT_CLOUD));
+        m_btLoadCloud.setMargin(new java.awt.Insets(2, 2, 2, 2));
+
+        m_btLoadCloud.setToolTipText(CLOUD_LOAD_TEXT);
+        m_btLoadCloud.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (!m_isLoadCloudAsked) {//action = set cloud
+                    m_isLoadCloudAsked = true;
+                    m_btLoadCloud.setIcon(IconManager.getIconWithHourGlass(IconManager.IconType.LOAD_ALIGNMENT_CLOUD));
+                    m_btLoadCloud.setToolTipText(CLOUD_IS_LOADING);
+                    ((DataboxMapAlignment) m_dataBox).loadCloud(); //will return in this class and call this.setAlignmentCloud
+                } else if (m_dataBox.isLoaded()) {//cloud is been shown, action = remove
+                    m_isLoadCloudAsked = false;//this boolean will affect cloud show
+                    m_btLoadCloud.setIcon(IconManager.getIcon(IconManager.IconType.LOAD_ALIGNMENT_CLOUD));
+                    m_btLoadCloud.setToolTipText(CLOUD_LOAD_TEXT);
+                    m_btCloudViewMode.setEnabled(false);
+                    m_btCloudViewMode.setToolTipText(CLOUD_VIEW_NOT_ENABLED_TEXT);
+                    setDataGraphic();
+                }
+
+            }
+        });
     }
 
     /**
@@ -196,7 +260,50 @@ public class MapAlignmentPanel extends HourglassPanel implements DataBoxPanelInt
      * can be called by DataBoxMapAlignment
      */
     public void setAlignmentCloud() {
+        this.m_btLoadCloud.setToolTipText(CLOUD_REMOVE_TEXT);
+        this.m_btLoadCloud.setIcon(IconManager.getIcon(IconManager.IconType.REMOVE_ALIGNMENT_CLOUD));
+        this.m_btCloudViewMode.setToolTipText(CLOUD_VIEW_All_TEXT);
+        this.m_btCloudViewMode.setEnabled(true);
         this.setDataGraphic();
+    }
+
+    private void createButtonZoom() {
+        m_btCloudViewMode = new JToggleButton();
+        m_btCloudViewMode.setIcon(IconManager.getIcon(IconManager.IconType.ZOOM_ALL));
+        m_btCloudViewMode.setMargin(new java.awt.Insets(2, 2, 2, 2));
+        m_btCloudViewMode.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (m_cloudViewMode == CLOUD_VIEW_BEST_FIT) {
+                    m_cloudViewMode = CLOUD_VIEW_ALL;
+                    m_btCloudViewMode.setIcon(IconManager.getIcon(IconManager.IconType.ZOOM_FIT));
+                    m_btCloudViewMode.setToolTipText(CLOUD_VIEW_BEST_FIT_TEXT);
+                    setDataGraphic();
+                } else {
+                    m_cloudViewMode = CLOUD_VIEW_BEST_FIT;
+                    m_btCloudViewMode.setIcon(IconManager.getIcon(IconManager.IconType.ZOOM_ALL));
+                    m_btCloudViewMode.setToolTipText(CLOUD_VIEW_All_TEXT);
+                    setDataGraphic();
+                }
+
+            }
+
+        });
+        m_btCloudViewMode.setToolTipText(CLOUD_VIEW_NOT_ENABLED_TEXT);
+        m_btCloudViewMode.setEnabled(false);//before the cloud is loaded, this is not enabled
+
+    }
+
+    /**
+     * be called by AlignmentPlotPanel, when ZoomGesture.ACTION_UNZOOM.<br>
+     *
+     */
+    public void updateZoomButton() {
+        if (m_btCloudViewMode.isEnabled()) {
+            m_cloudViewMode = CLOUD_VIEW_ALL;
+            m_btCloudViewMode.setIcon(IconManager.getIcon(IconManager.IconType.ZOOM_FIT));
+            m_btCloudViewMode.setToolTipText(CLOUD_VIEW_BEST_FIT_TEXT);
+        }
     }
 
     public void setData(QuantChannelInfo quantChannelInfo, List<ExtendedTableModelInterface> compareDataInterfaceList, List<CrossSelectionInterface> crossSelectionInterfaceList) {
@@ -259,6 +366,11 @@ public class MapAlignmentPanel extends HourglassPanel implements DataBoxPanelInt
         }
     }
 
+    /**
+     * info to show above the map alignment curve
+     *
+     * @return
+     */
     private String getAlignmentMethod() {
         String method = "unknown";
         Map<String, Object> quantParams;
@@ -360,7 +472,7 @@ public class MapAlignmentPanel extends HourglassPanel implements DataBoxPanelInt
         }
     }
 
-    private void setDataGraphicTableModel(MapAlignment map, BasePlotPanel graphicPanel) {
+    private void setDataGraphicTableModel(MapAlignment map, AlignmentPlotPanel graphicPanel) {
         CrossSelectionInterface crossSelectionTableModel;
         ExtendedTableModelInterface extendedTableModel;
         PlotScatterXicCloud plotCloud;
@@ -374,7 +486,7 @@ public class MapAlignmentPanel extends HourglassPanel implements DataBoxPanelInt
         String mapTitleTo = m_quantChannelInfo.getMapTitle(mapIdDst);
         String title = "Map Alignment from " + mapTitleFrom + " (to. " + mapTitleTo + ")";
         Color color = m_quantChannelInfo.getMapColor(mapIdDst);
-        mapTimePanel.setData((long) -1, map, listMapTime, color.darker(), title, true, mapTitleFrom, mapTitleTo);//set graphic content
+        mapTimePanel.setData((long) -1, map, listMapTime, color, title, true, mapTitleFrom, mapTitleTo);//set graphic content
 
         crossSelectionTableModel = mapTimePanel.getCrossSelectionInterface();
         extendedTableModel = mapTimePanel.getGlobalTableModelInterface();
@@ -387,21 +499,26 @@ public class MapAlignmentPanel extends HourglassPanel implements DataBoxPanelInt
         alignmentLiner.setTolerance(tolerance);
 
         graphicPanel.setPlot(alignmentLiner);
-        RTCompareTableModel cloudData = getCloudData(mapIdSrc);
-        if (cloudData != null) {
-            int axisX = cloudData.getColumnIndex(mapIdSrc);
-            int axisY = cloudData.getColumnIndex(mapIdDst);
-            plotCloud = new PlotScatterXicCloud(graphicPanel, cloudData, null, axisX, axisY);
 
-            plotCloud.setColor(color);
-            //set visible Min Max, the real Min Max are too large to show the alignment PlotLinear
-            double yMax = alignmentLiner.getYMax();
-            double yMin = alignmentLiner.getYMin();
-            plotCloud.setYMax(yMax + 2 * tolerance);
-            plotCloud.setYMin(yMin - 2 * tolerance);
+        if (this.m_isLoadCloudAsked) {
+            RTCompareTableModel cloudData = getCloudData(mapIdSrc);
+            if (cloudData != null) {
+                int axisX = cloudData.getColumnIndex(mapIdSrc);
+                int axisY = cloudData.getColumnIndex(mapIdDst);
+                plotCloud = new PlotScatterXicCloud(graphicPanel, cloudData, null, axisX, axisY);
 
-            graphicPanel.setPlot(plotCloud);
-            graphicPanel.addPlot(alignmentLiner);
+                plotCloud.setColor(color);
+
+                if (m_cloudViewMode == CLOUD_VIEW_BEST_FIT) {
+                    //set visible Min Max, the real Min Max are too large to show the alignment PlotLinear
+                    double yMax = alignmentLiner.getYMax();
+                    double yMin = alignmentLiner.getYMin();
+                    plotCloud.setYMax(yMax + 2 * tolerance);
+                    plotCloud.setYMin(yMin - 2 * tolerance);
+                }
+                graphicPanel.setPlot(plotCloud);
+                graphicPanel.addPlot(alignmentLiner);
+            }
         }
         graphicPanel.repaint();
 

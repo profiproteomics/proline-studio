@@ -47,6 +47,8 @@ public class DataboxMapAlignment extends AbstractDataBox {
     private Map<Long, RTCompareTableModel> m_compareRT2Maps;
     private double m_RT_Tolerance;
     private Long m_paramTaskId;
+    private boolean m_isCloudLoaded;
+    private boolean m_isCloudTaskAsked;
 
     public DataboxMapAlignment() {
         super(DataboxType.DataBoxMapAlignment, DataboxStyle.STYLE_XIC);
@@ -70,7 +72,11 @@ public class DataboxMapAlignment extends AbstractDataBox {
         outParameter = new GroupParameter();
         outParameter.addParameter(CrossSelectionInterface.class, true);
         registerOutParameter(outParameter);
-        m_RT_Tolerance = AbstractGenericQuantParamsPanel.DEFAULT_CA_FEATMAP_RTTOL_VALUE;
+        //m_RT_Tolerance = AbstractGenericQuantParamsPanel.DEFAULT_CA_FEATMAP_RTTOL_VALUE;
+        m_RT_Tolerance = 30;//for debug@todo delete
+
+        m_isCloudLoaded = false;
+        m_isCloudTaskAsked = false;
     }
 
     public double getRT_Tolerance() {
@@ -176,7 +182,7 @@ public class DataboxMapAlignment extends AbstractDataBox {
             @Override
             public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
                 setLoaded(loadingId);
-                if (finished){
+                if (finished) {
                     unregisterTask(taskId);
                 }
                 // do nothing, if juste de paramTask finished
@@ -186,34 +192,82 @@ public class DataboxMapAlignment extends AbstractDataBox {
 
                     if (finished) {
                         propagateDataChanged(ExtendedTableModelInterface.class);
-                        //if all task loaded, then execute the first Alignement Cloud
-                        if (DataboxMapAlignment.this.isLoaded()) {
-                            m_RT_Tolerance = getTimeTol();
-                            ((MapAlignmentPanel) DataboxMapAlignment.this.getPanel()).setAlignmentCloud();
-                        }
                     }
                 }
             }
 
         };
-
+        DatabaseLoadXicMasterQuantTask taskParameter = new DatabaseLoadXicMasterQuantTask(callback);
+        taskParameter.initLoadQuantChannels(getProjectId(), m_dataset);
         // ask asynchronous loading of data
         DatabaseLoadLcMSTask taskMapAlignment = new DatabaseLoadLcMSTask(callback);
         taskMapAlignment.initLoadAlignmentForXic(getProjectId(), m_dataset);
 
-        DatabaseLoadXicMasterQuantTask taskParameter = new DatabaseLoadXicMasterQuantTask(callback);
-        taskParameter.initLoadQuantChannels(getProjectId(), m_dataset);
         m_paramTaskId = taskParameter.getId();//this task is short, and it will be done at first
-        
-        m_masterQuantPeptideIonList = new ArrayList();
-        DatabaseLoadXicMasterQuantTask taskPeptideCloud = new DatabaseLoadXicMasterQuantTask(callback);
-        taskPeptideCloud.initLoadPeptideIons(this.getProjectId(), m_dataset, m_masterQuantPeptideIonList);
-
-        registerTask(taskMapAlignment);
         registerTask(taskParameter);
-        registerTask(taskPeptideCloud);
+        registerTask(taskMapAlignment);
+
     }
 
+    /**
+     * load peptideIon task is separated from the above task.
+     */
+    public void loadCloud() {
+        if (m_isCloudLoaded == true) {
+            ((MapAlignmentPanel) super.getDataBoxPanelInterface()).setAlignmentCloud();
+        } else {
+            //avoid multiple call when the cloud is not loaded
+            if (this.m_isCloudTaskAsked == true) {
+                return;
+            }
+
+            m_isCloudTaskAsked = true;
+            final int loadingId = setLoading();
+
+            if (m_dataset == null) {
+                m_dataset = (DDataset) m_previousDataBox.getData(false, DDataset.class);
+
+            }
+            AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
+
+                @Override
+                public boolean mustBeCalledInAWT() {
+                    return true;
+                }
+
+                @Override
+                public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
+                    setLoaded(loadingId);
+                    if (finished) {
+                        unregisterTask(taskId);
+                    }
+                    // do nothing, if juste de paramTask finished
+                    if (taskId != m_paramTaskId) {
+                        if (finished) {
+                            //if all task loaded, then execute the first Alignement Cloud
+                            if (DataboxMapAlignment.this.isLoaded()) {
+                                m_isCloudLoaded = true;
+                                m_RT_Tolerance = getTimeTol();
+                                ((MapAlignmentPanel) DataboxMapAlignment.this.getPanel()).setAlignmentCloud();
+                            }
+                        }
+                    }
+                }
+
+            };
+
+            m_masterQuantPeptideIonList = new ArrayList();
+            DatabaseLoadXicMasterQuantTask taskPeptideCloud = new DatabaseLoadXicMasterQuantTask(callback);
+            taskPeptideCloud.initLoadPeptideIons(this.getProjectId(), m_dataset, m_masterQuantPeptideIonList);
+            registerTask(taskPeptideCloud);
+        }
+
+    }
+
+    /**
+     * from the m_dataset, extact the RT tolerance 
+     * @return 
+     */
     private double getTimeTol() {
         Double time = AbstractGenericQuantParamsPanel.DEFAULT_CA_FEATMAP_RTTOL_VALUE;
         try {

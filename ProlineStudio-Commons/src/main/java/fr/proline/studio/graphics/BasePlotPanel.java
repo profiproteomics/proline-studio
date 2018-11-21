@@ -58,17 +58,17 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
 
     private static final Color PANEL_BACKGROUND_COLOR = UIManager.getColor("Panel.background");
 
-    private XAxis m_xAxis = null;
-    private YAxis m_yAxis = null;
+    protected XAxis m_xAxis = null;
+    protected YAxis m_yAxis = null;
     private double[] m_xAxisBounds = {Double.NaN, Double.NaN};
     private double[] m_yAxisBounds = {Double.NaN, Double.NaN};
 
-    private ArrayList<PlotBaseAbstract> m_plots = null;
+    protected ArrayList<PlotBaseAbstract> m_plots = null;
 
-    private final ZoomGesture m_zoomGesture = new ZoomGesture();
-    private final SelectionGestureLasso m_selectionGesture = new SelectionGestureLasso();
-    private final PanAxisGesture m_panAxisGesture = new PanAxisGesture();
-    private final MoveGesture m_moveGesture = new MoveGesture();
+    protected final ZoomGesture m_zoomGesture = new ZoomGesture();
+    protected final SelectionGestureLasso m_selectionGesture = new SelectionGestureLasso();
+    protected final PanAxisGesture m_panAxisGesture = new PanAxisGesture();
+    protected final MoveGesture m_moveGesture = new MoveGesture();
 
     public final static int GAP_FIGURES_Y = 30;
     public final static int GAP_FIGURES_X = 24;
@@ -78,12 +78,12 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
 
     private BufferedImage m_doubleBuffer = null;
     private boolean m_useDoubleBuffering = false;
-    private boolean m_updateDoubleBuffer = false;
+    protected boolean m_updateDoubleBuffer = false;
 
     private boolean m_plotHorizontalGrid = true;
     private boolean m_plotVerticalGrid = true;
     private boolean m_dataLocked = false;
-    private boolean m_drawCursor = false;
+    protected boolean m_drawCursor = false;
 
     private PlotToolbarListener m_plotToolbarListener = null;
     private List<PlotPanelListener> m_listeners = new ArrayList<>();
@@ -948,7 +948,7 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
     }
     private final StringBuilder m_sbTooltip = new StringBuilder();
 
-    private JPopupMenu createAxisPopup(final Axis axis, int x, int y) {
+    protected JPopupMenu createAxisPopup(final Axis axis, int x, int y) {
 
         boolean isXAxis = axis.equals(m_xAxis);
 

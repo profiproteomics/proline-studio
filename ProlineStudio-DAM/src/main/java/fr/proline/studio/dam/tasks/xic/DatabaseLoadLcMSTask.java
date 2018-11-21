@@ -995,13 +995,6 @@ public class DatabaseLoadLcMSTask extends AbstractDatabaseSlicerTask {
                 }
             }
             entityManagerLCMS.getTransaction().commit();
-//            m_logger.debug("----->DatabaseLoadLcMSTask fetchDataMainTaskAlignmentForXic " + m_dataset.getName() + " " + m_dataset.getMapAlignments());
-//            for (MapAlignment m : m_dataset.getMapAlignments()) {
-//                m_logger.debug("-----> src: " + m.getSourceMap().getId() + " dest : " + m.getDestinationMap().getId());
-//            }
-//
-//            m_logger.debug("<----->DatabaseLoadLcMSTask fetchDataMainTaskAlignmentForXic done");
-
         } catch (Exception e) {
             m_logger.error(getClass().getSimpleName() + " failed", e);
             m_taskError = new TaskError(e);

@@ -235,9 +235,14 @@ public class RTCompareTableModel implements ExtendedTableModelInterface {
         return RTCompareTableModel.PEPTEDE_SEQUENCE;
     }
 
+    /**
+     * return the information of the peptide id, sequence and charge
+     * @param rowIndex
+     * @return 
+     */
     public String getToolTipInfo(int rowIndex) {
         RTCompareRow row = this.m_data.get(rowIndex);
-        String infoValue = " Peptied id : " + row._peptideId + "<BR>";
+        String infoValue = " Peptide id : " + row._peptideId + "<BR>";
         infoValue += ("Sequence : ") + row._peptideSequence + "<BR>";
         infoValue += ("charge : ") + row._charge + "<BR>";
         return infoValue;

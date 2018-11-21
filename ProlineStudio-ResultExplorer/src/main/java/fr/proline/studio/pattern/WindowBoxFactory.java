@@ -553,7 +553,14 @@ public class WindowBoxFactory {
     private static SplittedPanelContainer generatePanel(AbstractDataBox[] boxes) {
         return generatePanel(boxes, true);
     }
-
+    /**
+     * for each dataBox, add it's nextDataBox<br>
+     * from seconde dataBox,  for each dataBox, if it's layout is vertical layout, add 1 nbContainerPanels<br>
+     * 
+     * @param boxes
+     * @param includeSaveAndAddButtonsInToolbar
+     * @return 
+     */
     private static SplittedPanelContainer generatePanel(AbstractDataBox[] boxes, boolean includeSaveAndAddButtonsInToolbar) {
 
         // link boxes together

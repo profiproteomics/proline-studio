@@ -72,9 +72,8 @@ public class DataboxMapAlignment extends AbstractDataBox {
         outParameter = new GroupParameter();
         outParameter.addParameter(CrossSelectionInterface.class, true);
         registerOutParameter(outParameter);
-        //m_RT_Tolerance = AbstractGenericQuantParamsPanel.DEFAULT_CA_FEATMAP_RTTOL_VALUE;
-        m_RT_Tolerance = 30;//for debug@todo delete
-
+        m_RT_Tolerance = AbstractGenericQuantParamsPanel.DEFAULT_CA_FEATMAP_RTTOL_VALUE;
+        
         m_isCloudLoaded = false;
         m_isCloudTaskAsked = false;
     }

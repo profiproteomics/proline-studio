@@ -1,6 +1,5 @@
 package fr.proline.studio.rsmexplorer.tree.xic;
 
-import fr.proline.core.orm.uds.Aggregation;
 import fr.proline.core.orm.uds.BiologicalGroup;
 import fr.proline.core.orm.uds.BiologicalSample;
 import fr.proline.core.orm.uds.Dataset;
@@ -12,10 +11,13 @@ import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
 import fr.proline.studio.dam.DatabaseDataManager;
 import fr.proline.studio.dam.data.DataSetData;
-import fr.proline.core.orm.uds.BiologicalSplSplAnalysisMap;
 import fr.proline.core.orm.uds.Run;
+import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.data.RunInfoData;
+import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
+import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
 import fr.proline.studio.dam.tasks.DatabaseRunsTask;
+import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.rsmexplorer.actions.identification.AbstractRSMAction;
 import fr.proline.studio.rsmexplorer.actions.xic.CreateAction;
 import fr.proline.studio.rsmexplorer.actions.xic.DeleteAction;
@@ -23,6 +25,9 @@ import fr.proline.studio.rsmexplorer.actions.xic.RenameAction;
 import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
+import fr.proline.studio.rsmexplorer.tree.DataSetNode;
+import fr.proline.studio.rsmexplorer.tree.quantitation.QuantitationTree;
+import fr.proline.studio.utils.StudioExceptions;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -208,16 +213,36 @@ public class XICDesignTree extends AbstractTree {
         List<DQuantitationChannel> listQuantChannels = dataset.getMasterQuantitationChannels().isEmpty() ? new ArrayList() : dataset.getMasterQuantitationChannels().get(0).getQuantitationChannels();
         List<BiologicalGroup> listBiologicalGroups = groupSetup.getBiologicalGroups();
         int childIndex = 0;
-        
+
+        // insert a node to represent reference identification dataset
         DDataset refDataset = dataset.getMasterQuantitationChannels().get(0).getIdentDataset();
         Long refResultSummaryId = dataset.getMasterQuantitationChannels().get(0).getIdentResultSummaryId();
-        XICReferenceRSMNode refDatasetNode = new XICReferenceRSMNode(DataSetData.createTemporaryAggregate(refDataset == null ? "auto" : refDataset.getName())); //new DataSetData(refDataset == null ? "auto" : refDataset.getName(), Dataset.DatasetType.AGGREGATE, Aggregation.ChildNature.OTHER));
+        DatasetReferenceNode refDatasetNode = new DatasetReferenceNode(DataSetData.createTemporaryAggregate(refDataset == null ? "auto" : refDataset.getName())); //new DataSetData(refDataset == null ? "auto" : refDataset.getName(), Dataset.DatasetType.AGGREGATE, Aggregation.ChildNature.OTHER));
         if(refDataset != null){
             if(refResultSummaryId ==null || !refResultSummaryId.equals(refDataset.getResultSummaryId()) )
-                refDatasetNode.setRefDatasetIncorrect(true);
+                refDatasetNode.setInvalidReference(true);
         }
         treeModel.insertNodeInto(refDatasetNode, rootNode, childIndex++);
-        
+
+        //insert a node to represents aggregated datasets
+        if (dataset.isAggregation()) {
+            DatasetReferenceNode aggregationNode = new DatasetReferenceNode(DataSetData.createTemporaryAggregate("Aggregation"));
+            treeModel.insertNodeInto(aggregationNode, rootNode, childIndex++);
+            try {
+                ArrayList<Integer> refDatasetIs = (ArrayList<Integer>) dataset.getQuantProcessingConfigAsMap().get("quantitation_ids");
+                int refDatasetIndex = 0;
+                for (Integer datasetId : refDatasetIs) {
+                    DataSetNode node = new DataSetNode(DataSetData.createTemporaryQuantitation(datasetId.toString()));
+                    loadDataSet(datasetId.longValue(), node);
+                    treeModel.insertNodeInto(node, aggregationNode, refDatasetIndex++);
+                }
+                
+            } catch (Exception e) {
+                StudioExceptions.notify("Unable to build aggregated datasets nodes", e);
+            }
+        }
+
+
         for (BiologicalGroup bioGroup : listBiologicalGroups) {
             XICBiologicalGroupNode biologicalGroupNode = new XICBiologicalGroupNode(DataSetData.createTemporaryAggregate(bioGroup.getName())); //new DataSetData(bioGroup.getName(), Dataset.DatasetType.AGGREGATE, Aggregation.ChildNature.OTHER));
             treeModel.insertNodeInto(biologicalGroupNode, rootNode, childIndex);
@@ -279,6 +304,39 @@ public class XICDesignTree extends AbstractTree {
         }
     }
 
+    private static void loadDataSet(Long quantiDatasetId, final DataSetNode datasetNode) {
+
+        final ArrayList<DDataset> readDatasetList = new ArrayList<>(1);
+        final QuantitationTree tree = QuantitationTree.getCurrentTree();
+        final DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
+        
+        AbstractDatabaseCallback readDatasetCallback = new AbstractDatabaseCallback() {
+
+            @Override
+            public boolean mustBeCalledInAWT() {
+                return true;
+            }
+
+            @Override
+            public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
+                if (success) {
+                    DDataset ds = readDatasetList.get(0);
+                    ((DataSetData) datasetNode.getData()).setDataset(ds);
+                    datasetNode.setIsChanging(false);
+                    treeModel.nodeChanged(datasetNode);
+                } else {
+                    treeModel.removeNodeFromParent(datasetNode);
+                }
+            }
+        };
+
+        DatabaseDataSetTask task = new DatabaseDataSetTask(readDatasetCallback);
+        task.initLoadDataset(quantiDatasetId, readDatasetList);
+        AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
+
+    }
+    
+    
     private static DQuantitationChannel getQuantChannelSampleAnalysis(SampleAnalysis sampleAnalysis, List<DQuantitationChannel> listQuantChannels) {
         for (DQuantitationChannel qCh : listQuantChannels) {
             SampleAnalysis sampleReplicate = qCh.getSampleReplicate();

@@ -5,7 +5,7 @@ import fr.proline.studio.rsmexplorer.tree.xic.XICDesignTree;
 import fr.proline.studio.rsmexplorer.tree.xic.IdentificationSelectionTree;
 import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
-import fr.proline.studio.rsmexplorer.tree.xic.XICReferenceRSMNode;
+import fr.proline.studio.rsmexplorer.tree.xic.DatasetReferenceNode;
 import fr.proline.studio.utils.IconManager;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -140,8 +140,8 @@ public class CreateXICDesignPanel extends JPanel {
         Enumeration childEnum = m_rootNode.children();
         while(childEnum.hasMoreElements()){
             AbstractNode childNode = (AbstractNode) childEnum.nextElement();
-            if(XICReferenceRSMNode.class.isInstance(childNode)){
-                isCorrect = !((XICReferenceRSMNode)childNode).isRefDatasetIncorrect();
+            if(DatasetReferenceNode.class.isInstance(childNode)){
+                isCorrect = !((DatasetReferenceNode)childNode).isInvalidReference();
             }
         }
         

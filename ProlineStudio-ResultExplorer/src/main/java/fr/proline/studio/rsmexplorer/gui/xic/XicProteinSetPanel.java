@@ -351,8 +351,6 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
                 for (Integer id : listIdsToHide) {
                     m_quantProteinSetTable.getColumnExt(m_quantProteinSetTable.convertColumnIndexToView(id)).setVisible(false);
                 }
-                // hide Id column
-                m_quantProteinSetTable.getColumnExt(m_quantProteinSetTable.convertColumnIndexToView(QuantProteinSetTableModel.COLTYPE_PROTEIN_SET_ID)).setVisible(false);
                 m_hideFirstTime = false;
             }
             
@@ -403,8 +401,6 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
             for (Integer id : listIdsToHide) {
                 m_quantProteinSetTable.getColumnExt(m_quantProteinSetTable.convertColumnIndexToView(id)).setVisible(false);
             }
-            // hide Id column
-            m_quantProteinSetTable.getColumnExt(m_quantProteinSetTable.convertColumnIndexToView(QuantProteinSetTableModel.COLTYPE_PROTEIN_SET_ID)).setVisible(false);
             m_hideFirstTime = false;
         }
     }

@@ -29,7 +29,7 @@ public abstract class AbstractNode extends DefaultMutableTreeNode implements Clo
         BIOLOGICAL_GROUP,
         BIOLOGICAL_SAMPLE_ANALYSIS,
         RUN,
-        REFERENCE_RSM
+        DATASET_REFERENCE
     }
     private static Action[] m_actionInstance = null;
     protected NodeTypes m_type;

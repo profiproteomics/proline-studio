@@ -12,20 +12,20 @@ import org.openide.nodes.Sheet;
  * 
  * @author JM235353
  */
-public class XICReferenceRSMNode extends AbstractNode {
+public class DatasetReferenceNode extends AbstractNode {
 
-    private boolean m_refDSIncorrect = false; // define if the reference DS has been modified since XIC was run
+    private boolean m_invalidReference = false; // define if the reference DS has been modified since XIC was run
     
-    public XICReferenceRSMNode(AbstractData data) {
-        super(NodeTypes.REFERENCE_RSM, data);
+    public DatasetReferenceNode(AbstractData data) {
+        super(NodeTypes.DATASET_REFERENCE, data);
     }
 
-    public void setRefDatasetIncorrect(boolean isIncorrect){
-        m_refDSIncorrect = isIncorrect;
+    public void setInvalidReference(boolean isIncorrect){
+        m_invalidReference = isIncorrect;
     }
     
-    public boolean isRefDatasetIncorrect(){
-        return m_refDSIncorrect;
+    public boolean isInvalidReference(){
+        return m_invalidReference;
     }
     
     @Override
@@ -36,7 +36,7 @@ public class XICReferenceRSMNode extends AbstractNode {
     
     @Override
     public ImageIcon getIcon(boolean expanded) {
-        if(m_refDSIncorrect)
+        if(m_invalidReference)
             return getIcon(IconManager.IconType.REFERENCE_RSM_ERR);
         else
             return getIcon(IconManager.IconType.REFERENCE_RSM);

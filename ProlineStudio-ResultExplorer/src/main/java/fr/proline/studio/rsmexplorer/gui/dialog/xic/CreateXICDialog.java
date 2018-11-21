@@ -1,8 +1,6 @@
 package fr.proline.studio.rsmexplorer.gui.dialog.xic;
 
 import fr.proline.studio.rsmexplorer.tree.xic.XICDesignTree;
-import fr.proline.core.orm.uds.Aggregation;
-import fr.proline.core.orm.uds.Dataset;
 import fr.proline.core.orm.uds.Project;
 import fr.proline.core.orm.uds.RawFile;
 import fr.proline.core.orm.uds.dto.DDataset;
@@ -27,7 +25,7 @@ import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
 import fr.proline.studio.rsmexplorer.tree.xic.XICBiologicalSampleAnalysisNode;
-import fr.proline.studio.rsmexplorer.tree.xic.XICReferenceRSMNode;
+import fr.proline.studio.rsmexplorer.tree.xic.DatasetReferenceNode;
 import fr.proline.studio.rsmexplorer.tree.xic.XICRunNode;
 import fr.proline.studio.settings.FilePreferences;
 import fr.proline.studio.settings.SettingsDialog;
@@ -120,7 +118,7 @@ public class CreateXICDialog extends DefaultDialog {
     public void displayExperimentalDesignTree() {
         DataSetNode rootNode = new DataSetNode(DataSetData.createTemporaryQuantitation("XIC")); //new DataSetData("XIC", Dataset.DatasetType.QUANTITATION, Aggregation.ChildNature.QUANTITATION_FRACTION));
         if (m_refDataset != null) {
-            XICReferenceRSMNode refDatasetNode = new XICReferenceRSMNode(DataSetData.createTemporaryAggregate(m_refDataset.getName())); //new DataSetData(m_refDataset.getName(), Dataset.DatasetType.AGGREGATE, Aggregation.ChildNature.OTHER));
+            DatasetReferenceNode refDatasetNode = new DatasetReferenceNode(DataSetData.createTemporaryAggregate(m_refDataset.getName())); //new DataSetData(m_refDataset.getName(), Dataset.DatasetType.AGGREGATE, Aggregation.ChildNature.OTHER));
             rootNode.add(refDatasetNode);
         }
         displayExperimentalDesignTree(rootNode);
@@ -702,8 +700,8 @@ public class CreateXICDialog extends DefaultDialog {
         m_designTree.renameXicTitle(xicDataset2Clone.getName() + "-Copy");
         if(rootNode.getChildCount()>0){
             AbstractNode firstChildNode = (AbstractNode) rootNode.getChildAt(0);
-            if(XICReferenceRSMNode.class.isInstance(firstChildNode)){
-                if(((XICReferenceRSMNode)firstChildNode).isRefDatasetIncorrect()){
+            if(DatasetReferenceNode.class.isInstance(firstChildNode)){
+                if(((DatasetReferenceNode)firstChildNode).isInvalidReference()){
                     //Save previous RSM associated to reference dataset to use the same one !
                     m_refResultSummaryId = xicDataset2Clone.getMasterQuantitationChannels().get(0).getIdentResultSummaryId();
                     CreateXICDesignPanel.getPanel().updatePanel();

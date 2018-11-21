@@ -278,11 +278,6 @@ public class XicPeptideIonPanel  extends HourglassPanel implements DataBoxPanelI
                 m_quantPeptideIonTable.getColumnExt(m_quantPeptideIonTable.convertColumnIndexToView(id)).setVisible(false);
             }
         }
-        // hide the id column
-        boolean columnVisible = ((TableColumnExt) columns.get(QuantPeptideIonTableModel.COLTYPE_PEPTIDE_ION_ID)).isVisible();
-        if (columnVisible) {
-            m_quantPeptideIonTable.getColumnExt(m_quantPeptideIonTable.convertColumnIndexToView(QuantPeptideIonTableModel.COLTYPE_PEPTIDE_ION_ID)).setVisible(false);
-        }
     }
     
     

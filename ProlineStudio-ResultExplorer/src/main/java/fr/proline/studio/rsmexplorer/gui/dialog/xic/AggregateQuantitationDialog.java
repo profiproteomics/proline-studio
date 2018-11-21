@@ -5,16 +5,11 @@
  */
 package fr.proline.studio.rsmexplorer.gui.dialog.xic;
 
-import fr.proline.core.orm.uds.Aggregation;
 import fr.proline.core.orm.uds.BiologicalGroup;
 import fr.proline.core.orm.uds.BiologicalSample;
-import fr.proline.core.orm.uds.Dataset;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dam.data.DataSetData;
 import fr.proline.studio.gui.DefaultDialog;
-import static fr.proline.studio.gui.DefaultDialog.BUTTON_BACK;
-import static fr.proline.studio.gui.DefaultDialog.BUTTON_LOAD;
-import static fr.proline.studio.gui.DefaultDialog.BUTTON_SAVE;
 import fr.proline.studio.gui.WizardPanel;
 import fr.proline.studio.rsmexplorer.gui.TreeUtils;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
@@ -23,7 +18,7 @@ import fr.proline.studio.rsmexplorer.tree.xic.XICBiologicalGroupNode;
 import fr.proline.studio.rsmexplorer.tree.xic.XICBiologicalSampleAnalysisNode;
 import fr.proline.studio.rsmexplorer.tree.xic.XICBiologicalSampleNode;
 import fr.proline.studio.rsmexplorer.tree.xic.XICDesignTree;
-import fr.proline.studio.rsmexplorer.tree.xic.XICReferenceRSMNode;
+import fr.proline.studio.rsmexplorer.tree.xic.DatasetReferenceNode;
 import fr.proline.studio.utils.IconManager;
 import java.awt.BorderLayout;
 import java.awt.Dialog;
@@ -183,11 +178,11 @@ public class AggregateQuantitationDialog extends DefaultDialog {
         
         DataSetNode rootNode = new DataSetNode(DataSetData.createTemporaryQuantitation("XIC Aggregation")); //new DataSetData("XIC Aggregation", Dataset.DatasetType.QUANTITATION, Aggregation.ChildNature.QUANTITATION_FRACTION));
         
-        XICReferenceRSMNode refDatasetNode = new XICReferenceRSMNode(DataSetData.createTemporaryAggregate(m_refDataset == null ? "auto" : m_refDataset.getName()));//new DataSetData(m_refDataset == null ? "auto" : m_refDataset.getName(), Dataset.DatasetType.AGGREGATE, Aggregation.ChildNature.OTHER));
+        DatasetReferenceNode refDatasetNode = new DatasetReferenceNode(DataSetData.createTemporaryAggregate(m_refDataset == null ? "auto" : m_refDataset.getName()));//new DataSetData(m_refDataset == null ? "auto" : m_refDataset.getName(), Dataset.DatasetType.AGGREGATE, Aggregation.ChildNature.OTHER));
         if(m_refDataset != null){
             Long refResultSummaryId = m_quantitations.get(0).getMasterQuantitationChannels().get(0).getIdentResultSummaryId();
             if(refResultSummaryId == null || !refResultSummaryId.equals(m_refDataset.getResultSummaryId()) )
-                refDatasetNode.setRefDatasetIncorrect(true);
+                refDatasetNode.setInvalidReference(true);
         }
         rootNode.insert(refDatasetNode, childIndex++);
         // group all Biological groups by name

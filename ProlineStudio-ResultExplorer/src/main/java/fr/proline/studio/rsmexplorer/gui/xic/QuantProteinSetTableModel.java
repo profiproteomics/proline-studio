@@ -677,6 +677,7 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
      */
     public List<Integer> getDefaultColumnsToHide() {
         List<Integer> listIds = new ArrayList();
+        listIds.add(COLTYPE_PROTEIN_SET_ID);
         if (m_quantChannels != null) {
             for (int i = m_quantChannels.length - 1; i >= 0; i--) {
                 if (m_isXICMode) {

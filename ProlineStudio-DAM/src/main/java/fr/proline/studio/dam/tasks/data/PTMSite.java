@@ -28,7 +28,8 @@ public class PTMSite {
 
     //
     // Variables defined in Proline OM that will be read out from the database
-    //
+    //@todo : try to make them private instead of public
+
     public Long proteinMatchId;
     public Long ptmDefinitionId;
     public Integer seqPosition;
@@ -87,10 +88,19 @@ public class PTMSite {
         m_ptmSpecificity = specificity;
     }
 
-    @JsonIgnore
     public void seLeafPeptideInstances(List<DPeptideInstance> peptideInstances) {
          m_leafPeptideInstancesByPeptideId = peptideInstances.stream().collect(Collectors.groupingBy(pi -> pi.getPeptideId()));
     }
+
+    public void setParentPeptideInstances(List<DPeptideInstance> parentPeptideInstances) {
+        m_parentPeptideInstances = parentPeptideInstances;
+    }
+
+    public void setQuantProteinSet(DMasterQuantProteinSet mqps) {
+        m_masterQuantProteinSet = mqps;
+    }
+
+
 
     public List<DPeptideInstance> getLeafPeptideInstances(Long peptideId) {
         return m_leafPeptideInstancesByPeptideId.get(peptideId);
@@ -102,11 +112,6 @@ public class PTMSite {
 
     public DPeptideMatch getBestPeptideMatch() {
         return m_bestPeptideMatch;
-    }
-    
-    @JsonIgnore
-    public void setParentPeptideInstances(List<DPeptideInstance> parentPeptideInstances) {
-        m_parentPeptideInstances = parentPeptideInstances;
     }
 
     public List<DPeptideInstance> getParentPeptideInstances() {
@@ -202,10 +207,6 @@ public class PTMSite {
 
     public Integer getPtmPositionOnPeptide(Long peptideId) {
         return getPtmPositionByPeptideId().get(peptideId);
-    }
-
-    void setQuantProteinSet(DMasterQuantProteinSet mqps) {
-        m_masterQuantProteinSet = mqps;
     }
 
     public DMasterQuantProteinSet getMasterQuantProteinSet() {

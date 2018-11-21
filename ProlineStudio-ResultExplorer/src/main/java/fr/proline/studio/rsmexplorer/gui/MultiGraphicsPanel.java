@@ -254,7 +254,7 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
             @Override
             public void actionPerformed(ActionEvent e) {
                 fillXYCombobox();
-                setDataImpl(m_valuesList, m_crossSelectionInterfaceList, false);
+                setDataImpl(m_valuesList, m_crossSelectionInterfaceList);
                 updateXYCbxVisibility();
 
             }
@@ -390,10 +390,6 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
     }
 
     public void setData(List<ExtendedTableModelInterface> valuesList, List<CrossSelectionInterface> crossSelectionInterfaceList) {
-        this.setData(valuesList, crossSelectionInterfaceList, false);
-    }
-
-    public void setData(List<ExtendedTableModelInterface> valuesList, List<CrossSelectionInterface> crossSelectionInterfaceList, boolean isSingle) {
         if (m_plotPanel.isLocked()) {
             return;
         }
@@ -406,7 +402,7 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
             }
         }
 
-        setDataImpl(valuesList, crossSelectionInterfaceList, isSingle);
+        setDataImpl(valuesList, crossSelectionInterfaceList);
         if (m_dataLocked) {
             // check that plotPanel corresponds, it can not correspond at the first call
             m_plotPanel.lockData(m_dataLocked);
@@ -419,7 +415,7 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
      * @param crossSelectionInterfaceList
      * @param isSingle to display one plot
      */
-    private void setDataImpl(List<ExtendedTableModelInterface> valuesList, List<CrossSelectionInterface> crossSelectionInterfaceList, boolean isSingle) {
+    private void setDataImpl(List<ExtendedTableModelInterface> valuesList, List<CrossSelectionInterface> crossSelectionInterfaceList) {
 
         m_valuesList = valuesList;
         m_crossSelectionInterfaceList = crossSelectionInterfaceList;
@@ -429,10 +425,8 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
             return;
         }
 
-        //if (m_valueXComboBox.getItemCount() == 0) {
-        //if isSingle == true, each time we update comob box //@KX @todo delete isSingle, because MapAlignemntPanel dont use MultiGraphicsPanel now
-        //if getItemCount() == 0, it is the first time we set data to combo box
-        if (isSingle == true ||(isSingle == false && m_valueXComboBox.getItemCount() == 0 )) {
+        
+        if ( m_valueXComboBox.getItemCount() == 0 ) {
                 fillXYCombobox();//update select panel combo box
 
             ActionListener actionForXYCbx = new ActionListener() {

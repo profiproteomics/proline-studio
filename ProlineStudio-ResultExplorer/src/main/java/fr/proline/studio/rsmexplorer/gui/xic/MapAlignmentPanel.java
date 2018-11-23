@@ -14,6 +14,7 @@ import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.dam.tasks.xic.MapAlignmentConverter;
+import fr.proline.studio.export.ExportButton;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
@@ -140,6 +141,8 @@ public class MapAlignmentPanel extends HourglassPanel implements DataBoxPanelInt
     }
 
     private JPanel initMapAlignmentPanel() {
+        ExportButton exportImageButton = new ExportButton("Graphic", this);
+        exportImageButton.setMargin(new java.awt.Insets(2, 2, 2, 2));
         createButtonLoadCloud();//m_loadCloudBt is created
         createButtonZoom();
 
@@ -191,6 +194,7 @@ public class MapAlignmentPanel extends HourglassPanel implements DataBoxPanelInt
         {
             JSeparator separator = new JSeparator(JSeparator.VERTICAL);
             cloudOptionPane.setLayout(new BoxLayout(cloudOptionPane, BoxLayout.LINE_AXIS));
+            cloudOptionPane.add(exportImageButton);
             cloudOptionPane.add(m_btCloudViewMode);
             cloudOptionPane.add(m_btLoadCloud);
             cloudOptionPane.add(Box.createRigidArea(new Dimension(10, 0)));

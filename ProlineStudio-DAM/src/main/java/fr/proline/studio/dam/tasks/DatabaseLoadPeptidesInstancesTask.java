@@ -19,7 +19,6 @@ import fr.proline.core.orm.msi.dto.DSpectrum;
 import fr.proline.core.orm.util.DStoreCustomPoolConnectorFactory;
 import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
-import static fr.proline.studio.dam.tasks.DatabaseLoadPeptideMatchTask.SUB_TASK_SRC_DAT_FILE;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -45,7 +44,8 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseSlicerTas
     
     public static final int SUB_TASK_PROTEINSET_NAME_LIST = 0;
     public static final int SUB_TASK_MSQUERY = 1;
-    public static final int SUB_TASK_COUNT = 2; // <<----- get in sync
+    public static final int SUB_TASK_SRC_DAT_FILE = 2;
+    public static final int SUB_TASK_COUNT = 3; // <<----- get in sync
     
     
     private long m_projectId;

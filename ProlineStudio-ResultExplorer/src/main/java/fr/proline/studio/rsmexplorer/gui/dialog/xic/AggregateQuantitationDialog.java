@@ -17,7 +17,7 @@ import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import fr.proline.studio.rsmexplorer.tree.xic.XICBiologicalGroupNode;
 import fr.proline.studio.rsmexplorer.tree.xic.XICBiologicalSampleAnalysisNode;
 import fr.proline.studio.rsmexplorer.tree.xic.XICBiologicalSampleNode;
-import fr.proline.studio.rsmexplorer.tree.xic.XICDesignTree;
+import fr.proline.studio.rsmexplorer.tree.xic.QuantExperimentalDesignTree;
 import fr.proline.studio.rsmexplorer.tree.xic.DatasetReferenceNode;
 import fr.proline.studio.utils.IconManager;
 import java.awt.BorderLayout;
@@ -79,7 +79,7 @@ public class AggregateQuantitationDialog extends DefaultDialog {
             throw new IllegalAccessException("Design parameters have not been set.");
         }
         
-        Map<String, Object> experimentalDesignParams = XICDesignTree.toExperimentalDesignParameters(m_experimentalDesignNode, m_refDataset, null);
+        Map<String, Object> experimentalDesignParams = QuantExperimentalDesignTree.toExperimentalDesignParameters(m_experimentalDesignNode, m_refDataset, null);
         return experimentalDesignParams;
     }
 
@@ -127,7 +127,7 @@ public class AggregateQuantitationDialog extends DefaultDialog {
                 m_experimentalDesignNode = node;
                 m_designPanel = new JPanel();
                 m_designPanel.setLayout(new BorderLayout());
-                XICDesignTree designTree = new XICDesignTree(m_experimentalDesignNode, true);
+                QuantExperimentalDesignTree designTree = new QuantExperimentalDesignTree(m_experimentalDesignNode, true);
                 m_designPanel.add(new WizardPanel("<html><b>Step 1:</b> Define the aggregation experimental design.</html>"), BorderLayout.NORTH);
                 m_designPanel.add(designTree, BorderLayout.CENTER);
                 

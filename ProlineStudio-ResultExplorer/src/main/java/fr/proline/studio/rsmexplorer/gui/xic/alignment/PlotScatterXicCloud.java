@@ -11,6 +11,7 @@ import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.graphics.PlotScatter;
 import fr.proline.studio.graphics.XAxis;
 import fr.proline.studio.graphics.YAxis;
+import fr.proline.studio.utils.CyclicColorPalette;
 import java.awt.Color;
 import java.awt.Graphics2D;
 
@@ -20,24 +21,24 @@ import java.awt.Graphics2D;
  */
 public class PlotScatterXicCloud extends PlotScatter {
 
-    private int transparence = 64;
+    private final static int TRANSPARENCY = 70;
 
     private Color m_color;
     private StringBuilder m_sBuilder;
-    private static Color m_diffColor = Color.green;
+    private Color m_highlightColor = new Color(CyclicColorPalette.GRAY_DARK.getRed(), CyclicColorPalette.GRAY_DARK.getGreen(), CyclicColorPalette.GRAY_DARK.getBlue(), TRANSPARENCY+15);
     
     private int m_colY; //index of column Y
 
     public PlotScatterXicCloud(BasePlotPanel plotPanel, ExtendedTableModelInterface compareDataInterface, CrossSelectionInterface crossSelectionInterface, int colX, int colY) {
         super(plotPanel, compareDataInterface, crossSelectionInterface, colX, colY);
         m_sBuilder = null;
-        m_color = Color.ORANGE;
+        m_color = CyclicColorPalette.getColor(2, TRANSPARENCY);
         m_colY = colY;
     }
 
     public void setColor(Color c) {
-        this.m_color = new Color(c.getRed(), c.getGreen(), c.getBlue(), transparence);
-
+        this.m_color = new Color(c.getRed(), c.getGreen(), c.getBlue(), TRANSPARENCY);
+        //this.m_highlightColor = CyclicColorPalette.getDarkerColor(m_color, 0.3);
     }
 
     /**
@@ -118,7 +119,7 @@ public class PlotScatterXicCloud extends PlotScatter {
             int y = yAxis.valueToPixel(m_dataY[i]) + ((m_jitterY != null) ? m_jitterY[i] : 0);
 
             if (((RTCompareTableModel) this.m_compareDataInterface).isMatchCountDiff(i, m_colY)) {
-                g.setColor(m_diffColor);
+                g.setColor(m_highlightColor);
             } else {
                 g.setColor(m_color);
             }

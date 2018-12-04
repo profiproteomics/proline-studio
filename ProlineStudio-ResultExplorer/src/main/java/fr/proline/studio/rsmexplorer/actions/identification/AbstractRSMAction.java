@@ -1,6 +1,6 @@
 package fr.proline.studio.rsmexplorer.actions.identification;
 
-import fr.proline.studio.rsmexplorer.tree.xic.XICDesignTree;
+import fr.proline.studio.rsmexplorer.tree.xic.QuantExperimentalDesignTree;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
 import fr.proline.studio.rsmexplorer.tree.quantitation.QuantitationTree;
@@ -19,14 +19,14 @@ import javax.swing.tree.TreePath;
 public abstract class AbstractRSMAction extends AbstractAction {
 
     private AbstractTree.TreeType m_treeType;
-    private XICDesignTree m_tree;
+    private QuantExperimentalDesignTree m_tree;
     
     public AbstractRSMAction(String name, AbstractTree.TreeType treeType) {
         super(name);
         m_treeType = treeType;
     }
     
-    public AbstractRSMAction(String name, AbstractTree.TreeType treeType, XICDesignTree tree){
+    public AbstractRSMAction(String name, AbstractTree.TreeType treeType, QuantExperimentalDesignTree tree){
         super(name);
         m_treeType = treeType;
         m_tree = tree;

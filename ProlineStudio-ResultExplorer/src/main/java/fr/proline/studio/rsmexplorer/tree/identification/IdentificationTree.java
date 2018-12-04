@@ -28,7 +28,7 @@ import fr.proline.studio.rsmexplorer.actions.identification.AddIdentificationFol
 import fr.proline.studio.rsmexplorer.actions.identification.AggregateAction;
 import fr.proline.studio.rsmexplorer.actions.identification.ClearDatasetAction;
 import fr.proline.studio.rsmexplorer.actions.identification.CopySearchResult;
-import fr.proline.studio.rsmexplorer.actions.identification.CreateXICAction;
+import fr.proline.studio.rsmexplorer.actions.identification.CreateQuantitationAction;
 import fr.proline.studio.rsmexplorer.actions.identification.ExportAction;
 import fr.proline.studio.rsmexplorer.actions.identification.FilterRSMProteinSetsJMSAction;
 import fr.proline.studio.rsmexplorer.actions.identification.GenerateSpectrumMatchesJMSAction;
@@ -37,6 +37,7 @@ import fr.proline.studio.rsmexplorer.actions.identification.ImportManager;
 import fr.proline.studio.rsmexplorer.actions.identification.ImportMaxQuantResultJMSAction;
 import fr.proline.studio.rsmexplorer.actions.identification.ImportSearchResultAsDatasetJMSAction;
 import fr.proline.studio.rsmexplorer.actions.identification.PasteSearchResult;
+import fr.proline.studio.rsmexplorer.actions.identification.QuantifyAction;
 import fr.proline.studio.rsmexplorer.actions.identification.RenameRsetAction;
 import fr.proline.studio.rsmexplorer.actions.identification.UpdatePeaklistSoftwareAction;
 import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
@@ -716,7 +717,7 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
                 // create the actions
                 Boolean showHiddenFunctionnality = false; // JPM.TODO : completely removed for the moment preferences.getBoolean("Profi", false);
 
-                m_mainActions = new ArrayList<>(26);  // <--- get in sync
+                m_mainActions = new ArrayList<>(25);  // <--- get in sync
 
 
                 DisplayRsetAction displayRsetAction = new DisplayRsetAction(AbstractTree.TreeType.TREE_IDENTIFICATION);
@@ -762,28 +763,34 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
 //                    }
                 ValidateJMSAction validateJMSAction = new ValidateJMSAction();
                 m_mainActions.add(validateJMSAction);
+                
                 MergeJMSAction mergeJmsAction = new MergeJMSAction();
                 m_mainActions.add(mergeJmsAction);
+                
                 FilterRSMProteinSetsJMSAction filterProtSetAction = new FilterRSMProteinSetsJMSAction();
                 m_mainActions.add(filterProtSetAction);
+                
                 ChangeTypicalProteinJMSAction changeTypicalProteinJmsAction = new ChangeTypicalProteinJMSAction(AbstractTree.TreeType.TREE_IDENTIFICATION);
                 m_mainActions.add(changeTypicalProteinJmsAction);
+                
                 IdentifyPtmSitesJMSAction identifyPtmSitesAction = new IdentifyPtmSitesJMSAction(AbstractTree.TreeType.TREE_IDENTIFICATION);
                 m_mainActions.add(identifyPtmSitesAction);
+                
                 m_mainActions.add(null);  // separator
+                
                 GenerateSpectrumMatchesJMSAction generateSpectrumMatchesAction = new GenerateSpectrumMatchesJMSAction(AbstractTree.TreeType.TREE_IDENTIFICATION);
                 m_mainActions.add(generateSpectrumMatchesAction);
+                
                 UpdatePeaklistSoftwareAction updatePeaklistSoftAction = new UpdatePeaklistSoftwareAction();
                 m_mainActions.add(updatePeaklistSoftAction);
+                
                 RetrieveBioSeqJMSAction retrieveBioSeqAction = new RetrieveBioSeqJMSAction(AbstractTree.TreeType.TREE_IDENTIFICATION);
                 m_mainActions.add(retrieveBioSeqAction);
 
                 m_mainActions.add(null);  // separator
-                SpectralCountAction spectralCountAction = new SpectralCountAction();
-                m_mainActions.add(spectralCountAction);
 
-                CreateXICAction createXICAction = new CreateXICAction(AbstractTree.TreeType.TREE_IDENTIFICATION);
-                m_mainActions.add(createXICAction);
+                QuantifyAction quantifyAction = new QuantifyAction(AbstractTree.TreeType.TREE_IDENTIFICATION);
+                m_mainActions.add(quantifyAction);
 
                 m_mainActions.add(null);  // separator
 

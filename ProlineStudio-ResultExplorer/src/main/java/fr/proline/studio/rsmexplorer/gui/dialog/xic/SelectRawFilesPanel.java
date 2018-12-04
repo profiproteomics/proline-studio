@@ -14,7 +14,7 @@ import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
 import fr.proline.studio.rsmexplorer.tree.xic.XICBiologicalGroupNode;
 import fr.proline.studio.rsmexplorer.tree.xic.XICBiologicalSampleAnalysisNode;
 import fr.proline.studio.rsmexplorer.tree.xic.XICBiologicalSampleNode;
-import fr.proline.studio.rsmexplorer.tree.xic.XICDesignTree;
+import fr.proline.studio.rsmexplorer.tree.xic.QuantExperimentalDesignTree;
 import fr.proline.studio.rsmexplorer.tree.xic.XICRunNode;
 import fr.proline.studio.rsmexplorer.tree.xic.XICRunNodeInitListener;
 import fr.proline.studio.table.DecoratedMarkerTable;
@@ -73,15 +73,11 @@ public class SelectRawFilesPanel extends JPanel implements XICRunNodeInitListene
     private final TreeFileChooserTransferHandler m_transferHandler;
     private AbstractNode m_rootNode;
 
-    private final XICDesignTree m_designTree;
-
-    public static SelectRawFilesPanel getPanel(AbstractNode rootNode, XICDesignTree designTree) {
+    public static SelectRawFilesPanel getPanel(AbstractNode rootNode) {
         if (m_singleton == null) {
-            m_singleton = new SelectRawFilesPanel(designTree);
+            m_singleton = new SelectRawFilesPanel();
         }
-
         m_singleton.setRootNode(rootNode);
-
         return m_singleton;
     }
 
@@ -89,9 +85,7 @@ public class SelectRawFilesPanel extends JPanel implements XICRunNodeInitListene
         return m_singleton;
     }
 
-    private SelectRawFilesPanel(XICDesignTree designTree) {
-
-        m_designTree = designTree;
+    private SelectRawFilesPanel() {
 
         m_transferHandler = new TreeFileChooserTransferHandler();
 
@@ -336,11 +330,11 @@ public class SelectRawFilesPanel extends JPanel implements XICRunNodeInitListene
                     return;
                 }
 
-                SelectRawFileDialog selectRawFileDialog = SelectRawFileDialog.getSelectRawFileDialog(CreateXICDialog.getDialog(null));
+                SelectRawFileDialog selectRawFileDialog = SelectRawFileDialog.getSelectRawFileDialog(CreateQuantitationDialog.getDialog(null));
                 selectRawFileDialog.init(potentialRawFiles, runInfoData);
-                //selectRawFileDialog.centerToWindow(CreateXICDialog.getDialog(null));
-                int x = (int) (CreateXICDialog.getDialog(null).getLocationOnScreen().getX() + CreateXICDialog.getDialog(null).getWidth() / 2);
-                int y = (int) (CreateXICDialog.getDialog(null).getLocationOnScreen().getY());
+                //selectRawFileDialog.centerToWindow(CreateQuantitationDialog.getDialog(null));
+                int x = (int) (CreateQuantitationDialog.getDialog(null).getLocationOnScreen().getX() + CreateQuantitationDialog.getDialog(null).getWidth() / 2);
+                int y = (int) (CreateQuantitationDialog.getDialog(null).getLocationOnScreen().getY());
                 selectRawFileDialog.setLocation(x, y);
                 selectRawFileDialog.setVisible(true);
                 if (selectRawFileDialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {

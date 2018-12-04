@@ -134,20 +134,23 @@ public class DataboxChildFeature extends AbstractDataBox {
 
             }
         };
-        Long alnRefMapId = m_quantChannelInfo.getDataset().getAlnReferenceMapId();
-        
+
+
         // ask asynchronous loading of data
         m_childFeatureList = new ArrayList();
         m_featureHasPeak = new ArrayList();
         m_peakelList = new ArrayList();
         m_peakList = new ArrayList();
         DatabaseLoadLcMSTask task = new DatabaseLoadLcMSTask(callback);
-        
-        List<MapAlignment> allMapAlignments = new ArrayList();
-        allMapAlignments.addAll(m_quantChannelInfo.getDataset().getMapAlignments());
-        allMapAlignments.addAll(m_quantChannelInfo.getDataset().getMapReversedAlignments());
-        
-        task.initLoadChildFeatureForPeptideIonWithPeakel(getProjectId(), m_masterQuantPeptideIon, m_childFeatureList, m_peakelList, allMapAlignments, alnRefMapId, m_quantChannelInfo.getDataset().getMaps());
+
+//        Long alnRefMapId = m_quantChannelInfo.getDataset().getAlnReferenceMapId();
+//        List<MapAlignment> allMapAlignments = new ArrayList();
+//        allMapAlignments.addAll(m_quantChannelInfo.getDataset().getMapAlignments());
+//        allMapAlignments.addAll(m_quantChannelInfo.getDataset().getMapReversedAlignments());
+
+
+//        task.initLoadChildFeatureForPeptideIonWithPeakel(getProjectId(), m_masterQuantPeptideIon, m_childFeatureList, m_peakelList, allMapAlignments, alnRefMapId, m_quantChannelInfo.getDataset().getMaps());
+        task.initLoadChildFeatureForPeptideIonWithPeakel(getProjectId(), m_masterQuantPeptideIon, m_childFeatureList, m_peakelList, m_quantChannelInfo.getDataset());
         registerTask(task);
 
     }
@@ -159,9 +162,9 @@ public class DataboxChildFeature extends AbstractDataBox {
             switch (viewType) {
                 case VIEW_ALL_GRAPH_PEAKS: {
                     for (int i = 0; i < m_childFeatureList.size(); i++) {
-                        Feature feature = m_childFeatureList.get(i);
-                        Color color = m_quantChannelInfo.getMapColor(feature.getMap().getId());
-                        String title = m_quantChannelInfo.getMapTitle(feature.getMap().getId());
+                        DFeature feature = m_childFeatureList.get(i);
+                        Color color = m_quantChannelInfo.getQuantChannelColor(feature.getQuantChannelId());
+                        String title = m_quantChannelInfo.getQuantChannels(feature.getQuantChannelId()).getName();
                         if (m_peakelList != null && m_peakelList.size() > i) {
                             List<Peakel> peakels = m_peakelList.get(i);
                             if (peakels.size() > 0) {
@@ -185,12 +188,12 @@ public class DataboxChildFeature extends AbstractDataBox {
                     break;
                 }
                 case VIEW_ALL_ISOTOPES_FOR_FEATURE: {
-                    Feature selectedFeature = ((XicFeaturePanel) getDataBoxPanelInterface()).getSelectedFeature();
+                    DFeature selectedFeature = ((XicFeaturePanel) getDataBoxPanelInterface()).getSelectedFeature();
                     if (selectedFeature != null) {
                         int id = m_childFeatureList.indexOf(selectedFeature);
                         if (id != -1) {
-                            Color color = m_quantChannelInfo.getMapColor(selectedFeature.getMap().getId());
-                            String title = m_quantChannelInfo.getMapTitle(selectedFeature.getMap().getId());
+                            Color color = m_quantChannelInfo.getQuantChannelColor(selectedFeature.getQuantChannelId());
+                            String title = m_quantChannelInfo.getQuantChannels(selectedFeature.getQuantChannelId()).getName();
                             if (m_peakelList != null && m_peakelList.size() > id) {
                                 List<Peakel> peakels = m_peakelList.get(id);
                                 int nbPeakel = peakels.size();

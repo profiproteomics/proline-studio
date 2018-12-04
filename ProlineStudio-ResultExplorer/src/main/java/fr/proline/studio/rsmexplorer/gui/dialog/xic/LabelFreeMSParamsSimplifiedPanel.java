@@ -25,7 +25,7 @@ import org.openide.util.NbPreferences;
  *
  * @author JM235353
  */
-public class DefineQuantParamsSimplifiedPanel extends AbstractGenericQuantParamsPanel {
+public class LabelFreeMSParamsSimplifiedPanel extends AbstractLabelFreeMSParamsPanel {
     
     private ObjectParameter<String> m_crossAssignStrategyParameter;
 
@@ -41,7 +41,7 @@ public class DefineQuantParamsSimplifiedPanel extends AbstractGenericQuantParams
     private JTextField m_alignmentFeatureMappTimeToleranceTF;     
     protected JCheckBox m_alignRTCB;
         
-    public DefineQuantParamsSimplifiedPanel(boolean readOnly, boolean readValues) {
+    public LabelFreeMSParamsSimplifiedPanel(boolean readOnly, boolean readValues) {
         super(readOnly);
 
         createParameters();
@@ -209,14 +209,14 @@ public class DefineQuantParamsSimplifiedPanel extends AbstractGenericQuantParams
             
             if(m_alignRTCB.isSelected()){
                 Map<String,Object> alignmentConfig = new HashMap<>();
-                alignmentConfig.put(AbstractGenericQuantParamsPanel.ALIGNMENT_METHOD_NAME, ALIGNMENT_METHOD_KEYS[0]);
+                alignmentConfig.put(AbstractLabelFreeMSParamsPanel.ALIGNMENT_METHOD_NAME, ALIGNMENT_METHOD_KEYS[0]);
                 alignmentConfig.put("smoothing_method_name", ALIGNMENT_SMOOTHING_METHOD_KEYS[0]);   
                 alignmentConfig.put("ft_mapping_method_name", FEATURE_MAPPING_METHOD_KEYS[0]);
                 Map<String,Object> alnFtParams = new HashMap<>();
                 alnFtParams.put("time_tol",  m_alignmentFeatureMappTimeToleranceTF.getText());
                 alignmentConfig.put("ft_mapping_method_params", alnFtParams);                
                 alignmentConfig.put("ignore_errors", false);
-                params.put(AbstractGenericQuantParamsPanel.ALIGNMENT_CONFIG, alignmentConfig);
+                params.put(AbstractLabelFreeMSParamsPanel.ALIGNMENT_CONFIG, alignmentConfig);
             }
             
         }

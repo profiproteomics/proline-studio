@@ -20,7 +20,7 @@ import org.openide.windows.WindowManager;
  *
  * @author VD225637
  */
-public class DefineQuantParamsCompletePanel extends AbstractGenericQuantParamsPanel {
+public class LabelFreeMSParamsCompletePanel extends AbstractLabelFreeMSParamsPanel {
 
     private ObjectParameter<String> m_clusteringTimeComputationParameter;
     private ObjectParameter<String> m_clusteringIntensityComputationParameter;
@@ -97,7 +97,7 @@ public class DefineQuantParamsCompletePanel extends AbstractGenericQuantParamsPa
 
     private JTabbedPane m_tabbedPane;
 
-    public DefineQuantParamsCompletePanel(boolean readOnly, boolean readValues) {
+    public LabelFreeMSParamsCompletePanel(boolean readOnly, boolean readValues) {
         super(readOnly);
 
         createParameters();
@@ -258,9 +258,9 @@ public class DefineQuantParamsCompletePanel extends AbstractGenericQuantParamsPa
         // 
         //*** Alignment Params
         // 
-        if (quantParams.containsKey(AbstractGenericQuantParamsPanel.ALIGNMENT_CONFIG)) {
-            Map<String, Object> alignmentConfig = (Map<String, Object>) quantParams.get(AbstractGenericQuantParamsPanel.ALIGNMENT_CONFIG);
-            m_alignmentMethodParameter.setValue((String) alignmentConfig.getOrDefault(AbstractGenericQuantParamsPanel.ALIGNMENT_METHOD_NAME, ALIGNMENT_METHOD_VALUES[0]));
+        if (quantParams.containsKey(AbstractLabelFreeMSParamsPanel.ALIGNMENT_CONFIG)) {
+            Map<String, Object> alignmentConfig = (Map<String, Object>) quantParams.get(AbstractLabelFreeMSParamsPanel.ALIGNMENT_CONFIG);
+            m_alignmentMethodParameter.setValue((String) alignmentConfig.getOrDefault(AbstractLabelFreeMSParamsPanel.ALIGNMENT_METHOD_NAME, ALIGNMENT_METHOD_VALUES[0]));
             Map<String, Object> alnParams = (Map<String, Object>) alignmentConfig.getOrDefault("aln_params", new HashMap<>());
             if (alnParams.containsKey("max_iterations")) {
                 try {

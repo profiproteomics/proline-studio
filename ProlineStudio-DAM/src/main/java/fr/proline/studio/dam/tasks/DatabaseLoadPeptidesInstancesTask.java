@@ -241,8 +241,8 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseSlicerTas
             PeptideInstance[] peptideInstances = peptideInstanceList.toArray(new PeptideInstance[nbPeptides]);
             m_rsm.getTransientData().setPeptideInstanceArray(peptideInstances);
             
-            fetchReadablePtmData(entityManagerMSI, m_rsm.getResultSet().getId(), peptideMap);
-            fetchPtmDataForPeptides(entityManagerMSI, peptideMap);
+            DatabasePTMsTask.fetchReadablePtmData(entityManagerMSI, m_rsm.getResultSet().getId(), peptideMap);
+            DatabasePTMsTask.fetchPtmDataForPeptides(entityManagerMSI, peptideMap);
              
             // slice the task and get the first one and execute the first slice now
             SubTask subTask = m_subTaskManager.sliceATaskAndGetFirst( SUB_TASK_PROTEINSET_NAME_LIST, nbPeptides, SLICE_SIZE );
@@ -356,7 +356,7 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseSlicerTas
                 fetchPeptideDataForProteinMatch(entityManagerMSI, rsm, pm, peptideMap);
             }
             
-            fetchPtmDataForPeptides(entityManagerMSI, peptideMap); 
+            DatabasePTMsTask.fetchPtmDataForPeptides(entityManagerMSI, peptideMap); 
             
             entityManagerMSI.getTransaction().commit();
         } catch (Exception e) {
@@ -451,7 +451,7 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseSlicerTas
             peptideInstanceList.add(dpi);
         }
 
-        fetchReadablePtmData(entityManagerMSI, rsm.getResultSet().getId(), peptideMapForPtm);
+        DatabasePTMsTask.fetchReadablePtmData(entityManagerMSI, rsm.getResultSet().getId(), peptideMapForPtm);
 
         int nbPeptides = peptideInstanceList.size();
         DPeptideInstance[] peptideInstances = peptideInstanceList.toArray(new DPeptideInstance[nbPeptides]);
@@ -491,51 +491,6 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseSlicerTas
                 p.getTransientData().setProteinSetArray(proteinSetArray);
             }
             proteinSetArray.add(proteinSet);
-        }
-    }
-
-    public static void fetchReadablePtmData(EntityManager entityManagerMSI, Long rsetId, HashMap<Long, Peptide> peptideMap) {
-        if ((peptideMap == null) || peptideMap.isEmpty()) return;
-        // Retrieve PeptideReadablePtmString
-        Query ptmStingQuery = entityManagerMSI.createQuery("SELECT p.id, ptmString "
-            + "FROM fr.proline.core.orm.msi.Peptide p, fr.proline.core.orm.msi.PeptideReadablePtmString ptmString "
-            + "WHERE p.id IN (:listId) AND ptmString.peptide=p AND ptmString.resultSet.id=:rsetId");
-        ptmStingQuery.setParameter("listId", peptideMap.keySet());
-        ptmStingQuery.setParameter("rsetId", rsetId);
-        
-        List<Object[]> ptmStrings = ptmStingQuery.getResultList();
-        Iterator<Object[]> it = ptmStrings.iterator();
-        while (it.hasNext()) {
-            Object[] res = it.next();
-            Long peptideId = (Long) res[0];
-            PeptideReadablePtmString ptmString = (PeptideReadablePtmString) res[1];
-            Peptide peptide = peptideMap.get(peptideId);
-            peptide.getTransientData().setPeptideReadablePtmString(ptmString);
-        }
-    }
-    
-
-    public static void fetchPtmDataForPeptides(EntityManager entityManagerMSI, HashMap<Long, Peptide> peptideMap) {
-
-        if (!peptideMap.isEmpty()) {
-            TypedQuery<DPeptidePTM> ptmQuery = entityManagerMSI.createQuery("SELECT new fr.proline.core.orm.msi.dto.DPeptidePTM(pptm.peptide.id, pptm.specificity.id, pptm.seqPosition) FROM fr.proline.core.orm.msi.PeptidePtm pptm WHERE pptm.peptide.id IN (:peptideIds)", DPeptidePTM.class);
-            ptmQuery.setParameter("peptideIds", peptideMap.keySet());
-            List<DPeptidePTM> ptmList = ptmQuery.getResultList();
-
-            Iterator<DPeptidePTM> it = ptmList.iterator();
-            while (it.hasNext()) {
-                DPeptidePTM ptm = it.next();
-
-                Peptide p = peptideMap.get(ptm.getIdPeptide());
-                HashMap<Integer, DPeptidePTM> map = p.getTransientData().getDPeptidePtmMap();
-                if (map == null) {
-                    map = new HashMap<>();
-                    p.getTransientData().setDPeptidePtmMap(map);
-                }
-
-                map.put((int) ptm.getSeqPosition(), ptm);
-
-            }
         }
     }
 }

@@ -6,7 +6,7 @@ import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.studio.extendedtablemodel.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
-import fr.proline.studio.dam.tasks.DatabasePTMSitesTask;
+import fr.proline.studio.dam.tasks.DatabasePTMsTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dam.tasks.data.PTMDataset;
 import fr.proline.studio.dam.tasks.data.PTMSite;
@@ -122,7 +122,7 @@ public class DataBoxPTMProteinSite extends AbstractDataBox {
 
         // ask asynchronous loading of data
 
-        DatabasePTMSitesTask task = new DatabasePTMSitesTask(callback, getProjectId(), m_dataset.getDataset().getResultSummary(), proteinPTMSiteArray);
+        DatabasePTMsTask task = new DatabasePTMsTask(callback, getProjectId(), m_dataset.getDataset().getResultSummary(), proteinPTMSiteArray);
         Long taskId = task.getId();
         if (m_previousTaskId != null) {
             // old task is suppressed if it has not been already done

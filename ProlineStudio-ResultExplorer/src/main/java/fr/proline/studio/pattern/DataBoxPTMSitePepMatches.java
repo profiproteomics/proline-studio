@@ -5,7 +5,7 @@ import fr.proline.core.orm.msi.dto.DPeptideInstance;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
-import fr.proline.studio.dam.tasks.DatabasePTMSitesTask;
+import fr.proline.studio.dam.tasks.DatabasePTMsTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dam.tasks.data.PTMSite;
 import fr.proline.studio.rsmexplorer.gui.PeptidesPTMSitePanel;
@@ -113,7 +113,7 @@ public class DataBoxPTMSitePepMatches extends AbstractDataBox {
             AccessDatabaseThread.getAccessDatabaseThread().abortTask(m_previousTaskId);
         }
          
-        DatabasePTMSitesTask task = new DatabasePTMSitesTask(callback, getProjectId(), rsm, ptmSite);
+        DatabasePTMsTask task = new DatabasePTMsTask(callback, getProjectId(), rsm, ptmSite);
         Long taskId = task.getId();
         m_logger.info(" Call pepMatch DatabasePTMProteinSiteTask_V2 task # "+taskId);
         m_previousTaskId = taskId;

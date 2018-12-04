@@ -7,15 +7,18 @@ import fr.proline.studio.utils.CyclicColorPalette;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
- * map quantChannel info and map info, especilaly to maintain the same colors between the maps and the quantChannels
+ * Map quantChannel info and map info, especilaly to maintain the same colors between the maps and the quantChannels
  * @author MB243701
  */
 public class QuantChannelInfo {
     
     private DQuantitationChannel[] m_quantChannels = null;
     private DDataset m_dataset = null;
+    private Map<Long, DQuantitationChannel> m_quantChannelsById;
     
     public QuantChannelInfo(DDataset dataset) {
         this.m_dataset = dataset;
@@ -26,13 +29,22 @@ public class QuantChannelInfo {
         }
         this.m_quantChannels = new DQuantitationChannel[listQuantChannel.size()];
         listQuantChannel.toArray(m_quantChannels);
-        
+        m_quantChannelsById = listQuantChannel.stream().collect(Collectors.toMap(qc -> qc.getId(), qc -> qc));
     }
 
+
+    public DQuantitationChannel getQuantChannels(Long id) {
+        return m_quantChannelsById.get(id);
+    }
+    
     public DQuantitationChannel[] getQuantChannels() {
         return m_quantChannels;
     }
 
+    public Color getQuantChannelColor(Long id) {
+        return CyclicColorPalette.getColor(getQuantChannels(id).getNumber()-1);
+    }
+    
     public void setQuantChannels(DQuantitationChannel[] quantChannels) {
         this.m_quantChannels = quantChannels;
     }
@@ -42,17 +54,20 @@ public class QuantChannelInfo {
         return  CyclicColorPalette.getHTMLColor(quantChIndex);
     }
     
-    
-    public Color getMapColor (Long mapId) {
+    private int getMapPaletteIndex(Long mapId) {
         for(int i=0; i<m_quantChannels.length; i++) {
             if (compareMap( m_quantChannels[i], mapId)) {
-                return CyclicColorPalette.getColor(i);
+                return i;
             }
         }
-        return CyclicColorPalette.getColor(m_quantChannels.length);
+        return m_quantChannels.length;
     }
     
-    public String  getMapHtmlColor (Long mapId) {
+    public Color getMapColor(Long mapId) {
+        return CyclicColorPalette.getColor(getMapPaletteIndex(mapId));
+    }
+    
+    public String  getMapHtmlColor(Long mapId) {
         for(int i=0; i<m_quantChannels.length; i++) {
             if (compareMap( m_quantChannels[i], mapId)) {
                 return CyclicColorPalette.getHTMLColor(i);

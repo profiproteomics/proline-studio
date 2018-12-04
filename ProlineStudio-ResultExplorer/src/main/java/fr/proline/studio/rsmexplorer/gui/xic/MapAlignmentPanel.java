@@ -39,7 +39,7 @@ import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 import fr.proline.studio.graphics.PlotBaseAbstract;
 import fr.proline.studio.graphics.PlotLinear;
 import fr.proline.studio.pattern.xic.DataboxMapAlignment;
-import fr.proline.studio.rsmexplorer.gui.dialog.xic.AbstractGenericQuantParamsPanel;
+import fr.proline.studio.rsmexplorer.gui.dialog.xic.AbstractLabelFreeMSParamsPanel;
 import fr.proline.studio.rsmexplorer.gui.xic.alignment.AlignmentPlotPanel;
 import fr.proline.studio.rsmexplorer.gui.xic.alignment.RTCompareTableModel;
 import fr.proline.studio.rsmexplorer.gui.xic.alignment.PlotScatterXicCloud;
@@ -324,14 +324,14 @@ public class MapAlignmentPanel extends HourglassPanel implements DataBoxPanelInt
             // reference alignment map
             m_referenceMapId = m_quantChannelInfo.getDataset().getAlnReferenceMapId();
             String referenceMapTitle = m_quantChannelInfo.getMapTitle(m_referenceMapId);
-            String htmlColor = m_quantChannelInfo.getMapHtmlColor(m_quantChannelInfo.getDataset().getAlnReferenceMapId());
+            String referenceMapColor = m_quantChannelInfo.getMapHtmlColor(m_quantChannelInfo.getDataset().getAlnReferenceMapId());
             m_alnMode = this.getAlignmentMethod();
 
             StringBuilder sb = new StringBuilder();
             sb.append("<html>");
 
             sb.append("Reference Map: ");
-            sb.append("<font color='").append(htmlColor).append("'>&#x25A0;&nbsp;</font>");
+            sb.append("<font color='").append(referenceMapColor).append("'>&#x25A0;&nbsp;</font>");
             sb.append(referenceMapTitle);
             sb.append(", Alignment Mode : ");
             sb.append(m_alnMode);
@@ -345,8 +345,8 @@ public class MapAlignmentPanel extends HourglassPanel implements DataBoxPanelInt
             for (ProcessedMap map : m_quantChannelInfo.getDataset().getMaps()) {
                 String mapTitle = m_quantChannelInfo.getMapTitle(map.getId());
                 sb = new StringBuilder();
-                htmlColor = m_quantChannelInfo.getMapHtmlColor(map.getId());
-                sb.append("<html><font color='").append(htmlColor).append("'>&#x25A0;&nbsp;</font>");
+                String mapColor = m_quantChannelInfo.getMapHtmlColor(map.getId());
+                sb.append("<html><font color='").append(mapColor).append("'>&#x25A0;&nbsp;</font>");
                 sb.append(mapTitle);
                 sb.append("</html>");
                 mapItems[i] = sb.toString();
@@ -380,9 +380,9 @@ public class MapAlignmentPanel extends HourglassPanel implements DataBoxPanelInt
         Map<String, Object> quantParams;
         try {
             quantParams = m_quantChannelInfo.getDataset().getQuantProcessingConfigAsMap();
-            if (quantParams.containsKey(AbstractGenericQuantParamsPanel.ALIGNMENT_CONFIG)) {
-                Map<String, Object> alignmentConfig = (Map<String, Object>) quantParams.get(AbstractGenericQuantParamsPanel.ALIGNMENT_CONFIG);
-                method = (String) alignmentConfig.getOrDefault(AbstractGenericQuantParamsPanel.ALIGNMENT_METHOD_NAME, "unknown");
+            if (quantParams.containsKey(AbstractLabelFreeMSParamsPanel.ALIGNMENT_CONFIG)) {
+                Map<String, Object> alignmentConfig = (Map<String, Object>) quantParams.get(AbstractLabelFreeMSParamsPanel.ALIGNMENT_CONFIG);
+                method = (String) alignmentConfig.getOrDefault(AbstractLabelFreeMSParamsPanel.ALIGNMENT_METHOD_NAME, "unknown");
             }
             return method;
         } catch (Exception e) {

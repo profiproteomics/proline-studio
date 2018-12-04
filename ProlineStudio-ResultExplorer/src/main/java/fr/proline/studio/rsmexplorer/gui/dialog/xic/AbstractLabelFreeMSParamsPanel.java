@@ -22,7 +22,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author VD225637
  */
-public abstract class AbstractGenericQuantParamsPanel extends JPanel {
+public abstract class AbstractLabelFreeMSParamsPanel extends AbstractParamsPanel {
 
     //-- quanti Params : All available params
     /*  
@@ -133,21 +133,16 @@ public abstract class AbstractGenericQuantParamsPanel extends JPanel {
     public final static String ALIGNMENT_CONFIG = "alignment_config";
     public final static String ALIGNMENT_METHOD_NAME = "method_name";
 
-    protected ParameterList m_parameterList;
-
     protected final boolean m_readOnly;
     protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
     protected JScrollPane m_scrollPane;
 
-    public AbstractGenericQuantParamsPanel(boolean readOnly) {
+    public AbstractLabelFreeMSParamsPanel(boolean readOnly) {
         m_readOnly = readOnly;
         m_parameterList = new ParameterList(XIC_PARAMS_PREFIX);
-        setBorder(AbstractGenericQuantParamsPanel.createTitledBorder(" XIC Parameters ", 0));
+        setBorder(AbstractLabelFreeMSParamsPanel.createTitledBorder(" Quantitation Parameters ", 0));
     }
 
-    public abstract Map<String, Object> getQuantParams();
-
-    public abstract void setQuantParams(Map<String, Object> quantParams);
 
     public abstract boolean isSimplifiedPanel();
 
@@ -169,9 +164,6 @@ public abstract class AbstractGenericQuantParamsPanel extends JPanel {
         getParameterList().loadParameters(filePreferences); //Load params 
     }
 
-    public ParameterList getParameterList() {
-        return m_parameterList;
-    }
 
     public static TitledBorder createTitledBorder(String title, int level) {
         switch (level) {

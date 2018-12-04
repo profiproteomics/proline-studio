@@ -363,7 +363,7 @@ public class XicFeaturePanel  extends HourglassPanel implements DataBoxPanelInte
         return m_dataBox.getSaveAction(splittedPanel);
     }
 
-    public Feature getSelectedFeature() {
+    public DFeature getSelectedFeature() {
         return m_featureTable.getSelectedFeature();
     }
     
@@ -517,7 +517,7 @@ public class XicFeaturePanel  extends HourglassPanel implements DataBoxPanelInte
         }
 
 
-        public Feature getSelectedFeature() {
+        public DFeature getSelectedFeature() {
 
             // Retrieve Selected Row
             int selectedRow = getSelectedRow();

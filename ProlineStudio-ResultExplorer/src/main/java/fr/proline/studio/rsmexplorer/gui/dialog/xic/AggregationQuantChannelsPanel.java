@@ -20,7 +20,7 @@ import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
 import fr.proline.studio.rsmexplorer.tree.xic.AbstractTreeTransferHandler;
 import fr.proline.studio.rsmexplorer.tree.xic.XICBiologicalGroupNode;
 import fr.proline.studio.rsmexplorer.tree.xic.XICBiologicalSampleAnalysisNode;
-import fr.proline.studio.rsmexplorer.tree.xic.XICDesignTree;
+import fr.proline.studio.rsmexplorer.tree.xic.QuantExperimentalDesignTree;
 import fr.proline.studio.rsmexplorer.tree.xic.XICSelectionTransferable;
 import fr.proline.studio.utils.IconManager;
 import org.slf4j.Logger;
@@ -144,8 +144,8 @@ public class AggregationQuantChannelsPanel extends JPanel {
             DataSetData datasetData = DataSetData.createTemporaryQuantitation(ds.getName()); //new DataSetData(ds.getName(), Dataset.DatasetType.QUANTITATION, Aggregation.ChildNature.QUANTITATION_FRACTION);
             datasetData.setDataset(ds);
             DataSetNode dsNode = new DataSetNode(datasetData);
-            XICDesignTree dsDesignTree = new XICDesignTree(dsNode, true);
-            XICDesignTree.displayExperimentalDesign(ds, dsNode, dsDesignTree, true, true);
+            QuantExperimentalDesignTree dsDesignTree = new QuantExperimentalDesignTree(dsNode, true);
+            QuantExperimentalDesignTree.displayExperimentalDesign(ds, dsNode, dsDesignTree, true, true);
             m_tabbedPane.add(ds.getName(), dsDesignTree);
         }
         validate();

@@ -6,7 +6,7 @@ import fr.proline.core.orm.msi.dto.DPeptideInstance;
 import fr.proline.studio.extendedtablemodel.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
-import fr.proline.studio.dam.tasks.DatabasePTMSitesTask;
+import fr.proline.studio.dam.tasks.DatabasePTMsTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dam.tasks.data.PTMSite;
 import fr.proline.studio.rsmexplorer.gui.PeptidesPTMSitePanel;
@@ -101,7 +101,7 @@ public class DataBoxPTMSitePeptides extends AbstractDataBox {
             }
         };
         
-        DatabasePTMSitesTask task = new DatabasePTMSitesTask(callback, getProjectId(), rsm, ptmSite);
+        DatabasePTMsTask task = new DatabasePTMsTask(callback, getProjectId(), rsm, ptmSite);
         Long taskId = task.getId();
         m_logger.info(" Call PTMSite Peptide DatabasePTMProteinSiteTask_V2 task # "+taskId);
         if (m_previousTaskId != null) {

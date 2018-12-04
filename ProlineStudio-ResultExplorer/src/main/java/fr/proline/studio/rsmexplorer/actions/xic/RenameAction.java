@@ -10,20 +10,20 @@ import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import fr.proline.studio.rsmexplorer.tree.xic.XICBiologicalSampleAnalysisNode;
-import fr.proline.studio.rsmexplorer.tree.xic.XICDesignTree;
+import fr.proline.studio.rsmexplorer.tree.xic.QuantExperimentalDesignTree;
 import javax.swing.tree.DefaultTreeModel;
 import org.openide.util.NbBundle;
 import org.openide.windows.WindowManager;
 
 /**
- * Rename a Node in a Xic XICDesignTree
+ * Rename a Node in a Xic QuantExperimentalDesignTree
  * @author JM235353
  */
 public class RenameAction extends AbstractRSMAction { 
     
-    private final XICDesignTree m_tree;
+    private final QuantExperimentalDesignTree m_tree;
 
-    public RenameAction(XICDesignTree tree) {
+    public RenameAction(QuantExperimentalDesignTree tree) {
         super(NbBundle.getMessage(RenameAction.class, "CTL_RenameAction"), AbstractTree.TreeType.TREE_XIC_DESIGN, tree);
         m_tree = tree;
     }

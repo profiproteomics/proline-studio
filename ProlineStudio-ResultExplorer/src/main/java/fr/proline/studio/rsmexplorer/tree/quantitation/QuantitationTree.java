@@ -1,14 +1,12 @@
 package fr.proline.studio.rsmexplorer.tree.quantitation;
 
-import fr.proline.core.orm.uds.Aggregation;
-import fr.proline.core.orm.uds.Dataset;
 import fr.proline.core.orm.uds.Project;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.DatabaseDataManager;
 import fr.proline.studio.dam.data.AbstractData;
 import fr.proline.studio.dam.data.DataSetData;
-import fr.proline.studio.rsmexplorer.actions.identification.CreateXICAction;
+import fr.proline.studio.rsmexplorer.actions.identification.CreateQuantitationAction;
 import fr.proline.studio.rsmexplorer.actions.identification.AbstractRSMAction;
 import fr.proline.studio.rsmexplorer.actions.identification.DeleteAction;
 import fr.proline.studio.rsmexplorer.actions.identification.DisplayRsmAction;
@@ -25,6 +23,7 @@ import fr.proline.studio.rsmexplorer.actions.identification.ExportAction;
 import fr.proline.studio.rsmexplorer.actions.identification.ExportDatasetJMSAction;
 import fr.proline.studio.rsmexplorer.actions.identification.GenerateSpectrumMatchesJMSAction;
 import fr.proline.studio.rsmexplorer.actions.identification.IdentifyPtmSitesJMSAction;
+import fr.proline.studio.rsmexplorer.actions.identification.QuantifyAction;
 import fr.proline.studio.rsmexplorer.actions.identification.RetrieveBioSeqJMSAction;
 import fr.proline.studio.rsmexplorer.actions.xic.AddQuantitationFolderAction;
 import fr.proline.studio.rsmexplorer.actions.xic.AggregateQuantitationsAction;
@@ -36,7 +35,7 @@ import fr.proline.studio.rsmexplorer.tree.*;
 import fr.proline.studio.rsmexplorer.tree.xic.XICBiologicalGroupNode;
 import fr.proline.studio.rsmexplorer.tree.xic.XICBiologicalSampleAnalysisNode;
 import fr.proline.studio.rsmexplorer.tree.xic.XICBiologicalSampleNode;
-import fr.proline.studio.rsmexplorer.tree.xic.XICDesignTree;
+import fr.proline.studio.rsmexplorer.tree.xic.QuantExperimentalDesignTree;
 import fr.proline.studio.rsmexplorer.tree.xic.XICRunNode;
 import java.awt.event.MouseEvent;
 import java.util.*;
@@ -211,11 +210,12 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
                     // create the actions
                     m_rootActions = new ArrayList<>(1);  // <--- get in sync
                     
-                    CreateXICAction createXICAction = new CreateXICAction(false);
+                    QuantifyAction quantifyAction = new QuantifyAction(AbstractTree.TreeType.TREE_QUANTITATION);
+                    m_rootActions.add(quantifyAction);
+                    //CreateXICAction createXICAction = new CreateQuantitationAction(false);
+                    //m_rootActions.add(createXICAction);
 
-                    AddQuantitationFolderAction addFolderAction = new AddQuantitationFolderAction();
-                    
-                    m_rootActions.add(createXICAction);
+                    AddQuantitationFolderAction addFolderAction = new AddQuantitationFolderAction();                    
                     m_rootActions.add(addFolderAction);
 
                     // add actions to popup
@@ -315,7 +315,7 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
                     ComputeQuantitationProfileAction computeQuantProfileAction = new ComputeQuantitationProfileAction();
                     m_mainActions.add(computeQuantProfileAction);
 
-                    CreateXICAction createXICAction = new CreateXICAction(true);
+                    CreateQuantitationAction createXICAction = new CreateQuantitationAction(true);
                     m_mainActions.add(createXICAction);
 
                     m_mainActions.add(null);  // separator
@@ -802,7 +802,7 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
         m_model.nodeStructureChanged(parentNode);
 
         if (parentNode instanceof DataSetNode && ((DataSetNode) parentNode).isQuantXIC()) {
-            XICDesignTree.displayExperimentalDesign(((DataSetNode) parentNode).getDataset(), parentNode, this, false, true);
+            QuantExperimentalDesignTree.displayExperimentalDesign(((DataSetNode) parentNode).getDataset(), parentNode, this, false, true);
         }
 
     }
@@ -849,7 +849,7 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
                         public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
                             ((DataSetData) datasetNode.getData()).setDataset(ds);
                             if (datasetNode instanceof DataSetNode && datasetNode.isQuantXIC()) {
-                                XICDesignTree.displayExperimentalDesign(datasetNode.getDataset(), datasetNode, tree, false, true);
+                                QuantExperimentalDesignTree.displayExperimentalDesign(datasetNode.getDataset(), datasetNode, tree, false, true);
                             }
                             datasetNode.setIsChanging(false);
                             treeModel.nodeChanged(datasetNode);

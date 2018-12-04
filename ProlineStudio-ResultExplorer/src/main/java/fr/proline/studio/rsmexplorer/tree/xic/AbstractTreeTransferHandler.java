@@ -44,7 +44,7 @@ public class AbstractTreeTransferHandler extends TransferHandler {
             Integer transferKey = XICSelectionTransferable.register(data);
             return new XICSelectionTransferable(transferKey);
         } else {
-            XICDesignTree tree = (XICDesignTree) c;
+            QuantExperimentalDesignTree tree = (QuantExperimentalDesignTree) c;
             AbstractNode[] selectedNodes = tree.getSelectedNodes();
             ArrayList<AbstractNode> keptNodes = new ArrayList<>();
             // only the nodes of the same type can be transferred

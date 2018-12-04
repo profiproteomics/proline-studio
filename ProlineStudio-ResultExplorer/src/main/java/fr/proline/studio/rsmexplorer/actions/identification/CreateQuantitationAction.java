@@ -1,6 +1,7 @@
 package fr.proline.studio.rsmexplorer.actions.identification;
 
 import fr.proline.core.orm.uds.Project;
+import fr.proline.core.orm.uds.QuantitationMethod;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.core.orm.uds.dto.DDatasetType;
 import fr.proline.studio.dam.AccessDatabaseThread;
@@ -11,10 +12,10 @@ import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadXicMasterQuantTask;
 import fr.proline.studio.dpm.AccessJMSManagerThread;
 import fr.proline.studio.dpm.task.jms.AbstractJMSCallback;
-import fr.proline.studio.dpm.task.jms.RunXICTask;
+import fr.proline.studio.dpm.task.jms.RunQuantitationTask;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
-import fr.proline.studio.rsmexplorer.gui.dialog.xic.CreateXICDialog;
+import fr.proline.studio.rsmexplorer.gui.dialog.xic.CreateQuantitationDialog;
 import fr.proline.studio.rsmexplorer.tree.quantitation.QuantitationTree;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
@@ -33,31 +34,42 @@ import org.slf4j.LoggerFactory;
  *
  * @author JM235353
  */
-public class CreateXICAction extends AbstractRSMAction {
+public class CreateQuantitationAction extends AbstractRSMAction {
 
     protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
 
-    private boolean m_isXiCClone = false;
+    private QuantitationMethod.Type m_quantitationType;
+    private boolean m_isFromExistingQuantitation = false;
     private boolean m_referenceDataSetDefined = false;
 
-    static String getMessage(boolean fromExistingXIC, AbstractTree.TreeType sourceTree) {
-        if (fromExistingXIC) {
-            return NbBundle.getMessage(CreateXICAction.class, "CTL_CreateXIC_Clone");
-        } else if (sourceTree.equals(AbstractTree.TreeType.TREE_QUANTITATION)) {
-            return NbBundle.getMessage(CreateXICAction.class, "CTL_CreateXIC");
-        } else {
-            return NbBundle.getMessage(CreateXICAction.class, "CTL_CreateXIC_Ident");
+    static String getMessage(boolean fromExistingXIC, AbstractTree.TreeType sourceTree, QuantitationMethod.Type type) {
+        
+        switch (type) {
+            case LABEL_FREE: {
+                if (fromExistingXIC) {
+                  return NbBundle.getMessage(CreateQuantitationAction.class, "CTL_CreateXIC_Clone");
+                } else {
+                  return NbBundle.getMessage(CreateQuantitationAction.class, "CTL_CreateXIC");
+                } 
+            }
+            case RESIDUE_LABELING: return NbBundle.getMessage(CreateQuantitationAction.class, "CTL_CreateResidueLabeling");
+            case ISOBARIC_TAG: return NbBundle.getMessage(CreateQuantitationAction.class, "CTL_CreateIsobaricLabeling");
+            
         }
+       return "unknown";
     }
 
-    public CreateXICAction(boolean fromExistingXIC) {
-        super(CreateXICAction.getMessage(fromExistingXIC, AbstractTree.TreeType.TREE_QUANTITATION), AbstractTree.TreeType.TREE_QUANTITATION);
-        m_isXiCClone = fromExistingXIC;
+    public CreateQuantitationAction(boolean fromExistingXIC) {
+        super(CreateQuantitationAction.getMessage(fromExistingXIC, AbstractTree.TreeType.TREE_QUANTITATION, QuantitationMethod.Type.LABEL_FREE), AbstractTree.TreeType.TREE_QUANTITATION);
+        // warn : at this time cloning is only supported for LABEL FREE quantitations
+        m_quantitationType = QuantitationMethod.Type.LABEL_FREE;
+        m_isFromExistingQuantitation = fromExistingXIC;
     }
 
-    public CreateXICAction(AbstractTree.TreeType sourceTree) {
-        super(CreateXICAction.getMessage(false, sourceTree), sourceTree);
-        m_isXiCClone = false;
+    public CreateQuantitationAction(AbstractTree.TreeType sourceTree, QuantitationMethod.Type type) {
+        super(CreateQuantitationAction.getMessage(false, sourceTree, type), sourceTree);
+        m_quantitationType = type; 
+        m_isFromExistingQuantitation = false;
     }
 
     @Override
@@ -68,7 +80,7 @@ public class CreateXICAction extends AbstractRSMAction {
             return;
         }
 
-        if (m_isXiCClone) {
+        if (m_isFromExistingQuantitation) {
             final DDataset currentDataset = ((DataSetData) ((DataSetNode) selectedNodes[0]).getData()).getDataset();
             final int posx = x;
             final int posy = y;
@@ -82,7 +94,7 @@ public class CreateXICAction extends AbstractRSMAction {
 
                 @Override
                 public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
-                    createXICDialog(currentDataset, posx, posy);
+                    createQuantitationDialog(currentDataset, posx, posy);
                 }
             };
             DatabaseLoadXicMasterQuantTask task = new DatabaseLoadXicMasterQuantTask(callback);
@@ -103,35 +115,30 @@ public class CreateXICAction extends AbstractRSMAction {
                     m_referenceDataSetDefined = false;
                 }
             }
-            createXICDialog(refDataset, x, y);
+            createQuantitationDialog(refDataset, x, y);
         }
     }
 
-    private void createXICDialog(DDataset dataset, int x, int y) {
+    private void createQuantitationDialog(DDataset dataset, int x, int y) {
         Long pID = ProjectExplorerPanel.getProjectExplorerPanel().getSelectedProject().getId();
-        CreateXICDialog dialog = CreateXICDialog.getDialog(WindowManager.getDefault().getMainWindow());
+        CreateQuantitationDialog dialog = CreateQuantitationDialog.getDialog(WindowManager.getDefault().getMainWindow());
+        IdentificationTree childTree = null;
+        DDataset refDataset = null;
+        DDataset existingDataset = (m_isFromExistingQuantitation) ? dataset : null;
+        
         if (m_referenceDataSetDefined) {
-            IdentificationTree childTree = IdentificationTree.getCurrentTree().copyDataSetRootSubTree(dataset, dataset.getProject().getId());
-            dialog.setSelectableIdentTree(childTree);
-            dialog.setReferenceIdentDataset(dataset);
-        } else if (m_isXiCClone && dataset.getMasterQuantitationChannels().get(0).getIdentDataset() != null) {
-            DDataset refDataset = dataset.getMasterQuantitationChannels().get(0).getIdentDataset();         
-            dialog.setReferenceIdentDataset(refDataset);
-            IdentificationTree childTree = IdentificationTree.getCurrentTree().copyDataSetRootSubTree(refDataset, refDataset.getProject().getId());
+            childTree = IdentificationTree.getCurrentTree().copyDataSetRootSubTree(dataset, dataset.getProject().getId());
+            refDataset = dataset;
+        } else if (existingDataset != null && existingDataset.getMasterQuantitationChannels().get(0).getIdentDataset() != null) {
+            refDataset = dataset.getMasterQuantitationChannels().get(0).getIdentDataset();
+            childTree = IdentificationTree.getCurrentTree().copyDataSetRootSubTree(refDataset, refDataset.getProject().getId());
             if (childTree == null) {
-                m_logger.debug("Reference dataset not already loaded: creates a new node to dispay in a new IdentificationTree");
+                m_logger.debug("Reference dataset not already loaded: creates a new node to display in a new IdentificationTree");
                 childTree = new IdentificationTree(ChildFactory.createNode(new DataSetData(refDataset)));
             }
-            dialog.setSelectableIdentTree(childTree);
-        } else {
-            dialog.setSelectableIdentTree(null);
-            dialog.setReferenceIdentDataset(null);
         }
 
-        dialog.displayExperimentalDesignTree();
-        if (m_isXiCClone) {
-            dialog.copyClonedDesignTree(dataset);
-        }
+        dialog.initializeExperimentalDesignTree(existingDataset, refDataset, childTree, m_quantitationType);
 
         dialog.setLocation(x, y);
         dialog.setVisible(true);
@@ -150,11 +157,8 @@ public class CreateXICAction extends AbstractRSMAction {
                 errorMsg.append("Null Quantitation parameters !  ");
             }
 
-            if (dialog.getExperimentalDesignNode() == null) {
+            if (dialog.getQuantitationDataset() == null) {
                 errorMsg.append("No experimental design defined  ");
-
-            } else if (!DataSetData.class.isInstance(dialog.getExperimentalDesignNode().getData())) {
-                errorMsg.append("Invalide Quantitation Dataset specified  ");
 
             } else {
 
@@ -163,7 +167,7 @@ public class CreateXICAction extends AbstractRSMAction {
                     errorMsg.append( registerErrMsg);
 
                 //*** Get experimental design values                
-                _quantiDS = (DataSetData) dialog.getExperimentalDesignNode().getData();
+                _quantiDS = dialog.getQuantitationDataset();
 
                 try {
                     expParams = dialog.getExperimentalDesignParameters();
@@ -177,14 +181,14 @@ public class CreateXICAction extends AbstractRSMAction {
                 return;
             }
 
-            m_logger.debug(" Will Compute XIC Quanti with on " + ((List) expParams.get("biological_samples")).size() + "samples.");
+            m_logger.debug(" Will Compute Quantitation on " + ((List) expParams.get("biological_samples")).size() + "samples.");
 
             final QuantitationTree tree = QuantitationTree.getCurrentTree();
             final DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
             final DataSetNode[] _quantitationNode = { QuantitationTree.getCurrentTree().createQuantitationNode(_quantiDS.getName()) };
             
             // CallBack for Xic Quantitation Service
-            AbstractJMSCallback xicCallback = new AbstractJMSCallback() {
+            AbstractJMSCallback quantCallback = new AbstractJMSCallback() {
 
                 @Override
                 public boolean mustBeCalledInAWT() {
@@ -194,16 +198,16 @@ public class CreateXICAction extends AbstractRSMAction {
                 @Override
                 public void run(boolean success) {
                     if (success) {
-                        m_logger.debug(" XIC SUCCESS : " + _xicQuantiDataSetId[0]);
+                        m_logger.debug(" Quantitation SUCCESS : " + _xicQuantiDataSetId[0]);
                         QuantitationTree.getCurrentTree().loadDataSet(_xicQuantiDataSetId[0], _quantitationNode[0]);
                     } else {
-                        m_logger.debug(" XIC ERROR ");
+                        m_logger.debug(" Quantitation ERROR ");
                         treeModel.removeNodeFromParent(_quantitationNode[0]);
                     }
                 }
             };
            
-            RunXICTask task = new RunXICTask(xicCallback, pID, _quantiDS.getName(), quantParams, expParams, _xicQuantiDataSetId);
+            RunQuantitationTask task = new RunQuantitationTask(quantCallback, pID, _quantiDS.getName(), quantParams, expParams, dialog.getQuantMethodId(), _xicQuantiDataSetId);
             AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
            
         } //End OK entered      
@@ -219,7 +223,7 @@ public class CreateXICAction extends AbstractRSMAction {
             return;
         }
 
-        if (m_isXiCClone) {
+        if (m_isFromExistingQuantitation) {
             // only one node selected
             if (selectedNodes.length != 1) {
                 setEnabled(false);
@@ -247,8 +251,22 @@ public class CreateXICAction extends AbstractRSMAction {
                 setEnabled(false);
                 return;
             }
+        } else {
+            AbstractNode node = (AbstractNode) selectedNodes[0];
+            
+            // must be a dataset or a project quantitation
+            if ((node.getType() != AbstractNode.NodeTypes.DATA_SET) && (node.getType() != AbstractNode.NodeTypes.PROJECT_QUANTITATION) ) {
+                setEnabled(false);
+                return;
+            }
+            
+            if ((node.getType() == AbstractNode.NodeTypes.DATA_SET) && ((DataSetNode)node).isFolder() ) {
+                setEnabled(false);
+                return;
+            }
+            
         }
-
+        
         setEnabled(true);
     }
 

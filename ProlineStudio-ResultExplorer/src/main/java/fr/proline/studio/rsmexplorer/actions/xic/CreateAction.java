@@ -8,7 +8,7 @@ package fr.proline.studio.rsmexplorer.actions.xic;
 import fr.proline.studio.rsmexplorer.actions.identification.AbstractRSMAction;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
-import fr.proline.studio.rsmexplorer.tree.xic.XICDesignTree;
+import fr.proline.studio.rsmexplorer.tree.xic.QuantExperimentalDesignTree;
 import static javax.swing.Action.NAME;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
@@ -24,9 +24,9 @@ public class CreateAction extends AbstractRSMAction {
     private CreateGroupNodeAction m_createGroupAction;
 
     private JMenu m_menu;
-    private final XICDesignTree m_tree;
+    private final QuantExperimentalDesignTree m_tree;
 
-    public CreateAction(XICDesignTree tree) {
+    public CreateAction(QuantExperimentalDesignTree tree) {
         super(NbBundle.getMessage(CreateAction.class, "CTL_CreateAction"), AbstractTree.TreeType.TREE_XIC_DESIGN, tree);
         m_tree = tree;
     }

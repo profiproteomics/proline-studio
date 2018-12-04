@@ -28,6 +28,9 @@ public class CyclicColorPalette {
     public static final Color GRAY_GRID_LOG = new Color(244, 240, 238);
     public static final Color BLUE_SELECTION_ZONE = new Color(0.2f, 0.2f, 1f, 0.5f);
 
+    public static final Color HIGHLIGHT_COLOR = new Color(168, 84, 109);
+    public static final Color GRAY_DARK = new Color(47, 43, 42);
+
     /**
      * get color from the default color palette if the colorIndex is too high,
      * the color returned will be of a different brightness than those in the
@@ -79,6 +82,28 @@ public class CyclicColorPalette {
             palette[i] = getColor(i);
         }
         return palette;
+    }
+
+    /**
+     * Make a color darker.
+     *
+     * @param color     Color to make darker.
+     * @param fraction  Darkness fraction.
+     * @return          Darker color.
+     */
+    public static Color getDarkerColor(Color color, double fraction)
+    {
+        int red   = (int) Math.round (color.getRed()   * (1.0 - fraction));
+        int green = (int) Math.round (color.getGreen() * (1.0 - fraction));
+        int blue  = (int) Math.round (color.getBlue()  * (1.0 - fraction));
+
+        if (red   < 0) red   = 0; else if (red   > 255) red   = 255;
+        if (green < 0) green = 0; else if (green > 255) green = 255;
+        if (blue  < 0) blue  = 0; else if (blue  > 255) blue  = 255;
+
+        int alpha = color.getAlpha();
+
+        return new Color (red, green, blue, alpha);
     }
 
     /**

@@ -4,21 +4,21 @@ import fr.proline.core.orm.uds.Project;
 import fr.proline.studio.dam.DatabaseDataManager;
 import fr.proline.studio.rsmexplorer.actions.identification.AbstractRSMAction;
 import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
-import fr.proline.studio.rsmexplorer.tree.xic.XICDesignTree;
+import fr.proline.studio.rsmexplorer.tree.xic.QuantExperimentalDesignTree;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import java.util.ArrayList;
 import org.openide.util.NbBundle;
 
 /**
- * Delete a Node in a Xic XICDesignTree
+ * Delete a Node in a Xic QuantExperimentalDesignTree
  * @author JM235353
  */
 public class DeleteAction  extends AbstractRSMAction {
     
-    public XICDesignTree m_tree;
+    public QuantExperimentalDesignTree m_tree;
     
-    public DeleteAction(XICDesignTree tree) {
+    public DeleteAction(QuantExperimentalDesignTree tree) {
         super(NbBundle.getMessage(DeleteAction.class, "CTL_DeleteAction"), AbstractTree.TreeType.TREE_XIC_DESIGN, tree);
         m_tree = tree;
     }

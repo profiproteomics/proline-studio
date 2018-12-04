@@ -20,11 +20,11 @@ import org.openide.windows.WindowManager;
  *
  * @author JM235353
  */
-public class DefineQuantParamsPanel extends JPanel {
+public class LabelFreeMSParamsPanel extends JPanel {
     
-    private static DefineQuantParamsPanel m_singleton = null;
+    private static LabelFreeMSParamsPanel m_singleton = null;
     
-    private AbstractGenericQuantParamsPanel m_internalQuantPanel = null;
+    private AbstractLabelFreeMSParamsPanel m_internalQuantPanel = null;
     
     private  JButton m_toggleButton = null;
     private JPanel m_mainPanel ;
@@ -33,7 +33,7 @@ public class DefineQuantParamsPanel extends JPanel {
     
     private GridBagConstraints m_internalPanelGBC = null;
     
-    private DefineQuantParamsPanel() {
+    private LabelFreeMSParamsPanel() {
         setLayout(new BorderLayout());
  
         
@@ -48,14 +48,14 @@ public class DefineQuantParamsPanel extends JPanel {
         return "2.0";
     }
     
-    public AbstractGenericQuantParamsPanel getParamsPanel() {
+    public AbstractLabelFreeMSParamsPanel getParamsPanel() {
         return m_internalQuantPanel;     
     }
     
 
-    public static DefineQuantParamsPanel getDefineQuantPanel() {
+    public static LabelFreeMSParamsPanel getLabelFreeMSQuantParamsPanel() {
         if (m_singleton == null) {
-            m_singleton = new DefineQuantParamsPanel();
+            m_singleton = new LabelFreeMSParamsPanel();
         }
 
         return m_singleton;
@@ -101,7 +101,7 @@ public class DefineQuantParamsPanel extends JPanel {
         c.gridwidth = 2;
         c.weighty = 1;
         Preferences preferences = NbPreferences.root();
-        boolean completePanel = ! preferences.getBoolean(AbstractGenericQuantParamsPanel.XIC_SIMPLIFIED_PARAMS, true);
+        boolean completePanel = ! preferences.getBoolean(AbstractLabelFreeMSParamsPanel.XIC_SIMPLIFIED_PARAMS, true);
 
         m_internalQuantPanel = getParamsPanel(completePanel, true);
         mainPanel.add(m_internalQuantPanel, c);  
@@ -122,13 +122,13 @@ public class DefineQuantParamsPanel extends JPanel {
         }        
     }
     
-    private AbstractGenericQuantParamsPanel getParamsPanel(boolean completePanel, boolean readValues) {
+    private AbstractLabelFreeMSParamsPanel getParamsPanel(boolean completePanel, boolean readValues) {
         m_completePanel = completePanel;
         updateButton(m_completePanel);
         if (m_completePanel) {
-            return new DefineQuantParamsCompletePanel(false, readValues);
+            return new LabelFreeMSParamsCompletePanel(false, readValues);
         } else {
-            return new DefineQuantParamsSimplifiedPanel(false, readValues);
+            return new LabelFreeMSParamsSimplifiedPanel(false, readValues);
         }
     }
     

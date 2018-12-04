@@ -42,16 +42,16 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 
 /**
- * XICDesignTree represents a XIC design
+ * QuantExperimentalDesignTree represents a quantitation experimental design tree
  *
  * @author JM235353
  */
-public class XICDesignTree extends AbstractTree {
+public class QuantExperimentalDesignTree extends AbstractTree {
 
     private JPopupMenu m_mainPopup;
     private ArrayList<AbstractRSMAction> m_mainActions;
 
-    public XICDesignTree(AbstractNode top, boolean editable) {
+    public QuantExperimentalDesignTree(AbstractNode top, boolean editable) {
 
         setEditable(editable);
 

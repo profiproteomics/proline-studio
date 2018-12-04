@@ -26,7 +26,7 @@ import fr.proline.studio.rsmexplorer.gui.xic.MapAlignmentPanel;
 import fr.proline.studio.rsmexplorer.gui.xic.MapTimePanel;
 import fr.proline.studio.rsmexplorer.gui.xic.QuantChannelInfo;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
-import fr.proline.studio.rsmexplorer.gui.dialog.xic.AbstractGenericQuantParamsPanel;
+import fr.proline.studio.rsmexplorer.gui.dialog.xic.AbstractLabelFreeMSParamsPanel;
 import fr.proline.studio.rsmexplorer.gui.xic.alignment.RTCompareTableModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,7 +72,7 @@ public class DataboxMapAlignment extends AbstractDataBox {
         outParameter = new GroupParameter();
         outParameter.addParameter(CrossSelectionInterface.class, true);
         registerOutParameter(outParameter);
-        m_RT_Tolerance = AbstractGenericQuantParamsPanel.DEFAULT_CA_FEATMAP_RTTOL_VALUE;
+        m_RT_Tolerance = AbstractLabelFreeMSParamsPanel.DEFAULT_CA_FEATMAP_RTTOL_VALUE;
         
         m_isCloudLoaded = false;
         m_isCloudTaskAsked = false;
@@ -268,7 +268,7 @@ public class DataboxMapAlignment extends AbstractDataBox {
      * @return 
      */
     private double getTimeTol() {
-        Double time = AbstractGenericQuantParamsPanel.DEFAULT_CA_FEATMAP_RTTOL_VALUE;
+        Double time = AbstractLabelFreeMSParamsPanel.DEFAULT_CA_FEATMAP_RTTOL_VALUE;
         try {
             Map<String, Object> quantParams = this.m_dataset.getQuantProcessingConfigAsMap();
             if (quantParams.containsKey("cross_assignment_config")) {
@@ -277,7 +277,7 @@ public class DataboxMapAlignment extends AbstractDataBox {
 
                 time = (Double) ftMappingParams.get("time_tol");
                 if (time == null) {
-                    time = AbstractGenericQuantParamsPanel.DEFAULT_CA_FEATMAP_RTTOL_VALUE;
+                    time = AbstractLabelFreeMSParamsPanel.DEFAULT_CA_FEATMAP_RTTOL_VALUE;
                 }
             }
         } catch (Exception ex) {

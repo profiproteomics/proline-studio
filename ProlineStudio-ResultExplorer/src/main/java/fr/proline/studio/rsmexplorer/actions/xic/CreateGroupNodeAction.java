@@ -14,7 +14,7 @@ import fr.proline.studio.rsmexplorer.actions.identification.AbstractRSMAction;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import fr.proline.studio.rsmexplorer.tree.xic.XICBiologicalGroupNode;
-import fr.proline.studio.rsmexplorer.tree.xic.XICDesignTree;
+import fr.proline.studio.rsmexplorer.tree.xic.QuantExperimentalDesignTree;
 import javax.swing.tree.DefaultTreeModel;
 import org.openide.util.NbBundle;
 import org.openide.windows.WindowManager;
@@ -25,9 +25,9 @@ import org.openide.windows.WindowManager;
  */
 public class CreateGroupNodeAction extends AbstractRSMAction {
 
-    private final XICDesignTree m_tree;
+    private final QuantExperimentalDesignTree m_tree;
 
-    public CreateGroupNodeAction(XICDesignTree tree) {
+    public CreateGroupNodeAction(QuantExperimentalDesignTree tree) {
         super(NbBundle.getMessage(CreateGroupNodeAction.class, "CTL_CreateGroupAction"), AbstractTree.TreeType.TREE_XIC_DESIGN, tree);
         m_tree = tree;
     }

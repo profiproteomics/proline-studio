@@ -148,15 +148,14 @@ public class FeatureTableModel extends LazyTableModel implements GlobalTableMode
                     lazyData.setData(null);
                     givePriorityTo(m_taskId, row, col);
                 }else {
-                    String mapTitle = m_quantChannelInfo.getMapTitle(feature.getMap().getId());
-                    if (mapTitle == null) mapTitle = feature.getMap().getName();
-                    Color mapColor = m_quantChannelInfo.getMapColor(feature.getMap().getId());
-                    String rsmHtmlColor = CyclicColorPalette.getHTMLColor(mapColor);
+                    String title = m_quantChannelInfo.getQuantChannels(feature.getQuantChannelId()).getName();
+                    Color color = m_quantChannelInfo.getQuantChannelColor(feature.getQuantChannelId());
+                    String rsmHtmlColor = CyclicColorPalette.getHTMLColor(color);
         
                     StringBuilder sb = new StringBuilder();
                     sb.append("<html>");
                     sb.append("<html><font color='").append(rsmHtmlColor).append("'>&#x25A0;&nbsp;</font>");
-                    sb.append(mapTitle);
+                    sb.append(title);
                     sb.append("</html>");
                     lazyData.setData(sb.toString());
                 }
@@ -310,7 +309,7 @@ public class FeatureTableModel extends LazyTableModel implements GlobalTableMode
     
     public Color getPlotColor(int i) {
 
-        return m_quantChannelInfo.getMapColor(m_features.get(i).getMap().getId());
+        return m_quantChannelInfo.getQuantChannelColor(m_features.get(i).getQuantChannelId());
     }
     
     public String getPlotTitle(int i) {
@@ -560,14 +559,14 @@ public class FeatureTableModel extends LazyTableModel implements GlobalTableMode
 
         // Retrieve Feature
         DFeature feature = m_features.get(row);
-        String mapTitle = m_quantChannelInfo.getMapTitle(feature.getMap().getId());
-        Color mapColor = m_quantChannelInfo.getMapColor(feature.getMap().getId());
-        String rsmHtmlColor = CyclicColorPalette.getHTMLColor(mapColor);
+        String title = m_quantChannelInfo.getQuantChannels(feature.getQuantChannelId()).getName();
+        Color color = m_quantChannelInfo.getQuantChannelColor(feature.getQuantChannelId());
+        String rsmHtmlColor = CyclicColorPalette.getHTMLColor(color);
         
         StringBuilder sb = new StringBuilder();
         sb.append("<html>");
         sb.append("<html><font color='").append(rsmHtmlColor).append("'>&#x25A0;&nbsp;</font>");
-        sb.append(mapTitle);
+        sb.append(title);
         sb.append("</html>");
         return sb.toString();
     }

@@ -7,11 +7,11 @@ import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
-import fr.proline.studio.rsmexplorer.gui.dialog.xic.DefineQuantParamsCompletePanel;
+import fr.proline.studio.rsmexplorer.gui.dialog.xic.LabelFreeMSParamsCompletePanel;
 import fr.proline.studio.rsmexplorer.gui.dialog.xic.QuantProfileXICPanel;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.quantitation.QuantitationTree;
-import fr.proline.studio.rsmexplorer.tree.xic.XICDesignTree;
+import fr.proline.studio.rsmexplorer.tree.xic.QuantExperimentalDesignTree;
 import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -34,7 +34,7 @@ public class ExperimentalDesignPanel extends HourglassPanel implements DataBoxPa
     
     private JScrollPane m_scrollPaneExpDesign;
     private JPanel m_expDesignPanel;
-    private XICDesignTree m_expDesignTree;
+    private QuantExperimentalDesignTree m_expDesignTree;
     private ExportButton m_exportButton;
     private JTabbedPane m_tabbedPane;
     private QuantProfileXICPanel m_profilizerParamPanel;
@@ -91,7 +91,7 @@ public class ExperimentalDesignPanel extends HourglassPanel implements DataBoxPa
         m_scrollPaneExpDesign = new JScrollPane();
         m_expDesignPanel = new JPanel();
         m_expDesignPanel.setLayout(new BorderLayout());
-        m_expDesignTree =  new XICDesignTree(QuantitationTree.getCurrentTree().copyCurrentNodeForSelection(), false);
+        m_expDesignTree =  new QuantExperimentalDesignTree(QuantitationTree.getCurrentTree().copyCurrentNodeForSelection(), false);
         m_expDesignPanel.add(m_expDesignTree, BorderLayout.CENTER);
         m_scrollPaneExpDesign.setViewportView(m_expDesignPanel);
         
@@ -155,7 +155,7 @@ public class ExperimentalDesignPanel extends HourglassPanel implements DataBoxPa
     }
     
     private void updateData(){
-        XICDesignTree.displayExperimentalDesign(m_dataset, (AbstractNode) m_expDesignTree.getModel().getRoot(), m_expDesignTree, true, true);
+        QuantExperimentalDesignTree.displayExperimentalDesign(m_dataset, (AbstractNode) m_expDesignTree.getModel().getRoot(), m_expDesignTree, true, true);
         
         // expand all
         for (int i = 0; i < m_expDesignTree.getRowCount(); i++) {
@@ -164,7 +164,7 @@ public class ExperimentalDesignPanel extends HourglassPanel implements DataBoxPa
         
         try {
             if (m_dataset.getQuantProcessingConfig() != null){
-                DefineQuantParamsCompletePanel xicParamPanel =  new DefineQuantParamsCompletePanel(true, false);                    
+                LabelFreeMSParamsCompletePanel xicParamPanel =  new LabelFreeMSParamsCompletePanel(true, false);                    
                 m_confPanel.removeAll();
                 xicParamPanel.resetScrollbar();
                 m_confPanel.add(xicParamPanel, BorderLayout.CENTER);

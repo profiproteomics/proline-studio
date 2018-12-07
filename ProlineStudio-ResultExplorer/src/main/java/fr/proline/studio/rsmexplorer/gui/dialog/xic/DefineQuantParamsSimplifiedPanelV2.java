@@ -286,7 +286,7 @@ public class DefineQuantParamsSimplifiedPanelV2 extends AbstractDefineQuantParam
 
     private JPanel createCrossAssignmentPanel(){
         JPanel panelA = new JPanel(new BorderLayout());
-        m_crossAssignCBoxTitle = new CheckBoxTitledBorder("Cross Assignement", true);
+        m_crossAssignCBoxTitle = new CheckBoxTitledBorder("Cross Assignment", true);
         m_crossAssignCBoxTitle.addActionListener(new ActionListener() {
 
             @Override
@@ -306,7 +306,7 @@ public class DefineQuantParamsSimplifiedPanelV2 extends AbstractDefineQuantParam
         c.gridx = 0;
         c.gridy = 0;
         c.weightx = 0;
-        m_allowCrossAssLabel = new JLabel("Allow cross assignement ");
+        m_allowCrossAssLabel = new JLabel("Allow cross assignment ");
         m_crossAssignSettingsPanel.add(m_allowCrossAssLabel, c);        
         c.gridx++;     
         c.weightx = 1;
@@ -332,7 +332,7 @@ public class DefineQuantParamsSimplifiedPanelV2 extends AbstractDefineQuantParam
         c.gridx = 0;
         c.weightx = 0;
         c.gridwidth=1;
-        m_alignmentFeatureTimeTolLabel = new JLabel("time tolerance (s):");
+        m_alignmentFeatureTimeTolLabel = new JLabel("Time tolerance (s):");
         m_alignmentFeatureTimeTolLabel.setEnabled(m_alignRTCB.isSelected()&&m_alignRTCB.isEnabled());
         m_crossAssignSettingsPanel.add(m_alignmentFeatureTimeTolLabel, c);
         c.gridx++;   

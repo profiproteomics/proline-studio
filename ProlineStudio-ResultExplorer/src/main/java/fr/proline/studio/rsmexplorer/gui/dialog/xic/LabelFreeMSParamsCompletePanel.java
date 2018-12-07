@@ -155,7 +155,7 @@ public class LabelFreeMSParamsCompletePanel extends AbstractLabelFreeMSParamsPan
         m_parameterList.add(m_alnIgnoreErrorsParameter);
 
         m_crossAssignStrategyCB = new JComboBox(CROSSASSIGN_STRATEGY_VALUES);
-        m_crossAssignStrategyParameter = new ObjectParameter<>("crossAssignStrategy", "Cross Assignement Strategy", m_crossAssignStrategyCB, CROSSASSIGN_STRATEGY_VALUES, CROSSASSIGN_STRATEGY_KEYS, 0, null);
+        m_crossAssignStrategyParameter = new ObjectParameter<>("crossAssignStrategy", "Cross Assignment Strategy", m_crossAssignStrategyCB, CROSSASSIGN_STRATEGY_VALUES, CROSSASSIGN_STRATEGY_KEYS, 0, null);
         m_parameterList.add(m_crossAssignStrategyParameter);
 
         m_clusteringMoZTolTF = new JTextField();
@@ -780,7 +780,7 @@ public class LabelFreeMSParamsCompletePanel extends AbstractLabelFreeMSParamsPan
 
     private JPanel createCrossAssignmentPanel() {
         JPanel panel = new JPanel(new BorderLayout());
-        m_crossAssignCBoxTitle = new CheckBoxTitledBorder("Cross Assignement", true);
+        m_crossAssignCBoxTitle = new CheckBoxTitledBorder("Cross Assignment", true);
         m_crossAssignCBoxTitle.setEnabled(!m_readOnly);
         m_crossAssignCBoxTitle.addActionListener(new ActionListener() {
             @Override
@@ -799,7 +799,7 @@ public class LabelFreeMSParamsCompletePanel extends AbstractLabelFreeMSParamsPan
         cm.gridx = 0;
         cm.gridy = 0;
         cm.weightx = 0;
-        m_allowCrossAssignLabel = new JLabel("Allow cross assignement ");
+        m_allowCrossAssignLabel = new JLabel("Allow cross assignment ");
         m_crossAssignSettingsPanel.add(m_allowCrossAssignLabel, cm);
         cm.gridx++;
         cm.weightx = 1;

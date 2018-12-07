@@ -416,7 +416,7 @@ public class IdentificationPropertiesTableModel extends AbstractPropertiesTableM
 
                     Set<UsedPtm> usedPtmSet = searchSetting.getUsedPtms();
 
-                    HashSet<String> stringPtmSet = new HashSet<String>();
+                    HashSet<String> stringPtmSet = new HashSet<>();
 
                     Iterator<UsedPtm> it = usedPtmSet.iterator();
 
@@ -426,23 +426,27 @@ public class IdentificationPropertiesTableModel extends AbstractPropertiesTableM
 
                         if (usedPtm.getIsFixed()) {
 
-                            String shortName = usedPtm.getShortName();
+                            StringBuilder shortNamebuilder = new StringBuilder(usedPtm.getShortName());
 
-                            //m_sb.append(shortName);
-                            if (shortName.indexOf('(') == -1) {
-                                PtmSpecificity ptmSpecificity = usedPtm.getPtmSpecificity();
-                                if (ptmSpecificity != null) {
-                                    Character c = ptmSpecificity.getResidue();
-                                    if (c != null) {
-
-                                        shortName = shortName.concat("(").concat(c.toString()).concat(")");
+                            PtmSpecificity ptmSpecificity = usedPtm.getPtmSpecificity();
+                            if (ptmSpecificity != null) {
+                                Character c = ptmSpecificity.getResidue();
+                                if (c != null) {
+                                    shortNamebuilder.append("(").append(c.toString()).append(")");
+                                } else if(ptmSpecificity.getLocation() != null){
+                                    PtmSpecificity.PtmLocation loc =  PtmSpecificity.PtmLocation.withName(ptmSpecificity.getLocation());
+                                    switch(loc) {
+                                        case ANY_C_TERM:
+                                        case ANY_N_TERM:
+                                        case PROT_C_TERM:
+                                        case PROT_N_TERM:
+                                            shortNamebuilder.append("(").append(loc.toString()).append(")");
                                     }
                                 }
                             }
 
-                            stringPtmSet.add(shortName);
+                            stringPtmSet.add(shortNamebuilder.toString());
                         }
-
                     }
 
                     String[] array = stringPtmSet.toArray(new String[stringPtmSet.size()]);
@@ -468,7 +472,7 @@ public class IdentificationPropertiesTableModel extends AbstractPropertiesTableM
 
                     Set<UsedPtm> usedPtmSet = searchSetting.getUsedPtms();
 
-                    HashSet<String> stringPtmSet = new HashSet<String>();
+                    HashSet<String> stringPtmSet = new HashSet<>();
 
                     Iterator<UsedPtm> it = usedPtmSet.iterator();
                     while (it.hasNext()) {
@@ -476,23 +480,27 @@ public class IdentificationPropertiesTableModel extends AbstractPropertiesTableM
 
                         if (!usedPtm.getIsFixed()) {
 
-                            String shortName = usedPtm.getShortName();
-
-                            if (shortName.indexOf('(') == -1) {
-                                PtmSpecificity ptmSpecificity = usedPtm.getPtmSpecificity();
-                                if (ptmSpecificity != null) {
-                                    Character c = ptmSpecificity.getResidue();
-                                    if (c != null) {
-
-                                        shortName = shortName.concat("(").concat(c.toString()).concat(")");
+                            StringBuilder shortNameB = new StringBuilder(usedPtm.getShortName());
+                            
+                            PtmSpecificity ptmSpecificity = usedPtm.getPtmSpecificity();
+                            if (ptmSpecificity != null) {
+                                Character c = ptmSpecificity.getResidue();
+                                if (c != null) {
+                                    shortNameB.append("(").append(c.toString()).append(")");
+                                } else if(ptmSpecificity.getLocation() != null){
+                                    PtmSpecificity.PtmLocation loc =  PtmSpecificity.PtmLocation.withName(ptmSpecificity.getLocation());
+                                    switch(loc) {
+                                        case ANY_C_TERM:
+                                        case ANY_N_TERM:
+                                        case PROT_C_TERM:
+                                        case PROT_N_TERM:
+                                            shortNameB.append("(").append(loc.toString()).append(")");
                                     }
                                 }
+//                        }
                             }
-
-                            stringPtmSet.add(shortName);
-
+                            stringPtmSet.add(shortNameB.toString());
                         }
-
                     }
 
                     String[] array = stringPtmSet.toArray(new String[stringPtmSet.size()]);

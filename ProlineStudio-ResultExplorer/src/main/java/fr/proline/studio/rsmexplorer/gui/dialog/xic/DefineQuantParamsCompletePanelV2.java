@@ -374,7 +374,7 @@ public class DefineQuantParamsCompletePanelV2 extends AbstractDefineQuantParamsP
         //
         //*** Normalization Params
         //
-        if (quantParams.containsKey("normalization_method")){
+        if (quantParams.containsKey("normalization_method") && quantParams.get("normalization_method")!=null){
             m_normalizationSettingsCBTitle.setSelected(true);
             updateNormalizationSettings();
             m_normalizationParameter.setValue((String)quantParams.getOrDefault("normalization_method",FEATURE_NORMALIZATION_VALUES[0]));

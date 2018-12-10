@@ -9,10 +9,11 @@ import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabasePTMsTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dam.tasks.data.PTMSite;
-import fr.proline.studio.rsmexplorer.gui.PeptidesPTMSitePanel;
+import fr.proline.studio.rsmexplorer.gui.PeptidesPTMSiteTablePanel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
+import fr.proline.studio.rsmexplorer.gui.ptm.PanelPeptidesPTMSiteAll;
 
 /**
  *
@@ -47,7 +48,7 @@ public class DataBoxPTMSitePeptides extends AbstractDataBox {
     
     @Override
     public void createPanel() {
-        PeptidesPTMSitePanel p = new PeptidesPTMSitePanel(false);
+        PanelPeptidesPTMSiteAll p = new PanelPeptidesPTMSiteAll();
         p.setName(m_typeName);
         p.setDataBox(this);
         setDataBoxPanelInterface(p);        
@@ -61,14 +62,14 @@ public class DataBoxPTMSitePeptides extends AbstractDataBox {
         m_rsm = rsm;
 
         if (ptmSite == null) {
-            ((PeptidesPTMSitePanel)getDataBoxPanelInterface()).setData(null, null);           
+            ((PanelPeptidesPTMSiteAll)getDataBoxPanelInterface()).setData(null, null);           
             return;
         }
          
         m_logger.info("DATA Changed : Update PTMSite Peptide WINDOWS. " + ptmSite.toString()+" data loaded " + ptmSite.isLoaded());
         if(ptmSite.isLoaded()){
             m_previousTaskId = null;
-            ((PeptidesPTMSitePanel) getDataBoxPanelInterface()).setData(ptmSite, null);           
+            ((PanelPeptidesPTMSiteAll) getDataBoxPanelInterface()).setData(ptmSite, null);           
             propagateDataChanged(ExtendedTableModelInterface.class);
             return;
         }
@@ -86,9 +87,9 @@ public class DataBoxPTMSitePeptides extends AbstractDataBox {
             public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
                 m_logger.info(" Back from PTMSite Peptide task # "+taskId);
                  if (success) {
-                     ((PeptidesPTMSitePanel) getDataBoxPanelInterface()).setData(ptmSite, null);
+                     ((PanelPeptidesPTMSiteAll) getDataBoxPanelInterface()).setData(ptmSite, null);
                 } else {
-                    ((PeptidesPTMSitePanel) getDataBoxPanelInterface()).setData(null, null);
+                    ((PanelPeptidesPTMSiteAll) getDataBoxPanelInterface()).setData(null, null);
                 }
 
                 setLoaded(loadingId);
@@ -125,13 +126,13 @@ public class DataBoxPTMSitePeptides extends AbstractDataBox {
             }
 
             if (parameterType.equals(PTMSite.class)) {
-                PTMSite ptmSite = ((PeptidesPTMSitePanel) getDataBoxPanelInterface()).getSelectedPTMSite();
+                PTMSite ptmSite = ((PanelPeptidesPTMSiteAll) getDataBoxPanelInterface()).getSelectedPTMSite();
                 if (ptmSite != null)
                     return ptmSite;
             }
             
             if (parameterType.equals(DPeptideInstance.class)) {
-                DPeptideInstance selectedParentPepInstance = ((PeptidesPTMSitePanel) getDataBoxPanelInterface()).getSelectedPeptideInstance();
+                DPeptideInstance selectedParentPepInstance = ((PanelPeptidesPTMSiteAll) getDataBoxPanelInterface()).getSelectedPeptideInstance();
                 if (selectedParentPepInstance != null)
                     return selectedParentPepInstance;
             }

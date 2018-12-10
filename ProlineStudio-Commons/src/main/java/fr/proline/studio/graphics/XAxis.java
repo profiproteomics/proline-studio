@@ -36,13 +36,14 @@ public class XAxis extends Axis {
         }
 
         
-
+       
         if (m_selected) {
             g.setColor(Color.white);
         } else {
             g.setColor(Color.black);
         }
-
+        
+        //display Axis line
         if (m_log) {
             paintLog(g, m_ticks);
         } else {
@@ -368,16 +369,16 @@ public class XAxis extends Axis {
             return;
         }
 
-        
+        //pick the color to paint ticks on the line
         if (m_selected) {
             g.setColor(Color.white);
         } else {
             g.setColor(CyclicColorPalette.GRAY_TEXT_DARK);
         }
 
-        
+        //pick the font to paint ticks on the line
         g.setFont(m_mustDrawDiagonalLabels ? m_valuesDiagonalFont : m_valuesFont);
-
+        
         int height = m_valuesFontMetrics.getHeight();
 
         int fractionalDigits = ticks.getFractionalDigits();
@@ -425,8 +426,8 @@ public class XAxis extends Axis {
 
             if (posX > previousEndX + 2) { // check to avoid to overlap labels
                 
-                g.drawLine(pX, m_y+BasePlotPanel.GAP_AXIS_LINE, pX, m_y + 4+BasePlotPanel.GAP_AXIS_LINE);
-                g.drawString(label, posX, m_y + height + 4+BasePlotPanel.GAP_AXIS_LINE);
+                g.drawLine(pX, m_y+BasePlotPanel.GAP_AXIS_LINE, pX, m_y + 4+BasePlotPanel.GAP_AXIS_LINE);//draw tick
+                g.drawString(label, posX, m_y + height + 4+BasePlotPanel.GAP_AXIS_LINE);//draw label
                 
                 previousEndX = posX + m_labelMinWidth;
             }

@@ -51,13 +51,13 @@ import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
  *
  * @author VD225637
  */
-public class PeptidesPTMSitePanel extends JPanel implements DataBoxPanelInterface, GlobalTabelModelProviderInterface {
+public class PeptidesPTMSiteTablePanel extends JPanel implements DataBoxPanelInterface, GlobalTabelModelProviderInterface {
 
-    private AbstractDataBox m_dataBox;
+    protected AbstractDataBox m_dataBox;
 
     private JScrollPane m_peptidesPtmSiteScrollPane;
-    private PeptidesPTMSiteTable m_peptidesPtmSiteTable;
-    private MarkerContainerPanel m_markerContainerPanel;
+    protected PeptidesPTMSiteTable m_peptidesPtmSiteTable;
+    protected MarkerContainerPanel m_markerContainerPanel;
 
     private SearchToggleButton m_searchToggleButton;
     private InfoToggleButton m_infoToggleButton;
@@ -67,8 +67,8 @@ public class PeptidesPTMSitePanel extends JPanel implements DataBoxPanelInterfac
     private ExportButton m_exportButton;
     private AddDataAnalyzerButton m_addCompareDataButton;
 
-    private PTMSite m_currentPeptidesPTMSite = null;
-    private DPeptideInstance m_currentPepInst = null;
+    protected PTMSite m_currentPeptidesPTMSite = null;
+    protected DPeptideInstance m_currentPepInst = null;
 
     
     private final boolean m_displayPeptidesMatches;
@@ -79,7 +79,7 @@ public class PeptidesPTMSitePanel extends JPanel implements DataBoxPanelInterfac
      * display only best PeptideMatch of all Peptide Instance for this PTMSite.
      * 
      */
-    public PeptidesPTMSitePanel(boolean viewAll) {
+    public PeptidesPTMSiteTablePanel(boolean viewAll) {
         m_displayPeptidesMatches = viewAll;
         initComponents();
     }
@@ -116,7 +116,7 @@ public class PeptidesPTMSitePanel extends JPanel implements DataBoxPanelInterfac
         return tableModel.getSelectedPeptideInstance(selectedRow);
     }
     
-    private int getSelectedTableModelRow(){
+    public int getSelectedTableModelRow(){
         
         // Retrieve Selected Row
         int selectedRow = m_peptidesPtmSiteTable.getSelectedRow();
@@ -462,7 +462,7 @@ public class PeptidesPTMSitePanel extends JPanel implements DataBoxPanelInterfac
 
         @Override
         public TablePopupMenu initPopupMenu() {
-            m_popupMenu = new DisplayTablePopupMenu(PeptidesPTMSitePanel.this);
+            m_popupMenu = new DisplayTablePopupMenu(PeptidesPTMSiteTablePanel.this);
 
             return m_popupMenu;
         }

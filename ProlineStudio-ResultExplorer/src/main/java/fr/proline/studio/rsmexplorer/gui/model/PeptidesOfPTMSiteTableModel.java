@@ -55,9 +55,9 @@ public class PeptidesOfPTMSiteTableModel extends DecoratedTableModel implements 
     public static final int COLTYPE_DELTA_MASS_PTM = 11;
     public static final int COLTYPE_PTM_PROBA = 12;
     public static final int COLTYPE_QUERY_TITLE = 13;
-    
+
     static class Row {
-        
+
         DPeptideInstance peptideInstance;
         DPeptideMatch peptideMatch;
 
@@ -65,98 +65,103 @@ public class PeptidesOfPTMSiteTableModel extends DecoratedTableModel implements 
             this.peptideInstance = peptideInstance;
             this.peptideMatch = peptideMatch;
         }
-        
+
     }
 //    public static final int COLTYPE_HIDDEN_PROTEIN_PTM = 16; // hidden column, must be the last
-   
+
     private static final String[] m_columnNames = {"Id", "Peptide", "Score", "Modification", "Residue", "Site Probability", "Modification D.Mass", "Modification Loc.", "Protein Loc.", "Protein N/C-term", "PTM", "PTM D.Mass", "PTM Probability", "Query title"};
     private static final String[] m_columnTooltips =  {"Peptide Id (Instance Id)", "Peptide", "Score of the peptide match", "Modification", "Modified residue", "Site probability", "Delta mass of the given modification", "Position of the modification on the peptide sequence", "Position of the modification on the protein sequence", "Protein N/C-term", "PTM modifications associated with this peptide", "PTMs delta mass", "PTMs probability", "Peptide match query title"};
     private final HashMap<Integer, TableCellRenderer> m_rendererMap = new HashMap();
 
     private PTMSite m_currentPtmSite;
-    private ArrayList<Row> m_ptmSitePeptides = new ArrayList<>(); 
+    private ArrayList<Row> m_ptmSitePeptides = new ArrayList<>();
     private ScoreRenderer m_scoreRenderer = new ScoreRenderer();
-        
+
     private String m_modelName;
-    private boolean m_showPeptideMatches = false; 
-    
+    private boolean m_showPeptideMatches = false;
+
     protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
 
     /**
      * Set data for this table Model
+     *
      * @param selectedPTMSite : PTM Site to display peptides [matches] for
-     * @param showPeptideMatches : specify if all peptide matches should be displayed or only best ones
-     * @param parentPepInstance : Specify the peptide instance ID to display peptide matches for. This parameter is only
-     * used if showPeptideMatches = true
+     * @param showPeptideMatches : specify if all peptide matches should be
+     * displayed or only best ones
+     * @param parentPepInstance : Specify the peptide instance ID to display
+     * peptide matches for. This parameter is only used if showPeptideMatches =
+     * true
      */
-    public void setData(PTMSite selectedPTMSite,boolean showPeptideMatches, DPeptideInstance parentPepInstance) {
+    public void setData(PTMSite selectedPTMSite, boolean showPeptideMatches, DPeptideInstance parentPepInstance) {
         m_currentPtmSite = selectedPTMSite;
         m_showPeptideMatches = showPeptideMatches;
         m_ptmSitePeptides = new ArrayList<>();
-        if(m_currentPtmSite == null){
+        if (m_currentPtmSite == null) {
             fireTableDataChanged();
             return;
         }
-        
+
         //Get all Peptide Instances Best PSM
-        if(!m_currentPtmSite.isLoaded()){
-            m_logger.warn("Peptide Matches not loaded for PTM Site "+m_currentPtmSite.toString());
+        if (!m_currentPtmSite.isLoaded()) {
+            m_logger.warn("Peptide Matches not loaded for PTM Site " + m_currentPtmSite.toString());
+        } else if (!m_showPeptideMatches) {
+//                m_currentPtmSite.getParentPeptideInstances().forEach(parentPeptideInstance -> {
+//                    DPeptideMatch bestPM = m_currentPtmSite.getBestPeptideMatchForPeptide(parentPeptideInstance.getPeptideId());
+//                    m_ptmSitePeptides.add(new Row(parentPeptideInstance, bestPM));
+//                });
+
+            List<DPeptideInstance> dpInstanceList = m_currentPtmSite.getParentPeptideInstances();
+            for (DPeptideInstance parentPeptideInstance : dpInstanceList) {
+                DPeptideMatch bestPM = m_currentPtmSite.getBestPeptideMatchForPeptide(parentPeptideInstance.getPeptideId());
+                m_ptmSitePeptides.add(new Row(parentPeptideInstance, bestPM));
+            }
+        } else if (parentPepInstance == null) {
+            // TODO : request all PeptideMatches ??
+            m_logger.warn("Must shown all peptide matches but no peptide instance specified for PTM Site " + m_currentPtmSite.toString());
         } else {
 
-            if (!m_showPeptideMatches) {
-                m_currentPtmSite.getParentPeptideInstances().forEach(parentPeptideInstance -> {
-                    DPeptideMatch bestPM = m_currentPtmSite.getBestPeptideMatchForPeptide(parentPeptideInstance.getPeptideId());
-                    m_ptmSitePeptides.add(new Row(parentPeptideInstance, bestPM));
-                });
-            } else {
-                if(parentPepInstance == null ){
-                    // TODO : request all PeptideMatches ??
-                    m_logger.warn("Must shown all peptide matches but no peptide instance specified for PTM Site "+m_currentPtmSite.toString());
-                } else {
-                    
-                    List<DPeptideInstance> peptideInstancesForPeptide = m_currentPtmSite.getLeafPeptideInstances(parentPepInstance.getPeptideId());
-                    
-                    if (peptideInstancesForPeptide == null) {
-                        // PtmSite and parentPepInstance do not correspond for the moment (asynchronous loading)
-                        m_currentPtmSite = null;
-                        fireTableDataChanged();
-                        return;
-                    }
-                    
-                    for (DPeptideInstance pi : peptideInstancesForPeptide) {
-                        for (DPeptideMatch pepMatch : pi.getPeptideMatches()) {
-                            m_ptmSitePeptides.add(new Row(pi, pepMatch));
-                        }
-                    }
-                    
-                    /*peptideMatchesForPeptide.forEach(entry  -> {
+            List<DPeptideInstance> peptideInstancesForPeptide = m_currentPtmSite.getLeafPeptideInstances(parentPepInstance.getPeptideId());
+
+            if (peptideInstancesForPeptide == null) {
+                // PtmSite and parentPepInstance do not correspond for the moment (asynchronous loading)
+                m_currentPtmSite = null;
+                fireTableDataChanged();
+                return;
+            }
+
+            for (DPeptideInstance pi : peptideInstancesForPeptide) {
+                for (DPeptideMatch pepMatch : pi.getPeptideMatches()) {
+                    m_ptmSitePeptides.add(new Row(pi, pepMatch));
+                }
+            }
+
+            /*peptideMatchesForPeptide.forEach(entry  -> {
                         entry.getValue().forEach( pepMatch -> {
                             m_ptmSitePeptides.add(new Row(entry.getKey(), pepMatch));
                         });
-                    });          */      
-                }
-            }
+                    });          */
         }
         fireTableDataChanged();
     }
-    
-    
-    public PTMSite getCurrentPTMSite(){
+
+    public PTMSite getCurrentPTMSite() {
         return m_currentPtmSite;
     }
-        
-    public DPeptideMatch getSelectedPeptideMatchSite(int row){
-        if(row <0 || (row >= getRowCount()) )
+
+    public DPeptideMatch getSelectedPeptideMatchSite(int row) {
+        if (row < 0 || (row >= getRowCount())) {
             return null;
-        return m_ptmSitePeptides.get(row).peptideMatch;        
+        }
+        return m_ptmSitePeptides.get(row).peptideMatch;
     }
-    
-    public DPeptideInstance getSelectedPeptideInstance(int row){
-        if(row <0 || (row >= getRowCount()) )
+
+    public DPeptideInstance getSelectedPeptideInstance(int row) {
+        if (row < 0 || (row >= getRowCount())) {
             return null;
+        }
         return m_ptmSitePeptides.get(row).peptideInstance;
     }
-    
+
     @Override
     public int getRowCount() {
         return m_ptmSitePeptides.size();
@@ -164,26 +169,25 @@ public class PeptidesOfPTMSiteTableModel extends DecoratedTableModel implements 
 
     @Override
     public int getColumnCount() {
-        return m_columnNames.length;    
+        return m_columnNames.length;
     }
-    
+
     @Override
     public String getColumnName(int col) {
         return m_columnNames[col];
     }
 
-     
-    
     @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
-        
+
         DPeptideMatch pepMatch = m_ptmSitePeptides.get(rowIndex).peptideMatch;
-        switch (columnIndex){
+        switch (columnIndex) {
             case COLTYPE_PEPTIDE_ID:
-                if(m_showPeptideMatches)
+                if (m_showPeptideMatches) {
                     return pepMatch.getId();
-                else
+                } else {
                     return m_ptmSitePeptides.get(rowIndex).peptideInstance.getId();
+                }
             case COLTYPE_PEPTIDE_NAME:
                 return pepMatch;
             case COLTYPE_PEPTIDE_SCORE:
@@ -205,7 +209,7 @@ public class PeptidesOfPTMSiteTableModel extends DecoratedTableModel implements 
                 } else if (locationSpecitifcity.contains("C-term")) {
                     return "C-term";
                 }
-                
+
                 return String.valueOf((int) m_currentPtmSite.getPtmPositionOnPeptide(pepMatch.getPeptide().getId()));
             }
             case COLTYPE_PROTEIN_LOC: {
@@ -221,21 +225,22 @@ public class PeptidesOfPTMSiteTableModel extends DecoratedTableModel implements 
             case COLTYPE_PTM_PROBA: {
                 DPtmSiteProperties properties = pepMatch.getPtmSiteProperties();
                 if (properties != null) {
-                    return properties.getMascotDeltaScore()*100;
+                    return properties.getMascotDeltaScore() * 100;
                 }
                 return null;
             }
             case COLTYPE_MODIFICATION_PROBA: {
-               DPtmSiteProperties properties = pepMatch.getPtmSiteProperties();
-               if (properties != null) {
-                   Float proba = properties.getMascotProbabilityBySite().get(m_currentPtmSite.toReadablePtmString(pepMatch.getPeptide().getId()));
+                DPtmSiteProperties properties = pepMatch.getPtmSiteProperties();
+                if (properties != null) {
+                    Map<String, Float> test = properties.getMascotProbabilityBySite();
+                    Float proba = properties.getMascotProbabilityBySite().get(m_currentPtmSite.toReadablePtmString(pepMatch.getPeptide().getId()));
                     // VDS Workaround test for issue #16643                      
                     if (proba == null) {
                         proba = properties.getMascotProbabilityBySite().get(m_currentPtmSite.toOtherReadablePtmString(pepMatch.getPeptide().getId()));
                     }
                     //END VDS Workaround
 //                    return properties.getMascotProbabilityBySite().get(m_currentPtmSite.toReadablePtmString(pepMatch.getPeptide().getId()))*100;
-                    return proba*100;
+                    return proba * 100;
                 }
                 return null;
             }
@@ -248,11 +253,11 @@ public class PeptidesOfPTMSiteTableModel extends DecoratedTableModel implements 
                     deltaMass += pepInfoPtm.getMonoMass();
                 }
                 return deltaMass;
-                
+
             case COLTYPE_DELTA_MASS_MODIFICATION: {
                 return m_currentPtmSite.getPtmSpecificity().getMonoMass();
             }
- 
+
             case COLTYPE_RESIDUE_AA: {
                 return m_currentPtmSite.getPtmSpecificity().getRresidueAASpecificity();
             }
@@ -266,18 +271,18 @@ public class PeptidesOfPTMSiteTableModel extends DecoratedTableModel implements 
 
     @Override
     public String getToolTipForHeader(int col) {
-        if(col == COLTYPE_PEPTIDE_ID && m_showPeptideMatches)            
-            return "Peptide Match Id";        
-        else
-            return m_columnTooltips[col];        
+        if (col == COLTYPE_PEPTIDE_ID && m_showPeptideMatches) {
+            return "Peptide Match Id";
+        } else {
+            return m_columnTooltips[col];
+        }
     }
 
     @Override
     public String getTootlTipValue(int row, int col) {
-         return null;
+        return null;
     }
-   
-    
+
     @Override
     public TableCellRenderer getRenderer(int row, int col) {
         if (m_rendererMap.containsKey(col)) {
@@ -342,18 +347,18 @@ public class PeptidesOfPTMSiteTableModel extends DecoratedTableModel implements 
 
     @Override
     public void givePriorityTo(Long taskId, int row, int col) {
-       //not used
+        //not used
     }
 
     @Override
     public void sortingChanged(int col) {
         // not used
-        
+
     }
 
     @Override
     public int getSubTaskId(int col) {
-         return -1; // not used
+        return -1; // not used
     }
 
     @Override
@@ -368,12 +373,11 @@ public class PeptidesOfPTMSiteTableModel extends DecoratedTableModel implements 
         }
         return getColumnClass(columnIndex);
     }
-    
+
     @Override
     public Class getColumnClass(int col) {
 
-        
-        switch (col){
+        switch (col) {
             case COLTYPE_PEPTIDE_ID:
                 return Long.class;
             case COLTYPE_PEPTIDE_NAME:
@@ -397,10 +401,9 @@ public class PeptidesOfPTMSiteTableModel extends DecoratedTableModel implements 
                 return Character.class;
         }
 
-        
         return null;
     }
-    
+
     @Override
     public Object getDataValueAt(int rowIndex, int columnIndex) {
         if (columnIndex == COLTYPE_PEPTIDE_NAME) {
@@ -411,7 +414,7 @@ public class PeptidesOfPTMSiteTableModel extends DecoratedTableModel implements 
 
     @Override
     public int[] getKeysColumn() {
-        int[] keys = { COLTYPE_PEPTIDE_NAME, COLTYPE_PEPTIDE_ID };
+        int[] keys = {COLTYPE_PEPTIDE_NAME, COLTYPE_PEPTIDE_ID};
         return keys;
     }
 
@@ -429,11 +432,10 @@ public class PeptidesOfPTMSiteTableModel extends DecoratedTableModel implements 
     public String getName() {
         return m_modelName;
     }
-    
-    
+
     @Override
     public Map<String, Object> getExternalData() {
-         return null;
+        return null;
     }
 
     @Override
@@ -497,7 +499,7 @@ public class PeptidesOfPTMSiteTableModel extends DecoratedTableModel implements 
 
     @Override
     public String getExportRowCell(int row, int col) {
-         return ExportModelUtilities.getExportRowCell(this, row, col);
+        return ExportModelUtilities.getExportRowCell(this, row, col);
     }
 
     @Override
@@ -509,5 +511,5 @@ public class PeptidesOfPTMSiteTableModel extends DecoratedTableModel implements 
     public String getExportColumnName(int col) {
         return getColumnName(col);
     }
-    
+
 }

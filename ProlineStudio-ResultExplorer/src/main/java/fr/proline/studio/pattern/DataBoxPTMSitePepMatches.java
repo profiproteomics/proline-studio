@@ -8,7 +8,7 @@ import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabasePTMsTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dam.tasks.data.PTMSite;
-import fr.proline.studio.rsmexplorer.gui.PeptidesPTMSitePanel;
+import fr.proline.studio.rsmexplorer.gui.PeptidesPTMSiteTablePanel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
@@ -48,7 +48,7 @@ public class DataBoxPTMSitePepMatches extends AbstractDataBox {
     
     @Override
     public void createPanel() {
-        PeptidesPTMSitePanel p = new PeptidesPTMSitePanel(true);
+        PeptidesPTMSiteTablePanel p = new PeptidesPTMSiteTablePanel(true);
         p.setName(m_typeName);
         p.setDataBox(this);
         setDataBoxPanelInterface(p);        
@@ -68,7 +68,7 @@ public class DataBoxPTMSitePepMatches extends AbstractDataBox {
             PTMSite ptmSiteTest = (PTMSite) m_previousDataBox.getData(false, PTMSite.class); 
             DPeptideInstance pepInstanceTest = (DPeptideInstance) m_previousDataBox.getData(false, DPeptideInstance.class); 
             
-            ((PeptidesPTMSitePanel)getDataBoxPanelInterface()).setData(null, null);           
+            ((PeptidesPTMSiteTablePanel)getDataBoxPanelInterface()).setData(null, null);           
             return;
         }
         
@@ -76,7 +76,7 @@ public class DataBoxPTMSitePepMatches extends AbstractDataBox {
         m_logger.info("DATA Changed : Update PepMatch WINDOWS. " + ptmSite.toString()+" data loaded " + ptmSite.isLoaded());
         if(ptmSite.isLoaded()){
             m_previousTaskId = null;
-            ((PeptidesPTMSitePanel) getDataBoxPanelInterface()).setData(ptmSite, m_parentPeptideInstance);           
+            ((PeptidesPTMSiteTablePanel) getDataBoxPanelInterface()).setData(ptmSite, m_parentPeptideInstance);           
             propagateDataChanged(ExtendedTableModelInterface.class);
             return;
         }
@@ -94,9 +94,9 @@ public class DataBoxPTMSitePepMatches extends AbstractDataBox {
             public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
                 m_logger.info(" Back from PepMatch task # "+taskId);
                 if (success) {
-                    ((PeptidesPTMSitePanel) getDataBoxPanelInterface()).setData(ptmSite, pepInstance);
+                    ((PeptidesPTMSiteTablePanel) getDataBoxPanelInterface()).setData(ptmSite, pepInstance);
                 } else {
-                    ((PeptidesPTMSitePanel) getDataBoxPanelInterface()).setData(null, null);
+                    ((PeptidesPTMSiteTablePanel) getDataBoxPanelInterface()).setData(null, null);
                 }
 
                 setLoaded(loadingId);
@@ -128,20 +128,20 @@ public class DataBoxPTMSitePepMatches extends AbstractDataBox {
         if (parameterType != null) {
 
             if (parameterType.equals(PTMSite.class)) {
-                PTMSite ptmSite = ((PeptidesPTMSitePanel) getDataBoxPanelInterface()).getSelectedPTMSite();
+                PTMSite ptmSite = ((PeptidesPTMSiteTablePanel) getDataBoxPanelInterface()).getSelectedPTMSite();
                 if (ptmSite != null)
                     return ptmSite;
             }
                         
             if (parameterType.equals(DPeptideMatch.class)) {
-                DPeptideMatch selectedPeptideMatch = ((PeptidesPTMSitePanel) getDataBoxPanelInterface()).getSelectedPeptideMatchSite();
+                DPeptideMatch selectedPeptideMatch = ((PeptidesPTMSiteTablePanel) getDataBoxPanelInterface()).getSelectedPeptideMatchSite();
                 if (selectedPeptideMatch != null)
                     return selectedPeptideMatch;
             }
             
             if (parameterType.equals(MsQueryInfoRset.class)) {
-                DPeptideMatch pepMatch = ((PeptidesPTMSitePanel) getDataBoxPanelInterface()).getSelectedPeptideMatchSite();
-                DPeptideInstance pepInstance = ((PeptidesPTMSitePanel) getDataBoxPanelInterface()).getSelectedPeptideInstance();
+                DPeptideMatch pepMatch = ((PeptidesPTMSiteTablePanel) getDataBoxPanelInterface()).getSelectedPeptideMatchSite();
+                DPeptideInstance pepInstance = ((PeptidesPTMSiteTablePanel) getDataBoxPanelInterface()).getSelectedPeptideInstance();
                 if (pepMatch != null && pepInstance != null) {
                     return new MsQueryInfoRset(pepMatch.getMsQuery(), pepInstance.getResultSummary().getResultSet());
                 }

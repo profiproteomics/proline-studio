@@ -81,6 +81,9 @@ public abstract class Axis {
         return !m_isPixel;
     }
     
+    /**
+     * a small panel can be defined by user the Min Max of the axis
+     */
     public static class AxisRangePanel extends JPanel {
 
         private JTextField m_minTextField;
@@ -103,7 +106,7 @@ public abstract class Axis {
             closeButton.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    setVisible(false);
+                    setVisible(true);
                 }
             });
 

@@ -27,42 +27,7 @@ public class PtmSitePeptide {
 
     private ArrayList<PtmSiteAA> _ptmList;
 
-    /**
-     * used by test demo
-     *
-     * @param pepId
-     * @param pepMatchId
-     * @param aa, specify amino aide
-     * @param sequence
-     * @param ptm
-     * @param locationInPep, the specify aa location in pep
-     * @param locationProtein, the specify aa location in protein
-     * @param ptmProbability, the specify aa ptm probability
-     */
-//    public PtmSitePeptide(long pepId, long pepMatchId, Character aa, String sequence, String ptm, int locationInPep, int locationProtein, float ptmProbability) {
-//
-//        _ptmList = new ArrayList<PtmSiteAA>();
-//        _beginInProtein = locationProtein - locationInPep; //@todo bug, when N-term and PTM at 1
-//        this._pepId = pepId;
-//        this._pepMatchId = pepMatchId;
-//        this._sequence = sequence;
-//
-//        this._locationInPep = locationInPep;
-//        this._locationProtein = locationProtein;
-//        this._ptmProbability = ptmProbability;
-//        String[] ptmSet = ptm.split(";");
-//
-//        for (String element : ptmSet) {
-//            PtmSiteAA pSite = createPtmSiteAA(element, _beginInProtein);
-//            if (Objects.equals(pSite.getAminoAcid(), aa)) {//juste a check
-//                if (locationInPep != pSite.getModifyLocPep() || locationProtein != pSite.getModifyLocProtein()) {
-//                    logger.error("Amino acide: " + aa + "(" + locationInPep + "," + locationProtein + ") <>" + pSite.toString());
-//                }
-//            }
-//            _ptmList.add(pSite);
-//        }
-//
-//    }
+
 
     /**
      *

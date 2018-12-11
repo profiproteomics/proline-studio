@@ -8,17 +8,12 @@ package fr.proline.studio.rsmexplorer.gui.ptm;
 import fr.proline.studio.rsmexplorer.gui.ptm.mark.PtmMarkCtrl;
 import fr.proline.studio.rsmexplorer.gui.ptm.pep.PeptideAreaCtrl;
 import fr.proline.studio.rsmexplorer.gui.ptm.mark.ProteinSequenceCtrl;
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
+
+import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import javax.swing.BoxLayout;
-import javax.swing.JPanel;
-import javax.swing.JScrollBar;
-import javax.swing.JScrollPane;
+import javax.swing.*;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,6 +40,7 @@ public class PanelPtmDraw extends JPanel implements MouseListener{
         _peptidePane = new PeptidePane(ctrlPeptideArea);
         _rowCount = 0;
         _sequenceLength = 0;
+        setDoubleBuffered(false);
         initComponents();
     }
 
@@ -55,20 +51,22 @@ public class PanelPtmDraw extends JPanel implements MouseListener{
 
         _peptidePane.setBackground(Color.WHITE);
         _peptidePane.setPreferredSize(new Dimension(INITIAL_WIDTH, ViewSetting.HEIGHT_MARK * 5));
-        JScrollPane verticalScrollPane = new JScrollPane(_peptidePane, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
-                JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-        verticalScrollPane.getViewport().setPreferredSize(new Dimension(INITIAL_WIDTH, ViewSetting.HEIGHT_MARK * 3));
 
-        ContentPane pane = new ContentPane();
+//        JScrollPane verticalScrollPane = new JScrollPane(_peptidePane, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+//        verticalScrollPane.getViewport().setPreferredSize(new Dimension(INITIAL_WIDTH, ViewSetting.HEIGHT_MARK * 3));
+
+//        ContentPane pane = new ContentPane();
         //BoxLayout take the MaximumSize
-        pane.setLayout(new BoxLayout(pane, BoxLayout.Y_AXIS));
-        pane.add(_titlePane);
-        pane.add(verticalScrollPane);
-        pane.setPreferredSize(new Dimension(INITIAL_WIDTH, INITIAL_HEIGHT));
+//        pane.setLayout(new BoxLayout(pane, BoxLayout.Y_AXIS));
+//        pane.add(_titlePane);
+//        pane.add(verticalScrollPane);
+//        pane.setPreferredSize(new Dimension(INITIAL_WIDTH, INITIAL_HEIGHT));
 
-        _horizonScrollPane = new JScrollPane(pane, JScrollPane.VERTICAL_SCROLLBAR_NEVER,
-                JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
-        _horizonScrollPane.getViewport().setPreferredSize(new Dimension(0, 250));
+        _horizonScrollPane = new JScrollPane(_peptidePane, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        _horizonScrollPane.getViewport().setPreferredSize(new Dimension(INITIAL_WIDTH, INITIAL_HEIGHT));
+
+        _horizonScrollPane.setColumnHeaderView(_titlePane);
+
         this.setLayout(new BorderLayout());
         this.add(_horizonScrollPane, BorderLayout.CENTER);
     }
@@ -87,9 +85,10 @@ public class PanelPtmDraw extends JPanel implements MouseListener{
     public void setAjustedLocation(int ajustedLocation) {
         this._ajustedLocation = ajustedLocation;
         if (ajustedLocation >= AJUSTE_GAP) {
+            //TODO Cby rq =assigning the parameter value does not change anything ..
             ajustedLocation -= AJUSTE_GAP;
         }
-        InitComponentPost();
+//        InitComponentPost();
     }
 
     void setRowCount(int rowCount) {
@@ -157,7 +156,6 @@ public class PanelPtmDraw extends JPanel implements MouseListener{
 
         private TitlePane(PtmMarkCtrl ctrlMark, ProteinSequenceCtrl ctrlSequence) {
             super();
-
             _ctrlMark = ctrlMark;
             _ctrlSequence = ctrlSequence;
             _ctrlMark.setBeginPoint(ViewSetting.BORDER_GAP + ViewSetting.WIDTH_AA, ViewSetting.BORDER_GAP);
@@ -185,11 +183,13 @@ public class PanelPtmDraw extends JPanel implements MouseListener{
         public Dimension getPreferredSize() {
             //logger.debug("title Pane preferred size: (" + this.getWidth() + "," + this.getHeight() + ")");
             //logger.debug("getPreferredSize horizontal value: " + _horizonScrollPane.getHorizontalScrollBar().getValue());
-            return new Dimension(this.getWidth(), ViewSetting.HEIGHT_MARK + ViewSetting.HEIGHT_SEQUENCE);
+            return new Dimension((_sequenceLength + AJUSTE_GAP-_ajustedLocation) * ViewSetting.WIDTH_AA, ViewSetting.HEIGHT_MARK + ViewSetting.HEIGHT_SEQUENCE);
         }
 
         @Override
         protected void paintComponent(Graphics g) {
+            this.isPaintingOrigin();
+
             super.paintComponent(g);
             if (_isDataLoaded) {
                 Graphics2D g2 = (Graphics2D) g;
@@ -197,6 +197,7 @@ public class PanelPtmDraw extends JPanel implements MouseListener{
                 _ctrlSequence.paint(g2, _ajustedLocation, this.getWidth());
             }
         }
+
     }
 
     private class PeptidePane extends JPanel {
@@ -231,4 +232,125 @@ public class PanelPtmDraw extends JPanel implements MouseListener{
         }
     }
 
+}
+
+
+/* Rule.java is used by ScrollDemo.java. */
+class Rule extends JComponent {
+    public static final int INCH = Toolkit.getDefaultToolkit().
+        getScreenResolution();
+    public static final int HORIZONTAL = 0;
+    public static final int VERTICAL = 1;
+    public static final int SIZE = 35;
+
+    public int orientation;
+    public boolean isMetric;
+    private int increment;
+    private int units;
+
+    public Rule(int o, boolean m) {
+        orientation = o;
+        isMetric = m;
+        setIncrementAndUnits();
+    }
+
+    public void setIsMetric(boolean isMetric) {
+        this.isMetric = isMetric;
+        setIncrementAndUnits();
+        repaint();
+    }
+
+    private void setIncrementAndUnits() {
+        if (isMetric) {
+            units = (int)((double)INCH / (double)2.54); // dots per centimeter
+            increment = units;
+        } else {
+            units = INCH;
+            increment = units / 2;
+        }
+    }
+
+    public boolean isMetric() {
+        return this.isMetric;
+    }
+
+    public int getIncrement() {
+        return increment;
+    }
+
+    public void setPreferredHeight(int ph) {
+        setPreferredSize(new Dimension(SIZE, ph));
+    }
+
+    public void setPreferredWidth(int pw) {
+        setPreferredSize(new Dimension(pw, SIZE));
+    }
+
+    protected void paintComponent(Graphics g) {
+        Rectangle drawHere = g.getClipBounds();
+
+        // Fill clipping area with dirty brown/orange.
+        g.setColor(new Color(230, 163, 4));
+        g.fillRect(drawHere.x, drawHere.y, drawHere.width, drawHere.height);
+
+        // Do the ruler labels in a small font that's black.
+        g.setFont(new Font("SansSerif", Font.PLAIN, 10));
+        g.setColor(Color.black);
+
+        // Some vars we need.
+        int end = 0;
+        int start = 0;
+        int tickLength = 0;
+        String text = null;
+
+        // Use clipping bounds to calculate first and last tick locations.
+        if (orientation == HORIZONTAL) {
+            start = (drawHere.x / increment) * increment;
+            end = (((drawHere.x + drawHere.width) / increment) + 1)
+                * increment;
+        } else {
+            start = (drawHere.y / increment) * increment;
+            end = (((drawHere.y + drawHere.height) / increment) + 1)
+                * increment;
+        }
+
+        // Make a special case of 0 to display the number
+        // within the rule and draw a units label.
+        if (start == 0) {
+            text = Integer.toString(0) + (isMetric ? " cm" : " in");
+            tickLength = 10;
+            if (orientation == HORIZONTAL) {
+                g.drawLine(0, SIZE-1, 0, SIZE-tickLength-1);
+                g.drawString(text, 2, 21);
+            } else {
+                g.drawLine(SIZE-1, 0, SIZE-tickLength-1, 0);
+                g.drawString(text, 9, 10);
+            }
+            text = null;
+            start = increment;
+        }
+
+        // ticks and labels
+        for (int i = start; i < end; i += increment) {
+            if (i % units == 0)  {
+                tickLength = 10;
+                text = Integer.toString(i/units);
+            } else {
+                tickLength = 7;
+                text = null;
+            }
+
+            if (tickLength != 0) {
+                if (orientation == HORIZONTAL) {
+                    g.drawLine(i, SIZE-1, i, SIZE-tickLength-1);
+                    if (text != null)
+                        g.drawString(text, i-3, 21);
+                } else {
+                    g.drawLine(SIZE-1, i, SIZE-tickLength-1, i);
+                    if (text != null)
+                        g.drawString(text, 9, i+3);
+                }
+            }
+        }
+    }
 }

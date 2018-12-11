@@ -62,41 +62,42 @@ public class PtmMarkView extends ViewPtmAbstract {
      * @param locationAjusted
      */
     @Override
-    public void paint(Graphics2D g, int locationAjusted, int areaWidth) {
-
+    public void paint(Graphics2D g, int locationAjusted, int fontWidth) {
+        fontWidth = 14;
         FontMetrics fm = g.getFontMetrics(ViewSetting.FONT_PTM);
         int descent = fm.getDescent();
         int StringHeight = fm.getHeight();
 
-        this.x0 = this.m_x + (this._locationProtein - locationAjusted - 1 + this._ajustNTermAt1) * ViewSetting.WIDTH_AA;
+        this.x0 = this.m_x + fontWidth+ (this._locationProtein - locationAjusted - 1 + this._ajustNTermAt1) * fontWidth;
         //this.x0 = this.m_x + (this._locationProtein - locationAjusted-1) * ViewSetting.WIDTH_AA;
-        this.y0 = this.m_y + ViewSetting.WIDTH_AA; //reserve location line
+        this.y0 = this.m_y + ViewSetting.HEIGHT_AA; //reserve location line
 
         g.setColor(m_color);
         //draw box
         g.setStroke(STROKE);
 
-        g.drawLine(x0, y0, x0 + ViewSetting.WIDTH_AA, y0);
-        g.drawLine(x0 + ViewSetting.WIDTH_AA, y0, x0 + ViewSetting.WIDTH_AA, y0 + ViewSetting.WIDTH_AA);
-        g.drawLine(x0, y0, x0, y0 + ViewSetting.WIDTH_AA);
-        g.drawLine(x0, y0 + ViewSetting.WIDTH_AA, x0 + ViewSetting.WIDTH_AA, y0 + ViewSetting.WIDTH_AA);
-        int yBottom = (int) (y0 + ViewSetting.WIDTH_AA * 1.5);
-        int xCenter = x0 + ViewSetting.WIDTH_AA / 2;
-        g.drawLine(xCenter, y0 + ViewSetting.WIDTH_AA, xCenter, yBottom);
-        g.drawLine(x0, yBottom, x0 + ViewSetting.WIDTH_AA, yBottom);
+        g.drawLine(x0, y0, x0 + fontWidth, y0);
+        g.drawLine(x0 + fontWidth, y0, x0 + fontWidth, y0 + ViewSetting.HEIGHT_AA);
+        g.drawLine(x0 + fontWidth, y0 + ViewSetting.HEIGHT_AA, x0, y0+ ViewSetting.HEIGHT_AA);
+        g.drawLine(x0, y0 + ViewSetting.HEIGHT_AA, x0, y0);
+        
+        int yBottom = (int) (y0 + ViewSetting.HEIGHT_AA * 1.5);
+        int xCenter = x0 + fontWidth / 2;
+        g.drawLine(xCenter, y0 + ViewSetting.HEIGHT_AA, xCenter, yBottom);
+        g.drawLine(x0, yBottom, x0 + ViewSetting.HEIGHT_AA, yBottom);
 
         //draw PTM Type in the box
         g.setFont(ViewSetting.FONT_PTM);
 
         int stringWidth = fm.stringWidth("" + m_type);
         // g.drawString(m_type, xCenter - stringWidth / 2, y0 + ViewSetting.WIDTH_AA - descent / 3); //x, y are base line begin x, y
-        g.drawString(m_type, xCenter - stringWidth / 2, y0 + ViewSetting.WIDTH_AA - 1); //x, y are base line begin x, y
+        g.drawString(m_type, xCenter - stringWidth / 2, y0 + ViewSetting.HEIGHT_AA - 1); //x, y are base line begin x, y
         //draw the location number upper
         g.setColor(CyclicColorPalette.GRAY_TEXT_DARK);
         g.setFont(ViewSetting.FONT_NUMBER);
         fm = g.getFontMetrics(ViewSetting.FONT_NUMBER);
         stringWidth = fm.stringWidth("" + _locationProtein);
-        if (stringWidth > (ViewSetting.WIDTH_AA - ViewSetting.BORDER_GAP + 3)) {
+        if (stringWidth > (fontWidth - ViewSetting.BORDER_GAP + 3)) {
             Font smallerFont = ViewSetting.FONT_NUMBER_DIAGONAL;
             g.setFont(smallerFont);
             fm = g.getFontMetrics(smallerFont);

@@ -18,12 +18,10 @@ public class PeptideAreaCtrl {
     PeptideAreaModel _mgr;
     PeptideSetView _view;
 
-
     public PeptideAreaCtrl() {
         _mgr = new PeptideAreaModel();
         _view = new PeptideSetView();
     }
-    
 
     public void setData(ArrayList<PtmSitePeptide> ptmSitePeptide) {
         _mgr.setPTM(ptmSitePeptide);
@@ -34,8 +32,19 @@ public class PeptideAreaCtrl {
         this._view.setBeginPoint(x, y);
     }
 
-    public void paint(Graphics2D g2, int ajustedLoaction, int areaWidth) {
-        this._view.paint(g2, ajustedLoaction, areaWidth);
+    public void paint(Graphics2D g2, int ajustedLoaction, int areaWidth, int fontWidth) {
+        this._view.paint(g2, ajustedLoaction, areaWidth, fontWidth);
     }
 
+    public PtmSitePeptide getSelectedItem(int x, int y) {
+        PtmSitePeptide result = this._view.getSelectedItem(x, y);
+        return result;
+
+    }
+
+    public int getSelectedItemIndex(int x, int y) {
+        int index = this._view.getSelectedItemIndex(x, y);
+        this._mgr.setSelctedItem(index);
+        return this._view.getSelectedItemIndex(x, y);
+    }
 }

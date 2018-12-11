@@ -53,14 +53,12 @@ public class PanelPeptidesPTMSiteAll extends JPanel implements DataBoxPanelInter
     }
     
     public void setData(PTMSite peptidesPTMSite, DPeptideInstance pepInst) {
-       logger.debug("PanelPeptidesPTMSiteAll setData ->");
+       //logger.debug("PanelPeptidesPTMSiteAll setData ->");
         if ((peptidesPTMSite == _currentPeptidesPTMSite) && (pepInst == _currentPepInst)) {
             return;
         }
-        
         _currentPeptidesPTMSite = peptidesPTMSite;
         _currentPepInst = pepInst;
-        //m_peptideData.setData(peptidesPTMSite, false, pepInst);
         
         _panelTable.setData(peptidesPTMSite, pepInst);
         _panelGraphic.setData(peptidesPTMSite, pepInst);

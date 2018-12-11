@@ -191,6 +191,13 @@ public class DataMgrPtm {
         return sb.toString();
     }
 
+//    protected DPeptideInstance getSelectedPeptideInstance(int row) {
+//        if (row < 0 || (row >= getRowCount())) {
+//            return null;
+//        }
+//        return (this._ptmSitePeptideRowSet.get(row)).peptideInstance;
+//    }
+
     /**
      * we copy the same method from PeptidesOfPTMSiteTableModel.java
      */
@@ -268,25 +275,34 @@ public class DataMgrPtm {
 
             String[] ptmSet = ptmReadString.split(";");
             for (String ptm : ptmSet) {
-                ptmFromStringList.add(new PtmSiteAA(ptm, peptideBeginLocationInProtein, isNTermAt1));
+                PtmSiteAA pa =new PtmSiteAA(ptm.trim(), peptideBeginLocationInProtein, isNTermAt1);
+                ptmFromStringList.add(pa);
+                logger.debug(""+this.getClass().toString()+" 1-PtmSiteAA:" + pa.toString());
             }
 
             //a subset of ptmsite can retrived probability
             if (properties != null) {
+                 float  proba =  properties.getMascotDeltaScore();
+                 logger.debug(""+this.getClass().toString()+" 2-PtmSiteAA: (" +aa+aaLocationInProtein+")"+ proba );
                 Map<String, Float> ptmProbabilitySet = properties.getMascotProbabilityBySite();
                 for (PtmSiteAA psa : ptmFromStringList) {
                     Float prob = ptmProbabilitySet.get(psa.getPtmSite());
                     if (prob != null) {
                         psa.setProbability(prob);
+                        logger.debug(""+this.getClass().toString()+" 3-PtmSiteAA:" + psa.toString()+prob);
                     }
                 }
             }
 
+            
+            
+            
             pPeptide = new PtmSitePeptide(pepId, pepMatchId, sequence, ptmFromStringList, peptideBeginLocationInProtein);
-            if (isNTermAt1 && peptideBeginLocationInProtein == 1)
+            if (isNTermAt1 && peptideBeginLocationInProtein == 1) {
                 this._beginBestFit = 0;//modify adjustLocation is N-Termini is at 1
+            }
             if (this._beginBestFit > pPeptide.getBeginInProtein()) {//@todo isNTermAt1 done
-                this._beginBestFit = pPeptide.getBeginInProtein();               
+                this._beginBestFit = pPeptide.getBeginInProtein();
             }
             //logger.debug("---calcul begin point:" + this._beginBestFit);
             //logger useful to collect test data

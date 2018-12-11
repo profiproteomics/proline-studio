@@ -18,7 +18,9 @@ public class ViewSetting {
     /**
      * the width to draw an Amino acid
      */
-    public static int WIDTH_AA = 14;
+    //public static int WIDTH_AA = 13;
+    public static int HEIGHT_AA = 14;
+    public static int HEIGHT_PTM = 14;
     public static int BORDER_GAP = 5;
     public static int HEIGHT_MARK;
     public static int HEIGHT_SEQUENCE;
@@ -26,13 +28,14 @@ public class ViewSetting {
     public static Font FONT_PTM = new Font(Font.MONOSPACED, Font.BOLD, 18);
     public static Font FONT_SEQUENCE = new Font(Font.MONOSPACED, Font.BOLD, 24);
     public static Color PEPTIDE_COLOR = new Color(240, 255, 255);
+    public static Color SELECTED_PEPTIDE_COLOR = Color.black;
     public static Color SEQUENCE_COLOR = Color.BLACK;
     private static final double FONT_ROTATE = -Math.PI / 6;
     public static Font FONT_NUMBER_DIAGONAL;
 
     static {
-        HEIGHT_MARK = WIDTH_AA * 2 + BORDER_GAP * 2;
-        HEIGHT_SEQUENCE = WIDTH_AA + BORDER_GAP * 4;
+        HEIGHT_MARK = HEIGHT_AA * 2 + BORDER_GAP * 2;
+        HEIGHT_SEQUENCE = HEIGHT_AA + BORDER_GAP * 4;
         
         AffineTransform rotateText = new AffineTransform();
         rotateText.rotate(FONT_ROTATE);

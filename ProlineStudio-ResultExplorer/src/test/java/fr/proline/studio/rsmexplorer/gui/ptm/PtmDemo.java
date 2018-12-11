@@ -37,6 +37,7 @@ public class PtmDemo extends JFrame {
         _ctrlMark = new PtmMarkCtrl();
         _ctrlSequence = new ProteinSequenceCtrl();
         _ctrlPeptideArea = new PeptideAreaCtrl();
+        _paintArea = new PanelPtmDraw(null, _ctrlMark, _ctrlSequence, _ctrlPeptideArea);
         initComponents();
     }
 
@@ -45,7 +46,7 @@ public class PtmDemo extends JFrame {
      */
     private void initComponents() {
         setLayout(new BorderLayout());
-        _paintArea = new PanelPtmDraw(_ctrlMark, _ctrlSequence, _ctrlPeptideArea);
+
         this.add(_paintArea, BorderLayout.CENTER);
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
     }
@@ -124,17 +125,19 @@ public class PtmDemo extends JFrame {
     public PtmSitePeptide createPtmSitePeptide(long pepId, long pepMatchId, Character aa, String sequence, String ptm, int locationInPep, int locationProtein, float ptmProbability) {
 
         ArrayList<PtmSiteAA> ptmList = new ArrayList<PtmSiteAA>();
-        int distance = locationProtein - locationInPep; 
-        
+        int distance = locationProtein - locationInPep;
+
         String[] ptmSet = ptm.split(";");
 
         for (String element : ptmSet) {
-            PtmSiteAA pSite = new PtmSiteAA(element, distance,false);
+            PtmSiteAA pSite = new PtmSiteAA(element.trim(), distance, false);
+            pSite.setProbability(ptmProbability);
             ptmList.add(pSite);
         }
-        return new PtmSitePeptide(pepId, pepMatchId, sequence, ptmList, distance);
-    }
+        PtmSitePeptide result = new PtmSitePeptide(pepId, pepMatchId, sequence, ptmList, distance);
 
+        return result;
+    }
 
     public static void main(String[] args) {
 

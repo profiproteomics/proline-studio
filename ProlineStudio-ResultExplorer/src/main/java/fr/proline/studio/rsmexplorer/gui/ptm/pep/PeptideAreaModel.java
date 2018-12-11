@@ -33,4 +33,15 @@ public class PeptideAreaModel {
         }
     }
 
+    protected void setSelctedItem(int index) {
+        PeptideView pv;
+        for (int i = 0; i < _viewPeptideList.size(); i++) {
+            pv = _viewPeptideList.get(i);
+            if (i != index) {
+                pv.setSelected(false);
+            }
+        }
+    }
+
+
 }

@@ -127,9 +127,8 @@ public class PtmSiteAA {
         return _readableString;
     }
 
-    @Override
+        @Override
     public String toString() {
-        return "PtmSiteAA{" + "m_aminoAcid=" + _aminoAcid + ", m_locPep=" + _locPep + ", m_locProtein=" + _locProtein + ", m_ptmType=" + _ptmType + ", _probability=" + _probability + '}';
+        return "PtmSiteAA{" + _readableString + ", m_locProtein=" + _locProtein +  ", _probability=" + _probability + '}';
     }
-
 }

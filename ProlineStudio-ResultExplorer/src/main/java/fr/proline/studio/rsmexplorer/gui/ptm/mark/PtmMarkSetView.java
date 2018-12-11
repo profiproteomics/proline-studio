@@ -19,10 +19,10 @@ public class PtmMarkSetView extends ViewPtmAbstract{
     
     
     @Override
-    public void paint(Graphics2D g, int locationAjusted, int areaWidth) {
+    public void paint(Graphics2D g, int locationAjusted, int fontWidth) {
         for (PtmMarkView pm : _PtmMarkList) {
             pm.setBeginPoint(m_x, m_y);
-            pm.paint(g, locationAjusted, areaWidth);
+            pm.paint(g, locationAjusted, fontWidth);
         }
     }
 

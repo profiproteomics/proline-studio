@@ -8,6 +8,7 @@ import fr.proline.studio.rsmexplorer.gui.ptm.mark.PtmMarkCtrl;
 import fr.proline.studio.rsmexplorer.gui.ptm.pep.PeptideAreaCtrl;
 import fr.proline.studio.rsmexplorer.gui.ptm.mark.ProteinSequenceCtrl;
 import java.awt.BorderLayout;
+import java.awt.Graphics;
 import java.util.ArrayList;
 import javax.swing.JToolBar;
 
@@ -31,6 +32,7 @@ public class PanelPeptidesPTMSiteGraphic extends PeptidesPTMSiteTablePanel {
         _ctrlMark = new PtmMarkCtrl();
         _ctrlSequence = new ProteinSequenceCtrl();
         _ctrlPeptideArea = new PeptideAreaCtrl();
+        _paintArea = new PanelPtmDraw(this, _ctrlMark, _ctrlSequence, _ctrlPeptideArea);
         initComponents();
 
     }
@@ -40,7 +42,7 @@ public class PanelPeptidesPTMSiteGraphic extends PeptidesPTMSiteTablePanel {
      */
     private void initComponents() {
         setLayout(new BorderLayout());
-        _paintArea = new PanelPtmDraw(_ctrlMark, _ctrlSequence, _ctrlPeptideArea);
+
         _paintArea.setSize(WIDTH - 30, HEIGHT);
         JToolBar toolbar = initToolbar();
         this.add(toolbar, BorderLayout.WEST);
@@ -76,7 +78,7 @@ public class PanelPeptidesPTMSiteGraphic extends PeptidesPTMSiteTablePanel {
         this.repaint();
     }
 
-     /**
+    /**
      * test use
      */
     public void setData(ArrayList<PtmSitePeptide> list) {
@@ -94,17 +96,16 @@ public class PanelPeptidesPTMSiteGraphic extends PeptidesPTMSiteTablePanel {
      * @todo @return
      */
     public DPeptideInstance getSelectedPeptideInstance() {
-
-        // Retrieve Selected Row
-        int selectedRow = getSelectedTableModelRow();
-//
-//        //return m_peptideData.getSelectedPeptideInstance(selectedRow);
-//        CompoundTableModel compoundTableModel = ((CompoundTableModel) m_peptidesPtmSiteTable.getModel());
-//        // Retrieve ProteinPTMSite selected
-//        PeptidesOfPTMSiteTableModel tableModel = (PeptidesOfPTMSiteTableModel) compoundTableModel.getBaseModel();
-//
-//        return tableModel.getSelectedPeptideInstance(selectedRow);
+//        int selectedRowIndex = this._paintArea.getSelectedPeptideIndex();
+//        return this._dataMgr.getSelectedPeptideInstance(selectedRowIndex);
         return null;
+    }
+
+    @Override
+    public void paint(Graphics g) {
+        super.paint(g); 
+        
+        
     }
 
 }

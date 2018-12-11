@@ -5,6 +5,7 @@
  */
 package fr.proline.studio.rsmexplorer.gui.ptm.pep;
 
+import fr.proline.studio.rsmexplorer.gui.ptm.PtmSitePeptide;
 import fr.proline.studio.rsmexplorer.gui.ptm.ViewPtmAbstract;
 import fr.proline.studio.rsmexplorer.gui.ptm.ViewSetting;
 import fr.proline.studio.utils.CyclicColorPalette;
@@ -23,18 +24,25 @@ public class PeptideSetView extends ViewPtmAbstract {
 
     ArrayList<PeptideView> _peptideList;
 
+    public PeptideSetView() {
+        _peptideList = null;
+    }
+
     @Override
-    public void paint(Graphics2D g, int locationAjusted, int areaWidth) {
+     public void paint(Graphics2D g, int locationAjusted, int areaWidth){
+         
+     }
+    public void paint(Graphics2D g, int locationAjusted, int areaWidth, int fontWidth) {
         x0 = m_x;
         y0 = m_y;
-        
+
         for (PeptideView vp : _peptideList) {
             paintGrillX(g, areaWidth, x0, y0);
             vp.setBeginPoint(x0, y0);
             g.setColor(ViewSetting.PEPTIDE_COLOR);
-            vp.paint(g, locationAjusted, areaWidth);
-            paintGrillX(g, areaWidth, x0, y0 + ViewSetting.WIDTH_AA);
-            y0 += (int) ViewSetting.WIDTH_AA * 1.5;
+            vp.paint(g, locationAjusted, fontWidth);
+            paintGrillX(g, areaWidth, x0, y0 + ViewSetting.HEIGHT_AA);
+            y0 += (int) ViewSetting.HEIGHT_AA * 1.5;
         }
     }
 
@@ -52,9 +60,48 @@ public class PeptideSetView extends ViewPtmAbstract {
         m_y = y;
     }
 
-    void setViewPeptideList(ArrayList<PeptideView> peptideList) {
+    protected void setViewPeptideList(ArrayList<PeptideView> peptideList) {
         this._peptideList = peptideList;
     }
 
+    protected PtmSitePeptide getSelectedItem(int x, int y) {
+        PtmSitePeptide selected = null;
+        y0 = m_y;
+        if (_peptideList != null) {
+            for (PeptideView vp : _peptideList) {
+                int yRangA = y0;
+                int yRangZ = yRangA + ViewSetting.HEIGHT_AA;
+                if (y > yRangA && y < yRangZ) {
+                    selected = vp.getSelectedPeptide(x);
+                    if (selected != null) {
+                        return selected;
+                    }
+                }
+                y0 += (int) ViewSetting.HEIGHT_AA * 1.5;
+            }
+        }
+        return selected;
+    }
+
+    protected int getSelectedItemIndex(int x, int y) {
+        PtmSitePeptide selected = null;
+        y0 = m_y;
+        PeptideView vp;
+        if (_peptideList != null) {
+            for (int i = 0; i < _peptideList.size(); i++) {
+                vp = _peptideList.get(i);
+                int yRangA = y0;
+                int yRangZ = yRangA + ViewSetting.HEIGHT_AA;
+                if (y > yRangA && y < yRangZ) {
+                    selected = vp.getSelectedPeptide(x);
+                    if (selected != null) {
+                        return i;
+                    }
+                }
+                y0 += (int) ViewSetting.HEIGHT_AA * 1.5;
+            }
+        }
+        return -1;
+    }
 
 }

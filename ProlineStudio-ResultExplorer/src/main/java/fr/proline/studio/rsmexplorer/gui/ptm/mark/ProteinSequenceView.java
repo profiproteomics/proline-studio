@@ -39,7 +39,8 @@ public class ProteinSequenceView extends ViewPtmAbstract {
     }
 
     @Override
-    public void paint(Graphics2D g, int locationAjusted, int areaWidth) {
+    public void paint(Graphics2D g, int locationAjusted, int fontWidth) {
+        fontWidth = 14;
         if (locationAjusted > _sequence.length()) {
             this._sequenceView = _sequence; 
         } else {
@@ -52,7 +53,11 @@ public class ProteinSequenceView extends ViewPtmAbstract {
         int descent = fm.getDescent();
         int StringHeight = fm.getHeight();
 
-        g.drawString(_sequenceView, x0, y0 + ascent - descent / 2); //x, y are base line begin x, y
+        for (int i = 0; i < _sequenceView.length(); i++){
+            String letter = Character.toString(_sequenceView.charAt(i));
+            g.drawString(letter, x0+fontWidth*(i+1), y0 + ascent - descent / 2); //x, y are base line begin x, y
+        }
+        g.drawString(_sequenceView, x0+fontWidth, y0 + ascent - descent / 2); //x, y are base line begin x, y
 
     }
 

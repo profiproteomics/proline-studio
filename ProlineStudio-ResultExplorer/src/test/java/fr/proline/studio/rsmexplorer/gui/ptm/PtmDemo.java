@@ -8,7 +8,8 @@ package fr.proline.studio.rsmexplorer.gui.ptm;
 import fr.proline.studio.rsmexplorer.gui.ptm.mark.PtmMarkCtrl;
 import fr.proline.studio.rsmexplorer.gui.ptm.pep.PeptideAreaCtrl;
 import fr.proline.studio.rsmexplorer.gui.ptm.mark.ProteinSequenceCtrl;
-import java.awt.BorderLayout;
+
+import java.awt.*;
 import java.util.ArrayList;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
@@ -33,6 +34,9 @@ public class PtmDemo extends JFrame {
 
     public PtmDemo() {
         super();
+
+        Font font = ViewSetting.FONT_SEQUENCE;
+
         _dataMgr = new DataMgrPtm();
         _ctrlMark = new PtmMarkCtrl();
         _ctrlSequence = new ProteinSequenceCtrl();

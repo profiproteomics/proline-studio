@@ -6,6 +6,7 @@
 package fr.proline.studio.rsmexplorer.gui.ptm.pep;
 
 import fr.proline.studio.rsmexplorer.gui.ptm.PtmSitePeptide;
+import fr.proline.studio.rsmexplorer.gui.ptm.ViewContext;
 import fr.proline.studio.rsmexplorer.gui.ptm.ViewPtmAbstract;
 import fr.proline.studio.rsmexplorer.gui.ptm.ViewSetting;
 import fr.proline.studio.utils.CyclicColorPalette;
@@ -20,7 +21,7 @@ import java.util.ArrayList;
  */
 public class PeptideSetView extends ViewPtmAbstract {
 
-    
+
 
     ArrayList<PeptideView> _peptideList;
 
@@ -29,19 +30,16 @@ public class PeptideSetView extends ViewPtmAbstract {
     }
 
     @Override
-     public void paint(Graphics2D g, int locationAjusted, int areaWidth){
-         
-     }
-    public void paint(Graphics2D g, int locationAjusted, int areaWidth, int fontWidth) {
+    public void paint(Graphics2D g, ViewContext viewContext) {
         x0 = m_x;
         y0 = m_y;
 
         for (PeptideView vp : _peptideList) {
-            paintGrillX(g, areaWidth, x0, y0);
-            paintGrillX(g, areaWidth, x0, y0 + ViewSetting.HEIGHT_AA);
+            paintGrillX(g, viewContext.getAreaWidth(), x0, y0);
             vp.setBeginPoint(x0, y0);
             g.setColor(ViewSetting.PEPTIDE_COLOR);
-            vp.paint(g, locationAjusted, fontWidth);
+            vp.paint(g, viewContext);
+            paintGrillX(g, viewContext.getAreaWidth(), x0, y0 + ViewSetting.HEIGHT_AA);
             y0 += (int) ViewSetting.HEIGHT_AA * 1.5;
         }
     }

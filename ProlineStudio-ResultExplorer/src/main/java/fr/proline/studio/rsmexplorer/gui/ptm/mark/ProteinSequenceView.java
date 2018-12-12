@@ -5,10 +5,11 @@
  */
 package fr.proline.studio.rsmexplorer.gui.ptm.mark;
 
+import fr.proline.studio.rsmexplorer.gui.ptm.ViewContext;
 import fr.proline.studio.rsmexplorer.gui.ptm.ViewPtmAbstract;
 import fr.proline.studio.rsmexplorer.gui.ptm.ViewSetting;
-import java.awt.FontMetrics;
-import java.awt.Graphics2D;
+
+import java.awt.*;
 
 /**
  * View of the sequence of a proteine
@@ -39,26 +40,28 @@ public class ProteinSequenceView extends ViewPtmAbstract {
     }
 
     @Override
-    public void paint(Graphics2D g, int locationAjusted, int fontWidth) {
-        fontWidth = 14;
-        if (locationAjusted > _sequence.length()) {
+    public void paint(Graphics2D g, ViewContext viewContext) {
+
+        double aaWidth = ViewSetting.WIDTH_AA;
+
+        if (viewContext.getAjustedLocation() > _sequence.length()) {
             this._sequenceView = _sequence; 
         } else {
-            this._sequenceView = _sequence.substring(locationAjusted);
+            this._sequenceView = _sequence.substring(viewContext.getAjustedLocation());
         }
-        g.setColor(ViewSetting.SEQUENCE_COLOR);
+
+        // For debug only
+//        g.setColor(Color.lightGray);
+//        for (int i = 0; i < _sequenceView.length(); i++){
+//            String letter = Character.toString(_sequenceView.charAt(i));
+//            g.drawRect((int)(x0 + aaWidth *(i+1)), y0, (int)(aaWidth), ViewSetting.HEIGHT_AA);
+//        }
+
         g.setFont(ViewSetting.FONT_SEQUENCE);
-        FontMetrics fm = g.getFontMetrics();
-        int ascent = fm.getAscent();
-        int descent = fm.getDescent();
-        int StringHeight = fm.getHeight();
-
-        for (int i = 0; i < _sequenceView.length(); i++){
-            String letter = Character.toString(_sequenceView.charAt(i));
-            g.drawString(letter, x0+fontWidth*(i+1), y0 + ascent - descent / 2); //x, y are base line begin x, y
-        }
-        g.drawString(_sequenceView, x0+fontWidth, y0 + ascent - descent / 2); //x, y are base line begin x, y
-
+        g.setColor(ViewSetting.SEQUENCE_COLOR);
+        g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+        g.drawString(_sequenceView, (int)(x0+ aaWidth), y0 + ViewSetting.HEIGHT_AA ); //x, y are base line begin x, y
+        g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_OFF);
     }
 
 }

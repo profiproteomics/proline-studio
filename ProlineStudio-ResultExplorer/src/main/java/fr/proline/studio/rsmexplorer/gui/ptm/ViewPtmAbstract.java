@@ -22,7 +22,7 @@ public abstract class ViewPtmAbstract extends MouseAdapter {
     protected int m_x;
     protected int m_y;
 
-    public abstract void paint(Graphics2D g, int locationAjusted, int width);
+    public abstract void paint(Graphics2D g, ViewContext viewContext);
 
     public abstract void setBeginPoint(int x, int y);
 

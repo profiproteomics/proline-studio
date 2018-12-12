@@ -6,6 +6,8 @@
 package fr.proline.studio.rsmexplorer.gui.ptm.mark;
 
 import fr.proline.studio.rsmexplorer.gui.ptm.PtmSiteAA;
+import fr.proline.studio.rsmexplorer.gui.ptm.ViewContext;
+
 import java.awt.Graphics2D;
 import java.util.ArrayList;
 
@@ -33,8 +35,8 @@ public class PtmMarkCtrl {
        this._view.setBeginPoint(x, y);
     }
 
-    public void paint(Graphics2D g2, int ajustedLoaction, int areaWidth) {
-        this._view.paint(g2, ajustedLoaction,areaWidth);
+    public void paint(Graphics2D g2, ViewContext viewContext) {
+        this._view.paint(g2, viewContext);
     }
     
 }

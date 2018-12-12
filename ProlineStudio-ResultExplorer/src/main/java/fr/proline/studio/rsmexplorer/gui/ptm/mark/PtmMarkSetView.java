@@ -5,6 +5,7 @@
  */
 package fr.proline.studio.rsmexplorer.gui.ptm.mark;
 
+import fr.proline.studio.rsmexplorer.gui.ptm.ViewContext;
 import fr.proline.studio.rsmexplorer.gui.ptm.ViewPtmAbstract;
 import java.awt.Graphics2D;
 import java.util.ArrayList;
@@ -19,10 +20,10 @@ public class PtmMarkSetView extends ViewPtmAbstract{
     
     
     @Override
-    public void paint(Graphics2D g, int locationAjusted, int fontWidth) {
+    public void paint(Graphics2D g, ViewContext viewContext) {
         for (PtmMarkView pm : _PtmMarkList) {
             pm.setBeginPoint(m_x, m_y);
-            pm.paint(g, locationAjusted, fontWidth);
+            pm.paint(g, viewContext);
         }
     }
 

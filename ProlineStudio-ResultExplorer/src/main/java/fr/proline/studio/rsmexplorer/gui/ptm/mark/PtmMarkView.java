@@ -5,15 +5,14 @@
  */
 package fr.proline.studio.rsmexplorer.gui.ptm.mark;
 
+import fr.proline.studio.rsmexplorer.gui.ptm.ViewContext;
 import fr.proline.studio.rsmexplorer.gui.ptm.ViewPtmAbstract;
 import fr.proline.studio.rsmexplorer.gui.ptm.PtmSiteAA;
 import fr.proline.studio.rsmexplorer.gui.ptm.ViewSetting;
 import fr.proline.studio.utils.CyclicColorPalette;
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.FontMetrics;
-import java.awt.Graphics2D;
+
+import java.awt.*;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,7 +23,7 @@ import org.slf4j.LoggerFactory;
 public class PtmMarkView extends ViewPtmAbstract {
 
     private static Logger logger = LoggerFactory.getLogger("ProlineStudio.rsmexplorer.ptm");
-    private static final BasicStroke STROKE = new BasicStroke(2f, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_ROUND);
+    private static final BasicStroke STROKE = new BasicStroke(1.5f, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_ROUND);
 
     /**
      * One letter
@@ -59,53 +58,56 @@ public class PtmMarkView extends ViewPtmAbstract {
      * location in a protein where this amino acid of protein begin to show
      *
      * @param g
-     * @param locationAjusted
+     * @param viewContext
      */
     @Override
-    public void paint(Graphics2D g, int locationAjusted, int fontWidth) {
-        fontWidth = 14;
-        FontMetrics fm = g.getFontMetrics(ViewSetting.FONT_PTM);
-        int descent = fm.getDescent();
-        int StringHeight = fm.getHeight();
+    public void paint(Graphics2D g, ViewContext viewContext) {
 
-        this.x0 = this.m_x + fontWidth+ (this._locationProtein - locationAjusted - 1 + this._ajustNTermAt1) * fontWidth;
+        double aaWidth = ViewSetting.WIDTH_AA;
+
+        FontMetrics fm = g.getFontMetrics(ViewSetting.FONT_PTM);
+
+        g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+        this.x0 = (int)(this.m_x + aaWidth+ (this._locationProtein - viewContext.getAjustedLocation() - 1 + this._ajustNTermAt1) * aaWidth);
         //this.x0 = this.m_x + (this._locationProtein - locationAjusted-1) * ViewSetting.WIDTH_AA;
         this.y0 = this.m_y + ViewSetting.HEIGHT_AA; //reserve location line
 
         g.setColor(m_color);
-        //draw box
+        //draw the box
         g.setStroke(STROKE);
-
-        g.drawLine(x0, y0, x0 + fontWidth, y0);
-        g.drawLine(x0 + fontWidth, y0, x0 + fontWidth, y0 + ViewSetting.HEIGHT_AA);
-        g.drawLine(x0 + fontWidth, y0 + ViewSetting.HEIGHT_AA, x0, y0+ ViewSetting.HEIGHT_AA);
+        g.drawLine(x0, y0, (int)(x0 + aaWidth), y0);
+        g.drawLine((int)(x0 + aaWidth), y0, (int)(x0 + aaWidth), y0 + ViewSetting.HEIGHT_AA);
+        g.drawLine((int)(x0 + aaWidth), y0 + ViewSetting.HEIGHT_AA, x0, y0+ ViewSetting.HEIGHT_AA);
         g.drawLine(x0, y0 + ViewSetting.HEIGHT_AA, x0, y0);
         
         int yBottom = (int) (y0 + ViewSetting.HEIGHT_AA * 1.5);
-        int xCenter = x0 + fontWidth / 2;
+        int xCenter = (int)(x0 + aaWidth / 2);
         g.drawLine(xCenter, y0 + ViewSetting.HEIGHT_AA, xCenter, yBottom);
         g.drawLine(x0, yBottom, x0 + ViewSetting.HEIGHT_AA, yBottom);
 
         //draw PTM Type in the box
         g.setFont(ViewSetting.FONT_PTM);
+        int stringWidth = fm.stringWidth(m_type);
+        // assume that letters are squared: do not use ascent or height but reuse font width to position ptm letter in the middle of the box
+        g.drawString(m_type, xCenter - stringWidth / 2, y0 + ViewSetting.HEIGHT_AA - (ViewSetting.HEIGHT_AA - stringWidth)/2); //x, y are base line begin x, y
 
-        int stringWidth = fm.stringWidth("" + m_type);
-        // g.drawString(m_type, xCenter - stringWidth / 2, y0 + ViewSetting.WIDTH_AA - descent / 3); //x, y are base line begin x, y
-        g.drawString(m_type, xCenter - stringWidth / 2, y0 + ViewSetting.HEIGHT_AA - 1); //x, y are base line begin x, y
+
         //draw the location number upper
         g.setColor(CyclicColorPalette.GRAY_TEXT_DARK);
         g.setFont(ViewSetting.FONT_NUMBER);
         fm = g.getFontMetrics(ViewSetting.FONT_NUMBER);
-        stringWidth = fm.stringWidth("" + _locationProtein);
-        if (stringWidth > (fontWidth - ViewSetting.BORDER_GAP + 3)) {
+        int descent = fm.getDescent();
+
+        stringWidth = fm.stringWidth(String.valueOf(_locationProtein));
+        if (stringWidth > (aaWidth - ViewSetting.BORDER_GAP + 3)) {
             Font smallerFont = ViewSetting.FONT_NUMBER_DIAGONAL;
             g.setFont(smallerFont);
             fm = g.getFontMetrics(smallerFont);
-            stringWidth = fm.stringWidth("" + _locationProtein);
+            stringWidth = fm.stringWidth(String.valueOf(_locationProtein));
         }
 
-        g.drawString("" + _locationProtein, xCenter - stringWidth / 2, y0 - descent / 2);
-
+        g.drawString(String.valueOf(_locationProtein), xCenter - stringWidth / 2, y0 - descent / 2);
+        g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_OFF);
     }
 
     @Override

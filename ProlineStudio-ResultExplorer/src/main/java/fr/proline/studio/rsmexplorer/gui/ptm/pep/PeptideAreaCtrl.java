@@ -6,6 +6,8 @@
 package fr.proline.studio.rsmexplorer.gui.ptm.pep;
 
 import fr.proline.studio.rsmexplorer.gui.ptm.PtmSitePeptide;
+import fr.proline.studio.rsmexplorer.gui.ptm.ViewContext;
+
 import java.awt.Graphics2D;
 import java.util.ArrayList;
 
@@ -32,8 +34,8 @@ public class PeptideAreaCtrl {
         this._view.setBeginPoint(x, y);
     }
 
-    public void paint(Graphics2D g2, int ajustedLoaction, int areaWidth, int fontWidth) {
-        this._view.paint(g2, ajustedLoaction, areaWidth, fontWidth);
+    public void paint(Graphics2D g2, ViewContext viewContext) {
+        this._view.paint(g2, viewContext);
     }
 
     public PtmSitePeptide getSelectedItem(int x, int y) {

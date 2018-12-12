@@ -69,7 +69,7 @@ public class PanelPtmDraw extends JPanel {
 
     public void setIsDataLoaded(boolean isDataLoaded) {
         if (isDataLoaded == true) {
-            this._selectedRowIndex = 0;            
+            this._selectedRowIndex = 0;
             this._isDataNull = false;
         }
         this._isDataLoaded = isDataLoaded;
@@ -118,53 +118,23 @@ public class PanelPtmDraw extends JPanel {
             _ctrlSequence.setBeginPoint(x, y);
         }
 
-//        /**
-//         * fixer the height
-//         *
-//         * @return
-//         */
-//        @Override
-//        public Dimension getMinimumSize() {
-//            return new Dimension(this.getWidth(), ViewSetting.HEIGHT_MARK + ViewSetting.HEIGHT_SEQUENCE);
-//        }
-//        //MUST rewrite it when use BoxLayout
-//        @Override
-//        public Dimension getMaximumSize() {
-//            //logger.debug("getMaximumSize title Pane Maxi size: (" + this.getWidth() + "," + this.getHeight() + ")");
-//            return new Dimension(Integer.MAX_VALUE, ViewSetting.HEIGHT_MARK + ViewSetting.HEIGHT_SEQUENCE + 30);
-//        }
-//
-//        @Override
-//        public Dimension getPreferredSize() {
-//            //logger.debug("title Pane preferred size: (" + this.getWidth() + "," + this.getHeight() + ")");
-//            //logger.debug("getPreferredSize horizontal value: " + _scrollPane.getHorizontalScrollBar().getValue());
-//            //return new Dimension((_sequenceLength + AJUSTE_GAP - _ajustedLocation) * ViewSetting.WIDTH_AA, ViewSetting.HEIGHT_MARK + ViewSetting.HEIGHT_SEQUENCE);
-//            return new Dimension((_sequenceLength + AJUSTE_GAP - _ajustedLocation) * 14, ViewSetting.HEIGHT_MARK + ViewSetting.HEIGHT_SEQUENCE);
-//        }
+        @Override
+        public Dimension getPreferredSize() {
+            //logger.debug("title Pane preferred size: (" + this.getWidth() + "," + this.getHeight() + ")");
+            //logger.debug("getPreferredSize horizontal value: " + _scrollPane.getHorizontalScrollBar().getValue());
+            return new Dimension((int)((_sequenceLength + AJUSTE_GAP - _ajustedLocation) * ViewSetting.WIDTH_AA), ViewSetting.HEIGHT_MARK + ViewSetting.HEIGHT_SEQUENCE);
+        }
+
         @Override
         protected void paintComponent(Graphics g) {
-            if (_isDataNull) {
-                super.paintComponent(g);
-            } else {
-                FontMetrics fontM = g.getFontMetrics(ViewSetting.FONT_SEQUENCE);
-                int[] widthSet = fontM.getWidths();
-
-                int fontWidth = widthSet[20];
-                fontWidth = 14;
-//            for (int i = 0; i < widthSet.length ; i++) {
-//                
-//                logger.debug(" width Font i : " +i+":"+widthSet[i]);
-//            }
-                //logger.debug(" width Font : "+ fontWidth);
-                this.isPaintingOrigin();
-                this.setPreferredSize(new Dimension((_sequenceLength + AJUSTE_GAP - _ajustedLocation) * fontWidth, ViewSetting.HEIGHT_MARK + ViewSetting.HEIGHT_SEQUENCE));
-                super.paintComponent(g);
-
-                if (_isDataLoaded) {
-                    Graphics2D g2 = (Graphics2D) g;
-                    _ctrlMark.paint(g2, _ajustedLocation, fontWidth);
-                    _ctrlSequence.paint(g2, _ajustedLocation, fontWidth);
-                }
+            this.isPaintingOrigin();
+            super.paintComponent(g);
+            ViewContext viewContext = new ViewContext();
+            viewContext.setAjustedLocation(_ajustedLocation);
+            if (_isDataLoaded) {
+                Graphics2D g2 = (Graphics2D) g;
+                _ctrlMark.paint(g2, viewContext);
+                _ctrlSequence.paint(g2, viewContext);
             }
         }
 
@@ -199,9 +169,7 @@ public class PanelPtmDraw extends JPanel {
 
         @Override
         public Dimension getPreferredSize() {
-            //int width = (_sequenceLength + AJUSTE_GAP - _ajustedLocation) * ViewSetting.WIDTH_AA;
-            int width = (_sequenceLength + AJUSTE_GAP - _ajustedLocation) * 14;
-            //int width = (_sequenceLength + AJUSTE_GAP) * ViewSetting.WIDTH_AA;
+            int width = (int)((_sequenceLength + AJUSTE_GAP - _ajustedLocation) * ViewSetting.WIDTH_AA);
             int height = _rowCount * (ViewSetting.HEIGHT_AA * 2 - ViewSetting.HEIGHT_AA / 2);
             if (height == 0) {
                 height = 5 * ViewSetting.HEIGHT_AA;
@@ -211,32 +179,17 @@ public class PanelPtmDraw extends JPanel {
 
         }
 
-        //tested don't work
-        //@Override
-//        public Dimension getMaximumSize() {
-//            logger.debug("2222222222PanelPtmDraw PeptidePane getMaximumSize");
-//            return super.getMaximumSize();
-//        }
-        //tested don't work
-        //@Override
-//        public Dimension getMinimumSize() {
-//            logger.debug("333333333PanelPtmDraw PeptidePane getMinimumSize");
-//            return super.getMinimumSize();
-//        }
         @Override
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
-            if (!_isDataNull) {
-                FontMetrics fontM = g.getFontMetrics(ViewSetting.FONT_SEQUENCE);
-                int fontWidth = fontM.getWidths()[20];
-                fontWidth = 14;
-                //set graphic begin point
-                //logger.debug(" width AA : " + fontWidth);
-                if (_isDataLoaded) {
-                    Graphics2D g2 = (Graphics2D) g;
 
-                    _ctrlPeptideArea.paint(g2, _ajustedLocation, this.getWidth(), fontWidth);
-                }
+            //set graphic begin point
+            //logger.debug(" width AA : " + fontWidth);
+            ViewContext viewContext = new ViewContext();
+            viewContext.setAjustedLocation(_ajustedLocation).setAreaWidth(this.getWidth());
+            if (_isDataLoaded) {
+                Graphics2D g2 = (Graphics2D) g;
+                _ctrlPeptideArea.paint(g2, viewContext);
             }
         }
     }

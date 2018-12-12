@@ -5,8 +5,10 @@
  */
 package fr.proline.studio.rsmexplorer.gui.ptm;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.Stroke;
 import java.awt.geom.AffineTransform;
 
 /**
@@ -29,14 +31,17 @@ public class ViewSetting {
     public static Font FONT_SEQUENCE = new Font(Font.MONOSPACED, Font.BOLD, 24);
     public static Color PEPTIDE_COLOR = new Color(240, 255, 255);
     public static Color SELECTED_PEPTIDE_COLOR = Color.black;
-    public static Color SEQUENCE_COLOR = Color.BLACK;
+    public static Color SEQUENCE_COLOR = Color.BLUE;
     private static final double FONT_ROTATE = -Math.PI / 6;
     public static Font FONT_NUMBER_DIAGONAL;
+    public static final Stroke DASHED = new BasicStroke(1.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_MITER, 10.0f, new float[]{2.0f, 2.0f}, 0.0f);
+
+    public static final BasicStroke STROKE_PEP = new BasicStroke(1.2f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER);
 
     static {
         HEIGHT_MARK = HEIGHT_AA * 2 + BORDER_GAP * 2;
         HEIGHT_SEQUENCE = HEIGHT_AA + BORDER_GAP * 4;
-        
+
         AffineTransform rotateText = new AffineTransform();
         rotateText.rotate(FONT_ROTATE);
         FONT_NUMBER_DIAGONAL = FONT_NUMBER.deriveFont(rotateText);

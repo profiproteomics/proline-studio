@@ -10,6 +10,8 @@ import java.awt.event.ActionListener;
 import javax.swing.JPanel;
 import fr.proline.studio.rsmexplorer.gui.PeptidesPTMSiteTablePanel;
 import java.awt.BorderLayout;
+import java.awt.Component;
+import javax.swing.JComponent;
 import javax.swing.JTabbedPane;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -83,10 +85,9 @@ public class PanelPeptidesPTMSiteAll extends JPanel implements DataBoxPanelInter
         return ((PeptidesPTMSiteTablePanel)this._panelTabbed.getSelectedComponent()).getSelectedPeptideInstance();
     }
     
-    //@todo 
     private int getSelectedTableModelRow() {
-        //@todo return ((PeptidesPTMSiteTablePanel) this._panelTabbed.getSelectedComponent()).getSelectedTableModelRow();
-        return this._panelTable.getSelectedTableModelRow();
+        return ((PeptidesPTMSiteTablePanel) this._panelTabbed.getSelectedComponent()).getSelectedTableModelRow();
+        //return this._panelTable.getSelectedTableModelRow();
     }
     
     @Override
@@ -118,7 +119,7 @@ public class PanelPeptidesPTMSiteAll extends JPanel implements DataBoxPanelInter
      */
     @Override
     public void addSingleValue(Object v) {
-        _panelGraphic.addSingleValue(v);
+        //_panelGraphic.addSingleValue(v);
         _panelTable.addSingleValue(v);
     }
     

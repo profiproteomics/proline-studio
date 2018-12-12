@@ -20,7 +20,7 @@ import java.util.ArrayList;
  */
 public class PeptideSetView extends ViewPtmAbstract {
 
-    private static final Stroke DASHED = new BasicStroke(1.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_MITER, 10.0f, new float[]{2.0f, 2.0f}, 0.0f);
+    
 
     ArrayList<PeptideView> _peptideList;
 
@@ -38,10 +38,10 @@ public class PeptideSetView extends ViewPtmAbstract {
 
         for (PeptideView vp : _peptideList) {
             paintGrillX(g, areaWidth, x0, y0);
+            paintGrillX(g, areaWidth, x0, y0 + ViewSetting.HEIGHT_AA);
             vp.setBeginPoint(x0, y0);
             g.setColor(ViewSetting.PEPTIDE_COLOR);
             vp.paint(g, locationAjusted, fontWidth);
-            paintGrillX(g, areaWidth, x0, y0 + ViewSetting.HEIGHT_AA);
             y0 += (int) ViewSetting.HEIGHT_AA * 1.5;
         }
     }
@@ -49,7 +49,7 @@ public class PeptideSetView extends ViewPtmAbstract {
     private void paintGrillX(Graphics2D g, int areaWidth, int x, int y) {
         Stroke s = g.getStroke();//remain original stroke
         g.setColor(CyclicColorPalette.GRAY_GRID);
-        g.setStroke(DASHED);
+        g.setStroke(ViewSetting.DASHED);
         g.drawLine(x, y, areaWidth, y);
         g.setStroke(s);
     }

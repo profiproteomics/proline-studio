@@ -44,7 +44,13 @@ public class PeptideAreaCtrl {
 
     public int getSelectedItemIndex(int x, int y) {
         int index = this._view.getSelectedItemIndex(x, y);
-        this._mgr.setSelctedItem(index);
+        this._mgr.setSelctedItem(index);//change select 
         return this._view.getSelectedItemIndex(x, y);
     }
+
+    public void setSelectedIndex(int i) {
+        this._mgr.setSelctedItem(i);
+    }
+
+
 }

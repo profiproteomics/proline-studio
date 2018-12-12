@@ -6,7 +6,6 @@
 package fr.proline.studio.rsmexplorer.gui.ptm;
 
 import java.awt.Color;
-import java.awt.Font;
 
 /**
  *

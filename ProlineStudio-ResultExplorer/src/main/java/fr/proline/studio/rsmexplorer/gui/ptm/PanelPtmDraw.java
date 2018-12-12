@@ -36,6 +36,7 @@ public class PanelPtmDraw extends JPanel {
     private int _sequenceLength;
     JScrollPane _scrollPane;
     private PanelPeptidesPTMSiteGraphic _ctrl;
+    private boolean _isDataNull;
 
     protected PanelPtmDraw(PanelPeptidesPTMSiteGraphic ctrl, PtmMarkCtrl ctrlMark, ProteinSequenceCtrl ctrlSequence, PeptideAreaCtrl ctrlPeptideArea) {
         _ctrl = ctrl;
@@ -43,7 +44,7 @@ public class PanelPtmDraw extends JPanel {
         _peptidePane = new PeptidePane(ctrlPeptideArea);
         _rowCount = 0;
         _sequenceLength = 0;
-        _selectedRowIndex = -1;
+        _selectedRowIndex = 0;
         setDoubleBuffered(false);
         initComponents();
 
@@ -68,7 +69,8 @@ public class PanelPtmDraw extends JPanel {
 
     public void setIsDataLoaded(boolean isDataLoaded) {
         if (isDataLoaded == true) {
-            this._selectedRowIndex = 0;
+            this._selectedRowIndex = 0;            
+            this._isDataNull = false;
         }
         this._isDataLoaded = isDataLoaded;
     }
@@ -91,6 +93,10 @@ public class PanelPtmDraw extends JPanel {
 
     protected int getSelectedPeptideIndex() {
         return this._selectedRowIndex;
+    }
+
+    protected void clean() {
+        this._isDataNull = true;
     }
 
     private class TitlePane extends JPanel {
@@ -128,34 +134,37 @@ public class PanelPtmDraw extends JPanel {
 //            return new Dimension(Integer.MAX_VALUE, ViewSetting.HEIGHT_MARK + ViewSetting.HEIGHT_SEQUENCE + 30);
 //        }
 //
-        @Override
-        public Dimension getPreferredSize() {
-            //logger.debug("title Pane preferred size: (" + this.getWidth() + "," + this.getHeight() + ")");
-            //logger.debug("getPreferredSize horizontal value: " + _scrollPane.getHorizontalScrollBar().getValue());
-            //return new Dimension((_sequenceLength + AJUSTE_GAP - _ajustedLocation) * ViewSetting.WIDTH_AA, ViewSetting.HEIGHT_MARK + ViewSetting.HEIGHT_SEQUENCE);
-            return new Dimension((_sequenceLength + AJUSTE_GAP - _ajustedLocation) * 14, ViewSetting.HEIGHT_MARK + ViewSetting.HEIGHT_SEQUENCE);
-        }
-
+//        @Override
+//        public Dimension getPreferredSize() {
+//            //logger.debug("title Pane preferred size: (" + this.getWidth() + "," + this.getHeight() + ")");
+//            //logger.debug("getPreferredSize horizontal value: " + _scrollPane.getHorizontalScrollBar().getValue());
+//            //return new Dimension((_sequenceLength + AJUSTE_GAP - _ajustedLocation) * ViewSetting.WIDTH_AA, ViewSetting.HEIGHT_MARK + ViewSetting.HEIGHT_SEQUENCE);
+//            return new Dimension((_sequenceLength + AJUSTE_GAP - _ajustedLocation) * 14, ViewSetting.HEIGHT_MARK + ViewSetting.HEIGHT_SEQUENCE);
+//        }
         @Override
         protected void paintComponent(Graphics g) {
-            FontMetrics fontM = g.getFontMetrics(ViewSetting.FONT_SEQUENCE);
-            int[] widthSet = fontM.getWidths();
+            if (_isDataNull) {
+                super.paintComponent(g);
+            } else {
+                FontMetrics fontM = g.getFontMetrics(ViewSetting.FONT_SEQUENCE);
+                int[] widthSet = fontM.getWidths();
 
-            int fontWidth = widthSet[20];
-            fontWidth = 14;
+                int fontWidth = widthSet[20];
+                fontWidth = 14;
 //            for (int i = 0; i < widthSet.length ; i++) {
 //                
 //                logger.debug(" width Font i : " +i+":"+widthSet[i]);
 //            }
-            //logger.debug(" width Font : "+ fontWidth);
-            this.isPaintingOrigin();
-            this.setPreferredSize(new Dimension((_sequenceLength + AJUSTE_GAP - _ajustedLocation) * fontWidth, ViewSetting.HEIGHT_MARK + ViewSetting.HEIGHT_SEQUENCE));
-            super.paintComponent(g);
+                //logger.debug(" width Font : "+ fontWidth);
+                this.isPaintingOrigin();
+                this.setPreferredSize(new Dimension((_sequenceLength + AJUSTE_GAP - _ajustedLocation) * fontWidth, ViewSetting.HEIGHT_MARK + ViewSetting.HEIGHT_SEQUENCE));
+                super.paintComponent(g);
 
-            if (_isDataLoaded) {
-                Graphics2D g2 = (Graphics2D) g;
-                _ctrlMark.paint(g2, _ajustedLocation, fontWidth);
-                _ctrlSequence.paint(g2, _ajustedLocation, fontWidth);
+                if (_isDataLoaded) {
+                    Graphics2D g2 = (Graphics2D) g;
+                    _ctrlMark.paint(g2, _ajustedLocation, fontWidth);
+                    _ctrlSequence.paint(g2, _ajustedLocation, fontWidth);
+                }
             }
         }
 
@@ -170,15 +179,15 @@ public class PanelPtmDraw extends JPanel {
             _ctrlPeptideArea = ctrlPeptideArea;
             this.addMouseListener(new MouseAdapter() {
                 public void mouseClicked(MouseEvent e) {
-                    PtmSitePeptide selectedItem = _ctrlPeptideArea.getSelectedItem(e.getX(), e.getY());
+                    //PtmSitePeptide selectedItem = _ctrlPeptideArea.getSelectedItem(e.getX(), e.getY());
                     int selectedIndex = _ctrlPeptideArea.getSelectedItemIndex(e.getX(), e.getY());
                     if (selectedIndex != -1) {
                         _selectedRowIndex = selectedIndex;
                     }
-                    logger.debug("PeptidePane mouseClicked(" + e.getX() + "," + e.getY() + ")");
-                    if (selectedItem != null) {
-                        //_ctrl.setSelectedPeptide(selectedItem);
-                        logger.debug(selectedItem.toString());
+                    //logger.debug("PeptidePane mouseClicked(" + e.getX() + "," + e.getY() + ")");
+                    if (_selectedRowIndex != -1) {
+                        _ctrl.valueChanged();
+                        //logger.debug(selectedItem.toString());
                     }
                 }
             });
@@ -217,20 +226,19 @@ public class PanelPtmDraw extends JPanel {
         @Override
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
+            if (!_isDataNull) {
+                FontMetrics fontM = g.getFontMetrics(ViewSetting.FONT_SEQUENCE);
+                int fontWidth = fontM.getWidths()[20];
+                fontWidth = 14;
+                //set graphic begin point
+                //logger.debug(" width AA : " + fontWidth);
+                if (_isDataLoaded) {
+                    Graphics2D g2 = (Graphics2D) g;
 
-            FontMetrics fontM = g.getFontMetrics(ViewSetting.FONT_SEQUENCE);
-            int fontWidth = fontM.getWidths()[20];
-            fontWidth = 14;
-            //set graphic begin point
-            //logger.debug(" width AA : " + fontWidth);
-            if (_isDataLoaded) {
-                Graphics2D g2 = (Graphics2D) g;
-
-                _ctrlPeptideArea.paint(g2, _ajustedLocation, this.getWidth(), fontWidth);
+                    _ctrlPeptideArea.paint(g2, _ajustedLocation, this.getWidth(), fontWidth);
+                }
             }
         }
-
     }
 
 }
-

@@ -54,19 +54,23 @@ public class PtmDemo extends JFrame {
     public void setData() {
         System.out.println("set data");
         _dataMgr.setData(createTestPtmSitePeptideList());
-        this._ctrlSequence.setData(_dataMgr.getProteinSequence());
-        this._ctrlMark.setData(_dataMgr.getAllPtmSite2Mark());
-        this._ctrlPeptideArea.setData(_dataMgr.getPtmSitePeptideList());
-        int ajustedLocation = _dataMgr.getBeginBestFit();
-        System.out.println("set data sequence->");
-        this._paintArea.setSequenceLength(_dataMgr.getProteinSequence().length());
-        System.out.println("set data sequence<-");
-        this._paintArea.setRowCount(_dataMgr.getRowCount());
-        this._paintArea.setIsDataLoaded(true);
-        this._paintArea.setAjustedLocation(ajustedLocation);
-        //this._paintArea.setAjustedLocation(30);
-        revalidate();
-        repaint();
+        //_dataMgr.setData(null);
+        if (_dataMgr.getPtmSitePeptideList() == null) {
+            this._paintArea.clean();
+        } else {
+            this._ctrlSequence.setData(_dataMgr.getProteinSequence());
+            this._ctrlMark.setData(_dataMgr.getAllPtmSite2Mark());
+            this._ctrlPeptideArea.setData(_dataMgr.getPtmSitePeptideList());
+            int ajustedLocation = _dataMgr.getBeginBestFit();
+            System.out.println("set data sequence->");
+            this._paintArea.setIsDataLoaded(true);
+            this._paintArea.setRowCount(this._dataMgr.getRowCount());
+            this._paintArea.setSequenceLength(_dataMgr.getProteinSequence().length());
+            this._paintArea.setAjustedLocation(ajustedLocation);
+            //valueChanged();
+        }
+        this.repaint();
+
     }
 
     /**

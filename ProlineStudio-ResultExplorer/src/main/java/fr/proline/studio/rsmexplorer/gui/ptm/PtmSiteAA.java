@@ -67,7 +67,7 @@ public class PtmSiteAA {
         } else {
             locationInProtein = location + peptideFirstAAInProtein;
         }
-        String type = s.substring(0, beginIndex);
+        String type = s.substring(0, beginIndex).trim();
         //return new PtmSiteAA(aa, location, locationInProtein, type, probability);
 
         this._readableString = s;
@@ -129,6 +129,6 @@ public class PtmSiteAA {
 
         @Override
     public String toString() {
-        return "PtmSiteAA{" + _readableString + ", m_locProtein=" + _locProtein +  ", _probability=" + _probability + '}';
+        return "PtmSiteAA{" + _readableString + ", locProtein=" + _locProtein +  ", probability=" + _probability + '}';
     }
 }

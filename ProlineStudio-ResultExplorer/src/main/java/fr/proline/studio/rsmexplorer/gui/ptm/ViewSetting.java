@@ -18,7 +18,7 @@ public class ViewSetting {
     /**
      * the width to draw an Amino acid
      */
-    public static double WIDTH_AA;
+    public static int WIDTH_AA;
     public static int HEIGHT_AA;
 
     public static int BORDER_GAP = 5;

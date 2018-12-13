@@ -42,10 +42,10 @@ public class ProteinSequenceView extends ViewPtmAbstract {
     @Override
     public void paint(Graphics2D g, ViewContext viewContext) {
 
-        double aaWidth = ViewSetting.WIDTH_AA;
+        int aaWidth = ViewSetting.WIDTH_AA;
 
         if (viewContext.getAjustedLocation() > _sequence.length()) {
-            this._sequenceView = _sequence; 
+            this._sequenceView = _sequence;
         } else {
             this._sequenceView = _sequence.substring(viewContext.getAjustedLocation());
         }
@@ -56,11 +56,10 @@ public class ProteinSequenceView extends ViewPtmAbstract {
 //            String letter = Character.toString(_sequenceView.charAt(i));
 //            g.drawRect((int)(x0 + aaWidth *(i+1)), y0, (int)(aaWidth), ViewSetting.HEIGHT_AA);
 //        }
-
         g.setFont(ViewSetting.FONT_SEQUENCE);
         g.setColor(ViewSetting.SEQUENCE_COLOR);
         g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-        g.drawString(_sequenceView, (int)(x0+ aaWidth), y0 + ViewSetting.HEIGHT_AA ); //x, y are base line begin x, y
+        g.drawString(_sequenceView, (x0 + aaWidth), y0 + ViewSetting.HEIGHT_AA); //x, y are base line begin x, y
         g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_OFF);
     }
 

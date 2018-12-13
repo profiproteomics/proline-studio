@@ -36,7 +36,7 @@ public class PanelPtmDraw extends JPanel {
     private int _sequenceLength;
     JScrollPane _scrollPane;
     private PanelPeptidesPTMSiteGraphic _ctrl;
-    private boolean _isDataNull;
+    private boolean _isDataNull;//when precedent databox change order ou filter, we can have non selected row, in this case, nothing to show
 
     protected PanelPtmDraw(PanelPeptidesPTMSiteGraphic ctrl, PtmMarkCtrl ctrlMark, ProteinSequenceCtrl ctrlSequence, PeptideAreaCtrl ctrlPeptideArea) {
         _ctrl = ctrl;
@@ -45,12 +45,13 @@ public class PanelPtmDraw extends JPanel {
         _rowCount = 0;
         _sequenceLength = 0;
         _selectedRowIndex = 0;
-        setDoubleBuffered(false);
+       
         initComponents();
 
     }
 
     private void initComponents() {
+         setDoubleBuffered(false);
         _titlePane.setMarkBeginPoint(ViewSetting.BORDER_GAP, ViewSetting.BORDER_GAP);
         _titlePane.setSequenceBeginPoint(ViewSetting.BORDER_GAP, ViewSetting.HEIGHT_MARK);
         _peptidePane.setBeginPoint(ViewSetting.BORDER_GAP, ViewSetting.BORDER_GAP);
@@ -99,42 +100,46 @@ public class PanelPtmDraw extends JPanel {
         this._isDataNull = true;
     }
 
+    protected void setSelectedIndex(int i) {
+        _selectedRowIndex = i;
+    }
+
     private class TitlePane extends JPanel {
 
-        private PtmMarkCtrl _ctrlMark;
-        private ProteinSequenceCtrl _ctrlSequence;
+        private PtmMarkCtrl m_ctrlMark;
+        private ProteinSequenceCtrl m_ctrlSequence;
 
         private TitlePane(PtmMarkCtrl ctrlMark, ProteinSequenceCtrl ctrlSequence) {
             super();
-            _ctrlMark = ctrlMark;
-            _ctrlSequence = ctrlSequence;
+            m_ctrlMark = ctrlMark;
+            m_ctrlSequence = ctrlSequence;
         }
 
         public void setMarkBeginPoint(int x, int y) {
-            _ctrlMark.setBeginPoint(x, y);
+            m_ctrlMark.setBeginPoint(x, y);
         }
 
         public void setSequenceBeginPoint(int x, int y) {
-            _ctrlSequence.setBeginPoint(x, y);
+            m_ctrlSequence.setBeginPoint(x, y);
         }
 
         @Override
         public Dimension getPreferredSize() {
-            //logger.debug("title Pane preferred size: (" + this.getWidth() + "," + this.getHeight() + ")");
-            //logger.debug("getPreferredSize horizontal value: " + _scrollPane.getHorizontalScrollBar().getValue());
-            return new Dimension((int)((_sequenceLength + AJUSTE_GAP - _ajustedLocation) * ViewSetting.WIDTH_AA), ViewSetting.HEIGHT_MARK + ViewSetting.HEIGHT_SEQUENCE);
+            return new Dimension((int) ((_sequenceLength + AJUSTE_GAP - _ajustedLocation) * ViewSetting.WIDTH_AA), ViewSetting.HEIGHT_MARK + ViewSetting.HEIGHT_SEQUENCE);
         }
 
         @Override
         protected void paintComponent(Graphics g) {
             this.isPaintingOrigin();
             super.paintComponent(g);
-            ViewContext viewContext = new ViewContext();
-            viewContext.setAjustedLocation(_ajustedLocation);
-            if (_isDataLoaded) {
-                Graphics2D g2 = (Graphics2D) g;
-                _ctrlMark.paint(g2, viewContext);
-                _ctrlSequence.paint(g2, viewContext);
+            if (!_isDataNull) {
+                ViewContext viewContext = new ViewContext();
+                viewContext.setAjustedLocation(_ajustedLocation);
+                if (_isDataLoaded) {
+                    Graphics2D g2 = (Graphics2D) g;
+                    m_ctrlMark.paint(g2, viewContext);
+                    m_ctrlSequence.paint(g2, viewContext);
+                }
             }
         }
 
@@ -142,21 +147,21 @@ public class PanelPtmDraw extends JPanel {
 
     private class PeptidePane extends JPanel {
 
-        private PeptideAreaCtrl _ctrlPeptideArea;
+        private PeptideAreaCtrl m_ctrlPeptideArea;
 
         private PeptidePane(PeptideAreaCtrl ctrlPeptideArea) {
             super();
-            _ctrlPeptideArea = ctrlPeptideArea;
+            m_ctrlPeptideArea = ctrlPeptideArea;
             this.addMouseListener(new MouseAdapter() {
                 public void mouseClicked(MouseEvent e) {
                     //PtmSitePeptide selectedItem = _ctrlPeptideArea.getSelectedItem(e.getX(), e.getY());
-                    int selectedIndex = _ctrlPeptideArea.getSelectedItemIndex(e.getX(), e.getY());
+                    int selectedIndex = m_ctrlPeptideArea.getSelectedItemIndex(e.getX(), e.getY());
                     if (selectedIndex != -1) {
                         _selectedRowIndex = selectedIndex;
                     }
                     //logger.debug("PeptidePane mouseClicked(" + e.getX() + "," + e.getY() + ")");
                     if (_selectedRowIndex != -1) {
-                        _ctrl.valueChanged();
+                        _ctrl.valueChanged(_selectedRowIndex);
                         //logger.debug(selectedItem.toString());
                     }
                 }
@@ -164,12 +169,12 @@ public class PanelPtmDraw extends JPanel {
         }
 
         public void setBeginPoint(int x, int y) {
-            _ctrlPeptideArea.setBeginPoint(x, y);
+            m_ctrlPeptideArea.setBeginPoint(x, y);
         }
 
         @Override
         public Dimension getPreferredSize() {
-            int width = (int)((_sequenceLength + AJUSTE_GAP - _ajustedLocation) * ViewSetting.WIDTH_AA);
+            int width = (int) ((_sequenceLength + AJUSTE_GAP - _ajustedLocation) * ViewSetting.WIDTH_AA);
             int height = _rowCount * (ViewSetting.HEIGHT_AA * 2 - ViewSetting.HEIGHT_AA / 2);
             if (height == 0) {
                 height = 5 * ViewSetting.HEIGHT_AA;
@@ -182,14 +187,13 @@ public class PanelPtmDraw extends JPanel {
         @Override
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
-
-            //set graphic begin point
-            //logger.debug(" width AA : " + fontWidth);
-            ViewContext viewContext = new ViewContext();
-            viewContext.setAjustedLocation(_ajustedLocation).setAreaWidth(this.getWidth());
-            if (_isDataLoaded) {
-                Graphics2D g2 = (Graphics2D) g;
-                _ctrlPeptideArea.paint(g2, viewContext);
+            if (!_isDataNull) {
+                ViewContext viewContext = new ViewContext();
+                viewContext.setAjustedLocation(_ajustedLocation).setAreaWidth(this.getWidth());
+                if (_isDataLoaded) {
+                    Graphics2D g2 = (Graphics2D) g;
+                    m_ctrlPeptideArea.paint(g2, viewContext);
+                }
             }
         }
     }

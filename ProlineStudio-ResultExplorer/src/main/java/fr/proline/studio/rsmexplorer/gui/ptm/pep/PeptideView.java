@@ -26,7 +26,6 @@ public class PeptideView extends ViewPtmAbstract {
     private PtmSitePeptide _peptide;
     private float _score;
     private boolean _isSelected;
-    private int _fontWidth = 14;
 
     public PeptideView(PtmSitePeptide pep) {
         this.x0 = 0;
@@ -41,22 +40,21 @@ public class PeptideView extends ViewPtmAbstract {
 
     @Override
     public void paint(Graphics2D g, ViewContext viewContext) {
-        double aaWidth = ViewSetting.WIDTH_AA;
+        int aaWidth = ViewSetting.WIDTH_AA;
 
-        //public abstract void drawRoundRect(int x, int y, int width, int height,int arcWidth, int arcHeight);
-        this.x0 = (int)(this.m_x + aaWidth + (this._beginIndex - viewContext.getAjustedLocation()) * aaWidth);
+        this.x0 = (this.m_x + aaWidth + (this._beginIndex - viewContext.getAjustedLocation()) * aaWidth);
         this.y0 = this.m_y;
-        int width = (int)(this._length * aaWidth);
+        int width = (this._length * aaWidth);
         int height = ViewSetting.HEIGHT_AA;
         g.setColor(ViewSetting.PEPTIDE_COLOR);
-        g.fillRoundRect(x0, y0, width, height, (int)aaWidth, ViewSetting.HEIGHT_AA);
+        g.fillRoundRect(x0, y0, width, height, aaWidth, ViewSetting.HEIGHT_AA);
         if (_isSelected == true) {
             g.setColor(ViewSetting.SELECTED_PEPTIDE_COLOR);
             g.setStroke(ViewSetting.STROKE_PEP);
-            g.drawRoundRect(x0, y0, width, height, (int)aaWidth, ViewSetting.HEIGHT_AA);
+            g.drawRoundRect(x0, y0, width, height, aaWidth, ViewSetting.HEIGHT_AA);
         }
         for (PtmSiteAA modifyA : _ptmSiteAAList) {
-            paintPtm(g, modifyA, y0, (int)aaWidth);
+            paintPtm(g, modifyA, y0);
         }
 
     }
@@ -74,7 +72,8 @@ public class PeptideView extends ViewPtmAbstract {
      * @param modifyA
      * @param y01
      */
-    private void paintPtm(Graphics2D g, PtmSiteAA modifyA, int y01, int aaWidth) {
+    private void paintPtm(Graphics2D g, PtmSiteAA modifyA, int y01) {
+        int aaWidth = ViewSetting.WIDTH_AA;
         Color colorOld = g.getColor();
         g.setColor(modifyA.getColorWithProbability());
         int location = modifyA.getModifyLocPep();
@@ -111,7 +110,7 @@ public class PeptideView extends ViewPtmAbstract {
 
     public PtmSitePeptide getSelectedPeptide(int compareX) {
         int xRangA = this.x0;
-        int xRangZ = this.x0 + this._length * _fontWidth;
+        int xRangZ = this.x0 + this._length * ViewSetting.HEIGHT_AA;
         //logger.debug(" element:"+this._peptide.toString()+"("+xRangA+","+xRangZ+")");
         if (compareX > xRangA && compareX < xRangZ) {
             return this._peptide;

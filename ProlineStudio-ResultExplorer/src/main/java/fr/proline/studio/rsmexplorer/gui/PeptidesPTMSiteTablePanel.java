@@ -46,6 +46,7 @@ import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import org.jdesktop.swingx.JXTable;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
+import fr.proline.studio.rsmexplorer.gui.ptm.PanelPeptidesPTMSiteAll;
 
 /**
  *
@@ -61,7 +62,7 @@ public class PeptidesPTMSiteTablePanel extends JPanel implements DataBoxPanelInt
 
     private SearchToggleButton m_searchToggleButton;
     private InfoToggleButton m_infoToggleButton;
-    
+
     private SettingsButton m_settingsButton;
     private FilterButton m_filterButton;
     private ExportButton m_exportButton;
@@ -70,14 +71,16 @@ public class PeptidesPTMSiteTablePanel extends JPanel implements DataBoxPanelInt
     protected PTMSite m_currentPeptidesPTMSite = null;
     protected DPeptideInstance m_currentPepInst = null;
 
-    
     private final boolean m_displayPeptidesMatches;
+    private PanelPeptidesPTMSiteAll _parent;
+
     /**
      * Display Peptides Matches of a PTMSite.
-     * 
-     * @param viewAll if true display all Peptides Matches of all Peptide Instance for this PTMSite. If false, 
-     * display only best PeptideMatch of all Peptide Instance for this PTMSite.
-     * 
+     *
+     * @param viewAll if true display all Peptides Matches of all Peptide
+     * Instance for this PTMSite. If false, display only best PeptideMatch of
+     * all Peptide Instance for this PTMSite.
+     *
      */
     public PeptidesPTMSiteTablePanel(boolean viewAll) {
         m_displayPeptidesMatches = viewAll;
@@ -91,37 +94,36 @@ public class PeptidesPTMSiteTablePanel extends JPanel implements DataBoxPanelInt
         PeptidesOfPTMSiteTableModel tableModel = (PeptidesOfPTMSiteTableModel) compoundTableModel.getBaseModel();
         return tableModel.getCurrentPTMSite();
     }
-    
+
     public DPeptideMatch getSelectedPeptideMatchSite() {
 
         CompoundTableModel compoundTableModel = ((CompoundTableModel) m_peptidesPtmSiteTable.getModel());
         // Retrieve ProteinPTMSite selected
         PeptidesOfPTMSiteTableModel tableModel = (PeptidesOfPTMSiteTableModel) compoundTableModel.getBaseModel();
-        
+
         // Retrieve Selected Row
-        int selectedRow = getSelectedTableModelRow();    
-        
+        int selectedRow = getSelectedTableModelRow();
+
         return tableModel.getSelectedPeptideMatchSite(selectedRow);
     }
-    
-    
+
     public DPeptideInstance getSelectedPeptideInstance() {
         CompoundTableModel compoundTableModel = ((CompoundTableModel) m_peptidesPtmSiteTable.getModel());
         // Retrieve ProteinPTMSite selected
         PeptidesOfPTMSiteTableModel tableModel = (PeptidesOfPTMSiteTableModel) compoundTableModel.getBaseModel();
-        
+
         // Retrieve Selected Row
-        int selectedRow = getSelectedTableModelRow();    
-        
+        int selectedRow = getSelectedTableModelRow();
+
         return tableModel.getSelectedPeptideInstance(selectedRow);
     }
-    
-    public int getSelectedTableModelRow(){
-        
+
+    public int getSelectedTableModelRow() {
+
         // Retrieve Selected Row
         int selectedRow = m_peptidesPtmSiteTable.getSelectedRow();
-        
-         // nothing selected
+
+        // nothing selected
         if (selectedRow == -1) {
             return -1;
         }
@@ -133,20 +135,19 @@ public class PeptidesPTMSiteTablePanel extends JPanel implements DataBoxPanelInt
         return selectedRow;
     }
 
-
     public void setData(PTMSite peptidesPTMSite, DPeptideInstance pepInst) {
 
         if ((peptidesPTMSite == m_currentPeptidesPTMSite) && (pepInst == m_currentPepInst)) {
             return;
         }
-        
+
         m_currentPeptidesPTMSite = peptidesPTMSite;
         m_currentPepInst = pepInst;
-        
+
         PeptidesOfPTMSiteTableModel model = ((PeptidesOfPTMSiteTableModel) ((CompoundTableModel) m_peptidesPtmSiteTable.getModel()).getBaseModel());
         model.setData(peptidesPTMSite, m_displayPeptidesMatches, pepInst);
         // select the first row
-        if ((peptidesPTMSite != null) && ((!m_displayPeptidesMatches) || (pepInst != null)) ) {
+        if ((peptidesPTMSite != null) && ((!m_displayPeptidesMatches) || (pepInst != null))) {
             m_peptidesPtmSiteTable.getSelectionModel().setSelectionInterval(0, 0);
             m_markerContainerPanel.setMaxLineNumber(m_peptidesPtmSiteTable.getModel().getRowCount());
         }
@@ -201,7 +202,7 @@ public class PeptidesPTMSiteTablePanel extends JPanel implements DataBoxPanelInt
 
         // Search Button
         m_exportButton = new ExportButton(((CompoundTableModel) m_peptidesPtmSiteTable.getModel()), "Peptides", m_peptidesPtmSiteTable);
-        m_searchToggleButton = new SearchToggleButton(m_peptidesPtmSiteTable, m_peptidesPtmSiteTable, ((CompoundTableModel) m_peptidesPtmSiteTable.getModel()));        
+        m_searchToggleButton = new SearchToggleButton(m_peptidesPtmSiteTable, m_peptidesPtmSiteTable, ((CompoundTableModel) m_peptidesPtmSiteTable.getModel()));
         m_settingsButton = new SettingsButton(((ProgressInterface) m_peptidesPtmSiteTable.getModel()), m_peptidesPtmSiteTable);
         m_infoToggleButton = new InfoToggleButton(m_peptidesPtmSiteTable, m_peptidesPtmSiteTable);
         m_filterButton = new FilterButton(((CompoundTableModel) m_peptidesPtmSiteTable.getModel())) {
@@ -387,7 +388,16 @@ public class PeptidesPTMSiteTablePanel extends JPanel implements DataBoxPanelInt
         //Nothing to Do
     }
 
-    private class PeptidesPTMSiteTable extends DecoratedMarkerTable implements  CrossSelectionInterface, InfoInterface, ProgressInterface {
+    public void setSelectedRow(int i) {
+
+        this.m_peptidesPtmSiteTable.setRowSelectionInterval(i, i);
+    }
+
+    public void setParent(PanelPeptidesPTMSiteAll parentPanel) {
+        this._parent = parentPanel;
+    }
+
+    private class PeptidesPTMSiteTable extends DecoratedMarkerTable implements CrossSelectionInterface, InfoInterface, ProgressInterface {
 
         public PeptidesPTMSiteTable() {
             super();
@@ -411,25 +421,24 @@ public class PeptidesPTMSiteTablePanel extends JPanel implements DataBoxPanelInt
             if (selectionWillBeRestored) {
                 return;
             }
-            
+
             if (m_displayPeptidesMatches) {
                 m_dataBox.propagateDataChanged(DPeptideMatch.class);
                 m_dataBox.propagateDataChanged(MsQueryInfoRset.class);
             } else {
-                m_dataBox.propagateDataChanged(PTMSite.class);            
+                m_dataBox.propagateDataChanged(PTMSite.class);
+                _parent.setSelectedRow(this.getSelectedRow(), PanelPeptidesPTMSiteAll.SOURCE_TABLE);
             }
         }
 
         public void selectionWillBeRestored(boolean b) {
             selectionWillBeRestored = b;
         }
-        
-        private boolean selectionWillBeRestored = false;
 
+        private boolean selectionWillBeRestored = false;
 
 //        @Override
 //        public void importSelection(HashSet selectedData) {
-
 //            ListSelectionModel selectionTableModel = getSelectionModel();
 //            selectionTableModel.clearSelection();
 //
@@ -459,7 +468,6 @@ public class PeptidesPTMSiteTablePanel extends JPanel implements DataBoxPanelInt
 //
 //            throw new RuntimeException(" HA HA NEEDED !!");
 //        }
-
         @Override
         public TablePopupMenu initPopupMenu() {
             m_popupMenu = new DisplayTablePopupMenu(PeptidesPTMSiteTablePanel.this);
@@ -477,28 +485,29 @@ public class PeptidesPTMSiteTablePanel extends JPanel implements DataBoxPanelInt
         public String getInfo() {
             int count = getModel().getRowCount();
             StringBuilder sb = new StringBuilder(count);
-            if(count > 1) {
+            if (count > 1) {
                 sb.append(" Peptides ");
             } else {
                 sb.append(" Peptide ");
             }
-            
-            if(m_displayPeptidesMatches)
+
+            if (m_displayPeptidesMatches) {
                 sb.append("Match ");
-            
+            }
+
             sb.append("for PTM Site");
-            
+
             return sb.toString();
         }
 
         @Override
         public boolean isLoaded() {
-            return true;            
+            return true;
         }
 
         @Override
         public int getLoadingPercentage() {
-            return 100;            
+            return 100;
         }
 
     }

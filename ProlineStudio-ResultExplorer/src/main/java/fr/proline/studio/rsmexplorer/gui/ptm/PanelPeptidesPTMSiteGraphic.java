@@ -3,7 +3,6 @@ package fr.proline.studio.rsmexplorer.gui.ptm;
 import fr.proline.core.orm.msi.dto.DPeptideInstance;
 import fr.proline.studio.dam.tasks.data.PTMSite;
 import fr.proline.studio.export.ExportButton;
-import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.rsmexplorer.gui.PeptidesPTMSiteTablePanel;
 import fr.proline.studio.rsmexplorer.gui.ptm.mark.PtmMarkCtrl;
 import fr.proline.studio.rsmexplorer.gui.ptm.pep.PeptideAreaCtrl;
@@ -27,6 +26,7 @@ public class PanelPeptidesPTMSiteGraphic extends PeptidesPTMSiteTablePanel {
     protected PtmMarkCtrl _ctrlMark;
     protected ProteinSequenceCtrl _ctrlSequence;
     protected PeptideAreaCtrl _ctrlPeptideArea;
+    private PanelPeptidesPTMSiteAll _parent;
 
     public PanelPeptidesPTMSiteGraphic() {
         super(false);
@@ -68,7 +68,7 @@ public class PanelPeptidesPTMSiteGraphic extends PeptidesPTMSiteTablePanel {
 
     // @Override
     public void setData(PTMSite peptidesPTMSite, DPeptideInstance pepInst) {
-        logger.debug(this.getClass().getName() + " setData ->");
+        //logger.debug(this.getClass().getName() + " setData ->");
         if ((peptidesPTMSite == m_currentPeptidesPTMSite) && (pepInst == m_currentPepInst)) {
             return;
         }
@@ -87,7 +87,7 @@ public class PanelPeptidesPTMSiteGraphic extends PeptidesPTMSiteTablePanel {
             this._paintArea.setRowCount(this._dataMgr.getRowCount());
             this._paintArea.setSequenceLength(_dataMgr.getProteinSequence().length());
             this._paintArea.setAjustedLocation(ajustedLocation);
-            valueChanged();
+            valueChanged(0);//first selected is 0
         }
         this.repaint();
     }
@@ -111,13 +111,29 @@ public class PanelPeptidesPTMSiteGraphic extends PeptidesPTMSiteTablePanel {
     // @Override
     public DPeptideInstance getSelectedPeptideInstance() {
         int selectedRowIndex = this._paintArea.getSelectedPeptideIndex();
-        logger.debug(this.getClass().getName() + "getSelectedPeptideInstance " + " selectRowIndex: " + selectedRowIndex);
+        //logger.debug(this.getClass().getName() + "getSelectedPeptideInstance " + " selectRowIndex: " + selectedRowIndex);
         return this._dataMgr.getSelectedPeptideInstance(selectedRowIndex);
     }
-
-    protected void valueChanged() {
+    
+    /**
+     * when selected petptied change, change next databox and table selected row
+     * @param i 
+     */
+    protected void valueChanged(int i) {
+        //logger.debug(this.getClass().getName() + "valueChanged selectRow="+ i);
         m_dataBox.propagateDataChanged(PTMSite.class);
+        this._parent.setSelectedRow(i, PanelPeptidesPTMSiteAll.SOURCE_GRAPHIC);
         this.repaint();
     }
 
+    public void setParent(PanelPeptidesPTMSiteAll parentPanel) {
+        this._parent = parentPanel;
+    }
+
+    @Override
+    public void setSelectedRow(int i) {
+        this._ctrlPeptideArea.setSelectedIndex(i);
+        this._paintArea.setSelectedIndex(i);
+    }
+    
 }

@@ -10,7 +10,6 @@ import fr.proline.studio.rsmexplorer.gui.ptm.ViewContext;
 import fr.proline.studio.rsmexplorer.gui.ptm.ViewPtmAbstract;
 import fr.proline.studio.rsmexplorer.gui.ptm.ViewSetting;
 import fr.proline.studio.utils.CyclicColorPalette;
-import java.awt.BasicStroke;
 import java.awt.Graphics2D;
 import java.awt.Stroke;
 import java.util.ArrayList;
@@ -20,8 +19,6 @@ import java.util.ArrayList;
  * @author Karine XUE
  */
 public class PeptideSetView extends ViewPtmAbstract {
-
-
 
     ArrayList<PeptideView> _peptideList;
 
@@ -36,10 +33,11 @@ public class PeptideSetView extends ViewPtmAbstract {
 
         for (PeptideView vp : _peptideList) {
             paintGrillX(g, viewContext.getAreaWidth(), x0, y0);
+            paintGrillX(g, viewContext.getAreaWidth(), x0, y0 + ViewSetting.HEIGHT_AA);
             vp.setBeginPoint(x0, y0);
             g.setColor(ViewSetting.PEPTIDE_COLOR);
             vp.paint(g, viewContext);
-            paintGrillX(g, viewContext.getAreaWidth(), x0, y0 + ViewSetting.HEIGHT_AA);
+
             y0 += (int) ViewSetting.HEIGHT_AA * 1.5;
         }
     }

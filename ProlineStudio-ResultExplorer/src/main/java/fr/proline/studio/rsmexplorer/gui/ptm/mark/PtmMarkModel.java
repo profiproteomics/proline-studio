@@ -2,8 +2,6 @@ package fr.proline.studio.rsmexplorer.gui.ptm.mark;
 
 import fr.proline.studio.rsmexplorer.gui.ptm.PtmSiteAA;
 import java.util.ArrayList;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /*
  * @cea 
@@ -15,7 +13,6 @@ import org.slf4j.LoggerFactory;
  * @author Karine XUE
  */
 public class PtmMarkModel {
-    private static Logger logger = LoggerFactory.getLogger("ProlineStudio.rsmexplorer.ptm");
 
     ArrayList<PtmMarkView> _PTMMarkList;
 
@@ -33,15 +30,14 @@ public class PtmMarkModel {
      * @param ptmSiteAA2Mark
      */
     public void setPTM(ArrayList<PtmSiteAA> ptmSiteAA2Mark) {
-        boolean  ajustNTerminiAt1 = false;
+        boolean ajustNTerminiAt1 = false;
 
         _PTMMarkList = new ArrayList<>();
         for (PtmSiteAA pa : ptmSiteAA2Mark) {
             PtmMarkView p = new PtmMarkView(pa);
             _PTMMarkList.add(p);
         }
-        
-       
+
     }
 
     public void addPTM(PtmSiteAA ptm) {

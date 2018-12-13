@@ -63,7 +63,7 @@ public class PtmMarkView extends ViewPtmAbstract {
     @Override
     public void paint(Graphics2D g, ViewContext viewContext) {
 
-        double aaWidth = ViewSetting.WIDTH_AA;
+        int aaWidth = ViewSetting.WIDTH_AA;
 
         FontMetrics fm = g.getFontMetrics(ViewSetting.FONT_PTM);
 

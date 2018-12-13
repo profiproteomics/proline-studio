@@ -26,28 +26,26 @@ public class PtmSitePeptide {
     private int _beginInProtein;
 
     private ArrayList<PtmSiteAA> _ptmList;
+    private boolean _isNTermAt1;
 
-
-
-    /**
-     *
-     * @param pepId
-     * @param pepMatchId
-     * @param sequence
-     * @param ptmSet
-     * @param distance
-     */
-    public PtmSitePeptide(long pepId, long pepMatchId, String sequence, ArrayList<PtmSiteAA> ptmSet, int distance) {
-
+    public PtmSitePeptide(long pepId, long pepMatchId, String sequence, ArrayList<PtmSiteAA> ptmSet, int peptideBeginLocationInProtein, boolean isNTermAt1) {
+        _isNTermAt1 = isNTermAt1;
         _ptmList = ptmSet;
-        _beginInProtein = distance; 
+        _beginInProtein = peptideBeginLocationInProtein;
         this._pepId = pepId;
         this._pepMatchId = pepMatchId;
         this._sequence = sequence;
     }
+
+    public boolean isNTermAt1() {
+        return _isNTermAt1;
+    }
+
+    
     /**
      * test use
-     * @return 
+     *
+     * @return
      */
     public int getBeginInProtein() {
         return _beginInProtein;
@@ -60,8 +58,6 @@ public class PtmSitePeptide {
     public String getSequence() {
         return _sequence;
     }
-
-
 
     @Override
     public String toString() {

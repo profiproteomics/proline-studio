@@ -34,17 +34,17 @@ public class PtmMarkView extends ViewPtmAbstract {
      * location in the protein, to paint above the type figure
      */
     int _locationProtein;
-    int _ajustNTermAt1;//useful for N-termini at protein 1;
+    //int _ajustNTermAt1;//useful for N-termini at protein 1;
 
     public PtmMarkView(PtmSiteAA pAA) {
         this.m_color = pAA.getColor();
         this.m_type = Character.toString(pAA.getPtmTypeChar());
         this._locationProtein = pAA.getModifyLocProtein();
-        if (pAA.isNTermAt1()) {
-            this._ajustNTermAt1 = 1;
-        } else {
-            this._ajustNTermAt1 = 0;
-        }
+//        if (pAA.isNTermAt1()) {
+//            this._ajustNTermAt1 = 1;
+//        } else {
+//            this._ajustNTermAt1 = 0;
+//        }
 
     }
 
@@ -68,8 +68,8 @@ public class PtmMarkView extends ViewPtmAbstract {
         FontMetrics fm = g.getFontMetrics(ViewSetting.FONT_PTM);
 
         g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-        this.x0 = (int)(this.m_x + aaWidth+ (this._locationProtein - viewContext.getAjustedLocation() - 1 + this._ajustNTermAt1) * aaWidth);
-        //this.x0 = this.m_x + (this._locationProtein - locationAjusted-1) * ViewSetting.WIDTH_AA;
+        //this.x0 = (int)(this.m_x + aaWidth+ (this._locationProtein - viewContext.getAjustedLocation()-1 + this._ajustNTermAt1) * aaWidth);
+        this.x0 = this.m_x + (this._locationProtein - viewContext.getAjustedLocation()) * ViewSetting.WIDTH_AA;
         this.y0 = this.m_y + ViewSetting.HEIGHT_AA; //reserve location line
 
         g.setColor(m_color);
@@ -112,6 +112,6 @@ public class PtmMarkView extends ViewPtmAbstract {
 
     @Override
     public String toString() {
-        return "ViewPtmMark{" + "m_type=" + m_type + ", _locationProtein=" + _locationProtein + ", _ajustNTermAt1=" + _ajustNTermAt1 + '}';
+        return "ViewPtmMark{" + "m_type=" + m_type + ", _locationProtein=" + _locationProtein + ", _ajustNTermAt1=" + '}';
     }
 }

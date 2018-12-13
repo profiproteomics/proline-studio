@@ -24,9 +24,9 @@ public class ViewSetting {
     public static int BORDER_GAP = 5;
     public static int HEIGHT_MARK;
     public static int HEIGHT_SEQUENCE;
-    public static Font FONT_NUMBER = new Font(Font.SERIF, Font.PLAIN, 8);
-    public static Font FONT_PTM = new Font(Font.MONOSPACED, Font.BOLD, 11);
-    public static Font FONT_SEQUENCE = new Font(Font.MONOSPACED, Font.BOLD, 16);
+    public static Font FONT_NUMBER = new Font(Font.SERIF, Font.PLAIN, 10);
+    public static Font FONT_PTM = new Font(Font.MONOSPACED, Font.BOLD, 14);
+    public static Font FONT_SEQUENCE = new Font(Font.MONOSPACED, Font.BOLD, 20);
     public static Color PEPTIDE_COLOR = new Color(240, 255, 255);
     public static Color SELECTED_PEPTIDE_COLOR = Color.black;
     public static Color SEQUENCE_COLOR = Color.BLUE;

@@ -25,7 +25,11 @@ public class ProteinSequenceCtrl {
     public void setData(String s){
         _view.setSequence(s);
     }
-
+    /**
+     * set graphic begin location
+     * @param x
+     * @param y 
+     */
     public void setBeginPoint(int x, int y) {
        this._view.setBeginPoint(x, y);
     }

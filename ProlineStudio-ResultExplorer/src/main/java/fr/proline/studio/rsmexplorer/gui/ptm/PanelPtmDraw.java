@@ -79,8 +79,7 @@ public class PanelPtmDraw extends JPanel {
     public void setAjustedLocation(int ajustedLocation) {
         this._ajustedLocation = ajustedLocation;
         if (ajustedLocation >= AJUSTE_GAP) {
-            //TODO Cby rq =assigning the parameter value does not change anything ..
-            ajustedLocation -= AJUSTE_GAP;
+            _ajustedLocation -= AJUSTE_GAP;
         }
     }
 

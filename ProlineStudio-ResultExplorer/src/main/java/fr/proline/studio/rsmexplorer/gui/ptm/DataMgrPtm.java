@@ -105,11 +105,11 @@ public class DataMgrPtm {
 
         _ptmSitePeptideRowSet = new ArrayList<>();
         if (_currentPtmSite == null) {
-            logger.debug(this.getClass().getName()+"setData"+" data is null");
+            logger.debug(this.getClass().getName() + "setData" + " data is null");
             this._PtmSitePeptideList = null;
             this._PtmSiteAA2Mark = null;
-            this._proteinSequence ="";
-            this._beginBestFit = 0;            
+            this._proteinSequence = "";
+            this._beginBestFit = 0;
             return;
         }
         //@todo verify only the bestPeptideMatch
@@ -172,6 +172,9 @@ public class DataMgrPtm {
             String content = pp.getSequence();
             int cLength = content.length();
             int pIndex = pp.getBeginInProtein();
+            if (pIndex == 1 && pp.isNTermAt1()) {
+                pIndex = 0;
+            }
             //logger.debug("Sequence (" + pIndex + "," + content + ")");
             int l = sb.length();
             if (l < pIndex) {
@@ -294,24 +297,25 @@ public class DataMgrPtm {
             for (String ptm : ptmSet) {
                 PtmSiteAA pa = new PtmSiteAA(ptm.trim(), peptideBeginLocationInProtein, isNTermAt1);
                 ptmFromStringList.add(pa);
-               // logger.debug("" + this.getClass().toString() + " 1-PtmSiteAA:" + pa.toString());
+                // logger.debug("" + this.getClass().toString() + " 1-PtmSiteAA:" + pa.toString());
             }
 
             //a subset of ptmsite can retrived probability
+            float proba = 1;
             if (properties != null) {
-                float proba = properties.getMascotDeltaScore();
+                proba = properties.getMascotDeltaScore();
                 //logger.debug("" + this.getClass().toString() + " 2-PtmSiteAA: (" + aa + aaLocationInProtein + ")" + proba);
                 Map<String, Float> ptmProbabilitySet = properties.getMascotProbabilityBySite();
                 for (PtmSiteAA psa : ptmFromStringList) {
                     Float prob = ptmProbabilitySet.get(psa.getPtmSite());
                     if (prob != null) {
                         psa.setProbability(prob);
-                       // logger.debug("" + this.getClass().toString() + " 3-PtmSiteAA:" + psa.toString() + " " + prob);
+                        // logger.debug("" + this.getClass().toString() + " 3-PtmSiteAA:" + psa.toString() + " " + prob);
                     }
                 }
             }
 
-            pPeptide = new PtmSitePeptide(pepId, pepMatchId, sequence, ptmFromStringList, peptideBeginLocationInProtein);
+            pPeptide = new PtmSitePeptide(pepId, pepMatchId, sequence, ptmFromStringList, peptideBeginLocationInProtein, isNTermAt1);
             if (isNTermAt1 && peptideBeginLocationInProtein == 1) {
                 this._beginBestFit = 0;//modify adjustLocation is N-Termini is at 1
             }
@@ -320,8 +324,8 @@ public class DataMgrPtm {
             }
             //logger.debug("---calcul begin point:" + this._beginBestFit);
             //logger useful to collect test data
-            //logger.debug("PtmSitePeptide Data: ((long)" + pepId + ", (long)" + pepMatchId + ", (Character)\'" + aa + "\', \"" + sequence + "\", \"" + ptm + "\", "
-            //        + locationInPep + ", " + seqPositionInProtein + ", " + ptmProbability + "f)");
+            //logger.debug("PtmSitePeptide ((long)" + pepId + ", (long)" + pepMatchId + ", \"" + sequence + "\", \"" + ptmReadString + "\", "
+            //       + aaLocationInPep + ", " + aaLocationInProtein + ", " + proba + "f));");
             ptmPepList.add(pPeptide);
         }
         return ptmPepList;

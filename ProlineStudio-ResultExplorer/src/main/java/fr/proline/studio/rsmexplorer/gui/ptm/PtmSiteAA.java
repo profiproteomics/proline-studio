@@ -77,7 +77,7 @@ public class PtmSiteAA {
         this._ptmType = new PtmType(type);
         this._probability = 1;
     }
-
+    
     public boolean isNTermAt1() {
         return _isNTermAt1;
     }

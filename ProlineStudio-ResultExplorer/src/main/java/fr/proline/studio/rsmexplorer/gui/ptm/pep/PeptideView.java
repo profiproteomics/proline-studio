@@ -35,6 +35,10 @@ public class PeptideView extends ViewPtmAbstract {
 
         _ptmSiteAAList = pep.getPtmSiteAAList();
         _beginIndex = pep.getBeginInProtein();
+        if (_beginIndex == 1){
+            if (pep.isNTermAt1())
+                _beginIndex = 0;
+        }
         _isSelected = false;
     }
 

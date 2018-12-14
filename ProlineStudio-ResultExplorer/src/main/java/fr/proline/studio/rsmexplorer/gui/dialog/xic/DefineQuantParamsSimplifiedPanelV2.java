@@ -12,6 +12,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.prefs.Preferences;
 import javax.swing.Box;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -47,11 +48,19 @@ public class DefineQuantParamsSimplifiedPanelV2 extends AbstractDefineQuantParam
         createParameters();
         
         //VDS: FIXME  m_parameterList.updateIsUsed(NbPreferences.root()); AND param.setUsed(true); ?????
+       //Reprendre la defintion des valeurs par defaut..... 
         if (readValues) {
+            // FIXME VDS-WART !!!! To get default alignRT to true
+            String alignRTKey = XIC_PARAMS_PREFIX+".alignRT";
+            Preferences preferences = NbPreferences.root();            
+            if(preferences.get(alignRTKey, null) == null){
+                preferences.put(alignRTKey, Boolean.TRUE.toString());
+            }
             m_parameterList.updateIsUsed(NbPreferences.root());
         } else {
             m_parameterList.setDefaultValues();
         }
+        
         for (AbstractParameter param : m_parameterList) {
             param.setUsed(true);
         }

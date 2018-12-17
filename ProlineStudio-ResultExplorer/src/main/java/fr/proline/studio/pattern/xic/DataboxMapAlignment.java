@@ -38,7 +38,8 @@ import org.slf4j.LoggerFactory;
  */
 public class DataboxMapAlignment extends AbstractDataBox {
 
-    protected static final Logger logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
+    protected static final Logger logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer.XIC.alignment");
+    private long logStartTime;
     private DDataset m_dataset;
 
     private QuantChannelInfo m_quantChannelInfo;
@@ -180,6 +181,7 @@ public class DataboxMapAlignment extends AbstractDataBox {
 
             @Override
             public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
+                logger.info(this.getClass().getName()+" task Id ="+ taskId+" finished during " + (System.currentTimeMillis()-logStartTime)+" TimeMillis");
                 setLoaded(loadingId);
                 if (finished) {
                     unregisterTask(taskId);
@@ -203,9 +205,11 @@ public class DataboxMapAlignment extends AbstractDataBox {
         taskMapAlignment.initLoadAlignmentForXic(getProjectId(), m_dataset);
 
         m_paramTaskId = taskParameter.getId();//this task is short, and it will be done at first
+        logStartTime = System.currentTimeMillis();
+        logger.info(this.getClass().getName()+" DatabaseLoadXicMasterQuantTask taskParameter Id ="+ m_paramTaskId+" registered" );
+        logger.info(this.getClass().getName()+" DatabaseLoadLcMSTask taskMapAlignment Id ="+ taskMapAlignment.getId()+" registered" );
         registerTask(taskParameter);
-        registerTask(taskMapAlignment);
-
+        registerTask(taskMapAlignment);       
     }
 
     /**
@@ -274,8 +278,7 @@ public class DataboxMapAlignment extends AbstractDataBox {
             if (quantParams.containsKey("cross_assignment_config")) {
                 Map<String, Object> crossAssignmentConfig = (Map<String, Object>) quantParams.get("cross_assignment_config");
                 Map<String, Object> ftMappingParams = (Map<String, Object>) crossAssignmentConfig.getOrDefault("ft_mapping_params", new HashMap<>());
-
-                time = (Double) ftMappingParams.get("time_tol");
+                time = Double.valueOf((String)ftMappingParams.get("time_tol"));
                 if (time == null) {
                     time = AbstractLabelFreeMSParamsPanel.DEFAULT_CA_FEATMAP_RTTOL_VALUE;
                 }

@@ -1,6 +1,6 @@
 package fr.proline.studio.rsmexplorer.gui.model;
 
-import fr.proline.studio.dam.tasks.data.PTMSite;
+import fr.proline.studio.dam.tasks.data.ptm.PTMSite;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -23,10 +23,10 @@ public class PTMProteinSiteTableModelProcessing {
         TreeSet<Character> residueTreeSet = new TreeSet<>();
 
         for (int i = 0; i < nbRows; i++) {
-            String modification = (String) model.getValueAt(i, PTMProtenSiteTableModel.COLTYPE_MODIFICATION);
+            String modification = (String) model.getValueAt(i, PTMProteinSiteTableModel.COLTYPE_MODIFICATION);
             modificationTreeSet.add(modification);
 
-            Character residue = (Character) model.getValueAt(i, PTMProtenSiteTableModel.COLTYPE_RESIDUE_AA);
+            Character residue = (Character) model.getValueAt(i, PTMProteinSiteTableModel.COLTYPE_RESIDUE_AA);
             if (residue != null) {
                 residueTreeSet.add(residue);
             }
@@ -68,7 +68,7 @@ public class PTMProteinSiteTableModelProcessing {
         HashMap<String, Integer> globalDistinctModificationsMap = new HashMap<>();
 
         for (int i = 0; i < rowCount; i++) {
-            String modification = (String) model.getValueAt(i, PTMProtenSiteTableModel.COLTYPE_MODIFICATION);                
+            String modification = (String) model.getValueAt(i, PTMProteinSiteTableModel.COLTYPE_MODIFICATION);
             Integer nb = globalDistinctModificationsMap.get(modification);
             if (nb == null) {
                 globalDistinctModificationsMap.put(modification, 1);

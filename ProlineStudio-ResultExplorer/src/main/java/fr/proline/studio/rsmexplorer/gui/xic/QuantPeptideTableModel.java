@@ -17,7 +17,7 @@ import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadXicMasterQuantTask;
 import fr.proline.studio.dam.tasks.xic.DatabaseModifyPeptideTask;
 import fr.proline.studio.export.ExportFontData;
-import fr.proline.studio.export.ExportModelUtilities;
+import fr.proline.studio.table.ExportModelUtilities;
 import fr.proline.studio.filter.ConvertValueInterface;
 import fr.proline.studio.filter.DoubleFilter;
 import fr.proline.studio.filter.Filter;

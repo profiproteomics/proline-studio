@@ -157,9 +157,10 @@ public class PanelPtmDraw extends JPanel {
                     int selectedIndex = m_ctrlPeptideArea.getSelectedItemIndex(e.getX(), e.getY());
                     if (selectedIndex != -1) {
                         _selectedRowIndex = selectedIndex;
+                        repaint();
                     }
                     //logger.debug("PeptidePane mouseClicked(" + e.getX() + "," + e.getY() + ")");
-                    if (_selectedRowIndex != -1) {
+                    if ((_selectedRowIndex != -1) && (_ctrl != null)) {
                         _ctrl.valueChanged(_selectedRowIndex);
                         //logger.debug(selectedItem.toString());
                     }

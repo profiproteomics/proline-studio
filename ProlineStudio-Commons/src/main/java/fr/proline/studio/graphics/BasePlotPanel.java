@@ -45,7 +45,6 @@ import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import scala.Array;
 
 /**
  * Panel to display data with an X and Y Axis

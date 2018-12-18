@@ -5,11 +5,11 @@
  */
 package fr.proline.studio.rsmexplorer.gui.ptm.pep;
 
-import fr.proline.studio.rsmexplorer.gui.ptm.PtmSitePeptide;
+import fr.proline.studio.dam.tasks.data.ptm.PTMSitePeptideInstance;
 import fr.proline.studio.rsmexplorer.gui.ptm.ViewContext;
 
 import java.awt.Graphics2D;
-import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
@@ -25,7 +25,7 @@ public class PeptideAreaCtrl {
         _view = new PeptideSetView();
     }
 
-    public void setData(ArrayList<PtmSitePeptide> ptmSitePeptide) {
+    public void setData(List<PTMSitePeptideInstance> ptmSitePeptide) {
         _mgr.setPTM(ptmSitePeptide);
         _view.setViewPeptideList(_mgr.getViewPeptideList());
     }
@@ -38,20 +38,20 @@ public class PeptideAreaCtrl {
         this._view.paint(g2, viewContext);
     }
 
-    public PtmSitePeptide getSelectedItem(int x, int y) {
-        PtmSitePeptide result = this._view.getSelectedItem(x, y);
+    public PTMSitePeptideInstance getSelectedItem(int x, int y) {
+        PTMSitePeptideInstance result = this._view.getSelectedItem(x, y);
         return result;
 
     }
 
     public int getSelectedItemIndex(int x, int y) {
         int index = this._view.getSelectedItemIndex(x, y);
-        this._mgr.setSelctedItem(index);//change select 
+        this._mgr.setSelectedItem(index);//change select
         return this._view.getSelectedItemIndex(x, y);
     }
 
     public void setSelectedIndex(int i) {
-        this._mgr.setSelctedItem(i);
+        this._mgr.setSelectedItem(i);
     }
 
 

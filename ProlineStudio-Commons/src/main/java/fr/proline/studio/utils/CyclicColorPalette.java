@@ -27,8 +27,6 @@ public class CyclicColorPalette {
     public static final Color GRAY_GRID = new Color(229, 226, 224);
     public static final Color GRAY_GRID_LOG = new Color(244, 240, 238);
     public static final Color BLUE_SELECTION_ZONE = new Color(0.2f, 0.2f, 1f, 0.5f);
-
-    public static final Color HIGHLIGHT_COLOR = new Color(168, 84, 109);
     public static final Color GRAY_DARK = new Color(47, 43, 42);
 
     /**

@@ -7,7 +7,7 @@ import fr.proline.studio.extendedtablemodel.AddDataAnalyzerButton;
 import fr.proline.studio.extendedtablemodel.GlobalTabelModelProviderInterface;
 import fr.proline.studio.extendedtablemodel.JoinDataModel;
 import fr.proline.studio.dam.tasks.SubTask;
-import fr.proline.studio.dam.tasks.data.PTMSite;
+import fr.proline.studio.dam.tasks.data.ptm.PTMSite;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.filter.FilterButton;
 import fr.proline.studio.graphics.CrossSelectionInterface;

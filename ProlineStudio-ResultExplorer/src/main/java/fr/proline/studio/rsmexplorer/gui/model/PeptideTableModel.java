@@ -11,7 +11,7 @@ import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.msi.dto.DProteinSet;
 import fr.proline.studio.corewrapper.util.PeptideClassesUtils;
 import fr.proline.studio.extendedtablemodel.ExtraDataType;
-import fr.proline.studio.export.ExportModelUtilities;
+import fr.proline.studio.table.ExportModelUtilities;
 import fr.proline.studio.export.ExportFontData;
 import fr.proline.studio.filter.*;
 import fr.proline.studio.graphics.PlotInformation;

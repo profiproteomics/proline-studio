@@ -5,9 +5,10 @@
  */
 package fr.proline.studio.rsmexplorer.gui.ptm.mark;
 
+import fr.proline.studio.dam.tasks.data.ptm.PTMSite;
+import fr.proline.studio.rsmexplorer.gui.ptm.PTMMark;
 import fr.proline.studio.rsmexplorer.gui.ptm.ViewContext;
 import fr.proline.studio.rsmexplorer.gui.ptm.ViewPtmAbstract;
-import fr.proline.studio.rsmexplorer.gui.ptm.PtmSiteAA;
 import fr.proline.studio.rsmexplorer.gui.ptm.ViewSetting;
 import fr.proline.studio.utils.CyclicColorPalette;
 
@@ -28,7 +29,7 @@ public class PtmMarkView extends ViewPtmAbstract {
     /**
      * One letter
      */
-    String m_type;
+    String m_symbol;
     Color m_color;
     /**
      * location in the protein, to paint above the type figure
@@ -36,16 +37,10 @@ public class PtmMarkView extends ViewPtmAbstract {
     int _locationProtein;
     //int _ajustNTermAt1;//useful for N-termini at protein 1;
 
-    public PtmMarkView(PtmSiteAA pAA) {
-        this.m_color = pAA.getColor();
-        this.m_type = Character.toString(pAA.getPtmTypeChar());
-        this._locationProtein = pAA.getModifyLocProtein();
-//        if (pAA.isNTermAt1()) {
-//            this._ajustNTermAt1 = 1;
-//        } else {
-//            this._ajustNTermAt1 = 0;
-//        }
-
+    public PtmMarkView(PTMMark mark) {
+        this.m_color =  ViewSetting.getColor(mark);
+        this.m_symbol = Character.toString(mark.getPtmSymbol());
+        this._locationProtein = mark.getProteinLocation();
     }
 
     @Override
@@ -66,7 +61,8 @@ public class PtmMarkView extends ViewPtmAbstract {
         int aaWidth = ViewSetting.WIDTH_AA;
 
         FontMetrics fm = g.getFontMetrics(ViewSetting.FONT_PTM);
-
+        Color oldColor = g.getColor();
+        
         g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
         //this.x0 = (int)(this.m_x + aaWidth+ (this._locationProtein - viewContext.getAjustedLocation()-1 + this._ajustNTermAt1) * aaWidth);
         this.x0 = this.m_x + (this._locationProtein - viewContext.getAjustedLocation()) * ViewSetting.WIDTH_AA;
@@ -87,9 +83,9 @@ public class PtmMarkView extends ViewPtmAbstract {
 
         //draw PTM Type in the box
         g.setFont(ViewSetting.FONT_PTM);
-        int stringWidth = fm.stringWidth(m_type);
+        int stringWidth = fm.stringWidth(m_symbol);
         // assume that letters are squared: do not use ascent or height but reuse font width to position ptm letter in the middle of the box
-        g.drawString(m_type, xCenter - stringWidth / 2, y0 + ViewSetting.HEIGHT_AA - (ViewSetting.HEIGHT_AA - stringWidth)/2); //x, y are base line begin x, y
+        g.drawString(m_symbol, xCenter - stringWidth / 2, y0 + ViewSetting.HEIGHT_AA - (ViewSetting.HEIGHT_AA - stringWidth)/2); //x, y are base line begin x, y
 
 
         //draw the location number upper
@@ -108,10 +104,11 @@ public class PtmMarkView extends ViewPtmAbstract {
 
         g.drawString(String.valueOf(_locationProtein), xCenter - stringWidth / 2, y0 - descent / 2);
         g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_OFF);
+        g.setColor(oldColor);
     }
 
     @Override
     public String toString() {
-        return "ViewPtmMark{" + "m_type=" + m_type + ", _locationProtein=" + _locationProtein + ", _ajustNTermAt1=" + '}';
+        return "ViewPtmMark{" + "m_type=" + m_symbol + ", _locationProtein=" + _locationProtein + ", _ajustNTermAt1=" + '}';
     }
 }

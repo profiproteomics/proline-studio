@@ -3,10 +3,13 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package fr.proline.studio.dam.tasks.data;
+package fr.proline.studio.dam.tasks.data.ptm;
 
+import fr.proline.core.orm.msi.Peptide;
 import fr.proline.core.orm.msi.dto.DMasterQuantProteinSet;
+import fr.proline.core.orm.msi.dto.DPeptideInstance;
 import fr.proline.core.orm.uds.dto.DDataset;
+import java.awt.Color;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +23,7 @@ public class PTMDataset {
     
     private DDataset m_dataset;
     private List<PTMSite> m_proteinPTMSites;
+    private Map<Long, Map<Long, PTMPeptideInstance>> m_ptmPeptideByPeptideId = new HashMap<>();
 
     public PTMDataset(DDataset dataset) {
         
@@ -36,9 +40,11 @@ public class PTMDataset {
         return m_proteinPTMSites;
     }
 
-    public void setPTMSites(List<PTMSite> m_proteinPTMSites) {
-        this.m_proteinPTMSites = m_proteinPTMSites;
+    public void setPTMSites(List<PTMSite> proteinPTMSites) {
+        this.m_proteinPTMSites = proteinPTMSites;
+        m_proteinPTMSites.stream().forEach(site -> site.setDataset(this));
     }
+
 
     public void setQuantProteinSets(List<DMasterQuantProteinSet> masterQuantProteinSetList, Map<Long, Long> typicalProteinMatchIdByProteinMatchId) {
         Map<Long, DMasterQuantProteinSet> mqProteinSetByProteinMatchId = new HashMap<>();
@@ -51,5 +57,27 @@ public class PTMDataset {
         }
     }
 
+
+    public PTMPeptideInstance getPTMPeptideInstance(Long proteinMatchId, Long peptideId) {
+        if (!m_ptmPeptideByPeptideId.containsKey(proteinMatchId))
+            return null;
+        return m_ptmPeptideByPeptideId.get(proteinMatchId).get(peptideId);
+    }
+
+    public PTMPeptideInstance getPTMPeptideInstance(Long proteinMatchId, DPeptideInstance peptideInstance) {
+
+        if (!m_ptmPeptideByPeptideId.containsKey(proteinMatchId)) {
+            m_ptmPeptideByPeptideId.put(proteinMatchId, new HashMap<>());
+        }
+
+        Map<Long, PTMPeptideInstance> map = m_ptmPeptideByPeptideId.get(proteinMatchId);
+
+        if (! map.containsKey(peptideInstance.getPeptideId())) {
+            PTMPeptideInstance ptmPeptide = new PTMPeptideInstance(peptideInstance);
+            map.put(peptideInstance.getPeptideId(), ptmPeptide);
+        }
+
+        return map.get(peptideInstance.getPeptideId());
+    }
     
 }

@@ -1,6 +1,5 @@
 package fr.proline.studio.pattern.xic;
 
-import fr.proline.core.orm.msi.ProteinSetProteinMatchItem;
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.dto.DMasterQuantProteinSet;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
@@ -12,8 +11,8 @@ import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabasePTMsTask;
 import fr.proline.studio.dam.tasks.SubTask;
-import fr.proline.studio.dam.tasks.data.PTMDataset;
-import fr.proline.studio.dam.tasks.data.PTMSite;
+import fr.proline.studio.dam.tasks.data.ptm.PTMDataset;
+import fr.proline.studio.dam.tasks.data.ptm.PTMSite;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadLcMSTask;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadXicMasterQuantTask;
 import fr.proline.studio.graphics.CrossSelectionInterface;

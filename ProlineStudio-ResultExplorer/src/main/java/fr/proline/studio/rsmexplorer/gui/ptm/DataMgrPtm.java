@@ -5,19 +5,16 @@
  */
 package fr.proline.studio.rsmexplorer.gui.ptm;
 
-import fr.proline.core.orm.msi.PeptideReadablePtmString;
 import fr.proline.core.orm.msi.dto.DBioSequence;
 import fr.proline.core.orm.msi.dto.DPeptideInstance;
-import fr.proline.core.orm.msi.dto.DPeptideMatch;
+import fr.proline.core.orm.msi.dto.DPeptidePTM;
 import fr.proline.core.orm.msi.dto.DProteinMatch;
-import fr.proline.core.orm.msi.dto.DPtmSiteProperties;
-import fr.proline.studio.dam.tasks.data.PTMSite;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import javax.swing.table.TableCellRenderer;
+import fr.proline.studio.dam.tasks.data.ptm.PTMPeptideInstance;
+import fr.proline.studio.dam.tasks.data.ptm.PTMSite;
+
+import java.util.*;
+
+import fr.proline.studio.dam.tasks.data.ptm.PTMSitePeptideInstance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,20 +25,18 @@ import org.slf4j.LoggerFactory;
 public class DataMgrPtm {
 
     private static Logger logger = LoggerFactory.getLogger("ProlineStudio.rsmexplorer.ptm");
-    private final HashMap<Integer, TableCellRenderer> m_rendererMap = new HashMap();
     /**
      * All data for this databox
      */
     private PTMSite _currentPtmSite;
-    private ArrayList<Row> _ptmSitePeptideRowSet;
-
-    private ArrayList<PtmSitePeptide> _PtmSitePeptideList;
-    private ArrayList<PtmSiteAA> _PtmSiteAA2Mark;
+    private List<PTMSitePeptideInstance> _peptidesInstances;
+    private Map<Integer, PTMMark> _allPtmMarks;
+    
     private String _proteinSequence;
     private int _beginBestFit;
 
     public DataMgrPtm() {
-        _ptmSitePeptideRowSet = new ArrayList<>();
+        _peptidesInstances = new ArrayList<>();
         _beginBestFit = Integer.MAX_VALUE;
     }
 
@@ -49,51 +44,20 @@ public class DataMgrPtm {
         return _proteinSequence;
     }
 
-    public ArrayList<PtmSitePeptide> getPtmSitePeptideList() {
-        return _PtmSitePeptideList;
-    }
-
     public int getRowCount() {
-        if (_PtmSitePeptideList == null) {
+        if (_peptidesInstances == null) {
             return -1;
         }
-        return _PtmSitePeptideList.size();
+        return _peptidesInstances.size();
     }
 
-    /**
-     * create a list of mark to paint, one (PtmType, location) appear only 1
-     * time
-     *
-     * @return
-     */
-    private ArrayList<PtmSiteAA> createPtmSitePP2Mark() {
-        ArrayList<PtmSiteAA> result = new ArrayList();
-        HashMap<Integer, PtmSiteAA> locationPtmMap = new HashMap();
-        Integer loc;
-        for (PtmSitePeptide mpep : _PtmSitePeptideList) {
-            for (PtmSiteAA mAA : mpep.getPtmSiteAAList()) {
-                loc = (Integer) mAA.getModifyLocProtein();
-                if (locationPtmMap.get(loc) == null) { // first time, only one Time for a location PtmSiteAA
-                    locationPtmMap.put(loc, mAA);
-                }
-            }
-        }
-        Collection set = locationPtmMap.values();
-        for (Object o : set) {
-            result.add((PtmSiteAA) o);
-        }
-        //logger.debug("all ptm Site AA " + result.toString());
-        return result;
-    }
-
-    public ArrayList<PtmSiteAA> getAllPtmSite2Mark() {
-        return this._PtmSiteAA2Mark;
+    public Collection<PTMMark> getAllPtmMarks() {
+        return this._allPtmMarks.values();
     }
 
     /**
      *
      * @param selectedPTMSite in first DataBox will be show in this Box
-     * @param parentPepInstance peptideMatch
      */
     public void setData(PTMSite selectedPTMSite) {
         if (_currentPtmSite != null && _currentPtmSite.equals(selectedPTMSite)) {
@@ -103,28 +67,47 @@ public class DataMgrPtm {
         _beginBestFit = Integer.MAX_VALUE;
         _currentPtmSite = selectedPTMSite;
 
-        _ptmSitePeptideRowSet = new ArrayList<>();
+        _peptidesInstances = new ArrayList<>();
+        _allPtmMarks = new HashMap<>();
         if (_currentPtmSite == null) {
             logger.debug(this.getClass().getName() + "setData" + " data is null");
-            this._PtmSitePeptideList = null;
-            this._PtmSiteAA2Mark = null;
             this._proteinSequence = "";
             this._beginBestFit = 0;
             return;
         }
         //@todo verify only the bestPeptideMatch
-        List<DPeptideInstance> dpInstanceList = _currentPtmSite.getParentPeptideInstances();
-        //List<DPeptideInstance> dpLeafInstanceList = _currentPtmSite.getLeafPeptideInstances(peptideId);
-        for (DPeptideInstance parentPeptideInstance : dpInstanceList) {
+        Set<Long> peptidesIds = new HashSet<>();
+            
+        for (DPeptideInstance parentPeptideInstance : _currentPtmSite.getParentPeptideInstances()) {
             long peptideId = parentPeptideInstance.getPeptideId();
-            //_currentPtmSite.get
-            DPeptideMatch bestPM = _currentPtmSite.getBestPeptideMatchForPeptide(peptideId);
-            //here we copy the same as setData in PeptidesOfPTMSiteTableModel
-            _ptmSitePeptideRowSet.add(new Row(parentPeptideInstance, bestPM));
+            peptidesIds.add(peptideId);
+            PTMSitePeptideInstance ptmPepInstance = _currentPtmSite.getPTMSitePeptideInstance(peptideId);
+            _peptidesInstances.add(ptmPepInstance);
+            if (_currentPtmSite.isProteinNTerm()) {
+                _beginBestFit = 0;
+            } else if (_beginBestFit > ptmPepInstance.getPTMPeptideInstance().getStartPosition()) {
+                   _beginBestFit = ptmPepInstance.getPTMPeptideInstance().getStartPosition();
+            }
+            
+            for (DPeptidePTM ptm : parentPeptideInstance.getPeptide().getTransientData().getDPeptidePtmMap().values()) {
+                int location = ptmPepInstance.getPTMPeptideInstance().getStartPosition() + (int)ptm.getSeqPosition();
+                PTMMark mark = new PTMMark(ptm, location);
+                _allPtmMarks.put(location, mark);
+            }          
+            
+//            for(PTMSite site : ptmPepInstance.getPTMPeptideInstance().getSites()) {
+//                if (site != _currentPtmSite) {
+//                    for (DPeptideInstance pi : site.getParentPeptideInstances()) {
+//                        peptideId = pi.getPeptideId();
+//                        if (!peptidesIds.contains(peptideId)) {
+//                            peptidesIds.add(peptideId);
+//                            _peptidesInstances.add(site.getPTMSitePeptideInstance(peptideId));
+//                        }
+//                    }
+//                }
+//            }
         }
 
-        _PtmSitePeptideList = createPtmSitePeptideList();
-        _PtmSiteAA2Mark = createPtmSitePP2Mark();
         DProteinMatch pm = _currentPtmSite.getProteinMatch();
         DBioSequence bs = pm.getDBioSequence();
         if (bs != null) {
@@ -132,22 +115,22 @@ public class DataMgrPtm {
         } else {
             _proteinSequence = createSequence();
         }
-        logger.debug("<--" + this.getClass().getName() + " peptide size=" + _PtmSitePeptideList.size() + " row size=" + _ptmSitePeptideRowSet.size());
+        logger.debug(" row/peptide size=" + _peptidesInstances.size());
     }
 
-    /**
-     * be used by test demo
-     */
-    public void setData(ArrayList<PtmSitePeptide> list) {
-        _PtmSitePeptideList = list;
-        for (PtmSitePeptide pp : list) {
-            if (this._beginBestFit > pp.getBeginInProtein()) {
-                this._beginBestFit = pp.getBeginInProtein();
-            }
-        }
-        _PtmSiteAA2Mark = createPtmSitePP2Mark();
-        _proteinSequence = createSequence();
-    }
+//    /**
+//     * be used by test demo
+//     */
+//    public void setData(ArrayList<PtmSitePeptide> list) {
+//        _PtmSitePeptideList = list;
+//        for (PtmSitePeptide pp : list) {
+//            if (this._beginBestFit > pp.getBeginInProtein()) {
+//                this._beginBestFit = pp.getBeginInProtein();
+//            }
+//        }
+//        _PtmSiteAA2Mark = createPtmSitePP2Mark();
+//        _proteinSequence = createSequence();
+//    }
 
     int getBeginBestFit() {
         return this._beginBestFit;
@@ -162,17 +145,19 @@ public class DataMgrPtm {
         StringBuilder sb = new StringBuilder();
         //prefix
         if (this._beginBestFit > 1) {
-            for (int i = 1; i < this._beginBestFit - 1; i++) {//lcoation begin from 1
+            for (int i = 1; i < this._beginBestFit - 1; i++) { // location begin from 1
                 sb.append("-");
             }
         }
 
-        for (PtmSitePeptide pp : _PtmSitePeptideList) {
+        for (PTMSitePeptideInstance item : _peptidesInstances) {
+            PTMPeptideInstance pp = item.getPTMPeptideInstance();
+            PTMSite site = item.getSite();
             //logger.debug("In  |"+sb.toString()+"("+sb.length());
             String content = pp.getSequence();
             int cLength = content.length();
-            int pIndex = pp.getBeginInProtein();
-            if (pIndex == 1 && pp.isNTermAt1()) {
+            int pIndex = pp.getStartPosition();
+            if (pIndex == 1 && site.isProteinNTerm()) {
                 pIndex = 0;
             }
             //logger.debug("Sequence (" + pIndex + "," + content + ")");
@@ -197,138 +182,28 @@ public class DataMgrPtm {
 
     protected DPeptideInstance getSelectedPeptideInstance(int row) {
         if (this.getRowCount() == 0) {
-            //logger.debug(this.getClass().getName() + " rowCount = 0");
             return null;
         }
         if (row < 0 || (row >= getRowCount())) {
-            //logger.debug(this.getClass().getName() + " select row = " + row + " rowCount = " + getRowCount());
             return null;
         }
-        //logger.debug(this.getClass().getName() + " select row=" + row + " OK");
-        Row rowData = this._ptmSitePeptideRowSet.get(row);
-        //logger.debug(this.getClass().getName() + " rowData " + rowData.toString());
-        return rowData.peptideInstance;
+        if (this._peptidesInstances.get(row) == null) {
+            return null;
+        }
+        return this._peptidesInstances.get(row).getPTMPeptideInstance().getPeptideInstance();
     }
 
     void updateSelect() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
-    /**
-     * we copy the same method from PeptidesOfPTMSiteTableModel.java
-     */
-    static class Row {
-
-        DPeptideInstance peptideInstance;
-        DPeptideMatch peptideMatch;
-
-        public Row(DPeptideInstance peptideInstance, DPeptideMatch peptideMatch) {
-            this.peptideInstance = peptideInstance;
-            this.peptideMatch = peptideMatch;
-        }
-
-        @Override
-        public String toString() {
-            return "Row{" + "peptideInstance=" + peptideInstance + ", peptideMatch=" + peptideMatch + '}';
-        }
-    }
 
     public Object getValueAt(int rowIndex) {
-
-        return _ptmSitePeptideRowSet.get(rowIndex);
+        return _peptidesInstances.get(rowIndex);
     }
-
-    /**
-     * Attention, the location begin with 1, we count location from 1 to N, so
-     * the 0 is N-termini, the length+1 is C-Termini
-     */
-    private ArrayList<PtmSitePeptide> createPtmSitePeptideList() {
-        ArrayList<PtmSitePeptide> ptmPepList = new ArrayList();
-        long pepId, pepMatchId;
-        Character aa;
-        String sequence;
-        String ptmReadString;
-        boolean isNTermAt1;
-        int aaLocationInPep, aaLocationInProtein, peptideBeginLocationInProtein;
-        float ptmProbability;
-        PtmSitePeptide pPeptide;
-
-        ArrayList<PtmSiteAA> ptmFromStringList;
-
-        for (int rowIndex = 0; rowIndex < _ptmSitePeptideRowSet.size(); rowIndex++) {
-
-            ptmFromStringList = new ArrayList<PtmSiteAA>();
-            isNTermAt1 = false;
-
-            DPeptideMatch pepMatch = _ptmSitePeptideRowSet.get(rowIndex).peptideMatch;
-            pepId = _ptmSitePeptideRowSet.get(rowIndex).peptideInstance.getId();
-
-            pepMatchId = pepMatch.getId();
-
-            aa = _currentPtmSite.getPtmSpecificity().getRresidueAASpecificity();
-            sequence = pepMatch.getPeptide().getSequence();
-
-            //**********  here is all ptm in string like Acetyl (Protein N-term); Phospho (S7); Phospho (T9); Phospho (S10); Phospho (S14); Phospho (Y30)
-            DPtmSiteProperties properties = pepMatch.getPtmSiteProperties();
-
-            PeptideReadablePtmString prPtmString = pepMatch.getPeptide().getTransientData().getPeptideReadablePtmString();
-
-            ptmReadString = "";
-            if (prPtmString != null) {
-                ptmReadString = prPtmString.getReadablePtmString();//get All ptmSite
-
-            }
-            aaLocationInProtein = _currentPtmSite.seqPosition;
-            aaLocationInPep = _currentPtmSite.getPtmPositionOnPeptide(pepMatch.getPeptide().getId());
-            peptideBeginLocationInProtein = aaLocationInProtein - aaLocationInPep;
-
-            String locationSpecitifcity = _currentPtmSite.getPtmSpecificity().getLocationSpecificity();
-            if (locationSpecitifcity.contains("N-term")) {
-
-                if (aaLocationInProtein == 1) {
-                    isNTermAt1 = true;
-                }
-
-            } else if (locationSpecitifcity.contains("C-term")) {
-                boolean isCterm = true;
-            }
-
-            String[] ptmSet = ptmReadString.split(";");
-            for (String ptm : ptmSet) {
-                PtmSiteAA pa = new PtmSiteAA(ptm.trim(), peptideBeginLocationInProtein, isNTermAt1);
-                ptmFromStringList.add(pa);
-                // logger.debug("" + this.getClass().toString() + " 1-PtmSiteAA:" + pa.toString());
-            }
-
-            //a subset of ptmsite can retrived probability
-            float proba = 1;
-            if (properties != null) {
-                proba = properties.getMascotDeltaScore();
-                //logger.debug("" + this.getClass().toString() + " 2-PtmSiteAA: (" + aa + aaLocationInProtein + ")" + proba);
-                Map<String, Float> ptmProbabilitySet = properties.getMascotProbabilityBySite();
-                for (PtmSiteAA psa : ptmFromStringList) {
-                    Float prob = ptmProbabilitySet.get(psa.getPtmSite());
-                    if (prob != null) {
-                        psa.setProbability(prob);
-                        // logger.debug("" + this.getClass().toString() + " 3-PtmSiteAA:" + psa.toString() + " " + prob);
-                    }
-                }
-            }
-
-            pPeptide = new PtmSitePeptide(pepId, pepMatchId, sequence, ptmFromStringList, peptideBeginLocationInProtein, isNTermAt1);
-            if (isNTermAt1 && peptideBeginLocationInProtein == 1) {
-                this._beginBestFit = 0;//modify adjustLocation is N-Termini is at 1
-            }
-            if (this._beginBestFit > pPeptide.getBeginInProtein()) {
-                this._beginBestFit = pPeptide.getBeginInProtein();
-            }
-            //logger.debug("---calcul begin point:" + this._beginBestFit);
-            //logger useful to collect test data
-            //logger.debug("PtmSitePeptide ((long)" + pepId + ", (long)" + pepMatchId + ", \"" + sequence + "\", \"" + ptmReadString + "\", "
-            //       + aaLocationInPep + ", " + aaLocationInProtein + ", " + proba + "f));");
-            ptmPepList.add(pPeptide);
-        }
-        return ptmPepList;
+    
+    public List<PTMSitePeptideInstance> getPTMSitePeptideInstances() {
+        return _peptidesInstances;
     }
 
 }

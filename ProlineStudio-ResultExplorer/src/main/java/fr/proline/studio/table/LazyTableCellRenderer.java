@@ -1,5 +1,6 @@
 package fr.proline.studio.table;
 
+import fr.proline.studio.table.TableDefaultRendererManager;
 import fr.proline.studio.utils.IconManager;
 import java.awt.Component;
 import javax.swing.JTable;

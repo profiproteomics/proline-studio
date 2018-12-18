@@ -1,6 +1,7 @@
 package fr.proline.studio.table;
 
 import fr.proline.studio.dam.AccessDatabaseThread;
+import fr.proline.studio.table.DecoratedTableModel;
 
 
 

@@ -7,8 +7,8 @@ import fr.proline.core.orm.msi.dto.DPeptidePTM;
 import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.core.orm.msi.dto.DPtmSiteProperties;
 import fr.proline.studio.extendedtablemodel.ExtraDataType;
-import fr.proline.studio.dam.tasks.data.PTMSite;
-import fr.proline.studio.export.ExportModelUtilities;
+import fr.proline.studio.dam.tasks.data.ptm.PTMSite;
+import fr.proline.studio.table.ExportModelUtilities;
 import fr.proline.studio.export.ExportFontData;
 import fr.proline.studio.filter.ConvertValueInterface;
 import fr.proline.studio.filter.DoubleFilter;
@@ -40,7 +40,7 @@ import javax.swing.table.TableCellRenderer;
  *
  * @author JM235353
  */
-public class PTMProtenSiteTableModel extends LazyTableModel implements GlobalTableModelInterface {
+public class PTMProteinSiteTableModel extends LazyTableModel implements GlobalTableModelInterface {
 
     public static final int COLTYPE_PROTEIN_ID = 0;
     public static final int COLTYPE_PROTEIN_NAME = 1;
@@ -85,7 +85,7 @@ public class PTMProtenSiteTableModel extends LazyTableModel implements GlobalTab
 
     private ScoreRenderer m_scoreRenderer = new ScoreRenderer();
 
-    public PTMProtenSiteTableModel(LazyTable table) {
+    public PTMProteinSiteTableModel(LazyTable table) {
         super(table);
     }
 
@@ -192,7 +192,7 @@ public class PTMProtenSiteTableModel extends LazyTableModel implements GlobalTab
         PTMSite proteinPTMSite = m_arrayInUse.get(row);
         DProteinMatch proteinMatch = proteinPTMSite.getProteinMatch();
         DPeptideMatch peptideMatch = proteinPTMSite.getBestPeptideMatch();
-        DInfoPTM infoPtm = proteinPTMSite.getPtmSpecificity();
+        DInfoPTM infoPtm = proteinPTMSite.getPTMSpecificity();
 
         switch (col) {
             case COLTYPE_PROTEIN_ID:
@@ -221,10 +221,10 @@ public class PTMProtenSiteTableModel extends LazyTableModel implements GlobalTab
                     return "C-term";
                 }
 
-                return String.valueOf((int) proteinPTMSite.getPtmPositionOnPeptide(peptideMatch.getPeptide().getId()));
+                return String.valueOf((int) proteinPTMSite.getPositionOnPeptide(peptideMatch.getPeptide().getId()));
             }
             case COLTYPE_PROTEIN_LOC: {
-                return proteinPTMSite.seqPosition;
+                return proteinPTMSite.getPositionOnProtein();
             }
             case COLTYPE_PROTEIN_NTERM_CTERM: {
                 String locationSpecitifcity = infoPtm.getLocationSpecificity();
@@ -276,7 +276,7 @@ public class PTMProtenSiteTableModel extends LazyTableModel implements GlobalTab
                 return proteinPTMSite.getPeptideCount();
             }
             case COLTYPE_RESIDUE_AA: {
-                return infoPtm.getRresidueAASpecificity();
+                return infoPtm.getResidueAASpecificity();
             }
             case COLTYPE_HIDDEN_PROTEIN_PTM:
                 return proteinPTMSite;

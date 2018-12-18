@@ -1,7 +1,10 @@
 package fr.proline.studio.rsmexplorer.gui.ptm.mark;
 
-import fr.proline.studio.rsmexplorer.gui.ptm.PtmSiteAA;
+import fr.proline.studio.dam.tasks.data.ptm.PTMSite;
+import fr.proline.studio.rsmexplorer.gui.ptm.PTMMark;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 /*
  * @cea 
@@ -14,13 +17,13 @@ import java.util.ArrayList;
  */
 public class PtmMarkModel {
 
-    ArrayList<PtmMarkView> _PTMMarkList;
+    List<PtmMarkView> _PTMMarkList;
 
     public PtmMarkModel() {
         _PTMMarkList = new ArrayList<>();
     }
 
-    public ArrayList<PtmMarkView> getPTMMarkList() {
+    public List<PtmMarkView> getPTMMarkList() {
         return _PTMMarkList;
     }
 
@@ -29,23 +32,21 @@ public class PtmMarkModel {
      *
      * @param ptmSiteAA2Mark
      */
-    public void setPTM(ArrayList<PtmSiteAA> ptmSiteAA2Mark) {
-        boolean ajustNTerminiAt1 = false;
-
+    public void setPTM(Collection<PTMMark> ptmMarks) {
         _PTMMarkList = new ArrayList<>();
-        for (PtmSiteAA pa : ptmSiteAA2Mark) {
+        for (PTMMark pa : ptmMarks) {
             PtmMarkView p = new PtmMarkView(pa);
             _PTMMarkList.add(p);
         }
 
     }
 
-    public void addPTM(PtmSiteAA ptm) {
+    public void addPTM(PTMMark ptm) {
         PtmMarkView p = new PtmMarkView(ptm);
         _PTMMarkList.add(p);
     }
 
-    public boolean removePtm(PtmSiteAA ptm) {
+    public boolean removePtm(PTMMark ptm) {
         int index = _PTMMarkList.indexOf(ptm);
         _PTMMarkList.remove(index);
         return _PTMMarkList.remove(ptm);

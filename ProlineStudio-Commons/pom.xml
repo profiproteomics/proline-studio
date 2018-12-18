@@ -66,16 +66,6 @@
         <!-- Proline dependencies -->
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>ProlineStudio-DAM</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>ProlineStudio-CoreWrapper</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
             <artifactId>ProlineStudio-Logger</artifactId>
             <version>${project.version}</version>
         </dependency>

@@ -4,7 +4,7 @@ import fr.proline.core.orm.msi.dto.DPeptideInstance;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.studio.extendedtablemodel.AddDataAnalyzerButton;
 import fr.proline.studio.extendedtablemodel.GlobalTabelModelProviderInterface;
-import fr.proline.studio.dam.tasks.data.PTMSite;
+import fr.proline.studio.dam.tasks.data.ptm.PTMSite;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.filter.FilterButton;
 import fr.proline.studio.graphics.CrossSelectionInterface;
@@ -68,7 +68,7 @@ public class PeptidesPTMSiteTablePanel extends JPanel implements DataBoxPanelInt
     private ExportButton m_exportButton;
     private AddDataAnalyzerButton m_addCompareDataButton;
 
-    protected PTMSite m_currentPeptidesPTMSite = null;
+    protected PTMSite m_currentPTMSite = null;
     protected DPeptideInstance m_currentPepInst = null;
 
     private final boolean m_displayPeptidesMatches;
@@ -137,11 +137,11 @@ public class PeptidesPTMSiteTablePanel extends JPanel implements DataBoxPanelInt
 
     public void setData(PTMSite peptidesPTMSite, DPeptideInstance pepInst) {
 
-        if ((peptidesPTMSite == m_currentPeptidesPTMSite) && (pepInst == m_currentPepInst)) {
+        if ((peptidesPTMSite == m_currentPTMSite) && (pepInst == m_currentPepInst)) {
             return;
         }
 
-        m_currentPeptidesPTMSite = peptidesPTMSite;
+        m_currentPTMSite = peptidesPTMSite;
         m_currentPepInst = pepInst;
 
         PeptidesOfPTMSiteTableModel model = ((PeptidesOfPTMSiteTableModel) ((CompoundTableModel) m_peptidesPtmSiteTable.getModel()).getBaseModel());

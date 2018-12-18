@@ -5,7 +5,7 @@
  */
 package fr.proline.studio.rsmexplorer.gui.ptm.pep;
 
-import fr.proline.studio.rsmexplorer.gui.ptm.PtmSitePeptide;
+import fr.proline.studio.dam.tasks.data.ptm.PTMSitePeptideInstance;
 import fr.proline.studio.rsmexplorer.gui.ptm.ViewContext;
 import fr.proline.studio.rsmexplorer.gui.ptm.ViewPtmAbstract;
 import fr.proline.studio.rsmexplorer.gui.ptm.ViewSetting;
@@ -60,8 +60,8 @@ public class PeptideSetView extends ViewPtmAbstract {
         this._peptideList = peptideList;
     }
 
-    protected PtmSitePeptide getSelectedItem(int x, int y) {
-        PtmSitePeptide selected = null;
+    protected PTMSitePeptideInstance getSelectedItem(int x, int y) {
+        PTMSitePeptideInstance selected = null;
         y0 = m_y;
         if (_peptideList != null) {
             for (PeptideView vp : _peptideList) {
@@ -80,7 +80,7 @@ public class PeptideSetView extends ViewPtmAbstract {
     }
 
     protected int getSelectedItemIndex(int x, int y) {
-        PtmSitePeptide selected = null;
+        PTMSitePeptideInstance selected = null;
         y0 = m_y;
         PeptideView vp;
         if (_peptideList != null) {

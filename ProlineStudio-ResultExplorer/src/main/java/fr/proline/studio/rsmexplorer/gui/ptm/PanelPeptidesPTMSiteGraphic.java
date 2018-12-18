@@ -1,7 +1,7 @@
 package fr.proline.studio.rsmexplorer.gui.ptm;
 
 import fr.proline.core.orm.msi.dto.DPeptideInstance;
-import fr.proline.studio.dam.tasks.data.PTMSite;
+import fr.proline.studio.dam.tasks.data.ptm.PTMSite;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.rsmexplorer.gui.PeptidesPTMSiteTablePanel;
 import fr.proline.studio.rsmexplorer.gui.ptm.mark.PtmMarkCtrl;
@@ -69,18 +69,18 @@ public class PanelPeptidesPTMSiteGraphic extends PeptidesPTMSiteTablePanel {
     // @Override
     public void setData(PTMSite peptidesPTMSite, DPeptideInstance pepInst) {
         //logger.debug(this.getClass().getName() + " setData ->");
-        if ((peptidesPTMSite == m_currentPeptidesPTMSite) && (pepInst == m_currentPepInst)) {
+        if ((peptidesPTMSite == m_currentPTMSite) && (pepInst == m_currentPepInst)) {
             return;
         }
         _dataMgr.setData(peptidesPTMSite);
         if (peptidesPTMSite == null) {
             this._paintArea.clean();
         } else {
-            this.m_currentPeptidesPTMSite = peptidesPTMSite;
+            this.m_currentPTMSite = peptidesPTMSite;
             this.m_currentPepInst = pepInst;
             this._ctrlSequence.setData(_dataMgr.getProteinSequence());
-            this._ctrlMark.setData(_dataMgr.getAllPtmSite2Mark());
-            this._ctrlPeptideArea.setData(_dataMgr.getPtmSitePeptideList());
+            this._ctrlMark.setData(_dataMgr.getAllPtmMarks());
+            this._ctrlPeptideArea.setData(_dataMgr.getPTMSitePeptideInstances());
             int ajustedLocation = _dataMgr.getBeginBestFit();
             this._ctrlPeptideArea.setSelectedIndex(0);
             this._paintArea.setIsDataLoaded(true);

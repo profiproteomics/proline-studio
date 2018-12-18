@@ -5,9 +5,13 @@
  */
 package fr.proline.studio.rsmexplorer.gui.ptm;
 
+import fr.proline.studio.dam.tasks.data.ptm.PTMSite;
+import fr.proline.studio.utils.CyclicColorPalette;
 import java.awt.*;
 import java.awt.font.FontRenderContext;
 import java.awt.geom.AffineTransform;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  *
@@ -24,11 +28,11 @@ public class ViewSetting {
     public static int BORDER_GAP = 5;
     public static int HEIGHT_MARK;
     public static int HEIGHT_SEQUENCE;
-    public static Font FONT_NUMBER = new Font(Font.SERIF, Font.PLAIN, 10);
-    public static Font FONT_PTM = new Font(Font.MONOSPACED, Font.BOLD, 14);
-    public static Font FONT_SEQUENCE = new Font(Font.MONOSPACED, Font.BOLD, 20);
-    public static Color PEPTIDE_COLOR = new Color(240, 255, 255);
-    public static Color SELECTED_PEPTIDE_COLOR = Color.black;
+    public static Font FONT_NUMBER = new Font(Font.SERIF, Font.PLAIN, 8);
+    public static Font FONT_PTM = new Font(Font.MONOSPACED, Font.BOLD, 11);
+    public static Font FONT_SEQUENCE = new Font(Font.MONOSPACED, Font.BOLD, 16);
+    public static Color PEPTIDE_COLOR = CyclicColorPalette.getDarkerColor(CyclicColorPalette.getColor(5), -0.7);
+    public static Color SELECTED_PEPTIDE_COLOR = CyclicColorPalette.GRAY_DARK;
     public static Color SEQUENCE_COLOR = Color.BLUE;
     private static final double FONT_ROTATE = -Math.PI / 6;
     public static Font FONT_NUMBER_DIAGONAL;
@@ -36,6 +40,8 @@ public class ViewSetting {
     public static final Stroke DASHED = new BasicStroke(1.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_MITER, 10.0f, new float[]{2.0f, 2.0f}, 0.0f);
     public static final BasicStroke STROKE_PEP = new BasicStroke(1.2f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER);
 
+    public static Map<Long, Color> PTM_COLORS = new HashMap<>();
+    
     static {
         AffineTransform affinetransform = new AffineTransform();
         FontRenderContext frc = new FontRenderContext(affinetransform,false,true);
@@ -51,23 +57,27 @@ public class ViewSetting {
         FONT_NUMBER_DIAGONAL = FONT_NUMBER.deriveFont(rotateText);
     }
 
-    public static final Color[] DEFAULT_BASE_PALETTE = {
-        new Color(225, 43, 10), // red
-        new Color(42, 23, 234), // blue
-        new Color(10, 255, 43), // green
+    
+    // PTM Colors: in this implementation always returns the same color for a specificity, colors 
+    // are assigned based on the order they are requested. A better implementation will be to 
+    // load used PTM specificityId of a project, sort them by Id and assigned a color based on the rank 
+    // of a specificity Id. 
+    
+    public static final Color getColor(PTMSite site) {
+        return getColor(site.getPTMSpecificity().getIdPtmSpecificity());
+    }
 
-        new Color(252, 180, 46), // orange
-        new Color(0, 147, 221), // cyan
-        new Color(221, 18, 123), // magenta
-        new Color(231, 197, 31), //yellow
-        new Color(231, 113, 58), //orange
-        new Color(169, 35, 59), //red bordeaux
-        new Color(106, 44, 95), //purple bordeaux
-        new Color(104, 71, 160), //purple blue
-        new Color(98, 126, 206), //blue
-        new Color(82, 120, 123), //green blue 
-        new Color(63, 121, 58), //green
-        new Color(109, 153, 5) //green grace
-    };
+    public static final Color getColor(Long specificityId) {
+        Color c = PTM_COLORS.get(specificityId);
+        if (c == null) {
+            c = CyclicColorPalette.getColor(PTM_COLORS.size());
+            PTM_COLORS.put(specificityId, c);
+        }
+        return c;
+    }
+    
+    public static final Color getColor(PTMMark mark) {
+        return getColor(mark.getPtmSpecificityId());
+    } 
 
 }

@@ -11,7 +11,7 @@ import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabasePTMsTask;
 import fr.proline.studio.dam.tasks.SubTask;
-import fr.proline.studio.dam.tasks.data.PTMSite;
+import fr.proline.studio.dam.tasks.data.ptm.PTMSite;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadXicMasterQuantTask;
 import static fr.proline.studio.pattern.DataBoxPTMSitePeptides.m_logger;
 import fr.proline.studio.rsmexplorer.gui.xic.QuantChannelInfo;
@@ -157,7 +157,7 @@ public class DataBoxXICPTMSitePeptides extends AbstractDataBox {
         // ask asynchronous loading of data
         m_masterQuantPeptideList = new ArrayList();
         DatabaseLoadXicMasterQuantTask task = new DatabaseLoadXicMasterQuantTask(callback);
-        task.initLoadPeptides(getProjectId(), m_dataset,  ptmSite.peptideInstanceIds, m_masterQuantPeptideList, true);
+        task.initLoadPeptides(getProjectId(), m_dataset,  ptmSite.getPeptideInstanceIds(), m_masterQuantPeptideList, true);
         
         registerTask(task);
 

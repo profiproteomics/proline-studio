@@ -8,7 +8,7 @@ package fr.proline.studio.rsmexplorer.gui.ptm.mark;
 import fr.proline.studio.rsmexplorer.gui.ptm.ViewContext;
 import fr.proline.studio.rsmexplorer.gui.ptm.ViewPtmAbstract;
 import java.awt.Graphics2D;
-import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
@@ -16,7 +16,7 @@ import java.util.ArrayList;
  */
 public class PtmMarkSetView extends ViewPtmAbstract{
 
-    private ArrayList<PtmMarkView> _PtmMarkList;
+    private List<PtmMarkView> _PtmMarkList;
     
     
     @Override
@@ -27,7 +27,7 @@ public class PtmMarkSetView extends ViewPtmAbstract{
         }
     }
 
-    void setPtmMarkList(ArrayList<PtmMarkView> ptmMarkList) {
+    void setPtmMarkList(List<PtmMarkView> ptmMarkList) {
         this._PtmMarkList = ptmMarkList;
     }
     

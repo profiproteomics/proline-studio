@@ -5,11 +5,11 @@
  */
 package fr.proline.studio.rsmexplorer.gui.ptm.mark;
 
-import fr.proline.studio.rsmexplorer.gui.ptm.PtmSiteAA;
+import fr.proline.studio.rsmexplorer.gui.ptm.PTMMark;
 import fr.proline.studio.rsmexplorer.gui.ptm.ViewContext;
 
 import java.awt.Graphics2D;
-import java.util.ArrayList;
+import java.util.Collection;
 
 /**
  *
@@ -26,8 +26,8 @@ public class PtmMarkCtrl {
         
     }
     
-    public void setData(ArrayList<PtmSiteAA> ptmSiteAA2Mark){
-        _mgr.setPTM(ptmSiteAA2Mark);
+    public void setData(Collection<PTMMark> ptmMarks){
+        _mgr.setPTM(ptmMarks);
         _view.setPtmMarkList(_mgr.getPTMMarkList());
     }
 

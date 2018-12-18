@@ -4,6 +4,7 @@ import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.progress.ProgressBarDialog;
 import fr.proline.studio.progress.ProgressInterface;
+import fr.proline.studio.table.DecoratedMarkerTable;
 import java.awt.event.AdjustmentEvent;
 import java.awt.event.AdjustmentListener;
 import java.awt.event.MouseAdapter;

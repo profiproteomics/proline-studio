@@ -1,7 +1,6 @@
 package fr.proline.studio.extendedtablemodel;
 
 import fr.proline.studio.export.ExportFontData;
-import fr.proline.studio.export.ExportModelUtilities;
 import fr.proline.studio.filter.DoubleFilter;
 import fr.proline.studio.filter.Filter;
 import fr.proline.studio.graphics.PlotInformation;

@@ -2,7 +2,7 @@ package fr.proline.studio.rsmexplorer.gui.ptm;
 
 import fr.proline.core.orm.msi.dto.DPeptideInstance;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
-import fr.proline.studio.dam.tasks.data.PTMSite;
+import fr.proline.studio.dam.tasks.data.ptm.PTMSite;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
@@ -72,8 +72,15 @@ public class PanelPeptidesPTMSiteAll extends JPanel implements DataBoxPanelInter
         _currentPeptidesPTMSite = peptidesPTMSite;
         _currentPepInst = pepInst;
 
-        _panelTable.setData(peptidesPTMSite, pepInst);
-        _panelGraphic.setData(peptidesPTMSite, pepInst);
+        
+        PeptidesPTMSiteTablePanel selectedPanel = ((PeptidesPTMSiteTablePanel) _panelTabbed.getSelectedComponent());
+        if (selectedPanel == _panelTable) {
+            _panelTable.setData(peptidesPTMSite, pepInst);
+            _panelGraphic.setData(peptidesPTMSite, pepInst);
+        } else {
+            _panelGraphic.setData(peptidesPTMSite, pepInst);
+            _panelTable.setData(peptidesPTMSite, pepInst);            
+        }
     }
 
     /**
@@ -154,13 +161,13 @@ public class PanelPeptidesPTMSiteAll extends JPanel implements DataBoxPanelInter
     static public int SOURCE_GRAPHIC = 1;
 
     public void setSelectedRow(int i, int source) {
-        if (i != -1) {
-            if (source == SOURCE_TABLE) {
-                this._panelGraphic.setSelectedRow(i);
-            } else if (source == SOURCE_GRAPHIC) {
-                this._panelTable.setSelectedRow(i);
-            }
-        }
+//        if (i != -1) {
+//            if (source == SOURCE_TABLE) {
+//                this._panelGraphic.setSelectedRow(i);
+//            } else if (source == SOURCE_GRAPHIC) {
+//                this._panelTable.setSelectedRow(i);
+//            }
+//        }
     }
 
 }

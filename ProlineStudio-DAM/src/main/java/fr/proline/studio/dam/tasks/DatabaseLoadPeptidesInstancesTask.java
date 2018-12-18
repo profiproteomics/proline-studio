@@ -4,7 +4,6 @@ package fr.proline.studio.dam.tasks;
 
 import fr.proline.core.orm.msi.Peptide;
 import fr.proline.core.orm.msi.PeptideInstance;
-import fr.proline.core.orm.msi.PeptideReadablePtmString;
 import fr.proline.core.orm.msi.ResultSet;
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.SequenceMatch;
@@ -13,7 +12,6 @@ import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.core.orm.msi.dto.DProteinSet;
 import fr.proline.core.orm.msi.dto.DPeptideInstance;
-import fr.proline.core.orm.msi.dto.DPeptidePTM;
 import fr.proline.core.orm.msi.dto.DPeptideSet;
 import fr.proline.core.orm.msi.dto.DSpectrum;
 import fr.proline.core.orm.util.DStoreCustomPoolConnectorFactory;
@@ -241,8 +239,8 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseSlicerTas
             PeptideInstance[] peptideInstances = peptideInstanceList.toArray(new PeptideInstance[nbPeptides]);
             m_rsm.getTransientData().setPeptideInstanceArray(peptideInstances);
             
-            DatabasePTMsTask.fetchReadablePtmData(entityManagerMSI, m_rsm.getResultSet().getId(), peptideMap);
-            DatabasePTMsTask.fetchPtmDataForPeptides(entityManagerMSI, peptideMap);
+            DatabasePTMsTask.fetchReadablePTMData(entityManagerMSI, m_rsm.getResultSet().getId(), peptideMap);
+            DatabasePTMsTask.fetchPTMDataForPeptides(entityManagerMSI, peptideMap);
              
             // slice the task and get the first one and execute the first slice now
             SubTask subTask = m_subTaskManager.sliceATaskAndGetFirst( SUB_TASK_PROTEINSET_NAME_LIST, nbPeptides, SLICE_SIZE );
@@ -356,7 +354,7 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseSlicerTas
                 fetchPeptideDataForProteinMatch(entityManagerMSI, rsm, pm, peptideMap);
             }
             
-            DatabasePTMsTask.fetchPtmDataForPeptides(entityManagerMSI, peptideMap); 
+            DatabasePTMsTask.fetchPTMDataForPeptides(entityManagerMSI, peptideMap);
             
             entityManagerMSI.getTransaction().commit();
         } catch (Exception e) {
@@ -451,7 +449,7 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseSlicerTas
             peptideInstanceList.add(dpi);
         }
 
-        DatabasePTMsTask.fetchReadablePtmData(entityManagerMSI, rsm.getResultSet().getId(), peptideMapForPtm);
+        DatabasePTMsTask.fetchReadablePTMData(entityManagerMSI, rsm.getResultSet().getId(), peptideMapForPtm);
 
         int nbPeptides = peptideInstanceList.size();
         DPeptideInstance[] peptideInstances = peptideInstanceList.toArray(new DPeptideInstance[nbPeptides]);

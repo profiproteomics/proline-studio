@@ -1,7 +1,8 @@
 package fr.proline.studio.rsmexplorer.gui.ptm.pep;
 
-import fr.proline.studio.rsmexplorer.gui.ptm.PtmSitePeptide;
+import fr.proline.studio.dam.tasks.data.ptm.PTMSitePeptideInstance;
 import java.util.ArrayList;
+import java.util.List;
 
 /*
  * @cea 
@@ -25,9 +26,9 @@ public class PeptideAreaModel {
         return _viewPeptideList;
     }
 
-    public void setPTM(ArrayList<PtmSitePeptide> pPeptide) {
+    public void setPTM(List<PTMSitePeptideInstance> pPeptide) {
         _viewPeptideList = new ArrayList<>();
-        for (PtmSitePeptide pep : pPeptide) {
+        for (PTMSitePeptideInstance pep : pPeptide) {
             PeptideView p = new PeptideView(pep);
             _viewPeptideList.add(p);
         }
@@ -38,7 +39,7 @@ public class PeptideAreaModel {
      *
      * @param index
      */
-    protected void setSelctedItem(int index) {
+    protected void setSelectedItem(int index) {
         if (index == -1) {
             return;
         }

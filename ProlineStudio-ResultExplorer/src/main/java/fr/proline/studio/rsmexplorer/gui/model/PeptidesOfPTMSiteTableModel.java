@@ -8,7 +8,7 @@ import fr.proline.core.orm.msi.dto.DPeptidePTM;
 import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.core.orm.msi.dto.DPtmSiteProperties;
 import fr.proline.studio.extendedtablemodel.ExtraDataType;
-import fr.proline.studio.dam.tasks.data.PTMSite;
+import fr.proline.studio.dam.tasks.data.ptm.PTMSite;
 import fr.proline.studio.export.ExportModelUtilities;
 import fr.proline.studio.export.ExportFontData;
 import fr.proline.studio.filter.Filter;
@@ -112,15 +112,20 @@ public class PeptidesOfPTMSiteTableModel extends DecoratedTableModel implements 
 
             List<DPeptideInstance> dpInstanceList = m_currentPtmSite.getParentPeptideInstances();
             for (DPeptideInstance parentPeptideInstance : dpInstanceList) {
-                DPeptideMatch bestPM = m_currentPtmSite.getBestPeptideMatchForPeptide(parentPeptideInstance.getPeptideId());
-                m_ptmSitePeptides.add(new Row(parentPeptideInstance, bestPM));
+                // TODO this check is mandatory to avoid NullPointer, but the problem must be handled: PTMSite and parentPepInstance parameters are inconsistent
+                if (m_currentPtmSite.getPTMSitePeptideInstance(parentPeptideInstance.getPeptideId()) != null) {
+                    DPeptideMatch bestPM = m_currentPtmSite.getPTMSitePeptideInstance(parentPeptideInstance.getPeptideId()).getBestPeptideMatch();
+                    m_ptmSitePeptides.add(new Row(parentPeptideInstance, bestPM));
+                }
             }
         } else if (parentPepInstance == null) {
             // TODO : request all PeptideMatches ??
             m_logger.warn("Must shown all peptide matches but no peptide instance specified for PTM Site " + m_currentPtmSite.toString());
         } else {
 
-            List<DPeptideInstance> peptideInstancesForPeptide = m_currentPtmSite.getLeafPeptideInstances(parentPepInstance.getPeptideId());
+            // TODO this check is mandatory to avoid NullPointer, but the problem must be handled: PTMSite and parentPepInstance parameters are inconsistent
+            if (m_currentPtmSite.getPTMSitePeptideInstance(parentPepInstance.getPeptideId()) != null) {
+            List<DPeptideInstance> peptideInstancesForPeptide = m_currentPtmSite.getPTMSitePeptideInstance(parentPepInstance.getPeptideId()).getLeafPepInstances();
 
             if (peptideInstancesForPeptide == null) {
                 // PtmSite and parentPepInstance do not correspond for the moment (asynchronous loading)
@@ -140,6 +145,7 @@ public class PeptidesOfPTMSiteTableModel extends DecoratedTableModel implements 
                             m_ptmSitePeptides.add(new Row(entry.getKey(), pepMatch));
                         });
                     });          */
+            }
         }
         fireTableDataChanged();
     }
@@ -200,23 +206,23 @@ public class PeptidesOfPTMSiteTableModel extends DecoratedTableModel implements 
                 }
                 return ptm;
             case COLTYPE_MODIFICATION: {
-                return m_currentPtmSite.getPtmSpecificity().getPtmShortName();
+                return m_currentPtmSite.getPTMSpecificity().getPtmShortName();
             }
             case COLTYPE_MODIFICATION_LOC: {
-                String locationSpecitifcity = m_currentPtmSite.getPtmSpecificity().getLocationSpecificity();
+                String locationSpecitifcity = m_currentPtmSite.getPTMSpecificity().getLocationSpecificity();
                 if (locationSpecitifcity.contains("N-term")) {
                     return "N-term";
                 } else if (locationSpecitifcity.contains("C-term")) {
                     return "C-term";
                 }
 
-                return String.valueOf((int) m_currentPtmSite.getPtmPositionOnPeptide(pepMatch.getPeptide().getId()));
+                return String.valueOf((int) m_currentPtmSite.getPositionOnPeptide(pepMatch.getPeptide().getId()));
             }
             case COLTYPE_PROTEIN_LOC: {
-                return m_currentPtmSite.seqPosition;
+                return m_currentPtmSite.getPositionOnProtein();
             }
             case COLTYPE_PROTEIN_NTERM_CTERM: {
-                String locationSpecitifcity = m_currentPtmSite.getPtmSpecificity().getLocationSpecificity();
+                String locationSpecitifcity = m_currentPtmSite.getPTMSpecificity().getLocationSpecificity();
                 if (locationSpecitifcity.contains("-term")) {
                     return locationSpecitifcity;
                 }
@@ -255,11 +261,11 @@ public class PeptidesOfPTMSiteTableModel extends DecoratedTableModel implements 
                 return deltaMass;
 
             case COLTYPE_DELTA_MASS_MODIFICATION: {
-                return m_currentPtmSite.getPtmSpecificity().getMonoMass();
+                return m_currentPtmSite.getPTMSpecificity().getMonoMass();
             }
 
             case COLTYPE_RESIDUE_AA: {
-                return m_currentPtmSite.getPtmSpecificity().getRresidueAASpecificity();
+                return m_currentPtmSite.getPTMSpecificity().getResidueAASpecificity();
             }
             case COLTYPE_QUERY_TITLE: {
                 return pepMatch.getMsQuery().getDSpectrum().getTitle();

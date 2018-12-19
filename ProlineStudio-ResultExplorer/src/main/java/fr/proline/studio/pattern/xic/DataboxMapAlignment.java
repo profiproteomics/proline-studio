@@ -39,7 +39,7 @@ import org.slf4j.LoggerFactory;
 public class DataboxMapAlignment extends AbstractDataBox {
 
     protected static final Logger logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer.XIC.alignment");
-    private long logStartTime;
+    private double m_logStartTime, m_logCloudStartTime;
     private DDataset m_dataset;
 
     private QuantChannelInfo m_quantChannelInfo;
@@ -50,7 +50,7 @@ public class DataboxMapAlignment extends AbstractDataBox {
     private Long m_paramTaskId;
     private boolean m_isCloudLoaded;
     private boolean m_isCloudTaskAsked;
-
+    
     public DataboxMapAlignment() {
         super(DataboxType.DataBoxMapAlignment, DataboxStyle.STYLE_XIC);
 
@@ -74,7 +74,7 @@ public class DataboxMapAlignment extends AbstractDataBox {
         outParameter.addParameter(CrossSelectionInterface.class, true);
         registerOutParameter(outParameter);
         m_RT_Tolerance = AbstractLabelFreeMSParamsPanel.DEFAULT_CA_FEATMAP_RTTOL_VALUE;
-        
+
         m_isCloudLoaded = false;
         m_isCloudTaskAsked = false;
     }
@@ -165,6 +165,7 @@ public class DataboxMapAlignment extends AbstractDataBox {
 
     @Override
     public void dataChanged() {
+        
         final int loadingId = setLoading();
 
         if (m_dataset == null) {
@@ -181,9 +182,10 @@ public class DataboxMapAlignment extends AbstractDataBox {
 
             @Override
             public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
-                logger.info(this.getClass().getName()+" task Id ="+ taskId+" finished during " + (System.currentTimeMillis()-logStartTime)+" TimeMillis");
                 setLoaded(loadingId);
                 if (finished) {
+                    logger.debug ( "DataboxMapAlignment task Id =" + taskId + " finished during " + (System.currentTimeMillis() - m_logStartTime) + " TimeMillis");
+
                     unregisterTask(taskId);
                 }
                 // do nothing, if juste de paramTask finished
@@ -205,17 +207,18 @@ public class DataboxMapAlignment extends AbstractDataBox {
         taskMapAlignment.initLoadAlignmentForXic(getProjectId(), m_dataset);
 
         m_paramTaskId = taskParameter.getId();//this task is short, and it will be done at first
-        logStartTime = System.currentTimeMillis();
-        logger.info(this.getClass().getName()+" DatabaseLoadXicMasterQuantTask taskParameter Id ="+ m_paramTaskId+" registered" );
-        logger.info(this.getClass().getName()+" DatabaseLoadLcMSTask taskMapAlignment Id ="+ taskMapAlignment.getId()+" registered" );
+        m_logStartTime = System.currentTimeMillis();
+        logger.debug(this.getClass().getName() + " DatabaseLoadXicMasterQuantTask taskParameter Id =" + m_paramTaskId + " registered");
+        logger.debug(this.getClass().getName() + " DatabaseLoadLcMSTask taskMapAlignment Id =" + taskMapAlignment.getId() + " registered");
         registerTask(taskParameter);
-        registerTask(taskMapAlignment);       
+        registerTask(taskMapAlignment);
     }
 
     /**
      * load peptideIon task is separated from the above task.
      */
     public void loadCloud() {
+        
         if (m_isCloudLoaded == true) {
             ((MapAlignmentPanel) super.getDataBoxPanelInterface()).setAlignmentCloud();
         } else {
@@ -247,6 +250,8 @@ public class DataboxMapAlignment extends AbstractDataBox {
                     // do nothing, if juste de paramTask finished
                     if (taskId != m_paramTaskId) {
                         if (finished) {
+                            logger.debug("DataboxMapAlignment task Id =" + taskId + " finished during " + (System.currentTimeMillis() - m_logCloudStartTime) + " TimeMillis");
+
                             //if all task loaded, then execute the first Alignement Cloud
                             if (DataboxMapAlignment.this.isLoaded()) {
                                 m_isCloudLoaded = true;
@@ -262,14 +267,17 @@ public class DataboxMapAlignment extends AbstractDataBox {
             m_masterQuantPeptideIonList = new ArrayList();
             DatabaseLoadXicMasterQuantTask taskPeptideCloud = new DatabaseLoadXicMasterQuantTask(callback);
             taskPeptideCloud.initLoadPeptideIons(this.getProjectId(), m_dataset, m_masterQuantPeptideIonList);
+            m_logCloudStartTime = System.currentTimeMillis();
+            logger.debug(this.getClass().getName() + " DatabaseLoadLcMSTask taskPeptideCloud Id =" + taskPeptideCloud.getId() + " registered");
             registerTask(taskPeptideCloud);
         }
 
     }
 
     /**
-     * from the m_dataset, extact the RT tolerance 
-     * @return 
+     * from the m_dataset, extact the RT tolerance
+     *
+     * @return
      */
     private double getTimeTol() {
         Double time = AbstractLabelFreeMSParamsPanel.DEFAULT_CA_FEATMAP_RTTOL_VALUE;
@@ -278,7 +286,7 @@ public class DataboxMapAlignment extends AbstractDataBox {
             if (quantParams.containsKey("cross_assignment_config")) {
                 Map<String, Object> crossAssignmentConfig = (Map<String, Object>) quantParams.get("cross_assignment_config");
                 Map<String, Object> ftMappingParams = (Map<String, Object>) crossAssignmentConfig.getOrDefault("ft_mapping_params", new HashMap<>());
-                time = Double.valueOf((String)ftMappingParams.get("time_tol"));
+                time = Double.valueOf((String) ftMappingParams.get("time_tol"));
                 if (time == null) {
                     time = AbstractLabelFreeMSParamsPanel.DEFAULT_CA_FEATMAP_RTTOL_VALUE;
                 }

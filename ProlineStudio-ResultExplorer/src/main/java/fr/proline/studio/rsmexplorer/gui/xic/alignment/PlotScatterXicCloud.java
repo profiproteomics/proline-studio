@@ -42,7 +42,7 @@ public class PlotScatterXicCloud extends PlotScatter {
     }
 
     /**
-     * limite the initial axis Y bound
+     * limit the initial axis Y bound
      *
      * @param m_yMin
      */
@@ -51,7 +51,7 @@ public class PlotScatterXicCloud extends PlotScatter {
     }
 
     /**
-     * limite the initial axis Y bound
+     * limit the initial axis Y bound
      *
      * @param m_yMax
      */

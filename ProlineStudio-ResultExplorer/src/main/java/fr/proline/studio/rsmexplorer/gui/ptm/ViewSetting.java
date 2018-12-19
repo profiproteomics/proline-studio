@@ -28,7 +28,7 @@ public class ViewSetting {
     public static int BORDER_GAP = 5;
     public static int HEIGHT_MARK;
     public static int HEIGHT_SEQUENCE;
-    public static Font FONT_NUMBER = new Font(Font.SERIF, Font.PLAIN, 8);
+    public static Font FONT_NUMBER = new Font(Font.SANS_SERIF, Font.PLAIN, 8);
     public static Font FONT_PTM = new Font(Font.MONOSPACED, Font.BOLD, 11);
     public static Font FONT_SEQUENCE = new Font(Font.MONOSPACED, Font.BOLD, 16);
     public static Color PEPTIDE_COLOR = CyclicColorPalette.getDarkerColor(CyclicColorPalette.getColor(5), -0.7);

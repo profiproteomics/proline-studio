@@ -22,12 +22,17 @@ import fr.proline.studio.types.XicMode;
 import java.util.ArrayList;
 import java.util.List;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author JM235353
  */
 public class DataboxXicPeptideIon extends AbstractDataBox {
+
+    protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer.xic");
+    private long m_logTimeStart;
 
     private DDataset m_dataset;
     private DMasterQuantPeptide m_masterQuantPeptide;
@@ -48,11 +53,10 @@ public class DataboxXicPeptideIon extends AbstractDataBox {
         GroupParameter inParameter = new GroupParameter();
         inParameter.addParameter(DDataset.class, false);
         registerInParameter(inParameter);
-        
+
         inParameter = new GroupParameter();
         inParameter.addParameter(DMasterQuantPeptide.class, false);
         registerInParameter(inParameter);
-        
 
         // Register possible out parameters
         GroupParameter outParameter = new GroupParameter();
@@ -62,11 +66,11 @@ public class DataboxXicPeptideIon extends AbstractDataBox {
         outParameter = new GroupParameter();
         outParameter.addParameter(QuantChannelInfo.class, false);
         registerOutParameter(outParameter);
-        
+
         outParameter = new GroupParameter();
         outParameter.addParameter(DPeptideMatch.class, false);
         registerOutParameter(outParameter);
-        
+
         outParameter = new GroupParameter();
         outParameter.addParameter(DDataset.class, false);
         outParameter.addParameter(ResultSummary.class, false);
@@ -75,7 +79,7 @@ public class DataboxXicPeptideIon extends AbstractDataBox {
         outParameter = new GroupParameter();
         outParameter.addParameter(ExtendedTableModelInterface.class, true);
         registerOutParameter(outParameter);
-        
+
     }
 
     @Override
@@ -84,7 +88,7 @@ public class DataboxXicPeptideIon extends AbstractDataBox {
         p.setName(m_typeName);
         p.setDataBox(this);
         setDataBoxPanelInterface(p);
-        
+
         getDataBoxPanelInterface().addSingleValue(new XicMode((m_isXICMode)));
     }
 
@@ -148,6 +152,7 @@ public class DataboxXicPeptideIon extends AbstractDataBox {
                 setLoaded(loadingId);
 
                 if (finished) {
+                    m_logger.info(" DataboxXicPeptideIon task#" + taskId + " in {} ms" ,(System.currentTimeMillis() - m_logTimeStart) );
                     unregisterTask(taskId);
                     propagateDataChanged(ExtendedTableModelInterface.class);
                 }
@@ -162,6 +167,9 @@ public class DataboxXicPeptideIon extends AbstractDataBox {
         } else {
             task.initLoadPeptideIons(getProjectId(), m_dataset, m_masterQuantPeptide, m_masterQuantPeptideIonList);
         }
+        Long taskId = task.getId();
+        m_logger.info(" DataboxXicPeptideIon DatabaseLoadXicMasterQuantTask task# " + taskId);
+        m_logTimeStart = System.currentTimeMillis();
         registerTask(task);
 
     }

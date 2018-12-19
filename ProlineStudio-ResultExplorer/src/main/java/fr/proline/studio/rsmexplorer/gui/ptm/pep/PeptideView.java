@@ -31,15 +31,20 @@ public class PeptideView extends ViewPtmAbstract {
     private PTMSitePeptideInstance _peptide;
     private boolean _isSelected;
     private int _beginIndex;
-    
+
     public PeptideView(PTMSitePeptideInstance pep) {
         this.x0 = 0;
         this.y0 = 0;
         this._peptide = pep;
-        this._length = pep.getPTMPeptideInstance().getSequence().length();
+        String sequence = pep.getPTMPeptideInstance().getSequence();
+        if (sequence != null) {
+            this._length = pep.getPTMPeptideInstance().getSequence().length();
+        } else {
+            this._length = 0;
+        }
         this._beginIndex = pep.getPTMPeptideInstance().getStartPosition();
         if ((_beginIndex == 1) && (pep.getSite().isProteinNTerm())) {
-                _beginIndex = 0;
+            _beginIndex = 0;
         }
         _isSelected = false;
     }
@@ -52,11 +57,11 @@ public class PeptideView extends ViewPtmAbstract {
         this.y0 = this.m_y;
         int width = (this._length * aaWidth);
         int height = ViewSetting.HEIGHT_AA;
-        
-        Color c = getColorWithProbability(ViewSetting.PEPTIDE_COLOR, (float)Math.min((_peptide.getBestPeptideMatch().getScore()-15)/100.0, 1.0));
+
+        Color c = getColorWithProbability(ViewSetting.PEPTIDE_COLOR, (float) Math.min((_peptide.getBestPeptideMatch().getScore() - 15) / 100.0, 1.0));
         g.setColor(c);
         g.fillRoundRect(x0, y0, width, height, aaWidth, ViewSetting.HEIGHT_AA);
-        
+
         Map<Integer, DPeptidePTM> map = _peptide.getPTMPeptideInstance().getPeptideInstance().getPeptide().getTransientData().getDPeptidePtmMap();
         for (Map.Entry<Integer, DPeptidePTM> modifyA : map.entrySet()) {
             paintPtm(g, modifyA.getValue(), modifyA.getKey(), y0);
@@ -76,7 +81,7 @@ public class PeptideView extends ViewPtmAbstract {
         m_y = y;
     }
 
-        /**
+    /**
      * paint the PTM on a Amino Acide
      *
      * @param g
@@ -103,27 +108,27 @@ public class PeptideView extends ViewPtmAbstract {
         }
         g.setColor(colorOld);
     }
-    
+
     public Color getColorWithProbability(Color c, Float probability) {
         if (probability != null) {
             float[] hsbvals = new float[3];//Hue Saturation Brightness
             Color.RGBtoHSB(c.getRed(), c.getGreen(), c.getBlue(), hsbvals);
-            Color colorWithProbability = Color.getHSBColor(hsbvals[0], hsbvals[1]*probability, hsbvals[2]);
+            Color colorWithProbability = Color.getHSBColor(hsbvals[0], hsbvals[1] * probability, hsbvals[2]);
             return colorWithProbability;
             //return c;
         }
         return CyclicColorPalette.GRAY_TEXT_LIGHT;
     }
-    
+
     public Float getProbability(DPeptidePTM ptm) {
         DPeptideMatch pepMatch = _peptide.getBestPeptideMatch();
         DPtmSiteProperties properties = pepMatch.getPtmSiteProperties();
         if (properties != null) {
-            String readablePtm =  DInfoPTM.getInfoPTMMap().get(ptm.getIdPtmSpecificity()).toReadablePtmString((int)ptm.getSeqPosition()); 
+            String readablePtm = DInfoPTM.getInfoPTMMap().get(ptm.getIdPtmSpecificity()).toReadablePtmString((int) ptm.getSeqPosition());
             Float probability = properties.getMascotProbabilityBySite().get(readablePtm);
             // VDS Workaround test for issue #16643                      
             if (probability == null) {
-                readablePtm =  DInfoPTM.getInfoPTMMap().get(ptm.getIdPtmSpecificity()).toOtherReadablePtmString((int)ptm.getSeqPosition()); 
+                readablePtm = DInfoPTM.getInfoPTMMap().get(ptm.getIdPtmSpecificity()).toOtherReadablePtmString((int) ptm.getSeqPosition());
                 probability = properties.getMascotProbabilityBySite().get(readablePtm);
                 if (probability == null) {
                     // this is a fix modification, set probability to 100%
@@ -135,10 +140,9 @@ public class PeptideView extends ViewPtmAbstract {
         return null;
     }
 
-    
     private String getToolTipText(double x, double y) {
-            
-            return "TODO PTM site probability :"; //+ getProbability() * 100 + "%";
+
+        return "TODO PTM site probability :"; //+ getProbability() * 100 + "%";
     }
 
     public PTMSitePeptideInstance getSelectedPeptide(int compareX) {

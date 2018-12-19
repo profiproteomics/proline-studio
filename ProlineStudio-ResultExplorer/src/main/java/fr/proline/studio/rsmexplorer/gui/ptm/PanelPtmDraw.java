@@ -8,11 +8,16 @@ package fr.proline.studio.rsmexplorer.gui.ptm;
 import fr.proline.studio.rsmexplorer.gui.ptm.mark.PtmMarkCtrl;
 import fr.proline.studio.rsmexplorer.gui.ptm.pep.PeptideAreaCtrl;
 import fr.proline.studio.rsmexplorer.gui.ptm.mark.ProteinSequenceCtrl;
-
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.FontMetrics;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import javax.swing.*;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,28 +39,31 @@ public class PanelPtmDraw extends JPanel {
     int _ajustedLocation;
     private int _rowCount;
     private int _sequenceLength;
-    JScrollPane _scrollPane;
+    private JScrollPane _scrollPane;
     private PanelPeptidesPTMSiteGraphic _ctrl;
     private boolean _isDataNull;//when precedent databox change order ou filter, we can have non selected row, in this case, nothing to show
+    private final PeptideNumberPane _numberPane;
 
     protected PanelPtmDraw(PanelPeptidesPTMSiteGraphic ctrl, PtmMarkCtrl ctrlMark, ProteinSequenceCtrl ctrlSequence, PeptideAreaCtrl ctrlPeptideArea) {
         _ctrl = ctrl;
         _titlePane = new TitlePane(ctrlMark, ctrlSequence);
         _peptidePane = new PeptidePane(ctrlPeptideArea);
+        _numberPane = new PeptideNumberPane();
         _rowCount = 0;
         _sequenceLength = 0;
         _selectedRowIndex = 0;
-       
+
         initComponents();
 
     }
 
     private void initComponents() {
-         setDoubleBuffered(false);
+        setDoubleBuffered(false);
+
         _titlePane.setMarkBeginPoint(ViewSetting.BORDER_GAP, ViewSetting.BORDER_GAP);
         _titlePane.setSequenceBeginPoint(ViewSetting.BORDER_GAP, ViewSetting.HEIGHT_MARK);
         _peptidePane.setBeginPoint(ViewSetting.BORDER_GAP, ViewSetting.BORDER_GAP);
-
+        _numberPane.setBeginPoint(ViewSetting.BORDER_GAP, ViewSetting.BORDER_GAP);
         //first setPreferredSize to guarantee the height
         _titlePane.setPreferredSize(new Dimension(INITIAL_WIDTH, ViewSetting.HEIGHT_MARK + ViewSetting.HEIGHT_SEQUENCE));
         _titlePane.setBackground(Color.WHITE);
@@ -63,7 +71,8 @@ public class PanelPtmDraw extends JPanel {
 
         _scrollPane = new JScrollPane(_peptidePane, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         _scrollPane.setColumnHeaderView(_titlePane);
-
+        _scrollPane.setRowHeaderView(_numberPane);
+        _scrollPane.setBackground(Color.white);
         this.setLayout(new BorderLayout());
         this.add(_scrollPane, BorderLayout.CENTER);
     }
@@ -196,6 +205,60 @@ public class PanelPtmDraw extends JPanel {
                 }
             }
         }
+    }
+
+    private class PeptideNumberPane extends JPanel {
+
+        int m_x0, m_y0;
+
+        private PeptideNumberPane() {
+            super();
+            this.setBackground(Color.WHITE);
+        }
+
+        public void setBeginPoint(int x, int y) {
+            m_x0 = x;
+            m_y0 = y;
+        }
+
+        @Override
+        public Dimension getPreferredSize() {
+            int width = ViewSetting.WIDTH_AA + 2 * ViewSetting.BORDER_GAP;
+            int height = _rowCount * (ViewSetting.HEIGHT_AA * 2 - ViewSetting.HEIGHT_AA / 2);
+            if (height == 0) {
+                height = 5 * ViewSetting.HEIGHT_AA;
+            }
+            return new Dimension(width, height);
+
+        }
+
+        @Override
+        protected void paintComponent(Graphics g) {
+            super.paintComponent(g);
+            if (!_isDataNull) {
+                if (_isDataLoaded) {
+                    Graphics2D g2 = (Graphics2D) g;
+                    FontMetrics f = g2.getFontMetrics(ViewSetting.FONT_NUMBER);
+                    int ascend = f.getAscent();
+                    int y0 = m_y0 + ascend;
+                    int x0;
+                    g2.setColor(Color.black);
+                    g2.setFont(ViewSetting.FONT_NUMBER);
+//                    g2.setColor(Color.WHITE);
+//                    g2.setFont(ViewSetting.FONT_PTM);
+                    String number;
+                    int stringWidth;
+                    for (int i = 1; i < _rowCount + 1; i++) {
+                        number = String.valueOf(i);
+                        stringWidth = f.stringWidth(number);
+                        x0 = m_x0 + ViewSetting.WIDTH_AA - stringWidth;
+                        g2.drawString("" + i, x0, y0);
+                        y0 += (int) ViewSetting.HEIGHT_AA * 1.5;
+                    }
+                }
+            }
+        }
+
     }
 
 }

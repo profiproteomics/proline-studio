@@ -14,12 +14,16 @@ import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.rsmexplorer.gui.PTMProteinSitePanel;
 import java.util.ArrayList;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author JM235353
  */
 public class DataBoxPTMProteinSite extends AbstractDataBox {
+    private static Logger logger = LoggerFactory.getLogger("ProlineStudio.ptm");
+    private long logStartTime;
     
     private PTMDataset m_dataset = null;
 
@@ -109,6 +113,8 @@ public class DataBoxPTMProteinSite extends AbstractDataBox {
                 setLoaded(loadingId);
                 
                 if (finished) {
+                    logger.info(this.getClass().getName()+" task Id ="+ taskId+" finished during " + (System.currentTimeMillis()-logStartTime)+" TimeMillis");
+        
                     if(m_previousTaskId != null && m_previousTaskId.equals(taskId)) {
                         m_previousTaskId = null; // Reste PreviousTask. Was finished ! 
                     }
@@ -124,13 +130,15 @@ public class DataBoxPTMProteinSite extends AbstractDataBox {
 
         DatabasePTMsTask task = new DatabasePTMsTask(callback, getProjectId(), m_dataset.getDataset().getResultSummary(), proteinPTMSiteArray);
         Long taskId = task.getId();
+        
         if (m_previousTaskId != null) {
             // old task is suppressed if it has not been already done
             AccessDatabaseThread.getAccessDatabaseThread().abortTask(m_previousTaskId);
         }
         m_previousTaskId = taskId;
+        logStartTime = System.currentTimeMillis();
+        logger.info(this.getClass().getName()+" DatabasePTMsTask task Id ="+ taskId+" registered" );
         registerTask(task);
-
     }
     private Long m_previousTaskId = null;
 

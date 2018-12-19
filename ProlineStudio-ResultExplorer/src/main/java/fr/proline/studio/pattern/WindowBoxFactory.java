@@ -246,18 +246,20 @@ public class WindowBoxFactory {
 
     public static WindowBox getPTMSitesWindowBox(String dataName) {
 
-        AbstractDataBox[] boxes = new AbstractDataBox[4];
+        AbstractDataBox[] boxes = new AbstractDataBox[5];
         boxes[0] = new DataBoxPTMProteinSite();
         boxes[0].setDataName(dataName);
-        boxes[1] = new DataBoxPTMSitePeptides();
-        boxes[2] = new DataBoxPTMSitePepMatches();
-        boxes[3] = new DataboxRsetPSMForMsQuery();
-        
+        boxes[1] = new DataBoxPTMSitePeptidesGraphic();
+        boxes[2] = new DataBoxPTMSitePeptides();
+        boxes[2].setLayout(SplittedPanelContainer.PanelLayout.HORIZONTAL);
+        boxes[3] = new DataBoxPTMSitePepMatches();
+        boxes[4] = new DataboxRsetPSMForMsQuery();
+
         IconManager.IconType iconType = IconManager.IconType.DATASET_RSM;
         return new WindowBox(boxes[0].getFullName(), generatePanel(boxes), boxes[0], IconManager.getImage(iconType));
     }
-    
-     public static WindowBox getXICPTMSitesWindowBox(String dataName) {
+
+    public static WindowBox getXICPTMSitesWindowBox(String dataName) {
 
         AbstractDataBox[] boxes = new AbstractDataBox[4];
         boxes[0] = new DataBoxXICPTMProteinSite();
@@ -553,13 +555,15 @@ public class WindowBoxFactory {
     private static SplittedPanelContainer generatePanel(AbstractDataBox[] boxes) {
         return generatePanel(boxes, true);
     }
+
     /**
      * for each dataBox, add it's nextDataBox<br>
-     * from seconde dataBox,  for each dataBox, if it's layout is vertical layout, add 1 nbContainerPanels<br>
-     * 
+     * from seconde dataBox, for each dataBox, if it's layout is vertical
+     * layout, add 1 nbContainerPanels<br>
+     *
      * @param boxes
      * @param includeSaveAndAddButtonsInToolbar
-     * @return 
+     * @return
      */
     private static SplittedPanelContainer generatePanel(AbstractDataBox[] boxes, boolean includeSaveAndAddButtonsInToolbar) {
 

@@ -46,7 +46,6 @@ import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import org.jdesktop.swingx.JXTable;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
-import fr.proline.studio.rsmexplorer.gui.ptm.PanelPeptidesPTMSiteAll;
 
 /**
  *
@@ -72,7 +71,6 @@ public class PeptidesPTMSiteTablePanel extends JPanel implements DataBoxPanelInt
     protected DPeptideInstance m_currentPepInst = null;
 
     private final boolean m_displayPeptidesMatches;
-    private PanelPeptidesPTMSiteAll _parent;
 
     /**
      * Display Peptides Matches of a PTMSite.
@@ -393,10 +391,6 @@ public class PeptidesPTMSiteTablePanel extends JPanel implements DataBoxPanelInt
         this.m_peptidesPtmSiteTable.setRowSelectionInterval(i, i);
     }
 
-    public void setParent(PanelPeptidesPTMSiteAll parentPanel) {
-        this._parent = parentPanel;
-    }
-
     private class PeptidesPTMSiteTable extends DecoratedMarkerTable implements CrossSelectionInterface, InfoInterface, ProgressInterface {
 
         public PeptidesPTMSiteTable() {
@@ -427,7 +421,6 @@ public class PeptidesPTMSiteTablePanel extends JPanel implements DataBoxPanelInt
                 m_dataBox.propagateDataChanged(MsQueryInfoRset.class);
             } else {
                 m_dataBox.propagateDataChanged(PTMSite.class);
-                _parent.setSelectedRow(this.getSelectedRow(), PanelPeptidesPTMSiteAll.SOURCE_TABLE);
             }
         }
 

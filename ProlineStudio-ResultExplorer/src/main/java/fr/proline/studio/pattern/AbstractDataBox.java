@@ -132,8 +132,8 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
         DataBoxPTMSitePeptides(48),
         DataBoxPTMSitePepMatches(49),
         DataBoxXICPTMProteinSite(50),
-        DataBoxXICPTMSitePeptides(51);
-        
+        DataBoxXICPTMSitePeptides(51),
+        DataBoxPTMSitePeptidesGraphic(52);
         int m_type;
         private static HashMap<Integer, DataboxType> m_databoxTypeMap = null;
         
@@ -237,6 +237,8 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
                     return new DataBoxXICPTMProteinSite();
                 case DataBoxXICPTMSitePeptides:
                     return new DataBoxXICPTMSitePeptides();
+                case DataBoxPTMSitePeptidesGraphic:
+                    return new DataBoxPTMSitePeptidesGraphic();
                 case DataBoxFrozenCopy:
                     return null; // not used for frozen copy
             }

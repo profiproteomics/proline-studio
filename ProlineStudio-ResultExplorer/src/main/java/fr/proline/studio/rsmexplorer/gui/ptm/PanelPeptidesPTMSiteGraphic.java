@@ -26,7 +26,6 @@ public class PanelPeptidesPTMSiteGraphic extends PeptidesPTMSiteTablePanel {
     protected PtmMarkCtrl _ctrlMark;
     protected ProteinSequenceCtrl _ctrlSequence;
     protected PeptideAreaCtrl _ctrlPeptideArea;
-    private PanelPeptidesPTMSiteAll _parent;
 
     public PanelPeptidesPTMSiteGraphic() {
         super(false);
@@ -86,9 +85,10 @@ public class PanelPeptidesPTMSiteGraphic extends PeptidesPTMSiteTablePanel {
             this._paintArea.setIsDataLoaded(true);
             this._paintArea.setRowCount(this._dataMgr.getRowCount());
             this._paintArea.setSequenceLength(_dataMgr.getProteinSequence().length());
-            this._paintArea.setAjustedLocation(ajustedLocation);
-            valueChanged(0);//first selected is 0
+            this._paintArea.setAjustedLocation(ajustedLocation);            
+            valueChanged(0);//first selected is 0            
         }
+        this.revalidate();
         this.repaint();
     }
 
@@ -122,12 +122,7 @@ public class PanelPeptidesPTMSiteGraphic extends PeptidesPTMSiteTablePanel {
     protected void valueChanged(int i) {
         //logger.debug(this.getClass().getName() + "valueChanged selectRow="+ i);
         m_dataBox.propagateDataChanged(PTMSite.class);
-        this._parent.setSelectedRow(i, PanelPeptidesPTMSiteAll.SOURCE_GRAPHIC);
         this.repaint();
-    }
-
-    public void setParent(PanelPeptidesPTMSiteAll parentPanel) {
-        this._parent = parentPanel;
     }
 
     @Override

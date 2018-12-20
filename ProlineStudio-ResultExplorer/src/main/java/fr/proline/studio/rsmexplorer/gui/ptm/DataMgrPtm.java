@@ -96,12 +96,11 @@ public class DataMgrPtm {
                     protLocation = (int) ptm.getSeqPosition();
                     if (protLocation == 0) {
                         protLocation = 1;
-                    }
-                    //protLocation = ptmPepInstance.getPTMPeptideInstance().getStartPosition() + (int) ptm.getSeqPosition();
+                    }                  
                 } else {
                     protLocation = ptmPepInstance.getPTMPeptideInstance().getStartPosition() + (int) ptm.getSeqPosition();
                 }
-                //protLocation = ptmPepInstance.getPTMPeptideInstance().getStartPosition() + (int) ptm.getSeqPosition();
+//                protLocation = ptmPepInstance.getPTMPeptideInstance().getStartPosition() + (int) ptm.getSeqPosition();
                 PTMMark mark = new PTMMark(ptm, protLocation);
                 _allPtmMarks.put(protLocation, mark);
             }

@@ -57,5 +57,10 @@ public class PeptideAreaCtrl {
         return this._view.getToolTipText(x,y);
     }
 
+    
+    public void setRelativeSelected(int relative) {
+       this._mgr.setRelativeSelected(relative);
+    }
+
 
 }

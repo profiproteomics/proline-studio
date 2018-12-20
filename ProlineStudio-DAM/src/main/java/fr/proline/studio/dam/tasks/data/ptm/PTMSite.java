@@ -122,7 +122,7 @@ public class PTMSite {
 
     private DPeptideMatch getBestPeptideMatch(List<DPeptideInstance> peptideInstances) {
 
-        List<DPeptideMatch> pepMatches = peptideInstances.stream().flatMap( pi -> pi.getPeptideMatches().stream()).collect(Collectors.toList());
+        List<DPeptideMatch> pepMatches = peptideInstances.stream().flatMap(pi -> pi.getPeptideMatches().stream()).collect(Collectors.toList());
 
         final Float bestProba[] = new Float[1];
         bestProba[0] = 0.00f;
@@ -193,7 +193,23 @@ public class PTMSite {
     }
 
     public boolean isProteinNTerm() {
-        return m_ptmSpecificity.getLocationSpecificity().endsWith("N-term") && getPositionOnProtein() == 1;
+        if (m_ptmSpecificity.getLocationSpecificity().endsWith("N-term") && getPositionOnProtein() == 1) {
+            return true;
+        } else if (getPositionOnProtein()-getModifLocationInPep()== 1) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private int getModifLocationInPep() {
+        String locationSpecitifcity = m_ptmSpecificity.getLocationSpecificity();
+        if (locationSpecitifcity.contains("N-term")) {
+            return 0;
+        } else if (locationSpecitifcity.contains("C-term")) {
+            return -1;
+        }
+        return (int) this.getPositionOnPeptide(this.getBestPeptideMatch().getPeptide().getId());
     }
 
 }

@@ -14,6 +14,7 @@ import java.awt.Dimension;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
@@ -192,6 +193,26 @@ public class PanelPtmDraw extends JPanel {
                 public void mouseDragged(MouseEvent e) {
                     // TODO Auto-generated method stub
 
+                }
+            });
+            this.addKeyListener(
+                    new java.awt.event.KeyListener() {
+                public void keyPressed(java.awt.event.KeyEvent evt) {
+                    if (evt.getKeyCode() == KeyEvent.VK_UP) {
+                        m_ctrlPeptideArea.setRelativeSelected(-1);
+                    } else if (evt.getKeyCode() == KeyEvent.VK_DOWN) {
+                        m_ctrlPeptideArea.setRelativeSelected(1);;
+                    }
+                }
+
+                @Override
+                public void keyTyped(KeyEvent e) {
+                    // TODO Auto-generated method stub
+                }
+
+                @Override
+                public void keyReleased(KeyEvent e) {
+                    // TODO Auto-generated method stub
                 }
             });
         }

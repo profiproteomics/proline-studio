@@ -14,18 +14,20 @@ import java.util.List;
  * @author Karine XUE
  */
 public class PeptideAreaModel {
-
+    
     ArrayList<PeptideView> _viewPeptideList;
-
+    int _selectedIndex;
+    
     public PeptideAreaModel() {
         _viewPeptideList = new ArrayList<PeptideView>();
-
+        _selectedIndex = 0;
+        
     }
-
+    
     public ArrayList<PeptideView> getViewPeptideList() {
         return _viewPeptideList;
     }
-
+    
     public void setPTM(List<PTMSitePeptideInstance> pPeptide) {
         _viewPeptideList = new ArrayList<>();
         for (PTMSitePeptideInstance pep : pPeptide) {
@@ -43,6 +45,7 @@ public class PeptideAreaModel {
         if (index == -1) {
             return;
         }
+        this._selectedIndex = index;
         PeptideView pv;
         for (int i = 0; i < _viewPeptideList.size(); i++) {
             pv = _viewPeptideList.get(i);
@@ -53,5 +56,15 @@ public class PeptideAreaModel {
             }
         }
     }
-
+    
+    protected void setRelativeSelected(int relative) {
+        int index = this._selectedIndex + relative;
+        if ((index == -1) || (index == this.getViewPeptideList().size())) {
+            return;
+        } else {
+            this._selectedIndex = index;
+            this.setSelectedItem(index);
+        }
+    }
+    
 }

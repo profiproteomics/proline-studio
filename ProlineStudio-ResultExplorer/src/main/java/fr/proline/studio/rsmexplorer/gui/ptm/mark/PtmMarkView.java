@@ -5,7 +5,6 @@
  */
 package fr.proline.studio.rsmexplorer.gui.ptm.mark;
 
-import fr.proline.studio.dam.tasks.data.ptm.PTMSite;
 import fr.proline.studio.rsmexplorer.gui.ptm.PTMMark;
 import fr.proline.studio.rsmexplorer.gui.ptm.ViewContext;
 import fr.proline.studio.rsmexplorer.gui.ptm.ViewPtmAbstract;

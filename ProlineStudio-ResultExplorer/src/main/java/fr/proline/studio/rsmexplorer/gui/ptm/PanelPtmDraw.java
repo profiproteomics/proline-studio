@@ -16,6 +16,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionListener;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
@@ -175,8 +176,30 @@ public class PanelPtmDraw extends JPanel {
                     }
                 }
             });
+            this.addMouseMotionListener(new MouseMotionListener() {
+
+                @Override
+                public void mouseMoved(MouseEvent e) {//for tooltips
+                    int x = e.getX();
+                    int y = e.getY();
+                    String tips = m_ctrlPeptideArea.getToolTipText(x, y);
+                    if (tips != null) {
+                        setToolTipText(tips);
+                    }
+                }
+
+                @Override
+                public void mouseDragged(MouseEvent e) {
+                    // TODO Auto-generated method stub
+
+                }
+            });
         }
 
+//        @Override
+//        public String getToolTipText(MouseEvent event) {
+//            return "this is my tooltips";
+//        }
         public void setBeginPoint(int x, int y) {
             m_ctrlPeptideArea.setBeginPoint(x, y);
         }

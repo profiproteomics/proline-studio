@@ -60,27 +60,8 @@ public class PeptideSetView extends ViewPtmAbstract {
         this._peptideList = peptideList;
     }
 
-    protected PTMSitePeptideInstance getSelectedItem(int x, int y) {
-        PTMSitePeptideInstance selected = null;
-        y0 = m_y;
-        if (_peptideList != null) {
-            for (PeptideView vp : _peptideList) {
-                int yRangA = y0;
-                int yRangZ = yRangA + ViewSetting.HEIGHT_AA;
-                if (y > yRangA && y < yRangZ) {
-                    selected = vp.getSelectedPeptide(x);
-                    if (selected != null) {
-                        return selected;
-                    }
-                }
-                y0 += (int) ViewSetting.HEIGHT_AA * 1.5;
-            }
-        }
-        return selected;
-    }
-
     protected int getSelectedItemIndex(int x, int y) {
-        PTMSitePeptideInstance selected = null;
+        boolean selected = false;
         y0 = m_y;
         PeptideView vp;
         if (_peptideList != null) {
@@ -89,8 +70,8 @@ public class PeptideSetView extends ViewPtmAbstract {
                 int yRangA = y0;
                 int yRangZ = yRangA + ViewSetting.HEIGHT_AA;
                 if (y > yRangA && y < yRangZ) {
-                    selected = vp.getSelectedPeptide(x);
-                    if (selected != null) {
+                    selected = vp.isSelected(x);
+                    if (selected) {
                         return i;
                     }
                 }
@@ -98,6 +79,14 @@ public class PeptideSetView extends ViewPtmAbstract {
             }
         }
         return -1;
+    }
+
+    protected String getToolTipText(int x, int y) {
+       int index  = getSelectedItemIndex(x,y);
+        
+       if (index != -1)
+           return _peptideList.get(index).getToolTipText(x);
+       else return null;
     }
 
 }

@@ -38,11 +38,10 @@ public class PeptideAreaCtrl {
         this._view.paint(g2, viewContext);
     }
 
-    public PTMSitePeptideInstance getSelectedItem(int x, int y) {
-        PTMSitePeptideInstance result = this._view.getSelectedItem(x, y);
-        return result;
-
-    }
+//    public PTMSitePeptideInstance getSelectedItem(int x, int y) {
+//        PTMSitePeptideInstance result = this._view.getSelectedItem(x, y);
+//        return result;
+//    }
 
     public int getSelectedItemIndex(int x, int y) {
         int index = this._view.getSelectedItemIndex(x, y);
@@ -52,6 +51,10 @@ public class PeptideAreaCtrl {
 
     public void setSelectedIndex(int i) {
         this._mgr.setSelectedItem(i);
+    }
+
+    public String getToolTipText(int x, int y) {
+        return this._view.getToolTipText(x,y);
     }
 
 

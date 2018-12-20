@@ -9,13 +9,17 @@ import fr.proline.core.orm.msi.dto.DInfoPTM;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.msi.dto.DPeptidePTM;
 import fr.proline.core.orm.msi.dto.DPtmSiteProperties;
+import fr.proline.studio.dam.tasks.data.ptm.PTMPeptideInstance;
 import fr.proline.studio.dam.tasks.data.ptm.PTMSitePeptideInstance;
 import fr.proline.studio.rsmexplorer.gui.ptm.*;
 import fr.proline.studio.utils.CyclicColorPalette;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.Map;
+import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,11 +36,16 @@ public class PeptideView extends ViewPtmAbstract {
     private boolean _isSelected;
     private int _beginIndex;
 
+    //private Map<Integer, DPeptidePTM> _mapPosPTM;
     public PeptideView(PTMSitePeptideInstance pep) {
         this.x0 = 0;
         this.y0 = 0;
         this._peptide = pep;
-        String sequence = pep.getPTMPeptideInstance().getSequence();
+        PTMPeptideInstance ins = pep.getPTMPeptideInstance();
+        String sequence = null;
+        if (ins != null) {
+            sequence = pep.getPTMPeptideInstance().getSequence();
+        }
         if (sequence != null) {
             this._length = pep.getPTMPeptideInstance().getSequence().length();
         } else {
@@ -49,6 +58,14 @@ public class PeptideView extends ViewPtmAbstract {
         _isSelected = false;
     }
 
+    private Map<Integer, DPeptidePTM> getPosPtmMap() {
+        return _peptide.getPTMPeptideInstance().getPeptideInstance().getPeptide().getTransientData().getDPeptidePtmMap();
+    }
+
+    private float getScore() {
+        return _peptide.getBestPeptideMatch().getScore();
+    }
+
     @Override
     public void paint(Graphics2D g, ViewContext viewContext) {
         int aaWidth = ViewSetting.WIDTH_AA;
@@ -57,12 +74,10 @@ public class PeptideView extends ViewPtmAbstract {
         this.y0 = this.m_y;
         int width = (this._length * aaWidth);
         int height = ViewSetting.HEIGHT_AA;
-
-        Color c = getColorWithProbability(ViewSetting.PEPTIDE_COLOR, (float) Math.min((_peptide.getBestPeptideMatch().getScore() - 15) / 100.0, 1.0));
+        Color c = getColorWithProbability(ViewSetting.PEPTIDE_COLOR, (float) Math.min((getScore() - 15) / 100.0, 1.0));
         g.setColor(c);
         g.fillRoundRect(x0, y0, width, height, aaWidth, ViewSetting.HEIGHT_AA);
-
-        Map<Integer, DPeptidePTM> map = _peptide.getPTMPeptideInstance().getPeptideInstance().getPeptide().getTransientData().getDPeptidePtmMap();
+        Map<Integer, DPeptidePTM> map = getPosPtmMap();
         for (Map.Entry<Integer, DPeptidePTM> modifyA : map.entrySet()) {
             paintPtm(g, modifyA.getValue(), modifyA.getKey(), y0);
         }
@@ -120,6 +135,12 @@ public class PeptideView extends ViewPtmAbstract {
         return CyclicColorPalette.GRAY_TEXT_LIGHT;
     }
 
+    /**
+     * get one ptm Probability
+     *
+     * @param ptm
+     * @return
+     */
     public Float getProbability(DPeptidePTM ptm) {
         DPeptideMatch pepMatch = _peptide.getBestPeptideMatch();
         DPtmSiteProperties properties = pepMatch.getPtmSiteProperties();
@@ -140,24 +161,59 @@ public class PeptideView extends ViewPtmAbstract {
         return null;
     }
 
-    private String getToolTipText(double x, double y) {
-
-        return "TODO PTM site probability :"; //+ getProbability() * 100 + "%";
+    private String getReadablePtmString(DPeptidePTM ptm) {
+        DPeptideMatch pepMatch = _peptide.getBestPeptideMatch();
+        DPtmSiteProperties properties = pepMatch.getPtmSiteProperties();
+        if (properties != null) {
+            String readablePtm = DInfoPTM.getInfoPTMMap().get(ptm.getIdPtmSpecificity()).toReadablePtmString((int) ptm.getSeqPosition());
+            return readablePtm;
+        }
+        return null;
     }
 
-    public PTMSitePeptideInstance getSelectedPeptide(int compareX) {
+    protected String getToolTipText(int x) {
+        String s = null;
+        if (isSelected(x)) {
+            s = "Score: " + getScore();
+            int xRangA = x - this.x0;
+
+            int position = xRangA / ViewSetting.WIDTH_AA + 1;
+            Map<Integer, DPeptidePTM> map = getPosPtmMap();
+            DPeptidePTM ptm = (DPeptidePTM) map.get(position);
+            if (ptm != null) {
+                float prob = getProbability(ptm)*100;
+                String readable = getReadablePtmString(ptm);
+                s = readable + "," +String.format("%1$.2f", prob)+"%";;
+            }
+        }
+        return s;
+    }
+
+    public boolean isSelected(int compareX) {
         int xRangA = this.x0;
         int xRangZ = this.x0 + this._length * ViewSetting.HEIGHT_AA;
         //logger.debug(" element:"+this._peptide.toString()+"("+xRangA+","+xRangZ+")");
         if (compareX > xRangA && compareX < xRangZ) {
-            return this._peptide;
+            return true;
         } else {
-            return null;
+            return false;
         }
 
     }
 
+//    public PTMSitePeptideInstance getSelectedPeptide(int compareX) {
+//        int xRangA = this.x0;
+//        int xRangZ = this.x0 + this._length * ViewSetting.HEIGHT_AA;
+//        //logger.debug(" element:"+this._peptide.toString()+"("+xRangA+","+xRangZ+")");
+//        if (compareX > xRangA && compareX < xRangZ) {
+//            return this._peptide;
+//        } else {
+//            return null;
+//        }
+//
+//    }
     void setSelected(boolean b) {
         this._isSelected = b;
     }
+
 }

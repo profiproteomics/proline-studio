@@ -38,5 +38,10 @@ public class PtmMarkCtrl {
     public void paint(Graphics2D g2, ViewContext viewContext) {
         this._view.paint(g2, viewContext);
     }
+
+    public String getToolTipText(int x, int y, int ajustedLocation) {
+       return this._view.getToolTipText(x,y, ajustedLocation);
+              
+    }
     
 }

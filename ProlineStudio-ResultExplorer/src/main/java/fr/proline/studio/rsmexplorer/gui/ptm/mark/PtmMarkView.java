@@ -28,16 +28,16 @@ public class PtmMarkView extends ViewPtmAbstract {
     /**
      * One letter
      */
-    String m_symbol;
-    Color m_color;
+    private String m_symbol;
+    private Color m_color;
     /**
      * location in the protein, to paint above the type figure
      */
-    int _locationProtein;
+    private int _locationProtein;
     //int _ajustNTermAt1;//useful for N-termini at protein 1;
 
     public PtmMarkView(PTMMark mark) {
-        this.m_color =  ViewSetting.getColor(mark);
+        this.m_color = ViewSetting.getColor(mark);
         this.m_symbol = Character.toString(mark.getPtmSymbol());
         this._locationProtein = mark.getProteinLocation();
     }
@@ -46,6 +46,10 @@ public class PtmMarkView extends ViewPtmAbstract {
     public void setBeginPoint(int x, int y) {
         this.m_x = x;
         this.m_y = y;
+    }
+
+    public int getLocationProtein() {
+        return _locationProtein;
     }
 
     /**
@@ -61,7 +65,7 @@ public class PtmMarkView extends ViewPtmAbstract {
 
         FontMetrics fm = g.getFontMetrics(ViewSetting.FONT_PTM);
         Color oldColor = g.getColor();
-        
+
         g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
         //this.x0 = (int)(this.m_x + aaWidth+ (this._locationProtein - viewContext.getAjustedLocation()-1 + this._ajustNTermAt1) * aaWidth);
         this.x0 = this.m_x + (this._locationProtein - viewContext.getAjustedLocation()) * ViewSetting.WIDTH_AA;
@@ -70,13 +74,13 @@ public class PtmMarkView extends ViewPtmAbstract {
         g.setColor(m_color);
         //draw the box
         g.setStroke(STROKE);
-        g.drawLine(x0, y0, (int)(x0 + aaWidth), y0);
-        g.drawLine((int)(x0 + aaWidth), y0, (int)(x0 + aaWidth), y0 + ViewSetting.HEIGHT_AA);
-        g.drawLine((int)(x0 + aaWidth), y0 + ViewSetting.HEIGHT_AA, x0, y0+ ViewSetting.HEIGHT_AA);
+        g.drawLine(x0, y0, (int) (x0 + aaWidth), y0);
+        g.drawLine((int) (x0 + aaWidth), y0, (int) (x0 + aaWidth), y0 + ViewSetting.HEIGHT_AA);
+        g.drawLine((int) (x0 + aaWidth), y0 + ViewSetting.HEIGHT_AA, x0, y0 + ViewSetting.HEIGHT_AA);
         g.drawLine(x0, y0 + ViewSetting.HEIGHT_AA, x0, y0);
-        
+
         int yBottom = (int) (y0 + ViewSetting.HEIGHT_AA * 1.5);
-        int xCenter = (int)(x0 + aaWidth / 2);
+        int xCenter = (int) (x0 + aaWidth / 2);
         g.drawLine(xCenter, y0 + ViewSetting.HEIGHT_AA, xCenter, yBottom);
         g.drawLine(x0, yBottom, x0 + ViewSetting.HEIGHT_AA, yBottom);
 
@@ -84,11 +88,11 @@ public class PtmMarkView extends ViewPtmAbstract {
         g.setFont(ViewSetting.FONT_PTM);
         int stringWidth = fm.stringWidth(m_symbol);
         // assume that letters are squared: do not use ascent or height but reuse font width to position ptm letter in the middle of the box
-        g.drawString(m_symbol, xCenter - stringWidth / 2, y0 + ViewSetting.HEIGHT_AA - (ViewSetting.HEIGHT_AA - stringWidth)/2); //x, y are base line begin x, y
-
+        g.drawString(m_symbol, xCenter - stringWidth / 2, y0 + ViewSetting.HEIGHT_AA - (ViewSetting.HEIGHT_AA - stringWidth) / 2); //x, y are base line begin x, y
 
         //draw the location number upper
-        g.setColor(CyclicColorPalette.GRAY_TEXT_DARK);
+        //g.setColor(CyclicColorPalette.GRAY_TEXT_DARK);
+        g.setColor(Color.BLACK);
         g.setFont(ViewSetting.FONT_NUMBER);
         fm = g.getFontMetrics(ViewSetting.FONT_NUMBER);
         int descent = fm.getDescent();
@@ -100,7 +104,7 @@ public class PtmMarkView extends ViewPtmAbstract {
             fm = g.getFontMetrics(smallerFont);
             stringWidth = fm.stringWidth(String.valueOf(_locationProtein));
         }
-
+        g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
         g.drawString(String.valueOf(_locationProtein), xCenter - stringWidth / 2, y0 - descent / 2);
         g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_OFF);
         g.setColor(oldColor);

@@ -73,8 +73,8 @@ public class PeptideView extends ViewPtmAbstract {
         this.x0 = (this.m_x + aaWidth + (this._beginIndex - viewContext.getAjustedLocation()) * aaWidth);
         this.y0 = this.m_y;
         int width = (this._length * aaWidth);
-        int height = ViewSetting.HEIGHT_AA;
-        Color c = getColorWithProbability(ViewSetting.PEPTIDE_COLOR, (float) Math.min((getScore() - 15) / 100.0, 1.0));
+        int height = ViewSetting.HEIGHT_AA;       
+        Color c = getColorWithProbability(ViewSetting.PEPTIDE_COLOR, (float) Math.min((Math.max(getScore(),15f) - 15) / 100.0, 1.0));
         g.setColor(c);
         g.fillRoundRect(x0, y0, width, height, aaWidth, ViewSetting.HEIGHT_AA);
         Map<Integer, DPeptidePTM> map = getPosPtmMap();

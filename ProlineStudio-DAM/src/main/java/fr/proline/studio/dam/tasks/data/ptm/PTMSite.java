@@ -193,6 +193,7 @@ public class PTMSite {
     }
 
     public boolean isProteinNTerm() {
+        String spec = m_ptmSpecificity.getLocationSpecificity();
         if (m_ptmSpecificity.getLocationSpecificity().endsWith("N-term") && getPositionOnProtein() == 1) {
             return true;
         } else if (getPositionOnProtein()-getModifLocationInPep()== 1) {

@@ -50,7 +50,7 @@ public class ViewSetting {
         HEIGHT_AA = (int)Math.round(WIDTH_AA);
 
         HEIGHT_MARK = (int)Math.round(HEIGHT_AA * 2.5 + BORDER_GAP * 2);
-        HEIGHT_SEQUENCE = HEIGHT_AA + BORDER_GAP * 2;
+        HEIGHT_SEQUENCE = HEIGHT_AA ;
 
         AffineTransform rotateText = new AffineTransform();
         rotateText.rotate(FONT_ROTATE);

@@ -14,6 +14,10 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
+ * A PTM Site is for one given protein , the modification on a amino acide, so 4
+ * keys for describe a PTMSite: protein, position + amino acid + type of
+ * modification. In this PTMSite class, for the given modification in this
+ * protein, there are a list of peptide which contain this modificaiton.
  *
  * @author CB205360
  */
@@ -26,8 +30,13 @@ public class PTMSite {
     private DMasterQuantProteinSet m_masterQuantProteinSet;
 
     private DPeptideMatch m_bestPeptideMatch;
-
+    /**
+     * map of peptied Id, peptide
+     */
     private Map<Long, PTMSitePeptideInstance> m_ptmSitePeptideInstanceByPepId;
+    /**
+     * map of peptideId, ptm position
+     */
     private Map<Long, Integer> m_ptmPositionByPeptideId;
     private List<DPeptideInstance> m_parentPeptideInstances;
 
@@ -195,8 +204,6 @@ public class PTMSite {
     public boolean isProteinNTerm() {
         String spec = m_ptmSpecificity.getLocationSpecificity();
         if (m_ptmSpecificity.getLocationSpecificity().endsWith("N-term") && getPositionOnProtein() == 1) {
-            return true;
-        } else if (getPositionOnProtein()-getModifLocationInPep()== 1) {
             return true;
         } else {
             return false;

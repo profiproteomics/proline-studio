@@ -43,9 +43,7 @@ public class PtmMarkSetView extends ViewPtmAbstract {
             for (PtmMarkView pm : _PtmMarkList) {
                 if (pm.getLocationProtein() == index) {
                     return "Location in Protein: " + index;
-                } else {
-                    return null;
-                }
+                } 
             }
         }
         return null;

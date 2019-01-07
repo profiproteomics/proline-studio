@@ -130,9 +130,8 @@ public class PanelPtmDraw extends JPanel {
                     int x = e.getX();
                     int y = e.getY();
                     String tips = m_ctrlMark.getToolTipText(x, y, _ajustedLocation);
-                    //if (tips != null) {
-                        setToolTipText(tips);//null will turn off ToolTip
-                    
+                    setToolTipText(tips);//null will turn off ToolTip
+
                 }
 
                 @Override
@@ -181,8 +180,8 @@ public class PanelPtmDraw extends JPanel {
             super();
             m_ctrlPeptideArea = ctrlPeptideArea;
             this.addMouseListener(new MouseAdapter() {
-                public void mouseClicked(MouseEvent e) {                    
-                      requestFocusInWindow();
+                public void mouseClicked(MouseEvent e) {
+                    requestFocusInWindow();
                     //PtmSitePeptide selectedItem = _ctrlPeptideArea.getSelectedItem(e.getX(), e.getY());
                     int selectedIndex = m_ctrlPeptideArea.getSelectedItemIndex(e.getX(), e.getY());
                     if (selectedIndex != -1) {
@@ -204,8 +203,8 @@ public class PanelPtmDraw extends JPanel {
                     int y = e.getY();
                     String tips = m_ctrlPeptideArea.getToolTipText(x, y);
                     //if (tips != null) {
-                        setToolTipText(tips);//null will turn off tooltip
-                    
+                    setToolTipText(tips);//null will turn off tooltip
+
                 }
 
                 @Override
@@ -217,7 +216,7 @@ public class PanelPtmDraw extends JPanel {
             this.addKeyListener(
                     new java.awt.event.KeyListener() {
                 public void keyPressed(java.awt.event.KeyEvent evt) {
-                    
+
                     if (evt.getKeyCode() == KeyEvent.VK_UP) {
                         m_ctrlPeptideArea.setRelativeSelected(-1);
                     } else if (evt.getKeyCode() == KeyEvent.VK_DOWN) {
@@ -237,7 +236,6 @@ public class PanelPtmDraw extends JPanel {
                 }
             });
         }
-
 
         public void setBeginPoint(int x, int y) {
             m_ctrlPeptideArea.setBeginPoint(x, y);

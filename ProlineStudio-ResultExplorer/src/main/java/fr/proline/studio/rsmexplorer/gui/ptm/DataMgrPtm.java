@@ -29,6 +29,9 @@ public class DataMgrPtm {
      * All data for this databox
      */
     private PTMSite _currentPtmSite;
+    /**
+     * all peptide who contain this PTM Site
+     */
     private List<PTMSitePeptideInstance> _peptidesInstances;
     private Map<Integer, PTMMark> _allPtmMarks;
 
@@ -68,53 +71,45 @@ public class DataMgrPtm {
 
         _peptidesInstances = new ArrayList<>();
         _allPtmMarks = new HashMap<>();
-        //create a liste of PTMSitePeptideInstance in _peptidesInstances
+
         if (_currentPtmSite == null) {
             logger.debug(this.getClass().getName() + "setData" + " data is null");
             this._proteinSequence = "";
             this._beginBestFit = 0;
             return;
         }
-        //@todo verify only the bestPeptideMatch
-        Set<Long> peptidesIds = new HashSet<>();
 
+        Set<Long> peptidesIds = new HashSet<>();
+       
+//retrive each peptide
         for (DPeptideInstance parentPeptideInstance : _currentPtmSite.getParentPeptideInstances()) {
             long peptideId = parentPeptideInstance.getPeptideId();
             peptidesIds.add(peptideId);
             PTMSitePeptideInstance ptmPepInstance = _currentPtmSite.getPTMSitePeptideInstance(peptideId);
             _peptidesInstances.add(ptmPepInstance);
-            if (_currentPtmSite.isProteinNTerm()) {
+            //retrive all ptm in string format
+            if (_currentPtmSite.isProteinNTerm()) {//@todo verify N-term
                 _beginBestFit = 0;
             } else if (_beginBestFit > ptmPepInstance.getPTMPeptideInstance().getStartPosition()) {
                 _beginBestFit = ptmPepInstance.getPTMPeptideInstance().getStartPosition();
             }
-//create PTMMark 
-            for (DPeptidePTM ptm : parentPeptideInstance.getPeptide().getTransientData().getDPeptidePtmMap().values()) {
+           logger.debug("begin best fit is="+_beginBestFit);
+//create PTMMark, take all of the site(position, type of modification) from this peptide, in order to create a PTMMark list
 
+            for (DPeptidePTM ptm : parentPeptideInstance.getPeptide().getTransientData().getDPeptidePtmMap().values()) {
                 int protLocation;
                 if (_currentPtmSite.isProteinNTerm()) {
-                    protLocation = (int) ptm.getSeqPosition();
+                   protLocation = (int) ptm.getSeqPosition();
+                   
                     if (protLocation == 0) {
                         protLocation = 1;
-                    }                  
+                    }
                 } else {
                     protLocation = ptmPepInstance.getPTMPeptideInstance().getStartPosition() + (int) ptm.getSeqPosition();
                 }
                 PTMMark mark = new PTMMark(ptm, protLocation);
                 _allPtmMarks.put(protLocation, mark);
             }
-
-//            for(PTMSite site : ptmPepInstance.getPTMPeptideInstance().getSites()) {
-//                if (site != _currentPtmSite) {
-//                    for (DPeptideInstance pi : site.getParentPeptideInstances()) {
-//                        peptideId = pi.getPeptideId();
-//                        if (!peptidesIds.contains(peptideId)) {
-//                            peptidesIds.add(peptideId);
-//                            _peptidesInstances.add(site.getPTMSitePeptideInstance(peptideId));
-//                        }
-//                    }
-//                }
-//            }
         }
 //create sequence
         DProteinMatch pm = _currentPtmSite.getProteinMatch();
@@ -127,19 +122,6 @@ public class DataMgrPtm {
         logger.debug(" row/peptide size=" + _peptidesInstances.size());
     }
 
-//    /**
-//     * be used by test demo
-//     */
-//    public void setData(ArrayList<PtmSitePeptide> list) {
-//        _PtmSitePeptideList = list;
-//        for (PtmSitePeptide pp : list) {
-//            if (this._beginBestFit > pp.getBeginInProtein()) {
-//                this._beginBestFit = pp.getBeginInProtein();
-//            }
-//        }
-//        _PtmSiteAA2Mark = createPtmSitePP2Mark();
-//        _proteinSequence = createSequence();
-//    }
     int getBeginBestFit() {
         return this._beginBestFit;
     }
@@ -160,12 +142,13 @@ public class DataMgrPtm {
 
         for (PTMSitePeptideInstance item : _peptidesInstances) {
             PTMPeptideInstance pp = item.getPTMPeptideInstance();
+            
             PTMSite site = item.getSite();
             //logger.debug("In  |"+sb.toString()+"("+sb.length());
             String content = pp.getSequence();
             int cLength = content.length();
             int pIndex = pp.getStartPosition();
-            if (pIndex == 1 && site.isProteinNTerm()) {
+            if (pIndex == 1 && site.isProteinNTerm()) {//@todo verify
                 pIndex = 0;
             }
             //logger.debug("Sequence (" + pIndex + "," + content + ")");
@@ -199,10 +182,6 @@ public class DataMgrPtm {
             return null;
         }
         return this._peptidesInstances.get(row).getPTMPeptideInstance().getPeptideInstance();
-    }
-
-    void updateSelect() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     public Object getValueAt(int rowIndex) {

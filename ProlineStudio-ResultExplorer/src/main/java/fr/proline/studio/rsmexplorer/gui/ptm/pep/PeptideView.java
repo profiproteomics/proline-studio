@@ -16,10 +16,7 @@ import fr.proline.studio.utils.CyclicColorPalette;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
-import java.text.DecimalFormat;
-import java.util.ArrayList;
 import java.util.Map;
-import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,7 +33,6 @@ public class PeptideView extends ViewPtmAbstract {
     private boolean _isSelected;
     private int _beginIndex;
 
-    //private Map<Integer, DPeptidePTM> _mapPosPTM;
     public PeptideView(PTMSitePeptideInstance pep) {
         this.x0 = 0;
         this.y0 = 0;
@@ -65,7 +61,12 @@ public class PeptideView extends ViewPtmAbstract {
     private float getScore() {
         return _peptide.getBestPeptideMatch().getScore();
     }
-
+    
+    /**
+     * paint a peptide
+     * @param g
+     * @param viewContext 
+     */
     @Override
     public void paint(Graphics2D g, ViewContext viewContext) {
         int aaWidth = ViewSetting.WIDTH_AA;
@@ -98,10 +99,10 @@ public class PeptideView extends ViewPtmAbstract {
 
     /**
      * paint the PTM on a Amino Acide
-     *
      * @param g
-     * @param modifyA
-     * @param y01
+     * @param ptm
+     * @param location
+     * @param y01 vertical begin position
      */
     private void paintPtm(Graphics2D g, DPeptidePTM ptm, int location, int y01) {
         int aaWidth = ViewSetting.WIDTH_AA;

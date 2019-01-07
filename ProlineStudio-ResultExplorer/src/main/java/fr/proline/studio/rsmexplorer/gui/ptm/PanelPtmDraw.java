@@ -217,11 +217,13 @@ public class PanelPtmDraw extends JPanel {
             this.addKeyListener(
                     new java.awt.event.KeyListener() {
                 public void keyPressed(java.awt.event.KeyEvent evt) {
-                    if (evt.getKeyCode() == KeyEvent.VK_7) {
+                    
+                    if (evt.getKeyCode() == KeyEvent.VK_UP) {
                         m_ctrlPeptideArea.setRelativeSelected(-1);
-                    } else if (evt.getKeyCode() == KeyEvent.VK_1) {
+                    } else if (evt.getKeyCode() == KeyEvent.VK_DOWN) {
                         m_ctrlPeptideArea.setRelativeSelected(1);;
                     }
+                    repaint();
                 }
 
                 @Override

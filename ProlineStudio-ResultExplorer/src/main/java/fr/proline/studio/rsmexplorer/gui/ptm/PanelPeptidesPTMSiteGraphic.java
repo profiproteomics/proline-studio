@@ -3,6 +3,7 @@ package fr.proline.studio.rsmexplorer.gui.ptm;
 import fr.proline.core.orm.msi.dto.DPeptideInstance;
 import fr.proline.studio.dam.tasks.data.ptm.PTMSite;
 import fr.proline.studio.export.ExportButton;
+import fr.proline.studio.pattern.DataBoxPTMProteinSite;
 import fr.proline.studio.rsmexplorer.gui.PeptidesPTMSiteTablePanel;
 import fr.proline.studio.rsmexplorer.gui.ptm.mark.PtmMarkCtrl;
 import fr.proline.studio.rsmexplorer.gui.ptm.pep.PeptideAreaCtrl;
@@ -88,7 +89,6 @@ public class PanelPeptidesPTMSiteGraphic extends PeptidesPTMSiteTablePanel {
             this._paintArea.setAjustedLocation(ajustedLocation);            
             valueChanged(0);//first selected is 0            
         }
-        this.revalidate();
         this.repaint();
     }
 

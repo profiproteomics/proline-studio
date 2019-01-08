@@ -102,6 +102,16 @@ public class PanelPtmDraw extends JPanel {
         this._sequenceLength = sequenceLength;
     }
 
+    /**
+     * useful for change scroll bar state
+     * @param g 
+     */
+    @Override
+    public void paint(Graphics g) {
+        this._scrollPane.getViewport().revalidate();//
+        super.paint(g); 
+    }
+
     protected int getSelectedPeptideIndex() {
         return this._selectedRowIndex;
     }

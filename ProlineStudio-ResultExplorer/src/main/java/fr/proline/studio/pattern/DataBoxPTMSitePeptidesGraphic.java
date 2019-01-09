@@ -19,7 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
+ * This class is very similaire as DataBoxPTMSitePeptides
  * @author Karine XUE
  */
 public class DataBoxPTMSitePeptidesGraphic extends AbstractDataBox {

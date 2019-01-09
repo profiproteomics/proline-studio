@@ -102,8 +102,7 @@ public class PanelPeptidesPTMSiteGraphic extends JPanel implements DataBoxPanelI
     }
 
     public PTMSite getSelectedPTMSite() {
-       int selectedRowIndex = this._paintArea.getSelectedPeptideIndex();
-       return this._dataMgr.getSelectedPTMSite(selectedRowIndex);
+       return this.m_currentPTMSite;
     }
     
     /**
@@ -131,8 +130,9 @@ public class PanelPeptidesPTMSiteGraphic extends JPanel implements DataBoxPanelI
      * @param i 
      */
     public void setSelectedRow(int i) {
+        this._dataMgr.setSelectedPeptideInstance(i);
         this._ctrlPeptideArea.setSelectedIndex(i);
-        this._paintArea.setSelectedIndex(i);
+        this._paintArea.setSelectedPeptideIndex(i);
     }
 
     @Override

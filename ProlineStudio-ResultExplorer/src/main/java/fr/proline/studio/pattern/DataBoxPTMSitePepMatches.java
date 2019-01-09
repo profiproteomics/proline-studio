@@ -73,8 +73,7 @@ public class DataBoxPTMSitePepMatches extends AbstractDataBox {
         }
         
         //Data already loaded. Just update panel.
-        m_logger.info("DATA Changed : Update PepMatch WINDOWS. " + ptmSite.toString()+" data loaded " + ptmSite.isLoaded());
-        if(ptmSite.isLoaded()){
+         if(ptmSite.isLoaded()){
             m_previousTaskId = null;
             ((PeptidesPTMSiteTablePanel) getDataBoxPanelInterface()).setData(ptmSite, m_parentPeptideInstance);           
             propagateDataChanged(ExtendedTableModelInterface.class);

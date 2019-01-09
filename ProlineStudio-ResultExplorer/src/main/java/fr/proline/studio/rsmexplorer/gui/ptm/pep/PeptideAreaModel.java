@@ -28,6 +28,11 @@ public class PeptideAreaModel {
         return _viewPeptideList;
     }
     
+    /**
+     * set all peptide of the given protein, which has this PTM Site
+     * create PeptideView object from PTMSitePeptideInstance
+     * @param pPeptide 
+     */
     public void setPTM(List<PTMSitePeptideInstance> pPeptide) {
         _viewPeptideList = new ArrayList<>();
         for (PTMSitePeptideInstance pep : pPeptide) {
@@ -41,7 +46,7 @@ public class PeptideAreaModel {
      *
      * @param index
      */
-    protected void setSelectedItem(int index) {
+    protected void setSelectedIndex(int index) {
         if (index == -1) {
             return;
         }
@@ -63,8 +68,12 @@ public class PeptideAreaModel {
             return;
         } else {
             this._selectedIndex = index;
-            this.setSelectedItem(index);
+            this.setSelectedIndex(index);
         }
+    }
+
+    protected int getSelectedIndex() {
+        return this._selectedIndex;
     }
     
 }

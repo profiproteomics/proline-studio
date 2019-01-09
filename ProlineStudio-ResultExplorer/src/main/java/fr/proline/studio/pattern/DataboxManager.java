@@ -11,58 +11,61 @@ import java.util.TreeMap;
 
 /**
  * Manage all databox and can find a databox which can be used
+ *
  * @author JM235353
  */
 public class DataboxManager {
-    
+
     private static DataboxManager m_databoxManager = null;
     
-    
-    private final AbstractDataBox[] m_dataBoxStartingArray = { new DataBoxRsetAll(), new DataBoxRsetPSM(), new DataBoxRsetAllProteinMatch(),
-                                                 new DataBoxRsmPSM(), new DataBoxRsmPeptideInstances(), new DataBoxAdjacencyMatrixChoice(),
-                                                 new DataBoxRsmAllProteinSet(), new DataboxXicPeptideSet(), new DataboxXicPeptideIon(), new DataboxXicProteinSet(), 
-                                                new DataBoxMSQueriesForRSM(), new DataBoxMSQueriesForRset(), new DataBoxPTMProteinSite() };
-    
-    private final AbstractDataBox[] m_dataBoxContinuingArray = { new DataBoxRsetPeptideSpectrum(), new DataBoxRsetPeptideSpectrumValues(),
-                                                 new DataBoxRsetProteinsForPeptideMatch(),
-                                                 new DataboxRsetPeptidesOfProtein(),
-                                                 new DataBoxRsmPeptidesOfProtein(), new DataBoxRsmProteinAndPeptideSequence(),
-                                                 new DataBoxRsmProteinSetOfPeptides(), new DataBoxRsmProteinsOfProteinSet(), 
-                                                 new DataBoxTaskDescription()/*, new DataBoxStatisticsFrequencyResponse()*/, new DataBoxRsetPeptideFragmentation(), 
-                                                 new DataBoxRsetPeptideSpectrumError(), new DataboxRsmPSMOfProteinSet(), new DataboxRsmPSMOfPeptide(), 
-                                                 new DataboxGraphics(false), new DataboxPSMOfMasterQuantPeptide() , 
-                                                 new DataboxXicPeptideSet(), new DataboxXicPeptideIon(), new DataboxChildFeature(), new DataboxMultiGraphics(false, false), 
-                                                 new DataboxMapAlignment(),
-                                                 new DataBoxAdjacencyMatrixChoice() , new DataBoxAdjacencyMatrix(),
-                                                new DataboxRSMPSMForMsQuery(), new DataboxRsetPSMForMsQuery()};
-    
+    private final AbstractDataBox[] m_dataBoxStartingArray = {new DataBoxRsetAll(), new DataBoxRsetPSM(), new DataBoxRsetAllProteinMatch(),
+        new DataBoxRsmPSM(), new DataBoxRsmPeptideInstances(), new DataBoxAdjacencyMatrixChoice(),
+        new DataBoxRsmAllProteinSet(), new DataboxXicPeptideSet(), new DataboxXicPeptideIon(), new DataboxXicProteinSet(),
+        new DataBoxMSQueriesForRSM(), new DataBoxMSQueriesForRset(), new DataBoxPTMProteinSite()};
+
+    private final AbstractDataBox[] m_dataBoxContinuingArray = {new DataBoxRsetPeptideSpectrum(), new DataBoxRsetPeptideSpectrumValues(),
+        new DataBoxRsetProteinsForPeptideMatch(),
+        new DataboxRsetPeptidesOfProtein(),
+        new DataBoxRsmPeptidesOfProtein(), new DataBoxRsmProteinAndPeptideSequence(),
+        new DataBoxRsmProteinSetOfPeptides(), new DataBoxRsmProteinsOfProteinSet(),
+        new DataBoxTaskDescription()/*, new DataBoxStatisticsFrequencyResponse()*/, new DataBoxRsetPeptideFragmentation(),
+        new DataBoxRsetPeptideSpectrumError(), new DataboxRsmPSMOfProteinSet(), new DataboxRsmPSMOfPeptide(),
+        new DataboxGraphics(false), new DataboxPSMOfMasterQuantPeptide(),
+        new DataboxXicPeptideSet(), new DataboxXicPeptideIon(), new DataboxChildFeature(), new DataboxMultiGraphics(false, false),
+        new DataboxMapAlignment(),
+        new DataBoxAdjacencyMatrixChoice(), new DataBoxAdjacencyMatrix(),
+        new DataboxRSMPSMForMsQuery(), new DataboxRsetPSMForMsQuery(),
+        new DataBoxPTMSitePeptides(), new DataBoxPTMSitePeptidesGraphic(),
+        new DataBoxPTMSitePepMatches()
+    };
+
     private DataboxManager() {
     }
-    
+
     public static DataboxManager getDataboxManager() {
         if (m_databoxManager == null) {
             m_databoxManager = new DataboxManager();
         }
         return m_databoxManager;
     }
-    
+
     public TreeMap<ParameterDistance, AbstractDataBox> findCompatibleStartingDataboxList(ArrayList<GroupParameter> outParameters) {
-        
-       TreeMap<ParameterDistance, AbstractDataBox> compatibilityList = new TreeMap<>();
-        for (int i=0;i<m_dataBoxStartingArray.length;i++) {
+
+        TreeMap<ParameterDistance, AbstractDataBox> compatibilityList = new TreeMap<>();
+        for (int i = 0; i < m_dataBoxStartingArray.length; i++) {
             double averageDistance = m_dataBoxStartingArray[i].calculateParameterCompatibilityDistance(outParameters);
-            if (averageDistance >=0) {
+            if (averageDistance >= 0) {
                 compatibilityList.put(new ParameterDistance(averageDistance), m_dataBoxStartingArray[i]);
             }
         }
-        
+
         return compatibilityList;
     }
 
     public TreeMap<ParameterDistance, AbstractDataBox> findCompatibleDataboxList(AbstractDataBox previousDatabox, Class[] importantInParameter) {
-        
+
         AvailableParameters avalaibleParameters = new AvailableParameters(previousDatabox);
-        
+
         TreeMap<ParameterDistance, AbstractDataBox> compatibilityList = new TreeMap<>();
         if (importantInParameter != null) {
             for (int j = 0; j < importantInParameter.length; j++) {
@@ -95,8 +98,8 @@ public class DataboxManager {
                 }
             }
         }
-        
+
         return compatibilityList;
     }
-    
+
 }

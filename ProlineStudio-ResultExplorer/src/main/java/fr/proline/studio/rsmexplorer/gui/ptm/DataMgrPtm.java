@@ -93,7 +93,6 @@ public class DataMgrPtm {
             } else if (_beginBestFit > ptmPepInstance.getPTMPeptideInstance().getStartPosition()) {
                 _beginBestFit = ptmPepInstance.getPTMPeptideInstance().getStartPosition();
             }
-            logger.debug("begin best fit is=" + _beginBestFit);
 //create PTMMark, take all of the site(position, type of modification) from this peptide, in order to create a PTMMark list
 
             for (DPeptidePTM ptm : parentPeptideInstance.getPeptide().getTransientData().getDPeptidePtmMap().values()) {
@@ -192,8 +191,5 @@ public class DataMgrPtm {
         return _peptidesInstances;
     }
 
-    PTMSite getSelectedPTMSite(int row) {
-        return _currentPtmSite;
-    }
 
 }

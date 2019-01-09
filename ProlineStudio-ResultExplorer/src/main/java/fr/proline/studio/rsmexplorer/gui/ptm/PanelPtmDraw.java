@@ -37,7 +37,6 @@ public class PanelPtmDraw extends JPanel {
     private boolean _isDataLoaded;
     private TitlePane _titlePane;
     private PeptidePane _peptidePane;
-    private int _selectedRowIndex;
     int _ajustedLocation;
     private int _rowCount;
     private int _sequenceLength;
@@ -53,8 +52,6 @@ public class PanelPtmDraw extends JPanel {
         _numberPane = new PeptideNumberPane();
         _rowCount = 0;
         _sequenceLength = 0;
-        _selectedRowIndex = 0;
-
         initComponents();
 
     }
@@ -81,7 +78,6 @@ public class PanelPtmDraw extends JPanel {
 
     public void setIsDataLoaded(boolean isDataLoaded) {
         if (isDataLoaded == true) {
-            this._selectedRowIndex = 0;
             this._isDataNull = false;
         }
         this._isDataLoaded = isDataLoaded;
@@ -104,24 +100,25 @@ public class PanelPtmDraw extends JPanel {
 
     /**
      * useful for change scroll bar state
-     * @param g 
+     *
+     * @param g
      */
     @Override
     public void paint(Graphics g) {
         this._scrollPane.getViewport().revalidate();//
-        super.paint(g); 
+        super.paint(g);
     }
 
     protected int getSelectedPeptideIndex() {
-        return this._selectedRowIndex;
+        return this._peptidePane.m_ctrlPeptideArea.getSelectedIndex();
     }
 
     protected void clean() {
         this._isDataNull = true;
     }
 
-    protected void setSelectedIndex(int i) {
-        _selectedRowIndex = i;
+    protected void setSelectedPeptideIndex(int i) {
+        this._peptidePane.m_ctrlPeptideArea.setSelectedIndex(i);
     }
 
     private class TitlePane extends JPanel {
@@ -193,15 +190,11 @@ public class PanelPtmDraw extends JPanel {
                 public void mouseClicked(MouseEvent e) {
                     requestFocusInWindow();
                     //PtmSitePeptide selectedItem = _ctrlPeptideArea.getSelectedItem(e.getX(), e.getY());
-                    int selectedIndex = m_ctrlPeptideArea.getSelectedItemIndex(e.getX(), e.getY());
-                    if (selectedIndex != -1) {
-                        _selectedRowIndex = selectedIndex;
+                    int oldSelected = m_ctrlPeptideArea.getSelectedIndex();
+                    int selectedIndex = m_ctrlPeptideArea.getSelectedIndex(e.getX(), e.getY());
+                    if (selectedIndex != oldSelected && (selectedIndex != -1) && (_ctrl != null)) {
                         repaint();
-                    }
-                    //logger.debug("PeptidePane mouseClicked(" + e.getX() + "," + e.getY() + ")");
-                    if ((_selectedRowIndex != -1) && (_ctrl != null)) {
-                        _ctrl.valueChanged(_selectedRowIndex);//propagate
-                        //logger.debug(selectedItem.toString());
+                        _ctrl.valueChanged(selectedIndex);//propagate
                     }
                 }
             });
@@ -226,13 +219,17 @@ public class PanelPtmDraw extends JPanel {
             this.addKeyListener(
                     new java.awt.event.KeyListener() {
                 public void keyPressed(java.awt.event.KeyEvent evt) {
-
+                    int oldSelected = m_ctrlPeptideArea.getSelectedIndex();
                     if (evt.getKeyCode() == KeyEvent.VK_UP) {
                         m_ctrlPeptideArea.setRelativeSelected(-1);
                     } else if (evt.getKeyCode() == KeyEvent.VK_DOWN) {
-                        m_ctrlPeptideArea.setRelativeSelected(1);;
+                        m_ctrlPeptideArea.setRelativeSelected(1);
                     }
-                    repaint();
+                    int selectedIndex = m_ctrlPeptideArea.getSelectedIndex();
+                    if (oldSelected != selectedIndex) {
+                        _ctrl.valueChanged(selectedIndex);
+                        repaint();
+                    }
                 }
 
                 @Override

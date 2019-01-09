@@ -161,7 +161,11 @@ public class PeptideView extends ViewPtmAbstract {
         }
         return null;
     }
-
+    /**
+     * useful for Tooltips
+     * @param ptm
+     * @return 
+     */
     private String getReadablePtmString(DPeptidePTM ptm) {
         DPeptideMatch pepMatch = _peptide.getBestPeptideMatch();
         DPtmSiteProperties properties = pepMatch.getPtmSiteProperties();
@@ -184,7 +188,7 @@ public class PeptideView extends ViewPtmAbstract {
             if (ptm != null) {
                 float prob = getProbability(ptm)*100;
                 String readable = getReadablePtmString(ptm);
-                s = readable + "," +String.format("%1$.2f", prob)+"%";;
+                s = readable + ", " +String.format("%1$.2f", prob)+"%";;
             }
         }
         return s;

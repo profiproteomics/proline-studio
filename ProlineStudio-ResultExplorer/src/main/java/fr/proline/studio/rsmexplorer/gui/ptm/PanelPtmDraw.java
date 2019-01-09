@@ -200,7 +200,7 @@ public class PanelPtmDraw extends JPanel {
                     }
                     //logger.debug("PeptidePane mouseClicked(" + e.getX() + "," + e.getY() + ")");
                     if ((_selectedRowIndex != -1) && (_ctrl != null)) {
-                        _ctrl.valueChanged(_selectedRowIndex);
+                        _ctrl.valueChanged(_selectedRowIndex);//propagate
                         //logger.debug(selectedItem.toString());
                     }
                 }

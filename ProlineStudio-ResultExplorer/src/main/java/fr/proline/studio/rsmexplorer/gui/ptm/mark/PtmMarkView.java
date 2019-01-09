@@ -9,7 +9,6 @@ import fr.proline.studio.rsmexplorer.gui.ptm.PTMMark;
 import fr.proline.studio.rsmexplorer.gui.ptm.ViewContext;
 import fr.proline.studio.rsmexplorer.gui.ptm.ViewPtmAbstract;
 import fr.proline.studio.rsmexplorer.gui.ptm.ViewSetting;
-import fr.proline.studio.utils.CyclicColorPalette;
 
 import java.awt.*;
 

@@ -25,16 +25,22 @@ public class PTMMark {
     public DPeptidePTM getPeptidePtm() {
         return m_peptidePtm;
     }
-
+    
     public int getProteinLocation() {
         return m_proteinLocation;
     }
-
+    /**
+     * 
+     * @return the first letter of the modification name
+     */
     public char getPtmSymbol() {
         DInfoPTM ptm = DInfoPTM.getInfoPTMMap().get(m_peptidePtm.getIdPtmSpecificity());
         return ptm.getPtmShortName().toUpperCase().charAt(0);
     }
-
+    /**
+     * The PtmSpecificity contains the informations of (location, amino acide, ptm_id and its name)
+     * @return le identifient de PtmSpecificity
+     */
     public Long getPtmSpecificityId() {
         return m_peptidePtm.getIdPtmSpecificity();
     }

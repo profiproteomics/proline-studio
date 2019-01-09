@@ -80,7 +80,7 @@ public class DataMgrPtm {
         }
 
         Set<Long> peptidesIds = new HashSet<>();
-       
+
 //retrive each peptide
         for (DPeptideInstance parentPeptideInstance : _currentPtmSite.getParentPeptideInstances()) {
             long peptideId = parentPeptideInstance.getPeptideId();
@@ -93,14 +93,14 @@ public class DataMgrPtm {
             } else if (_beginBestFit > ptmPepInstance.getPTMPeptideInstance().getStartPosition()) {
                 _beginBestFit = ptmPepInstance.getPTMPeptideInstance().getStartPosition();
             }
-           logger.debug("begin best fit is="+_beginBestFit);
+            logger.debug("begin best fit is=" + _beginBestFit);
 //create PTMMark, take all of the site(position, type of modification) from this peptide, in order to create a PTMMark list
 
             for (DPeptidePTM ptm : parentPeptideInstance.getPeptide().getTransientData().getDPeptidePtmMap().values()) {
                 int protLocation;
                 if (_currentPtmSite.isProteinNTerm()) {
-                   protLocation = (int) ptm.getSeqPosition();
-                   
+                    protLocation = (int) ptm.getSeqPosition();
+
                     if (protLocation == 0) {
                         protLocation = 1;
                     }
@@ -142,7 +142,7 @@ public class DataMgrPtm {
 
         for (PTMSitePeptideInstance item : _peptidesInstances) {
             PTMPeptideInstance pp = item.getPTMPeptideInstance();
-            
+
             PTMSite site = item.getSite();
             //logger.debug("In  |"+sb.toString()+"("+sb.length());
             String content = pp.getSequence();
@@ -184,12 +184,16 @@ public class DataMgrPtm {
         return this._peptidesInstances.get(row).getPTMPeptideInstance().getPeptideInstance();
     }
 
-    public Object getValueAt(int rowIndex) {
-        return _peptidesInstances.get(rowIndex);
+    protected void setSelectedPeptideInstance(int row) {
+        ;
     }
 
     public List<PTMSitePeptideInstance> getPTMSitePeptideInstances() {
         return _peptidesInstances;
+    }
+
+    PTMSite getSelectedPTMSite(int row) {
+        return _currentPtmSite;
     }
 
 }

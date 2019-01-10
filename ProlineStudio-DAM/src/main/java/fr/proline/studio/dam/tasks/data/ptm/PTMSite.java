@@ -200,7 +200,10 @@ public class PTMSite {
     public Integer getPositionOnProtein() {
         return m_site.seqPosition;
     }
-
+    public Character getAminoAcide(){
+        Character AA = m_ptmSpecificity.getResidueAASpecificity();
+        return AA;
+    }
     public boolean isProteinNTerm() {
         String spec = m_ptmSpecificity.getLocationSpecificity();
         if (m_ptmSpecificity.getLocationSpecificity().endsWith("N-term") && getPositionOnProtein() == 1) {

@@ -191,5 +191,9 @@ public class DataMgrPtm {
         return _peptidesInstances;
     }
 
+    protected int getPTMSiteSeqPos() {
+        return this._currentPtmSite.getPositionOnProtein();
+    }
+
 
 }

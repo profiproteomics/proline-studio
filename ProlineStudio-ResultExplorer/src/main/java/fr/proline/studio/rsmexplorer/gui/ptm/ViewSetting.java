@@ -36,33 +36,32 @@ public class ViewSetting {
     public static Color SEQUENCE_COLOR = Color.BLUE;
     private static final double FONT_ROTATE = -Math.PI / 6;
     public static Font FONT_NUMBER_DIAGONAL;
+    public static final BasicStroke STROKE = new BasicStroke(1.5f, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_ROUND);
 
     public static final Stroke DASHED = new BasicStroke(1.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_MITER, 10.0f, new float[]{2.0f, 2.0f}, 0.0f);
     public static final BasicStroke STROKE_PEP = new BasicStroke(1.2f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER);
 
     public static Map<Long, Color> PTM_COLORS = new HashMap<>();
-    
+
     static {
         AffineTransform affinetransform = new AffineTransform();
-        FontRenderContext frc = new FontRenderContext(affinetransform,false,true);
-        WIDTH_AA = (int)Math.round(FONT_SEQUENCE.getStringBounds("M", frc).getWidth());
+        FontRenderContext frc = new FontRenderContext(affinetransform, false, true);
+        WIDTH_AA = (int) Math.round(FONT_SEQUENCE.getStringBounds("M", frc).getWidth());
         // getHeight or getAscent give the height of the line, not the height of the single character. Since the font is monospaced, we assume that letters are square.
-        HEIGHT_AA = (int)Math.round(WIDTH_AA);
+        HEIGHT_AA = (int) Math.round(WIDTH_AA);
 
-        HEIGHT_MARK = (int)Math.round(HEIGHT_AA * 2.5 + BORDER_GAP * 2);
-        HEIGHT_SEQUENCE = HEIGHT_AA ;
+        HEIGHT_MARK = (int) Math.round(HEIGHT_AA * 2.5 + BORDER_GAP * 2);
+        HEIGHT_SEQUENCE = HEIGHT_AA + HEIGHT_AA / 2 + BORDER_GAP;
 
         AffineTransform rotateText = new AffineTransform();
         rotateText.rotate(FONT_ROTATE);
         FONT_NUMBER_DIAGONAL = FONT_NUMBER.deriveFont(rotateText);
     }
 
-    
     // PTM Colors: in this implementation always returns the same color for a specificity, colors 
     // are assigned based on the order they are requested. A better implementation will be to 
     // load used PTM specificityId of a project, sort them by Id and assigned a color based on the rank 
     // of a specificity Id. 
-    
     public static final Color getColor(PTMSite site) {
         return getColor(site.getPTMSpecificity().getIdPtmSpecificity());
     }
@@ -75,9 +74,9 @@ public class ViewSetting {
         }
         return c;
     }
-    
+
     public static final Color getColor(PTMMark mark) {
         return getColor(mark.getPtmSpecificityId());
-    } 
+    }
 
 }

@@ -22,7 +22,6 @@ import org.slf4j.LoggerFactory;
 public class PtmMarkView extends ViewPtmAbstract {
 
     private static Logger logger = LoggerFactory.getLogger("ProlineStudio.rsmexplorer.ptm");
-    private static final BasicStroke STROKE = new BasicStroke(1.5f, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_ROUND);
 
     /**
      * One letter
@@ -72,7 +71,7 @@ public class PtmMarkView extends ViewPtmAbstract {
 
         g.setColor(m_color);
         //draw the box
-        g.setStroke(STROKE);
+        g.setStroke(ViewSetting.STROKE);
         g.drawLine(x0, y0, (int) (x0 + aaWidth), y0);
         g.drawLine((int) (x0 + aaWidth), y0, (int) (x0 + aaWidth), y0 + ViewSetting.HEIGHT_AA);
         g.drawLine((int) (x0 + aaWidth), y0 + ViewSetting.HEIGHT_AA, x0, y0 + ViewSetting.HEIGHT_AA);

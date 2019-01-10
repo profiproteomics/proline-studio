@@ -37,5 +37,9 @@ public class ProteinSequenceCtrl {
     public void paint(Graphics2D g2, ViewContext viewContext) {
         this._view.paint(g2, viewContext);
     }
+
+    public void setPTMSequencePosition(int i) {
+        this._view.setPTMSequencePosition(i);
+    }
     
 }

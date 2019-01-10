@@ -45,7 +45,6 @@ public class PanelPeptidesPTMSiteGraphic extends JPanel implements DataBoxPanelI
         _ctrlPeptideArea = new PeptideAreaCtrl();
         _paintArea = new PanelPtmDraw(this, _ctrlMark, _ctrlSequence, _ctrlPeptideArea);
         initComponents();
-
     }
 
     /**
@@ -88,6 +87,7 @@ public class PanelPeptidesPTMSiteGraphic extends JPanel implements DataBoxPanelI
             this.m_currentPTMSite = peptidesPTMSite;
             this.m_currentPepInst = pepInst;
             this._ctrlSequence.setData(_dataMgr.getProteinSequence());
+            this._ctrlSequence.setPTMSequencePosition(_dataMgr.getPTMSiteSeqPos());
             this._ctrlMark.setData(_dataMgr.getAllPtmMarks());
             this._ctrlPeptideArea.setData(_dataMgr.getPTMSitePeptideInstances());
             int ajustedLocation = _dataMgr.getBeginBestFit();

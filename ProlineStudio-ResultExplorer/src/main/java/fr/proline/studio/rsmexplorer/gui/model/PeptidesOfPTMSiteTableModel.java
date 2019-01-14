@@ -19,6 +19,10 @@ import fr.proline.studio.rsmexplorer.gui.renderer.PercentageRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.ScoreRenderer;
 import fr.proline.studio.table.DecoratedTableModel;
 import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
+import fr.proline.studio.filter.ConvertValueInterface;
+import fr.proline.studio.filter.DoubleFilter;
+import fr.proline.studio.filter.IntegerFilter;
+import fr.proline.studio.filter.StringFilter;
 import fr.proline.studio.table.LazyData;
 import fr.proline.studio.table.TableDefaultRendererManager;
 import fr.proline.studio.table.renderer.DefaultLeftAlignRenderer;
@@ -70,7 +74,7 @@ public class PeptidesOfPTMSiteTableModel extends DecoratedTableModel implements 
 //    public static final int COLTYPE_HIDDEN_PROTEIN_PTM = 16; // hidden column, must be the last
 
     private static final String[] m_columnNames = {"Id", "Peptide", "Score", "Modification", "Residue", "Site Probability", "Modification D.Mass", "Modification Loc.", "Protein Loc.", "Protein N/C-term", "PTM", "PTM D.Mass", "PTM Probability", "Query title"};
-    private static final String[] m_columnTooltips =  {"Peptide Id (Instance Id)", "Peptide", "Score of the peptide match", "Modification", "Modified residue", "Site probability", "Delta mass of the given modification", "Position of the modification on the peptide sequence", "Position of the modification on the protein sequence", "Protein N/C-term", "PTM modifications associated with this peptide", "PTMs delta mass", "PTMs probability", "Peptide match query title"};
+    private static final String[] m_columnTooltips = {"Peptide Id (Instance Id)", "Peptide", "Score of the peptide match", "Modification", "Modified residue", "Site probability", "Delta mass of the given modification", "Position of the modification on the peptide sequence", "Position of the modification on the protein sequence", "Protein N/C-term", "PTM modifications associated with this peptide", "PTMs delta mass", "PTMs probability", "Peptide match query title"};
     private final HashMap<Integer, TableCellRenderer> m_rendererMap = new HashMap();
 
     private PTMSite m_currentPtmSite;
@@ -121,32 +125,29 @@ public class PeptidesOfPTMSiteTableModel extends DecoratedTableModel implements 
         } else if (parentPepInstance == null) {
             // TODO : request all PeptideMatches ??
             m_logger.warn("Must shown all peptide matches but no peptide instance specified for PTM Site " + m_currentPtmSite.toString());
-        } else {
+        } else // TODO this check is mandatory to avoid NullPointer, but the problem must be handled: PTMSite and parentPepInstance parameters are inconsistent
+         if (m_currentPtmSite.getPTMSitePeptideInstance(parentPepInstance.getPeptideId()) != null) {
+                List<DPeptideInstance> peptideInstancesForPeptide = m_currentPtmSite.getPTMSitePeptideInstance(parentPepInstance.getPeptideId()).getLeafPepInstances();
 
-            // TODO this check is mandatory to avoid NullPointer, but the problem must be handled: PTMSite and parentPepInstance parameters are inconsistent
-            if (m_currentPtmSite.getPTMSitePeptideInstance(parentPepInstance.getPeptideId()) != null) {
-            List<DPeptideInstance> peptideInstancesForPeptide = m_currentPtmSite.getPTMSitePeptideInstance(parentPepInstance.getPeptideId()).getLeafPepInstances();
-
-            if (peptideInstancesForPeptide == null) {
-                // PtmSite and parentPepInstance do not correspond for the moment (asynchronous loading)
-                m_currentPtmSite = null;
-                fireTableDataChanged();
-                return;
-            }
-
-            for (DPeptideInstance pi : peptideInstancesForPeptide) {
-                for (DPeptideMatch pepMatch : pi.getPeptideMatches()) {
-                    m_ptmSitePeptides.add(new Row(pi, pepMatch));
+                if (peptideInstancesForPeptide == null) {
+                    // PtmSite and parentPepInstance do not correspond for the moment (asynchronous loading)
+                    m_currentPtmSite = null;
+                    fireTableDataChanged();
+                    return;
                 }
-            }
 
-            /*peptideMatchesForPeptide.forEach(entry  -> {
+                for (DPeptideInstance pi : peptideInstancesForPeptide) {
+                    for (DPeptideMatch pepMatch : pi.getPeptideMatches()) {
+                        m_ptmSitePeptides.add(new Row(pi, pepMatch));
+                    }
+                }
+
+                /*peptideMatchesForPeptide.forEach(entry  -> {
                         entry.getValue().forEach( pepMatch -> {
                             m_ptmSitePeptides.add(new Row(entry.getKey(), pepMatch));
                         });
                     });          */
             }
-        }
         fireTableDataChanged();
     }
 
@@ -480,7 +481,45 @@ public class PeptidesOfPTMSiteTableModel extends DecoratedTableModel implements 
 
     @Override
     public void addFilters(LinkedHashMap<Integer, Filter> filtersMap) {
-        //TODO 
+        ConvertValueInterface peptideConverter = new ConvertValueInterface() {
+            @Override
+            public Object convertValue(Object o) {
+                if (o == null) {
+                    return null;
+                }
+                return ((DPeptideMatch) o).getPeptide().getSequence();
+            }
+
+        };
+
+        filtersMap.put(COLTYPE_PEPTIDE_NAME, new StringFilter(getColumnName(COLTYPE_PEPTIDE_NAME), peptideConverter, COLTYPE_PEPTIDE_NAME));
+        filtersMap.put(COLTYPE_PEPTIDE_SCORE, new DoubleFilter(getColumnName(COLTYPE_PEPTIDE_SCORE), null, COLTYPE_PEPTIDE_SCORE));
+
+        filtersMap.put(COLTYPE_MODIFICATION, new StringFilter(getColumnName(COLTYPE_MODIFICATION), null, COLTYPE_MODIFICATION));
+        
+                ConvertValueInterface aAConverter = new ConvertValueInterface() {
+            @Override
+            public Object convertValue(Object o) {
+                if (o == null) {
+                    return null;
+                }
+                return ((Character) o).toString();
+            }
+
+        };
+        filtersMap.put(COLTYPE_RESIDUE_AA, new StringFilter(getColumnName(COLTYPE_RESIDUE_AA), aAConverter, COLTYPE_RESIDUE_AA));
+
+        filtersMap.put(COLTYPE_MODIFICATION_PROBA, new DoubleFilter(getColumnName(COLTYPE_MODIFICATION_PROBA), null, COLTYPE_MODIFICATION_PROBA));
+        filtersMap.put(COLTYPE_DELTA_MASS_MODIFICATION, new DoubleFilter(getColumnName(COLTYPE_DELTA_MASS_MODIFICATION), null, COLTYPE_DELTA_MASS_MODIFICATION));
+        filtersMap.put(COLTYPE_MODIFICATION_LOC, new StringFilter(getColumnName(COLTYPE_MODIFICATION_LOC), null, COLTYPE_MODIFICATION_LOC));
+        filtersMap.put(COLTYPE_PROTEIN_LOC, new IntegerFilter(getColumnName(COLTYPE_PROTEIN_LOC), null, COLTYPE_PROTEIN_LOC));
+        filtersMap.put(COLTYPE_PROTEIN_NTERM_CTERM, new StringFilter(getColumnName(COLTYPE_PROTEIN_NTERM_CTERM), null, COLTYPE_PROTEIN_NTERM_CTERM));
+
+        filtersMap.put(COLTYPE_PEPTIDE_PTM, new StringFilter(getColumnName(COLTYPE_PEPTIDE_PTM), null, COLTYPE_PEPTIDE_PTM));
+
+        filtersMap.put(COLTYPE_DELTA_MASS_PTM, new DoubleFilter(getColumnName(COLTYPE_DELTA_MASS_PTM), null, COLTYPE_DELTA_MASS_PTM));
+        filtersMap.put(COLTYPE_PTM_PROBA, new DoubleFilter(getColumnName(COLTYPE_PTM_PROBA), null, COLTYPE_PTM_PROBA));
+        filtersMap.put(COLTYPE_QUERY_TITLE, new StringFilter(getColumnName(COLTYPE_QUERY_TITLE), null, COLTYPE_QUERY_TITLE));
     }
 
     @Override

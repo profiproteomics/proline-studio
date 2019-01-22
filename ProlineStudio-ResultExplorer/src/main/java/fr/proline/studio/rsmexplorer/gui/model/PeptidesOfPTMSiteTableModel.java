@@ -22,6 +22,7 @@ import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
 import fr.proline.studio.filter.ConvertValueInterface;
 import fr.proline.studio.filter.DoubleFilter;
 import fr.proline.studio.filter.IntegerFilter;
+import fr.proline.studio.filter.StringDiffFilter;
 import fr.proline.studio.filter.StringFilter;
 import fr.proline.studio.table.LazyData;
 import fr.proline.studio.table.TableDefaultRendererManager;
@@ -492,10 +493,10 @@ public class PeptidesOfPTMSiteTableModel extends DecoratedTableModel implements 
 
         };
 
-        filtersMap.put(COLTYPE_PEPTIDE_NAME, new StringFilter(getColumnName(COLTYPE_PEPTIDE_NAME), peptideConverter, COLTYPE_PEPTIDE_NAME));
+        filtersMap.put(COLTYPE_PEPTIDE_NAME, new StringDiffFilter(getColumnName(COLTYPE_PEPTIDE_NAME), peptideConverter, COLTYPE_PEPTIDE_NAME));
         filtersMap.put(COLTYPE_PEPTIDE_SCORE, new DoubleFilter(getColumnName(COLTYPE_PEPTIDE_SCORE), null, COLTYPE_PEPTIDE_SCORE));
 
-        filtersMap.put(COLTYPE_MODIFICATION, new StringFilter(getColumnName(COLTYPE_MODIFICATION), null, COLTYPE_MODIFICATION));
+        filtersMap.put(COLTYPE_MODIFICATION, new StringDiffFilter(getColumnName(COLTYPE_MODIFICATION), null, COLTYPE_MODIFICATION));
         
                 ConvertValueInterface aAConverter = new ConvertValueInterface() {
             @Override
@@ -507,19 +508,19 @@ public class PeptidesOfPTMSiteTableModel extends DecoratedTableModel implements 
             }
 
         };
-        filtersMap.put(COLTYPE_RESIDUE_AA, new StringFilter(getColumnName(COLTYPE_RESIDUE_AA), aAConverter, COLTYPE_RESIDUE_AA));
+        filtersMap.put(COLTYPE_RESIDUE_AA, new StringDiffFilter(getColumnName(COLTYPE_RESIDUE_AA), aAConverter, COLTYPE_RESIDUE_AA));
 
         filtersMap.put(COLTYPE_MODIFICATION_PROBA, new DoubleFilter(getColumnName(COLTYPE_MODIFICATION_PROBA), null, COLTYPE_MODIFICATION_PROBA));
         filtersMap.put(COLTYPE_DELTA_MASS_MODIFICATION, new DoubleFilter(getColumnName(COLTYPE_DELTA_MASS_MODIFICATION), null, COLTYPE_DELTA_MASS_MODIFICATION));
-        filtersMap.put(COLTYPE_MODIFICATION_LOC, new StringFilter(getColumnName(COLTYPE_MODIFICATION_LOC), null, COLTYPE_MODIFICATION_LOC));
+        filtersMap.put(COLTYPE_MODIFICATION_LOC, new StringDiffFilter(getColumnName(COLTYPE_MODIFICATION_LOC), null, COLTYPE_MODIFICATION_LOC));
         filtersMap.put(COLTYPE_PROTEIN_LOC, new IntegerFilter(getColumnName(COLTYPE_PROTEIN_LOC), null, COLTYPE_PROTEIN_LOC));
-        filtersMap.put(COLTYPE_PROTEIN_NTERM_CTERM, new StringFilter(getColumnName(COLTYPE_PROTEIN_NTERM_CTERM), null, COLTYPE_PROTEIN_NTERM_CTERM));
+        filtersMap.put(COLTYPE_PROTEIN_NTERM_CTERM, new StringDiffFilter(getColumnName(COLTYPE_PROTEIN_NTERM_CTERM), null, COLTYPE_PROTEIN_NTERM_CTERM));
 
-        filtersMap.put(COLTYPE_PEPTIDE_PTM, new StringFilter(getColumnName(COLTYPE_PEPTIDE_PTM), null, COLTYPE_PEPTIDE_PTM));
+        filtersMap.put(COLTYPE_PEPTIDE_PTM, new StringDiffFilter(getColumnName(COLTYPE_PEPTIDE_PTM), null, COLTYPE_PEPTIDE_PTM));
 
         filtersMap.put(COLTYPE_DELTA_MASS_PTM, new DoubleFilter(getColumnName(COLTYPE_DELTA_MASS_PTM), null, COLTYPE_DELTA_MASS_PTM));
         filtersMap.put(COLTYPE_PTM_PROBA, new DoubleFilter(getColumnName(COLTYPE_PTM_PROBA), null, COLTYPE_PTM_PROBA));
-        filtersMap.put(COLTYPE_QUERY_TITLE, new StringFilter(getColumnName(COLTYPE_QUERY_TITLE), null, COLTYPE_QUERY_TITLE));
+        filtersMap.put(COLTYPE_QUERY_TITLE, new StringDiffFilter(getColumnName(COLTYPE_QUERY_TITLE), null, COLTYPE_QUERY_TITLE));
     }
 
     @Override

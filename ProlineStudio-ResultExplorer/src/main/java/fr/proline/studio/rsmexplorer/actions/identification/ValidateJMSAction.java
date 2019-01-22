@@ -62,7 +62,7 @@ public class ValidateJMSAction extends AbstractRSMAction {
             if (dataSetNode.hasResultSummary()) {
                 nbAlreadyValidated++;
             }
-            if(((DataSetData) dataSetNode.getData()).getDatasetType().equals(Dataset.DatasetType.AGGREGATE)){
+            if(((DataSetData) dataSetNode.getData()).getDatasetType().isAggregation()){
                 mergedDatasetSelected = true;
             }
         }

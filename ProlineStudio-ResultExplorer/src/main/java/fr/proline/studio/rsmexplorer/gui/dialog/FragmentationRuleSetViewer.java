@@ -21,14 +21,14 @@ public class FragmentationRuleSetViewer extends DefaultDialog {
     
     private static FragmentationRuleSetViewer m_singletonDialog = null;
     
-    public static FragmentationRuleSetViewer getDialog(Window parent){
-       if (m_singletonDialog == null) {
-            m_singletonDialog = new FragmentationRuleSetViewer(parent);
-        }
-        return m_singletonDialog;   
-    }
+//    public static FragmentationRuleSetViewer getDialog(Window parent){
+//       if (m_singletonDialog == null) {
+//            m_singletonDialog = new FragmentationRuleSetViewer(parent);
+//        }
+//        return m_singletonDialog;   
+//    }
 
-    private FragmentationRuleSetViewer(Window parent) {
+    public FragmentationRuleSetViewer(Window parent) {
         super(parent, Dialog.ModalityType.DOCUMENT_MODAL);
         
         setTitle("Fragmentation Rule Sets Viewer");

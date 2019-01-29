@@ -421,7 +421,7 @@ public class ImportIdentificationDialog extends DefaultDialog {
         viewFragmentationRuleSet.addActionListener( new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                FragmentationRuleSetViewer viewer  = FragmentationRuleSetViewer.getDialog(m_singletonDialog);
+                FragmentationRuleSetViewer viewer  = new FragmentationRuleSetViewer(m_singletonDialog);
                 viewer.setVisible(true);
                         
             }

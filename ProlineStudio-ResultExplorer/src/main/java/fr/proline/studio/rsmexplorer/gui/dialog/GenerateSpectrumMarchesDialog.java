@@ -75,7 +75,9 @@ public class GenerateSpectrumMarchesDialog extends DefaultDialog {
         c.gridwidth = 2;
         JTextArea helpTxt = new JTextArea("Choose Fragmentation Rule Set to use to generate (new) spectrum matches.");
         helpTxt.setRows(1);
-        helpTxt.setForeground(Color.gray);
+        helpTxt.setForeground(Color.LIGHT_GRAY);
+        helpTxt.setBackground(Color.WHITE);
+        helpTxt.setEditable(false);
         internalPanel.add(helpTxt, c);
         
         c.gridx = 0;
@@ -143,7 +145,7 @@ public class GenerateSpectrumMarchesDialog extends DefaultDialog {
         viewFragmentationRuleSet.addActionListener( new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                FragmentationRuleSetViewer viewer  = FragmentationRuleSetViewer.getDialog(dialog);
+                FragmentationRuleSetViewer viewer  = new FragmentationRuleSetViewer(dialog);
                 viewer.setVisible(true);
                         
             }

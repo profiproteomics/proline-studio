@@ -12,6 +12,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.prefs.Preferences;
 import javax.swing.Box;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -45,10 +46,17 @@ public class LabelFreeMSParamsSimplifiedPanel extends AbstractLabelFreeMSParamsP
         super(readOnly);
 
         createParameters();
-        
+         //VDS: FIXME  m_parameterList.updateIsUsed(NbPreferences.root()); AND param.setUsed(true); ?????
+         //Reprendre la defintion des valeurs par defaut.....
         if (readValues) {
             m_parameterList.updateIsUsed(NbPreferences.root());
         } else {
+        // FIXME VDS-WART !!!! To get default alignRT to true
+            String alignRTKey = XIC_PARAMS_PREFIX+".alignRT";
+            Preferences preferences = NbPreferences.root();            
+            if(preferences.get(alignRTKey, null) == null){
+                preferences.put(alignRTKey, Boolean.TRUE.toString());
+            }
             m_parameterList.setDefaultValues();
         }
         for (AbstractParameter param : m_parameterList) {
@@ -97,7 +105,7 @@ public class LabelFreeMSParamsSimplifiedPanel extends AbstractLabelFreeMSParamsP
         DoubleParameter featureMappingTimeTolParameter = new DoubleParameter("featureTimeTol", "RT tolerance", m_crossAssignFeatureMappRTTolTF, DEFAULT_CA_FEATMAP_RTTOL_VALUE, new Double(0), null);
         m_parameterList.add(featureMappingTimeTolParameter);
 
-        m_alignRTCB = new JCheckBox("Align RT");
+        m_alignRTCB = new JCheckBox("Align RT", true);
         m_alignRTCB.addActionListener(new ActionListener() {
 
             @Override
@@ -278,8 +286,7 @@ public class LabelFreeMSParamsSimplifiedPanel extends AbstractLabelFreeMSParamsP
         m_crossAssRTToleranceLabel.setEnabled(isEnabled);
         m_crossAssignFeatureMappRTTolTF.setEnabled(isEnabled);
         m_alignRTCB.setEnabled(isEnabled);
-        m_alignmentFeatureTimeTolLabel.setEnabled(isEnabled);
-        m_alignmentFeatureMappTimeToleranceTF.setEnabled(isEnabled);
+        enableAlignment(m_alignRTCB.isSelected()&& isEnabled);
     }
     
 
@@ -332,9 +339,11 @@ public class LabelFreeMSParamsSimplifiedPanel extends AbstractLabelFreeMSParamsP
         c.weightx = 0;
         c.gridwidth=1;
         m_alignmentFeatureTimeTolLabel = new JLabel("Time tolerance (s):");
+        m_alignmentFeatureTimeTolLabel.setEnabled(m_alignRTCB.isSelected()&&m_alignRTCB.isEnabled());
         m_crossAssignSettingsPanel.add(m_alignmentFeatureTimeTolLabel, c);
         c.gridx++;   
         c.weightx = 1;
+        m_alignmentFeatureMappTimeToleranceTF.setEnabled(m_alignRTCB.isSelected()&&m_alignRTCB.isEnabled());
         m_crossAssignSettingsPanel.add(m_alignmentFeatureMappTimeToleranceTF,c);
         panelA.add(m_crossAssignSettingsPanel, BorderLayout.NORTH);
         return panelA ;                 

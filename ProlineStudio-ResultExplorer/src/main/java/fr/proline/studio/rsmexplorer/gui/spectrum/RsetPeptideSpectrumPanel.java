@@ -197,13 +197,11 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
                 dialog.setVisible(true);
                 if (dialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {
                     Long frsId = dialog.getFragmentationRuleSetId();
-                    Boolean forceGenerate = dialog.getDoForceGenerate();
-                    m_generateMatchButton.setEnabled(false);
+                    Boolean forceGenerate = dialog.getDoForceGenerate();                    
                     generateSpectrumMatch(frsId, forceGenerate);
                 }          
             }
         });
-        m_generateMatchButton.setEnabled(false);
         toolbar.add(m_generateMatchButton);
         
         return toolbar;
@@ -219,17 +217,16 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
         m_previousFragmentationSet = (peptideFragmentationData!=null);
         
         
-        // enable generateMatchButton, when fragmentation data is not known
-        // and when the user own the project
-        if (peptideFragmentationData == null) {
-            // to execute this action, the user must be the owner of the project
-            Project selectedProject = ProjectExplorerPanel.getProjectExplorerPanel().getSelectedProject();
-            if (DatabaseDataManager.getDatabaseDataManager().ownProject(selectedProject)) {
-                m_generateMatchButton.setEnabled(true);
-            }
-        }else {
-             m_generateMatchButton.setEnabled(false);
+        // enable generateMatchButton, when the user own the project
+//        if (peptideFragmentationData == null) {
+        // to execute this action, the user must be the owner of the project
+        Project selectedProject = ProjectExplorerPanel.getProjectExplorerPanel().getSelectedProject();
+        if (DatabaseDataManager.getDatabaseDataManager().ownProject(selectedProject)) {
+            m_generateMatchButton.setEnabled(true);
         }
+//        }else {
+//             m_generateMatchButton.setEnabled(false);
+//        }
         
         
         m_chart.setNotify(false);

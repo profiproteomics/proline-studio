@@ -12,10 +12,10 @@ import fr.proline.studio.rsmexplorer.gui.spectrum.PeptideFragmentationData;
 public class DataBoxRsetPeptideSpectrumError extends AbstractDataBox {
 
     private DPeptideMatch m_previousPeptideMatch = null;
-    
+
     public DataBoxRsetPeptideSpectrumError() {
         super(DataboxType.DataBoxRsetPeptideSpectrumError, DataboxStyle.STYLE_RSET);
-        
+
         // Name of this databox
         m_typeName = "Spectrum Error";
         m_description = "Spectrum Error of a Peptide";
@@ -42,14 +42,13 @@ public class DataBoxRsetPeptideSpectrumError extends AbstractDataBox {
     public void dataChanged() {
 
         final PeptideFragmentationData fragmentationData = (PeptideFragmentationData) m_previousDataBox.getData(false, PeptideFragmentationData.class);
-        final DPeptideMatch peptideMatch = (fragmentationData!=null) ? fragmentationData.getPeptideMatch() : null;
-        
+        final DPeptideMatch peptideMatch = (fragmentationData != null) ? fragmentationData.getPeptideMatch() : null;
+
         if ((m_previousPeptideMatch == peptideMatch) && (fragmentationData == null)) {
             return;
         }
         m_previousPeptideMatch = peptideMatch;
 
-        
         if (peptideMatch == null) {
             ((RsetPeptideSpectrumErrorPanel) getDataBoxPanelInterface()).setData(null, null);
             return;
@@ -58,5 +57,5 @@ public class DataBoxRsetPeptideSpectrumError extends AbstractDataBox {
         ((RsetPeptideSpectrumErrorPanel) getDataBoxPanelInterface()).setData(peptideMatch, fragmentationData);
 
     }
-    
+
 }

@@ -15,7 +15,6 @@ import java.nio.FloatBuffer;
 import javax.swing.JToolBar;
 import javax.swing.JPanel;
 
-
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
@@ -34,7 +33,6 @@ import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 import org.slf4j.LoggerFactory;
 
-
 import fr.proline.core.orm.msi.Peptide;
 import fr.proline.core.orm.msi.dto.DSpectrum;
 import fr.proline.core.orm.msi.dto.DMsQuery;
@@ -45,7 +43,6 @@ import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 
-
 /**
  * Panel used to display a Spectrum of a PeptideMatch
  *
@@ -53,11 +50,10 @@ import fr.proline.studio.pattern.DataBoxPanelInterface;
  */
 public class RsetPeptideSpectrumErrorPanel extends HourglassPanel implements DataBoxPanelInterface, SplittedPanelContainer.ReactiveTabbedComponent {
 
-
     private AbstractDataBox m_dataBox;
 
     private boolean m_isDisplayed = true;
-    
+
     private boolean m_redrawInProgress = false; // to ensure no circular loop in changeEven when triggered by zooming the graph... 
     private double m_spectrumMinX = 0;
     private double m_spectrumMaxX = 0;
@@ -68,10 +64,8 @@ public class RsetPeptideSpectrumErrorPanel extends HourglassPanel implements Dat
     private JPanel m_spectrumPanel;
 
     private RsetPeptideSpectrumErrorAnnotations m_spectrumErrorAnnotations = null;
-    
+
     private static final String SERIES_NAME = "spectrumData";
-
-
 
     /**
      * Creates new form RsetPeptideSpectrumErrorPanel
@@ -94,7 +88,6 @@ public class RsetPeptideSpectrumErrorPanel extends HourglassPanel implements Dat
 
         m_chart.getXYPlot().getDomainAxis().setDefaultAutoRange(new Range(0, maxXvalue * 1.60));
 
-
         plot.setBackgroundPaint(Color.white);
 
         XYStickRenderer renderer = new XYStickRenderer();
@@ -104,13 +97,12 @@ public class RsetPeptideSpectrumErrorPanel extends HourglassPanel implements Dat
 
         initComponents();
 
-
     }
 
     private void initComponents() {
-        
+
         setLayout(new BorderLayout());
-        
+
         ChartPanel cp = new ChartPanel(m_chart, true) {
 
             @Override
@@ -134,14 +126,11 @@ public class RsetPeptideSpectrumErrorPanel extends HourglassPanel implements Dat
         cp.setMaximumDrawHeight(Integer.MAX_VALUE); // when the windows becomes bigger.
         m_spectrumPanel = cp;
 
-
         //
         JToolBar toolbar = initToolbar();
 
         add(toolbar, BorderLayout.WEST);
         add(m_spectrumPanel, BorderLayout.CENTER);
-
-
 
     }
 
@@ -174,7 +163,6 @@ public class RsetPeptideSpectrumErrorPanel extends HourglassPanel implements Dat
         m_spectrumErrorAnnotations = new RsetPeptideSpectrumErrorAnnotations(m_chart, peptideMatch, peptideFragmentationData);
         m_spectrumErrorAnnotations.addErrorAnnotations();
 
-
         m_spectrumMinY = m_spectrumErrorAnnotations.m_spectrumMinY;
         m_spectrumMaxY = m_spectrumErrorAnnotations.m_spectrumMaxY;
         if (m_spectrumMinY <= 0 && m_spectrumMaxY >= 0) {
@@ -186,15 +174,12 @@ public class RsetPeptideSpectrumErrorPanel extends HourglassPanel implements Dat
 
             }
         }
+        revalidate();
         // set default auto bounds in case there is no annotations (which sets new autobounds)
 
     }
     private DPeptideMatch m_peptideMatchPostponed = null;
     private PeptideFragmentationData m_peptideFragmentationDataPostponed = null;
-
-
-
-
 
     private void constructSpectrumErrorChart(DPeptideMatch pm) {
 
@@ -205,19 +190,19 @@ public class RsetPeptideSpectrumErrorPanel extends HourglassPanel implements Dat
             m_chart.setTitle("No Data Available");
             return;
         }
-        
+
         Peptide p = pm.getPeptide();
         if (p == null) {
             m_chart.setTitle("No Data Available");
             return;
         }
-        
+
         DMsQuery msQuery = pm.isMsQuerySet() ? pm.getMsQuery() : null;
         if (msQuery == null) {
             m_chart.setTitle("No Data Available");
             return;
         }
-        
+
         DSpectrum spectrum = msQuery.isSpectrumFullySet() ? msQuery.getDSpectrum() : null;
         if (spectrum == null) {
             m_chart.setTitle("No Data Available");
@@ -227,15 +212,11 @@ public class RsetPeptideSpectrumErrorPanel extends HourglassPanel implements Dat
         byte[] intensityByteArray = spectrum.getIntensityList();
         byte[] massByteArray = spectrum.getMozList();
 
-
         if ((intensityByteArray == null) || (massByteArray == null)) {
             // should not happen
             m_dataSet.removeSeries(SERIES_NAME);
             return;
         }
-
-
-
 
         ByteBuffer intensityByteBuffer = ByteBuffer.wrap(intensityByteArray).order(ByteOrder.LITTLE_ENDIAN);
         FloatBuffer intensityFloatBuffer = intensityByteBuffer.asFloatBuffer();
@@ -252,7 +233,6 @@ public class RsetPeptideSpectrumErrorPanel extends HourglassPanel implements Dat
             massDoubleArray[i] = massDoubleBuffer.get();
         }
 
-
         int size = intensityDoubleArray.length;
         if (size != massDoubleArray.length) {
             LoggerFactory.getLogger("ProlineStudio.ResultExplorer").debug("Intensity and Mass List have different size");
@@ -266,16 +246,13 @@ public class RsetPeptideSpectrumErrorPanel extends HourglassPanel implements Dat
         }
         m_dataSet.addSeries(SERIES_NAME, data);
 
-
         // Set title
         String title = "Query " + pm.getMsQuery().getInitialId() + " - " + pm.getPeptide().getSequence();
         m_chart.setTitle(title);
 
-
         // reset X/Y zooming
         // ((ChartPanel) m_spectrumPanel).restoreAutoBounds();
         ((ChartPanel) m_spectrumPanel).setBackground(Color.white);
-
 
         /// ---- start of plot listenener (for zoom changes for instance)
         final XYPlot plot = m_chart.getXYPlot();
@@ -291,22 +268,18 @@ public class RsetPeptideSpectrumErrorPanel extends HourglassPanel implements Dat
         plot.getRangeAxis().setDefaultAutoRange(new Range(m_spectrumMinY, m_spectrumMaxY));
         plot.getDomainAxis().setDefaultAutoRange(new Range(0, m_spectrumMaxX));
 
-
-
         plot.addChangeListener(new PlotChangeListener() {
 
             @Override
             public void plotChanged(PlotChangeEvent arg0) {
 
                 //Plot CHANGED (due to zoom for instance)
-
                 double newMinX = plot.getDomainAxis().getLowerBound();
                 double newMaxX = plot.getDomainAxis().getUpperBound();
                 double newMinY = plot.getRangeAxis().getLowerBound();
                 double newMaxY = plot.getRangeAxis().getUpperBound();
 
                 // only if zoom change do the following:
-
                 if (!m_redrawInProgress) {
                     if (newMinX != m_spectrumMinX
                             || newMaxX != m_spectrumMaxX
@@ -341,11 +314,12 @@ public class RsetPeptideSpectrumErrorPanel extends HourglassPanel implements Dat
     public void setDataBox(AbstractDataBox dataBox) {
         m_dataBox = dataBox;
     }
+
     @Override
     public AbstractDataBox getDataBox() {
         return m_dataBox;
     }
-    
+
     @Override
     public void addSingleValue(Object v) {
         // not used for the moment JPM.TODO ?
@@ -360,7 +334,7 @@ public class RsetPeptideSpectrumErrorPanel extends HourglassPanel implements Dat
     public ActionListener getAddAction(SplittedPanelContainer splittedPanel) {
         return m_dataBox.getAddAction(splittedPanel);
     }
-    
+
     @Override
     public ActionListener getSaveAction(SplittedPanelContainer splittedPanel) {
         return m_dataBox.getSaveAction(splittedPanel);
@@ -388,7 +362,6 @@ public class RsetPeptideSpectrumErrorPanel extends HourglassPanel implements Dat
          *
          */
         //private static final long serialVersionUID = 1L;
-
         @Override
         public void drawItem(Graphics2D g2, XYItemRendererState state, Rectangle2D dataArea,
                 PlotRenderingInfo info, XYPlot plot, ValueAxis domainAxis, ValueAxis rangeAxis,

@@ -1,6 +1,5 @@
 package fr.proline.studio.pattern;
 
-
 import fr.proline.core.orm.msi.ObjectTree;
 import fr.proline.core.orm.msi.dto.DSpectrum;
 import fr.proline.core.orm.msi.dto.DMsQuery;
@@ -15,13 +14,14 @@ import fr.proline.studio.rsmexplorer.gui.spectrum.PeptideFragmentationData;
 
 /**
  * Databox for a Spectrum
+ *
  * @author JM235353
- */          
+ */
 public class DataBoxRsetPeptideSpectrum extends AbstractDataBox {
 
     private DPeptideMatch m_previousPeptideMatch = null;
     private PeptideFragmentationData m_fragmentationData = null;
-    
+
     public DataBoxRsetPeptideSpectrum() {
         super(DataboxType.DataBoxRsetPeptideSpectrum, DataboxStyle.STYLE_RSET);
 
@@ -59,14 +59,14 @@ public class DataBoxRsetPeptideSpectrum extends AbstractDataBox {
         }
         m_previousPeptideMatch = peptideMatch;
         m_fragmentationData = null;
-        
+
         if (peptideMatch == null) {
             ((RsetPeptideSpectrumPanel) getDataBoxPanelInterface()).setData(null, null);
             return;
         }
 
-        boolean needToLoadData = ((!peptideMatch.isMsQuerySet()) ||
-                                  (!peptideMatch.getMsQuery().isSpectrumFullySet()));
+        boolean needToLoadData = ((!peptideMatch.isMsQuerySet())
+                || (!peptideMatch.getMsQuery().isSpectrumFullySet()));
 
         if (needToLoadData) {
 
@@ -83,9 +83,9 @@ public class DataBoxRsetPeptideSpectrum extends AbstractDataBox {
                 public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
 
                     loadAnnotations(peptideMatch);
-                    
+
                     setLoaded(loadingId);
-                    
+
                     if (finished) {
                         unregisterTask(taskId);
                     }
@@ -102,16 +102,12 @@ public class DataBoxRsetPeptideSpectrum extends AbstractDataBox {
             m_previousTaskId = taskId;
             registerTask(task);
 
-
-
-
         } else {
             loadAnnotations(peptideMatch);
         }
     }
     private Long m_previousTaskId = null;
-    
-    
+
     public void loadAnnotations(final DPeptideMatch peptideMatch) {
 
         final DataBoxRsetPeptideSpectrum _databox = this;
@@ -128,14 +124,15 @@ public class DataBoxRsetPeptideSpectrum extends AbstractDataBox {
             public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
 
                 ObjectTree objectTree = objectTreeResult[0];
+                PeptideFragmentationData previousValue = m_fragmentationData;
                 m_fragmentationData = (objectTree != null) ? new PeptideFragmentationData(peptideMatch, objectTree) : null;
 
                 ((RsetPeptideSpectrumPanel) getDataBoxPanelInterface()).setData(peptideMatch, m_fragmentationData);
-
-                if (m_fragmentationData != null) {
+                propagateDataChanged(DPeptideMatch.class);
+                if (m_fragmentationData != null || (m_fragmentationData == null && previousValue != null)) {
                     _databox.propagateDataChanged(PeptideFragmentationData.class);
                 }
-                
+
                 if (finished) {
                     unregisterTask(taskId);
                 }
@@ -155,11 +152,10 @@ public class DataBoxRsetPeptideSpectrum extends AbstractDataBox {
 
     }
     private Long m_previousFragmentationTaskId = null;
-    
-    
+
     @Override
     public Object getData(boolean getArray, Class parameterType) {
-        if (parameterType!= null ) {
+        if (parameterType != null) {
             if (parameterType.equals(DMsQuery.class)) {
                 DPeptideMatch peptideMatch = (DPeptideMatch) m_previousDataBox.getData(false, DPeptideMatch.class);
                 if (peptideMatch != null) {

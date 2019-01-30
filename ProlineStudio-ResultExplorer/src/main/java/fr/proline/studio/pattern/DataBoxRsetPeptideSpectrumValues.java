@@ -1,7 +1,5 @@
-
 package fr.proline.studio.pattern;
 
-import fr.proline.core.orm.msi.dto.DMsQuery;
 import fr.proline.core.orm.msi.dto.DSpectrum;
 import fr.proline.core.orm.msi.dto.DMsQuery;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
@@ -9,6 +7,7 @@ import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseLoadSpectrumsTask;
 import fr.proline.studio.dam.tasks.SubTask;
+import fr.proline.studio.rsmexplorer.gui.spectrum.PeptideFragmentationData;
 import fr.proline.studio.rsmexplorer.gui.spectrum.RsetPeptideSpectrumValuesPanel;
 
 /**
@@ -18,7 +17,7 @@ import fr.proline.studio.rsmexplorer.gui.spectrum.RsetPeptideSpectrumValuesPanel
 public class DataBoxRsetPeptideSpectrumValues extends AbstractDataBox {
 
     private DPeptideMatch m_previousPeptideMatch = null;
-    
+
     public DataBoxRsetPeptideSpectrumValues() {
         super(DataboxType.DataBoxRsetPeptideSpectrumValues, DataboxStyle.STYLE_RSET);
 
@@ -30,7 +29,6 @@ public class DataBoxRsetPeptideSpectrumValues extends AbstractDataBox {
         GroupParameter inParameter = new GroupParameter();
         inParameter.addParameter(DPeptideMatch.class, false);
         registerInParameter(inParameter);
-
 
     }
 
@@ -44,11 +42,13 @@ public class DataBoxRsetPeptideSpectrumValues extends AbstractDataBox {
 
     @Override
     public void dataChanged() {
-        final DPeptideMatch peptideMatch = (DPeptideMatch) m_previousDataBox.getData(false, DPeptideMatch.class);
-
-        if (m_previousPeptideMatch == peptideMatch) {
+        //final DPeptideMatch peptideMatch = (DPeptideMatch) m_previousDataBox.getData(false, DPeptideMatch.class);
+        final PeptideFragmentationData fragmentationData = (PeptideFragmentationData) m_previousDataBox.getData(false, PeptideFragmentationData.class);
+        final DPeptideMatch peptideMatch = (fragmentationData != null) ? fragmentationData.getPeptideMatch() : null;
+        if ((m_previousPeptideMatch == peptideMatch) && (fragmentationData == null)) {
             return;
         }
+       
         m_previousPeptideMatch = peptideMatch;
 
         if (peptideMatch == null) {
@@ -56,9 +56,8 @@ public class DataBoxRsetPeptideSpectrumValues extends AbstractDataBox {
             return;
         }
 
-        
-        boolean needToLoadData = ((!peptideMatch.isMsQuerySet()) ||
-                                  (!peptideMatch.getMsQuery().isSpectrumFullySet()));
+        boolean needToLoadData = ((!peptideMatch.isMsQuerySet())
+                || (!peptideMatch.getMsQuery().isSpectrumFullySet()));
 
         // JPM.WART : look fo Spectrum table which will load same data
         if (needToLoadData) {
@@ -71,7 +70,7 @@ public class DataBoxRsetPeptideSpectrumValues extends AbstractDataBox {
                 previousBox = previousBox.m_previousDataBox;
             }
         }
-        
+
         if (needToLoadData) {
 
             final int loadingId = setLoading();
@@ -88,9 +87,9 @@ public class DataBoxRsetPeptideSpectrumValues extends AbstractDataBox {
                 public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
 
                     ((RsetPeptideSpectrumValuesPanel) getDataBoxPanelInterface()).setData(peptideMatch);
-                    
+
                     setLoaded(loadingId);
-                    
+
                     if (finished) {
                         unregisterTask(taskId);
                     }
@@ -107,22 +106,15 @@ public class DataBoxRsetPeptideSpectrumValues extends AbstractDataBox {
             m_previousTaskId = taskId;
             registerTask(task);
 
-
-
-
         } else {
             ((RsetPeptideSpectrumValuesPanel) getDataBoxPanelInterface()).setData(peptideMatch);
         }
     }
     private Long m_previousTaskId = null;
-    
-    
 
-    
-    
     @Override
     public Object getData(boolean getArray, Class parameterType) {
-        if (parameterType!= null ) {
+        if (parameterType != null) {
             if (parameterType.equals(DMsQuery.class)) {
                 DPeptideMatch peptideMatch = (DPeptideMatch) m_previousDataBox.getData(false, DPeptideMatch.class);
                 if (peptideMatch != null) {

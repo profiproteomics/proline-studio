@@ -53,7 +53,6 @@ import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JToolBar;
-import javax.swing.event.ListSelectionEvent;
 import javax.swing.table.TableCellRenderer;
 import org.jdesktop.swingx.JXTable;
 
@@ -141,7 +140,7 @@ public class RsetPeptideSpectrumValuesPanel extends HourglassPanel implements Da
         toolbar.setFloatable(false);
 
         m_settingsButton = new SettingsButton(((ProgressInterface) m_spectrumValuesTable.getModel()), m_spectrumValuesTable);
-        
+
         m_filterButton = new FilterButton(((CompoundTableModel) m_spectrumValuesTable.getModel())) {
 
             @Override
@@ -181,12 +180,13 @@ public class RsetPeptideSpectrumValuesPanel extends HourglassPanel implements Da
         m_previousPeptideMatch = peptideMatch;
 
         retrieveSpectrumData(peptideMatch);
-
+        
     }
 
     private void retrieveSpectrumData(DPeptideMatch pm) {
 
         if (pm == null) {
+            ((SpectrumValuesTableModel) ((CompoundTableModel) m_spectrumValuesTable.getModel()).getBaseModel()).setData(null, null);
             return;
         }
 
@@ -336,7 +336,7 @@ public class RsetPeptideSpectrumValuesPanel extends HourglassPanel implements Da
 
         private String m_modelName;
 
-        public void setData(double[] massDoubleArray ,double[] intensityDoubleArray) {
+        public void setData(double[] massDoubleArray, double[] intensityDoubleArray) {
             m_massDoubleArray = massDoubleArray;
             m_intensityDoubleArray = intensityDoubleArray;
 
@@ -506,7 +506,7 @@ public class RsetPeptideSpectrumValuesPanel extends HourglassPanel implements Da
         public String getExportRowCell(int row, int col) {
             return ExportModelUtilities.getExportRowCell(this, row, col);
         }
-        
+
         @Override
         public ArrayList<ExportFontData> getExportFonts(int row, int col) {
             return null;
@@ -545,7 +545,7 @@ public class RsetPeptideSpectrumValuesPanel extends HourglassPanel implements Da
         public GlobalTableModelInterface getFrozzenModel() {
             return this;
         }
-        
+
         @Override
         public ArrayList<ExtraDataType> getExtraDataTypes() {
             return null;
@@ -560,7 +560,7 @@ public class RsetPeptideSpectrumValuesPanel extends HourglassPanel implements Da
         public Object getRowValue(Class c, int row) {
             return null;
         }
-        
+
         @Override
         public Object getColValue(Class c, int col) {
             return null;

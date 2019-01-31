@@ -14,7 +14,7 @@ public class DataBoxRsetPeptideFragmentation extends AbstractDataBox {
 
     public DataBoxRsetPeptideFragmentation() {
         super(DataboxType.DataBoxRsetPeptideFragmentation, DataboxStyle.STYLE_RSET);
-        
+
         // Name of this databox
         m_typeName = "Fragmentation Table";
         m_description = "Fragmentation table of a Peptide";
@@ -24,7 +24,6 @@ public class DataBoxRsetPeptideFragmentation extends AbstractDataBox {
         inParameter.addParameter(DPeptideMatch.class, false);
         inParameter.addParameter(PeptideFragmentationData.class, false);
         registerInParameter(inParameter);
-
 
     }
 
@@ -39,7 +38,7 @@ public class DataBoxRsetPeptideFragmentation extends AbstractDataBox {
     @Override
     public void dataChanged() {
         final PeptideFragmentationData fragmentationData = (PeptideFragmentationData) m_previousDataBox.getData(false, PeptideFragmentationData.class);
-        final DPeptideMatch peptideMatch = (fragmentationData!=null) ? fragmentationData.getPeptideMatch() : null;
+        final DPeptideMatch peptideMatch = (fragmentationData != null) ? fragmentationData.getPeptideMatch() : null;
 
         if ((m_previousPeptideMatch == peptideMatch) && (fragmentationData == null)) {
             return;
@@ -48,11 +47,9 @@ public class DataBoxRsetPeptideFragmentation extends AbstractDataBox {
 
         if (peptideMatch == null) {
             ((RsetPeptideFragmentationTablePanel) getDataBoxPanelInterface()).setData(null, null);
-            return;
+        } else {
+            ((RsetPeptideFragmentationTablePanel) getDataBoxPanelInterface()).setData(peptideMatch, fragmentationData);
         }
-
-        ((RsetPeptideFragmentationTablePanel) getDataBoxPanelInterface()).setData(peptideMatch, fragmentationData);
-
 
     }
 }

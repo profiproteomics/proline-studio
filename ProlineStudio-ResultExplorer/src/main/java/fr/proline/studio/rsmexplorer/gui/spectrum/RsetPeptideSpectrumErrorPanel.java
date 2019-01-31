@@ -146,13 +146,13 @@ public class RsetPeptideSpectrumErrorPanel extends HourglassPanel implements Dat
     }
 
     public void setData(DPeptideMatch peptideMatch, PeptideFragmentationData peptideFragmentationData) {
-
-        if (!m_isDisplayed) {
-            // postpone update
-            m_peptideMatchPostponed = peptideMatch;
-            m_peptideFragmentationDataPostponed = peptideFragmentationData;
-            return;
-        }
+//        if (!m_isDisplayed) {
+//            m_logger.debug("not m_isDisplayed");
+//            // postpone update
+//            m_peptideMatchPostponed = peptideMatch;
+//            m_peptideFragmentationDataPostponed = peptideFragmentationData;
+//            return;
+//        }
         m_peptideMatchPostponed = null;
         m_peptideFragmentationDataPostponed = null;
         updateDisplay(peptideMatch, peptideFragmentationData);
@@ -306,8 +306,6 @@ public class RsetPeptideSpectrumErrorPanel extends HourglassPanel implements Dat
 
             }
         });
-
-        /// ----
     }
 
     @Override

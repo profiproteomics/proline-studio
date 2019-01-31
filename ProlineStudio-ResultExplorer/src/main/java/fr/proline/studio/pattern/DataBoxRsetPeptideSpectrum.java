@@ -125,12 +125,14 @@ public class DataBoxRsetPeptideSpectrum extends AbstractDataBox {
 
                 ObjectTree objectTree = objectTreeResult[0];
                 PeptideFragmentationData previousValue = m_fragmentationData;
+                
                 m_fragmentationData = (objectTree != null) ? new PeptideFragmentationData(peptideMatch, objectTree) : null;
 
                 ((RsetPeptideSpectrumPanel) getDataBoxPanelInterface()).setData(peptideMatch, m_fragmentationData);
-                propagateDataChanged(DPeptideMatch.class);
+                //propagateDataChanged(DPeptideMatch.class);
                 if (m_fragmentationData != null || (m_fragmentationData == null && previousValue != null)) {
-                    _databox.propagateDataChanged(PeptideFragmentationData.class);
+                   // _databox.propagateDataChanged(PeptideFragmentationData.class);
+                    propagateDataChanged(DPeptideMatch.class);
                 }
 
                 if (finished) {

@@ -42,13 +42,13 @@ public class DataBoxRsetPeptideSpectrumValues extends AbstractDataBox {
 
     @Override
     public void dataChanged() {
-        //final DPeptideMatch peptideMatch = (DPeptideMatch) m_previousDataBox.getData(false, DPeptideMatch.class);
-        final PeptideFragmentationData fragmentationData = (PeptideFragmentationData) m_previousDataBox.getData(false, PeptideFragmentationData.class);
-        final DPeptideMatch peptideMatch = (fragmentationData != null) ? fragmentationData.getPeptideMatch() : null;
+         DPeptideMatch peptideMatchData = (DPeptideMatch) m_previousDataBox.getData(false, DPeptideMatch.class);
+         PeptideFragmentationData fragmentationData = (PeptideFragmentationData) m_previousDataBox.getData(false, PeptideFragmentationData.class);
+         DPeptideMatch peptideMatch = (fragmentationData != null) ? fragmentationData.getPeptideMatch() : peptideMatchData;
         if ((m_previousPeptideMatch == peptideMatch) && (fragmentationData == null)) {
             return;
         }
-       
+
         m_previousPeptideMatch = peptideMatch;
 
         if (peptideMatch == null) {
@@ -56,8 +56,7 @@ public class DataBoxRsetPeptideSpectrumValues extends AbstractDataBox {
             return;
         }
 
-        boolean needToLoadData = ((!peptideMatch.isMsQuerySet())
-                || (!peptideMatch.getMsQuery().isSpectrumFullySet()));
+        boolean needToLoadData = true;
 
         // JPM.WART : look fo Spectrum table which will load same data
         if (needToLoadData) {
@@ -70,7 +69,10 @@ public class DataBoxRsetPeptideSpectrumValues extends AbstractDataBox {
                 previousBox = previousBox.m_previousDataBox;
             }
         }
-
+        //even if needToLoadData is true, that means we had DataBoxRsetPeptideSpectrum in previous DataBox, the peptideMatch  with SpectrumFullySet  is not sure loaded
+        needToLoadData = ((!peptideMatch.isMsQuerySet())
+                || (!peptideMatch.getMsQuery().isSpectrumFullySet()));
+        
         if (needToLoadData) {
 
             final int loadingId = setLoading();
@@ -105,7 +107,6 @@ public class DataBoxRsetPeptideSpectrumValues extends AbstractDataBox {
             }
             m_previousTaskId = taskId;
             registerTask(task);
-
         } else {
             ((RsetPeptideSpectrumValuesPanel) getDataBoxPanelInterface()).setData(peptideMatch);
         }

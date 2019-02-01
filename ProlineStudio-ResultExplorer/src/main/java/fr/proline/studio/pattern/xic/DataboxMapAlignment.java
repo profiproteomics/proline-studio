@@ -188,7 +188,7 @@ public class DataboxMapAlignment extends AbstractDataBox {
 
                     unregisterTask(taskId);
                 }
-                // do nothing, if juste de paramTask finished
+                // do nothing, if only de paramTask finished
                 if (taskId != m_paramTaskId) {
                     m_quantChannelInfo = new QuantChannelInfo(m_dataset);
                     ((MapAlignmentPanel) getDataBoxPanelInterface()).setData(m_quantChannelInfo, getCompareDataInterfaceList(), getCrossSelectionInterfaceList());

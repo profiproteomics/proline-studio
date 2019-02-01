@@ -34,7 +34,6 @@ import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 import org.slf4j.LoggerFactory;
 
-
 import fr.proline.core.orm.msi.Peptide;
 import fr.proline.core.orm.msi.dto.DSpectrum;
 import fr.proline.core.orm.msi.dto.DMsQuery;
@@ -62,9 +61,7 @@ import java.awt.event.ActionEvent;
 import javax.swing.JButton;
 import org.openide.windows.WindowManager;
 
-
 import org.slf4j.Logger;
-
 
 /**
  * Panel used to display a Spectrum of a PeptideMatch
@@ -191,7 +188,7 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
             public void actionPerformed(ActionEvent e) {
                 GenerateSpectrumMarchesDialog dialog = new GenerateSpectrumMarchesDialog(WindowManager.getDefault().getMainWindow());
                 Point location = m_generateMatchButton.getLocationOnScreen();
-                dialog.setLocation(location.x+30, location.y - dialog.getHeight()-60);
+                dialog.setLocation(location.x + 30, location.y - dialog.getHeight() - 60);
                 dialog.setVisible(true);
                 if (dialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {
                     Long frsId = dialog.getFragmentationRuleSetId();
@@ -253,15 +250,13 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
             @Override
             public void run(boolean success) {
                 if (success) {
-
                     _isSpectrumMatchGenerateAsked = false;//this boolean will affect cloud show
-                    m_generateMatchButton.setIcon(IconManager.getIcon(IconManager.IconType.FRAGMENTATION));
-                    m_generateMatchButton.setToolTipText("Generate & Store Spectrum Match");
-
                     ((DataBoxRsetPeptideSpectrum) m_dataBox).loadAnnotations(m_previousPeptideMatch);
                 } else {
                     m_logger.error("Fail to generate spectrum matches for peptide_match.id=" + m_previousPeptideMatch.getId());
                 }
+                m_generateMatchButton.setIcon(IconManager.getIcon(IconManager.IconType.FRAGMENTATION));
+                m_generateMatchButton.setToolTipText("Generate & Store Spectrum Match");
                 setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
             }
         };

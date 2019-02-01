@@ -7,7 +7,6 @@ import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
 import fr.proline.core.orm.util.DStoreCustomPoolConnectorFactory;
-import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabasePTMsTask;
 import fr.proline.studio.dam.tasks.SubTask;
@@ -37,19 +36,18 @@ import org.slf4j.LoggerFactory;
  *
  * @author VD225637
  */
-public class DataBoxXICPTMProteinSite extends AbstractDataBox {
+public class DataBoxXicPTMProteinSite extends AbstractDataBox {
 
     private static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
     
     private PTMDataset m_dataset;
     private ResultSummary m_rsm;
-    private Long m_previousTaskId = null;
     private List<DMasterQuantProteinSet> m_masterQuantProteinSetList;
     private DQuantitationChannel[] m_quantitationChannelArray = null;
     private QuantChannelInfo m_quantChannelInfo;
 
      
-    public DataBoxXICPTMProteinSite(){
+    public DataBoxXicPTMProteinSite(){
         super(DataboxType.DataBoxXICPTMProteinSite, DataboxStyle.STYLE_XIC);
         
         // Name of this databox
@@ -125,7 +123,7 @@ public class DataBoxXICPTMProteinSite extends AbstractDataBox {
     public void dataChanged() {
         final int loadingId = setLoading();
 
-        final ArrayList<PTMSite> proteinPTMSiteArray = new ArrayList<>();
+        final ArrayList<PTMSite> ptmSiteArray = new ArrayList<>();
         
         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
 
@@ -136,15 +134,12 @@ public class DataBoxXICPTMProteinSite extends AbstractDataBox {
 
             @Override
             public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
-
-                loadXicData(taskId, proteinPTMSiteArray,finished );
-                setLoaded(loadingId);
                 
                 if (finished) {
-                    if (m_previousTaskId != null && m_previousTaskId.equals(taskId)) {
-                        m_previousTaskId = null; // Reset PreviousTask. Was finished ! 
-                    }
-                    m_dataset.setPTMSites(proteinPTMSiteArray);
+                    m_dataset.setPTMSites(ptmSiteArray);
+                    
+                    loadXicData(loadingId, taskId, ptmSiteArray,finished );
+                    
                     unregisterTask(taskId);
                     propagateDataChanged(ExtendedTableModelInterface.class);
                 }
@@ -154,18 +149,13 @@ public class DataBoxXICPTMProteinSite extends AbstractDataBox {
 
         // ask asynchronous loading of data
 
-        DatabasePTMsTask task = new DatabasePTMsTask(callback, getProjectId(), m_rsm, proteinPTMSiteArray);
-        Long taskId = task.getId();
-        if (m_previousTaskId != null) {
-            // old task is suppressed if it has not been already done
-            AccessDatabaseThread.getAccessDatabaseThread().abortTask(m_previousTaskId);
-        }
-        m_previousTaskId = taskId;
+        DatabasePTMsTask task = new DatabasePTMsTask(callback);
+        task.initLoadPTMSites(getProjectId(), m_rsm, ptmSiteArray);
         registerTask(task);
 
     }
     
-    public void loadXicData(long taskId, ArrayList<PTMSite> proteinPTMSiteArray, boolean finished) {
+    public void loadXicData(int loadingId, long taskId, ArrayList<PTMSite> proteinPTMSiteArray, boolean finished) {
 
         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
 
@@ -187,15 +177,17 @@ public class DataBoxXICPTMProteinSite extends AbstractDataBox {
 
                         @Override
                         public void run(boolean success, long task2Id, SubTask subTask, boolean finished) {
-                            
-                            m_quantChannelInfo = new QuantChannelInfo(m_dataset.getDataset());
-                            getDataBoxPanelInterface().addSingleValue(m_quantChannelInfo);
 
                             if (finished) {
                                 Map<Long, Long> typicalProteinMatchIdByProteinMatchId = loadProteinMatchMapping();
                                 m_dataset.setQuantProteinSets(m_masterQuantProteinSetList, typicalProteinMatchIdByProteinMatchId);
+                                
+                                m_quantChannelInfo = new QuantChannelInfo(m_dataset.getDataset());
+                                getDataBoxPanelInterface().addSingleValue(m_quantChannelInfo);
+                            
                                 ((PTMProteinSitePanel) getDataBoxPanelInterface()).setData(taskId, proteinPTMSiteArray, finished);         
                                 unregisterTask(task2Id);
+                                
                             }
                         }
 
@@ -212,6 +204,7 @@ public class DataBoxXICPTMProteinSite extends AbstractDataBox {
                 if (finished) {
                     unregisterTask(taskId);
                     propagateDataChanged(ExtendedTableModelInterface.class);
+                    setLoaded(loadingId);
                 }
             }
         };

@@ -5,16 +5,9 @@
  */
 package fr.proline.studio.dam.tasks.data.ptm;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import fr.proline.core.orm.msi.PtmSpecificity.PtmLocation;
-import fr.proline.core.orm.msi.dto.*;
-
-import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  *

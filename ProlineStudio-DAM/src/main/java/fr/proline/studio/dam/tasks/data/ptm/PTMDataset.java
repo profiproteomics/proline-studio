@@ -5,14 +5,14 @@
  */
 package fr.proline.studio.dam.tasks.data.ptm;
 
-import fr.proline.core.orm.msi.Peptide;
 import fr.proline.core.orm.msi.dto.DMasterQuantProteinSet;
 import fr.proline.core.orm.msi.dto.DPeptideInstance;
 import fr.proline.core.orm.uds.dto.DDataset;
-import java.awt.Color;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Represents a set of PTM sites, displayed from a quantification dataset or from an identification dataset.
@@ -21,6 +21,8 @@ import java.util.Map;
  */
 public class PTMDataset {
     
+    protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.DAM.Task");
+
     private DDataset m_dataset;
     private List<PTMSite> m_proteinPTMSites;
     private Map<Long, Map<Long, PTMPeptideInstance>> m_ptmPeptideByPeptideId = new HashMap<>();
@@ -48,7 +50,12 @@ public class PTMDataset {
 
     public void setQuantProteinSets(List<DMasterQuantProteinSet> masterQuantProteinSetList, Map<Long, Long> typicalProteinMatchIdByProteinMatchId) {
         Map<Long, DMasterQuantProteinSet> mqProteinSetByProteinMatchId = new HashMap<>();
-        masterQuantProteinSetList.stream().forEach(mqps -> mqProteinSetByProteinMatchId.put(mqps.getProteinSet().getProteinMatchId(), mqps));
+        
+        for(DMasterQuantProteinSet mqps : masterQuantProteinSetList) {
+            if (mqps.getProteinSet() != null) {
+                mqProteinSetByProteinMatchId.put(mqps.getProteinSet().getProteinMatchId(), mqps);
+            } 
+        }        
         
         for (PTMSite site : m_proteinPTMSites) {
             Long typicalPMId = typicalProteinMatchIdByProteinMatchId.get(site.getProteinMatch().getId());

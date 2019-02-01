@@ -1,12 +1,13 @@
 package fr.proline.studio.pattern;
 
+import fr.proline.studio.pattern.xic.DataBoxXicPTMSitePeptides;
 import fr.proline.studio.extendedtablemodel.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import fr.proline.studio.dam.tasks.AbstractDatabaseTask;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.id.ProjectId;
-import fr.proline.studio.pattern.xic.DataBoxXICPTMProteinSite;
+import fr.proline.studio.pattern.xic.DataBoxXicPTMProteinSite;
 import fr.proline.studio.pattern.xic.DataboxChildFeature;
 import fr.proline.studio.pattern.xic.DataboxExperimentalDesign;
 import fr.proline.studio.pattern.xic.DataboxMapAlignment;
@@ -222,7 +223,7 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
                 case DataBoxRsetPSMForMsQuery:
                     return new DataboxRsetPSMForMsQuery();
                 case DataBoxPTMProteinSite:
-                    return new DataBoxPTMProteinSite();
+                    return new DataBoxPTMSiteProtein();
                 case DataBoxDataAnalyzerResults:
                     return new DataBoxDataAnalyzerResults();
                 case DataBoxImage:
@@ -234,9 +235,9 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
                 case DataBoxPTMSitePepMatches:
                     return new DataBoxPTMSitePepMatches();
                 case DataBoxXICPTMProteinSite:
-                    return new DataBoxXICPTMProteinSite();
+                    return new DataBoxXicPTMProteinSite();
                 case DataBoxXICPTMSitePeptides:
-                    return new DataBoxXICPTMSitePeptides();
+                    return new DataBoxXicPTMSitePeptides();
                 case DataBoxPTMSitePeptidesGraphic:
                     return new DataBoxPTMSitePeptidesGraphic();
                 case DataBoxFrozenCopy:

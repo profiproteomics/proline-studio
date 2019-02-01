@@ -164,7 +164,7 @@ public class PeptideTableModel extends DecoratedTableModel implements GlobalTabl
 
         // Retrieve Peptide Instance
         DPeptideInstance peptideInstance = m_peptideInstances[row];
-
+        
         switch (col) {
             case COLTYPE_PEPTIDE_ID:
                 return peptideInstance.getId();

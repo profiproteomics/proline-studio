@@ -21,14 +21,15 @@ import org.slf4j.LoggerFactory;
  *
  * @author JM235353
  */
-public class DataBoxPTMProteinSite extends AbstractDataBox {
+public class DataBoxPTMSiteProtein extends AbstractDataBox {
+
     private static Logger logger = LoggerFactory.getLogger("ProlineStudio.ptm");
     private long logStartTime;
-    
+
     private PTMDataset m_dataset = null;
 
     
-    public DataBoxPTMProteinSite() { 
+    public DataBoxPTMSiteProtein() { 
         super(DataboxType.DataBoxPTMProteinSite, DataboxStyle.STYLE_RSM);
         
         // Name of this databox
@@ -80,7 +81,7 @@ public class DataBoxPTMProteinSite extends AbstractDataBox {
 
         final int loadingId = setLoading();
 
-        final ArrayList<PTMSite> proteinPTMSiteArray = new ArrayList<>();
+        final ArrayList<PTMSite> ptmSiteArray = new ArrayList<>();
         
         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
 
@@ -92,35 +93,10 @@ public class DataBoxPTMProteinSite extends AbstractDataBox {
             @Override
             public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
 
-                ((PTMProteinSitePanel) getDataBoxPanelInterface()).setData(taskId, proteinPTMSiteArray, finished);
-                
-                //PTMProteinSitePanel_V2 //JPM.TODO
-                
-                /*if (subTask == null) {
-                    DProteinSet[] proteinSetArray = m_rsm.getTransientData().getProteinSetArray();
-                    ((RsmProteinSetPanel) getDataBoxPanelInterface()).setData(taskId, proteinSetArray, finished);
-                    
-                    if (m_dataToBeSelected != null) {
-                        ((RsmProteinSetPanel) getDataBoxPanelInterface()).selectData(m_dataToBeSelected);
-                        m_dataToBeSelected = null;
-                    }
-                } else {
-                    ((RsmProteinSetPanel) getDataBoxPanelInterface()).dataUpdated(subTask, finished);
-                    
-                }*/
-                                
-
-                setLoaded(loadingId);
-                
                 if (finished) {
-                    logger.info(this.getClass().getName()+" task Id ="+ taskId+" finished during " + (System.currentTimeMillis()-logStartTime)+" TimeMillis");
-        
-                    if(m_previousTaskId != null && m_previousTaskId.equals(taskId)) {
-                        m_previousTaskId = null; // Reste PreviousTask. Was finished ! 
-                    }
-                    m_dataset.setPTMSites(proteinPTMSiteArray);
-                    unregisterTask(taskId);
-                    propagateDataChanged(ExtendedTableModelInterface.class);
+                    m_dataset.setPTMSites(ptmSiteArray);
+                    loadPeptideMatches(loadingId, taskId, ptmSiteArray, finished);
+                    
                 }
             }
         };
@@ -128,27 +104,46 @@ public class DataBoxPTMProteinSite extends AbstractDataBox {
 
         // ask asynchronous loading of data
 
-        DatabasePTMsTask task = new DatabasePTMsTask(callback, getProjectId(), m_dataset.getDataset().getResultSummary(), proteinPTMSiteArray);
-        Long taskId = task.getId();
-        
-        if (m_previousTaskId != null) {
-            // old task is suppressed if it has not been already done
-            AccessDatabaseThread.getAccessDatabaseThread().abortTask(m_previousTaskId);
-        }
-        m_previousTaskId = taskId;
+        DatabasePTMsTask task = new DatabasePTMsTask(callback);
+        task.initLoadPTMSites(getProjectId(), m_dataset.getDataset().getResultSummary(), ptmSiteArray);
+        registerTask(task);
+
+    }
+    
+    
+    public void loadPeptideMatches(int loadingId, long taskId, ArrayList<PTMSite> ptmSiteArray, boolean finished) {
+
+        AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
+
+            @Override
+            public boolean mustBeCalledInAWT() {
+                return true;
+            }
+
+            @Override
+            public void run(boolean success, final long taskId, SubTask subTask, boolean finished) {
+                if (finished) {
+                    logger.info(this.getClass().getName()+" task Id ="+ taskId+" finished during " + (System.currentTimeMillis()-logStartTime)+" TimeMillis");
+                    ((PTMProteinSitePanel) getDataBoxPanelInterface()).setData(taskId, ptmSiteArray, finished);
+                    setLoaded(loadingId);
+                    unregisterTask(taskId);
+                    propagateDataChanged(ExtendedTableModelInterface.class);
+                }
+            }
+        };
+
+        DatabasePTMsTask task = new DatabasePTMsTask(callback);
+        task.initFillPTMSites(getProjectId(), m_dataset.getDataset().getResultSummary(), ptmSiteArray);
         logStartTime = System.currentTimeMillis();
         logger.info(this.getClass().getName()+" DatabasePTMsTask task Id ="+ taskId+" registered" );
         registerTask(task);
-    }
-    private Long m_previousTaskId = null;
 
+    }
+    
  
     @Override
     public Object getData(boolean getArray, Class parameterType) {
         if (parameterType!= null ) {
-            /*if (parameterType.equals(DProteinSet.class)) {
-                return ((RsmProteinSetPanel)getDataBoxPanelInterface()).getSelectedProteinSet();
-            }*/ //JPM.TODO
             if (parameterType.equals(ResultSummary.class)) {
                 if (m_dataset.getDataset().getResultSummary() != null) {
                     return m_dataset.getDataset().getResultSummary();

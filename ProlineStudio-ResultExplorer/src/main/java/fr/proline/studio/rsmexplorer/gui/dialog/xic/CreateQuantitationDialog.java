@@ -231,7 +231,8 @@ public class CreateQuantitationDialog extends DefaultDialog {
                     }
                 };
 
-                DatabasePTMsTask task = new DatabasePTMsTask(callback, m_refIdentDataset.getProject().getId(), m_refIdentDataset.getResultSummaryId(), ptms);
+                DatabasePTMsTask task = new DatabasePTMsTask(callback);
+                task.initLoadUsedPTMs(m_refIdentDataset.getProject().getId(), m_refIdentDataset.getResultSummaryId(), ptms);
                 AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
             } else {
                m_quantMethodParamsPanel = new ResidueMethodParamsPanel(m_experimentalDesignPanel.getQuantitationMethod(), m_identifiedPtms);

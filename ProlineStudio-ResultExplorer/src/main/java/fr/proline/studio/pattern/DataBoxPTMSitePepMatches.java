@@ -91,7 +91,6 @@ public class DataBoxPTMSitePepMatches extends AbstractDataBox {
 
             @Override
             public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
-                m_logger.info(" Back from PepMatch task # "+taskId);
                 if (success) {
                     ((PeptidesPTMSiteTablePanel) getDataBoxPanelInterface()).setData(ptmSite, pepInstance);
                 } else {
@@ -112,9 +111,9 @@ public class DataBoxPTMSitePepMatches extends AbstractDataBox {
             AccessDatabaseThread.getAccessDatabaseThread().abortTask(m_previousTaskId);
         }
          
-        DatabasePTMsTask task = new DatabasePTMsTask(callback, getProjectId(), rsm, ptmSite);
+        DatabasePTMsTask task = new DatabasePTMsTask(callback);
+        task.initFillPTMSite(getProjectId(), rsm, ptmSite);
         Long taskId = task.getId();
-        m_logger.info(" Call pepMatch DatabasePTMProteinSiteTask_V2 task # "+taskId);
         m_previousTaskId = taskId;
         registerTask(task);            
                              

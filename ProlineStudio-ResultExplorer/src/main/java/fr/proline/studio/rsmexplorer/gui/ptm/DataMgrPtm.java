@@ -118,7 +118,6 @@ public class DataMgrPtm {
         } else {
             _proteinSequence = createSequence();
         }
-        logger.debug(" row/peptide size=" + _peptidesInstances.size());
     }
 
     int getBeginBestFit() {

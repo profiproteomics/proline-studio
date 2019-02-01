@@ -1,10 +1,11 @@
 package fr.proline.studio.pattern;
 
+import fr.proline.studio.pattern.xic.DataBoxXicPTMSitePeptides;
 import fr.proline.core.orm.msi.ResultSet;
 import java.util.HashMap;
 
 import fr.proline.studio.gui.SplittedPanelContainer;
-import fr.proline.studio.pattern.xic.DataBoxXICPTMProteinSite;
+import fr.proline.studio.pattern.xic.DataBoxXicPTMProteinSite;
 import fr.proline.studio.pattern.xic.DataboxChildFeature;
 import fr.proline.studio.pattern.xic.DataboxExperimentalDesign;
 import fr.proline.studio.pattern.xic.DataboxMapAlignment;
@@ -247,7 +248,7 @@ public class WindowBoxFactory {
     public static WindowBox getPTMSitesWindowBox(String dataName) {
 
         AbstractDataBox[] boxes = new AbstractDataBox[5];
-        boxes[0] = new DataBoxPTMProteinSite();
+        boxes[0] = new DataBoxPTMSiteProtein();
         boxes[0].setDataName(dataName);
         boxes[1] = new DataBoxPTMSitePeptidesGraphic();
         boxes[2] = new DataBoxPTMSitePeptides();
@@ -262,9 +263,9 @@ public class WindowBoxFactory {
     public static WindowBox getXICPTMSitesWindowBox(String dataName) {
 
         AbstractDataBox[] boxes = new AbstractDataBox[4];
-        boxes[0] = new DataBoxXICPTMProteinSite();
+        boxes[0] = new DataBoxXicPTMProteinSite();
         boxes[0].setDataName(dataName);
-        boxes[1] = new DataBoxXICPTMSitePeptides();
+        boxes[1] = new DataBoxXicPTMSitePeptides();
         boxes[2] = new DataboxMultiGraphics(false, false);
         boxes[2].setLayout(SplittedPanelContainer.PanelLayout.TABBED);
         boxes[3] = new DataBoxPTMSitePepMatches();

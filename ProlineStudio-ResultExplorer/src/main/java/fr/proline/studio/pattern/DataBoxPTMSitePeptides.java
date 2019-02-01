@@ -101,11 +101,10 @@ public class DataBoxPTMSitePeptides extends AbstractDataBox {
                 }
             }
         };
-
-        DatabasePTMsTask task = new DatabasePTMsTask(callback, getProjectId(), rsm, ptmSite);
+        
+        DatabasePTMsTask task = new DatabasePTMsTask(callback);
+        task.initFillPTMSite(getProjectId(), rsm, ptmSite);
         Long taskId = task.getId();
-        m_logger.info(" DataBoxPTMSitePeptides DatabasePTMsTask  task# " + taskId);
-        m_logTimeStart = System.currentTimeMillis();
         if (m_previousTaskId != null) {
             // old task is suppressed if it has not been already done
             AccessDatabaseThread.getAccessDatabaseThread().abortTask(m_previousTaskId);

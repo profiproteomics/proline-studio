@@ -1,4 +1,4 @@
-package fr.proline.studio.pattern;
+package fr.proline.studio.pattern.xic;
 
 
 import fr.proline.core.orm.msi.ResultSummary;
@@ -13,26 +13,31 @@ import fr.proline.studio.dam.tasks.DatabasePTMsTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dam.tasks.data.ptm.PTMSite;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadXicMasterQuantTask;
-import static fr.proline.studio.pattern.DataBoxPTMSitePeptides.m_logger;
 import fr.proline.studio.rsmexplorer.gui.xic.QuantChannelInfo;
 import fr.proline.studio.rsmexplorer.gui.xic.XicPeptidesPTMSitePanel;
 import java.util.ArrayList;
 import java.util.List;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
+import fr.proline.studio.pattern.AbstractDataBox;
+import fr.proline.studio.pattern.GroupParameter;
 import fr.proline.studio.rsmexplorer.gui.xic.PeptideTableModel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author VD225637
  */
-public class DataBoxXICPTMSitePeptides extends AbstractDataBox {
+public class DataBoxXicPTMSitePeptides extends AbstractDataBox {
 
+    protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
+    
     private ResultSummary m_rsm ;
     private DDataset m_dataset;
     
     private PTMSite m_currentPtmSite = null;
 
-    public DataBoxXICPTMSitePeptides(){
+    public DataBoxXicPTMSitePeptides(){
         super(DataboxType.DataBoxXICPTMSitePeptides, DataboxStyle.STYLE_XIC);
 
         // Name of this databox
@@ -78,11 +83,10 @@ public class DataBoxXICPTMSitePeptides extends AbstractDataBox {
         
     private void ptmSiteChanged(PTMSite ptmSite){
 
-        m_logger.info("DATA Changed : Update XIC PTMSite Peptide WINDOWS. " + ptmSite.toString()+" data loaded " + ptmSite.isLoaded());
         if (ptmSite.isLoaded()) {
             m_previousTaskId = null;
 
-            xicDataChanged(ptmSite,-1);
+            loadXicData(ptmSite,-1);
 //            setPanelData(ptmSite);
             return;
         }
@@ -98,14 +102,13 @@ public class DataBoxXICPTMSitePeptides extends AbstractDataBox {
 
             @Override
             public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
-                m_logger.info(" Back from PTMSite Peptide task # "+taskId);
-                xicDataChanged(ptmSite,loadingId);
+                loadXicData(ptmSite,loadingId);
              }
         };
         
-        DatabasePTMsTask task = new DatabasePTMsTask(callback, getProjectId(), m_rsm, ptmSite);
+        DatabasePTMsTask task = new DatabasePTMsTask(callback);
+        task.initFillPTMSite(getProjectId(), m_rsm, ptmSite);
         Long taskId = task.getId();
-        m_logger.info(" Call PTMSite Peptide DatabasePTMProteinSiteTask_V2 task # "+taskId);
         if (m_previousTaskId != null) {
             // old task is suppressed if it has not been already done
             AccessDatabaseThread.getAccessDatabaseThread().abortTask(m_previousTaskId);
@@ -119,7 +122,7 @@ public class DataBoxXICPTMSitePeptides extends AbstractDataBox {
     private QuantChannelInfo m_quantChannelInfo;
     private List<DMasterQuantPeptide> m_masterQuantPeptideList;
     
-    private void xicDataChanged(PTMSite ptmSite,int startedLoadingId){
+    private void loadXicData(PTMSite ptmSite,int startedLoadingId){
 
         m_dataset = (DDataset) m_previousDataBox.getData(false, DDataset.class);
         m_quantChannelInfo = (QuantChannelInfo) m_previousDataBox.getData(false, QuantChannelInfo.class);       

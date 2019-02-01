@@ -53,9 +53,9 @@ public class WorkingSet implements Serializable {
 
     @Override
     public String toString() {
-        return m_name + " (" + m_description + ")";
+        return m_name;
     }
-
+    
     public boolean removeEntry(String path) {
         for (int i = 0; i < m_entries.size(); i++) {
             JSONObject innerObj = (JSONObject) m_entries.get(i);

@@ -182,10 +182,8 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
             @Override
             public void actionPerformed(ActionEvent evt) {
 
-                ArrayList<File> localFiles = extractSelectedRawFiles(WorkingSetEntry.Location.LOCAL);
-
-                ArrayList<WorkingSetEntry> remoteEntries = extractSelectedWorkingSetEntries(WorkingSetEntry.Location.REMOTE);
-
+                ArrayList<File> localFiles = getSelectedRawFiles(WorkingSetEntry.Location.LOCAL);
+                ArrayList<WorkingSetEntry> remoteEntries = getSelectedWorkingSetEntries(WorkingSetEntry.Location.REMOTE);
                 ArrayList<File> totalFiles = new ArrayList<File>();
 
                 if (!remoteEntries.isEmpty()) {
@@ -206,25 +204,16 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
                             //all the action will be here.
 
                             totalFiles.addAll(localFiles);
-
                             for (int i = 0; i < list.size(); i++) {
                                 MsListenerDownloadParameter p = list.get(i);
-
                                 if (p.wasSuccessful()) {
-
                                     File newFile = p.getDestinationFile();
-
                                     if (newFile.exists()) {
-
                                         replaceEntry(p.getRemoteFile(), newFile);
-
                                         totalFiles.add(newFile);
                                     }
-
                                 }
-
                             }
-
                             verifyEncodingAndProcess(totalFiles, ActionType.VIEW);
                         }
 
@@ -251,7 +240,6 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
                     downloadBatch.addMsListener(msListener);
                     Thread downloadThread = new Thread(downloadBatch);
                     downloadThread.start();
-
                 } else {
                     verifyEncodingAndProcess(localFiles, ActionType.VIEW);
                 }
@@ -268,10 +256,8 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
             @Override
             public void actionPerformed(ActionEvent evt) {
 
-                ArrayList<File> localFiles = extractSelectedRawFiles(WorkingSetEntry.Location.LOCAL);
-
-                ArrayList<WorkingSetEntry> remoteEntries = extractSelectedWorkingSetEntries(WorkingSetEntry.Location.REMOTE);
-
+                ArrayList<File> localFiles = getSelectedRawFiles(WorkingSetEntry.Location.LOCAL);
+                ArrayList<WorkingSetEntry> remoteEntries = getSelectedWorkingSetEntries(WorkingSetEntry.Location.REMOTE);
                 ArrayList<File> totalFiles = new ArrayList<File>();
 
                 if (!remoteEntries.isEmpty()) {
@@ -291,23 +277,16 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
                         public void downloadPerformed(ArrayList<MsListenerDownloadParameter> list) {
 
                             totalFiles.addAll(localFiles);
-
                             for (int i = 0; i < list.size(); i++) {
                                 MsListenerDownloadParameter p = list.get(i);
-
                                 if (p.wasSuccessful()) {
-
                                     File newFile = p.getDestinationFile();
-
                                     if (newFile.exists()) {
                                         replaceEntry(p.getRemoteFile(), newFile);
                                         totalFiles.add(newFile);
                                     }
-
                                 }
-
                             }
-
                             verifyEncodingAndProcess(totalFiles, ActionType.DETECT_PEAKELS);
                         }
 
@@ -588,7 +567,7 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
 
     }
 
-    private ArrayList<File> extractSelectedRawFiles(WorkingSetEntry.Location location) {
+    private ArrayList<File> getSelectedRawFiles(WorkingSetEntry.Location location) {
         ArrayList<File> files = new ArrayList<File>();
 
         for (int i = 0; i < m_selectedWorkingSetEntries.size(); i++) {
@@ -601,7 +580,7 @@ public class WorkingSetView extends JPanel implements IPopupMenuDelegate {
         return files;
     }
 
-    private ArrayList<WorkingSetEntry> extractSelectedWorkingSetEntries(WorkingSetEntry.Location location) {
+    private ArrayList<WorkingSetEntry> getSelectedWorkingSetEntries(WorkingSetEntry.Location location) {
         ArrayList<WorkingSetEntry> entries = new ArrayList<WorkingSetEntry>();
 
         for (int i = 0; i < m_selectedWorkingSetEntries.size(); i++) {

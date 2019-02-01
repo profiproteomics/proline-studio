@@ -105,7 +105,8 @@ public class DataBoxPTMSitePeptidesGraphic extends AbstractDataBox {
             }
         };
 
-        DatabasePTMsTask task = new DatabasePTMsTask(callback, getProjectId(), rsm, ptmSite);
+        DatabasePTMsTask task = new DatabasePTMsTask(callback);
+        task.initFillPTMSite(getProjectId(), rsm, ptmSite);
         Long taskId = task.getId();
         m_logger.info(" DataBoxPTMSitePeptides DatabasePTMsTask  task# " + taskId);
         m_logTimeStart = System.currentTimeMillis();

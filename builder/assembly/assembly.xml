@@ -18,7 +18,15 @@
       <outputDirectory>/</outputDirectory>
     </fileSet>
 
-    
+    <fileSet>
+      <directory>${basedir}/src/main/resources/</directory>
+      <includes>
+        <include>R/**</include>
+      </includes>
+      <outputDirectory>/</outputDirectory>
+    </fileSet>
+
+
     <fileSet>
       <directory>${project.build.directory}/${project.artifactId}-${project.version}/prolinestudio</directory>
       <outputDirectory>/</outputDirectory>

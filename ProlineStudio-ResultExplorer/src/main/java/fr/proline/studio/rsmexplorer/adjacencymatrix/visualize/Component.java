@@ -15,14 +15,11 @@ public class Component {
 
     private ArrayList<LightProteinMatch> m_proteinMatchArray = new ArrayList<>();
     private ArrayList<LightProteinMatch> m_proteinMatchWithEquivalentArray = null;
-    
     private ArrayList<LightPeptideMatch> m_peptideArray = new ArrayList<>();
     
     
     public HashMap<LightProteinMatch, ArrayList<LightProteinMatch>> m_equivalentProteins = null;
     
-    
-
     
     private HashMap<Integer, WeakPeptideReference> m_weakPeptidesMap = null;
 

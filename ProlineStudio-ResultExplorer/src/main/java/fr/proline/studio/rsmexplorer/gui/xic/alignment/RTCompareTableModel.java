@@ -197,15 +197,11 @@ public class RTCompareTableModel implements ExtendedTableModelInterface {
         }
     }
 
-    public boolean isMatchCountDiff(int rowIndex, int colY) {
+    public boolean isCrossAssigned(int rowIndex, int colY) {
         RTCompareRow row = this.m_data.get(rowIndex);
         int countFrom = row._MatchCountFrom;
         int countTo = row._MatchCountTo[colY - 4];
-        if (countFrom > 0 && countTo > 0 && countFrom != countTo) {
-            return true;
-        } else {
-            return false;
-        }
+        return (countFrom == 0 || countTo == 0);
     }
 
     /**

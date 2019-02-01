@@ -1,14 +1,12 @@
 package fr.proline.studio.rsmexplorer.actions;
 
 import fr.proline.studio.rsmexplorer.gui.dialog.UploadDatDialog;
-import fr.proline.studio.rsmexplorer.gui.dialog.UploadMzdbDialog;
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import org.openide.awt.ActionRegistration;
-import org.openide.awt.ActionReference;
 import org.openide.awt.ActionReferences;
 import org.openide.awt.ActionID;
 import org.openide.util.ContextAwareAction;
@@ -17,8 +15,7 @@ import org.openide.util.NbBundle;
 import org.openide.util.NbBundle.Messages;
 import org.openide.windows.WindowManager;
 
-@ActionID(category = "File",
-        id = "fr.proline.studio.rsmexplorer.actions.UploadDatAction")
+@ActionID(category = "File", id = "fr.proline.studio.rsmexplorer.actions.UploadDatAction")
 @ActionRegistration(displayName = "#CTL_UploadDatAction")
 @ActionReferences({
     //@ActionReference(path = "Menu/File", position = 600)

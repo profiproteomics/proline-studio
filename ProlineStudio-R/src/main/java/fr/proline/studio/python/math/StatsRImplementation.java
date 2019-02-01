@@ -28,6 +28,8 @@ import org.python.core.PyTuple;
 import org.rosuda.REngine.REXPDouble;
 import org.rosuda.REngine.REXPGenericVector;
 import org.rosuda.REngine.RList;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -36,6 +38,8 @@ import org.rosuda.REngine.RList;
  * @author JM235353
  */
 public class StatsRImplementation {
+
+    protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
 
     private static final String LIB_PROSTAR = "DAPAR";
     private static final String LIB_CP4P = "cp4p";
@@ -604,6 +608,7 @@ public class StatsRImplementation {
 
         // Create a temp file with a matrix containing cols data
         File matrixTempFile = StatsUtil.columnsToMatrixTempFile(cols, false, false, true);
+        m_logger.debug("R input file created : "+matrixTempFile.getAbsolutePath());
 
         // do the calculation
         Table t = cols[0].getTable();

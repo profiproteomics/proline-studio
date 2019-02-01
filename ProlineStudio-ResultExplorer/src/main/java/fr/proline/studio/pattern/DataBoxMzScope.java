@@ -9,6 +9,9 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
+import fr.proline.studio.msfiles.WorkingSetView;
+import java.util.Map;
+import org.json.simple.JSONObject;
 
 /**
  * databox which contains mzscope
@@ -137,7 +140,7 @@ public class DataBoxMzScope extends AbstractDataBox{
         for (MzdbInfo mzdbInfo : mzdbInfos) {
             String f = mzdbInfo.getFileName();
             if ( f!= null){
-                File file = new File(m_mzdbDir+File.separator+f);
+                File file = findFile(f);
                 if (file.exists()){
                     mzdbInfo.setFile(file);
                     infos.add(mzdbInfo);
@@ -148,6 +151,23 @@ public class DataBoxMzScope extends AbstractDataBox{
         }
         ((StudioMzScopePanel) getDataBoxPanelInterface()).setData((long)-1,  infos, true);
         setLoaded(loadingId);
+    }
+    
+    private File findFile(String f) {
+        
+        Map<String,JSONObject> map = WorkingSetView.getWorkingSetView().getModel().getEntiesObjects();
+        for (Map.Entry<String,JSONObject> entry: map.entrySet()) {
+            String filename = (String)entry.getValue().get("filename");
+            String location = (String) entry.getValue().get("location");
+
+            if (filename.equalsIgnoreCase(f) && location.equalsIgnoreCase("LOCAL")) {
+                String path = (String)entry.getValue().get("path");
+                return new File(path);
+            }
+        }
+        
+        return new File(m_mzdbDir+File.separator+f);
+        
     }
     
 }

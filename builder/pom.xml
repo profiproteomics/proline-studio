@@ -28,7 +28,7 @@
 		<dependency>
 			<groupId>com.oracle</groupId>
 			<artifactId>jre</artifactId>
-			<version>1.8.77</version>
+			<version>1.8.77-EDyP</version>
 			<type>zip</type>
 			<classifier>${os.classifier}</classifier>
 		</dependency>

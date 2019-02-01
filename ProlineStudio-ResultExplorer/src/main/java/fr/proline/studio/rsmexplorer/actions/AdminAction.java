@@ -18,8 +18,7 @@ import org.openide.util.NbBundle;
 import org.openide.util.NbBundle.Messages;
 import org.openide.windows.WindowManager;
 
-@ActionID(category = "File",
-        id = "fr.proline.studio.rsmexplorer.actions.AdminAction")
+@ActionID(category = "File", id = "fr.proline.studio.rsmexplorer.actions.AdminAction")
 @ActionRegistration(displayName = "#CTL_AdminAction")
 @ActionReferences({
     @ActionReference(path = "Menu/File", position = 50)

@@ -148,21 +148,22 @@ public class MzScopePanel extends JPanel implements IFeatureViewer, IExtractionR
             if (rawfile == null) {
                 rawfile = RawFileManager.getInstance().addRawFile(f);
             }
-            List<AbstractRawFilePanel> list = mapRawFilePanelRawFile.get(rawfile);
-            if (list != null) {
-                boolean fileAlreadyOpen = false;
-                for (AbstractRawFilePanel p : list) {
-                    if (p instanceof SingleRawFilePanel) {
-                        fileAlreadyOpen = true;
-                        break;
-                    }
-                }
-                if (!fileAlreadyOpen) {
-                    rawfiles.add(rawfile);
-                }
-            } else {
-                rawfiles.add(rawfile);
-            }
+            rawfiles.add(rawfile);
+//            List<AbstractRawFilePanel> list = mapRawFilePanelRawFile.get(rawfile);
+//            if (list != null) {
+//                boolean fileAlreadyOpen = false;
+//                for (AbstractRawFilePanel p : list) {
+//                    if (p instanceof SingleRawFilePanel) {
+//                        fileAlreadyOpen = true;
+//                        break;
+//                    }
+//                }
+//                if (!fileAlreadyOpen) {
+//                    rawfiles.add(rawfile);
+//                }
+//            } else {
+//                rawfiles.add(rawfile);
+//            }
         }
         if (display) {
             displayRaw(rawfiles);
@@ -328,12 +329,13 @@ public class MzScopePanel extends JPanel implements IFeatureViewer, IExtractionR
     }
 
     public AbstractRawFilePanel displayRaw(List<IRawFile> rawfiles) {
+        if (rawfiles.size() == 1) {
+            return displayRaw(rawfiles.get(0), true);
+        } 
         String name = getName(rawfiles);
-
         AbstractRawFilePanel plotPanel = new MultiRawFilePanel(rawfiles);
         final ButtonTabComponent tabComp = addRawTab(name, plotPanel);
         IRawFileLoading rawFileLoading = new IRawFileLoading() {
-
             @Override
             public void setWaitingState(boolean waitingState) {
                 tabComp.setWaitingState(waitingState);

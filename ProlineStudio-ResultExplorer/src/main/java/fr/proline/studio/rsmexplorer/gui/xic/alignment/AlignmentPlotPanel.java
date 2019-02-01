@@ -22,16 +22,16 @@ import org.slf4j.LoggerFactory;
  * @author Karine XUE
  */
 public class AlignmentPlotPanel extends BasePlotPanel {
-    private MapAlignmentPanel m_control;
 
     private static final Logger m_logger = LoggerFactory.getLogger(AlignmentPlotPanel.class);
+
+    private MapAlignmentPanel m_control;
+    
     public AlignmentPlotPanel(MapAlignmentPanel parentPanel) {
         super();
         m_control = parentPanel;
     }
 
-
-    
 
     @Override
     public void mouseReleased(MouseEvent e) {

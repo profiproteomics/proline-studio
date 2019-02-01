@@ -495,8 +495,8 @@ public class MatrixPanel extends HourglassPanel implements DataBoxPanelInterface
             int columnCount = m_component.getProteinSize(m_showEquivalentProteins);
 
             // calculate square size :
-            int squareSizeX = (int) (((width - TITLE_SIZE - m_peptideNamePixelSize - DELTA) / (columnCount + 1)));
-            int squareSizeY = (int) (((height - INFO_SIZE - TITLE_SIZE - m_proteinNamePixelSize - DELTA) / (rowCount + 1)));
+            int squareSizeX = 16; // (int) (((width - TITLE_SIZE - m_peptideNamePixelSize - DELTA) / (columnCount + 1)));
+            int squareSizeY = 16; //(int) (((height - INFO_SIZE - TITLE_SIZE - m_proteinNamePixelSize - DELTA) / (rowCount + 1)));
             m_squareSize = Math.min(squareSizeX, squareSizeY);
             if (m_squareSize > MAX_CELL_SIZE) {
                 m_squareSize = MAX_CELL_SIZE;

@@ -1,7 +1,6 @@
 package fr.proline.studio.dam.data;
 
 import fr.proline.core.orm.msi.*;
-import fr.proline.core.orm.uds.Aggregation;
 import fr.proline.core.orm.uds.Dataset;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.core.orm.uds.dto.DDatasetType;

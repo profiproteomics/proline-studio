@@ -118,13 +118,14 @@ public class PlotScatterXicCloud extends PlotScatter {
             int x = xAxis.valueToPixel(m_dataX[i]) + ((m_jitterX != null) ? m_jitterX[i] : 0);
             int y = yAxis.valueToPixel(m_dataY[i]) + ((m_jitterY != null) ? m_jitterY[i] : 0);
 
-            if (((RTCompareTableModel) this.m_compareDataInterface).isMatchCountDiff(i, m_colY)) {
+            if (((RTCompareTableModel) this.m_compareDataInterface).isCrossAssigned(i, m_colY)) {
                 g.setColor(m_highlightColor);
+                g.drawOval(x - 3, y - 3, 6, 6);
             } else {
                 g.setColor(m_color);
+                g.fillOval(x - 3, y - 3, 6, 6);
             }
 
-            g.fillOval(x - 3, y - 3, 6, 6);
         }
 
         // plot selected
@@ -140,8 +141,9 @@ public class PlotScatterXicCloud extends PlotScatter {
 
             g.setColor(m_color);
 
-            g.fillOval(x - 3, y - 3, 6, 6);
-
+            if (!((RTCompareTableModel) this.m_compareDataInterface).isCrossAssigned(i, m_colY)) {
+                g.fillOval(x - 3, y - 3, 6, 6);
+            }
             g.setColor(Color.black);
             g.drawOval(x - 3, y - 3, 6, 6);
 

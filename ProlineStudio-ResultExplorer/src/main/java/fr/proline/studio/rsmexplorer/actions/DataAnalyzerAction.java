@@ -16,8 +16,7 @@ import org.openide.util.NbBundle;
  * @author JM235353
  */
 
-@ActionID(category = "Window",
-id = "fr.proline.studio.rsmexplorer.actions.DataAnalyzerAction")
+@ActionID(category = "Window", id = "fr.proline.studio.rsmexplorer.actions.DataAnalyzerAction")
 @ActionRegistration(displayName = "#CTL_DataAnalyzerAction")
 @ActionReferences({
     @ActionReference(path = "Menu/Window", position = 100)

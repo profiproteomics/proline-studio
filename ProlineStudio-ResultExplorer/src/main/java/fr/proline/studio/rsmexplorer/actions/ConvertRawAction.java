@@ -14,8 +14,7 @@ import org.openide.util.NbBundle;
 import org.openide.util.NbBundle.Messages;
 import org.openide.windows.WindowManager;
 
-@ActionID(category = "File",
-        id = "fr.proline.studio.rsmexplorer.actions.ConvertRawAction")
+@ActionID(category = "File", id = "fr.proline.studio.rsmexplorer.actions.ConvertRawAction")
 @ActionRegistration(displayName = "#CTL_ConvertRawAction")
 /*
 @ActionReferences({

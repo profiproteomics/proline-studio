@@ -1,5 +1,6 @@
 package fr.proline.studio.rserver;
 
+import fr.proline.studio.python.math.StatsUtil;
 import fr.proline.studio.utils.StudioExceptions;
 import java.io.BufferedReader;
 import java.io.File;
@@ -204,6 +205,7 @@ public class RServerManager {
     public void connect() throws RServerManager.RServerException {
         connect(true);
     }
+    
     public void connect(boolean log) throws RServerManager.RServerException {
         String serverURL = "localhost";
         Preferences preferences = NbPreferences.root();
@@ -213,8 +215,22 @@ public class RServerManager {
         String password = null;
 
         connect(serverURL, port, user, password, log);
-
+        
+        if (isConnected()) {
+           try {
+                File f = new File(".");
+                String pathToInitRFile = f.getCanonicalPath() + File.separatorChar + "R" + File.separatorChar + "ProlineStudioInit.R";
+                f = new File(pathToInitRFile);
+                if (f.exists()) {
+                     m_connection.voidEval("source('"+ StatsUtil.getPath(f)+"')");
+                }
+            } catch  (Exception e) {
+                LoggerFactory.getLogger("ProlineStudio.Commons").error(getClass().getSimpleName() + " failed", e);
+                throw new RServerException(e.getMessage());
+            }
+        }
     }
+    
     public RConnection connect(String host, int port) throws RServerException {
         return connect(host, port, null, null, true);
     }

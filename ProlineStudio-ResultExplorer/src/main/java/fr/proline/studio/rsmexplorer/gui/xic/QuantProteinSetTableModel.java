@@ -59,7 +59,7 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
     public static final int COLTYPE_NB_QUANT_PEPTIDE = 5;
     public static final int LAST_STATIC_COLUMN = COLTYPE_NB_QUANT_PEPTIDE;
 
-    private static final String[] m_columnNames = {"Id", "Protein Set", "Overview","Description", "#Peptide", "<html>#Quant.<br/>Peptide</html>"};
+    private static final String[] m_columnNames = {"Id", "Protein Set", "Overview", "Description", "#Peptide", "<html>#Quant.<br/>Peptide</html>"};
     private static final String[] m_columnNamesForFilter = {"Id", "Protein Set", "Overview", "Description", "#Peptide", "#Quant.Peptide"};
     private static final String[] m_toolTipColumns = {"MasterQuantProteinSet Id", "Identified Protein label", "Overview","Description", "Number of Identified Peptides", "Number of Quantified Peptides"};
 
@@ -744,6 +744,9 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
             case COLTYPE_OVERVIEW: {
                 return CompareValueRenderer.CompareValue.class;
             }
+            case COLTYPE_DESCRIPTION: {
+                return String.class;
+            }            
             case COLTYPE_NB_PEPTIDE: {
                 return Integer.class;
             }

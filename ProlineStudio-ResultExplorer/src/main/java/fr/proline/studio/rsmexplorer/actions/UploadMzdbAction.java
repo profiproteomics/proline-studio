@@ -7,8 +7,6 @@ import java.awt.event.ActionListener;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import org.openide.awt.ActionRegistration;
-import org.openide.awt.ActionReference;
-import org.openide.awt.ActionReferences;
 import org.openide.awt.ActionID;
 import org.openide.util.ContextAwareAction;
 import org.openide.util.Lookup;
@@ -16,8 +14,7 @@ import org.openide.util.NbBundle;
 import org.openide.util.NbBundle.Messages;
 import org.openide.windows.WindowManager;
 
-@ActionID(category = "File",
-        id = "fr.proline.studio.rsmexplorer.actions.UploadMzdbAction")
+@ActionID(category = "File", id = "fr.proline.studio.rsmexplorer.actions.UploadMzdbAction")
 @ActionRegistration(displayName = "#CTL_UploadMzdbAction")
 
 /*

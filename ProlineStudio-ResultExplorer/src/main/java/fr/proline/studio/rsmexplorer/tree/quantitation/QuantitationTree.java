@@ -27,6 +27,7 @@ import fr.proline.studio.rsmexplorer.actions.identification.QuantifyAction;
 import fr.proline.studio.rsmexplorer.actions.identification.RetrieveBioSeqJMSAction;
 import fr.proline.studio.rsmexplorer.actions.xic.AddQuantitationFolderAction;
 import fr.proline.studio.rsmexplorer.actions.xic.AggregateQuantitationsAction;
+import fr.proline.studio.rsmexplorer.actions.xic.ComputeQuantPostProcessingAction;
 import fr.proline.studio.rsmexplorer.actions.xic.ComputeQuantitationProfileAction;
 import fr.proline.studio.rsmexplorer.actions.xic.DisplayExperimentalDesignAction;
 import fr.proline.studio.rsmexplorer.actions.xic.DisplayXICAction;
@@ -288,7 +289,7 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
             } else {
                 if (m_mainPopup == null) {
                     // create the actions
-                    m_mainActions = new ArrayList<>(19);  // <--- get in sync
+                    m_mainActions = new ArrayList<>(20);  // <--- get in sync
 
                     DisplayXICAction displayXICAction = new DisplayXICAction();
                     m_mainActions.add(displayXICAction);
@@ -314,6 +315,9 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
 
                     ComputeQuantitationProfileAction computeQuantProfileAction = new ComputeQuantitationProfileAction();
                     m_mainActions.add(computeQuantProfileAction);
+                    
+                    ComputeQuantPostProcessingAction computeQuantPostProcessingAction = new ComputeQuantPostProcessingAction();
+                    m_mainActions.add(computeQuantPostProcessingAction);
 
                     CreateQuantitationAction createXICAction = new CreateQuantitationAction(true);
                     m_mainActions.add(createXICAction);

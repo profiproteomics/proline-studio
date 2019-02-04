@@ -4,6 +4,9 @@
  */
 package fr.proline.studio.rsmexplorer.gui.dialog.xic;
 
+import fr.proline.core.orm.msi.PtmSpecificity;
+import fr.proline.core.orm.uds.dto.DDataset;
+import fr.proline.studio.dam.tasks.DatabasePTMsTask;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.parameter.ParameterError;
 import fr.proline.studio.parameter.ParameterList;
@@ -13,8 +16,10 @@ import fr.proline.studio.settings.SettingsUtils;
 import java.awt.Dialog;
 import java.awt.Window;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.prefs.Preferences;
+import java.util.stream.Collectors;
 import javax.swing.JFileChooser;
 import org.openide.util.NbPreferences;
 import org.slf4j.LoggerFactory;
@@ -24,25 +29,16 @@ import org.slf4j.LoggerFactory;
  *
  * @author MB243701
  */
-public class QuantProfileXICDialog extends DefaultDialog {
+public class QuantPostProcessingDialog extends DefaultDialog {
 
-    private static QuantProfileXICDialog m_singletonDialog = null;
+    private QuantPostProcessingPanel m_quantProfilePanel;
+    private DDataset m_dataset;
+    
+    public final static String SETTINGS_KEY = "QuantPostProcessing";
 
-    private QuantProfileXICPanel m_quantProfilePanel;
-
-    public final static String SETTINGS_KEY = "QuantProfile";
-
-    public static QuantProfileXICDialog getDialog(Window parent) {
-        if (m_singletonDialog == null) {
-            m_singletonDialog = new QuantProfileXICDialog(parent);
-        }
-
-        return m_singletonDialog;
-    }
-
-    private QuantProfileXICDialog(Window parent) {
+    public QuantPostProcessingDialog(Window parent, DDataset dataset) {
         super(parent, Dialog.ModalityType.APPLICATION_MODAL);
-
+        m_dataset = dataset;
         setTitle("Refine Proteins Sets Abundances");
 
         setDocumentationSuffix("id.2dlolyb");
@@ -103,7 +99,7 @@ public class QuantProfileXICDialog extends DefaultDialog {
                         preferences.put(key, value);
                     }
 
-                    m_quantProfilePanel.getParameterList().loadParameters(filePreferences);
+                    m_quantProfilePanel.loadParameters(filePreferences);
                 } catch (Exception e) {
                     LoggerFactory.getLogger("ProlineStudio.ResultExplorer").error("Parsing of User Settings File Failed", e);
                     setStatus(true, "Parsing of your Settings File failed");
@@ -143,7 +139,12 @@ public class QuantProfileXICDialog extends DefaultDialog {
     }
 
     private void init() {
-        m_quantProfilePanel = new QuantProfileXICPanel(false);
+        //Get potential PTMs from dataset
+        final ArrayList<PtmSpecificity> ptms = new ArrayList<>();
+        DatabasePTMsTask task = new DatabasePTMsTask(null, m_dataset.getProject().getId(), m_dataset.getResultSummaryId(), ptms);
+        task.fetchData();
+        Map<Long, String> ptmSpecificityNameById = ptms.stream().collect(Collectors.toMap(ptmS -> ptmS.getId(), ptmS -> ptmS.getPtm().getShortName()));
+        m_quantProfilePanel = new QuantPostProcessingPanel(false, ptmSpecificityNameById);
         Preferences preferences = NbPreferences.root();
         m_quantProfilePanel.getParameterList().loadParameters(preferences);
 

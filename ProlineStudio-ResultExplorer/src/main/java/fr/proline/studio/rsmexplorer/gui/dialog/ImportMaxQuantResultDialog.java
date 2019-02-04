@@ -47,6 +47,7 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import org.openide.util.NbBundle;
 import org.openide.util.NbPreferences;
 import org.slf4j.LoggerFactory;
 
@@ -481,7 +482,8 @@ public class ImportMaxQuantResultDialog extends DefaultDialog {
         });
 
         m_accessionRegexpTF = new JTextField(20);
-        StringParameter accessionParameter = new StringParameter("accession_regexp", "Accession regular expression", m_accessionRegexpTF, "", new Integer(2), null);
+        m_accessionRegexpTF.setToolTipText(NbBundle.getMessage(ImportMaxQuantResultDialog.class, "ImportMaxQuantResultDialog.accessionRegExp.Tooltip.text"));
+        StringParameter accessionParameter = new StringParameter("accession_regexp", "Accession regular expression", m_accessionRegexpTF, "", 0, null);
         accessionParameter.setUsed(true);
         parameterList.add(accessionParameter);
         

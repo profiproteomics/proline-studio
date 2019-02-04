@@ -289,6 +289,7 @@ public class QuantPostProcessingPanel extends JPanel {
         m_scrollPane.setViewportView(m_tabbedPane);
         m_scrollPane.createVerticalScrollBar();
         add(m_scrollPane, BorderLayout.CENTER);
+        updateDiscardPTMs();
     }
 
 

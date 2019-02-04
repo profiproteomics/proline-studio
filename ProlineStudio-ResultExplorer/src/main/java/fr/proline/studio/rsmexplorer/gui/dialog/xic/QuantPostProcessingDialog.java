@@ -39,7 +39,7 @@ public class QuantPostProcessingDialog extends DefaultDialog {
     public QuantPostProcessingDialog(Window parent, DDataset dataset) {
         super(parent, Dialog.ModalityType.APPLICATION_MODAL);
         m_dataset = dataset;
-        setTitle("Refine Proteins Sets Abundances");
+        setTitle("Compute PostProcessing on Proteins Sets Abundances");
 
         setDocumentationSuffix("id.2dlolyb");
 
@@ -141,7 +141,8 @@ public class QuantPostProcessingDialog extends DefaultDialog {
     private void init() {
         //Get potential PTMs from dataset
         final ArrayList<PtmSpecificity> ptms = new ArrayList<>();
-        DatabasePTMsTask task = new DatabasePTMsTask(null, m_dataset.getProject().getId(), m_dataset.getResultSummaryId(), ptms);
+        DatabasePTMsTask task = new DatabasePTMsTask(null);
+        task.initLoadUsedPTMs(m_dataset.getProject().getId(), m_dataset.getResultSummaryId(), ptms);
         task.fetchData();
         Map<Long, String> ptmSpecificityNameById = ptms.stream().collect(Collectors.toMap(ptmS -> ptmS.getId(), ptmS -> ptmS.getPtm().getShortName()));
         m_quantProfilePanel = new QuantPostProcessingPanel(false, ptmSpecificityNameById);

@@ -47,7 +47,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Panel to display data with an X and Y Axis
+ * Panel to display data with X and Y Axis
  *
  * @author JM235353
  */
@@ -59,8 +59,8 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
 
     protected XAxis m_xAxis = null;
     protected YAxis m_yAxis = null;
-    private double[] m_xAxisBounds = {Double.NaN, Double.NaN};
-    private double[] m_yAxisBounds = {Double.NaN, Double.NaN};
+    protected double[] m_xAxisBounds = {Double.NaN, Double.NaN};
+    protected double[] m_yAxisBounds = {Double.NaN, Double.NaN};
 
     protected ArrayList<PlotBaseAbstract> m_plots = null;
 
@@ -76,7 +76,7 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
     public final static int GAP_AXIS_LINE = 5;
 
     private BufferedImage m_doubleBuffer = null;
-    private boolean m_useDoubleBuffering = false;
+    protected boolean m_useDoubleBuffering = false;
     protected boolean m_updateDoubleBuffer = false;
 
     private boolean m_plotHorizontalGrid = true;
@@ -113,6 +113,8 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
     //events
     private EventListenerList listenerList = new EventListenerList();
 
+    private boolean _isEnumAxisUpdated = false;
+
     public BasePlotPanel() {
         formatE.applyPattern("0.#####E0");
         addMouseListener(this);
@@ -126,15 +128,58 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
         m_plotTitle = title;
     }
 
+    public String getPlotTitle() {
+        return m_plotTitle;
+    }
+
     public void enableButton(PlotToolbarListener.BUTTONS button, boolean v) {
         if (m_plotToolbarListener != null) {
             m_plotToolbarListener.enable(button, v);
         }
     }
 
+    private void updateEnumAxis() {
+        if (m_plots.size() == 0) {
+            return;
+        }
+        XAxis xAxis = this.getXAxis();
+        YAxis yAxis = this.getYAxis();
+        double xMin = xAxis.getMinValue();
+        double xMax = xAxis.getMaxValue();
+        double yMin = yAxis.getMinValue();
+        double yMax = yAxis.getMaxValue();
+        double newXMin = xMin;
+        double newXMax = xMax;
+        double newYMin = yMin;
+        double newYMax = yMax;
+        
+        boolean isModified = false;
+        if (xAxis.isEnum()) {
+            newXMin = xMin - 0.5;
+            newXMax = xMax + 0.5;
+            isModified = true;
+            xAxis.setRange(newXMin, newXMax);
+        }
+        if (yAxis.isEnum()) {
+            newYMin = yMin - 0.5;
+            newYMax = yMax + 0.5;
+            isModified = true;
+            yAxis.setRange(newYMin, newYMax);
+        }
+        if (isModified) {
+            fireUpdateAxisRange(xMin, xMax, newXMin, newXMax, yMin, yMax, newYMin, newYMax);
+
+        }
+        this._isEnumAxisUpdated = true;
+    }
+
+    
     @Override
     public void paint(Graphics g) {
 //        fps.startFrame();
+        if (!_isEnumAxisUpdated) {
+            updateEnumAxis();
+        }
 
         Graphics2D g2d = (Graphics2D) g;
         g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
@@ -152,7 +197,7 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
         g.setColor(PANEL_BACKGROUND_COLOR);
         g.fillRect(0, 0, width, height);
 
-        // title
+        //1 optionnal title at the begin
         int titleY = 0;
         if (this.m_plotTitle != null) {
             int wt = StringUtils.lenghtOfString(m_plotTitle, getFontMetrics(titleFont));
@@ -171,7 +216,7 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
 
         int figuresXHeight = GAP_FIGURES_X;
         //double[] tab = getMinMaxPlots();
-
+        //2 draw axis X
         if ((m_xAxis != null) && (m_xAxis.displayAxis())) {
 
             // set default size
@@ -188,13 +233,13 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
                 double leftMargin =  m_margins.left == 0 ? 0.0 : Math.abs(m_xAxis.pixelToValue(0) -  m_xAxis.pixelToValue(m_margins.left));
                 m_xAxis.setRange(tab[0] - leftMargin,tab[1] + rightMargin);
             }*/
-
+            //prepare plotArea begin point & width
             m_plotArea.x = m_xAxis.m_x + 1;
             m_plotArea.width = m_xAxis.m_width;
             m_xAxis.paint(g2d);
 
         }
-
+        //3 draw axis Y
         if ((m_yAxis != null) && (m_yAxis.displayAxis())) {
 
             m_yAxis.setSize(0, GAP_END_AXIS + titleY, GAP_FIGURES_Y + GAP_AXIS_TITLE + GAP_AXIS_LINE/*+GAP_TOP_AXIS*/, height - figuresXHeight - GAP_AXIS_TITLE - GAP_END_AXIS - titleY);
@@ -203,11 +248,12 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
                 double bottomMargin =  m_margins.bottom == 0 ? 0.0 : Math.abs(m_yAxis.pixelToValue(0) -  m_yAxis.pixelToValue(m_margins.bottom));
                 m_yAxis.setRange(tab[2] - bottomMargin,tab[3] + topMargin);
             }*/
+            //prepare plotArea begin point & height
             m_plotArea.y = m_yAxis.m_y + 1;
             m_plotArea.height = m_yAxis.m_height;
             m_yAxis.paint(g2d);
         }
-
+        //4 draw a list of plot
         if (m_plots != null) {
             if (m_plotArea.width >= 0 && m_plotArea.height >= 0) {
                 if (m_useDoubleBuffering) {
@@ -216,18 +262,21 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
                         m_doubleBuffer = new BufferedImage(m_plotArea.width, m_plotArea.height, BufferedImage.TYPE_INT_ARGB);
                     }
                     if (createDoubleBuffer || m_updateDoubleBuffer) {
+                        //from BufferedImage, get Graphics2D, initialize it's color,
                         Graphics2D graphicBufferG2d = (Graphics2D) m_doubleBuffer.getGraphics();
                         graphicBufferG2d.setColor(Color.white);
+                        //paint backgrand 
                         graphicBufferG2d.fillRect(0, 0, m_plotArea.width, m_plotArea.height);
                         graphicBufferG2d.translate(-m_plotArea.x, -m_plotArea.y);
+                        //paint verticalGrid
                         if ((m_plotVerticalGrid) && (m_xAxis.displayAxis())) {
                             m_xAxis.paintGrid(graphicBufferG2d, m_plotArea.x, m_plotArea.width, m_plotArea.y, m_plotArea.height);
                         }
-
+                        //paint HorizontalGrid
                         if ((m_plotHorizontalGrid) && (m_yAxis.displayAxis())) {
                             m_yAxis.paintGrid(graphicBufferG2d, m_plotArea.x, m_plotArea.width, m_plotArea.y, m_plotArea.height);
                         }
-
+                        //paint plot them selves
                         for (PlotBaseAbstract plot : m_plots) {
                             plot.paint(graphicBufferG2d);
                         }
@@ -238,29 +287,31 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
                 } else {
 
                     long startPlotTime = System.currentTimeMillis();
+                    //paint background
                     g.setColor(Color.white);
                     g.fillRect(m_plotArea.x, m_plotArea.y, m_plotArea.width, m_plotArea.height);
+                    //paint vertical grid
                     if ((m_plotVerticalGrid) && (m_xAxis != null) && (m_xAxis.displayAxis())) {
                         m_xAxis.paintGrid(g2d, m_plotArea.x, m_plotArea.width, m_plotArea.y, m_plotArea.height);
                     }
-
+                    //paint horizontalGrid
                     if ((m_plotHorizontalGrid) && (m_yAxis != null) && (m_yAxis.displayAxis())) {
                         m_yAxis.paintGrid(g2d, m_plotArea.x, m_plotArea.width, m_plotArea.y, m_plotArea.height);
                     }
-
+                    //paint plot themselves
                     for (PlotBaseAbstract plot : m_plots) {
                         plot.paint(g2d);
                     }
                     long stopPlotTime = System.currentTimeMillis();
                     if (stopPlotTime - startPlotTime > 50) {
-                        // display is too slow , we use an image
+                        // display is too slow , we use with buffered image
                         m_useDoubleBuffering = true;
                     }
                 }
             }
-
+            //4.1 for each plot, if it has over, marker cursors, draw over, markers,cursors
             for (PlotBaseAbstract plot : m_plots) {
-                plot.paintOver(g2d);
+                plot.paintOver(g2d); //nerver used
             }
             for (PlotBaseAbstract plot : m_plots) {
                 plot.paintMarkers(g2d);
@@ -293,6 +344,11 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
 //        fps.stopFrame();
     }
 
+    /**
+     * Paint coordinate x, y value
+     *
+     * @param g
+     */
     private void paintCoord(Graphics2D g) {
         int lx = StringUtils.lenghtOfString(m_coordX, getFontMetrics(coordFont));
         int ly = StringUtils.lenghtOfString(m_coordY, getFontMetrics(coordFont));
@@ -428,9 +484,13 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
         return m_plots.size() > 0;
     }
 
+    public ArrayList<PlotBaseAbstract> getPlots() {
+        return (ArrayList<PlotBaseAbstract>) m_plots;
+    }
+
     public void addPlot(PlotXYAbstract plot) {
         m_plots.add(plot);
-        updateAxis(plot);
+        updateAxis(plot);        
     }
 
     public ArrayList<Long> getSelection() {
@@ -493,8 +553,14 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
         return tab;
     }
 
+    /**
+     * from plot list, get the bounds of Axis X and Y,
+     *
+     * @param plot
+     */
     public void updateAxis(PlotBaseAbstract plot) {
-        double[] tab = getMinMaxPlots();
+        this._isEnumAxisUpdated = false;
+        double[] tab = getMinMaxPlots();//get Axis X, Y bounds, tab is doube[4]= [minX, maxX, minY, maxY]
 
         XAxis xAxis = getXAxis();
         //xAxis.setLog(false);  // we do no longer change the log setting
@@ -658,10 +724,10 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
             }
         } else if (!m_zoomGesture.isZooming() && !m_selectionGesture.isSelecting() && !m_moveGesture.isMoving() && (m_panAxisGesture.getAction() != PanAxisGesture.ACTION_PAN)) {
 
-            if (m_xAxis != null && m_xAxis.inside(x, y)) {
+            if (m_xAxis != null && m_xAxis.inside(x, y)) {//zoom on the X Axis
                 mustRepaint |= m_xAxis.setSelected(!m_xAxis.isSelected());
                 mustRepaint |= m_yAxis.setSelected(false);
-            } else if (m_yAxis != null && m_yAxis.inside(x, y)) {
+            } else if (m_yAxis != null && m_yAxis.inside(x, y)) {//zoom on the Y Axis
                 mustRepaint |= m_xAxis.setSelected(false);
                 mustRepaint |= m_yAxis.setSelected(!m_yAxis.isSelected());
             }
@@ -1047,14 +1113,14 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
         double newYmin = m_yAxis.getMinValue() + (m_yAxis.getMinValue() - yValue) * factor * e.getWheelRotation();
         double newYmax = m_yAxis.getMaxValue() - (yValue - m_yAxis.getMaxValue()) * factor * e.getWheelRotation();
 
-        if (m_plots.get(0).inside(e.getX(), e.getY())) {
+        if (m_plots.get(0).inside(e.getX(), e.getY())) {//mouse wheel move on m_plotArea
             m_xAxis.setRange(newXmin, newXmax);
             m_yAxis.setRange(newYmin, newYmax);
             repaintUpdateDoubleBuffer();
-        } else if ((m_xAxis != null) && m_xAxis.inside(e.getX(), e.getY())) {
+        } else if ((m_xAxis != null) && m_xAxis.inside(e.getX(), e.getY())) {//mouse wheel move on Axis X
             m_xAxis.setRange(newXmin, newXmax);
             repaintUpdateDoubleBuffer();
-        } else if ((m_yAxis != null) && m_yAxis.inside(e.getX(), e.getY())) {
+        } else if ((m_yAxis != null) && m_yAxis.inside(e.getX(), e.getY())) {//mouse wheel move on Axis Y
             m_yAxis.setRange(newYmin, newYmax);
             repaintUpdateDoubleBuffer();
         }

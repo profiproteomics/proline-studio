@@ -21,6 +21,7 @@ import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.border.EmptyBorder;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
+import fr.proline.studio.pattern.xic.DataBoxXicPTMSitePeptides;
 
 /**
  *
@@ -262,13 +263,16 @@ public class WindowBoxFactory {
 
     public static WindowBox getXICPTMSitesWindowBox(String dataName) {
 
-        AbstractDataBox[] boxes = new AbstractDataBox[4];
+        AbstractDataBox[] boxes = new AbstractDataBox[5];
         boxes[0] = new DataBoxXicPTMProteinSite();
         boxes[0].setDataName(dataName);
-        boxes[1] = new DataBoxXicPTMSitePeptides();
-        boxes[2] = new DataboxMultiGraphics(false, false);
+
+        boxes[1] = new DataBoxPTMSitePeptidesGraphic();
+        boxes[2] = new DataBoxXicPTMSitePeptides();
         boxes[2].setLayout(SplittedPanelContainer.PanelLayout.TABBED);
-        boxes[3] = new DataBoxPTMSitePepMatches();
+        boxes[3] = new DataboxMultiGraphics(false, false);
+        boxes[3].setLayout(SplittedPanelContainer.PanelLayout.HORIZONTAL);
+        boxes[4] = new DataBoxPTMSitePepMatches();
 
         IconManager.IconType iconType = IconManager.IconType.QUANT_XIC;
         return new WindowBox(boxes[0].getFullName(), generatePanel(boxes), boxes[0], IconManager.getImage(iconType));

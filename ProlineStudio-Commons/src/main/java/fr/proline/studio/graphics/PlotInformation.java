@@ -49,10 +49,17 @@ public class PlotInformation {
         this.plotInfo = plotInfo;
     }
     
+    /**
+     * if draw a pint at the PlotLinear point
+     * @return 
+     */
     public boolean isDrawPoints() {
         return this.isDrawPoints;
     }
-    
+    /**
+     * if draw a pint at the PlotLinear point
+     * @return 
+     */
     public void setDrawPoints(boolean drawPoints) {
         this.isDrawPoints = drawPoints ;
     }

@@ -54,9 +54,13 @@ public class QuantPostProcessingPanel extends JPanel {
 
     private List<JCheckBox> m_peptideModificationListChB;
     private JComboBox<String> m_abundanceSummarizingMethodCB;
+    private JLabel m_modifiedPeptidesFilteringMethodLabel;
+    private JComboBox<String> m_modifiedPeptidesFilteringMethodCB;
 
     private final static String[] ABUNDANCE_SUMMARIZER_METHOD_VALUES = {"Mean", "Mean of top 3 peptides", "Median", "Median Biological Profile", "Median Profile", "Sum", "Median Ratio Fitting"};
     private final static String[] ABUNDANCE_SUMMARIZER_METHOD_KEYS = {"MEAN", "MEAN_OF_TOP3", "MEDIAN", "MEDIAN_BIOLOGICAL_PROFILE", "MEDIAN_PROFILE", "SUM", "LFQ"};
+    private final static String[] MODIFIED_PEPTIDE_FILTERING_METHOD_VALUES={"Discard all forms", "Discard modified forms only", "Keep most abundant form"};
+    private final static String[] MODIFIED_PEPTIDE_FILTERING_METHOD_KEYS={"DISCARD_ALL_FORMS","DISCARD_MODIFIED_FORMS", "KEEP_MOST_ABUNDANT_FORM" };
 
     private JTextField m_peptideStatTestsAlpha;
     private JCheckBox m_applyPepNormalizationChB;
@@ -90,6 +94,7 @@ public class QuantPostProcessingPanel extends JPanel {
     private BooleanParameter m_applyProfileClusteringParameter;
     private BooleanParameter m_useOnlySpecificPeptidesParameter;
     private ObjectParameter<String> m_abundanceSummarizingMethodParameter;
+    private ObjectParameter<String> m_modifiedPeptidesFilteringMethodParameter;
     private List<BooleanParameter> m_peptidesModificationListParameter;
 
     private boolean m_readOnly;
@@ -223,13 +228,19 @@ public class QuantPostProcessingPanel extends JPanel {
         m_abundanceSummarizingMethodCB.setEnabled(!m_readOnly);
         m_abundanceSummarizingMethodParameter = new ObjectParameter<>("abundanceSummarizerMethod", "Abundance Summarizer Method", m_abundanceSummarizingMethodCB, ABUNDANCE_SUMMARIZER_METHOD_VALUES, ABUNDANCE_SUMMARIZER_METHOD_KEYS, 5, null);
         m_parameterList.add(m_abundanceSummarizingMethodParameter);
-
+        
+        m_modifiedPeptidesFilteringMethodCB = new JComboBox(MODIFIED_PEPTIDE_FILTERING_METHOD_VALUES);
+        m_modifiedPeptidesFilteringMethodCB.setEnabled(!m_readOnly);
+        m_modifiedPeptidesFilteringMethodParameter = new ObjectParameter<>("modifiedPeptidesFilteringMethod", "Modified Peptides Filtering Method",m_modifiedPeptidesFilteringMethodCB, MODIFIED_PEPTIDE_FILTERING_METHOD_VALUES, MODIFIED_PEPTIDE_FILTERING_METHOD_KEYS,0,null);
+        m_parameterList.add(m_modifiedPeptidesFilteringMethodParameter);
     }
 
     private void updateDiscardPTMs() {
         m_peptideModificationListChB.forEach((ptmCBx) -> {
             ptmCBx.setEnabled(m_discardModifiedPeptidesChB.isSelected());
         });
+        m_modifiedPeptidesFilteringMethodLabel.setEnabled(m_discardModifiedPeptidesChB.isSelected());
+        m_modifiedPeptidesFilteringMethodCB.setEnabled(m_discardModifiedPeptidesChB.isSelected());
     }
 
     public void loadParameters(FilePreferences filePreferences) throws BackingStoreException {
@@ -322,9 +333,22 @@ public class QuantPostProcessingPanel extends JPanel {
             c.weightx = 0.5;
             pepSelectionPanel.add(modifCB, c);
         }
+                      
+        c.gridy++;
+        c.weightx = 0;
+        c.gridwidth = 1;
+        m_modifiedPeptidesFilteringMethodLabel = new JLabel("Modified Peptide Filtering Method :");
+        m_modifiedPeptidesFilteringMethodLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+        pepSelectionPanel.add(m_modifiedPeptidesFilteringMethodLabel, c);
+
+        c.gridx++;
+        c.weightx = 1;
+        pepSelectionPanel.add(m_modifiedPeptidesFilteringMethodCB, c);        
         
         // discardPeptidesSharingPeakels
+        c.gridx = 0;
         c.gridy++;
+        c.gridwidth = 2;
         c.weightx = 1;
         c.insets = new Insets(5, 5, 5, 5);
         pepSelectionPanel.add(m_discardPeptidesSharingPeakelsChB, c);
@@ -538,6 +562,7 @@ public class QuantPostProcessingPanel extends JPanel {
                 ptmIds.add(ptmId);
             }
         }
+        params.put("modified_peptide_filtering_method", MODIFIED_PEPTIDE_FILTERING_METHOD_KEYS[m_modifiedPeptidesFilteringMethodCB.getSelectedIndex()]);
         params.put("ptm_definition_ids_to_discard", ptmIds);
         params.put("discard_peptides_sharing_peakels", m_discardPeptidesSharingPeakelsChB.isSelected());
         params.put("apply_profile_clustering", m_applyProfileClusteringChB.isSelected());
@@ -569,37 +594,38 @@ public class QuantPostProcessingPanel extends JPanel {
      *
      * @param refinedParams
      */
+    //VDS To modify for new service version !
     //VDS TODO : if Profi = false, Use only values seen in this mode ! Set other to default ?
-    public void setRefinedParams(Map<String, Object> refinedParams) {
-        m_useOnlySpecificPeptidesChB.setSelected(Boolean.valueOf(refinedParams.get("use_only_specific_peptides").toString()));
-        m_discardMissCleavedPeptidesChB.setSelected(Boolean.valueOf(refinedParams.get("discard_missed_cleaved_peptides").toString()));
-        //m_discardOxidizedPeptidesChB.setSelected(Boolean.valueOf(refinedParams.get("discard_oxidized_peptides").toString()));
-        m_discardPeptidesSharingPeakelsChB.setSelected(Boolean.valueOf(refinedParams.get("discard_peptides_sharing_peakels").toString()));
-
-        //VDS TODO :If not completeMode should be set to false 
-        m_applyProfileClusteringChB.setSelected(Boolean.valueOf(refinedParams.get("apply_profile_clustering").toString()));
-        for (int i = 0; i < ABUNDANCE_SUMMARIZER_METHOD_KEYS.length; i++) {
-            if (ABUNDANCE_SUMMARIZER_METHOD_KEYS[i].equals(refinedParams.get("abundance_summarizer_method").toString())) {
-                m_abundanceSummarizingMethodCB.setSelectedIndex(i);
-                break;
-            }
-        }
-
-        Map<String, Object> peptideStatConfigMap = (Map<String, Object>) refinedParams.get("peptide_stat_config");
-        m_peptideStatTestsAlpha.setText(peptideStatConfigMap.get("stat_tests_alpha").toString());//VDS TODO :If not completeMode should be set to 0.01
-        m_applyPepNormalizationChB.setSelected(Boolean.valueOf(peptideStatConfigMap.get("apply_normalization").toString()));
-        m_applyPepMissValInferenceChB.setSelected(Boolean.valueOf(peptideStatConfigMap.get("apply_miss_val_inference").toString()));//VDS TODO :If not completeMode should be set to false
-        m_applyPepVarianceCorrectionChB.setSelected(Boolean.valueOf(peptideStatConfigMap.get("apply_variance_correction").toString()));//VDS TODO :If not completeMode should be set to false
-        m_applyPepTTestChB.setSelected(Boolean.valueOf(peptideStatConfigMap.get("apply_ttest").toString()));//VDS TODO :If not completeMode should be set to false
-        m_applyPepZTestChB.setSelected(Boolean.valueOf(peptideStatConfigMap.get("apply_ztest").toString()));//VDS TODO :If not completeMode should be set to false
-
-        Map<String, Object> proteinStatConfigMap = (Map<String, Object>) refinedParams.get("protein_stat_config");
-        m_proteinStatTestsAlpha.setText(proteinStatConfigMap.get("stat_tests_alpha").toString());//VDS TODO :If not completeMode should be set to 0.01
-        m_applyProtNormalizationChB.setSelected(Boolean.valueOf(proteinStatConfigMap.get("apply_normalization").toString()));
-        m_applyProtMissValInferenceChB.setSelected(Boolean.valueOf(proteinStatConfigMap.get("apply_miss_val_inference").toString()));//VDS TODO :If not completeMode should be set to false
-        m_applyProtVarianceCorrectionChB.setSelected(Boolean.valueOf(proteinStatConfigMap.get("apply_variance_correction").toString()));//VDS TODO :If not completeMode should be set to false
-        m_applyProtTTestChB.setSelected(Boolean.valueOf(peptideStatConfigMap.get("apply_ttest").toString()));//VDS TODO :If not completeMode should be set to false
-        m_applyProtZTestChB.setSelected(Boolean.valueOf(peptideStatConfigMap.get("apply_ztest").toString()));//VDS TODO :If not completeMode should be set to false
-    }
+//    public void setRefinedParams(Map<String, Object> refinedParams) {
+//        m_useOnlySpecificPeptidesChB.setSelected(Boolean.valueOf(refinedParams.get("use_only_specific_peptides").toString()));
+//        m_discardMissCleavedPeptidesChB.setSelected(Boolean.valueOf(refinedParams.get("discard_missed_cleaved_peptides").toString()));
+//        //m_discardOxidizedPeptidesChB.setSelected(Boolean.valueOf(refinedParams.get("discard_oxidized_peptides").toString()));
+//        m_discardPeptidesSharingPeakelsChB.setSelected(Boolean.valueOf(refinedParams.get("discard_peptides_sharing_peakels").toString()));
+//
+//        //VDS TODO :If not completeMode should be set to false 
+//        m_applyProfileClusteringChB.setSelected(Boolean.valueOf(refinedParams.get("apply_profile_clustering").toString()));
+//        for (int i = 0; i < ABUNDANCE_SUMMARIZER_METHOD_KEYS.length; i++) {
+//            if (ABUNDANCE_SUMMARIZER_METHOD_KEYS[i].equals(refinedParams.get("abundance_summarizer_method").toString())) {
+//                m_abundanceSummarizingMethodCB.setSelectedIndex(i);
+//                break;
+//            }
+//        }
+//
+//        Map<String, Object> peptideStatConfigMap = (Map<String, Object>) refinedParams.get("peptide_stat_config");
+//        m_peptideStatTestsAlpha.setText(peptideStatConfigMap.get("stat_tests_alpha").toString());//VDS TODO :If not completeMode should be set to 0.01
+//        m_applyPepNormalizationChB.setSelected(Boolean.valueOf(peptideStatConfigMap.get("apply_normalization").toString()));
+//        m_applyPepMissValInferenceChB.setSelected(Boolean.valueOf(peptideStatConfigMap.get("apply_miss_val_inference").toString()));//VDS TODO :If not completeMode should be set to false
+//        m_applyPepVarianceCorrectionChB.setSelected(Boolean.valueOf(peptideStatConfigMap.get("apply_variance_correction").toString()));//VDS TODO :If not completeMode should be set to false
+//        m_applyPepTTestChB.setSelected(Boolean.valueOf(peptideStatConfigMap.get("apply_ttest").toString()));//VDS TODO :If not completeMode should be set to false
+//        m_applyPepZTestChB.setSelected(Boolean.valueOf(peptideStatConfigMap.get("apply_ztest").toString()));//VDS TODO :If not completeMode should be set to false
+//
+//        Map<String, Object> proteinStatConfigMap = (Map<String, Object>) refinedParams.get("protein_stat_config");
+//        m_proteinStatTestsAlpha.setText(proteinStatConfigMap.get("stat_tests_alpha").toString());//VDS TODO :If not completeMode should be set to 0.01
+//        m_applyProtNormalizationChB.setSelected(Boolean.valueOf(proteinStatConfigMap.get("apply_normalization").toString()));
+//        m_applyProtMissValInferenceChB.setSelected(Boolean.valueOf(proteinStatConfigMap.get("apply_miss_val_inference").toString()));//VDS TODO :If not completeMode should be set to false
+//        m_applyProtVarianceCorrectionChB.setSelected(Boolean.valueOf(proteinStatConfigMap.get("apply_variance_correction").toString()));//VDS TODO :If not completeMode should be set to false
+//        m_applyProtTTestChB.setSelected(Boolean.valueOf(peptideStatConfigMap.get("apply_ttest").toString()));//VDS TODO :If not completeMode should be set to false
+//        m_applyProtZTestChB.setSelected(Boolean.valueOf(peptideStatConfigMap.get("apply_ztest").toString()));//VDS TODO :If not completeMode should be set to false
+//    }
 
 }

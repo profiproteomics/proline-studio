@@ -181,6 +181,7 @@ public class ExperimentalDesignPanel extends HourglassPanel implements DataBoxPa
                 }
                 m_profilizerParamPanel = new QuantProfileXICPanel(true);
                 m_refinedPanel.add(m_profilizerParamPanel, BorderLayout.CENTER);
+                //VDS FIXME TODO : Swith to compute Post Processing !
                 m_profilizerParamPanel.setRefinedParams(m_dataset.getPostQuantProcessingConfigAsMap());
                 
             }else{

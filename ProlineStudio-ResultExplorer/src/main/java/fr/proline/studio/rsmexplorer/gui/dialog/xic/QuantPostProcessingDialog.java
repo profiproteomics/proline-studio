@@ -144,7 +144,7 @@ public class QuantPostProcessingDialog extends DefaultDialog {
         DatabasePTMsTask task = new DatabasePTMsTask(null);
         task.initLoadUsedPTMs(m_dataset.getProject().getId(), m_dataset.getResultSummaryId(), ptms);
         task.fetchData();
-        Map<Long, String> ptmSpecificityNameById = ptms.stream().collect(Collectors.toMap(ptmS -> ptmS.getId(), ptmS -> ptmS.getPtm().getShortName()));
+        Map<Long, String> ptmSpecificityNameById = ptms.stream().collect(Collectors.toMap(ptmS -> ptmS.getId(), ptmS -> ptmS.toString()));
         m_quantProfilePanel = new QuantPostProcessingPanel(false, ptmSpecificityNameById);
         Preferences preferences = NbPreferences.root();
         m_quantProfilePanel.getParameterList().loadParameters(preferences);

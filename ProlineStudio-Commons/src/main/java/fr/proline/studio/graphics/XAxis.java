@@ -1,7 +1,6 @@
 package fr.proline.studio.graphics;
 
 import fr.proline.studio.graphics.cursor.AbstractCursor;
-import fr.proline.studio.graphics.panel.DoubleYAxisPlotPanel;
 import fr.proline.studio.utils.CyclicColorPalette;
 import java.awt.Color;
 import java.awt.Font;
@@ -9,8 +8,6 @@ import java.awt.Graphics2D;
 import java.awt.Stroke;
 import java.awt.geom.AffineTransform;
 import java.text.DecimalFormat;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * X Axis
@@ -19,7 +16,6 @@ import org.slf4j.LoggerFactory;
  */
 public class XAxis extends Axis {
 
-    private static final Logger m_logger = LoggerFactory.getLogger(XAxis.class);
     private static final double FONT_ROTATE = Math.PI / 6;
 
     private int m_lastWidth;
@@ -32,7 +28,6 @@ public class XAxis extends Axis {
 
     @Override
     public void paint(Graphics2D g) {
-        m_logger.debug(String.format("___________AxisX width=%d", m_width));
         if (m_selected) {
             int stringWidth = m_valuesFontMetrics.stringWidth("    ");
             g.setColor(Color.darkGray);
@@ -45,7 +40,7 @@ public class XAxis extends Axis {
             g.setColor(Color.black);
         }
 
-        //display Axis line
+        //display Axis line + ticks
         if (m_log) {
             paintLog(g, m_ticks);
         } else {
@@ -202,7 +197,6 @@ public class XAxis extends Axis {
 
         int maxTicks = m_width / 30;
         m_ticks = new AxisTicks(m_minValue, m_maxValue, maxTicks, m_log, m_isInteger, m_isEnum);
-        m_logger.debug(String.format("new AxisTicks, min=%f, max=%f, maxTicks=%d, log=%b, integer=%b, Enum=%b",m_minValue, m_maxValue, maxTicks, m_log, m_isInteger, m_isEnum));
         m_minTick = m_ticks.getTickMin();
         m_maxTick = m_ticks.getTickMax();
         m_tickSpacing = m_ticks.getTickSpacing();
@@ -419,7 +413,6 @@ public class XAxis extends Axis {
 
                 g.drawLine(pX, m_y + BasePlotPanel.GAP_AXIS_LINE, pX, m_y + 4 + BasePlotPanel.GAP_AXIS_LINE);//draw tick
                 g.drawString(label, posX, m_y + height + 4 + BasePlotPanel.GAP_AXIS_LINE);//draw label
-
                 previousEndX = posX + m_labelMinWidth;
             }
 
@@ -518,10 +511,7 @@ public class XAxis extends Axis {
 
         int pixelStart = valueToPixel(m_minTick);
         int pixelStop = valueToPixel(m_maxTick);
-        m_logger.debug(String.format("___________AxisX m_minTick=%f, m_maxTick=%f, m_x=%d", m_minTick, m_maxTick, m_x));
-         int stop =  m_x + (int) Math.round(((m_maxTick - m_minValue) / (m_maxValue - m_minValue)) * m_width);
-        m_logger.debug(String.format("___________AxisX pixelStart=%d, pixelStop=%d", pixelStart, pixelStop));
-        m_logger.debug(String.format("valueToPixel stop = %d, min=%f, max=%f,width=%d)", stop, m_minValue, m_maxValue, m_width));
+        int stop = m_x + (int) Math.round(((m_maxTick - m_minValue) / (m_maxValue - m_minValue)) * m_width);
         if (pixelStart >= pixelStop) { // avoid infinite loop 
             return;
         }

@@ -3,6 +3,7 @@ package fr.proline.studio.extendedtablemodel;
 import fr.proline.studio.export.ExportFontData;
 import fr.proline.studio.extendedtablemodel.JoinDataModel.JoinTAG;
 import fr.proline.studio.filter.Filter;
+import fr.proline.studio.graphics.PlotDataSpec;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
 import fr.proline.studio.table.LazyData;
@@ -399,6 +400,11 @@ public class MultiJoinDataModel extends AbstractTableModel implements GlobalTabl
     @Override
     public String getExportColumnName(int col) {
         return m_modelFinal.getExportColumnName(convertColIndex(col));
+    }
+
+    @Override
+    public PlotDataSpec getDataSpecAt(int i) {
+        return null;
     }
     
 }

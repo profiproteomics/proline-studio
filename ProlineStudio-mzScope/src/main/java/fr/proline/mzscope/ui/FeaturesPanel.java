@@ -11,6 +11,7 @@ import fr.proline.studio.filter.FilterButton;
 import fr.proline.studio.filter.actions.ClearRestrainAction;
 import fr.proline.studio.filter.actions.RestrainAction;
 import fr.proline.studio.graphics.BasePlotPanel;
+import fr.proline.studio.graphics.PlotDataSpec;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotLinear;
 import fr.proline.studio.markerbar.MarkerContainerPanel;
@@ -453,6 +454,11 @@ class PeakelWrapper implements ExtendedTableModelInterface {
 
     @Override
     public Object getSingleValue(Class c) {
+        return null;
+    }
+
+    @Override
+    public PlotDataSpec getDataSpecAt(int i) {
         return null;
     }
     

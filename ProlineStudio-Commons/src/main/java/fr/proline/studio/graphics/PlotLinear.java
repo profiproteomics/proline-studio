@@ -38,6 +38,7 @@ public class PlotLinear extends PlotXYAbstract {
 
     private double[] m_dataX;
     private double[] m_dataY;
+    private PlotDataSpec[] m_dataSpec;
 
     private double m_gradientParamValuesMin;
     private double m_gradientParamValuesMax;
@@ -70,7 +71,8 @@ public class PlotLinear extends PlotXYAbstract {
 
     private BasicStroke m_strokeLine = STROKE_1;
     private BasicStroke m_userStrock = null;
-    private BasicStroke m_edgeStrock =  new BasicStroke(1f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER);;
+    private BasicStroke m_edgeStrock = new BasicStroke(1f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER);
+    ;
     private ArrayList<ParameterList> m_parameterListArray = null;
 
     private boolean displayAntiAliasing = true;
@@ -393,6 +395,10 @@ public class PlotLinear extends PlotXYAbstract {
         return y; //JPM.TODO
     }
 
+    /**
+     * from m_col, X, Y, create one m_dataX list, one m_dataY list. These 2
+     * lists will be used when Paint
+     */
     @Override
     public final void update() {
 
@@ -404,6 +410,7 @@ public class PlotLinear extends PlotXYAbstract {
 
         m_dataX = new double[size];
         m_dataY = new double[size];
+        m_dataSpec = new PlotDataSpec[size];
         m_selected = new boolean[size];
 
         boolean xAsEnum = m_plotPanel.getXAxis().isEnum();
@@ -424,6 +431,7 @@ public class PlotLinear extends PlotXYAbstract {
                 m_dataY[i] = (value == null || value.equals(Float.NaN) || !Number.class.isAssignableFrom(value.getClass())) ? Double.NaN : ((Number) value).doubleValue(); //CBy TODO : ne pas avoir a tester le type Number
             }
             m_selected[i] = false;
+            m_dataSpec[i] = m_compareDataInterface.getDataSpecAt(i);
         }
 
         // min and max values
@@ -461,6 +469,7 @@ public class PlotLinear extends PlotXYAbstract {
             m_dataX = new double[0];
             m_dataY = new double[0];
             m_selected = new boolean[0];
+            m_dataSpec = new PlotDataSpec[0];
             return;
         }
 
@@ -643,12 +652,7 @@ public class PlotLinear extends PlotXYAbstract {
         return m_yMax;
     }
 
-    @Override
-    public void paint(Graphics2D g) {
-
-        XAxis xAxis = m_plotPanel.getXAxis();
-        YAxis yAxis = m_plotPanel.getYAxis();
-
+    public void paint(Graphics2D g, XAxis xAxis, YAxis yAxis) {
         // set clipping area
         int clipX = xAxis.valueToPixel(xAxis.getMinValue());
         int clipWidth = xAxis.valueToPixel(xAxis.getMaxValue()) - clipX;
@@ -696,7 +700,11 @@ public class PlotLinear extends PlotXYAbstract {
                     g.setStroke(m_strokeLine);
                 }
                 if (m_isDrawPoints && isDef) {
-                    g.fillOval(x - 3, y - 3, 6, 6);
+                    if (m_dataSpec[i].getSharp().equals(PlotDataSpec.SHARP.EMPTY)) {
+                        g.drawOval(x - 3, y - 3, 6, 6);
+                    } else {
+                        g.fillOval(x - 3, y - 3, 6, 6);
+                    }
                 }
                 if (m_isDrawGap || (!m_isDrawGap && isDef && isDef0)) {
                     g.drawLine(x0, y0, x, y);
@@ -711,6 +719,13 @@ public class PlotLinear extends PlotXYAbstract {
             }
 
         }
+    }
+
+    @Override
+    public void paint(Graphics2D g) {
+        XAxis xAxis = m_plotPanel.getXAxis();
+        YAxis yAxis = m_plotPanel.getYAxis();
+        this.paint(g, xAxis, yAxis);
     }
 
     private void paintEdge(Graphics2D g, Color color, double tolerance) {
@@ -766,13 +781,15 @@ public class PlotLinear extends PlotXYAbstract {
             for (int i = 1; i < dataSize; i++) {
                 double el = m_dataX[i];
                 double elY = m_dataY[i];
-
+                PlotDataSpec spec = m_dataSpec[i];
                 for (j = i; j > 0 && m_dataX[j - 1] > el; j--) {
                     m_dataX[j] = m_dataX[j - 1];
                     m_dataY[j] = m_dataY[j - 1];
+                    m_dataSpec[j] = m_dataSpec[j - 1];
                 }
                 m_dataX[j] = el;
                 m_dataY[j] = elY;
+                m_dataSpec[j] = spec;
             }
         }
     }

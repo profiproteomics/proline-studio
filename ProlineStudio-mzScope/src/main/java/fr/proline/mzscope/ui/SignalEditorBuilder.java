@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
+import fr.proline.studio.graphics.PlotDataSpec;
 
 /**
  *
@@ -140,6 +141,11 @@ class SignalWrapper implements ExtendedTableModelInterface {
 
     @Override
     public Object getSingleValue(Class c) {
+        return null;
+    }
+
+    @Override
+    public PlotDataSpec getDataSpecAt(int i) {
         return null;
     }
    

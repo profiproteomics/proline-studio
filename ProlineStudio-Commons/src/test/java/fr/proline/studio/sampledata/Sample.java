@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import javax.swing.table.TableModel;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
+import fr.proline.studio.graphics.PlotDataSpec;
 
 /**
  *
@@ -14,83 +15,91 @@ import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
  */
 public class Sample implements ExtendedTableModelInterface {
 
-   private TableModel model; 
-   
-   public Sample(int size) {
-      List<Object[]> sample = SampleDataGenerator.generate(size);
-      String[] col = { "xValue", "isA", "anInt", "yValue", "anotherInt", "id"};
-      model = new SampleTableModel(sample, col);
-   }
+    private TableModel model;
 
-   public Sample(TableModel model) {
-       this.model = model;
-   }
-   
-   public TableModel getTableModel() {
-      return model;
-   }
-   
-   @Override
-   public int getRowCount() {
-      return model.getRowCount();
-   }
+    public Sample(int size) {
+        List<Object[]> sample = SampleDataGenerator.generate(size);
+        String[] col = {"xValue", "isA", "anInt", "yValue", "anotherInt", "id"};
+        model = new SampleTableModel(sample, col);
+    }
 
-   @Override
-   public int getColumnCount() {
-      return model.getColumnCount();
-   }
+    public Sample(int[] curve, int xlength, int nbPoint) {
+        
+        List<Object[]> sample = (new CurveSample(curve, xlength, nbPoint)).getRowList();
+        String[] col = {"xValue", "yValue"};
+        model = new SampleTableModel(sample, col);
+    }
 
-   @Override
-   public String getDataColumnIdentifier(int columnIndex) {
-      return model.getColumnName(columnIndex);
-   }
+    public Sample(TableModel model) {
+        this.model = model;
+    }
 
-   @Override
-   public Class getDataColumnClass(int columnIndex) {
-      return model.getColumnClass(columnIndex);
-   }
+    public TableModel getTableModel() {
+        return model;
+    }
 
-   @Override
-   public Object getDataValueAt(int rowIndex, int columnIndex) {
-      return model.getValueAt(rowIndex, columnIndex);
-   }
+    @Override
+    public int getRowCount() {
+        return model.getRowCount();
+    }
 
-   @Override
-   public int[] getKeysColumn() {
-      int[] key = { 5 }; 
-      return key;
-   }
+    @Override
+    public int getColumnCount() {
+        return model.getColumnCount();
+    }
 
-   @Override
-   public int getInfoColumn() {
-      return 2;
-   }
+    @Override
+    public String getDataColumnIdentifier(int columnIndex) {
+        return model.getColumnName(columnIndex);
+    }
 
-   @Override
-   public void setName(String name) {
-      throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-   }
+    @Override
+    public Class getDataColumnClass(int columnIndex) {
+        return model.getColumnClass(columnIndex);
+    }
 
-   @Override
-   public String getName() {
-      return "Sample dataset";
-   }
+    @Override
+    public Object getDataValueAt(int rowIndex, int columnIndex) {
+        //System.out.println("("+rowIndex+","+columnIndex+")");
+        return model.getValueAt(rowIndex, columnIndex);
+    }
 
-   @Override
-   public Map<String, Object> getExternalData() {
-      return null;
-   }
+    @Override
+    public int[] getKeysColumn() {
+        int[] key = {5};
+        return key;
+    }
 
-   @Override
-   public PlotInformation getPlotInformation() {
-      return null;
-   }
+    @Override
+    public int getInfoColumn() {
+        return 2;
+    }
+
+    @Override
+    public void setName(String name) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public String getName() {
+        return "Sample dataset";
+    }
+
+    @Override
+    public Map<String, Object> getExternalData() {
+        return null;
+    }
+
+    @Override
+    public PlotInformation getPlotInformation() {
+        return null;
+    }
 
     @Override
     public long row2UniqueId(int rowIndex) {
         return rowIndex;
     }
-    
+
     @Override
     public int uniqueId2Row(long id) {
         return (int) id;
@@ -113,7 +122,7 @@ public class Sample implements ExtendedTableModelInterface {
 
     @Override
     public Object getColValue(Class c, int col) {
-       return null;
+        return null;
     }
 
     @Override
@@ -124,6 +133,10 @@ public class Sample implements ExtendedTableModelInterface {
     @Override
     public Object getSingleValue(Class c) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+    @Override
+    public PlotDataSpec getDataSpecAt(int i) {
+        return null;
     }
 
 }

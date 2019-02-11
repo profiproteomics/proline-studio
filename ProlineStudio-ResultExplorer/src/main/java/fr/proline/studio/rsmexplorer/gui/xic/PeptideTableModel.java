@@ -12,6 +12,8 @@ import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
 import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
 import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
+import fr.proline.studio.graphics.PlotDataSpec;
+import fr.proline.studio.graphics.panel.DoubleYAxisPlotPanel;
 import fr.proline.studio.table.LazyData;
 import fr.proline.studio.table.LazyTable;
 import fr.proline.studio.table.LazyTableModel;
@@ -23,6 +25,8 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import javax.swing.table.TableCellRenderer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * data for one masterQuantPeptide : for the different conditions (quant
@@ -225,7 +229,7 @@ public class PeptideTableModel extends LazyTableModel implements GlobalTableMode
             }
             plotInformation.setPlotTitle(sb.toString());
         }
-        
+
         if (m_quantPeptide.getSelectionLevel() < 2) {
             plotInformation.setPlotColor(Color.LIGHT_GRAY);
         }
@@ -239,9 +243,9 @@ public class PeptideTableModel extends LazyTableModel implements GlobalTableMode
         return PlotType.LINEAR_PLOT;
     }
 
-   @Override
+    @Override
     public int[] getBestColIndex(PlotType plotType) {
- 
+
         switch (plotType) {
             case LINEAR_PLOT: {
                 int[] cols = new int[2];
@@ -257,7 +261,7 @@ public class PeptideTableModel extends LazyTableModel implements GlobalTableMode
     public String getExportRowCell(int row, int col) {
         return ExportModelUtilities.getExportRowCell(this, row, col);
     }
-    
+
     @Override
     public ArrayList<ExportFontData> getExportFonts(int row, int col) {
         return null;
@@ -282,8 +286,8 @@ public class PeptideTableModel extends LazyTableModel implements GlobalTableMode
                     renderer = new FloatRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 0);
                 }
             }
-            
-        }    
+
+        }
         return renderer;
     }
 
@@ -321,5 +325,26 @@ public class PeptideTableModel extends LazyTableModel implements GlobalTableMode
     public Object getColValue(Class c, int col) {
         return null;
     }
+
+    private static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer.peptideTableModel");
+
+    @Override
+    public PlotDataSpec getDataSpecAt(int row) {
+        m_logger.debug("########call getDataSpecAt");
+        PlotDataSpec result = new PlotDataSpec();
+        DQuantitationChannel qc = m_quantChannels[row];
+        // retrieve quantPeptide for the quantChannelId
+        Map<Long, DQuantPeptide> quantPeptideByQchIds = m_quantPeptide.getQuantPeptideByQchIds();
+        DQuantPeptide quantPeptide = quantPeptideByQchIds.get(qc.getId());
+        if (!(quantPeptide == null || quantPeptide.getRawAbundance() == null || quantPeptide.getPeptideMatchesCount() == null)) {
+            int matcheCount = quantPeptide.getPeptideMatchesCount();
+            m_logger.debug(String.format("#########row %s, matchcount=%d", qc.getFullName(), matcheCount));
+            if (matcheCount == 0) {
+                result.setSharp(PlotDataSpec.SHARP.EMPTY);
+            }
+        }
+        return result;
+    }
+
 
 }

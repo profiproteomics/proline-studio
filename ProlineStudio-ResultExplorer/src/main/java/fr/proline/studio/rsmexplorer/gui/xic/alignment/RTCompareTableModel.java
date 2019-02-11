@@ -10,6 +10,7 @@ import fr.proline.core.orm.msi.dto.DPeptideInstance;
 import fr.proline.core.orm.msi.dto.DQuantPeptideIon;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 import fr.proline.studio.extendedtablemodel.ExtraDataType;
+import fr.proline.studio.graphics.PlotDataSpec;
 import fr.proline.studio.graphics.PlotInformation;
 import java.util.ArrayList;
 import java.util.List;
@@ -116,6 +117,11 @@ public class RTCompareTableModel implements ExtendedTableModelInterface {
     public String getInfo(int rowIndex) {
         return this.m_data.get(rowIndex).toString();
 
+    }
+
+    @Override
+    public PlotDataSpec getDataSpecAt(int i) {
+        return null;
     }
 
     protected class RTCompareRow {

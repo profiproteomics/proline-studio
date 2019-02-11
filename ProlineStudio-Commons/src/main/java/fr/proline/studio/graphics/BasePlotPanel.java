@@ -66,7 +66,13 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
 
     protected final ZoomGesture m_zoomGesture = new ZoomGesture();
     protected final SelectionGestureLasso m_selectionGesture = new SelectionGestureLasso();
+    /**
+     * manage zoom/unzoom gesture
+     */
     protected final PanAxisGesture m_panAxisGesture = new PanAxisGesture();
+    /**
+     * manage movable object
+     */
     protected final MoveGesture m_moveGesture = new MoveGesture();
 
     public final static int GAP_FIGURES_Y = 30;
@@ -75,25 +81,25 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
     public final static int GAP_AXIS_TITLE = 20;
     public final static int GAP_AXIS_LINE = 5;
 
-    private BufferedImage m_doubleBuffer = null;
+    protected BufferedImage m_doubleBuffer = null;
     protected boolean m_useDoubleBuffering = false;
     protected boolean m_updateDoubleBuffer = false;
 
-    private boolean m_plotHorizontalGrid = true;
-    private boolean m_plotVerticalGrid = true;
+    protected boolean m_plotHorizontalGrid = true;
+    protected boolean m_plotVerticalGrid = true;
     private boolean m_dataLocked = false;
     protected boolean m_drawCursor = false;
 
     private PlotToolbarListener m_plotToolbarListener = null;
     private List<PlotPanelListener> m_listeners = new ArrayList<>();
 
-    private final Rectangle m_plotArea = new Rectangle();
+    protected Rectangle m_plotArea = new Rectangle();
 
     // show coord.
-    private String m_coordX = "";
-    private String m_coordY = "";
-    private int m_posx;
-    private int m_posy;
+    private String m_coordX = "";//kx: ? for cursor
+    private String m_coordY = "";//kx: ? for cursor
+    private int m_posx;//kx?
+    private int m_posy;//kx?
     /* font coord */
     private final static Font coordFont = new Font("dialog", Font.BOLD, 9);
     private final static Color coordColor = Color.GRAY;
@@ -104,16 +110,20 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
     private final static DecimalFormat format = (DecimalFormat) nf;
 
     // title
-    private String m_plotTitle = null;
+    protected String m_plotTitle = null;
     /* title coord */
-    private final static Font titleFont = new Font("dialog", Font.BOLD, 11);
-    private final static Color titleColor = Color.DARK_GRAY;
+    protected final static Font TITLE_FONT = new Font("dialog", Font.BOLD, 11);
+    protected final static Color TITLE_COLOR = Color.DARK_GRAY;
 
 //    public final FPSUtility fps = new FPSUtility(20);
     //events
     private EventListenerList listenerList = new EventListenerList();
-
-    private boolean _isEnumAxisUpdated = false;
+    /**
+     * if Axis is Enum type, after calculate the min max, we add a space before
+     * & after, this ajustment is need only one time before the first paint,
+     * each time if the select Axis change item, we should ajust it.
+     */
+    protected boolean _isEnumAxisUpdated = false;
 
     public BasePlotPanel() {
         formatE.applyPattern("0.#####E0");
@@ -152,7 +162,7 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
         double newXMax = xMax;
         double newYMin = yMin;
         double newYMax = yMax;
-        
+
         boolean isModified = false;
         if (xAxis.isEnum()) {
             newXMin = xMin - 0.5;
@@ -173,7 +183,6 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
         this._isEnumAxisUpdated = true;
     }
 
-    
     @Override
     public void paint(Graphics g) {
 //        fps.startFrame();
@@ -200,13 +209,13 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
         //1 optionnal title at the begin
         int titleY = 0;
         if (this.m_plotTitle != null) {
-            int wt = StringUtils.lenghtOfString(m_plotTitle, getFontMetrics(titleFont));
+            int wt = StringUtils.lenghtOfString(m_plotTitle, getFontMetrics(TITLE_FONT));
             int titleX = (width - wt) / 2;
-            int ascent = getFontMetrics(titleFont).getAscent();
-            int descent = getFontMetrics(titleFont).getDescent();
+            int ascent = getFontMetrics(TITLE_FONT).getAscent();
+            int descent = getFontMetrics(TITLE_FONT).getDescent();
             titleY = ascent;
-            g.setFont(titleFont);
-            g.setColor(titleColor);
+            g.setFont(TITLE_FONT);
+            g.setColor(TITLE_COLOR);
             g.drawString(m_plotTitle, titleX, titleY);
             titleY += descent;
         }
@@ -349,7 +358,7 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
      *
      * @param g
      */
-    private void paintCoord(Graphics2D g) {
+    protected void paintCoord(Graphics2D g) {
         int lx = StringUtils.lenghtOfString(m_coordX, getFontMetrics(coordFont));
         int ly = StringUtils.lenghtOfString(m_coordY, getFontMetrics(coordFont));
         int maxl = Math.max(lx, ly);
@@ -490,7 +499,7 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
 
     public void addPlot(PlotXYAbstract plot) {
         m_plots.add(plot);
-        updateAxis(plot);        
+        updateAxis(plot);
     }
 
     public ArrayList<Long> getSelection() {
@@ -514,19 +523,19 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
      *
      * @return doube[4]= [minX, maxX, minY, maxY]
      */
-    private double[] getMinMaxPlots() {
+    protected double[] getMinMaxPlots(ArrayList<PlotBaseAbstract> plotList) {
         double[] tab = new double[4];
-        int nb = m_plots.size();
-        if (m_plots != null && nb > 0) {
-            double minX = m_plots.get(0).getXMin();
-            double maxX = m_plots.get(0).getXMax();
-            double minY = m_plots.get(0).getYMin();
-            double maxY = m_plots.get(0).getYMax();
+        int nb = plotList.size();
+        if (plotList != null && nb > 0) {
+            double minX = plotList.get(0).getXMin();
+            double maxX = plotList.get(0).getXMax();
+            double minY = plotList.get(0).getYMin();
+            double maxY = plotList.get(0).getYMax();
             for (int k = 1; k < nb; k++) {
-                double plotXMin = m_plots.get(k).getXMin();
-                double plotXMax = m_plots.get(k).getXMax();
-                double plotYMin = m_plots.get(k).getYMin();
-                double plotYMax = m_plots.get(k).getYMax();
+                double plotXMin = plotList.get(k).getXMin();
+                double plotXMax = plotList.get(k).getXMax();
+                double plotYMin = plotList.get(k).getYMin();
+                double plotYMax = plotList.get(k).getYMax();
                 if (plotXMin != 0 && plotXMax != 0) {
                     if (minX == 0 && maxX == 0) {
                         minX = plotXMin;
@@ -553,24 +562,55 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
         return tab;
     }
 
+    private double[] getMinMaxPlots() {
+        return this.getMinMaxPlots(this.m_plots);
+    }
+
     /**
      * from plot list, get the bounds of Axis X and Y,
      *
      * @param plot
      */
+//    public void updateAxis(PlotBaseAbstract plot) {
+//        this._isEnumAxisUpdated = false;
+//        double[] tab = getMinMaxPlots();//get Axis X, Y bounds, tab is doube[4]= [minX, maxX, minY, maxY]
+//
+//        XAxis xAxis = getXAxis();
+//        //xAxis.setLog(false);  // we do no longer change the log setting
+//        xAxis.setSelected(false);
+//        xAxis.setRange((Double.isNaN(m_xAxisBounds[0])) ? tab[0] : m_xAxisBounds[0], (Double.isNaN(m_xAxisBounds[1])) ? tab[1] : m_xAxisBounds[1]);
+//
+//        YAxis yAxis = getYAxis();
+//        //yAxis.setLog(false);  // we do no longer change the log setting
+//        yAxis.setSelected(false);
+//        yAxis.setRange((Double.isNaN(m_yAxisBounds[0])) ? tab[2] : m_yAxisBounds[0], (Double.isNaN(m_yAxisBounds[1])) ? tab[3] : m_yAxisBounds[1]);
+//
+//        m_updateDoubleBuffer = true;
+//        m_useDoubleBuffering = plot.getDoubleBufferingPolicy();
+//    }
+    
     public void updateAxis(PlotBaseAbstract plot) {
+       updateAxis(plot, m_plots, getXAxis(), getYAxis(), m_xAxisBounds, m_yAxisBounds);
+    }
+            
+            
+        /**
+     * from plot list, get the bounds of Axis X and Y,
+     *
+     * @param plot
+     */
+    public void updateAxis(PlotBaseAbstract plot, ArrayList<PlotBaseAbstract> plotList, 
+            XAxis xAxis, YAxis yAxis,  double[] xBounds,  double[] yBounds ) {
         this._isEnumAxisUpdated = false;
-        double[] tab = getMinMaxPlots();//get Axis X, Y bounds, tab is doube[4]= [minX, maxX, minY, maxY]
+        double[] tab = getMinMaxPlots(plotList);//get Axis X, Y bounds, tab is doube[4]= [minX, maxX, minY, maxY]
 
-        XAxis xAxis = getXAxis();
         //xAxis.setLog(false);  // we do no longer change the log setting
         xAxis.setSelected(false);
-        xAxis.setRange((Double.isNaN(m_xAxisBounds[0])) ? tab[0] : m_xAxisBounds[0], (Double.isNaN(m_xAxisBounds[1])) ? tab[1] : m_xAxisBounds[1]);
+        xAxis.setRange((Double.isNaN(xBounds[0])) ? tab[0] : xBounds[0], (Double.isNaN(xBounds[1])) ? tab[1] : xBounds[1]);
 
-        YAxis yAxis = getYAxis();
         //yAxis.setLog(false);  // we do no longer change the log setting
         yAxis.setSelected(false);
-        yAxis.setRange((Double.isNaN(m_yAxisBounds[0])) ? tab[2] : m_yAxisBounds[0], (Double.isNaN(m_yAxisBounds[1])) ? tab[3] : m_yAxisBounds[1]);
+        yAxis.setRange((Double.isNaN(yBounds[0])) ? tab[2] : yBounds[0], (Double.isNaN(yBounds[1])) ? tab[3] : yBounds[1]);
 
         m_updateDoubleBuffer = true;
         m_useDoubleBuffering = plot.getDoubleBufferingPolicy();

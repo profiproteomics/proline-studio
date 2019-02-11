@@ -70,6 +70,10 @@ public abstract class PlotBaseAbstract implements Axis.EnumXInterface, Axis.Enum
     }
 
     public abstract void paint(Graphics2D g);
+    
+    public void paint(Graphics2D g, XAxis xAxis, YAxis yAxis){
+        
+    }
 
     public void paintOver(Graphics2D g) {
 

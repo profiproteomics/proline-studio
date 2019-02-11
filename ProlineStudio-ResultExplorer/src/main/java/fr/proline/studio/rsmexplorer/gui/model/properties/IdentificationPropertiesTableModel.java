@@ -16,6 +16,7 @@ import fr.proline.core.orm.msi.UsedPtm;
 import fr.proline.core.orm.uds.FragmentationRuleSet;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dam.DatabaseDataManager;
+import fr.proline.studio.graphics.PlotDataSpec;
 import fr.proline.studio.table.DataGroup;
 import fr.proline.studio.utils.SerializedPropertiesUtil;
 import java.awt.Color;
@@ -139,6 +140,11 @@ public class IdentificationPropertiesTableModel extends AbstractPropertiesTableM
         
         fireTableStructureChanged();
         
+    }
+
+    @Override
+    public PlotDataSpec getDataSpecAt(int i) {
+        return null;
     }
     
     /**

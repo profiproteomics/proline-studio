@@ -89,7 +89,7 @@ public abstract class Axis {
         private JTextField m_minTextField;
         private JTextField m_maxTextField;
         private Axis m_axis;
-
+        
         public AxisRangePanel(Axis axis) {
 
             m_axis = axis;
@@ -227,6 +227,14 @@ public abstract class Axis {
         m_rangePanel = new AxisRangePanel(this);
     }
 
+    public int getX() {
+        return m_x;
+    }
+
+    public int getY() {
+        return m_y;
+    }
+    
     public AxisRangePanel getRangePanel() {
         return m_rangePanel;
     }
@@ -335,8 +343,8 @@ public abstract class Axis {
         return m_maxTick;
     }
 
-    public int getY() {
-        return m_y;
+    public int getWidth() {
+        return m_width;
     }
 
     public int getHeight() {

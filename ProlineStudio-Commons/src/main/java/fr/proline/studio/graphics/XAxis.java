@@ -1,6 +1,7 @@
 package fr.proline.studio.graphics;
 
 import fr.proline.studio.graphics.cursor.AbstractCursor;
+import fr.proline.studio.graphics.panel.DoubleYAxisPlotPanel;
 import fr.proline.studio.utils.CyclicColorPalette;
 import java.awt.Color;
 import java.awt.Font;
@@ -8,6 +9,8 @@ import java.awt.Graphics2D;
 import java.awt.Stroke;
 import java.awt.geom.AffineTransform;
 import java.text.DecimalFormat;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * X Axis
@@ -16,33 +19,32 @@ import java.text.DecimalFormat;
  */
 public class XAxis extends Axis {
 
-    private static final double FONT_ROTATE = Math.PI/6;
-    
+    private static final Logger m_logger = LoggerFactory.getLogger(XAxis.class);
+    private static final double FONT_ROTATE = Math.PI / 6;
+
     private int m_lastWidth;
-    
+
     private AxisTicks m_ticks;
-    
+
     public XAxis(BasePlotPanel p) {
         super(p);
     }
 
     @Override
     public void paint(Graphics2D g) {
-
+        m_logger.debug(String.format("___________AxisX width=%d", m_width));
         if (m_selected) {
             int stringWidth = m_valuesFontMetrics.stringWidth("    ");
             g.setColor(Color.darkGray);
-            g.fillRect(m_x-stringWidth, m_y, m_width+stringWidth*2, m_height);
+            g.fillRect(m_x - stringWidth, m_y, m_width + stringWidth * 2, m_height);
         }
 
-        
-       
         if (m_selected) {
             g.setColor(Color.white);
         } else {
             g.setColor(Color.black);
         }
-        
+
         //display Axis line
         if (m_log) {
             paintLog(g, m_ticks);
@@ -68,19 +70,18 @@ public class XAxis extends Axis {
             int ascent = m_titleFontMetrics.getAscent();
             int descent = m_titleFontMetrics.getDescent();
             int baseline = top + ((bottom + 1 - top) / 2) - ((ascent + descent) / 2) + ascent;
-            g.drawString(m_title, m_x+(m_width - titleWidth) / 2, baseline);
+            g.drawString(m_title, m_x + (m_width - titleWidth) / 2, baseline);
         }
 
     }
 
-    
     @Override
     public void paintCursor(Graphics2D g, AbstractCursor cursor, boolean selected) {
 
         g.setFont(m_valuesFont);
-        
+
         final int DELTA = 3;
-        
+
         double x = cursor.getValue();
 
         int integerDigits = cursor.getIntegerDigits();
@@ -89,13 +90,11 @@ public class XAxis extends Axis {
         }
         int fractionalDigits = cursor.getFractionalDigits();
         if (fractionalDigits == -1) {
-            fractionalDigits = m_ticks.getFractionalDigits()+2;
+            fractionalDigits = m_ticks.getFractionalDigits() + 2;
         }
-        
-        
-        
+
         double multForRounding = Math.pow(10, fractionalDigits);
-  
+
         String label;
         if (m_isEnum) {
             label = m_plotPanel.getEnumValueX((int) Math.round(x), false); //JPM.WART
@@ -110,29 +109,26 @@ public class XAxis extends Axis {
             }
 
             DecimalFormat df = selectDecimalFormat(fractionalDigits + 2, integerDigits);
-            
-            
-            
-            
+
             label = df.format(xDisplay);
 
             cursor.setFormat(integerDigits, fractionalDigits, df);
         }
-        
+
         int stringWidth = m_valuesFontMetrics.stringWidth(label);
-        
+
         int posX = valueToPixel(x);
-        
+
         int height = m_valuesFontMetrics.getHeight();
-        
+
         Stroke prevStroke = g.getStroke();
         g.setStroke(selected ? AbstractCursor.LINE2_STROKE : cursor.getStroke());
-        
+
         g.setColor(Color.white);
-        
+
         // check paint at right
         int rightLimitX = valueToPixel(m_maxValue);
-        int flagPositionX = posX+stringWidth+DELTA*2;
+        int flagPositionX = posX + stringWidth + DELTA * 2;
         if (flagPositionX < rightLimitX) {
             // Cursor X Flag painted at right
             g.fillRect(posX, m_y + 4 + BasePlotPanel.GAP_AXIS_LINE - DELTA, stringWidth + DELTA * 2, height + DELTA * 2);
@@ -144,28 +140,27 @@ public class XAxis extends Axis {
             g.drawString(label, posX + DELTA, m_y + height + 4 + BasePlotPanel.GAP_AXIS_LINE);
         } else {
             // Cursor X Flag painted at left
-            g.fillRect(posX-(stringWidth + DELTA * 2), m_y + 4 + BasePlotPanel.GAP_AXIS_LINE - DELTA, stringWidth + DELTA * 2, height + DELTA * 2);
+            g.fillRect(posX - (stringWidth + DELTA * 2), m_y + 4 + BasePlotPanel.GAP_AXIS_LINE - DELTA, stringWidth + DELTA * 2, height + DELTA * 2);
 
             g.setColor(cursor.getColor());
             g.drawLine(posX, m_y, posX, m_y + 4 + BasePlotPanel.GAP_AXIS_LINE - DELTA);
-            g.drawRect(posX-(stringWidth + DELTA * 2), m_y + 4 + BasePlotPanel.GAP_AXIS_LINE - DELTA, stringWidth + DELTA * 2, height + DELTA * 2);
+            g.drawRect(posX - (stringWidth + DELTA * 2), m_y + 4 + BasePlotPanel.GAP_AXIS_LINE - DELTA, stringWidth + DELTA * 2, height + DELTA * 2);
 
-            g.drawString(label, posX-stringWidth - DELTA, m_y + height + 4 + BasePlotPanel.GAP_AXIS_LINE);
+            g.drawString(label, posX - stringWidth - DELTA, m_y + height + 4 + BasePlotPanel.GAP_AXIS_LINE);
         }
-
 
         // restore stroke
         g.setStroke(prevStroke);
 
     }
-    
+
     public String defaultFormat(double x) {
 
         int integerDigits = m_ticks.getIntegerDigits();
-        int fractionalDigits = m_ticks.getFractionalDigits()+2;
+        int fractionalDigits = m_ticks.getFractionalDigits() + 2;
 
         double multForRounding = Math.pow(10, fractionalDigits);
-  
+
         String label;
         if (m_isEnum) {
             label = m_plotPanel.getEnumValueX((int) Math.round(x), false); //JPM.WART
@@ -180,25 +175,23 @@ public class XAxis extends Axis {
             }
 
             DecimalFormat df = selectDecimalFormat(fractionalDigits + 2, integerDigits);
-            
-            
-            
-            
+
             label = df.format(xDisplay);
 
         }
-        
+
         return label;
 
     }
 
     /**
-     * Main purpose of this function is to evaluate if we need to plot labels in diagonal
-     * when there is not enough space
-     * @param g 
+     * Main purpose of this function is to evaluate if we need to plot labels in
+     * diagonal when there is not enough space
+     *
+     * @param g
      */
     public void preparePaint(Graphics2D g) {
-        
+
         m_labelMaxWidth = 0;
         m_mustDrawDiagonalLabels = false;
 
@@ -206,21 +199,20 @@ public class XAxis extends Axis {
             m_valuesFont = g.getFont().deriveFont(Font.PLAIN, 10);
             m_valuesFontMetrics = g.getFontMetrics(m_valuesFont);
         }
-        
+
         int maxTicks = m_width / 30;
         m_ticks = new AxisTicks(m_minValue, m_maxValue, maxTicks, m_log, m_isInteger, m_isEnum);
-        
-                
+        m_logger.debug(String.format("new AxisTicks, min=%f, max=%f, maxTicks=%d, log=%b, integer=%b, Enum=%b",m_minValue, m_maxValue, maxTicks, m_log, m_isInteger, m_isEnum));
         m_minTick = m_ticks.getTickMin();
         m_maxTick = m_ticks.getTickMax();
         m_tickSpacing = m_ticks.getTickSpacing();
-        
+
         if (m_log) {
             preparePaintLog(g, m_ticks);
         } else {
             preparePaintLinear(g, m_ticks);
         }
-        
+
         if (m_mustDrawDiagonalLabels) {
             m_labelMinWidth = m_valuesFontMetrics.stringWidth("000");
             if (m_valuesDiagonalFont == null) {
@@ -228,13 +220,14 @@ public class XAxis extends Axis {
                 rotateText.rotate(FONT_ROTATE);
                 m_valuesDiagonalFont = m_valuesFont.deriveFont(rotateText);
             }
-            
-            m_minimumAxisHeight = 8+m_valuesFontMetrics.getHeight()+(int) Math.round(StrictMath.ceil(StrictMath.sin(FONT_ROTATE)*m_labelMaxWidth));
+
+            m_minimumAxisHeight = 8 + m_valuesFontMetrics.getHeight() + (int) Math.round(StrictMath.ceil(StrictMath.sin(FONT_ROTATE) * m_labelMaxWidth));
         } else {
             m_labelMinWidth = m_valuesFontMetrics.stringWidth("0");
-            m_minimumAxisHeight = 8+m_valuesFontMetrics.getHeight();
+            m_minimumAxisHeight = 8 + m_valuesFontMetrics.getHeight();
         }
     }
+
     private void preparePaintLinear(Graphics2D g, AxisTicks ticks) {
 
         int fractionalDigits = ticks.getFractionalDigits();
@@ -245,7 +238,7 @@ public class XAxis extends Axis {
             m_fractionalDigits = fractionalDigits;
             m_integerDigits = integerDigits;
         }
-        
+
         int pixelStart = valueToPixel(m_minTick);
         int pixelStop = valueToPixel(m_maxTick);
 
@@ -260,7 +253,6 @@ public class XAxis extends Axis {
         int pX = pixelStart;
         int previousEndX = -Integer.MAX_VALUE;
         while (true) {
-            
 
             int stringWidth;
             String label;
@@ -282,7 +274,7 @@ public class XAxis extends Axis {
                 stringWidth = m_valuesFontMetrics.stringWidth(label);
             }
 
-            if (stringWidth>m_labelMaxWidth) {
+            if (stringWidth > m_labelMaxWidth) {
                 m_labelMaxWidth = stringWidth;
                 maxLabel = label;
             }
@@ -300,17 +292,17 @@ public class XAxis extends Axis {
             if (pX > pixelStop) {
                 break;
             }
-            
+
         }
-        
+
         if (m_mustDrawDiagonalLabels) {
-            if (maxLabel.length()>20) {
-                maxLabel = maxLabel.substring(0, 19)+"..";
+            if (maxLabel.length() > 20) {
+                maxLabel = maxLabel.substring(0, 19) + "..";
                 m_labelMaxWidth = m_valuesFontMetrics.stringWidth(maxLabel);
             }
         }
     }
-    
+
     private void preparePaintLog(Graphics2D g, AxisTicks ticks) {
 
         if (m_df == null) {
@@ -330,17 +322,16 @@ public class XAxis extends Axis {
         int previousEndX = -Integer.MAX_VALUE;
         while (true) {
 
-
             // round x
             double xDisplay = x;
 
             String s = m_df.format(xDisplay);
             int stringWidth = m_valuesFontMetrics.stringWidth(s);
 
-            if (stringWidth>m_labelMaxWidth) {
+            if (stringWidth > m_labelMaxWidth) {
                 m_labelMaxWidth = stringWidth;
             }
-            
+
             int posX = pX - stringWidth / 2;
             if (posX > previousEndX + 2) { // check to avoid to overlap labels
                 previousEndX = posX + stringWidth;
@@ -358,12 +349,12 @@ public class XAxis extends Axis {
         }
 
     }
- 
+
     private void paintLinear(Graphics2D g, AxisTicks ticks) {
 
         int pixelStart = valueToPixel(m_minValue);
         int pixelStop = valueToPixel(m_maxValue);
-        g.drawLine(pixelStart, m_y+BasePlotPanel.GAP_AXIS_LINE, pixelStop, m_y+BasePlotPanel.GAP_AXIS_LINE);
+        g.drawLine(pixelStart, m_y + BasePlotPanel.GAP_AXIS_LINE, pixelStop, m_y + BasePlotPanel.GAP_AXIS_LINE);
 
         if (pixelStart >= pixelStop) { // avoid infinite loop 
             return;
@@ -378,7 +369,7 @@ public class XAxis extends Axis {
 
         //pick the font to paint ticks on the line
         g.setFont(m_mustDrawDiagonalLabels ? m_valuesDiagonalFont : m_valuesFont);
-        
+
         int height = m_valuesFontMetrics.getHeight();
 
         int fractionalDigits = ticks.getFractionalDigits();
@@ -391,13 +382,13 @@ public class XAxis extends Axis {
         int pX = valueToPixel(x);
         int previousEndX = -Integer.MAX_VALUE;
         m_lastWidth = -1;
-       
+
         while (true) {
 
             String label;
             if (m_isEnum) {
                 label = m_plotPanel.getEnumValueX((int) Math.round(x), false); //JPM.WART
-                if (label == null){
+                if (label == null) {
                     label = " ";
                 }
                 if (m_mustDrawDiagonalLabels) {
@@ -413,7 +404,7 @@ public class XAxis extends Axis {
                 }
 
                 label = m_df.format(xDisplay);
-                
+
             }
 
             int posX;
@@ -425,10 +416,10 @@ public class XAxis extends Axis {
             }
 
             if (posX > previousEndX + 2) { // check to avoid to overlap labels
-                
-                g.drawLine(pX, m_y+BasePlotPanel.GAP_AXIS_LINE, pX, m_y + 4+BasePlotPanel.GAP_AXIS_LINE);//draw tick
-                g.drawString(label, posX, m_y + height + 4+BasePlotPanel.GAP_AXIS_LINE);//draw label
-                
+
+                g.drawLine(pX, m_y + BasePlotPanel.GAP_AXIS_LINE, pX, m_y + 4 + BasePlotPanel.GAP_AXIS_LINE);//draw tick
+                g.drawString(label, posX, m_y + height + 4 + BasePlotPanel.GAP_AXIS_LINE);//draw label
+
                 previousEndX = posX + m_labelMinWidth;
             }
 
@@ -455,12 +446,12 @@ public class XAxis extends Axis {
 
         int pixelStart = valueToPixel(m_minValue);
         int pixelStop = valueToPixel(m_maxValue);
-        g.drawLine(pixelStart, m_y+BasePlotPanel.GAP_AXIS_LINE, pixelStop, m_y+BasePlotPanel.GAP_AXIS_LINE);
+        g.drawLine(pixelStart, m_y + BasePlotPanel.GAP_AXIS_LINE, pixelStop, m_y + BasePlotPanel.GAP_AXIS_LINE);
 
         if (pixelStart >= pixelStop) { // avoid infinite loop 
             return;
         }
- 
+
         g.setFont(m_mustDrawDiagonalLabels ? m_valuesDiagonalFont : m_valuesFont);
 
         int height = m_valuesFontMetrics.getHeight();
@@ -469,14 +460,14 @@ public class XAxis extends Axis {
         int pX = pixelStart;
         int previousEndX = -Integer.MAX_VALUE;
         while (true) {
-            
+
             if (m_selected) {
                 g.setColor(Color.white);
             } else {
                 g.setColor(CyclicColorPalette.GRAY_TEXT_DARK);
             }
-            
-            g.drawLine(pX, m_y+BasePlotPanel.GAP_AXIS_LINE, pX, m_y + 4+BasePlotPanel.GAP_AXIS_LINE);
+
+            g.drawLine(pX, m_y + BasePlotPanel.GAP_AXIS_LINE, pX, m_y + 4 + BasePlotPanel.GAP_AXIS_LINE);
 
             // round x
             double xDisplay = x;
@@ -486,7 +477,7 @@ public class XAxis extends Axis {
 
             int posX = pX - stringWidth / 2;
             if (posX > previousEndX + 2) { // check to avoid to overlap labels
-                g.drawString(s, posX, m_y + height + 4+BasePlotPanel.GAP_AXIS_LINE);
+                g.drawString(s, posX, m_y + height + 4 + BasePlotPanel.GAP_AXIS_LINE);
                 previousEndX = posX + stringWidth;
             }
 
@@ -495,18 +486,18 @@ public class XAxis extends Axis {
             if (pX > pixelStop) {
                 break;
             }
-            
+
             if (m_selected) {
                 g.setColor(Color.white);
             } else {
                 g.setColor(CyclicColorPalette.GRAY_TEXT_LIGHT);
             }
-            
+
             // display min ticks between two major ticks
-            for (int i=2;i<=9;i++) {
-                double xMinTick = Math.pow(10, x)*(((double)i)*0.1d);
+            for (int i = 2; i <= 9; i++) {
+                double xMinTick = Math.pow(10, x) * (((double) i) * 0.1d);
                 int pMinTick = valueToPixel(xMinTick);
-                 g.drawLine(pMinTick, m_y+BasePlotPanel.GAP_AXIS_LINE, pMinTick, m_y + 4+BasePlotPanel.GAP_AXIS_LINE);                
+                g.drawLine(pMinTick, m_y + BasePlotPanel.GAP_AXIS_LINE, pMinTick, m_y + 4 + BasePlotPanel.GAP_AXIS_LINE);
             }
 
         }
@@ -522,32 +513,35 @@ public class XAxis extends Axis {
         }
 
     }
-    
+
     public void paintGridLinear(Graphics2D g, int xPixel, int width, int yPixel, int height) {
 
         int pixelStart = valueToPixel(m_minTick);
         int pixelStop = valueToPixel(m_maxTick);
-
+        m_logger.debug(String.format("___________AxisX m_minTick=%f, m_maxTick=%f, m_x=%d", m_minTick, m_maxTick, m_x));
+         int stop =  m_x + (int) Math.round(((m_maxTick - m_minValue) / (m_maxValue - m_minValue)) * m_width);
+        m_logger.debug(String.format("___________AxisX pixelStart=%d, pixelStop=%d", pixelStart, pixelStop));
+        m_logger.debug(String.format("valueToPixel stop = %d, min=%f, max=%f,width=%d)", stop, m_minValue, m_maxValue, m_width));
         if (pixelStart >= pixelStop) { // avoid infinite loop 
             return;
         }
 
-        g.setColor(CyclicColorPalette.GRAY_GRID);
+        //g.setColor(CyclicColorPalette.GRAY_GRID);
+        g.setColor(Color.ORANGE);
         Stroke s = g.getStroke();
         g.setStroke(DASHED);
-        
+
         double x = m_minTick;
         int pX = pixelStart;
         int previousEndX = -Integer.MAX_VALUE;
         while (true) {
-            
+
             if (pX > previousEndX + 2) { // check to avoid to display grid for overlap labels
-                if ((pX>=xPixel) && (pX<=xPixel+width)) {
+                if ((pX >= xPixel) && (pX <= xPixel + width)) {
                     g.drawLine(pX, yPixel, pX, yPixel + height - 1);
                 }
                 previousEndX = pX + m_lastWidth;
             }
-            
 
             x += m_tickSpacing;
             pX = valueToPixel(x);
@@ -557,7 +551,7 @@ public class XAxis extends Axis {
         }
         g.setStroke(s);
     }
-    
+
     public void paintGridLog(Graphics2D g, int y, int height) {
         int pixelStart = valueToPixel(Math.pow(10, m_minTick));
         int pixelStop = valueToPixel(Math.pow(10, m_maxTick));
@@ -565,10 +559,10 @@ public class XAxis extends Axis {
         if (pixelStart >= pixelStop) { // avoid infinite loop 
             return;
         }
-        
+
         Stroke s = g.getStroke();
         g.setStroke(DASHED);
-        
+
         double x = m_minTick;
         int pX = pixelStart;
         while (true) {
@@ -580,12 +574,12 @@ public class XAxis extends Axis {
             if (pX > pixelStop) {
                 break;
             }
-            
+
             g.setColor(CyclicColorPalette.GRAY_GRID_LOG);
-            
+
             // display min ticks between two major ticks
-            for (int i=2;i<=9;i++) {
-                double xMinTick = Math.pow(10, x)*(((double)i)*0.1d);
+            for (int i = 2; i <= 9; i++) {
+                double xMinTick = Math.pow(10, x) * (((double) i) * 0.1d);
                 int pMinTick = valueToPixel(xMinTick);
                 g.drawLine(pMinTick, y, pMinTick, y + height - 1);
             }
@@ -623,7 +617,7 @@ public class XAxis extends Axis {
             double v = m_minValue + ((((double) pixel) - m_x) / ((double) m_width)) * (m_maxValue - m_minValue);
             return v;
         }
-        
+
     }
 
 }

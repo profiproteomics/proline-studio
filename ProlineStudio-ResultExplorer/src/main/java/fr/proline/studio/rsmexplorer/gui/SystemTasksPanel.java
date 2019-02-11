@@ -266,7 +266,7 @@ public class SystemTasksPanel extends AbstractTasksPanel {
                 JMSNotificationMessage notifMsg = JMSMessageUtil.buildJMSNotificationMessage(msg, JMSNotificationMessage.MessageStatus.PENDING);
                 if (notifMsg != null) {
                     pendingMsg.add(notifMsg);
-                    m_logger.debug(notifMsg.toString());
+                    //m_logger.debug(notifMsg.toString());
                 } else {
                     m_logger.debug("Invalid message in Queue ! " + msg);
                 }

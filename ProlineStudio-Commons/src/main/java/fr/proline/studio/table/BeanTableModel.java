@@ -9,6 +9,7 @@ import fr.proline.studio.filter.StringFilter;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
 import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
+import fr.proline.studio.graphics.PlotDataSpec;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
@@ -426,6 +427,11 @@ public class BeanTableModel<T> extends AbstractTableModel implements GlobalTable
 
     @Override
     public ArrayList<ExtraDataType> getExtraDataTypes() {
+        return null;
+    }
+
+    @Override
+    public PlotDataSpec getDataSpecAt(int i) {
         return null;
     }
 

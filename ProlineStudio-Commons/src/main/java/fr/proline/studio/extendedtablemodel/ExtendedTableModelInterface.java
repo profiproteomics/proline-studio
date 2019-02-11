@@ -1,5 +1,6 @@
 package fr.proline.studio.extendedtablemodel;
 
+import fr.proline.studio.graphics.PlotDataSpec;
 import fr.proline.studio.graphics.PlotInformation;
 import java.util.Map;
 
@@ -48,5 +49,7 @@ public interface ExtendedTableModelInterface extends ExtraDataForTableModelInter
     // it is important to be able to track rows after filtering
     public long row2UniqueId(int rowIndex);
     public int uniqueId2Row(long id);
+
+    public PlotDataSpec getDataSpecAt(int i);
 
 }

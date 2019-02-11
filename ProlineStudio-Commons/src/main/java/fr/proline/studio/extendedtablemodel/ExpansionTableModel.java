@@ -7,6 +7,7 @@ package fr.proline.studio.extendedtablemodel;
 
 import fr.proline.studio.export.ExportFontData;
 import fr.proline.studio.filter.Filter;
+import fr.proline.studio.graphics.PlotDataSpec;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
 import fr.proline.studio.table.LazyData;
@@ -323,6 +324,11 @@ public class ExpansionTableModel implements GlobalTableModelInterface {
             return m_slaveModel.getExportColumnName(col - m_masterModel.getColumnCount());
         }
         return m_masterModel.getExportColumnName(col);
+    }
+
+    @Override
+    public PlotDataSpec getDataSpecAt(int i) {
+            return null;
     }
 
 }

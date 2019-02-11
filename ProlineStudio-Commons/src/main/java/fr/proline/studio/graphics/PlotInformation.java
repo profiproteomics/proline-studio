@@ -21,8 +21,19 @@ public class PlotInformation {
     
     // key value information, to be displayed in the tooltip
     private HashMap<String, String> plotInfo;
+    
+    private boolean _hasDataSpec;
 
     public PlotInformation() {
+        _hasDataSpec = false;
+    }
+
+    public boolean isHasDataSpec() {
+        return _hasDataSpec;
+    }
+
+    public void setHasDataSpec(boolean hasDataSpec) {
+        this._hasDataSpec = hasDataSpec;
     }
 
     public Color getPlotColor() {

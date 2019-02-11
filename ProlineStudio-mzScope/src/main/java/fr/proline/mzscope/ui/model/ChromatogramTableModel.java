@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Map;
 import javax.swing.table.AbstractTableModel;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
+import fr.proline.studio.graphics.PlotDataSpec;
 
 /**
  * data for chromatogram
@@ -153,6 +154,11 @@ public class ChromatogramTableModel  extends AbstractTableModel implements Exten
     @Override
     public Object getSingleValue(Class c) {
         return null;
+    }
+
+    @Override
+    public PlotDataSpec getDataSpecAt(int i) {
+            return null;
     }
     
 }

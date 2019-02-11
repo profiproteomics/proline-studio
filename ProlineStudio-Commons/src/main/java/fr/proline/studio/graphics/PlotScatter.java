@@ -42,22 +42,24 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Scatter Plot
+ *
  * @author JM235353
  */
 public class PlotScatter extends PlotXYAbstract implements Axis.EnumXInterface, Axis.EnumYInterface {
+
     protected static final Logger logger = LoggerFactory.getLogger("ProlineStudio.Common");
     protected double m_xMin;
     protected double m_xMax;
     protected double m_yMin;
     protected double m_yMax;
-    
+
     protected double[] m_dataX;
     protected double[] m_dataY;
     protected int[] m_jitterX;
     protected int[] m_jitterY;
     private String[] m_enumX;
     private String[] m_enumY;
-    
+
     // next 6 variable are for color
     private double m_gradientParamValuesMin;
     private double m_gradientParamValuesMax;
@@ -65,40 +67,39 @@ public class PlotScatter extends PlotXYAbstract implements Axis.EnumXInterface, 
     private int m_gradientParamCol = -1;
     private Color[] m_gradientColors;
     private float[] m_gradientFractions;
-    
-    
+
     protected boolean[] m_selected;
     private long[] m_ids;
     private HashMap<Long, Integer> m_idToIndex;
 
     private static final int SELECT_SENSIBILITY = 8;
-    
+
     private static final String PLOT_SCATTER_COLOR_KEY = "PLOT_SCATTER_COLOR";
     private static final String PLOT_SCATTER_X_JITTER_KEY = "PLOT_SCATTER_X_JITTER";
     private static final String PLOT_SCATTER_Y_JITTER_KEY = "PLOT_SCATTER_Y_JITTER";
-    
+
     private final ColorOrGradientParameter m_colorParameter;
     private final IntegerParameter m_jitterXParameter;
     private final IntegerParameter m_jitterYParameter;
-    
+
     private ArrayList<ParameterList> m_parameterListArray = null;
-    
+
     private final LinkedList<GraphicDataGroup> m_dataGroup = new LinkedList<>();
     private final HashMap<Long, GraphicDataGroup> m_idsToGraphicDataGroup = new HashMap<>();
     private final HashMap<GraphicDataGroup, LinkedHashSet<Long>> m_graphicDataGroupToId = new HashMap<>();
     private StringBuilder m_sb = null;
-    
+
     public PlotScatter(BasePlotPanel plotPanel, ExtendedTableModelInterface compareDataInterface, CrossSelectionInterface crossSelectionInterface, int colX, int colY) {
         super(plotPanel, PlotType.SCATTER_PLOT, compareDataInterface, crossSelectionInterface);
         int[] cols = new int[2]; //JPM.TODO enhance
         cols[COL_X_ID] = colX;
         cols[COL_Y_ID] = colY;
-        
+
         update(cols, null); //by call this methode, min max X, min max Y are calculated
-        
+
         // Color parameter
         ParameterList colorParameteList = new ParameterList("Colors");
-       
+
         ColorOrGradient colorOrGradient = new ColorOrGradient();
         colorOrGradient.setColor(CyclicColorPalette.getColor(21, 128));
         float[] fractions = {0.0f, 1.0f};
@@ -108,25 +109,22 @@ public class PlotScatter extends PlotXYAbstract implements Axis.EnumXInterface, 
 
         m_colorParameter = new ColorOrGradientParameter(PLOT_SCATTER_COLOR_KEY, "Scatter Plot Color", colorOrGradient, null);
         colorParameteList.add(m_colorParameter);
-        
+
         // Jitter parameter
         ParameterList settingsParameterList = new ParameterList("Settings");
-        
+
         m_jitterXParameter = new IntegerParameter(PLOT_SCATTER_X_JITTER_KEY, "X Jitter", JSlider.class, 0, 0, 20);
         m_jitterYParameter = new IntegerParameter(PLOT_SCATTER_Y_JITTER_KEY, "Y Jitter", JSlider.class, 0, 0, 20);
         settingsParameterList.add(m_jitterXParameter);
         settingsParameterList.add(m_jitterYParameter);
-        
-        
-        m_parameterListArray = new  ArrayList<>(2);
+
+        m_parameterListArray = new ArrayList<>(2);
         m_parameterListArray.add(colorParameteList);
         m_parameterListArray.add(settingsParameterList);
 
-        
         addMeasurement(new WidthMeasurement(this));
     }
 
-    
     @Override
     public ArrayList<ParameterList> getParameters() {
 
@@ -144,11 +142,9 @@ public class PlotScatter extends PlotXYAbstract implements Axis.EnumXInterface, 
 
         m_colorParameter.setGradientParam(m_potentialGradientParamArray);
 
-
-        
         return m_parameterListArray;
     }
-    
+
     @Override
     public String getToolTipText(double x, double y) {
         int indexFound = findPoint(x, y);
@@ -177,10 +173,9 @@ public class PlotScatter extends PlotXYAbstract implements Axis.EnumXInterface, 
             }
         } else {
             infoValue = m_compareDataInterface.getDataValueAt(indexFound, m_compareDataInterface.getInfoColumn()).toString();
-            
+
         }
 
-        
         m_sb.append(infoValue);
         m_sb.append("<BR>");
         m_sb.append(m_plotPanel.getXAxis().getTitle());
@@ -204,13 +199,12 @@ public class PlotScatter extends PlotXYAbstract implements Axis.EnumXInterface, 
         String tooltip = m_sb.toString();
         m_sb.setLength(0);
         return tooltip;
- 
+
     }
 
-    
     @Override
     public boolean select(double x, double y, boolean append) {
-        
+
         int indexFound = findPoint(x, y);
 
         int size = m_dataX.length;
@@ -223,13 +217,13 @@ public class PlotScatter extends PlotXYAbstract implements Axis.EnumXInterface, 
         if (indexFound != -1) {
 
             m_selected[indexFound] = true;
-            
+
             return true;
         }
 
         return false;
     }
-    
+
     @Override
     public boolean select(Path2D.Double path, double minX, double maxX, double minY, double maxY, boolean append) {
 
@@ -246,17 +240,15 @@ public class PlotScatter extends PlotXYAbstract implements Axis.EnumXInterface, 
             } else if (path.contains(dataX, dataY)) {
                 m_selected[i] = true;
                 aSelection = true;
-            } else {
-                if (!append) {
-                    m_selected[i] = false;
-                }
+            } else if (!append) {
+                m_selected[i] = false;
             }
 
         }
-        
+
         return aSelection;
     }
-    
+
     @Override
     public ArrayList<Long> getSelectedIds() {
         ArrayList<Long> selection = new ArrayList();
@@ -267,6 +259,7 @@ public class PlotScatter extends PlotXYAbstract implements Axis.EnumXInterface, 
         }
         return selection;
     }
+
     @Override
     public void setSelectedIds(ArrayList<Long> selectedIds) {
         for (int i = 0; i < m_selected.length; i++) {
@@ -277,29 +270,29 @@ public class PlotScatter extends PlotXYAbstract implements Axis.EnumXInterface, 
             if (index == null) {
                 continue;
             }
-             m_selected[index] = true; 
+            m_selected[index] = true;
         }
     }
-    
+
     /**
      * return nearestDataIndex
+     *
      * @param x, pixel x
      * @param y, pixel y
-     * @return 
+     * @return
      */
     protected int findPoint(double x, double y) {
 
         double rangeX = m_xMax - m_xMin;
         double rangeY = m_yMax - m_yMin;
-        
+
         double distanceMin = Double.MAX_VALUE;
         int nearestDataIndex = -1;
-        int size = m_dataX == null ? 0 :m_dataX.length;
+        int size = m_dataX == null ? 0 : m_dataX.length;
         for (int i = size - 1; i >= 0; i--) { // reverse loop to select first the data in foreground
             double dataX = m_dataX[i];
             double dataY = m_dataY[i];
-        
-            
+
             // take in account jitter
             if (m_jitterX != null) {
                 XAxis xAxis = m_plotPanel.getXAxis();
@@ -312,9 +305,8 @@ public class PlotScatter extends PlotXYAbstract implements Axis.EnumXInterface, 
                 dataY = yAxis.pixelToValue(yWithJitter);
             }
 
-            
-            double normalizedDistanceX = (rangeX<=10e-10) ? 0 : (x-dataX)/rangeX;
-            if (normalizedDistanceX<0) {
+            double normalizedDistanceX = (rangeX <= 10e-10) ? 0 : (x - dataX) / rangeX;
+            if (normalizedDistanceX < 0) {
                 normalizedDistanceX = -normalizedDistanceX;
             }
 
@@ -334,11 +326,11 @@ public class PlotScatter extends PlotXYAbstract implements Axis.EnumXInterface, 
         if (nearestDataIndex != -1) {
 
             int jitterX = (m_jitterX == null) ? 0 : m_jitterX[nearestDataIndex];
-            if (Math.abs(m_plotPanel.getXAxis().valueToPixel(x)-m_plotPanel.getXAxis().valueToPixel( m_dataX[nearestDataIndex])-jitterX)>SELECT_SENSIBILITY) {
+            if (Math.abs(m_plotPanel.getXAxis().valueToPixel(x) - m_plotPanel.getXAxis().valueToPixel(m_dataX[nearestDataIndex]) - jitterX) > SELECT_SENSIBILITY) {
                 return -1;
             }
             int jitterY = (m_jitterY == null) ? 0 : m_jitterY[nearestDataIndex];
-            if (Math.abs(m_plotPanel.getYAxis().valueToPixel(y)-m_plotPanel.getYAxis().valueToPixel( m_dataY[nearestDataIndex])-jitterY)>SELECT_SENSIBILITY) {
+            if (Math.abs(m_plotPanel.getYAxis().valueToPixel(y) - m_plotPanel.getYAxis().valueToPixel(m_dataY[nearestDataIndex]) - jitterY) > SELECT_SENSIBILITY) {
                 return -1;
             }
 
@@ -356,16 +348,14 @@ public class PlotScatter extends PlotXYAbstract implements Axis.EnumXInterface, 
         for (int i = size - 1; i >= 0; i--) { // reverse loop to select first the data in foreground
             double dataX = m_dataX[i];
 
-            
             // take in account jitter
             /*if (m_jitterX != null) {
                 XAxis xAxis = m_plotPanel.getXAxis();
                 int xWithJitter = xAxis.valueToPixel(dataX) + m_jitterX[i];
                 dataX = xAxis.pixelToValue(xWithJitter);
             }*/ //JPM.TODO
-
-            double distanceX = (x-dataX);
-            if (distanceX<0) {
+            double distanceX = (x - dataX);
+            if (distanceX < 0) {
                 distanceX = -distanceX;
             }
 
@@ -382,7 +372,7 @@ public class PlotScatter extends PlotXYAbstract implements Axis.EnumXInterface, 
 
         return x;
     }
-    
+
     @Override
     public double getNearestYData(double y) {
 
@@ -392,8 +382,8 @@ public class PlotScatter extends PlotXYAbstract implements Axis.EnumXInterface, 
         for (int i = size - 1; i >= 0; i--) { // reverse loop to select first the data in foreground
             double dataY = m_dataY[i];
 
-            double distanceY = (y-dataY);
-            if (distanceY<0) {
+            double distanceY = (y - dataY);
+            if (distanceY < 0) {
                 distanceY = -distanceY;
             }
 
@@ -410,31 +400,31 @@ public class PlotScatter extends PlotXYAbstract implements Axis.EnumXInterface, 
 
         return y;
     }
-    
+
     @Override
     public void parametersChanged() {
         updateJitter();
     }
-    
+
     private void updateJitter() {
-        
+
         // parametersChanged() can be call soon, and so parameters could be not initialized
         if (m_compareDataInterface == null) {
             return;
         }
-        
+
         int size = m_compareDataInterface.getRowCount();
         if (size == 0) {
 
             return;
         }
-        
+
         if ((m_jitterXParameter == null) || (m_jitterYParameter == null) || (m_jitterXParameter.getObjectValue() == null) || (m_jitterYParameter.getObjectValue() == null)) {
             m_jitterX = null;
             m_jitterY = null;
             return;
         }
-        
+
         int jitterX = ((Integer) m_jitterXParameter.getObjectValue());
         int jitterY = ((Integer) m_jitterYParameter.getObjectValue());
 
@@ -461,7 +451,7 @@ public class PlotScatter extends PlotXYAbstract implements Axis.EnumXInterface, 
             m_jitterY = null;
         }
     }
-    
+
     /**
      * here we get min max X,min max Y
      */
@@ -470,7 +460,7 @@ public class PlotScatter extends PlotXYAbstract implements Axis.EnumXInterface, 
 
         int size = m_compareDataInterface.getRowCount();
         if (size == 0) {
- 
+
             return;
         }
 
@@ -482,14 +472,14 @@ public class PlotScatter extends PlotXYAbstract implements Axis.EnumXInterface, 
 
         // set jitter values
         updateJitter();
-        
+
         boolean xAsEnum = m_plotPanel.getXAxis().isEnum();
         boolean yAsEnum = m_plotPanel.getYAxis().isEnum();
-        
+
         if (xAsEnum) {
             HashMap<String, Integer> stringToEnumMap = new HashMap<>();
-            HashMap<Integer, String> enumToStringMap = new  HashMap<>();
-            
+            HashMap<Integer, String> enumToStringMap = new HashMap<>();
+
             int enumIndex = 0;
             for (int i = 0; i < size; i++) {
 
@@ -507,33 +497,33 @@ public class PlotScatter extends PlotXYAbstract implements Axis.EnumXInterface, 
                 m_ids[i] = m_compareDataInterface.row2UniqueId(i);
                 m_idToIndex.put(m_ids[i], i);
             }
-            
+
             m_enumX = new String[enumToStringMap.size()];
             Iterator<Integer> itEnum = enumToStringMap.keySet().iterator();
             while (itEnum.hasNext()) {
                 Integer enumI = itEnum.next();
                 m_enumX[enumI] = enumToStringMap.get(enumI);
             }
-            
+
         } else {
             for (int i = 0; i < size; i++) {
                 Object value = m_compareDataInterface.getDataValueAt(i, m_cols[COL_X_ID]);
                 m_dataX[i] = (value == null || !Number.class.isAssignableFrom(value.getClass())) ? Double.NaN : ((Number) value).doubleValue(); //CBy TODO : ne pas avoir a tester le type Number
                 m_selected[i] = false;
-                 m_ids[i] = m_compareDataInterface.row2UniqueId(i);
-                 m_idToIndex.put(m_ids[i], i);
+                m_ids[i] = m_compareDataInterface.row2UniqueId(i);
+                m_idToIndex.put(m_ids[i], i);
             }
         }
-        
+
         if (yAsEnum) {
             HashMap<String, Integer> stringToEnumMap = new HashMap<>();
-            HashMap<Integer, String> enumToStringMap = new  HashMap<>();
-            
+            HashMap<Integer, String> enumToStringMap = new HashMap<>();
+
             int enumIndex = 0;
             for (int i = 0; i < size; i++) {
 
                 String stringValue = m_compareDataInterface.getDataValueAt(i, m_cols[COL_Y_ID]).toString();
-                
+
                 Integer enumIndexCur = stringToEnumMap.get(stringValue);
                 if (enumIndexCur == null) {
                     enumIndexCur = enumIndex;
@@ -542,8 +532,8 @@ public class PlotScatter extends PlotXYAbstract implements Axis.EnumXInterface, 
                     enumIndex++;
                 }
                 m_dataY[i] = enumIndexCur;
-            } 
-            
+            }
+
             m_enumY = new String[enumToStringMap.size()];
             Iterator<Integer> itEnum = enumToStringMap.keySet().iterator();
             while (itEnum.hasNext()) {
@@ -557,15 +547,14 @@ public class PlotScatter extends PlotXYAbstract implements Axis.EnumXInterface, 
             }
         }
 
-
         // min and max values
         double minX = m_dataX[0];
         double maxX = minX;
         double minY = m_dataY[0];
         double maxY = minY;
         int i = 1;
-        while (minX != minX || (minY!=minY)) { // NaN values
-            if (i>=size) {
+        while (minX != minX || (minY != minY)) { // NaN values
+            if (i >= size) {
                 break;
             }
             minX = m_dataX[i];
@@ -622,9 +611,8 @@ public class PlotScatter extends PlotXYAbstract implements Axis.EnumXInterface, 
         m_plotPanel.setXAxisTitle(m_compareDataInterface.getDataColumnIdentifier(m_cols[COL_X_ID]));
         m_plotPanel.setYAxisTitle(m_compareDataInterface.getDataColumnIdentifier(m_cols[COL_Y_ID]));
 
-
         removeAllCursors();
-        
+
         if (m_compareDataInterface instanceof ExtraDataForTableModelInterface) {
             CursorInfoList cursorInfoList = (CursorInfoList) ((ExtraDataForTableModelInterface) m_compareDataInterface).getColValue(CursorInfoList.class, m_cols[COL_X_ID]);
             if (cursorInfoList != null) {
@@ -634,7 +622,7 @@ public class PlotScatter extends PlotXYAbstract implements Axis.EnumXInterface, 
                     addCursor(cursor);
                 }
             }
-            
+
             cursorInfoList = (CursorInfoList) ((ExtraDataForTableModelInterface) m_compareDataInterface).getColValue(CursorInfoList.class, m_cols[COL_Y_ID]);
             if (cursorInfoList != null) {
                 for (CursorInfo info : cursorInfoList.getCursorInfoList()) {
@@ -645,27 +633,25 @@ public class PlotScatter extends PlotXYAbstract implements Axis.EnumXInterface, 
             }
         }
 
-        
-
         m_plotPanel.repaint();
     }
-    
+
     private void setGradientValues() {
         ColorOrGradient colorOrGradient = m_colorParameter.getColor();
         boolean useGradient = !colorOrGradient.isColorSelected();
         if (!useGradient) {
             return;
         }
-        
+
         m_gradientColors = colorOrGradient.getGradient().getColors();
         m_gradientFractions = colorOrGradient.getGradient().getFractions();
-        
+
         int gradientParamCol = m_colorParameter.getSelectedReferenceIdName().getColumnIndex();
         if (gradientParamCol == m_gradientParamCol) {
             return;
         }
         m_gradientParamCol = gradientParamCol;
-        
+
         int size = m_compareDataInterface.getRowCount();
         if ((m_gradientParamValues == null) || (m_gradientParamValues.length != size)) {
             m_gradientParamValues = new double[size];
@@ -673,9 +659,9 @@ public class PlotScatter extends PlotXYAbstract implements Axis.EnumXInterface, 
         if (size == 0) {
             return;
         }
-        
+
         Object value = m_compareDataInterface.getDataValueAt(0, m_gradientParamCol);
-        double d = (value == null || ! Number.class.isAssignableFrom(value.getClass())) ? Double.NaN : ((Number)value).doubleValue();
+        double d = (value == null || !Number.class.isAssignableFrom(value.getClass())) ? Double.NaN : ((Number) value).doubleValue();
         m_gradientParamValues[0] = d;
 
         m_gradientParamValuesMin = d;
@@ -683,46 +669,40 @@ public class PlotScatter extends PlotXYAbstract implements Axis.EnumXInterface, 
 
         for (int i = 1; i < size; i++) {
             value = m_compareDataInterface.getDataValueAt(i, m_gradientParamCol);
-            d = (value == null || ! Number.class.isAssignableFrom(value.getClass())) ? Double.NaN : ((Number)value).doubleValue();
+            d = (value == null || !Number.class.isAssignableFrom(value.getClass())) ? Double.NaN : ((Number) value).doubleValue();
             m_gradientParamValues[i] = d;
-            if (d<m_gradientParamValuesMin) {
+            if (d < m_gradientParamValuesMin) {
                 m_gradientParamValuesMin = d;
-            } else if (d>m_gradientParamValuesMax) {
+            } else if (d > m_gradientParamValuesMax) {
                 m_gradientParamValuesMax = d;
             }
         }
-        
 
-        
-        
     }
 
     private Color getColorInGradient(double d) {
-        double f = (d-m_gradientParamValuesMin)/(m_gradientParamValuesMax-m_gradientParamValuesMin);
-        for (int i=0;i<m_gradientFractions.length-1;i++) {
+        double f = (d - m_gradientParamValuesMin) / (m_gradientParamValuesMax - m_gradientParamValuesMin);
+        for (int i = 0; i < m_gradientFractions.length - 1; i++) {
             float f1 = m_gradientFractions[i];
-            float f2 = m_gradientFractions[i+1];
-            if ((f>=f1) && (f<=f2)) {
+            float f2 = m_gradientFractions[i + 1];
+            if ((f >= f1) && (f <= f2)) {
                 Color c1 = m_gradientColors[i];
-                Color c2 = m_gradientColors[i+1];
-                double fInInterval = (f-f1)/(f2-f1);
-                int r = (int) Math.round(  ((double) (c2.getRed()-c1.getRed()))  *fInInterval+(double) c1.getRed() );
-                int g = (int) Math.round(  ((double) (c2.getGreen()-c1.getGreen()))  *fInInterval+(double) c1.getGreen() );
-                int b = (int) Math.round(  ((double) (c2.getBlue()-c1.getBlue()))  *fInInterval+(double) c1.getBlue() );
-                int a = (int) Math.round(  ((double) (c2.getAlpha()-c1.getAlpha()))  *fInInterval+(double) c1.getAlpha() );
+                Color c2 = m_gradientColors[i + 1];
+                double fInInterval = (f - f1) / (f2 - f1);
+                int r = (int) Math.round(((double) (c2.getRed() - c1.getRed())) * fInInterval + (double) c1.getRed());
+                int g = (int) Math.round(((double) (c2.getGreen() - c1.getGreen())) * fInInterval + (double) c1.getGreen());
+                int b = (int) Math.round(((double) (c2.getBlue() - c1.getBlue())) * fInInterval + (double) c1.getBlue());
+                int a = (int) Math.round(((double) (c2.getAlpha() - c1.getAlpha())) * fInInterval + (double) c1.getAlpha());
                 return new Color(r, g, b, a);
             }
         }
-        
-        if (f<= m_gradientFractions[0]) {
+
+        if (f <= m_gradientFractions[0]) {
             return m_gradientColors[0];
         }
-        return m_gradientColors[m_gradientFractions.length-1];
+        return m_gradientColors[m_gradientFractions.length - 1];
     }
 
-    
-    
-    
     @Override
     public double getXMin() {
         return m_xMin;
@@ -744,21 +724,17 @@ public class PlotScatter extends PlotXYAbstract implements Axis.EnumXInterface, 
     }
 
     @Override
-    public void paint(Graphics2D g) {
-                
-        XAxis xAxis = m_plotPanel.getXAxis();
-        YAxis yAxis = m_plotPanel.getYAxis(); 
-        
+    public void paint(Graphics2D g, XAxis xAxis, YAxis yAxis) {      
         // set clipping area
         int clipX = xAxis.valueToPixel(xAxis.getMinValue());
-        int clipWidth = xAxis.valueToPixel(xAxis.getMaxValue())-clipX;
+        int clipWidth = xAxis.valueToPixel(xAxis.getMaxValue()) - clipX;
         int clipY = yAxis.valueToPixel(yAxis.getMaxValue());
-        int clipHeight = yAxis.valueToPixel(yAxis.getMinValue())-clipY;
+        int clipHeight = yAxis.valueToPixel(yAxis.getMinValue()) - clipY;
         g.setClip(clipX, clipY, clipWidth, clipHeight);
 
         ColorOrGradient colorOrGradient = m_colorParameter.getColor();
         boolean useGradient = !colorOrGradient.isColorSelected();
-        
+
         Color plotColor = Color.black; // default init
 
         if (!useGradient) {
@@ -766,45 +742,49 @@ public class PlotScatter extends PlotXYAbstract implements Axis.EnumXInterface, 
         } else {
             setGradientValues(); // set gradient values if needed
         }
- 
+
         // first plot non selected
-        
         int size = (m_dataX != null) ? m_dataX.length : 0;
         for (int i = 0; i < size; i++) {
             if (m_selected[i]) {
                 continue;
             }
-            
+
             int x = xAxis.valueToPixel(m_dataX[i]) + ((m_jitterX != null) ? m_jitterX[i] : 0);
             int y = yAxis.valueToPixel(m_dataY[i]) + ((m_jitterY != null) ? m_jitterY[i] : 0);
 
             Color c = selectColor(plotColor, useGradient, i);
             g.setColor(c);
 
-            g.fillOval(x-3, y-3, 6, 6);
+            g.fillOval(x - 3, y - 3, 6, 6);
 
         }
-        
+
         // plot selected
-        for (int i=0;i<size;i++) {
+        for (int i = 0; i < size; i++) {
             if (!m_selected[i]) {
                 continue;
             }
-            int x = xAxis.valueToPixel( m_dataX[i]) + ((m_jitterX != null) ? m_jitterX[i] : 0);
-            int y = yAxis.valueToPixel( m_dataY[i]) + ((m_jitterY != null) ? m_jitterY[i] : 0);
+            int x = xAxis.valueToPixel(m_dataX[i]) + ((m_jitterX != null) ? m_jitterX[i] : 0);
+            int y = yAxis.valueToPixel(m_dataY[i]) + ((m_jitterY != null) ? m_jitterY[i] : 0);
 
             Color c = selectColor(plotColor, useGradient, i);
             g.setColor(c);
 
-            g.fillOval(x-3, y-3, 6, 6);
-            
-            g.setColor(Color.black);
-            g.drawOval(x-3, y-3, 6, 6);
+            g.fillOval(x - 3, y - 3, 6, 6);
 
+            g.setColor(Color.black);
+            g.drawOval(x - 3, y - 3, 6, 6);
 
         }
 
+    }
 
+    @Override
+    public void paint(Graphics2D g) {
+        XAxis xAxis = m_plotPanel.getXAxis();
+        YAxis yAxis = m_plotPanel.getYAxis();
+        this.paint(g, xAxis, yAxis);
     }
 
     private Color selectColor(Color plotColor, boolean useGradient, int i) {
@@ -825,10 +805,10 @@ public class PlotScatter extends PlotXYAbstract implements Axis.EnumXInterface, 
         }
         return c;
     }
-    
+
     @Override
     public boolean getDoubleBufferingPolicy() {
-        return m_dataX != null && m_dataX.length>2000;
+        return m_dataX != null && m_dataX.length > 2000;
     }
 
     @Override
@@ -840,12 +820,12 @@ public class PlotScatter extends PlotXYAbstract implements Axis.EnumXInterface, 
     public boolean needsYAxis() {
         return true;
     }
-    
+
     @Override
     public boolean isMouseOnPlot(double x, double y) {
         return findPoint(x, y) != -1;
     }
-    
+
     @Override
     public boolean isMouseOnSelectedPlot(double x, double y) {
         int index = findPoint(x, y);
@@ -854,10 +834,9 @@ public class PlotScatter extends PlotXYAbstract implements Axis.EnumXInterface, 
         }
         return m_selected[index];
     }
-    
+
     @Override
     public JPopupMenu getPopupMenu(double x, double y) {
-
 
         boolean onSelection = false;
         int index = findPoint(x, y);
@@ -865,10 +844,10 @@ public class PlotScatter extends PlotXYAbstract implements Axis.EnumXInterface, 
             onSelection = m_selected[index];
         }
         long id = (index == -1) ? -1 : m_ids[index];
-        
+
         // search for group
         final GraphicDataGroup group = (id == -1) ? null : m_idsToGraphicDataGroup.get(id);
-        
+
         JMenuItem addGroupAction = new JMenuItem("Add Group");
         addGroupAction.addActionListener(new ActionListener() {
             @Override
@@ -881,60 +860,57 @@ public class PlotScatter extends PlotXYAbstract implements Axis.EnumXInterface, 
 
                 StringParameter groupNameParameter = new StringParameter("GroupName", "Group Name", JTextField.class, "", 0, 32);
                 groupParameterList.add(groupNameParameter);
-                
+
                 Color defaultColor = CyclicColorPalette.getColor(21, 128);
                 ColorParameter colorParameter = new ColorParameter("GroupColorParameter", "Color", defaultColor, ColorButtonAndPalettePanel.class);
                 groupParameterList.add(colorParameter);
-                
+
                 DefaultParameterDialog parameterDialog = new DefaultParameterDialog(WindowManager.getDefault().getMainWindow(), "Plot Parameters", parameterListArray);
                 parameterDialog.setLocationRelativeTo(m_plotPanel);
                 parameterDialog.setVisible(true);
-                
-                if (parameterDialog.getButtonClicked() == DefaultParameterDialog.BUTTON_OK) {
-                   String groupName = groupNameParameter.getStringValue();
-                   Color c = colorParameter.getColor();
-                   GraphicDataGroup dataGroup = new GraphicDataGroup(groupName, c);
-                   
-                   m_dataGroup.addFirst(dataGroup);
-                   LinkedHashSet<Long> selectedIds = new LinkedHashSet<>();
-                   for (int i = 0; i < m_selected.length; i++) {
-                       if (m_selected[i]) {
-                           
-                           long id = m_ids[i];
-                           GraphicDataGroup oldGroup = m_idsToGraphicDataGroup.get(id);
-                           if (oldGroup != null) {
-                               m_graphicDataGroupToId.get(oldGroup).remove(id);
-                           }
-                           
-                           m_idsToGraphicDataGroup.put(id, dataGroup);
-                           selectedIds.add(id);
 
-                           
-                       }
-                   }
-                   m_graphicDataGroupToId.put(dataGroup, selectedIds);
-                   
-                   String name = dataGroup.getName();
+                if (parameterDialog.getButtonClicked() == DefaultParameterDialog.BUTTON_OK) {
+                    String groupName = groupNameParameter.getStringValue();
+                    Color c = colorParameter.getColor();
+                    GraphicDataGroup dataGroup = new GraphicDataGroup(groupName, c);
+
+                    m_dataGroup.addFirst(dataGroup);
+                    LinkedHashSet<Long> selectedIds = new LinkedHashSet<>();
+                    for (int i = 0; i < m_selected.length; i++) {
+                        if (m_selected[i]) {
+
+                            long id = m_ids[i];
+                            GraphicDataGroup oldGroup = m_idsToGraphicDataGroup.get(id);
+                            if (oldGroup != null) {
+                                m_graphicDataGroupToId.get(oldGroup).remove(id);
+                            }
+
+                            m_idsToGraphicDataGroup.put(id, dataGroup);
+                            selectedIds.add(id);
+
+                        }
+                    }
+                    m_graphicDataGroupToId.put(dataGroup, selectedIds);
+
+                    String name = dataGroup.getName();
                     if ((name != null) && (!name.isEmpty())) {
                         // calculation of percentageY is a wart, could be done in a better way
-                        double percentageY = 1-(0.1*m_dataGroup.size());
-                        if (percentageY<0.1) {
+                        double percentageY = 1 - (0.1 * m_dataGroup.size());
+                        if (percentageY < 0.1) {
                             percentageY = 0.1;
                         }
                         LabelMarker marker = new LabelMarker(m_plotPanel, new PercentageCoordinates(0.9, percentageY), dataGroup.getName(), LabelMarker.ORIENTATION_XY_MIDDLE, LabelMarker.ORIENTATION_XY_MIDDLE, dataGroup.getColor());
                         dataGroup.setAssociatedMarker(marker);
                         addMarker(marker);
                     }
-                   
-                   
-                   // repaint
-                   m_plotPanel.repaintUpdateDoubleBuffer();
-                   
+
+                    // repaint
+                    m_plotPanel.repaintUpdateDoubleBuffer();
+
                 }
             }
         });
 
-        
         addGroupAction.setEnabled(onSelection);
 
         JMenuItem selectGroupAction = new JMenuItem("Select Group");
@@ -961,13 +937,12 @@ public class PlotScatter extends PlotXYAbstract implements Axis.EnumXInterface, 
             }
         });
         selectGroupAction.setEnabled(group != null);
-        
-        
+
         JMenuItem deleteGroupAction = new JMenuItem("Delete Group");
         deleteGroupAction.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                
+
                 LinkedHashSet<Long> ids = m_graphicDataGroupToId.get(group);
                 for (Long id : ids) {
                     m_idsToGraphicDataGroup.remove(id);
@@ -978,23 +953,23 @@ public class PlotScatter extends PlotXYAbstract implements Axis.EnumXInterface, 
                 if (marker != null) {
                     removeMarker(marker);
                 }
-                
+
                 // repaint
-                   m_plotPanel.repaintUpdateDoubleBuffer();
+                m_plotPanel.repaintUpdateDoubleBuffer();
             }
         });
 
         deleteGroupAction.setEnabled(group != null);
-        
+
         AbstractCursor cursor = getOverCursor(m_plotPanel.getXAxis().valueToPixel(x), m_plotPanel.getYAxis().valueToPixel(y));
         boolean isOverCursor = (cursor != null);
-        
+
         if (isOverCursor) {
             // cursor must be selected
             selectCursor(cursor);
         }
-        
-        JMenuItem  addVerticalCursorAction = new JMenuItem ("Add Vertical Cursor");
+
+        JMenuItem addVerticalCursorAction = new JMenuItem("Add Vertical Cursor");
         addVerticalCursorAction.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -1003,8 +978,8 @@ public class PlotScatter extends PlotXYAbstract implements Axis.EnumXInterface, 
                 m_plotPanel.repaint();
             }
         });
-        
-        JMenuItem  addHorizontalCursorAction = new JMenuItem ("Add Horizontal Cursor");
+
+        JMenuItem addHorizontalCursorAction = new JMenuItem("Add Horizontal Cursor");
         addHorizontalCursorAction.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -1013,11 +988,10 @@ public class PlotScatter extends PlotXYAbstract implements Axis.EnumXInterface, 
                 m_plotPanel.repaint();
             }
         });
-        
-        
+
         addVerticalCursorAction.setEnabled(!isOverCursor);
         addHorizontalCursorAction.setEnabled(!isOverCursor);
-        
+
         JMenuItem deleteCursorAction = new JMenuItem("Delete Cursor");
         deleteCursorAction.addActionListener(new ActionListener() {
             @Override
@@ -1040,7 +1014,6 @@ public class PlotScatter extends PlotXYAbstract implements Axis.EnumXInterface, 
             });
         }
 
-        
         JPopupMenu menu = new JPopupMenu();
         menu.add(addGroupAction);
         menu.add(selectGroupAction);
@@ -1052,13 +1025,13 @@ public class PlotScatter extends PlotXYAbstract implements Axis.EnumXInterface, 
         if (snapToDataMenuItem != null) {
             menu.add(snapToDataMenuItem);
         }
-        
+
         return menu;
     }
-    
+
     @Override
     public String getEnumValueX(int index, boolean fromData) {
-        
+
         if (fromData) {
             if ((index < 0) || (index >= m_dataX.length)) {
                 return "";
@@ -1066,17 +1039,15 @@ public class PlotScatter extends PlotXYAbstract implements Axis.EnumXInterface, 
 
             return m_enumX[(int) Math.round(m_dataX[index])];
         } else {
-             if ((index < 0) || (index >= m_enumX.length)) {
+            if ((index < 0) || (index >= m_enumX.length)) {
                 return "";
             }
 
             return m_enumX[index];
         }
-        
-        
-        
+
     }
-    
+
     @Override
     public String getEnumValueY(int index, boolean fromData) {
 

@@ -14,6 +14,7 @@ import java.util.Map;
 import javax.swing.table.AbstractTableModel;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
+import fr.proline.studio.graphics.PlotDataSpec;
 
 /**
  *
@@ -80,7 +81,11 @@ public class StatisticsTableModel extends AbstractTableModel implements Extended
     public Object getDataValueAt(int rowIndex, int columnIndex) {
         return getValueAt(rowIndex, columnIndex);
     }
-
+    
+    @Override
+    public PlotDataSpec getDataSpecAt(int i) {
+            return null;
+    }
    @Override
     public int[] getKeysColumn() {
         int[] keys = { COLTYPE_TIME };

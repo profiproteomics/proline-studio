@@ -6,6 +6,7 @@ import fr.proline.studio.export.ExportFontData;
 import fr.proline.studio.filter.Filter;
 import fr.proline.studio.filter.FilterTableModelInterface;
 import fr.proline.studio.filter.FilterTableModel;
+import fr.proline.studio.graphics.PlotDataSpec;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
 import fr.proline.studio.table.LazyData;
@@ -456,6 +457,11 @@ public class CompoundTableModel extends AbstractTableModel implements GlobalTabl
     @Override
     public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
         m_lastModel.setValueAt(aValue, rowIndex, columnIndex);
+    }
+
+    @Override
+    public PlotDataSpec getDataSpecAt(int i) {
+            return null;
     }
 
 }

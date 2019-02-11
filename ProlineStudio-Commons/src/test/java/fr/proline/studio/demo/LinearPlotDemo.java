@@ -38,7 +38,7 @@ public class LinearPlotDemo extends JFrame {
       Sample sample = new Sample(3000);
       PlotLinear linear = new PlotLinear(basePlot, sample, null, 5, 0);
       linear.setStrokeFixed(true);
-      linear.setAntiAliasing(true);
+        linear.setAntiAliasing(true);
       linear.addMarker(new LineMarker(basePlot, 1000, LineMarker.ORIENTATION_VERTICAL));
       linear.addMarker(new LineMarker(basePlot, 1250, Color.BLUE));
       linear.addMarker(new IntervalMarker(basePlot, Color.orange, Color.RED, 1200, 1300));

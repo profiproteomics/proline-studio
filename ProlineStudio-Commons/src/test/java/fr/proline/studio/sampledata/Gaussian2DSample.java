@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import javax.swing.table.TableModel;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
+import fr.proline.studio.graphics.PlotDataSpec;
 
 /**
  *
@@ -127,6 +128,10 @@ public class Gaussian2DSample implements ExtendedTableModelInterface {
     @Override
     public Object getSingleValue(Class c) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+    @Override
+    public PlotDataSpec getDataSpecAt(int i) {
+        return null;
     }
 
 }

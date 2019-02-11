@@ -1,5 +1,6 @@
 package fr.proline.studio.extendedtablemodel;
 
+import fr.proline.studio.graphics.PlotDataSpec;
 import fr.proline.studio.graphics.PlotInformation;
 import java.util.ArrayList;
 import java.util.Map;
@@ -169,6 +170,11 @@ public class StatsModel implements ExtendedTableModelInterface {
     @Override
     public Object getSingleValue(Class c) {
         return m_src.getSingleValue(c);
+    }
+
+    @Override
+    public PlotDataSpec getDataSpecAt(int i) {
+        return null;
     }
     
 }

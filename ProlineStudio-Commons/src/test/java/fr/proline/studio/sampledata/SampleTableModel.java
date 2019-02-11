@@ -15,6 +15,11 @@ public class SampleTableModel extends AbstractTableModel implements DecoratedTab
    private Class[] classes;
    private String[] columns;
 
+   /**
+    * 
+    * @param sample, an Array list of object[]
+    * @param columns , list of column name
+    */
    public SampleTableModel(List<Object[]> sample, String[] columns) {
       this.sample = sample;
       this.columns = columns;

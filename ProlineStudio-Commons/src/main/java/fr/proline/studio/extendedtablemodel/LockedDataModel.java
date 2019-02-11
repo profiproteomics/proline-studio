@@ -1,6 +1,7 @@
 package fr.proline.studio.extendedtablemodel;
 
 import fr.proline.studio.graphics.BestGraphicsInterface;
+import fr.proline.studio.graphics.PlotDataSpec;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
 import java.util.ArrayList;
@@ -173,6 +174,11 @@ public class LockedDataModel implements ExtendedTableModelInterface, BestGraphic
     @Override
     public Object getSingleValue(Class c) {
         return m_src.getSingleValue(c);
+    }
+
+    @Override
+    public PlotDataSpec getDataSpecAt(int i) {
+        return null;
     }
 
 }

@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Map;
 import javax.swing.table.AbstractTableModel;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
+import fr.proline.studio.graphics.PlotDataSpec;
 
 /**
  * data for scan
@@ -171,5 +172,10 @@ public class ScanTableModel extends AbstractTableModel implements ExtendedTableM
     @Override
     public Object getSingleValue(Class c) {
         return null;
+    }
+
+    @Override
+    public PlotDataSpec getDataSpecAt(int i) {
+            return null;
     }
 }

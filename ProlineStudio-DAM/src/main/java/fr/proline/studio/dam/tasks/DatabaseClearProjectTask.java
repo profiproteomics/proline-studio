@@ -165,10 +165,10 @@ public class DatabaseClearProjectTask extends AbstractDatabaseTask {
             
             
             // Get rsm used in quanti
-            List<Long> listQtRsmIdsUds = new ArrayList<Long>();
+            List<Long> listQtRsmIdsUds = new ArrayList<>();
             String queryQtRsmUds = "SELECT DISTINCT(mqc.quantResultSummaryId) "
                 + "FROM fr.proline.core.orm.uds.MasterQuantitationChannel mqc, fr.proline.core.orm.uds.Dataset ds "
-                + "WHERE mqc.dataset.id =ds.id AND "
+                + "WHERE mqc.quantDataset.id =ds.id AND "
                 + "mqc.quantResultSummaryId IS NOT NULL AND "
                 + "ds.project.id=:projectId  ";
             if (clearTrashDataOnly){

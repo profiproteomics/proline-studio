@@ -53,24 +53,24 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
 
     private boolean m_canChooseColor = false;
     //plot type combo box
-    private JComboBox<PlotType> m_allPlotsComboBox;
+    protected JComboBox<PlotType> m_allPlotsComboBox;
     //Axis combo box
-    private JComboBox<String> m_valueXComboBox;
-    private JComboBox<String> m_valueYComboBox;
-    private JComboBox<String> m_valueZComboBox;
+    protected JComboBox<String> m_valueXComboBox;
+    protected JComboBox<String> m_valueYComboBox;
+    protected JComboBox<String> m_valueZComboBox;
     //Axis label
     private JLabel m_valueXLabel;
     private JLabel m_valueYLabel;
     private JLabel m_valueZLabel;
 
-    private List<PlotBaseAbstract> m_plotGraphicsList = null;
+    protected List<PlotBaseAbstract> m_plotGraphicsList = null;
 
-    private List<ExtendedTableModelInterface> m_valuesList = null;
-    private List<CrossSelectionInterface> m_crossSelectionInterfaceList = null;
+    protected List<ExtendedTableModelInterface> m_valuesList = null;
+    protected List<CrossSelectionInterface> m_crossSelectionInterfaceList = null;
 
-    private boolean m_isUpdatingCbx = false;
+    protected boolean m_isUpdatingCbx = false;
 
-    private boolean m_dataLocked = false;
+    protected boolean m_dataLocked = false;
 
     private JToggleButton m_gridButton = null;
     private JButton m_importSelectionButton = null;
@@ -93,7 +93,7 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
         add(toolbar, BorderLayout.WEST);
     }
 
-    public final JPanel createInternalPanel() {
+    public JPanel createInternalPanel() {
 
         JPanel internalPanel = new JPanel();
         internalPanel.setLayout(new GridBagLayout());
@@ -230,7 +230,7 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
 
     }
 
-    private JPanel createSelectPanel() {
+    protected JPanel createSelectPanel() {
         JPanel selectPanel = new JPanel();
         selectPanel.setLayout(new GridBagLayout());
 
@@ -321,7 +321,7 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
     /**
      * set data in Combo Box X, Y
      */
-    private void fillXYCombobox() {
+    protected void fillXYCombobox() {
         m_isUpdatingCbx = true;
         try {
             // clear combobox

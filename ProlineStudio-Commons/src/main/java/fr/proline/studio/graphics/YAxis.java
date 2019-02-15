@@ -19,33 +19,36 @@ public class YAxis extends Axis {
     private AxisTicks m_ticks;
 
     private int m_lastHeight;
-    private boolean _isLeftAxis;
-    private int _lineXStart;
+    private boolean m_isLeftAxis;
+    private int m_lineXStart;
 
     public YAxis(BasePlotPanel p) {
-
         super(p);
-        this._isLeftAxis = false;
+        this.m_isLeftAxis = false;
 
     }
 
     public void setLeftAxis() {
-        this._isLeftAxis = true;
+        this.m_isLeftAxis = true;
 
     }
 
     private void calculLineXStart() {
-        if (_isLeftAxis) {
-            _lineXStart = m_x + BasePlotPanel.GAP_AXIS_LINE;
+        if (m_isLeftAxis) {
+            m_lineXStart = m_x + BasePlotPanel.GAP_AXIS_LINE;
         } else {
-            _lineXStart = m_x + m_width - BasePlotPanel.GAP_AXIS_LINE;
+            m_lineXStart = m_x + m_width - BasePlotPanel.GAP_AXIS_LINE;
         }
 
     }
 
+    public void setSize(int x, int y, int width, int height) {
+        super.setSize(x, y, width, height);
+        calculLineXStart();
+    }
+
     @Override
     public void paint(Graphics2D g) {
-        calculLineXStart();
         if (m_valuesFont == null) {
             m_valuesFont = g.getFont().deriveFont(Font.PLAIN, 10);
             m_valuesFontMetrics = g.getFontMetrics(m_valuesFont);
@@ -96,13 +99,12 @@ public class YAxis extends Axis {
             }
             int titleWidth = m_titleFontMetrics.stringWidth(m_title);
 
-            int bottom = (_isLeftAxis) ? m_x + BasePlotPanel.GAP_AXIS_TITLE : m_x + BasePlotPanel.GAP_AXIS_LINE;
-            int top = bottom + BasePlotPanel.GAP_AXIS_TITLE;
             int ascent = m_titleFontMetrics.getAscent();
             int descent = m_titleFontMetrics.getDescent();
+            int bottom = (m_isLeftAxis) ? m_lineXStart + BasePlotPanel.GAP_FIGURES_Y : m_x + 1;
+            int top = bottom + BasePlotPanel.GAP_AXIS_TITLE;
             int baseline = top + ((bottom + 1 - top) / 2) - ((ascent + descent) / 2) + ascent;
             g.drawString(m_title, baseline, m_y + (m_height + titleWidth) / 2);
-
             // restore font (necessary due to affine transform
             g.setFont(prevFont);
         }
@@ -169,8 +171,8 @@ public class YAxis extends Axis {
         g.setColor(cursor.getColor());
         g.drawRect(x1, pY - halfAscent - DELTA, x2 - x1, height + DELTA * 2);
 
-        g.drawString(label, _lineXStart - stringWidth - 6, pY + halfAscent);
-        g.drawLine(_lineXStart, pY, _lineXStart - BasePlotPanel.GAP_AXIS_LINE, pY);
+        g.drawString(label, m_lineXStart - stringWidth - 6, pY + halfAscent);
+        g.drawLine(m_lineXStart, pY, m_lineXStart - BasePlotPanel.GAP_AXIS_LINE, pY);
 
         // restore stroke
         g.setStroke(prevStroke);
@@ -204,7 +206,7 @@ public class YAxis extends Axis {
 
         int pixelStart = valueToPixel(m_minValue);
         int pixelStop = valueToPixel(m_maxValue);
-        g.drawLine(_lineXStart, pixelStart, _lineXStart, pixelStop);
+        g.drawLine(m_lineXStart, pixelStart, m_lineXStart, pixelStop);
 
         if (pixelStart <= pixelStop) { // avoid infinite loop when histogram is flat
             return;
@@ -227,8 +229,9 @@ public class YAxis extends Axis {
 
             if (m_isEnum) {
                 label = m_plotPanel.getEnumValueY((int) Math.round(y), false); //JPM.WART
-                if (label == null)
-                    label =" ";
+                if (label == null) {
+                    label = " ";
+                }
                 stringWidth = m_valuesFontMetrics.stringWidth(label);
                 int height = (int) Math.round(StrictMath.ceil(m_valuesFontMetrics.getLineMetrics(label, g).getHeight()));
                 if (height > m_lastHeight) {
@@ -248,8 +251,8 @@ public class YAxis extends Axis {
                 }
             }
 //draw      
-            int tickX = ((_isLeftAxis) ? _lineXStart + 4 : _lineXStart);
-            int tickStringX = ((_isLeftAxis) ? _lineXStart + 6 : _lineXStart - stringWidth - 6);
+            int tickX = ((m_isLeftAxis) ? m_lineXStart + 4 : m_lineXStart);
+            int tickStringX = ((m_isLeftAxis) ? m_lineXStart + 6 : m_lineXStart - stringWidth - 6);
 
             if (pY < previousEndY - m_lastHeight - 2) { // check to avoid to overlap labels
                 g.drawString(label, tickStringX, pY + halfAscent);
@@ -288,7 +291,7 @@ public class YAxis extends Axis {
 
         int pixelStart = valueToPixel(m_minValue);
         int pixelStop = valueToPixel(m_maxValue);
-        g.drawLine(_lineXStart, pixelStart, _lineXStart, pixelStop);
+        g.drawLine(m_lineXStart, pixelStart, m_lineXStart, pixelStop);
 
         if (pixelStart <= pixelStop) { // avoid infinite loop when histogram is flat
             return;
@@ -319,10 +322,10 @@ public class YAxis extends Axis {
             }
 
             if (pY < previousEndY - m_lastHeight - 2) { // check to avoid to overlap labels
-                g.drawString(s, _lineXStart - stringWidth - 6, pY + halfAscent);
+                g.drawString(s, m_lineXStart - stringWidth - 6, pY + halfAscent);
                 previousEndY = pY;
             }
-            g.drawLine(_lineXStart, pY, _lineXStart - 4, pY);
+            g.drawLine(m_lineXStart, pY, m_lineXStart - 4, pY);
 
             y += m_tickSpacing;
             pY = valueToPixel(Math.pow(10, y));
@@ -336,7 +339,7 @@ public class YAxis extends Axis {
             } else {
                 g.setColor(CyclicColorPalette.GRAY_TEXT_LIGHT);
             }
-            int tickX = ((_isLeftAxis) ? _lineXStart + 3 : _lineXStart);
+            int tickX = ((m_isLeftAxis) ? m_lineXStart + 3 : m_lineXStart);
             // display min ticks between two major ticks
             for (int i = 2; i <= 9; i++) {
                 double yMinTick = Math.pow(10, y) * (((double) i) * 0.1d);

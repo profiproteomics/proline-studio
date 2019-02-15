@@ -28,12 +28,13 @@ public class XAxis extends Axis {
 
     @Override
     public void paint(Graphics2D g) {
+        //background Color
         if (m_selected) {
             int stringWidth = m_valuesFontMetrics.stringWidth("    ");
             g.setColor(Color.darkGray);
             g.fillRect(m_x - stringWidth, m_y, m_width + stringWidth * 2, m_height);
         }
-
+        //set line+ticks color
         if (m_selected) {
             g.setColor(Color.white);
         } else {

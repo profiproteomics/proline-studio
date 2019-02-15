@@ -55,7 +55,7 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
 
     private static final Logger m_logger = LoggerFactory.getLogger(BasePlotPanel.class);
 
-    private static final Color PANEL_BACKGROUND_COLOR = UIManager.getColor("Panel.background");
+    protected static final Color PANEL_BACKGROUND_COLOR = UIManager.getColor("Panel.background");
 
     protected XAxis m_xAxis = null;
     protected YAxis m_yAxis = null;
@@ -96,8 +96,8 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
     protected Rectangle m_plotArea = new Rectangle();
 
     // show coord.
-    private String m_coordX = "";//kx: ? for cursor
-    private String m_coordY = "";//kx: ? for cursor
+    protected String m_coordX = "";//kx: ? for cursor
+    protected String m_coordY = "";//kx: ? for cursor
     private int m_posx;//kx?
     private int m_posy;//kx?
     /* font coord */
@@ -148,7 +148,10 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
         }
     }
 
-    private void updateEnumAxis() {
+    /**
+     * used to add 0.5 space before first & after last enum label
+     */
+    protected void updateEnumAxis() {
         if (m_plots.size() == 0) {
             return;
         }
@@ -243,8 +246,8 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
                 m_xAxis.setRange(tab[0] - leftMargin,tab[1] + rightMargin);
             }*/
             //prepare plotArea begin point & width
-            m_plotArea.x = m_xAxis.m_x + 1;
-            m_plotArea.width = m_xAxis.m_width;
+            m_plotArea.x = m_xAxis.getX() + 1;
+            m_plotArea.width = m_xAxis.getWidth();
             m_xAxis.paint(g2d);
 
         }
@@ -258,8 +261,8 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
                 m_yAxis.setRange(tab[2] - bottomMargin,tab[3] + topMargin);
             }*/
             //prepare plotArea begin point & height
-            m_plotArea.y = m_yAxis.m_y + 1;
-            m_plotArea.height = m_yAxis.m_height;
+            m_plotArea.y = m_yAxis.getY() + 1;
+            m_plotArea.height = m_yAxis.getHeight();
             m_yAxis.paint(g2d);
         }
         //4 draw a list of plot
@@ -473,7 +476,6 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
     public void setPlot(PlotBaseAbstract plot) {
         m_plots = new ArrayList();
         m_plots.add(plot);
-
         updateAxis(plot);
     }
 
@@ -523,7 +525,7 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
      *
      * @return doube[4]= [minX, maxX, minY, maxY]
      */
-    protected double[] getMinMaxPlots(ArrayList<PlotBaseAbstract> plotList) {
+    private double[] getMinMaxPlots(ArrayList<PlotBaseAbstract> plotList) {
         double[] tab = new double[4];
         int nb = plotList.size();
         if (plotList != null && nb > 0) {
@@ -571,46 +573,19 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
      *
      * @param plot
      */
-//    public void updateAxis(PlotBaseAbstract plot) {
-//        this._isEnumAxisUpdated = false;
-//        double[] tab = getMinMaxPlots();//get Axis X, Y bounds, tab is doube[4]= [minX, maxX, minY, maxY]
-//
-//        XAxis xAxis = getXAxis();
-//        //xAxis.setLog(false);  // we do no longer change the log setting
-//        xAxis.setSelected(false);
-//        xAxis.setRange((Double.isNaN(m_xAxisBounds[0])) ? tab[0] : m_xAxisBounds[0], (Double.isNaN(m_xAxisBounds[1])) ? tab[1] : m_xAxisBounds[1]);
-//
-//        YAxis yAxis = getYAxis();
-//        //yAxis.setLog(false);  // we do no longer change the log setting
-//        yAxis.setSelected(false);
-//        yAxis.setRange((Double.isNaN(m_yAxisBounds[0])) ? tab[2] : m_yAxisBounds[0], (Double.isNaN(m_yAxisBounds[1])) ? tab[3] : m_yAxisBounds[1]);
-//
-//        m_updateDoubleBuffer = true;
-//        m_useDoubleBuffering = plot.getDoubleBufferingPolicy();
-//    }
-    
     public void updateAxis(PlotBaseAbstract plot) {
-       updateAxis(plot, m_plots, getXAxis(), getYAxis(), m_xAxisBounds, m_yAxisBounds);
-    }
-            
-            
-        /**
-     * from plot list, get the bounds of Axis X and Y,
-     *
-     * @param plot
-     */
-    public void updateAxis(PlotBaseAbstract plot, ArrayList<PlotBaseAbstract> plotList, 
-            XAxis xAxis, YAxis yAxis,  double[] xBounds,  double[] yBounds ) {
         this._isEnumAxisUpdated = false;
-        double[] tab = getMinMaxPlots(plotList);//get Axis X, Y bounds, tab is doube[4]= [minX, maxX, minY, maxY]
+        double[] tab = getMinMaxPlots();//get Axis X, Y bounds, tab is doube[4]= [minX, maxX, minY, maxY]
 
+        XAxis xAxis = getXAxis();
         //xAxis.setLog(false);  // we do no longer change the log setting
         xAxis.setSelected(false);
-        xAxis.setRange((Double.isNaN(xBounds[0])) ? tab[0] : xBounds[0], (Double.isNaN(xBounds[1])) ? tab[1] : xBounds[1]);
+        xAxis.setRange((Double.isNaN(m_xAxisBounds[0])) ? tab[0] : m_xAxisBounds[0], (Double.isNaN(m_xAxisBounds[1])) ? tab[1] : m_xAxisBounds[1]);
 
+        YAxis yAxis = getYAxis();
         //yAxis.setLog(false);  // we do no longer change the log setting
         yAxis.setSelected(false);
-        yAxis.setRange((Double.isNaN(yBounds[0])) ? tab[2] : yBounds[0], (Double.isNaN(yBounds[1])) ? tab[3] : yBounds[1]);
+        yAxis.setRange((Double.isNaN(m_yAxisBounds[0])) ? tab[2] : m_yAxisBounds[0], (Double.isNaN(m_yAxisBounds[1])) ? tab[3] : m_yAxisBounds[1]);
 
         m_updateDoubleBuffer = true;
         m_useDoubleBuffering = plot.getDoubleBufferingPolicy();
@@ -1258,7 +1233,7 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
 
             // TODO : pas sur que cette position soit à l'interieur du graphique. Le plus simple est de choisir en 
             //fonction de l'axe : en X : min (0, mouse.y - 20), en Y: min (mouse.x + 5, width)
-            SwingUtilities.convertPointFromScreen(p, m_axis.m_plotPanel);
+            SwingUtilities.convertPointFromScreen(p, m_axis.getPlotPanel());
             if (m_isXAxis) {
                 p.y = m_axis.getY() - panel.getHeight();
             }

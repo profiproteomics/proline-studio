@@ -6,7 +6,9 @@
 package fr.proline.studio.pattern;
 
 import fr.proline.core.orm.msi.ResultSummary;
+import fr.proline.core.orm.msi.dto.DMasterQuantProteinSet;
 import fr.proline.core.orm.msi.dto.DPeptideInstance;
+import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabasePTMsTask;
@@ -15,11 +17,13 @@ import fr.proline.studio.dam.tasks.data.ptm.PTMSite;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 import fr.proline.studio.extendedtablemodel.GlobalTabelModelProviderInterface;
 import fr.proline.studio.rsmexplorer.gui.ptm.PanelPeptidesPTMSiteGraphic;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * This class is very similaire as DataBoxPTMSitePeptides
+ *
  * @author Karine XUE
  */
 public class DataBoxPTMSitePeptidesGraphic extends AbstractDataBox {
@@ -27,6 +31,9 @@ public class DataBoxPTMSitePeptidesGraphic extends AbstractDataBox {
     private ResultSummary m_rsm;
     protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer.ptm");
     private long m_logTimeStart;
+
+    private List<DMasterQuantProteinSet> m_masterQuantProteinSetList;
+    private DDataset m_dataset;
 
     public DataBoxPTMSitePeptidesGraphic() {
         super(DataboxType.DataBoxPTMSitePeptides, DataboxStyle.STYLE_RSM);

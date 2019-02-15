@@ -700,7 +700,7 @@ public class PlotLinear extends PlotXYAbstract {
                     g.setStroke(m_strokeLine);
                 }
                 if (m_isDrawPoints && isDef) {
-                    if (m_dataSpec[i].getSharp().equals(PlotDataSpec.SHARP.EMPTY)) {
+                    if (m_dataSpec[i].getFill().equals(PlotDataSpec.FILL.EMPTY)) {
                         g.drawOval(x - 3, y - 3, 6, 6);
                     } else {
                         g.fillOval(x - 3, y - 3, 6, 6);
@@ -793,7 +793,7 @@ public class PlotLinear extends PlotXYAbstract {
             }
         }
     }
-
+    
     public void setPlotInformation(PlotInformation plotInformation) {
         this.m_plotInformation = plotInformation;
         if (plotInformation != null) {

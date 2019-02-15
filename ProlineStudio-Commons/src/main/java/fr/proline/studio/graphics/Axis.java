@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
 public abstract class Axis {
 
     protected static final Stroke DASHED = new BasicStroke(1.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_MITER, 10.0f, new float[]{2.0f, 2.0f}, 0.0f);
-    private static final Logger m_logger = LoggerFactory.getLogger(Axis.class);
+    protected static final Logger m_logger = LoggerFactory.getLogger(Axis.class);
     protected String m_title = null;
     protected Font m_titleFont = null;
     protected FontMetrics m_titleFontMetrics;
@@ -70,6 +70,7 @@ public abstract class Axis {
     protected boolean m_isPixel = false;
 
     protected BasePlotPanel m_plotPanel;
+
     protected AxisRangePanel m_rangePanel;
     protected boolean m_mustDrawDiagonalLabels = false;
     protected int m_labelMinWidth = 0;
@@ -80,7 +81,7 @@ public abstract class Axis {
     public boolean displayAxis() {
         return !m_isPixel;
     }
-    
+
     /**
      * a small panel can be defined by user the Min Max of the axis
      */
@@ -89,7 +90,7 @@ public abstract class Axis {
         private JTextField m_minTextField;
         private JTextField m_maxTextField;
         private Axis m_axis;
-        
+
         public AxisRangePanel(Axis axis) {
 
             m_axis = axis;
@@ -191,7 +192,6 @@ public abstract class Axis {
             setVisible(false);
         }
 
-        
         private void updateRange() {
             if (m_maxTextField.getText().isEmpty() || m_minTextField.getText().isEmpty()) {
                 return;
@@ -234,7 +234,11 @@ public abstract class Axis {
     public int getY() {
         return m_y;
     }
-    
+
+    public BasePlotPanel getPlotPanel() {
+        return m_plotPanel;
+    }
+
     public AxisRangePanel getRangePanel() {
         return m_rangePanel;
     }
@@ -256,7 +260,7 @@ public abstract class Axis {
     public void setLog(boolean log) {
         m_log = log;
         m_df = null; // reinit for display
-      /*if (log) {
+        /*if (log) {
          m_minValue = Math.log10(m_minValue);
          m_maxValue = Math.log10(m_maxValue);
          } else {
@@ -314,7 +318,7 @@ public abstract class Axis {
     }
 
     public abstract void paint(Graphics2D g);
-    
+
     public abstract void paintCursor(Graphics2D g, AbstractCursor cursor, boolean selected);
 
     public abstract int valueToPixel(double v);
@@ -381,12 +385,12 @@ public abstract class Axis {
                 fractionalDigits--;
             }
         }
-        
+
         DecimalFormat df = new DecimalFormat(pattern);
         DecimalFormatSymbols sym = DecimalFormatSymbols.getInstance();
         sym.setDecimalSeparator('.');
         df.setDecimalFormatSymbols(sym);
-        
+
         return new DecimalFormat(pattern);
     }
 

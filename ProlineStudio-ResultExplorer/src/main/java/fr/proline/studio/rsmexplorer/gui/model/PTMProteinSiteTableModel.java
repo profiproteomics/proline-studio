@@ -272,7 +272,7 @@ public class PTMProteinSiteTableModel extends LazyTableModel implements GlobalTa
             case COLTYPE_DELTA_MASS_MODIFICATION: {
                 return infoPtm.getMonoMass();
             }
-            case COLTYPE_PEPTIDE_COUNT: {
+            case COLTYPE_PEPTIDE_COUNT: {                
                 return proteinPTMSite.getPeptideCount();
             }
             case COLTYPE_RESIDUE_AA: {

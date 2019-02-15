@@ -328,7 +328,7 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
 
         return internalPanel;
     }
-
+    
     public void setData(Long taskId, DQuantitationChannel[] quantChannels, List<DMasterQuantProteinSet> proteinSets, boolean isXICMode, boolean finished) {
 
         m_isXICMode = isXICMode;

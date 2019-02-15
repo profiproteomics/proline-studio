@@ -14,17 +14,22 @@ import java.awt.Stroke;
  * @author Karine XUE
  */
 public class PlotDataSpec {
-    protected static final Stroke DASHED = new BasicStroke(1.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_MITER, 10.0f, new float[]{2.0f, 2.0f}, 0.0f);
-    
-    public enum SHARP{FILL, EMPTY};
+
+    public enum FILL {
+        FILL, EMPTY
+    };
+
+    public enum SHARP {
+        OVAL, CROIX
+    };
     private Color _color;
     private SHARP _sharp;
-    private Stroke _stroke;
+    private FILL _fill;
 
     public PlotDataSpec() {
         this._color = Color.BLACK;
-        this._sharp = SHARP.FILL;
-        this._stroke = DASHED;
+        this._sharp = null;
+        this._fill = FILL.FILL;
     }
 
     public Color getColor() {
@@ -35,8 +40,8 @@ public class PlotDataSpec {
         return _sharp;
     }
 
-    public Stroke getStroke() {
-        return _stroke;
+    public FILL getFill() {
+        return _fill;
     }
 
     public void setColor(Color color) {
@@ -47,8 +52,8 @@ public class PlotDataSpec {
         this._sharp = sharp;
     }
 
-    public void setStroke(Stroke stroke) {
-        this._stroke = stroke;
+    public void setFill(FILL fill) {
+        this._fill = fill;
     }
 
 }

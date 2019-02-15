@@ -74,7 +74,10 @@ public abstract class PlotBaseAbstract implements Axis.EnumXInterface, Axis.Enum
     public void paint(Graphics2D g, XAxis xAxis, YAxis yAxis){
         
     }
-
+    /**
+     * usualy used to show tooltips information  
+     * @param g 
+     */
     public void paintOver(Graphics2D g) {
 
     }
@@ -322,7 +325,7 @@ public abstract class PlotBaseAbstract implements Axis.EnumXInterface, Axis.Enum
         return true;
     }
 
-    public JPopupMenu getPopupMenu(double x, double y) {
+     public JPopupMenu getPopupMenu(double x, double y) {
         return null;
     }
 

@@ -40,15 +40,15 @@ public class PeptideTableModel extends LazyTableModel implements GlobalTableMode
     public static final int COLTYPE_ABUNDANCE = 2;
     public static final int COLTYPE_RAW_ABUNDANCE = 3;
     public static final int COLTYPE_PSM = 4;
-    private static final String[] m_columnNames = {"Id", "Quant. Channel", "Abundance", "Raw Abundance", "Pep. match count"};
-    private static final String[] m_columnNames_SC = {"Id", "Quant. Channel", "Abundance", "Specific SC", "Basic SC"};
+    protected static final String[] m_columnNames = {"Id", "Quant. Channel", "Abundance", "Raw Abundance", "Pep. match count"};
+    protected static final String[] m_columnNames_SC = {"Id", "Quant. Channel", "Abundance", "Specific SC", "Basic SC"};
 
     private DMasterQuantPeptide m_quantPeptide = null;
-    private DQuantitationChannel[] m_quantChannels = null;
+    protected DQuantitationChannel[] m_quantChannels = null;
 
-    private String m_modelName;
+    protected String m_modelName;
 
-    private boolean m_isXICMode = true;
+    protected boolean m_isXICMode = true;
 
     public PeptideTableModel(LazyTable table) {
         super(table);
@@ -325,11 +325,11 @@ public class PeptideTableModel extends LazyTableModel implements GlobalTableMode
         return null;
     }
 
-    private static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer.peptideTableModel");
+    //private static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer.peptideTableModel");
 
     @Override
     public PlotDataSpec getDataSpecAt(int row) {
-        m_logger.debug("########call getDataSpecAt");
+        //m_logger.debug("########call getDataSpecAt");
         PlotDataSpec result = new PlotDataSpec();
         DQuantitationChannel qc = m_quantChannels[row];
         // retrieve quantPeptide for the quantChannelId
@@ -337,9 +337,9 @@ public class PeptideTableModel extends LazyTableModel implements GlobalTableMode
         DQuantPeptide quantPeptide = quantPeptideByQchIds.get(qc.getId());
         if (!(quantPeptide == null || quantPeptide.getRawAbundance() == null || quantPeptide.getPeptideMatchesCount() == null)) {
             int matcheCount = quantPeptide.getPeptideMatchesCount();
-            m_logger.debug(String.format("#########row %s, matchcount=%d", qc.getFullName(), matcheCount));
+            //m_logger.debug(String.format("#########row %s, matchcount=%d", qc.getFullName(), matcheCount));
             if (matcheCount == 0) {
-                result.setSharp(PlotDataSpec.SHARP.EMPTY);
+                result.setFill(PlotDataSpec.FILL.EMPTY);
             }
         }
         return result;

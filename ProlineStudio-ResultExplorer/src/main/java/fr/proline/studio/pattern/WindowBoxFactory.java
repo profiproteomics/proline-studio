@@ -22,6 +22,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.border.EmptyBorder;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 import fr.proline.studio.pattern.xic.DataBoxXicPTMSitePeptides;
+import fr.proline.studio.pattern.xic.DataboxXicAbundanceGraphic;
 
 /**
  *
@@ -270,7 +271,8 @@ public class WindowBoxFactory {
         boxes[1] = new DataBoxPTMSitePeptidesGraphic();
         boxes[2] = new DataBoxXicPTMSitePeptides();
         boxes[2].setLayout(SplittedPanelContainer.PanelLayout.TABBED);
-        boxes[3] = new DataboxMultiGraphics(false, false);
+        //boxes[3] = new DataboxMultiGraphics(false, false);
+        boxes[3] = new DataboxXicAbundanceGraphic();
         boxes[3].setLayout(SplittedPanelContainer.PanelLayout.HORIZONTAL);
         boxes[4] = new DataBoxPTMSitePepMatches();
 

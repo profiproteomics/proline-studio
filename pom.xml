@@ -10,7 +10,7 @@
     </parent>
 
     <artifactId>ProlineStudio-parent</artifactId>
-    <version>2.0.0-SNAPSHOT</version> <!-- ProlineStudio version -->
+    <version>2.0.0</version> <!-- ProlineStudio version -->
     <packaging>pom</packaging>
 
     <name>ProlineStudio-parent</name>
@@ -34,7 +34,7 @@
     </properties>
 
     <scm>
-        <connection>scm:svn:https://bioproj.extra.cea.fr/svn/proline/ProlineStudio/branches/2.0.0-RCandidates</connection>
+        <connection>scm:svn:https://bioproj.extra.cea.fr/svn/proline/ProlineStudio/tags/2.0.0</connection>
     </scm>
  
 

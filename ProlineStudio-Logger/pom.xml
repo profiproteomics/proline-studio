@@ -3,14 +3,13 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <artifactId>ProlineStudio-parent</artifactId>
+        <artifactId>prolinestudio-parent</artifactId>
         <groupId>fr.proline</groupId>
         <version>2.1.0-SNAPSHOT</version>
     </parent>
 
     <groupId>fr.proline</groupId>
-    <artifactId>ProlineStudio-Logger</artifactId>
-
+    <artifactId>prolinestudio-logger</artifactId>
     <packaging>nbm</packaging>
 
     <name>ProlineStudio-Logger</name>

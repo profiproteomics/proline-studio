@@ -3,13 +3,13 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <artifactId>ProlineStudio-parent</artifactId>
+        <artifactId>prolinestudio-parent</artifactId>
         <groupId>fr.proline</groupId>
         <version>2.1.0-SNAPSHOT</version>
     </parent>
 
     <groupId>fr.proline</groupId>
-    <artifactId>ProlineStudio-ResultExplorer</artifactId>
+    <artifactId>prolinestudio-resultexplorer</artifactId>
     <packaging>nbm</packaging>
 
     <name>ProlineStudio-ResultExplorer</name>
@@ -276,33 +276,33 @@
         <!-- ProlineStudio dependencies -->
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>ProlineStudio-Commons</artifactId>
+            <artifactId>prolinestudio-commons</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>ProlineStudio-DAM</artifactId>
+            <artifactId>prolinestudio-dam</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>ProlineStudio-CoreWrapper</artifactId>
+            <artifactId>prolinestudio-corewrapper</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>ProlineStudio-Logger</artifactId>
+            <artifactId>prolinestudio-logger</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>fr.proline</groupId>
-            <artifactId>ProlineStudio-DPM</artifactId>
+            <artifactId>prolinestudio-dpm</artifactId>
             <version>${project.version}</version>
             <type>jar</type>
         </dependency>
         <dependency>
             <groupId>fr.proline</groupId>
-            <artifactId>ProlineStudio-mzScope</artifactId>
+            <artifactId>prolinestudio-mzscope</artifactId>
             <version>${project.version}</version>
             <type>jar</type>
         </dependency>
@@ -313,7 +313,7 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>ProlineStudio-R</artifactId>
+            <artifactId>prolinestudio-R</artifactId>
             <version>${project.version}</version>
         </dependency>
         

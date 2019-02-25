@@ -4,11 +4,11 @@
 
     <parent>
         <groupId>fr.proline</groupId>
-        <artifactId>ProlineStudio-parent</artifactId>
+        <artifactId>prolinestudio-parent</artifactId>
         <version>2.1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>ProlineStudio-app</artifactId>
+    <artifactId>prolinestudio-app</artifactId>
     <packaging>nbm-application</packaging>
     <name>ProlineStudio-app</name>
 
@@ -80,13 +80,13 @@
         <!-- ProlineStudio dependencies -->
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>ProlineStudio-branding</artifactId>
+            <artifactId>prolinestudio-branding</artifactId>
             <version>${project.version}</version>
         </dependency>
 
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>ProlineStudio-ResultExplorer</artifactId>
+            <artifactId>prolinestudio-resultexplorer</artifactId>
             <version>${project.version}</version>
             <exclusions>
                 <exclusion>

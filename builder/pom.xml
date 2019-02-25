@@ -14,13 +14,13 @@
 
 		<dependency>
 			<groupId>fr.proline</groupId>
-			<artifactId>ProlineStudio-app</artifactId>
+			<artifactId>prolinestudio-app</artifactId>
 			<version>${studio.version}</version>
 			<type>zip</type>
 			<exclusions>
 				<exclusion>
-					<groupId>*</groupId>
-					<artifactId>*</artifactId>
+                                    <groupId>*</groupId>
+                                    <artifactId>*</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>

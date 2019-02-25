@@ -3,13 +3,13 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <artifactId>ProlineStudio-parent</artifactId>
+        <artifactId>prolinestudio-parent</artifactId>
         <groupId>fr.proline</groupId>
         <version>2.1.0-SNAPSHOT</version>
     </parent>
 
     <groupId>fr.proline</groupId>
-    <artifactId>ProlineStudio-DAM</artifactId>
+    <artifactId>prolinestudio-dam</artifactId>
     <packaging>nbm</packaging>
 
     <name>ProlineStudio-DAM</name>
@@ -42,12 +42,12 @@
         <!-- ProlineStudio dependencies -->
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>ProlineStudio-CoreWrapper</artifactId>
+            <artifactId>prolinestudio-corewrapper</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>ProlineStudio-Logger</artifactId>
+            <artifactId>prolinestudio-logger</artifactId>
             <version>${project.version}</version>
         </dependency>
         

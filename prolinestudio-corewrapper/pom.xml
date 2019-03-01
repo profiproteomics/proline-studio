@@ -35,7 +35,7 @@
         
         <dependency>
             <groupId>fr.profi.util</groupId>
-            <artifactId>profI-commons-java</artifactId>
+            <artifactId>profi-commons-java</artifactId>
             <version>${util.version}</version>
         </dependency>
         <dependency>

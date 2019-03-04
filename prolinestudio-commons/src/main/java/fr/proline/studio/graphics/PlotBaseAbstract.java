@@ -123,7 +123,9 @@ public abstract class PlotBaseAbstract implements Axis.EnumXInterface, Axis.Enum
         updateAxisSpecificities();
         update();
     }
-
+    /**
+     * update the value of isInteger, isEnum, isPixel in XAxis and YAxis
+     */
     public void updateAxisSpecificities() {
         if (!needsXAxis()) {
             m_plotPanel.getXAxis().setSpecificities(false, false, true);
@@ -140,7 +142,7 @@ public abstract class PlotBaseAbstract implements Axis.EnumXInterface, Axis.Enum
             Class yClass = m_compareDataInterface.getDataColumnClass(m_cols[COL_Y_ID]);
             boolean isIntegerY = ((yClass.equals(Integer.class)) || (yClass.equals(Long.class)) || (yClass.equals(String.class)));
             boolean isEnumY = (yClass.equals(String.class));
-            m_plotPanel.getYAxis().setSpecificities(isIntegerY, isEnumY, false);
+            m_plotPanel.setAxisYSpecificities(isIntegerY, isEnumY, false, this);
         }
     }
 

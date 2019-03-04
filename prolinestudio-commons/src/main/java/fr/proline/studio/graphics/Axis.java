@@ -410,5 +410,6 @@ public abstract class Axis {
     public interface EnumYInterface {
 
         public String getEnumValueY(int index, boolean fromData);
+        public String getEnumValueY(int index, boolean fromData, Axis axis);
     }
 }

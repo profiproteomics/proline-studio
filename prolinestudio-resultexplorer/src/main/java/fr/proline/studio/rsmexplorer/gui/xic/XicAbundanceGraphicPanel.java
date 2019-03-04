@@ -96,11 +96,10 @@ public class XicAbundanceGraphicPanel extends MultiGraphicsPanel {
      * @param crossSelectionInterfaceList
      * @param isSingle to display one plot
      */
-    private void setDataImpl(List<ExtendedTableModelInterface> valuesList, List<CrossSelectionInterface> crossSelectionInterfaceList, XicAbundanceProteinTableModel proteinAbundance) {
+    private void setDataImpl(List<ExtendedTableModelInterface> valuesList, List<CrossSelectionInterface> crossSelectionInterfaceList,
+            XicAbundanceProteinTableModel proteinAbundance) {
         m_valuesList = valuesList;
         m_crossSelectionInterfaceList = crossSelectionInterfaceList;
-        m_plotGraphicsList.clear();
-
         if (valuesList == null) {
             return;
         }
@@ -117,20 +116,15 @@ public class XicAbundanceGraphicPanel extends MultiGraphicsPanel {
                     ReferenceToColumn refX = (ReferenceToColumn) m_valueXComboBox.getSelectedItem();
                     ReferenceToColumn refY = (ReferenceToColumn) m_valueYComboBox.getSelectedItem();
                     String zParameter = (String) m_valueZComboBox.getSelectedItem();
-                    for (PlotBaseAbstract plotGraphic : m_plotGraphicsList) {
-                        int[] cols = new int[2]; //JPM.TODO enhance
-                        cols[COL_X_ID] = refX.getColumnIndex();
-                        cols[COL_Y_ID] = refY.getColumnIndex();
-                        plotGraphic.update(cols, zParameter);
-
-                    }
+                    int[] cols = new int[2];
+                    cols[COL_X_ID] = refX.getColumnIndex();
+                    cols[COL_Y_ID] = refY.getColumnIndex();
+                    m_plotPanel.updatePlots(cols, zParameter);
                     if (proteinAbundance.getRowCount() > 0 && m_valuesList.size() > 0) {
                         Color color = proteinAbundance.getPlotInformation().getPlotColor();
-                        m_plotPanel.setSecondAxisTitle("Protein " + proteinAbundance.getColumnName(refY.getColumnIndex()), color);
+                        m_plotPanel.setSecondAxisPlotInfo("Protein " + proteinAbundance.getColumnName(refY.getColumnIndex()), color);
                         m_plotPanel.preparePaint();
                     }
-                    
-                    m_plotPanel.repaint();
                 }
             };
 
@@ -148,6 +142,7 @@ public class XicAbundanceGraphicPanel extends MultiGraphicsPanel {
         switch (plotType) {
             case LINEAR_PLOT: {
                 m_plotPanel.clearPlots();
+                //plot on main Axis Y
                 for (int i = 0; i < m_valuesList.size(); i++) {
                     CrossSelectionInterface crossSelectionInterface = (m_crossSelectionInterfaceList == null) || (m_crossSelectionInterfaceList.size() <= i) ? null : m_crossSelectionInterfaceList.get(i);
                     //create plotGraphics for each table
@@ -155,8 +150,8 @@ public class XicAbundanceGraphicPanel extends MultiGraphicsPanel {
                     plotGraphics.setPlotInformation(m_valuesList.get(i).getPlotInformation());
                     plotGraphics.setIsPaintMarker(false);
                     m_plotPanel.addPlot(plotGraphics, DoubleYAxisPlotPanel.Layout.MAIN);
-                    m_plotGraphicsList.add(plotGraphics);
                 }
+                //plot on second Axis Y
                 if (proteinAbundance.getRowCount() != 0 && m_valuesList.size() != 0) {//creat a plot which show protein abundance  
                     CrossSelectionInterface crossSelectionInterface2 = null;
                     PlotLinear plotGraphics = new PlotLinear(m_plotPanel, proteinAbundance, crossSelectionInterface2, refX.getColumnIndex(), refY.getColumnIndex());
@@ -164,11 +159,9 @@ public class XicAbundanceGraphicPanel extends MultiGraphicsPanel {
                     plotGraphics.setIsPaintMarker(false);
                     m_plotPanel.addPlot(plotGraphics, DoubleYAxisPlotPanel.Layout.SECOND);
                     Color color = proteinAbundance.getPlotInformation().getPlotColor();
-                    m_plotPanel.setSecondAxisTitle("Protein " + proteinAbundance.getColumnName(refY.getColumnIndex()), color);
-                    m_plotGraphicsList.add(plotGraphics);
+                    m_plotPanel.setSecondAxisPlotInfo("Protein " + proteinAbundance.getColumnName(refY.getColumnIndex()), color);
                 }
                 m_plotPanel.preparePaint();
-                m_plotPanel.repaint();
                 break;
             }
         }

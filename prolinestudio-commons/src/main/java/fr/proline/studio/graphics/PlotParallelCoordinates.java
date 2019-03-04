@@ -432,6 +432,11 @@ public class PlotParallelCoordinates extends PlotMultiDataAbstract {
         return null;
     }
     
+    @Override
+    public String getEnumValueY(int index, boolean fromData, Axis axis) {
+       return getEnumValueY(index, fromData);
+    }
+    
 
     @Override
     public MoveableInterface getOverMovable(int x, int y) {

@@ -883,4 +883,5 @@ public class PlotLinear extends PlotXYAbstract {
         this.displayAntiAliasing = displayAntiAliasing;
     }
 
+   
 }

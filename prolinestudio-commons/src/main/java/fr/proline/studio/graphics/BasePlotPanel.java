@@ -123,7 +123,7 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
      * & after, this ajustment is need only one time before the first paint,
      * each time if the select Axis change item, we should ajust it.
      */
-    protected boolean _isEnumAxisUpdated = false;
+    protected boolean m_isEnumAxisUpdated = false;
 
     public BasePlotPanel() {
         formatE.applyPattern("0.#####E0");
@@ -183,13 +183,13 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
             fireUpdateAxisRange(xMin, xMax, newXMin, newXMax, yMin, yMax, newYMin, newYMax);
 
         }
-        this._isEnumAxisUpdated = true;
+        this.m_isEnumAxisUpdated = true;
     }
 
     @Override
     public void paint(Graphics g) {
 //        fps.startFrame();
-        if (!_isEnumAxisUpdated) {
+        if (!m_isEnumAxisUpdated) {
             updateEnumAxis();
         }
 
@@ -525,7 +525,7 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
      *
      * @return doube[4]= [minX, maxX, minY, maxY]
      */
-    private double[] getMinMaxPlots(ArrayList<PlotBaseAbstract> plotList) {
+    protected double[] getMinMaxPlots(ArrayList<PlotBaseAbstract> plotList) {
         double[] tab = new double[4];
         int nb = plotList.size();
         if (plotList != null && nb > 0) {
@@ -574,7 +574,7 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
      * @param plot
      */
     public void updateAxis(PlotBaseAbstract plot) {
-        this._isEnumAxisUpdated = false;
+        this.m_isEnumAxisUpdated = false;
         double[] tab = getMinMaxPlots();//get Axis X, Y bounds, tab is doube[4]= [minX, maxX, minY, maxY]
 
         XAxis xAxis = getXAxis();
@@ -1080,6 +1080,10 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
         return m_plots.get(0).getEnumValueX(index, fromData);
     }
 
+    public String getEnumValueY(int index, boolean fromData, Axis axis) {
+        return getEnumValueY(index, fromData);
+    }
+
     @Override
     public String getEnumValueY(int index, boolean fromData) {
         if ((m_plots == null) || (m_plots.isEmpty())) {
@@ -1140,6 +1144,10 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
             repaintUpdateDoubleBuffer();
         }
         fireUpdateAxisRange(oldMinX, oldMaxX, m_xAxis.getMinValue(), m_xAxis.getMaxValue(), oldMinY, oldMaxY, m_yAxis.getMinValue(), m_yAxis.getMaxValue());
+    }
+
+    public void setAxisYSpecificities(boolean isIntegerY, boolean isEnum, boolean isPixel, PlotBaseAbstract plot) {
+        this.m_yAxis.setSpecificities(isIntegerY, isEnum, isPixel);
     }
 
     public class MeasurementAction extends AbstractAction {

@@ -41,8 +41,6 @@ public class DoubleYAxisPlotPanel extends BasePlotPanel {
     String m_secondYAxisTitle = "";
     private Color m_secondYAxisColor;
 
-
-
     public enum Layout {
         MAIN, SECOND
     };
@@ -108,9 +106,19 @@ public class DoubleYAxisPlotPanel extends BasePlotPanel {
         this.m_plotAxisMap.put(plot, Layout.MAIN);
     }
 
-    public void setSecondAxisTitle(String title, Color color) {
+    public void setSecondAxisPlotInfo(String title, Color color) {
         m_secondYAxisTitle = title;
         m_secondYAxisColor = color;
+    }
+
+    
+    @Override
+    public void setAxisYSpecificities(boolean isIntegerY, boolean isEnum, boolean isPixel, PlotBaseAbstract plot) {
+        if (m_mainPlots.contains(plot)) {
+            this.m_yAxis.setSpecificities(isIntegerY, isEnum, isPixel);
+        } else {
+            this.m_secondYAxis.setSpecificities(isIntegerY, isEnum, isPixel);
+        }
     }
 
     public void preparePaint() {
@@ -121,13 +129,26 @@ public class DoubleYAxisPlotPanel extends BasePlotPanel {
             this.m_plots.add((PlotBaseAbstract) obj);
         }
         m_secondYAxis.setTitle(m_secondYAxisTitle);
+        repaint();
     }
 
     public void updatePlots(int[] cols, String parameterZ) {
-        for (PlotBaseAbstract plot: m_mainPlots){
+        this.m_plotAxisMap = new HashMap();
+        for (PlotBaseAbstract plot : m_mainPlots) {
             plot.update(cols, parameterZ);
+            m_plotAxisMap.put(plot, Layout.MAIN);
+        }
+        for (PlotBaseAbstract plot : m_secondPlots) {
+            plot.update(cols, parameterZ);
+            m_plotAxisMap.put(plot, Layout.SECOND);
         }
 
+    }
+
+    @Override
+    public void updateAxis(PlotBaseAbstract plot) {
+        updateAxis(m_mainPlots, m_xAxis, m_yAxis, m_xAxisBounds, m_yAxisBounds);
+        updateAxis(m_secondPlots, m_secondXAxis, m_secondYAxis, m_secondXBounds, m_secondYBounds); //suppose only one plot use seconde Y Axis
     }
 
     /**
@@ -140,7 +161,7 @@ public class DoubleYAxisPlotPanel extends BasePlotPanel {
         if (xAxis == null || yAxis == null) {
             return;
         }
-        this._isEnumAxisUpdated = false;
+        this.m_isEnumAxisUpdated = false;
         double[] tab = getMinMaxPlots(plotList);//get Axis X, Y bounds, tab is doube[4]= [minX, maxX, minY, maxY]
         //xAxis.setLog(false);  // we do no longer change the log setting
         xAxis.setSelected(false);
@@ -152,56 +173,35 @@ public class DoubleYAxisPlotPanel extends BasePlotPanel {
         m_updateDoubleBuffer = true;
     }
 
-    /**
-     * browse each plot to find the Min Max X, Y
-     *
-     * @return doube[4]= [minX, maxX, minY, maxY]
-     */
-    protected double[] getMinMaxPlots(ArrayList<PlotBaseAbstract> plotList) {
-        m_useDoubleBuffering = false;
-        double[] tab = new double[4];
-
-        int nb = plotList.size();
-        if (plotList != null && nb > 0) {
-            double minX = plotList.get(0).getXMin();
-            double maxX = plotList.get(0).getXMax();
-            double minY = plotList.get(0).getYMin();
-            double maxY = plotList.get(0).getYMax();
-            for (PlotBaseAbstract plot : plotList) {
-                double plotXMin = plot.getXMin();
-                double plotXMax = plot.getXMax();
-                double plotYMin = plot.getYMin();
-                double plotYMax = plot.getYMax();
-                if (plotXMin != 0 && plotXMax != 0) {
-                    if (minX == 0 && maxX == 0) {
-                        minX = plotXMin;
-                        maxX = plotXMax;
-                    }
-                    minX = Math.min(minX, plotXMin);
-                    maxX = Math.max(maxX, plotXMax);
-                }
-                if (plotYMin != 0 && plotYMax != 0) {
-                    if (minY == 0 && maxY == 0) {
-                        minY = plotYMin;
-                        maxY = plotYMax;
-                    }
-                    minY = Math.min(minY, plotYMin);
-                    maxY = Math.max(maxY, plotYMax);
-                }
-                m_useDoubleBuffering = m_useDoubleBuffering && plot.getDoubleBufferingPolicy();
-            }
-            tab[0] = minX;
-            tab[1] = maxX;
-            tab[2] = minY;
-            tab[3] = maxY;
-
+    @Override
+    protected void updateEnumAxis() {
+        if (m_secondYAxis.isEnum()) {
+            double y2Min = m_secondYAxis.getMinValue()-0.5;
+            double y2Max = m_secondYAxis.getMaxValue()+0.5;
+            m_secondYAxis.setRange(y2Min, y2Max);
         }
-        return tab;
+        super.updateEnumAxis();
     }
 
     @Override
+    public String getEnumValueY(int index, boolean fromData, Axis axis) {
+        if (axis == this.m_yAxis) {
+            if ((m_mainPlots == null) || (m_mainPlots.isEmpty())) {
+                return null;
+            }
+            return m_mainPlots.get(0).getEnumValueY(index, fromData);
+        }
+        if (axis == this.m_secondYAxis) {
+            if ((m_secondPlots == null) || (m_secondPlots.isEmpty())) {
+                return null;
+            }
+            return m_secondPlots.get(0).getEnumValueY(index, fromData);
+        }
+        return null;
+    }
+    @Override
     public void paint(Graphics g) {
-        if (!_isEnumAxisUpdated) {
+        if (!m_isEnumAxisUpdated) {
             updateEnumAxis();
         }
 

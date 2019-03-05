@@ -1146,6 +1146,11 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
         fireUpdateAxisRange(oldMinX, oldMaxX, m_xAxis.getMinValue(), m_xAxis.getMaxValue(), oldMinY, oldMaxY, m_yAxis.getMinValue(), m_yAxis.getMaxValue());
     }
 
+    public void setAxisXSpecificities(boolean isIntegerY, boolean isEnum, boolean isPixel) {
+        m_xAxis = this.getXAxis();
+        this.m_xAxis.setSpecificities(isIntegerY, isEnum, isPixel);
+    }
+
     public void setAxisYSpecificities(boolean isIntegerY, boolean isEnum, boolean isPixel, PlotBaseAbstract plot) {
         m_yAxis = this.getYAxis();
         this.m_yAxis.setSpecificities(isIntegerY, isEnum, isPixel);

@@ -133,7 +133,7 @@ public abstract class PlotBaseAbstract implements Axis.EnumXInterface, Axis.Enum
             Class xClass = m_compareDataInterface.getDataColumnClass(m_cols[COL_X_ID]);
             boolean isIntegerX = ((xClass.equals(Integer.class)) || (xClass.equals(Long.class)) || (xClass.equals(String.class)));
             boolean isEnumX = (xClass.equals(String.class));
-            m_plotPanel.getXAxis().setSpecificities(isIntegerX, isEnumX, false);
+            m_plotPanel.setAxisXSpecificities(isIntegerX, isEnumX, false);
         }
 
         if (!needsYAxis()) {//@kx ?????

@@ -111,7 +111,15 @@ public class DoubleYAxisPlotPanel extends BasePlotPanel {
         m_secondYAxisColor = color;
     }
 
-    
+    public void setAxisXSpecificities(boolean isIntegerY, boolean isEnum, boolean isPixel) {
+        if (m_xAxis != null) {
+            this.m_xAxis.setSpecificities(isIntegerY, isEnum, isPixel);
+        }
+        if (m_secondXAxis != null) {
+            this.m_secondXAxis.setSpecificities(isIntegerY, isEnum, isPixel);
+        }
+    }
+
     @Override
     public void setAxisYSpecificities(boolean isIntegerY, boolean isEnum, boolean isPixel, PlotBaseAbstract plot) {
         if (m_mainPlots.contains(plot)) {
@@ -124,11 +132,15 @@ public class DoubleYAxisPlotPanel extends BasePlotPanel {
     public void preparePaint() {
         updateAxis(m_mainPlots, m_xAxis, m_yAxis, m_xAxisBounds, m_yAxisBounds);
         updateAxis(m_secondPlots, m_secondXAxis, m_secondYAxis, m_secondXBounds, m_secondYBounds); //suppose only one plot use seconde Y Axis
+        if (m_xAxis != null && m_secondXAxis != null) {
+            m_xAxis.setRange(Math.min(m_xAxis.getMinValue(), m_secondXAxis.getMinValue()), Math.max(m_xAxis.getMaxValue(), m_secondXAxis.getMaxValue()));
+            //m_secondXAxis.setRange(Math.min(m_xAxis.getMinValue(), m_secondXAxis.getMinValue()), Math.max(m_xAxis.getMaxValue(), m_secondXAxis.getMaxValue()));
+        }
         this.m_plots = new ArrayList();
         for (Object obj : this.m_plotAxisMap.keySet()) {
             this.m_plots.add((PlotBaseAbstract) obj);
         }
-        m_secondYAxis.setTitle(m_secondYAxisTitle);        
+        m_secondYAxis.setTitle(m_secondYAxisTitle);
     }
 
     public void updatePlots(int[] cols, String parameterZ) {
@@ -175,9 +187,14 @@ public class DoubleYAxisPlotPanel extends BasePlotPanel {
     @Override
     protected void updateEnumAxis() {
         if (m_secondYAxis.isEnum()) {
-            double y2Min = m_secondYAxis.getMinValue()-0.5;
-            double y2Max = m_secondYAxis.getMaxValue()+0.5;
+            double y2Min = m_secondYAxis.getMinValue() - 0.5;
+            double y2Max = m_secondYAxis.getMaxValue() + 0.5;
             m_secondYAxis.setRange(y2Min, y2Max);
+        }
+        if (m_secondXAxis.isEnum()) {
+            double x2Min = m_secondXAxis.getMinValue() - 0.5;
+            double x2Max = m_secondXAxis.getMaxValue() + 0.5;
+            m_secondXAxis.setRange(x2Min, x2Max);
         }
         super.updateEnumAxis();
     }
@@ -198,6 +215,7 @@ public class DoubleYAxisPlotPanel extends BasePlotPanel {
         }
         return null;
     }
+
     @Override
     public void paint(Graphics g) {
         if (!m_isEnumAxisUpdated) {
@@ -249,10 +267,20 @@ public class DoubleYAxisPlotPanel extends BasePlotPanel {
                 int xAxisHeight = figuresXHeight + GAP_AXIS_TITLE + GAP_AXIS_LINE;
                 // set default size
                 m_xAxis.setSize(xAxisX, xAxisY, xAxisWidth, xAxisHeight);
+                m_secondXAxis.setSize(xAxisX, xAxisY, xAxisWidth, xAxisHeight);
                 // prepare paint
                 m_xAxis.preparePaint(g2d);
+                m_secondXAxis.preparePaint(g2d);
+
+                XAxis realXAxis = m_xAxis;
+                if (m_xAxis.getMaxTick() < 1) {
+                    realXAxis = m_secondXAxis;
+                } else if (m_xAxis.getMaxValue() < m_secondXAxis.getMaxValue()) {
+                    realXAxis = m_secondXAxis;
+                }
+
                 // set correct size
-                figuresXHeight = m_xAxis.getMiniMumAxisHeight(figuresXHeight);
+                figuresXHeight = realXAxis.getMiniMumAxisHeight(figuresXHeight);
                 xAxisY = height - figuresXHeight - GAP_AXIS_TITLE;
                 xAxisHeight = figuresXHeight + GAP_AXIS_TITLE + GAP_AXIS_LINE;
                 m_xAxis.setSize(xAxisX, xAxisY, xAxisWidth, xAxisHeight);
@@ -262,7 +290,7 @@ public class DoubleYAxisPlotPanel extends BasePlotPanel {
                 //prepare plotArea begin point & width
                 m_plotArea.x = m_xAxis.getX() + 1;
                 m_plotArea.width = m_xAxis.getWidth();
-                m_xAxis.paint(g2d);
+                realXAxis.paint(g2d);
                 //m_logger.debug("___->paint main xAxis done");
 
             }
@@ -388,7 +416,7 @@ public class DoubleYAxisPlotPanel extends BasePlotPanel {
                 plot.paintMarkers(g2d);//markers
                 plot.paintCursors(g2d);//cursors
             } else if (layout == Layout.SECOND) {
-                plot.paint(g2d, m_xAxis, m_secondYAxis);
+                plot.paint(g2d, m_secondXAxis, m_secondYAxis);
                 plot.paintOver(g2d); //nerver used
             }
 
@@ -680,6 +708,7 @@ public class DoubleYAxisPlotPanel extends BasePlotPanel {
             if (m_panAxisGesture.getPanningAxis() == PanAxisGesture.X_AXIS_PAN) {
                 double delta = m_xAxis.pixelToValue(m_panAxisGesture.getPreviousX()) - m_xAxis.pixelToValue(e.getX());
                 m_xAxis.setRange(m_xAxis.getMinValue() + delta, m_xAxis.getMaxValue() + delta);
+                m_secondXAxis.setRange(m_secondXAxis.getMinValue() + delta, m_secondXAxis.getMaxValue() + delta);
                 fireUpdateAxisRange(oldMinX, oldMaxX, m_xAxis.getMinValue(), m_xAxis.getMaxValue(), oldMinY, oldMaxY, m_yAxis.getMinValue(), m_yAxis.getMaxValue());
             } else if (m_panAxisGesture.getPanningAxis() == PanAxisGesture.Y_AT_RIGHT_AXIS_PAN) {
                 double delta = m_secondYAxis.pixelToValue(m_panAxisGesture.getPreviousYAtRight()) - m_secondYAxis.pixelToValue(e.getY());
@@ -716,27 +745,33 @@ public class DoubleYAxisPlotPanel extends BasePlotPanel {
         double oldMaxY2 = m_secondYAxis.getMaxValue();
         double factor = 0.20;
         double xValue = m_xAxis.pixelToValue(e.getX());
+        double x2Value = m_secondXAxis.pixelToValue(e.getX());
         double yValue = m_yAxis.pixelToValue(e.getY());
         double y2Value = m_secondYAxis.pixelToValue(e.getY());
         double newXmin = m_xAxis.getMinValue() + (m_xAxis.getMinValue() - xValue) * factor * e.getWheelRotation();
         double newXmax = m_xAxis.getMaxValue() - (xValue - m_xAxis.getMaxValue()) * factor * e.getWheelRotation();
+        double newX2Min = m_secondXAxis.getMinValue() + (m_secondXAxis.getMinValue() - x2Value) * factor * e.getWheelRotation();
+        double newX2Max = m_secondXAxis.getMaxValue() - (x2Value - m_secondXAxis.getMaxValue()) * factor * e.getWheelRotation();
+
         double newYmin = m_yAxis.getMinValue() + (m_yAxis.getMinValue() - yValue) * factor * e.getWheelRotation();
         double newYmax = m_yAxis.getMaxValue() - (yValue - m_yAxis.getMaxValue()) * factor * e.getWheelRotation();
-        double newMinY2 = m_secondYAxis.getMinValue() + (m_secondYAxis.getMinValue() - yValue) * factor * e.getWheelRotation();
-        double newMaxY2 = m_secondYAxis.getMaxValue() - (y2Value - m_secondYAxis.getMaxValue()) * factor * e.getWheelRotation();
+        double newY2Min = m_secondYAxis.getMinValue() + (m_secondYAxis.getMinValue() - yValue) * factor * e.getWheelRotation();
+        double newY2Max = m_secondYAxis.getMaxValue() - (y2Value - m_secondYAxis.getMaxValue()) * factor * e.getWheelRotation();
         if (m_plots.get(0).inside(e.getX(), e.getY())) {//mouse wheel move on m_plotArea
             m_xAxis.setRange(newXmin, newXmax);
+            m_secondXAxis.setRange(newX2Min, newX2Max);
             m_yAxis.setRange(newYmin, newYmax);
-            m_secondYAxis.setRange(newMinY2, newMaxY2);
+            m_secondYAxis.setRange(newY2Min, newY2Max);
             repaintUpdateDoubleBuffer();
         } else if ((m_xAxis != null) && m_xAxis.inside(e.getX(), e.getY())) {//mouse wheel move on Axis X
             m_xAxis.setRange(newXmin, newXmax);
+            m_secondXAxis.setRange(newX2Min, newX2Max);
             repaintUpdateDoubleBuffer();
         } else if ((m_yAxis != null) && m_yAxis.inside(e.getX(), e.getY())) {//mouse wheel move on Axis Y
             m_yAxis.setRange(newYmin, newYmax);
             repaintUpdateDoubleBuffer();
         } else if ((m_secondYAxis != null) && m_secondYAxis.inside(e.getX(), e.getY())) {//mouse wheel move on second Axis Y
-            m_secondYAxis.setRange(newMinY2, newMaxY2);
+            m_secondYAxis.setRange(newY2Min, newY2Max);
             repaintUpdateDoubleBuffer();
         }
         fireUpdateAxisRange(oldMinX, oldMaxX, m_xAxis.getMinValue(), m_xAxis.getMaxValue(), oldMinY, oldMaxY, m_yAxis.getMinValue(), m_yAxis.getMaxValue());

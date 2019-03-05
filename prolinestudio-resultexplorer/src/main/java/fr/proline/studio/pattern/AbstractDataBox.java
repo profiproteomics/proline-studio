@@ -12,6 +12,7 @@ import fr.proline.studio.pattern.xic.DataboxChildFeature;
 import fr.proline.studio.pattern.xic.DataboxExperimentalDesign;
 import fr.proline.studio.pattern.xic.DataboxMapAlignment;
 import fr.proline.studio.pattern.xic.DataboxPSMOfMasterQuantPeptide;
+import fr.proline.studio.pattern.xic.DataboxXicAbundanceGraphic;
 import fr.proline.studio.pattern.xic.DataboxXicPeptideIon;
 import fr.proline.studio.pattern.xic.DataboxXicPeptideSet;
 import fr.proline.studio.pattern.xic.DataboxXicProteinSet;
@@ -30,47 +31,44 @@ import org.jdesktop.swingx.JXTable;
 
 /**
  *
- * A Box receive IN-parameters. According to them, it loads data from the database.
- * These data are displayed to the user in an associated Graphical Panel.
- * If the user select data in the panel, the box offers the selected data as OUT-parameters
- * for the next dataBox.
- * 
+ * A Box receive IN-parameters. According to them, it loads data from the
+ * database. These data are displayed to the user in an associated Graphical
+ * Panel. If the user select data in the panel, the box offers the selected data
+ * as OUT-parameters for the next dataBox.
+ *
  * @author JM235353
  */
 public abstract class AbstractDataBox implements ChangeListener, ProgressInterface, SplittedPanelContainer.UserActions {
-   
-    
-    
+
     // Panel corresponding to this box
     private DataBoxPanelInterface m_panel;
-    
+
     // In and out Parameters Registered
     private final HashSet<GroupParameter> m_inParameters = new HashSet<>();
     private final ArrayList<GroupParameter> m_outParameters = new ArrayList<>();
-    
-    
+
     private final HashMap<Long, TaskInfo> m_taskMap = new HashMap<>();
-    
+
     private ProjectId m_projectId = new ProjectId();
-    
+
     protected String m_typeName;
     protected String m_dataName;
     protected String m_fullName = null;
     protected String m_description = "";
     protected String m_userName = null;
-    
+
     private SplittedPanelContainer.PanelLayout m_layout = SplittedPanelContainer.PanelLayout.VERTICAL;
-    
+
     protected ArrayList<AbstractDataBox> m_nextDataBoxArray = null;
     protected AbstractDataBox m_previousDataBox = null;
-    
+
     private int m_loadingId = 0;
-    
+
     private int m_id = -1;
     private static int m_idCount = 0;
-    
+
     private Image m_icon;
-    
+
     protected DataboxStyle m_style;
     protected DataboxType m_type;
 
@@ -79,9 +77,9 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
         STYLE_SC,
         STYLE_RSM,
         STYLE_RSET,
-        STYLE_UNKNOWN 
+        STYLE_UNKNOWN
     }
-    
+
     public enum DataboxType {
         DataBoxRsetAll(0),
         DataBoxRsetAllProteinMatch(1),
@@ -118,13 +116,12 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
         DataboxExperimentalDesign(33),
         DataBoxAdjacencyMatrix(34),
         DataBoxAdjacencyMatrixChoice(35),
-        DataBoxMapAlignment(36), 
-        DataBoxMSQueriesForRSM(37), 
+        DataBoxMapAlignment(36),
+        DataBoxMSQueriesForRSM(37),
         DataBoxRSMPSMForMsQuery(38),
         DataBoxRsetPeptideSpectrumValues(39),
-        DataBoxMSQueriesForRset(40), 
+        DataBoxMSQueriesForRset(40),
         DataBoxRsetPSMForMsQuery(41),
-        
         DataBoxDataAnalyzerResults(43),
         DataBoxImage(44),
         DataBoxSystemTasks(45),
@@ -134,18 +131,19 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
         DataBoxPTMSitePepMatches(49),
         DataBoxXICPTMProteinSite(50),
         DataBoxXICPTMSitePeptides(51),
-        DataBoxPTMSitePeptidesGraphic(52);
+        DataBoxPTMSitePeptidesGraphic(52),
+        DataboxXicAbundanceGraphic(53);
         int m_type;
         private static HashMap<Integer, DataboxType> m_databoxTypeMap = null;
-        
+
         DataboxType(int type) {
             m_type = type;
         }
-        
+
         public int intValue() {
             return m_type;
         }
-        
+
         public AbstractDataBox getDatabox() {
             switch (this) {
                 case DataBoxRsetAll:
@@ -191,7 +189,7 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
                 case DataboxXicPeptideSet:
                     return new DataboxXicPeptideSet();
                 case DataboxRsetMSDiag:
-                	return new DataBoxRsetMSDiag(null);
+                    return new DataBoxRsetMSDiag(null);
                 case DataboxXicPeptideIon:
                     return new DataboxXicPeptideIon();
                 case DataboxGraphics:
@@ -240,12 +238,15 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
                     return new DataBoxXicPTMSitePeptides();
                 case DataBoxPTMSitePeptidesGraphic:
                     return new DataBoxPTMSitePeptidesGraphic();
+                case DataboxXicAbundanceGraphic:
+                    return new DataboxXicAbundanceGraphic();
+
                 case DataBoxFrozenCopy:
                     return null; // not used for frozen copy
             }
             return null; // should not happen
         }
-        
+
         private static HashMap<Integer, DataboxType> generateDataboxTypeMap() {
             HashMap<Integer, DataboxType> map = new HashMap<>();
             DataboxType[] databoxTypeArray = DataboxType.values();
@@ -254,71 +255,70 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
             }
             return map;
         }
-        
+
         public static DataboxType getDataboxType(int type) {
             if (m_databoxTypeMap == null) {
                 m_databoxTypeMap = generateDataboxTypeMap();
             }
             return m_databoxTypeMap.get(type);
         }
-        
-        
+
     }
-    
+
     public AbstractDataBox(DataboxType type, DataboxStyle style) {
         m_type = type;
         m_style = style;
-        
+
         // Register possible out parameters
         GroupParameter outParameter = new GroupParameter();
         outParameter.addParameter(ProjectId.class, false);
         registerOutParameter(outParameter);
     }
-    
+
     protected void setDataBoxPanelInterface(DataBoxPanelInterface panelInterface) {
         m_panel = panelInterface;
         if (m_panel != null) {
             getDataBoxPanelInterface().addSingleValue(m_projectId);
         }
     }
-    
+
     protected DataBoxPanelInterface getDataBoxPanelInterface() {
         return m_panel;
     }
-    
+
     public void setUserName(String userName) {
         m_userName = userName;
-    } 
- 
+    }
+
     public String getUserName() {
         return m_userName;
     }
-    
+
     public DataboxType getType() {
         return m_type;
     }
-    
+
     public DataboxStyle getStyle() {
         return m_style;
     }
-    
+
     public int getId() {
         if (m_id == -1) {
             m_id = ++m_idCount;
         }
         return m_id;
     }
-    
+
     public void setIcon(Image icon) {
         m_icon = icon;
     }
-    
+
     public Image getIcon() {
         return m_icon;
     }
-    
+
     public Image getDefaultIcon() {
-        switch(m_style) {
+        switch (m_style) {
             case STYLE_RSET:
                 return IconManager.getImage(IconManager.IconType.DATASET_RSET);
             case STYLE_RSM:
@@ -332,54 +332,55 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
         }
         return null;
     }
-    
+
     protected void deleteThis() {
-        
+
         // cancel task possibily running
         if (!m_taskMap.isEmpty()) {
             AccessDatabaseThread.getAccessDatabaseThread().abortTasks(m_taskMap.keySet());
             m_taskMap.clear();
         }
-        
-         if (m_nextDataBoxArray != null) {
+
+        if (m_nextDataBoxArray != null) {
             for (AbstractDataBox nextDataBox : m_nextDataBoxArray) {
                 nextDataBox.deleteThis();
             }
         }
     }
-    
+
     /**
-     * A task must be registered, so it can be cancelled
-     * (a DataBox must not directly call AccessDatabaseThread.getAccessDatabaseThread().addTask()
+     * A task must be registered, so it can be cancelled (a DataBox must not
+     * directly call AccessDatabaseThread.getAccessDatabaseThread().addTask()
      * method
-     * @param task 
+     *
+     * @param task
      */
     protected void registerTask(AbstractDatabaseTask task) {
         AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
         m_taskMap.put(task.getId(), task.getTaskInfo());
-        
+
     }
+
     protected void unregisterTask(Long taskId) {
         m_taskMap.remove(taskId);
     }
- 
-    
+
     protected final void registerInParameter(GroupParameter parameter) {
         m_inParameters.add(parameter);
     }
-    
-    protected final void registerOutParameter(GroupParameter parameter)  {
+
+    protected final void registerOutParameter(GroupParameter parameter) {
         m_outParameters.add(parameter);
     }
-    
+
     public ArrayList<GroupParameter> getOutParameters() {
         return m_outParameters;
     }
-    
+
     public HashSet<GroupParameter> getInParameters() {
         return m_inParameters;
     }
-    
+
     public boolean isDataDependant(Class dataType) {
         Iterator<GroupParameter> it = m_inParameters.iterator();
         while (it.hasNext()) {
@@ -390,7 +391,7 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
         }
         return false;
     }
-  
+
     public boolean isDataProvider(Class dataType) {
         Iterator<GroupParameter> it = m_outParameters.iterator();
         while (it.hasNext()) {
@@ -401,7 +402,7 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
         }
         return false;
     }
-    
+
     public void loadedDataModified(Long rsetId, Long rsmId, Class dataType, ArrayList modificationsList, int reason) {
         if (isDataProvider(dataType)) {
             dataMustBeRecalculated(rsetId, rsmId, dataType, modificationsList, reason);
@@ -412,30 +413,29 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
             }
         }
     }
-    
+
     public double calculateParameterCompatibilityDistance(ArrayList<GroupParameter> outParameters) {
         Iterator<GroupParameter> it = m_inParameters.iterator();
         while (it.hasNext()) {
             GroupParameter parameter = it.next();
-            
+
             if (parameter.isCompatibleWithOutParameter(outParameters)) {
                 return 0;
             }
         }
         return -1;
     }
-    
-    
+
     public double calculateParameterCompatibilityDistance(AvailableParameters avalaibleParameters, AbstractDataBox nextDataBox, Class compulsoryInParameterClass) {
-        
-        
+
         return avalaibleParameters.calculateParameterCompatibilityDistance(nextDataBox, compulsoryInParameterClass);
 
     }
-    
+
     /**
-     * set m_nextDataBoxArray and m_previousDataBox 
-     * @param nextDataBox 
+     * set m_nextDataBoxArray and m_previousDataBox
+     *
+     * @param nextDataBox
      */
     public void addNextDataBox(AbstractDataBox nextDataBox) {
         if (m_nextDataBoxArray == null) {
@@ -447,7 +447,7 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
             nextDataBox.m_previousDataBox = this;
         }
     }
-    
+
     public void removeNextDataBox(AbstractDataBox nextDataBox) {
         if (m_nextDataBoxArray == null) {
             // should not happen
@@ -455,56 +455,55 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
         }
         m_nextDataBoxArray.remove(nextDataBox);
     }
-    
 
     public abstract void createPanel();
-    
+
     public abstract void dataChanged();
-    
+
     /**
-     * To be overriden if the modification in a following databox
-     * can lead to a modificiation of the data of the current databox.
-     * (for instance, disabling peptides -> modifications of protein set
-     * in the XIC View
-     * @param dataType 
+     * To be overriden if the modification in a following databox can lead to a
+     * modificiation of the data of the current databox. (for instance,
+     * disabling peptides -> modifications of protein set in the XIC View
+     *
+     * @param dataType
      */
     public void dataMustBeRecalculated(Long rsetId, Long rsmId, Class dataType, ArrayList modificationsList, int reason) {
-        
+
     }
-    
+
     public Object getData(boolean getArray, Class parameterType) {
-        
-        if ((parameterType!= null ) && (parameterType.equals(ProjectId.class))) {
-            if ((m_projectId==null) || (m_projectId.getId() == -1L)) {
+
+        if ((parameterType != null) && (parameterType.equals(ProjectId.class))) {
+            if ((m_projectId == null) || (m_projectId.getId() == -1L)) {
                 if (m_previousDataBox != null) {
                     return m_previousDataBox.getData(getArray, parameterType);
                 }
             }
             return m_projectId;
         }
-        
+
         if (m_previousDataBox != null) {
             return m_previousDataBox.getData(getArray, parameterType);
         }
         return null;
     }
-    
+
     public Object getData(boolean getArray, Class parameterType, boolean isList) {
-        
-        if ((parameterType!= null ) && (parameterType.equals(ProjectId.class))) {
+
+        if ((parameterType != null) && (parameterType.equals(ProjectId.class))) {
             return m_projectId;
         }
-        
+
         if (m_previousDataBox != null) {
             return m_previousDataBox.getData(getArray, parameterType, isList);
         }
         return null;
     }
-    
+
     public void setEntryData(Object data) {
         throw new UnsupportedOperationException();
     }
-    
+
     public void propagateDataChanged(Class dataType) {
         if (m_nextDataBoxArray != null) {
             for (AbstractDataBox nextDataBox : m_nextDataBoxArray) {
@@ -514,11 +513,9 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
                 nextDataBox.propagateDataChanged(dataType);
             }
         }
-        
+
     }
- 
-    
-    
+
     public void setProjectId(long projectId) {
         if (m_panel != null) {
             getDataBoxPanelInterface().addSingleValue(m_projectId);
@@ -533,53 +530,54 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
         }
         return projectId.getId();
     }
-    
+
     public Long getRsetId() {
         if (m_previousDataBox != null) {
             return m_previousDataBox.getRsetId();
         }
         return null;
     }
+
     public Long getRsmId() {
         if (m_previousDataBox != null) {
             return m_previousDataBox.getRsmId();
         }
         return null;
     }
-    
+
     public DataBoxPanelInterface getPanel() {
         return m_panel;
     }
-    
+
     public void setLayout(SplittedPanelContainer.PanelLayout layout) {
         m_layout = layout;
     }
-    
+
     public SplittedPanelContainer.PanelLayout getLayout() {
         return m_layout;
     }
-    
+
     public String getTypeName() {
         return m_typeName;
     }
-    
+
     public void setDataName(String dataName) {
         m_dataName = dataName;
     }
-    
+
     public String getDataName() {
-        
+
         if (m_dataName != null) {
             return m_dataName;
         }
-        
+
         if (m_previousDataBox != null) {
             return m_previousDataBox.getDataName();
         }
 
         return null;
     }
-    
+
     public String getFullName() {
         if (m_userName != null) {
             return m_userName;
@@ -590,7 +588,7 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
         // try to construct a full name
         String dataName = getDataName();
         if (dataName != null) {
-            m_fullName = dataName+' '+m_typeName;
+            m_fullName = dataName + ' ' + m_typeName;
             return m_fullName;
         }
 
@@ -600,79 +598,78 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
     public String getDescription() {
         return m_description;
     }
-    
+
     public void windowClosed() {
         deleteThis();
     }
-    
-    public void windowOpened() {    
+
+    public void windowOpened() {
     }
-    
+
     @Override
     public void stateChanged(ChangeEvent e) {
     }
-    
-    
+
     public int setLoading(boolean andCalculating) {
         final int loadingId = m_loadingId++;
         getDataBoxPanelInterface().setLoading(loadingId, andCalculating);
         return loadingId;
     }
-    
+
     public int setLoading() {
         final int loadingId = m_loadingId++;
         getDataBoxPanelInterface().setLoading(loadingId);
         return loadingId;
     }
-    
+
     public void setLoaded(int loadingId) {
         getDataBoxPanelInterface().setLoaded(loadingId);
     }
-    
+
     protected void selectDataWhenLoaded(HashSet data) {
-        
+
     }
-    
+
     @Override
     public ActionListener getRemoveAction(SplittedPanelContainer splittedPanel) {
         return new RemoveDataBoxActionListener(splittedPanel, this);
     }
-        
+
     @Override
     public ActionListener getAddAction(SplittedPanelContainer splittedPanel) {
         return new AddDataBoxActionListener(splittedPanel, this);
     }
-    
+
     @Override
     public ActionListener getSaveAction(SplittedPanelContainer splittedPanel) {
         return new SaveDataBoxActionListener(splittedPanel);
     }
-    
+
     @Override
     public int getLoadingPercentage() {
         if (m_taskMap.isEmpty()) {
             return 100;
         }
-        
+
         float percentage = 0;
         int nb = 0;
         Iterator<TaskInfo> it = m_taskMap.values().iterator();
         while (it.hasNext()) {
             TaskInfo info = it.next();
-            percentage +=info.getPercentage();
+            percentage += info.getPercentage();
             nb++;
         }
         percentage /= nb;
 
         return (int) Math.round(percentage);
     }
-    
+
     @Override
     public boolean isLoaded() {
         if (m_taskMap.isEmpty()) {
             return true;
         }
-  
+
         Iterator<TaskInfo> it = m_taskMap.values().iterator();
         while (it.hasNext()) {
             TaskInfo info = it.next();
@@ -684,9 +681,8 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
         return true;
     }
 
-
     public void retrieveTableModels(ArrayList<TableInfo> list) {
- 
+
         if (m_panel instanceof GlobalTabelModelProviderInterface) {
             JXTable table = ((GlobalTabelModelProviderInterface) m_panel).getGlobalAssociatedTable();
             if (table != null) {
@@ -694,22 +690,22 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
                 list.add(info);
             }
         }
-        
+
         if (m_nextDataBoxArray != null) {
             for (AbstractDataBox nextDataBox : m_nextDataBoxArray) {
                 nextDataBox.retrieveTableModels(list);
             }
         }
     }
-    
+
     public ArrayList<AbstractDataBox> getNextDataBoxArray() {
         return m_nextDataBoxArray;
     }
-    
+
     public Class[] getImportantInParameterClass() {
         return null;
     }
-    
+
     public String getImportantOutParameterValue() {
         return null;
     }

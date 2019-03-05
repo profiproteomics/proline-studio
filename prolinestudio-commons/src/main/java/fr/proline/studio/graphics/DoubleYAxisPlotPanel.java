@@ -128,8 +128,7 @@ public class DoubleYAxisPlotPanel extends BasePlotPanel {
         for (Object obj : this.m_plotAxisMap.keySet()) {
             this.m_plots.add((PlotBaseAbstract) obj);
         }
-        m_secondYAxis.setTitle(m_secondYAxisTitle);
-        repaint();
+        m_secondYAxis.setTitle(m_secondYAxisTitle);        
     }
 
     public void updatePlots(int[] cols, String parameterZ) {
@@ -353,9 +352,9 @@ public class DoubleYAxisPlotPanel extends BasePlotPanel {
         double[] newY = new double[2];
         newY[0] = newMinY;
         newY[1] = newMaxY;
-//        for (PlotPanelListener l : m_listeners) {
-//            l.updateAxisRange(oldX, newX, oldY, newY);
-//        }
+        for (PlotPanelListener l : m_listeners) {
+            l.updateAxisRange(oldX, newX, oldY, newY);
+        }
     }
 
     /**

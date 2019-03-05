@@ -91,15 +91,15 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
     protected boolean m_drawCursor = false;
 
     private PlotToolbarListener m_plotToolbarListener = null;
-    private List<PlotPanelListener> m_listeners = new ArrayList<>();
+    protected List<PlotPanelListener> m_listeners = new ArrayList<>();
 
     protected Rectangle m_plotArea = new Rectangle();
 
-    // show coord.
-    protected String m_coordX = "";//kx: ? for cursor
-    protected String m_coordY = "";//kx: ? for cursor
-    private int m_posx;//kx?
-    private int m_posy;//kx?
+    // cursor, show coord.
+    protected String m_coordX = "";
+    protected String m_coordY = "";
+    private int m_posx;
+    private int m_posy;
     /* font coord */
     private final static Font coordFont = new Font("dialog", Font.BOLD, 9);
     private final static Color coordColor = Color.GRAY;
@@ -521,7 +521,7 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
     }
 
     /**
-     * browse each plot to find the Min Max X, Y
+     * browse each plot to find the Min Max X, Y, useful for XAxis YAxis
      *
      * @return doube[4]= [minX, maxX, minY, maxY]
      */
@@ -1147,6 +1147,7 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
     }
 
     public void setAxisYSpecificities(boolean isIntegerY, boolean isEnum, boolean isPixel, PlotBaseAbstract plot) {
+        m_yAxis = this.getYAxis();
         this.m_yAxis.setSpecificities(isIntegerY, isEnum, isPixel);
     }
 

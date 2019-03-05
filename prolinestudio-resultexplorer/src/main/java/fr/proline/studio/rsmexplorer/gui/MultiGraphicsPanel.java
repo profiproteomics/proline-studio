@@ -36,6 +36,8 @@ import javax.swing.JToolBar;
 import org.openide.windows.WindowManager;
 import fr.proline.studio.graphics.BasePlotPanel.PlotToolbarListener;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -43,15 +45,12 @@ import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
  */
 public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelInterface, PlotToolbarListener {
 
-    private AbstractDataBox m_dataBox;
+    private static final Logger m_logger = LoggerFactory.getLogger(MultiGraphicsPanel.class);
+    protected AbstractDataBox m_dataBox;
 
-    private BasePlotPanel m_plotPanel;
+    protected BasePlotPanel m_plotPanel;
 
-    public BasePlotPanel getM_plotPanel() {
-        return m_plotPanel;
-    }
-
-    private boolean m_canChooseColor = false;
+    protected boolean m_canChooseColor = false;
     //plot type combo box
     protected JComboBox<PlotType> m_allPlotsComboBox;
     //Axis combo box
@@ -59,9 +58,9 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
     protected JComboBox<String> m_valueYComboBox;
     protected JComboBox<String> m_valueZComboBox;
     //Axis label
-    private JLabel m_valueXLabel;
-    private JLabel m_valueYLabel;
-    private JLabel m_valueZLabel;
+    protected JLabel m_valueXLabel;
+    protected JLabel m_valueYLabel;
+    protected JLabel m_valueZLabel;
 
     protected List<PlotBaseAbstract> m_plotGraphicsList = null;
 
@@ -72,9 +71,9 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
 
     protected boolean m_dataLocked = false;
 
-    private JToggleButton m_gridButton = null;
-    private JButton m_importSelectionButton = null;
-    private JButton m_exportSelectionButton = null;
+    protected JToggleButton m_gridButton = null;
+    protected JButton m_importSelectionButton = null;
+    protected JButton m_exportSelectionButton = null;
 
     public MultiGraphicsPanel(boolean dataLocked, boolean canChooseColor) {
         m_dataLocked = dataLocked;
@@ -84,7 +83,7 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
         initComponent();
     }
 
-    private void initComponent() {
+    protected void initComponent() {
         JPanel internalPanel = createInternalPanel();
         JToolBar toolbar = initToolbar();
 
@@ -93,7 +92,7 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
         add(toolbar, BorderLayout.WEST);
     }
 
-    public JPanel createInternalPanel() {
+    protected JPanel createInternalPanel() {
 
         JPanel internalPanel = new JPanel();
         internalPanel.setLayout(new GridBagLayout());
@@ -119,7 +118,7 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
         return internalPanel;
     }
 
-    public final JToolBar initToolbar() {
+    protected final JToolBar initToolbar() {
 
         JToolBar toolbar = new JToolBar(JToolBar.VERTICAL);
         toolbar.setFloatable(false);
@@ -297,7 +296,7 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
      * for the current Plot, needsX(), needsY() will affect m_valueX-Y-ZLabel
      * and m_valueX-Y-Z ComboBox
      */
-    private void updateXYCbxVisibility() {
+    protected void updateXYCbxVisibility() {
         PlotType plotType = (PlotType) m_allPlotsComboBox.getSelectedItem();
 
         m_valueXLabel.setVisible(plotType.needsX());
@@ -415,7 +414,7 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
      * @param crossSelectionInterfaceList
      * @param isSingle to display one plot
      */
-    private void setDataImpl(List<ExtendedTableModelInterface> valuesList, List<CrossSelectionInterface> crossSelectionInterfaceList) {
+    protected void setDataImpl(List<ExtendedTableModelInterface> valuesList, List<CrossSelectionInterface> crossSelectionInterfaceList) {
 
         m_valuesList = valuesList;
         m_crossSelectionInterfaceList = crossSelectionInterfaceList;
@@ -425,9 +424,8 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
             return;
         }
 
-        
-        if ( m_valueXComboBox.getItemCount() == 0 ) {
-                fillXYCombobox();//update select panel combo box
+        if (m_valueXComboBox.getItemCount() == 0) {
+            fillXYCombobox();//update select panel combo box
 
             ActionListener actionForXYCbx = new ActionListener() {
                 @Override
@@ -438,10 +436,11 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
                     ReferenceToColumn refX = (ReferenceToColumn) m_valueXComboBox.getSelectedItem();
                     ReferenceToColumn refY = (ReferenceToColumn) m_valueYComboBox.getSelectedItem();
                     String zParameter = (String) m_valueZComboBox.getSelectedItem();
+                    int[] cols = new int[2]; //JPM.TODO enhance
+                    cols[COL_X_ID] = refX.getColumnIndex();
+                    cols[COL_Y_ID] = refY.getColumnIndex();
+                    m_logger.debug(String.format("--**--value X%s-(%d),  Y%s-(%d)", refX.toString(), cols[0], refY.toString(), cols[1]));
                     for (PlotBaseAbstract plotGraphic : m_plotGraphicsList) {
-                        int[] cols = new int[2]; //JPM.TODO enhance
-                        cols[COL_X_ID] = refX.getColumnIndex();
-                        cols[COL_Y_ID] = refY.getColumnIndex();
                         plotGraphic.update(cols, zParameter);
                         m_plotPanel.updateAxis(plotGraphic);
                     }
@@ -449,7 +448,6 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
                 }
             };
 
-            //@Karine XUE: if Axis change, Combo Box Change
             m_valueXComboBox.addActionListener(actionForXYCbx);
             m_valueYComboBox.addActionListener(actionForXYCbx);
             m_valueZComboBox.addActionListener(actionForXYCbx);

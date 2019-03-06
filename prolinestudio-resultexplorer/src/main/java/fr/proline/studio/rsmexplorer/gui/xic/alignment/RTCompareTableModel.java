@@ -83,6 +83,8 @@ public class RTCompareTableModel implements ExtendedTableModelInterface {
             rTimeTo = new float[m_mapCount - 1];
             matchCountTo = new int[rTimeTo.length];
             pi = masterPep.getPeptideInstance();
+            if (pi == null)
+                continue;
             peptideId = pi.getPeptideId();
             peptideSequence = pi.getPeptide().getSequence();
             charge = masterPep.getCharge();

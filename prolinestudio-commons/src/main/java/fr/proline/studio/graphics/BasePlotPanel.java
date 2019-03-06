@@ -98,16 +98,16 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
     // cursor, show coord.
     protected String m_coordX = "";
     protected String m_coordY = "";
-    private int m_posx;
-    private int m_posy;
+    protected int m_posx;
+    protected int m_posy;
     /* font coord */
     private final static Font coordFont = new Font("dialog", Font.BOLD, 9);
     private final static Color coordColor = Color.GRAY;
 
-    private final static NumberFormat nfE = NumberFormat.getNumberInstance();
-    private final static DecimalFormat formatE = (DecimalFormat) nfE;
-    private final static NumberFormat nf = NumberFormat.getNumberInstance();
-    private final static DecimalFormat format = (DecimalFormat) nf;
+    protected final static NumberFormat nfE = NumberFormat.getNumberInstance();
+    protected final static DecimalFormat formatE = (DecimalFormat) nfE;
+    protected final static NumberFormat nf = NumberFormat.getNumberInstance();
+    protected final static DecimalFormat format = (DecimalFormat) nf;
 
     // title
     protected String m_plotTitle = null;
@@ -1026,7 +1026,7 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
         }
 
     }
-    private final StringBuilder m_sbTooltip = new StringBuilder();
+    protected final StringBuilder m_sbTooltip = new StringBuilder();
 
     protected JPopupMenu createAxisPopup(final Axis axis, int x, int y) {
 

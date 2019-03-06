@@ -48,7 +48,7 @@ public class DoubleAxisPlotPanelTest extends JFrame {
          pInfo2.setPlotTitle("blue linear");
         p2.setPlotInformation(pInfo2);
         graphicsPanel.setPlot(p1);
-        graphicsPanel.addPlot(p2, DoubleYAxisPlotPanel.Layout.SECOND);
+        graphicsPanel.addAuxiliaryPlot(p2);
         graphicsPanel.preparePaint();
         getContentPane().setLayout(new BorderLayout());
         getContentPane().add(graphicsPanel, BorderLayout.CENTER);

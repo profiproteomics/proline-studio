@@ -40,12 +40,6 @@ public class DoubleYAxisPlotPanel extends BasePlotPanel {
     private static final Logger m_logger = LoggerFactory.getLogger(DoubleYAxisPlotPanel.class);
     String m_secondYAxisTitle = "";
     private Color m_secondYAxisColor;
-
-    public enum Layout {
-        MAIN, SECOND
-    };
-
-    private HashMap<PlotBaseAbstract, Layout> m_plotAxisMap;
     private ArrayList<PlotBaseAbstract> m_mainPlots;
     private ArrayList<PlotBaseAbstract> m_secondPlots;
 
@@ -68,7 +62,6 @@ public class DoubleYAxisPlotPanel extends BasePlotPanel {
         m_plots = new ArrayList<PlotBaseAbstract>();
         m_mainPlots = new ArrayList<PlotBaseAbstract>();
         m_secondPlots = new ArrayList<PlotBaseAbstract>();
-        m_plotAxisMap = new HashMap();
         m_secondXAxis = new XAxis(this);
         m_secondYAxis = new YAxis(this);
         m_secondYAxis.setSecondAxis();
@@ -80,18 +73,15 @@ public class DoubleYAxisPlotPanel extends BasePlotPanel {
 
     @Override
     public void addPlot(PlotXYAbstract plot) {
-        this.addPlot(plot, Layout.MAIN);
+        this.addMainPlot(plot);
     }
 
-    public void addPlot(PlotXYAbstract plot, Layout l) {
-        if (l == Layout.MAIN) {
-            this.m_mainPlots.add(plot);
-            this.m_plotAxisMap.put(plot, Layout.MAIN);
+    public void addMainPlot(PlotXYAbstract plot) {
+        this.m_mainPlots.add(plot);
+    }
 
-        } else if (l == Layout.SECOND) {
-            this.m_secondPlots.add(plot);
-            this.m_plotAxisMap.put(plot, Layout.SECOND);
-        }
+    public void addAuxiliaryPlot(PlotXYAbstract plot) {
+        this.m_secondPlots.add(plot);
     }
 
     @Override
@@ -99,14 +89,12 @@ public class DoubleYAxisPlotPanel extends BasePlotPanel {
         m_plots = new ArrayList();
         m_mainPlots = new ArrayList();
         m_secondPlots = new ArrayList();
-        this.m_plotAxisMap = new HashMap();
     }
 
     @Override
     public void setPlot(PlotBaseAbstract plot) {
         clearPlots();
         this.m_mainPlots.add(plot);
-        this.m_plotAxisMap.put(plot, Layout.MAIN);
     }
 
     public void setSecondAxisPlotInfo(String title, Color color) {
@@ -142,21 +130,17 @@ public class DoubleYAxisPlotPanel extends BasePlotPanel {
         }
 
         this.m_plots = new ArrayList();
-        for (Object obj : this.m_plotAxisMap.keySet()) {
-            this.m_plots.add((PlotBaseAbstract) obj);
-        }
+        this.m_plots.addAll(m_mainPlots);
+        this.m_plots.addAll(m_secondPlots);
         m_secondYAxis.setTitle(m_secondYAxisTitle);
     }
 
     public void updatePlots(int[] cols, String parameterZ) {
-        this.m_plotAxisMap = new HashMap();
         for (PlotBaseAbstract plot : m_mainPlots) {
             plot.update(cols, parameterZ);
-            m_plotAxisMap.put(plot, Layout.MAIN);
         }
         for (PlotBaseAbstract plot : m_secondPlots) {
             plot.update(cols, parameterZ);
-            m_plotAxisMap.put(plot, Layout.SECOND);
         }
         //setAxisTitle();
 
@@ -438,20 +422,16 @@ public class DoubleYAxisPlotPanel extends BasePlotPanel {
             realYAxis.paintGrid(g2d, m_plotArea.x, m_plotArea.width, m_plotArea.y, m_plotArea.height);
         }
 
-        Layout layout;
-        for (PlotBaseAbstract plot : m_plots) {
-            layout = m_plotAxisMap.get(plot);
-            if (layout == Layout.MAIN) {
-                plot.paint(g2d, m_xAxis, m_yAxis);
-                //for each plot on main Axis, if it has over,, draw over, ,cursors
-                plot.paintOver(g2d); //nerver used
-                plot.paintMarkers(g2d);//markers
-                plot.paintCursors(g2d);//cursors
-            } else if (layout == Layout.SECOND) {
-                plot.paint(g2d, m_secondXAxis, m_secondYAxis);
-                plot.paintOver(g2d); //nerver used
-            }
-
+        for (PlotBaseAbstract plot : m_mainPlots) {
+            plot.paint(g2d, m_xAxis, m_yAxis);
+            //for each plot on main Axis, if it has over,, draw over, ,cursors
+            plot.paintOver(g2d); //nerver used
+            plot.paintMarkers(g2d);//markers
+            plot.paintCursors(g2d);//cursors
+        }
+        for (PlotBaseAbstract plot : m_secondPlots) {
+            plot.paint(g2d, m_secondXAxis, m_secondYAxis);
+            plot.paintOver(g2d); //nerver used
         }
 
         long stopPlotTime = System.currentTimeMillis();
@@ -756,10 +736,122 @@ public class DoubleYAxisPlotPanel extends BasePlotPanel {
         }
     }
 
-//    @Override
-//    public void mouseMoved(MouseEvent e) { //same
-//      super.mouseMoved(e);
-//    }
+    @Override
+    public void mouseMoved(MouseEvent e) {
+        if (m_plots == null || m_plots.isEmpty() || e == null) {
+            m_coordX = "";
+            m_coordY = "";
+            if (m_drawCursor) {
+                repaint();
+            }
+            return;
+        }
+
+        if ((m_xAxis == null) || (m_yAxis == null)) {
+            return;
+        }
+
+        double xValue = m_xAxis.pixelToValue(e.getX());
+        double yValue = m_yAxis.pixelToValue(e.getY());
+        boolean isInGridArea = (e.getX() <= m_plotArea.width + m_plotArea.x && e.getX() >= m_plotArea.x && e.getY() >= m_plotArea.y && e.getY() <= m_plotArea.height + m_plotArea.y);
+        if (!isInGridArea) {
+            m_coordX = "";
+            m_coordY = "";
+            if (m_xAxis.inside(e.getX(), e.getY())) {
+                setCursor(new Cursor(Cursor.W_RESIZE_CURSOR));
+            } else if (m_yAxis.inside(e.getX(), e.getY())) {
+                setCursor(new Cursor(Cursor.N_RESIZE_CURSOR));
+            } else {
+                setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+            }
+        } else {
+            setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+            if (m_drawCursor) {
+                setCursor(new Cursor(Cursor.CROSSHAIR_CURSOR));
+                if ((xValue > -0.1 && xValue < 0.1) || xValue >= 10000 || xValue <= -10000) {
+                    m_coordX = formatE.format(xValue);
+                } else {
+                    m_coordX = format.format(xValue);
+                }
+                if ((yValue > -0.1 && yValue < 0.1) || yValue >= 10000 || yValue <= -10000) {
+                    m_coordY = formatE.format(yValue);
+                } else {
+                    m_coordY = format.format(yValue);
+                }
+                m_posx = e.getX();
+                m_posy = e.getY();
+            }
+        }
+
+        int nbPlotTooltip = 0;
+        boolean repaintNeeded = false;
+        //tooltips on m_mainPlots
+        for (PlotBaseAbstract plot : m_mainPlots) {
+            xValue = m_xAxis.pixelToValue(e.getX());
+            yValue = m_yAxis.pixelToValue(e.getY());
+            boolean isPlotSelected = plot.isMouseOnPlot(xValue, yValue);
+            repaintNeeded |= plot.setIsPaintMarker(isPlotSelected);
+
+            String toolTipForPlot = plot.getToolTipText(xValue, yValue);
+
+            if (toolTipForPlot != null && !toolTipForPlot.isEmpty()) {
+                if (nbPlotTooltip == 0) {
+                    m_sbTooltip.append("<html>");
+                }
+
+                if (nbPlotTooltip < 3) {
+                    m_sbTooltip.append(toolTipForPlot);
+                    m_sbTooltip.append("<br/>");
+                }
+
+                nbPlotTooltip++;
+            }
+
+        }
+        //repeat the same thing on m_secondPlots
+        for (PlotBaseAbstract plot : m_secondPlots) {
+            xValue = m_secondXAxis.pixelToValue(e.getX());
+            yValue = m_secondYAxis.pixelToValue(e.getY());
+            boolean isPlotSelected = plot.isMouseOnPlot(xValue, yValue);
+            repaintNeeded |= plot.setIsPaintMarker(isPlotSelected);
+
+            String toolTipForPlot = plot.getToolTipText(xValue, yValue);
+
+            if (toolTipForPlot != null && !toolTipForPlot.isEmpty()) {
+                if (nbPlotTooltip == 0) {
+                    m_sbTooltip.append("<html>");
+                }
+
+                if (nbPlotTooltip < 3) {
+                    m_sbTooltip.append(toolTipForPlot);
+                    m_sbTooltip.append("<br/>");
+                }
+
+                nbPlotTooltip++;
+            }
+
+        }
+
+        if (nbPlotTooltip >= 3) {
+            m_sbTooltip.append("[...]");
+        }
+
+        if (nbPlotTooltip > 0) {
+            m_sbTooltip.append("</html>");
+            setToolTipText(m_sbTooltip.toString());
+            m_sbTooltip.setLength(0);
+        } else {
+            setToolTipText(null);
+        }
+
+        if (repaintNeeded) {
+            repaintUpdateDoubleBuffer();
+        } else if (m_drawCursor) {
+            repaint();
+        }
+
+    }    
+
     @Override
     public void mouseWheelMoved(MouseWheelEvent e) {
         if (m_plots == null || m_plots.isEmpty() || e == null) {

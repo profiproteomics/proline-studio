@@ -18,7 +18,6 @@ import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 import fr.proline.studio.graphics.DoubleYAxisPlotPanel;
 import fr.proline.studio.rsmexplorer.gui.MultiGraphicsPanel;
 import java.awt.Color;
-import javax.swing.JComboBox;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -169,7 +168,7 @@ public class XicAbundanceGraphicPanel extends MultiGraphicsPanel {
                     PlotLinear plotGraphics = new PlotLinear(m_plotPanel, m_valuesList.get(i), crossSelectionInterface, refX.getColumnIndex(), refY.getColumnIndex());
                     plotGraphics.setPlotInformation(m_valuesList.get(i).getPlotInformation());
                     plotGraphics.setIsPaintMarker(false);
-                    ((DoubleYAxisPlotPanel) m_plotPanel).addPlot(plotGraphics, DoubleYAxisPlotPanel.Layout.MAIN);
+                    ((DoubleYAxisPlotPanel) m_plotPanel).addMainPlot(plotGraphics);
                 }
                 //plot on second Axis Y
                 if (proteinAbundance.getRowCount() != 0 && m_valuesList.size() != 0) {//creat a plot which show protein abundance  
@@ -177,7 +176,7 @@ public class XicAbundanceGraphicPanel extends MultiGraphicsPanel {
                     PlotLinear plotGraphics = new PlotLinear(m_plotPanel, proteinAbundance, crossSelectionInterface2, refX.getColumnIndex(), refY.getColumnIndex());
                     plotGraphics.setPlotInformation(proteinAbundance.getPlotInformation());
                     plotGraphics.setIsPaintMarker(false);
-                    ((DoubleYAxisPlotPanel) m_plotPanel).addPlot(plotGraphics, DoubleYAxisPlotPanel.Layout.SECOND);
+                    ((DoubleYAxisPlotPanel) m_plotPanel).addAuxiliaryPlot(plotGraphics);
                     Color color = proteinAbundance.getPlotInformation().getPlotColor();
                     ((DoubleYAxisPlotPanel) m_plotPanel).setSecondAxisPlotInfo("Protein " + proteinAbundance.getColumnName(refY.getColumnIndex()), color);
                 }

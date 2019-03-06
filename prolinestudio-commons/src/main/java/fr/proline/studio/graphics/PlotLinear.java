@@ -564,7 +564,7 @@ public class PlotLinear extends PlotXYAbstract {
         m_plotPanel.setXAxisTitle(m_compareDataInterface.getDataColumnIdentifier(m_cols[COL_X_ID]));
         m_plotPanel.setYAxisTitle(m_compareDataInterface.getDataColumnIdentifier(m_cols[COL_Y_ID]));
     }
-
+   
     private void setGradientValues() {
         ColorOrGradient colorOrGradient = m_colorParameter.getColor();
         boolean useGradient = !colorOrGradient.isColorSelected();

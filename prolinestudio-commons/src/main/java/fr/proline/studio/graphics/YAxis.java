@@ -24,17 +24,17 @@ public class YAxis extends Axis {
 
     public YAxis(BasePlotPanel p) {
         super(p);
-        this.m_isLeftAxis = false;
-
-    }
-
-    public void setLeftAxis() {
         this.m_isLeftAxis = true;
 
     }
 
+    public void setSecondAxis() {
+        this.m_isLeftAxis = false;
+
+    }
+
     private void calculLineXStart() {
-        if (m_isLeftAxis) {
+        if (!m_isLeftAxis) {
             m_lineXStart = m_x + BasePlotPanel.GAP_AXIS_LINE;
         } else {
             m_lineXStart = m_x + m_width - BasePlotPanel.GAP_AXIS_LINE;
@@ -101,9 +101,9 @@ public class YAxis extends Axis {
 
             int ascent = m_titleFontMetrics.getAscent();
             int descent = m_titleFontMetrics.getDescent();
-            int bottom = (m_isLeftAxis) ? m_lineXStart + BasePlotPanel.GAP_FIGURES_Y : m_x + 1;
+            int bottom = (m_isLeftAxis) ? m_x : m_lineXStart + BasePlotPanel.GAP_FIGURES_Y;
             int top = bottom + BasePlotPanel.GAP_AXIS_TITLE;
-            int baseline = top + ((bottom + 1 - top) / 2) - ((ascent + descent) / 2) + ascent;
+            int baseline = top + ((bottom - top) / 2) - ((ascent + descent) / 2) + ascent;
             g.drawString(m_title, baseline, m_y + (m_height + titleWidth) / 2);
             // restore font (necessary due to affine transform
             g.setFont(prevFont);
@@ -178,7 +178,12 @@ public class YAxis extends Axis {
         g.setStroke(prevStroke);
 
     }
-
+    
+    /**
+     * paint linear axis with ticks
+     * @param g
+     * @param ticks 
+     */
     private void paintLinear(Graphics2D g, AxisTicks ticks) {
 
         m_minTick = ticks.getTickMin();
@@ -203,7 +208,7 @@ public class YAxis extends Axis {
         g.setFont(m_valuesFont);
 
         int halfAscent = m_valuesFontMetrics.getAscent() / 2;
-
+        //draw the line
         int pixelStart = valueToPixel(m_minValue);
         int pixelStop = valueToPixel(m_maxValue);
         g.drawLine(m_lineXStart, pixelStart, m_lineXStart, pixelStop);
@@ -250,9 +255,9 @@ public class YAxis extends Axis {
                     m_lastHeight = height;
                 }
             }
-//draw      
-            int tickX = ((m_isLeftAxis) ? m_lineXStart + 4 : m_lineXStart);
-            int tickStringX = ((m_isLeftAxis) ? m_lineXStart + 6 : m_lineXStart - stringWidth - 6);
+            //draw ticket & it's label
+            int tickX = ((m_isLeftAxis) ? m_lineXStart : m_lineXStart + 4);
+            int tickStringX = ((m_isLeftAxis) ? m_lineXStart - stringWidth - 6 : m_lineXStart+4);
 
             if (pY < previousEndY - m_lastHeight - 2) { // check to avoid to overlap labels
                 g.drawString(label, tickStringX, pY + halfAscent);
@@ -339,7 +344,7 @@ public class YAxis extends Axis {
             } else {
                 g.setColor(CyclicColorPalette.GRAY_TEXT_LIGHT);
             }
-            int tickX = ((m_isLeftAxis) ? m_lineXStart + 3 : m_lineXStart);
+            int tickX = ((m_isLeftAxis) ? m_lineXStart : m_lineXStart + 3);
             // display min ticks between two major ticks
             for (int i = 2; i <= 9; i++) {
                 double yMinTick = Math.pow(10, y) * (((double) i) * 0.1d);

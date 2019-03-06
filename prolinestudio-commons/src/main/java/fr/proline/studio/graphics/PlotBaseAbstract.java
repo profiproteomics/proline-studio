@@ -70,13 +70,15 @@ public abstract class PlotBaseAbstract implements Axis.EnumXInterface, Axis.Enum
     }
 
     public abstract void paint(Graphics2D g);
-    
-    public void paint(Graphics2D g, XAxis xAxis, YAxis yAxis){
-        
+
+    public void paint(Graphics2D g, XAxis xAxis, YAxis yAxis) {
+
     }
+
     /**
-     * usualy used to show tooltips information  
-     * @param g 
+     * usualy used to show tooltips information
+     *
+     * @param g
      */
     public void paintOver(Graphics2D g) {
 
@@ -123,6 +125,7 @@ public abstract class PlotBaseAbstract implements Axis.EnumXInterface, Axis.Enum
         updateAxisSpecificities();
         update();
     }
+
     /**
      * update the value of isInteger, isEnum, isPixel in XAxis and YAxis
      */
@@ -147,6 +150,14 @@ public abstract class PlotBaseAbstract implements Axis.EnumXInterface, Axis.Enum
     }
 
     public abstract void update();
+
+    public String getXAxisTitle() {
+        return m_compareDataInterface.getDataColumnIdentifier(m_cols[COL_X_ID]);
+    }
+
+    public String getYAxisTitle() {
+        return m_compareDataInterface.getDataColumnIdentifier(m_cols[COL_Y_ID]);
+    }
 
     public abstract boolean select(double x, double y, boolean append);
 
@@ -327,7 +338,7 @@ public abstract class PlotBaseAbstract implements Axis.EnumXInterface, Axis.Enum
         return true;
     }
 
-     public JPopupMenu getPopupMenu(double x, double y) {
+    public JPopupMenu getPopupMenu(double x, double y) {
         return null;
     }
 

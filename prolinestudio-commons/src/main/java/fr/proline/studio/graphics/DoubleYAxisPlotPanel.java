@@ -26,8 +26,8 @@ import javax.swing.JComponent;
 import javax.swing.JPopupMenu;
 import javax.swing.ToolTipManager;
 import javax.swing.SwingUtilities;
-//import org.slf4j.Logger;
-//import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A Panel which has multiple layout, one layout has 1 Axis X/Y, and a groupe of
@@ -37,7 +37,7 @@ import javax.swing.SwingUtilities;
  */
 public class DoubleYAxisPlotPanel extends BasePlotPanel {
 
-    //private static final Logger m_logger = LoggerFactory.getLogger(DoubleYAxisPlotPanel.class);
+    private static final Logger m_logger = LoggerFactory.getLogger(DoubleYAxisPlotPanel.class);
     String m_secondYAxisTitle = "";
     private Color m_secondYAxisColor;
 
@@ -61,6 +61,8 @@ public class DoubleYAxisPlotPanel extends BasePlotPanel {
      */
     private double[] m_secondYBounds;
 
+    private boolean m_isMainPlotEmpty;
+
     public DoubleYAxisPlotPanel() {
         super();
         m_plots = new ArrayList<PlotBaseAbstract>();
@@ -69,10 +71,11 @@ public class DoubleYAxisPlotPanel extends BasePlotPanel {
         m_plotAxisMap = new HashMap();
         m_secondXAxis = new XAxis(this);
         m_secondYAxis = new YAxis(this);
-        m_secondYAxis.setLeftAxis();
+        m_secondYAxis.setSecondAxis();
         m_secondXBounds = new double[]{Double.NaN, Double.NaN};
         m_secondYBounds = new double[]{Double.NaN, Double.NaN};
         ToolTipManager.sharedInstance().registerComponent(this);
+        m_isMainPlotEmpty = false;
     }
 
     @Override
@@ -131,11 +134,13 @@ public class DoubleYAxisPlotPanel extends BasePlotPanel {
 
     public void preparePaint() {
         updateAxis(m_mainPlots, m_xAxis, m_yAxis, m_xAxisBounds, m_yAxisBounds);
+        m_isMainPlotEmpty = (getMinMaxPlots(m_mainPlots)[3] == 0);
         updateAxis(m_secondPlots, m_secondXAxis, m_secondYAxis, m_secondXBounds, m_secondYBounds); //suppose only one plot use seconde Y Axis
         if (m_xAxis != null && m_secondXAxis != null) {
             m_xAxis.setRange(Math.min(m_xAxis.getMinValue(), m_secondXAxis.getMinValue()), Math.max(m_xAxis.getMaxValue(), m_secondXAxis.getMaxValue()));
             //m_secondXAxis.setRange(Math.min(m_xAxis.getMinValue(), m_secondXAxis.getMinValue()), Math.max(m_xAxis.getMaxValue(), m_secondXAxis.getMaxValue()));
         }
+
         this.m_plots = new ArrayList();
         for (Object obj : this.m_plotAxisMap.keySet()) {
             this.m_plots.add((PlotBaseAbstract) obj);
@@ -153,13 +158,25 @@ public class DoubleYAxisPlotPanel extends BasePlotPanel {
             plot.update(cols, parameterZ);
             m_plotAxisMap.put(plot, Layout.SECOND);
         }
+        //setAxisTitle();
 
     }
 
+    private void setAxisTitle() {
+        if (!(m_mainPlots == null || m_mainPlots.isEmpty())) {
+            this.m_xAxis.setTitle(m_mainPlots.get(0).getXAxisTitle());
+            this.m_yAxis.setTitle(m_mainPlots.get(0).getYAxisTitle());
+        }
+        this.m_secondYAxis.setTitle(m_secondPlots.get(0).getXAxisTitle());
+    }
+
+    /**
+     * do nothing, because updatAxis will be called juste before paint
+     *
+     * @param plot
+     */
     @Override
     public void updateAxis(PlotBaseAbstract plot) {
-        updateAxis(m_mainPlots, m_xAxis, m_yAxis, m_xAxisBounds, m_yAxisBounds);
-        updateAxis(m_secondPlots, m_secondXAxis, m_secondYAxis, m_secondXBounds, m_secondYBounds); //suppose only one plot use seconde Y Axis
     }
 
     /**
@@ -214,6 +231,18 @@ public class DoubleYAxisPlotPanel extends BasePlotPanel {
             return m_secondPlots.get(0).getEnumValueY(index, fromData);
         }
         return null;
+    }
+
+    @Override
+    public String getEnumValueX(int index, boolean fromData) {
+        ArrayList<PlotBaseAbstract> plots = m_mainPlots;
+        if (m_isMainPlotEmpty) {
+            plots = m_secondPlots;
+        }
+        if (!plots.isEmpty()) {
+            return plots.get(0).getEnumValueX(index, fromData);
+        }
+        return "";
     }
 
     @Override
@@ -273,12 +302,9 @@ public class DoubleYAxisPlotPanel extends BasePlotPanel {
                 m_secondXAxis.preparePaint(g2d);
 
                 XAxis realXAxis = m_xAxis;
-                if (m_xAxis.getMaxTick() < 1) {
-                    realXAxis = m_secondXAxis;
-                } else if (m_xAxis.getMaxValue() < m_secondXAxis.getMaxValue()) {
+                if (m_isMainPlotEmpty) {
                     realXAxis = m_secondXAxis;
                 }
-
                 // set correct size
                 figuresXHeight = realXAxis.getMiniMumAxisHeight(figuresXHeight);
                 xAxisY = height - figuresXHeight - GAP_AXIS_TITLE;
@@ -335,10 +361,10 @@ public class DoubleYAxisPlotPanel extends BasePlotPanel {
                         //from BufferedImage, get Graphics2D, initialize it's color,
                         Graphics2D graphicBufferG2d = (Graphics2D) m_doubleBuffer.getGraphics();
                         graphicBufferG2d.translate(-m_plotArea.x, -m_plotArea.y);
-                        this.paintPlot(graphicBufferG2d);
+                        this.paintPlotWithGrid(graphicBufferG2d);
                     }
                 } else {
-                    this.paintPlot(g2d);
+                    this.paintPlotWithGrid(g2d);
                 }
             }
 
@@ -386,13 +412,13 @@ public class DoubleYAxisPlotPanel extends BasePlotPanel {
     }
 
     /**
-     * paint each BasePlotPanel
+     * paint each Plot with grid
      *
      * @param g2d
      * @param xAxis
      * @param yAxis
      */
-    private void paintPlot(Graphics2D g2d) {
+    private void paintPlotWithGrid(Graphics2D g2d) {
         // m_logger.debug("___->paintPlotpaint plot...useDoubleBuffer=" + m_useDoubleBuffering);
         long startPlotTime = System.currentTimeMillis();
         //paint background
@@ -403,9 +429,15 @@ public class DoubleYAxisPlotPanel extends BasePlotPanel {
             m_xAxis.paintGrid(g2d, m_plotArea.x, m_plotArea.width, m_plotArea.y, m_plotArea.height);
         }
         //paint horizontalGrid
-        if ((m_plotHorizontalGrid) && (m_yAxis != null) && (m_yAxis.displayAxis())) {
-            m_yAxis.paintGrid(g2d, m_plotArea.x, m_plotArea.width, m_plotArea.y, m_plotArea.height);
+        YAxis realYAxis = m_yAxis;
+        if (m_isMainPlotEmpty) {
+            realYAxis = m_secondYAxis;
         }
+
+        if ((m_plotHorizontalGrid) && (realYAxis != null) && (realYAxis.displayAxis())) {
+            realYAxis.paintGrid(g2d, m_plotArea.x, m_plotArea.width, m_plotArea.y, m_plotArea.height);
+        }
+
         Layout layout;
         for (PlotBaseAbstract plot : m_plots) {
             layout = m_plotAxisMap.get(plot);

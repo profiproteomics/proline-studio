@@ -747,7 +747,7 @@ public class DatabaseLoadLcMSTask extends AbstractDatabaseSlicerTask {
     /**
      * main task to load all child features for a masterQuantPeptideIon with
      * peakels
-     *
+     * 
      * @return
      */
     private boolean fetchDataMainTaskChildFeatureForPeptideIonWithPeakels() {
@@ -768,6 +768,20 @@ public class DatabaseLoadLcMSTask extends AbstractDatabaseSlicerTask {
                     qcByProcessMapId.put(qc.getLcmsMapId(), qc);
                 }
 
+                /*
+                  Actually child features are retrieve by getting masterFeatureItem which reference QPeptideIon's Lcms Feature id as child.
+                  The problem is that in Aggregated Quantitation, MasterQuantPeptideIon don't reference a (valid ?) MasterFeature. So we can't find all child
+                  features linked to a MasterFeature as it was done for 'classical' quantitation.
+                  
+                  This new "retrieve features" method may return multiple MasterFeatureItem if a child Feature is referenced by multiple Master Feature (for exemple multiple 
+                  potential peptides for a msQuery).
+                
+                  The solution 
+                  - If in Aggregation Quantitation, there is no MasterFeature (and not a invalid one), we could test this absence and choose to use "Get MasterFeatureItem by MasterFeature Id" 
+                  in case of 'classical quantitation' or to use "Get MasterFeatureItem by ChildFeature" in case of aggregation.
+                  - Test a flag that indicate for which kind of quantitation we have to get the ChildFeatures for. And as in first option, use one or the other query...
+                  - Always use the "Get MasterFeatureItem by ChildFeature" query but remove redundant Features (CHOOSED SOLUTION)                  
+                */
                 //load masterFeatureItem and determine all rawMap which have a feature to create the missing features
                 Set<Long> listOfRawMapsId = new HashSet();
 //                String queryMFI = "SELECT mfi "
@@ -786,7 +800,7 @@ public class DatabaseLoadLcMSTask extends AbstractDatabaseSlicerTask {
                 
 
                 List<MasterFeatureItem> resultMFIList = queryMasterFeatureItem.getResultList();
-                List<Feature> allFeature = new ArrayList();
+                Set<Feature> allFeature = new HashSet<>();
                 Feature bestChild = null;
                 Double bestChildElutionTime = Double.NaN;
                 Map sourceMap = null;

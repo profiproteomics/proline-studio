@@ -128,7 +128,8 @@ public class PeptidesPTMSiteTablePanel extends JPanel implements DataBoxPanelInt
 
         CompoundTableModel compoundTableModel = ((CompoundTableModel) m_peptidesPtmSiteTable.getModel());
         // convert according to the sorting
-        //selectedRow = m_peptidesPtmSiteTable.convertRowIndexToModel(selectedRow);
+        selectedRow = m_peptidesPtmSiteTable.convertRowIndexToModel(selectedRow);
+        //find the original index
         selectedRow = compoundTableModel.convertCompoundRowToBaseModelRow(selectedRow);
         return selectedRow;
     }
@@ -206,7 +207,8 @@ public class PeptidesPTMSiteTablePanel extends JPanel implements DataBoxPanelInt
         m_filterButton = new FilterButton(((CompoundTableModel) m_peptidesPtmSiteTable.getModel())) {
             @Override
             protected void filteringDone() {
-                m_dataBox.propagateDataChanged(ExtendedTableModelInterface.class);
+                m_dataBox.propagateDataChanged(ExtendedTableModelInterface.class
+                );
                 m_infoToggleButton.updateInfo();
             }
         };

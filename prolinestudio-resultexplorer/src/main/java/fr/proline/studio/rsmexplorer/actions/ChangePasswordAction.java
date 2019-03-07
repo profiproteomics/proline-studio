@@ -22,7 +22,7 @@ import org.openide.windows.WindowManager;
  *
  * @author jm235353
  */
-@ActionID(category = "File", id = "fr.proline.studio.rsmexplorer.actions.identification.ChangePasswordAction")
+@ActionID(category = "File", id = "fr.proline.studio.rsmexplorer.actions.ChangePasswordAction")
 @ActionRegistration(displayName = "#CTL_ChangePasswordAction")
 @ActionReferences({
     @ActionReference(path = "Menu/File", position = 200)

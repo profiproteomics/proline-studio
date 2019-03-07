@@ -160,8 +160,10 @@ public class ExtractionResultsPanel extends JPanel {
      * clear all extraction values
      */
     private void clearAllValues(){
+        m_extractionResultsTableModel = new ExtractionResultsTableModel();
+        m_globalTableModel.setBaseModel(m_extractionResultsTableModel);
+        m_globalTableModel.fireTableStructureChanged();
         m_importedTableModel = null;
-        setExtractionsValues(new ArrayList());
     }
 
     private void importCSVExtractions() {
@@ -174,7 +176,7 @@ public class ExtractionResultsPanel extends JPanel {
                 return;
             }
             m_importedTableModel = new ImportedDataTableModel();
-            ImportedDataTableModel.loadFile(m_importedTableModel, csvFile.getAbsolutePath(), ',', true, false);
+            ImportedDataTableModel.loadFile(m_importedTableModel, csvFile.getAbsolutePath(), ';', true, false);
             int mzColumnIdx = m_importedTableModel.findColumn("moz");
             if (mzColumnIdx == -1) {
                 mzColumnIdx = m_importedTableModel.findColumn("m/z");
@@ -182,11 +184,15 @@ public class ExtractionResultsPanel extends JPanel {
                     mzColumnIdx = m_importedTableModel.findColumn("mz");
                 }
             }
-            List<Double> mzValues= new ArrayList<>();
-            for (int k = 0; k < m_importedTableModel.getRowCount(); k++) {
-                mzValues.add((Double)m_importedTableModel.getValueAt(k, mzColumnIdx));
+            if (mzColumnIdx != -1) {
+                List<Double> mzValues = new ArrayList<>();
+                for (int k = 0; k < m_importedTableModel.getRowCount(); k++) {
+                    mzValues.add((Double) m_importedTableModel.getValueAt(k, mzColumnIdx));
+                }
+                setExtractionsValues(mzValues);
+            } else {
+                JOptionPane.showMessageDialog(this, "No column named \"mz\",\"moz\" or \"m/z\" detected in the imported file.\n Verify the column headers (the column separator must be \";\")", "Error", JOptionPane.ERROR_MESSAGE);
             }
-            setExtractionsValues(mzValues);
         }
     }
 

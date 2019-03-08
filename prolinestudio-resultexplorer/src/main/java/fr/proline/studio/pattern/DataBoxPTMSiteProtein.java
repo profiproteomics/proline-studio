@@ -13,8 +13,6 @@ import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.rsmexplorer.gui.PTMProteinSitePanel;
 import java.util.ArrayList;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -22,11 +20,7 @@ import org.slf4j.LoggerFactory;
  */
 public class DataBoxPTMSiteProtein extends AbstractDataBox {
 
-    private static Logger logger = LoggerFactory.getLogger("ProlineStudio.ptm");
-    private long logStartTime;
-
     private PTMDataset m_dataset = null;
-
     
     public DataBoxPTMSiteProtein() { 
         super(DataboxType.DataBoxPTMProteinSite, DataboxStyle.STYLE_RSM);
@@ -122,7 +116,6 @@ public class DataBoxPTMSiteProtein extends AbstractDataBox {
             @Override
             public void run(boolean success, final long taskId, SubTask subTask, boolean finished) {
                 if (finished) {
-                    logger.info(this.getClass().getName()+" task Id ="+ taskId+" finished during " + (System.currentTimeMillis()-logStartTime)+" TimeMillis");
                     ((PTMProteinSitePanel) getDataBoxPanelInterface()).setData(taskId, ptmSiteArray, finished);
                     setLoaded(loadingId);
                     unregisterTask(taskId);
@@ -133,8 +126,6 @@ public class DataBoxPTMSiteProtein extends AbstractDataBox {
 
         DatabasePTMsTask task = new DatabasePTMsTask(callback);
         task.initFillPTMSites(getProjectId(), m_dataset.getDataset().getResultSummary(), ptmSiteArray);
-        logStartTime = System.currentTimeMillis();
-        logger.info(this.getClass().getName()+" DatabasePTMsTask task Id ="+ taskId+" registered" );
         registerTask(task);
 
     }

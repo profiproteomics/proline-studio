@@ -18,8 +18,6 @@ import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 import fr.proline.studio.extendedtablemodel.GlobalTabelModelProviderInterface;
 import fr.proline.studio.rsmexplorer.gui.ptm.PanelPeptidesPTMSiteGraphic;
 import java.util.List;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * This class is very similaire as DataBoxPTMSitePeptides
@@ -29,9 +27,6 @@ import org.slf4j.LoggerFactory;
 public class DataBoxPTMSitePeptidesGraphic extends AbstractDataBox {
 
     private ResultSummary m_rsm;
-    protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer.ptm");
-    private long m_logTimeStart;
-
     private List<DMasterQuantProteinSet> m_masterQuantProteinSetList;
     private DDataset m_dataset;
 
@@ -103,8 +98,7 @@ public class DataBoxPTMSitePeptidesGraphic extends AbstractDataBox {
 
                 setLoaded(loadingId);
 
-                if (finished) {
-                    m_logger.info(" DataBoxPTMSitePeptides task#" + taskId + " in " + (System.currentTimeMillis() - m_logTimeStart) + " ms");
+                if (finished) {                    
                     m_previousTaskId = null;
                     unregisterTask(taskId);
                     propagateDataChanged(ExtendedTableModelInterface.class);
@@ -115,8 +109,6 @@ public class DataBoxPTMSitePeptidesGraphic extends AbstractDataBox {
         DatabasePTMsTask task = new DatabasePTMsTask(callback);
         task.initFillPTMSite(getProjectId(), rsm, ptmSite);
         Long taskId = task.getId();
-        m_logger.info(" DataBoxPTMSitePeptides DatabasePTMsTask  task# " + taskId);
-        m_logTimeStart = System.currentTimeMillis();
         if (m_previousTaskId != null) {
             // old task is suppressed if it has not been already done
             AccessDatabaseThread.getAccessDatabaseThread().abortTask(m_previousTaskId);

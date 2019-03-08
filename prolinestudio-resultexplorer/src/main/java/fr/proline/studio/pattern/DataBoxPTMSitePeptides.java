@@ -8,8 +8,6 @@ import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabasePTMsTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dam.tasks.data.ptm.PTMSite;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 import fr.proline.studio.rsmexplorer.gui.PeptidesPTMSiteTablePanel;
 
@@ -21,9 +19,7 @@ import fr.proline.studio.rsmexplorer.gui.PeptidesPTMSiteTablePanel;
 public class DataBoxPTMSitePeptides extends AbstractDataBox {
 
     private ResultSummary m_rsm;
-    protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer.ptm");
-    private long m_logTimeStart;
-
+    
     public DataBoxPTMSitePeptides() {
         super(DataboxType.DataBoxPTMSitePeptides, DataboxStyle.STYLE_RSM);
 
@@ -93,8 +89,7 @@ public class DataBoxPTMSitePeptides extends AbstractDataBox {
 
                 setLoaded(loadingId);
 
-                if (finished) {
-                    m_logger.info(" DataBoxPTMSitePeptides task#" + taskId + " in " + (System.currentTimeMillis() - m_logTimeStart) + " ms");
+                if (finished) {                    
                     m_previousTaskId = null;
                     unregisterTask(taskId);
                     propagateDataChanged(ExtendedTableModelInterface.class);

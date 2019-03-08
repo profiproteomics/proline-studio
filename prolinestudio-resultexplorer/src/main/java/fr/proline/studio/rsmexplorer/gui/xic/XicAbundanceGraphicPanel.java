@@ -18,8 +18,8 @@ import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 import fr.proline.studio.graphics.DoubleYAxisPlotPanel;
 import fr.proline.studio.rsmexplorer.gui.MultiGraphicsPanel;
 import java.awt.Color;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+//import org.slf4j.Logger;
+//import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
  */
 public class XicAbundanceGraphicPanel extends MultiGraphicsPanel {
 
-    private static final Logger m_logger = LoggerFactory.getLogger(XicAbundanceGraphicPanel.class);
+    //private static final Logger m_logger = LoggerFactory.getLogger(XicAbundanceGraphicPanel.class);
     private AbstractDataBox m_dataBox;
     private PTMSite m_ptmSite;
     private int[] columnXYIndex;

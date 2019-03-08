@@ -350,8 +350,10 @@ public class DatabasePTMsTask extends AbstractDatabaseTask {
         for (PTMSite site : sitesToFill) {
             // insert .filter(key -> leafPeptideInstancesById.containsKey(key)) ? Theoretically no : all instances has been retrieved .. 
             List<DPeptideInstance> leafPeptideInstances = Arrays.stream(site.getPeptideInstanceIds()).map(id -> leafPeptideInstancesById.get(id)).collect(Collectors.toList());
-            Set<DPeptideInstance> parentPeptideInstances = leafPeptideInstances.stream().map(pi -> pi.getPeptideId()).map(id -> parentPeptideInstancesByPepId.get(id)).collect(Collectors.toSet());            
-            site.setPeptideInstances(Arrays.asList(parentPeptideInstances), leafPeptideInstances);
+            Set<DPeptideInstance> parentPeptideInstancesAsSet = leafPeptideInstances.stream().map(pi -> pi.getPeptideId()).map(id -> parentPeptideInstancesByPepId.get(id)).collect(Collectors.toSet());            
+            List<DPeptideInstance> parentPeptideInstances = new ArrayList<>();
+            parentPeptideInstances.addAll(parentPeptideInstancesAsSet);
+            site.setPeptideInstances(parentPeptideInstances, leafPeptideInstances);
         }
     }
     

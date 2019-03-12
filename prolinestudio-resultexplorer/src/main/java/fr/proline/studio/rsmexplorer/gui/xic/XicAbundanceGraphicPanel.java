@@ -132,18 +132,10 @@ public class XicAbundanceGraphicPanel extends MultiGraphicsPanel {
                     }
                     columnXYIndex[0] = cols[0];
                     columnXYIndex[1] = cols[1];
-                    //m_logger.debug(String.format("--**--value X%s-(%d->%d),  Y%s-(%d->%d)", refX.toString(), columnXYIndex[0], cols[0], refY.toString(), cols[1],columnXYIndex[1]));
+
                     ((DoubleYAxisPlotPanel) m_plotPanel).updatePlots(cols, zParameter);
-                    //m_logger.debug("--**--updatePlots done");
-//                    if (proteinAbundance.getRowCount() > 0 && m_valuesList.size() > 0) {
-//                        Color color = proteinAbundance.getPlotInformation().getPlotColor();
-//                        m_plotPanel.setSecondAxisPlotInfo("Protein " + proteinAbundance.getColumnName(refY.getColumnIndex()), color);
-//                        m_plotPanel.preparePaint();
-//                    }
                     ((DoubleYAxisPlotPanel) m_plotPanel).preparePaint();
-                    //m_logger.debug("--**--preparePaint done");
                     m_plotPanel.repaint();
-                    //m_logger.debug("--**--paint done");
                 }
             };
 
@@ -171,7 +163,7 @@ public class XicAbundanceGraphicPanel extends MultiGraphicsPanel {
                     ((DoubleYAxisPlotPanel) m_plotPanel).addMainPlot(plotGraphics);
                 }
                 //plot on second Axis Y
-                if (proteinAbundance.getRowCount() != 0 && m_valuesList.size() != 0) {//creat a plot which show protein abundance  
+                if (proteinAbundance!= null && proteinAbundance.getRowCount() != 0 && m_valuesList.size() != 0) {//creat a plot which show protein abundance  
                     CrossSelectionInterface crossSelectionInterface2 = null;
                     PlotLinear plotGraphics = new PlotLinear(m_plotPanel, proteinAbundance, crossSelectionInterface2, refX.getColumnIndex(), refY.getColumnIndex());
                     plotGraphics.setPlotInformation(proteinAbundance.getPlotInformation());

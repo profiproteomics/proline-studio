@@ -21,7 +21,6 @@ import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.GroupParameter;
 import fr.proline.studio.rsmexplorer.gui.xic.PeptideTableModel;
 import fr.proline.studio.rsmexplorer.gui.xic.XicAbundanceProteinTableModel;
-import java.util.HashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -232,7 +231,7 @@ public class DataBoxXicPTMSitePeptides extends AbstractDataBox {
     private XicAbundanceProteinTableModel getProteinAbundanceTableModel() {
         XicAbundanceProteinTableModel protTableModel = new XicAbundanceProteinTableModel();
         if (m_quantChannelInfo != null) {
-            protTableModel.setData(m_quantChannelInfo.getQuantChannels(), m_currentPtmSite);
+            protTableModel.setData(m_quantChannelInfo.getQuantChannels(), m_currentPtmSite.getMasterQuantProteinSet());
         }
         return protTableModel;
 

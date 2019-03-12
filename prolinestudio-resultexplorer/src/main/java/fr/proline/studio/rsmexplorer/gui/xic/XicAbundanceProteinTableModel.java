@@ -21,21 +21,20 @@ import org.slf4j.LoggerFactory;
  * @author Karine XUE
  */
 public class XicAbundanceProteinTableModel extends PeptideTableModel {
-    private DMasterQuantProteinSet m_proteinSet = null;
 
-    private PTMSite m_ptmSite;
+    private DMasterQuantProteinSet m_proteinSet = null;
 
     public XicAbundanceProteinTableModel() {
         super(null);
     }
 
-    public void setData(DQuantitationChannel[] quantChannels, PTMSite ptmSite) {
-        this.m_ptmSite = ptmSite;
+    public void setData(DQuantitationChannel[] quantChannels, DMasterQuantProteinSet proteinSet) {
         this.m_quantChannels = quantChannels;
-        this.m_proteinSet = ptmSite.getMasterQuantProteinSet();
+        this.m_proteinSet = proteinSet;
         fireTableDataChanged();
     }
 
+   
     @Override
     public Object getValueAt(int row, int col) {
         // Retrieve QuantChannel
@@ -79,29 +78,17 @@ public class XicAbundanceProteinTableModel extends PeptideTableModel {
         if (m_proteinSet != null && m_proteinSet.getProteinSet() != null && m_proteinSet.getProteinSet().getTypicalProteinMatch() != null) {
             DProteinMatch proteinMatch = m_proteinSet.getProteinSet().getTypicalProteinMatch();
             StringBuilder sb = new StringBuilder(proteinMatch.getAccession()); //protein name, 
-            sb.append(" - ").append(getPTMSiteInfo());
             plotInformation.setPlotTitle(sb.toString());
         }
 
         if (m_proteinSet.getSelectionLevel() < 2) {
             plotInformation.setPlotColor(Color.LIGHT_GRAY);
-        }else{
+        } else {
             plotInformation.setPlotColor(Color.ORANGE);
         }
         plotInformation.setDrawPoints(true);
         plotInformation.setDrawGap(true);
         return plotInformation;
-    }
-
-    public String getPTMSiteInfo() {
-        String ptm = "";
-        if (m_ptmSite != null && m_ptmSite.getBestPeptideMatch() != null) {
-            PeptideReadablePtmString ptmString = m_ptmSite.getBestPeptideMatch().getPeptide().getTransientData().getPeptideReadablePtmString();
-            {
-                ptm = ptmString.getReadablePtmString();
-            }
-        }
-        return ptm;
     }
 
     @Override
@@ -136,10 +123,9 @@ public class XicAbundanceProteinTableModel extends PeptideTableModel {
     }
 
     //private static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer.XicAbundanceProteinTableModel");
-
     @Override
     public PlotDataSpec getDataSpecAt(int row) {
-       // m_logger.debug("########call getDataSpecAt in Protein TableModel");
+        // m_logger.debug("########call getDataSpecAt in Protein TableModel");
         PlotDataSpec result = new PlotDataSpec();
         DQuantitationChannel qc = m_quantChannels[row];
         // retrieve quantPeptide for the quantChannelId

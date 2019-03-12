@@ -26,8 +26,8 @@ import javax.swing.JComponent;
 import javax.swing.JPopupMenu;
 import javax.swing.ToolTipManager;
 import javax.swing.SwingUtilities;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+//import org.slf4j.Logger;
+//import org.slf4j.LoggerFactory;
 
 /**
  * A Panel which has multiple layout, one layout has 1 Axis X/Y, and a groupe of
@@ -37,7 +37,7 @@ import org.slf4j.LoggerFactory;
  */
 public class DoubleYAxisPlotPanel extends BasePlotPanel {
 
-    private static final Logger m_logger = LoggerFactory.getLogger(DoubleYAxisPlotPanel.class);
+    //private static final Logger m_logger = LoggerFactory.getLogger(DoubleYAxisPlotPanel.class);
     String m_secondYAxisTitle = "";
     private Color m_secondYAxisColor;
     private ArrayList<PlotBaseAbstract> m_mainPlots;
@@ -121,18 +121,29 @@ public class DoubleYAxisPlotPanel extends BasePlotPanel {
     }
 
     public void preparePaint() {
-        updateAxis(m_mainPlots, m_xAxis, m_yAxis, m_xAxisBounds, m_yAxisBounds);
+        updateAxis();
         m_isMainPlotEmpty = (getMinMaxPlots(m_mainPlots)[3] == 0);
-        updateAxis(m_secondPlots, m_secondXAxis, m_secondYAxis, m_secondXBounds, m_secondYBounds); //suppose only one plot use seconde Y Axis
-        if (m_xAxis != null && m_secondXAxis != null) {
-            m_xAxis.setRange(Math.min(m_xAxis.getMinValue(), m_secondXAxis.getMinValue()), Math.max(m_xAxis.getMaxValue(), m_secondXAxis.getMaxValue()));
-            //m_secondXAxis.setRange(Math.min(m_xAxis.getMinValue(), m_secondXAxis.getMinValue()), Math.max(m_xAxis.getMaxValue(), m_secondXAxis.getMaxValue()));
-        }
-
         this.m_plots = new ArrayList();
         this.m_plots.addAll(m_mainPlots);
         this.m_plots.addAll(m_secondPlots);
         m_secondYAxis.setTitle(m_secondYAxisTitle);
+    }
+
+    private void updateAxis() {
+        updateAxis(m_mainPlots, m_xAxis, m_yAxis, m_xAxisBounds, m_yAxisBounds);
+        updateAxis(m_secondPlots, m_secondXAxis, m_secondYAxis, m_secondXBounds, m_secondYBounds); //suppose only one plot use seconde Y Axis
+        if (m_xAxis != null && m_secondXAxis != null) {
+            /**
+             * concate 2 xAxis to get the largest xAxis
+             */
+            m_xAxis.setRange(Math.min(m_xAxis.getMinValue(), m_secondXAxis.getMinValue()), Math.max(m_xAxis.getMaxValue(), m_secondXAxis.getMaxValue()));
+        }
+        if (m_yAxis != null && m_secondYAxis != null) {
+            /**
+             * concate 2 xAxis to get the largest xAxis
+             */
+            m_secondXAxis.setRange(Math.min(m_xAxis.getMinValue(), m_secondXAxis.getMinValue()), m_secondXAxis.getMaxValue());
+        }
     }
 
     public void updatePlots(int[] cols, String parameterZ) {
@@ -164,7 +175,8 @@ public class DoubleYAxisPlotPanel extends BasePlotPanel {
     }
 
     /**
-     * from plot list, get the bounds of Axis X and Y,
+     * from plot list, get the bounds of Axis X and Y, the range of X, Y are the
+     * original optimised
      *
      * @param plot
      */
@@ -567,7 +579,6 @@ public class DoubleYAxisPlotPanel extends BasePlotPanel {
         }
 
         if (m_moveGesture.isMoving()) {
-
             int modifier = e.getModifiers();
             boolean isCtrlOrShiftDown = ((modifier & (InputEvent.SHIFT_MASK | InputEvent.CTRL_MASK)) != 0);
 
@@ -577,7 +588,6 @@ public class DoubleYAxisPlotPanel extends BasePlotPanel {
             mustRepaint = true;
         } else if (m_selectionGesture.isSelecting()) {//select work only at the 1st plot
             m_selectionGesture.stopSelection(x, y);
-
             int modifier = e.getModifiers();
             boolean isCtrlOrShiftDown = ((modifier & (InputEvent.SHIFT_MASK | InputEvent.CTRL_MASK)) != 0);
 
@@ -627,11 +637,18 @@ public class DoubleYAxisPlotPanel extends BasePlotPanel {
                 double oldMaxX = m_xAxis.getMaxValue();//*
                 double oldMinY = m_yAxis.getMinValue();//*
                 double oldMaxY = m_yAxis.getMaxValue();//*
+                double oldMinX2 = m_secondXAxis.getMinValue();
+                double oldMaxX2 = m_secondXAxis.getMaxValue();
                 double oldMinY2 = m_secondYAxis.getMinValue();
                 double oldMaxY2 = m_secondYAxis.getMaxValue();
-                m_xAxis.setRange(m_xAxis.pixelToValue(m_zoomGesture.getStartX()), m_xAxis.pixelToValue(m_zoomGesture.getEndX()));
-                m_yAxis.setRange(m_yAxis.pixelToValue(m_zoomGesture.getEndY()), m_yAxis.pixelToValue(m_zoomGesture.getStartY()));
-                m_secondYAxis.setRange(m_secondYAxis.pixelToValue(m_zoomGesture.getEndY()), m_secondYAxis.pixelToValue(m_zoomGesture.getStartY()));
+                int startX = m_zoomGesture.getStartX();
+                int endX = m_zoomGesture.getEndX();
+                int startY = m_zoomGesture.getStartY();
+                int endY = m_zoomGesture.getEndY();
+                m_xAxis.setRange(m_xAxis.pixelToValue(startX), m_xAxis.pixelToValue(endX));
+                m_yAxis.setRange(m_yAxis.pixelToValue(endY), m_yAxis.pixelToValue(startY));
+                m_secondXAxis.setRange(m_secondXAxis.pixelToValue(startX), m_secondXAxis.pixelToValue(endX));
+                m_secondYAxis.setRange(m_secondYAxis.pixelToValue(endY), m_secondYAxis.pixelToValue(startY));
                 //seconde yAxis setRange
                 m_updateDoubleBuffer = true;
                 // @todo next line to verify
@@ -642,13 +659,12 @@ public class DoubleYAxisPlotPanel extends BasePlotPanel {
                     double oldMaxX = m_xAxis.getMaxValue();
                     double oldMinY = m_yAxis.getMinValue();
                     double oldMaxY = m_yAxis.getMaxValue();
+                    double oldMinX2 = m_secondXAxis.getMinValue();
+                    double oldMaxX2 = m_secondXAxis.getMaxValue();
                     double oldMinY2 = m_secondYAxis.getMinValue();
                     double oldMaxY2 = m_secondYAxis.getMaxValue();
                     //updateAxis(m_plots.get(0));
-                    m_xAxis.setRange(m_xAxis.pixelToValue(m_zoomGesture.getStartX()), m_xAxis.pixelToValue(m_zoomGesture.getEndX()));
-                    m_yAxis.setRange(m_yAxis.pixelToValue(m_zoomGesture.getEndY()), m_yAxis.pixelToValue(m_zoomGesture.getStartY()));
-                    m_secondYAxis.setRange(m_secondYAxis.pixelToValue(m_zoomGesture.getEndY()), m_secondYAxis.pixelToValue(m_zoomGesture.getStartY()));
-                    // @todo next line to verify
+                    updateAxis();
                     fireUpdateAxisRange(oldMinX, oldMaxX, m_xAxis.getMinValue(), m_xAxis.getMaxValue(), oldMinY, oldMaxY, m_yAxis.getMinValue(), m_yAxis.getMaxValue());
                 }
                 m_updateDoubleBuffer = true;
@@ -850,7 +866,7 @@ public class DoubleYAxisPlotPanel extends BasePlotPanel {
             repaint();
         }
 
-    }    
+    }
 
     @Override
     public void mouseWheelMoved(MouseWheelEvent e) {

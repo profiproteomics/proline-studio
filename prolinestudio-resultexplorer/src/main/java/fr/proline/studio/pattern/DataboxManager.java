@@ -1,9 +1,11 @@
 package fr.proline.studio.pattern;
 
+import fr.proline.studio.pattern.xic.DataBoxXicPTMSitePeptides;
 import fr.proline.studio.pattern.xic.DataboxChildFeature;
 import fr.proline.studio.pattern.xic.DataboxMapAlignment;
 import fr.proline.studio.pattern.xic.DataboxPSMOfMasterQuantPeptide;
 import fr.proline.studio.pattern.xic.DataboxXicPeptideIon;
+import fr.proline.studio.pattern.xic.DataboxXicPeptideProteinGraphic;
 import fr.proline.studio.pattern.xic.DataboxXicPeptideSet;
 import fr.proline.studio.pattern.xic.DataboxXicProteinSet;
 import java.util.ArrayList;
@@ -31,7 +33,8 @@ public class DataboxManager {
         new DataBoxTaskDescription()/*, new DataBoxStatisticsFrequencyResponse()*/, new DataBoxRsetPeptideFragmentation(),
         new DataBoxRsetPeptideSpectrumError(), new DataboxRsmPSMOfProteinSet(), new DataboxRsmPSMOfPeptide(),
         new DataboxGraphics(false), new DataboxPSMOfMasterQuantPeptide(),
-        new DataboxXicPeptideSet(), new DataboxXicPeptideIon(), new DataboxChildFeature(), new DataboxMultiGraphics(false, false),
+        new DataboxXicPeptideSet(), new DataboxXicPeptideIon(), new DataboxChildFeature(), 
+        new DataboxMultiGraphics(false, false),new DataboxXicPeptideProteinGraphic(),new DataBoxXicPTMSitePeptides(),
         new DataboxMapAlignment(),
         new DataBoxAdjacencyMatrixChoice(), new DataBoxAdjacencyMatrix(),
         new DataboxRSMPSMForMsQuery(), new DataboxRsetPSMForMsQuery(),

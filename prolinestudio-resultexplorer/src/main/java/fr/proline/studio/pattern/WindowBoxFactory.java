@@ -23,6 +23,7 @@ import javax.swing.border.EmptyBorder;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 import fr.proline.studio.pattern.xic.DataBoxXicPTMSitePeptides;
 import fr.proline.studio.pattern.xic.DataboxXicAbundanceGraphic;
+import fr.proline.studio.pattern.xic.DataboxXicPeptideProteinGraphic;
 
 /**
  *
@@ -379,8 +380,9 @@ public class WindowBoxFactory {
         ((DataboxXicProteinSet) boxes[0]).setXICMode(xicMode);
         boxes[1] = new DataboxXicPeptideSet();
         ((DataboxXicPeptideSet) boxes[1]).setXICMode(xicMode);
-        boxes[2] = new DataboxMultiGraphics(false, false);
-        boxes[2].setLayout(SplittedPanelContainer.PanelLayout.TABBED);
+        //boxes[2] = new DataboxMultiGraphics(false, false);
+        boxes[2] = new DataboxXicPeptideProteinGraphic();
+        boxes[2].setLayout(SplittedPanelContainer.PanelLayout.HORIZONTAL);
         if (xicMode) {
             boxes[3] = new DataboxXicPeptideIon();
             ((DataboxXicPeptideIon) boxes[3]).setXICMode(xicMode);

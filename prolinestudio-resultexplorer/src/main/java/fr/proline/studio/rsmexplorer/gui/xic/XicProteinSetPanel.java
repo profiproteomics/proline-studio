@@ -86,7 +86,7 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
     private QuantProteinSetTable m_quantProteinSetTable;
 
     private DefaultFloatingPanel m_refineProteinsPanel;
-    
+
     private MarkerContainerPanel m_markerContainerPanel;
     private boolean m_isXICMode;
 
@@ -100,7 +100,7 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
     private SearchToggleButton m_searchToggleButton;
     private InfoToggleButton m_infoToggleButton;
 
-    private static final String OVERVIEW_KEY = "OVERVIEW_KEY";    
+    private static final String OVERVIEW_KEY = "OVERVIEW_KEY";
 
     public XicProteinSetPanel() {
         initComponents();
@@ -111,8 +111,6 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
 
         final JPanel proteinSetPanel = createProteinSetPanel();
 
-  
-        
         ResultCallback resultCallback = new ResultCallback() {
             @Override
             public void run(boolean success) {
@@ -143,37 +141,36 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
 
                     // ask asynchronous loading of data
                     DatabaseModifyPeptideTask task = new DatabaseModifyPeptideTask(callback);
-                    
+
                     task.initRemovePeptideModifiedOnProtein(m_dataBox.getProjectId(), masterQuantProteinSetModified);
                     AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
                 }
-                
+
             }
-            
+
         };
-        
+
         ActionListener refineAction = new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 DataboxXicProteinSet databox = (DataboxXicProteinSet) m_dataBox;
                 long projectId = m_dataBox.getProjectId();
                 DDataset dataset = (DDataset) databox.getData(false, DDataset.class);
-                
-                boolean okCalled = ComputeQuantitationProfileAction.quantificationProfile(resultCallback, getX()+20, getY()+20, projectId, dataset, null);
+
+                boolean okCalled = ComputeQuantitationProfileAction.quantificationProfile(resultCallback, getX() + 20, getY() + 20, projectId, dataset, null);
                 if (okCalled) {
                     m_refineProteinsPanel.actionStarted();
                 }
             }
-            
+
         };
-        
-        
+
         String[] actionText = {"Refine"};
-        ActionListener[] actionListeners = { refineAction };
-        Icon[] icons = { IconManager.getIcon(IconManager.IconType.REFINE) };
-        
+        ActionListener[] actionListeners = {refineAction};
+        Icon[] icons = {IconManager.getIcon(IconManager.IconType.REFINE)};
+
         m_refineProteinsPanel = new DefaultFloatingPanel("Proteins need to be refined : ", actionText, actionListeners, icons);
-        
+
         final JLayeredPane layeredPane = new JLayeredPane();
 
         layeredPane.addComponentListener(new ComponentListener() {
@@ -203,11 +200,9 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
         add(layeredPane, BorderLayout.CENTER);
 
         layeredPane.add(proteinSetPanel, JLayeredPane.DEFAULT_LAYER);
-        layeredPane.add(m_infoToggleButton.getInfoPanel(), new Integer(JLayeredPane.PALETTE_LAYER+1));  
-        layeredPane.add(m_searchToggleButton.getSearchPanel(), new Integer(JLayeredPane.PALETTE_LAYER+2));   
-        layeredPane.add(m_refineProteinsPanel, JLayeredPane.PALETTE_LAYER);  
-        
-        
+        layeredPane.add(m_infoToggleButton.getInfoPanel(), new Integer(JLayeredPane.PALETTE_LAYER + 1));
+        layeredPane.add(m_searchToggleButton.getSearchPanel(), new Integer(JLayeredPane.PALETTE_LAYER + 2));
+        layeredPane.add(m_refineProteinsPanel, JLayeredPane.PALETTE_LAYER);
 
     }
 
@@ -236,7 +231,7 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
         toolbar.add(m_searchToggleButton);
 
         m_settingsButton = new SettingsButton(((ProgressInterface) m_quantProteinSetTable.getModel()), m_quantProteinSetTable);
-        
+
         m_filterButton = new FilterButton(((CompoundTableModel) m_quantProteinSetTable.getModel())) {
 
             @Override
@@ -253,7 +248,6 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
         toolbar.add(m_settingsButton);
         toolbar.add(m_exportButton);
 
-
         m_addCompareDataButton = new AddDataAnalyzerButton(((CompoundTableModel) m_quantProteinSetTable.getModel())) {
 
             @Override
@@ -267,13 +261,12 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
                 DataAnalyzerWindowBoxManager.addTableInfo(tableInfo);
             }
         };
-        
+
         toolbar.add(m_addCompareDataButton);
 
-        
         m_infoToggleButton = new InfoToggleButton(m_quantProteinSetTable, m_quantProteinSetTable);
         toolbar.add(m_infoToggleButton);
-        
+
         m_calcButton = new JButton(IconManager.getIcon(IconManager.IconType.CALCULATOR));
         m_calcButton.addActionListener(new ActionListener() {
 
@@ -328,15 +321,15 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
 
         return internalPanel;
     }
-    
+
     public void setData(Long taskId, DQuantitationChannel[] quantChannels, List<DMasterQuantProteinSet> proteinSets, boolean isXICMode, boolean finished) {
 
         m_isXICMode = isXICMode;
         ((QuantProteinSetTableModel) ((CompoundTableModel) m_quantProteinSetTable.getModel()).getBaseModel()).setData(taskId, quantChannels, proteinSets, isXICMode);
-        URLCellRenderer renderer = (URLCellRenderer) ((CompoundTableModel)m_quantProteinSetTable.getModel()).getRenderer(0, QuantProteinSetTableModel.COLTYPE_PROTEIN_SET_NAME);
+        URLCellRenderer renderer = (URLCellRenderer) ((CompoundTableModel) m_quantProteinSetTable.getModel()).getRenderer(0, QuantProteinSetTableModel.COLTYPE_PROTEIN_SET_NAME);
         m_quantProteinSetTable.addMouseListener(renderer);
         m_quantProteinSetTable.addMouseMotionListener(renderer);
-        
+
         // select the first row
         if ((proteinSets != null) && (proteinSets.size() > 0)) {
             m_quantProteinSetTable.getSelectionModel().setSelectionInterval(0, 0);
@@ -353,7 +346,7 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
                 }
                 m_hideFirstTime = false;
             }
-            
+
             // check if refine panel must be shown
             try {
                 for (int i = 0; i < proteinSets.size(); i++) {
@@ -365,7 +358,6 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
                         m_refineProteinsPanel.setVisible(true);
                         break;
                     }
-
 
                 }
             } catch (Exception e) {
@@ -379,7 +371,7 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
     public void dataModified(ArrayList modificationsList, int reason) {
 
         boolean modification = m_quantProteinSetTable.dataModified(modificationsList, reason);
-        
+
         if (modification) {
             if (reason == DataBoxViewerManager.REASON_PEPTIDE_SUPPRESSED) {
                 m_refineProteinsPanel.setLocation(getX() + 20, getY() + 20);
@@ -388,8 +380,7 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
 
         }
     }
-    
-    
+
     public void dataUpdated(SubTask subTask, boolean finished) {
         m_quantProteinSetTable.dataUpdated(subTask, finished);
         if (m_hideFirstTime) {
@@ -427,7 +418,7 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
     public void addSingleValue(Object v) {
         getGlobalTableModelInterface().addSingleValue(v);
     }
-    
+
     @Override
     public GlobalTableModelInterface getGlobalTableModelInterface() {
         return (GlobalTableModelInterface) m_quantProteinSetTable.getModel();
@@ -461,7 +452,7 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
     private class QuantProteinSetTable extends LazyTable implements ExportTableSelectionInterface, ExportModelInterface, InfoInterface {
 
         private ObjectParameter m_overviewParameter = null;
-        
+
         public QuantProteinSetTable() {
             super(m_proteinSetScrollPane.getVerticalScrollBar());
         }
@@ -469,23 +460,23 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
         public ArrayList<DMasterQuantProteinSet> getModifiedQuantProteinSet() {
             return ((QuantProteinSetTableModel) (((CompoundTableModel) getModel()).getBaseModel())).getModifiedQuantProteinSet();
         }
-        
+
         @Override
         public ArrayList<ParameterList> getParameters() {
-            ArrayList<ParameterList>  parameterListArray = super.getParameters();
+            ArrayList<ParameterList> parameterListArray = super.getParameters();
 
             ParameterList overviewParameterList = new ParameterList("Overview Parameters");
-            
-            String[] overviewDisplay = { m_isXICMode ? "Overview on Pep. Match Count" : "Overview on Basic SC", m_isXICMode ? "Overview on Raw Abundance" : "Overview on Specific SC", m_isXICMode ? "Overview on Abundance" : "Overview on Weighted SC" };
-            Integer[] overviewValues = { 0, 1, 2 };
-            
+
+            String[] overviewDisplay = {m_isXICMode ? "Overview on Pep. Match Count" : "Overview on Basic SC", m_isXICMode ? "Overview on Raw Abundance" : "Overview on Specific SC", m_isXICMode ? "Overview on Abundance" : "Overview on Weighted SC"};
+            Integer[] overviewValues = {0, 1, 2};
+
             List<TableColumn> columns = getColumns(true);
             QuantProteinSetTableModel quantProteinSetTableModel = ((QuantProteinSetTableModel) ((CompoundTableModel) m_quantProteinSetTable.getModel()).getBaseModel());
             int overviewType = quantProteinSetTableModel.getOverviewType();
             boolean overviewColumnVisible = ((TableColumnExt) columns.get(QuantProteinSetTableModel.COLTYPE_OVERVIEW)).isVisible();
-            
+
             int defaultIndex = 0;
-            
+
             if (!overviewColumnVisible) {
                 defaultIndex = 0;
             } else {
@@ -505,23 +496,23 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
 
             m_overviewParameter = new ObjectParameter(OVERVIEW_KEY, "Overview", null, overviewDisplay, overviewValues, defaultIndex, null);
             overviewParameterList.add(m_overviewParameter);
-            
+
             parameterListArray.add(overviewParameterList);
-            
+
             return parameterListArray;
         }
-               
+
         @Override
         public void parametersChanged() {
             super.parametersChanged();
-            
+
             // parametersChanged() can be call soon, and so parameters could be not initialized
             if (m_overviewParameter == null) {
                 return;
             }
 
             Integer index = (Integer) m_overviewParameter.getAssociatedObjectValue();
-            
+
             QuantProteinSetTableModel model = ((QuantProteinSetTableModel) ((CompoundTableModel) m_quantProteinSetTable.getModel()).getBaseModel());
 
             if (index == 2) {
@@ -530,10 +521,10 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
                 model.setOverviewType(QuantProteinSetTableModel.COLTYPE_RAW_ABUNDANCE);
             } else if (index == 0) {
                 model.setOverviewType(QuantProteinSetTableModel.COLTYPE_PSM);
-            } 
-   
+            }
+
         }
-        
+
         @Override
         public void addTableModelListener(TableModelListener l) {
             getModel().addTableModelListener(l);
@@ -567,27 +558,23 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
         public void prepostPopupMenu() {
             m_idProteinSetAction.setBox(m_dataBox);
         }*/
-
-        
         @Override
         public TablePopupMenu initPopupMenu() {
             m_popupMenu = new DisplayTablePopupMenu(XicProteinSetPanel.this);
 
             m_idProteinSetAction = new DisplayIdentificationProteinSetsAction();
             m_popupMenu.addAction(m_idProteinSetAction);
-            
+
             return m_popupMenu;
         }
         private DisplayTablePopupMenu m_popupMenu;
-
-
 
         @Override
         public void prepostPopupMenu() {
             m_idProteinSetAction.setBox(m_dataBox);
             m_popupMenu.prepostPopupMenu();
         }
-        
+
         /**
          * Called whenever the value of the selection changes.
          *
@@ -674,7 +661,6 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
 
         }
 
-
         public void dataUpdated(SubTask subTask, boolean finished) {
 
             LastAction keepLastAction = m_lastAction;
@@ -684,11 +670,11 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
                 int rowSelected = getSelectionModel().getMinSelectionIndex();
                 int rowSelectedInModel = (rowSelected == -1) ? -1 : convertRowIndexToModel(rowSelected);
 
-            // Update Model (but protein set table must not react to the model update)
+                // Update Model (but protein set table must not react to the model update)
                 selectionWillBeRestored(true);
                 try {
                     ((QuantProteinSetTableModel) (((CompoundTableModel) getModel()).getBaseModel())).dataUpdated();
-                    
+
                 } finally {
                     selectionWillBeRestored(false);
                 }
@@ -699,7 +685,7 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
                     //getSelectionModel().setSelectionInterval(rowSelectedInView, rowSelectedInView);
                     setSelection(rowSelectedInView);
 
-                // if the subtask correspond to the loading of the data of the sorted column,
+                    // if the subtask correspond to the loading of the data of the sorted column,
                     // we keep the row selected visible
                     if (((keepLastAction == LastAction.ACTION_SELECTING) || (keepLastAction == LastAction.ACTION_SORTING)) && (subTask.getSubTaskId() == ((CompoundTableModel) getModel()).getSubTaskId(getSortedColumnIndex()))) {
                         scrollRowToVisible(rowSelectedInView);
@@ -717,8 +703,7 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
                 setSortable(true);
             }
         }
-        
-        
+
         public boolean dataModified(ArrayList modificationsList, int reason) {
 
             boolean modified = false;
@@ -759,9 +744,8 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
             }
 
             return modified;
-            
+
         }
-        
 
         public void selectionWillBeRestored(boolean b) {
             selectionWillBeRestored = b;
@@ -792,14 +776,13 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
         public ArrayList<ExportFontData> getExportFonts(int row, int col) {
             return ((CompoundTableModel) m_quantProteinSetTable.getModel()).getExportFonts(convertRowIndexToModel(row), convertColumnIndexToModel(col));
         }
-        
+
         @Override
         public String getInfo() {
             int count = getModel().getRowCount();
-            return count+((count>1) ? " Proteins Sets" : " Protein Set");
+            return count + ((count > 1) ? " Proteins Sets" : " Protein Set");
         }
 
     }
-
 
 }

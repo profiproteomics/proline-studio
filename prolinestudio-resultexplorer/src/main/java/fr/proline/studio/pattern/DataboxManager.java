@@ -1,6 +1,5 @@
 package fr.proline.studio.pattern;
 
-import fr.proline.studio.pattern.xic.DataBoxXicPTMSitePeptides;
 import fr.proline.studio.pattern.xic.DataboxChildFeature;
 import fr.proline.studio.pattern.xic.DataboxMapAlignment;
 import fr.proline.studio.pattern.xic.DataboxPSMOfMasterQuantPeptide;
@@ -34,7 +33,7 @@ public class DataboxManager {
         new DataBoxRsetPeptideSpectrumError(), new DataboxRsmPSMOfProteinSet(), new DataboxRsmPSMOfPeptide(),
         new DataboxGraphics(false), new DataboxPSMOfMasterQuantPeptide(),
         new DataboxXicPeptideSet(), new DataboxXicPeptideIon(), new DataboxChildFeature(), 
-        new DataboxMultiGraphics(false, false),new DataboxXicPeptideProteinGraphic(),new DataBoxXicPTMSitePeptides(),
+        new DataboxMultiGraphics(false, false),new DataboxXicPeptideProteinGraphic(),
         new DataboxMapAlignment(),
         new DataBoxAdjacencyMatrixChoice(), new DataBoxAdjacencyMatrix(),
         new DataBoxRsmPSMForMsQuery(), new DataboxRsetPSMForMsQuery(),

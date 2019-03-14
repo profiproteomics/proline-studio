@@ -37,6 +37,8 @@ public class XicAbundanceProteinTableModel extends PeptideTableModel {
    
     @Override
     public Object getValueAt(int row, int col) {
+        if (m_quantChannels == null || m_proteinSet == null)
+            return null;
         // Retrieve QuantChannel
         DQuantitationChannel qc = m_quantChannels[row];
         // retrieve quantPeptide for the quantChannelId

@@ -21,7 +21,6 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.geom.Path2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
-import java.util.HashMap;
 import javax.swing.JComponent;
 import javax.swing.JPopupMenu;
 import javax.swing.ToolTipManager;
@@ -253,7 +252,7 @@ public class DoubleYAxisPlotPanel extends BasePlotPanel {
         int xAxisX = GAP_FIGURES_Y + GAP_AXIS_TITLE + GAP_AXIS_LINE;
         int yAxisWidth = GAP_FIGURES_Y + GAP_AXIS_TITLE + GAP_AXIS_LINE;
         // height and width of the panel
-        int width = getWidth() - yAxisWidth;
+        int width = getWidth() - yAxisWidth; //- YAxis width at right
         int height = getHeight();
         int xAxisWidth = width - (xAxisX);
 
@@ -359,6 +358,7 @@ public class DoubleYAxisPlotPanel extends BasePlotPanel {
                         graphicBufferG2d.translate(-m_plotArea.x, -m_plotArea.y);
                         this.paintPlotWithGrid(graphicBufferG2d);
                     }
+                    g2d.drawImage(m_doubleBuffer, m_plotArea.x, m_plotArea.y, null);
                 } else {
                     this.paintPlotWithGrid(g2d);
                 }

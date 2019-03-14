@@ -104,7 +104,7 @@ public class XicAbundanceGraphicPanel extends MultiGraphicsPanel {
      * @param crossSelectionInterfaceList
      * @param isSingle to display one plot
      */
-    private void setDataImpl(List<ExtendedTableModelInterface> valuesList, List<CrossSelectionInterface> crossSelectionInterfaceList,
+     private void setDataImpl(List<ExtendedTableModelInterface> valuesList, List<CrossSelectionInterface> crossSelectionInterfaceList,
             XicAbundanceProteinTableModel proteinAbundance) {
 
         if (valuesList == null) {

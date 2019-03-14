@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 import fr.proline.studio.rsmexplorer.gui.xic.PeptideTableModel;
+import java.util.stream.Collectors;
 
 /**
  *
@@ -54,6 +55,8 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
         
         inParameter = new GroupParameter();
         inParameter.addParameter(DProteinSet.class, false);
+        inParameter.addParameter(DMasterQuantProteinSet.class, false);
+        inParameter.addParameter(QuantChannelInfo.class, false);        
         inParameter.addParameter(XicMode.class, false);
         registerInParameter(inParameter);
 
@@ -119,7 +122,7 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
     public void dataChanged() {
         final boolean allPeptides = m_previousDataBox == null;
         DProteinSet oldProteinSet = m_proteinSet;
-
+        List<DPeptideInstance> pepInstances = null;
         if (!allPeptides) {
             m_proteinSet = (DProteinSet) m_previousDataBox.getData(false, DProteinSet.class);
             m_masterQuantProteinSet = (DMasterQuantProteinSet) m_previousDataBox.getData(false, DMasterQuantProteinSet.class);
@@ -129,6 +132,7 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
                 return;
             }
             m_isXICMode = ((XicMode) m_previousDataBox.getData(false, XicMode.class)).isXicMode();
+            pepInstances = (List<DPeptideInstance>) m_previousDataBox.getData(false, DPeptideInstance.class, true);
         }
 
         final int loadingId = setLoading();
@@ -192,9 +196,12 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
         DatabaseLoadXicMasterQuantTask task = new DatabaseLoadXicMasterQuantTask(callback);
         if (allPeptides) {
             task.initLoadPeptides(getProjectId(), m_dataset, m_masterQuantPeptideList, isXICMode());
+        } else if(pepInstances != null && !pepInstances.isEmpty()){
+            List<Long> parentPepInstanceIdsL = pepInstances.stream().map( pi -> pi.getId() ).collect(Collectors.toList());
+            task.initLoadPeptides(getProjectId(), m_dataset,  parentPepInstanceIdsL.toArray(new Long[parentPepInstanceIdsL.size()]), m_masterQuantPeptideList, isXICMode());
         } else {
             task.initLoadPeptides(getProjectId(), m_dataset, m_masterQuantProteinSet, m_masterQuantPeptideList, isXICMode());
-        }
+        } 
         registerTask(task);
 
     }

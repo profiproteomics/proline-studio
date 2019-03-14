@@ -3,6 +3,7 @@ package fr.proline.studio.rsmexplorer.gui;
 
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.msi.dto.DProteinMatch;
+import fr.proline.core.orm.msi.dto.DProteinSet;
 import fr.proline.studio.extendedtablemodel.AddDataAnalyzerButton;
 import fr.proline.studio.extendedtablemodel.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.tasks.SubTask;
@@ -444,10 +445,11 @@ public class PTMProteinSitePanel extends HourglassPanel implements DataBoxPanelI
             if (selectionWillBeRestored) {
                 return;
             }
- 
+				//VDS: Order is important ! To be corrected using set of class for propagation
+            m_dataBox.propagateDataChanged(PTMSite.class);
+            m_dataBox.propagateDataChanged(DProteinSet.class);
             m_dataBox.propagateDataChanged(DProteinMatch.class);
             m_dataBox.propagateDataChanged(DPeptideMatch.class);
-            m_dataBox.propagateDataChanged(PTMSite.class);
 
         }
 

@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
  */
 public class PTMSite {
 
-    private JSONPTMSite m_site;
+    private final JSONPTMSite m_site;
     private DInfoPTM m_ptmSpecificity;
 
     private DProteinMatch m_proteinMatch;

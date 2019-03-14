@@ -51,7 +51,7 @@ public class DataBoxMSQueriesForRSM extends AbstractDataBox{
         registerOutParameter(outParameter);
         
         outParameter = new GroupParameter();
-        outParameter.addParameter(MsQueryInfoRSM.class, false);
+        outParameter.addParameter(MsQueryInfoRsm.class, false);
         registerOutParameter(outParameter);
 
        
@@ -126,9 +126,9 @@ public class DataBoxMSQueriesForRSM extends AbstractDataBox{
             if (parameterType.equals(ResultSet.class)) {
                 return m_rsm.getResultSet();
             }
-            if (parameterType.equals(MsQueryInfoRSM.class)) {
+            if (parameterType.equals(MsQueryInfoRsm.class)) {
                 DMsQuery msq = ((MSQueriesPanel)getDataBoxPanelInterface()).getSelectedMsQuery();
-                return new MsQueryInfoRSM(msq, m_rsm);
+                return new MsQueryInfoRsm(msq, m_rsm);
             }
         }
         return super.getData(getArray, parameterType);
@@ -136,7 +136,7 @@ public class DataBoxMSQueriesForRSM extends AbstractDataBox{
     
     @Override
     public Class[] getImportantInParameterClass() {
-        Class[] classList = { DMsQuery.class, MsQueryInfoRSM.class };
+        Class[] classList = { DMsQuery.class, MsQueryInfoRsm.class };
         return classList;
     }
 

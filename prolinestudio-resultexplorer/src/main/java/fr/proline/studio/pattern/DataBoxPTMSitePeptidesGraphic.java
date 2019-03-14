@@ -6,9 +6,7 @@
 package fr.proline.studio.pattern;
 
 import fr.proline.core.orm.msi.ResultSummary;
-import fr.proline.core.orm.msi.dto.DMasterQuantProteinSet;
 import fr.proline.core.orm.msi.dto.DPeptideInstance;
-import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabasePTMsTask;
@@ -17,7 +15,6 @@ import fr.proline.studio.dam.tasks.data.ptm.PTMSite;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 import fr.proline.studio.extendedtablemodel.GlobalTabelModelProviderInterface;
 import fr.proline.studio.rsmexplorer.gui.ptm.PanelPeptidesPTMSiteGraphic;
-import java.util.List;
 
 /**
  * This class is very similaire as DataBoxPTMSitePeptides
@@ -27,11 +24,8 @@ import java.util.List;
 public class DataBoxPTMSitePeptidesGraphic extends AbstractDataBox {
 
     private ResultSummary m_rsm;
-    private List<DMasterQuantProteinSet> m_masterQuantProteinSetList;
-    private DDataset m_dataset;
-
     public DataBoxPTMSitePeptidesGraphic() {
-        super(DataboxType.DataBoxPTMSitePeptides, DataboxStyle.STYLE_RSM);
+        super(DataboxType.DataBoxPTMSitePeptidesGraphic, DataboxStyle.STYLE_RSM);//VDS: could use RSM even in XIC ?
 
         // Name of this databox
         m_typeName = "Graphic PTM Site's Peptides";
@@ -63,8 +57,7 @@ public class DataBoxPTMSitePeptidesGraphic extends AbstractDataBox {
     public void dataChanged() {
 
         final PTMSite ptmSite = (PTMSite) m_previousDataBox.getData(false, PTMSite.class);
-        final ResultSummary rsm = (ResultSummary) m_previousDataBox.getData(false, ResultSummary.class);
-        m_rsm = rsm;
+        m_rsm = (ResultSummary) m_previousDataBox.getData(false, ResultSummary.class);
 
         if (ptmSite == null) {
             ((PanelPeptidesPTMSiteGraphic) getDataBoxPanelInterface()).setData(null, null);
@@ -107,7 +100,7 @@ public class DataBoxPTMSitePeptidesGraphic extends AbstractDataBox {
         };
 
         DatabasePTMsTask task = new DatabasePTMsTask(callback);
-        task.initFillPTMSite(getProjectId(), rsm, ptmSite);
+        task.initFillPTMSite(getProjectId(), m_rsm, ptmSite);
         Long taskId = task.getId();
         if (m_previousTaskId != null) {
             // old task is suppressed if it has not been already done

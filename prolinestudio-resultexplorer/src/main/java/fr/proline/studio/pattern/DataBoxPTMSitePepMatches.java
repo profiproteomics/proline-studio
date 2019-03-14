@@ -1,6 +1,5 @@
 package fr.proline.studio.pattern;
 
-import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.dto.DPeptideInstance;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.studio.dam.AccessDatabaseThread;
@@ -34,7 +33,6 @@ public class DataBoxPTMSitePepMatches extends AbstractDataBox {
 
         GroupParameter inParameter = new GroupParameter();
         inParameter.addParameter(PTMSite.class, false);
-        inParameter.addParameter(ResultSummary.class, false);
         inParameter.addParameter(DPeptideInstance.class, false);
         registerInParameter(inParameter);
         
@@ -58,16 +56,11 @@ public class DataBoxPTMSitePepMatches extends AbstractDataBox {
     public void dataChanged() {
 
         final PTMSite ptmSite = (PTMSite) m_previousDataBox.getData(false, PTMSite.class); 
-        final ResultSummary rsm = (ResultSummary) m_previousDataBox.getData(false, ResultSummary.class);         
         final DPeptideInstance pepInstance = (DPeptideInstance) m_previousDataBox.getData(false, DPeptideInstance.class); 
        
         m_parentPeptideInstance = pepInstance;
         
         if ((ptmSite == null) || (pepInstance == null)) {
-            
-            PTMSite ptmSiteTest = (PTMSite) m_previousDataBox.getData(false, PTMSite.class); 
-            DPeptideInstance pepInstanceTest = (DPeptideInstance) m_previousDataBox.getData(false, DPeptideInstance.class); 
-            
             ((PeptidesPTMSiteTablePanel)getDataBoxPanelInterface()).setData(null, null);           
             return;
         }
@@ -112,7 +105,7 @@ public class DataBoxPTMSitePepMatches extends AbstractDataBox {
         }
          
         DatabasePTMsTask task = new DatabasePTMsTask(callback);
-        task.initFillPTMSite(getProjectId(), rsm, ptmSite);
+        task.initFillPTMSite(getProjectId(), ptmSite.getPTMdataset().getDataset().getResultSummary(), ptmSite);
         Long taskId = task.getId();
         m_previousTaskId = taskId;
         registerTask(task);            

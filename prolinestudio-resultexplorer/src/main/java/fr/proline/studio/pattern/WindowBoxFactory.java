@@ -1,11 +1,9 @@
 package fr.proline.studio.pattern;
 
-import fr.proline.studio.pattern.xic.DataBoxXicPTMSitePeptides;
 import fr.proline.core.orm.msi.ResultSet;
 import java.util.HashMap;
 
 import fr.proline.studio.gui.SplittedPanelContainer;
-import fr.proline.studio.pattern.xic.DataBoxXicPTMProteinSite;
 import fr.proline.studio.pattern.xic.DataboxChildFeature;
 import fr.proline.studio.pattern.xic.DataboxExperimentalDesign;
 import fr.proline.studio.pattern.xic.DataboxMapAlignment;
@@ -21,8 +19,6 @@ import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.border.EmptyBorder;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
-import fr.proline.studio.pattern.xic.DataBoxXicPTMSitePeptides;
-import fr.proline.studio.pattern.xic.DataboxXicAbundanceGraphic;
 import fr.proline.studio.pattern.xic.DataboxXicPeptideProteinGraphic;
 
 /**
@@ -36,15 +32,20 @@ public class WindowBoxFactory {
         boxes[0] = databox;
         boxes[0].setDataName(dataName);
 
-        Image icon = null;
-        if (windowType == WindowSavedManager.SAVE_WINDOW_FOR_RSM) {
-            icon = IconManager.getImage(isDecoy ? IconManager.IconType.DATASET_RSM_DECOY : IconManager.IconType.DATASET_RSM);
-        } else if (windowType == WindowSavedManager.SAVE_WINDOW_FOR_RSET) {
-            icon = IconManager.getImage(isDecoy ? IconManager.IconType.DATASET_RSET_DECOY : IconManager.IconType.DATASET_RSET);
-        } else if (windowType == WindowSavedManager.SAVE_WINDOW_FOR_QUANTI) {
-            icon = IconManager.getImage(isXIC ? IconManager.IconType.QUANT_XIC : IconManager.IconType.QUANT_SC);
-        } else {
-            icon = databox.getDefaultIcon();
+        Image icon;
+        switch (windowType) {
+            case WindowSavedManager.SAVE_WINDOW_FOR_RSM:
+                icon = IconManager.getImage(isDecoy ? IconManager.IconType.DATASET_RSM_DECOY : IconManager.IconType.DATASET_RSM);
+                break;
+            case WindowSavedManager.SAVE_WINDOW_FOR_RSET:
+                icon = IconManager.getImage(isDecoy ? IconManager.IconType.DATASET_RSET_DECOY : IconManager.IconType.DATASET_RSET);
+                break;
+            case WindowSavedManager.SAVE_WINDOW_FOR_QUANTI:
+                icon = IconManager.getImage(isXIC ? IconManager.IconType.QUANT_XIC : IconManager.IconType.QUANT_SC);
+                break;
+            default:
+                icon = databox.getDefaultIcon();
+                break;
         }
 
         WindowBox winBox = new WindowBox(windowName, generatePanel(boxes), boxes[0], icon);
@@ -253,6 +254,7 @@ public class WindowBoxFactory {
         AbstractDataBox[] boxes = new AbstractDataBox[5];
         boxes[0] = new DataBoxPTMSiteProtein();
         boxes[0].setDataName(dataName);
+        ((DataBoxPTMSiteProtein)boxes[0]).setXicResult(false);
         boxes[1] = new DataBoxPTMSitePeptidesGraphic();
         boxes[2] = new DataBoxPTMSitePeptides();
         boxes[2].setLayout(SplittedPanelContainer.PanelLayout.HORIZONTAL);
@@ -263,19 +265,26 @@ public class WindowBoxFactory {
         return new WindowBox(boxes[0].getFullName(), generatePanel(boxes), boxes[0], IconManager.getImage(iconType));
     }
 
-    public static WindowBox getXICPTMSitesWindowBox(String dataName) {
 
-        AbstractDataBox[] boxes = new AbstractDataBox[5];
-        boxes[0] = new DataBoxXicPTMProteinSite();
+    public static WindowBox getXicPTMSitesWindowBox(String dataName) {
+
+        AbstractDataBox[] boxes = new AbstractDataBox[6];
+        boxes[0] = new DataBoxPTMSiteProtein();
         boxes[0].setDataName(dataName);
+        ((DataBoxPTMSiteProtein)boxes[0]).setXicResult(true);
 
         boxes[1] = new DataBoxPTMSitePeptidesGraphic();
-        boxes[2] = new DataBoxXicPTMSitePeptides();
-        boxes[2].setLayout(SplittedPanelContainer.PanelLayout.TABBED);
-        //boxes[3] = new DataboxMultiGraphics(false, false);
-        boxes[3] = new DataboxXicAbundanceGraphic();
-        boxes[3].setLayout(SplittedPanelContainer.PanelLayout.HORIZONTAL);
-        boxes[4] = new DataBoxPTMSitePepMatches();
+        
+        boxes[2] = new DataBoxPTMSitePeptides();//new DataBoxXicPTMSitePeptides();
+        boxes[2].setLayout(SplittedPanelContainer.PanelLayout.HORIZONTAL);
+    
+        boxes[3] = new DataboxXicPeptideSet();
+        ((DataboxXicPeptideSet) boxes[3]).setXICMode(true);
+        
+        boxes[4] = new DataboxMultiGraphics(false, false);
+        // boxes[4] = new DataboxXicAbundanceGraphic();
+        boxes[4].setLayout(SplittedPanelContainer.PanelLayout.HORIZONTAL);
+        boxes[5] = new DataBoxPTMSitePepMatches();
 
         IconManager.IconType iconType = IconManager.IconType.QUANT_XIC;
         return new WindowBox(boxes[0].getFullName(), generatePanel(boxes), boxes[0], IconManager.getImage(iconType));
@@ -465,12 +474,12 @@ public class WindowBoxFactory {
         return new WindowBox(fullName, generatePanel(boxes), boxes[0], IconManager.getImage(iconType));
     }
 
-    public static WindowBox getMSQueriesWindowBoxForRSM(String dataName, boolean mergedData) {
+    public static WindowBox getMSQueriesWindowBoxForRsm(String dataName, boolean mergedData) {
         // create boxes
         AbstractDataBox[] boxes = new AbstractDataBox[2];
         boxes[0] = new DataBoxMSQueriesForRSM();
         boxes[0].setDataName(dataName);
-        boxes[1] = new DataboxRSMPSMForMsQuery(mergedData);
+        boxes[1] = new DataBoxRsmPSMForMsQuery(mergedData);
         boxes[1].setLayout(SplittedPanelContainer.PanelLayout.VERTICAL);
         IconManager.IconType iconType = IconManager.IconType.DATASET_RSM;
         return new WindowBox(boxes[0].getFullName(), generatePanel(boxes), boxes[0], IconManager.getImage(iconType));
@@ -545,15 +554,20 @@ public class WindowBoxFactory {
 
     public static WindowBox getFromBoxesWindowBox(String title, AbstractDataBox[] boxes, boolean isDecoy, boolean isXIC, char windowType) {
 
-        IconManager.IconType iconType = IconManager.IconType.DATASET;
-        if (windowType == WindowSavedManager.SAVE_WINDOW_FOR_RSM) {
-            iconType = isDecoy ? IconManager.IconType.DATASET_RSM_DECOY : IconManager.IconType.DATASET_RSM;
-        } else if (windowType == WindowSavedManager.SAVE_WINDOW_FOR_RSET) {
-            iconType = isDecoy ? IconManager.IconType.DATASET_RSET_DECOY : IconManager.IconType.DATASET_RSET;
-        } else if (windowType == WindowSavedManager.SAVE_WINDOW_FOR_QUANTI) {
-            iconType = isXIC ? IconManager.IconType.QUANT_XIC : IconManager.IconType.QUANT_SC;
-        } else {
-            iconType = IconManager.IconType.CHALKBOARD;
+        IconManager.IconType iconType;
+        switch (windowType) {
+            case WindowSavedManager.SAVE_WINDOW_FOR_RSM:
+                iconType = isDecoy ? IconManager.IconType.DATASET_RSM_DECOY : IconManager.IconType.DATASET_RSM;
+                break;
+            case WindowSavedManager.SAVE_WINDOW_FOR_RSET:
+                iconType = isDecoy ? IconManager.IconType.DATASET_RSET_DECOY : IconManager.IconType.DATASET_RSET;
+                break;
+            case WindowSavedManager.SAVE_WINDOW_FOR_QUANTI:
+                iconType = isXIC ? IconManager.IconType.QUANT_XIC : IconManager.IconType.QUANT_SC;
+                break;
+            default:
+                iconType = IconManager.IconType.CHALKBOARD;
+                break;
         }
 
         WindowBox winBox = new WindowBox(title, generatePanel(boxes), boxes[0], IconManager.getImage(iconType));

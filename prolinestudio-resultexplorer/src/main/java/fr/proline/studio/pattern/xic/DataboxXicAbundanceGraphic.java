@@ -14,7 +14,7 @@ import fr.proline.studio.rsmexplorer.gui.xic.XicAbundanceGraphicPanel;
  */
 public class DataboxXicAbundanceGraphic extends AbstractDataBox {
 
-    private List<ExtendedTableModelInterface> m_valuesList = null;
+//    private List<ExtendedTableModelInterface> m_valuesList = null;
 
     private boolean m_defaultLocked = false;
     private boolean m_canChooseColor = false;
@@ -32,9 +32,8 @@ public class DataboxXicAbundanceGraphic extends AbstractDataBox {
         // Register Possible in parameters
         GroupParameter inParameter = new GroupParameter();
         inParameter.addParameter(ExtendedTableModelInterface.class, true);
-        registerInParameter(inParameter);
-
         inParameter.addParameter(CrossSelectionInterface.class, true);
+        inParameter.addParameter(XicAbundanceProteinTableModel.class, false);
         registerInParameter(inParameter);
 
     }
@@ -55,15 +54,16 @@ public class DataboxXicAbundanceGraphic extends AbstractDataBox {
     public void dataChanged() {
         final List<ExtendedTableModelInterface> valuesL = (List<ExtendedTableModelInterface>) m_previousDataBox.getData(false, ExtendedTableModelInterface.class, true);
         final List<CrossSelectionInterface> crossSelectionInterfaceL = (List<CrossSelectionInterface>) m_previousDataBox.getData(false, CrossSelectionInterface.class, true);
-        XicAbundanceProteinTableModel proteinAbundance = (XicAbundanceProteinTableModel) m_previousDataBox.getData(false, XicAbundanceProteinTableModel.class, false);
+        
+        XicAbundanceProteinTableModel proteinAbundance = (XicAbundanceProteinTableModel) m_previousDataBox.getData(false, XicAbundanceProteinTableModel.class);
 
         ((XicAbundanceGraphicPanel) getDataBoxPanelInterface()).setData(valuesL, crossSelectionInterfaceL, proteinAbundance);
     }
 
-    @Override
-    public void setEntryData(Object data) {
-        m_valuesList = (List<ExtendedTableModelInterface>) data;
-        dataChanged();
-    }
+//    @Override
+//    public void setEntryData(Object data) {
+//        m_valuesList = (List<ExtendedTableModelInterface>) data;
+//        dataChanged();
+//    }
 
 }

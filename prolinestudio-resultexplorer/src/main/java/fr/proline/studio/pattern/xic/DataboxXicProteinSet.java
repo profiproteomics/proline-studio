@@ -50,10 +50,11 @@ public class DataboxXicProteinSet extends AbstractDataBox {
         registerInParameter(inParameter);
 
         // Register possible out parameters
-        // One or Multiple ProteinSet
+        // One or Multiple ProteinSet 
+        //VDS : Only one ?!
         GroupParameter outParameter = new GroupParameter();
-        outParameter.addParameter(DProteinSet.class, true);
-        outParameter.addParameter(DMasterQuantProteinSet.class, true);
+        outParameter.addParameter(DProteinSet.class, false);
+        outParameter.addParameter(DMasterQuantProteinSet.class, false);
         outParameter.addParameter(DDataset.class, false);
         outParameter.addParameter(ResultSummary.class, false);
         outParameter.addParameter(QuantChannelInfo.class, false);

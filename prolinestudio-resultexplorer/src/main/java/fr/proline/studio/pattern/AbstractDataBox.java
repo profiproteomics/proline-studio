@@ -1,13 +1,11 @@
 package fr.proline.studio.pattern;
 
-import fr.proline.studio.pattern.xic.DataBoxXicPTMSitePeptides;
 import fr.proline.studio.extendedtablemodel.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import fr.proline.studio.dam.tasks.AbstractDatabaseTask;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.id.ProjectId;
-import fr.proline.studio.pattern.xic.DataBoxXicPTMProteinSite;
 import fr.proline.studio.pattern.xic.DataboxChildFeature;
 import fr.proline.studio.pattern.xic.DataboxExperimentalDesign;
 import fr.proline.studio.pattern.xic.DataboxMapAlignment;
@@ -126,7 +124,7 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
         DataBoxImage(44),
         DataBoxSystemTasks(45),
         DataBoxFrozenCopy(46),
-        DataBoxPTMProteinSite(47),
+        DataBoxPTMSiteProtein(47), 
         DataBoxPTMSitePeptides(48),
         DataBoxPTMSitePepMatches(49),
         DataBoxXICPTMProteinSite(50),
@@ -213,14 +211,14 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
                 case DataBoxMSQueriesForRSM:
                     return new DataBoxMSQueriesForRSM();
                 case DataBoxRSMPSMForMsQuery:
-                    return new DataboxRSMPSMForMsQuery();
+                    return new DataBoxRsmPSMForMsQuery();
                 case DataBoxRsetPeptideSpectrumValues:
                     return new DataBoxRsetPeptideSpectrumValues();
                 case DataBoxMSQueriesForRset:
                     return new DataBoxMSQueriesForRset();
                 case DataBoxRsetPSMForMsQuery:
                     return new DataboxRsetPSMForMsQuery();
-                case DataBoxPTMProteinSite:
+                case DataBoxPTMSiteProtein:
                     return new DataBoxPTMSiteProtein();
                 case DataBoxDataAnalyzerResults:
                     return new DataBoxDataAnalyzerResults();
@@ -232,15 +230,11 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
                     return new DataBoxPTMSitePeptides();
                 case DataBoxPTMSitePepMatches:
                     return new DataBoxPTMSitePepMatches();
-                case DataBoxXICPTMProteinSite:
-                    return new DataBoxXicPTMProteinSite();
-                case DataBoxXICPTMSitePeptides:
-                    return new DataBoxXicPTMSitePeptides();
                 case DataBoxPTMSitePeptidesGraphic:
                     return new DataBoxPTMSitePeptidesGraphic();
                 case DataboxXicAbundanceGraphic:
                     return new DataboxXicAbundanceGraphic();
-
+                    
                 case DataBoxFrozenCopy:
                     return null; // not used for frozen copy
             }
@@ -488,6 +482,9 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
         return null;
     }
 
+    // VDS: Should 
+    // call getData if isList = false
+    // or rename to getDataList(boolean getArray, Class parameterType)
     public Object getData(boolean getArray, Class parameterType, boolean isList) {
 
         if ((parameterType != null) && (parameterType.equals(ProjectId.class))) {

@@ -678,6 +678,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                         if (proteinSets != null && !proteinSets.isEmpty()) {
                             // for each proteinSet, retrieve the DMasterQuantProteinSet
                             int nbProteinSet = proteinSets.size();
+                            m_logger.debug("------- > fetchDataProteinMainTask : get ProtSet with MQPS: "+nbProteinSet);
                             m_proteinSetIds = new ArrayList<>(nbProteinSet);
                             m_resultSetIds = new ArrayList<>(nbProteinSet);
                             for (int i = 0; i < nbProteinSet; i++) {
@@ -1427,7 +1428,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
      */
     private boolean fetchProteinSetData(EntityManager entityManagerMSI, List<Long> proteinSetIds) {
         int nbMQP = m_masterQuantProteinSetList.size();
-
+        m_logger.debug("fetchProteinSetData for "+proteinSetIds.size()+" m_masterQuantProteinSetList "+nbMQP);
         String queryDMasterQuantProteinSet = "SELECT new fr.proline.core.orm.msi.dto.DMasterQuantProteinSet"
                 + "(q.id,  q.selectionLevel, q.objectTreeId,  q.serializedProperties,  p.resultSummary.id,  p.id) "
                 + " FROM MasterQuantComponent q,  ProteinSet p "
@@ -1437,7 +1438,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
         masterQuantProteinSetsQuery.setParameter("listId", proteinSetIds);
         //masterQuantProteinSetsQuery.setParameter("rsmId", resultSummaryId); // NO NEED, and even if this constaint is added, the query become slow
         List<DMasterQuantProteinSet> listResult = masterQuantProteinSetsQuery.getResultList();
-
+        m_logger.debug(" found  DMasterQuantProteinSet "+listResult.size());
         
         TypedQuery<DProteinSet> proteinSetQuery = entityManagerMSI.createQuery("SELECT new fr.proline.core.orm.msi.dto.DProteinSet(ps.id, ps.representativeProteinMatchId, ps.resultSummary.id, ps.serializedProperties) FROM ProteinSet ps WHERE ps.id=:psId ", DProteinSet.class);
         String queryProteinMatch = "SELECT new fr.proline.core.orm.msi.dto.DProteinMatch(pm.id, pm.accession,  pm.score, pm.peptideCount, pm.resultSet.id, pm.description, pm.serializedProperties) "
@@ -1515,14 +1516,21 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
             }
         }
        
+        m_logger.debug(" -- Get DMasterQuantProteinSet info and associated DQuantProteinSet for each Quant Channel");
+        int nbrMqPsSet =0;
+        int nbrMqPsupdated =0;
         //Get DMasterQuantProteinSet info and associated DQuantProteinSet for each Quant Channel
         for (DMasterQuantProteinSet masterQuantProteinSet : listResult) {
             proteinSetQuery.setParameter("psId", masterQuantProteinSet.getProteinSetId());
             DProteinSet dProteinSet = proteinSetQuery.getSingleResult();
+            if(dProteinSet==null)
+                 m_logger.debug( "--- NOT FOUND  DProteinSet for MQPrS "+masterQuantProteinSet.getId());
             // typical protein match id
             proteinMatchQuery.setParameter("pmId", dProteinSet.getProteinMatchId());
             try {
                 DProteinMatch typicalProteinMatch = proteinMatchQuery.getSingleResult();
+                if(typicalProteinMatch==null)
+                    m_logger.debug( "--- NOT FOUND  DProteinMatch for MQPrS "+masterQuantProteinSet.getId());
                 dProteinSet.setTypicalProteinMatch(typicalProteinMatch);
             } catch (NoResultException | NonUniqueResultException e) {
                 m_logger.error(getClass().getSimpleName() + " failed", e);
@@ -1539,6 +1547,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
             }
             masterQuantProteinSet.setQuantProteinSetByQchIds(quantProteinSetByQchIds);
             masterQuantProteinSet.setProteinSet(dProteinSet);
+            nbrMqPsSet++;
             // nb PeptideInstance and nbPeptide quantified
 
             queryCountPepAndQuantPep.setParameter("rsmId", masterQuantProteinSet.getQuantResultSummaryId());
@@ -1602,8 +1611,14 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                     break;
                 }
             }
+            nbrMqPsupdated++;
+            if(nbrMqPsupdated != nbrMqPsSet)
+                    m_logger.debug(" REERRR");
+            if(nbrMqPsSet % 100 ==0)
+                m_logger.debug("update "+nbrMqPsSet+" m_masterQuantProteinSetList index "+index);
             m_masterQuantProteinSetList.set(index, masterQuantProteinSet);
         }
+        m_logger.debug(" GET Through "+nbrMqPsSet+" updated "+nbrMqPsupdated);
             return true;
     }
 

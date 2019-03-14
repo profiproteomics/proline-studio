@@ -56,7 +56,7 @@ public class DisplayXICPTMSitesAction extends AbstractRSMAction {
         if (rsm != null) {
 
             // prepare window box
-            WindowBox wbox = WindowBoxFactory.getXICPTMSitesWindowBox(dataSet.getName());
+            WindowBox wbox = WindowBoxFactory.getXicPTMSitesWindowBox(dataSet.getName());
             wbox.setEntryData(dataSet.getProject().getId(), new PTMDataset(dataSet));
             
             // open a window to display the window box
@@ -77,8 +77,8 @@ public class DisplayXICPTMSitesAction extends AbstractRSMAction {
 
                 @Override
                 public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
-
-                    WindowBox wbox = WindowBoxFactory.getXICPTMSitesWindowBox(dataSet.getName());
+                    WindowBox wbox = WindowBoxFactory.getXicPTMSitesWindowBox(dataSet.getName());
+                     
                     // open a window to display the window box
                     DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
                     win.open();

@@ -54,7 +54,7 @@ public class DisplayMSQueryAction extends AbstractRSMAction {
             boolean mergedData = (rsType == ResultSet.Type.USER) || (rsType == ResultSet.Type.DECOY_USER); // Merge or Decoy Merge
             
             // prepare window box
-            WindowBox wbox = WindowBoxFactory.getMSQueriesWindowBoxForRSM(dataSet.getName(), mergedData);
+            WindowBox wbox = WindowBoxFactory.getMSQueriesWindowBoxForRsm(dataSet.getName(), mergedData);
             wbox.setEntryData(dataSet.getProject().getId(), rsm);
             
             // open a window to display the window box
@@ -80,7 +80,7 @@ public class DisplayMSQueryAction extends AbstractRSMAction {
                     ResultSet.Type rsType = rset.getType();
                     boolean mergedData = (rsType == ResultSet.Type.USER) || (rsType == ResultSet.Type.DECOY_USER); // Merge or Decoy Merge
                     
-                    WindowBox wbox = WindowBoxFactory.getMSQueriesWindowBoxForRSM(dataSet.getName(), mergedData);
+                    WindowBox wbox = WindowBoxFactory.getMSQueriesWindowBoxForRsm(dataSet.getName(), mergedData);
                     // open a window to display the window box
                     DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
                     win.open();

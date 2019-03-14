@@ -13,7 +13,7 @@ import fr.proline.studio.filter.IntegerFilter;
 import fr.proline.studio.filter.StringFilter;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
-import fr.proline.studio.pattern.MsQueryInfoRSM;
+import fr.proline.studio.pattern.MsQueryInfoRsm;
 import fr.proline.studio.pattern.MsQueryInfoRset;
 import fr.proline.studio.table.renderer.DefaultLeftAlignRenderer;
 import fr.proline.studio.table.renderer.DefaultRightAlignRenderer;
@@ -425,7 +425,7 @@ public class MSQueriesTableModel extends LazyTableModel implements GlobalTableMo
         ArrayList<ExtraDataType> list = new ArrayList<>();
         list.add(new ExtraDataType(DMsQuery.class, true));
         if (m_rsmSource) {
-            list.add(new ExtraDataType(MsQueryInfoRSM.class, true));
+            list.add(new ExtraDataType(MsQueryInfoRsm.class, true));
         } else {
             list.add(new ExtraDataType(MsQueryInfoRset.class, true));
         }
@@ -442,8 +442,8 @@ public class MSQueriesTableModel extends LazyTableModel implements GlobalTableMo
     public Object getRowValue(Class c, int row) {
         if (c.equals(DMsQuery.class)) {
             return m_msqueries.get(row);
-        } else if (c.equals(MsQueryInfoRSM.class) && m_rsmSource) {
-            return new MsQueryInfoRSM(m_msqueries.get(row), (ResultSummary) getValue(ResultSummary.class));
+        } else if (c.equals(MsQueryInfoRsm.class) && m_rsmSource) {
+            return new MsQueryInfoRsm(m_msqueries.get(row), (ResultSummary) getValue(ResultSummary.class));
         } else if (c.equals(MsQueryInfoRset.class) && !m_rsmSource) {
             return new MsQueryInfoRset(m_msqueries.get(row), (ResultSet) getValue(ResultSet.class));
         }

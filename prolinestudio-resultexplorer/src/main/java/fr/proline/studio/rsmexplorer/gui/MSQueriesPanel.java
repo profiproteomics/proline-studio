@@ -16,7 +16,7 @@ import fr.proline.studio.parameter.SettingsButton;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.pattern.DataAnalyzerWindowBoxManager;
-import fr.proline.studio.pattern.MsQueryInfoRSM;
+import fr.proline.studio.pattern.MsQueryInfoRsm;
 import fr.proline.studio.pattern.MsQueryInfoRset;
 import fr.proline.studio.progress.ProgressInterface;
 import fr.proline.studio.table.TableInfo;
@@ -419,7 +419,7 @@ public class MSQueriesPanel extends HourglassPanel implements DataBoxPanelInterf
             }
             
             if (m_fromRSM){
-                m_dataBox.propagateDataChanged(MsQueryInfoRSM.class);
+                m_dataBox.propagateDataChanged(MsQueryInfoRsm.class);
             }else{
                 m_dataBox.propagateDataChanged(MsQueryInfoRset.class);
             }

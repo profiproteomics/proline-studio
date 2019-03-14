@@ -24,7 +24,7 @@ import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
  * display Peptide Matches for a given MsQuey
  * @author MB243701
  */
-public class DataboxRSMPSMForMsQuery extends AbstractDataBox{
+public class DataBoxRsmPSMForMsQuery extends AbstractDataBox{
     
     private DMsQuery m_msQuery;
     private ResultSet m_rset;
@@ -33,11 +33,11 @@ public class DataboxRSMPSMForMsQuery extends AbstractDataBox{
     
     private boolean m_mergedData;
     
-    public DataboxRSMPSMForMsQuery() {
+    public DataBoxRsmPSMForMsQuery() {
         this(false);
     }
     
-    public DataboxRSMPSMForMsQuery(boolean mergedData) {
+    public DataBoxRsmPSMForMsQuery(boolean mergedData) {
         
         super(DataboxType.DataBoxRSMPSMForMsQuery, DataboxStyle.STYLE_RSM);
         
@@ -51,7 +51,7 @@ public class DataboxRSMPSMForMsQuery extends AbstractDataBox{
         // Register Possible in parameters
         // One MsQuery & rsm & rs, rsm could be null
         GroupParameter inParameter = new GroupParameter();
-        inParameter.addParameter(MsQueryInfoRSM.class, false);
+        inParameter.addParameter(MsQueryInfoRsm.class, false);
         registerInParameter(inParameter);
         
         // Register possible out parameters
@@ -81,7 +81,7 @@ public class DataboxRSMPSMForMsQuery extends AbstractDataBox{
     @Override
     public void dataChanged() {
         long oldMsQId = m_msQuery == null? -1: m_msQuery.getId();
-        final MsQueryInfoRSM _msqI = (MsQueryInfoRSM) m_previousDataBox.getData(false, MsQueryInfoRSM.class);
+        final MsQueryInfoRsm _msqI = (MsQueryInfoRsm) m_previousDataBox.getData(false, MsQueryInfoRsm.class);
         if (_msqI != null && _msqI.getMsQuery() != null && oldMsQId == _msqI.getMsQuery().getId()){
             return ;
         }
@@ -150,8 +150,8 @@ public class DataboxRSMPSMForMsQuery extends AbstractDataBox{
         
         getDataBoxPanelInterface().addSingleValue(data);
         
-        if (data instanceof MsQueryInfoRSM) {
-            MsQueryInfoRSM o = (MsQueryInfoRSM) data;
+        if (data instanceof MsQueryInfoRsm) {
+            MsQueryInfoRsm o = (MsQueryInfoRsm) data;
             m_msQuery = o.getMsQuery();
             m_rset = o.getResultSet();
             getDataBoxPanelInterface().addSingleValue(m_rset);

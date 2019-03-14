@@ -127,6 +127,7 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
             m_proteinSet = (DProteinSet) m_previousDataBox.getData(false, DProteinSet.class);
             m_masterQuantProteinSet = (DMasterQuantProteinSet) m_previousDataBox.getData(false, DMasterQuantProteinSet.class);
             m_dataset = (DDataset) m_previousDataBox.getData(false, DDataset.class);
+            //in display XIC PTM, m_previousDataBox has not QuantChannelInfo
             m_quantChannelInfo = (QuantChannelInfo) m_previousDataBox.getData(false, QuantChannelInfo.class);
             if (m_proteinSet == null || m_proteinSet.equals(oldProteinSet)) {
                 return;
@@ -149,7 +150,7 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
 
                 if (subTask == null) {
 
-                    if (!allPeptides) {
+                    if (!allPeptides && m_quantChannelInfo != null) {
                         ((XicPeptidePanel) getDataBoxPanelInterface()).setData(taskId, m_proteinSet != null, m_quantChannelInfo.getQuantChannels(), m_masterQuantPeptideList, m_isXICMode, finished);
                                              
                     } else {
@@ -268,6 +269,8 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
     }
 
     private List<ExtendedTableModelInterface> getTableModelInterfaceList() {
+        if (m_quantChannelInfo == null)
+            return null;
         List<ExtendedTableModelInterface> list = new ArrayList();
         if (m_masterQuantPeptideList != null){
             for (DMasterQuantPeptide quantPeptide : m_masterQuantPeptideList) {

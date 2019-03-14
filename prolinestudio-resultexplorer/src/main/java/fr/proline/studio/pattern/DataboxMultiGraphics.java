@@ -54,7 +54,8 @@ public class DataboxMultiGraphics extends AbstractDataBox  {
     public void dataChanged() {
         final List<ExtendedTableModelInterface> valuesL = (List<ExtendedTableModelInterface>) m_previousDataBox.getData(false, ExtendedTableModelInterface.class, true);
         final List<CrossSelectionInterface> crossSelectionInterfaceL =  (List<CrossSelectionInterface>) m_previousDataBox.getData(false, CrossSelectionInterface.class, true);
-        ((MultiGraphicsPanel)getDataBoxPanelInterface()).setData(valuesL, crossSelectionInterfaceL);
+        if (valuesL != null)
+            ((MultiGraphicsPanel)getDataBoxPanelInterface()).setData(valuesL, crossSelectionInterfaceL);
     }
     
     @Override

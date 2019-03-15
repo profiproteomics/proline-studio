@@ -184,7 +184,8 @@ public abstract class DecoratedMarkerTable extends DecoratedTable implements Mar
     
     @Override
     public int convertRowIndexNonFilteredModelToView(int rowIndex) {
-        if (rowIndex == -1) {
+            
+        if ( (rowIndex == -1) || (rowIndex >= this.getRowCount())) {
             return -1;
         }
         TableModel model = getModel();

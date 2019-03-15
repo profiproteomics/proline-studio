@@ -568,6 +568,12 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
         return this.getMinMaxPlots(this.m_plots);
     }
 
+    public void updatePlots(int[] cols, String parameterZ) {
+        for (PlotBaseAbstract plot : m_plots) {
+            plot.update(cols, parameterZ);
+        }
+    }
+
     /**
      * from plot list, get the bounds of Axis X and Y,
      *

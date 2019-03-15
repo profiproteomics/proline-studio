@@ -10,7 +10,6 @@ import fr.proline.studio.pattern.xic.DataboxChildFeature;
 import fr.proline.studio.pattern.xic.DataboxExperimentalDesign;
 import fr.proline.studio.pattern.xic.DataboxMapAlignment;
 import fr.proline.studio.pattern.xic.DataboxPSMOfMasterQuantPeptide;
-import fr.proline.studio.pattern.xic.DataboxXicAbundanceGraphic;
 import fr.proline.studio.pattern.xic.DataboxXicPeptideIon;
 import fr.proline.studio.pattern.xic.DataboxXicPeptideSet;
 import fr.proline.studio.pattern.xic.DataboxXicProteinSet;
@@ -124,13 +123,13 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
         DataBoxImage(44),
         DataBoxSystemTasks(45),
         DataBoxFrozenCopy(46),
-        DataBoxPTMSiteProtein(47), 
+        DataBoxPTMSiteProtein(47),
         DataBoxPTMSitePeptides(48),
         DataBoxPTMSitePepMatches(49),
         DataBoxXICPTMProteinSite(50),
         DataBoxXICPTMSitePeptides(51),
         DataBoxPTMSitePeptidesGraphic(52),
-        DataboxXicAbundanceGraphic(53);
+        DataboxMultiGraphicsDoubleYAxis(53);
         int m_type;
         private static HashMap<Integer, DataboxType> m_databoxTypeMap = null;
 
@@ -196,6 +195,8 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
                     return new DataboxChildFeature();
                 case DataboxMultiGraphics:
                     return new DataboxMultiGraphics();
+                case DataboxMultiGraphicsDoubleYAxis:
+                    return new DataboxMultiGraphicsDoubleYAxis();
                 case DataboxPSMOfMasterQuantPeptide:
                     return new DataboxPSMOfMasterQuantPeptide();
                 case DataBoxMzScope:
@@ -232,9 +233,6 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
                     return new DataBoxPTMSitePepMatches();
                 case DataBoxPTMSitePeptidesGraphic:
                     return new DataBoxPTMSitePeptidesGraphic();
-                case DataboxXicAbundanceGraphic:
-                    return new DataboxXicAbundanceGraphic();
-                    
                 case DataBoxFrozenCopy:
                     return null; // not used for frozen copy
             }

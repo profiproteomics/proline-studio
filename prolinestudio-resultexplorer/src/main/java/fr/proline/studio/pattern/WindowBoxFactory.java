@@ -19,7 +19,6 @@ import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.border.EmptyBorder;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
-import fr.proline.studio.pattern.xic.DataboxXicPeptideProteinGraphic;
 
 /**
  *
@@ -254,7 +253,7 @@ public class WindowBoxFactory {
         AbstractDataBox[] boxes = new AbstractDataBox[5];
         boxes[0] = new DataBoxPTMSiteProtein();
         boxes[0].setDataName(dataName);
-        ((DataBoxPTMSiteProtein)boxes[0]).setXicResult(false);
+        ((DataBoxPTMSiteProtein) boxes[0]).setXicResult(false);
         boxes[1] = new DataBoxPTMSitePeptidesGraphic();
         boxes[2] = new DataBoxPTMSitePeptides();
         boxes[2].setLayout(SplittedPanelContainer.PanelLayout.HORIZONTAL);
@@ -265,24 +264,23 @@ public class WindowBoxFactory {
         return new WindowBox(boxes[0].getFullName(), generatePanel(boxes), boxes[0], IconManager.getImage(iconType));
     }
 
-
     public static WindowBox getXicPTMSitesWindowBox(String dataName) {
 
         AbstractDataBox[] boxes = new AbstractDataBox[6];
         boxes[0] = new DataBoxPTMSiteProtein();
         boxes[0].setDataName(dataName);
-        ((DataBoxPTMSiteProtein)boxes[0]).setXicResult(true);
+        ((DataBoxPTMSiteProtein) boxes[0]).setXicResult(true);
 
         boxes[1] = new DataBoxPTMSitePeptidesGraphic();
-        
+
         boxes[2] = new DataBoxPTMSitePeptides();//new DataBoxXicPTMSitePeptides();
         boxes[2].setLayout(SplittedPanelContainer.PanelLayout.HORIZONTAL);
-    
+
         boxes[3] = new DataboxXicPeptideSet();
         ((DataboxXicPeptideSet) boxes[3]).setXICMode(true);
-        
-        boxes[4] = new DataboxMultiGraphics(false, false);
-        // boxes[4] = new DataboxXicAbundanceGraphic();
+
+        //boxes[4] = new DataboxMultiGraphics(false, false);
+        boxes[4] = new DataboxMultiGraphicsDoubleYAxis();
         boxes[4].setLayout(SplittedPanelContainer.PanelLayout.HORIZONTAL);
         boxes[5] = new DataBoxPTMSitePepMatches();
 
@@ -390,7 +388,7 @@ public class WindowBoxFactory {
         boxes[1] = new DataboxXicPeptideSet();
         ((DataboxXicPeptideSet) boxes[1]).setXICMode(xicMode);
         //boxes[2] = new DataboxMultiGraphics(false, false);
-        boxes[2] = new DataboxXicPeptideProteinGraphic();
+        boxes[2] = new DataboxMultiGraphicsDoubleYAxis();
         boxes[2].setLayout(SplittedPanelContainer.PanelLayout.HORIZONTAL);
         if (xicMode) {
             boxes[3] = new DataboxXicPeptideIon();

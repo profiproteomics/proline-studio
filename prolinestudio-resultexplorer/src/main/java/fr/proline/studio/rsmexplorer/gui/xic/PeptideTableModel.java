@@ -159,7 +159,12 @@ public class PeptideTableModel extends LazyTableModel implements GlobalTableMode
     public String getDataColumnIdentifier(int columnIndex) {
         return m_isXICMode ? m_columnNames[columnIndex] : m_columnNames_SC[columnIndex];
     }
-
+    
+    /**
+     * Some times, used to determine isInteger, isEnum for graphic, export, calculations in Data Analyser propose
+     * @param columnIndex
+     * @return 
+     */
     @Override
     public Class getDataColumnClass(int columnIndex) {
         switch (columnIndex) {

@@ -4,7 +4,6 @@ import fr.proline.studio.pattern.xic.DataboxChildFeature;
 import fr.proline.studio.pattern.xic.DataboxMapAlignment;
 import fr.proline.studio.pattern.xic.DataboxPSMOfMasterQuantPeptide;
 import fr.proline.studio.pattern.xic.DataboxXicPeptideIon;
-import fr.proline.studio.pattern.xic.DataboxXicPeptideProteinGraphic;
 import fr.proline.studio.pattern.xic.DataboxXicPeptideSet;
 import fr.proline.studio.pattern.xic.DataboxXicProteinSet;
 import java.util.ArrayList;
@@ -18,11 +17,11 @@ import java.util.TreeMap;
 public class DataboxManager {
 
     private static DataboxManager m_databoxManager = null;
-    
+
     private final AbstractDataBox[] m_dataBoxStartingArray = {new DataBoxRsetAll(), new DataBoxRsetPSM(), new DataBoxRsetAllProteinMatch(),
         new DataBoxRsmPSM(), new DataBoxRsmPeptideInstances(), new DataBoxAdjacencyMatrixChoice(),
         new DataBoxRsmAllProteinSet(), new DataboxXicPeptideSet(), new DataboxXicPeptideIon(), new DataboxXicProteinSet(),
-        new DataBoxMSQueriesForRSM(), new DataBoxMSQueriesForRset(), new DataBoxPTMSiteProtein()}; 
+        new DataBoxMSQueriesForRSM(), new DataBoxMSQueriesForRset(), new DataBoxPTMSiteProtein()};
 
     private final AbstractDataBox[] m_dataBoxContinuingArray = {new DataBoxRsetPeptideSpectrum(), new DataBoxRsetPeptideSpectrumValues(),
         new DataBoxRsetProteinsForPeptideMatch(),
@@ -32,8 +31,8 @@ public class DataboxManager {
         new DataBoxTaskDescription()/*, new DataBoxStatisticsFrequencyResponse()*/, new DataBoxRsetPeptideFragmentation(),
         new DataBoxRsetPeptideSpectrumError(), new DataboxRsmPSMOfProteinSet(), new DataboxRsmPSMOfPeptide(),
         new DataboxGraphics(false), new DataboxPSMOfMasterQuantPeptide(),
-        new DataboxXicPeptideSet(), new DataboxXicPeptideIon(), new DataboxChildFeature(), 
-        new DataboxMultiGraphics(false, false),new DataboxXicPeptideProteinGraphic(),
+        new DataboxXicPeptideSet(), new DataboxXicPeptideIon(), new DataboxChildFeature(),
+        new DataboxMultiGraphics(false, false), new DataboxMultiGraphicsDoubleYAxis(),
         new DataboxMapAlignment(),
         new DataBoxAdjacencyMatrixChoice(), new DataBoxAdjacencyMatrix(),
         new DataBoxRsmPSMForMsQuery(), new DataboxRsetPSMForMsQuery(),

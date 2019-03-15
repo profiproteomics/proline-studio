@@ -9,23 +9,23 @@ import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
  *
  * @author JM235353
  */
-public class DataboxMultiGraphics extends AbstractDataBox  {
- 
+public class DataboxMultiGraphics extends AbstractDataBox {
+
     private List<ExtendedTableModelInterface> m_valuesList = null;
 
     private boolean m_defaultLocked = false;
     private boolean m_canChooseColor = false;
-    
-    public DataboxMultiGraphics() {
-       this(false, false);
-    }
-    
-    public DataboxMultiGraphics(boolean defaultLocked, boolean canChooseColor) {
-         super(DataboxType.DataboxMultiGraphics, DataboxStyle.STYLE_UNKNOWN);
 
-         m_defaultLocked = defaultLocked;
-         m_canChooseColor = canChooseColor ;
-         
+    public DataboxMultiGraphics() {
+        this(false, false);
+    }
+
+    public DataboxMultiGraphics(boolean defaultLocked, boolean canChooseColor) {
+        super(DataboxType.DataboxMultiGraphics, DataboxStyle.STYLE_UNKNOWN);
+
+        m_defaultLocked = defaultLocked;
+        m_canChooseColor = canChooseColor;
+
         // Name of this databox
         m_typeName = "Graphic";
         m_description = "Linear Plot";
@@ -34,21 +34,23 @@ public class DataboxMultiGraphics extends AbstractDataBox  {
         GroupParameter inParameter = new GroupParameter();
         inParameter.addParameter(ExtendedTableModelInterface.class, true);
         registerInParameter(inParameter);
-        
+
         inParameter.addParameter(CrossSelectionInterface.class, true);
         registerInParameter(inParameter);
-        
+
     }
-    
+
     @Override
     public void createPanel() {
-        MultiGraphicsPanel p = new MultiGraphicsPanel(m_defaultLocked, m_canChooseColor);
+        MultiGraphicsPanel p = new MultiGraphicsPanel(m_defaultLocked, m_canChooseColor, false);
         p.setName(m_typeName);
         p.setDataBox(this);
         setDataBoxPanelInterface(p);
     }
+
     /**
-     * in the case of DisplayMapAlignement action, m_previousDataBox is DataboxMapAlignment
+     * in the case of DisplayMapAlignement action, m_previousDataBox is
+     * DataboxMapAlignment
      */
     @Override
     public void dataChanged() {
@@ -57,11 +59,11 @@ public class DataboxMultiGraphics extends AbstractDataBox  {
         if (valuesL != null)
             ((MultiGraphicsPanel)getDataBoxPanelInterface()).setData(valuesL, crossSelectionInterfaceL);
     }
-    
+
     @Override
     public void setEntryData(Object data) {
         m_valuesList = (List<ExtendedTableModelInterface>) data;
         dataChanged();
     }
-    
+
 }

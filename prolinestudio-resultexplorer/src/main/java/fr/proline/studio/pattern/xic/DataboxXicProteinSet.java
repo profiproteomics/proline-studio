@@ -254,20 +254,8 @@ public class DataboxXicProteinSet extends AbstractDataBox {
             if (parameterType.equals(CrossSelectionInterface.class)) {
                 return getCrossSelectionInterfaceList();
             }
-        } else if (parameterType.equals(XicAbundanceProteinTableModel.class)) {
-            return getProteinAbundanceTableModel();
         }
         return super.getData(getArray, parameterType, isList);
-    }
-
-    private XicAbundanceProteinTableModel getProteinAbundanceTableModel() {
-        XicAbundanceProteinTableModel protTableModel = new XicAbundanceProteinTableModel();
-        if (m_quantChannelInfo != null) {
-            DMasterQuantProteinSet proteinSet  = ((XicProteinSetPanel) getDataBoxPanelInterface()).getSelectedMasterQuantProteinSet();
-            protTableModel.setData(m_quantChannelInfo.getQuantChannels(), proteinSet);
-        }
-        return protTableModel;
-
     }
 
     @Override

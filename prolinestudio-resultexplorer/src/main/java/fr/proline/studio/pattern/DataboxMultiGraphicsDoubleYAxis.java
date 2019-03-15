@@ -1,33 +1,30 @@
-/*
- * @cea 
- * http://www.profiproteomics.fr
- * create date: 11 mars 2019
- */
-package fr.proline.studio.pattern.xic;
+package fr.proline.studio.pattern;
 
-import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 import fr.proline.studio.graphics.CrossSelectionInterface;
-import fr.proline.studio.pattern.AbstractDataBox;
-import fr.proline.studio.pattern.GroupParameter;
-import fr.proline.studio.rsmexplorer.gui.xic.XicAbundanceGraphicPanel;
-import fr.proline.studio.rsmexplorer.gui.xic.XicAbundanceProteinTableModel;
+import fr.proline.studio.rsmexplorer.gui.MultiGraphicsPanel;
 import java.util.List;
+import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
+import fr.proline.studio.extendedtablemodel.SecondAxisTableModelInterface;
 
 /**
  *
- * @author Karine XUE
+ * @author JM235353
  */
-public class DataboxXicPeptideProteinGraphic extends AbstractDataBox {
+public class DataboxMultiGraphicsDoubleYAxis extends AbstractDataBox {
 
     private List<ExtendedTableModelInterface> m_valuesList = null;
+
     private boolean m_defaultLocked = false;
     private boolean m_canChooseColor = false;
 
-    public DataboxXicPeptideProteinGraphic() {
-        super(DataboxType.DataboxXicAbundanceGraphic, DataboxStyle.STYLE_UNKNOWN);
+    public DataboxMultiGraphicsDoubleYAxis() {
+        super(DataboxType.DataboxMultiGraphicsDoubleYAxis, DataboxStyle.STYLE_UNKNOWN);
+
+        m_defaultLocked = false;
+        m_canChooseColor = false;
 
         // Name of this databox
-        m_typeName = "Graphic peptide/protein abundance";
+        m_typeName = "Graphic double Y Axis";
         m_description = "Linear Plot";
 
         // Register Possible in parameters
@@ -42,18 +39,23 @@ public class DataboxXicPeptideProteinGraphic extends AbstractDataBox {
 
     @Override
     public void createPanel() {
-        XicAbundanceGraphicPanel p = new XicAbundanceGraphicPanel(m_defaultLocked, m_canChooseColor);
+        MultiGraphicsPanel p = new MultiGraphicsPanel(m_defaultLocked, m_canChooseColor, true);
         p.setName(m_typeName);
         p.setDataBox(this);
         setDataBoxPanelInterface(p);
     }
 
+    /**
+     * in the case of DisplayMapAlignement action, m_previousDataBox is
+     * DataboxMapAlignment
+     */
     @Override
     public void dataChanged() {
         final List<ExtendedTableModelInterface> valuesL = (List<ExtendedTableModelInterface>) m_previousDataBox.getData(false, ExtendedTableModelInterface.class, true);
         final List<CrossSelectionInterface> crossSelectionInterfaceL = (List<CrossSelectionInterface>) m_previousDataBox.getData(false, CrossSelectionInterface.class, true);
-        XicAbundanceProteinTableModel proteinAbundance = (XicAbundanceProteinTableModel) m_previousDataBox.getData(false, XicAbundanceProteinTableModel.class, false);
-        ((XicAbundanceGraphicPanel) getDataBoxPanelInterface()).setData(valuesL, crossSelectionInterfaceL, proteinAbundance);
+        SecondAxisTableModelInterface valueOnYAxis2 = (SecondAxisTableModelInterface) m_previousDataBox.getData(false, SecondAxisTableModelInterface.class, false);
+
+        ((MultiGraphicsPanel) getDataBoxPanelInterface()).setData(valuesL, crossSelectionInterfaceL, valueOnYAxis2);    
     }
 
     @Override

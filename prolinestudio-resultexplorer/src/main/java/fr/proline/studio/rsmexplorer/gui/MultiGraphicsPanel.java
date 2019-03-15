@@ -7,8 +7,6 @@ import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.graphics.BasePlotPanel;
 import fr.proline.studio.graphics.PlotLinear;
 import fr.proline.studio.graphics.PlotBaseAbstract;
-import static fr.proline.studio.graphics.PlotBaseAbstract.COL_X_ID;
-import static fr.proline.studio.graphics.PlotBaseAbstract.COL_Y_ID;
 import fr.proline.studio.graphics.PlotType;
 import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
@@ -36,6 +34,11 @@ import javax.swing.JToolBar;
 import org.openide.windows.WindowManager;
 import fr.proline.studio.graphics.BasePlotPanel.PlotToolbarListener;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
+import fr.proline.studio.extendedtablemodel.SecondAxisTableModelInterface;
+import fr.proline.studio.graphics.DoubleYAxisPlotPanel;
+import static fr.proline.studio.graphics.PlotBaseAbstract.COL_X_ID;
+import static fr.proline.studio.graphics.PlotBaseAbstract.COL_Y_ID;
+import java.awt.Color;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,6 +52,7 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
     protected AbstractDataBox m_dataBox;
 
     protected BasePlotPanel m_plotPanel;
+    private boolean _isDoubleYAxis;
 
     protected boolean m_canChooseColor = false;
     //plot type combo box
@@ -57,6 +61,7 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
     protected JComboBox<String> m_valueXComboBox;
     protected JComboBox<String> m_valueYComboBox;
     protected JComboBox<String> m_valueZComboBox;
+    protected int[] columnXYIndex;
     //Axis label
     protected JLabel m_valueXLabel;
     protected JLabel m_valueYLabel;
@@ -66,7 +71,7 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
 
     protected List<ExtendedTableModelInterface> m_valuesList = null;
     protected List<CrossSelectionInterface> m_crossSelectionInterfaceList = null;
-
+    protected SecondAxisTableModelInterface m_valueOn2Yxis = null;
     protected boolean m_isUpdatingCbx = false;
 
     protected boolean m_dataLocked = false;
@@ -75,7 +80,9 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
     protected JButton m_importSelectionButton = null;
     protected JButton m_exportSelectionButton = null;
 
-    public MultiGraphicsPanel(boolean dataLocked, boolean canChooseColor) {
+    public MultiGraphicsPanel(boolean dataLocked, boolean canChooseColor, boolean isDoubleYAxis) {
+        _isDoubleYAxis = isDoubleYAxis;
+        columnXYIndex = new int[2];
         m_dataLocked = dataLocked;
         m_canChooseColor = canChooseColor;
         m_plotGraphicsList = new ArrayList();
@@ -101,8 +108,11 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
         c.anchor = GridBagConstraints.NORTHWEST;
         c.fill = GridBagConstraints.BOTH;
         c.insets = new java.awt.Insets(0, 5, 0, 5);
-
-        m_plotPanel = new BasePlotPanel();
+        if (_isDoubleYAxis) {
+            m_plotPanel = new DoubleYAxisPlotPanel();
+        } else {
+            m_plotPanel = new BasePlotPanel();
+        }
         m_plotPanel.setPlotToolbarListener(this);
         JPanel selectPanel = createSelectPanel();
 
@@ -253,7 +263,7 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
             @Override
             public void actionPerformed(ActionEvent e) {
                 fillXYCombobox();
-                setDataImpl(m_valuesList, m_crossSelectionInterfaceList);
+                setDataImpl();
                 updateXYCbxVisibility();
 
             }
@@ -388,8 +398,57 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
         }
     }
 
+    protected void setXYZComboBox() {
+        if (m_valueXComboBox.getItemCount() == 0) {
+            fillXYCombobox();//update select panel combo box
+
+            ActionListener actionForXYCbx = new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    //m_logger.debug("--**--actionPerformed actionForXYCbx " + e.getActionCommand());
+                    if (m_isUpdatingCbx) {//=setData in combo box
+                        return;
+                    }
+                    ReferenceToColumn refX = (ReferenceToColumn) m_valueXComboBox.getSelectedItem();
+                    ReferenceToColumn refY = (ReferenceToColumn) m_valueYComboBox.getSelectedItem();
+                    String zParameter = (String) m_valueZComboBox.getSelectedItem();
+                    int[] cols = new int[2];
+                    cols[COL_X_ID] = refX.getColumnIndex();
+                    cols[COL_Y_ID] = refY.getColumnIndex();
+                    if ((cols[0] == columnXYIndex[COL_X_ID]) && (cols[1] == columnXYIndex[COL_Y_ID])) {
+                        return;
+                    }
+                    columnXYIndex[COL_X_ID] = cols[0];
+                    columnXYIndex[COL_Y_ID] = cols[1];
+
+                    m_plotPanel.updatePlots(cols, zParameter);
+                    if (m_plotPanel instanceof DoubleYAxisPlotPanel) {
+                        ((DoubleYAxisPlotPanel) m_plotPanel).preparePaint();
+                    }
+                    m_plotPanel.repaint();
+                }
+            };
+
+            m_valueXComboBox.addActionListener(actionForXYCbx);
+            m_valueYComboBox.addActionListener(actionForXYCbx);
+            m_valueZComboBox.addActionListener(actionForXYCbx);
+
+        }
+    }
+
     public void setData(List<ExtendedTableModelInterface> valuesList, List<CrossSelectionInterface> crossSelectionInterfaceList) {
+        this.setData(valuesList, crossSelectionInterfaceList, m_valueOn2Yxis);
+    }
+
+    public void setData(List<ExtendedTableModelInterface> valuesList, List<CrossSelectionInterface> crossSelectionInterfaceList, SecondAxisTableModelInterface value2) {
         if (m_plotPanel.isLocked()) {
+            return;
+        }
+        m_valuesList = valuesList;
+        m_crossSelectionInterfaceList = crossSelectionInterfaceList;
+        m_valueOn2Yxis = value2;
+        m_plotGraphicsList.clear();
+        if (valuesList == null) {
             return;
         }
         for (int i = 0; i < valuesList.size(); i++) {
@@ -397,11 +456,11 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
             if ((m_dataLocked) && !(values instanceof LockedDataModel)) {
                 // wart for first call when directly locked
                 values = new LockedDataModel(values);
-                valuesList.set(i, values);
+                valuesList.set(i, values);//replace values with the same but locked values
             }
         }
-
-        setDataImpl(valuesList, crossSelectionInterfaceList);
+        this.setXYZComboBox();
+        this.setDataImpl();
         if (m_dataLocked) {
             // check that plotPanel corresponds, it can not correspond at the first call
             m_plotPanel.lockData(m_dataLocked);
@@ -414,66 +473,62 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
      * @param crossSelectionInterfaceList
      * @param isSingle to display one plot
      */
-    protected void setDataImpl(List<ExtendedTableModelInterface> valuesList, List<CrossSelectionInterface> crossSelectionInterfaceList) {
-
-        m_valuesList = valuesList;
-        m_crossSelectionInterfaceList = crossSelectionInterfaceList;
-        m_plotGraphicsList.clear();
-
-        if (valuesList == null) {
-            return;
-        }
-
-        if (m_valueXComboBox.getItemCount() == 0) {
-            fillXYCombobox();//update select panel combo box
-
-            ActionListener actionForXYCbx = new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    if (m_isUpdatingCbx) {
-                        return;
-                    }
-                    ReferenceToColumn refX = (ReferenceToColumn) m_valueXComboBox.getSelectedItem();
-                    ReferenceToColumn refY = (ReferenceToColumn) m_valueYComboBox.getSelectedItem();
-                    String zParameter = (String) m_valueZComboBox.getSelectedItem();
-                    int[] cols = new int[2]; //JPM.TODO enhance
-                    cols[COL_X_ID] = refX.getColumnIndex();
-                    cols[COL_Y_ID] = refY.getColumnIndex();
-                    m_logger.debug(String.format("--**--value X%s-(%d),  Y%s-(%d)", refX.toString(), cols[0], refY.toString(), cols[1]));
-                    for (PlotBaseAbstract plotGraphic : m_plotGraphicsList) {
-                        plotGraphic.update(cols, zParameter);
-                        m_plotPanel.updateAxis(plotGraphic);
-                    }
-                    m_plotPanel.repaint();
-                }
-            };
-
-            m_valueXComboBox.addActionListener(actionForXYCbx);
-            m_valueYComboBox.addActionListener(actionForXYCbx);
-            m_valueZComboBox.addActionListener(actionForXYCbx);
-
-        }
-
+    private void setDataImpl() {
         ReferenceToColumn refX = (ReferenceToColumn) m_valueXComboBox.getSelectedItem();
         ReferenceToColumn refY = (ReferenceToColumn) m_valueYComboBox.getSelectedItem();
+        if (refX != null && refY != null) {
+            columnXYIndex[COL_X_ID] = refX.getColumnIndex();
+            columnXYIndex[COL_Y_ID] = refY.getColumnIndex();
+        }
         //String zParameter = (String) m_valueZComboBox.getSelectedItem();
         PlotType plotType = (PlotType) m_allPlotsComboBox.getSelectedItem();
         switch (plotType) {
             case LINEAR_PLOT: {
                 m_plotPanel.clearPlots();
-                for (int i = 0; i < m_valuesList.size(); i++) {
-                    CrossSelectionInterface crossSelectionInterface = (m_crossSelectionInterfaceList == null) || (m_crossSelectionInterfaceList.size() <= i) ? null : m_crossSelectionInterfaceList.get(i);
-                    //create plotGraphics for each table
-                    PlotLinear plotGraphics = new PlotLinear(m_plotPanel, m_valuesList.get(i), crossSelectionInterface, refX.getColumnIndex(), refY.getColumnIndex());
-                    plotGraphics.setPlotInformation(m_valuesList.get(i).getPlotInformation());
-                    plotGraphics.setIsPaintMarker(false);
-                    m_plotPanel.addPlot(plotGraphics);
-                    m_plotGraphicsList.add(plotGraphics);
+                if (m_valueOn2Yxis != null) {
+                    setPlotsWithDoubleYAxis();
+                } else {
+                    setPlots();
                 }
                 m_plotPanel.repaint();
+
                 break;
             }
         }
+    }
+
+    private void setPlots() {
+        for (int i = 0; i < m_valuesList.size(); i++) {
+            CrossSelectionInterface crossSelectionInterface = (m_crossSelectionInterfaceList == null) || (m_crossSelectionInterfaceList.size() <= i) ? null : m_crossSelectionInterfaceList.get(i);
+            //create plotGraphics for each table
+            PlotLinear plotGraphics = new PlotLinear(m_plotPanel, m_valuesList.get(i), crossSelectionInterface, columnXYIndex[COL_X_ID], columnXYIndex[COL_Y_ID]);
+            plotGraphics.setPlotInformation(m_valuesList.get(i).getPlotInformation());
+            plotGraphics.setIsPaintMarker(false);
+            m_plotPanel.addPlot(plotGraphics);
+            m_plotGraphicsList.add(plotGraphics);
+        }
+    }
+
+    private void setPlotsWithDoubleYAxis() {
+        for (int i = 0; i < m_valuesList.size(); i++) {
+            CrossSelectionInterface crossSelectionInterface = (m_crossSelectionInterfaceList == null) || (m_crossSelectionInterfaceList.size() <= i) ? null : m_crossSelectionInterfaceList.get(i);
+            //create plotGraphics for each table
+            PlotLinear plotGraphics = new PlotLinear(m_plotPanel, m_valuesList.get(i), crossSelectionInterface, columnXYIndex[COL_X_ID], columnXYIndex[COL_Y_ID]);
+            plotGraphics.setPlotInformation(m_valuesList.get(i).getPlotInformation());
+            plotGraphics.setIsPaintMarker(false);
+            ((DoubleYAxisPlotPanel) m_plotPanel).addMainPlot(plotGraphics);
+        }
+        //plot on second Axis Y
+        if (m_valueOn2Yxis != null && m_valueOn2Yxis.getRowCount() != 0 && m_valuesList.size() != 0) {//creat a plot which show protein abundance  
+            CrossSelectionInterface crossSelectionInterface2 = null;
+            PlotLinear plotGraphics = new PlotLinear(m_plotPanel, m_valueOn2Yxis, crossSelectionInterface2, columnXYIndex[COL_X_ID], columnXYIndex[COL_Y_ID]);
+            plotGraphics.setPlotInformation(m_valueOn2Yxis.getPlotInformation());
+            plotGraphics.setIsPaintMarker(false);
+            ((DoubleYAxisPlotPanel) m_plotPanel).addAuxiliaryPlot(plotGraphics);
+            Color color = m_valueOn2Yxis.getPlotInformation().getPlotColor();
+            ((DoubleYAxisPlotPanel) m_plotPanel).setSecondAxisPlotInfo("Protein " + m_valueOn2Yxis.getDataColumnIdentifier(columnXYIndex[COL_Y_ID]), color);
+        }
+        ((DoubleYAxisPlotPanel) m_plotPanel).preparePaint();
 
     }
 

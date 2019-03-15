@@ -1,26 +1,23 @@
 package fr.proline.studio.rsmexplorer.gui.xic;
 
-import fr.proline.core.orm.msi.PeptideReadablePtmString;
 import fr.proline.core.orm.msi.dto.DMasterQuantProteinSet;
 import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.core.orm.msi.dto.DQuantProteinSet;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
-import fr.proline.studio.dam.tasks.data.ptm.PTMSite;
 import fr.proline.studio.extendedtablemodel.ExtraDataType;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
+import fr.proline.studio.extendedtablemodel.SecondAxisTableModelInterface;
 import fr.proline.studio.graphics.PlotDataSpec;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Map;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author Karine XUE
  */
-public class XicAbundanceProteinTableModel extends PeptideTableModel {
+public class XicAbundanceProteinTableModel extends PeptideTableModel implements SecondAxisTableModelInterface{
 
     private DMasterQuantProteinSet m_proteinSet = null;
 

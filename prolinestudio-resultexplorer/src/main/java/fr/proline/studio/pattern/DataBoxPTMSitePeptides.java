@@ -1,6 +1,7 @@
 package fr.proline.studio.pattern;
 
 import fr.proline.core.orm.msi.ResultSummary;
+import fr.proline.core.orm.msi.dto.DMasterQuantProteinSet;
 import fr.proline.core.orm.msi.dto.DPeptideInstance;
 import fr.proline.studio.extendedtablemodel.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.AccessDatabaseThread;
@@ -16,7 +17,6 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
  *
  * @author VD225637
@@ -29,9 +29,8 @@ public class DataBoxPTMSitePeptides extends AbstractDataBox {
     private PTMSite m_currentPtmSite;
     private PTMDataset m_ptmDataset;
 
-    
     public DataBoxPTMSitePeptides() {
-        super(DataboxType.DataBoxPTMSitePeptides, DataboxStyle.STYLE_RSM);       
+        super(DataboxType.DataBoxPTMSitePeptides, DataboxStyle.STYLE_RSM);
 
         // Name of this databox
         m_typeName = "PTM Site's Peptides";
@@ -61,8 +60,8 @@ public class DataBoxPTMSitePeptides extends AbstractDataBox {
     }
 
     @Override
-    public void dataChanged() {       
-        
+    public void dataChanged() {
+
         m_currentPtmSite = (PTMSite) m_previousDataBox.getData(false, PTMSite.class);
         m_ptmDataset = (PTMDataset) m_previousDataBox.getData(false, PTMDataset.class);
         m_rsm = m_ptmDataset.getDataset().getResultSummary();
@@ -71,7 +70,7 @@ public class DataBoxPTMSitePeptides extends AbstractDataBox {
             ((XicPeptidesPTMSitePanel) getDataBoxPanelInterface()).setData(null);
             return;
         }
-       
+
         if (m_currentPtmSite == null) {
             ((PeptidesPTMSiteTablePanel) getDataBoxPanelInterface()).setData(null, null);
             return;
@@ -112,7 +111,7 @@ public class DataBoxPTMSitePeptides extends AbstractDataBox {
                 }
             }
         };
-        
+
         DatabasePTMsTask task = new DatabasePTMsTask(callback);
         task.initFillPTMSite(getProjectId(), m_rsm, m_currentPtmSite);
         Long taskId = task.getId();
@@ -158,21 +157,20 @@ public class DataBoxPTMSitePeptides extends AbstractDataBox {
 
         return super.getData(getArray, parameterType);
     }
-    
+
     @Override
     public Object getData(boolean getArray, Class parameterType, boolean isList) {
         if (parameterType != null && isList) {
-            
-            if(parameterType.equals(DPeptideInstance.class)){
+            if (parameterType.equals(DPeptideInstance.class)) {
                 List<DPeptideInstance> parentPepInstances = m_currentPtmSite.getParentPeptideInstances();
-                if(!getArray)
+                if (!getArray) {
                     return parentPepInstances;
-                else {                    
+                } else {
                     return parentPepInstances.toArray(new Long[parentPepInstances.size()]);
                 }
-                    
+
             }
-        }         
+        }
         return super.getData(getArray, parameterType, isList);
     }
 

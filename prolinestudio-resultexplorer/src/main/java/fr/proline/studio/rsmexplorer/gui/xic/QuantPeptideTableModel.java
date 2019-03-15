@@ -318,10 +318,15 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
                     return "";
                 } else {
                     Float f = peptideInstance.getElutionTime();
-                    if (f == null) {
-                        return "";
-                    }
-                    return String.valueOf(f);
+                    if(f!=null)
+                        return StringUtils.getTimeInMinutes(peptideInstance.getElutionTime(),2);
+                    else 
+                         return "";
+//                    Float f = peptideInstance.getElutionTime();
+//                    if (f == null) {
+//                        return "";
+//                    }
+//                    return String.valueOf(f);
                 }
 
             }

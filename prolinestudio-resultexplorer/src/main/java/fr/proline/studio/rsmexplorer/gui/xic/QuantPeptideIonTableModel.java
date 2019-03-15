@@ -725,7 +725,7 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements GlobalT
                 if (peptideIon.getResultSummary() == null) {
                     return "";
                 } else {
-                    return String.valueOf(peptideIon.getElutionTime());
+                    return StringUtils.getTimeInMinutes(peptideIon.getElutionTime(),2);                    
                 }
 
             }

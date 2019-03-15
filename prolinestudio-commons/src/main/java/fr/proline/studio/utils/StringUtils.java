@@ -144,5 +144,18 @@ public class StringUtils {
             return html;
         }
     }
+    
+    public static String getTimeInMinutes(float seconds, int nbDigit) {
+        double min = seconds / 60;
+        
+        return DataFormat.format(min, nbDigit);
+    }
+    
+    public static String getTimeAsMinSecText(long seconds) {
+        long min = seconds / 60;
+        long sec = seconds % 60;
+        
+        return String.format("%d min %d sec",min, sec);
+    }
 
 }

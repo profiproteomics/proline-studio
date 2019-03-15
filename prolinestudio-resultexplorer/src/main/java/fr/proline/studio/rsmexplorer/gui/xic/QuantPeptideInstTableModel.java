@@ -317,10 +317,10 @@ public class QuantPeptideInstTableModel  extends LazyTableModel implements Globa
                     return "";
                 } else {
                     Float f = peptideInstance.getElutionTime();
-                    if (f == null) {
-                        return "";
-                    }
-                    return String.valueOf(f);
+                    if(f!=null)
+                        return StringUtils.getTimeInMinutes(peptideInstance.getElutionTime(),2);
+                    else 
+                         return "";                    
                 }
 
             }

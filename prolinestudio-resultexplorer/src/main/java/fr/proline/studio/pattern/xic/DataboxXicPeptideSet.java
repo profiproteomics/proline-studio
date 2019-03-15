@@ -131,7 +131,7 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
             m_dataset = (DDataset) m_previousDataBox.getData(false, DDataset.class);
             //in display XIC PTM, m_previousDataBox has not QuantChannelInfo
             m_quantChannelInfo = (QuantChannelInfo) m_previousDataBox.getData(false, QuantChannelInfo.class);
-            if (m_proteinSet == null || m_proteinSet.equals(oldProteinSet)) {
+            if (m_proteinSet == null ) {
                 return;
             }
             m_isXICMode = ((XicMode) m_previousDataBox.getData(false, XicMode.class)).isXicMode();

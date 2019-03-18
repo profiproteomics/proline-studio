@@ -265,7 +265,7 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
             }
         }
         if (parameterType.equals(SecondAxisTableModelInterface.class)) {
-           if (m_quantChannelInfo == null) {
+           if (m_quantChannelInfo == null || m_masterQuantProteinSet == null) {
                 return null;
             }
             XicAbundanceProteinTableModel protTableModel = new XicAbundanceProteinTableModel();

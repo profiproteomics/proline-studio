@@ -6,7 +6,7 @@ import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.msi.dto.DPeptidePTM;
 import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.module.seq.BioSequenceProvider;
-import fr.proline.module.seq.dto.BioSequenceWrapper;
+import fr.proline.module.seq.dto.DBioSequence;
 import fr.proline.studio.dam.DatabaseDataManager;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.gui.HourglassPanel;
@@ -134,17 +134,17 @@ public class RsmProteinAndPeptideSequencePanel extends HourglassPanel implements
         values.add(accession);
  
 
-        Map<String, BioSequenceProvider.SEDbIdentifierRelated> result = BioSequenceProvider.findSEDbIdentRelatedData(values);
+        Map<String, BioSequenceProvider.RelatedIdentifiers> result = BioSequenceProvider.findSEDbIdentRelatedData(values);
         
-        BioSequenceProvider.SEDbIdentifierRelated relatedObjects = result.get(accession);
-        if ((relatedObjects == null) || (relatedObjects.getBioSequenceWrappers() == null))  {
+        BioSequenceProvider.RelatedIdentifiers relatedObjects = result.get(accession);
+        if ((relatedObjects == null) || (relatedObjects.getDBioSequences() == null))  {
             m_editorPane.setText("Protein Sequence not available in database");
             return;
         }
         
-        List<BioSequenceWrapper> bioSequenceWrapperList = relatedObjects.getBioSequenceWrappers();
+        List<DBioSequence> bioSequenceWrapperList = relatedObjects.getDBioSequences();
         
-        BioSequenceWrapper biosequenceWrapperSelected = null;
+        DBioSequence biosequenceWrapperSelected = null;
         int nb = bioSequenceWrapperList.size();
         for (int i=0;i<nb;i++) {
             biosequenceWrapperSelected = bioSequenceWrapperList.get(i);

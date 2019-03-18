@@ -5,12 +5,16 @@ import fr.proline.studio.rsmexplorer.gui.MultiGraphicsPanel;
 import java.util.List;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 import fr.proline.studio.extendedtablemodel.SecondAxisTableModelInterface;
+//import org.slf4j.Logger;
+//import org.slf4j.LoggerFactory;
 
 /**
  *
- * @author JM235353
+ * @author Karine XUE
  */
 public class DataboxMultiGraphicsDoubleYAxis extends AbstractDataBox {
+
+    //private static final Logger m_logger = LoggerFactory.getLogger(DataboxMultiGraphicsDoubleYAxis.class);
 
     private List<ExtendedTableModelInterface> m_valuesList = null;
 
@@ -35,6 +39,8 @@ public class DataboxMultiGraphicsDoubleYAxis extends AbstractDataBox {
         inParameter.addParameter(CrossSelectionInterface.class, true);
         registerInParameter(inParameter);
 
+        inParameter.addParameter(SecondAxisTableModelInterface.class, false);
+        registerInParameter(inParameter);
     }
 
     @Override
@@ -54,8 +60,9 @@ public class DataboxMultiGraphicsDoubleYAxis extends AbstractDataBox {
         final List<ExtendedTableModelInterface> valuesL = (List<ExtendedTableModelInterface>) m_previousDataBox.getData(false, ExtendedTableModelInterface.class, true);
         final List<CrossSelectionInterface> crossSelectionInterfaceL = (List<CrossSelectionInterface>) m_previousDataBox.getData(false, CrossSelectionInterface.class, true);
         SecondAxisTableModelInterface valueOnYAxis2 = (SecondAxisTableModelInterface) m_previousDataBox.getData(false, SecondAxisTableModelInterface.class, false);
-
-        ((MultiGraphicsPanel) getDataBoxPanelInterface()).setData(valuesL, crossSelectionInterfaceL, valueOnYAxis2);    
+        if (valueOnYAxis2 != null) {
+            ((MultiGraphicsPanel) getDataBoxPanelInterface()).setData(valuesL, crossSelectionInterfaceL, valueOnYAxis2);
+        }
     }
 
     @Override

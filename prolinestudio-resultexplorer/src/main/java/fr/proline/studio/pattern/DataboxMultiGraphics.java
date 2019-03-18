@@ -37,6 +37,7 @@ public class DataboxMultiGraphics extends AbstractDataBox {
 
         inParameter.addParameter(CrossSelectionInterface.class, true);
         registerInParameter(inParameter);
+        
 
     }
 

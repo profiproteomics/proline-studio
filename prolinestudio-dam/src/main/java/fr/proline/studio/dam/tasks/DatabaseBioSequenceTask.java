@@ -6,7 +6,6 @@ import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.msi.dto.DPeptideSet;
 import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.module.seq.BioSequenceProvider;
-import fr.proline.module.seq.dto.BioSequenceWrapper;
 import fr.proline.studio.dam.DatabaseDataManager;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import java.util.ArrayList;
@@ -80,18 +79,18 @@ public class DatabaseBioSequenceTask extends AbstractDatabaseTask {
             values.add(accession);
         }
 
-        Map<String, BioSequenceProvider.SEDbIdentifierRelated> result = BioSequenceProvider.findSEDbIdentRelatedData(values);
+        Map<String, BioSequenceProvider.RelatedIdentifiers> result = BioSequenceProvider.findSEDbIdentRelatedData(values);
 
         for (int i = 0; i < nbProteinMatches; i++) {
             DProteinMatch proteinMatch = proteinMatchList.get(i);
 
-            BioSequenceProvider.SEDbIdentifierRelated relatedObjects = result.get(proteinMatch.getAccession());
-            if(relatedObjects == null || relatedObjects.getBioSequenceWrappers() == null || relatedObjects.getBioSequenceWrappers().isEmpty()){
+            BioSequenceProvider.RelatedIdentifiers relatedObjects = result.get(proteinMatch.getAccession());
+            if(relatedObjects == null || relatedObjects.getDBioSequences() == null || relatedObjects.getDBioSequences().isEmpty()){
                 proteinMatch.setDBioSequence(null);
                 continue;
             }
-            
-            List<BioSequenceWrapper> bioSequenceWrapperList = relatedObjects.getBioSequenceWrappers();
+
+            List<fr.proline.module.seq.dto.DBioSequence> bioSequenceWrapperList = relatedObjects.getDBioSequences();
 
             DPeptideSet peptideSet = null;
             if (rsmId != null) {
@@ -102,7 +101,7 @@ public class DatabaseBioSequenceTask extends AbstractDatabaseTask {
             DPeptideInstance[] peptideInstances = (peptideSet == null) ? null : peptideSet.getPeptideInstances();
             if (peptideInstances == null) {
                 // we can not check with peptides, we return the first biosequence
-                BioSequenceWrapper biosequenceWrapperSelected = null;
+                fr.proline.module.seq.dto.DBioSequence biosequenceWrapperSelected = null;
                 if (bioSequenceWrapperList.size() > 0) {
                     biosequenceWrapperSelected = bioSequenceWrapperList.get(0);
                 }
@@ -115,7 +114,7 @@ public class DatabaseBioSequenceTask extends AbstractDatabaseTask {
 
                 // we check the biosequence according to the peptides found for the ProteinMatch
 
-                BioSequenceWrapper biosequenceWrapperSelected = null;
+                fr.proline.module.seq.dto.DBioSequence biosequenceWrapperSelected = null;
                 int nb = bioSequenceWrapperList.size();
                 for (int j = 0; j < nb; j++) {
                     biosequenceWrapperSelected = bioSequenceWrapperList.get(j);

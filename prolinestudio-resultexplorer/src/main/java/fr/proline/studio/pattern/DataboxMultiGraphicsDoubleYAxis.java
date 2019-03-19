@@ -39,8 +39,8 @@ public class DataboxMultiGraphicsDoubleYAxis extends AbstractDataBox {
         inParameter.addParameter(CrossSelectionInterface.class, true);
         registerInParameter(inParameter);
 
-        inParameter.addParameter(SecondAxisTableModelInterface.class, false);
-        registerInParameter(inParameter);
+//        inParameter.addParameter(SecondAxisTableModelInterface.class, false);
+//        registerInParameter(inParameter);
     }
 
     @Override

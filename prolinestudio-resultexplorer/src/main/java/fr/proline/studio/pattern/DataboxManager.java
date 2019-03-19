@@ -32,7 +32,7 @@ public class DataboxManager {
         new DataBoxRsetPeptideSpectrumError(), new DataboxRsmPSMOfProteinSet(), new DataboxRsmPSMOfPeptide(),
         new DataboxGraphics(false), new DataboxPSMOfMasterQuantPeptide(),
         new DataboxXicPeptideSet(), new DataboxXicPeptideIon(), new DataboxChildFeature(),
-        new DataboxMultiGraphics(false, false), new DataboxMultiGraphicsDoubleYAxis(),
+        new DataboxMultiGraphicsDoubleYAxis(), new DataboxMultiGraphics(false, false),
         new DataboxMapAlignment(),
         new DataBoxAdjacencyMatrixChoice(), new DataBoxAdjacencyMatrix(),
         new DataBoxRsmPSMForMsQuery(), new DataboxRsetPSMForMsQuery(),

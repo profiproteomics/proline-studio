@@ -13,17 +13,17 @@ public abstract class PlotXYAbstract extends PlotBaseAbstract {
         super(plotPanel, plotType, compareDataInterface, crossSelectionInterface);
     }
 
-    @Override
-    public boolean inside(int x, int y) {
-
-        XAxis xAxis = m_plotPanel.getXAxis();
-        YAxis yAxis = m_plotPanel.getYAxis();
-        int x1 = xAxis.valueToPixel(xAxis.getMinValue());
-        int x2 = xAxis.valueToPixel(xAxis.getMaxValue());
-        int y1 = yAxis.valueToPixel(yAxis.getMaxValue());
-        int y2 = yAxis.valueToPixel(yAxis.getMinValue());
-        return (x >= x1) && (x <= x2) && (y >= y1) && (y <= y2);
-    }
+//    @Override
+//    public boolean inside(int x, int y) {
+//
+//        XAxis xAxis = m_plotPanel.getXAxis();
+//        YAxis yAxis = m_plotPanel.getYAxis();
+//        int x1 = xAxis.valueToPixel(xAxis.getMinValue());
+//        int x2 = xAxis.valueToPixel(xAxis.getMaxValue());
+//        int y1 = yAxis.valueToPixel(yAxis.getMaxValue());
+//        int y2 = yAxis.valueToPixel(yAxis.getMinValue());
+//        return (x >= x1) && (x <= x2) && (y >= y1) && (y <= y2);
+//    }
 
     @Override
     public String getEnumValueY(int index, boolean fromData, Axis axis) {

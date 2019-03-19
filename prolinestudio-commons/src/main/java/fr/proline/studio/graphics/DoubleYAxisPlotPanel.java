@@ -73,14 +73,17 @@ public class DoubleYAxisPlotPanel extends BasePlotPanel {
     @Override
     public void addPlot(PlotXYAbstract plot) {
         this.addMainPlot(plot);
+        this.m_plots.add(plot);
     }
 
     public void addMainPlot(PlotXYAbstract plot) {
         this.m_mainPlots.add(plot);
+        this.m_plots.add(plot);
     }
 
     public void addAuxiliaryPlot(PlotXYAbstract plot) {
         this.m_secondPlots.add(plot);
+        this.m_plots.add(plot);
     }
 
     @Override
@@ -94,6 +97,7 @@ public class DoubleYAxisPlotPanel extends BasePlotPanel {
     public void setPlot(PlotBaseAbstract plot) {
         clearPlots();
         this.m_mainPlots.add(plot);
+        this.m_plots.add(plot);
     }
 
     public void setSecondAxisPlotInfo(String title, Color color) {
@@ -121,10 +125,6 @@ public class DoubleYAxisPlotPanel extends BasePlotPanel {
 
     public void preparePaint() {
         updateAxis();
-        m_isMainPlotEmpty = (getMinMaxPlots(m_mainPlots)[3] == 0);
-        this.m_plots = new ArrayList();
-        this.m_plots.addAll(m_mainPlots);
-        this.m_plots.addAll(m_secondPlots);
         m_secondYAxis.setTitle(m_secondYAxisTitle);
     }
 
@@ -143,6 +143,7 @@ public class DoubleYAxisPlotPanel extends BasePlotPanel {
              */
             m_secondXAxis.setRange(Math.min(m_xAxis.getMinValue(), m_secondXAxis.getMinValue()), m_secondXAxis.getMaxValue());
         }
+        m_isMainPlotEmpty = (getMinMaxPlots(m_mainPlots)[3] == 0);//YAxis, max =0
     }
 
     public void updatePlots(int[] cols, String parameterZ) {
@@ -480,7 +481,8 @@ public class DoubleYAxisPlotPanel extends BasePlotPanel {
         }
         int x = e.getX();
         int y = e.getY();
-        if (m_plots.get(0).inside(x, y)) {
+        //if (m_plots.get(0).inside(x, y)) {
+        if (insidePlotArea(x, y, m_xAxis, m_yAxis) ||insidePlotArea(x, y, m_secondXAxis, m_secondYAxis) ) {
             // Mouse Pressed in the plot area
 
             // deselect axis
@@ -897,7 +899,8 @@ public class DoubleYAxisPlotPanel extends BasePlotPanel {
         double newYmax = m_yAxis.getMaxValue() - (yValue - m_yAxis.getMaxValue()) * factor * e.getWheelRotation();
         double newY2Min = m_secondYAxis.getMinValue() + (m_secondYAxis.getMinValue() - yValue) * factor * e.getWheelRotation();
         double newY2Max = m_secondYAxis.getMaxValue() - (y2Value - m_secondYAxis.getMaxValue()) * factor * e.getWheelRotation();
-        if (m_plots.get(0).inside(e.getX(), e.getY())) {//mouse wheel move on m_plotArea
+        //if (m_plots.get(0).inside(e.getX(), e.getY())) {//mouse wheel move on m_plotArea
+        if (insidePlotArea(e.getX(), e.getY(),m_xAxis, m_yAxis) || insidePlotArea(e.getX(), e.getY(),m_secondXAxis, m_secondYAxis)) {//mouse wheel move on m_plotArea
             m_xAxis.setRange(newXmin, newXmax);
             m_secondXAxis.setRange(newX2Min, newX2Max);
             m_yAxis.setRange(newYmin, newYmax);
@@ -916,5 +919,5 @@ public class DoubleYAxisPlotPanel extends BasePlotPanel {
         }
         fireUpdateAxisRange(oldMinX, oldMaxX, m_xAxis.getMinValue(), m_xAxis.getMaxValue(), oldMinY, oldMaxY, m_yAxis.getMinValue(), m_yAxis.getMaxValue());
     }
-
+    
 }

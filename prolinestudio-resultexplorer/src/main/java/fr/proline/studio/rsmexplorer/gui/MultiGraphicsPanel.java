@@ -6,7 +6,6 @@ import fr.proline.studio.graphics.BestGraphicsInterface;
 import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.graphics.BasePlotPanel;
 import fr.proline.studio.graphics.PlotLinear;
-import fr.proline.studio.graphics.PlotBaseAbstract;
 import fr.proline.studio.graphics.PlotType;
 import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
@@ -67,8 +66,6 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
     protected JLabel m_valueYLabel;
     protected JLabel m_valueZLabel;
 
-    protected List<PlotBaseAbstract> m_plotGraphicsList = null;
-
     protected List<ExtendedTableModelInterface> m_valuesList = null;
     protected List<CrossSelectionInterface> m_crossSelectionInterfaceList = null;
     protected SecondAxisTableModelInterface m_valueOn2Yxis = null;
@@ -85,8 +82,7 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
         columnXYIndex = new int[2];
         m_dataLocked = dataLocked;
         m_canChooseColor = canChooseColor;
-        m_plotGraphicsList = new ArrayList();
-
+        
         initComponent();
     }
 
@@ -447,7 +443,6 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
         m_valuesList = valuesList;
         m_crossSelectionInterfaceList = crossSelectionInterfaceList;
         m_valueOn2Yxis = value2;
-        m_plotGraphicsList.clear();
         if (valuesList == null) {
             return;
         }
@@ -505,7 +500,6 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
             plotGraphics.setPlotInformation(m_valuesList.get(i).getPlotInformation());
             plotGraphics.setIsPaintMarker(false);
             m_plotPanel.addPlot(plotGraphics);
-            m_plotGraphicsList.add(plotGraphics);
         }
     }
 
@@ -519,14 +513,14 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
             ((DoubleYAxisPlotPanel) m_plotPanel).addMainPlot(plotGraphics);
         }
         //plot on second Axis Y
-        if (m_valueOn2Yxis != null && m_valueOn2Yxis.getRowCount() != 0 && m_valuesList.size() != 0) {//creat a plot which show protein abundance  
+        if (m_valueOn2Yxis != null && m_valueOn2Yxis.getRowCount() != 0) {//creat a plot which show PlotLinear on 2nd Axis  
             CrossSelectionInterface crossSelectionInterface2 = null;
             PlotLinear plotGraphics = new PlotLinear(m_plotPanel, m_valueOn2Yxis, crossSelectionInterface2, columnXYIndex[COL_X_ID], columnXYIndex[COL_Y_ID]);
             plotGraphics.setPlotInformation(m_valueOn2Yxis.getPlotInformation());
             plotGraphics.setIsPaintMarker(false);
             ((DoubleYAxisPlotPanel) m_plotPanel).addAuxiliaryPlot(plotGraphics);
             Color color = m_valueOn2Yxis.getPlotInformation().getPlotColor();
-            ((DoubleYAxisPlotPanel) m_plotPanel).setSecondAxisPlotInfo(m_valueOn2Yxis.getName()+" " + m_valueOn2Yxis.getDataColumnIdentifier(columnXYIndex[COL_Y_ID]), color);
+            ((DoubleYAxisPlotPanel) m_plotPanel).setSecondAxisPlotInfo(m_valueOn2Yxis.getName() + " " + m_valueOn2Yxis.getDataColumnIdentifier(columnXYIndex[COL_Y_ID]), color);
         }
         ((DoubleYAxisPlotPanel) m_plotPanel).preparePaint();
 

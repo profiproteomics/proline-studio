@@ -675,7 +675,7 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
 
         int x = e.getX();
         int y = e.getY();
-        if (m_plots.get(0).inside(x, y)) {
+        if (insidePlotArea(x, y)) {
             // Mouse Pressed in the plot area
 
             // deselect axis
@@ -1138,7 +1138,7 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
         double newYmin = m_yAxis.getMinValue() + (m_yAxis.getMinValue() - yValue) * factor * e.getWheelRotation();
         double newYmax = m_yAxis.getMaxValue() - (yValue - m_yAxis.getMaxValue()) * factor * e.getWheelRotation();
 
-        if (m_plots.get(0).inside(e.getX(), e.getY())) {//mouse wheel move on m_plotArea
+        if (insidePlotArea(e.getX(), e.getY())) {//mouse wheel move on m_plotArea
             m_xAxis.setRange(newXmin, newXmax);
             m_yAxis.setRange(newYmin, newYmax);
             repaintUpdateDoubleBuffer();
@@ -1319,5 +1319,17 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
             }
             return sum / (double) count;
         }
+    }
+
+    private boolean insidePlotArea(int x, int y) {
+        return this.insidePlotArea(x, y, m_xAxis, m_yAxis);
+    }
+
+    protected boolean insidePlotArea(int x, int y, XAxis xAxis, YAxis yAxis) {
+        int x1 = xAxis.valueToPixel(xAxis.getMinValue());
+        int x2 = xAxis.valueToPixel(xAxis.getMaxValue());
+        int y1 = yAxis.valueToPixel(yAxis.getMaxValue());
+        int y2 = yAxis.valueToPixel(yAxis.getMinValue());
+        return (x >= x1) && (x <= x2) && (y >= y1) && (y <= y2);
     }
 }

@@ -61,7 +61,7 @@ public abstract class PlotBaseAbstract implements Axis.EnumXInterface, Axis.Enum
 
     public abstract double getYMax();
 
-    public abstract boolean inside(int x, int y);
+    //public abstract boolean inside(int x, int y);
 
     public abstract void parametersChanged();
 

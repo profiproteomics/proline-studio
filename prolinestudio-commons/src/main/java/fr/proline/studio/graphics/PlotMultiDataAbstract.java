@@ -14,10 +14,10 @@ public abstract class PlotMultiDataAbstract extends PlotBaseAbstract {
     }
 
         
-    @Override
-    public boolean inside(int x, int y) {
-        return true;
-    }
+//    @Override
+//    public boolean inside(int x, int y) {
+//        return true;
+//    }
     
     @Override
     public boolean isMouseWheelSupported() {

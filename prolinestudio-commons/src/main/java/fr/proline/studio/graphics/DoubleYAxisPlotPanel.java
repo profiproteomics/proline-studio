@@ -25,8 +25,8 @@ import javax.swing.JComponent;
 import javax.swing.JPopupMenu;
 import javax.swing.ToolTipManager;
 import javax.swing.SwingUtilities;
-//import org.slf4j.Logger;
-//import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A Panel which has multiple layout, one layout has 1 Axis X/Y, and a groupe of
@@ -36,7 +36,8 @@ import javax.swing.SwingUtilities;
  */
 public class DoubleYAxisPlotPanel extends BasePlotPanel {
 
-    //private static final Logger m_logger = LoggerFactory.getLogger(DoubleYAxisPlotPanel.class);
+    private static final Logger m_logger = LoggerFactory.getLogger(DoubleYAxisPlotPanel.class);
+    
     String m_secondYAxisTitle = "";
     private Color m_secondYAxisColor;
     private ArrayList<PlotBaseAbstract> m_mainPlots;
@@ -98,6 +99,14 @@ public class DoubleYAxisPlotPanel extends BasePlotPanel {
         clearPlots();
         this.m_mainPlots.add(plot);
         this.m_plots.add(plot);
+    }
+
+    public YAxis getSecondYAxis() {
+        return m_secondYAxis;
+    }
+
+    public XAxis getSecondXAxis() {
+        return m_secondXAxis;
     }
 
     public void setSecondAxisPlotInfo(String title, Color color) {
@@ -639,10 +648,10 @@ public class DoubleYAxisPlotPanel extends BasePlotPanel {
                 double oldMaxX = m_xAxis.getMaxValue();//*
                 double oldMinY = m_yAxis.getMinValue();//*
                 double oldMaxY = m_yAxis.getMaxValue();//*
-                double oldMinX2 = m_secondXAxis.getMinValue();
-                double oldMaxX2 = m_secondXAxis.getMaxValue();
-                double oldMinY2 = m_secondYAxis.getMinValue();
-                double oldMaxY2 = m_secondYAxis.getMaxValue();
+//                double oldMinX2 = m_secondXAxis.getMinValue();
+//                double oldMaxX2 = m_secondXAxis.getMaxValue();
+//                double oldMinY2 = m_secondYAxis.getMinValue();
+//                double oldMaxY2 = m_secondYAxis.getMaxValue();
                 int startX = m_zoomGesture.getStartX();
                 int endX = m_zoomGesture.getEndX();
                 int startY = m_zoomGesture.getStartY();
@@ -661,10 +670,10 @@ public class DoubleYAxisPlotPanel extends BasePlotPanel {
                     double oldMaxX = m_xAxis.getMaxValue();
                     double oldMinY = m_yAxis.getMinValue();
                     double oldMaxY = m_yAxis.getMaxValue();
-                    double oldMinX2 = m_secondXAxis.getMinValue();
-                    double oldMaxX2 = m_secondXAxis.getMaxValue();
-                    double oldMinY2 = m_secondYAxis.getMinValue();
-                    double oldMaxY2 = m_secondYAxis.getMaxValue();
+//                    double oldMinX2 = m_secondXAxis.getMinValue();
+//                    double oldMaxX2 = m_secondXAxis.getMaxValue();
+//                    double oldMinY2 = m_secondYAxis.getMinValue();
+//                    double oldMaxY2 = m_secondYAxis.getMaxValue();
                     //updateAxis(m_plots.get(0));
                     updateAxis();
                     fireUpdateAxisRange(oldMinX, oldMaxX, m_xAxis.getMinValue(), m_xAxis.getMaxValue(), oldMinY, oldMaxY, m_yAxis.getMinValue(), m_yAxis.getMaxValue());
@@ -883,8 +892,9 @@ public class DoubleYAxisPlotPanel extends BasePlotPanel {
         double oldMaxX = m_xAxis.getMaxValue();
         double oldMinY = m_yAxis.getMinValue();
         double oldMaxY = m_yAxis.getMaxValue();
-        double oldMinY2 = m_secondYAxis.getMinValue();
-        double oldMaxY2 = m_secondYAxis.getMaxValue();
+//        double oldMinY2 = m_secondYAxis.getMinValue();
+//        double oldMaxY2 = m_secondYAxis.getMaxValue();
+                
         double factor = 0.20;
         double xValue = m_xAxis.pixelToValue(e.getX());
         double x2Value = m_secondXAxis.pixelToValue(e.getX());
@@ -897,7 +907,7 @@ public class DoubleYAxisPlotPanel extends BasePlotPanel {
 
         double newYmin = m_yAxis.getMinValue() + (m_yAxis.getMinValue() - yValue) * factor * e.getWheelRotation();
         double newYmax = m_yAxis.getMaxValue() - (yValue - m_yAxis.getMaxValue()) * factor * e.getWheelRotation();
-        double newY2Min = m_secondYAxis.getMinValue() + (m_secondYAxis.getMinValue() - yValue) * factor * e.getWheelRotation();
+        double newY2Min = m_secondYAxis.getMinValue() + (m_secondYAxis.getMinValue() - y2Value) * factor * e.getWheelRotation();
         double newY2Max = m_secondYAxis.getMaxValue() - (y2Value - m_secondYAxis.getMaxValue()) * factor * e.getWheelRotation();
         //if (m_plots.get(0).inside(e.getX(), e.getY())) {//mouse wheel move on m_plotArea
         if (insidePlotArea(e.getX(), e.getY(),m_xAxis, m_yAxis) || insidePlotArea(e.getX(), e.getY(),m_secondXAxis, m_secondYAxis)) {//mouse wheel move on m_plotArea

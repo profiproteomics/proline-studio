@@ -5,9 +5,7 @@
  */
 package fr.proline.studio.graphics;
 
-import java.awt.BasicStroke;
 import java.awt.Color;
-import java.awt.Stroke;
 
 /**
  *

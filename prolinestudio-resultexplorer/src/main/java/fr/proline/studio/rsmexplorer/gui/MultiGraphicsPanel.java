@@ -523,6 +523,17 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
             ((DoubleYAxisPlotPanel) m_plotPanel).setSecondAxisPlotInfo(m_valueOn2Yxis.getName() + " " + m_valueOn2Yxis.getDataColumnIdentifier(columnXYIndex[COL_Y_ID]), color);
         }
         ((DoubleYAxisPlotPanel) m_plotPanel).preparePaint();
+        double minY = ((DoubleYAxisPlotPanel) m_plotPanel).getYAxis().getMinValue();
+        double maxY = ((DoubleYAxisPlotPanel) m_plotPanel).getYAxis().getMaxValue();
+        ((DoubleYAxisPlotPanel) m_plotPanel).getYAxis().setRange(0, maxY);
+        
+        maxY = ((DoubleYAxisPlotPanel) m_plotPanel).getSecondYAxis().getMaxValue();
+        ((DoubleYAxisPlotPanel) m_plotPanel).getSecondYAxis().setRange(0, maxY);
+        
+//        ((DoubleYAxisPlotPanel) m_plotPanel).getYAxis().setRange(0, maxY);
+        
+//        bounds = ((DoubleYAxisPlotPanel) m_plotPanel).getS;
+        
 
     }
 

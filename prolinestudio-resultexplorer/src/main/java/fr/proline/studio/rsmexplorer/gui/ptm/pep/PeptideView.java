@@ -40,14 +40,14 @@ public class PeptideView extends ViewPtmAbstract {
         PTMPeptideInstance ins = pep.getPTMPeptideInstance();
         String sequence = null;
         if (ins != null) {
-            sequence = pep.getPTMPeptideInstance().getSequence();
+            sequence = ins.getSequence();
         }
         if (sequence != null) {
-            this._length = pep.getPTMPeptideInstance().getSequence().length();
+            this._length = ins.getSequence().length();
         } else {
             this._length = 0;
         }
-        this._beginIndex = pep.getPTMPeptideInstance().getStartPosition();
+        this._beginIndex = ins.getStartPosition();
         if ((_beginIndex == 1) && (pep.getSite().isProteinNTerm())) {
             _beginIndex = 0;
         }

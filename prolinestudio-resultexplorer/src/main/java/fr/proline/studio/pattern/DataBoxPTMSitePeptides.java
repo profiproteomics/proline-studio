@@ -1,8 +1,8 @@
 package fr.proline.studio.pattern;
 
 import fr.proline.core.orm.msi.ResultSummary;
-import fr.proline.core.orm.msi.dto.DMasterQuantProteinSet;
 import fr.proline.core.orm.msi.dto.DPeptideInstance;
+import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.studio.extendedtablemodel.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
@@ -28,6 +28,7 @@ public class DataBoxPTMSitePeptides extends AbstractDataBox {
     private long m_logTimeStart;
     private PTMSite m_currentPtmSite;
     private PTMDataset m_ptmDataset;
+    private DPeptideMatch m_selecedDPeptideMatch ;
 
     public DataBoxPTMSitePeptides() {
         super(DataboxType.DataBoxPTMSitePeptides, DataboxStyle.STYLE_RSM);
@@ -63,6 +64,8 @@ public class DataBoxPTMSitePeptides extends AbstractDataBox {
     public void dataChanged() {
 
         m_currentPtmSite = (PTMSite) m_previousDataBox.getData(false, PTMSite.class);
+        m_selecedDPeptideMatch = (DPeptideMatch)m_previousDataBox.getData(false, DPeptideMatch.class);
+        //m_logger.debug("selected peptide Match, ptm {}", m_selecedDPeptideMatch.getPeptide().getTransientData().getPeptideReadablePtmString().getReadablePtmString());
         m_ptmDataset = (PTMDataset) m_previousDataBox.getData(false, PTMDataset.class);
         m_rsm = m_ptmDataset.getDataset().getResultSummary();
 
@@ -80,6 +83,8 @@ public class DataBoxPTMSitePeptides extends AbstractDataBox {
         if (m_currentPtmSite.isLoaded()) {
             m_previousTaskId = null;
             ((PeptidesPTMSiteTablePanel) getDataBoxPanelInterface()).setData(m_currentPtmSite, null);
+            if (m_selecedDPeptideMatch != null)
+                ((PeptidesPTMSiteTablePanel) getDataBoxPanelInterface()).setSelectedPeptide(m_selecedDPeptideMatch);
             propagateDataChanged(ExtendedTableModelInterface.class);
             return;
         }

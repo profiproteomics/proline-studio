@@ -29,8 +29,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * A Panel which has multiple layout, one layout has 1 Axis X/Y, and a groupe of
- * Plot
+ * A Panel which has 2 YAxis, the second one is at right
  *
  * @author Karine XUE
  */
@@ -339,7 +338,7 @@ public class DoubleYAxisPlotPanel extends BasePlotPanel {
                 m_plotArea.height = m_yAxis.getHeight();
                 m_yAxis.paint(g2d);
             }
-            //3.2 draw second axis Y & paint a rectangle to indicate the plot color en 2nd Axis Y
+            //3.2 draw second axis Y & paint a rectangle to indicate the plot color on 2nd Axis Y
             {
                 if ((m_secondYAxis != null) && (m_secondYAxis.displayAxis())) {
                     //m_logger.debug("->seconde Axis Y");                    
@@ -350,7 +349,7 @@ public class DoubleYAxisPlotPanel extends BasePlotPanel {
                     if (m_secondYAxisColor != null) {
                         g2d.setColor(m_secondYAxisColor);
                     }
-                    g2d.fillRect(x, y, 10, 10);  //paint a rectangle to indicate the plot color en 2nd Axis Y
+                    g2d.fillRect(x, y, 10, 10);  //paint a rectangle to indicate the plot color on 2nd Axis Y
                     //m_logger.debug("<->seconde Axis Y");
                 }
             }

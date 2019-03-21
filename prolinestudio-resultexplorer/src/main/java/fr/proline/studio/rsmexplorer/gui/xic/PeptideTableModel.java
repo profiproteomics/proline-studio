@@ -159,11 +159,13 @@ public class PeptideTableModel extends LazyTableModel implements GlobalTableMode
     public String getDataColumnIdentifier(int columnIndex) {
         return m_isXICMode ? m_columnNames[columnIndex] : m_columnNames_SC[columnIndex];
     }
-    
+
     /**
-     * Some times, used to determine isInteger, isEnum for graphic, export, calculations in Data Analyser propose
+     * Some times, used to determine isInteger, isEnum for graphic, export,
+     * calculations in Data Analyser propose
+     *
      * @param columnIndex
-     * @return 
+     * @return
      */
     @Override
     public Class getDataColumnClass(int columnIndex) {
@@ -331,7 +333,6 @@ public class PeptideTableModel extends LazyTableModel implements GlobalTableMode
     }
 
     //private static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer.peptideTableModel");
-
     @Override
     public PlotDataSpec getDataSpecAt(int row) {
         //m_logger.debug("########call getDataSpecAt");
@@ -350,5 +351,19 @@ public class PeptideTableModel extends LazyTableModel implements GlobalTableMode
         return result;
     }
 
+    @Override
+    public String toString() {
+        String lineString = "\n";
+        for (int i = 0; i < 5; i++) {
+            lineString += this.getColumnName(i) + "; ";
+        }
+        for (int row = 0; row < this.getRowCount(); row++) {
+            lineString += "\n";
+            for (int i = 0; i < 5; i++) {
+                lineString += this.getValueAt(row, i) + "; ";
+            }
+        }
+        return lineString;
+    }
 
 }

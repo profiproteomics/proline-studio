@@ -169,7 +169,7 @@ public class DataMgrPtm {
         return sb.toString();
     }
 
-    protected DPeptideInstance getSelectedPeptideInstance(int row) {
+    protected PTMSitePeptideInstance getSelectedPTMSitePeptideInstance(int row) {
         if (this.getRowCount() == 0) {
             return null;
         }
@@ -179,11 +179,16 @@ public class DataMgrPtm {
         if (this._peptidesInstances.get(row) == null) {
             return null;
         }
-        return this._peptidesInstances.get(row).getPTMPeptideInstance().getPeptideInstance();
+        return this._peptidesInstances.get(row);
     }
 
-    protected void setSelectedPeptideInstance(int row) {
-        ;
+    protected DPeptideInstance getSelectedDPeptideInstance(int row) {
+        PTMSitePeptideInstance selected = this.getSelectedPTMSitePeptideInstance(row);
+        if (selected != null) {
+            return selected.getPTMPeptideInstance().getPeptideInstance();
+        } else {
+            return null;
+        }
     }
 
     public List<PTMSitePeptideInstance> getPTMSitePeptideInstances() {
@@ -193,6 +198,5 @@ public class DataMgrPtm {
     protected int getPTMSiteSeqPos() {
         return this._currentPtmSite.getPositionOnProtein();
     }
-
 
 }

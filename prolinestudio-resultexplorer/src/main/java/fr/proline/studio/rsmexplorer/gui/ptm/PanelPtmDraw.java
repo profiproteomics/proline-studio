@@ -197,7 +197,7 @@ public class PanelPtmDraw extends JPanel {
                     int selectedIndex = m_ctrlPeptideArea.getSelectedIndex(e.getX(), e.getY());
                     if (selectedIndex != oldSelected && (selectedIndex != -1) && (_ctrl != null)) {
                         repaint();
-                        _ctrl.valueChanged(selectedIndex);//propagate
+                        _ctrl.valueChanged();//propagate
                     }
                 }
             });
@@ -230,7 +230,7 @@ public class PanelPtmDraw extends JPanel {
                     }
                     int selectedIndex = m_ctrlPeptideArea.getSelectedIndex();
                     if (oldSelected != selectedIndex) {
-                        _ctrl.valueChanged(selectedIndex);
+                        _ctrl.valueChanged();
                         repaint();
                     }
                 }

@@ -1,7 +1,9 @@
 package fr.proline.studio.rsmexplorer.gui.ptm;
 
 import fr.proline.core.orm.msi.dto.DPeptideInstance;
+import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.studio.dam.tasks.data.ptm.PTMSite;
+import fr.proline.studio.dam.tasks.data.ptm.PTMSitePeptideInstance;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.pattern.AbstractDataBox;
@@ -23,7 +25,7 @@ import org.slf4j.LoggerFactory;
 //public class PanelPeptidesPTMSiteGraphic extends PeptidesPTMSiteTablePanel {
 public class PanelPeptidesPTMSiteGraphic extends JPanel implements DataBoxPanelInterface, SplittedPanelContainer.UserActions {
 
-    private static Logger logger = LoggerFactory.getLogger("ProlineStudio.rsmexplorer.ptm");
+    private static Logger logger = LoggerFactory.getLogger(PanelPeptidesPTMSiteGraphic.class);
     protected DataMgrPtm _dataMgr;
 
     protected Object _projetId;
@@ -34,7 +36,6 @@ public class PanelPeptidesPTMSiteGraphic extends JPanel implements DataBoxPanelI
 
     protected AbstractDataBox m_dataBox;
     protected PTMSite m_currentPTMSite = null;
-    protected DPeptideInstance m_currentPepInst = null;
 
     public PanelPeptidesPTMSiteGraphic() {
         //super(false);
@@ -77,7 +78,10 @@ public class PanelPeptidesPTMSiteGraphic extends JPanel implements DataBoxPanelI
     // @Override
     public void setData(PTMSite peptidesPTMSite, DPeptideInstance pepInst) {
         //logger.debug(this.getClass().getName() + " setData ->");
-        if ((peptidesPTMSite == m_currentPTMSite) && (pepInst == m_currentPepInst)) {
+        if (peptidesPTMSite == null) {
+            return;
+        }
+        if ((peptidesPTMSite.equals(m_currentPTMSite))) {
             return;
         }
         _dataMgr.setData(peptidesPTMSite);
@@ -85,7 +89,7 @@ public class PanelPeptidesPTMSiteGraphic extends JPanel implements DataBoxPanelI
             this._paintArea.clean();
         } else {
             this.m_currentPTMSite = peptidesPTMSite;
-            this.m_currentPepInst = pepInst;
+
             this._ctrlSequence.setData(_dataMgr.getProteinSequence());
             this._ctrlSequence.setPTMSequencePosition(_dataMgr.getPTMSiteSeqPos());
             this._ctrlMark.setData(_dataMgr.getAllPtmMarks());
@@ -96,41 +100,53 @@ public class PanelPeptidesPTMSiteGraphic extends JPanel implements DataBoxPanelI
             this._paintArea.setRowCount(this._dataMgr.getRowCount());
             this._paintArea.setSequenceLength(_dataMgr.getProteinSequence().length());
             this._paintArea.setAjustedLocation(ajustedLocation);
-            valueChanged(0);//first selected is 0            
+            valueChanged();
         }
         this.repaint();
     }
 
     public PTMSite getSelectedPTMSite() {
-       return this.m_currentPTMSite;
+        return this.m_currentPTMSite;
     }
-    
+
     /**
      * used to set next Data Box
      */
-    public DPeptideInstance getSelectedPeptideInstance() {
+    public DPeptideInstance getSelectedDPeptideInstance() {
         int selectedRowIndex = this._paintArea.getSelectedPeptideIndex();
-        //logger.debug(this.getClass().getName() + "getSelectedPeptideInstance " + " selectRowIndex: " + selectedRowIndex);
-        return this._dataMgr.getSelectedPeptideInstance(selectedRowIndex);
+        //logger.debug("getSelectedPeptideInstance selectRowIndex: " + selectedRowIndex);
+        return this._dataMgr.getSelectedDPeptideInstance(selectedRowIndex);
     }
+
+    public PTMSitePeptideInstance getSelectedPTMSitePeptideInstance() {
+        int selectedRowIndex = this._paintArea.getSelectedPeptideIndex();
+        //logger.debug("getSelectedPeptideInstance selectRowIndex: " + selectedRowIndex);
+        return this._dataMgr.getSelectedPTMSitePeptideInstance(selectedRowIndex);
+    }
+
+    public DPeptideMatch getSelectedDPeptideMatch() {
+        PTMSitePeptideInstance insts = this.getSelectedPTMSitePeptideInstance();
+        if (insts == null) {
+            return null;
+        } else {
+            return insts.getBestPeptideMatch();
+        }
+    }
+
     /**
      * when selected petptied change, change next databox and table selected row
-     *
-     * @param i
      */
-    protected void valueChanged(int i) {
-        //logger.debug(this.getClass().getName() + "valueChanged selectRow="+ i);
-        _dataMgr.setSelectedPeptideInstance(i);
+    protected void valueChanged() {
         m_dataBox.propagateDataChanged(PTMSite.class);
         this.repaint();
     }
 
     /**
      * useful between table-graphic ptm site panel
-     * @param i 
+     *
+     * @param i
      */
     public void setSelectedRow(int i) {
-        this._dataMgr.setSelectedPeptideInstance(i);
         this._ctrlPeptideArea.setSelectedIndex(i);
         this._paintArea.setSelectedPeptideIndex(i);
     }
@@ -179,7 +195,5 @@ public class PanelPeptidesPTMSiteGraphic extends JPanel implements DataBoxPanelI
     public void setLoaded(int id) {
         //Nothing to Do
     }
-
-
 
 }

@@ -23,7 +23,6 @@ import fr.proline.studio.filter.ConvertValueInterface;
 import fr.proline.studio.filter.DoubleFilter;
 import fr.proline.studio.filter.IntegerFilter;
 import fr.proline.studio.filter.StringDiffFilter;
-import fr.proline.studio.filter.StringFilter;
 import fr.proline.studio.table.LazyData;
 import fr.proline.studio.table.TableDefaultRendererManager;
 import fr.proline.studio.table.renderer.DefaultLeftAlignRenderer;
@@ -99,7 +98,7 @@ public class PeptidesOfPTMSiteTableModel extends DecoratedTableModel implements 
      */
     public void setData(PTMSite selectedPTMSite, boolean showPeptideMatches, DPeptideInstance parentPepInstance) {
         m_currentPtmSite = selectedPTMSite;
-        m_showPeptideMatches = showPeptideMatches;
+        m_showPeptideMatches = showPeptideMatches;        
         m_ptmSitePeptides = new ArrayList<>();
         if (m_currentPtmSite == null) {
             fireTableDataChanged();
@@ -168,6 +167,17 @@ public class PeptidesOfPTMSiteTableModel extends DecoratedTableModel implements 
             return null;
         }
         return m_ptmSitePeptides.get(row).peptideInstance;
+    }
+
+    public int getSelectedIndex(DPeptideMatch pep) {
+        DPeptideMatch comparePep;
+        for (int row = 0; row < this.getRowCount(); row++) {
+            comparePep = m_ptmSitePeptides.get(row).peptideMatch;
+            if (pep.equals(comparePep)) {
+                return row;
+            }
+        }
+        return -1;
     }
 
     @Override
@@ -497,8 +507,8 @@ public class PeptidesOfPTMSiteTableModel extends DecoratedTableModel implements 
         filtersMap.put(COLTYPE_PEPTIDE_SCORE, new DoubleFilter(getColumnName(COLTYPE_PEPTIDE_SCORE), null, COLTYPE_PEPTIDE_SCORE));
 
         filtersMap.put(COLTYPE_MODIFICATION, new StringDiffFilter(getColumnName(COLTYPE_MODIFICATION), null, COLTYPE_MODIFICATION));
-        
-                ConvertValueInterface aAConverter = new ConvertValueInterface() {
+
+        ConvertValueInterface aAConverter = new ConvertValueInterface() {
             @Override
             public Object convertValue(Object o) {
                 if (o == null) {

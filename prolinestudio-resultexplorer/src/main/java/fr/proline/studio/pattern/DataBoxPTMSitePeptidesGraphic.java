@@ -7,6 +7,7 @@ package fr.proline.studio.pattern;
 
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.dto.DPeptideInstance;
+import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabasePTMsTask;
@@ -24,6 +25,7 @@ import fr.proline.studio.rsmexplorer.gui.ptm.PanelPeptidesPTMSiteGraphic;
 public class DataBoxPTMSitePeptidesGraphic extends AbstractDataBox {
 
     private ResultSummary m_rsm;
+
     public DataBoxPTMSitePeptidesGraphic() {
         super(DataboxType.DataBoxPTMSitePeptidesGraphic, DataboxStyle.STYLE_RSM);//VDS: could use RSM even in XIC ?
 
@@ -91,7 +93,7 @@ public class DataBoxPTMSitePeptidesGraphic extends AbstractDataBox {
 
                 setLoaded(loadingId);
 
-                if (finished) {                    
+                if (finished) {
                     m_previousTaskId = null;
                     unregisterTask(taskId);
                     propagateDataChanged(ExtendedTableModelInterface.class);
@@ -131,7 +133,7 @@ public class DataBoxPTMSitePeptidesGraphic extends AbstractDataBox {
             }
 
             if (parameterType.equals(DPeptideInstance.class)) {
-                DPeptideInstance selectedParentPepInstance = ((PanelPeptidesPTMSiteGraphic) getDataBoxPanelInterface()).getSelectedPeptideInstance();
+                DPeptideInstance selectedParentPepInstance = ((PanelPeptidesPTMSiteGraphic) getDataBoxPanelInterface()).getSelectedDPeptideInstance();
                 if (selectedParentPepInstance != null) {
                     return selectedParentPepInstance;
                 }
@@ -139,6 +141,10 @@ public class DataBoxPTMSitePeptidesGraphic extends AbstractDataBox {
 
             if (parameterType.equals(ExtendedTableModelInterface.class)) {
                 return ((GlobalTabelModelProviderInterface) getDataBoxPanelInterface()).getGlobalTableModelInterface();
+            }
+            //PTMSitePeptideInstance
+            if (parameterType.equals(DPeptideMatch.class)) {
+                return ((PanelPeptidesPTMSiteGraphic) getDataBoxPanelInterface()).getSelectedDPeptideMatch();
             }
         }
 

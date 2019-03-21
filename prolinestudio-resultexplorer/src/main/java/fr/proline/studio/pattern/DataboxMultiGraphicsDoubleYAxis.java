@@ -34,11 +34,10 @@ public class DataboxMultiGraphicsDoubleYAxis extends AbstractDataBox {
         // Register Possible in parameters
         GroupParameter inParameter = new GroupParameter();
         inParameter.addParameter(ExtendedTableModelInterface.class, true);
-        registerInParameter(inParameter);
-
         inParameter.addParameter(CrossSelectionInterface.class, true);
+        inParameter.addParameter(SecondAxisTableModelInterface.class, true);
         registerInParameter(inParameter);
-
+       
 //        inParameter.addParameter(SecondAxisTableModelInterface.class, false);
 //        registerInParameter(inParameter);
     }
@@ -59,7 +58,7 @@ public class DataboxMultiGraphicsDoubleYAxis extends AbstractDataBox {
     public void dataChanged() {
         final List<ExtendedTableModelInterface> valuesL = (List<ExtendedTableModelInterface>) m_previousDataBox.getData(false, ExtendedTableModelInterface.class, true);
         final List<CrossSelectionInterface> crossSelectionInterfaceL = (List<CrossSelectionInterface>) m_previousDataBox.getData(false, CrossSelectionInterface.class, true);
-        SecondAxisTableModelInterface valueOnYAxis2 = (SecondAxisTableModelInterface) m_previousDataBox.getData(false, SecondAxisTableModelInterface.class, false);
+        SecondAxisTableModelInterface valueOnYAxis2 = (SecondAxisTableModelInterface) m_previousDataBox.getData(false, SecondAxisTableModelInterface.class);
         if (valueOnYAxis2 != null) {
             ((MultiGraphicsPanel) getDataBoxPanelInterface()).setData(valuesL, crossSelectionInterfaceL, valueOnYAxis2);
         }
@@ -68,7 +67,7 @@ public class DataboxMultiGraphicsDoubleYAxis extends AbstractDataBox {
     @Override
     public void setEntryData(Object data) {
         m_valuesList = (List<ExtendedTableModelInterface>) data;
-        dataChanged();
+        ((MultiGraphicsPanel) getDataBoxPanelInterface()).setData(m_valuesList, null);    
     }
 
 }

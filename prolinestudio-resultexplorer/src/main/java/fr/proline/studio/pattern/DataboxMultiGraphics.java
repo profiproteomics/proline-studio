@@ -54,7 +54,7 @@ public class DataboxMultiGraphics extends AbstractDataBox {
      * DataboxMapAlignment
      */
     @Override
-    public void dataChanged() {
+    public void dataChanged() {      
         final List<ExtendedTableModelInterface> valuesL = (List<ExtendedTableModelInterface>) m_previousDataBox.getData(false, ExtendedTableModelInterface.class, true);
         final List<CrossSelectionInterface> crossSelectionInterfaceL =  (List<CrossSelectionInterface>) m_previousDataBox.getData(false, CrossSelectionInterface.class, true);
         if (valuesL != null)
@@ -64,7 +64,7 @@ public class DataboxMultiGraphics extends AbstractDataBox {
     @Override
     public void setEntryData(Object data) {
         m_valuesList = (List<ExtendedTableModelInterface>) data;
-        dataChanged();
+        ((MultiGraphicsPanel)getDataBoxPanelInterface()).setData(m_valuesList, null);
     }
 
 }

@@ -140,12 +140,12 @@ public class PeptidesPTMSiteTablePanel extends JPanel implements DataBoxPanelInt
         return selectedRow;
     }
 
-    public void setSelectedPeptide(DPeptideMatch pep) {
+    public void setSelectedPeptide(DPeptideInstance pep) {
         PeptidesOfPTMSiteTableModel model = ((PeptidesOfPTMSiteTableModel) ((CompoundTableModel) m_peptidesPtmSiteTable.getModel()).getBaseModel());
         int index = model.getSelectedIndex(pep); //this is the model original index
         //now find the real row perhaps after sorting or filting
         if (index != -1) {
-        //find the original index
+            //find the original index
             CompoundTableModel compoundTableModel = ((CompoundTableModel) m_peptidesPtmSiteTable.getModel());
             int selectedRow = compoundTableModel.convertBaseModelRowToCompoundRow(index);
             // convert according to the sorting

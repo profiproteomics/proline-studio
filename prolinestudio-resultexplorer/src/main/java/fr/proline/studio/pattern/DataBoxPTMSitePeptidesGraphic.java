@@ -7,7 +7,6 @@ package fr.proline.studio.pattern;
 
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.dto.DPeptideInstance;
-import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabasePTMsTask;
@@ -60,7 +59,8 @@ public class DataBoxPTMSitePeptidesGraphic extends AbstractDataBox {
 
         final PTMSite ptmSite = (PTMSite) m_previousDataBox.getData(false, PTMSite.class);
         m_rsm = (ResultSummary) m_previousDataBox.getData(false, ResultSummary.class);
-
+        DPeptideInstance selectedInsts = (DPeptideInstance) m_previousDataBox.getData(false, DPeptideInstance.class);
+        
         if (ptmSite == null) {
             ((PanelPeptidesPTMSiteGraphic) getDataBoxPanelInterface()).setData(null, null);
             return;
@@ -70,6 +70,8 @@ public class DataBoxPTMSitePeptidesGraphic extends AbstractDataBox {
         if (ptmSite.isLoaded()) {
             m_previousTaskId = null;
             ((PanelPeptidesPTMSiteGraphic) getDataBoxPanelInterface()).setData(ptmSite, null);
+            if (selectedInsts != null)
+                ((PanelPeptidesPTMSiteGraphic) getDataBoxPanelInterface()).setSelectedPeptide(selectedInsts);
             propagateDataChanged(ExtendedTableModelInterface.class);
             return;
         }
@@ -141,10 +143,6 @@ public class DataBoxPTMSitePeptidesGraphic extends AbstractDataBox {
 
             if (parameterType.equals(ExtendedTableModelInterface.class)) {
                 return ((GlobalTabelModelProviderInterface) getDataBoxPanelInterface()).getGlobalTableModelInterface();
-            }
-            //PTMSitePeptideInstance
-            if (parameterType.equals(DPeptideMatch.class)) {
-                return ((PanelPeptidesPTMSiteGraphic) getDataBoxPanelInterface()).getSelectedDPeptideMatch();
             }
         }
 

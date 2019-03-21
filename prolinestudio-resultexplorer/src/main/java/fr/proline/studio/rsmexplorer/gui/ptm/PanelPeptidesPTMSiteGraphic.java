@@ -1,9 +1,7 @@
 package fr.proline.studio.rsmexplorer.gui.ptm;
 
 import fr.proline.core.orm.msi.dto.DPeptideInstance;
-import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.studio.dam.tasks.data.ptm.PTMSite;
-import fr.proline.studio.dam.tasks.data.ptm.PTMSitePeptideInstance;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.pattern.AbstractDataBox;
@@ -118,20 +116,12 @@ public class PanelPeptidesPTMSiteGraphic extends JPanel implements DataBoxPanelI
         return this._dataMgr.getSelectedDPeptideInstance(selectedRowIndex);
     }
 
-    public PTMSitePeptideInstance getSelectedPTMSitePeptideInstance() {
-        int selectedRowIndex = this._paintArea.getSelectedPeptideIndex();
-        //logger.debug("getSelectedPeptideInstance selectRowIndex: " + selectedRowIndex);
-        return this._dataMgr.getSelectedPTMSitePeptideInstance(selectedRowIndex);
+    public void setSelectedPeptide(DPeptideInstance pep){
+        int row = this._dataMgr.getPeptideIndex(pep);
+        this._paintArea.setSelectedPeptideIndex(row);
+        repaint();
     }
 
-    public DPeptideMatch getSelectedDPeptideMatch() {
-        PTMSitePeptideInstance insts = this.getSelectedPTMSitePeptideInstance();
-        if (insts == null) {
-            return null;
-        } else {
-            return insts.getBestPeptideMatch();
-        }
-    }
 
     /**
      * when selected petptied change, change next databox and table selected row

@@ -72,9 +72,9 @@ public class PeptideView extends ViewPtmAbstract {
         int aaWidth = ViewSetting.WIDTH_AA;
 
         this.x0 = (this.m_x + aaWidth + (this._beginIndex - viewContext.getAjustedLocation()) * aaWidth);
-        this.y0 = this.m_y;
+        this.y0 = this.m_y+1;
         int width = (this._length * aaWidth);
-        int height = ViewSetting.HEIGHT_AA;       
+        int height = ViewSetting.HEIGHT_AA-1;       
         Color c = getColorWithProbability(ViewSetting.PEPTIDE_COLOR, (float) Math.min((Math.max(getScore(),15f) - 15) / 100.0, 1.0));
         g.setColor(c);
         g.fillRoundRect(x0, y0, width, height, aaWidth, ViewSetting.HEIGHT_AA);

@@ -191,6 +191,16 @@ public class DataMgrPtm {
         }
     }
 
+    public int getPeptideIndex(DPeptideInstance pep) {
+        DPeptideInstance comparePep;
+        for (int row = 0; row < this._peptidesInstances.size(); row ++){
+            comparePep = _peptidesInstances.get(row).getPTMPeptideInstance().getPeptideInstance();
+            if (comparePep.equals(pep))
+                return row;
+        }
+        return -1;
+    }
+
     public List<PTMSitePeptideInstance> getPTMSitePeptideInstances() {
         return _peptidesInstances;
     }

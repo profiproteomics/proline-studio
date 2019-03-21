@@ -98,7 +98,7 @@ public class PeptidesOfPTMSiteTableModel extends DecoratedTableModel implements 
      */
     public void setData(PTMSite selectedPTMSite, boolean showPeptideMatches, DPeptideInstance parentPepInstance) {
         m_currentPtmSite = selectedPTMSite;
-        m_showPeptideMatches = showPeptideMatches;        
+        m_showPeptideMatches = showPeptideMatches;
         m_ptmSitePeptides = new ArrayList<>();
         if (m_currentPtmSite == null) {
             fireTableDataChanged();
@@ -126,7 +126,8 @@ public class PeptidesOfPTMSiteTableModel extends DecoratedTableModel implements 
             // TODO : request all PeptideMatches ??
             m_logger.warn("Must shown all peptide matches but no peptide instance specified for PTM Site " + m_currentPtmSite.toString());
         } else // TODO this check is mandatory to avoid NullPointer, but the problem must be handled: PTMSite and parentPepInstance parameters are inconsistent
-         if (m_currentPtmSite.getPTMSitePeptideInstance(parentPepInstance.getPeptideId()) != null) {
+        {
+            if (m_currentPtmSite.getPTMSitePeptideInstance(parentPepInstance.getPeptideId()) != null) {
                 List<DPeptideInstance> peptideInstancesForPeptide = m_currentPtmSite.getPTMSitePeptideInstance(parentPepInstance.getPeptideId()).getLeafPepInstances();
 
                 if (peptideInstancesForPeptide == null) {
@@ -148,6 +149,7 @@ public class PeptidesOfPTMSiteTableModel extends DecoratedTableModel implements 
                         });
                     });          */
             }
+        }
         fireTableDataChanged();
     }
 
@@ -169,10 +171,10 @@ public class PeptidesOfPTMSiteTableModel extends DecoratedTableModel implements 
         return m_ptmSitePeptides.get(row).peptideInstance;
     }
 
-    public int getSelectedIndex(DPeptideMatch pep) {
-        DPeptideMatch comparePep;
+    public int getSelectedIndex(DPeptideInstance pep) {
+        DPeptideInstance comparePep;
         for (int row = 0; row < this.getRowCount(); row++) {
-            comparePep = m_ptmSitePeptides.get(row).peptideMatch;
+            comparePep = m_ptmSitePeptides.get(row).peptideInstance;
             if (pep.equals(comparePep)) {
                 return row;
             }

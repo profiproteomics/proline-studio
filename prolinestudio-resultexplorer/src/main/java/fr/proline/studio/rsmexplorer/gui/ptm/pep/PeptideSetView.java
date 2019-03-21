@@ -69,7 +69,8 @@ public class PeptideSetView extends ViewPtmAbstract {
                 int yRangA = y0;
                 int yRangZ = yRangA + ViewSetting.HEIGHT_AA;
                 if (y > yRangA && y < yRangZ) {
-                    selected = vp.isSelected(x);
+                    //selected = vp.isSelected(x);
+                    selected = true; //when x is not inside of peptide, we select it
                     if (selected) {
                         return i;
                     }

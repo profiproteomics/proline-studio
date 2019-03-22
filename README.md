@@ -3,7 +3,8 @@
 
 ## Note
 
-:warning: We are currently migrating Proline source code from our legacy SVN repository to GitHub. In the meantime, we provide the source files of the different projects as a tar.gz file in the release section.
+:warning: 
+We are currently migrating Proline source code from our legacy SVN repository to GitHub. In the meantime, we provide the source files of the different projects as a tar.gz file in the release section.
 
 ---
 

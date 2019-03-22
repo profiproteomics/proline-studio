@@ -99,8 +99,8 @@ public class DataBoxPTMSiteProtein extends AbstractDataBox {
         return m_isXicResult;
     }
 
-    public void setXicResult(boolean isXICMode) {
-        m_isXicResult = isXICMode;
+    public void setXicResult(boolean isXICResult) {
+        m_isXicResult = isXICResult;
         m_style = (m_isXicResult) ? DataboxStyle.STYLE_XIC : DataboxStyle.STYLE_SC;
         if(m_isXicResult)
             registerXicOutParameter();
@@ -158,7 +158,7 @@ public class DataBoxPTMSiteProtein extends AbstractDataBox {
 
             @Override
             public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
-                m_logger.debug("END task "+taskId+" call next loadPeptideMatches if finished unregisterTask "+finished); 
+                m_logger.debug("**** END task "+taskId+" call loadPeptideMatches &  unregisterTask if finished "+finished); 
                 if (finished) {
                     m_ptmDataset.setPTMSites(ptmSiteArray);
                     loadPeptideMatches(loadingId, taskId, ptmSiteArray, finished);
@@ -172,7 +172,7 @@ public class DataBoxPTMSiteProtein extends AbstractDataBox {
         
         DatabasePTMsTask task = new DatabasePTMsTask(callback);
         task.initLoadPTMSites(getProjectId(), m_ptmDataset.getDataset().getResultSummary(), ptmSiteArray);
-        m_logger.debug("Register task "+task.getId()+" : "+task.toString());
+        m_logger.debug("**** Register task DatabasePTMsTask.initLoadPTMSites "+task.getId()+" : "+task.toString());
         registerTask(task);
 
     }
@@ -188,7 +188,7 @@ public class DataBoxPTMSiteProtein extends AbstractDataBox {
 
             @Override
             public void run(boolean success, final long taskId, SubTask subTask, boolean finished) {
-                m_logger.info(" run "+taskId+" : is finished  (unregister) "+finished+" subtask "+subTask+" sucess ? "+success+" found "+m_masterQuantProteinSetList.size()+" mqPrS");
+                m_logger.info(" **** +++ END task  "+taskId+" : is finished ? (unregister) "+finished+"; subtask ? "+subTask+"; sucess ? "+success+"; found "+m_masterQuantProteinSetList.size()+" mqPrS");
                 if (subTask == null) {
 
                     AbstractDatabaseCallback mapCallback = new AbstractDatabaseCallback() {
@@ -200,7 +200,7 @@ public class DataBoxPTMSiteProtein extends AbstractDataBox {
 
                         @Override
                         public void run(boolean success, long task2Id, SubTask subTask, boolean finished) {
-                            m_logger.info(" END  "+task2Id+" if finished unregister "+finished);
+                            m_logger.info("**** +++ --- END  task "+task2Id+" if finished ? "+finished+" unregister + set loaded");
                             if (finished) {                                                               
                                 m_quantChannelInfo = new QuantChannelInfo(m_ptmDataset.getDataset());
                                 getDataBoxPanelInterface().addSingleValue(m_quantChannelInfo);
@@ -213,7 +213,7 @@ public class DataBoxPTMSiteProtein extends AbstractDataBox {
                     // ask asynchronous loading of data
                     DatabaseLoadLcMSTask taskMap = new DatabaseLoadLcMSTask(mapCallback);
                     taskMap.initLoadAlignmentForXic(getProjectId(), m_ptmDataset.getDataset());
-                    m_logger.info(" Register taskMap  "+taskMap.getId()+" : "+taskMap.toString());
+                    m_logger.info("**** +++ --- Register taskMap DatabaseLoadLcMSTask.initLoadAlignmentForXic "+taskMap.getId()+" : "+taskMap.toString());
                     registerTask(taskMap);
 
                 } else {
@@ -221,8 +221,8 @@ public class DataBoxPTMSiteProtein extends AbstractDataBox {
 //                    ((PTMProteinSitePanel) getDataBoxPanelInterface()).dataUpdated(subTask, finished);
                 }
 
-                if (finished) {                    
-                    m_logger.info(" Unregister "+taskId+" loadProteinMatchMapping + propagate and set Loaded ");
+                if (finished) {        
+                    m_logger.info(" **** +++ Unregister "+taskId+" loadProteinMatchMapping + propagate and set Loaded ");
                     Map<Long, Long> typicalProteinMatchIdByProteinMatchId = loadProteinMatchMapping();
                     m_ptmDataset.setQuantProteinSets(m_masterQuantProteinSetList, typicalProteinMatchIdByProteinMatchId);                    
                     ((PTMProteinSitePanel) getDataBoxPanelInterface()).setData(taskId, proteinPTMSiteArray, finished);                    
@@ -236,7 +236,7 @@ public class DataBoxPTMSiteProtein extends AbstractDataBox {
         // ask asynchronous loading of data        
         DatabaseLoadXicMasterQuantTask task = new DatabaseLoadXicMasterQuantTask(callback);
         task.initLoadProteinSets(getProjectId(), m_ptmDataset.getDataset(), m_masterQuantProteinSetList);
-         m_logger.info("Register task (Xic initLoadProteinSets)"+task.getId()+" : "+task.toString());
+        m_logger.debug("**** +++ Register task XicMasterQuantTask . initLoadProteinSets "+task.getId()+" : "+task.toString());        
         registerTask(task);
 
     }
@@ -289,9 +289,8 @@ public class DataBoxPTMSiteProtein extends AbstractDataBox {
 
             @Override
             public void run(boolean success, final long taskId, SubTask subTask, boolean finished) {
-                m_logger.debug("END task "+taskId+" call next loadXicData "+ m_isXicResult+"; if finished unregister "+finished); 
+                m_logger.debug("**** --- END task "+taskId+ " if finished ("+finished+") call unregister + loadXicData ? "+ m_isXicResult+" duration "+ (System.currentTimeMillis()-logStartTime)+" TimeMillis"); 
                 if (finished) {
-                    m_logger.info(this.getClass().getName()+" task Id ="+ taskId+" finished during " + (System.currentTimeMillis()-logStartTime)+" TimeMillis");
                     if(isXicResult()){
                         loadXicData(loadingId, taskId, ptmSiteArray, finished);
                     } else {
@@ -307,7 +306,7 @@ public class DataBoxPTMSiteProtein extends AbstractDataBox {
         DatabasePTMsTask task = new DatabasePTMsTask(callback);
         task.initFillPTMSites(getProjectId(), m_ptmDataset.getDataset().getResultSummary(), ptmSiteArray);
         logStartTime = System.currentTimeMillis();
-        m_logger.info(this.getClass().getName()+" DatabasePTMsTask task Id ="+ task.getId()+" registered" );
+        m_logger.debug("**** --- Register task DatabasePTMsTask.initFillPTMSites " +task.getId()+" : "+task.toString());
         registerTask(task);
 
     }

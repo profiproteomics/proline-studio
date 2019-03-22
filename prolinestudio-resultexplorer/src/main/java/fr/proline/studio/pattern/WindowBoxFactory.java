@@ -266,7 +266,7 @@ public class WindowBoxFactory {
 
     public static WindowBox getXicPTMSitesWindowBox(String dataName) {
 
-        AbstractDataBox[] boxes = new AbstractDataBox[6];
+        AbstractDataBox[] boxes = new AbstractDataBox[8];
         boxes[0] = new DataBoxPTMSiteProtein();
         boxes[0].setDataName(dataName);
         ((DataBoxPTMSiteProtein) boxes[0]).setXicResult(true);
@@ -276,13 +276,16 @@ public class WindowBoxFactory {
         boxes[2] = new DataBoxPTMSitePeptides();//new DataBoxXicPTMSitePeptides();
         boxes[2].setLayout(SplittedPanelContainer.PanelLayout.HORIZONTAL);
 
-        boxes[3] = new DataboxXicPeptideSet();
-        ((DataboxXicPeptideSet) boxes[3]).setXICMode(true);
-
-        //boxes[4] = new DataboxMultiGraphics(false, false);
-        boxes[4] = new DataboxMultiGraphicsDoubleYAxis();
-        boxes[4].setLayout(SplittedPanelContainer.PanelLayout.HORIZONTAL);
+        boxes[3] = new DataboxXicPeptideSet(true);
+        ((DataboxXicPeptideSet) boxes[3]).setXICMode(true);      
+        boxes[4] = new DataboxMultiGraphics(false,false,true);
+        boxes[4].setLayout(SplittedPanelContainer.PanelLayout.HORIZONTAL);               
         boxes[5] = new DataBoxPTMSitePepMatches();
+        boxes[5].setLayout(SplittedPanelContainer.PanelLayout.TABBED);
+        
+        boxes[6] = new DataboxXicPeptideSet(false);
+        boxes[7] = new DataboxMultiGraphics(false,false,true);
+        boxes[7].setLayout(SplittedPanelContainer.PanelLayout.HORIZONTAL);     
 
         IconManager.IconType iconType = IconManager.IconType.QUANT_XIC;
         return new WindowBox(boxes[0].getFullName(), generatePanel(boxes), boxes[0], IconManager.getImage(iconType));
@@ -386,9 +389,8 @@ public class WindowBoxFactory {
         boxes[0].setDataName(dataName);
         ((DataboxXicProteinSet) boxes[0]).setXICMode(xicMode);
         boxes[1] = new DataboxXicPeptideSet();
-        ((DataboxXicPeptideSet) boxes[1]).setXICMode(xicMode);
-        //boxes[2] = new DataboxMultiGraphics(false, false);
-        boxes[2] = new DataboxMultiGraphicsDoubleYAxis();
+        ((DataboxXicPeptideSet) boxes[1]).setXICMode(xicMode);        
+        boxes[2] = new DataboxMultiGraphics(false,false,true);
         boxes[2].setLayout(SplittedPanelContainer.PanelLayout.HORIZONTAL);
         if (xicMode) {
             boxes[3] = new DataboxXicPeptideIon();

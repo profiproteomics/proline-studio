@@ -445,11 +445,11 @@ public class PTMProteinSitePanel extends HourglassPanel implements DataBoxPanelI
             if (selectionWillBeRestored) {
                 return;
             }
-				//VDS: Order is important ! To be corrected using set of class for propagation
+            //VDS: Order is important ! To be corrected using set of class for propagation
             m_dataBox.propagateDataChanged(PTMSite.class);
             m_dataBox.propagateDataChanged(DProteinSet.class);
             m_dataBox.propagateDataChanged(DProteinMatch.class);
-            m_dataBox.propagateDataChanged(DPeptideMatch.class);
+//            m_dataBox.propagateDataChanged(DPeptideMatch.class);
 
         }
 

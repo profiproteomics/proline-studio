@@ -171,6 +171,7 @@ public class PeptidesOfPTMSiteTableModel extends DecoratedTableModel implements 
         return m_ptmSitePeptides.get(row).peptideInstance;
     }
 
+    //VDS : Rename getPeptideInstanceIndex : No selection here
     public int getSelectedIndex(DPeptideInstance pep) {
         DPeptideInstance comparePep;
         for (int row = 0; row < this.getRowCount(); row++) {

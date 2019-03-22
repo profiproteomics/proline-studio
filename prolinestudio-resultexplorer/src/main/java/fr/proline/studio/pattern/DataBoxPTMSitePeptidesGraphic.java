@@ -29,8 +29,8 @@ public class DataBoxPTMSitePeptidesGraphic extends AbstractDataBox {
         super(DataboxType.DataBoxPTMSitePeptidesGraphic, DataboxStyle.STYLE_RSM);//VDS: could use RSM even in XIC ?
 
         // Name of this databox
-        m_typeName = "Graphic PTM Site's Peptides";
-        m_description = "Graphic Peptides of a PTM Protein Sites ";
+        m_typeName = "PTM Site Matches Plot";
+        m_description = "Peptides of a PTM Protein Sites graphical display.";
 
         // Register Possible in parameters
         // One ResultSummary

@@ -33,6 +33,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author MB243701
  */
+//VDS FIXME : Pas vraiment un modele pour Peptide.... A Renommer !
 public class PeptideTableModel extends LazyTableModel implements GlobalTableModelInterface {
 
     public static final int COLTYPE_QC_ID = 0;

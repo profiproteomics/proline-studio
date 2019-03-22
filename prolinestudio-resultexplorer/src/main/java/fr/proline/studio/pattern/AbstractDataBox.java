@@ -100,7 +100,7 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
         DataboxRsmPSMOfPeptide(20),
         DataboxXicProteinSet(21),
         DataboxRsetMSDiag(22),
-        //DataboxSelectCompareData(23),
+        DataboxXicPeptideSetShortList(23),
         DataboxCompareResult(24),
         DataboxXicPeptideSet(25),
         DataboxXicPeptideIon(26),
@@ -183,6 +183,8 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
                     return new DataboxRsmPSMOfPeptide();
                 case DataboxXicProteinSet:
                     return new DataboxXicProteinSet();
+                case DataboxXicPeptideSetShortList:
+                    return new DataboxXicPeptideSet(true);
                 case DataboxXicPeptideSet:
                     return new DataboxXicPeptideSet();
                 case DataboxRsetMSDiag:
@@ -196,7 +198,7 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
                 case DataboxMultiGraphics:
                     return new DataboxMultiGraphics();
                 case DataboxMultiGraphicsDoubleYAxis:
-                    return new DataboxMultiGraphicsDoubleYAxis();
+                    return new DataboxMultiGraphics(false,false,true);
                 case DataboxPSMOfMasterQuantPeptide:
                     return new DataboxPSMOfMasterQuantPeptide();
                 case DataBoxMzScope:
@@ -463,6 +465,7 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
 
     }
 
+    // VDS FIXME : getArray : ?? Not used 
     public Object getData(boolean getArray, Class parameterType) {
 
         if ((parameterType != null) && (parameterType.equals(ProjectId.class))) {
@@ -480,9 +483,8 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
         return null;
     }
 
-    // VDS: Should 
-    // call getData if isList = false
-    // or rename to getDataList(boolean getArray, Class parameterType)
+    // VDS: FIXME
+    // isList => return a List of object from data => transformToList ?? 
     public Object getData(boolean getArray, Class parameterType, boolean isList) {
 
         if ((parameterType != null) && (parameterType.equals(ProjectId.class))) {

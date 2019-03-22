@@ -50,7 +50,6 @@ public class DataBoxPTMSitePeptides extends AbstractDataBox {
 
     @Override
     public void createPanel() {
-        //PeptidesPTMSiteTablePanel p = new PeptidesPTMSiteTablePanel();
         PeptidesPTMSiteTablePanel p = new PeptidesPTMSiteTablePanel(false);
         p.setName(m_typeName);
         p.setDataBox(this);
@@ -161,12 +160,7 @@ public class DataBoxPTMSitePeptides extends AbstractDataBox {
         if (parameterType != null && isList) {
             if (parameterType.equals(DPeptideInstance.class)) {
                 List<DPeptideInstance> parentPepInstances = m_currentPtmSite.getParentPeptideInstances();
-                if (!getArray) {
                     return parentPepInstances;
-                } else {
-                    return parentPepInstances.toArray(new Long[parentPepInstances.size()]);
-                }
-
             }
         }
         return super.getData(getArray, parameterType, isList);

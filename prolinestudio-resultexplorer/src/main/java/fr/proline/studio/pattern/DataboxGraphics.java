@@ -24,8 +24,8 @@ public class DataboxGraphics extends AbstractDataBox  {
          m_defaultLocked = defaultLocked;
          
         // Name of this databox
-        m_typeName = "Graphic";
-        m_description = "Graphics : Histogram / Scatter Plot / Venn Diagram / Parallel Coordinates";
+        m_typeName = "Customisable Graphical Display";
+        m_description = "Plots data as Histogram / Scatter Plot / Venn Diagram / Parallel Coordinates";
 
         // Register Possible in parameters
         // One ResultSummary
@@ -33,6 +33,14 @@ public class DataboxGraphics extends AbstractDataBox  {
         inParameter.addParameter(ExtendedTableModelInterface.class, false);
         registerInParameter(inParameter);
         
+    }
+    
+    protected void setDefaultLocked(boolean defaultLocked){
+        m_defaultLocked = defaultLocked;
+    }
+    
+    protected boolean isDefaultLocked(){
+        return m_defaultLocked;
     }
     
     @Override

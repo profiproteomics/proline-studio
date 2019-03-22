@@ -17,6 +17,7 @@ import java.util.Map;
  *
  * @author Karine XUE
  */
+//VDS FIXME : Pas vraiment un modele pour les abondance de Proteines.... A Renommer ! 
 public class XicAbundanceProteinTableModel extends PeptideTableModel implements SecondAxisTableModelInterface{
 
     private DMasterQuantProteinSet m_proteinSet = null;

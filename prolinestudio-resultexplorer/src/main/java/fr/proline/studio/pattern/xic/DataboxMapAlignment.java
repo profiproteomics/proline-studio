@@ -55,8 +55,8 @@ public class DataboxMapAlignment extends AbstractDataBox {
         super(DataboxType.DataBoxMapAlignment, DataboxStyle.STYLE_XIC);
 
         // Name of this databox
-        m_typeName = "Graphic XIC Map Alignment";
-        m_description = "Map Alignment information for a XIC";
+        m_typeName = "Map Alignment Plot";
+        m_description = "Graphical display of XIC Map Alignment.";
 
         m_compareRT2Maps = new HashMap<Long, RTCompareTableModel>();
         // Register Possible in parameters

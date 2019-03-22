@@ -29,10 +29,18 @@ public class AddDataBoxActionListener implements ActionListener {
         dialog.setLocationRelativeTo(WindowManager.getDefault().getMainWindow());
         dialog.setVisible(true);
         if (dialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {
+            
             AbstractDataBox genericDatabox = dialog.getSelectedDataBox();
             try {
-                genericDatabox = (AbstractDataBox) genericDatabox.getClass().newInstance(); // copy the databox
-
+                AbstractDataBox newGenericDatabox = (AbstractDataBox) genericDatabox.getClass().newInstance(); // copy the databox
+                
+                //Some databox must be specifically configured ...  VDS : To be more generic ?!
+                if(DataboxGraphics.class.isInstance(newGenericDatabox)) {
+                    ((DataboxGraphics)newGenericDatabox).setDefaultLocked(((DataboxGraphics)genericDatabox).isDefaultLocked());
+                } else if (DataboxMultiGraphics.class.isInstance(newGenericDatabox) ){                    
+                    newGenericDatabox = new DataboxMultiGraphics(false, false, ((DataboxMultiGraphics)genericDatabox).isDoubleYAxis());                    
+                }
+                genericDatabox = newGenericDatabox;
             } catch (InstantiationException | IllegalAccessException e) {
                 // should never happen
             }

@@ -25,7 +25,7 @@ It's a java client application based on Netbeans Platform and is composed of sev
   
 # License
 
-This project is licensed under the CeCILL License - see the Licence_CeCILL_V2.1-en.txt file for details
+This project is licensed under the [CeCILL License V2.1](http://www.cecill.info/licences/Licence_CeCILL_V2.1-en.html)
 
 # Proline Web Site
 

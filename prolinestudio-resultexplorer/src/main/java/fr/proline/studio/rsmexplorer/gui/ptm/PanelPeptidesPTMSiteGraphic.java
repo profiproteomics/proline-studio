@@ -6,6 +6,7 @@ import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
+import fr.proline.studio.rsmexplorer.gui.PeptidesPTMSitePanelInterface;
 import fr.proline.studio.rsmexplorer.gui.ptm.mark.PtmMarkCtrl;
 import fr.proline.studio.rsmexplorer.gui.ptm.pep.PeptideAreaCtrl;
 import fr.proline.studio.rsmexplorer.gui.ptm.mark.ProteinSequenceCtrl;
@@ -21,7 +22,7 @@ import org.slf4j.LoggerFactory;
  * @author Karine XUE
  */
 //public class PanelPeptidesPTMSiteGraphic extends PeptidesPTMSiteTablePanel {
-public class PanelPeptidesPTMSiteGraphic extends JPanel implements DataBoxPanelInterface, SplittedPanelContainer.UserActions {
+public class PanelPeptidesPTMSiteGraphic extends JPanel implements DataBoxPanelInterface, SplittedPanelContainer.UserActions, PeptidesPTMSitePanelInterface {
 
     private static Logger logger = LoggerFactory.getLogger(PanelPeptidesPTMSiteGraphic.class);
     protected DataMgrPtm _dataMgr;
@@ -73,7 +74,8 @@ public class PanelPeptidesPTMSiteGraphic extends JPanel implements DataBoxPanelI
         return toolbar;
     }
 
-    // @Override
+    
+    @Override
     public void setData(PTMSite peptidesPTMSite, DPeptideInstance pepInst) {
         //logger.debug(this.getClass().getName() + " setData ->");
         if (peptidesPTMSite == null) {
@@ -110,12 +112,14 @@ public class PanelPeptidesPTMSiteGraphic extends JPanel implements DataBoxPanelI
     /**
      * used to set next Data Box
      */
-    public DPeptideInstance getSelectedDPeptideInstance() {
+    @Override
+    public DPeptideInstance getSelectedPeptideInstance() {
         int selectedRowIndex = this._paintArea.getSelectedPeptideIndex();
         //logger.debug("getSelectedPeptideInstance selectRowIndex: " + selectedRowIndex);
         return this._dataMgr.getSelectedDPeptideInstance(selectedRowIndex);
     }
 
+    @Override
     public void setSelectedPeptide(DPeptideInstance pep){
         int row = this._dataMgr.getPeptideIndex(pep);
         this._paintArea.setSelectedPeptideIndex(row);

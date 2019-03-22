@@ -51,7 +51,7 @@ import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
  *
  * @author VD225637
  */
-public class PeptidesPTMSiteTablePanel extends JPanel implements DataBoxPanelInterface, GlobalTabelModelProviderInterface {
+public class PeptidesPTMSiteTablePanel extends JPanel implements DataBoxPanelInterface, GlobalTabelModelProviderInterface, PeptidesPTMSitePanelInterface {
 
     protected AbstractDataBox m_dataBox;
 
@@ -85,6 +85,7 @@ public class PeptidesPTMSiteTablePanel extends JPanel implements DataBoxPanelInt
         initComponents();
     }
 
+    @Override
     public PTMSite getSelectedPTMSite() {
 
         CompoundTableModel compoundTableModel = ((CompoundTableModel) m_peptidesPtmSiteTable.getModel());
@@ -105,6 +106,7 @@ public class PeptidesPTMSiteTablePanel extends JPanel implements DataBoxPanelInt
         return tableModel.getSelectedPeptideMatchSite(selectedRow);
     }
 
+    @Override
     public DPeptideInstance getSelectedPeptideInstance() {
         CompoundTableModel compoundTableModel = ((CompoundTableModel) m_peptidesPtmSiteTable.getModel());
         // Retrieve ProteinPTMSite selected
@@ -155,6 +157,7 @@ public class PeptidesPTMSiteTablePanel extends JPanel implements DataBoxPanelInt
         }
     }
 
+    @Override
     public void setData(PTMSite peptidesPTMSite, DPeptideInstance pepInst) {
 
         if ((peptidesPTMSite == m_currentPTMSite) && (pepInst == m_currentPepInst)) {

@@ -10,6 +10,7 @@ import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dam.tasks.data.ptm.PTMDataset;
 import fr.proline.studio.dam.tasks.data.ptm.PTMSite;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
+import fr.proline.studio.rsmexplorer.gui.PeptidesPTMSitePanelInterface;
 import fr.proline.studio.rsmexplorer.gui.PeptidesPTMSiteTablePanel;
 import java.util.List;
 import org.slf4j.Logger;
@@ -26,13 +27,13 @@ public class DataBoxPTMSitePeptides extends AbstractDataBox {
     private long m_logTimeStart;
     private PTMSite m_currentPtmSite;
     private PTMDataset m_ptmDataset;
-   
+
     public DataBoxPTMSitePeptides() {
         super(DataboxType.DataBoxPTMSitePeptides, DataboxStyle.STYLE_RSM);
 
         // Name of this databox
-        m_typeName = "PTM Site's Peptides";
-        m_description = "Peptides of a PTM Protein Sites ";
+            m_typeName = "PTM Site's Peptides";
+            m_description = "Peptides of a PTM Protein Sites ";
 
         // Register Possible in parameters
         // One ResultSummary
@@ -50,32 +51,34 @@ public class DataBoxPTMSitePeptides extends AbstractDataBox {
 
     @Override
     public void createPanel() {
-        PeptidesPTMSiteTablePanel p = new PeptidesPTMSiteTablePanel(false);
-        p.setName(m_typeName);
-        p.setDataBox(this);
-        setDataBoxPanelInterface(p);
+            PeptidesPTMSiteTablePanel p = new PeptidesPTMSiteTablePanel(false);
+            p.setName(m_typeName);
+            p.setDataBox(this);
+            setDataBoxPanelInterface(p);
     }
 
     @Override
     public void dataChanged() {
+        PeptidesPTMSitePanelInterface panel = (PeptidesPTMSitePanelInterface) getDataBoxPanelInterface();
 
-        m_currentPtmSite = (PTMSite) m_previousDataBox.getData(false, PTMSite.class);        
-        DPeptideInstance inst = (DPeptideInstance) m_previousDataBox.getData(false, DPeptideInstance.class);
+        m_currentPtmSite = (PTMSite) m_previousDataBox.getData(false, PTMSite.class);
+
+        DPeptideInstance selectedInsts = (DPeptideInstance) m_previousDataBox.getData(false, DPeptideInstance.class);
         //m_logger.debug("selected peptide Match, ptm {}", m_selecedDPeptideMatch.getPeptide().getTransientData().getPeptideReadablePtmString().getReadablePtmString());
         m_ptmDataset = (PTMDataset) m_previousDataBox.getData(false, PTMDataset.class);
         m_rsm = m_ptmDataset.getDataset().getResultSummary();
 
         if (m_currentPtmSite == null) {
-            ((PeptidesPTMSiteTablePanel) getDataBoxPanelInterface()).setData(null, null);
+            panel.setData(null, null);
             return;
         }
 
         //m_logger.debug("DATA Changed : Update PTMSite Peptide WINDOWS. " + ptmSite.toString() + " data loaded " + ptmSite.isLoaded());
         if (m_currentPtmSite.isLoaded()) {
             m_previousTaskId = null;
-            ((PeptidesPTMSiteTablePanel) getDataBoxPanelInterface()).setData(m_currentPtmSite, null);
-            if (inst != null) {
-                ((PeptidesPTMSiteTablePanel) getDataBoxPanelInterface()).setSelectedPeptide(inst);
+            panel.setData(m_currentPtmSite, null);
+            if (selectedInsts != null) {
+                panel.setSelectedPeptide(selectedInsts);
             }
             propagateDataChanged(ExtendedTableModelInterface.class);
             return;
@@ -93,9 +96,9 @@ public class DataBoxPTMSitePeptides extends AbstractDataBox {
             @Override
             public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
                 if (success) {
-                    ((PeptidesPTMSiteTablePanel) getDataBoxPanelInterface()).setData(m_currentPtmSite, null);
+                    panel.setData(m_currentPtmSite, null);
                 } else {
-                    ((PeptidesPTMSiteTablePanel) getDataBoxPanelInterface()).setData(null, null);
+                    panel.setData(null, null);
                 }
 
                 setLoaded(loadingId);
@@ -134,14 +137,14 @@ public class DataBoxPTMSitePeptides extends AbstractDataBox {
             }
 
             if (parameterType.equals(PTMSite.class)) {
-                PTMSite ptmSite = ((PeptidesPTMSiteTablePanel) getDataBoxPanelInterface()).getSelectedPTMSite();
+                PTMSite ptmSite = ((PeptidesPTMSitePanelInterface) getDataBoxPanelInterface()).getSelectedPTMSite();
                 if (ptmSite != null) {
                     return ptmSite;
                 }
             }
 
             if (parameterType.equals(DPeptideInstance.class)) {
-                DPeptideInstance selectedParentPepInstance = ((PeptidesPTMSiteTablePanel) getDataBoxPanelInterface()).getSelectedPeptideInstance();
+                DPeptideInstance selectedParentPepInstance = ((PeptidesPTMSitePanelInterface) getDataBoxPanelInterface()).getSelectedPeptideInstance();
                 if (selectedParentPepInstance != null) {
                     return selectedParentPepInstance;
                 }
@@ -160,7 +163,7 @@ public class DataBoxPTMSitePeptides extends AbstractDataBox {
         if (parameterType != null && isList) {
             if (parameterType.equals(DPeptideInstance.class)) {
                 List<DPeptideInstance> parentPepInstances = m_currentPtmSite.getParentPeptideInstances();
-                    return parentPepInstances;
+                return parentPepInstances;
             }
         }
         return super.getData(getArray, parameterType, isList);

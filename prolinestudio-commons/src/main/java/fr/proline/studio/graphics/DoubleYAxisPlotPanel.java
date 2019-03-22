@@ -344,12 +344,12 @@ public class DoubleYAxisPlotPanel extends BasePlotPanel {
                     //m_logger.debug("->seconde Axis Y");                    
                     m_secondYAxis.setSize(m_plotArea.width + yAxisWidth, yAxisY, yAxisWidth, yAxisHeight);
                     m_secondYAxis.paint(g2d);
-                    int x = m_plotArea.x + m_plotArea.width + BasePlotPanel.GAP_FIGURES_Y;
-                    int y = m_plotArea.y;
-                    if (m_secondYAxisColor != null) {
-                        g2d.setColor(m_secondYAxisColor);
-                    }
-                    g2d.fillRect(x, y, 10, 10);  //paint a rectangle to indicate the plot color on 2nd Axis Y
+//                    int x = m_plotArea.x + m_plotArea.width + BasePlotPanel.GAP_FIGURES_Y;
+//                    int y = m_plotArea.y;
+//                    if (m_secondYAxisColor != null) {
+//                        g2d.setColor(m_secondYAxisColor);
+//                    }
+//                    g2d.fillRect(x, y, 10, 10);  //paint a rectangle to indicate the plot color on 2nd Axis Y
                     //m_logger.debug("<->seconde Axis Y");
                 }
             }

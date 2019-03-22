@@ -520,7 +520,10 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
             plotGraphics.setIsPaintMarker(false);
             ((DoubleYAxisPlotPanel) m_plotPanel).addAuxiliaryPlot(plotGraphics);
             Color color = m_valueOn2Yxis.getPlotInformation().getPlotColor();
-            ((DoubleYAxisPlotPanel) m_plotPanel).setSecondAxisPlotInfo(m_valueOn2Yxis.getName() + " " + m_valueOn2Yxis.getDataColumnIdentifier(columnXYIndex[COL_Y_ID]), color);
+            String axisTitle = m_valueOn2Yxis.getName();
+            if (axisTitle == null)
+                axisTitle = "";
+            ((DoubleYAxisPlotPanel) m_plotPanel).setSecondAxisPlotInfo(axisTitle + " " + m_valueOn2Yxis.getDataColumnIdentifier(columnXYIndex[COL_Y_ID]), color);
         }
         ((DoubleYAxisPlotPanel) m_plotPanel).preparePaint();
         double minY = ((DoubleYAxisPlotPanel) m_plotPanel).getYAxis().getMinValue();

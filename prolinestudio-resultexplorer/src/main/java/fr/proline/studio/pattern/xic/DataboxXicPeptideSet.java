@@ -286,6 +286,7 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
                 }
                 XicAbundanceProteinTableModel protTableModel = new XicAbundanceProteinTableModel();
                 protTableModel.setData(m_quantChannelInfo.getQuantChannels(), m_masterQuantProteinSet);
+                protTableModel.setName("Protein");
                 return protTableModel;
             }
         }

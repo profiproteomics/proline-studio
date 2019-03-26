@@ -891,21 +891,19 @@ public class DoubleYAxisPlotPanel extends BasePlotPanel {
         double oldMaxX = m_xAxis.getMaxValue();
         double oldMinY = m_yAxis.getMinValue();
         double oldMaxY = m_yAxis.getMaxValue();
-//        double oldMinY2 = m_secondYAxis.getMinValue();
-//        double oldMaxY2 = m_secondYAxis.getMaxValue();
-                
+        
         double factor = 0.20;
         double xValue = m_xAxis.pixelToValue(e.getX());
         double x2Value = m_secondXAxis.pixelToValue(e.getX());
         double yValue = m_yAxis.pixelToValue(e.getY());
         double y2Value = m_secondYAxis.pixelToValue(e.getY());
-        double newXmin = m_xAxis.getMinValue() + (m_xAxis.getMinValue() - xValue) * factor * e.getWheelRotation();
-        double newXmax = m_xAxis.getMaxValue() - (xValue - m_xAxis.getMaxValue()) * factor * e.getWheelRotation();
+        double newXmin = oldMinX + (oldMinX - xValue) * factor * e.getWheelRotation();
+        double newXmax = oldMaxX - (xValue - oldMaxX) * factor * e.getWheelRotation();
         double newX2Min = m_secondXAxis.getMinValue() + (m_secondXAxis.getMinValue() - x2Value) * factor * e.getWheelRotation();
         double newX2Max = m_secondXAxis.getMaxValue() - (x2Value - m_secondXAxis.getMaxValue()) * factor * e.getWheelRotation();
 
-        double newYmin = m_yAxis.getMinValue() + (m_yAxis.getMinValue() - yValue) * factor * e.getWheelRotation();
-        double newYmax = m_yAxis.getMaxValue() - (yValue - m_yAxis.getMaxValue()) * factor * e.getWheelRotation();
+        double newYmin = oldMinY + (oldMinY - yValue) * factor * e.getWheelRotation();
+        double newYmax = oldMaxY - (yValue - oldMaxY) * factor * e.getWheelRotation();
         double newY2Min = m_secondYAxis.getMinValue() + (m_secondYAxis.getMinValue() - y2Value) * factor * e.getWheelRotation();
         double newY2Max = m_secondYAxis.getMaxValue() - (y2Value - m_secondYAxis.getMaxValue()) * factor * e.getWheelRotation();
         //if (m_plots.get(0).inside(e.getX(), e.getY())) {//mouse wheel move on m_plotArea

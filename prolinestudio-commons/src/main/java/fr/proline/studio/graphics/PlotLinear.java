@@ -564,7 +564,7 @@ public class PlotLinear extends PlotXYAbstract {
         m_plotPanel.setXAxisTitle(m_compareDataInterface.getDataColumnIdentifier(m_cols[COL_X_ID]));
         m_plotPanel.setYAxisTitle(m_compareDataInterface.getDataColumnIdentifier(m_cols[COL_Y_ID]));
     }
-   
+
     private void setGradientValues() {
         ColorOrGradient colorOrGradient = m_colorParameter.getColor();
         boolean useGradient = !colorOrGradient.isColorSelected();
@@ -684,6 +684,9 @@ public class PlotLinear extends PlotXYAbstract {
         if (size > 0) {
             int x0 = xAxis.valueToPixel(m_dataX[0]);
             int y0 = yAxis.valueToPixel(m_dataY[0]);
+            x0 = (Double.valueOf(m_dataX[0]).isNaN()) ? xAxis.valueToPixel(0) : x0;
+            y0 = (Double.valueOf(m_dataY[0]).isNaN()) ? 0 : y0;
+
             boolean isDef0 = !Double.valueOf(m_dataX[0]).isNaN() && !Double.valueOf(m_dataY[0]).isNaN();
 
             for (int i = 0; i < size; i++) {
@@ -692,6 +695,9 @@ public class PlotLinear extends PlotXYAbstract {
                 }
                 int x = xAxis.valueToPixel(m_dataX[i]);
                 int y = yAxis.valueToPixel(m_dataY[i]);
+                x = (Double.valueOf(m_dataX[i]).isNaN()) ? xAxis.valueToPixel(0): x;
+                y = (Double.valueOf(m_dataY[i]).isNaN()) ? 0 : y;
+                
                 boolean isDef = !Double.valueOf(m_dataX[i]).isNaN() && !Double.valueOf(m_dataY[i]).isNaN();
                 g.setColor(plotColor);
                 if (m_userStrock != null) {
@@ -793,7 +799,7 @@ public class PlotLinear extends PlotXYAbstract {
             }
         }
     }
-    
+
     public void setPlotInformation(PlotInformation plotInformation) {
         this.m_plotInformation = plotInformation;
         if (plotInformation != null) {
@@ -883,5 +889,4 @@ public class PlotLinear extends PlotXYAbstract {
         this.displayAntiAliasing = displayAntiAliasing;
     }
 
-   
 }

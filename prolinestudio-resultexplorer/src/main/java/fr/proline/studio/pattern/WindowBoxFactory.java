@@ -276,15 +276,15 @@ public class WindowBoxFactory {
         boxes[2] = new DataBoxPTMSitePeptides();//new DataBoxXicPTMSitePeptides();
         boxes[2].setLayout(SplittedPanelContainer.PanelLayout.HORIZONTAL);
 
-        boxes[3] = new DataboxXicPeptideSet(true);
+        boxes[3] = new DataboxXicPeptideSet(true);//display the selected peptide in each chanel
         ((DataboxXicPeptideSet) boxes[3]).setXICMode(true);      
-        boxes[4] = new DataboxMultiGraphics(false,false,true);
+        boxes[4] = new DataboxMultiGraphics(false,false,true);//associate a graphic databox for DataboxXicPeptideSet
         boxes[4].setLayout(SplittedPanelContainer.PanelLayout.HORIZONTAL);               
         boxes[5] = new DataBoxPTMSitePepMatches();
         boxes[5].setLayout(SplittedPanelContainer.PanelLayout.TABBED);
         
-        boxes[6] = new DataboxXicPeptideSet(false);
-        boxes[7] = new DataboxMultiGraphics(false,false,true);
+        boxes[6] = new DataboxXicPeptideSet(false);//display the selected peptideMatch in each chanel
+        boxes[7] = new DataboxMultiGraphics(false,false,true); //associate a graphic databox for DataboxXicPeptideSet
         boxes[7].setLayout(SplittedPanelContainer.PanelLayout.HORIZONTAL);     
 
         IconManager.IconType iconType = IconManager.IconType.QUANT_XIC;

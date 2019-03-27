@@ -583,11 +583,13 @@ public class XAxis extends Axis {
         if (m_isPixel) {
             return (int) Math.round(v);
         }
+        v = (Double.valueOf(v).isNaN()) ? 0 : v;
         if (m_log) {
-            v = Math.log10(v);
+            double logV;
+            logV = (v == 0) ? 0 : Math.log10(v);
             double min = Math.log10(m_minValue);
             double max = Math.log10(m_maxValue);
-            return m_x + (int) Math.round(((v - min) / (max - min)) * m_width);
+            return m_x + (int) Math.round(((logV - min) / (max - min)) * m_width);                          
         } else {
             return m_x + (int) Math.round(((v - m_minValue) / (m_maxValue - m_minValue)) * m_width);
         }

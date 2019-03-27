@@ -178,11 +178,11 @@ public class YAxis extends Axis {
         g.setStroke(prevStroke);
 
     }
-    
+
     /**
      * paint linear axis with ticks
      * @param g
-     * @param ticks 
+     * @param ticks
      */
     private void paintLinear(Graphics2D g, AxisTicks ticks) {
 
@@ -257,7 +257,7 @@ public class YAxis extends Axis {
             }
             //draw ticket & it's label
             int tickX = ((m_isLeftAxis) ? m_lineXStart : m_lineXStart + 4);
-            int tickStringX = ((m_isLeftAxis) ? m_lineXStart - stringWidth - 6 : m_lineXStart+4);
+            int tickStringX = ((m_isLeftAxis) ? m_lineXStart - stringWidth - 6 : m_lineXStart + 4);
 
             if (pY < previousEndY - m_lastHeight - 2) { // check to avoid to overlap labels
                 g.drawString(label, tickStringX, pY + halfAscent);
@@ -440,11 +440,12 @@ public class YAxis extends Axis {
 
     @Override
     public int valueToPixel(double v) {
+        v = (Double.valueOf(v).isNaN()) ? 0 : v;
         if (m_log) {
-            v = Math.log10(v);
+            double logV = (v == 0) ? 0 : Math.log10(v);
             double min = Math.log10(m_minValue);
             double max = Math.log10(m_maxValue);
-            return (m_y + m_height) - (int) Math.round(((v - min) / (max - min)) * m_height);
+            return (m_y + m_height) - (int) Math.round(((logV - min) / (max - min)) * m_height);
         } else {
             return (m_y + m_height) - (int) Math.round(((v - m_minValue) / (m_maxValue - m_minValue)) * m_height);
         }

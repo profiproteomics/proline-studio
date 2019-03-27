@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
  */
 public class PlotLinear extends PlotXYAbstract {
 
-    protected static final Logger logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
+    protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
     private double m_xMin;
     private double m_xMax;
     private double m_yMin;
@@ -684,9 +684,6 @@ public class PlotLinear extends PlotXYAbstract {
         if (size > 0) {
             int x0 = xAxis.valueToPixel(m_dataX[0]);
             int y0 = yAxis.valueToPixel(m_dataY[0]);
-            x0 = (Double.valueOf(m_dataX[0]).isNaN()) ? xAxis.valueToPixel(0) : x0;
-            y0 = (Double.valueOf(m_dataY[0]).isNaN()) ? 0 : y0;
-
             boolean isDef0 = !Double.valueOf(m_dataX[0]).isNaN() && !Double.valueOf(m_dataY[0]).isNaN();
 
             for (int i = 0; i < size; i++) {
@@ -695,9 +692,6 @@ public class PlotLinear extends PlotXYAbstract {
                 }
                 int x = xAxis.valueToPixel(m_dataX[i]);
                 int y = yAxis.valueToPixel(m_dataY[i]);
-                x = (Double.valueOf(m_dataX[i]).isNaN()) ? xAxis.valueToPixel(0): x;
-                y = (Double.valueOf(m_dataY[i]).isNaN()) ? 0 : y;
-                
                 boolean isDef = !Double.valueOf(m_dataX[i]).isNaN() && !Double.valueOf(m_dataY[i]).isNaN();
                 g.setColor(plotColor);
                 if (m_userStrock != null) {

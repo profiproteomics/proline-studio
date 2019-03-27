@@ -427,8 +427,8 @@ public class SystemTasksPanel extends AbstractTasksPanel {
             switch (columnIndex) {
                 case COLTYPE_MESSAGE_EVENT_TYPE:
                     return msg;
-                case COLTYPE_MESSAGE_JSON_RPC_ID:
-                    return msg.getJsonRPCMsgId();
+                case COLTYPE_MESSAGE_JSON_RPC_ID:                    
+                    return Integer.valueOf(msg.getJsonRPCMsgId());
                 case COLTYPE_MESSAGE_SERVICE_NAME:
                     if (StringUtils.isNotEmpty(msg.getServiceDescription())) {
                         return msg.getServiceDescription();
@@ -478,6 +478,7 @@ public class SystemTasksPanel extends AbstractTasksPanel {
         public Class getColumnClass(int col) {
             switch (col) {
                 case COLTYPE_MESSAGE_JSON_RPC_ID:
+                    return Integer.class;
                 case COLTYPE_MESSAGE_SERVICE_NAME:
                 case COLTYPE_MESSAGE_SERVICE_SOURCE:
                 case COLTYPE_MESSAGE_REQ_ID:

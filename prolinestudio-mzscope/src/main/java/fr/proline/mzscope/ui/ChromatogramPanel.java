@@ -17,6 +17,8 @@ import fr.proline.studio.graphics.PlotPanel;
 import fr.proline.studio.graphics.PlotPanelListener;
 import fr.proline.studio.graphics.marker.AbstractMarker;
 import fr.proline.studio.graphics.marker.LineMarker;
+import fr.proline.studio.graphics.measurement.IntegralMeasurement;
+import fr.proline.studio.graphics.measurement.WidthMeasurement;
 import fr.proline.studio.utils.CyclicColorPalette;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -139,6 +141,8 @@ public class ChromatogramPanel extends JPanel implements PlotPanelListener {
       chromatogramPlot.setPlotInformation(chromatoModel.getPlotInformation());
       chromatogramPlot.setIsPaintMarker(true);
       chromatogramPlot.setStrokeFixed(true);
+      chromatogramPlot.addMeasurement(new IntegralMeasurement(chromatogramPlot));
+      //chromatogramPlot.addMeasurement(new WidthMeasurement(chromatogramPlot));
       chromatogramPlotPanel.addPlot(chromatogramPlot);
       chromatogramPlots.add(chromatogramPlot);
       
@@ -295,15 +299,4 @@ public class ChromatogramPanel extends JPanel implements PlotPanelListener {
         chromatogramPlotPanel.repaintUpdateDoubleBuffer();
     }
         
-        
-//        public void computeAxisRange(double zoomXLevel, double relativeXValue, double oldXMin, double oldXMax){
-//        
-//        double newRangeX = (double)(zoomXLevel * (oldXMax - oldXMin) / 100.0);
-//        double x =   (double)(oldXMin + (relativeXValue * (oldXMax - oldXMin) / 100.0));
-//        double newXMin = x - (double)(newRangeX / 2.0);
-//        double newXMax = x + (double)(newRangeX / 2.0);
-//
-//        logger.debug("{} move from min={}, max={} to min={}, max={}", currentChromatogram.rawFilename, oldXMin, oldXMax, newXMin, newXMax);
-//    }
-
 }

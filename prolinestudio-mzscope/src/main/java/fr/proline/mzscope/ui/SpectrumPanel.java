@@ -24,6 +24,7 @@ import fr.proline.studio.graphics.marker.LineMarker;
 import fr.proline.studio.graphics.marker.PointMarker;
 import fr.proline.studio.graphics.marker.coordinates.DataCoordinates;
 import fr.proline.studio.graphics.measurement.IntegralMeasurement;
+import fr.proline.studio.graphics.measurement.WidthMeasurement;
 import fr.proline.studio.utils.CyclicColorPalette;
 import fr.proline.studio.utils.IconManager;
 import java.awt.BorderLayout;
@@ -295,20 +296,6 @@ class ScansSpinnerModel extends AbstractSpinnerModel {
          Color plotColor = rawFilePanel.getPlotColor(rawFilePanel.getCurrentRawfile().getName());
          ScanTableModel scanModel = new ScanTableModel(scan);
          scanModel.setColor(plotColor);
-         if (scan.getDataType() == Spectrum.ScanType.CENTROID) { 
-            //stick plot
-            scanPlot = new PlotStick(spectrumPlotPanel, scanModel, null, ScanTableModel.COLTYPE_SCAN_MASS, ScanTableModel.COLTYPE_SCAN_INTENSITIES);
-            ((PlotStick) scanPlot).setStrokeFixed(true);
-            ((PlotStick) scanPlot).setPlotInformation(scanModel.getPlotInformation());
-            ((PlotStick) scanPlot).setIsPaintMarker(true);
-         } else {
-            scanPlot = new PlotLinear(spectrumPlotPanel, scanModel, null, ScanTableModel.COLTYPE_SCAN_MASS, ScanTableModel.COLTYPE_SCAN_INTENSITIES);
-            ((PlotLinear) scanPlot).addMeasurement(new IntegralMeasurement(scanPlot));
-            ((PlotLinear) scanPlot).setStrokeFixed(true);
-            ((PlotLinear) scanPlot).setPlotInformation(scanModel.getPlotInformation());
-            ((PlotLinear) scanPlot).setIsPaintMarker(true);
-         }
-
          scanPlot = buildPlot(scan, rawFilePanel.getPlotColor(rawFilePanel.getCurrentRawfile().getName()));
          spectrumPlotPanel.setPlot(scanPlot);
          spectrumPlotPanel.lockMinXValue();
@@ -372,13 +359,14 @@ class ScansSpinnerModel extends AbstractSpinnerModel {
             plot = new PlotStick(spectrumPlotPanel, scanModel, null, ScanTableModel.COLTYPE_SCAN_MASS, ScanTableModel.COLTYPE_SCAN_INTENSITIES);
             ((PlotStick) plot).setStrokeFixed(true);
             ((PlotStick) plot).setPlotInformation(scanModel.getPlotInformation());
-            ((PlotStick) plot).setIsPaintMarker(true);
         } else {
             plot = new PlotLinear(spectrumPlotPanel, scanModel, null, ScanTableModel.COLTYPE_SCAN_MASS, ScanTableModel.COLTYPE_SCAN_INTENSITIES);
-            ((PlotLinear) plot).setStrokeFixed(true);
+            plot.addMeasurement(new IntegralMeasurement(plot));
+            plot.addMeasurement(new WidthMeasurement(plot));
+          ((PlotLinear) plot).setStrokeFixed(true);
             ((PlotLinear) plot).setPlotInformation(scanModel.getPlotInformation());
-            ((PlotLinear) plot).setIsPaintMarker(true);
         }
+        plot.setIsPaintMarker(true);
         return plot;
     }
    

@@ -18,7 +18,7 @@ public class IntegralMeasurement extends DeltaXMeasurement {
         DeltaXMeasurement.AlgorithmMeasurement integralAlgorithm = new DeltaXMeasurement.AlgorithmMeasurement() {
             @Override
             public String getName() {
-                return "Measurement Integral";
+                return "Integral measurement";
             }
 
             @Override

@@ -342,7 +342,7 @@ public class MzdbRawFile implements IRawFile {
                     } else {
                         runSlices = getMzDbReader().getLcMsnRunSliceIterator(params.getMinMz(), params.getMaxMz(), params.getFragmentMinMz(), params.getFragmentMaxMz());
                     }
-                }else{
+                } else{
                     runSlices = getMzDbReader().getLcMsRunSliceIterator(params.getMinMz(), params.getMaxMz());
                 }
             }

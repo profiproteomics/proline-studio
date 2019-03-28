@@ -14,7 +14,7 @@ public class WidthMeasurement extends DeltaXMeasurement {
         AlgorithmMeasurement widthAlgorithm = new AlgorithmMeasurement() {
             @Override
             public String getName() {
-                return "Measurement Width";
+                return "Width measurement";
             }
 
             @Override

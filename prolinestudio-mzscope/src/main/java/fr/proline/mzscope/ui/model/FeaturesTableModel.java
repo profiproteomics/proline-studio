@@ -87,7 +87,7 @@ public class FeaturesTableModel extends DecoratedTableModel implements GlobalTab
             case COLTYPE_FEATURE_APEX_INT_COL:
                 return m_features.get(rowIndex).getApexIntensity();
             case COLTYPE_FEATURE_AREA_COL:
-                return m_features.get(rowIndex).getArea();
+                return m_features.get(rowIndex).getArea()/60.0;
             case COLTYPE_FEATURE_SCAN_COUNT_COL:
                 return m_features.get(rowIndex).getScanCount();
             case COLTYPE_FEATURE_CHARGE_COL:

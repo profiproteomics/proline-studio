@@ -72,8 +72,7 @@ public class DoubleYAxisPlotPanel extends BasePlotPanel {
 
     @Override
     public void addPlot(PlotXYAbstract plot) {
-        this.addMainPlot(plot);
-        this.m_plots.add(plot);
+        addMainPlot(plot);
     }
 
     public void addMainPlot(PlotXYAbstract plot) {
@@ -81,6 +80,14 @@ public class DoubleYAxisPlotPanel extends BasePlotPanel {
         this.m_plots.add(plot);
     }
 
+    public boolean hasMainPlots() {
+      return m_mainPlots.size() > 0;
+    }
+    
+    public boolean hasAuxiliaryPlots() {
+      return m_secondPlots.size() > 0;
+    }
+    
     public void addAuxiliaryPlot(PlotXYAbstract plot) {
         this.m_secondPlots.add(plot);
         this.m_plots.add(plot);
@@ -131,6 +138,20 @@ public class DoubleYAxisPlotPanel extends BasePlotPanel {
         }
     }
 
+    public void setYAxisBounds(double min, double max) {
+        super.setYAxisBounds(min, max);
+        if (m_plots != null && !m_plots.isEmpty()) {
+          preparePaint();
+        }
+    }
+
+    public void setSecondaryYAxisBounds(double min, double max) {
+        m_secondYBounds = new double[]{min, max};
+        if (m_secondPlots != null & !m_secondPlots.isEmpty()) {
+          preparePaint();
+        }
+    }
+
     public void preparePaint() {
         updateAxis();
         m_secondYAxis.setTitle(m_secondYAxisTitle);
@@ -151,6 +172,8 @@ public class DoubleYAxisPlotPanel extends BasePlotPanel {
              */
             m_secondXAxis.setRange(Math.min(m_xAxis.getMinValue(), m_secondXAxis.getMinValue()), m_secondXAxis.getMaxValue());
         }
+        //CBy : que se passe-t-il si le main plot represente des valeurs entre -100 et 0 ? MaxY == 0 mais
+        // on a tout de meme un mainPlot
         m_isMainPlotEmpty = (getMinMaxPlots(m_mainPlots)[3] == 0);//YAxis, max =0
     }
 
@@ -186,9 +209,9 @@ public class DoubleYAxisPlotPanel extends BasePlotPanel {
      * from plot list, get the bounds of Axis X and Y, the range of X, Y are the
      * original optimised
      *
-     * @param plot
+     * @param plotList
      */
-    public void updateAxis(ArrayList<PlotBaseAbstract> plotList,
+    private void updateAxis(ArrayList<PlotBaseAbstract> plotList,
             XAxis xAxis, YAxis yAxis, double[] xBounds, double[] yBounds) {
         if (xAxis == null || yAxis == null) {
             return;
@@ -350,7 +373,6 @@ public class DoubleYAxisPlotPanel extends BasePlotPanel {
 //                        g2d.setColor(m_secondYAxisColor);
 //                    }
 //                    g2d.fillRect(x, y, 10, 10);  //paint a rectangle to indicate the plot color on 2nd Axis Y
-                    //m_logger.debug("<->seconde Axis Y");
                 }
             }
             //4 paint plot with grid
@@ -420,8 +442,6 @@ public class DoubleYAxisPlotPanel extends BasePlotPanel {
      * paint each Plot with grid
      *
      * @param g2d
-     * @param xAxis
-     * @param yAxis
      */
     private void paintPlotWithGrid(Graphics2D g2d) {
         // m_logger.debug("___->paintPlotpaint plot...useDoubleBuffer=" + m_useDoubleBuffering);

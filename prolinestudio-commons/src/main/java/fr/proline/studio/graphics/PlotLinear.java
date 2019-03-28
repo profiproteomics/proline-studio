@@ -404,7 +404,6 @@ public class PlotLinear extends PlotXYAbstract {
 
         int size = m_compareDataInterface.getRowCount();
         if (size == 0) {
-
             return;
         }
 

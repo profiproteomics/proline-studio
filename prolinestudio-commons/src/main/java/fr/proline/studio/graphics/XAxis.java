@@ -517,8 +517,7 @@ public class XAxis extends Axis {
             return;
         }
 
-        //g.setColor(CyclicColorPalette.GRAY_GRID);
-        g.setColor(Color.ORANGE);
+        g.setColor(CyclicColorPalette.GRAY_GRID);
         Stroke s = g.getStroke();
         g.setStroke(DASHED);
 

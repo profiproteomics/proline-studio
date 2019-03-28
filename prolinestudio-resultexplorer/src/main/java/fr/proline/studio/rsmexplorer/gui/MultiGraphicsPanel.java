@@ -464,9 +464,6 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
 
     /**
      *
-     * @param valuesList
-     * @param crossSelectionInterfaceList
-     * @param isSingle to display one plot
      */
     private void setDataImpl() {
         ReferenceToColumn refX = (ReferenceToColumn) m_valueXComboBox.getSelectedItem();
@@ -504,40 +501,47 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
     }
 
     private void setPlotsWithDoubleYAxis() {
+      m_logger.info("Setting double Y Axis plots");
+      DoubleYAxisPlotPanel plotPanel = ((DoubleYAxisPlotPanel) m_plotPanel);
+      double mainPlotMaxY = Double.NEGATIVE_INFINITY;
+      double secondPlotMaxY = Double.NEGATIVE_INFINITY;
         for (int i = 0; i < m_valuesList.size(); i++) {
             CrossSelectionInterface crossSelectionInterface = (m_crossSelectionInterfaceList == null) || (m_crossSelectionInterfaceList.size() <= i) ? null : m_crossSelectionInterfaceList.get(i);
             //create plotGraphics for each table
             PlotLinear plotGraphics = new PlotLinear(m_plotPanel, m_valuesList.get(i), crossSelectionInterface, columnXYIndex[COL_X_ID], columnXYIndex[COL_Y_ID]);
+            mainPlotMaxY = Math.max(mainPlotMaxY, plotGraphics.getYMax());
             plotGraphics.setPlotInformation(m_valuesList.get(i).getPlotInformation());
             plotGraphics.setIsPaintMarker(false);
-            ((DoubleYAxisPlotPanel) m_plotPanel).addMainPlot(plotGraphics);
+            plotPanel.addMainPlot(plotGraphics);
         }
         //plot on second Axis Y
         if (m_valueOn2Yxis != null && m_valueOn2Yxis.getRowCount() != 0) {//creat a plot which show PlotLinear on 2nd Axis  
             CrossSelectionInterface crossSelectionInterface2 = null;
             PlotLinear plotGraphics = new PlotLinear(m_plotPanel, m_valueOn2Yxis, crossSelectionInterface2, columnXYIndex[COL_X_ID], columnXYIndex[COL_Y_ID]);
+            secondPlotMaxY = plotGraphics.getYMax();
             plotGraphics.setPlotInformation(m_valueOn2Yxis.getPlotInformation());
             plotGraphics.setIsPaintMarker(false);
-            ((DoubleYAxisPlotPanel) m_plotPanel).addAuxiliaryPlot(plotGraphics);
+            plotPanel.addAuxiliaryPlot(plotGraphics);
             Color color = m_valueOn2Yxis.getPlotInformation().getPlotColor();
             String axisTitle = m_valueOn2Yxis.getName();
             if (axisTitle == null)
                 axisTitle = "";
-            ((DoubleYAxisPlotPanel) m_plotPanel).setSecondAxisPlotInfo(axisTitle + " " + m_valueOn2Yxis.getDataColumnIdentifier(columnXYIndex[COL_Y_ID]), color);
+            plotPanel.setSecondAxisPlotInfo(axisTitle + " " + m_valueOn2Yxis.getDataColumnIdentifier(columnXYIndex[COL_Y_ID]), color);
         }
-        ((DoubleYAxisPlotPanel) m_plotPanel).preparePaint();
-        double minY = ((DoubleYAxisPlotPanel) m_plotPanel).getYAxis().getMinValue();
-        double maxY = ((DoubleYAxisPlotPanel) m_plotPanel).getYAxis().getMaxValue();
-        ((DoubleYAxisPlotPanel) m_plotPanel).getYAxis().setRange(0, maxY);
+        plotPanel.preparePaint();
         
-        maxY = ((DoubleYAxisPlotPanel) m_plotPanel).getSecondYAxis().getMaxValue();
-        ((DoubleYAxisPlotPanel) m_plotPanel).getSecondYAxis().setRange(0, maxY);
+        if (plotPanel.hasMainPlots()) {
+          //add to max the quantity equivalent to 5 pixels
+          mainPlotMaxY += (mainPlotMaxY/plotPanel.getYAxis().getHeight())*5;
+          plotPanel.setYAxisBounds(0, mainPlotMaxY);
+        }
         
-//        ((DoubleYAxisPlotPanel) m_plotPanel).getYAxis().setRange(0, maxY);
+        if (plotPanel.hasAuxiliaryPlots()) {
+          secondPlotMaxY += (secondPlotMaxY/plotPanel.getSecondYAxis().getHeight())*5;
+          plotPanel.setSecondaryYAxisBounds(0, secondPlotMaxY);          
+        }
         
-//        bounds = ((DoubleYAxisPlotPanel) m_plotPanel).getS;
-        
-
+        m_logger.info("Settings done");
     }
 
     @Override

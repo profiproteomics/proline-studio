@@ -107,7 +107,7 @@ public abstract class Axis {
             closeButton.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    setVisible(true);
+                    setVisible(false);
                 }
             });
 
@@ -274,7 +274,7 @@ public abstract class Axis {
     }
 
     public boolean canBeInLog() {
-        return (m_minValue >= 10e-9) && (!m_isEnum);
+        return m_log || (m_minValue >= 10e-9) && (!m_isEnum);
     }
 
     public void setSize(int x, int y, int width, int height) {

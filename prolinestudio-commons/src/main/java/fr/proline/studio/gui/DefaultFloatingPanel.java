@@ -40,7 +40,6 @@ public class DefaultFloatingPanel extends HourglassPanel {
         closeButton.setContentAreaFilled(false);
 
         closeButton.addActionListener(new ActionListener() {
-
             @Override
             public void actionPerformed(ActionEvent e) {
                 setVisible(false);

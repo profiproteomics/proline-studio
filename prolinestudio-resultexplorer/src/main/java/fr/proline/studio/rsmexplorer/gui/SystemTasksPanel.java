@@ -25,6 +25,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -60,8 +62,8 @@ public class SystemTasksPanel extends AbstractTasksPanel {
     private static final int UPDATE_DELAY = 1000;
     private Timer m_updateTimer = null;
     private static int m_connectionErrCount = 0;
-    protected static final Logger m_loggerProline =  LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
- 
+    protected static final Logger m_loggerProline = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
+
     private JButton m_reconnectButton;
 
     public SystemTasksPanel() {
@@ -104,7 +106,7 @@ public class SystemTasksPanel extends AbstractTasksPanel {
             public void actionPerformed(ActionEvent e) {
                 if (!isMonitoringConnected()) { //should be the case if button enabled !
                     m_connectionErrCount = 0; //reinit counter
-                    reInitConnection();                   
+                    reInitConnection();
                 }
             }
         });
@@ -304,28 +306,27 @@ public class SystemTasksPanel extends AbstractTasksPanel {
         }
     }
 
-    private void reInitConnection(){
+    private void reInitConnection() {
         m_qBrowser = null;
         //TODO: add method in JMSConnectionManager to disconnect/reconnect without reset of variables
         String jmsHost = JMSConnectionManager.getJMSConnectionManager().m_jmsServerHost;
         JMSConnectionManager.getJMSConnectionManager().closeConnection();
-        JMSConnectionManager.getJMSConnectionManager().setJMSServerHost(jmsHost);                
+        JMSConnectionManager.getJMSConnectionManager().setJMSServerHost(jmsHost);
         if (!checkJMSVariables()) { // still can't connect 
             stopOtherDataCollecting();
             m_reconnectButton.setEnabled(true);
         } else {
             m_reconnectButton.setEnabled(false);
-        }   
+        }
     }
-    
+
     /**
-     * Called when notification is stopped (JMS connection is closed) 
-     * to stop other king of data collect.
-     * Stop browsing Proline JMS Queue 
+     * Called when notification is stopped (JMS connection is closed) to stop
+     * other king of data collect. Stop browsing Proline JMS Queue
      */
     @Override
     protected void stopOtherDataCollecting() {
-        m_qBrowser = null;       
+        m_qBrowser = null;
         m_updateTimer.stop();
     }
 
@@ -381,6 +382,7 @@ public class SystemTasksPanel extends AbstractTasksPanel {
         public void addMessage(JMSNotificationMessage msg) {
             int sr = m_messageTable.getSelectedRow();
             addSingleMessage(msg);
+            sortMessageById();
             fireTableDataChanged();
         }
 
@@ -399,7 +401,27 @@ public class SystemTasksPanel extends AbstractTasksPanel {
             for (JMSNotificationMessage msg : msgs) {
                 addSingleMessage(msg);
             }
+            sortMessageById();
             fireTableDataChanged();
+        }
+
+        private synchronized void sortMessageById() {
+            Collections.sort(m_notificationMsgs, new SortById());
+            indexByMsgId.clear();
+            for (int i = 0; i < m_notificationMsgs.size(); i++) {
+                indexByMsgId.put(m_notificationMsgs.get(i).getServerUniqueMsgId(), i);
+            }
+
+        }
+
+        /**
+         * Used for sorting in descending order
+         */
+        class SortById implements Comparator<JMSNotificationMessage> {
+
+            public int compare(JMSNotificationMessage a, JMSNotificationMessage b) {
+                return Integer.valueOf(b.getJsonRPCMsgId()) - Integer.valueOf(a.getJsonRPCMsgId());
+            }
         }
 
         @Override
@@ -427,7 +449,7 @@ public class SystemTasksPanel extends AbstractTasksPanel {
             switch (columnIndex) {
                 case COLTYPE_MESSAGE_EVENT_TYPE:
                     return msg;
-                case COLTYPE_MESSAGE_JSON_RPC_ID:                    
+                case COLTYPE_MESSAGE_JSON_RPC_ID:
                     return Integer.valueOf(msg.getJsonRPCMsgId());
                 case COLTYPE_MESSAGE_SERVICE_NAME:
                     if (StringUtils.isNotEmpty(msg.getServiceDescription())) {
@@ -496,7 +518,6 @@ public class SystemTasksPanel extends AbstractTasksPanel {
         public TableCellRenderer getRenderer(int row, int col) {
             return new DefaultLeftAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(getColumnClass(col)));
         }
-
     }
 
     public class DateAndTimeRenderer extends DefaultTableCellRenderer {

@@ -102,7 +102,7 @@ public class FloatParameter extends AbstractParameter {
         if (m_graphicalType.equals(JTextField.class)) {
             JTextField textField = (JTextField) m_parameterComponent;
             try {
-                value = Float.parseFloat(textField.getText());
+                value = Float.parseFloat(textField.getText().trim());
             } catch (NumberFormatException nfe) {
                 return new ParameterError(m_name + " is  not a Number", m_parameterComponent);
             }
@@ -145,7 +145,7 @@ public class FloatParameter extends AbstractParameter {
     @Override
     public Object getObjectValue() {
         if (m_graphicalType.equals(JTextField.class)) {
-            return ((JTextField) m_parameterComponent).getText();
+            return ((JTextField) m_parameterComponent).getText().trim();
         }
         return ""; // should not happen
     }

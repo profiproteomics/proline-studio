@@ -153,7 +153,7 @@ public class FileParameter extends AbstractParameter {
 
         if (m_graphicalType.equals(JTextField.class)) {
             JTextField textField = (JTextField) m_parameterComponent;
-            String path = textField.getText();
+            String path = textField.getText().trim();
             if (path.isEmpty()) {
                 return new ParameterError(path + " file is missing", m_parameterComponent);
             }
@@ -179,7 +179,7 @@ public class FileParameter extends AbstractParameter {
     public Object getObjectValue() {
         if (m_graphicalType.equals(JTextField.class)) {
             if (m_parameterComponent != null) {
-                return ((JTextField) m_parameterComponent).getText();
+                return ((JTextField) m_parameterComponent).getText().trim();
             }
         }
         return ""; // should not happen

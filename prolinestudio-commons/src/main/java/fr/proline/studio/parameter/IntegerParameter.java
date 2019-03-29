@@ -121,7 +121,7 @@ public class IntegerParameter extends AbstractParameter {
                         @Override
                         public void run() {
                             try {
-                                int value = Integer.parseInt(textField.getText());
+                                int value = Integer.parseInt(textField.getText().trim());
                                 slider.setValue(value);
                             } catch (NumberFormatException e) {
                             }
@@ -197,7 +197,7 @@ public class IntegerParameter extends AbstractParameter {
         if (m_graphicalType.equals(JTextField.class)) {
             JTextField textField = (JTextField) m_parameterComponent;
             try {
-                value = Integer.parseInt(textField.getText());
+                value = Integer.parseInt(textField.getText().trim());
             } catch (NumberFormatException nfe) {
                 return new ParameterError(m_name + " is not a Integer", m_parameterComponent);
             }
@@ -261,7 +261,7 @@ public class IntegerParameter extends AbstractParameter {
         }
 
         if (m_graphicalType.equals(JTextField.class)) {
-            return Integer.parseInt(((JTextField) m_parameterComponent).getText());
+            return Integer.parseInt(((JTextField) m_parameterComponent).getText().trim());
         }
         if (m_graphicalType.equals(JSlider.class)) {
             return ((JSlider) m_parameterComponent).getValue();

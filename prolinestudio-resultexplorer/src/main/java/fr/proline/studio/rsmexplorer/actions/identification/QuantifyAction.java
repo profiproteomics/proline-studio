@@ -42,7 +42,7 @@ public class QuantifyAction extends AbstractRSMAction {
         JMenuItem createSILACItem = new JMenuItem(m_createSILACAction);
         m_menu.add(createSILACItem);
 
-        m_createTMTAction = new CreateQuantitationAction(m_treeType, QuantitationMethod.Type.ISOBARIC_TAG);
+        m_createTMTAction = new CreateQuantitationAction(m_treeType, QuantitationMethod.Type.ISOBARIC_TAGGING);
         JMenuItem createTMTItem = new JMenuItem(m_createTMTAction);
         m_menu.add(createTMTItem);
         

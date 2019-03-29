@@ -93,7 +93,7 @@ public class QuantExperimentalDesignPanel extends JPanel {
         c.anchor = GridBagConstraints.NORTHWEST;
         
         switch (m_quantitationType) {
-            case ISOBARIC_TAG:
+            case ISOBARIC_TAGGING:
             case RESIDUE_LABELING: {
                 c.fill = GridBagConstraints.HORIZONTAL;
                 c.weighty = 0;

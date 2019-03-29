@@ -53,7 +53,7 @@ public class CreateQuantitationAction extends AbstractRSMAction {
                 } 
             }
             case RESIDUE_LABELING: return NbBundle.getMessage(CreateQuantitationAction.class, "CTL_CreateResidueLabeling");
-            case ISOBARIC_TAG: return NbBundle.getMessage(CreateQuantitationAction.class, "CTL_CreateIsobaricLabeling");
+            case ISOBARIC_TAGGING: return NbBundle.getMessage(CreateQuantitationAction.class, "CTL_CreateIsobaricLabeling");
             
         }
        return "unknown";

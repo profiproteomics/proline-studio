@@ -240,7 +240,7 @@ public class CreateQuantitationDialog extends DefaultDialog {
                revalidate();
                repaint();
             }
-        } else if (m_quantitationType == QuantitationMethod.Type.ISOBARIC_TAG) {
+        } else if (m_quantitationType == QuantitationMethod.Type.ISOBARIC_TAGGING) {
             m_quantMethodParamsPanel = new IsobaricMethodParamsPanel(m_experimentalDesignPanel.getQuantitationMethod());
             replaceInternalComponent(m_quantMethodParamsPanel);
             revalidate();

@@ -42,7 +42,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
+ * To rename : This Panel displays multiple Linear Plots : One per ExtendedTableModelInterface
+ * passed through setData method.
+ * A second (set: actually one, should be list) of object could also be plotted on a second axis .
+ *  ==> Rename to MultipleLinearPlotsPanel ... ? 
+ * 
+ * 
  * @author JM235353
  */
 public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelInterface, PlotToolbarListener {

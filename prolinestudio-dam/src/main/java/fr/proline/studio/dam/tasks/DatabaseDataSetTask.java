@@ -892,7 +892,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
             DatabaseLoadXicMasterQuantTask.fetchDataQuantChannels(m_project.getId(), m_dataset, m_taskError);
 
             // load ObjectTree linked to the dataset
-            if ((objectTreeIdByName != null) && (m_dataset.getQuantProcessingConfig() == null)){
+            if ((objectTreeIdByName != null) && (m_dataset.getQuantProcessingConfig() == null || m_dataset.getPostQuantProcessingConfig() == null)){
                 for (Map.Entry<String, Long> entry: objectTreeIdByName.entrySet()) {
                     if (entry.getKey().startsWith("quantitation")) {
                         Long objectId = entry.getValue();

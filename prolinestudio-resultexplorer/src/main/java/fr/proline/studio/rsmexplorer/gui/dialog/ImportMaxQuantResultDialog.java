@@ -64,7 +64,7 @@ public class ImportMaxQuantResultDialog extends DefaultDialog {
     private JComboBox m_instrumentsComboBox = null;
     private JTextField m_accessionRegexpTF = null;
     private JCheckBox m_importQuantitationCB = null;
-    
+
     //To select folder containing result
     private JList<File> m_fileList;
     private JScrollPane m_fileListScrollPane;
@@ -194,7 +194,7 @@ public class ImportMaxQuantResultDialog extends DefaultDialog {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-
+                setStatus(false, String.format("%d file(s)", m_fileList.getModel().getSize()));
                 if (m_defaultImportMQPath != null && m_defaultImportMQPath.length() > 0) {
                     m_fchooser = new JFileChooser(new File(m_defaultImportMQPath));
                 } else {
@@ -209,12 +209,12 @@ public class ImportMaxQuantResultDialog extends DefaultDialog {
                     boolean hasFilesPreviously = (m_fileList.getModel().getSize() != 0);
 
                     File[] files = new File[1];
-                    files[0] =  m_fchooser.getSelectedFile();
+                    files[0] = m_fchooser.getSelectedFile();
                     int nbFiles = files.length;
                     for (int i = 0; i < nbFiles; i++) {
                         ((DefaultListModel) m_fileList.getModel()).addElement(files[i]);
                     }
-
+                    setStatus(false, String.format("%d file(s)", m_fileList.getModel().getSize()));
                     if (nbFiles > 0) {
                         File f = files[0];
                         f = f.getParentFile();
@@ -235,6 +235,7 @@ public class ImportMaxQuantResultDialog extends DefaultDialog {
                 while (it.hasNext()) {
                     ((DefaultListModel) m_fileList.getModel()).removeElement(it.next());
                 }
+                setStatus(false, String.format("%d file(s)", m_fileList.getModel().getSize()));
                 m_removeFileButton.setEnabled(false);
             }
         });
@@ -299,6 +300,7 @@ public class ImportMaxQuantResultDialog extends DefaultDialog {
         // reinit of files selection
         ((DefaultListModel) m_fileList.getModel()).removeAllElements();
         m_removeFileButton.setEnabled(false);
+        setStatus(false, String.format("%d file(s)", m_fileList.getModel().getSize()));
         restoreInitialParameters(NbPreferences.root());
     }
 
@@ -306,28 +308,27 @@ public class ImportMaxQuantResultDialog extends DefaultDialog {
         InstrumentConfiguration instrument = (InstrumentConfiguration) m_sourceParameterList.getParameter("instrument").getObjectValue();
         return instrument.getId();
     }
-    
+
     public String getAccessionRegexp() {
         return m_sourceParameterList.getParameter("accession_regexp").getStringValue();
     }
 
     public Boolean getImportQuantitation() {
-        return (Boolean)m_sourceParameterList.getParameter("import_quant_result").getObjectValue();
+        return (Boolean) m_sourceParameterList.getParameter("import_quant_result").getObjectValue();
     }
-    
+
     public File[] getFilePaths() {
-        
+
         DefaultListModel model = ((DefaultListModel) m_fileList.getModel());
         int nbFiles = model.getSize();
         File[] filePaths = new File[nbFiles];
-        for (int i=0;i<nbFiles;i++) {
-            filePaths[i] =  ((File)model.getElementAt(i));
+        for (int i = 0; i < nbFiles; i++) {
+            filePaths[i] = ((File) model.getElementAt(i));
         }
 
         return filePaths;
     }
-    
-    
+
     @Override
     protected boolean okCalled() {
 
@@ -486,12 +487,12 @@ public class ImportMaxQuantResultDialog extends DefaultDialog {
         StringParameter accessionParameter = new StringParameter("accession_regexp", "Accession regular expression", m_accessionRegexpTF, "", 0, null);
         accessionParameter.setUsed(true);
         parameterList.add(accessionParameter);
-        
+
         m_importQuantitationCB = new JCheckBox("Import quantitation values");
         BooleanParameter importParameter = new BooleanParameter("import_quant_result", "Import quantitation results", m_importQuantitationCB, false);
         importParameter.setUsed(true);
         parameterList.add(importParameter);
-        
+
         return parameterList;
 
     }

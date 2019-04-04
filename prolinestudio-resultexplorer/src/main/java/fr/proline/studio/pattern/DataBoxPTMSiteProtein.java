@@ -1,11 +1,10 @@
 package fr.proline.studio.pattern;
 
 import fr.proline.core.orm.msi.ResultSummary;
-import fr.proline.core.orm.msi.dto.DMasterQuantProteinSet;
-import fr.proline.core.orm.msi.dto.DPeptideMatch;
-import fr.proline.core.orm.msi.dto.DProteinMatch;
-import fr.proline.core.orm.msi.dto.DProteinSet;
+import fr.proline.core.orm.msi.dto.*;
 import fr.proline.core.orm.uds.dto.DDataset;
+import fr.proline.core.orm.uds.dto.DMasterQuantitationChannel;
+import fr.proline.core.orm.uds.dto.DQuantitationChannel;
 import fr.proline.core.orm.util.DStoreCustomPoolConnectorFactory;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.extendedtablemodel.GlobalTabelModelProviderInterface;
@@ -19,14 +18,15 @@ import fr.proline.studio.dam.tasks.xic.DatabaseLoadLcMSTask;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadXicMasterQuantTask;
 import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.rsmexplorer.gui.PTMProteinSitePanel;
-import java.util.ArrayList;
+
+import java.util.*;
+
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 import fr.proline.studio.rsmexplorer.gui.xic.QuantChannelInfo;
 import fr.proline.studio.types.XicMode;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import org.slf4j.Logger;
@@ -95,7 +95,7 @@ public class DataBoxPTMSiteProtein extends AbstractDataBox {
                 
     }
     
-    public boolean isXicResult() {
+    private boolean isXicResult() {
         return m_isXicResult;
     }
 
@@ -224,10 +224,12 @@ public class DataBoxPTMSiteProtein extends AbstractDataBox {
                 if (finished) {        
                     m_logger.info(" **** +++ Unregister "+taskId+" loadProteinMatchMapping + propagate and set Loaded ");
                     Map<Long, Long> typicalProteinMatchIdByProteinMatchId = loadProteinMatchMapping();
-                    m_ptmDataset.setQuantProteinSets(m_masterQuantProteinSetList, typicalProteinMatchIdByProteinMatchId);                    
-                    ((PTMProteinSitePanel) getDataBoxPanelInterface()).setData(taskId, proteinPTMSiteArray, finished);                    
+                    m_ptmDataset.setQuantProteinSets(m_masterQuantProteinSetList, typicalProteinMatchIdByProteinMatchId);
+                    m_logger.info("{} mq proteinset assigned", m_masterQuantProteinSetList.size());
+                    ((PTMProteinSitePanel) getDataBoxPanelInterface()).setData(taskId, proteinPTMSiteArray, finished);
                     unregisterTask(taskId);
                     setLoaded(loadingId);
+                    startLoadingMasterQuantPeptides(proteinPTMSiteArray);
                     propagateDataChanged(ExtendedTableModelInterface.class);
                 }
             }
@@ -240,7 +242,75 @@ public class DataBoxPTMSiteProtein extends AbstractDataBox {
         registerTask(task);
 
     }
-        
+
+
+    private void startLoadingMasterQuantPeptides(final ArrayList<PTMSite> proteinPTMSiteArray) {
+        m_logger.debug("start loading MQPeptides from PTMSites and compute PTMSite expression values");
+        List<DMasterQuantPeptide> masterQuantPeptideList = new ArrayList();
+
+        AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
+
+            @Override
+            public boolean mustBeCalledInAWT() {
+                return true;
+            }
+
+            @Override
+            public void run(boolean success, final long taskId, SubTask subTask, boolean finished) {
+                if(finished) {
+                    unregisterTask(taskId);
+                    m_logger.info("MQPeptides loaded !! ");
+                    DMasterQuantitationChannel masterQC = proteinPTMSiteArray.get(0).getPTMdataset().getDataset().getMasterQuantitationChannels().get(0);
+                    Map<Long, DMasterQuantPeptide> mqPepById = masterQuantPeptideList.stream().collect(Collectors.toMap(x -> x.getPeptideInstanceId(), x -> x));
+
+                    float[] protAbundances = new float[masterQC.getGroupsCount()];
+                    for (PTMSite currentSite : proteinPTMSiteArray) {
+                        // by default set to null
+                        currentSite.setExpressionValue(Double.NaN);
+                        if (currentSite.getMasterQuantProteinSet() != null) {
+
+                            for (int groupNumber = 0 ; groupNumber < masterQC.getGroupsCount(); groupNumber++) {
+                                Stream<DQuantProteinSet> stream = masterQC.getQuantitationChannels(groupNumber+1).stream().map(c -> currentSite.getMasterQuantProteinSet().getQuantProteinSetByQchIds().get(c.getId())).filter(q -> q!= null);
+                                protAbundances[groupNumber] = stream.collect(Collectors.averagingDouble(dqps -> dqps.getAbundance())).floatValue();
+                            }
+
+                            for (DPeptideInstance pep : currentSite.getParentPeptideInstances()) {
+                                DMasterQuantPeptide mqPep = mqPepById.get(pep.getId());
+                                if (mqPep != null) {
+                                    float[] pepAbundances = new float[masterQC.getGroupsCount()];
+                                    for (int groupNumber = 0 ; groupNumber < masterQC.getGroupsCount(); groupNumber++) {
+                                        Stream<DQuantPeptide> stream = masterQC.getQuantitationChannels(groupNumber+1).stream().map(c -> mqPep.getQuantPeptideByQchIds().get(c.getId())).filter(q -> q!= null);
+                                        pepAbundances[groupNumber] = stream.collect(Collectors.averagingDouble(dqp -> dqp.getAbundance())).floatValue();
+                                    }
+                                    // Compute an expression metric from protAbundances and pepAbundances and set this value
+                                    // to PTMSite expression value
+                                    double expression = Double.isNaN((Double)currentSite.getExpressionValue()) ? 0.0 : (Double)currentSite.getExpressionValue();
+                                    for (int groupNumber = 1 ; groupNumber < masterQC.getGroupsCount(); groupNumber++) {
+                                        double pepFC = Math.log(pepAbundances[groupNumber]/pepAbundances[groupNumber-1])/Math.log(2);
+                                        double protFC = Math.log(protAbundances[groupNumber]/protAbundances[groupNumber-1])/Math.log(2);
+                                        double diffFC = protFC - pepFC;
+                                        if (Math.abs(diffFC) > Math.abs(expression)) {
+                                            expression = diffFC;
+                                        }
+                                    }
+                                    currentSite.setExpressionValue(expression);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        };
+
+
+        DatabaseLoadXicMasterQuantTask task = new DatabaseLoadXicMasterQuantTask(callback);
+        List<Long> parentPepInstanceIds = proteinPTMSiteArray.stream().flatMap(site -> site.getParentPeptideInstances().stream()).map(pepInstance -> pepInstance.getId()).distinct().collect(Collectors.toList());
+        m_logger.info("Loading {} peptideInstances XIC data", parentPepInstanceIds.size());
+        task.initLoadPeptides(getProjectId(), m_ptmDataset.getDataset(), parentPepInstanceIds.toArray(new Long[parentPepInstanceIds.size()]), masterQuantPeptideList, true);
+        registerTask(task);
+    }
+
+
     private Map<Long, Long> loadProteinMatchMapping() {
         Map<Long, Long> typicalProteinMatchIdByProteinMatchId = new HashMap<>();
         EntityManager entityManagerMSI = DStoreCustomPoolConnectorFactory.getInstance().getMsiDbConnector(getProjectId()).createEntityManager();

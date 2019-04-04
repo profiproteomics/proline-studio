@@ -532,9 +532,10 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
             entityManagerMSI.getTransaction().commit();
             entityManagerUDS.getTransaction().commit();
             entityManagerLCMS.getTransaction().commit();
-//            m_logger.info("fetchQuantChannels took "+(System.currentTimeMillis() - start)+" ms");
+            m_logger.info("fetchQuantChannels took "+(System.currentTimeMillis() - start)+" ms");
         } catch (Exception e) {
             //logger.error(getClass().getSimpleName() + " failed", e);
+            m_logger.error("fetchDataQuantChannels failed", e);
             taskError = new TaskError(e);
             try {
                 entityManagerMSI.getTransaction().rollback();
@@ -747,7 +748,8 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                     if (resultSummaryId != null) {
                         
                         // CBy : Je ne comprend pas ce que fait ce code si peptideInstanceIdArray est non null ??? Il selection les id des objets 
-                        // dont on a deja les Id ???? Au mieux il filtre ceux qui n'ont pas été trouvés ?? 
+                        // dont on a deja les Id ???? Au mieux il filtre ceux qui n'ont pas été trouvés : OUI c'est possible car les peptides instance qui sont 
+                        // envoyés peuvent etre les peptide instance des feuilles d'un PTMSite par exemple .... mais ce filtrage devrait être fait en amont plutot non ? 
                         
                         // load peptideInstance
                         String queryPep = "SELECT pi.id "
@@ -767,6 +769,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                         List<Long> listIds = (List<Long>) peptidesQuery.getResultList();
                         m_peptideInstanceIds = listIds;
 
+                        m_logger.info("### loading XIC for peptides ... query returns {} peptide instances", m_peptideInstanceIds.size());
                         List<DMasterQuantPeptide> listDMasterQuantPeptideFake = new ArrayList();
                         for (Long m_peptideInstanceId : m_peptideInstanceIds) {
                             DMasterQuantPeptide f = new DMasterQuantPeptide(-1, 0, -1, "", resultSummaryId);
@@ -837,6 +840,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
      * @return
      */
     private boolean fetchDataPeptideIonMainTask() {
+        long start = System.currentTimeMillis();
         EntityManager entityManagerMSI = DStoreCustomPoolConnectorFactory.getInstance().getMsiDbConnector(m_projectId).createEntityManager();
         try {
             entityManagerMSI.getTransaction().begin();
@@ -865,6 +869,8 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                             mqpi.setId(m_masterQuantPeptideIonId);
                             m_masterQuantPeptideIonList.add(mqpi);
                         }
+
+                        m_logger.info("Peptide Ions ids fetched in = "+(System.currentTimeMillis() - start)+" ms");
 
                         // slice the task and get the first one
                         SubTask subTask = m_subTaskManager.sliceATaskAndGetFirst(SUB_TASK_PEPTIDE_ION, m_masterQuantPeptideIonIds.size(), SLICE_SIZE);
@@ -899,7 +905,6 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
         // set priority as low for the possible sub tasks
         m_defaultPriority = Priority.LOW;
         m_currentPriority = Priority.LOW;
-
         return true;
     }
 
@@ -1795,6 +1800,10 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
     private boolean fetchPeptideIonData(EntityManager entityManagerMSI, List<Long> listMasterPeptideIonsIds) {
         // list of MasterQuantPeptideIons
         int nbM = m_masterQuantPeptideIonList.size();
+        
+        int nbMsub = listMasterPeptideIonsIds.size();
+        long start = System.currentTimeMillis();
+        
         String queryMasterPeptideIons = "SELECT new fr.proline.core.orm.msi.dto.DMasterQuantPeptideIon(pi, mqpi, p, pm) "
                 + "FROM fr.proline.core.orm.msi.PeptideInstance pi, fr.proline.core.orm.msi.MasterQuantPeptideIon mqpi, "
                 + "fr.proline.core.orm.msi.Peptide p, fr.proline.core.orm.msi.PeptideMatch pm "
@@ -1839,6 +1848,8 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
             indexes.add(index);
         } // end for
 
+        m_logger.info("DMQPep ions for "+nbMsub+" ions duration = "+(System.currentTimeMillis()-start)+" ms");
+        start = System.currentTimeMillis();
         
         /////////////////////////////////
         HashMap<Long, Peptide> peptideMap = new HashMap<>();
@@ -1901,7 +1912,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
         peptideMatchIds.addAll(peptideMatchMap.keySet());
         
         fetchProteinSetName(entityManagerMSI, peptideMatchIds, peptideMatchMap);
-
+        
         fetchPeptideIonAbundances(listObjectTreeId, entityManagerMSI, indexes);
 
         // peptideIons without peptide
@@ -1934,6 +1945,9 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
 
         fetchPeptideIonAbundances(listObjectTreeId, entityManagerMSI, indexes);
         
+         m_logger.info("Fetch ions pepInstance, pepMatch & Ab. for "+nbMsub+" ions duration = "+(System.currentTimeMillis()-start)+" ms");
+        start = System.currentTimeMillis();
+
         return true;
     }
 

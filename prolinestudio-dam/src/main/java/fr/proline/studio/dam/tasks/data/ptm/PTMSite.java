@@ -41,6 +41,7 @@ public class PTMSite {
     private List<DPeptideInstance> m_parentPeptideInstances;
 
     private PTMDataset m_dataset;
+    private Object m_expressionValue;
 
     public PTMSite(JSONPTMSite jsonSite) {
         m_site = jsonSite;
@@ -208,27 +209,26 @@ public class PTMSite {
     public Integer getPositionOnProtein() {
         return m_site.seqPosition;
     }
-    public Character getAminoAcide(){
+
+    public Character getAminoAcid(){
         Character AA = m_ptmSpecificity.getResidueAASpecificity();
         return AA;
     }
+
+    public void setExpressionValue(Object value) {
+        m_expressionValue =  value;
+    }
+
+    public Object getExpressionValue() {
+        return m_expressionValue;
+    }
+
     public boolean isProteinNTerm() {
-        String spec = m_ptmSpecificity.getLocationSpecificity();
         if (m_ptmSpecificity.getLocationSpecificity().endsWith("N-term") && getPositionOnProtein() == 1) {
             return true;
         } else {
             return false;
         }
-    }
-
-    private int getModifLocationInPep() {
-        String locationSpecitifcity = m_ptmSpecificity.getLocationSpecificity();
-        if (locationSpecitifcity.contains("N-term")) {
-            return 0;
-        } else if (locationSpecitifcity.contains("C-term")) {
-            return -1;
-        }
-        return (int) this.getPositionOnPeptide(this.getBestPeptideMatch().getPeptide().getId());
     }
 
 }

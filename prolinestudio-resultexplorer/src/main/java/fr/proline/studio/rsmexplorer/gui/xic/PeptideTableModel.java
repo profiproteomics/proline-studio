@@ -257,7 +257,7 @@ public class PeptideTableModel extends LazyTableModel implements GlobalTableMode
             case LINEAR_PLOT: {
                 int[] cols = new int[2];
                 cols[0] = COLTYPE_QC_NAME;
-                cols[1] = COLTYPE_RAW_ABUNDANCE;
+                cols[1] = COLTYPE_ABUNDANCE;
                 return cols;
             }
         }

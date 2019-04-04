@@ -506,7 +506,6 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
     }
 
     private void setPlotsWithDoubleYAxis() {
-      m_logger.info("Setting double Y Axis plots");
       DoubleYAxisPlotPanel plotPanel = ((DoubleYAxisPlotPanel) m_plotPanel);
       double mainPlotMaxY = Double.NEGATIVE_INFINITY;
       double secondPlotMaxY = Double.NEGATIVE_INFINITY;
@@ -546,7 +545,6 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
           plotPanel.setSecondaryYAxisBounds(0, secondPlotMaxY);          
         }
         
-        m_logger.info("Settings done");
     }
 
     @Override

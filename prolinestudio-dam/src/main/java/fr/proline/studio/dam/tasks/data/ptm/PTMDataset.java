@@ -33,6 +33,15 @@ public class PTMDataset {
         return m_dataset;
     }
 
+    
+    public boolean isIdentification() {
+      return m_dataset.isIdentification();
+    }
+
+    public boolean isQuantitation() {
+      return m_dataset.isQuantitation();
+    }
+    
     public List<PTMSite> getPTMSites() {
         return m_proteinPTMSites;
     }

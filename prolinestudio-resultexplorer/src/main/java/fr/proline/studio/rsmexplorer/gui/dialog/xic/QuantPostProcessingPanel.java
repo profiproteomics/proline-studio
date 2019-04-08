@@ -33,6 +33,7 @@ import org.openide.util.NbPreferences;
  * this, we use a display mode (complete or release), that could be changed in
  * the preferences properties Issue #13875: remove Normalized Median Profile
  * option
+ * Modified for version 2.0 of PostProcessing params
  *
  * @author MB243701
  */
@@ -550,7 +551,8 @@ public class QuantPostProcessingPanel extends JPanel {
 
     public Map<String, Object> getQuantParams() {
         Map<String, Object> params = new HashMap<>();
-
+        params.put("config_version", "2.0"); //Panel for PostProcessing config parameters version  2.0
+        
         params.put("use_only_specific_peptides", m_useOnlySpecificPeptidesChB.isSelected());
         params.put("discard_miss_cleaved_peptides", m_discardMissCleavedPeptidesChB.isSelected());
         params.put("discard_modified_peptides", m_discardModifiedPeptidesChB.isSelected());

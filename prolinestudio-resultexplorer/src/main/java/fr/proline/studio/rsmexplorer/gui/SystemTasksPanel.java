@@ -380,7 +380,6 @@ public class SystemTasksPanel extends AbstractTasksPanel {
         }
 
         public void addMessage(JMSNotificationMessage msg) {
-            int sr = m_messageTable.getSelectedRow();
             addSingleMessage(msg);
             sortMessageById();
             fireTableDataChanged();
@@ -390,6 +389,9 @@ public class SystemTasksPanel extends AbstractTasksPanel {
             String msgId = msg.getServerUniqueMsgId();
             if (indexByMsgId.containsKey(msgId)) {
                 int index = indexByMsgId.get(msgId);
+                JMSNotificationMessage prevMsg = m_notificationMsgs.get(index);
+                if( (!msg.getJsonRPCMsgId().equals(prevMsg.getJsonRPCMsgId())) && msgId.equals(msg.getJsonRPCMsgId()))
+                    msg = new JMSNotificationMessage(msg.getServiceName(), msg.getServiceVersion(), msg.getServiceSource(), msg.getServiceDescription(), msg.getServiceInfo(), msg.getEventDate().getTime(), msgId, prevMsg.getJsonRPCMsgId(), msg.getEventType());
                 m_notificationMsgs.set(index, msg);
             } else {
                 m_notificationMsgs.add(msg);
@@ -419,9 +421,16 @@ public class SystemTasksPanel extends AbstractTasksPanel {
          */
         class SortById implements Comparator<JMSNotificationMessage> {
 
+            @Override
             public int compare(JMSNotificationMessage a, JMSNotificationMessage b) {
-                return Integer.valueOf(b.getJsonRPCMsgId()) - Integer.valueOf(a.getJsonRPCMsgId());
-            }
+                try {
+                    Integer bIntId = Integer.valueOf(b.getJsonRPCMsgId());
+                    Integer aIntId = Integer.valueOf(a.getJsonRPCMsgId());
+                    return bIntId - aIntId;
+                } catch(NumberFormatException nfe) {
+                    return a.getJsonRPCMsgId().compareTo(b.getJsonRPCMsgId());
+                }
+            } 
         }
 
         @Override
@@ -450,7 +459,11 @@ public class SystemTasksPanel extends AbstractTasksPanel {
                 case COLTYPE_MESSAGE_EVENT_TYPE:
                     return msg;
                 case COLTYPE_MESSAGE_JSON_RPC_ID:
-                    return Integer.valueOf(msg.getJsonRPCMsgId());
+                    try {
+                        return Integer.valueOf(msg.getJsonRPCMsgId());                        
+                    } catch(NumberFormatException nfe){
+                        return -1;
+                    }
                 case COLTYPE_MESSAGE_SERVICE_NAME:
                     if (StringUtils.isNotEmpty(msg.getServiceDescription())) {
                         return msg.getServiceDescription();

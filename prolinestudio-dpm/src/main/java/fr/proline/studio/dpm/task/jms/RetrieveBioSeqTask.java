@@ -51,7 +51,7 @@ public class RetrieveBioSeqTask extends AbstractJMSTask {
         setTaskInfoRequest(message.getText());
 
         //  Send the Message        
-        m_producer.send(message, Message .DEFAULT_DELIVERY_MODE, Message.DEFAULT_PRIORITY,50000);
+        m_producer.send(message, Message.DEFAULT_DELIVERY_MODE, Message.DEFAULT_PRIORITY,50000);
         m_lastMsgId = message.getJMSMessageID();
         m_loggerProline.info("Message [{}] sent", m_lastMsgId);
         m_taskInfo.setJmsMessageID(message.getJMSMessageID());

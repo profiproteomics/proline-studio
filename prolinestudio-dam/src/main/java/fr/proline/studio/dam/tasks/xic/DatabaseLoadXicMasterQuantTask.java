@@ -519,7 +519,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
             // load ObjectTree corresponding to the QUANTITATION.*_CONFIG
             Map<String, Long> objectTreeIdByName = datasetDB.getObjectTreeIdByName();
             // load ObjectTree linked to the dataset
-            if ((objectTreeIdByName != null) && (dataset.getQuantProcessingConfig() == null || dataset.getPostQuantProcessingConfig()==null)){
+            if (objectTreeIdByName != null){
                 for (Map.Entry<String, Long> entry: objectTreeIdByName.entrySet()) {
                     if (entry.getKey().startsWith("quantitation")) {
                         Long objectId = entry.getValue();

@@ -171,7 +171,6 @@ public class DataSetData extends AbstractData {
             }
             entityManagerMSI.getTransaction().commit();
         } catch (Exception e) {
-            ;
         } finally {
             entityManagerMSI.close();
         }

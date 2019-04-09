@@ -248,6 +248,8 @@ public class LabelFreeMSParamsCompletePanel extends AbstractLabelFreeMSParamsPan
      */
     public void setQuantParams(Map<String, Object> quantParams) {
         Map<String, Object> extRactParams = (Map<String, Object>) quantParams.get("extraction_params");
+        if (extRactParams==null)
+            return;
         m_extractionMoZTolTF.setText("" + Double.parseDouble(extRactParams.get("moz_tol").toString()));
         if (quantParams.containsKey("detection_params")) {
             Map<String, Object> detectionParams = (Map<String, Object>) quantParams.get("detection_params");

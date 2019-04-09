@@ -277,7 +277,7 @@ public class DatabaseProteinMatchesTask extends AbstractDatabaseSlicerTask {
 
         }
         
-        DatabaseBioSequenceTask.fetchData(proteinMatchList, null);
+        DatabaseBioSequenceTask.fetchData(proteinMatchList, m_projectId);
 
     }
     

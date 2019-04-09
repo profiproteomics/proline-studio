@@ -5,61 +5,53 @@ import fr.proline.core.orm.msi.dto.DPeptideInstance;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.msi.dto.DPeptideSet;
 import fr.proline.core.orm.msi.dto.DProteinMatch;
+import fr.proline.core.orm.util.DStoreCustomPoolConnectorFactory;
 import fr.proline.module.seq.BioSequenceProvider;
 import fr.proline.studio.dam.DatabaseDataManager;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
+
+import javax.persistence.EntityManager;
+import javax.persistence.Query;
+import javax.persistence.TypedQuery;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Find biosequence for a list of ProteinMatch, check the biosequence according to the validated peptides when it is possible
  * @author JM235353
  */
-public class DatabaseBioSequenceTask extends AbstractDatabaseTask {
+public class DatabaseBioSequenceTask {
 
-    private List<DProteinMatch> m_proteinMatchList = null;
-    private Long m_rsmId = null;
-    
-    public DatabaseBioSequenceTask(AbstractDatabaseCallback callback) {
-        super(callback, null);
-    }
-    
-    public void initLoadBioSequences(List<DProteinMatch> proteinMatchList) {
-        setTaskInfo(new TaskInfo("Load Biosequence for " + proteinMatchList.get(0).getAccession() + "...", false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_LOW));
-        m_proteinMatchList = proteinMatchList;
-        m_rsmId = null;
-        setPriority(Priority.NORMAL_1);
-    }
-    
-    public void initLoadBioSequences(List<DProteinMatch> proteinMatchList, Long rsmId) {
-        setTaskInfo(new TaskInfo("Load Biosequence for " + proteinMatchList.get(0).getAccession() + "...", false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_LOW));
-        m_proteinMatchList = proteinMatchList;
-        m_rsmId = rsmId;
-        setPriority(Priority.NORMAL_1);
-    }
-    
-    public void initLoadBioSequences(DProteinMatch proteintMatch) {
-        setTaskInfo(new TaskInfo("Load Biosequence for " + proteintMatch.getAccession() + "...", false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_LOW));
-        m_proteinMatchList = new ArrayList<>(1);
-        m_proteinMatchList.add(proteintMatch);
-        m_rsmId = null;
-        setPriority(Priority.NORMAL_1);
+    public static boolean fetchData(List<DProteinMatch> proteinMatchList, Long projectId) {
+
+        Map<Long, DProteinMatch> proteinMatchById = proteinMatchList.stream().collect(Collectors.toMap(pm -> pm.getId(), pm -> pm));
+        EntityManager entityManagerMSI = DStoreCustomPoolConnectorFactory.getInstance().getMsiDbConnector(projectId).createEntityManager();
+        try {
+
+            Query query = entityManagerMSI.createQuery("SELECT pm.id, bs.sequence, bs.mass, bs.pi FROM fr.proline.core.orm.msi.ProteinMatch pm, fr.proline.core.orm.msi.BioSequence bs WHERE bs.id = pm.bioSequenceId AND pm.id IN (:proteinMatchIds)");
+            query.setParameter("proteinMatchIds", proteinMatchById.keySet());
+            Iterator<Object[]> itProteinGroupsQuery = query.getResultList().iterator();
+            while (itProteinGroupsQuery.hasNext()) {
+                Object[] resCur = itProteinGroupsQuery.next();
+                Long proteinMatchId = (Long) resCur[0];
+                String sequence = (String) resCur[1];
+                Integer mass = (Integer) resCur[2];
+                Float pI = (Float) resCur[3];
+                proteinMatchById.get(proteinMatchId).setDBioSequence(new DBioSequence(sequence, mass, pI));
+            }
+
+        } catch (RuntimeException e) {
+
+        } finally {
+            entityManagerMSI.close();
+        }
+        return true;
     }
 
-    public void initLoadBioSequences(DProteinMatch proteintMatch, Long rsmId) {
-        setTaskInfo(new TaskInfo("Load Biosequence for " + proteintMatch.getAccession() + "...", false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_LOW));
-        m_proteinMatchList = new ArrayList<>(1);
-        m_proteinMatchList.add(proteintMatch);
-        m_rsmId = rsmId;
-        setPriority(Priority.NORMAL_1);
-    }
-
-    @Override
-    public boolean fetchData() {
-        return fetchData(m_proteinMatchList, m_rsmId);
-    }
-    public static boolean fetchData(List<DProteinMatch> proteinMatchList, Long rsmId) {
+    public static boolean fetchData_PreviousImpl(List<DProteinMatch> proteinMatchList, Long rsmId) {
 
         int nbProteinMatches = proteinMatchList.size();
         
@@ -160,8 +152,4 @@ public class DatabaseBioSequenceTask extends AbstractDatabaseTask {
 
     }
 
-    @Override
-    public boolean needToFetch() {
-        return true;
-    }
 }

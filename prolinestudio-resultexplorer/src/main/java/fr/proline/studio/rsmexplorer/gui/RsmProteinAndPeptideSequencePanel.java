@@ -5,9 +5,8 @@ import fr.proline.core.orm.msi.dto.DPeptideInstance;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.msi.dto.DPeptidePTM;
 import fr.proline.core.orm.msi.dto.DProteinMatch;
-import fr.proline.module.seq.BioSequenceProvider;
-import fr.proline.module.seq.dto.DBioSequence;
 import fr.proline.studio.dam.DatabaseDataManager;
+import fr.proline.studio.dam.tasks.DatabaseBioSequenceTask;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
@@ -15,8 +14,10 @@ import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.utils.DataFormat;
 import fr.proline.studio.utils.GlobalValues;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.awt.*;
-import java.util.List;
 import java.awt.event.ActionListener;
 import java.util.*;
 import javax.swing.*;
@@ -31,8 +32,9 @@ import javax.swing.text.html.StyleSheet;
  */
 public class RsmProteinAndPeptideSequencePanel extends HourglassPanel implements DataBoxPanelInterface {
 
+    private static final Logger m_logger = LoggerFactory.getLogger(RsmProteinAndPeptideSequencePanel.class);
+
     private AbstractDataBox m_dataBox;
-    
     private JEditorPane m_editorPane;
     private JScrollPane m_sequenceScrollPane;
      
@@ -111,7 +113,7 @@ public class RsmProteinAndPeptideSequencePanel extends HourglassPanel implements
     private final int HIGHLIGHT_OTHER_MODIFICATION         = 0x10;
     
 
-    public void setData(Long rsmId, DProteinMatch pm, DPeptideInstance selectedPeptide, DPeptideInstance[] peptideInstances) {
+    public void setData(Long projectId, DProteinMatch pm, DPeptideInstance selectedPeptide, DPeptideInstance[] peptideInstances) {
         
         if (pm == null) {
             m_editorPane.setText("");
@@ -128,105 +130,57 @@ public class RsmProteinAndPeptideSequencePanel extends HourglassPanel implements
              m_editorPane.setText("There is no Protein Sequence Database available. Please contact your IT Administrator to install it.");
             return;
         }
-        
-        String accession = pm.getAccession();
-        ArrayList<String> values = new ArrayList<>();
-        values.add(accession);
- 
 
-        Map<String, BioSequenceProvider.RelatedIdentifiers> result = BioSequenceProvider.findSEDbIdentRelatedData(values);
-        
-        BioSequenceProvider.RelatedIdentifiers relatedObjects = result.get(accession);
-        if ((relatedObjects == null) || (relatedObjects.getDBioSequences() == null))  {
-            m_editorPane.setText("Protein Sequence not available in database");
-            return;
+        if ( !pm.isDBiosequenceSet() && projectId != null) {
+            m_logger.info("BioSequence is absent from the protein match, trying to load it ...");
+            DatabaseBioSequenceTask.fetchData( Collections.singletonList(pm), projectId);
         }
-        
-        List<DBioSequence> bioSequenceWrapperList = relatedObjects.getDBioSequences();
-        
-        DBioSequence biosequenceWrapperSelected = null;
-        int nb = bioSequenceWrapperList.size();
-        for (int i=0;i<nb;i++) {
-            biosequenceWrapperSelected = bioSequenceWrapperList.get(i);
-            
-            String sequence = biosequenceWrapperSelected.getSequence();
-            
-            // check for different peptides that the sequences math to the biosequence
+
+        if (pm.isDBiosequenceSet()) {
+            String sequence = pm.getDBioSequence().getSequence();
+            int sequenceLength = sequence.length();
+
+            int[] highlights = new int[sequenceLength];
+            for (int i = 0; i < sequenceLength; i++) {
+                highlights[i] = HIGHLIGHT_NONE;
+            }
+
+            // highlight for non selected peptides
             int nbPeptides = peptideInstances.length;
-            for (int j = 0; j < nbPeptides; j++) {
+            for (int i = 0; i < nbPeptides; i++) {
 
-                DPeptideMatch peptideMatch = peptideInstances[j].getBestPeptideMatch();
-                String peptideSequence = peptideMatch.getPeptide().getSequence();
-                int start = peptideMatch.getSequenceMatch().getId().getStart();
-                int stop = peptideMatch.getSequenceMatch().getId().getStop();
-                if (stop>sequence.length()) {
-                    biosequenceWrapperSelected = null;
-                    break;
+                if (peptideInstances[i].equals(selectedPeptide)) {
+                    continue;
                 }
-                
-                String subSequence = sequence.substring(start-1, stop);
-                if (subSequence.compareTo(peptideSequence) != 0) {
-                    biosequenceWrapperSelected = null;
-                    break;
+
+                DPeptideMatch peptideMatch = ((DPeptideMatch) peptideInstances[i].getBestPeptideMatch());
+                hightlight(peptideMatch, false, highlights);
+            }
+
+            if (selectedPeptide != null) {
+                // highlight for selected peptide (must be done last to override modifications
+                // of overlaping non selected peptides
+                hightlight(((DPeptideMatch) selectedPeptide.getBestPeptideMatch()), true, highlights);
+            }
+
+            // calculate coverage
+            int noCoverageNumber = 0;
+            for (int i = 0; i < sequenceLength; i++) {
+                if (highlights[i] == HIGHLIGHT_NONE) {
+                    noCoverageNumber++;
                 }
             }
-            if (biosequenceWrapperSelected != null) {
-                break;
-            }
-        }
-        
-        
-        
-        if (biosequenceWrapperSelected == null) {
+            double coverage = (((double) (sequenceLength - noCoverageNumber)) / ((double) sequenceLength)) * 100.0d;
+            String coverageFormatted = DataFormat.format(coverage, 2);
+
+            m_editorPane.setText(constructDisplayedSequence(pm, sequence, highlights, coverageFormatted));
+            m_editorPane.setCaretPosition(0);
+        } else {
             m_editorPane.setText("Protein Sequence not available in database");
-
             return;
         }
-  
-        
-        String sequence = biosequenceWrapperSelected.getSequence();
-        int sequenceLength = sequence.length();
-        
-        int[] highlights = new int[sequenceLength];
-        for (int i=0;i<sequenceLength;i++) {
-            highlights[i] = HIGHLIGHT_NONE;
-        }
-        
-        // highlight for non selected peptides
-        int nbPeptides = peptideInstances.length;
-        for (int i = 0; i < nbPeptides; i++) {
-
-            if (peptideInstances[i].equals(selectedPeptide)) {
-                continue;
-            }
-
-            DPeptideMatch peptideMatch = ((DPeptideMatch)peptideInstances[i].getBestPeptideMatch());
-            hightlight(peptideMatch, false, highlights);
-        }
-        
-        if (selectedPeptide != null) {
-            // highlight for selected peptide (must be done last to override modifications
-            // of overlaping non selected peptides
-            hightlight(((DPeptideMatch)selectedPeptide.getBestPeptideMatch()), true, highlights);
-        }
-
-        // calculate coverage
-        int noCoverageNumber = 0;
-        for (int i=0;i<sequenceLength;i++) {
-            if (highlights[i] == HIGHLIGHT_NONE) {
-                noCoverageNumber++;
-            }
-        }
-        double coverage = (((double)(sequenceLength-noCoverageNumber)) / ((double) sequenceLength))*100.0d;
-        String coverageFormatted = DataFormat.format(coverage, 2);
-        
-        
-        m_editorPane.setText(constructDisplayedSequence(pm, sequence, highlights, coverageFormatted));
-        
-        m_editorPane.setCaretPosition(0);
-
-
     }
+
     private void hightlight(DPeptideMatch p, boolean selectedPeptide, int[] highlights) {
                    
 
@@ -335,15 +289,10 @@ public class RsmProteinAndPeptideSequencePanel extends HourglassPanel implements
         sb.append("<span class='nter_cter'>&nbsp;&nbsp;</span>&nbsp;N/C-ter PTM&nbsp;&nbsp;&nbsp;&nbsp;");
         sb.append("<span class='modif'>&nbsp;&nbsp;</span>&nbsp;AA PTM&nbsp;&nbsp;&nbsp;&nbsp;");
         sb.append("<span class='modif_nter_cter'>&nbsp;&nbsp;</span>&nbsp;N/C-ter and AA PTM");
-        
         sb.append("<br><br>");
-        
         sb.append("Coverage : ").append(coverageFormatted).append('%');
-        
         sb.append("<br><br>");
-        
         sb.append(pm.getAccession()).append(" : ").append(pm.getDescription());
-        
         sb.append("</p></body></html>");
         
         return sb.toString();

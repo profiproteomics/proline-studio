@@ -78,9 +78,10 @@ public class DataBoxRsmProteinAndPeptideSequence extends AbstractDataBox {
                 selectedPeptide = null;
             }
         } 
-        
-        
-        ((RsmProteinAndPeptideSequencePanel) getDataBoxPanelInterface()).setData(resultSummary.getId() , proteinMatch, selectedPeptide, peptideInstances);
+
+        Long projectId = resultSummary.getTransientData().getDDataset() == null ? null : resultSummary.getTransientData().getDDataset().getProject().getId();
+
+        ((RsmProteinAndPeptideSequencePanel) getDataBoxPanelInterface()).setData(projectId , proteinMatch, selectedPeptide, peptideInstances);
     }
 
 }

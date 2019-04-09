@@ -58,7 +58,7 @@ public class DatabaseProteinsFromProteinSetTask extends AbstractDatabaseTask {
             
             entityManagerMSI.getTransaction().begin();
             
-            fetchProteins(entityManagerMSI, m_proteinSet);
+            fetchProteins(entityManagerMSI, m_proteinSet, m_projectId);
             
             entityManagerMSI.getTransaction().commit();
         } catch  (RuntimeException e) {
@@ -88,7 +88,7 @@ public class DatabaseProteinsFromProteinSetTask extends AbstractDatabaseTask {
         return true;
     }
     
-    protected static void fetchProteins( EntityManager entityManagerMSI, DProteinSet proteinSet) throws Exception{
+    protected static void fetchProteins(EntityManager entityManagerMSI, DProteinSet proteinSet, long projectId) throws Exception{
 
         Long rsmId = proteinSet.getResultSummaryId();
 
@@ -148,7 +148,7 @@ public class DatabaseProteinsFromProteinSetTask extends AbstractDatabaseTask {
         
         
         // retrieve biosequence
-        DatabaseBioSequenceTask.fetchData(proteinMatchList, rsmId);
+        DatabaseBioSequenceTask.fetchData(proteinMatchList, projectId);
 
 
         DProteinMatch[] sameSetArray = sameSet.toArray(new DProteinMatch[sameSet.size()]);

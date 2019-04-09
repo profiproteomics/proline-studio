@@ -171,25 +171,31 @@ public class ExperimentalDesignPanel extends HourglassPanel implements DataBoxPa
         }
 
         try {
-            if (m_dataset.getQuantProcessingConfig() != null) {
-                LabelFreeMSParamsCompletePanel xicParamPanel = new LabelFreeMSParamsCompletePanel(true, false);
-                m_confPanel.removeAll();
-                xicParamPanel.resetScrollbar();
-                m_confPanel.add(xicParamPanel, BorderLayout.CENTER);
-                xicParamPanel.setQuantParams(m_dataset.getQuantProcessingConfigAsMap());
+            if (m_dataset.isQuantitation() && m_dataset.isAggregation()) {
+                //if isQuantitation isAggregation, we don't show parameter tab
+                m_confPanel.setVisible(false);
+                m_tabbedPane.remove(m_confPanel);
             } else {
-                m_confPanel.removeAll();
-                m_confPanel.add(new JLabel("no configuration available"), BorderLayout.CENTER);
+                if (m_dataset.getQuantProcessingConfig() != null) {
+                    LabelFreeMSParamsCompletePanel xicParamPanel = new LabelFreeMSParamsCompletePanel(true, false);
+                    m_confPanel.removeAll();
+                    xicParamPanel.resetScrollbar();
+                    m_confPanel.add(xicParamPanel, BorderLayout.CENTER);
+                    xicParamPanel.setQuantParams(m_dataset.getQuantProcessingConfigAsMap());
+                } else {
+                    m_confPanel.removeAll();
+                    m_confPanel.add(new JLabel("no configuration available"), BorderLayout.CENTER);
+                }
             }
 
             if (m_dataset.getPostQuantProcessingConfig() != null) {
                 m_refinedPanel.removeAll();
-                if (m_tabbedPane.getTabCount() == 2) {
+                //if (m_tabbedPane.getTabCount() == 2) {
                     m_tabbedPane.add(TAB_POST_PROCESSING_TITLE, m_refinedPanel);
-                }
+                //}
                 Map<Long, String> ptmName = getPtmSpecificityNameById();
                 m_profilizerParamPanel = new QuantPostProcessingPanel(true, ptmName);//read only
-                m_refinedPanel.add(m_profilizerParamPanel, BorderLayout.CENTER);                
+                m_refinedPanel.add(m_profilizerParamPanel, BorderLayout.CENTER);
                 m_profilizerParamPanel.setRefinedParams(m_dataset.getPostQuantProcessingConfigAsMap());
 
             } else {

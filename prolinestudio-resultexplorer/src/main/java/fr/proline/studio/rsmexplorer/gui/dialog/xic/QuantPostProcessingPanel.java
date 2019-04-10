@@ -632,7 +632,7 @@ public class QuantPostProcessingPanel extends JPanel {
      */
     //VDS TODO : if Profi = false, Use only values seen in this mode ! Set other to default ?
     public void setRefinedParams(Map<String, Object> refinedParams) {
-        
+
         boolean isVersion2 = false;
         Object isDiscardModifiedPeptide = refinedParams.get(DISCARD_MODIFIED_PEPTIDES);
         if (isDiscardModifiedPeptide != null) {
@@ -641,7 +641,6 @@ public class QuantPostProcessingPanel extends JPanel {
 
         m_useOnlySpecificPeptidesChB.setSelected(Boolean.valueOf(refinedParams.get(USE_ONLY_SPECIFIC_PEPTIDES).toString()));//V1&V2
 
-        
         Object isDmcPep = isVersion2 ? refinedParams.get(DISCARD_MISS_CLEAVED_PEPTIDES) : refinedParams.get(DISCARD_MISS_CLEAVED_PEPTIDES_V1);
         m_discardMissCleavedPeptidesChB.setSelected(Boolean.valueOf(isDmcPep.toString()));
 
@@ -654,45 +653,66 @@ public class QuantPostProcessingPanel extends JPanel {
             m_discardModifiedPeptidesChB.setSelected(Boolean.valueOf(isDiscardModifiedPeptide.toString()));//V2
         }
 
-        List<Long> ptmIdList = (ArrayList) refinedParams.get(PTM_DEFINITION_IDS_TO_DISCARD);
-        if (ptmIdList == null) {//V1
-            ptmIdList = new ArrayList();//a list of Long
+        ArrayList ptmIdListFromParam = (ArrayList) refinedParams.get(PTM_DEFINITION_IDS_TO_DISCARD);//return is an Integer ArrayList, not desired Long ArrayList
+        List<Long> ptmIdList = new ArrayList();
+        if (ptmIdListFromParam != null) {
+            //convert Integer ArrayList to Long ArrayList
+            for (Object l : ptmIdListFromParam) {
+                ptmIdList.add(Long.parseLong("" + l));
+            }
+        } else {//V1
+            ptmIdList = new ArrayList<Long>();//a list of Long
             for (Long id : m_ptmSpecificityNameById.keySet()) {
                 if (m_ptmSpecificityNameById.get(id).contains("Oxidation") && isV1DiscardOxidPepSelected == true) {
                     ptmIdList.add(id);
                 }
             }
         }
-
+//        String trace = "\n<-\n";
+//        for (String s : refinedParams.keySet()) {
+//            trace += (s + ": " + refinedParams.get(s) + "\n");
+//        }
+//        trace += "ptmIdList: " + ptmIdList.toString() + "\n";
         for (BooleanParameter ptmToDiscardParameter : m_peptidesModificationListParameter) {
             JCheckBox ptmChB = (JCheckBox) ptmToDiscardParameter.getComponent();
             Long ptmId = (Long) ptmToDiscardParameter.getAssociatedData();
             if (ptmIdList.contains(ptmId)) {
                 ptmChB.setSelected(true);
+            } else {
+                ptmChB.setSelected(false);
             }
+
         }
 
+//        m_logger.debug("refinedParams:{}\n->", trace);
         String pmfMethod = isVersion2 ? (String) refinedParams.get(MODIFIED_PEPTIDE_FILTERING_METHOD) : "";
         int index = 0;
-        for (int i = 0; i < MODIFIED_PEPTIDE_FILTERING_METHOD_KEYS.length; i++) {
+        for (int i = 0;
+                i < MODIFIED_PEPTIDE_FILTERING_METHOD_KEYS.length;
+                i++) {
             if (MODIFIED_PEPTIDE_FILTERING_METHOD_KEYS[i].equals(pmfMethod)) {
                 index = i;
                 break;
             }
         }
+
         m_modifiedPeptidesFilteringMethodCB.setSelectedIndex(index);//V2
 
         m_discardPeptidesSharingPeakelsChB.setSelected(Boolean.valueOf(refinedParams.get(DISCARD_PEPTIDES_SHARING_PEAKELS).toString()));//V1&V2
         String summarisedMethodKey = isVersion2 ? (String) refinedParams.get(ABUNDANCE_SUMMARIZING_METHOD) : (String) refinedParams.get(ABUNDANCE_SUMMARIZING_METHOD_V1);
         index = 0;
-        for (int i = 0; i < ABUNDANCE_SUMMARIZING_METHOD_KEYS.length; i++) {
+        for (int i = 0;
+                i < ABUNDANCE_SUMMARIZING_METHOD_KEYS.length;
+                i++) {
             if (ABUNDANCE_SUMMARIZING_METHOD_KEYS[i].equals(summarisedMethodKey)) {
                 index = i;
                 break;
             }
         }
+
         m_abundanceSummarizingMethodCB.setSelectedIndex(index);
 //VDS TODO :If not completeMode should be set to false 
+
         m_applyProfileClusteringChB.setSelected(Boolean.valueOf(refinedParams.get("apply_profile_clustering").toString()));
 
         Map<String, Object> peptideStatConfigMap = (Map<String, Object>) refinedParams.get("peptide_stat_config");

@@ -34,7 +34,8 @@ import org.slf4j.LoggerFactory;
  * parameters linked to the peptide selection and the applyNormalization to do
  * this, we use a display mode (complete or release), that could be changed in
  * the preferences properties Issue #13875: remove Normalized Median Profile
- * option Modified for version 2.0 of PostProcessing params
+ * option.
+ * Modified for version 2.0 of PostProcessing params
  *
  * @author MB243701
  */
@@ -630,9 +631,7 @@ public class QuantPostProcessingPanel extends JPanel {
      *
      * @param refinedParams
      */
-    //VDS TODO : if Profi = false, Use only values seen in this mode ! Set other to default ?
     public void setRefinedParams(Map<String, Object> refinedParams) {
-
         boolean isVersion2 = false;
         Object isDiscardModifiedPeptide = refinedParams.get(DISCARD_MODIFIED_PEPTIDES);
         if (isDiscardModifiedPeptide != null) {
@@ -711,7 +710,7 @@ public class QuantPostProcessingPanel extends JPanel {
         }
 
         m_abundanceSummarizingMethodCB.setSelectedIndex(index);
-//VDS TODO :If not completeMode should be set to false 
+        //VDS TODO :If not completeMode should be set to false 
 
         m_applyProfileClusteringChB.setSelected(Boolean.valueOf(refinedParams.get("apply_profile_clustering").toString()));
 
@@ -731,8 +730,8 @@ public class QuantPostProcessingPanel extends JPanel {
         m_applyProtNormalizationChB.setSelected(Boolean.valueOf(proteinStatConfigMap.get(APPLY_NORMALIZATION).toString()));
         m_applyProtMissValInferenceChB.setSelected(Boolean.valueOf(proteinStatConfigMap.get("apply_miss_val_inference").toString()));//VDS TODO :If not completeMode should be set to false
         m_applyProtVarianceCorrectionChB.setSelected(Boolean.valueOf(proteinStatConfigMap.get("apply_variance_correction").toString()));//VDS TODO :If not completeMode should be set to false
-        m_applyProtTTestChB.setSelected(Boolean.valueOf(peptideStatConfigMap.get("apply_ttest").toString()));//VDS TODO :If not completeMode should be set to false
-        m_applyProtZTestChB.setSelected(Boolean.valueOf(peptideStatConfigMap.get("apply_ztest").toString()));//VDS TODO :If not completeMode should be set to false
+        m_applyProtTTestChB.setSelected(Boolean.valueOf(proteinStatConfigMap.get("apply_ttest").toString()));//VDS TODO :If not completeMode should be set to false
+        m_applyProtZTestChB.setSelected(Boolean.valueOf(proteinStatConfigMap.get("apply_ztest").toString()));//VDS TODO :If not completeMode should be set to false
     }
 
 }

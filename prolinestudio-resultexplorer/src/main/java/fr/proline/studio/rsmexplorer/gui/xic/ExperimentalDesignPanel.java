@@ -50,6 +50,8 @@ public class ExperimentalDesignPanel extends HourglassPanel implements DataBoxPa
     private JPanel m_refinedPanel;
 
     private DDataset m_dataset;
+    private boolean m_displayPostProcessing = false;
+    private boolean m_displayQuantParam = true;
 
     private static String TAB_POST_PROCESSING_TITLE = "Compute Post Processing";
 
@@ -172,8 +174,9 @@ public class ExperimentalDesignPanel extends HourglassPanel implements DataBoxPa
 
         try {
             if (m_dataset.isQuantitation() && m_dataset.isAggregation()) {
-                //if isQuantitation isAggregation, we don't show parameter tab
+                //if isQuantitation isAggregation, we don't show parameter tab                
                 m_confPanel.setVisible(false);
+                m_displayQuantParam = false;
                 m_tabbedPane.remove(m_confPanel);
             } else {
                 if (m_dataset.getQuantProcessingConfig() != null) {
@@ -186,24 +189,29 @@ public class ExperimentalDesignPanel extends HourglassPanel implements DataBoxPa
                     m_confPanel.removeAll();
                     m_confPanel.add(new JLabel("no configuration available"), BorderLayout.CENTER);
                 }
+                if(!m_displayQuantParam){
+                    m_displayQuantParam = true;
+                    m_tabbedPane.add(m_confPanel);
+                }
             }
 
             if (m_dataset.getPostQuantProcessingConfig() != null) {
                 m_refinedPanel.removeAll();
-                //if (m_tabbedPane.getTabCount() == 2) {
+                if (!m_displayPostProcessing) {
                     m_tabbedPane.add(TAB_POST_PROCESSING_TITLE, m_refinedPanel);
-                //}
+                    m_displayPostProcessing = true;
+                }
                 Map<Long, String> ptmName = getPtmSpecificityNameById();
                 m_profilizerParamPanel = new QuantPostProcessingPanel(true, ptmName);//read only
                 m_refinedPanel.add(m_profilizerParamPanel, BorderLayout.CENTER);
                 m_profilizerParamPanel.setRefinedParams(m_dataset.getPostQuantProcessingConfigAsMap());
 
             } else {
-                if (m_tabbedPane.getTabCount() == 3) {
-                    m_tabbedPane.removeTabAt(2);
+                if (m_displayPostProcessing) {
+                    m_tabbedPane.remove(m_refinedPanel);
+                    m_displayPostProcessing = false;                    
                 }
-                m_refinedPanel.removeAll();
-                m_refinedPanel.add(new JLabel("no configuration available"), BorderLayout.CENTER);
+                m_refinedPanel.removeAll();                
             }
         } catch (Exception ex) {
             m_logger.error("error while settings quanti params " + ex);

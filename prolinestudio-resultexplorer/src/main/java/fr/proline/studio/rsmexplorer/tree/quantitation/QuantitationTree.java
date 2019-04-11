@@ -28,7 +28,6 @@ import fr.proline.studio.rsmexplorer.actions.identification.RetrieveBioSeqJMSAct
 import fr.proline.studio.rsmexplorer.actions.xic.AddQuantitationFolderAction;
 import fr.proline.studio.rsmexplorer.actions.xic.AggregateQuantitationsAction;
 import fr.proline.studio.rsmexplorer.actions.xic.ComputeQuantPostProcessingAction;
-import fr.proline.studio.rsmexplorer.actions.xic.ComputeQuantitationProfileAction;
 import fr.proline.studio.rsmexplorer.actions.xic.DisplayExperimentalDesignAction;
 import fr.proline.studio.rsmexplorer.actions.xic.DisplayXICAction;
 import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;

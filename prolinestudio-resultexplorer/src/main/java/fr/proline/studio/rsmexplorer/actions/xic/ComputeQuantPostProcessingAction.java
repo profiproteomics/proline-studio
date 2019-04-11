@@ -84,7 +84,7 @@ public class ComputeQuantPostProcessingAction extends AbstractRSMAction {
                         }
                     }    
                     
-                    quantificationProfile(posX, posY, pID, dataSet, datasetNode);
+                    quantificationProfile(null, posX, posY, pID, dataSet, datasetNode);
                 }
             }
         };
@@ -96,7 +96,7 @@ public class ComputeQuantPostProcessingAction extends AbstractRSMAction {
     }
     
     
-    private boolean quantificationProfile(int posx, int posy, Long pID, DDataset dataSet, DataSetNode datasetNode) {
+    public static boolean quantificationProfile(final ResultCallback resultCallback, int posx, int posy, Long pID, DDataset dataSet, DataSetNode datasetNode) {
         // dialog with the parameters for quantitation profiler
         QuantPostProcessingDialog dialog = new QuantPostProcessingDialog(WindowManager.getDefault().getMainWindow(), dataSet);
         dialog.setLocation(posx, posy);
@@ -148,7 +148,10 @@ public class ComputeQuantPostProcessingAction extends AbstractRSMAction {
                             datasetNode.setIsChanging(false);
                             treeModel.nodeChanged(datasetNode);
                         }
-                       
+                        if (resultCallback != null) {
+                            resultCallback.run(success);
+                        }
+ 
                     }
                 };
                 fr.proline.studio.dpm.task.jms.ComputeQuantPostProcessingTask task = new fr.proline.studio.dpm.task.jms.ComputeQuantPostProcessingTask(xicCallback, pID, masterQuantChannelId, quantParams, xicName);

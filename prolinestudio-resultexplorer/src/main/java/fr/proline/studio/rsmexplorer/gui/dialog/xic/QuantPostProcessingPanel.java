@@ -34,8 +34,7 @@ import org.slf4j.LoggerFactory;
  * parameters linked to the peptide selection and the applyNormalization to do
  * this, we use a display mode (complete or release), that could be changed in
  * the preferences properties Issue #13875: remove Normalized Median Profile
- * option.
- * Modified for version 2.0 of PostProcessing params
+ * option. Modified for version 2.0 of PostProcessing params
  *
  * @author MB243701
  */
@@ -308,6 +307,7 @@ public class QuantPostProcessingPanel extends JPanel {
     }
 
     public ParameterList getParameterList() {
+        this.m_discardPeptidesSharingPeakelsChB.setEnabled(true);
         return m_parameterList;
     }
 
@@ -700,9 +700,7 @@ public class QuantPostProcessingPanel extends JPanel {
         m_discardPeptidesSharingPeakelsChB.setSelected(Boolean.valueOf(refinedParams.get(DISCARD_PEPTIDES_SHARING_PEAKELS).toString()));//V1&V2
         String summarisedMethodKey = isVersion2 ? (String) refinedParams.get(ABUNDANCE_SUMMARIZING_METHOD) : (String) refinedParams.get(ABUNDANCE_SUMMARIZING_METHOD_V1);
         index = 0;
-        for (int i = 0;
-                i < ABUNDANCE_SUMMARIZING_METHOD_KEYS.length;
-                i++) {
+        for (int i = 0; i < ABUNDANCE_SUMMARIZING_METHOD_KEYS.length; i++) {
             if (ABUNDANCE_SUMMARIZING_METHOD_KEYS[i].equals(summarisedMethodKey)) {
                 index = i;
                 break;
@@ -732,6 +730,20 @@ public class QuantPostProcessingPanel extends JPanel {
         m_applyProtVarianceCorrectionChB.setSelected(Boolean.valueOf(proteinStatConfigMap.get("apply_variance_correction").toString()));//VDS TODO :If not completeMode should be set to false
         m_applyProtTTestChB.setSelected(Boolean.valueOf(proteinStatConfigMap.get("apply_ttest").toString()));//VDS TODO :If not completeMode should be set to false
         m_applyProtZTestChB.setSelected(Boolean.valueOf(proteinStatConfigMap.get("apply_ztest").toString()));//VDS TODO :If not completeMode should be set to false
+    }
+
+    /**
+     * for XIC Aggregation, the m_discardPeptidesSharingPeakelsChB should be
+     * invalid; but for other XIC, this option must be enable to avoid
+     * preference parameters setting.
+     *
+     * @param isAggregation
+     */
+    public void setDiscardPeptidesSharingPeakelsChB(boolean isAggregation) {
+        if (isAggregation) {
+            m_discardPeptidesSharingPeakelsChB.setSelected(false);
+        }
+        m_discardPeptidesSharingPeakelsChB.setEnabled(!isAggregation);
     }
 
 }

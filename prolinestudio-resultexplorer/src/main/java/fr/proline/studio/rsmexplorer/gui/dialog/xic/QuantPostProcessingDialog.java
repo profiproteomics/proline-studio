@@ -31,9 +31,9 @@ import org.slf4j.LoggerFactory;
  */
 public class QuantPostProcessingDialog extends DefaultDialog {
 
-    private QuantPostProcessingPanel m_quantProfilePanel;
+    private QuantPostProcessingPanel m_quantPostProcessingPanel;
     private DDataset m_dataset;
-    
+
     public final static String SETTINGS_KEY = "QuantPostProcessing";
 
     public QuantPostProcessingDialog(Window parent, DDataset dataset) {
@@ -66,7 +66,7 @@ public class QuantPostProcessingDialog extends DefaultDialog {
             FilePreferences filePreferences = new FilePreferences(f, null, "");
 
             // Save Parameters  
-            ParameterList parameterList = m_quantProfilePanel.getParameterList();
+            ParameterList parameterList = m_quantPostProcessingPanel.getParameterList();
             parameterList.saveParameters(filePreferences);
 
             SettingsUtils.addSettingsPath(SETTINGS_KEY, f.getAbsolutePath());
@@ -85,7 +85,7 @@ public class QuantPostProcessingDialog extends DefaultDialog {
 
         if (settingsDialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {
             if (settingsDialog.isDefaultSettingsSelected()) {
-                ParameterList parameterList = m_quantProfilePanel.getParameterList();
+                ParameterList parameterList = m_quantPostProcessingPanel.getParameterList();
                 parameterList.initDefaults();
             } else {
                 try {
@@ -99,7 +99,7 @@ public class QuantPostProcessingDialog extends DefaultDialog {
                         preferences.put(key, value);
                     }
 
-                    m_quantProfilePanel.loadParameters(filePreferences);
+                    m_quantPostProcessingPanel.loadParameters(filePreferences);
                 } catch (Exception e) {
                     LoggerFactory.getLogger("ProlineStudio.ResultExplorer").error("Parsing of User Settings File Failed", e);
                     setStatus(true, "Parsing of your Settings File failed");
@@ -120,7 +120,7 @@ public class QuantPostProcessingDialog extends DefaultDialog {
 
         // save parameters
         Preferences preferences = NbPreferences.root();
-        m_quantProfilePanel.getParameterList().saveParameters(preferences);
+        m_quantPostProcessingPanel.getParameterList().saveParameters(preferences);
 
         return true;
 
@@ -128,7 +128,7 @@ public class QuantPostProcessingDialog extends DefaultDialog {
 
     private boolean checkParameters() {
         // check parameters
-        ParameterError error = m_quantProfilePanel.getParameterList().checkParameters();
+        ParameterError error = m_quantPostProcessingPanel.getParameterList().checkParameters();
         if (error != null) {
             setStatus(true, error.getErrorMessage());
             highlight(error.getParameterComponent());
@@ -145,14 +145,15 @@ public class QuantPostProcessingDialog extends DefaultDialog {
         task.initLoadUsedPTMs(m_dataset.getProject().getId(), m_dataset.getResultSummaryId(), ptms);
         task.fetchData();
         Map<Long, String> ptmSpecificityNameById = ptms.stream().collect(Collectors.toMap(ptmS -> ptmS.getId(), ptmS -> ptmS.toString()));
-        m_quantProfilePanel = new QuantPostProcessingPanel(false, ptmSpecificityNameById);
+        m_quantPostProcessingPanel = new QuantPostProcessingPanel(false, ptmSpecificityNameById);
         Preferences preferences = NbPreferences.root();
-        m_quantProfilePanel.getParameterList().loadParameters(preferences);
-
-        setInternalComponent(m_quantProfilePanel);
+        m_quantPostProcessingPanel.getParameterList().loadParameters(preferences);
+        boolean isAggregation = (m_dataset.isQuantitation() && m_dataset.isAggregation()) ? true : false;
+        m_quantPostProcessingPanel.setDiscardPeptidesSharingPeakelsChB(isAggregation);
+        setInternalComponent(m_quantPostProcessingPanel);
     }
 
     public Map<String, Object> getQuantParams() {
-        return m_quantProfilePanel.getQuantParams();
+        return m_quantPostProcessingPanel.getQuantParams();
     }
 }

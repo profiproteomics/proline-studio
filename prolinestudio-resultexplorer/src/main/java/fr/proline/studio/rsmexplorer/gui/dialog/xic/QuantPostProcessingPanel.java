@@ -46,6 +46,8 @@ public class QuantPostProcessingPanel extends JPanel {
 
     // for now, for the public release, some parameters are hidden
     private boolean completeMode = false;
+    
+    private boolean m_loadedPTMsParamsError = false; //Specify if loaded params from file don't contains this Quant PTMs list
 
     private JScrollPane m_scrollPane;
     private JTabbedPane m_tabbedPane;
@@ -156,7 +158,7 @@ public class QuantPostProcessingPanel extends JPanel {
 
         m_discardMissCleavedPeptidesChB = new JCheckBox("Discard Missed Cleaved Peptides");
         m_discardMissCleavedPeptidesChB.setEnabled(!m_readOnly);
-        m_discardMissCleavedPeptidesParameter = new BooleanParameter(DISCARD_MISS_CLEAVED_PEPTIDES, "Discard Missed Cleaved Peptides", m_discardMissCleavedPeptidesChB, false);
+        m_discardMissCleavedPeptidesParameter = new BooleanParameter("discardMissedCleavedPeptides", "Discard Missed Cleaved Peptides", m_discardMissCleavedPeptidesChB, false);
         m_parameterList.add(m_discardMissCleavedPeptidesParameter);
 
         m_discardModifiedPeptidesChB = new JCheckBox("Discard Modified Peptides");
@@ -182,17 +184,17 @@ public class QuantPostProcessingPanel extends JPanel {
 
         m_discardPeptidesSharingPeakelsChB = new JCheckBox("Discard Peptides sharing Peakels");
         m_discardPeptidesSharingPeakelsChB.setEnabled(!m_readOnly);
-        m_discardPeptidesSharingPeakelsParameter = new BooleanParameter(DISCARD_PEPTIDES_SHARING_PEAKELS, "Discard Peptides sharing Peakels", m_discardPeptidesSharingPeakelsChB, false);
+        m_discardPeptidesSharingPeakelsParameter = new BooleanParameter("discardPeptidesSharingPeakels", "Discard Peptides sharing Peakels", m_discardPeptidesSharingPeakelsChB, false);
         m_parameterList.add(m_discardPeptidesSharingPeakelsParameter);
 
         m_applyPepNormalizationChB = new JCheckBox("Apply Normalization (median)");
         m_applyPepNormalizationChB.setEnabled(!m_readOnly);
-        m_applyPepNormalizationParameter = new BooleanParameter(APPLY_NORMALIZATION, "Apply Normalization on peptides", m_applyPepNormalizationChB, false);
+        m_applyPepNormalizationParameter = new BooleanParameter("applyPepNormalization", "Apply Normalization on peptides", m_applyPepNormalizationChB, false);
         m_parameterList.add(m_applyPepNormalizationParameter);
 
         m_applyProtNormalizationChB = new JCheckBox("Apply Normalization (median)");
         m_applyProtNormalizationChB.setEnabled(!m_readOnly);
-        m_applyProtNormalizationParameter = new BooleanParameter(APPLY_NORMALIZATION, "Apply Normalization on proteins", m_applyProtNormalizationChB, false);
+        m_applyProtNormalizationParameter = new BooleanParameter("applyProtNormalization", "Apply Normalization on proteins", m_applyProtNormalizationChB, false);
         m_parameterList.add(m_applyProtNormalizationParameter);
 
         m_applyPepMissValInferenceChB = new JCheckBox("Apply Missing Value Inference");
@@ -242,7 +244,7 @@ public class QuantPostProcessingPanel extends JPanel {
 
         m_useOnlySpecificPeptidesChB = new JCheckBox("Use Only Specific Peptides");
         m_useOnlySpecificPeptidesChB.setEnabled(!m_readOnly);
-        m_useOnlySpecificPeptidesParameter = new BooleanParameter(USE_ONLY_SPECIFIC_PEPTIDES, "Use Only Specific Peptides", m_useOnlySpecificPeptidesChB, true);
+        m_useOnlySpecificPeptidesParameter = new BooleanParameter("useOnlySpecificPeptides", "Use Only Specific Peptides", m_useOnlySpecificPeptidesChB, true);
         m_parameterList.add(m_useOnlySpecificPeptidesParameter);
 
         m_abundanceSummarizingMethodCB = new JComboBox(ABUNDANCE_SUMMARIZING_METHOD_VALUES);
@@ -273,11 +275,8 @@ public class QuantPostProcessingPanel extends JPanel {
      * @throws BackingStoreException
      */
     public void loadParameters(FilePreferences filePreferences) throws BackingStoreException {
-        Preferences preferences = NbPreferences.root();
-        String[] keys = filePreferences.keys();
-        for (String key : keys) {
-            if (!completeMode) {
-                String[] hiddenParams = {m_parameterList.getPrefixName() + m_peptideStatTestsAlphaParameter.getName(),
+         m_loadedPTMsParamsError = false;
+        String[] hiddenParams = {m_parameterList.getPrefixName() + m_peptideStatTestsAlphaParameter.getName(),
                     m_parameterList.getPrefixName() + m_proteinStatTestsAlphaParameter.getName(),
                     m_parameterList.getPrefixName() + m_applyPepMissValInferenceParameter.getName(),
                     m_parameterList.getPrefixName() + m_applyProtMissValInferenceParameter.getName(),
@@ -289,7 +288,21 @@ public class QuantPostProcessingPanel extends JPanel {
                     m_parameterList.getPrefixName() + m_applyProtZTestParameter.getName(),
                     m_parameterList.getPrefixName() + m_applyProfileClusteringParameter.getName(),
                     m_parameterList.getPrefixName() + m_applyProfileClusteringParameter.getName(),};
-
+        
+        Preferences preferences = NbPreferences.root();
+        String[] keys = filePreferences.keys();
+        List<String> thisQuantPtmIds = new ArrayList();
+        List<String> prefQuantPtmIds = new ArrayList();
+        for (BooleanParameter ptmToDiscardParameter : m_peptidesModificationListParameter) {
+            Long ptmId = (Long) ptmToDiscardParameter.getAssociatedData();
+            thisQuantPtmIds.add(m_parameterList.getPrefixName()+"discardPeptideModification_"+ptmId);
+        }
+            
+        for (String key : keys) {
+            if(key.startsWith(m_parameterList.getPrefixName() +"discardPeptideModification_")){
+                prefQuantPtmIds.add(key);
+            }
+            if (!completeMode) {                
                 if (Arrays.asList(hiddenParams).contains(key)) {
                     filePreferences.remove(key); // Don't load this parameter     
                 } else {
@@ -301,7 +314,19 @@ public class QuantPostProcessingPanel extends JPanel {
                 preferences.put(key, value);
             }
         }
-
+        
+        if(prefQuantPtmIds.size() >= thisQuantPtmIds.size()){ //More PTMs in loaded file. Test if at least same as PTMs of this quant
+            if(!prefQuantPtmIds.containsAll(thisQuantPtmIds)){
+                m_loadedPTMsParamsError = true;
+            }                     
+        } else {
+            m_loadedPTMsParamsError = true;
+        }
+        if(m_loadedPTMsParamsError){
+            JOptionPane.showMessageDialog(this, " Warning:  read parameter don't match current list", "Load Parameter ERROR",JOptionPane.ERROR_MESSAGE);
+            String label = m_discardModifiedPeptidesChB.getText()+" (WARNING: Read parameter don't match current list)";
+            m_discardModifiedPeptidesChB.setText(label);
+        }
         getParameterList().loadParameters(filePreferences); //Load params 
         updateDiscardPTMs();
     }

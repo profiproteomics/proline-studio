@@ -33,8 +33,12 @@ public class Installer extends VersionInstaller {
         int secIndex =  moduleVersion.length();
         if(firstIndex >0)
             secIndex = moduleVersion.indexOf('.', firstIndex+1);        
-        if(secIndex>0)
-            productVersion = moduleVersion.substring(0, secIndex);
+        if(secIndex>0){
+			if(secIndex+2 <= moduleVersion.length())
+				productVersion = moduleVersion.substring(0, secIndex+2);
+			else
+				productVersion = moduleVersion.substring(0, secIndex);
+		}
         
         //String buildnumber = productVersion+" Milestone ("+moduleBuildDate+")"; //specify if Milestone, Release Candidate or release (or nothing = release)
         String buildnumber = productVersion; //specify if Milestone, Release Candidate or release (or nothing = release)

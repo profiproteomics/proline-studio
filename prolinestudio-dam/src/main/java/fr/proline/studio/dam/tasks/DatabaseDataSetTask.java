@@ -38,7 +38,9 @@ import fr.proline.core.orm.uds.dto.DDatasetType.AggregationInformation;
 import fr.proline.core.orm.util.JsonSerializer;
 import fr.proline.studio.dam.data.DatasetToCopy;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadXicMasterQuantTask;
+import java.io.IOException;
 import javax.persistence.NoResultException;
+import org.netbeans.api.db.explorer.DatabaseException;
 
 /**
  * Used to load dataset in two cases : - parent dataset of a project - children
@@ -539,7 +541,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
                 DatabaseConnection dbconn = DatabaseConnection.create(driver, msiJdbcUrl, dbUser, "public", dbPassword, true);
 
                 cm.addConnection(dbconn);
-            } catch (Exception e) {
+            } catch (DatabaseException e) {
 
                 String message = e.getMessage();
                 if ((message == null) || (!message.contains("connection already exists"))) { //JPM.WART : avoid error because the connection already exist
@@ -710,11 +712,16 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
             QuantitationMethod quantitationMethod = (QuantitationMethod) resCur[1];
             ddatasetById.get(id).setQuantitationMethod(quantitationMethod);
         }
-
+                
         for (Map.Entry<Long, DDataset> entrySet : ddatasetById.entrySet()) {
             DDataset ds = entrySet.getValue();
-            if (ds.isQuantitation() && ds.getQuantMethodInfo() == QuantitationMethodInfo.FEATURES_EXTRACTION) {
-                ds.setChildrenCount(1);
+            if (ds.isQuantitation()){
+                if(ds.getQuantMethodInfo() == QuantitationMethodInfo.FEATURES_EXTRACTION) {
+                    ds.setChildrenCount(1);
+                }
+                //Load ObjectTree linked to the dataset
+                Dataset datasetDB = entityManagerUDS.find(Dataset.class, entrySet.getKey());
+                setDDatasetQuantProperties(ds, datasetDB.getObjectTreeIdByName(), entityManagerUDS);
             }
         }        
     }
@@ -810,7 +817,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
                 }
 
                 entityManagerMSI.getTransaction().commit();
-            } catch (Exception e) {
+            } catch (IOException e) {
                 m_logger.error(getClass().getSimpleName() + " failed", e);
                 m_taskError = new TaskError(e);
                 try {
@@ -882,8 +889,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
             Dataset datasetDB = entityManagerUDS.find(Dataset.class, m_dataset.getId());
             QuantitationMethod quantMethodDB = datasetDB.getMethod();
             List<MasterQuantitationChannel> listMasterQuantitationChannels = datasetDB.getMasterQuantitationChannels();
-            List<QuantitationLabel> labels = quantMethodDB.getLabels();
-            Map<String, Long> objectTreeIdByName = datasetDB.getObjectTreeIdByName();
+            List<QuantitationLabel> labels = quantMethodDB.getLabels();            
             // fill the current object with the db object
             quantMethodDB.setLabels(labels);
             m_dataset.setQuantitationMethod(quantMethodDB);
@@ -892,15 +898,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
             DatabaseLoadXicMasterQuantTask.fetchDataQuantChannels(m_project.getId(), m_dataset, m_taskError);
 
             // load ObjectTree linked to the dataset
-            if (objectTreeIdByName != null){
-                for (Map.Entry<String, Long> entry: objectTreeIdByName.entrySet()) {
-                    if (entry.getKey().startsWith("quantitation")) {
-                        Long objectId = entry.getValue();
-                        fr.proline.core.orm.uds.ObjectTree objectTree = entityManagerUDS.find(fr.proline.core.orm.uds.ObjectTree.class, objectId);
-                        m_dataset.setObjectTree(objectTree);
-                    }
-                }
-            }
+            setDDatasetQuantProperties(m_dataset, datasetDB.getObjectTreeIdByName(), entityManagerUDS);
 
             entityManagerUDS.getTransaction().commit();
             entityManagerMSI.getTransaction().commit();
@@ -924,6 +922,19 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
         }
 
         return true;
+    }
+    
+    private void setDDatasetQuantProperties(DDataset ddataset, Map<String, Long> objectTreeIdByName, EntityManager entityManagerUDS){
+        if (objectTreeIdByName != null){
+            for (Map.Entry<String, Long> entry: objectTreeIdByName.entrySet()) {
+                if (entry.getKey().startsWith("quantitation")) {
+                    Long objectId = entry.getValue();
+                    fr.proline.core.orm.uds.ObjectTree objectTree = entityManagerUDS.find(fr.proline.core.orm.uds.ObjectTree.class, objectId);
+                    ddataset.setObjectTree(objectTree);
+                }
+            }
+        }
+
     }
 
     private void fetchRsetAndRsmForOneDataset(EntityManager entityManagerMSI, DDataset d) {
@@ -1021,6 +1032,9 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
                 quantitationQuery.setParameter("dsId", m_datasetId);
                 QuantitationMethod quantitationMethod = quantitationQuery.getSingleResult();
                 ddataSet.setQuantitationMethod(quantitationMethod);
+                
+                Dataset datasetDB = entityManagerUDS.find(Dataset.class, m_datasetId);
+                setDDatasetQuantProperties(ddataSet, datasetDB.getObjectTreeIdByName(), entityManagerUDS);
             }
 
             entityManagerUDS.getTransaction().commit();
@@ -1050,7 +1064,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
             // *** load dataset for specified id
             TypedQuery<DDataset> dataSetQuery = entityManagerUDS.createQuery("SELECT new fr.proline.core.orm.uds.dto.DDataset(d.id, d.project, d.name,  d.type, d.childCount, d.resultSetId, d.resultSummaryId, d.number)  FROM Dataset d WHERE d.id=:dsId", DDataset.class);
             dataSetQuery.setParameter("dsId", m_datasetId);
-            DDataset ddataSet = null;
+            DDataset ddataSet;
             try {
                 ddataSet = dataSetQuery.getSingleResult();
                 m_datasetList.add(ddataSet);

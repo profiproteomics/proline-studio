@@ -1,7 +1,6 @@
 package fr.proline.studio.rsmexplorer.tree.xic;
 
 import fr.proline.core.orm.msi.Peaklist;
-import fr.proline.core.orm.uds.Dataset;
 import fr.proline.core.orm.uds.RawFile;
 import fr.proline.core.orm.uds.Run;
 import fr.proline.core.orm.uds.dto.DDataset;
@@ -13,7 +12,6 @@ import fr.proline.studio.dam.tasks.DatabasePeaklistTask;
 import fr.proline.studio.dam.tasks.DatabaseRunsTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
-import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import fr.proline.studio.utils.IconManager;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -345,7 +343,7 @@ public class XICRunNode extends AbstractNode {
 
         String searchString = selectedFile.getName().substring(0, selectedFile.getName().lastIndexOf('.'));
 
-        final HashMap<String, RawFile> m_rawFilesMap = new HashMap<String, RawFile>();
+        final HashMap<String, RawFile> m_rawFilesMap = new HashMap<>();
         final TreeNode _this = this;
 
         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {

@@ -69,7 +69,7 @@ public abstract class AbstractNode extends DefaultMutableTreeNode implements Clo
         }
         if(m_isDisabled) {
             return IconManager.getGrayedIcon(iconType);
-        }
+        }        
         return IconManager.getIcon(iconType);
     }
     

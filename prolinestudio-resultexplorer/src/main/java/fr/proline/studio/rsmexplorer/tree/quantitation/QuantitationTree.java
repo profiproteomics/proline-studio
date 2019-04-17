@@ -176,14 +176,13 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
 
                 AggregateQuantitationsAction aggregateAction = new AggregateQuantitationsAction();
                 m_multiActions.add(aggregateAction);
-                
+
                 m_multiActions.add(null);  // separator
-                
+
                 ExportDatasetJMSAction exportDatasetAction = new ExportDatasetJMSAction(AbstractTree.TreeType.TREE_QUANTITATION, true);
                 m_multiActions.add(exportDatasetAction);
                 RetrieveBioSeqJMSAction retrieveBioSeqAction = new RetrieveBioSeqJMSAction(AbstractTree.TreeType.TREE_QUANTITATION);
                 m_multiActions.add(retrieveBioSeqAction);
-
 
                 m_multiActions.add(null);  // separator
 
@@ -209,13 +208,13 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
                 if (m_rootPopup == null) {
                     // create the actions
                     m_rootActions = new ArrayList<>(1);  // <--- get in sync
-                    
+
                     QuantifyAction quantifyAction = new QuantifyAction(AbstractTree.TreeType.TREE_QUANTITATION);
                     m_rootActions.add(quantifyAction);
                     //CreateXICAction createXICAction = new CreateQuantitationAction(false);
                     //m_rootActions.add(createXICAction);
 
-                    AddQuantitationFolderAction addFolderAction = new AddQuantitationFolderAction();                    
+                    AddQuantitationFolderAction addFolderAction = new AddQuantitationFolderAction();
                     m_rootActions.add(addFolderAction);
 
                     // add actions to popup
@@ -254,7 +253,6 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
                 if (m_identPopup == null) {
 
                     m_identActions = new ArrayList<>(6);  // <--- get in sync
-
 
                     DisplayRsetAction displayRsetAction = new DisplayRsetAction(AbstractTree.TreeType.TREE_QUANTITATION);
                     m_identActions.add(displayRsetAction);
@@ -303,7 +301,7 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
 
                     AddQuantitationFolderAction addFolderAction = new AddQuantitationFolderAction();
                     m_mainActions.add(addFolderAction);
-                    
+
                     RenameAction renameQuantitationAction = new RenameAction(AbstractTree.TreeType.TREE_QUANTITATION);
                     m_mainActions.add(renameQuantitationAction);
 
@@ -311,7 +309,7 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
                     m_mainActions.add(deleteAction);
 
                     m_mainActions.add(null);  // separator
-
+                    
                     ComputeQuantPostProcessingAction computeQuantPostProcessingAction = new ComputeQuantPostProcessingAction();
                     m_mainActions.add(computeQuantPostProcessingAction);
 
@@ -329,7 +327,6 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
                     m_mainActions.add(generateSpectrumMatchesAction);
                     RetrieveBioSeqJMSAction retrieveBioSeqAction = new RetrieveBioSeqJMSAction(AbstractTree.TreeType.TREE_QUANTITATION);
                     m_mainActions.add(retrieveBioSeqAction);
-
 
                     m_mainActions.add(null);  // separator
 
@@ -487,129 +484,128 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
     // popUpMenu: delete (move to the quantitation trash)
     public void moveToTrash(AbstractNode[] selectedNodes) {
 
-
-            int nbSelectedNode = selectedNodes.length;
-            if (nbSelectedNode == 0) {
-                return; // should not happen
-            }
+        int nbSelectedNode = selectedNodes.length;
+        if (nbSelectedNode == 0) {
+            return; // should not happen
+        }
 
         // we must keep only parent nodes
-            // if a child and its parent are selected, we keep only the parent
-            ArrayList<AbstractNode> keptNodes = new ArrayList<>(nbSelectedNode);
-            keptNodes.add(selectedNodes[0]);
-            mainloop:
-            for (int i = 1; i < nbSelectedNode; i++) {
-                AbstractNode curNode = selectedNodes[i];
+        // if a child and its parent are selected, we keep only the parent
+        ArrayList<AbstractNode> keptNodes = new ArrayList<>(nbSelectedNode);
+        keptNodes.add(selectedNodes[0]);
+        mainloop:
+        for (int i = 1; i < nbSelectedNode; i++) {
+            AbstractNode curNode = selectedNodes[i];
 
-                // look for an ancestor
-                int nbKeptNodes = keptNodes.size();
-                for (int j = 0; j < nbKeptNodes; j++) {
+            // look for an ancestor
+            int nbKeptNodes = keptNodes.size();
+            for (int j = 0; j < nbKeptNodes; j++) {
 
-                    AbstractNode curKeptNode = keptNodes.get(j);
-                    if (curNode.isNodeAncestor(curKeptNode)) {
-                        // ancestor is already in kept node
-                        continue mainloop;
-                    }
+                AbstractNode curKeptNode = keptNodes.get(j);
+                if (curNode.isNodeAncestor(curKeptNode)) {
+                    // ancestor is already in kept node
+                    continue mainloop;
                 }
-                // look for children and remove them
-                for (int j = nbKeptNodes - 1; j >= 0; j--) {
-
-                    AbstractNode curKeptNode = keptNodes.get(j);
-                    if (curKeptNode.isNodeAncestor(curNode)) {
-                        // we have found a children
-                        keptNodes.remove(j);
-                    }
-                }
-                keptNodes.add(curNode);
-
             }
+            // look for children and remove them
+            for (int j = nbKeptNodes - 1; j >= 0; j--) {
 
-            // search Project Node
-            QuantitationProjectNode projectNode = null;
-            AbstractNode parentNodeCur = (AbstractNode) keptNodes.get(0).getParent();
-            while (parentNodeCur != null) {
-                if (parentNodeCur instanceof QuantitationProjectNode) {
-                    projectNode = (QuantitationProjectNode) parentNodeCur;
+                AbstractNode curKeptNode = keptNodes.get(j);
+                if (curKeptNode.isNodeAncestor(curNode)) {
+                    // we have found a children
+                    keptNodes.remove(j);
+                }
+            }
+            keptNodes.add(curNode);
+
+        }
+
+        // search Project Node
+        QuantitationProjectNode projectNode = null;
+        AbstractNode parentNodeCur = (AbstractNode) keptNodes.get(0).getParent();
+        while (parentNodeCur != null) {
+            if (parentNodeCur instanceof QuantitationProjectNode) {
+                projectNode = (QuantitationProjectNode) parentNodeCur;
+                break;
+            }
+            parentNodeCur = (AbstractNode) parentNodeCur.getParent();
+        }
+
+        if (projectNode == null) {
+            return; // should not happen
+        }
+
+        // search trash (should be at the end)
+        DataSetNode trash = null;
+        int nbChildren = projectNode.getChildCount();
+        for (int i = nbChildren - 1; i >= 0; i--) {
+            AbstractNode childNode = (AbstractNode) projectNode.getChildAt(i);
+            if (childNode instanceof DataSetNode) {
+                DataSetNode datasetNode = (DataSetNode) childNode;
+                if (datasetNode.isTrash()) {
+                    trash = datasetNode;
                     break;
                 }
-                parentNodeCur = (AbstractNode) parentNodeCur.getParent();
             }
+        }
+        if (trash == null) {
+            return; // should not happen
+        }
 
-            if (projectNode == null) {
-                return; // should not happen
-            }
+        // move node to Trash
+        LinkedHashSet<AbstractNode> allParentNodeModified = new LinkedHashSet<>();
 
-            // search trash (should be at the end)
-            DataSetNode trash = null;
-            int nbChildren = projectNode.getChildCount();
-            for (int i = nbChildren - 1; i >= 0; i--) {
-                AbstractNode childNode = (AbstractNode) projectNode.getChildAt(i);
-                if (childNode instanceof DataSetNode) {
-                    DataSetNode datasetNode = (DataSetNode) childNode;
-                    if (datasetNode.isTrash()) {
-                        trash = datasetNode;
-                        break;
-                    }
-                }
-            }
-            if (trash == null) {
-                return; // should not happen
-            }
-
-            // move node to Trash
-            LinkedHashSet<AbstractNode> allParentNodeModified = new LinkedHashSet<>();
-
-            int nbKeptNodes = keptNodes.size();
-            for (int i = 0; i < nbKeptNodes; i++) {
-                AbstractNode nodeCur = keptNodes.get(i);
-                allParentNodeModified.add((AbstractNode) nodeCur.getParent());
-                m_model.removeNodeFromParent(nodeCur);
-                m_model.insertNodeInto(nodeCur, trash, trash.getChildCount());
-            }
+        int nbKeptNodes = keptNodes.size();
+        for (int i = 0; i < nbKeptNodes; i++) {
+            AbstractNode nodeCur = keptNodes.get(i);
+            allParentNodeModified.add((AbstractNode) nodeCur.getParent());
+            m_model.removeNodeFromParent(nodeCur);
+            m_model.insertNodeInto(nodeCur, trash, trash.getChildCount());
+        }
 
         // Trash must be added at the end : because the add of dataset must be done
-            // after children have been removed from their parents
-            allParentNodeModified.add(trash);
+        // after children have been removed from their parents
+        allParentNodeModified.add(trash);
 
-            LinkedHashMap<Object, ArrayList<DDataset>> databaseObjectsToModify = new LinkedHashMap<>();
+        LinkedHashMap<Object, ArrayList<DDataset>> databaseObjectsToModify = new LinkedHashMap<>();
 
-            Iterator<AbstractNode> it = allParentNodeModified.iterator();
-            while (it.hasNext()) {
+        Iterator<AbstractNode> it = allParentNodeModified.iterator();
+        while (it.hasNext()) {
 
-                AbstractNode parentNode = it.next();
+            AbstractNode parentNode = it.next();
 
-                // get Parent Database Object
-                Object databaseParentObject = null;
-                AbstractNode.NodeTypes type = parentNode.getType();
-                if (type == AbstractNode.NodeTypes.DATA_SET) {
-                    DataSetNode datasetNode = ((DataSetNode) parentNode);
-                    databaseParentObject = datasetNode.getDataset();
-                    //nodeToBeChanged.add(datasetNode);
-                } else if (type == AbstractNode.NodeTypes.PROJECT_QUANTITATION) {
-                    QuantitationProjectNode projectNodeS = ((QuantitationProjectNode) parentNode);
-                    databaseParentObject = projectNodeS.getProject();
-                }
-
-                // get new Dataset children
-                int nb = parentNode.getChildCount();
-                ArrayList<DDataset> datasetList = new ArrayList<>(nb);
-                for (int i = 0; i < nb; i++) {
-                    // we are sure that it is a Dataset
-                    AbstractNode childNode = ((AbstractNode) parentNode.getChildAt(i));
-                    if (childNode instanceof DataSetNode) {
-                        DDataset dataset = ((DataSetNode) childNode).getDataset();
-                        datasetList.add(dataset);
-                    } else if (childNode instanceof HourGlassNode) {
-                        // (should not happen)
-                    }
-                }
-
-                // register this modification
-                databaseObjectsToModify.put(databaseParentObject, datasetList);
+            // get Parent Database Object
+            Object databaseParentObject = null;
+            AbstractNode.NodeTypes type = parentNode.getType();
+            if (type == AbstractNode.NodeTypes.DATA_SET) {
+                DataSetNode datasetNode = ((DataSetNode) parentNode);
+                databaseParentObject = datasetNode.getDataset();
+                //nodeToBeChanged.add(datasetNode);
+            } else if (type == AbstractNode.NodeTypes.PROJECT_QUANTITATION) {
+                QuantitationProjectNode projectNodeS = ((QuantitationProjectNode) parentNode);
+                databaseParentObject = projectNodeS.getProject();
             }
 
-            // ask the modification to the database at once (intricate to put in a thread in Dnd context)
-            DatabaseDataSetTask.updateDatasetAndProjectsTree(databaseObjectsToModify, false);
+            // get new Dataset children
+            int nb = parentNode.getChildCount();
+            ArrayList<DDataset> datasetList = new ArrayList<>(nb);
+            for (int i = 0; i < nb; i++) {
+                // we are sure that it is a Dataset
+                AbstractNode childNode = ((AbstractNode) parentNode.getChildAt(i));
+                if (childNode instanceof DataSetNode) {
+                    DDataset dataset = ((DataSetNode) childNode).getDataset();
+                    datasetList.add(dataset);
+                } else if (childNode instanceof HourGlassNode) {
+                    // (should not happen)
+                }
+            }
+
+            // register this modification
+            databaseObjectsToModify.put(databaseParentObject, datasetList);
+        }
+
+        // ask the modification to the database at once (intricate to put in a thread in Dnd context)
+        DatabaseDataSetTask.updateDatasetAndProjectsTree(databaseObjectsToModify, false);
 
     }
 
@@ -822,12 +818,12 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
         return quantitationNode;
     }
 
-     public void loadDataSet(Long quantiDatasetId, final DataSetNode datasetNode) {
+    public void loadDataSet(Long quantiDatasetId, final DataSetNode datasetNode) {
 
         final ArrayList<DDataset> readDatasetList = new ArrayList<>(1);
         final QuantitationTree tree = QuantitationTree.getCurrentTree();
         final DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
-        
+
         AbstractDatabaseCallback readDatasetCallback = new AbstractDatabaseCallback() {
 
             @Override

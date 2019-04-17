@@ -42,6 +42,7 @@ public class WizardPanel extends JPanel {
  
         if (helpText != null && ! helpText.isEmpty()) {
             JTextArea helpArea = new JTextArea(helpText);
+            helpArea.setEditable(false);
             helpArea.setForeground(Color.LIGHT_GRAY);
             helpArea.setBackground(Color.WHITE);
             helpArea.setLineWrap(true);

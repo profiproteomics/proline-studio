@@ -494,6 +494,10 @@ public abstract class AbstractTree extends JTree implements MouseListener {
         return getSelectionModel().isRowSelected(row);
     }
 
+    /**
+     * set selectedRows
+     * @param e 
+     */
     protected void manageSelectionOnRightClick(MouseEvent e) {
 
         int[] selectedRows = getSelectionRows();

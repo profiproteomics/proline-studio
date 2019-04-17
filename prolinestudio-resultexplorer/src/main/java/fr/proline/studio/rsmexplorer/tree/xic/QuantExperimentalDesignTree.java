@@ -226,7 +226,7 @@ public class QuantExperimentalDesignTree extends AbstractTree {
 
         //insert a node to represents aggregated datasets
         if (dataset.isAggregation()) {
-            DatasetReferenceNode aggregationNode = new DatasetReferenceNode(DataSetData.createTemporaryAggregate("Aggregation"));
+            DatasetReferenceNode aggregationNode = new DatasetReferenceNode(DataSetData.createTemporaryAggregate("Aggregation"), true);
             treeModel.insertNodeInto(aggregationNode, rootNode, childIndex++);
             try {
                 ArrayList<Integer> refDatasetIs = (ArrayList<Integer>) dataset.getQuantProcessingConfigAsMap().get("quantitation_ids");
@@ -234,6 +234,7 @@ public class QuantExperimentalDesignTree extends AbstractTree {
                 for (Integer datasetId : refDatasetIs) {
                     DataSetNode node = new DataSetNode(DataSetData.createTemporaryQuantitation(datasetId.toString()));
                     loadDataSet(datasetId.longValue(), node);
+                    node.setIsReference();
                     treeModel.insertNodeInto(node, aggregationNode, refDatasetIndex++);
                 }
                 
@@ -303,7 +304,12 @@ public class QuantExperimentalDesignTree extends AbstractTree {
             childIndex++;
         }
     }
-
+    
+    /**
+     * use quantiDatasetId as id, load data from database, to fill the object datasetNode
+     * @param quantiDatasetId
+     * @param datasetNode, empty datasetNode 
+     */
     private static void loadDataSet(Long quantiDatasetId, final DataSetNode datasetNode) {
 
         final ArrayList<DDataset> readDatasetList = new ArrayList<>(1);
@@ -492,6 +498,11 @@ public class QuantExperimentalDesignTree extends AbstractTree {
         return experimentalDesignParams;
     }
     
+    /**
+     * get run id from database for each rsm id
+     * @param rsmIDs
+     * @return HashMap<rsmId, runId>
+     */
     private static HashMap<Long, Long> getRunIdForRSMs(Collection<Long> rsmIDs) {
         //Get Run Ids for specified RSMs
         Long pID = ProjectExplorerPanel.getProjectExplorerPanel().getSelectedProject().getId();

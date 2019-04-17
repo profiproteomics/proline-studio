@@ -103,6 +103,7 @@ public class IconManager {
         BIOLOGICAL_GROUP,
         BIOLOGICAL_SAMPLE,
         REFERENCE_RSM,
+        REFERENCE_AGRRE,
         REFERENCE_RSM_ERR,
         DATASET,
         DATASET_RSET,
@@ -489,6 +490,8 @@ public class IconManager {
                 return "fr/proline/studio/images/dataset-rset.png";
             case REFERENCE_RSM:
                 return "fr/proline/studio/images/quant-rsm-ref.png";
+            case REFERENCE_AGRRE:
+                return "fr/proline/studio/images/quant-aggregation-ref.png";
             case REFERENCE_RSM_ERR:
                 return "fr/proline/studio/images/quant-rsm-ref-err.png";
             case DATASET_RSM:

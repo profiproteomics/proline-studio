@@ -26,19 +26,19 @@ import javax.swing.ImageIcon;
 import javax.swing.tree.DefaultTreeModel;
 import org.openide.nodes.Sheet;
 
-
-
 /**
  * Node for Dataset
+ *
  * @author JM235353
  */
 public class DataSetNode extends AbstractNode {
 
+    private boolean m_isReference = false;
+
     public DataSetNode(NodeTypes type, AbstractData data) {
         super(type, data);
     }
-    
-    
+
     public DataSetNode(AbstractData data) {
         super(NodeTypes.DATA_SET, data);
     }
@@ -48,8 +48,7 @@ public class DataSetNode extends AbstractNode {
 
         DDataset dataset = ((DataSetData) getData()).getDataset();
         DDatasetType datasetType = ((DataSetData) getData()).getDatasetType();
-        
-        
+
         if (datasetType.isTrash()) {
             return getIcon(IconManager.IconType.TRASH);
         }
@@ -109,6 +108,9 @@ public class DataSetNode extends AbstractNode {
                 return getIcon(IconManager.IconType.QUANT_XIC);
             }
             if (dataset.getQuantMethodInfo() == QuantitationMethodInfo.FEATURES_EXTRACTION) { // XIC
+                    if (datasetType.isAggregation()) {
+                        return getIcon(IconManager.IconType.QUANT_AGGREGATION_XIC);
+                    }
                 return getIcon(IconManager.IconType.QUANT_XIC);
             } else if (dataset.getQuantMethodInfo() == QuantitationMethodInfo.SPECTRAL_COUNTING) { // Spectral count
                 return getIcon(IconManager.IconType.QUANT_SC);
@@ -120,7 +122,16 @@ public class DataSetNode extends AbstractNode {
         return getIcon(IconManager.IconType.QUANT);// sould not happen
 
     }
-    
+
+    @Override
+    public ImageIcon getIcon(IconManager.IconType iconType) {
+        if (m_isReference) {
+            return IconManager.getGrayedIcon(iconType);
+        } else {
+            return super.getIcon(iconType);
+        }
+    }
+
     public boolean isMerged() {
 
         DDatasetType datasetType = ((DataSetData) getData()).getDatasetType();
@@ -131,22 +142,20 @@ public class DataSetNode extends AbstractNode {
                     return true;
                 }
             }
-        } else if (datasetType.isQuantitation()){
+        } else if (datasetType.isQuantitation()) {
             return true; //rsType is Quantitation but, a SC or a XIC is necessarily a merge
         }
         return false;
     }
-    
 
-    
     public DDataset getDataset() {
         return ((DataSetData) getData()).getDataset();
     }
-    
+
     public void setDataset(DDataset dataset) {
         ((DataSetData) getData()).setDataset(dataset);
     }
-    
+
     public boolean isTrash() {
         DDataset dataset = ((DataSetData) getData()).getDataset();
         if (dataset == null) {
@@ -158,7 +167,7 @@ public class DataSetNode extends AbstractNode {
         }
         return false;
     }
-    
+
     public boolean isFolder() {
         DDataset dataset = ((DataSetData) getData()).getDataset();
         if (dataset == null) {
@@ -170,42 +179,40 @@ public class DataSetNode extends AbstractNode {
         }
         return false;
     }
-    
+
     public boolean hasResultSummary() {
         DDataset dataSet = ((DataSetData) getData()).getDataset();
         return (dataSet != null) && (dataSet.getResultSummaryId() != null);
     }
-    
 
     public Long getResultSummaryId() {
         return ((DataSetData) getData()).getDataset().getResultSummaryId();
     }
-    
+
     public ResultSummary getResultSummary() {
         // getResultSummary() can return null if the resultSummary has not been loaded previously
         DDataset dataSet = ((DataSetData) getData()).getDataset();
         return dataSet.getResultSummary();
     }
-    
-    
+
     public boolean hasResultSet() {
         DDataset dataSet = ((DataSetData) getData()).getDataset();
         return (dataSet != null) && ((dataSet.getResultSetId() != null) || (dataSet.isQuantitation()));
     }
-    
+
     public Long getResultSetId() {
         return ((DataSetData) getData()).getDataset().getResultSetId();
     }
-    
+
     public ResultSet getResultSet() {
         // getResultSet() can return null if the resultSet has not been loaded previously
         DDataset dataSet = ((DataSetData) getData()).getDataset();
-        if(dataSet.getResultSet()==null){
+        if (dataSet.getResultSet() == null) {
             DataSetData.fetchRsetAndRsmForOneDataset(dataSet);
         }
         return dataSet.getResultSet();
     }
-    
+
     @Override
     public boolean isInTrash() {
         if (isTrash()) {
@@ -213,7 +220,7 @@ public class DataSetNode extends AbstractNode {
         }
         return ((AbstractNode) getParent()).isInTrash();
     }
-    
+
     @Override
     public String toString() {
         //JPM.WART : display Trash instead of TRASH
@@ -222,10 +229,10 @@ public class DataSetNode extends AbstractNode {
         }
         return super.toString();
     }
-    
+
     @Override
     public boolean canBeDeleted() {
-        
+
         // for the moment, we can delete only empty DataSet with no leaf
         if (isChanging()) {
             return false;
@@ -233,7 +240,7 @@ public class DataSetNode extends AbstractNode {
         if (isInTrash()) {
             return false;
         }
-        
+
         Enumeration e = children();
         while (e.hasMoreElements()) {
             AbstractNode child = (AbstractNode) e.nextElement();
@@ -243,14 +250,15 @@ public class DataSetNode extends AbstractNode {
         }
 
         return true;
-        
+
     }
-    
+
     /**
-     * rename the dataset with the given newName
-     * This operation could be done on the IdentificationTree or a QuantitationTree
+     * rename the dataset with the given newName This operation could be done on
+     * the IdentificationTree or a QuantitationTree
+     *
      * @param newName
-     * @param tree 
+     * @param tree
      */
     public void rename(final String newName, final AbstractTree tree) {
 
@@ -266,7 +274,6 @@ public class DataSetNode extends AbstractNode {
             if (tree != null) {
                 ((DefaultTreeModel) tree.getModel()).nodeChanged(this);
             }
-
 
             AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
 
@@ -285,20 +292,19 @@ public class DataSetNode extends AbstractNode {
                 }
             };
 
-
             // ask asynchronous loading of data
             DatabaseDataSetTask task = new DatabaseDataSetTask(callback);
             task.initRenameDataset(dataset, name, newName);
             AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
         }
     }
-    
+
     @Override
     public void loadDataForProperties(final Runnable callback) {
-        
+
         // we must load resultSet and resultSummary
         final DDataset dataSet = ((DataSetData) getData()).getDataset();
-        
+
         AbstractDatabaseCallback dbCallback = new AbstractDatabaseCallback() {
 
             @Override
@@ -308,13 +314,11 @@ public class DataSetNode extends AbstractNode {
 
             @Override
             public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
-                
+
                 callback.run();
 
-                
             }
         };
-
 
         // ask asynchronous loading of data
         // depending of the type
@@ -323,16 +327,16 @@ public class DataSetNode extends AbstractNode {
             DatabaseDataSetTask task1 = new DatabaseDataSetTask(dbCallback);
             task1.setPriority(Priority.HIGH_3); // highest priority
             task1.initLoadQuantitation(dataSet.getProject(), dataSet);
-            
+
             AccessDatabaseThread.getAccessDatabaseThread().addTask(task1);
-        } else { 
-        
+        } else {
+
             // Task 1 : Load ResultSet and ResultSummary
             AbstractDatabaseCallback task1Callback = (dataSet.getResultSetId() != null) ? null : dbCallback;
             DatabaseDataSetTask task1 = new DatabaseDataSetTask(task1Callback);
             task1.setPriority(Priority.HIGH_3); // highest priority
             task1.initLoadRsetAndRsm(dataSet);
-        
+
             // Task 2 : Load ResultSet Extra Data
             if (dataSet.getResultSetId() != null) {
                 AbstractDatabaseCallback task2Callback = (dataSet.getResultSummaryId() != null) ? null : dbCallback;
@@ -352,8 +356,7 @@ public class DataSetNode extends AbstractNode {
         }
 
     }
-    
-    
+
     @Override
     public AbstractNode copyNode() {
         if (isTrash()) {
@@ -363,55 +366,61 @@ public class DataSetNode extends AbstractNode {
         copyChildren(copy);
         return copy;
     }
-    
+
     /**
-     * return true in case of DatasetNode is a quantitation node (XIC or spectral count)
-     * @return 
+     * return true in case of DatasetNode is a quantitation node (XIC or
+     * spectral count)
+     *
+     * @return
      */
-    public boolean isQuantitation(){
-       DDatasetType datasetType = ((DataSetData) getData()).getDatasetType();
-       return  (datasetType.isQuantitation()) ;
+    public boolean isQuantitation() {
+        DDatasetType datasetType = ((DataSetData) getData()).getDatasetType();
+        return (datasetType.isQuantitation());
     }
-    
+
     /**
      * return true if it's a quantitation Spectral Count
-     * @return 
+     *
+     * @return
      */
     public boolean isQuantSC() {
         if (isQuantitation()) {
-            DDataset d =  ((DataSetData) getData()).getDataset();
+            DDataset d = ((DataSetData) getData()).getDataset();
             return d.getQuantMethodInfo() == DDatasetType.QuantitationMethodInfo.SPECTRAL_COUNTING;
         } else {
             return false;
         }
     }
-    
+
     /**
      * return true if it's a quantitation XIC
-     * @return 
+     *
+     * @return
      */
     public boolean isQuantXIC() {
         if (isQuantitation()) {
-            DDataset d =  ((DataSetData) getData()).getDataset();
+            DDataset d = ((DataSetData) getData()).getDataset();
             return d.getQuantMethodInfo() == DDatasetType.QuantitationMethodInfo.FEATURES_EXTRACTION;
-        }else {
+        } else {
             return false;
         }
     }
-    
+
     /**
-     * return the parent dataset of the current node, if the parent is a merged dataset
-     * @return 
+     * return the parent dataset of the current node, if the parent is a merged
+     * dataset
+     *
+     * @return
      */
-    public DDataset getParentMergedDataset ()  {
+    public DDataset getParentMergedDataset() {
         if (this.getParent() instanceof DataSetNode) {
-            DataSetNode parentNode = (DataSetNode)this.getParent();
+            DataSetNode parentNode = (DataSetNode) this.getParent();
             if (parentNode.getDataset().getAggregationInformation() != null) {
                 return parentNode.getDataset();
-            }else {
+            } else {
                 return null;
             }
-        }else {
+        } else {
             return null;
         }
     }
@@ -419,5 +428,9 @@ public class DataSetNode extends AbstractNode {
     @Override
     public Sheet createSheet() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    public void setIsReference() {
+        this.m_isReference = true;
     }
 }

@@ -73,7 +73,7 @@ public class DataboxMapAlignment extends AbstractDataBox {
         outParameter = new GroupParameter();
         outParameter.addParameter(CrossSelectionInterface.class, true);
         registerOutParameter(outParameter);
-        m_RT_Tolerance = AbstractLabelFreeMSParamsPanel.DEFAULT_CA_FEATMAP_RTTOL_VALUE;
+        m_RT_Tolerance = 0.0;
 
         m_isCloudLoaded = false;
         m_isCloudTaskAsked = false;

@@ -5,47 +5,34 @@
  */
 package fr.proline.studio.rsmexplorer.gui.dialog.xic;
 
-import fr.proline.core.orm.uds.Aggregation;
-import fr.proline.core.orm.uds.BiologicalGroup;
-import fr.proline.core.orm.uds.Dataset;
-import fr.proline.core.orm.uds.QuantitationChannel;
 import fr.proline.core.orm.uds.dto.DDataset;
-import fr.proline.studio.dam.data.AbstractData;
 import fr.proline.studio.dam.data.DataSetData;
 import fr.proline.studio.gui.WizardPanel;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
-import static fr.proline.studio.rsmexplorer.tree.AbstractNode.NodeTypes.*;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
-import fr.proline.studio.rsmexplorer.tree.xic.AbstractTreeTransferHandler;
-import fr.proline.studio.rsmexplorer.tree.xic.XICBiologicalGroupNode;
-import fr.proline.studio.rsmexplorer.tree.xic.XICBiologicalSampleAnalysisNode;
+import fr.proline.studio.rsmexplorer.gui.dialog.xic.aggregation.QCMappingTreeTableModel;
+import fr.proline.studio.rsmexplorer.gui.dialog.xic.aggregation.DQuantitationChannelMapping;
+import fr.proline.studio.rsmexplorer.gui.dialog.xic.aggregation.QCMappingTransferHandler;
 import fr.proline.studio.rsmexplorer.tree.xic.QuantExperimentalDesignTree;
-import fr.proline.studio.rsmexplorer.tree.xic.XICSelectionTransferable;
 import fr.proline.studio.utils.IconManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import javax.swing.*;
 import java.awt.*;
-import java.awt.datatransfer.UnsupportedFlavorException;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import org.jdesktop.swingx.JXTreeTable;
-import org.jdesktop.swingx.treetable.AbstractTreeTableModel;
-import org.openide.util.Exceptions;
 
 /**
  *
@@ -56,26 +43,26 @@ public class AggregationQuantChannelsPanel extends JPanel {
     protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
 
     private static AggregationQuantChannelsPanel m_singleton;
-    private QCMappingTreeTableModel m_model; 
+    private MappingTreeTable m_treeTable;
+    private QCMappingTreeTableModel m_treeTableModel;
     private JScrollPane m_tableScrollPane;
     private JTabbedPane m_tabbedPane;
-    
+
     public static AggregationQuantChannelsPanel getPanel(AbstractNode rootNode, List<DDataset> datasets) {
         if (m_singleton == null) {
             m_singleton = new AggregationQuantChannelsPanel();
-        } 
+        }
         m_singleton.setMapping(rootNode, datasets);
-        
+
         return m_singleton;
     }
-    
-    public AggregationQuantChannelsPanel() {
+
+    private AggregationQuantChannelsPanel() {
         setLayout(new BorderLayout());
         add(new WizardPanel("<html><b>Step 2:</b> Define mapping between quantitation channels.</html>"), BorderLayout.NORTH);
         add(createMainPanel(), BorderLayout.CENTER);
     }
 
-    
     public final JPanel createMainPanel() {
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new GridBagLayout());
@@ -83,7 +70,7 @@ public class AggregationQuantChannelsPanel extends JPanel {
         c.anchor = GridBagConstraints.NORTHWEST;
         c.fill = GridBagConstraints.BOTH;
         c.insets = new java.awt.Insets(5, 5, 5, 5);
-        
+
         JPanel framePanel = new JPanel(new GridBagLayout());
 
         JSplitPane sp = new JSplitPane();
@@ -92,24 +79,26 @@ public class AggregationQuantChannelsPanel extends JPanel {
         sp.setDividerLocation(0.70);
         sp.setResizeWeight(0.5);
 
-        final GridBagConstraints cFrame = new GridBagConstraints();
-        cFrame.insets = new java.awt.Insets(5, 5, 5, 5);
+        final GridBagConstraints frameConstraints = new GridBagConstraints();
+        frameConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        frameConstraints.gridx = 0;
+        frameConstraints.gridy = 0;
+        frameConstraints.gridwidth = 2;
+        frameConstraints.weightx = 1;
+        frameConstraints.weighty = 0;
+        frameConstraints.anchor = GridBagConstraints.NORTH;
+        frameConstraints.fill = GridBagConstraints.NONE;
 
-        cFrame.gridx = 0;
-        cFrame.gridy = 0;
-        cFrame.gridwidth = 2;
-        cFrame.weightx = 1;
-        cFrame.weighty = 0;
-        cFrame.anchor = GridBagConstraints.NORTH;
-        cFrame.fill = GridBagConstraints.NONE;
-        framePanel.add(new JLabel("Drag & Drop", IconManager.getIcon(IconManager.IconType.DRAG_AND_DROP), JLabel.LEADING), cFrame);
+        JPanel mappingToolBar = new QCMappingToolbar();
+        framePanel.add(mappingToolBar, frameConstraints);
+        //framePanel.add(new JLabel("Drag & Drop", IconManager.getIcon(IconManager.IconType.DRAG_AND_DROP), JLabel.LEADING), frameConstraints);
 
-        cFrame.anchor = GridBagConstraints.NORTHWEST;
-        cFrame.fill = GridBagConstraints.BOTH;
-        cFrame.gridwidth = 1;
-        cFrame.gridy++;
-        cFrame.weighty = 1;
-        framePanel.add(sp, cFrame);
+        frameConstraints.anchor = GridBagConstraints.NORTHWEST;
+        frameConstraints.fill = GridBagConstraints.BOTH;
+        frameConstraints.gridwidth = 1;
+        frameConstraints.gridy++;
+        frameConstraints.weighty = 1;
+        framePanel.add(sp, frameConstraints);
 
         c.gridx = 0;
         c.gridy = 0;
@@ -121,25 +110,43 @@ public class AggregationQuantChannelsPanel extends JPanel {
 
         return mainPanel;
     }
-        
+
+    /**
+     * left Aggregation Panel
+     *
+     * @return
+     */
     private JComponent createQCMappingPanel() {
         m_tableScrollPane = new JScrollPane();
         m_tableScrollPane.getViewport().setBackground(Color.white);
         return m_tableScrollPane;
     }
 
+    /**
+     * right tabbed panel, multi quantitation
+     *
+     * @return
+     */
     private JComponent createDatasetsPanel() {
         m_tabbedPane = new JTabbedPane();
-        
+
         return m_tabbedPane;
     }
-  
-    public void setMapping(AbstractNode rootNode, List<DDataset> datasets)  {
-        m_model = new QCMappingTreeTableModel(rootNode, datasets);
-        
-        m_tableScrollPane.setViewportView(createTreeTable(m_model));
+
+    /**
+     * set data in left m_tableScrollPane, right m_tabbedPane, create for each
+     * tab a QuantExperimentalDesignTree using DDataset(=Quantitation).
+     *
+     * @param rootNode, used to create Aggragation QCMappingTreeTableModel &
+     * MappingTreeTable
+     * @param datasets
+     */
+    public void setMapping(AbstractNode rootNode, List<DDataset> datasets) {
+        m_treeTableModel = new QCMappingTreeTableModel(rootNode, datasets);
+        m_treeTable = createTreeTable(m_treeTableModel);
+        m_tableScrollPane.setViewportView(m_treeTable);
         m_tabbedPane.removeAll();
-        
+
         for (DDataset ds : datasets) {
             DataSetData datasetData = DataSetData.createTemporaryQuantitation(ds.getName()); //new DataSetData(ds.getName(), Dataset.DatasetType.QUANTITATION, Aggregation.ChildNature.QUANTITATION_FRACTION);
             datasetData.setDataset(ds);
@@ -151,26 +158,15 @@ public class AggregationQuantChannelsPanel extends JPanel {
         validate();
         repaint();
     }
-    
-    private JXTreeTable createTreeTable(QCMappingTreeTableModel model) {
-        JXTreeTable treeTable = new JXTreeTable(model) {
-            @Override
-            public String getToolTipText(MouseEvent event) {   
-                int column = columnAtPoint(event.getPoint());
-                if (column > 0 && column < getColumnCount()) {
-                    int row = rowAtPoint(event.getPoint());
-                    if (row < getRowCount())
-                        return model.getToolTipText(nodeForRow(row), column);
-                }
-                return super.getToolTipText(event);
-            }
-            
-            protected Object nodeForRow(int row) {
-                TreePath path = getPathForRow(row);
-                return path != null ? path.getLastPathComponent() : null;
-            }
-        };
-        
+
+    /**
+     * create the TreeTable shown in left m_tableScrollPane
+     *
+     * @param model
+     * @return
+     */
+    private MappingTreeTable createTreeTable(QCMappingTreeTableModel model) {
+        MappingTreeTable treeTable = new MappingTreeTable(model);
         // rendering of the tree
         treeTable.putClientProperty("JTree.lineStyle", "Horizontal");
         treeTable.setRowHeight(18);
@@ -179,310 +175,255 @@ public class AggregationQuantChannelsPanel extends JPanel {
         treeTable.setTreeCellRenderer(renderer);
         treeTable.expandAll();
         TransferHandler handler = new QCMappingTransferHandler(treeTable);
-        
+
         treeTable.setTransferHandler(handler);
         treeTable.setDropMode(DropMode.ON);
         treeTable.setRootVisible(true);
+        treeTable.setShowGrid(true, true);
 
         return treeTable;
 
     }
-    
+
     public List<Map<String, Object>> getQuantChannelsMatching() {
         List<Map<String, Object>> mappingList = new ArrayList<>();
-        for (DQuantitationChannelMapping entry : m_model.getMapping().values()) {
+        for (DQuantitationChannelMapping entry : m_treeTableModel.getMapping().values()) {
             Map<String, Object> mapping = new HashMap<>();
             mapping.put("quant_channel_number", entry.getParentQCNumber());
-            Map<Long, Long> map = entry.getMappedQuantChannels().entrySet().stream().filter(e -> (e.getValue() != null) ).collect(Collectors.toMap(
-                e -> e.getKey().getMasterQuantitationChannels().get(0).getId(),
-                e -> e.getValue().getId()
+            Map<Long, Long> map = entry.getMappedQuantChannels().entrySet().stream().filter(e -> (e.getValue() != null)).collect(Collectors.toMap(
+                    e -> e.getKey().getMasterQuantitationChannels().get(0).getId(),
+                    e -> e.getValue().getId()
             ));
             mapping.put("quant_channels_matching", map);
             mappingList.add(mapping);
         }
-        
+
         return mappingList;
     }
 
-}
+    class QCMappingToolbar extends JPanel {
 
-class QCMappingTreeTableModel extends AbstractTreeTableModel {
+        JButton _removeBt;
+        JButton _upBt;
+        JButton _downBt;
 
-    List<DDataset> m_datasets;
-    Map<AbstractNode, DQuantitationChannelMapping> m_parentQCMappings;
-//    List<AbstractNode> m_indexedNodes; 
-    
-    public QCMappingTreeTableModel(AbstractNode rootNode, List<DDataset> datasets) {
-        super(rootNode);
-        m_datasets = datasets;
-        m_parentQCMappings = inferDefaultMapping(rootNode);
-//        m_indexedNodes = new ArrayList<>();
-//        Enumeration en = rootNode.preorderEnumeration();
-//        while(en.hasMoreElements()) {
-//            m_indexedNodes.add((AbstractNode)en.nextElement());
-//        }
-    }
+        public QCMappingToolbar() {
+            super();
+            createRemoveButton();
+            createUpButton();
+            createDownButton();
+            setLayout(new GridBagLayout());
+            final GridBagConstraints c = new GridBagConstraints();
+            c.insets = new java.awt.Insets(5, 5, 5, 5);
+            c.gridx = 0;
+            c.gridy = 0;
+            c.weightx = 1;
+            c.weighty = 0;
+            c.fill = GridBagConstraints.HORIZONTAL;
 
-
-    @Override
-    public int getColumnCount() {
-        return m_datasets.size() + 1;
-    }
-
-    @Override
-    public Class<?> getColumnClass(int columnIndex) {
-        return String.class; 
-    }
-
-    @Override
-    public String getColumnName(int columnIndex) {
-        if (columnIndex == 0) {
-            return "Sample Analysis";
-        } else {
-           DDataset ds = m_datasets.get(columnIndex - 1);
-           return ds.getName();
+            this.add(_removeBt, c);
+            c.gridx++;
+            this.add(_upBt, c);
+            c.gridx++;
+            this.add(_downBt, c);
+            c.gridx++;
+            this.add(new JLabel("Drag & Drop", IconManager.getIcon(IconManager.IconType.DRAG_AND_DROP), JLabel.LEADING), c);
         }
+
+        void createRemoveButton() {
+            _removeBt = new JButton("remove");
+            _removeBt.addActionListener(new ActionListener() {
+
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    m_treeTable.removeAssociateChannel();
+                }
+            });
+        }
+
+        void createUpButton() {
+            _upBt = new JButton();
+            _upBt.setIcon(IconManager.getIcon(IconManager.IconType.ARROW_UP));
+            _upBt.setToolTipText("up");
+            _upBt.addActionListener(new ActionListener() {
+
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    m_treeTable.moveUp();
+                }
+            });
+
+        }
+
+        void createDownButton() {
+            _downBt = new JButton();
+            _downBt.setIcon(IconManager.getIcon(IconManager.IconType.ARROW_DOWN));
+            _downBt.setToolTipText("down");
+            _downBt.addActionListener(new ActionListener() {
+
+                @Override
+                public void actionPerformed(ActionEvent e) {
+
+                    m_treeTable.moveDown();
+                }
+            });
+        }
+
     }
-        
-    public String getToolTipText(Object o, int column) {
-        DDataset ds = m_datasets.get(column - 1);
-        AbstractNode node = (AbstractNode)o;
-        if (node != null && node.getType() == BIOLOGICAL_SAMPLE_ANALYSIS) {
-            DQuantitationChannelMapping mapping = m_parentQCMappings.get(node);
-            QuantitationChannel childQc = mapping.getMappedQuantChannels().get(ds);
-            if (childQc != null) {
-                return new StringBuilder(childQc.getName()).append(" (id=").append(childQc.getId()).append(", number=").append(childQc.getNumber()).append(")").toString();
+
+    class MappingTreeTable extends JXTreeTable {
+        //private static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer.AggregationQuant");
+
+        private QCMappingTreeTableModel m_model;
+
+        public MappingTreeTable(QCMappingTreeTableModel treeModel) {
+            super(treeModel);
+            m_model = treeModel;
+            setCellSelectionEnabled(true);
+            this.addMouseListener(new PopupAdapter());
+        }
+
+        @Override
+        public String getToolTipText(MouseEvent event) {
+            int column = columnAtPoint(event.getPoint());
+            if (column > 0 && column < getColumnCount()) {
+                int row = rowAtPoint(event.getPoint());
+                if (row < getRowCount()) {
+                    return m_model.getToolTipText(getNodeForRow(row), column);
+                }
+            }
+            return super.getToolTipText(event);
+        }
+
+        public Object getNodeForRow(int row) {
+            TreePath path = getPathForRow(row);
+            return path != null ? path.getLastPathComponent() : null;
+        }
+
+        protected void removeAssociateChannel() {
+            int[] rowList = getSelectedRows();
+            int[] columnList = getSelectedColumns();
+            for (int row : rowList) {
+                for (int column : columnList) {
+                    m_model.remove(row, column);
+                }
+            }
+            this.repaint();
+        }
+
+        protected void moveUpDown(int weight) {
+            List<Integer> newSelectedRows = new ArrayList();
+            int[] rows = getSelectedRows();
+            List<Integer> rowList = Arrays.stream(rows).boxed().collect(Collectors.toList());
+            if (weight == -1) {
+                Collections.sort(rowList);//lower element move first
+
             } else {
-                return null;
+                Collections.sort(rowList, Collections.reverseOrder());//higher element move first
             }
-        }
-        return null;
-    }
-    
-    private Map<AbstractNode, DQuantitationChannelMapping> inferDefaultMapping(AbstractNode node) {
-
-        Map<AbstractNode, DQuantitationChannelMapping> mappings = new HashMap<>();
-        Stream<Object> groupStream = Collections.list(node.children()).stream().filter(n -> (((AbstractNode) n).getType() == AbstractNode.NodeTypes.BIOLOGICAL_GROUP));
-        AtomicInteger index = new AtomicInteger(1);
-        List<XICBiologicalGroupNode> groupNodes = groupStream.map(o -> ((XICBiologicalGroupNode) o)).collect(Collectors.toList());
-        for (XICBiologicalGroupNode groupNode : groupNodes) {
-            
-            Map<AbstractNode, DQuantitationChannelMapping> qcNodes = parseGroup(groupNode).collect(Collectors.toMap(x -> x, x -> new DQuantitationChannelMapping(index.getAndIncrement())));
-            List<DQuantitationChannelMapping> sortedMappings = qcNodes.values().stream().sorted(Comparator.comparing(DQuantitationChannelMapping::getParentQCNumber)).collect(Collectors.toList());
-            
-            for (DDataset ds : m_datasets) {
-                BiologicalGroup group = ds.getGroupSetup().getBiologicalGroups().stream().filter(bg -> bg.getName().equals(((DataSetData)groupNode.getData()).getTemporaryName())).findAny().orElse(null);
-                if (group != null) {
-                    List<QuantitationChannel> groupQcs = group.getBiologicalSamples().stream().flatMap(bs -> bs.getQuantitationChannels().stream()).collect(Collectors.toList());
-                    for (int k = 0; k < Math.min(groupQcs.size(), sortedMappings.size()); k++) {
-                        sortedMappings.get(k).put(ds, groupQcs.get(k));
-                    }
+            if (m_model.isEndChannel(rowList, weight)) {
+                return;
+            }
+            int[] columnList = getSelectedColumns();
+            int row, targetRow;
+            for (int i = 0; i < rowList.size(); i++) {
+                //for (int row : rowList) {
+                row = rowList.get(i);
+                for (int column : columnList) {
+                    targetRow = m_model.moveUpDown(row, column, weight);
+                    newSelectedRows.add(targetRow);
                 }
-            }            
-            mappings.putAll(qcNodes);
-        }
-        return mappings;
-    }
-
-    private Stream<XICBiologicalSampleAnalysisNode> parseGroup(XICBiologicalGroupNode groupNode) {
-        Stream<Object> stream = Collections.list(groupNode.children()).stream().flatMap(node -> Collections.list(((AbstractNode)node).children()).stream());
-        return stream.map(node -> ((XICBiologicalSampleAnalysisNode)node));
-    }
-
-    @Override
-    public boolean isCellEditable(Object o, int column) {
-        AbstractNode node = (AbstractNode)o;
-        boolean editable = (column>0) && (node.getType() == BIOLOGICAL_SAMPLE_ANALYSIS);
-        return editable;
-    }
-
-    @Override
-    public void setValueAt(Object value, Object node, int column) {
-        String text = (String) value;
-        DDataset ds = m_datasets.get(column - 1);
-        DQuantitationChannelMapping mapping = m_parentQCMappings.get(node);
-        if ((text == null) || (text.trim().isEmpty())) {
-            mapping.put(ds, null);
-        } else {
-            try {
-                int number = Integer.parseInt(text);
-                mapping.put(ds, number);
-            } catch (Exception e) { 
-                //not a number, do not change the value 
             }
+            Collections.sort(newSelectedRows);
+            int firstRow = newSelectedRows.get(0);
+            for (int i = 0; i < newSelectedRows.size(); i++) {
+                row = newSelectedRows.get(i);
+                if (i == 0) {
+                    setRowSelectionInterval(row, row);
+                } else {
+                    addRowSelectionInterval(row, row);;
+                }
+            }
+
+            this.repaint();
+
         }
-    }
-    
-    @Override
-    public Object getValueAt(Object o, int columnIndex) {
-        AbstractNode node = (AbstractNode)o;
-        if (columnIndex == 0) {
-            return node.toString();
-        } else if (XICBiologicalSampleAnalysisNode.class.isAssignableFrom(node.getClass())) {
-            DDataset ds = m_datasets.get(columnIndex - 1);
-            DQuantitationChannelMapping mapping = m_parentQCMappings.get(node);
-            QuantitationChannel childQc = mapping.getMappedQuantChannels().get(ds);
-            if (childQc != null) {
-                return childQc.getName();
+
+        private void moveUp() {
+            moveUpDown(-1);
+        }
+
+        private void moveDown() {
+            moveUpDown(1);
+        }
+
+        //select column, row
+        protected void manageSelectionOnRightClick(MouseEvent e) {
+            int x = e.getX();
+            int y = e.getY();
+            Point p = new Point(x, y);
+            int[] selectedRows = this.getSelectedRows();
+            int nbSelectedRows = selectedRows.length;
+            if (nbSelectedRows == 0) {
+                // no row is selected, we select the current row
+                int row = rowAtPoint(p);
+                if (row != -1) {
+                    setRowSelectionInterval(row, row);
+                }
             } else {
-                return "<ignored>";
-            }
-        }
-        return null;
-    }
-    
-    @Override
-    public Object getChild(Object parent, int index) {
-        TreeNode node = (TreeNode)parent;
-        return node.getChildAt(index);
-    }
+                int rowStarting = selectedRows[0];
+                // one row is selected
+                int row = rowAtPoint(p);
+                if ((row != -1) && (e.isShiftDown() || e.isControlDown())) {
+                    setRowSelectionInterval(rowStarting, row);
 
-    @Override
-    public int getChildCount(Object parent) {
-        TreeNode node = (TreeNode)parent;
-        return node.getChildCount();
-    }
-
-    @Override
-    public int getIndexOfChild(Object parent, Object child) {
-        AbstractNode node = (AbstractNode)parent;
-        return node.getIndex((TreeNode)child);
-    }
-  
-    public Map<AbstractNode, DQuantitationChannelMapping> getMapping() {
-        return m_parentQCMappings;
-    }
-
-    DDataset getDatasetAt(int column) {
-        return m_datasets.get(column-1);
-    }
-    
-//    public AbstractNode getNodeAt(int rowIndex) {
-//        if (rowIndex >= 0 && rowIndex < m_indexedNodes.size()) {
-//            return m_indexedNodes.get(rowIndex);
-//        }
-//        return null;
-//    }
-
-}
-
-class DQuantitationChannelMapping {
-
-    private Integer parentQCNumber;
-    private Map<DDataset, QuantitationChannel> mappedQuantChannels;
-
-    public DQuantitationChannelMapping(Integer parentQCNumber) {
-        this.parentQCNumber = parentQCNumber;
-        this.mappedQuantChannels = new HashMap<>();
-    }
-
-    public Integer getParentQCNumber() {
-        return parentQCNumber;
-    }
-
-    public Map<DDataset, QuantitationChannel> getMappedQuantChannels() {
-        return mappedQuantChannels;
-    }
-
-    void put(DDataset ds, QuantitationChannel childQC) {
-        mappedQuantChannels.put(ds, childQC);
-    }
-
-    void put(DDataset ds, int qcNumber) {
-        QuantitationChannel childQC = ds.getMasterQuantitationChannels().get(0).getQuantitationChannels().stream().filter(qc -> qc.getNumber() == qcNumber).findFirst().orElse(null);
-        if (childQC != null) {
-            mappedQuantChannels.put(ds, childQC);
-        }
-    }
-
-}
-
-class QCMappingTransferHandler extends AbstractTreeTransferHandler {
-
-    private Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
-    private final QCMappingTreeTableModel m_model;
-    private final JXTreeTable m_tree;
-    
-    public QCMappingTransferHandler(JXTreeTable tree) {
-        super(false);
-        m_tree = tree;
-        m_model = (QCMappingTreeTableModel)m_tree.getTreeTableModel();
-    }
-
-    @Override
-    public boolean canImport(TransferHandler.TransferSupport support) {
-
-        support.setShowDropLocation(true);
-
-        if (support.isDataFlavorSupported(XICSelectionTransferable.RSMNodeList_FLAVOR)) {
-
-            // drop path
-            JTable.DropLocation dropLocation = ((JTable.DropLocation) support.getDropLocation());
-            if ((dropLocation == null) || (dropLocation.getRow() == -1) || (dropLocation.getColumn() == -1) || (dropLocation.getColumn() == 0)){
-                return false;
-            }
-            
-            AbstractNode.NodeTypes designNodeType = null;
-            try {
-                XICSelectionTransferable transfer = (XICSelectionTransferable) support.getTransferable().getTransferData(XICSelectionTransferable.RSMNodeList_FLAVOR);
-                XICSelectionTransferable.TransferData data = XICSelectionTransferable.getData(transfer.getTransferKey());
-                designNodeType = data.getDesignNodeType();
-                ArrayList<AbstractNode> nodesList = (ArrayList<AbstractNode>) data.getDesignList();
-                if (nodesList != null && !nodesList.isEmpty()) {
-                    AbstractData rootData = ((AbstractNode)nodesList.get(0).getRoot()).getData();
-                    DDataset sourceDS = ((DataSetData)rootData).getDataset();
-                    DDataset destDS = m_model.getDatasetAt(dropLocation.getColumn());
-                    if (sourceDS.getId() != destDS.getId()) return false;
-                }
-            } catch (UnsupportedFlavorException | IOException e) {
-                // should never happen
-                m_logger.error(getClass().getSimpleName() + " DnD error ", e);
-                return false;
-            }
-
-            // TODO : Determine whether we accept the location depending on the node type
-            
-            return (designNodeType == BIOLOGICAL_GROUP) || (designNodeType == BIOLOGICAL_SAMPLE_ANALYSIS);
-            
-        }
-        return false;
-    }
-
-    @Override
-    public boolean importData(TransferHandler.TransferSupport support) {
-        try {
-            JTable.DropLocation dropLocation = ((JTable.DropLocation) support.getDropLocation());
-            TreePath path = m_tree.getPathForRow(dropLocation.getRow());
-            AbstractNode node = (path != null) ? (AbstractNode)path.getLastPathComponent() : null;
-            DDataset ds = m_model.getDatasetAt(dropLocation.getColumn());
-            
-            XICSelectionTransferable transfer = (XICSelectionTransferable) support.getTransferable().getTransferData(XICSelectionTransferable.RSMNodeList_FLAVOR);
-            XICSelectionTransferable.TransferData data = XICSelectionTransferable.getData(transfer.getTransferKey());
-            ArrayList<AbstractNode> dsNodesList = (ArrayList<AbstractNode>) data.getDesignList();
-            
-            if (dsNodesList == null) return false;
-            
-            for (AbstractNode dsNode : dsNodesList) {
-                switch (dsNode.getType()) {
-                    case BIOLOGICAL_GROUP: m_logger.info("moving group");
-                    case BIOLOGICAL_SAMPLE_ANALYSIS: {
-                        DQuantitationChannelMapping mapping = m_model.getMapping().get(node);
-                        if (mapping != null) {
-                            mapping.put(ds,((DataSetData)dsNode.getData()).getDataset().getNumber());
-                        }
-                    }
+                } else if ((row != -1) && (row != selectedRows[0])) {
+                    // we change the selection
+                    setRowSelectionInterval(row, row);
                 }
             }
-            
-            return false;
-        } catch (UnsupportedFlavorException ex) {
-            m_logger.error(getClass().getSimpleName() + " DnD error ", ex);
-        } catch (IOException ex) {
-            Exceptions.printStackTrace(ex);
         }
-        return false;
-    }
-    
-    
 
+        //remove, up, down action
+        private void triggerPopup(MouseEvent e) {
+            JPopupMenu popup;
+            popup = new JPopupMenu();
+            popup.add("test remove");
+            popup.add("test up");
+            popup.add("test down");
+            popup.show((JComponent) e.getSource(), e.getX(), e.getY());
+        }
+
+        class PopupAdapter extends MouseAdapter {
+
+            @Override
+            public void mouseClicked(MouseEvent e) {
+            }
+
+            @Override
+            public void mousePressed(MouseEvent e) {
+                if (SwingUtilities.isRightMouseButton(e)) {
+                    manageSelectionOnRightClick(e);
+                }
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                if (SwingUtilities.isRightMouseButton(e)) {
+                    manageSelectionOnRightClick(e);
+                    triggerPopup(e);
+                }
+            }
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+            }
+        }
+    }
+
+    
 }

@@ -3,7 +3,6 @@ package fr.proline.studio.rsmexplorer.tree.identification;
 import fr.proline.studio.rsmexplorer.actions.identification.DisplayRsmAction;
 import fr.proline.studio.rsmexplorer.actions.identification.DeleteAction;
 import fr.proline.studio.rsmexplorer.actions.identification.AbstractRSMAction;
-import fr.proline.studio.rsmexplorer.actions.identification.SpectralCountAction;
 import fr.proline.studio.rsmexplorer.actions.identification.PropertiesAction;
 import fr.proline.studio.rsmexplorer.actions.identification.DisplayAllRsetAction;
 import fr.proline.studio.rsmexplorer.actions.identification.EmptyTrashAction;
@@ -28,7 +27,6 @@ import fr.proline.studio.rsmexplorer.actions.identification.AddIdentificationFol
 import fr.proline.studio.rsmexplorer.actions.identification.AggregateAction;
 import fr.proline.studio.rsmexplorer.actions.identification.ClearDatasetAction;
 import fr.proline.studio.rsmexplorer.actions.identification.CopySearchResult;
-import fr.proline.studio.rsmexplorer.actions.identification.CreateQuantitationAction;
 import fr.proline.studio.rsmexplorer.actions.identification.ExportAction;
 import fr.proline.studio.rsmexplorer.actions.identification.FilterRSMProteinSetsJMSAction;
 import fr.proline.studio.rsmexplorer.actions.identification.GenerateSpectrumMatchesJMSAction;

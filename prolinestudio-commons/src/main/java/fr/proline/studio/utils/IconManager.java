@@ -127,6 +127,8 @@ public class IconManager {
         ARROW_DOWN,
         ARROW_RIGHT,
         ARROW_UP,
+        ARROW_MOVE_UP,
+        ARROW_MOVE_DOWN,
         ADD_DATA_ANALYZER,
         DATA_ANALYZER,
         GRID,
@@ -208,7 +210,7 @@ public class IconManager {
     }
 
     public static ImageIcon getGrayedIcon(IconType iconType) {
-
+    
         ImageIcon grayedIcon = m_grayedIconMap.get(iconType);
         if (grayedIcon == null) {
             String path = getIconFilePath(iconType);
@@ -230,7 +232,7 @@ public class IconManager {
                     int blue = color & 0x000000FF;
                     int greyLevel = (int) Math.round(((double) (red + green + blue)) / 3.0);
                     // lighter grey
-                    greyLevel += (int) 100;
+                    greyLevel += (int) 50;
                     if (greyLevel > 255) {
                         greyLevel = 255;
                     }
@@ -534,6 +536,12 @@ public class IconManager {
                 return "fr/proline/studio/images/arrow-right.png";
             case ARROW_UP:
                 return "fr/proline/studio/images/arrow-up.png";
+                 case ARROW_MOVE_UP:
+                return "fr/proline/studio/images/arrow-move-up.png"; 
+                 case ARROW_MOVE_DOWN:
+                return "fr/proline/studio/images/arrow-move-down.png";
+                
+                
             case ADD_DATA_ANALYZER:
                 return "fr/proline/studio/images/data-analyzer-add.png";
             case DATA_ANALYZER:

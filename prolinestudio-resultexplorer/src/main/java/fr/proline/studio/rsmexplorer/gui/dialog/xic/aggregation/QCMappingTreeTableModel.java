@@ -305,14 +305,21 @@ public class QCMappingTreeTableModel extends AbstractTreeTableModel {
         }
     }
 
+    /**
+     *
+     * @param row
+     * @param column
+     * @param weight, 1= down, -1 = up
+     * @return the index of target node, or -1 if failed
+     */
     public int moveUpDown(int row, int column, int weight) {
-        
+
         AbstractNode srcNode = this.m_indexedNodes.get(row);
         if (XICBiologicalSampleAnalysisNode.class.isInstance(srcNode)) {
             DDataset Quanti = this.m_datasets.get(column - 1);
             int targetIndex = m_indexChannelNodes.indexOf(row) + weight;
             int targetIndexChannelNode = m_indexChannelNodes.get(targetIndex);
-            m_logger.debug("targetIndex: {},{}",targetIndex, targetIndexChannelNode);
+            m_logger.debug("targetIndex: {},{}", targetIndex, targetIndexChannelNode);
             DQuantitationChannelMapping srcMapping = this.m_parentQCMappings.get((XICBiologicalSampleAnalysisNode) srcNode);
             QuantitationChannel srcChannel = srcMapping.getQuantChannel(Quanti);
 
@@ -328,6 +335,13 @@ public class QCMappingTreeTableModel extends AbstractTreeTableModel {
         return -1;
     }
 
+    /**
+     * determinate if the move up or move down reach the top/bottm
+     *
+     * @param selectedRowList
+     * @param weight
+     * @return
+     */
     public boolean isEndChannel(List<Integer> selectedRowList, int weight) {
         for (int row : selectedRowList) {
             AbstractNode srcNode = this.m_indexedNodes.get(row);
@@ -344,5 +358,23 @@ public class QCMappingTreeTableModel extends AbstractTreeTableModel {
 
         }
         return false;
+    }
+
+    public boolean isChannelSelected(int[] rowList, int[] columnList) {
+        for (int row : rowList) {
+            AbstractNode srcNode = this.m_indexedNodes.get(row);
+            for (int column : columnList) {
+                DDataset Quanti = this.m_datasets.get(column - 1);
+                if (XICBiologicalSampleAnalysisNode.class.isInstance(srcNode)) {
+                    DQuantitationChannelMapping srcMapping = this.m_parentQCMappings.get((XICBiologicalSampleAnalysisNode) srcNode);
+                    QuantitationChannel srcChannel = srcMapping.getQuantChannel(Quanti);
+                    if (srcChannel != null) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+
     }
 }

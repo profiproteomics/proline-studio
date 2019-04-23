@@ -16,8 +16,6 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class AbstractNode extends DefaultMutableTreeNode implements Cloneable, PropertiesProviderInterface {
 
-   
-    
     public enum NodeTypes {
         TREE_PARENT,
         PROJECT_IDENTIFICATION,

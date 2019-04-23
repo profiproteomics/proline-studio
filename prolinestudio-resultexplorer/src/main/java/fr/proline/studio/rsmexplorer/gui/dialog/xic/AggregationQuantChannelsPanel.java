@@ -243,7 +243,7 @@ public class AggregationQuantChannelsPanel extends JPanel {
 
         void createUpButton() {
             _upBt = new JButton();
-            _upBt.setIcon(IconManager.getIcon(IconManager.IconType.ARROW_UP));
+            _upBt.setIcon(IconManager.getIcon(IconManager.IconType.ARROW_MOVE_UP));
             _upBt.setToolTipText("up");
             _upBt.addActionListener(new ActionListener() {
 
@@ -257,7 +257,7 @@ public class AggregationQuantChannelsPanel extends JPanel {
 
         void createDownButton() {
             _downBt = new JButton();
-            _downBt.setIcon(IconManager.getIcon(IconManager.IconType.ARROW_DOWN));
+            _downBt.setIcon(IconManager.getIcon(IconManager.IconType.ARROW_MOVE_DOWN));
             _downBt.setToolTipText("down");
             _downBt.addActionListener(new ActionListener() {
 
@@ -331,22 +331,24 @@ public class AggregationQuantChannelsPanel extends JPanel {
                 row = rowList.get(i);
                 for (int column : columnList) {
                     targetRow = m_model.moveUpDown(row, column, weight);
-                    newSelectedRows.add(targetRow);
+                    if (targetRow != -1) {
+                        newSelectedRows.add(targetRow);
+                    }
                 }
             }
-            Collections.sort(newSelectedRows);
-            int firstRow = newSelectedRows.get(0);
-            for (int i = 0; i < newSelectedRows.size(); i++) {
-                row = newSelectedRows.get(i);
-                if (i == 0) {
-                    setRowSelectionInterval(row, row);
-                } else {
-                    addRowSelectionInterval(row, row);;
+            if (newSelectedRows.size() > 0) {
+                Collections.sort(newSelectedRows);
+                int firstRow = newSelectedRows.get(0);
+                for (int i = 0; i < newSelectedRows.size(); i++) {
+                    row = newSelectedRows.get(i);
+                    if (i == 0) {
+                        setRowSelectionInterval(row, row);
+                    } else {
+                        addRowSelectionInterval(row, row);;
+                    }
                 }
+                this.repaint();
             }
-
-            this.repaint();
-
         }
 
         private void moveUp() {
@@ -362,24 +364,19 @@ public class AggregationQuantChannelsPanel extends JPanel {
             int x = e.getX();
             int y = e.getY();
             Point p = new Point(x, y);
+            int Coloumn = columnAtPoint(p);
+            int row = rowAtPoint(p);
             int[] selectedRows = this.getSelectedRows();
-            int nbSelectedRows = selectedRows.length;
-            if (nbSelectedRows == 0) {
-                // no row is selected, we select the current row
-                int row = rowAtPoint(p);
-                if (row != -1) {
-                    setRowSelectionInterval(row, row);
-                }
-            } else {
-                int rowStarting = selectedRows[0];
-                // one row is selected
-                int row = rowAtPoint(p);
-                if ((row != -1) && (e.isShiftDown() || e.isControlDown())) {
-                    setRowSelectionInterval(rowStarting, row);
-
-                } else if ((row != -1) && (row != selectedRows[0])) {
-                    // we change the selection
-                    setRowSelectionInterval(row, row);
+            int[] selectedCols = this.getSelectedColumns();
+            if (selectedRows.length != 0) {
+                List<Integer> selectedRowList = Arrays.stream(selectedRows).boxed().collect(Collectors.toList());
+                if (selectedRowList.contains(row)) {
+                    List<Integer> selectedColList = Arrays.stream(selectedCols).boxed().collect(Collectors.toList());
+                    if (selectedColList.contains(Coloumn)) {
+                        if (m_model.isChannelSelected(selectedRows, selectedCols)) {
+                            triggerPopup(e);
+                        }
+                    }
                 }
             }
         }
@@ -388,9 +385,30 @@ public class AggregationQuantChannelsPanel extends JPanel {
         private void triggerPopup(MouseEvent e) {
             JPopupMenu popup;
             popup = new JPopupMenu();
-            popup.add("test remove");
-            popup.add("test up");
-            popup.add("test down");
+            ActionListener menuListener = new ActionListener() {
+                public void actionPerformed(ActionEvent event) {
+                    String command = event.getActionCommand();
+                    if (command.equals("remove")){
+                        removeAssociateChannel();
+                    }else if (command.equals("up")){
+                        moveUp();
+                    }else if (command.equals("down")){
+                        moveDown();
+                    }
+                }
+            };
+            JMenuItem item;
+            popup.add(item = new JMenuItem("remove"));
+            item.setHorizontalTextPosition(JMenuItem.RIGHT);
+            item.addActionListener(menuListener);
+            popup.addSeparator();
+            popup.add(item = new JMenuItem("up", IconManager.getIcon(IconManager.IconType.ARROW_MOVE_UP)));
+            item.setHorizontalTextPosition(JMenuItem.RIGHT);
+            item.addActionListener(menuListener);
+            popup.add(item = new JMenuItem("down", IconManager.getIcon(IconManager.IconType.ARROW_MOVE_DOWN)));
+            item.setHorizontalTextPosition(JMenuItem.RIGHT);
+            item.addActionListener(menuListener);
+
             popup.show((JComponent) e.getSource(), e.getX(), e.getY());
         }
 
@@ -402,16 +420,15 @@ public class AggregationQuantChannelsPanel extends JPanel {
 
             @Override
             public void mousePressed(MouseEvent e) {
-                if (SwingUtilities.isRightMouseButton(e)) {
-                    manageSelectionOnRightClick(e);
-                }
+//                if (SwingUtilities.isRightMouseButton(e)) {
+//                    manageSelectionOnRightClick(e);
+//                }
             }
 
             @Override
             public void mouseReleased(MouseEvent e) {
                 if (SwingUtilities.isRightMouseButton(e)) {
                     manageSelectionOnRightClick(e);
-                    triggerPopup(e);
                 }
             }
 
@@ -425,5 +442,4 @@ public class AggregationQuantChannelsPanel extends JPanel {
         }
     }
 
-    
 }

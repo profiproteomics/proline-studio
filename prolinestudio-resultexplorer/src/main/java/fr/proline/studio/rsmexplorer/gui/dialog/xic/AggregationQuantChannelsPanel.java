@@ -8,6 +8,7 @@ package fr.proline.studio.rsmexplorer.gui.dialog.xic;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dam.data.DataSetData;
 import fr.proline.studio.gui.WizardPanel;
+import fr.proline.studio.rsmexplorer.gui.dialog.xic.aggregation.MappingTreeTable;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
@@ -22,6 +23,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
@@ -246,12 +249,12 @@ public class AggregationQuantChannelsPanel extends JPanel {
             _upBt.setIcon(IconManager.getIcon(IconManager.IconType.ARROW_MOVE_UP));
             _upBt.setToolTipText("up");
             _upBt.addActionListener(new ActionListener() {
-
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     m_treeTable.moveUp();
                 }
             });
+            _upBt.addKeyListener(new AltKeyAdapter());
 
         }
 
@@ -267,179 +270,26 @@ public class AggregationQuantChannelsPanel extends JPanel {
                     m_treeTable.moveDown();
                 }
             });
+            _downBt.addKeyListener(new AltKeyAdapter());
         }
 
-    }
-
-    class MappingTreeTable extends JXTreeTable {
-        //private static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer.AggregationQuant");
-
-        private QCMappingTreeTableModel m_model;
-
-        public MappingTreeTable(QCMappingTreeTableModel treeModel) {
-            super(treeModel);
-            m_model = treeModel;
-            setCellSelectionEnabled(true);
-            this.addMouseListener(new PopupAdapter());
-        }
-
-        @Override
-        public String getToolTipText(MouseEvent event) {
-            int column = columnAtPoint(event.getPoint());
-            if (column > 0 && column < getColumnCount()) {
-                int row = rowAtPoint(event.getPoint());
-                if (row < getRowCount()) {
-                    return m_model.getToolTipText(getNodeForRow(row), column);
-                }
-            }
-            return super.getToolTipText(event);
-        }
-
-        public Object getNodeForRow(int row) {
-            TreePath path = getPathForRow(row);
-            return path != null ? path.getLastPathComponent() : null;
-        }
-
-        protected void removeAssociateChannel() {
-            int[] rowList = getSelectedRows();
-            int[] columnList = getSelectedColumns();
-            for (int row : rowList) {
-                for (int column : columnList) {
-                    m_model.remove(row, column);
-                }
-            }
-            this.repaint();
-        }
-
-        protected void moveUpDown(int weight) {
-            List<Integer> newSelectedRows = new ArrayList();
-            int[] rows = getSelectedRows();
-            List<Integer> rowList = Arrays.stream(rows).boxed().collect(Collectors.toList());
-            if (weight == -1) {
-                Collections.sort(rowList);//lower element move first
-
-            } else {
-                Collections.sort(rowList, Collections.reverseOrder());//higher element move first
-            }
-            if (m_model.isEndChannel(rowList, weight)) {
-                return;
-            }
-            int[] columnList = getSelectedColumns();
-            int row, targetRow;
-            for (int i = 0; i < rowList.size(); i++) {
-                //for (int row : rowList) {
-                row = rowList.get(i);
-                for (int column : columnList) {
-                    targetRow = m_model.moveUpDown(row, column, weight);
-                    if (targetRow != -1) {
-                        newSelectedRows.add(targetRow);
-                    }
-                }
-            }
-            if (newSelectedRows.size() > 0) {
-                Collections.sort(newSelectedRows);
-                int firstRow = newSelectedRows.get(0);
-                for (int i = 0; i < newSelectedRows.size(); i++) {
-                    row = newSelectedRows.get(i);
-                    if (i == 0) {
-                        setRowSelectionInterval(row, row);
-                    } else {
-                        addRowSelectionInterval(row, row);;
-                    }
-                }
-                this.repaint();
-            }
-        }
-
-        private void moveUp() {
-            moveUpDown(-1);
-        }
-
-        private void moveDown() {
-            moveUpDown(1);
-        }
-
-        //select column, row
-        protected void manageSelectionOnRightClick(MouseEvent e) {
-            int x = e.getX();
-            int y = e.getY();
-            Point p = new Point(x, y);
-            int Coloumn = columnAtPoint(p);
-            int row = rowAtPoint(p);
-            int[] selectedRows = this.getSelectedRows();
-            int[] selectedCols = this.getSelectedColumns();
-            if (selectedRows.length != 0) {
-                List<Integer> selectedRowList = Arrays.stream(selectedRows).boxed().collect(Collectors.toList());
-                if (selectedRowList.contains(row)) {
-                    List<Integer> selectedColList = Arrays.stream(selectedCols).boxed().collect(Collectors.toList());
-                    if (selectedColList.contains(Coloumn)) {
-                        if (m_model.isChannelSelected(selectedRows, selectedCols)) {
-                            triggerPopup(e);
-                        }
-                    }
-                }
-            }
-        }
-
-        //remove, up, down action
-        private void triggerPopup(MouseEvent e) {
-            JPopupMenu popup;
-            popup = new JPopupMenu();
-            ActionListener menuListener = new ActionListener() {
-                public void actionPerformed(ActionEvent event) {
-                    String command = event.getActionCommand();
-                    if (command.equals("remove")){
-                        removeAssociateChannel();
-                    }else if (command.equals("up")){
-                        moveUp();
-                    }else if (command.equals("down")){
-                        moveDown();
-                    }
-                }
-            };
-            JMenuItem item;
-            popup.add(item = new JMenuItem("remove"));
-            item.setHorizontalTextPosition(JMenuItem.RIGHT);
-            item.addActionListener(menuListener);
-            popup.addSeparator();
-            popup.add(item = new JMenuItem("up", IconManager.getIcon(IconManager.IconType.ARROW_MOVE_UP)));
-            item.setHorizontalTextPosition(JMenuItem.RIGHT);
-            item.addActionListener(menuListener);
-            popup.add(item = new JMenuItem("down", IconManager.getIcon(IconManager.IconType.ARROW_MOVE_DOWN)));
-            item.setHorizontalTextPosition(JMenuItem.RIGHT);
-            item.addActionListener(menuListener);
-
-            popup.show((JComponent) e.getSource(), e.getX(), e.getY());
-        }
-
-        class PopupAdapter extends MouseAdapter {
+        class AltKeyAdapter extends KeyAdapter {
 
             @Override
-            public void mouseClicked(MouseEvent e) {
-            }
-
-            @Override
-            public void mousePressed(MouseEvent e) {
-//                if (SwingUtilities.isRightMouseButton(e)) {
-//                    manageSelectionOnRightClick(e);
-//                }
-            }
-
-            @Override
-            public void mouseReleased(MouseEvent e) {
-                if (SwingUtilities.isRightMouseButton(e)) {
-                    manageSelectionOnRightClick(e);
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ALT) {
+                    m_treeTable.setAltDown(true);
                 }
             }
 
             @Override
-            public void mouseEntered(MouseEvent e) {
-            }
-
-            @Override
-            public void mouseExited(MouseEvent e) {
+            public void keyReleased(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ALT) {
+                    m_treeTable.setAltDown(false);
+                }
             }
         }
+
     }
 
 }

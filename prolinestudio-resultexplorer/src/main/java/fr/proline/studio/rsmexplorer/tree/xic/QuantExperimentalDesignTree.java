@@ -73,10 +73,11 @@ public class QuantExperimentalDesignTree extends AbstractTree {
         AbstractNode.NodeTypes nodeType = rsmNode.getType();
         if ((nodeType == AbstractNode.NodeTypes.BIOLOGICAL_GROUP)
                 || (nodeType == AbstractNode.NodeTypes.BIOLOGICAL_SAMPLE)
-                || (nodeType == AbstractNode.NodeTypes.DATA_SET)
-                || (nodeType == AbstractNode.NodeTypes.BIOLOGICAL_SAMPLE_ANALYSIS)) {
-
+                || (nodeType == AbstractNode.NodeTypes.DATA_SET)){
             ((DataSetData) rsmNode.getData()).setTemporaryName(newName);
+        }
+        else if (nodeType == AbstractNode.NodeTypes.BIOLOGICAL_SAMPLE_ANALYSIS){
+            ((XICBiologicalSampleAnalysisNode)rsmNode).setQuantChannelName(newName);
         }
     }
 

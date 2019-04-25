@@ -42,7 +42,8 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 
 /**
- * QuantExperimentalDesignTree represents a quantitation experimental design tree
+ * QuantExperimentalDesignTree represents a quantitation experimental design
+ * tree
  *
  * @author JM235353
  */
@@ -58,7 +59,7 @@ public class QuantExperimentalDesignTree extends AbstractTree {
         setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 
         XICTransferHandler handler = new XICTransferHandler(false, this);
-        setTransferHandler(handler);
+        super.setTransferHandler(handler);
 
         setDropMode(DropMode.ON_OR_INSERT);
         setDragEnabled(true);
@@ -83,7 +84,12 @@ public class QuantExperimentalDesignTree extends AbstractTree {
         rename(rootNode, newName);
         ((DefaultTreeModel) getModel()).nodeChanged(rootNode);
     }
-
+    
+    /**
+     * a node type isPathEditable, can use F2 trigger rename
+     * @param path
+     * @return 
+     */
     @Override
     public boolean isPathEditable(TreePath path) {
 
@@ -97,8 +103,8 @@ public class QuantExperimentalDesignTree extends AbstractTree {
             AbstractNode.NodeTypes nodeType = node.getType();
             if ((nodeType == AbstractNode.NodeTypes.BIOLOGICAL_GROUP)
                     || (nodeType == AbstractNode.NodeTypes.BIOLOGICAL_SAMPLE)
-                    || (nodeType == AbstractNode.NodeTypes.DATA_SET)) {
-
+                    || (nodeType == AbstractNode.NodeTypes.DATA_SET)
+                    || (nodeType == AbstractNode.NodeTypes.BIOLOGICAL_SAMPLE_ANALYSIS)){
                 return true;
             }
         }
@@ -144,9 +150,9 @@ public class QuantExperimentalDesignTree extends AbstractTree {
 
             CreateAction createAction = new CreateAction(this);
             m_mainActions.add(createAction);
-            
+
             m_mainActions.add(null);
-            
+
             RenameAction renameAction = new RenameAction(this);
             m_mainActions.add(renameAction);
 
@@ -186,13 +192,18 @@ public class QuantExperimentalDesignTree extends AbstractTree {
     }
 
     /**
-     * Replace current Experimental Design Node with an existing one. This is called when Design Tree is used with an existing experimental Design :
-     * to create XIC by clone, display XIC result (in quanti tree for instanceà) or display experimental design already run ... 
+     * Replace current Experimental Design Node with an existing one. This is
+     * called when Design Tree is used with an existing experimental Design : to
+     * create XIC by clone, display XIC result (in quanti tree for instanceà) or
+     * display experimental design already run ...
+     *
      * @param dataset quantitiation DS to extract experimental design from
      * @param rootNode : root node for Experimental Design nodes
      * @param tree : tree to insert Experimental Design nodes
      * @param expandPath :specify if tree should be expanded or not
-     * @param includeRunNodes : Add runNode to Experimental Design Tree. If not, root Node are created but only added to XICBiologicalSampleAnalysisNode ( addXicRunNode method)
+     * @param includeRunNodes : Add runNode to Experimental Design Tree. If not,
+     * root Node are created but only added to XICBiologicalSampleAnalysisNode (
+     * addXicRunNode method)
      */
     public static void displayExperimentalDesign(DDataset dataset, AbstractNode rootNode, AbstractTree tree, boolean expandPath, boolean includeRunNodes) {
         if (dataset == null) {
@@ -218,9 +229,10 @@ public class QuantExperimentalDesignTree extends AbstractTree {
         DDataset refDataset = dataset.getMasterQuantitationChannels().get(0).getIdentDataset();
         Long refResultSummaryId = dataset.getMasterQuantitationChannels().get(0).getIdentResultSummaryId();
         DatasetReferenceNode refDatasetNode = new DatasetReferenceNode(DataSetData.createTemporaryAggregate(refDataset == null ? "auto" : refDataset.getName())); //new DataSetData(refDataset == null ? "auto" : refDataset.getName(), Dataset.DatasetType.AGGREGATE, Aggregation.ChildNature.OTHER));
-        if(refDataset != null){
-            if(refResultSummaryId ==null || !refResultSummaryId.equals(refDataset.getResultSummaryId()) )
+        if (refDataset != null) {
+            if (refResultSummaryId == null || !refResultSummaryId.equals(refDataset.getResultSummaryId())) {
                 refDatasetNode.setInvalidReference(true);
+            }
         }
         treeModel.insertNodeInto(refDatasetNode, rootNode, childIndex++);
 
@@ -235,14 +247,13 @@ public class QuantExperimentalDesignTree extends AbstractTree {
                     DataSetNode node = new DataSetNode(DataSetData.createTemporaryQuantitation(datasetId.toString()));
                     loadDataSet(datasetId.longValue(), node);
                     node.setIsReference();
-                    treeModel.insertNodeInto(node, aggregationNode, refDatasetIndex++);
+                    treeModel.insertNodeInto(node, aggregationNode, refDatasetIndex++);                    
                 }
                 
             } catch (Exception e) {
                 StudioExceptions.notify("Unable to build aggregated datasets nodes", e);
             }
         }
-
 
         for (BiologicalGroup bioGroup : listBiologicalGroups) {
             XICBiologicalGroupNode biologicalGroupNode = new XICBiologicalGroupNode(DataSetData.createTemporaryAggregate(bioGroup.getName())); //new DataSetData(bioGroup.getName(), Dataset.DatasetType.AGGREGATE, Aggregation.ChildNature.OTHER));
@@ -273,7 +284,7 @@ public class QuantExperimentalDesignTree extends AbstractTree {
                         if (qCh.getName() != null) {
                             sampleAnalysisNode.setQuantChannelName(qCh.getName());
                         }
-                              
+
                         if (qCh.getRun() != null) {
                             Run run = qCh.getRun();
                             RawFile rawFile = run.getRawFile();
@@ -300,22 +311,30 @@ public class QuantExperimentalDesignTree extends AbstractTree {
                 }
                 childSampleIndex++;
             }
-            // expandPath( new TreePath(biologicalGroupNode.getPath()));
+            if (dataset.isAggregation()) {//aggragation dataset can't expand by above code
+                tree.expandPath(new TreePath(biologicalGroupNode.getPath()));
+               for (Enumeration e = biologicalGroupNode.children(); e.hasMoreElements();) {
+                   XICBiologicalSampleNode samplNode = (XICBiologicalSampleNode) e.nextElement();
+                   tree.expandPath(new TreePath(samplNode.getPath()));
+               }
+            }
             childIndex++;
         }
     }
-    
+
     /**
-     * use quantiDatasetId as id, load data from database, to fill the object datasetNode
+     * use quantiDatasetId as id, load data from database, to fill the object
+     * datasetNode
+     *
      * @param quantiDatasetId
-     * @param datasetNode, empty datasetNode 
+     * @param datasetNode, empty datasetNode
      */
     private static void loadDataSet(Long quantiDatasetId, final DataSetNode datasetNode) {
 
         final ArrayList<DDataset> readDatasetList = new ArrayList<>(1);
         final QuantitationTree tree = QuantitationTree.getCurrentTree();
         final DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
-        
+
         AbstractDatabaseCallback readDatasetCallback = new AbstractDatabaseCallback() {
 
             @Override
@@ -341,8 +360,7 @@ public class QuantExperimentalDesignTree extends AbstractTree {
         AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
 
     }
-    
-    
+
     private static DQuantitationChannel getQuantChannelSampleAnalysis(SampleAnalysis sampleAnalysis, List<DQuantitationChannel> listQuantChannels) {
         for (DQuantitationChannel qCh : listQuantChannels) {
             SampleAnalysis sampleReplicate = qCh.getSampleReplicate();
@@ -354,14 +372,18 @@ public class QuantExperimentalDesignTree extends AbstractTree {
     }
 
     /**
-     * Convert Tree hierarchy from specified node, which should contain Xic specific nodes : groups, samples ....) to a Map containing
-     * corresponding experimental design structure
-     * 
-     * @param node : root node containing XIC Experimental Design nodes 
-     * @param refDataset : Dataset to used as Reference dataset for MasterQuantChannel, may be null if no reference Dataset specified
-     * @param refRsmId : Result Summary Id to use as Reference identification result summary for MasterQuantChannel. If null and reference dataset specified, use result summatu Id of dataset
+     * Convert Tree hierarchy from specified node, which should contain Xic
+     * specific nodes : groups, samples ....) to a Map containing corresponding
+     * experimental design structure
+     *
+     * @param node : root node containing XIC Experimental Design nodes
+     * @param refDataset : Dataset to used as Reference dataset for
+     * MasterQuantChannel, may be null if no reference Dataset specified
+     * @param refRsmId : Result Summary Id to use as Reference identification
+     * result summary for MasterQuantChannel. If null and reference dataset
+     * specified, use result summatu Id of dataset
      * @return
-     * @throws IllegalAccessException 
+     * @throws IllegalAccessException
      */
     public static Map<String, Object> toExperimentalDesignParameters(AbstractNode node, DDataset refDataset, Long refRsmId) throws IllegalAccessException {
         Map<String, Object> experimentalDesignParams = new HashMap<>();
@@ -375,66 +397,67 @@ public class QuantExperimentalDesignTree extends AbstractTree {
         List _biologicalGroupList = new ArrayList();
         HashMap<String, Long> _rsmIdBySampleAnalysis = new HashMap<>();
         HashMap<Long, Long> _runIdByRSMId = new HashMap<>();
-        HashMap<String, ArrayList<String>> _samplesAnalysisBySample = new HashMap<>();       
+        HashMap<String, ArrayList<String>> _samplesAnalysisBySample = new HashMap<>();
         Map<Integer, String> splNameByNbr = new HashMap<>();
-        List<Long> rsmIdsToGetRunIdsFor  = new ArrayList();
+        List<Long> rsmIdsToGetRunIdsFor = new ArrayList();
         Enumeration xicGrps = node.children();
         while (xicGrps.hasMoreElements() && errorMsg == null) {
             AbstractNode grpNode = (AbstractNode) xicGrps.nextElement();
-            
+
             if (XICBiologicalGroupNode.class.isAssignableFrom(grpNode.getClass())) {
-            String grpName = grpNode.getData().getName();
+                String grpName = grpNode.getData().getName();
 
-            //Iterate over Samples
-            Enumeration grpSpls = grpNode.children();
-            List<Integer> splNumbers = new ArrayList();
+                //Iterate over Samples
+                Enumeration grpSpls = grpNode.children();
+                List<Integer> splNumbers = new ArrayList();
 
-            while (grpSpls.hasMoreElements() && errorMsg == null) {
-                AbstractNode splNode = (AbstractNode) grpSpls.nextElement();
-                String sampleName = grpName + splNode.getData().getName();
-                splNameByNbr.put(splNumber, sampleName);                        
-                splNumbers.add(splNumber++);
+                while (grpSpls.hasMoreElements() && errorMsg == null) {
+                    AbstractNode splNode = (AbstractNode) grpSpls.nextElement();
+                    String sampleName = grpName + splNode.getData().getName();
+                    splNameByNbr.put(splNumber, sampleName);
+                    splNumbers.add(splNumber++);
 
-                //Iterate over SampleAnalysis
-                Enumeration identRSMs = splNode.children();
-                ArrayList<String> splAnalysisNames = new ArrayList<>();
-                while (identRSMs.hasMoreElements()) {
-                    //VD TODO TEST child type
-                    XICBiologicalSampleAnalysisNode qChannelNode = (XICBiologicalSampleAnalysisNode) identRSMs.nextElement();
-                    XICRunNode associatedRunNode = qChannelNode.getXicRunNode();
-                    String quantChName = qChannelNode.getQuantChannelName();
-                    if ((quantChName == null) || (quantChName.isEmpty())) {
-                        quantChName = qChannelNode.getData().getName();
-                    }
-                    splAnalysisNames.add(quantChName);
-                    if (!DataSetData.class.isInstance(qChannelNode.getData())) {
-                        errorMsg = "Invalide Sample Analysis specified ";
-                        break;
-                    }
-                    
-                    if (qChannelNode.getData() != null && ((DataSetData) qChannelNode.getData()).getDataset() != null) {
-                        Long rsmId = ((DataSetData) qChannelNode.getData()).getDataset().getResultSummaryId();
-                        _rsmIdBySampleAnalysis.put(quantChName, rsmId);
-                        if (associatedRunNode != null && ((RunInfoData) associatedRunNode.getData()).getRun() != null) {
-                            _runIdByRSMId.put(rsmId, ((RunInfoData) associatedRunNode.getData()).getRun().getId());
-                        } else {
-                            rsmIdsToGetRunIdsFor.add(rsmId);
+                    //Iterate over SampleAnalysis
+                    Enumeration identRSMs = splNode.children();
+                    ArrayList<String> splAnalysisNames = new ArrayList<>();
+                    while (identRSMs.hasMoreElements()) {
+                        //VD TODO TEST child type
+                        XICBiologicalSampleAnalysisNode qChannelNode = (XICBiologicalSampleAnalysisNode) identRSMs.nextElement();
+                        XICRunNode associatedRunNode = qChannelNode.getXicRunNode();
+                        String quantChName = qChannelNode.getQuantChannelName();
+                        if ((quantChName == null) || (quantChName.isEmpty())) {
+                            quantChName = qChannelNode.getData().getName();
+                        }
+                        splAnalysisNames.add(quantChName);
+                        if (!DataSetData.class.isInstance(qChannelNode.getData())) {
+                            errorMsg = "Invalide Sample Analysis specified ";
+                            break;
+                        }
+
+                        if (qChannelNode.getData() != null && ((DataSetData) qChannelNode.getData()).getDataset() != null) {
+                            Long rsmId = ((DataSetData) qChannelNode.getData()).getDataset().getResultSummaryId();
+                            _rsmIdBySampleAnalysis.put(quantChName, rsmId);
+                            if (associatedRunNode != null && ((RunInfoData) associatedRunNode.getData()).getRun() != null) {
+                                _runIdByRSMId.put(rsmId, ((RunInfoData) associatedRunNode.getData()).getRun().getId());
+                            } else {
+                                rsmIdsToGetRunIdsFor.add(rsmId);
+                            }
                         }
                     }
-                }
-                _samplesAnalysisBySample.put(sampleName, splAnalysisNames);
-            } //End go through group's sample
+                    _samplesAnalysisBySample.put(sampleName, splAnalysisNames);
+                } //End go through group's sample
 
-            Map<String, Object> biologicalGroupParams = new HashMap<>();
-            biologicalGroupParams.put("number", grpNumber++);
-            biologicalGroupParams.put("name", grpName);
-            biologicalGroupParams.put("sample_numbers", splNumbers);
-            _biologicalGroupList.add(biologicalGroupParams);
+                Map<String, Object> biologicalGroupParams = new HashMap<>();
+                biologicalGroupParams.put("number", grpNumber++);
+                biologicalGroupParams.put("name", grpName);
+                biologicalGroupParams.put("sample_numbers", splNumbers);
+                _biologicalGroupList.add(biologicalGroupParams);
             }
         }// End go through groups
         //Read Run IDs for not found run Ids
-        if(!rsmIdsToGetRunIdsFor.isEmpty())
+        if (!rsmIdsToGetRunIdsFor.isEmpty()) {
             _runIdByRSMId.putAll(getRunIdForRSMs(rsmIdsToGetRunIdsFor));
+        }
         if (errorMsg != null) {
             throw new IllegalAccessException(errorMsg);
         }
@@ -457,7 +480,7 @@ public class QuantExperimentalDesignTree extends AbstractTree {
         experimentalDesignParams.put("group_setups", groupSetupParamsList);
         List biologicalSampleList = new ArrayList();
         List quantChanneList = new ArrayList();
-        List<Integer> samplesNbrList = new ArrayList(splNameByNbr.keySet());      
+        List<Integer> samplesNbrList = new ArrayList(splNameByNbr.keySet());
         Collections.sort(samplesNbrList);
         Iterator<Integer> samplesNbrIt = samplesNbrList.iterator();
         while (samplesNbrIt.hasNext()) {
@@ -468,7 +491,7 @@ public class QuantExperimentalDesignTree extends AbstractTree {
             biologicalSampleParams.put("number", nextSplNbr);
             biologicalSampleParams.put("name", nextSpl);
             biologicalSampleList.add(biologicalSampleParams);
-            
+
             List<String> splAnalysis = _samplesAnalysisBySample.get(nextSpl);
             for (String nextSplAnalysis : splAnalysis) {
                 Map<String, Object> quantChannelParams = new HashMap<>();
@@ -489,17 +512,18 @@ public class QuantExperimentalDesignTree extends AbstractTree {
         masterQuantChannelParams.put("number", 1);
         masterQuantChannelParams.put("name", node.getData().getName());
         masterQuantChannelParams.put("quant_channels", quantChanneList);
-        if (refDataset != null) {            
-            masterQuantChannelParams.put("ident_dataset_id", (refRsmId!=null)?refRsmId : refDataset.getId());
+        if (refDataset != null) {
+            masterQuantChannelParams.put("ident_dataset_id", (refRsmId != null) ? refRsmId : refDataset.getId());
             masterQuantChannelParams.put("ident_result_summary_id", refDataset.getResultSummaryId());
         }
         masterQuantChannelsList.add(masterQuantChannelParams);
         experimentalDesignParams.put("master_quant_channels", masterQuantChannelsList);
         return experimentalDesignParams;
     }
-    
+
     /**
      * get run id from database for each rsm id
+     *
      * @param rsmIDs
      * @return HashMap<rsmId, runId>
      */

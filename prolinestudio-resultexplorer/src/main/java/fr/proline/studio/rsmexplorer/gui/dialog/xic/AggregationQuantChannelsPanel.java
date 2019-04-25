@@ -62,7 +62,13 @@ public class AggregationQuantChannelsPanel extends JPanel {
 
     private AggregationQuantChannelsPanel() {
         setLayout(new BorderLayout());
-        add(new WizardPanel("<html><b>Step 2:</b> Define mapping between quantitation channels.</html>"), BorderLayout.NORTH);
+        String title = "<html><b>Step 2:</b> Define mapping between quantitation channels, verify if proposed quantification channel is OK.</html>";
+        String help ="For each aggregated quantitation, associate initials quantitation channels to final ones: \n"
+                + "   - Drag and drop quantitation channels from experimental design on the right to the mapping table on the left.\n" 
+                + "   - It is also possible to remove an existing mapping (if no matching should be done), it will be replaced by <ignore>.\n"
+                + "    -- To do this, remove or insert shifting up or down other quant channels";
+                 
+        add(new WizardPanel(title,help), BorderLayout.NORTH);
         add(createMainPanel(), BorderLayout.CENTER);
     }
 
@@ -94,7 +100,6 @@ public class AggregationQuantChannelsPanel extends JPanel {
 
         JPanel mappingToolBar = new QCMappingToolbar();
         framePanel.add(mappingToolBar, frameConstraints);
-        //framePanel.add(new JLabel("Drag & Drop", IconManager.getIcon(IconManager.IconType.DRAG_AND_DROP), JLabel.LEADING), frameConstraints);
 
         frameConstraints.anchor = GridBagConstraints.NORTHWEST;
         frameConstraints.fill = GridBagConstraints.BOTH;
@@ -145,9 +150,11 @@ public class AggregationQuantChannelsPanel extends JPanel {
      * @param datasets
      */
     public void setMapping(AbstractNode rootNode, List<DDataset> datasets) {
+        //left
         m_treeTableModel = new QCMappingTreeTableModel(rootNode, datasets);
         m_treeTable = createTreeTable(m_treeTableModel);
         m_tableScrollPane.setViewportView(m_treeTable);
+        //right
         m_tabbedPane.removeAll();
 
         for (DDataset ds : datasets) {
@@ -156,7 +163,8 @@ public class AggregationQuantChannelsPanel extends JPanel {
             DataSetNode dsNode = new DataSetNode(datasetData);
             QuantExperimentalDesignTree dsDesignTree = new QuantExperimentalDesignTree(dsNode, true);
             QuantExperimentalDesignTree.displayExperimentalDesign(ds, dsNode, dsDesignTree, true, true);
-            m_tabbedPane.add(ds.getName(), dsDesignTree);
+            JScrollPane sPane = new JScrollPane(dsDesignTree);
+            m_tabbedPane.add(ds.getName(), sPane);
         }
         validate();
         repaint();

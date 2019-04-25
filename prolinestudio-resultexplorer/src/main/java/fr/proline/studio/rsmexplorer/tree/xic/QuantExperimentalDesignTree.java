@@ -73,7 +73,8 @@ public class QuantExperimentalDesignTree extends AbstractTree {
         AbstractNode.NodeTypes nodeType = rsmNode.getType();
         if ((nodeType == AbstractNode.NodeTypes.BIOLOGICAL_GROUP)
                 || (nodeType == AbstractNode.NodeTypes.BIOLOGICAL_SAMPLE)
-                || (nodeType == AbstractNode.NodeTypes.DATA_SET)) {
+                || (nodeType == AbstractNode.NodeTypes.DATA_SET)
+                || (nodeType == AbstractNode.NodeTypes.BIOLOGICAL_SAMPLE_ANALYSIS)) {
 
             ((DataSetData) rsmNode.getData()).setTemporaryName(newName);
         }
@@ -279,7 +280,9 @@ public class QuantExperimentalDesignTree extends AbstractTree {
                             DDataset dds = new DDataset(qCh.getIdentDatasetId(), dataset.getProject(), name, Dataset.DatasetType.IDENTIFICATION, 0, qCh.getIdentRs().getId(), qCh.getIdentResultSummaryId(), qCh.getNumber());
                             dds.setResultSet(qCh.getIdentRs());
                             dsData.setDataset(dds);
+                           
                         }
+                        dsData.setChannelNumber(qCh.getNumber());
                         XICBiologicalSampleAnalysisNode sampleAnalysisNode = new XICBiologicalSampleAnalysisNode(dsData);
                         if (qCh.getName() != null) {
                             sampleAnalysisNode.setQuantChannelName(qCh.getName());

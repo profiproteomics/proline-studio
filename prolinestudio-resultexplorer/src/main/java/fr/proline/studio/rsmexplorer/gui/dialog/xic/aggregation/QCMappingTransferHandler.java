@@ -72,7 +72,6 @@ public class QCMappingTransferHandler extends AbstractTreeTransferHandler {
                 m_logger.error(getClass().getSimpleName() + " DnD error ", e);
                 return false;
             }
-            m_logger.debug("canImport  designNodeType= {}", designNodeType);
             // TODO : Determine whether we accept the location depending on the node type
             return (designNodeType == BIOLOGICAL_GROUP) || (designNodeType == BIOLOGICAL_SAMPLE_ANALYSIS);
 
@@ -101,15 +100,10 @@ public class QCMappingTransferHandler extends AbstractTreeTransferHandler {
                     case BIOLOGICAL_GROUP:
                         m_logger.info("moving group");
                     case BIOLOGICAL_SAMPLE_ANALYSIS: {
-                        //m_logger.debug("importData moving channel data={}", ((DataSetData) dsNode.getData()).getDataset().getName() );
                         DQuantitationChannelMapping mapping = m_treeTableModel.getMapping().get(node);
                         if (mapping != null) {
                             DataSetData userObject = (DataSetData) dsNode.getData();
-                            DDataset dataset = userObject.getDataset();
-                            if (dataset != null)
-                            mapping.put(ds, dataset.getNumber());
-                            else
-                            ;//@TODO//mapping.put(ds, ((DataSetData) dsNode.getData()).getDataset().getNumber());
+                            mapping.put(ds, userObject.getChannelNumber());
                         }
                     }
                 }

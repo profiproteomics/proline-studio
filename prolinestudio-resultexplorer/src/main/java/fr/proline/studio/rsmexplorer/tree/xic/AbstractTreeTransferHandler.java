@@ -32,6 +32,8 @@ public class AbstractTreeTransferHandler extends TransferHandler {
     @Override
     protected Transferable createTransferable(JComponent c) {
         if (m_isIdentificationSelectionTree) {
+            //create Transferable for IdentificationSelectionTree
+            //data = DataSetNode List
             IdentificationSelectionTree tree = (IdentificationSelectionTree) c;
             AbstractNode[] selectedNodes = tree.getSelectedNodes();
             ArrayList<DataSetNode> keptNodes = new ArrayList<>();
@@ -40,10 +42,12 @@ public class AbstractTreeTransferHandler extends TransferHandler {
                 return null;
             }
             XICSelectionTransferable.TransferData data = new XICSelectionTransferable.TransferData();
-            data.setDatasetList(keptNodes);
+            data.setDatasetList(keptNodes);//set Transferable data
             Integer transferKey = XICSelectionTransferable.register(data);
             return new XICSelectionTransferable(transferKey);
         } else {
+            //create Transferable for QuantExperimentalDesignTree
+            //date = AbstractNode List
             QuantExperimentalDesignTree tree = (QuantExperimentalDesignTree) c;
             AbstractNode[] selectedNodes = tree.getSelectedNodes();
             ArrayList<AbstractNode> keptNodes = new ArrayList<>();
@@ -67,7 +71,7 @@ public class AbstractTreeTransferHandler extends TransferHandler {
             }
             String keptNodesAsString = keptNodes.stream().map(i -> i.toString()).collect(Collectors.joining(",","[","]"));
             XICSelectionTransferable.TransferData data = new XICSelectionTransferable.TransferData();
-            data.setDesignList(keptNodes);
+            data.setDesignList(keptNodes);//set Transferable data
             Integer transferKey = XICSelectionTransferable.register(data);
             return new XICSelectionTransferable(transferKey);
         }

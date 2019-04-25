@@ -27,6 +27,16 @@ public class DataSetData extends AbstractData {
     private DDataset m_dataset = null;
     private String m_temporaryName = null;
     private DDatasetType m_temporaryDatasetType = null;
+    private Integer m_channelNumber = null;
+
+    public Integer getChannelNumber() {
+        return m_channelNumber;
+    }
+
+    public void setChannelNumber(Integer m_channelNumber) {
+        this.m_channelNumber = m_channelNumber;
+    }
+    
 
     public static DataSetData createTemporaryFolder(String name) {
         DDatasetType type = new DDatasetType(null, Dataset.DatasetType.IDENTIFICATION_FOLDER, null, null);

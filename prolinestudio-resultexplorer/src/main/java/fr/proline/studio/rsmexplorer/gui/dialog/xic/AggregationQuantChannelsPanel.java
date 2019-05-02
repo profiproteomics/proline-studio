@@ -8,7 +8,7 @@ package fr.proline.studio.rsmexplorer.gui.dialog.xic;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dam.data.DataSetData;
 import fr.proline.studio.gui.WizardPanel;
-import fr.proline.studio.rsmexplorer.gui.dialog.xic.aggregation.MappingTreeTable;
+import fr.proline.studio.rsmexplorer.gui.dialog.xic.aggregation.QCMappingTreeTable;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
@@ -40,7 +40,7 @@ public class AggregationQuantChannelsPanel extends JPanel {
     protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
 
     private static AggregationQuantChannelsPanel m_singleton;
-    private MappingTreeTable m_treeTable;
+    private QCMappingTreeTable m_treeTable;
     private QCMappingTreeTableModel m_treeTableModel;
     private JScrollPane m_tableScrollPane;
     private JTabbedPane m_tabbedPane;
@@ -171,8 +171,8 @@ public class AggregationQuantChannelsPanel extends JPanel {
      * @param model
      * @return
      */
-    private MappingTreeTable createTreeTable(QCMappingTreeTableModel model) {
-        MappingTreeTable treeTable = new MappingTreeTable(model);
+    private QCMappingTreeTable createTreeTable(QCMappingTreeTableModel model) {
+        QCMappingTreeTable treeTable = new QCMappingTreeTable(model);
         // rendering of the tree
         treeTable.putClientProperty("JTree.lineStyle", "Horizontal");
         treeTable.setRowHeight(18);

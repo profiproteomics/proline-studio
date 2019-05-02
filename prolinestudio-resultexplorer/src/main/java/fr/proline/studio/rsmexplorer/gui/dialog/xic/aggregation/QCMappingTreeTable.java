@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Karine XUE
  */
-public class MappingTreeTable extends JXTreeTable {
+public class QCMappingTreeTable extends JXTreeTable {
 
     //private static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer.AggregationQuant");
     private static final int UP = -1;
@@ -39,7 +39,7 @@ public class MappingTreeTable extends JXTreeTable {
     private QCMappingTreeTableModel m_model;
     private boolean m_isAltDown;
 
-    public MappingTreeTable(QCMappingTreeTableModel treeModel) {
+    public QCMappingTreeTable(QCMappingTreeTableModel treeModel) {
         super(treeModel);
         m_model = treeModel;
         m_model.cloneMapping();

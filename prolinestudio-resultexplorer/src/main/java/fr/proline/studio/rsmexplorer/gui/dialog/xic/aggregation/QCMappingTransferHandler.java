@@ -12,6 +12,7 @@ import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import static fr.proline.studio.rsmexplorer.tree.AbstractNode.NodeTypes.BIOLOGICAL_GROUP;
 import static fr.proline.studio.rsmexplorer.tree.AbstractNode.NodeTypes.BIOLOGICAL_SAMPLE_ANALYSIS;
 import fr.proline.studio.rsmexplorer.tree.xic.AbstractTreeTransferHandler;
+import fr.proline.studio.rsmexplorer.tree.xic.XICBiologicalSampleAnalysisNode;
 import fr.proline.studio.rsmexplorer.tree.xic.XICSelectionTransferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.IOException;
@@ -63,7 +64,7 @@ public class QCMappingTransferHandler extends AbstractTreeTransferHandler {
                     AbstractData rootData = ((AbstractNode) nodesList.get(0).getRoot()).getData();
                     DDataset sourceDS = ((DataSetData) rootData).getDataset();
                     DDataset destDS = m_treeTableModel.getDatasetAt(dropLocation.getColumn());
-                    if (sourceDS.getId()!= destDS.getId()) {
+                    if (sourceDS.getId() != destDS.getId()) {
                         return false;
                     }
                 }
@@ -83,30 +84,34 @@ public class QCMappingTransferHandler extends AbstractTreeTransferHandler {
     public boolean importData(TransferHandler.TransferSupport support) {
         try {
             JTable.DropLocation dropLocation = ((JTable.DropLocation) support.getDropLocation());
-            TreePath path = m_tree.getPathForRow(dropLocation.getRow());
-            AbstractNode node = (path != null) ? (AbstractNode) path.getLastPathComponent() : null;
-            DDataset ds = m_treeTableModel.getDatasetAt(dropLocation.getColumn());
+            TreePath dropPath = m_tree.getPathForRow(dropLocation.getRow());
+            AbstractNode dropNode = (dropPath != null) ? (AbstractNode) dropPath.getLastPathComponent() : null;
+            DDataset dropLocationDs = m_treeTableModel.getDatasetAt(dropLocation.getColumn());
 
             XICSelectionTransferable transfer = (XICSelectionTransferable) support.getTransferable().getTransferData(XICSelectionTransferable.RSMNodeList_FLAVOR);
-            XICSelectionTransferable.TransferData data = XICSelectionTransferable.getData(transfer.getTransferKey());
-            ArrayList<AbstractNode> dsNodesList = (ArrayList<AbstractNode>) data.getDesignList();
+            XICSelectionTransferable.TransferData transferData = XICSelectionTransferable.getData(transfer.getTransferKey());
+            ArrayList<AbstractNode> transferDsNodesList = (ArrayList<AbstractNode>) transferData.getDesignList();
 
-            if (dsNodesList == null) {
+            if (transferDsNodesList == null) {
                 return false;
             }
-
-            for (AbstractNode dsNode : dsNodesList) {
+            AbstractNode dropChannelNode = dropNode;
+            for (AbstractNode dsNode : transferDsNodesList) {
                 switch (dsNode.getType()) {
                     case BIOLOGICAL_GROUP:
                         m_logger.info("moving group");
                     case BIOLOGICAL_SAMPLE_ANALYSIS: {
-                        DQuantitationChannelMapping mapping = m_treeTableModel.getMapping().get(node);
-                        if (mapping != null) {
+                        DQuantitationChannelMapping dropLocationMapping = m_treeTableModel.getMapping().get(dropChannelNode);
+                        if (dropLocationMapping != null) {
                             DataSetData userObject = (DataSetData) dsNode.getData();
-                            mapping.put(ds, userObject.getChannelNumber());
+                            dropLocationMapping.put(dropLocationDs, userObject.getChannelNumber());
                         }
+                        dropChannelNode = this.m_treeTableModel.getNextChannelNode((XICBiologicalSampleAnalysisNode)dropChannelNode);
+                        if (dropChannelNode == null)
+                            continue;
                     }
                 }
+                
             }
 
             return false;
@@ -117,4 +122,5 @@ public class QCMappingTransferHandler extends AbstractTreeTransferHandler {
         }
         return false;
     }
+
 }

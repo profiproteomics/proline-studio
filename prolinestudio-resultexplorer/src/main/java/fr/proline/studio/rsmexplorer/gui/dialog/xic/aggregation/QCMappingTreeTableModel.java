@@ -304,6 +304,21 @@ public class QCMappingTreeTableModel extends AbstractTreeTableModel {
         }
         return null;
     }
+    
+    /**
+     * from one XICBiologicalSampleAnalysisNode get the next XICBiologicalSampleAnalysisNode
+     * @param node
+     * @return 
+     */
+    public XICBiologicalSampleAnalysisNode getNextChannelNode(XICBiologicalSampleAnalysisNode node) {
+        int i = m_indexedNodes.indexOf(node);
+        int j = m_indexChannelNodes.indexOf(i) + 1;
+        if (j < m_indexChannelNodes.size()) {
+            int nextChannelIndex = m_indexChannelNodes.get(j);
+            return (XICBiologicalSampleAnalysisNode)getNodeAt(nextChannelIndex);
+        }
+        return null;
+    }
 
     public void remove(int row, int column) {
         AbstractNode node = this.m_indexedNodes.get(row);

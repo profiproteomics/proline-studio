@@ -25,17 +25,11 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import javax.swing.tree.TreePath;
-import org.jdesktop.swingx.JXTreeTable;
 
 /**
  *
@@ -63,12 +57,13 @@ public class AggregationQuantChannelsPanel extends JPanel {
     private AggregationQuantChannelsPanel() {
         setLayout(new BorderLayout());
         String title = "<html><b>Step 2:</b> Define mapping between quantitation channels, verify if proposed quantification channel is OK.</html>";
-        String help ="For each aggregated quantitation, associate initials quantitation channels to final ones: \n"
-                + "   - Drag and drop quantitation channels from experimental design on the right to the mapping table on the left.\n" 
-                + "   - It is also possible to remove an existing mapping (if no matching should be done), it will be replaced by <ignore>.\n"
-                + "    -- To do this, remove or insert shifting up or down other quant channels";
-                 
-        add(new WizardPanel(title,help), BorderLayout.NORTH);
+
+        String help = "For each aggregated quantitation, associate initials quantitation channels to final ones: <br>"
+                + "&nbsp -<b>Drag and drop</b> quantitation channels from experimental design on the right to the mapping table on the left.<br>"
+                + "&nbsp -It is also possible to <b>remove</b> an existing mapping (if no matching should be done), it will be replaced by  &lt ignore &gt .<br>"
+                + "&nbsp --To do this, remove or <b>insert shifting up or down</b> other quant channels.";
+
+        add(new WizardPanel(title, help), BorderLayout.NORTH);
         add(createMainPanel(), BorderLayout.CENTER);
     }
 
@@ -217,12 +212,16 @@ public class AggregationQuantChannelsPanel extends JPanel {
         JButton _removeBt;
         JButton _upBt;
         JButton _downBt;
+        JButton _insertUpBt;
+        JButton _insertDownBt;
 
         public QCMappingToolbar() {
             super();
             createRemoveButton();
             createUpButton();
             createDownButton();
+            createInsertUpButton();
+            createInsertDownButton();
             setLayout(new GridBagLayout());
             final GridBagConstraints c = new GridBagConstraints();
             c.insets = new java.awt.Insets(5, 5, 5, 5);
@@ -237,6 +236,10 @@ public class AggregationQuantChannelsPanel extends JPanel {
             this.add(_upBt, c);
             c.gridx++;
             this.add(_downBt, c);
+            c.gridx++;
+            this.add(_insertUpBt, c);
+            c.gridx++;
+            this.add(_insertDownBt, c);
             c.gridx++;
             this.add(new JLabel("Drag & Drop", IconManager.getIcon(IconManager.IconType.DRAG_AND_DROP), JLabel.LEADING), c);
         }
@@ -253,8 +256,7 @@ public class AggregationQuantChannelsPanel extends JPanel {
         }
 
         void createUpButton() {
-            _upBt = new JButton();
-            _upBt.setIcon(IconManager.getIcon(IconManager.IconType.ARROW_MOVE_UP));
+            _upBt = new JButton("up");
             _upBt.setToolTipText("up");
             _upBt.addActionListener(new ActionListener() {
                 @Override
@@ -267,8 +269,7 @@ public class AggregationQuantChannelsPanel extends JPanel {
         }
 
         void createDownButton() {
-            _downBt = new JButton();
-            _downBt.setIcon(IconManager.getIcon(IconManager.IconType.ARROW_MOVE_DOWN));
+            _downBt = new JButton("down");
             _downBt.setToolTipText("down");
             _downBt.addActionListener(new ActionListener() {
 
@@ -279,6 +280,31 @@ public class AggregationQuantChannelsPanel extends JPanel {
                 }
             });
             _downBt.addKeyListener(new AltKeyAdapter());
+        }
+
+        void createInsertUpButton() {
+            _insertUpBt = new JButton("Insert Up");
+            _insertUpBt.setIcon(IconManager.getIcon(IconManager.IconType.ARROW_MOVE_UP));
+            _insertUpBt.setToolTipText("Insert Up");
+            _insertUpBt.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    m_treeTable.moveInsertUp();
+                }
+            });
+        }
+
+        void createInsertDownButton() {
+            _insertDownBt = new JButton("Insert down");
+            _insertDownBt.setIcon(IconManager.getIcon(IconManager.IconType.ARROW_MOVE_DOWN));
+            _insertDownBt.setToolTipText("Insert down");
+            _insertDownBt.addActionListener(new ActionListener() {
+
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    m_treeTable.moveInsertDown();
+                }
+            });
         }
 
         class AltKeyAdapter extends KeyAdapter {

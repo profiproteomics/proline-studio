@@ -33,8 +33,7 @@ import org.slf4j.LoggerFactory;
  */
 public class MappingTreeTable extends JXTreeTable {
 
-    private static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer.AggregationQuant");
-
+    //private static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer.AggregationQuant");
     private static final int UP = -1;
     private static final int DOWN = 1;
     private QCMappingTreeTableModel m_model;
@@ -50,7 +49,6 @@ public class MappingTreeTable extends JXTreeTable {
             @Override
             public void keyPressed(KeyEvent e) {
                 if (e.getKeyCode() == KeyEvent.VK_ALT) {
-                    m_logger.debug(" key ALT pressed");
                     if (m_isAltDown == false) {
                         m_model.cloneMapping();
                         m_isAltDown = true;
@@ -62,7 +60,6 @@ public class MappingTreeTable extends JXTreeTable {
             @Override
             public void keyReleased(KeyEvent e) {
                 if (e.getKeyCode() == KeyEvent.VK_ALT) {
-                    m_logger.debug(" key ALT released");
                     if (m_isAltDown == true) {
                         m_model.cleanStartingMapping();
                         m_isAltDown = false;
@@ -100,11 +97,26 @@ public class MappingTreeTable extends JXTreeTable {
         this.repaint();
     }
 
-    protected void moveUpDownReplace(int weight) {
-        List<Integer> newSelectedRows = new ArrayList();
+    private void setContinueSelected() {
         int[] rows = getSelectedRows();
+        int min, max;
+        min = rows[0];
+        max = rows[0];
+        for (int row : rows) {
+            min = Math.min(min, row);
+            max = Math.max(max, row);
+        }
+        this.setRowSelectionInterval(min, max);//selection must be continue
+    }
+
+    protected void moveInsertUpDown(int weight, boolean isInsertMode) {
+        if (isInsertMode)
+            setContinueSelected();
+        int[] rows = getSelectedRows();
+        //get selected row, range it in order ascending(for up) ou descending(for down)
+        List<Integer> newSelectedRows = new ArrayList();
         List<Integer> rowList = Arrays.stream(rows).boxed().collect(Collectors.toList());
-        if (weight == -1) {
+        if (weight == UP) {
             Collections.sort(rowList);//lower element move first
 
         } else {
@@ -113,19 +125,27 @@ public class MappingTreeTable extends JXTreeTable {
         if (m_model.isEndChannel(rowList, weight)) {
             return;
         }
-
+        //move up/down for each cell
         int[] columnList = getSelectedColumns();
+        m_model.setSelected(getSelectedRows(), getSelectedColumns());
+        if (isInsertMode){
+        m_model.preInsertMove(rowList.get(0), rowList.get(rowList.size() - 1), columnList, weight);
+        }
         int row, targetRow;
         for (int i = 0; i < rowList.size(); i++) {
             //for (int row : rowList) {
             row = rowList.get(i);
             for (int column : columnList) {
-                targetRow = m_model.moveUpDown(row, column, weight, m_isAltDown);
+                targetRow = m_model.moveUpDown(row, column, weight, (isInsertMode)? false:m_isAltDown);
                 if (targetRow != -1) {
                     newSelectedRows.add(targetRow);
                 }
             }
         }
+        if (isInsertMode)
+        m_model.postInsertMove(rowList.get(rowList.size() - 1), columnList);
+
+        //set the new selected rows colomns
         if (newSelectedRows.size() > 0) {
             Collections.sort(newSelectedRows);
             int firstRow = newSelectedRows.get(0);
@@ -142,52 +162,19 @@ public class MappingTreeTable extends JXTreeTable {
     }
 
     public void moveUp() {
-        moveUpDown(UP);
+        moveInsertUpDown(UP, false);
     }
 
     public void moveDown() {
-        moveUpDown(DOWN);
+        moveInsertUpDown(DOWN, false);
     }
 
-    private void moveUpDown(int weight) {
-        List<Integer> newSelectedRows = new ArrayList();
-        int[] rows = getSelectedRows();
-        List<Integer> rowList = Arrays.stream(rows).boxed().collect(Collectors.toList());
-        if (weight == -1) {
-            Collections.sort(rowList);//lower element move first
+    public void moveInsertUp() {
+        moveInsertUpDown(UP, true);
+    }
 
-        } else {
-            Collections.sort(rowList, Collections.reverseOrder());//higher element move first
-        }
-        if (m_model.isEndChannel(rowList, weight)) {
-            return;
-        }
-        int[] columns = getSelectedColumns();
-        m_model.setSelected(getSelectedRows(), getSelectedColumns());
-        int row, targetRow;
-        for (int i = 0; i < rowList.size(); i++) {
-            //for (int row : rowList) {
-            row = rowList.get(i);
-            for (int column : columns) {
-                targetRow = m_model.moveUpDown(row, column, weight, m_isAltDown);
-                if (targetRow != -1) {
-                    newSelectedRows.add(targetRow);
-                }
-            }
-        }
-        if (newSelectedRows.size() > 0) {
-            Collections.sort(newSelectedRows);
-            int firstRow = newSelectedRows.get(0);
-            for (int i = 0; i < newSelectedRows.size(); i++) {
-                row = newSelectedRows.get(i);
-                if (i == 0) {
-                    setRowSelectionInterval(row, row);
-                } else {
-                    addRowSelectionInterval(row, row);;
-                }
-            }
-            this.repaint();
-        }
+    public void moveInsertDown() {
+        moveInsertUpDown(DOWN, true);
     }
 
     //select column, row
@@ -221,12 +208,12 @@ public class MappingTreeTable extends JXTreeTable {
                 String command = event.getActionCommand();
                 if (command.equals("remove")) {
                     removeAssociateChannel();
-                } else if (command.equals("up")) {
+                } else if (command.equals("Insert up")) {
                     m_isAltDown = (e.isAltDown()) ? true : false;
-                    moveUpDown(UP);
-                } else if (command.equals("down")) {
+                    moveInsertUpDown(UP, true);
+                } else if (command.equals("Insert down")) {
                     m_isAltDown = (e.isAltDown()) ? true : false;
-                    moveUpDown(DOWN);
+                    moveInsertUpDown(DOWN, true);
                 }
             }
         };
@@ -235,10 +222,10 @@ public class MappingTreeTable extends JXTreeTable {
         item.setHorizontalTextPosition(JMenuItem.RIGHT);
         item.addActionListener(menuListener);
         popup.addSeparator();
-        popup.add(item = new JMenuItem("up", IconManager.getIcon(IconManager.IconType.ARROW_MOVE_UP)));
+        popup.add(item = new JMenuItem("Insert up", IconManager.getIcon(IconManager.IconType.ARROW_MOVE_UP)));
         item.setHorizontalTextPosition(JMenuItem.RIGHT);
         item.addActionListener(menuListener);
-        popup.add(item = new JMenuItem("down", IconManager.getIcon(IconManager.IconType.ARROW_MOVE_DOWN)));
+        popup.add(item = new JMenuItem("Insert down", IconManager.getIcon(IconManager.IconType.ARROW_MOVE_DOWN)));
         item.setHorizontalTextPosition(JMenuItem.RIGHT);
         item.addActionListener(menuListener);
 
@@ -257,6 +244,7 @@ public class MappingTreeTable extends JXTreeTable {
     }
 
     class PopupAdapter extends MouseAdapter {
+
         @Override
         public void mouseClicked(MouseEvent e) {
         }

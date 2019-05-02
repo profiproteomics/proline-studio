@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
  */
 public class QCMappingTreeTableModel extends AbstractTreeTableModel {
 
-    protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer.QCMappingTreeTableModel");
+    //protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer.QCMappingTreeTableModel");
     /**
      * Aggregation Quanti result tree data
      */
@@ -46,8 +46,18 @@ public class QCMappingTreeTableModel extends AbstractTreeTableModel {
      * <AggregationChannelid, <QuantiDataset, QuantiChannel>>
      */
     Map<XICBiologicalSampleAnalysisNode, DQuantitationChannelMapping> m_parentQCMappings, m_startingQCMappings;
+    //m_startingQCMappings for alt+up/down
+    /**
+     * a ordered List according to tree row index, useful for getNodeAt()
+     */
     List<AbstractNode> m_indexedNodes;
+    /**
+     * List, for ordred channel, memorize its tree row index
+     */
     List<Integer> m_indexChannelNodes;
+    /**
+     * memorize which channel is selected, used for move Up/Down
+     */
     List<Long> m_selectedChannelIds;
 
     public QCMappingTreeTableModel(AbstractNode rootNode, List<DDataset> datasets) {
@@ -60,24 +70,30 @@ public class QCMappingTreeTableModel extends AbstractTreeTableModel {
         Enumeration en = rootNode.preorderEnumeration();
         while (en.hasMoreElements()) {
             AbstractNode node = (AbstractNode) en.nextElement();
-            m_indexedNodes.add(node);
+            m_indexedNodes.add(node);//create a ordered List according to tree row index
             if (XICBiologicalSampleAnalysisNode.class.isInstance(node)) {
                 m_indexChannelNodes.add(m_indexedNodes.size() - 1);
             }
         }
     }
 
+    /**
+     * Clone Mapping in m_startingQCMappings, used for Alt+Up/Down
+     */
     public void cloneMapping() {
         m_startingQCMappings = new HashMap();
         for (XICBiologicalSampleAnalysisNode cn : m_parentQCMappings.keySet()) {
             DQuantitationChannelMapping copy = m_parentQCMappings.get(cn).clone();
             m_startingQCMappings.put(cn, copy);
-            m_logger.debug("channel {}, mapping: {}", cn, copy.toString());
+            //m_logger.debug("channel {}, mapping: {}", cn, copy);
         }
 
     }
-    
-    public void cleanStartingMapping(){
+
+    /**
+     * clean m_startingQCMappings, used for Alt+Up/Down
+     */
+    public void cleanStartingMapping() {
         m_startingQCMappings = new HashMap();
     }
 
@@ -178,11 +194,24 @@ public class QCMappingTreeTableModel extends AbstractTreeTableModel {
         return sampleCompletName;
     }
 
+    /**
+     * from a Group, retrive all its Channel Nodes. Group->parse All
+     * Samples->retrive each Channel
+     *
+     * @param groupNode
+     * @return
+     */
     private Stream<XICBiologicalSampleAnalysisNode> parseGroup(XICBiologicalGroupNode groupNode) {
         Stream<Object> stream = Collections.list(groupNode.children()).stream().flatMap(node -> Collections.list(((AbstractNode) node).children()).stream());
         return stream.map(node -> ((XICBiologicalSampleAnalysisNode) node));
     }
 
+    /**
+     * from a sample, retrive all its Channel Nodes.
+     *
+     * @param sampleNode
+     * @return
+     */
     private Stream<XICBiologicalSampleAnalysisNode> parseSample(XICBiologicalSampleNode sampleNode) {
         Stream<Object> stream = Collections.list(sampleNode.children()).stream();
         return stream.map(node -> ((XICBiologicalSampleAnalysisNode) node));
@@ -190,9 +219,7 @@ public class QCMappingTreeTableModel extends AbstractTreeTableModel {
 
     @Override
     public boolean isCellEditable(Object o, int column) {
-        AbstractNode node = (AbstractNode) o;
-        boolean editable = (column > 0) && (node.getType() == BIOLOGICAL_SAMPLE_ANALYSIS);
-        return editable;
+        return false;
     }
 
     /**
@@ -265,6 +292,12 @@ public class QCMappingTreeTableModel extends AbstractTreeTableModel {
         return m_datasets.get(column - 1);
     }
 
+    /**
+     * from rowIndex, get Node
+     *
+     * @param rowIndex
+     * @return
+     */
     public AbstractNode getNodeAt(int rowIndex) {
         if (rowIndex >= 0 && rowIndex < m_indexedNodes.size()) {
             return m_indexedNodes.get(rowIndex);
@@ -289,7 +322,6 @@ public class QCMappingTreeTableModel extends AbstractTreeTableModel {
      * @return the index of target node, or -1 if failed
      */
     public int moveUpDown(int row, int column, int weight, boolean isAltDown) {
-        m_logger.debug("alt is down? {}", isAltDown);
         AbstractNode srcNode = this.m_indexedNodes.get(row);
         if (XICBiologicalSampleAnalysisNode.class.isInstance(srcNode)) {
             DDataset Quanti = this.m_datasets.get(column - 1);
@@ -303,28 +335,37 @@ public class QCMappingTreeTableModel extends AbstractTreeTableModel {
             DQuantitationChannelMapping targetMapping = this.m_parentQCMappings.get((XICBiologicalSampleAnalysisNode) targetNode);
 
             if (srcChannel != null) {
-                m_logger.debug("selectedChannelId {}", m_selectedChannelIds.toString());
+                //m_logger.debug("selectedChannelId {}", m_selectedChannelIds.toString());
                 if (!isAltDown) {
                     srcMapping.remove(Quanti);
                 } else {
                     QuantitationChannel oldChannel = m_startingQCMappings.get(srcNode).getQuantChannel(Quanti);
                     if (oldChannel != null) {
-                        m_logger.debug("oldChannel id {}, name {}", oldChannel.getId(), oldChannel.getName());
+                        //m_logger.debug("oldChannel id {}, name {}", oldChannel.getId(), oldChannel.getName());
                     }
                     if (oldChannel != null && !m_selectedChannelIds.contains(oldChannel.getId())) {
                         srcMapping.put(Quanti, oldChannel);
-                        m_logger.debug(" srcMapping: {}", srcMapping.toString());
+                        //m_logger.debug(" srcMapping: {}", srcMapping.toString());
                     } else {
                         srcMapping.remove(Quanti);
                     }
                 }
                 targetMapping.put(Quanti, srcChannel);
-                return targetIndexChannelNode;//row index of the table
+            } else {
+                targetMapping.put(Quanti, null);
+
             }
+            return targetIndexChannelNode;//row index of the table
         }
         return -1;
     }
 
+    /**
+     * call by TreeTable, set selected channel
+     *
+     * @param rowList
+     * @param columnList
+     */
     public void setSelected(int[] rowList, int[] columnList) {
         m_selectedChannelIds = new ArrayList();
         for (int row : rowList) {
@@ -334,7 +375,9 @@ public class QCMappingTreeTableModel extends AbstractTreeTableModel {
                     DDataset Quanti = this.m_datasets.get(col - 1);
                     DQuantitationChannelMapping srcMapping = this.m_parentQCMappings.get((XICBiologicalSampleAnalysisNode) srcNode);
                     QuantitationChannel srcChannel = srcMapping.getQuantChannel(Quanti);
-                    m_selectedChannelIds.add(srcChannel.getId());
+                    if (srcChannel != null) {
+                        m_selectedChannelIds.add(srcChannel.getId());
+                    }
                 }
             }
         }
@@ -365,6 +408,14 @@ public class QCMappingTreeTableModel extends AbstractTreeTableModel {
         return false;
     }
 
+    /**
+     * test if at list 1 Channel is selected, used by TreeTable to determine if
+     * trigger Popup Menu
+     *
+     * @param rowList
+     * @param columnList
+     * @return
+     */
     public boolean isChannelSelected(int[] rowList, int[] columnList) {
         for (int row : rowList) {
             AbstractNode srcNode = this.m_indexedNodes.get(row);
@@ -380,6 +431,40 @@ public class QCMappingTreeTableModel extends AbstractTreeTableModel {
             }
         }
         return false;
-
     }
+
+    DQuantitationChannelMapping m_holdChannel = new DQuantitationChannelMapping(0);
+
+    /**
+     * 1 row, several columns
+     *
+     * @param srcRow
+     * @param targetRow
+     * @param columnList
+     * @param weight
+     */
+    public void preInsertMove(Integer srcRow, Integer targetRow, int[] columnList, int weight) {
+        m_holdChannel = new DQuantitationChannelMapping(targetRow);
+        int nextIndex = m_indexChannelNodes.indexOf(srcRow) + weight;
+        int nextChannelIndex = m_indexChannelNodes.get(nextIndex);
+        for (int column : columnList) {
+            DQuantitationChannelMapping srcMapping = this.m_parentQCMappings.get((XICBiologicalSampleAnalysisNode) getNodeAt(nextChannelIndex));
+            DDataset quanti = this.m_datasets.get(column - 1);
+            QuantitationChannel srcChannel = srcMapping.getQuantChannel(quanti);
+            m_holdChannel.put(quanti, srcChannel);
+        }
+    }
+
+    void postInsertMove(Integer targetRow, int[] columnList) {
+        int targetIndex = m_indexChannelNodes.indexOf(targetRow);
+        int targetChannelIndex = m_indexChannelNodes.get(targetIndex);
+        XICBiologicalSampleAnalysisNode targetNode = (XICBiologicalSampleAnalysisNode) this.getNodeAt(targetChannelIndex);
+        for (int column : columnList) {
+            DQuantitationChannelMapping mapping = m_parentQCMappings.get(targetNode);
+            DDataset quanti = this.m_datasets.get(column - 1);
+            mapping.remove(quanti);
+            mapping.put(quanti, m_holdChannel.getQuantChannel(quanti));
+        }
+    }
+
 }

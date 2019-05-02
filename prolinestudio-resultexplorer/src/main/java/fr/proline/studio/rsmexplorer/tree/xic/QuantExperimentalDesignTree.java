@@ -71,13 +71,14 @@ public class QuantExperimentalDesignTree extends AbstractTree {
     public void rename(AbstractNode rsmNode, String newName) {
 
         AbstractNode.NodeTypes nodeType = rsmNode.getType();
-        if ((nodeType == AbstractNode.NodeTypes.BIOLOGICAL_GROUP)
-                || (nodeType == AbstractNode.NodeTypes.BIOLOGICAL_SAMPLE)
-                || (nodeType == AbstractNode.NodeTypes.DATA_SET)){
+        if ((nodeType == AbstractNode.NodeTypes.BIOLOGICAL_GROUP)//group node
+                || (nodeType == AbstractNode.NodeTypes.BIOLOGICAL_SAMPLE)//sample node
+                || (nodeType == AbstractNode.NodeTypes.DATA_SET))//root node
+        {
             ((DataSetData) rsmNode.getData()).setTemporaryName(newName);
-        }
-        else if (nodeType == AbstractNode.NodeTypes.BIOLOGICAL_SAMPLE_ANALYSIS){
-            ((XICBiologicalSampleAnalysisNode)rsmNode).setQuantChannelName(newName);
+        } else if (nodeType == AbstractNode.NodeTypes.BIOLOGICAL_SAMPLE_ANALYSIS)//channel node
+        {
+            ((XICBiologicalSampleAnalysisNode) rsmNode).setQuantChannelName(newName);
         }
     }
 
@@ -86,11 +87,12 @@ public class QuantExperimentalDesignTree extends AbstractTree {
         rename(rootNode, newName);
         ((DefaultTreeModel) getModel()).nodeChanged(rootNode);
     }
-    
+
     /**
-     * a node type isPathEditable, can use F2 trigger rename
+     * a node type isPathEditable, we can use F2 to rename
+     *
      * @param path
-     * @return 
+     * @return
      */
     @Override
     public boolean isPathEditable(TreePath path) {
@@ -106,7 +108,7 @@ public class QuantExperimentalDesignTree extends AbstractTree {
             if ((nodeType == AbstractNode.NodeTypes.BIOLOGICAL_GROUP)
                     || (nodeType == AbstractNode.NodeTypes.BIOLOGICAL_SAMPLE)
                     || (nodeType == AbstractNode.NodeTypes.DATA_SET)
-                    || (nodeType == AbstractNode.NodeTypes.BIOLOGICAL_SAMPLE_ANALYSIS)){
+                    || (nodeType == AbstractNode.NodeTypes.BIOLOGICAL_SAMPLE_ANALYSIS)) {
                 return true;
             }
         }
@@ -249,9 +251,9 @@ public class QuantExperimentalDesignTree extends AbstractTree {
                     DataSetNode node = new DataSetNode(DataSetData.createTemporaryQuantitation(datasetId.toString()));
                     loadDataSet(datasetId.longValue(), node);
                     node.setIsReference();
-                    treeModel.insertNodeInto(node, aggregationNode, refDatasetIndex++);                    
+                    treeModel.insertNodeInto(node, aggregationNode, refDatasetIndex++);
                 }
-                
+
             } catch (Exception e) {
                 StudioExceptions.notify("Unable to build aggregated datasets nodes", e);
             }
@@ -281,7 +283,7 @@ public class QuantExperimentalDesignTree extends AbstractTree {
                             DDataset dds = new DDataset(qCh.getIdentDatasetId(), dataset.getProject(), name, Dataset.DatasetType.IDENTIFICATION, 0, qCh.getIdentRs().getId(), qCh.getIdentResultSummaryId(), qCh.getNumber());
                             dds.setResultSet(qCh.getIdentRs());
                             dsData.setDataset(dds);
-                           
+
                         }
                         dsData.setChannelNumber(qCh.getNumber());
                         XICBiologicalSampleAnalysisNode sampleAnalysisNode = new XICBiologicalSampleAnalysisNode(dsData);
@@ -317,10 +319,10 @@ public class QuantExperimentalDesignTree extends AbstractTree {
             }
             if (dataset.isAggregation()) {//aggragation dataset can't expand by above code
                 tree.expandPath(new TreePath(biologicalGroupNode.getPath()));
-               for (Enumeration e = biologicalGroupNode.children(); e.hasMoreElements();) {
-                   XICBiologicalSampleNode samplNode = (XICBiologicalSampleNode) e.nextElement();
-                   tree.expandPath(new TreePath(samplNode.getPath()));
-               }
+                for (Enumeration e = biologicalGroupNode.children(); e.hasMoreElements();) {
+                    XICBiologicalSampleNode samplNode = (XICBiologicalSampleNode) e.nextElement();
+                    tree.expandPath(new TreePath(samplNode.getPath()));
+                }
             }
             childIndex++;
         }

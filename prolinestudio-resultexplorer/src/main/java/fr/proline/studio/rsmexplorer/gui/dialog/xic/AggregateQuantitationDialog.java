@@ -59,12 +59,18 @@ public class AggregateQuantitationDialog extends DefaultDialog {
      * step 1 Panel
      */
     private JPanel m_designPanel = null;
-    private AbstractNode m_experimentalDesignNode = null;
-    private List<DDataset> m_quantitations;
     /**
      * step 2 Panel
      */
     private AggregationQuantChannelsPanel m_quantChannelsPanel;
+    private AbstractNode m_experimentalDesignNode = null;
+    /**
+     * initals Quantitations
+     */
+    private List<DDataset> m_quantitations;
+    /**
+     * first Quantitation as reference
+     */
     private DDataset m_refDataset = null;
 
     private AggregateQuantitationDialog(Window parent) {
@@ -102,14 +108,14 @@ public class AggregateQuantitationDialog extends DefaultDialog {
     }
 
     /**
-     * m_quantitations = selected Quantitation (loadedQuantitations)
+     * as soon as the constructor called, set data, m_quantitations and
      * m_refDataSet = first DataSet (Quantitation)
      *
-     * @param loadedQuantitations
+     * @param loadedQuantitations selected Quantitations to Aggregate
      */
     public void setQuantitationDatasets(List<DDataset> loadedQuantitations) {
         m_quantitations = loadedQuantitations;
-        //for each dataset in m_quantitations, get it's getIdentDataset of getMasterQuantitationChannels id
+        //for each dataset in m_quantitations, get it's getIdentDataset of getMasterQuantitationChannels id, ds=DDataset, ids = IdentDataset
         List<Long> refDatasetIds = m_quantitations.stream().map(ds -> ds.getMasterQuantitationChannels().get(0).getIdentDataset()).map(ids -> (ids == null) ? -1 : ids.getId()).distinct().collect(Collectors.toList());
         // If all quantification datasets are using the same reference, set that reference to m_refDataset
         if (refDatasetIds.size() == 1 && refDatasetIds.get(0) != -1) {
@@ -122,7 +128,7 @@ public class AggregateQuantitationDialog extends DefaultDialog {
     }
 
     public void displayExperimentalDesignTree() {
-        AbstractNode rootNode = inferExperimentalDesign();
+        AbstractNode rootNode = inferExperimentalDesign2();
         displayExperimentalDesignTree(rootNode);
     }
 
@@ -132,10 +138,10 @@ public class AggregateQuantitationDialog extends DefaultDialog {
      * @param node
      */
     public void displayExperimentalDesignTree(AbstractNode node) {
-        String step1Title = "<html><b>Step 1:</b> Define the aggregation experimental design. <html>";
-        String step1Help = " The proposed experimental design is inferred from the quantitations to aggregate. You can: \n"
-                + "  - change the order (using Drag & Drop)\n "
-                + "  - rename the groups, samples and/or repliques (runs) by using F2 or contextual menu. ";
+        String step1Title = "<html><b>Step 1:</b> Define the aggregation experimental design.</html>";
+        String step1Help = " <html>The proposed experimental design is inferred from the quantitations to aggregate. You can: <br>"
+                + "  - <b>change</b> the order (using Drag & Drop)<br> "
+                + "  - <b>rename</b> the groups, samples and/or repliques (runs) by using F2 or contextual menu.  </html>";
         if (m_quantitations != null && m_quantitations.size() > 0) {
             m_step = STEP_PANEL_DEFINE_EXP_DESIGN;
             setButtonName(DefaultDialog.BUTTON_OK, "Next");
@@ -213,9 +219,7 @@ public class AggregateQuantitationDialog extends DefaultDialog {
      */
     private DataSetNode inferExperimentalDesign() {
         int childIndex = 0;
-
         DataSetNode rootNode = new DataSetNode(DataSetData.createTemporaryQuantitation("XIC Aggregation")); //new DataSetData("XIC Aggregation", Dataset.DatasetType.QUANTITATION, Aggregation.ChildNature.QUANTITATION_FRACTION));
-
         DatasetReferenceNode refDatasetNode = new DatasetReferenceNode(DataSetData.createTemporaryAggregate(m_refDataset == null ? "auto" : m_refDataset.getName()));//new DataSetData(m_refDataset == null ? "auto" : m_refDataset.getName(), Dataset.DatasetType.AGGREGATE, Aggregation.ChildNature.OTHER));
         if (m_refDataset != null) {
             Long refResultSummaryId = m_quantitations.get(0).getMasterQuantitationChannels().get(0).getIdentResultSummaryId();
@@ -233,6 +237,7 @@ public class AggregateQuantitationDialog extends DefaultDialog {
         for (DDataset Quant : m_quantitations) {
             //create group List according first quanti group compositon
             groupList = Quant.getGroupSetup().getBiologicalGroups();
+            List<String> sortedSampleList = new ArrayList();
             for (BiologicalGroup group : groupList) {
                 String groupName = group.getName();
                 if (!sortedGroupList.contains(groupName)) {
@@ -241,6 +246,7 @@ public class AggregateQuantitationDialog extends DefaultDialog {
                     rootNode.insert(biologicalGroupNode, childIndex++);
                     //Map<BiologicalSameple name, List<BiologicalSample>> (bg=BiologicalGroup, s = BiologicalSample)
                     Map<String, List<BiologicalSample>> samples = groups.get(groupName).stream().map(bg -> bg.getBiologicalSamples()).flatMap(Collection::stream).collect(Collectors.groupingBy(s -> s.getName(), Collectors.toList()));
+
                     int sampleIndex = 0;
                     for (String sampleCompletName : samples.keySet()) {
                         String sampleName = shortenSampleName(groupName, sampleCompletName);
@@ -269,6 +275,95 @@ public class AggregateQuantitationDialog extends DefaultDialog {
                 }
             }
 
+        }
+        return rootNode;
+    }
+    /**
+     * sorted group & sorted sample
+     * @return 
+     */
+    private DataSetNode inferExperimentalDesign2() {
+        int childIndex = 0;
+        DataSetNode rootNode = new DataSetNode(DataSetData.createTemporaryQuantitation("XIC Aggregation")); //new DataSetData("XIC Aggregation", Dataset.DatasetType.QUANTITATION, Aggregation.ChildNature.QUANTITATION_FRACTION));
+        DatasetReferenceNode refDatasetNode = new DatasetReferenceNode(DataSetData.createTemporaryAggregate(m_refDataset == null ? "auto" : m_refDataset.getName()));//new DataSetData(m_refDataset == null ? "auto" : m_refDataset.getName(), Dataset.DatasetType.AGGREGATE, Aggregation.ChildNature.OTHER));
+        if (m_refDataset != null) {
+            Long refResultSummaryId = m_quantitations.get(0).getMasterQuantitationChannels().get(0).getIdentResultSummaryId();
+            if (refResultSummaryId == null || !refResultSummaryId.equals(m_refDataset.getResultSummaryId())) {
+                refDatasetNode.setInvalidReference(true);
+            }
+        }
+        rootNode.insert(refDatasetNode, childIndex++);
+        int qcIndex = 1;
+        List<String> sortedGroupList = new ArrayList();
+        List<BiologicalGroup> groupList;
+        XICBiologicalGroupNode biologicalGroupNode;
+        Map<String, List<String>> groupSamplesMap = new HashMap();
+        List<String> sampleNameList;
+        // create Map<GroupName, List<BiologicalGroup>> by "collect" (ds = dataSet) (bg = BiologicalGroup)
+        Map<String, List<BiologicalGroup>> groups = m_quantitations.stream().map(ds -> ds.getGroupSetup().getBiologicalGroups()).flatMap(Collection::stream).collect(Collectors.groupingBy(bg -> bg.getName(), Collectors.toList()));
+        for (DDataset Quant : m_quantitations) {
+            //create group List according first quanti group compositon
+            groupList = Quant.getGroupSetup().getBiologicalGroups();
+            List<String> sortedSampleList = new ArrayList();
+            for (BiologicalGroup group : groupList) {
+                String groupName = group.getName();
+                int gIndex = sortedGroupList.indexOf(groupName);
+                if (gIndex == -1) {
+                    sortedGroupList.add(groupName);
+                    groupSamplesMap.put(groupName, new ArrayList());
+                    biologicalGroupNode = new XICBiologicalGroupNode(DataSetData.createTemporaryAggregate(groupName));
+                    rootNode.insert(biologicalGroupNode, childIndex++);
+                } else {
+                    biologicalGroupNode = (XICBiologicalGroupNode) rootNode.getChildAt(gIndex + 1);//first node is rootNode
+                }
+                List<BiologicalSample> sampleList = group.getBiologicalSamples();
+                for (BiologicalSample sample : sampleList) {
+                    String sampleName = sample.getName();
+                    sampleNameList = groupSamplesMap.get(groupName);
+                    XICBiologicalSampleNode biologicalSampleNode;
+                    int sIndex = sortedGroupList.indexOf(sampleName);
+                    if (sIndex == -1) {
+                        sampleNameList.add(sampleName);
+                        String shortSampleName = shortenSampleName(groupName, sampleName);
+                        biologicalSampleNode = new XICBiologicalSampleNode(DataSetData.createTemporaryAggregate(shortSampleName));
+                        //create XICBiologicalSampleNode under biologicalGroupNode
+                        biologicalGroupNode.insert(biologicalSampleNode, sampleNameList.size() - 1);
+
+                        Map<String, List<BiologicalSample>> samples = groups.get(groupName).stream().map(bg -> bg.getBiologicalSamples()).flatMap(Collection::stream).collect(Collectors.groupingBy(s -> s.getName(), Collectors.toList()));
+                        int maxReplicates = 0;
+                        for (BiologicalSample bs : samples.get(sampleName)) {
+                            int replicates = bs.getQuantitationChannels().size();
+                            maxReplicates = Math.max(replicates, maxReplicates);
+                        }
+
+                        for (int i = 0; i < maxReplicates; i++) {
+                            //for each channel, give it a name with a number order
+                            String name = "Channel " + Integer.toString(qcIndex++);
+                            //empty DataSetData, who has only name
+                            DataSetData dsData = DataSetData.createTemporaryIdentification(name);
+                            //create a ChannelNode, with empty DataSetData; 
+                            XICBiologicalSampleAnalysisNode sampleAnalysisNode = new XICBiologicalSampleAnalysisNode(dsData);
+                            sampleAnalysisNode.setQuantChannelName(name);
+                            // created XICBiologicalSampleAnalysisNode under biologicalSampleNode
+                            biologicalSampleNode.insert(sampleAnalysisNode, biologicalSampleNode.getChildCount());
+                        }
+                    }
+                }
+            }
+        }
+
+        int cIndex = 1;
+        for (int i = 0; i < rootNode.getChildCount(); i++) {
+            AbstractNode groupNode = (AbstractNode) rootNode.getChildAt(i);//groupe node
+            if (XICBiologicalGroupNode.class.isInstance(groupNode)) {
+                for (int j = 0; j < groupNode.getChildCount(); j++) {
+                    AbstractNode sampleNode = (AbstractNode) groupNode.getChildAt(j);
+                    for (int k = 0; k < sampleNode.getChildCount(); k++) {
+                        XICBiologicalSampleAnalysisNode cNode = (XICBiologicalSampleAnalysisNode) sampleNode.getChildAt(k);
+                        cNode.setQuantChannelName("Channel " + cIndex++);
+                    }
+                }
+            }
         }
         return rootNode;
     }

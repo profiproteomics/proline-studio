@@ -87,7 +87,6 @@ public class AggregateQuantitationsAction extends AbstractRSMAction {
         
         AggregateQuantitationDialog dialog = AggregateQuantitationDialog.getDialog(WindowManager.getDefault().getMainWindow());
         dialog.setQuantitationDatasets(loadedQuantitations);
-        dialog.displayExperimentalDesignTree();
         dialog.setLocation(x, y);
         dialog.setVisible(true);
         if (dialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {

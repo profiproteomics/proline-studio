@@ -571,11 +571,7 @@ public class PTMProteinSitePanel extends HourglassPanel implements DataBoxPanelI
             String modifInfo = model.getModificationsInfo();
             return count+((count>1) ? " PTM Proteins Sites" : " PTM Protein Site")+" \n "+modifInfo;
         }
-
-        
         
     }
-    
-
     
 }

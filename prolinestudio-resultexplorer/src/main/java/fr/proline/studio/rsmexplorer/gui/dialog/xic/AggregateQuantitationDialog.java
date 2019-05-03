@@ -321,7 +321,7 @@ public class AggregateQuantitationDialog extends DefaultDialog {
                     String sampleName = sample.getName();
                     sampleNameList = groupSamplesMap.get(groupName);
                     XICBiologicalSampleNode biologicalSampleNode;
-                    int sIndex = sortedGroupList.indexOf(sampleName);
+                    int sIndex = sampleNameList.indexOf(sampleName);
                     if (sIndex == -1) {
                         sampleNameList.add(sampleName);
                         String shortSampleName = shortenSampleName(groupName, sampleName);

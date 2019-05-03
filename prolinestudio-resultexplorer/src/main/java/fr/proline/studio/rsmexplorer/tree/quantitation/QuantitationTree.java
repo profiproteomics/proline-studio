@@ -136,6 +136,10 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
 
         AbstractNode n = selectedNodes[0];
         boolean isRootPopup = n.isRoot();
+        boolean isAggregationDataSet = false;
+        if (n instanceof DataSetNode){
+           isAggregationDataSet = ((DataSetNode) n).getDataset().isAggregation();
+        }
 
         // check if the Root node or Trash or a Node in Trash is selected
         //boolean rootNodeSelected = false;
@@ -283,7 +287,10 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
                 }
                 popup = m_identPopup;
                 actions = m_identActions;
-            } else {
+            } else if ((nbNodes == 1) &&  isAggregationDataSet ){
+                return;
+            }
+            else{
                 if (m_mainPopup == null) {
                     // create the actions
                     m_mainActions = new ArrayList<>(20);  // <--- get in sync

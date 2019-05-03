@@ -86,6 +86,8 @@ public class XICBiologicalSampleAnalysisNode extends DataSetNode {
     @Override
     public boolean hasResultSummary() {
         DDataset dataSet = ((DataSetData) getData()).getDataset();
+        if (dataSet == null)
+            return false;
         return (dataSet.getResultSummaryId() != null);
     }
 

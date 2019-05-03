@@ -20,8 +20,10 @@ import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import fr.proline.studio.rsmexplorer.tree.quantitation.QuantitationTree;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import javax.swing.JOptionPane;
 import javax.swing.tree.DefaultTreeModel;
 import org.openide.util.NbBundle;
@@ -36,6 +38,7 @@ import org.slf4j.LoggerFactory;
 public class AggregateQuantitationsAction extends AbstractRSMAction {
 
     protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
+    private int m_nbLoadedQuanti;
 
     public AggregateQuantitationsAction() {
         super(NbBundle.getMessage(AggregateQuantitationsAction.class, "CTL_AggregateQuantitations"), AbstractTree.TreeType.TREE_QUANTITATION);
@@ -49,13 +52,17 @@ public class AggregateQuantitationsAction extends AbstractRSMAction {
             return;
         }
 
-        final List<DDataset> loadedQuantitations = new ArrayList<>();
+        List<Long> quantiId = new ArrayList();
+        for (AbstractNode n : selectedNodes) {
+            quantiId.add(((DataSetNode) n).getDataset().getId());
+        }
+        final DDataset[] loadedQuantitations = new DDataset[2];//to ensure the same order as selected node 
 
+        m_nbLoadedQuanti = 0;
         for (AbstractNode n : selectedNodes) {
             if (!n.isRoot() && DataSetNode.class.isInstance(n)) {
                 DataSetNode node = (DataSetNode) n;
                 final DataSetData dataset = (DataSetData) node.getData();
-
                 AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
 
                     @Override
@@ -66,10 +73,16 @@ public class AggregateQuantitationsAction extends AbstractRSMAction {
                     @Override
                     public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
                         if (success) {
-                            loadedQuantitations.add(dataset.getDataset());
-                            if (loadedQuantitations.size() == selectedNodes.length) {
-                                createAggregationDialog(loadedQuantitations, x, y);
-                            } 
+                            //loadedQuantitations.add(dataset.getDataset());
+                            DDataset quantiDs = dataset.getDataset();
+                            long idQuanti = quantiDs.getId();
+                            int index = quantiId.indexOf(idQuanti);
+                            loadedQuantitations[index] = quantiDs;
+                            m_nbLoadedQuanti++;
+                            if (m_nbLoadedQuanti == selectedNodes.length) {
+                                List<DDataset> loadedSelectedQuanti = Arrays.stream(loadedQuantitations).collect(Collectors.toList());
+                                createAggregationDialog(loadedSelectedQuanti, x, y);
+                            }
                         }
                     }
 
@@ -84,15 +97,15 @@ public class AggregateQuantitationsAction extends AbstractRSMAction {
 
     private void createAggregationDialog(List<DDataset> loadedQuantitations, int x, int y) {
         Long projectID = ProjectExplorerPanel.getProjectExplorerPanel().getSelectedProject().getId();
-        
+
         AggregateQuantitationDialog dialog = AggregateQuantitationDialog.getDialog(WindowManager.getDefault().getMainWindow());
         dialog.setQuantitationDatasets(loadedQuantitations);
         dialog.setLocation(x, y);
         dialog.setVisible(true);
         if (dialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {
-            
+
             final Long[] _xicQuantiDataSetId = new Long[1];
-            
+
             String datasetName = "Quant Agg.";
             StringBuffer errorMsg = new StringBuffer("");
 
@@ -100,13 +113,13 @@ public class AggregateQuantitationsAction extends AbstractRSMAction {
             DataSetData _quantiDS = (DataSetData) dialog.getExperimentalDesignNode().getData();
             Map<String, Object> expParams = null;
             try {
-                    expParams = dialog.getExperimentalDesignParameters();
-                } catch (IllegalAccessException iae) {
-                    errorMsg.append(iae.getMessage());
-                }
-            
+                expParams = dialog.getExperimentalDesignParameters();
+            } catch (IllegalAccessException iae) {
+                errorMsg.append(iae.getMessage());
+            }
+
             Map<String, Object> quantParams = dialog.getQuantiParameters();
-            
+
             if (!errorMsg.toString().isEmpty()) {
                 JOptionPane.showMessageDialog(dialog, errorMsg, "Warning", JOptionPane.ERROR_MESSAGE);
                 return;
@@ -116,8 +129,8 @@ public class AggregateQuantitationsAction extends AbstractRSMAction {
 
             final QuantitationTree tree = QuantitationTree.getCurrentTree();
             final DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
-            final DataSetNode[] _quantitationNode = { QuantitationTree.getCurrentTree().createQuantitationNode(datasetName) };
-            
+            final DataSetNode[] _quantitationNode = {QuantitationTree.getCurrentTree().createQuantitationNode(datasetName)};
+
             // CallBack for Xic Quantitation Service
             AbstractJMSCallback xicCallback = new AbstractJMSCallback() {
 
@@ -137,7 +150,7 @@ public class AggregateQuantitationsAction extends AbstractRSMAction {
                     }
                 }
             };
-           
+
             AggregateQuantitationTask task = new AggregateQuantitationTask(xicCallback, projectID, datasetName, quantParams, expParams, _xicQuantiDataSetId);
             AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
         }

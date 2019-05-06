@@ -55,18 +55,7 @@ public class PTMSite {
         } else {
             builder.append("Protein Match ID").append(m_site.proteinMatchId).append("-");
         }
-        if (m_ptmSpecificity != null) {
-            builder.append(m_ptmSpecificity.getPtmShortName()).append("(");
-            if (m_ptmSpecificity.getLocationSpecificity().equals("Anywhere")) {
-                builder.append(m_ptmSpecificity.getResidueAASpecificity());
-            } else {
-                builder.append(m_ptmSpecificity.getLocationSpecificity());
-            }
-            builder.append(")-");
-        } else {
-            builder.append("PTM ID").append(m_site.ptmDefinitionId).append("-");
-        }
-        builder.append(m_site.seqPosition);
+        builder.append(toProteinReadablePtmString());
         return builder.toString();
     }
 
@@ -177,6 +166,29 @@ public class PTMSite {
         return m_ptmPositionByPeptideId;
     }
 
+    public List<PTMPeptideInstance> getAssociatedPTMPeptideInstances(){
+        List<PTMPeptideInstance> res = m_ptmSitePeptideInstanceByPepId.values().stream().map(ptmSitePepInst -> ptmSitePepInst.getPTMPeptideInstance()).collect(Collectors.toList());
+        return res;
+    }
+    
+    public String toProteinReadablePtmString() {
+        StringBuilder builder = new StringBuilder();
+        if (m_ptmSpecificity != null) {
+            builder.append(m_ptmSpecificity.getPtmShortName()).append("(");
+            if (m_ptmSpecificity.getLocationSpecificity().equals("Anywhere")) {
+                builder.append(m_ptmSpecificity.getResidueAASpecificity());
+            } else {
+                builder.append(m_ptmSpecificity.getLocationSpecificity());
+            }
+            builder.append(")-");
+        } else {
+            builder.append("PTM ID").append(m_site.ptmDefinitionId).append("-");
+        }
+        builder.append(m_site.seqPosition);
+        return builder.toString();
+    }
+
+    
     public String toReadablePtmString(Long peptideId) {
         return m_ptmSpecificity.toReadablePtmString(getPositionOnPeptide(peptideId));
     }

@@ -377,6 +377,36 @@ public class QuantExperimentalDesignTree extends AbstractTree {
         return null;
     }
 
+     /* 
+     * Extract from ExperimentalDesignTree the Ids of all the RSMs that will be quantified.
+     * @param node : root node containing XIC Experimental Design nodes 
+     */
+    public static List<Long> getQuantifiedRsmIds(AbstractNode node) {
+        final List<Long> rsmIds = new ArrayList<>();
+        Enumeration xicGrps = node.children();
+        while (xicGrps.hasMoreElements()) {
+            AbstractNode grpNode = (AbstractNode) xicGrps.nextElement();
+            if (XICBiologicalGroupNode.class.isAssignableFrom(grpNode.getClass())) {
+                //Iterate over Samples
+                Enumeration grpSpls = grpNode.children();
+                while (grpSpls.hasMoreElements()) {
+                    AbstractNode splNode = (AbstractNode) grpSpls.nextElement();
+                    Enumeration identRSMs = splNode.children();
+                    while (identRSMs.hasMoreElements()) {
+                        AbstractNode identNode = (AbstractNode) identRSMs.nextElement();
+                        if (XICBiologicalSampleAnalysisNode.class.isAssignableFrom(identNode.getClass())) {
+                            XICBiologicalSampleAnalysisNode qChannelNode = (XICBiologicalSampleAnalysisNode) identNode;
+                            if (qChannelNode.getData() != null && ((DataSetData) qChannelNode.getData()).getDataset() != null) {
+                                rsmIds.add(((DataSetData) qChannelNode.getData()).getDataset().getResultSummaryId());
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return rsmIds;
+    }
+    
     /**
      * Convert Tree hierarchy from specified node, which should contain Xic
      * specific nodes : groups, samples ....) to a Map containing corresponding
@@ -388,7 +418,7 @@ public class QuantExperimentalDesignTree extends AbstractTree {
      * @param refRsmId : Result Summary Id to use as Reference identification
      * result summary for MasterQuantChannel. If null and reference dataset
      * specified, use result summatu Id of dataset
-     * @return
+     * 
      * @throws IllegalAccessException
      */
     public static Map<String, Object> toExperimentalDesignParameters(AbstractNode node, DDataset refDataset, Long refRsmId) throws IllegalAccessException {

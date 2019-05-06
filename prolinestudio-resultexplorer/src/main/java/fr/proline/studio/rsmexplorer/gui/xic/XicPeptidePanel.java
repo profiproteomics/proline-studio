@@ -228,34 +228,33 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
         toolbar.add(m_settingsButton);
         toolbar.add(m_exportButton);
 
-        
-        // graphics button
-        m_graphicsButton = new JButton(IconManager.getIcon(IconManager.IconType.CHART));
-        m_graphicsButton.setToolTipText("Graphics : Linear Plot");
-        m_graphicsButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (!((CompoundTableModel) m_quantPeptideTable.getModel()).isLoaded()) {
-
-                    ProgressBarDialog dialog = ProgressBarDialog.getDialog(WindowManager.getDefault().getMainWindow(), ((CompoundTableModel) m_quantPeptideTable.getModel()), "Data loading", "Histogram functionnality is not available while data is loading. Please Wait.");
-                    dialog.setLocation(getLocationOnScreen().x + m_graphicsButton.getWidth() + 5, m_graphicsButton.getLocationOnScreen().y + getHeight() + 5);
-                    dialog.setVisible(true);
-
-                    if (!dialog.isWaitingFinished()) {
-                        return;
-                    }
-                }
-                // prepare window box
-                WindowBox wbox = WindowBoxFactory.getMultiGraphicsWindowBox("Peptide Graphic", m_dataBox, false);
-                wbox.setEntryData(m_dataBox.getProjectId(), m_dataBox.getData(false, List.class));
-
-                // open a window to display the window box
-                DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
-                win.open();
-                win.requestActive();
-            }
-        });
         if (m_canGraph){
+            // graphics button
+            m_graphicsButton = new JButton(IconManager.getIcon(IconManager.IconType.CHART));
+            m_graphicsButton.setToolTipText("Graphics : Linear Plot");
+            m_graphicsButton.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    if (!((CompoundTableModel) m_quantPeptideTable.getModel()).isLoaded()) {
+
+                        ProgressBarDialog dialog = ProgressBarDialog.getDialog(WindowManager.getDefault().getMainWindow(), ((CompoundTableModel) m_quantPeptideTable.getModel()), "Data loading", "Histogram functionnality is not available while data is loading. Please Wait.");
+                        dialog.setLocation(getLocationOnScreen().x + m_graphicsButton.getWidth() + 5, m_graphicsButton.getLocationOnScreen().y + getHeight() + 5);
+                        dialog.setVisible(true);
+
+                        if (!dialog.isWaitingFinished()) {
+                            return;
+                        }
+                    }
+                    // prepare window box
+                    WindowBox wbox = WindowBoxFactory.getMultiGraphicsWindowBox("Peptide Graphic", m_dataBox, false);
+                    wbox.setEntryData(m_dataBox.getProjectId(), m_dataBox.getData(false, List.class));
+
+                    // open a window to display the window box
+                    DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
+                    win.open();
+                    win.requestActive();
+                }
+            });
             toolbar.add(m_graphicsButton);
         }
         
@@ -369,7 +368,7 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
         }
     }
     
-    public void setColumnsVisibility() {
+    private void setColumnsVisibility() {
         // hide the rawAbundance  and selectionLevel columns
         List<Integer> listIdsToHide = ((QuantPeptideTableModel) ((CompoundTableModel) m_quantPeptideTable.getModel()).getBaseModel()).getDefaultColumnsToHide();
         List<TableColumn> columns = m_quantPeptideTable.getColumns(true);

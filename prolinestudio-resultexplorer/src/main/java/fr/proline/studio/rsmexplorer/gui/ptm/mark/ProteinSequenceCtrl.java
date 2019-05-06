@@ -16,30 +16,31 @@ import java.awt.Graphics2D;
 public class ProteinSequenceCtrl {
     
     
-    ProteinSequenceView _view;
+    ProteinSequenceView m_view;
 
     public ProteinSequenceCtrl() {
-        _view = new ProteinSequenceView();
+        m_view = new ProteinSequenceView();
     }
     
     public void setData(String s){
-        _view.setSequence(s);
+        m_view.setSequence(s);
     }
+    
     /**
      * set graphic begin location
      * @param x
      * @param y 
      */
     public void setBeginPoint(int x, int y) {
-       this._view.setBeginPoint(x, y);
+       this.m_view.setBeginPoint(x, y);
     }
 
     public void paint(Graphics2D g2, ViewContext viewContext) {
-        this._view.paint(g2, viewContext);
+        this.m_view.paint(g2, viewContext);
     }
 
     public void setPTMSequencePosition(int i) {
-        this._view.setPTMSequencePosition(i);
+        this.m_view.setPTMSequencePosition(i);
     }
     
 }

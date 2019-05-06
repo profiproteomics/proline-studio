@@ -15,16 +15,16 @@ import java.util.List;
  *
  * @author Karine XUE
  */
-public class PtmMarkModel {
+public class PTMMarkModel {
 
-    List<PtmMarkView> _PTMMarkList;
+    List<PTMMarkView> m_ptmMarkList;
 
-    public PtmMarkModel() {
-        _PTMMarkList = new ArrayList<>();
+    public PTMMarkModel() {
+        m_ptmMarkList = new ArrayList<>();
     }
 
-    public List<PtmMarkView> getPTMMarkList() {
-        return _PTMMarkList;
+    public List<PTMMarkView> getPTMMarkList() {
+        return m_ptmMarkList;
     }
 
     /**
@@ -33,23 +33,23 @@ public class PtmMarkModel {
      * @param ptmSiteAA2Mark
      */
     public void setPTM(Collection<PTMMark> ptmMarks) {
-        _PTMMarkList = new ArrayList<>();
+        m_ptmMarkList = new ArrayList<>();
         for (PTMMark pa : ptmMarks) {
-            PtmMarkView p = new PtmMarkView(pa);
-            _PTMMarkList.add(p);
+            PTMMarkView p = new PTMMarkView(pa);
+            m_ptmMarkList.add(p);
         }
 
     }
 
     public void addPTM(PTMMark ptm) {
-        PtmMarkView p = new PtmMarkView(ptm);
-        _PTMMarkList.add(p);
+        PTMMarkView p = new PTMMarkView(ptm);
+        m_ptmMarkList.add(p);
     }
 
     public boolean removePtm(PTMMark ptm) {
-        int index = _PTMMarkList.indexOf(ptm);
-        _PTMMarkList.remove(index);
-        return _PTMMarkList.remove(ptm);
+        int index = m_ptmMarkList.indexOf(ptm);
+        m_ptmMarkList.remove(index);
+        return m_ptmMarkList.remove(ptm);
     }
 
 }

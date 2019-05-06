@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Karine XUE
  */
-public class PtmMarkView extends ViewPtmAbstract {
+public class PTMMarkView extends ViewPtmAbstract {
 
     private static Logger logger = LoggerFactory.getLogger("ProlineStudio.rsmexplorer.ptm");
 
@@ -31,13 +31,13 @@ public class PtmMarkView extends ViewPtmAbstract {
     /**
      * location in the protein, to paint above the type figure
      */
-    private int _locationProtein;
+    private int m_locationProtein;
     //int _ajustNTermAt1;//useful for N-termini at protein 1;
 
-    public PtmMarkView(PTMMark mark) {
+    public PTMMarkView(PTMMark mark) {
         this.m_color = ViewSetting.getColor(mark);
         this.m_symbol = Character.toString(mark.getPtmSymbol());
-        this._locationProtein = mark.getProteinLocation();
+        this.m_locationProtein = mark.getProteinLocation();
     }
 
     @Override
@@ -47,7 +47,7 @@ public class PtmMarkView extends ViewPtmAbstract {
     }
 
     public int getLocationProtein() {
-        return _locationProtein;
+        return m_locationProtein;
     }
 
     /**
@@ -66,7 +66,7 @@ public class PtmMarkView extends ViewPtmAbstract {
 
         g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
         //this.x0 = (int)(this.m_x + aaWidth+ (this._locationProtein - viewContext.getAjustedLocation()-1 + this._ajustNTermAt1) * aaWidth);
-        this.x0 = this.m_x + (this._locationProtein - viewContext.getAjustedLocation()) * ViewSetting.WIDTH_AA;
+        this.x0 = this.m_x + (this.m_locationProtein - viewContext.getAjustedLocation()) * ViewSetting.WIDTH_AA;
         this.y0 = this.m_y + ViewSetting.HEIGHT_AA; //reserve location line
 
         g.setColor(m_color);
@@ -95,21 +95,21 @@ public class PtmMarkView extends ViewPtmAbstract {
         fm = g.getFontMetrics(ViewSetting.FONT_NUMBER);
         int descent = fm.getDescent();
 
-        stringWidth = fm.stringWidth(String.valueOf(_locationProtein));
+        stringWidth = fm.stringWidth(String.valueOf(m_locationProtein));
         if (stringWidth > (aaWidth - ViewSetting.BORDER_GAP + 3)) {
             Font smallerFont = ViewSetting.FONT_NUMBER_DIAGONAL;
             g.setFont(smallerFont);
             fm = g.getFontMetrics(smallerFont);
-            stringWidth = fm.stringWidth(String.valueOf(_locationProtein));
+            stringWidth = fm.stringWidth(String.valueOf(m_locationProtein));
         }
         g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-        g.drawString(String.valueOf(_locationProtein), xCenter - stringWidth / 2, y0 - descent / 2);
+        g.drawString(String.valueOf(m_locationProtein), xCenter - stringWidth / 2, y0 - descent / 2);
         g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_OFF);
         g.setColor(oldColor);
     }
 
     @Override
     public String toString() {
-        return "ViewPtmMark{" + "m_type=" + m_symbol + ", _locationProtein=" + _locationProtein + ", _ajustNTermAt1=" + '}';
+        return "ViewPtmMark{" + "m_type=" + m_symbol + ", _locationProtein=" + m_locationProtein + ", _ajustNTermAt1=" + '}';
     }
 }

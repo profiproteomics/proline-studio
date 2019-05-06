@@ -18,24 +18,24 @@ import java.awt.*;
  */
 public class ProteinSequenceView extends ViewPtmAbstract {
 
-    private String _sequence;
-    private String _sequenceView;
+    private String m_sequence;
+    private String m_sequenceView;
     /**
      * the PTM Site Position on the proteine sequence
      */
-    private int _pTMSeqPos;
+    private int m_ptmSeqPos;
 
     public ProteinSequenceView() {
         this.x0 = 0;
         this.y0 = 0;
-        this._sequence = "";
-        this._sequenceView = _sequence;
-        this._pTMSeqPos = 0;
+        this.m_sequence = "";
+        this.m_sequenceView = m_sequence;
+        this.m_ptmSeqPos = 0;
     }
 
     public void setSequence(String sequenceProtein) {
-        this._sequence = sequenceProtein;
-        this._sequenceView = _sequence;
+        this.m_sequence = sequenceProtein;
+        this.m_sequenceView = m_sequence;
     }
 
     @Override
@@ -51,10 +51,10 @@ public class ProteinSequenceView extends ViewPtmAbstract {
         int aaHeight = ViewSetting.HEIGHT_AA;
         int adjuste = viewContext.getAjustedLocation();
 
-        if (viewContext.getAjustedLocation() > _sequence.length()) {
-            this._sequenceView = _sequence;
+        if (viewContext.getAjustedLocation() > m_sequence.length()) {
+            this.m_sequenceView = m_sequence;
         } else {
-            this._sequenceView = _sequence.substring(viewContext.getAjustedLocation());
+            this.m_sequenceView = m_sequence.substring(viewContext.getAjustedLocation());
         }
 
         // For debug only
@@ -66,19 +66,21 @@ public class ProteinSequenceView extends ViewPtmAbstract {
         g.setFont(ViewSetting.FONT_SEQUENCE);
         g.setColor(ViewSetting.SEQUENCE_COLOR);
         g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-        g.drawString(_sequenceView, (x0 + aaWidth), y0 + ViewSetting.HEIGHT_AA); //x, y are base line begin x, y
+        g.drawString(m_sequenceView, (x0 + aaWidth), y0 + ViewSetting.HEIGHT_AA); //x, y are base line begin x, y
         g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_OFF);
         //g.drawRect(x0+aaWidth*(this._pTMSeqPos-adjuste), y0, aaWidth, ViewSetting.HEIGHT_AA);
-        int xPtmA = x0 + aaWidth * (this._pTMSeqPos - adjuste);
-        g.setColor(Color.red);
-        int[] xPtm = {xPtmA, xPtmA + aaWidth, xPtmA + aaWidth / 2};
-        int yPtmA = y0 + aaHeight + 2;
-        int[] yPtm = {yPtmA, yPtmA, yPtmA + aaHeight / 2};
-        g.fillPolygon(xPtm, yPtm, yPtm.length);
+        if(m_ptmSeqPos>=0){
+            int xPtmA = x0 + aaWidth * (this.m_ptmSeqPos - adjuste);
+            g.setColor(Color.red);
+            int[] xPtm = {xPtmA, xPtmA + aaWidth, xPtmA + aaWidth / 2};
+            int yPtmA = y0 + aaHeight + 2;
+            int[] yPtm = {yPtmA, yPtmA, yPtmA + aaHeight / 2};
+            g.fillPolygon(xPtm, yPtm, yPtm.length);
+        }
     }
 
     void setPTMSequencePosition(int i) {
-        this._pTMSeqPos = i;
+        this.m_ptmSeqPos = i;
     }
 
 }

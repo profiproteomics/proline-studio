@@ -15,32 +15,32 @@ import java.util.Collection;
  *
  * @author Karine XUE
  */
-public class PtmMarkCtrl {
+public class PTMMarkCtrl {
     
-    PtmMarkModel _mgr;
-    PtmMarkSetView _view;
+    PTMMarkModel m_mgr;
+    PTMMarkSetView m_view;
     
-    public PtmMarkCtrl() {
-        _mgr = new PtmMarkModel();
-        _view = new PtmMarkSetView();
+    public PTMMarkCtrl() {
+        m_mgr = new PTMMarkModel();
+        m_view = new PTMMarkSetView();
         
     }
     
     public void setData(Collection<PTMMark> ptmMarks){
-        _mgr.setPTM(ptmMarks);
-        _view.setPtmMarkList(_mgr.getPTMMarkList());
+        m_mgr.setPTM(ptmMarks);
+        m_view.setPtmMarkList(m_mgr.getPTMMarkList());
     }
 
     public void setBeginPoint(int x, int y) {
-       this._view.setBeginPoint(x, y);
+       this.m_view.setBeginPoint(x, y);
     }
 
     public void paint(Graphics2D g2, ViewContext viewContext) {
-        this._view.paint(g2, viewContext);
+        this.m_view.paint(g2, viewContext);
     }
 
     public String getToolTipText(int x, int y, int ajustedLocation) {
-       return this._view.getToolTipText(x,y, ajustedLocation);
+       return this.m_view.getToolTipText(x,y, ajustedLocation);
               
     }
     

@@ -33,6 +33,7 @@ public class QuantExperimentalDesignPanel extends JPanel {
     private final QuantExperimentalDesignTree m_experimentalDesignTree;
     private final QuantitationMethod.Type m_quantitationType;
     private JComboBox<QuantitationMethod> m_methodsCbx;
+    private QuantitationMethod m_selectedMethod;
     
     public QuantExperimentalDesignPanel(AbstractNode rootNode, IdentificationTree selectionTree, QuantitationMethod.Type quantitationType) {
         m_rootNode = rootNode;
@@ -92,6 +93,16 @@ public class QuantExperimentalDesignPanel extends JPanel {
         c.weightx = 1;
         c.anchor = GridBagConstraints.NORTHWEST;
         
+        /*
+        Create method JCombo box but display only for some types. 
+        Only one choice for label free, no panel needed.
+        */
+        m_methodsCbx = new JComboBox<>(retrieveQuantMethods(m_quantitationType));
+        m_selectedMethod = ((QuantitationMethod)m_methodsCbx.getSelectedItem());
+        m_methodsCbx.addItemListener((e) -> {
+            m_selectedMethod = ((QuantitationMethod)m_methodsCbx.getSelectedItem()); 
+        });
+        
         switch (m_quantitationType) {
             case ISOBARIC_TAGGING:
             case RESIDUE_LABELING: {
@@ -128,9 +139,8 @@ public class QuantExperimentalDesignPanel extends JPanel {
         
         c.gridx++;
         c.weightx = 0.2;
-        m_methodsCbx = new JComboBox<>(retrieveQuantMethods(quantitationType));
         panel.add(m_methodsCbx, c);
-        
+       
         c.gridx++;
         c.weightx = 1;
         c.fill = GridBagConstraints.HORIZONTAL;
@@ -230,10 +240,13 @@ public class QuantExperimentalDesignPanel extends JPanel {
         return m_experimentalDesignTree;
     }
 
+    public List<Long> getQuantifiedRsmIds(){
+        return m_experimentalDesignTree.getQuantifiedRsmIds(m_rootNode);
+    }
+
+    
     public QuantitationMethod getQuantitationMethod() {
-        if (m_quantitationType == QuantitationMethod.Type.LABEL_FREE)
-            return null;
-        return ((QuantitationMethod)m_methodsCbx.getSelectedItem());
+        return m_selectedMethod;
     }
 
 }

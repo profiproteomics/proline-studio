@@ -232,7 +232,14 @@ public class CreateQuantitationDialog extends DefaultDialog {
                 };
 
                 DatabasePTMsTask task = new DatabasePTMsTask(callback);
-                task.initLoadUsedPTMs(m_refIdentDataset.getProject().getId(), m_refIdentDataset.getResultSummaryId(), ptms);
+                if(m_refIdentDataset == null){
+                    //get information from leaf rsm
+                    Long projectId = ProjectExplorerPanel.getProjectExplorerPanel().getSelectedProject().getId();
+                    List<Long> rsmIds = m_experimentalDesignPanel.getQuantifiedRsmIds();
+                    task.initLoadUsedPTMs(projectId, rsmIds, ptms);
+                } else {
+                    task.initLoadUsedPTMs(m_refIdentDataset.getProject().getId(), m_refIdentDataset.getResultSummaryId(), ptms);
+                }
                 AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
             } else {
                m_quantMethodParamsPanel = new ResidueMethodParamsPanel(m_experimentalDesignPanel.getQuantitationMethod(), m_identifiedPtms);
@@ -422,9 +429,6 @@ public class CreateQuantitationDialog extends DefaultDialog {
     }
     
     public Long getQuantMethodId() {
-        if (m_quantitationType == QuantitationMethod.Type.LABEL_FREE) {
-            return 1L;
-        }
         return m_experimentalDesignPanel.getQuantitationMethod().getId();
     }
     
@@ -440,62 +444,68 @@ public class CreateQuantitationDialog extends DefaultDialog {
     }
 
     private void displayNextPanel() {
-        if (m_step == STEP_PANEL_CREATE_EXPERIMENTAL_DESIGN) {
-            if (m_quantitationType == QuantitationMethod.Type.LABEL_FREE) { 
+        switch (m_step) {
+            case STEP_PANEL_CREATE_EXPERIMENTAL_DESIGN: 
+                if (m_quantitationType == QuantitationMethod.Type.LABEL_FREE) {
+                    displayLinkRawFilesPanel();
+                } else {
+                    displayQuantMethodParamsPanel();
+                }   break;
+            case STEP_PANEL_QUANT_METHOD_PARAMS:
                 displayLinkRawFilesPanel();
-            } else {
-                displayQuantMethodParamsPanel();
-            }
-        } else if (m_step == STEP_PANEL_QUANT_METHOD_PARAMS) {
-            displayLinkRawFilesPanel();
-        } else if (m_step == STEP_PANEL_LINK_RAW_FILES) {
-            displayLabelFreeParamsPanel();
-        } 
-        
+                break;
+            case STEP_PANEL_LINK_RAW_FILES:
+                displayLabelFreeParamsPanel();
+                break;
+            default:
+                break;
+        }         
     }
     
     @Override
     protected boolean okCalled() {
 
-        if (m_step == STEP_PANEL_CREATE_EXPERIMENTAL_DESIGN) {//CreateXICDesignPanel-NEXT button
+        switch (m_step) {
+            case STEP_PANEL_CREATE_EXPERIMENTAL_DESIGN:
+                //CreateXICDesignPanel-NEXT button
 
-            //VDS: Can't checkDesignStructure and checkBiologicalGroupName be merged !! 
-            if ((!checkDesignStructure(m_experimentalDesignNode, new HashSet<>())) || (!checkBiologicalGroupName(m_experimentalDesignNode))) {
+                //VDS: Can't checkDesignStructure and checkBiologicalGroupName be merged !!
+                if ((!checkDesignStructure(m_experimentalDesignNode, new HashSet<>())) || (!checkBiologicalGroupName(m_experimentalDesignNode))) {
+                    return false;
+                }
+                
+                //Will call displayLinkRawFilesPanel if Spectrum are OK !
+                checkSpectrum();
+                
                 return false;
-            }
-
-            //Will call displayLinkRawFilesPanel if Spectrum are OK ! 
-            checkSpectrum();
-
-            return false;
-        } else if (m_step == STEP_PANEL_QUANT_METHOD_PARAMS) {
-        
-            displayNextPanel();
-            
-            return false;
-            
-        } else if (m_step == STEP_PANEL_LINK_RAW_FILES) {//SelectRawFilesPanel-NEXT button
-
-            if (!checkRawFiles()) {
+            case STEP_PANEL_QUANT_METHOD_PARAMS:
+                displayNextPanel();
+                
                 return false;
-            }
-
-            displayNextPanel();
-
-            return false;
-        } else { //STEP_PANEL_DEFINE_XIC_PARAMS , LabelFreeMSParamsPanel-OK button
-
-            if (!checkQuantParameters()) {
+            case STEP_PANEL_LINK_RAW_FILES:
+                //SelectRawFilesPanel-NEXT button
+                
+                if (!checkRawFiles()) {
+                    return false;
+                }
+                
+                displayNextPanel();
+                
                 return false;
-            }
-
-            // Save Parameters  
-            ParameterList parameterList = LabelFreeMSParamsPanel.getLabelFreeMSQuantParamsPanel().getParamsPanel().getParameterList();
-            Preferences preferences = NbPreferences.root();
-            parameterList.saveParameters(preferences);
-            preferences.putBoolean(AbstractLabelFreeMSParamsPanel.XIC_SIMPLIFIED_PARAMS, LabelFreeMSParamsPanel.getLabelFreeMSQuantParamsPanel().getParamsPanel().isSimplifiedPanel());
-
-            return true;
+            default:
+                //STEP_PANEL_DEFINE_XIC_PARAMS , LabelFreeMSParamsPanel-OK button
+                
+                if (!checkQuantParameters()) {
+                    return false;
+                }
+                
+                // Save Parameters
+                ParameterList parameterList = LabelFreeMSParamsPanel.getLabelFreeMSQuantParamsPanel().getParamsPanel().getParameterList();
+                Preferences preferences = NbPreferences.root();
+                parameterList.saveParameters(preferences);
+                preferences.putBoolean(AbstractLabelFreeMSParamsPanel.XIC_SIMPLIFIED_PARAMS, LabelFreeMSParamsPanel.getLabelFreeMSQuantParamsPanel().getParamsPanel().isSimplifiedPanel());
+                
+                return true;
         }
 
     }
@@ -578,26 +588,26 @@ public class CreateQuantitationDialog extends DefaultDialog {
 
     @Override
     protected boolean backCalled() {
-        if (m_step == STEP_PANEL_QUANT_METHOD_PARAMS) {
-
-            displayExperimentalDesignPanel(m_experimentalDesignNode);
-
-            return false;
-        } else if (m_step == STEP_PANEL_LINK_RAW_FILES) {
-
-            m_selectRawFilePanel.pruneDesignTree();
-            if (m_quantitationType == QuantitationMethod.Type.LABEL_FREE) {
+        switch (m_step) {
+            case STEP_PANEL_QUANT_METHOD_PARAMS:
                 displayExperimentalDesignPanel(m_experimentalDesignNode);
-            } else {
-                displayQuantMethodParamsPanel();
-            }
-
-            return false;
-        } else if (m_step == STEP_PANEL_LABEL_FREE_PARAMS) {
-
-            displayLinkRawFilesPanel();
-
-            return false;
+                
+                return false;
+            case STEP_PANEL_LINK_RAW_FILES:
+                m_selectRawFilePanel.pruneDesignTree();
+                if (m_quantitationType == QuantitationMethod.Type.LABEL_FREE) {
+                    displayExperimentalDesignPanel(m_experimentalDesignNode);
+                } else {
+                    displayQuantMethodParamsPanel();
+                }
+                
+                return false;
+            case STEP_PANEL_LABEL_FREE_PARAMS:
+                displayLinkRawFilesPanel();
+                
+                return false;
+            default:
+                break;
         }
 
         return false;

@@ -20,7 +20,9 @@ import fr.proline.studio.rsmexplorer.actions.identification.AbstractRSMAction;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
+import javax.swing.JOptionPane;
 import org.openide.util.NbBundle;
+import org.openide.windows.WindowManager;
 
 /**
  *
@@ -34,17 +36,17 @@ public class DisplayXICPTMSitesAction extends AbstractRSMAction {
     
     @Override
     public void actionPerformed(AbstractNode[] selectedNodes, int x, int y) {
-
+        int answer= JOptionPane.showConfirmDialog(WindowManager.getDefault().getMainWindow(), "New Version ?");
         int nbNodes = selectedNodes.length;
         for (int i = 0; i < nbNodes; i++) {
             DataSetNode dataSetNode = (DataSetNode) selectedNodes[i];
 
-            actionImpl(dataSetNode);
+            actionImpl(dataSetNode, answer);
         }
 
     }
     
-    private void actionImpl(DataSetNode dataSetNode) {
+    private void actionImpl(DataSetNode dataSetNode, int answer) {
         
         final DDataset dataSet = ((DataSetData) dataSetNode.getData()).getDataset();
         
@@ -56,9 +58,14 @@ public class DisplayXICPTMSitesAction extends AbstractRSMAction {
         if (rsm != null) {
 
             // prepare window box
-            WindowBox wbox = WindowBoxFactory.getXicPTMSitesWindowBox(dataSet.getName());
-            wbox.setEntryData(dataSet.getProject().getId(), new PTMDataset(dataSet));
-            
+            WindowBox wbox;
+            if(answer == JOptionPane.YES_OPTION){
+                wbox = WindowBoxFactory.getXicPTMSitesWindowBox(dataSet.getName());
+            } else {
+                wbox = WindowBoxFactory.getXicPTMSitesWindowBoxOK(dataSet.getName());            
+            }
+            wbox.setEntryData(dataSet.getProject().getId(), new PTMDataset(dataSet));    
+               
             // open a window to display the window box
             DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
             win.open();
@@ -77,7 +84,12 @@ public class DisplayXICPTMSitesAction extends AbstractRSMAction {
 
                 @Override
                 public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
-                    WindowBox wbox = WindowBoxFactory.getXicPTMSitesWindowBox(dataSet.getName());
+                                WindowBox wbox;
+                    if(answer == JOptionPane.YES_OPTION) {
+                        wbox = WindowBoxFactory.getXicPTMSitesWindowBox(dataSet.getName());
+                    } else {
+                        wbox = WindowBoxFactory.getXicPTMSitesWindowBoxOK(dataSet.getName());
+                    }                    
                      
                     // open a window to display the window box
                     DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);

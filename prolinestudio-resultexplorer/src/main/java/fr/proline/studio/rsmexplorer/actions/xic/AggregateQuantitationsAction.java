@@ -56,7 +56,7 @@ public class AggregateQuantitationsAction extends AbstractRSMAction {
         for (AbstractNode n : selectedNodes) {
             quantiId.add(((DataSetNode) n).getDataset().getId());
         }
-        final DDataset[] loadedQuantitations = new DDataset[2];//to ensure the same order as selected node 
+        final DDataset[] loadedQuantitations = new DDataset[selectedNodes.length];//to ensure the same order as selected node 
 
         m_nbLoadedQuanti = 0;
         for (AbstractNode n : selectedNodes) {

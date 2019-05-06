@@ -77,11 +77,12 @@ public class WizardPanel extends JPanel {
             title = newTitle.replaceAll("</html>", "");
         }
         String htmlText = "<!DOCTYPE html><html><head><style>div {"
+                +"font-size: 11px;"
                 + "padding-top: 0;"
                 + "padding-bottom: 12px;"
                 + "}</style></head><body>";
         htmlText += "<div style=\"color:blue;\"><b>" + title + "</b></div>";
-        htmlText += "<div style=\"color:black;\">" + helpText + "</div></body></html>";
+        htmlText += "<div style=\"color:Gray;\">" + helpText + "</div></body></html>";
         wizardPane.setText(htmlText);
         add(wizardPane, BorderLayout.CENTER);
         this.setBorder(BorderFactory.createMatteBorder(5, 5, 5, 5, Color.LIGHT_GRAY));

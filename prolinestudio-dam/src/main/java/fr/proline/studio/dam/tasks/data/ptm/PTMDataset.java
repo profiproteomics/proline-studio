@@ -20,7 +20,7 @@ public class PTMDataset {
 
     private DDataset m_dataset;
     private List<PTMSite> m_proteinPTMSites;
-    private Map<Long, Map<Long, PTMPeptideInstance>> m_ptmPeptideByPeptideId = new HashMap<>();
+    private Map<Long, Map<Long, PTMPeptideInstance>> m_ptmPeptideByPeptideIdByProtMatchId = new HashMap<>();
 
     public PTMDataset(DDataset dataset) {
         
@@ -68,20 +68,33 @@ public class PTMDataset {
         }
     }
 
-
+    /**
+     * return the PTMPeptideInstance corresponding to the specified peptideId identifying specified ProteinMatch
+     * null is returned if no PTMPeptideInstance defined (yet ?)
+     * @param proteinMatchId
+     * @param peptideId
+     * @return 
+     */
     public PTMPeptideInstance getPTMPeptideInstance(Long proteinMatchId, Long peptideId) {
-        if (!m_ptmPeptideByPeptideId.containsKey(proteinMatchId))
+        if (!m_ptmPeptideByPeptideIdByProtMatchId.containsKey(proteinMatchId))
             return null;
-        return m_ptmPeptideByPeptideId.get(proteinMatchId).get(peptideId);
+        return m_ptmPeptideByPeptideIdByProtMatchId.get(proteinMatchId).get(peptideId);
     }
 
+    /**
+     * return the PTMPeptideInstance corresponding to the specified peptideId identifying specified ProteinMatch
+     * If not yet defined, create a new PTMPeptideInstance
+     * @param proteinMatchId
+     * @param peptideInstance
+     * @return 
+     */
     public PTMPeptideInstance getPTMPeptideInstance(Long proteinMatchId, DPeptideInstance peptideInstance) {
 
-        if (!m_ptmPeptideByPeptideId.containsKey(proteinMatchId)) {
-            m_ptmPeptideByPeptideId.put(proteinMatchId, new HashMap<>());
+        if (!m_ptmPeptideByPeptideIdByProtMatchId.containsKey(proteinMatchId)) {
+            m_ptmPeptideByPeptideIdByProtMatchId.put(proteinMatchId, new HashMap<>());
         }
 
-        Map<Long, PTMPeptideInstance> map = m_ptmPeptideByPeptideId.get(proteinMatchId);
+        Map<Long, PTMPeptideInstance> map = m_ptmPeptideByPeptideIdByProtMatchId.get(proteinMatchId);
 
         if (! map.containsKey(peptideInstance.getPeptideId())) {
             PTMPeptideInstance ptmPeptide = new PTMPeptideInstance(peptideInstance);

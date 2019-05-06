@@ -11,7 +11,7 @@ import javax.swing.table.AbstractTableModel;
  *
  * @author JM235353
  */
-public class PTMProteinSiteTableModelProcessing {
+public class ProteinPTMSiteTableModelProcessing {
     
     public static String calculateDataWORedundance(AbstractTableModel model, ArrayList<String> modificationsArray, ArrayList<Character> residuesArray, HashMap<Character, Integer> residuesMap, ArrayList<PTMSite> proteinPTMSiteArray,HashMap<String, Integer> modificationsMap) {
 
@@ -23,10 +23,10 @@ public class PTMProteinSiteTableModelProcessing {
         TreeSet<Character> residueTreeSet = new TreeSet<>();
 
         for (int i = 0; i < nbRows; i++) {
-            String modification = (String) model.getValueAt(i, PTMProteinSiteTableModel.COLTYPE_MODIFICATION);
+            String modification = (String) model.getValueAt(i, ProteinPTMSiteTableModel.COLTYPE_MODIFICATION);
             modificationTreeSet.add(modification);
 
-            Character residue = (Character) model.getValueAt(i, PTMProteinSiteTableModel.COLTYPE_RESIDUE_AA);
+            Character residue = (Character) model.getValueAt(i, ProteinPTMSiteTableModel.COLTYPE_RESIDUE_AA);
             if (residue != null) {
                 residueTreeSet.add(residue);
             }
@@ -68,7 +68,7 @@ public class PTMProteinSiteTableModelProcessing {
         HashMap<String, Integer> globalDistinctModificationsMap = new HashMap<>();
 
         for (int i = 0; i < rowCount; i++) {
-            String modification = (String) model.getValueAt(i, PTMProteinSiteTableModel.COLTYPE_MODIFICATION);
+            String modification = (String) model.getValueAt(i, ProteinPTMSiteTableModel.COLTYPE_MODIFICATION);
             Integer nb = globalDistinctModificationsMap.get(modification);
             if (nb == null) {
                 globalDistinctModificationsMap.put(modification, 1);

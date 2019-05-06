@@ -43,7 +43,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author JM235353
  */
-public class PTMProteinSiteTableModel extends LazyTableModel implements GlobalTableModelInterface {
+public class ProteinPTMSiteTableModel extends LazyTableModel implements GlobalTableModelInterface {
 
   private final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ptm");
 
@@ -89,7 +89,7 @@ public class PTMProteinSiteTableModel extends LazyTableModel implements GlobalTa
 
   private ScoreRenderer m_scoreRenderer = new ScoreRenderer();
 
-  public PTMProteinSiteTableModel(LazyTable table) {
+  public ProteinPTMSiteTableModel(LazyTable table) {
     super(table);
   }
 
@@ -266,7 +266,7 @@ public class PTMProteinSiteTableModel extends LazyTableModel implements GlobalTa
     m_proteinPTMSiteArray = proteinPTMSiteArray;
     m_arrayInUse = m_proteinPTMSiteArray;
     m_taskId = taskId;
-    m_modificationInfo = PTMProteinSiteTableModelProcessing.calculateDataWORedundance(this, m_modificationsArray, m_residuesArray, m_residuesMap, proteinPTMSiteArray, m_modificationsMap);
+    m_modificationInfo = ProteinPTMSiteTableModelProcessing.calculateDataWORedundance(this, m_modificationsArray, m_residuesArray, m_residuesMap, proteinPTMSiteArray, m_modificationsMap);
     
     if (!proteinPTMSiteArray.isEmpty() ) {
       m_ptmDataset = proteinPTMSiteArray.get(0).getPTMdataset();

@@ -301,7 +301,7 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
     private List<ExtendedTableModelInterface> getTableModelInterfaceList() {
         if (m_quantChannelInfo == null) {
             if (m_previousDataBox != null) {
-                m_quantChannelInfo = (QuantChannelInfo) m_previousDataBox.getData(this.m_isXICMode, QuantChannelInfo.class);
+                m_quantChannelInfo = (QuantChannelInfo) m_previousDataBox.getData(false, QuantChannelInfo.class);
 
                 if (m_quantChannelInfo == null) {
                     return null;

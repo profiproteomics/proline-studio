@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author VD225637
  */
-public class DataBoxPTMSitePeptides extends AbstractDataBox {
+ public class DataBoxPTMSitePeptides extends AbstractDataBox {
 
     private ResultSummary m_rsm;
     protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer.ptm");

@@ -4,7 +4,6 @@ import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.dto.*;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.core.orm.uds.dto.DMasterQuantitationChannel;
-import fr.proline.core.orm.uds.dto.DQuantitationChannel;
 import fr.proline.core.orm.util.DStoreCustomPoolConnectorFactory;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.extendedtablemodel.GlobalTabelModelProviderInterface;
@@ -13,11 +12,12 @@ import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
 import fr.proline.studio.dam.tasks.DatabasePTMsTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dam.tasks.data.ptm.PTMDataset;
+import fr.proline.studio.dam.tasks.data.ptm.PTMPeptideInstance;
 import fr.proline.studio.dam.tasks.data.ptm.PTMSite;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadLcMSTask;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadXicMasterQuantTask;
 import fr.proline.studio.graphics.CrossSelectionInterface;
-import fr.proline.studio.rsmexplorer.gui.PTMProteinSitePanel;
+import fr.proline.studio.rsmexplorer.gui.ProteinPTMSitePanel;
 
 import java.util.*;
 
@@ -71,6 +71,7 @@ public class DataBoxPTMSiteProtein extends AbstractDataBox {
         registerOutParameter(outParameter);
         
         outParameter = new GroupParameter();
+        outParameter.addParameter(PTMPeptideInstance.class, true);
         outParameter.addParameter(PTMSite.class, true);
         outParameter.addParameter(PTMDataset.class, false);
         registerOutParameter(outParameter);
@@ -136,7 +137,7 @@ public class DataBoxPTMSiteProtein extends AbstractDataBox {
     
     @Override
     public void createPanel() {
-        PTMProteinSitePanel p = new PTMProteinSitePanel();
+        ProteinPTMSitePanel p = new ProteinPTMSitePanel();
         p.setName(m_typeName);
         p.setDataBox(this);
         setDataBoxPanelInterface(p);
@@ -226,7 +227,7 @@ public class DataBoxPTMSiteProtein extends AbstractDataBox {
                     Map<Long, Long> typicalProteinMatchIdByProteinMatchId = loadProteinMatchMapping();
                     m_ptmDataset.setQuantProteinSets(m_masterQuantProteinSetList, typicalProteinMatchIdByProteinMatchId);
                     m_logger.info("{} mq proteinset assigned", m_masterQuantProteinSetList.size());
-                    ((PTMProteinSitePanel) getDataBoxPanelInterface()).setData(taskId, proteinPTMSiteArray, finished);
+                    ((ProteinPTMSitePanel) getDataBoxPanelInterface()).setData(taskId, proteinPTMSiteArray, finished);
                     unregisterTask(taskId);
                     setLoaded(loadingId);
                     startLoadingMasterQuantPeptides(proteinPTMSiteArray);
@@ -364,7 +365,7 @@ public class DataBoxPTMSiteProtein extends AbstractDataBox {
                     if(isXicResult()){
                         loadXicData(loadingId, taskId, ptmSiteArray, finished);
                     } else {
-                        ((PTMProteinSitePanel) getDataBoxPanelInterface()).setData(taskId, ptmSiteArray, finished);
+                        ((ProteinPTMSitePanel) getDataBoxPanelInterface()).setData(taskId, ptmSiteArray, finished);
                         setLoaded(loadingId);
                         propagateDataChanged(ExtendedTableModelInterface.class);
                     }
@@ -390,19 +391,19 @@ public class DataBoxPTMSiteProtein extends AbstractDataBox {
             }
             
             if (parameterType.equals(DProteinMatch.class)) {
-                PTMSite proteinPtmSite = ((PTMProteinSitePanel)getDataBoxPanelInterface()).getSelectedProteinPTMSite();
+                PTMSite proteinPtmSite = ((ProteinPTMSitePanel)getDataBoxPanelInterface()).getSelectedProteinPTMSite();
                 if (proteinPtmSite != null) {
                     return proteinPtmSite.getProteinMatch();
                 }
             }
             if (parameterType.equals(DPeptideMatch.class)) {
-                PTMSite proteinPtmSite = ((PTMProteinSitePanel) getDataBoxPanelInterface()).getSelectedProteinPTMSite();
+                PTMSite proteinPtmSite = ((ProteinPTMSitePanel) getDataBoxPanelInterface()).getSelectedProteinPTMSite();
                 if (proteinPtmSite != null) {
                     return proteinPtmSite.getBestPeptideMatch();
                 }
             }
             if (parameterType.equals(PTMSite.class)) {
-                return ((PTMProteinSitePanel) getDataBoxPanelInterface()).getSelectedProteinPTMSite();
+                return ((ProteinPTMSitePanel) getDataBoxPanelInterface()).getSelectedProteinPTMSite();
             }
             if (parameterType.equals(PTMDataset.class)){
                 return m_ptmDataset;
@@ -412,13 +413,13 @@ public class DataBoxPTMSiteProtein extends AbstractDataBox {
             }
              //XIC Specific ---- 
             if(parameterType.equals(DMasterQuantProteinSet.class) && isXicResult()) {
-                PTMSite proteinPtmSite = ((PTMProteinSitePanel)getDataBoxPanelInterface()).getSelectedProteinPTMSite();
+                PTMSite proteinPtmSite = ((ProteinPTMSitePanel)getDataBoxPanelInterface()).getSelectedProteinPTMSite();
                 if (proteinPtmSite != null) {
                     return proteinPtmSite.getMasterQuantProteinSet();
                 }
             }
             if (parameterType.equals(DProteinSet.class) && isXicResult()) {
-               PTMSite proteinPtmSite = ((PTMProteinSitePanel)getDataBoxPanelInterface()).getSelectedProteinPTMSite();
+               PTMSite proteinPtmSite = ((ProteinPTMSitePanel)getDataBoxPanelInterface()).getSelectedProteinPTMSite();
                 if (proteinPtmSite != null) {
                     return proteinPtmSite.getMasterQuantProteinSet().getProteinSet();
                 }     
@@ -440,6 +441,18 @@ public class DataBoxPTMSiteProtein extends AbstractDataBox {
         return super.getData(getArray, parameterType);
     }
  
+    @Override
+    public Object getData(boolean getArray, Class parameterType, boolean isList) {
+        if(parameterType.equals(PTMPeptideInstance.class) && isList){
+            PTMSite site = ((ProteinPTMSitePanel) getDataBoxPanelInterface()).getSelectedProteinPTMSite();
+            List<PTMPeptideInstance> sitePtmPepInstance =  new ArrayList<>();
+            if(site != null)
+                sitePtmPepInstance = site.getAssociatedPTMPeptideInstances();
+            return sitePtmPepInstance;
+        }
+        return super.getData(getArray, parameterType, isList);
+    }
+            
     @Override
     public void setEntryData(Object data) {
         

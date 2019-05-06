@@ -46,7 +46,7 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
 
     private final HashMap<Long, TaskInfo> m_taskMap = new HashMap<>();
 
-    private ProjectId m_projectId = new ProjectId();
+    private final ProjectId m_projectId = new ProjectId();
 
     protected String m_typeName;
     protected String m_dataName;
@@ -129,7 +129,8 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
         DataBoxXICPTMProteinSite(50),
         DataBoxXICPTMSitePeptides(51),
         DataBoxPTMSitePeptidesGraphic(52),
-        DataboxMultiGraphicsDoubleYAxis(53);
+        DataboxMultiGraphicsDoubleYAxis(53),
+        DataBoxPTMPeptides(54);
         int m_type;
         private static HashMap<Integer, DataboxType> m_databoxTypeMap = null;
 
@@ -235,6 +236,8 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
                     return new DataBoxPTMSitePepMatches();
                 case DataBoxPTMSitePeptidesGraphic:
                     return new DataBoxPTMSitePeptidesGraphic();
+                case DataBoxPTMPeptides:
+                    return new DataBoxPTMPeptides();
                 case DataBoxFrozenCopy:
                     return null; // not used for frozen copy
             }

@@ -57,9 +57,10 @@ public class AggregationQuantChannelsPanel extends JPanel {
     private AggregationQuantChannelsPanel() {
         setLayout(new BorderLayout());
         String title = "<html><b>Step 2:</b> Define mapping between quantitation channels, verify if proposed quantification channel is OK.</html>";
-
+        String dndImage = IconManager.getURLForIcon(IconManager.IconType.DRAG_AND_DROP);
+        
         String help = "For each aggregated quantitation, associate initials quantitation channels to final ones: <br>"
-                + "&nbsp -<b>Drag and drop</b> quantitation channels from experimental design on the right to the mapping table on the left.<br>"
+                + "&nbsp -<b>Drag and drop</b><img src="+dndImage+"> quantitation channel(s) from experimental design on the right to the mapping table on the left.<br>"
                 + "&nbsp -It is also possible to <b>remove</b> an existing mapping (if no matching should be done), it will be replaced by  &lt ignore &gt .<br>"
                 + "&nbsp --To do this, remove or <b>insert shifting up or down</b> other quant channels.";
 
@@ -87,10 +88,10 @@ public class AggregationQuantChannelsPanel extends JPanel {
         frameConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         frameConstraints.gridx = 0;
         frameConstraints.gridy = 0;
-        frameConstraints.gridwidth = 2;
+        //frameConstraints.gridwidth = 1;
         frameConstraints.weightx = 1;
         frameConstraints.weighty = 0;
-        frameConstraints.anchor = GridBagConstraints.NORTH;
+        frameConstraints.anchor = GridBagConstraints.NORTHWEST;
         frameConstraints.fill = GridBagConstraints.NONE;
 
         JPanel mappingToolBar = new QCMappingToolbar();
@@ -98,7 +99,7 @@ public class AggregationQuantChannelsPanel extends JPanel {
 
         frameConstraints.anchor = GridBagConstraints.NORTHWEST;
         frameConstraints.fill = GridBagConstraints.BOTH;
-        frameConstraints.gridwidth = 1;
+        //frameConstraints.gridwidth = 1;
         frameConstraints.gridy++;
         frameConstraints.weighty = 1;
         framePanel.add(sp, frameConstraints);
@@ -239,9 +240,7 @@ public class AggregationQuantChannelsPanel extends JPanel {
             c.gridx++;
             this.add(_insertUpBt, c);
             c.gridx++;
-            this.add(_insertDownBt, c);
-            c.gridx++;
-            this.add(new JLabel("Drag & Drop", IconManager.getIcon(IconManager.IconType.DRAG_AND_DROP), JLabel.LEADING), c);
+            this.add(_insertDownBt, c);           
         }
 
         void createRemoveButton() {

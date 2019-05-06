@@ -32,6 +32,7 @@ import fr.proline.studio.rsmexplorer.actions.xic.DisplayExperimentalDesignAction
 import fr.proline.studio.rsmexplorer.actions.xic.DisplayXICAction;
 import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
 import fr.proline.studio.rsmexplorer.tree.*;
+import fr.proline.studio.rsmexplorer.tree.xic.DatasetReferenceNode;
 import fr.proline.studio.rsmexplorer.tree.xic.XICBiologicalGroupNode;
 import fr.proline.studio.rsmexplorer.tree.xic.XICBiologicalSampleAnalysisNode;
 import fr.proline.studio.rsmexplorer.tree.xic.XICBiologicalSampleNode;
@@ -137,8 +138,11 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
         AbstractNode n = selectedNodes[0];
         boolean isRootPopup = n.isRoot();
         boolean isAggregationDataSet = false;
-        if (n instanceof DataSetNode){
-           isAggregationDataSet = ((DataSetNode) n).getDataset().isAggregation();
+        AbstractNode parentNode = (AbstractNode) n.getParent();
+        if (parentNode != null) {
+            if (parentNode instanceof DatasetReferenceNode) {
+                isAggregationDataSet = true;
+            }
         }
 
         // check if the Root node or Trash or a Node in Trash is selected
@@ -287,10 +291,9 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
                 }
                 popup = m_identPopup;
                 actions = m_identActions;
-            } else if ((nbNodes == 1) &&  isAggregationDataSet ){
+            } else if ((nbNodes == 1) && isAggregationDataSet) {
                 return;
-            }
-            else{
+            } else {
                 if (m_mainPopup == null) {
                     // create the actions
                     m_mainActions = new ArrayList<>(20);  // <--- get in sync
@@ -316,7 +319,7 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
                     m_mainActions.add(deleteAction);
 
                     m_mainActions.add(null);  // separator
-                    
+
                     ComputeQuantPostProcessingAction computeQuantPostProcessingAction = new ComputeQuantPostProcessingAction();
                     m_mainActions.add(computeQuantPostProcessingAction);
 

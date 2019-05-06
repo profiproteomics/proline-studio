@@ -18,12 +18,13 @@ import org.openide.util.NbBundle;
 
 /**
  * Action to display map alignment
+ *
  * @author MB243701
  */
 public class DisplayMapAlignmentAction extends AbstractRSMAction {
 
     public DisplayMapAlignmentAction() {
-       super(NbBundle.getMessage(DisplayMapAlignmentAction.class,"CTL_DisplayMapAlignmentAction"), AbstractTree.TreeType.TREE_QUANTITATION);
+        super(NbBundle.getMessage(DisplayMapAlignmentAction.class, "CTL_DisplayMapAlignmentAction"), AbstractTree.TreeType.TREE_QUANTITATION);
     }
 
     @Override
@@ -72,11 +73,17 @@ public class DisplayMapAlignmentAction extends AbstractRSMAction {
             setEnabled(false);
             return;
         }
+        if (node.getType() == AbstractNode.NodeTypes.DATA_SET) {
+            if (((DataSetNode) node).getDataset().isAggregation()) {
+                setEnabled(false);
+            }
+            return;
+        }
 
         DataSetNode datasetNode = (DataSetNode) node;
 
         // must be a quantitation XIC
-        if (! datasetNode.isQuantXIC()) {
+        if (!datasetNode.isQuantXIC()) {
             setEnabled(false);
             return;
         }

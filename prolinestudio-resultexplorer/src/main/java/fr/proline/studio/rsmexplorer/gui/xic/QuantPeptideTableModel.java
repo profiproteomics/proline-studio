@@ -1084,7 +1084,7 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
         m_projectId = projectId;
         if (m_quantChannels != null && m_quantChannels.length == quantChannels.length) {
             for (int i = 0; i < m_quantChannels.length; i++) {
-                structureChanged = !(m_quantChannels[i].equals(quantChannels[i]));
+                structureChanged = !(m_quantChannels[i].equals(quantChannels[i])); //VDS Prend la derniere valeur !
             }
         }
         m_quantPeptides = peptides;
@@ -1273,7 +1273,7 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
     }
 
     public Long getResultSummaryId() {
-        if ((m_quantPeptides == null) || (m_quantPeptides.size() == 0)) {
+        if ((m_quantPeptides == null) || (m_quantPeptides.isEmpty())) {
             return null;
         }
 

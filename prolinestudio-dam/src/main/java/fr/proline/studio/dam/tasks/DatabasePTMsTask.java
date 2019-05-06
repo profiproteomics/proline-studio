@@ -46,7 +46,7 @@ public class DatabasePTMsTask extends AbstractDatabaseTask {
 
     private long m_projectId = -1;
     private ResultSummary m_rsm = null;
-    private Long m_rsmId = null;
+    private List<Long> m_rsmIds = null;
     private PTMSite m_ptmSiteToFill = null;
     private List<PtmSpecificity> m_ptms = null;
     
@@ -96,11 +96,19 @@ public class DatabasePTMsTask extends AbstractDatabaseTask {
     public void initLoadUsedPTMs(Long projectId, Long rsmId, List<PtmSpecificity> ptmsToFill) {
         init(new TaskInfo("Load used PTMs from RSM id" + rsmId, false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_MEDIUM));
         m_projectId = projectId;
-        m_rsmId = rsmId;
+        m_rsmIds = new ArrayList<>();
+        m_rsmIds.add(rsmId);
         m_ptms = ptmsToFill;
         m_action = LOAD_IDENTIFIED_PTM_SPECIFICITIES;
     }
         
+    public void initLoadUsedPTMs(Long projectId, List<Long> rsmIds, List<PtmSpecificity> ptmsToFill) {
+        init(new TaskInfo("Load used PTMs from RSM ids" + rsmIds, false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_MEDIUM));
+        m_projectId = projectId;
+        m_rsmIds = rsmIds;
+        m_ptms = ptmsToFill;
+        m_action = LOAD_IDENTIFIED_PTM_SPECIFICITIES;
+    }    
     
     @Override
     public boolean needToFetch() {
@@ -148,10 +156,13 @@ public class DatabasePTMsTask extends AbstractDatabaseTask {
 
             entityManagerMSI.getTransaction().begin();
             long stop = System.currentTimeMillis();
+            m_logger.debug("Identified PTM entityManagerMSI.getTransaction().begin {} ms", (stop-start));
+            start = stop;
             
-            TypedQuery<PtmSpecificity> query = entityManagerMSI.createQuery("SELECT DISTINCT(pp.specificity) FROM PeptidePtm pp, PeptideInstance pi WHERE pi.resultSummary.id=:rsmId AND pi.peptide.id = pp.peptide.id", PtmSpecificity.class);
-            query.setParameter("rsmId", m_rsmId);
+            TypedQuery<PtmSpecificity> query = entityManagerMSI.createQuery("SELECT DISTINCT(pp.specificity) FROM PeptidePtm pp, PeptideInstance pi WHERE pi.resultSummary.id in (:rsmIds) AND pi.peptide.id = pp.peptide.id", PtmSpecificity.class);
+            query.setParameter("rsmIds", m_rsmIds);
             m_ptms.addAll(query.getResultList());
+            
             stop = System.currentTimeMillis();
             m_logger.debug("Identified PTM fetched in {} ms", (stop-start));
             
@@ -297,7 +308,8 @@ public class DatabasePTMsTask extends AbstractDatabaseTask {
                 dpi.setPeptideMatches(new ArrayList<>());
                 leafPeptideInstancesById.put(dpi.getId(), dpi);
             }
-            
+            if(pi.getBestPeptideMatchId() == dpm.getId())
+                 leafPeptideInstancesById.get(pi.getId()).setBestPeptideMatch(dpm);
             leafPeptideInstancesById.get(pi.getId()).getPeptideMatches().add(dpm);
         }
         m_logger.debug(" created leafPeptideInstancesById. Nbr pepIns "+leafPeptideInstancesById.size());

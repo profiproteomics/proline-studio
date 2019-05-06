@@ -1,14 +1,16 @@
 package fr.proline.studio.dam.tasks.data.ptm;
 
 import fr.proline.core.orm.msi.dto.DPeptideInstance;
+import fr.proline.core.orm.msi.dto.DPeptideMatch;
 
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 
 public class PTMPeptideInstance {
 
-  private DPeptideInstance m_peptideInstance;
-  private Set<PTMSite> m_sites = new HashSet<>();
+  private final DPeptideInstance m_peptideInstance;
+  private final Set<PTMSite> m_sites = new HashSet<>();
   private Integer m_startPosition;
 
   public PTMPeptideInstance(DPeptideInstance peptideInstance) {
@@ -37,5 +39,24 @@ public class PTMPeptideInstance {
 
   public Set<PTMSite> getSites() {
     return m_sites;
+  }
+
+  // !! VDS FIXME Add better solution to get Info ==> lazy data upload !!!
+  public DPeptideMatch getBestPepMatch() {
+    DPeptideMatch pepMatch = getPeptideInstance().getBestPeptideMatch();
+    if (pepMatch == null) {
+        //m_logger.warn("--- PTMPeptide (Xic) table: UNABLE to get peptide match associated to peptide instance "+ptmPepInstance.toString());
+        //Try using ptmSite PTMSitePeptideInstance
+        Iterator<PTMSite> siteIT = getSites().iterator();
+        while (siteIT.hasNext()) {
+            PTMSite nextSite = siteIT.next();
+            PTMSitePeptideInstance ptmSitePepInst = nextSite.getPTMSitePeptideInstance(getPeptideInstance().getPeptideId());
+            if (ptmSitePepInst != null) {
+                pepMatch = ptmSitePepInst.getBestPeptideMatch();
+                break;
+            }
+        }
+    }
+    return pepMatch;
   }
 }

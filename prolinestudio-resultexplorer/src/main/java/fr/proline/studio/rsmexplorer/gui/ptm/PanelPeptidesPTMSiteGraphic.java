@@ -7,7 +7,7 @@ import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.rsmexplorer.gui.PeptidesPTMSitePanelInterface;
-import fr.proline.studio.rsmexplorer.gui.ptm.mark.PtmMarkCtrl;
+import fr.proline.studio.rsmexplorer.gui.ptm.mark.PTMMarkCtrl;
 import fr.proline.studio.rsmexplorer.gui.ptm.pep.PeptideAreaCtrl;
 import fr.proline.studio.rsmexplorer.gui.ptm.mark.ProteinSequenceCtrl;
 import java.awt.BorderLayout;
@@ -21,17 +21,16 @@ import org.slf4j.LoggerFactory;
  *
  * @author Karine XUE
  */
-//public class PanelPeptidesPTMSiteGraphic extends PeptidesPTMSiteTablePanel {
+
 public class PanelPeptidesPTMSiteGraphic extends JPanel implements DataBoxPanelInterface, SplittedPanelContainer.UserActions, PeptidesPTMSitePanelInterface {
 
     private static Logger logger = LoggerFactory.getLogger(PanelPeptidesPTMSiteGraphic.class);
-    protected DataMgrPtm _dataMgr;
+    protected DataMgrPtm m_dataMgr;
 
-    protected Object _projetId;
-    protected PanelPtmDraw _paintArea;
-    protected PtmMarkCtrl _ctrlMark;
-    protected ProteinSequenceCtrl _ctrlSequence;
-    protected PeptideAreaCtrl _ctrlPeptideArea;
+    protected PanelPtmDraw m_paintArea;
+    protected PTMMarkCtrl m_ctrlMark;
+    protected ProteinSequenceCtrl m_ctrlSequence;
+    protected PeptideAreaCtrl m_ctrlPeptideArea;
 
     protected AbstractDataBox m_dataBox;
     protected PTMSite m_currentPTMSite = null;
@@ -39,11 +38,11 @@ public class PanelPeptidesPTMSiteGraphic extends JPanel implements DataBoxPanelI
     public PanelPeptidesPTMSiteGraphic() {
         //super(false);
         super();
-        _dataMgr = new DataMgrPtm();
-        _ctrlMark = new PtmMarkCtrl();
-        _ctrlSequence = new ProteinSequenceCtrl();
-        _ctrlPeptideArea = new PeptideAreaCtrl();
-        _paintArea = new PanelPtmDraw(this, _ctrlMark, _ctrlSequence, _ctrlPeptideArea);
+        m_dataMgr = new DataMgrPtm();
+        m_ctrlMark = new PTMMarkCtrl();
+        m_ctrlSequence = new ProteinSequenceCtrl();
+        m_ctrlPeptideArea = new PeptideAreaCtrl();
+        m_paintArea = new PanelPtmDraw(this, m_ctrlMark, m_ctrlSequence, m_ctrlPeptideArea);
         initComponents();
     }
 
@@ -53,10 +52,10 @@ public class PanelPeptidesPTMSiteGraphic extends JPanel implements DataBoxPanelI
     private void initComponents() {
         setLayout(new BorderLayout());
 
-        _paintArea.setSize(WIDTH - 30, HEIGHT);
+        m_paintArea.setSize(WIDTH - 30, HEIGHT);
         JToolBar toolbar = initToolbar();
         this.add(toolbar, BorderLayout.WEST);
-        this.add(_paintArea, BorderLayout.CENTER);
+        this.add(m_paintArea, BorderLayout.CENTER);
 
     }
 
@@ -84,22 +83,22 @@ public class PanelPeptidesPTMSiteGraphic extends JPanel implements DataBoxPanelI
         if ((peptidesPTMSite.equals(m_currentPTMSite))) {
             return;
         }
-        _dataMgr.setData(peptidesPTMSite);
+        m_dataMgr.setData(peptidesPTMSite);
         if (peptidesPTMSite == null) {
-            this._paintArea.clean();
+            this.m_paintArea.clean();
         } else {
             this.m_currentPTMSite = peptidesPTMSite;
 
-            this._ctrlSequence.setData(_dataMgr.getProteinSequence());
-            this._ctrlSequence.setPTMSequencePosition(_dataMgr.getPTMSiteSeqPos());
-            this._ctrlMark.setData(_dataMgr.getAllPtmMarks());
-            this._ctrlPeptideArea.setData(_dataMgr.getPTMSitePeptideInstances());
-            int ajustedLocation = _dataMgr.getBeginBestFit();
-            this._ctrlPeptideArea.setSelectedIndex(0);
-            this._paintArea.setIsDataLoaded(true);
-            this._paintArea.setRowCount(this._dataMgr.getRowCount());
-            this._paintArea.setSequenceLength(_dataMgr.getProteinSequence().length());
-            this._paintArea.setAjustedLocation(ajustedLocation);
+            this.m_ctrlSequence.setData(m_dataMgr.getProteinSequence());
+            this.m_ctrlSequence.setPTMSequencePosition(m_dataMgr.getPTMSiteSeqPos());
+            this.m_ctrlMark.setData(m_dataMgr.getAllPtmMarks());
+            this.m_ctrlPeptideArea.setData(m_dataMgr.getPTMSitePeptideInstances());
+            int ajustedLocation = m_dataMgr.getBeginBestFit();
+            this.m_ctrlPeptideArea.setSelectedIndex(0);
+            this.m_paintArea.setIsDataLoaded(true);
+            this.m_paintArea.setRowCount(this.m_dataMgr.getRowCount());
+            this.m_paintArea.setSequenceLength(m_dataMgr.getProteinSequence().length());
+            this.m_paintArea.setAjustedLocation(ajustedLocation);
             valueChanged();
         }
         this.repaint();
@@ -114,15 +113,15 @@ public class PanelPeptidesPTMSiteGraphic extends JPanel implements DataBoxPanelI
      */
     @Override
     public DPeptideInstance getSelectedPeptideInstance() {
-        int selectedRowIndex = this._paintArea.getSelectedPeptideIndex();
+        int selectedRowIndex = this.m_paintArea.getSelectedPeptideIndex();
         //logger.debug("getSelectedPeptideInstance selectRowIndex: " + selectedRowIndex);
-        return this._dataMgr.getSelectedDPeptideInstance(selectedRowIndex);
+        return this.m_dataMgr.getSelectedDPeptideInstance(selectedRowIndex);
     }
 
     @Override
     public void setSelectedPeptide(DPeptideInstance pep){
-        int row = this._dataMgr.getPeptideIndex(pep);
-        this._paintArea.setSelectedPeptideIndex(row);
+        int row = this.m_dataMgr.getPeptideIndex(pep);
+        this.m_paintArea.setSelectedPeptideIndex(row);
         repaint();
     }
 
@@ -141,8 +140,8 @@ public class PanelPeptidesPTMSiteGraphic extends JPanel implements DataBoxPanelI
      * @param i
      */
     public void setSelectedRow(int i) {
-        this._ctrlPeptideArea.setSelectedIndex(i);
-        this._paintArea.setSelectedPeptideIndex(i);
+        this.m_ctrlPeptideArea.setSelectedIndex(i);
+        this.m_paintArea.setSelectedPeptideIndex(i);
     }
 
     @Override

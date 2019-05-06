@@ -210,11 +210,11 @@ public class AggregationQuantChannelsPanel extends JPanel {
 
     class QCMappingToolbar extends JPanel {
 
-        JButton _removeBt;
-        JButton _upBt;
-        JButton _downBt;
-        JButton _insertUpBt;
-        JButton _insertDownBt;
+        JButton m_removeBt;
+        JButton m_upBt;
+        JButton m_downBt;
+        JButton m_insertUpBt;
+        JButton m_insertDownBt;
 
         public QCMappingToolbar() {
             super();
@@ -232,20 +232,20 @@ public class AggregationQuantChannelsPanel extends JPanel {
             c.weighty = 0;
             c.fill = GridBagConstraints.HORIZONTAL;
 
-            this.add(_removeBt, c);
+            this.add(m_removeBt, c);
             c.gridx++;
-            this.add(_upBt, c);
+            this.add(m_upBt, c);
             c.gridx++;
-            this.add(_downBt, c);
+            this.add(m_downBt, c);
             c.gridx++;
-            this.add(_insertUpBt, c);
+            this.add(m_insertUpBt, c);
             c.gridx++;
-            this.add(_insertDownBt, c);           
+            this.add(m_insertDownBt, c);           
         }
 
-        void createRemoveButton() {
-            _removeBt = new JButton("remove");
-            _removeBt.addActionListener(new ActionListener() {
+        private void createRemoveButton() {
+            m_removeBt = new JButton("Remove this analysis");
+            m_removeBt.addActionListener(new ActionListener() {
 
                 @Override
                 public void actionPerformed(ActionEvent e) {
@@ -254,23 +254,25 @@ public class AggregationQuantChannelsPanel extends JPanel {
             });
         }
 
-        void createUpButton() {
-            _upBt = new JButton("up");
-            _upBt.setToolTipText("up");
-            _upBt.addActionListener(new ActionListener() {
+        private void createUpButton() {
+            m_upBt = new JButton();
+            m_upBt.setIcon(IconManager.getIcon(IconManager.IconType.ARROW_MOVE_UP));
+            m_upBt.setToolTipText("Shift this analysis up");
+            m_upBt.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     m_treeTable.moveUp();
                 }
             });
-            _upBt.addKeyListener(new AltKeyAdapter());
+            m_upBt.addKeyListener(new AltKeyAdapter());
 
         }
 
-        void createDownButton() {
-            _downBt = new JButton("down");
-            _downBt.setToolTipText("down");
-            _downBt.addActionListener(new ActionListener() {
+        private void createDownButton() {
+            m_downBt = new JButton();
+            m_downBt.setIcon(IconManager.getIcon(IconManager.IconType.ARROW_MOVE_DOWN));
+            m_downBt.setToolTipText("Shift this analysis down");
+            m_downBt.addActionListener(new ActionListener() {
 
                 @Override
                 public void actionPerformed(ActionEvent e) {
@@ -278,14 +280,14 @@ public class AggregationQuantChannelsPanel extends JPanel {
                     m_treeTable.moveDown();
                 }
             });
-            _downBt.addKeyListener(new AltKeyAdapter());
+            m_downBt.addKeyListener(new AltKeyAdapter());
         }
 
         void createInsertUpButton() {
-            _insertUpBt = new JButton("Insert Up");
-            _insertUpBt.setIcon(IconManager.getIcon(IconManager.IconType.ARROW_MOVE_UP));
-            _insertUpBt.setToolTipText("Insert Up");
-            _insertUpBt.addActionListener(new ActionListener() {
+            m_insertUpBt = new JButton("Insert Up");
+            m_insertUpBt.setIcon(IconManager.getIcon(IconManager.IconType.ARROW_MOVE_UP));
+            m_insertUpBt.setToolTipText("Insert Up");
+            m_insertUpBt.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     m_treeTable.moveInsertUp();
@@ -294,10 +296,10 @@ public class AggregationQuantChannelsPanel extends JPanel {
         }
 
         void createInsertDownButton() {
-            _insertDownBt = new JButton("Insert down");
-            _insertDownBt.setIcon(IconManager.getIcon(IconManager.IconType.ARROW_MOVE_DOWN));
-            _insertDownBt.setToolTipText("Insert down");
-            _insertDownBt.addActionListener(new ActionListener() {
+            m_insertDownBt = new JButton("Insert down");
+            m_insertDownBt.setIcon(IconManager.getIcon(IconManager.IconType.ARROW_MOVE_DOWN));
+            m_insertDownBt.setToolTipText("Insert down");
+            m_insertDownBt.addActionListener(new ActionListener() {
 
                 @Override
                 public void actionPerformed(ActionEvent e) {

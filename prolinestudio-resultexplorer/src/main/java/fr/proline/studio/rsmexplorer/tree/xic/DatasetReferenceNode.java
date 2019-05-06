@@ -16,16 +16,16 @@ import org.openide.nodes.Sheet;
 public class DatasetReferenceNode extends AbstractNode {
 
     private boolean m_invalidReference = false; // define if the reference DS has been modified since XIC was run
-    private boolean m_isAggrgation;
+    private boolean m_isAggregation;
 
     public DatasetReferenceNode(AbstractData data) {
         super(NodeTypes.DATASET_REFERENCE, data);
-        this.m_isAggrgation = false;
+        this.m_isAggregation = false;
     }
 
   public DatasetReferenceNode(AbstractData data, boolean isAggragation) {
         super(NodeTypes.DATASET_REFERENCE, data);
-        this.m_isAggrgation = isAggragation;
+        this.m_isAggregation = isAggragation;
     }
     public void setInvalidReference(boolean isIncorrect) {
         m_invalidReference = isIncorrect;
@@ -37,7 +37,7 @@ public class DatasetReferenceNode extends AbstractNode {
 
     @Override
     public String toString() {
-        if (m_isAggrgation) {
+        if (m_isAggregation) {
             return super.toString();
         } else {
             return "Identification reference : " + super.toString();
@@ -49,7 +49,7 @@ public class DatasetReferenceNode extends AbstractNode {
         if (m_invalidReference) {
             return getIcon(IconManager.IconType.REFERENCE_RSM_ERR);
         } else {
-            if (m_isAggrgation)
+            if (m_isAggregation)
                 return getIcon(IconManager.IconType.REFERENCE_AGRRE);
             else
                 return getIcon(IconManager.IconType.REFERENCE_RSM);

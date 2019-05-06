@@ -5,6 +5,7 @@
  */
 package fr.proline.studio.rsmexplorer.gui.ptm.pep;
 
+import fr.proline.studio.dam.tasks.data.ptm.PTMPeptideInstance;
 import fr.proline.studio.dam.tasks.data.ptm.PTMSitePeptideInstance;
 import fr.proline.studio.rsmexplorer.gui.ptm.ViewContext;
 
@@ -17,47 +18,52 @@ import java.util.List;
  */
 public class PeptideAreaCtrl {
 
-    PeptideAreaModel _mgr;
-    PeptideSetView _view;
+    PeptideAreaModel m_mgr;
+    PeptideSetView m_pepSetView;
 
     public PeptideAreaCtrl() {
-        _mgr = new PeptideAreaModel();
-        _view = new PeptideSetView();
+        m_mgr = new PeptideAreaModel();
+        m_pepSetView = new PeptideSetView();
     }
 
     public void setData(List<PTMSitePeptideInstance> ptmSitePeptide) {
-        _mgr.setPTM(ptmSitePeptide);
-        _view.setViewPeptideList(_mgr.getViewPeptideList());
+        m_mgr.setPTM(ptmSitePeptide);
+        m_pepSetView.setPeptideViewList(m_mgr.getViewPeptideList());
     }
-
+    
+    public void setPTMPepInstanceData(List<PTMPeptideInstance> ptmSitePeptide) {
+        m_mgr.setPTMPeptides(ptmSitePeptide);
+        m_pepSetView.setPeptideViewList(m_mgr.getViewPeptideList());
+    }
+    
     public void setBeginPoint(int x, int y) {
-        this._view.setBeginPoint(x, y);
+        this.m_pepSetView.setBeginPoint(x, y);
     }
 
     public void paint(Graphics2D g2, ViewContext viewContext) {
-        this._view.paint(g2, viewContext);
+        this.m_pepSetView.paint(g2, viewContext);
     }
 
     public int getSelectedIndex(int x, int y) {
-        int index = this._view.getSelectedItemIndex(x, y);
-        this._mgr.setSelectedIndex(index);//change select
-        return this._view.getSelectedItemIndex(x, y);
+        int index = this.m_pepSetView.getSelectedItemIndex(x, y);
+        this.m_mgr.setSelectedIndex(index);//change select
+        return this.m_pepSetView.getSelectedItemIndex(x, y);
     }
 
     public void setSelectedIndex(int i) {
-        this._mgr.setSelectedIndex(i);
+        this.m_mgr.setSelectedIndex(i);
     }
 
     public int getSelectedIndex() {
-        return this._mgr.getSelectedIndex();
+        return this.m_mgr.getSelectedIndex();
     }
 
     public String getToolTipText(int x, int y) {
-        return this._view.getToolTipText(x, y);
+        return this.m_pepSetView.getToolTipText(x, y);
     }
 
     public void setRelativeSelected(int relative) {
-        this._mgr.setRelativeSelected(relative);
+        this.m_mgr.setRelativeSelected(relative);
     }
 
 }

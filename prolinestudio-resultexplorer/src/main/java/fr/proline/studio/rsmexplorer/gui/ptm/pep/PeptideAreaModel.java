@@ -1,5 +1,6 @@
 package fr.proline.studio.rsmexplorer.gui.ptm.pep;
 
+import fr.proline.studio.dam.tasks.data.ptm.PTMPeptideInstance;
 import fr.proline.studio.dam.tasks.data.ptm.PTMSitePeptideInstance;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,33 +16,47 @@ import java.util.List;
  */
 public class PeptideAreaModel {
 
-    ArrayList<PeptideView> _viewPeptideList;
-    int _selectedIndex;
+    ArrayList<PeptideView> m_viewPeptideList;
+    int m_selectedIndex;
 
     public PeptideAreaModel() {
-        _viewPeptideList = new ArrayList<PeptideView>();
-        _selectedIndex = 0;
+        m_viewPeptideList = new ArrayList<PeptideView>();
+        m_selectedIndex = 0;
 
     }
 
     public ArrayList<PeptideView> getViewPeptideList() {
-        return _viewPeptideList;
+        return m_viewPeptideList;
     }
 
     /**
-     * set all peptide of the given protein, which has this PTM Site create
-     * PeptideView object from PTMSitePeptideInstance
+     * set all peptide of a given protein as PTMSitePeptideInstance (références: peptide instance + PTMSite + leafs peptide instances...)
+     * Create assocated PeptideView object from PTMSitePeptideInstance
      *
      * @param pPeptide
      */
     public void setPTM(List<PTMSitePeptideInstance> pPeptide) {
-        _viewPeptideList = new ArrayList<>();
+        m_viewPeptideList = new ArrayList<>();
         for (PTMSitePeptideInstance pep : pPeptide) {
             PeptideView p = new PeptideView(pep);
-            _viewPeptideList.add(p);
+            m_viewPeptideList.add(p);
         }
     }
 
+     /**
+     * set all peptide of a given protein as PTMPeptideInstance (références: peptide instance + all PTMSite...)
+     * Create assocated PeptideView object from PTMSitePeptideInstance
+     *
+     * @param pPeptide
+     */
+    public void setPTMPeptides(List<PTMPeptideInstance> pPeptide) {
+        m_viewPeptideList = new ArrayList<>();
+        for (PTMPeptideInstance pep : pPeptide) {
+            PeptideView p = new PeptideView(pep);
+            m_viewPeptideList.add(p);
+        }
+    }
+    
     /**
      * prepare repaint
      *
@@ -51,10 +66,10 @@ public class PeptideAreaModel {
         if (index == -1) {
             return;
         }
-        this._selectedIndex = index;
+        this.m_selectedIndex = index;
         PeptideView pv;
-        for (int i = 0; i < _viewPeptideList.size(); i++) {
-            pv = _viewPeptideList.get(i);
+        for (int i = 0; i < m_viewPeptideList.size(); i++) {
+            pv = m_viewPeptideList.get(i);
             if (i != index) {
                 pv.setSelected(false);
             } else {
@@ -64,17 +79,17 @@ public class PeptideAreaModel {
     }
 
     protected void setRelativeSelected(int relative) {
-        int index = this._selectedIndex + relative;
+        int index = this.m_selectedIndex + relative;
         if ((index == -1) || (index == this.getViewPeptideList().size())) {
             return;
         } else {
-            this._selectedIndex = index;
+            this.m_selectedIndex = index;
             this.setSelectedIndex(index);
         }
     }
 
     protected int getSelectedIndex() {
-        return this._selectedIndex;
+        return this.m_selectedIndex;
     }
 
 }

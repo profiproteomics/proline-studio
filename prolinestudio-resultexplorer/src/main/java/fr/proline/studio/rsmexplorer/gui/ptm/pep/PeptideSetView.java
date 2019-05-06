@@ -19,10 +19,10 @@ import java.util.ArrayList;
  */
 public class PeptideSetView extends ViewPtmAbstract {
 
-    ArrayList<PeptideView> _peptideList;
+    ArrayList<PeptideView> m_peptideList;
 
     public PeptideSetView() {
-        _peptideList = null;
+        m_peptideList = new ArrayList<>();
     }
 
     @Override
@@ -30,7 +30,7 @@ public class PeptideSetView extends ViewPtmAbstract {
         x0 = m_x;
         y0 = m_y;
 
-        for (PeptideView vp : _peptideList) {
+        for (PeptideView vp : m_peptideList) {
             paintGrillX(g, viewContext.getAreaWidth(), x0, y0);
             paintGrillX(g, viewContext.getAreaWidth(), x0, y0 + ViewSetting.HEIGHT_AA);
             vp.setBeginPoint(x0, y0);
@@ -55,17 +55,19 @@ public class PeptideSetView extends ViewPtmAbstract {
         m_y = y;
     }
 
-    protected void setViewPeptideList(ArrayList<PeptideView> peptideList) {
-        this._peptideList = peptideList;
+    protected void setPeptideViewList(ArrayList<PeptideView> peptideList) {
+        if(peptideList == null)
+            m_peptideList = new ArrayList<>();
+        else 
+            m_peptideList = peptideList;
     }
 
     protected int getSelectedItemIndex(int x, int y) {
         boolean selected = false;
         y0 = m_y;
         PeptideView vp;
-        if (_peptideList != null) {
-            for (int i = 0; i < _peptideList.size(); i++) {
-                vp = _peptideList.get(i);
+             for (int i = 0; i < m_peptideList.size(); i++) {
+                vp = m_peptideList.get(i);
                 int yRangA = y0;
                 int yRangZ = yRangA + ViewSetting.HEIGHT_AA;
                 if (y > yRangA && y < yRangZ) {
@@ -76,8 +78,7 @@ public class PeptideSetView extends ViewPtmAbstract {
                     }
                 }
                 y0 += (int) ViewSetting.HEIGHT_AA * 1.5;
-            }
-        }
+            }        
         return -1;
     }
 
@@ -85,7 +86,7 @@ public class PeptideSetView extends ViewPtmAbstract {
        int index  = getSelectedItemIndex(x,y);
         
        if (index != -1)
-           return _peptideList.get(index).getToolTipText(x);
+           return m_peptideList.get(index).getToolTipText(x);
        else return null;
     }
 

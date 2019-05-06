@@ -142,6 +142,7 @@ public class PeptidesPTMSiteTablePanel extends JPanel implements DataBoxPanelInt
         return selectedRow;
     }
 
+    @Override
     public void setSelectedPeptide(DPeptideInstance pep) {
         PeptidesOfPTMSiteTableModel model = ((PeptidesOfPTMSiteTableModel) ((CompoundTableModel) m_peptidesPtmSiteTable.getModel()).getBaseModel());
         int index = model.getSelectedIndex(pep); //this is the model original index
@@ -183,7 +184,7 @@ public class PeptidesPTMSiteTablePanel extends JPanel implements DataBoxPanelInt
 
         setLayout(new BorderLayout());
 
-        final JPanel proteinPTMSitePanel = createPeptidesPTMSitePanel();
+        final JPanel peptidePTMSitePanel = createPeptidesPTMSitePanel();
 
         final JLayeredPane layeredPane = new JLayeredPane();
 
@@ -193,7 +194,7 @@ public class PeptidesPTMSiteTablePanel extends JPanel implements DataBoxPanelInt
             public void componentResized(ComponentEvent e) {
                 final Component c = e.getComponent();
 
-                proteinPTMSitePanel.setBounds(0, 0, c.getWidth(), c.getHeight());
+                peptidePTMSitePanel.setBounds(0, 0, c.getWidth(), c.getHeight());
                 layeredPane.revalidate();
                 layeredPane.repaint();
 
@@ -213,7 +214,7 @@ public class PeptidesPTMSiteTablePanel extends JPanel implements DataBoxPanelInt
         });
         add(layeredPane, BorderLayout.CENTER);
 
-        layeredPane.add(proteinPTMSitePanel, JLayeredPane.DEFAULT_LAYER);
+        layeredPane.add(peptidePTMSitePanel, JLayeredPane.DEFAULT_LAYER);
         layeredPane.add(m_infoToggleButton.getInfoPanel(), JLayeredPane.PALETTE_LAYER);
         layeredPane.add(m_searchToggleButton.getSearchPanel(), new Integer(JLayeredPane.PALETTE_LAYER + 1));
 
@@ -418,7 +419,8 @@ public class PeptidesPTMSiteTablePanel extends JPanel implements DataBoxPanelInt
     }
 
     private class PeptidesPTMSiteTable extends DecoratedMarkerTable implements CrossSelectionInterface, InfoInterface, ProgressInterface {
-
+        private boolean selectionWillBeRestored = false;
+ 
         public PeptidesPTMSiteTable() {
             super();
         }
@@ -446,7 +448,7 @@ public class PeptidesPTMSiteTablePanel extends JPanel implements DataBoxPanelInt
                 m_dataBox.propagateDataChanged(DPeptideMatch.class);
                 m_dataBox.propagateDataChanged(MsQueryInfoRset.class);
             } else {
-                m_dataBox.propagateDataChanged(PTMSite.class);
+                m_dataBox.propagateDataChanged(PTMSite.class);//VDS Peptide ?
             }
         }
 
@@ -454,7 +456,7 @@ public class PeptidesPTMSiteTablePanel extends JPanel implements DataBoxPanelInt
             selectionWillBeRestored = b;
         }
 
-        private boolean selectionWillBeRestored = false;
+       
 
 //        @Override
 //        public void importSelection(HashSet selectedData) {

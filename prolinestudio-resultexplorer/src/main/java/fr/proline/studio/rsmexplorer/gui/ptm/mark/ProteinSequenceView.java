@@ -51,7 +51,7 @@ public class ProteinSequenceView extends ViewPtmAbstract {
         int aaHeight = ViewSetting.HEIGHT_AA;
         int adjuste = viewContext.getAjustedLocation();
 
-        if (viewContext.getAjustedLocation() > m_sequence.length()) {
+        if (adjuste > m_sequence.length()) {
             this.m_sequenceView = m_sequence;
         } else {
             this.m_sequenceView = m_sequence.substring(viewContext.getAjustedLocation());

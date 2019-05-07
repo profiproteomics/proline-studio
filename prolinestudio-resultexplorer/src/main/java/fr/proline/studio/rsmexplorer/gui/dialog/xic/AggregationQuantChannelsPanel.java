@@ -149,6 +149,9 @@ public class AggregationQuantChannelsPanel extends JPanel {
         //left
         m_treeTableModel = new QCMappingTreeTableModel(rootNode, datasets);
         m_treeTable = createTreeTable(m_treeTableModel);
+        m_treeTable.getColumnModel().getColumn(0).setPreferredWidth(160);//first column more large
+        m_treeTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);//in order to have the Horizontal scroll bar if need
+                
         m_tableScrollPane.setViewportView(m_treeTable);
         //right
         m_tabbedPane.removeAll();

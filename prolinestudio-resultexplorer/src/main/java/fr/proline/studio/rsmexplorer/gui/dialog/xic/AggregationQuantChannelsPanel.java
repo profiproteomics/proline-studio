@@ -58,9 +58,9 @@ public class AggregationQuantChannelsPanel extends JPanel {
         setLayout(new BorderLayout());
         String title = "<html><b>Step 2:</b> Define mapping between quantitation channels, verify if proposed quantification channel is OK.</html>";
         String dndImage = IconManager.getURLForIcon(IconManager.IconType.DRAG_AND_DROP);
-        
+
         String help = "For each aggregated quantitation, associate initials quantitation channels to final ones: <br>"
-                + "&nbsp -<b>Drag and drop</b><img src="+dndImage+"> quantitation channel(s) from experimental design on the right to the mapping table on the left.<br>"
+                + "&nbsp -<b>Drag and drop</b><img src=" + dndImage + "> quantitation channel(s) from experimental design on the right to the mapping table on the left.<br>"
                 + "&nbsp -It is also possible to <b>remove</b> an existing mapping (if no matching should be done), it will be replaced by  &lt ignore &gt .<br>"
                 + "&nbsp --To do this, remove or <b>insert shifting up or down</b> other quant channels.";
 
@@ -149,9 +149,6 @@ public class AggregationQuantChannelsPanel extends JPanel {
         //left
         m_treeTableModel = new QCMappingTreeTableModel(rootNode, datasets);
         m_treeTable = createTreeTable(m_treeTableModel);
-        m_treeTable.getColumnModel().getColumn(0).setPreferredWidth(160);//first column more large
-        m_treeTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);//in order to have the Horizontal scroll bar if need
-                
         m_tableScrollPane.setViewportView(m_treeTable);
         //right
         m_tabbedPane.removeAll();
@@ -190,7 +187,10 @@ public class AggregationQuantChannelsPanel extends JPanel {
         treeTable.setDropMode(DropMode.ON);
         treeTable.setRootVisible(true);
         treeTable.setShowGrid(true, true);
-
+        treeTable.getColumnModel().getColumn(0).setPreferredWidth(160);//first column more large   
+        if (treeTable.getColumnCount(false) > 3) {
+            treeTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);//in order to have the Horizontal scroll bar if need
+        }
         return treeTable;
 
     }
@@ -243,7 +243,7 @@ public class AggregationQuantChannelsPanel extends JPanel {
             c.gridx++;
             this.add(m_insertUpBt, c);
             c.gridx++;
-            this.add(m_insertDownBt, c);           
+            this.add(m_insertDownBt, c);
         }
 
         private void createRemoveButton() {

@@ -14,46 +14,48 @@ import javax.swing.tree.TreePath;
 
 /**
  * Base Class for actions on a Tree
+ *
  * @author JM235353
  */
 public abstract class AbstractRSMAction extends AbstractAction {
 
     private AbstractTree.TreeType m_treeType;
     private QuantExperimentalDesignTree m_tree;
-    
+
     public AbstractRSMAction(String name, AbstractTree.TreeType treeType) {
         super(name);
         m_treeType = treeType;
     }
-    
+
     public AbstractRSMAction(String name, AbstractTree.TreeType treeType, QuantExperimentalDesignTree tree){
         super(name);
         m_treeType = treeType;
         m_tree = tree;
     }
-    
+
     /**
      * Return the AbstractTree.TreeType from which the action has been called.
-     * @return 
+     *
+     * @return
      */
-    protected AbstractTree.TreeType getSourceTreeType(){
+    protected AbstractTree.TreeType getSourceTreeType() {
         return m_treeType;
     }
-    
+
     public boolean isIdentificationTree() {
         return m_treeType == AbstractTree.TreeType.TREE_IDENTIFICATION;
     }
-    
+
     @Override
     public void actionPerformed(ActionEvent e) {
 
         AbstractTree tree = null;
         switch (m_treeType) {
             case TREE_IDENTIFICATION:
-                tree = IdentificationTree.getCurrentTree(); 
+                tree = IdentificationTree.getCurrentTree();
                 break;
             case TREE_QUANTITATION:
-                tree = QuantitationTree.getCurrentTree(); 
+                tree = QuantitationTree.getCurrentTree();
                 break;
             case TREE_XIC_DESIGN:
                 tree = m_tree;
@@ -61,11 +63,11 @@ public abstract class AbstractRSMAction extends AbstractAction {
             default:
                 return; // should not happen
         }
-    
-        if(tree==null){
+
+        if (tree == null) {
             return;
         }
-        
+
         TreePath treePath = tree.getSelectionPath();
 
         Rectangle r = tree.getPathBounds(treePath);
@@ -76,15 +78,15 @@ public abstract class AbstractRSMAction extends AbstractAction {
         actionPerformed(tree.getSelectedNodes(), x, y);
 
     }
-    
+
     public void actionPerformed(AbstractNode[] selectedNodes, int x, int y) { 
     }
-    
+
     public JMenuItem getPopupPresenter() {
         return new JMenuItem(this);
     }
-    
+
     public abstract void updateEnabled(AbstractNode[] selectedNodes);
 
     
-}
+    }

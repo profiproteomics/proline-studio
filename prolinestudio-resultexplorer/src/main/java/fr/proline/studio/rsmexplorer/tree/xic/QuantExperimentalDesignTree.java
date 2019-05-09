@@ -377,7 +377,7 @@ public class QuantExperimentalDesignTree extends AbstractTree {
         return null;
     }
 
-     /* 
+    /* 
      * Extract from ExperimentalDesignTree the Ids of all the RSMs that will be quantified.
      * @param node : root node containing XIC Experimental Design nodes 
      */
@@ -406,7 +406,7 @@ public class QuantExperimentalDesignTree extends AbstractTree {
         }
         return rsmIds;
     }
-    
+
     /**
      * Convert Tree hierarchy from specified node, which should contain Xic
      * specific nodes : groups, samples ....) to a Map containing corresponding
@@ -418,7 +418,7 @@ public class QuantExperimentalDesignTree extends AbstractTree {
      * @param refRsmId : Result Summary Id to use as Reference identification
      * result summary for MasterQuantChannel. If null and reference dataset
      * specified, use result summatu Id of dataset
-     * 
+     *
      * @throws IllegalAccessException
      */
     public static Map<String, Object> toExperimentalDesignParameters(AbstractNode node, DDataset refDataset, Long refRsmId) throws IllegalAccessException {

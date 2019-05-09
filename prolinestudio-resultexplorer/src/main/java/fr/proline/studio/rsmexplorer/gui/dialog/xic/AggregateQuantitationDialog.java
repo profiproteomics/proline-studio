@@ -25,7 +25,6 @@ import java.awt.Dialog;
 import java.awt.Window;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -128,7 +127,7 @@ public class AggregateQuantitationDialog extends DefaultDialog {
     }
 
     public void displayExperimentalDesignTree() {
-        AbstractNode rootNode = inferExperimentalDesign2();
+        AbstractNode rootNode = inferExperimentalDesign();
         displayExperimentalDesignTree(rootNode);
     }
 
@@ -232,71 +231,6 @@ public class AggregateQuantitationDialog extends DefaultDialog {
         List<String> sortedGroupList = new ArrayList();
         List<BiologicalGroup> groupList;
         XICBiologicalGroupNode biologicalGroupNode;
-        // create Map<GroupName, List<BiologicalGroup>> by "collect" (ds = dataSet) (bg = BiologicalGroup)
-        Map<String, List<BiologicalGroup>> groups = m_quantitations.stream().map(ds -> ds.getGroupSetup().getBiologicalGroups()).flatMap(Collection::stream).collect(Collectors.groupingBy(bg -> bg.getName(), Collectors.toList()));
-        for (DDataset Quant : m_quantitations) {
-            //create group List according first quanti group compositon
-            groupList = Quant.getGroupSetup().getBiologicalGroups();
-            List<String> sortedSampleList = new ArrayList();
-            for (BiologicalGroup group : groupList) {
-                String groupName = group.getName();
-                if (!sortedGroupList.contains(groupName)) {
-                    sortedGroupList.add(groupName);
-                    biologicalGroupNode = new XICBiologicalGroupNode(DataSetData.createTemporaryAggregate(groupName));
-                    rootNode.insert(biologicalGroupNode, childIndex++);
-                    //Map<BiologicalSameple name, List<BiologicalSample>> (bg=BiologicalGroup, s = BiologicalSample)
-                    Map<String, List<BiologicalSample>> samples = groups.get(groupName).stream().map(bg -> bg.getBiologicalSamples()).flatMap(Collection::stream).collect(Collectors.groupingBy(s -> s.getName(), Collectors.toList()));
-
-                    int sampleIndex = 0;
-                    for (String sampleCompletName : samples.keySet()) {
-                        String sampleName = shortenSampleName(groupName, sampleCompletName);
-                        XICBiologicalSampleNode biologicalSampleNode = new XICBiologicalSampleNode(DataSetData.createTemporaryAggregate(sampleName)); //new DataSetData(sampleName, Dataset.DatasetType.AGGREGATE, Aggregation.ChildNature.OTHER));
-                        //create XICBiologicalSampleNode under biologicalGroupNode
-                        biologicalGroupNode.insert(biologicalSampleNode, sampleIndex++);
-
-                        int maxReplicates = 0;
-                        for (BiologicalSample bs : samples.get(sampleCompletName)) {
-                            int replicates = bs.getQuantitationChannels().size();
-                            maxReplicates = Math.max(replicates, maxReplicates);
-                        }
-
-                        for (int i = 0; i < maxReplicates; i++) {
-                            //for each channel, give it a name with a number order
-                            String name = "Channel " + Integer.toString(qcIndex++);
-                            //empty DataSetData, who has only name
-                            DataSetData dsData = DataSetData.createTemporaryIdentification(name);
-                            //create a ChannelNode, with empty DataSetData; 
-                            XICBiologicalSampleAnalysisNode sampleAnalysisNode = new XICBiologicalSampleAnalysisNode(dsData);
-                            sampleAnalysisNode.setQuantChannelName(name);
-                            // created XICBiologicalSampleAnalysisNode under biologicalSampleNode
-                            biologicalSampleNode.insert(sampleAnalysisNode, biologicalSampleNode.getChildCount());
-                        }
-                    }
-                }
-            }
-
-        }
-        return rootNode;
-    }
-    /**
-     * sorted group & sorted sample
-     * @return 
-     */
-    private DataSetNode inferExperimentalDesign2() {
-        int childIndex = 0;
-        DataSetNode rootNode = new DataSetNode(DataSetData.createTemporaryQuantitation("XIC Aggregation")); //new DataSetData("XIC Aggregation", Dataset.DatasetType.QUANTITATION, Aggregation.ChildNature.QUANTITATION_FRACTION));
-        DatasetReferenceNode refDatasetNode = new DatasetReferenceNode(DataSetData.createTemporaryAggregate(m_refDataset == null ? "auto" : m_refDataset.getName()));//new DataSetData(m_refDataset == null ? "auto" : m_refDataset.getName(), Dataset.DatasetType.AGGREGATE, Aggregation.ChildNature.OTHER));
-        if (m_refDataset != null) {
-            Long refResultSummaryId = m_quantitations.get(0).getMasterQuantitationChannels().get(0).getIdentResultSummaryId();
-            if (refResultSummaryId == null || !refResultSummaryId.equals(m_refDataset.getResultSummaryId())) {
-                refDatasetNode.setInvalidReference(true);
-            }
-        }
-        rootNode.insert(refDatasetNode, childIndex++);
-        int qcIndex = 1;
-        List<String> sortedGroupList = new ArrayList();
-        List<BiologicalGroup> groupList;
-        XICBiologicalGroupNode biologicalGroupNode;
         Map<String, List<String>> groupSamplesMap = new HashMap();
         List<String> sampleNameList;
         // create Map<GroupName, List<BiologicalGroup>> by "collect" (ds = dataSet) (bg = BiologicalGroup)
@@ -351,7 +285,7 @@ public class AggregateQuantitationDialog extends DefaultDialog {
                 }
             }
         }
-
+        //rename all channel
         int cIndex = 1;
         for (int i = 0; i < rootNode.getChildCount(); i++) {
             AbstractNode groupNode = (AbstractNode) rootNode.getChildAt(i);//groupe node

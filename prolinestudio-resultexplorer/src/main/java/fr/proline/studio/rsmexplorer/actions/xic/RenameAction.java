@@ -19,8 +19,8 @@ import org.openide.windows.WindowManager;
  * Rename a Node in a Xic QuantExperimentalDesignTree
  * @author JM235353
  */
-public class RenameAction extends AbstractRSMAction { 
-    
+public class RenameAction extends AbstractRSMAction {
+
     private final QuantExperimentalDesignTree m_tree;
 
     public RenameAction(QuantExperimentalDesignTree tree) {
@@ -34,10 +34,9 @@ public class RenameAction extends AbstractRSMAction {
         // only one node selected for this action
         final AbstractNode n = selectedNodes[0];
 
-        
         AbstractNode.NodeTypes nodeType = n.getType();
-        
-        switch(nodeType){
+
+        switch (nodeType) {
             case BIOLOGICAL_GROUP:
             case BIOLOGICAL_SAMPLE:
             case DATA_SET:
@@ -55,27 +54,27 @@ public class RenameAction extends AbstractRSMAction {
                     ((DefaultTreeModel) m_tree.getModel()).nodeChanged(n);
                 }
                 break;
-            case BIOLOGICAL_SAMPLE_ANALYSIS :
+            case BIOLOGICAL_SAMPLE_ANALYSIS:
                 XICBiologicalSampleAnalysisNode bioSplAnaysisNode = ((XICBiologicalSampleAnalysisNode) n);
                 String qChName = bioSplAnaysisNode.getQuantChannelName();
                 String qChNewName = showRenameDialog(qChName, x, y);
-                
+
                 if (qChNewName == null) {
                     return;
                 }
-                
+
                 if (qChName.compareTo(qChNewName) != 0) {
                     bioSplAnaysisNode.setQuantChannelName(qChNewName);
                     ((DefaultTreeModel) m_tree.getModel()).nodeChanged(n);
                 }
-            default:              
-                 break;
+            default:
+                break;
         }
 
     }
-        
+
     private String showRenameDialog(String name, int x, int y) {
-        
+
         OptionDialog dialog = new OptionDialog(WindowManager.getDefault().getMainWindow(), "Rename", null, "New Name", OptionDialog.OptionDialogType.TEXTFIELD);
         dialog.setText(name);
         dialog.setLocation(x, y);
@@ -84,14 +83,14 @@ public class RenameAction extends AbstractRSMAction {
         if (dialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {
             newName = dialog.getText();
         }
-        
+
         if ((newName != null) && (newName.length() > 0)) {
             return newName;
         }
-        
+
         return null;
     }
-    
+
     @Override
     public void updateEnabled(AbstractNode[] selectedNodes) {
 
@@ -101,7 +100,7 @@ public class RenameAction extends AbstractRSMAction {
             setEnabled(false);
             return;
         }
-        
+
         int nbSelectedNodes = selectedNodes.length;
 
         // we rename multiple nodes
@@ -115,7 +114,7 @@ public class RenameAction extends AbstractRSMAction {
         if ((nodeType != AbstractNode.NodeTypes.BIOLOGICAL_GROUP)
                 && (nodeType != AbstractNode.NodeTypes.BIOLOGICAL_SAMPLE)
                 && (nodeType != AbstractNode.NodeTypes.DATA_SET)
-                && (nodeType != AbstractNode.NodeTypes.BIOLOGICAL_SAMPLE_ANALYSIS) ) {
+                && (nodeType != AbstractNode.NodeTypes.BIOLOGICAL_SAMPLE_ANALYSIS)) {
             setEnabled(false);
             return;
         }
@@ -123,8 +122,5 @@ public class RenameAction extends AbstractRSMAction {
         setEnabled(true);
 
     }
-    
-    
-
 
 }

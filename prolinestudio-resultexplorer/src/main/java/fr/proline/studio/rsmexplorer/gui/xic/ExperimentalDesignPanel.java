@@ -167,11 +167,6 @@ public class ExperimentalDesignPanel extends HourglassPanel implements DataBoxPa
     private void updateData() {
         QuantExperimentalDesignTree.displayExperimentalDesign(m_dataset, (AbstractNode) m_expDesignTree.getModel().getRoot(), m_expDesignTree, true, true);
 
-        // expand all
-        for (int i = 0; i < m_expDesignTree.getRowCount(); i++) {
-            m_expDesignTree.expandRow(i);
-        }
-
         try {
             if (m_dataset.isQuantitation() && m_dataset.isAggregation()) {
                 //if isQuantitation isAggregation, we don't show parameter tab                

@@ -76,6 +76,8 @@ public class DisplayMapAlignmentAction extends AbstractRSMAction {
         if (node.getType() == AbstractNode.NodeTypes.DATA_SET) {
             if (((DataSetNode) node).getDataset().isAggregation()) {
                 setEnabled(false);
+            }else{
+                setEnabled(true);
             }
             return;
         }

@@ -1,8 +1,20 @@
 package fr.proline.studio.rsmexplorer.gui.spectrum;
 
-import java.text.DecimalFormat;
+import fr.proline.core.orm.msi.dto.DPeptideMatch;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.annotations.XYLineAnnotation;
+import org.jfree.chart.annotations.XYTextAnnotation;
+import org.jfree.chart.plot.Marker;
+import org.jfree.chart.plot.ValueMarker;
+import org.jfree.chart.plot.XYPlot;
+import org.jfree.ui.RectangleAnchor;
+import org.jfree.ui.TextAnchor;
+import org.slf4j.LoggerFactory;
+
+import java.awt.*;
 import java.text.NumberFormat;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  *
@@ -11,11 +23,8 @@ import java.util.HashMap;
 public class SpectrumFragmentationUtil {
     
     private static HashMap<Character, Double> m_aaMassHashMap = null;
-    private static HashMap<Double, Character> m_aaNameHashMap = null;
-    private static NumberFormat m_aaDeltaMassFormatter = null;
-    
-    public static double getMassFromAminoAcid(char aa) {
 
+    public static double getMassFromAminoAcid(char aa) {
         if (m_aaMassHashMap == null) {
             m_aaMassHashMap = new HashMap<>();
             m_aaMassHashMap.put('A', (double) 71.03711);
@@ -40,11 +49,8 @@ public class SpectrumFragmentationUtil {
             m_aaMassHashMap.put('Y', (double) 163.06333);
             m_aaMassHashMap.put('?', (double) 100);
         }
-
-
         return m_aaMassHashMap.get(aa);
-
     }
-    
-    
+
+
 }

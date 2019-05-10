@@ -11,7 +11,6 @@ import fr.proline.studio.extendedtablemodel.ExtraDataType;
 import fr.proline.studio.export.ExportModelInterface;
 import fr.proline.studio.export.ExportModelUtilities;
 import fr.proline.studio.export.ExportFontData;
-import fr.proline.studio.export.ExportTextInterface;
 import fr.proline.studio.graphics.PlotInformation;
 
 import fr.proline.studio.rsmexplorer.gui.spectrum.PeptideFragmentationData.FragmentMatch;
@@ -122,7 +121,7 @@ public class RsetPeptideFragmentationTable extends DecoratedTable {
 
     public static class FragmentationTableModel extends DecoratedTableModel implements ExtendedTableModelInterface, ExportModelInterface {
 
-        private TheoreticalFragmentSeries[] m_fragSer;
+        private List<TheoreticalFragmentSeries> m_fragSer;
         private String m_peptideSequence;
         private int m_sizeMaxSeries;
         private String[][] m_matrix;
@@ -148,18 +147,18 @@ public class RsetPeptideFragmentationTable extends DecoratedTable {
             m_columnNames = null;
         }
 
-        public void setData(PeptideFragmentationData petpideFragmentationData, String peptideSequence) {
+        public void setData(PeptideFragmentationData peptideFragmentationData, String peptideSequence) {
 
             initData();
 
-            m_fragSer = petpideFragmentationData.getFragmentSeries();
-            FragmentMatch[] fragMa = petpideFragmentationData.getFragmentMatch();
+            m_fragSer = peptideFragmentationData.getTheoreticalFragmentSeries();
+            FragmentMatch[] fragmentMatches = peptideFragmentationData.getFragmentMatches();
             m_peptideSequence = peptideSequence;
 
             int sizeMaxSeries = 0;
-            for (int i = 0; i < m_fragSer.length; i++) {
-                if (m_fragSer[i].masses.length > sizeMaxSeries) {
-                    sizeMaxSeries = m_fragSer[i].masses.length;
+            for (int i = 0; i < m_fragSer.size(); i++) {
+                if (m_fragSer.get(i).masses.length > sizeMaxSeries) {
+                    sizeMaxSeries = m_fragSer.get(i).masses.length;
                 }
 
             }
@@ -167,43 +166,10 @@ public class RsetPeptideFragmentationTable extends DecoratedTable {
             m_sizeMaxSeries = sizeMaxSeries;
 
             // get series names
-            String xyzSerieName = "";
-            String abcSerieName = "";
-            for (int i = 0; i < m_fragSer.length; i++) {
-                switch (m_fragSer[i].frag_series.charAt(0)) {
-                    case 'a': // either a,b or c do:
-                    case 'b':
-                    case 'c':
-                        if (m_fragSer[i].frag_series.length() > 1) {
-                            // then it is either a ++ or a b-H2O and so on...
-                        } else // it's a 'a/b/c' ion
-                        {
-                            if (!abcSerieName.equals("b")) {// only if b not already defined, else we keep b
-                                abcSerieName = "" + m_fragSer[i].frag_series.charAt(0);
-                            }
-                        }
-                        break;
-                    case 'v':
-                    case 'w':
-                    case 'x':
-                    case 'y':
-                    case 'z':
-                        if (m_fragSer[i].frag_series.length() > 1) {
-                            // then it is either a ++ or a b-H2O and so on...
-                        } else // it's a 'v/w/x/y/z' ion
-                        {
-                            if (!xyzSerieName.equals("y")) {// only if b not already defined, else we keep b
-                                xyzSerieName = "" + m_fragSer[i].frag_series.charAt(0);
+            String xyzSerieName = peptideFragmentationData.getXYZReferenceSeriesName();
+            String abcSerieName = peptideFragmentationData.getABCReferenceSeriesName();
 
-                            }
-                        }
-                        break;
-                    default:
-                        break;
-                }
-            }
-
-            m_columnNames = new String[m_fragSer.length + 3 + m_fragSer.length];
+            m_columnNames = new String[m_fragSer.size() + 3 + m_fragSer.size()];
             int i = 0;
             m_columnNames[i++] = "amino acid";
             m_columnNames[i++] = abcSerieName + " ion";
@@ -223,22 +189,24 @@ public class RsetPeptideFragmentationTable extends DecoratedTable {
             m_matrix = new String[sizeMaxSeries][m_columnNames.length];
             m_matrixIntensity = new double[sizeMaxSeries][m_columnNames.length];
 
-            for (int j = 0; j < m_fragSer.length; j++) { // loop through theoFragment series here
-                for (int k = 0; k < m_fragSer[j].masses.length; k++) { // loop through masses for each fragment series
-                    for (i = 0; i < fragMa.length; i++) { // find matching fragMatches with theoFragSeries
-                        if ((fragMa[i].getCharge() == m_fragSer[j].getCharge()) && fragMa[i].getSeriesName().equals(m_fragSer[j].frag_series)) {
+            for (int j = 0; j < m_fragSer.size(); j++) { // loop through theoFragment series here
+                for (int k = 0; k < m_fragSer.get(j).masses.length; k++) { // loop through masses for each fragment series
+                    for (i = 0; i < fragmentMatches.length; i++) { // find matching fragMatches with theoFragSeries
+                        if ((fragmentMatches[i].getCharge() == m_fragSer.get(j).getCharge())
+                                && fragmentMatches[i].getSeriesName().equals(m_fragSer.get(j).frag_series)
+                                && Math.abs(fragmentMatches[i].calculated_moz - m_fragSer.get(j).masses[k]) < 0.01) {
 
-                            if ((m_fragSer[j].frag_series.toUpperCase().contains("A")
-                                    || m_fragSer[j].frag_series.toUpperCase().contains("B")
-                                    || m_fragSer[j].frag_series.toUpperCase().contains("C")) && (fragMa[i].getPosition() == k + 1)) {
+                            if ((m_fragSer.get(j).frag_series.toUpperCase().contains("A")
+                                    || m_fragSer.get(j).frag_series.toUpperCase().contains("B")
+                                    || m_fragSer.get(j).frag_series.toUpperCase().contains("C")) && (fragmentMatches[i].getPosition() == k + 1)) {
                                 m_matrix[k][j + 2] = "ABC";
-                                m_matrixIntensity[k][j + 2] = fragMa[i].intensity; // assign matching peak intensity
+                                m_matrixIntensity[k][j + 2] = fragmentMatches[i].intensity; // assign matching peak intensity
                                 m_matrix[k][j + 2] += "intensity";
-                            } else if ((m_fragSer[j].frag_series.toUpperCase().contains("X")
-                                    || m_fragSer[j].frag_series.toUpperCase().contains("Y")
-                                    || m_fragSer[j].frag_series.toUpperCase().contains("Z")) && ((sizeMaxSeries - fragMa[i].getPosition()) == k)) {
+                            } else if ((m_fragSer.get(j).frag_series.toUpperCase().contains("X")
+                                    || m_fragSer.get(j).frag_series.toUpperCase().contains("Y")
+                                    || m_fragSer.get(j).frag_series.toUpperCase().contains("Z")) && ((sizeMaxSeries - fragmentMatches[i].getPosition()) == k)) {
                                 m_matrix[k][j + 2] = "XYZ";
-                                m_matrixIntensity[k][j + 2] = fragMa[i].intensity; // assign matching peak intensity
+                                m_matrixIntensity[k][j + 2] = fragmentMatches[i].intensity; // assign matching peak intensity
                                 m_matrix[k][j + 2] += "intensity";
                             } else {
                                 // immonium or anything else than abc,v,w,xyz
@@ -292,7 +260,7 @@ public class RsetPeptideFragmentationTable extends DecoratedTable {
             if (columnIndex == 1) {
                 return Integer.class;
             }
-            if (columnIndex == m_fragSer.length + 2) {
+            if (columnIndex == m_fragSer.size() + 2) {
                 return Integer.class;
             }
 
@@ -316,25 +284,25 @@ public class RsetPeptideFragmentationTable extends DecoratedTable {
                 return rowIndex + 1;
             }
 
-            if (columnIndex == m_fragSer.length + 3 /*
+            if (columnIndex == m_fragSer.size() + 3 /*
                      * m_columnNames.length
                      */ - 1) {
                 return m_sizeMaxSeries - rowIndex;
             }
 
-            if (columnIndex < m_fragSer.length + 3) { // return mass value
-                TheoreticalFragmentSeries currentFragSer = m_fragSer[columnIndex - 2];
+            if (columnIndex < m_fragSer.size() + 3) { // return mass value
+                TheoreticalFragmentSeries currentFragSer = m_fragSer.get(columnIndex - 2);
 
                 if (currentFragSer.masses[rowIndex] != 0) {
                     return (double) Math.round(currentFragSer.masses[rowIndex] * 10000) / 10000;
                 } else {
                     return null;
                 }
-            } else if (columnIndex > m_fragSer.length + 2 && columnIndex < m_columnNames.length)// return intensity value
+            } else if (columnIndex > m_fragSer.size() + 2 && columnIndex < m_columnNames.length)// return intensity value
             {
 
-                if (m_matrixIntensity[rowIndex][columnIndex - m_fragSer.length - 1] > 0) {
-                    return new BigDecimal(m_matrixIntensity[rowIndex][columnIndex - m_fragSer.length - 1], new MathContext(3));
+                if (m_matrixIntensity[rowIndex][columnIndex - m_fragSer.size() - 1] > 0) {
+                    return new BigDecimal(m_matrixIntensity[rowIndex][columnIndex - m_fragSer.size() - 1], new MathContext(3));
                 } else {
                     return null;
                 }

@@ -205,42 +205,11 @@ public class RsetPeptideSpectrumValuesPanel extends HourglassPanel implements Da
             return;
         }
 
-        byte[] intensityByteArray = spectrum.getIntensityList();
-        byte[] massByteArray = spectrum.getMozList();
-
-        if ((intensityByteArray == null) || (massByteArray == null)) {
-            // should not happen
-            return;
+        double[][] data = spectrum.getMassIntensityValues();
+        if (data != null) {
+            m_spectrumTitle = spectrum.getTitle();
+            ((SpectrumValuesTableModel) ((CompoundTableModel) m_spectrumValuesTable.getModel()).getBaseModel()).setData(data[DSpectrum.MASSES_INDEX], data[DSpectrum.INTENSITIES_INDEX]);
         }
-
-        ByteBuffer intensityByteBuffer = ByteBuffer.wrap(intensityByteArray).order(ByteOrder.LITTLE_ENDIAN);
-        FloatBuffer intensityFloatBuffer = intensityByteBuffer.asFloatBuffer();
-        double[] intensityDoubleArray = new double[intensityFloatBuffer.remaining()];
-        for (int i = 0; i < intensityDoubleArray.length; i++) {
-            intensityDoubleArray[i] = (double) intensityFloatBuffer.get();
-        }
-
-        ByteBuffer massByteBuffer = ByteBuffer.wrap(massByteArray).order(ByteOrder.LITTLE_ENDIAN);
-        DoubleBuffer massDoubleBuffer = massByteBuffer.asDoubleBuffer();
-        double[] massDoubleArray = new double[massDoubleBuffer.remaining()];
-        for (int i = 0; i < massDoubleArray.length; i++) {
-            massDoubleArray[i] = massDoubleBuffer.get();
-        }
-
-        int size = intensityDoubleArray.length;
-        if (size != massDoubleArray.length) {
-            LoggerFactory.getLogger("ProlineStudio.ResultExplorer").debug("Intensity and Mass List have different size");
-            return;
-        }
-
-        // Set title
-        String title = "Query " + msQuery.getInitialId() + " - " + p.getSequence();
-
-        // set the spectrum title
-        m_spectrumTitle = spectrum.getTitle();
-
-        ((SpectrumValuesTableModel)((CompoundTableModel) m_spectrumValuesTable.getModel()).getBaseModel()).setData(massDoubleArray,intensityDoubleArray);
-        
     }
 
     @Override

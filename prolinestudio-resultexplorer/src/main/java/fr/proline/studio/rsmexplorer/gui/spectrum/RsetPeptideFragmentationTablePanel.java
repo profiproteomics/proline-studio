@@ -2,7 +2,6 @@ package fr.proline.studio.rsmexplorer.gui.spectrum;
 
 
 
-import fr.proline.core.orm.msi.ObjectTree;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.studio.export.ExportButton;
 
@@ -13,9 +12,7 @@ import fr.proline.studio.pattern.DataBoxPanelInterface;
 
 import java.awt.*;
 import java.awt.event.ActionListener;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JToolBar;
+import javax.swing.*;
 
 /**
  * Panel used to display a Spectrum of a PeptideMatch
@@ -30,15 +27,20 @@ public class RsetPeptideFragmentationTablePanel extends HourglassPanel implement
 
     private RsetPeptideFragmentationTable m_fragmentationTable = null;
     private HideFragmentsTableIntensityButton m_hideFragIntensityButton = null;
+    private JTextArea m_descriptionTA;
     
     public RsetPeptideFragmentationTablePanel() {
         setLayout(new BorderLayout());
         
         m_fragmentationTable = new RsetPeptideFragmentationTable();
+        m_descriptionTA = new JTextArea();
+        m_descriptionTA.setEditable(false);
+        m_descriptionTA.setOpaque(false);
         
         JToolBar toolbar = createToolbar();
         JPanel internalPanel = createInternalPanel();
-        
+
+        add(m_descriptionTA, BorderLayout.NORTH);
         add(internalPanel, BorderLayout.CENTER);
         add(toolbar, BorderLayout.WEST);
     }
@@ -80,25 +82,6 @@ public class RsetPeptideFragmentationTablePanel extends HourglassPanel implement
 
     
     public void setData(DPeptideMatch peptideMatch, PeptideFragmentationData peptideFragmentationData) {
-    	// we need to update the fragmentation data, in case the fragmentationData was not null and is now null
-        /*if(peptideFragmentationData == null) {
-        	return;
-        }
-    	if(peptideFragmentationData.isEmpty) {
-        	return;
-        }
-        if (!m_isDisplayed) {
-            // postpone update
-            m_peptideMatchPostponed = peptideMatch;
-            m_peptideFragmentationDataPostponed = peptideFragmentationData;
-            return;
-        }*/
-        m_peptideMatchPostponed = null;
-        m_peptideFragmentationDataPostponed = null;
-        updateDisplay(peptideMatch, peptideFragmentationData);
-
-    }
-    private void updateDisplay(DPeptideMatch peptideMatch, PeptideFragmentationData peptideFragmentationData) {
         m_fragmentationTable.setData(peptideMatch, peptideFragmentationData);
         
         // update hideFragIntensityButton button
@@ -107,10 +90,12 @@ public class RsetPeptideFragmentationTablePanel extends HourglassPanel implement
         if (isEnable ^ enable) {
             m_hideFragIntensityButton.setEnabled(enable);
         }
+        if ((peptideFragmentationData != null) && peptideFragmentationData.getNeutralLossStatus() != null)
+          m_descriptionTA.setText("Sum of Neutral Losses : "+peptideFragmentationData.getNeutralLossStatus());
+        else 
+          m_descriptionTA.setText("");
     }
-    private DPeptideMatch m_peptideMatchPostponed = null;
-    private PeptideFragmentationData m_peptideFragmentationDataPostponed = null;
-
+    
     @Override
     public void setDataBox(AbstractDataBox dataBox) {
         m_dataBox = dataBox;
@@ -144,15 +129,7 @@ public class RsetPeptideFragmentationTablePanel extends HourglassPanel implement
     public void setShowed(boolean showed) {
         if (showed == m_isDisplayed) {
             return;
-        }/*
-        if (!m_isDisplayed) {
-            // update display
-            //if (m_peptideMatchPostponed != null) {
-                updateDisplay(m_peptideMatchPostponed, m_peptideFragmentationDataPostponed);
-                m_peptideMatchPostponed = null;
-                m_peptideFragmentationDataPostponed = null;
-            //}
-        }*/
+        }
         m_isDisplayed = showed;
     }
 

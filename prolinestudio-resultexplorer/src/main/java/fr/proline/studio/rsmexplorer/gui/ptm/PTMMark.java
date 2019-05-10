@@ -45,6 +45,12 @@ public class PTMMark {
     public boolean isPTMNorCterm(){
         return m_ptmIsNorCTerm;
     }
+
+    public String getPtmShortName() {
+        DInfoPTM ptm = DInfoPTM.getInfoPTMMap().get(m_peptidePtm.getIdPtmSpecificity());
+        return ptm.getPtmShortName();
+    }
+
     /**
      * 
      * @return the first letter of the modification name

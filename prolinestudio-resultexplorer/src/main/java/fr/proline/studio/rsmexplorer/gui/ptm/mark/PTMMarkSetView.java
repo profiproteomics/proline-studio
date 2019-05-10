@@ -41,11 +41,12 @@ public class PTMMarkSetView extends ViewPtmAbstract {
     }
 
     protected String getToolTipText(int x, int y, int ajustedLocation) {
-        if (y >= this.m_y && y <= this.m_y + ViewSetting.HEIGHT_AA * 2 && m_ptmMarkList != null) {
+        if (y >= this.m_y && y <= (this.m_y + ViewSetting.HEIGHT_AA * 3) && m_ptmMarkList != null) {
             int index = (x - this.m_x) / ViewSetting.WIDTH_AA + ajustedLocation;
             for (PTMMarkView pm : m_ptmMarkList) {
-                if (pm.getDisplayedLocationProtein() == index) {
-                    return "Location in Protein: " + index;
+                if (pm.getLocationProtein()== index) {
+                    
+                    return pm.getPTMShortName()+"(Protein Loc. " + pm.getDisplayedLocationProtein()+")";
                 } 
             }
         }

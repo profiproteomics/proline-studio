@@ -88,7 +88,7 @@ public class DataMgrPtm {
             PTMSitePeptideInstance ptmPepInstance = m_currentPtmSite.getPTMSitePeptideInstance(peptideId);
             m_peptidesInstances.add(ptmPepInstance);
             //retrive all ptm in string format
-            if (m_currentPtmSite.isProteinNTerm()) {//@todo verify N-term
+            if (m_currentPtmSite.isProteinNTermWithOutM()) {//@todo verify N-term
                 m_beginBestFit = 0;
             } else if (m_beginBestFit > ptmPepInstance.getPTMPeptideInstance().getStartPosition()) {
                 m_beginBestFit = ptmPepInstance.getPTMPeptideInstance().getStartPosition();
@@ -97,7 +97,7 @@ public class DataMgrPtm {
 
             for (DPeptidePTM ptm : parentPeptideInstance.getPeptide().getTransientData().getDPeptidePtmMap().values()) {
                 int protLocation;
-                if (m_currentPtmSite.isProteinNTerm()) {
+                if (m_currentPtmSite.isProteinNTermWithOutM()) {
                     protLocation = (int) ptm.getSeqPosition();
 
                     if (protLocation == 0) {
@@ -116,7 +116,15 @@ public class DataMgrPtm {
         if (bs != null) {
             m_proteinSequence = bs.getSequence();
         } else {
-            m_proteinSequence = createSequence();
+//            if (ProjectExplorerPanel.getProjectExplorerPanel().getSelectedProject().getId() >0 ) {                
+//                DatabaseBioSequenceTask.fetchData( Collections.singletonList(pm), ProjectExplorerPanel.getProjectExplorerPanel().getSelectedProject().getId());
+//                bs = pm.getDBioSequence();
+//            }   
+//            if (bs != null) {
+//                m_proteinSequence = bs.getSequence();
+//            } else {
+                m_proteinSequence = createSequence();
+//            }
         }
     }
 
@@ -146,7 +154,7 @@ public class DataMgrPtm {
             String content = pp.getSequence();
             int cLength = content.length();
             int pIndex = pp.getStartPosition();
-            if (pIndex == 1 && site.isProteinNTerm()) {//@todo verify
+            if (pIndex == 1 && site.isProteinNTermWithOutM()) {//@todo verify
                 pIndex = 0;
             }
             //logger.debug("Sequence (" + pIndex + "," + content + ")");

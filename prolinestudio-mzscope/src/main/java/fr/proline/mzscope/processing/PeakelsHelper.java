@@ -48,7 +48,7 @@ public class PeakelsHelper {
     private RTree<Peakel, Point> rTree;
 
     private static PeakelsHelper fromMzScopeFeatures(List<IFeature> features) {
-        List<Peakel> peakels = features.stream().flatMap(f -> Arrays.asList(f.getPeakels()).stream()).collect(Collectors.toList());;
+        List<Peakel> peakels = features.stream().flatMap(f -> Arrays.asList(f.getPeakels()).stream()).collect(Collectors.toList());
         return new PeakelsHelper(peakels);
     }
 
@@ -67,12 +67,12 @@ public class PeakelsHelper {
     }
 
     public List<Peakel> findCoelutigPeakels(double minMz, double maxMz, float minRt, float maxRt) {
-        List<Peakel> peakels = new ArrayList<>(1000);
+        List<Peakel> coelutingPeakels = new ArrayList<>(1000);
         Iterator<Entry<Peakel, Point>> peakelIterator = rTree.search(Geometries.rectangle(minMz, minRt, maxMz, maxRt)).toBlocking().toIterable().iterator();
         while (peakelIterator.hasNext()) {
-            peakels.add(peakelIterator.next().value());
+            coelutingPeakels.add(peakelIterator.next().value());
         }
-        return peakels;
+        return coelutingPeakels;
     }
 
     public List<Feature> deisotopePeakels(MzDbReader reader, float mzTolPPM) throws StreamCorruptedException, SQLiteException {

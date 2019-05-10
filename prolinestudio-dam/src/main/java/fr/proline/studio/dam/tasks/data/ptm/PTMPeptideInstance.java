@@ -11,7 +11,7 @@ public class PTMPeptideInstance {
 
   private final DPeptideInstance m_peptideInstance;
   private final Set<PTMSite> m_sites = new HashSet<>();
-  private Integer m_startPosition;
+  private Integer m_startPosition; //Start position of Peptide on Protein sequence
 
   public PTMPeptideInstance(DPeptideInstance peptideInstance) {
     m_peptideInstance = peptideInstance;

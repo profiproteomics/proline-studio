@@ -127,7 +127,7 @@ public class PanelPtmDraw extends JPanel {
     private class TitlePane extends JPanel {
 
         private PTMMarkCtrl m_ctrlMark;
-        private ProteinSequenceCtrl m_ctrlSequence;
+        private final ProteinSequenceCtrl m_ctrlSequence;
 
         private TitlePane(PTMMarkCtrl ctrlMark, ProteinSequenceCtrl ctrlSequence) {
             super();
@@ -171,7 +171,7 @@ public class PanelPtmDraw extends JPanel {
             super.paintComponent(g);
             if (!m_isDataNull) {
                 ViewContext viewContext = new ViewContext();
-                viewContext.setAjustedLocation(m_ajustedLocation);
+                viewContext.setAjustedStartLocation(m_ajustedLocation);
                 if (m_isDataLoaded) {
                     Graphics2D g2 = (Graphics2D) g;
                     m_ctrlMark.paint(g2, viewContext);
@@ -268,7 +268,7 @@ public class PanelPtmDraw extends JPanel {
             super.paintComponent(g);
             if (!m_isDataNull) {
                 ViewContext viewContext = new ViewContext();
-                viewContext.setAjustedLocation(m_ajustedLocation).setAreaWidth(this.getWidth());
+                viewContext.setAjustedStartLocation(m_ajustedLocation).setAreaWidth(this.getWidth());
                 if (m_isDataLoaded) {
                     Graphics2D g2 = (Graphics2D) g;
                     m_ctrlPeptideArea.paint(g2, viewContext);

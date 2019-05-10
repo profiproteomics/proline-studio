@@ -15,12 +15,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
+import java.util.Optional;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,11 +37,13 @@ public class PTMPeptidesGraphicModel {
     private Map<Integer, PTMMark> m_allPtmMarks;
      
     private String m_proteinSequence;
-    private int m_beginBestFit;
+    private int m_lowerStartLocation;
+    private int m_higherEndLocation;
     
     public PTMPeptidesGraphicModel() {
         m_ptmPeptidesInstances = new ArrayList<>();
-        m_beginBestFit = Integer.MAX_VALUE;
+        m_lowerStartLocation = Integer.MAX_VALUE;
+        m_higherEndLocation = Integer.MIN_VALUE;
     }
     
     public List<PTMPeptideInstance> getPTMPeptideInstance() {
@@ -83,64 +85,98 @@ public class PTMPeptidesGraphicModel {
             return;
         }
         
+        //--- Reinitialize variables
         m_ptmPeptidesInstances = ptmInstances;
+        if(ptmInstances == null)
+            m_ptmPeptidesInstances =new ArrayList<>();
         m_allPtmMarks = new HashMap<>();
-        m_beginBestFit = Integer.MAX_VALUE;
+        m_lowerStartLocation = Integer.MAX_VALUE;
+        m_higherEndLocation = Integer.MIN_VALUE;
         
-        if (ptmInstances == null || ptmInstances.isEmpty()) {
+        if ( m_ptmPeptidesInstances.isEmpty()) {
             LOG.debug(this.getClass().getName() + "setData" + " data is null");
             this.m_proteinSequence = "";
-            this.m_beginBestFit = 0;
+            this.m_lowerStartLocation = 0;
+            m_higherEndLocation = 0;
             return;
         }
 
-        Set<PTMSite> ptmSites = new HashSet<>();
         DProteinMatch pm = null;
+        boolean protNTermPTMWithOutMExist = false;
+        final Map<Integer, List<PTMSite>> ptmSiteByProteinPos = new HashMap<>();
+        Iterator<PTMSite> allSites = m_ptmPeptidesInstances.stream().flatMap(pi -> pi.getSites().stream()).collect(Collectors.toSet()).iterator();
+        while (allSites.hasNext()) {
+            PTMSite nextPTMSite= allSites.next();            
+            if(pm == null)
+                pm = nextPTMSite.getProteinMatch();
+            int loc = nextPTMSite.getPositionOnProtein();
+            if (nextPTMSite.isProteinNTermWithOutM()) {
+                protNTermPTMWithOutMExist = true;
+            }
+            if(!ptmSiteByProteinPos.containsKey(loc))
+                ptmSiteByProteinPos.put(loc,new ArrayList<>()); 
+
+            ptmSiteByProteinPos.get(loc).add(nextPTMSite); 
+        }
         
         //retrive each peptide
         for (PTMPeptideInstance ptmPeptideInstance : ptmInstances){
+            //for Nterm could be 0 or 1 if first AA of prot not present (withouM)
+            int ptmPepStartLocOnProt = ptmPeptideInstance.getStartPosition();
+            int ptmPepSeqLenght =  ptmPeptideInstance.getSequence().length();            
+                    
+            if (m_lowerStartLocation > ptmPepStartLocOnProt) 
+                m_lowerStartLocation = ptmPepStartLocOnProt;
+            if(m_higherEndLocation < (ptmPepStartLocOnProt + ptmPepSeqLenght))
+                m_higherEndLocation = ptmPepStartLocOnProt + ptmPepSeqLenght;
             
-            Iterator<PTMSite> PTMSitesIt = ptmPeptideInstance.getSites().iterator();
-            while(PTMSitesIt.hasNext()){                
-                PTMSite nextPTMSite = PTMSitesIt.next();
-                if(pm == null)
-                    pm = nextPTMSite.getProteinMatch();
-                if(!ptmSites.contains(nextPTMSite)) {               
-                    if (nextPTMSite.isProteinNTerm()) {
-                        m_beginBestFit = 0;
-                    } else if (m_beginBestFit > ptmPeptideInstance.getStartPosition()) {
-                        m_beginBestFit = ptmPeptideInstance.getStartPosition();
-                    } 
-                }
-
-                //create PTMMark, take all of the site(position, type of modification) from this peptide, in order to create a PTMMark list
-                int protLocation;
-                for (DPeptidePTM ptm : ptmPeptideInstance.getPeptideInstance().getPeptide().getTransientData().getDPeptidePtmMap().values()) {                
-                    if (nextPTMSite.isProteinNTerm()) {
-                        protLocation = (int) ptm.getSeqPosition();
-
-                        if (protLocation == 0) {
-                            protLocation = 1;
+            //create PTMMark, take all of the site(position, type of modification) from this peptide, in order to create a PTMMark list
+            int protLocation;                
+            for (DPeptidePTM ptm : ptmPeptideInstance.getPeptideInstance().getPeptide().getTransientData().getDPeptidePtmMap().values()) {
+                boolean currentPTMisNCterm = false;
+                int locOnPeptide = (int) ptm.getSeqPosition();
+                protLocation = ptmPepStartLocOnProt + locOnPeptide;
+                int protLocToDisplay = protLocation;
+                if(ptmSiteByProteinPos.containsKey(protLocation) ){
+                    List<PTMSite> ptmSitesPositionned = ptmSiteByProteinPos.get(protLocation);
+                    Optional<PTMSite> correspondingPTMSite = ptmSitesPositionned.stream().filter(site -> site.getPTMSpecificity().getIdPtmSpecificity() == ptm.getIdPtmSpecificity()).findFirst();
+                    if(correspondingPTMSite.isPresent()) {
+                        if (correspondingPTMSite.get().isProteinNTermWithOutM()) {
+                            m_lowerStartLocation = 0;                        
+                            protLocToDisplay = 1;
                         }
-                    } else {
-                        protLocation = ptmPeptideInstance.getStartPosition() + (int) ptm.getSeqPosition();
+                        if(correspondingPTMSite.get().isProteinCTerm() || correspondingPTMSite.get().isProteinNTerm())
+                            currentPTMisNCterm = true;
                     }
-                    PTMMark mark = new PTMMark(ptm, protLocation);
-                    m_allPtmMarks.put(protLocation, mark);
+                } else {
+                   LOG.warn("Try to display a PTm without associated PTMSites.... "+protLocation+" def id "+ptm.toString());
                 }
+                if(protNTermPTMWithOutMExist) //Sequence of Prtotein displayed without M : shift location on prot
+                    protLocation = protLocation-1;  
+                PTMMark mark = new PTMMark(ptm, protLocation, protLocToDisplay,currentPTMisNCterm);
+                LOG.debug(" PTMPepGraphicModel setData add PTMMark at " + protLocation +" show " + protLocToDisplay +" symb " + mark.getPtmSymbol());                  
+                m_allPtmMarks.put(protLocation, mark);                    
             }
-               
+//            }
+            LOG.debug(" PTMPepGraphicModel setData m_lowerStartLocation" + m_lowerStartLocation+" nbr m_allPtmMarks "+m_allPtmMarks.size());  
         }
         
         //create sequence  
         if(pm != null){
-            DBioSequence bs = null;
-            if ( !pm.isDBiosequenceSet() && prjId >0 ) {
+            DBioSequence bs = pm.getDBioSequence();
+            if ( bs == null && prjId >0 ) {
                 LOG.info("BioSequence is absent from the protein match, trying to load it ...");
                 DatabaseBioSequenceTask.fetchData( Collections.singletonList(pm), prjId);
                 bs = pm.getDBioSequence();
-            }
-            m_proteinSequence =  (bs == null) ? createSequence() : bs.getSequence();
+            } 
+            m_proteinSequence ="";
+            if ( bs != null){
+                m_proteinSequence = bs.getSequence();
+                if(protNTermPTMWithOutMExist)
+                    m_proteinSequence = m_proteinSequence.substring(1);
+            } else                      
+                m_proteinSequence =  createSequence();
+            LOG.info(" m_proteinSequence = "+m_proteinSequence);
         }
 
     }
@@ -153,8 +189,8 @@ public class PTMPeptidesGraphicModel {
     private String createSequence() {
         StringBuilder sb = new StringBuilder();
         //prefix
-        if (this.m_beginBestFit > 1) {
-            for (int i = 1; i < this.m_beginBestFit - 1; i++) { // location begin from 1
+        if (this.m_lowerStartLocation > 1) {
+            for (int i = 1; i < this.m_lowerStartLocation - 1; i++) { // location begin from 1
                 sb.append("-");
             }
         }
@@ -162,7 +198,7 @@ public class PTMPeptidesGraphicModel {
         for (PTMPeptideInstance pepInst : m_ptmPeptidesInstances) {
             boolean isProteinNTerm = false;
             if(pepInst.getSites().size()>0) 
-                isProteinNTerm = pepInst.getSites().iterator().next().isProteinNTerm();
+                isProteinNTerm = pepInst.getSites().iterator().next().isProteinNTermWithOutM();
 
              //logger.debug("In  |"+sb.toString()+"("+sb.length());
             String content = pepInst.getSequence();
@@ -191,14 +227,15 @@ public class PTMPeptidesGraphicModel {
         return sb.toString();
     }
     
-    public int getBeginBestFit() {
-        return this.m_beginBestFit;
+    public int getLowerStartInProtSeq() {
+        return this.m_lowerStartLocation;
+    }
+    
+    public int getHigherEndInProtSeq() {
+        return this.m_higherEndLocation;
     }
        
     public int getRowCount(){
-        if (m_ptmPeptidesInstances == null) {
-            return -1;
-        }
         return m_ptmPeptidesInstances.size(); 
     }
     

@@ -236,6 +236,14 @@ public class PTMSite {
     }
 
     public boolean isProteinNTerm() {
+        return m_ptmSpecificity.getLocationSpecificity().endsWith("N-term");        
+    }
+    
+    public boolean isProteinCTerm() {
+        return m_ptmSpecificity.getLocationSpecificity().endsWith("C-term");        
+    }
+    
+    public boolean isProteinNTermWithOutM() {
         if (m_ptmSpecificity.getLocationSpecificity().endsWith("N-term") && getPositionOnProtein() == 1) {
             return true;
         } else {

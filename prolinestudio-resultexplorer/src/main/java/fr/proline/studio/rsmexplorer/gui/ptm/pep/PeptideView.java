@@ -10,12 +10,14 @@ import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.msi.dto.DPeptidePTM;
 import fr.proline.core.orm.msi.dto.DPtmSiteProperties;
 import fr.proline.studio.dam.tasks.data.ptm.PTMPeptideInstance;
+import fr.proline.studio.dam.tasks.data.ptm.PTMSite;
 import fr.proline.studio.dam.tasks.data.ptm.PTMSitePeptideInstance;
 import fr.proline.studio.rsmexplorer.gui.ptm.*;
 import fr.proline.studio.utils.CyclicColorPalette;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.util.Iterator;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,24 +44,21 @@ public class PeptideView extends ViewPtmAbstract {
         this.y0 = 0;
         this.m_ptmSitePeptideInst = pep;
         m_ptmPeptideInst = pep.getPTMPeptideInstance();
-        String sequence = null;
-//        if (ins != null) {
-            sequence = m_ptmPeptideInst.getSequence();
-//        }
+        String sequence = m_ptmPeptideInst.getSequence();
         if (sequence != null) {
             this.m_length = m_ptmPeptideInst.getSequence().length();
         } else {
             this.m_length = 0;
         }
         this.m_beginIndex = m_ptmPeptideInst.getStartPosition();
-        if ((m_beginIndex == 1) && (pep.getSite().isProteinNTerm())) {
+        if ((m_beginIndex == 1) && (pep.getSite().isProteinNTermWithOutM())) {
             m_beginIndex = 0;
         }
         m_isSelected = false;
     }
     
     public PeptideView(PTMPeptideInstance pep) {
-         isPtmSiteView = false;
+        isPtmSiteView = false;
         x0 = 0;
         y0 = 0;
         m_isSelected = false;
@@ -74,8 +73,14 @@ public class PeptideView extends ViewPtmAbstract {
                     
             m_beginIndex = pep.getStartPosition();
             boolean isProteinNTerm = false;
-            if(pep.getSites().size()>0) 
-                isProteinNTerm = pep.getSites().iterator().next().isProteinNTerm();            
+            Iterator<PTMSite> allSites = pep.getSites().iterator();
+            while (allSites.hasNext()) {
+                PTMSite site = allSites.next();
+                if(site.isProteinNTermWithOutM()) {
+                    isProteinNTerm = true;
+                    break;
+                }
+            }
             if ((m_beginIndex == 1) && isProteinNTerm)  
                 m_beginIndex = 0;   
         }
@@ -102,7 +107,7 @@ public class PeptideView extends ViewPtmAbstract {
     public void paint(Graphics2D g, ViewContext viewContext) {
         int aaWidth = ViewSetting.WIDTH_AA;
 
-        this.x0 = (this.m_x + aaWidth + (this.m_beginIndex - viewContext.getAjustedLocation()) * aaWidth);
+        this.x0 = (this.m_x + aaWidth + (this.m_beginIndex - viewContext.getAjustedStartLocation()) * aaWidth);
         this.y0 = this.m_y+1;
         int width = (this.m_length * aaWidth);
         int height = ViewSetting.HEIGHT_AA-1;       

@@ -157,16 +157,7 @@ public class PTMPeptidesGraphicView extends JPanel implements DataBoxPanelInterf
     }
 
 
-    public void setData(List<PTMPeptideInstance> peptidesInstances ) {
-        //logger.debug(this.getClass().getName() + " setData ->");
-//        if (peptidesPTMSite == null) {
-//            return;
-//        }
-//        if ((peptidesPTMSite.equals(m_currentPTMSite))) {
-//            return;
-//        }
-
-        
+    public void setData(List<PTMPeptideInstance> peptidesInstances ) {       
         m_dataModel.setData(peptidesInstances, m_dataBox.getProjectId());
         if (peptidesInstances == null) {
             this.m_internalPanel.clean();
@@ -176,6 +167,7 @@ public class PTMPeptidesGraphicView extends JPanel implements DataBoxPanelInterf
         }
         this.repaint();
     }
+    
 private class PTMPeptidesGraphicPanel extends JPanel  {
      
     private static final int INITIAL_WIDTH = 1200;
@@ -188,7 +180,7 @@ private class PTMPeptidesGraphicPanel extends JPanel  {
     private final PeptidePane m_peptidesPane;
     private final PeptideNumberPane m_peptidesNumberPane;
 
-    int m_ajustedLocation;
+    int m_ajustedStartLocation;
     private int m_sequenceLength;
     private boolean m_isDataNull;//when precedent databox change order or filter, we can have non selected row, in this case, nothing to show
     
@@ -231,17 +223,11 @@ private class PTMPeptidesGraphicPanel extends JPanel  {
         m_dataModel = dataModel;
     }
 
-//    public void setIsDataLoaded(boolean isDataLoaded) {
-//        if (isDataLoaded == true) {
-//            this.m_isDataNull = false;
-//        }
-//        this.m_isDataLoaded = isDataLoaded;
-//    }
 
     public void setAjustedLocation(int ajustedLocation) {
-        this.m_ajustedLocation = ajustedLocation;
+        this.m_ajustedStartLocation = ajustedLocation;
         if (ajustedLocation >= AJUSTE_GAP) {
-            m_ajustedLocation -= AJUSTE_GAP;
+            m_ajustedStartLocation -= AJUSTE_GAP;
         }
     }
 
@@ -273,7 +259,7 @@ private class PTMPeptidesGraphicPanel extends JPanel  {
         m_titlePane.updateData();
         m_peptidesPane.updateData();
 
-        int ajustedLocation = m_dataModel.getBeginBestFit();
+        int ajustedLocation = m_dataModel.getLowerStartInProtSeq();
         m_isDataNull = false;
         m_sequenceLength = m_dataModel.getProteinSequence().length();
         setAjustedLocation(ajustedLocation);
@@ -294,7 +280,7 @@ private class PTMPeptidesGraphicPanel extends JPanel  {
                 public void mouseMoved(MouseEvent e) {//for tooltips
                     int x = e.getX();
                     int y = e.getY();
-                    String tips = m_ctrlMark.getToolTipText(x, y, m_ajustedLocation);
+                    String tips = m_ctrlMark.getToolTipText(x, y, m_ajustedStartLocation);
                     setToolTipText(tips);//null will turn off ToolTip
 
                 }
@@ -329,7 +315,7 @@ private class PTMPeptidesGraphicPanel extends JPanel  {
 
         @Override
         public Dimension getPreferredSize() {
-            return new Dimension((int) ((m_sequenceLength + AJUSTE_GAP - m_ajustedLocation) * ViewSetting.WIDTH_AA), ViewSetting.HEIGHT_MARK + ViewSetting.HEIGHT_SEQUENCE);
+            return new Dimension((int) ((m_sequenceLength + AJUSTE_GAP - m_ajustedStartLocation) * ViewSetting.WIDTH_AA), ViewSetting.HEIGHT_MARK + ViewSetting.HEIGHT_SEQUENCE);
         }
 
         @Override
@@ -338,12 +324,14 @@ private class PTMPeptidesGraphicPanel extends JPanel  {
             super.paintComponent(g);
             if (!m_isDataNull) {
                 ViewContext viewContext = new ViewContext();
-                viewContext.setAjustedLocation(m_ajustedLocation);
-//                if (m_isDataLoaded) {
+                viewContext.setAjustedStartLocation(m_ajustedStartLocation);
+                int adjustedEndLoc = m_dataModel.getHigherEndInProtSeq();                
+                if(m_sequenceLength > (adjustedEndLoc+AJUSTE_GAP))
+                    adjustedEndLoc = m_dataModel.getHigherEndInProtSeq()+AJUSTE_GAP;
+                    viewContext.setAjustedEndLocation(adjustedEndLoc).setShowNCtermIndex(false);
                     Graphics2D g2 = (Graphics2D) g;
                     m_ctrlMark.paint(g2, viewContext);
                     m_ctrlSequence.paint(g2, viewContext);
-//                }
             }
         }
 
@@ -425,7 +413,7 @@ private class PTMPeptidesGraphicPanel extends JPanel  {
 
         @Override
         public Dimension getPreferredSize() {
-            int width = (int) ((m_sequenceLength + AJUSTE_GAP - m_ajustedLocation) * ViewSetting.WIDTH_AA);
+            int width = (int) ((m_sequenceLength + AJUSTE_GAP - m_ajustedStartLocation) * ViewSetting.WIDTH_AA);
             int height = m_dataModel.getRowCount() * (ViewSetting.HEIGHT_AA * 2 - ViewSetting.HEIGHT_AA / 2);
             if (height == 0) {
                 height = 5 * ViewSetting.HEIGHT_AA;
@@ -440,11 +428,9 @@ private class PTMPeptidesGraphicPanel extends JPanel  {
             super.paintComponent(g);
             if (!m_isDataNull) {
                 ViewContext viewContext = new ViewContext();
-                viewContext.setAjustedLocation(m_ajustedLocation).setAreaWidth(this.getWidth());
-//                if (m_isDataLoaded) {
-                    Graphics2D g2 = (Graphics2D) g;
-                    m_ctrlPeptideArea.paint(g2, viewContext);
-//                }
+                viewContext.setAjustedStartLocation(m_ajustedStartLocation).setAreaWidth(this.getWidth());
+                Graphics2D g2 = (Graphics2D) g;
+                m_ctrlPeptideArea.paint(g2, viewContext);
             }
         }
     }
@@ -478,27 +464,26 @@ private class PTMPeptidesGraphicPanel extends JPanel  {
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
             if (!m_isDataNull) {
-//                if (m_isDataLoaded) {
-                    Graphics2D g2 = (Graphics2D) g;
-                    FontMetrics f = g2.getFontMetrics(ViewSetting.FONT_NUMBER);
-                    int ascend = f.getAscent();
-                    int y0 = m_y0 + ascend;
-                    int x0;
-                    g2.setColor(Color.black);
-                    g2.setFont(ViewSetting.FONT_NUMBER);
+                Graphics2D g2 = (Graphics2D) g;
+                FontMetrics f = g2.getFontMetrics(ViewSetting.FONT_NUMBER);
+                int ascend = f.getAscent();
+                int y0 = m_y0 + ascend;
+                int x0;
+                g2.setColor(Color.black);
+                g2.setFont(ViewSetting.FONT_NUMBER);
 //                    g2.setColor(Color.WHITE);
 //                    g2.setFont(ViewSetting.FONT_PTM);
-                    String number;
-                    int stringWidth;
-                    int rowCount = m_dataModel.getRowCount();
-                    for (int i = 1; i < rowCount + 1; i++) {
-                        number = String.valueOf(i);
-                        stringWidth = f.stringWidth(number);
-                        x0 = m_x0 + ViewSetting.WIDTH_AA - stringWidth;
-                        g2.drawString("" + i, x0, y0);
-                        y0 += (int) ViewSetting.HEIGHT_AA * 1.5;
-                    }
-//                }
+                String number;
+                int stringWidth;
+                int rowCount = m_dataModel.getRowCount();
+                for (int i = 1; i < rowCount + 1; i++) {
+                    number = String.valueOf(i);
+                    stringWidth = f.stringWidth(number);
+                    x0 = m_x0 + ViewSetting.WIDTH_AA - stringWidth;
+                    g2.drawString("" + i, x0, y0);
+                    y0 += (int) ViewSetting.HEIGHT_AA * 1.5;
+                }
+
             }
         }
 

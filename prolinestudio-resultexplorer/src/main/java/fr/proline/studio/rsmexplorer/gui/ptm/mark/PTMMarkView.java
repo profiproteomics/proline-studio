@@ -33,11 +33,19 @@ public class PTMMarkView extends ViewPtmAbstract {
      */
     private int m_locationProtein;
     //int _ajustNTermAt1;//useful for N-termini at protein 1;
+    /**
+     * location in the protein, to paint above the type figure
+     */
+    private int m_displayedLocationProtein;
+    
+    private boolean m_isNCtermPTM;
 
     public PTMMarkView(PTMMark mark) {
         this.m_color = ViewSetting.getColor(mark);
         this.m_symbol = Character.toString(mark.getPtmSymbol());
         this.m_locationProtein = mark.getProteinLocation();
+        m_displayedLocationProtein = mark.getProteinLocationToDisplay();
+        m_isNCtermPTM = mark.isPTMNorCterm();
     }
 
     @Override
@@ -48,6 +56,10 @@ public class PTMMarkView extends ViewPtmAbstract {
 
     public int getLocationProtein() {
         return m_locationProtein;
+    }
+    
+    public int getDisplayedLocationProtein() {
+        return m_displayedLocationProtein;
     }
 
     /**
@@ -66,7 +78,7 @@ public class PTMMarkView extends ViewPtmAbstract {
 
         g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
         //this.x0 = (int)(this.m_x + aaWidth+ (this._locationProtein - viewContext.getAjustedLocation()-1 + this._ajustNTermAt1) * aaWidth);
-        this.x0 = this.m_x + (this.m_locationProtein - viewContext.getAjustedLocation()) * ViewSetting.WIDTH_AA;
+        this.x0 = this.m_x + (this.m_locationProtein - viewContext.getAjustedStartLocation()) * ViewSetting.WIDTH_AA;
         this.y0 = this.m_y + ViewSetting.HEIGHT_AA; //reserve location line
 
         g.setColor(m_color);
@@ -90,26 +102,28 @@ public class PTMMarkView extends ViewPtmAbstract {
 
         //draw the location number upper
         //g.setColor(CyclicColorPalette.GRAY_TEXT_DARK);
-        g.setColor(Color.BLACK);
-        g.setFont(ViewSetting.FONT_NUMBER);
-        fm = g.getFontMetrics(ViewSetting.FONT_NUMBER);
-        int descent = fm.getDescent();
+        if(!m_isNCtermPTM ||(m_isNCtermPTM && viewContext.isNCtermIndexShown()) ){
+            g.setColor(Color.BLACK);
+            g.setFont(ViewSetting.FONT_NUMBER);
+            fm = g.getFontMetrics(ViewSetting.FONT_NUMBER);
+            int descent = fm.getDescent();
 
-        stringWidth = fm.stringWidth(String.valueOf(m_locationProtein));
-        if (stringWidth > (aaWidth - ViewSetting.BORDER_GAP + 3)) {
-            Font smallerFont = ViewSetting.FONT_NUMBER_DIAGONAL;
-            g.setFont(smallerFont);
-            fm = g.getFontMetrics(smallerFont);
             stringWidth = fm.stringWidth(String.valueOf(m_locationProtein));
+            if (stringWidth > (aaWidth - ViewSetting.BORDER_GAP + 3)) {
+                Font smallerFont = ViewSetting.FONT_NUMBER_DIAGONAL;
+                g.setFont(smallerFont);
+                fm = g.getFontMetrics(smallerFont);
+                stringWidth = fm.stringWidth(String.valueOf(m_locationProtein));
+            }
+            g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+            g.drawString(String.valueOf(m_displayedLocationProtein), xCenter - stringWidth / 2, y0 - descent / 2);
+            g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_OFF);
         }
-        g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-        g.drawString(String.valueOf(m_locationProtein), xCenter - stringWidth / 2, y0 - descent / 2);
-        g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_OFF);
         g.setColor(oldColor);
     }
 
     @Override
     public String toString() {
-        return "ViewPtmMark{" + "m_type=" + m_symbol + ", _locationProtein=" + m_locationProtein + ", _ajustNTermAt1=" + '}';
+        return "ViewPtmMark{" + "m_type=" + m_symbol + ", _locationProtein=" + m_locationProtein + ", m_displayedLocationProtein=" +m_displayedLocationProtein+ '}';
     }
 }

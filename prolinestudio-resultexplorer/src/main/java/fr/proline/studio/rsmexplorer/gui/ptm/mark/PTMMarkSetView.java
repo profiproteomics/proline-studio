@@ -44,7 +44,7 @@ public class PTMMarkSetView extends ViewPtmAbstract {
         if (y >= this.m_y && y <= this.m_y + ViewSetting.HEIGHT_AA * 2 && m_ptmMarkList != null) {
             int index = (x - this.m_x) / ViewSetting.WIDTH_AA + ajustedLocation;
             for (PTMMarkView pm : m_ptmMarkList) {
-                if (pm.getLocationProtein() == index) {
+                if (pm.getDisplayedLocationProtein() == index) {
                     return "Location in Protein: " + index;
                 } 
             }

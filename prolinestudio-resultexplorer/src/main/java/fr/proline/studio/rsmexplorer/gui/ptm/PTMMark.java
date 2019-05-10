@@ -16,10 +16,18 @@ public class PTMMark {
     
     private DPeptidePTM m_peptidePtm;
     private int m_proteinLocation;
+    private int m_proteinDisplayLocation;
+    private boolean m_ptmIsNorCTerm;
 
-    public PTMMark(DPeptidePTM m_peptidePtm, int m_proteinLocation) {
-        this.m_peptidePtm = m_peptidePtm;
-        this.m_proteinLocation = m_proteinLocation;
+    public PTMMark(DPeptidePTM peptidePtm, int proteinLocation) {
+        this(peptidePtm, proteinLocation, proteinLocation, false);
+    }
+    
+    public PTMMark(DPeptidePTM peptidePtm, int proteinLocation, int proteinDisplayLocation, boolean isNCTermPTM) {
+        this.m_peptidePtm = peptidePtm;
+        this.m_proteinLocation = proteinLocation;
+        m_proteinDisplayLocation = proteinDisplayLocation;
+        m_ptmIsNorCTerm = isNCTermPTM;
     }
 
     public DPeptidePTM getPeptidePtm() {
@@ -28,6 +36,14 @@ public class PTMMark {
     
     public int getProteinLocation() {
         return m_proteinLocation;
+    }
+        
+    public int getProteinLocationToDisplay() {
+        return m_proteinDisplayLocation;
+    }
+    
+    public boolean isPTMNorCterm(){
+        return m_ptmIsNorCTerm;
     }
     /**
      * 
@@ -44,7 +60,5 @@ public class PTMMark {
     public Long getPtmSpecificityId() {
         return m_peptidePtm.getIdPtmSpecificity();
     }
-    
-    
-    
+          
 }

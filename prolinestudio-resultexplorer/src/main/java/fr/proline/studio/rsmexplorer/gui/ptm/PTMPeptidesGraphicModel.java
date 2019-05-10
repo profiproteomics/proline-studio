@@ -93,8 +93,7 @@ public class PTMPeptidesGraphicModel {
         m_lowerStartLocation = Integer.MAX_VALUE;
         m_higherEndLocation = Integer.MIN_VALUE;
         
-        if ( m_ptmPeptidesInstances.isEmpty()) {
-            LOG.debug(this.getClass().getName() + "setData" + " data is null");
+        if ( m_ptmPeptidesInstances.isEmpty()) {            
             this.m_proteinSequence = "";
             this.m_lowerStartLocation = 0;
             m_higherEndLocation = 0;
@@ -149,23 +148,23 @@ public class PTMPeptidesGraphicModel {
                             currentPTMisNCterm = true;
                     }
                 } else {
-                   LOG.warn("Try to display a PTm without associated PTMSites.... "+protLocation+" def id "+ptm.toString());
+                   LOG.warn("Try to display a PTM without associated PTMSites.... "+protLocation+" def id "+ptm.toString());
                 }
                 if(protNTermPTMWithOutMExist) //Sequence of Prtotein displayed without M : shift location on prot
                     protLocation = protLocation-1;  
                 PTMMark mark = new PTMMark(ptm, protLocation, protLocToDisplay,currentPTMisNCterm);
-                LOG.debug(" PTMPepGraphicModel setData add PTMMark at " + protLocation +" show " + protLocToDisplay +" symb " + mark.getPtmSymbol());                  
+                LOG.trace(" PTMPepGraphicModel setData add PTMMark at " + protLocation +" show " + protLocToDisplay +" symb " + mark.getPtmSymbol());                  
                 m_allPtmMarks.put(protLocation, mark);                    
             }
 //            }
-            LOG.debug(" PTMPepGraphicModel setData m_lowerStartLocation" + m_lowerStartLocation+" nbr m_allPtmMarks "+m_allPtmMarks.size());  
+            LOG.trace(" PTMPepGraphicModel setData m_lowerStartLocation" + m_lowerStartLocation+" nbr m_allPtmMarks "+m_allPtmMarks.size());  
         }
         
         //create sequence  
         if(pm != null){
             DBioSequence bs = pm.getDBioSequence();
             if ( bs == null && prjId >0 ) {
-                LOG.info("BioSequence is absent from the protein match, trying to load it ...");
+                LOG.trace("BioSequence is absent from the protein match, trying to load it ...");
                 DatabaseBioSequenceTask.fetchData( Collections.singletonList(pm), prjId);
                 bs = pm.getDBioSequence();
             } 
@@ -176,7 +175,6 @@ public class PTMPeptidesGraphicModel {
                     m_proteinSequence = m_proteinSequence.substring(1);
             } else                      
                 m_proteinSequence =  createSequence();
-            LOG.info(" m_proteinSequence = "+m_proteinSequence);
         }
 
     }
@@ -200,14 +198,12 @@ public class PTMPeptidesGraphicModel {
             if(pepInst.getSites().size()>0) 
                 isProteinNTerm = pepInst.getSites().iterator().next().isProteinNTermWithOutM();
 
-             //logger.debug("In  |"+sb.toString()+"("+sb.length());
             String content = pepInst.getSequence();
             int cLength = content.length();
             int pIndex = pepInst.getStartPosition();
             if (pIndex == 1 && isProteinNTerm) {//@todo verify
                 pIndex = 0;
             }
-            //logger.debug("Sequence (" + pIndex + "," + content + ")");
             int l = sb.length();
             if (l < pIndex) {
                 for (int i = l; i < pIndex; i++) {
@@ -220,10 +216,7 @@ public class PTMPeptidesGraphicModel {
                 sb.delete(pIndex, sb.length());
                 sb.append(content);
             }
-            //logger.debug(content+"("+pIndex+"-"+cLength);
-            //logger.debug("Out |"+sb.toString()+"("+sb.length());
         }
-        //logger.debug("finl Sequence :" + sb.toString());
         return sb.toString();
     }
     

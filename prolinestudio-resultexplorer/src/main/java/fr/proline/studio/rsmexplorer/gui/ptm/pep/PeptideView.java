@@ -242,17 +242,6 @@ public class PeptideView extends ViewPtmAbstract {
 
     }
 
-//    public PTMSitePeptideInstance getSelectedPeptide(int compareX) {
-//        int xRangA = this.x0;
-//        int xRangZ = this.x0 + this._length * ViewSetting.HEIGHT_AA;
-//        //logger.debug(" element:"+this._peptide.toString()+"("+xRangA+","+xRangZ+")");
-//        if (compareX > xRangA && compareX < xRangZ) {
-//            return this._peptide;
-//        } else {
-//            return null;
-//        }
-//
-//    }
     void setSelected(boolean b) {
         this.m_isSelected = b;
     }

@@ -46,10 +46,5 @@ public class PTMMarkModel {
         m_ptmMarkList.add(p);
     }
 
-    public boolean removePtm(PTMMark ptm) {
-        int index = m_ptmMarkList.indexOf(ptm);
-        m_ptmMarkList.remove(index);
-        return m_ptmMarkList.remove(ptm);
-    }
 
 }

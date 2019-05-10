@@ -43,4 +43,8 @@ public class ProteinSequenceCtrl {
         this.m_view.setPTMSequencePosition(i);
     }
     
+    @Override
+    public String toString(){
+        return m_view.toString();
+    }
 }

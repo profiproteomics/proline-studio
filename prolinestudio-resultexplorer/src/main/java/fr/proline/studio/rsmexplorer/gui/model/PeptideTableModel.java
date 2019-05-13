@@ -29,6 +29,7 @@ import fr.proline.studio.table.LazyData;
 import fr.proline.studio.table.TableDefaultRendererManager;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import javax.swing.table.TableCellRenderer;
@@ -222,7 +223,7 @@ public class PeptideTableModel extends DecoratedTableModel implements GlobalTabl
                 if (p == null) {
                     return null;
                 }
-                ArrayList<DProteinSet> proteinSetList = p.getTransientData().getProteinSetArray();
+                HashSet<DProteinSet> proteinSetList = new HashSet(p.getTransientData().getProteinSetArray());
                 if (proteinSetList == null) {
                     return null;
                 }
@@ -235,11 +236,11 @@ public class PeptideTableModel extends DecoratedTableModel implements GlobalTabl
                     return ""; // should never happen   
                 }
                 Peptide p = peptideMatch.getPeptide();
-                if (p == null) {
+                if (p == null || p.getTransientData().getProteinSetArray()==null) {
                     return "";
                 }
-                ArrayList<DProteinSet> proteinSetList = p.getTransientData().getProteinSetArray();
-                if (proteinSetList == null) {
+                HashSet<DProteinSet> proteinSetList = new HashSet(p.getTransientData().getProteinSetArray());
+                if (proteinSetList.isEmpty()) {
                     return "";
                 }
 
@@ -247,12 +248,13 @@ public class PeptideTableModel extends DecoratedTableModel implements GlobalTabl
                 int nbProteinGroups = proteinSetList.size();
                 display.append(nbProteinGroups);
                 display.append(" (");
-                for (int i = 0; i < nbProteinGroups; i++) {
-                    display.append(((DProteinSet)proteinSetList.get(i)).getTypicalProteinMatch().getAccession());
-                    if (i + 1 < nbProteinGroups) {
+                final int startSize = display.length();
+                proteinSetList.forEach(ps -> {
+                    if(display.length() > startSize)
                         display.append(',');
-                    }
-                }
+                    display.append(ps.getTypicalProteinMatch().getAccession());
+                });
+                
                 display.append(')');
 
                 return display.toString();

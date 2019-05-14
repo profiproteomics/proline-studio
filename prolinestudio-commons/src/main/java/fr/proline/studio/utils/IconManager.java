@@ -129,6 +129,8 @@ public class IconManager {
         ARROW_UP,
         ARROW_MOVE_UP,
         ARROW_MOVE_DOWN,
+        ARROW_INSERT_UP,
+        ARROW_INSERT_DOWN,
         ADD_DATA_ANALYZER,
         DATA_ANALYZER,
         GRID,
@@ -536,12 +538,14 @@ public class IconManager {
                 return "fr/proline/studio/images/arrow-right.png";
             case ARROW_UP:
                 return "fr/proline/studio/images/arrow-up.png";
-                 case ARROW_MOVE_UP:
-                return "fr/proline/studio/images/arrow-move-up.png"; 
-                 case ARROW_MOVE_DOWN:
-                return "fr/proline/studio/images/arrow-move-down.png";
-                
-                
+             case ARROW_MOVE_UP:
+                return "fr/proline/studio/images/move-up.png";
+              case ARROW_MOVE_DOWN:
+                return "fr/proline/studio/images/move-down.png";
+            case ARROW_INSERT_UP:
+                return "fr/proline/studio/images/move-up.png";
+            case ARROW_INSERT_DOWN:
+                return "fr/proline/studio/images/move-down.png";
             case ADD_DATA_ANALYZER:
                 return "fr/proline/studio/images/data-analyzer-add.png";
             case DATA_ANALYZER:

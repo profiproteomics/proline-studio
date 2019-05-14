@@ -158,7 +158,7 @@ public class AggregationQuantChannelsPanel extends JPanel {
             datasetData.setDataset(ds);
             DataSetNode dsNode = new DataSetNode(datasetData);
             QuantExperimentalDesignTree dsDesignTree = new QuantExperimentalDesignTree(dsNode, true);
-            QuantExperimentalDesignTree.displayExperimentalDesign(ds, dsNode, dsDesignTree, true, true);
+            QuantExperimentalDesignTree.displayExperimentalDesign(ds, dsNode, dsDesignTree, false, true);
             JScrollPane sPane = new JScrollPane(dsDesignTree);
             m_tabbedPane.add(ds.getName(), sPane);
         }

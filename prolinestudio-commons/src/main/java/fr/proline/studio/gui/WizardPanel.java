@@ -14,11 +14,7 @@ import java.awt.GridBagLayout;
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JTextArea;
 import javax.swing.JTextPane;
-import javax.swing.text.Style;
-import javax.swing.text.StyleConstants;
-import javax.swing.text.StyledDocument;
 
 /**
  *
@@ -61,6 +57,7 @@ public class WizardPanel extends JPanel {
      */
     public void htmlWizard(String title, String helpText) {
         setLayout(new BorderLayout());
+        setBackground(Color.white);
         /**
          * right icon image
          */
@@ -76,12 +73,15 @@ public class WizardPanel extends JPanel {
             newTitle = title.replaceAll("<html>", "");
             title = newTitle.replaceAll("</html>", "");
         }
+        String fontfamily = this.getFont().getFamily();
+        int fontSize = this.getFont().getSize();
         String htmlText = "<!DOCTYPE html><html><head><style>div {"
-                +"font-size: 11px;"
+                + "font-family: " + fontfamily + ";"
+                + "font-size: " + fontSize + ";"
                 + "padding-top: 0;"
                 + "padding-bottom: 12px;"
                 + "}</style></head><body>";
-        htmlText += "<div style=\"color:blue;\"><b>" + title + "</b></div>";
+        htmlText += "<div style=\"color:black;\"><b>" + title + "</b></div>";
         htmlText += "<div style=\"color:Gray;\">" + helpText + "</div></body></html>";
         wizardPane.setText(htmlText);
         add(wizardPane, BorderLayout.CENTER);

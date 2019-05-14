@@ -70,7 +70,7 @@ public class CreateXICBiologicalNodeAction extends AbstractRSMAction {
             case BIOLOGICAL_SAMPLE_ANALYSIS:
                 if (parentNode.getType() == AbstractNode.NodeTypes.DATA_SET) {
                     AbstractNode gNode = this.createXICNode(parentNode, NodeTypes.BIOLOGICAL_GROUP, "New Group", x, y, false);
-                    AbstractNode sNode = this.createXICNode(gNode, m_createNodeType, "New Sample", x, y, false);
+                    AbstractNode sNode = this.createXICNode(gNode, NodeTypes.BIOLOGICAL_SAMPLE, "New Sample", x, y, false);
                     this.createXICNode(sNode, m_createNodeType, "Channel new 1", x, y, true);
                 } else if (parentNode.getType() == AbstractNode.NodeTypes.BIOLOGICAL_SAMPLE) {
                     this.createXICNode(parentNode, m_createNodeType, "Channel new 1", x, y, true);

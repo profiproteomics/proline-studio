@@ -122,11 +122,12 @@ public class QCMappingTreeTableModel extends AbstractTreeTableModel {
         AbstractNode node = (AbstractNode) o;
         if (node != null && node.getType() == BIOLOGICAL_SAMPLE_ANALYSIS) {
             DQuantitationChannelMapping mapping = m_parentQCMappings.get(node);
-            QuantitationChannel childQc = mapping.getMappedQuantChannels().get(ds);
-            if (childQc != null) {
-                return new StringBuilder(childQc.getName()).append(" (id=").append(childQc.getId()).append(", number=").append(childQc.getNumber()).append(")").toString();
-            } else {
-                return null;
+            Map<DDataset, QuantitationChannel> quantChannelMap = mapping.getMappedQuantChannels();
+            if (quantChannelMap != null) {
+                QuantitationChannel childQc = quantChannelMap.get(ds);
+                if (childQc != null) {
+                    return new StringBuilder(childQc.getName()).append(" (id=").append(childQc.getId()).append(", number=").append(childQc.getNumber()).append(")").toString();               
+                }
             }
         }
         return null;
@@ -304,18 +305,20 @@ public class QCMappingTreeTableModel extends AbstractTreeTableModel {
         }
         return null;
     }
-    
+
     /**
-     * from one XICBiologicalSampleAnalysisNode get the next XICBiologicalSampleAnalysisNode
+     * from one XICBiologicalSampleAnalysisNode get the next
+     * XICBiologicalSampleAnalysisNode
+     *
      * @param node
-     * @return 
+     * @return
      */
     public XICBiologicalSampleAnalysisNode getNextChannelNode(XICBiologicalSampleAnalysisNode node) {
         int i = m_indexedNodes.indexOf(node);
         int j = m_indexChannelNodes.indexOf(i) + 1;
         if (j < m_indexChannelNodes.size()) {
             int nextChannelIndex = m_indexChannelNodes.get(j);
-            return (XICBiologicalSampleAnalysisNode)getNodeAt(nextChannelIndex);
+            return (XICBiologicalSampleAnalysisNode) getNodeAt(nextChannelIndex);
         }
         return null;
     }

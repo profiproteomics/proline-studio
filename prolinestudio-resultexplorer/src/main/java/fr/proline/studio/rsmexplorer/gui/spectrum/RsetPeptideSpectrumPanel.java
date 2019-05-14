@@ -10,7 +10,7 @@ import fr.proline.studio.dpm.task.jms.GenerateSpectrumMatchTask;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.pattern.DataBoxRsetPeptideSpectrum;
 import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
-import fr.proline.studio.rsmexplorer.gui.dialog.GenerateSpectrumMarchesDialog;
+import fr.proline.studio.rsmexplorer.gui.dialog.GenerateSpectrumMatchesDialog;
 import fr.proline.studio.utils.IconManager;
 import org.jfree.chart.annotations.XYLineAnnotation;
 import org.jfree.chart.annotations.XYPointerAnnotation;
@@ -25,7 +25,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.geom.Rectangle2D;
 
 /**
  * Panel used to display a Spectrum of a PeptideMatch
@@ -56,7 +55,7 @@ public class RsetPeptideSpectrumPanel extends AbstractPeptideSpectrumPanel {
     m_generateMatchButton.addActionListener(new ActionListener() {
           @Override
           public void actionPerformed(ActionEvent e) {
-            GenerateSpectrumMarchesDialog dialog = new GenerateSpectrumMarchesDialog(WindowManager.getDefault().getMainWindow());
+            GenerateSpectrumMatchesDialog dialog = new GenerateSpectrumMatchesDialog(WindowManager.getDefault().getMainWindow());
             Point location = m_generateMatchButton.getLocationOnScreen();
             dialog.setLocation(location.x + 30, location.y - dialog.getHeight() - 60);
             dialog.setVisible(true);

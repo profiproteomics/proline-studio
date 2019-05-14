@@ -18,7 +18,7 @@ import fr.proline.studio.dpm.task.jms.AbstractJMSCallback;
 import fr.proline.studio.dpm.task.jms.GenerateSpectrumMatchTask;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
-import fr.proline.studio.rsmexplorer.gui.dialog.GenerateSpectrumMarchesDialog;
+import fr.proline.studio.rsmexplorer.gui.dialog.GenerateSpectrumMatchesDialog;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
@@ -72,7 +72,7 @@ public class GenerateSpectrumMatchesJMSAction extends AbstractRSMAction {
             loadRSData(ds);
         }
                              
-        GenerateSpectrumMarchesDialog dialog = new GenerateSpectrumMarchesDialog(WindowManager.getDefault().getMainWindow(),allDSs);
+        GenerateSpectrumMatchesDialog dialog = new GenerateSpectrumMatchesDialog(WindowManager.getDefault().getMainWindow(),allDSs);
         dialog.setLocation(x, y);
         dialog.setVisible(true);
         if (dialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {

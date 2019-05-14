@@ -42,9 +42,6 @@ public abstract class AbstractJMSTask  extends AbstractLongTask implements Messa
     
     protected boolean m_synchronous;
     private int responseTimeout = 10000;
-        
-    
-    protected static int m_idIncrement = 0;
 
     protected static final Logger m_loggerProline = LoggerFactory.getLogger("ProlineStudio.DPM.Task");
     

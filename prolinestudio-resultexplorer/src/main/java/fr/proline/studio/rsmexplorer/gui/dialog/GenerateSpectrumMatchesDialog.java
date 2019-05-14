@@ -32,9 +32,9 @@ import javax.swing.SwingConstants;
  *
  * @author VD225637
  */
-public class GenerateSpectrumMarchesDialog extends DefaultDialog {
+public class GenerateSpectrumMatchesDialog extends DefaultDialog {
     
-//    private static GenerateSpectrumMarchesDialog m_singletonDialog = null;
+//    private static GenerateSpectrumMatchesDialog m_singletonDialog = null;
     private JLabel m_fragmentationRuleSetsLabel = null;
     private JComboBox m_fragmentationRuleSetsComboBox = null;
     private JCheckBox m_forceGenerateChB = null;
@@ -42,7 +42,7 @@ public class GenerateSpectrumMarchesDialog extends DefaultDialog {
     
     private List<DDataset> m_datasets = null;
        
-    public GenerateSpectrumMarchesDialog(Window parent){
+    public GenerateSpectrumMatchesDialog(Window parent){
         super(parent, Dialog.ModalityType.APPLICATION_MODAL);
          
         setTitle("Generate Spectrum Matches");
@@ -51,7 +51,7 @@ public class GenerateSpectrumMarchesDialog extends DefaultDialog {
         pack();
     }
     
-    public GenerateSpectrumMarchesDialog(Window parent,  List<DDataset> allDSs){
+    public GenerateSpectrumMatchesDialog(Window parent, List<DDataset> allDSs){
         super(parent, Dialog.ModalityType.APPLICATION_MODAL);
         m_datasets = allDSs;
         setTitle("Generate Spectrum Matches");
@@ -141,7 +141,7 @@ public class GenerateSpectrumMarchesDialog extends DefaultDialog {
         JButton viewFragmentationRuleSet = new JButton(IconManager.getIcon(IconManager.IconType.DOCUMENT_LIST));    
         viewFragmentationRuleSet.setMargin(new java.awt.Insets(2, 2, 2, 2));
         viewFragmentationRuleSet.setToolTipText("View Fragmentation Rule Sets");
-        final GenerateSpectrumMarchesDialog dialog = this;
+        final GenerateSpectrumMatchesDialog dialog = this;
         viewFragmentationRuleSet.addActionListener( new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {

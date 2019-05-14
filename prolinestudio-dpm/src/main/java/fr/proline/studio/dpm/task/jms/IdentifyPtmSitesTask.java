@@ -7,9 +7,10 @@ import com.thetransactioncompany.jsonrpc2.JSONRPC2Request;
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Response;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import fr.proline.studio.dpm.AccessJMSManagerThread;
-import static fr.proline.studio.dpm.task.jms.AbstractJMSTask.m_loggerProline;
 import fr.proline.studio.dpm.task.util.JMSConnectionManager;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.TextMessage;
@@ -25,15 +26,24 @@ public class IdentifyPtmSitesTask extends AbstractJMSTask {
     private Long m_projectId;
     private Long m_resultSummaryId;
     private Boolean m_forceAction;
-    
+    private String m_version;
+    private List<Long> m_ptmIds;
+    private String m_clusteringMethodName;
+
     public IdentifyPtmSitesTask(AbstractJMSCallback callback, String datasetName, Long projectId, Long resultSummaryId, Boolean force) {
         super(callback, new TaskInfo( ((datasetName != null) ? "Identify PTM sites for "+datasetName : "Identify PTM sites"), true, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_HIGH));
         m_projectId = projectId;
         m_resultSummaryId = resultSummaryId;
         m_forceAction = force;
     }
-    
-    
+
+    public IdentifyPtmSitesTask(AbstractJMSCallback callback, String datasetName, Long projectId, Long resultSummaryId, Boolean force, String version, List<Long> ptmIds, String clusteringMethodName) {
+        this(callback, datasetName, projectId, resultSummaryId, force);
+        this.m_version = version;
+        this.m_ptmIds = ptmIds;
+        this.m_clusteringMethodName = clusteringMethodName;
+    }
+
     @Override
     public void taskRun() throws JMSException {
         final JSONRPC2Request jsonRequest = new JSONRPC2Request(JMSConnectionManager.PROLINE_PROCESS_METHOD_NAME, Integer.valueOf(m_taskInfo.getId()));
@@ -44,6 +54,8 @@ public class IdentifyPtmSitesTask extends AbstractJMSTask {
         /* ReplyTo = Temporary Destination Queue for Server -> Client response */
         message.setJMSReplyTo(m_replyQueue);
         message.setStringProperty(JMSConnectionManager.PROLINE_SERVICE_NAME_KEY, m_serviceName);
+        if(m_version != null )
+            message.setStringProperty(JMSConnectionManager.PROLINE_SERVICE_VERSION_KEY, m_version);
         addSourceToMessage(message);    
         addDescriptionToMessage(message);
         
@@ -64,6 +76,12 @@ public class IdentifyPtmSitesTask extends AbstractJMSTask {
         } else {
             // WARNING : for development purpose ONLY ! (allow to recompute ptm site of a single RSM multiple times
             params.put("force",  true);
+        }
+        if (m_version != null) {
+            params.put("ptm_ids", m_ptmIds);
+            Map<String, Object> clusteringConfig = new HashMap<>();
+            clusteringConfig.put("method_name", m_clusteringMethodName);
+            params.put("clustering_config", clusteringConfig);
         }
         return params;
     }

@@ -11,7 +11,9 @@ import fr.proline.studio.dam.DatabaseDataManager;
 import fr.proline.studio.dpm.AccessJMSManagerThread;
 import fr.proline.studio.dpm.task.jms.AbstractJMSCallback;
 import fr.proline.studio.dpm.task.jms.IdentifyPtmSitesTask;
+import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
+import fr.proline.studio.rsmexplorer.gui.dialog.IdentifyPtmSitesDialog;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
@@ -19,6 +21,7 @@ import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
 import fr.proline.studio.rsmexplorer.tree.quantitation.QuantitationTree;
 import javax.swing.tree.DefaultTreeModel;
 import org.openide.util.NbBundle;
+import org.openide.windows.WindowManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -74,13 +77,25 @@ public class IdentifyPtmSitesJMSAction extends AbstractRSMAction {
             };
             
             final DDataset dataset = node.getDataset();
-            Long projectId = dataset.getProject().getId();
-            Long resultSummaryId = dataset.getResultSummaryId();
-            IdentifyPtmSitesTask task = new IdentifyPtmSitesTask(callback, dataset.getName(), projectId, resultSummaryId, null);
-            AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
+            
+            IdentifyPtmSitesDialog dialog = new IdentifyPtmSitesDialog(WindowManager.getDefault().getMainWindow(),dataset);
+            dialog.setLocation(x, y);
+            dialog.setVisible(true);
+            if (dialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {
+              Long projectId = dataset.getProject().getId();
+              Long resultSummaryId = dataset.getResultSummaryId();
+
+              IdentifyPtmSitesTask task;
+
+              if (dialog.getServiceVersion().equals("2.0")) {
+                  task = new IdentifyPtmSitesTask(callback, dataset.getName(), projectId, resultSummaryId, null, dialog.getServiceVersion(), dialog.getPtms(), dialog.getClusteringMethodName());
+              } else {
+                  task = new IdentifyPtmSitesTask(callback, dataset.getName(), projectId, resultSummaryId, null);
+              }
+
+              AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
+            }
         }
-        
-        
     }
 
 

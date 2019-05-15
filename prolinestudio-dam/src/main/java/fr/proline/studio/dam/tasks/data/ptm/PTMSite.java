@@ -7,11 +7,9 @@ package fr.proline.studio.dam.tasks.data.ptm;
 
 import fr.proline.core.orm.msi.dto.*;
 
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * A PTM Site is for one given protein , the modification on a amino acide, so 4
@@ -31,7 +29,7 @@ public class PTMSite {
 
     private DPeptideMatch m_bestPeptideMatch;
     /**
-     * map of peptied Id, peptide
+     * map of peptideId, peptideInstance
      */
     private Map<Long, PTMSitePeptideInstance> m_ptmSitePeptideInstanceByPepId;
     /**
@@ -85,7 +83,7 @@ public class PTMSite {
     
     /**
      * With leafInstances, we can create a map of leafPepInstanceByPepId
-     * For each peptide found in parentPeptideInstances, we instancier a PTMPeptideInstance, set it's start postion. 
+     * For each peptide found in parentPeptideInstances, we instantiate a PTMPeptideInstance, set it's start postion.
      * With the peptideId, we can find all of it's leafPeptide, so that a new PTMSitePeptideInstance is create. 
      * at last, we put this PTMSitePeptideInstance in the m_ptmSitePeptideInstanceByPepId.
      * @param parentPeptideInstances
@@ -104,7 +102,6 @@ public class PTMSite {
             PTMSitePeptideInstance ptmSitePeptideInstance = new PTMSitePeptideInstance(this, ptmPeptide, leafPeptideInstances, getBestPeptideMatch(leafPeptideInstances));
             m_ptmSitePeptideInstanceByPepId.put(peptideId, ptmSitePeptideInstance);
         }
-
     }
 
     public List<DPeptideInstance> getParentPeptideInstances() {
@@ -129,7 +126,7 @@ public class PTMSite {
 
     private DPeptideMatch getBestPeptideMatch(List<DPeptideInstance> peptideInstances) {
 
-        List<DPeptideMatch> pepMatches = peptideInstances.stream().flatMap(pi -> pi.getPeptideMatches().stream()).collect(Collectors.toList());
+        List<DPeptideMatch> pepMatches = peptideInstances.stream().flatMap(pi -> Optional.ofNullable(pi.getPeptideMatches()).map(Collection::stream).orElseGet(Stream::empty)).collect(Collectors.toList());
 
         final Float bestProba[] = new Float[1];
         bestProba[0] = 0.00f;
@@ -220,11 +217,6 @@ public class PTMSite {
 
     public Integer getPositionOnProtein() {
         return m_site.seqPosition;
-    }
-
-    public Character getAminoAcid(){
-        Character AA = m_ptmSpecificity.getResidueAASpecificity();
-        return AA;
     }
 
     public void setExpressionValue(Object value) {

@@ -22,7 +22,7 @@ import java.util.Map;
  * @author Karine XUE
  */
 public class RTCompareTableModel implements ExtendedTableModelInterface {
-    // |PEPTEDE_ID|PEPTEDE_SEQUENCE|CHARGE|ELUTION_TIME_FROM|_eTimeTo[0]|_eTimeTo[1]|....|_eTimeTo[n]|
+    // |PEPTIDE_ID|PEPTIDE_SEQUENCE|CHARGE|ELUTION_TIME_FROM|_eTimeTo[0]|_eTimeTo[1]|....|_eTimeTo[n]|
 
     private String m_modelName;
 
@@ -41,8 +41,8 @@ public class RTCompareTableModel implements ExtendedTableModelInterface {
      */
     private Map<Long, String> m_idNameMap;
     private String[] m_columnName;
-    private static int PEPTEDE_ID = 0;
-    private static int PEPTEDE_SEQUENCE = 1;
+    private static int PEPTIDE_ID = 0;
+    private static int PEPTIDE_SEQUENCE = 1;
     private static int CHARGE = 2;
     private static int ELUTION_TIME_FROM = 3;
     private int m_mapCount;
@@ -62,8 +62,8 @@ public class RTCompareTableModel implements ExtendedTableModelInterface {
         m_rsmIdArray = rsmIdArray;
         m_data = new ArrayList<>();
         m_columnName = new String[rsmIdArray.length + 3];
-        m_columnName[PEPTEDE_ID] = "Peptide Id";//[0]
-        m_columnName[PEPTEDE_SEQUENCE] = "Peptide Seqence";//[1]
+        m_columnName[PEPTIDE_ID] = "Peptide Id";//[0]
+        m_columnName[PEPTIDE_SEQUENCE] = "Peptide Sequence";//[1]
         m_columnName[CHARGE] = "Charge";//[2]
         m_columnName[ELUTION_TIME_FROM] = "Time in Map " + m_idNameMap.get(rsmIdArray[0]) + " (min)";
         for (int i = 4; i < rsmIdArray.length + 3; i++) {
@@ -174,9 +174,9 @@ public class RTCompareTableModel implements ExtendedTableModelInterface {
     @Override
     public Class getDataColumnClass(int columnIndex) {
         switch (columnIndex) {
-            case 0://MapRTCompareTableModel.PEPTEDE_ID:
+            case 0://MapRTCompareTableModel.PEPTIDE_ID:
                 return Long.class;
-            case 1://MapRTCompareTableModel.PEPTEDE_SEQUENCE:
+            case 1://MapRTCompareTableModel.PEPTIDE_SEQUENCE:
                 return String.class;
             case 2://MapRTCompareTableModel.CHARGE:
                 return Integer.class;
@@ -188,9 +188,9 @@ public class RTCompareTableModel implements ExtendedTableModelInterface {
     @Override
     public Object getDataValueAt(int rowIndex, int columnIndex) {
         RTCompareRow row = this.m_data.get(rowIndex);
-        if (columnIndex == RTCompareTableModel.PEPTEDE_ID) {
+        if (columnIndex == RTCompareTableModel.PEPTIDE_ID) {
             return row._peptideId;
-        } else if (columnIndex == RTCompareTableModel.PEPTEDE_SEQUENCE) {
+        } else if (columnIndex == RTCompareTableModel.PEPTIDE_SEQUENCE) {
             return row._peptideSequence;
         } else if (columnIndex == RTCompareTableModel.CHARGE) {
             return row._charge;
@@ -236,7 +236,7 @@ public class RTCompareTableModel implements ExtendedTableModelInterface {
 
     @Override
     public int getInfoColumn() {
-        return RTCompareTableModel.PEPTEDE_SEQUENCE;
+        return RTCompareTableModel.PEPTIDE_SEQUENCE;
     }
 
     /**

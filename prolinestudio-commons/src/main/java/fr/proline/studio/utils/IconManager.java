@@ -543,9 +543,9 @@ public class IconManager {
               case ARROW_MOVE_DOWN:
                 return "fr/proline/studio/images/move-down.png";
             case ARROW_INSERT_UP:
-                return "fr/proline/studio/images/move-up.png";
+                return "fr/proline/studio/images/insert-up.png";
             case ARROW_INSERT_DOWN:
-                return "fr/proline/studio/images/move-down.png";
+                return "fr/proline/studio/images/insert-down.png";
             case ADD_DATA_ANALYZER:
                 return "fr/proline/studio/images/data-analyzer-add.png";
             case DATA_ANALYZER:

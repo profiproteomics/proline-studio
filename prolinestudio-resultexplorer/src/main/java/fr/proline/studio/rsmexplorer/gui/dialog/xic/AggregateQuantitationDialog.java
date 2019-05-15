@@ -128,7 +128,7 @@ public class AggregateQuantitationDialog extends DefaultDialog {
 
     public void displayExperimentalDesignTree() {
         AbstractNode rootNode = inferExperimentalDesign();
-        displayExperimentalDesignTree(rootNode);
+        displayStep1ExperimentalDesignTree(rootNode);
     }
 
     /**
@@ -136,11 +136,12 @@ public class AggregateQuantitationDialog extends DefaultDialog {
      *
      * @param node
      */
-    public void displayExperimentalDesignTree(AbstractNode node) {
-        String step1Title = "<html><b>Step 1:</b> Define the aggregation experimental design.</html>";
-        String step1Help = " <html>The proposed experimental design is inferred from the quantitations to aggregate. You can: <br>"
-                + "  - <b>change</b> the order (using Drag & Drop)<br> "
-                + "  - <b>rename</b> the groups, samples and/or repliques (runs) by using F2 or contextual menu.  </html>";
+    public void displayStep1ExperimentalDesignTree(AbstractNode node) {
+        String step1Title = "Step 1: Define the aggregation experimental design";
+        String step1Help = " The following experimental design was inferred from the quantitation that will be aggregated. Group, samples and channels (replicates) entities can be modified<br>"
+                + " &nbsp - &nbsp Change entities <b>order</b> by drag and drop<br> "
+                + " &nbsp - &nbsp <b>Rename</b> entities by pressing &lt F2 &gt or contextual menu (right click)<br> \n" 
+                + " &nbsp - &nbsp <b>Create</b> or <b>delete</b> entities from the contextual menu.";
         if (m_quantitations != null && m_quantitations.size() > 0) {
             m_step = STEP_PANEL_DEFINE_EXP_DESIGN;
             setButtonName(DefaultDialog.BUTTON_OK, "Next");
@@ -170,7 +171,7 @@ public class AggregateQuantitationDialog extends DefaultDialog {
     /**
      * setp 2 panel
      */
-    private void displayQuantChannelsMapping() {
+    private void displayStep2QuantChannelsMapping() {
         m_step = STEP_PANEL_DEFINE_AGGREGATION_PARAMS;
 
         setButtonName(DefaultDialog.BUTTON_OK, org.openide.util.NbBundle.getMessage(DefaultDialog.class, "DefaultDialog.okButton.text"));
@@ -189,7 +190,7 @@ public class AggregateQuantitationDialog extends DefaultDialog {
     @Override
     protected boolean okCalled() {
         if (m_step == STEP_PANEL_DEFINE_EXP_DESIGN) {
-            displayQuantChannelsMapping();
+            displayStep2QuantChannelsMapping();
             return false;
         }
         return true;
@@ -198,7 +199,7 @@ public class AggregateQuantitationDialog extends DefaultDialog {
     @Override
     protected boolean backCalled() {
         if (m_step == STEP_PANEL_DEFINE_AGGREGATION_PARAMS) {
-            displayExperimentalDesignTree(m_experimentalDesignNode);
+            displayStep1ExperimentalDesignTree(m_experimentalDesignNode);
             return false;
         }
         return false;

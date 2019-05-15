@@ -9,8 +9,6 @@ import fr.proline.studio.utils.IconManager;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
@@ -33,11 +31,16 @@ import org.slf4j.LoggerFactory;
  */
 public class QCMappingTreeTable extends JXTreeTable {
 
-    //private static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer.AggregationQuant");
+    private static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer.AggregationQuant");
     private static final int UP = -1;
     private static final int DOWN = 1;
+    public static final String ERRASE = "Remove";
+    public static final String MOVE_UP = "Move Up";
+    public static final String MOVE_DOWN = "Move Down";
+    public static final String INSERT_UP = "Insert Up";
+    public static final String INSERT_DOWN = "Insert Down";
     private QCMappingTreeTableModel m_model;
-    private boolean m_isAltDown;
+    //private boolean m_isAltDown;
 
     public QCMappingTreeTable(QCMappingTreeTableModel treeModel) {
         super(treeModel);
@@ -45,28 +48,6 @@ public class QCMappingTreeTable extends JXTreeTable {
         m_model.cloneMapping();
         setCellSelectionEnabled(true);
         this.addMouseListener(new PopupAdapter());
-        this.addKeyListener(new KeyAdapter() {
-            @Override
-            public void keyPressed(KeyEvent e) {
-                if (e.getKeyCode() == KeyEvent.VK_ALT) {
-                    if (m_isAltDown == false) {
-                        m_model.cloneMapping();
-                        m_isAltDown = true;
-                    }
-
-                }
-            }
-
-            @Override
-            public void keyReleased(KeyEvent e) {
-                if (e.getKeyCode() == KeyEvent.VK_ALT) {
-                    if (m_isAltDown == true) {
-                        m_model.cleanStartingMapping();
-                        m_isAltDown = false;
-                    }
-                }
-            }
-        });
     }
 
     @Override
@@ -109,9 +90,13 @@ public class QCMappingTreeTable extends JXTreeTable {
         this.setRowSelectionInterval(min, max);//selection must be continue
     }
 
-    protected void moveInsertUpDown(int weight, boolean isInsertMode) {
-        if (isInsertMode)
+    protected void moveUpDown(int weight, boolean isInsertMode) {
+        if (getSelectedRows().length == 0) {
+            return;
+        }
+        if (isInsertMode) {
             setContinueSelected();
+        }
         int[] rows = getSelectedRows();
         //get selected row, range it in order ascending(for up) ou descending(for down)
         List<Integer> newSelectedRows = new ArrayList();
@@ -128,23 +113,28 @@ public class QCMappingTreeTable extends JXTreeTable {
         //move up/down for each cell
         int[] columnList = getSelectedColumns();
         m_model.setSelected(getSelectedRows(), getSelectedColumns());
-        if (isInsertMode){
-        m_model.preInsertMove(rowList.get(0), rowList.get(rowList.size() - 1), columnList, weight);
+        if (isInsertMode) {
+            m_model.preInsertMove(rowList.get(0), rowList.get(rowList.size() - 1), columnList, weight);
         }
         int row, targetRow;
         for (int i = 0; i < rowList.size(); i++) {
             //for (int row : rowList) {
             row = rowList.get(i);
             for (int column : columnList) {
-                targetRow = m_model.moveUpDown(row, column, weight, (isInsertMode)? false:m_isAltDown);
+                if (column == 0) {
+                    continue;
+                }
+                targetRow = m_model.moveUpDown(row, column, weight);
+                m_logger.debug("targetRow: {}",targetRow );
                 if (targetRow != -1) {
                     newSelectedRows.add(targetRow);
                 }
             }
         }
-        if (isInsertMode)
-        m_model.postInsertMove(rowList.get(rowList.size() - 1), columnList);
-
+        if (isInsertMode) {
+            m_model.postInsertMove(rowList.get(rowList.size() - 1), columnList);
+        }
+        m_logger.debug("newSelectedRow index: {}", newSelectedRows);
         //set the new selected rows colomns
         if (newSelectedRows.size() > 0) {
             Collections.sort(newSelectedRows);
@@ -162,19 +152,19 @@ public class QCMappingTreeTable extends JXTreeTable {
     }
 
     public void moveUp() {
-        moveInsertUpDown(UP, false);
+        moveUpDown(UP, false);
     }
 
     public void moveDown() {
-        moveInsertUpDown(DOWN, false);
+        moveUpDown(DOWN, false);
     }
 
     public void moveInsertUp() {
-        moveInsertUpDown(UP, true);
+        moveUpDown(UP, true);
     }
 
     public void moveInsertDown() {
-        moveInsertUpDown(DOWN, true);
+        moveUpDown(DOWN, true);
     }
 
     //select column, row
@@ -206,41 +196,39 @@ public class QCMappingTreeTable extends JXTreeTable {
         ActionListener menuListener = new ActionListener() {
             public void actionPerformed(ActionEvent event) {
                 String command = event.getActionCommand();
-                if (command.equals("remove")) {
+                if (command.equals(ERRASE)) {
                     removeAssociateChannel();
-                } else if (command.equals("Insert up")) {
-                    m_isAltDown = (e.isAltDown()) ? true : false;
-                    moveInsertUpDown(UP, true);
-                } else if (command.equals("Insert down")) {
-                    m_isAltDown = (e.isAltDown()) ? true : false;
-                    moveInsertUpDown(DOWN, true);
+                } else if (command.equals(INSERT_UP)) {
+                    moveUpDown(UP, true);
+                } else if (command.equals(INSERT_DOWN)) {
+                    moveUpDown(DOWN, true);
+                } else if (command.equals(MOVE_UP)) {
+                    moveUpDown(UP, false);
+                } else if (command.equals(MOVE_DOWN)) {
+                    moveUpDown(DOWN, false);
                 }
             }
         };
         JMenuItem item;
-        popup.add(item = new JMenuItem("remove"));
+        popup.add(item = new JMenuItem(ERRASE, IconManager.getIcon(IconManager.IconType.ERASER)));
         item.setHorizontalTextPosition(JMenuItem.RIGHT);
         item.addActionListener(menuListener);
         popup.addSeparator();
-        popup.add(item = new JMenuItem("Insert up", IconManager.getIcon(IconManager.IconType.ARROW_MOVE_UP)));
+        popup.add(item = new JMenuItem(INSERT_UP, IconManager.getIcon(IconManager.IconType.ARROW_INSERT_UP)));
         item.setHorizontalTextPosition(JMenuItem.RIGHT);
         item.addActionListener(menuListener);
-        popup.add(item = new JMenuItem("Insert down", IconManager.getIcon(IconManager.IconType.ARROW_MOVE_DOWN)));
+        popup.add(item = new JMenuItem(INSERT_DOWN, IconManager.getIcon(IconManager.IconType.ARROW_INSERT_DOWN)));
+        item.setHorizontalTextPosition(JMenuItem.RIGHT);
+        item.addActionListener(menuListener);
+        popup.addSeparator();
+        popup.add(item = new JMenuItem(MOVE_UP, IconManager.getIcon(IconManager.IconType.ARROW_MOVE_UP)));
+        item.setHorizontalTextPosition(JMenuItem.RIGHT);
+        item.addActionListener(menuListener);
+        popup.add(item = new JMenuItem(MOVE_DOWN, IconManager.getIcon(IconManager.IconType.ARROW_MOVE_DOWN)));
         item.setHorizontalTextPosition(JMenuItem.RIGHT);
         item.addActionListener(menuListener);
 
         popup.show((JComponent) e.getSource(), e.getX(), e.getY());
-    }
-
-    public void setAltDown(boolean b) {
-        if (m_isAltDown != b) {
-            this.m_isAltDown = b;
-            if (m_isAltDown == true) {
-                m_model.cloneMapping();
-            } else {
-                m_model.cleanStartingMapping();
-            }
-        }
     }
 
     class PopupAdapter extends MouseAdapter {

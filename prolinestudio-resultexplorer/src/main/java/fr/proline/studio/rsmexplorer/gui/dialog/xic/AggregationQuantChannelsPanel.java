@@ -23,8 +23,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -38,7 +36,6 @@ import java.util.stream.Collectors;
 public class AggregationQuantChannelsPanel extends JPanel {
 
     protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
-
     private static AggregationQuantChannelsPanel m_singleton;
     private QCMappingTreeTable m_treeTable;
     private QCMappingTreeTableModel m_treeTableModel;
@@ -56,27 +53,20 @@ public class AggregationQuantChannelsPanel extends JPanel {
 
     private AggregationQuantChannelsPanel() {
         setLayout(new BorderLayout());
-        String title = "<html><b>Step 2:</b> Define mapping between quantitation channels, verify if proposed quantification channel is OK.</html>";
+        String title = "Step2. Define quantitation channels mapping";
         String dndImage = IconManager.getURLForIcon(IconManager.IconType.DRAG_AND_DROP);
 
-        String help = "For each aggregated quantitation, associate initials quantitation channels to final ones: <br>"
-                + "&nbsp -<b>Drag and drop</b><img src=" + dndImage + "> quantitation channel(s) from experimental design on the right to the mapping table on the left.<br>"
-                + "&nbsp -It is also possible to <b>remove</b> an existing mapping (if no matching should be done), it will be replaced by  &lt ignore &gt .<br>"
-                + "&nbsp --To do this, remove or <b>insert shifting up or down</b> other quant channels.";
+        String help = "Each quantitation channel of the aggregation will correspond to sample analyses of aggregated quantitations. The following modifications can be made: <br>"
+                + " &nbsp - &nbsp <b>Change association</b> by dragging and dropping sample analysis from the right panel to the table cell<br>"
+                + " &nbsp - &nbsp <b>Remove association</b> by using the contextual menu or the toolbar<br>"
+                + " &nbsp - &nbsp <b>Move</b> analyses up or down by using the toolbar or the contextual menu.";
 
         add(new WizardPanel(title, help), BorderLayout.NORTH);
         add(createMainPanel(), BorderLayout.CENTER);
     }
 
     public final JPanel createMainPanel() {
-        JPanel mainPanel = new JPanel();
-        mainPanel.setLayout(new GridBagLayout());
-        final GridBagConstraints c = new GridBagConstraints();
-        c.anchor = GridBagConstraints.NORTHWEST;
-        c.fill = GridBagConstraints.BOTH;
-        c.insets = new java.awt.Insets(5, 5, 5, 5);
-
-        JPanel framePanel = new JPanel(new GridBagLayout());
+        JPanel mainPanel = new JPanel(new BorderLayout());
 
         JSplitPane sp = new JSplitPane();
         sp.setLeftComponent(createQCMappingPanel());
@@ -84,34 +74,20 @@ public class AggregationQuantChannelsPanel extends JPanel {
         sp.setDividerLocation(0.70);
         sp.setResizeWeight(0.5);
 
-        final GridBagConstraints frameConstraints = new GridBagConstraints();
-        frameConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        frameConstraints.gridx = 0;
-        frameConstraints.gridy = 0;
-        //frameConstraints.gridwidth = 1;
-        frameConstraints.weightx = 1;
-        frameConstraints.weighty = 0;
-        frameConstraints.anchor = GridBagConstraints.NORTHWEST;
-        frameConstraints.fill = GridBagConstraints.NONE;
+        JToolBar mappingToolBar = new QCMappingToolbar();
+        mappingToolBar.setFloatable(false);
+        mappingToolBar.setRollover(true);
 
-        JPanel mappingToolBar = new QCMappingToolbar();
-        framePanel.add(mappingToolBar, frameConstraints);
+        JPanel toolbarPanel = new JPanel();
 
-        frameConstraints.anchor = GridBagConstraints.NORTHWEST;
-        frameConstraints.fill = GridBagConstraints.BOTH;
-        //frameConstraints.gridwidth = 1;
-        frameConstraints.gridy++;
-        frameConstraints.weighty = 1;
-        framePanel.add(sp, frameConstraints);
+        toolbarPanel.setLayout(new BoxLayout(toolbarPanel, BoxLayout.LINE_AXIS));
+        toolbarPanel.add(Box.createHorizontalGlue());
+        toolbarPanel.add(mappingToolBar);
+        toolbarPanel.add(Box.createHorizontalGlue());
+        toolbarPanel.add(Box.createHorizontalGlue());
 
-        c.gridx = 0;
-        c.gridy = 0;
-        c.weightx = 1;
-        c.weighty = 1;
-        c.anchor = GridBagConstraints.NORTHWEST;
-        c.fill = GridBagConstraints.BOTH;
-        mainPanel.add(framePanel, c);
-
+        mainPanel.add(toolbarPanel, BorderLayout.NORTH);
+        mainPanel.add(sp, BorderLayout.CENTER);
         return mainPanel;
     }
 
@@ -211,7 +187,7 @@ public class AggregationQuantChannelsPanel extends JPanel {
         return mappingList;
     }
 
-    class QCMappingToolbar extends JPanel {
+    class QCMappingToolbar extends JToolBar {
 
         JButton m_removeBt;
         JButton m_upBt;
@@ -226,28 +202,19 @@ public class AggregationQuantChannelsPanel extends JPanel {
             createDownButton();
             createInsertUpButton();
             createInsertDownButton();
-            setLayout(new GridBagLayout());
-            final GridBagConstraints c = new GridBagConstraints();
-            c.insets = new java.awt.Insets(5, 5, 5, 5);
-            c.gridx = 0;
-            c.gridy = 0;
-            c.weightx = 1;
-            c.weighty = 0;
-            c.fill = GridBagConstraints.HORIZONTAL;
 
-            this.add(m_removeBt, c);
-            c.gridx++;
-            this.add(m_upBt, c);
-            c.gridx++;
-            this.add(m_downBt, c);
-            c.gridx++;
-            this.add(m_insertUpBt, c);
-            c.gridx++;
-            this.add(m_insertDownBt, c);
+            this.add(m_removeBt);
+            this.addSeparator();
+            this.add(m_upBt);
+            this.add(m_downBt);
+            this.addSeparator();
+            this.add(m_insertUpBt);
+            this.add(m_insertDownBt);
         }
 
         private void createRemoveButton() {
-            m_removeBt = new JButton("Remove this analysis");
+            m_removeBt = new JButton(IconManager.getIcon(IconManager.IconType.ERASER));
+            m_removeBt.setToolTipText(QCMappingTreeTable.ERRASE);
             m_removeBt.addActionListener(new ActionListener() {
 
                 @Override
@@ -260,21 +227,20 @@ public class AggregationQuantChannelsPanel extends JPanel {
         private void createUpButton() {
             m_upBt = new JButton();
             m_upBt.setIcon(IconManager.getIcon(IconManager.IconType.ARROW_MOVE_UP));
-            m_upBt.setToolTipText("Shift this analysis up");
+            m_upBt.setToolTipText(QCMappingTreeTable.MOVE_UP);
             m_upBt.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     m_treeTable.moveUp();
                 }
             });
-            m_upBt.addKeyListener(new AltKeyAdapter());
 
         }
 
         private void createDownButton() {
             m_downBt = new JButton();
             m_downBt.setIcon(IconManager.getIcon(IconManager.IconType.ARROW_MOVE_DOWN));
-            m_downBt.setToolTipText("Shift this analysis down");
+            m_downBt.setToolTipText(QCMappingTreeTable.MOVE_DOWN);
             m_downBt.addActionListener(new ActionListener() {
 
                 @Override
@@ -283,13 +249,11 @@ public class AggregationQuantChannelsPanel extends JPanel {
                     m_treeTable.moveDown();
                 }
             });
-            m_downBt.addKeyListener(new AltKeyAdapter());
         }
 
         void createInsertUpButton() {
-            m_insertUpBt = new JButton("Insert Up");
-            m_insertUpBt.setIcon(IconManager.getIcon(IconManager.IconType.ARROW_MOVE_UP));
-            m_insertUpBt.setToolTipText("Insert Up");
+            m_insertUpBt = new JButton(IconManager.getIcon(IconManager.IconType.ARROW_INSERT_UP));
+            m_insertUpBt.setToolTipText(QCMappingTreeTable.INSERT_UP);
             m_insertUpBt.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
@@ -299,9 +263,8 @@ public class AggregationQuantChannelsPanel extends JPanel {
         }
 
         void createInsertDownButton() {
-            m_insertDownBt = new JButton("Insert down");
-            m_insertDownBt.setIcon(IconManager.getIcon(IconManager.IconType.ARROW_MOVE_DOWN));
-            m_insertDownBt.setToolTipText("Insert down");
+            m_insertDownBt = new JButton(IconManager.getIcon(IconManager.IconType.ARROW_INSERT_DOWN));
+            m_insertDownBt.setToolTipText(QCMappingTreeTable.INSERT_DOWN);
             m_insertDownBt.addActionListener(new ActionListener() {
 
                 @Override
@@ -309,23 +272,6 @@ public class AggregationQuantChannelsPanel extends JPanel {
                     m_treeTable.moveInsertDown();
                 }
             });
-        }
-
-        class AltKeyAdapter extends KeyAdapter {
-
-            @Override
-            public void keyPressed(KeyEvent e) {
-                if (e.getKeyCode() == KeyEvent.VK_ALT) {
-                    m_treeTable.setAltDown(true);
-                }
-            }
-
-            @Override
-            public void keyReleased(KeyEvent e) {
-                if (e.getKeyCode() == KeyEvent.VK_ALT) {
-                    m_treeTable.setAltDown(false);
-                }
-            }
         }
 
     }

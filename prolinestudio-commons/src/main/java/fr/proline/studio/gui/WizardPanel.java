@@ -51,11 +51,12 @@ public class WizardPanel extends JPanel {
 
     /**
      * When we have helpText, show Html suppted JTextPane
-     *
-     * @param title
-     * @param helpText
+     * @param htmlSupportedTitle
+     * @param htmlSupportedHelpText 
      */
-    public void htmlWizard(String title, String helpText) {
+    public void htmlWizard(String htmlSupportedTitle, String htmlSupportedHelpText) {
+        String title = htmlSupportedTitle;
+        String helpText = htmlSupportedHelpText;
         setLayout(new BorderLayout());
         setBackground(Color.white);
         /**

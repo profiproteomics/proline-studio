@@ -10,7 +10,6 @@ import fr.proline.core.orm.uds.BiologicalSample;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dam.data.DataSetData;
 import fr.proline.studio.gui.DefaultDialog;
-import fr.proline.studio.gui.WizardPanel;
 import fr.proline.studio.rsmexplorer.gui.TreeUtils;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
@@ -140,8 +139,9 @@ public class AggregateQuantitationDialog extends DefaultDialog {
         String step1Title = "Step 1: Define the aggregation experimental design";
         String step1Help = " The following experimental design was inferred from the quantitation that will be aggregated. Group, samples and channels (replicates) entities can be modified<br>"
                 + " &nbsp - &nbsp Change entities <b>order</b> by drag and drop<br> "
-                + " &nbsp - &nbsp <b>Rename</b> entities by pressing &lt F2 &gt or contextual menu (right click)<br> \n" 
+                + " &nbsp - &nbsp <b>Rename</b> entities by pressing &lt F2 &gt or contextual menu (right click)<br> \n"
                 + " &nbsp - &nbsp <b>Create</b> or <b>delete</b> entities from the contextual menu.";
+        this.setHelp(step1Title, step1Help);
         if (m_quantitations != null && m_quantitations.size() > 0) {
             m_step = STEP_PANEL_DEFINE_EXP_DESIGN;
             setButtonName(DefaultDialog.BUTTON_OK, "Next");
@@ -156,7 +156,7 @@ public class AggregateQuantitationDialog extends DefaultDialog {
                 JScrollPane treePanel = new JScrollPane();
                 m_designPanel.setLayout(new BorderLayout());
                 QuantExperimentalDesignTree designTree = new QuantExperimentalDesignTree(m_experimentalDesignNode, true);
-                m_designPanel.add(new WizardPanel(step1Title, step1Help), BorderLayout.NORTH);
+                //m_designPanel.add(new WizardPanel(step1Title, step1Help), BorderLayout.NORTH);
                 treePanel.setViewportView(designTree);
                 m_designPanel.add(treePanel, BorderLayout.CENTER);
 
@@ -180,7 +180,12 @@ public class AggregateQuantitationDialog extends DefaultDialog {
         setButtonVisible(BUTTON_BACK, true);
         setButtonVisible(BUTTON_LOAD, false);
         setButtonVisible(BUTTON_SAVE, false);
-
+        String step2Title = "Step2. Define quantitation channels mapping";
+        String step2Help = "Each quantitation channel of the aggregation will correspond to sample analyses of aggregated quantitations. The following modifications can be made: <br>"
+                + " &nbsp - &nbsp <b>Change association</b> by dragging and dropping sample analysis from the right panel to the table cell<br>"
+                + " &nbsp - &nbsp <b>Remove association</b> by using the contextual menu or the toolbar<br>"
+                + " &nbsp - &nbsp <b>Move</b> analyses up or down by using the toolbar or the contextual menu.";
+        this.setHelp(step2Title, step2Help);
         m_quantChannelsPanel = AggregationQuantChannelsPanel.getPanel(m_experimentalDesignNode, m_quantitations);
         replaceInternalComponent(m_quantChannelsPanel);
         revalidate();

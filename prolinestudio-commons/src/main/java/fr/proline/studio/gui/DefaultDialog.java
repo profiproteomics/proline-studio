@@ -48,6 +48,8 @@ public class DefaultDialog extends javax.swing.JDialog {
 
     private DefaultDialogListener m_defaultDialogListener;
 
+    private JPanel m_helpPanel;
+
     /**
      * Creates new form AbstractDialog
      */
@@ -163,6 +165,36 @@ public class DefaultDialog extends javax.swing.JDialog {
 
     public int getButtonClicked() {
         return m_buttonClicked;
+    }
+
+    /**
+     * set Help without title, with default 'INFORMATION' icon.
+     *
+     * @param htmlSupportedTxt
+     */
+    public void setHelpText(String htmlSupportedTxt) {
+        this.setHelp(IconManager.getIcon(IconManager.IconType.INFORMATION), null, htmlSupportedTxt);
+    }
+
+    /**
+     * set Help without title
+     *
+     * @param icon
+     * @param htmlSupportedTxt
+     */
+    public void setHelpTextWithIcon(Icon icon, String htmlSupportedTxt) {
+        this.setHelp(icon, null, htmlSupportedTxt);
+    }
+
+    public void setHelp(String title, String htmlSupportedTxt) {
+        m_helpPanel.removeAll();
+        m_helpPanel.add(new WizardPanel(title, htmlSupportedTxt), BorderLayout.CENTER);
+    }
+
+    public void setHelp(Icon icon, String title, String htmlSupportedTxt) {
+        m_helpPanel.removeAll();
+        m_helpPanel.add(new WizardPanel(icon, title, htmlSupportedTxt), BorderLayout.CENTER);;
+        repaint();
     }
 
     protected void setInternalComponent(Component component) {
@@ -303,9 +335,16 @@ public class DefaultDialog extends javax.swing.JDialog {
 
         c.gridy++;
         c.weighty = 1;
+
+        JPanel mainPanel = new JPanel(new BorderLayout());
+        m_helpPanel = new JPanel(new BorderLayout());
+        mainPanel.add(m_helpPanel, BorderLayout.NORTH);
+
         m_internalPanel = new JPanel();
         m_internalPanel.setLayout(new GridBagLayout());
-        add(m_internalPanel, c);
+        mainPanel.add(m_internalPanel, BorderLayout.CENTER);
+
+        add(mainPanel, c);
 
         JPanel buttonPanel = createButtonPanel();
         c.gridy++;

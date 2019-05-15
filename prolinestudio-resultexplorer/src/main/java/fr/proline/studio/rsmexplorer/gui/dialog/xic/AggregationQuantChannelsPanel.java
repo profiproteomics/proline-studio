@@ -7,7 +7,6 @@ package fr.proline.studio.rsmexplorer.gui.dialog.xic;
 
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dam.data.DataSetData;
-import fr.proline.studio.gui.WizardPanel;
 import fr.proline.studio.rsmexplorer.gui.dialog.xic.aggregation.QCMappingTreeTable;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
@@ -53,15 +52,6 @@ public class AggregationQuantChannelsPanel extends JPanel {
 
     private AggregationQuantChannelsPanel() {
         setLayout(new BorderLayout());
-        String title = "Step2. Define quantitation channels mapping";
-        String dndImage = IconManager.getURLForIcon(IconManager.IconType.DRAG_AND_DROP);
-
-        String help = "Each quantitation channel of the aggregation will correspond to sample analyses of aggregated quantitations. The following modifications can be made: <br>"
-                + " &nbsp - &nbsp <b>Change association</b> by dragging and dropping sample analysis from the right panel to the table cell<br>"
-                + " &nbsp - &nbsp <b>Remove association</b> by using the contextual menu or the toolbar<br>"
-                + " &nbsp - &nbsp <b>Move</b> analyses up or down by using the toolbar or the contextual menu.";
-
-        add(new WizardPanel(title, help), BorderLayout.NORTH);
         add(createMainPanel(), BorderLayout.CENTER);
     }
 

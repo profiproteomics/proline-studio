@@ -3,8 +3,6 @@ package fr.proline.studio.rsmexplorer.gui.dialog;
 import fr.proline.studio.dpm.data.ChangeTypicalRule;
 import fr.proline.studio.gui.DefaultDialog;
 import java.awt.*;
-import java.io.File;
-import java.io.IOException;
 import java.util.List;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
@@ -52,10 +50,8 @@ public class ChangeTypicalProteinDialog extends DefaultDialog {
 
         c.gridx = 0;
         c.gridy = 0;
-        JTextArea helpTxt = new JTextArea("Specify rules to satisfy for choosing typical protein, in priority order: \n For each protein set, rule 0 will be tested then rule 1...");
-        helpTxt.setRows(2);
-        helpTxt.setForeground(Color.gray);
-        internalPanel.add(helpTxt, c);
+        this.setHelpText("Specify rules to satisfy for choosing typical protein, in priority order: <br> "
+                + "For each protein set, rule 0 will be tested then rule 1...");
 
         changePanel = new ChangeTypicalProteinPanel();
         c.gridy++;

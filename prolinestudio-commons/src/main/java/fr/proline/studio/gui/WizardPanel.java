@@ -9,12 +9,13 @@ import fr.proline.studio.utils.IconManager;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import javax.swing.BorderFactory;
+import javax.swing.Icon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextPane;
+import javax.swing.border.Border;
+import javax.swing.border.EtchedBorder;
 
 /**
  *
@@ -22,37 +23,45 @@ import javax.swing.JTextPane;
  */
 public class WizardPanel extends JPanel {
 
+    String m_title;
+    String m_helpText;
+    Icon m_icon;
+
+    public WizardPanel() {
+        this(null, null);
+    }
+
     public WizardPanel(String title) {
         this(title, null);
     }
 
     public WizardPanel(String title, String helpText) {
+        this(IconManager.getIcon(IconManager.IconType.WAND_HAT), title, helpText);
+    }
+
+    public WizardPanel(Icon icon, String title, String helpText) {
         super();
-        if (helpText != null && !helpText.isEmpty()) {
-            htmlWizard(title, helpText);
+        m_title = title;
+        m_helpText = helpText;
+        m_icon = icon;
+        initComponent();
+    }
 
-        } else {
-            setLayout(new GridBagLayout());
-            GridBagConstraints c = new GridBagConstraints();
-            c.anchor = GridBagConstraints.NORTHWEST;
-            c.fill = GridBagConstraints.BOTH;
-            c.insets = new java.awt.Insets(5, 15, 5, 15);
-
-            JLabel wizardLabel = new JLabel(title);
-            wizardLabel.setIcon(IconManager.getIcon(IconManager.IconType.WAND_HAT));
-
-            c.gridx = 0;
-            c.gridy = 0;
-            c.weightx = 1;
-            c.weighty = 1;
-            add(wizardLabel, c);
+    private void initComponent() {
+        if (m_title == null && m_helpText == null) {
+            setVisible(false);
+            return;
         }
+
+        htmlWizard(m_title, m_helpText);
+        setVisible(true);
     }
 
     /**
      * When we have helpText, show Html suppted JTextPane
+     *
      * @param htmlSupportedTitle
-     * @param htmlSupportedHelpText 
+     * @param htmlSupportedHelpText
      */
     public void htmlWizard(String htmlSupportedTitle, String htmlSupportedHelpText) {
         String title = htmlSupportedTitle;
@@ -62,18 +71,16 @@ public class WizardPanel extends JPanel {
         /**
          * right icon image
          */
-        JLabel wizardLabel = new JLabel(IconManager.getIcon(IconManager.IconType.WAND_HAT));
+        JLabel wizardLabel = new JLabel(m_icon);
         wizardLabel.setPreferredSize(new Dimension(30, 30));
         add(wizardLabel, BorderLayout.LINE_START);
 
         JTextPane wizardPane = new JTextPane();
         wizardPane.setEditable(false);
         wizardPane.setContentType("text/html");
-        String newTitle;
-        if (title.contains("<html>") || title.contains("</html>")) {
-            newTitle = title.replaceAll("<html>", "");
-            title = newTitle.replaceAll("</html>", "");
-        }
+        String htmlTitle = formatString(title, "black");
+        String htmlHelp = formatString(helpText, "gray");
+
         String fontfamily = this.getFont().getFamily();
         int fontSize = this.getFont().getSize();
         String htmlText = "<!DOCTYPE html><html><head><style>div {"
@@ -82,10 +89,26 @@ public class WizardPanel extends JPanel {
                 + "padding-top: 0;"
                 + "padding-bottom: 12px;"
                 + "}</style></head><body>";
-        htmlText += "<div style=\"color:black;\"><b>" + title + "</b></div>";
-        htmlText += "<div style=\"color:Gray;\">" + helpText + "</div></body></html>";
+        htmlText += htmlTitle;
+        htmlText += htmlHelp + "</body></html>";
         wizardPane.setText(htmlText);
         add(wizardPane, BorderLayout.CENTER);
-        this.setBorder(BorderFactory.createMatteBorder(5, 5, 5, 5, Color.LIGHT_GRAY));
+        //this.setBorder(BorderFactory.createMatteBorder(5, 5, 5, 5, Color.LIGHT_GRAY));
+        Border raisedbevel = BorderFactory.createRaisedBevelBorder();
+        Border loweredbevel = BorderFactory.createLoweredBevelBorder();
+        this.setBorder(BorderFactory.createCompoundBorder(raisedbevel, loweredbevel));
+    }
+
+    private String formatString(String txt, String color) {
+        if (txt != null && !txt.isEmpty()) {
+            String newTxt;
+            if (txt.contains("<html>") || txt.contains("</html>")) {
+                newTxt = txt.replaceAll("<html>", "");
+                txt = newTxt.replaceAll("</html>", "");
+            }
+            return "<div style=\"color:" + color + ";\"><b>" + txt + "</b></div>";
+        }
+        return "";
+
     }
 }

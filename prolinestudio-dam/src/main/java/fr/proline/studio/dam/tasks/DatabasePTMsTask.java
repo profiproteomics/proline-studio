@@ -159,7 +159,7 @@ public class DatabasePTMsTask extends AbstractDatabaseTask {
             m_logger.debug("Identified PTM entityManagerMSI.getTransaction().begin {} ms", (stop-start));
             start = stop;
             
-            TypedQuery<PtmSpecificity> query = entityManagerMSI.createQuery("SELECT DISTINCT(pp.specificity) FROM PeptidePtm pp, PeptideInstance pi WHERE pi.resultSummary.id in (:rsmIds) AND pi.peptide.id = pp.peptide.id", PtmSpecificity.class);
+            TypedQuery<PtmSpecificity> query = entityManagerMSI.createQuery("SELECT DISTINCT(pp.specificity) FROM PeptidePtm pp, PeptideInstance pi JOIN FETCH pp.specificity.ptm ptm WHERE pi.resultSummary.id in (:rsmIds) AND pi.peptide.id = pp.peptide.id", PtmSpecificity.class);
             query.setParameter("rsmIds", m_rsmIds);
             m_ptms.addAll(query.getResultList());
             
@@ -233,7 +233,7 @@ public class DatabasePTMsTask extends AbstractDatabaseTask {
 //                }
 //            }
             
-            fetchPTMSiteData2(m_ptmSiteArray, entityManagerMSI, mapper);
+            fetchPTMSitesData(m_ptmSiteArray, entityManagerMSI, mapper);
             
             long stop = System.currentTimeMillis();
             m_logger.debug("??/{} PTM Sites filled in {} ms", m_ptmSiteArray.size(), (stop-start));
@@ -255,13 +255,13 @@ public class DatabasePTMsTask extends AbstractDatabaseTask {
         return true;
     }
 
-    private void fetchPTMSiteData2(List<PTMSite> sitesToFill, EntityManager entityManagerMSI, ObjectMapper mapper) throws IOException {
+    private void fetchPTMSitesData(List<PTMSite> sitesToFill, EntityManager entityManagerMSI, ObjectMapper mapper) throws IOException {
         HashMap<Long, Peptide> allPeptidesMap = new HashMap();
         HashMap<Long, DPeptideInstance> leafPeptideInstancesById = new HashMap<>();
         
         Set<Long> pepInstanceIds = sitesToFill.stream().flatMap( s -> Arrays.stream(s.getPeptideInstanceIds()) ).collect(Collectors.toSet());
         
-         m_logger.debug("fetchPTMSiteData2: pepInstanceIds " +pepInstanceIds.size());
+         m_logger.debug("fetchPTMSitesData: pepInstanceIds " +pepInstanceIds.size());
         //---- Load Peptide Match + Spectrum / MSQuery information for all peptideInstance of PTMSite
         Query peptidesQuery = entityManagerMSI.createQuery("SELECT pm, pi\n"
                 + "              FROM fr.proline.core.orm.msi.PeptideInstancePeptideMatchMap pipm, fr.proline.core.orm.msi.PeptideMatch pm, fr.proline.core.orm.msi.PeptideInstance pi \n"
@@ -270,7 +270,7 @@ public class DatabasePTMsTask extends AbstractDatabaseTask {
         List l = peptidesQuery.getResultList();
         Iterator<Object[]> itPeptidesQuery = l.iterator();
         //---- Create List of DPeptideMatch (linked to DSpectrum + DMsQuery) from query resumlt
-        m_logger.debug("fetchPTMSiteData2: query result size "+l.size());        
+        m_logger.debug("fetchPTMSitesData: query result size "+l.size());
         while (itPeptidesQuery.hasNext()) {
             Object[] resCur = itPeptidesQuery.next();
             

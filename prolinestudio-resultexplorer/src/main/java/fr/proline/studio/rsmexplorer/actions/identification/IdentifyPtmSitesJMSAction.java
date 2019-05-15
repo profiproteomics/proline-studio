@@ -5,9 +5,12 @@
  */
 package fr.proline.studio.rsmexplorer.actions.identification;
 
+import fr.proline.core.orm.msi.Ptm;
+import fr.proline.core.orm.msi.PtmSpecificity;
 import fr.proline.core.orm.uds.Project;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dam.DatabaseDataManager;
+import fr.proline.studio.dam.tasks.DatabasePTMsTask;
 import fr.proline.studio.dpm.AccessJMSManagerThread;
 import fr.proline.studio.dpm.task.jms.AbstractJMSCallback;
 import fr.proline.studio.dpm.task.jms.IdentifyPtmSitesTask;
@@ -24,6 +27,10 @@ import org.openide.util.NbBundle;
 import org.openide.windows.WindowManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * action to generate spectrum matches via JMS 
@@ -77,8 +84,14 @@ public class IdentifyPtmSitesJMSAction extends AbstractRSMAction {
             };
             
             final DDataset dataset = node.getDataset();
-            
-            IdentifyPtmSitesDialog dialog = new IdentifyPtmSitesDialog(WindowManager.getDefault().getMainWindow(),dataset);
+
+            //Retrieve potential PTMs from dataset
+            final ArrayList<PtmSpecificity> ptmSpecificities = new ArrayList<>();
+            DatabasePTMsTask ptmTask = new DatabasePTMsTask(null);
+            ptmTask.initLoadUsedPTMs(dataset.getProject().getId(), dataset.getResultSummaryId(), ptmSpecificities);
+            ptmTask.fetchData();
+            List<Ptm> ptms = ptmSpecificities.stream().map(s -> s.getPtm()).distinct().collect(Collectors.toList());
+            IdentifyPtmSitesDialog dialog = new IdentifyPtmSitesDialog(WindowManager.getDefault().getMainWindow(),dataset, ptms);
             dialog.setLocation(x, y);
             dialog.setVisible(true);
             if (dialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {

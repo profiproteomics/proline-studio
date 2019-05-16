@@ -8,7 +8,6 @@ package fr.proline.studio.rsmexplorer.gui.dialog.xic;
 import fr.proline.core.orm.msi.PtmSpecificity;
 import fr.proline.core.orm.uds.QuantitationLabel;
 import fr.proline.core.orm.uds.QuantitationMethod;
-import fr.proline.studio.gui.WizardPanel;
 import fr.proline.studio.utils.IconManager;
 import java.awt.BorderLayout;
 import java.awt.Component;

@@ -141,7 +141,7 @@ public class AggregateQuantitationDialog extends DefaultDialog {
                 + " &nbsp - &nbsp Change entities <b>order</b> by drag and drop<br> "
                 + " &nbsp - &nbsp <b>Rename</b> entities by pressing &lt F2 &gt or contextual menu (right click)<br> \n"
                 + " &nbsp - &nbsp <b>Create</b> or <b>delete</b> entities from the contextual menu.";
-        this.setHelp(step1Title, step1Help);
+        this.setHelpHeader(step1Title, step1Help);
         if (m_quantitations != null && m_quantitations.size() > 0) {
             m_step = STEP_PANEL_DEFINE_EXP_DESIGN;
             setButtonName(DefaultDialog.BUTTON_OK, "Next");
@@ -185,7 +185,7 @@ public class AggregateQuantitationDialog extends DefaultDialog {
                 + " &nbsp - &nbsp <b>Change association</b> by dragging and dropping sample analysis from the right panel to the table cell<br>"
                 + " &nbsp - &nbsp <b>Remove association</b> by using the contextual menu or the toolbar<br>"
                 + " &nbsp - &nbsp <b>Move</b> analyses up or down by using the toolbar or the contextual menu.";
-        this.setHelp(step2Title, step2Help);
+        this.setHelpHeader(step2Title, step2Help);
         m_quantChannelsPanel = AggregationQuantChannelsPanel.getPanel(m_experimentalDesignNode, m_quantitations);
         replaceInternalComponent(m_quantChannelsPanel);
         revalidate();

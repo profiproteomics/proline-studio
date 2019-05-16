@@ -37,7 +37,6 @@ public class Export2MzIdentMLFilePanel extends JPanel {
     public Export2MzIdentMLFilePanel(DefaultDialog parent) {
         m_parent = parent;
         setLayout(new BorderLayout());
-        parent.setHelp(IconManager.getIcon(IconManager.IconType.IDENTIFICATION),"MzIdentML output file", NbBundle.getMessage(Export2MzIdentMLDialog.class, "Export2MzIdentMLDialog.help.text"));
         add(createMainPanel(), BorderLayout.CENTER);
 
     }

@@ -180,7 +180,7 @@ public class CreateQuantitationDialog extends DefaultDialog {
         setButtonVisible(BUTTON_BACK, false);
 
         // Update and Replace panel
-        setHelp("<html><b>Step 1:</b> Drag and Drop Identification Summaries to build the Experimental Design.</html>", null);
+        setHelpHeader("<html><b>Step 1:</b> Drag and Drop Identification Summaries to build the Experimental Design.</html>", null);
         replaceInternalComponent(m_experimentalDesignPanel);
         revalidate();
         repaint();
@@ -199,7 +199,7 @@ public class CreateQuantitationDialog extends DefaultDialog {
 
         // Update and Replace panel
         m_selectRawFilePanel = SelectRawFilesPanel.getPanel(m_experimentalDesignNode);
-        setHelp("<html><b>Step 2:</b> Drag and Drop File Path.</html>", null);
+        setHelpHeader("<html><b>Step 2:</b> Drag and Drop File Path.</html>", null);
         replaceInternalComponent(m_selectRawFilePanel);
         revalidate();
         repaint();
@@ -231,7 +231,7 @@ public class CreateQuantitationDialog extends DefaultDialog {
                         if (success) {
                             m_identifiedPtms = ptms;
                             m_quantMethodParamsPanel = new ResidueMethodParamsPanel(m_experimentalDesignPanel.getQuantitationMethod(), m_identifiedPtms);
-                            setHelp("<html><b>Step 1.5:</b> Specify residue labeling method parameters.</html>", null);
+                            setHelpHeader("<html><b>Step 1.5:</b> Specify residue labeling method parameters.</html>", null);
                             replaceInternalComponent(m_quantMethodParamsPanel);
                             revalidate();
                             repaint();
@@ -251,14 +251,14 @@ public class CreateQuantitationDialog extends DefaultDialog {
                 AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
             } else {
                 m_quantMethodParamsPanel = new ResidueMethodParamsPanel(m_experimentalDesignPanel.getQuantitationMethod(), m_identifiedPtms);
-                setHelp("<html><b>Step 1.5:</b> Specify residue labeling method parameters.</html>", null);
+                setHelpHeader("<html><b>Step 1.5:</b> Specify residue labeling method parameters.</html>", null);
                 replaceInternalComponent(m_quantMethodParamsPanel);
                 revalidate();
                 repaint();
             }
         } else if (m_quantitationType == QuantitationMethod.Type.ISOBARIC_TAGGING) {
             m_quantMethodParamsPanel = new IsobaricMethodParamsPanel(m_experimentalDesignPanel.getQuantitationMethod());
-            setHelp("<html><b>Step 1.5:</b> Specify isobaric quantitation method parameters.</html>", null);
+            setHelpHeader("<html><b>Step 1.5:</b> Specify isobaric quantitation method parameters.</html>", null);
             replaceInternalComponent(m_quantMethodParamsPanel);
             revalidate();
             repaint();
@@ -279,7 +279,7 @@ public class CreateQuantitationDialog extends DefaultDialog {
 
         // Update and Replace panel
         LabelFreeMSParamsPanel quantPanel = LabelFreeMSParamsPanel.getLabelFreeMSQuantParamsPanel();
-        setHelp("<html><b>Step 3:</b> Specify quantitation parameters.</html>", null);
+        setHelpHeader("<html><b>Step 3:</b> Specify quantitation parameters.</html>", null);
         quantPanel.getParamsPanel().resetScrollbar();
         replaceInternalComponent(quantPanel);
         revalidate();

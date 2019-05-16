@@ -14,81 +14,85 @@ import java.awt.Window;
 import java.io.File;
 import java.util.HashMap;
 import javax.swing.JFileChooser;
+import org.openide.util.NbBundle;
 
 /**
  *
  * @author VD225637
  */
-public class Export2MzIdentMLDialog  extends DefaultDialog {
+public class Export2MzIdentMLDialog extends DefaultDialog {
+
     protected final static String MZIDENT_SETTINGS_KEY = "Export2MzIdentML";
 
     private static final int STEP_PANEL_EXPORT_PARAM_DEF = 0;
     private static final int STEP_PANEL_FILE_CHOOSER = 1;
     private int m_step = STEP_PANEL_EXPORT_PARAM_DEF;
-    
+
     private DefaultDialog.ProgressTask m_task = null; //VDS ? 
-    private Export2MzIdentMLParamPanel m_paramPanel; 
+    private Export2MzIdentMLParamPanel m_paramPanel;
     private Export2MzIdentMLFilePanel m_filePanel;
-    
+
     public Export2MzIdentMLDialog(Window parent) {
         super(parent, Dialog.ModalityType.APPLICATION_MODAL);
-        setTitle("Export to MzIdentML format");   
+        setTitle("Export to MzIdentML format");
         setResizable(true);
-        
+
 //        setDocumentationSuffix(m_contact_FN_key); //VDS TODO
         setButtonName(BUTTON_OK, "Next");
         setButtonIcon(DefaultDialog.BUTTON_OK, IconManager.getIcon(IconManager.IconType.ARROW));
         setButtonVisible(BUTTON_LOAD, true);
         setButtonVisible(BUTTON_SAVE, true);
-        
-        m_paramPanel= new Export2MzIdentMLParamPanel(this);
+
+        m_paramPanel = new Export2MzIdentMLParamPanel(this);
+        this.setHelpHeader(IconManager.getIcon(IconManager.IconType.INFORMATION),"MzIdentML parameters", NbBundle.getMessage(Export2MzIdentMLDialog.class,"Export2MzIdentMLDialog.help.text"));
         setInternalComponent(m_paramPanel);
     }
-    
+
     public void setTask(DefaultDialog.ProgressTask task) {
         m_task = task;
     }
-        
+
     @Override
     protected boolean okCalled() {
-         if (m_step == STEP_PANEL_EXPORT_PARAM_DEF) {
-            if(!m_paramPanel.checkParameters())
+        if (m_step == STEP_PANEL_EXPORT_PARAM_DEF) {
+            if (!m_paramPanel.checkParameters()) {
                 return false;
-             
+            }
+
             m_paramPanel.saveParameters(null);
-             
+
             // change to ok button before call to last panel
-            setButtonName(BUTTON_OK, "OK");            
+            setButtonName(BUTTON_OK, "OK");
             setButtonIcon(BUTTON_OK, IconManager.getIcon(IconManager.IconType.OK));
 
             setButtonVisible(BUTTON_LOAD, false);
             setButtonVisible(BUTTON_SAVE, false);
-            
+
             m_filePanel = new Export2MzIdentMLFilePanel(this);
+            this.setHelpHeader(IconManager.getIcon(IconManager.IconType.INFORMATION), "MzIdentML output file", NbBundle.getMessage(Export2MzIdentMLDialog.class, "Export2MzIdentMLDialog.help.text"));
             replaceInternalComponent(m_filePanel);
+            
             revalidate();
             repaint();
-            m_step = STEP_PANEL_FILE_CHOOSER;    
-            
+            m_step = STEP_PANEL_FILE_CHOOSER;
+
             return false;
-         } else {
+        } else {
             if (!m_filePanel.checkParameters()) {
                 return false;
-            } 
+            }
             startTask(m_task);
             return false;
-         }                 
+        }
     }
-    
 
-    
     @Override
     protected boolean loadCalled() {
         if (m_step == STEP_PANEL_EXPORT_PARAM_DEF) {
             m_paramPanel.loadParameters();
         }
         return false;
-    }   
+    }
 
     @Override
     protected boolean saveCalled() {
@@ -96,8 +100,9 @@ public class Export2MzIdentMLDialog  extends DefaultDialog {
         if (m_step == STEP_PANEL_EXPORT_PARAM_DEF) {
 
             // check parameters 
-            if(!m_paramPanel.checkParameters())
+            if (!m_paramPanel.checkParameters()) {
                 return false;
+            }
 
             JFileChooser fileChooser = SettingsUtils.getFileChooser(MZIDENT_SETTINGS_KEY);
             int result = fileChooser.showSaveDialog(this);
@@ -112,18 +117,20 @@ public class Export2MzIdentMLDialog  extends DefaultDialog {
         }
         return false;
     }
-    
+
     public HashMap<String, Object> getExportParams() {
-        if(m_paramPanel != null)
+        if (m_paramPanel != null) {
             return m_paramPanel.getExportParams();
-        else 
-            return null;       
-    }
-    
-     public String getFileName() {
-        if(m_filePanel != null)
-            return m_filePanel.getFileName();
-        else
+        } else {
             return null;
+        }
+    }
+
+    public String getFileName() {
+        if (m_filePanel != null) {
+            return m_filePanel.getFileName();
+        } else {
+            return null;
+        }
     }
 }

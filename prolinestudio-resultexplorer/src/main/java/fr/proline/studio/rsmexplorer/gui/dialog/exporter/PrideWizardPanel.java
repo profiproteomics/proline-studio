@@ -1,6 +1,6 @@
 package fr.proline.studio.rsmexplorer.gui.dialog.exporter;
 
-import fr.proline.studio.gui.WizardPanel;
+import fr.proline.studio.gui.HelpHeaderPanel;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.util.HashMap;
@@ -14,7 +14,7 @@ public abstract class PrideWizardPanel extends JPanel {
 
     protected void initWizardPanels(String wizardLabel){
         setLayout(new BorderLayout());
-        add(new WizardPanel(wizardLabel), BorderLayout.PAGE_START);
+        add(new HelpHeaderPanel(wizardLabel), BorderLayout.PAGE_START);
         add(createMainPanel(), BorderLayout.CENTER);
     }
     

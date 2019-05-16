@@ -50,7 +50,7 @@ public class ChangeTypicalProteinDialog extends DefaultDialog {
 
         c.gridx = 0;
         c.gridy = 0;
-        this.setHelpText("Specify rules to satisfy for choosing typical protein, in priority order: <br> "
+        this.setHelpHeaderText("Specify rules to satisfy for choosing typical protein, in priority order: <br> "
                 + "For each protein set, rule 0 will be tested then rule 1...");
 
         changePanel = new ChangeTypicalProteinPanel();

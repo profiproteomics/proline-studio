@@ -20,25 +20,25 @@ import javax.swing.border.Border;
  *
  * @author CB205360
  */
-public class WizardPanel extends JPanel {
+public class HelpHeaderPanel extends JPanel {
 
     String m_title;
     String m_helpText;
     Icon m_icon;
 
-    public WizardPanel() {
+    public HelpHeaderPanel() {
         this(null, null);
     }
 
-    public WizardPanel(String title) {
+    public HelpHeaderPanel(String title) {
         this(title, null);
     }
 
-    public WizardPanel(String title, String helpText) {
+    public HelpHeaderPanel(String title, String helpText) {
         this(IconManager.getIcon(IconManager.IconType.WAND_HAT), title, helpText);
     }
 
-    public WizardPanel(Icon icon, String title, String helpText) {
+    public HelpHeaderPanel(Icon icon, String title, String helpText) {
         super();
         m_title = title;
         m_helpText = helpText;

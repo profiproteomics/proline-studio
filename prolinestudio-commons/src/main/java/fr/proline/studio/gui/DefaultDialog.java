@@ -168,43 +168,50 @@ public class DefaultDialog extends javax.swing.JDialog {
     }
 
     /**
-     * set Help without title, with default 'INFORMATION' icon.
+     * set Help without title, with default 'INFORMATION' icon. if belong to new
+     * panel, often followed with replaceInternalComponent or
+     * setInternalComponent
      *
      * @param htmlSupportedTxt
      */
-    public void setHelpText(String htmlSupportedTxt) {
-        this.setHelp(IconManager.getIcon(IconManager.IconType.INFORMATION), null, htmlSupportedTxt);
+    public void setHelpHeaderText(String htmlSupportedTxt) {
+        this.setHelpHeader(IconManager.getIcon(IconManager.IconType.INFORMATION), null, htmlSupportedTxt);
     }
 
     /**
-     * set Help without title
-     * must follow with replaceInternalComponent /setInternalComponent
+     * set Help text with specific icon, but without title. If belong to new panel, often followed with
+     * replaceInternalComponent or setInternalComponent
      *
      * @param icon
      * @param htmlSupportedTxt
      */
-    public void setHelpTextWithIcon(Icon icon, String htmlSupportedTxt) {
-        this.setHelp(icon, null, htmlSupportedTxt);
+    public void setHelpHeaderTextWithIcon(Icon icon, String htmlSupportedTxt) {
+        this.setHelpHeader(icon, null, htmlSupportedTxt);
     }
 
     /**
-     *  must follow with replaceInternalComponent /setInternalComponent
+     * Set Help Wizard with defaut icon: step(Hat). If belong to new panel,
+     * often followed with replaceInternalComponent or setInternalComponent
+     *
      * @param title
-     * @param htmlSupportedTxt 
+     * @param htmlSupportedTxt
      */
-    public void setHelp(String title, String htmlSupportedTxt) {
+    public void setHelpHeader(String title, String htmlSupportedTxt) {
         m_helpPanel.removeAll();
-        m_helpPanel.add(new WizardPanel(title, htmlSupportedTxt), BorderLayout.CENTER);
+        m_helpPanel.add(new HelpHeaderPanel(title, htmlSupportedTxt), BorderLayout.CENTER);
     }
+
     /**
-     *  must follow with replaceInternalComponent /setInternalComponent
+     * Set Help Wizard with specific icon. If belong to new panel, often
+     * followed with replaceInternalComponent or setInternalComponent
+     *
      * @param icon
      * @param title
-     * @param htmlSupportedTxt 
+     * @param htmlSupportedTxt
      */
-    public void setHelp(Icon icon, String title, String htmlSupportedTxt) {
+    public void setHelpHeader(Icon icon, String title, String htmlSupportedTxt) {
         m_helpPanel.removeAll();
-        m_helpPanel.add(new WizardPanel(icon, title, htmlSupportedTxt), BorderLayout.CENTER);;
+        m_helpPanel.add(new HelpHeaderPanel(icon, title, htmlSupportedTxt), BorderLayout.CENTER);;
         repaint();
     }
 

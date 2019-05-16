@@ -60,18 +60,18 @@ import org.slf4j.LoggerFactory;
  * @author JM235353
  */
 public class CreateQuantitationDialog extends DefaultDialog {
-    
+
     protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
 
     private static final int STEP_PANEL_CREATE_EXPERIMENTAL_DESIGN = 0;
-    private static final int STEP_PANEL_QUANT_METHOD_PARAMS = 1;    
+    private static final int STEP_PANEL_QUANT_METHOD_PARAMS = 1;
     private static final int STEP_PANEL_LINK_RAW_FILES = 2;
     private static final int STEP_PANEL_LABEL_FREE_PARAMS = 3;
     private int m_step = STEP_PANEL_CREATE_EXPERIMENTAL_DESIGN;
-    
+
     private static final String SETTINGS_KEY = "XIC";
     private static CreateQuantitationDialog m_singletonDialog = null;
-    
+
     private IdentificationTree m_selectionTree = null;
     private AbstractNode m_experimentalDesignNode = null;
     private QuantitationMethod.Type m_quantitationType;
@@ -86,8 +86,8 @@ public class CreateQuantitationDialog extends DefaultDialog {
     public static CreateQuantitationDialog getDialog(Window parent) {
         if (m_singletonDialog == null) {
             m_singletonDialog = new CreateQuantitationDialog(parent);
-        } 
-        
+        }
+
         return m_singletonDialog;
     }
 
@@ -102,12 +102,16 @@ public class CreateQuantitationDialog extends DefaultDialog {
     }
 
     /**
-     * Initialize this dialog with the specified parameters. existingQuantDataset can be null when this dialog is created to build a new quantification. 
-     * 
-     * @param existingQuantDataset : the quantitation dataset to clone (can be null when creating a new quantitation)
-     * @param refIdentDataset : the reference identification dataset 
-     * @param selectionTree : the tree from which identification datasets can be drag'n'dropped to build the experimental design
-     * @param m_quantitationType  : the quantification type
+     * for step 1 Initialize this dialog with the specified parameters.
+     * existingQuantDataset can be null when this dialog is created to build a
+     * new quantification.
+     *
+     * @param existingQuantDataset : the quantitation dataset to clone (can be
+     * null when creating a new quantitation)
+     * @param refIdentDataset : the reference identification dataset
+     * @param selectionTree : the tree from which identification datasets can be
+     * drag'n'dropped to build the experimental design
+     * @param m_quantitationType : the quantification type
      */
     public void initializeExperimentalDesignTree(DDataset existingQuantDataset, DDataset refIdentDataset, IdentificationTree selectionTree, QuantitationMethod.Type quantitationType) {
         m_selectionTree = selectionTree;
@@ -154,7 +158,7 @@ public class CreateQuantitationDialog extends DefaultDialog {
                 rootNode.add(refDatasetNode);
             }
         }
-        
+
         //reset drop zone
         if (m_selectRawFilePanel != null) {
             m_selectRawFilePanel.resetDropZonePanel();
@@ -162,7 +166,8 @@ public class CreateQuantitationDialog extends DefaultDialog {
 
         displayExperimentalDesignPanel(rootNode);
     }
-    
+
+    //for step 1
     private void displayExperimentalDesignPanel(AbstractNode rootNode) {
 
         m_experimentalDesignNode = rootNode;
@@ -175,12 +180,13 @@ public class CreateQuantitationDialog extends DefaultDialog {
         setButtonVisible(BUTTON_BACK, false);
 
         // Update and Replace panel
+        setHelp("<html><b>Step 1:</b> Drag and Drop Identification Summaries to build the Experimental Design.</html>", null);
         replaceInternalComponent(m_experimentalDesignPanel);
         revalidate();
         repaint();
-
     }
 
+    //for step 2
     protected void displayLinkRawFilesPanel() {
 
         m_step = STEP_PANEL_LINK_RAW_FILES;
@@ -193,12 +199,13 @@ public class CreateQuantitationDialog extends DefaultDialog {
 
         // Update and Replace panel
         m_selectRawFilePanel = SelectRawFilesPanel.getPanel(m_experimentalDesignNode);
-        
+        setHelp("<html><b>Step 2:</b> Drag and Drop File Path.</html>", null);
         replaceInternalComponent(m_selectRawFilePanel);
         revalidate();
         repaint();
 
     }
+
     protected void displayQuantMethodParamsPanel() {
 
         m_step = STEP_PANEL_QUANT_METHOD_PARAMS;
@@ -224,6 +231,7 @@ public class CreateQuantitationDialog extends DefaultDialog {
                         if (success) {
                             m_identifiedPtms = ptms;
                             m_quantMethodParamsPanel = new ResidueMethodParamsPanel(m_experimentalDesignPanel.getQuantitationMethod(), m_identifiedPtms);
+                            setHelp("<html><b>Step 1.5:</b> Specify residue labeling method parameters.</html>", null);
                             replaceInternalComponent(m_quantMethodParamsPanel);
                             revalidate();
                             repaint();
@@ -232,7 +240,7 @@ public class CreateQuantitationDialog extends DefaultDialog {
                 };
 
                 DatabasePTMsTask task = new DatabasePTMsTask(callback);
-                if(m_refIdentDataset == null){
+                if (m_refIdentDataset == null) {
                     //get information from leaf rsm
                     Long projectId = ProjectExplorerPanel.getProjectExplorerPanel().getSelectedProject().getId();
                     List<Long> rsmIds = m_experimentalDesignPanel.getQuantifiedRsmIds();
@@ -242,24 +250,26 @@ public class CreateQuantitationDialog extends DefaultDialog {
                 }
                 AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
             } else {
-               m_quantMethodParamsPanel = new ResidueMethodParamsPanel(m_experimentalDesignPanel.getQuantitationMethod(), m_identifiedPtms);
-               replaceInternalComponent(m_quantMethodParamsPanel);
-               revalidate();
-               repaint();
+                m_quantMethodParamsPanel = new ResidueMethodParamsPanel(m_experimentalDesignPanel.getQuantitationMethod(), m_identifiedPtms);
+                setHelp("<html><b>Step 1.5:</b> Specify residue labeling method parameters.</html>", null);
+                replaceInternalComponent(m_quantMethodParamsPanel);
+                revalidate();
+                repaint();
             }
         } else if (m_quantitationType == QuantitationMethod.Type.ISOBARIC_TAGGING) {
             m_quantMethodParamsPanel = new IsobaricMethodParamsPanel(m_experimentalDesignPanel.getQuantitationMethod());
+            setHelp("<html><b>Step 1.5:</b> Specify isobaric quantitation method parameters.</html>", null);
             replaceInternalComponent(m_quantMethodParamsPanel);
             revalidate();
             repaint();
         }
-        
 
     }
 
+    //for step 3
     protected void displayLabelFreeParamsPanel() {
         m_step = STEP_PANEL_LABEL_FREE_PARAMS;
- 
+
         setButtonName(DefaultDialog.BUTTON_OK, org.openide.util.NbBundle.getMessage(DefaultDialog.class, "DefaultDialog.okButton.text"));
         setButtonIcon(DefaultDialog.BUTTON_OK, IconManager.getIcon(IconManager.IconType.OK));
 
@@ -269,19 +279,20 @@ public class CreateQuantitationDialog extends DefaultDialog {
 
         // Update and Replace panel
         LabelFreeMSParamsPanel quantPanel = LabelFreeMSParamsPanel.getLabelFreeMSQuantParamsPanel();
+        setHelp("<html><b>Step 3:</b> Specify quantitation parameters.</html>", null);
         quantPanel.getParamsPanel().resetScrollbar();
         replaceInternalComponent(quantPanel);
         revalidate();
         repaint();
     }
-    
+
     @Override
     public void pack() {
         // forbid pack by overloading the method
     }
 
     public DataSetData getQuantitationDataset() {
-        return (m_experimentalDesignNode == null) ? null : (DataSetData)m_experimentalDesignNode.getData();
+        return (m_experimentalDesignNode == null) ? null : (DataSetData) m_experimentalDesignNode.getData();
     }
 
     private void updatePeaklist(RunInfoData runInfoData, long projectID, long resultSetID) {
@@ -371,7 +382,7 @@ public class CreateQuantitationDialog extends DefaultDialog {
 
                                 } catch (InterruptedException ie) {
                                     // should not happen
-                                    m_logger.error("", ie); 
+                                    m_logger.error("", ie);
                                 }
                             } else {
                                 this.updatePeaklist(runData, pID, rsID);
@@ -403,40 +414,42 @@ public class CreateQuantitationDialog extends DefaultDialog {
             throw new IllegalAccessException("Design parameters have not been set.");
         }
         Map<String, Object> experimentalDesignParams = QuantExperimentalDesignTree.toExperimentalDesignParameters(m_experimentalDesignNode, m_refIdentDataset, m_refResultSummaryId);
-        
-        
+
         // Hack : modify experimentalDesignParams for SILAC / TMT methods
         if (m_quantitationType != QuantitationMethod.Type.LABEL_FREE) {
             QuantitationMethod method = m_experimentalDesignPanel.getQuantitationMethod();
-            ArrayList<Object> qcs = (ArrayList)((Map)((List)experimentalDesignParams.get("master_quant_channels")).get(0)).get("quant_channels");
+            ArrayList<Object> qcs = (ArrayList) ((Map) ((List) experimentalDesignParams.get("master_quant_channels")).get(0)).get("quant_channels");
             int nbQcs = qcs.size();
-            ArrayList<Object> newQcs = new ArrayList<>(nbQcs*method.getLabels().size());
+            ArrayList<Object> newQcs = new ArrayList<>(nbQcs * method.getLabels().size());
             for (Object o : qcs) {
-                Map qc = (Map)o;
+                Map qc = (Map) o;
                 for (QuantitationLabel label : method.getLabels()) {
                     Map newQc = new HashMap(qc);
                     newQc.put("quant_label_id", label.getId());
-                    newQc.put("name", qc.get("name")+"."+label.getName());
-                    newQc.put("number", newQcs.size()+1);
+                    newQc.put("name", qc.get("name") + "." + label.getName());
+                    newQc.put("number", newQcs.size() + 1);
                     newQcs.add(newQc);
                 }
             }
             qcs.clear();
             qcs.addAll(newQcs);
         }
-        
+
         return experimentalDesignParams;
     }
-    
+
     public Long getQuantMethodId() {
+        if (m_quantitationType == QuantitationMethod.Type.LABEL_FREE) {
+            return 3L;
+        }
         return m_experimentalDesignPanel.getQuantitationMethod().getId();
     }
-    
+
     public Map<String, Object> getQuantiParameters() {
-        Map<String, Object> lfParamas =  LabelFreeMSParamsPanel.getLabelFreeMSQuantParamsPanel().getParamsPanel().getQuantParams();
-        if (m_quantitationType == QuantitationMethod.Type.LABEL_FREE)
+        Map<String, Object> lfParamas = LabelFreeMSParamsPanel.getLabelFreeMSQuantParamsPanel().getParamsPanel().getQuantParams();
+        if (m_quantitationType == QuantitationMethod.Type.LABEL_FREE) {
             return lfParamas;
-        else {
+        } else {
             Map<String, Object> quantiParams = m_quantMethodParamsPanel.getQuantParams();
             quantiParams.put("label_free_quant_config", lfParamas);
             return quantiParams;
@@ -445,12 +458,13 @@ public class CreateQuantitationDialog extends DefaultDialog {
 
     private void displayNextPanel() {
         switch (m_step) {
-            case STEP_PANEL_CREATE_EXPERIMENTAL_DESIGN: 
+            case STEP_PANEL_CREATE_EXPERIMENTAL_DESIGN:
                 if (m_quantitationType == QuantitationMethod.Type.LABEL_FREE) {
                     displayLinkRawFilesPanel();
                 } else {
                     displayQuantMethodParamsPanel();
-                }   break;
+                }
+                break;
             case STEP_PANEL_QUANT_METHOD_PARAMS:
                 displayLinkRawFilesPanel();
                 break;
@@ -459,9 +473,9 @@ public class CreateQuantitationDialog extends DefaultDialog {
                 break;
             default:
                 break;
-        }         
+        }
     }
-    
+
     @Override
     protected boolean okCalled() {
 
@@ -473,38 +487,38 @@ public class CreateQuantitationDialog extends DefaultDialog {
                 if ((!checkDesignStructure(m_experimentalDesignNode, new HashSet<>())) || (!checkBiologicalGroupName(m_experimentalDesignNode))) {
                     return false;
                 }
-                
+
                 //Will call displayLinkRawFilesPanel if Spectrum are OK !
                 checkSpectrum();
-                
+
                 return false;
             case STEP_PANEL_QUANT_METHOD_PARAMS:
                 displayNextPanel();
-                
+
                 return false;
             case STEP_PANEL_LINK_RAW_FILES:
                 //SelectRawFilesPanel-NEXT button
-                
+
                 if (!checkRawFiles()) {
                     return false;
                 }
-                
+
                 displayNextPanel();
-                
+
                 return false;
             default:
                 //STEP_PANEL_DEFINE_XIC_PARAMS , LabelFreeMSParamsPanel-OK button
-                
+
                 if (!checkQuantParameters()) {
                     return false;
                 }
-                
+
                 // Save Parameters
                 ParameterList parameterList = LabelFreeMSParamsPanel.getLabelFreeMSQuantParamsPanel().getParamsPanel().getParameterList();
                 Preferences preferences = NbPreferences.root();
                 parameterList.saveParameters(preferences);
                 preferences.putBoolean(AbstractLabelFreeMSParamsPanel.XIC_SIMPLIFIED_PARAMS, LabelFreeMSParamsPanel.getLabelFreeMSQuantParamsPanel().getParamsPanel().isSimplifiedPanel());
-                
+
                 return true;
         }
 
@@ -564,15 +578,15 @@ public class CreateQuantitationDialog extends DefaultDialog {
                 try {
                     File settingsFile = settingsDialog.getSelectedFile();
                     FilePreferences filePreferences = new FilePreferences(settingsFile, null, "");
-                    if(Arrays.asList(filePreferences.keys()).contains(AbstractLabelFreeMSParamsPanel.XIC_SIMPLIFIED_PARAMS)){
+                    if (Arrays.asList(filePreferences.keys()).contains(AbstractLabelFreeMSParamsPanel.XIC_SIMPLIFIED_PARAMS)) {
                         boolean isSimplified = filePreferences.getBoolean(AbstractLabelFreeMSParamsPanel.XIC_SIMPLIFIED_PARAMS, true);
-                        LabelFreeMSParamsPanel.getLabelFreeMSQuantParamsPanel().setIsSimplifiedPanel(isSimplified);                        
+                        LabelFreeMSParamsPanel.getLabelFreeMSQuantParamsPanel().setIsSimplifiedPanel(isSimplified);
                     }
                     String version = filePreferences.get(AbstractLabelFreeMSParamsPanel.XIC_PARAMS_VERSION_KEY, "1.0");
                     String panelVersion = LabelFreeMSParamsPanel.getLabelFreeMSQuantParamsPanel().getParamsVersion();
-                    if(!version.equals(panelVersion)){
-                        String msg = "Can't load "+version+" quantitation parameters to "+panelVersion+" one. All parameters may not have been taken into account !";
-                        JOptionPane.showMessageDialog(this, msg, "Load XIC parameters error",JOptionPane.ERROR_MESSAGE);
+                    if (!version.equals(panelVersion)) {
+                        String msg = "Can't load " + version + " quantitation parameters to " + panelVersion + " one. All parameters may not have been taken into account !";
+                        JOptionPane.showMessageDialog(this, msg, "Load XIC parameters error", JOptionPane.ERROR_MESSAGE);
                     }
                     LabelFreeMSParamsPanel.getLabelFreeMSQuantParamsPanel().getParamsPanel().loadParameters(filePreferences);
 
@@ -591,7 +605,7 @@ public class CreateQuantitationDialog extends DefaultDialog {
         switch (m_step) {
             case STEP_PANEL_QUANT_METHOD_PARAMS:
                 displayExperimentalDesignPanel(m_experimentalDesignNode);
-                
+
                 return false;
             case STEP_PANEL_LINK_RAW_FILES:
                 m_selectRawFilePanel.pruneDesignTree();
@@ -600,11 +614,11 @@ public class CreateQuantitationDialog extends DefaultDialog {
                 } else {
                     displayQuantMethodParamsPanel();
                 }
-                
+
                 return false;
             case STEP_PANEL_LABEL_FREE_PARAMS:
                 displayLinkRawFilesPanel();
-                
+
                 return false;
             default:
                 break;
@@ -659,12 +673,12 @@ public class CreateQuantitationDialog extends DefaultDialog {
 
                 @Override
                 public int getMaxValue() {
-                    return 100; 
+                    return 100;
                 }
 
                 @Override
                 protected Object doInBackground() throws Exception {
-                    
+
                     AbstractDatabaseCallback spectraTestCallback = new AbstractDatabaseCallback() {
                         @Override
                         public boolean mustBeCalledInAWT() {
@@ -712,16 +726,15 @@ public class CreateQuantitationDialog extends DefaultDialog {
 
                     m_spectrumTask = new DatabaseVerifySpectrumFromResultSets(spectraTestCallback, resultSetIds, projectId, failedRSIds, failedSpectraPerRSIds);
                     AccessDatabaseThread.getAccessDatabaseThread().addTask(m_spectrumTask);
-                           
+
                     return null;
                 }
 
             };
 
-            
             loadWaitingDialog.setTask(loadConfigTasktask);
             Point p = this.getLocation();
-            loadWaitingDialog.setLocation(p.x,p.y);
+            loadWaitingDialog.setLocation(p.x, p.y);
             loadWaitingDialog.setVisible(true);
         } else {
             displayNextPanel();
@@ -848,6 +861,5 @@ public class CreateQuantitationDialog extends DefaultDialog {
     protected boolean cancelCalled() {
         return true;
     }
-
 
 }

@@ -4,7 +4,6 @@ import fr.proline.core.orm.uds.RawFile;
 import fr.proline.studio.dam.data.RunInfoData;
 import fr.proline.studio.dpm.serverfilesystem.ServerFileSystemView;
 import fr.proline.studio.gui.DefaultDialog;
-import fr.proline.studio.gui.WizardPanel;
 import fr.proline.studio.rsmexplorer.gui.TreeFileChooserPanel;
 import fr.proline.studio.rsmexplorer.gui.TreeFileChooserTableModelInterface;
 import fr.proline.studio.rsmexplorer.gui.TreeFileChooserTransferHandler;
@@ -14,7 +13,6 @@ import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
 import fr.proline.studio.rsmexplorer.tree.xic.XICBiologicalGroupNode;
 import fr.proline.studio.rsmexplorer.tree.xic.XICBiologicalSampleAnalysisNode;
 import fr.proline.studio.rsmexplorer.tree.xic.XICBiologicalSampleNode;
-import fr.proline.studio.rsmexplorer.tree.xic.QuantExperimentalDesignTree;
 import fr.proline.studio.rsmexplorer.tree.xic.XICRunNode;
 import fr.proline.studio.rsmexplorer.tree.xic.XICRunNodeInitListener;
 import fr.proline.studio.table.DecoratedMarkerTable;
@@ -22,6 +20,7 @@ import fr.proline.studio.table.DecoratedTableModel;
 import fr.proline.studio.table.TablePopupMenu;
 import fr.proline.studio.utils.IconManager;
 import fr.proline.studio.utils.HelpUtils;
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.GridBagConstraints;
@@ -86,27 +85,12 @@ public class SelectRawFilesPanel extends JPanel implements XICRunNodeInitListene
     }
 
     private SelectRawFilesPanel() {
-
         m_transferHandler = new TreeFileChooserTransferHandler();
 
-        JPanel wizardPanel = new WizardPanel("<html><b>Step 2:</b> Drag and Drop File Path.</html>");
         JPanel mainPanel = createMainPanel();
 
-        setLayout(new GridBagLayout());
-        GridBagConstraints c = new GridBagConstraints();
-        c.anchor = GridBagConstraints.NORTHWEST;
-        c.fill = GridBagConstraints.BOTH;
-        c.insets = new java.awt.Insets(5, 5, 5, 5);
-
-        c.gridx = 0;
-        c.gridy = 0;
-        c.weightx = 1;
-        add(wizardPanel, c);
-
-        c.gridy++;
-        c.weighty = 1;
-
-        add(mainPanel, c);
+        setLayout(new BorderLayout());
+        add(mainPanel, BorderLayout.CENTER);
 
     }
 
@@ -176,7 +160,6 @@ public class SelectRawFilesPanel extends JPanel implements XICRunNodeInitListene
 
         return mainPanel;
     }
-
 
     private JPanel createDesignTablePanel() {
         JPanel panel = new JPanel();
@@ -429,7 +412,7 @@ public class SelectRawFilesPanel extends JPanel implements XICRunNodeInitListene
                 }
             }
         }
-       
+
         private void parseSample(XICBiologicalGroupNode groupNode, XICBiologicalSampleNode sampleNode) {
             int nbChildren = sampleNode.getChildCount();
             for (int i = 0; i < nbChildren; i++) {
@@ -439,10 +422,10 @@ public class SelectRawFilesPanel extends JPanel implements XICRunNodeInitListene
                     XICBiologicalSampleAnalysisNode sampleAnalysisNode = (XICBiologicalSampleAnalysisNode) child;
 
                     if (sampleAnalysisNode.getXicRunNode() == null) {
-                        XICRunNode runNode = new XICRunNode(new RunInfoData(),(DefaultTreeModel)  IdentificationTree.getCurrentTree().getModel());
+                        XICRunNode runNode = new XICRunNode(new RunInfoData(), (DefaultTreeModel) IdentificationTree.getCurrentTree().getModel());
                         runNode.addXICRunNodeInitListener(m_singleton);
                         //HACK new method so that runNode is available later when we want to retrieve the potential matching raw files! calls super.add()
-                        sampleAnalysisNode.addXicRunNode(runNode,true);
+                        sampleAnalysisNode.addXicRunNode(runNode, true);
                         runNode.init(sampleAnalysisNode.getDataset(), this);
                     } else {
                         sampleAnalysisNode.add(sampleAnalysisNode.getXicRunNode());
@@ -606,11 +589,11 @@ public class SelectRawFilesPanel extends JPanel implements XICRunNodeInitListene
                             for (String key : rawFiles.keySet()) {
                                 set.add(HelpUtils.getFileName(key.toLowerCase(), SUFFIX));
                             }
-                        } else if(info.getPeakListPath()!=null){
+                        } else if (info.getPeakListPath() != null) {
                             set.add(HelpUtils.getFileName(info.getPeakListPath().toLowerCase(), SUFFIX));
-                        }  
+                        }
                         m_potentialFileNameForMissings.put(i, set);
-                    } 
+                    }
 
                 }
 
@@ -624,18 +607,18 @@ public class SelectRawFilesPanel extends JPanel implements XICRunNodeInitListene
         @Override
         public boolean shouldConfirmCorruptFiles(ArrayList<Integer> indices) {
             for (int i = 0; i < indices.size(); i++) {
-                RunInfoData.Status status = ((RunInfoData)getXICRunNode(indices.get(i)).getData()).getStatus();
-                if(status == RunInfoData.Status.LAST_DEFINED){ // || status == RunInfoData.Status.SYSTEM_PROPOSED){
+                RunInfoData.Status status = ((RunInfoData) getXICRunNode(indices.get(i)).getData()).getStatus();
+                if (status == RunInfoData.Status.LAST_DEFINED) { // || status == RunInfoData.Status.SYSTEM_PROPOSED){
                     return true;
                 }
             }
             return false;
         }
-        
+
         @Override
         public boolean canSetFiles(ArrayList<Integer> indices) {
             for (int i = 0; i < indices.size(); i++) {
-                if(((RunInfoData)getXICRunNode(indices.get(i)).getData()).getStatus() == RunInfoData.Status.LINKED_IN_DATABASE){
+                if (((RunInfoData) getXICRunNode(indices.get(i)).getData()).getStatus() == RunInfoData.Status.LINKED_IN_DATABASE) {
                     return false;
                 }
             }

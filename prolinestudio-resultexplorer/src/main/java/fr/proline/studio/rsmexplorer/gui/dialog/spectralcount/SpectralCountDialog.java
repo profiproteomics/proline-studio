@@ -40,6 +40,7 @@ public class SpectralCountDialog extends DefaultDialog {
         setButtonIcon(DefaultDialog.BUTTON_OK, IconManager.getIcon(IconManager.IconType.ARROW));
 
         SpectralCountNamePanel namePanel = SpectralCountNamePanel.getSpectralCountNamePanel();
+        this.setHelp("<html><b>Step 1:</b> Define spectral count name and description.</html>", null);
         namePanel.reinit();
         setInternalComponent(namePanel);
 
@@ -81,7 +82,9 @@ public class SpectralCountDialog extends DefaultDialog {
 
             }
 
-            TreeSelectionPanel treeSelectionPanel = TreeSelectionPanel.getTreeSelectionPanel(m_tree, "<html><b>Step 2:</b> Select Identification Summaries.</html>", "Select the Identification Summaries for which Spectral Count will be calculated. The common list of protein sets and peptide specificity will be calculated at parent level, from which spectral count has been run.");
+            TreeSelectionPanel treeSelectionPanel = TreeSelectionPanel.getTreeSelectionPanel(m_tree);
+            this.setHelp("<html><b>Step 2:</b> Select Identification Summaries.</html>", 
+                    "Select the Identification Summaries for which Spectral Count will be calculated. The common list of protein sets and peptide specificity will be calculated at parent level, from which spectral count has been run.");
             replaceInternalComponent(treeSelectionPanel);
 
             revalidate();
@@ -112,8 +115,8 @@ public class SpectralCountDialog extends DefaultDialog {
             m_tree.setSelection(new ArrayList<ResultSummary>());
 
 
-            TreeSelectionPanel treeSelectionPanel = TreeSelectionPanel.getTreeSelectionPanel(m_tree, "<html><b>Step 3:</b> Select Weight Computation Identification Summaries.</html>", "Select Datasets (and associated identification summaries) in the hierarchy where shared PSM weight will be defined. The calculated weight will then be applied to Identification Summaries previously selected, the nearest parent will be used as reference for PSM weight.");
-
+            TreeSelectionPanel treeSelectionPanel = TreeSelectionPanel.getTreeSelectionPanel(m_tree);
+            setHelp( "<html><b>Step 3:</b> Select Weight Computation Identification Summaries.</html>", "Select Datasets (and associated identification summaries) in the hierarchy where shared PSM weight will be defined. The calculated weight will then be applied to Identification Summaries previously selected, the nearest parent will be used as reference for PSM weight.");
             replaceInternalComponent(treeSelectionPanel);
 
             revalidate();

@@ -6,7 +6,6 @@
 package fr.proline.studio.rsmexplorer.gui.dialog.xic;
 
 import fr.proline.core.orm.uds.QuantitationMethod;
-import fr.proline.studio.gui.WizardPanel;
 import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -33,13 +32,8 @@ public class IsobaricMethodParamsPanel extends AbstractParamsPanel {
         m_quantMethod = method;
         
         setLayout(new BorderLayout());
-        
-        JPanel wizardPanel = new WizardPanel("<html><b>Step 1.5:</b> Specify isobaric quantitation method parameters.</html>");
         JPanel mainPanel = createMainPanel();
-
-        add(wizardPanel, BorderLayout.PAGE_START);
         add(mainPanel, BorderLayout.CENTER);
-
     }
     
     private JPanel createMainPanel() {

@@ -6,13 +6,13 @@
 package fr.proline.studio.rsmexplorer.gui.dialog.exporter;
 
 import fr.proline.studio.gui.DefaultDialog;
-import fr.proline.studio.gui.WizardPanel;
 import fr.proline.studio.parameter.AbstractParameter;
 import fr.proline.studio.parameter.ParameterError;
 import fr.proline.studio.parameter.ParameterList;
 import fr.proline.studio.parameter.StringParameter;
 import fr.proline.studio.settings.FilePreferences;
 import fr.proline.studio.settings.SettingsDialog;
+import fr.proline.studio.utils.IconManager;
 import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
 import java.io.File;
@@ -53,7 +53,7 @@ public class Export2MzIdentMLParamPanel extends JPanel {
     public Export2MzIdentMLParamPanel(DefaultDialog parent) {
         m_parent = parent;
         setLayout(new BorderLayout());
-        add(new WizardPanel("MzIdentML parameters", NbBundle.getMessage(Export2MzIdentMLDialog.class,"Export2MzIdentMLDialog.help.text")), BorderLayout.PAGE_START);
+        parent.setHelp(IconManager.getIcon(IconManager.IconType.INFORMATION),"MzIdentML parameters", NbBundle.getMessage(Export2MzIdentMLDialog.class,"Export2MzIdentMLDialog.help.text"));
         add(createMainPanel(), BorderLayout.CENTER);   
     }
         

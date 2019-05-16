@@ -178,6 +178,7 @@ public class DefaultDialog extends javax.swing.JDialog {
 
     /**
      * set Help without title
+     * must follow with replaceInternalComponent /setInternalComponent
      *
      * @param icon
      * @param htmlSupportedTxt
@@ -186,11 +187,21 @@ public class DefaultDialog extends javax.swing.JDialog {
         this.setHelp(icon, null, htmlSupportedTxt);
     }
 
+    /**
+     *  must follow with replaceInternalComponent /setInternalComponent
+     * @param title
+     * @param htmlSupportedTxt 
+     */
     public void setHelp(String title, String htmlSupportedTxt) {
         m_helpPanel.removeAll();
         m_helpPanel.add(new WizardPanel(title, htmlSupportedTxt), BorderLayout.CENTER);
     }
-
+    /**
+     *  must follow with replaceInternalComponent /setInternalComponent
+     * @param icon
+     * @param title
+     * @param htmlSupportedTxt 
+     */
     public void setHelp(Icon icon, String title, String htmlSupportedTxt) {
         m_helpPanel.removeAll();
         m_helpPanel.add(new WizardPanel(icon, title, htmlSupportedTxt), BorderLayout.CENTER);;

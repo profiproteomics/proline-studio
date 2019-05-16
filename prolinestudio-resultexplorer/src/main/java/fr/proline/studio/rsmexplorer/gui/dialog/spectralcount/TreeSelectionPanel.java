@@ -3,12 +3,10 @@ package fr.proline.studio.rsmexplorer.gui.dialog.spectralcount;
 
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.uds.dto.DDataset;
-import fr.proline.studio.gui.WizardPanel;
 import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
+import java.awt.BorderLayout;
 import java.util.ArrayList;
 import javax.swing.*;
 import javax.swing.tree.TreePath;
@@ -27,31 +25,15 @@ public class TreeSelectionPanel extends JPanel {
         return m_treeSelectionPanel;
     }
     
-    public static TreeSelectionPanel getTreeSelectionPanel(IdentificationTree tree, String wizardLabel, String wizardHelp) {
-        m_treeSelectionPanel =  new TreeSelectionPanel(tree, wizardLabel,wizardHelp );
+    public static TreeSelectionPanel getTreeSelectionPanel(IdentificationTree tree) {
+        m_treeSelectionPanel =  new TreeSelectionPanel(tree);
         return m_treeSelectionPanel;
     }
     
-    private TreeSelectionPanel(IdentificationTree tree, String wizardLabel, String wizardHelp) {
+    private TreeSelectionPanel(IdentificationTree tree) {
         m_tree = tree;
-
-        setLayout(new GridBagLayout());
-        GridBagConstraints c = new GridBagConstraints();
-        c.anchor = GridBagConstraints.NORTHWEST;
-        c.fill = GridBagConstraints.BOTH;
-        c.insets = new java.awt.Insets(5, 5, 5, 5);
-
-        c.gridx = 0;
-        c.gridy = 0;
-        c.weightx = 1;
-        add(new WizardPanel(wizardLabel, wizardHelp), c);
-        
-        c.gridy++;
-        c.weighty = 1;
-        add(createMainPanel(), c);
-
-
- 
+        setLayout(new BorderLayout());
+        add(createMainPanel(), BorderLayout.CENTER);
     }
 
     private JComponent createMainPanel() {

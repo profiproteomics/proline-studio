@@ -2,7 +2,6 @@ package fr.proline.studio.rsmexplorer.gui.dialog.xic;
 
 import fr.proline.core.orm.uds.QuantitationMethod;
 import fr.proline.core.orm.util.DStoreCustomPoolConnectorFactory;
-import fr.proline.studio.gui.WizardPanel;
 import fr.proline.studio.rsmexplorer.tree.xic.QuantExperimentalDesignTree;
 import fr.proline.studio.rsmexplorer.tree.xic.IdentificationSelectionTree;
 import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
@@ -34,20 +33,16 @@ public class QuantExperimentalDesignPanel extends JPanel {
     private final QuantitationMethod.Type m_quantitationType;
     private JComboBox<QuantitationMethod> m_methodsCbx;
     private QuantitationMethod m_selectedMethod;
-    
+
     public QuantExperimentalDesignPanel(AbstractNode rootNode, IdentificationTree selectionTree, QuantitationMethod.Type quantitationType) {
         m_rootNode = rootNode;
         m_selectionTree = selectionTree;
         m_experimentalDesignTree = new QuantExperimentalDesignTree(m_rootNode, true);
         m_quantitationType = quantitationType;
-        
-        JPanel wizardPanel = new WizardPanel("<html><b>Step 1:</b> Drag and Drop Identification Summaries to build the Experimental Design.</html>");
+
         JPanel mainPanel = createMainPanel();
-
         setLayout(new BorderLayout());
-        add(wizardPanel, BorderLayout.NORTH);
         add(mainPanel, BorderLayout.CENTER);
-
     }
 
     public final JPanel createMainPanel() {
@@ -57,7 +52,7 @@ public class QuantExperimentalDesignPanel extends JPanel {
         c.anchor = GridBagConstraints.NORTHWEST;
         c.fill = GridBagConstraints.BOTH;
         c.insets = new java.awt.Insets(5, 5, 5, 5);
-        
+
         JPanel designTreePanel = createDesignTreePanel();
         JPanel selectionTreePanel = createSelectionTreePanel();
 
@@ -92,28 +87,28 @@ public class QuantExperimentalDesignPanel extends JPanel {
         c.gridy = 0;
         c.weightx = 1;
         c.anchor = GridBagConstraints.NORTHWEST;
-        
+
         /*
         Create method JCombo box but display only for some types. 
         Only one choice for label free, no panel needed.
-        */
+         */
         m_methodsCbx = new JComboBox<>(retrieveQuantMethods(m_quantitationType));
-        m_selectedMethod = ((QuantitationMethod)m_methodsCbx.getSelectedItem());
+        m_selectedMethod = ((QuantitationMethod) m_methodsCbx.getSelectedItem());
         m_methodsCbx.addItemListener((e) -> {
-            m_selectedMethod = ((QuantitationMethod)m_methodsCbx.getSelectedItem()); 
+            m_selectedMethod = ((QuantitationMethod) m_methodsCbx.getSelectedItem());
         });
-        
+
         switch (m_quantitationType) {
             case ISOBARIC_TAGGING:
             case RESIDUE_LABELING: {
                 c.fill = GridBagConstraints.HORIZONTAL;
                 c.weighty = 0;
-                mainPanel.add(createMethodPanel(m_quantitationType), c); 
+                mainPanel.add(createMethodPanel(m_quantitationType), c);
                 c.gridx = 0;
                 c.gridy++;
-            }   
+            }
         }
-        c.weighty = 1;               
+        c.weighty = 1;
         c.fill = GridBagConstraints.BOTH;
         mainPanel.add(framePanel, c);
 
@@ -133,28 +128,27 @@ public class QuantExperimentalDesignPanel extends JPanel {
         c.weighty = 1;
         c.anchor = GridBagConstraints.NORTHWEST;
         c.fill = GridBagConstraints.NONE;
-        
+
         JLabel label = new JLabel("Name:");
         panel.add(label, c);
-        
+
         c.gridx++;
         c.weightx = 0.2;
         panel.add(m_methodsCbx, c);
-       
+
         c.gridx++;
         c.weightx = 1;
         c.fill = GridBagConstraints.HORIZONTAL;
         panel.add(new JPanel(), c);
-        
-        
+
         return panel;
     }
-    
+
     private QuantitationMethod[] retrieveQuantMethods(QuantitationMethod.Type quantitationType) {
-        
+
         EntityManager entityManagerUDS = DStoreCustomPoolConnectorFactory.getInstance().getUdsDbConnector().createEntityManager();
         try {
-            TypedQuery<QuantitationMethod> query =  entityManagerUDS.createNamedQuery("findQuantMethodForType", QuantitationMethod.class);
+            TypedQuery<QuantitationMethod> query = entityManagerUDS.createNamedQuery("findQuantMethodForType", QuantitationMethod.class);
             query.setParameter("searchType", quantitationType.toString());
             List<QuantitationMethod> results = query.getResultList();
             results.forEach(method -> Hibernate.initialize(method.getLabels()));
@@ -164,11 +158,10 @@ public class QuantExperimentalDesignPanel extends JPanel {
         } finally {
             entityManagerUDS.close();
         }
-        
+
         return null;
     }
-    
-    
+
     private JPanel createDesignTreePanel() {
         JPanel designTreePanel = new JPanel();
 
@@ -182,7 +175,7 @@ public class QuantExperimentalDesignPanel extends JPanel {
         c.gridy = 0;
         c.weightx = 1;
         c.weighty = 1;
-        
+
         JScrollPane treeScrollPane = new JScrollPane();
         treeScrollPane.setViewportView(m_experimentalDesignTree);
 
@@ -195,13 +188,13 @@ public class QuantExperimentalDesignPanel extends JPanel {
         JPanel selectionTreePanel = new JPanel();
         boolean isCorrect = true;
         Enumeration childEnum = m_rootNode.children();
-        while(childEnum.hasMoreElements()){
+        while (childEnum.hasMoreElements()) {
             AbstractNode childNode = (AbstractNode) childEnum.nextElement();
-            if(DatasetReferenceNode.class.isInstance(childNode)){
-                isCorrect = !((DatasetReferenceNode)childNode).isInvalidReference();
+            if (DatasetReferenceNode.class.isInstance(childNode)) {
+                isCorrect = !((DatasetReferenceNode) childNode).isInvalidReference();
             }
         }
-        
+
         selectionTreePanel.setLayout(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();
         c.anchor = GridBagConstraints.NORTHWEST;
@@ -212,7 +205,7 @@ public class QuantExperimentalDesignPanel extends JPanel {
         c.gridy = 0;
         c.weightx = 1;
         c.weighty = 1;
-        if(isCorrect){
+        if (isCorrect) {
             AbstractNode rootSelectionNode;
             if (m_selectionTree == null) {
                 rootSelectionNode = IdentificationTree.getCurrentTree().copyRootNodeForSelection();
@@ -235,16 +228,15 @@ public class QuantExperimentalDesignPanel extends JPanel {
 
         return selectionTreePanel;
     }
-    
-    public QuantExperimentalDesignTree getExperimentalDesignTree(){
+
+    public QuantExperimentalDesignTree getExperimentalDesignTree() {
         return m_experimentalDesignTree;
     }
 
-    public List<Long> getQuantifiedRsmIds(){
+    public List<Long> getQuantifiedRsmIds() {
         return m_experimentalDesignTree.getQuantifiedRsmIds(m_rootNode);
     }
 
-    
     public QuantitationMethod getQuantitationMethod() {
         return m_selectedMethod;
     }

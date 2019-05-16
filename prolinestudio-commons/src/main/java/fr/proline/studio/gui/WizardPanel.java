@@ -15,7 +15,6 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextPane;
 import javax.swing.border.Border;
-import javax.swing.border.EtchedBorder;
 
 /**
  *
@@ -64,8 +63,6 @@ public class WizardPanel extends JPanel {
      * @param htmlSupportedHelpText
      */
     public void htmlWizard(String htmlSupportedTitle, String htmlSupportedHelpText) {
-        String title = htmlSupportedTitle;
-        String helpText = htmlSupportedHelpText;
         setLayout(new BorderLayout());
         setBackground(Color.white);
         /**
@@ -78,37 +75,62 @@ public class WizardPanel extends JPanel {
         JTextPane wizardPane = new JTextPane();
         wizardPane.setEditable(false);
         wizardPane.setContentType("text/html");
-        String htmlTitle = formatString(title, "black");
-        String htmlHelp = formatString(helpText, "gray");
-
-        String fontfamily = this.getFont().getFamily();
+        String title = removeHtmlTag(htmlSupportedTitle);
+        if (!title.isEmpty()) {
+            title = "<div id=\"label\">" + title + "</div>";
+        }
+        String help = removeHtmlTag(htmlSupportedHelpText);
+        if (!help.isEmpty()) {
+            help = "<div id=\"help\">" + help + "</div>";
+        }
+        String fontFamily = this.getFont().getFamily();
         int fontSize = this.getFont().getSize();
-        String htmlText = "<!DOCTYPE html><html><head><style>div {"
-                + "font-family: " + fontfamily + ";"
-                + "font-size: " + fontSize + ";"
-                + "padding-top: 0;"
-                + "padding-bottom: 12px;"
-                + "}</style></head><body>";
-        htmlText += htmlTitle;
-        htmlText += htmlHelp + "</body></html>";
-        wizardPane.setText(htmlText);
+
+        String html = String.format(htmlModel(), fontFamily, fontSize, fontFamily, fontSize, title, help);
+        wizardPane.setText(html);
         add(wizardPane, BorderLayout.CENTER);
-        //this.setBorder(BorderFactory.createMatteBorder(5, 5, 5, 5, Color.LIGHT_GRAY));
         Border raisedbevel = BorderFactory.createRaisedBevelBorder();
         Border loweredbevel = BorderFactory.createLoweredBevelBorder();
         this.setBorder(BorderFactory.createCompoundBorder(raisedbevel, loweredbevel));
     }
 
-    private String formatString(String txt, String color) {
+    private String htmlModel() {
+        return "<html> \n"
+                + "   <head>\n"
+                + "      <style type=\"text/css\">  \n"
+                + "         #label{\n"
+                + "         color: black; \n"
+                + "         font-family: %s;\n"
+                + "         font-weight: bold;\n"
+                + "         font-size: %d;\n"
+                + "         padding-top: 3px;\n"
+                + "         padding-bottom: 3px; \n"
+                + "         } \n"
+                + "         #help{\n"
+                + "         color: Gray; \n"
+                + "         font-family: %s;\n"
+                + "         font-size: %d;\n"
+                + "         padding-top: 6px;\n"
+                + "         padding-bottom: 6px;\n"
+                + "         } \n"
+                + "      </style> \n"
+                + "   </head> \n"
+                + "   <body>\n"
+                + "	%s <!-- title --> \n"               
+                + "	%s <!-- help text -->\n"
+                + "   </body> \n"
+                + "</html>";
+    }
+
+    private String removeHtmlTag(String txt) {
         if (txt != null && !txt.isEmpty()) {
-            String newTxt;
             if (txt.contains("<html>") || txt.contains("</html>")) {
-                newTxt = txt.replaceAll("<html>", "");
-                txt = newTxt.replaceAll("</html>", "");
+                String newTxt = txt.replaceAll("<html>", "").replaceAll("</html>", "");
+                return newTxt;
             }
-            return "<div style=\"color:" + color + ";\"><b>" + txt + "</b></div>";
+            return txt;
         }
         return "";
-
     }
+
 }

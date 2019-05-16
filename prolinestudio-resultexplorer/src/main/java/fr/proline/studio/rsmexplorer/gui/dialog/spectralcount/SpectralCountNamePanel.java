@@ -1,6 +1,6 @@
 package fr.proline.studio.rsmexplorer.gui.dialog.spectralcount;
 
-import fr.proline.studio.gui.WizardPanel;
+import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import javax.swing.*;
@@ -31,25 +31,8 @@ public class SpectralCountNamePanel extends JPanel {
     }
     
     private SpectralCountNamePanel() {
-
-        setLayout(new GridBagLayout());
-        GridBagConstraints c = new GridBagConstraints();
-        c.anchor = GridBagConstraints.NORTHWEST;
-        c.fill = GridBagConstraints.BOTH;
-        c.insets = new java.awt.Insets(5, 5, 5, 5);
-
-        c.gridx = 0;
-        c.gridy = 0;
-        c.weightx = 1;
-        add(new WizardPanel("<html><b>Step 1:</b> Define spectral count name and description.</html>"), c);
-
-        c.gridy++;
-        c.weighty = 1;
-        
-        add(createMainPanel(), c);
-
-
-
+        setLayout(new BorderLayout());
+        add(createMainPanel(), BorderLayout.CENTER);
     }
 
     private JPanel createMainPanel() {

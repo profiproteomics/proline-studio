@@ -44,11 +44,7 @@ public class ResidueMethodParamsPanel extends AbstractParamsPanel {
         m_ptms = ptms;
         
         setLayout(new BorderLayout());
-        
-        JPanel wizardPanel = new WizardPanel("<html><b>Step 1.5:</b> Specify residue labeling method parameters.</html>");
         JPanel mainPanel = createMainPanel();
-
-        add(wizardPanel, BorderLayout.PAGE_START);
         add(mainPanel, BorderLayout.CENTER);
     }
     

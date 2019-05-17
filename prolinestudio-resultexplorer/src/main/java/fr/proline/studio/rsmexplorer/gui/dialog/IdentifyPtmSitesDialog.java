@@ -1,7 +1,6 @@
 package fr.proline.studio.rsmexplorer.gui.dialog;
 
 import fr.proline.core.orm.msi.Ptm;
-import fr.proline.core.orm.msi.PtmSpecificity;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.gui.DefaultDialog;
 

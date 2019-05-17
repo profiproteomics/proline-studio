@@ -69,18 +69,11 @@ public class QuantExperimentalDesignPanel extends JPanel {
 
         cFrame.gridx = 0;
         cFrame.gridy = 0;
-        cFrame.gridwidth = 2;
         cFrame.weightx = 1;
-        cFrame.weighty = 0;
-        cFrame.anchor = GridBagConstraints.NORTH;
-        cFrame.fill = GridBagConstraints.NONE;
-        framePanel.add(new JLabel("Drag & Drop", IconManager.getIcon(IconManager.IconType.DRAG_AND_DROP), JLabel.LEADING), cFrame);
-
+        cFrame.weighty = 1;
         cFrame.anchor = GridBagConstraints.NORTHWEST;
         cFrame.fill = GridBagConstraints.BOTH;
         cFrame.gridwidth = 1;
-        cFrame.gridy++;
-        cFrame.weighty = 1;
         framePanel.add(sp, cFrame);
 
         c.gridx = 0;

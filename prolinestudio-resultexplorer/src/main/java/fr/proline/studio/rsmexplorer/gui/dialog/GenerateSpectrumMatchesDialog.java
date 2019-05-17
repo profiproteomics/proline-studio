@@ -47,17 +47,15 @@ public class GenerateSpectrumMatchesDialog extends DefaultDialog {
          
         setTitle("Generate Spectrum Matches");
         setDocumentationSuffix("id.1mrcu09");
+        setHelpHeaderText("Choose Fragmentation Rule Set that will be used to generate spectrum matches.<br>" +
+                " With force parameter set, new generated spectrum matches will overwrite existing ones.");
         initInternalPanel();
         pack();
     }
     
     public GenerateSpectrumMatchesDialog(Window parent, List<DDataset> allDSs){
-        super(parent, Dialog.ModalityType.APPLICATION_MODAL);
+        this(parent);
         m_datasets = allDSs;
-        setTitle("Generate Spectrum Matches");
-        setDocumentationSuffix("id.1mrcu09");
-        initInternalPanel();
-        pack();
     }
     
     private void initInternalPanel() {
@@ -72,16 +70,6 @@ public class GenerateSpectrumMatchesDialog extends DefaultDialog {
         
         c.gridx = 0;
         c.gridy = 0;
-        c.gridwidth = 2;
-        JTextArea helpTxt = new JTextArea("Choose Fragmentation Rule Set to use to generate (new) spectrum matches.");
-        helpTxt.setRows(1);
-        helpTxt.setForeground(Color.LIGHT_GRAY);
-        helpTxt.setBackground(Color.WHITE);
-        helpTxt.setEditable(false);
-        internalPanel.add(helpTxt, c);
-        
-        c.gridx = 0;
-        c.gridy++;
         c.gridwidth = 2;
         c.weightx = 1.0;
         c.weighty = 1.0;

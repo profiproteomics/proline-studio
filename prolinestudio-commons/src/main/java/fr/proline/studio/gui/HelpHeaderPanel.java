@@ -6,15 +6,15 @@
 package fr.proline.studio.gui;
 
 import fr.proline.studio.utils.IconManager;
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
+
+import java.awt.*;
 import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextPane;
 import javax.swing.border.Border;
+import javax.swing.border.EtchedBorder;
 
 /**
  *
@@ -63,14 +63,24 @@ public class HelpHeaderPanel extends JPanel {
      * @param htmlSupportedHelpText
      */
     public void htmlWizard(String htmlSupportedTitle, String htmlSupportedHelpText) {
-        setLayout(new BorderLayout());
+        setLayout(new GridBagLayout());
+        GridBagConstraints c = new GridBagConstraints(0,0,1,1,0,0,GridBagConstraints.NORTH, GridBagConstraints.NONE, null, 0,0);
+        c.insets = new Insets(10,15,10,15);
+
         setBackground(Color.white);
         /**
          * right icon image
          */
         JLabel wizardLabel = new JLabel(m_icon);
         wizardLabel.setPreferredSize(new Dimension(30, 30));
-        add(wizardLabel, BorderLayout.LINE_START);
+        add(wizardLabel, c);
+
+        c.gridx = 1;
+        c.fill = GridBagConstraints.BOTH;
+        c.anchor = GridBagConstraints.NORTHWEST;
+        c.weightx = 1;
+        c.weighty = 1;
+        c.insets = new Insets(5,5,10,5);
 
         JTextPane wizardPane = new JTextPane();
         wizardPane.setEditable(false);
@@ -88,10 +98,11 @@ public class HelpHeaderPanel extends JPanel {
 
         String html = String.format(htmlModel(), fontFamily, fontSize, fontFamily, fontSize, title, help);
         wizardPane.setText(html);
-        add(wizardPane, BorderLayout.CENTER);
-        Border raisedbevel = BorderFactory.createRaisedBevelBorder();
-        Border loweredbevel = BorderFactory.createLoweredBevelBorder();
-        this.setBorder(BorderFactory.createCompoundBorder(raisedbevel, loweredbevel));
+        add(wizardPane, c);
+//        Border raisedbevel = BorderFactory.createRaisedBevelBorder();
+//        Border loweredbevel = BorderFactory.createLoweredBevelBorder();
+//        this.setBorder(BorderFactory.createCompoundBorder(raisedbevel, loweredbevel));
+        this.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
     }
 
     private String htmlModel() {

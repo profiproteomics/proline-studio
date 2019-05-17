@@ -180,7 +180,7 @@ public class CreateQuantitationDialog extends DefaultDialog {
         setButtonVisible(BUTTON_BACK, false);
 
         // Update and Replace panel
-        setHelpHeader("<html><b>Step 1:</b> Drag and Drop Identification Summaries to build the Experimental Design.</html>", null);
+        setHelpHeader("<html><b>Step 1:</b> Define the experimental design</html>", "<b>Drag and Drop</b> identification summaries from the right panel to build the experimental design on the left.");
         replaceInternalComponent(m_experimentalDesignPanel);
         revalidate();
         repaint();
@@ -199,7 +199,8 @@ public class CreateQuantitationDialog extends DefaultDialog {
 
         // Update and Replace panel
         m_selectRawFilePanel = SelectRawFilesPanel.getPanel(m_experimentalDesignNode);
-        setHelpHeader("<html><b>Step 2:</b> Drag and Drop File Path.</html>", null);
+        setHelpHeader("<html><b>Step 2:</b> Associate MS files to sample analyses.</html>",
+                "Drag and Drop files from the right panel to the drop zone or to the sample analyses table to link files to sample analyses.");
         replaceInternalComponent(m_selectRawFilePanel);
         revalidate();
         repaint();

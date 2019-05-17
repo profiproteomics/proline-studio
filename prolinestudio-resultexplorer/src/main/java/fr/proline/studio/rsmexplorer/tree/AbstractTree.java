@@ -26,13 +26,6 @@ public abstract class AbstractTree extends JTree implements MouseListener {
     private SetRsetNameAction m_subscribedRenamer;
     private int m_expected = -1;
 
-    public enum TreeType {
-        TREE_IDENTIFICATION,
-        TREE_QUANTITATION,
-        TREE_SELECTION,
-        TREE_XIC_DESIGN
-    }
-
     protected RSMTreeModel m_model;
     protected RSMTreeSelectionModel m_selectionModel;
     protected HashMap<AbstractData, AbstractNode> loadingMap = new HashMap<>();

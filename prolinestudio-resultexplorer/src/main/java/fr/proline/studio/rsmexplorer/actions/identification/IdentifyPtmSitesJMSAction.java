@@ -23,13 +23,16 @@ import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 
 import javax.swing.tree.DefaultTreeModel;
 
+import org.apache.lucene.search.FieldComparator;
 import org.openide.util.NbBundle;
 import org.openide.windows.WindowManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 /**
@@ -49,52 +52,60 @@ public class IdentifyPtmSitesJMSAction extends AbstractRSMAction {
   public void actionPerformed(final AbstractNode[] selectedNodes, int x, int y) {
 
     final DefaultTreeModel treeModel = (DefaultTreeModel) getTree().getModel();
-
     int nbNodes = selectedNodes.length;
-    for (int i = 0; i < nbNodes; i++) {
-      final DataSetNode node = (DataSetNode) selectedNodes[i];
 
-      AbstractJMSCallback callback = new AbstractJMSCallback() {
-
-        @Override
-        public boolean mustBeCalledInAWT() {
-          return true;
-        }
-
-        @Override
-        public void run(boolean success) {
-          node.setIsChanging(false);
-          treeModel.nodeChanged(node);
-        }
-      };
-
-      final DDataset dataset = node.getDataset();
-
+    if (nbNodes > 0) {
+      List<Ptm> ptms = new ArrayList<>();
       //Retrieve potential PTMs from dataset
-      final ArrayList<PtmSpecificity> ptmSpecificities = new ArrayList<>();
-      DatabasePTMsTask ptmTask = new DatabasePTMsTask(null);
-      ptmTask.initLoadUsedPTMs(dataset.getProject().getId(), dataset.getResultSummaryId(), ptmSpecificities);
-      ptmTask.fetchData();
-      List<Ptm> ptms = ptmSpecificities.stream().map(s -> s.getPtm()).distinct().collect(Collectors.toList());
-      IdentifyPtmSitesDialog dialog = new IdentifyPtmSitesDialog(WindowManager.getDefault().getMainWindow(), dataset, ptms);
+      for (int i = 0; i < nbNodes; i++) {
+        ArrayList<PtmSpecificity> ptmSpecificities = new ArrayList<>();
+        DataSetNode node = (DataSetNode) selectedNodes[i];
+        DatabasePTMsTask ptmTask = new DatabasePTMsTask(null);
+        ptmTask.initLoadUsedPTMs(node.getDataset().getProject().getId(), node.getDataset().getResultSummaryId(), ptmSpecificities);
+        ptmTask.fetchData();
+        ptms.addAll(ptmSpecificities.stream().map(s -> s.getPtm()).distinct().collect(Collectors.toList()));
+      }
+
+      TreeSet<Ptm> ptmsTreeSet = ptms.stream().collect(Collectors.toCollection(() -> new TreeSet<>(Comparator.comparing(p -> Long.valueOf(p.getId())))));
+      ptms = new ArrayList<>(ptmsTreeSet);
+
+      IdentifyPtmSitesDialog dialog = new IdentifyPtmSitesDialog(WindowManager.getDefault().getMainWindow(), ptms);
       dialog.setLocation(x, y);
       dialog.setVisible(true);
       if (dialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {
 
-        node.setIsChanging(true);
-        treeModel.nodeChanged(node);
+        for (int i = 0; i < nbNodes; i++) {
 
-        Long projectId = dataset.getProject().getId();
-        Long resultSummaryId = dataset.getResultSummaryId();
-        IdentifyPtmSitesTask task;
+          final DataSetNode node = (DataSetNode) selectedNodes[i];
+          AbstractJMSCallback callback = new AbstractJMSCallback() {
+            @Override
+            public boolean mustBeCalledInAWT() {
+              return true;
+            }
 
-        if (dialog.getServiceVersion().equals("2.0")) {
-          task = new IdentifyPtmSitesTask(callback, dataset.getName(), projectId, resultSummaryId, null, dialog.getServiceVersion(), dialog.getPtms(), dialog.getClusteringMethodName());
-        } else {
-          task = new IdentifyPtmSitesTask(callback, dataset.getName(), projectId, resultSummaryId, null);
+            @Override
+            public void run(boolean success) {
+              node.setIsChanging(false);
+              treeModel.nodeChanged(node);
+            }
+          };
+
+          final DDataset dataset = node.getDataset();
+
+          node.setIsChanging(true);
+          treeModel.nodeChanged(node);
+
+          Long projectId = dataset.getProject().getId();
+          Long resultSummaryId = dataset.getResultSummaryId();
+          IdentifyPtmSitesTask task;
+
+          if (dialog.getServiceVersion().equals("2.0")) {
+            task = new IdentifyPtmSitesTask(callback, dataset.getName(), projectId, resultSummaryId, null, dialog.getServiceVersion(), dialog.getPtms(), dialog.getClusteringMethodName());
+          } else {
+            task = new IdentifyPtmSitesTask(callback, dataset.getName(), projectId, resultSummaryId, null);
+          }
+          AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
         }
-
-        AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
       }
     }
   }

@@ -14,20 +14,21 @@ import java.util.stream.Collectors;
 
 public class IdentifyPtmSitesDialog extends DefaultDialog {
 
-  DDataset m_dataset;
   List<Ptm> m_ptms;
   List<Ptm> m_selectedPtms;
 
   private JComboBox<String> m_clusteringMethodCbx;
 
-  public IdentifyPtmSitesDialog(Window parent, DDataset dataset, List<Ptm> ptms) {
+  public IdentifyPtmSitesDialog(Window parent, List<Ptm> ptms) {
     super(parent, Dialog.ModalityType.APPLICATION_MODAL);
-    m_dataset = dataset;
     ptms.sort(Comparator.comparing(Ptm::getShortName));
     m_ptms = ptms;
     m_selectedPtms = new ArrayList<>(m_ptms);
 
     setTitle("Identify Ptm sites");
+    setHelpHeaderText("Select the list of modifications of interest (other modifications <br>" +
+            "will be ignored during clustering) and the name of the method that will be <br>" +
+            " used to clusterize modification sites.");
     initInternalPanel();
     pack();
   }

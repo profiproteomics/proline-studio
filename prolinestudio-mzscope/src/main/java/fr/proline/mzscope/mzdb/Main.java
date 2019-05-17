@@ -48,7 +48,7 @@ public class Main {
          
          
         Iterator<RunSlice> runSlices = reader.getLcMsnRunSliceIterator(450.0, 455.0, 200, 1000);
-        FeatureDetectorConfig detectorConfig = new FeatureDetectorConfig(2, tolPPM, 5, 0.9f, new SmartPeakelFinderConfig(5, 3, 0.75f, false, 10, false, false, true));
+        FeatureDetectorConfig detectorConfig = new FeatureDetectorConfig(2, tolPPM, 5, new SmartPeakelFinderConfig(5, 3, 0.75f, false, 10, false, false, true));
         MzDbFeatureDetector detector = new MzDbFeatureDetector(reader, detectorConfig);
             
         Peakel[] peakels = detector.detectPeakels(runSlices, Option.apply(1));

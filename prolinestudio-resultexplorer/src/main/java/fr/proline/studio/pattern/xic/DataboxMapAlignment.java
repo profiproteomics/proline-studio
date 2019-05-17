@@ -27,7 +27,7 @@ import fr.proline.studio.rsmexplorer.gui.xic.MapTimePanel;
 import fr.proline.studio.rsmexplorer.gui.xic.QuantChannelInfo;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 import fr.proline.studio.rsmexplorer.gui.dialog.xic.AbstractLabelFreeMSParamsPanel;
-import fr.proline.studio.rsmexplorer.gui.xic.alignment.RTCompareTableModel;
+import fr.proline.studio.rsmexplorer.gui.xic.alignment.IonsRTTableModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,7 +45,7 @@ public class DataboxMapAlignment extends AbstractDataBox {
     private QuantChannelInfo m_quantChannelInfo;
     private List<DMasterQuantPeptideIon> m_masterQuantPeptideIonList;
 
-    private Map<Long, RTCompareTableModel> m_compareRT2Maps;
+    private Map<Long, IonsRTTableModel> m_compareRT2Maps;
     private double m_RT_Tolerance;
     private Long m_paramTaskId;
     private boolean m_isCloudLoaded;
@@ -58,7 +58,7 @@ public class DataboxMapAlignment extends AbstractDataBox {
         m_typeName = "Map Alignment Plot";
         m_description = "Graphical display of XIC Map Alignment.";
 
-        m_compareRT2Maps = new HashMap<Long, RTCompareTableModel>();
+        m_compareRT2Maps = new HashMap<Long, IonsRTTableModel>();
         // Register Possible in parameters
         // One Dataset 
         GroupParameter inParameter = new GroupParameter();
@@ -243,13 +243,11 @@ public class DataboxMapAlignment extends AbstractDataBox {
 
                 @Override
                 public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
-                    setLoaded(loadingId);
-                    if (finished) {
-                        unregisterTask(taskId);
-                    }
-                    // do nothing, if juste de paramTask finished
+                    // wait for the whole task to complete
                     if (taskId != m_paramTaskId) {
                         if (finished) {
+                            setLoaded(loadingId);
+                            unregisterTask(taskId);
                             logger.debug("DataboxMapAlignment task Id =" + taskId + " finished during " + (System.currentTimeMillis() - m_logCloudStartTime) + " TimeMillis");
 
                             //if all task loaded, then execute the first Alignement Cloud
@@ -304,8 +302,8 @@ public class DataboxMapAlignment extends AbstractDataBox {
      * @param mapFrom
      * @param mapTo
      */
-    public RTCompareTableModel getPeptideCloud(long mapIdFrom) {
-        RTCompareTableModel listETI;
+    public IonsRTTableModel getPeptideCloud(long mapIdFrom) {
+        IonsRTTableModel listETI;
         listETI = m_compareRT2Maps.get(mapIdFrom);
         if (listETI == null) {
             listETI = createMapRTCompareTableModel(mapIdFrom);
@@ -315,7 +313,7 @@ public class DataboxMapAlignment extends AbstractDataBox {
         return listETI;
     }
 
-    private RTCompareTableModel createMapRTCompareTableModel(long mapIdFrom) {
+    private IonsRTTableModel createMapRTCompareTableModel(long mapIdFrom) {
         Map<Long, String> idNameMap = new HashMap<>(); // Map<rsmId,MapTitleName>
         Map<Long, Long> idMap = new HashMap<>();       // Map<MapId,resultSummaryId>
         List<ProcessedMap> processMapList = m_quantChannelInfo.getDataset().getMaps();
@@ -337,7 +335,7 @@ public class DataboxMapAlignment extends AbstractDataBox {
             }
         }
 
-        RTCompareTableModel cloud = new RTCompareTableModel(m_masterQuantPeptideIonList, idMap, idNameMap, rsmIdArray);
+        IonsRTTableModel cloud = new IonsRTTableModel(m_masterQuantPeptideIonList, idMap, idNameMap, rsmIdArray);
         return cloud;
     }
 

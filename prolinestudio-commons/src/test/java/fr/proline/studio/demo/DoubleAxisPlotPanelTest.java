@@ -31,7 +31,7 @@ public class DoubleAxisPlotPanelTest extends JFrame {
         int[] curve1Y1 = {10, 8, 7, 6, 3, 1, 2, 3, 2, 3, 12, 10, 9, 8}; //red
         int[] curve2Y1 = {2, 2, 2, 4, 5, 6, 8, 7, 6, 5, 5, 4, 2, 2, 4, 5};//red
 
-        int[] curveY2 = {10, 8, 7, 6, 3, 1, 2, 2, 2, 4, 5, 6, 7, 10, 11, 12, 10, 9, 8, 7, 6, 5, 5, 4, 3, 2, 3, 5, 9, 11};//blue
+        int[] curveY2 = {100, 80, 70, 60, 30, 10, 20, 20, 20, 40, 50, 60, 70, 100, 110, 120, 100, 90, 80, 70, 60, 50, 50, 40, 30, 20, 30, 50, 90, 110};//blue
 //         int[] curveY1 = {5, 4, 3, 2, 3};
 //        int[] curveY2 = {10, 8, 7, 6, 3 };
         Sample sample1 = new Sample(curveY1, 120, 30);
@@ -59,7 +59,12 @@ public class DoubleAxisPlotPanelTest extends JFrame {
         graphicsPanel.addAuxiliaryPlot(p2);
         Color color = p2.getPlotInformation().getPlotColor();
         graphicsPanel.setSecondAxisPlotInfo("Protein " , color);
+        
         graphicsPanel.preparePaint();
+        
+        graphicsPanel.setYAxisBounds(0, 20);
+        graphicsPanel.setSecondaryYAxisBounds(-10, 200);
+        
         getContentPane().setLayout(new BorderLayout());
         getContentPane().add(graphicsPanel, BorderLayout.CENTER);
         pack();
@@ -72,6 +77,14 @@ public class DoubleAxisPlotPanelTest extends JFrame {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
+
+      System.out.println("NaN value = " + Double.NaN);      
+      System.out.println("MIN value = " + Double.MIN_VALUE);
+      System.out.println("Math.max(NaN, MIN) = " + Math.max(Double.NaN, Double.MIN_VALUE));
+      System.out.println("Math.max(MIN, 0) = " + Math.max(Double.MIN_VALUE, 0.0));
+      System.out.println("MIN = NAN " + (Double.NaN == Double.MIN_VALUE));
+      
+      
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
             SwingUtilities.invokeLater(new Runnable() {

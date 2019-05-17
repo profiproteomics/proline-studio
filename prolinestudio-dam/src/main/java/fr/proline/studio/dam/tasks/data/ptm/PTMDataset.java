@@ -3,6 +3,8 @@ package fr.proline.studio.dam.tasks.data.ptm;
 import fr.proline.core.orm.msi.dto.DMasterQuantProteinSet;
 import fr.proline.core.orm.msi.dto.DPeptideInstance;
 import fr.proline.core.orm.uds.dto.DDataset;
+
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -68,13 +70,10 @@ public class PTMDataset {
         }
     }
 
-    /**
-     * return the PTMPeptideInstance corresponding to the specified peptideId identifying specified ProteinMatch
-     * null is returned if no PTMPeptideInstance defined (yet ?)
-     * @param proteinMatchId
-     * @param peptideId
-     * @return 
-     */
+    public Collection<PTMPeptideInstance> getPTMPeptideInstance(Long proteinMatchId) {
+        return m_ptmPeptideByPeptideIdByProtMatchId.get(proteinMatchId).values();
+    }
+
     public PTMPeptideInstance getPTMPeptideInstance(Long proteinMatchId, Long peptideId) {
         if (!m_ptmPeptideByPeptideIdByProtMatchId.containsKey(proteinMatchId))
             return null;
@@ -86,7 +85,7 @@ public class PTMDataset {
      * If not yet defined, create a new PTMPeptideInstance
      * @param proteinMatchId
      * @param peptideInstance
-     * @return 
+     * @return
      */
     public PTMPeptideInstance getPTMPeptideInstance(Long proteinMatchId, DPeptideInstance peptideInstance) {
 

@@ -8,50 +8,46 @@ package fr.proline.studio.rsmexplorer.gui.xic;
 import fr.proline.core.orm.lcms.MapAlignment;
 import fr.proline.core.orm.lcms.MapTime;
 import fr.proline.core.orm.lcms.ProcessedMap;
-import fr.proline.studio.graphics.CrossSelectionInterface;
+import fr.proline.studio.graphics.*;
+import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.dam.tasks.xic.MapAlignmentConverter;
 import fr.proline.studio.export.ExportButton;
-import java.awt.BorderLayout;
-import java.awt.FlowLayout;
+
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import javax.swing.BorderFactory;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
+import java.util.*;
+import javax.swing.*;
+
+import fr.proline.studio.utils.CyclicColorPalette;
+import org.apache.commons.math3.analysis.interpolation.LoessInterpolator;
+import org.apache.commons.lang3.tuple.Pair;
+import org.openide.windows.WindowManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
-import fr.proline.studio.graphics.PlotBaseAbstract;
-import fr.proline.studio.graphics.PlotLinear;
 import fr.proline.studio.pattern.xic.DataboxMapAlignment;
 import fr.proline.studio.rsmexplorer.gui.dialog.xic.AbstractLabelFreeMSParamsPanel;
-import fr.proline.studio.rsmexplorer.gui.xic.alignment.AlignmentPlotPanel;
-import fr.proline.studio.rsmexplorer.gui.xic.alignment.RTCompareTableModel;
-import fr.proline.studio.rsmexplorer.gui.xic.alignment.PlotScatterXicCloud;
+import fr.proline.studio.rsmexplorer.gui.xic.alignment.IonsRTTableModel;
+import fr.proline.studio.rsmexplorer.gui.xic.alignment.IonsRTScatterPlot;
+import fr.proline.studio.table.BeanTableModel;
 import fr.proline.studio.utils.IconManager;
-import java.awt.Color;
-import java.awt.Dimension;
-import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.JSeparator;
-import javax.swing.JSplitPane;
-import javax.swing.JToggleButton;
+import java.io.PrintWriter;
+
+import java.util.List;
+import java.util.stream.Collectors;
 import javax.swing.border.TitledBorder;
+
+import static java.util.stream.Collectors.averagingDouble;
+import static java.util.stream.Collectors.groupingBy;
 
 /**
  * map alignment panel for 1 dataset
@@ -60,60 +56,52 @@ import javax.swing.border.TitledBorder;
  */
 public class MapAlignmentPanel extends HourglassPanel implements DataBoxPanelInterface {
 
+
     private static final Logger logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
-    private AbstractDataBox m_dataBox;
-
-    private final static NumberFormat format2 = new DecimalFormat("#0.0000");
-
-    private QuantChannelInfo m_quantChannelInfo;
-    // all map alignments
-    private List<MapAlignment> m_allMapAlignments;
-
-    private final static String panelTitle = " LC-MS Map Alignments";
-
-    private JLabel m_labelTitle;
-    private JTextField m_tfSouceTime;
-    private JTextField m_tfDestTime;
-    private JComboBox m_cbSourceMaps;
-    private JComboBox m_cbDestMaps;
-    private DefaultComboBoxModel m_cbSourceModel;
-    private DefaultComboBoxModel m_cbDestModel;
-
-    private static final String CLOUD_VIEW_BEST_FIT_TEXT = "Show Best Fit Zone";
-    private static final String CLOUD_VIEW_All_TEXT = "Show All Peptide Ion";
-    private static final String CLOUD_VIEW_NOT_ENABLED_TEXT = "Zoom Not Enabled";
+    private static final String CLOUD_VIEW_BEST_FIT_TEXT = "Zoom to fit RT tolerance range";
+    private static final String CLOUD_VIEW_All_TEXT = "Zoom to fit all ions";
+    private static final String CLOUD_VIEW_NOT_ENABLED_TEXT = "Zoom disabled";
     private static final int CLOUD_VIEW_ALL = 1;
     private static final int CLOUD_VIEW_BEST_FIT = 0;//default show mode
-    private JToggleButton m_btCloudViewMode;
-    private int m_cloudViewMode;
+    private static final String CLOUD_LOAD_TEXT = "Load matched peptide ions";
+    private static final String CLOUD_REMOVE_TEXT = "Remove peptide ions plot";
+    private static final String CLOUD_IS_LOADING = "Loading ions ...";
+    private final static NumberFormat format2 = new DecimalFormat("#0.0000");
 
-    private static final String CLOUD_LOAD_TEXT = "Load the peptide compare points";
-    private static final String CLOUD_REMOVE_TEXT = "Remove the peptide compare points";
-    private static final String CLOUD_IS_LOADING = "In loading...peptide compare points";
-    private JToggleButton m_btLoadCloud;
-    private boolean m_isLoadCloudAsked;
-
+    private AbstractDataBox m_dataBox;
+    private QuantChannelInfo m_quantChannelInfo;
+    private List<MapAlignment> m_allMapAlignments;
     private Map<Integer, ProcessedMap> m_mapName;
     private long m_referenceMapId;
 
-    private String m_alnMode;
+    private JLabel m_labelTitle;
+    private JTextField m_SourceTimeTF;
+    private JTextField m_DestTimeTF;
+    private JComboBox m_sourceMapsCB;
+    private JComboBox m_destMapsCB;
 
-    private List<ExtendedTableModelInterface> m_valuesList = null;
-    private List<CrossSelectionInterface> m_crossSelectionInterfaceList = null;
+    private JToggleButton m_loadIonsBtn;
+    private boolean m_isIonsCloudLoaded;
+    private JToggleButton m_zoomModeBtn;
+    private int m_zoomMode;
+    private JButton m_addLoessCurveBtn;
+    private JButton m_removeLoessCurveBtn;
+    private JButton m_showHideCrossAssigned;
+
     private JSplitPane m_splitPane;
-    private AlignmentPlotPanel m_alignmentGraphicPanel;  //who has BasePlotPanel
-    private boolean m_isSourceDestComboBoxSeted = false;
+    private BasePlotPanel m_alignmentGraphicPanel;
     /**
-     * for alignement iterative mode, sometimes, we should show 2 graphic
+     * for alignment iterative mode, sometimes, we should show 2 graphic
      */
-    private AlignmentPlotPanel m_alignmentGraphicPanel_2;
+    private BasePlotPanel m_alignmentGraphicPanel_2;
+    private boolean m_isInitialized = false;
+    private IonsRTScatterPlot m_ionsScatterPlot;
 
     public MapAlignmentPanel(DataboxMapAlignment dataBox) {
         super();
         m_referenceMapId = 0;
-        m_alnMode = "unknown";
         m_dataBox = dataBox;
-        m_isLoadCloudAsked = false;
+        m_isIonsCloudLoaded = false;
         initComponents();
     }
 
@@ -122,13 +110,13 @@ public class MapAlignmentPanel extends HourglassPanel implements DataBoxPanelInt
         pane = new JPanel();
         JPanel mapAlignmentPanel = initMapAlignmentPanel();
         //m_alignmentGraphicPanel = new MultiGraphicsPanel(false, false);
-        m_alignmentGraphicPanel = new AlignmentPlotPanel(this);
+        m_alignmentGraphicPanel = new BasePlotPanel();
         //m_alignmentGraphicPanel_2 = new MultiGraphicsPanel(false, false);
-        m_alignmentGraphicPanel_2 = new AlignmentPlotPanel(this);
+        m_alignmentGraphicPanel_2 = new BasePlotPanel();
         // the second graphic panel has not data in exhaustive mode and in iterative mode, when one selected map is reference map
         m_alignmentGraphicPanel_2.setVisible(false);
         pane.setLayout(new BorderLayout());
-        TitledBorder titleB = new TitledBorder(null, panelTitle, TitledBorder.CENTER, TitledBorder.CENTER);
+        TitledBorder titleB = new TitledBorder(null, " LC-MS Map Alignments", TitledBorder.CENTER, TitledBorder.CENTER);
         pane.setBorder(titleB);
         pane.add(mapAlignmentPanel, BorderLayout.PAGE_START);
         m_splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, m_alignmentGraphicPanel, m_alignmentGraphicPanel_2);
@@ -137,20 +125,19 @@ public class MapAlignmentPanel extends HourglassPanel implements DataBoxPanelInt
         pane.add(m_splitPane, BorderLayout.CENTER);
         this.setLayout(new BorderLayout());
         this.add(pane, BorderLayout.CENTER);
-
     }
 
     private JPanel initMapAlignmentPanel() {
         ExportButton exportImageButton = new ExportButton("Graphic", this);
         exportImageButton.setMargin(new java.awt.Insets(2, 2, 2, 2));
-        createButtonLoadCloud();//m_loadCloudBt is created
-        createButtonZoom();
+        createLoadIonsButton();
+        createZoomButton();
 
         m_labelTitle = new JLabel("<html>Reference Map: <font color='RED'>&#x25A0;&nbsp;</font>"
                 + "   map   &nbsp;, Alignment Mode : I/H) </html>");
 
-        m_tfSouceTime = new JTextField(10);
-        m_tfSouceTime.addFocusListener(new FocusListener() {
+        m_SourceTimeTF = new JTextField(10);
+        m_SourceTimeTF.addFocusListener(new FocusListener() {
             @Override
             public void focusGained(FocusEvent e) {
             }
@@ -160,65 +147,90 @@ public class MapAlignmentPanel extends HourglassPanel implements DataBoxPanelInt
                 convertTime();
             }
         });
-        m_tfSouceTime.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                convertTime();
-            }
-        });
-        m_tfSouceTime.setName("tfSourceTime");
-        m_tfSouceTime.setToolTipText("fill time in min");
+        m_SourceTimeTF.addActionListener(e -> convertTime());
+        m_SourceTimeTF.setName("tfSourceTime");
+        m_SourceTimeTF.setToolTipText("Enter retention time (in minutes)");
 
-        m_cbSourceMaps = new JComboBox();
-        m_cbSourceMaps.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                //((DataboxMapAlignment)m_dataBox).setMapFrom(m_cbSourceMaps.getSelectedItem());
-                convertTime();
-                setDataGraphic();
-            }
-
+        m_sourceMapsCB = new JComboBox();
+        m_sourceMapsCB.addActionListener(e -> {
+            convertTime();
+            setDataGraphic();
         });
 
-        m_cbDestMaps = new JComboBox();
-        m_cbDestMaps.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                convertTime();
-                setDataGraphic();
-            }
+        m_destMapsCB = new JComboBox();
+        m_destMapsCB.addActionListener(e -> {
+            convertTime();
+            setDataGraphic();
         });
-        m_cbDestMaps.setName("cbDestMaps");
+        m_destMapsCB.setName("cbDestMaps");
 
         JPanel cloudOptionPane = new JPanel();
-        {
-            JSeparator separator = new JSeparator(JSeparator.VERTICAL);
-            cloudOptionPane.setLayout(new BoxLayout(cloudOptionPane, BoxLayout.LINE_AXIS));
-            cloudOptionPane.add(exportImageButton);
-            cloudOptionPane.add(m_btCloudViewMode);
-            cloudOptionPane.add(m_btLoadCloud);
-            cloudOptionPane.add(Box.createRigidArea(new Dimension(10, 0)));
-            cloudOptionPane.add(separator);
-        }
-        JPanel timePanel = new JPanel();
-        {
-            timePanel.setLayout(new FlowLayout(FlowLayout.LEFT));
+        JSeparator separator = new JSeparator(JSeparator.VERTICAL);
+        cloudOptionPane.setLayout(new BoxLayout(cloudOptionPane, BoxLayout.LINE_AXIS));
 
-            timePanel.add(m_tfSouceTime);
-            JLabel label0 = new JLabel("(min) in ");
-            timePanel.add(label0);
-            m_cbSourceMaps.setName("cbSourceMaps");
-            timePanel.add(m_cbSourceMaps);
-            JLabel label = new JLabel("predicted to");
-            timePanel.add(label);
-            m_tfDestTime = new JTextField(10);
-            m_tfDestTime.setName("tfDestTime");
-            m_tfDestTime.setEditable(false);
-            timePanel.add(m_tfDestTime);
-            JLabel label2 = new JLabel("(min) in");
-            timePanel.add(label2);
-            timePanel.add(m_cbDestMaps);
-        }
+        m_showHideCrossAssigned = new JButton();
+        m_showHideCrossAssigned.setIcon(IconManager.getIcon(IconManager.IconType.HIDE_CROSS_ASSIGNED));
+        m_showHideCrossAssigned.setActionCommand("HIDE");
+        m_showHideCrossAssigned.setMargin(new java.awt.Insets(2, 2, 2, 2));
+        m_showHideCrossAssigned.setToolTipText("Show/Hide cross assigned ions");
+        m_showHideCrossAssigned.addActionListener(e -> {
+            if (m_ionsScatterPlot != null) {
+              if (e.getActionCommand().equals("HIDE")) { 
+                m_ionsScatterPlot.showCrossAssignedIons(false);
+                m_showHideCrossAssigned.setActionCommand("SHOW");
+                m_showHideCrossAssigned.setIcon(IconManager.getIcon(IconManager.IconType.SHOW_CROSS_ASSIGNED));
+              } else {
+                m_ionsScatterPlot.showCrossAssignedIons(true);
+                m_showHideCrossAssigned.setActionCommand("HIDE");
+                m_showHideCrossAssigned.setIcon(IconManager.getIcon(IconManager.IconType.HIDE_CROSS_ASSIGNED));
+              }
+              m_alignmentGraphicPanel.repaintUpdateDoubleBuffer();
+            }
+        });
+
+        m_addLoessCurveBtn = new JButton();
+        m_addLoessCurveBtn.setIcon(IconManager.getIcon(IconManager.IconType.ADD_LOESS_CURVE));
+        m_addLoessCurveBtn.setMargin(new java.awt.Insets(2, 2, 2, 2));
+        m_addLoessCurveBtn.setToolTipText("Fit a Loess smooth curve to ions scatter plot");
+        m_addLoessCurveBtn.addActionListener(e -> computeLoess());
+
+        m_removeLoessCurveBtn = new JButton();
+        m_removeLoessCurveBtn.setIcon(IconManager.getIcon(IconManager.IconType.REMOVE_LOESS_CURVE));
+        m_removeLoessCurveBtn.setMargin(new java.awt.Insets(2, 2, 2, 2));
+        m_removeLoessCurveBtn.setToolTipText("Clear Loess fit curve ");
+        m_removeLoessCurveBtn.addActionListener(e ->  {
+            //force cloud reload. TODO : find a better way to remove loess curves
+            ((DataboxMapAlignment) m_dataBox).loadCloud();
+            m_removeLoessCurveBtn.setEnabled(false);
+        });
+
+        cloudOptionPane.add(exportImageButton);
+        cloudOptionPane.add(m_loadIonsBtn);
+        cloudOptionPane.add(m_zoomModeBtn);
+        cloudOptionPane.add(m_showHideCrossAssigned);
+        cloudOptionPane.add(m_addLoessCurveBtn);
+        cloudOptionPane.add(m_removeLoessCurveBtn);
+        cloudOptionPane.add(Box.createRigidArea(new Dimension(10, 0)));
+        setEnabledCloudButtons(false);
+        cloudOptionPane.add(separator);
+
+        JPanel timePanel = new JPanel();
+        timePanel.setLayout(new FlowLayout(FlowLayout.LEFT));
+
+        timePanel.add(m_SourceTimeTF);
+        JLabel label0 = new JLabel("(min) in ");
+        timePanel.add(label0);
+        m_sourceMapsCB.setName("cbSourceMaps");
+        timePanel.add(m_sourceMapsCB);
+        JLabel label = new JLabel("predicted to");
+        timePanel.add(label);
+        m_DestTimeTF = new JTextField(10);
+        m_DestTimeTF.setName("tfDestTime");
+        m_DestTimeTF.setEditable(false);
+        timePanel.add(m_DestTimeTF);
+        JLabel label2 = new JLabel("(min) in");
+        timePanel.add(label2);
+        timePanel.add(m_destMapsCB);
 
         JPanel beginPane = new JPanel(new FlowLayout());
         beginPane.add(cloudOptionPane);
@@ -232,91 +244,197 @@ public class MapAlignmentPanel extends HourglassPanel implements DataBoxPanelInt
         return pane;
     }
 
-    private void createButtonLoadCloud() {
-        m_btLoadCloud = new JToggleButton(IconManager.getIcon(IconManager.IconType.LOAD_ALIGNMENT_CLOUD));
-        m_btLoadCloud.setMargin(new java.awt.Insets(2, 2, 2, 2));
+    private void setEnabledCloudButtons(boolean enable) {
+      m_addLoessCurveBtn.setEnabled(enable);
+      //warning: removeFit enable status depends on addFit only
+      m_removeLoessCurveBtn.setEnabled(false);
+      m_showHideCrossAssigned.setEnabled(enable);
+      m_zoomModeBtn.setEnabled(enable);
+    }
+    
+    private void computeLoess() {
+        if (this.m_isIonsCloudLoaded) {
 
-        m_btLoadCloud.setToolTipText(CLOUD_LOAD_TEXT);
-        m_btLoadCloud.addActionListener(new ActionListener() {
+            long mapIdSrc = getSelectedMapId(m_sourceMapsCB);
+            long mapIdDst = getSelectedMapId(m_destMapsCB);
+            MapAlignment map = MapAlignmentConverter.getMapAlgn(mapIdSrc, mapIdDst, m_allMapAlignments);
+
+            IonsRTTableModel cloudData = getCloudData(mapIdSrc);
+            if (cloudData != null) {
+
+                double bandwidth = 0.1;
+
+                LoessParametersDialog dialog = new LoessParametersDialog();
+                dialog.getValueTF().setText(Double.toString(bandwidth));
+                Point panelLocation = this.getLocationOnScreen();
+                dialog.setLocation(panelLocation.x + this.getWidth()/2, panelLocation.y+this.getHeight()/2);
+                dialog.setVisible(true);
+
+                if (dialog.getButtonClicked() == DefaultDialog.BUTTON_OK){
+
+                    bandwidth = Double.parseDouble(dialog.getValueTF().getText());
+
+                    int axisX = cloudData.getColumnIndex(mapIdSrc);
+                    int axisY = cloudData.getColumnIndex(mapIdDst);
+                    int size = cloudData.getRowCount();
+                    List<Pair<Double, Double>> data = new ArrayList<>(size);
+
+                    for (int i = 0; i < size; i++) {
+                        if (!cloudData.isCrossAssigned(i, axisY)) {
+                            Object value = cloudData.getDataValueAt(i, axisX);
+                            Double v1 = ((value == null || !Number.class.isAssignableFrom(value.getClass())) ? Double.NaN : ((Number) value).doubleValue());
+                            value = cloudData.getDataValueAt(i, axisY);
+                            Double v2 = ((value == null || !Number.class.isAssignableFrom(value.getClass())) ? Double.NaN : ((Number) value).doubleValue());
+                            if (Math.abs(v2) < 600.0)
+                                data.add(Pair.of(v1, v2));
+                        }
+                    }
+
+                    Map<Double, Double> landmarks = data.stream().distinct().collect(groupingBy(p -> p.getKey(), averagingDouble(p -> p.getValue())));
+                    data = landmarks.entrySet().stream().map(e -> Pair.of(e.getKey(), e.getValue())).sorted().collect(Collectors.toList());
+
+                    double[] x = new double[data.size()];
+                    double[] y = new double[data.size()];
+                    for (int i = 0; i < data.size(); i++) {
+                        x[i] = data.get(i).getKey();
+                        y[i] = data.get(i).getValue();
+                    }
+                    try {
+
+
+                        LoessInterpolator interpolator = new LoessInterpolator(bandwidth, LoessInterpolator.DEFAULT_ROBUSTNESS_ITERS, LoessInterpolator.DEFAULT_ACCURACY);
+                        double[] yfit = interpolator.smooth(x, y);
+                        createRegressionPlot(x, yfit);
+
+                        PrintWriter writer = new PrintWriter("squared_residuals.csv");
+                        
+                        double[] residuals = new double[yfit.length];
+                        for (int k = 0; k < yfit.length; k++) {
+                            residuals[k] = (y[k] - yfit[k]) * (y[k] - yfit[k]);
+                            writer.println(residuals[k]+","+x[k]);
+                        }
+
+                        writer.close();
+                        
+                        interpolator = new LoessInterpolator(Math.max(0.15, bandwidth), LoessInterpolator.DEFAULT_ROBUSTNESS_ITERS, LoessInterpolator.DEFAULT_ACCURACY);
+                        double[] sd = interpolator.smooth(x, residuals);
+                        double[] upper = new double[yfit.length];
+                        double[] lower = new double[yfit.length];
+                        for (int k = 0; k < yfit.length; k++) {
+                            double s = Math.sqrt(Math.max(0, sd[k]));
+                            upper[k] = yfit[k] + 2 * s;
+                            lower[k] = yfit[k] - 2 * s;
+                        }
+
+                        createRegressionPlot(x, upper);
+                        createRegressionPlot(x, lower);
+
+                        m_removeLoessCurveBtn.setEnabled(true);
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+
+    }
+
+    private void createRegressionPlot(double[] x, double[] newDeltas) {
+        List<Pair<Double, Double>> data;
+        data = new ArrayList<>(x.length);
+        for (int i = 0 ; i < x.length; i++) {
+          data.add(Pair.of(x[i], newDeltas[i]));
+        }
+
+        BeanTableModel model = new BeanTableModel(Pair.class);
+        model.setData(data);
+        String xAxisTitle = m_alignmentGraphicPanel.getXAxis().getTitle();
+        String yAxisTitle = m_alignmentGraphicPanel.getYAxis().getTitle();
+
+        PlotLinear regressionCurve = new PlotLinear(m_alignmentGraphicPanel, model, null ,0, 3);
+        PlotInformation plotInfo = new PlotInformation();
+        plotInfo.setPlotColor(CyclicColorPalette.GRAY_DARK);
+        regressionCurve.setPlotInformation(plotInfo);
+        regressionCurve.setStroke(1f);
+        m_alignmentGraphicPanel.addPlot(regressionCurve);
+        // restore axis titles
+        m_alignmentGraphicPanel.getXAxis().setTitle(xAxisTitle);
+        m_alignmentGraphicPanel.getYAxis().setTitle(yAxisTitle);
+        m_alignmentGraphicPanel.repaint();
+    }
+
+    private void createLoadIonsButton() {
+        m_loadIonsBtn = new JToggleButton();
+        m_loadIonsBtn.setIcon(IconManager.getIcon(IconManager.IconType.LOAD_ALIGNMENT_CLOUD));
+        m_loadIonsBtn.setMargin(new java.awt.Insets(2, 2, 2, 2));
+
+        m_loadIonsBtn.setToolTipText(CLOUD_LOAD_TEXT);
+        m_loadIonsBtn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (!m_isLoadCloudAsked) {//action = set cloud
-                    m_isLoadCloudAsked = true;
-                    m_btLoadCloud.setIcon(IconManager.getIconWithHourGlass(IconManager.IconType.LOAD_ALIGNMENT_CLOUD));
-                    m_btLoadCloud.setToolTipText(CLOUD_IS_LOADING);
+                if (!m_isIonsCloudLoaded) {//action = set cloud
+                    m_isIonsCloudLoaded = true;
+                    m_loadIonsBtn.setIcon(IconManager.getIconWithHourGlass(IconManager.IconType.LOAD_ALIGNMENT_CLOUD));
+                    m_loadIonsBtn.setToolTipText(CLOUD_IS_LOADING);
                     ((DataboxMapAlignment) m_dataBox).loadCloud(); //will return in this class and call this.setAlignmentCloud
                 } else if (m_dataBox.isLoaded()) {//cloud is been shown, action = remove
-                    m_isLoadCloudAsked = false;//this boolean will affect cloud show
-                    m_btLoadCloud.setIcon(IconManager.getIcon(IconManager.IconType.LOAD_ALIGNMENT_CLOUD));
-                    m_btLoadCloud.setToolTipText(CLOUD_LOAD_TEXT);
-                    m_btCloudViewMode.setEnabled(false);
-                    m_btCloudViewMode.setToolTipText(CLOUD_VIEW_NOT_ENABLED_TEXT);
+                    m_isIonsCloudLoaded = false;//this boolean will affect cloud show
+                    m_loadIonsBtn.setIcon(IconManager.getIcon(IconManager.IconType.LOAD_ALIGNMENT_CLOUD));
+                    m_loadIonsBtn.setToolTipText(CLOUD_LOAD_TEXT);
+                    setEnabledCloudButtons(false);
                     setDataGraphic();
                 }
-
             }
         });
     }
 
+    private void createZoomButton() {
+        m_zoomModeBtn = new JToggleButton();
+        m_zoomModeBtn.setIcon(IconManager.getIcon(IconManager.IconType.ZOOM_ALL));
+        m_zoomModeBtn.setMargin(new java.awt.Insets(2, 2, 2, 2));
+        m_zoomModeBtn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (m_zoomMode == CLOUD_VIEW_BEST_FIT) {
+                    m_zoomMode = CLOUD_VIEW_ALL;
+                    m_zoomModeBtn.setIcon(IconManager.getIcon(IconManager.IconType.ZOOM_FIT));
+                    m_zoomModeBtn.setToolTipText(CLOUD_VIEW_BEST_FIT_TEXT);
+                    setDataGraphic();
+                } else {
+                    m_zoomMode = CLOUD_VIEW_BEST_FIT;
+                    m_zoomModeBtn.setIcon(IconManager.getIcon(IconManager.IconType.ZOOM_ALL));
+                    m_zoomModeBtn.setToolTipText(CLOUD_VIEW_All_TEXT);
+                    setDataGraphic();
+                }
+
+            }
+
+        });
+        m_zoomModeBtn.setToolTipText(CLOUD_VIEW_NOT_ENABLED_TEXT);
+    }
+
+
+
     /**
-     * show in plotScatter, the cloud, usulay be called when user change combo
+     * show in plotScatter, the cloud, usually be called when user change combo
      * box selection <br>
      * can be called by DataBoxMapAlignment
      */
     public void setAlignmentCloud() {
-        this.m_btLoadCloud.setToolTipText(CLOUD_REMOVE_TEXT);
-        this.m_btLoadCloud.setIcon(IconManager.getIcon(IconManager.IconType.REMOVE_ALIGNMENT_CLOUD));
-        this.m_btCloudViewMode.setToolTipText(CLOUD_VIEW_All_TEXT);
-        this.m_btCloudViewMode.setEnabled(true);
+        this.m_loadIonsBtn.setToolTipText(CLOUD_REMOVE_TEXT);
+        this.m_loadIonsBtn.setIcon(IconManager.getIcon(IconManager.IconType.REMOVE_ALIGNMENT_CLOUD));
+        this.m_zoomModeBtn.setToolTipText(CLOUD_VIEW_All_TEXT);
+        setEnabledCloudButtons(true);
         this.setDataGraphic();
     }
 
-    private void createButtonZoom() {
-        m_btCloudViewMode = new JToggleButton();
-        m_btCloudViewMode.setIcon(IconManager.getIcon(IconManager.IconType.ZOOM_ALL));
-        m_btCloudViewMode.setMargin(new java.awt.Insets(2, 2, 2, 2));
-        m_btCloudViewMode.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (m_cloudViewMode == CLOUD_VIEW_BEST_FIT) {
-                    m_cloudViewMode = CLOUD_VIEW_ALL;
-                    m_btCloudViewMode.setIcon(IconManager.getIcon(IconManager.IconType.ZOOM_FIT));
-                    m_btCloudViewMode.setToolTipText(CLOUD_VIEW_BEST_FIT_TEXT);
-                    setDataGraphic();
-                } else {
-                    m_cloudViewMode = CLOUD_VIEW_BEST_FIT;
-                    m_btCloudViewMode.setIcon(IconManager.getIcon(IconManager.IconType.ZOOM_ALL));
-                    m_btCloudViewMode.setToolTipText(CLOUD_VIEW_All_TEXT);
-                    setDataGraphic();
-                }
-
-            }
-
-        });
-        m_btCloudViewMode.setToolTipText(CLOUD_VIEW_NOT_ENABLED_TEXT);
-        m_btCloudViewMode.setEnabled(false);//before the cloud is loaded, this is not enabled
-
-    }
-
-    /**
-     * be called by AlignmentPlotPanel, when ZoomGesture.ACTION_UNZOOM.<br>
-     *
-     */
-    public void updateZoomButton() {
-        if (m_btCloudViewMode.isEnabled()) {
-            m_cloudViewMode = CLOUD_VIEW_ALL;
-            m_btCloudViewMode.setIcon(IconManager.getIcon(IconManager.IconType.ZOOM_FIT));
-            m_btCloudViewMode.setToolTipText(CLOUD_VIEW_BEST_FIT_TEXT);
-        }
-    }
 
     public void setData(QuantChannelInfo quantChannelInfo, List<ExtendedTableModelInterface> compareDataInterfaceList, List<CrossSelectionInterface> crossSelectionInterfaceList) {
         //@Karine XUE,when a databaseLoadTask or it's subTask is finished, the callback will be called in DataBox, 
-        //so this setData method can be called several time. m_isSourceDestComboBoxSeted is used to limite the repetition
-        if (!this.m_isSourceDestComboBoxSeted) {
+        //so this setData method can be called several time. m_isInitialized is used to limite the repetition
+        if (!this.m_isInitialized) {
             this.m_quantChannelInfo = quantChannelInfo;
-            this.m_valuesList = compareDataInterfaceList;
-            this.m_crossSelectionInterfaceList = crossSelectionInterfaceList;
 
             m_allMapAlignments = new ArrayList();
             m_allMapAlignments.addAll(m_quantChannelInfo.getDataset().getMapAlignments());
@@ -325,7 +443,7 @@ public class MapAlignmentPanel extends HourglassPanel implements DataBoxPanelInt
             m_referenceMapId = m_quantChannelInfo.getDataset().getAlnReferenceMapId();
             String referenceMapTitle = m_quantChannelInfo.getMapTitle(m_referenceMapId);
             String referenceMapColor = m_quantChannelInfo.getMapHtmlColor(m_quantChannelInfo.getDataset().getAlnReferenceMapId());
-            m_alnMode = this.getAlignmentMethod();
+
 
             StringBuilder sb = new StringBuilder();
             sb.append("<html>");
@@ -334,7 +452,7 @@ public class MapAlignmentPanel extends HourglassPanel implements DataBoxPanelInt
             sb.append("<font color='").append(referenceMapColor).append("'>&#x25A0;&nbsp;</font>");
             sb.append(referenceMapTitle);
             sb.append(", Alignment Mode : ");
-            sb.append(m_alnMode);
+            sb.append(this.getAlignmentMethod());
             sb.append("</html>");
             m_labelTitle.setText(sb.toString());
 
@@ -353,20 +471,19 @@ public class MapAlignmentPanel extends HourglassPanel implements DataBoxPanelInt
                 m_mapName.put(i, map);
                 i++;
             }
-            m_cbSourceModel = new DefaultComboBoxModel(mapItems);
-            m_cbDestModel = new DefaultComboBoxModel(mapItems);
-            m_cbSourceMaps.setModel(m_cbSourceModel);
-            m_cbDestMaps.setModel(m_cbDestModel);
+            DefaultComboBoxModel sourceMapsModel = new DefaultComboBoxModel(mapItems);
+            DefaultComboBoxModel destMapsModel = new DefaultComboBoxModel(mapItems);
+            m_sourceMapsCB.setModel(sourceMapsModel);
+            m_destMapsCB.setModel(destMapsModel);
             if (mapItems.length > 0) {
-                m_cbSourceModel.setSelectedItem(mapItems[0]);
+                sourceMapsModel.setSelectedItem(mapItems[0]);
             }
             if (mapItems.length > 1) {
-                m_cbDestModel.setSelectedItem(mapItems[1]);
+                destMapsModel.setSelectedItem(mapItems[1]);
             }
             setDataGraphic();
-            this.m_isSourceDestComboBoxSeted = true;
+            this.m_isInitialized = true;
             repaint();
-
         }
     }
 
@@ -427,38 +544,33 @@ public class MapAlignmentPanel extends HourglassPanel implements DataBoxPanelInt
 
     private void convertTime() {
         try {
-            Double time = Double.parseDouble(m_tfSouceTime.getText());
-            Double calcTime = calcTimeInMapAlign(time, getSelectedMapId(m_cbSourceMaps), getSelectedMapId(m_cbDestMaps));
+            Double time = Double.parseDouble(m_SourceTimeTF.getText());
+            Double calcTime = calcTimeInMapAlign(time, getSelectedMapId(m_sourceMapsCB), getSelectedMapId(m_destMapsCB));
             if (calcTime.isNaN()) {
-                m_tfDestTime.setText("");
+                m_DestTimeTF.setText("");
             } else {
-                m_tfDestTime.setText(format2.format(calcTime / 60));
+                m_DestTimeTF.setText(format2.format(calcTime / 60));
             }
         } catch (NumberFormatException ex) {
         }
     }
 
     private void setDataGraphic() {
-        long mapIdSrc = getSelectedMapId(m_cbSourceMaps);
-        long mapIdDst = getSelectedMapId(m_cbDestMaps);
+        long mapIdSrc = getSelectedMapId(m_sourceMapsCB);
+        long mapIdDst = getSelectedMapId(m_destMapsCB);
         if (mapIdSrc == mapIdDst) {
-            //this.m_alignmentGraphicPanel.ClearAxisTitle(m_quantChannelInfo.getMapTitle(mapIdSrc));
             this.m_alignmentGraphicPanel.clearPlotsWithRepaint();
             if (this.m_alignmentGraphicPanel_2.isVisible()) {//iterative mode, and nobody of source, destination map is reference map
-                //this.m_alignmentGraphicPanel_2.ClearAxisTitle(m_quantChannelInfo.getMapTitle(mapIdSrc));
                 this.m_alignmentGraphicPanel_2.setVisible(false);
                 this.m_alignmentGraphicPanel_2.clearPlotsWithRepaint();
             }
             repaint();
         } else {
-            List<MapAlignment> mapAList;
             MapAlignment map = MapAlignmentConverter.getMapAlgn(mapIdSrc, mapIdDst, m_allMapAlignments);
-            List<CrossSelectionInterface> listCSI = new ArrayList();
-            List<ExtendedTableModelInterface> listETI = new ArrayList();
             if (map != null) // exhaustive mode, or in Iterative mode, one of mapIdA,mapIdZ is the reference map
             {
                 this.m_alignmentGraphicPanel_2.setVisible(false);
-                setDataGraphicTableModel(map, this.m_alignmentGraphicPanel);
+                setDataGraphicTableModel(map, m_alignmentGraphicPanel);
 
             } else {
                 //from source to reference
@@ -472,14 +584,12 @@ public class MapAlignmentPanel extends HourglassPanel implements DataBoxPanelInt
                     this.m_splitPane.resetToPreferredSizes();
                 }
             }
-
         }
     }
 
-    private void setDataGraphicTableModel(MapAlignment map, AlignmentPlotPanel graphicPanel) {
+    private void setDataGraphicTableModel(MapAlignment map, BasePlotPanel graphicPanel) {
         CrossSelectionInterface crossSelectionTableModel;
         ExtendedTableModelInterface extendedTableModel;
-        PlotScatterXicCloud plotCloud;
         Long mapIdSrc = map.getSourceMap().getId();
         Long mapIdDst = map.getDestinationMap().getId();
 
@@ -495,40 +605,39 @@ public class MapAlignmentPanel extends HourglassPanel implements DataBoxPanelInt
         crossSelectionTableModel = mapTimePanel.getCrossSelectionInterface();
         extendedTableModel = mapTimePanel.getGlobalTableModelInterface();
         double tolerance = ((DataboxMapAlignment) this.m_dataBox).getRT_Tolerance();
-        PlotLinear alignmentLiner = new PlotLinear(graphicPanel, extendedTableModel, crossSelectionTableModel,
+        PlotLinear alignmentCurve = new PlotLinear(graphicPanel, extendedTableModel, crossSelectionTableModel,
                 PlotBaseAbstract.COL_X_ID, PlotBaseAbstract.COL_Y_ID);
 
-        alignmentLiner.setPlotInformation(extendedTableModel.getPlotInformation());//set Color
-        alignmentLiner.setStroke(3f);  //set Stroke
-        alignmentLiner.setTolerance(tolerance);
+        alignmentCurve.setPlotInformation(extendedTableModel.getPlotInformation());//set Color
+        alignmentCurve.setStroke(3f);  //set Stroke
+        alignmentCurve.setTolerance(tolerance);
 
-        graphicPanel.setPlot(alignmentLiner);
+        graphicPanel.setPlot(alignmentCurve);
 
-        if (this.m_isLoadCloudAsked) {
-            RTCompareTableModel cloudData = getCloudData(mapIdSrc);
+        if (this.m_isIonsCloudLoaded) {
+            IonsRTTableModel cloudData = getCloudData(mapIdSrc);
             if (cloudData != null) {
                 int axisX = cloudData.getColumnIndex(mapIdSrc);
                 int axisY = cloudData.getColumnIndex(mapIdDst);
-                plotCloud = new PlotScatterXicCloud(graphicPanel, cloudData, null, axisX, axisY);
-
-                plotCloud.setColor(color);
-
-                if (m_cloudViewMode == CLOUD_VIEW_BEST_FIT) {
+                m_removeLoessCurveBtn.setEnabled(false);
+                m_ionsScatterPlot = new IonsRTScatterPlot(graphicPanel, cloudData, null, axisX, axisY);
+                m_ionsScatterPlot.showCrossAssignedIons(m_showHideCrossAssigned.getActionCommand().equals("HIDE"));
+                m_ionsScatterPlot.setColor(color);
+                if (m_zoomMode == CLOUD_VIEW_BEST_FIT) {
                     //set visible Min Max, the real Min Max are too large to show the alignment PlotLinear
-                    double yMax = alignmentLiner.getYMax();
-                    double yMin = alignmentLiner.getYMin();
-                    plotCloud.setYMax(yMax + 2 * tolerance);
-                    plotCloud.setYMin(yMin - 2 * tolerance);
+                    double yMax = alignmentCurve.getYMax();
+                    double yMin = alignmentCurve.getYMin();
+                    m_ionsScatterPlot.setYMax(yMax + 2 * tolerance);
+                    m_ionsScatterPlot.setYMin(yMin - 2 * tolerance);
                 }
-                graphicPanel.setPlot(plotCloud);
-                graphicPanel.addPlot(alignmentLiner);
+                graphicPanel.setPlot(m_ionsScatterPlot);
+                graphicPanel.addPlot(alignmentCurve);
             }
         }
         graphicPanel.repaint();
-
     }
 
-    private RTCompareTableModel getCloudData(long mapIdSrc) {
+    private IonsRTTableModel getCloudData(long mapIdSrc) {
         if (this.m_dataBox.isLoaded()) {
             return ((DataboxMapAlignment) this.m_dataBox).getPeptideCloud(mapIdSrc);
         } else {
@@ -561,4 +670,33 @@ public class MapAlignmentPanel extends HourglassPanel implements DataBoxPanelInt
         return calcTime;
     }
 
+}
+
+class LoessParametersDialog extends DefaultDialog {
+
+    JTextField m_valueTF;
+
+    LoessParametersDialog() {
+        super(WindowManager.getDefault().getMainWindow(), Dialog.ModalityType.APPLICATION_MODAL);
+        setTitle("Loess regression parameters");
+        JPanel panel = new JPanel();
+        panel.setLayout(new GridBagLayout());
+        GridBagConstraints c = new GridBagConstraints();
+        c.anchor = GridBagConstraints.CENTER;
+        c.fill = GridBagConstraints.HORIZONTAL;
+        c.insets = new java.awt.Insets(15, 15, 15, 5);
+        c.gridx = 0;
+        c.gridy = 0;
+        panel.add(new JLabel("Bandwidth value (0-1.0):"), c);
+        c.gridx++;
+        c.insets = new java.awt.Insets(15, 5, 15, 15);
+        m_valueTF = new JTextField();
+        m_valueTF.setColumns(10);
+        panel.add(m_valueTF, c);
+        setInternalComponent(panel);
+    }
+
+    public JTextField getValueTF() {
+        return m_valueTF;
+    }
 }

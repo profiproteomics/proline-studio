@@ -122,6 +122,10 @@ public class IconManager {
         LOAD_SETTINGS,
         LOAD_ALIGNMENT_CLOUD,
         REMOVE_ALIGNMENT_CLOUD,
+        SHOW_CROSS_ASSIGNED,
+        HIDE_CROSS_ASSIGNED,
+        ADD_LOESS_CURVE,
+        REMOVE_LOESS_CURVE,
         SAVE_SETTINGS,
         SAVE_WND,
         ARROW_DOWN,
@@ -187,7 +191,7 @@ public class IconManager {
         TEST,
         OPTIONS_MORE,
         OPTIONS_LESS,
-        PIN;
+        PIN
     }
     private final static HashMap<IconType, ImageIcon> m_iconMap = new HashMap<>();
     private final static HashMap<IconType, ImageIcon> m_iconHourGlassMap = new HashMap<>();
@@ -526,6 +530,14 @@ public class IconManager {
                 return "fr/proline/studio/images/load-settings.png";
             case LOAD_ALIGNMENT_CLOUD:
                 return "fr/proline/studio/images/scatterplot-add.png";
+            case SHOW_CROSS_ASSIGNED:
+                return "fr/proline/studio/images/show-crossassigned-ions.png";
+            case HIDE_CROSS_ASSIGNED:
+                return "fr/proline/studio/images/hide-crossassigned-ions.png";
+            case ADD_LOESS_CURVE:
+                return "fr/proline/studio/images/loess-fit-add.png";
+            case REMOVE_LOESS_CURVE:
+                return "fr/proline/studio/images/loess-fit-remove.png";
             case REMOVE_ALIGNMENT_CLOUD:
                 return "fr/proline/studio/images/scatterplot-remove.png";
             case SAVE_SETTINGS:

@@ -17,12 +17,12 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * RT = elution time = retention time
+ * RT = elution time = retention time. The table is organized as follows:
+ * |PEPTIDE_ID|PEPTIDE_SEQUENCE|CHARGE|ELUTION_TIME_FROM|_eTimeTo[0]|_eTimeTo[1]|....|_eTimeTo[n]|
  *
  * @author Karine XUE
  */
-public class RTCompareTableModel implements ExtendedTableModelInterface {
-    // |PEPTIDE_ID|PEPTIDE_SEQUENCE|CHARGE|ELUTION_TIME_FROM|_eTimeTo[0]|_eTimeTo[1]|....|_eTimeTo[n]|
+public class IonsRTTableModel implements ExtendedTableModelInterface {
 
     private String m_modelName;
 
@@ -31,9 +31,9 @@ public class RTCompareTableModel implements ExtendedTableModelInterface {
      */
     private Map<Long, Long> m_idMap;
     private long[] m_rsmIdArray;
-    private List<RTCompareRow> m_data;
+    private List<IonRTRow> m_data;
 
-    public List<RTCompareRow> getData() {
+    public List<IonRTRow> getData() {
         return m_data;
     }
     /**
@@ -54,8 +54,8 @@ public class RTCompareTableModel implements ExtendedTableModelInterface {
      * @param idMap, Map<MapId,resultSummaryId>
      * @param m_masterQuantPeptideIonList
      */
-    public RTCompareTableModel(List<DMasterQuantPeptideIon> m_masterQuantPeptideIonList,
-            Map<Long, Long> idMap, Map<Long, String> idNameMap, long[] rsmIdArray) {
+    public IonsRTTableModel(List<DMasterQuantPeptideIon> m_masterQuantPeptideIonList,
+                            Map<Long, Long> idMap, Map<Long, String> idNameMap, long[] rsmIdArray) {
         m_mapCount = rsmIdArray.length;
         m_idNameMap = idNameMap;
         m_idMap = idMap;
@@ -112,7 +112,7 @@ public class RTCompareTableModel implements ExtendedTableModelInterface {
                     }
                 }
             }
-            this.m_data.add(new RTCompareRow(peptideId, peptideSequence, charge, rTimeFrom, rTimeTo, matchCountFrom, matchCountTo));
+            this.m_data.add(new IonRTRow(peptideId, peptideSequence, charge, rTimeFrom, rTimeTo, matchCountFrom, matchCountTo));
         }
     }
 
@@ -126,7 +126,7 @@ public class RTCompareTableModel implements ExtendedTableModelInterface {
         return null;
     }
 
-    protected class RTCompareRow {
+    protected class IonRTRow {
 
         long _peptideId;
         String _peptideSequence;
@@ -136,7 +136,7 @@ public class RTCompareTableModel implements ExtendedTableModelInterface {
         int _MatchCountFrom;
         int[] _MatchCountTo;
 
-        public RTCompareRow(long peptideId, String peptideSequence, int charge, float eTimeFrom, float[] eTimeTo, int matchCountFrom, int[] matchCountTo) {
+        public IonRTRow(long peptideId, String peptideSequence, int charge, float eTimeFrom, float[] eTimeTo, int matchCountFrom, int[] matchCountTo) {
             this._peptideId = peptideId;
             this._peptideSequence = peptideSequence;
             this._charge = charge;
@@ -187,14 +187,14 @@ public class RTCompareTableModel implements ExtendedTableModelInterface {
 
     @Override
     public Object getDataValueAt(int rowIndex, int columnIndex) {
-        RTCompareRow row = this.m_data.get(rowIndex);
-        if (columnIndex == RTCompareTableModel.PEPTIDE_ID) {
+        IonRTRow row = this.m_data.get(rowIndex);
+        if (columnIndex == IonsRTTableModel.PEPTIDE_ID) {
             return row._peptideId;
-        } else if (columnIndex == RTCompareTableModel.PEPTIDE_SEQUENCE) {
+        } else if (columnIndex == IonsRTTableModel.PEPTIDE_SEQUENCE) {
             return row._peptideSequence;
-        } else if (columnIndex == RTCompareTableModel.CHARGE) {
+        } else if (columnIndex == IonsRTTableModel.CHARGE) {
             return row._charge;
-        } else if (columnIndex == RTCompareTableModel.ELUTION_TIME_FROM) {
+        } else if (columnIndex == IonsRTTableModel.ELUTION_TIME_FROM) {
             return row._eTimeFrom / 60d; //in minute
         } else if (columnIndex > 3 && columnIndex < this.m_mapCount + 3) {
             return row._eTimeTo[columnIndex - 4]; //in seconde
@@ -206,7 +206,7 @@ public class RTCompareTableModel implements ExtendedTableModelInterface {
     }
 
     public boolean isCrossAssigned(int rowIndex, int colY) {
-        RTCompareRow row = this.m_data.get(rowIndex);
+        IonRTRow row = this.m_data.get(rowIndex);
         int countFrom = row._MatchCountFrom;
         int countTo = row._MatchCountTo[colY - 4];
         return (countFrom == 0 || countTo == 0);
@@ -236,7 +236,7 @@ public class RTCompareTableModel implements ExtendedTableModelInterface {
 
     @Override
     public int getInfoColumn() {
-        return RTCompareTableModel.PEPTIDE_SEQUENCE;
+        return IonsRTTableModel.PEPTIDE_SEQUENCE;
     }
 
     /**
@@ -245,7 +245,7 @@ public class RTCompareTableModel implements ExtendedTableModelInterface {
      * @return 
      */
     public String getToolTipInfo(int rowIndex) {
-        RTCompareRow row = this.m_data.get(rowIndex);
+        IonRTRow row = this.m_data.get(rowIndex);
         String infoValue = " Peptide id : " + row._peptideId + "<BR>";
         infoValue += ("Sequence : ") + row._peptideSequence + "<BR>";
         infoValue += ("charge : ") + row._charge + "<BR>";

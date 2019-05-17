@@ -2,16 +2,17 @@ package fr.proline.studio.dam.tasks.data.ptm;
 
 import fr.proline.core.orm.msi.dto.DPeptideInstance;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
+import java.util.ArrayList;
+import java.util.Comparator;
 
-import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Set;
+import java.util.List;
 
 public class PTMPeptideInstance {
 
-  private final DPeptideInstance m_peptideInstance;
-  private final Set<PTMSite> m_sites = new HashSet<>();
-  private Integer m_startPosition; //Start position of Peptide on Protein sequence
+  private DPeptideInstance m_peptideInstance;
+  private List<PTMSite> m_sites = new ArrayList<>();
+  private Integer m_startPosition;
 
   public PTMPeptideInstance(DPeptideInstance peptideInstance) {
     m_peptideInstance = peptideInstance;
@@ -22,7 +23,10 @@ public class PTMPeptideInstance {
   }
 
   public void addPTMSite(PTMSite site) {
-    m_sites.add(site);
+    if (!m_sites.contains(site)) {
+      m_sites.add(site);
+      m_sites.sort(Comparator.comparingInt(PTMSite::getPositionOnProtein));
+    }
   }
 
   public void setStartPosition(int start) {
@@ -33,11 +37,15 @@ public class PTMPeptideInstance {
     return m_startPosition;
   }
 
+  public Integer getStopPosition() {
+    return m_startPosition + m_peptideInstance.getPeptide().getSequence().length();
+  }
+
   public DPeptideInstance getPeptideInstance() {
     return m_peptideInstance;
   }
 
-  public Set<PTMSite> getSites() {
+  public List<PTMSite> getSites() {
     return m_sites;
   }
 

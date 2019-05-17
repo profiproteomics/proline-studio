@@ -19,26 +19,31 @@ import java.awt.Graphics2D;
  *
  * @author Karine XUE
  */
-public class PlotScatterXicCloud extends PlotScatter {
+public class IonsRTScatterPlot extends PlotScatter {
 
     private final static int TRANSPARENCY = 70;
 
     private Color m_color;
-    private StringBuilder m_sBuilder;
     private Color m_highlightColor = new Color(CyclicColorPalette.GRAY_DARK.getRed(), CyclicColorPalette.GRAY_DARK.getGreen(), CyclicColorPalette.GRAY_DARK.getBlue(), TRANSPARENCY+15);
-    
+
+    private boolean m_showCrossAssignedIons = true;
+
+    private StringBuilder m_sBuilder;
     private int m_colY; //index of column Y
 
-    public PlotScatterXicCloud(BasePlotPanel plotPanel, ExtendedTableModelInterface compareDataInterface, CrossSelectionInterface crossSelectionInterface, int colX, int colY) {
+    public IonsRTScatterPlot(BasePlotPanel plotPanel, ExtendedTableModelInterface compareDataInterface, CrossSelectionInterface crossSelectionInterface, int colX, int colY) {
         super(plotPanel, compareDataInterface, crossSelectionInterface, colX, colY);
-        m_sBuilder = null;
+        m_sBuilder = new StringBuilder();
         m_color = CyclicColorPalette.getColor(2, TRANSPARENCY);
         m_colY = colY;
     }
 
     public void setColor(Color c) {
         this.m_color = new Color(c.getRed(), c.getGreen(), c.getBlue(), TRANSPARENCY);
-        //this.m_highlightColor = CyclicColorPalette.getDarkerColor(m_color, 0.3);
+    }
+
+    public void showCrossAssignedIons(boolean showCrossAssignedIons) {
+        this.m_showCrossAssignedIons = showCrossAssignedIons;
     }
 
     /**
@@ -66,11 +71,11 @@ public class PlotScatterXicCloud extends PlotScatter {
             return null;
         }
 
-        if (m_sBuilder == null) {
-            m_sBuilder = new StringBuilder();
+        if (((IonsRTTableModel) this.m_compareDataInterface).isCrossAssigned(indexFound, m_colY) && !m_showCrossAssignedIons) {
+            return null;
         }
 
-        String infoValue = ((RTCompareTableModel) m_compareDataInterface).getToolTipInfo(indexFound);
+        String infoValue = ((IonsRTTableModel) m_compareDataInterface).getToolTipInfo(indexFound);
 
         m_sBuilder.append(infoValue);
         m_sBuilder.append("<BR>");
@@ -118,9 +123,11 @@ public class PlotScatterXicCloud extends PlotScatter {
             int x = xAxis.valueToPixel(m_dataX[i]) + ((m_jitterX != null) ? m_jitterX[i] : 0);
             int y = yAxis.valueToPixel(m_dataY[i]) + ((m_jitterY != null) ? m_jitterY[i] : 0);
 
-            if (((RTCompareTableModel) this.m_compareDataInterface).isCrossAssigned(i, m_colY)) {
-                g.setColor(m_highlightColor);
-                g.drawOval(x - 3, y - 3, 6, 6);
+            if (((IonsRTTableModel) this.m_compareDataInterface).isCrossAssigned(i, m_colY)) {
+                if (m_showCrossAssignedIons) {
+                    g.setColor(m_highlightColor);
+                    g.drawOval(x - 3, y - 3, 6, 6);
+                }
             } else {
                 g.setColor(m_color);
                 g.fillOval(x - 3, y - 3, 6, 6);
@@ -141,11 +148,14 @@ public class PlotScatterXicCloud extends PlotScatter {
 
             g.setColor(m_color);
 
-            if (!((RTCompareTableModel) this.m_compareDataInterface).isCrossAssigned(i, m_colY)) {
+            if (!((IonsRTTableModel) this.m_compareDataInterface).isCrossAssigned(i, m_colY)) {
                 g.fillOval(x - 3, y - 3, 6, 6);
+                g.setColor(Color.black);
+                g.drawOval(x - 3, y - 3, 6, 6);
+            } else if (m_showCrossAssignedIons) {
+                g.setColor(Color.black);
+                g.drawOval(x - 3, y - 3, 6, 6);
             }
-            g.setColor(Color.black);
-            g.drawOval(x - 3, y - 3, 6, 6);
 
         }
 

@@ -440,9 +440,8 @@ public class YAxis extends Axis {
 
     @Override
     public int valueToPixel(double v) {
-        v = (Double.valueOf(v).isNaN()) ? 0 : v;
         if (m_log) {
-            double logV = (v == 0) ? 0 : Math.log10(v);
+            double logV = ((v == 0) || Double.isNaN(v)) ? 0 : Math.log10(v);
             double min = Math.log10(m_minValue);
             double max = Math.log10(m_maxValue);
             return (m_y + m_height) - (int) Math.round(((logV - min) / (max - min)) * m_height);

@@ -6,7 +6,6 @@
 package fr.proline.studio.rsmexplorer.actions.identification;
 
 import fr.proline.core.orm.uds.Aggregation;
-import fr.proline.core.orm.uds.Dataset;
 import fr.proline.core.orm.uds.Project;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dam.AccessDatabaseThread;
@@ -44,8 +43,8 @@ import org.openide.windows.WindowManager;
  */
 public class ImportMaxQuantResultJMSAction extends AbstractRSMAction {
 
-    public ImportMaxQuantResultJMSAction() {
-        super(NbBundle.getMessage(ImportMaxQuantResultJMSAction.class, "CTL_ImportMaxQuantResult"), AbstractTree.TreeType.TREE_IDENTIFICATION);
+    public ImportMaxQuantResultJMSAction(AbstractTree tree) {
+        super(NbBundle.getMessage(ImportMaxQuantResultJMSAction.class, "CTL_ImportMaxQuantResult"), tree);
     }
 
     @Override

@@ -26,8 +26,8 @@ import org.openide.util.NbBundle;
  */
 public class DisplayMSQueryForRsetAction extends AbstractRSMAction {
 
-    public DisplayMSQueryForRsetAction(AbstractTree.TreeType treeType) {
-       super(NbBundle.getMessage(DisplayMSQueryForRsetAction.class, "CTL_DisplayMSQueryAction"), treeType);
+    public DisplayMSQueryForRsetAction(AbstractTree tree) {
+       super(NbBundle.getMessage(DisplayMSQueryForRsetAction.class, "CTL_DisplayMSQueryAction"), tree);
     }
     
     @Override

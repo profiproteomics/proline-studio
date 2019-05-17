@@ -1,7 +1,5 @@
 package fr.proline.studio.rsmexplorer.actions.identification;
 
-import fr.proline.core.orm.uds.Aggregation;
-import fr.proline.core.orm.uds.Dataset;
 import fr.proline.core.orm.uds.Project;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dam.DatabaseDataManager;
@@ -41,8 +39,8 @@ public class SpectralCountAction extends AbstractRSMAction {
     final static public String DS_WEIGHT_LIST_PROPERTIES = "dsWeightList";
 
 
-    public SpectralCountAction() {
-        super(NbBundle.getMessage(SpectralCountAction.class, "CTL_CompareWithSCAction"), AbstractTree.TreeType.TREE_IDENTIFICATION);
+    public SpectralCountAction(AbstractTree tree) {
+        super(NbBundle.getMessage(SpectralCountAction.class, "CTL_CompareWithSCAction"), tree);
 
     }
 

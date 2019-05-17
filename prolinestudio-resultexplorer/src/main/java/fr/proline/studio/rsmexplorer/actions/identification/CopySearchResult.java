@@ -19,8 +19,8 @@ import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
  */
 public class CopySearchResult extends AbstractRSMAction {
 
-    public CopySearchResult() {
-        super("Copy Search Result", AbstractTree.TreeType.TREE_IDENTIFICATION);
+    public CopySearchResult(AbstractTree tree) {
+        super("Copy Search Result", tree);
     }
 
     @Override

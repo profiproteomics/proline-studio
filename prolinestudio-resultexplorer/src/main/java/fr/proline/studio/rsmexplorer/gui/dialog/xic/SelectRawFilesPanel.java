@@ -115,16 +115,12 @@ public class SelectRawFilesPanel extends JPanel implements XICRunNodeInitListene
     public final JPanel createMainPanel() {
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new GridBagLayout());
-        final GridBagConstraints c = new GridBagConstraints();
-        c.anchor = GridBagConstraints.NORTHWEST;
-        c.fill = GridBagConstraints.BOTH;
-        c.insets = new java.awt.Insets(5, 5, 5, 5);
 
         JPanel designTablePanel = createDesignTablePanel();
         JPanel filePathPanel = createFilePathPanel();
 
         JPanel framePanel = new JPanel(new GridBagLayout());
-        framePanel.setBorder(BorderFactory.createTitledBorder(" XIC Design "));
+        framePanel.setBorder(BorderFactory.createTitledBorder(" MS files association "));
 
         JSplitPane sp = new JSplitPane();
         sp.setLeftComponent(designTablePanel);
@@ -136,20 +132,17 @@ public class SelectRawFilesPanel extends JPanel implements XICRunNodeInitListene
 
         cFrame.gridx = 0;
         cFrame.gridy = 0;
-        cFrame.gridwidth = 2;
         cFrame.weightx = 1;
-        cFrame.weighty = 0;
-        cFrame.anchor = GridBagConstraints.NORTH;
-        cFrame.fill = GridBagConstraints.NONE;
-        framePanel.add(new JLabel("Drag & Drop", IconManager.getIcon(IconManager.IconType.DRAG_AND_DROP), JLabel.LEADING), cFrame);
-
+        cFrame.weighty = 1;
         cFrame.anchor = GridBagConstraints.NORTHWEST;
         cFrame.fill = GridBagConstraints.BOTH;
         cFrame.gridwidth = 1;
-        cFrame.gridy++;
-        cFrame.weighty = 1;
         framePanel.add(sp, cFrame);
 
+        final GridBagConstraints c = new GridBagConstraints();
+        c.anchor = GridBagConstraints.NORTHWEST;
+        c.fill = GridBagConstraints.BOTH;
+        c.insets = new java.awt.Insets(5, 5, 5, 5);
         c.gridx = 0;
         c.gridy = 0;
         c.weightx = 1;
@@ -200,7 +193,7 @@ public class SelectRawFilesPanel extends JPanel implements XICRunNodeInitListene
     private JPanel createDropZonePanel() {
         JPanel panel = new JPanel();
         panel.setLayout(new GridLayout(1, 2, 5, 5));
-        panel.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createTitledBorder("Automatic mzDB File Association"), BorderFactory.createEmptyBorder(5, 5, 5, 5)));
+        panel.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createTitledBorder("Automatic MS file association"), BorderFactory.createEmptyBorder(5, 5, 5, 5)));
 
         m_dropZoneInfo = new XICDropZoneInfo();
         m_dropZone = new XICDropZone(m_transferHandler);

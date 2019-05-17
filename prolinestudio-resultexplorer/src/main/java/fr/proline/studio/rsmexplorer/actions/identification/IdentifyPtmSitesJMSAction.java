@@ -20,8 +20,6 @@ import fr.proline.studio.rsmexplorer.gui.dialog.IdentifyPtmSitesDialog;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
-import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
-import fr.proline.studio.rsmexplorer.tree.quantitation.QuantitationTree;
 
 import javax.swing.tree.DefaultTreeModel;
 
@@ -43,28 +41,14 @@ public class IdentifyPtmSitesJMSAction extends AbstractRSMAction {
 
   protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
 
-  public IdentifyPtmSitesJMSAction(AbstractTree.TreeType selectedTree) {
-    super(NbBundle.getMessage(IdentifyPtmSitesJMSAction.class, "CTL_IdentifyPtmSitesAction"), selectedTree);
+  public IdentifyPtmSitesJMSAction(AbstractTree tree) {
+    super(NbBundle.getMessage(IdentifyPtmSitesJMSAction.class, "CTL_IdentifyPtmSitesAction"), tree);
   }
 
   @Override
   public void actionPerformed(final AbstractNode[] selectedNodes, int x, int y) {
 
-    AbstractTree.TreeType source = getSourceTreeType();
-    AbstractTree tree;
-    switch (source) {
-      case TREE_IDENTIFICATION:
-        tree = IdentificationTree.getCurrentTree();
-        break;
-      case TREE_QUANTITATION:
-        tree = QuantitationTree.getCurrentTree();
-        break;
-      default:
-        m_logger.warn("Unexpected source tree for this action ! " + source.name());
-        return;
-    }
-
-    final DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
+    final DefaultTreeModel treeModel = (DefaultTreeModel) getTree().getModel();
 
     int nbNodes = selectedNodes.length;
     for (int i = 0; i < nbNodes; i++) {

@@ -19,22 +19,18 @@ import org.openide.util.NbBundle;
  */
 public class DeleteAction extends AbstractRSMAction {
 
-    private AbstractTree.TreeType m_treeType;
-    
-    public DeleteAction(AbstractTree.TreeType treeType) {
-        super(NbBundle.getMessage(DeleteAction.class, "CTL_DeleteAction"), treeType);
-        this.m_treeType = treeType;
+
+    public DeleteAction(AbstractTree tree) {
+        super(NbBundle.getMessage(DeleteAction.class, "CTL_DeleteAction"), tree);
     }
 
     @Override
-    public void actionPerformed(AbstractNode[] selectedNodes, int x, int y) { 
-        // depends on the treeType
-        if (m_treeType == AbstractTree.TreeType.TREE_IDENTIFICATION ){
-            IdentificationTree tree = IdentificationTree.getCurrentTree();
-            tree.moveToTrash(selectedNodes);
-        }else if (m_treeType == AbstractTree.TreeType.TREE_QUANTITATION ){
-             QuantitationTree tree = QuantitationTree.getCurrentTree();
-             tree.moveToTrash(selectedNodes);
+    public void actionPerformed(AbstractNode[] selectedNodes, int x, int y) {
+      AbstractTree tree = getTree();
+        if (tree == IdentificationTree.getCurrentTree()){
+            ((IdentificationTree)tree).moveToTrash(selectedNodes);
+        } else if (tree == QuantitationTree.getCurrentTree()){
+            ((QuantitationTree)tree).moveToTrash(selectedNodes);
         }
     }
     

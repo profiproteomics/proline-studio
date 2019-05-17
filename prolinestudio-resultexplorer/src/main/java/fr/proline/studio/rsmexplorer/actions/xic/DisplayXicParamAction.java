@@ -22,8 +22,8 @@ import org.openide.util.NbBundle;
  */
 public class DisplayXicParamAction extends AbstractRSMAction {
     
-    public DisplayXicParamAction() {
-       super(NbBundle.getMessage(DisplayXicParamAction.class,"CTL_DisplayXicParamAction"), AbstractTree.TreeType.TREE_QUANTITATION);
+    public DisplayXicParamAction(AbstractTree tree) {
+       super(NbBundle.getMessage(DisplayXicParamAction.class,"CTL_DisplayXicParamAction"), tree);
     }
     
     @Override

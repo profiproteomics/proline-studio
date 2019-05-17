@@ -6,7 +6,6 @@ import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import fr.proline.studio.rsmexplorer.tree.identification.IdProjectIdentificationNode;
 import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
 import fr.proline.core.orm.uds.Aggregation;
-import fr.proline.core.orm.uds.Dataset;
 import fr.proline.core.orm.uds.dto.DDataset;
 
 import fr.proline.core.orm.uds.Project;
@@ -30,16 +29,14 @@ import org.openide.windows.WindowManager;
 public class AggregateAction extends AbstractRSMAction {
 
     
-    public AggregateAction() {
-        super(NbBundle.getMessage(AggregateAction.class, "CTL_AggregateAction"), AbstractTree.TreeType.TREE_IDENTIFICATION);
+    public AggregateAction(AbstractTree tree) {
+        super(NbBundle.getMessage(AggregateAction.class, "CTL_AggregateAction"), tree);
     }
 
     
     @Override
     public void actionPerformed(AbstractNode[] selectedNodes, int x, int y) {
 
-
-        
         AddAggregateDialog dialog = AddAggregateDialog.getDialog(WindowManager.getDefault().getMainWindow());
         dialog.setLocation(x, y);
         dialog.setVisible(true);

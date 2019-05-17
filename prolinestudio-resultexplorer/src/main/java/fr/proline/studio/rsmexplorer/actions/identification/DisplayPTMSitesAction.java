@@ -22,8 +22,8 @@ import org.openide.util.NbBundle;
  */
 public class DisplayPTMSitesAction  extends AbstractRSMAction {
 
-    public DisplayPTMSitesAction(AbstractTree.TreeType treeType) {
-       super(NbBundle.getMessage(DisplayPTMSitesAction.class, "CTL_PtmProteinSite"), treeType);
+    public DisplayPTMSitesAction(AbstractTree tree) {
+       super(NbBundle.getMessage(DisplayPTMSitesAction.class, "CTL_PtmProteinSite"), tree);
     }
     
     @Override

@@ -10,8 +10,6 @@ import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.identification.IdProjectIdentificationNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
-import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
-import fr.proline.studio.rsmexplorer.tree.quantitation.QuantitationTree;
 import org.openide.util.NbBundle;
 import org.openide.windows.WindowManager;
 
@@ -21,22 +19,15 @@ import org.openide.windows.WindowManager;
  */
 public class RenameAction extends AbstractRSMAction {
 
-    // tree type: could be Identification or Quantitation
-    AbstractTree.TreeType m_treeType = null;
-    
     /**
      * Builds the RenameAction depending of the treeType
-     * @param treeType 
      */
-    public RenameAction(AbstractTree.TreeType treeType) {
-        super(NbBundle.getMessage(RenameAction.class, "CTL_RenameAction"), treeType);
-        this.m_treeType = treeType;
+    public RenameAction(AbstractTree tree) {
+        super(NbBundle.getMessage(RenameAction.class, "CTL_RenameAction"), tree);
     }
 
     @Override
     public void actionPerformed(AbstractNode[] selectedNodes, int x, int y) {
-        
-   
 
         // only one node selected for this action
         final AbstractNode n = selectedNodes[0];
@@ -50,14 +41,7 @@ public class RenameAction extends AbstractRSMAction {
             String name = dataset.getName();
             String newName = showRenameDialog(name, x, y);
 
-            // depends on the treeType
-            AbstractTree tree = null;
-            if (m_treeType == AbstractTree.TreeType.TREE_IDENTIFICATION ){
-                tree = IdentificationTree.getCurrentTree();
-            }else if (m_treeType == AbstractTree.TreeType.TREE_QUANTITATION ){
-                 tree = QuantitationTree.getCurrentTree();
-            }
-            datasetNode.rename(newName, tree);
+            datasetNode.rename(newName, getTree());
             
         } else if (nodeType == AbstractNode.NodeTypes.PROJECT_IDENTIFICATION) {
             IdProjectIdentificationNode projectNode = (IdProjectIdentificationNode) n;

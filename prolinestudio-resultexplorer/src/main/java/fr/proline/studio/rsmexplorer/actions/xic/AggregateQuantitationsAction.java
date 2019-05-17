@@ -40,8 +40,8 @@ public class AggregateQuantitationsAction extends AbstractRSMAction {
     protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
     private int m_nbLoadedQuanti;
 
-    public AggregateQuantitationsAction() {
-        super(NbBundle.getMessage(AggregateQuantitationsAction.class, "CTL_AggregateQuantitations"), AbstractTree.TreeType.TREE_QUANTITATION);
+    public AggregateQuantitationsAction(AbstractTree tree) {
+        super(NbBundle.getMessage(AggregateQuantitationsAction.class, "CTL_AggregateQuantitations"), tree);
     }
 
     @Override

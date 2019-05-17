@@ -5,28 +5,20 @@ import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.DatabaseDataManager;
 import fr.proline.studio.dam.data.ClearProjectData;
-import fr.proline.studio.dam.taskinfo.TaskInfoManager;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseClearProjectTask;
 import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
 import fr.proline.studio.dam.tasks.SubTask;
-import fr.proline.studio.dpm.AccessJMSManagerThread;
-import fr.proline.studio.dpm.task.jms.AbstractJMSCallback;
-import fr.proline.studio.dpm.task.jms.ClearProjectTask;
-import fr.proline.studio.dpm.task.util.JMSConnectionManager;
-import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.gui.InfoDialog;
 import fr.proline.studio.gui.OptionDialog;
 import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
-import fr.proline.studio.rsmexplorer.gui.dialog.ClearProjectDialog;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
-import fr.proline.studio.rsmexplorer.tree.quantitation.QuantitationTree;
+
 import java.util.ArrayList;
 import java.util.List;
-import javax.swing.JOptionPane;
 import javax.swing.tree.DefaultTreeModel;
 import org.openide.util.NbBundle;
 import org.openide.windows.WindowManager;
@@ -38,63 +30,48 @@ import org.openide.windows.WindowManager;
  */
 public class EmptyTrashAction extends AbstractRSMAction {
 
-    private AbstractTree.TreeType m_treeType;
 
-    public EmptyTrashAction(AbstractTree.TreeType treeType) {
-        super(NbBundle.getMessage(EmptyTrashAction.class, "CTL_EmptyTrashAction"), treeType);
-        this.m_treeType = treeType;
+    public EmptyTrashAction(AbstractTree tree) {
+        super(NbBundle.getMessage(EmptyTrashAction.class, "CTL_EmptyTrashAction"), tree);
     }
 
 //    @Override
-    public void actionPerformedWOClearRsRSM(AbstractNode[] selectedNodes, int x, int y) {
-
-        // selected node is the Trash
-        final AbstractNode n = selectedNodes[0];
-        DataSetNode datasetNode = (DataSetNode) n;
-        DDataset trashDataset = datasetNode.getDataset();
-
-        AbstractTree tree = null;
-        boolean identificationDataset = false;
-        if (this.m_treeType == AbstractTree.TreeType.TREE_IDENTIFICATION) {
-            tree = IdentificationTree.getCurrentTree();
-            identificationDataset = true;
-        } else if (this.m_treeType == AbstractTree.TreeType.TREE_QUANTITATION) {
-            tree = QuantitationTree.getCurrentTree();
-            identificationDataset = false;
-        }
-        if (tree == null) {
-            return;
-        }
-        final DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
-
-        n.setIsChanging(true);
-
-        AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
-
-            @Override
-            public boolean mustBeCalledInAWT() {
-                return true;
-            }
-
-            @Override
-            public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
-                n.setIsChanging(false);
-                if (success) {
-
-                    n.removeAllChildren();
-                    treeModel.nodeStructureChanged(n);
-
-                } else {
-                    treeModel.nodeChanged(n);
-                }
-            }
-        };
-
-        DatabaseDataSetTask task = new DatabaseDataSetTask(callback);
-        task.initEmptyTrash(trashDataset, identificationDataset);
-        AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
-
-    }
+//    public void actionPerformedWOClearRsRSM(AbstractTree selectedTree, AbstractNode[] selectedNodes, int x, int y) {
+//
+//        // selected node is the Trash
+//        final AbstractNode n = selectedNodes[0];
+//        DataSetNode datasetNode = (DataSetNode) n;
+//        DDataset trashDataset = datasetNode.getDataset();
+//        boolean identificationDataset = (selectedTree == IdentificationTree.getCurrentTree());
+//        final DefaultTreeModel treeModel = (DefaultTreeModel) selectedTree.getModel();
+//
+//        n.setIsChanging(true);
+//
+//        AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
+//
+//            @Override
+//            public boolean mustBeCalledInAWT() {
+//                return true;
+//            }
+//
+//            @Override
+//            public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
+//                n.setIsChanging(false);
+//                if (success) {
+//
+//                    n.removeAllChildren();
+//                    treeModel.nodeStructureChanged(n);
+//                } else {
+//                    treeModel.nodeChanged(n);
+//                }
+//            }
+//        };
+//
+//        DatabaseDataSetTask task = new DatabaseDataSetTask(callback);
+//        task.initEmptyTrash(trashDataset, identificationDataset);
+//        AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
+//
+//    }
 
     @Override
     public void updateEnabled(AbstractNode[] selectedNodes) {
@@ -107,7 +84,6 @@ public class EmptyTrashAction extends AbstractRSMAction {
         }
 
         AbstractNode n = selectedNodes[0];  // only one node can be selected
-
         setEnabled(!n.isChanging() && (!n.isLeaf()));
 
     }
@@ -132,21 +108,9 @@ public class EmptyTrashAction extends AbstractRSMAction {
         final AbstractNode n = selectedNodes[0];
         final DDataset trashDataset = ((DataSetNode) n).getDataset();
 
-        AbstractTree tree = null;
-        boolean identDs = false;
-        if (this.m_treeType == AbstractTree.TreeType.TREE_IDENTIFICATION) {
-            tree = IdentificationTree.getCurrentTree();
-            identDs = true;
-        } else if (this.m_treeType == AbstractTree.TreeType.TREE_QUANTITATION) {
-            tree = QuantitationTree.getCurrentTree();
-            identDs = false;
-        }
-        final boolean identificationDataset = identDs;
-        if (tree == null) {
-            return;
-        }
+        final boolean identificationDataset = (getTree() == IdentificationTree.getCurrentTree());
+        final DefaultTreeModel treeModel = (DefaultTreeModel) getTree().getModel();
 
-        final DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
         n.setIsChanging(true);
 
         Project project = trashDataset.getProject();

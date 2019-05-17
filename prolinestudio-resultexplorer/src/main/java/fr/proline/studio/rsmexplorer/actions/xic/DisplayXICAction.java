@@ -28,23 +28,20 @@ public class DisplayXICAction extends AbstractRSMAction {
     private ManageUserWindowsAction m_manageUserWindowsAction;
     private ArrayList<DisplaySavedWindowAction> m_displaySavedWindowActionList;
     
-    private AbstractTree.TreeType m_treeType;
-    
-   public DisplayXICAction() {
-       super(NbBundle.getMessage(DisplayXICAction.class,"CTL_DisplayXicAction"), AbstractTree.TreeType.TREE_QUANTITATION);
-       m_treeType = AbstractTree.TreeType.TREE_QUANTITATION;
+   public DisplayXICAction(AbstractTree tree) {
+       super(NbBundle.getMessage(DisplayXICAction.class,"CTL_DisplayXicAction"), tree);
    }
    
    @Override
     public JMenuItem getPopupPresenter() {
         m_menu = new JMenu((String) getValue(NAME));
         
-        m_displayXICProteinSetAction = new DisplayXICProteinSetAction();
-        m_displayXICPeptideSetAction = new DisplayXICPeptideSetAction();
-        m_displayXICPeptideIonAction = new DisplayXICPeptideIonAction();
-        m_displayXICPtmProteinSiteAction = new DisplayXICPTMSitesAction();
-        m_manageUserWindowsAction = new ManageUserWindowsAction(WindowSavedManager.SAVE_WINDOW_FOR_QUANTI, m_treeType);
-        m_displayUserWindowAction = new DisplayUserWindowAction(WindowSavedManager.SAVE_WINDOW_FOR_QUANTI, m_treeType);
+        m_displayXICProteinSetAction = new DisplayXICProteinSetAction(getTree());
+        m_displayXICPeptideSetAction = new DisplayXICPeptideSetAction(getTree());
+        m_displayXICPeptideIonAction = new DisplayXICPeptideIonAction(getTree());
+        m_displayXICPtmProteinSiteAction = new DisplayXICPTMSitesAction(getTree());
+        m_manageUserWindowsAction = new ManageUserWindowsAction(WindowSavedManager.SAVE_WINDOW_FOR_QUANTI, getTree());
+        m_displayUserWindowAction = new DisplayUserWindowAction(WindowSavedManager.SAVE_WINDOW_FOR_QUANTI, getTree());
        
         ArrayList<String> savedWindowsList = WindowSavedManager.readSavedWindows();
         int nb = savedWindowsList.size();
@@ -55,7 +52,7 @@ public class DisplayXICAction extends AbstractRSMAction {
                 continue;
             }
             String name = WindowSavedManager.getWindowName(wndSaved);
-            m_displaySavedWindowActionList.add(new DisplaySavedWindowAction(name, i, m_treeType));
+            m_displaySavedWindowActionList.add(new DisplaySavedWindowAction(name, i, getTree()));
         }
         
         

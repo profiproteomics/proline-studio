@@ -4,7 +4,6 @@ import fr.proline.core.orm.uds.Project;
 import fr.proline.studio.dam.DatabaseDataManager;
 import fr.proline.studio.rsmexplorer.actions.identification.AbstractRSMAction;
 import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
-import fr.proline.studio.rsmexplorer.tree.xic.QuantExperimentalDesignTree;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import java.util.ArrayList;
@@ -16,11 +15,9 @@ import org.openide.util.NbBundle;
  */
 public class DeleteAction  extends AbstractRSMAction {
     
-    public QuantExperimentalDesignTree m_tree;
-    
-    public DeleteAction(QuantExperimentalDesignTree tree) {
-        super(NbBundle.getMessage(DeleteAction.class, "CTL_DeleteAction"), AbstractTree.TreeType.TREE_XIC_DESIGN, tree);
-        m_tree = tree;
+
+    public DeleteAction(AbstractTree tree) {
+        super(NbBundle.getMessage(DeleteAction.class, "CTL_DeleteAction"), tree);
     }
 
     @Override
@@ -31,7 +28,7 @@ public class DeleteAction  extends AbstractRSMAction {
             return;
         }
 
-        AbstractTree.RSMTreeModel model = (AbstractTree.RSMTreeModel) m_tree.getModel();
+        AbstractTree.RSMTreeModel model = (AbstractTree.RSMTreeModel) getTree().getModel();
         
         // we must keep only parent nodes
         // if a child and its parent are selected, we keep only the parent

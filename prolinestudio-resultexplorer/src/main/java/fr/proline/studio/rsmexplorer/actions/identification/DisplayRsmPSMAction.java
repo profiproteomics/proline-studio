@@ -14,9 +14,9 @@ import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.pattern.WindowBox;
 import fr.proline.studio.pattern.WindowBoxFactory;
 import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
+import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
-import fr.proline.studio.rsmexplorer.tree.AbstractTree.TreeType;
 import org.openide.util.NbBundle;
 
 /**
@@ -25,8 +25,8 @@ import org.openide.util.NbBundle;
  */
 public class DisplayRsmPSMAction extends AbstractRSMAction {
 
-   public DisplayRsmPSMAction(TreeType treeType) {
-       super(NbBundle.getMessage(DisplayRsmPeptidesAction.class, "CTL_DisplayRsmPSMAction"), treeType);
+   public DisplayRsmPSMAction(AbstractTree tree) {
+       super(NbBundle.getMessage(DisplayRsmPeptidesAction.class, "CTL_DisplayRsmPSMAction"), tree);
    }
 
     @Override

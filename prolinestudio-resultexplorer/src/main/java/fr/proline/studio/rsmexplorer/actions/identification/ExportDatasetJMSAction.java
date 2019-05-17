@@ -30,12 +30,12 @@ public class ExportDatasetJMSAction extends AbstractRSMAction {
     protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
     private List<String> m_config;
 
-    public ExportDatasetJMSAction(AbstractTree.TreeType treeType) {
-        super(NbBundle.getMessage(ExportDatasetJMSAction.class, "CTL_ExportDatasetAction"), treeType);
+    public ExportDatasetJMSAction(AbstractTree tree) {
+        super(NbBundle.getMessage(ExportDatasetJMSAction.class, "CTL_ExportDatasetAction"), tree);
     }
 
-    public ExportDatasetJMSAction(AbstractTree.TreeType treeType, boolean exportTitle) {
-        super(NbBundle.getMessage(ExportDatasetJMSAction.class, "CTL_ExportAction") + " " + NbBundle.getMessage(ExportDatasetJMSAction.class, "CTL_ExportDatasetAction"), treeType);
+    public ExportDatasetJMSAction(AbstractTree tree, boolean exportTitle) {
+        super(NbBundle.getMessage(ExportDatasetJMSAction.class, "CTL_ExportAction") + " " + NbBundle.getMessage(ExportDatasetJMSAction.class, "CTL_ExportDatasetAction"), tree);
     }
 
     @Override

@@ -8,7 +8,7 @@ import fr.proline.studio.dpm.task.jms.ExportDatasetTask;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.rsmexplorer.gui.dialog.exporter.ExportPrideDialog;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
-import fr.proline.studio.rsmexplorer.tree.AbstractTree.TreeType;
+import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,8 +25,8 @@ public class ExportRSM2PrideJMSAction extends AbstractRSMAction {
    
     protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
  
-    public ExportRSM2PrideJMSAction(TreeType treeType){
-        super(NbBundle.getMessage(ExportRSM2PrideJMSAction.class, "CTL_ExportPrideAction"), treeType);    
+    public ExportRSM2PrideJMSAction(AbstractTree tree){
+        super(NbBundle.getMessage(ExportRSM2PrideJMSAction.class, "CTL_ExportPrideAction"), tree);
     }
     
      @Override

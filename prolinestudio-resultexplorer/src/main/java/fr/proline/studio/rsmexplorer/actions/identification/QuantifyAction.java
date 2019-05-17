@@ -2,7 +2,8 @@ package fr.proline.studio.rsmexplorer.actions.identification;
 
 import fr.proline.core.orm.uds.QuantitationMethod;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
-import fr.proline.studio.rsmexplorer.tree.AbstractTree.TreeType;
+import fr.proline.studio.rsmexplorer.tree.AbstractTree;
+
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import org.openide.util.NbBundle;
@@ -19,30 +20,28 @@ public class QuantifyAction extends AbstractRSMAction {
     private CreateQuantitationAction m_createTMTAction;
     
     private JMenu m_menu;
-    private TreeType m_treeType;
-    
-    public QuantifyAction(TreeType treeType) {
-        super(NbBundle.getMessage(QuantifyAction.class, "CTL_QuantifyAction"), treeType);
-        m_treeType = treeType;
+
+    public QuantifyAction(AbstractTree tree) {
+        super(NbBundle.getMessage(QuantifyAction.class, "CTL_QuantifyAction"), tree);
     }
 
     @Override
     public JMenuItem getPopupPresenter() {
         m_menu = new JMenu((String) getValue(NAME));
 
-        m_spectralCountAction = new SpectralCountAction();
+        m_spectralCountAction = new SpectralCountAction(getTree());
         JMenuItem spectralCountItem = new JMenuItem(m_spectralCountAction);
         m_menu.add(spectralCountItem);
         
-        m_createXICAction = new CreateQuantitationAction(m_treeType, QuantitationMethod.Type.LABEL_FREE);
+        m_createXICAction = new CreateQuantitationAction(getTree(), QuantitationMethod.Type.LABEL_FREE);
         JMenuItem createXICItem = new JMenuItem(m_createXICAction);
         m_menu.add(createXICItem);
 
-        m_createSILACAction = new CreateQuantitationAction(m_treeType, QuantitationMethod.Type.RESIDUE_LABELING);
+        m_createSILACAction = new CreateQuantitationAction(getTree(), QuantitationMethod.Type.RESIDUE_LABELING);
         JMenuItem createSILACItem = new JMenuItem(m_createSILACAction);
         m_menu.add(createSILACItem);
 
-        m_createTMTAction = new CreateQuantitationAction(m_treeType, QuantitationMethod.Type.ISOBARIC_TAGGING);
+        m_createTMTAction = new CreateQuantitationAction(getTree(), QuantitationMethod.Type.ISOBARIC_TAGGING);
         JMenuItem createTMTItem = new JMenuItem(m_createTMTAction);
         m_menu.add(createTMTItem);
         

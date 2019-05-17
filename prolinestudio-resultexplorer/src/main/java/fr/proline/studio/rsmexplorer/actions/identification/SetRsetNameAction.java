@@ -25,24 +25,18 @@ import org.openide.util.NbBundle;
 public class SetRsetNameAction extends AbstractRSMAction {
 
     private static final String GENERAL_APPLICATION_SETTINGS = "General Application Settings";
-    private String m_parameterValue;
+
     private AbstractNode[] m_selectedNodes;
     private String m_naming;
-    private AbstractTree m_tree;
     private boolean fail = false;
     private ArrayList<DataSetNode> toRename;
-
-    // tree type: could be Identification or Quantitation
-    AbstractTree.TreeType m_treeType = null;
 
     /**
      * Builds the RenameAction depending of the treeType
      *
-     * @param treeType
      */
-    public SetRsetNameAction(AbstractTree.TreeType treeType, String naming, String ctlProperty) {
-        super(NbBundle.getMessage(SetRsetNameAction.class, ctlProperty), treeType);
-        this.m_treeType = treeType;
+    public SetRsetNameAction(AbstractTree tree, String naming, String ctlProperty) {
+        super(NbBundle.getMessage(SetRsetNameAction.class, ctlProperty), tree);
         this.m_naming = naming;
     }
 
@@ -56,8 +50,7 @@ public class SetRsetNameAction extends AbstractRSMAction {
 
             int initialExpected = 0;
 
-            m_tree = IdentificationTree.getCurrentTree();
-            m_tree.subscribeRenamer(this);
+            getTree().subscribeRenamer(this);
 
             for (int i = 0; i < selectedNodes.length; i++) {
                 if (selectedNodes[i].getType() == AbstractNode.NodeTypes.DATA_SET) {
@@ -65,11 +58,11 @@ public class SetRsetNameAction extends AbstractRSMAction {
                 }
             }
 
-            m_tree.setExpected(initialExpected);
+            getTree().setExpected(initialExpected);
 
             for (int i = 0; i < selectedNodes.length; i++) {
                 if (selectedNodes[i].getType() == AbstractNode.NodeTypes.DATA_SET) {
-                    m_tree.loadAllAtOnce((DataSetNode) selectedNodes[i], true);
+                    getTree().loadAllAtOnce((DataSetNode) selectedNodes[i], true);
                 }
             }
         }
@@ -78,7 +71,7 @@ public class SetRsetNameAction extends AbstractRSMAction {
 
     public void proceedWithRenaming() {
 
-        m_tree.subscribeRenamer(null);
+        getTree().subscribeRenamer(null);
         
         fail = false;
 
@@ -88,7 +81,7 @@ public class SetRsetNameAction extends AbstractRSMAction {
             if (m_selectedNodes[i].getType() == AbstractNode.NodeTypes.DATA_SET) {
                 DataSetNode datasetNode = (DataSetNode) m_selectedNodes[i];
 
-                m_tree.expandNodeIfNeeded(datasetNode);
+                getTree().expandNodeIfNeeded(datasetNode);
 
                 if (datasetNode.getChildCount() > 0) {
                     Enumeration<AbstractNode> e = datasetNode.depthFirstEnumeration();
@@ -97,7 +90,7 @@ public class SetRsetNameAction extends AbstractRSMAction {
                         if (currentElement.getType() == AbstractNode.NodeTypes.DATA_SET && currentElement.isLeaf() && currentElement.getChildCount() == 0) {
                             toRename.add((DataSetNode) currentElement);
                         } else {
-                            m_tree.expandNodeIfNeeded(currentElement);
+                            getTree().expandNodeIfNeeded(currentElement);
                         }
                     }
                 } else {
@@ -124,7 +117,7 @@ public class SetRsetNameAction extends AbstractRSMAction {
                 @Override
                 public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
 
-                    if (IdentificationTree.renameNode(dataset, m_naming, node, m_tree)) {
+                    if (IdentificationTree.renameNode(dataset, m_naming, node, getTree())) {
                         fail = true;
                     }
 
@@ -137,7 +130,7 @@ public class SetRsetNameAction extends AbstractRSMAction {
                 task.initLoadRsetAndRsm(dataset);
                 AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
             } else {
-                if (IdentificationTree.renameNode(dataset, m_naming, node, m_tree)) {
+                if (IdentificationTree.renameNode(dataset, m_naming, node, getTree())) {
                     fail = true;
                 }
             }

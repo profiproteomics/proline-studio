@@ -57,7 +57,7 @@ public class AggregationQuantChannelsPanel extends JPanel {
 
     public final JPanel createMainPanel() {
         JPanel mainPanel = new JPanel(new BorderLayout());
-
+        mainPanel.setBorder(BorderFactory.createTitledBorder(" Sample Analyses mapping "));
         JSplitPane sp = new JSplitPane();
         sp.setLeftComponent(createQCMappingPanel());
         sp.setRightComponent(createDatasetsPanel());
@@ -68,15 +68,7 @@ public class AggregationQuantChannelsPanel extends JPanel {
         mappingToolBar.setFloatable(false);
         mappingToolBar.setRollover(true);
 
-        JPanel toolbarPanel = new JPanel();
-
-        toolbarPanel.setLayout(new BoxLayout(toolbarPanel, BoxLayout.LINE_AXIS));
-        toolbarPanel.add(Box.createHorizontalGlue());
-        toolbarPanel.add(mappingToolBar);
-        toolbarPanel.add(Box.createHorizontalGlue());
-        toolbarPanel.add(Box.createHorizontalGlue());
-
-        mainPanel.add(toolbarPanel, BorderLayout.NORTH);
+        mainPanel.add(mappingToolBar, BorderLayout.NORTH);
         mainPanel.add(sp, BorderLayout.CENTER);
         return mainPanel;
     }

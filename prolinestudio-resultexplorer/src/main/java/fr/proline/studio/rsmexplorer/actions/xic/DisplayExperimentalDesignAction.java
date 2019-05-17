@@ -20,16 +20,16 @@ public class DisplayExperimentalDesignAction extends AbstractRSMAction {
 
     private JMenu m_menu;
 
-    public DisplayExperimentalDesignAction() {
-        super(NbBundle.getMessage(DisplayExperimentalDesignAction.class, "CTL_DisplayExperimentalDesignAction"), AbstractTree.TreeType.TREE_QUANTITATION);
+    public DisplayExperimentalDesignAction(AbstractTree tree) {
+        super(NbBundle.getMessage(DisplayExperimentalDesignAction.class, "CTL_DisplayExperimentalDesignAction"), tree);
     }
 
     @Override
     public JMenuItem getPopupPresenter() {
         m_menu = new JMenu((String) getValue(NAME));              
     
-        m_xicParamAction = new DisplayXicParamAction();
-        m_mapAlignmentAction = new DisplayMapAlignmentAction();
+        m_xicParamAction = new DisplayXicParamAction(getTree());
+        m_mapAlignmentAction = new DisplayMapAlignmentAction(getTree());
 
         JMenuItem xicParamItem = new JMenuItem(m_xicParamAction);
         JMenuItem mapAlignItem = new JMenuItem(m_mapAlignmentAction);

@@ -26,8 +26,8 @@ import org.openide.windows.WindowManager;
  */
 public class FilterRSMProteinSetsJMSAction extends AbstractRSMAction{
       
-    public FilterRSMProteinSetsJMSAction() {
-        super(NbBundle.getMessage(FilterRSMProteinSetsJMSAction.class, "CTL_FilterRSMProteinSetsAction"), AbstractTree.TreeType.TREE_IDENTIFICATION);
+    public FilterRSMProteinSetsJMSAction(AbstractTree tree) {
+        super(NbBundle.getMessage(FilterRSMProteinSetsJMSAction.class, "CTL_FilterRSMProteinSetsAction"), tree);
     }
 
     @Override

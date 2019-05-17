@@ -2,7 +2,6 @@ package fr.proline.studio.rsmexplorer.actions.identification;
 
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import fr.proline.core.orm.uds.Aggregation;
-import fr.proline.core.orm.uds.Dataset;
 import fr.proline.core.orm.uds.Project;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dam.AccessDatabaseThread;
@@ -42,8 +41,8 @@ public class ImportSearchResultAsDatasetJMSAction extends AbstractRSMAction {
     //VDS TODO : To merge with ImportSearchResultAsRsetJMSAction
     private static final String GENERAL_APPLICATION_SETTINGS = "General Application Settings";
 
-    public ImportSearchResultAsDatasetJMSAction() {
-        super(NbBundle.getMessage(ImportSearchResultAsDatasetJMSAction.class, "CTL_AddSearchResult"), AbstractTree.TreeType.TREE_IDENTIFICATION);
+    public ImportSearchResultAsDatasetJMSAction(AbstractTree tree) {
+        super(NbBundle.getMessage(ImportSearchResultAsDatasetJMSAction.class, "CTL_AddSearchResult"), tree);
     }
 
     @Override

@@ -1,7 +1,5 @@
 package fr.proline.studio.rsmexplorer.actions.identification;
 
-import fr.proline.core.orm.uds.Aggregation;
-import fr.proline.core.orm.uds.Dataset;
 import fr.proline.core.orm.uds.Project;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dam.AccessDatabaseThread;
@@ -27,8 +25,8 @@ import javax.swing.tree.DefaultTreeModel;
  */
 public class PasteSearchResult extends AbstractRSMAction {
 
-    public PasteSearchResult() {
-        super("Paste Search Result", AbstractTree.TreeType.TREE_IDENTIFICATION);
+    public PasteSearchResult(AbstractTree tree) {
+        super("Paste Search Result", tree);
     }
 
     @Override

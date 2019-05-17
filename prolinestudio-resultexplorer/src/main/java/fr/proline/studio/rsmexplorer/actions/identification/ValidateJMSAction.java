@@ -1,6 +1,5 @@
 package fr.proline.studio.rsmexplorer.actions.identification;
 
-import fr.proline.core.orm.uds.Dataset;
 import fr.proline.core.orm.uds.Project;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.core.orm.uds.dto.DDatasetType;
@@ -43,8 +42,8 @@ import org.openide.windows.WindowManager;
 public class ValidateJMSAction extends AbstractRSMAction {
 
        
-    public ValidateJMSAction() {
-        super(NbBundle.getMessage(ValidateJMSAction.class, "CTL_ValidateAction"), AbstractTree.TreeType.TREE_IDENTIFICATION);       
+    public ValidateJMSAction(AbstractTree tree) {
+        super(NbBundle.getMessage(ValidateJMSAction.class, "CTL_ValidateAction"), tree);
     }
 
     @Override

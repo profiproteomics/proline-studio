@@ -11,7 +11,6 @@ import fr.proline.studio.gui.OptionDialog;
 import fr.proline.studio.rsmexplorer.actions.identification.AbstractRSMAction;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode.NodeTypes;
-import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import fr.proline.studio.rsmexplorer.tree.xic.QuantExperimentalDesignTree;
 import fr.proline.studio.rsmexplorer.tree.xic.XICBiologicalGroupNode;
 import fr.proline.studio.rsmexplorer.tree.xic.XICBiologicalSampleAnalysisNode;
@@ -31,7 +30,7 @@ public class CreateXICBiologicalNodeAction extends AbstractRSMAction {
     private final QuantExperimentalDesignTree m_tree;
 
     public CreateXICBiologicalNodeAction(String actionName, NodeTypes type, QuantExperimentalDesignTree tree) {
-        super(actionName, AbstractTree.TreeType.TREE_XIC_DESIGN, tree);
+        super(actionName, tree);
         m_createNodeType = type;
         m_tree = tree;
     }

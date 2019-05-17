@@ -17,8 +17,8 @@ import org.openide.util.NbBundle;
  */
 public class DisplayXICPeptideSetAction extends AbstractRSMAction {
 
-    public DisplayXICPeptideSetAction() {
-        super(NbBundle.getMessage(DisplayXICPeptideSetAction.class, "CTL_DisplayXicPeptideSetAction"), AbstractTree.TreeType.TREE_QUANTITATION);
+    public DisplayXICPeptideSetAction(AbstractTree tree) {
+        super(NbBundle.getMessage(DisplayXICPeptideSetAction.class, "CTL_DisplayXicPeptideSetAction"), tree);
     }
 
     @Override

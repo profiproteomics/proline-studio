@@ -16,10 +16,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
-import javax.swing.JComponent;
-import javax.swing.JMenuItem;
-import javax.swing.JPopupMenu;
-import javax.swing.SwingUtilities;
+import javax.swing.*;
 import javax.swing.tree.TreePath;
 import org.jdesktop.swingx.JXTreeTable;
 import org.slf4j.Logger;
@@ -47,6 +44,7 @@ public class QCMappingTreeTable extends JXTreeTable {
         m_model = treeModel;
         m_model.cloneMapping();
         setCellSelectionEnabled(true);
+        setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
         this.addMouseListener(new PopupAdapter());
     }
 
@@ -135,16 +133,15 @@ public class QCMappingTreeTable extends JXTreeTable {
             m_model.postInsertMove(rowList.get(rowList.size() - 1), columnList);
         }
         m_logger.debug("newSelectedRow index: {}", newSelectedRows);
-        //set the new selected rows colomns
+        //set the new selected rows columns
         if (newSelectedRows.size() > 0) {
             Collections.sort(newSelectedRows);
-            int firstRow = newSelectedRows.get(0);
             for (int i = 0; i < newSelectedRows.size(); i++) {
                 row = newSelectedRows.get(i);
                 if (i == 0) {
                     setRowSelectionInterval(row, row);
                 } else {
-                    addRowSelectionInterval(row, row);;
+                    addRowSelectionInterval(row, row);
                 }
             }
             this.repaint();
@@ -232,31 +229,11 @@ public class QCMappingTreeTable extends JXTreeTable {
     }
 
     class PopupAdapter extends MouseAdapter {
-
-        @Override
-        public void mouseClicked(MouseEvent e) {
-        }
-
-        @Override
-        public void mousePressed(MouseEvent e) {
-//                if (SwingUtilities.isRightMouseButton(e)) {
-//                    manageSelectionOnRightClick(e);
-//                }
-        }
-
         @Override
         public void mouseReleased(MouseEvent e) {
             if (SwingUtilities.isRightMouseButton(e)) {
                 manageSelectionOnRightClick(e);
             }
-        }
-
-        @Override
-        public void mouseEntered(MouseEvent e) {
-        }
-
-        @Override
-        public void mouseExited(MouseEvent e) {
         }
     }
 }

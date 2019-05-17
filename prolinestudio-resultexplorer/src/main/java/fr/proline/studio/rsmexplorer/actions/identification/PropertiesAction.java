@@ -13,6 +13,7 @@ import fr.proline.studio.rsmexplorer.gui.model.properties.XICPropertiesTableMode
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
+import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
 import fr.proline.studio.utils.IconManager;
 import org.openide.util.NbBundle;
 
@@ -25,8 +26,8 @@ import org.openide.util.NbBundle;
 
 public class PropertiesAction extends AbstractRSMAction {
 
-    public PropertiesAction(AbstractTree.TreeType treeType) {
-        super(NbBundle.getMessage(PropertiesAction.class, "CTL_PropertiesAction"), treeType);
+    public PropertiesAction(AbstractTree tree) {
+        super(NbBundle.getMessage(PropertiesAction.class, "CTL_PropertiesAction"), tree);
     }
 
     @Override
@@ -42,18 +43,13 @@ public class PropertiesAction extends AbstractRSMAction {
 
         
         boolean identificationProperties = false;
-        boolean isIdentificationTree = isIdentificationTree();
+        boolean isIdentificationTree = (getTree() == IdentificationTree.getCurrentTree());
         
         for (int i = 0; i < nbSelectedNodes; i++) {
-            AbstractNode node = selectedNodes[i];
-
-            AbstractNode.NodeTypes type = node.getType();
-
+            AbstractNode.NodeTypes type = selectedNodes[i].getType();
             if ((type == AbstractNode.NodeTypes.PROJECT_IDENTIFICATION) || ((type == AbstractNode.NodeTypes.DATA_SET) && (isIdentificationTree)) || (type == AbstractNode.NodeTypes.BIOLOGICAL_SAMPLE_ANALYSIS)) {
                 identificationProperties = true;
- 
             }
-
         }
 
         // new Properties window

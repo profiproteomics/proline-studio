@@ -32,8 +32,8 @@ public class ExportSpectraListJMSAction extends AbstractRSMAction {
 
     FormatCompatibility m_compatibility;
     
-    public ExportSpectraListJMSAction(AbstractTree.TreeType treeType, FormatCompatibility compatibility) {
-        super(NbBundle.getMessage(ExportSpectraListJMSAction.class, "CTL_"+compatibility.toString()+"SpectraListAction"), treeType);
+    public ExportSpectraListJMSAction(AbstractTree tree, FormatCompatibility compatibility) {
+        super(NbBundle.getMessage(ExportSpectraListJMSAction.class, "CTL_"+compatibility.toString()+"SpectraListAction"), tree);
         m_compatibility = compatibility;
     }
 

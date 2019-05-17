@@ -42,7 +42,7 @@ public class CreateQuantitationAction extends AbstractRSMAction {
     private boolean m_isFromExistingQuantitation = false;
     private boolean m_referenceDataSetDefined = false;
 
-    static String getMessage(boolean fromExistingXIC, AbstractTree.TreeType sourceTree, QuantitationMethod.Type type) {
+    static String getMessage(boolean fromExistingXIC, QuantitationMethod.Type type) {
         
         switch (type) {
             case LABEL_FREE: {
@@ -59,15 +59,15 @@ public class CreateQuantitationAction extends AbstractRSMAction {
        return "unknown";
     }
 
-    public CreateQuantitationAction(boolean fromExistingXIC) {
-        super(CreateQuantitationAction.getMessage(fromExistingXIC, AbstractTree.TreeType.TREE_QUANTITATION, QuantitationMethod.Type.LABEL_FREE), AbstractTree.TreeType.TREE_QUANTITATION);
+    public CreateQuantitationAction(AbstractTree tree, boolean fromExistingXIC) {
+        super(CreateQuantitationAction.getMessage(fromExistingXIC, QuantitationMethod.Type.LABEL_FREE), tree);
         // warn : at this time cloning is only supported for LABEL FREE quantitations
         m_quantitationType = QuantitationMethod.Type.LABEL_FREE;
         m_isFromExistingQuantitation = fromExistingXIC;
     }
 
-    public CreateQuantitationAction(AbstractTree.TreeType sourceTree, QuantitationMethod.Type type) {
-        super(CreateQuantitationAction.getMessage(false, sourceTree, type), sourceTree);
+    public CreateQuantitationAction(AbstractTree tree, QuantitationMethod.Type type) {
+        super(CreateQuantitationAction.getMessage(false, type), tree);
         m_quantitationType = type; 
         m_isFromExistingQuantitation = false;
     }

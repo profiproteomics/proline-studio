@@ -1,7 +1,6 @@
 package fr.proline.studio.rsmexplorer.actions.identification;
 
 import fr.proline.core.orm.uds.dto.DDataset;
-import fr.proline.core.orm.uds.Dataset;
 import fr.proline.core.orm.uds.Project;
 import fr.proline.core.orm.uds.dto.DDatasetType.AggregationInformation;
 import fr.proline.studio.dam.AccessDatabaseThread;
@@ -40,8 +39,8 @@ public class MergeJMSAction extends AbstractRSMAction {
     private ConfigurableMergeAction m_aggregationMergeAction;
     private ConfigurableMergeAction m_unionMergeAction;
     
-    public MergeJMSAction() {
-        super(NbBundle.getMessage(MergeJMSAction.class, "CTL_MergeAction"), AbstractTree.TreeType.TREE_IDENTIFICATION);
+    public MergeJMSAction(AbstractTree tree) {
+        super(NbBundle.getMessage(MergeJMSAction.class, "CTL_MergeAction"), tree);
     }
     
     @Override
@@ -50,8 +49,8 @@ public class MergeJMSAction extends AbstractRSMAction {
         Preferences preferences = NbPreferences.root();
         Boolean showHiddenFunctionnality =  preferences.getBoolean("Profi", false);
 
-        m_aggregationMergeAction = new ConfigurableMergeAction(MergeTask.Config.AGGREGATION);
-        m_unionMergeAction = new ConfigurableMergeAction(MergeTask.Config.UNION);
+        m_aggregationMergeAction = new ConfigurableMergeAction(getTree(), MergeTask.Config.AGGREGATION);
+        m_unionMergeAction = new ConfigurableMergeAction(getTree(), MergeTask.Config.UNION);
         JMenuItem mergeAggregateItem = new JMenuItem(m_aggregationMergeAction);
         m_menu.add(mergeAggregateItem);
         JMenuItem mergeUnionItem = new JMenuItem(m_unionMergeAction);    
@@ -76,8 +75,8 @@ class ConfigurableMergeAction extends AbstractRSMAction {
     
     private MergeTask.Config m_configuration;
     
-    public ConfigurableMergeAction(MergeTask.Config config) {
-        super(config.getValue(), AbstractTree.TreeType.TREE_IDENTIFICATION);
+    public ConfigurableMergeAction(AbstractTree tree, MergeTask.Config config) {
+        super(config.getValue(), tree);
         m_configuration = config;
     }
     

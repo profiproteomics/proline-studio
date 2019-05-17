@@ -48,10 +48,6 @@ public class QuantExperimentalDesignPanel extends JPanel {
     public final JPanel createMainPanel() {
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new GridBagLayout());
-        final GridBagConstraints c = new GridBagConstraints();
-        c.anchor = GridBagConstraints.NORTHWEST;
-        c.fill = GridBagConstraints.BOTH;
-        c.insets = new java.awt.Insets(5, 5, 5, 5);
 
         JPanel designTreePanel = createDesignTreePanel();
         JPanel selectionTreePanel = createSelectionTreePanel();
@@ -66,7 +62,6 @@ public class QuantExperimentalDesignPanel extends JPanel {
 
         final GridBagConstraints cFrame = new GridBagConstraints();
         cFrame.insets = new java.awt.Insets(5, 5, 5, 5);
-
         cFrame.gridx = 0;
         cFrame.gridy = 0;
         cFrame.weightx = 1;
@@ -76,6 +71,10 @@ public class QuantExperimentalDesignPanel extends JPanel {
         cFrame.gridwidth = 1;
         framePanel.add(sp, cFrame);
 
+        final GridBagConstraints c = new GridBagConstraints();
+        c.anchor = GridBagConstraints.NORTHWEST;
+        c.fill = GridBagConstraints.BOTH;
+        c.insets = new java.awt.Insets(5, 5, 5, 5);
         c.gridx = 0;
         c.gridy = 0;
         c.weightx = 1;

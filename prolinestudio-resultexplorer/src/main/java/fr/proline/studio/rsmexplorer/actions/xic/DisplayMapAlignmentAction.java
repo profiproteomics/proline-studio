@@ -23,8 +23,8 @@ import org.openide.util.NbBundle;
  */
 public class DisplayMapAlignmentAction extends AbstractRSMAction {
 
-    public DisplayMapAlignmentAction() {
-        super(NbBundle.getMessage(DisplayMapAlignmentAction.class, "CTL_DisplayMapAlignmentAction"), AbstractTree.TreeType.TREE_QUANTITATION);
+    public DisplayMapAlignmentAction(AbstractTree tree) {
+        super(NbBundle.getMessage(DisplayMapAlignmentAction.class, "CTL_DisplayMapAlignmentAction"), tree);
     }
 
     @Override

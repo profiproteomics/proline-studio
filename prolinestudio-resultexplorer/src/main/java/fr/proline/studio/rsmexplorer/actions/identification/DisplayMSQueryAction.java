@@ -22,8 +22,8 @@ import org.openide.util.NbBundle;
  */
 public class DisplayMSQueryAction extends AbstractRSMAction {
 
-    public DisplayMSQueryAction(AbstractTree.TreeType treeType) {
-       super(NbBundle.getMessage(DisplayMSQueryAction.class, "CTL_DisplayMSQueryAction"), treeType);
+    public DisplayMSQueryAction(AbstractTree tree) {
+       super(NbBundle.getMessage(DisplayMSQueryAction.class, "CTL_DisplayMSQueryAction"), tree);
     }
     
     @Override

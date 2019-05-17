@@ -1,7 +1,5 @@
 package fr.proline.studio.rsmexplorer.actions.identification;
 
-import fr.proline.core.orm.uds.Aggregation;
-import fr.proline.core.orm.uds.Dataset;
 import fr.proline.core.orm.uds.Project;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dam.AccessDatabaseThread;
@@ -29,8 +27,8 @@ import org.openide.windows.WindowManager;
 public class AddIdentificationFolderAction extends AbstractRSMAction {
 
     
-    public AddIdentificationFolderAction() {
-        super("Add Identification Folder", AbstractTree.TreeType.TREE_IDENTIFICATION);
+    public AddIdentificationFolderAction(AbstractTree tree) {
+        super("Add Identification Folder", tree);
     }
 
     

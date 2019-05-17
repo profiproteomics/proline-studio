@@ -1,7 +1,5 @@
 package fr.proline.studio.rsmexplorer.actions.xic;
 
-import fr.proline.core.orm.uds.Aggregation;
-import fr.proline.core.orm.uds.Dataset;
 import fr.proline.core.orm.uds.Project;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dam.AccessDatabaseThread;
@@ -30,15 +28,13 @@ import org.openide.windows.WindowManager;
 public class AddQuantitationFolderAction extends AbstractRSMAction {
 
     
-    public AddQuantitationFolderAction() {
-        super("Add Quantitation Folder", AbstractTree.TreeType.TREE_QUANTITATION);
+    public AddQuantitationFolderAction(AbstractTree tree) {
+        super("Add Quantitation Folder", tree);
     }
 
     
     @Override
     public void actionPerformed(AbstractNode[] selectedNodes, int x, int y) {
-
-
         
         AddFolderDialog dialog = AddFolderDialog.getDialog(WindowManager.getDefault().getMainWindow());
         dialog.setLocation(x, y);

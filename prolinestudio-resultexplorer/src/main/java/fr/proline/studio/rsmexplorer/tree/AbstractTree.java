@@ -27,7 +27,6 @@ public abstract class AbstractTree extends JTree implements MouseListener {
     private int m_expected = -1;
 
     public enum TreeType {
-
         TREE_IDENTIFICATION,
         TREE_QUANTITATION,
         TREE_SELECTION,

@@ -28,8 +28,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
+import javax.swing.*;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -153,6 +153,7 @@ public class AggregateQuantitationDialog extends DefaultDialog {
             if (node != m_experimentalDesignNode) {
                 m_experimentalDesignNode = node;
                 m_designPanel = new JPanel();
+                m_designPanel.setBorder(BorderFactory.createTitledBorder(" Experimental Design "));
                 JScrollPane treePanel = new JScrollPane();
                 m_designPanel.setLayout(new BorderLayout());
                 QuantExperimentalDesignTree designTree = new QuantExperimentalDesignTree(m_experimentalDesignNode, true);

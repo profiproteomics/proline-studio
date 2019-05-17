@@ -5,6 +5,8 @@ import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
+
+import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
 import org.openide.util.NbBundle;
 
 /**
@@ -22,23 +24,20 @@ public class ExportAction extends AbstractRSMAction {
     
     private JMenu m_menu;
     
-    private AbstractTree.TreeType m_treeType;
 
-    
-   public ExportAction(AbstractTree.TreeType treeType) {
-       super(NbBundle.getMessage(ExportAction.class, "CTL_ExportAction"), treeType);
-       m_treeType = treeType;
+   public ExportAction(AbstractTree tree) {
+       super(NbBundle.getMessage(ExportAction.class, "CTL_ExportAction"), tree);
    }
 
     @Override
     public JMenuItem getPopupPresenter() {
         m_menu = new JMenu((String) getValue(NAME));              
 
-        m_exportDatasetAction = new ExportDatasetJMSAction(m_treeType);
+        m_exportDatasetAction = new ExportDatasetJMSAction(getTree());
 
-        if (AbstractTree.TreeType.TREE_IDENTIFICATION.equals(m_treeType)) {
-            m_exportPrideAction = new ExportRSM2PrideJMSAction(m_treeType);
-            m_exportMzIdentMLAction = new ExportMzIdentMLAction(m_treeType);
+        if (getTree() == IdentificationTree.getCurrentTree()) {
+            m_exportPrideAction = new ExportRSM2PrideJMSAction(getTree());
+            m_exportMzIdentMLAction = new ExportMzIdentMLAction(getTree());
         } else {
             m_exportPrideAction = null;
             m_exportMzIdentMLAction = null;
@@ -58,8 +57,8 @@ public class ExportAction extends AbstractRSMAction {
         }
 
         JMenu exportMenu = new JMenu(NbBundle.getMessage(ExportAction.class, "CTL_ExportSpectraListAction"));
-        m_exportPeakViewSpectraAction = new ExportSpectraListJMSAction(m_treeType, ExportSpectraListJMSAction.FormatCompatibility.PeakView);
-        m_exportSpectronautSpectraAction = new ExportSpectraListJMSAction(m_treeType, ExportSpectraListJMSAction.FormatCompatibility.Spectronaut);
+        m_exportPeakViewSpectraAction = new ExportSpectraListJMSAction(getTree(), ExportSpectraListJMSAction.FormatCompatibility.PeakView);
+        m_exportSpectronautSpectraAction = new ExportSpectraListJMSAction(getTree(), ExportSpectraListJMSAction.FormatCompatibility.Spectronaut);
         
         JMenuItem exportSpectraItem = new JMenuItem(m_exportPeakViewSpectraAction);        
         exportMenu.add(exportSpectraItem);

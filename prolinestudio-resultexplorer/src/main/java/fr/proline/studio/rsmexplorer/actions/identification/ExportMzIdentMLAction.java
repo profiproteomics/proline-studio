@@ -10,8 +10,6 @@ import fr.proline.studio.dpm.AccessJMSManagerThread;
 import fr.proline.studio.dpm.task.jms.AbstractJMSCallback;
 import fr.proline.studio.dpm.task.jms.DownloadFileTask;
 import fr.proline.studio.dpm.task.jms.ExportDatasetTask;
-import fr.proline.studio.export.ExportDialog;
-import fr.proline.studio.export.ExporterFactory;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.rsmexplorer.gui.dialog.exporter.Export2MzIdentMLDialog;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
@@ -32,8 +30,8 @@ public class ExportMzIdentMLAction extends AbstractRSMAction {
        
     protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
       
-    public ExportMzIdentMLAction(AbstractTree.TreeType treeType) {
-        super(NbBundle.getMessage(ExportMzIdentMLAction.class, "CTL_ExportMzIdentMLAction") , treeType);
+    public ExportMzIdentMLAction(AbstractTree tree) {
+        super(NbBundle.getMessage(ExportMzIdentMLAction.class, "CTL_ExportMzIdentMLAction") , tree);
     }
     
         @Override

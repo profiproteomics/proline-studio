@@ -182,19 +182,19 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
                 // create the actions
                 m_multiActions = new ArrayList<>(4);  // <--- get in sync
 
-                AggregateQuantitationsAction aggregateAction = new AggregateQuantitationsAction();
+                AggregateQuantitationsAction aggregateAction = new AggregateQuantitationsAction(this);
                 m_multiActions.add(aggregateAction);
 
                 m_multiActions.add(null);  // separator
 
-                ExportDatasetJMSAction exportDatasetAction = new ExportDatasetJMSAction(AbstractTree.TreeType.TREE_QUANTITATION, true);
+                ExportDatasetJMSAction exportDatasetAction = new ExportDatasetJMSAction(this, true);
                 m_multiActions.add(exportDatasetAction);
-                RetrieveBioSeqJMSAction retrieveBioSeqAction = new RetrieveBioSeqJMSAction(AbstractTree.TreeType.TREE_QUANTITATION);
+                RetrieveBioSeqJMSAction retrieveBioSeqAction = new RetrieveBioSeqJMSAction(this);
                 m_multiActions.add(retrieveBioSeqAction);
 
                 m_multiActions.add(null);  // separator
 
-                PropertiesAction propertiesAction = new PropertiesAction(AbstractTree.TreeType.TREE_QUANTITATION);
+                PropertiesAction propertiesAction = new PropertiesAction(this);
                 m_multiActions.add(propertiesAction);
 
                 // add actions to popup
@@ -217,12 +217,12 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
                     // create the actions
                     m_rootActions = new ArrayList<>(1);  // <--- get in sync
 
-                    QuantifyAction quantifyAction = new QuantifyAction(AbstractTree.TreeType.TREE_QUANTITATION);
+                    QuantifyAction quantifyAction = new QuantifyAction(this);
                     m_rootActions.add(quantifyAction);
                     //CreateXICAction createXICAction = new CreateQuantitationAction(false);
                     //m_rootActions.add(createXICAction);
 
-                    AddQuantitationFolderAction addFolderAction = new AddQuantitationFolderAction();
+                    AddQuantitationFolderAction addFolderAction = new AddQuantitationFolderAction(this);
                     m_rootActions.add(addFolderAction);
 
                     // add actions to popup
@@ -246,7 +246,7 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
                     // create the actions
                     m_trashActions = new ArrayList<>(1);  // <--- get in sync
 
-                    EmptyTrashAction emtpyTrashAction = new EmptyTrashAction(AbstractTree.TreeType.TREE_QUANTITATION);
+                    EmptyTrashAction emtpyTrashAction = new EmptyTrashAction(this);
                     m_trashActions.add(emtpyTrashAction);
 
                     m_trashPopup = new JPopupMenu();
@@ -262,20 +262,20 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
 
                     m_identActions = new ArrayList<>(6);  // <--- get in sync
 
-                    DisplayRsetAction displayRsetAction = new DisplayRsetAction(AbstractTree.TreeType.TREE_QUANTITATION);
+                    DisplayRsetAction displayRsetAction = new DisplayRsetAction(this);
                     m_identActions.add(displayRsetAction);
 
-                    DisplayRsmAction displayRsmAction = new DisplayRsmAction(AbstractTree.TreeType.TREE_QUANTITATION);
+                    DisplayRsmAction displayRsmAction = new DisplayRsmAction(this);
                     m_identActions.add(displayRsmAction);
 
                     m_identActions.add(null);  // separator
 
-                    ExportAction exportAction = new ExportAction(AbstractTree.TreeType.TREE_QUANTITATION);
+                    ExportAction exportAction = new ExportAction(this);
                     m_identActions.add(exportAction);
 
                     m_identActions.add(null);  // separator
 
-                    PropertiesAction propertiesAction = new PropertiesAction(AbstractTree.TreeType.TREE_QUANTITATION);
+                    PropertiesAction propertiesAction = new PropertiesAction(this);
                     m_identActions.add(propertiesAction);
 
                     // add actions to popup
@@ -298,54 +298,54 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
                     // create the actions
                     m_mainActions = new ArrayList<>(20);  // <--- get in sync
 
-                    DisplayXICAction displayXICAction = new DisplayXICAction();
+                    DisplayXICAction displayXICAction = new DisplayXICAction(this);
                     m_mainActions.add(displayXICAction);
 
-                    DisplayRsmAction displayRsmAction = new DisplayRsmAction(AbstractTree.TreeType.TREE_QUANTITATION);
+                    DisplayRsmAction displayRsmAction = new DisplayRsmAction(this);
                     m_mainActions.add(displayRsmAction);
 
-                    DisplayExperimentalDesignAction expDesignAction = new DisplayExperimentalDesignAction();
+                    DisplayExperimentalDesignAction expDesignAction = new DisplayExperimentalDesignAction(this);
                     m_mainActions.add(expDesignAction);
 
                     m_mainActions.add(null);  // separator
 
-                    AddQuantitationFolderAction addFolderAction = new AddQuantitationFolderAction();
+                    AddQuantitationFolderAction addFolderAction = new AddQuantitationFolderAction(this);
                     m_mainActions.add(addFolderAction);
 
-                    RenameAction renameQuantitationAction = new RenameAction(AbstractTree.TreeType.TREE_QUANTITATION);
+                    RenameAction renameQuantitationAction = new RenameAction(this);
                     m_mainActions.add(renameQuantitationAction);
 
-                    DeleteAction deleteAction = new DeleteAction(AbstractTree.TreeType.TREE_QUANTITATION);
+                    DeleteAction deleteAction = new DeleteAction(this);
                     m_mainActions.add(deleteAction);
 
                     m_mainActions.add(null);  // separator
 
-                    ComputeQuantPostProcessingAction computeQuantPostProcessingAction = new ComputeQuantPostProcessingAction();
+                    ComputeQuantPostProcessingAction computeQuantPostProcessingAction = new ComputeQuantPostProcessingAction(this);
                     m_mainActions.add(computeQuantPostProcessingAction);
 
-                    CreateQuantitationAction createXICAction = new CreateQuantitationAction(true);
+                    CreateQuantitationAction createXICAction = new CreateQuantitationAction(this, true);
                     m_mainActions.add(createXICAction);
 
                     m_mainActions.add(null);  // separator
 
-                    ChangeTypicalProteinJMSAction changeTypicalProteinJmsAction = new ChangeTypicalProteinJMSAction(AbstractTree.TreeType.TREE_QUANTITATION);
+                    ChangeTypicalProteinJMSAction changeTypicalProteinJmsAction = new ChangeTypicalProteinJMSAction(this);
                     m_mainActions.add(changeTypicalProteinJmsAction);
-                    IdentifyPtmSitesJMSAction identifyPtmSitesAction = new IdentifyPtmSitesJMSAction(AbstractTree.TreeType.TREE_QUANTITATION);
+                    IdentifyPtmSitesJMSAction identifyPtmSitesAction = new IdentifyPtmSitesJMSAction(this);
                     m_mainActions.add(identifyPtmSitesAction);
 
-                    GenerateSpectrumMatchesJMSAction generateSpectrumMatchesAction = new GenerateSpectrumMatchesJMSAction(AbstractTree.TreeType.TREE_QUANTITATION);
+                    GenerateSpectrumMatchesJMSAction generateSpectrumMatchesAction = new GenerateSpectrumMatchesJMSAction(this);
                     m_mainActions.add(generateSpectrumMatchesAction);
-                    RetrieveBioSeqJMSAction retrieveBioSeqAction = new RetrieveBioSeqJMSAction(AbstractTree.TreeType.TREE_QUANTITATION);
+                    RetrieveBioSeqJMSAction retrieveBioSeqAction = new RetrieveBioSeqJMSAction(this);
                     m_mainActions.add(retrieveBioSeqAction);
 
                     m_mainActions.add(null);  // separator
 
-                    ExportAction exportAction = new ExportAction(AbstractTree.TreeType.TREE_QUANTITATION);
+                    ExportAction exportAction = new ExportAction(this);
                     m_mainActions.add(exportAction);
 
                     m_mainActions.add(null);  // separator
 
-                    PropertiesAction propertiesAction = new PropertiesAction(AbstractTree.TreeType.TREE_QUANTITATION);
+                    PropertiesAction propertiesAction = new PropertiesAction(this);
                     m_mainActions.add(propertiesAction);
 
                     // add actions to popup

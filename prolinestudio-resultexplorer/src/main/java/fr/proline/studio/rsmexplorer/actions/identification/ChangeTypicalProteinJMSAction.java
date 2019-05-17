@@ -27,8 +27,8 @@ import java.util.List;
 public class ChangeTypicalProteinJMSAction extends AbstractRSMAction {
 
     
-    public ChangeTypicalProteinJMSAction(AbstractTree.TreeType treeType) {
-        super(NbBundle.getMessage(ChangeTypicalProteinJMSAction.class, "CTL_ChangeTypicalProtein"), treeType);
+    public ChangeTypicalProteinJMSAction(AbstractTree tree) {
+        super(NbBundle.getMessage(ChangeTypicalProteinJMSAction.class, "CTL_ChangeTypicalProtein"), tree);
     }
 
     @Override

@@ -28,8 +28,8 @@ public class DisplaySavedWindowAction extends AbstractRSMAction {
 
     private int m_wndIndex;
     
-    public DisplaySavedWindowAction(String name, int wndIndex, AbstractTree.TreeType treeType) {
-        super(name, treeType);
+    public DisplaySavedWindowAction(String name, int wndIndex, AbstractTree tree) {
+        super(name, tree);
         m_wndIndex = wndIndex;
     }
 

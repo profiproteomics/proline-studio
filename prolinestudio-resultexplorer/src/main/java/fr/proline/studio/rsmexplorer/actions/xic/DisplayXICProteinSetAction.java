@@ -17,8 +17,8 @@ import org.openide.util.NbBundle;
  */
 public class DisplayXICProteinSetAction extends AbstractRSMAction {
 
-    public DisplayXICProteinSetAction() {
-        super(NbBundle.getMessage(DisplayXICProteinSetAction.class, "CTL_XicProteinSetAction"), AbstractTree.TreeType.TREE_QUANTITATION);
+    public DisplayXICProteinSetAction(AbstractTree tree) {
+        super(NbBundle.getMessage(DisplayXICProteinSetAction.class, "CTL_XicProteinSetAction"), tree);
     }
 
     @Override

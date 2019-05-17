@@ -39,8 +39,8 @@ public class ComputeQuantPostProcessingAction extends AbstractRSMAction {
     protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
 
 
-    public ComputeQuantPostProcessingAction() {
-        super(NbBundle.getMessage(ComputeQuantPostProcessingAction.class, "CTL_ComputeQuantPostProcessingAction"), AbstractTree.TreeType.TREE_QUANTITATION);
+    public ComputeQuantPostProcessingAction(AbstractTree tree) {
+        super(NbBundle.getMessage(ComputeQuantPostProcessingAction.class, "CTL_ComputeQuantPostProcessingAction"), tree);
 
     }
 

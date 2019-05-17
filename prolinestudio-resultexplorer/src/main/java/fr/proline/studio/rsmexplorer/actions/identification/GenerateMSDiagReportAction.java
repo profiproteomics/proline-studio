@@ -15,12 +15,9 @@ import fr.proline.studio.pattern.WindowBox;
 import fr.proline.studio.pattern.WindowBoxFactory;
 import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
 import fr.proline.studio.rsmexplorer.gui.dialog.MSDiagDialog;
+import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
-import fr.proline.studio.rsmexplorer.tree.AbstractTree.TreeType;
-import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
-
-import javax.swing.tree.DefaultTreeModel;
 
 import org.openide.util.NbBundle;
 import org.openide.windows.WindowManager;
@@ -31,15 +28,12 @@ import org.openide.windows.WindowManager;
  */
 public class GenerateMSDiagReportAction extends AbstractRSMAction {
 
-    public GenerateMSDiagReportAction(TreeType treeType) {
-        super(NbBundle.getMessage(GenerateMSDiagReportAction.class, "CTL_GenerateMSDiagReportAction"), treeType);
+    public GenerateMSDiagReportAction(AbstractTree tree) {
+        super(NbBundle.getMessage(GenerateMSDiagReportAction.class, "CTL_GenerateMSDiagReportAction"), tree);
     }
 
     @Override
     public void actionPerformed(AbstractNode[] selectedNodes, int x, int y) {
-
-    	IdentificationTree tree = IdentificationTree.getCurrentTree();
-
 
         
         int nbNodes = selectedNodes.length;

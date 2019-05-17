@@ -1,7 +1,8 @@
 package fr.proline.studio.rsmexplorer.actions.identification;
 
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
-import fr.proline.studio.rsmexplorer.tree.AbstractTree.TreeType;
+import fr.proline.studio.rsmexplorer.tree.AbstractTree;
+
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import org.openide.util.NbBundle;
@@ -15,25 +16,22 @@ public class RenameRsetAction extends AbstractRSMAction {
 
     private RenameAction m_renameAction;
     private SetRsetNameAction m_searchNameAction, m_peaklistAction, m_msiAction, m_mascotAction;
-
     private JMenu m_menu;
-    private TreeType m_treeType;
 
-    public RenameRsetAction(TreeType treeType) {
-        super(NbBundle.getMessage(RenameRsetAction.class, "CTL_RenameRsetAction"), treeType);
-        m_treeType = treeType;
+    public RenameRsetAction(AbstractTree tree) {
+        super(NbBundle.getMessage(RenameRsetAction.class, "CTL_RenameRsetAction"), tree);
     }
 
     @Override
     public JMenuItem getPopupPresenter() {
         m_menu = new JMenu((String) getValue(NAME));
 
-        m_renameAction = new RenameAction(m_treeType);
+        m_renameAction = new RenameAction(getTree());
 
-        m_searchNameAction = new SetRsetNameAction(m_treeType, ImportManager.SEARCH_RESULT_NAME_SOURCE, "CTL_RenameRsetSearchResultAction");
-        m_peaklistAction = new SetRsetNameAction(m_treeType, ImportManager.PEAKLIST_PATH_SOURCE, "CTL_RenameRsetPeaklistAction");
-        m_msiAction = new SetRsetNameAction(m_treeType, ImportManager.MSI_SEARCH_FILE_NAME_SOURCE, "CTL_RenameRsetMsiAction");
-        m_mascotAction = new SetRsetNameAction(m_treeType, ImportManager.MASCOT_DAEMON_RULE, "CTL_RenameRsetMascotAction");
+        m_searchNameAction = new SetRsetNameAction(getTree(), ImportManager.SEARCH_RESULT_NAME_SOURCE, "CTL_RenameRsetSearchResultAction");
+        m_peaklistAction = new SetRsetNameAction(getTree(), ImportManager.PEAKLIST_PATH_SOURCE, "CTL_RenameRsetPeaklistAction");
+        m_msiAction = new SetRsetNameAction(getTree(), ImportManager.MSI_SEARCH_FILE_NAME_SOURCE, "CTL_RenameRsetMsiAction");
+        m_mascotAction = new SetRsetNameAction(getTree(), ImportManager.MASCOT_DAEMON_RULE, "CTL_RenameRsetMascotAction");
 
         JMenuItem renameItem = new JMenuItem(m_renameAction);
         JMenuItem searchNameItem = new JMenuItem(m_searchNameAction);

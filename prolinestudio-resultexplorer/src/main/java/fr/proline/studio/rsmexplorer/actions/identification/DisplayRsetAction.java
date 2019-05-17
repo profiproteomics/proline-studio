@@ -2,7 +2,8 @@ package fr.proline.studio.rsmexplorer.actions.identification;
 
 import fr.proline.studio.pattern.WindowSavedManager;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
-import fr.proline.studio.rsmexplorer.tree.AbstractTree.TreeType;
+import fr.proline.studio.rsmexplorer.tree.AbstractTree;
+
 import java.util.ArrayList;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
@@ -23,23 +24,21 @@ public class DisplayRsetAction extends AbstractRSMAction {
    private ArrayList<DisplaySavedWindowAction> m_displaySavedWindowActionList;
 
    private JMenu m_menu;
-   private TreeType m_treeType;
-    
-   public DisplayRsetAction(TreeType treeType) {
-       super(NbBundle.getMessage(DisplayRsetAction.class, "CTL_DisplayRsetAction"), treeType);
-       m_treeType = treeType;
+
+   public DisplayRsetAction(AbstractTree tree) {
+       super(NbBundle.getMessage(DisplayRsetAction.class, "CTL_DisplayRsetAction"), tree);
    }
 
     @Override
     public JMenuItem getPopupPresenter() {
         m_menu = new JMenu((String) getValue(NAME));
         
-        m_displayMSQueryAction = new DisplayMSQueryForRsetAction(m_treeType);
-        m_displayRsetPeptidesAction = new DisplayRsetPeptidesAction(m_treeType);
-        m_displayRsetProteinMatchesAction = new DisplayRsetProteinMatchesAction(m_treeType);
-        m_msDiagReportAction = new GenerateMSDiagReportAction(m_treeType); 
-        m_manageUserWindowsAction = new ManageUserWindowsAction(WindowSavedManager.SAVE_WINDOW_FOR_RSET, m_treeType);
-        m_displayUserWindowAction = new DisplayUserWindowAction(WindowSavedManager.SAVE_WINDOW_FOR_RSET, m_treeType);
+        m_displayMSQueryAction = new DisplayMSQueryForRsetAction(getTree());
+        m_displayRsetPeptidesAction = new DisplayRsetPeptidesAction(getTree());
+        m_displayRsetProteinMatchesAction = new DisplayRsetProteinMatchesAction(getTree());
+        m_msDiagReportAction = new GenerateMSDiagReportAction(getTree());
+        m_manageUserWindowsAction = new ManageUserWindowsAction(WindowSavedManager.SAVE_WINDOW_FOR_RSET, getTree());
+        m_displayUserWindowAction = new DisplayUserWindowAction(WindowSavedManager.SAVE_WINDOW_FOR_RSET, getTree());
         
         
         ArrayList<String> savedWindowsList = WindowSavedManager.readSavedWindows();
@@ -51,7 +50,7 @@ public class DisplayRsetAction extends AbstractRSMAction {
                 continue;
             }
             String name = WindowSavedManager.getWindowName(wndSaved);
-            m_displaySavedWindowActionList.add(new DisplaySavedWindowAction(name, i, m_treeType));
+            m_displaySavedWindowActionList.add(new DisplaySavedWindowAction(name, i, getTree()));
         }
        
         JMenuItem displayMSQueryItem = new JMenuItem(m_displayMSQueryAction);

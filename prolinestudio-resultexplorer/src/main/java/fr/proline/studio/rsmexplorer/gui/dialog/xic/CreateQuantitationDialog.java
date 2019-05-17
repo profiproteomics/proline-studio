@@ -200,7 +200,7 @@ public class CreateQuantitationDialog extends DefaultDialog {
         // Update and Replace panel
         m_selectRawFilePanel = SelectRawFilesPanel.getPanel(m_experimentalDesignNode);
         setHelpHeader("<html><b>Step 2:</b> Associate MS files to sample analyses.</html>",
-                "Drag and Drop files from the right panel to the drop zone or to the sample analyses table to link files to sample analyses.");
+                "Drag and Drop files from the file explorer (right panel) to the drop zone or to the sample analyses table to link files to sample analyses.");
         replaceInternalComponent(m_selectRawFilePanel);
         revalidate();
         repaint();

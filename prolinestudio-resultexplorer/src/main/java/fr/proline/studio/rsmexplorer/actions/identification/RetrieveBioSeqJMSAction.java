@@ -17,7 +17,7 @@ import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
-import fr.proline.studio.rsmexplorer.tree.quantitation.QuantitationTree;
+
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.tree.DefaultTreeModel;
@@ -32,8 +32,8 @@ import org.slf4j.LoggerFactory;
 public class RetrieveBioSeqJMSAction extends AbstractRSMAction {
     protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
     
-    public RetrieveBioSeqJMSAction(AbstractTree.TreeType selectedTree) {
-        super(NbBundle.getMessage(RetrieveBioSeqJMSAction.class, "CTL_RetrieveBioSeq"), selectedTree);
+    public RetrieveBioSeqJMSAction(AbstractTree tree) {
+        super(NbBundle.getMessage(RetrieveBioSeqJMSAction.class, "CTL_RetrieveBioSeq"), tree);
     }
 
     @Override
@@ -77,21 +77,7 @@ public class RetrieveBioSeqJMSAction extends AbstractRSMAction {
     @Override
     public void actionPerformed(AbstractNode[] selectedNodes, int x, int y) {
        
-        AbstractTree.TreeType source = getSourceTreeType();
-        AbstractTree tree;
-        switch (source) {
-            case TREE_IDENTIFICATION:
-                tree = IdentificationTree.getCurrentTree(); 
-                break;
-            case TREE_QUANTITATION:
-                tree = QuantitationTree.getCurrentTree(); 
-                break;
-            default:
-                m_logger.warn("Unexpected source tree for this action ! "+source.name());
-                return; 
-        }
-        
-        DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
+        DefaultTreeModel treeModel = (DefaultTreeModel) getTree().getModel();
         List<DataSetNode> datasets = new ArrayList<>();
         List<Long> rsmIds = new ArrayList<>();
 

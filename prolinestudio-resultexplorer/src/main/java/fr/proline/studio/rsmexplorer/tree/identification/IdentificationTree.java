@@ -666,7 +666,7 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
                 // create the actions
                 m_trashActions = new ArrayList<>(1);  // <--- get in sync
 
-                EmptyTrashAction emtpyTrashAction = new EmptyTrashAction(AbstractTree.TreeType.TREE_IDENTIFICATION);
+                EmptyTrashAction emtpyTrashAction = new EmptyTrashAction(this);
                 m_trashActions.add(emtpyTrashAction);
 
                 m_trashPopup = new JPopupMenu();
@@ -684,12 +684,12 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
                 // create the actions
                 m_allImportedActions = new ArrayList<>(6);  // <--- get in sync
 
-                DisplayAllRsetAction allRsetAction = new DisplayAllRsetAction();
+                DisplayAllRsetAction allRsetAction = new DisplayAllRsetAction(this);
                 m_allImportedActions.add(allRsetAction);
 
                 m_allImportedActions.add(null);
 
-                ImportSearchResultAsRsetJMSAction importJmsAction = new ImportSearchResultAsRsetJMSAction();
+                ImportSearchResultAsRsetJMSAction importJmsAction = new ImportSearchResultAsRsetJMSAction(this);
                 m_allImportedActions.add(importJmsAction);
 
 
@@ -718,86 +718,86 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
                 m_mainActions = new ArrayList<>(25);  // <--- get in sync
 
 
-                DisplayRsetAction displayRsetAction = new DisplayRsetAction(AbstractTree.TreeType.TREE_IDENTIFICATION);
+                DisplayRsetAction displayRsetAction = new DisplayRsetAction(this);
                 m_mainActions.add(displayRsetAction);
 
-                DisplayRsmAction displayRsmAction = new DisplayRsmAction(AbstractTree.TreeType.TREE_IDENTIFICATION);
+                DisplayRsmAction displayRsmAction = new DisplayRsmAction(this);
                 m_mainActions.add(displayRsmAction);
 
                 m_mainActions.add(null);  // separator
 
-                AggregateAction aggregateAction = new AggregateAction();
+                AggregateAction aggregateAction = new AggregateAction(this);
                 m_mainActions.add(aggregateAction);
 
-                AddIdentificationFolderAction addFolderAction = new AddIdentificationFolderAction();
+                AddIdentificationFolderAction addFolderAction = new AddIdentificationFolderAction(this);
                 m_mainActions.add(addFolderAction);
                 
                 m_mainActions.add(null);  // separator
                 
-                CopySearchResult copyAction = new CopySearchResult();
+                CopySearchResult copyAction = new CopySearchResult(this);
                 m_mainActions.add(copyAction);
                 
-                PasteSearchResult pasteAction = new PasteSearchResult();
+                PasteSearchResult pasteAction = new PasteSearchResult(this);
                 m_mainActions.add(pasteAction);
                 
                 m_mainActions.add(null);  // separator
 
-                RenameRsetAction renameRsetAction = new RenameRsetAction(AbstractTree.TreeType.TREE_IDENTIFICATION);
+                RenameRsetAction renameRsetAction = new RenameRsetAction(this);
                 m_mainActions.add(renameRsetAction);
 
-                ClearDatasetAction clearAction = new ClearDatasetAction();
+                ClearDatasetAction clearAction = new ClearDatasetAction(this);
                 m_mainActions.add(clearAction);
 
-                DeleteAction deleteAction = new DeleteAction(AbstractTree.TreeType.TREE_IDENTIFICATION);
+                DeleteAction deleteAction = new DeleteAction(this);
                 m_mainActions.add(deleteAction);
 
                 m_mainActions.add(null);  // separator
 
-                ImportSearchResultAsDatasetJMSAction identificationAction = new ImportSearchResultAsDatasetJMSAction();
+                ImportSearchResultAsDatasetJMSAction identificationAction = new ImportSearchResultAsDatasetJMSAction(this);
                 m_mainActions.add(identificationAction);
 //                    if (showHiddenFunctionnality) {
-                ImportMaxQuantResultJMSAction importMaxQuant = new ImportMaxQuantResultJMSAction();
+                ImportMaxQuantResultJMSAction importMaxQuant = new ImportMaxQuantResultJMSAction(this);
                 m_mainActions.add(importMaxQuant);
 //                    }
-                ValidateJMSAction validateJMSAction = new ValidateJMSAction();
+                ValidateJMSAction validateJMSAction = new ValidateJMSAction(this);
                 m_mainActions.add(validateJMSAction);
                 
-                MergeJMSAction mergeJmsAction = new MergeJMSAction();
+                MergeJMSAction mergeJmsAction = new MergeJMSAction(this);
                 m_mainActions.add(mergeJmsAction);
                 
-                FilterRSMProteinSetsJMSAction filterProtSetAction = new FilterRSMProteinSetsJMSAction();
+                FilterRSMProteinSetsJMSAction filterProtSetAction = new FilterRSMProteinSetsJMSAction(this);
                 m_mainActions.add(filterProtSetAction);
                 
-                ChangeTypicalProteinJMSAction changeTypicalProteinJmsAction = new ChangeTypicalProteinJMSAction(AbstractTree.TreeType.TREE_IDENTIFICATION);
+                ChangeTypicalProteinJMSAction changeTypicalProteinJmsAction = new ChangeTypicalProteinJMSAction(this);
                 m_mainActions.add(changeTypicalProteinJmsAction);
                 
-                IdentifyPtmSitesJMSAction identifyPtmSitesAction = new IdentifyPtmSitesJMSAction(AbstractTree.TreeType.TREE_IDENTIFICATION);
+                IdentifyPtmSitesJMSAction identifyPtmSitesAction = new IdentifyPtmSitesJMSAction(this);
                 m_mainActions.add(identifyPtmSitesAction);
                 
                 m_mainActions.add(null);  // separator
                 
-                GenerateSpectrumMatchesJMSAction generateSpectrumMatchesAction = new GenerateSpectrumMatchesJMSAction(AbstractTree.TreeType.TREE_IDENTIFICATION);
+                GenerateSpectrumMatchesJMSAction generateSpectrumMatchesAction = new GenerateSpectrumMatchesJMSAction(this);
                 m_mainActions.add(generateSpectrumMatchesAction);
                 
-                UpdatePeaklistSoftwareAction updatePeaklistSoftAction = new UpdatePeaklistSoftwareAction();
+                UpdatePeaklistSoftwareAction updatePeaklistSoftAction = new UpdatePeaklistSoftwareAction(this);
                 m_mainActions.add(updatePeaklistSoftAction);
                 
-                RetrieveBioSeqJMSAction retrieveBioSeqAction = new RetrieveBioSeqJMSAction(AbstractTree.TreeType.TREE_IDENTIFICATION);
+                RetrieveBioSeqJMSAction retrieveBioSeqAction = new RetrieveBioSeqJMSAction(this);
                 m_mainActions.add(retrieveBioSeqAction);
 
                 m_mainActions.add(null);  // separator
 
-                QuantifyAction quantifyAction = new QuantifyAction(AbstractTree.TreeType.TREE_IDENTIFICATION);
+                QuantifyAction quantifyAction = new QuantifyAction(this);
                 m_mainActions.add(quantifyAction);
 
                 m_mainActions.add(null);  // separator
 
-                ExportAction exportAction = new ExportAction(AbstractTree.TreeType.TREE_IDENTIFICATION);
+                ExportAction exportAction = new ExportAction(this);
                 m_mainActions.add(exportAction);
 
                 m_mainActions.add(null);  // separator
 
-                PropertiesAction propertiesAction = new PropertiesAction(AbstractTree.TreeType.TREE_IDENTIFICATION);
+                PropertiesAction propertiesAction = new PropertiesAction(this);
                 m_mainActions.add(propertiesAction);
 
                 // add actions to popup
@@ -867,7 +867,7 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
             if (nbNodes == 1) {
                 AbstractNode n = selectedNodes[0];
                 if (n instanceof IdAllImportedNode) {
-                    new DisplayAllRsetAction().actionPerformed(selectedNodes, e.getX(), e.getY());
+                    new DisplayAllRsetAction(this).actionPerformed(selectedNodes, e.getX(), e.getY());
                 }
             }
         }

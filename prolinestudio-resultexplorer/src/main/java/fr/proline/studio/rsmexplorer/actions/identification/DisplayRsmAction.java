@@ -2,7 +2,8 @@ package fr.proline.studio.rsmexplorer.actions.identification;
 
 import fr.proline.studio.pattern.WindowSavedManager;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
-import fr.proline.studio.rsmexplorer.tree.AbstractTree.TreeType;
+import fr.proline.studio.rsmexplorer.tree.AbstractTree;
+
 import java.util.ArrayList;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
@@ -27,28 +28,26 @@ public class DisplayRsmAction extends AbstractRSMAction {
     private ArrayList<DisplaySavedWindowAction> m_displaySavedWindowActionList;
     
     private JMenu m_menu;
-    private TreeType m_treeType;
-    
-    public DisplayRsmAction(TreeType treeType) {
-        super(NbBundle.getMessage(DisplayRsmAction.class, "CTL_DisplayRsmAction"), treeType);
-        m_treeType = treeType;
+
+    public DisplayRsmAction(AbstractTree tree) {
+        super(NbBundle.getMessage(DisplayRsmAction.class, "CTL_DisplayRsmAction"), tree);
     }
 
     @Override
     public JMenuItem getPopupPresenter() {
         m_menu = new JMenu((String) getValue(NAME));
 
-        m_displayMSQueryAction = new DisplayMSQueryAction(m_treeType);
-        m_displayRsmPSMAction = new DisplayRsmPSMAction(m_treeType);
-        m_displayRsmPeptidesAction = new DisplayRsmPeptidesAction(m_treeType);
-        m_displayRsmProteinSetsAction = new DisplayRsmProteinSetsAction(m_treeType);       
-        m_displayPtmProteinSite = new DisplayPTMSitesAction(m_treeType);
+        m_displayMSQueryAction = new DisplayMSQueryAction(getTree());
+        m_displayRsmPSMAction = new DisplayRsmPSMAction(getTree());
+        m_displayRsmPeptidesAction = new DisplayRsmPeptidesAction(getTree());
+        m_displayRsmProteinSetsAction = new DisplayRsmProteinSetsAction(getTree());
+        m_displayPtmProteinSite = new DisplayPTMSitesAction(getTree());
         
-        m_displayAdjacencyMatrixAction = new DisplayAdjacencyMatrixAction(m_treeType);
+        m_displayAdjacencyMatrixAction = new DisplayAdjacencyMatrixAction(getTree());
         
         
-        m_manageUserWindowsAction = new ManageUserWindowsAction(WindowSavedManager.SAVE_WINDOW_FOR_RSM, m_treeType);
-        m_displayUserWindowAction = new DisplayUserWindowAction(WindowSavedManager.SAVE_WINDOW_FOR_RSM, m_treeType);
+        m_manageUserWindowsAction = new ManageUserWindowsAction(WindowSavedManager.SAVE_WINDOW_FOR_RSM, getTree());
+        m_displayUserWindowAction = new DisplayUserWindowAction(WindowSavedManager.SAVE_WINDOW_FOR_RSM, getTree());
         
         ArrayList<String> savedWindowsList = WindowSavedManager.readSavedWindows();
         int nb = savedWindowsList.size();
@@ -59,7 +58,7 @@ public class DisplayRsmAction extends AbstractRSMAction {
                 continue;
             }
             String name = WindowSavedManager.getWindowName(wndSaved);
-            m_displaySavedWindowActionList.add(new DisplaySavedWindowAction(name, i, m_treeType));
+            m_displaySavedWindowActionList.add(new DisplaySavedWindowAction(name, i, getTree()));
         }
 
 

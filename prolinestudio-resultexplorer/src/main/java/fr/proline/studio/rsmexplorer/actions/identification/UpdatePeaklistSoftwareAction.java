@@ -32,8 +32,8 @@ import org.slf4j.LoggerFactory;
 public class UpdatePeaklistSoftwareAction extends AbstractRSMAction {
     protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
  
-    public UpdatePeaklistSoftwareAction(){        
-        super(NbBundle.getMessage(UpdatePeaklistSoftwareAction.class, "CTL_UpdatePeaklistSoft"), AbstractTree.TreeType.TREE_IDENTIFICATION);
+    public UpdatePeaklistSoftwareAction(AbstractTree tree){
+        super(NbBundle.getMessage(UpdatePeaklistSoftwareAction.class, "CTL_UpdatePeaklistSoft"), tree);
     }
     
     @Override

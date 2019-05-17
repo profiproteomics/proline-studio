@@ -24,8 +24,8 @@ import org.openide.windows.WindowManager;
 public class ClearDatasetAction extends AbstractRSMAction {
     
     
-    public ClearDatasetAction() {
-        super(NbBundle.getMessage(ClearDatasetAction.class, "CTL_ClearAction"), AbstractTree.TreeType.TREE_IDENTIFICATION);
+    public ClearDatasetAction(AbstractTree tree) {
+        super(NbBundle.getMessage(ClearDatasetAction.class, "CTL_ClearAction"), tree);
     }
 
      @Override

@@ -30,7 +30,7 @@ public class CreateAction extends AbstractRSMAction {
     private JMenuItem m_createChannelItem;
 
     public CreateAction(QuantExperimentalDesignTree tree) {
-        super(NbBundle.getMessage(CreateAction.class, "CTL_CreateAction"), AbstractTree.TreeType.TREE_XIC_DESIGN, tree);
+        super(NbBundle.getMessage(CreateAction.class, "CTL_CreateAction"), tree);
         m_tree = tree;
     }
 

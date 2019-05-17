@@ -30,8 +30,8 @@ import org.openide.windows.WindowManager;
  */
 public class DisplayXICPTMSitesAction extends AbstractRSMAction {
 
-    public DisplayXICPTMSitesAction() {
-       super(NbBundle.getMessage(DisplayXICPTMSitesAction.class, "CTL_DisplayPtmProteinSite"), AbstractTree.TreeType.TREE_QUANTITATION);
+    public DisplayXICPTMSitesAction(AbstractTree tree) {
+       super(NbBundle.getMessage(DisplayXICPTMSitesAction.class, "CTL_DisplayPtmProteinSite"), tree);
     }
     
     @Override

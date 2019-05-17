@@ -10,7 +10,7 @@ import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import fr.proline.studio.rsmexplorer.tree.xic.XICBiologicalSampleAnalysisNode;
-import fr.proline.studio.rsmexplorer.tree.xic.QuantExperimentalDesignTree;
+
 import javax.swing.tree.DefaultTreeModel;
 import org.openide.util.NbBundle;
 import org.openide.windows.WindowManager;
@@ -21,11 +21,9 @@ import org.openide.windows.WindowManager;
  */
 public class RenameAction extends AbstractRSMAction {
 
-    private final QuantExperimentalDesignTree m_tree;
 
-    public RenameAction(QuantExperimentalDesignTree tree) {
-        super(NbBundle.getMessage(RenameAction.class, "CTL_RenameAction"), AbstractTree.TreeType.TREE_XIC_DESIGN, tree);
-        m_tree = tree;
+    public RenameAction(AbstractTree tree) {
+        super(NbBundle.getMessage(RenameAction.class, "CTL_RenameAction"), tree);
     }
 
     @Override
@@ -51,7 +49,7 @@ public class RenameAction extends AbstractRSMAction {
 
                 if (name.compareTo(newName) != 0) {
                     data.setTemporaryName(newName);
-                    ((DefaultTreeModel) m_tree.getModel()).nodeChanged(n);
+                    ((DefaultTreeModel) getTree().getModel()).nodeChanged(n);
                 }
                 break;
             case BIOLOGICAL_SAMPLE_ANALYSIS:
@@ -65,7 +63,7 @@ public class RenameAction extends AbstractRSMAction {
 
                 if (qChName.compareTo(qChNewName) != 0) {
                     bioSplAnaysisNode.setQuantChannelName(qChNewName);
-                    ((DefaultTreeModel) m_tree.getModel()).nodeChanged(n);
+                    ((DefaultTreeModel) getTree().getModel()).nodeChanged(n);
                 }
             default:
                 break;

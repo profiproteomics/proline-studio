@@ -22,8 +22,7 @@ import fr.proline.studio.rsmexplorer.gui.dialog.GenerateSpectrumMatchesDialog;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
-import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
-import fr.proline.studio.rsmexplorer.tree.quantitation.QuantitationTree;
+
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.tree.DefaultTreeModel;
@@ -40,28 +39,15 @@ public class GenerateSpectrumMatchesJMSAction extends AbstractRSMAction {
     
     protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
 
-    public GenerateSpectrumMatchesJMSAction(AbstractTree.TreeType selectedTree) {
-        super(NbBundle.getMessage(GenerateSpectrumMatchesJMSAction.class, "CTL_GenerateSpectrumMatchesAction"), selectedTree);
+    public GenerateSpectrumMatchesJMSAction(AbstractTree tree) {
+        super(NbBundle.getMessage(GenerateSpectrumMatchesJMSAction.class, "CTL_GenerateSpectrumMatchesAction"), tree);
     }
     
     @Override
     public void actionPerformed(final AbstractNode[] selectedNodes, int x, int y) {
         
-        AbstractTree.TreeType source = getSourceTreeType();
-        AbstractTree tree;
-        switch (source) {
-            case TREE_IDENTIFICATION:
-                tree = IdentificationTree.getCurrentTree(); 
-                break;
-            case TREE_QUANTITATION:
-                tree = QuantitationTree.getCurrentTree(); 
-                break;
-            default:
-                m_logger.warn("Unexpected source tree for this action ! "+source.name());
-                return; 
-        }
-        
-        final DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
+
+        final DefaultTreeModel treeModel = (DefaultTreeModel) getTree().getModel();
         
         int nbNodes = selectedNodes.length;
         List<DDataset> allDSs = new ArrayList();

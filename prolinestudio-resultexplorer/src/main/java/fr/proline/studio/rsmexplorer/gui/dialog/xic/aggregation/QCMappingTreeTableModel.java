@@ -11,7 +11,6 @@ import fr.proline.core.orm.uds.QuantitationChannel;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dam.data.DataSetData;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
-import static fr.proline.studio.rsmexplorer.tree.AbstractNode.NodeTypes.BIOLOGICAL_SAMPLE_ANALYSIS;
 import fr.proline.studio.rsmexplorer.tree.xic.XICBiologicalGroupNode;
 import fr.proline.studio.rsmexplorer.tree.xic.XICBiologicalSampleAnalysisNode;
 import fr.proline.studio.rsmexplorer.tree.xic.XICBiologicalSampleNode;
@@ -20,8 +19,10 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -45,7 +46,7 @@ public class QCMappingTreeTableModel extends AbstractTreeTableModel {
      * Quantitation(orignial) Tree data Map <AggregationChannelNode,
      * <AggregationChannelid, <QuantiDataset, QuantiChannel>>
      */
-    Map<XICBiologicalSampleAnalysisNode, DQuantitationChannelMapping> m_parentQCMappings, m_startingQCMappings;
+    Map<XICBiologicalSampleAnalysisNode, DQuantitationChannelMapping> m_parentQCMappings;
     //m_startingQCMappings for alt+up/down
     /**
      * a ordered List according to tree row index, useful for getNodeAt()
@@ -77,26 +78,6 @@ public class QCMappingTreeTableModel extends AbstractTreeTableModel {
         }
     }
 
-    /**
-     * Clone Mapping in m_startingQCMappings, used for Alt+Up/Down
-     */
-    public void cloneMapping() {
-        m_startingQCMappings = new HashMap();
-        for (XICBiologicalSampleAnalysisNode cn : m_parentQCMappings.keySet()) {
-            DQuantitationChannelMapping copy = m_parentQCMappings.get(cn).clone();
-            m_startingQCMappings.put(cn, copy);
-            //m_logger.debug("channel {}, mapping: {}", cn, copy);
-        }
-
-    }
-
-    /**
-     * clean m_startingQCMappings, used for Alt+Up/Down
-     */
-    public void cleanStartingMapping() {
-        m_startingQCMappings = new HashMap();
-    }
-
     @Override
     public int getColumnCount() {
         return m_datasets.size() + 1;
@@ -120,7 +101,7 @@ public class QCMappingTreeTableModel extends AbstractTreeTableModel {
     public String getToolTipText(Object o, int column) {
         DDataset ds = m_datasets.get(column - 1);
         AbstractNode node = (AbstractNode) o;
-        if (node != null && node.getType() == BIOLOGICAL_SAMPLE_ANALYSIS) {
+        if (node != null && node.getType() == AbstractNode.NodeTypes.BIOLOGICAL_SAMPLE_ANALYSIS) {
             DQuantitationChannelMapping mapping = m_parentQCMappings.get(node);
             Map<DDataset, QuantitationChannel> quantChannelMap = mapping.getMappedQuantChannels();
             if (quantChannelMap != null) {
@@ -143,11 +124,13 @@ public class QCMappingTreeTableModel extends AbstractTreeTableModel {
     private Map<XICBiologicalSampleAnalysisNode, DQuantitationChannelMapping> inferDefaultMapping(AbstractNode node) {
 
         Map<XICBiologicalSampleAnalysisNode, DQuantitationChannelMapping> mappings = new HashMap<>();
-        Stream<Object> groupStream = Collections.list(node.children()).stream().filter(n -> (((AbstractNode) n).getType() == AbstractNode.NodeTypes.BIOLOGICAL_GROUP));
+        Stream<Object> groupStream = Collections.list(node.children()).stream()
+                .filter(n -> (((AbstractNode) n).getType() == AbstractNode.NodeTypes.BIOLOGICAL_GROUP));
         AtomicInteger index = new AtomicInteger(1);
         List<XICBiologicalGroupNode> groupNodes = groupStream.map(o -> ((XICBiologicalGroupNode) o)).collect(Collectors.toList());
         for (XICBiologicalGroupNode groupNode : groupNodes) {
-            Stream<Object> sampleStream = Collections.list(groupNode.children()).stream().filter(n -> (((AbstractNode) n).getType() == AbstractNode.NodeTypes.BIOLOGICAL_SAMPLE));
+            Stream<Object> sampleStream = Collections.list(groupNode.children()).stream()
+                    .filter(n -> (((AbstractNode) n).getType() == AbstractNode.NodeTypes.BIOLOGICAL_SAMPLE));
             List<XICBiologicalSampleNode> sampleNodeList = sampleStream.map(s -> ((XICBiologicalSampleNode) s)).collect(Collectors.toList());
             for (XICBiologicalSampleNode sampleNode : sampleNodeList) {
                 //@KX for each group, create a  DQuantitationChannelMapping, the parentQCNumber of DQuantitationChannelMapping increse+1 at each time
@@ -155,17 +138,27 @@ public class QCMappingTreeTableModel extends AbstractTreeTableModel {
                 //@KX (x = XICBiologicalSampleAnalysisNode), empty mapping which has only channel number
                 //Map<ChannelNode, Mapping =(Aggregation channel, Map<Quanti-QuantiChannel>)
                 Stream<XICBiologicalSampleAnalysisNode> sampleNodeStream = parseSample(sampleNode);
-                Map<XICBiologicalSampleAnalysisNode, DQuantitationChannelMapping> qcsNodes = sampleNodeStream.collect(Collectors.toMap(x -> x, x -> new DQuantitationChannelMapping(index.getAndIncrement())));
+                Map<XICBiologicalSampleAnalysisNode, DQuantitationChannelMapping> qcsNodes = sampleNodeStream.collect(
+                        Collectors.toMap(x -> x, x -> new DQuantitationChannelMapping(index.getAndIncrement())));
 
                 //@KX obtain all DQuantitationChannelMapping(empty util now) sorted by parentQCNumber Quant Channel idNumber
                 //now fill the DQuantitationChannelMapping in qcNodes
-                List<DQuantitationChannelMapping> sortedMappings = qcsNodes.values().stream().sorted(Comparator.comparing(DQuantitationChannelMapping::getParentQCNumber)).collect(Collectors.toList());
+                List<DQuantitationChannelMapping> sortedMappings = qcsNodes.values()
+                        .stream()
+                        .sorted(Comparator.comparing(DQuantitationChannelMapping::getParentQCNumber))
+                        .collect(Collectors.toList());
                 //now, parse each (starting) Quantitation DataSet
                 for (DDataset ds : m_datasets) {
                     //for each  quntitation(DDataSet), find if it has a group who has a same name (bg = BiologicalGroup)
-                    BiologicalGroup group = ds.getGroupSetup().getBiologicalGroups().stream().filter(bg -> bg.getName().equals(((DataSetData) groupNode.getData()).getTemporaryName())).findAny().orElse(null);
+                    BiologicalGroup group = ds.getGroupSetup().getBiologicalGroups()
+                            .stream()
+                            .filter(bg -> bg.getName().equals(((DataSetData) groupNode.getData()).getTemporaryName()))
+                            .findAny().orElse(null);
                     if (group != null) {
-                        BiologicalSample sample = group.getBiologicalSamples().stream().filter(bs -> bs.getName().equals(getCompletSampleName(group, sampleNode))).findAny().orElse(null);
+                        BiologicalSample sample = group.getBiologicalSamples()
+                                .stream()
+                                .filter(bs -> bs.getName().equals(getCompletSampleName(group, sampleNode)))
+                                .findAny().orElse(null);
                         if (sample != null) {
                             //retreive all QuantitationChannel in all of the sample (bs=getBiologicalSamples)
                             List<QuantitationChannel> groupQcs = sample.getQuantitationChannels();
@@ -203,8 +196,12 @@ public class QCMappingTreeTableModel extends AbstractTreeTableModel {
      * @return
      */
     private Stream<XICBiologicalSampleAnalysisNode> parseGroup(XICBiologicalGroupNode groupNode) {
-        Stream<Object> stream = Collections.list(groupNode.children()).stream().flatMap(node -> Collections.list(((AbstractNode) node).children()).stream());
-        return stream.map(node -> ((XICBiologicalSampleAnalysisNode) node));
+        Stream<Object> stream = Collections.list(groupNode.children())//sampleNode in list
+                .stream()
+                .flatMap(sampleNode -> Collections.list(
+                ((AbstractNode) sampleNode).children()).stream()//XICBiologicalSampleAnalysisNode in stream
+                );
+        return stream.map(node -> ((XICBiologicalSampleAnalysisNode) node));//type cast
     }
 
     /**
@@ -469,10 +466,11 @@ public class QCMappingTreeTableModel extends AbstractTreeTableModel {
         }
     }
 
-    void postInsertMove(Integer targetRow, int[] columnList) {
+    public void postInsertMove(Integer targetRow, int[] columnList) {
         int targetIndex = m_indexChannelNodes.indexOf(targetRow);
-        if (targetIndex == -1)
+        if (targetIndex == -1) {
             return;
+        }
         int targetChannelIndex = m_indexChannelNodes.get(targetIndex);
         XICBiologicalSampleAnalysisNode targetNode = (XICBiologicalSampleAnalysisNode) this.getNodeAt(targetChannelIndex);
         for (int column : columnList) {
@@ -486,4 +484,42 @@ public class QCMappingTreeTableModel extends AbstractTreeTableModel {
         }
     }
 
+    public String verifyRedundantChannel() {
+        String r = "";
+        for (DDataset ds : this.m_datasets) {
+            ArrayList<String> redunday = findRedundantChannel(ds);
+            if (!redunday.isEmpty()) {
+                r += "in column: " + ds.getName() + ",Sample Analysis channel: " + redunday.stream().collect(Collectors.joining(",")) + "\n";
+            }
+        }
+        if (!r.isEmpty()) {
+            r += "are repeated.";
+        }
+        return r;
+    }
+
+    protected ArrayList<String> findRedundantChannel(DDataset quanti) {
+        Map<XICBiologicalSampleAnalysisNode, DQuantitationChannelMapping> map = this.getMapping();
+        Stream<String> channelsName = map.values().stream()
+                .map(nMap -> nMap.getQuantChannel(quanti))
+                .filter(chv -> Objects.nonNull(chv))
+                .map(ch -> ch.getName());
+
+        Iterator channelIt = channelsName.iterator();
+        ArrayList<String> channelEnum = new ArrayList();
+        ArrayList<String> channelDouble = new ArrayList();
+        String chName;
+        while (channelIt.hasNext()) {
+            chName = (String) channelIt.next();
+            if (!channelEnum.contains(chName)) {
+                channelEnum.add(chName);
+            } else {
+                if (!channelDouble.contains(chName)) {
+                    channelDouble.add(chName);
+                }
+            }
+        }
+        return channelDouble;
+
+    }
 }

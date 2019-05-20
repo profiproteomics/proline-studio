@@ -199,7 +199,8 @@ public class AggregateQuantitationDialog extends DefaultDialog {
             displayStep2QuantChannelsMapping();
             return false;
         }
-        return true;
+        return m_quantChannelsPanel.verifyRedundantChannel();
+
     }
 
     @Override
@@ -241,7 +242,10 @@ public class AggregateQuantitationDialog extends DefaultDialog {
         Map<String, List<String>> groupSamplesMap = new HashMap();
         List<String> sampleNameList;
         // create Map<GroupName, List<BiologicalGroup>> by "collect" (ds = dataSet) (bg = BiologicalGroup)
-        Map<String, List<BiologicalGroup>> groups = m_quantitations.stream().map(ds -> ds.getGroupSetup().getBiologicalGroups()).flatMap(Collection::stream).collect(Collectors.groupingBy(bg -> bg.getName(), Collectors.toList()));
+        Map<String, List<BiologicalGroup>> groups = m_quantitations.stream()
+                .map(ds -> ds.getGroupSetup().getBiologicalGroups())
+                .flatMap(Collection::stream)
+                .collect(Collectors.groupingBy(bg -> bg.getName(), Collectors.toList()));
         for (DDataset Quant : m_quantitations) {
             //create group List according first quanti group compositon
             groupList = Quant.getGroupSetup().getBiologicalGroups();

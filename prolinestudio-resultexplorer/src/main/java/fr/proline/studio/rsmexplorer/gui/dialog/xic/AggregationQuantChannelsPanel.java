@@ -169,6 +169,16 @@ public class AggregationQuantChannelsPanel extends JPanel {
         return mappingList;
     }
 
+    public boolean verifyRedundantChannel() {
+        String r = this.m_treeTableModel.verifyRedundantChannel();
+        if (! r.isEmpty())
+        {
+            JOptionPane.showMessageDialog(this, r);
+            return false;
+        }
+        return true;
+    }
+
     class QCMappingToolbar extends JToolBar {
 
         JButton m_removeBt;

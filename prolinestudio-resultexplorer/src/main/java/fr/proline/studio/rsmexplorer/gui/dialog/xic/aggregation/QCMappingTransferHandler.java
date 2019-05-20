@@ -9,18 +9,17 @@ import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dam.data.AbstractData;
 import fr.proline.studio.dam.data.DataSetData;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
-import static fr.proline.studio.rsmexplorer.tree.AbstractNode.NodeTypes.BIOLOGICAL_GROUP;
-import static fr.proline.studio.rsmexplorer.tree.AbstractNode.NodeTypes.BIOLOGICAL_SAMPLE_ANALYSIS;
 import fr.proline.studio.rsmexplorer.tree.xic.AbstractTreeTransferHandler;
 import fr.proline.studio.rsmexplorer.tree.xic.XICBiologicalSampleAnalysisNode;
 import fr.proline.studio.rsmexplorer.tree.xic.XICSelectionTransferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.stream.Collectors;
+import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.TransferHandler;
 import javax.swing.tree.TreePath;
-import org.jdesktop.swingx.JXTreeTable;
 import org.openide.util.Exceptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,10 +31,10 @@ import org.slf4j.LoggerFactory;
 public class QCMappingTransferHandler extends AbstractTreeTransferHandler {
 
     protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
-    private JXTreeTable m_tree;
+    private QCMappingTreeTable m_tree;
     private QCMappingTreeTableModel m_treeTableModel;
 
-    public QCMappingTransferHandler(JXTreeTable tree) {
+    public QCMappingTransferHandler(QCMappingTreeTable tree) {
         super(false);
         m_tree = tree;
         m_treeTableModel = (QCMappingTreeTableModel) m_tree.getTreeTableModel();
@@ -74,7 +73,7 @@ public class QCMappingTransferHandler extends AbstractTreeTransferHandler {
                 return false;
             }
             // TODO : Determine whether we accept the location depending on the node type
-            return (designNodeType == BIOLOGICAL_GROUP) || (designNodeType == BIOLOGICAL_SAMPLE_ANALYSIS);
+            return (designNodeType == AbstractNode.NodeTypes.BIOLOGICAL_GROUP) || (designNodeType == AbstractNode.NodeTypes.BIOLOGICAL_SAMPLE_ANALYSIS);
 
         }
         return false;
@@ -95,25 +94,32 @@ public class QCMappingTransferHandler extends AbstractTreeTransferHandler {
             if (transferDsNodesList == null) {
                 return false;
             }
-            AbstractNode dropChannelNode = dropNode;
+            AbstractNode dropChannelTreeNode = dropNode;
+            ArrayList<DataSetData> transferedChannel = new ArrayList();
             for (AbstractNode dsNode : transferDsNodesList) {
                 switch (dsNode.getType()) {
                     case BIOLOGICAL_GROUP:
                         m_logger.info("moving group");
                     case BIOLOGICAL_SAMPLE_ANALYSIS: {
-                        DQuantitationChannelMapping dropLocationMapping = m_treeTableModel.getMapping().get(dropChannelNode);
+                        DQuantitationChannelMapping dropLocationMapping = m_treeTableModel.getMapping().get(dropChannelTreeNode);
                         if (dropLocationMapping != null) {
                             DataSetData userObject = (DataSetData) dsNode.getData();
+                            String dropedObjectName = userObject.getName();
                             dropLocationMapping.put(dropLocationDs, userObject.getChannelNumber());
+                            transferedChannel.add(userObject);
                         }
-                        dropChannelNode = this.m_treeTableModel.getNextChannelNode((XICBiologicalSampleAnalysisNode)dropChannelNode);
-                        if (dropChannelNode == null)
+                        dropChannelTreeNode = this.m_treeTableModel.getNextChannelNode((XICBiologicalSampleAnalysisNode) dropChannelTreeNode);
+                        if (dropChannelTreeNode == null) {
                             continue;
+                        }
                     }
                 }
-                
             }
-
+            ArrayList<String> doubleChannel = m_treeTableModel.findRedundantChannel(dropLocationDs);
+            if (doubleChannel != null && !doubleChannel.isEmpty()) {
+                String message = String.format("Channels: %s are repeated in this Quantitation column", doubleChannel.stream().collect(Collectors.joining(",")));
+                JOptionPane.showMessageDialog(m_tree, message);
+            }
             return false;
         } catch (UnsupportedFlavorException ex) {
             m_logger.error(getClass().getSimpleName() + " DnD error ", ex);

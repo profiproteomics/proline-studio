@@ -37,12 +37,10 @@ public class QCMappingTreeTable extends JXTreeTable {
     public static final String INSERT_UP = "Insert Up";
     public static final String INSERT_DOWN = "Insert Down";
     private QCMappingTreeTableModel m_model;
-    //private boolean m_isAltDown;
 
     public QCMappingTreeTable(QCMappingTreeTableModel treeModel) {
         super(treeModel);
         m_model = treeModel;
-        m_model.cloneMapping();
         setCellSelectionEnabled(true);
         setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
         this.addMouseListener(new PopupAdapter());

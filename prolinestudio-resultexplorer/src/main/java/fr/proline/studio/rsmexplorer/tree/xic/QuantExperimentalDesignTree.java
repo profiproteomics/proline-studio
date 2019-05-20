@@ -317,7 +317,7 @@ public class QuantExperimentalDesignTree extends AbstractTree {
                 }
                 childSampleIndex++;
             }
-            if (dataset.isAggregation()) {//aggragation dataset can't expand by above code
+            if (dataset.isAggregation()) {//aggragation dataset can't be expanded by above code
                 tree.expandPath(new TreePath(biologicalGroupNode.getPath()));
                 for (Enumeration e = biologicalGroupNode.children(); e.hasMoreElements();) {
                     XICBiologicalSampleNode samplNode = (XICBiologicalSampleNode) e.nextElement();

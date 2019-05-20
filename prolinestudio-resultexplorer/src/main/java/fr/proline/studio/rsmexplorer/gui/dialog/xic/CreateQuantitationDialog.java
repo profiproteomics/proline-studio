@@ -440,9 +440,6 @@ public class CreateQuantitationDialog extends DefaultDialog {
     }
 
     public Long getQuantMethodId() {
-        if (m_quantitationType == QuantitationMethod.Type.LABEL_FREE) {
-            return 3L;
-        }
         return m_experimentalDesignPanel.getQuantitationMethod().getId();
     }
 

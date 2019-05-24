@@ -10,7 +10,7 @@ import fr.proline.core.orm.msi.PtmSpecificity;
 import fr.proline.core.orm.uds.Project;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dam.DatabaseDataManager;
-import fr.proline.studio.dam.tasks.DatabasePTMsTask;
+import fr.proline.studio.dam.tasks.DatabasePTMSitesTask;
 import fr.proline.studio.dpm.AccessJMSManagerThread;
 import fr.proline.studio.dpm.task.jms.AbstractJMSCallback;
 import fr.proline.studio.dpm.task.jms.IdentifyPtmSitesTask;
@@ -60,7 +60,7 @@ public class IdentifyPtmSitesJMSAction extends AbstractRSMAction {
       for (int i = 0; i < nbNodes; i++) {
         ArrayList<PtmSpecificity> ptmSpecificities = new ArrayList<>();
         DataSetNode node = (DataSetNode) selectedNodes[i];
-        DatabasePTMsTask ptmTask = new DatabasePTMsTask(null);
+        DatabasePTMSitesTask ptmTask = new DatabasePTMSitesTask(null);
         ptmTask.initLoadUsedPTMs(node.getDataset().getProject().getId(), node.getDataset().getResultSummaryId(), ptmSpecificities);
         ptmTask.fetchData();
         ptms.addAll(ptmSpecificities.stream().map(s -> s.getPtm()).distinct().collect(Collectors.toList()));

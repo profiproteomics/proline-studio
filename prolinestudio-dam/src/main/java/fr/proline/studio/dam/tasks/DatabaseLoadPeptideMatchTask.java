@@ -910,7 +910,7 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
                 peptideMap.put(peptide.getId(), peptide);
             }
 
-            DatabasePTMsTask.fetchPTMDataForPeptides(entityManagerMSI, peptideMap);
+            DatabasePTMSitesTask.fetchPTMDataForPeptides(entityManagerMSI, peptideMap);
             
         } else {
 
@@ -947,7 +947,7 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
             peptide.getTransientData().setPeptideReadablePtmString(ptmString);
         }
         
-        DatabasePTMsTask.fetchPTMDataForPeptides(entityManagerMSI, peptideMap);
+        DatabasePTMSitesTask.fetchPTMDataForPeptides(entityManagerMSI, peptideMap);
        
  
     }

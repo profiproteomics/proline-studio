@@ -5,7 +5,7 @@ import fr.proline.core.orm.msi.dto.DPeptideInstance;
 import fr.proline.studio.extendedtablemodel.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
-import fr.proline.studio.dam.tasks.DatabasePTMsTask;
+import fr.proline.studio.dam.tasks.DatabasePTMSitesTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dam.tasks.data.ptm.PTMDataset;
 import fr.proline.studio.dam.tasks.data.ptm.PTMSite;
@@ -112,7 +112,7 @@ import org.slf4j.LoggerFactory;
             }
         };
 
-        DatabasePTMsTask task = new DatabasePTMsTask(callback);
+        DatabasePTMSitesTask task = new DatabasePTMSitesTask(callback);
         task.initFillPTMSite(getProjectId(), m_rsm, m_currentPtmSite);
         Long taskId = task.getId();
         if (m_previousTaskId != null) {

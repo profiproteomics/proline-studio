@@ -11,7 +11,7 @@ import fr.proline.core.orm.msi.dto.DMasterQuantProteinSet;
 import fr.proline.core.orm.msi.dto.DPeptideInstance;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
-import fr.proline.studio.dam.tasks.DatabasePTMsTask;
+import fr.proline.studio.dam.tasks.DatabasePTMSitesTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dam.tasks.data.ptm.PTMDataset;
 import fr.proline.studio.dam.tasks.data.ptm.PTMPeptideInstance;
@@ -107,8 +107,15 @@ public class DataBoxPTMPeptides extends AbstractDataBox {
         //Get information from prevous box:     
         // -- PTM Dataset & RSM the ptm peptides belong to
         // -- List of PTM Peptides to display
-        PTMDataset newPtmDataset = (PTMDataset) m_previousDataBox.getData(false, PTMDataset.class);
+        PTMDataset newPtmDataset = (PTMDataset) m_previousDataBox.getData(false, PTMDataset.class);        
         List<PTMPeptideInstance> newPtmPepInstancesPtmSite = (List<PTMPeptideInstance> ) m_previousDataBox.getData(false, PTMPeptideInstance.class, true);
+
+//        // Load data if not yet loaded
+//        if(newPtmPepInstancesPtmSite == null || newPtmPepInstancesPtmSite.isEmpty()){
+//            
+//        }
+        
+        
         
         boolean valueUnchanged  = Objects.equals(newPtmDataset, m_ptmDataset) && Objects.equals(newPtmPepInstancesPtmSite,m_ptmPepInstancesPtmSite);
         
@@ -199,7 +206,7 @@ public class DataBoxPTMPeptides extends AbstractDataBox {
             }
         };
 
-        DatabasePTMsTask task = new DatabasePTMsTask(callback);
+        DatabasePTMSitesTask task = new DatabasePTMSitesTask(callback);
         task.initFillPTMSites(getProjectId(), m_rsm, notLoadedPtmSite);
         Long taskId = task.getId();
         if (m_previousPTMTaskId != null) {

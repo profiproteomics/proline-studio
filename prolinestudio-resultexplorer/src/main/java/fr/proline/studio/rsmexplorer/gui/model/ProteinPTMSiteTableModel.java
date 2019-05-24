@@ -486,57 +486,7 @@ public class ProteinPTMSiteTableModel extends LazyTableModel implements GlobalTa
     return this;
   }
 
-  public class ProteinCount implements Comparable {
-
-    private final int m_sameSetCount;
-    private final int m_subSetCount;
-
-    public ProteinCount(int sameSetCount, int subSetCount) {
-      m_sameSetCount = sameSetCount;
-      m_subSetCount = subSetCount;
-    }
-
-    public int getNbProteins() {
-      return m_sameSetCount + m_subSetCount;
-    }
-
-    public String toHtml() {
-
-      String urlSameset = IconManager.getURLForIcon(IconManager.IconType.SAME_SET);
-      String urlSubset = IconManager.getURLForIcon(IconManager.IconType.SUB_SET);
-
-      m_sb.setLength(0);
-      m_sb.append("<html>");
-      m_sb.append((int) (m_sameSetCount + m_subSetCount));
-      m_sb.append("&nbsp;&nbsp;(").append(m_sameSetCount).append("&nbsp;<img src=\"").append(urlSameset).append("\">");
-      m_sb.append("&nbsp;,&nbsp;").append(m_subSetCount).append("&nbsp;<img src=\"").append(urlSubset).append("\">&nbsp;");
-      m_sb.append(')');
-      m_sb.append("</html>");
-      return m_sb.toString();
-    }
-
-    @Override
-    public String toString() {
-
-      m_sb.setLength(0);
-      m_sb.append((int) (m_sameSetCount + m_subSetCount));
-      m_sb.append(" (").append(m_sameSetCount);
-      m_sb.append(",").append(m_subSetCount);
-      m_sb.append(')');
-      return m_sb.toString();
-    }
-
-    @Override
-    public int compareTo(Object o) {
-      int sameSet = m_sameSetCount - ((ProteinCount) o).m_sameSetCount;
-      if (sameSet != 0) {
-        return sameSet;
-      }
-      return m_subSetCount - ((ProteinCount) o).m_subSetCount;
-    }
-
-  }
-
+ 
   @Override
   public Map<String, Object> getExternalData() {
     return null;

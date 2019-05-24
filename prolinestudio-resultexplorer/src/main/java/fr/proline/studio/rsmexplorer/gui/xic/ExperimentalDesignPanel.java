@@ -2,7 +2,7 @@ package fr.proline.studio.rsmexplorer.gui.xic;
 
 import fr.proline.core.orm.msi.PtmSpecificity;
 import fr.proline.core.orm.uds.dto.DDataset;
-import fr.proline.studio.dam.tasks.DatabasePTMsTask;
+import fr.proline.studio.dam.tasks.DatabasePTMSitesTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.gui.HourglassPanel;
@@ -216,7 +216,7 @@ public class ExperimentalDesignPanel extends HourglassPanel implements DataBoxPa
 
     private Map<Long, String> getPtmSpecificityNameById() {
         final ArrayList<PtmSpecificity> ptms = new ArrayList<>();
-        DatabasePTMsTask task = new DatabasePTMsTask(null);
+        DatabasePTMSitesTask task = new DatabasePTMSitesTask(null);
         task.initLoadUsedPTMs(m_dataset.getProject().getId(), m_dataset.getResultSummaryId(), ptms);
         task.fetchData();
         return ptms.stream().collect(Collectors.toMap(ptmS -> ptmS.getId(), ptmS -> ptmS.toString()));

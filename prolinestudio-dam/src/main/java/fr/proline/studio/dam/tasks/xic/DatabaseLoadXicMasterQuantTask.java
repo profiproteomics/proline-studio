@@ -38,7 +38,7 @@ import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.AbstractDatabaseSlicerTask;
-import fr.proline.studio.dam.tasks.DatabasePTMsTask;
+import fr.proline.studio.dam.tasks.DatabasePTMSitesTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1054,8 +1054,8 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
             peptideInstanceList.add(dpi);
         }
 
-        DatabasePTMsTask.fetchReadablePTMData(entityManagerMSI, m_dataset.getResultSetId(), peptideMap);
-        DatabasePTMsTask.fetchPTMDataForPeptides(entityManagerMSI, peptideMap);
+        DatabasePTMSitesTask.fetchReadablePTMData(entityManagerMSI, m_dataset.getResultSetId(), peptideMap);
+        DatabasePTMSitesTask.fetchPTMDataForPeptides(entityManagerMSI, peptideMap);
 
         int nbMP = m_masterQuantPeptideList.size();
         int nbPI = peptideInstanceList.size();
@@ -1267,8 +1267,8 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
             }
         }
 
-        DatabasePTMsTask.fetchReadablePTMData(entityManagerMSI, m_dataset.getResultSetId(), peptideMap);
-        DatabasePTMsTask.fetchPTMDataForPeptides(entityManagerMSI, peptideMap);
+        DatabasePTMSitesTask.fetchReadablePTMData(entityManagerMSI, m_dataset.getResultSetId(), peptideMap);
+        DatabasePTMSitesTask.fetchPTMDataForPeptides(entityManagerMSI, peptideMap);
 
         // load masterQuantPeptide not linked to a peptideInstance
         queryDMasterQuantPeptide = "SELECT  new fr.proline.core.orm.msi.dto.DMasterQuantPeptide"
@@ -1891,8 +1891,8 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
             peptideInstanceList.add(dpi);
         }
 
-        DatabasePTMsTask.fetchReadablePTMData(entityManagerMSI, m_dataset.getResultSetId(), peptideMap);
-        DatabasePTMsTask.fetchPTMDataForPeptides(entityManagerMSI, peptideMap);
+        DatabasePTMSitesTask.fetchReadablePTMData(entityManagerMSI, m_dataset.getResultSetId(), peptideMap);
+        DatabasePTMSitesTask.fetchPTMDataForPeptides(entityManagerMSI, peptideMap);
 
         ArrayList<Long> peptideMatchIds = new ArrayList<>(peptideMatchMap.size());
         peptideMatchIds.addAll(peptideMatchMap.keySet());

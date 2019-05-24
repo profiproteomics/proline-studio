@@ -6,7 +6,7 @@ package fr.proline.studio.rsmexplorer.gui.dialog.xic;
 
 import fr.proline.core.orm.msi.PtmSpecificity;
 import fr.proline.core.orm.uds.dto.DDataset;
-import fr.proline.studio.dam.tasks.DatabasePTMsTask;
+import fr.proline.studio.dam.tasks.DatabasePTMSitesTask;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.parameter.ParameterError;
 import fr.proline.studio.parameter.ParameterList;
@@ -141,7 +141,7 @@ public class QuantPostProcessingDialog extends DefaultDialog {
     private void init() {
         //Get potential PTMs from dataset
         final ArrayList<PtmSpecificity> ptms = new ArrayList<>();
-        DatabasePTMsTask task = new DatabasePTMsTask(null);
+        DatabasePTMSitesTask task = new DatabasePTMSitesTask(null);
         task.initLoadUsedPTMs(m_dataset.getProject().getId(), m_dataset.getResultSummaryId(), ptms);
         task.fetchData();
         Map<Long, String> ptmSpecificityNameById = ptms.stream().collect(Collectors.toMap(ptmS -> ptmS.getId(), ptmS -> ptmS.toString()));

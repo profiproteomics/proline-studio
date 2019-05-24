@@ -4,6 +4,7 @@ import fr.proline.studio.dam.tasks.data.ptm.PTMSite;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.TreeSet;
 import javax.swing.table.AbstractTableModel;
 
@@ -13,7 +14,7 @@ import javax.swing.table.AbstractTableModel;
  */
 public class ProteinPTMSiteTableModelProcessing {
     
-    public static String calculateDataWORedundance(AbstractTableModel model, ArrayList<String> modificationsArray, ArrayList<Character> residuesArray, HashMap<Character, Integer> residuesMap, ArrayList<PTMSite> proteinPTMSiteArray,HashMap<String, Integer> modificationsMap) {
+    public static String calculateDataWORedundance(AbstractTableModel model, ArrayList<String> modificationsArray, ArrayList<Character> residuesArray, HashMap<Character, Integer> residuesMap, List<PTMSite> proteinPTMSiteArray,HashMap<String, Integer> modificationsMap) {
 
         
         int nbRows = model.getRowCount();
@@ -62,7 +63,7 @@ public class ProteinPTMSiteTableModelProcessing {
 
     }
 
-    private static HashMap<String, Integer> getModificationCount(AbstractTableModel model, ArrayList<PTMSite> proteinPTMSiteArray) {
+    private static HashMap<String, Integer> getModificationCount(AbstractTableModel model, List<PTMSite> proteinPTMSiteArray) {
            
         int rowCount = proteinPTMSiteArray.size();
         HashMap<String, Integer> globalDistinctModificationsMap = new HashMap<>();

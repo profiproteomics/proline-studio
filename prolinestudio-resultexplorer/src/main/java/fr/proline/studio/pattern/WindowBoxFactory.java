@@ -264,7 +264,17 @@ public class WindowBoxFactory {
         return new WindowBox(boxes[0].getFullName(), generatePanel(boxes), boxes[0], IconManager.getImage(iconType));
     }
 
-        public static WindowBox getXicPTMSitesWindowBox(String dataName) {
+    public static WindowBox getXicPTMDataWindowBox(String dataName) {
+        AbstractDataBox[] boxes = new AbstractDataBox[2];
+        boxes[0] = new DataBoxPTMClusters();
+        boxes[0].setDataName(dataName);
+        ((DataBoxPTMClusters) boxes[0]).setXicResult(true);
+        boxes[1] = new DataBoxPTMPeptides();
+        IconManager.IconType iconType = IconManager.IconType.QUANT_XIC;
+        return new WindowBox(boxes[0].getFullName(), generatePanel(boxes), boxes[0], IconManager.getImage(iconType));        
+    }
+    
+    public static WindowBox getXicPTMSitesWindowBox(String dataName) {
 
         AbstractDataBox[] boxes = new AbstractDataBox[6];
         boxes[0] = new DataBoxPTMSiteProtein();

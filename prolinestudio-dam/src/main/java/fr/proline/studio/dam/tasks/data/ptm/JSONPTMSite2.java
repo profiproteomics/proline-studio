@@ -5,18 +5,17 @@
  */
 package fr.proline.studio.dam.tasks.data.ptm;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
 /**
  *
- * @author CB205360
+ * @author VD225637
  */
-@JsonIgnoreProperties(ignoreUnknown = true)
-public class JSONPTMSite extends AbstractJSONPTMSite {
+public class JSONPTMSite2 extends AbstractJSONPTMSite {
+    //
+    // Variables defined in Proline OM that will be read out from the database
+    //@todo : try to make them private instead of public
+    public Long id;
 
-    //List of all PeptidesInstances Ids (in leaf RSM)
-    public Long[] peptideInstanceIds;
-    
     //List of PepidesInstances which don't match this PTM but with same mass
-    public Long[] isomericPeptideInstanceIds;
+    public Long[] isomericPeptideIds;
+    
 }

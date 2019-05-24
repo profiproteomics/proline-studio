@@ -4,7 +4,7 @@ import fr.proline.core.orm.msi.dto.DPeptideInstance;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
-import fr.proline.studio.dam.tasks.DatabasePTMsTask;
+import fr.proline.studio.dam.tasks.DatabasePTMSitesTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dam.tasks.data.ptm.PTMSite;
 import fr.proline.studio.rsmexplorer.gui.PeptidesPTMSiteTablePanel;
@@ -104,7 +104,7 @@ public class DataBoxPTMSitePepMatches extends AbstractDataBox {
             AccessDatabaseThread.getAccessDatabaseThread().abortTask(m_previousTaskId);
         }
          
-        DatabasePTMsTask task = new DatabasePTMsTask(callback);
+        DatabasePTMSitesTask task = new DatabasePTMSitesTask(callback);
         task.initFillPTMSite(getProjectId(), ptmSite.getPTMdataset().getDataset().getResultSummary(), ptmSite);
         Long taskId = task.getId();
         m_previousTaskId = taskId;

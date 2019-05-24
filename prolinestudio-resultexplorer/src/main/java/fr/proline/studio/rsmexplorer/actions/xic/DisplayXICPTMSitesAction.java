@@ -36,7 +36,7 @@ public class DisplayXICPTMSitesAction extends AbstractRSMAction {
     
     @Override
     public void actionPerformed(AbstractNode[] selectedNodes, int x, int y) {
-        int answer= JOptionPane.showConfirmDialog(WindowManager.getDefault().getMainWindow(), "New Version ?");
+        int answer= JOptionPane.showConfirmDialog(WindowManager.getDefault().getMainWindow(), "Do you want to \n - View Protein Sites in V2 ? Click on YES \n - View PTM Clusters ? Click on No \n - View PTM Sites in V1 ? Click on Cancel.");
         int nbNodes = selectedNodes.length;
         for (int i = 0; i < nbNodes; i++) {
             DataSetNode dataSetNode = (DataSetNode) selectedNodes[i];
@@ -61,6 +61,8 @@ public class DisplayXICPTMSitesAction extends AbstractRSMAction {
             WindowBox wbox;
             if(answer == JOptionPane.YES_OPTION){
                 wbox = WindowBoxFactory.getXicPTMSitesWindowBox(dataSet.getName());
+            } else if (answer == JOptionPane.NO_OPTION){
+                wbox = WindowBoxFactory.getXicPTMDataWindowBox(dataSet.getName());            
             } else {
                 wbox = WindowBoxFactory.getXicPTMSitesWindowBoxOK(dataSet.getName());            
             }
@@ -85,11 +87,13 @@ public class DisplayXICPTMSitesAction extends AbstractRSMAction {
                 @Override
                 public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
                                 WindowBox wbox;
-                    if(answer == JOptionPane.YES_OPTION) {
+                    if (answer == JOptionPane.YES_OPTION) {
                         wbox = WindowBoxFactory.getXicPTMSitesWindowBox(dataSet.getName());
+                    } else if (answer == JOptionPane.NO_OPTION) {
+                        wbox = WindowBoxFactory.getXicPTMDataWindowBox(dataSet.getName());
                     } else {
                         wbox = WindowBoxFactory.getXicPTMSitesWindowBoxOK(dataSet.getName());
-                    }                    
+                    }        
                      
                     // open a window to display the window box
                     DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);

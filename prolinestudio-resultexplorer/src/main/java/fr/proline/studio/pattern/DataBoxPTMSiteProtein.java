@@ -9,7 +9,7 @@ import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.extendedtablemodel.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
-import fr.proline.studio.dam.tasks.DatabasePTMsTask;
+import fr.proline.studio.dam.tasks.DatabasePTMSitesTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dam.tasks.data.ptm.PTMDataset;
 import fr.proline.studio.dam.tasks.data.ptm.PTMPeptideInstance;
@@ -171,7 +171,7 @@ public class DataBoxPTMSiteProtein extends AbstractDataBox {
 
         // ask asynchronous loading of data
         
-        DatabasePTMsTask task = new DatabasePTMsTask(callback);
+        DatabasePTMSitesTask task = new DatabasePTMSitesTask(callback);
         task.initLoadPTMSites(getProjectId(), m_ptmDataset.getDataset().getResultSummary(), ptmSiteArray);
         m_logger.debug("**** Register task DatabasePTMsTask.initLoadPTMSites "+task.getId()+" : "+task.toString());
         registerTask(task);
@@ -191,7 +191,7 @@ public class DataBoxPTMSiteProtein extends AbstractDataBox {
             public void run(boolean success, final long taskId, SubTask subTask, boolean finished) {
                 m_logger.info(" **** +++ END task  "+taskId+" : is finished ? (unregister) "+finished+"; subtask ? "+subTask+"; sucess ? "+success+"; found "+m_masterQuantProteinSetList.size()+" mqPrS");
                 if (subTask == null) {
-
+                    m_quantChannelInfo = new QuantChannelInfo(m_ptmDataset.getDataset());
                     AbstractDatabaseCallback mapCallback = new AbstractDatabaseCallback() {
 
                         @Override
@@ -203,7 +203,7 @@ public class DataBoxPTMSiteProtein extends AbstractDataBox {
                         public void run(boolean success, long task2Id, SubTask subTask, boolean finished) {
                             m_logger.info("**** +++ --- END  task "+task2Id+" if finished ? "+finished+" unregister + set loaded");
                             if (finished) {                                                               
-                                m_quantChannelInfo = new QuantChannelInfo(m_ptmDataset.getDataset());
+//                                m_quantChannelInfo = new QuantChannelInfo(m_ptmDataset.getDataset());
                                 getDataBoxPanelInterface().addSingleValue(m_quantChannelInfo);
                                 unregisterTask(task2Id);
                                 setLoaded(loadingId);
@@ -374,7 +374,7 @@ public class DataBoxPTMSiteProtein extends AbstractDataBox {
             }
         };
 
-        DatabasePTMsTask task = new DatabasePTMsTask(callback);
+        DatabasePTMSitesTask task = new DatabasePTMSitesTask(callback);
         task.initFillPTMSites(getProjectId(), m_ptmDataset.getDataset().getResultSummary(), ptmSiteArray);
         logStartTime = System.currentTimeMillis();
         m_logger.debug("**** --- Register task DatabasePTMsTask.initFillPTMSites " +task.getId()+" : "+task.toString());
@@ -515,7 +515,5 @@ public class DataBoxPTMSiteProtein extends AbstractDataBox {
         }
         return null;
     }
-   
-    
-
+      
 }

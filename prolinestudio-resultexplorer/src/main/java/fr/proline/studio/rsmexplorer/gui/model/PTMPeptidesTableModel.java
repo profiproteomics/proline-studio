@@ -340,6 +340,8 @@ public class PTMPeptidesTableModel extends LazyTableModel implements GlobalTable
                 double deltaMass = 0;
                  if(pepMatch == null)
                     return deltaMass;
+                 if(pepMatch.getPeptidePTMArray() == null)
+                     return deltaMass;
                 for (DPeptidePTM peptidePTM : pepMatch.getPeptidePTMArray()) {
                     DInfoPTM pepInfoPtm = DInfoPTM.getInfoPTMMap().get(peptidePTM.getIdPtmSpecificity());
                     deltaMass += pepInfoPtm.getMonoMass();

@@ -13,7 +13,7 @@ import fr.proline.studio.dam.data.DataSetData;
 import fr.proline.studio.dam.data.RunInfoData;
 import fr.proline.studio.dam.data.RunInfoData.Status;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
-import fr.proline.studio.dam.tasks.DatabasePTMsTask;
+import fr.proline.studio.dam.tasks.DatabasePTMSitesTask;
 import fr.proline.studio.dam.tasks.DatabasePeaklistTask;
 import fr.proline.studio.dam.tasks.DatabaseRunsTask;
 import fr.proline.studio.dam.tasks.DatabaseVerifySpectrumFromResultSets;
@@ -240,7 +240,7 @@ public class CreateQuantitationDialog extends DefaultDialog {
                     }
                 };
 
-                DatabasePTMsTask task = new DatabasePTMsTask(callback);
+                DatabasePTMSitesTask task = new DatabasePTMSitesTask(callback);
                 if (m_refIdentDataset == null) {
                     //get information from leaf rsm
                     Long projectId = ProjectExplorerPanel.getProjectExplorerPanel().getSelectedProject().getId();

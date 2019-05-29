@@ -335,6 +335,8 @@ public class DataBoxPTMPeptides extends AbstractDataBox {
     public Object getData(boolean getArray, Class parameterType, boolean isList) {
         if (parameterType != null && isList) {
             if (parameterType.equals(PTMPeptideInstance.class)) {
+                if(m_ptmPepInstancesPtmSite == null)
+                    return new ArrayList<DPeptideInstance>();
                 List<PTMPeptideInstance> ptmPepInstances = new ArrayList(m_ptmPepInstancesPtmSite);
                 return ptmPepInstances;
             } 

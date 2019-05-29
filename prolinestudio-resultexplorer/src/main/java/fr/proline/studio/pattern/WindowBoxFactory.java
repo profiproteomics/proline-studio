@@ -265,11 +265,12 @@ public class WindowBoxFactory {
     }
 
     public static WindowBox getXicPTMDataWindowBox(String dataName) {
-        AbstractDataBox[] boxes = new AbstractDataBox[2];
+        AbstractDataBox[] boxes = new AbstractDataBox[3];
         boxes[0] = new DataBoxPTMClusters();
         boxes[0].setDataName(dataName);
         ((DataBoxPTMClusters) boxes[0]).setXicResult(true);
         boxes[1] = new DataBoxPTMPeptides();
+        boxes[2] = new DataBoxPTMPeptidesGraphic();
         IconManager.IconType iconType = IconManager.IconType.QUANT_XIC;
         return new WindowBox(boxes[0].getFullName(), generatePanel(boxes), boxes[0], IconManager.getImage(iconType));        
     }

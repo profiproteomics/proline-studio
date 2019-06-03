@@ -73,16 +73,18 @@ public class DisplayMapAlignmentAction extends AbstractRSMAction {
             setEnabled(false);
             return;
         }
-        if (node.getType() == AbstractNode.NodeTypes.DATA_SET) {
-            if (((DataSetNode) node).getDataset().isAggregation()) {
+
+        if ((node.getType() == AbstractNode.NodeTypes.DATA_SET) && ((DataSetNode)node).getDataset().isAggregation() ) {
                 setEnabled(false);
-            }else{
-                setEnabled(true);
-            }
-            return;
+                return;
         }
 
         DataSetNode datasetNode = (DataSetNode) node;
+
+        if (datasetNode.isFolder()) {
+            setEnabled(false);
+            return;
+        }
 
         // must be a quantitation XIC
         if (!datasetNode.isQuantXIC()) {

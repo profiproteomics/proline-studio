@@ -136,6 +136,12 @@ public class IdentifyPtmSitesJMSAction extends AbstractRSMAction {
       }
 
       DataSetNode dataSetNode = (DataSetNode) node;
+
+      if (dataSetNode.isFolder()) {
+        setEnabled(false);
+        return;
+      }
+
       if (!dataSetNode.hasResultSet()) {
         setEnabled(false);
         return;

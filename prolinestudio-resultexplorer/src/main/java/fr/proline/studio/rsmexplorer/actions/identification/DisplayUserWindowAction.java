@@ -235,13 +235,17 @@ public class DisplayUserWindowAction extends AbstractRSMAction {
         }
         
         DataSetNode dataSetNode = (DataSetNode) node;
-        
+
+        if (dataSetNode.isFolder()) {
+            setEnabled(false);
+            return;
+        }
+
         if ((m_windowType == WindowSavedManager.SAVE_WINDOW_FOR_RSET) && (!dataSetNode.hasResultSet())) {
             setEnabled(false);
             return;
         }
-        
-                
+
         if ((forRsm()) && (!dataSetNode.hasResultSummary())) {
             setEnabled(false);
             return;

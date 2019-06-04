@@ -32,10 +32,10 @@ public class PTMCluster {
 
     private DPeptideMatch m_bestPeptideMatch;
     
-    //PeptideInstance of parent dataset
-    private List<DPeptideInstance> m_parentPeptideInstances;
-    //PTMPeptideInstance of leaf dataset by peptideId
-    private Map<Long, PTMPeptideInstance> m_ptmPeptideInstanceByPepId;
+//    //PeptideInstance of parent dataset
+//    private List<DPeptideInstance> m_parentPeptideInstances;
+//    //PTMPeptideInstance of leaf dataset by peptideId
+//    private Map<Long, PTMPeptideInstance> m_ptmPeptideInstanceByPepId;
 
         
     private PTMDataset m_ptmDataset;
@@ -131,6 +131,11 @@ public class PTMCluster {
         return m_jsonCluster.peptideIds.length;
     }
      
+    public void setQuantProteinSet(DMasterQuantProteinSet mqps) {
+        m_masterQuantProteinSet = mqps;
+    }
+    
+    
     public DMasterQuantProteinSet getMasterQuantProteinSet() {
         return m_masterQuantProteinSet;
     }

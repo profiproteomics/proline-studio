@@ -124,6 +124,14 @@ public class PTMDataset {
             DMasterQuantProteinSet mqps = mqProteinSetByProteinMatchId.get(typicalPMId);
             site.setQuantProteinSet(mqps);
         }
+        
+        if(m_ptmClusters !=null) {
+            for(PTMCluster cluster : m_ptmClusters){
+                Long typicalPMId = typicalProteinMatchIdByProteinMatchId.get(cluster.getProteinMatch().getId());
+                DMasterQuantProteinSet mqps = mqProteinSetByProteinMatchId.get(typicalPMId);
+                cluster.setQuantProteinSet(mqps);            
+            }
+        }
     }
 
     public Collection<PTMPeptideInstance> getPTMPeptideInstance(Long proteinMatchId) {

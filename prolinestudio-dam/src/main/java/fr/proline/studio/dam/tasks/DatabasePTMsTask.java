@@ -187,10 +187,10 @@ public class DatabasePTMsTask extends AbstractDatabaseSlicerTask {
             
             //--- Read PTM data in object tree associated to rsm
             ResultSummary rsm = entityManagerMSI.find(ResultSummary.class,  m_dataset.getResultSummaryId());
-            
-            ObjectTree ot = entityManagerMSI.find(ObjectTree.class,rsm.getObjectTreeIdByName().get("result_summary.ptm_dataset"));
-            if(ot == null)
+            if(rsm.getObjectTreeIdByName().isEmpty() || rsm.getObjectTreeIdByName().get("result_summary.ptm_dataset")==null){
                 throw new RuntimeException(" PTM Identification (v2) has not been run on this dataset.");
+            }
+            ObjectTree ot = entityManagerMSI.find(ObjectTree.class,rsm.getObjectTreeIdByName().get("result_summary.ptm_dataset"));
             ObjectMapper mapper = new ObjectMapper();
             mapper.setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE);
             JSONPTMDataset jsonDS = mapper.readValue(ot.getClobData(),  JSONPTMDataset.class);

@@ -6,10 +6,12 @@ import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.core.orm.uds.dto.DMasterQuantitationChannel;
 import fr.proline.core.orm.util.DStoreCustomPoolConnectorFactory;
 import fr.proline.studio.dam.AccessDatabaseThread;
+import fr.proline.studio.dam.taskinfo.TaskInfo;
 import fr.proline.studio.extendedtablemodel.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
 import fr.proline.studio.dam.tasks.DatabasePTMSitesTask;
+import fr.proline.studio.dam.tasks.DatabasePTMsTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dam.tasks.data.ptm.PTMDataset;
 import fr.proline.studio.dam.tasks.data.ptm.PTMPeptideInstance;
@@ -29,6 +31,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,12 +50,18 @@ public class DataBoxPTMSiteProtein extends AbstractDataBox {
     private ResultSummary m_rsm;
     private QuantChannelInfo m_quantChannelInfo; //Xic Specific
     private boolean m_isXicResult = false; //If false: display Ident result PTMSite
+    private boolean m_viewPTMResultV2; //If false: display Ident result PTMSit
     
     public DataBoxPTMSiteProtein() { 
+        this(false);
+    }
+    
+    public DataBoxPTMSiteProtein(boolean isV2PTMData) { 
         super(AbstractDataBox.DataboxType.DataBoxPTMSiteProtein, AbstractDataBox.DataboxStyle.STYLE_RSM);
+        m_viewPTMResultV2 = isV2PTMData;
         
         // Name of this databox
-        m_typeName = "PTM Protein Sites"; //May be Quant PTM Protein Sites... 
+        m_typeName = m_viewPTMResultV2 ? "PTM Protein Sites" : "PTM Protein Sites (V1)"; //May be Quant PTM Protein Sites... 
         m_description = "PTM Protein Sites of a dataset";//May be Ident or Quant dataset... 
 
         // Register Possible in parameters
@@ -145,6 +155,13 @@ public class DataBoxPTMSiteProtein extends AbstractDataBox {
     
     @Override
     public void dataChanged() {
+        if(m_viewPTMResultV2)
+            dataChangedV2();
+        else
+            dataChangedV1();
+    }
+    
+    public void dataChangedV1() {
 
         final int loadingId = setLoading();
 
@@ -159,10 +176,17 @@ public class DataBoxPTMSiteProtein extends AbstractDataBox {
 
             @Override
             public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
-                m_logger.debug("**** END task "+taskId+" call loadPeptideMatches &  unregisterTask if finished "+finished); 
-                if (finished) {
-                    m_ptmDataset.setPTMSites(ptmSiteArray);
+                m_logger.debug("**** Callback task "+taskId+" call loadPeptideMatches &  unregisterTask if finished : "+finished); 
+                if(success){
                     loadPeptideMatches(loadingId, taskId, ptmSiteArray, finished);
+                } else{
+                    setLoaded(loadingId);
+                    TaskInfo ti =  getTaskInfo(taskId);
+                    String message = (ti != null && ti.hasTaskError()) ? ti.getTaskError().getErrorText() : "Error loading PTM Site";
+                    JOptionPane.showMessageDialog(((JPanel) getDataBoxPanelInterface()), message,"PTM Site loading error", JOptionPane.ERROR_MESSAGE);
+                }
+                if (finished) {
+                    m_ptmDataset.setPTMSites(ptmSiteArray);                    
                     unregisterTask(taskId);
                 }
             }
@@ -170,12 +194,64 @@ public class DataBoxPTMSiteProtein extends AbstractDataBox {
 
 
         // ask asynchronous loading of data
-        
-        DatabasePTMSitesTask task = new DatabasePTMSitesTask(callback);
-        task.initLoadPTMSites(getProjectId(), m_ptmDataset.getDataset().getResultSummary(), ptmSiteArray);
-        m_logger.debug("**** Register task DatabasePTMsTask.initLoadPTMSites "+task.getId()+" : "+task.toString());
-        registerTask(task);
+            
+            DatabasePTMSitesTask task = new DatabasePTMSitesTask(callback);
+            task.initLoadPTMSites(getProjectId(), m_ptmDataset.getDataset().getResultSummary(), ptmSiteArray);
+            m_logger.debug("**** Register task DatabasePTMSitesTask.initLoadPTMSites ID: "+task.getId());
+            registerTask(task);
 
+    }
+    
+    public void dataChangedV2() {
+           
+        final int loadingId = setLoading();
+       
+        List<PTMDataset> ptmDS = new ArrayList<>();
+        AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
+
+            @Override
+            public boolean mustBeCalledInAWT() {
+                return true;
+            }
+
+            @Override
+            public void run(boolean success, long taskId, SubTask subTask, boolean finished) {                   
+                m_logger.debug("**** Callback task "+taskId+": subtask = "+subTask+" is finished = "+finished); 
+                if(success) {
+                    if(subTask == null){
+                        //Main task callback!
+                        m_ptmDataset = ptmDS.get(0);
+                        m_logger.debug(" Add PTMCluster "+ptmDS.get(0).getPTMClusters().size());
+                        loadPeptideMatchesV2();
+
+                    } else  {
+                        //In subtask, update data! 
+                        m_logger.debug(" Should update PTMSites table "+ptmDS.get(0).getPTMSites().size());
+                        ((ProteinPTMSitePanel)getDataBoxPanelInterface()).dataUpdated(subTask, finished);                    
+                    }   
+                } else{                    
+                    TaskInfo ti =  getTaskInfo(taskId);
+                    String message = (ti != null && ti.hasTaskError()) ? ti.getTaskError().getErrorText() : "Error loading PTM Site";
+                    JOptionPane.showMessageDialog(((JPanel) getDataBoxPanelInterface()), message,"PTM Site loading error", JOptionPane.ERROR_MESSAGE);                    
+                    ((ProteinPTMSitePanel) getDataBoxPanelInterface()).setData(taskId, null, finished); 
+                }
+                
+                if (finished) {
+                    setLoaded(loadingId);
+                    unregisterTask(taskId);
+                    m_logger.debug(" DONE Should propagate changes ");
+                    propagateDataChanged(ExtendedTableModelInterface.class);
+                }
+            }
+        };
+
+
+        // ask asynchronous loading of data
+        
+        DatabasePTMsTask task = new DatabasePTMsTask(callback);
+        task.initLoadPTMDataset(getProjectId(), m_ptmDataset.getDataset(), ptmDS);
+        m_logger.debug("**** Register task DatabasePTMsTask.initLoadPTMDataset ID : "+task.getId());
+        registerTask(task); 
     }
     
     public void loadXicData(int loadingId, long taskId, ArrayList<PTMSite> proteinPTMSiteArray, boolean finished) {
@@ -382,6 +458,50 @@ public class DataBoxPTMSiteProtein extends AbstractDataBox {
 
     }
     
+    private boolean m_loadPepMatchOnGoing = false;
+    private void loadPeptideMatchesV2(){
+                
+        final int loadingId = setLoading();
+        AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
+
+            @Override
+            public boolean mustBeCalledInAWT() {
+                return true;
+            }
+
+            @Override
+            public void run(boolean success, final long taskId, SubTask subTask, boolean finished) {
+                m_logger.debug("**** --- CallBack task "+taskId+ " if finished ("+finished+") subtask = "+ subTask+" duration "+ (System.currentTimeMillis()-logStartTime)+" TimeMillis"); 
+                if(subTask == null){
+                    //Main task callback!                    
+                    m_logger.debug(" PTM Sites PepInstance on going ... first iteration");
+                    ((ProteinPTMSitePanel) getDataBoxPanelInterface()).setData(taskId, (ArrayList) m_ptmDataset.getPTMSites(), finished);
+
+                } else  {
+                    //In subtask, update data! 
+                    m_logger.debug(" PTM Sites PepInstance on going .. subtask");
+                    ((ProteinPTMSitePanel) getDataBoxPanelInterface()).dataUpdated(subTask, finished);               
+                }   
+                if (finished) {         
+                    m_loadPepMatchOnGoing = false;
+                    if(isXicResult()){
+                        loadXicData(loadingId, taskId, (ArrayList) m_ptmDataset.getPTMSites(), finished);
+                    } else {
+                        setLoaded(loadingId);
+                        propagateDataChanged(ExtendedTableModelInterface.class);
+                    }
+                    unregisterTask(taskId);
+                }
+            }
+        };
+        
+        DatabasePTMsTask task = new DatabasePTMsTask(callback);
+        task.initFillPTMSites(getProjectId(), m_ptmDataset, m_ptmDataset.getPTMSites());
+        m_loadPepMatchOnGoing = true;
+        logStartTime = System.currentTimeMillis();
+        m_logger.debug("**** --- Register task DatabasePTMsTask.initFillPTMSites " +task.getId()+" : "+task.toString());
+        registerTask(task);        
+    }
  
     @Override
     public Object getData(boolean getArray, Class parameterType) {
@@ -420,7 +540,7 @@ public class DataBoxPTMSiteProtein extends AbstractDataBox {
             }
             if (parameterType.equals(DProteinSet.class) && isXicResult()) {
                PTMSite proteinPtmSite = ((ProteinPTMSitePanel)getDataBoxPanelInterface()).getSelectedProteinPTMSite();
-                if (proteinPtmSite != null) {
+                if (proteinPtmSite != null && proteinPtmSite.getMasterQuantProteinSet() != null) {
                     return proteinPtmSite.getMasterQuantProteinSet().getProteinSet();
                 }     
             }          
@@ -444,6 +564,8 @@ public class DataBoxPTMSiteProtein extends AbstractDataBox {
     @Override
     public Object getData(boolean getArray, Class parameterType, boolean isList) {
         if(parameterType.equals(PTMPeptideInstance.class) && isList){
+        if(m_loadPepMatchOnGoing)
+                return null;            
             PTMSite site = ((ProteinPTMSitePanel) getDataBoxPanelInterface()).getSelectedProteinPTMSite();
             List<PTMPeptideInstance> sitePtmPepInstance =  new ArrayList<>();
             if(site != null)

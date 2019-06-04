@@ -18,6 +18,7 @@ import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.core.orm.uds.dto.DMasterQuantitationChannel;
 import fr.proline.core.orm.util.DStoreCustomPoolConnectorFactory;
 import fr.proline.studio.dam.AccessDatabaseThread;
+import fr.proline.studio.dam.taskinfo.TaskInfo;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
 import fr.proline.studio.dam.tasks.DatabasePTMsTask;
@@ -25,7 +26,6 @@ import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dam.tasks.data.ptm.PTMCluster;
 import fr.proline.studio.dam.tasks.data.ptm.PTMDataset;
 import fr.proline.studio.dam.tasks.data.ptm.PTMPeptideInstance;
-import fr.proline.studio.dam.tasks.data.ptm.PTMSite;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadLcMSTask;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadXicMasterQuantTask;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
@@ -43,6 +43,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -219,17 +221,25 @@ public class DataBoxPTMClusters extends AbstractDataBox {
 
             @Override
             public void run(boolean success, final long taskId, SubTask subTask, boolean finished) {
-                m_logger.debug("**** --- CalBAck task "+taskId+ " if finished ("+finished+") subtask "+ subTask+" duration "+ (System.currentTimeMillis()-logStartTime)+" TimeMillis"); 
-                if(subTask == null){
-                    //Main task callback!                    
-                    m_logger.debug(" PTMCluster PepInstance on going ... first iteration");
-                    ((PTMClustersProteinPanel) getDataBoxPanelInterface()).setData(taskId, (ArrayList) m_ptmDataset.getPTMClusters(), finished);
+                m_logger.debug("**** --- CallbAck task "+taskId+ ". Sucess :  "+success+" if finished ("+finished+") subtask "+ subTask+" duration "+ (System.currentTimeMillis()-logStartTime)+" TimeMillis"); 
+                if(success){
+                    if(subTask == null){
+                        //Main task callback!                    
+                        m_logger.debug(" PTMCluster PepInstance on going ... first iteration");
+                        ((PTMClustersProteinPanel) getDataBoxPanelInterface()).setData(taskId, (ArrayList) m_ptmDataset.getPTMClusters(), finished);
 
-                } else  {
-                    //In subtask, update data! 
-                    m_logger.debug(" PTMCluster PepInstance on going .. subtask");
-                    ((PTMClustersProteinPanel) getDataBoxPanelInterface()).dataUpdated(subTask, finished);               
-                }   
+                    } else  {
+                        //In subtask, update data! 
+                        m_logger.debug(" PTMCluster PepInstance on going .. subtask");
+                        ((PTMClustersProteinPanel) getDataBoxPanelInterface()).dataUpdated(subTask, finished);               
+                    }   
+                } else{                    
+                    TaskInfo ti =  getTaskInfo(taskId);
+                    String message = (ti != null && ti.hasTaskError()) ? ti.getTaskError().getErrorText() : "Error loading PTM Cluster";
+                    JOptionPane.showMessageDialog(((JPanel) getDataBoxPanelInterface()), message,"PTM Cluster loading error", JOptionPane.ERROR_MESSAGE);                    
+                    ((PTMClustersProteinPanel) getDataBoxPanelInterface()).setData(taskId, null, finished); 
+                }
+                
                 if (finished) {
                     m_loadPepMatchOnGoing = false;
                     if(isXicResult()){

@@ -265,17 +265,23 @@ public class WindowBoxFactory {
     }
 
     public static WindowBox getXicPTMDataWindowBox(String dataName) {
-        AbstractDataBox[] boxes = new AbstractDataBox[3];
+        AbstractDataBox[] boxes = new AbstractDataBox[6];
         boxes[0] = new DataBoxPTMClusters();
         boxes[0].setDataName(dataName);
         ((DataBoxPTMClusters) boxes[0]).setXicResult(true);
         boxes[1] = new DataBoxPTMPeptides();
         boxes[2] = new DataBoxPTMPeptidesGraphic();
+        boxes[3] = new DataboxMultiGraphics(false,false,true);//associate a graphic databox for DataboxXicPeptideSet
+        boxes[3].setLayout(SplittedPanelContainer.PanelLayout.HORIZONTAL);      
+        boxes[4] = new DataboxXicPeptideSet(false);//display the selected peptideMatch in each chanel
+        boxes[5] = new DataboxMultiGraphics(false,false,true); //associate a graphic databox for DataboxXicPeptideSet
+        boxes[5].setLayout(SplittedPanelContainer.PanelLayout.HORIZONTAL);     
+
         IconManager.IconType iconType = IconManager.IconType.QUANT_XIC;
         return new WindowBox(boxes[0].getFullName(), generatePanel(boxes), boxes[0], IconManager.getImage(iconType));        
     }
     
-    public static WindowBox getXicPTMSitesWindowBox(String dataName) {
+    public static WindowBox getXicPTMSitesWindowBoxV2(String dataName) {
 
         AbstractDataBox[] boxes = new AbstractDataBox[6];
         boxes[0] = new DataBoxPTMSiteProtein();
@@ -302,7 +308,7 @@ public class WindowBoxFactory {
     }
 
         
-    public static WindowBox getXicPTMSitesWindowBoxOK(String dataName) {
+    public static WindowBox getXicPTMSitesWindowBoxV1(String dataName) {
 
         AbstractDataBox[] boxes = new AbstractDataBox[8];
         boxes[0] = new DataBoxPTMSiteProtein();

@@ -56,7 +56,6 @@ public class DatabasePTMSitesTask extends AbstractDatabaseTask {
     private PTMSite m_ptmSiteOutput = null;
     private List<PTMSite> m_ptmSitesOutput = null;    
     private List<PtmSpecificity> m_ptmsOutput = null;    
-    private List<PTMDataset> m_ptmDatasetOutput = null;    
 
     final int SLICE_SIZE = 1000;
     
@@ -66,7 +65,7 @@ public class DatabasePTMSitesTask extends AbstractDatabaseTask {
     private final static int FILL_PTM_SITE_PEPINFO = 1;
     private final static int LOAD_IDENTIFIED_PTM_SPECIFICITIES = 2;
     private final static int FILL_ALL_PTM_SITES_PEPINFO = 3;
-    private final static int LOAD_PTMDATASET = 4;
+
     
     public DatabasePTMSitesTask(AbstractDatabaseCallback callback) {
         super(callback, null);
@@ -117,14 +116,7 @@ public class DatabasePTMSitesTask extends AbstractDatabaseTask {
         m_ptmsOutput = ptmsToFill;
         m_action = LOAD_IDENTIFIED_PTM_SPECIFICITIES;
     }    
-    
-    public void initLoadPTMDataset(Long projectId, DDataset dataset, List<PTMDataset> ptmDataset) {
-        init(new TaskInfo("Load used PTMs from RSM ids" , false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_MEDIUM));
-        m_projectId = projectId;
-        m_ptmDatasetOutput = ptmDataset;
-        m_dataset = dataset;
-        m_action = LOAD_PTMDATASET;
-    }        
+        
     
     @Override
     public boolean needToFetch() {
@@ -134,9 +126,6 @@ public class DatabasePTMSitesTask extends AbstractDatabaseTask {
             case LOAD_ALL_PTM_SITES_FOR_RSMS: {
                 return true;
             }  
-            case LOAD_PTMDATASET: {
-                return true; //May already have data loaded ... if existing ptmDataset is passed to init method
-            }
             case FILL_PTM_SITE_PEPINFO: {
                 return !m_ptmSiteOutput.isLoaded();
             }              
@@ -159,9 +148,6 @@ public class DatabasePTMSitesTask extends AbstractDatabaseTask {
                 }
                 case FILL_ALL_PTM_SITES_PEPINFO: {
                     return fetchAllPTMSitesPeptideMatches();
-                }
-                case LOAD_PTMDATASET: {
-                    return fetchPTMDataset();
                 }
             }
            
@@ -202,38 +188,6 @@ public class DatabasePTMSitesTask extends AbstractDatabaseTask {
         }
 
         return true;    
-    }
-    
-    private boolean fetchPTMDataset() {
-
-        EntityManager entityManagerMSI = DStoreCustomPoolConnectorFactory.getInstance().getMsiDbConnector(m_projectId).createEntityManager();
-        try {
-
-            entityManagerMSI.getTransaction().begin();
-            
-            ResultSummary rsm = entityManagerMSI.find(ResultSummary.class,  m_dataset.getResultSummaryId());
-            
-            ObjectTree ot = entityManagerMSI.find(ObjectTree.class,rsm.getObjectTreeIdByName().get("result_summary.ptm_dataset"));
-            ObjectMapper mapper = new ObjectMapper();
-            mapper.setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE);
-            JSONPTMDataset values = mapper.readValue(ot.getClobData(),  JSONPTMDataset.class);
-            PTMDataset ptmDS = new PTMDataset(m_dataset);
-            
-        } catch (Exception e) {
-            m_logger.error(getClass().getSimpleName() + " failed", e);
-            m_taskError = new TaskError(e);
-            try {
-                entityManagerMSI.getTransaction().rollback();
-            } catch (Exception rollbackException) {
-                m_logger.error(getClass().getSimpleName() + " failed : potential network problem", rollbackException);
-            }
-            return false;
-        } finally {
-            entityManagerMSI.close();
-        }
-
-        return true;
-        
     }
     
     private boolean fetchPTMSitePeptideMatches(){

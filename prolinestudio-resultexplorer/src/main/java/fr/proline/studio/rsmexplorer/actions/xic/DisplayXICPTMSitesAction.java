@@ -60,11 +60,11 @@ public class DisplayXICPTMSitesAction extends AbstractRSMAction {
             // prepare window box
             WindowBox wbox;
             if(answer == JOptionPane.YES_OPTION){
-                wbox = WindowBoxFactory.getXicPTMSitesWindowBox(dataSet.getName());
+                wbox = WindowBoxFactory.getXicPTMSitesWindowBoxV2(dataSet.getName());
             } else if (answer == JOptionPane.NO_OPTION){
                 wbox = WindowBoxFactory.getXicPTMDataWindowBox(dataSet.getName());            
             } else {
-                wbox = WindowBoxFactory.getXicPTMSitesWindowBoxOK(dataSet.getName());            
+                wbox = WindowBoxFactory.getXicPTMSitesWindowBoxV1(dataSet.getName());            
             }
             wbox.setEntryData(dataSet.getProject().getId(), new PTMDataset(dataSet));    
                
@@ -88,11 +88,11 @@ public class DisplayXICPTMSitesAction extends AbstractRSMAction {
                 public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
                                 WindowBox wbox;
                     if (answer == JOptionPane.YES_OPTION) {
-                        wbox = WindowBoxFactory.getXicPTMSitesWindowBox(dataSet.getName());
+                        wbox = WindowBoxFactory.getXicPTMSitesWindowBoxV2(dataSet.getName());
                     } else if (answer == JOptionPane.NO_OPTION) {
                         wbox = WindowBoxFactory.getXicPTMDataWindowBox(dataSet.getName());
                     } else {
-                        wbox = WindowBoxFactory.getXicPTMSitesWindowBoxOK(dataSet.getName());
+                        wbox = WindowBoxFactory.getXicPTMSitesWindowBoxV1(dataSet.getName());
                     }        
                      
                     // open a window to display the window box
